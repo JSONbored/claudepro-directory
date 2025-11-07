@@ -20,7 +20,7 @@ import {
 } from '@/src/lib/config/category-config';
 import { ROUTES } from '@/src/lib/constants/routes';
 import { Briefcase, ExternalLink } from '@/src/lib/icons';
-import type { ContentItem } from '@/src/lib/schemas/component.schema';
+import type { ContentItem } from '@/src/lib/types/component.types';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 interface FeaturedSectionProps {

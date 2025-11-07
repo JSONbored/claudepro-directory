@@ -17,8 +17,8 @@ import { motion } from 'motion/react';
 import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { LinkedinShareButton, TwitterShareButton } from 'react-share';
-import { trackInteraction } from '@/src/lib/analytics/client';
 import { APP_CONFIG } from '@/src/lib/constants';
+import { trackInteraction } from '@/src/lib/edge/client';
 import { Camera, Check, ChevronDown, Code, Copy, Linkedin, Share2, Twitter } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
@@ -53,6 +53,118 @@ export interface ProductionCodeBlockProps {
   showLineNumbers?: boolean | undefined;
   /** Additional CSS classes */
   className?: string | undefined;
+}
+
+/**
+ * Share Dropdown Component (Internal)
+ * Reusable dropdown for Twitter/LinkedIn/Copy/Embed actions
+ */
+interface ShareDropdownProps {
+  currentUrl: string;
+  category: string;
+  slug: string;
+  onShare: (platform: SharePlatform) => void;
+  onEmbedCopy: () => void;
+  onMouseLeave: () => void;
+}
+
+function ShareDropdown({
+  currentUrl,
+  category,
+  slug,
+  onShare,
+  onEmbedCopy,
+  onMouseLeave,
+}: ShareDropdownProps) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="absolute top-full right-0 z-50 mt-2 w-56 rounded-lg border border-border bg-card/95 p-2 shadow-xl backdrop-blur-md"
+      onMouseLeave={onMouseLeave}
+    >
+      {/* Twitter Share */}
+      <div className="share-button-wrapper mb-1">
+        <TwitterShareButton
+          url={generateShareUrl({
+            url: currentUrl,
+            category,
+            slug,
+            platform: 'twitter',
+            title: `${category} - ${slug}`,
+          })}
+          title={generateShareText({
+            url: currentUrl,
+            category,
+            slug,
+            platform: 'twitter',
+            title: `${category} - ${slug}`,
+          })}
+          onClick={() => onShare('twitter')}
+        >
+          <div className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 font-medium text-sm transition-all hover:bg-accent/15">
+            <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[#1DA1F2]/20">
+              <Twitter className="h-3 w-3 text-[#1DA1F2]" />
+            </div>
+            <span className="text-foreground">Share on Twitter</span>
+          </div>
+        </TwitterShareButton>
+      </div>
+
+      {/* LinkedIn Share */}
+      <div className="share-button-wrapper mb-1">
+        <LinkedinShareButton
+          url={generateShareUrl({
+            url: currentUrl,
+            category,
+            slug,
+            platform: 'linkedin',
+            title: `${category} - ${slug}`,
+          })}
+          title={generateShareText({
+            url: currentUrl,
+            category,
+            slug,
+            platform: 'linkedin',
+            title: `${category} - ${slug}`,
+          })}
+          summary={`Check out this ${category} resource on claudepro.directory`}
+          onClick={() => onShare('linkedin')}
+        >
+          <div className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 font-medium text-sm transition-all hover:bg-accent/15">
+            <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[#0A66C2]/20">
+              <Linkedin className="h-3 w-3 text-[#0A66C2]" />
+            </div>
+            <span className="text-foreground">Share on LinkedIn</span>
+          </div>
+        </LinkedinShareButton>
+      </div>
+
+      {/* Copy Link */}
+      <button
+        type="button"
+        onClick={() => onShare('copy_link')}
+        className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 font-medium text-foreground text-sm transition-all hover:scale-[1.02] hover:bg-accent/15 active:scale-[0.98]"
+      >
+        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-accent/20">
+          <Copy className="h-3 w-3" />
+        </div>
+        <span>Copy Link</span>
+      </button>
+
+      {/* Embed Code */}
+      <button
+        type="button"
+        onClick={onEmbedCopy}
+        className="mt-1 flex w-full items-center gap-3 rounded-md border-border/50 border-t px-3 py-2 pt-3 text-foreground text-sm transition-colors hover:bg-accent/10"
+      >
+        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-accent/20">
+          <Code className="h-3 w-3" />
+        </div>
+        <span>Copy Embed Code</span>
+      </button>
+    </motion.div>
+  );
 }
 
 export function ProductionCodeBlock({
@@ -266,93 +378,14 @@ export function ProductionCodeBlock({
 
               {/* Share dropdown - positioned below button */}
               {isShareOpen && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="absolute top-full right-0 z-50 mt-2 w-56 rounded-lg border border-border bg-card/95 p-2 shadow-xl backdrop-blur-md"
+                <ShareDropdown
+                  currentUrl={currentUrl}
+                  category={category}
+                  slug={slug}
+                  onShare={handleShare}
+                  onEmbedCopy={handleEmbedCopy}
                   onMouseLeave={() => setIsShareOpen(false)}
-                >
-                  {/* Twitter Share */}
-                  <div className="share-button-wrapper mb-1">
-                    <TwitterShareButton
-                      url={generateShareUrl({
-                        url: currentUrl,
-                        category,
-                        slug,
-                        platform: 'twitter',
-                        title: `${category} - ${slug}`,
-                      })}
-                      title={generateShareText({
-                        url: currentUrl,
-                        category,
-                        slug,
-                        platform: 'twitter',
-                        title: `${category} - ${slug}`,
-                      })}
-                      onClick={() => handleShare('twitter')}
-                    >
-                      <div className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 font-medium text-sm transition-all hover:bg-accent/15">
-                        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[#1DA1F2]/20">
-                          <Twitter className="h-3 w-3 text-[#1DA1F2]" />
-                        </div>
-                        <span className="text-foreground">Share on Twitter</span>
-                      </div>
-                    </TwitterShareButton>
-                  </div>
-
-                  {/* LinkedIn Share */}
-                  <div className="share-button-wrapper mb-1">
-                    <LinkedinShareButton
-                      url={generateShareUrl({
-                        url: currentUrl,
-                        category,
-                        slug,
-                        platform: 'linkedin',
-                        title: `${category} - ${slug}`,
-                      })}
-                      title={generateShareText({
-                        url: currentUrl,
-                        category,
-                        slug,
-                        platform: 'linkedin',
-                        title: `${category} - ${slug}`,
-                      })}
-                      summary={`Check out this ${category} resource on claudepro.directory`}
-                      onClick={() => handleShare('linkedin')}
-                    >
-                      <div className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 font-medium text-sm transition-all hover:bg-accent/15">
-                        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[#0A66C2]/20">
-                          <Linkedin className="h-3 w-3 text-[#0A66C2]" />
-                        </div>
-                        <span className="text-foreground">Share on LinkedIn</span>
-                      </div>
-                    </LinkedinShareButton>
-                  </div>
-
-                  {/* Copy Link */}
-                  <button
-                    type="button"
-                    onClick={() => handleShare('copy_link')}
-                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 font-medium text-foreground text-sm transition-all hover:scale-[1.02] hover:bg-accent/15 active:scale-[0.98]"
-                  >
-                    <div className="flex h-5 w-5 items-center justify-center rounded-full bg-accent/20">
-                      <Copy className="h-3 w-3" />
-                    </div>
-                    <span>Copy Link</span>
-                  </button>
-
-                  {/* Embed Code */}
-                  <button
-                    type="button"
-                    onClick={handleEmbedCopy}
-                    className="mt-1 flex w-full items-center gap-3 rounded-md border-border/50 border-t px-3 py-2 pt-3 text-foreground text-sm transition-colors hover:bg-accent/10"
-                  >
-                    <div className="flex h-5 w-5 items-center justify-center rounded-full bg-accent/20">
-                      <Code className="h-3 w-3" />
-                    </div>
-                    <span>Copy Embed Code</span>
-                  </button>
-                </motion.div>
+                />
               )}
             </div>
 
@@ -419,93 +452,14 @@ export function ProductionCodeBlock({
 
               {/* Share dropdown - positioned below button */}
               {isShareOpen && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="absolute top-full right-0 z-50 mt-2 w-56 rounded-lg border border-border bg-card/95 p-2 shadow-xl backdrop-blur-md"
+                <ShareDropdown
+                  currentUrl={currentUrl}
+                  category={category}
+                  slug={slug}
+                  onShare={handleShare}
+                  onEmbedCopy={handleEmbedCopy}
                   onMouseLeave={() => setIsShareOpen(false)}
-                >
-                  {/* Twitter Share */}
-                  <div className="share-button-wrapper mb-1">
-                    <TwitterShareButton
-                      url={generateShareUrl({
-                        url: currentUrl,
-                        category,
-                        slug,
-                        platform: 'twitter',
-                        title: `${category} - ${slug}`,
-                      })}
-                      title={generateShareText({
-                        url: currentUrl,
-                        category,
-                        slug,
-                        platform: 'twitter',
-                        title: `${category} - ${slug}`,
-                      })}
-                      onClick={() => handleShare('twitter')}
-                    >
-                      <div className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 font-medium text-sm transition-all hover:bg-accent/15">
-                        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[#1DA1F2]/20">
-                          <Twitter className="h-3 w-3 text-[#1DA1F2]" />
-                        </div>
-                        <span className="text-foreground">Share on Twitter</span>
-                      </div>
-                    </TwitterShareButton>
-                  </div>
-
-                  {/* LinkedIn Share */}
-                  <div className="share-button-wrapper mb-1">
-                    <LinkedinShareButton
-                      url={generateShareUrl({
-                        url: currentUrl,
-                        category,
-                        slug,
-                        platform: 'linkedin',
-                        title: `${category} - ${slug}`,
-                      })}
-                      title={generateShareText({
-                        url: currentUrl,
-                        category,
-                        slug,
-                        platform: 'linkedin',
-                        title: `${category} - ${slug}`,
-                      })}
-                      summary={`Check out this ${category} resource on claudepro.directory`}
-                      onClick={() => handleShare('linkedin')}
-                    >
-                      <div className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 font-medium text-sm transition-all hover:bg-accent/15">
-                        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[#0A66C2]/20">
-                          <Linkedin className="h-3 w-3 text-[#0A66C2]" />
-                        </div>
-                        <span className="text-foreground">Share on LinkedIn</span>
-                      </div>
-                    </LinkedinShareButton>
-                  </div>
-
-                  {/* Copy Link */}
-                  <button
-                    type="button"
-                    onClick={() => handleShare('copy_link')}
-                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 font-medium text-foreground text-sm transition-all hover:scale-[1.02] hover:bg-accent/15 active:scale-[0.98]"
-                  >
-                    <div className="flex h-5 w-5 items-center justify-center rounded-full bg-accent/20">
-                      <Copy className="h-3 w-3" />
-                    </div>
-                    <span>Copy Link</span>
-                  </button>
-
-                  {/* Embed Code */}
-                  <button
-                    type="button"
-                    onClick={handleEmbedCopy}
-                    className="mt-1 flex w-full items-center gap-3 rounded-md border-border/50 border-t px-3 py-2 pt-3 text-foreground text-sm transition-colors hover:bg-accent/10"
-                  >
-                    <div className="flex h-5 w-5 items-center justify-center rounded-full bg-accent/20">
-                      <Code className="h-3 w-3" />
-                    </div>
-                    <span>Copy Embed Code</span>
-                  </button>
-                </motion.div>
+                />
               )}
             </div>
 

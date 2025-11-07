@@ -1,0 +1,62 @@
+# Supabase Edge Functions Configuration
+# This file persists JWT verification settings across redeployments
+
+# =============================================================================
+# Public API Functions - No JWT Verification
+# =============================================================================
+
+[functions.llms-txt]
+verify_jwt = false  # Public API serving LLMs.txt documentation
+
+[functions.sitemap]
+verify_jwt = false  # Public sitemap.xml endpoint
+
+[functions.gallery]
+verify_jwt = false  # Public gallery endpoint
+
+[functions.content-paginated]
+verify_jwt = false  # Public content listing with optional auth
+
+[functions.status]
+verify_jwt = false  # Public health check endpoint
+
+[functions.feeds]
+verify_jwt = false  # Public RSS/Atom feed endpoints (changelog + all content categories)
+
+[functions.json-api]
+verify_jwt = false  # Public JSON API endpoint with JSON-LD structured data
+
+[functions.markdown-export]
+verify_jwt = false  # Public markdown export endpoint for all categories
+
+[functions.metadata-api]
+verify_jwt = false  # Public metadata generation endpoint (24hr cache, replaces 19k PostgREST requests/day)
+
+# =============================================================================
+# Webhook Functions - No JWT Verification (Use Signature Verification)
+# =============================================================================
+
+[functions.resend-webhook]
+verify_jwt = false  # Uses Svix signature verification
+
+[functions.email-handler]
+verify_jwt = false  # Uses Svix signature verification for auth hooks
+
+[functions.discord-error-relay]
+verify_jwt = false  # Database-triggered webhook (internal)
+
+[functions.discord-content-announcement]
+verify_jwt = false  # Database-triggered webhook (internal)
+
+[functions.discord-submission-notification]
+verify_jwt = false  # Database-triggered webhook (internal)
+
+[functions.changelog-auto-sync]
+verify_jwt = false  # Vercel webhook with signature verification
+
+# =============================================================================
+# Authenticated Functions - Require JWT Verification
+# =============================================================================
+
+[functions.analytics]
+verify_jwt = true  # Requires authenticated user for analytics tracking

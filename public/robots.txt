@@ -33,6 +33,10 @@ Allow: /changelog
 Allow: /changelog/*
 Allow: /changelog/rss.xml
 Allow: /changelog/atom.xml
+Allow: /rss.xml
+Allow: /atom.xml
+Allow: /*/rss.xml
+Allow: /*/atom.xml
 Allow: /llms.txt
 Allow: /*/llms.txt
 Allow: /*/*/llms.txt

@@ -24,7 +24,7 @@ const UnifiedNewsletterCapture = dynamic(
   }
 );
 
-export const revalidate = 300; // 5 minutes ISR
+export const revalidate = false;
 
 export const metadata = generatePageMetadata('/board');
 

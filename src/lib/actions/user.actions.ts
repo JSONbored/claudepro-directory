@@ -77,13 +77,14 @@ type ActivityTimelineResponse = {
   total: number;
 };
 
-import { nonEmptyString } from '@/src/lib/schemas/primitives';
-import {
-  bookmarkInsertTransformSchema,
-  removeBookmarkSchema,
-} from '@/src/lib/schemas/transforms/data-normalization.schema';
-
 import { createClient } from '@/src/lib/supabase/server';
+
+// Manual Zod schemas (database validates, Zod just provides type safety)
+const bookmarkSchema = z.object({
+  content_type: z.string(),
+  content_slug: z.string(),
+  notes: z.string().optional().nullable(),
+});
 
 export const updateProfile = authedAction
   .metadata({
@@ -176,7 +177,7 @@ export const addBookmark = authedAction
     actionName: 'addBookmark',
     category: 'user',
   })
-  .schema(bookmarkInsertTransformSchema)
+  .schema(bookmarkSchema)
   .action(async ({ parsedInput, ctx }) => {
     try {
       const { content_type, content_slug, notes } = parsedInput;
@@ -218,7 +219,7 @@ export const removeBookmark = authedAction
     actionName: 'removeBookmark',
     category: 'user',
   })
-  .schema(removeBookmarkSchema)
+  .schema(bookmarkSchema.pick({ content_type: true, content_slug: true }))
   .action(async ({ parsedInput, ctx }) => {
     try {
       const { content_type, content_slug } = parsedInput;
@@ -285,7 +286,7 @@ export const addBookmarkBatch = authedAction
               Enums<'content_category'>,
               ...Enums<'content_category'>[],
             ]),
-            content_slug: nonEmptyString,
+            content_slug: z.string().min(1),
           })
         )
         .min(1)
@@ -381,6 +382,75 @@ export async function isFollowing(user_id: string): Promise<boolean> {
   return data ?? false;
 }
 
+/**
+ * Batch check bookmark status for multiple items - Database-First
+ * Eliminates N+1 queries (20 queries → 1, 95% reduction)
+ */
+export const getBookmarkStatusBatch = authedAction
+  .metadata({ actionName: 'getBookmarkStatusBatch', category: 'user' })
+  .schema(
+    z.object({
+      items: z.array(
+        z.object({
+          content_type: z.string(),
+          content_slug: z.string(),
+        })
+      ),
+    })
+  )
+  .action(async ({ parsedInput, ctx }) => {
+    const supabase = await createClient();
+
+    const { data, error } = await supabase.rpc('is_bookmarked_batch', {
+      p_user_id: ctx.userId,
+      p_items: parsedInput.items,
+    });
+
+    if (error) {
+      logger.error('Failed to batch check bookmarks', new Error(error.message), {
+        userId: ctx.userId,
+        itemCount: parsedInput.items.length,
+      });
+      throw new Error(error.message);
+    }
+
+    // Return as Map for O(1) lookups: key = "category:slug", value = boolean
+    return new Map(
+      (data || []).map((row) => [`${row.content_type}:${row.content_slug}`, row.is_bookmarked])
+    );
+  });
+
+/**
+ * Batch check follow status for multiple users - Database-First
+ * Eliminates N+1 queries (20 queries → 1, 95% reduction)
+ */
+export const getFollowStatusBatch = authedAction
+  .metadata({ actionName: 'getFollowStatusBatch', category: 'user' })
+  .schema(
+    z.object({
+      user_ids: z.array(z.string().uuid()),
+    })
+  )
+  .action(async ({ parsedInput, ctx }) => {
+    const supabase = await createClient();
+
+    const { data, error } = await supabase.rpc('is_following_batch', {
+      p_follower_id: ctx.userId,
+      p_followed_user_ids: parsedInput.user_ids,
+    });
+
+    if (error) {
+      logger.error('Failed to batch check follows', new Error(error.message), {
+        userId: ctx.userId,
+        userCount: parsedInput.user_ids.length,
+      });
+      throw new Error(error.message);
+    }
+
+    // Return as Map for O(1) lookups: key = user_id, value = boolean
+    return new Map((data || []).map((row) => [row.followed_user_id, row.is_following]));
+  });
+
 export const getActivitySummary = authedAction
   .metadata({ actionName: 'getActivitySummary', category: 'user' })
   .schema(z.void())
@@ -426,6 +496,35 @@ export const getActivityTimeline = authedAction
         'Failed to get activity timeline',
         error instanceof Error ? error : new Error(String(error)),
         { userId: ctx.userId, type: type || 'all', limit, offset }
+      );
+      throw error;
+    }
+  });
+
+export const getUserIdentities = authedAction
+  .metadata({ actionName: 'getUserIdentities', category: 'user' })
+  .schema(z.void())
+  .action(async ({ ctx }) => {
+    try {
+      const supabase = await createClient();
+      const { data, error } = await supabase.rpc('get_user_identities', {
+        p_user_id: ctx.userId,
+      });
+      if (error) throw new Error(`Failed to fetch user identities: ${error.message}`);
+
+      return data as {
+        identities: Array<{
+          provider: string;
+          email: string;
+          created_at: string;
+          last_sign_in_at: string;
+        }>;
+      };
+    } catch (error) {
+      logger.error(
+        'Failed to get user identities',
+        error instanceof Error ? error : new Error(String(error)),
+        { userId: ctx.userId }
       );
       throw error;
     }

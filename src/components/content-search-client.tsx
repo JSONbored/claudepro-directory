@@ -23,7 +23,7 @@ import type {
   ContentSearchClientProps,
   DisplayableContent,
   FilterState,
-} from '@/src/lib/schemas/component.schema';
+} from '@/src/lib/types/component.types';
 import { ICON_NAME_MAP } from '@/src/lib/ui-constants';
 
 /**

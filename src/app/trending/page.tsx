@@ -28,7 +28,7 @@ const UnifiedNewsletterCapture = dynamic(
   }
 );
 
-export const revalidate = 300; // 5 minutes ISR
+export const revalidate = false;
 
 export const metadata = generatePageMetadata('/trending');
 
@@ -66,7 +66,7 @@ export default async function TrendingPage({ searchParams }: PagePropsWithSearch
     },
     [`trending-${period}-${metric}-${category || ''}-${page}-${limit}`],
     {
-      revalidate: 300, // 5 minutes (matches page ISR)
+      revalidate: false, // Matches page-level ISR (fully static)
       tags: ['trending', ...(category ? [`trending-${category}`] : [])],
     }
   )();

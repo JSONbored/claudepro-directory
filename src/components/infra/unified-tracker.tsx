@@ -6,9 +6,9 @@
  */
 
 import { useEffect } from 'react';
-import { trackInteraction } from '@/src/lib/analytics/client';
 import { trackEvent } from '@/src/lib/analytics/tracker';
 import type { CategoryId } from '@/src/lib/config/category-config';
+import { trackInteraction } from '@/src/lib/edge/client';
 import { logger } from '@/src/lib/logger';
 
 export type UnifiedTrackerProps =

@@ -162,15 +162,14 @@ export async function searchByPopularity(
     async () => {
       const supabase = createAnonClient();
 
-      const rpcParams: Database['public']['Functions']['search_by_popularity']['Args'] = {};
-
-      const trimmedQuery = query.trim();
-      if (trimmedQuery) rpcParams.p_query = trimmedQuery;
-      if (filters?.p_categories) rpcParams.p_categories = filters.p_categories;
-      if (filters?.p_tags) rpcParams.p_tags = filters.p_tags;
-      if (filters?.p_authors) rpcParams.p_authors = filters.p_authors;
-      if (filters?.p_limit) rpcParams.p_limit = filters.p_limit;
-      if (filters?.p_offset) rpcParams.p_offset = filters.p_offset;
+      const rpcParams: Database['public']['Functions']['search_by_popularity']['Args'] = {
+        p_query: query.trim() || '',
+        ...(filters?.p_categories && { p_categories: filters.p_categories }),
+        ...(filters?.p_tags && { p_tags: filters.p_tags }),
+        ...(filters?.p_authors && { p_authors: filters.p_authors }),
+        p_limit: filters?.p_limit ?? 20,
+        p_offset: filters?.p_offset ?? 0,
+      };
 
       const { data, error } = await supabase.rpc('search_by_popularity', rpcParams);
 

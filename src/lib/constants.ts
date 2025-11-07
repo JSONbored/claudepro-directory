@@ -429,78 +429,18 @@ export const EXTERNAL_SERVICES = externalServicesSchema.parse({
 });
 
 /**
- * Sitemap Route Configuration
- *
- * Controls which routes are automatically included in sitemap.xml
- * via automated route discovery from the app directory.
- *
- * Strategy: Include all routes by default, exclude via patterns
+ * Get dynamic SEO description with live content count from database
+ * Cached with Next.js fetch cache (24hr revalidation)
  */
-export const SITEMAP_CONFIG = {
-  /**
-   * Route Exclusion Patterns
-   *
-   * Routes matching these glob/regex patterns are excluded from sitemap.
-   * Supports wildcards (*) and exact matches.
-   *
-   * Auto-excluded route types:
-   * - Auth-walled pages (login, account)
-   * - API endpoints
-   * - Dynamic tool results (temporary, user-specific)
-   * - Internal admin pages
-   */
-  excludePatterns: [
-    // Auth & Account Routes
-    '/login',
-    '/auth/*',
-    '/auth-code-error',
-    '/account',
-    '/account/*',
+export async function getContentDescription(): Promise<string> {
+  const { createAnonClient } = await import('@/src/lib/supabase/server-anon');
+  const supabase = createAnonClient();
 
-    // API Routes (not user-facing)
-    '/api/*',
+  const { count } = await supabase.from('content').select('*', { count: 'exact', head: true });
 
-    // Auth-Required Actions
-    '/board/new',
-    '*/new', // All "new" creation pages
-    '*/edit', // All edit pages
-    '*/analytics', // All analytics pages
+  if (!count) {
+    throw new Error('Failed to fetch content count for description');
+  }
 
-    // Dynamic Results (temporary, user-specific)
-    '/tools/*/results/*',
-
-    // Route Groups (not actual routes)
-    '(auth)/*',
-    '(seo)/*',
-  ] as const,
-
-  /**
-   * Route Priority Overrides
-   *
-   * Custom priority values for specific route patterns.
-   * Default priority is 0.5 for discovered routes.
-   */
-  priorityOverrides: {
-    '/': 1.0, // Homepage - highest priority
-    '/ph-bundle': 0.9, // Product Hunt launch
-    '/ph-waitlist': 0.8, // Waitlist
-    '/trending': 0.8, // High-value discovery
-    '/guides': 0.7, // Educational content
-    '/u/*': 0.6, // User profiles
-  } as Record<string, number>,
-
-  /**
-   * Change Frequency Overrides
-   *
-   * Custom changefreq values for specific route patterns.
-   * Default changefreq is 'weekly' for discovered routes.
-   */
-  changefreqOverrides: {
-    '/': 'daily',
-    '/trending': 'daily',
-    '/ph-bundle': 'weekly',
-    '/ph-waitlist': 'weekly',
-    '/changelog': 'daily',
-    '/u/*': 'weekly',
-  } as Record<string, 'always' | 'hourly' | 'daily' | 'weekly' | 'monthly' | 'yearly' | 'never'>,
-} as const;
+  return `Open-source directory of ${count}+ Claude AI configurations. Community-driven collection of MCP servers, automation hooks, custom commands, agents, and rules.`;
+}

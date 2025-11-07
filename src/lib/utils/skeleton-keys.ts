@@ -16,7 +16,3 @@ export function getSkeletonKeys(count: number): readonly string[] {
 
   return keys;
 }
-
-export function clearSkeletonKeyCache(): void {
-  keyCache.clear();
-}

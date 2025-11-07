@@ -9,12 +9,14 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/card';
-import { getUserJobs } from '@/src/lib/actions/business.actions';
 import { ROUTES } from '@/src/lib/constants/routes';
 import { BarChart, Briefcase, Edit, ExternalLink, Eye, Plus } from '@/src/lib/icons';
+import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
+import { createClient } from '@/src/lib/supabase/server';
 import { BADGE_COLORS, type JobStatusType, UI_CLASSES } from '@/src/lib/ui-constants';
 import { formatRelativeDate } from '@/src/lib/utils/data.utils';
+import type { Tables } from '@/src/types/database.types';
 
 // Force dynamic rendering - requires authentication
 export const dynamic = 'force-dynamic';
@@ -22,7 +24,49 @@ export const dynamic = 'force-dynamic';
 export const metadata = generatePageMetadata('/account/jobs');
 
 export default async function MyJobsPage() {
-  const jobs = await getUserJobs();
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  let jobs: Array<Tables<'jobs'>> = [];
+  let hasError = false;
+
+  if (user) {
+    let data: unknown = null;
+    let error: unknown = null;
+
+    if (typeof supabase.rpc === 'function') {
+      ({ data, error } = await supabase.rpc('get_user_dashboard', { p_user_id: user.id }));
+    } else {
+      logger.warn(
+        'Supabase RPC unavailable (mock client fallback detected); skipping dashboard fetch.',
+        { context: 'MyJobsPage' }
+      );
+      // Mock client case - set empty jobs array to avoid misleading validation errors
+      jobs = [];
+    }
+
+    if (error) {
+      logger.error(
+        'Failed to fetch user dashboard',
+        error instanceof Error ? error : new Error(String(error))
+      );
+      hasError = true;
+    } else if (data !== null) {
+      // Trust database types - PostgreSQL validates structure
+      const result = data as { jobs: Array<Tables<'jobs'>> };
+      jobs = result.jobs || [];
+    }
+  }
+
+  if (hasError) {
+    return (
+      <div className="space-y-6">
+        <div className="text-destructive">Failed to load jobs. Please try again later.</div>
+      </div>
+    );
+  }
 
   const getStatusColor = (status: string) => {
     return BADGE_COLORS.jobStatus[status as JobStatusType] || 'bg-muted';

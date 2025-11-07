@@ -9,7 +9,7 @@ import { UnifiedContentBox } from '@/src/components/domain/unified-content-box';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/card';
 import { highlightCode } from '@/src/lib/content/syntax-highlighting';
 import { Zap } from '@/src/lib/icons';
-import type { StepByStepGuideProps } from '@/src/lib/schemas/component.schema';
+import type { StepByStepGuideProps } from '@/src/lib/types/component.types';
 
 export function StepByStepGuide(props: StepByStepGuideProps) {
   const { steps, title, description, totalTime } = props;

@@ -13,6 +13,7 @@ import {
   Bookmark,
   Briefcase,
   Home,
+  Plug,
   Send,
   Settings,
   TrendingUp,
@@ -91,6 +92,7 @@ export default async function AccountLayout({ children }: { children: React.Reac
       ? [{ name: 'Sponsorships', href: '/account/sponsorships', icon: TrendingUp }]
       : []),
     { name: 'Settings', href: '/account/settings', icon: Settings },
+    { name: 'Connected Accounts', href: '/account/connected-accounts', icon: Plug },
   ];
 
   return (

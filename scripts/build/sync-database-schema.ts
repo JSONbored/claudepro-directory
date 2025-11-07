@@ -1,30 +1,27 @@
 #!/usr/bin/env tsx
 /**
- * Unified Database Schema Sync Script
+ * Database Schema Sync Script
  *
- * Single script that handles all database-related artifact generation:
+ * Handles database-related artifact generation:
  * 1. Schema dump (supabase/schema.sql) - OPTIONAL, for version control only
  * 2. TypeScript types (src/types/database.types.ts) - queries database directly
- * 3. Zod schemas (src/lib/schemas/generated/db-schemas.ts) - reads from types file
  *
  * Features:
  * - Smart defaults: skips schema.sql by default (not needed for type generation)
  * - Comprehensive change detection (tables, views, functions, indexes, triggers)
- * - Individual operation support (--only-dump, --only-types, --only-zod)
- * - Skip flags (--skip-dump, --skip-types, --skip-zod)
+ * - Individual operation support (--only-dump, --only-types)
+ * - Skip flags (--skip-dump, --skip-types)
  * - Force regeneration (--force)
  * - Hash-based caching for performance
  *
  * Usage:
- *   pnpm sync:db                # Fast mode: types + zod only (~13-20s)
+ *   pnpm sync:db                # Fast mode: types only (~10-15s)
  *   pnpm sync:db:full           # Complete sync including schema.sql (~60s)
  *   pnpm sync:db --force        # Force regeneration (respects skip flags)
  *   pnpm sync:db:types          # Only regenerate TypeScript types
- *   pnpm sync:db:zod            # Only regenerate Zod schemas
- *   pnpm sync:db:dump           # Only dump schema.sql
  *
  * Performance:
- * - Fast mode (types + zod): ~13-20 seconds ⚡
+ * - Fast mode (types): ~10-15 seconds ⚡
  * - Full sync (with schema.sql): ~60 seconds
  * - No changes: ~200-500ms (early exit after hash check)
  *
@@ -34,7 +31,7 @@
  */
 
 import { execSync } from 'node:child_process';
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import ora from 'ora';
@@ -51,10 +48,6 @@ const ROOT = join(__dirname, '../..');
 // Output files
 const SCHEMA_FILE = join(ROOT, 'supabase/schema.sql');
 const TYPES_FILE = join(ROOT, 'src/types/database.types.ts');
-const ZOD_OUTPUT_FILE = join(ROOT, 'src/lib/schemas/generated/db-schemas.ts');
-const ZOD_TYPES_FILE = join(ROOT, 'src/lib/schemas/generated/db-schemas.d.ts');
-const ZOD_CONFIG_FILE = join(ROOT, 'supazod.config.ts');
-const ZOD_OUTPUT_DIR = join(ROOT, 'src/lib/schemas/generated');
 
 /**
  * Comprehensive schema query covering all database objects
@@ -342,110 +335,6 @@ async function generateTypes(isForce: boolean, cachedHash?: string | null): Prom
 }
 
 // ============================================================================
-// Step 3: Zod Schemas
-// ============================================================================
-
-async function generateZodSchemas(isForce: boolean): Promise<StepResult> {
-  const startTime = performance.now();
-  const spinner = ora();
-
-  try {
-    console.log(`\n${'='.repeat(80)}`);
-    console.log('🔷 STEP 3: Zod Schemas (src/lib/schemas/generated/db-schemas.ts)');
-    console.log(`${'='.repeat(80)}\n`);
-
-    // Ensure output directory exists
-    if (!existsSync(ZOD_OUTPUT_DIR)) {
-      mkdirSync(ZOD_OUTPUT_DIR, { recursive: true });
-    }
-
-    // Check if regeneration needed
-    if (!isForce) {
-      spinner.start('Checking for type changes...');
-
-      if (!existsSync(TYPES_FILE)) {
-        throw new Error('TypeScript types file not found - run type generation first');
-      }
-
-      const typesContent = readFileSync(TYPES_FILE, 'utf-8');
-      const currentHash = computeHash(typesContent);
-
-      if (!hasHashChanged('zod-schemas', currentHash)) {
-        spinner.info('Types unchanged - skipping Zod generation');
-        return {
-          step: 'Zod Schemas',
-          success: true,
-          skipped: true,
-          duration_ms: Math.round(performance.now() - startTime),
-          reason: 'No changes detected',
-        };
-      }
-      spinner.succeed('Types changed - generating Zod schemas...');
-    }
-
-    spinner.start('Generating Zod schemas from TypeScript types...');
-
-    // Verify config exists
-    if (!existsSync(ZOD_CONFIG_FILE)) {
-      throw new Error(`Configuration file not found: ${ZOD_CONFIG_FILE}`);
-    }
-
-    // Run Supazod
-    const command = [
-      'pnpm supazod',
-      `--input "${TYPES_FILE}"`,
-      `--output "${ZOD_OUTPUT_FILE}"`,
-      `--types-output "${ZOD_TYPES_FILE}"`,
-      '--schema public',
-      `--config "${ZOD_CONFIG_FILE}"`,
-    ].join(' ');
-
-    execSync(command, {
-      cwd: ROOT,
-      stdio: 'pipe',
-      encoding: 'utf-8',
-    });
-
-    // Validate
-    const schemasContent = readFileSync(ZOD_OUTPUT_FILE, 'utf-8');
-    if (
-      !(schemasContent.includes('import { z } from') && schemasContent.includes('export const'))
-    ) {
-      throw new Error('Generated Zod schemas appear invalid');
-    }
-
-    // Store hash
-    const typesContent = readFileSync(TYPES_FILE, 'utf-8');
-    const currentHash = computeHash(typesContent);
-    const duration = Math.round(performance.now() - startTime);
-
-    setHash('zod-schemas', currentHash, {
-      reason: 'Zod schemas regenerated from types',
-      duration,
-    });
-
-    spinner.succeed(`Zod schema generation complete (${duration}ms)`);
-
-    return {
-      step: 'Zod Schemas',
-      success: true,
-      skipped: false,
-      duration_ms: duration,
-    };
-  } catch (error) {
-    spinner.fail('Zod generation failed');
-    console.error(`   ${error instanceof Error ? error.message : String(error)}`);
-    return {
-      step: 'Zod Schemas',
-      success: false,
-      skipped: false,
-      duration_ms: Math.round(performance.now() - startTime),
-      reason: error instanceof Error ? error.message : String(error),
-    };
-  }
-}
-
-// ============================================================================
 // Main
 // ============================================================================
 
@@ -454,32 +343,28 @@ async function main() {
   const isForce = args.includes('--force');
   const onlyDump = args.includes('--only-dump');
   const onlyTypes = args.includes('--only-types');
-  const onlyZod = args.includes('--only-zod');
   const skipDump = args.includes('--skip-dump');
   const skipTypes = args.includes('--skip-types');
-  const skipZod = args.includes('--skip-zod');
 
   // Determine which operations to run
-  const runDump = onlyDump || !(onlyTypes || onlyZod || skipDump);
-  const runTypes = onlyTypes || !(onlyDump || onlyZod || skipTypes);
-  const runZod = onlyZod || !(onlyDump || onlyTypes || skipZod);
+  const runDump = onlyDump || !(onlyTypes || skipDump);
+  const runTypes = onlyTypes || !(onlyDump || skipTypes);
 
   console.log('🔄 Database Schema Sync\n');
   console.log('Configuration:');
   console.log(`  Force regeneration: ${isForce ? 'Yes' : 'No'}`);
   console.log(`  Schema dump: ${runDump ? 'Yes' : 'No'}`);
-  console.log(`  Type generation: ${runTypes ? 'Yes' : 'No'}`);
-  console.log(`  Zod generation: ${runZod ? 'Yes' : 'No'}\n`);
+  console.log(`  Type generation: ${runTypes ? 'Yes' : 'No'}\n`);
 
   const overallStartTime = performance.now();
   const results: StepResult[] = [];
 
   try {
-    // OPTIMIZATION: Single schema hash query for all checks (was 3 queries before)
+    // OPTIMIZATION: Single schema hash query for all checks
     let cachedSchemaHashForRun: string | null | undefined;
 
     // Early exit optimization: Check if anything needs regeneration
-    if (!isForce && runDump && runTypes && runZod) {
+    if (!isForce && runDump && runTypes) {
       console.log('🔍 Checking if database schema has changed...\n');
       cachedSchemaHashForRun = await getSchemaHash();
 
@@ -489,15 +374,7 @@ async function main() {
           hasHashChanged('db-schema', cachedSchemaHashForRun)
         );
 
-        // Check Zod separately (depends on types content, not schema)
-        let zodUpToDate = false;
-        if (existsSync(TYPES_FILE)) {
-          const typesContent = readFileSync(TYPES_FILE, 'utf-8');
-          const typesHash = computeHash(typesContent);
-          zodUpToDate = !hasHashChanged('zod-schemas', typesHash);
-        }
-
-        if (schemaUpToDate && zodUpToDate) {
+        if (schemaUpToDate) {
           console.log('✅ Database schema unchanged - all artifacts up to date');
           console.log('   Use --force to regenerate anyway\n');
           cleanup();
@@ -523,13 +400,6 @@ async function main() {
       results.push(await generateTypes(isForce, cachedSchemaHashForRun));
       if (!results[results.length - 1].success) {
         throw new Error('Type generation failed - aborting');
-      }
-    }
-
-    if (runZod) {
-      results.push(await generateZodSchemas(isForce));
-      if (!results[results.length - 1].success) {
-        throw new Error('Zod generation failed - aborting');
       }
     }
 

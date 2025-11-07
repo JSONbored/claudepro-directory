@@ -17,6 +17,9 @@ if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
   throw new Error('Missing required environment variables: SUPABASE_URL and/or SUPABASE_ANON_KEY');
 }
 
+// Singleton Supabase client - reused across all requests for optimal performance
+const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY);
+
 // Public CORS headers for GET (allow all origins)
 const getCorsHeaders = {
   ...publicCorsHeaders,
@@ -56,8 +59,6 @@ Deno.serve(async (req) => {
 
     const offset = (page - 1) * limit;
 
-    const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY);
-
     const { data, error } = await supabase.rpc('get_gallery_trending', {
       ...(category && { p_category: category }),
       p_limit: limit,
@@ -78,8 +79,9 @@ Deno.serve(async (req) => {
         status: 200,
         headers: {
           'Content-Type': 'application/json',
-          ...getCorsHeaders,
           'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
+          'CDN-Cache-Control': 'max-age=300',
+          ...getCorsHeaders,
         },
       }
     );

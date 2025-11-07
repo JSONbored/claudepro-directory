@@ -119,12 +119,14 @@ async function handleGetForYouFeed(supabase: any, user: any, body: any, corsHead
     return unauthorizedResponse('Unauthorized', corsHeaders);
   }
 
-  const { category, limit = 12 } = body;
+  const { category, limit = 12, offset = 0, exclude_bookmarked = false } = body;
 
   const { data: feedData, error } = await supabase.rpc('get_personalized_feed', {
     p_user_id: user.id,
     ...(category && { p_category: category }),
     p_limit: limit,
+    p_offset: offset,
+    p_exclude_bookmarked: exclude_bookmarked,
   });
 
   if (error) {

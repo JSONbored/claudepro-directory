@@ -96,5 +96,13 @@ export function createAnonClient() {
       autoRefreshToken: false,
       detectSessionInUrl: false,
     },
+    global: {
+      headers: {
+        'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
+      },
+    },
+    db: {
+      schema: 'public',
+    },
   });
 }

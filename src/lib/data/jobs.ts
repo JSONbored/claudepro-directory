@@ -118,8 +118,3 @@ export async function getJobsCount(): Promise<number> {
     return 0;
   }
 }
-
-// Backwards compatibility export
-export const jobs: Job[] = [];
-// Note: This empty array is for backwards compatibility only
-// All code should now use getJobs() instead of importing static jobs array

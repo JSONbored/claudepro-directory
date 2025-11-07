@@ -36,6 +36,9 @@ const SUPABASE_URL = Deno.env.get('NEXT_PUBLIC_SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const SITE_URL = Deno.env.get('NEXT_PUBLIC_SITE_URL') || 'https://claudepro.directory';
 
+// Singleton Supabase client - reused across all requests for optimal performance
+const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+
 // Extract project ID dynamically from Supabase URL (e.g., https://hgtjdifxfapoltfflowc.supabase.co)
 const SUPABASE_PROJECT_ID = SUPABASE_URL.match(/https:\/\/([^.]+)\.supabase\.co/)?.[1] || 'unknown';
 
@@ -131,8 +134,6 @@ Deno.serve(async (req) => {
     return new Response('Method not allowed', { status: 405 });
   }
 
-  // Initialize Supabase client for logging (uses generated types)
-  const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
   let logId: string | null = null;
 
   try {

@@ -194,6 +194,44 @@ export function createDownloadAction(
 }
 
 /**
+ * Create a storage URL download action handler
+ *
+ * Downloads files directly from Supabase Storage using the storage_url field.
+ * Shows appropriate toast notifications for success/failure.
+ *
+ * @param label - Button label text (e.g., "Download Skill")
+ * @param icon - React icon component to display
+ * @returns ActionButtonConfig with storage download handler
+ *
+ * @example
+ * ```tsx
+ * // skills category - download from storage_url
+ * primaryAction: createStorageDownloadAction(
+ *   'Download Skill',
+ *   <Download className={`h-4 w-4 mr-2`} />
+ * )
+ * ```
+ */
+export function createStorageDownloadAction(label: string, icon: ReactNode): ActionButtonConfig {
+  return {
+    label,
+    icon,
+    handler: (item: ContentItem) => {
+      if ('storage_url' in item && item.storage_url) {
+        window.location.href = item.storage_url;
+        toasts.raw.success('Download started!', {
+          description: `Downloading ${item.title || item.slug} package...`,
+        });
+      } else {
+        toasts.raw.error('Download unavailable', {
+          description: 'This skill package is not yet available for download.',
+        });
+      }
+    },
+  };
+}
+
+/**
  * Create a GitHub link action handler
  *
  * Standardizes GitHub repository link opening pattern.
@@ -289,14 +327,10 @@ export const commonActions = {
 
   /**
    * Download skill ZIP package (for skills category)
-   * Downloads Claude Desktop-compatible SKILL.md package
+   * Downloads Claude Desktop-compatible SKILL.md package from Supabase Storage
    */
   applySkill: () =>
-    createDownloadAction(
-      'Download Skill',
-      <Download className={'mr-2 h-4 w-4'} />,
-      '/downloads/skills/{slug}.zip'
-    ),
+    createStorageDownloadAction('Download Skill', <Download className={'mr-2 h-4 w-4'} />),
 
   /**
    * View hooks on GitHub action (for hooks category)

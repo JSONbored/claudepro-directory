@@ -6,20 +6,16 @@
 
 import { motion } from 'motion/react';
 import { useRouter } from 'next/navigation';
-import { useAction } from 'next-safe-action/hooks';
 import { useEffect, useState, useTransition } from 'react';
 import { usePostCopyEmail } from '@/src/components/infra/providers/post-copy-email-provider';
 import { Button } from '@/src/components/primitives/button';
 import { useButtonSuccess } from '@/src/hooks/use-button-success';
 import { useCopyToClipboard } from '@/src/hooks/use-copy-to-clipboard';
-import { deleteJob, toggleJobStatus } from '@/src/lib/actions/business.actions';
 import { trackUsage } from '@/src/lib/actions/content.actions';
-import { getGitHubStars } from '@/src/lib/actions/github.actions';
-import { copyMarkdownAction, downloadMarkdownAction } from '@/src/lib/actions/markdown-actions';
 import { addBookmark, removeBookmark } from '@/src/lib/actions/user.actions';
-import { trackInteraction } from '@/src/lib/analytics/client';
 import { type CategoryId, isValidCategory } from '@/src/lib/config/category-config';
 import { SOCIAL_LINKS } from '@/src/lib/constants';
+import { trackInteraction } from '@/src/lib/edge/client';
 import {
   ArrowLeft,
   Bookmark,
@@ -90,7 +86,6 @@ type CopyLLMsVariant = {
   showIcon?: boolean;
   category?: CategoryId;
   slug?: string;
-  contentId?: string;
 } & ButtonStyleProps;
 
 type BookmarkVariant = {
@@ -321,7 +316,8 @@ function AuthSignOutButton({
 }
 
 /**
- * Copy Markdown Button
+ * Copy Markdown Button - Edge Function Direct Fetch
+ * Fetches markdown directly from edge function (all categories including skills)
  */
 function CopyMarkdownButton({
   category,
@@ -345,65 +341,77 @@ function CopyMarkdownButton({
     },
   });
 
-  const { executeAsync, status } = useAction(copyMarkdownAction);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleClick = async () => {
-    if (status === 'executing') return;
+    if (isLoading) return;
+    setIsLoading(true);
 
     try {
-      const result = await executeAsync({
-        category,
-        slug,
-        includeMetadata,
-        includeFooter,
+      // Build query parameters
+      const params = new URLSearchParams({
+        includeMetadata: includeMetadata.toString(),
+        includeFooter: includeFooter.toString(),
       });
 
-      if (result?.data?.success && result.data.markdown) {
-        await copy(result.data.markdown);
-        triggerSuccess();
-        toasts.raw.success('Copied to clipboard!', {
-          description: 'Markdown content ready to paste',
-        });
+      // Fetch markdown from edge function (returns plain text markdown)
+      const response = await fetch(`/${category}/${slug}.md?${params}`);
 
-        // Track usage with database-first trackUsage()
-        if (result.data.content_id) {
-          trackUsage({
-            content_id: result.data.content_id,
-            action_type: 'copy',
-          }).catch(() => {
-            // Intentionally empty - analytics failures should not affect UX
-          });
-        }
-
-        // Trigger email modal
-        showModal({
-          copyType: 'markdown',
-          category,
-          slug,
-          ...(referrer && { referrer }),
-        });
-
-        // Track analytics (fire-and-forget)
-        const contentLength = result.data.markdown.length;
-        import('@/src/lib/analytics/tracker')
-          .then((tracker) => {
-            tracker.trackEvent('markdown_copied', {
-              category,
-              slug,
-              contentLength,
-              copyCount: 1,
-            });
-          })
-          .catch(() => {
-            // Intentionally empty - analytics failures should not affect UX
-          });
-      } else {
-        throw new Error(result?.data?.error || 'Failed to generate markdown');
+      if (!response.ok) {
+        throw new Error(`Failed to fetch markdown: ${response.statusText}`);
       }
+
+      // Get plain text markdown content
+      const markdown = await response.text();
+
+      if (!markdown) {
+        throw new Error('No markdown content returned');
+      }
+
+      // Copy to clipboard
+      await copy(markdown);
+      triggerSuccess();
+      toasts.raw.success('Copied to clipboard!', {
+        description: 'Markdown content ready to paste',
+      });
+
+      // Track usage with database-first trackUsage() (atomic RPC, 50-100ms faster)
+      trackUsage({
+        content_type: category,
+        content_slug: slug,
+        action_type: 'copy',
+      }).catch(() => {
+        // Intentionally empty - analytics failures should not affect UX
+      });
+
+      // Trigger email modal
+      showModal({
+        copyType: 'markdown',
+        category,
+        slug,
+        ...(referrer && { referrer }),
+      });
+
+      // Track analytics (fire-and-forget)
+      const contentLength = markdown.length;
+      import('@/src/lib/analytics/tracker')
+        .then((tracker) => {
+          tracker.trackEvent('markdown_copied', {
+            category,
+            slug,
+            contentLength,
+            copyCount: 1,
+          });
+        })
+        .catch(() => {
+          // Intentionally empty - analytics failures should not affect UX
+        });
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
       logger.error('Copy markdown failed', err, { category, slug });
       toasts.raw.error('Failed to copy markdown', { description: err.message });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -413,7 +421,7 @@ function CopyMarkdownButton({
         variant={buttonVariant}
         size={size}
         onClick={handleClick}
-        disabled={disabled || status === 'executing' || isSuccess}
+        disabled={disabled || isLoading || isSuccess}
         className={cn(
           'gap-2 transition-all',
           isSuccess && 'border-green-500/50 bg-green-500/10 text-green-400',
@@ -428,7 +436,9 @@ function CopyMarkdownButton({
 }
 
 /**
- * Download Markdown Button
+ * Download Markdown Button - Edge Function Direct Fetch
+ * Downloads markdown .md file for ALL categories (uniform behavior)
+ * Skills: This downloads the .md file. Separate ZIP button on detail page.
  */
 function DownloadMarkdownButton({
   category,
@@ -441,122 +451,78 @@ function DownloadMarkdownButton({
   disabled = false,
 }: DownloadMarkdownVariant) {
   const { isSuccess, triggerSuccess } = useButtonSuccess();
-  const { executeAsync, status } = useAction(downloadMarkdownAction);
-  const [zipUrl, setZipUrl] = useState<string | null>(null);
-  const [isLoadingUrl, setIsLoadingUrl] = useState(category === 'skills');
-  const [contentId, setContentId] = useState<string | null>(null);
-  const supabase = createClient();
-
-  // Skills category: Fetch storage_url from database
-  useEffect(() => {
-    if (category !== 'skills') return;
-
-    const fetchStorageData = async () => {
-      const { data, error } = await supabase
-        .from('content')
-        .select('id, storage_url')
-        .eq('category', 'skills')
-        .eq('slug', slug)
-        .single();
-
-      if (!error && data) {
-        setZipUrl(data.storage_url);
-        setContentId(data.id);
-      }
-      setIsLoadingUrl(false);
-    };
-
-    fetchStorageData().catch(() => {
-      // Intentionally empty - fetch errors handled by setting loading state to false
-      setIsLoadingUrl(false);
-    });
-  }, [category, slug, supabase]);
-
-  // Skills category: Download ZIP from Supabase Storage with trackUsage()
-  if (category === 'skills') {
-    const handleZipClick = async () => {
-      if (contentId) {
-        trackUsage({
-          content_id: contentId,
-          action_type: 'download_zip',
-        }).catch(() => {
-          // Intentionally empty - analytics failures should not affect UX
-        });
-      }
-    };
-
-    return (
-      <Button
-        variant={buttonVariant}
-        size={size}
-        asChild
-        disabled={disabled || isLoadingUrl || !zipUrl}
-        className={cn('gap-2 transition-all', className)}
-      >
-        <a href={zipUrl || '#'} download onClick={handleZipClick}>
-          {showIcon && <Download className="h-4 w-4" />}
-          <span>{isLoadingUrl ? 'Loading...' : 'Download ZIP'}</span>
-        </a>
-      </Button>
-    );
-  }
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleClick = async () => {
-    if (status === 'executing') return;
+    if (isLoading) return;
+    setIsLoading(true);
 
     try {
-      const result = await executeAsync({ category, slug });
+      // Fetch markdown from edge function (returns plain text markdown)
+      const response = await fetch(
+        `/${category}/${slug}.md?includeMetadata=true&includeFooter=true`
+      );
 
-      if (result?.data?.success && result.data.markdown && result.data.filename) {
-        // Create blob and download
-        const blob = new Blob([result.data.markdown], {
-          type: 'text/markdown;charset=utf-8',
-        });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = result.data.filename;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-
-        triggerSuccess();
-        toasts.raw.success('Downloaded successfully!', {
-          description: `Saved as ${result.data.filename}`,
-        });
-
-        // Track usage with database-first trackUsage()
-        if (result.data.content_id) {
-          trackUsage({
-            content_id: result.data.content_id,
-            action_type: 'download_markdown',
-          }).catch(() => {
-            // Intentional
-          });
-        }
-
-        // Track analytics (fire-and-forget)
-        const fileSize = blob.size;
-        import('@/src/lib/analytics/tracker')
-          .then((tracker) => {
-            tracker.trackEvent('markdown_downloaded', {
-              category,
-              slug,
-              fileSize,
-              downloadCount: 1,
-            });
-          })
-          .catch(() => {
-            // Intentional
-          });
-      } else {
-        throw new Error(result?.data?.error || 'Failed to generate markdown');
+      if (!response.ok) {
+        throw new Error(`Failed to fetch markdown: ${response.statusText}`);
       }
+
+      // Get plain text markdown and filename from headers
+      const markdown = await response.text();
+      const contentDisposition = response.headers.get('Content-Disposition');
+      const filename = contentDisposition?.match(/filename="([^"]+)"/)?.[1] || `${slug}.md`;
+
+      if (!markdown) {
+        throw new Error('No markdown content returned');
+      }
+
+      // Create blob and download
+      const blob = new Blob([markdown], {
+        type: 'text/markdown;charset=utf-8',
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      triggerSuccess();
+      toasts.raw.success('Downloaded successfully!', {
+        description: `Saved as ${filename}`,
+      });
+
+      // Track usage with database-first trackUsage() (atomic RPC, 50-100ms faster)
+      trackUsage({
+        content_type: category,
+        content_slug: slug,
+        action_type: 'download_markdown',
+      }).catch(() => {
+        // Intentionally empty - analytics failures should not affect UX
+      });
+
+      // Track analytics (fire-and-forget)
+      const fileSize = blob.size;
+      import('@/src/lib/analytics/tracker')
+        .then((tracker) => {
+          tracker.trackEvent('markdown_downloaded', {
+            category,
+            slug,
+            fileSize,
+            downloadCount: 1,
+          });
+        })
+        .catch(() => {
+          // Intentionally empty - analytics failures should not affect UX
+        });
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
       logger.error('Download markdown failed', err, { category, slug });
       toasts.raw.error('Failed to download', { description: err.message });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -566,7 +532,7 @@ function DownloadMarkdownButton({
         variant={buttonVariant}
         size={size}
         onClick={handleClick}
-        disabled={disabled || status === 'executing' || isSuccess}
+        disabled={disabled || isLoading || isSuccess}
         className={cn(
           'gap-2 transition-all',
           isSuccess && 'border-green-500/50 bg-green-500/10 text-green-400',
@@ -593,7 +559,6 @@ function CopyLLMsButton({
   disabled = false,
   category,
   slug,
-  contentId,
 }: CopyLLMsVariant) {
   const [isLoading, setIsLoading] = useState(false);
   const { isSuccess, triggerSuccess } = useButtonSuccess();
@@ -622,10 +587,11 @@ function CopyLLMsButton({
         description: 'AI-optimized content ready to paste',
       });
 
-      // Track usage with database-first trackUsage() (uses prop from server component)
-      if (contentId) {
+      // Track usage with database-first trackUsage() (atomic RPC, 50-100ms faster)
+      if (category && slug) {
         trackUsage({
-          content_id: contentId,
+          content_type: category,
+          content_slug: slug,
           action_type: 'llmstxt',
         }).catch(() => {
           // Intentional
@@ -866,18 +832,35 @@ function JobToggleButton({
 }: JobToggleVariant) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+  const supabase = createClient();
 
   const handleToggle = () => {
     const newStatus = currentStatus === 'active' ? 'draft' : 'active';
 
     startTransition(async () => {
       try {
-        const result = await toggleJobStatus({
-          id: jobId,
-          status: newStatus as 'draft' | 'pending_review' | 'active' | 'expired' | 'rejected',
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        if (!user) throw new Error('You must be signed in to manage jobs');
+
+        const { data, error } = await supabase.rpc('manage_job', {
+          p_action: 'toggle_status',
+          p_user_id: user.id,
+          p_data: {
+            id: jobId,
+            status: newStatus,
+          },
         });
 
-        if (result?.data?.success) {
+        if (error) throw new Error(error.message);
+
+        if (!data || typeof data !== 'object' || !('success' in data)) {
+          throw new Error('Invalid response from manage_job RPC');
+        }
+        const result = data as { success: boolean };
+
+        if (result.success) {
           toasts.success.actionCompleted(
             newStatus === 'active' ? 'Job listing resumed' : 'Job listing paused'
           );
@@ -885,7 +868,12 @@ function JobToggleButton({
         } else {
           toasts.error.actionFailed('update job status');
         }
-      } catch (_error) {
+      } catch (error) {
+        logger.error(
+          'Failed to toggle job status',
+          error instanceof Error ? error : new Error(String(error)),
+          { jobId, newStatus }
+        );
         toasts.error.serverError();
       }
     });
@@ -927,6 +915,7 @@ function JobDeleteButton({
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [isDeleting, setIsDeleting] = useState(false);
+  const supabase = createClient();
 
   const handleDelete = () => {
     if (
@@ -938,16 +927,37 @@ function JobDeleteButton({
     setIsDeleting(true);
     startTransition(async () => {
       try {
-        const result = await deleteJob({ id: jobId });
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        if (!user) throw new Error('You must be signed in to delete jobs');
 
-        if (result?.data?.success) {
+        const { data, error } = await supabase.rpc('manage_job', {
+          p_action: 'delete',
+          p_user_id: user.id,
+          p_data: { id: jobId },
+        });
+
+        if (error) throw new Error(error.message);
+
+        if (!data || typeof data !== 'object' || !('success' in data)) {
+          throw new Error('Invalid response from manage_job RPC');
+        }
+        const result = data as { success: boolean };
+
+        if (result.success) {
           toasts.success.itemDeleted('Job listing');
           router.refresh();
         } else {
           toasts.error.actionFailed('delete job listing');
           setIsDeleting(false);
         }
-      } catch (_error) {
+      } catch (error) {
+        logger.error(
+          'Failed to delete job',
+          error instanceof Error ? error : new Error(String(error)),
+          { jobId }
+        );
         toasts.error.serverError();
         setIsDeleting(false);
       }
@@ -979,42 +989,36 @@ function GitHubStarsButton({
   disabled = false,
 }: GitHubStarsVariant) {
   const [stars, setStars] = useState<number | null>(null);
-  const { executeAsync, status } = useAction(getGitHubStars);
 
   useEffect(() => {
-    const fetchStars = async () => {
+    const apiUrl = (() => {
       try {
-        const result = await executeAsync({ repo_url: repoUrl });
-
-        if (
-          result &&
-          'data' in result &&
-          result.data &&
-          typeof result.data === 'object' &&
-          'stars' in result.data
-        ) {
-          setStars(result.data.stars as number);
+        const { pathname, hostname } = new URL(repoUrl);
+        if (hostname === 'github.com') {
+          const [, owner, repo] = pathname.split('/');
+          if (owner && repo) {
+            return `https://api.github.com/repos/${owner}/${repo}`;
+          }
         }
-      } catch (err) {
-        logger.error(
-          'Failed to fetch GitHub stars',
-          err instanceof Error ? err : new Error(String(err)),
-          { repoUrl }
-        );
+      } catch {
+        // Intentional noop – fall back to default repo
       }
-    };
+      return 'https://api.github.com/repos/JSONbored/claudepro-directory';
+    })();
 
-    fetchStars().catch(() => {
-      // Intentional
-    });
-  }, [repoUrl, executeAsync]);
+    fetch(apiUrl)
+      .then((res) => res.json())
+      .then((data) => {
+        const count =
+          data && typeof data.stargazers_count === 'number' ? data.stargazers_count : null;
+        setStars(count);
+      })
+      .catch(() => setStars(null));
+  }, [repoUrl]);
 
   const handleClick = () => {
     window.open(repoUrl, '_blank', 'noopener,noreferrer');
   };
-
-  const isLoading = status === 'executing';
-  const hasError = status === 'hasErrored';
 
   return (
     <Button
@@ -1023,11 +1027,10 @@ function GitHubStarsButton({
       onClick={handleClick}
       disabled={disabled}
       className={cn('gap-2', className)}
-      aria-label={`Star us on GitHub${stars ? ` - ${stars} stars` : ''}${hasError ? ' (star count unavailable)' : ''}`}
-      title={hasError ? 'Star count temporarily unavailable. Click to visit GitHub.' : undefined}
+      aria-label={`Star us on GitHub${stars ? ` - ${stars} stars` : ''}`}
     >
       <Github className="h-4 w-4" aria-hidden="true" />
-      {!isLoading && stars !== null && !hasError && (
+      {typeof stars === 'number' && (
         <span className="font-medium tabular-nums">{stars.toLocaleString()}</span>
       )}
     </Button>

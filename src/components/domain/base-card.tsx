@@ -40,7 +40,7 @@ import {
 import { type UseCardNavigationOptions, useCardNavigation } from '@/src/hooks/use-card-navigation';
 import { APP_CONFIG, SOCIAL_LINKS } from '@/src/lib/constants';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
-import { getViewTransitionStyle } from '@/src/lib/utils/view-transitions.utils';
+import { getViewTransitionName } from '@/src/lib/utils/view-transitions.utils';
 
 /**
  * Props for BaseCard component
@@ -296,7 +296,7 @@ export const BaseCard = memo(
     // View transition style for smooth page morphing
     const viewTransitionStyle =
       useViewTransitions && viewTransitionSlug
-        ? getViewTransitionStyle('card', viewTransitionSlug)
+        ? { viewTransitionName: getViewTransitionName('card', viewTransitionSlug) }
         : undefined;
 
     // Card content wrapper - conditionally render with or without motion animations

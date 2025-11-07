@@ -7,8 +7,6 @@ import type { Metadata } from 'next';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
-import { BadgeGrid } from '@/src/components/features/badges/badge-grid';
-import { ReputationBreakdown } from '@/src/components/features/reputation/reputation-breakdown';
 import { FollowButton } from '@/src/components/features/social/follow-button';
 import {
   Card,
@@ -31,7 +29,7 @@ interface UserProfilePageProps {
 /**
  * ISR revalidation interval for user profile pages
  */
-export const revalidate = 1800; // 30 minutes
+export const revalidate = false;
 
 export async function generateMetadata({ params }: UserProfilePageProps): Promise<Metadata> {
   const { slug } = await params;
@@ -47,9 +45,7 @@ type UserProfile = {
   image: string | null;
   bio: string | null;
   website: string | null;
-  location: string | null;
-  tier: string;
-  reputation_score: number;
+  tier: string | null;
   created_at: string;
 };
 
@@ -74,16 +70,14 @@ type RPCContribution = Pick<
   Tables<'user_content'>,
   | 'id'
   | 'content_type'
+  | 'slug'
   | 'name'
   | 'description'
   | 'featured'
   | 'view_count'
   | 'download_count'
   | 'created_at'
-> & {
-  content_slug: string;
-  status: string;
-};
+>;
 
 // Base profile data from get_user_profile()
 type ProfileData = {
@@ -102,27 +96,8 @@ type ProfileData = {
   isOwner: boolean;
 };
 
-// Badge type from get_user_badges_with_details RPC
-type UserBadgeWithDetails = Pick<
-  Tables<'user_badges'>,
-  'id' | 'badge_id' | 'earned_at' | 'featured' | 'metadata'
-> & {
-  badge: Tables<'badges'>;
-};
-
-// Extended profile data from get_user_profile_complete() - adds reputation and badges
-type ProfileDataComplete = ProfileData & {
-  reputation: {
-    breakdown: {
-      from_posts: number;
-      from_votes_received: number;
-      from_comments: number;
-      from_submissions: number;
-      total: number;
-    };
-  } | null;
-  badges: UserBadgeWithDetails[];
-};
+// Profile data type - uses get_user_profile() RPC
+type ProfileDataComplete = ProfileData;
 
 export default async function UserProfilePage({ params }: UserProfilePageProps) {
   const { slug } = await params;
@@ -134,8 +109,8 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
   } = await supabase.auth.getUser();
 
   // Consolidated RPC: 4 calls → 1 (75% reduction)
-  // get_user_profile_complete() includes: profile + stats + posts + collections + contributions + reputation + badges
-  const { data: profileData, error } = await supabase.rpc('get_user_profile_complete', {
+  // get_user_profile() includes: profile + stats + posts + collections + contributions
+  const { data: profileData, error } = await supabase.rpc('get_user_profile', {
     p_user_slug: slug,
     ...(currentUser?.id && { p_viewer_id: currentUser.id }),
   });
@@ -151,46 +126,7 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
 
   // Type-safe extraction using ProfileDataComplete
   const data = profileData as ProfileDataComplete;
-  const {
-    profile,
-    stats,
-    posts,
-    collections,
-    contributions,
-    isFollowing,
-    isOwner,
-    reputation,
-    badges,
-  } = data;
-
-  // Fetch reputation metadata (tiers + actions + tier display config)
-  const [tierConfigsResult, reputationTiersResult, reputationActionsResult] = await Promise.all([
-    supabase
-      .from('tier_display_config')
-      .select('tier, label, css_classes')
-      .eq('active', true)
-      .then((res) => res.data || []),
-    supabase
-      .from('reputation_tiers')
-      .select('*')
-      .eq('active', true)
-      .order('order', { ascending: true })
-      .then((res) => res.data || []),
-    supabase
-      .from('reputation_actions')
-      .select('action_type, points')
-      .eq('active', true)
-      .then((res) => res.data || []),
-  ]);
-
-  const reputationData = reputation;
-  const userBadges = badges || [];
-  const reputationTiers = reputationTiersResult;
-  const reputationActions = reputationActionsResult;
-
-  const tierConfigs = Object.fromEntries(
-    tierConfigsResult.map((t) => [t.tier, { label: t.label, className: t.css_classes }])
-  );
+  const { profile, stats, posts, collections, contributions, isFollowing } = data;
 
   const { followerCount, followingCount } = stats;
 
@@ -261,16 +197,6 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
           {/* Stats sidebar */}
           <div className="space-y-4">
-            {reputationData?.breakdown && (
-              <ReputationBreakdown
-                breakdown={reputationData.breakdown}
-                tiers={reputationTiers}
-                actions={reputationActions}
-                showDetails={true}
-                showProgress={true}
-              />
-            )}
-
             {/* Quick Stats Card */}
             <Card>
               <CardHeader>
@@ -294,21 +220,6 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                   <UnifiedBadge variant="base" style="secondary">
                     {posts?.length || 0}
                   </UnifiedBadge>
-                </div>
-                <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
-                  <span className={UI_CLASSES.TEXT_SM_MUTED}>Account Tier</span>
-                  {(() => {
-                    const tier = profile.tier || 'free';
-                    const tierConfig = tierConfigs[tier] || {
-                      label: 'Free',
-                      className: 'border-muted-foreground/20 text-muted-foreground',
-                    };
-                    return (
-                      <UnifiedBadge variant="base" style="outline" className={tierConfig.className}>
-                        {tierConfig.label}
-                      </UnifiedBadge>
-                    );
-                  })()}
                 </div>
                 <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
                   <span className={UI_CLASSES.TEXT_SM_MUTED}>Member since</span>
@@ -429,7 +340,7 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                   {contributions.map((item) => (
                     <Card key={item.id} className={UI_CLASSES.CARD_INTERACTIVE}>
-                      <a href={`/${item.content_type}/${item.content_slug}`}>
+                      <a href={`/${item.content_type}/${item.slug}`}>
                         <CardHeader>
                           <div className={'mb-2 flex items-center justify-between'}>
                             <UnifiedBadge variant="base" style="secondary" className="text-xs">
@@ -457,14 +368,6 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                     </Card>
                   ))}
                 </div>
-              </div>
-            )}
-
-            {/* Badges Section */}
-            {userBadges.length > 0 && (
-              <div>
-                <h2 className="mb-4 font-bold text-2xl">Badges</h2>
-                <BadgeGrid badges={userBadges} canEdit={isOwner} featuredOnly={false} />
               </div>
             )}
           </div>

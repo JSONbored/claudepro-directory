@@ -96,7 +96,7 @@ export async function trackEmbedGeneration(options: {
   format: 'iframe' | 'wordpress' | 'markdown';
 }): Promise<void> {
   try {
-    const { trackInteraction } = await import('@/src/lib/analytics/client');
+    const { trackInteraction } = await import('@/src/lib/edge/client');
 
     await trackInteraction({
       interaction_type: 'embed_generated',

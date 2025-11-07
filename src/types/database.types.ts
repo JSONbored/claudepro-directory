@@ -250,54 +250,6 @@ export type Database = {
         };
         Relationships: [];
       };
-      badges: {
-        Row: {
-          active: boolean | null;
-          category: string;
-          created_at: string;
-          criteria: Json;
-          description: string;
-          icon: string | null;
-          id: string;
-          name: string;
-          order: number | null;
-          rarity: Database['public']['Enums']['badge_rarity'];
-          slug: string;
-          tier_required: string | null;
-          updated_at: string;
-        };
-        Insert: {
-          active?: boolean | null;
-          category: string;
-          created_at?: string;
-          criteria: Json;
-          description: string;
-          icon?: string | null;
-          id?: string;
-          name: string;
-          order?: number | null;
-          rarity?: Database['public']['Enums']['badge_rarity'];
-          slug: string;
-          tier_required?: string | null;
-          updated_at?: string;
-        };
-        Update: {
-          active?: boolean | null;
-          category?: string;
-          created_at?: string;
-          criteria?: Json;
-          description?: string;
-          icon?: string | null;
-          id?: string;
-          name?: string;
-          order?: number | null;
-          rarity?: Database['public']['Enums']['badge_rarity'];
-          slug?: string;
-          tier_required?: string | null;
-          updated_at?: string;
-        };
-        Relationships: [];
-      };
       bookmarks: {
         Row: {
           content_slug: string;
@@ -327,27 +279,6 @@ export type Database = {
           user_id?: string;
         };
         Relationships: [
-          {
-            foreignKeyName: 'bookmarks_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'mv_user_leaderboard';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'bookmarks_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_badge_stats';
-            referencedColumns: ['user_id'];
-          },
-          {
-            foreignKeyName: 'bookmarks_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_stats';
-            referencedColumns: ['user_id'];
-          },
           {
             foreignKeyName: 'bookmarks_user_id_fkey';
             columns: ['user_id'];
@@ -675,27 +606,6 @@ export type Database = {
             foreignKeyName: 'collection_items_user_id_fkey';
             columns: ['user_id'];
             isOneToOne: false;
-            referencedRelation: 'mv_user_leaderboard';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'collection_items_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_badge_stats';
-            referencedColumns: ['user_id'];
-          },
-          {
-            foreignKeyName: 'collection_items_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_stats';
-            referencedColumns: ['user_id'];
-          },
-          {
-            foreignKeyName: 'collection_items_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
             referencedRelation: 'users';
             referencedColumns: ['id'];
           },
@@ -733,27 +643,6 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: 'posts';
             referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'comments_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'mv_user_leaderboard';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'comments_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_badge_stats';
-            referencedColumns: ['user_id'];
-          },
-          {
-            foreignKeyName: 'comments_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_stats';
-            referencedColumns: ['user_id'];
           },
           {
             foreignKeyName: 'comments_user_id_fkey';
@@ -818,27 +707,6 @@ export type Database = {
             foreignKeyName: 'companies_owner_id_fkey';
             columns: ['owner_id'];
             isOneToOne: false;
-            referencedRelation: 'mv_user_leaderboard';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'companies_owner_id_fkey';
-            columns: ['owner_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_badge_stats';
-            referencedColumns: ['user_id'];
-          },
-          {
-            foreignKeyName: 'companies_owner_id_fkey';
-            columns: ['owner_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_stats';
-            referencedColumns: ['user_id'];
-          },
-          {
-            foreignKeyName: 'companies_owner_id_fkey';
-            columns: ['owner_id'];
-            isOneToOne: false;
             referencedRelation: 'users';
             referencedColumns: ['id'];
           },
@@ -857,7 +725,6 @@ export type Database = {
           date_added: string;
           description: string;
           difficulty_score: number | null;
-          discovery_metadata: Json | null;
           display_title: string | null;
           documentation_url: string | null;
           download_url: string | null;
@@ -901,7 +768,6 @@ export type Database = {
           date_added: string;
           description: string;
           difficulty_score?: number | null;
-          discovery_metadata?: Json | null;
           display_title?: string | null;
           documentation_url?: string | null;
           download_url?: string | null;
@@ -945,7 +811,6 @@ export type Database = {
           date_added?: string;
           description?: string;
           difficulty_score?: number | null;
-          discovery_metadata?: Json | null;
           display_title?: string | null;
           documentation_url?: string | null;
           download_url?: string | null;
@@ -1113,6 +978,7 @@ export type Database = {
       };
       content_submissions: {
         Row: {
+          approved_slug: string | null;
           author: string;
           author_profile_url: string | null;
           category: string;
@@ -1136,8 +1002,11 @@ export type Database = {
           submitter_ip: unknown;
           tags: string[] | null;
           updated_at: string;
+          webhook_announcement_sent_at: string | null;
+          webhook_notification_sent_at: string | null;
         };
         Insert: {
+          approved_slug?: string | null;
           author: string;
           author_profile_url?: string | null;
           category: string;
@@ -1161,8 +1030,11 @@ export type Database = {
           submitter_ip?: unknown;
           tags?: string[] | null;
           updated_at?: string;
+          webhook_announcement_sent_at?: string | null;
+          webhook_notification_sent_at?: string | null;
         };
         Update: {
+          approved_slug?: string | null;
           author?: string;
           author_profile_url?: string | null;
           category?: string;
@@ -1186,6 +1058,8 @@ export type Database = {
           submitter_ip?: unknown;
           tags?: string[] | null;
           updated_at?: string;
+          webhook_announcement_sent_at?: string | null;
+          webhook_notification_sent_at?: string | null;
         };
         Relationships: [];
       };
@@ -1405,50 +1279,8 @@ export type Database = {
             foreignKeyName: 'followers_follower_id_fkey';
             columns: ['follower_id'];
             isOneToOne: false;
-            referencedRelation: 'mv_user_leaderboard';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'followers_follower_id_fkey';
-            columns: ['follower_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_badge_stats';
-            referencedColumns: ['user_id'];
-          },
-          {
-            foreignKeyName: 'followers_follower_id_fkey';
-            columns: ['follower_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_stats';
-            referencedColumns: ['user_id'];
-          },
-          {
-            foreignKeyName: 'followers_follower_id_fkey';
-            columns: ['follower_id'];
-            isOneToOne: false;
             referencedRelation: 'users';
             referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'followers_following_id_fkey';
-            columns: ['following_id'];
-            isOneToOne: false;
-            referencedRelation: 'mv_user_leaderboard';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'followers_following_id_fkey';
-            columns: ['following_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_badge_stats';
-            referencedColumns: ['user_id'];
-          },
-          {
-            foreignKeyName: 'followers_following_id_fkey';
-            columns: ['following_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_stats';
-            referencedColumns: ['user_id'];
           },
           {
             foreignKeyName: 'followers_following_id_fkey';
@@ -1661,99 +1493,6 @@ export type Database = {
           },
         ];
       };
-      github_repo_stats: {
-        Row: {
-          created_at: string;
-          forks: number | null;
-          id: string;
-          last_fetched_at: string;
-          open_issues: number | null;
-          repo_name: string;
-          repo_owner: string;
-          repo_url: string;
-          stars: number;
-          updated_at: string;
-          watchers: number | null;
-        };
-        Insert: {
-          created_at?: string;
-          forks?: number | null;
-          id?: string;
-          last_fetched_at?: string;
-          open_issues?: number | null;
-          repo_name: string;
-          repo_owner: string;
-          repo_url: string;
-          stars?: number;
-          updated_at?: string;
-          watchers?: number | null;
-        };
-        Update: {
-          created_at?: string;
-          forks?: number | null;
-          id?: string;
-          last_fetched_at?: string;
-          open_issues?: number | null;
-          repo_name?: string;
-          repo_owner?: string;
-          repo_url?: string;
-          stars?: number;
-          updated_at?: string;
-          watchers?: number | null;
-        };
-        Relationships: [];
-      };
-      index_usage_snapshots: {
-        Row: {
-          created_at: string;
-          id: string;
-          idx_blks_hit: number;
-          idx_blks_read: number;
-          idx_scan: number;
-          idx_tup_fetch: number;
-          idx_tup_read: number;
-          index_definition: string;
-          index_size_bytes: number;
-          indexname: string;
-          schemaname: string;
-          snapshot_date: string;
-          table_size_bytes: number;
-          tablename: string;
-        };
-        Insert: {
-          created_at?: string;
-          id?: string;
-          idx_blks_hit: number;
-          idx_blks_read: number;
-          idx_scan: number;
-          idx_tup_fetch: number;
-          idx_tup_read: number;
-          index_definition: string;
-          index_size_bytes: number;
-          indexname: string;
-          schemaname: string;
-          snapshot_date?: string;
-          table_size_bytes: number;
-          tablename: string;
-        };
-        Update: {
-          created_at?: string;
-          id?: string;
-          idx_blks_hit?: number;
-          idx_blks_read?: number;
-          idx_scan?: number;
-          idx_tup_fetch?: number;
-          idx_tup_read?: number;
-          index_definition?: string;
-          index_size_bytes?: number;
-          indexname?: string;
-          schemaname?: string;
-          snapshot_date?: string;
-          table_size_bytes?: number;
-          tablename?: string;
-        };
-        Relationships: [];
-      };
       jobs: {
         Row: {
           active: boolean | null;
@@ -1889,27 +1628,6 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: 'company_job_stats';
             referencedColumns: ['company_id'];
-          },
-          {
-            foreignKeyName: 'jobs_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'mv_user_leaderboard';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'jobs_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_badge_stats';
-            referencedColumns: ['user_id'];
-          },
-          {
-            foreignKeyName: 'jobs_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_stats';
-            referencedColumns: ['user_id'];
           },
           {
             foreignKeyName: 'jobs_user_id_fkey';
@@ -2168,27 +1886,6 @@ export type Database = {
             foreignKeyName: 'payments_user_id_fkey';
             columns: ['user_id'];
             isOneToOne: false;
-            referencedRelation: 'mv_user_leaderboard';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'payments_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_badge_stats';
-            referencedColumns: ['user_id'];
-          },
-          {
-            foreignKeyName: 'payments_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_stats';
-            referencedColumns: ['user_id'];
-          },
-          {
-            foreignKeyName: 'payments_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
             referencedRelation: 'users';
             referencedColumns: ['id'];
           },
@@ -2233,88 +1930,10 @@ export type Database = {
             foreignKeyName: 'posts_user_id_fkey';
             columns: ['user_id'];
             isOneToOne: false;
-            referencedRelation: 'mv_user_leaderboard';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'posts_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_badge_stats';
-            referencedColumns: ['user_id'];
-          },
-          {
-            foreignKeyName: 'posts_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_stats';
-            referencedColumns: ['user_id'];
-          },
-          {
-            foreignKeyName: 'posts_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
             referencedRelation: 'users';
             referencedColumns: ['id'];
           },
         ];
-      };
-      profiles: {
-        Row: {
-          badges: Json | null;
-          bio: string | null;
-          created_at: string;
-          display_name: string | null;
-          follow_email: boolean;
-          id: string;
-          interests: string[] | null;
-          profile_public: boolean;
-          reputation_score: number;
-          social_x_link: string | null;
-          total_bookmarks: number;
-          total_submissions: number;
-          total_views: number;
-          updated_at: string;
-          website: string | null;
-          work: string | null;
-        };
-        Insert: {
-          badges?: Json | null;
-          bio?: string | null;
-          created_at?: string;
-          display_name?: string | null;
-          follow_email?: boolean;
-          id: string;
-          interests?: string[] | null;
-          profile_public?: boolean;
-          reputation_score?: number;
-          social_x_link?: string | null;
-          total_bookmarks?: number;
-          total_submissions?: number;
-          total_views?: number;
-          updated_at?: string;
-          website?: string | null;
-          work?: string | null;
-        };
-        Update: {
-          badges?: Json | null;
-          bio?: string | null;
-          created_at?: string;
-          display_name?: string | null;
-          follow_email?: boolean;
-          id?: string;
-          interests?: string[] | null;
-          profile_public?: boolean;
-          reputation_score?: number;
-          social_x_link?: string | null;
-          total_bookmarks?: number;
-          total_submissions?: number;
-          total_views?: number;
-          updated_at?: string;
-          website?: string | null;
-          work?: string | null;
-        };
-        Relationships: [];
       };
       quiz_options: {
         Row: {
@@ -2408,78 +2027,6 @@ export type Database = {
         };
         Relationships: [];
       };
-      reputation_actions: {
-        Row: {
-          action_type: string;
-          active: boolean;
-          created_at: string;
-          description: string;
-          id: string;
-          points: number;
-          updated_at: string;
-        };
-        Insert: {
-          action_type: string;
-          active?: boolean;
-          created_at?: string;
-          description: string;
-          id?: string;
-          points: number;
-          updated_at?: string;
-        };
-        Update: {
-          action_type?: string;
-          active?: boolean;
-          created_at?: string;
-          description?: string;
-          id?: string;
-          points?: number;
-          updated_at?: string;
-        };
-        Relationships: [];
-      };
-      reputation_tiers: {
-        Row: {
-          active: boolean;
-          color: string;
-          created_at: string;
-          description: string;
-          icon: string;
-          id: string;
-          max_score: number | null;
-          min_score: number;
-          name: string;
-          order: number;
-          updated_at: string;
-        };
-        Insert: {
-          active?: boolean;
-          color: string;
-          created_at?: string;
-          description: string;
-          icon: string;
-          id?: string;
-          max_score?: number | null;
-          min_score: number;
-          name: string;
-          order: number;
-          updated_at?: string;
-        };
-        Update: {
-          active?: boolean;
-          color?: string;
-          created_at?: string;
-          description?: string;
-          icon?: string;
-          id?: string;
-          max_score?: number | null;
-          min_score?: number;
-          name?: string;
-          order?: number;
-          updated_at?: string;
-        };
-        Relationships: [];
-      };
       review_helpful_votes: {
         Row: {
           created_at: string;
@@ -2506,27 +2053,6 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: 'review_ratings';
             referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'review_helpful_votes_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'mv_user_leaderboard';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'review_helpful_votes_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_badge_stats';
-            referencedColumns: ['user_id'];
-          },
-          {
-            foreignKeyName: 'review_helpful_votes_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_stats';
-            referencedColumns: ['user_id'];
           },
           {
             foreignKeyName: 'review_helpful_votes_user_id_fkey';
@@ -2572,27 +2098,6 @@ export type Database = {
           user_id?: string;
         };
         Relationships: [
-          {
-            foreignKeyName: 'review_ratings_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'mv_user_leaderboard';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'review_ratings_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_badge_stats';
-            referencedColumns: ['user_id'];
-          },
-          {
-            foreignKeyName: 'review_ratings_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_stats';
-            referencedColumns: ['user_id'];
-          },
           {
             foreignKeyName: 'review_ratings_user_id_fkey';
             columns: ['user_id'];
@@ -2695,29 +2200,15 @@ export type Database = {
             foreignKeyName: 'sponsored_clicks_sponsored_id_fkey';
             columns: ['sponsored_id'];
             isOneToOne: false;
+            referencedRelation: 'mv_content_list_slim';
+            referencedColumns: ['sponsored_content_id'];
+          },
+          {
+            foreignKeyName: 'sponsored_clicks_sponsored_id_fkey';
+            columns: ['sponsored_id'];
+            isOneToOne: false;
             referencedRelation: 'sponsored_content';
             referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'sponsored_clicks_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'mv_user_leaderboard';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'sponsored_clicks_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_badge_stats';
-            referencedColumns: ['user_id'];
-          },
-          {
-            foreignKeyName: 'sponsored_clicks_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_stats';
-            referencedColumns: ['user_id'];
           },
           {
             foreignKeyName: 'sponsored_clicks_user_id_fkey';
@@ -2779,27 +2270,6 @@ export type Database = {
             foreignKeyName: 'sponsored_content_user_id_fkey';
             columns: ['user_id'];
             isOneToOne: false;
-            referencedRelation: 'mv_user_leaderboard';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'sponsored_content_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_badge_stats';
-            referencedColumns: ['user_id'];
-          },
-          {
-            foreignKeyName: 'sponsored_content_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_stats';
-            referencedColumns: ['user_id'];
-          },
-          {
-            foreignKeyName: 'sponsored_content_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
             referencedRelation: 'users';
             referencedColumns: ['id'];
           },
@@ -2835,29 +2305,15 @@ export type Database = {
             foreignKeyName: 'sponsored_impressions_sponsored_id_fkey';
             columns: ['sponsored_id'];
             isOneToOne: false;
+            referencedRelation: 'mv_content_list_slim';
+            referencedColumns: ['sponsored_content_id'];
+          },
+          {
+            foreignKeyName: 'sponsored_impressions_sponsored_id_fkey';
+            columns: ['sponsored_id'];
+            isOneToOne: false;
             referencedRelation: 'sponsored_content';
             referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'sponsored_impressions_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'mv_user_leaderboard';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'sponsored_impressions_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_badge_stats';
-            referencedColumns: ['user_id'];
-          },
-          {
-            foreignKeyName: 'sponsored_impressions_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_stats';
-            referencedColumns: ['user_id'];
           },
           {
             foreignKeyName: 'sponsored_impressions_user_id_fkey';
@@ -3057,27 +2513,6 @@ export type Database = {
             foreignKeyName: 'submissions_user_id_fkey';
             columns: ['user_id'];
             isOneToOne: false;
-            referencedRelation: 'mv_user_leaderboard';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'submissions_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_badge_stats';
-            referencedColumns: ['user_id'];
-          },
-          {
-            foreignKeyName: 'submissions_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_stats';
-            referencedColumns: ['user_id'];
-          },
-          {
-            foreignKeyName: 'submissions_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
             referencedRelation: 'users';
             referencedColumns: ['id'];
           },
@@ -3140,79 +2575,10 @@ export type Database = {
             foreignKeyName: 'subscriptions_user_id_fkey';
             columns: ['user_id'];
             isOneToOne: false;
-            referencedRelation: 'mv_user_leaderboard';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'subscriptions_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_badge_stats';
-            referencedColumns: ['user_id'];
-          },
-          {
-            foreignKeyName: 'subscriptions_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_stats';
-            referencedColumns: ['user_id'];
-          },
-          {
-            foreignKeyName: 'subscriptions_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
             referencedRelation: 'users';
             referencedColumns: ['id'];
           },
         ];
-      };
-      table_bloat_snapshots: {
-        Row: {
-          autovacuum_count: number | null;
-          bloat_ratio: number;
-          created_at: string;
-          dead_tuples: number;
-          id: string;
-          last_autovacuum: string | null;
-          last_vacuum: string | null;
-          live_tuples: number;
-          schemaname: string;
-          snapshot_date: string;
-          tablename: string;
-          total_bytes: number;
-          vacuum_count: number | null;
-        };
-        Insert: {
-          autovacuum_count?: number | null;
-          bloat_ratio: number;
-          created_at?: string;
-          dead_tuples: number;
-          id?: string;
-          last_autovacuum?: string | null;
-          last_vacuum?: string | null;
-          live_tuples: number;
-          schemaname: string;
-          snapshot_date?: string;
-          tablename: string;
-          total_bytes: number;
-          vacuum_count?: number | null;
-        };
-        Update: {
-          autovacuum_count?: number | null;
-          bloat_ratio?: number;
-          created_at?: string;
-          dead_tuples?: number;
-          id?: string;
-          last_autovacuum?: string | null;
-          last_vacuum?: string | null;
-          live_tuples?: number;
-          schemaname?: string;
-          snapshot_date?: string;
-          tablename?: string;
-          total_bytes?: number;
-          vacuum_count?: number | null;
-        };
-        Relationships: [];
       };
       tier_display_config: {
         Row: {
@@ -3283,96 +2649,6 @@ export type Database = {
             foreignKeyName: 'user_affinities_user_id_fkey';
             columns: ['user_id'];
             isOneToOne: false;
-            referencedRelation: 'mv_user_leaderboard';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'user_affinities_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_badge_stats';
-            referencedColumns: ['user_id'];
-          },
-          {
-            foreignKeyName: 'user_affinities_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_stats';
-            referencedColumns: ['user_id'];
-          },
-          {
-            foreignKeyName: 'user_affinities_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'users';
-            referencedColumns: ['id'];
-          },
-        ];
-      };
-      user_badges: {
-        Row: {
-          badge_id: string;
-          created_at: string;
-          earned_at: string;
-          featured: boolean | null;
-          id: string;
-          metadata: Json | null;
-          updated_at: string;
-          user_id: string;
-        };
-        Insert: {
-          badge_id: string;
-          created_at?: string;
-          earned_at?: string;
-          featured?: boolean | null;
-          id?: string;
-          metadata?: Json | null;
-          updated_at?: string;
-          user_id: string;
-        };
-        Update: {
-          badge_id?: string;
-          created_at?: string;
-          earned_at?: string;
-          featured?: boolean | null;
-          id?: string;
-          metadata?: Json | null;
-          updated_at?: string;
-          user_id?: string;
-        };
-        Relationships: [
-          {
-            foreignKeyName: 'user_badges_badge_id_fkey';
-            columns: ['badge_id'];
-            isOneToOne: false;
-            referencedRelation: 'badges';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'user_badges_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'mv_user_leaderboard';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'user_badges_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_badge_stats';
-            referencedColumns: ['user_id'];
-          },
-          {
-            foreignKeyName: 'user_badges_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_stats';
-            referencedColumns: ['user_id'];
-          },
-          {
-            foreignKeyName: 'user_badges_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
             referencedRelation: 'users';
             referencedColumns: ['id'];
           },
@@ -3419,27 +2695,6 @@ export type Database = {
           view_count?: number;
         };
         Relationships: [
-          {
-            foreignKeyName: 'user_collections_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'mv_user_leaderboard';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'user_collections_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_badge_stats';
-            referencedColumns: ['user_id'];
-          },
-          {
-            foreignKeyName: 'user_collections_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_stats';
-            referencedColumns: ['user_id'];
-          },
           {
             foreignKeyName: 'user_collections_user_id_fkey';
             columns: ['user_id'];
@@ -3506,27 +2761,6 @@ export type Database = {
             foreignKeyName: 'user_content_user_id_fkey';
             columns: ['user_id'];
             isOneToOne: false;
-            referencedRelation: 'mv_user_leaderboard';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'user_content_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_badge_stats';
-            referencedColumns: ['user_id'];
-          },
-          {
-            foreignKeyName: 'user_content_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_stats';
-            referencedColumns: ['user_id'];
-          },
-          {
-            foreignKeyName: 'user_content_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
             referencedRelation: 'users';
             referencedColumns: ['id'];
           },
@@ -3564,27 +2798,6 @@ export type Database = {
           user_id?: string | null;
         };
         Relationships: [
-          {
-            foreignKeyName: 'user_interactions_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'mv_user_leaderboard';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'user_interactions_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_badge_stats';
-            referencedColumns: ['user_id'];
-          },
-          {
-            foreignKeyName: 'user_interactions_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_stats';
-            referencedColumns: ['user_id'];
-          },
           {
             foreignKeyName: 'user_interactions_user_id_fkey';
             columns: ['user_id'];
@@ -3668,27 +2881,6 @@ export type Database = {
             foreignKeyName: 'user_mcps_user_id_fkey';
             columns: ['user_id'];
             isOneToOne: false;
-            referencedRelation: 'mv_user_leaderboard';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'user_mcps_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_badge_stats';
-            referencedColumns: ['user_id'];
-          },
-          {
-            foreignKeyName: 'user_mcps_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_stats';
-            referencedColumns: ['user_id'];
-          },
-          {
-            foreignKeyName: 'user_mcps_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
             referencedRelation: 'users';
             referencedColumns: ['id'];
           },
@@ -3730,50 +2922,8 @@ export type Database = {
             foreignKeyName: 'user_similarities_user_a_id_fkey';
             columns: ['user_a_id'];
             isOneToOne: false;
-            referencedRelation: 'mv_user_leaderboard';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'user_similarities_user_a_id_fkey';
-            columns: ['user_a_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_badge_stats';
-            referencedColumns: ['user_id'];
-          },
-          {
-            foreignKeyName: 'user_similarities_user_a_id_fkey';
-            columns: ['user_a_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_stats';
-            referencedColumns: ['user_id'];
-          },
-          {
-            foreignKeyName: 'user_similarities_user_a_id_fkey';
-            columns: ['user_a_id'];
-            isOneToOne: false;
             referencedRelation: 'users';
             referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'user_similarities_user_b_id_fkey';
-            columns: ['user_b_id'];
-            isOneToOne: false;
-            referencedRelation: 'mv_user_leaderboard';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'user_similarities_user_b_id_fkey';
-            columns: ['user_b_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_badge_stats';
-            referencedColumns: ['user_id'];
-          },
-          {
-            foreignKeyName: 'user_similarities_user_b_id_fkey';
-            columns: ['user_b_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_stats';
-            referencedColumns: ['user_id'];
           },
           {
             foreignKeyName: 'user_similarities_user_b_id_fkey';
@@ -3790,6 +2940,7 @@ export type Database = {
           bookmark_count: number;
           comment_count: number;
           created_at: string;
+          display_name: string | null;
           email: string | null;
           follow_email: boolean | null;
           follower_count: number;
@@ -3800,16 +2951,14 @@ export type Database = {
           interests: Json | null;
           name: string | null;
           post_count: number;
+          profile_public: boolean | null;
           public: boolean | null;
-          reputation_score: number | null;
           search_vector: unknown;
           slug: string | null;
           social_x_link: string | null;
           status: string | null;
           submission_count: number;
           tier: string | null;
-          tier_name: string | null;
-          tier_progress: number | null;
           updated_at: string;
           votes_received_count: number;
           website: string | null;
@@ -3820,6 +2969,7 @@ export type Database = {
           bookmark_count?: number;
           comment_count?: number;
           created_at?: string;
+          display_name?: string | null;
           email?: string | null;
           follow_email?: boolean | null;
           follower_count?: number;
@@ -3830,16 +2980,14 @@ export type Database = {
           interests?: Json | null;
           name?: string | null;
           post_count?: number;
+          profile_public?: boolean | null;
           public?: boolean | null;
-          reputation_score?: number | null;
           search_vector?: unknown;
           slug?: string | null;
           social_x_link?: string | null;
           status?: string | null;
           submission_count?: number;
           tier?: string | null;
-          tier_name?: string | null;
-          tier_progress?: number | null;
           updated_at?: string;
           votes_received_count?: number;
           website?: string | null;
@@ -3850,6 +2998,7 @@ export type Database = {
           bookmark_count?: number;
           comment_count?: number;
           created_at?: string;
+          display_name?: string | null;
           email?: string | null;
           follow_email?: boolean | null;
           follower_count?: number;
@@ -3860,16 +3009,14 @@ export type Database = {
           interests?: Json | null;
           name?: string | null;
           post_count?: number;
+          profile_public?: boolean | null;
           public?: boolean | null;
-          reputation_score?: number | null;
           search_vector?: unknown;
           slug?: string | null;
           social_x_link?: string | null;
           status?: string | null;
           submission_count?: number;
           tier?: string | null;
-          tier_name?: string | null;
-          tier_progress?: number | null;
           updated_at?: string;
           votes_received_count?: number;
           website?: string | null;
@@ -3903,27 +3050,6 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: 'posts';
             referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'votes_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'mv_user_leaderboard';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'votes_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_badge_stats';
-            referencedColumns: ['user_id'];
-          },
-          {
-            foreignKeyName: 'votes_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_stats';
-            referencedColumns: ['user_id'];
           },
           {
             foreignKeyName: 'votes_user_id_fkey';
@@ -4013,6 +3139,31 @@ export type Database = {
           last_viewed_at: string | null;
           slug: string | null;
           total_time_spent_seconds: number | null;
+          view_count: number | null;
+        };
+        Relationships: [];
+      };
+      mv_content_list_slim: {
+        Row: {
+          author: string | null;
+          author_profile_url: string | null;
+          bookmark_count: number | null;
+          category: string | null;
+          copy_count: number | null;
+          created_at: string | null;
+          date_added: string | null;
+          description: string | null;
+          display_title: string | null;
+          id: string | null;
+          is_sponsored: boolean | null;
+          popularity_score: number | null;
+          slug: string | null;
+          source: string | null;
+          sponsored_content_id: string | null;
+          sponsorship_tier: string | null;
+          tags: string[] | null;
+          title: string | null;
+          updated_at: string | null;
           view_count: number | null;
         };
         Relationships: [];
@@ -4129,22 +3280,6 @@ export type Database = {
         };
         Relationships: [];
       };
-      mv_user_leaderboard: {
-        Row: {
-          created_at: string | null;
-          id: string | null;
-          image: string | null;
-          name: string | null;
-          percentile_rank: number | null;
-          rank: number | null;
-          reputation_score: number | null;
-          slug: string | null;
-          tier: string | null;
-          tier_name: string | null;
-          tier_progress: number | null;
-        };
-        Relationships: [];
-      };
       mv_weekly_new_content: {
         Row: {
           category: string | null;
@@ -4196,69 +3331,10 @@ export type Database = {
             foreignKeyName: 'user_affinities_user_id_fkey';
             columns: ['user_id'];
             isOneToOne: false;
-            referencedRelation: 'mv_user_leaderboard';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'user_affinities_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_badge_stats';
-            referencedColumns: ['user_id'];
-          },
-          {
-            foreignKeyName: 'user_affinities_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'user_stats';
-            referencedColumns: ['user_id'];
-          },
-          {
-            foreignKeyName: 'user_affinities_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
             referencedRelation: 'users';
             referencedColumns: ['id'];
           },
         ];
-      };
-      user_badge_stats: {
-        Row: {
-          bookmarks_received: number | null;
-          comments: number | null;
-          followers: number | null;
-          last_updated: string | null;
-          posts: number | null;
-          reputation: number | null;
-          reviews: number | null;
-          submissions: number | null;
-          user_id: string | null;
-          votes_received: number | null;
-        };
-        Relationships: [];
-      };
-      user_stats: {
-        Row: {
-          account_age_days: number | null;
-          approved_submissions: number | null;
-          avg_rating_given: number | null;
-          created_at: string | null;
-          featured_badges: number | null;
-          public_collections: number | null;
-          refreshed_at: string | null;
-          reputation_score: number | null;
-          total_badges: number | null;
-          total_bookmarks: number | null;
-          total_collections: number | null;
-          total_comments: number | null;
-          total_posts: number | null;
-          total_reviews: number | null;
-          total_submissions: number | null;
-          total_upvotes_received: number | null;
-          total_votes_given: number | null;
-          user_id: string | null;
-        };
-        Relationships: [];
       };
     };
     Functions: {
@@ -4275,34 +3351,9 @@ export type Database = {
         Args: { p_moderator_notes?: string; p_submission_id: string };
         Returns: Json;
       };
-      auto_award_badges: {
-        Args: { p_user_id: string };
-        Returns: {
-          awarded: boolean;
-          badge_name: string;
-          badge_slug: string;
-          reason: string;
-        }[];
-      };
       batch_add_bookmarks: {
         Args: { p_items: Json; p_user_id: string };
         Returns: Json;
-      };
-      batch_recalculate_all_reputation: {
-        Args: never;
-        Returns: {
-          new_score: number;
-          old_score: number;
-          updated: boolean;
-          user_id: string;
-        }[];
-      };
-      batch_recalculate_reputation: {
-        Args: { user_ids: string[] };
-        Returns: {
-          new_reputation_score: number;
-          user_id: string;
-        }[];
       };
       batch_update_user_affinity_scores: {
         Args: { p_max_users?: number; p_user_ids: string[] };
@@ -4326,7 +3377,6 @@ export type Database = {
               p_created_at: string;
               p_date_added: string;
               p_description: string;
-              p_discovery_metadata: Json;
               p_display_title: string;
               p_documentation_url: string;
               p_examples: Json;
@@ -4360,7 +3410,6 @@ export type Database = {
               p_created_at: string;
               p_date_added: string;
               p_description: string;
-              p_discovery_metadata: Json;
               p_display_title: string;
               p_documentation_url: string;
               p_examples: Json;
@@ -4422,45 +3471,7 @@ export type Database = {
         Args: { p_tags_a: string[]; p_tags_b: string[] };
         Returns: number;
       };
-      calculate_user_reputation: {
-        Args: { target_user_id: string };
-        Returns: number;
-      };
-      calculate_user_reputation_score: {
-        Args: { p_user_id: string };
-        Returns: number;
-      };
       cancel_email_sequence: { Args: { p_email: string }; Returns: undefined };
-      capture_index_usage_snapshot: {
-        Args: never;
-        Returns: {
-          indexes_captured: number;
-          snapshot_id: string;
-          unused_indexes: number;
-        }[];
-      };
-      capture_table_bloat_snapshot: {
-        Args: never;
-        Returns: {
-          bloated_tables: number;
-          max_bloat_ratio: number;
-          snapshot_id: string;
-          tables_captured: number;
-        }[];
-      };
-      check_all_badges: { Args: { target_user_id: string }; Returns: number };
-      check_and_award_badge: {
-        Args: { badge_slug: string; target_user_id: string };
-        Returns: boolean;
-      };
-      check_and_award_badges_manual: {
-        Args: { p_user_id: string };
-        Returns: {
-          badge_slugs: string[];
-          badges_awarded: number;
-          success: boolean;
-        }[];
-      };
       check_vacuum_needed: {
         Args: never;
         Returns: {
@@ -4474,10 +3485,6 @@ export type Database = {
       enroll_in_email_sequence: {
         Args: { p_email: string };
         Returns: undefined;
-      };
-      evaluate_badge_criteria: {
-        Args: { p_criteria: Json; p_stats: Json };
-        Returns: boolean;
       };
       extract_tags_for_search: { Args: { tags: Json }; Returns: string };
       filter_jobs: {
@@ -4500,15 +3507,44 @@ export type Database = {
         Returns: string;
       };
       format_week_range: { Args: { week_start: string }; Returns: string };
+      generate_category_llms_txt: {
+        Args: { p_category: string };
+        Returns: string;
+      };
+      generate_changelog_atom_feed: {
+        Args: { p_limit?: number };
+        Returns: string;
+      };
+      generate_changelog_entry_llms_txt: {
+        Args: { p_slug: string };
+        Returns: string;
+      };
+      generate_changelog_llms_txt: { Args: never; Returns: string };
+      generate_changelog_rss_feed: {
+        Args: { p_limit?: number };
+        Returns: string;
+      };
       generate_command_installation: {
         Args: { p_slug: string; p_title: string };
         Returns: Json;
+      };
+      generate_content_atom_feed: {
+        Args: { p_category?: string; p_limit?: number };
+        Returns: string;
       };
       generate_content_field: {
         Args: { p_category: string; p_field_type: string; p_slug: string };
         Returns: Json;
       };
+      generate_content_rss_feed: {
+        Args: { p_category?: string; p_limit?: number };
+        Returns: string;
+      };
       generate_hook_installation: { Args: { p_slug: string }; Returns: Json };
+      generate_llms_txt_content: {
+        Args: { p_category: string; p_slug: string };
+        Returns: Json;
+      };
       generate_markdown_export: {
         Args: {
           p_category: string;
@@ -4518,15 +3554,15 @@ export type Database = {
         };
         Returns: Json;
       };
-      generate_metadata_for_route: {
-        Args: { p_context: Json; p_route?: string; p_route_pattern: string };
-        Returns: Json;
-      };
+      generate_metadata_complete: { Args: { p_route: string }; Returns: Json };
+      generate_sitemap_xml: { Args: { p_base_url?: string }; Returns: string };
+      generate_sitewide_llms_txt: { Args: never; Returns: string };
       generate_slug: { Args: { p_name: string }; Returns: string };
       generate_slug_from_filename: {
         Args: { p_filename: string };
         Returns: string;
       };
+      generate_tool_llms_txt: { Args: { p_tool_name: string }; Returns: string };
       get_account_dashboard: { Args: { p_user_id: string }; Returns: Json };
       get_active_notifications: {
         Args: { p_dismissed_ids?: string[] };
@@ -4610,33 +3646,14 @@ export type Database = {
               total_views: number;
             }[];
           };
-      get_api_category_content: {
-        Args: { p_category: string; p_limit?: number; p_offset?: number };
-        Returns: Json;
-      };
-      get_api_content: {
-        Args: { p_category: string; p_slug: string };
-        Returns: Json;
+      get_api_content_full: {
+        Args: { p_base_url?: string; p_category: string; p_slug: string };
+        Returns: string;
       };
       get_api_health: { Args: never; Returns: Json };
       get_app_settings: {
         Args: { p_category?: string; p_environment?: string };
         Returns: Json;
-      };
-      get_bloated_tables: {
-        Args: { p_min_bloat_ratio?: number; p_min_dead_tuples?: number };
-        Returns: {
-          autovacuum_count: number;
-          bloat_ratio: number;
-          dead_tuples: number;
-          last_autovacuum: string;
-          last_vacuum: string;
-          live_tuples: number;
-          recommendation: string;
-          table_size_mb: number;
-          tablename: string;
-          vacuum_count: number;
-        }[];
       };
       get_bookmark_counts_by_category: {
         Args: { category_filter: string };
@@ -4652,7 +3669,6 @@ export type Database = {
           comments: number;
           followers: number;
           posts: number;
-          reputation: number;
           reviews: number;
           submissions: number;
           user_id: string;
@@ -4666,7 +3682,6 @@ export type Database = {
           comments: number;
           followers: number;
           posts: number;
-          reputation: number;
           reviews: number;
           submissions: number;
           user_id: string;
@@ -4747,37 +3762,29 @@ export type Database = {
         Args: { p_category: string; p_slug: string; p_user_id?: string };
         Returns: Json;
       };
-      get_content_paginated:
-        | {
-            Args: {
-              p_author?: string;
-              p_category?: string;
-              p_limit?: number;
-              p_offset?: number;
-              p_order_by?: string;
-              p_order_direction?: string;
-              p_search?: string;
-              p_tags?: string[];
-            };
-            Returns: Json;
-          }
-        | {
-            Args: { p_category?: string; p_limit?: number; p_offset?: number };
-            Returns: {
-              author: string;
-              category: string;
-              copy_count: number;
-              created_at: string;
-              date_added: string;
-              description: string;
-              id: string;
-              slug: string;
-              source: string;
-              tags: string[];
-              title: string;
-              view_count: number;
-            }[];
-          };
+      get_content_paginated: {
+        Args: {
+          p_author?: string;
+          p_category?: string;
+          p_limit?: number;
+          p_offset?: number;
+          p_order_by?: string;
+          p_order_direction?: string;
+          p_search?: string;
+          p_tags?: string[];
+        };
+        Returns: Json;
+      };
+      get_content_paginated_slim: {
+        Args: {
+          p_category?: string;
+          p_limit?: number;
+          p_offset?: number;
+          p_order_by?: string;
+          p_order_direction?: string;
+        };
+        Returns: Json;
+      };
       get_content_templates: { Args: { p_category: string }; Returns: Json };
       get_content_with_analytics:
         | {
@@ -4943,17 +3950,6 @@ export type Database = {
         }[];
       };
       get_generation_config: { Args: { p_category?: string }; Returns: Json };
-      get_github_stars: {
-        Args: { p_repo_url: string };
-        Returns: {
-          forks: number;
-          is_cached: boolean;
-          last_fetched_at: string;
-          open_issues: number;
-          stars: number;
-          watchers: number;
-        }[];
-      };
       get_homepage_complete: {
         Args: { p_category_ids?: string[] };
         Returns: Json;
@@ -4968,18 +3964,6 @@ export type Database = {
             Returns: Json;
           }
         | { Args: { p_category_ids: string[] }; Returns: Json };
-      get_index_usage_trends: {
-        Args: { p_weeks_lookback?: number };
-        Returns: {
-          indexname: string;
-          tablename: string;
-          trend: string;
-          week_1_scans: number;
-          week_2_scans: number;
-          week_3_scans: number;
-          week_4_scans: number;
-        }[];
-      };
       get_job_detail: { Args: { p_slug: string }; Returns: Json };
       get_jobs_by_category: {
         Args: { p_category: string };
@@ -5032,10 +4016,6 @@ export type Database = {
       };
       get_jobs_count: { Args: never; Returns: number };
       get_jobs_list: { Args: never; Returns: Json };
-      get_metadata_template: {
-        Args: { p_route_pattern: string };
-        Returns: Json;
-      };
       get_my_submissions: {
         Args: { p_limit?: number; p_offset?: number };
         Returns: Json;
@@ -5195,11 +4175,6 @@ export type Database = {
           isSetofReturn: true;
         };
       };
-      get_tier_name_from_score: { Args: { p_score: number }; Returns: string };
-      get_tier_progress_from_score: {
-        Args: { p_score: number };
-        Returns: number;
-      };
       get_top_contributors: { Args: { p_limit?: number }; Returns: Json };
       get_top_tags_for_category: {
         Args: { p_category: string; p_limit?: number };
@@ -5248,17 +4223,6 @@ export type Database = {
         };
         Returns: Json;
       };
-      get_unused_indexes: {
-        Args: { p_days_lookback?: number; p_min_size_mb?: number };
-        Returns: {
-          index_definition: string;
-          index_size_mb: number;
-          indexname: string;
-          recommendation: string;
-          tablename: string;
-          total_scans: number;
-        }[];
-      };
       get_usage_recommendations: {
         Args: {
           p_category?: string;
@@ -5304,36 +4268,6 @@ export type Database = {
           isSetofReturn: true;
         };
       };
-      get_user_badge_stats: {
-        Args: { p_user_id?: string };
-        Returns: {
-          bookmarks_received: number | null;
-          comments: number | null;
-          followers: number | null;
-          last_updated: string | null;
-          posts: number | null;
-          reputation: number | null;
-          reviews: number | null;
-          submissions: number | null;
-          user_id: string | null;
-          votes_received: number | null;
-        }[];
-        SetofOptions: {
-          from: '*';
-          to: 'user_badge_stats';
-          isOneToOne: false;
-          isSetofReturn: true;
-        };
-      };
-      get_user_badges_with_details: {
-        Args: {
-          p_featured_only?: boolean;
-          p_limit?: number;
-          p_offset?: number;
-          p_user_id: string;
-        };
-        Returns: Json;
-      };
       get_user_collection_detail: {
         Args: {
           p_collection_slug: string;
@@ -5347,6 +4281,7 @@ export type Database = {
         Args: { p_limit?: number; p_user_id: string };
         Returns: string[];
       };
+      get_user_identities: { Args: { p_user_id: string }; Returns: Json };
       get_user_interaction_summary: {
         Args: { p_user_id: string };
         Returns: Json;
@@ -5356,16 +4291,8 @@ export type Database = {
         Args: { p_user_slug: string; p_viewer_id?: string };
         Returns: Json;
       };
-      get_user_profile_complete: {
-        Args: { p_user_slug: string; p_viewer_id?: string };
-        Returns: Json;
-      };
       get_user_recent_interactions: {
         Args: { p_limit?: number; p_user_id: string };
-        Returns: Json;
-      };
-      get_user_reputation_breakdown: {
-        Args: { p_user_id: string };
         Returns: Json;
       };
       get_user_settings: { Args: { p_user_id: string }; Returns: Json };
@@ -5440,9 +4367,24 @@ export type Database = {
         };
         Returns: boolean;
       };
+      is_bookmarked_batch: {
+        Args: { p_items: Json; p_user_id: string };
+        Returns: {
+          content_slug: string;
+          content_type: string;
+          is_bookmarked: boolean;
+        }[];
+      };
       is_following: {
         Args: { follower_id: string; following_id: string };
         Returns: boolean;
+      };
+      is_following_batch: {
+        Args: { p_followed_user_ids: string[]; p_follower_id: string };
+        Returns: {
+          followed_user_id: string;
+          is_following: boolean;
+        }[];
       };
       is_in_future: { Args: { input_date: string }; Returns: boolean };
       is_in_past: { Args: { input_date: string }; Returns: boolean };
@@ -5497,16 +4439,9 @@ export type Database = {
           total_updated: number;
         }[];
       };
+      process_pending_webhooks: { Args: never; Returns: Json };
       refresh_mv_site_urls: { Args: never; Returns: undefined };
       refresh_profile_from_oauth: { Args: { user_id: string }; Returns: Json };
-      refresh_user_stat: {
-        Args: { p_user_id: string };
-        Returns: {
-          message: string;
-          success: boolean;
-          user_id: string;
-        }[];
-      };
       refresh_user_stats: {
         Args: never;
         Returns: {
@@ -5527,10 +4462,6 @@ export type Database = {
           p_user_id: string;
         };
         Returns: Json;
-      };
-      render_guide_sections_to_markdown: {
-        Args: { sections: Json };
-        Returns: string;
       };
       reorder_collection_items: {
         Args: { p_collection_id: string; p_items: Json; p_user_id: string };
@@ -5562,7 +4493,6 @@ export type Database = {
           created_at: string;
           date_added: string;
           description: string;
-          discovery_metadata: Json;
           examples: Json;
           features: Json;
           fts_vector: unknown;
@@ -5622,7 +4552,6 @@ export type Database = {
           created_at: string;
           date_added: string;
           description: string;
-          discovery_metadata: Json;
           examples: Json;
           features: Json;
           id: string;
@@ -5692,6 +4621,7 @@ export type Database = {
           bookmark_count: number;
           comment_count: number;
           created_at: string;
+          display_name: string | null;
           email: string | null;
           follow_email: boolean | null;
           follower_count: number;
@@ -5702,16 +4632,14 @@ export type Database = {
           interests: Json | null;
           name: string | null;
           post_count: number;
+          profile_public: boolean | null;
           public: boolean | null;
-          reputation_score: number | null;
           search_vector: unknown;
           slug: string | null;
           social_x_link: string | null;
           status: string | null;
           submission_count: number;
           tier: string | null;
-          tier_name: string | null;
-          tier_progress: number | null;
           updated_at: string;
           votes_received_count: number;
           website: string | null;
@@ -5763,10 +4691,6 @@ export type Database = {
           vacuum_command: string;
         }[];
       };
-      toggle_badge_featured: {
-        Args: { p_badge_id: string; p_featured: boolean; p_user_id: string };
-        Returns: Json;
-      };
       toggle_follow: {
         Args: {
           p_action: string;
@@ -5782,6 +4706,15 @@ export type Database = {
       toggle_review_helpful: {
         Args: { p_helpful: boolean; p_review_id: string; p_user_id: string };
         Returns: Json;
+      };
+      track_content_usage: {
+        Args: {
+          p_action_type: string;
+          p_content_slug: string;
+          p_content_type: string;
+          p_user_id?: string;
+        };
+        Returns: undefined;
       };
       track_sponsored_event: {
         Args: { p_data: Json; p_event_type: string; p_user_id: string };
@@ -5801,7 +4734,7 @@ export type Database = {
           p_bio?: string;
           p_display_name?: string;
           p_follow_email?: boolean;
-          p_interests?: string[];
+          p_interests?: Json;
           p_profile_public?: boolean;
           p_social_x_link?: string;
           p_user_id: string;
@@ -5810,26 +4743,11 @@ export type Database = {
         };
         Returns: Json;
       };
-      upsert_github_stars: {
-        Args: {
-          p_forks?: number;
-          p_open_issues?: number;
-          p_repo_url: string;
-          p_stars: number;
-          p_watchers?: number;
-        };
-        Returns: undefined;
-      };
-      user_has_badge: {
-        Args: { p_badge_slug: string; p_user_id: string };
-        Returns: boolean;
-      };
       validate_content_metadata: { Args: { metadata: Json }; Returns: boolean };
     };
     Enums: {
       announcement_priority: 'high' | 'medium' | 'low';
       announcement_variant: 'default' | 'outline' | 'secondary' | 'destructive';
-      badge_rarity: 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary';
       changelog_category: 'Added' | 'Changed' | 'Deprecated' | 'Removed' | 'Fixed' | 'Security';
       content_category:
         | 'agents'
@@ -6046,7 +4964,6 @@ export const Constants = {
     Enums: {
       announcement_priority: ['high', 'medium', 'low'],
       announcement_variant: ['default', 'outline', 'secondary', 'destructive'],
-      badge_rarity: ['common', 'uncommon', 'rare', 'epic', 'legendary'],
       changelog_category: ['Added', 'Changed', 'Deprecated', 'Removed', 'Fixed', 'Security'],
       content_category: [
         'agents',

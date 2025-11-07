@@ -49,13 +49,7 @@ import { getContentByCategory } from '@/src/lib/content/supabase-content-loader'
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 
-/**
- * ISR revalidation interval for category listing pages
- *
- * @constant {number}
- * @description Pages revalidate every 1 hour to pick up new content and analytics updates.
- */
-export const revalidate = 3600; // 1 hour
+export const revalidate = false;
 
 /**
  * Generate static params for all valid categories

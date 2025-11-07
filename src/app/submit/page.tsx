@@ -20,14 +20,30 @@ const UnifiedNewsletterCapture = dynamic(
 );
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/card';
-import { getSubmissionDashboard } from '@/src/lib/actions/business.actions';
 import { CheckCircle, Clock, Lightbulb, Medal, TrendingUp, Trophy } from '@/src/lib/icons';
+import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
+import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import type { Database } from '@/src/types/database.types';
 
-type DashboardData = Awaited<ReturnType<typeof getSubmissionDashboard>>['data'];
-type RecentSubmission = NonNullable<DashboardData>['recent'][number];
-type TopContributor = NonNullable<DashboardData>['contributors'][number];
+// Type for dashboard response - trust database validation
+type SubmissionDashboardResult = {
+  stats: { total: number; pending: number; merged_this_week: number };
+  recent: Array<{
+    id: string | number;
+    content_name: string;
+    content_type: string;
+    merged_at: string;
+    user?: { name: string; slug: string } | null;
+  }>;
+  contributors: Array<{
+    name: string;
+    slug: string;
+    rank: number;
+    mergedCount: number;
+  }>;
+};
 
 const SUBMISSION_TIPS = [
   'Be specific in your descriptions - help users understand what your config does',
@@ -37,7 +53,7 @@ const SUBMISSION_TIPS = [
   'Tag appropriately - tags help users discover your work',
 ];
 
-const TYPE_LABELS: Record<string, string> = {
+const TYPE_LABELS: Record<Database['public']['Enums']['submission_type'], string> = {
   agents: 'Agent',
   mcp: 'MCP',
   rules: 'Rule',
@@ -62,20 +78,46 @@ function formatTimeAgo(dateString: string): string {
 export const metadata = generatePageMetadata('/submit');
 
 /**
- * ISR Configuration: Marketing pages update infrequently
- * revalidate: 86400 = Revalidate every 24 hours
+ * Static generation: Dashboard data fetched at build time
  */
-export const revalidate = 86400;
+export const revalidate = false;
 
 export default async function SubmitPage() {
-  const dashboardResult = await getSubmissionDashboard({
-    recentLimit: 5,
-    contributorsLimit: 5,
-  });
+  const supabase = await createClient();
 
-  const stats = dashboardResult?.data?.stats || { total: 0, pending: 0, mergedThisWeek: 0 };
-  const recentMerged = dashboardResult?.data?.recent || [];
-  const topContributors = dashboardResult?.data?.contributors || [];
+  let data: unknown;
+  let error: unknown;
+
+  if (typeof supabase.rpc === 'function') {
+    ({ data, error } = await supabase.rpc('get_submission_dashboard', {
+      p_recent_limit: 5,
+      p_contributors_limit: 5,
+    }));
+  } else {
+    logger.warn(
+      'Supabase RPC unavailable (mock client fallback detected); using empty submission dashboard data.'
+    );
+  }
+
+  if (error) {
+    logger.error(
+      'Failed to fetch submission dashboard',
+      error instanceof Error ? error : new Error(String(error))
+    );
+  }
+
+  // Trust database types - PostgreSQL validates structure
+  const result = (data as SubmissionDashboardResult | null) || null;
+
+  const stats = result?.stats || { total: 0, pending: 0, merged_this_week: 0 };
+  const recentMerged = (result?.recent || []) as Array<{
+    id: string | number;
+    content_name: string;
+    content_type: Database['public']['Enums']['submission_type'];
+    merged_at: string;
+    user?: { name: string; slug: string } | null;
+  }>;
+  const topContributors = result?.contributors || [];
 
   const formConfig = await getSubmissionFormConfig();
 
@@ -123,7 +165,7 @@ export default async function SubmitPage() {
                   <span className={'text-muted-foreground text-sm'}>Merged This Week</span>
                 </div>
                 <span className={'font-semibold text-green-400 text-lg'}>
-                  {stats.mergedThisWeek}
+                  {stats.merged_this_week}
                 </span>
               </div>
             </CardContent>
@@ -136,7 +178,7 @@ export default async function SubmitPage() {
                 <CardTitle className={'font-medium text-sm'}>🔥 Recently Merged</CardTitle>
               </CardHeader>
               <CardContent className={'space-y-3'}>
-                {(recentMerged as RecentSubmission[]).map((submission) => (
+                {recentMerged.map((submission) => (
                   <div
                     key={submission.id}
                     className={`${UI_CLASSES.FLEX_ITEMS_START_GAP_2} border-border/50 border-b pb-3 last:border-0 last:pb-0`}
@@ -177,7 +219,7 @@ export default async function SubmitPage() {
                 <CardTitle className={'font-medium text-sm'}>🌟 Top Contributors</CardTitle>
               </CardHeader>
               <CardContent className={'space-y-2'}>
-                {(topContributors as TopContributor[]).map((contributor) => {
+                {topContributors.map((contributor) => {
                   const getMedalIcon = (rank: number) => {
                     if (rank === 1) return <Trophy className="h-4 w-4 text-yellow-400" />;
                     if (rank === 2) return <Medal className="h-4 w-4 text-gray-400" />;

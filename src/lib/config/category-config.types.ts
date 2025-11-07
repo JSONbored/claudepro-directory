@@ -3,7 +3,6 @@
  * Shared type definitions to prevent circular dependencies
  */
 
-import type { z } from 'zod';
 import type { LucideIcon } from '@/src/lib/icons';
 import type { Tables } from '@/src/types/database.types';
 
@@ -13,10 +12,7 @@ type DatabaseCategoryConfig = Tables<'category_configs'>;
 
 export type CategoryId = DatabaseCategoryConfig['category'];
 
-export interface UnifiedCategoryConfig<
-  T extends ContentType = ContentType,
-  TId extends string = string,
-> {
+export interface UnifiedCategoryConfig<TId extends string = string> {
   readonly id: TId;
   title: string;
   pluralTitle: string;
@@ -26,7 +22,6 @@ export interface UnifiedCategoryConfig<
   showOnHomepage: boolean;
   keywords: string;
   metaDescription: string;
-  readonly schema: z.ZodType<T>;
   readonly typeName: string;
   readonly generateFullContent: boolean;
   readonly metadataFields: ReadonlyArray<string>;

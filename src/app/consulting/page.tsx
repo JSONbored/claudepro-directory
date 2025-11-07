@@ -23,9 +23,9 @@ export const metadata: Metadata = {
 
 /**
  * ISR Configuration: Marketing pages update infrequently
- * revalidate: 86400 = Revalidate every 24 hours
+ * revalidate: false = Static generation (no ISR)
  */
-export const revalidate = 86400;
+export const revalidate = false;
 
 export default function ConsultingPage() {
   return (

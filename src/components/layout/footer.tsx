@@ -10,14 +10,15 @@
 
 import { motion } from 'motion/react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useTheme } from 'next-themes';
-import { memo, useEffect, useState } from 'react';
+import { memo, useEffect, useMemo, useState } from 'react';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { HeyClaudeLogo } from '@/src/components/layout/heyclaude-logo';
 import { ThemeToggle } from '@/src/components/layout/theme-toggle';
 import { APP_CONFIG, EXTERNAL_SERVICES, SOCIAL_LINKS } from '@/src/lib/constants';
 import { ROUTES } from '@/src/lib/constants/routes';
-import { DiscordIcon, ExternalLink, Github, Sparkles } from '@/src/lib/icons';
+import { DiscordIcon, ExternalLink, Github, Rss, Sparkles } from '@/src/lib/icons';
 
 /**
  * Footer Component
@@ -31,6 +32,26 @@ function FooterComponent() {
   const currentYear = new Date().getFullYear();
   const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
+  const pathname = usePathname();
+
+  // Context-aware RSS feed - shows most relevant feed for current page
+  const rssFeed = useMemo(() => {
+    if (pathname?.startsWith('/agents')) return { url: '/agents/rss.xml', label: 'Agents Feed' };
+    if (pathname?.startsWith('/mcp')) return { url: '/mcp/rss.xml', label: 'MCP Feed' };
+    if (pathname?.startsWith('/rules')) return { url: '/rules/rss.xml', label: 'Rules Feed' };
+    if (pathname?.startsWith('/commands'))
+      return { url: '/commands/rss.xml', label: 'Commands Feed' };
+    if (pathname?.startsWith('/hooks')) return { url: '/hooks/rss.xml', label: 'Hooks Feed' };
+    if (pathname?.startsWith('/statuslines'))
+      return { url: '/statuslines/rss.xml', label: 'Statuslines Feed' };
+    if (pathname?.startsWith('/skills')) return { url: '/skills/rss.xml', label: 'Skills Feed' };
+    if (pathname?.startsWith('/collections'))
+      return { url: '/collections/rss.xml', label: 'Collections Feed' };
+    if (pathname?.startsWith('/guides')) return { url: '/guides/rss.xml', label: 'Guides Feed' };
+    if (pathname?.startsWith('/changelog'))
+      return { url: '/changelog/rss.xml', label: 'Changelog Feed' };
+    return { url: '/rss.xml', label: 'RSS Feed' }; // Default: site-wide feed
+  }, [pathname]);
 
   // Wait for client-side mount to avoid hydration mismatch
   useEffect(() => {
@@ -152,6 +173,7 @@ function FooterComponent() {
                 { href: ROUTES.COMMUNITY, label: 'Community', icon: null },
                 { href: ROUTES.SUBMIT, label: 'Submit Content', icon: null },
                 { href: ROUTES.PARTNER, label: 'Partner Program', icon: null },
+                { href: rssFeed.url, label: rssFeed.label, icon: Rss },
                 { href: ROUTES.LLMS_TXT, label: 'LLMs.txt', icon: Sparkles },
               ].map((link, index) => (
                 <motion.li

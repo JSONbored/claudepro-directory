@@ -23,7 +23,7 @@ import type {
  * Cached with React cache() for request-level deduplication
  */
 export const getCategoryConfigs = cache(
-  (): Record<CategoryId, UnifiedCategoryConfig<ContentType, CategoryId>> => {
+  (): Record<CategoryId, UnifiedCategoryConfig<CategoryId>> => {
     return CATEGORY_CONFIGS;
   }
 );

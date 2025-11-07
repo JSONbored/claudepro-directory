@@ -8,11 +8,13 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/card';
-import { getUserSubmissions } from '@/src/lib/actions/business.actions';
 import { ROUTES } from '@/src/lib/constants/routes';
 import { CheckCircle, Clock, ExternalLink, GitPullRequest, Send, XCircle } from '@/src/lib/icons';
+import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
+import { createClient } from '@/src/lib/supabase/server';
 import { BADGE_COLORS, type SubmissionStatusType, UI_CLASSES } from '@/src/lib/ui-constants';
+import type { Tables } from '@/src/types/database.types';
 
 // Force dynamic rendering - requires authentication
 export const dynamic = 'force-dynamic';
@@ -20,7 +22,33 @@ export const dynamic = 'force-dynamic';
 export const metadata = generatePageMetadata('/account/submissions');
 
 export default async function SubmissionsPage() {
-  const submissions = await getUserSubmissions();
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  let submissions: Array<Tables<'submissions'>> = [];
+  let hasError = false;
+
+  if (user) {
+    const { data, error } = await supabase.rpc('get_user_dashboard', { p_user_id: user.id });
+    if (error) {
+      logger.error('Failed to fetch user dashboard', error);
+      hasError = true;
+    } else if (data) {
+      // Trust database types - PostgreSQL validates structure
+      const result = data as { submissions: Array<Tables<'submissions'>> };
+      submissions = result.submissions || [];
+    }
+  }
+
+  if (hasError) {
+    return (
+      <div className="space-y-6">
+        <div className="text-destructive">Failed to load submissions. Please try again later.</div>
+      </div>
+    );
+  }
 
   const getStatusBadge = (status: string) => {
     const variants = {

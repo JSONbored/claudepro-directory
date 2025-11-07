@@ -12,7 +12,7 @@ import { Button } from '@/src/components/primitives/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/card';
 import { Separator } from '@/src/components/primitives/separator';
 import { getQuizConfiguration } from '@/src/lib/actions/quiz.actions';
-import { generateConfigRecommendations } from '@/src/lib/analytics/client';
+import { generateConfigRecommendations } from '@/src/lib/edge/client';
 
 type QuizQuestion = {
   id: string;
@@ -30,21 +30,21 @@ type QuizQuestion = {
 
 import { ArrowLeft, ArrowRight, Loader2, Sparkles } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
-import { publicGetRecommendationsArgsSchema } from '@/src/lib/schemas/generated/db-schemas';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { toasts } from '@/src/lib/utils/toast.utils';
 import { QuestionCard } from './question-card';
 import { QuizProgress } from './quiz-progress';
 
-const quizAnswersSchema = publicGetRecommendationsArgsSchema
-  .omit({ p_use_case: true, p_experience_level: true, p_tool_preferences: true })
-  .extend({
-    useCase: z.string(),
-    experienceLevel: z.string(),
-    toolPreferences: z.array(z.string()).min(1).max(5),
-    teamSize: z.string().optional(),
-    timestamp: z.string().datetime().optional(),
-  });
+// Manual Zod schema (database validates via RPC function)
+const quizAnswersSchema = z.object({
+  useCase: z.string(),
+  experienceLevel: z.string(),
+  toolPreferences: z.array(z.string()).min(1).max(5),
+  p_integrations: z.array(z.string()).optional(),
+  p_focus_areas: z.array(z.string()).optional(),
+  teamSize: z.string().optional(),
+  timestamp: z.string().datetime().optional(),
+});
 
 type QuizAnswers = z.infer<typeof quizAnswersSchema>;
 

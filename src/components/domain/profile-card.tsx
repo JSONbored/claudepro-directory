@@ -17,7 +17,7 @@ import { memo } from 'react';
 import { BaseCard } from '@/src/components/domain/base-card';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { Button } from '@/src/components/primitives/button';
-import { Award, Briefcase, ExternalLink, Medal, Users } from '@/src/lib/icons';
+import { Award, Briefcase, ExternalLink, Users } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import type { Tables } from '@/src/types/database.types';
 
@@ -53,16 +53,6 @@ const TIER_CONFIG = {
       'border-purple-500/30 bg-gradient-to-r from-purple-500/10 to-pink-500/10 text-purple-600 dark:text-purple-400',
   },
 } as const;
-
-/**
- * Format reputation score with K/M suffixes
- */
-function formatReputation(score: number | null): string {
-  if (!score) return '0';
-  if (score >= 1000000) return `${(score / 1000000).toFixed(1)}M`;
-  if (score >= 1000) return `${(score / 1000).toFixed(1)}K`;
-  return score.toString();
-}
 
 function ProfileCardComponent({ user, variant = 'default', showActions = true }: ProfileCardProps) {
   const tier = (user.tier || 'free') as 'free' | 'pro' | 'enterprise';
@@ -110,18 +100,6 @@ function ProfileCardComponent({ user, variant = 'default', showActions = true }:
       )}
       renderMetadataBadges={() => (
         <>
-          {/* Reputation score */}
-          {user.reputation_score !== null && user.reputation_score > 0 && (
-            <UnifiedBadge
-              variant="base"
-              style="secondary"
-              className="h-7 gap-1.5 border-amber-500/20 bg-amber-500/10 px-2.5 font-medium text-amber-600 dark:text-amber-400"
-            >
-              <Medal className="h-3.5 w-3.5" aria-hidden="true" />
-              <span className="text-xs">{formatReputation(user.reputation_score)}</span>
-            </UnifiedBadge>
-          )}
-
           {/* Contributions count */}
           {user.total_contributions !== undefined && user.total_contributions > 0 && (
             <UnifiedBadge

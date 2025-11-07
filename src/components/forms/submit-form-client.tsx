@@ -24,7 +24,6 @@ import {
 } from '@/src/components/primitives/card';
 import { Input } from '@/src/components/primitives/input';
 import { Label } from '@/src/components/primitives/label';
-import { submitConfiguration } from '@/src/lib/actions/business.actions';
 import {
   SUBMISSION_CONTENT_TYPES,
   type SubmissionContentType,
@@ -33,12 +32,12 @@ import {
   type TextFieldDefinition,
 } from '@/src/lib/forms/types';
 import { CheckCircle, Github, Send } from '@/src/lib/icons';
-import type { configSubmissionSchema } from '@/src/lib/schemas/form.schema';
-// Note: Server action already validates with configSubmissionSchema
-// Client-side validation would be redundant and cause type mismatches
+import { logger } from '@/src/lib/logger';
+import { createClient } from '@/src/lib/supabase/client';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { ParseStrategy, safeParse } from '@/src/lib/utils/data.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
+import type { Database, Json } from '@/src/types/database.types';
 import { ContentTypeFieldRenderer } from './content-type-field-renderer';
 import { DuplicateWarning } from './duplicate-warning';
 import { ExamplesArrayInput } from './examples-array-input';
@@ -234,84 +233,140 @@ export function SubmitFormClient({ formConfig }: SubmitFormClientProps) {
 
     startTransition(async () => {
       try {
+        const supabase = createClient();
+
+        // Check authentication
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+
+        if (!user) {
+          toasts.error.submissionFailed('You must be signed in to submit content');
+          return;
+        }
+
         const formData = new FormData(event.currentTarget);
 
         /**
-         * CONFIGURATION-DRIVEN SUBMISSION
-         * Extract all form fields generically and pass to server action.
-         * Server action validates with configSubmissionSchema which handles:
-         * - Type discrimination (based on `type` field)
-         * - Coercion (string → number)
-         * - Validation (min/max/regex)
-         * - Transformation (trim, split tags/arrays)
-         * - Sanitization (security transforms)
-         *
-         * Adding new content types = just update form.schema.ts
-         * Zero changes needed here!
+         * DATABASE-FIRST SUBMISSION
+         * Extract form fields and call RPC directly.
+         * Database validates via CHECK constraints.
          */
-        const submissionData: Record<string, unknown> = {
-          type: contentType,
-        };
+        const submissionData: Record<string, unknown> = {};
 
         // Extract all form fields generically
         for (const [key, value] of formData.entries()) {
-          // Handle examples JSON parsing with production-grade validation
+          // Handle examples JSON parsing
           if (key === 'examples') {
             const examplesJson = value as string;
             if (examplesJson && examplesJson !== '[]') {
               try {
-                // Production-grade: safeParse with Zod validation (client-safe VALIDATED_JSON strategy)
                 submissionData.examples = safeParse(examplesJson, examplesArraySchema, {
                   strategy: ParseStrategy.VALIDATED_JSON,
                 });
-              } catch {
-                // Invalid JSON - server will handle validation error
+              } catch (error) {
+                logger.warn('Failed to parse examples JSON, field will be omitted', {
+                  error: error instanceof Error ? error.message : String(error),
+                });
+                toasts.raw.warning('Examples field could not be parsed and will be omitted');
                 submissionData.examples = undefined;
               }
             }
             continue;
           }
 
-          // Add all other fields as-is (server will coerce/transform via Zod)
           submissionData[key] = value || undefined;
         }
 
-        /**
-         * ARCHITECTURE: Form Data Submission Pattern
-         *
-         * This type assertion is CORRECT and NECESSARY because:
-         *
-         * 1. Client-side: Unknown user input (Record<string, unknown>)
-         *    - FormData can contain ANY user input
-         *    - Cannot be validated at compile-time
-         *
-         * 2. Server-side: Runtime Zod validation (configSubmissionSchema)
-         *    - Server action validates with .schema() before processing
-         *    - Invalid data returns validation error to user
-         *
-         * 3. Type System Bridge:
-         *    - Assertion tells TypeScript: "I'm passing unknown data to a validator"
-         *    - Alternative (no cast) would require redundant client validation
-         *    - This is the STANDARD pattern for server actions with user input
-         *
-         * This is production-ready: data is validated at runtime where it matters.
-         */
-        const result = await submitConfiguration(
-          submissionData as z.input<typeof configSubmissionSchema>
-        );
+        // Validate required fields before casting
+        const requiredFields = ['name', 'description', 'category', 'author'] as const;
+        for (const field of requiredFields) {
+          if (!submissionData[field] || typeof submissionData[field] !== 'string') {
+            toasts.error.submissionFailed(`Missing or invalid required field: ${field}`);
+            return;
+          }
+        }
 
-        if (result?.data?.success) {
+        // Direct RPC call - database validates everything
+        const rpcArgs: Database['public']['Functions']['submit_content_for_review']['Args'] = {
+          p_submission_type: contentType,
+          p_name: submissionData.name as string,
+          p_description: submissionData.description as string,
+          p_category: submissionData.category as string,
+          p_author: submissionData.author as string,
+          // Cast to Json - database validates structure via CHECK constraints
+          p_content_data: submissionData as Json,
+        };
+
+        if (submissionData.author_profile_url) {
+          rpcArgs.p_author_profile_url = submissionData.author_profile_url as string;
+        }
+        if (submissionData.github_url) {
+          rpcArgs.p_github_url = submissionData.github_url as string;
+        }
+        if (submissionData.tags) {
+          rpcArgs.p_tags = (submissionData.tags as string)
+            .split(',')
+            .map((tag) => tag.trim())
+            .filter((tag) => tag.length > 0);
+        }
+
+        const { data, error } = await supabase.rpc('submit_content_for_review', rpcArgs);
+
+        if (error) {
+          logger.error('Submission RPC failed', new Error(error.message));
+          // Show generic error to user, full error is logged
+          toasts.error.submissionFailed(
+            'Failed to submit content. Please try again or contact support.'
+          );
+          return;
+        }
+
+        if (!data) {
+          toasts.error.submissionFailed('No data returned from submission');
+          return;
+        }
+
+        // Validate response structure
+        if (
+          !data ||
+          typeof data !== 'object' ||
+          !('success' in data) ||
+          typeof data.success !== 'boolean'
+        ) {
+          logger.error('Invalid RPC response structure', new Error(JSON.stringify(data)));
+          toasts.error.submissionFailed('Received invalid response from server');
+          return;
+        }
+
+        const result = data as {
+          success: boolean;
+          submission_id?: string;
+          status?: string;
+          message?: string;
+        };
+
+        if (result.success) {
+          if (!(result.submission_id && result.status)) {
+            logger.warn('Success response missing expected fields', {
+              submission_id: result.submission_id || 'missing',
+              status: result.status || 'missing',
+            });
+          }
           setSubmissionResult({
-            submission_id: result.data.submission_id,
-            status: result.data.status,
-            message: result.data.message,
+            submission_id: result.submission_id || 'unknown',
+            status: result.status || 'pending',
+            message: result.message || 'Your submission has been received and is pending review!',
           });
 
           toasts.success.submissionCreated(contentType);
-
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }
       } catch (error) {
+        logger.error(
+          'Submission failed',
+          error instanceof Error ? error : new Error(String(error))
+        );
         toasts.error.submissionFailed(error instanceof Error ? error.message : undefined);
       }
     });
