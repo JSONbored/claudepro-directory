@@ -35,16 +35,6 @@ const reviewSchema = z.object({
   review_text: z.string().optional().nullable(),
 });
 
-const postSchema = z
-  .object({
-    title: z.string().min(1),
-    content: z.string().optional().nullable(),
-    url: z.string().optional().nullable(),
-  })
-  .refine((data) => data.content || data.url, {
-    message: 'Post must have either content or a URL',
-  });
-
 const getReviewsSchema = z.object({
   content_type: z.string(),
   content_slug: z.string(),
@@ -76,13 +66,6 @@ const helpfulVoteSchema = z.object({
 
 const reviewDeleteSchema = z.object({
   review_id: z.string(),
-});
-
-const updatePostSchema = z.object({
-  id: z.string(),
-  title: z.string().min(1).optional(),
-  content: z.string().optional().nullable(),
-  url: z.string().optional().nullable(),
 });
 
 // =====================================================
@@ -489,166 +472,6 @@ export const getReviewsWithStats = rateLimitedAction
 
 // DELETED: getReviews() - Use getReviewsWithStats() instead (optimized single RPC)
 // DELETED: getAggregateRating() - Use getReviewsWithStats() instead (optimized single RPC)
-
-// ============================================
-// POST ACTIONS
-// ============================================
-
-/**
- * Create a new post
- */
-export const createPost = authedAction
-  .metadata({ actionName: 'createPost', category: 'form' })
-  .schema(postSchema)
-  .action(async ({ parsedInput, ctx }) => {
-    try {
-      const supabase = await createClient();
-      const { data, error } = await supabase.rpc('manage_post', {
-        p_action: 'create',
-        p_user_id: ctx.userId,
-        p_data: parsedInput,
-      });
-
-      if (error) throw new Error(error.message);
-
-      revalidatePath('/board');
-      return data as unknown as { success: boolean; post: Tables<'posts'> };
-    } catch (error) {
-      logger.error(
-        'Failed to create post',
-        error instanceof Error ? error : new Error(String(error)),
-        {
-          userId: ctx.userId,
-          title: parsedInput.title,
-        }
-      );
-      throw error;
-    }
-  });
-
-/**
- * Update a post (own posts only)
- */
-export const updatePost = authedAction
-  .metadata({ actionName: 'updatePost', category: 'form' })
-  .schema(updatePostSchema)
-  .action(async ({ parsedInput, ctx }) => {
-    try {
-      const supabase = await createClient();
-      const { data, error } = await supabase.rpc('manage_post', {
-        p_action: 'update',
-        p_user_id: ctx.userId,
-        p_data: parsedInput,
-      });
-
-      if (error) throw new Error(error.message);
-
-      revalidatePath('/board');
-      return data as unknown as { success: boolean; post: Tables<'posts'> };
-    } catch (error) {
-      logger.error(
-        'Failed to update post',
-        error instanceof Error ? error : new Error(String(error)),
-        {
-          userId: ctx.userId,
-          postId: parsedInput.id,
-        }
-      );
-      throw error;
-    }
-  });
-
-/**
- * Delete a post (own posts only)
- */
-export const deletePost = authedAction
-  .metadata({ actionName: 'deletePost', category: 'form' })
-  .schema(z.object({ id: z.string() }))
-  .action(async ({ parsedInput, ctx }) => {
-    try {
-      const supabase = await createClient();
-      const { data, error } = await supabase.rpc('manage_post', {
-        p_action: 'delete',
-        p_user_id: ctx.userId,
-        p_data: parsedInput,
-      });
-
-      if (error) throw new Error(error.message);
-
-      revalidatePath('/board');
-      return data as { success: boolean };
-    } catch (error) {
-      logger.error(
-        'Failed to delete post',
-        error instanceof Error ? error : new Error(String(error)),
-        {
-          userId: ctx.userId,
-          postId: parsedInput.id,
-        }
-      );
-      throw error;
-    }
-  });
-
-export const votePost = authedAction
-  .metadata({ actionName: 'votePost', category: 'user' })
-  .schema(z.object({ post_id: z.string(), action: z.enum(['vote', 'unvote']) }))
-  .action(async ({ parsedInput, ctx }) => {
-    const supabase = await createClient();
-    const { data, error } = await supabase.rpc('toggle_post_vote', {
-      p_post_id: parsedInput.post_id,
-      p_user_id: ctx.userId,
-      p_action: parsedInput.action,
-    });
-    if (error) throw new Error(error.message);
-    revalidatePath('/board');
-    return data as { success: boolean; action: string };
-  });
-
-/**
- * Create a comment on a post
- */
-export const createComment = authedAction
-  .metadata({ actionName: 'createComment', category: 'form' })
-  .schema(
-    z.object({
-      post_id: z.string(),
-      content: z.string().min(1).max(2000),
-    })
-  )
-  .action(async ({ parsedInput, ctx }) => {
-    const supabase = await createClient();
-    const { data, error } = await supabase.rpc('manage_comment', {
-      p_action: 'create',
-      p_user_id: ctx.userId,
-      p_data: parsedInput,
-    });
-
-    if (error) throw new Error(error.message);
-
-    revalidatePath('/board');
-    return data as unknown as { success: boolean; comment: Tables<'comments'> };
-  });
-
-/**
- * Delete a comment (own comments only)
- */
-export const deleteComment = authedAction
-  .metadata({ actionName: 'deleteComment', category: 'form' })
-  .schema(z.object({ id: z.string() }))
-  .action(async ({ parsedInput, ctx }) => {
-    const supabase = await createClient();
-    const { data, error } = await supabase.rpc('manage_comment', {
-      p_action: 'delete',
-      p_user_id: ctx.userId,
-      p_data: parsedInput,
-    });
-
-    if (error) throw new Error(error.message);
-
-    revalidatePath('/board');
-    return data as { success: boolean };
-  });
 
 // ============================================
 // USAGE TRACKING ACTIONS

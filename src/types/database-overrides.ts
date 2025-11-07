@@ -70,52 +70,8 @@ type DatabaseWithViewOverrides = {
         };
       };
 
-      /**
-       * personalized_feed view
-       * Extends content table with user affinity scores
-       *
-       * user_id is nullable (not all content has affinity for all users)
-       */
-      personalized_feed: {
-        Row: {
-          // Content fields (NOT NULL from content table)
-          id: string;
-          slug: string;
-          title: string;
-          description: string;
-          category: string;
-          author: string;
-          date_added: string;
-          tags: string[];
-          source_table: string;
-          created_at: string;
-          updated_at: string;
-
-          // Metrics (COALESCE defaults to 0)
-          affinity_score: number;
-          bookmark_count: number;
-          popularity_score: number;
-          trending_score: number;
-
-          // Nullable fields
-          user_id: string | null; // Nullable - not all content has user affinity
-          affinity_calculated_at: string | null;
-          author_profile_url: string | null;
-          features: string[] | null;
-          use_cases: string[] | null;
-          examples: DatabaseGenerated['public']['Tables']['content']['Row']['examples'];
-        };
-      };
-
-      /**
-       * recommendation_results view
-       * Extends content table with recommendation scores
-       *
-       * user_id is nullable (recommendations are user-specific)
-       */
       recommendation_results: {
         Row: {
-          // Content fields (NOT NULL from content table)
           id: string;
           slug: string;
           title: string;
@@ -127,15 +83,10 @@ type DatabaseWithViewOverrides = {
           source_table: string;
           created_at: string;
           updated_at: string;
-
-          // Metrics (COALESCE defaults to 0)
           recommendation_score: number;
-          user_affinity: number;
           bookmark_count: number;
           popularity_score: number;
-
-          // Nullable fields
-          user_id: string | null; // Nullable - recommendations are user-specific
+          user_id: string | null;
           author_profile_url: string | null;
           features: string[] | null;
           use_cases: string[] | null;

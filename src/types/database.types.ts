@@ -3,54 +3,6 @@ export type Json = string | number | boolean | null | { [key: string]: Json | un
 export type Database = {
   public: {
     Tables: {
-      affinity_config: {
-        Row: {
-          id: number;
-          max_bookmarks: number | null;
-          max_copies: number | null;
-          max_time_spent_seconds: number | null;
-          max_views: number | null;
-          min_score_threshold: number | null;
-          recency_half_life_days: number | null;
-          updated_at: string | null;
-          weight_bookmarks: number | null;
-          weight_copies: number | null;
-          weight_recency: number | null;
-          weight_time_spent: number | null;
-          weight_views: number | null;
-        };
-        Insert: {
-          id?: number;
-          max_bookmarks?: number | null;
-          max_copies?: number | null;
-          max_time_spent_seconds?: number | null;
-          max_views?: number | null;
-          min_score_threshold?: number | null;
-          recency_half_life_days?: number | null;
-          updated_at?: string | null;
-          weight_bookmarks?: number | null;
-          weight_copies?: number | null;
-          weight_recency?: number | null;
-          weight_time_spent?: number | null;
-          weight_views?: number | null;
-        };
-        Update: {
-          id?: number;
-          max_bookmarks?: number | null;
-          max_copies?: number | null;
-          max_time_spent_seconds?: number | null;
-          max_views?: number | null;
-          min_score_threshold?: number | null;
-          recency_half_life_days?: number | null;
-          updated_at?: string | null;
-          weight_bookmarks?: number | null;
-          weight_copies?: number | null;
-          weight_recency?: number | null;
-          weight_time_spent?: number | null;
-          weight_views?: number | null;
-        };
-        Relationships: [];
-      };
       analytics_event_categories: {
         Row: {
           active: boolean;
@@ -389,6 +341,7 @@ export type Database = {
           date_updated: string | null;
           description: string;
           featured: boolean | null;
+          git_commit_sha: string | null;
           git_hash: string | null;
           git_tag: string | null;
           id: string;
@@ -411,6 +364,7 @@ export type Database = {
           date_updated?: string | null;
           description: string;
           featured?: boolean | null;
+          git_commit_sha?: string | null;
           git_hash?: string | null;
           git_tag?: string | null;
           id?: string;
@@ -433,6 +387,7 @@ export type Database = {
           date_updated?: string | null;
           description?: string;
           featured?: boolean | null;
+          git_commit_sha?: string | null;
           git_hash?: string | null;
           git_tag?: string | null;
           id?: string;
@@ -604,48 +559,6 @@ export type Database = {
           },
           {
             foreignKeyName: 'collection_items_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'users';
-            referencedColumns: ['id'];
-          },
-        ];
-      };
-      comments: {
-        Row: {
-          content: string;
-          created_at: string;
-          id: string;
-          post_id: string;
-          updated_at: string;
-          user_id: string;
-        };
-        Insert: {
-          content: string;
-          created_at?: string;
-          id?: string;
-          post_id: string;
-          updated_at?: string;
-          user_id: string;
-        };
-        Update: {
-          content?: string;
-          created_at?: string;
-          id?: string;
-          post_id?: string;
-          updated_at?: string;
-          user_id?: string;
-        };
-        Relationships: [
-          {
-            foreignKeyName: 'comments_post_id_fkey';
-            columns: ['post_id'];
-            isOneToOne: false;
-            referencedRelation: 'posts';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'comments_user_id_fkey';
             columns: ['user_id'];
             isOneToOne: false;
             referencedRelation: 'users';
@@ -1891,50 +1804,6 @@ export type Database = {
           },
         ];
       };
-      posts: {
-        Row: {
-          comment_count: number | null;
-          content: string | null;
-          created_at: string;
-          id: string;
-          title: string;
-          updated_at: string;
-          url: string | null;
-          user_id: string;
-          vote_count: number | null;
-        };
-        Insert: {
-          comment_count?: number | null;
-          content?: string | null;
-          created_at?: string;
-          id?: string;
-          title: string;
-          updated_at?: string;
-          url?: string | null;
-          user_id: string;
-          vote_count?: number | null;
-        };
-        Update: {
-          comment_count?: number | null;
-          content?: string | null;
-          created_at?: string;
-          id?: string;
-          title?: string;
-          updated_at?: string;
-          url?: string | null;
-          user_id?: string;
-          vote_count?: number | null;
-        };
-        Relationships: [
-          {
-            foreignKeyName: 'posts_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'users';
-            referencedColumns: ['id'];
-          },
-        ];
-      };
       quiz_options: {
         Row: {
           created_at: string | null;
@@ -2610,50 +2479,6 @@ export type Database = {
         };
         Relationships: [];
       };
-      user_affinities: {
-        Row: {
-          affinity_score: number;
-          based_on: Json | null;
-          calculated_at: string;
-          content_slug: string;
-          content_type: string;
-          created_at: string;
-          id: string;
-          updated_at: string;
-          user_id: string;
-        };
-        Insert: {
-          affinity_score: number;
-          based_on?: Json | null;
-          calculated_at?: string;
-          content_slug: string;
-          content_type: string;
-          created_at?: string;
-          id?: string;
-          updated_at?: string;
-          user_id: string;
-        };
-        Update: {
-          affinity_score?: number;
-          based_on?: Json | null;
-          calculated_at?: string;
-          content_slug?: string;
-          content_type?: string;
-          created_at?: string;
-          id?: string;
-          updated_at?: string;
-          user_id?: string;
-        };
-        Relationships: [
-          {
-            foreignKeyName: 'user_affinities_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'users';
-            referencedColumns: ['id'];
-          },
-        ];
-      };
       user_collections: {
         Row: {
           bookmark_count: number;
@@ -2938,7 +2763,6 @@ export type Database = {
         Row: {
           bio: string | null;
           bookmark_count: number;
-          comment_count: number;
           created_at: string;
           display_name: string | null;
           email: string | null;
@@ -2950,7 +2774,6 @@ export type Database = {
           image: string | null;
           interests: Json | null;
           name: string | null;
-          post_count: number;
           profile_public: boolean | null;
           public: boolean | null;
           search_vector: unknown;
@@ -2960,14 +2783,12 @@ export type Database = {
           submission_count: number;
           tier: string | null;
           updated_at: string;
-          votes_received_count: number;
           website: string | null;
           work: string | null;
         };
         Insert: {
           bio?: string | null;
           bookmark_count?: number;
-          comment_count?: number;
           created_at?: string;
           display_name?: string | null;
           email?: string | null;
@@ -2979,7 +2800,6 @@ export type Database = {
           image?: string | null;
           interests?: Json | null;
           name?: string | null;
-          post_count?: number;
           profile_public?: boolean | null;
           public?: boolean | null;
           search_vector?: unknown;
@@ -2989,14 +2809,12 @@ export type Database = {
           submission_count?: number;
           tier?: string | null;
           updated_at?: string;
-          votes_received_count?: number;
           website?: string | null;
           work?: string | null;
         };
         Update: {
           bio?: string | null;
           bookmark_count?: number;
-          comment_count?: number;
           created_at?: string;
           display_name?: string | null;
           email?: string | null;
@@ -3008,7 +2826,6 @@ export type Database = {
           image?: string | null;
           interests?: Json | null;
           name?: string | null;
-          post_count?: number;
           profile_public?: boolean | null;
           public?: boolean | null;
           search_vector?: unknown;
@@ -3018,47 +2835,10 @@ export type Database = {
           submission_count?: number;
           tier?: string | null;
           updated_at?: string;
-          votes_received_count?: number;
           website?: string | null;
           work?: string | null;
         };
         Relationships: [];
-      };
-      votes: {
-        Row: {
-          created_at: string;
-          id: string;
-          post_id: string;
-          user_id: string;
-        };
-        Insert: {
-          created_at?: string;
-          id?: string;
-          post_id: string;
-          user_id: string;
-        };
-        Update: {
-          created_at?: string;
-          id?: string;
-          post_id?: string;
-          user_id?: string;
-        };
-        Relationships: [
-          {
-            foreignKeyName: 'votes_post_id_fkey';
-            columns: ['post_id'];
-            isOneToOne: false;
-            referencedRelation: 'posts';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'votes_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'users';
-            referencedColumns: ['id'];
-          },
-        ];
       };
       webhook_events: {
         Row: {
@@ -3301,41 +3081,6 @@ export type Database = {
         };
         Relationships: [];
       };
-      trending_content_24h: {
-        Row: {
-          bookmark_count_24h: number | null;
-          content_slug: string | null;
-          content_type: string | null;
-          last_refreshed: string | null;
-          latest_activity_at: string | null;
-          post_count_24h: number | null;
-          trending_score: number | null;
-          vote_count_24h: number | null;
-        };
-        Relationships: [];
-      };
-      user_affinity_scores: {
-        Row: {
-          avg_affinity_score: number | null;
-          content_type: string | null;
-          last_calculated_at: string | null;
-          last_refreshed: string | null;
-          max_affinity_score: number | null;
-          top_affinity_scores: number[] | null;
-          top_content_slugs: string[] | null;
-          total_affinities: number | null;
-          user_id: string | null;
-        };
-        Relationships: [
-          {
-            foreignKeyName: 'user_affinities_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'users';
-            referencedColumns: ['id'];
-          },
-        ];
-      };
     };
     Functions: {
       add_bookmark: {
@@ -3354,16 +3099,6 @@ export type Database = {
       batch_add_bookmarks: {
         Args: { p_items: Json; p_user_id: string };
         Returns: Json;
-      };
-      batch_update_user_affinity_scores: {
-        Args: { p_max_users?: number; p_user_ids: string[] };
-        Returns: {
-          inserted_count: number;
-          processing_time_ms: number;
-          total_affinity_count: number;
-          updated_count: number;
-          user_id: string;
-        }[];
       };
       build_enriched_content_base:
         | {
@@ -3432,32 +3167,6 @@ export type Database = {
             };
             Returns: Json;
           };
-      calculate_affinity_score_for_content: {
-        Args: {
-          p_content_slug: string;
-          p_content_type: string;
-          p_user_id: string;
-        };
-        Returns: {
-          affinity_score: number;
-          breakdown: Json;
-          component_scores: Json;
-          content_slug: string;
-          content_type: string;
-          interaction_summary: Json;
-          user_id: string;
-        }[];
-      };
-      calculate_all_user_affinities: {
-        Args: { p_user_id: string };
-        Returns: {
-          affinity_score: number;
-          breakdown: Json;
-          content_slug: string;
-          content_type: string;
-          interaction_summary: Json;
-        }[];
-      };
       calculate_content_popularity_score: {
         Args: {
           p_bookmark_count: number;
@@ -3750,14 +3459,6 @@ export type Database = {
           isSetofReturn: true;
         };
       };
-      get_content_affinity: {
-        Args: {
-          p_content_slug: string;
-          p_content_type: string;
-          p_user_id: string;
-        };
-        Returns: number;
-      };
       get_content_detail_complete: {
         Args: { p_category: string; p_slug: string; p_user_id?: string };
         Returns: Json;
@@ -4049,24 +3750,6 @@ export type Database = {
         Returns: Json;
       };
       get_performance_baseline: { Args: never; Returns: Json };
-      get_personalized_feed: {
-        Args: { p_category?: string; p_limit?: number; p_user_id: string };
-        Returns: Json;
-      };
-      get_popular_posts: {
-        Args: { limit_count?: number };
-        Returns: {
-          comment_count: number;
-          content: string;
-          created_at: string;
-          id: string;
-          title: string;
-          updated_at: string;
-          url: string;
-          user_id: string;
-          vote_count: number;
-        }[];
-      };
       get_quiz_configuration: { Args: never; Returns: Json };
       get_recent_merged: { Args: { p_limit?: number }; Returns: Json };
       get_recommendations: {
@@ -4183,25 +3866,6 @@ export type Database = {
           tag_count: number;
         }[];
       };
-      get_trending_24h: {
-        Args: { p_limit?: number };
-        Returns: {
-          bookmark_count_24h: number | null;
-          content_slug: string | null;
-          content_type: string | null;
-          last_refreshed: string | null;
-          latest_activity_at: string | null;
-          post_count_24h: number | null;
-          trending_score: number | null;
-          vote_count_24h: number | null;
-        }[];
-        SetofOptions: {
-          from: '*';
-          to: 'trending_content_24h';
-          isOneToOne: false;
-          isSetofReturn: true;
-        };
-      };
       get_trending_content: {
         Args: { p_limit?: number };
         Returns: {
@@ -4223,17 +3887,6 @@ export type Database = {
         };
         Returns: Json;
       };
-      get_usage_recommendations: {
-        Args: {
-          p_category?: string;
-          p_content_slug?: string;
-          p_content_type?: string;
-          p_limit?: number;
-          p_trigger: string;
-          p_user_id: string;
-        };
-        Returns: Json;
-      };
       get_user_activity_summary: { Args: { p_user_id: string }; Returns: Json };
       get_user_activity_timeline: {
         Args: {
@@ -4247,26 +3900,6 @@ export type Database = {
       get_user_affinities: {
         Args: { p_limit?: number; p_min_score?: number; p_user_id: string };
         Returns: Json;
-      };
-      get_user_affinity_scores: {
-        Args: { p_user_id: string };
-        Returns: {
-          avg_affinity_score: number | null;
-          content_type: string | null;
-          last_calculated_at: string | null;
-          last_refreshed: string | null;
-          max_affinity_score: number | null;
-          top_affinity_scores: number[] | null;
-          top_content_slugs: string[] | null;
-          total_affinities: number | null;
-          user_id: string | null;
-        }[];
-        SetofOptions: {
-          from: '*';
-          to: 'user_affinity_scores';
-          isOneToOne: false;
-          isSetofReturn: true;
-        };
       };
       get_user_collection_detail: {
         Args: {
@@ -4393,19 +4026,11 @@ export type Database = {
         Args: { p_action: string; p_data: Json; p_user_id: string };
         Returns: Json;
       };
-      manage_comment: {
-        Args: { p_action: string; p_data: Json; p_user_id: string };
-        Returns: Json;
-      };
       manage_company: {
         Args: { p_action: string; p_data: Json; p_user_id: string };
         Returns: Json;
       };
       manage_job: {
-        Args: { p_action: string; p_data: Json; p_user_id: string };
-        Returns: Json;
-      };
-      manage_post: {
         Args: { p_action: string; p_data: Json; p_user_id: string };
         Returns: Json;
       };
@@ -4619,7 +4244,6 @@ export type Database = {
         Returns: {
           bio: string | null;
           bookmark_count: number;
-          comment_count: number;
           created_at: string;
           display_name: string | null;
           email: string | null;
@@ -4631,7 +4255,6 @@ export type Database = {
           image: string | null;
           interests: Json | null;
           name: string | null;
-          post_count: number;
           profile_public: boolean | null;
           public: boolean | null;
           search_vector: unknown;
@@ -4641,7 +4264,6 @@ export type Database = {
           submission_count: number;
           tier: string | null;
           updated_at: string;
-          votes_received_count: number;
           website: string | null;
           work: string | null;
         }[];
@@ -4699,10 +4321,6 @@ export type Database = {
         };
         Returns: Json;
       };
-      toggle_post_vote: {
-        Args: { p_action: string; p_post_id: string; p_user_id: string };
-        Returns: Json;
-      };
       toggle_review_helpful: {
         Args: { p_helpful: boolean; p_review_id: string; p_user_id: string };
         Returns: Json;
@@ -4721,14 +4339,6 @@ export type Database = {
         Returns: Json;
       };
       unaccent: { Args: { '': string }; Returns: string };
-      update_user_affinity_scores: {
-        Args: { p_user_id: string };
-        Returns: {
-          inserted_count: number;
-          total_affinity_count: number;
-          updated_count: number;
-        }[];
-      };
       update_user_profile: {
         Args: {
           p_bio?: string;

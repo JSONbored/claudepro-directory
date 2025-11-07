@@ -1,33 +1,7 @@
 'use client';
 
 /**
- * Navigation Component
- *
- * Main navigation component with comprehensive accessibility support.
- *
- * **Keyboard Navigation:**
- * - ⌘K/Ctrl+K: Open global search/command menu
- * - Tab: Navigate through interactive elements
- * - Arrow keys: Navigate dropdown menu items (Radix UI)
- * - Enter/Space: Activate links and buttons
- * - Escape: Close dropdowns and mobile menu
- *
- * **Accessibility Features (WCAG 2.1 AA):**
- * - aria-current="page" on active navigation items
- * - aria-label on navigation landmarks and icon buttons
- * - aria-hidden="true" on decorative elements
- * - Semantic HTML (<nav>, <header>)
- * - Focus management with Radix UI primitives
- * - Screen reader optimized
- *
- * **Architecture:**
- * - Configuration-driven (src/config/navigation.ts)
- * - DRY principle: Single source of truth for nav items
- * - Responsive: Desktop dropdown, mobile sheet
- * - Performance: rAF scroll debouncing, passive listeners
- *
- * @see docs/NAVIGATION_KEYBOARD_GUIDE.md for full accessibility documentation
- * @see Linear Issues: SHA-3026, SHA-3027, SHA-3028, SHA-3029, SHA-3030, SHA-3031, SHA-3032
+ * Main navigation with keyboard support (⌘K search, dropdowns) and responsive layout
  */
 
 import { motion, useScroll, useTransform } from 'motion/react';
@@ -63,7 +37,6 @@ import {
   Github,
   Handshake,
   Menu,
-  Sparkles,
   Users,
 } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
@@ -296,28 +269,6 @@ const NavigationComponent = () => {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-[560px] p-4">
-                      {/* Featured "For You" Card - shadcn navbar-02 pattern */}
-                      <Link
-                        href="/for-you"
-                        prefetch={true}
-                        className="group mb-4 block rounded-lg border border-accent/20 bg-gradient-to-br from-accent/10 via-accent/5 to-transparent p-4 no-underline transition-all duration-300 hover:border-accent/30"
-                      >
-                        <div className="flex items-start gap-3">
-                          <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-accent/20 transition-colors group-hover:bg-accent/30">
-                            <Sparkles className="h-5 w-5 text-accent" aria-hidden="true" />
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <div className="mb-1 font-semibold text-foreground text-sm transition-colors group-hover:text-accent">
-                              For You
-                            </div>
-                            <div className="text-muted-foreground/90 text-xs leading-relaxed">
-                              AI-powered personalized recommendations based on your interests and
-                              browsing history
-                            </div>
-                          </div>
-                        </div>
-                      </Link>
-
                       {/* 2-column grid for quick links */}
                       <div className="mb-3 grid grid-cols-2 gap-4">
                         {SECONDARY_NAVIGATION.map((group) => (

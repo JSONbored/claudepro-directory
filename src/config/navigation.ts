@@ -1,16 +1,5 @@
 /**
- * Navigation Configuration
- *
- * Centralized, type-safe configuration for all navigation links across the application.
- * Supports multi-level navigation, icons, descriptions, and categorization.
- *
- * Architecture:
- * - Type-safe: Full TypeScript interfaces with validation
- * - Maintainable: Single source of truth for all nav links
- * - Scalable: Easy to add new links without modifying components
- * - SEO-friendly: Structured data for navigation
- *
- * @see Research Report: "shadcn Navbar Components" - Section 5
+ * Type-safe navigation configuration for all site navigation links
  */
 
 import {
@@ -26,62 +15,26 @@ import {
   MessageSquare,
   Plug,
   PlusCircle,
-  Sparkles,
   Terminal,
   TrendingUp,
   Users,
   Zap,
 } from '@/src/lib/icons';
 
-/**
- * Navigation Link Interface
- *
- * Defines the structure for all navigation links in the application.
- */
 export interface NavigationLink {
-  /** Display label */
   label: string;
-
-  /** Route path */
   href: string;
-
-  /** Optional icon component */
   icon?: LucideIcon;
-
-  /** Optional description for dropdown menus */
   description?: string;
-
-  /** Whether this is a new feature/category */
   isNew?: boolean;
-
-  /** Optional external link indicator */
   external?: boolean;
-
-  /** Optional sub-links for dropdown menus */
   children?: NavigationLink[];
 }
 
-/**
- * Navigation Group Interface
- *
- * Groups related navigation links with a heading.
- */
 export interface NavigationGroup {
-  /** Group heading */
   heading: string;
-
-  /** Links in this group */
   links: NavigationLink[];
 }
-
-/**
- * Primary Navigation Links
- *
- * Main navigation items displayed prominently in the nav bar.
- * Order matters - these appear left-to-right on desktop.
- *
- * Structure: Configs (dropdown) | Trending | Guides | Jobs | Contact | More
- */
 export const PRIMARY_NAVIGATION: NavigationLink[] = [
   {
     label: 'Configs',
@@ -166,37 +119,16 @@ export const PRIMARY_NAVIGATION: NavigationLink[] = [
   },
 ];
 
-/**
- * Secondary Navigation Links
- *
- * Additional links displayed in "More" dropdown or secondary menu.
- * Grouped by category for better organization.
- *
- * Note: Primary nav has Configs (dropdown), Trending, Guides, Jobs, Contact
- * More dropdown contains: For You (featured), Board, Companies, Changelog, Community, Partner Program
- */
 export const SECONDARY_NAVIGATION: NavigationGroup[] = [
   {
     heading: 'Discover',
     links: [
-      {
-        label: 'For You',
-        href: '/for-you',
-        icon: Sparkles,
-        description: 'Personalized recommendations',
-      },
       {
         label: 'Gallery',
         href: '/gallery',
         icon: Camera,
         description: 'Code screenshot gallery',
         isNew: true,
-      },
-      {
-        label: 'Board',
-        href: '/board',
-        icon: MessageSquare,
-        description: 'Community discussions',
       },
       {
         label: 'Companies',
@@ -236,11 +168,6 @@ export const SECONDARY_NAVIGATION: NavigationGroup[] = [
   },
 ];
 
-/**
- * Action Links
- *
- * Call-to-action links (typically buttons in the nav bar).
- */
 export const ACTION_LINKS: NavigationLink[] = [
   {
     label: 'Submit Config',
@@ -250,78 +177,24 @@ export const ACTION_LINKS: NavigationLink[] = [
   },
 ];
 
-/**
- * Get All Navigation Links (Flat)
- *
- * Returns a flat array of all navigation links for search/command palette.
- *
- * @returns Flat array of all navigation links
- */
 export function getAllNavigationLinks(): NavigationLink[] {
   const secondaryLinks = SECONDARY_NAVIGATION.flatMap((group) => group.links);
   return [...PRIMARY_NAVIGATION, ...secondaryLinks, ...ACTION_LINKS];
 }
 
-/**
- * Get Navigation Link by Path
- *
- * Finds a navigation link by its href path.
- *
- * @param path - The path to search for
- * @returns Navigation link or undefined if not found
- */
 export function getNavigationLinkByPath(path: string): NavigationLink | undefined {
   return getAllNavigationLinks().find((link) => link.href === path);
 }
 
-/**
- * Is Active Path Helper
- *
- * Determines if a navigation link is active based on current pathname.
- *
- * @param linkPath - The navigation link path
- * @param currentPath - The current pathname
- * @returns True if the link is active
- */
 export function isActivePath(linkPath: string, currentPath: string): boolean {
-  // Exact match for homepage
-  if (linkPath === '/' && currentPath === '/') {
-    return true;
-  }
-
-  // Prefix match for all other routes
-  if (linkPath !== '/' && currentPath.startsWith(linkPath)) {
-    return true;
-  }
-
+  if (linkPath === '/' && currentPath === '/') return true;
+  if (linkPath !== '/' && currentPath.startsWith(linkPath)) return true;
   return false;
 }
 
-/**
- * Get Breadcrumb Trail
- *
- * Generates breadcrumb navigation from current path.
- *
- * @param pathname - Current pathname
- * @returns Array of navigation links forming breadcrumb trail
- *
- * @example
- * ```ts
- * getBreadcrumbTrail('/agents/production-specialist')
- * // Returns: [{ label: 'Home', href: '/' }, { label: 'Agents', href: '/agents' }]
- * ```
- */
 export function getBreadcrumbTrail(pathname: string): NavigationLink[] {
-  const breadcrumbs: NavigationLink[] = [
-    {
-      label: 'Home',
-      href: '/',
-    },
-  ];
-
-  if (pathname === '/') {
-    return breadcrumbs;
-  }
+  const breadcrumbs: NavigationLink[] = [{ label: 'Home', href: '/' }];
+  if (pathname === '/') return breadcrumbs;
 
   const segments = pathname.split('/').filter(Boolean);
   let currentPath = '';
@@ -333,7 +206,6 @@ export function getBreadcrumbTrail(pathname: string): NavigationLink[] {
     if (link) {
       breadcrumbs.push(link);
     } else {
-      // Fallback for dynamic routes
       breadcrumbs.push({
         label: segment.charAt(0).toUpperCase() + segment.slice(1).replace(/-/g, ' '),
         href: currentPath,
