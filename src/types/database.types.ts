@@ -3063,6 +3063,7 @@ export type Database = {
       build_software_application_schema:
         | { Args: { p_category: string; p_slug: string }; Returns: Json }
         | { Args: { p_config: Json; p_content_row: Json }; Returns: Json };
+      build_static_route_json_ld: { Args: { p_path: string }; Returns: Json };
       calculate_content_popularity_score: {
         Args: {
           p_bookmark_count: number;
@@ -3087,6 +3088,10 @@ export type Database = {
         }[];
       };
       cleanup_old_interactions: { Args: never; Returns: number };
+      diagnose_failing_section: {
+        Args: { p_section_index: number; p_slug: string };
+        Returns: string;
+      };
       enroll_in_email_sequence: {
         Args: { p_email: string };
         Returns: undefined;
