@@ -17,21 +17,25 @@ export const dynamic = 'force-dynamic';
 export const metadata = generatePageMetadata('/account/activity');
 
 export default async function ActivityPage() {
-  // Fetch activity data
-  const [summaryResult, timelineResult] = await Promise.all([
+  // Fetch activity data - use Promise.allSettled for partial success handling
+  const [summaryResult, timelineResult] = await Promise.allSettled([
     getActivitySummary(),
     getActivityTimeline({ limit: 50, offset: 0 }),
   ]);
 
-  const summary = summaryResult?.data;
-  const timeline = timelineResult?.data;
+  const summary = summaryResult.status === 'fulfilled' ? summaryResult.value?.data : undefined;
+  const timeline = timelineResult.status === 'fulfilled' ? timelineResult.value?.data : undefined;
 
   if (!(summary && timeline)) {
     return (
       <div className="space-y-6">
         <div>
           <h1 className="mb-2 font-bold text-3xl">Activity</h1>
-          <p className="text-muted-foreground">Sign in to view your contribution history</p>
+          <p className="text-muted-foreground">
+            {summaryResult.status === 'rejected' || timelineResult.status === 'rejected'
+              ? 'Failed to load activity data. Please try again later.'
+              : 'Sign in to view your contribution history'}
+          </p>
         </div>
       </div>
     );

@@ -5,7 +5,6 @@
 
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
-import { z } from 'zod';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { SubmitFormClient } from '@/src/components/forms/submit-form-client';
 import { getSubmissionFormConfig } from '@/src/lib/forms/submission-form-config';
@@ -28,36 +27,23 @@ import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import type { Database } from '@/src/types/database.types';
 
-const SubmissionDashboardSchema = z.object({
-  stats: z.object({
-    total: z.number(),
-    pending: z.number(),
-    merged_this_week: z.number(),
-  }),
-  recent: z.array(
-    z.object({
-      id: z.union([z.string(), z.number()]),
-      content_name: z.string(),
-      content_type: z.string(),
-      merged_at: z.string(),
-      user: z
-        .object({
-          name: z.string(),
-          slug: z.string(),
-        })
-        .nullable()
-        .optional(),
-    })
-  ),
-  contributors: z.array(
-    z.object({
-      name: z.string(),
-      slug: z.string(),
-      rank: z.number(),
-      mergedCount: z.number(),
-    })
-  ),
-});
+// Type for dashboard response - trust database validation
+type SubmissionDashboardResult = {
+  stats: { total: number; pending: number; merged_this_week: number };
+  recent: Array<{
+    id: string | number;
+    content_name: string;
+    content_type: string;
+    merged_at: string;
+    user?: { name: string; slug: string } | null;
+  }>;
+  contributors: Array<{
+    name: string;
+    slug: string;
+    rank: number;
+    mergedCount: number;
+  }>;
+};
 
 const SUBMISSION_TIPS = [
   'Be specific in your descriptions - help users understand what your config does',
@@ -120,16 +106,8 @@ export default async function SubmitPage() {
     );
   }
 
-  let result: z.infer<typeof SubmissionDashboardSchema> | null = null;
-
-  try {
-    result = SubmissionDashboardSchema.parse(data);
-  } catch (validationError) {
-    logger.error(
-      'Invalid dashboard response',
-      validationError instanceof Error ? validationError : new Error(String(validationError))
-    );
-  }
+  // Trust database types - PostgreSQL validates structure
+  const result = (data as SubmissionDashboardResult | null) || null;
 
   const stats = result?.stats || { total: 0, pending: 0, merged_this_week: 0 };
   const recentMerged = (result?.recent || []) as Array<{

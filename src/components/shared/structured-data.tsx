@@ -1,6 +1,5 @@
 import Script from 'next/script';
 import { isValidCategory } from '@/src/lib/config/category-config';
-import { SEO_CONFIG } from '@/src/lib/config/seo-config';
 import { APP_CONFIG } from '@/src/lib/constants';
 import { getContentItemUrl } from '@/src/lib/utils/content.utils';
 import { serializeJsonLd } from '@/src/lib/utils/jsonld.utils';
@@ -29,10 +28,6 @@ export function StructuredData({
   pageTitle,
   pageDescription,
 }: StructuredDataProps) {
-  // Note: CSP nonce removed for ISR compatibility.
-  // JSON-LD scripts (type="application/ld+json") are data, not executable code,
-  // so they don't require CSP nonces.
-
   const generateLD = () => {
     const baseUrl = APP_CONFIG.url;
 
@@ -42,7 +37,7 @@ export function StructuredData({
           '@context': 'https://schema.org',
           '@type': 'WebSite',
           name: APP_CONFIG.name,
-          description: SEO_CONFIG.defaultDescription,
+          description: APP_CONFIG.description,
           url: baseUrl,
           potentialAction: {
             '@type': 'SearchAction',

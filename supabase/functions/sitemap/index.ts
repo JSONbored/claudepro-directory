@@ -78,6 +78,7 @@ Deno.serve(async (req) => {
         'Content-Type': 'application/xml; charset=utf-8',
         'Content-Length': xmlString.length.toString(),
         'Cache-Control': 'public, s-maxage=86400, stale-while-revalidate=604800',
+        'CDN-Cache-Control': 'max-age=86400',
         'X-Robots-Tag': 'index, follow',
         'X-Generated-By': 'Supabase Edge Function',
         'X-Content-Source': 'PostgreSQL mv_site_urls',

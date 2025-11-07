@@ -1,5 +1,5 @@
 {
-  "ignoreCommand": "git diff --quiet HEAD^ HEAD -- . ':(exclude).github/' ':(exclude)scripts/github-actions/' ':(exclude)templates/' ':(exclude)*.md' ':(exclude)LICENSE' ':(exclude).gitignore'",
+  "ignoreCommand": "bash -c '[[ \"$VERCEL_GIT_COMMIT_REF\" == \"main\" || \"$VERCEL_GIT_COMMIT_REF\" == \"dev\" ]] && exit 1 || exit 0'",
   "installCommand": "pnpm install --frozen-lockfile",
   "buildCommand": "pnpm build",
   "outputDirectory": ".next",

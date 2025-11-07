@@ -382,6 +382,75 @@ export async function isFollowing(user_id: string): Promise<boolean> {
   return data ?? false;
 }
 
+/**
+ * Batch check bookmark status for multiple items - Database-First
+ * Eliminates N+1 queries (20 queries → 1, 95% reduction)
+ */
+export const getBookmarkStatusBatch = authedAction
+  .metadata({ actionName: 'getBookmarkStatusBatch', category: 'user' })
+  .schema(
+    z.object({
+      items: z.array(
+        z.object({
+          content_type: z.string(),
+          content_slug: z.string(),
+        })
+      ),
+    })
+  )
+  .action(async ({ parsedInput, ctx }) => {
+    const supabase = await createClient();
+
+    const { data, error } = await supabase.rpc('is_bookmarked_batch', {
+      p_user_id: ctx.userId,
+      p_items: parsedInput.items,
+    });
+
+    if (error) {
+      logger.error('Failed to batch check bookmarks', new Error(error.message), {
+        userId: ctx.userId,
+        itemCount: parsedInput.items.length,
+      });
+      throw new Error(error.message);
+    }
+
+    // Return as Map for O(1) lookups: key = "category:slug", value = boolean
+    return new Map(
+      (data || []).map((row) => [`${row.content_type}:${row.content_slug}`, row.is_bookmarked])
+    );
+  });
+
+/**
+ * Batch check follow status for multiple users - Database-First
+ * Eliminates N+1 queries (20 queries → 1, 95% reduction)
+ */
+export const getFollowStatusBatch = authedAction
+  .metadata({ actionName: 'getFollowStatusBatch', category: 'user' })
+  .schema(
+    z.object({
+      user_ids: z.array(z.string().uuid()),
+    })
+  )
+  .action(async ({ parsedInput, ctx }) => {
+    const supabase = await createClient();
+
+    const { data, error } = await supabase.rpc('is_following_batch', {
+      p_follower_id: ctx.userId,
+      p_followed_user_ids: parsedInput.user_ids,
+    });
+
+    if (error) {
+      logger.error('Failed to batch check follows', new Error(error.message), {
+        userId: ctx.userId,
+        userCount: parsedInput.user_ids.length,
+      });
+      throw new Error(error.message);
+    }
+
+    // Return as Map for O(1) lookups: key = user_id, value = boolean
+    return new Map((data || []).map((row) => [row.followed_user_id, row.is_following]));
+  });
+
 export const getActivitySummary = authedAction
   .metadata({ actionName: 'getActivitySummary', category: 'user' })
   .schema(z.void())

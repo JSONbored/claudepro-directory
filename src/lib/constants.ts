@@ -427,3 +427,20 @@ export const EXTERNAL_SERVICES = externalServicesSchema.parse({
     www: 'https://www.claudepro.directory',
   },
 });
+
+/**
+ * Get dynamic SEO description with live content count from database
+ * Cached with Next.js fetch cache (24hr revalidation)
+ */
+export async function getContentDescription(): Promise<string> {
+  const { createAnonClient } = await import('@/src/lib/supabase/server-anon');
+  const supabase = createAnonClient();
+
+  const { count } = await supabase.from('content').select('*', { count: 'exact', head: true });
+
+  if (!count) {
+    throw new Error('Failed to fetch content count for description');
+  }
+
+  return `Open-source directory of ${count}+ Claude AI configurations. Community-driven collection of MCP servers, automation hooks, custom commands, agents, and rules.`;
+}

@@ -123,6 +123,7 @@ Deno.serve(async (req) => {
         'Content-Type': 'application/json; charset=utf-8',
         'Content-Length': jsonContent.length.toString(),
         'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
+        'CDN-Cache-Control': 'max-age=3600',
         'X-Robots-Tag': 'index, follow',
         'X-Content-Type-Options': 'nosniff',
         'X-Generated-By': 'Supabase Edge Function',

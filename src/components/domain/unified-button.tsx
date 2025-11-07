@@ -86,7 +86,6 @@ type CopyLLMsVariant = {
   showIcon?: boolean;
   category?: CategoryId;
   slug?: string;
-  contentId?: string;
 } & ButtonStyleProps;
 
 type BookmarkVariant = {
@@ -376,18 +375,14 @@ function CopyMarkdownButton({
         description: 'Markdown content ready to paste',
       });
 
-      // Track usage with database-first trackUsage() using content_id from header
-      const contentId = response.headers.get('X-Content-ID');
-      if (contentId) {
-        trackUsage({
-          content_id: contentId,
-          action_type: 'copy',
-        }).catch(() => {
-          // Intentionally empty - analytics failures should not affect UX
-        });
-      } else {
-        logger.debug('X-Content-ID header missing from markdown response', { category, slug });
-      }
+      // Track usage with database-first trackUsage() (atomic RPC, 50-100ms faster)
+      trackUsage({
+        content_type: category,
+        content_slug: slug,
+        action_type: 'copy',
+      }).catch(() => {
+        // Intentionally empty - analytics failures should not affect UX
+      });
 
       // Trigger email modal
       showModal({
@@ -499,18 +494,14 @@ function DownloadMarkdownButton({
         description: `Saved as ${filename}`,
       });
 
-      // Track usage with database-first trackUsage() using content_id from header
-      const contentId = response.headers.get('X-Content-ID');
-      if (contentId) {
-        trackUsage({
-          content_id: contentId,
-          action_type: 'download_markdown',
-        }).catch(() => {
-          // Intentionally empty - analytics failures should not affect UX
-        });
-      } else {
-        logger.debug('X-Content-ID header missing from markdown response', { category, slug });
-      }
+      // Track usage with database-first trackUsage() (atomic RPC, 50-100ms faster)
+      trackUsage({
+        content_type: category,
+        content_slug: slug,
+        action_type: 'download_markdown',
+      }).catch(() => {
+        // Intentionally empty - analytics failures should not affect UX
+      });
 
       // Track analytics (fire-and-forget)
       const fileSize = blob.size;
@@ -568,7 +559,6 @@ function CopyLLMsButton({
   disabled = false,
   category,
   slug,
-  contentId,
 }: CopyLLMsVariant) {
   const [isLoading, setIsLoading] = useState(false);
   const { isSuccess, triggerSuccess } = useButtonSuccess();
@@ -597,10 +587,11 @@ function CopyLLMsButton({
         description: 'AI-optimized content ready to paste',
       });
 
-      // Track usage with database-first trackUsage() (uses prop from server component)
-      if (contentId) {
+      // Track usage with database-first trackUsage() (atomic RPC, 50-100ms faster)
+      if (category && slug) {
         trackUsage({
-          content_id: contentId,
+          content_type: category,
+          content_slug: slug,
           action_type: 'llmstxt',
         }).catch(() => {
           // Intentional

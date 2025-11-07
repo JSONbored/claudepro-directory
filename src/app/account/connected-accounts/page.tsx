@@ -32,8 +32,14 @@ export default async function ConnectedAccountsPage() {
   );
 
   if (!result.data || result.serverError) {
-    const errorMessage =
-      result.serverError || 'Failed to load connected accounts. Please try again later.';
+    // Extract readable error message - handle both string and object cases
+    const errorMessage = result.serverError
+      ? typeof result.serverError === 'string'
+        ? result.serverError
+        : (result.serverError as { message?: string }).message ||
+          String(result.serverError) ||
+          'Failed to load connected accounts. Please try again later.'
+      : 'Failed to load connected accounts. Please try again later.';
 
     return (
       <div className="space-y-6">

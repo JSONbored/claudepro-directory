@@ -177,6 +177,7 @@ Deno.serve(async (req) => {
         'Content-Type': contentType,
         'Content-Length': xmlContent.length.toString(),
         'Cache-Control': 'public, s-maxage=600, stale-while-revalidate=3600',
+        'CDN-Cache-Control': 'max-age=600',
         'X-Robots-Tag': 'index, follow',
         'X-Generated-By': 'Supabase Edge Function',
         'X-Content-Source': contentSource,
