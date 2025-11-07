@@ -42,7 +42,7 @@ export async function generateStaticParams() {
   return VALID_CATEGORIES.map((category) => ({ category }));
 }
 
-// ISR: Revalidate every 15 minutes
+// Static generation at build time
 export const revalidate = false;
 
 async function getCategoryGalleryData(category: string) {

@@ -24,7 +24,6 @@ export const metadata: Metadata = {
   },
 };
 
-// ISR: Revalidate every 15 minutes
 export const revalidate = false;
 
 async function getGalleryData() {
