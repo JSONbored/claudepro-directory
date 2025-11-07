@@ -38,9 +38,23 @@ export default async function MyJobsPage() {
   let hasError = false;
 
   if (user) {
-    const { data, error } = await supabase.rpc('get_user_dashboard', { p_user_id: user.id });
+    let data: unknown = null;
+    let error: unknown = null;
+
+    if (typeof supabase.rpc === 'function') {
+      ({ data, error } = await supabase.rpc('get_user_dashboard', { p_user_id: user.id }));
+    } else {
+      logger.warn(
+        'Supabase RPC unavailable (mock client fallback detected); skipping dashboard fetch.',
+        { context: 'MyJobsPage' }
+      );
+    }
+
     if (error) {
-      logger.error('Failed to fetch user dashboard', error);
+      logger.error(
+        'Failed to fetch user dashboard',
+        error instanceof Error ? error : new Error(String(error))
+      );
       hasError = true;
     } else {
       try {

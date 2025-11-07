@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { z } from 'zod';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { Button } from '@/src/components/primitives/button';
 import {
@@ -15,6 +16,10 @@ import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';
 import { BADGE_COLORS, type SubmissionStatusType, UI_CLASSES } from '@/src/lib/ui-constants';
 import type { Tables } from '@/src/types/database.types';
+
+const DashboardResponseSchema = z.object({
+  submissions: z.array(z.custom<Tables<'submissions'>>()),
+});
 
 // Force dynamic rendering - requires authentication
 export const dynamic = 'force-dynamic';
@@ -36,10 +41,16 @@ export default async function SubmissionsPage() {
       logger.error('Failed to fetch user dashboard', error);
       hasError = true;
     } else {
-      const result = data as unknown as {
-        submissions: Array<Tables<'submissions'>>;
-      };
-      submissions = result.submissions || [];
+      try {
+        const validated = DashboardResponseSchema.parse(data);
+        submissions = validated.submissions;
+      } catch (validationError) {
+        logger.error(
+          'Invalid dashboard response',
+          validationError instanceof Error ? validationError : new Error(String(validationError))
+        );
+        hasError = true;
+      }
     }
   }
 

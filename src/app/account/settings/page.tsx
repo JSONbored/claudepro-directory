@@ -17,7 +17,7 @@ import {
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
-import type { Database, Tables } from '@/src/types/database.types';
+import type { Tables } from '@/src/types/database.types';
 
 // Force dynamic rendering - requires authentication
 export const dynamic = 'force-dynamic';
@@ -65,7 +65,7 @@ export default async function SettingsPage() {
       image: user.user_metadata?.avatar_url ?? user.user_metadata?.picture ?? null,
       profile_public: true,
       follow_email: true,
-    } as Database['public']['Tables']['users']['Insert']);
+    });
   }
 
   if (!profile) return null;

@@ -1000,7 +1000,22 @@ function GitHubStarsButton({
   const [stars, setStars] = useState<number | null>(null);
 
   useEffect(() => {
-    fetch('https://api.github.com/repos/JSONbored/claudepro-directory')
+    const apiUrl = (() => {
+      try {
+        const { pathname, hostname } = new URL(repoUrl);
+        if (hostname === 'github.com') {
+          const [, owner, repo] = pathname.split('/');
+          if (owner && repo) {
+            return `https://api.github.com/repos/${owner}/${repo}`;
+          }
+        }
+      } catch {
+        // Intentional noop – fall back to default repo
+      }
+      return 'https://api.github.com/repos/JSONbored/claudepro-directory';
+    })();
+
+    fetch(apiUrl)
       .then((res) => res.json())
       .then((data) => {
         const count =
@@ -1008,7 +1023,7 @@ function GitHubStarsButton({
         setStars(count);
       })
       .catch(() => setStars(null));
-  }, []);
+  }, [repoUrl]);
 
   const handleClick = () => {
     window.open(repoUrl, '_blank', 'noopener,noreferrer');

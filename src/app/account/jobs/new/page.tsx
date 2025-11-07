@@ -29,7 +29,11 @@ export default function NewJobPage() {
 
     if (error) throw new Error(error.message);
 
-    const result = rpcData as unknown as {
+    if (!rpcData || typeof rpcData !== 'object' || !('success' in rpcData)) {
+      throw new Error('Invalid response from manage_job RPC');
+    }
+
+    const result = rpcData as {
       success: boolean;
       job: { id: string; slug: string };
       requiresPayment: boolean;

@@ -9,7 +9,7 @@
  * Uses Intersection Observer for visibility detection.
  */
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { createClient } from '@/src/lib/supabase/client';
 
 interface SponsoredTrackerProps {
@@ -34,7 +34,7 @@ export function SponsoredTracker({
 }: SponsoredTrackerProps) {
   const elementRef = useRef<HTMLDivElement>(null);
   const impressionTracked = useRef(false);
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
 
   // Track impression when element becomes visible
   useEffect(() => {
