@@ -264,7 +264,11 @@ export function SubmitFormClient({ formConfig }: SubmitFormClientProps) {
                 submissionData.examples = safeParse(examplesJson, examplesArraySchema, {
                   strategy: ParseStrategy.VALIDATED_JSON,
                 });
-              } catch {
+              } catch (error) {
+                logger.warn('Failed to parse examples JSON, field will be omitted', {
+                  error: error instanceof Error ? error.message : String(error),
+                });
+                toasts.raw.warning('Examples field could not be parsed and will be omitted');
                 submissionData.examples = undefined;
               }
             }
@@ -272,6 +276,15 @@ export function SubmitFormClient({ formConfig }: SubmitFormClientProps) {
           }
 
           submissionData[key] = value || undefined;
+        }
+
+        // Validate required fields before casting
+        const requiredFields = ['name', 'description', 'category', 'author'] as const;
+        for (const field of requiredFields) {
+          if (!submissionData[field] || typeof submissionData[field] !== 'string') {
+            toasts.error.submissionFailed(`Missing or invalid required field: ${field}`);
+            return;
+          }
         }
 
         // Direct RPC call - database validates everything
@@ -291,14 +304,20 @@ export function SubmitFormClient({ formConfig }: SubmitFormClientProps) {
           rpcArgs.p_github_url = submissionData.github_url as string;
         }
         if (submissionData.tags) {
-          rpcArgs.p_tags = (submissionData.tags as string).split(',');
+          rpcArgs.p_tags = (submissionData.tags as string)
+            .split(',')
+            .map((tag) => tag.trim())
+            .filter((tag) => tag.length > 0);
         }
 
         const { data, error } = await supabase.rpc('submit_content_for_review', rpcArgs);
 
         if (error) {
           logger.error('Submission RPC failed', new Error(error.message));
-          toasts.error.submissionFailed(error.message);
+          // Show generic error to user, full error is logged
+          toasts.error.submissionFailed(
+            'Failed to submit content. Please try again or contact support.'
+          );
           return;
         }
 
@@ -307,17 +326,35 @@ export function SubmitFormClient({ formConfig }: SubmitFormClientProps) {
           return;
         }
 
-        const result = data as unknown as {
+        // Validate response structure
+        if (
+          !data ||
+          typeof data !== 'object' ||
+          !('success' in data) ||
+          typeof data.success !== 'boolean'
+        ) {
+          logger.error('Invalid RPC response structure', new Error(JSON.stringify(data)));
+          toasts.error.submissionFailed('Received invalid response from server');
+          return;
+        }
+
+        const result = data as {
           success: boolean;
-          submission_id: string;
-          status: string;
-          message: string;
+          submission_id?: string;
+          status?: string;
+          message?: string;
         };
 
         if (result.success) {
+          if (!(result.submission_id && result.status)) {
+            logger.warn('Success response missing expected fields', {
+              submission_id: result.submission_id || 'missing',
+              status: result.status || 'missing',
+            });
+          }
           setSubmissionResult({
-            submission_id: result.submission_id,
-            status: result.status,
+            submission_id: result.submission_id || 'unknown',
+            status: result.status || 'pending',
             message: result.message || 'Your submission has been received and is pending review!',
           });
 

@@ -67,13 +67,26 @@ export const revalidate = false;
 
 export default async function SubmitPage() {
   const supabase = await createClient();
-  const { data, error } = await supabase.rpc('get_submission_dashboard', {
-    p_recent_limit: 5,
-    p_contributors_limit: 5,
-  });
+
+  let data: unknown;
+  let error: unknown;
+
+  if (typeof supabase.rpc === 'function') {
+    ({ data, error } = await supabase.rpc('get_submission_dashboard', {
+      p_recent_limit: 5,
+      p_contributors_limit: 5,
+    }));
+  } else {
+    logger.warn(
+      'Supabase RPC unavailable (mock client fallback detected); using empty submission dashboard data.'
+    );
+  }
 
   if (error) {
-    logger.error('Failed to fetch submission dashboard', error);
+    logger.error(
+      'Failed to fetch submission dashboard',
+      error instanceof Error ? error : new Error(String(error))
+    );
   }
 
   const result = data as {

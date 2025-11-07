@@ -21,7 +21,7 @@ pre-commit:
   commands:
     # 1. Type checking for TypeScript files
     type-check:
-      glob: "*.{ts,tsx}"
+      glob: "**/*.{ts,tsx}"
       run: |
         echo "🔍 Type checking..."
         pnpm type-check
@@ -29,7 +29,7 @@ pre-commit:
 
     # 2. Format check (Biome)
     format-check:
-      glob: "*.{ts,tsx,js,jsx,json}"
+      glob: "**/*.{ts,tsx,js,jsx,json}"
       run: |
         echo "✨ Checking code formatting..."
         pnpm lint || (echo "❌ Run 'pnpm format' to auto-fix formatting issues" && exit 1)

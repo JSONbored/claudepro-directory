@@ -9,7 +9,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { ConfigCard } from '@/src/components/domain/config-card';
 import { UnifiedCardGrid } from '@/src/components/domain/unified-card-grid';
 import { trackEvent } from '@/src/lib/analytics/tracker';
-import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
+import type { Tables } from '@/src/types/database.types';
 
 // Type inlined from database RPC response structure
 type ForYouFeedResponse = {
@@ -58,6 +58,7 @@ export function ForYouFeedClient({ initialData }: ForYouFeedClientProps) {
   const transformedRecommendations = useMemo(
     () =>
       recommendations.map((rec) => ({
+        // Core fields from recommendation
         id: rec.slug,
         slug: rec.slug,
         title: rec.title,
@@ -73,10 +74,38 @@ export function ForYouFeedClient({ initialData }: ForYouFeedClientProps) {
         seo_title: null,
         content: null,
         popularity_score: rec.popularity ?? null,
-        // discovery_metadata removed (bandwidth optimization)
+        // Required database fields with defaults
+        avg_rating: null,
+        bookmark_count: 0,
+        copy_count: 0,
+        difficulty_score: null,
+        display_title: null,
+        documentation_url: null,
+        download_url: null,
+        examples: null,
+        features: null,
+        fts_vector: null,
+        git_hash: null,
+        has_breaking_changes: null,
+        has_prerequisites: null,
+        has_troubleshooting: null,
+        json_ld: null,
+        metadata: {},
+        og_type: null,
+        reading_time: null,
+        review_count: 0,
+        robots_follow: null,
+        robots_index: null,
+        source: null,
+        storage_url: null,
+        synced_at: null,
+        twitter_card: null,
+        use_cases: null,
+        view_count: 0,
+        // Custom recommendation metadata
         _recommendationSource: rec.source,
         _recommendationReason: rec.reason,
-      })) as unknown as ContentItem[],
+      })) as Tables<'content'>[],
     [recommendations]
   );
 

@@ -64,7 +64,9 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
       work: profile.work || '',
       website: profile.website || '',
       social_x_link: profile.social_x_link || '',
-      interests: Array.isArray(profile.interests) ? (profile.interests as string[]) : [],
+      interests: Array.isArray(profile.interests)
+        ? profile.interests.filter((item): item is string => typeof item === 'string')
+        : [],
       public: profile.profile_public ?? true,
       follow_email: profile.follow_email ?? true,
     },

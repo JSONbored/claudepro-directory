@@ -23,7 +23,7 @@ export const metadata: Metadata = {
 
 /**
  * ISR Configuration: Marketing pages update infrequently
- * revalidate: 86400 = Revalidate every 24 hours
+ * revalidate: false = Static generation (no ISR)
  */
 export const revalidate = false;
 

@@ -5,6 +5,7 @@
  * Database-first: displays data from get_user_identities() RPC
  */
 
+import type { ComponentType } from 'react';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { Button } from '@/src/components/primitives/button';
 import { CheckCircle, DiscordBrandIcon, GithubBrandIcon, GoogleBrandIcon } from '@/src/lib/icons';
@@ -24,7 +25,7 @@ const PROVIDER_CONFIG: Record<
   string,
   {
     label: string;
-    icon: React.ComponentType<{ className?: string }>;
+    icon: ComponentType<{ className?: string }>;
     linkUrl: string;
     unlinkable: boolean;
   }

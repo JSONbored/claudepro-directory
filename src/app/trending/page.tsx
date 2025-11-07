@@ -66,7 +66,7 @@ export default async function TrendingPage({ searchParams }: PagePropsWithSearch
     },
     [`trending-${period}-${metric}-${category || ''}-${page}-${limit}`],
     {
-      revalidate: 300, // 5 minutes (matches page ISR)
+      revalidate: false, // Matches page-level ISR (fully static)
       tags: ['trending', ...(category ? [`trending-${category}`] : [])],
     }
   )();

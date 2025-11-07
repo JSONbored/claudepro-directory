@@ -199,14 +199,12 @@ export async function UnifiedDetailPage({
       };
 
       try {
-        const [highlightedHookConfig, highlightedScript] = await Promise.all([
-          config.hookConfig
-            ? Promise.resolve(highlightCode(JSON.stringify(config.hookConfig, null, 2), 'json'))
-            : Promise.resolve(null),
-          config.scriptContent
-            ? Promise.resolve(highlightCode(config.scriptContent, 'bash'))
-            : Promise.resolve(null),
-        ]);
+        const highlightedHookConfig = config.hookConfig
+          ? highlightCode(JSON.stringify(config.hookConfig, null, 2), 'json')
+          : null;
+        const highlightedScript = config.scriptContent
+          ? highlightCode(config.scriptContent, 'bash')
+          : null;
 
         return {
           format: 'hook' as const,

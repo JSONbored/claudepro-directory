@@ -9,6 +9,7 @@ import { memo } from 'react';
 import { Card, CardContent } from '@/src/components/primitives/card';
 import type { Activity } from '@/src/lib/actions/user.actions';
 import { FileText, GitPullRequest, MessageSquare, ThumbsUp } from '@/src/lib/icons';
+import { logger } from '@/src/lib/logger';
 
 interface ActivityTimelineProps {
   activities: Activity[];
@@ -42,6 +43,13 @@ export const ActivityTimeline = memo(function ActivityTimeline({
     <div className="space-y-3">
       {displayActivities.map((activity) => {
         const config = ACTIVITY_CONFIG[activity.type];
+
+        // Guard against unknown activity types
+        if (!config) {
+          logger.warn('Unknown activity type', { type: activity.type });
+          return null;
+        }
+
         const Icon = config.icon;
 
         // Determine title based on activity type
@@ -54,6 +62,9 @@ export const ActivityTimeline = memo(function ActivityTimeline({
           title = activity.title;
         } else if (activity.type === 'vote') {
           title = `${activity.vote_type} vote`;
+        } else {
+          // Fallback for unknown types
+          title = 'Unknown activity';
         }
 
         return (

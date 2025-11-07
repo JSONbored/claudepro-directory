@@ -1,3 +1,4 @@
+import { z } from 'zod';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import {
   Card,
@@ -8,10 +9,10 @@ import {
 } from '@/src/components/primitives/card';
 import { ROUTES } from '@/src/lib/constants/routes';
 import { Bookmark, Calendar } from '@/src/lib/icons';
+import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
-import type { Tables } from '@/src/types/database.types';
 
 // Force dynamic rendering - requires authentication
 export const dynamic = 'force-dynamic';
@@ -31,20 +32,38 @@ export default async function AccountDashboard() {
     p_user_id: user.id,
   });
 
-  // Type assertion to database-generated Json type
-  type DashboardResponse = {
-    bookmark_count: number;
-    profile: Pick<Tables<'users'>, 'name' | 'tier' | 'created_at'>;
-  };
+  // Runtime validation schema for RPC response
+  const DashboardResponseSchema = z.object({
+    bookmark_count: z.number(),
+    profile: z.object({
+      name: z.string().nullable(),
+      tier: z.string().nullable(),
+      created_at: z.string(),
+    }),
+  });
 
-  const { bookmark_count, profile } = (dashboardData || {
-    bookmark_count: 0,
-    profile: {
-      name: null,
-      tier: null,
-      created_at: new Date().toISOString(),
-    },
-  }) as unknown as DashboardResponse;
+  type DashboardResponse = z.infer<typeof DashboardResponseSchema>;
+
+  // Validate and fallback on error
+  let validatedData: DashboardResponse;
+  try {
+    validatedData = DashboardResponseSchema.parse(dashboardData);
+  } catch (error) {
+    logger.error(
+      'Invalid dashboard response structure',
+      error instanceof Error ? error : new Error(String(error))
+    );
+    validatedData = {
+      bookmark_count: 0,
+      profile: {
+        name: null,
+        tier: null,
+        created_at: new Date().toISOString(),
+      },
+    };
+  }
+
+  const { bookmark_count, profile } = validatedData;
 
   const bookmarkCount = bookmark_count;
   const accountAge = profile?.created_at

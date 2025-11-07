@@ -20,9 +20,23 @@ export const dynamic = 'force-dynamic';
 export const metadata = generatePageMetadata('/account/connected-accounts');
 
 export default async function ConnectedAccountsPage() {
-  const { data: identitiesData } = await getUserIdentities();
+  const result = await getUserIdentities();
 
-  const identities = identitiesData?.identities || [];
+  if (!result.data) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="mb-2 font-bold text-3xl">Connected Accounts</h1>
+          <p className="text-muted-foreground">Manage your OAuth provider connections</p>
+        </div>
+        <div className="text-destructive">
+          Failed to load connected accounts. Please try again later.
+        </div>
+      </div>
+    );
+  }
+
+  const identities = result.data.identities || [];
 
   return (
     <div className="space-y-6">

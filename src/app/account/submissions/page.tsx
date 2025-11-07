@@ -28,17 +28,27 @@ export default async function SubmissionsPage() {
   } = await supabase.auth.getUser();
 
   let submissions: Array<Tables<'submissions'>> = [];
+  let hasError = false;
 
   if (user) {
     const { data, error } = await supabase.rpc('get_user_dashboard', { p_user_id: user.id });
     if (error) {
       logger.error('Failed to fetch user dashboard', error);
+      hasError = true;
     } else {
       const result = data as unknown as {
         submissions: Array<Tables<'submissions'>>;
       };
       submissions = result.submissions || [];
     }
+  }
+
+  if (hasError) {
+    return (
+      <div className="space-y-6">
+        <div className="text-destructive">Failed to load submissions. Please try again later.</div>
+      </div>
+    );
   }
 
   const getStatusBadge = (status: string) => {

@@ -627,6 +627,12 @@ const nextConfig = {
           '/:category(agents|commands|hooks|mcp|rules|skills|statuslines|collections|guides)/:slug.json',
         destination: `${supabaseUrl}/functions/v1/json-api/:category/:slug`,
       },
+      // Markdown Export routes - proxy to edge function for database-first architecture
+      {
+        source:
+          '/:category(agents|commands|hooks|mcp|rules|skills|statuslines|collections|guides)/:slug.md',
+        destination: `${supabaseUrl}/functions/v1/markdown-export/:category/:slug`,
+      },
     ];
   },
 };
