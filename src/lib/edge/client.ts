@@ -6,24 +6,6 @@
 import { logger } from '@/src/lib/logger';
 import { createClient } from '@/src/lib/supabase/client';
 
-// Type inlined from database RPC response structure
-type ForYouFeedResponse = {
-  recommendations: Array<{
-    slug: string;
-    title: string;
-    description: string;
-    category: string;
-    url: string;
-    score: number;
-    source: string;
-    reason?: string;
-  }>;
-  total_count: number;
-  sources_used: string[];
-  user_has_history: boolean;
-  generated_at: string;
-};
-
 const EDGE_BASE_URL = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1`;
 
 interface EdgeCallOptions {
@@ -107,65 +89,12 @@ export async function trackInteraction(params: {
   return callAnalyticsAction('trackInteraction', params);
 }
 
-export async function getForYouFeed(params: {
-  limit?: number;
-  offset?: number;
-  category?: string;
-  exclude_bookmarked?: boolean;
-}): Promise<ForYouFeedResponse> {
-  return callAnalyticsAction('getForYouFeed', params) as Promise<ForYouFeedResponse>;
-}
-
 export async function getSimilarConfigs(params: {
   content_type: string;
   content_slug: string;
   limit?: number;
 }) {
   return callAnalyticsAction('getSimilarConfigs', params);
-}
-
-export async function getUsageRecommendations(params: {
-  trigger: 'after_bookmark' | 'after_copy' | 'extended_time' | 'category_browse';
-  content_type?: string;
-  content_slug?: string;
-  category?: string;
-  time_spent?: number;
-}) {
-  return callAnalyticsAction('getUsageRecommendations', params);
-}
-
-export async function getUserAffinities(params: { limit?: number; min_score?: number }) {
-  return callAnalyticsAction('getUserAffinities', params);
-}
-
-export async function calculateUserAffinities() {
-  return callAnalyticsAction('calculateUserAffinities');
-}
-
-export async function getContentAffinity(content_type: string, content_slug: string) {
-  const result = (await callAnalyticsAction('getContentAffinity', {
-    content_type,
-    content_slug,
-  })) as { affinity: number };
-  return result.affinity;
-}
-
-export async function getUserFavoriteCategories() {
-  const result = (await callAnalyticsAction('getUserFavoriteCategories')) as {
-    categories: unknown[];
-  };
-  return result.categories;
-}
-
-export async function getUserRecentInteractions(limit = 20) {
-  const result = (await callAnalyticsAction('getUserRecentInteractions', { limit })) as {
-    interactions: unknown[];
-  };
-  return result.interactions;
-}
-
-export async function getUserInteractionSummary() {
-  return callAnalyticsAction('getUserInteractionSummary');
 }
 
 // Config recommendations response (analytics Edge function wrapper)

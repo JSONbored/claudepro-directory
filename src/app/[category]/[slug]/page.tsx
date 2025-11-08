@@ -7,8 +7,7 @@ import { notFound } from 'next/navigation';
 import { ReadProgress } from '@/src/components/content/read-progress';
 import { UnifiedDetailPage } from '@/src/components/content/unified-detail-page';
 import { CollectionDetailView } from '@/src/components/content/unified-detail-page/collection-detail-view';
-import { BreadcrumbSchema } from '@/src/components/infra/structured-data/breadcrumb-schema';
-import { UnifiedStructuredData } from '@/src/components/infra/structured-data/unified-structured-data';
+import { StructuredData } from '@/src/components/infra/structured-data';
 import { UnifiedTracker } from '@/src/components/infra/unified-tracker';
 import {
   type CategoryId,
@@ -16,7 +15,6 @@ import {
   isValidCategory,
   VALID_CATEGORIES,
 } from '@/src/lib/config/category-config';
-import { APP_CONFIG } from '@/src/lib/constants';
 import { type ContentItem, getContentByCategory } from '@/src/lib/content/supabase-content-loader';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
@@ -195,10 +193,6 @@ export default async function DetailPage({
   // No transformation needed - displayTitle computed at build time
   // This eliminates runtime overhead and follows DRY principles
 
-  // Type-safe breadcrumb name with discriminated union
-  const breadcrumbName =
-    fullItem && 'display_title' in fullItem ? fullItem.display_title : fullItem.title;
-
   // Conditional rendering: Collections use specialized CollectionDetailView
   // TypeScript narrows fullItem type based on category check
   if (category === 'collections' && fullItem && fullItem.category === 'collections') {
@@ -209,19 +203,7 @@ export default async function DetailPage({
 
         <UnifiedTracker variant="view" category={category} slug={slug} />
         <UnifiedTracker variant="page-view" category={category} slug={slug} />
-        <UnifiedStructuredData item={fullItem} />
-        <BreadcrumbSchema
-          items={[
-            {
-              name: config.title || category,
-              url: `${APP_CONFIG.url}/${category}`,
-            },
-            {
-              name: breadcrumbName || slug,
-              url: `${APP_CONFIG.url}/${category}/${slug}`,
-            },
-          ]}
-        />
+        <StructuredData route={`/${category}/${slug}`} />
         <CollectionDetailView
           collection={
             fullItem as Database['public']['Tables']['content']['Row'] & { category: 'collections' }
@@ -239,19 +221,7 @@ export default async function DetailPage({
 
       <UnifiedTracker variant="view" category={category} slug={slug} />
       <UnifiedTracker variant="page-view" category={category} slug={slug} />
-      <UnifiedStructuredData item={fullItem || itemData} />
-      <BreadcrumbSchema
-        items={[
-          {
-            name: config.title || category,
-            url: `${APP_CONFIG.url}/${category}`,
-          },
-          {
-            name: breadcrumbName || slug,
-            url: `${APP_CONFIG.url}/${category}/${slug}`,
-          },
-        ]}
-      />
+      <StructuredData route={`/${category}/${slug}`} />
       <UnifiedDetailPage
         item={fullItem || itemData}
         relatedItems={relatedItems}

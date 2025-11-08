@@ -1,11 +1,15 @@
 # Dependencies
 node_modules
+supabase/functions/node_modules
 
 # Build outputs
 dist
 dist-ssr
 .next
 out
+
+# Next.js TypeScript (auto-generated)
+next-env.d.ts
 
 # Logs
 logs

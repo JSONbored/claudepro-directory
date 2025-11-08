@@ -2,6 +2,33 @@
 # This file persists JWT verification settings across redeployments
 
 # =============================================================================
+# Unified Webhook Architecture (Database-First)
+# =============================================================================
+# All webhooks flow through a unified architecture:
+#
+# INBOUND WEBHOOKS (External → Us):
+#   1. External service (Resend/Vercel) → webhook-router edge function
+#   2. webhook-router verifies signature (HMAC SHA-256/SHA-1)
+#   3. webhook-router inserts to webhook_events table (direction='inbound')
+#   4. PostgreSQL trigger routes to appropriate handler based on source enum
+#   5. Business logic edge functions process the event
+#
+# OUTBOUND WEBHOOKS (Us → External):
+#   1. Database trigger or edge function calls sendDiscordWebhook() utility
+#   2. Utility logs to webhook_events table (direction='outbound')
+#   3. Utility sends to Discord with exponential backoff retry
+#   4. Success/failure logged back to webhook_events
+#
+# BENEFITS:
+#   - Single source of truth for ALL webhook activity (webhook_events table)
+#   - Centralized signature verification (webhook-router)
+#   - Shared utilities (Discord webhooks, CORS, validation, response patterns)
+#   - Complete audit trail (both directions tracked)
+#   - 217 LOC reduction (-12%) with 548 lines of duplicated code eliminated
+#
+# =============================================================================
+
+# =============================================================================
 # Public API Functions - No JWT Verification
 # =============================================================================
 
@@ -29,15 +56,18 @@ verify_jwt = false  # Public JSON API endpoint with JSON-LD structured data
 [functions.markdown-export]
 verify_jwt = false  # Public markdown export endpoint for all categories
 
-[functions.metadata-api]
-verify_jwt = false  # Public metadata generation endpoint (24hr cache, replaces 19k PostgREST requests/day)
+[functions.seo-api]
+verify_jwt = false  # Public SEO endpoint: metadata + pre-generated schemas (24hr cache)
+
+[functions.readme-generator]
+verify_jwt = false  # Public on-demand README generator (database-first, 15ms RPC)
 
 # =============================================================================
 # Webhook Functions - No JWT Verification (Use Signature Verification)
 # =============================================================================
 
-[functions.resend-webhook]
-verify_jwt = false  # Uses Svix signature verification
+[functions.webhook-router]
+verify_jwt = false  # Unified webhook router with HMAC SHA-1/SHA-256/Svix verification (replaces resend-webhook)
 
 [functions.email-handler]
 verify_jwt = false  # Uses Svix signature verification for auth hooks

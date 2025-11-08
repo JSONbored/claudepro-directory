@@ -6,10 +6,9 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
-import { BreadcrumbSchema } from '@/src/components/infra/structured-data/breadcrumb-schema';
+import { StructuredData } from '@/src/components/infra/structured-data';
 import { Button } from '@/src/components/primitives/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/card';
-import { APP_CONFIG } from '@/src/lib/constants';
 import { ROUTES } from '@/src/lib/constants/routes';
 import { getJobBySlug } from '@/src/lib/data/jobs';
 import {
@@ -85,18 +84,7 @@ export default async function JobPage({ params }: PageProps) {
 
   return (
     <>
-      <BreadcrumbSchema
-        items={[
-          {
-            name: 'Jobs',
-            url: `${APP_CONFIG.url}/jobs`,
-          },
-          {
-            name: job.title,
-            url: `${APP_CONFIG.url}/jobs/${job.slug}`,
-          },
-        ]}
-      />
+      <StructuredData route={`/jobs/${slug}`} />
 
       <div className={'min-h-screen bg-background'}>
         <div className={'border-border/50 border-b bg-card/30'}>

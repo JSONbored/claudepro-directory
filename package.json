@@ -34,7 +34,7 @@
     "generate:categories:exec": "tsx scripts/build/generate-category-config.ts",
     "generate:service-worker": "turbo run generate:service-worker:exec",
     "generate:service-worker:exec": "tsx scripts/build/generate-service-worker.ts",
-    "generate:readme": "tsx scripts/build/generate-readme.ts",
+    "generate:readme": "tsx scripts/utils/generate-readme.ts",
     "sync:db": "tsx scripts/build/sync-database-schema.ts --skip-dump",
     "sync:db:full": "tsx scripts/build/sync-database-schema.ts",
     "sync:db:types": "tsx scripts/build/sync-database-schema.ts --only-types",
@@ -47,6 +47,7 @@
     "indexnow:submit": "tsx scripts/utilities/submit-indexnow.ts",
     "start": "next start",
     "type-check": "tsc --noEmit",
+    "type-check:edge": "cd supabase/functions && deno check '**/*.ts'",
     "lint": "ultracite check",
     "format": "ultracite fix",
     "email:dev": "email dev --dir src/emails --port 3001",
@@ -58,6 +59,7 @@
     "analyze:all": "npm run analyze:unused && npm run analyze:circular"
   },
   "dependencies": {
+    "@calcom/embed-react": "^1.5.3",
     "@hookform/resolvers": "^5.2.2",
     "@radix-ui/react-avatar": "^1.1.11",
     "@radix-ui/react-checkbox": "^1.3.3",
@@ -104,7 +106,7 @@
     "react-error-boundary": "^6.0.0",
     "react-hook-form": "^7.66.0",
     "react-share": "^5.2.2",
-    "resend": "^6.4.1",
+    "resend": "^6.4.2",
     "sonner": "^2.0.7",
     "sugar-high": "^0.9.4",
     "tailwind-merge": "^3.3.1",
@@ -116,7 +118,7 @@
     "zustand": "^5.0.8"
   },
   "devDependencies": {
-    "@aws-sdk/client-s3": "^3.926.0",
+    "@aws-sdk/client-s3": "^3.927.0",
     "@biomejs/biome": "2.2.7",
     "@next/bundle-analyzer": "^16.0.1",
     "@types/archiver": "^7.0.0",

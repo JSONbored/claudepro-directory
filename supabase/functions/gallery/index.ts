@@ -1,39 +1,22 @@
 /**
- * Gallery Edge Function - Infinite scroll pagination
- * Migrated from /api/gallery for 35-50% server load reduction
+ * Gallery - Infinite scroll pagination for trending content
  */
 
-import { createClient } from 'jsr:@supabase/supabase-js@2';
-import type { Database } from '../_shared/database.types.ts';
+import { getOnlyCorsHeaders } from '../_shared/utils/cors.ts';
 import {
-  publicCorsHeaders,
+  errorResponse,
+  jsonResponse,
   methodNotAllowedResponse,
 } from '../_shared/utils/response.ts';
-
-const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
-const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY');
-
-if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-  throw new Error('Missing required environment variables: SUPABASE_URL and/or SUPABASE_ANON_KEY');
-}
-
-// Singleton Supabase client - reused across all requests for optimal performance
-const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-// Public CORS headers for GET (allow all origins)
-const getCorsHeaders = {
-  ...publicCorsHeaders,
-  'Access-Control-Allow-Methods': 'GET, OPTIONS',
-};
+import { supabaseAnon } from '../_shared/utils/supabase.ts';
 
 Deno.serve(async (req) => {
-  // CORS preflight
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: getCorsHeaders });
+    return new Response(null, { headers: getOnlyCorsHeaders });
   }
 
   if (req.method !== 'GET') {
-    return methodNotAllowedResponse('GET', getCorsHeaders);
+    return methodNotAllowedResponse('GET', getOnlyCorsHeaders);
   }
 
   try {
@@ -42,31 +25,35 @@ Deno.serve(async (req) => {
     const page = Number.parseInt(url.searchParams.get('page') || '1', 10);
     const limit = Number.parseInt(url.searchParams.get('limit') || '20', 10);
 
-    // Validate pagination parameters
     if (Number.isNaN(page) || page < 1) {
-      return new Response(
-        JSON.stringify({ error: 'Invalid page parameter', message: 'Page must be a positive integer' }),
-        { status: 400, headers: { 'Content-Type': 'application/json', ...getCorsHeaders } }
+      return jsonResponse(
+        { error: 'Invalid page parameter', message: 'Page must be a positive integer' },
+        400,
+        getOnlyCorsHeaders
       );
     }
 
     if (Number.isNaN(limit) || limit < 1 || limit > 100) {
-      return new Response(
-        JSON.stringify({ error: 'Invalid limit parameter', message: 'Limit must be between 1 and 100' }),
-        { status: 400, headers: { 'Content-Type': 'application/json', ...getCorsHeaders } }
+      return jsonResponse(
+        { error: 'Invalid limit parameter', message: 'Limit must be between 1 and 100' },
+        400,
+        getOnlyCorsHeaders
       );
     }
 
     const offset = (page - 1) * limit;
 
-    const { data, error } = await supabase.rpc('get_gallery_trending', {
+    const { data, error } = await supabaseAnon.rpc('get_gallery_trending', {
       ...(category && { p_category: category }),
       p_limit: limit,
       p_offset: offset,
       p_days_back: 90,
     });
 
-    if (error) throw error;
+    if (error) {
+      console.error('Gallery RPC error:', error);
+      return errorResponse(error, 'get_gallery_trending', getOnlyCorsHeaders);
+    }
 
     return new Response(
       JSON.stringify({
@@ -81,21 +68,12 @@ Deno.serve(async (req) => {
           'Content-Type': 'application/json',
           'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
           'CDN-Cache-Control': 'max-age=300',
-          ...getCorsHeaders,
+          ...getOnlyCorsHeaders,
         },
       }
     );
   } catch (error) {
     console.error('Gallery edge function error:', error);
-    return new Response(
-      JSON.stringify({
-        error: 'Internal Server Error',
-        message: error instanceof Error ? error.message : 'Unknown error',
-      }),
-      {
-        status: 500,
-        headers: { 'Content-Type': 'application/json', ...getCorsHeaders },
-      }
-    );
+    return errorResponse(error as Error, 'gallery', getOnlyCorsHeaders);
   }
 });

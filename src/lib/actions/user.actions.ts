@@ -82,8 +82,11 @@ import { createClient } from '@/src/lib/supabase/server';
 // Manual Zod schemas (database validates, Zod just provides type safety)
 const bookmarkSchema = z.object({
   content_type: z.string(),
-  content_slug: z.string(),
-  notes: z.string().optional().nullable(),
+  content_slug: z
+    .string()
+    .max(200)
+    .regex(/^[a-zA-Z0-9\-_/]+$/),
+  notes: z.string().max(500).optional().nullable(),
 });
 
 export const updateProfile = authedAction
@@ -197,7 +200,6 @@ export const addBookmark = authedAction
 
       revalidatePath('/account');
       revalidatePath('/account/library');
-      revalidatePath('/for-you');
 
       return data as { success: boolean; bookmark: unknown };
     } catch (error) {
@@ -239,7 +241,6 @@ export const removeBookmark = authedAction
       revalidatePath('/account');
       revalidatePath('/account/library');
       revalidateTag(`user-${userId}`, 'max');
-      revalidatePath('/for-you');
 
       return data as { success: boolean };
     } catch (error) {
@@ -312,7 +313,6 @@ export const addBookmarkBatch = authedAction
       revalidatePath('/account');
       revalidatePath('/account/library');
       revalidateTag(`user-${userId}`, 'max');
-      revalidatePath('/for-you');
 
       return result;
     } catch (error) {

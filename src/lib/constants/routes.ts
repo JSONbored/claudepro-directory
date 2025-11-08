@@ -4,15 +4,11 @@
 
 export const ROUTES = {
   HOME: '/',
-  BOARD: '/board',
-  BOARD_NEW: '/board/new',
   COMMUNITY: '/community',
   COMPANIES: '/companies',
   LLMS_TXT: '/llms.txt',
   LOGIN: '/login',
   PARTNER: '/partner',
-  PH_BUNDLE: '/ph-bundle',
-  PH_WAITLIST: '/ph-waitlist',
   SUBMIT: '/submit',
   AGENTS: '/agents',
   CHANGELOG: '/changelog',

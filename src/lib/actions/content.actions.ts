@@ -14,40 +14,67 @@ import type { Tables } from '@/src/types/database.types';
 
 // Manual Zod schemas (database validates, Zod just provides type safety)
 const collectionSchema = z.object({
-  name: z.string(),
-  slug: z.string(),
-  description: z.string().optional().nullable(),
+  name: z.string().min(2).max(100),
+  slug: z
+    .string()
+    .min(2)
+    .max(100)
+    .regex(/^[a-z0-9-]+$/),
+  description: z.string().max(500).optional().nullable(),
   is_public: z.boolean().default(false),
 });
 
 const collectionItemSchema = z.object({
   collection_id: z.string(),
   content_type: z.string(),
-  content_slug: z.string(),
-  notes: z.string().optional().nullable(),
-  order: z.number().int().optional(),
+  content_slug: z
+    .string()
+    .max(200)
+    .regex(/^[a-zA-Z0-9\-_/]+$/),
+  notes: z.string().max(500).optional().nullable(),
+  order: z.number().int().min(0).optional(),
 });
 
 const reviewSchema = z.object({
-  content_type: z.string(),
-  content_slug: z.string(),
+  content_type: z.enum([
+    'agents',
+    'mcp',
+    'rules',
+    'commands',
+    'hooks',
+    'statuslines',
+    'collections',
+    'guides',
+    'skills',
+    'jobs',
+    'changelog',
+  ]),
+  content_slug: z
+    .string()
+    .max(200)
+    .regex(/^[a-zA-Z0-9\-_/]+$/),
   rating: z.number().int().min(1).max(5),
-  review_text: z.string().optional().nullable(),
+  review_text: z.string().max(2000).optional().nullable(),
 });
 
-const postSchema = z
-  .object({
-    title: z.string().min(1),
-    content: z.string().optional().nullable(),
-    url: z.string().optional().nullable(),
-  })
-  .refine((data) => data.content || data.url, {
-    message: 'Post must have either content or a URL',
-  });
-
 const getReviewsSchema = z.object({
-  content_type: z.string(),
-  content_slug: z.string(),
+  content_type: z.enum([
+    'agents',
+    'mcp',
+    'rules',
+    'commands',
+    'hooks',
+    'statuslines',
+    'collections',
+    'guides',
+    'skills',
+    'jobs',
+    'changelog',
+  ]),
+  content_slug: z
+    .string()
+    .max(200)
+    .regex(/^[a-zA-Z0-9\-_/]+$/),
   sort_by: z.enum(['recent', 'helpful', 'rating_high', 'rating_low']).default('recent'),
   limit: z.number().int().min(1).max(100).default(20),
   offset: z.number().int().min(0).default(0),
@@ -58,7 +85,7 @@ const reorderItemsSchema = z.object({
   items: z.array(
     z.object({
       id: z.string(),
-      order: z.number().int(),
+      order: z.number().int().min(0),
     })
   ),
 });
@@ -66,7 +93,7 @@ const reorderItemsSchema = z.object({
 const reviewUpdateSchema = z.object({
   review_id: z.string(),
   rating: z.number().int().min(1).max(5).optional(),
-  review_text: z.string().optional().nullable(),
+  review_text: z.string().max(2000).optional().nullable(),
 });
 
 const helpfulVoteSchema = z.object({
@@ -76,13 +103,6 @@ const helpfulVoteSchema = z.object({
 
 const reviewDeleteSchema = z.object({
   review_id: z.string(),
-});
-
-const updatePostSchema = z.object({
-  id: z.string(),
-  title: z.string().min(1).optional(),
-  content: z.string().optional().nullable(),
-  url: z.string().optional().nullable(),
 });
 
 // =====================================================
@@ -489,166 +509,6 @@ export const getReviewsWithStats = rateLimitedAction
 
 // DELETED: getReviews() - Use getReviewsWithStats() instead (optimized single RPC)
 // DELETED: getAggregateRating() - Use getReviewsWithStats() instead (optimized single RPC)
-
-// ============================================
-// POST ACTIONS
-// ============================================
-
-/**
- * Create a new post
- */
-export const createPost = authedAction
-  .metadata({ actionName: 'createPost', category: 'form' })
-  .schema(postSchema)
-  .action(async ({ parsedInput, ctx }) => {
-    try {
-      const supabase = await createClient();
-      const { data, error } = await supabase.rpc('manage_post', {
-        p_action: 'create',
-        p_user_id: ctx.userId,
-        p_data: parsedInput,
-      });
-
-      if (error) throw new Error(error.message);
-
-      revalidatePath('/board');
-      return data as unknown as { success: boolean; post: Tables<'posts'> };
-    } catch (error) {
-      logger.error(
-        'Failed to create post',
-        error instanceof Error ? error : new Error(String(error)),
-        {
-          userId: ctx.userId,
-          title: parsedInput.title,
-        }
-      );
-      throw error;
-    }
-  });
-
-/**
- * Update a post (own posts only)
- */
-export const updatePost = authedAction
-  .metadata({ actionName: 'updatePost', category: 'form' })
-  .schema(updatePostSchema)
-  .action(async ({ parsedInput, ctx }) => {
-    try {
-      const supabase = await createClient();
-      const { data, error } = await supabase.rpc('manage_post', {
-        p_action: 'update',
-        p_user_id: ctx.userId,
-        p_data: parsedInput,
-      });
-
-      if (error) throw new Error(error.message);
-
-      revalidatePath('/board');
-      return data as unknown as { success: boolean; post: Tables<'posts'> };
-    } catch (error) {
-      logger.error(
-        'Failed to update post',
-        error instanceof Error ? error : new Error(String(error)),
-        {
-          userId: ctx.userId,
-          postId: parsedInput.id,
-        }
-      );
-      throw error;
-    }
-  });
-
-/**
- * Delete a post (own posts only)
- */
-export const deletePost = authedAction
-  .metadata({ actionName: 'deletePost', category: 'form' })
-  .schema(z.object({ id: z.string() }))
-  .action(async ({ parsedInput, ctx }) => {
-    try {
-      const supabase = await createClient();
-      const { data, error } = await supabase.rpc('manage_post', {
-        p_action: 'delete',
-        p_user_id: ctx.userId,
-        p_data: parsedInput,
-      });
-
-      if (error) throw new Error(error.message);
-
-      revalidatePath('/board');
-      return data as { success: boolean };
-    } catch (error) {
-      logger.error(
-        'Failed to delete post',
-        error instanceof Error ? error : new Error(String(error)),
-        {
-          userId: ctx.userId,
-          postId: parsedInput.id,
-        }
-      );
-      throw error;
-    }
-  });
-
-export const votePost = authedAction
-  .metadata({ actionName: 'votePost', category: 'user' })
-  .schema(z.object({ post_id: z.string(), action: z.enum(['vote', 'unvote']) }))
-  .action(async ({ parsedInput, ctx }) => {
-    const supabase = await createClient();
-    const { data, error } = await supabase.rpc('toggle_post_vote', {
-      p_post_id: parsedInput.post_id,
-      p_user_id: ctx.userId,
-      p_action: parsedInput.action,
-    });
-    if (error) throw new Error(error.message);
-    revalidatePath('/board');
-    return data as { success: boolean; action: string };
-  });
-
-/**
- * Create a comment on a post
- */
-export const createComment = authedAction
-  .metadata({ actionName: 'createComment', category: 'form' })
-  .schema(
-    z.object({
-      post_id: z.string(),
-      content: z.string().min(1).max(2000),
-    })
-  )
-  .action(async ({ parsedInput, ctx }) => {
-    const supabase = await createClient();
-    const { data, error } = await supabase.rpc('manage_comment', {
-      p_action: 'create',
-      p_user_id: ctx.userId,
-      p_data: parsedInput,
-    });
-
-    if (error) throw new Error(error.message);
-
-    revalidatePath('/board');
-    return data as unknown as { success: boolean; comment: Tables<'comments'> };
-  });
-
-/**
- * Delete a comment (own comments only)
- */
-export const deleteComment = authedAction
-  .metadata({ actionName: 'deleteComment', category: 'form' })
-  .schema(z.object({ id: z.string() }))
-  .action(async ({ parsedInput, ctx }) => {
-    const supabase = await createClient();
-    const { data, error } = await supabase.rpc('manage_comment', {
-      p_action: 'delete',
-      p_user_id: ctx.userId,
-      p_data: parsedInput,
-    });
-
-    if (error) throw new Error(error.message);
-
-    revalidatePath('/board');
-    return data as { success: boolean };
-  });
 
 // ============================================
 // USAGE TRACKING ACTIONS

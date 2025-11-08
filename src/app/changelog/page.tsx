@@ -26,7 +26,7 @@ import type { Metadata } from 'next';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { ChangelogListClient } from '@/src/components/features/changelog/changelog-list-client';
-import { ChangelogBlogStructuredData } from '@/src/components/infra/structured-data/changelog-structured-data';
+import { StructuredData } from '@/src/components/infra/structured-data';
 
 const UnifiedNewsletterCapture = dynamic(
   () =>
@@ -116,8 +116,7 @@ export default async function ChangelogPage() {
 
     return (
       <>
-        {/* Structured Data - Blog Schema */}
-        <ChangelogBlogStructuredData entries={entries} />
+        <StructuredData route="/changelog" />
 
         <div className="container max-w-6xl space-y-8 py-8">
           {/* Header */}

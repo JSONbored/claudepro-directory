@@ -27,13 +27,11 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ReadProgress } from '@/src/components/content/read-progress';
 import { ChangelogContent } from '@/src/components/features/changelog/changelog-content';
-import { BreadcrumbSchema } from '@/src/components/infra/structured-data/breadcrumb-schema';
-import { ChangelogArticleStructuredData } from '@/src/components/infra/structured-data/changelog-structured-data';
+import { StructuredData } from '@/src/components/infra/structured-data';
 import { UnifiedTracker } from '@/src/components/infra/unified-tracker';
 import { Separator } from '@/src/components/primitives/separator';
 import { getAllChangelogEntries, getChangelogEntryBySlug } from '@/src/lib/changelog/loader';
 import { formatChangelogDate, getChangelogUrl } from '@/src/lib/changelog/utils';
-import { APP_CONFIG } from '@/src/lib/constants';
 import { ROUTES } from '@/src/lib/constants/routes';
 import { ArrowLeft, Calendar } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
@@ -106,22 +104,8 @@ export default async function ChangelogEntryPage({
         {/* View Tracker - Track page views */}
         <UnifiedTracker variant="view" category="changelog" slug={entry.slug} />
 
-        {/* Structured Data - TechArticle Schema */}
-        <ChangelogArticleStructuredData entry={entry} />
-
-        {/* Breadcrumb Schema - SEO optimization */}
-        <BreadcrumbSchema
-          items={[
-            {
-              name: 'Changelog',
-              url: `${APP_CONFIG.url}/changelog`,
-            },
-            {
-              name: entry.title,
-              url: `${APP_CONFIG.url}/changelog/${entry.slug}`,
-            },
-          ]}
-        />
+        {/* Structured Data - Pre-generated schemas from database */}
+        <StructuredData route={`/changelog/${entry.slug}`} />
 
         <article className="container max-w-4xl space-y-8 py-8">
           {/* Navigation */}

@@ -1,153 +1,98 @@
 /**
- * Unified Feeds Edge Function - Database-First Architecture
- * Generates RSS 2.0 and Atom 1.0 feeds for changelog and all content categories.
- *
- * Supported Routes:
- * - /changelog/rss.xml → changelog RSS feed
- * - /changelog/atom.xml → changelog Atom feed
- * - /rss.xml → site-wide content RSS feed
- * - /atom.xml → site-wide content Atom feed
- * - /{category}/rss.xml → category-specific RSS feed (mcp, agents, rules, etc.)
- * - /{category}/atom.xml → category-specific Atom feed
- *
- * Performance:
- * - <5ms PostgreSQL XML generation
- * - ~50KB response size per feed
- * - Singleton Supabase client for optimal connection reuse
- * - Direct TEXT return (zero JSONB parsing overhead)
- *
- * Environment Variables:
- *   SUPABASE_URL             - Supabase project URL
- *   SUPABASE_ANON_KEY        - Anonymous key for RPC calls
+ * Unified Feeds - RSS/Atom feeds for changelog and content categories
  */
 
-import { createClient } from 'jsr:@supabase/supabase-js@2';
+import { VALID_CONTENT_CATEGORIES } from '../_shared/constants/categories.ts';
+import { getOnlyCorsHeaders } from '../_shared/utils/cors.ts';
 import {
+  badRequestResponse,
   errorResponse,
   methodNotAllowedResponse,
-  badRequestResponse,
 } from '../_shared/utils/response.ts';
-
-const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
-const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY');
-
-if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-  throw new Error('Missing required environment variables: SUPABASE_URL and/or SUPABASE_ANON_KEY');
-}
-
-// Singleton Supabase client - reused across all requests for optimal performance
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-const getCorsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
-};
-
-// Valid content categories matching database category_configs
-const VALID_CATEGORIES = [
-  'agents',
-  'commands',
-  'hooks',
-  'mcp',
-  'rules',
-  'skills',
-  'statuslines',
-  'collections',
-  'guides',
-];
+import { supabaseAnon } from '../_shared/utils/supabase.ts';
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, {
       status: 200,
-      headers: getCorsHeaders,
+      headers: getOnlyCorsHeaders,
     });
   }
 
   if (req.method !== 'GET') {
-    return methodNotAllowedResponse('GET', getCorsHeaders);
+    return methodNotAllowedResponse('GET', getOnlyCorsHeaders);
   }
 
   try {
     const url = new URL(req.url);
-    const type = url.searchParams.get('type'); // 'rss' or 'atom'
-    const category = url.searchParams.get('category'); // null = site-wide, 'changelog', or content category
+    const type = url.searchParams.get('type');
+    const category = url.searchParams.get('category');
 
-    // Validate type parameter
-    if (!type || !['rss', 'atom'].includes(type)) {
+    if (!(type && ['rss', 'atom'].includes(type))) {
       return badRequestResponse(
         'Missing or invalid type parameter. Valid types: rss, atom',
-        getCorsHeaders
+        getOnlyCorsHeaders
       );
     }
 
-    // Validate category parameter if provided
-    if (category && category !== 'changelog' && !VALID_CATEGORIES.includes(category)) {
+    if (category && category !== 'changelog' && !VALID_CONTENT_CATEGORIES.includes(category)) {
       return badRequestResponse(
-        `Invalid category parameter. Valid categories: changelog, ${VALID_CATEGORIES.join(', ')}, or omit for site-wide feed`,
-        getCorsHeaders
+        `Invalid category parameter. Valid categories: changelog, ${VALID_CONTENT_CATEGORIES.join(', ')}, or omit for site-wide feed`,
+        getOnlyCorsHeaders
       );
     }
 
     let xmlContent: string | null = null;
-    let contentType: string;
-    let feedType: string;
     let contentSource: string;
 
-    // Route to appropriate RPC function based on category and type
     if (category === 'changelog') {
-      // Changelog feeds
       if (type === 'rss') {
-        const { data, error } = await supabase.rpc('generate_changelog_rss_feed', {
+        const { data, error } = await supabaseAnon.rpc('generate_changelog_rss_feed', {
           p_limit: 50,
         });
         if (error) {
           console.error('RPC error (changelog rss):', error);
-          return errorResponse(error, 'generate_changelog_rss_feed', getCorsHeaders);
+          return errorResponse(error, 'generate_changelog_rss_feed', getOnlyCorsHeaders);
         }
         xmlContent = data;
         contentSource = 'PostgreSQL changelog_entries';
       } else {
-        const { data, error } = await supabase.rpc('generate_changelog_atom_feed', {
+        const { data, error } = await supabaseAnon.rpc('generate_changelog_atom_feed', {
           p_limit: 50,
         });
         if (error) {
           console.error('RPC error (changelog atom):', error);
-          return errorResponse(error, 'generate_changelog_atom_feed', getCorsHeaders);
+          return errorResponse(error, 'generate_changelog_atom_feed', getOnlyCorsHeaders);
         }
         xmlContent = data;
         contentSource = 'PostgreSQL changelog_entries';
       }
-    } else {
-      // Content feeds (site-wide or category-specific)
-      if (type === 'rss') {
-        const { data, error } = await supabase.rpc('generate_content_rss_feed', {
-          p_category: category || null, // null = site-wide
-          p_limit: 50,
-        });
-        if (error) {
-          console.error('RPC error (content rss):', error);
-          return errorResponse(error, 'generate_content_rss_feed', getCorsHeaders);
-        }
-        xmlContent = data;
-        contentSource = category
-          ? `PostgreSQL content (${category})`
-          : 'PostgreSQL content (all categories)';
-      } else {
-        const { data, error } = await supabase.rpc('generate_content_atom_feed', {
-          p_category: category || null, // null = site-wide
-          p_limit: 50,
-        });
-        if (error) {
-          console.error('RPC error (content atom):', error);
-          return errorResponse(error, 'generate_content_atom_feed', getCorsHeaders);
-        }
-        xmlContent = data;
-        contentSource = category
-          ? `PostgreSQL content (${category})`
-          : 'PostgreSQL content (all categories)';
+    } else if (type === 'rss') {
+      const { data, error } = await supabaseAnon.rpc('generate_content_rss_feed', {
+        p_category: category || null,
+        p_limit: 50,
+      });
+      if (error) {
+        console.error('RPC error (content rss):', error);
+        return errorResponse(error, 'generate_content_rss_feed', getOnlyCorsHeaders);
       }
+      xmlContent = data;
+      contentSource = category
+        ? `PostgreSQL content (${category})`
+        : 'PostgreSQL content (all categories)';
+    } else {
+      const { data, error } = await supabaseAnon.rpc('generate_content_atom_feed', {
+        p_category: category || null,
+        p_limit: 50,
+      });
+      if (error) {
+        console.error('RPC error (content atom):', error);
+        return errorResponse(error, 'generate_content_atom_feed', getOnlyCorsHeaders);
+      }
+      xmlContent = data;
+      contentSource = category
+        ? `PostgreSQL content (${category})`
+        : 'PostgreSQL content (all categories)';
     }
 
     if (!xmlContent) {
@@ -156,18 +101,16 @@ Deno.serve(async (req) => {
         status: 500,
         headers: {
           'Content-Type': 'text/plain',
-          ...getCorsHeaders,
+          ...getOnlyCorsHeaders,
         },
       });
     }
 
-    contentType = type === 'rss'
-      ? 'application/rss+xml; charset=utf-8'
-      : 'application/atom+xml; charset=utf-8';
-    feedType = type;
+    const contentType =
+      type === 'rss' ? 'application/rss+xml; charset=utf-8' : 'application/atom+xml; charset=utf-8';
 
-    console.log(`${category || 'site-wide'} ${feedType} feed generated:`, {
-      contentLength: xmlContent.length,
+    console.log(`${category || 'site-wide'} ${type} feed generated:`, {
+      bytes: xmlContent.length,
       entryCount: (xmlContent.match(/<(item|entry)>/g) || []).length,
     });
 
@@ -175,17 +118,16 @@ Deno.serve(async (req) => {
       status: 200,
       headers: {
         'Content-Type': contentType,
-        'Content-Length': xmlContent.length.toString(),
         'Cache-Control': 'public, s-maxage=600, stale-while-revalidate=3600',
         'CDN-Cache-Control': 'max-age=600',
         'X-Robots-Tag': 'index, follow',
         'X-Generated-By': 'Supabase Edge Function',
         'X-Content-Source': contentSource,
-        ...getCorsHeaders,
+        ...getOnlyCorsHeaders,
       },
     });
   } catch (error) {
     console.error('Edge function error:', error);
-    return errorResponse(error as Error, 'feeds', getCorsHeaders);
+    return errorResponse(error as Error, 'feeds', getOnlyCorsHeaders);
   }
 });

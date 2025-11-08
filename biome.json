@@ -9,7 +9,8 @@
       "scripts/**/*.mjs",
       "scripts/utils/**/*.js",
       "content/**/*",
-      "config/**/*"
+      "config/**/*",
+      "supabase/functions/**/*.ts"
     ],
     "experimentalScannerIgnores": [
       ".next/**/*",
@@ -404,6 +405,19 @@
       },
       "formatter": {
         "enabled": false
+      }
+    },
+    {
+      "includes": ["supabase/functions/**/*.ts", "supabase/functions/**/*.tsx"],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noConsole": "off"
+          },
+          "correctness": {
+            "noUndeclaredVariables": "off"
+          }
+        }
       }
     }
   ]
