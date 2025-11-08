@@ -16,13 +16,14 @@ import { ParseStrategy, safeParse } from '@/src/lib/utils/data.utils';
 export function validateJsonLdSafe(data: unknown): unknown {
   const jsonString = JSON.stringify(data);
 
-  if (/<script\b/i.test(jsonString)) {
-    throw new Error('Script tags are not allowed in JSON-LD data');
-  }
-
-  if (/javascript:/i.test(jsonString)) {
+  // Check for javascript: protocol ONLY when it appears in URLs (after quotes/colons)
+  // Allows educational text like "JavaScript: " while blocking actual javascript: URLs
+  if (/(["':])\s*javascript:/i.test(jsonString)) {
     throw new Error('JavaScript protocol not allowed in JSON-LD data');
   }
+
+  // Note: Script tag check removed - serializeJsonLd() escapes all < to \u003c preventing XSS
+  // This allows legitimate code examples (Svelte, React, etc.) while maintaining security
 
   // Production-grade: safeParse with permissive unknown schema for round-trip validation
   return safeParse(jsonString, z.unknown(), {
