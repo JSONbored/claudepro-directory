@@ -68,7 +68,7 @@ Deno.serve(async (req) => {
     }
 
     console.log('sitemap.xml generated:', {
-      contentLength: xmlString.length,
+      bytes: xmlString.length,
       urlCount: (xmlString.match(/<url>/g) || []).length,
     });
 
@@ -76,7 +76,6 @@ Deno.serve(async (req) => {
       status: 200,
       headers: {
         'Content-Type': 'application/xml; charset=utf-8',
-        'Content-Length': xmlString.length.toString(),
         'Cache-Control': 'public, s-maxage=86400, stale-while-revalidate=604800',
         'CDN-Cache-Control': 'max-age=86400',
         'X-Robots-Tag': 'index, follow',

@@ -79,21 +79,21 @@ Deno.serve(async (req) => {
       );
     }
 
+    const responseBody = JSON.stringify(data);
     console.log('SEO generated:', {
       route,
       include,
       pattern: data._debug?.pattern || data.metadata?._debug?.pattern,
       titleLength: data.title?.length || data.metadata?.title?.length || 0,
       schemaCount: data.schemas?.length || 0,
+      bytes: responseBody.length,
     });
 
     // Return complete SEO data with aggressive caching
-    const responseBody = JSON.stringify(data);
     return new Response(responseBody, {
       status: 200,
       headers: {
         'Content-Type': 'application/json; charset=utf-8',
-        'Content-Length': responseBody.length.toString(),
         'Cache-Control': 'public, s-maxage=86400, stale-while-revalidate=604800', // 24hr cache, 7 day stale
         'CDN-Cache-Control': 'max-age=86400', // Cloudflare 24hr cache
         'X-Robots-Tag': 'index, follow',

@@ -173,7 +173,7 @@ Deno.serve(async (req) => {
     console.log('Markdown export generated:', {
       category,
       slug,
-      contentLength: result.markdown.length,
+      bytes: result.markdown.length,
       filename: result.filename,
       content_id: result.content_id,
     });
@@ -185,7 +185,6 @@ Deno.serve(async (req) => {
       headers: {
         'Content-Type': 'text/markdown; charset=utf-8',
         'Content-Disposition': `inline; filename="${result.filename}"`,
-        'Content-Length': result.markdown.length.toString(),
         'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
         'CDN-Cache-Control': 'max-age=3600',
         'X-Robots-Tag': 'index, follow',

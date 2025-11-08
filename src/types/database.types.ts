@@ -2154,7 +2154,9 @@ export type Database = {
           generate_creative_work: boolean | null;
           generate_faq: boolean | null;
           generate_how_to: boolean | null;
+          generate_item_list: boolean | null;
           generate_job_posting: boolean | null;
+          generate_learning_resource: boolean | null;
           generate_review: boolean | null;
           generate_source_code: boolean | null;
           generate_speakable: boolean | null;
@@ -2178,7 +2180,9 @@ export type Database = {
           generate_creative_work?: boolean | null;
           generate_faq?: boolean | null;
           generate_how_to?: boolean | null;
+          generate_item_list?: boolean | null;
           generate_job_posting?: boolean | null;
+          generate_learning_resource?: boolean | null;
           generate_review?: boolean | null;
           generate_source_code?: boolean | null;
           generate_speakable?: boolean | null;
@@ -2202,7 +2206,9 @@ export type Database = {
           generate_creative_work?: boolean | null;
           generate_faq?: boolean | null;
           generate_how_to?: boolean | null;
+          generate_item_list?: boolean | null;
           generate_job_posting?: boolean | null;
+          generate_learning_resource?: boolean | null;
           generate_review?: boolean | null;
           generate_source_code?: boolean | null;
           generate_speakable?: boolean | null;
@@ -3059,10 +3065,31 @@ export type Database = {
             };
             Returns: Json;
           };
+      build_faq_schema: {
+        Args: { p_category: string; p_slug: string };
+        Returns: Json;
+      };
+      build_how_to_schema: {
+        Args: { p_category: string; p_slug: string };
+        Returns: Json;
+      };
+      build_item_list_schema: {
+        Args: { p_category: string; p_slug: string };
+        Returns: Json;
+      };
+      build_learning_resource_schema: {
+        Args: { p_category: string; p_slug: string };
+        Returns: Json;
+      };
       build_organization_json_ld: { Args: never; Returns: Json };
+      build_person_schema: { Args: { p_slug: string }; Returns: Json };
       build_software_application_schema:
         | { Args: { p_category: string; p_slug: string }; Returns: Json }
         | { Args: { p_config: Json; p_content_row: Json }; Returns: Json };
+      build_source_code_schema: {
+        Args: { p_category: string; p_slug: string };
+        Returns: Json;
+      };
       build_static_route_json_ld: { Args: { p_path: string }; Returns: Json };
       calculate_content_popularity_score: {
         Args: {
@@ -3151,6 +3178,10 @@ export type Database = {
         Returns: string;
       };
       generate_hook_installation: { Args: { p_slug: string }; Returns: Json };
+      generate_item_llms_txt: {
+        Args: { p_category: string; p_slug: string };
+        Returns: string;
+      };
       generate_llms_txt_content: {
         Args: { p_category: string; p_slug: string };
         Returns: Json;
@@ -3302,6 +3333,14 @@ export type Database = {
       };
       get_category_config: { Args: { p_category?: string }; Returns: Json };
       get_category_configs_with_features: { Args: never; Returns: Json };
+      get_category_description: {
+        Args: { p_category: string };
+        Returns: string;
+      };
+      get_category_display_name: {
+        Args: { p_category: string };
+        Returns: string;
+      };
       get_changelog_entries: {
         Args: {
           p_category?: string;
