@@ -113,7 +113,7 @@ Deno.serve(async (req) => {
     console.log('JSON API response generated:', {
       category,
       slug,
-      contentLength: jsonContent.length,
+      bytes: jsonContent.length,
     });
 
     // jsonContent is already pre-stringified TEXT from PostgreSQL (protocol optimization)
@@ -121,7 +121,6 @@ Deno.serve(async (req) => {
       status: 200,
       headers: {
         'Content-Type': 'application/json; charset=utf-8',
-        'Content-Length': jsonContent.length.toString(),
         'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
         'CDN-Cache-Control': 'max-age=3600',
         'X-Robots-Tag': 'index, follow',

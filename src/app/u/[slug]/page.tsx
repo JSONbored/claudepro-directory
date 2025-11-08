@@ -15,7 +15,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/card';
-import { FolderOpen, Globe, MessageSquare, Users } from '@/src/lib/icons';
+import { FolderOpen, Globe, Users } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createAnonClient } from '@/src/lib/supabase/server-anon';
@@ -50,18 +50,6 @@ type UserProfile = {
 };
 
 // RPC return types - exact structure from get_user_profile() JSONB
-type RPCPost = Pick<
-  Tables<'posts'>,
-  | 'id'
-  | 'user_id'
-  | 'title'
-  | 'content'
-  | 'url'
-  | 'vote_count'
-  | 'comment_count'
-  | 'created_at'
-  | 'updated_at'
->;
 type RPCCollection = Pick<
   Tables<'user_collections'>,
   'id' | 'slug' | 'name' | 'description' | 'is_public' | 'item_count' | 'view_count' | 'created_at'
@@ -85,11 +73,9 @@ type ProfileData = {
   stats: {
     followerCount: number;
     followingCount: number;
-    postsCount: number;
     collectionsCount: number;
     contributionsCount: number;
   };
-  posts: RPCPost[];
   collections: RPCCollection[];
   contributions: RPCContribution[];
   isFollowing: boolean;
@@ -126,7 +112,7 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
 
   // Type-safe extraction using ProfileDataComplete
   const data = profileData as ProfileDataComplete;
-  const { profile, stats, posts, collections, contributions, isFollowing } = data;
+  const { profile, stats, collections, contributions, isFollowing } = data;
 
   const { followerCount, followingCount } = stats;
 
@@ -216,12 +202,6 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                   </UnifiedBadge>
                 </div>
                 <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
-                  <span className={UI_CLASSES.TEXT_SM_MUTED}>Posts</span>
-                  <UnifiedBadge variant="base" style="secondary">
-                    {posts?.length || 0}
-                  </UnifiedBadge>
-                </div>
-                <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
                   <span className={UI_CLASSES.TEXT_SM_MUTED}>Member since</span>
                   <span className="text-sm">
                     {new Date(profile.created_at).toLocaleDateString('en-US', {
@@ -236,59 +216,6 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
 
           {/* Main content */}
           <div className="space-y-6 md:col-span-2">
-            <div>
-              <h2 className="mb-4 font-bold text-2xl">Recent Posts</h2>
-
-              {!posts || posts.length === 0 ? (
-                <Card>
-                  <CardContent className={'flex flex-col items-center py-12'}>
-                    <MessageSquare className="mb-4 h-12 w-12 text-muted-foreground" />
-                    <p className="text-muted-foreground">No posts yet</p>
-                  </CardContent>
-                </Card>
-              ) : (
-                <div className="space-y-4">
-                  {posts.map((post) => (
-                    <Card key={post.id}>
-                      <CardHeader>
-                        <CardTitle className="text-lg">
-                          {post.url ? (
-                            <a
-                              href={post.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="transition-colors-smooth group-hover:text-accent"
-                            >
-                              {post.title}
-                            </a>
-                          ) : (
-                            post.title
-                          )}
-                        </CardTitle>
-                        {post.content && (
-                          <CardDescription className="mt-2 whitespace-pre-wrap">
-                            {post.content.length > 150
-                              ? `${post.content.slice(0, 150)}...`
-                              : post.content}
-                          </CardDescription>
-                        )}
-                      </CardHeader>
-                      <CardContent>
-                        <div className={'flex items-center gap-3 text-muted-foreground text-xs'}>
-                          <UnifiedBadge variant="base" style="secondary">
-                            {post.vote_count || 0} votes
-                          </UnifiedBadge>
-                          <span>{post.comment_count || 0} comments</span>
-                          <span>•</span>
-                          <span>{new Date(post.created_at).toLocaleDateString()}</span>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              )}
-            </div>
-
             {/* Public Collections */}
             <div>
               <h2 className="mb-4 font-bold text-2xl">Public Collections</h2>

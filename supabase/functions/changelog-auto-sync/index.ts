@@ -467,14 +467,14 @@ Deno.serve(async (req) => {
     // 6. Get last deployed commit from changelog table
     const { data: lastEntry } = await supabase
       .from('changelog')
-      .select('git_hash')
-      .not('git_hash', 'is', null)
+      .select('git_commit_sha')
+      .not('git_commit_sha', 'is', null)
       .order('created_at', { ascending: false })
       .limit(1)
       .single();
 
     // Fallback: if no previous changelog, use HEAD~10 (last 10 commits)
-    const baseHash = lastEntry?.git_hash || `${deployment.meta.commitId}~10`;
+    const baseHash = lastEntry?.git_commit_sha || `${deployment.meta.commitId}~10`;
     const headHash = deployment.meta.commitId;
 
     console.log(`Fetching commits from GitHub: ${baseHash}...${headHash}`);
@@ -531,7 +531,7 @@ Deno.serve(async (req) => {
       date_added: date,
       tags: ['release', 'automation'],
       sections: sections as unknown as never, // JSONB type
-      git_hash: deployment.meta.commitId,
+      git_commit_sha: deployment.meta.commitId,
       commit_count: commits.length,
       contributors: [...new Set(commits.map((c) => c.commit.author.name))],
     };

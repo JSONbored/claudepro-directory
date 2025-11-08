@@ -32,6 +32,9 @@ verify_jwt = false  # Public markdown export endpoint for all categories
 [functions.metadata-api]
 verify_jwt = false  # Public metadata generation endpoint (24hr cache, replaces 19k PostgREST requests/day)
 
+[functions.seo-api]
+verify_jwt = false  # Public SEO endpoint: metadata + pre-generated schemas (24hr cache, 1,912 LOC → 160 LOC)
+
 # =============================================================================
 # Webhook Functions - No JWT Verification (Use Signature Verification)
 # =============================================================================

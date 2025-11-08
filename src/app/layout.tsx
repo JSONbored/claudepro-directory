@@ -31,11 +31,10 @@ const NotificationToastHandler = dynamic(
 import { ErrorBoundary } from '@/src/components/infra/error-boundary';
 import { PostCopyEmailProvider } from '@/src/components/infra/providers/post-copy-email-provider';
 import { PwaInstallTracker } from '@/src/components/infra/pwa-install-tracker';
-import { OrganizationStructuredData } from '@/src/components/infra/structured-data/organization-schema';
+import { StructuredData } from '@/src/components/infra/structured-data';
 import { getActiveAnnouncement } from '@/src/components/layout/announcement-banner-server';
 import { LayoutContent } from '@/src/components/layout/layout-content';
 
-import { StructuredData } from '@/src/components/shared/structured-data';
 import { UmamiScript } from '@/src/components/shared/umami-script';
 import { APP_CONFIG } from '@/src/lib/constants';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
@@ -157,8 +156,7 @@ export default async function RootLayout({
       <body className="font-sans">
         {/* Suspense boundary for structured data - streams after initial HTML */}
         <Suspense fallback={null}>
-          {await StructuredData({ type: 'website' })}
-          {await OrganizationStructuredData()}
+          <StructuredData route="/" />
         </Suspense>
         <ThemeProvider
           attribute="data-theme"

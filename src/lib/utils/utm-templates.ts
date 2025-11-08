@@ -17,7 +17,7 @@
  * UTM parameter structure for email campaigns
  */
 export interface EmailUTMParams {
-  source: 'email' | 'partner_email' | 'ph_launch';
+  source: 'email' | 'partner_email';
   medium: string;
   campaign: string;
   content?: string;
@@ -88,43 +88,6 @@ export const EMAIL_UTM_TEMPLATES = {
     source: 'email' as const,
     medium: 'lead_magnet',
     campaign: 'templates',
-  },
-
-  // Product Hunt launch
-  PH_PRE_LAUNCH: {
-    source: 'ph_launch' as const,
-    medium: 'product_hunt',
-    campaign: 'pre_launch',
-  },
-  PH_LAUNCH_DAY: {
-    source: 'ph_launch' as const,
-    medium: 'product_hunt',
-    campaign: 'launch_day',
-  },
-  PH_MID_DAY_REMINDER: {
-    source: 'ph_launch' as const,
-    medium: 'product_hunt',
-    campaign: 'mid_day_reminder',
-  },
-  PH_POST_LAUNCH_WEEK_1: {
-    source: 'ph_launch' as const,
-    medium: 'product_hunt',
-    campaign: 'post_launch_week_1',
-  },
-  PH_POST_LAUNCH_WEEK_2: {
-    source: 'ph_launch' as const,
-    medium: 'product_hunt',
-    campaign: 'post_launch_week_2',
-  },
-  PH_POST_LAUNCH_WEEK_3: {
-    source: 'ph_launch' as const,
-    medium: 'product_hunt',
-    campaign: 'post_launch_week_3',
-  },
-  PH_POST_LAUNCH_WEEK_4: {
-    source: 'ph_launch' as const,
-    medium: 'product_hunt',
-    campaign: 'post_launch_week_4',
   },
 
   // Partner campaigns

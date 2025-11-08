@@ -167,7 +167,7 @@ Deno.serve(async (req) => {
     feedType = type;
 
     console.log(`${category || 'site-wide'} ${feedType} feed generated:`, {
-      contentLength: xmlContent.length,
+      bytes: xmlContent.length,
       entryCount: (xmlContent.match(/<(item|entry)>/g) || []).length,
     });
 
@@ -175,7 +175,6 @@ Deno.serve(async (req) => {
       status: 200,
       headers: {
         'Content-Type': contentType,
-        'Content-Length': xmlContent.length.toString(),
         'Cache-Control': 'public, s-maxage=600, stale-while-revalidate=3600',
         'CDN-Cache-Control': 'max-age=600',
         'X-Robots-Tag': 'index, follow',

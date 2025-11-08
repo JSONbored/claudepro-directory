@@ -1,54 +1,16 @@
 /**
- * Metadata Generator - Edge Function Architecture
- * Calls metadata-api edge function (cached 24hrs) instead of direct RPC
- * Replaces: 766 lines of TypeScript route classification + template logic
+ * Metadata Generator - Unified SEO API Architecture
  */
 
 import type { Metadata } from 'next';
 import { APP_CONFIG } from '@/src/lib/constants';
 import { logger } from '@/src/lib/logger';
 import { generateOGImageUrl, OG_IMAGE_DIMENSIONS } from '@/src/lib/og/url-generator';
-
-const METADATA_API_URL = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/metadata-api`;
+import { fetchMetadata, type SEOMetadata } from '@/src/lib/seo/client';
 
 interface MetadataContext {
   params?: Record<string, string | string[]>;
   [key: string]: unknown;
-}
-
-interface MetadataAPIResponse {
-  title: string;
-  description: string;
-  keywords: string[];
-  openGraphType: 'website' | 'article';
-  twitterCard: string;
-  robots: { index: boolean; follow: boolean };
-  authors?: Array<{ name: string }> | null;
-  publishedTime?: string | null;
-  modifiedTime?: string | null;
-  shouldAddLlmsTxt: boolean;
-  isOverride: boolean;
-}
-
-async function fetchMetadataFromAPI(route: string): Promise<MetadataAPIResponse> {
-  const url = `${METADATA_API_URL}?route=${encodeURIComponent(route)}`;
-
-  try {
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
-      next: { revalidate: 86400 }, // 24hr Next.js cache (matches edge function cache)
-    });
-
-    if (!response.ok) {
-      throw new Error(`Metadata API error: ${response.status} ${response.statusText}`);
-    }
-
-    return await response.json();
-  } catch (error) {
-    logger.error(`Failed to fetch metadata from edge function for route: ${route}`, error as Error);
-    throw error;
-  }
 }
 
 export async function generatePageMetadata(
@@ -67,8 +29,8 @@ export async function generatePageMetadata(
     }
   }
 
-  // Fetch metadata from cached edge function
-  const config = await fetchMetadataFromAPI(resolvedRoute);
+  // Fetch metadata from unified seo-api edge function
+  const config: SEOMetadata = await fetchMetadata(resolvedRoute);
 
   const canonicalUrl = buildCanonicalUrl(resolvedRoute);
   const ogImageUrl = generateOGImageUrl(resolvedRoute);

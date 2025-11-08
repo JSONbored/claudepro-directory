@@ -197,7 +197,6 @@ export const addBookmark = authedAction
 
       revalidatePath('/account');
       revalidatePath('/account/library');
-      revalidatePath('/for-you');
 
       return data as { success: boolean; bookmark: unknown };
     } catch (error) {
@@ -239,7 +238,6 @@ export const removeBookmark = authedAction
       revalidatePath('/account');
       revalidatePath('/account/library');
       revalidateTag(`user-${userId}`, 'max');
-      revalidatePath('/for-you');
 
       return data as { success: boolean };
     } catch (error) {
@@ -312,7 +310,6 @@ export const addBookmarkBatch = authedAction
       revalidatePath('/account');
       revalidatePath('/account/library');
       revalidateTag(`user-${userId}`, 'max');
-      revalidatePath('/for-you');
 
       return result;
     } catch (error) {

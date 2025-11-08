@@ -50,32 +50,8 @@ Deno.serve(async (req) => {
       case 'trackInteraction':
         return await handleTrackInteraction(supabase, user, body, corsHeaders);
 
-      case 'getForYouFeed':
-        return await handleGetForYouFeed(supabase, user, body, corsHeaders);
-
       case 'getSimilarConfigs':
         return await handleGetSimilarConfigs(supabase, body, corsHeaders);
-
-      case 'getUsageRecommendations':
-        return await handleGetUsageRecommendations(supabase, user, body, corsHeaders);
-
-      case 'getUserAffinities':
-        return await handleGetUserAffinities(supabase, user, body, corsHeaders);
-
-      case 'calculateUserAffinities':
-        return await handleCalculateUserAffinities(supabase, user, corsHeaders);
-
-      case 'getContentAffinity':
-        return await handleGetContentAffinity(supabase, user, body, corsHeaders);
-
-      case 'getUserFavoriteCategories':
-        return await handleGetUserFavoriteCategories(supabase, user, corsHeaders);
-
-      case 'getUserRecentInteractions':
-        return await handleGetUserRecentInteractions(supabase, user, body, corsHeaders);
-
-      case 'getUserInteractionSummary':
-        return await handleGetUserInteractionSummary(supabase, user, corsHeaders);
 
       case 'generateConfigRecommendations':
         return await handleGenerateConfigRecommendations(supabase, body, corsHeaders);
@@ -114,40 +90,6 @@ async function handleTrackInteraction(
   return jsonResponse({ success: true }, 200, corsHeaders);
 }
 
-async function handleGetForYouFeed(supabase: any, user: any, body: any, corsHeaders: Record<string, string>) {
-  if (!user) {
-    return unauthorizedResponse('Unauthorized', corsHeaders);
-  }
-
-  const { category, limit = 12, offset = 0, exclude_bookmarked = false } = body;
-
-  const { data: feedData, error } = await supabase.rpc('get_personalized_feed', {
-    p_user_id: user.id,
-    ...(category && { p_category: category }),
-    p_limit: limit,
-    p_offset: offset,
-    p_exclude_bookmarked: exclude_bookmarked,
-  });
-
-  if (error) {
-    return jsonResponse({ error: error.message }, 500, corsHeaders);
-  }
-
-  const feed = feedData as Database['public']['Functions']['get_personalized_feed']['Returns'];
-  const response = {
-    recommendations: feed.recommendations.map((rec: any) => ({
-      ...rec,
-      url: getContentItemUrl(rec.category, rec.slug),
-    })),
-    total_count: feed.total_count,
-    sources_used: feed.sources_used,
-    user_has_history: feed.user_has_history,
-    generated_at: feed.generated_at,
-  };
-
-  return jsonResponse(response, 200, corsHeaders);
-}
-
 async function handleGetSimilarConfigs(supabase: any, body: any, corsHeaders: Record<string, string>) {
   const { content_type, content_slug, limit = 6 } = body;
 
@@ -168,150 +110,6 @@ async function handleGetSimilarConfigs(supabase: any, body: any, corsHeaders: Re
   }));
 
   return jsonResponse(result, 200, corsHeaders);
-}
-
-async function handleGetUsageRecommendations(supabase: any, user: any, body: any, corsHeaders: Record<string, string>) {
-  if (!user) {
-    return unauthorizedResponse('Unauthorized', corsHeaders);
-  }
-
-  const { trigger, content_type, content_slug, category } = body;
-
-  const { data, error } = await supabase.rpc('get_usage_recommendations', {
-    p_user_id: user.id,
-    p_trigger: trigger,
-    ...(content_type && { p_content_type: content_type }),
-    ...(content_slug && { p_content_slug: content_slug }),
-    ...(category && { p_category: category }),
-    p_limit: 3,
-  });
-
-  if (error) {
-    return jsonResponse({ error: error.message }, 500, corsHeaders);
-  }
-
-  const rpcResponse = data as Database['public']['Functions']['get_usage_recommendations']['Returns'];
-  const response = {
-    recommendations: rpcResponse.recommendations.map((rec: any) => ({
-      ...rec,
-      url: getContentItemUrl(rec.category, rec.slug),
-    })),
-    trigger,
-    context: { content_type, content_slug, category },
-  };
-
-  return jsonResponse(response, 200, corsHeaders);
-}
-
-async function handleGetUserAffinities(supabase: any, user: any, body: any, corsHeaders: Record<string, string>) {
-  if (!user) {
-    return unauthorizedResponse('Unauthorized', corsHeaders);
-  }
-
-  const { limit = 50, min_score = 10 } = body;
-
-  const { data, error } = await supabase.rpc('get_user_affinities', {
-    p_user_id: user.id,
-    p_limit: limit,
-    p_min_score: min_score,
-  });
-
-  if (error) {
-    return jsonResponse({ error: error.message }, 500, corsHeaders);
-  }
-
-  return jsonResponse(data, 200, corsHeaders);
-}
-
-async function handleCalculateUserAffinities(supabase: any, user: any, corsHeaders: Record<string, string>) {
-  if (!user) {
-    return unauthorizedResponse('Unauthorized', corsHeaders);
-  }
-
-  const { data, error } = await supabase.rpc('update_user_affinity_scores', {
-    p_user_id: user.id,
-  });
-
-  if (error) {
-    return jsonResponse({ error: error.message }, 500, corsHeaders);
-  }
-
-  const result = data?.[0];
-  return jsonResponse({
-    success: true,
-    message: `Affinities calculated (${result?.inserted_count || 0} new, ${result?.updated_count || 0} updated)`,
-    affinities_calculated: result?.total_affinity_count || 0,
-    inserted_count: result?.inserted_count || 0,
-    updated_count: result?.updated_count || 0,
-  }, 200, corsHeaders);
-}
-
-async function handleGetContentAffinity(supabase: any, user: any, body: any, corsHeaders: Record<string, string>) {
-  if (!user) {
-    return jsonResponse({ affinity: null }, 200, corsHeaders);
-  }
-
-  const { content_type, content_slug } = body;
-
-  const { data, error } = await supabase.rpc('get_content_affinity', {
-    p_user_id: user.id,
-    p_content_type: content_type,
-    p_content_slug: content_slug,
-  });
-
-  return jsonResponse({ affinity: error ? null : data }, 200, corsHeaders);
-}
-
-async function handleGetUserFavoriteCategories(supabase: any, user: any, corsHeaders: Record<string, string>) {
-  if (!user) {
-    return jsonResponse({ categories: [] }, 200, corsHeaders);
-  }
-
-  const { data, error } = await supabase.rpc('get_user_favorite_categories', {
-    p_user_id: user.id,
-    p_limit: 3,
-  });
-
-  return jsonResponse({ categories: error ? [] : data }, 200, corsHeaders);
-}
-
-async function handleGetUserRecentInteractions(supabase: any, user: any, body: any, corsHeaders: Record<string, string>) {
-  if (!user) {
-    return jsonResponse({ interactions: [] }, 200, corsHeaders);
-  }
-
-  const { limit = 20 } = body;
-
-  const { data, error } = await supabase.rpc('get_user_recent_interactions', {
-    p_user_id: user.id,
-    p_limit: limit,
-  });
-
-  if (error) {
-    return jsonResponse({ interactions: [] }, 200, corsHeaders);
-  }
-
-  return jsonResponse({ interactions: data }, 200, corsHeaders);
-}
-
-async function handleGetUserInteractionSummary(supabase: any, user: any, corsHeaders: Record<string, string>) {
-  const defaultSummary = {
-    total_interactions: 0,
-    views: 0,
-    copies: 0,
-    bookmarks: 0,
-    unique_content_items: 0,
-  };
-
-  if (!user) {
-    return jsonResponse(defaultSummary, 200, corsHeaders);
-  }
-
-  const { data, error } = await supabase.rpc('get_user_interaction_summary', {
-    p_user_id: user.id,
-  });
-
-  return jsonResponse(error ? defaultSummary : data, 200, corsHeaders);
 }
 
 async function handleGenerateConfigRecommendations(supabase: any, body: any, corsHeaders: Record<string, string>) {
