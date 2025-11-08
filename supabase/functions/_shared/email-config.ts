@@ -81,12 +81,15 @@ export const EMAIL_CONFIG = {
       { name: 'category', value: 'collection' },
     ],
   },
-} as const satisfies Record<EmailTemplate, {
-  from: string;
-  subject: string;
-  template: string;
-  tags: Array<{ name: string; value: string }>;
-}>;
+} as const satisfies Record<
+  EmailTemplate,
+  {
+    from: string;
+    subject: string;
+    template: string;
+    tags: Array<{ name: string; value: string }>;
+  }
+>;
 
 /**
  * Get email configuration by template type

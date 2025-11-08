@@ -50,7 +50,7 @@ export const CATEGORY_CONFIGS: Record<CategoryId, UnifiedCategoryConfig<Category
     keywords:
       'MCP servers, Model Context Protocol, Claude Desktop, external tools, API integration',
     metaDescription:
-      'MCP servers for Claude Desktop in October 2025. Extend Claude with file systems, databases, APIs, and custom tools via Model Context Protocol.',
+      'MCP servers for Claude Desktop. Extend Claude with file systems, databases, APIs, and custom tools via Model Context Protocol for enhanced functionality.',
     typeName: 'MCP Server',
     generateFullContent: true,
     metadataFields: ['title', 'description', 'category', 'slug', 'created_at', 'updated_at'],
@@ -102,7 +102,7 @@ export const CATEGORY_CONFIGS: Record<CategoryId, UnifiedCategoryConfig<Category
     showOnHomepage: false,
     keywords: 'Claude jobs, AI jobs, engineering jobs, remote AI positions',
     metaDescription:
-      'Job opportunities in Claude and AI in October 2025. Find roles working with Claude, AI engineering positions, and remote opportunities.',
+      'Job opportunities in Claude and AI. Find roles working with Claude, AI engineering positions, remote opportunities, and cutting-edge AI careers worldwide.',
     typeName: 'Job',
     generateFullContent: true,
     metadataFields: ['title', 'description', 'category', 'slug', 'created_at', 'updated_at'],
@@ -153,7 +153,7 @@ export const CATEGORY_CONFIGS: Record<CategoryId, UnifiedCategoryConfig<Category
     showOnHomepage: true,
     keywords: 'Claude hooks, event hooks, automation, Claude Code hooks, git hooks',
     metaDescription:
-      'Event-driven hooks for Claude Code in October 2025. Automate workflows with pre-commit, post-merge, and custom event triggers.',
+      'Event-driven hooks for Claude Code. Automate workflows with pre-commit, post-merge, and custom event triggers to enhance development workflow and quality.',
     typeName: 'Hook',
     generateFullContent: true,
     metadataFields: ['title', 'description', 'category', 'slug', 'created_at', 'updated_at'],
@@ -308,7 +308,7 @@ export const CATEGORY_CONFIGS: Record<CategoryId, UnifiedCategoryConfig<Category
     showOnHomepage: false,
     keywords: 'Claude guides, tutorials, how-to guides, best practices, workflows',
     metaDescription:
-      'Comprehensive guides for Claude in October 2025. Tutorials, comparisons, workflows, and troubleshooting for Claude Desktop and Code.',
+      'Comprehensive guides for Claude. Tutorials, comparisons, workflows, and troubleshooting for Claude Desktop and Code. Learn best practices and techniques.',
     typeName: 'Guide',
     generateFullContent: true,
     metadataFields: ['title', 'description', 'category', 'slug', 'created_at', 'updated_at'],
@@ -360,7 +360,7 @@ export const CATEGORY_CONFIGS: Record<CategoryId, UnifiedCategoryConfig<Category
     showOnHomepage: true,
     keywords: 'Claude skills, AI capabilities, task guides, skill packages, Claude Desktop skills',
     metaDescription:
-      'Claude skills for October 2025. Downloadable capability packages with requirements, examples, and instructions for specific tasks.',
+      'Claude skills and capability packages. Downloadable packages with requirements, examples, and detailed instructions for specific tasks, workflows, use cases.',
     typeName: 'Skill',
     generateFullContent: true,
     metadataFields: ['title', 'description', 'category', 'slug', 'created_at', 'updated_at'],
@@ -412,7 +412,7 @@ export const CATEGORY_CONFIGS: Record<CategoryId, UnifiedCategoryConfig<Category
     showOnHomepage: true,
     keywords: 'Claude commands, slash commands, custom commands, Claude Code, CLI',
     metaDescription:
-      'Custom slash commands for Claude Code in October 2025. Community-created prompt templates, automation commands, and workflow shortcuts.',
+      'Custom slash commands for Claude Code. Community-created prompt templates, automation commands, and workflow shortcuts to streamline your development process.',
     typeName: 'Command',
     generateFullContent: true,
     metadataFields: ['title', 'description', 'category', 'slug', 'created_at', 'updated_at'],
@@ -464,7 +464,7 @@ export const CATEGORY_CONFIGS: Record<CategoryId, UnifiedCategoryConfig<Category
     showOnHomepage: false,
     keywords: 'changelog, updates, release notes, new features, bug fixes',
     metaDescription:
-      'ClaudePro Directory changelog for October 2025. Track new features, improvements, and bug fixes.',
+      'ClaudePro Directory changelog. Track new features, improvements, bug fixes, and version history. Stay updated with latest releases and development progress.',
     typeName: 'Changelog Entry',
     generateFullContent: true,
     metadataFields: ['title', 'description', 'category', 'slug', 'created_at', 'updated_at'],
@@ -516,7 +516,7 @@ export const CATEGORY_CONFIGS: Record<CategoryId, UnifiedCategoryConfig<Category
     showOnHomepage: true,
     keywords: 'Claude collections, curated content, workflow bundles, themed collections',
     metaDescription:
-      'Curated Claude collections for October 2025. Pre-assembled bundles of agents, commands, and tools for specific use cases and workflows.',
+      'Curated Claude collections. Pre-assembled bundles of agents, commands, and tools for specific use cases and workflows to boost your productivity and efficiency.',
     typeName: 'Collection',
     generateFullContent: true,
     metadataFields: ['title', 'description', 'category', 'slug', 'created_at', 'updated_at'],
@@ -568,7 +568,7 @@ export const CATEGORY_CONFIGS: Record<CategoryId, UnifiedCategoryConfig<Category
     showOnHomepage: true,
     keywords: 'Claude statusline, CLI statusline, terminal status, Claude Code customization',
     metaDescription:
-      'Statusline scripts for Claude Code CLI in October 2025. Display git status, project info, and custom metrics in your terminal.',
+      'Statusline scripts for Claude Code CLI. Display git status, project info, and custom metrics in your terminal for enhanced productivity and workflow visibility.',
     typeName: 'Statusline',
     generateFullContent: true,
     metadataFields: ['title', 'description', 'category', 'slug', 'created_at', 'updated_at'],

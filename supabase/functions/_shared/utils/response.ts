@@ -24,7 +24,9 @@ export function getAuthenticatedCorsHeaders(requestOrigin: string | null): Recor
     ...(Deno.env.get('NODE_ENV') === 'development' ? ['http://localhost:3000'] : []),
   ];
 
-  const origin = allowedOrigins.includes(requestOrigin || '') ? requestOrigin! : allowedOrigins[0];
+  const origin = allowedOrigins.includes(requestOrigin || '')
+    ? requestOrigin || allowedOrigins[0]
+    : allowedOrigins[0];
 
   return {
     'Access-Control-Allow-Origin': origin,
@@ -33,12 +35,6 @@ export function getAuthenticatedCorsHeaders(requestOrigin: string | null): Recor
     'Access-Control-Allow-Credentials': 'true',
   };
 }
-
-/**
- * Legacy export for backwards compatibility
- * @deprecated Use publicCorsHeaders or getAuthenticatedCorsHeaders() instead
- */
-const corsHeaders = publicCorsHeaders;
 
 /**
  * Optimized JSON response helper - Zero object spread overhead
@@ -68,28 +64,28 @@ export function errorResponse(error: unknown, context: string, cors = publicCors
   );
 }
 
-export function successResponse(data: unknown, status: number = 200, cors = publicCorsHeaders): Response {
+export function successResponse(data: unknown, status = 200, cors = publicCorsHeaders): Response {
   return jsonResponse(data, status, cors);
 }
 
-export function methodNotAllowedResponse(allowedMethod: string = 'POST', cors = publicCorsHeaders): Response {
-  return new Response(
-    JSON.stringify({ error: 'Method not allowed', allowed: allowedMethod }),
-    {
-      status: 405,
-      headers: {
-        'Content-Type': 'application/json',
-        'Allow': allowedMethod,
-        ...cors,
-      },
-    }
-  );
+export function methodNotAllowedResponse(
+  allowedMethod = 'POST',
+  cors = publicCorsHeaders
+): Response {
+  return new Response(JSON.stringify({ error: 'Method not allowed', allowed: allowedMethod }), {
+    status: 405,
+    headers: {
+      'Content-Type': 'application/json',
+      Allow: allowedMethod,
+      ...cors,
+    },
+  });
 }
 
 export function badRequestResponse(message: string, cors = publicCorsHeaders): Response {
   return jsonResponse({ error: 'Bad Request', message }, 400, cors);
 }
 
-export function unauthorizedResponse(message: string = 'Unauthorized', cors = publicCorsHeaders): Response {
+export function unauthorizedResponse(message = 'Unauthorized', cors = publicCorsHeaders): Response {
   return jsonResponse({ error: 'Unauthorized', message }, 401, cors);
 }

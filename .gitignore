@@ -1,5 +1,6 @@
 # Dependencies
 node_modules
+supabase/functions/node_modules
 
 # Build outputs
 dist

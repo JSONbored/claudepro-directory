@@ -1,61 +1,26 @@
 /**
- * LLMs.txt Edge Function - Unified Router
- * Single edge function handling all llms.txt patterns via query parameters
- *
- * Performance optimizations:
- * - Singleton Supabase client (reused across requests)
- * - Direct TEXT return from RPC functions (no JSONB parsing)
- * - Single RPC call per request
- * - Minimal egress (pre-formatted output from database)
- * - Rate limiting headers for API consumers
+ * LLMs.txt - Unified router for all llms.txt patterns
  */
 
-import { createClient } from 'jsr:@supabase/supabase-js@2';
+import { VALID_CONTENT_CATEGORIES } from '../_shared/constants/categories.ts';
+import { getOnlyCorsHeaders } from '../_shared/utils/cors.ts';
 import {
   badRequestResponse,
   errorResponse,
   methodNotAllowedResponse,
-  publicCorsHeaders,
 } from '../_shared/utils/response.ts';
-
-const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
-const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY');
-const SITE_URL = Deno.env.get('NEXT_PUBLIC_SITE_URL') || 'https://claudepro.directory';
-
-if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-  throw new Error('Missing required environment variables: SUPABASE_URL and/or SUPABASE_ANON_KEY');
-}
-
-// Singleton Supabase client - reused across all requests for optimal performance
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-const getCorsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
-};
-
-const VALID_CATEGORIES = [
-  'agents',
-  'commands',
-  'hooks',
-  'mcp',
-  'rules',
-  'skills',
-  'statuslines',
-  'collections',
-];
+import { supabaseAnon } from '../_shared/utils/supabase.ts';
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, {
       status: 200,
-      headers: getCorsHeaders,
+      headers: getOnlyCorsHeaders,
     });
   }
 
   if (req.method !== 'GET') {
-    return methodNotAllowedResponse('GET', getCorsHeaders);
+    return methodNotAllowedResponse('GET', getOnlyCorsHeaders);
   }
 
   try {
@@ -70,56 +35,53 @@ Deno.serve(async (req) => {
 
     switch (type) {
       case 'sitewide': {
-        // /llms.txt - Site-wide index
-        const { data, error } = await supabase.rpc('generate_sitewide_llms_txt');
+        const { data, error } = await supabaseAnon.rpc('generate_sitewide_llms_txt');
         if (error) {
           console.error('RPC error (sitewide):', error);
-          return errorResponse(error, 'generate_sitewide_llms_txt', getCorsHeaders);
+          return errorResponse(error, 'generate_sitewide_llms_txt', getOnlyCorsHeaders);
         }
         content = data;
         break;
       }
 
       case 'category': {
-        // /[category]/llms.txt - Category listing
         if (!category) {
-          return badRequestResponse('Missing required parameter: category', getCorsHeaders);
+          return badRequestResponse('Missing required parameter: category', getOnlyCorsHeaders);
         }
-        if (!VALID_CATEGORIES.includes(category)) {
-          return badRequestResponse(`Invalid category: ${category}`, getCorsHeaders);
+        if (!VALID_CONTENT_CATEGORIES.includes(category)) {
+          return badRequestResponse(`Invalid category: ${category}`, getOnlyCorsHeaders);
         }
 
-        const { data, error } = await supabase.rpc('generate_category_llms_txt', {
+        const { data, error } = await supabaseAnon.rpc('generate_category_llms_txt', {
           p_category: category,
         });
         if (error) {
           console.error('RPC error (category):', error);
-          return errorResponse(error, 'generate_category_llms_txt', getCorsHeaders);
+          return errorResponse(error, 'generate_category_llms_txt', getOnlyCorsHeaders);
         }
         content = data;
         break;
       }
 
       case 'item': {
-        // /[category]/[slug]/llms.txt - Individual item (returns pre-formatted TEXT)
-        if (!category || !slug) {
+        if (!(category && slug)) {
           return badRequestResponse(
             'Missing required parameters: category and slug',
-            getCorsHeaders
+            getOnlyCorsHeaders
           );
         }
-        if (!VALID_CATEGORIES.includes(category)) {
-          return badRequestResponse(`Invalid category: ${category}`, getCorsHeaders);
+        if (!VALID_CONTENT_CATEGORIES.includes(category)) {
+          return badRequestResponse(`Invalid category: ${category}`, getOnlyCorsHeaders);
         }
 
-        const { data, error } = await supabase.rpc('generate_item_llms_txt', {
+        const { data, error } = await supabaseAnon.rpc('generate_item_llms_txt', {
           p_category: category,
           p_slug: slug,
         });
 
         if (error) {
           console.error('RPC error (item):', error);
-          return errorResponse(error, 'generate_item_llms_txt', getCorsHeaders);
+          return errorResponse(error, 'generate_item_llms_txt', getOnlyCorsHeaders);
         }
 
         if (!data) {
@@ -128,7 +90,7 @@ Deno.serve(async (req) => {
             headers: {
               'Content-Type': 'text/plain; charset=utf-8',
               'Cache-Control': 'no-store, must-revalidate',
-              ...getCorsHeaders,
+              ...getOnlyCorsHeaders,
             },
           });
         }
@@ -138,28 +100,26 @@ Deno.serve(async (req) => {
       }
 
       case 'changelog-index': {
-        // /changelog/llms.txt - Changelog index
-        const { data, error } = await supabase.rpc('generate_changelog_llms_txt');
+        const { data, error } = await supabaseAnon.rpc('generate_changelog_llms_txt');
         if (error) {
           console.error('RPC error (changelog-index):', error);
-          return errorResponse(error, 'generate_changelog_llms_txt', getCorsHeaders);
+          return errorResponse(error, 'generate_changelog_llms_txt', getOnlyCorsHeaders);
         }
         content = data;
         break;
       }
 
       case 'changelog-entry': {
-        // /changelog/[slug]/llms.txt - Individual changelog entry
         if (!slug) {
-          return badRequestResponse('Missing required parameter: slug', getCorsHeaders);
+          return badRequestResponse('Missing required parameter: slug', getOnlyCorsHeaders);
         }
 
-        const { data, error } = await supabase.rpc('generate_changelog_entry_llms_txt', {
+        const { data, error } = await supabaseAnon.rpc('generate_changelog_entry_llms_txt', {
           p_slug: slug,
         });
         if (error) {
           console.error('RPC error (changelog-entry):', error);
-          return errorResponse(error, 'generate_changelog_entry_llms_txt', getCorsHeaders);
+          return errorResponse(error, 'generate_changelog_entry_llms_txt', getOnlyCorsHeaders);
         }
         if (!data) {
           return new Response('Changelog entry not found', {
@@ -167,7 +127,7 @@ Deno.serve(async (req) => {
             headers: {
               'Content-Type': 'text/plain; charset=utf-8',
               'Cache-Control': 'no-store, must-revalidate',
-              ...getCorsHeaders,
+              ...getOnlyCorsHeaders,
             },
           });
         }
@@ -176,20 +136,19 @@ Deno.serve(async (req) => {
       }
 
       case 'tool': {
-        // /tools/[tool]/llms.txt - Tool documentation
         if (!tool) {
-          return badRequestResponse('Missing required parameter: tool', getCorsHeaders);
+          return badRequestResponse('Missing required parameter: tool', getOnlyCorsHeaders);
         }
         if (tool !== 'config-recommender') {
-          return badRequestResponse(`Invalid tool: ${tool}`, getCorsHeaders);
+          return badRequestResponse(`Invalid tool: ${tool}`, getOnlyCorsHeaders);
         }
 
-        const { data, error } = await supabase.rpc('generate_tool_llms_txt', {
+        const { data, error } = await supabaseAnon.rpc('generate_tool_llms_txt', {
           p_tool_name: tool,
         });
         if (error) {
           console.error('RPC error (tool):', error);
-          return errorResponse(error, 'generate_tool_llms_txt', getCorsHeaders);
+          return errorResponse(error, 'generate_tool_llms_txt', getOnlyCorsHeaders);
         }
         content = data;
         break;
@@ -198,7 +157,7 @@ Deno.serve(async (req) => {
       default:
         return badRequestResponse(
           'Missing or invalid type parameter. Valid types: sitewide, category, item, changelog-index, changelog-entry, tool',
-          getCorsHeaders
+          getOnlyCorsHeaders
         );
     }
 
@@ -208,7 +167,7 @@ Deno.serve(async (req) => {
         headers: {
           'Content-Type': 'text/plain; charset=utf-8',
           'Cache-Control': 'no-store, must-revalidate',
-          ...getCorsHeaders,
+          ...getOnlyCorsHeaders,
         },
       });
     }
@@ -230,11 +189,11 @@ Deno.serve(async (req) => {
         'CDN-Cache-Control': 'max-age=3600',
         'X-RateLimit-Limit': '1000',
         'X-RateLimit-Window': '3600',
-        ...getCorsHeaders,
+        ...getOnlyCorsHeaders,
       },
     });
   } catch (error) {
     console.error('Edge function error:', error);
-    return errorResponse(error as Error, 'llms-txt', getCorsHeaders);
+    return errorResponse(error as Error, 'llms-txt', getOnlyCorsHeaders);
   }
 });

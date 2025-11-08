@@ -5,345 +5,423 @@
  * For full types, see src/types/database.types.ts (generated via pnpm generate:types)
  */
 
-export type Json =
-  | string
-  | number
-  | boolean
-  | null
-  | { [key: string]: Json | undefined }
-  | Json[]
+export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
 export interface Database {
   public: {
     Functions: {
       get_weekly_digest: {
-        Args: { p_week_start?: string }
-        Returns: Json
-      }
+        Args: { p_week_start?: string };
+        Returns: Json;
+      };
       get_due_sequence_emails: {
-        Args: Record<string, never>
-        Returns: Json
-      }
+        Args: Record<string, never>;
+        Returns: Json;
+      };
       get_personalized_feed: {
-        Args: { p_user_id: string; p_category?: string; p_limit?: number }
-        Returns: Json
-      }
+        Args: { p_user_id: string; p_category?: string; p_limit?: number };
+        Returns: Json;
+      };
       get_similar_content: {
-        Args: { p_content_type: string; p_content_slug: string; p_limit?: number }
-        Returns: Json
-      }
+        Args: { p_content_type: string; p_content_slug: string; p_limit?: number };
+        Returns: Json;
+      };
       get_usage_recommendations: {
-        Args: { p_user_id: string; p_trigger: string; p_content_type?: string; p_content_slug?: string; p_category?: string; p_limit?: number }
-        Returns: Json
-      }
+        Args: {
+          p_user_id: string;
+          p_trigger: string;
+          p_content_type?: string;
+          p_content_slug?: string;
+          p_category?: string;
+          p_limit?: number;
+        };
+        Returns: Json;
+      };
       get_content_affinity: {
-        Args: { p_user_id: string; p_content_type: string; p_content_slug: string }
-        Returns: Json
-      }
+        Args: { p_user_id: string; p_content_type: string; p_content_slug: string };
+        Returns: Json;
+      };
       get_user_affinities: {
-        Args: { p_user_id: string }
-        Returns: Json
-      }
+        Args: { p_user_id: string };
+        Returns: Json;
+      };
       get_user_favorite_categories: {
-        Args: { p_user_id: string }
-        Returns: Json
-      }
+        Args: { p_user_id: string };
+        Returns: Json;
+      };
       generate_metadata_complete: {
-        Args: { p_route: string; p_include?: string }
-        Returns: Json
-      }
+        Args: { p_route: string; p_include?: string };
+        Returns: Json;
+      };
       get_user_recent_interactions: {
-        Args: { p_user_id: string; p_limit?: number }
-        Returns: Json
-      }
+        Args: { p_user_id: string; p_limit?: number };
+        Returns: Json;
+      };
       get_user_interaction_summary: {
-        Args: { p_user_id: string }
-        Returns: Json
-      }
+        Args: { p_user_id: string };
+        Returns: Json;
+      };
       get_recommendations: {
-        Args: { p_user_profile: Json; p_limit?: number }
-        Returns: Json
-      }
+        Args: { p_user_profile: Json; p_limit?: number };
+        Returns: Json;
+      };
       update_user_affinity_scores: {
-        Args: { p_user_id: string }
-        Returns: Json
-      }
+        Args: { p_user_id: string };
+        Returns: Json;
+      };
       // LLMs.txt generation functions
       generate_sitewide_llms_txt: {
-        Args: never
-        Returns: string
-      }
+        Args: never;
+        Returns: string;
+      };
       generate_category_llms_txt: {
-        Args: { p_category: string }
-        Returns: string
-      }
+        Args: { p_category: string };
+        Returns: string;
+      };
       generate_llms_txt_content: {
-        Args: { p_category: string; p_slug: string }
-        Returns: Json
-      }
+        Args: { p_category: string; p_slug: string };
+        Returns: Json;
+      };
       generate_changelog_llms_txt: {
-        Args: never
-        Returns: string
-      }
+        Args: never;
+        Returns: string;
+      };
       generate_changelog_entry_llms_txt: {
-        Args: { p_slug: string }
-        Returns: string
-      }
+        Args: { p_slug: string };
+        Returns: string;
+      };
       generate_tool_llms_txt: {
-        Args: { p_tool_name: string }
-        Returns: string
-      }
-    }
+        Args: { p_tool_name: string };
+        Returns: string;
+      };
+    };
     Tables: {
       content_submissions: {
         Row: {
-          author: string
-          author_profile_url: string | null
-          auto_slug: string | null
-          category: string
-          content_data: Json
-          created_at: string
-          description: string
-          github_pr_url: string | null
-          github_url: string | null
-          id: string
-          merged_at: string | null
-          moderated_at: string | null
-          moderated_by: string | null
-          moderator_notes: string | null
-          name: string
-          spam_reasons: string[] | null
-          spam_score: number | null
-          status: string
-          submission_type: string
-          submitter_email: string | null
-          submitter_id: string | null
-          submitter_ip: unknown
-          tags: string[] | null
-          updated_at: string
-        }
+          author: string;
+          author_profile_url: string | null;
+          auto_slug: string | null;
+          category: string;
+          content_data: Json;
+          created_at: string;
+          description: string;
+          github_pr_url: string | null;
+          github_url: string | null;
+          id: string;
+          merged_at: string | null;
+          moderated_at: string | null;
+          moderated_by: string | null;
+          moderator_notes: string | null;
+          name: string;
+          spam_reasons: string[] | null;
+          spam_score: number | null;
+          status: string;
+          submission_type: string;
+          submitter_email: string | null;
+          submitter_id: string | null;
+          submitter_ip: unknown;
+          tags: string[] | null;
+          updated_at: string;
+        };
         Insert: {
-          author: string
-          author_profile_url?: string | null
-          auto_slug?: string | null
-          category: string
-          content_data?: Json
-          created_at?: string
-          description: string
-          github_pr_url?: string | null
-          github_url?: string | null
-          id?: string
-          merged_at?: string | null
-          moderated_at?: string | null
-          moderated_by?: string | null
-          moderator_notes?: string | null
-          name: string
-          spam_reasons?: string[] | null
-          spam_score?: number | null
-          status?: string
-          submission_type: string
-          submitter_email?: string | null
-          submitter_id?: string | null
-          submitter_ip?: unknown
-          tags?: string[] | null
-          updated_at?: string
-        }
+          author: string;
+          author_profile_url?: string | null;
+          auto_slug?: string | null;
+          category: string;
+          content_data?: Json;
+          created_at?: string;
+          description: string;
+          github_pr_url?: string | null;
+          github_url?: string | null;
+          id?: string;
+          merged_at?: string | null;
+          moderated_at?: string | null;
+          moderated_by?: string | null;
+          moderator_notes?: string | null;
+          name: string;
+          spam_reasons?: string[] | null;
+          spam_score?: number | null;
+          status?: string;
+          submission_type: string;
+          submitter_email?: string | null;
+          submitter_id?: string | null;
+          submitter_ip?: unknown;
+          tags?: string[] | null;
+          updated_at?: string;
+        };
         Update: {
-          author?: string
-          author_profile_url?: string | null
-          auto_slug?: string | null
-          category?: string
-          content_data?: Json
-          created_at?: string
-          description?: string
-          github_pr_url?: string | null
-          github_url?: string | null
-          id?: string
-          merged_at?: string | null
-          moderated_at?: string | null
-          moderated_by?: string | null
-          moderator_notes?: string | null
-          name?: string
-          spam_reasons?: string[] | null
-          spam_score?: number | null
-          status?: string
-          submission_type?: string
-          submitter_email?: string | null
-          submitter_id?: string | null
-          submitter_ip?: unknown
-          tags?: string[] | null
-          updated_at?: string
-        }
-      }
+          author?: string;
+          author_profile_url?: string | null;
+          auto_slug?: string | null;
+          category?: string;
+          content_data?: Json;
+          created_at?: string;
+          description?: string;
+          github_pr_url?: string | null;
+          github_url?: string | null;
+          id?: string;
+          merged_at?: string | null;
+          moderated_at?: string | null;
+          moderated_by?: string | null;
+          moderator_notes?: string | null;
+          name?: string;
+          spam_reasons?: string[] | null;
+          spam_score?: number | null;
+          status?: string;
+          submission_type?: string;
+          submitter_email?: string | null;
+          submitter_id?: string | null;
+          submitter_ip?: unknown;
+          tags?: string[] | null;
+          updated_at?: string;
+        };
+      };
+      newsletter_subscriptions: {
+        Row: {
+          confirmation_token: string | null;
+          confirmed: boolean | null;
+          confirmed_at: string | null;
+          consent_given: boolean | null;
+          copy_category: string | null;
+          copy_slug: string | null;
+          copy_type: string | null;
+          created_at: string | null;
+          email: string;
+          id: string;
+          ip_address: unknown;
+          last_email_sent_at: string | null;
+          last_sync_at: string | null;
+          referrer: string | null;
+          resend_contact_id: string | null;
+          source: Database['public']['Enums']['newsletter_source'] | null;
+          status: string;
+          subscribed_at: string | null;
+          sync_error: string | null;
+          sync_status: string | null;
+          unsubscribed_at: string | null;
+          updated_at: string | null;
+          user_agent: string | null;
+        };
+        Insert: {
+          confirmation_token?: string | null;
+          confirmed?: boolean | null;
+          confirmed_at?: string | null;
+          consent_given?: boolean | null;
+          copy_category?: string | null;
+          copy_slug?: string | null;
+          copy_type?: string | null;
+          created_at?: string | null;
+          email: string;
+          id?: string;
+          ip_address?: unknown;
+          last_email_sent_at?: string | null;
+          last_sync_at?: string | null;
+          referrer?: string | null;
+          resend_contact_id?: string | null;
+          source?: Database['public']['Enums']['newsletter_source'] | null;
+          status?: string;
+          subscribed_at?: string | null;
+          sync_error?: string | null;
+          sync_status?: string | null;
+          unsubscribed_at?: string | null;
+          updated_at?: string | null;
+          user_agent?: string | null;
+        };
+        Update: {
+          confirmation_token?: string | null;
+          confirmed?: boolean | null;
+          confirmed_at?: string | null;
+          consent_given?: boolean | null;
+          copy_category?: string | null;
+          copy_slug?: string | null;
+          copy_type?: string | null;
+          created_at?: string | null;
+          email?: string;
+          id?: string;
+          ip_address?: unknown;
+          last_email_sent_at?: string | null;
+          last_sync_at?: string | null;
+          referrer?: string | null;
+          resend_contact_id?: string | null;
+          source?: Database['public']['Enums']['newsletter_source'] | null;
+          status?: string;
+          subscribed_at?: string | null;
+          sync_error?: string | null;
+          sync_status?: string | null;
+          unsubscribed_at?: string | null;
+          updated_at?: string | null;
+          user_agent?: string | null;
+        };
+      };
       webhook_events: {
         Row: {
-          created_at: string
-          data: Json
-          direction: Database['public']['Enums']['webhook_direction']
-          error: string | null
-          http_status_code: number | null
-          id: string
-          next_retry_at: string | null
-          processed: boolean | null
-          processed_at: string | null
-          received_at: string | null
-          related_id: string | null
-          response_payload: Json | null
-          retry_count: number | null
-          source: Database['public']['Enums']['webhook_source']
-          svix_id: string | null
-          type: string
-        }
+          created_at: string;
+          data: Json;
+          direction: Database['public']['Enums']['webhook_direction'];
+          error: string | null;
+          http_status_code: number | null;
+          id: string;
+          next_retry_at: string | null;
+          processed: boolean | null;
+          processed_at: string | null;
+          received_at: string | null;
+          related_id: string | null;
+          response_payload: Json | null;
+          retry_count: number | null;
+          source: Database['public']['Enums']['webhook_source'];
+          svix_id: string | null;
+          type: string;
+        };
         Insert: {
-          created_at: string
-          data?: Json
-          direction?: Database['public']['Enums']['webhook_direction']
-          error?: string | null
-          http_status_code?: number | null
-          id?: string
-          next_retry_at?: string | null
-          processed?: boolean | null
-          processed_at?: string | null
-          received_at?: string | null
-          related_id?: string | null
-          response_payload?: Json | null
-          retry_count?: number | null
-          source?: Database['public']['Enums']['webhook_source']
-          svix_id?: string | null
-          type: string
-        }
+          created_at: string;
+          data?: Json;
+          direction?: Database['public']['Enums']['webhook_direction'];
+          error?: string | null;
+          http_status_code?: number | null;
+          id?: string;
+          next_retry_at?: string | null;
+          processed?: boolean | null;
+          processed_at?: string | null;
+          received_at?: string | null;
+          related_id?: string | null;
+          response_payload?: Json | null;
+          retry_count?: number | null;
+          source?: Database['public']['Enums']['webhook_source'];
+          svix_id?: string | null;
+          type: string;
+        };
         Update: {
-          created_at?: string
-          data?: Json
-          direction?: Database['public']['Enums']['webhook_direction']
-          error?: string | null
-          http_status_code?: number | null
-          id?: string
-          next_retry_at?: string | null
-          processed?: boolean | null
-          processed_at?: string | null
-          received_at?: string | null
-          related_id?: string | null
-          response_payload?: Json | null
-          retry_count?: number | null
-          source?: Database['public']['Enums']['webhook_source']
-          svix_id?: string | null
-          type?: string
-        }
-        Relationships: []
-      }
+          created_at?: string;
+          data?: Json;
+          direction?: Database['public']['Enums']['webhook_direction'];
+          error?: string | null;
+          http_status_code?: number | null;
+          id?: string;
+          next_retry_at?: string | null;
+          processed?: boolean | null;
+          processed_at?: string | null;
+          received_at?: string | null;
+          related_id?: string | null;
+          response_payload?: Json | null;
+          retry_count?: number | null;
+          source?: Database['public']['Enums']['webhook_source'];
+          svix_id?: string | null;
+          type?: string;
+        };
+        Relationships: [];
+      };
       content: {
         Row: {
-          id: string
-          category: string
-          slug: string
-          title: string
-          display_title: string | null
-          seo_title: string | null
-          description: string
-          author: string
-          author_profile_url: string | null
-          date_added: string
-          tags: string[] | null
-          content: string | null
-          source: string | null
-          documentation_url: string | null
-          features: string[] | null
-          use_cases: string[] | null
-          examples: Json | null
-          discovery_metadata: Json | null
-          metadata: Json | null
-          git_hash: string | null
-        }
-      }
+          id: string;
+          category: string;
+          slug: string;
+          title: string;
+          display_title: string | null;
+          seo_title: string | null;
+          description: string;
+          author: string;
+          author_profile_url: string | null;
+          date_added: string;
+          tags: string[] | null;
+          content: string | null;
+          source: string | null;
+          documentation_url: string | null;
+          features: string[] | null;
+          use_cases: string[] | null;
+          examples: Json | null;
+          discovery_metadata: Json | null;
+          metadata: Json | null;
+          git_hash: string | null;
+        };
+      };
       changelog_entries: {
         Row: {
-          canonical_url: string | null
-          changes: Json
-          commit_count: number | null
-          content: string
-          contributors: string[] | null
-          created_at: string
-          description: string | null
-          featured: boolean
-          git_commit_sha: string | null
-          id: string
-          json_ld: Json | null
-          keywords: string[] | null
-          og_image: string | null
-          og_type: string | null
-          published: boolean
-          raw_content: string
-          release_date: string
-          robots_follow: boolean | null
-          robots_index: boolean | null
-          slug: string
-          source: string | null
-          title: string
-          tldr: string | null
-          twitter_card: string | null
-          updated_at: string
-        }
+          canonical_url: string | null;
+          changes: Json;
+          commit_count: number | null;
+          content: string;
+          contributors: string[] | null;
+          created_at: string;
+          description: string | null;
+          featured: boolean;
+          git_commit_sha: string | null;
+          id: string;
+          json_ld: Json | null;
+          keywords: string[] | null;
+          og_image: string | null;
+          og_type: string | null;
+          published: boolean;
+          raw_content: string;
+          release_date: string;
+          robots_follow: boolean | null;
+          robots_index: boolean | null;
+          slug: string;
+          source: string | null;
+          title: string;
+          tldr: string | null;
+          twitter_card: string | null;
+          updated_at: string;
+        };
         Insert: {
-          canonical_url?: string | null
-          changes?: Json
-          commit_count?: number | null
-          content: string
-          contributors?: string[] | null
-          created_at?: string
-          description?: string | null
-          featured?: boolean
-          git_commit_sha?: string | null
-          id?: string
-          json_ld?: Json | null
-          keywords?: string[] | null
-          og_image?: string | null
-          og_type?: string | null
-          published?: boolean
-          raw_content: string
-          release_date: string
-          robots_follow?: boolean | null
-          robots_index?: boolean | null
-          slug: string
-          source?: string | null
-          title: string
-          tldr?: string | null
-          twitter_card?: string | null
-          updated_at?: string
-        }
+          canonical_url?: string | null;
+          changes?: Json;
+          commit_count?: number | null;
+          content: string;
+          contributors?: string[] | null;
+          created_at?: string;
+          description?: string | null;
+          featured?: boolean;
+          git_commit_sha?: string | null;
+          id?: string;
+          json_ld?: Json | null;
+          keywords?: string[] | null;
+          og_image?: string | null;
+          og_type?: string | null;
+          published?: boolean;
+          raw_content: string;
+          release_date: string;
+          robots_follow?: boolean | null;
+          robots_index?: boolean | null;
+          slug: string;
+          source?: string | null;
+          title: string;
+          tldr?: string | null;
+          twitter_card?: string | null;
+          updated_at?: string;
+        };
         Update: {
-          canonical_url?: string | null
-          changes?: Json
-          commit_count?: number | null
-          content?: string
-          contributors?: string[] | null
-          created_at?: string
-          description?: string | null
-          featured?: boolean
-          git_commit_sha?: string | null
-          id?: string
-          json_ld?: Json | null
-          keywords?: string[] | null
-          og_image?: string | null
-          og_type?: string | null
-          published?: boolean
-          raw_content?: string
-          release_date?: string
-          robots_follow?: boolean | null
-          robots_index?: boolean | null
-          slug?: string
-          source?: string | null
-          title?: string
-          tldr?: string | null
-          twitter_card?: string | null
-          updated_at?: string
-        }
-        Relationships: []
-      }
-    }
+          canonical_url?: string | null;
+          changes?: Json;
+          commit_count?: number | null;
+          content?: string;
+          contributors?: string[] | null;
+          created_at?: string;
+          description?: string | null;
+          featured?: boolean;
+          git_commit_sha?: string | null;
+          id?: string;
+          json_ld?: Json | null;
+          keywords?: string[] | null;
+          og_image?: string | null;
+          og_type?: string | null;
+          published?: boolean;
+          raw_content?: string;
+          release_date?: string;
+          robots_follow?: boolean | null;
+          robots_index?: boolean | null;
+          slug?: string;
+          source?: string | null;
+          title?: string;
+          tldr?: string | null;
+          twitter_card?: string | null;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+    };
     Enums: {
-      webhook_direction: 'inbound' | 'outbound'
-      webhook_source: 'resend' | 'vercel' | 'discord' | 'supabase_db' | 'custom'
-    }
-  }
+      webhook_direction: 'inbound' | 'outbound';
+      webhook_source: 'resend' | 'vercel' | 'discord' | 'supabase_db' | 'custom';
+    };
+  };
 }

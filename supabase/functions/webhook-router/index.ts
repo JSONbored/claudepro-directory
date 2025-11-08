@@ -1,50 +1,27 @@
 /**
- * Unified Webhook Router - Database-First Architecture
- * Single entry point for ALL external webhooks (Resend, Vercel, custom)
- *
- * Flow:
- * 1. Verify webhook signature (HMAC SHA-1/SHA-256/Svix)
- * 2. Identify source (headers, payload shape)
- * 3. Insert to webhook_events table
- * 4. PostgreSQL trigger handles routing to business logic
- * 5. Return 200 OK (fast acknowledgment <50ms)
- *
- * Supported Sources:
- * - Resend (Svix HMAC SHA-256) - Email events
- * - Vercel (HMAC SHA-1) - Deployment events
- * - Custom (configurable) - Future extensibility
- *
- * Environment Variables:
- *   RESEND_WEBHOOK_SECRET  - Svix secret for Resend webhooks
- *   VERCEL_WEBHOOK_SECRET  - Secret for Vercel deployment webhooks
- *   SUPABASE_URL           - Supabase project URL
- *   SUPABASE_SERVICE_ROLE_KEY - Service role key for webhook_events insert
+ * Unified Webhook Router - Signature verification + database routing
  */
 
-import { createClient } from 'jsr:@supabase/supabase-js@2';
 import type { Database } from '../_shared/database.types.ts';
 import {
-  publicCorsHeaders,
-  errorResponse,
-  successResponse,
-  methodNotAllowedResponse,
   badRequestResponse,
+  errorResponse,
+  methodNotAllowedResponse,
+  publicCorsHeaders,
+  successResponse,
   unauthorizedResponse,
 } from '../_shared/utils/response.ts';
+import { supabaseServiceRole } from '../_shared/utils/supabase-service-role.ts';
+import { verifyVercelSignature } from '../_shared/utils/vercel.ts';
 
-// Environment variables
 const RESEND_WEBHOOK_SECRET = Deno.env.get('RESEND_WEBHOOK_SECRET');
 const VERCEL_WEBHOOK_SECRET = Deno.env.get('VERCEL_WEBHOOK_SECRET');
-const SUPABASE_URL = Deno.env.get('SUPABASE_URL') ?? '';
-const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
-
-// Singleton Supabase client - reused across all requests for optimal performance
-const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
 // CORS headers with webhook-specific allowed headers
 const webhookCorsHeaders = {
   ...publicCorsHeaders,
-  'Access-Control-Allow-Headers': 'Content-Type, svix-id, svix-timestamp, svix-signature, x-vercel-signature',
+  'Access-Control-Allow-Headers':
+    'Content-Type, svix-id, svix-timestamp, svix-signature, x-vercel-signature',
 };
 
 type WebhookSource = Database['public']['Enums']['webhook_source'];
@@ -78,7 +55,10 @@ Deno.serve(async (req) => {
 
     if (!identification.verified) {
       console.error('Webhook verification failed:', identification.error);
-      return unauthorizedResponse(identification.error || 'Signature verification failed', webhookCorsHeaders);
+      return unauthorizedResponse(
+        identification.error || 'Signature verification failed',
+        webhookCorsHeaders
+      );
     }
 
     // Parse webhook payload
@@ -96,7 +76,7 @@ Deno.serve(async (req) => {
     }
 
     // Insert into webhook_events table (trigger will handle routing)
-    const { error } = await supabase.from('webhook_events').insert({
+    const { error } = await supabaseServiceRole.from('webhook_events').insert({
       source: identification.source,
       direction: 'inbound',
       type,
@@ -117,9 +97,14 @@ Deno.serve(async (req) => {
       return errorResponse(error, 'webhook-router:insert', webhookCorsHeaders);
     }
 
-    console.log(`Webhook routed: source=${identification.source}, type=${type}, id=${idempotencyKey}`);
-    return successResponse({ message: 'OK', source: identification.source }, 200, webhookCorsHeaders);
-
+    console.log(
+      `Webhook routed: source=${identification.source}, type=${type}, id=${idempotencyKey}`
+    );
+    return successResponse(
+      { message: 'OK', source: identification.source },
+      200,
+      webhookCorsHeaders
+    );
   } catch (error) {
     return errorResponse(error, 'webhook-router', webhookCorsHeaders);
   }
@@ -143,7 +128,7 @@ async function identifyAndVerifyWebhook(
       return {
         source: 'resend',
         verified: false,
-        error: 'RESEND_WEBHOOK_SECRET not configured'
+        error: 'RESEND_WEBHOOK_SECRET not configured',
       };
     }
 
@@ -158,7 +143,7 @@ async function identifyAndVerifyWebhook(
     return {
       source: 'resend',
       verified,
-      error: verified ? undefined : 'Svix signature verification failed'
+      error: verified ? undefined : 'Svix signature verification failed',
     };
   }
 
@@ -170,20 +155,16 @@ async function identifyAndVerifyWebhook(
       return {
         source: 'vercel',
         verified: false,
-        error: 'VERCEL_WEBHOOK_SECRET not configured'
+        error: 'VERCEL_WEBHOOK_SECRET not configured',
       };
     }
 
-    const verified = await verifyVercelSignature(
-      body,
-      vercelSignature,
-      VERCEL_WEBHOOK_SECRET
-    );
+    const verified = await verifyVercelSignature(body, vercelSignature, VERCEL_WEBHOOK_SECRET);
 
     return {
       source: 'vercel',
       verified,
-      error: verified ? undefined : 'Vercel signature verification failed'
+      error: verified ? undefined : 'Vercel signature verification failed',
     };
   }
 
@@ -191,7 +172,7 @@ async function identifyAndVerifyWebhook(
   return {
     source: 'custom',
     verified: false,
-    error: 'No recognized webhook signature headers'
+    error: 'No recognized webhook signature headers',
   };
 }
 
@@ -217,7 +198,7 @@ async function verifySvixSignature(
     let secretBytes: Uint8Array;
     if (secret.startsWith('whsec_')) {
       const base64Secret = secret.substring(6); // Remove 'whsec_' prefix
-      secretBytes = Uint8Array.from(atob(base64Secret), c => c.charCodeAt(0));
+      secretBytes = Uint8Array.from(atob(base64Secret), (c) => c.charCodeAt(0));
     } else {
       const encoder = new TextEncoder();
       secretBytes = encoder.encode(secret);
@@ -246,43 +227,22 @@ async function verifySvixSignature(
 }
 
 /**
- * Verify Vercel webhook signature
- * Vercel standard: HMAC SHA-1
- */
-async function verifyVercelSignature(
-  body: string,
-  signature: string,
-  secret: string
-): Promise<boolean> {
-  try {
-    const encoder = new TextEncoder();
-    const key = await crypto.subtle.importKey(
-      'raw',
-      encoder.encode(secret),
-      { name: 'HMAC', hash: 'SHA-1' },
-      false,
-      ['sign']
-    );
-
-    const expectedSignature = await crypto.subtle.sign('HMAC', key, encoder.encode(body));
-    const expectedHex = Array.from(new Uint8Array(expectedSignature))
-      .map((b) => b.toString(16).padStart(2, '0'))
-      .join('');
-
-    return signature === expectedHex;
-  } catch (error) {
-    console.error('Vercel signature verification error:', error);
-    return false;
-  }
-}
-
-/**
  * Extract common webhook fields based on source
  * Returns normalized type, created_at, and idempotency key
  */
+interface WebhookPayload {
+  type?: string;
+  event?: string;
+  created_at?: string;
+  createdAt?: string | number;
+  timestamp?: string;
+  id?: string;
+  [key: string]: unknown;
+}
+
 function extractWebhookFields(
   source: WebhookSource,
-  payload: any,
+  payload: WebhookPayload,
   headers: Headers
 ): {
   type: string | null;
@@ -306,9 +266,8 @@ function extractWebhookFields(
         idempotencyKey: payload.id || headers.get('x-vercel-id') || null,
       };
 
-    case 'custom':
     default:
-      // Generic webhook format
+      // Generic webhook format (custom and other sources)
       return {
         type: payload.type || payload.event || null,
         createdAt: payload.created_at || payload.timestamp || null,

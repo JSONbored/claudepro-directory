@@ -14,30 +14,67 @@ import type { Tables } from '@/src/types/database.types';
 
 // Manual Zod schemas (database validates, Zod just provides type safety)
 const collectionSchema = z.object({
-  name: z.string(),
-  slug: z.string(),
-  description: z.string().optional().nullable(),
+  name: z.string().min(2).max(100),
+  slug: z
+    .string()
+    .min(2)
+    .max(100)
+    .regex(/^[a-z0-9-]+$/),
+  description: z.string().max(500).optional().nullable(),
   is_public: z.boolean().default(false),
 });
 
 const collectionItemSchema = z.object({
   collection_id: z.string(),
   content_type: z.string(),
-  content_slug: z.string(),
-  notes: z.string().optional().nullable(),
-  order: z.number().int().optional(),
+  content_slug: z
+    .string()
+    .max(200)
+    .regex(/^[a-zA-Z0-9\-_/]+$/),
+  notes: z.string().max(500).optional().nullable(),
+  order: z.number().int().min(0).optional(),
 });
 
 const reviewSchema = z.object({
-  content_type: z.string(),
-  content_slug: z.string(),
+  content_type: z.enum([
+    'agents',
+    'mcp',
+    'rules',
+    'commands',
+    'hooks',
+    'statuslines',
+    'collections',
+    'guides',
+    'skills',
+    'jobs',
+    'changelog',
+  ]),
+  content_slug: z
+    .string()
+    .max(200)
+    .regex(/^[a-zA-Z0-9\-_/]+$/),
   rating: z.number().int().min(1).max(5),
-  review_text: z.string().optional().nullable(),
+  review_text: z.string().max(2000).optional().nullable(),
 });
 
 const getReviewsSchema = z.object({
-  content_type: z.string(),
-  content_slug: z.string(),
+  content_type: z.enum([
+    'agents',
+    'mcp',
+    'rules',
+    'commands',
+    'hooks',
+    'statuslines',
+    'collections',
+    'guides',
+    'skills',
+    'jobs',
+    'changelog',
+  ]),
+  content_slug: z
+    .string()
+    .max(200)
+    .regex(/^[a-zA-Z0-9\-_/]+$/),
   sort_by: z.enum(['recent', 'helpful', 'rating_high', 'rating_low']).default('recent'),
   limit: z.number().int().min(1).max(100).default(20),
   offset: z.number().int().min(0).default(0),
@@ -48,7 +85,7 @@ const reorderItemsSchema = z.object({
   items: z.array(
     z.object({
       id: z.string(),
-      order: z.number().int(),
+      order: z.number().int().min(0),
     })
   ),
 });
@@ -56,7 +93,7 @@ const reorderItemsSchema = z.object({
 const reviewUpdateSchema = z.object({
   review_id: z.string(),
   rating: z.number().int().min(1).max(5).optional(),
-  review_text: z.string().optional().nullable(),
+  review_text: z.string().max(2000).optional().nullable(),
 });
 
 const helpfulVoteSchema = z.object({

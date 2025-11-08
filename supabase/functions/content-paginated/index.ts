@@ -1,43 +1,25 @@
 /**
- * Content Paginated Edge Function - Homepage "All" tab infinite scroll
- * Uses mv_content_list_slim for 87% bandwidth reduction (15KB → 2KB per item)
+ * Content paginated - Homepage "All" tab infinite scroll
  */
 
-import { createClient } from 'jsr:@supabase/supabase-js@2';
+import { getWithAuthCorsHeaders } from '../_shared/utils/cors.ts';
 import {
   errorResponse,
   jsonResponse,
   methodNotAllowedResponse,
 } from '../_shared/utils/response.ts';
-
-const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
-const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY');
-
-if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-  throw new Error('Missing required environment variables: SUPABASE_URL and/or SUPABASE_ANON_KEY');
-}
-
-// Singleton Supabase client - reused across all requests for optimal performance
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-// GET-specific CORS headers for read-only public endpoint with Authorization support
-const getCorsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-};
+import { supabaseAnon } from '../_shared/utils/supabase.ts';
 
 Deno.serve(async (req: Request) => {
-  // Handle CORS preflight - public endpoint (read-only content)
   if (req.method === 'OPTIONS') {
     return new Response(null, {
       status: 200,
-      headers: getCorsHeaders,
+      headers: getWithAuthCorsHeaders,
     });
   }
 
   if (req.method !== 'GET') {
-    return methodNotAllowedResponse('GET', getCorsHeaders);
+    return methodNotAllowedResponse('GET', getWithAuthCorsHeaders);
   }
 
   try {
@@ -55,7 +37,7 @@ Deno.serve(async (req: Request) => {
       return jsonResponse(
         { error: 'Invalid parameters', message: 'offset must be a non-negative integer' },
         400,
-        getCorsHeaders
+        getWithAuthCorsHeaders
       );
     }
 
@@ -63,10 +45,10 @@ Deno.serve(async (req: Request) => {
       return jsonResponse(
         { error: 'Invalid parameters', message: 'limit must be between 1 and 100' },
         400,
-        getCorsHeaders
+        getWithAuthCorsHeaders
       );
     }
-    const { data, error } = await supabase.rpc('get_content_paginated_slim', {
+    const { data, error } = await supabaseAnon.rpc('get_content_paginated_slim', {
       p_category: category,
       p_limit: limit,
       p_offset: offset,
@@ -74,24 +56,22 @@ Deno.serve(async (req: Request) => {
 
     if (error) {
       console.error('RPC error:', error);
-      return errorResponse(error, 'get_content_paginated_slim', getCorsHeaders);
+      return errorResponse(error, 'get_content_paginated_slim', getWithAuthCorsHeaders);
     }
 
-    // Extract items array from JSONB response
     const items = data?.items || [];
 
-    // Return with caching headers (1 day = 86400 seconds, matches MV refresh)
     return new Response(JSON.stringify(items), {
       status: 200,
       headers: {
         'Content-Type': 'application/json',
         'Cache-Control': 'public, s-maxage=86400, stale-while-revalidate=43200',
         'CDN-Cache-Control': 'max-age=86400',
-        ...getCorsHeaders,
+        ...getWithAuthCorsHeaders,
       },
     });
   } catch (error) {
     console.error('Edge function error:', error);
-    return errorResponse(error, 'content-paginated', getCorsHeaders);
+    return errorResponse(error, 'content-paginated', getWithAuthCorsHeaders);
   }
 });

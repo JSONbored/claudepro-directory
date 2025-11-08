@@ -132,7 +132,7 @@ async function generateCategoryConfig() {
     title: '${dbConfig.title.replace(/'/g, "\\'")}',
     pluralTitle: '${dbConfig.plural_title.replace(/'/g, "\\'")}',
     description: '${dbConfig.description.replace(/'/g, "\\'")}',
-    icon: ICON_MAP['${dbConfig.icon_name}'] || FileText,
+    icon: ICON_MAP.${dbConfig.icon_name} || FileText,
     colorScheme: '${dbConfig.color_scheme}',
     showOnHomepage: ${features.show_on_homepage ?? true},
     keywords: '${dbConfig.keywords.replace(/'/g, "\\'")}',

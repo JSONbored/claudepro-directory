@@ -3161,6 +3161,7 @@ export type Database = {
         Args: { p_include?: string; p_route: string };
         Returns: Json;
       };
+      generate_readme_data: { Args: never; Returns: Json };
       generate_sitemap_xml: { Args: { p_base_url?: string }; Returns: string };
       generate_sitewide_llms_txt: { Args: never; Returns: string };
       generate_slug: { Args: { p_name: string }; Returns: string };
@@ -3869,6 +3870,10 @@ export type Database = {
         Returns: undefined;
       };
       handle_webhook_email_sent: {
+        Args: { p_event_data: Json; p_webhook_id: string };
+        Returns: undefined;
+      };
+      handle_webhook_vercel_deployment: {
         Args: { p_event_data: Json; p_webhook_id: string };
         Returns: undefined;
       };

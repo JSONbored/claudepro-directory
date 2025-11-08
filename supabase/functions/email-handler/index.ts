@@ -1,46 +1,32 @@
 /**
- * Consolidated Email Handler - Database-First Architecture
- * Single Edge Function routing ALL email operations via action parameter
- *
- * Actions: welcome, transactional, digest, sequence
- * Triggered by: Auth hooks, DB triggers, pg_cron
- *
- * CONSOLIDATION: Replaces 4 separate Edge Functions (1,229 → 200 LOC, 82% reduction)
+ * Consolidated Email Handler - Routes all email operations via action parameter
  */
 
-import React from 'npm:react@18.3.1';
 import { Webhook } from 'https://esm.sh/standardwebhooks@1.0.0';
-import { Resend } from 'npm:resend@4.0.0';
 import { renderAsync } from 'npm:@react-email/components@0.0.22';
-import { createClient } from 'jsr:@supabase/supabase-js@2';
-
-import {
-  AUTH_HOOK_ENV,
-  RESEND_ENV,
-  SUPABASE_ENV,
-  validateEnvironment,
-} from '../_shared/email-config.ts';
-import {
-  errorResponse,
-  successResponse,
-  methodNotAllowedResponse,
-  badRequestResponse,
-  jsonResponse,
-  publicCorsHeaders,
-} from '../_shared/utils/response.ts';
-
+import React from 'npm:react@18.3.1';
+import { Resend } from 'npm:resend@4.0.0';
+import { AUTH_HOOK_ENV, RESEND_ENV, validateEnvironment } from '../_shared/email-config.ts';
 // React Email Templates
 import { NewsletterWelcome } from '../_shared/templates/newsletter-welcome.tsx';
-import { WeeklyDigest } from '../_shared/templates/weekly-digest.tsx';
+import { OnboardingCommunity } from '../_shared/templates/onboarding-community.tsx';
 import { OnboardingGettingStarted } from '../_shared/templates/onboarding-getting-started.tsx';
 import { OnboardingPowerTips } from '../_shared/templates/onboarding-power-tips.tsx';
-import { OnboardingCommunity } from '../_shared/templates/onboarding-community.tsx';
 import { OnboardingStayEngaged } from '../_shared/templates/onboarding-stay-engaged.tsx';
+import { WeeklyDigest } from '../_shared/templates/weekly-digest.tsx';
+import {
+  badRequestResponse,
+  errorResponse,
+  jsonResponse,
+  methodNotAllowedResponse,
+  publicCorsHeaders,
+  successResponse,
+} from '../_shared/utils/response.ts';
+import { supabaseServiceRole } from '../_shared/utils/supabase-service-role.ts';
 
-validateEnvironment(['resend', 'auth-hook', 'supabase']);
+validateEnvironment(['resend', 'auth-hook']);
 
 const resend = new Resend(RESEND_ENV.apiKey);
-const supabase = createClient(SUPABASE_ENV.url, SUPABASE_ENV.serviceRoleKey);
 const hookSecret = AUTH_HOOK_ENV.secret.replace('v1,whsec_', '');
 
 Deno.serve(async (req: Request) => {
@@ -71,9 +57,9 @@ Deno.serve(async (req: Request) => {
       case 'transactional':
         return await handleTransactional(req);
       case 'digest':
-        return await handleDigest(req);
+        return await handleDigest();
       case 'sequence':
-        return await handleSequence(req);
+        return await handleSequence();
       default:
         return badRequestResponse(`Unknown action: ${action}`);
     }
@@ -86,9 +72,14 @@ Deno.serve(async (req: Request) => {
  * Handle Newsletter Subscription
  * Full flow: Validate → Resend audience → Database → Welcome email → Sequence
  */
+type SubscribePayload = Pick<
+  Database['public']['Tables']['newsletter_subscriptions']['Insert'],
+  'email' | 'source' | 'referrer' | 'copy_type' | 'copy_category' | 'copy_slug'
+>;
+
 async function handleSubscribe(req: Request): Promise<Response> {
   // Parse and validate JSON body
-  let payload: any;
+  let payload: unknown;
   try {
     payload = await req.json();
   } catch {
@@ -99,7 +90,8 @@ async function handleSubscribe(req: Request): Promise<Response> {
     return badRequestResponse('Valid JSON body is required');
   }
 
-  const { email, source, referrer, copy_type, copy_category, copy_slug } = payload;
+  const { email, source, referrer, copy_type, copy_category, copy_slug } =
+    payload as SubscribePayload;
 
   // Validate email format
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -125,7 +117,10 @@ async function handleSubscribe(req: Request): Promise<Response> {
 
       if (resendError) {
         // If email already exists in Resend, that's OK - just log it
-        if (resendError.message?.includes('already exists') || resendError.message?.includes('duplicate')) {
+        if (
+          resendError.message?.includes('already exists') ||
+          resendError.message?.includes('duplicate')
+        ) {
           console.log(`Email ${normalizedEmail} already in Resend audience - skipping sync`);
           syncStatus = 'skipped';
           syncError = 'Email already in audience';
@@ -147,7 +142,7 @@ async function handleSubscribe(req: Request): Promise<Response> {
     }
 
     // Step 2: Insert into database (rate limiting handled by BEFORE INSERT trigger)
-    const { data: subscription, error: dbError } = await supabase
+    const { data: subscription, error: dbError } = await supabaseServiceRole
       .from('newsletter_subscriptions')
       .insert({
         email: normalizedEmail,
@@ -185,7 +180,9 @@ async function handleSubscribe(req: Request): Promise<Response> {
     }
 
     // Step 3: Send welcome email
-    const html = await renderAsync(React.createElement(NewsletterWelcome, { email: normalizedEmail }));
+    const html = await renderAsync(
+      React.createElement(NewsletterWelcome, { email: normalizedEmail })
+    );
 
     const { data: emailData, error: emailError } = await resend.emails.send({
       from: 'ClaudePro Directory <hello@mail.claudepro.directory>',
@@ -202,7 +199,7 @@ async function handleSubscribe(req: Request): Promise<Response> {
 
     // Step 4: Enroll in onboarding sequence
     try {
-      await supabase.rpc('enroll_in_email_sequence', {
+      await supabaseServiceRole.rpc('enroll_in_email_sequence', {
         p_email: normalizedEmail,
       });
     } catch (sequenceError) {
@@ -247,7 +244,7 @@ async function handleWelcome(req: Request): Promise<Response> {
     if (error) throw new Error(error.message);
 
     // Enroll in onboarding sequence
-    await supabase.rpc('enroll_in_email_sequence', {
+    await supabaseServiceRole.rpc('enroll_in_email_sequence', {
       p_email: email,
     });
 
@@ -259,14 +256,16 @@ async function handleWelcome(req: Request): Promise<Response> {
   const headers = Object.fromEntries(req.headers);
   const wh = new Webhook(hookSecret);
 
-  let verified;
+  let verified: { user: { id: string; email: string } };
   try {
     verified = wh.verify(payloadText, headers) as { user: { id: string; email: string } };
-  } catch (error) {
+  } catch {
     return badRequestResponse('Invalid webhook signature');
   }
 
-  const html = await renderAsync(React.createElement(NewsletterWelcome, { email: verified.user.email }));
+  const html = await renderAsync(
+    React.createElement(NewsletterWelcome, { email: verified.user.email })
+  );
 
   const { data, error } = await resend.emails.send({
     from: 'ClaudePro Directory <hello@mail.claudepro.directory>',
@@ -291,22 +290,20 @@ async function handleTransactional(req: Request): Promise<Response> {
   return successResponse({ sent: false, reason: 'not_implemented', type });
 }
 
-async function handleDigest(req: Request): Promise<Response> {
+async function handleDigest(): Promise<Response> {
   const previousWeekStart = getPreviousWeekStart();
 
-  const { data: digest, error: digestError} = await supabase.rpc('get_weekly_digest', {
+  const { data: digest, error: digestError } = await supabaseServiceRole.rpc('get_weekly_digest', {
     p_week_start: previousWeekStart,
   });
 
   if (digestError) throw digestError;
 
-  const digestData =
-    (digest as Database['public']['Functions']['get_weekly_digest']['Returns'] | null);
+  const digestData = digest as
+    | Database['public']['Functions']['get_weekly_digest']['Returns']
+    | null;
 
-  if (
-    !digestData ||
-    (!digestData.newContent?.length && !digestData.trendingContent?.length)
-  ) {
+  if (!(digestData && (digestData.newContent?.length || digestData.trendingContent?.length))) {
     return successResponse({ skipped: true, reason: 'no_content' });
   }
 
@@ -331,12 +328,13 @@ async function handleDigest(req: Request): Promise<Response> {
   });
 }
 
-async function handleSequence(req: Request): Promise<Response> {
-  const { data, error } = await supabase.rpc('get_due_sequence_emails');
+async function handleSequence(): Promise<Response> {
+  const { data, error } = await supabaseServiceRole.rpc('get_due_sequence_emails');
 
   if (error) throw error;
 
-  const dueEmails = (data as Database['public']['Functions']['get_due_sequence_emails']['Returns']) || [];
+  const dueEmails =
+    (data as Database['public']['Functions']['get_due_sequence_emails']['Returns']) || [];
 
   if (dueEmails.length === 0) {
     return successResponse({ sent: 0, failed: 0 });
@@ -352,7 +350,7 @@ async function handleSequence(req: Request): Promise<Response> {
     5: 'Stay Engaged with ClaudePro',
   };
 
-  const STEP_TEMPLATES: Record<number, any> = {
+  const STEP_TEMPLATES: Record<number, React.FC<{ email: string }>> = {
     2: OnboardingGettingStarted,
     3: OnboardingPowerTips,
     4: OnboardingCommunity,
@@ -377,14 +375,14 @@ async function handleSequence(req: Request): Promise<Response> {
 
       if (result.error) throw new Error(result.error.message);
 
-      await supabase.rpc('mark_sequence_email_processed', {
+      await supabaseServiceRole.rpc('mark_sequence_email_processed', {
         p_schedule_id: id,
         p_email: email,
         p_step: step,
         p_success: true,
       });
 
-      await supabase.rpc('schedule_next_sequence_step', {
+      await supabaseServiceRole.rpc('schedule_next_sequence_step', {
         p_email: email,
         p_current_step: step,
       });
@@ -416,7 +414,7 @@ function getPreviousWeekStart(): string {
 }
 
 async function getAllSubscribers(): Promise<string[]> {
-  const { data, error } = await supabase.rpc('get_active_subscribers');
+  const { data, error } = await supabaseServiceRole.rpc('get_active_subscribers');
 
   if (error) {
     console.error('Failed to fetch subscribers from database:', error);
@@ -426,7 +424,13 @@ async function getAllSubscribers(): Promise<string[]> {
   return data || [];
 }
 
-async function sendBatchDigest(subscribers: string[], digestData: any) {
+interface WeeklyDigestData {
+  weekOf?: string;
+  newContent?: Array<{ category: string; slug: string; title: string; description?: string }>;
+  trendingContent?: Array<{ category: string; slug: string; title: string; description?: string }>;
+}
+
+async function sendBatchDigest(subscribers: string[], digestData: WeeklyDigestData) {
   let success = 0;
   let failed = 0;
 

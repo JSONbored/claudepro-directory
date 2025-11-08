@@ -3,19 +3,54 @@
  * All analytics/personalization logic colocated with PostgreSQL
  */
 
-import { createClient } from 'jsr:@supabase/supabase-js@2';
 import type { Database } from '../_shared/database.types.ts';
 import {
   getAuthenticatedCorsHeaders,
   jsonResponse,
   unauthorizedResponse,
 } from '../_shared/utils/response.ts';
+import { SITE_URL, supabaseServiceRole } from '../_shared/utils/supabase-service-role.ts';
 
-const SITE_URL = Deno.env.get('NEXT_PUBLIC_SITE_URL') || 'https://claudepro.directory';
-const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
-const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+type SupabaseClient = typeof supabaseServiceRole;
+type AuthUser = { id: string; email?: string } | null;
 
-type InteractionType = 'view' | 'copy' | 'bookmark' | 'click' | 'time_spent' | 'search' | 'filter' | 'screenshot' | 'share' | 'embed_generated' | 'download';
+interface TrackInteractionBody {
+  action: 'trackInteraction';
+  content_type: string;
+  content_slug: string;
+  interaction_type: InteractionType;
+  session_id?: string;
+  metadata?: Record<string, unknown>;
+}
+
+interface GetSimilarConfigsBody {
+  action: 'getSimilarConfigs';
+  content_type: string;
+  content_slug: string;
+  limit?: number;
+}
+
+interface GenerateConfigRecommendationsBody {
+  action: 'generateConfigRecommendations';
+  useCase: string;
+  experienceLevel: string;
+  toolPreferences: string;
+  integrations?: string[];
+  focusAreas?: string[];
+}
+
+type InteractionType =
+  | 'view'
+  | 'copy'
+  | 'bookmark'
+  | 'click'
+  | 'time_spent'
+  | 'search'
+  | 'filter'
+  | 'screenshot'
+  | 'share'
+  | 'embed_generated'
+  | 'download';
 
 function getContentItemUrl(category: string, slug: string): string {
   return `${SITE_URL}/${category}/${slug}`;
@@ -35,27 +70,23 @@ Deno.serve(async (req) => {
       return unauthorizedResponse('Missing authorization header', corsHeaders);
     }
 
-    const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
-      global: {
-        headers: { Authorization: authHeader },
-      },
-    });
-
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabaseServiceRole.auth.getUser(authHeader.replace('Bearer ', ''));
 
     const body = await req.json();
     const { action } = body;
 
     switch (action) {
       case 'trackInteraction':
-        return await handleTrackInteraction(supabase, user, body, corsHeaders);
+        return await handleTrackInteraction(supabaseServiceRole, user, body, corsHeaders);
 
       case 'getSimilarConfigs':
-        return await handleGetSimilarConfigs(supabase, body, corsHeaders);
+        return await handleGetSimilarConfigs(supabaseServiceRole, body, corsHeaders);
 
       case 'generateConfigRecommendations':
-        return await handleGenerateConfigRecommendations(supabase, body, corsHeaders);
-      
+        return await handleGenerateConfigRecommendations(supabaseServiceRole, body, corsHeaders);
+
       default:
         return jsonResponse({ error: `Unknown action: ${action}` }, 400, corsHeaders);
     }
@@ -66,9 +97,9 @@ Deno.serve(async (req) => {
 });
 
 async function handleTrackInteraction(
-  supabase: any,
-  user: any,
-  body: any,
+  supabase: SupabaseClient,
+  user: AuthUser,
+  body: TrackInteractionBody,
   corsHeaders: Record<string, string>
 ) {
   const { content_type, content_slug, interaction_type, session_id, metadata } = body;
@@ -77,7 +108,7 @@ async function handleTrackInteraction(
     content_type,
     content_slug,
     interaction_type: interaction_type as InteractionType,
-    user_id: user?.id || null,  // Allow anonymous tracking
+    user_id: user?.id || null, // Allow anonymous tracking
     session_id: session_id || null,
     metadata: metadata || null,
   });
@@ -90,7 +121,11 @@ async function handleTrackInteraction(
   return jsonResponse({ success: true }, 200, corsHeaders);
 }
 
-async function handleGetSimilarConfigs(supabase: any, body: any, corsHeaders: Record<string, string>) {
+async function handleGetSimilarConfigs(
+  supabase: SupabaseClient,
+  body: GetSimilarConfigsBody,
+  corsHeaders: Record<string, string>
+) {
   const { content_type, content_slug, limit = 6 } = body;
 
   const { data, error } = await supabase.rpc('get_similar_content', {
@@ -103,8 +138,20 @@ async function handleGetSimilarConfigs(supabase: any, body: any, corsHeaders: Re
     return jsonResponse({ error: error.message }, 500, corsHeaders);
   }
 
-  const result = data as Database['public']['Functions']['get_similar_content']['Returns'];
-  (result as { similar_items: any[] }).similar_items = (result as { similar_items: any[] }).similar_items.map((item: any) => ({
+  interface SimilarItem {
+    category: string;
+    slug: string;
+    title: string;
+    description?: string;
+    similarity_score?: number;
+  }
+
+  interface SimilarContentResult {
+    similar_items: SimilarItem[];
+  }
+
+  const result = data as SimilarContentResult;
+  result.similar_items = result.similar_items.map((item) => ({
     ...item,
     url: getContentItemUrl(item.category, item.slug),
   }));
@@ -112,7 +159,11 @@ async function handleGetSimilarConfigs(supabase: any, body: any, corsHeaders: Re
   return jsonResponse(result, 200, corsHeaders);
 }
 
-async function handleGenerateConfigRecommendations(supabase: any, body: any, corsHeaders: Record<string, string>) {
+async function handleGenerateConfigRecommendations(
+  supabase: SupabaseClient,
+  body: GenerateConfigRecommendationsBody,
+  corsHeaders: Record<string, string>
+) {
   const { useCase, experienceLevel, toolPreferences, integrations = [], focusAreas = [] } = body;
   const startTime = performance.now();
 
@@ -129,7 +180,8 @@ async function handleGenerateConfigRecommendations(supabase: any, body: any, cor
     return jsonResponse({ error: error.message }, 500, corsHeaders);
   }
 
-  const enrichedResult = dbResult as Database['public']['Functions']['get_recommendations']['Returns'];
+  const enrichedResult =
+    dbResult as Database['public']['Functions']['get_recommendations']['Returns'];
   const resultId = `rec_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
   const duration = performance.now() - startTime;
 
