@@ -41,21 +41,6 @@ export type LazyLoaderOptions<T> = {
   onError?: (error: Error) => void;
 };
 
-export type SEOPageData = {
-  title: string;
-  seoTitle?: string;
-  description: string;
-  keywords: string[];
-  dateUpdated: string;
-  content: string;
-  author?: string;
-  readingTime?: string;
-  difficulty?: string;
-  category?: string;
-  sections?: Record<string, unknown>[];
-  isJsonGuide?: boolean;
-};
-
 export type RelatedGuide = {
   title: string;
   slug: string;

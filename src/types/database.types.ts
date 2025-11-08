@@ -444,10 +444,13 @@ export type Database = {
         Row: {
           canonical_url: string | null;
           changes: Json;
+          commit_count: number | null;
           content: string;
+          contributors: string[] | null;
           created_at: string;
           description: string | null;
           featured: boolean;
+          git_commit_sha: string | null;
           id: string;
           json_ld: Json | null;
           keywords: string[] | null;
@@ -459,6 +462,7 @@ export type Database = {
           robots_follow: boolean | null;
           robots_index: boolean | null;
           slug: string;
+          source: string | null;
           title: string;
           tldr: string | null;
           twitter_card: string | null;
@@ -467,10 +471,13 @@ export type Database = {
         Insert: {
           canonical_url?: string | null;
           changes?: Json;
+          commit_count?: number | null;
           content: string;
+          contributors?: string[] | null;
           created_at?: string;
           description?: string | null;
           featured?: boolean;
+          git_commit_sha?: string | null;
           id?: string;
           json_ld?: Json | null;
           keywords?: string[] | null;
@@ -482,6 +489,7 @@ export type Database = {
           robots_follow?: boolean | null;
           robots_index?: boolean | null;
           slug: string;
+          source?: string | null;
           title: string;
           tldr?: string | null;
           twitter_card?: string | null;
@@ -490,10 +498,13 @@ export type Database = {
         Update: {
           canonical_url?: string | null;
           changes?: Json;
+          commit_count?: number | null;
           content?: string;
+          contributors?: string[] | null;
           created_at?: string;
           description?: string | null;
           featured?: boolean;
+          git_commit_sha?: string | null;
           id?: string;
           json_ld?: Json | null;
           keywords?: string[] | null;
@@ -505,6 +516,7 @@ export type Database = {
           robots_follow?: boolean | null;
           robots_index?: boolean | null;
           slug?: string;
+          source?: string | null;
           title?: string;
           tldr?: string | null;
           twitter_card?: string | null;
@@ -2662,6 +2674,7 @@ export type Database = {
           id: string;
           image: string | null;
           interests: Json | null;
+          json_ld: Json | null;
           name: string | null;
           profile_public: boolean | null;
           public: boolean | null;
@@ -2688,6 +2701,7 @@ export type Database = {
           id: string;
           image?: string | null;
           interests?: Json | null;
+          json_ld?: Json | null;
           name?: string | null;
           profile_public?: boolean | null;
           public?: boolean | null;
@@ -2714,6 +2728,7 @@ export type Database = {
           id?: string;
           image?: string | null;
           interests?: Json | null;
+          json_ld?: Json | null;
           name?: string | null;
           profile_public?: boolean | null;
           public?: boolean | null;
@@ -2733,39 +2748,54 @@ export type Database = {
         Row: {
           created_at: string;
           data: Json;
+          direction: Database['public']['Enums']['webhook_direction'];
           error: string | null;
+          http_status_code: number | null;
           id: string;
           next_retry_at: string | null;
           processed: boolean | null;
           processed_at: string | null;
           received_at: string | null;
+          related_id: string | null;
+          response_payload: Json | null;
           retry_count: number | null;
+          source: Database['public']['Enums']['webhook_source'];
           svix_id: string | null;
           type: string;
         };
         Insert: {
           created_at: string;
           data?: Json;
+          direction?: Database['public']['Enums']['webhook_direction'];
           error?: string | null;
+          http_status_code?: number | null;
           id?: string;
           next_retry_at?: string | null;
           processed?: boolean | null;
           processed_at?: string | null;
           received_at?: string | null;
+          related_id?: string | null;
+          response_payload?: Json | null;
           retry_count?: number | null;
+          source?: Database['public']['Enums']['webhook_source'];
           svix_id?: string | null;
           type: string;
         };
         Update: {
           created_at?: string;
           data?: Json;
+          direction?: Database['public']['Enums']['webhook_direction'];
           error?: string | null;
+          http_status_code?: number | null;
           id?: string;
           next_retry_at?: string | null;
           processed?: boolean | null;
           processed_at?: string | null;
           received_at?: string | null;
+          related_id?: string | null;
+          response_payload?: Json | null;
           retry_count?: number | null;
+          source?: Database['public']['Enums']['webhook_source'];
           svix_id?: string | null;
           type?: string;
         };
@@ -2998,73 +3028,6 @@ export type Database = {
         Args: { p_category: string; p_slug: string };
         Returns: Json;
       };
-      build_enriched_content_base:
-        | {
-            Args: {
-              p_author: string;
-              p_author_profile_url: string;
-              p_bookmark_count: number;
-              p_category: string;
-              p_content: string;
-              p_copy_count: number;
-              p_created_at: string;
-              p_date_added: string;
-              p_description: string;
-              p_display_title: string;
-              p_documentation_url: string;
-              p_examples: Json;
-              p_features: string[];
-              p_id: string;
-              p_popularity_score: number;
-              p_seo_title: string;
-              p_slug: string;
-              p_source: string;
-              p_source_table: string;
-              p_sponsor_tier: string;
-              p_sponsored_active: boolean;
-              p_sponsored_id: string;
-              p_tags: string[];
-              p_title: string;
-              p_troubleshooting: Json[];
-              p_updated_at: string;
-              p_use_cases: string[];
-              p_view_count: number;
-            };
-            Returns: Json;
-          }
-        | {
-            Args: {
-              p_author: string;
-              p_author_profile_url: string;
-              p_bookmark_count: number;
-              p_category: string;
-              p_content: string;
-              p_copy_count: number;
-              p_created_at: string;
-              p_date_added: string;
-              p_description: string;
-              p_display_title: string;
-              p_documentation_url: string;
-              p_examples: Json;
-              p_features: string[];
-              p_id: string;
-              p_popularity_score: number;
-              p_seo_title: string;
-              p_slug: string;
-              p_source: string;
-              p_source_table: string;
-              p_sponsor_tier: string;
-              p_sponsored_active: boolean;
-              p_sponsored_id: string;
-              p_tags: string[];
-              p_title: string;
-              p_troubleshooting: Json[];
-              p_updated_at: string;
-              p_use_cases: string[];
-              p_view_count: number;
-            };
-            Returns: Json;
-          };
       build_faq_schema: {
         Args: { p_category: string; p_slug: string };
         Returns: Json;
@@ -3081,7 +3044,6 @@ export type Database = {
         Args: { p_category: string; p_slug: string };
         Returns: Json;
       };
-      build_organization_json_ld: { Args: never; Returns: Json };
       build_person_schema: { Args: { p_slug: string }; Returns: Json };
       build_software_application_schema:
         | { Args: { p_category: string; p_slug: string }; Returns: Json }
@@ -4195,6 +4157,7 @@ export type Database = {
           id: string;
           image: string | null;
           interests: Json | null;
+          json_ld: Json | null;
           name: string | null;
           profile_public: boolean | null;
           public: boolean | null;
@@ -4388,6 +4351,8 @@ export type Database = {
         | 'general-development'
         | 'testing-qa'
         | 'security-audit';
+      webhook_direction: 'inbound' | 'outbound';
+      webhook_source: 'resend' | 'vercel' | 'discord' | 'supabase_db' | 'custom';
     };
     CompositeTypes: {
       [_ in never]: never;
@@ -4606,6 +4571,8 @@ export const Constants = {
         'testing-qa',
         'security-audit',
       ],
+      webhook_direction: ['inbound', 'outbound'],
+      webhook_source: ['resend', 'vercel', 'discord', 'supabase_db', 'custom'],
     },
   },
 } as const;

@@ -37,7 +37,7 @@ import {
   successResponse,
 } from '../_shared/utils/response.ts';
 
-type ChangelogInsert = Database['public']['Tables']['changelog']['Insert'];
+type ChangelogInsert = Database['public']['Tables']['changelog_entries']['Insert'];
 
 // Environment variables
 const GITHUB_TOKEN = Deno.env.get('GITHUB_TOKEN');
@@ -200,6 +200,102 @@ function groupCommitsByType(commits: GitHubCommit[]): ChangelogSection[] {
 }
 
 /**
+ * Transform sections array to changes JSONB object format
+ * Must include all 6 keepachangelog keys (Added, Changed, Deprecated, Removed, Fixed, Security)
+ */
+function transformSectionsToChanges(sections: ChangelogSection[]): Json {
+  const changes: Record<string, string[]> = {
+    Added: [],
+    Changed: [],
+    Deprecated: [],
+    Removed: [],
+    Fixed: [],
+    Security: [],
+  };
+
+  for (const section of sections) {
+    if (changes[section.title] !== undefined) {
+      changes[section.title] = section.items;
+    }
+  }
+
+  return changes as Json;
+}
+
+/**
+ * Generate full markdown content from sections
+ */
+function generateMarkdownContent(sections: ChangelogSection[]): string {
+  const parts: string[] = [];
+
+  for (const section of sections) {
+    parts.push(`## ${section.title}\n`);
+    for (const item of section.items) {
+      parts.push(`- ${item}`);
+    }
+    parts.push(''); // blank line between sections
+  }
+
+  return parts.join('\n').trim();
+}
+
+/**
+ * Send Discord webhook with exponential backoff retry
+ */
+async function sendDiscordWithRetry(
+  webhookUrl: string,
+  payload: string,
+  maxRetries = 3
+): Promise<void> {
+  let lastError: Error | null = null;
+
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      const response = await fetch(webhookUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: payload, // payload is already JSON stringified
+      });
+
+      if (response.ok) {
+        console.log(`Discord notification sent successfully (attempt ${attempt + 1})`);
+        return;
+      }
+
+      // Rate limited - wait and retry
+      if (response.status === 429) {
+        const retryAfter = response.headers.get('Retry-After');
+        const waitMs = retryAfter ? parseInt(retryAfter) * 1000 : Math.pow(2, attempt) * 1000;
+        console.warn(`Discord rate limited, waiting ${waitMs}ms before retry ${attempt + 1}/${maxRetries}`);
+        await new Promise(resolve => setTimeout(resolve, waitMs));
+        continue;
+      }
+
+      // Other error - exponential backoff
+      const errorText = await response.text();
+      lastError = new Error(`Discord webhook failed (${response.status}): ${errorText}`);
+
+      if (attempt < maxRetries - 1) {
+        const backoffMs = Math.pow(2, attempt) * 1000; // 1s, 2s, 4s
+        console.warn(`Discord webhook failed, retrying in ${backoffMs}ms (attempt ${attempt + 1}/${maxRetries})`);
+        await new Promise(resolve => setTimeout(resolve, backoffMs));
+      }
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error(String(error));
+
+      if (attempt < maxRetries - 1) {
+        const backoffMs = Math.pow(2, attempt) * 1000;
+        console.warn(`Discord webhook error, retrying in ${backoffMs}ms (attempt ${attempt + 1}/${maxRetries}):`, error);
+        await new Promise(resolve => setTimeout(resolve, backoffMs));
+      }
+    }
+  }
+
+  // All retries failed - log but don't throw (Discord is non-critical)
+  console.error(`Discord notification failed after ${maxRetries} attempts:`, lastError);
+}
+
+/**
  * Infer changelog title from commits
  */
 function inferTitle(commits: GitHubCommit[]): string {
@@ -319,57 +415,93 @@ async function sendDiscordAnnouncement(params: {
   const changedCount = sections.find((s) => s.title === 'Changed')?.items.length || 0;
   const fixedCount = sections.find((s) => s.title === 'Fixed')?.items.length || 0;
 
+  // Build engaging description with highlights
+  const highlights = [];
+  if (addedCount > 0) highlights.push(`✨ **${addedCount}** new feature${addedCount === 1 ? '' : 's'}`);
+  if (changedCount > 0) highlights.push(`🔧 **${changedCount}** improvement${changedCount === 1 ? '' : 's'}`);
+  if (fixedCount > 0) highlights.push(`🐛 **${fixedCount}** bug fix${fixedCount === 1 ? '' : 'es'}`);
+
+  const description = highlights.join(' • ');
+
+  // Build fields with actual changelog content
+  const fields = [];
+
+  // TL;DR section
+  if (tldr && tldr.length > 0) {
+    fields.push({
+      name: '📝 TL;DR',
+      value: tldr.slice(0, 300) + (tldr.length > 300 ? '...' : ''),
+      inline: false,
+    });
+  }
+
+  // Added section
+  const addedSection = sections.find((s) => s.title === 'Added');
+  if (addedSection && addedSection.items.length > 0) {
+    const items = addedSection.items.slice(0, 5); // Max 5 items
+    const value = items.map(item => `• ${item.slice(0, 80)}${item.length > 80 ? '...' : ''}`).join('\n');
+    fields.push({
+      name: '✨ What\'s New',
+      value: value + (addedSection.items.length > 5 ? `\n*...and ${addedSection.items.length - 5} more*` : ''),
+      inline: false,
+    });
+  }
+
+  // Changed section
+  const changedSection = sections.find((s) => s.title === 'Changed');
+  if (changedSection && changedSection.items.length > 0) {
+    const items = changedSection.items.slice(0, 5);
+    const value = items.map(item => `• ${item.slice(0, 80)}${item.length > 80 ? '...' : ''}`).join('\n');
+    fields.push({
+      name: '🔧 Improvements',
+      value: value + (changedSection.items.length > 5 ? `\n*...and ${changedSection.items.length - 5} more*` : ''),
+      inline: false,
+    });
+  }
+
+  // Fixed section
+  const fixedSection = sections.find((s) => s.title === 'Fixed');
+  if (fixedSection && fixedSection.items.length > 0) {
+    const items = fixedSection.items.slice(0, 5);
+    const value = items.map(item => `• ${item.slice(0, 80)}${item.length > 80 ? '...' : ''}`).join('\n');
+    fields.push({
+      name: '🐛 Bug Fixes',
+      value: value + (fixedSection.items.length > 5 ? `\n*...and ${fixedSection.items.length - 5} more*` : ''),
+      inline: false,
+    });
+  }
+
+  // Stats footer field
+  const latestCommit = commits[commits.length - 1];
+  const commitUrl = `https://github.com/${GITHUB_REPO_OWNER}/${GITHUB_REPO_NAME}/commit/${latestCommit.sha}`;
+  const shortSha = latestCommit.sha.slice(0, 7);
+
+  fields.push({
+    name: '📊 Release Stats',
+    value: `${commits.length} commit${commits.length === 1 ? '' : 's'} • ${contributors.length} contributor${contributors.length === 1 ? '' : 's'}\n[View commit \`${shortSha}\` on GitHub](${commitUrl})`,
+    inline: false,
+  });
+
   const embed = {
     title: `📋 ${title}`,
-    description: tldr.length > 200 ? tldr.slice(0, 197) + '...' : tldr,
+    description,
     color: 0x3ba55d, // Green for releases
     url: `${SITE_URL}/changelog/${slug}`,
-    fields: [
-      {
-        name: '✨ What\'s New',
-        value: addedCount > 0 ? `${addedCount} new ${addedCount === 1 ? 'feature' : 'features'}` : 'No new features',
-        inline: true,
-      },
-      {
-        name: '🔧 Improvements',
-        value: changedCount > 0 ? `${changedCount} ${changedCount === 1 ? 'change' : 'changes'}` : 'No changes',
-        inline: true,
-      },
-      {
-        name: '🐛 Bug Fixes',
-        value: fixedCount > 0 ? `${fixedCount} ${fixedCount === 1 ? 'fix' : 'fixes'}` : 'No fixes',
-        inline: true,
-      },
-      {
-        name: '📊 Impact',
-        value: `${commits.length} ${commits.length === 1 ? 'commit' : 'commits'} from ${contributors.length} ${contributors.length === 1 ? 'contributor' : 'contributors'}`,
-        inline: false,
-      },
-      {
-        name: '🔗 Read Full Changelog',
-        value: `[View on Claude Pro Directory](${SITE_URL}/changelog/${slug})`,
-        inline: false,
-      },
-    ],
+    fields,
     footer: {
-      text: `Released ${date} • Claude Pro Directory`,
+      text: `Claude Pro Directory • Released ${date}`,
+      icon_url: 'https://claudepro.directory/favicon.ico',
     },
     timestamp: new Date().toISOString(),
   };
 
-  const response = await fetch(DISCORD_WEBHOOK_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
+  await sendDiscordWithRetry(
+    DISCORD_WEBHOOK_URL,
+    JSON.stringify({
       content: '🚀 **New Release Deployed!**',
       embeds: [embed],
-    }),
-  });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`Discord webhook failed (${response.status}): ${errorText}`);
-  }
+    })
+  );
 }
 
 /**
@@ -464,9 +596,9 @@ Deno.serve(async (req) => {
       `Processing deployment.succeeded for main branch. Commit: ${deployment.meta.commitId}`
     );
 
-    // 6. Get last deployed commit from changelog table
+    // 6. Get last deployed commit from changelog_entries table
     const { data: lastEntry } = await supabase
-      .from('changelog')
+      .from('changelog_entries')
       .select('git_commit_sha')
       .not('git_commit_sha', 'is', null)
       .order('created_at', { ascending: false })
@@ -521,23 +653,53 @@ Deno.serve(async (req) => {
     // 12. Generate slug
     const slug = generateSlug(date, title);
 
-    // 13. Insert into changelog table
+    // 13. Check for duplicate entry (prevent webhook retry duplicates)
+    const { data: existingEntry } = await supabase
+      .from('changelog_entries')
+      .select('id, slug')
+      .eq('git_commit_sha', deployment.meta.commitId)
+      .maybeSingle();
+
+    if (existingEntry) {
+      console.log(`Changelog entry already exists for commit ${deployment.meta.commitId}: ${existingEntry.slug}`);
+      return successResponse(
+        {
+          success: true,
+          skipped: true,
+          reason: 'Changelog entry already exists for this commit',
+          changelog_id: existingEntry.id,
+          changelog_slug: existingEntry.slug,
+        },
+        200,
+        postCorsHeaders
+      );
+    }
+
+    // 14. Transform sections to changes JSONB object
+    const changes = transformSectionsToChanges(sections);
+    const content = generateMarkdownContent(sections);
+    const rawContent = markdown;
+
+    // 15. Insert into changelog_entries table
     const changelogInsert: ChangelogInsert = {
       slug,
       title,
-      description: tldr.slice(0, 200), // Truncate to 200 chars
-      category: 'release',
-      date_published: date,
-      date_added: date,
-      tags: ['release', 'automation'],
-      sections: sections as unknown as never, // JSONB type
+      description: tldr.slice(0, 500), // Use tldr as description
+      content,
+      raw_content: rawContent,
+      tldr,
+      release_date: date,
+      changes,
       git_commit_sha: deployment.meta.commitId,
       commit_count: commits.length,
       contributors: [...new Set(commits.map((c) => c.commit.author.name))],
+      source: 'jsonbored',
+      published: true,
+      featured: false,
     };
 
     const { data: changelogEntry, error: insertError } = await supabase
-      .from('changelog')
+      .from('changelog_entries')
       .insert(changelogInsert)
       .select('id, slug')
       .single();

@@ -175,46 +175,62 @@ export interface Database {
           updated_at?: string
         }
       }
-      webhook_logs: {
+      webhook_events: {
         Row: {
-          completed_at: string | null
           created_at: string
-          error_message: string | null
+          data: Json
+          direction: Database['public']['Enums']['webhook_direction']
+          error: string | null
           http_status_code: number | null
           id: string
-          request_payload: Json | null
+          next_retry_at: string | null
+          processed: boolean | null
+          processed_at: string | null
+          received_at: string | null
+          related_id: string | null
           response_payload: Json | null
           retry_count: number | null
-          status: string
-          submission_id: string
-          webhook_type: string
+          source: Database['public']['Enums']['webhook_source']
+          svix_id: string | null
+          type: string
         }
         Insert: {
-          completed_at?: string | null
-          created_at?: string
-          error_message?: string | null
+          created_at: string
+          data?: Json
+          direction?: Database['public']['Enums']['webhook_direction']
+          error?: string | null
           http_status_code?: number | null
           id?: string
-          request_payload?: Json | null
+          next_retry_at?: string | null
+          processed?: boolean | null
+          processed_at?: string | null
+          received_at?: string | null
+          related_id?: string | null
           response_payload?: Json | null
           retry_count?: number | null
-          status: string
-          submission_id: string
-          webhook_type: string
+          source?: Database['public']['Enums']['webhook_source']
+          svix_id?: string | null
+          type: string
         }
         Update: {
-          completed_at?: string | null
           created_at?: string
-          error_message?: string | null
+          data?: Json
+          direction?: Database['public']['Enums']['webhook_direction']
+          error?: string | null
           http_status_code?: number | null
           id?: string
-          request_payload?: Json | null
+          next_retry_at?: string | null
+          processed?: boolean | null
+          processed_at?: string | null
+          received_at?: string | null
+          related_id?: string | null
           response_payload?: Json | null
           retry_count?: number | null
-          status?: string
-          submission_id?: string
-          webhook_type?: string
+          source?: Database['public']['Enums']['webhook_source']
+          svix_id?: string | null
+          type?: string
         }
+        Relationships: []
       }
       content: {
         Row: {
@@ -240,6 +256,94 @@ export interface Database {
           git_hash: string | null
         }
       }
+      changelog_entries: {
+        Row: {
+          canonical_url: string | null
+          changes: Json
+          commit_count: number | null
+          content: string
+          contributors: string[] | null
+          created_at: string
+          description: string | null
+          featured: boolean
+          git_commit_sha: string | null
+          id: string
+          json_ld: Json | null
+          keywords: string[] | null
+          og_image: string | null
+          og_type: string | null
+          published: boolean
+          raw_content: string
+          release_date: string
+          robots_follow: boolean | null
+          robots_index: boolean | null
+          slug: string
+          source: string | null
+          title: string
+          tldr: string | null
+          twitter_card: string | null
+          updated_at: string
+        }
+        Insert: {
+          canonical_url?: string | null
+          changes?: Json
+          commit_count?: number | null
+          content: string
+          contributors?: string[] | null
+          created_at?: string
+          description?: string | null
+          featured?: boolean
+          git_commit_sha?: string | null
+          id?: string
+          json_ld?: Json | null
+          keywords?: string[] | null
+          og_image?: string | null
+          og_type?: string | null
+          published?: boolean
+          raw_content: string
+          release_date: string
+          robots_follow?: boolean | null
+          robots_index?: boolean | null
+          slug: string
+          source?: string | null
+          title: string
+          tldr?: string | null
+          twitter_card?: string | null
+          updated_at?: string
+        }
+        Update: {
+          canonical_url?: string | null
+          changes?: Json
+          commit_count?: number | null
+          content?: string
+          contributors?: string[] | null
+          created_at?: string
+          description?: string | null
+          featured?: boolean
+          git_commit_sha?: string | null
+          id?: string
+          json_ld?: Json | null
+          keywords?: string[] | null
+          og_image?: string | null
+          og_type?: string | null
+          published?: boolean
+          raw_content?: string
+          release_date?: string
+          robots_follow?: boolean | null
+          robots_index?: boolean | null
+          slug?: string
+          source?: string | null
+          title?: string
+          tldr?: string | null
+          twitter_card?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+    }
+    Enums: {
+      webhook_direction: 'inbound' | 'outbound'
+      webhook_source: 'resend' | 'vercel' | 'discord' | 'supabase_db' | 'custom'
     }
   }
 }

@@ -1,10 +1,5 @@
 'use client';
 
-/**
- * Unified content box component (accordion, FAQ, infobox, callout)
- */
-
-import Script from 'next/script';
 import { useCallback, useState } from 'react';
 import { Alert, AlertDescription, AlertTitle } from '@/src/components/primitives/alert';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/card';
@@ -17,7 +12,6 @@ import type {
 } from '@/src/lib/types/component.types';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
-import { serializeJsonLd } from '@/src/lib/utils/jsonld.utils';
 
 export type AccordionVariant = AccordionProps & {
   contentType: 'accordion';
@@ -142,7 +136,6 @@ function AccordionBox(props: AccordionVariant) {
 }
 
 function FAQBox(props: FAQVariant) {
-  // Database CHECK constraint validates structure - no runtime validation needed
   const { questions, title, description } = props;
   const validQuestions = questions || [];
 
@@ -150,66 +143,33 @@ function FAQBox(props: FAQVariant) {
     return null;
   }
 
-  // Generate FAQPage JSON-LD with proper mainEntity structure
-  const faqPageSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'FAQPage' as const,
-    name: title || 'FAQ',
-    description: description || `Frequently asked questions about ${title || 'this topic'}`,
-    mainEntity: validQuestions.map((faq) => ({
-      '@type': 'Question' as const,
-      name: faq.question,
-      acceptedAnswer: {
-        '@type': 'Answer' as const,
-        text: faq.answer,
-      },
-    })),
-  };
-
-  // Generate unique ID based on title to prevent duplicates
-  const scriptId = `faq-structured-data-${(title || 'faq').toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
-
   return (
-    <>
-      {/* JSON-LD Structured Data - Arcjet CSP + Next.js Script handle nonce automatically */}
-      <Script
-        id={scriptId}
-        type="application/ld+json"
-        // biome-ignore lint/security/noDangerouslySetInnerHtml: JSON-LD structured data is generated from validated Zod schemas
-        dangerouslySetInnerHTML={{
-          __html: serializeJsonLd(faqPageSchema),
-        }}
-        strategy="afterInteractive"
-      />
+    <section className="my-8 space-y-6">
+      <div className="mb-6">
+        <h2 className="mb-2 font-bold text-2xl">{title}</h2>
+        {description && <p className="text-muted-foreground">{description}</p>}
+      </div>
 
-      {/* Visual FAQ Component - No schema.org microdata to avoid duplicate declarations */}
-      <section className="my-8 space-y-6">
-        <div className="mb-6">
-          <h2 className="mb-2 font-bold text-2xl">{title}</h2>
-          {description && <p className="text-muted-foreground">{description}</p>}
-        </div>
-
-        <div className="space-y-4">
-          {validQuestions.map((faq) => (
-            <Card key={faq.question} className="border border-border bg-code/50 backdrop-blur-sm">
-              <CardHeader>
-                <CardTitle className="flex items-start gap-3 font-semibold text-lg">
-                  <div className="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-primary/10">
-                    <span className="font-bold text-primary text-sm">Q</span>
-                  </div>
-                  {faq.question}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="pl-9">
-                  <div className="text-muted-foreground leading-relaxed">{faq.answer}</div>
+      <div className="space-y-4">
+        {validQuestions.map((faq) => (
+          <Card key={faq.question} className="border border-border bg-code/50 backdrop-blur-sm">
+            <CardHeader>
+              <CardTitle className="flex items-start gap-3 font-semibold text-lg">
+                <div className="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-primary/10">
+                  <span className="font-bold text-primary text-sm">Q</span>
                 </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </section>
-    </>
+                {faq.question}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="pl-9">
+                <div className="text-muted-foreground leading-relaxed">{faq.answer}</div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </section>
   );
 }
 
