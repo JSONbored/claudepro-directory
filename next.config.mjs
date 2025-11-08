@@ -329,6 +329,7 @@ const nextConfig = {
       process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://hgtjdifxfapoltfflowc.supabase.co';
 
     return [
+      // Sitemap.xml - proxy to edge function
       {
         source: '/sitemap.xml',
         destination: `${supabaseUrl}/functions/v1/sitemap`,
