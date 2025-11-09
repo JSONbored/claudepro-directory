@@ -186,34 +186,16 @@ export default async function DetailPage({
     notFound();
   }
 
-  const analytics = response.analytics as { view_count: number } | null;
+  const analytics = response.analytics as { view_count: number; copy_count: number } | null;
   const viewCount = analytics?.view_count || 0;
+  const copyCount = analytics?.copy_count || 0;
   const relatedItems = (response.related as ContentItem[]) || [];
 
   // No transformation needed - displayTitle computed at build time
   // This eliminates runtime overhead and follows DRY principles
 
-  // Conditional rendering: Collections use specialized CollectionDetailView
-  // TypeScript narrows fullItem type based on category check
-  if (category === 'collections' && fullItem && fullItem.category === 'collections') {
-    return (
-      <>
-        {/* Read Progress Bar - Shows reading progress at top of page */}
-        <ReadProgress />
-
-        <UnifiedTracker variant="view" category={category} slug={slug} />
-        <UnifiedTracker variant="page-view" category={category} slug={slug} />
-        <StructuredData route={`/${category}/${slug}`} />
-        <CollectionDetailView
-          collection={
-            fullItem as Database['public']['Tables']['content']['Row'] & { category: 'collections' }
-          }
-        />
-      </>
-    );
-  }
-
-  // Default rendering: All other categories use UnifiedDetailPage
+  // Unified rendering: All categories use UnifiedDetailPage
+  // Collections pass their specialized sections via collectionSections prop
   return (
     <>
       {/* Read Progress Bar - Shows reading progress at top of page */}
@@ -226,6 +208,18 @@ export default async function DetailPage({
         item={fullItem || itemData}
         relatedItems={relatedItems}
         viewCount={viewCount}
+        copyCount={copyCount}
+        collectionSections={
+          category === 'collections' && fullItem && fullItem.category === 'collections' ? (
+            <CollectionDetailView
+              collection={
+                fullItem as Database['public']['Tables']['content']['Row'] & {
+                  category: 'collections';
+                }
+              }
+            />
+          ) : undefined
+        }
       />
     </>
   );

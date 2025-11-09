@@ -178,7 +178,7 @@ export function QuizForm() {
   if (!quizConfig) {
     return (
       <div className="flex items-center justify-center p-12">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <Loader2 className={`${UI_CLASSES.ICON_XL} animate-spin text-primary`} />
       </div>
     );
   }
@@ -273,7 +273,7 @@ export function QuizForm() {
                 <Card className="border-primary/20 bg-primary/5">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-lg">
-                      <Sparkles className="h-5 w-5 text-primary" />
+                      <Sparkles className={`${UI_CLASSES.ICON_MD} text-primary`} />
                       What happens next?
                     </CardTitle>
                   </CardHeader>
@@ -353,7 +353,7 @@ export function QuizForm() {
               onClick={goToPrevious}
               disabled={currentQuestion === 1 || isPending}
             >
-              <ArrowLeft className="mr-2 h-4 w-4" />
+              <ArrowLeft className={UI_CLASSES.ICON_SM_LEADING} />
               Previous
             </Button>
 
@@ -376,7 +376,7 @@ export function QuizForm() {
                   </>
                 ) : (
                   <>
-                    <Sparkles className="mr-2 h-4 w-4" />
+                    <Sparkles className={UI_CLASSES.ICON_SM_LEADING} />
                     Get Results
                   </>
                 )}

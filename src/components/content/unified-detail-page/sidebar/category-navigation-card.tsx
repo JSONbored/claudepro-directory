@@ -122,7 +122,7 @@ export function CategoryNavigationCard({
                       : `text-muted-foreground ${info.color || 'hover:bg-muted/50 hover:text-primary'}`
                   }`}
                 >
-                  <Icon className="h-4 w-4" />
+                  <Icon className={UI_CLASSES.ICON_SM} />
                 </Link>
               </TooltipTrigger>
               <TooltipContent side="bottom" className="max-w-[200px] text-xs">

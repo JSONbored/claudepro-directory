@@ -220,7 +220,7 @@ export function ExamplesArrayInput({
           disabled={examples.length >= maxExamples}
           className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}
         >
-          <Plus className="h-4 w-4" />
+          <Plus className={UI_CLASSES.ICON_SM} />
           Add Example
         </Button>
       </div>
@@ -258,9 +258,9 @@ export function ExamplesArrayInput({
                     className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} flex-1 text-left transition-opacity hover:opacity-70`}
                   >
                     {isExpanded ? (
-                      <ChevronUp className="h-4 w-4" />
+                      <ChevronUp className={UI_CLASSES.ICON_SM} />
                     ) : (
-                      <ChevronDown className="h-4 w-4" />
+                      <ChevronDown className={UI_CLASSES.ICON_SM} />
                     )}
                     <CardTitle className="text-base">
                       {example.title || `Example ${index + 1}`}
@@ -271,10 +271,10 @@ export function ExamplesArrayInput({
                     variant="ghost"
                     size="sm"
                     onClick={() => removeExample(index)}
-                    className="h-8 w-8 p-0"
+                    className={`${UI_CLASSES.ICON_XL} p-0`}
                     title="Remove example"
                   >
-                    <Trash className="h-4 w-4" />
+                    <Trash className={UI_CLASSES.ICON_SM} />
                   </Button>
                 </div>
                 {!validation.valid && (
@@ -374,7 +374,7 @@ export function ExamplesArrayInput({
           onClick={addExample}
           className="flex w-full items-center gap-2"
         >
-          <Plus className="h-4 w-4" />
+          <Plus className={UI_CLASSES.ICON_SM} />
           Add Another Example ({examples.length}/{maxExamples})
         </Button>
       )}

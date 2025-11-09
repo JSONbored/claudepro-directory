@@ -30,6 +30,8 @@ import { motion, useMotionValue, useTransform } from 'motion/react';
 import type { ReactNode } from 'react';
 import { useEffect, useState } from 'react';
 import { Bookmark, Copy as CopyIcon } from '@/src/lib/icons';
+import { SEMANTIC_COLORS } from '@/src/lib/semantic-colors';
+import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 interface SwipeableCardWrapperProps {
   children: ReactNode;
@@ -108,8 +110,8 @@ export function SwipeableCardWrapper({
         className="pointer-events-none absolute inset-y-0 left-0 z-0 flex w-20 items-center justify-start pl-4"
         style={{ opacity: copyIndicatorOpacity }}
       >
-        <div className="rounded-lg border border-green-500/30 bg-green-500/20 p-3 text-green-600 dark:text-green-400">
-          <CopyIcon className="h-5 w-5" aria-hidden="true" />
+        <div className={`rounded-lg p-3 ${SEMANTIC_COLORS.SWIPE_COPY}`}>
+          <CopyIcon className={UI_CLASSES.ICON_MD} aria-hidden="true" />
         </div>
       </motion.div>
 
@@ -118,8 +120,8 @@ export function SwipeableCardWrapper({
         className="pointer-events-none absolute inset-y-0 right-0 z-0 flex w-20 items-center justify-end pr-4"
         style={{ opacity: bookmarkIndicatorOpacity }}
       >
-        <div className="rounded-lg border border-blue-500/30 bg-blue-500/20 p-3 text-blue-600 dark:text-blue-400">
-          <Bookmark className="h-5 w-5" aria-hidden="true" />
+        <div className={`rounded-lg p-3 ${SEMANTIC_COLORS.SWIPE_BOOKMARK}`}>
+          <Bookmark className={UI_CLASSES.ICON_MD} aria-hidden="true" />
         </div>
       </motion.div>
 

@@ -85,7 +85,7 @@ export function DiagnosticFlow(props: DiagnosticFlowProps) {
                   <div
                     className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} text-green-600 dark:text-green-400`}
                   >
-                    <CheckCircle className="h-5 w-5" />
+                    <CheckCircle className={UI_CLASSES.ICON_MD} />
                     <p className="font-medium">Solution Found:</p>
                   </div>
                   <p className="text-muted-foreground">{currentStepData?.solution}</p>

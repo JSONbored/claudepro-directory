@@ -65,7 +65,7 @@ export function ChangelogListClient({ entries, categoryCounts }: ChangelogListCl
                     className="transition-all duration-200"
                     renderTopBadges={() => (
                       <div className={'flex items-center gap-2'}>
-                        <Calendar className="h-4 w-4 text-muted-foreground" />
+                        <Calendar className={`${UI_CLASSES.ICON_SM} text-muted-foreground`} />
                         <time
                           dateTime={entry.release_date}
                           className="font-medium text-muted-foreground text-sm"
@@ -107,7 +107,7 @@ export function ChangelogListClient({ entries, categoryCounts }: ChangelogListCl
                         }
                       >
                         <span>Read full changelog</span>
-                        <ArrowRight className="h-4 w-4" />
+                        <ArrowRight className={UI_CLASSES.ICON_SM} />
                       </div>
                     }
                   />

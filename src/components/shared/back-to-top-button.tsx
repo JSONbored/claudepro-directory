@@ -24,6 +24,7 @@
 import { AnimatePresence, motion } from 'motion/react';
 import { useEffect, useState } from 'react';
 import { ArrowUp } from '@/src/lib/icons';
+import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 interface BackToTopButtonProps {
   /**
@@ -100,7 +101,7 @@ export function BackToTopButton({ threshold = 300, className = '' }: BackToTopBu
           `}
           aria-label="Scroll to top"
         >
-          <ArrowUp className="h-4 w-4 md:h-5 md:w-5" aria-hidden="true" />
+          <ArrowUp className={`${UI_CLASSES.ICON_SM} md:h-5 md:w-5`} aria-hidden="true" />
         </motion.button>
       )}
     </AnimatePresence>

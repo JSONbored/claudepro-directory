@@ -123,7 +123,9 @@ export function NavigationCommandMenu({
     // Type guard: check if it's a valid React component
     if (typeof Icon === 'function') {
       const IconComponent = Icon as React.ComponentType<{ className?: string }>;
-      return <IconComponent className="h-4 w-4 flex-shrink-0 text-muted-foreground" />;
+      return (
+        <IconComponent className={`${UI_CLASSES.ICON_SM} flex-shrink-0 text-muted-foreground`} />
+      );
     }
     return null;
   };

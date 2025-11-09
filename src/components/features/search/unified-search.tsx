@@ -23,6 +23,7 @@ import {
 import { useUnifiedSearch } from '@/src/hooks/use-unified-search';
 import { ChevronDown, ChevronUp, Filter, Search } from '@/src/lib/icons';
 import type { FilterState, UnifiedSearchProps } from '@/src/lib/types/component.types';
+import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
 
 export type { FilterState };
@@ -137,7 +138,7 @@ function UnifiedSearchComponent({
         <div className="space-y-3">
           <div className="relative">
             <div className="-translate-y-1/2 pointer-events-none absolute top-1/2 left-4 z-10">
-              <Search className="h-5 w-5 text-accent" aria-hidden="true" />
+              <Search className={`${UI_CLASSES.ICON_MD} text-accent`} aria-hidden="true" />
             </div>
             <Input
               id={searchInputId}
@@ -191,7 +192,7 @@ function UnifiedSearchComponent({
                 aria-controls={filterPanelId}
                 aria-label={`${isFilterOpen ? 'Close' : 'Open'} filter panel${activeFilterCount > 0 ? ` (${activeFilterCount} active filters)` : ''}`}
               >
-                <Filter className="h-4 w-4" aria-hidden="true" />
+                <Filter className={UI_CLASSES.ICON_SM} aria-hidden="true" />
                 <span>Filter</span>
                 {activeFilterCount > 0 && (
                   <UnifiedBadge

@@ -29,9 +29,9 @@ export function ErrorTable(props: ErrorTableProps) {
   };
 
   const severityIcons = {
-    critical: <AlertTriangle className="h-4 w-4" />,
-    warning: <Info className="h-4 w-4" />,
-    info: <Info className="h-4 w-4" />,
+    critical: <AlertTriangle className={UI_CLASSES.ICON_SM} />,
+    warning: <Info className={UI_CLASSES.ICON_SM} />,
+    info: <Info className={UI_CLASSES.ICON_SM} />,
   };
 
   return (

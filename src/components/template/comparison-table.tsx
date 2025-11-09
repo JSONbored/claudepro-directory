@@ -14,6 +14,7 @@ import {
 } from '@/src/components/primitives/card';
 import { CheckCircle } from '@/src/lib/icons';
 import type { ComparisonTableProps } from '@/src/lib/types/component.types';
+import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 export function ComparisonTable(props: ComparisonTableProps) {
   // Database CHECK constraint validates structure - no runtime validation needed
@@ -53,7 +54,7 @@ export function ComparisonTable(props: ComparisonTableProps) {
                   <td className="p-4">
                     {typeof item.option1 === 'boolean' ? (
                       item.option1 ? (
-                        <CheckCircle className="h-5 w-5 text-green-500" />
+                        <CheckCircle className={`${UI_CLASSES.ICON_MD} text-green-500`} />
                       ) : (
                         <span className="text-muted-foreground">—</span>
                       )
@@ -64,7 +65,7 @@ export function ComparisonTable(props: ComparisonTableProps) {
                   <td className="p-4">
                     {typeof item.option2 === 'boolean' ? (
                       item.option2 ? (
-                        <CheckCircle className="h-5 w-5 text-green-500" />
+                        <CheckCircle className={`${UI_CLASSES.ICON_MD} text-green-500`} />
                       ) : (
                         <span className="text-muted-foreground">—</span>
                       )
@@ -76,7 +77,7 @@ export function ComparisonTable(props: ComparisonTableProps) {
                     <td className="p-4">
                       {typeof item.option3 === 'boolean' ? (
                         item.option3 ? (
-                          <CheckCircle className="h-5 w-5 text-green-500" />
+                          <CheckCircle className={`${UI_CLASSES.ICON_MD} text-green-500`} />
                         ) : (
                           <span className="text-muted-foreground">—</span>
                         )

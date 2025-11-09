@@ -113,7 +113,9 @@ function UnifiedCardGridComponent(props: UnifiedCardGridProps) {
     return (
       <output className="flex items-center justify-center py-12" aria-live="polite">
         <div className="flex items-center gap-2">
-          <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+          <div
+            className={`${UI_CLASSES.ICON_SM} animate-spin rounded-full border-2 border-primary border-t-transparent`}
+          />
           <p className="text-muted-foreground text-sm">{loadingMessage}</p>
         </div>
       </output>
@@ -157,7 +159,9 @@ function UnifiedCardGridComponent(props: UnifiedCardGridProps) {
         >
           {isLoading && (
             <div className="flex items-center gap-2">
-              <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+              <div
+                className={`${UI_CLASSES.ICON_SM} animate-spin rounded-full border-2 border-primary border-t-transparent`}
+              />
               <p className="text-muted-foreground text-sm">{loadingMessage}</p>
             </div>
           )}

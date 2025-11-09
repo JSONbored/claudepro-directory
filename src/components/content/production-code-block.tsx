@@ -86,7 +86,7 @@ function ShareDropdown({ currentUrl, category, slug, onShare, onMouseLeave }: Sh
         >
           <div className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 font-medium text-sm transition-all hover:bg-accent/15">
             <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[#1DA1F2]/20">
-              <Twitter className="h-3 w-3 text-[#1DA1F2]" />
+              <Twitter className={`${UI_CLASSES.ICON_XS} text-[#1DA1F2]`} />
             </div>
             <span className="text-foreground">Share on Twitter</span>
           </div>
@@ -115,7 +115,7 @@ function ShareDropdown({ currentUrl, category, slug, onShare, onMouseLeave }: Sh
         >
           <div className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 font-medium text-sm transition-all hover:bg-accent/15">
             <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[#0A66C2]/20">
-              <Linkedin className="h-3 w-3 text-[#0A66C2]" />
+              <Linkedin className={`${UI_CLASSES.ICON_XS} text-[#0A66C2]`} />
             </div>
             <span className="text-foreground">Share on LinkedIn</span>
           </div>
@@ -129,7 +129,7 @@ function ShareDropdown({ currentUrl, category, slug, onShare, onMouseLeave }: Sh
         className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 font-medium text-foreground text-sm transition-all hover:scale-[1.02] hover:bg-accent/15 active:scale-[0.98]"
       >
         <div className="flex h-5 w-5 items-center justify-center rounded-full bg-accent/20">
-          <Copy className="h-3 w-3" />
+          <Copy className={UI_CLASSES.ICON_XS} />
         </div>
         <span>Copy Link</span>
       </button>
@@ -301,7 +301,7 @@ export function ProductionCodeBlock({
               className="flex items-center justify-center rounded-md bg-code/95 p-1.5 text-muted-foreground shadow-md backdrop-blur-md transition-colors hover:bg-code hover:text-foreground disabled:opacity-50"
               title={isScreenshotting ? 'Capturing screenshot...' : 'Screenshot code'}
             >
-              <Camera className="h-3.5 w-3.5" />
+              <Camera className={UI_CLASSES.ICON_XS} />
             </motion.button>
 
             {/* Share button with dropdown */}
@@ -312,7 +312,7 @@ export function ProductionCodeBlock({
                 className="flex items-center justify-center rounded-md bg-code/95 p-1.5 text-muted-foreground shadow-md backdrop-blur-md transition-colors hover:bg-code hover:text-foreground"
                 title="Share code"
               >
-                <Share2 className="h-3.5 w-3.5" />
+                <Share2 className={UI_CLASSES.ICON_XS} />
               </motion.button>
 
               {/* Share dropdown - positioned below button */}
@@ -337,9 +337,9 @@ export function ProductionCodeBlock({
               title={isCopied ? 'Copied!' : 'Copy code'}
             >
               {isCopied ? (
-                <Check className="h-3.5 w-3.5 text-green-500" />
+                <Check className={`${UI_CLASSES.ICON_XS} text-green-500`} />
               ) : (
-                <Copy className="h-3.5 w-3.5 text-muted-foreground" />
+                <Copy className={`${UI_CLASSES.ICON_XS} text-muted-foreground`} />
               )}
             </motion.button>
 
@@ -374,7 +374,7 @@ export function ProductionCodeBlock({
               className="flex items-center justify-center rounded-md bg-code/95 p-1.5 text-muted-foreground shadow-md backdrop-blur-md transition-colors hover:bg-code hover:text-foreground disabled:opacity-50"
               title={isScreenshotting ? 'Capturing screenshot...' : 'Screenshot code'}
             >
-              <Camera className="h-3.5 w-3.5" />
+              <Camera className={UI_CLASSES.ICON_XS} />
             </motion.button>
 
             {/* Share button with dropdown */}
@@ -385,7 +385,7 @@ export function ProductionCodeBlock({
                 className="flex items-center justify-center rounded-md bg-code/95 p-1.5 text-muted-foreground shadow-md backdrop-blur-md transition-colors hover:bg-code hover:text-foreground"
                 title="Share code"
               >
-                <Share2 className="h-3.5 w-3.5" />
+                <Share2 className={UI_CLASSES.ICON_XS} />
               </motion.button>
 
               {/* Share dropdown - positioned below button */}
@@ -410,9 +410,9 @@ export function ProductionCodeBlock({
               title={isCopied ? 'Copied!' : 'Copy code'}
             >
               {isCopied ? (
-                <Check className="h-3.5 w-3.5 text-green-500" />
+                <Check className={`${UI_CLASSES.ICON_XS} text-green-500`} />
               ) : (
-                <Copy className="h-3.5 w-3.5 text-muted-foreground" />
+                <Copy className={`${UI_CLASSES.ICON_XS} text-muted-foreground`} />
               )}
             </motion.button>
 
@@ -459,7 +459,7 @@ export function ProductionCodeBlock({
             className="transition-transform duration-200"
             style={{ transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)' }}
           >
-            <ChevronDown className="h-4 w-4" />
+            <ChevronDown className={UI_CLASSES.ICON_SM} />
           </div>
           <span className="text-xs">
             {isExpanded ? 'Collapse' : `Expand ${code.split('\n').length} lines`}

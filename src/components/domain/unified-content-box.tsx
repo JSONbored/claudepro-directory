@@ -4,6 +4,7 @@ import { useCallback, useState } from 'react';
 import { Alert, AlertDescription, AlertTitle } from '@/src/components/primitives/alert';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/card';
 import { AlertTriangle, CheckCircle, ChevronDown, ChevronUp, Info, Zap } from '@/src/lib/icons';
+import { INFOBOX_COLORS, INFOBOX_ICON_COLORS } from '@/src/lib/semantic-colors';
 import type {
   AccordionProps,
   CalloutProps,
@@ -109,12 +110,12 @@ function AccordionBox(props: AccordionVariant) {
                   <div className="ml-4 flex-shrink-0">
                     {openItems.has(index) ? (
                       <ChevronUp
-                        className="h-4 w-4 text-muted-foreground transition-transform"
+                        className={`${UI_CLASSES.ICON_SM} text-muted-foreground transition-transform`}
                         aria-hidden="true"
                       />
                     ) : (
                       <ChevronDown
-                        className="h-4 w-4 text-muted-foreground transition-transform"
+                        className={`${UI_CLASSES.ICON_SM} text-muted-foreground transition-transform`}
                         aria-hidden="true"
                       />
                     )}
@@ -177,29 +178,25 @@ function InfoBoxComponent(props: InfoBoxVariant) {
   // Database CHECK constraint validates structure - no runtime validation needed
   const { title, children, variant } = props;
 
-  const variantStyles: Record<'info' | 'warning' | 'success' | 'error', string> = {
-    info: 'border-blue-500 bg-blue-500/5',
-    warning: 'border-yellow-500 bg-yellow-500/5',
-    success: 'border-green-500 bg-green-500/5',
-    error: 'border-red-500 bg-red-500/5',
-  };
+  const currentVariant = variant || 'info';
+  const variantKey = currentVariant.toUpperCase() as keyof typeof INFOBOX_COLORS;
 
   const iconMap: Record<'info' | 'warning' | 'success' | 'error', React.ReactElement> = {
-    info: <Info className="h-5 w-5 text-blue-500" />,
-    warning: <AlertTriangle className="h-5 w-5 text-yellow-500" />,
-    success: <CheckCircle className="h-5 w-5 text-green-500" />,
-    error: <AlertTriangle className="h-5 w-5 text-red-500" />,
+    info: <Info className={cn(UI_CLASSES.ICON_MD, INFOBOX_ICON_COLORS.INFO)} />,
+    warning: <AlertTriangle className={cn(UI_CLASSES.ICON_MD, INFOBOX_ICON_COLORS.WARNING)} />,
+    success: <CheckCircle className={cn(UI_CLASSES.ICON_MD, INFOBOX_ICON_COLORS.SUCCESS)} />,
+    error: <AlertTriangle className={cn(UI_CLASSES.ICON_MD, INFOBOX_ICON_COLORS.ERROR)} />,
   };
 
   return (
     <div
       itemScope
       itemType="https://schema.org/Note"
-      className={cn('my-6 rounded-r-lg border-l-4 p-6', variantStyles[variant || 'info'])}
+      className={cn('my-6 rounded-r-lg border-l-4 p-6', INFOBOX_COLORS[variantKey])}
     >
       {title && (
         <div className={cn(UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2, 'mb-3')}>
-          {iconMap[variant || 'info']}
+          {iconMap[currentVariant]}
           <h4 className="font-semibold text-foreground" itemProp="name">
             {title}
           </h4>
@@ -219,11 +216,11 @@ function CalloutComponent(props: CalloutVariant) {
   return (
     <Alert className="my-6">
       <div className={UI_CLASSES.FLEX_ITEMS_START_GAP_3}>
-        {type === 'info' && <Info className="h-4 w-4" />}
-        {type === 'warning' && <AlertTriangle className="h-4 w-4" />}
-        {type === 'error' && <AlertTriangle className="h-4 w-4" />}
-        {type === 'success' && <CheckCircle className="h-4 w-4" />}
-        {type === 'tip' && <Zap className="h-4 w-4" />}
+        {type === 'info' && <Info className={UI_CLASSES.ICON_SM} />}
+        {type === 'warning' && <AlertTriangle className={UI_CLASSES.ICON_SM} />}
+        {type === 'error' && <AlertTriangle className={UI_CLASSES.ICON_SM} />}
+        {type === 'success' && <CheckCircle className={UI_CLASSES.ICON_SM} />}
+        {type === 'tip' && <Zap className={UI_CLASSES.ICON_SM} />}
         <div className="flex-1">
           {title && <AlertTitle>{title}</AlertTitle>}
           <AlertDescription className="mt-2">{children}</AlertDescription>

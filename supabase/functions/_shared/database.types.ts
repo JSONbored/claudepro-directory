@@ -419,7 +419,48 @@ export interface Database {
         Relationships: [];
       };
     };
+    Views: {
+      mv_content_trending_metrics: {
+        Row: {
+          bookmarks_total: number | null;
+          category: string | null;
+          copies_total: number | null;
+          created_at: string | null;
+          days_old: number | null;
+          engagement_score: number | null;
+          freshness_score: number | null;
+          last_refreshed: string | null;
+          slug: string | null;
+          trending_score: number | null;
+          views_7d: number | null;
+          views_prev_7d: number | null;
+          views_total: number | null;
+        };
+      };
+      mv_content_stats: {
+        Row: {
+          author: string | null;
+          bookmark_count: number | null;
+          category: string | null;
+          copy_count: number | null;
+          created_at: string | null;
+          description: string | null;
+          difficulty_score: number | null;
+          display_title: string | null;
+          last_interaction_at: string | null;
+          last_viewed_at: string | null;
+          popularity_score: number | null;
+          reading_time: number | null;
+          slug: string | null;
+          tags: string[] | null;
+          title: string | null;
+          updated_at: string | null;
+          view_count: number | null;
+        };
+      };
+    };
     Enums: {
+      newsletter_source: 'homepage' | 'content_page' | 'api' | 'import';
       webhook_direction: 'inbound' | 'outbound';
       webhook_source: 'resend' | 'vercel' | 'discord' | 'supabase_db' | 'custom';
     };

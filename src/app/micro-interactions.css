@@ -1,8 +1,41 @@
 /**
- * Micro-interactions & Polish - Global Touch Feedback
+ * Micro-interactions & Polish - Global CSS-based Animations
  *
- * Subtle touch feedback and interaction polish across the entire site.
- * Enhances UX with delightful micro-interactions.
+ * ANIMATION ARCHITECTURE - Motion.dev vs CSS:
+ *
+ * This file contains ONLY CSS-based global micro-interactions.
+ * For component-level animations, use Motion.dev (Framer Motion).
+ *
+ * WHEN TO USE THIS FILE (CSS):
+ * - Global micro-interactions (focus rings, link underlines, smooth scrolling)
+ * - Touch feedback for mobile devices (active states)
+ * - Theme transitions (dark mode toggle)
+ * - Reduced motion fallbacks (@media prefers-reduced-motion)
+ * - Performance-critical animations (GPU-accelerated transforms)
+ * - Cursor feedback (pointer, not-allowed, text)
+ * - Loading states (skeleton shimmer, pulse animations)
+ *
+ * WHEN TO USE MOTION.DEV (Framer Motion):
+ * - Component-level interactions (card hover, button tap, badge hover)
+ * - Element-specific physics (spring animations for natural feel)
+ * - State-driven animations (loading, success, error states)
+ * - Gesture-based interactions (swipe, drag, pan)
+ * - See: src/lib/ui-constants.ts → ANIMATION_CONSTANTS for standardized configs
+ *
+ * CRITICAL RULE - NEVER MIX BOTH:
+ * A single element should NEVER have Motion.dev whileHover AND CSS hover:transform.
+ * Choose one approach per animation property to avoid conflicts.
+ *
+ * Example conflict (FIXED in BaseCard):
+ * ❌ WRONG: <motion.div whileHover={{ y: -2 }} className="hover-lift">
+ * ✅ RIGHT: <motion.div whileHover={{ y: -2 }}> (Motion.dev only)
+ * ✅ RIGHT: <div className="hover-lift"> (CSS only)
+ *
+ * CURRENT MOTION.DEV USAGE:
+ * - BaseCard: whileHover y:-2 (0.2s ease) + whileTap y:0 (0.15s ease)
+ * - UnifiedBadge: whileHover y:-2 (spring 400/17) + whileTap scale:0.95
+ * - Button: whileHover scale:1.02 + whileTap scale:0.98 (spring 400/17)
+ * - FAB buttons: whileHover scale:1.1 + whileTap scale:0.9 (spring 400/17)
  *
  * @module app/micro-interactions
  */
@@ -122,13 +155,23 @@ a:not([class*="button"]):not([class*="btn"]):not(.no-underline):hover::after {
  * Card Interactions
  * =========================== */
 
-/* Smooth card lift on hover - Exclude navigation, search, and input elements */
-[class*="card"]:hover:not(nav):not(header):not([role="search"]):not(input):not(textarea):not(
-    select
-  ),
-[class*="Card"]:hover:not(nav):not(header):not([role="search"]):not(input):not(textarea):not(
-    select
-  ) {
+/* DEPRECATED: .hover-lift CSS class (replaced by Motion.dev)
+ *
+ * This CSS class is NO LONGER USED in BaseCard (as of 2025-11-09).
+ * BaseCard now uses Motion.dev whileHover for card lift animations.
+ *
+ * MIGRATION GUIDE:
+ * - Old approach: <div className="hover-lift"> (CSS)
+ * - New approach: <motion.div whileHover={{ y: -2 }}> (Motion.dev)
+ *
+ * This class is kept for backward compatibility with:
+ * - Legacy components that haven't migrated to Motion.dev yet
+ * - Static cards that don't need interactive animations
+ *
+ * If you're building a new component, use Motion.dev instead.
+ * See: src/lib/ui-constants.ts → ANIMATION_CONSTANTS
+ */
+.hover-lift:hover {
   transform: translateY(-2px);
   transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }

@@ -295,7 +295,10 @@ function HomePageClientComponent({ initialData, featuredByCategory, stats }: Hom
                           whileTap={{ scale: 0.95 }}
                           transition={{ type: 'spring', stiffness: 400, damping: 17 }}
                         >
-                          <Icon className="h-4 w-4 flex-shrink-0 text-accent" aria-hidden="true" />
+                          <Icon
+                            className={`${UI_CLASSES.ICON_SM} flex-shrink-0 text-accent`}
+                            aria-hidden="true"
+                          />
                           <span className="font-medium text-sm">
                             <NumberTicker value={stats[categoryId] || 0} delay={delay} />
                           </span>
@@ -338,7 +341,7 @@ function HomePageClientComponent({ initialData, featuredByCategory, stats }: Hom
                         }}
                       >
                         <Icon
-                          className="h-4 w-4 transition-colors group-hover:text-accent"
+                          className={`${UI_CLASSES.ICON_SM} transition-colors group-hover:text-accent`}
                           aria-hidden="true"
                         />
                         <span className="transition-colors group-hover:text-foreground">

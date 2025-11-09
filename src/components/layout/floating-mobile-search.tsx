@@ -19,6 +19,7 @@
 import { motion } from 'motion/react';
 import { Button } from '@/src/components/primitives/button';
 import { Search } from '@/src/lib/icons';
+import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 export function FloatingMobileSearch() {
   const handleSearchClick = () => {
@@ -52,7 +53,7 @@ export function FloatingMobileSearch() {
         onClick={handleSearchClick}
         aria-label="Open search"
       >
-        <Search className="h-6 w-6" />
+        <Search className={UI_CLASSES.ICON_LG} />
       </Button>
     </motion.div>
   );

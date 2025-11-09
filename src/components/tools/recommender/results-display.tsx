@@ -145,7 +145,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
     <div className="space-y-8">
       <div className="space-y-4 text-center">
         <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_CENTER_GAP_2}>
-          <Sparkles className="h-6 w-6 text-primary" />
+          <Sparkles className={`${UI_CLASSES.ICON_LG} text-primary`} />
           <h1 className="font-bold text-3xl md:text-4xl">Your Personalized Recommendations</h1>
         </div>
 
@@ -157,11 +157,11 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
 
         <div className={'flex-wrap items-center justify-center gap-3'}>
           <UnifiedBadge variant="base" style="secondary" className="text-sm">
-            <TrendingUp className="mr-1 h-3 w-3" />
+            <TrendingUp className={UI_CLASSES.ICON_XS_LEADING} />
             {summary.avgMatchScore}% Avg Match
           </UnifiedBadge>
           <UnifiedBadge variant="base" style="secondary" className="text-sm">
-            <BarChart className="mr-1 h-3 w-3" />
+            <BarChart className={UI_CLASSES.ICON_XS_LEADING} />
             {summary.diversityScore}% Diversity
           </UnifiedBadge>
           <UnifiedBadge variant="base" style="outline" className="text-sm">
@@ -177,7 +177,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
             disabled={isPending}
             className="gap-2"
           >
-            <Bookmark className="h-4 w-4" />
+            <Bookmark className={UI_CLASSES.ICON_SM} />
             {isPending ? 'Saving...' : 'Save All to Library'}
           </Button>
           <Button
@@ -186,12 +186,12 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
             onClick={() => setShowShareModal(true)}
             className="gap-2"
           >
-            <Share2 className="h-4 w-4" />
+            <Share2 className={UI_CLASSES.ICON_SM} />
             Share Results
           </Button>
           <Button variant="outline" size="sm" asChild>
             <Link href={ROUTES.TOOLS_CONFIG_RECOMMENDER} className="gap-2">
-              <RefreshCw className="h-4 w-4" />
+              <RefreshCw className={UI_CLASSES.ICON_SM} />
               Start Over
             </Link>
           </Button>
@@ -201,7 +201,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
       <Collapsible open={showRefinePanel} onOpenChange={setShowRefinePanel}>
         <CollapsibleTrigger asChild>
           <Button variant="ghost" size="sm" className="w-full gap-2">
-            <Settings className="h-4 w-4" />
+            <Settings className={UI_CLASSES.ICON_SM} />
             Adjust Preferences
             <ChevronDown
               className={`h-4 w-4 transition-transform ${showRefinePanel ? 'rotate-180' : ''}`}
@@ -373,7 +373,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                             style="secondary"
                             className={`${getMatchScoreColor(matchScore)} px-3 py-1 font-bold text-base`}
                           >
-                            <Sparkles className="mr-1 h-3 w-3" />
+                            <Sparkles className={UI_CLASSES.ICON_XS_LEADING} />
                             {matchScore}%
                           </UnifiedBadge>
                         </TooltipTrigger>
@@ -391,7 +391,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                         style="outline"
                         className="bg-background/80 backdrop-blur-sm"
                       >
-                        <Award className="mr-1 h-3 w-3" />#{result.rank}
+                        <Award className={UI_CLASSES.ICON_XS_LEADING} />#{result.rank}
                       </UnifiedBadge>
                     </div>
                   )}
@@ -467,7 +467,9 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                         >
                           <span className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_CENTER_GAP_2}>
                             View Details
-                            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                            <ArrowRight
+                              className={`${UI_CLASSES.ICON_SM} transition-transform group-hover:translate-x-1`}
+                            />
                           </span>
                         </Button>
                       }
@@ -492,7 +494,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
       <Card className="border-primary/20 bg-primary/5">
         <CardHeader>
           <CardTitle className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-            <Sparkles className="h-5 w-5 text-primary" />
+            <Sparkles className={`${UI_CLASSES.ICON_MD} text-primary`} />
             What's Next?
           </CardTitle>
         </CardHeader>
@@ -505,7 +507,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
             <Button asChild>
               <Link href="/" className="gap-2">
                 Browse All Configs
-                <ArrowRight className="h-4 w-4" />
+                <ArrowRight className={UI_CLASSES.ICON_SM} />
               </Link>
             </Button>
             <Button variant="outline" asChild>

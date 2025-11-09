@@ -50,7 +50,7 @@ const FeaturedSection: FC<FeaturedSectionProps> = memo(
         <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} mb-8`}>
           <h2 className={'font-bold text-2xl'}>{title}</h2>
           <Link href={href} className="flex items-center gap-2 text-accent hover:underline">
-            View all <ExternalLink className="h-4 w-4" />
+            View all <ExternalLink className={UI_CLASSES.ICON_SM} />
           </Link>
         </div>
         <UnifiedCardGrid
@@ -104,7 +104,7 @@ const FeaturedSectionsComponent: FC<FeaturedSectionsProps> = ({ categories, cate
         <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} mb-8`}>
           <h2 className={'font-bold text-2xl'}>Featured Jobs</h2>
           <Link href={ROUTES.JOBS} className="flex items-center gap-2 text-accent hover:underline">
-            View all <ExternalLink className="h-4 w-4" />
+            View all <ExternalLink className={UI_CLASSES.ICON_SM} />
           </Link>
         </div>
         <div className={UI_CLASSES.CONTAINER_CARD_MUTED}>

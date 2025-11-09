@@ -716,7 +716,7 @@ function HistogramVariant({
       <Card className="bg-muted/50 p-6">
         <div className="text-center">
           <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} mb-2 justify-center`}>
-            <Star className="h-8 w-8 text-muted-foreground/30" aria-hidden="true" />
+            <Star className={`${UI_CLASSES.ICON_XL} text-muted-foreground/30`} aria-hidden="true" />
           </div>
           <p className="text-muted-foreground text-sm">No reviews yet. Be the first to review!</p>
         </div>

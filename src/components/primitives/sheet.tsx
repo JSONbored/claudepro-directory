@@ -17,6 +17,7 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { motion, useDragControls } from 'motion/react';
 import type * as React from 'react';
 import { X } from '@/src/lib/icons';
+import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 import { cn } from '@/src/lib/utils';
 
@@ -155,7 +156,7 @@ const SheetContent = ({
             data-radix-sheet-close
             className="absolute top-4 right-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary"
           >
-            <X className="h-4 w-4" />
+            <X className={UI_CLASSES.ICON_SM} />
             <span className="sr-only">Close</span>
           </SheetPrimitive.Close>
         </motion.div>

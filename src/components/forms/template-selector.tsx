@@ -82,10 +82,10 @@ export function TemplateSelector({ contentType, onSelect }: TemplateSelectorProp
       <DropdownMenuTrigger asChild>
         <Button variant="outline" className="w-full justify-between" type="button">
           <span className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-            <FileText className="h-4 w-4" />
+            <FileText className={UI_CLASSES.ICON_SM} />
             Use Template
           </span>
-          <ChevronDown className="h-4 w-4 opacity-50" />
+          <ChevronDown className={`${UI_CLASSES.ICON_SM} opacity-50`} />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-[280px] sm:w-[320px]">

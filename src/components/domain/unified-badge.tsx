@@ -25,6 +25,8 @@ import {
   TooltipTrigger,
 } from '@/src/components/primitives/tooltip';
 import { Star, TrendingUp, Zap } from '@/src/lib/icons';
+import { SEMANTIC_COLORS } from '@/src/lib/semantic-colors';
+import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
 
 /**
@@ -171,6 +173,13 @@ export type UnifiedBadgeProps =
       badgeVariant?: 'default' | 'outline';
       children?: React.ReactNode;
       className?: string;
+    }
+  | {
+      /** Counter badge overlay (social proof for action buttons) */
+      variant: 'notification-count';
+      count: number;
+      type: 'view' | 'copy' | 'bookmark';
+      className?: string;
     };
 
 /**
@@ -298,9 +307,9 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
         case 'featured':
           return <Star className="mr-1 h-3 w-3 fill-current" aria-hidden="true" />;
         case 'promoted':
-          return <TrendingUp className="mr-1 h-3 w-3" aria-hidden="true" />;
+          return <TrendingUp className={UI_CLASSES.ICON_XS_LEADING} aria-hidden="true" />;
         case 'spotlight':
-          return <Zap className="mr-1 h-3 w-3" aria-hidden="true" />;
+          return <Zap className={UI_CLASSES.ICON_XS_LEADING} aria-hidden="true" />;
         default:
           return null;
       }
@@ -438,9 +447,9 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
       <output
         className={cn(
           'inline-flex items-center justify-center',
-          'px-1.5 py-0.5',
+          'px-2.5 py-0.5',
           'font-semibold text-[10px] uppercase tracking-wider',
-          'rounded border',
+          'rounded-full border',
           'transition-colors duration-200',
           variantStyles[badgeVariant],
           props.className
@@ -449,6 +458,46 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
       >
         {children}
       </output>
+    );
+  }
+
+  // Counter badge overlay variant (social proof)
+  if (props.variant === 'notification-count') {
+    const { count, type } = props;
+
+    // Don't render if count is 0 or negative
+    if (count <= 0) return null;
+
+    // Format count for social proof: exact up to 1k, then compact notation (1k, 1.1k, etc.)
+    const displayCount =
+      count < 1000
+        ? count.toString()
+        : count < 10000
+          ? `${(count / 1000).toFixed(1)}k`
+          : `${Math.floor(count / 1000)}k`;
+
+    // Minimal semantic colors - just the text color, no background
+    const colorStyles = {
+      view: SEMANTIC_COLORS.SOCIAL_VIEW,
+      copy: SEMANTIC_COLORS.SOCIAL_COPY,
+      bookmark: SEMANTIC_COLORS.SOCIAL_BOOKMARK,
+    };
+
+    // Custom font size: text-[10px] instead of text-xs (12px) for minimal badge overlays
+    // where 12px would be too large and obtrusive
+    return (
+      <span
+        className={cn(
+          '-top-1 -right-1 absolute',
+          'font-semibold text-[10px] tabular-nums leading-none',
+          'pointer-events-none',
+          colorStyles[type],
+          props.className
+        )}
+        aria-hidden="true"
+      >
+        {displayCount}
+      </span>
     );
   }
 

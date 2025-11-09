@@ -10,27 +10,29 @@
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { SOCIAL_LINKS } from '@/src/lib/constants';
 import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
-import { Calendar, Eye, Tag, User } from '@/src/lib/icons';
+import { Calendar, Copy, Eye, Tag, User } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
-import { formatViewCount } from '@/src/lib/utils/content.utils';
+import { formatCopyCount, formatViewCount } from '@/src/lib/utils/content.utils';
 import { formatDate } from '@/src/lib/utils/data.utils';
 
 export interface DetailMetadataProps {
   item: ContentItem;
   viewCount?: number | undefined;
+  copyCount?: number | undefined;
 }
 
 /**
  * DetailMetadata Component (Server Component)
  *
- * Renders author, date, view count, and tags metadata for a content item
+ * Renders author, date, view count, copy count, and tags metadata for a content item
  * No React.memo needed - server components don't re-render
  */
-export function DetailMetadata({ item, viewCount }: DetailMetadataProps) {
+export function DetailMetadata({ item, viewCount, copyCount }: DetailMetadataProps) {
   const hasMetadata =
     ('author' in item && item.author) ||
     ('date_added' in item && item.date_added) ||
-    viewCount !== undefined;
+    viewCount !== undefined ||
+    copyCount !== undefined;
   const hasTags = 'tags' in item && Array.isArray(item.tags) && item.tags.length > 0;
 
   if (!(hasMetadata || hasTags)) return null;
@@ -42,7 +44,7 @@ export function DetailMetadata({ item, viewCount }: DetailMetadataProps) {
         <div className="mb-4 flex flex-wrap gap-4 text-muted-foreground text-sm">
           {'author' in item && item.author && (
             <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-              <User className="h-4 w-4" />
+              <User className={UI_CLASSES.ICON_SM} />
               <a
                 href={
                   ('author_profile_url' in item && item.author_profile_url) ||
@@ -58,14 +60,20 @@ export function DetailMetadata({ item, viewCount }: DetailMetadataProps) {
           )}
           {'date_added' in item && item.date_added && (
             <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-              <Calendar className="h-4 w-4" />
+              <Calendar className={UI_CLASSES.ICON_SM} />
               <span>{formatDate(item.date_added)}</span>
             </div>
           )}
           {viewCount !== undefined && viewCount > 0 && (
             <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-              <Eye className="h-4 w-4" />
-              <span>{formatViewCount(viewCount)} views</span>
+              <Eye className={UI_CLASSES.ICON_SM} />
+              <span>{formatViewCount(viewCount)}</span>
+            </div>
+          )}
+          {copyCount !== undefined && copyCount > 0 && (
+            <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+              <Copy className={UI_CLASSES.ICON_SM} />
+              <span>{formatCopyCount(copyCount)}</span>
             </div>
           )}
         </div>
@@ -74,7 +82,7 @@ export function DetailMetadata({ item, viewCount }: DetailMetadataProps) {
       {/* Tags */}
       {hasTags && 'tags' in item && Array.isArray(item.tags) && (
         <div className={UI_CLASSES.FLEX_WRAP_GAP_2}>
-          <Tag className="h-4 w-4 text-muted-foreground" />
+          <Tag className={`${UI_CLASSES.ICON_SM} text-muted-foreground`} />
           {(item.tags as string[]).map((tag: string) => (
             <UnifiedBadge key={tag} variant="base" style="outline" className="text-xs">
               {tag}

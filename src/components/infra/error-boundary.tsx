@@ -34,7 +34,10 @@ function ErrorFallback({ error, resetErrorBoundary }: ErrorFallbackProps) {
       <Card className={'w-full max-w-2xl'}>
         <CardHeader>
           <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3}>
-            <AlertTriangle className="h-8 w-8 text-destructive" aria-hidden="true" />
+            <AlertTriangle
+              className={`${UI_CLASSES.ICON_XL} text-destructive`}
+              aria-hidden="true"
+            />
             <CardTitle as="h1" className="text-2xl">
               Something went wrong
             </CardTitle>
@@ -59,11 +62,11 @@ function ErrorFallback({ error, resetErrorBoundary }: ErrorFallbackProps) {
 
           <div className="flex gap-3">
             <Button onClick={handleReset} variant="default">
-              <RefreshCw className="mr-2 h-4 w-4" />
+              <RefreshCw className={UI_CLASSES.ICON_SM_LEADING} />
               Try Again
             </Button>
             <Button onClick={handleGoHome} variant="outline">
-              <Home className="mr-2 h-4 w-4" />
+              <Home className={UI_CLASSES.ICON_SM_LEADING} />
               Go Home
             </Button>
           </div>

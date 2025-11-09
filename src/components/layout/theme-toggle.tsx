@@ -160,7 +160,7 @@ export function ThemeToggle() {
 
   return (
     <div ref={containerRef} className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-      <Sun className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+      <Sun className={`${UI_CLASSES.ICON_SM} text-muted-foreground`} aria-hidden="true" />
       <Switch
         checked={theme === 'dark'}
         onCheckedChange={(checked) => {
@@ -199,7 +199,7 @@ export function ThemeToggle() {
         onClick={handleToggle}
         aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
       />
-      <Moon className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+      <Moon className={`${UI_CLASSES.ICON_SM} text-muted-foreground`} aria-hidden="true" />
     </div>
   );
 }

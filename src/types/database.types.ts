@@ -995,60 +995,6 @@ export type Database = {
         };
         Relationships: [];
       };
-      featured_configs: {
-        Row: {
-          calculated_at: string;
-          calculation_metadata: Json | null;
-          content_slug: string;
-          content_type: string;
-          created_at: string;
-          engagement_score: number | null;
-          final_score: number;
-          freshness_score: number | null;
-          id: string;
-          rank: number;
-          rating_score: number | null;
-          trending_score: number | null;
-          updated_at: string;
-          week_end: string;
-          week_start: string;
-        };
-        Insert: {
-          calculated_at?: string;
-          calculation_metadata?: Json | null;
-          content_slug: string;
-          content_type: string;
-          created_at?: string;
-          engagement_score?: number | null;
-          final_score: number;
-          freshness_score?: number | null;
-          id?: string;
-          rank: number;
-          rating_score?: number | null;
-          trending_score?: number | null;
-          updated_at?: string;
-          week_end: string;
-          week_start: string;
-        };
-        Update: {
-          calculated_at?: string;
-          calculation_metadata?: Json | null;
-          content_slug?: string;
-          content_type?: string;
-          created_at?: string;
-          engagement_score?: number | null;
-          final_score?: number;
-          freshness_score?: number | null;
-          id?: string;
-          rank?: number;
-          rating_score?: number | null;
-          trending_score?: number | null;
-          updated_at?: string;
-          week_end?: string;
-          week_start?: string;
-        };
-        Relationships: [];
-      };
       followers: {
         Row: {
           created_at: string;
@@ -2888,20 +2834,6 @@ export type Database = {
         };
         Relationships: [];
       };
-      mv_trending_content: {
-        Row: {
-          bookmark_count: number | null;
-          category: string | null;
-          copy_count: number | null;
-          description: string | null;
-          last_refreshed: string | null;
-          latest_activity: string | null;
-          slug: string | null;
-          title: string | null;
-          view_count: number | null;
-        };
-        Relationships: [];
-      };
       mv_weekly_new_content: {
         Row: {
           category: string | null;
@@ -2999,7 +2931,6 @@ export type Database = {
           needs_vacuum: boolean;
         }[];
       };
-      cleanup_old_interactions: { Args: never; Returns: number };
       diagnose_failing_section: {
         Args: { p_section_index: number; p_slug: string };
         Returns: string;
@@ -3463,12 +3394,6 @@ export type Database = {
         Args: { p_category_ids: string[]; p_week_start?: string };
         Returns: Json;
       };
-      get_homepage_featured_only:
-        | {
-            Args: { p_all_configs_limit?: number; p_category_ids: string[] };
-            Returns: Json;
-          }
-        | { Args: { p_category_ids: string[] }; Returns: Json };
       get_job_detail: { Args: { p_slug: string }; Returns: Json };
       get_jobs_by_category: {
         Args: { p_category: string };
@@ -3615,7 +3540,6 @@ export type Database = {
           suggestion: string;
         }[];
       };
-      get_sidebar_guides_data: { Args: { p_limit?: number }; Returns: Json };
       get_similar_content: {
         Args: {
           p_content_slug: string;
@@ -3668,27 +3592,6 @@ export type Database = {
           tag: string;
           tag_count: number;
         }[];
-      };
-      get_trending_content: {
-        Args: { p_limit?: number };
-        Returns: {
-          category: string;
-          description: string;
-          slug: string;
-          title: string;
-          url: string;
-          view_count: number;
-        }[];
-      };
-      get_trending_page: {
-        Args: {
-          p_category?: string;
-          p_limit?: number;
-          p_metric?: Database['public']['Enums']['trending_metric'];
-          p_page?: number;
-          p_period?: Database['public']['Enums']['trending_period'];
-        };
-        Returns: Json;
       };
       get_user_activity_summary: { Args: { p_user_id: string }; Returns: Json };
       get_user_activity_timeline: {

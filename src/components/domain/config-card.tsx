@@ -25,21 +25,13 @@ import { useCopyToClipboard } from '@/src/hooks/use-copy-to-clipboard';
 import { addBookmark } from '@/src/lib/actions/user.actions';
 import { type CategoryId, isValidCategory } from '@/src/lib/config/category-config';
 import { trackInteraction } from '@/src/lib/edge/client';
-import {
-  Award,
-  Bookmark,
-  Copy as CopyIcon,
-  ExternalLink,
-  Eye,
-  Github,
-  Layers,
-  Sparkles,
-} from '@/src/lib/icons';
+import { Award, ExternalLink, Eye, Github, Layers, Sparkles } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
+import { SEMANTIC_COLORS } from '@/src/lib/semantic-colors';
 import type { ConfigCardProps } from '@/src/lib/types/component.types';
 import { BADGE_COLORS, CARD_BEHAVIORS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { getDisplayTitle } from '@/src/lib/utils';
-import { formatCopyCount, formatViewCount, getContentItemUrl } from '@/src/lib/utils/content.utils';
+import { formatViewCount, getContentItemUrl } from '@/src/lib/utils/content.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
 
 export const ConfigCard = memo(
@@ -247,9 +239,9 @@ export const ConfigCard = memo(
                 <UnifiedBadge
                   variant="base"
                   style="outline"
-                  className={`text-xs ${BADGE_COLORS.collectionType[collectionType as keyof typeof BADGE_COLORS.collectionType] || ''}`}
+                  className={`${UI_CLASSES.TEXT_BADGE} ${BADGE_COLORS.collectionType[collectionType as keyof typeof BADGE_COLORS.collectionType] || ''}`}
                 >
-                  <Layers className="mr-1 h-3 w-3" aria-hidden="true" />
+                  <Layers className={UI_CLASSES.ICON_XS_LEADING} aria-hidden="true" />
                   {COLLECTION_TYPE_LABELS[collectionType as keyof typeof COLLECTION_TYPE_LABELS]}
                 </UnifiedBadge>
               )}
@@ -262,7 +254,7 @@ export const ConfigCard = memo(
                   <UnifiedBadge
                     variant="base"
                     style="outline"
-                    className={`text-xs ${BADGE_COLORS.difficulty[collectionDifficulty as 'beginner' | 'intermediate' | 'advanced']}`}
+                    className={`${UI_CLASSES.TEXT_BADGE} ${BADGE_COLORS.difficulty[collectionDifficulty as 'beginner' | 'intermediate' | 'advanced']}`}
                   >
                     {collectionDifficulty}
                   </UnifiedBadge>
@@ -272,7 +264,7 @@ export const ConfigCard = memo(
                 <UnifiedBadge
                   variant="base"
                   style="outline"
-                  className={'border-muted-foreground/20 text-muted-foreground text-xs'}
+                  className={`${UI_CLASSES.BADGE_METADATA} ${UI_CLASSES.TEXT_BADGE}`}
                 >
                   {itemCount} {itemCount === 1 ? 'item' : 'items'}
                 </UnifiedBadge>
@@ -283,12 +275,12 @@ export const ConfigCard = memo(
                 <UnifiedBadge
                   variant="base"
                   style="secondary"
-                  className="fade-in slide-in-from-top-2 animate-in gap-1 border-amber-500/30 bg-gradient-to-r from-amber-500/10 to-yellow-500/10 font-semibold text-amber-600 shadow-sm transition-all duration-300 hover:from-amber-500/15 hover:to-yellow-500/15 hover:shadow-md dark:text-amber-400"
+                  className={`fade-in slide-in-from-top-2 animate-in ${UI_CLASSES.SPACE_TIGHT} font-semibold shadow-sm transition-all duration-300 hover:from-amber-500/15 hover:to-yellow-500/15 hover:shadow-md ${SEMANTIC_COLORS.FEATURED}`}
                 >
                   {featuredRank && featuredRank <= 3 ? (
-                    <Award className="h-3.5 w-3.5 text-amber-500" aria-hidden="true" />
+                    <Award className={`${UI_CLASSES.ICON_XS} text-amber-500`} aria-hidden="true" />
                   ) : (
-                    <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
+                    <Sparkles className={UI_CLASSES.ICON_XS} aria-hidden="true" />
                   )}
                   Featured
                   {featuredRank && <span className="text-xs opacity-75">#{featuredRank}</span>}
@@ -310,80 +302,6 @@ export const ConfigCard = memo(
           )}
           renderMetadataBadges={() => (
             <>
-              {/* View count badge */}
-              {behavior.showViewCount &&
-                viewCount !== undefined &&
-                typeof viewCount === 'number' && (
-                  <button
-                    type="button"
-                    onClick={(e) => e.stopPropagation()}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        e.stopPropagation();
-                      }
-                    }}
-                    className="rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-                    aria-label={`${formatViewCount(viewCount)} views`}
-                  >
-                    <UnifiedBadge
-                      variant="base"
-                      style="secondary"
-                      className="h-7 gap-1.5 border-primary/20 bg-primary/10 px-2.5 font-medium text-primary transition-colors hover:bg-primary/15"
-                    >
-                      <Eye className="h-3.5 w-3.5" aria-hidden="true" />
-                      <span className="text-xs">{formatViewCount(viewCount)}</span>
-                    </UnifiedBadge>
-                  </button>
-                )}
-
-              {/* Copy count badge - social proof for engagement */}
-              {behavior.showCopyCount && copyCount !== undefined && copyCount > 0 && (
-                <button
-                  type="button"
-                  onClick={(e) => e.stopPropagation()}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.stopPropagation();
-                    }
-                  }}
-                  className="rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-                  aria-label={`${formatCopyCount(copyCount)} uses`}
-                >
-                  <UnifiedBadge
-                    variant="base"
-                    style="secondary"
-                    className="h-7 gap-1.5 border-green-500/20 bg-green-500/10 px-2.5 font-medium text-green-600 transition-colors hover:bg-green-500/15 dark:text-green-400"
-                  >
-                    <CopyIcon className="h-3.5 w-3.5" aria-hidden="true" />
-                    <span className="text-xs">{formatCopyCount(copyCount)}</span>
-                  </UnifiedBadge>
-                </button>
-              )}
-
-              {/* Bookmark count badge - social proof for saves */}
-              {bookmarkCount !== undefined && bookmarkCount > 0 && (
-                <button
-                  type="button"
-                  onClick={(e) => e.stopPropagation()}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.stopPropagation();
-                    }
-                  }}
-                  className="rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-                  aria-label={`${bookmarkCount} ${bookmarkCount === 1 ? 'bookmark' : 'bookmarks'}`}
-                >
-                  <UnifiedBadge
-                    variant="base"
-                    style="secondary"
-                    className="h-7 gap-1.5 border-blue-500/20 bg-blue-500/10 px-2.5 font-medium text-blue-600 transition-colors hover:bg-blue-500/15 dark:text-blue-400"
-                  >
-                    <Bookmark className="h-3.5 w-3.5" aria-hidden="true" />
-                    <span className="text-xs">{bookmarkCount}</span>
-                  </UnifiedBadge>
-                </button>
-              )}
-
               {/* Rating badge - shows average rating and count */}
               {behavior.showRating && hasRating && ratingData && (
                 <button
@@ -412,14 +330,14 @@ export const ConfigCard = memo(
                 <Button
                   variant="ghost"
                   size="sm"
-                  className={`h-7 w-7 p-0 ${UI_CLASSES.BUTTON_GHOST_ICON}`}
+                  className={`${UI_CLASSES.ICON_BUTTON_SM} ${UI_CLASSES.BUTTON_GHOST_ICON}`}
                   onClick={(e) => {
                     e.stopPropagation();
                     window.open(item.repository as string, '_blank');
                   }}
                   aria-label={`View ${displayTitle} repository on GitHub`}
                 >
-                  <Github className="h-3 w-3" aria-hidden="true" />
+                  <Github className={UI_CLASSES.ICON_XS} aria-hidden="true" />
                 </Button>
               )}
 
@@ -427,46 +345,70 @@ export const ConfigCard = memo(
                 <Button
                   variant="ghost"
                   size="sm"
-                  className={`h-7 w-7 p-0 ${UI_CLASSES.BUTTON_GHOST_ICON}`}
+                  className={`${UI_CLASSES.ICON_BUTTON_SM} ${UI_CLASSES.BUTTON_GHOST_ICON}`}
                   onClick={(e) => {
                     e.stopPropagation();
                     window.open(item.documentation_url as string, '_blank');
                   }}
                   aria-label={`View ${displayTitle} documentation`}
                 >
-                  <ExternalLink className="h-3 w-3" aria-hidden="true" />
+                  <ExternalLink className={UI_CLASSES.ICON_XS} aria-hidden="true" />
                 </Button>
               )}
 
-              {/* Bookmark button */}
-              <UnifiedButton
-                variant="bookmark"
-                contentType={item.category || 'agents'}
-                contentSlug={item.slug}
-              />
-
-              {behavior.showCopyButton && (
+              {/* Bookmark button with count overlay */}
+              <div className="relative">
                 <UnifiedButton
-                  variant="card-copy"
-                  url={`${typeof window !== 'undefined' ? window.location.origin : ''}${targetPath}`}
-                  category={(item.category || 'agents') as CategoryId}
-                  slug={item.slug}
-                  title={displayTitle}
+                  variant="bookmark"
+                  contentType={item.category || 'agents'}
+                  contentSlug={item.slug}
                 />
+                {bookmarkCount !== undefined && bookmarkCount > 0 && (
+                  <UnifiedBadge
+                    variant="notification-count"
+                    count={bookmarkCount}
+                    type="bookmark"
+                  />
+                )}
+              </div>
+
+              {/* Copy button with count overlay */}
+              {behavior.showCopyButton && (
+                <div className="relative">
+                  <UnifiedButton
+                    variant="card-copy"
+                    url={`${typeof window !== 'undefined' ? window.location.origin : ''}${targetPath}`}
+                    category={(item.category || 'agents') as CategoryId}
+                    slug={item.slug}
+                    title={displayTitle}
+                  />
+                  {behavior.showCopyCount && copyCount !== undefined && copyCount > 0 && (
+                    <UnifiedBadge variant="notification-count" count={copyCount} type="copy" />
+                  )}
+                </div>
               )}
 
-              <Button
-                variant="ghost"
-                size="sm"
-                className={`h-7 px-2 text-xs ${UI_CLASSES.BUTTON_GHOST_ICON}`}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  window.location.href = targetPath;
-                }}
-                aria-label={`View details for ${displayTitle}`}
-              >
-                View
-              </Button>
+              {/* View button with count overlay */}
+              <div className="relative">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className={`${UI_CLASSES.ICON_BUTTON_SM} ${UI_CLASSES.BUTTON_GHOST_ICON}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    window.location.href = targetPath;
+                  }}
+                  aria-label={`View details for ${displayTitle}${behavior.showViewCount && viewCount !== undefined && typeof viewCount === 'number' ? ` - ${formatViewCount(viewCount)}` : ''}`}
+                >
+                  <Eye className={UI_CLASSES.ICON_XS} aria-hidden="true" />
+                </Button>
+                {behavior.showViewCount &&
+                  viewCount !== undefined &&
+                  typeof viewCount === 'number' &&
+                  viewCount > 0 && (
+                    <UnifiedBadge variant="notification-count" count={viewCount} type="view" />
+                  )}
+              </div>
             </>
           )}
           customMetadataText={

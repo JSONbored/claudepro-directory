@@ -1,10 +1,11 @@
 'use client';
 
 /**
- * ProfileCard Component - Configuration-Driven User Profile Display
+ * ProfileCard Component - User-Focused Profile Display
  *
  * Architecture:
  * - Reuses BaseCard for composition (zero duplication)
+ * - Avatar-first design with user image display
  * - Configuration-driven badge/metadata rendering
  * - Performance optimized with React.memo
  * - SEO-friendly with proper ARIA labels
@@ -16,8 +17,9 @@
 import { memo } from 'react';
 import { BaseCard } from '@/src/components/domain/base-card';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/src/components/primitives/avatar';
 import { Button } from '@/src/components/primitives/button';
-import { Award, Briefcase, ExternalLink, Users } from '@/src/lib/icons';
+import { Award, ExternalLink, Users } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import type { Tables } from '@/src/types/database.types';
 
@@ -38,47 +40,80 @@ export interface ProfileCardProps {
 }
 
 /**
- * Tier badge configuration
+ * Member type badge configuration based on user role/activity
  */
-const TIER_CONFIG = {
-  free: { label: 'Free', className: 'border-muted-foreground/20 text-muted-foreground' },
-  pro: {
-    label: 'Pro',
-    className:
-      'border-amber-500/30 bg-gradient-to-r from-amber-500/10 to-yellow-500/10 text-amber-600 dark:text-amber-400',
-  },
-  enterprise: {
-    label: 'Enterprise',
-    className:
-      'border-purple-500/30 bg-gradient-to-r from-purple-500/10 to-pink-500/10 text-purple-600 dark:text-purple-400',
-  },
-} as const;
+const getMemberBadge = (user: UserProfile) => {
+  // Check if user has a company (owner_id in companies table would need to be checked)
+  // For now, default to "Member" - can be enhanced with additional data
+  const contributionCount = user.total_contributions || 0;
+
+  if (contributionCount >= 10) {
+    return {
+      label: 'Contributor',
+      className: 'border-accent/30 bg-accent/10 text-accent',
+    };
+  }
+
+  return {
+    label: 'Member',
+    className: 'border-muted-foreground/20 text-muted-foreground',
+  };
+};
 
 function ProfileCardComponent({ user, variant = 'default', showActions = true }: ProfileCardProps) {
-  const tier = (user.tier || 'free') as 'free' | 'pro' | 'enterprise';
-  const tierConfig = TIER_CONFIG[tier];
+  const memberBadge = getMemberBadge(user);
   const slug = user.slug || 'unknown';
-  const displayName = user.name || `@${slug}`;
+  const username = `@${slug}`;
+  const displayName = user.name || username;
   const profileUrl = `/u/${slug}`;
+
+  // Generate initials for avatar fallback
+  const initials =
+    (user.name || slug)
+      .split(' ')
+      .map((n: string) => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2) || 'U';
 
   return (
     <BaseCard
       targetPath={profileUrl}
-      displayTitle={displayName}
-      {...(user.bio ? { description: user.bio } : {})}
+      displayTitle=""
       showActions={showActions}
-      ariaLabel={`${displayName} - ${user.work || 'Community member'}`}
+      ariaLabel={`${username} - ${user.work || 'Community member'}`}
       showAuthor={false}
       compactMode={variant === 'compact'}
+      renderHeader={() => (
+        <div className="flex flex-col items-center gap-3 text-center">
+          {/* Avatar */}
+          <Avatar className="h-16 w-16 ring-2 ring-accent/20 ring-offset-2 ring-offset-background">
+            {user.image && (
+              <AvatarImage src={user.image} alt={`${username}'s avatar`} className="object-cover" />
+            )}
+            <AvatarFallback className="bg-accent/10 font-semibold text-accent text-lg">
+              {initials}
+            </AvatarFallback>
+          </Avatar>
+
+          {/* Username */}
+          <div className="w-full min-w-0">
+            <h3 className="truncate font-semibold text-base">{username}</h3>
+            {user.work && (
+              <p className="mt-0.5 truncate text-muted-foreground text-sm">{user.work}</p>
+            )}
+          </div>
+        </div>
+      )}
       renderTopBadges={() => (
-        <>
-          {/* Tier badge */}
+        <div className="flex flex-wrap items-center justify-center gap-1.5">
+          {/* Member type badge */}
           <UnifiedBadge
             variant="base"
             style="outline"
-            className={`text-xs ${tierConfig.className}`}
+            className={`${UI_CLASSES.TEXT_BADGE} ${memberBadge.className}`}
           >
-            {tierConfig.label}
+            {memberBadge.label}
           </UnifiedBadge>
 
           {/* Top interests (max 2) */}
@@ -91,12 +126,12 @@ function ProfileCardComponent({ user, variant = 'default', showActions = true }:
                   key={interest}
                   variant="base"
                   style="secondary"
-                  className="border-primary/20 text-primary text-xs"
+                  className={`${UI_CLASSES.TEXT_BADGE} border-primary/20 text-primary`}
                 >
                   {interest}
                 </UnifiedBadge>
               ))}
-        </>
+        </div>
       )}
       renderMetadataBadges={() => (
         <>
@@ -105,10 +140,10 @@ function ProfileCardComponent({ user, variant = 'default', showActions = true }:
             <UnifiedBadge
               variant="base"
               style="secondary"
-              className="h-7 gap-1.5 border-primary/20 bg-primary/10 px-2.5 font-medium text-primary"
+              className="h-7 gap-1.5 border-primary/20 bg-primary/10 font-medium text-primary"
             >
-              <Award className="h-3.5 w-3.5" aria-hidden="true" />
-              <span className="text-xs">{user.total_contributions}</span>
+              <Award className={UI_CLASSES.ICON_XS} aria-hidden="true" />
+              <span className={UI_CLASSES.TEXT_BADGE}>{user.total_contributions}</span>
             </UnifiedBadge>
           )}
 
@@ -117,10 +152,10 @@ function ProfileCardComponent({ user, variant = 'default', showActions = true }:
             <UnifiedBadge
               variant="base"
               style="secondary"
-              className="h-7 gap-1.5 border-border bg-muted/50 px-2.5 font-medium text-foreground"
+              className="h-7 gap-1.5 border-border bg-muted/50 font-medium text-foreground"
             >
-              <Users className="h-3.5 w-3.5" aria-hidden="true" />
-              <span className="text-xs">{user.followers_count}</span>
+              <Users className={UI_CLASSES.ICON_XS} aria-hidden="true" />
+              <span className={UI_CLASSES.TEXT_BADGE}>{user.followers_count}</span>
             </UnifiedBadge>
           )}
         </>
@@ -132,14 +167,14 @@ function ProfileCardComponent({ user, variant = 'default', showActions = true }:
             <Button
               variant="ghost"
               size="sm"
-              className={`h-7 w-7 p-0 ${UI_CLASSES.BUTTON_GHOST_ICON}`}
+              className={`${UI_CLASSES.ICON_BUTTON_SM} ${UI_CLASSES.BUTTON_GHOST_ICON}`}
               onClick={(e) => {
                 e.stopPropagation();
                 window.open(user.website as string, '_blank');
               }}
               aria-label={`Visit ${displayName}'s website`}
             >
-              <ExternalLink className="h-3 w-3" aria-hidden="true" />
+              <ExternalLink className={UI_CLASSES.ICON_XS} aria-hidden="true" />
             </Button>
           )}
 
@@ -148,14 +183,14 @@ function ProfileCardComponent({ user, variant = 'default', showActions = true }:
             <Button
               variant="ghost"
               size="sm"
-              className={`h-7 w-7 p-0 ${UI_CLASSES.BUTTON_GHOST_ICON}`}
+              className={`${UI_CLASSES.ICON_BUTTON_SM} ${UI_CLASSES.BUTTON_GHOST_ICON}`}
               onClick={(e) => {
                 e.stopPropagation();
                 window.open(user.social_x_link as string, '_blank');
               }}
               aria-label={`Visit ${displayName} on X/Twitter`}
             >
-              <ExternalLink className="h-3 w-3" aria-hidden="true" />
+              <ExternalLink className={UI_CLASSES.ICON_XS} aria-hidden="true" />
             </Button>
           )}
 
@@ -163,7 +198,7 @@ function ProfileCardComponent({ user, variant = 'default', showActions = true }:
           <Button
             variant="ghost"
             size="sm"
-            className={`h-7 px-2 text-xs ${UI_CLASSES.BUTTON_GHOST_ICON}`}
+            className={`${UI_CLASSES.BUTTON_ICON_TEXT_SM} ${UI_CLASSES.BUTTON_GHOST_ICON}`}
             onClick={(e) => {
               e.stopPropagation();
               window.location.href = profileUrl;
@@ -174,14 +209,7 @@ function ProfileCardComponent({ user, variant = 'default', showActions = true }:
           </Button>
         </>
       )}
-      customMetadataText={
-        user.work ? (
-          <>
-            <Briefcase className="h-3 w-3 text-muted-foreground" aria-hidden="true" />
-            <span className="text-muted-foreground text-xs">{user.work}</span>
-          </>
-        ) : null
-      }
+      customMetadataText={null}
     />
   );
 }

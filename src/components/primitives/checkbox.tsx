@@ -3,6 +3,7 @@
 import * as CheckboxPrimitive from '@radix-ui/react-checkbox';
 import type * as React from 'react';
 import { Check } from '@/src/lib/icons';
+import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
 
 const Checkbox = ({
@@ -21,7 +22,7 @@ const Checkbox = ({
     {...props}
   >
     <CheckboxPrimitive.Indicator className={cn('flex items-center justify-center text-current')}>
-      <Check className="h-4 w-4" />
+      <Check className={UI_CLASSES.ICON_SM} />
     </CheckboxPrimitive.Indicator>
   </CheckboxPrimitive.Root>
 );

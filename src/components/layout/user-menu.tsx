@@ -106,7 +106,7 @@ export function UserMenu({ className }: UserMenuProps) {
   if (loading) {
     return (
       <div className={`flex items-center ${className}`}>
-        <Skeleton size="lg" width="lg" rounded="full" className="h-8 w-8" />
+        <Skeleton size="lg" width="lg" rounded="full" className={UI_CLASSES.ICON_XL} />
       </div>
     );
   }
@@ -115,18 +115,20 @@ export function UserMenu({ className }: UserMenuProps) {
   if (!user) {
     return (
       <div className={className}>
-        <Button
-          variant="ghost"
-          size="sm"
-          className={UI_CLASSES.BUTTON_GHOST_ICON}
+        <Link
+          href="/login"
+          className={`group relative flex items-center gap-1.5 px-2 py-1 font-medium ${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_NAV} no-underline transition-colors duration-200`}
           aria-label="Sign in"
-          asChild
         >
-          <Link href="/login">
-            <UserIcon className="h-4 w-4" />
-            <span className={'hidden lg:inline'}>Sign In</span>
-          </Link>
-        </Button>
+          <UserIcon className={UI_CLASSES.ICON_XS} />
+          <span className="relative hidden lg:inline">
+            Sign In
+            <span
+              className="absolute bottom-0 left-0 h-[2px] w-0 bg-accent transition-all duration-300 group-hover:w-full"
+              aria-hidden="true"
+            />
+          </span>
+        </Link>
       </div>
     );
   }
@@ -157,7 +159,7 @@ export function UserMenu({ className }: UserMenuProps) {
               className="relative h-8 w-8 rounded-full p-0 hover:ring-2 hover:ring-accent/30"
               aria-label={`User menu for ${displayName}`}
             >
-              <Avatar className="h-8 w-8">
+              <Avatar className={UI_CLASSES.ICON_XL}>
                 {avatarUrl && <AvatarImage src={avatarUrl} alt={displayName || 'User avatar'} />}
                 <AvatarFallback className="bg-accent/20 font-semibold text-accent text-sm">
                   {initials}
@@ -181,21 +183,21 @@ export function UserMenu({ className }: UserMenuProps) {
           {/* Navigation Links */}
           <DropdownMenuItem asChild>
             <Link href="/account/settings">
-              <Settings className="mr-2 h-4 w-4" />
+              <Settings className={UI_CLASSES.ICON_SM_LEADING} />
               <span>Settings</span>
             </Link>
           </DropdownMenuItem>
 
           <DropdownMenuItem asChild>
             <Link href="/account/library">
-              <BookOpen className="mr-2 h-4 w-4" />
+              <BookOpen className={UI_CLASSES.ICON_SM_LEADING} />
               <span>Library</span>
             </Link>
           </DropdownMenuItem>
 
           <DropdownMenuItem asChild>
             <Link href="/account/activity">
-              <Activity className="mr-2 h-4 w-4" />
+              <Activity className={UI_CLASSES.ICON_SM_LEADING} />
               <span>Activity</span>
             </Link>
           </DropdownMenuItem>
@@ -208,7 +210,7 @@ export function UserMenu({ className }: UserMenuProps) {
             disabled={signingOut}
             className="cursor-pointer text-destructive focus:text-destructive"
           >
-            <LogOut className="mr-2 h-4 w-4" />
+            <LogOut className={UI_CLASSES.ICON_SM_LEADING} />
             <span>{signingOut ? 'Signing out...' : 'Sign out'}</span>
           </DropdownMenuItem>
         </DropdownMenuContent>

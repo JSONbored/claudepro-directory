@@ -32,7 +32,7 @@ export function QuizProgress({
         </div>
         {percentComplete === 100 && (
           <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} text-primary text-sm`}>
-            <CheckCircle className="h-4 w-4" />
+            <CheckCircle className={UI_CLASSES.ICON_SM} />
             <span>Complete!</span>
           </div>
         )}
@@ -65,7 +65,7 @@ export function QuizProgress({
             }`}
             title={`Question ${step}${step < currentQuestion ? ' (completed)' : step === currentQuestion ? ' (current)' : ''}`}
           >
-            {step < currentQuestion ? <CheckCircle className="h-4 w-4" /> : step}
+            {step < currentQuestion ? <CheckCircle className={UI_CLASSES.ICON_SM} /> : step}
           </div>
         ))}
       </div>

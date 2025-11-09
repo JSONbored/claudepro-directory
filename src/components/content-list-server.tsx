@@ -37,7 +37,7 @@ function ContentHeroSection<T extends ContentItem>({
               {(() => {
                 const IconComponent =
                   ICON_NAME_MAP[icon as keyof typeof ICON_NAME_MAP] || HelpCircle;
-                return <IconComponent className="h-8 w-8 text-primary" />;
+                return <IconComponent className={`${UI_CLASSES.ICON_XL} text-primary`} />;
               })()}
             </div>
           </div>
@@ -57,7 +57,12 @@ function ContentHeroSection<T extends ContentItem>({
                       if (typeof badge.icon === 'string') {
                         const BadgeIconComponent =
                           ICON_NAME_MAP[badge.icon as keyof typeof ICON_NAME_MAP] || HelpCircle;
-                        return <BadgeIconComponent className="mr-1 h-3 w-3" aria-hidden="true" />;
+                        return (
+                          <BadgeIconComponent
+                            className={UI_CLASSES.ICON_XS_LEADING}
+                            aria-hidden="true"
+                          />
+                        );
                       }
                       return null;
                     })()}
@@ -73,7 +78,7 @@ function ContentHeroSection<T extends ContentItem>({
               className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}
               aria-label={`Submit a new ${title.slice(0, -1).toLowerCase()}`}
             >
-              <ExternalLink className="h-3 w-3" aria-hidden="true" />
+              <ExternalLink className={UI_CLASSES.ICON_XS} aria-hidden="true" />
               Submit {title.slice(0, -1)}
             </Link>
           </Button>

@@ -283,7 +283,7 @@ export function ListItemManager(props: ListItemManagerProps) {
                     aria-label={`Remove ${item}`}
                     disabled={disabled}
                   >
-                    <X className="h-3 w-3" />
+                    <X className={UI_CLASSES.ICON_XS} />
                   </button>
                 </UnifiedBadge>
               ))}

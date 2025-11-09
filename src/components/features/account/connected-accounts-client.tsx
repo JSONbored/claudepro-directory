@@ -9,6 +9,7 @@ import type { ComponentType } from 'react';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { Button } from '@/src/components/primitives/button';
 import { CheckCircle, DiscordBrandIcon, GithubBrandIcon, GoogleBrandIcon } from '@/src/lib/icons';
+import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 interface Identity {
   provider: string;
@@ -88,14 +89,14 @@ export function ConnectedAccountsClient({ identities }: ConnectedAccountsClientP
           >
             <div className="flex items-center gap-4">
               <div className="rounded-full border bg-accent/5 p-3">
-                <IconComponent className="h-6 w-6" />
+                <IconComponent className={UI_CLASSES.ICON_LG} />
               </div>
               <div>
                 <div className="flex items-center gap-2">
                   <h3 className="font-medium">{config.label}</h3>
                   {isConnected && (
                     <UnifiedBadge variant="base" style="default" className="gap-1">
-                      <CheckCircle className="h-3 w-3" />
+                      <CheckCircle className={UI_CLASSES.ICON_XS} />
                       Connected
                     </UnifiedBadge>
                   )}

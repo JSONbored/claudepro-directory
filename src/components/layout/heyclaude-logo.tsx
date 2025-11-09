@@ -68,9 +68,8 @@ export function HeyClaudeLogo({
       transition={{ duration, ease: 'easeOut' }}
       className={cn(
         'font-bold tracking-tight',
-        // Custom gradient for heyclaude branding
-        'bg-gradient-to-r from-orange-100 via-purple-100 to-blue-100',
-        'dark:from-orange-400/30 dark:via-purple-400/30 dark:to-blue-400/30',
+        // Force solid orange color - uses ! prefix to override HighlightText defaults
+        '!bg-accent',
         sizeClasses[size],
         className
       )}

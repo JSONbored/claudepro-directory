@@ -171,7 +171,10 @@ export function AnnouncementBannerClient({ announcement }: AnnouncementBannerCli
                     'flex min-h-[36px] min-w-[36px] flex-shrink-0 items-center justify-center rounded-full transition-colors duration-200 hover:bg-accent/20 focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 sm:min-h-[40px] sm:min-w-[40px]'
                   }
                 >
-                  <X className="h-3.5 w-3.5 text-foreground sm:h-4 sm:w-4" aria-hidden="true" />
+                  <X
+                    className={`${UI_CLASSES.ICON_XS} text-foreground sm:h-4 sm:w-4`}
+                    aria-hidden="true"
+                  />
                 </button>
               )}
             </div>

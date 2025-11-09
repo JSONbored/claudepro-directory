@@ -147,7 +147,7 @@ export function UnifiedNewsletterCapture(props: UnifiedNewsletterCaptureProps) {
         >
           <div className="mb-6 flex justify-center">
             <div className="rounded-2xl border border-accent/20 bg-accent/10 p-4 shadow-accent/10 shadow-md backdrop-blur-sm">
-              <Mail className="h-8 w-8 text-accent" aria-hidden="true" />
+              <Mail className={`${UI_CLASSES.ICON_XL} text-accent`} aria-hidden="true" />
             </div>
           </div>
 
@@ -182,7 +182,7 @@ export function UnifiedNewsletterCapture(props: UnifiedNewsletterCaptureProps) {
           <CardHeader className="pb-5">
             <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3} mb-3`}>
               <div className="rounded-lg border border-primary/20 bg-primary/10 p-2.5">
-                <Mail className="h-5 w-5 text-primary" aria-hidden="true" />
+                <Mail className={`${UI_CLASSES.ICON_MD} text-primary`} aria-hidden="true" />
               </div>
               <CardTitle className="font-bold text-xl">{finalHeadline}</CardTitle>
             </div>
@@ -210,7 +210,10 @@ export function UnifiedNewsletterCapture(props: UnifiedNewsletterCaptureProps) {
           )}
         >
           <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3} min-w-0 flex-1`}>
-            <Mail className="h-5 w-5 flex-shrink-0 text-primary" aria-hidden="true" />
+            <Mail
+              className={`${UI_CLASSES.ICON_MD} flex-shrink-0 text-primary`}
+              aria-hidden="true"
+            />
             <div className="min-w-0 flex-1">
               <p className="truncate font-medium text-sm">{finalHeadline}</p>
               <p className="truncate text-muted-foreground text-xs">{finalDescription}</p>
@@ -236,7 +239,7 @@ export function UnifiedNewsletterCapture(props: UnifiedNewsletterCaptureProps) {
           <CardHeader className="flex-1">
             <div className="mb-4">
               <div className="inline-flex rounded-lg border border-primary/20 bg-primary/10 p-3">
-                <Mail className="h-6 w-6 text-primary" aria-hidden="true" />
+                <Mail className={`${UI_CLASSES.ICON_LG} text-primary`} aria-hidden="true" />
               </div>
             </div>
             <CardTitle className="mb-3 font-bold text-xl">{finalHeadline}</CardTitle>
@@ -345,13 +348,15 @@ function FormVariant({ source, className }: { source: NewsletterSource; classNam
           >
             {isSubmitting ? (
               <span className="flex items-center gap-2">
-                <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                <span
+                  className={`${UI_CLASSES.ICON_SM} animate-spin rounded-full border-2 border-current border-t-transparent`}
+                />
                 Subscribing...
               </span>
             ) : (
               <span className="flex items-center gap-2">
                 {NEWSLETTER_CTA_CONFIG.buttonText}
-                <Mail className="h-4 w-4" aria-hidden="true" />
+                <Mail className={UI_CLASSES.ICON_SM} aria-hidden="true" />
               </span>
             )}
           </Button>
@@ -471,7 +476,7 @@ function FooterBarVariant({
         <div className="mx-auto hidden max-w-5xl items-center justify-between gap-6 md:flex">
           <div className="flex flex-shrink-0 items-center gap-3">
             <div className="rounded-lg border border-accent/20 bg-accent/10 p-2.5">
-              <Mail className="h-5 w-5 text-accent" aria-hidden="true" />
+              <Mail className={`${UI_CLASSES.ICON_MD} text-accent`} aria-hidden="true" />
             </div>
             <div>
               <p className="font-semibold text-base text-foreground">
@@ -490,7 +495,7 @@ function FooterBarVariant({
                 aria-label="Dismiss newsletter signup"
                 className="flex-shrink-0"
               >
-                <X className="h-4 w-4" aria-hidden="true" />
+                <X className={UI_CLASSES.ICON_SM} aria-hidden="true" />
               </Button>
             )}
           </div>
@@ -500,7 +505,10 @@ function FooterBarVariant({
         <div className="flex flex-col gap-3 md:hidden">
           <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
             <div className="flex items-center gap-2">
-              <Mail className="h-4 w-4 flex-shrink-0 text-accent" aria-hidden="true" />
+              <Mail
+                className={`${UI_CLASSES.ICON_SM} flex-shrink-0 text-accent`}
+                aria-hidden="true"
+              />
               <p className="font-medium text-foreground text-sm">
                 {NEWSLETTER_CTA_CONFIG.headline}
               </p>
@@ -512,7 +520,7 @@ function FooterBarVariant({
                 onClick={handleDismiss}
                 aria-label="Dismiss newsletter signup"
               >
-                <X className="h-4 w-4" aria-hidden="true" />
+                <X className={UI_CLASSES.ICON_SM} aria-hidden="true" />
               </Button>
             )}
           </div>

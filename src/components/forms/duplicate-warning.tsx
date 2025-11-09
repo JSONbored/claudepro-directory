@@ -4,6 +4,7 @@ import { motion } from 'motion/react';
 import { useEffect, useState } from 'react';
 import { Alert, AlertDescription, AlertTitle } from '@/src/components/primitives/alert';
 import { AlertTriangle } from '@/src/lib/icons';
+import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 interface DuplicateWarningProps {
   contentType: string;
@@ -91,7 +92,7 @@ export function DuplicateWarning({ contentType: _contentType, name }: DuplicateW
 
   return (
     <Alert className="border-yellow-500/20 bg-yellow-500/5">
-      <AlertTriangle className="h-4 w-4 text-yellow-400" />
+      <AlertTriangle className={`${UI_CLASSES.ICON_SM} text-yellow-400`} />
       <AlertTitle className="text-yellow-400">Suggestion</AlertTitle>
       <AlertDescription>
         <p className={'text-muted-foreground text-sm'}>{warning}</p>

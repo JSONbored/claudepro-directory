@@ -24,7 +24,7 @@ import { Label } from '@/src/components/primitives/label';
 import { Textarea } from '@/src/components/primitives/textarea';
 import type { ContentTypeConfig, FieldDefinition, GridColumn } from '@/src/lib/forms/types';
 import { resolveFormIcon } from '@/src/lib/icons';
-import { getResponsiveGridClass } from '@/src/lib/ui-constants';
+import { getResponsiveGridClass, UI_CLASSES } from '@/src/lib/ui-constants';
 
 // ============================================================================
 // GRID LAYOUT SYSTEM
@@ -68,7 +68,7 @@ function TextFieldRenderer({ field, formId }: FieldRendererProps) {
         <div className="relative">
           {iconPosition === 'left' && (
             <div className="-translate-y-1/2 absolute top-1/2 left-3 text-muted-foreground">
-              <Icon className="h-4 w-4" />
+              <Icon className={UI_CLASSES.ICON_SM} />
             </div>
           )}
           <Input
@@ -81,7 +81,7 @@ function TextFieldRenderer({ field, formId }: FieldRendererProps) {
           />
           {iconPosition === 'right' && (
             <div className="-translate-y-1/2 absolute top-1/2 right-3 text-muted-foreground">
-              <Icon className="h-4 w-4" />
+              <Icon className={UI_CLASSES.ICON_SM} />
             </div>
           )}
         </div>

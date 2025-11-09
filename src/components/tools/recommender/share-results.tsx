@@ -56,7 +56,7 @@ export function ShareResults({ shareUrl, resultCount, onClose }: ShareResultsPro
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-            <Share2 className="h-5 w-5" />
+            <Share2 className={UI_CLASSES.ICON_MD} />
             Share Your Results
           </DialogTitle>
           <DialogDescription>
@@ -80,7 +80,11 @@ export function ShareResults({ shareUrl, resultCount, onClose }: ShareResultsPro
               onClick={handleCopy}
               className="shrink-0"
             >
-              {copied ? <Check className="h-4 w-4 text-green-600" /> : <Copy className="h-4 w-4" />}
+              {copied ? (
+                <Check className={`${UI_CLASSES.ICON_SM} text-green-600`} />
+              ) : (
+                <Copy className={UI_CLASSES.ICON_SM} />
+              )}
             </Button>
           </div>
 
@@ -95,7 +99,7 @@ export function ShareResults({ shareUrl, resultCount, onClose }: ShareResultsPro
                   logger.info('Recommendation results shared', { platform: 'twitter' });
                 }}
               >
-                <Twitter className="h-4 w-4" />
+                <Twitter className={UI_CLASSES.ICON_SM} />
                 Twitter
               </a>
             </Button>
@@ -109,7 +113,7 @@ export function ShareResults({ shareUrl, resultCount, onClose }: ShareResultsPro
                   logger.info('Recommendation results shared', { platform: 'linkedin' });
                 }}
               >
-                <Linkedin className="h-4 w-4" />
+                <Linkedin className={UI_CLASSES.ICON_SM} />
                 LinkedIn
               </a>
             </Button>
@@ -123,7 +127,7 @@ export function ShareResults({ shareUrl, resultCount, onClose }: ShareResultsPro
                   logger.info('Recommendation results shared', { platform: 'facebook' });
                 }}
               >
-                <Facebook className="h-4 w-4" />
+                <Facebook className={UI_CLASSES.ICON_SM} />
                 Facebook
               </a>
             </Button>
@@ -135,7 +139,7 @@ export function ShareResults({ shareUrl, resultCount, onClose }: ShareResultsPro
                   logger.info('Recommendation results shared', { platform: 'email' });
                 }}
               >
-                <Mail className="h-4 w-4" />
+                <Mail className={UI_CLASSES.ICON_SM} />
                 Email
               </a>
             </Button>

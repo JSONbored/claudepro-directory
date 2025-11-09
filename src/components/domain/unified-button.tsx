@@ -34,7 +34,9 @@ import {
   Trash,
 } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
+import { SEMANTIC_COLORS } from '@/src/lib/semantic-colors';
 import { createClient } from '@/src/lib/supabase/client';
+import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
 
@@ -265,7 +267,7 @@ function AuthSignInButton({
         <>Signing in...</>
       ) : (
         <>
-          <IconComponent className="h-4 w-4" />
+          <IconComponent className={UI_CLASSES.ICON_SM} />
           Sign in with {provider === 'github' ? 'GitHub' : 'Google'}
         </>
       )}
@@ -309,7 +311,7 @@ function AuthSignOutButton({
       variant={buttonVariant}
       className={className}
     >
-      <LogOut className="mr-2 h-4 w-4" />
+      <LogOut className={UI_CLASSES.ICON_SM_LEADING} />
       {loading ? 'Signing out...' : 'Sign out'}
     </Button>
   );
@@ -407,13 +409,14 @@ function CopyMarkdownButton({
         size={size}
         onClick={handleClick}
         disabled={disabled || isLoading || isSuccess}
-        className={cn(
-          'gap-2 transition-all',
-          isSuccess && 'border-green-500/50 bg-green-500/10 text-green-400',
-          className
-        )}
+        className={cn('gap-2 transition-all', isSuccess && SEMANTIC_COLORS.SUCCESS, className)}
       >
-        {showIcon && (isSuccess ? <Check className="h-4 w-4" /> : <FileText className="h-4 w-4" />)}
+        {showIcon &&
+          (isSuccess ? (
+            <Check className={UI_CLASSES.ICON_SM} />
+          ) : (
+            <FileText className={UI_CLASSES.ICON_SM} />
+          ))}
         {size !== 'icon' && <span>{isSuccess ? 'Copied!' : label}</span>}
       </Button>
     </motion.div>
@@ -503,13 +506,14 @@ function DownloadMarkdownButton({
         size={size}
         onClick={handleClick}
         disabled={disabled || isLoading || isSuccess}
-        className={cn(
-          'gap-2 transition-all',
-          isSuccess && 'border-green-500/50 bg-green-500/10 text-green-400',
-          className
-        )}
+        className={cn('gap-2 transition-all', isSuccess && SEMANTIC_COLORS.SUCCESS, className)}
       >
-        {showIcon && (isSuccess ? <Check className="h-4 w-4" /> : <Download className="h-4 w-4" />)}
+        {showIcon &&
+          (isSuccess ? (
+            <Check className={UI_CLASSES.ICON_SM} />
+          ) : (
+            <Download className={UI_CLASSES.ICON_SM} />
+          ))}
         {size !== 'icon' && <span>{isSuccess ? 'Downloaded!' : label}</span>}
       </Button>
     </motion.div>
@@ -585,24 +589,20 @@ function CopyLLMsButton({
         size={size}
         onClick={handleClick}
         disabled={disabled || isLoading || isSuccess}
-        className={cn(
-          'gap-2 transition-all',
-          isSuccess && 'border-green-500/50 bg-green-500/10 text-green-400',
-          className
-        )}
+        className={cn('gap-2 transition-all', isSuccess && SEMANTIC_COLORS.SUCCESS, className)}
       >
         {showIcon &&
           (isSuccess ? (
-            <Check className="h-4 w-4" />
+            <Check className={UI_CLASSES.ICON_SM} />
           ) : isLoading ? (
             <motion.div
               animate={{ opacity: [1, 0.5, 1] }}
               transition={{ duration: 1, repeat: Number.POSITIVE_INFINITY, ease: 'easeInOut' }}
             >
-              <Sparkles className="h-4 w-4" />
+              <Sparkles className={UI_CLASSES.ICON_SM} />
             </motion.div>
           ) : (
-            <Sparkles className="h-4 w-4" />
+            <Sparkles className={UI_CLASSES.ICON_SM} />
           ))}
         {size !== 'icon' && <span>{isSuccess ? 'Copied!' : isLoading ? 'Loading...' : label}</span>}
       </Button>
@@ -693,18 +693,23 @@ function BookmarkButton({
     <Button
       variant={buttonVariant}
       size={size}
-      className={cn('h-7 w-7 p-0', className)}
+      className={cn(UI_CLASSES.ICON_BUTTON_SM, className)}
       onClick={handleToggle}
       disabled={disabled || isPending}
       aria-label={isBookmarked ? 'Remove bookmark' : 'Add bookmark'}
       title={isBookmarked ? 'Remove bookmark' : 'Add bookmark'}
     >
       {isBookmarked ? (
-        <BookmarkCheck className="h-3 w-3 fill-current text-primary" aria-hidden="true" />
+        <BookmarkCheck
+          className={`${UI_CLASSES.ICON_XS} fill-current text-primary`}
+          aria-hidden="true"
+        />
       ) : (
-        <Bookmark className="h-3 w-3" aria-hidden="true" />
+        <Bookmark className={UI_CLASSES.ICON_XS} aria-hidden="true" />
       )}
-      {showLabel && <span className="ml-1 text-xs">{isBookmarked ? 'Saved' : 'Save'}</span>}
+      {showLabel && (
+        <span className={`ml-1 ${UI_CLASSES.TEXT_BADGE}`}>{isBookmarked ? 'Saved' : 'Save'}</span>
+      )}
     </Button>
   );
 }
@@ -760,15 +765,15 @@ function CardCopyButton({
     <Button
       variant={buttonVariant}
       size={size}
-      className={cn('h-7 w-7 p-0', className)}
+      className={cn(UI_CLASSES.ICON_BUTTON_SM, className)}
       onClick={handleCopy}
       disabled={disabled}
       aria-label={copied ? 'Link copied to clipboard' : `Copy link to ${title}`}
     >
       {copied ? (
-        <Check className="h-3 w-3 text-green-500" aria-hidden="true" />
+        <Check className={cn(UI_CLASSES.ICON_XS, SEMANTIC_COLORS.SOCIAL_COPY)} aria-hidden="true" />
       ) : (
-        <Copy className="h-3 w-3" aria-hidden="true" />
+        <Copy className={UI_CLASSES.ICON_XS} aria-hidden="true" />
       )}
     </Button>
   );
@@ -844,12 +849,12 @@ function JobToggleButton({
     >
       {currentStatus === 'active' ? (
         <>
-          <Pause className="mr-1 h-3 w-3" />
+          <Pause className={UI_CLASSES.ICON_XS_LEADING} />
           Pause
         </>
       ) : (
         <>
-          <Play className="mr-1 h-3 w-3" />
+          <Play className={UI_CLASSES.ICON_XS_LEADING} />
           Resume
         </>
       )}
@@ -927,7 +932,7 @@ function JobDeleteButton({
       disabled={disabled || isPending || isDeleting}
       className={cn('text-destructive', className)}
     >
-      <Trash className="mr-1 h-3 w-3" />
+      <Trash className={UI_CLASSES.ICON_XS_LEADING} />
       Delete
     </Button>
   );
@@ -939,7 +944,7 @@ function JobDeleteButton({
 function GitHubStarsButton({
   repoUrl = SOCIAL_LINKS.github,
   size = 'sm',
-  buttonVariant = 'outline',
+  buttonVariant = 'ghost',
   className,
   disabled = false,
 }: GitHubStarsVariant) {
@@ -984,7 +989,7 @@ function GitHubStarsButton({
       className={cn('gap-2', className)}
       aria-label={`Star us on GitHub${stars ? ` - ${stars} stars` : ''}`}
     >
-      <Github className="h-4 w-4" aria-hidden="true" />
+      <Github className={UI_CLASSES.ICON_SM} aria-hidden="true" />
       {typeof stars === 'number' && (
         <span className="font-medium tabular-nums">{stars.toLocaleString()}</span>
       )}
@@ -1012,7 +1017,7 @@ function BackButton({
       disabled={disabled}
       className={cn('text-muted-foreground hover:text-foreground', className)}
     >
-      <ArrowLeft className="mr-2 h-4 w-4" />
+      <ArrowLeft className={UI_CLASSES.ICON_SM_LEADING} />
       {label}
     </Button>
   );
@@ -1047,7 +1052,7 @@ function LinkButton({
       disabled={disabled}
       className={cn('gap-2', className)}
     >
-      {Icon && <Icon className="h-4 w-4" />}
+      {Icon && <Icon className={UI_CLASSES.ICON_SM} />}
       {label}
     </Button>
   );
@@ -1123,26 +1128,22 @@ function AsyncActionButton({
       size={size}
       onClick={handleClick}
       disabled={disabled || isLoading || isSuccess}
-      className={cn(
-        'gap-2 transition-all',
-        isSuccess && 'border-green-500/50 bg-green-500/10 text-green-400',
-        className
-      )}
+      className={cn('gap-2 transition-all', isSuccess && SEMANTIC_COLORS.SUCCESS, className)}
       aria-label={currentAriaLabel}
       title={title}
     >
       {showIcon &&
         (isSuccess ? (
-          <Check className="h-4 w-4" aria-hidden="true" />
+          <Check className={UI_CLASSES.ICON_SM} aria-hidden="true" />
         ) : isLoading ? (
           <motion.div
             animate={{ opacity: [1, 0.5, 1] }}
             transition={{ duration: 1, repeat: Number.POSITIVE_INFINITY, ease: 'easeInOut' }}
           >
-            <Icon className="h-4 w-4" aria-hidden="true" />
+            <Icon className={UI_CLASSES.ICON_SM} aria-hidden="true" />
           </motion.div>
         ) : (
-          <Icon className="h-4 w-4" aria-hidden="true" />
+          <Icon className={UI_CLASSES.ICON_SM} aria-hidden="true" />
         ))}
       {size !== 'icon' && <span className="text-sm">{currentLabel}</span>}
     </Button>

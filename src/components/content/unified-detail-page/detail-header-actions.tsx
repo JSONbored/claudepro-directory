@@ -23,6 +23,7 @@ import type { CategoryId } from '@/src/lib/config/category-config';
 import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
 import { trackInteraction } from '@/src/lib/edge/client';
 import { ArrowLeft, Check, Copy } from '@/src/lib/icons';
+import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { toasts } from '@/src/lib/utils/toast.utils';
 
 /**
@@ -142,7 +143,7 @@ export function DetailHeaderActions({
           onClick={() => router.back()}
           className="text-muted-foreground hover:text-foreground"
         >
-          <ArrowLeft className="mr-2 h-4 w-4" />
+          <ArrowLeft className={UI_CLASSES.ICON_SM_LEADING} />
           Back
         </Button>
       </div>
@@ -187,7 +188,7 @@ export function DetailHeaderActions({
                   </>
                 ) : (
                   <>
-                    <Copy className="mr-2 h-4 w-4" />
+                    <Copy className={UI_CLASSES.ICON_SM_LEADING} />
                     Copy Content
                   </>
                 )}

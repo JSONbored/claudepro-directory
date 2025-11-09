@@ -55,8 +55,8 @@ const NavLink = ({ href, children, className = '', isActive, onClick }: NavLinkP
   const linkProps = {
     href,
     prefetch: true,
-    className: `group relative px-2 py-1 text-sm font-medium transition-colors duration-200 no-underline ${
-      active ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
+    className: `group relative px-2 py-1 text-xs font-medium transition-colors duration-200 no-underline ${
+      active ? 'text-foreground' : 'text-foreground/80 hover:text-foreground'
     } ${className}`,
     ...(active && { 'aria-current': 'page' as const }),
     ...(onClick && { onClick }),
@@ -90,7 +90,8 @@ const NavigationComponent = () => {
   const { scrollY } = useScroll();
   const backdropBlur = useTransform(scrollY, [0, 100], ['blur(0px)', 'blur(12px)']);
   const navOpacity = useTransform(scrollY, [0, 50], [0.95, 1]);
-  const logoScale = useTransform(scrollY, [0, 100], [1, 0.9]);
+  // Adjusted logo scale to compensate for removed size prop (scales slightly more to match h-11/h-12 sizing)
+  const logoScale = useTransform(scrollY, [0, 100], [1, 0.78]);
 
   // SHA-2088: Optimized scroll handler with threshold check and rAF debouncing
   // Only updates state when crossing 20px threshold (prevents 98% of unnecessary re-renders)
@@ -147,7 +148,7 @@ const NavigationComponent = () => {
         <div className="container mx-auto">
           <motion.nav
             className={
-              'rounded-2xl border border-border/50 bg-card/95 shadow-xl transition-colors duration-300'
+              'rounded-2xl border border-border/50 bg-background/95 shadow-2xl backdrop-blur-xl transition-colors duration-300'
             }
             style={{ backdropFilter: backdropBlur }}
             aria-label="Main navigation container"
@@ -158,7 +159,7 @@ const NavigationComponent = () => {
                   isScrolled ? 'h-11 md:h-12' : 'h-14 md:h-16'
                 }`}
               >
-                {/* Logo with Motion.dev scale animation */}
+                {/* Logo with Motion.dev scale animation - no size prop to avoid double animation */}
                 <Link
                   href={ROUTES.HOME}
                   prefetch={true}
@@ -166,13 +167,13 @@ const NavigationComponent = () => {
                   aria-label="heyclaude - Go to homepage"
                 >
                   <motion.div style={{ scale: logoScale }}>
-                    <HeyClaudeLogo size={isScrolled ? 'sm' : 'md'} duration={1.2} />
+                    <HeyClaudeLogo size="md" duration={0} />
                   </motion.div>
                 </Link>
 
                 {/* Desktop Navigation - ONLY show at xl: (1280px+) */}
                 <nav
-                  className={`hidden xl:flex ${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} text-sm lg:gap-4 lg:text-base`}
+                  className={`hidden xl:flex ${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} text-xs`}
                   aria-label="Primary navigation"
                 >
                   {PRIMARY_NAVIGATION.map((link) => {
@@ -181,15 +182,20 @@ const NavigationComponent = () => {
                       return (
                         <DropdownMenu key={link.label}>
                           <DropdownMenuTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="px-2 py-1 font-medium text-muted-foreground text-sm transition-colors hover:bg-accent/10 hover:text-foreground"
+                            <button
+                              type="button"
+                              className={`group relative flex items-center px-2 py-1 font-medium ${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_NAV} transition-colors duration-200`}
                               aria-label={`Open ${link.label} menu`}
                             >
-                              {link.label}
-                              <ChevronDown className="ml-1 h-3 w-3" />
-                            </Button>
+                              <span className="relative">
+                                {link.label}
+                                <span
+                                  className="absolute bottom-0 left-0 h-[2px] w-0 bg-accent transition-all duration-300 group-hover:w-full"
+                                  aria-hidden="true"
+                                />
+                              </span>
+                              <ChevronDown className="ml-1 h-2.5 w-2.5" />
+                            </button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="start" className="w-[480px] p-3">
                             <div className="grid grid-cols-2 gap-2">
@@ -200,18 +206,18 @@ const NavigationComponent = () => {
                                     <Link
                                       href={child.href}
                                       prefetch={true}
-                                      className="group flex w-full cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-2 transition-colors duration-150 hover:bg-accent/10"
+                                      className="group flex w-full cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-2 no-underline transition-colors hover:bg-white/5"
                                     >
                                       {ChildIcon && (
-                                        <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-md bg-muted/50 transition-colors group-hover:bg-accent/15">
+                                        <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-md bg-muted/50">
                                           <ChildIcon
-                                            className="h-3.5 w-3.5 text-muted-foreground transition-colors group-hover:text-accent"
+                                            className={`${UI_CLASSES.ICON_XS} text-muted-foreground`}
                                             aria-hidden="true"
                                           />
                                         </div>
                                       )}
                                       <div className="flex min-w-0 flex-1 flex-col items-start gap-0.5">
-                                        <div className="flex w-full items-center gap-1.5 truncate font-medium text-sm transition-colors group-hover:text-accent">
+                                        <div className="flex w-full items-center gap-1.5 truncate font-medium text-sm">
                                           {child.label}
                                           {child.isNew && (
                                             <UnifiedBadge
@@ -221,7 +227,7 @@ const NavigationComponent = () => {
                                           )}
                                         </div>
                                         {child.description && (
-                                          <div className="line-clamp-1 text-[11px] text-muted-foreground/80 transition-colors group-hover:text-foreground/60">
+                                          <div className="line-clamp-1 text-[11px] text-muted-foreground">
                                             {child.description}
                                           </div>
                                         )}
@@ -258,15 +264,20 @@ const NavigationComponent = () => {
 
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-muted-foreground transition-colors hover:bg-accent/10 hover:text-foreground"
+                      <button
+                        type="button"
+                        className={`group relative flex items-center px-2 py-1 font-medium ${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_NAV} transition-colors duration-200`}
                         aria-label="Open additional navigation menu"
                       >
-                        More
-                        <ChevronDown className="ml-1 h-3 w-3" />
-                      </Button>
+                        <span className="relative">
+                          More
+                          <span
+                            className="absolute bottom-0 left-0 h-[2px] w-0 bg-accent transition-all duration-300 group-hover:w-full"
+                            aria-hidden="true"
+                          />
+                        </span>
+                        <ChevronDown className="ml-1 h-2.5 w-2.5" />
+                      </button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-[560px] p-4">
                       {/* 2-column grid for quick links */}
@@ -284,32 +295,22 @@ const NavigationComponent = () => {
                                     <Link
                                       href={link.href}
                                       prefetch={true}
-                                      className={
-                                        'group flex w-full cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-2 transition-colors duration-150 hover:bg-accent/10'
-                                      }
+                                      className="group flex w-full cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-2 no-underline transition-colors hover:bg-white/5"
                                     >
                                       {IconComponent && (
-                                        <div
-                                          className={
-                                            'flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-md bg-muted/50 transition-colors group-hover:bg-accent/15'
-                                          }
-                                        >
+                                        <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-md bg-muted/50">
                                           <IconComponent
-                                            className="h-3.5 w-3.5 text-muted-foreground transition-colors group-hover:text-accent"
+                                            className={`${UI_CLASSES.ICON_XS} text-muted-foreground`}
                                             aria-hidden="true"
                                           />
                                         </div>
                                       )}
-                                      <div
-                                        className={
-                                          'flex min-w-0 flex-1 flex-col items-start gap-0.5'
-                                        }
-                                      >
-                                        <div className="w-full truncate font-medium text-sm transition-colors group-hover:text-accent">
+                                      <div className="flex min-w-0 flex-1 flex-col items-start gap-0.5">
+                                        <div className="w-full truncate font-medium text-sm">
                                           {link.label}
                                         </div>
                                         {link.description && (
-                                          <div className="line-clamp-1 text-[11px] text-muted-foreground/80 transition-colors group-hover:text-foreground/60">
+                                          <div className="line-clamp-1 text-[11px] text-muted-foreground">
                                             {link.description}
                                           </div>
                                         )}
@@ -332,7 +333,7 @@ const NavigationComponent = () => {
                           className="group flex items-center gap-2 rounded-md px-3 py-2.5 no-underline transition-colors hover:bg-accent/10"
                         >
                           <Users
-                            className="h-4 w-4 text-muted-foreground transition-colors group-hover:text-accent"
+                            className={`${UI_CLASSES.ICON_SM} text-muted-foreground transition-colors group-hover:text-accent`}
                             aria-hidden="true"
                           />
                           <div className="font-medium text-foreground text-sm transition-colors group-hover:text-accent">
@@ -345,7 +346,7 @@ const NavigationComponent = () => {
                           className="group flex items-center gap-2 rounded-md px-3 py-2.5 no-underline transition-colors hover:bg-accent/10"
                         >
                           <Handshake
-                            className="h-4 w-4 text-muted-foreground transition-colors group-hover:text-accent"
+                            className={`${UI_CLASSES.ICON_SM} text-muted-foreground transition-colors group-hover:text-accent`}
                             aria-hidden="true"
                           />
                           <div className="font-medium text-foreground text-sm transition-colors group-hover:text-accent">
@@ -358,7 +359,7 @@ const NavigationComponent = () => {
                           className="group flex items-center gap-2 rounded-md px-3 py-2.5 no-underline transition-colors hover:bg-accent/10"
                         >
                           <Briefcase
-                            className="h-4 w-4 text-muted-foreground transition-colors group-hover:text-accent"
+                            className={`${UI_CLASSES.ICON_SM} text-muted-foreground transition-colors group-hover:text-accent`}
                             aria-hidden="true"
                           />
                           <div className="font-medium text-foreground text-sm transition-colors group-hover:text-accent">
@@ -368,6 +369,15 @@ const NavigationComponent = () => {
                       </div>
                     </DropdownMenuContent>
                   </DropdownMenu>
+
+                  {/* Search Icon - Right of More */}
+                  <SearchTrigger
+                    variant="ghost"
+                    size="sm"
+                    showShortcut={false}
+                    onClick={() => setCommandPaletteOpen(true)}
+                    className={UI_CLASSES.TEXT_XS}
+                  />
                 </nav>
 
                 {/* Tablet Navigation (768px-1279px) - Horizontal scroll with Motion.dev */}
@@ -410,18 +420,8 @@ const NavigationComponent = () => {
                 </motion.nav>
 
                 {/* Right Side Actions */}
-                <div className={'flex items-center gap-2 md:gap-3'}>
-                  {/* Global Search Trigger - Opens Command Palette */}
-                  <div className={'hidden md:block'}>
-                    <SearchTrigger
-                      variant="ghost"
-                      size="sm"
-                      showShortcut={!isScrolled}
-                      onClick={() => setCommandPaletteOpen(true)}
-                    />
-                  </div>
-
-                  {/* Action Links - Submit Config Button */}
+                <div className={'flex items-center gap-1.5 md:gap-2'}>
+                  {/* Action Links - Create Button */}
                   {ACTION_LINKS.map((link) => {
                     const ActionIcon = link.icon;
                     return (
@@ -430,10 +430,10 @@ const NavigationComponent = () => {
                         asChild
                         variant="outline"
                         size="sm"
-                        className={'hidden md:flex'}
+                        className={`hidden md:flex ${UI_CLASSES.TEXT_XS}`}
                       >
                         <Link href={link.href} prefetch={true}>
-                          {ActionIcon && <ActionIcon className="mr-2 h-4 w-4" />}
+                          {ActionIcon && <ActionIcon className={UI_CLASSES.ICON_XS_LEADING} />}
                           {link.label}
                         </Link>
                       </Button>
@@ -444,13 +444,16 @@ const NavigationComponent = () => {
                     variant="ghost"
                     size="sm"
                     onClick={() => window.open('https://discord.gg/Ax3Py4YDrq', '_blank')}
-                    className={`hidden md:flex ${UI_CLASSES.BUTTON_GHOST_ICON}`}
+                    className={`hidden md:flex ${UI_CLASSES.TEXT_NAV} ${UI_CLASSES.BUTTON_GHOST_ICON}`}
                     aria-label="Join our Discord community"
                   >
-                    <DiscordIcon className="h-4 w-4" />
+                    <DiscordIcon className={UI_CLASSES.ICON_XS} />
                   </Button>
 
-                  <UnifiedButton variant="github-stars" className={'hidden md:flex'} />
+                  <UnifiedButton
+                    variant="github-stars"
+                    className={`hidden md:flex ${UI_CLASSES.TEXT_XS}`}
+                  />
 
                   <UserMenu className={'hidden md:flex'} />
 
@@ -463,7 +466,7 @@ const NavigationComponent = () => {
                         className="md:hidden"
                         aria-label="Open mobile menu"
                       >
-                        <Menu className="h-6 w-6" />
+                        <Menu className={UI_CLASSES.ICON_LG} />
                       </Button>
                     </SheetTrigger>
                     <SheetContent
@@ -627,7 +630,7 @@ const NavigationComponent = () => {
                                   onClick={item.onClick}
                                   aria-label={item.label}
                                 >
-                                  <item.icon className="h-8 w-8" />
+                                  <item.icon className={UI_CLASSES.ICON_XL} />
                                 </Button>
                               </motion.div>
                             ))}

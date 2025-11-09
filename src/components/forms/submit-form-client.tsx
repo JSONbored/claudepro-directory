@@ -502,13 +502,13 @@ export function SubmitFormClient({ formConfig }: SubmitFormClientProps) {
                         ease: 'easeInOut',
                       }}
                     >
-                      <Github className="h-4 w-4" />
+                      <Github className={UI_CLASSES.ICON_SM} />
                     </motion.div>
                     Creating PR...
                   </>
                 ) : (
                   <>
-                    <Send className="mr-2 h-4 w-4" />
+                    <Send className={UI_CLASSES.ICON_SM_LEADING} />
                     Submit for Review
                   </>
                 )}

@@ -302,7 +302,7 @@ export const BaseCard = memo(
     // Card content wrapper - conditionally render with or without motion animations
     const cardElement = (
       <Card
-        className={`${disableNavigation ? '' : UI_CLASSES.CARD_INTERACTIVE} ${variant === 'detailed' ? 'p-6' : ''} ${variant === 'review' ? 'rounded-lg border p-4' : ''} ${compactMode ? 'p-4' : ''} ${className || ''} relative`}
+        className={`${disableNavigation ? '' : UI_CLASSES.CARD_INTERACTIVE} ${variant === 'detailed' ? UI_CLASSES.CARD_PADDING_DEFAULT : ''} ${variant === 'review' ? `rounded-lg border ${UI_CLASSES.CARD_PADDING_COMPACT}` : ''} ${compactMode ? UI_CLASSES.CARD_PADDING_COMPACT : ''} ${className || ''} relative`}
         style={{
           ...viewTransitionStyle,
           contain: 'paint',
@@ -319,7 +319,7 @@ export const BaseCard = memo(
         )}
 
         <CardHeader
-          className={`${variant === 'review' ? 'mb-3 p-0' : 'pb-3'} ${compactMode ? 'pb-2' : ''}`}
+          className={`${variant === 'review' ? `${UI_CLASSES.MARGIN_COMPACT} p-0` : 'pb-3'} ${compactMode ? UI_CLASSES.CARD_HEADER_TIGHT : ''}`}
         >
           {/* Custom header slot (for review avatar/rating, changelog date) */}
           {renderHeader?.()}
@@ -330,12 +330,14 @@ export const BaseCard = memo(
               <div className="flex-1">
                 {/* Top badges slot (type, difficulty, sponsored, etc.) */}
                 {renderTopBadges && (
-                  <div className={'mb-1 flex items-center gap-2'}>{renderTopBadges()}</div>
+                  <div className={`mb-1 flex items-center ${UI_CLASSES.SPACE_COMPACT}`}>
+                    {renderTopBadges()}
+                  </div>
                 )}
 
                 {/* Title */}
                 <CardTitle
-                  className={`font-semibold text-foreground text-lg ${disableNavigation ? '' : 'transition-colors-smooth group-hover:text-accent'}`}
+                  className={`${UI_CLASSES.TEXT_CARD_TITLE} text-foreground ${disableNavigation ? '' : 'transition-colors-smooth group-hover:text-accent'}`}
                 >
                   {displayTitle}
                 </CardTitle>
@@ -350,7 +352,7 @@ export const BaseCard = memo(
 
               {/* Source badge (right side of header) */}
               {source && (
-                <div className={'ml-2 flex items-center gap-1'}>
+                <div className={`ml-2 flex items-center ${UI_CLASSES.SPACE_TIGHT}`}>
                   <UnifiedBadge
                     variant="source"
                     source={
@@ -375,7 +377,7 @@ export const BaseCard = memo(
           className={`${variant === 'review' ? 'p-0' : 'pt-0'} ${compactMode ? 'pt-0' : ''}`}
         >
           {/* Custom content slot (for review expandable text) */}
-          {renderContent && <div className="mb-3">{renderContent()}</div>}
+          {renderContent && <div className={UI_CLASSES.MARGIN_COMPACT}>{renderContent()}</div>}
 
           {/* Tags */}
           {tags && tags.length > 0 && (
@@ -387,7 +389,7 @@ export const BaseCard = memo(
                 <UnifiedBadge
                   variant="base"
                   style="outline"
-                  className={'border-muted-foreground/20 text-muted-foreground text-xs'}
+                  className={`${UI_CLASSES.BADGE_METADATA} ${UI_CLASSES.TEXT_BADGE}`}
                 >
                   +{overflowCount}
                 </UnifiedBadge>
@@ -399,7 +401,7 @@ export const BaseCard = memo(
           <div className={UI_CLASSES.CARD_FOOTER_RESPONSIVE}>
             {/* Left side: Author and custom metadata */}
             {(showAuthor && author) || customMetadataText ? (
-              <div className={'flex items-center gap-2 text-muted-foreground text-xs'}>
+              <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} ${UI_CLASSES.TEXT_METADATA}`}>
                 {showAuthor && author && (
                   <span>
                     by{' '}

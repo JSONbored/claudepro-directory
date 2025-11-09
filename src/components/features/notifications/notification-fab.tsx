@@ -19,6 +19,7 @@
 import { AnimatePresence, motion } from 'motion/react';
 import { Bell } from '@/src/lib/icons';
 import { type NotificationStore, useNotificationStore } from '@/src/lib/stores/notification-store';
+import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { NotificationBadge } from './notification-badge';
 
 export function NotificationFAB() {
@@ -48,7 +49,7 @@ export function NotificationFAB() {
         }
         aria-label={`${unreadCount} unread notification${unreadCount > 1 ? 's' : ''}`}
       >
-        <Bell className="h-6 w-6" aria-hidden="true" />
+        <Bell className={UI_CLASSES.ICON_LG} aria-hidden="true" />
         <NotificationBadge />
       </motion.button>
     </AnimatePresence>

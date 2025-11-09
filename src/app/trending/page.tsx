@@ -1,9 +1,8 @@
 /**
- * Trending Page - Database-First RPC Architecture
- * Single RPC call to get_trending_page() - all logic in PostgreSQL
+ * Trending Page - Edge Function Architecture
+ * Calls trending edge function with CDN caching - all logic in PostgreSQL + edge function
  */
 
-import { unstable_cache } from 'next/cache';
 import dynamic from 'next/dynamic';
 import { Suspense } from 'react';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
@@ -14,9 +13,7 @@ import { Clock, Star, TrendingUp, Users } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import type { PagePropsWithSearchParams } from '@/src/lib/schemas/app.schema';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-import { createAnonClient } from '@/src/lib/supabase/server-anon';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
-import type { Database } from '@/src/types/database.types';
 
 const UnifiedNewsletterCapture = dynamic(
   () =>
@@ -32,61 +29,54 @@ export const revalidate = false;
 
 export const metadata = generatePageMetadata('/trending');
 
-type TrendingPeriod = Database['public']['Enums']['trending_period'];
-type TrendingMetric = Database['public']['Enums']['trending_metric'];
-
 export default async function TrendingPage({ searchParams }: PagePropsWithSearchParams) {
   const rawParams = await searchParams;
-  const supabase = createAnonClient();
-
-  const period = (rawParams?.period as TrendingPeriod) || 'week';
-  const metric = (rawParams?.metric as TrendingMetric) || 'views';
   const category = rawParams?.category as string | undefined;
-  const page = Number(rawParams?.page) || 1;
-  const limit = Math.min(Number(rawParams?.limit) || 20, 100);
+  const limit = Math.min(Number(rawParams?.limit) || 12, 100);
 
   logger.info('Trending page accessed', {
-    period,
-    metric,
     category: category || 'all',
-    page,
     limit,
   });
 
-  // Wrapped in unstable_cache for additional performance boost
-  const { data, error } = await unstable_cache(
-    async () => {
-      return supabase.rpc('get_trending_page', {
-        p_period: period,
-        p_metric: metric,
-        ...(category && { p_category: category }),
-        p_page: page,
-        p_limit: limit,
-      });
-    },
-    [`trending-${period}-${metric}-${category || ''}-${page}-${limit}`],
-    {
-      revalidate: false, // Matches page-level ISR (fully static)
-      tags: ['trending', ...(category ? [`trending-${category}`] : [])],
-    }
-  )();
+  // Fetch from edge function (with CDN caching)
+  const baseUrl =
+    process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://hgtjdifxfapoltfflowc.supabase.co';
 
-  if (error) {
-    logger.error('Failed to load trending page data', error);
-  }
+  const [trendingData, popularData, recentData] = await Promise.all([
+    fetch(
+      `${baseUrl}/functions/v1/trending?mode=page&tab=trending${category ? `&category=${category}` : ''}&limit=${limit}`,
+      {
+        next: { revalidate: 86400, tags: ['trending'] },
+      }
+    )
+      .then((r) => r.json())
+      .catch(() => ({ trending: [], totalCount: 0 })),
 
-  const pageData = (data || {
-    trending: [],
-    popular: [],
-    recent: [],
-    totalCount: 0,
-    metadata: { period, metric, category: null, page, limit, algorithm: 'fallback' },
-  }) as {
-    trending: ContentItem[];
-    popular: ContentItem[];
-    recent: ContentItem[];
-    totalCount: number;
-    metadata: Record<string, unknown>;
+    fetch(
+      `${baseUrl}/functions/v1/trending?mode=page&tab=popular${category ? `&category=${category}` : ''}&limit=${limit}`,
+      {
+        next: { revalidate: 86400, tags: ['trending'] },
+      }
+    )
+      .then((r) => r.json())
+      .catch(() => ({ popular: [] })),
+
+    fetch(
+      `${baseUrl}/functions/v1/trending?mode=page&tab=recent${category ? `&category=${category}` : ''}&limit=${limit}`,
+      {
+        next: { revalidate: 86400, tags: ['trending'] },
+      }
+    )
+      .then((r) => r.json())
+      .catch(() => ({ recent: [] })),
+  ]);
+
+  const pageData = {
+    trending: (trendingData.trending || []) as ContentItem[],
+    popular: (popularData.popular || []) as ContentItem[],
+    recent: (recentData.recent || []) as ContentItem[],
+    totalCount: trendingData.totalCount || 0,
   };
 
   const pageTitleId = 'trending-page-title';

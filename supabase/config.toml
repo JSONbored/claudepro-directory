@@ -59,6 +59,9 @@ verify_jwt = false  # Public SEO endpoint: metadata + pre-generated schemas (24h
 [functions.readme-generator]
 verify_jwt = false  # Public on-demand README generator (database-first, 15ms RPC)
 
+[functions.trending]
+verify_jwt = false  # Public trending data with CDN caching (24hr s-maxage)
+
 # =============================================================================
 # Webhook Functions - No JWT Verification (Use Signature Verification)
 # =============================================================================

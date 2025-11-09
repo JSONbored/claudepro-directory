@@ -19,6 +19,7 @@ import { ThemeToggle } from '@/src/components/layout/theme-toggle';
 import { APP_CONFIG, EXTERNAL_SERVICES, SOCIAL_LINKS } from '@/src/lib/constants';
 import { ROUTES } from '@/src/lib/constants/routes';
 import { DiscordIcon, ExternalLink, Github, Rss, Sparkles } from '@/src/lib/icons';
+import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 /**
  * Footer Component
@@ -93,7 +94,7 @@ function FooterComponent() {
                     className="link-icon text-muted-foreground"
                     aria-label={social.label}
                   >
-                    <social.icon className="h-5 w-5" />
+                    <social.icon className={UI_CLASSES.ICON_MD} />
                   </Link>
                 ))}
                 {/* Theme Toggle */}
@@ -194,7 +195,7 @@ function FooterComponent() {
                       className="inline-flex items-center gap-2 text-base text-muted-foreground transition-colors hover:text-foreground md:text-sm"
                       aria-label={link.label}
                     >
-                      {link.icon && <link.icon className="h-4 w-4" />}
+                      {link.icon && <link.icon className={UI_CLASSES.ICON_SM} />}
                       <span>{link.label}</span>
                     </Link>
                   </motion.div>

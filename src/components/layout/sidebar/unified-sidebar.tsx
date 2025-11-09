@@ -62,7 +62,7 @@ function UnifiedSidebarComponent({
           <Card className="border-muted/40 shadow-sm">
             <CardHeader className="px-3 pt-3 pb-2">
               <CardTitle className="flex items-center gap-1.5 font-medium text-xs">
-                <TrendingUp className="h-3 w-3 text-primary" />
+                <TrendingUp className={`${UI_CLASSES.ICON_XS} text-primary`} />
                 <span>Trending Now</span>
               </CardTitle>
             </CardHeader>
@@ -141,7 +141,7 @@ function UnifiedSidebarComponent({
               <Card className="border-muted/40 shadow-sm">
                 <CardHeader className={'px-3 pt-3 pb-2'}>
                   <CardTitle className={'flex items-center gap-1.5 font-medium text-xs'}>
-                    <Sparkles className="h-3 w-3 text-yellow-500" />
+                    <Sparkles className={`${UI_CLASSES.ICON_XS} text-yellow-500`} />
                     <span>Related Guides</span>
                   </CardTitle>
                 </CardHeader>
@@ -174,7 +174,7 @@ function UnifiedSidebarComponent({
           <Card className="border-muted/40 shadow-sm">
             <CardHeader className="px-3 pt-3 pb-2">
               <CardTitle className="flex items-center gap-1.5 font-medium text-xs">
-                <Clock className="h-3 w-3 text-muted-foreground" />
+                <Clock className={`${UI_CLASSES.ICON_XS} text-muted-foreground`} />
                 <span>Recent Guides</span>
               </CardTitle>
             </CardHeader>
@@ -198,7 +198,7 @@ function UnifiedSidebarComponent({
           <Card className="border-muted/40 shadow-sm">
             <CardHeader className="px-3 pt-3 pb-2">
               <CardTitle className="flex items-center gap-1.5 font-medium text-xs">
-                <Sparkles className="h-3 w-3 text-yellow-500" />
+                <Sparkles className={`${UI_CLASSES.ICON_XS} text-yellow-500`} />
                 <span>Getting Started</span>
               </CardTitle>
             </CardHeader>
@@ -216,7 +216,7 @@ function UnifiedSidebarComponent({
           <CardContent className="p-3">
             <div className="text-center text-2xs text-muted-foreground/50">
               <div className="flex items-center justify-center gap-1.5">
-                <Users className="h-3 w-3" />
+                <Users className={UI_CLASSES.ICON_XS} />
                 <span>Community Resources</span>
               </div>
             </div>

@@ -1249,14 +1249,6 @@
     animation: slideUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  .hover-lift {
-    transition: var(--transition-normal);
-  }
-
-  .hover-lift:hover {
-    box-shadow: var(--shadow-lg);
-  }
-
   /* Navigation styling */
   .nav-backdrop {
     background: color-mix(in oklch, var(--color-background), transparent 5%);

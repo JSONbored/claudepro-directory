@@ -162,7 +162,7 @@ export const SECONDARY_NAVIGATION: NavigationGroup[] = [
 
 export const ACTION_LINKS: NavigationLink[] = [
   {
-    label: 'Submit Config',
+    label: 'Create',
     href: '/submit',
     icon: PlusCircle,
     description: 'Share your configuration',

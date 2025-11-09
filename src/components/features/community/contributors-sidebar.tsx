@@ -33,7 +33,7 @@ function ContributorsSidebarComponent({ topContributors, newMembers }: Contribut
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
-            <TrendingUp className="h-4 w-4 text-accent" />
+            <TrendingUp className={`${UI_CLASSES.ICON_SM} text-accent`} />
             <CardTitle className="text-sm">Trending Contributors</CardTitle>
           </div>
         </CardHeader>
@@ -79,7 +79,7 @@ function ContributorsSidebarComponent({ topContributors, newMembers }: Contribut
                   <p className="truncate font-medium text-sm">{displayName}</p>
                   {contributor.total_contributions !== undefined && (
                     <div className="flex items-center gap-1 text-muted-foreground text-xs">
-                      <Award className="h-3 w-3" />
+                      <Award className={UI_CLASSES.ICON_XS} />
                       <span>{contributor.total_contributions} contributions</span>
                     </div>
                   )}
@@ -112,7 +112,7 @@ function ContributorsSidebarComponent({ topContributors, newMembers }: Contribut
                       alt={displayName}
                       width={32}
                       height={32}
-                      className="h-8 w-8 flex-shrink-0 rounded-full object-cover"
+                      className={`${UI_CLASSES.ICON_XL} flex-shrink-0 rounded-full object-cover`}
                     />
                   ) : (
                     <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-accent font-bold text-xs">

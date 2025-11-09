@@ -210,7 +210,7 @@ export function CollectionItemManager({
           disabled={!selectedBookmarkId || isPending}
           className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}
         >
-          <Plus className="h-4 w-4" />
+          <Plus className={UI_CLASSES.ICON_SM} />
           Add
         </Button>
       </div>
@@ -236,22 +236,22 @@ export function CollectionItemManager({
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-6 w-6 p-0"
+                  className={`${UI_CLASSES.ICON_LG} p-0`}
                   onClick={() => handleMoveUp(index)}
                   disabled={index === 0 || isPending}
                   aria-label="Move up"
                 >
-                  <ArrowUp className="h-3 w-3" />
+                  <ArrowUp className={UI_CLASSES.ICON_XS} />
                 </Button>
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-6 w-6 p-0"
+                  className={`${UI_CLASSES.ICON_LG} p-0`}
                   onClick={() => handleMoveDown(index)}
                   disabled={index === items.length - 1 || isPending}
                   aria-label="Move down"
                 >
-                  <ArrowDown className="h-3 w-3" />
+                  <ArrowDown className={UI_CLASSES.ICON_XS} />
                 </Button>
               </div>
 
@@ -276,23 +276,23 @@ export function CollectionItemManager({
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-8 w-8 p-0"
+                  className={`${UI_CLASSES.ICON_XL} p-0`}
                   onClick={() =>
                     window.open(`/${item.content_type}/${item.content_slug}`, '_blank')
                   }
                   aria-label="View item"
                 >
-                  <ExternalLink className="h-4 w-4" />
+                  <ExternalLink className={UI_CLASSES.ICON_SM} />
                 </Button>
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                  className={`${UI_CLASSES.ICON_XL} p-0 text-destructive hover:text-destructive`}
                   onClick={() => handleRemove(item.id)}
                   disabled={isPending}
                   aria-label="Remove item"
                 >
-                  <Trash className="h-4 w-4" />
+                  <Trash className={UI_CLASSES.ICON_SM} />
                 </Button>
               </div>
             </div>

@@ -61,33 +61,23 @@ export interface ReadProgressProps {
   };
 }
 
-/**
- * Color mapping to CSS variables
- */
-const COLOR_MAP = {
-  accent: 'hsl(var(--accent))',
-  primary: 'hsl(var(--primary))',
-  foreground: 'hsl(var(--foreground))',
-} as const;
-
 export function ReadProgress({
   position = 'below-nav',
-  color = 'accent',
-  height = 3,
+  height = 5,
   zIndex = 51,
   springConfig = {
-    stiffness: 100,
-    damping: 30,
-    restDelta: 0.001,
+    stiffness: 400,
+    damping: 40,
+    restDelta: 0.0001,
   },
 }: ReadProgressProps) {
   const [isMounted, setIsMounted] = useState(false);
   const [navHeight, setNavHeight] = useState(0);
+  const [navWidth, setNavWidth] = useState(0);
+  const [navLeft, setNavLeft] = useState(0);
 
-  // Track scroll progress (0 to 1)
+  // Motion hooks must be called unconditionally (React rules)
   const { scrollYProgress } = useScroll();
-
-  // Apply spring physics for smooth animation
   const scaleX = useSpring(scrollYProgress, springConfig);
 
   // Dynamically measure navigation height
@@ -98,22 +88,33 @@ export function ReadProgress({
       return;
     }
 
-    // Query the navigation header element
-    const updateNavHeight = () => {
-      const nav = document.querySelector('header');
-      if (nav) {
-        setNavHeight(nav.offsetHeight);
+    // Query the navigation element (inner nav, not outer header with padding)
+    const updateNavDimensions = () => {
+      const header = document.querySelector('header');
+      const nav = header?.querySelector('nav');
+      if (header && nav) {
+        const navRect = nav.getBoundingClientRect();
+        // Position at bottom of navbar
+        setNavHeight(navRect.bottom);
+        // Match navbar width and left position
+        setNavWidth(navRect.width);
+        setNavLeft(navRect.left);
       }
     };
 
     // Initial measurement
-    updateNavHeight();
+    updateNavDimensions();
 
     // Update on resize (nav might change height at different breakpoints)
-    const resizeObserver = new ResizeObserver(updateNavHeight);
-    const nav = document.querySelector('header');
-    if (nav) {
-      resizeObserver.observe(nav);
+    const resizeObserver = new ResizeObserver(updateNavDimensions);
+    const header = document.querySelector('header');
+    if (header) {
+      resizeObserver.observe(header);
+      // Also observe the inner nav element
+      const nav = header.querySelector('nav');
+      if (nav) {
+        resizeObserver.observe(nav);
+      }
     }
 
     return () => {
@@ -126,10 +127,19 @@ export function ReadProgress({
     return null;
   }
 
+  // Don't render below-nav mode until navHeight is measured
+  if (position === 'below-nav' && (navHeight === 0 || navWidth === 0)) {
+    return null;
+  }
+
   // Calculate position based on mode
   const getPositionStyle = () => {
     if (position === 'below-nav') {
-      return { top: `${navHeight}px` };
+      return {
+        top: `${navHeight}px`, // Position directly below the navbar
+        left: `${navLeft}px`,
+        width: `${navWidth}px`,
+      };
     }
     if (position === 'top') {
       return { top: 0 };
@@ -139,22 +149,20 @@ export function ReadProgress({
 
   return (
     <motion.div
-      className="fixed right-0 left-0 origin-left"
+      className="pointer-events-none fixed origin-left bg-accent"
       style={{
         ...getPositionStyle(),
         height: `${height}px`,
-        backgroundColor: COLOR_MAP[color],
         scaleX,
         zIndex,
-        // Respect reduced motion preferences
-        // Motion.dev handles this automatically, but we can add custom behavior
+        borderRadius: '2.5px', // Pill shape (half of 5px height)
       }}
-      // Accessibility: Announce progress to screen readers
       role="progressbar"
       aria-label="Reading progress"
       aria-valuemin={0}
       aria-valuemax={100}
       aria-valuenow={Math.round(scrollYProgress.get() * 100)}
+      suppressHydrationWarning
     />
   );
 }

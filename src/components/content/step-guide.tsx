@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primi
 import { highlightCode } from '@/src/lib/content/syntax-highlighting';
 import { Zap } from '@/src/lib/icons';
 import type { StepByStepGuideProps } from '@/src/lib/types/component.types';
+import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 export function StepByStepGuide(props: StepByStepGuideProps) {
   const { steps, title, description, totalTime } = props;
@@ -33,7 +34,7 @@ export function StepByStepGuide(props: StepByStepGuideProps) {
         )}
         {totalTime && (
           <div className={'flex items-center gap-2 text-muted-foreground text-sm'}>
-            <Zap className="h-4 w-4" />
+            <Zap className={UI_CLASSES.ICON_SM} />
             <span itemProp="totalTime">Total time: {totalTime}</span>
           </div>
         )}
