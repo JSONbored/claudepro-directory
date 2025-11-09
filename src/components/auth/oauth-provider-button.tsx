@@ -8,6 +8,7 @@ import { motion } from 'motion/react';
 import { useState } from 'react';
 import { DiscordBrandIcon, GithubBrandIcon, GoogleBrandIcon } from '@/src/lib/icons';
 import { createClient } from '@/src/lib/supabase/client';
+import { ANIMATION_CONSTANTS } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
 
@@ -69,7 +70,7 @@ export function OAuthProviderButton({ provider, redirectTo, className }: OAuthPr
       {/* Circular icon button */}
       <div
         className={cn(
-          'flex h-16 w-16 items-center justify-center rounded-full border bg-white/5 transition-all duration-200 hover:scale-105 hover:bg-white/10',
+          `flex h-16 w-16 items-center justify-center rounded-full border bg-white/5 ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT} hover:scale-105 hover:bg-white/10`,
           loading && 'cursor-wait'
         )}
         style={{ borderColor: 'oklch(74% 0.2 35 / 0.3)' }}

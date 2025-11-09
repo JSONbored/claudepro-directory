@@ -10,6 +10,7 @@ import {
 import { ROUTES } from '@/src/lib/constants/routes';
 import { AlertCircle } from '@/src/lib/icons';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
+import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 export const metadata = generatePageMetadata('/auth/auth-code-error');
 
@@ -29,7 +30,7 @@ export default function AuthCodeError() {
           There was a problem signing you in. This could be due to an invalid or expired link.
         </CardDescription>
       </CardHeader>
-      <CardContent className="flex flex-col gap-2">
+      <CardContent className={UI_CLASSES.FLEX_COL_GAP_2}>
         <Button asChild>
           <Link href={ROUTES.LOGIN}>Try Again</Link>
         </Button>

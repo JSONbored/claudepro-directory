@@ -15,7 +15,7 @@ import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu';
 import { motion } from 'motion/react';
 import type * as React from 'react';
 import { Check, ChevronRight, Circle } from '@/src/lib/icons';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { DIMENSIONS, POSITION_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
 
 import { cn } from '@/src/lib/utils';
 
@@ -67,7 +67,7 @@ const DropdownMenuSubContent = ({
   <DropdownMenuPrimitive.SubContent
     ref={ref}
     className={cn(
-      'data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-lg data-[state=closed]:animate-out data-[state=open]:animate-in',
+      `data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 z-50 ${DIMENSIONS.MIN_W_BUTTON} overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-lg data-[state=closed]:animate-out data-[state=open]:animate-in`,
       className
     )}
     {...props}
@@ -102,7 +102,7 @@ const DropdownMenuContent = ({
       <DropdownMenuPrimitive.Content ref={ref} sideOffset={sideOffset} asChild {...props}>
         <motion.div
           className={cn(
-            'z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md will-change-transform',
+            `z-50 ${DIMENSIONS.MIN_W_BUTTON} overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md will-change-transform`,
             'data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=closed]:animate-out',
             className
           )}
@@ -170,7 +170,9 @@ const DropdownMenuCheckboxItem = ({
     checked={checked ?? false}
     {...props}
   >
-    <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
+    <span
+      className={`${POSITION_PATTERNS.ABSOLUTE_LEFT_ICON} flex h-3.5 w-3.5 items-center justify-center`}
+    >
       <DropdownMenuPrimitive.ItemIndicator>
         <Check className={UI_CLASSES.ICON_SM} />
       </DropdownMenuPrimitive.ItemIndicator>
@@ -196,7 +198,9 @@ const DropdownMenuRadioItem = ({
     )}
     {...props}
   >
-    <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
+    <span
+      className={`${POSITION_PATTERNS.ABSOLUTE_LEFT_ICON} flex h-3.5 w-3.5 items-center justify-center`}
+    >
       <DropdownMenuPrimitive.ItemIndicator>
         <Circle className="h-2 w-2 fill-current" />
       </DropdownMenuPrimitive.ItemIndicator>

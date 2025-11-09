@@ -95,7 +95,7 @@ export default async function SubmissionsPage() {
         </div>
         <Button asChild>
           <Link href={ROUTES.SUBMIT}>
-            <Send className="mr-2 h-4 w-4" />
+            <Send className={`mr-2 ${UI_CLASSES.ICON_SM}`} />
             New Submission
           </Link>
         </Button>
@@ -104,7 +104,7 @@ export default async function SubmissionsPage() {
       {submissions.length === 0 ? (
         <Card>
           <CardContent className={'flex flex-col items-center py-12'}>
-            <Send className="mb-4 h-12 w-12 text-muted-foreground" />
+            <Send className={`mb-4 h-12 w-12 ${UI_CLASSES.ICON_NEUTRAL}`} />
             <h3 className="mb-2 font-semibold text-xl">No submissions yet</h3>
             <p className={'mb-4 max-w-md text-center text-muted-foreground'}>
               Share your Claude configurations with the community! Your contributions help everyone
@@ -112,7 +112,7 @@ export default async function SubmissionsPage() {
             </p>
             <Button asChild>
               <Link href={ROUTES.SUBMIT}>
-                <Send className="mr-2 h-4 w-4" />
+                <Send className={`mr-2 ${UI_CLASSES.ICON_SM}`} />
                 Submit Your First Configuration
               </Link>
             </Button>
@@ -202,7 +202,7 @@ export default async function SubmissionsPage() {
         <CardContent className="pt-6">
           <div className="flex gap-3">
             <GitPullRequest
-              className={`h-5 w-5 text-blue-400 ${UI_CLASSES.FLEX_SHRINK_0_MT_0_5}`}
+              className={`${UI_CLASSES.ICON_MD} ${UI_CLASSES.ICON_INFO} ${UI_CLASSES.FLEX_SHRINK_0_MT_0_5}`}
             />
             <div className="flex-1">
               <p className={'font-medium text-blue-400 text-sm'}>How it works</p>

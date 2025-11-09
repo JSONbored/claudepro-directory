@@ -41,7 +41,7 @@ import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
 import { logger } from '@/src/lib/logger';
 import type { DisplayableContent, FilterState } from '@/src/lib/types/component.types';
 import type { HomePageClientProps } from '@/src/lib/types/page-props.types';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { ANIMATION_CONSTANTS, UI_CLASSES } from '@/src/lib/ui-constants';
 import type { Database } from '@/src/types/database.types';
 
 /**
@@ -293,7 +293,7 @@ function HomePageClientComponent({ initialData, featuredByCategory, stats }: Hom
                         <motion.div
                           className="flex min-w-fit items-center gap-2 whitespace-nowrap rounded-lg border border-border/40 bg-card/50 px-4 py-2.5 backdrop-blur-sm"
                           whileTap={{ scale: 0.95 }}
-                          transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+                          transition={ANIMATION_CONSTANTS.SPRING_DEFAULT}
                         >
                           <Icon
                             className={`${UI_CLASSES.ICON_SM} flex-shrink-0 text-accent`}
@@ -333,18 +333,18 @@ function HomePageClientComponent({ initialData, featuredByCategory, stats }: Hom
                           y: -2,
                           borderColor: 'hsl(var(--accent) / 0.3)',
                           backgroundColor: 'hsl(var(--accent) / 0.05)',
-                          transition: { type: 'spring', stiffness: 400, damping: 15 },
+                          transition: ANIMATION_CONSTANTS.SPRING_DEFAULT,
                         }}
                         whileTap={{
                           scale: 0.98,
-                          transition: { type: 'spring', stiffness: 400, damping: 15 },
+                          transition: ANIMATION_CONSTANTS.SPRING_DEFAULT,
                         }}
                       >
                         <Icon
                           className={`${UI_CLASSES.ICON_SM} transition-colors group-hover:text-accent`}
                           aria-hidden="true"
                         />
-                        <span className="transition-colors group-hover:text-foreground">
+                        <span className={`transition-colors ${UI_CLASSES.GROUP_HOVER_ACCENT}`}>
                           <NumberTicker value={stats[categoryId] || 0} delay={delay} />{' '}
                           {displayText}
                         </span>

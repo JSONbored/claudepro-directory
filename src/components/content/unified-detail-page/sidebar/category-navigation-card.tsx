@@ -67,7 +67,7 @@ import {
 } from '@/src/components/primitives/tooltip';
 import type { LucideIcon } from '@/src/lib/icons';
 import { nonEmptyString } from '@/src/lib/schemas/primitives';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { DIMENSIONS, UI_CLASSES } from '@/src/lib/ui-constants';
 
 /**
  * Schema for category info
@@ -125,7 +125,7 @@ export function CategoryNavigationCard({
                   <Icon className={UI_CLASSES.ICON_SM} />
                 </Link>
               </TooltipTrigger>
-              <TooltipContent side="bottom" className="max-w-[200px] text-xs">
+              <TooltipContent side="bottom" className={`${DIMENSIONS.TOOLTIP_MAX} text-xs`}>
                 <div className="font-semibold">{info.label}</div>
                 <div className="mt-0.5 text-muted-foreground">{info.description}</div>
               </TooltipContent>

@@ -6,6 +6,7 @@
 
 import { motion } from 'motion/react';
 import type { ReactNode } from 'react';
+import { DIMENSIONS } from '@/src/lib/ui-constants';
 
 interface SplitAuthLayoutProps {
   brandPanel: ReactNode;
@@ -15,7 +16,7 @@ interface SplitAuthLayoutProps {
 
 export function SplitAuthLayout({ brandPanel, authPanel, mobileHeader }: SplitAuthLayoutProps) {
   return (
-    <div className="relative h-[100dvh] overflow-hidden bg-background">
+    <div className={`relative ${DIMENSIONS.FULL_VIEWPORT} overflow-hidden bg-background`}>
       {/* Desktop: Side-by-side layout */}
       <div className="hidden h-full lg:grid lg:grid-cols-2">
         {/* Left: Brand content */}
@@ -31,9 +32,8 @@ export function SplitAuthLayout({ brandPanel, authPanel, mobileHeader }: SplitAu
         {/* Right: Auth card with Claude orange accent */}
         <div className="flex items-center justify-center">
           <motion.div
-            className="rounded-2xl bg-card p-12 shadow-2xl"
+            className={`${DIMENSIONS.DROPDOWN_LG} rounded-2xl bg-card p-12 shadow-2xl`}
             style={{
-              width: '480px',
               borderWidth: '0.5px',
               borderStyle: 'solid',
               borderColor: 'oklch(74% 0.2 35)',

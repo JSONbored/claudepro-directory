@@ -140,7 +140,9 @@ export function NavigationCommandMenu({
         {getIcon(item.iconName)}
         <div className="flex flex-col items-start">
           <span>{item.title}</span>
-          <span className="text-muted-foreground text-xs transition-colors group-hover:text-foreground/70">
+          <span
+            className={`text-muted-foreground text-xs transition-colors ${UI_CLASSES.GROUP_HOVER_ACCENT}`}
+          >
             {item.description}
           </span>
         </div>

@@ -17,7 +17,7 @@ import {
   Sparkles,
   X,
 } from '@/src/lib/icons';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { ANIMATION_CONSTANTS, DIMENSIONS, UI_CLASSES } from '@/src/lib/ui-constants';
 import type { Tables } from '@/src/types/database.types';
 
 /**
@@ -116,9 +116,7 @@ export function AnnouncementBannerClient({ announcement }: AnnouncementBannerCli
       {/* Rounded pill container */}
       <div className="container mx-auto">
         <div
-          className={
-            'rounded-full border border-accent/20 bg-accent/10 shadow-sm backdrop-blur-sm transition-all duration-300 hover:border-accent/30 hover:shadow-md motion-reduce:transition-none'
-          }
+          className={`rounded-full border border-accent/20 bg-accent/10 shadow-sm backdrop-blur-sm ${ANIMATION_CONSTANTS.CSS_TRANSITION_SLOW} hover:border-accent/30 hover:shadow-md motion-reduce:transition-none`}
         >
           <div className="px-4 py-2 md:px-6 md:py-2.5">
             <div className={UI_CLASSES.FLEX_COL_SM_ROW_ITEMS_CENTER_JUSTIFY_BETWEEN}>
@@ -137,7 +135,7 @@ export function AnnouncementBannerClient({ announcement }: AnnouncementBannerCli
                   {announcement.href ? (
                     <Link
                       href={announcement.href}
-                      className={`hover:underline ${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1_5} transition-colors duration-200`}
+                      className={`hover:underline ${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1_5} ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT}`}
                     >
                       <span className="line-clamp-2 sm:line-clamp-1">{announcement.title}</span>
                       {IconComponent && (
@@ -167,9 +165,7 @@ export function AnnouncementBannerClient({ announcement }: AnnouncementBannerCli
                   type="button"
                   onClick={dismiss}
                   aria-label="Dismiss announcement"
-                  className={
-                    'flex min-h-[36px] min-w-[36px] flex-shrink-0 items-center justify-center rounded-full transition-colors duration-200 hover:bg-accent/20 focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 sm:min-h-[40px] sm:min-w-[40px]'
-                  }
+                  className={`flex ${DIMENSIONS.MIN_H_ICON_BUTTON_SM} ${DIMENSIONS.MIN_W_ICON_BUTTON_SM} flex-shrink-0 items-center justify-center rounded-full ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT} hover:bg-accent/20 focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 sm:${DIMENSIONS.MIN_H_ICON_BUTTON_MD} sm:${DIMENSIONS.MIN_W_ICON_BUTTON_MD}`}
                 >
                   <X
                     className={`${UI_CLASSES.ICON_XS} text-foreground sm:h-4 sm:w-4`}

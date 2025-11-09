@@ -23,7 +23,7 @@ import {
 import { useUnifiedSearch } from '@/src/hooks/use-unified-search';
 import { ChevronDown, ChevronUp, Filter, Search } from '@/src/lib/icons';
 import type { FilterState, UnifiedSearchProps } from '@/src/lib/types/component.types';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { POSITION_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
 
 export type { FilterState };
@@ -137,7 +137,9 @@ function UnifiedSearchComponent({
       <search className={cn('w-full space-y-4', className)}>
         <div className="space-y-3">
           <div className="relative">
-            <div className="-translate-y-1/2 pointer-events-none absolute top-1/2 left-4 z-10">
+            <div
+              className={`-translate-y-1/2 pointer-events-none ${POSITION_PATTERNS.ABSOLUTE_TOP_HALF} left-4 z-10`}
+            >
               <Search className={`${UI_CLASSES.ICON_MD} text-accent`} aria-hidden="true" />
             </div>
             <Input

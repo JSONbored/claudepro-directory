@@ -7,6 +7,7 @@ import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { SubmitFormClient } from '@/src/components/forms/submit-form-client';
+import { NavLink } from '@/src/components/shared/nav-link';
 import { getSubmissionFormConfig } from '@/src/lib/forms/submission-form-config';
 
 const UnifiedNewsletterCapture = dynamic(
@@ -147,21 +148,21 @@ export default async function SubmitPage() {
             <CardContent className={'space-y-3'}>
               <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
                 <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                  <TrendingUp className="h-4 w-4 text-blue-400" />
+                  <TrendingUp className={`${UI_CLASSES.ICON_SM} ${UI_CLASSES.ICON_INFO}`} />
                   <span className={'text-muted-foreground text-sm'}>Total Configs</span>
                 </div>
                 <span className={'font-semibold text-lg'}>{stats.total}</span>
               </div>
               <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
                 <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                  <Clock className="h-4 w-4 text-yellow-400" />
+                  <Clock className={`${UI_CLASSES.ICON_SM} ${UI_CLASSES.ICON_WARNING}`} />
                   <span className={'text-muted-foreground text-sm'}>Pending Review</span>
                 </div>
                 <span className={'font-semibold text-lg text-yellow-400'}>{stats.pending}</span>
               </div>
               <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
                 <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                  <CheckCircle className="h-4 w-4 text-green-400" />
+                  <CheckCircle className={`${UI_CLASSES.ICON_SM} ${UI_CLASSES.ICON_SUCCESS}`} />
                   <span className={'text-muted-foreground text-sm'}>Merged This Week</span>
                 </div>
                 <span className={'font-semibold text-green-400 text-lg'}>
@@ -183,7 +184,9 @@ export default async function SubmitPage() {
                     key={submission.id}
                     className={`${UI_CLASSES.FLEX_ITEMS_START_GAP_2} border-border/50 border-b pb-3 last:border-0 last:pb-0`}
                   >
-                    <CheckCircle className="mt-0.5 h-4 w-4 flex-shrink-0 text-green-400" />
+                    <CheckCircle
+                      className={`mt-0.5 ${UI_CLASSES.ICON_SM} flex-shrink-0 ${UI_CLASSES.ICON_SUCCESS}`}
+                    />
                     <div className="min-w-0 flex-1">
                       <p className={'truncate font-medium text-sm'}>{submission.content_name}</p>
                       <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} mt-1 flex-wrap`}>
@@ -193,12 +196,9 @@ export default async function SubmitPage() {
                         {submission.user && (
                           <span className={'text-muted-foreground text-xs'}>
                             by{' '}
-                            <Link
-                              href={`/u/${submission.user.slug}`}
-                              className="transition-colors hover:text-foreground"
-                            >
+                            <NavLink href={`/u/${submission.user.slug}`}>
                               @{submission.user.name}
-                            </Link>
+                            </NavLink>
                           </span>
                         )}
                       </div>
@@ -221,9 +221,18 @@ export default async function SubmitPage() {
               <CardContent className={'space-y-2'}>
                 {topContributors.map((contributor) => {
                   const getMedalIcon = (rank: number) => {
-                    if (rank === 1) return <Trophy className="h-4 w-4 text-yellow-400" />;
-                    if (rank === 2) return <Medal className="h-4 w-4 text-gray-400" />;
-                    if (rank === 3) return <Medal className="h-4 w-4 text-amber-600" />;
+                    if (rank === 1)
+                      return (
+                        <Trophy className={`${UI_CLASSES.ICON_SM} ${UI_CLASSES.ICON_WARNING}`} />
+                      );
+                    if (rank === 2)
+                      return (
+                        <Medal className={`${UI_CLASSES.ICON_SM} ${UI_CLASSES.ICON_NEUTRAL}`} />
+                      );
+                    if (rank === 3)
+                      return (
+                        <Medal className={`${UI_CLASSES.ICON_SM} ${UI_CLASSES.ICON_WARNING}`} />
+                      );
                     return null;
                   };
 
@@ -258,7 +267,8 @@ export default async function SubmitPage() {
           <Card className="border-blue-500/20 bg-blue-500/5">
             <CardHeader>
               <CardTitle className={'flex items-center gap-2 font-medium text-sm'}>
-                <Lightbulb className="h-4 w-4 text-blue-400" />💡 Tips for Success
+                <Lightbulb className={`${UI_CLASSES.ICON_SM} ${UI_CLASSES.ICON_INFO}`} />💡 Tips for
+                Success
               </CardTitle>
             </CardHeader>
             <CardContent>

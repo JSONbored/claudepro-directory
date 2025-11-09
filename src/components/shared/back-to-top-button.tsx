@@ -24,7 +24,7 @@
 import { AnimatePresence, motion } from 'motion/react';
 import { useEffect, useState } from 'react';
 import { ArrowUp } from '@/src/lib/icons';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { ANIMATION_CONSTANTS, POSITION_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
 
 interface BackToTopButtonProps {
   /**
@@ -92,12 +92,8 @@ export function BackToTopButton({ threshold = 300, className = '' }: BackToTopBu
           exit={{ opacity: 0, scale: 0.8, y: 20 }}
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
-          transition={{
-            type: 'spring',
-            stiffness: 400,
-            damping: 17,
-          }}
-          className={`fixed top-20 right-6 z-40 flex h-11 w-11 items-center justify-center rounded-full border border-border/50 bg-card/95 text-foreground shadow-black/10 shadow-lg backdrop-blur-md transition-colors duration-200 will-change-transform hover:border-accent/50 hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-background md:top-24 md:right-12 md:h-12 md:w-12 dark:shadow-black/30 ${className}
+          transition={ANIMATION_CONSTANTS.SPRING_DEFAULT}
+          className={`${POSITION_PATTERNS.FIXED_TOP_RIGHT_RESPONSIVE} z-40 flex h-11 w-11 items-center justify-center rounded-full border border-border/50 bg-card/95 text-foreground shadow-black/10 shadow-lg backdrop-blur-md ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT} will-change-transform hover:border-accent/50 hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-background md:top-24 md:right-12 md:h-12 md:w-12 dark:shadow-black/30 ${className}
           `}
           aria-label="Scroll to top"
         >

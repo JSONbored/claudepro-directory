@@ -17,7 +17,7 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { motion, useDragControls } from 'motion/react';
 import type * as React from 'react';
 import { X } from '@/src/lib/icons';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { ANIMATION_CONSTANTS, POSITION_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
 
 import { cn } from '@/src/lib/utils';
 
@@ -38,7 +38,7 @@ const SheetOverlay = ({
 }) => (
   <SheetPrimitive.Overlay
     className={cn(
-      'data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-50 bg-black/80 will-change-opacity data-[state=closed]:animate-out data-[state=open]:animate-in',
+      `data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 ${POSITION_PATTERNS.FIXED_INSET} z-50 bg-black/80 will-change-opacity data-[state=closed]:animate-out data-[state=open]:animate-in`,
       className
     )}
     {...props}
@@ -145,16 +145,12 @@ const SheetContent = ({
           dragElastic={dragConfig.dragElastic}
           dragMomentum={false}
           onDragEnd={handleDragEnd}
-          transition={{
-            type: 'spring',
-            stiffness: 400,
-            damping: 30,
-          }}
+          transition={ANIMATION_CONSTANTS.SPRING_SMOOTH}
         >
           {children}
           <SheetPrimitive.Close
             data-radix-sheet-close
-            className="absolute top-4 right-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary"
+            className={`${POSITION_PATTERNS.ABSOLUTE_TOP_RIGHT_OFFSET_XL} rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary`}
           >
             <X className={UI_CLASSES.ICON_SM} />
             <span className="sr-only">Close</span>
@@ -167,7 +163,10 @@ const SheetContent = ({
 SheetContent.displayName = SheetPrimitive.Content.displayName;
 
 const SheetHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
-  <div className={cn('flex flex-col space-y-2 text-center sm:text-left', className)} {...props} />
+  <div
+    className={cn(UI_CLASSES.FLEX_COL_SPACE_Y_2, 'text-center sm:text-left', className)}
+    {...props}
+  />
 );
 SheetHeader.displayName = 'SheetHeader';
 

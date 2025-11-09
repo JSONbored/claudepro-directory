@@ -60,7 +60,7 @@ import {
 } from '@/src/components/primitives/select';
 import { Textarea } from '@/src/components/primitives/textarea';
 import { ChevronDown, ChevronUp, Code, Plus, Trash } from '@/src/lib/icons';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { DIMENSIONS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
 
 // Supported languages for syntax highlighting
@@ -334,7 +334,7 @@ export function ExamplesArrayInput({
                       value={example.code}
                       onChange={(e) => updateExample(index, 'code', e.target.value)}
                       placeholder="export default { ... }"
-                      className="min-h-[150px] font-mono text-sm"
+                      className={`${DIMENSIONS.INPUT_LG} font-mono text-sm`}
                       maxLength={10000}
                       required
                     />
@@ -351,7 +351,7 @@ export function ExamplesArrayInput({
                       value={example.description || ''}
                       onChange={(e) => updateExample(index, 'description', e.target.value)}
                       placeholder="Explain what this example demonstrates..."
-                      className="min-h-[80px]"
+                      className={DIMENSIONS.INPUT_SM}
                       maxLength={500}
                     />
                     <p className={cn('text-xs', 'text-muted-foreground')}>

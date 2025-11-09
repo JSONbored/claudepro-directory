@@ -1,5 +1,5 @@
-import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/card';
+import { NavLink } from '@/src/components/shared/nav-link';
 import { APP_CONFIG, SOCIAL_LINKS } from '@/src/lib/constants';
 import { DiscordIcon, Github, Mail, MessageSquare } from '@/src/lib/icons';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
@@ -35,14 +35,14 @@ export default function ContactPage() {
             <p className="mb-4 text-muted-foreground">
               Join the conversation, ask questions, and share ideas with the community.
             </p>
-            <Link
+            <NavLink
               href={`${SOCIAL_LINKS.github}/discussions`}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 text-accent hover:underline"
+              className="inline-flex items-center gap-2"
             >
               Visit Discussions →
-            </Link>
+            </NavLink>
           </CardContent>
         </Card>
 
@@ -58,14 +58,14 @@ export default function ContactPage() {
             <p className="mb-4 text-muted-foreground">
               Chat with other users, get help, and stay updated on the latest developments.
             </p>
-            <Link
+            <NavLink
               href={SOCIAL_LINKS.discord || '#'}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 text-accent hover:underline"
+              className="inline-flex items-center gap-2"
             >
               Join Discord →
-            </Link>
+            </NavLink>
           </CardContent>
         </Card>
 
@@ -81,14 +81,14 @@ export default function ContactPage() {
             <p className="mb-4 text-muted-foreground">
               Found a bug or have a feature request? Open an issue on GitHub.
             </p>
-            <Link
+            <NavLink
               href={`${SOCIAL_LINKS.github}/issues/new`}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 text-accent hover:underline"
+              className="inline-flex items-center gap-2"
             >
               Create Issue →
-            </Link>
+            </NavLink>
           </CardContent>
         </Card>
 
@@ -104,12 +104,12 @@ export default function ContactPage() {
             <p className="mb-4 text-muted-foreground">
               For private inquiries, partnerships, or other matters, reach us via email.
             </p>
-            <a
+            <NavLink
               href={`mailto:${SOCIAL_LINKS.email}`}
-              className="inline-flex items-center gap-2 text-accent hover:underline"
+              className="inline-flex items-center gap-2"
             >
               {SOCIAL_LINKS.email} →
-            </a>
+            </NavLink>
           </CardContent>
         </Card>
       </div>
@@ -119,10 +119,7 @@ export default function ContactPage() {
         <h2 className="mb-4 font-semibold text-2xl">Frequently Asked Questions</h2>
         <p className="mb-4">
           Before reaching out, you might find answers in our{' '}
-          <Link href="/help" className="text-accent hover:underline">
-            Help Center
-          </Link>
-          .
+          <NavLink href="/help">Help Center</NavLink>.
         </p>
 
         <h2 className="mt-8 mb-4 font-semibold text-2xl">Response Time</h2>
@@ -134,14 +131,8 @@ export default function ContactPage() {
         <h2 className="mt-8 mb-4 font-semibold text-2xl">Contributing</h2>
         <p className="mb-4">
           Interested in contributing to {APP_CONFIG.name}? Check out our{' '}
-          <Link href="/submit" className="text-accent hover:underline">
-            submission guidelines
-          </Link>{' '}
-          or{' '}
-          <Link href="/partner" className="text-accent hover:underline">
-            partner program
-          </Link>
-          .
+          <NavLink href="/submit">submission guidelines</NavLink> or{' '}
+          <NavLink href="/partner">partner program</NavLink>.
         </p>
       </div>
     </div>

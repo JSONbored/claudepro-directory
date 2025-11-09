@@ -8,6 +8,7 @@ import { memo } from 'react';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { TabsList, TabsTrigger } from '@/src/components/primitives/tabs';
 import type { ChangelogCategory } from '@/src/lib/changelog/loader';
+import { DIMENSIONS } from '@/src/lib/ui-constants';
 
 export interface CategoryFilterProps {
   activeCategory: 'All' | ChangelogCategory;
@@ -34,7 +35,7 @@ export const CategoryFilter = memo(({ activeCategory, categoryCounts }: Category
           <UnifiedBadge
             variant="base"
             style={activeCategory === category ? 'default' : 'secondary'}
-            className="ml-1 h-5 min-w-[1.5rem] justify-center px-1.5 text-xs"
+            className={`ml-1 h-5 ${DIMENSIONS.MIN_W_BADGE} justify-center px-1.5 text-xs`}
           >
             {categoryCounts[category] || 0}
           </UnifiedBadge>

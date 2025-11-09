@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import { NavLink } from '@/src/components/shared/nav-link';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 
 export const metadata = generatePageMetadata('/cookies');
@@ -165,14 +165,8 @@ export default function CookiesPage() {
           <h2 className="mb-4 font-semibold text-2xl">8. Contact Us</h2>
           <p className="mb-4">
             If you have questions about our use of cookies, please{' '}
-            <Link href="/contact" className="text-accent hover:underline">
-              contact us
-            </Link>{' '}
-            or review our{' '}
-            <Link href="/privacy" className="text-accent hover:underline">
-              Privacy Policy
-            </Link>
-            .
+            <NavLink href="/contact">contact us</NavLink> or review our{' '}
+            <NavLink href="/privacy">Privacy Policy</NavLink>.
           </p>
         </section>
       </div>

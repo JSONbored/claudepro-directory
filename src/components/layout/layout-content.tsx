@@ -11,6 +11,7 @@ import { AnnouncementBannerClient } from '@/src/components/layout/announcement-b
 import { FloatingMobileSearch } from '@/src/components/layout/floating-mobile-search';
 import { Navigation } from '@/src/components/layout/navigation';
 import { BackToTopButton } from '@/src/components/shared/back-to-top-button';
+import { DIMENSIONS } from '@/src/lib/ui-constants';
 import type { Tables } from '@/src/types/database.types';
 
 const Footer = dynamic(
@@ -70,7 +71,7 @@ export function LayoutContent({ children, announcement }: LayoutContentProps) {
     return (
       <>
         {/* biome-ignore lint/correctness/useUniqueElementIds: Static ID required for skip navigation accessibility */}
-        <main id="main-content" className="h-[100dvh] w-full overflow-hidden">
+        <main id="main-content" className={`${DIMENSIONS.FULL_VIEWPORT} w-full overflow-hidden`}>
           {children}
         </main>
       </>

@@ -231,20 +231,20 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
                     {/* Impressions bar */}
                     <div className="relative h-8 overflow-hidden rounded bg-muted">
                       <div
-                        className="absolute top-0 left-0 h-full bg-primary/30 transition-all"
+                        className="${POSITION_PATTERNS.ABSOLUTE_TOP_LEFT} h-full bg-primary/30 transition-all"
                         style={{ width: `${(impressions / maxImpressions) * 100}%` }}
                       />
-                      <div className="absolute inset-0 flex items-center px-2 text-xs">
+                      <div className="${POSITION_PATTERNS.ABSOLUTE_INSET} flex items-center px-2 text-xs">
                         {impressions > 0 && `${impressions} views`}
                       </div>
                     </div>
                     {/* Clicks bar */}
                     <div className="relative h-8 overflow-hidden rounded bg-muted">
                       <div
-                        className="absolute top-0 left-0 h-full bg-accent/50 transition-all"
+                        className="${POSITION_PATTERNS.ABSOLUTE_TOP_LEFT} h-full bg-accent/50 transition-all"
                         style={{ width: `${impressions > 0 ? (clicks / impressions) * 100 : 0}%` }}
                       />
-                      <div className="absolute inset-0 flex items-center px-2 text-xs">
+                      <div className="${POSITION_PATTERNS.ABSOLUTE_INSET} flex items-center px-2 text-xs">
                         {clicks > 0 && `${clicks} clicks`}
                       </div>
                     </div>

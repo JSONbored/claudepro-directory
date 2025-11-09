@@ -36,7 +36,7 @@ import {
 import { logger } from '@/src/lib/logger';
 import { SEMANTIC_COLORS } from '@/src/lib/semantic-colors';
 import { createClient } from '@/src/lib/supabase/client';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { STATE_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
 
@@ -800,25 +800,36 @@ function JobToggleButton({
     startTransition(async () => {
       try {
         const {
-          data: { user },
-        } = await supabase.auth.getUser();
-        if (!user) throw new Error('You must be signed in to manage jobs');
+          data: { session },
+        } = await supabase.auth.getSession();
 
-        const { data, error } = await supabase.rpc('manage_job', {
-          p_action: 'toggle_status',
-          p_user_id: user.id,
-          p_data: {
-            id: jobId,
-            status: newStatus,
-          },
-        });
-
-        if (error) throw new Error(error.message);
-
-        if (!data || typeof data !== 'object' || !('success' in data)) {
-          throw new Error('Invalid response from manage_job RPC');
+        if (!session?.access_token) {
+          throw new Error('You must be signed in to manage jobs');
         }
-        const result = data as { success: boolean };
+
+        // Call jobs-handler edge function directly
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/jobs-handler`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${session.access_token}`,
+              'X-Job-Action': 'toggle',
+            },
+            body: JSON.stringify({
+              id: jobId,
+              status: newStatus,
+            }),
+          }
+        );
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
+          throw new Error(errorData.message || 'Failed to toggle job status');
+        }
+
+        const result = (await response.json()) as { success: boolean };
 
         if (result.success) {
           toasts.success.actionCompleted(
@@ -888,22 +899,33 @@ function JobDeleteButton({
     startTransition(async () => {
       try {
         const {
-          data: { user },
-        } = await supabase.auth.getUser();
-        if (!user) throw new Error('You must be signed in to delete jobs');
+          data: { session },
+        } = await supabase.auth.getSession();
 
-        const { data, error } = await supabase.rpc('manage_job', {
-          p_action: 'delete',
-          p_user_id: user.id,
-          p_data: { id: jobId },
-        });
-
-        if (error) throw new Error(error.message);
-
-        if (!data || typeof data !== 'object' || !('success' in data)) {
-          throw new Error('Invalid response from manage_job RPC');
+        if (!session?.access_token) {
+          throw new Error('You must be signed in to delete jobs');
         }
-        const result = data as { success: boolean };
+
+        // Call jobs-handler edge function directly
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/jobs-handler`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${session.access_token}`,
+              'X-Job-Action': 'delete',
+            },
+            body: JSON.stringify({ id: jobId }),
+          }
+        );
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
+          throw new Error(errorData.message || 'Failed to delete job');
+        }
+
+        const result = (await response.json()) as { success: boolean };
 
         if (result.success) {
           toasts.success.itemDeleted('Job listing');
@@ -1015,7 +1037,7 @@ function BackButton({
       size={size}
       onClick={() => router.back()}
       disabled={disabled}
-      className={cn('text-muted-foreground hover:text-foreground', className)}
+      className={cn('text-muted-foreground', STATE_PATTERNS.HOVER_TEXT_FOREGROUND, className)}
     >
       <ArrowLeft className={UI_CLASSES.ICON_SM_LEADING} />
       {label}

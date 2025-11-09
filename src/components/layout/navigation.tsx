@@ -39,7 +39,13 @@ import {
   Menu,
   Users,
 } from '@/src/lib/icons';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
+import {
+  ANIMATION_CONSTANTS,
+  DIMENSIONS,
+  POSITION_PATTERNS,
+  RESPONSIVE_PATTERNS,
+  UI_CLASSES,
+} from '@/src/lib/ui-constants';
 
 interface NavLinkProps {
   href: string;
@@ -55,7 +61,7 @@ const NavLink = ({ href, children, className = '', isActive, onClick }: NavLinkP
   const linkProps = {
     href,
     prefetch: true,
-    className: `group relative px-2 py-1 text-xs font-medium transition-colors duration-200 no-underline ${
+    className: `group relative px-2 py-1 text-xs font-medium ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT} no-underline ${
       active ? 'text-foreground' : 'text-foreground/80 hover:text-foreground'
     } ${className}`,
     ...(active && { 'aria-current': 'page' as const }),
@@ -70,7 +76,7 @@ const NavLink = ({ href, children, className = '', isActive, onClick }: NavLinkP
       <span className="relative inline-block">
         {children}
         <span
-          className={`absolute bottom-0 left-0 h-[2px] bg-accent transition-all duration-300 ${
+          className={`${POSITION_PATTERNS.ABSOLUTE_BOTTOM_LEFT} ${DIMENSIONS.UNDERLINE} bg-accent ${ANIMATION_CONSTANTS.CSS_TRANSITION_SLOW} ${
             active ? 'w-full' : 'w-0 group-hover:w-full'
           }`}
           aria-hidden="true"
@@ -133,7 +139,7 @@ const NavigationComponent = () => {
       {/* Skip to main content link for keyboard navigation (WCAG 2.1 AA) */}
       <a
         href="#main-content"
-        className="sr-only transition-all duration-200 focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[100] focus:rounded-md focus:bg-accent focus:px-4 focus:py-2 focus:text-accent-foreground focus:shadow-lg focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-background"
+        className={`sr-only ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT} focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[100] focus:rounded-md focus:bg-accent focus:px-4 focus:py-2 focus:text-accent-foreground focus:shadow-lg focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-background`}
       >
         Skip to main content
       </a>
@@ -142,20 +148,18 @@ const NavigationComponent = () => {
       <NavigationCommandMenu open={commandPaletteOpen} onOpenChange={setCommandPaletteOpen} />
 
       <motion.header
-        className="sticky top-0 z-50 w-full px-3 pt-1 pb-3 will-change-transform contain-layout"
+        className={`${POSITION_PATTERNS.STICKY_TOP} z-50 w-full px-3 pt-1 pb-3 will-change-transform contain-layout`}
         style={{ opacity: navOpacity }}
       >
         <div className="container mx-auto">
           <motion.nav
-            className={
-              'rounded-2xl border border-border/50 bg-background/95 shadow-2xl backdrop-blur-xl transition-colors duration-300'
-            }
+            className={`rounded-2xl border border-border/50 bg-background/95 shadow-2xl backdrop-blur-xl ${ANIMATION_CONSTANTS.CSS_TRANSITION_SLOW}`}
             style={{ backdropFilter: backdropBlur }}
             aria-label="Main navigation container"
           >
-            <div className="px-3 md:px-4">
+            <div className={RESPONSIVE_PATTERNS.PADDING_RESPONSIVE_SM}>
               <div
-                className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} transition-[height] duration-300 will-change-auto ${
+                className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} transition-[height] ${ANIMATION_CONSTANTS.CSS_TRANSITION_SLOW} will-change-auto ${
                   isScrolled ? 'h-11 md:h-12' : 'h-14 md:h-16'
                 }`}
               >
@@ -163,7 +167,7 @@ const NavigationComponent = () => {
                 <Link
                   href={ROUTES.HOME}
                   prefetch={true}
-                  className="flex flex-shrink-0 items-center no-underline"
+                  className={`${UI_CLASSES.FLEX_ITEMS_CENTER_FLEX_SHRINK_0} no-underline`}
                   aria-label="heyclaude - Go to homepage"
                 >
                   <motion.div style={{ scale: logoScale }}>
@@ -184,21 +188,24 @@ const NavigationComponent = () => {
                           <DropdownMenuTrigger asChild>
                             <button
                               type="button"
-                              className={`group relative flex items-center px-2 py-1 font-medium ${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_NAV} transition-colors duration-200`}
+                              className={`group relative flex items-center px-2 py-1 font-medium ${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_NAV} ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT}`}
                               aria-label={`Open ${link.label} menu`}
                             >
                               <span className="relative">
                                 {link.label}
                                 <span
-                                  className="absolute bottom-0 left-0 h-[2px] w-0 bg-accent transition-all duration-300 group-hover:w-full"
+                                  className={`${POSITION_PATTERNS.ABSOLUTE_BOTTOM_LEFT} ${DIMENSIONS.UNDERLINE} w-0 bg-accent ${ANIMATION_CONSTANTS.CSS_TRANSITION_SLOW} group-hover:w-full`}
                                   aria-hidden="true"
                                 />
                               </span>
                               <ChevronDown className="ml-1 h-2.5 w-2.5" />
                             </button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent align="start" className="w-[480px] p-3">
-                            <div className="grid grid-cols-2 gap-2">
+                          <DropdownMenuContent
+                            align="start"
+                            className={`${DIMENSIONS.DROPDOWN_LG} p-3`}
+                          >
+                            <div className={UI_CLASSES.GRID_COLS_2_GAP_2}>
                               {link.children.map((child) => {
                                 const ChildIcon = child.icon;
                                 return (
@@ -206,18 +213,26 @@ const NavigationComponent = () => {
                                     <Link
                                       href={child.href}
                                       prefetch={true}
-                                      className="group flex w-full cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-2 no-underline transition-colors hover:bg-white/5"
+                                      className={UI_CLASSES.FLEX_INTERACTIVE_MENU_ITEM}
                                     >
                                       {ChildIcon && (
-                                        <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-md bg-muted/50">
+                                        <div
+                                          className={`${UI_CLASSES.FLEX_ICON_WRAPPER_SM} bg-muted/50`}
+                                        >
                                           <ChildIcon
                                             className={`${UI_CLASSES.ICON_XS} text-muted-foreground`}
                                             aria-hidden="true"
                                           />
                                         </div>
                                       )}
-                                      <div className="flex min-w-0 flex-1 flex-col items-start gap-0.5">
-                                        <div className="flex w-full items-center gap-1.5 truncate font-medium text-sm">
+                                      <div
+                                        className={
+                                          UI_CLASSES.FLEX_MIN_W_0_FLEX_1_COL_ITEMS_START_GAP_0_5
+                                        }
+                                      >
+                                        <div
+                                          className={`${UI_CLASSES.FLEX_W_FULL_ITEMS_CENTER_GAP_1_5} truncate font-medium text-sm`}
+                                        >
                                           {child.label}
                                           {child.isNew && (
                                             <UnifiedBadge
@@ -266,22 +281,22 @@ const NavigationComponent = () => {
                     <DropdownMenuTrigger asChild>
                       <button
                         type="button"
-                        className={`group relative flex items-center px-2 py-1 font-medium ${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_NAV} transition-colors duration-200`}
+                        className={`group relative flex items-center px-2 py-1 font-medium ${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_NAV} ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT}`}
                         aria-label="Open additional navigation menu"
                       >
                         <span className="relative">
                           More
                           <span
-                            className="absolute bottom-0 left-0 h-[2px] w-0 bg-accent transition-all duration-300 group-hover:w-full"
+                            className={`${POSITION_PATTERNS.ABSOLUTE_BOTTOM_LEFT} ${DIMENSIONS.UNDERLINE} w-0 bg-accent ${ANIMATION_CONSTANTS.CSS_TRANSITION_SLOW} group-hover:w-full`}
                             aria-hidden="true"
                           />
                         </span>
                         <ChevronDown className="ml-1 h-2.5 w-2.5" />
                       </button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-[560px] p-4">
+                    <DropdownMenuContent align="end" className={`${DIMENSIONS.DROPDOWN_XL} p-4`}>
                       {/* 2-column grid for quick links */}
-                      <div className="mb-3 grid grid-cols-2 gap-4">
+                      <div className={`${UI_CLASSES.MB_2} ${UI_CLASSES.GRID_COLS_2_GAP_4}`}>
                         {SECONDARY_NAVIGATION.map((group) => (
                           <div key={group.heading} className="space-y-2">
                             <DropdownMenuLabel className="px-2 py-1 font-semibold text-[10px] text-muted-foreground uppercase tracking-wider">
@@ -295,17 +310,23 @@ const NavigationComponent = () => {
                                     <Link
                                       href={link.href}
                                       prefetch={true}
-                                      className="group flex w-full cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-2 no-underline transition-colors hover:bg-white/5"
+                                      className={UI_CLASSES.FLEX_INTERACTIVE_MENU_ITEM}
                                     >
                                       {IconComponent && (
-                                        <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-md bg-muted/50">
+                                        <div
+                                          className={`${UI_CLASSES.FLEX_ICON_WRAPPER_SM} bg-muted/50`}
+                                        >
                                           <IconComponent
                                             className={`${UI_CLASSES.ICON_XS} text-muted-foreground`}
                                             aria-hidden="true"
                                           />
                                         </div>
                                       )}
-                                      <div className="flex min-w-0 flex-1 flex-col items-start gap-0.5">
+                                      <div
+                                        className={
+                                          UI_CLASSES.FLEX_MIN_W_0_FLEX_1_COL_ITEMS_START_GAP_0_5
+                                        }
+                                      >
                                         <div className="w-full truncate font-medium text-sm">
                                           {link.label}
                                         </div>
@@ -326,11 +347,11 @@ const NavigationComponent = () => {
 
                       {/* Footer Links - Community, Partner Program, Consulting */}
                       <DropdownMenuSeparator className="my-2.5" />
-                      <div className="grid grid-cols-3 gap-2">
+                      <div className={UI_CLASSES.GRID_COLS_3_GAP_2}>
                         <Link
                           href="/community"
                           prefetch={true}
-                          className="group flex items-center gap-2 rounded-md px-3 py-2.5 no-underline transition-colors hover:bg-accent/10"
+                          className={UI_CLASSES.FLEX_INTERACTIVE_NAV_ITEM}
                         >
                           <Users
                             className={`${UI_CLASSES.ICON_SM} text-muted-foreground transition-colors group-hover:text-accent`}
@@ -343,7 +364,7 @@ const NavigationComponent = () => {
                         <Link
                           href="/partner"
                           prefetch={true}
-                          className="group flex items-center gap-2 rounded-md px-3 py-2.5 no-underline transition-colors hover:bg-accent/10"
+                          className={UI_CLASSES.FLEX_INTERACTIVE_NAV_ITEM}
                         >
                           <Handshake
                             className={`${UI_CLASSES.ICON_SM} text-muted-foreground transition-colors group-hover:text-accent`}
@@ -356,7 +377,7 @@ const NavigationComponent = () => {
                         <Link
                           href="/consulting"
                           prefetch={true}
-                          className="group flex items-center gap-2 rounded-md px-3 py-2.5 no-underline transition-colors hover:bg-accent/10"
+                          className={UI_CLASSES.FLEX_INTERACTIVE_NAV_ITEM}
                         >
                           <Briefcase
                             className={`${UI_CLASSES.ICON_SM} text-muted-foreground transition-colors group-hover:text-accent`}
@@ -420,7 +441,7 @@ const NavigationComponent = () => {
                 </motion.nav>
 
                 {/* Right Side Actions */}
-                <div className={'flex items-center gap-1.5 md:gap-2'}>
+                <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1_5}>
                   {/* Action Links - Create Button */}
                   {ACTION_LINKS.map((link) => {
                     const ActionIcon = link.icon;
@@ -471,18 +492,18 @@ const NavigationComponent = () => {
                     </SheetTrigger>
                     <SheetContent
                       side="right"
-                      className="w-full border-border/50 border-l sm:w-[380px]"
+                      className={`w-full border-border/50 border-l sm:${DIMENSIONS.SIDEBAR_LG}`}
                     >
                       {/* Swipe-to-close indicator */}
                       <motion.div
-                        className="-translate-x-1/2 absolute top-2 left-1/2 h-1 w-12 cursor-grab rounded-full bg-border/50 active:cursor-grabbing"
+                        className="${POSITION_PATTERNS.ABSOLUTE_TOP_HALF} -translate-x-1/2 left-1/2 h-1 w-12 cursor-grab rounded-full bg-border/50 active:cursor-grabbing"
                         drag="y"
                         dragConstraints={{ top: 0, bottom: 50 }}
                         onDragEnd={(_, info) => {
                           if (info.offset.y > 100) setIsOpen(false);
                         }}
                         whileDrag={{ scale: 1.2, backgroundColor: 'hsl(var(--accent))' }}
-                        transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+                        transition={ANIMATION_CONSTANTS.SPRING_DEFAULT}
                       />
 
                       <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
@@ -513,7 +534,7 @@ const NavigationComponent = () => {
                                   <Link
                                     href={link.href}
                                     onClick={() => setIsOpen(false)}
-                                    className="flex w-full items-center justify-center rounded-xl border-2 border-accent bg-accent px-5 py-4 font-semibold text-accent-foreground text-base transition-all duration-200 hover:bg-accent/90 active:scale-[0.97]"
+                                    className={`flex w-full items-center justify-center rounded-xl border-2 border-accent bg-accent px-5 py-4 font-semibold text-accent-foreground text-base ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT} hover:bg-accent/90 active:scale-[0.97]`}
                                   >
                                     {ActionIcon && (
                                       <ActionIcon className="mr-2 h-5 w-5 flex-shrink-0" />
@@ -539,7 +560,7 @@ const NavigationComponent = () => {
                                     href={link.href}
                                     isActive={isActive}
                                     onClick={() => setIsOpen(false)}
-                                    className="flex w-full items-center rounded-xl border border-border bg-card px-5 py-4 font-medium text-base transition-all duration-200 hover:border-accent/50 hover:bg-accent/10 active:scale-[0.97]"
+                                    className={`flex w-full items-center rounded-xl border border-border bg-card px-5 py-4 font-medium text-base ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT} hover:border-accent/50 hover:bg-accent/10 active:scale-[0.97]`}
                                   >
                                     {IconComponent && (
                                       <IconComponent className="mr-3 h-5 w-5 flex-shrink-0" />
@@ -579,7 +600,7 @@ const NavigationComponent = () => {
                                           href={link.href}
                                           isActive={isActive}
                                           onClick={() => setIsOpen(false)}
-                                          className="flex w-full items-center rounded-xl border border-border/40 bg-card/50 px-5 py-4 font-medium text-muted-foreground text-sm transition-all duration-200 hover:border-accent/30 hover:bg-accent/5 hover:text-foreground active:scale-[0.98]"
+                                          className={`flex w-full items-center rounded-xl border border-border/40 bg-card/50 px-5 py-4 font-medium text-muted-foreground text-sm ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT} hover:border-accent/30 hover:bg-accent/5 hover:text-foreground active:scale-[0.98]`}
                                         >
                                           {IconComponent && (
                                             <IconComponent className="mr-3 h-4 w-4 flex-shrink-0" />
@@ -602,7 +623,7 @@ const NavigationComponent = () => {
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: 0.3 }}
                         >
-                          <div className="grid grid-cols-3 gap-4 px-4">
+                          <div className={`${UI_CLASSES.GRID_COLS_3_GAP_4} px-4`}>
                             {[
                               {
                                 icon: DiscordIcon,
@@ -621,12 +642,12 @@ const NavigationComponent = () => {
                               <motion.div
                                 key={item.label}
                                 whileTap={{ scale: 0.9 }}
-                                transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+                                transition={ANIMATION_CONSTANTS.SPRING_DEFAULT}
                               >
                                 <Button
                                   variant="outline"
                                   size="lg"
-                                  className={`h-20 w-full rounded-2xl border-border/40 bg-card hover:bg-${item.color}/10 hover:border-${item.color}/30 transition-all duration-200`}
+                                  className={`h-20 w-full rounded-2xl border-border/40 bg-card hover:bg-${item.color}/10 hover:border-${item.color}/30 ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT}`}
                                   onClick={item.onClick}
                                   aria-label={item.label}
                                 >

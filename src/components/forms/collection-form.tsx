@@ -113,7 +113,7 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className={UI_CLASSES.FORM_SECTION_SPACING}>
       {/* Collection Name */}
       <FormField
         variant="input"
@@ -174,7 +174,7 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
 
       {/* Bookmarks Selection (only in create mode initially) */}
       {mode === 'create' && bookmarks.length > 0 && (
-        <div className="space-y-4">
+        <div className={UI_CLASSES.FORM_GROUP_SPACING}>
           <div>
             <Label className="text-base">Add Bookmarks (Optional)</Label>
             <p className={'mt-1 text-muted-foreground text-sm'}>

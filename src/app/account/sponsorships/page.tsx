@@ -86,10 +86,7 @@ export default async function SponsorshipsPage() {
                         showIcon
                       />
                       {isActive ? (
-                        <UnifiedBadge
-                          variant="base"
-                          className="border-green-500/20 bg-green-500/10 text-green-400"
-                        >
+                        <UnifiedBadge variant="base" className={UI_CLASSES.STATUS_APPROVED}>
                           Active
                         </UnifiedBadge>
                       ) : (
@@ -98,10 +95,7 @@ export default async function SponsorshipsPage() {
                         </UnifiedBadge>
                       )}
                       {hasHitLimit && (
-                        <UnifiedBadge
-                          variant="base"
-                          className="border-orange-500/20 bg-orange-500/10 text-orange-400"
-                        >
+                        <UnifiedBadge variant="base" className={UI_CLASSES.STATUS_WARNING}>
                           Limit Reached
                         </UnifiedBadge>
                       )}

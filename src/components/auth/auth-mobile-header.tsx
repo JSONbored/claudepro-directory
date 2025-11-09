@@ -6,11 +6,12 @@
 
 import { motion } from 'motion/react';
 import { HeyClaudeLogo } from '@/src/components/layout/heyclaude-logo';
+import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 export function AuthMobileHeader() {
   return (
     <motion.div
-      className="px-6 py-6"
+      className={UI_CLASSES.CARD_BODY_SPACING}
       style={{ backgroundColor: 'oklch(74% 0.2 35)' }}
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}

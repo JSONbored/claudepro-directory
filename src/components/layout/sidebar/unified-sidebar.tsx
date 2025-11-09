@@ -16,7 +16,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primi
 import { ROUTES } from '@/src/lib/constants/routes';
 import { Clock, Sparkles, TrendingUp, Users } from '@/src/lib/icons';
 import type { RelatedGuide } from '@/src/lib/schemas/app.schema';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { DIMENSIONS, POSITION_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
 
 export interface TrendingGuide {
   title: string;
@@ -50,7 +50,7 @@ function UnifiedSidebarComponent({
 }: UnifiedSidebarProps) {
   return (
     <div
-      className="sticky top-20 max-h-[calc(100vh-6rem)] overflow-y-auto"
+      className={`${POSITION_PATTERNS.STICKY_TOP_NAV} ${DIMENSIONS.SIDEBAR_MAX} overflow-y-auto`}
       style={{
         scrollbarWidth: 'thin',
         scrollbarColor: 'rgba(156, 163, 175, 0.3) transparent',
@@ -74,7 +74,9 @@ function UnifiedSidebarComponent({
                     href={guide.slug}
                     className="group flex items-center justify-between rounded px-1.5 py-1 text-xs transition-colors hover:bg-muted/50"
                   >
-                    <span className="flex-1 truncate text-muted-foreground group-hover:text-foreground">
+                    <span
+                      className={`flex-1 truncate text-muted-foreground ${UI_CLASSES.GROUP_HOVER_ACCENT}`}
+                    >
                       <span className="mr-1.5 text-muted-foreground/60">{index + 1}.</span>
                       {guide.title}
                     </span>

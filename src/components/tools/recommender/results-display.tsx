@@ -47,7 +47,7 @@ import {
   Sparkles,
   TrendingUp,
 } from '@/src/lib/icons';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { POSITION_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { getContentItemUrl } from '@/src/lib/utils/content.utils';
 import type { Database } from '@/src/types/database.types';
 
@@ -350,9 +350,9 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
               });
               const matchScore = result.match_score;
               const getMatchScoreColor = (score: number) => {
-                if (score >= 90) return 'text-green-600 dark:text-green-400';
-                if (score >= 75) return 'text-blue-600 dark:text-blue-400';
-                if (score >= 60) return 'text-yellow-600 dark:text-yellow-400';
+                if (score >= 90) return UI_CLASSES.SCORE_EXCELLENT;
+                if (score >= 75) return UI_CLASSES.SCORE_GOOD;
+                if (score >= 60) return UI_CLASSES.SCORE_FAIR;
                 return 'text-muted-foreground';
               };
               const getMatchGradient = (score: number) => {
@@ -364,7 +364,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
 
               return (
                 <div key={result.slug} className="relative">
-                  <div className="absolute top-4 right-4 z-10">
+                  <div className="${POSITION_PATTERNS.ABSOLUTE_TOP_RIGHT_OFFSET_XL} z-10">
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
@@ -385,7 +385,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                   </div>
 
                   {result.rank <= 3 && (
-                    <div className="absolute top-4 left-4 z-10">
+                    <div className="${POSITION_PATTERNS.ABSOLUTE_TOP_LEFT_OFFSET_XL} z-10">
                       <UnifiedBadge
                         variant="base"
                         style="outline"
@@ -396,7 +396,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                     </div>
                   )}
 
-                  <div className="absolute right-4 bottom-4 z-10">
+                  <div className="${POSITION_PATTERNS.ABSOLUTE_BOTTOM_RIGHT_OFFSET} z-10">
                     <UnifiedButton
                       variant="bookmark"
                       contentType={result.category}
@@ -406,7 +406,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                   </div>
 
                   <div
-                    className={`absolute inset-0 bg-gradient-to-br ${getMatchGradient(matchScore)} pointer-events-none opacity-50`}
+                    className={`${POSITION_PATTERNS.ABSOLUTE_INSET} bg-gradient-to-br ${getMatchGradient(matchScore)} pointer-events-none opacity-50`}
                   />
 
                   <Link href={targetPath}>

@@ -1,3 +1,6 @@
+'use client';
+
+import { motion } from 'motion/react';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { Button } from '@/src/components/primitives/button';
 import {
@@ -19,31 +22,21 @@ import {
   MousePointer,
   Sparkles,
 } from '@/src/lib/icons';
-import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { ANIMATION_CONSTANTS, RESPONSIVE_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
 
-export const metadata = generatePageMetadata('/partner');
-
-export const revalidate = 86400; // 24 hours
-
-async function getConfigCount(): Promise<number> {
-  const { createAnonClient } = await import('@/src/lib/supabase/server-anon');
-  const supabase = createAnonClient();
-
-  const { count } = await supabase.from('content').select('*', { count: 'exact', head: true });
-
-  return count || 282; // Fallback to known minimum
-}
-
-export default async function PartnerPage() {
-  const configCount = await getConfigCount();
+export default function PartnerPage() {
+  const configCount = 282; // Static count for client component
 
   return (
     <div className={'container mx-auto px-4 py-12'}>
       {/* Hero Section */}
       <div className={'mx-auto mb-12 max-w-5xl text-center'}>
-        <h1 className={'mb-4 font-bold text-4xl md:text-5xl'}>Reach 3,000+ Claude AI Developers</h1>
-        <p className={'mb-6 text-muted-foreground text-xl'}>
+        <h1
+          className={`mb-4 ${RESPONSIVE_PATTERNS.TEXT_RESPONSIVE_2XL} ${UI_CLASSES.HEADING_H1.split(' ')[1]}`}
+        >
+          Reach 3,000+ Claude AI Developers
+        </h1>
+        <p className={`mb-6 ${UI_CLASSES.TEXT_BODY_LG} text-muted-foreground`}>
           The largest directory of Claude configurations. Attract engineers building the future of
           AI tooling.
         </p>
@@ -52,19 +45,29 @@ export default async function PartnerPage() {
         <div className={'mx-auto mb-8 grid max-w-3xl grid-cols-3 gap-4'}>
           <Card>
             <CardContent className="pt-6 pb-6">
-              <p className={'mb-1 font-bold text-2xl text-primary'}>3,000+</p>
+              <p
+                className={`mb-1 ${UI_CLASSES.HEADING_H3.split(' ').slice(0, 2).join(' ')} text-primary`}
+              >
+                3,000+
+              </p>
               <p className={UI_CLASSES.TEXT_SM_MUTED}>Monthly Visitors</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="pt-6 pb-6">
-              <p className={'mb-1 font-bold text-2xl text-primary'}>16,000+</p>
+              <p
+                className={`mb-1 ${UI_CLASSES.HEADING_H3.split(' ').slice(0, 2).join(' ')} text-primary`}
+              >
+                16,000+
+              </p>
               <p className={UI_CLASSES.TEXT_SM_MUTED}>Page Views</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="pt-6 pb-6">
-              <p className={'mb-1 font-bold text-2xl text-primary'}>
+              <p
+                className={`mb-1 ${UI_CLASSES.HEADING_H3.split(' ').slice(0, 2).join(' ')} text-primary`}
+              >
                 {configCount.toLocaleString()}+
               </p>
               <p className={UI_CLASSES.TEXT_SM_MUTED}>Configurations</p>
@@ -109,150 +112,154 @@ export default async function PartnerPage() {
         <h2 className={'mb-8 text-center font-bold text-3xl'}>Simple, Transparent Pricing</h2>
         <div className={'grid gap-8 md:grid-cols-2'}>
           {/* Job Listings */}
-          <Card
-            className={
-              'relative overflow-hidden border-2 transition-all hover:border-primary/50 hover:shadow-lg'
-            }
+          <motion.div
+            whileHover={{ y: -4, scale: 1.01 }}
+            whileTap={{ scale: 0.99 }}
+            transition={ANIMATION_CONSTANTS.SPRING_DEFAULT}
           >
-            <CardHeader>
-              <div className={'mb-4 flex items-start justify-between'}>
-                <div className="rounded-lg bg-blue-500/10 p-3">
-                  <Briefcase className="h-6 w-6 text-blue-500" />
+            <Card className={'relative overflow-hidden border-2'}>
+              <CardHeader>
+                <div className={'mb-4 flex items-start justify-between'}>
+                  <div className="rounded-lg bg-blue-500/10 p-3">
+                    <Briefcase className={`${UI_CLASSES.ICON_LG} ${UI_CLASSES.ICON_INFO}`} />
+                  </div>
+                  <UnifiedBadge
+                    variant="base"
+                    style="outline"
+                    className="border-blue-500/20 bg-blue-500/5"
+                  >
+                    Most Popular
+                  </UnifiedBadge>
                 </div>
-                <UnifiedBadge
-                  variant="base"
-                  style="outline"
-                  className="border-blue-500/20 bg-blue-500/5"
-                >
-                  Most Popular
-                </UnifiedBadge>
-              </div>
-              <CardTitle className="text-2xl">Job Listings</CardTitle>
-              <CardDescription className="text-base">
-                Hire Claude AI engineers, ML experts, and automation specialists
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {/* Pricing */}
-              <div className={'rounded-lg border bg-muted/30 p-4'}>
-                <div className={'mb-2 flex items-baseline gap-2'}>
-                  <span className={'font-bold text-muted-foreground text-xl line-through'}>
-                    $249
-                  </span>
-                  <span className={'font-bold text-3xl text-primary'}>$149</span>
-                  <span className={UI_CLASSES.TEXT_SM_MUTED}>/month</span>
+                <CardTitle className="text-2xl">Job Listings</CardTitle>
+                <CardDescription className="text-base">
+                  Hire Claude AI engineers, ML experts, and automation specialists
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Pricing */}
+                <div className={'rounded-lg border bg-muted/30 p-4'}>
+                  <div className={'mb-2 flex items-baseline gap-2'}>
+                    <span className={'font-bold text-muted-foreground text-xl line-through'}>
+                      $249
+                    </span>
+                    <span className={'font-bold text-3xl text-primary'}>$149</span>
+                    <span className={UI_CLASSES.TEXT_SM_MUTED}>/month</span>
+                  </div>
+                  <p className={UI_CLASSES.TEXT_XS_MUTED}>
+                    30-day featured placement • Launch pricing
+                  </p>
                 </div>
-                <p className={UI_CLASSES.TEXT_XS_MUTED}>
-                  30-day featured placement • Launch pricing
-                </p>
-              </div>
 
-              {/* Features */}
-              <div className="space-y-3">
-                <div className={'flex items-start gap-2'}>
-                  <Check className="mt-0.5 h-4 w-4 text-green-500" />
-                  <p className={UI_CLASSES.TEXT_SM}>Featured in /jobs section</p>
+                {/* Features */}
+                <div className="space-y-3">
+                  <div className={'flex items-start gap-2'}>
+                    <Check className={`mt-0.5 ${UI_CLASSES.ICON_SM} ${UI_CLASSES.ICON_SUCCESS}`} />
+                    <p className={UI_CLASSES.TEXT_SM}>Featured in /jobs section</p>
+                  </div>
+                  <div className={'flex items-start gap-2'}>
+                    <Check className={`mt-0.5 ${UI_CLASSES.ICON_SM} ${UI_CLASSES.ICON_SUCCESS}`} />
+                    <p className={UI_CLASSES.TEXT_SM}>Company logo & branding</p>
+                  </div>
+                  <div className={'flex items-start gap-2'}>
+                    <Check className={`mt-0.5 ${UI_CLASSES.ICON_SM} ${UI_CLASSES.ICON_SUCCESS}`} />
+                    <p className={UI_CLASSES.TEXT_SM}>Apply button to your ATS</p>
+                  </div>
+                  <div className={'flex items-start gap-2'}>
+                    <Check className={`mt-0.5 ${UI_CLASSES.ICON_SM} ${UI_CLASSES.ICON_SUCCESS}`} />
+                    <p className={UI_CLASSES.TEXT_SM}>30-day visibility</p>
+                  </div>
+                  <div className={'flex items-start gap-2'}>
+                    <Check className={`mt-0.5 ${UI_CLASSES.ICON_SM} ${UI_CLASSES.ICON_SUCCESS}`} />
+                    <p className={UI_CLASSES.TEXT_SM}>Analytics dashboard</p>
+                  </div>
                 </div>
-                <div className={'flex items-start gap-2'}>
-                  <Check className="mt-0.5 h-4 w-4 text-green-500" />
-                  <p className={UI_CLASSES.TEXT_SM}>Company logo & branding</p>
-                </div>
-                <div className={'flex items-start gap-2'}>
-                  <Check className="mt-0.5 h-4 w-4 text-green-500" />
-                  <p className={UI_CLASSES.TEXT_SM}>Apply button to your ATS</p>
-                </div>
-                <div className={'flex items-start gap-2'}>
-                  <Check className="mt-0.5 h-4 w-4 text-green-500" />
-                  <p className={UI_CLASSES.TEXT_SM}>30-day visibility</p>
-                </div>
-                <div className={'flex items-start gap-2'}>
-                  <Check className="mt-0.5 h-4 w-4 text-green-500" />
-                  <p className={UI_CLASSES.TEXT_SM}>Analytics dashboard</p>
-                </div>
-              </div>
 
-              {/* CTA */}
-              <Button className="w-full" size="lg" asChild>
-                <a href={`mailto:${SOCIAL_LINKS.partnerEmail}?subject=Job Listing - Get Started`}>
-                  <Mail className={'mr-2 h-4 w-4'} />
-                  Post a Job
-                </a>
-              </Button>
-            </CardContent>
-          </Card>
+                {/* CTA */}
+                <Button className="w-full" size="lg" asChild>
+                  <a href={`mailto:${SOCIAL_LINKS.partnerEmail}?subject=Job Listing - Get Started`}>
+                    <Mail className={'mr-2 h-4 w-4'} />
+                    Post a Job
+                  </a>
+                </Button>
+              </CardContent>
+            </Card>
+          </motion.div>
 
           {/* Sponsored Listings */}
-          <Card
-            className={
-              'relative overflow-hidden border-2 transition-all hover:border-primary/50 hover:shadow-lg'
-            }
+          <motion.div
+            whileHover={{ y: -4, scale: 1.01 }}
+            whileTap={{ scale: 0.99 }}
+            transition={ANIMATION_CONSTANTS.SPRING_DEFAULT}
           >
-            <CardHeader>
-              <div className={'mb-4 flex items-start justify-between'}>
-                <div className="rounded-lg bg-purple-500/10 p-3">
-                  <Megaphone className="h-6 w-6 text-purple-500" />
+            <Card className={'relative overflow-hidden border-2'}>
+              <CardHeader>
+                <div className={'mb-4 flex items-start justify-between'}>
+                  <div className="rounded-lg bg-purple-500/10 p-3">
+                    <Megaphone className={`${UI_CLASSES.ICON_LG} text-purple-500`} />
+                  </div>
+                  <UnifiedBadge
+                    variant="base"
+                    style="outline"
+                    className="border-purple-500/20 bg-purple-500/5"
+                  >
+                    High ROI
+                  </UnifiedBadge>
                 </div>
-                <UnifiedBadge
-                  variant="base"
-                  style="outline"
-                  className="border-purple-500/20 bg-purple-500/5"
-                >
-                  High ROI
-                </UnifiedBadge>
-              </div>
-              <CardTitle className="text-2xl">Sponsored Listings</CardTitle>
-              <CardDescription className="text-base">
-                Feature your MCP server, agent, or tool at the top of search results
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {/* Pricing */}
-              <div className={'rounded-lg border bg-muted/30 p-4'}>
-                <div className={'mb-2 flex items-baseline gap-2'}>
-                  <span className={'font-bold text-muted-foreground text-xl line-through'}>
-                    $199
-                  </span>
-                  <span className={'font-bold text-3xl text-primary'}>$119</span>
-                  <span className={UI_CLASSES.TEXT_SM_MUTED}>/month</span>
+                <CardTitle className="text-2xl">Sponsored Listings</CardTitle>
+                <CardDescription className="text-base">
+                  Feature your MCP server, agent, or tool at the top of search results
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Pricing */}
+                <div className={'rounded-lg border bg-muted/30 p-4'}>
+                  <div className={'mb-2 flex items-baseline gap-2'}>
+                    <span className={'font-bold text-muted-foreground text-xl line-through'}>
+                      $199
+                    </span>
+                    <span className={'font-bold text-3xl text-primary'}>$119</span>
+                    <span className={UI_CLASSES.TEXT_SM_MUTED}>/month</span>
+                  </div>
+                  <p className={UI_CLASSES.TEXT_XS_MUTED}>Per listing • Launch pricing</p>
                 </div>
-                <p className={UI_CLASSES.TEXT_XS_MUTED}>Per listing • Launch pricing</p>
-              </div>
 
-              {/* Features */}
-              <div className="space-y-3">
-                <div className={'flex items-start gap-2'}>
-                  <Check className="mt-0.5 h-4 w-4 text-green-500" />
-                  <p className={UI_CLASSES.TEXT_SM}>Top placement in category</p>
+                {/* Features */}
+                <div className="space-y-3">
+                  <div className={'flex items-start gap-2'}>
+                    <Check className={`mt-0.5 ${UI_CLASSES.ICON_SM} ${UI_CLASSES.ICON_SUCCESS}`} />
+                    <p className={UI_CLASSES.TEXT_SM}>Top placement in category</p>
+                  </div>
+                  <div className={'flex items-start gap-2'}>
+                    <Check className={`mt-0.5 ${UI_CLASSES.ICON_SM} ${UI_CLASSES.ICON_SUCCESS}`} />
+                    <p className={UI_CLASSES.TEXT_SM}>"Sponsored" badge</p>
+                  </div>
+                  <div className={'flex items-start gap-2'}>
+                    <Check className={`mt-0.5 ${UI_CLASSES.ICON_SM} ${UI_CLASSES.ICON_SUCCESS}`} />
+                    <p className={UI_CLASSES.TEXT_SM}>Homepage feature rotation</p>
+                  </div>
+                  <div className={'flex items-start gap-2'}>
+                    <Check className={`mt-0.5 ${UI_CLASSES.ICON_SM} ${UI_CLASSES.ICON_SUCCESS}`} />
+                    <p className={UI_CLASSES.TEXT_SM}>Analytics dashboard</p>
+                  </div>
+                  <div className={'flex items-start gap-2'}>
+                    <Check className={`mt-0.5 ${UI_CLASSES.ICON_SM} ${UI_CLASSES.ICON_SUCCESS}`} />
+                    <p className={UI_CLASSES.TEXT_SM}>Custom call-to-action</p>
+                  </div>
                 </div>
-                <div className={'flex items-start gap-2'}>
-                  <Check className="mt-0.5 h-4 w-4 text-green-500" />
-                  <p className={UI_CLASSES.TEXT_SM}>"Sponsored" badge</p>
-                </div>
-                <div className={'flex items-start gap-2'}>
-                  <Check className="mt-0.5 h-4 w-4 text-green-500" />
-                  <p className={UI_CLASSES.TEXT_SM}>Homepage feature rotation</p>
-                </div>
-                <div className={'flex items-start gap-2'}>
-                  <Check className="mt-0.5 h-4 w-4 text-green-500" />
-                  <p className={UI_CLASSES.TEXT_SM}>Analytics dashboard</p>
-                </div>
-                <div className={'flex items-start gap-2'}>
-                  <Check className="mt-0.5 h-4 w-4 text-green-500" />
-                  <p className={UI_CLASSES.TEXT_SM}>Custom call-to-action</p>
-                </div>
-              </div>
 
-              {/* CTA */}
-              <Button className="w-full" size="lg" variant="default" asChild>
-                <a
-                  href={`mailto:${SOCIAL_LINKS.partnerEmail}?subject=Sponsored Listing - Get Started`}
-                >
-                  <Mail className={'mr-2 h-4 w-4'} />
-                  Get Featured
-                </a>
-              </Button>
-            </CardContent>
-          </Card>
+                {/* CTA */}
+                <Button className="w-full" size="lg" variant="default" asChild>
+                  <a
+                    href={`mailto:${SOCIAL_LINKS.partnerEmail}?subject=Sponsored Listing - Get Started`}
+                  >
+                    <Mail className={'mr-2 h-4 w-4'} />
+                    Get Featured
+                  </a>
+                </Button>
+              </CardContent>
+            </Card>
+          </motion.div>
         </div>
       </div>
 

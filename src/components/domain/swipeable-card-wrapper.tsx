@@ -31,7 +31,7 @@ import type { ReactNode } from 'react';
 import { useEffect, useState } from 'react';
 import { Bookmark, Copy as CopyIcon } from '@/src/lib/icons';
 import { SEMANTIC_COLORS } from '@/src/lib/semantic-colors';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { ANIMATION_CONSTANTS, POSITION_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
 
 interface SwipeableCardWrapperProps {
   children: ReactNode;
@@ -107,7 +107,7 @@ export function SwipeableCardWrapper({
     <div className="relative">
       {/* Swipe Indicator - Copy (Right) */}
       <motion.div
-        className="pointer-events-none absolute inset-y-0 left-0 z-0 flex w-20 items-center justify-start pl-4"
+        className={`pointer-events-none ${POSITION_PATTERNS.ABSOLUTE_INSET_Y_LEFT} z-0 flex w-20 items-center justify-start pl-4`}
         style={{ opacity: copyIndicatorOpacity }}
       >
         <div className={`rounded-lg p-3 ${SEMANTIC_COLORS.SWIPE_COPY}`}>
@@ -117,7 +117,7 @@ export function SwipeableCardWrapper({
 
       {/* Swipe Indicator - Bookmark (Left) */}
       <motion.div
-        className="pointer-events-none absolute inset-y-0 right-0 z-0 flex w-20 items-center justify-end pr-4"
+        className={`pointer-events-none ${POSITION_PATTERNS.ABSOLUTE_INSET_Y_RIGHT} z-0 flex w-20 items-center justify-end pr-4`}
         style={{ opacity: bookmarkIndicatorOpacity }}
       >
         <div className={`rounded-lg p-3 ${SEMANTIC_COLORS.SWIPE_BOOKMARK}`}>
@@ -150,11 +150,7 @@ export function SwipeableCardWrapper({
             x.set(0);
           }
         }}
-        transition={{
-          type: 'spring',
-          stiffness: 400,
-          damping: 30,
-        }}
+        transition={ANIMATION_CONSTANTS.SPRING_SMOOTH}
         className="relative z-10"
       >
         {children}

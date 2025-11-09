@@ -799,8 +799,6 @@ export type Database = {
           submitter_ip: unknown;
           tags: string[] | null;
           updated_at: string;
-          webhook_announcement_sent_at: string | null;
-          webhook_notification_sent_at: string | null;
         };
         Insert: {
           approved_slug?: string | null;
@@ -827,8 +825,6 @@ export type Database = {
           submitter_ip?: unknown;
           tags?: string[] | null;
           updated_at?: string;
-          webhook_announcement_sent_at?: string | null;
-          webhook_notification_sent_at?: string | null;
         };
         Update: {
           approved_slug?: string | null;
@@ -855,8 +851,6 @@ export type Database = {
           submitter_ip?: unknown;
           tags?: string[] | null;
           updated_at?: string;
-          webhook_announcement_sent_at?: string | null;
-          webhook_notification_sent_at?: string | null;
         };
         Relationships: [];
       };
@@ -2246,6 +2240,30 @@ export type Database = {
           label?: string;
           tier?: string;
           updated_at?: string;
+        };
+        Relationships: [];
+      };
+      trigger_test_log: {
+        Row: {
+          category: string | null;
+          created_at: string | null;
+          event_type: string | null;
+          id: string;
+          slug: string | null;
+        };
+        Insert: {
+          category?: string | null;
+          created_at?: string | null;
+          event_type?: string | null;
+          id?: string;
+          slug?: string | null;
+        };
+        Update: {
+          category?: string | null;
+          created_at?: string | null;
+          event_type?: string | null;
+          id?: string;
+          slug?: string | null;
         };
         Relationships: [];
       };
@@ -3740,10 +3758,6 @@ export type Database = {
         Args: { p_action: string; p_data: Json; p_user_id: string };
         Returns: Json;
       };
-      manage_job: {
-        Args: { p_action: string; p_data: Json; p_user_id: string };
-        Returns: Json;
-      };
       manage_review: {
         Args: { p_action: string; p_data: Json; p_user_id: string };
         Returns: Json;
@@ -3774,7 +3788,6 @@ export type Database = {
           total_updated: number;
         }[];
       };
-      process_pending_webhooks: { Args: never; Returns: Json };
       refresh_mv_site_urls: { Args: never; Returns: undefined };
       refresh_profile_from_oauth: { Args: { user_id: string }; Returns: Json };
       refresh_user_stats: {
@@ -4122,7 +4135,7 @@ export type Database = {
         | 'screenshot'
         | 'share'
         | 'download';
-      job_status: 'draft' | 'pending_review' | 'active' | 'expired' | 'rejected';
+      job_status: 'draft' | 'pending_review' | 'active' | 'expired' | 'rejected' | 'deleted';
       newsletter_source:
         | 'footer'
         | 'homepage'
@@ -4338,7 +4351,7 @@ export const Constants = {
         'share',
         'download',
       ],
-      job_status: ['draft', 'pending_review', 'active', 'expired', 'rejected'],
+      job_status: ['draft', 'pending_review', 'active', 'expired', 'rejected', 'deleted'],
       newsletter_source: [
         'footer',
         'homepage',

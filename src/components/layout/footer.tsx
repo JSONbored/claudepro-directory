@@ -19,7 +19,7 @@ import { ThemeToggle } from '@/src/components/layout/theme-toggle';
 import { APP_CONFIG, EXTERNAL_SERVICES, SOCIAL_LINKS } from '@/src/lib/constants';
 import { ROUTES } from '@/src/lib/constants/routes';
 import { DiscordIcon, ExternalLink, Github, Rss, Sparkles } from '@/src/lib/icons';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { ANIMATION_CONSTANTS, RESPONSIVE_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
 
 /**
  * Footer Component
@@ -63,7 +63,7 @@ function FooterComponent() {
     <footer className={'border-border/50 border-t bg-background/95 backdrop-blur'}>
       <div className="container mx-auto px-4 py-8 md:py-12">
         {/* Four-column grid with better mobile stacking */}
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 md:gap-12 lg:grid-cols-4">
+        <div className={UI_CLASSES.GRID_COLS_1_MD_2_LG_4}>
           {/* About Section - Takes full width on mobile */}
           <motion.div
             className="text-center md:text-left"
@@ -75,13 +75,15 @@ function FooterComponent() {
             <div className={'mb-4 flex justify-center md:justify-start'}>
               <HeyClaudeLogo size="md" inView={true} duration={1.5} />
             </div>
-            <p className={'mx-auto mb-6 max-w-sm text-muted-foreground text-sm md:mx-0 md:text-xs'}>
+            <p
+              className={`mx-auto mb-6 max-w-sm text-muted-foreground md:mx-0 ${RESPONSIVE_PATTERNS.TEXT_RESPONSIVE_SM}`}
+            >
               {APP_CONFIG.description}
             </p>
 
             {/* Social Icons + Theme Toggle + Badge - Vertical stack */}
-            <div className="flex flex-col items-center gap-4 md:items-start">
-              <div className="flex items-center gap-4">
+            <div className={UI_CLASSES.FLEX_COL_MD_ITEMS_START}>
+              <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_4}>
                 {[
                   { href: SOCIAL_LINKS.github || '#', icon: Github, label: 'GitHub' },
                   { href: SOCIAL_LINKS.discord || '#', icon: DiscordIcon, label: 'Discord' },
@@ -121,7 +123,9 @@ function FooterComponent() {
             viewport={{ once: true }}
             transition={{ duration: 0.4, delay: 0.1 }}
           >
-            <h3 className={'mb-4 font-semibold text-lg md:text-base'}>Browse</h3>
+            <h3 className={`mb-4 font-semibold ${RESPONSIVE_PATTERNS.TEXT_RESPONSIVE_MD}`}>
+              Browse
+            </h3>
             <ul className={'space-y-3 md:space-y-2'}>
               {[
                 { href: ROUTES.AGENTS, label: 'Agents' },
@@ -143,12 +147,12 @@ function FooterComponent() {
                   <motion.div
                     whileHover={{ scale: 1.05, x: 3 }}
                     whileTap={{ scale: 0.95 }}
-                    transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+                    transition={ANIMATION_CONSTANTS.SPRING_DEFAULT}
                     className="inline-block"
                   >
                     <Link
                       href={link.href}
-                      className="link-accent-underline text-base text-muted-foreground transition-colors hover:text-foreground md:text-sm"
+                      className={`link-accent-underline text-muted-foreground transition-colors hover:text-foreground ${RESPONSIVE_PATTERNS.TEXT_RESPONSIVE_MD}`}
                     >
                       {link.label}
                     </Link>
@@ -166,7 +170,9 @@ function FooterComponent() {
             viewport={{ once: true }}
             transition={{ duration: 0.4, delay: 0.2 }}
           >
-            <h3 className={'mb-4 font-semibold text-lg md:text-base'}>Resources</h3>
+            <h3 className={`mb-4 font-semibold ${RESPONSIVE_PATTERNS.TEXT_RESPONSIVE_MD}`}>
+              Resources
+            </h3>
             <ul className={'space-y-3 md:space-y-2'}>
               {[
                 { href: ROUTES.GUIDES, label: 'Guides', icon: null },
@@ -187,12 +193,12 @@ function FooterComponent() {
                   <motion.div
                     whileHover={{ scale: 1.05, x: 3 }}
                     whileTap={{ scale: 0.95 }}
-                    transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+                    transition={ANIMATION_CONSTANTS.SPRING_DEFAULT}
                     className="inline-block"
                   >
                     <Link
                       href={link.href}
-                      className="inline-flex items-center gap-2 text-base text-muted-foreground transition-colors hover:text-foreground md:text-sm"
+                      className={`inline-flex items-center gap-2 text-muted-foreground transition-colors hover:text-foreground ${RESPONSIVE_PATTERNS.TEXT_RESPONSIVE_MD}`}
                       aria-label={link.label}
                     >
                       {link.icon && <link.icon className={UI_CLASSES.ICON_SM} />}
@@ -212,7 +218,9 @@ function FooterComponent() {
             viewport={{ once: true }}
             transition={{ duration: 0.4, delay: 0.3 }}
           >
-            <h3 className={'mb-4 font-semibold text-lg md:text-base'}>Support</h3>
+            <h3 className={`mb-4 font-semibold ${RESPONSIVE_PATTERNS.TEXT_RESPONSIVE_MD}`}>
+              Support
+            </h3>
             <ul className={'space-y-3 md:space-y-2'}>
               {[
                 { href: '/consulting', label: 'Work with JSONbored' },
@@ -232,12 +240,12 @@ function FooterComponent() {
                   <motion.div
                     whileHover={{ scale: 1.05, x: 3 }}
                     whileTap={{ scale: 0.95 }}
-                    transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+                    transition={ANIMATION_CONSTANTS.SPRING_DEFAULT}
                     className="inline-block"
                   >
                     <Link
                       href={link.href}
-                      className="link-accent-underline text-base text-muted-foreground transition-colors hover:text-foreground md:text-sm"
+                      className={`link-accent-underline text-muted-foreground transition-colors hover:text-foreground ${RESPONSIVE_PATTERNS.TEXT_RESPONSIVE_MD}`}
                     >
                       {link.label}
                     </Link>
@@ -264,7 +272,7 @@ function FooterComponent() {
           </div>
 
           {/* Right: Status Badge */}
-          <div className="flex items-center">
+          <div className={UI_CLASSES.FLEX_ITEMS_CENTER}>
             {/* BetterStack Status Badge - Theme-aware */}
             {mounted && (
               <iframe

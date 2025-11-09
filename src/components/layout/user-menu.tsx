@@ -37,7 +37,12 @@ import {
 import { Skeleton } from '@/src/components/primitives/loading-skeleton';
 import { Activity, BookOpen, LogOut, Settings, User as UserIcon } from '@/src/lib/icons';
 import { createClient } from '@/src/lib/supabase/client';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
+import {
+  ANIMATION_CONSTANTS,
+  DIMENSIONS,
+  POSITION_PATTERNS,
+  UI_CLASSES,
+} from '@/src/lib/ui-constants';
 import { toasts } from '@/src/lib/utils/toast.utils';
 
 interface UserMenuProps {
@@ -117,14 +122,14 @@ export function UserMenu({ className }: UserMenuProps) {
       <div className={className}>
         <Link
           href="/login"
-          className={`group relative flex items-center gap-1.5 px-2 py-1 font-medium ${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_NAV} no-underline transition-colors duration-200`}
+          className={`group relative flex items-center gap-1.5 px-2 py-1 font-medium ${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_NAV} no-underline ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT}`}
           aria-label="Sign in"
         >
           <UserIcon className={UI_CLASSES.ICON_XS} />
           <span className="relative hidden lg:inline">
             Sign In
             <span
-              className="absolute bottom-0 left-0 h-[2px] w-0 bg-accent transition-all duration-300 group-hover:w-full"
+              className={`${POSITION_PATTERNS.ABSOLUTE_BOTTOM_LEFT} ${DIMENSIONS.UNDERLINE} w-0 bg-accent ${ANIMATION_CONSTANTS.CSS_TRANSITION_SLOW} group-hover:w-full`}
               aria-hidden="true"
             />
           </span>
@@ -152,7 +157,7 @@ export function UserMenu({ className }: UserMenuProps) {
           <motion.div
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
-            transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+            transition={ANIMATION_CONSTANTS.SPRING_DEFAULT}
           >
             <Button
               variant="ghost"
@@ -169,7 +174,11 @@ export function UserMenu({ className }: UserMenuProps) {
           </motion.div>
         </DropdownMenuTrigger>
 
-        <DropdownMenuContent className="w-56" align="end" forceMount>
+        <DropdownMenuContent
+          className={`${DIMENSIONS.DROPDOWN_SM} sm:${DIMENSIONS.DROPDOWN_MD}`}
+          align="end"
+          forceMount
+        >
           {/* User Info */}
           <DropdownMenuLabel className="font-normal">
             <div className="flex flex-col">

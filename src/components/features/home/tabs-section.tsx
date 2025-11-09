@@ -27,6 +27,7 @@ import {
 } from '@/src/lib/config/category-config';
 import { ROUTES } from '@/src/lib/constants/routes';
 import type { DisplayableContent } from '@/src/lib/types/component.types';
+import { ANIMATION_CONSTANTS } from '@/src/lib/ui-constants';
 
 interface TabsSectionProps {
   activeTab: string;
@@ -70,7 +71,7 @@ const TabsSectionComponent: FC<TabsSectionProps> = ({
               <motion.div
                 key={tab}
                 whileTap={{ scale: 0.95 }}
-                transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+                transition={ANIMATION_CONSTANTS.SPRING_DEFAULT}
               >
                 <TabsTrigger
                   value={tab}

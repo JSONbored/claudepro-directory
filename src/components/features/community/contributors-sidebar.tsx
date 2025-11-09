@@ -19,7 +19,7 @@ import type { UserProfile } from '@/src/components/domain/profile-card';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/card';
 import { Award, Medal, TrendingUp } from '@/src/lib/icons';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { POSITION_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
 
 export interface ContributorsSidebarProps {
   topContributors: UserProfile[];
@@ -28,7 +28,7 @@ export interface ContributorsSidebarProps {
 
 function ContributorsSidebarComponent({ topContributors, newMembers }: ContributorsSidebarProps) {
   return (
-    <aside className="sticky top-4 space-y-6">
+    <aside className={`${POSITION_PATTERNS.STICKY_TOP_4} space-y-6`}>
       {/* Trending Contributors */}
       <Card>
         <CardHeader>

@@ -15,6 +15,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/card';
+import { NavLink } from '@/src/components/shared/nav-link';
 import { FolderOpen, Globe, Users } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
@@ -152,15 +153,14 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                   {profile.website && (
                     <>
                       <span>•</span>
-                      <a
+                      <NavLink
                         href={profile.website}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1} text-primary hover:underline`}
+                        external
+                        className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}
                       >
                         <Globe className="h-4 w-4" />
                         Website
-                      </a>
+                      </NavLink>
                     </>
                   )}
                 </div>

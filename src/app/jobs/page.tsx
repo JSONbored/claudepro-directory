@@ -24,7 +24,7 @@ import { logger } from '@/src/lib/logger';
 import type { PagePropsWithSearchParams } from '@/src/lib/schemas/app.schema';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createAnonClient } from '@/src/lib/supabase/server-anon';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { POSITION_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
 import type { Tables } from '@/src/types/database.types';
 
 const UnifiedNewsletterCapture = dynamic(
@@ -187,7 +187,9 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
               <CardContent className="p-6">
                 <form method="GET" action="/jobs" className={UI_CLASSES.GRID_RESPONSIVE_4}>
                   <div className="relative">
-                    <Search className="-translate-y-1/2 absolute top-1/2 left-3 h-4 w-4 transform text-muted-foreground" />
+                    <Search
+                      className={`${POSITION_PATTERNS.ABSOLUTE_TOP_HALF_LEFT} -translate-y-1/2 h-4 w-4 transform text-muted-foreground`}
+                    />
                     <Input
                       id={searchInputId}
                       name="search"

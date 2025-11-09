@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import { NavLink } from '@/src/components/shared/nav-link';
 import { APP_CONFIG } from '@/src/lib/constants';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 
@@ -70,11 +70,7 @@ export default function PrivacyPage() {
             your activity on our service. You can control cookies through your browser settings.
           </p>
           <p className="mb-4">
-            For more details, see our{' '}
-            <Link href="/cookies" className="text-accent hover:underline">
-              Cookie Policy
-            </Link>
-            .
+            For more details, see our <NavLink href="/cookies">Cookie Policy</NavLink>.
           </p>
         </section>
 
@@ -118,10 +114,7 @@ export default function PrivacyPage() {
           <h2 className="mb-4 font-semibold text-2xl">9. Contact Us</h2>
           <p className="mb-4">
             If you have questions about this Privacy Policy, please{' '}
-            <Link href="/contact" className="text-accent hover:underline">
-              contact us
-            </Link>
-            .
+            <NavLink href="/contact">contact us</NavLink>.
           </p>
         </section>
       </div>

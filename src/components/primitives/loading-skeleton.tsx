@@ -14,7 +14,7 @@
 import { cva, type VariantProps } from 'class-variance-authority';
 import { motion } from 'motion/react';
 import type * as React from 'react';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { POSITION_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
 
 const skeletonVariants = cva('relative overflow-hidden bg-muted rounded', {
@@ -90,7 +90,7 @@ function Skeleton({
       {/* Shimmer wave effect - only if not disabled */}
       {!noShimmer && (
         <motion.div
-          className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent"
+          className={`${POSITION_PATTERNS.ABSOLUTE_INSET} bg-gradient-to-r from-transparent via-white/10 to-transparent`}
           animate={{
             x: ['-100%', '100%'],
           }}

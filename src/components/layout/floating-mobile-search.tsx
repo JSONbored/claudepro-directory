@@ -19,7 +19,7 @@
 import { motion } from 'motion/react';
 import { Button } from '@/src/components/primitives/button';
 import { Search } from '@/src/lib/icons';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { ANIMATION_CONSTANTS, POSITION_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
 
 export function FloatingMobileSearch() {
   const handleSearchClick = () => {
@@ -39,10 +39,10 @@ export function FloatingMobileSearch() {
 
   return (
     <motion.div
-      className="fixed right-4 bottom-20 z-40 md:hidden"
+      className={`${POSITION_PATTERNS.FIXED_BOTTOM_RIGHT} bottom-20 z-40 md:hidden`}
       initial={{ scale: 0, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}
-      transition={{ delay: 0.5, type: 'spring', stiffness: 260, damping: 20 }}
+      transition={{ delay: 0.5, ...ANIMATION_CONSTANTS.SPRING_SMOOTH }}
       whileHover={{ scale: 1.1 }}
       whileTap={{ scale: 0.9 }}
     >

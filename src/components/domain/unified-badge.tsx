@@ -26,7 +26,7 @@ import {
 } from '@/src/components/primitives/tooltip';
 import { Star, TrendingUp, Zap } from '@/src/lib/icons';
 import { SEMANTIC_COLORS } from '@/src/lib/semantic-colors';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { ANIMATION_CONSTANTS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
 
 /**
@@ -221,7 +221,7 @@ const BadgeWrapper = ({ children }: { children: React.ReactNode }) => (
     className="inline-block"
     whileHover={{
       y: -2,
-      transition: { type: 'spring', stiffness: 400, damping: 17 },
+      transition: ANIMATION_CONSTANTS.SPRING_DEFAULT,
     }}
     whileTap={{ scale: 0.95 }}
   >
@@ -253,7 +253,7 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
       <BadgeWrapper>
         <div
           className={cn(
-            'border font-medium text-xs transition-colors hover:shadow-md hover:shadow-primary/20',
+            `border font-medium text-xs ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT} hover:shadow-md hover:shadow-primary/20`,
             categoryBadgeStyles[props.category],
             props.className
           )}
@@ -270,7 +270,7 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
       <BadgeWrapper>
         <div
           className={cn(
-            'border font-medium text-xs transition-colors hover:shadow-md hover:shadow-primary/20',
+            `border font-medium text-xs ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT} hover:shadow-md hover:shadow-primary/20`,
             sourceBadgeStyles[props.source],
             props.className
           )}
@@ -287,7 +287,7 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
       <BadgeWrapper>
         <div
           className={cn(
-            'border font-medium text-xs transition-colors hover:shadow-md hover:shadow-primary/20',
+            `border font-medium text-xs ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT} hover:shadow-md hover:shadow-primary/20`,
             statusBadgeStyles[props.status],
             props.className
           )}
@@ -351,7 +351,7 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
         <button
           type="button"
           className={cn(
-            'inline-flex items-center rounded-full border px-2.5 py-0.5 font-semibold text-xs transition-all duration-200',
+            `inline-flex items-center rounded-full border px-2.5 py-0.5 font-semibold text-xs ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT}`,
             'cursor-pointer bg-accent text-accent-foreground shadow-lg shadow-primary/25',
             props.className
           )}
@@ -450,7 +450,7 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
           'px-2.5 py-0.5',
           'font-semibold text-[10px] uppercase tracking-wider',
           'rounded-full border',
-          'transition-colors duration-200',
+          ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT,
           variantStyles[badgeVariant],
           props.className
         )}

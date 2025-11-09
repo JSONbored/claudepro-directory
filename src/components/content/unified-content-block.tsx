@@ -398,9 +398,7 @@ function QuickReferenceVariant(props: QuickReferenceProps) {
               key={`${item.label}-${index}`}
               itemScope
               itemType="https://schema.org/PropertyValue"
-              className={
-                'flex flex-col gap-2 rounded-lg border bg-card/50 p-3 sm:flex-row sm:items-start sm:gap-4'
-              }
+              className={`${UI_CLASSES.FLEX_COL_GAP_2} rounded-lg border bg-card/50 p-3 sm:flex-row sm:items-start sm:gap-4`}
             >
               <div className="sm:w-1/3">
                 <dt itemProp="name" className={`font-medium ${UI_CLASSES.TEXT_SM_MUTED}`}>

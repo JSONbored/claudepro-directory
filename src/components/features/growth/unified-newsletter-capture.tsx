@@ -29,7 +29,7 @@ import { NEWSLETTER_CTA_CONFIG } from '@/src/lib/config/category-config';
 import { trackInteraction } from '@/src/lib/edge/client';
 import { Mail, X } from '@/src/lib/icons';
 import { createClient } from '@/src/lib/supabase/client';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { DIMENSIONS, POSITION_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
 
@@ -221,7 +221,7 @@ export function UnifiedNewsletterCapture(props: UnifiedNewsletterCaptureProps) {
           </div>
           <FormVariant
             source={source}
-            className="w-full sm:w-auto sm:min-w-[320px] sm:max-w-[400px]"
+            className={`w-full sm:w-auto sm:${DIMENSIONS.MIN_W_NEWSLETTER_FORM} sm:${DIMENSIONS.NEWSLETTER_FORM_MAX}`}
           />
         </div>
       );
@@ -300,8 +300,8 @@ function FormVariant({ source, className }: { source: NewsletterSource; classNam
 
   return (
     <form onSubmit={handleSubmit} className={cn('w-full', className)}>
-      <div className="flex flex-col gap-3">
-        <div className="flex flex-col gap-3 sm:flex-row">
+      <div className={UI_CLASSES.FLEX_COL_GAP_3}>
+        <div className={UI_CLASSES.FLEX_COL_SM_ROW_GAP_3}>
           <div className="relative flex-1">
             <Input
               type="email"
@@ -313,7 +313,7 @@ function FormVariant({ source, className }: { source: NewsletterSource; classNam
               required
               disabled={isSubmitting}
               className={cn(
-                'h-[52px] min-w-0 px-5 text-base',
+                `${DIMENSIONS.BUTTON_LG} min-w-0 px-5 text-base`,
                 'border-border/40 bg-background/95 backdrop-blur-sm',
                 'transition-all duration-200 ease-out',
                 'focus:border-accent/50 focus:ring-2 focus:ring-accent/20',
@@ -336,14 +336,14 @@ function FormVariant({ source, className }: { source: NewsletterSource; classNam
             disabled={isSubmitting || !email.trim()}
             size="lg"
             className={cn(
-              'h-[52px] flex-shrink-0 whitespace-nowrap px-8',
+              `${DIMENSIONS.BUTTON_LG} flex-shrink-0 whitespace-nowrap px-8`,
               'bg-gradient-to-r from-accent via-accent to-primary font-semibold text-accent-foreground',
               'shadow-md transition-all duration-200 ease-out',
               'hover:scale-[1.02] hover:from-accent/90 hover:via-accent/90 hover:to-primary/90 hover:shadow-lg',
               'active:scale-[0.98]',
               'focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2',
               'disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100',
-              'w-full sm:w-auto sm:min-w-[140px]'
+              `w-full sm:w-auto sm:${DIMENSIONS.MIN_W_NEWSLETTER_BUTTON}`
             )}
           >
             {isSubmitting ? (
@@ -467,10 +467,12 @@ function FooterBarVariant({
 
   return (
     <aside
-      className="slide-in-from-bottom fixed right-0 bottom-0 left-0 z-50 animate-in border-[var(--color-border-medium)] border-t-2 bg-[var(--color-bg-overlay)] shadow-xl backdrop-blur-xl duration-300"
+      className={`slide-in-from-bottom ${POSITION_PATTERNS.FIXED_BOTTOM_FULL_RESPONSIVE} z-50 animate-in border-[var(--color-border-medium)] border-t-2 bg-[var(--color-bg-overlay)] shadow-xl backdrop-blur-xl duration-300`}
       aria-label="Newsletter signup"
     >
-      <div className="absolute top-0 right-0 left-0 h-px bg-gradient-to-r from-transparent via-[var(--color-accent)]/30 to-transparent" />
+      <div
+        className={`${POSITION_PATTERNS.ABSOLUTE_TOP_FULL} h-px bg-gradient-to-r from-transparent via-[var(--color-accent)]/30 to-transparent`}
+      />
       <div className="container mx-auto px-4 py-6 md:py-4">
         {/* Desktop layout */}
         <div className="mx-auto hidden max-w-5xl items-center justify-between gap-6 md:flex">
@@ -486,7 +488,7 @@ function FooterBarVariant({
             </div>
           </div>
           <div className="flex flex-shrink-0 items-center gap-3">
-            <FormVariant source={source} className="min-w-[360px]" />
+            <FormVariant source={source} className={DIMENSIONS.MIN_W_NEWSLETTER_FORM_LG} />
             {dismissible && (
               <Button
                 variant="ghost"
@@ -502,7 +504,7 @@ function FooterBarVariant({
         </div>
 
         {/* Mobile layout */}
-        <div className="flex flex-col gap-3 md:hidden">
+        <div className={`${UI_CLASSES.FLEX_COL_GAP_3} md:hidden`}>
           <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
             <div className="flex items-center gap-2">
               <Mail
@@ -679,7 +681,7 @@ function ModalVariant({
             />
           </div>
 
-          <div className="flex flex-col gap-3 sm:flex-row">
+          <div className={UI_CLASSES.FLEX_COL_SM_ROW_GAP_3}>
             <Button
               type="submit"
               disabled={isLoading || !email.trim()}

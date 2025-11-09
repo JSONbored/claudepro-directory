@@ -62,7 +62,7 @@ function ShareDropdown({ currentUrl, category, slug, onShare, onMouseLeave }: Sh
     <motion.div
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="absolute top-full right-0 z-50 mt-2 w-56 rounded-lg border border-border bg-card/95 p-2 shadow-xl backdrop-blur-md"
+      className="${POSITION_PATTERNS.ABSOLUTE_TOP_RIGHT} top-full z-50 mt-2 w-56 rounded-lg border border-border bg-card/95 p-2 shadow-xl backdrop-blur-md"
       onMouseLeave={onMouseLeave}
     >
       {/* Twitter Share */}
@@ -85,7 +85,7 @@ function ShareDropdown({ currentUrl, category, slug, onShare, onMouseLeave }: Sh
           onClick={() => onShare('twitter')}
         >
           <div className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 font-medium text-sm transition-all hover:bg-accent/15">
-            <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[#1DA1F2]/20">
+            <div className={`${UI_CLASSES.CODE_BLOCK_SOCIAL_ICON_WRAPPER} bg-[#1DA1F2]/20`}>
               <Twitter className={`${UI_CLASSES.ICON_XS} text-[#1DA1F2]`} />
             </div>
             <span className="text-foreground">Share on Twitter</span>
@@ -114,7 +114,7 @@ function ShareDropdown({ currentUrl, category, slug, onShare, onMouseLeave }: Sh
           onClick={() => onShare('linkedin')}
         >
           <div className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 font-medium text-sm transition-all hover:bg-accent/15">
-            <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[#0A66C2]/20">
+            <div className={`${UI_CLASSES.CODE_BLOCK_SOCIAL_ICON_WRAPPER} bg-[#0A66C2]/20`}>
               <Linkedin className={`${UI_CLASSES.ICON_XS} text-[#0A66C2]`} />
             </div>
             <span className="text-foreground">Share on LinkedIn</span>
@@ -128,7 +128,7 @@ function ShareDropdown({ currentUrl, category, slug, onShare, onMouseLeave }: Sh
         onClick={() => onShare('copy_link')}
         className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 font-medium text-foreground text-sm transition-all hover:scale-[1.02] hover:bg-accent/15 active:scale-[0.98]"
       >
-        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-accent/20">
+        <div className={`${UI_CLASSES.CODE_BLOCK_SOCIAL_ICON_WRAPPER} bg-accent/20`}>
           <Copy className={UI_CLASSES.ICON_XS} />
         </div>
         <span>Copy Link</span>
@@ -292,13 +292,13 @@ export function ProductionCodeBlock({
       {filename && (
         <div className={UI_CLASSES.CODE_BLOCK_HEADER}>
           <span className={UI_CLASSES.CODE_BLOCK_FILENAME}>{filename}</span>
-          <div className="flex items-center gap-1">
+          <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
             {/* Screenshot button */}
             <motion.button
               type="button"
               onClick={handleScreenshot}
               disabled={isScreenshotting}
-              className="flex items-center justify-center rounded-md bg-code/95 p-1.5 text-muted-foreground shadow-md backdrop-blur-md transition-colors hover:bg-code hover:text-foreground disabled:opacity-50"
+              className={`${UI_CLASSES.CODE_BLOCK_BUTTON_ICON} disabled:opacity-50`}
               title={isScreenshotting ? 'Capturing screenshot...' : 'Screenshot code'}
             >
               <Camera className={UI_CLASSES.ICON_XS} />
@@ -309,7 +309,7 @@ export function ProductionCodeBlock({
               <motion.button
                 type="button"
                 onClick={() => setIsShareOpen(!isShareOpen)}
-                className="flex items-center justify-center rounded-md bg-code/95 p-1.5 text-muted-foreground shadow-md backdrop-blur-md transition-colors hover:bg-code hover:text-foreground"
+                className={UI_CLASSES.CODE_BLOCK_BUTTON_ICON}
                 title="Share code"
               >
                 <Share2 className={UI_CLASSES.ICON_XS} />
@@ -333,7 +333,7 @@ export function ProductionCodeBlock({
               onClick={handleCopy}
               animate={isCopied ? { scale: [1, 1.1, 1] } : {}}
               transition={{ duration: 0.3 }}
-              className="flex items-center justify-center rounded-md bg-code/95 p-1.5 shadow-md backdrop-blur-md transition-colors hover:bg-code"
+              className={UI_CLASSES.CODE_BLOCK_BUTTON_BASE}
               title={isCopied ? 'Copied!' : 'Copy code'}
             >
               {isCopied ? (
@@ -365,13 +365,13 @@ export function ProductionCodeBlock({
       >
         {/* Top-right action buttons + badge (when no filename header) */}
         {!filename && (
-          <div className="absolute top-3 right-3 z-20 flex items-center gap-1">
+          <div className="${POSITION_PATTERNS.ABSOLUTE_TOP_RIGHT_OFFSET_LG} z-20 flex items-center gap-1">
             {/* Screenshot button */}
             <motion.button
               type="button"
               onClick={handleScreenshot}
               disabled={isScreenshotting}
-              className="flex items-center justify-center rounded-md bg-code/95 p-1.5 text-muted-foreground shadow-md backdrop-blur-md transition-colors hover:bg-code hover:text-foreground disabled:opacity-50"
+              className={`${UI_CLASSES.CODE_BLOCK_BUTTON_ICON} disabled:opacity-50`}
               title={isScreenshotting ? 'Capturing screenshot...' : 'Screenshot code'}
             >
               <Camera className={UI_CLASSES.ICON_XS} />
@@ -382,7 +382,7 @@ export function ProductionCodeBlock({
               <motion.button
                 type="button"
                 onClick={() => setIsShareOpen(!isShareOpen)}
-                className="flex items-center justify-center rounded-md bg-code/95 p-1.5 text-muted-foreground shadow-md backdrop-blur-md transition-colors hover:bg-code hover:text-foreground"
+                className={UI_CLASSES.CODE_BLOCK_BUTTON_ICON}
                 title="Share code"
               >
                 <Share2 className={UI_CLASSES.ICON_XS} />
@@ -406,7 +406,7 @@ export function ProductionCodeBlock({
               onClick={handleCopy}
               animate={isCopied ? { scale: [1, 1.1, 1] } : {}}
               transition={{ duration: 0.3 }}
-              className="flex items-center justify-center rounded-md bg-code/95 p-1.5 shadow-md backdrop-blur-md transition-colors hover:bg-code"
+              className={UI_CLASSES.CODE_BLOCK_BUTTON_BASE}
               title={isCopied ? 'Copied!' : 'Copy code'}
             >
               {isCopied ? (
@@ -428,7 +428,7 @@ export function ProductionCodeBlock({
         {/* Gradient fade when collapsed - with smooth CSS transition */}
         {needsCollapse && !isExpanded && (
           <div
-            className="pointer-events-none absolute right-0 bottom-0 left-0 z-10 h-24 transition-opacity duration-200"
+            className="${POSITION_PATTERNS.ABSOLUTE_BOTTOM_FULL} pointer-events-none z-10 h-24 transition-opacity duration-200"
             style={{
               background: 'linear-gradient(to bottom, transparent 0%, var(--color-bg-code) 90%)',
             }}

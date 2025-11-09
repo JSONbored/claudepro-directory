@@ -16,6 +16,7 @@ import {
   CardTitle,
 } from '@/src/components/primitives/card';
 import { Separator } from '@/src/components/primitives/separator';
+import { NavLink } from '@/src/components/shared/nav-link';
 import { trackInteraction } from '@/src/lib/edge/client';
 import { ArrowLeft, ExternalLink } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
@@ -162,11 +163,8 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
             )}
 
             <div className={'mt-2 text-muted-foreground text-sm'}>
-              Created by{' '}
-              <Link href={`/u/${slug}`} className="text-primary hover:underline">
-                {profileUser.name || slug}
-              </Link>{' '}
-              • {collection.item_count} {collection.item_count === 1 ? 'item' : 'items'} •{' '}
+              Created by <NavLink href={`/u/${slug}`}>{profileUser.name || slug}</NavLink> •{' '}
+              {collection.item_count} {collection.item_count === 1 ? 'item' : 'items'} •{' '}
               {collection.view_count} views
             </div>
           </div>

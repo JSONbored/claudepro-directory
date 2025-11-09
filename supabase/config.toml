@@ -85,8 +85,11 @@ verify_jwt = false  # Database-triggered webhook (internal)
 verify_jwt = false  # Vercel webhook with signature verification
 
 # =============================================================================
-# Authenticated Functions - Require JWT Verification
+# Authenticated Functions - Manual JWT Verification in Code
 # =============================================================================
+
+[functions.jobs-handler]
+verify_jwt = false  # Manual JWT verification via supabaseServiceRole.auth.getUser()
 
 [functions.analytics]
 verify_jwt = true  # Requires authenticated user for analytics tracking

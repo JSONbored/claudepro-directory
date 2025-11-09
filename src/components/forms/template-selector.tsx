@@ -15,7 +15,7 @@ import {
 import type { SubmissionContentType } from '@/src/lib/forms/types';
 import { ChevronDown, FileText } from '@/src/lib/icons';
 import { createClient } from '@/src/lib/supabase/client';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { DIMENSIONS, UI_CLASSES } from '@/src/lib/ui-constants';
 
 export interface Template {
   id: string;
@@ -88,7 +88,10 @@ export function TemplateSelector({ contentType, onSelect }: TemplateSelectorProp
           <ChevronDown className={`${UI_CLASSES.ICON_SM} opacity-50`} />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="w-[280px] sm:w-[320px]">
+      <DropdownMenuContent
+        align="start"
+        className={`${DIMENSIONS.DROPDOWN_SM} sm:${DIMENSIONS.DROPDOWN_MD}`}
+      >
         {templates.map((template) => (
           <DropdownMenuItem
             key={template.id}

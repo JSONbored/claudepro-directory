@@ -75,13 +75,13 @@ export default async function MyJobsPage() {
   const getPlanBadge = (plan: string) => {
     if (plan === 'premium')
       return (
-        <UnifiedBadge variant="base" className="bg-purple-500/10 text-purple-400">
+        <UnifiedBadge variant="base" className={UI_CLASSES.STATUS_PREMIUM}>
           Premium
         </UnifiedBadge>
       );
     if (plan === 'featured')
       return (
-        <UnifiedBadge variant="base" className="bg-blue-500/10 text-blue-400">
+        <UnifiedBadge variant="base" className={UI_CLASSES.STATUS_PUBLISHED}>
           Featured
         </UnifiedBadge>
       );

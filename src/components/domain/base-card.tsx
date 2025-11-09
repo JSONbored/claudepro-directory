@@ -39,7 +39,7 @@ import {
 } from '@/src/components/primitives/card';
 import { type UseCardNavigationOptions, useCardNavigation } from '@/src/hooks/use-card-navigation';
 import { APP_CONFIG, SOCIAL_LINKS } from '@/src/lib/constants';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { POSITION_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { getViewTransitionName } from '@/src/lib/utils/view-transitions.utils';
 
 /**
@@ -315,7 +315,9 @@ export const BaseCard = memo(
       >
         {/* Top accent border for related content */}
         {topAccent && (
-          <div className="absolute top-0 right-0 left-0 h-px bg-border opacity-70 transition-opacity group-hover:opacity-100" />
+          <div
+            className={`${POSITION_PATTERNS.ABSOLUTE_TOP_FULL} h-px bg-border opacity-70 transition-opacity group-hover:opacity-100`}
+          />
         )}
 
         <CardHeader

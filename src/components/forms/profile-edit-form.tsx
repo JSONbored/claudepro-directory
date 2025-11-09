@@ -14,6 +14,7 @@ import { ListItemManager } from '@/src/components/forms/utilities/list-item-mana
 import { ToggleField } from '@/src/components/forms/utilities/toggle-field';
 import { Button } from '@/src/components/primitives/button';
 import { refreshProfileFromOAuth, updateProfile } from '@/src/lib/actions/user.actions';
+import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { toasts } from '@/src/lib/utils/toast.utils';
 import type { Tables } from '@/src/types/database.types';
 
@@ -99,7 +100,7 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <form onSubmit={handleSubmit(onSubmit)} className={UI_CLASSES.FORM_SECTION_SPACING}>
       <FormField
         variant="input"
         label="Name"
@@ -175,7 +176,7 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
         description="Press Enter or click Add"
       />
 
-      <div className="space-y-4 pt-2">
+      <div className={`${UI_CLASSES.FORM_GROUP_SPACING} pt-2`}>
         <ToggleField
           label="Public profile"
           description="Allow others to view your profile"

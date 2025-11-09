@@ -34,7 +34,7 @@ export function SearchTrigger({
         `}
       >
         <Search
-          className={`${UI_CLASSES.ICON_SM} text-muted-foreground group-hover:text-foreground`}
+          className={`${UI_CLASSES.ICON_SM} text-muted-foreground ${UI_CLASSES.GROUP_HOVER_ACCENT}`}
         />
         <span className={'flex-1 text-left text-sm'}>Search content...</span>
         {showShortcut && (

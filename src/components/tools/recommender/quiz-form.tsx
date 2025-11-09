@@ -30,7 +30,7 @@ type QuizQuestion = {
 
 import { ArrowLeft, ArrowRight, Loader2, Sparkles } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { DIMENSIONS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { toasts } from '@/src/lib/utils/toast.utils';
 import { QuestionCard } from './question-card';
 import { QuizProgress } from './quiz-progress';
@@ -367,7 +367,7 @@ export function QuizForm() {
                 type="button"
                 onClick={handleSubmit}
                 disabled={isPending}
-                className="min-w-[140px]"
+                className={DIMENSIONS.MIN_W_INPUT}
               >
                 {isPending ? (
                   <>

@@ -50,7 +50,7 @@ export default function ErrorBoundary({
           </div>
         )}
 
-        <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
+        <div className={UI_CLASSES.FLEX_COL_SM_ROW_GAP_3}>
           <Button onClick={reset} size="lg">
             <RefreshCw className="mr-2 h-4 w-4" />
             Try Again

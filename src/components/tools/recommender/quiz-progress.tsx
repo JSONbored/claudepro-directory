@@ -7,7 +7,7 @@
 
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { CheckCircle } from '@/src/lib/icons';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { POSITION_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
 
 interface QuizProgressProps {
   currentQuestion: number;
@@ -41,7 +41,7 @@ export function QuizProgress({
       {/* Progress bar */}
       <div className="relative h-2 w-full overflow-hidden rounded-full bg-muted">
         <div
-          className="absolute top-0 left-0 h-full bg-primary transition-all duration-300 ease-in-out"
+          className={`${POSITION_PATTERNS.ABSOLUTE_TOP_LEFT} h-full bg-primary transition-all duration-300 ease-in-out`}
           style={{ width: `${percentComplete}%` }}
           role="progressbar"
           aria-valuenow={percentComplete}

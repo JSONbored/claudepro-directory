@@ -10,6 +10,7 @@
 'use client';
 
 import { HighlightText } from '@/src/components/ui/shadcn-io/highlight-text';
+import { RESPONSIVE_PATTERNS } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
 
 interface HeyClaudeLogoProps {
@@ -55,10 +56,10 @@ export function HeyClaudeLogo({
   duration = 1.5,
 }: HeyClaudeLogoProps) {
   const sizeClasses = {
-    sm: 'text-base md:text-lg',
-    md: 'text-lg md:text-xl lg:text-2xl',
-    lg: 'text-xl md:text-2xl lg:text-3xl',
-    xl: 'text-2xl md:text-3xl lg:text-4xl',
+    sm: RESPONSIVE_PATTERNS.TEXT_RESPONSIVE_MD,
+    md: RESPONSIVE_PATTERNS.TEXT_RESPONSIVE_LG,
+    lg: RESPONSIVE_PATTERNS.TEXT_RESPONSIVE_XL,
+    xl: RESPONSIVE_PATTERNS.TEXT_RESPONSIVE_2XL,
   };
 
   return (
