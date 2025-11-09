@@ -391,21 +391,6 @@ function CopyMarkdownButton({
         slug,
         ...(referrer && { referrer }),
       });
-
-      // Track analytics (fire-and-forget)
-      const contentLength = markdown.length;
-      import('@/src/lib/analytics/tracker')
-        .then((tracker) => {
-          tracker.trackEvent('markdown_copied', {
-            category,
-            slug,
-            contentLength,
-            copyCount: 1,
-          });
-        })
-        .catch(() => {
-          // Intentionally empty - analytics failures should not affect UX
-        });
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
       logger.error('Copy markdown failed', err, { category, slug });
@@ -502,21 +487,6 @@ function DownloadMarkdownButton({
       }).catch(() => {
         // Intentionally empty - analytics failures should not affect UX
       });
-
-      // Track analytics (fire-and-forget)
-      const fileSize = blob.size;
-      import('@/src/lib/analytics/tracker')
-        .then((tracker) => {
-          tracker.trackEvent('markdown_downloaded', {
-            category,
-            slug,
-            fileSize,
-            downloadCount: 1,
-          });
-        })
-        .catch(() => {
-          // Intentionally empty - analytics failures should not affect UX
-        });
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
       logger.error('Download markdown failed', err, { category, slug });
@@ -596,21 +566,6 @@ function CopyLLMsButton({
         }).catch(() => {
           // Intentional
         });
-      }
-
-      // Track analytics (fire-and-forget)
-      if (category && slug) {
-        import('@/src/lib/analytics/tracker')
-          .then((tracker) => {
-            tracker.trackEvent('llmstxt_copied', {
-              category,
-              slug,
-              contentLength: content.length,
-            });
-          })
-          .catch(() => {
-            // Intentional
-          });
       }
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));

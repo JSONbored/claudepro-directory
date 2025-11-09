@@ -3,83 +3,6 @@ export type Json = string | number | boolean | null | { [key: string]: Json | un
 export type Database = {
   public: {
     Tables: {
-      analytics_event_categories: {
-        Row: {
-          active: boolean;
-          created_at: string;
-          description: string;
-          display_order: number;
-          id: string;
-          name: string;
-          updated_at: string;
-        };
-        Insert: {
-          active?: boolean;
-          created_at?: string;
-          description: string;
-          display_order: number;
-          id?: string;
-          name: string;
-          updated_at?: string;
-        };
-        Update: {
-          active?: boolean;
-          created_at?: string;
-          description?: string;
-          display_order?: number;
-          id?: string;
-          name?: string;
-          updated_at?: string;
-        };
-        Relationships: [];
-      };
-      analytics_events: {
-        Row: {
-          category: string;
-          created_at: string;
-          debug_only: boolean;
-          description: string;
-          enabled: boolean;
-          event_name: string;
-          id: string;
-          payload_schema: Json | null;
-          sample_rate: number | null;
-          updated_at: string;
-        };
-        Insert: {
-          category: string;
-          created_at?: string;
-          debug_only?: boolean;
-          description: string;
-          enabled?: boolean;
-          event_name: string;
-          id?: string;
-          payload_schema?: Json | null;
-          sample_rate?: number | null;
-          updated_at?: string;
-        };
-        Update: {
-          category?: string;
-          created_at?: string;
-          debug_only?: boolean;
-          description?: string;
-          enabled?: boolean;
-          event_name?: string;
-          id?: string;
-          payload_schema?: Json | null;
-          sample_rate?: number | null;
-          updated_at?: string;
-        };
-        Relationships: [
-          {
-            foreignKeyName: 'analytics_events_category_fkey';
-            columns: ['category'];
-            isOneToOne: false;
-            referencedRelation: 'analytics_event_categories';
-            referencedColumns: ['name'];
-          },
-        ];
-      };
       announcement_dismissals: {
         Row: {
           announcement_id: string;
@@ -2494,8 +2417,8 @@ export type Database = {
       };
       user_interactions: {
         Row: {
-          content_slug: string;
-          content_type: string;
+          content_slug: string | null;
+          content_type: string | null;
           created_at: string;
           id: string;
           interaction_type: string;
@@ -2504,8 +2427,8 @@ export type Database = {
           user_id: string | null;
         };
         Insert: {
-          content_slug: string;
-          content_type: string;
+          content_slug?: string | null;
+          content_type?: string | null;
           created_at?: string;
           id?: string;
           interaction_type: string;
@@ -2514,8 +2437,8 @@ export type Database = {
           user_id?: string | null;
         };
         Update: {
-          content_slug?: string;
-          content_type?: string;
+          content_slug?: string | null;
+          content_type?: string | null;
           created_at?: string;
           id?: string;
           interaction_type?: string;
@@ -3223,7 +3146,7 @@ export type Database = {
       get_all_structured_data_configs: { Args: never; Returns: Json };
       get_analytics_summary:
         | {
-            Args: { p_category?: string; p_slug?: string };
+            Args: { p_category: string; p_slug: string };
             Returns: {
               bookmark_count: number | null;
               category: string | null;
@@ -3531,30 +3454,6 @@ export type Database = {
         }[];
       };
       get_form_fields_grouped: { Args: { p_form_type: string }; Returns: Json };
-      get_gallery_trending: {
-        Args: {
-          p_category?: string;
-          p_days_back?: number;
-          p_limit?: number;
-          p_offset?: number;
-        };
-        Returns: {
-          author: string;
-          category: string;
-          copy_count: number;
-          created_at: string;
-          description: string;
-          last_interaction_at: string;
-          last_screenshot_at: string;
-          screenshot_count: number;
-          share_count: number;
-          slug: string;
-          tags: string[];
-          title: string;
-          trending_score: number;
-          view_count: number;
-        }[];
-      };
       get_generation_config: { Args: { p_category?: string }; Returns: Json };
       get_homepage_complete: {
         Args: { p_category_ids?: string[] };
@@ -4319,7 +4218,6 @@ export type Database = {
         | 'filter'
         | 'screenshot'
         | 'share'
-        | 'embed_generated'
         | 'download';
       job_status: 'draft' | 'pending_review' | 'active' | 'expired' | 'rejected';
       newsletter_source:
@@ -4535,7 +4433,6 @@ export const Constants = {
         'filter',
         'screenshot',
         'share',
-        'embed_generated',
         'download',
       ],
       job_status: ['draft', 'pending_review', 'active', 'expired', 'rejected'],

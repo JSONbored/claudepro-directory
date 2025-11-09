@@ -1,11 +1,8 @@
-import type { Metadata } from 'next';
 import Link from 'next/link';
 import { APP_CONFIG } from '@/src/lib/constants';
+import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 
-export const metadata: Metadata = {
-  title: `Privacy Policy - ${APP_CONFIG.name}`,
-  description: `Privacy Policy for ${APP_CONFIG.name}. Learn how we collect, use, and protect your personal information when you use our Claude AI configuration directory.`,
-};
+export const metadata = generatePageMetadata('/privacy');
 
 /**
  * ISR Configuration: Legal pages are static and never change

@@ -1,16 +1,7 @@
 'use client';
 
 /**
- * Production Code Block Component - Sugar High with Viral Features
- *
- * Features:
- * - Sugar High syntax highlighting (1KB, 7x faster than Shiki)
- * - Screenshot generation with watermark branding
- * - Social share buttons (Twitter, LinkedIn) with UTM tracking
- * - Embed code generation for viral backlinks
- * - 1-click copy with Sonner toast
- * - Max-height constraint with smooth expand/collapse
- * - Mobile-optimized (48px touch targets)
+ * Code block with syntax highlighting, screenshot, share, and copy functionality
  */
 
 import { motion } from 'motion/react';
@@ -19,10 +10,9 @@ import { useEffect, useRef, useState } from 'react';
 import { LinkedinShareButton, TwitterShareButton } from 'react-share';
 import { APP_CONFIG } from '@/src/lib/constants';
 import { trackInteraction } from '@/src/lib/edge/client';
-import { Camera, Check, ChevronDown, Code, Copy, Linkedin, Share2, Twitter } from '@/src/lib/icons';
+import { Camera, Check, ChevronDown, Copy, Linkedin, Share2, Twitter } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
-import { copyEmbedCode, trackEmbedGeneration } from '@/src/lib/utils/embed.utils';
 import {
   copyScreenshotToClipboard,
   downloadScreenshot,
@@ -57,25 +47,17 @@ export interface ProductionCodeBlockProps {
 
 /**
  * Share Dropdown Component (Internal)
- * Reusable dropdown for Twitter/LinkedIn/Copy/Embed actions
+ * Reusable dropdown for Twitter/LinkedIn/Copy actions
  */
 interface ShareDropdownProps {
   currentUrl: string;
   category: string;
   slug: string;
   onShare: (platform: SharePlatform) => void;
-  onEmbedCopy: () => void;
   onMouseLeave: () => void;
 }
 
-function ShareDropdown({
-  currentUrl,
-  category,
-  slug,
-  onShare,
-  onEmbedCopy,
-  onMouseLeave,
-}: ShareDropdownProps) {
+function ShareDropdown({ currentUrl, category, slug, onShare, onMouseLeave }: ShareDropdownProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: -10 }}
@@ -150,18 +132,6 @@ function ShareDropdown({
           <Copy className="h-3 w-3" />
         </div>
         <span>Copy Link</span>
-      </button>
-
-      {/* Embed Code */}
-      <button
-        type="button"
-        onClick={onEmbedCopy}
-        className="mt-1 flex w-full items-center gap-3 rounded-md border-border/50 border-t px-3 py-2 pt-3 text-foreground text-sm transition-colors hover:bg-accent/10"
-      >
-        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-accent/20">
-          <Code className="h-3 w-3" />
-        </div>
-        <span>Copy Embed Code</span>
       </button>
     </motion.div>
   );
@@ -314,37 +284,6 @@ export function ProductionCodeBlock({
     }
   };
 
-  /**
-   * Handle embed code copy
-   * Performance: Generate on-demand, track for viral loop analytics
-   */
-  const handleEmbedCopy = async () => {
-    try {
-      const success = await copyEmbedCode({
-        category,
-        slug,
-        width: 600,
-        height: 400,
-        theme: 'auto',
-      });
-
-      if (success) {
-        toasts.success.embedCopied();
-
-        trackEmbedGeneration({ category, slug, format: 'iframe' }).catch(() => {
-          // Intentional
-        });
-      } else {
-        toasts.error.copyFailed('embed code');
-      }
-
-      setIsShareOpen(false);
-    } catch (error) {
-      toasts.error.embedFailed();
-      logger.error('Embed copy failed', error as Error);
-    }
-  };
-
   const maxHeight = `${maxLines * 1.6}rem`; // 1.6rem per line
 
   return (
@@ -383,7 +322,6 @@ export function ProductionCodeBlock({
                   category={category}
                   slug={slug}
                   onShare={handleShare}
-                  onEmbedCopy={handleEmbedCopy}
                   onMouseLeave={() => setIsShareOpen(false)}
                 />
               )}
@@ -457,7 +395,6 @@ export function ProductionCodeBlock({
                   category={category}
                   slug={slug}
                   onShare={handleShare}
-                  onEmbedCopy={handleEmbedCopy}
                   onMouseLeave={() => setIsShareOpen(false)}
                 />
               )}

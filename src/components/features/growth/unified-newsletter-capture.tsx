@@ -25,8 +25,8 @@ import {
 } from '@/src/components/primitives/sheet';
 import type { NewsletterSource } from '@/src/hooks/use-newsletter';
 import { useNewsletter } from '@/src/hooks/use-newsletter';
-import { trackEvent } from '@/src/lib/analytics/tracker';
 import { NEWSLETTER_CTA_CONFIG } from '@/src/lib/config/category-config';
+import { trackInteraction } from '@/src/lib/edge/client';
 import { Mail, X } from '@/src/lib/icons';
 import { createClient } from '@/src/lib/supabase/client';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
@@ -548,9 +548,8 @@ function ModalVariant({
       ...(category && { copy_category: category }),
       ...(slug && { copy_slug: slug }),
     },
-    customAnalyticsEvent: 'newsletter_subscription_post_copy',
     successMessage: 'Check your inbox for a welcome email',
-    showToasts: true, // Let hook handle all toast notifications based on actual async results
+    showToasts: true,
     logContext: {
       variant: 'modal',
       copyType,
@@ -567,10 +566,18 @@ function ModalVariant({
       const now = Date.now();
       setShowTime(now);
 
-      trackEvent('email_modal_shown', {
-        trigger_source: 'post_copy',
-        copy_type: copyType,
-        session_copy_count: 1,
+      trackInteraction({
+        content_type: null,
+        content_slug: null,
+        interaction_type: 'click',
+        metadata: {
+          action: 'email_modal_shown',
+          trigger_source: 'post_copy',
+          copy_type: copyType,
+          session_copy_count: 1,
+        },
+      }).catch(() => {
+        // Analytics failure should not affect UX
       });
     }
   }, [open, copyType]);
@@ -595,10 +602,18 @@ function ModalVariant({
     if (showTime) {
       const timeShown = Date.now() - showTime;
 
-      trackEvent('email_modal_dismissed', {
-        trigger_source: 'post_copy',
-        dismissal_method: 'maybe_later',
-        time_shown_ms: timeShown,
+      trackInteraction({
+        content_type: null,
+        content_slug: null,
+        interaction_type: 'click',
+        metadata: {
+          action: 'email_modal_dismissed',
+          trigger_source: 'post_copy',
+          dismissal_method: 'maybe_later',
+          time_shown_ms: timeShown,
+        },
+      }).catch(() => {
+        // Analytics failure should not affect UX
       });
     }
 
@@ -610,10 +625,18 @@ function ModalVariant({
     if (!open && showTime) {
       const timeShown = Date.now() - showTime;
 
-      trackEvent('email_modal_dismissed', {
-        trigger_source: 'post_copy',
-        dismissal_method: 'close_button',
-        time_shown_ms: timeShown,
+      trackInteraction({
+        content_type: null,
+        content_slug: null,
+        interaction_type: 'click',
+        metadata: {
+          action: 'email_modal_dismissed',
+          trigger_source: 'post_copy',
+          dismissal_method: 'close_button',
+          time_shown_ms: timeShown,
+        },
+      }).catch(() => {
+        // Analytics failure should not affect UX
       });
     }
 

@@ -1,11 +1,8 @@
-import type { Metadata } from 'next';
 import Link from 'next/link';
 import { APP_CONFIG, SOCIAL_LINKS } from '@/src/lib/constants';
+import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 
-export const metadata: Metadata = {
-  title: `Accessibility Statement - ${APP_CONFIG.name}`,
-  description: `Accessibility Statement for ${APP_CONFIG.name}. Learn about our commitment to digital accessibility and WCAG 2.1 AA compliance for our Claude AI directory.`,
-};
+export const metadata = generatePageMetadata('/accessibility');
 
 /**
  * ISR Configuration: Legal pages are static and never change

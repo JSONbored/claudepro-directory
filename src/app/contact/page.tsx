@@ -1,13 +1,10 @@
-import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/card';
 import { APP_CONFIG, SOCIAL_LINKS } from '@/src/lib/constants';
 import { DiscordIcon, Github, Mail, MessageSquare } from '@/src/lib/icons';
+import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 
-export const metadata: Metadata = {
-  title: `Contact Us - ${APP_CONFIG.name}`,
-  description: `Get in touch with the ${APP_CONFIG.name} team. Find support, report issues, or connect with us through GitHub, Discord, or email.`,
-};
+export const metadata = generatePageMetadata('/contact');
 
 /**
  * ISR Configuration: Marketing pages update infrequently

@@ -1,11 +1,8 @@
-import type { Metadata } from 'next';
 import Link from 'next/link';
 import { APP_CONFIG } from '@/src/lib/constants';
+import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 
-export const metadata: Metadata = {
-  title: `Terms of Service - ${APP_CONFIG.name}`,
-  description: `Terms of Service for ${APP_CONFIG.name}. Review our terms and conditions for using our Claude AI configuration directory and community platform.`,
-};
+export const metadata = generatePageMetadata('/terms');
 
 /**
  * ISR Configuration: Legal pages are static and never change

@@ -4,7 +4,7 @@
  * Consulting Page Client Component - Cal.com integration and animations
  */
 
-import { getCalApi } from '@calcom/embed-react';
+import Cal, { getCalApi } from '@calcom/embed-react';
 import { motion, type Variants } from 'motion/react';
 import Link from 'next/link';
 import { useEffect } from 'react';
@@ -61,7 +61,7 @@ export function ConsultingClient() {
   };
 
   return (
-    <div className="container mx-auto max-w-4xl px-4 py-12">
+    <div className="container mx-auto px-4 py-12">
       {/* Hero Section */}
       <motion.div className="mb-16" initial="hidden" animate="visible" variants={containerVariants}>
         <motion.div variants={itemVariants}>
@@ -71,7 +71,7 @@ export function ConsultingClient() {
         </motion.div>
 
         <motion.div variants={itemVariants} className="mb-8">
-          <Terminal className="mx-auto max-w-2xl">
+          <Terminal className="mx-auto max-w-5xl">
             <AnimatedSpan delay={0}>
               <span className="text-green-500">ghost@zeronode</span>
               <span className="text-muted-foreground">:</span>
@@ -441,6 +441,32 @@ export function ConsultingClient() {
             I respond within 24 hours. No sales pitch—just an honest conversation about your
             project.
           </p>
+        </motion.div>
+      </motion.section>
+
+      {/* Calendar Embed */}
+      <motion.section
+        className="mb-16"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, margin: '-100px' }}
+        variants={containerVariants}
+      >
+        <motion.h2 variants={itemVariants} className="mb-6 text-center font-bold text-3xl">
+          Book Your Free Discovery Call
+        </motion.h2>
+        <motion.div
+          variants={itemVariants}
+          className="rounded-lg border border-border bg-card/50 p-4"
+        >
+          <Cal
+            calLink="jsonbored/heyclaude-consult"
+            config={{
+              theme: 'dark',
+              layout: 'month_view',
+            }}
+            style={{ width: '100%', height: '100%', overflow: 'hidden' }}
+          />
         </motion.div>
       </motion.section>
 

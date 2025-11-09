@@ -252,14 +252,6 @@
     // Stash the event so it can be triggered later
     deferredPrompt = e;
 
-    // Track that the prompt was shown
-    if (typeof window.umami !== "undefined") {
-      window.umami.track("pwa_prompt_shown", {
-        platform: navigator.platform || "unknown",
-        standalone: window.matchMedia("(display-mode: standalone)").matches,
-      });
-    }
-
     log("[PWA] Install prompt ready");
 
     // Optionally show custom install UI
@@ -271,14 +263,6 @@
   window.addEventListener("appinstalled", () => {
     log("[PWA] App installed successfully");
 
-    // Track successful installation
-    if (typeof window.umami !== "undefined") {
-      window.umami.track("pwa_installed", {
-        platform: navigator.platform || "unknown",
-        timestamp: new Date().toISOString(),
-      });
-    }
-
     // Clear the deferred prompt
     deferredPrompt = null;
 
@@ -289,13 +273,6 @@
   // Track when app is launched from home screen
   if (window.matchMedia("(display-mode: standalone)").matches) {
     log("[PWA] App launched in standalone mode");
-
-    if (typeof window.umami !== "undefined") {
-      window.umami.track("pwa_launched", {
-        platform: navigator.platform || "unknown",
-        timestamp: new Date().toISOString(),
-      });
-    }
   }
 
   // Expose control functions for debugging and user preferences
@@ -335,19 +312,6 @@
       const { outcome } = await deferredPrompt.userChoice;
 
       log("[PWA] User choice:", outcome);
-
-      // Track user response
-      if (typeof window.umami !== "undefined") {
-        if (outcome === "accepted") {
-          window.umami.track("pwa_prompt_accepted", {
-            platform: navigator.platform || "unknown",
-          });
-        } else {
-          window.umami.track("pwa_prompt_dismissed", {
-            platform: navigator.platform || "unknown",
-          });
-        }
-      }
 
       // Clear the prompt
       deferredPrompt = null;

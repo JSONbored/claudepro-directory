@@ -6,7 +6,7 @@
 'use client';
 
 import { useCallback, useState, useTransition } from 'react';
-import { trackEvent } from '@/src/lib/analytics/tracker';
+import { trackInteraction } from '@/src/lib/edge/client';
 import { logger } from '@/src/lib/logger';
 import { toasts } from '@/src/lib/utils/toast.utils';
 import type { Enums } from '@/src/types/database.types';
@@ -14,19 +14,6 @@ import type { Enums } from '@/src/types/database.types';
 export type NewsletterSource = Enums<'newsletter_source'>;
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
-
-function getEmailSubscriptionEvent(source: NewsletterSource): string {
-  const eventMap: Record<NewsletterSource, string> = {
-    footer: 'email_subscribed_footer',
-    homepage: 'email_subscribed_homepage',
-    modal: 'email_subscribed_modal',
-    content_page: 'email_subscribed_content_page',
-    inline: 'email_subscribed_inline',
-    post_copy: 'email_subscribed_post_copy',
-    resend_import: 'email_subscribed_resend_import',
-  };
-  return eventMap[source];
-}
 
 export interface UseNewsletterOptions {
   source: NewsletterSource;
@@ -42,8 +29,6 @@ export interface UseNewsletterOptions {
     copy_slug?: string;
     [key: string]: unknown;
   };
-  /** Optional custom analytics event name (overrides default source-based event) */
-  customAnalyticsEvent?: string;
   /** Optional context for error logging (variant, component-specific metadata) */
   logContext?: Record<string, unknown>;
 }
@@ -66,7 +51,6 @@ export function useNewsletter(options: UseNewsletterOptions): UseNewsletterRetur
     errorTitle = 'Subscription failed',
     showToasts = true,
     metadata,
-    customAnalyticsEvent,
     logContext,
   } = options;
 
@@ -121,11 +105,18 @@ export function useNewsletter(options: UseNewsletterOptions): UseNewsletterRetur
             });
           }
 
-          const eventName = customAnalyticsEvent || getEmailSubscriptionEvent(source);
-          trackEvent(eventName, {
-            contact_id: result.subscription_id,
-            ...(referrer && { referrer }),
-            ...(metadata && metadata),
+          trackInteraction({
+            content_type: null,
+            content_slug: null,
+            interaction_type: 'newsletter_subscribe',
+            metadata: {
+              source,
+              subscription_id: result.subscription_id,
+              ...(referrer && { referrer }),
+              ...(metadata && metadata),
+            },
+          }).catch(() => {
+            // Analytics failure should not affect UX
           });
 
           reset();
@@ -181,7 +172,6 @@ export function useNewsletter(options: UseNewsletterOptions): UseNewsletterRetur
     errorTitle,
     showToasts,
     reset,
-    customAnalyticsEvent,
     metadata,
     logContext,
   ]);

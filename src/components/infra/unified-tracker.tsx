@@ -6,7 +6,6 @@
  */
 
 import { useEffect } from 'react';
-import { trackEvent } from '@/src/lib/analytics/tracker';
 import type { CategoryId } from '@/src/lib/config/category-config';
 import { trackInteraction } from '@/src/lib/edge/client';
 import { logger } from '@/src/lib/logger';
@@ -114,13 +113,17 @@ function PageViewVariant({
 }: Extract<UnifiedTrackerProps, { variant: 'page-view' }>) {
   useTrackingEffect(
     () => {
-      trackEvent('content_viewed', {
-        category,
-        slug,
-        page: typeof window !== 'undefined' ? window.location.pathname : `/${category}/${slug}`,
-        source: sourcePage || 'direct',
+      return trackInteraction({
+        interaction_type: 'view',
+        content_type: category,
+        content_slug: slug,
+        metadata: {
+          page: typeof window !== 'undefined' ? window.location.pathname : `/${category}/${slug}`,
+          source: sourcePage || 'direct',
+        },
+      }).catch(() => {
+        // Intentional
       });
-      return Promise.resolve();
     },
     delay,
     [category, slug, sourcePage]

@@ -1,11 +1,7 @@
-import type { Metadata } from 'next';
 import Link from 'next/link';
-import { APP_CONFIG } from '@/src/lib/constants';
+import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 
-export const metadata: Metadata = {
-  title: `Cookie Policy - ${APP_CONFIG.name}`,
-  description: `Cookie Policy for ${APP_CONFIG.name}. Learn about the cookies we use and how to manage your cookie preferences when using our Claude AI configuration directory.`,
-};
+export const metadata = generatePageMetadata('/cookies');
 
 /**
  * ISR Configuration: Legal pages are static and never change

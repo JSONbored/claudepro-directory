@@ -76,20 +76,9 @@ function ErrorFallback({ error, resetErrorBoundary }: ErrorFallbackProps) {
 export function ErrorBoundary({ children, fallback }: ErrorBoundaryProps) {
   const handleError = useCallback((error: Error, errorInfo: { componentStack?: string | null }) => {
     // Use centralized error handler for consistent logging and tracking
-    const errorResponse = createErrorBoundaryFallback(error, {
+    createErrorBoundaryFallback(error, {
       componentStack: errorInfo.componentStack || '',
     });
-
-    // Track error boundary triggers in Umami
-    if (window?.umami) {
-      window.umami.track('error_boundary_triggered', {
-        error_type: error.name || 'Unknown',
-        error_message: error.message?.substring(0, 100) || 'No message',
-        page: window.location.pathname,
-        component_stack_depth: errorInfo.componentStack?.split('\n').length || 0,
-        request_id: errorResponse.requestId || null,
-      });
-    }
   }, []);
 
   return (

@@ -162,8 +162,8 @@ importers:
         specifier: ^2.0.7
         version: 2.0.7(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       sugar-high:
-        specifier: ^0.9.4
-        version: 0.9.4
+        specifier: ^0.9.5
+        version: 0.9.5
       tailwind-merge:
         specifier: ^3.3.1
         version: 3.3.1
@@ -3135,8 +3135,8 @@ packages:
       babel-plugin-macros:
         optional: true
 
-  sugar-high@0.9.4:
-    resolution: {integrity: sha512-KzDgMqYZ3zxo2F+AdhAQ1vjyZj3FHe4TwiQCJisD1d4GlzBS/Z/pfUT1S7wCJdq71zjOt9TAfX6HnYqcI4YJrQ==}
+  sugar-high@0.9.5:
+    resolution: {integrity: sha512-eirwp9p7QcMg6EFCD6zrGh4H30uFx2YtfiMJUavagceP6/YUUjLeiQmis7QuwqKB3nXrWXlLaRumCqOd9AKpSA==}
 
   svix@1.76.1:
     resolution: {integrity: sha512-CRuDWBTgYfDnBLRaZdKp9VuoPcNUq9An14c/k+4YJ15Qc5Grvf66vp0jvTltd4t7OIRj+8lM1DAgvSgvf7hdLw==}
@@ -6468,7 +6468,7 @@ snapshots:
       client-only: 0.0.1
       react: 19.2.0
 
-  sugar-high@0.9.4: {}
+  sugar-high@0.9.5: {}
 
   svix@1.76.1:
     dependencies:

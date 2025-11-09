@@ -227,6 +227,22 @@ const nextConfig = {
         destination: '/',
         permanent: true,
       },
+      // Gallery & Embed Cleanup - Redirect removed features
+      {
+        source: '/gallery',
+        destination: '/trending',
+        permanent: true,
+      },
+      {
+        source: '/gallery/:category',
+        destination: '/:category',
+        permanent: true,
+      },
+      {
+        source: '/embed/:category/:slug',
+        destination: '/:category/:slug',
+        permanent: true,
+      },
     ];
   },
   async headers() {

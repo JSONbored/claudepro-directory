@@ -27,6 +27,7 @@ import { type CategoryId, isValidCategory } from '@/src/lib/config/category-conf
 import { trackInteraction } from '@/src/lib/edge/client';
 import {
   Award,
+  Bookmark,
   Copy as CopyIcon,
   ExternalLink,
   Eye,
@@ -135,6 +136,9 @@ export const ConfigCard = memo(
 
     // copyCount is a runtime property added by analytics (not in schema)
     const copyCount = (item as { copyCount?: number }).copyCount;
+
+    // bookmarkCount is a runtime property added by analytics (not in schema)
+    const bookmarkCount = (item as { bookmarkCount?: number }).bookmarkCount;
 
     // Extract featured metadata (weekly algorithm selection)
     // Note: _featured is a computed property added by trending algorithm, not in schema
@@ -352,6 +356,30 @@ export const ConfigCard = memo(
                   >
                     <CopyIcon className="h-3.5 w-3.5" aria-hidden="true" />
                     <span className="text-xs">{formatCopyCount(copyCount)}</span>
+                  </UnifiedBadge>
+                </button>
+              )}
+
+              {/* Bookmark count badge - social proof for saves */}
+              {bookmarkCount !== undefined && bookmarkCount > 0 && (
+                <button
+                  type="button"
+                  onClick={(e) => e.stopPropagation()}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.stopPropagation();
+                    }
+                  }}
+                  className="rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                  aria-label={`${bookmarkCount} ${bookmarkCount === 1 ? 'bookmark' : 'bookmarks'}`}
+                >
+                  <UnifiedBadge
+                    variant="base"
+                    style="secondary"
+                    className="h-7 gap-1.5 border-blue-500/20 bg-blue-500/10 px-2.5 font-medium text-blue-600 transition-colors hover:bg-blue-500/15 dark:text-blue-400"
+                  >
+                    <Bookmark className="h-3.5 w-3.5" aria-hidden="true" />
+                    <span className="text-xs">{bookmarkCount}</span>
                   </UnifiedBadge>
                 </button>
               )}

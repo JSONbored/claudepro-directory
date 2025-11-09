@@ -3,9 +3,9 @@
 /**
  * PWA Install Tracker Component
  *
- * Tracks PWA installation events using the standard trackEvent pattern.
+ * Tracks PWA installation events using trackInteraction() to database.
  * Listens to browser-level PWA events dispatched by service-worker-init.js
- * and tracks them through our centralized analytics system.
+ * and stores them in user_interactions table.
  *
  * Events Tracked:
  * - pwa_installable: Browser shows PWA can be installed
@@ -14,39 +14,60 @@
  *
  * Architecture:
  * - Service worker init dispatches custom DOM events
- * - This component listens and forwards to trackEvent()
- * - Provides consistent event config, sampling, and validation
+ * - This component listens and forwards to trackInteraction()
+ * - Data stored in user_interactions table with NULL content fields
  *
- * @module components/shared/pwa-install-tracker
+ * @module components/infra/pwa-install-tracker
  */
 
 import { useEffect } from 'react';
-import { trackEvent } from '@/src/lib/analytics/tracker';
+import { trackInteraction } from '@/src/lib/edge/client';
 
 export function PwaInstallTracker() {
   useEffect(() => {
     // Track when PWA becomes installable
     const handleInstallable = () => {
-      trackEvent('pwa_installable', {
-        platform: navigator.platform || 'unknown',
-        user_agent: navigator.userAgent,
+      trackInteraction({
+        content_type: null,
+        content_slug: null,
+        interaction_type: 'pwa_installable',
+        metadata: {
+          platform: navigator.platform || 'unknown',
+          user_agent: navigator.userAgent,
+        },
+      }).catch(() => {
+        // Analytics failure should not affect UX
       });
     };
 
     // Track successful installation
     const handleInstalled = () => {
-      trackEvent('pwa_installed', {
-        platform: navigator.platform || 'unknown',
-        timestamp: new Date().toISOString(),
+      trackInteraction({
+        content_type: null,
+        content_slug: null,
+        interaction_type: 'pwa_installed',
+        metadata: {
+          platform: navigator.platform || 'unknown',
+          timestamp: new Date().toISOString(),
+        },
+      }).catch(() => {
+        // Analytics failure should not affect UX
       });
     };
 
     // Track standalone launch (from home screen)
     const handleStandaloneLaunch = () => {
       if (window.matchMedia('(display-mode: standalone)').matches) {
-        trackEvent('pwa_launched', {
-          platform: navigator.platform || 'unknown',
-          timestamp: new Date().toISOString(),
+        trackInteraction({
+          content_type: null,
+          content_slug: null,
+          interaction_type: 'pwa_launched',
+          metadata: {
+            platform: navigator.platform || 'unknown',
+            timestamp: new Date().toISOString(),
+          },
+        }).catch(() => {
+          // Analytics failure should not affect UX
         });
       }
     };
