@@ -3,6 +3,7 @@
  * All scoring logic in PostgreSQL via get_related_content() RPC function.
  */
 
+import { cache } from 'react';
 import { logger } from '@/src/lib/logger';
 import { createClient } from '@/src/lib/supabase/server';
 import type { Database } from '@/src/types/database.types';
@@ -18,7 +19,7 @@ export interface RelatedContentInput {
 }
 
 class RelatedContentService {
-  async getRelatedContent(input: RelatedContentInput) {
+  getRelatedContent = cache(async (input: RelatedContentInput) => {
     const startTime = performance.now();
     const supabase = await createClient();
     const currentSlug = input.currentPath.split('/').pop() || '';
@@ -77,7 +78,7 @@ class RelatedContentService {
       },
       algorithm: 'v3.0.0-database-first',
     };
-  }
+  });
 }
 
 export const relatedContentService = new RelatedContentService();

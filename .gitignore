@@ -40,10 +40,6 @@ lerna-debug.log*
 .claude/
 .cursor/
 
-# Build-generated API files
-public/static-api/
-
-# Skill ZIP packages (build artifacts copied from content/skills/*.zip)
 # Source ZIPs in content/skills/ are git-tracked for GitHub discoverability
 public/downloads/skills/*.zip
 
@@ -53,33 +49,13 @@ public/downloads/skills/*.zip
 # Dynamic sitemap served by Supabase edge function (do not commit local copies)
 public/sitemap.xml
 
-# Sitemap URL extraction and submission batches (temporary files for manual submission)
-sitemap-urls-full.txt
-submission-batches/
-
-# Fumadocs generated API documentation (regenerated at build time)
-content/api-docs/*.mdx
-
 # Cache files
 .eslintcache
 *.tsbuildinfo
-coverage/
-.coverage-baseline.json
-.coverage-history.json
-.vitest/
 .parcel-cache/
 .turbo/
 .temp/
 .build-cache/
-
-# Test artifacts
-test-results/
-playwright-report/
-playwright/.cache/
-
-# Lighthouse CI reports (regenerated on each run)
-.lighthouseci/
-config/reports/lighthouse/
 
 # Environment files
 .env*
@@ -96,27 +72,10 @@ stats.html
 # System files
 Thumbs.db
 
-SEO-WORKFLOW.md
 tsconfig.tsbuildinfo
 .env*.local
-core
 
 manifest.json
-
-# Technical debt tracking (personal baseline, not committed)
-config/tools/tech-debt/.baseline.json
-config/tools/tech-debt/.history.json
-
-*storybook.log
-storybook-static
-
-MIGRATION_GUIDE.md
-
-redis-export.json
-
-scripts/import-redis-seed-data.ts
-
-scripts/redis-export.ts
 
 # Supabase schema dump (contains secrets in trigger definitions)
 supabase/schema.sql
@@ -128,10 +87,6 @@ supabase/schema.sql
 .launchd/README.md
 
 .launchd/uninstall.sh
-
-REPUTATION_BADGE_REMOVAL_PLAN.md
-
-RPC_TYPE_ANALYSIS.md
 
 # Turborepo
 .turbo

@@ -134,6 +134,7 @@ export default async function CompaniesPage() {
                           width={64}
                           height={64}
                           className="h-16 w-16 rounded-lg border object-cover"
+                          priority
                         />
                       ) : (
                         <div className="flex h-16 w-16 items-center justify-center rounded-lg border bg-accent">

@@ -293,7 +293,7 @@ function HomePageClientComponent({ initialData, featuredByCategory, stats }: Hom
                     <Link
                       key={categoryId}
                       href={categoryRoute}
-                      className="group"
+                      className="group no-underline"
                       aria-label={`View all ${displayText}`}
                     >
                       <motion.div

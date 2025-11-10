@@ -10,7 +10,6 @@ import { TopContributors } from '@/src/components/features/community/top-contrib
 import { HomePageClient } from '@/src/components/features/home';
 import { LoadingSkeleton } from '@/src/components/primitives/loading-skeleton';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-import { RESPONSIVE_PATTERNS } from '@/src/lib/ui-constants';
 
 const RollingText = dynamicImport(
   () => import('@/src/components/core/magic/rolling-text').then((mod) => mod.RollingText),
@@ -113,9 +112,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
         <section className={'relative border-border/50 border-b'} aria-label="Homepage hero">
           <div className={'container relative mx-auto px-4 py-10 sm:py-16 lg:py-24'}>
             <div className={'mx-auto max-w-4xl text-center'}>
-              <h1
-                className={`mb-4 font-bold text-foreground tracking-tight sm:mb-6 ${RESPONSIVE_PATTERNS.TEXT_RESPONSIVE_2XL}`}
-              >
+              <h1 className="mb-4 font-bold text-4xl text-foreground tracking-tight sm:mb-6 sm:text-5xl lg:text-7xl">
                 The home for Claude{' '}
                 <RollingText
                   words={['enthusiasts', 'developers', 'power users', 'beginners', 'builders']}
@@ -124,9 +121,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
                 />
               </h1>
 
-              <p
-                className={`mx-auto max-w-3xl text-muted-foreground leading-relaxed ${RESPONSIVE_PATTERNS.TEXT_RESPONSIVE_MD}`}
-              >
+              <p className="mx-auto max-w-3xl text-muted-foreground text-sm leading-relaxed sm:text-base lg:text-lg">
                 Join{' '}
                 <NumberTicker
                   value={memberCount}

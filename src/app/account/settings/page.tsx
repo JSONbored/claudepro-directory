@@ -132,6 +132,7 @@ export default async function SettingsPage() {
                 width={64}
                 height={64}
                 className="h-16 w-16 rounded-full object-cover"
+                priority
               />
               <div>
                 <p className="text-sm">

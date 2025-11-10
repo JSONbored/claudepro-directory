@@ -93,6 +93,7 @@ export default async function CompanyPage({ params }: CompanyPageProps) {
                 width={96}
                 height={96}
                 className="h-24 w-24 rounded-lg border-4 border-background object-cover"
+                priority
               />
             ) : (
               <div className="flex h-24 w-24 items-center justify-center rounded-lg border-4 border-background bg-accent font-bold text-2xl">
@@ -262,7 +263,7 @@ export default async function CompanyPage({ params }: CompanyPageProps) {
                     rel="noopener noreferrer"
                     className={UI_CLASSES.LINK_ACCENT}
                   >
-                    Visit Website →
+                    Visit Website ?
                   </a>
                 )}
               </CardContent>

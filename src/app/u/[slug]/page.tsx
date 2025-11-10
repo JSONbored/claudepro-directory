@@ -84,6 +84,7 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                   width={96}
                   height={96}
                   className="h-24 w-24 rounded-full border-4 border-background object-cover"
+                  priority
                 />
               ) : (
                 <div className="flex h-24 w-24 items-center justify-center rounded-full border-4 border-background bg-accent font-bold text-2xl">

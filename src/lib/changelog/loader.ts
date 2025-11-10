@@ -4,6 +4,7 @@
  */
 
 import { unstable_cache } from 'next/cache';
+import { cache } from 'react';
 import { z } from 'zod';
 import { logger } from '@/src/lib/logger';
 import { createAnonClient } from '@/src/lib/supabase/server-anon';
@@ -51,7 +52,7 @@ export function parseChangelogChanges(changes: unknown): ChangelogChanges {
   }
 }
 
-export async function getChangelog() {
+export const getChangelog = cache(async () => {
   return unstable_cache(
     async () => {
       try {
@@ -79,9 +80,9 @@ export async function getChangelog() {
       tags: ['changelog'],
     }
   )();
-}
+});
 
-export async function getAllChangelogEntries(): Promise<ChangelogEntry[]> {
+export const getAllChangelogEntries = cache(async (): Promise<ChangelogEntry[]> => {
   return unstable_cache(
     async () => {
       try {
@@ -109,36 +110,38 @@ export async function getAllChangelogEntries(): Promise<ChangelogEntry[]> {
       tags: ['changelog'],
     }
   )();
-}
+});
 
-export async function getChangelogEntryBySlug(slug: string): Promise<ChangelogEntry | null> {
-  return unstable_cache(
-    async () => {
-      try {
-        const supabase = createAnonClient();
-        const { data, error } = await supabase.rpc('get_changelog_entry_by_slug', {
-          p_slug: slug,
-        });
+export const getChangelogEntryBySlug = cache(
+  async (slug: string): Promise<ChangelogEntry | null> => {
+    return unstable_cache(
+      async () => {
+        try {
+          const supabase = createAnonClient();
+          const { data, error } = await supabase.rpc('get_changelog_entry_by_slug', {
+            p_slug: slug,
+          });
 
-        if (error) throw error;
-        return (data as ChangelogEntry) || null;
-      } catch (error) {
-        logger.error(
-          `Failed to load changelog entry: ${slug}`,
-          error instanceof Error ? error : new Error(String(error))
-        );
-        return null;
+          if (error) throw error;
+          return (data as ChangelogEntry) || null;
+        } catch (error) {
+          logger.error(
+            `Failed to load changelog entry: ${slug}`,
+            error instanceof Error ? error : new Error(String(error))
+          );
+          return null;
+        }
+      },
+      [`changelog-entry-${slug}`],
+      {
+        revalidate: 3600, // 1 hour
+        tags: ['changelog', `changelog-${slug}`],
       }
-    },
-    [`changelog-entry-${slug}`],
-    {
-      revalidate: 3600, // 1 hour
-      tags: ['changelog', `changelog-${slug}`],
-    }
-  )();
-}
+    )();
+  }
+);
 
-export async function getRecentChangelogEntries(limit = 5): Promise<ChangelogEntry[]> {
+export const getRecentChangelogEntries = cache(async (limit = 5): Promise<ChangelogEntry[]> => {
   return unstable_cache(
     async () => {
       try {
@@ -166,40 +169,42 @@ export async function getRecentChangelogEntries(limit = 5): Promise<ChangelogEnt
       tags: ['changelog'],
     }
   )();
-}
+});
 
-export async function getChangelogEntriesByCategory(category: string): Promise<ChangelogEntry[]> {
-  return unstable_cache(
-    async () => {
-      try {
-        const supabase = createAnonClient();
-        const { data, error } = await supabase.rpc('get_changelog_entries', {
-          p_category: category,
-          p_published_only: true,
-          p_limit: 1000,
-        });
+export const getChangelogEntriesByCategory = cache(
+  async (category: string): Promise<ChangelogEntry[]> => {
+    return unstable_cache(
+      async () => {
+        try {
+          const supabase = createAnonClient();
+          const { data, error } = await supabase.rpc('get_changelog_entries', {
+            p_category: category,
+            p_published_only: true,
+            p_limit: 1000,
+          });
 
-        if (error) throw error;
+          if (error) throw error;
 
-        const result = data as GetChangelogEntriesReturn;
-        return result.entries || [];
-      } catch (error) {
-        logger.error(
-          `Failed to filter changelog entries by category: ${category}`,
-          error instanceof Error ? error : new Error(String(error))
-        );
-        return [];
+          const result = data as GetChangelogEntriesReturn;
+          return result.entries || [];
+        } catch (error) {
+          logger.error(
+            `Failed to filter changelog entries by category: ${category}`,
+            error instanceof Error ? error : new Error(String(error))
+          );
+          return [];
+        }
+      },
+      [`changelog-category-${category}`],
+      {
+        revalidate: 3600, // 1 hour
+        tags: ['changelog', `changelog-category-${category}`],
       }
-    },
-    [`changelog-category-${category}`],
-    {
-      revalidate: 3600, // 1 hour
-      tags: ['changelog', `changelog-category-${category}`],
-    }
-  )();
-}
+    )();
+  }
+);
 
-export async function getFeaturedChangelogEntries(limit = 3): Promise<ChangelogEntry[]> {
+export const getFeaturedChangelogEntries = cache(async (limit = 3): Promise<ChangelogEntry[]> => {
   try {
     const supabase = createAnonClient();
     const { data, error } = await supabase.rpc('get_changelog_entries', {
@@ -219,9 +224,9 @@ export async function getFeaturedChangelogEntries(limit = 3): Promise<ChangelogE
     );
     return [];
   }
-}
+});
 
-export async function getChangelogMetadata() {
+export const getChangelogMetadata = cache(async () => {
   try {
     const supabase = createAnonClient();
     const { data, error } = await supabase.rpc('get_changelog_metadata');
@@ -235,4 +240,4 @@ export async function getChangelogMetadata() {
     );
     return null;
   }
-}
+});

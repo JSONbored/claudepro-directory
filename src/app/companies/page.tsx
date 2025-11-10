@@ -121,7 +121,7 @@ export default async function CompaniesPage() {
           </Card>
         ) : (
           <div className={UI_CLASSES.GRID_RESPONSIVE_3}>
-            {companies.map((company) => (
+            {companies.map((company, index) => (
               <Card key={company.id} className={UI_CLASSES.CARD_GRADIENT_HOVER}>
                 {company.featured && (
                   <div className="-top-2 -right-2 absolute z-10">
@@ -141,6 +141,7 @@ export default async function CompaniesPage() {
                         width={48}
                         height={48}
                         className="h-12 w-12 rounded-lg object-cover"
+                        priority={index < 6}
                       />
                     )}
                     <div className="flex-1">
