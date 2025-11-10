@@ -97,12 +97,17 @@ export function PostCopyEmailProvider({ children }: PostCopyEmailProviderProps) 
   const [isOpen, setIsOpen] = useState(false);
   const [modalContext, setModalContext] = useState<ModalContext | null>(null);
   const [hasShownThisSession, setHasShownThisSession] = useState(false);
+  const [copyCount, setCopyCount] = useState(0);
 
   // Check if modal has been shown this session on mount
   useEffect(() => {
     const shown = sessionStorage.getItem(SESSION_KEY);
+    const count = sessionStorage.getItem('copy-count');
     if (shown === 'true') {
       setHasShownThisSession(true);
+    }
+    if (count) {
+      setCopyCount(Number.parseInt(count, 10));
     }
   }, []);
 
@@ -111,6 +116,16 @@ export function PostCopyEmailProvider({ children }: PostCopyEmailProviderProps) 
    */
   const showModal = useCallback(
     (context: ModalContext) => {
+      // Increment copy count
+      const newCount = copyCount + 1;
+      setCopyCount(newCount);
+      sessionStorage.setItem('copy-count', String(newCount));
+
+      // Only show after 2nd copy action (prove value first)
+      if (newCount < 2) {
+        return;
+      }
+
       // Don't show if already shown this session
       if (hasShownThisSession) {
         return;
@@ -128,7 +143,7 @@ export function PostCopyEmailProvider({ children }: PostCopyEmailProviderProps) 
       setHasShownThisSession(true);
       sessionStorage.setItem(SESSION_KEY, 'true');
     },
-    [hasShownThisSession]
+    [hasShownThisSession, copyCount]
   );
 
   /**

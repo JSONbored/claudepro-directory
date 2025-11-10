@@ -55,7 +55,7 @@ async function HomeContentSection({
 }: {
   homepageContentData: GetHomepageCompleteReturn['content'];
 }) {
-  const categoryIds = getHomepageCategoryIds();
+  const categoryIds = getHomepageCategoryIds;
 
   try {
     return (
@@ -76,7 +76,7 @@ async function HomeContentSection({
       <HomePageClient
         initialData={emptyData}
         featuredByCategory={{}}
-        stats={Object.fromEntries(categoryIds.map((id) => [id, 0]))}
+        stats={Object.fromEntries(categoryIds.map((id: string) => [id, 0]))}
       />
     );
   }
@@ -88,7 +88,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   // Consolidated homepage data: get_homepage_complete() returns everything (67% fewer DB calls)
   const supabase = createAnonClient();
   const { data: homepageData, error: homepageError } = await supabase.rpc('get_homepage_complete', {
-    p_category_ids: getHomepageCategoryIds(),
+    p_category_ids: [...getHomepageCategoryIds],
   });
 
   if (homepageError) {

@@ -31,19 +31,8 @@ export const getCategoryConfigs = cache(
 export type { CategoryId, CategoryStatsConfig, ContentType, UnifiedCategoryConfig };
 export type UnifiedCategoryConfigValue = UnifiedCategoryConfig;
 
-export const VALID_CATEGORIES: readonly CategoryId[] = [
-  'agents',
-  'mcp',
-  'commands',
-  'rules',
-  'hooks',
-  'statuslines',
-  'skills',
-  'collections',
-  'guides',
-  'jobs',
-  'changelog',
-] as const;
+// Re-export from generated file (single source of truth)
+export const VALID_CATEGORIES = ALL_CATEGORY_IDS;
 
 /**
  * Get category config by ID (static, no database query)
@@ -60,29 +49,10 @@ export function isValidCategory(category: string): category is CategoryId {
   return VALID_CATEGORIES.includes(category as CategoryId);
 }
 
-/**
- * Get all category IDs (static, no database query)
- * Cached with React cache() for request-level deduplication
- */
-export const getAllCategoryIds = cache((): CategoryId[] => {
-  return [...ALL_CATEGORY_IDS];
-});
-
-/**
- * Get homepage category IDs (static, no database query)
- * Cached with React cache() for request-level deduplication
- */
-export const getHomepageCategoryIds = cache((): CategoryId[] => {
-  return [...HOMEPAGE_CATEGORY_IDS];
-});
-
-/**
- * Get cacheable category IDs (static, no database query)
- * Cached with React cache() for request-level deduplication
- */
-export const getCacheableCategoryIds = cache((): CategoryId[] => {
-  return [...CACHEABLE_CATEGORY_IDS];
-});
+// Direct exports (already immutable from generated file)
+export { ALL_CATEGORY_IDS as getAllCategoryIds };
+export { HOMEPAGE_CATEGORY_IDS as getHomepageCategoryIds };
+export { CACHEABLE_CATEGORY_IDS as getCacheableCategoryIds };
 
 export const HOMEPAGE_FEATURED_CATEGORIES = [
   'agents',

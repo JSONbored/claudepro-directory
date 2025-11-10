@@ -37,12 +37,7 @@ import {
 import { Skeleton } from '@/src/components/primitives/loading-skeleton';
 import { Activity, BookOpen, LogOut, Settings, User as UserIcon } from '@/src/lib/icons';
 import { createClient } from '@/src/lib/supabase/client';
-import {
-  ANIMATION_CONSTANTS,
-  DIMENSIONS,
-  POSITION_PATTERNS,
-  UI_CLASSES,
-} from '@/src/lib/ui-constants';
+import { ANIMATION_CONSTANTS, DIMENSIONS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { toasts } from '@/src/lib/utils/toast.utils';
 
 interface UserMenuProps {
@@ -120,20 +115,17 @@ export function UserMenu({ className }: UserMenuProps) {
   if (!user) {
     return (
       <div className={className}>
-        <Link
-          href="/login"
-          className={`group relative flex items-center gap-1.5 px-2 py-1 font-medium ${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_NAV} no-underline ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT}`}
-          aria-label="Sign in"
+        <Button
+          asChild
+          variant="ghost"
+          size="sm"
+          className="border-accent/20 bg-accent/10 font-medium text-accent text-xs hover:bg-accent/20 hover:text-accent-foreground"
         >
-          <UserIcon className={UI_CLASSES.ICON_XS} />
-          <span className="relative hidden lg:inline">
-            Sign In
-            <span
-              className={`${POSITION_PATTERNS.ABSOLUTE_BOTTOM_LEFT} ${DIMENSIONS.UNDERLINE} w-0 bg-accent ${ANIMATION_CONSTANTS.CSS_TRANSITION_SLOW} group-hover:w-full`}
-              aria-hidden="true"
-            />
-          </span>
-        </Link>
+          <Link href="/login" aria-label="Join free - Sign in with GitHub">
+            <UserIcon className={UI_CLASSES.ICON_XS_LEADING} />
+            <span className="hidden lg:inline">Join Free</span>
+          </Link>
+        </Button>
       </div>
     );
   }

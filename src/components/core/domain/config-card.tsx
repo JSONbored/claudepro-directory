@@ -42,7 +42,7 @@ export const ConfigCard = memo(
     showActions = true,
     enableSwipeGestures = true, // Enable mobile swipe gestures (copy/bookmark)
     useViewTransitions = true, // Enable smooth page morphing with View Transitions API (Baseline as of October 2025)
-    showBorderBeam = false, // Position-based BorderBeam animation (top 3 featured items)
+    showBorderBeam, // Auto-enable for featured items if not explicitly set
   }: ConfigCardProps) => {
     const displayTitle = getDisplayTitle(item);
     const targetPath = getContentItemUrl({
@@ -138,6 +138,9 @@ export const ConfigCard = memo(
     const isFeatured = !!featuredData;
     const featuredRank = featuredData?.rank;
 
+    // Auto-enable border beam for featured items if not explicitly set
+    const shouldShowBeam = showBorderBeam !== undefined ? showBorderBeam : isFeatured;
+
     // Extract rating metadata (if available)
     // Note: _rating is a computed property added by rating aggregator, not in schema
     const ratingData = (item as { _rating?: { average: number; count: number } })._rating;
@@ -161,10 +164,11 @@ export const ConfigCard = memo(
 
     return (
       <div className="relative">
-        {/* BorderBeam animation - position-based (top 3 featured items per category) */}
-        {showBorderBeam && (
+        {/* BorderBeam animation - auto-enabled for featured items */}
+        {shouldShowBeam && (
           <BorderBeam
-            duration={8}
+            size={200}
+            duration={15}
             colorFrom={featuredRank === 1 ? '#ffaa40' : '#9333ea'}
             colorTo={featuredRank === 1 ? '#ffd700' : '#a855f7'}
             borderWidth={1.5}
