@@ -21,7 +21,7 @@ import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createAnonClient } from '@/src/lib/supabase/server-anon';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
-import type { Tables } from '@/src/types/database.types';
+import type { GetUserProfileReturn } from '@/src/types/database-overrides';
 
 interface UserProfilePageProps {
   params: Promise<{ slug: string }>;
@@ -38,53 +38,6 @@ export async function generateMetadata({ params }: UserProfilePageProps): Promis
     params: { slug },
   });
 }
-
-type UserProfile = {
-  id: string;
-  slug: string;
-  name: string;
-  image: string | null;
-  bio: string | null;
-  website: string | null;
-  tier: string | null;
-  created_at: string;
-};
-
-// RPC return types - exact structure from get_user_profile() JSONB
-type RPCCollection = Pick<
-  Tables<'user_collections'>,
-  'id' | 'slug' | 'name' | 'description' | 'is_public' | 'item_count' | 'view_count' | 'created_at'
->;
-type RPCContribution = Pick<
-  Tables<'user_content'>,
-  | 'id'
-  | 'content_type'
-  | 'slug'
-  | 'name'
-  | 'description'
-  | 'featured'
-  | 'view_count'
-  | 'download_count'
-  | 'created_at'
->;
-
-// Base profile data from get_user_profile()
-type ProfileData = {
-  profile: UserProfile;
-  stats: {
-    followerCount: number;
-    followingCount: number;
-    collectionsCount: number;
-    contributionsCount: number;
-  };
-  collections: RPCCollection[];
-  contributions: RPCContribution[];
-  isFollowing: boolean;
-  isOwner: boolean;
-};
-
-// Profile data type - uses get_user_profile() RPC
-type ProfileDataComplete = ProfileData;
 
 export default async function UserProfilePage({ params }: UserProfilePageProps) {
   const { slug } = await params;
@@ -111,8 +64,8 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
     notFound();
   }
 
-  // Type-safe extraction using ProfileDataComplete
-  const data = profileData as ProfileDataComplete;
+  // Type-safe RPC return using centralized type definition
+  const data = profileData as GetUserProfileReturn;
   const { profile, stats, collections, contributions, isFollowing } = data;
 
   const { followerCount, followingCount } = stats;

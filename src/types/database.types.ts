@@ -3526,6 +3526,20 @@ export type Database = {
         Returns: Json;
       };
       get_performance_baseline: { Args: never; Returns: Json };
+      get_popular_content: {
+        Args: { p_category?: string; p_limit?: number };
+        Returns: {
+          author: string;
+          category: string;
+          copy_count: number;
+          description: string;
+          popularity_score: number;
+          slug: string;
+          tags: string[];
+          title: string;
+          view_count: number;
+        }[];
+      };
       get_quiz_configuration: { Args: never; Returns: Json };
       get_recent_merged: { Args: { p_limit?: number }; Returns: Json };
       get_recommendations: {
@@ -3580,6 +3594,17 @@ export type Database = {
           p_tags?: string[];
         };
         Returns: number;
+      };
+      get_search_facets: {
+        Args: never;
+        Returns: {
+          all_tags: string[];
+          author_count: number;
+          authors: string[];
+          category: string;
+          content_count: number;
+          tag_count: number;
+        }[];
       };
       get_search_suggestions: {
         Args: { p_limit?: number; p_query: string };
@@ -3638,6 +3663,24 @@ export type Database = {
         Returns: {
           tag: string;
           tag_count: number;
+        }[];
+      };
+      get_trending_metrics: {
+        Args: { p_category?: string; p_limit?: number };
+        Returns: {
+          bookmarks_total: number;
+          category: string;
+          copies_total: number;
+          created_at: string;
+          days_old: number;
+          engagement_score: number;
+          freshness_score: number;
+          last_refreshed: string;
+          slug: string;
+          trending_score: number;
+          views_7d: number;
+          views_prev_7d: number;
+          views_total: number;
         }[];
       };
       get_user_activity_summary: { Args: { p_user_id: string }; Returns: Json };
@@ -4056,8 +4099,6 @@ export type Database = {
           isSetofReturn: true;
         };
       };
-      show_limit: { Args: never; Returns: number };
-      show_trgm: { Args: { '': string }; Returns: string[] };
       slug_to_title: { Args: { p_slug: string }; Returns: string };
       submit_content_for_review: {
         Args: {
@@ -4120,7 +4161,6 @@ export type Database = {
         Args: { p_data: Json; p_event_type: string; p_user_id: string };
         Returns: Json;
       };
-      unaccent: { Args: { '': string }; Returns: string };
       update_user_profile: {
         Args: {
           p_bio?: string;

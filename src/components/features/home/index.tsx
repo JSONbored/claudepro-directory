@@ -206,7 +206,7 @@ function HomePageClientComponent({ initialData, featuredByCategory, stats }: Hom
     for (const category of HOMEPAGE_FEATURED_CATEGORIES) {
       const categoryData = initialData[category as keyof typeof initialData];
       if (categoryData && Array.isArray(categoryData)) {
-        maps[category] = new Set(categoryData.map((item: ContentItem) => item.slug));
+        maps[category] = new Set(categoryData.map((item: DisplayableContent) => item.slug));
       }
     }
 

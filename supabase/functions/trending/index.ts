@@ -59,12 +59,13 @@ Deno.serve(async (req: Request) => {
 
     // SIDEBAR MODE: Trending + Recent for sidebar widget
     if (mode === 'sidebar') {
-      const { data: trendingData, error: trendingError } = await supabaseAnon
-        .from('mv_content_trending_metrics')
-        .select('category, slug, views_total')
-        .eq('category', category || 'guides')
-        .order('views_total', { ascending: false })
-        .limit(limit);
+      const { data: trendingData, error: trendingError } = await supabaseAnon.rpc(
+        'get_trending_metrics',
+        {
+          p_category: category || 'guides',
+          p_limit: limit,
+        }
+      );
 
       if (trendingError) {
         console.error('Sidebar trending query error:', trendingError);
@@ -131,20 +132,14 @@ Deno.serve(async (req: Request) => {
 
     // PAGE MODE: Trending page with 3 tabs
     if (tab === 'trending') {
-      // Query mv_content_trending_metrics for metrics
-      let metricsQuery = supabaseAnon
-        .from('mv_content_trending_metrics')
-        .select(
-          'category, slug, views_total, copies_total, bookmarks_total, trending_score, engagement_score, freshness_score'
-        )
-        .order('views_total', { ascending: false })
-        .limit(limit);
-
-      if (category) {
-        metricsQuery = metricsQuery.eq('category', category);
-      }
-
-      const { data: metricsData, error: metricsError } = await metricsQuery;
+      // Query get_trending_metrics RPC for metrics
+      const { data: metricsData, error: metricsError } = await supabaseAnon.rpc(
+        'get_trending_metrics',
+        {
+          p_category: category,
+          p_limit: limit,
+        }
+      );
 
       if (metricsError) {
         console.error('Trending metrics query error:', metricsError);
@@ -203,26 +198,17 @@ Deno.serve(async (req: Request) => {
     }
 
     if (tab === 'popular') {
-      let query = supabaseAnon
-        .from('mv_content_stats')
-        .select(
-          'category, slug, title, description, author, tags, view_count, copy_count, popularity_score'
-        )
-        .order('view_count', { ascending: false })
-        .limit(limit);
-
-      if (category) {
-        query = query.eq('category', category);
-      }
-
-      const { data, error } = await query;
+      const { data, error } = await supabaseAnon.rpc('get_popular_content', {
+        p_category: category,
+        p_limit: limit,
+      });
 
       if (error) {
         console.error('Popular tab query error:', error);
         return errorResponse(error, 'popular-tab', getWithAuthCorsHeaders);
       }
 
-      const popular = data.map((item) => ({
+      const popular = (data || []).map((item) => ({
         category: item.category,
         slug: item.slug,
         title: item.title,

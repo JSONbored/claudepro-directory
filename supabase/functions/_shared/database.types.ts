@@ -83,6 +83,38 @@ export interface Database {
         Args: { p_content_type: string; p_content_slug: string; p_limit?: number };
         Returns: Json;
       };
+      get_trending_metrics: {
+        Args: { p_category?: string; p_limit?: number };
+        Returns: {
+          bookmarks_total: number;
+          category: string;
+          copies_total: number;
+          created_at: string;
+          days_old: number;
+          engagement_score: number;
+          freshness_score: number;
+          last_refreshed: string;
+          slug: string;
+          trending_score: number;
+          views_7d: number;
+          views_prev_7d: number;
+          views_total: number;
+        }[];
+      };
+      get_popular_content: {
+        Args: { p_category?: string; p_limit?: number };
+        Returns: {
+          author: string;
+          category: string;
+          copy_count: number;
+          description: string;
+          popularity_score: number;
+          slug: string;
+          tags: string[];
+          title: string;
+          view_count: number;
+        }[];
+      };
       get_usage_recommendations: {
         Args: {
           p_user_id: string;

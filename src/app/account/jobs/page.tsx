@@ -17,6 +17,7 @@ import { createClient } from '@/src/lib/supabase/server';
 import { BADGE_COLORS, type JobStatusType, UI_CLASSES } from '@/src/lib/ui-constants';
 import { formatRelativeDate } from '@/src/lib/utils/data.utils';
 import type { Tables } from '@/src/types/database.types';
+import type { GetUserDashboardReturn } from '@/src/types/database-overrides';
 
 // Force dynamic rendering - requires authentication
 export const dynamic = 'force-dynamic';
@@ -54,8 +55,8 @@ export default async function MyJobsPage() {
       );
       hasError = true;
     } else if (data !== null) {
-      // Trust database types - PostgreSQL validates structure
-      const result = data as { jobs: Array<Tables<'jobs'>> };
+      // Type-safe RPC return using centralized type definition
+      const result = data as GetUserDashboardReturn;
       jobs = result.jobs || [];
     }
   }

@@ -36,18 +36,14 @@ const UnifiedNewsletterCapture = dynamicImport(
   }
 );
 
-import { type CategoryId, getHomepageCategoryIds } from '@/src/lib/config/category-config';
-import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
+import { getHomepageCategoryIds } from '@/src/lib/config/category-config';
 import { logger } from '@/src/lib/logger';
 import { createAnonClient } from '@/src/lib/supabase/server-anon';
-import type { Tables } from '@/src/types/database.types';
+import type { GetHomepageCompleteReturn } from '@/src/types/database-overrides';
 
 export const metadata = generatePageMetadata('/');
 
 export const revalidate = false; // Static + on-demand ISR via content trigger
-
-type CategoryMetadata = ContentItem & { category: CategoryId };
-type EnrichedMetadata = CategoryMetadata & { viewCount: number; copyCount: number };
 
 interface HomePageProps {
   searchParams: Promise<{
@@ -58,25 +54,16 @@ interface HomePageProps {
 async function HomeContentSection({
   homepageContentData,
 }: {
-  homepageContentData: {
-    categoryData: Record<string, EnrichedMetadata[]>;
-    stats: Record<string, number>;
-    weekStart: string;
-  };
+  homepageContentData: GetHomepageCompleteReturn['content'];
 }) {
   const categoryIds = getHomepageCategoryIds();
 
   try {
-    const enrichedData = homepageContentData;
-
-    const featuredByCategory = enrichedData.categoryData as Record<string, EnrichedMetadata[]>;
-    const initialData = enrichedData.categoryData as Record<string, unknown[]>;
-
     return (
       <HomePageClient
-        initialData={initialData as Record<string, ContentItem[]>}
-        featuredByCategory={featuredByCategory as Record<string, ContentItem[]>}
-        stats={enrichedData.stats}
+        initialData={homepageContentData.categoryData}
+        featuredByCategory={homepageContentData.categoryData}
+        stats={homepageContentData.stats}
       />
     );
   } catch (error) {
@@ -84,10 +71,7 @@ async function HomeContentSection({
       'Homepage content section error',
       error instanceof Error ? error : new Error(String(error))
     );
-    const emptyData: Record<string, ContentItem[]> = {};
-    for (const id of categoryIds) {
-      emptyData[id] = [];
-    }
+    const emptyData: GetHomepageCompleteReturn['content']['categoryData'] = {};
 
     return (
       <HomePageClient
@@ -116,14 +100,12 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   }
 
   // Extract member_count and top_contributors from consolidated response
-  type UserRow = Pick<Tables<'users'>, 'id' | 'slug' | 'name' | 'image' | 'bio' | 'work' | 'tier'>;
+  // Type-safe RPC return using centralized type definition
+  const homepageResult = homepageData as GetHomepageCompleteReturn | null;
 
-  const memberCount = homepageError
-    ? 0
-    : (homepageData as { member_count?: number })?.member_count || 0;
-  const topContributors = homepageError
-    ? []
-    : (homepageData as { top_contributors?: UserRow[] })?.top_contributors || [];
+  const memberCount = homepageError || !homepageResult ? 0 : homepageResult.member_count || 0;
+  const topContributors =
+    homepageError || !homepageResult ? [] : homepageResult.top_contributors || [];
 
   return (
     <div className={'min-h-screen bg-background'}>
@@ -163,15 +145,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
           <Suspense fallback={<LoadingSkeleton />}>
             <HomeContentSection
               homepageContentData={
-                (
-                  homepageData as {
-                    content: {
-                      categoryData: Record<string, EnrichedMetadata[]>;
-                      stats: Record<string, number>;
-                      weekStart: string;
-                    };
-                  }
-                )?.content || {
+                homepageResult?.content || {
                   categoryData: {},
                   stats: {},
                   weekStart: '',

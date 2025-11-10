@@ -7,6 +7,7 @@ import type { CategoryId } from '@/src/lib/config/category-config';
 import { logger } from '@/src/lib/logger';
 import { createAnonClient } from '@/src/lib/supabase/server-anon';
 import type { Tables } from '@/src/types/database.types';
+import type { GetEnrichedContentListReturn } from '@/src/types/database-overrides';
 
 export type ContentItem = Tables<'content'> | Tables<'jobs'>;
 export type ContentListItem = Tables<'content'>;
@@ -37,7 +38,9 @@ async function withErrorHandling<T>(
   }
 }
 
-export async function getContentByCategory(category: CategoryId): Promise<ContentItem[]> {
+export async function getContentByCategory(
+  category: CategoryId
+): Promise<GetEnrichedContentListReturn> {
   return withErrorHandling(
     async () => {
       const supabase = createAnonClient();
@@ -49,7 +52,7 @@ export async function getContentByCategory(category: CategoryId): Promise<Conten
       });
 
       if (error) throw error;
-      return (data || []) as ContentItem[];
+      return (data || []) as GetEnrichedContentListReturn;
     },
     [],
     `getContentByCategory(${category})`
@@ -187,37 +190,6 @@ export async function getContentCount(category?: CategoryId): Promise<number> {
         `getContentCount(${category || 'all'})`
       ),
     [`content-count-${category || 'all'}`],
-    {
-      revalidate: 3600,
-      tags: category ? [`content-${category}`] : ['content-all'],
-    }
-  )();
-}
-
-export async function getContentWithAnalytics(
-  category?: CategoryId,
-  orderBy: 'popularity_score' | 'trending_score' | 'view_count' | 'created_at' = 'popularity_score',
-  limit = 20
-) {
-  return unstable_cache(
-    () =>
-      withErrorHandling(
-        async () => {
-          const supabase = createAnonClient();
-          let query = supabase
-            .from('mv_content_stats')
-            .select('*')
-            .order(orderBy, { ascending: false, nullsFirst: false })
-            .limit(limit);
-          if (category) query = query.eq('category', category);
-          const { data, error } = await query;
-          if (error) throw error;
-          return data || [];
-        },
-        [],
-        'getContentWithAnalytics'
-      ),
-    [`content-analytics-${category || 'all'}-${orderBy}-${limit}`],
     {
       revalidate: 3600,
       tags: category ? [`content-${category}`] : ['content-all'],

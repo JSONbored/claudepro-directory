@@ -134,10 +134,7 @@ export async function getSearchFacets() {
     async () => {
       const supabase = createAnonClient();
 
-      const { data, error } = await supabase
-        .from('mv_search_facets')
-        .select('*')
-        .order('category', { ascending: true });
+      const { data, error } = await supabase.rpc('get_search_facets');
 
       if (error) {
         logger.error('Failed to fetch search facets', error);

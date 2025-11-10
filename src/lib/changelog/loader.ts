@@ -7,7 +7,8 @@ import { unstable_cache } from 'next/cache';
 import { z } from 'zod';
 import { logger } from '@/src/lib/logger';
 import { createAnonClient } from '@/src/lib/supabase/server-anon';
-import type { Json, Tables } from '@/src/types/database.types';
+import type { Tables } from '@/src/types/database.types';
+import type { GetChangelogEntriesReturn } from '@/src/types/database-overrides';
 
 // Zod schema for changelog entry changes structure (JSONB validation)
 const changeItemSchema = z.object({
@@ -62,13 +63,7 @@ export async function getChangelog() {
 
         if (error) throw error;
 
-        const result = data as {
-          entries: ChangelogEntry[];
-          total: number;
-          limit: number;
-          offset: number;
-          hasMore: boolean;
-        };
+        const result = data as GetChangelogEntriesReturn;
         return result;
       } catch (error) {
         logger.error(
@@ -98,7 +93,7 @@ export async function getAllChangelogEntries(): Promise<ChangelogEntry[]> {
 
         if (error) throw error;
 
-        const result = data as { entries: ChangelogEntry[] };
+        const result = data as GetChangelogEntriesReturn;
         return result.entries || [];
       } catch (error) {
         logger.error(
@@ -155,7 +150,7 @@ export async function getRecentChangelogEntries(limit = 5): Promise<ChangelogEnt
 
         if (error) throw error;
 
-        const result = data as { entries: ChangelogEntry[] };
+        const result = data as GetChangelogEntriesReturn;
         return result.entries || [];
       } catch (error) {
         logger.error(
@@ -186,7 +181,7 @@ export async function getChangelogEntriesByCategory(category: string): Promise<C
 
         if (error) throw error;
 
-        const result = data as { entries: ChangelogEntry[] };
+        const result = data as GetChangelogEntriesReturn;
         return result.entries || [];
       } catch (error) {
         logger.error(
@@ -232,7 +227,7 @@ export async function getChangelogMetadata() {
     const { data, error } = await supabase.rpc('get_changelog_metadata');
 
     if (error) throw error;
-    return data as Json;
+    return data;
   } catch (error) {
     logger.error(
       'Failed to load changelog metadata',

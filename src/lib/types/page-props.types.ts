@@ -3,12 +3,12 @@
  * Defines props for Next.js page components with proper typing
  *
  * DATABASE-FIRST 2025 Architecture:
- * - Uses ContentItem from database content table
+ * - Uses RPC return types from database-overrides.ts
  * - Zero manual schema maintenance
  * - Auto-updates when database schema changes
  */
 
-import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
+import type { GetHomepageCompleteReturn } from '@/src/types/database-overrides';
 
 /**
  * SHA-2100: slugParamsSchema moved to app.schema.ts (canonical location)
@@ -17,14 +17,13 @@ import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
 
 /**
  * Client component props for home page - Database-First
- * Uses ContentItem from content table, stats from PostgreSQL RPC.
- * Category configs are imported statically on client (no serialization needed).
+ * Uses proper RPC return types from get_homepage_complete()
  */
 export interface HomePageClientProps {
-  /** Initial server-side data for client hydration (from content table) */
-  initialData: Record<string, ContentItem[]>;
+  /** Initial server-side data for client hydration (from get_homepage_complete RPC) */
+  initialData: GetHomepageCompleteReturn['content']['categoryData'];
   /** Weekly featured content grouped by category */
-  featuredByCategory?: Record<string, ContentItem[]>;
+  featuredByCategory?: GetHomepageCompleteReturn['content']['categoryData'];
   /** Content category statistics */
-  stats?: Record<string, number>;
+  stats?: GetHomepageCompleteReturn['content']['stats'];
 }
