@@ -9,6 +9,7 @@ import { UnifiedDetailPage } from '@/src/components/content/unified-detail-page'
 import { CollectionDetailView } from '@/src/components/content/unified-detail-page/collection-detail-view';
 import { StructuredData } from '@/src/components/core/infra/structured-data';
 import { UnifiedTracker } from '@/src/components/core/infra/unified-tracker';
+import { RecentlyViewedTracker } from '@/src/components/features/navigation/recently-viewed-tracker';
 import {
   type CategoryId,
   getCategoryConfig,
@@ -20,6 +21,7 @@ import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createAnonClient } from '@/src/lib/supabase/server-anon';
 import type { Database } from '@/src/types/database.types';
+import type { RecentlyViewedCategory } from '@/src/hooks/use-recently-viewed';
 
 export const revalidate = false; // Static generation - zero database egress during serving
 
@@ -204,6 +206,25 @@ export default async function DetailPage({
       <UnifiedTracker variant="view" category={category} slug={slug} />
       <UnifiedTracker variant="page-view" category={category} slug={slug} />
       <StructuredData route={`/${category}/${slug}`} />
+
+      {/* Recently Viewed Tracking */}
+      <RecentlyViewedTracker
+        category={category as RecentlyViewedCategory}
+        slug={slug}
+        title={
+          ('display_title' in fullItem && fullItem.display_title) ||
+          ('title' in fullItem && fullItem.title) ||
+          slug
+        }
+        description={fullItem.description}
+        {...('tags' in fullItem &&
+        Array.isArray(fullItem.tags) &&
+        fullItem.tags.length > 0 &&
+        fullItem.tags.every((tag) => typeof tag === 'string')
+          ? { tags: (fullItem.tags as string[]).slice(0, 3) }
+          : {})}
+      />
+
       <UnifiedDetailPage
         item={fullItem || itemData}
         relatedItems={relatedItems}
