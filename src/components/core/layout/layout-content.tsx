@@ -8,9 +8,7 @@
 import dynamic from 'next/dynamic';
 import { usePathname } from 'next/navigation';
 import { AnnouncementBannerClient } from '@/src/components/core/layout/announcement-banner-client';
-import { FloatingMobileSearch } from '@/src/components/core/layout/floating-mobile-search';
 import { Navigation } from '@/src/components/core/layout/navigation';
-import { BackToTopButton } from '@/src/components/core/shared/back-to-top-button';
 import { DIMENSIONS } from '@/src/lib/ui-constants';
 import type { Tables } from '@/src/types/database.types';
 
@@ -19,16 +17,6 @@ const Footer = dynamic(
   {
     loading: () => null,
     ssr: true,
-  }
-);
-
-const NotificationFAB = dynamic(
-  () =>
-    import('@/src/components/features/notifications/notification-fab').then((mod) => ({
-      default: mod.NotificationFAB,
-    })),
-  {
-    loading: () => null,
   }
 );
 
@@ -97,9 +85,6 @@ export function LayoutContent({ children, announcement }: LayoutContentProps) {
           {children}
         </main>
         <Footer />
-        <FloatingMobileSearch />
-        <BackToTopButton />
-        <NotificationFAB />
         <NotificationSheet />
         <UnifiedNewsletterCapture variant="footer-bar" source="footer" />
       </div>
