@@ -1,5 +1,5 @@
+import { NavLink } from '@/src/components/core/shared/nav-link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/card';
-import { NavLink } from '@/src/components/shared/nav-link';
 import { APP_CONFIG, SOCIAL_LINKS } from '@/src/lib/constants';
 import { DiscordIcon, Github, Mail, MessageSquare } from '@/src/lib/icons';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';

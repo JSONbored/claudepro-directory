@@ -7,7 +7,7 @@
  * Performance: Eliminated from client bundle, server-rendered for instant display
  */
 
-import { UnifiedBadge } from '@/src/components/domain/unified-badge';
+import { UnifiedBadge } from '@/src/components/core/domain/unified-badge';
 import { SOCIAL_LINKS } from '@/src/lib/constants';
 import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
 import { Calendar, Copy, Eye, Tag, User } from '@/src/lib/icons';

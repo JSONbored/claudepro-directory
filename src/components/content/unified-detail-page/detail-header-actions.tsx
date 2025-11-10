@@ -14,8 +14,8 @@
 
 import { motion } from 'motion/react';
 import { useRouter } from 'next/navigation';
-import { UnifiedBadge } from '@/src/components/domain/unified-badge';
-import { UnifiedButton } from '@/src/components/domain/unified-button';
+import { UnifiedBadge } from '@/src/components/core/domain/unified-badge';
+import { UnifiedButton } from '@/src/components/core/domain/unified-button';
 import type { CopyType } from '@/src/components/features/growth/unified-newsletter-capture';
 import { Button } from '@/src/components/primitives/button';
 import { useCopyWithEmailCapture } from '@/src/hooks/use-copy-with-email-capture';

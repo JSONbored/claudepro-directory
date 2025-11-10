@@ -5,22 +5,22 @@
 
 import dynamicImport from 'next/dynamic';
 import { Suspense } from 'react';
+import { LazySection } from '@/src/components/core/infra/lazy-section';
 import { TopContributors } from '@/src/components/features/community/top-contributors';
 import { HomePageClient } from '@/src/components/features/home';
-import { LazySection } from '@/src/components/infra/lazy-section';
 import { LoadingSkeleton } from '@/src/components/primitives/loading-skeleton';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { RESPONSIVE_PATTERNS } from '@/src/lib/ui-constants';
 
 const RollingText = dynamicImport(
-  () => import('@/src/components/magic/rolling-text').then((mod) => mod.RollingText),
+  () => import('@/src/components/core/magic/rolling-text').then((mod) => mod.RollingText),
   {
     loading: () => <span className="text-accent">enthusiasts</span>,
   }
 );
 
 const NumberTicker = dynamicImport(
-  () => import('@/src/components/magic/number-ticker').then((mod) => mod.NumberTicker),
+  () => import('@/src/components/core/magic/number-ticker').then((mod) => mod.NumberTicker),
   {
     loading: () => <span className="font-semibold text-accent">0</span>,
   }

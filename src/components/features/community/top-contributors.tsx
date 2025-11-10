@@ -13,7 +13,7 @@
  */
 
 import { memo } from 'react';
-import { ProfileCard, type UserProfile } from '@/src/components/domain/profile-card';
+import { ProfileCard, type UserProfile } from '@/src/components/core/domain/profile-card';
 import { Users } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 

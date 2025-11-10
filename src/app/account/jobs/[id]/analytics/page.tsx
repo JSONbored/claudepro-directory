@@ -4,7 +4,7 @@
 
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
-import { UnifiedBadge } from '@/src/components/domain/unified-badge';
+import { UnifiedBadge } from '@/src/components/core/domain/unified-badge';
 import { Button } from '@/src/components/primitives/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/card';
 import { ROUTES } from '@/src/lib/constants';

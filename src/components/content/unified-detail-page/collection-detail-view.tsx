@@ -23,7 +23,7 @@
  */
 
 import { Suspense } from 'react';
-import { ConfigCard } from '@/src/components/domain/config-card';
+import { ConfigCard } from '@/src/components/core/domain/config-card';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/card';
 import { Skeleton } from '@/src/components/primitives/loading-skeleton';
 import { getCategoryConfigs, isValidCategory } from '@/src/lib/config/category-config';

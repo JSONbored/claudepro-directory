@@ -4,7 +4,8 @@
  */
 
 import Link from 'next/link';
-import { UnifiedBadge } from '@/src/components/domain/unified-badge';
+import { UnifiedBadge } from '@/src/components/core/domain/unified-badge';
+import { NavLink } from '@/src/components/core/shared/nav-link';
 import { Button } from '@/src/components/primitives/button';
 import {
   Card,
@@ -14,7 +15,6 @@ import {
   CardTitle,
 } from '@/src/components/primitives/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/primitives/tabs';
-import { NavLink } from '@/src/components/shared/nav-link';
 import { ROUTES } from '@/src/lib/constants';
 import { Bookmark as BookmarkIcon, ExternalLink, FolderOpen, Layers, Plus } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';

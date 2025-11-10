@@ -7,9 +7,9 @@
 
 import Link from 'next/link';
 import { useState, useTransition } from 'react';
-import { BaseCard } from '@/src/components/domain/base-card';
-import { UnifiedBadge } from '@/src/components/domain/unified-badge';
-import { UnifiedButton } from '@/src/components/domain/unified-button';
+import { BaseCard } from '@/src/components/core/domain/base-card';
+import { UnifiedBadge } from '@/src/components/core/domain/unified-badge';
+import { UnifiedButton } from '@/src/components/core/domain/unified-button';
 import { Button } from '@/src/components/primitives/button';
 import {
   Card,

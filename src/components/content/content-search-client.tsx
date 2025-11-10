@@ -2,9 +2,9 @@
 
 import dynamic from 'next/dynamic';
 import { memo, useCallback, useState } from 'react';
-import { ConfigCard } from '@/src/components/domain/config-card';
-import { UnifiedCardGrid } from '@/src/components/domain/unified-card-grid';
-import { ErrorBoundary } from '@/src/components/infra/error-boundary';
+import { ConfigCard } from '@/src/components/core/domain/config-card';
+import { UnifiedCardGrid } from '@/src/components/core/domain/unified-card-grid';
+import { ErrorBoundary } from '@/src/components/core/infra/error-boundary';
 import { Skeleton } from '@/src/components/primitives/loading-skeleton';
 
 const UnifiedSearch = dynamic(

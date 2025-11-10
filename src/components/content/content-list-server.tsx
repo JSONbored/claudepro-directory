@@ -1,9 +1,9 @@
 import Link from 'next/link';
 import { Suspense, useId } from 'react';
-import { ContentSearchClient } from '@/src/components/content-search-client';
-import { UnifiedBadge } from '@/src/components/domain/unified-badge';
+import { ContentSearchClient } from '@/src/components/content/content-search-client';
+import { UnifiedBadge } from '@/src/components/core/domain/unified-badge';
+import { LazySection } from '@/src/components/core/infra/lazy-section';
 import { UnifiedNewsletterCapture } from '@/src/components/features/growth/unified-newsletter-capture';
-import { LazySection } from '@/src/components/infra/lazy-section';
 import { Button } from '@/src/components/primitives/button';
 import { Skeleton } from '@/src/components/primitives/loading-skeleton';
 import { ROUTES } from '@/src/lib/constants';

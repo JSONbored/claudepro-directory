@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { UnifiedBadge } from '@/src/components/domain/unified-badge';
+import { UnifiedBadge } from '@/src/components/core/domain/unified-badge';
 import {
   Card,
   CardContent,

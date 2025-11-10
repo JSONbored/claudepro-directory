@@ -1,4 +1,4 @@
-import { NavLink } from '@/src/components/shared/nav-link';
+import { NavLink } from '@/src/components/core/shared/nav-link';
 import { APP_CONFIG, SOCIAL_LINKS } from '@/src/lib/constants';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 

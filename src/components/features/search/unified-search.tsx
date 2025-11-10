@@ -7,9 +7,9 @@
 
 import { usePathname } from 'next/navigation';
 import { memo, useCallback, useEffect, useId, useState } from 'react';
-import { UnifiedBadge } from '@/src/components/domain/unified-badge';
+import { UnifiedBadge } from '@/src/components/core/domain/unified-badge';
+import { ErrorBoundary } from '@/src/components/core/infra/error-boundary';
 import { SearchFilterPanel } from '@/src/components/features/search/search-filter-panel';
-import { ErrorBoundary } from '@/src/components/infra/error-boundary';
 import { Button } from '@/src/components/primitives/button';
 import { Collapsible, CollapsibleContent } from '@/src/components/primitives/collapsible';
 import { Input } from '@/src/components/primitives/input';

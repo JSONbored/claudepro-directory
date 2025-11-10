@@ -7,8 +7,8 @@ import { notFound } from 'next/navigation';
 import { ReadProgress } from '@/src/components/content/read-progress';
 import { UnifiedDetailPage } from '@/src/components/content/unified-detail-page';
 import { CollectionDetailView } from '@/src/components/content/unified-detail-page/collection-detail-view';
-import { StructuredData } from '@/src/components/infra/structured-data';
-import { UnifiedTracker } from '@/src/components/infra/unified-tracker';
+import { StructuredData } from '@/src/components/core/infra/structured-data';
+import { UnifiedTracker } from '@/src/components/core/infra/unified-tracker';
 import {
   type CategoryId,
   getCategoryConfig,

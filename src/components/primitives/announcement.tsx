@@ -1,6 +1,6 @@
 import type * as React from 'react';
 
-import { baseBadgeVariants } from '@/src/components/domain/unified-badge';
+import { baseBadgeVariants } from '@/src/components/core/domain/unified-badge';
 import { ANIMATION_CONSTANTS } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
 

@@ -1,7 +1,7 @@
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import Link from 'next/link';
-import { UnifiedBadge } from '@/src/components/domain/unified-badge';
+import { UnifiedBadge } from '@/src/components/core/domain/unified-badge';
 import { Button } from '@/src/components/primitives/button';
 
 const UnifiedNewsletterCapture = dynamic(

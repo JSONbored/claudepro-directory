@@ -8,8 +8,8 @@ import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { JobCard } from '@/src/components/domain/job-card';
-import { UnifiedBadge } from '@/src/components/domain/unified-badge';
+import { JobCard } from '@/src/components/core/domain/job-card';
+import { UnifiedBadge } from '@/src/components/core/domain/unified-badge';
 import {
   Card,
   CardContent,

@@ -6,7 +6,7 @@
  */
 
 import type { ComponentType } from 'react';
-import { UnifiedBadge } from '@/src/components/domain/unified-badge';
+import { UnifiedBadge } from '@/src/components/core/domain/unified-badge';
 import { Button } from '@/src/components/primitives/button';
 import { CheckCircle, DiscordBrandIcon, GithubBrandIcon, GoogleBrandIcon } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';

@@ -3,7 +3,7 @@
  */
 
 import { notFound, redirect } from 'next/navigation';
-import { CompanyForm } from '@/src/components/forms/company-form';
+import { CompanyForm } from '@/src/components/core/forms/company-form';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';

@@ -24,9 +24,9 @@
 
 import type { Metadata } from 'next';
 import dynamic from 'next/dynamic';
+import { StructuredData } from '@/src/components/core/infra/structured-data';
+import { NavLink } from '@/src/components/core/shared/nav-link';
 import { ChangelogListClient } from '@/src/components/features/changelog/changelog-list-client';
-import { StructuredData } from '@/src/components/infra/structured-data';
-import { NavLink } from '@/src/components/shared/nav-link';
 
 const UnifiedNewsletterCapture = dynamic(
   () =>

@@ -25,11 +25,11 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { ReadProgress } from '@/src/components/content/read-progress';
+import { StructuredData } from '@/src/components/core/infra/structured-data';
+import { UnifiedTracker } from '@/src/components/core/infra/unified-tracker';
+import { NavLink } from '@/src/components/core/shared/nav-link';
 import { ChangelogContent } from '@/src/components/features/changelog/changelog-content';
-import { StructuredData } from '@/src/components/infra/structured-data';
-import { UnifiedTracker } from '@/src/components/infra/unified-tracker';
 import { Separator } from '@/src/components/primitives/separator';
-import { NavLink } from '@/src/components/shared/nav-link';
 import { getAllChangelogEntries, getChangelogEntryBySlug } from '@/src/lib/changelog/loader';
 import { formatChangelogDate, getChangelogUrl } from '@/src/lib/changelog/utils';
 import { ROUTES } from '@/src/lib/constants';

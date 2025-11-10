@@ -11,8 +11,8 @@
 
 import Link from 'next/link';
 import { type FC, memo, useMemo } from 'react';
-import { ConfigCard } from '@/src/components/domain/config-card';
-import { UnifiedCardGrid } from '@/src/components/domain/unified-card-grid';
+import { ConfigCard } from '@/src/components/core/domain/config-card';
+import { UnifiedCardGrid } from '@/src/components/core/domain/unified-card-grid';
 import { Button } from '@/src/components/primitives/button';
 import {
   HOMEPAGE_FEATURED_CATEGORIES,

@@ -6,9 +6,9 @@
 import { unstable_cache } from 'next/cache';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
-import { JobCard } from '@/src/components/domain/job-card';
-import { JobsPromo } from '@/src/components/domain/jobs-promo';
-import { UnifiedBadge } from '@/src/components/domain/unified-badge';
+import { JobCard } from '@/src/components/core/domain/job-card';
+import { JobsPromo } from '@/src/components/core/domain/jobs-promo';
+import { UnifiedBadge } from '@/src/components/core/domain/unified-badge';
 import { Button } from '@/src/components/primitives/button';
 import { Card, CardContent } from '@/src/components/primitives/card';
 import { Input } from '@/src/components/primitives/input';

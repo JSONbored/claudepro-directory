@@ -4,7 +4,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { notFound, redirect } from 'next/navigation';
-import { JobForm } from '@/src/components/forms/job-form';
+import { JobForm } from '@/src/components/core/forms/job-form';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';

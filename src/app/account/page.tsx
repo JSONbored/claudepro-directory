@@ -1,5 +1,6 @@
 import { z } from 'zod';
-import { UnifiedBadge } from '@/src/components/domain/unified-badge';
+import { UnifiedBadge } from '@/src/components/core/domain/unified-badge';
+import { NavLink } from '@/src/components/core/shared/nav-link';
 import {
   Card,
   CardContent,
@@ -7,7 +8,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/card';
-import { NavLink } from '@/src/components/shared/nav-link';
 import { ROUTES } from '@/src/lib/constants';
 import { Bookmark, Calendar } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';

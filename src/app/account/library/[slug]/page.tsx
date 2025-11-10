@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
-import { UnifiedBadge } from '@/src/components/domain/unified-badge';
-import { CollectionItemManager } from '@/src/components/library/collection-item-manager';
+import { CollectionItemManager } from '@/src/components/core/collection-item-manager';
+import { UnifiedBadge } from '@/src/components/core/domain/unified-badge';
 import { Button } from '@/src/components/primitives/button';
 import {
   Card,

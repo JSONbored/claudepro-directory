@@ -6,8 +6,8 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
-import { BaseCard } from '@/src/components/domain/base-card';
-import { UnifiedBadge } from '@/src/components/domain/unified-badge';
+import { BaseCard } from '@/src/components/core/domain/base-card';
+import { UnifiedBadge } from '@/src/components/core/domain/unified-badge';
 import { CategoryFilter } from '@/src/components/features/changelog/category-filter';
 import { Tabs, TabsContent } from '@/src/components/primitives/tabs';
 import type { ChangelogCategory, ChangelogEntry } from '@/src/lib/changelog/loader';

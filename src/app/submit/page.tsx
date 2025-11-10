@@ -5,9 +5,9 @@
 
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
-import { UnifiedBadge } from '@/src/components/domain/unified-badge';
-import { SubmitFormClient } from '@/src/components/forms/submit-form-client';
-import { NavLink } from '@/src/components/shared/nav-link';
+import { UnifiedBadge } from '@/src/components/core/domain/unified-badge';
+import { SubmitFormClient } from '@/src/components/core/forms/submit-form-client';
+import { NavLink } from '@/src/components/core/shared/nav-link';
 import { getSubmissionFormConfig } from '@/src/lib/forms/submission-form-config';
 
 const UnifiedNewsletterCapture = dynamic(

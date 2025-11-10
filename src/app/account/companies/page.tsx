@@ -6,7 +6,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { UnifiedBadge } from '@/src/components/domain/unified-badge';
+import { UnifiedBadge } from '@/src/components/core/domain/unified-badge';
 import { Button } from '@/src/components/primitives/button';
 import {
   Card,

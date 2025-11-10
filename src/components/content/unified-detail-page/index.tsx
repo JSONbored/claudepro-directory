@@ -6,7 +6,7 @@
 import { Suspense } from 'react';
 import { JSONSectionRenderer } from '@/src/components/content/json-section-renderer';
 import { UnifiedContentSection } from '@/src/components/content/unified-content-section';
-import { UnifiedReview } from '@/src/components/domain/unified-review';
+import { UnifiedReview } from '@/src/components/core/domain/unified-review';
 import { UnifiedNewsletterCapture } from '@/src/components/features/growth/unified-newsletter-capture';
 import {
   type CategoryId,

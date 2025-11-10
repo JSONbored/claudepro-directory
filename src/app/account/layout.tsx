@@ -5,7 +5,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { UnifiedButton } from '@/src/components/domain/unified-button';
+import { UnifiedButton } from '@/src/components/core/domain/unified-button';
 import { Button } from '@/src/components/primitives/button';
 import { Card } from '@/src/components/primitives/card';
 import {

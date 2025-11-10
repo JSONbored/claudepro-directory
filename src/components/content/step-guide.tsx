@@ -4,8 +4,8 @@
  */
 
 import { ProductionCodeBlock } from '@/src/components/content/production-code-block';
-import { UnifiedBadge } from '@/src/components/domain/unified-badge';
-import { UnifiedContentBox } from '@/src/components/domain/unified-content-box';
+import { UnifiedBadge } from '@/src/components/core/domain/unified-badge';
+import { UnifiedContentBox } from '@/src/components/core/domain/unified-content-box';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/card';
 import { highlightCode } from '@/src/lib/content/syntax-highlighting';
 import { Zap } from '@/src/lib/icons';

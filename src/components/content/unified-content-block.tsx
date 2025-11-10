@@ -40,7 +40,7 @@
  * ```
  */
 
-import { UnifiedBadge } from '@/src/components/domain/unified-badge';
+import { UnifiedBadge } from '@/src/components/core/domain/unified-badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/src/components/primitives/avatar';
 import {
   Card,

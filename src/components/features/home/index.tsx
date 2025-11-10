@@ -24,12 +24,12 @@ import { motion } from 'motion/react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { NumberTicker } from '@/src/components/core/magic/number-ticker';
 import {
   LazyFeaturedSections,
   LazySearchSection,
   LazyTabsSection,
 } from '@/src/components/features/home/lazy-homepage-sections';
-import { NumberTicker } from '@/src/components/magic/number-ticker';
 import { HomepageStatsSkeleton, Skeleton } from '@/src/components/primitives/loading-skeleton';
 import {
   getCategoryConfigs,
