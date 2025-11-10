@@ -40,12 +40,27 @@ const UnifiedNewsletterCapture = dynamic(
   }
 );
 
+const FloatingActionBar = dynamic(
+  () =>
+    import('@/src/components/features/fab/floating-action-bar').then((mod) => ({
+      default: mod.FloatingActionBar,
+    })),
+  {
+    loading: () => null,
+  }
+);
+
 interface LayoutContentProps {
   children: React.ReactNode;
   announcement: Tables<'announcements'> | null;
+  useFloatingActionBar?: boolean;
 }
 
-export function LayoutContent({ children, announcement }: LayoutContentProps) {
+export function LayoutContent({
+  children,
+  announcement,
+  useFloatingActionBar = false,
+}: LayoutContentProps) {
   const pathname = usePathname();
 
   // Auth route prefixes - Next.js strips route groups like (auth) from URLs
@@ -79,12 +94,14 @@ export function LayoutContent({ children, announcement }: LayoutContentProps) {
       </a>
       <div className={'flex min-h-screen flex-col bg-background'}>
         {announcement && <AnnouncementBannerClient announcement={announcement} />}
-        <Navigation />
+        <Navigation hideCreateButton={useFloatingActionBar} />
         {/* biome-ignore lint/correctness/useUniqueElementIds: Static ID required for skip navigation accessibility */}
         <main id="main-content" className="flex-1">
           {children}
         </main>
         <Footer />
+        {/* Feature flag: Floating Action Bar (can be toggled on/off via Statsig) */}
+        {useFloatingActionBar && <FloatingActionBar />}
         <NotificationSheet />
         <UnifiedNewsletterCapture variant="footer-bar" source="footer" />
       </div>

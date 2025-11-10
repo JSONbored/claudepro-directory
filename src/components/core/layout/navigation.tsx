@@ -30,7 +30,12 @@ import {
   UI_CLASSES,
 } from '@/src/lib/ui-constants';
 
-const NavigationComponent = () => {
+interface NavigationProps {
+  /** Hide Create button when FloatingActionBar is enabled */
+  hideCreateButton?: boolean;
+}
+
+const NavigationComponent = ({ hideCreateButton = false }: NavigationProps = {}) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
@@ -130,24 +135,25 @@ const NavigationComponent = () => {
 
                 {/* Right Side Actions */}
                 <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1_5}>
-                  {/* Action Links - Create Button */}
-                  {ACTION_LINKS.map((link) => {
-                    const ActionIcon = link.icon;
-                    return (
-                      <Button
-                        key={link.href}
-                        asChild
-                        variant="outline"
-                        size="sm"
-                        className={`hidden md:flex ${UI_CLASSES.TEXT_XS}`}
-                      >
-                        <Link href={link.href} prefetch={true}>
-                          {ActionIcon && <ActionIcon className={UI_CLASSES.ICON_XS_LEADING} />}
-                          {link.label}
-                        </Link>
-                      </Button>
-                    );
-                  })}
+                  {/* Action Links - Create Button (hidden when FloatingActionBar is enabled) */}
+                  {!hideCreateButton &&
+                    ACTION_LINKS.map((link) => {
+                      const ActionIcon = link.icon;
+                      return (
+                        <Button
+                          key={link.href}
+                          asChild
+                          variant="outline"
+                          size="sm"
+                          className={`hidden md:flex ${UI_CLASSES.TEXT_XS}`}
+                        >
+                          <Link href={link.href} prefetch={true}>
+                            {ActionIcon && <ActionIcon className={UI_CLASSES.ICON_XS_LEADING} />}
+                            {link.label}
+                          </Link>
+                        </Button>
+                      );
+                    })}
 
                   <Button
                     variant="ghost"

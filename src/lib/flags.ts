@@ -77,4 +77,7 @@ export const featureFlags = {
   // Infrastructure
   publicAPI: createFeatureFlag('public_api'),
   enhancedSkeletons: createFeatureFlag('enhanced_skeletons'),
+
+  // UI Components
+  floatingActionBar: createFeatureFlag('floating_action_bar'),
 };
