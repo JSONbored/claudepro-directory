@@ -124,7 +124,7 @@
     "@types/archiver": "^7.0.0",
     "archiver": "^7.0.1",
     "knip": "^5.68.0",
-    "lefthook": "^2.0.2",
+    "lefthook": "^2.0.3",
     "ora": "^8.2.0",
     "turbo": "^2.6.0",
     "ultracite": "^6.3.2"
