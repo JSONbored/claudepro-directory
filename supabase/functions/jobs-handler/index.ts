@@ -5,6 +5,7 @@
 
 import type { Database } from '../_shared/database.types.ts';
 import { sendDiscordWebhook } from '../_shared/utils/discord.ts';
+import { createPolarCheckout, getPolarProductPriceId } from '../_shared/utils/polar.ts';
 import {
   badRequestResponse,
   errorResponse,
@@ -18,6 +19,7 @@ type JobRow = Database['public']['Tables']['jobs']['Row'];
 type JobInsert = Database['public']['Tables']['jobs']['Insert'];
 type JobUpdate = Database['public']['Tables']['jobs']['Update'];
 type JobStatus = Database['public']['Enums']['job_status'];
+type CompanyInsert = Database['public']['Tables']['companies']['Insert'];
 
 Deno.serve(async (req: Request) => {
   // OPTIONS preflight
@@ -44,7 +46,12 @@ Deno.serve(async (req: Request) => {
   }
 
   // Webhook actions don't require JWT (triggered by database)
-  const webhookActions = ['notify-new', 'notify-status-change', 'cleanup-deleted'];
+  const webhookActions = [
+    'notify-new',
+    'notify-status-change',
+    'cleanup-deleted',
+    'notify-expired',
+  ];
   const isWebhookAction = webhookActions.includes(action);
 
   let userId: string | undefined;
@@ -101,6 +108,8 @@ Deno.serve(async (req: Request) => {
         return await handleNotifyStatusChange(req);
       case 'cleanup-deleted':
         return await handleCleanupDeleted(req);
+      case 'notify-expired':
+        return await handleNotifyExpired(req);
       default:
         return badRequestResponse(`Unknown action: ${action}`);
     }
@@ -108,6 +117,66 @@ Deno.serve(async (req: Request) => {
     return errorResponse(error, `jobs-handler:${action}`);
   }
 });
+
+/**
+ * Generate URL-safe slug from company name
+ */
+function generateSlug(name: string): string {
+  return name
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+/**
+ * Get existing company by name or create new one (auto-linking)
+ */
+async function getOrCreateCompany(companyName: string, userId: string): Promise<string | null> {
+  try {
+    const slug = generateSlug(companyName);
+
+    if (!slug || slug.length === 0) {
+      console.warn('Invalid company name for slug generation:', companyName);
+      return null;
+    }
+
+    // Check if company already exists by slug
+    const { data: existingCompany } = await supabaseServiceRole
+      .from('companies')
+      .select('id')
+      .eq('slug', slug)
+      .single();
+
+    if (existingCompany) {
+      return existingCompany.id;
+    }
+
+    // Create new company using proper typed insert
+    const companyInsert: CompanyInsert = {
+      name: companyName.trim(),
+      slug,
+      owner_id: userId,
+      featured: false,
+    };
+
+    const { data: newCompany, error } = await supabaseServiceRole
+      .from('companies')
+      .insert(companyInsert)
+      .select('id')
+      .single();
+
+    if (error) {
+      console.error('Error auto-creating company:', error);
+      return null;
+    }
+
+    return newCompany.id;
+  } catch (error) {
+    console.error('Error in getOrCreateCompany:', error);
+    return null;
+  }
+}
 
 /**
  * Create Job - POST /jobs-handler with X-Job-Action: create
@@ -154,6 +223,25 @@ async function handleCreate(req: Request, userId: string): Promise<Response> {
       .replace(/\s+/g, '-')
       .replace(/[^a-z0-9-]/g, '')}-${Date.now()}`;
 
+  // Auto-link company if not already provided
+  let companyId = data.company_id || null;
+  if (!companyId && data.company) {
+    companyId = await getOrCreateCompany(data.company, userId);
+  }
+
+  // Determine pricing based on plan and tier
+  const plan = data.plan || 'one-time';
+  const tier = data.tier || 'standard';
+
+  // Pricing matrix
+  const pricing = {
+    'one-time': { standard: 79.0, featured: 178.0 },
+    subscription: { standard: 59.0, featured: 108.0 },
+  };
+
+  const paymentAmount =
+    pricing[plan as keyof typeof pricing]?.[tier as keyof (typeof pricing)['one-time']] || 79.0;
+
   // Insert job with business rules
   const { data: job, error } = await supabaseServiceRole
     .from('jobs')
@@ -175,12 +263,13 @@ async function handleCreate(req: Request, userId: string): Promise<Response> {
       benefits: data.benefits || [],
       contact_email: data.contact_email || null,
       company_logo: data.company_logo || null,
-      company_id: data.company_id || null,
+      company_id: companyId,
       slug,
-      status: 'pending_review' as JobStatus, // Business rule: all new jobs require review
-      payment_amount: 299.0, // Business rule: standard job posting fee
+      tier,
+      status: 'pending_payment' as JobStatus,
+      payment_amount: paymentAmount,
       payment_status: 'unpaid',
-      plan: 'standard',
+      plan,
     })
     .select()
     .single();
@@ -190,13 +279,50 @@ async function handleCreate(req: Request, userId: string): Promise<Response> {
     return errorResponse(error, 'create_job');
   }
 
+  // Get user email for Polar checkout
+  const {
+    data: { user },
+    error: userError,
+  } = await supabaseServiceRole.auth.getUser(
+    req.headers.get('Authorization')?.replace('Bearer ', '') || ''
+  );
+
+  if (userError || !user?.email) {
+    console.error('Failed to get user email:', userError);
+    return errorResponse({ message: 'User email not found' }, 'get_user_email');
+  }
+
+  // Get Polar product price ID
+  const productPriceId = getPolarProductPriceId(plan, tier);
+
+  if (!productPriceId) {
+    console.error('Polar product price ID not configured for:', { plan, tier });
+    return errorResponse({ message: 'Payment product not configured' }, 'polar_product_missing');
+  }
+
+  // Create Polar checkout session
+  const siteUrl = Deno.env.get('SITE_URL') || 'https://claudepro.directory';
+  const checkoutResult = await createPolarCheckout({
+    productPriceId,
+    jobId: job.id,
+    userId,
+    customerEmail: user.email,
+    customerName: user.user_metadata?.full_name || user.user_metadata?.name,
+    successUrl: `${siteUrl}/account/jobs?payment=success&job_id=${job.id}`,
+  });
+
+  if ('error' in checkoutResult) {
+    console.error('Polar checkout creation failed:', checkoutResult.error);
+    return errorResponse({ message: checkoutResult.error }, 'polar_checkout_failed');
+  }
+
   return successResponse(
     {
       success: true,
       job,
       requiresPayment: true,
-      message:
-        'Job submitted for review! You will receive payment instructions via email after admin approval.',
+      checkoutUrl: checkoutResult.url,
+      message: 'Job created! Redirecting to payment...',
     },
     201
   );
@@ -401,6 +527,11 @@ async function handleNotifyNew(req: Request): Promise<Response> {
 
   const job = webhookPayload.record;
 
+  // Skip placeholder jobs (no notifications)
+  if (job.is_placeholder) {
+    return successResponse({ success: true, skipped: true, reason: 'placeholder' });
+  }
+
   // Only notify for pending_review jobs
   if (job.status !== 'pending_review') {
     return successResponse({ success: true, skipped: true });
@@ -510,6 +641,11 @@ async function handleNotifyStatusChange(req: Request): Promise<Response> {
 
   const job = webhookPayload.record;
   const oldJob = webhookPayload.old_record;
+
+  // Skip placeholder jobs (no notifications)
+  if (job.is_placeholder) {
+    return successResponse({ success: true, skipped: true, reason: 'placeholder' });
+  }
 
   // Only notify if status actually changed
   if (job.status === oldJob?.status) {
@@ -683,4 +819,97 @@ async function handleCleanupDeleted(req: Request): Promise<Response> {
     success: true,
     archived: archiveData,
   });
+}
+
+/**
+ * Webhook: Notify Expired Jobs - POST /jobs-handler with X-Job-Action: notify-expired
+ * Triggered by database webhook when expire_jobs() updates jobs to 'expired' status
+ */
+async function handleNotifyExpired(req: Request): Promise<Response> {
+  let payload: unknown;
+  try {
+    payload = await req.json();
+  } catch {
+    return badRequestResponse('Valid JSON body required');
+  }
+
+  if (!payload || typeof payload !== 'object' || Array.isArray(payload)) {
+    return badRequestResponse('Valid JSON body required');
+  }
+
+  const webhookPayload = payload as {
+    type: string;
+    table: string;
+    record: JobRow;
+    old_record: JobRow;
+  };
+
+  if (webhookPayload.type !== 'UPDATE' || !webhookPayload.record) {
+    return badRequestResponse('Invalid webhook payload');
+  }
+
+  const job = webhookPayload.record;
+  const oldJob = webhookPayload.old_record;
+
+  // Skip placeholder jobs (no notifications)
+  if (job.is_placeholder) {
+    return successResponse({ success: true, skipped: true, reason: 'placeholder' });
+  }
+
+  // Only process if status changed to 'expired'
+  if (job.status !== 'expired' || oldJob?.status === 'expired') {
+    return successResponse({ success: true, skipped: true });
+  }
+
+  console.log(`Job expired: ${job.id} (${job.title})`);
+
+  // Send Discord notification
+  const DISCORD_WEBHOOK_URL = Deno.env.get('DISCORD_WEBHOOK_JOBS');
+  if (DISCORD_WEBHOOK_URL) {
+    const embed = {
+      title: `⏰ Job Expired: ${job.title}`,
+      description: 'Job listing has reached its expiration date',
+      color: 0xffa500, // Orange
+      fields: [
+        {
+          name: '🏢 Company',
+          value: job.company,
+          inline: true,
+        },
+        {
+          name: '📂 Category',
+          value: `\`${job.category}\``,
+          inline: true,
+        },
+        {
+          name: '📅 Expired At',
+          value: job.expires_at ? new Date(job.expires_at).toLocaleDateString() : 'Unknown',
+          inline: false,
+        },
+      ],
+      footer: {
+        text: `Job ID: ${job.id.slice(0, 8)}`,
+      },
+      timestamp: new Date().toISOString(),
+    };
+
+    try {
+      await sendDiscordWebhook(
+        DISCORD_WEBHOOK_URL,
+        {
+          content: '⏰ **Job Expired**',
+          embeds: [embed],
+        },
+        'job_expired',
+        job.id
+      );
+      console.log(`Sent expiration notification for: ${job.id}`);
+      return successResponse({ success: true });
+    } catch (error) {
+      console.error('Failed to send Discord webhook:', error);
+      return errorResponse(error, 'notify_expired_discord');
+    }
+  }
+
+  return successResponse({ success: true });
 }

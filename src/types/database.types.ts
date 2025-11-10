@@ -1,6 +1,11 @@
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
 export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: '13.0.5';
+  };
   public: {
     Tables: {
       announcement_dismissals: {
@@ -1247,8 +1252,10 @@ export type Database = {
           expires_at: string | null;
           featured: boolean | null;
           id: string;
+          is_placeholder: boolean;
           link: string;
           location: string | null;
+          locked_price: number | null;
           order: number | null;
           payment_amount: number | null;
           payment_date: string | null;
@@ -1256,6 +1263,9 @@ export type Database = {
           payment_reference: string | null;
           payment_status: string;
           plan: string;
+          polar_customer_id: string | null;
+          polar_order_id: string | null;
+          polar_subscription_id: string | null;
           posted_at: string | null;
           remote: boolean | null;
           requirements: Json;
@@ -1264,6 +1274,9 @@ export type Database = {
           slug: string;
           status: Database['public']['Enums']['job_status'];
           tags: Json;
+          tier: string;
+          tier_price: number | null;
+          tier_upgraded_at: string | null;
           title: string;
           type: string;
           updated_at: string;
@@ -1287,8 +1300,10 @@ export type Database = {
           expires_at?: string | null;
           featured?: boolean | null;
           id?: string;
+          is_placeholder?: boolean;
           link: string;
           location?: string | null;
+          locked_price?: number | null;
           order?: number | null;
           payment_amount?: number | null;
           payment_date?: string | null;
@@ -1296,6 +1311,9 @@ export type Database = {
           payment_reference?: string | null;
           payment_status?: string;
           plan?: string;
+          polar_customer_id?: string | null;
+          polar_order_id?: string | null;
+          polar_subscription_id?: string | null;
           posted_at?: string | null;
           remote?: boolean | null;
           requirements?: Json;
@@ -1304,6 +1322,9 @@ export type Database = {
           slug?: string;
           status?: Database['public']['Enums']['job_status'];
           tags?: Json;
+          tier?: string;
+          tier_price?: number | null;
+          tier_upgraded_at?: string | null;
           title: string;
           type: string;
           updated_at?: string;
@@ -1327,8 +1348,10 @@ export type Database = {
           expires_at?: string | null;
           featured?: boolean | null;
           id?: string;
+          is_placeholder?: boolean;
           link?: string;
           location?: string | null;
+          locked_price?: number | null;
           order?: number | null;
           payment_amount?: number | null;
           payment_date?: string | null;
@@ -1336,6 +1359,9 @@ export type Database = {
           payment_reference?: string | null;
           payment_status?: string;
           plan?: string;
+          polar_customer_id?: string | null;
+          polar_order_id?: string | null;
+          polar_subscription_id?: string | null;
           posted_at?: string | null;
           remote?: boolean | null;
           requirements?: Json;
@@ -1344,6 +1370,9 @@ export type Database = {
           slug?: string;
           status?: Database['public']['Enums']['job_status'];
           tags?: Json;
+          tier?: string;
+          tier_price?: number | null;
+          tier_upgraded_at?: string | null;
           title?: string;
           type?: string;
           updated_at?: string;
@@ -2957,6 +2986,13 @@ export type Database = {
         Args: { p_email: string };
         Returns: undefined;
       };
+      expire_jobs: {
+        Args: never;
+        Returns: {
+          expired_count: number;
+          expiring_soon_count: number;
+        }[];
+      };
       extract_tags_for_search: { Args: { tags: Json }; Returns: string };
       filter_jobs: {
         Args: {
@@ -3236,6 +3272,7 @@ export type Database = {
           isSetofReturn: true;
         };
       };
+      get_company_profile: { Args: { p_slug: string }; Returns: Json };
       get_content_detail_complete: {
         Args: { p_category: string; p_slug: string; p_user_id?: string };
         Returns: Json;
@@ -3349,8 +3386,10 @@ export type Database = {
           expires_at: string | null;
           featured: boolean | null;
           id: string;
+          is_placeholder: boolean;
           link: string;
           location: string | null;
+          locked_price: number | null;
           order: number | null;
           payment_amount: number | null;
           payment_date: string | null;
@@ -3358,6 +3397,9 @@ export type Database = {
           payment_reference: string | null;
           payment_status: string;
           plan: string;
+          polar_customer_id: string | null;
+          polar_order_id: string | null;
+          polar_subscription_id: string | null;
           posted_at: string | null;
           remote: boolean | null;
           requirements: Json;
@@ -3366,6 +3408,9 @@ export type Database = {
           slug: string;
           status: Database['public']['Enums']['job_status'];
           tags: Json;
+          tier: string;
+          tier_price: number | null;
+          tier_upgraded_at: string | null;
           title: string;
           type: string;
           updated_at: string;
@@ -3431,8 +3476,10 @@ export type Database = {
           expires_at: string | null;
           featured: boolean | null;
           id: string;
+          is_placeholder: boolean;
           link: string;
           location: string | null;
+          locked_price: number | null;
           order: number | null;
           payment_amount: number | null;
           payment_date: string | null;
@@ -3440,6 +3487,9 @@ export type Database = {
           payment_reference: string | null;
           payment_status: string;
           plan: string;
+          polar_customer_id: string | null;
+          polar_order_id: string | null;
+          polar_subscription_id: string | null;
           posted_at: string | null;
           remote: boolean | null;
           requirements: Json;
@@ -3448,6 +3498,9 @@ export type Database = {
           slug: string;
           status: Database['public']['Enums']['job_status'];
           tags: Json;
+          tier: string;
+          tier_price: number | null;
+          tier_upgraded_at: string | null;
           title: string;
           type: string;
           updated_at: string;
@@ -3633,6 +3686,7 @@ export type Database = {
         };
         Returns: Json;
       };
+      get_user_companies: { Args: { p_user_id: string }; Returns: Json };
       get_user_dashboard: { Args: { p_user_id: string }; Returns: Json };
       get_user_favorite_categories: {
         Args: { p_limit?: number; p_user_id: string };
@@ -3672,6 +3726,26 @@ export type Database = {
           isOneToOne: false;
           isSetofReturn: true;
         };
+      };
+      handle_polar_order_paid: {
+        Args: { webhook_data: Json; webhook_id: string };
+        Returns: undefined;
+      };
+      handle_polar_order_refunded: {
+        Args: { webhook_data: Json; webhook_id: string };
+        Returns: undefined;
+      };
+      handle_polar_subscription_canceled: {
+        Args: { webhook_data: Json; webhook_id: string };
+        Returns: undefined;
+      };
+      handle_polar_subscription_renewal: {
+        Args: { webhook_data: Json; webhook_id: string };
+        Returns: undefined;
+      };
+      handle_polar_subscription_revoked: {
+        Args: { webhook_data: Json; webhook_id: string };
+        Returns: undefined;
       };
       handle_webhook_bounce: {
         Args: { p_event_data: Json; p_webhook_id: string };
@@ -3931,8 +4005,10 @@ export type Database = {
           expires_at: string | null;
           featured: boolean | null;
           id: string;
+          is_placeholder: boolean;
           link: string;
           location: string | null;
+          locked_price: number | null;
           order: number | null;
           payment_amount: number | null;
           payment_date: string | null;
@@ -3940,6 +4016,9 @@ export type Database = {
           payment_reference: string | null;
           payment_status: string;
           plan: string;
+          polar_customer_id: string | null;
+          polar_order_id: string | null;
+          polar_subscription_id: string | null;
           posted_at: string | null;
           remote: boolean | null;
           requirements: Json;
@@ -3948,6 +4027,9 @@ export type Database = {
           slug: string;
           status: Database['public']['Enums']['job_status'];
           tags: Json;
+          tier: string;
+          tier_price: number | null;
+          tier_upgraded_at: string | null;
           title: string;
           type: string;
           updated_at: string;
@@ -4135,7 +4217,14 @@ export type Database = {
         | 'screenshot'
         | 'share'
         | 'download';
-      job_status: 'draft' | 'pending_review' | 'active' | 'expired' | 'rejected' | 'deleted';
+      job_status:
+        | 'draft'
+        | 'pending_payment'
+        | 'pending_review'
+        | 'active'
+        | 'expired'
+        | 'rejected'
+        | 'deleted';
       newsletter_source:
         | 'footer'
         | 'homepage'
@@ -4171,7 +4260,7 @@ export type Database = {
         | 'testing-qa'
         | 'security-audit';
       webhook_direction: 'inbound' | 'outbound';
-      webhook_source: 'resend' | 'vercel' | 'discord' | 'supabase_db' | 'custom';
+      webhook_source: 'resend' | 'vercel' | 'discord' | 'supabase_db' | 'custom' | 'polar';
     };
     CompositeTypes: {
       [_ in never]: never;
@@ -4351,7 +4440,15 @@ export const Constants = {
         'share',
         'download',
       ],
-      job_status: ['draft', 'pending_review', 'active', 'expired', 'rejected', 'deleted'],
+      job_status: [
+        'draft',
+        'pending_payment',
+        'pending_review',
+        'active',
+        'expired',
+        'rejected',
+        'deleted',
+      ],
       newsletter_source: [
         'footer',
         'homepage',
@@ -4390,7 +4487,7 @@ export const Constants = {
         'security-audit',
       ],
       webhook_direction: ['inbound', 'outbound'],
-      webhook_source: ['resend', 'vercel', 'discord', 'supabase_db', 'custom'],
+      webhook_source: ['resend', 'vercel', 'discord', 'supabase_db', 'custom', 'polar'],
     },
   },
 } as const;

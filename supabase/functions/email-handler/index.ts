@@ -7,6 +7,12 @@ import { renderAsync } from 'npm:@react-email/components@0.0.22';
 import React from 'npm:react@18.3.1';
 import { Resend } from 'npm:resend@4.0.0';
 import { AUTH_HOOK_ENV, RESEND_ENV, validateEnvironment } from '../_shared/email-config.ts';
+import { JobApproved } from '../_shared/templates/job-approved.tsx';
+import { JobExpired } from '../_shared/templates/job-expired.tsx';
+import { JobExpiring } from '../_shared/templates/job-expiring.tsx';
+import { JobPaymentConfirmed } from '../_shared/templates/job-payment-confirmed.tsx';
+import { JobRejected } from '../_shared/templates/job-rejected.tsx';
+import { JobSubmitted } from '../_shared/templates/job-submitted.tsx';
 // React Email Templates
 import { NewsletterWelcome } from '../_shared/templates/newsletter-welcome.tsx';
 import { OnboardingCommunity } from '../_shared/templates/onboarding-community.tsx';
@@ -60,6 +66,19 @@ Deno.serve(async (req: Request) => {
         return await handleDigest();
       case 'sequence':
         return await handleSequence();
+      // Job lifecycle emails
+      case 'job-submitted':
+        return await handleJobSubmitted(req);
+      case 'job-approved':
+        return await handleJobApproved(req);
+      case 'job-rejected':
+        return await handleJobRejected(req);
+      case 'job-expiring':
+        return await handleJobExpiring(req);
+      case 'job-expired':
+        return await handleJobExpired(req);
+      case 'job-payment-confirmed':
+        return await handleJobPaymentConfirmed(req);
       default:
         return badRequestResponse(`Unknown action: ${action}`);
     }
@@ -468,4 +487,180 @@ async function sendBatchDigest(subscribers: string[], digestData: WeeklyDigestDa
     failed,
     successRate: `${((success / (success + failed)) * 100).toFixed(1)}%`,
   };
+}
+
+/**
+ * Job Lifecycle Email Handlers
+ */
+
+async function handleJobSubmitted(req: Request): Promise<Response> {
+  const payload = await req.json();
+  const { jobTitle, company, userEmail, jobId } = payload;
+
+  const html = await renderAsync(
+    React.createElement(JobSubmitted, { jobTitle, company, userEmail, jobId })
+  );
+
+  const { data, error } = await resend.emails.send({
+    from: 'ClaudePro Directory <jobs@mail.claudepro.directory>',
+    to: userEmail,
+    subject: `Job Submitted: ${jobTitle}`,
+    html,
+    tags: [{ name: 'type', value: 'job-submitted' }],
+  });
+
+  if (error) throw new Error(error.message);
+
+  return successResponse({ sent: true, id: data?.id, jobId });
+}
+
+async function handleJobApproved(req: Request): Promise<Response> {
+  const payload = await req.json();
+  const { jobTitle, company, userEmail, jobId, plan, paymentAmount, paymentUrl } = payload;
+
+  const html = await renderAsync(
+    React.createElement(JobApproved, {
+      jobTitle,
+      company,
+      userEmail,
+      jobId,
+      plan,
+      paymentAmount,
+      paymentUrl,
+    })
+  );
+
+  const { data, error } = await resend.emails.send({
+    from: 'ClaudePro Directory <jobs@mail.claudepro.directory>',
+    to: userEmail,
+    subject: `Job Approved: ${jobTitle}`,
+    html,
+    tags: [{ name: 'type', value: 'job-approved' }],
+  });
+
+  if (error) throw new Error(error.message);
+
+  return successResponse({ sent: true, id: data?.id, jobId });
+}
+
+async function handleJobRejected(req: Request): Promise<Response> {
+  const payload = await req.json();
+  const { jobTitle, company, userEmail, jobId, rejectionReason } = payload;
+
+  const html = await renderAsync(
+    React.createElement(JobRejected, { jobTitle, company, userEmail, jobId, rejectionReason })
+  );
+
+  const { data, error } = await resend.emails.send({
+    from: 'ClaudePro Directory <jobs@mail.claudepro.directory>',
+    to: userEmail,
+    subject: `Action Required: Update Your Job Posting - ${jobTitle}`,
+    html,
+    tags: [{ name: 'type', value: 'job-rejected' }],
+  });
+
+  if (error) throw new Error(error.message);
+
+  return successResponse({ sent: true, id: data?.id, jobId });
+}
+
+async function handleJobExpiring(req: Request): Promise<Response> {
+  const payload = await req.json();
+  const { jobTitle, company, userEmail, jobId, expiresAt, daysRemaining, renewalUrl } = payload;
+
+  const html = await renderAsync(
+    React.createElement(JobExpiring, {
+      jobTitle,
+      company,
+      userEmail,
+      jobId,
+      expiresAt,
+      daysRemaining,
+      renewalUrl,
+    })
+  );
+
+  const { data, error } = await resend.emails.send({
+    from: 'ClaudePro Directory <jobs@mail.claudepro.directory>',
+    to: userEmail,
+    subject: `Expiring Soon: ${jobTitle} (${daysRemaining} days remaining)`,
+    html,
+    tags: [{ name: 'type', value: 'job-expiring' }],
+  });
+
+  if (error) throw new Error(error.message);
+
+  return successResponse({ sent: true, id: data?.id, jobId });
+}
+
+async function handleJobExpired(req: Request): Promise<Response> {
+  const payload = await req.json();
+  const { jobTitle, company, userEmail, jobId, expiredAt, viewCount, clickCount, repostUrl } =
+    payload;
+
+  const html = await renderAsync(
+    React.createElement(JobExpired, {
+      jobTitle,
+      company,
+      userEmail,
+      jobId,
+      expiredAt,
+      viewCount,
+      clickCount,
+      repostUrl,
+    })
+  );
+
+  const { data, error } = await resend.emails.send({
+    from: 'ClaudePro Directory <jobs@mail.claudepro.directory>',
+    to: userEmail,
+    subject: `Job Listing Expired: ${jobTitle}`,
+    html,
+    tags: [{ name: 'type', value: 'job-expired' }],
+  });
+
+  if (error) throw new Error(error.message);
+
+  return successResponse({ sent: true, id: data?.id, jobId });
+}
+
+async function handleJobPaymentConfirmed(req: Request): Promise<Response> {
+  const payload = await req.json();
+  const {
+    jobTitle,
+    company,
+    userEmail,
+    jobId,
+    jobSlug,
+    plan,
+    paymentAmount,
+    paymentDate,
+    expiresAt,
+  } = payload;
+
+  const html = await renderAsync(
+    React.createElement(JobPaymentConfirmed, {
+      jobTitle,
+      company,
+      userEmail,
+      jobId,
+      jobSlug,
+      plan,
+      paymentAmount,
+      paymentDate,
+      expiresAt,
+    })
+  );
+
+  const { data, error } = await resend.emails.send({
+    from: 'ClaudePro Directory <jobs@mail.claudepro.directory>',
+    to: userEmail,
+    subject: `Your Job is Live: ${jobTitle}`,
+    html,
+    tags: [{ name: 'type', value: 'job-payment-confirmed' }],
+  });
+
+  if (error) throw new Error(error.message);
+
+  return successResponse({ sent: true, id: data?.id, jobId });
 }

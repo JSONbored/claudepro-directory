@@ -12,11 +12,19 @@ import { BADGE_COLORS, type JobType, UI_CLASSES } from '@/src/lib/ui-constants';
 import { formatRelativeDate } from '@/src/lib/utils/data.utils';
 
 export const JobCard = memo(({ job }: JobCardProps) => {
+  const isFeatured = job.tier === 'featured';
+
   return (
-    <Card className={`${UI_CLASSES.CARD_GRADIENT_HOVER} relative`}>
-      {job.featured && (
-        <div className={'-top-2 -right-2 absolute z-10'}>
-          <UnifiedBadge variant="base" style="default" className="bg-accent text-accent-foreground">
+    <Card
+      className={`${UI_CLASSES.CARD_GRADIENT_HOVER} relative ${
+        isFeatured
+          ? `${UI_CLASSES.JOB_FEATURED_BORDER} ${UI_CLASSES.JOB_FEATURED_GRADIENT} ${UI_CLASSES.JOB_FEATURED_GLOW}`
+          : ''
+      }`}
+    >
+      {isFeatured && (
+        <div className="-top-2 -right-2 absolute z-10">
+          <UnifiedBadge variant="base" style="default" className={UI_CLASSES.JOB_FEATURED_BADGE}>
             <Star className={UI_CLASSES.ICON_XS_LEADING} />
             Featured
           </UnifiedBadge>

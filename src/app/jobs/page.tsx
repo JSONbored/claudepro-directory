@@ -7,6 +7,7 @@ import { unstable_cache } from 'next/cache';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { JobCard } from '@/src/components/domain/job-card';
+import { JobsPromo } from '@/src/components/domain/jobs-promo';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { Button } from '@/src/components/primitives/button';
 import { Card, CardContent } from '@/src/components/primitives/card';
@@ -323,63 +324,69 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
       )}
 
       <section className={'container mx-auto px-4 py-12'}>
-        <div className="space-y-8">
-          {(totalJobs || 0) === 0 ? (
-            <Card>
-              <CardContent className={'flex flex-col items-center justify-center py-24'}>
-                <div className={'mb-6 rounded-full bg-accent/10 p-4'}>
-                  <Briefcase className={'h-12 w-12 text-muted-foreground'} />
-                </div>
-                <h3 className="mb-4 font-bold text-2xl">No Jobs Available Yet</h3>
-                <p className={'mb-8 max-w-md text-center text-muted-foreground leading-relaxed'}>
-                  We're building our jobs board! Soon you'll find amazing opportunities with
-                  companies working on the future of AI. Be the first to know when new positions are
-                  posted.
-                </p>
-                <div className="flex gap-4">
-                  <Button asChild>
-                    <Link href={ROUTES.PARTNER}>
-                      <Plus className="mr-2 h-4 w-4" />
-                      Post the First Job
-                    </Link>
-                  </Button>
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_320px]">
+          <div className="space-y-8">
+            {(totalJobs || 0) === 0 ? (
+              <Card>
+                <CardContent className={'flex flex-col items-center justify-center py-24'}>
+                  <div className={'mb-6 rounded-full bg-accent/10 p-4'}>
+                    <Briefcase className={'h-12 w-12 text-muted-foreground'} />
+                  </div>
+                  <h3 className="mb-4 font-bold text-2xl">No Jobs Available Yet</h3>
+                  <p className={'mb-8 max-w-md text-center text-muted-foreground leading-relaxed'}>
+                    We're building our jobs board! Soon you'll find amazing opportunities with
+                    companies working on the future of AI. Be the first to know when new positions
+                    are posted.
+                  </p>
+                  <div className="flex gap-4">
+                    <Button asChild>
+                      <Link href={ROUTES.PARTNER}>
+                        <Plus className="mr-2 h-4 w-4" />
+                        Post the First Job
+                      </Link>
+                    </Button>
+                    <Button variant="outline" asChild>
+                      <Link href={ROUTES.COMMUNITY}>Join Community</Link>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : jobs.length === 0 ? (
+              <Card>
+                <CardContent className={'flex flex-col items-center justify-center py-16'}>
+                  <Briefcase className={'mb-4 h-16 w-16 text-muted-foreground'} />
+                  <h3 className={'mb-2 font-semibold text-xl'}>No Jobs Found</h3>
+                  <p className={'mb-6 max-w-md text-center text-muted-foreground'}>
+                    No jobs match your current filters. Try adjusting your search criteria.
+                  </p>
                   <Button variant="outline" asChild>
-                    <Link href={ROUTES.COMMUNITY}>Join Community</Link>
+                    <Link href={ROUTES.JOBS}>Clear All Filters</Link>
                   </Button>
+                </CardContent>
+              </Card>
+            ) : (
+              <>
+                <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
+                  <div>
+                    <h2 className="font-bold text-2xl">
+                      {jobs.length} {jobs.length === 1 ? 'Job' : 'Jobs'} Found
+                    </h2>
+                    <p className="text-muted-foreground">Showing all available positions</p>
+                  </div>
                 </div>
-              </CardContent>
-            </Card>
-          ) : jobs.length === 0 ? (
-            <Card>
-              <CardContent className={'flex flex-col items-center justify-center py-16'}>
-                <Briefcase className={'mb-4 h-16 w-16 text-muted-foreground'} />
-                <h3 className={'mb-2 font-semibold text-xl'}>No Jobs Found</h3>
-                <p className={'mb-6 max-w-md text-center text-muted-foreground'}>
-                  No jobs match your current filters. Try adjusting your search criteria.
-                </p>
-                <Button variant="outline" asChild>
-                  <Link href={ROUTES.JOBS}>Clear All Filters</Link>
-                </Button>
-              </CardContent>
-            </Card>
-          ) : (
-            <>
-              <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
-                <div>
-                  <h2 className="font-bold text-2xl">
-                    {jobs.length} {jobs.length === 1 ? 'Job' : 'Jobs'} Found
-                  </h2>
-                  <p className="text-muted-foreground">Showing all available positions</p>
-                </div>
-              </div>
 
-              <div className={UI_CLASSES.GRID_RESPONSIVE_3}>
-                {jobs.map((job) => (
-                  <JobCard key={job.slug} job={job} />
-                ))}
-              </div>
-            </>
-          )}
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                  {jobs.map((job) => (
+                    <JobCard key={job.slug} job={job} />
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+
+          <aside className="w-full space-y-6 lg:sticky lg:top-24 lg:h-fit">
+            <JobsPromo />
+          </aside>
         </div>
       </section>
 

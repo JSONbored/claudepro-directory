@@ -54,6 +54,7 @@ export default function NewJobPage() {
       success: boolean;
       job: { id: string; slug: string };
       requiresPayment: boolean;
+      checkoutUrl?: string;
       message: string;
     };
 
@@ -61,9 +62,14 @@ export default function NewJobPage() {
       revalidatePath('/jobs');
       revalidatePath('/account/jobs');
 
-      // If requires payment (featured/premium), stay on page with message
-      if (result.requiresPayment) {
-        return result;
+      // If requires payment, return checkout URL for client-side redirect
+      if (result.requiresPayment && result.checkoutUrl) {
+        return {
+          success: true,
+          requiresPayment: true,
+          checkoutUrl: result.checkoutUrl,
+          message: 'Redirecting to payment...',
+        };
       }
 
       // Standard plan - redirect to jobs list

@@ -333,6 +333,12 @@ export const UI_CLASSES = {
     'border-amber-500/30 bg-gradient-to-r from-amber-500/10 to-yellow-500/10 text-amber-600 dark:text-amber-400',
   BADGE_METADATA: 'border-muted-foreground/20 text-muted-foreground',
 
+  // ----- Featured Job Styling -----
+  JOB_FEATURED_BORDER: 'border-2 border-orange-500/50',
+  JOB_FEATURED_GRADIENT: 'bg-gradient-to-br from-orange-500/5 to-orange-600/10',
+  JOB_FEATURED_BADGE: 'bg-orange-500 text-white border-orange-500',
+  JOB_FEATURED_GLOW: 'shadow-lg shadow-orange-500/10',
+
   // ----- Grids -----
   GRID_RESPONSIVE_3: 'grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3',
   GRID_RESPONSIVE_3_TIGHT: 'grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3',
@@ -479,6 +485,9 @@ export const UI_CLASSES = {
   CONTAINER_PAGE: 'container mx-auto px-4 py-8',
   INTERACTIVE_ITEM: 'px-4 py-3 border rounded-lg hover:bg-accent transition-colors text-left',
   LIST_DISC_SPACED: 'list-disc pl-6 space-y-2',
+  INPUT_HIDDEN: 'hidden',
+  UPLOAD_ZONE:
+    'flex h-32 w-full cursor-pointer items-center justify-center rounded-lg border-2 border-muted-foreground/25 border-dashed bg-muted/50 transition-colors hover:border-muted-foreground/50 hover:bg-muted',
 } as const;
 
 // ==========================================

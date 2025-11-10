@@ -31,12 +31,11 @@
  */
 
 import { execSync } from 'node:child_process';
-import { writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import ora from 'ora';
 import { computeHash, hasHashChanged, setHash } from '../utils/build-cache.js';
-import { ensureEnvVars } from '../utils/env.js';
 
 // ============================================================================
 // Constants
@@ -116,14 +115,41 @@ interface StepResult {
 // Shared Utilities
 // ============================================================================
 
-async function getDatabaseUrl(): Promise<string | null> {
+function loadEnvConfig(): { projectId?: string; dbUrl?: string } {
   try {
-    await ensureEnvVars(['POSTGRES_URL_NON_POOLING']);
-    return process.env.POSTGRES_URL_NON_POOLING || null;
+    // Load from .env.db.local
+    if (!existsSync('.env.db.local')) {
+      console.error('❌ Missing .env.db.local file');
+      console.error('Create it with:');
+      console.error('SUPABASE_PROJECT_ID="your-project-ref"');
+      console.error('POSTGRES_URL_NON_POOLING="postgres://..."  # For schema dumps only');
+      return {};
+    }
+
+    const envContent = readFileSync('.env.db.local', 'utf-8');
+    const envVars = Object.fromEntries(
+      envContent
+        .split('\n')
+        .filter((line) => line && !line.startsWith('#'))
+        .map((line) => {
+          const [key, ...values] = line.split('=');
+          return [key, values.join('=').replace(/^["']|["']$/g, '')];
+        })
+    );
+
+    return {
+      projectId: envVars.SUPABASE_PROJECT_ID,
+      dbUrl: envVars.POSTGRES_URL_NON_POOLING,
+    };
   } catch (error) {
-    console.error('❌ Failed to load environment variables:', error);
-    return null;
+    console.error('❌ Failed to load .env.db.local:', error);
+    return {};
   }
+}
+
+function getDatabaseUrl(): string | null {
+  const config = loadEnvConfig();
+  return config.dbUrl || null;
 }
 
 function calculateSchemaHash(dbUrl: string): string | null {
@@ -145,13 +171,13 @@ function calculateSchemaHash(dbUrl: string): string | null {
 let cachedSchemaHash: string | null | undefined;
 let cacheInitialized = false;
 
-async function getSchemaHash(forceRefresh = false): Promise<string | null> {
+function getSchemaHash(forceRefresh = false): string | null {
   // Return cached value if available and not forcing refresh
   if (cacheInitialized && !forceRefresh && cachedSchemaHash !== undefined) {
     return cachedSchemaHash;
   }
 
-  const dbUrl = await getDatabaseUrl();
+  const dbUrl = getDatabaseUrl();
   if (!dbUrl) {
     cachedSchemaHash = null;
     cacheInitialized = true;
@@ -173,10 +199,7 @@ function cleanup(): void {
 // Step 1: Schema Dump
 // ============================================================================
 
-async function generateSchemaDump(
-  isForce: boolean,
-  cachedHash?: string | null
-): Promise<StepResult> {
+function generateSchemaDump(isForce: boolean, cachedHash?: string | null): StepResult {
   const startTime = performance.now();
   const spinner = ora();
 
@@ -189,7 +212,7 @@ async function generateSchemaDump(
     if (!isForce) {
       spinner.start('Checking for schema changes...');
       // OPTIMIZATION: Use cached hash if provided (avoids redundant database query)
-      const currentHash = cachedHash !== undefined ? cachedHash : await getSchemaHash();
+      const currentHash = cachedHash !== undefined ? cachedHash : getSchemaHash();
 
       if (currentHash && !hasHashChanged('schema-dump', currentHash)) {
         spinner.info('Schema unchanged - skipping dump');
@@ -220,7 +243,7 @@ async function generateSchemaDump(
     }
 
     // Store hash (refresh cache after successful dump)
-    const currentHash = await getSchemaHash(true);
+    const currentHash = getSchemaHash(true);
     const duration = Math.round(performance.now() - startTime);
 
     if (currentHash) {
@@ -255,7 +278,7 @@ async function generateSchemaDump(
 // Step 2: TypeScript Types
 // ============================================================================
 
-async function generateTypes(isForce: boolean, cachedHash?: string | null): Promise<StepResult> {
+function generateTypes(isForce: boolean, cachedHash?: string | null): StepResult {
   const startTime = performance.now();
   const spinner = ora();
 
@@ -268,7 +291,7 @@ async function generateTypes(isForce: boolean, cachedHash?: string | null): Prom
     if (!isForce) {
       spinner.start('Checking for schema changes...');
       // OPTIMIZATION: Use cached hash if provided (avoids redundant database query)
-      const currentHash = cachedHash !== undefined ? cachedHash : await getSchemaHash();
+      const currentHash = cachedHash !== undefined ? cachedHash : getSchemaHash();
 
       if (currentHash && !hasHashChanged('db-schema', currentHash)) {
         spinner.info('Schema unchanged - skipping type generation');
@@ -285,15 +308,19 @@ async function generateTypes(isForce: boolean, cachedHash?: string | null): Prom
 
     spinner.start('Generating TypeScript types from Supabase...');
 
-    const dbUrl = await getDatabaseUrl();
-    if (!dbUrl) {
-      throw new Error('Database URL not found');
+    const config = loadEnvConfig();
+    if (!config.projectId) {
+      throw new Error('SUPABASE_PROJECT_ID not found in .env.db.local');
     }
 
-    const output = execSync(`supabase gen types typescript --db-url "${dbUrl}" --schema public`, {
-      encoding: 'utf-8',
-      stdio: 'pipe',
-    });
+    // Use --project-id instead of --db-url (handles SSL automatically via Supabase API)
+    const output = execSync(
+      `supabase gen types typescript --project-id "${config.projectId}" --schema public`,
+      {
+        encoding: 'utf-8',
+        stdio: 'pipe',
+      }
+    );
 
     writeFileSync(TYPES_FILE, output, 'utf-8');
 
@@ -303,7 +330,7 @@ async function generateTypes(isForce: boolean, cachedHash?: string | null): Prom
     }
 
     // Store hash (use cached value, no need to refresh)
-    const currentHash = cachedHash !== undefined ? cachedHash : await getSchemaHash();
+    const currentHash = cachedHash !== undefined ? cachedHash : getSchemaHash();
     const duration = Math.round(performance.now() - startTime);
 
     if (currentHash) {
@@ -338,7 +365,7 @@ async function generateTypes(isForce: boolean, cachedHash?: string | null): Prom
 // Main
 // ============================================================================
 
-async function main() {
+function main() {
   const args = process.argv.slice(2);
   const isForce = args.includes('--force');
   const onlyDump = args.includes('--only-dump');
@@ -366,7 +393,7 @@ async function main() {
     // Early exit optimization: Check if anything needs regeneration
     if (!isForce && runDump && runTypes) {
       console.log('🔍 Checking if database schema has changed...\n');
-      cachedSchemaHashForRun = await getSchemaHash();
+      cachedSchemaHashForRun = getSchemaHash();
 
       if (cachedSchemaHashForRun) {
         const schemaUpToDate = !(
@@ -385,19 +412,19 @@ async function main() {
       }
     } else if (!isForce && (runDump || runTypes)) {
       // Pre-fetch schema hash if we'll need it (single query for both dump and types)
-      cachedSchemaHashForRun = await getSchemaHash();
+      cachedSchemaHashForRun = getSchemaHash();
     }
 
     // Run operations in order, passing cached hash to avoid redundant queries
     if (runDump) {
-      results.push(await generateSchemaDump(isForce, cachedSchemaHashForRun));
+      results.push(generateSchemaDump(isForce, cachedSchemaHashForRun));
       if (!results[results.length - 1].success) {
         throw new Error('Schema dump failed - aborting');
       }
     }
 
     if (runTypes) {
-      results.push(await generateTypes(isForce, cachedSchemaHashForRun));
+      results.push(generateTypes(isForce, cachedSchemaHashForRun));
       if (!results[results.length - 1].success) {
         throw new Error('Type generation failed - aborting');
       }
@@ -444,8 +471,10 @@ async function main() {
   }
 }
 
-main().catch((error) => {
+try {
+  main();
+} catch (error) {
   console.error('❌ Unhandled error in main:', error);
   cleanup();
   process.exit(1);
-});
+}

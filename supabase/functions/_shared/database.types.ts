@@ -9,7 +9,64 @@ export type Json = string | number | boolean | null | { [key: string]: Json | un
 
 export interface Database {
   public: {
+    Tables: {
+      companies: {
+        Row: {
+          created_at: string;
+          description: string | null;
+          featured: boolean | null;
+          id: string;
+          industry: string | null;
+          logo: string | null;
+          name: string;
+          owner_id: string | null;
+          search_vector: unknown;
+          size: string | null;
+          slug: string;
+          updated_at: string;
+          using_cursor_since: string | null;
+          website: string | null;
+        };
+        Insert: {
+          created_at?: string;
+          description?: string | null;
+          featured?: boolean | null;
+          id?: string;
+          industry?: string | null;
+          logo?: string | null;
+          name: string;
+          owner_id?: string | null;
+          search_vector?: unknown;
+          size?: string | null;
+          slug: string;
+          updated_at?: string;
+          using_cursor_since?: string | null;
+          website?: string | null;
+        };
+        Update: {
+          created_at?: string;
+          description?: string | null;
+          featured?: boolean | null;
+          id?: string;
+          industry?: string | null;
+          logo?: string | null;
+          name?: string;
+          owner_id?: string | null;
+          search_vector?: unknown;
+          size?: string | null;
+          slug?: string;
+          updated_at?: string;
+          using_cursor_since?: string | null;
+          website?: string | null;
+        };
+        Relationships: [];
+      };
+    };
     Functions: {
+      get_company_profile: {
+        Args: { p_slug: string };
+        Returns: Json;
+      };
       get_weekly_digest: {
         Args: { p_week_start?: string };
         Returns: Json;
@@ -334,6 +391,56 @@ export interface Database {
           git_hash: string | null;
         };
       };
+      companies: {
+        Row: {
+          created_at: string;
+          description: string | null;
+          featured: boolean | null;
+          id: string;
+          industry: string | null;
+          logo: string | null;
+          name: string;
+          owner_id: string | null;
+          search_vector: unknown;
+          size: string | null;
+          slug: string;
+          updated_at: string;
+          using_cursor_since: string | null;
+          website: string | null;
+        };
+        Insert: {
+          created_at?: string;
+          description?: string | null;
+          featured?: boolean | null;
+          id?: string;
+          industry?: string | null;
+          logo?: string | null;
+          name: string;
+          owner_id?: string | null;
+          search_vector?: unknown;
+          size?: string | null;
+          slug: string;
+          updated_at?: string;
+          using_cursor_since?: string | null;
+          website?: string | null;
+        };
+        Update: {
+          created_at?: string;
+          description?: string | null;
+          featured?: boolean | null;
+          id?: string;
+          industry?: string | null;
+          logo?: string | null;
+          name?: string;
+          owner_id?: string | null;
+          search_vector?: unknown;
+          size?: string | null;
+          slug?: string;
+          updated_at?: string;
+          using_cursor_since?: string | null;
+          website?: string | null;
+        };
+      };
       jobs: {
         Row: {
           active: boolean | null;
@@ -585,7 +692,7 @@ export interface Database {
       job_status: 'draft' | 'pending_review' | 'active' | 'expired' | 'rejected' | 'deleted';
       newsletter_source: 'homepage' | 'content_page' | 'api' | 'import';
       webhook_direction: 'inbound' | 'outbound';
-      webhook_source: 'resend' | 'vercel' | 'discord' | 'supabase_db' | 'custom';
+      webhook_source: 'resend' | 'vercel' | 'discord' | 'supabase_db' | 'custom' | 'polar';
     };
   };
 }

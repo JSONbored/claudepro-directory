@@ -91,5 +91,8 @@ verify_jwt = false  # Vercel webhook with signature verification
 [functions.jobs-handler]
 verify_jwt = false  # Manual JWT verification via supabaseServiceRole.auth.getUser()
 
+[functions.companies-handler]
+verify_jwt = false  # GET: Public profiles (CDN cached). POST: Manual JWT verification via supabaseServiceRole.auth.getUser()
+
 [functions.analytics]
 verify_jwt = true  # Requires authenticated user for analytics tracking

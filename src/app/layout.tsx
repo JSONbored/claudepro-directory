@@ -7,6 +7,7 @@ const SpeedInsights = (
   await import('@vercel/speed-insights/next').catch(() => ({ SpeedInsights: () => null }))
 ).SpeedInsights;
 
+import { GeistMono } from 'geist/font/mono';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import { ThemeProvider } from 'next-themes';
@@ -42,7 +43,7 @@ import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 // Configure Inter font with optimizations
 const inter = Inter({
   subsets: ['latin'],
-  display: 'optional', // Changed from 'swap' to 'optional' for better performance (zero layout shifts)
+  display: 'optional',
   variable: '--font-inter',
   preload: true,
   fallback: [
@@ -125,7 +126,11 @@ export default async function RootLayout({
   const announcement = await getActiveAnnouncement();
 
   return (
-    <html lang="en" suppressHydrationWarning className={`${inter.variable} font-sans`}>
+    <html
+      lang="en"
+      suppressHydrationWarning
+      className={`${inter.variable} ${GeistMono.variable} font-sans`}
+    >
       <head>
         {/* Viewport for responsive design */}
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />

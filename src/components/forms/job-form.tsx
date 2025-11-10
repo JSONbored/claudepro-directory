@@ -5,7 +5,8 @@
  * All slug generation in PostgreSQL via job_slug() function.
  */
 
-import { useState, useTransition } from 'react';
+import { useId, useState, useTransition } from 'react';
+import { CompanySelector } from '@/src/components/forms/company-selector';
 import { FormField } from '@/src/components/forms/utilities/form-field';
 import { ListItemManager } from '@/src/components/forms/utilities/list-item-manager';
 import { Button } from '@/src/components/primitives/button';
@@ -16,6 +17,8 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/card';
+import { Checkbox } from '@/src/components/primitives/checkbox';
+import { Label } from '@/src/components/primitives/label';
 import {
   Select,
   SelectContent,
@@ -24,12 +27,12 @@ import {
   SelectValue,
 } from '@/src/components/primitives/select';
 import { ROUTES } from '@/src/lib/constants/routes';
+import { Star } from '@/src/lib/icons';
+import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { toasts } from '@/src/lib/utils/toast.utils';
 import type { Database } from '@/src/types/database.types';
 
 type CreateJobInput = Database['public']['Tables']['jobs']['Insert'];
-
-import { UI_CLASSES } from '@/src/lib/ui-constants';
-import { toasts } from '@/src/lib/utils/toast.utils';
 
 interface JobFormProps {
   initialData?: Partial<CreateJobInput>;
@@ -40,7 +43,11 @@ interface JobFormProps {
 }
 
 export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: JobFormProps) {
+  const featuredCheckboxId = useId();
   const [isPending, startTransition] = useTransition();
+  const [companyId, setCompanyId] = useState<string | null>(initialData?.company_id || null);
+  const [companyName, setCompanyName] = useState<string>(initialData?.company || '');
+  const [isFeatured, setIsFeatured] = useState<boolean>(initialData?.tier === 'featured');
   const [tags, setTags] = useState<string[]>(
     Array.isArray(initialData?.tags) ? (initialData.tags as string[]) : []
   );
@@ -65,7 +72,8 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
 
     const jobData: CreateJobInput = {
       title: formData.get('title') as string,
-      company: formData.get('company') as string,
+      company: companyName, // Use state (supports legacy text field)
+      company_id: companyId, // FK to companies table
       ...(location && { location }),
       description: formData.get('description') as string,
       ...(salary && { salary }),
@@ -78,6 +86,8 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
       requirements,
       benefits,
       link: formData.get('link') as string,
+      plan: formData.get('plan') as string,
+      tier: isFeatured ? 'featured' : 'standard',
       ...(contactEmail && { contact_email: contactEmail }),
       ...(companyLogo && { company_logo: companyLogo }),
     };
@@ -116,13 +126,13 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
             placeholder="e.g., Senior AI Engineer"
           />
 
-          <FormField
-            variant="input"
-            label="Company"
-            name="company"
-            {...(initialData?.company && { defaultValue: initialData.company })}
-            required
-            placeholder="e.g., Acme Corp"
+          <CompanySelector
+            value={companyId}
+            onChange={(id, name) => {
+              setCompanyId(id);
+              setCompanyName(name);
+            }}
+            defaultCompanyName={initialData?.company}
           />
 
           <div className="grid grid-cols-2 gap-4">
@@ -310,34 +320,59 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
       <Card>
         <CardHeader>
           <CardTitle>Listing Plan</CardTitle>
-          <CardDescription>Choose your visibility level</CardDescription>
+          <CardDescription>30 days of visibility - choose your plan</CardDescription>
         </CardHeader>
         <CardContent>
-          <Select name="plan" defaultValue={initialData?.plan || 'standard'}>
+          <Select name="plan" defaultValue={initialData?.plan || 'one-time'}>
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="standard">
+              <SelectItem value="one-time">
                 <div>
-                  <div className="font-medium">Standard (Free)</div>
-                  <div className={UI_CLASSES.TEXT_XS_MUTED}>Basic listing, 30 days</div>
+                  <div className="font-medium">One-Time - $79</div>
+                  <div className={UI_CLASSES.TEXT_XS_MUTED}>30 days active, pay once</div>
                 </div>
               </SelectItem>
-              <SelectItem value="featured">
+              <SelectItem value="subscription">
                 <div>
-                  <div className="font-medium">Featured (Contact for pricing)</div>
-                  <div className={UI_CLASSES.TEXT_XS_MUTED}>Top placement, badge, analytics</div>
-                </div>
-              </SelectItem>
-              <SelectItem value="premium">
-                <div>
-                  <div className="font-medium">Premium (Contact for pricing)</div>
-                  <div className={UI_CLASSES.TEXT_XS_MUTED}>Featured + newsletter + promotion</div>
+                  <div className="font-medium">Subscription - $59/month</div>
+                  <div className={UI_CLASSES.TEXT_XS_MUTED}>
+                    Auto-renew, cancel anytime (first 50: lifetime rate lock)
+                  </div>
                 </div>
               </SelectItem>
             </SelectContent>
           </Select>
+          <p className={`${UI_CLASSES.TEXT_XS_MUTED} mt-2`}>
+            Payment via Polar.sh after submission. Job goes live immediately after payment
+            confirmation.
+          </p>
+
+          <div className="mt-4 rounded-lg border border-orange-500/30 bg-orange-500/5 p-4">
+            <div className="flex items-start gap-3">
+              <Checkbox
+                id={featuredCheckboxId}
+                checked={isFeatured}
+                onCheckedChange={(checked) => setIsFeatured(checked as boolean)}
+              />
+              <div className="flex-1">
+                <Label
+                  htmlFor={featuredCheckboxId}
+                  className="flex cursor-pointer items-center gap-2 font-semibold text-sm"
+                >
+                  <Star className={`${UI_CLASSES.ICON_SM} text-orange-500`} />
+                  Make this a Featured Listing
+                </Label>
+                <p className={`${UI_CLASSES.TEXT_XS_MUTED} mt-1`}>
+                  Top placement with orange badge and priority in search results
+                </p>
+                <p className="mt-2 font-medium text-orange-600 text-sm dark:text-orange-400">
+                  +$99 one-time or +$49/month with subscription
+                </p>
+              </div>
+            </div>
+          </div>
         </CardContent>
       </Card>
 
