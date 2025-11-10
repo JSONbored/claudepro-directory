@@ -1,0 +1,72 @@
+import { statsigAdapter, type StatsigUser } from '@flags-sdk/statsig';
+import { flag, dedupe } from 'flags/next';
+import type { Identify } from 'flags';
+import { createClient } from '@/src/lib/supabase/server';
+
+/**
+ * Identify function - provides user context for flag evaluation
+ * Statsig uses this to do % rollouts, user targeting, etc.
+ */
+export const identify = dedupe((async () => {
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    return {
+      userID: user?.id || 'anonymous',
+      email: user?.email,
+      // Add custom attributes for targeting:
+      customIDs: {
+        userSlug: user?.user_metadata?.slug,
+      },
+    };
+  } catch (error) {
+    // Fallback to anonymous if auth fails
+    return {
+      userID: 'anonymous',
+    };
+  }
+}) satisfies Identify<StatsigUser>);
+
+/**
+ * Factory function to create feature flags
+ */
+export const createFeatureFlag = (key: string) =>
+  flag<boolean, StatsigUser>({
+    key,
+    adapter: statsigAdapter.featureGate((gate) => gate.value, {
+      exposureLogging: true, // Track when flags are checked (for analytics)
+    }),
+    identify,
+  });
+
+/**
+ * All feature flags - centralized
+ * Usage: const enabled = await featureFlags.testFlag();
+ */
+export const featureFlags = {
+  // Test
+  testFlag: createFeatureFlag('test_flag'),
+
+  // Growth features
+  referralProgram: createFeatureFlag('referral_program'),
+  confettiAnimations: createFeatureFlag('confetti_animations'),
+  recentlyViewed: createFeatureFlag('recently_viewed_sidebar'),
+  compareConfigs: createFeatureFlag('compare_configs'),
+
+  // Monetization features
+  promotedConfigs: createFeatureFlag('promoted_configs'),
+  jobAlerts: createFeatureFlag('job_alerts'),
+  selfServiceCheckout: createFeatureFlag('self_service_checkout'),
+
+  // UX enhancements
+  contentDetailTabs: createFeatureFlag('content_detail_tabs'),
+  interactiveOnboarding: createFeatureFlag('interactive_onboarding'),
+  configPlayground: createFeatureFlag('config_playground'),
+
+  // Infrastructure
+  publicAPI: createFeatureFlag('public_api'),
+  enhancedSkeletons: createFeatureFlag('enhanced_skeletons'),
+};
