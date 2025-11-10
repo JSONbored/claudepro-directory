@@ -14,14 +14,22 @@ export const identify = dedupe((async () => {
       data: { user },
     } = await supabase.auth.getUser();
 
-    return {
+    const baseUser: StatsigUser = {
       userID: user?.id || 'anonymous',
-      email: user?.email,
-      // Add custom attributes for targeting:
-      customIDs: {
-        userSlug: user?.user_metadata?.slug,
-      },
     };
+
+    // Only add optional fields if they exist
+    if (user?.email) {
+      baseUser.email = user.email;
+    }
+
+    if (user?.user_metadata?.slug) {
+      baseUser.customIDs = {
+        userSlug: user.user_metadata.slug as string,
+      };
+    }
+
+    return baseUser;
   } catch (error) {
     // Fallback to anonymous if auth fails
     return {
