@@ -8,7 +8,7 @@ import { Suspense } from 'react';
 import { LazySection } from '@/src/components/core/infra/lazy-section';
 import { TopContributors } from '@/src/components/features/community/top-contributors';
 import { HomePageClient } from '@/src/components/features/home';
-import { LoadingSkeleton } from '@/src/components/primitives/loading-skeleton';
+import { HomePageLoading } from '@/src/lib/components/loading-factory';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 
 const RollingText = dynamicImport(
@@ -137,7 +137,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
         </section>
 
         <div className={'relative'}>
-          <Suspense fallback={<LoadingSkeleton />}>
+          <Suspense fallback={<HomePageLoading />}>
             <HomeContentSection
               homepageContentData={
                 homepageResult?.content || {
