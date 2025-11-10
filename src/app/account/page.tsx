@@ -8,7 +8,7 @@ import {
   CardTitle,
 } from '@/src/components/primitives/card';
 import { NavLink } from '@/src/components/shared/nav-link';
-import { ROUTES } from '@/src/lib/constants/routes';
+import { ROUTES } from '@/src/lib/constants';
 import { Bookmark, Calendar } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';

@@ -2272,30 +2272,6 @@ export type Database = {
         };
         Relationships: [];
       };
-      trigger_test_log: {
-        Row: {
-          category: string | null;
-          created_at: string | null;
-          event_type: string | null;
-          id: string;
-          slug: string | null;
-        };
-        Insert: {
-          category?: string | null;
-          created_at?: string | null;
-          event_type?: string | null;
-          id?: string;
-          slug?: string | null;
-        };
-        Update: {
-          category?: string | null;
-          created_at?: string | null;
-          event_type?: string | null;
-          id?: string;
-          slug?: string | null;
-        };
-        Relationships: [];
-      };
       user_collections: {
         Row: {
           bookmark_count: number;
@@ -3791,7 +3767,7 @@ export type Database = {
       };
       invoke_edge_function: {
         Args: { action_header: string; function_name: string; payload?: Json };
-        Returns: string;
+        Returns: number;
       };
       is_admin: { Args: { p_user_id: string }; Returns: boolean };
       is_bookmarked: {

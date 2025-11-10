@@ -36,7 +36,7 @@ import {
   getCategoryStatsConfig,
   HOMEPAGE_FEATURED_CATEGORIES,
 } from '@/src/lib/config/category-config';
-import { ROUTES } from '@/src/lib/constants/routes';
+import { ROUTES } from '@/src/lib/constants';
 import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
 import { logger } from '@/src/lib/logger';
 import type { DisplayableContent, FilterState } from '@/src/lib/types/component.types';

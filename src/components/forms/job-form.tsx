@@ -26,7 +26,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/src/components/primitives/select';
-import { ROUTES } from '@/src/lib/constants/routes';
+import { ROUTES } from '@/src/lib/constants';
 import { Star } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { toasts } from '@/src/lib/utils/toast.utils';

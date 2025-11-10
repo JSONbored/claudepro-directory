@@ -6,8 +6,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { ResultsDisplay } from '@/src/components/tools/recommender/results-display';
-import { APP_CONFIG } from '@/src/lib/constants';
-import { ROUTES } from '@/src/lib/constants/routes';
+import { APP_CONFIG, ROUTES } from '@/src/lib/constants';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';

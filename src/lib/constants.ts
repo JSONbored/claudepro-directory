@@ -444,3 +444,178 @@ export async function getContentDescription(): Promise<string> {
 
   return `Open-source directory of ${count}+ Claude AI configurations. Community-driven collection of MCP servers, automation hooks, custom commands, agents, and rules.`;
 }
+
+/**
+ * Route Constants
+ * Type-safe route constants for Next.js navigation
+ */
+export const ROUTES = {
+  HOME: '/',
+  COMMUNITY: '/community',
+  COMPANIES: '/companies',
+  LLMS_TXT: '/llms.txt',
+  LOGIN: '/login',
+  PARTNER: '/partner',
+  SUBMIT: '/submit',
+  AGENTS: '/agents',
+  CHANGELOG: '/changelog',
+  COLLECTIONS: '/collections',
+  COMMANDS: '/commands',
+  GUIDES: '/guides',
+  HOOKS: '/hooks',
+  JOBS: '/jobs',
+  MCP: '/mcp',
+  RULES: '/rules',
+  SKILLS: '/skills',
+  STATUSLINES: '/statuslines',
+  ACCOUNT: '/account',
+  ACCOUNT_ACTIVITY: '/account/activity',
+  ACCOUNT_COMPANIES: '/account/companies',
+  ACCOUNT_JOBS: '/account/jobs',
+  ACCOUNT_JOBS_NEW: '/account/jobs/new',
+  ACCOUNT_LIBRARY: '/account/library',
+  ACCOUNT_LIBRARY_NEW: '/account/library/new',
+  ACCOUNT_SETTINGS: '/account/settings',
+  ACCOUNT_SPONSORSHIPS: '/account/sponsorships',
+  ACCOUNT_SUBMISSIONS: '/account/submissions',
+  TOOLS_CONFIG_RECOMMENDER: '/tools/config-recommender',
+  AUTH_AUTH_CODE_ERROR: '/auth/auth-code-error',
+} as const;
+
+/**
+ * Security Configuration
+ * Used for trusted hostname validation, security headers, and allowed origins
+ */
+export const SECURITY_CONFIG = {
+  headers: {
+    'X-Frame-Options': 'DENY',
+    'X-Content-Type-Options': 'nosniff',
+    'Referrer-Policy': 'strict-origin-when-cross-origin',
+    'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
+  },
+  // Trusted hostnames for validation
+  trustedHostnames: {
+    github: ['github.com', 'www.github.com'] as const,
+    umami: ['umami.claudepro.directory'] as const,
+    vercel: ['va.vercel-scripts.com'] as const,
+  },
+  // Allowed origins for postMessage
+  allowedOrigins: [
+    APP_CONFIG.url,
+    'https://www.claudepro.directory',
+    'https://dev.claudepro.directory',
+  ] as const,
+} as const;
+
+/**
+ * Time Constants
+ * Common time conversions for consistency across the codebase
+ */
+export const TIME_CONSTANTS = {
+  SECOND: 1000,
+  MINUTE: 60 * 1000,
+  HOUR: 60 * 60 * 1000,
+  DAY: 24 * 60 * 60 * 1000,
+  WEEK: 7 * 24 * 60 * 60 * 1000,
+} as const;
+
+/**
+ * Service Delays Configuration
+ * Standardized delays for API calls, retries, and service interactions
+ */
+export const SERVICE_DELAYS = {
+  // API retry delays
+  retry: {
+    initial: 1000, // 1 second
+    exponential: 2000, // Base for exponential backoff
+    maximum: 10000, // 10 seconds max
+  },
+  // Email service delays
+  email: {
+    send: 1000, // 1 second between sends
+    retry: 2000, // 2 seconds on failure
+  },
+  // External API delays
+  api: {
+    github: 1000, // 1 second (respect GitHub rate limits)
+    resend: 1000, // 1 second between requests
+    external: 500, // 500ms default for external APIs
+  },
+  // Database operation delays
+  database: {
+    query: 100, // 100ms between queries
+    write: 200, // 200ms between writes
+    transaction: 500, // 500ms for transaction retry
+  },
+} as const;
+
+/**
+ * Polling Intervals Configuration
+ * Standardized intervals for periodic checks and updates
+ */
+export const POLLING_INTERVALS = {
+  // Real-time updates
+  realtime: 1000, // 1 second
+  // Badge notifications
+  badges: 30000, // 30 seconds
+  // Status checks
+  status: {
+    health: 60000, // 1 minute
+    api: 30000, // 30 seconds
+    database: 120000, // 2 minutes
+  },
+  // Analytics polling
+  analytics: {
+    views: 60000, // 1 minute
+    stats: 300000, // 5 minutes
+  },
+} as const;
+
+/**
+ * Timeout Configuration
+ * Standardized timeouts for various operations
+ */
+export const TIMEOUTS = {
+  // API timeouts
+  api: {
+    default: 5000, // 5 seconds
+    long: 10000, // 10 seconds
+    short: 2000, // 2 seconds
+  },
+  // UI interaction timeouts
+  ui: {
+    debounce: 150, // Search debounce
+    tooltip: 300, // Tooltip delay
+    animation: 300, // Animation duration
+    transition: 200, // Transition duration
+  },
+  // Test timeouts
+  test: {
+    default: 5000, // 5 seconds
+    long: 10000, // 10 seconds
+    network: 5000, // 5 seconds for network idle
+  },
+} as const;
+
+/**
+ * Animation Durations Configuration
+ * Standardized animation durations for consistent UX
+ */
+export const ANIMATION_DURATIONS = {
+  // Number ticker animations
+  ticker: {
+    default: 1500, // 1.5 seconds
+    fast: 1000, // 1 second
+    slow: 2000, // 2 seconds
+  },
+  // Stagger delays for sequential animations
+  stagger: {
+    fast: 100, // 100ms between items
+    medium: 200, // 200ms between items
+    slow: 300, // 300ms between items
+  },
+  // Border beam animations
+  beam: {
+    default: 15000, // 15 seconds (from border-beam component)
+  },
+} as const;

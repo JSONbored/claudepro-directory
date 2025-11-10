@@ -18,7 +18,7 @@ import {
   HOMEPAGE_FEATURED_CATEGORIES,
   type UnifiedCategoryConfig,
 } from '@/src/lib/config/category-config';
-import { ROUTES } from '@/src/lib/constants/routes';
+import { ROUTES } from '@/src/lib/constants';
 import { Briefcase, ExternalLink } from '@/src/lib/icons';
 import type { ContentItem } from '@/src/lib/types/component.types';
 import { UI_CLASSES } from '@/src/lib/ui-constants';

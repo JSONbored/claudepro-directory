@@ -130,3 +130,5 @@ supabase/schema.sql
 .launchd/uninstall.sh
 
 REPUTATION_BADGE_REMOVAL_PLAN.md
+
+RPC_TYPE_ANALYSIS.md

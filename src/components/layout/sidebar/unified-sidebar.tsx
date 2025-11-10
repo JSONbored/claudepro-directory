@@ -13,7 +13,7 @@
 import Link from 'next/link';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/card';
-import { ROUTES } from '@/src/lib/constants/routes';
+import { ROUTES } from '@/src/lib/constants';
 import { Clock, Sparkles, TrendingUp, Users } from '@/src/lib/icons';
 import type { RelatedGuide } from '@/src/lib/schemas/app.schema';
 import { DIMENSIONS, POSITION_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';

@@ -11,8 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/card';
-import { APP_CONFIG } from '@/src/lib/constants';
-import { ROUTES } from '@/src/lib/constants/routes';
+import { APP_CONFIG, ROUTES } from '@/src/lib/constants';
 import { ArrowLeft, Edit, Share2 } from '@/src/lib/icons';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';

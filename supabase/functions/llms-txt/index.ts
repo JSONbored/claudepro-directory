@@ -89,7 +89,8 @@ Deno.serve(async (req) => {
             status: 404,
             headers: {
               'Content-Type': 'text/plain; charset=utf-8',
-              'Cache-Control': 'no-store, must-revalidate',
+              'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=7200',
+              'CDN-Cache-Control': 'max-age=3600',
               ...getOnlyCorsHeaders,
             },
           });
@@ -126,7 +127,8 @@ Deno.serve(async (req) => {
             status: 404,
             headers: {
               'Content-Type': 'text/plain; charset=utf-8',
-              'Cache-Control': 'no-store, must-revalidate',
+              'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=7200',
+              'CDN-Cache-Control': 'max-age=3600',
               ...getOnlyCorsHeaders,
             },
           });
@@ -166,7 +168,8 @@ Deno.serve(async (req) => {
         status: 404,
         headers: {
           'Content-Type': 'text/plain; charset=utf-8',
-          'Cache-Control': 'no-store, must-revalidate',
+          'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=7200',
+          'CDN-Cache-Control': 'max-age=3600',
           ...getOnlyCorsHeaders,
         },
       });

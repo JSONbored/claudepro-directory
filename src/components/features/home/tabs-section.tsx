@@ -25,7 +25,7 @@ import {
   HOMEPAGE_TAB_CATEGORIES,
   type UnifiedCategoryConfig,
 } from '@/src/lib/config/category-config';
-import { ROUTES } from '@/src/lib/constants/routes';
+import { ROUTES } from '@/src/lib/constants';
 import type { DisplayableContent } from '@/src/lib/types/component.types';
 import { ANIMATION_CONSTANTS } from '@/src/lib/ui-constants';
 

@@ -17,7 +17,7 @@ import {
   CardTitle,
 } from '@/src/components/primitives/card';
 import { SelectItem } from '@/src/components/primitives/select';
-import { ROUTES } from '@/src/lib/constants/routes';
+import { ROUTES } from '@/src/lib/constants';
 import { FileText, X } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { createClient } from '@/src/lib/supabase/client';

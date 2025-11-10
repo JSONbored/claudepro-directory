@@ -6,7 +6,7 @@ import { UnifiedNewsletterCapture } from '@/src/components/features/growth/unifi
 import { LazySection } from '@/src/components/infra/lazy-section';
 import { Button } from '@/src/components/primitives/button';
 import { Skeleton } from '@/src/components/primitives/loading-skeleton';
-import { ROUTES } from '@/src/lib/constants/routes';
+import { ROUTES } from '@/src/lib/constants';
 import { ExternalLink, HelpCircle } from '@/src/lib/icons';
 import type { ContentItem, ContentListServerProps } from '@/src/lib/types/component.types';
 import { ICON_NAME_MAP, UI_CLASSES } from '@/src/lib/ui-constants';

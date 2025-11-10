@@ -28,8 +28,7 @@ import {
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/src/components/primitives/sheet';
 import { PrefetchLink } from '@/src/components/shared/prefetch-link';
 import { ACTION_LINKS, PRIMARY_NAVIGATION, SECONDARY_NAVIGATION } from '@/src/config/navigation';
-import { SOCIAL_LINKS } from '@/src/lib/constants';
-import { ROUTES } from '@/src/lib/constants/routes';
+import { ROUTES, SOCIAL_LINKS } from '@/src/lib/constants';
 import {
   Briefcase,
   ChevronDown,

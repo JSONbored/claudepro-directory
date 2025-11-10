@@ -14,8 +14,7 @@ const UnifiedNewsletterCapture = dynamic(
 );
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/card';
-import { SOCIAL_LINKS } from '@/src/lib/constants';
-import { ROUTES } from '@/src/lib/constants/routes';
+import { ROUTES, SOCIAL_LINKS } from '@/src/lib/constants';
 import { Github, MessageCircle, MessageSquare, Twitter, Users } from '@/src/lib/icons';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';

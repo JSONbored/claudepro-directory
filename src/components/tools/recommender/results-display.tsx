@@ -33,7 +33,7 @@ import {
   TooltipTrigger,
 } from '@/src/components/primitives/tooltip';
 import { addBookmarkBatch } from '@/src/lib/actions/user.actions';
-import { ROUTES } from '@/src/lib/constants/routes';
+import { ROUTES } from '@/src/lib/constants';
 import {
   ArrowRight,
   Award,

@@ -16,8 +16,7 @@ import { memo, useEffect, useMemo, useState } from 'react';
 import { UnifiedBadge } from '@/src/components/domain/unified-badge';
 import { HeyClaudeLogo } from '@/src/components/layout/heyclaude-logo';
 import { ThemeToggle } from '@/src/components/layout/theme-toggle';
-import { APP_CONFIG, EXTERNAL_SERVICES, SOCIAL_LINKS } from '@/src/lib/constants';
-import { ROUTES } from '@/src/lib/constants/routes';
+import { APP_CONFIG, EXTERNAL_SERVICES, ROUTES, SOCIAL_LINKS } from '@/src/lib/constants';
 import { DiscordIcon, ExternalLink, Github, Rss, Sparkles } from '@/src/lib/icons';
 import { ANIMATION_CONSTANTS, RESPONSIVE_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
 
