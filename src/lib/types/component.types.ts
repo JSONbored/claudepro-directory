@@ -123,6 +123,7 @@ export type ContentSearchClientProps<T extends DisplayableContent = DisplayableC
   title: string;
   icon: string;
   type?: string;
+  category?: string;
 };
 
 export type ContentSidebarProps<T extends ContentItem = ContentItem> = {

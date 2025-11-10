@@ -7,9 +7,8 @@ const SpeedInsights = (
   await import('@vercel/speed-insights/next').catch(() => ({ SpeedInsights: () => null }))
 ).SpeedInsights;
 
-import { GeistMono } from 'geist/font/mono';
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
+import localFont from 'next/font/local';
 import { ThemeProvider } from 'next-themes';
 import { Suspense } from 'react';
 import './globals.css';
@@ -40,11 +39,11 @@ import { UmamiScript } from '@/src/components/core/shared/umami-script';
 import { APP_CONFIG } from '@/src/lib/constants';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 
-// Configure Inter font with optimizations
-const inter = Inter({
-  subsets: ['latin'],
-  display: 'optional',
+// Self-hosted fonts - no external requests, faster FCP, GDPR compliant
+const inter = localFont({
+  src: '../fonts/Inter-Variable.woff2',
   variable: '--font-inter',
+  display: 'optional',
   preload: true,
   fallback: [
     'system-ui',
@@ -55,6 +54,25 @@ const inter = Inter({
     'Arial',
     'sans-serif',
   ],
+  weight: '100 900',
+});
+
+const geist = localFont({
+  src: '../fonts/GeistVF.woff2',
+  variable: '--font-geist',
+  display: 'optional',
+  preload: true,
+  fallback: ['system-ui', '-apple-system', 'sans-serif'],
+  weight: '100 900',
+});
+
+const geistMono = localFont({
+  src: '../fonts/GeistMonoVF.woff2',
+  variable: '--font-geist-mono',
+  display: 'optional',
+  preload: true,
+  fallback: ['Menlo', 'Monaco', 'Courier New', 'monospace'],
+  weight: '100 900',
 });
 
 // Generate homepage metadata from centralized registry
@@ -129,7 +147,7 @@ export default async function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${inter.variable} ${GeistMono.variable} font-sans`}
+      className={`${inter.variable} ${geist.variable} ${geistMono.variable} font-sans`}
     >
       <head>
         {/* Viewport for responsive design */}

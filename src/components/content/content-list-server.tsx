@@ -129,6 +129,7 @@ export function ContentListServer<T extends DisplayableContent>({
           <ContentSearchClient
             items={items}
             type={type}
+            category={type}
             searchPlaceholder={searchPlaceholder}
             title={title}
             icon={icon}

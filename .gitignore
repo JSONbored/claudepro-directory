@@ -132,3 +132,6 @@ supabase/schema.sql
 REPUTATION_BADGE_REMOVAL_PLAN.md
 
 RPC_TYPE_ANALYSIS.md
+
+# Turborepo
+.turbo

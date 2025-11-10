@@ -23,7 +23,7 @@
 import { motion } from 'motion/react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { NumberTicker } from '@/src/components/core/magic/number-ticker';
 import {
   LazyFeaturedSections,
@@ -42,7 +42,6 @@ import { logger } from '@/src/lib/logger';
 import type { DisplayableContent, FilterState } from '@/src/lib/types/component.types';
 import type { HomePageClientProps } from '@/src/lib/types/page-props.types';
 import { ANIMATION_CONSTANTS, UI_CLASSES } from '@/src/lib/ui-constants';
-import type { Database } from '@/src/types/database.types';
 
 /**
  * OPTIMIZATION (2025-10-22): Enabled SSR for UnifiedSearch
@@ -70,7 +69,6 @@ function HomePageClientComponent({ initialData, featuredByCategory, stats }: Hom
   const [isSearching, setIsSearching] = useState(false);
   const [filters, setFilters] = useState({});
   const [currentSearchQuery, setCurrentSearchQuery] = useState('');
-  const abortControllerRef = useRef<AbortController | null>(null);
 
   const categoryStatsConfig = useMemo(() => getCategoryStatsConfig(), []);
   const categoryConfigs = useMemo(() => getCategoryConfigs(), []);
@@ -130,62 +128,34 @@ function HomePageClientComponent({ initialData, featuredByCategory, stats }: Hom
 
   const handleSearch = useCallback(
     async (query: string, categoryOverride?: string) => {
-      // Cancel previous request if still pending
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-      }
-
       if (!query.trim()) {
         setSearchResults(allConfigs);
         setIsSearching(false);
         setCurrentSearchQuery('');
-        abortControllerRef.current = null;
         return;
       }
 
       setCurrentSearchQuery(query.trim());
       setIsSearching(true);
-      abortControllerRef.current = new AbortController();
-      const currentController = abortControllerRef.current;
 
       try {
-        // Direct database RPC call - no API route middleman
-        const { createClient } = await import('@/src/lib/supabase/client');
-        const supabase = createClient();
+        const { searchContent } = await import('@/src/lib/edge/search-client');
 
-        // Performance optimization: Filter by category at database level
         const effectiveTab = categoryOverride ?? activeTab;
-        const rpcParams: {
-          p_query: string;
-          p_limit: number;
-          p_categories?: string[];
-        } = {
-          p_query: query.trim(),
-          p_limit: 50,
-        };
+        const categories =
+          effectiveTab !== 'all' && effectiveTab !== 'community' ? [effectiveTab] : undefined;
 
-        // Only filter by category if not "all" or "community" tab
-        if (effectiveTab !== 'all' && effectiveTab !== 'community') {
-          rpcParams.p_categories = [effectiveTab];
-        }
+        const response = await searchContent(query.trim(), {
+          ...(categories && { categories }),
+          limit: 50,
+        });
 
-        const { data, error } = await supabase.rpc('search_content_optimized', rpcParams);
-
-        // Ignore results if this request was aborted
-        if (currentController.signal.aborted) return;
-
-        if (error) throw error;
-
-        // Use proper database-generated type from search RPC
-        type SearchResultType =
-          Database['public']['Functions']['search_content_optimized']['Returns'][number];
-        setSearchResults((data || []) as SearchResultType[]);
+        setSearchResults(response.results);
       } catch (error) {
-        // Ignore abort errors (expected when fast typing)
-        if (currentController.signal.aborted) return;
-
         logger.error('Search failed', error as Error, { source: 'HomePageSearch' });
         setSearchResults(allConfigs);
+      } finally {
+        setIsSearching(false);
       }
     },
     [allConfigs, activeTab]

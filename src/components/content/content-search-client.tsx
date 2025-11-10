@@ -1,7 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { memo, useCallback, useState } from 'react';
+import { memo, useCallback, useEffect, useState } from 'react';
 import { ConfigCard } from '@/src/components/core/domain/config-card';
 import { UnifiedCardGrid } from '@/src/components/core/domain/unified-card-grid';
 import { ErrorBoundary } from '@/src/components/core/infra/error-boundary';
@@ -19,6 +19,7 @@ const UnifiedSearch = dynamic(
 );
 
 import { HelpCircle } from '@/src/lib/icons';
+import { logger } from '@/src/lib/logger';
 import type {
   ContentSearchClientProps,
   DisplayableContent,
@@ -27,42 +28,59 @@ import type {
 import { ICON_NAME_MAP } from '@/src/lib/ui-constants';
 
 /**
- * Content Search Client Component
- * Production 2025 Architecture: Infinite Scroll with Intersection Observer
- *
- * Performance Optimizations:
- * - Intersection Observer for progressive loading
- * - Loads 30 items per batch for optimal performance
- * - Compatible with CSS Grid layout
- * - Memoized to prevent re-renders when parent state changes
- * - Only re-renders when items/searchPlaceholder/title/icon props change
+ * Content Search Client - Edge Function Integration
+ * Migrated from client-side filtering to unified-search edge function
  */
 function ContentSearchClientComponent<T extends DisplayableContent>({
   items,
   searchPlaceholder,
   title,
   icon,
+  category,
 }: ContentSearchClientProps<T>) {
-  // Local state for search (no server call needed - data already provided)
   const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState<FilterState>({});
+  const [searchResults, setSearchResults] = useState<T[]>(items);
 
-  const handleSearch = useCallback((query: string) => {
-    setSearchQuery(query);
-  }, []);
+  const handleSearch = useCallback(
+    async (query: string) => {
+      setSearchQuery(query);
+
+      // Empty query → show all initial items
+      if (!query.trim()) {
+        setSearchResults(items);
+        return;
+      }
+
+      try {
+        const { searchContent } = await import('@/src/lib/edge/search-client');
+
+        const response = await searchContent(query.trim(), {
+          ...(category && { categories: [category] }),
+          limit: 100,
+        });
+
+        setSearchResults(response.results as T[]);
+      } catch (error) {
+        logger.error('Content search failed', error as Error, { source: 'ContentSearchClient' });
+        setSearchResults(items);
+      }
+    },
+    [items, category]
+  );
 
   const handleFiltersChange = useCallback((newFilters: FilterState) => {
     setFilters(newFilters);
   }, []);
 
-  // Simple client-side filtering since data is already provided
-  const filteredItems = items.filter((item) => {
-    if (!searchQuery) return true;
-    const query = searchQuery.toLowerCase();
-    return (
-      item.title?.toLowerCase().includes(query) || item.description?.toLowerCase().includes(query)
-    );
-  }) as T[];
+  // Reset results when initial items change
+  useEffect(() => {
+    if (!searchQuery) {
+      setSearchResults(items);
+    }
+  }, [items, searchQuery]);
+
+  const filteredItems = searchResults;
 
   const filterOptions = { tags: [], authors: [], categories: [] };
 

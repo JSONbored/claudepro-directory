@@ -61,8 +61,93 @@ export interface Database {
         };
         Relationships: [];
       };
+      search_queries: {
+        Row: {
+          created_at: string;
+          filters: Json | null;
+          id: string;
+          normalized_query: string | null;
+          query: string;
+          result_count: number | null;
+          session_id: string | null;
+          user_id: string | null;
+        };
+        Insert: {
+          created_at?: string;
+          filters?: Json | null;
+          id?: string;
+          normalized_query?: string | null;
+          query: string;
+          result_count?: number | null;
+          session_id?: string | null;
+          user_id?: string | null;
+        };
+        Update: {
+          created_at?: string;
+          filters?: Json | null;
+          id?: string;
+          normalized_query?: string | null;
+          query?: string;
+          result_count?: number | null;
+          session_id?: string | null;
+          user_id?: string | null;
+        };
+        Relationships: [];
+      };
     };
     Functions: {
+      search_content_optimized: {
+        Args: {
+          p_authors?: string[];
+          p_categories?: string[];
+          p_limit?: number;
+          p_offset?: number;
+          p_query?: string;
+          p_sort?: string;
+          p_tags?: string[];
+        };
+        Returns: {
+          _featured: Json;
+          author: string;
+          author_profile_url: string;
+          bookmark_count: number;
+          category: string;
+          combined_score: number;
+          copyCount: number;
+          created_at: string;
+          date_added: string;
+          description: string;
+          examples: Json;
+          features: Json;
+          id: string;
+          relevance_score: number;
+          slug: string;
+          source: string;
+          tags: string[];
+          title: string;
+          updated_at: string;
+          use_cases: Json;
+          viewCount: number;
+        }[];
+      };
+      get_search_suggestions_from_history: {
+        Args: { p_limit?: number; p_query: string };
+        Returns: {
+          search_count: number;
+          suggestion: string;
+        }[];
+      };
+      get_search_facets: {
+        Args: never;
+        Returns: {
+          all_tags: string[];
+          author_count: number;
+          authors: string[];
+          category: string;
+          content_count: number;
+          tag_count: number;
+        }[];
+      };
       get_company_profile: {
         Args: { p_slug: string };
         Returns: Json;

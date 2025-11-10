@@ -62,6 +62,9 @@ verify_jwt = false  # Public on-demand README generator (database-first, 15ms RP
 [functions.trending]
 verify_jwt = false  # Public trending data with CDN caching (24hr s-maxage)
 
+[functions.unified-search]
+verify_jwt = false  # Public search API with optional auth for analytics tracking (5min edge cache)
+
 # =============================================================================
 # Webhook Functions - No JWT Verification (Use Signature Verification)
 # =============================================================================

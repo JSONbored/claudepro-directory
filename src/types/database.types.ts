@@ -1829,6 +1829,39 @@ export type Database = {
           },
         ];
       };
+      search_queries: {
+        Row: {
+          created_at: string;
+          filters: Json | null;
+          id: string;
+          normalized_query: string | null;
+          query: string;
+          result_count: number | null;
+          session_id: string | null;
+          user_id: string | null;
+        };
+        Insert: {
+          created_at?: string;
+          filters?: Json | null;
+          id?: string;
+          normalized_query?: string | null;
+          query: string;
+          result_count?: number | null;
+          session_id?: string | null;
+          user_id?: string | null;
+        };
+        Update: {
+          created_at?: string;
+          filters?: Json | null;
+          id?: string;
+          normalized_query?: string | null;
+          query?: string;
+          result_count?: number | null;
+          session_id?: string | null;
+          user_id?: string | null;
+        };
+        Relationships: [];
+      };
       sponsored_clicks: {
         Row: {
           created_at: string;
@@ -3609,6 +3642,13 @@ export type Database = {
       get_search_suggestions: {
         Args: { p_limit?: number; p_query: string };
         Returns: {
+          suggestion: string;
+        }[];
+      };
+      get_search_suggestions_from_history: {
+        Args: { p_limit?: number; p_query: string };
+        Returns: {
+          search_count: number;
           suggestion: string;
         }[];
       };
