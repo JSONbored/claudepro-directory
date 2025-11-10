@@ -26,6 +26,7 @@ import {
 import { useConfetti } from '@/src/hooks/use-confetti';
 import type { NewsletterSource } from '@/src/hooks/use-newsletter';
 import { useNewsletter } from '@/src/hooks/use-newsletter';
+import { InlineSpinner } from '@/src/lib/components/loading-factory';
 import { NEWSLETTER_CTA_CONFIG } from '@/src/lib/config/category-config';
 import { trackInteraction } from '@/src/lib/edge/client';
 import { Mail, X } from '@/src/lib/icons';
@@ -353,12 +354,7 @@ function FormVariant({ source, className }: { source: NewsletterSource; classNam
             )}
           >
             {isSubmitting ? (
-              <span className="flex items-center gap-2">
-                <span
-                  className={`${UI_CLASSES.ICON_SM} animate-spin rounded-full border-2 border-current border-t-transparent`}
-                />
-                Subscribing...
-              </span>
+              <InlineSpinner size="sm" message="Subscribing..." />
             ) : (
               <span className="flex items-center gap-2">
                 {NEWSLETTER_CTA_CONFIG.buttonText}
