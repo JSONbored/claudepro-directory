@@ -4,10 +4,10 @@
  */
 
 import dynamic from 'next/dynamic';
-import Link from 'next/link';
-import { UnifiedBadge } from '@/src/components/core/domain/unified-badge';
+import { JobsPromo } from '@/src/components/core/domain/jobs-promo';
+import { SidebarActivityCard } from '@/src/components/core/forms/sidebar-activity-card';
 import { SubmitFormClient } from '@/src/components/core/forms/submit-form-client';
-import { NavLink } from '@/src/components/core/shared/nav-link';
+import { SubmitPageHero } from '@/src/components/core/forms/submit-page-hero';
 import { getSubmissionFormConfig } from '@/src/lib/forms/submission-form-config';
 
 const UnifiedNewsletterCapture = dynamic(
@@ -21,11 +21,12 @@ const UnifiedNewsletterCapture = dynamic(
 );
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/card';
-import { CheckCircle, Clock, Lightbulb, Medal, TrendingUp, Trophy } from '@/src/lib/icons';
+import { TrendingUp } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { cn } from '@/src/lib/utils';
 import type { Database } from '@/src/types/database.types';
 
 // Type for dashboard response - trust database validation
@@ -111,177 +112,70 @@ export default async function SubmitPage() {
   const result = (data as SubmissionDashboardResult | null) || null;
 
   const stats = result?.stats || { total: 0, pending: 0, merged_this_week: 0 };
-  const recentMerged = (result?.recent || []) as Array<{
-    id: string | number;
-    content_name: string;
-    content_type: Database['public']['Enums']['submission_type'];
-    merged_at: string;
-    user?: { name: string; slug: string } | null;
-  }>;
-  const topContributors = result?.contributors || [];
+  const recentMerged = (
+    (result?.recent || []) as Array<{
+      id: string | number;
+      content_name: string;
+      content_type: Database['public']['Enums']['submission_type'];
+      merged_at: string;
+      user?: { name: string; slug: string } | null;
+    }>
+  ).map((submission) => ({
+    ...submission,
+    merged_at_formatted: formatTimeAgo(submission.merged_at),
+  }));
 
   const formConfig = await getSubmissionFormConfig();
 
   return (
     <div className="container mx-auto max-w-7xl px-4 py-8 sm:py-12">
-      {/* Header - Responsive text sizes */}
-      <div className={'mb-6 text-center sm:mb-8 lg:mb-12'}>
-        <h1 className="mb-3 font-bold text-3xl sm:mb-4 sm:text-4xl lg:text-5xl">
-          Submit Your Configuration
-        </h1>
-        <p className={'mx-auto max-w-3xl px-2 text-base text-muted-foreground sm:px-4 sm:text-lg'}>
-          Share your Claude configurations with the community - no JSON formatting required!
-        </p>
-      </div>
+      {/* Hero Header with animations */}
+      <SubmitPageHero stats={stats} />
 
-      <div className="grid items-start gap-6 lg:grid-cols-[1fr_380px] lg:gap-8">
+      <div className="grid items-start gap-6 lg:grid-cols-[2fr_1fr] lg:gap-8">
         <div className="w-full min-w-0">
           <SubmitFormClient formConfig={formConfig} />
         </div>
 
         <aside className="w-full space-y-4 sm:space-y-6 lg:sticky lg:top-24 lg:h-fit">
-          {/* Stats Card */}
+          {/* Job Promo Card - Priority #1 */}
+          <JobsPromo />
+
+          {/* Stats Card - 3-column grid */}
           <Card>
             <CardHeader>
-              <CardTitle className={'font-medium text-sm'}>📊 Live Stats</CardTitle>
-            </CardHeader>
-            <CardContent className={'space-y-3'}>
-              <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
-                <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                  <TrendingUp className={`${UI_CLASSES.ICON_SM} ${UI_CLASSES.ICON_INFO}`} />
-                  <span className={'text-muted-foreground text-sm'}>Total Configs</span>
-                </div>
-                <span className={'font-semibold text-lg'}>{stats.total}</span>
-              </div>
-              <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
-                <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                  <Clock className={`${UI_CLASSES.ICON_SM} ${UI_CLASSES.ICON_WARNING}`} />
-                  <span className={'text-muted-foreground text-sm'}>Pending Review</span>
-                </div>
-                <span className={'font-semibold text-lg text-yellow-400'}>{stats.pending}</span>
-              </div>
-              <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
-                <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                  <CheckCircle className={`${UI_CLASSES.ICON_SM} ${UI_CLASSES.ICON_SUCCESS}`} />
-                  <span className={'text-muted-foreground text-sm'}>Merged This Week</span>
-                </div>
-                <span className={'font-semibold text-green-400 text-lg'}>
-                  {stats.merged_this_week}
-                </span>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Recent Submissions Card */}
-          {recentMerged.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle className={'font-medium text-sm'}>🔥 Recently Merged</CardTitle>
-              </CardHeader>
-              <CardContent className={'space-y-3'}>
-                {recentMerged.map((submission) => (
-                  <div
-                    key={submission.id}
-                    className={`${UI_CLASSES.FLEX_ITEMS_START_GAP_2} border-border/50 border-b pb-3 last:border-0 last:pb-0`}
-                  >
-                    <CheckCircle
-                      className={`mt-0.5 ${UI_CLASSES.ICON_SM} flex-shrink-0 ${UI_CLASSES.ICON_SUCCESS}`}
-                    />
-                    <div className="min-w-0 flex-1">
-                      <p className={'truncate font-medium text-sm'}>{submission.content_name}</p>
-                      <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} mt-1 flex-wrap`}>
-                        <UnifiedBadge variant="base" style="outline" className="text-xs">
-                          {TYPE_LABELS[submission.content_type]}
-                        </UnifiedBadge>
-                        {submission.user && (
-                          <span className={'text-muted-foreground text-xs'}>
-                            by{' '}
-                            <NavLink href={`/u/${submission.user.slug}`}>
-                              @{submission.user.name}
-                            </NavLink>
-                          </span>
-                        )}
-                      </div>
-                      <p className={'mt-1 text-muted-foreground text-xs'}>
-                        {formatTimeAgo(submission.merged_at)}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Top Contributors Card */}
-          {topContributors.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle className={'font-medium text-sm'}>🌟 Top Contributors</CardTitle>
-              </CardHeader>
-              <CardContent className={'space-y-2'}>
-                {topContributors.map((contributor) => {
-                  const getMedalIcon = (rank: number) => {
-                    if (rank === 1)
-                      return (
-                        <Trophy className={`${UI_CLASSES.ICON_SM} ${UI_CLASSES.ICON_WARNING}`} />
-                      );
-                    if (rank === 2)
-                      return (
-                        <Medal className={`${UI_CLASSES.ICON_SM} ${UI_CLASSES.ICON_NEUTRAL}`} />
-                      );
-                    if (rank === 3)
-                      return (
-                        <Medal className={`${UI_CLASSES.ICON_SM} ${UI_CLASSES.ICON_WARNING}`} />
-                      );
-                    return null;
-                  };
-
-                  return (
-                    <Link
-                      key={contributor.slug}
-                      href={`/u/${contributor.slug}`}
-                      className={
-                        '-mx-2 flex items-center justify-between rounded px-2 py-2 transition-colors hover:bg-accent/5'
-                      }
-                    >
-                      <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} min-w-0 flex-1`}>
-                        <span
-                          className={'w-4 flex-shrink-0 font-medium text-muted-foreground text-sm'}
-                        >
-                          {contributor.rank}.
-                        </span>
-                        {getMedalIcon(contributor.rank)}
-                        <span className={'truncate text-sm'}>@{contributor.name}</span>
-                      </div>
-                      <span className={'ml-2 flex-shrink-0 font-semibold text-green-400 text-sm'}>
-                        {contributor.mergedCount}
-                      </span>
-                    </Link>
-                  );
-                })}
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Tips Card */}
-          <Card className="border-blue-500/20 bg-blue-500/5">
-            <CardHeader>
-              <CardTitle className={'flex items-center gap-2 font-medium text-sm'}>
-                <Lightbulb className={`${UI_CLASSES.ICON_SM} ${UI_CLASSES.ICON_INFO}`} />💡 Tips for
-                Success
+              <CardTitle className={cn(UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2, 'font-medium text-sm')}>
+                <TrendingUp className={UI_CLASSES.ICON_SM} />
+                Community Stats
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <ul className={'list-none space-y-2'}>
-                {SUBMISSION_TIPS.map((tip) => (
-                  <li key={tip} className={UI_CLASSES.FLEX_ITEMS_START_GAP_2}>
-                    <span className="mt-0.5 text-blue-400 text-xs">•</span>
-                    <span className={'text-muted-foreground text-xs'}>{tip}</span>
-                  </li>
-                ))}
-              </ul>
+            <CardContent className={UI_CLASSES.GRID_COLS_3_GAP_2}>
+              {/* Total */}
+              <div className={cn('rounded-lg p-3 text-center', 'bg-blue-500/10')}>
+                <div className={'font-bold text-2xl text-blue-400'}>{stats.total}</div>
+                <div className={UI_CLASSES.TEXT_XS_MUTED}>Total</div>
+              </div>
+
+              {/* Pending */}
+              <div className={cn('rounded-lg p-3 text-center', 'bg-yellow-500/10')}>
+                <div className={'font-bold text-2xl text-yellow-400'}>{stats.pending}</div>
+                <div className={UI_CLASSES.TEXT_XS_MUTED}>Pending</div>
+              </div>
+
+              {/* This Week */}
+              <div className={cn('rounded-lg p-3 text-center', 'bg-green-500/10')}>
+                <div className={'font-bold text-2xl text-green-400'}>{stats.merged_this_week}</div>
+                <div className={UI_CLASSES.TEXT_XS_MUTED}>This Week</div>
+              </div>
             </CardContent>
           </Card>
+
+          {/* Combined Recent + Tips Tabbed Card */}
+          <SidebarActivityCard
+            recentMerged={recentMerged}
+            tips={SUBMISSION_TIPS}
+            typeLabels={TYPE_LABELS}
+          />
         </aside>
       </div>
 

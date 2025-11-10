@@ -570,3 +570,186 @@ export type GetRecommendationsReturn = Array<{
 
 export type TrackSponsoredEventReturn = { success: boolean };
 export type ToggleReviewHelpfulReturn = { success: boolean; helpful_count: number };
+
+/**
+ * ============================================================================
+ * PRIORITY 1: USER-FACING DASHBOARD RPC RETURN TYPES
+ * ============================================================================
+ * High-impact functions used in app routes - critical for type safety
+ */
+
+/**
+ * get_community_directory RPC return type
+ * Returns user directory with segmented lists for community page
+ *
+ * Structure from usage: /src/app/community/directory/page.tsx:17-33
+ */
+export type GetCommunityDirectoryReturn = {
+  all_users: Array<Tables<'users'>>;
+  top_contributors: Array<Tables<'users'>>;
+  new_members: Array<Tables<'users'>>;
+};
+
+/**
+ * get_navigation_menu RPC return type
+ * Returns navigation menu structure for command palette
+ *
+ * Structure from usage: /src/components/core/layout/navigation-command-menu.tsx:22-34
+ */
+export type GetNavigationMenuReturn = {
+  primary: Array<{
+    path: string;
+    title: string;
+    description: string;
+    iconName: string;
+    group: 'primary' | 'secondary' | 'actions';
+  }>;
+  secondary: Array<{
+    path: string;
+    title: string;
+    description: string;
+    iconName: string;
+    group: 'primary' | 'secondary' | 'actions';
+  }>;
+  actions: Array<{
+    path: string;
+    title: string;
+    description: string;
+    iconName: string;
+    group: 'primary' | 'secondary' | 'actions';
+  }>;
+};
+
+/**
+ * get_submission_dashboard RPC return type
+ * Returns submission statistics and recent activity for /submit page
+ *
+ * Structure from usage: /src/app/submit/page.tsx:33-48
+ */
+export type GetSubmissionDashboardReturn = {
+  stats: {
+    total: number;
+    pending: number;
+    merged_this_week: number;
+  };
+  recent: Array<{
+    id: string | number;
+    content_name: string;
+    content_type: string;
+    merged_at: string;
+    user?: { name: string; slug: string } | null;
+  }>;
+  contributors: Array<{
+    name: string;
+    slug: string;
+    rank: number;
+    mergedCount: number;
+  }>;
+};
+
+/**
+ * get_account_dashboard RPC return type
+ * Returns user account dashboard with profile and bookmark count
+ *
+ * Structure from usage: /src/app/account/page.tsx:36-44
+ */
+export type GetAccountDashboardReturn = {
+  bookmark_count: number;
+  profile: {
+    name: string | null;
+    tier: string | null;
+    created_at: string;
+  };
+};
+
+/**
+ * get_user_companies RPC return type
+ * Returns list of companies owned by user
+ *
+ * Structure from usage: /src/app/account/companies/page.tsx:67
+ */
+export type GetUserCompaniesReturn = {
+  companies: Array<Tables<'companies'>>;
+};
+
+/**
+ * get_user_collection_detail RPC return type
+ * Returns full collection details with user info, collection metadata, and items
+ *
+ * Structure from usage: /src/app/u/[slug]/collections/[collectionSlug]/page.tsx:35-65
+ */
+export type GetUserCollectionDetailReturn = {
+  user: {
+    id: string;
+    slug: string;
+    name: string;
+    image: string | null;
+    tier: string;
+  };
+  collection: {
+    id: string;
+    user_id: string;
+    slug: string;
+    name: string;
+    description: string | null;
+    is_public: boolean;
+    item_count: number;
+    view_count: number;
+    created_at: string;
+    updated_at: string;
+  };
+  items: Array<{
+    id: string;
+    collection_id: string;
+    content_type: string;
+    content_slug: string;
+    notes: string | null;
+    order: number;
+    added_at: string;
+  }>;
+  isOwner: boolean;
+};
+
+/**
+ * get_sponsorship_analytics RPC return type
+ * Returns sponsorship analytics with daily stats and computed metrics
+ *
+ * Structure from usage: /src/app/account/sponsorships/[id]/analytics/page.tsx:45-57
+ */
+export type GetSponsorshipAnalyticsReturn = {
+  sponsorship: Tables<'sponsored_content'>;
+  daily_stats: Array<{
+    date: string;
+    impressions: number;
+    clicks: number;
+  }>;
+  computed_metrics: {
+    ctr: number;
+    days_active: number;
+    avg_impressions_per_day: number;
+  };
+};
+
+/**
+ * get_content_templates RPC return type
+ * Returns curated starter templates for a given content type
+ *
+ * Structure from usage: /src/components/core/forms/template-selector.tsx:20-28
+ */
+export type GetContentTemplatesReturn = Array<{
+  id: string;
+  type: string;
+  name: string;
+  description: string;
+  category?: string;
+  tags?: string;
+  [key: string]: unknown; // Allow additional dynamic fields
+}>;
+
+/**
+ * get_active_notifications RPC return type
+ * NOTE: This function already has a proper return type in database.types.ts
+ * Returns array of notification objects (not Json)
+ * See database.types.ts line 3091-3106 for the full type definition
+ */
+// No type override needed - already properly typed in generated file

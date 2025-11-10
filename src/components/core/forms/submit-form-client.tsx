@@ -15,15 +15,11 @@ import { motion } from 'motion/react';
 import { useId, useState, useTransition } from 'react';
 import { z } from 'zod';
 import { Button } from '@/src/components/primitives/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/src/components/primitives/card';
+import { Card, CardContent } from '@/src/components/primitives/card';
 import { Input } from '@/src/components/primitives/input';
 import { Label } from '@/src/components/primitives/label';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/primitives/tabs';
+import { Textarea } from '@/src/components/primitives/textarea';
 import {
   SUBMISSION_CONTENT_TYPES,
   type SubmissionContentType,
@@ -31,16 +27,18 @@ import {
   type SubmissionFormSection,
   type TextFieldDefinition,
 } from '@/src/lib/forms/types';
-import { CheckCircle, Github, Send } from '@/src/lib/icons';
+import { CheckCircle, Code, FileText, Github, Layers, Send, Sparkles } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { createClient } from '@/src/lib/supabase/client';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { cn } from '@/src/lib/utils';
 import { ParseStrategy, safeParse } from '@/src/lib/utils/data.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
 import type { Database, Json } from '@/src/types/database.types';
 import { ContentTypeFieldRenderer } from './content-type-field-renderer';
 import { DuplicateWarning } from './duplicate-warning';
 import { ExamplesArrayInput } from './examples-array-input';
+import { FormSectionCard } from './form-section-card';
 import { type Template, TemplateSelector } from './template-selector';
 
 /**
@@ -126,6 +124,9 @@ export function SubmitFormClient({ formConfig }: SubmitFormClientProps) {
 
   /** Name for real-time duplicate checking */
   const [name, setName] = useState('');
+
+  /** Description for markdown preview */
+  const [description, setDescription] = useState('');
 
   /** Form submission loading state */
   const [isPending, startTransition] = useTransition();
@@ -388,41 +389,80 @@ export function SubmitFormClient({ formConfig }: SubmitFormClientProps) {
 
   return (
     <>
-      {/* Success Message */}
+      {/* Success Message with celebration animation */}
       {submissionResult && (
-        <Card className={'mb-6 border-green-500/20 bg-green-500/5'}>
-          <CardContent className={'pt-6'}>
-            <div className={UI_CLASSES.FLEX_COL_SM_ROW_ITEMS_START}>
-              <CheckCircle
-                className={`h-5 w-5 text-green-500 ${UI_CLASSES.FLEX_SHRINK_0_MT_0_5}`}
-              />
-              <div className="min-w-0 flex-1">
-                <p className="font-medium">Submission Successful! 🎉</p>
-                <p className={'mt-1 text-muted-foreground text-sm'}>{submissionResult.message}</p>
-                <p className={'mt-1 text-muted-foreground text-xs'}>
-                  Status: {submissionResult.status} • ID:{' '}
-                  {submissionResult.submission_id.slice(0, 8)}...
-                </p>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9, y: -20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+        >
+          <Card className={'mb-6 border-green-500/20 bg-green-500/5'}>
+            <CardContent className={'pt-6'}>
+              <div className={UI_CLASSES.FLEX_COL_SM_ROW_ITEMS_START}>
+                <motion.div
+                  initial={{ scale: 0, rotate: -180 }}
+                  animate={{ scale: 1, rotate: 0 }}
+                  transition={{ type: 'spring', stiffness: 500, damping: 15, delay: 0.2 }}
+                >
+                  <CheckCircle
+                    className={`h-6 w-6 text-green-500 ${UI_CLASSES.FLEX_SHRINK_0_MT_0_5}`}
+                  />
+                </motion.div>
+                <div className="min-w-0 flex-1">
+                  <motion.p
+                    className="font-semibold text-green-600 text-lg dark:text-green-400"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.3 }}
+                  >
+                    Submission Successful! 🎉
+                  </motion.p>
+                  <motion.p
+                    className={'mt-1 text-muted-foreground text-sm'}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.4 }}
+                  >
+                    {submissionResult.message}
+                  </motion.p>
+                  <motion.p
+                    className={'mt-1 text-muted-foreground text-xs'}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.5 }}
+                  >
+                    Status: {submissionResult.status} • ID:{' '}
+                    {submissionResult.submission_id.slice(0, 8)}...
+                  </motion.p>
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </motion.div>
       )}
 
-      {/* Main Form */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-xl sm:text-2xl">Configuration Details</CardTitle>
-          <CardDescription className="text-sm sm:text-base">
-            Fill out the form - we'll handle the technical formatting for you
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
-            {/* Type Selection + Template Selector */}
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor={`${formId}-type`}>Content Type *</Label>
+      {/* Main Form - Sectioned with visual hierarchy */}
+      <form onSubmit={handleSubmit} className={UI_CLASSES.SPACE_Y_6}>
+        {/* Section 1: Content Type + Template */}
+        <FormSectionCard
+          step={1}
+          title="Choose Configuration Type"
+          description="Select what you're submitting"
+          icon={Layers}
+          theme="primary"
+          showBorderBeam={false}
+        >
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className={UI_CLASSES.SPACE_Y_2}>
+              <Label htmlFor={`${formId}-type`}>Content Type *</Label>
+              <div className="relative">
+                <Layers
+                  className={cn(
+                    UI_CLASSES.ICON_SM,
+                    '-translate-y-1/2 pointer-events-none absolute top-1/2 left-3',
+                    UI_CLASSES.TEXT_MUTED
+                  )}
+                />
                 <select
                   id={`${formId}-type`}
                   value={contentType}
@@ -432,7 +472,7 @@ export function SubmitFormClient({ formConfig }: SubmitFormClientProps) {
                   }}
                   required
                   className={
-                    'flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm'
+                    'flex h-10 w-full rounded-md border border-input bg-background py-2 pr-3 pl-10 text-sm'
                   }
                 >
                   {SUBMISSION_CONTENT_TYPES.map((type) => (
@@ -442,95 +482,196 @@ export function SubmitFormClient({ formConfig }: SubmitFormClientProps) {
                   ))}
                 </select>
               </div>
-
-              <div className="space-y-2">
-                <Label>Quick Start</Label>
-                <TemplateSelector contentType={contentType} onSelect={handleTemplateSelect} />
-              </div>
             </div>
 
-            {/* Name Field + Duplicate Warning (Special case - has interactive validation) */}
-            <div className="space-y-2">
-              <Label htmlFor={`${formId}-name`}>{nameFieldConfig.label}</Label>
-              <Input
-                id={`${formId}-name`}
-                name="name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder={nameFieldConfig.placeholder}
-                required={nameFieldConfig.required ?? true}
-              />
-              <p className="text-muted-foreground text-xs">
+            <div className={UI_CLASSES.SPACE_Y_2}>
+              <Label>Quick Start</Label>
+              <TemplateSelector contentType={contentType} onSelect={handleTemplateSelect} />
+            </div>
+          </div>
+        </FormSectionCard>
+
+        {/* Section 2: Basic Information */}
+        <FormSectionCard
+          step={2}
+          title="Basic Information"
+          description="Name and describe your configuration"
+          icon={FileText}
+          theme="blue"
+          showBorderBeam={false}
+        >
+          <div className={UI_CLASSES.SPACE_Y_4}>
+            {/* Name Field + Duplicate Warning */}
+            <div className={UI_CLASSES.SPACE_Y_2}>
+              <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
+                <Label htmlFor={`${formId}-name`}>{nameFieldConfig.label}</Label>
+                <span className={cn(UI_CLASSES.TEXT_XS_MUTED, 'font-medium')}>
+                  {name.length}/100
+                </span>
+              </div>
+              <div className="relative">
+                <Input
+                  id={`${formId}-name`}
+                  name="name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder={nameFieldConfig.placeholder}
+                  required={nameFieldConfig.required ?? true}
+                  maxLength={100}
+                  className="pr-10"
+                />
+                {name.length > 3 && (
+                  <motion.div
+                    className="-translate-y-1/2 absolute top-1/2 right-3"
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ type: 'spring', stiffness: 500, damping: 15 }}
+                  >
+                    <CheckCircle className={cn(UI_CLASSES.ICON_SM, UI_CLASSES.ICON_SUCCESS)} />
+                  </motion.div>
+                )}
+              </div>
+              <p className={UI_CLASSES.TEXT_XS_MUTED}>
                 {nameFieldConfig.helpText ?? 'A clear, descriptive name for your configuration'}
               </p>
               <DuplicateWarning contentType={contentType} name={name} />
             </div>
 
-            {/* Common Fields - Config-Driven Rendering (description, category, author, github) */}
+            {/* Description Field with Markdown Preview */}
+            <div className={UI_CLASSES.SPACE_Y_2}>
+              <Label htmlFor={`${formId}-description`}>Description *</Label>
+              <Tabs defaultValue="write" className="w-full">
+                <TabsList className="w-full">
+                  <TabsTrigger value="write" className="flex-1">
+                    Write
+                  </TabsTrigger>
+                  <TabsTrigger value="preview" className="flex-1">
+                    Preview
+                  </TabsTrigger>
+                </TabsList>
+                <TabsContent value="write" className="mt-2">
+                  <Textarea
+                    id={`${formId}-description`}
+                    name="description"
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    placeholder="Describe what your configuration does and how to use it..."
+                    required
+                    rows={6}
+                    className="resize-y font-sans"
+                  />
+                  <p className={cn(UI_CLASSES.TEXT_XS_MUTED, UI_CLASSES.MARGIN_TOP_MICRO)}>
+                    Supports markdown formatting (bold, italic, lists, links, code blocks)
+                  </p>
+                </TabsContent>
+                <TabsContent value="preview" className="mt-2">
+                  <div
+                    className={cn(
+                      'min-h-[150px] rounded-md border border-input bg-background p-4',
+                      'prose prose-sm dark:prose-invert max-w-none'
+                    )}
+                  >
+                    {description ? (
+                      <p className="whitespace-pre-wrap">{description}</p>
+                    ) : (
+                      <p className={UI_CLASSES.TEXT_MUTED}>
+                        Nothing to preview yet. Write something in the Write tab!
+                      </p>
+                    )}
+                  </div>
+                </TabsContent>
+              </Tabs>
+            </div>
+
+            {/* Other Common Fields (excluding description) */}
             {commonFields.length > 0 && (
-              <ContentTypeFieldRenderer config={{ fields: commonFields }} formId={formId} />
+              <ContentTypeFieldRenderer
+                config={{ fields: commonFields.filter((f) => f.name !== 'description') }}
+                formId={formId}
+              />
             )}
+          </div>
+        </FormSectionCard>
 
-            {/* Type-Specific Fields - Config-Driven Rendering */}
-            {typeSpecificFields.length > 0 && (
-              <ContentTypeFieldRenderer config={{ fields: typeSpecificFields }} formId={formId} />
-            )}
+        {/* Section 3: Type-Specific Configuration */}
+        {typeSpecificFields.length > 0 && (
+          <FormSectionCard
+            step={3}
+            title="Type-Specific Configuration"
+            description={`Configuration details for ${FORM_TYPE_LABELS[contentType]}`}
+            icon={Code}
+            theme="green"
+            showBorderBeam={false}
+          >
+            <ContentTypeFieldRenderer config={{ fields: typeSpecificFields }} formId={formId} />
+          </FormSectionCard>
+        )}
 
-            {/* Tags Field - Config-Driven Rendering */}
+        {/* Section 4: Examples & Tags */}
+        <FormSectionCard
+          step={4}
+          title="Examples & Tags"
+          description="Help users understand how to use your configuration"
+          icon={Sparkles}
+          theme="purple"
+          showBorderBeam={false}
+        >
+          <div className={UI_CLASSES.SPACE_Y_4}>
+            {/* Tags Field */}
             {tagFields.length > 0 && (
               <ContentTypeFieldRenderer config={{ fields: tagFields }} formId={formId} />
             )}
 
-            {/* Usage Examples (All Types - Optional) */}
+            {/* Usage Examples */}
             <ExamplesArrayInput name="examples" maxExamples={10} />
+          </div>
+        </FormSectionCard>
 
-            {/* Submit Button */}
-            <div className={`${UI_CLASSES.FLEX_COL_SM_ROW_GAP_3} pt-2 sm:pt-4`}>
-              <Button
-                type="submit"
-                disabled={isPending}
-                className={'w-full flex-1 sm:flex-initial'}
-              >
-                {isPending ? (
-                  <>
-                    <motion.div
-                      className="mr-2"
-                      animate={{ opacity: [1, 0.5, 1] }}
-                      transition={{
-                        duration: 1,
-                        repeat: Number.POSITIVE_INFINITY,
-                        ease: 'easeInOut',
-                      }}
-                    >
-                      <Github className={UI_CLASSES.ICON_SM} />
-                    </motion.div>
-                    Creating PR...
-                  </>
-                ) : (
-                  <>
-                    <Send className={UI_CLASSES.ICON_SM_LEADING} />
-                    Submit for Review
-                  </>
-                )}
-              </Button>
-            </div>
+        {/* Enhanced Submit Button */}
+        <motion.div
+          className={`${UI_CLASSES.FLEX_COL_SM_ROW_GAP_3} pt-2 sm:pt-4`}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+        >
+          <Button type="submit" disabled={isPending} className={'w-full flex-1 sm:flex-initial'}>
+            {isPending ? (
+              <>
+                <motion.div
+                  className="mr-2"
+                  animate={{ opacity: [1, 0.5, 1], rotate: [0, 360] }}
+                  transition={{
+                    duration: 1,
+                    repeat: Number.POSITIVE_INFINITY,
+                    ease: 'easeInOut',
+                  }}
+                >
+                  <Github className={UI_CLASSES.ICON_SM} />
+                </motion.div>
+                Creating PR...
+              </>
+            ) : (
+              <>
+                <Send className={UI_CLASSES.ICON_SM_LEADING} />
+                Submit for Review
+              </>
+            )}
+          </Button>
+        </motion.div>
 
-            {/* Info Box */}
-            <div className="rounded-lg border border-blue-500/20 bg-blue-500/10 p-3 sm:p-4">
-              <div className={`${UI_CLASSES.FLEX_GAP_2} sm:gap-3`}>
-                <Github className={`h-5 w-5 text-blue-400 ${UI_CLASSES.FLEX_SHRINK_0_MT_0_5}`} />
-                <div className="min-w-0 flex-1">
-                  <p className={'font-medium text-blue-400 text-sm'}>How it works</p>
-                  <p className={'mt-1 text-muted-foreground text-sm'}>
-                    We'll automatically create a Pull Request with your submission. Our team reviews
-                    for quality and accuracy, then merges it to make your contribution live!
-                  </p>
-                </div>
-              </div>
+        {/* Info Box */}
+        <div className="rounded-lg border border-blue-500/20 bg-blue-500/10 p-3 sm:p-4">
+          <div className={`${UI_CLASSES.FLEX_GAP_2} sm:gap-3`}>
+            <Github className={`h-5 w-5 text-blue-400 ${UI_CLASSES.FLEX_SHRINK_0_MT_0_5}`} />
+            <div className="min-w-0 flex-1">
+              <p className={'font-medium text-blue-400 text-sm'}>How it works</p>
+              <p className={'mt-1 text-muted-foreground text-sm'}>
+                We'll automatically create a Pull Request with your submission. Our team reviews for
+                quality and accuracy, then merges it to make your contribution live!
+              </p>
             </div>
-          </form>
-        </CardContent>
-      </Card>
+          </div>
+        </div>
+      </form>
     </>
   );
 }
