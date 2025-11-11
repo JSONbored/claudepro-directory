@@ -11,22 +11,22 @@
 
 import Link from 'next/link';
 import { type FC, memo, useMemo } from 'react';
-import { ConfigCard } from '@/src/components/domain/config-card';
-import { UnifiedCardGrid } from '@/src/components/domain/unified-card-grid';
+import { ConfigCard } from '@/src/components/core/domain/config-card';
+import { UnifiedCardGrid } from '@/src/components/core/domain/unified-card-grid';
 import { Button } from '@/src/components/primitives/button';
 import {
   HOMEPAGE_FEATURED_CATEGORIES,
   type UnifiedCategoryConfig,
 } from '@/src/lib/config/category-config';
-import { ROUTES } from '@/src/lib/constants/routes';
+import { ROUTES } from '@/src/lib/constants';
 import { Briefcase, ExternalLink } from '@/src/lib/icons';
-import type { ContentItem } from '@/src/lib/types/component.types';
+import type { DisplayableContent } from '@/src/lib/types/component.types';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 interface FeaturedSectionProps {
   title: string;
   href: string;
-  items: readonly ContentItem[];
+  items: readonly DisplayableContent[];
 }
 
 /**
@@ -50,7 +50,7 @@ const FeaturedSection: FC<FeaturedSectionProps> = memo(
         <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} mb-8`}>
           <h2 className={'font-bold text-2xl'}>{title}</h2>
           <Link href={href} className="flex items-center gap-2 text-accent hover:underline">
-            View all <ExternalLink className="h-4 w-4" />
+            View all <ExternalLink className={UI_CLASSES.ICON_SM} />
           </Link>
         </div>
         <UnifiedCardGrid
@@ -72,7 +72,7 @@ FeaturedSection.displayName = 'FeaturedSection';
  * This allows any number of categories without hardcoding
  */
 interface FeaturedSectionsProps {
-  categories: Record<string, readonly ContentItem[]>;
+  categories: Record<string, readonly DisplayableContent[]>;
   categoryConfigs: Record<string, UnifiedCategoryConfig>;
 }
 
@@ -104,7 +104,7 @@ const FeaturedSectionsComponent: FC<FeaturedSectionsProps> = ({ categories, cate
         <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} mb-8`}>
           <h2 className={'font-bold text-2xl'}>Featured Jobs</h2>
           <Link href={ROUTES.JOBS} className="flex items-center gap-2 text-accent hover:underline">
-            View all <ExternalLink className="h-4 w-4" />
+            View all <ExternalLink className={UI_CLASSES.ICON_SM} />
           </Link>
         </div>
         <div className={UI_CLASSES.CONTAINER_CARD_MUTED}>

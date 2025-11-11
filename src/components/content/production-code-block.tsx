@@ -1,16 +1,7 @@
 'use client';
 
 /**
- * Production Code Block Component - Sugar High with Viral Features
- *
- * Features:
- * - Sugar High syntax highlighting (1KB, 7x faster than Shiki)
- * - Screenshot generation with watermark branding
- * - Social share buttons (Twitter, LinkedIn) with UTM tracking
- * - Embed code generation for viral backlinks
- * - 1-click copy with Sonner toast
- * - Max-height constraint with smooth expand/collapse
- * - Mobile-optimized (48px touch targets)
+ * Code block with syntax highlighting, screenshot, share, and copy functionality
  */
 
 import { motion } from 'motion/react';
@@ -19,10 +10,9 @@ import { useEffect, useRef, useState } from 'react';
 import { LinkedinShareButton, TwitterShareButton } from 'react-share';
 import { APP_CONFIG } from '@/src/lib/constants';
 import { trackInteraction } from '@/src/lib/edge/client';
-import { Camera, Check, ChevronDown, Code, Copy, Linkedin, Share2, Twitter } from '@/src/lib/icons';
+import { Camera, Check, ChevronDown, Copy, Linkedin, Share2, Twitter } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
-import { copyEmbedCode, trackEmbedGeneration } from '@/src/lib/utils/embed.utils';
 import {
   copyScreenshotToClipboard,
   downloadScreenshot,
@@ -57,30 +47,22 @@ export interface ProductionCodeBlockProps {
 
 /**
  * Share Dropdown Component (Internal)
- * Reusable dropdown for Twitter/LinkedIn/Copy/Embed actions
+ * Reusable dropdown for Twitter/LinkedIn/Copy actions
  */
 interface ShareDropdownProps {
   currentUrl: string;
   category: string;
   slug: string;
   onShare: (platform: SharePlatform) => void;
-  onEmbedCopy: () => void;
   onMouseLeave: () => void;
 }
 
-function ShareDropdown({
-  currentUrl,
-  category,
-  slug,
-  onShare,
-  onEmbedCopy,
-  onMouseLeave,
-}: ShareDropdownProps) {
+function ShareDropdown({ currentUrl, category, slug, onShare, onMouseLeave }: ShareDropdownProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="absolute top-full right-0 z-50 mt-2 w-56 rounded-lg border border-border bg-card/95 p-2 shadow-xl backdrop-blur-md"
+      className="${POSITION_PATTERNS.ABSOLUTE_TOP_RIGHT} top-full z-50 mt-2 w-56 rounded-lg border border-border bg-card/95 p-2 shadow-xl backdrop-blur-md"
       onMouseLeave={onMouseLeave}
     >
       {/* Twitter Share */}
@@ -103,8 +85,8 @@ function ShareDropdown({
           onClick={() => onShare('twitter')}
         >
           <div className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 font-medium text-sm transition-all hover:bg-accent/15">
-            <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[#1DA1F2]/20">
-              <Twitter className="h-3 w-3 text-[#1DA1F2]" />
+            <div className={`${UI_CLASSES.CODE_BLOCK_SOCIAL_ICON_WRAPPER} bg-[#1DA1F2]/20`}>
+              <Twitter className={`${UI_CLASSES.ICON_XS} text-[#1DA1F2]`} />
             </div>
             <span className="text-foreground">Share on Twitter</span>
           </div>
@@ -132,8 +114,8 @@ function ShareDropdown({
           onClick={() => onShare('linkedin')}
         >
           <div className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 font-medium text-sm transition-all hover:bg-accent/15">
-            <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[#0A66C2]/20">
-              <Linkedin className="h-3 w-3 text-[#0A66C2]" />
+            <div className={`${UI_CLASSES.CODE_BLOCK_SOCIAL_ICON_WRAPPER} bg-[#0A66C2]/20`}>
+              <Linkedin className={`${UI_CLASSES.ICON_XS} text-[#0A66C2]`} />
             </div>
             <span className="text-foreground">Share on LinkedIn</span>
           </div>
@@ -146,22 +128,10 @@ function ShareDropdown({
         onClick={() => onShare('copy_link')}
         className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 font-medium text-foreground text-sm transition-all hover:scale-[1.02] hover:bg-accent/15 active:scale-[0.98]"
       >
-        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-accent/20">
-          <Copy className="h-3 w-3" />
+        <div className={`${UI_CLASSES.CODE_BLOCK_SOCIAL_ICON_WRAPPER} bg-accent/20`}>
+          <Copy className={UI_CLASSES.ICON_XS} />
         </div>
         <span>Copy Link</span>
-      </button>
-
-      {/* Embed Code */}
-      <button
-        type="button"
-        onClick={onEmbedCopy}
-        className="mt-1 flex w-full items-center gap-3 rounded-md border-border/50 border-t px-3 py-2 pt-3 text-foreground text-sm transition-colors hover:bg-accent/10"
-      >
-        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-accent/20">
-          <Code className="h-3 w-3" />
-        </div>
-        <span>Copy Embed Code</span>
       </button>
     </motion.div>
   );
@@ -314,37 +284,6 @@ export function ProductionCodeBlock({
     }
   };
 
-  /**
-   * Handle embed code copy
-   * Performance: Generate on-demand, track for viral loop analytics
-   */
-  const handleEmbedCopy = async () => {
-    try {
-      const success = await copyEmbedCode({
-        category,
-        slug,
-        width: 600,
-        height: 400,
-        theme: 'auto',
-      });
-
-      if (success) {
-        toasts.success.embedCopied();
-
-        trackEmbedGeneration({ category, slug, format: 'iframe' }).catch(() => {
-          // Intentional
-        });
-      } else {
-        toasts.error.copyFailed('embed code');
-      }
-
-      setIsShareOpen(false);
-    } catch (error) {
-      toasts.error.embedFailed();
-      logger.error('Embed copy failed', error as Error);
-    }
-  };
-
   const maxHeight = `${maxLines * 1.6}rem`; // 1.6rem per line
 
   return (
@@ -353,16 +292,16 @@ export function ProductionCodeBlock({
       {filename && (
         <div className={UI_CLASSES.CODE_BLOCK_HEADER}>
           <span className={UI_CLASSES.CODE_BLOCK_FILENAME}>{filename}</span>
-          <div className="flex items-center gap-1">
+          <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
             {/* Screenshot button */}
             <motion.button
               type="button"
               onClick={handleScreenshot}
               disabled={isScreenshotting}
-              className="flex items-center justify-center rounded-md bg-code/95 p-1.5 text-muted-foreground shadow-md backdrop-blur-md transition-colors hover:bg-code hover:text-foreground disabled:opacity-50"
+              className={`${UI_CLASSES.CODE_BLOCK_BUTTON_ICON} disabled:opacity-50`}
               title={isScreenshotting ? 'Capturing screenshot...' : 'Screenshot code'}
             >
-              <Camera className="h-3.5 w-3.5" />
+              <Camera className={UI_CLASSES.ICON_XS} />
             </motion.button>
 
             {/* Share button with dropdown */}
@@ -370,10 +309,10 @@ export function ProductionCodeBlock({
               <motion.button
                 type="button"
                 onClick={() => setIsShareOpen(!isShareOpen)}
-                className="flex items-center justify-center rounded-md bg-code/95 p-1.5 text-muted-foreground shadow-md backdrop-blur-md transition-colors hover:bg-code hover:text-foreground"
+                className={UI_CLASSES.CODE_BLOCK_BUTTON_ICON}
                 title="Share code"
               >
-                <Share2 className="h-3.5 w-3.5" />
+                <Share2 className={UI_CLASSES.ICON_XS} />
               </motion.button>
 
               {/* Share dropdown - positioned below button */}
@@ -383,7 +322,6 @@ export function ProductionCodeBlock({
                   category={category}
                   slug={slug}
                   onShare={handleShare}
-                  onEmbedCopy={handleEmbedCopy}
                   onMouseLeave={() => setIsShareOpen(false)}
                 />
               )}
@@ -395,13 +333,13 @@ export function ProductionCodeBlock({
               onClick={handleCopy}
               animate={isCopied ? { scale: [1, 1.1, 1] } : {}}
               transition={{ duration: 0.3 }}
-              className="flex items-center justify-center rounded-md bg-code/95 p-1.5 shadow-md backdrop-blur-md transition-colors hover:bg-code"
+              className={UI_CLASSES.CODE_BLOCK_BUTTON_BASE}
               title={isCopied ? 'Copied!' : 'Copy code'}
             >
               {isCopied ? (
-                <Check className="h-3.5 w-3.5 text-green-500" />
+                <Check className={`${UI_CLASSES.ICON_XS} text-green-500`} />
               ) : (
-                <Copy className="h-3.5 w-3.5 text-muted-foreground" />
+                <Copy className={`${UI_CLASSES.ICON_XS} text-muted-foreground`} />
               )}
             </motion.button>
 
@@ -427,16 +365,16 @@ export function ProductionCodeBlock({
       >
         {/* Top-right action buttons + badge (when no filename header) */}
         {!filename && (
-          <div className="absolute top-3 right-3 z-20 flex items-center gap-1">
+          <div className="${POSITION_PATTERNS.ABSOLUTE_TOP_RIGHT_OFFSET_LG} z-20 flex items-center gap-1">
             {/* Screenshot button */}
             <motion.button
               type="button"
               onClick={handleScreenshot}
               disabled={isScreenshotting}
-              className="flex items-center justify-center rounded-md bg-code/95 p-1.5 text-muted-foreground shadow-md backdrop-blur-md transition-colors hover:bg-code hover:text-foreground disabled:opacity-50"
+              className={`${UI_CLASSES.CODE_BLOCK_BUTTON_ICON} disabled:opacity-50`}
               title={isScreenshotting ? 'Capturing screenshot...' : 'Screenshot code'}
             >
-              <Camera className="h-3.5 w-3.5" />
+              <Camera className={UI_CLASSES.ICON_XS} />
             </motion.button>
 
             {/* Share button with dropdown */}
@@ -444,10 +382,10 @@ export function ProductionCodeBlock({
               <motion.button
                 type="button"
                 onClick={() => setIsShareOpen(!isShareOpen)}
-                className="flex items-center justify-center rounded-md bg-code/95 p-1.5 text-muted-foreground shadow-md backdrop-blur-md transition-colors hover:bg-code hover:text-foreground"
+                className={UI_CLASSES.CODE_BLOCK_BUTTON_ICON}
                 title="Share code"
               >
-                <Share2 className="h-3.5 w-3.5" />
+                <Share2 className={UI_CLASSES.ICON_XS} />
               </motion.button>
 
               {/* Share dropdown - positioned below button */}
@@ -457,7 +395,6 @@ export function ProductionCodeBlock({
                   category={category}
                   slug={slug}
                   onShare={handleShare}
-                  onEmbedCopy={handleEmbedCopy}
                   onMouseLeave={() => setIsShareOpen(false)}
                 />
               )}
@@ -469,13 +406,13 @@ export function ProductionCodeBlock({
               onClick={handleCopy}
               animate={isCopied ? { scale: [1, 1.1, 1] } : {}}
               transition={{ duration: 0.3 }}
-              className="flex items-center justify-center rounded-md bg-code/95 p-1.5 shadow-md backdrop-blur-md transition-colors hover:bg-code"
+              className={UI_CLASSES.CODE_BLOCK_BUTTON_BASE}
               title={isCopied ? 'Copied!' : 'Copy code'}
             >
               {isCopied ? (
-                <Check className="h-3.5 w-3.5 text-green-500" />
+                <Check className={`${UI_CLASSES.ICON_XS} text-green-500`} />
               ) : (
-                <Copy className="h-3.5 w-3.5 text-muted-foreground" />
+                <Copy className={`${UI_CLASSES.ICON_XS} text-muted-foreground`} />
               )}
             </motion.button>
 
@@ -491,7 +428,7 @@ export function ProductionCodeBlock({
         {/* Gradient fade when collapsed - with smooth CSS transition */}
         {needsCollapse && !isExpanded && (
           <div
-            className="pointer-events-none absolute right-0 bottom-0 left-0 z-10 h-24 transition-opacity duration-200"
+            className="${POSITION_PATTERNS.ABSOLUTE_BOTTOM_FULL} pointer-events-none z-10 h-24 transition-opacity duration-200"
             style={{
               background: 'linear-gradient(to bottom, transparent 0%, var(--color-bg-code) 90%)',
             }}
@@ -522,7 +459,7 @@ export function ProductionCodeBlock({
             className="transition-transform duration-200"
             style={{ transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)' }}
           >
-            <ChevronDown className="h-4 w-4" />
+            <ChevronDown className={UI_CLASSES.ICON_SM} />
           </div>
           <span className="text-xs">
             {isExpanded ? 'Collapse' : `Expand ${code.split('\n').length} lines`}

@@ -1,7 +1,7 @@
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import Link from 'next/link';
-import { UnifiedBadge } from '@/src/components/domain/unified-badge';
+import { UnifiedBadge } from '@/src/components/core/domain/unified-badge';
 import { Button } from '@/src/components/primitives/button';
 
 const UnifiedNewsletterCapture = dynamic(
@@ -21,7 +21,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/card';
-import { ROUTES } from '@/src/lib/constants/routes';
+import { ROUTES } from '@/src/lib/constants';
 import { Briefcase, Building, ExternalLink, Plus, Star, TrendingUp } from '@/src/lib/icons';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient as createAdminClient } from '@/src/lib/supabase/admin-client';
@@ -121,7 +121,7 @@ export default async function CompaniesPage() {
           </Card>
         ) : (
           <div className={UI_CLASSES.GRID_RESPONSIVE_3}>
-            {companies.map((company) => (
+            {companies.map((company, index) => (
               <Card key={company.id} className={UI_CLASSES.CARD_GRADIENT_HOVER}>
                 {company.featured && (
                   <div className="-top-2 -right-2 absolute z-10">
@@ -141,6 +141,7 @@ export default async function CompaniesPage() {
                         width={48}
                         height={48}
                         className="h-12 w-12 rounded-lg object-cover"
+                        priority={index < 6}
                       />
                     )}
                     <div className="flex-1">

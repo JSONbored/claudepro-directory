@@ -7,6 +7,7 @@
 import { motion } from 'motion/react';
 import Link from 'next/link';
 import { Button } from '@/src/components/primitives/button';
+import { UI_CLASSES } from '@/src/lib/ui-constants';
 import type { Tables } from '@/src/types/database.types';
 
 type Notification = Tables<'notifications'>;
@@ -49,7 +50,7 @@ export function NotificationItem({ notification }: NotificationItemProps) {
         }
         aria-label="Dismiss notification"
       >
-        <X className="h-4 w-4" />
+        <X className={UI_CLASSES.ICON_SM} />
       </button>
 
       <div className="flex gap-3 pr-6">
@@ -61,7 +62,7 @@ export function NotificationItem({ notification }: NotificationItemProps) {
           }
           `}
         >
-          <Bell className="h-5 w-5" />
+          <Bell className={UI_CLASSES.ICON_MD} />
         </div>
 
         <div className="flex-1 space-y-1">

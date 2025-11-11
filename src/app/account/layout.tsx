@@ -5,7 +5,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { UnifiedButton } from '@/src/components/domain/unified-button';
+import { UnifiedButton } from '@/src/components/core/domain/unified-button';
 import { Button } from '@/src/components/primitives/button';
 import { Card } from '@/src/components/primitives/card';
 import {
@@ -126,6 +126,7 @@ export default async function AccountLayout({ children }: { children: React.Reac
                   width={48}
                   height={48}
                   className="h-12 w-12 rounded-full object-cover"
+                  priority
                 />
               ) : (
                 <div className="flex h-12 w-12 items-center justify-center rounded-full bg-accent">

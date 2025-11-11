@@ -36,7 +36,7 @@ const nextConfig = {
   },
 
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: false,
   },
 
   images: {
@@ -47,6 +47,9 @@ const nextConfig = {
       { protocol: 'https', hostname: '*.githubusercontent.com' },
       { protocol: 'https', hostname: 'claudepro.directory' },
       { protocol: 'https', hostname: 'www.claudepro.directory' },
+      { protocol: 'https', hostname: 'lh3.googleusercontent.com' },
+      { protocol: 'https', hostname: '*.supabase.co' },
+      { protocol: 'https', hostname: 'hgtjdifxfapoltfflowc.supabase.co' },
     ],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
@@ -227,6 +230,22 @@ const nextConfig = {
         destination: '/',
         permanent: true,
       },
+      // Gallery & Embed Cleanup - Redirect removed features
+      {
+        source: '/gallery',
+        destination: '/trending',
+        permanent: true,
+      },
+      {
+        source: '/gallery/:category',
+        destination: '/:category',
+        permanent: true,
+      },
+      {
+        source: '/embed/:category/:slug',
+        destination: '/:category/:slug',
+        permanent: true,
+      },
     ];
   },
   async headers() {
@@ -324,9 +343,9 @@ const nextConfig = {
   },
 
   async rewrites() {
-    const edgeBase = `${process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://hgtjdifxfapoltfflowc.supabase.co'}/functions/v1/llms-txt`;
     const supabaseUrl =
       process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://hgtjdifxfapoltfflowc.supabase.co';
+    const contentApi = `${supabaseUrl}/functions/v1/content-api`;
 
     return [
       // Sitemap.xml - proxy to edge function
@@ -354,33 +373,44 @@ const nextConfig = {
           '/:category(agents|commands|hooks|mcp|rules|skills|statuslines|collections|guides)/atom.xml',
         destination: `${supabaseUrl}/functions/v1/feeds?type=atom&category=:category`,
       },
-      { source: '/llms.txt', destination: `${edgeBase}?type=sitewide` },
-      { source: '/changelog/llms.txt', destination: `${edgeBase}?type=changelog-index` },
+
+      // LLMs.txt rewrites → content-api
+      { source: '/llms.txt', destination: `${contentApi}/sitewide?format=llms-txt` },
+      {
+        source: '/changelog/llms.txt',
+        destination: `${contentApi}/changelog?format=llms-changelog`,
+      },
       {
         source: '/changelog/:slug/llms.txt',
-        destination: `${edgeBase}?type=changelog-entry&slug=:slug`,
+        destination: `${contentApi}/changelog/:slug?format=llms-entry`,
       },
       {
         source: '/tools/config-recommender/llms.txt',
-        destination: `${edgeBase}?type=tool&tool=config-recommender`,
+        destination: `${contentApi}/tools/config-recommender?format=llms-tool`,
       },
       {
-        source: '/:category/llms.txt',
-        destination: `${edgeBase}?type=category&category=:category`,
+        source:
+          '/:category(agents|commands|hooks|mcp|rules|skills|statuslines|collections|guides)/llms.txt',
+        destination: `${contentApi}/:category?format=llms-category`,
       },
       {
-        source: '/:category/:slug/llms.txt',
-        destination: `${edgeBase}?type=item&category=:category&slug=:slug`,
+        source:
+          '/:category(agents|commands|hooks|mcp|rules|skills|statuslines|collections|guides)/:slug/llms.txt',
+        destination: `${contentApi}/:category/:slug?format=llms-txt`,
       },
+
+      // JSON API rewrites → content-api
       {
         source:
           '/:category(agents|commands|hooks|mcp|rules|skills|statuslines|collections|guides)/:slug.json',
-        destination: `${supabaseUrl}/functions/v1/json-api/:category/:slug`,
+        destination: `${contentApi}/:category/:slug?format=json`,
       },
+
+      // Markdown export rewrites → content-api
       {
         source:
           '/:category(agents|commands|hooks|mcp|rules|skills|statuslines|collections|guides)/:slug.md',
-        destination: `${supabaseUrl}/functions/v1/markdown-export/:category/:slug`,
+        destination: `${contentApi}/:category/:slug?format=markdown`,
       },
     ];
   },

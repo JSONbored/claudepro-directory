@@ -14,7 +14,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { z } from 'zod';
 import { ALL_CATEGORY_IDS } from '../../src/lib/config/category-config.generated.js';
-import { SECURITY_CONFIG } from '../../src/lib/constants/security.js';
+import { SECURITY_CONFIG } from '../../src/lib/constants.js';
 import { ParseStrategy, safeParse } from '../../src/lib/utils/data.utils.js';
 import { computeHash, hasHashChanged, setHash } from '../utils/build-cache.js';
 

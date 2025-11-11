@@ -11,6 +11,7 @@ import {
   DialogTitle,
 } from '@/src/components/primitives/dialog';
 import { Search } from '@/src/lib/icons';
+import { DIMENSIONS } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
 
 const Command = ({
@@ -80,7 +81,7 @@ const CommandList = ({
 }) => (
   <CommandPrimitive.List
     ref={ref}
-    className={cn('max-h-[300px] overflow-y-auto overflow-x-hidden', className)}
+    className={cn(`${DIMENSIONS.DROPDOWN_MAX} overflow-y-auto overflow-x-hidden`, className)}
     {...props}
   />
 );

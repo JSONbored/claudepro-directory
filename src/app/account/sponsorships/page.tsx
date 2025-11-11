@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { UnifiedBadge } from '@/src/components/domain/unified-badge';
+import { UnifiedBadge } from '@/src/components/core/domain/unified-badge';
 import { Button } from '@/src/components/primitives/button';
 import {
   Card,
@@ -8,7 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/card';
-import { ROUTES } from '@/src/lib/constants/routes';
+import { ROUTES } from '@/src/lib/constants';
 import { BarChart, Eye, MousePointer, TrendingUp } from '@/src/lib/icons';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';
@@ -86,10 +86,7 @@ export default async function SponsorshipsPage() {
                         showIcon
                       />
                       {isActive ? (
-                        <UnifiedBadge
-                          variant="base"
-                          className="border-green-500/20 bg-green-500/10 text-green-400"
-                        >
+                        <UnifiedBadge variant="base" className={UI_CLASSES.STATUS_APPROVED}>
                           Active
                         </UnifiedBadge>
                       ) : (
@@ -98,10 +95,7 @@ export default async function SponsorshipsPage() {
                         </UnifiedBadge>
                       )}
                       {hasHitLimit && (
-                        <UnifiedBadge
-                          variant="base"
-                          className="border-orange-500/20 bg-orange-500/10 text-orange-400"
-                        >
+                        <UnifiedBadge variant="base" className={UI_CLASSES.STATUS_WARNING}>
                           Limit Reached
                         </UnifiedBadge>
                       )}

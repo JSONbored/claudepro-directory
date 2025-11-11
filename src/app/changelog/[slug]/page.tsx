@@ -23,16 +23,16 @@
  */
 
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ReadProgress } from '@/src/components/content/read-progress';
+import { StructuredData } from '@/src/components/core/infra/structured-data';
+import { UnifiedTracker } from '@/src/components/core/infra/unified-tracker';
+import { NavLink } from '@/src/components/core/shared/nav-link';
 import { ChangelogContent } from '@/src/components/features/changelog/changelog-content';
-import { StructuredData } from '@/src/components/infra/structured-data';
-import { UnifiedTracker } from '@/src/components/infra/unified-tracker';
 import { Separator } from '@/src/components/primitives/separator';
 import { getAllChangelogEntries, getChangelogEntryBySlug } from '@/src/lib/changelog/loader';
 import { formatChangelogDate, getChangelogUrl } from '@/src/lib/changelog/utils';
-import { ROUTES } from '@/src/lib/constants/routes';
+import { ROUTES } from '@/src/lib/constants';
 import { ArrowLeft, Calendar } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
@@ -109,15 +109,13 @@ export default async function ChangelogEntryPage({
 
         <article className="container max-w-4xl space-y-8 py-8">
           {/* Navigation */}
-          <Link
+          <NavLink
             href={ROUTES.CHANGELOG}
-            className={
-              'inline-flex items-center gap-2 text-muted-foreground text-sm transition-colors hover:text-foreground'
-            }
+            className="inline-flex items-center gap-2 text-muted-foreground text-sm"
           >
             <ArrowLeft className="h-4 w-4" />
             <span>Back to Changelog</span>
-          </Link>
+          </NavLink>
 
           {/* Header */}
           <header className="space-y-4 pb-6">
@@ -159,15 +157,13 @@ export default async function ChangelogEntryPage({
     return (
       <div className="container max-w-4xl py-8">
         <div className="space-y-4">
-          <Link
+          <NavLink
             href={ROUTES.CHANGELOG}
-            className={
-              'inline-flex items-center gap-2 text-muted-foreground text-sm transition-colors hover:text-foreground'
-            }
+            className="inline-flex items-center gap-2 text-muted-foreground text-sm"
           >
             <ArrowLeft className="h-4 w-4" />
             <span>Back to Changelog</span>
-          </Link>
+          </NavLink>
           <h1 className="font-bold text-4xl tracking-tight">Error Loading Entry</h1>
           <p className="text-muted-foreground">
             Unable to load this changelog entry. Please try again later.

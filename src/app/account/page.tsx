@@ -1,5 +1,6 @@
 import { z } from 'zod';
-import { UnifiedBadge } from '@/src/components/domain/unified-badge';
+import { UnifiedBadge } from '@/src/components/core/domain/unified-badge';
+import { NavLink } from '@/src/components/core/shared/nav-link';
 import {
   Card,
   CardContent,
@@ -7,7 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/card';
-import { ROUTES } from '@/src/lib/constants/routes';
+import { ROUTES } from '@/src/lib/constants';
 import { Bookmark, Calendar } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
@@ -132,31 +133,19 @@ export default async function AccountDashboard() {
         </CardHeader>
         <CardContent className="space-y-2">
           <p className="text-sm">
-            • View your{' '}
-            <a href={ROUTES.ACCOUNT_ACTIVITY} className="text-primary hover:underline">
-              contribution history
-            </a>{' '}
-            and earn badges
+            • View your <NavLink href={ROUTES.ACCOUNT_ACTIVITY}>contribution history</NavLink> and
+            earn badges
           </p>
           <p className="text-sm">
-            • Browse the{' '}
-            <a href={ROUTES.HOME} className="text-primary hover:underline">
-              directory
-            </a>{' '}
-            and bookmark your favorite configurations
+            • Browse the <NavLink href={ROUTES.HOME}>directory</NavLink> and bookmark your favorite
+            configurations
           </p>
           <p className="text-sm">
-            • View your{' '}
-            <a href={ROUTES.ACCOUNT_LIBRARY} className="text-primary hover:underline">
-              library
-            </a>{' '}
-            with saved bookmarks and collections
+            • View your <NavLink href={ROUTES.ACCOUNT_LIBRARY}>library</NavLink> with saved
+            bookmarks and collections
           </p>
           <p className="text-sm">
-            • Update your profile in{' '}
-            <a href={ROUTES.ACCOUNT_SETTINGS} className="text-primary hover:underline">
-              settings
-            </a>
+            • Update your profile in <NavLink href={ROUTES.ACCOUNT_SETTINGS}>settings</NavLink>
           </p>
         </CardContent>
       </Card>

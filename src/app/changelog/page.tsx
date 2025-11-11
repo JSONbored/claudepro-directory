@@ -24,9 +24,9 @@
 
 import type { Metadata } from 'next';
 import dynamic from 'next/dynamic';
-import Link from 'next/link';
+import { StructuredData } from '@/src/components/core/infra/structured-data';
+import { NavLink } from '@/src/components/core/shared/nav-link';
 import { ChangelogListClient } from '@/src/components/features/changelog/changelog-list-client';
-import { StructuredData } from '@/src/components/infra/structured-data';
 
 const UnifiedNewsletterCapture = dynamic(
   () =>
@@ -121,15 +121,13 @@ export default async function ChangelogPage() {
         <div className="container max-w-6xl space-y-8 py-8">
           {/* Header */}
           <div className="space-y-4">
-            <Link
+            <NavLink
               href="/"
-              className={
-                'inline-flex items-center gap-2 text-muted-foreground text-sm transition-colors hover:text-foreground'
-              }
+              className="inline-flex items-center gap-2 text-muted-foreground text-sm"
             >
               <ArrowLeft className="h-4 w-4" />
               <span>Back to Home</span>
-            </Link>
+            </NavLink>
 
             <div className="space-y-2">
               <h1 className="font-bold text-4xl tracking-tight">Changelog</h1>

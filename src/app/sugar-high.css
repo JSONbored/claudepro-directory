@@ -20,9 +20,9 @@
   --sh-entity: #ffcb6b; /* Yellow for entities */
 
   /* Code block structure colors - Dark mode */
-  --code-bg: oklch(20% 0.005 60); /* #1a1a1a - matches spec */
-  --code-border: oklch(25% 0.005 60); /* #3a3a3a - more visible border */
-  --code-inner-glow: oklch(22% 0.005 60); /* #252525 - inner glow layer */
+  --code-bg: oklch(12% 0.003 60);
+  --code-border: oklch(18% 0.004 60);
+  --code-inner-glow: oklch(14% 0.003 60);
   --code-header-bg: rgba(255, 255, 255, 0.03);
   --code-line-number: #6b7280; /* Much brighter gray - highly visible */
 
@@ -160,10 +160,10 @@
 }
 
 .code-block-filename {
-  font-family: var(--font-mono, "JetBrains Mono", "Monaco", monospace);
+  font-family: var(--font-geist-mono, "GeistMono"), "SF Mono", monospace;
   font-size: 0.875rem;
   font-weight: 500;
-  color: oklch(60% 0.01 260); /* #9CA3AF - muted */
+  color: oklch(60% 0.01 260);
 }
 
 /* Language Badge - Glassmorphic Design */
@@ -271,9 +271,9 @@
   padding: 1rem 0;
   overflow-x: auto;
   background: var(--code-bg);
-  font-family: "JetBrains Mono", "Fira Code", Consolas, Monaco, monospace;
+  font-family: var(--font-geist-mono, "GeistMono"), "SF Mono", Consolas, Monaco, monospace;
   font-size: 0.8125rem; /* 13px */
-  line-height: 0.75; /* Ultra-tight 0.75 line spacing */
+  line-height: 1.5;
 }
 
 /* Custom Scrollbar - Dark Mode */

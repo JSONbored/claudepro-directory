@@ -23,7 +23,7 @@
  */
 
 import { Suspense } from 'react';
-import { ConfigCard } from '@/src/components/domain/config-card';
+import { ConfigCard } from '@/src/components/core/domain/config-card';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/card';
 import { Skeleton } from '@/src/components/primitives/loading-skeleton';
 import { getCategoryConfigs, isValidCategory } from '@/src/lib/config/category-config';
@@ -33,7 +33,6 @@ import { AlertTriangle, CheckCircle } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 
 import { UI_CLASSES } from '@/src/lib/ui-constants';
-import { getViewTransitionName } from '@/src/lib/utils/view-transitions.utils';
 import type { Database } from '@/src/types/database.types';
 
 interface ItemWithData {
@@ -130,16 +129,16 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
     | undefined;
 
   return (
-    <div
-      className="space-y-12"
-      style={{ viewTransitionName: getViewTransitionName('card', collection.slug) }}
-    >
+    <>
       {/* Prerequisites Section */}
       {prerequisites && prerequisites.length > 0 && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-xl">
-              <AlertTriangle className="h-5 w-5 text-yellow-500" aria-hidden="true" />
+              <AlertTriangle
+                className={`${UI_CLASSES.ICON_MD} text-yellow-500`}
+                aria-hidden="true"
+              />
               Prerequisites
             </CardTitle>
           </CardHeader>
@@ -243,9 +242,15 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
             <div className="grid grid-cols-2 gap-4">
               <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
                 {compatibility.claudeDesktop ? (
-                  <CheckCircle className="h-4 w-4 text-green-500" aria-hidden="true" />
+                  <CheckCircle
+                    className={`${UI_CLASSES.ICON_SM} text-green-500`}
+                    aria-hidden="true"
+                  />
                 ) : (
-                  <AlertTriangle className="h-4 w-4 text-red-500" aria-hidden="true" />
+                  <AlertTriangle
+                    className={`${UI_CLASSES.ICON_SM} text-red-500`}
+                    aria-hidden="true"
+                  />
                 )}
                 <span className="text-muted-foreground text-sm">
                   Claude Desktop {compatibility.claudeDesktop ? '(Supported)' : '(Not Supported)'}
@@ -253,9 +258,15 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
               </div>
               <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
                 {compatibility.claudeCode ? (
-                  <CheckCircle className="h-4 w-4 text-green-500" aria-hidden="true" />
+                  <CheckCircle
+                    className={`${UI_CLASSES.ICON_SM} text-green-500`}
+                    aria-hidden="true"
+                  />
                 ) : (
-                  <AlertTriangle className="h-4 w-4 text-red-500" aria-hidden="true" />
+                  <AlertTriangle
+                    className={`${UI_CLASSES.ICON_SM} text-red-500`}
+                    aria-hidden="true"
+                  />
                 )}
                 <span className="text-muted-foreground text-sm">
                   Claude Code {compatibility.claudeCode ? '(Supported)' : '(Not Supported)'}
@@ -265,6 +276,6 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
           </CardContent>
         </Card>
       )}
-    </div>
+    </>
   );
 }

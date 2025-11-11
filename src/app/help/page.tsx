@@ -1,19 +1,12 @@
-import type { Metadata } from 'next';
+'use client';
+
+import { motion } from 'motion/react';
 import Link from 'next/link';
+import { NavLink } from '@/src/components/core/shared/nav-link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/card';
 import { APP_CONFIG } from '@/src/lib/constants';
 import { BookOpen, Code, FileText, HelpCircle, MessageSquare, Search } from '@/src/lib/icons';
-
-export const metadata: Metadata = {
-  title: `Help Center - ${APP_CONFIG.name}`,
-  description: `Help Center for ${APP_CONFIG.name}. Find guides, tutorials, and answers to common questions about using our Claude AI configuration directory.`,
-};
-
-/**
- * ISR Configuration: Marketing pages update infrequently
- * revalidate: 86400 = Revalidate every 24 hours
- */
-export const revalidate = false;
+import { ANIMATION_CONSTANTS, UI_CLASSES } from '@/src/lib/ui-constants';
 
 const helpTopics = [
   {
@@ -125,12 +118,9 @@ export default function HelpPage() {
                 <ul className="space-y-2">
                   {topic.links.map((link) => (
                     <li key={link.label}>
-                      <Link
-                        href={link.href}
-                        className="flex items-center gap-1 text-accent text-sm hover:underline"
-                      >
+                      <NavLink href={link.href} className="flex items-center gap-1 text-sm">
                         {link.label} →
-                      </Link>
+                      </NavLink>
                     </li>
                   ))}
                 </ul>
@@ -155,12 +145,9 @@ export default function HelpPage() {
               <CardContent>
                 <p className="mb-3 text-muted-foreground">{item.answer}</p>
                 {item.link && (
-                  <Link
-                    href={item.link.href}
-                    className="inline-flex items-center gap-1 text-accent hover:underline"
-                  >
+                  <NavLink href={item.link.href} className="inline-flex items-center gap-1">
                     {item.link.label} →
-                  </Link>
+                  </NavLink>
                 )}
               </CardContent>
             </Card>
@@ -173,39 +160,57 @@ export default function HelpPage() {
         <h2 className="mb-6 font-semibold text-2xl">Quick Actions</h2>
         <div className="grid gap-4 md:grid-cols-3">
           <Link href="/search" className="block">
-            <Card className="h-full cursor-pointer transition-colors hover:bg-accent/5">
-              <CardContent className="pt-6">
-                <div className="mb-2 flex items-center gap-3">
-                  <Search className="h-6 w-6 text-accent" />
-                  <h3 className="font-semibold">Search</h3>
-                </div>
-                <p className="text-muted-foreground text-sm">Find configurations and resources</p>
-              </CardContent>
-            </Card>
+            <motion.div
+              whileHover={{ y: -4, scale: 1.01 }}
+              whileTap={{ scale: 0.99 }}
+              transition={ANIMATION_CONSTANTS.SPRING_DEFAULT}
+            >
+              <Card className="h-full cursor-pointer">
+                <CardContent className="pt-6">
+                  <div className="mb-2 flex items-center gap-3">
+                    <Search className="h-6 w-6 text-accent" />
+                    <h3 className="font-semibold">Search</h3>
+                  </div>
+                  <p className="text-muted-foreground text-sm">Find configurations and resources</p>
+                </CardContent>
+              </Card>
+            </motion.div>
           </Link>
 
           <Link href="/guides" className="block">
-            <Card className="h-full cursor-pointer transition-colors hover:bg-accent/5">
-              <CardContent className="pt-6">
-                <div className="mb-2 flex items-center gap-3">
-                  <BookOpen className="h-6 w-6 text-accent" />
-                  <h3 className="font-semibold">Guides</h3>
-                </div>
-                <p className="text-muted-foreground text-sm">Browse tutorials and how-tos</p>
-              </CardContent>
-            </Card>
+            <motion.div
+              whileHover={{ y: -4, scale: 1.01 }}
+              whileTap={{ scale: 0.99 }}
+              transition={ANIMATION_CONSTANTS.SPRING_DEFAULT}
+            >
+              <Card className="h-full cursor-pointer">
+                <CardContent className="pt-6">
+                  <div className="mb-2 flex items-center gap-3">
+                    <BookOpen className="h-6 w-6 text-accent" />
+                    <h3 className="font-semibold">Guides</h3>
+                  </div>
+                  <p className="text-muted-foreground text-sm">Browse tutorials and how-tos</p>
+                </CardContent>
+              </Card>
+            </motion.div>
           </Link>
 
           <Link href="/contact" className="block">
-            <Card className="h-full cursor-pointer transition-colors hover:bg-accent/5">
-              <CardContent className="pt-6">
-                <div className="mb-2 flex items-center gap-3">
-                  <MessageSquare className="h-6 w-6 text-accent" />
-                  <h3 className="font-semibold">Contact Support</h3>
-                </div>
-                <p className="text-muted-foreground text-sm">Get help from our team</p>
-              </CardContent>
-            </Card>
+            <motion.div
+              whileHover={{ y: -4, scale: 1.01 }}
+              whileTap={{ scale: 0.99 }}
+              transition={ANIMATION_CONSTANTS.SPRING_DEFAULT}
+            >
+              <Card className="h-full cursor-pointer">
+                <CardContent className="pt-6">
+                  <div className="mb-2 flex items-center gap-3">
+                    <MessageSquare className="h-6 w-6 text-accent" />
+                    <h3 className="font-semibold">Contact Support</h3>
+                  </div>
+                  <p className="text-muted-foreground text-sm">Get help from our team</p>
+                </CardContent>
+              </Card>
+            </motion.div>
           </Link>
         </div>
       </section>
@@ -217,16 +222,16 @@ export default function HelpPage() {
             <h2 className="mb-2 font-semibold text-xl">Still need help?</h2>
             <p className="mb-4 text-muted-foreground">Our community is here to assist you</p>
             <div className="flex justify-center gap-4">
-              <Link
+              <NavLink
                 href="/contact"
-                className="inline-flex items-center gap-2 rounded-lg bg-accent px-4 py-2 text-accent-foreground transition-colors hover:bg-accent/90"
+                className={`inline-flex items-center gap-2 rounded-lg bg-accent ${UI_CLASSES.CONTAINER_PADDING_SM} text-accent-foreground transition-colors hover:bg-accent/90`}
               >
                 <MessageSquare className="h-4 w-4" />
                 Contact Us
-              </Link>
+              </NavLink>
               <Link
                 href="/community"
-                className="inline-flex items-center gap-2 rounded-lg border border-accent/20 px-4 py-2 transition-colors hover:bg-accent/10"
+                className={`inline-flex items-center gap-2 rounded-lg border border-accent/20 ${UI_CLASSES.CONTAINER_PADDING_SM} transition-colors hover:bg-accent/10`}
               >
                 Join Community
               </Link>

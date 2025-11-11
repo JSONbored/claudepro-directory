@@ -16,12 +16,13 @@ import { verifyVercelSignature } from '../_shared/utils/vercel.ts';
 
 const RESEND_WEBHOOK_SECRET = Deno.env.get('RESEND_WEBHOOK_SECRET');
 const VERCEL_WEBHOOK_SECRET = Deno.env.get('VERCEL_WEBHOOK_SECRET');
+const POLAR_WEBHOOK_SECRET = Deno.env.get('POLAR_WEBHOOK_SECRET');
 
 // CORS headers with webhook-specific allowed headers
 const webhookCorsHeaders = {
   ...publicCorsHeaders,
   'Access-Control-Allow-Headers':
-    'Content-Type, svix-id, svix-timestamp, svix-signature, x-vercel-signature',
+    'Content-Type, svix-id, svix-timestamp, svix-signature, x-vercel-signature, webhook-id, webhook-timestamp, webhook-signature',
 };
 
 type WebhookSource = Database['public']['Enums']['webhook_source'];
@@ -73,6 +74,21 @@ Deno.serve(async (req) => {
 
     if (!type) {
       return badRequestResponse('Missing webhook type field', webhookCorsHeaders);
+    }
+
+    // SECURITY: Polar webhooks MUST have idempotency key (payment security)
+    if (identification.source === 'polar' && !idempotencyKey) {
+      console.error('Polar webhook missing webhook-id header - REJECTING');
+      return badRequestResponse(
+        'Missing webhook-id header (idempotency required)',
+        webhookCorsHeaders
+      );
+    }
+
+    // SECURITY: Enforce timestamp for Polar (replay attack prevention)
+    if (identification.source === 'polar' && !createdAt) {
+      console.error('Polar webhook missing timestamp - REJECTING');
+      return badRequestResponse('Missing webhook timestamp', webhookCorsHeaders);
     }
 
     // Insert into webhook_events table (trigger will handle routing)
@@ -165,6 +181,37 @@ async function identifyAndVerifyWebhook(
       source: 'vercel',
       verified,
       error: verified ? undefined : 'Vercel signature verification failed',
+    };
+  }
+
+  // Check for Polar/Standard Webhooks headers (webhook-id, webhook-timestamp, webhook-signature)
+  const polarId = headers.get('webhook-id');
+  const polarTimestamp = headers.get('webhook-timestamp');
+  const polarSignature = headers.get('webhook-signature');
+
+  if (polarId && polarTimestamp && polarSignature) {
+    if (!POLAR_WEBHOOK_SECRET) {
+      return {
+        source: 'polar',
+        verified: false,
+        error: 'POLAR_WEBHOOK_SECRET not configured',
+      };
+    }
+
+    // Polar uses Standard Webhooks spec (same as Svix/Resend)
+    // Reuse verifySvixSignature since it implements Standard Webhooks spec
+    const verified = await verifySvixSignature(
+      body,
+      polarId,
+      polarTimestamp,
+      polarSignature,
+      POLAR_WEBHOOK_SECRET
+    );
+
+    return {
+      source: 'polar',
+      verified,
+      error: verified ? undefined : 'Polar signature verification failed',
     };
   }
 
@@ -264,6 +311,14 @@ function extractWebhookFields(
         type: payload.type || null,
         createdAt: payload.createdAt || new Date().toISOString(),
         idempotencyKey: payload.id || headers.get('x-vercel-id') || null,
+      };
+
+    case 'polar':
+      // Polar webhook format (Standard Webhooks spec)
+      return {
+        type: payload.type || null,
+        createdAt: payload.timestamp || null,
+        idempotencyKey: headers.get('webhook-id'),
       };
 
     default:

@@ -13,8 +13,9 @@
  */
 
 import { memo } from 'react';
-import { ProfileCard, type UserProfile } from '@/src/components/domain/profile-card';
+import { ProfileCard, type UserProfile } from '@/src/components/core/domain/profile-card';
 import { Users } from '@/src/lib/icons';
+import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 export interface TopContributorsProps {
   contributors: UserProfile[];
@@ -36,7 +37,7 @@ function TopContributorsComponent({
   return (
     <section className="container mx-auto px-4 py-12">
       <div className="mb-6 flex items-center gap-3">
-        <Users className="h-6 w-6 text-accent" />
+        <Users className={`${UI_CLASSES.ICON_LG} text-accent`} />
         <h2 className="font-bold text-2xl">{title}</h2>
       </div>
 

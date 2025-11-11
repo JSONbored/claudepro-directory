@@ -1,14 +1,12 @@
 /**
  * On-Demand ISR Revalidation - Database-First Architecture
- * Called by Supabase Database Webhook when SEO metadata changes
+ * Called by PostgreSQL trigger when content changes
  *
- * Webhook payload format from Supabase:
+ * Payload format from PostgreSQL trigger:
  * {
- *   "type": "INSERT" | "UPDATE",
- *   "table": "page_metadata_cache",
- *   "record": { route: "/agents/code-reviewer", ... },
- *   "schema": "public",
- *   "old_record": null | { ... }
+ *   "secret": "REVALIDATE_SECRET",
+ *   "category": "agents",
+ *   "slug": "code-reviewer"
  * }
  */
 
@@ -19,9 +17,11 @@ import { logger } from '@/src/lib/logger';
 
 export async function POST(request: NextRequest) {
   try {
-    // Verify webhook secret from header
-    const secret = request.headers.get('x-webhook-secret');
-    if (secret !== process.env.REVALIDATE_SECRET) {
+    const body = await request.json();
+    const { secret, category, slug } = body;
+
+    // Verify secret from body (PostgreSQL trigger sends in payload)
+    if (!secret || secret !== process.env.REVALIDATE_SECRET) {
       logger.warn('Revalidate webhook unauthorized', {
         hasSecret: !!secret,
         ip: request.headers.get('x-forwarded-for') || 'unknown',
@@ -29,37 +29,53 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const body = await request.json();
-
-    // Supabase sends the record data
-    const route = body.record?.route;
-
-    // Validate route
-    if (!route || typeof route !== 'string') {
+    // Validate required fields
+    if (!category || typeof category !== 'string') {
       logger.warn('Revalidate webhook invalid payload', {
-        hasRoute: !!route,
-        routeType: typeof route,
+        hasCategory: !!category,
+        categoryType: typeof category,
         bodyKeys: Object.keys(body).join(', '),
       });
       return NextResponse.json(
-        { error: 'Missing or invalid route in webhook payload' },
+        { error: 'Missing or invalid category in webhook payload' },
         { status: 400 }
       );
     }
 
-    // Revalidate the route
-    revalidatePath(route);
+    // Determine paths to revalidate
+    const paths: string[] = [];
+
+    // Always revalidate homepage (shows recent content)
+    paths.push('/');
+
+    // Revalidate category list page
+    paths.push(`/${category}`);
+
+    // Revalidate detail page if slug provided
+    if (slug && typeof slug === 'string') {
+      paths.push(`/${category}/${slug}`);
+    }
+
+    // Revalidate all paths
+    for (const path of paths) {
+      revalidatePath(path);
+    }
+
+    logger.info('Revalidated paths successfully', {
+      category,
+      slug: slug || null,
+      pathCount: paths.length,
+    });
 
     return NextResponse.json({
       revalidated: true,
-      route,
-      type: body.type,
+      paths,
       timestamp: new Date().toISOString(),
     });
   } catch (error: unknown) {
     return handleApiError(error, {
       route: '/api/revalidate',
-      operation: 'revalidate_path',
+      operation: 'revalidate_content_paths',
       method: 'POST',
     });
   }

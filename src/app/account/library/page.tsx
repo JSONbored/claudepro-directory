@@ -4,7 +4,8 @@
  */
 
 import Link from 'next/link';
-import { UnifiedBadge } from '@/src/components/domain/unified-badge';
+import { UnifiedBadge } from '@/src/components/core/domain/unified-badge';
+import { NavLink } from '@/src/components/core/shared/nav-link';
 import { Button } from '@/src/components/primitives/button';
 import {
   Card,
@@ -14,7 +15,7 @@ import {
   CardTitle,
 } from '@/src/components/primitives/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/primitives/tabs';
-import { ROUTES } from '@/src/lib/constants/routes';
+import { ROUTES } from '@/src/lib/constants';
 import { Bookmark as BookmarkIcon, ExternalLink, FolderOpen, Layers, Plus } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
@@ -126,9 +127,9 @@ export default async function LibraryPage() {
                   Start exploring the directory and bookmark your favorite agents, MCP servers,
                   rules, and more!
                 </p>
-                <Link href="/" className="mt-4 text-primary hover:underline">
+                <NavLink href="/" className="mt-4">
                   Browse Directory →
-                </Link>
+                </NavLink>
               </CardContent>
             </Card>
           ) : (
@@ -148,12 +149,12 @@ export default async function LibraryPage() {
                           <CardDescription className="mt-2">{bookmark.notes}</CardDescription>
                         )}
                       </div>
-                      <Link
+                      <NavLink
                         href={`/${bookmark.content_type}/${bookmark.content_slug}`}
-                        className="text-primary hover:text-primary/80"
+                        className="hover:text-primary/80"
                       >
                         <ExternalLink className="h-4 w-4" />
-                      </Link>
+                      </NavLink>
                     </div>
                   </CardHeader>
                   <CardContent>

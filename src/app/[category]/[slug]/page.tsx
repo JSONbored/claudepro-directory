@@ -7,8 +7,10 @@ import { notFound } from 'next/navigation';
 import { ReadProgress } from '@/src/components/content/read-progress';
 import { UnifiedDetailPage } from '@/src/components/content/unified-detail-page';
 import { CollectionDetailView } from '@/src/components/content/unified-detail-page/collection-detail-view';
-import { StructuredData } from '@/src/components/infra/structured-data';
-import { UnifiedTracker } from '@/src/components/infra/unified-tracker';
+import { StructuredData } from '@/src/components/core/infra/structured-data';
+import { UnifiedTracker } from '@/src/components/core/infra/unified-tracker';
+import { RecentlyViewedTracker } from '@/src/components/features/navigation/recently-viewed-tracker';
+import type { RecentlyViewedCategory } from '@/src/hooks/use-recently-viewed';
 import {
   type CategoryId,
   getCategoryConfig,
@@ -186,34 +188,16 @@ export default async function DetailPage({
     notFound();
   }
 
-  const analytics = response.analytics as { view_count: number } | null;
+  const analytics = response.analytics as { view_count: number; copy_count: number } | null;
   const viewCount = analytics?.view_count || 0;
+  const copyCount = analytics?.copy_count || 0;
   const relatedItems = (response.related as ContentItem[]) || [];
 
   // No transformation needed - displayTitle computed at build time
   // This eliminates runtime overhead and follows DRY principles
 
-  // Conditional rendering: Collections use specialized CollectionDetailView
-  // TypeScript narrows fullItem type based on category check
-  if (category === 'collections' && fullItem && fullItem.category === 'collections') {
-    return (
-      <>
-        {/* Read Progress Bar - Shows reading progress at top of page */}
-        <ReadProgress />
-
-        <UnifiedTracker variant="view" category={category} slug={slug} />
-        <UnifiedTracker variant="page-view" category={category} slug={slug} />
-        <StructuredData route={`/${category}/${slug}`} />
-        <CollectionDetailView
-          collection={
-            fullItem as Database['public']['Tables']['content']['Row'] & { category: 'collections' }
-          }
-        />
-      </>
-    );
-  }
-
-  // Default rendering: All other categories use UnifiedDetailPage
+  // Unified rendering: All categories use UnifiedDetailPage
+  // Collections pass their specialized sections via collectionSections prop
   return (
     <>
       {/* Read Progress Bar - Shows reading progress at top of page */}
@@ -222,10 +206,41 @@ export default async function DetailPage({
       <UnifiedTracker variant="view" category={category} slug={slug} />
       <UnifiedTracker variant="page-view" category={category} slug={slug} />
       <StructuredData route={`/${category}/${slug}`} />
+
+      {/* Recently Viewed Tracking */}
+      <RecentlyViewedTracker
+        category={category as RecentlyViewedCategory}
+        slug={slug}
+        title={
+          ('display_title' in fullItem && fullItem.display_title) ||
+          ('title' in fullItem && fullItem.title) ||
+          slug
+        }
+        description={fullItem.description}
+        {...('tags' in fullItem &&
+        Array.isArray(fullItem.tags) &&
+        fullItem.tags.length > 0 &&
+        fullItem.tags.every((tag) => typeof tag === 'string')
+          ? { tags: (fullItem.tags as string[]).slice(0, 3) }
+          : {})}
+      />
+
       <UnifiedDetailPage
         item={fullItem || itemData}
         relatedItems={relatedItems}
         viewCount={viewCount}
+        copyCount={copyCount}
+        collectionSections={
+          category === 'collections' && fullItem && fullItem.category === 'collections' ? (
+            <CollectionDetailView
+              collection={
+                fullItem as Database['public']['Tables']['content']['Row'] & {
+                  category: 'collections';
+                }
+              }
+            />
+          ) : undefined
+        }
       />
     </>
   );

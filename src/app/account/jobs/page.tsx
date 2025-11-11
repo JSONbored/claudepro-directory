@@ -1,6 +1,6 @@
 import Link from 'next/link';
-import { UnifiedBadge } from '@/src/components/domain/unified-badge';
-import { UnifiedButton } from '@/src/components/domain/unified-button';
+import { UnifiedBadge } from '@/src/components/core/domain/unified-badge';
+import { UnifiedButton } from '@/src/components/core/domain/unified-button';
 import { Button } from '@/src/components/primitives/button';
 import {
   Card,
@@ -9,7 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/card';
-import { ROUTES } from '@/src/lib/constants/routes';
+import { ROUTES } from '@/src/lib/constants';
 import { BarChart, Briefcase, Edit, ExternalLink, Eye, Plus } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
@@ -17,6 +17,7 @@ import { createClient } from '@/src/lib/supabase/server';
 import { BADGE_COLORS, type JobStatusType, UI_CLASSES } from '@/src/lib/ui-constants';
 import { formatRelativeDate } from '@/src/lib/utils/data.utils';
 import type { Tables } from '@/src/types/database.types';
+import type { GetUserDashboardReturn } from '@/src/types/database-overrides';
 
 // Force dynamic rendering - requires authentication
 export const dynamic = 'force-dynamic';
@@ -54,8 +55,8 @@ export default async function MyJobsPage() {
       );
       hasError = true;
     } else if (data !== null) {
-      // Trust database types - PostgreSQL validates structure
-      const result = data as { jobs: Array<Tables<'jobs'>> };
+      // Type-safe RPC return using centralized type definition
+      const result = data as GetUserDashboardReturn;
       jobs = result.jobs || [];
     }
   }
@@ -75,13 +76,13 @@ export default async function MyJobsPage() {
   const getPlanBadge = (plan: string) => {
     if (plan === 'premium')
       return (
-        <UnifiedBadge variant="base" className="bg-purple-500/10 text-purple-400">
+        <UnifiedBadge variant="base" className={UI_CLASSES.STATUS_PREMIUM}>
           Premium
         </UnifiedBadge>
       );
     if (plan === 'featured')
       return (
-        <UnifiedBadge variant="base" className="bg-blue-500/10 text-blue-400">
+        <UnifiedBadge variant="base" className={UI_CLASSES.STATUS_PUBLISHED}>
           Featured
         </UnifiedBadge>
       );

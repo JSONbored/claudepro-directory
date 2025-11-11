@@ -14,8 +14,8 @@
 
 import { motion } from 'motion/react';
 import { useRouter } from 'next/navigation';
-import { UnifiedBadge } from '@/src/components/domain/unified-badge';
-import { UnifiedButton } from '@/src/components/domain/unified-button';
+import { UnifiedBadge } from '@/src/components/core/domain/unified-badge';
+import { UnifiedButton } from '@/src/components/core/domain/unified-button';
 import type { CopyType } from '@/src/components/features/growth/unified-newsletter-capture';
 import { Button } from '@/src/components/primitives/button';
 import { useCopyWithEmailCapture } from '@/src/hooks/use-copy-with-email-capture';
@@ -23,6 +23,7 @@ import type { CategoryId } from '@/src/lib/config/category-config';
 import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
 import { trackInteraction } from '@/src/lib/edge/client';
 import { ArrowLeft, Check, Copy } from '@/src/lib/icons';
+import { STATE_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { toasts } from '@/src/lib/utils/toast.utils';
 
 /**
@@ -127,7 +128,24 @@ export function DetailHeaderActions({
 
   // Handle action clicks based on type
   const handleActionClick = (action: SerializableAction) => {
-    // Generic toast for all action types
+    // Handle download action - check for storage_url
+    if (action.type === 'download' && 'storage_url' in item && item.storage_url) {
+      window.location.href = item.storage_url;
+      toasts.raw.success('Download started!', {
+        description: `Downloading ${item.title || item.slug} package...`,
+      });
+
+      trackInteraction({
+        interaction_type: 'download',
+        content_type: category,
+        content_slug: item.slug,
+      }).catch(() => {
+        // Intentional
+      });
+      return;
+    }
+
+    // Generic toast for other action types
     toasts.raw.success(`${action.label}`, {
       description: `Copy the ${typeName.toLowerCase()} content and follow the installation instructions.`,
     });
@@ -140,36 +158,40 @@ export function DetailHeaderActions({
         <Button
           variant="ghost"
           onClick={() => router.back()}
-          className="text-muted-foreground hover:text-foreground"
+          className={`text-muted-foreground ${STATE_PATTERNS.HOVER_TEXT_FOREGROUND}`}
         >
-          <ArrowLeft className="mr-2 h-4 w-4" />
+          <ArrowLeft className={UI_CLASSES.ICON_SM_LEADING} />
           Back
         </Button>
       </div>
 
       {/* Main content header */}
-      <div className={'flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between'}>
+      <div className={`${UI_CLASSES.FLEX_COL_GAP_6} lg:flex-row lg:items-start lg:justify-between`}>
         <div className="flex-1">
           <div className={'mb-4 flex items-center gap-3'}>
-            <UnifiedBadge variant="base" style="secondary" className={'font-medium text-xs'}>
+            <UnifiedBadge
+              variant="base"
+              style="secondary"
+              className={`${UI_CLASSES.TEXT_BADGE} font-medium`}
+            >
               {typeName}
             </UnifiedBadge>
-            <UnifiedBadge variant="base" style="outline" className="text-xs">
+            <UnifiedBadge variant="base" style="outline" className={UI_CLASSES.TEXT_BADGE}>
               {category}
             </UnifiedBadge>
           </div>
 
-          <h1 className={'mb-4 font-bold text-4xl tracking-tight'}>{displayTitle}</h1>
+          <h1 className={`mb-4 ${UI_CLASSES.HEADING_H1}`}>{displayTitle}</h1>
 
           {item.description && (
-            <p className={'mb-6 text-muted-foreground text-xl leading-relaxed'}>
+            <p className={`mb-6 ${UI_CLASSES.TEXT_BODY_LG} text-muted-foreground`}>
               {item.description}
             </p>
           )}
         </div>
 
         {/* Action buttons */}
-        <div className={'flex flex-col gap-3 sm:flex-row'}>
+        <div className={UI_CLASSES.FLEX_COL_SM_ROW_GAP_3}>
           <Button onClick={() => handleActionClick(primaryAction)} className="min-w-0">
             {primaryAction.label}
           </Button>
@@ -187,7 +209,7 @@ export function DetailHeaderActions({
                   </>
                 ) : (
                   <>
-                    <Copy className="mr-2 h-4 w-4" />
+                    <Copy className={UI_CLASSES.ICON_SM_LEADING} />
                     Copy Content
                   </>
                 )}

@@ -1,6 +1,6 @@
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
-import { UnifiedBadge } from '@/src/components/domain/unified-badge';
+import { UnifiedBadge } from '@/src/components/core/domain/unified-badge';
 import { Button } from '@/src/components/primitives/button';
 
 const UnifiedNewsletterCapture = dynamic(
@@ -14,8 +14,7 @@ const UnifiedNewsletterCapture = dynamic(
 );
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/card';
-import { SOCIAL_LINKS } from '@/src/lib/constants';
-import { ROUTES } from '@/src/lib/constants/routes';
+import { ROUTES, SOCIAL_LINKS } from '@/src/lib/constants';
 import { Github, MessageCircle, MessageSquare, Twitter, Users } from '@/src/lib/icons';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';

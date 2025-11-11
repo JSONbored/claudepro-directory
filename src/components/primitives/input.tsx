@@ -4,6 +4,7 @@ import { motion } from 'motion/react';
 import type * as React from 'react';
 import { useState } from 'react';
 
+import { ANIMATION_CONSTANTS, STATE_PATTERNS } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
 
 export interface InputProps extends React.ComponentProps<'input'> {
@@ -30,7 +31,7 @@ const Input = ({ className, type, ref, error, errorId, onFocus, onBlur, ...props
       <input
         type={type}
         className={cn(
-          'relative flex h-12 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background transition-all duration-200 file:border-0 file:bg-transparent file:font-medium file:text-foreground file:text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm',
+          `relative flex h-12 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT} file:border-0 file:bg-transparent file:font-medium file:text-foreground file:text-sm placeholder:text-muted-foreground ${STATE_PATTERNS.FOCUS_RING} ${STATE_PATTERNS.DISABLED_CURSOR} md:text-sm`,
           error && 'border-destructive focus-visible:ring-destructive',
           className
         )}

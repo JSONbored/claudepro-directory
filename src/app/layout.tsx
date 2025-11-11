@@ -8,7 +8,7 @@ const SpeedInsights = (
 ).SpeedInsights;
 
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
+import localFont from 'next/font/local';
 import { ThemeProvider } from 'next-themes';
 import { Suspense } from 'react';
 import './globals.css';
@@ -28,22 +28,23 @@ const NotificationToastHandler = dynamic(
   }
 );
 
-import { ErrorBoundary } from '@/src/components/infra/error-boundary';
-import { PostCopyEmailProvider } from '@/src/components/infra/providers/post-copy-email-provider';
-import { PwaInstallTracker } from '@/src/components/infra/pwa-install-tracker';
-import { StructuredData } from '@/src/components/infra/structured-data';
-import { getActiveAnnouncement } from '@/src/components/layout/announcement-banner-server';
-import { LayoutContent } from '@/src/components/layout/layout-content';
+import { ErrorBoundary } from '@/src/components/core/infra/error-boundary';
+import { PostCopyEmailProvider } from '@/src/components/core/infra/providers/post-copy-email-provider';
+import { PwaInstallTracker } from '@/src/components/core/infra/pwa-install-tracker';
+import { StructuredData } from '@/src/components/core/infra/structured-data';
+import { getActiveAnnouncement } from '@/src/components/core/layout/announcement-banner-server';
+import { LayoutContent } from '@/src/components/core/layout/layout-content';
 
-import { UmamiScript } from '@/src/components/shared/umami-script';
+import { UmamiScript } from '@/src/components/core/shared/umami-script';
 import { APP_CONFIG } from '@/src/lib/constants';
+import { featureFlags } from '@/src/lib/flags';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 
-// Configure Inter font with optimizations
-const inter = Inter({
-  subsets: ['latin'],
-  display: 'optional', // Changed from 'swap' to 'optional' for better performance (zero layout shifts)
+// Self-hosted fonts - no external requests, faster FCP, GDPR compliant
+const inter = localFont({
+  src: '../fonts/Inter-Variable.woff2',
   variable: '--font-inter',
+  display: 'optional',
   preload: true,
   fallback: [
     'system-ui',
@@ -54,6 +55,25 @@ const inter = Inter({
     'Arial',
     'sans-serif',
   ],
+  weight: '100 900',
+});
+
+const geist = localFont({
+  src: '../fonts/GeistVF.woff2',
+  variable: '--font-geist',
+  display: 'optional',
+  preload: true,
+  fallback: ['system-ui', '-apple-system', 'sans-serif'],
+  weight: '100 900',
+});
+
+const geistMono = localFont({
+  src: '../fonts/GeistMonoVF.woff2',
+  variable: '--font-geist-mono',
+  display: 'optional',
+  preload: true,
+  fallback: ['Menlo', 'Monaco', 'Courier New', 'monospace'],
+  weight: '100 900',
 });
 
 // Generate homepage metadata from centralized registry
@@ -124,8 +144,15 @@ export default async function RootLayout({
   // Fetch announcement data server-side using anonymous client (ISR-safe)
   const announcement = await getActiveAnnouncement();
 
+  // Fetch feature flags server-side for A/B testing and gradual rollouts
+  const useFloatingActionBar = await featureFlags.floatingActionBar();
+
   return (
-    <html lang="en" suppressHydrationWarning className={`${inter.variable} font-sans`}>
+    <html
+      lang="en"
+      suppressHydrationWarning
+      className={`${inter.variable} ${geist.variable} ${geistMono.variable} font-sans`}
+    >
       <head>
         {/* Viewport for responsive design */}
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
@@ -168,7 +195,12 @@ export default async function RootLayout({
         >
           <PostCopyEmailProvider>
             <ErrorBoundary>
-              <LayoutContent announcement={announcement}>{children}</LayoutContent>
+              <LayoutContent
+                announcement={announcement}
+                useFloatingActionBar={useFloatingActionBar}
+              >
+                {children}
+              </LayoutContent>
             </ErrorBoundary>
             <Toaster />
             <NotificationToastHandler />

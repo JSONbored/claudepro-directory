@@ -20,11 +20,11 @@ function BadgeDelta({
 }) {
   const icon =
     deltaType === 'increase' ? (
-      <ArrowUpIcon className="h-3 w-3" />
+      <ArrowUpIcon className={UI_CLASSES.ICON_XS} />
     ) : deltaType === 'decrease' ? (
-      <ArrowDownIcon className="h-3 w-3" />
+      <ArrowDownIcon className={UI_CLASSES.ICON_XS} />
     ) : (
-      <MinusIcon className="h-3 w-3" />
+      <MinusIcon className={UI_CLASSES.ICON_XS} />
     );
 
   const colorClass =

@@ -1,11 +1,7 @@
-import type { Metadata } from 'next';
-import Link from 'next/link';
-import { APP_CONFIG } from '@/src/lib/constants';
+import { NavLink } from '@/src/components/core/shared/nav-link';
+import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 
-export const metadata: Metadata = {
-  title: `Cookie Policy - ${APP_CONFIG.name}`,
-  description: `Cookie Policy for ${APP_CONFIG.name}. Learn about the cookies we use and how to manage your cookie preferences when using our Claude AI configuration directory.`,
-};
+export const metadata = generatePageMetadata('/cookies');
 
 /**
  * ISR Configuration: Legal pages are static and never change
@@ -169,14 +165,8 @@ export default function CookiesPage() {
           <h2 className="mb-4 font-semibold text-2xl">8. Contact Us</h2>
           <p className="mb-4">
             If you have questions about our use of cookies, please{' '}
-            <Link href="/contact" className="text-accent hover:underline">
-              contact us
-            </Link>{' '}
-            or review our{' '}
-            <Link href="/privacy" className="text-accent hover:underline">
-              Privacy Policy
-            </Link>
-            .
+            <NavLink href="/contact">contact us</NavLink> or review our{' '}
+            <NavLink href="/privacy">Privacy Policy</NavLink>.
           </p>
         </section>
       </div>

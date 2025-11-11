@@ -1,6 +1,9 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { ProfileEditForm, RefreshProfileButton } from '@/src/components/forms/profile-edit-form';
+import {
+  ProfileEditForm,
+  RefreshProfileButton,
+} from '@/src/components/core/forms/profile-edit-form';
 import { Button } from '@/src/components/primitives/button';
 import {
   Card,
@@ -17,7 +20,7 @@ import {
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
-import type { Tables } from '@/src/types/database.types';
+import type { GetUserSettingsReturn } from '@/src/types/database-overrides';
 
 // Force dynamic rendering - requires authentication
 export const dynamic = 'force-dynamic';
@@ -37,22 +40,8 @@ export default async function SettingsPage() {
     p_user_id: user.id,
   });
 
-  // RPC returns Json - use generated database types
-  type UserDataResult = Pick<Tables<'users'>, 'slug' | 'name' | 'image' | 'tier'>;
-  type ProfileResult = Pick<
-    Tables<'users'>,
-    | 'display_name'
-    | 'bio'
-    | 'work'
-    | 'website'
-    | 'social_x_link'
-    | 'interests'
-    | 'profile_public'
-    | 'follow_email'
-    | 'created_at'
-  >;
-
-  const settingsResult = settingsData as { user_data?: UserDataResult; profile?: ProfileResult };
+  // Type-safe RPC return using centralized type definition
+  const settingsResult = settingsData as GetUserSettingsReturn;
   const userData = settingsResult?.user_data;
   const profile = settingsResult?.profile;
 
@@ -95,7 +84,7 @@ export default async function SettingsPage() {
           </div>
         </CardHeader>
         <CardContent>
-          <ProfileEditForm profile={profile as ProfileResult} />
+          <ProfileEditForm profile={profile} />
         </CardContent>
       </Card>
 
@@ -143,6 +132,7 @@ export default async function SettingsPage() {
                 width={64}
                 height={64}
                 className="h-16 w-16 rounded-full object-cover"
+                priority
               />
               <div>
                 <p className="text-sm">

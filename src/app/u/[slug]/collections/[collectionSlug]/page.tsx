@@ -6,7 +6,8 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { UnifiedBadge } from '@/src/components/domain/unified-badge';
+import { UnifiedBadge } from '@/src/components/core/domain/unified-badge';
+import { NavLink } from '@/src/components/core/shared/nav-link';
 import { Button } from '@/src/components/primitives/button';
 import {
   Card,
@@ -162,11 +163,8 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
             )}
 
             <div className={'mt-2 text-muted-foreground text-sm'}>
-              Created by{' '}
-              <Link href={`/u/${slug}`} className="text-primary hover:underline">
-                {profileUser.name || slug}
-              </Link>{' '}
-              • {collection.item_count} {collection.item_count === 1 ? 'item' : 'items'} •{' '}
+              Created by <NavLink href={`/u/${slug}`}>{profileUser.name || slug}</NavLink> •{' '}
+              {collection.item_count} {collection.item_count === 1 ? 'item' : 'items'} •{' '}
               {collection.view_count} views
             </div>
           </div>

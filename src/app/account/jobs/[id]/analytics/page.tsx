@@ -4,10 +4,10 @@
 
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
-import { UnifiedBadge } from '@/src/components/domain/unified-badge';
+import { UnifiedBadge } from '@/src/components/core/domain/unified-badge';
 import { Button } from '@/src/components/primitives/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/card';
-import { ROUTES } from '@/src/lib/constants/routes';
+import { ROUTES } from '@/src/lib/constants';
 import { ArrowLeft, BarChart, ExternalLink, Eye } from '@/src/lib/icons';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';
@@ -129,7 +129,7 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPageProps
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="font-medium text-sm">Total Views</CardTitle>
-            <Eye className="h-4 w-4 text-muted-foreground" />
+            <Eye className={`${UI_CLASSES.ICON_SM} ${UI_CLASSES.ICON_NEUTRAL}`} />
           </CardHeader>
           <CardContent>
             <div className="font-bold text-2xl">{viewCount.toLocaleString()}</div>
@@ -142,7 +142,7 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPageProps
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="font-medium text-sm">Clicks</CardTitle>
-            <ExternalLink className="h-4 w-4 text-muted-foreground" />
+            <ExternalLink className={`${UI_CLASSES.ICON_SM} ${UI_CLASSES.ICON_NEUTRAL}`} />
           </CardHeader>
           <CardContent>
             <div className="font-bold text-2xl">{clickCount.toLocaleString()}</div>

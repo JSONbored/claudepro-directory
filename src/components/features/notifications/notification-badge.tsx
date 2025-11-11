@@ -16,6 +16,7 @@
 
 import { AnimatePresence, motion } from 'motion/react';
 import { type NotificationStore, useNotificationStore } from '@/src/lib/stores/notification-store';
+import { ANIMATION_CONSTANTS, POSITION_PATTERNS } from '@/src/lib/ui-constants';
 
 interface NotificationBadgeProps {
   /** Custom className for styling */
@@ -35,8 +36,8 @@ export function NotificationBadge({ className = '' }: NotificationBadgeProps) {
         initial={{ scale: 0, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0, opacity: 0 }}
-        transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-        className={`-top-1 -right-1 absolute flex h-5 w-5 items-center justify-center rounded-full bg-destructive font-medium text-destructive-foreground text-xs shadow-md ${className}
+        transition={ANIMATION_CONSTANTS.SPRING_BOUNCY}
+        className={`${POSITION_PATTERNS.ABSOLUTE_TOP_BADGE} flex h-5 w-5 items-center justify-center rounded-full bg-destructive font-medium text-destructive-foreground text-xs shadow-md ${className}
         `}
         aria-live="polite"
         aria-label={`${unreadCount} unread notification${unreadCount > 1 ? 's' : ''}`}

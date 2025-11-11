@@ -17,16 +17,17 @@
 import { motion } from 'motion/react';
 import Link from 'next/link';
 import { type FC, memo, useMemo } from 'react';
-import { ConfigCard } from '@/src/components/domain/config-card';
-import { UnifiedCardGrid } from '@/src/components/domain/unified-card-grid';
+import { ConfigCard } from '@/src/components/core/domain/config-card';
+import { UnifiedCardGrid } from '@/src/components/core/domain/unified-card-grid';
 import { Button } from '@/src/components/primitives/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/primitives/tabs';
 import {
   HOMEPAGE_TAB_CATEGORIES,
   type UnifiedCategoryConfig,
 } from '@/src/lib/config/category-config';
-import { ROUTES } from '@/src/lib/constants/routes';
+import { ROUTES } from '@/src/lib/constants';
 import type { DisplayableContent } from '@/src/lib/types/component.types';
+import { ANIMATION_CONSTANTS } from '@/src/lib/ui-constants';
 
 interface TabsSectionProps {
   activeTab: string;
@@ -70,7 +71,7 @@ const TabsSectionComponent: FC<TabsSectionProps> = ({
               <motion.div
                 key={tab}
                 whileTap={{ scale: 0.95 }}
-                transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+                transition={ANIMATION_CONSTANTS.SPRING_DEFAULT}
               >
                 <TabsTrigger
                   value={tab}

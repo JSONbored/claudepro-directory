@@ -1,11 +1,8 @@
-import type { Metadata } from 'next';
-import Link from 'next/link';
+import { NavLink } from '@/src/components/core/shared/nav-link';
 import { APP_CONFIG, SOCIAL_LINKS } from '@/src/lib/constants';
+import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 
-export const metadata: Metadata = {
-  title: `Accessibility Statement - ${APP_CONFIG.name}`,
-  description: `Accessibility Statement for ${APP_CONFIG.name}. Learn about our commitment to digital accessibility and WCAG 2.1 AA compliance for our Claude AI directory.`,
-};
+export const metadata = generatePageMetadata('/accessibility');
 
 /**
  * ISR Configuration: Legal pages are static and never change
@@ -40,14 +37,13 @@ export default function AccessibilityPage() {
           <h2 className="mb-4 font-semibold text-2xl">Conformance Status</h2>
           <p className="mb-4">
             We aim to conform to the{' '}
-            <a
+            <NavLink
               href="https://www.w3.org/WAI/WCAG21/quickref/"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-accent hover:underline"
             >
               Web Content Accessibility Guidelines (WCAG) 2.1
-            </a>{' '}
+            </NavLink>{' '}
             at the AA level. These guidelines explain how to make web content more accessible for
             people with disabilities.
           </p>
@@ -144,27 +140,20 @@ export default function AccessibilityPage() {
           </p>
           <ul className="list-disc space-y-2 pl-6">
             <li>
-              Email:{' '}
-              <a href={`mailto:${SOCIAL_LINKS.email}`} className="text-accent hover:underline">
-                {SOCIAL_LINKS.email}
-              </a>
+              Email: <NavLink href={`mailto:${SOCIAL_LINKS.email}`}>{SOCIAL_LINKS.email}</NavLink>
             </li>
             <li>
-              Contact form:{' '}
-              <Link href="/contact" className="text-accent hover:underline">
-                Contact Us
-              </Link>
+              Contact form: <NavLink href="/contact">Contact Us</NavLink>
             </li>
             <li>
               GitHub Issues:{' '}
-              <a
+              <NavLink
                 href={`${SOCIAL_LINKS.github}/issues`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-accent hover:underline"
               >
                 Report an Issue
-              </a>
+              </NavLink>
             </li>
           </ul>
           <p className="mt-4">
@@ -182,14 +171,13 @@ export default function AccessibilityPage() {
           <ul className="list-disc space-y-2 pl-6">
             <li>
               U.S. Department of Justice:{' '}
-              <a
+              <NavLink
                 href="https://www.ada.gov/filing_complaint.htm"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-accent hover:underline"
               >
                 ADA Complaint Form
-              </a>
+              </NavLink>
             </li>
           </ul>
         </section>

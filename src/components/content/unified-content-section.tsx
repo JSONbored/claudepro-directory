@@ -7,7 +7,7 @@
 
 import { motion } from 'motion/react';
 import { ProductionCodeBlock } from '@/src/components/content/production-code-block';
-import { UnifiedBadge } from '@/src/components/domain/unified-badge';
+import { UnifiedBadge } from '@/src/components/core/domain/unified-badge';
 import {
   Card,
   CardContent,
@@ -199,7 +199,7 @@ export function UnifiedContentSection(props: UnifiedContentSectionProps) {
         <Card className={cn('', className)}>
           <CardHeader>
             <CardTitle className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-              <Icon className="h-5 w-5" />
+              <Icon className={UI_CLASSES.ICON_MD} />
               {title}
             </CardTitle>
             {description && <CardDescription>{description}</CardDescription>}
@@ -227,7 +227,7 @@ export function UnifiedContentSection(props: UnifiedContentSectionProps) {
         <Card className={cn('', className)}>
           <CardHeader>
             <CardTitle className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-              <Copy className="h-5 w-5" />
+              <Copy className={UI_CLASSES.ICON_MD} />
               {title}
             </CardTitle>
             {description && <CardDescription>{description}</CardDescription>}
@@ -255,7 +255,7 @@ export function UnifiedContentSection(props: UnifiedContentSectionProps) {
           <Card data-section="configuration" className={cn('', className)}>
             <CardHeader>
               <CardTitle className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                <Copy className="h-5 w-5" />
+                <Copy className={UI_CLASSES.ICON_MD} />
                 Configuration
               </CardTitle>
               <CardDescription>
@@ -288,7 +288,7 @@ export function UnifiedContentSection(props: UnifiedContentSectionProps) {
           <Card className={cn('', className)}>
             <CardHeader>
               <CardTitle className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                <Copy className="h-5 w-5" />
+                <Copy className={UI_CLASSES.ICON_MD} />
                 Hook Configuration
               </CardTitle>
               <CardDescription>Hook setup and script content</CardDescription>
@@ -325,7 +325,7 @@ export function UnifiedContentSection(props: UnifiedContentSectionProps) {
         <Card className={cn('', className)}>
           <CardHeader>
             <CardTitle className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-              <Copy className="h-5 w-5" />
+              <Copy className={UI_CLASSES.ICON_MD} />
               Configuration
             </CardTitle>
             <CardDescription>Configuration settings and parameters</CardDescription>
@@ -361,7 +361,7 @@ export function UnifiedContentSection(props: UnifiedContentSectionProps) {
         <Card className={cn('', className)}>
           <CardHeader>
             <CardTitle className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-              <Copy className="h-5 w-5" />
+              <Copy className={UI_CLASSES.ICON_MD} />
               {title}
             </CardTitle>
             {description && <CardDescription>{description}</CardDescription>}
@@ -419,7 +419,7 @@ export function UnifiedContentSection(props: UnifiedContentSectionProps) {
         <Card className={cn('', className)}>
           <CardHeader>
             <CardTitle className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-              <Copy className="h-5 w-5" />
+              <Copy className={UI_CLASSES.ICON_MD} />
               Troubleshooting
             </CardTitle>
             {description && <CardDescription>{description}</CardDescription>}
@@ -465,7 +465,7 @@ export function UnifiedContentSection(props: UnifiedContentSectionProps) {
         <Card className={cn('', className)}>
           <CardHeader>
             <CardTitle className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-              <Copy className="h-5 w-5" />
+              <Copy className={UI_CLASSES.ICON_MD} />
               Installation
             </CardTitle>
             <CardDescription>Setup instructions and requirements</CardDescription>

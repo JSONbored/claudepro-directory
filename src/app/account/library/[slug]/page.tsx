@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
-import { UnifiedBadge } from '@/src/components/domain/unified-badge';
-import { CollectionItemManager } from '@/src/components/library/collection-item-manager';
+import { CollectionItemManager } from '@/src/components/core/collection-item-manager';
+import { UnifiedBadge } from '@/src/components/core/domain/unified-badge';
 import { Button } from '@/src/components/primitives/button';
 import {
   Card,
@@ -11,8 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/card';
-import { APP_CONFIG } from '@/src/lib/constants';
-import { ROUTES } from '@/src/lib/constants/routes';
+import { APP_CONFIG, ROUTES } from '@/src/lib/constants';
 import { ArrowLeft, Edit, Share2 } from '@/src/lib/icons';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';

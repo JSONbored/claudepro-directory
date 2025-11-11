@@ -23,13 +23,15 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/src/components/primitives/sheet';
+import { useConfetti } from '@/src/hooks/use-confetti';
 import type { NewsletterSource } from '@/src/hooks/use-newsletter';
 import { useNewsletter } from '@/src/hooks/use-newsletter';
-import { trackEvent } from '@/src/lib/analytics/tracker';
+import { InlineSpinner } from '@/src/lib/components/loading-factory';
 import { NEWSLETTER_CTA_CONFIG } from '@/src/lib/config/category-config';
+import { trackInteraction } from '@/src/lib/edge/client';
 import { Mail, X } from '@/src/lib/icons';
 import { createClient } from '@/src/lib/supabase/client';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { DIMENSIONS, POSITION_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
 
@@ -147,7 +149,7 @@ export function UnifiedNewsletterCapture(props: UnifiedNewsletterCaptureProps) {
         >
           <div className="mb-6 flex justify-center">
             <div className="rounded-2xl border border-accent/20 bg-accent/10 p-4 shadow-accent/10 shadow-md backdrop-blur-sm">
-              <Mail className="h-8 w-8 text-accent" aria-hidden="true" />
+              <Mail className={`${UI_CLASSES.ICON_XL} text-accent`} aria-hidden="true" />
             </div>
           </div>
 
@@ -182,7 +184,7 @@ export function UnifiedNewsletterCapture(props: UnifiedNewsletterCaptureProps) {
           <CardHeader className="pb-5">
             <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3} mb-3`}>
               <div className="rounded-lg border border-primary/20 bg-primary/10 p-2.5">
-                <Mail className="h-5 w-5 text-primary" aria-hidden="true" />
+                <Mail className={`${UI_CLASSES.ICON_MD} text-primary`} aria-hidden="true" />
               </div>
               <CardTitle className="font-bold text-xl">{finalHeadline}</CardTitle>
             </div>
@@ -210,7 +212,10 @@ export function UnifiedNewsletterCapture(props: UnifiedNewsletterCaptureProps) {
           )}
         >
           <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3} min-w-0 flex-1`}>
-            <Mail className="h-5 w-5 flex-shrink-0 text-primary" aria-hidden="true" />
+            <Mail
+              className={`${UI_CLASSES.ICON_MD} flex-shrink-0 text-primary`}
+              aria-hidden="true"
+            />
             <div className="min-w-0 flex-1">
               <p className="truncate font-medium text-sm">{finalHeadline}</p>
               <p className="truncate text-muted-foreground text-xs">{finalDescription}</p>
@@ -218,7 +223,7 @@ export function UnifiedNewsletterCapture(props: UnifiedNewsletterCaptureProps) {
           </div>
           <FormVariant
             source={source}
-            className="w-full sm:w-auto sm:min-w-[320px] sm:max-w-[400px]"
+            className={`w-full sm:w-auto sm:${DIMENSIONS.MIN_W_NEWSLETTER_FORM} sm:${DIMENSIONS.NEWSLETTER_FORM_MAX}`}
           />
         </div>
       );
@@ -236,7 +241,7 @@ export function UnifiedNewsletterCapture(props: UnifiedNewsletterCaptureProps) {
           <CardHeader className="flex-1">
             <div className="mb-4">
               <div className="inline-flex rounded-lg border border-primary/20 bg-primary/10 p-3">
-                <Mail className="h-6 w-6 text-primary" aria-hidden="true" />
+                <Mail className={`${UI_CLASSES.ICON_LG} text-primary`} aria-hidden="true" />
               </div>
             </div>
             <CardTitle className="mb-3 font-bold text-xl">{finalHeadline}</CardTitle>
@@ -284,8 +289,13 @@ export function UnifiedNewsletterCapture(props: UnifiedNewsletterCaptureProps) {
 }
 
 function FormVariant({ source, className }: { source: NewsletterSource; className?: string }) {
+  const { celebrateSignup } = useConfetti();
   const { email, setEmail, isSubmitting, subscribe, error } = useNewsletter({
     source,
+    onSuccess: () => {
+      // Celebrate newsletter signup! 🎉
+      celebrateSignup();
+    },
   });
   const errorId = useId();
   const [isFocused, setIsFocused] = useState(false);
@@ -297,8 +307,8 @@ function FormVariant({ source, className }: { source: NewsletterSource; classNam
 
   return (
     <form onSubmit={handleSubmit} className={cn('w-full', className)}>
-      <div className="flex flex-col gap-3">
-        <div className="flex flex-col gap-3 sm:flex-row">
+      <div className={UI_CLASSES.FLEX_COL_GAP_3}>
+        <div className={UI_CLASSES.FLEX_COL_SM_ROW_GAP_3}>
           <div className="relative flex-1">
             <Input
               type="email"
@@ -310,7 +320,7 @@ function FormVariant({ source, className }: { source: NewsletterSource; classNam
               required
               disabled={isSubmitting}
               className={cn(
-                'h-[52px] min-w-0 px-5 text-base',
+                `${DIMENSIONS.BUTTON_LG} min-w-0 px-5 text-base`,
                 'border-border/40 bg-background/95 backdrop-blur-sm',
                 'transition-all duration-200 ease-out',
                 'focus:border-accent/50 focus:ring-2 focus:ring-accent/20',
@@ -333,25 +343,22 @@ function FormVariant({ source, className }: { source: NewsletterSource; classNam
             disabled={isSubmitting || !email.trim()}
             size="lg"
             className={cn(
-              'h-[52px] flex-shrink-0 whitespace-nowrap px-8',
+              `${DIMENSIONS.BUTTON_LG} flex-shrink-0 whitespace-nowrap px-8`,
               'bg-gradient-to-r from-accent via-accent to-primary font-semibold text-accent-foreground',
               'shadow-md transition-all duration-200 ease-out',
               'hover:scale-[1.02] hover:from-accent/90 hover:via-accent/90 hover:to-primary/90 hover:shadow-lg',
               'active:scale-[0.98]',
               'focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2',
               'disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100',
-              'w-full sm:w-auto sm:min-w-[140px]'
+              `w-full sm:w-auto sm:${DIMENSIONS.MIN_W_NEWSLETTER_BUTTON}`
             )}
           >
             {isSubmitting ? (
-              <span className="flex items-center gap-2">
-                <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                Subscribing...
-              </span>
+              <InlineSpinner size="sm" message="Subscribing..." />
             ) : (
               <span className="flex items-center gap-2">
                 {NEWSLETTER_CTA_CONFIG.buttonText}
-                <Mail className="h-4 w-4" aria-hidden="true" />
+                <Mail className={UI_CLASSES.ICON_SM} aria-hidden="true" />
               </span>
             )}
           </Button>
@@ -462,16 +469,18 @@ function FooterBarVariant({
 
   return (
     <aside
-      className="slide-in-from-bottom fixed right-0 bottom-0 left-0 z-50 animate-in border-[var(--color-border-medium)] border-t-2 bg-[var(--color-bg-overlay)] shadow-xl backdrop-blur-xl duration-300"
+      className={`slide-in-from-bottom ${POSITION_PATTERNS.FIXED_BOTTOM_FULL_RESPONSIVE} z-50 animate-in border-[var(--color-border-medium)] border-t-2 bg-[var(--color-bg-overlay)] shadow-xl backdrop-blur-xl duration-300`}
       aria-label="Newsletter signup"
     >
-      <div className="absolute top-0 right-0 left-0 h-px bg-gradient-to-r from-transparent via-[var(--color-accent)]/30 to-transparent" />
+      <div
+        className={`${POSITION_PATTERNS.ABSOLUTE_TOP_FULL} h-px bg-gradient-to-r from-transparent via-[var(--color-accent)]/30 to-transparent`}
+      />
       <div className="container mx-auto px-4 py-6 md:py-4">
         {/* Desktop layout */}
         <div className="mx-auto hidden max-w-5xl items-center justify-between gap-6 md:flex">
           <div className="flex flex-shrink-0 items-center gap-3">
             <div className="rounded-lg border border-accent/20 bg-accent/10 p-2.5">
-              <Mail className="h-5 w-5 text-accent" aria-hidden="true" />
+              <Mail className={`${UI_CLASSES.ICON_MD} text-accent`} aria-hidden="true" />
             </div>
             <div>
               <p className="font-semibold text-base text-foreground">
@@ -481,7 +490,7 @@ function FooterBarVariant({
             </div>
           </div>
           <div className="flex flex-shrink-0 items-center gap-3">
-            <FormVariant source={source} className="min-w-[360px]" />
+            <FormVariant source={source} className={DIMENSIONS.MIN_W_NEWSLETTER_FORM_LG} />
             {dismissible && (
               <Button
                 variant="ghost"
@@ -490,17 +499,20 @@ function FooterBarVariant({
                 aria-label="Dismiss newsletter signup"
                 className="flex-shrink-0"
               >
-                <X className="h-4 w-4" aria-hidden="true" />
+                <X className={UI_CLASSES.ICON_SM} aria-hidden="true" />
               </Button>
             )}
           </div>
         </div>
 
         {/* Mobile layout */}
-        <div className="flex flex-col gap-3 md:hidden">
+        <div className={`${UI_CLASSES.FLEX_COL_GAP_3} md:hidden`}>
           <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
             <div className="flex items-center gap-2">
-              <Mail className="h-4 w-4 flex-shrink-0 text-accent" aria-hidden="true" />
+              <Mail
+                className={`${UI_CLASSES.ICON_SM} flex-shrink-0 text-accent`}
+                aria-hidden="true"
+              />
               <p className="font-medium text-foreground text-sm">
                 {NEWSLETTER_CTA_CONFIG.headline}
               </p>
@@ -512,7 +524,7 @@ function FooterBarVariant({
                 onClick={handleDismiss}
                 aria-label="Dismiss newsletter signup"
               >
-                <X className="h-4 w-4" aria-hidden="true" />
+                <X className={UI_CLASSES.ICON_SM} aria-hidden="true" />
               </Button>
             )}
           </div>
@@ -548,9 +560,8 @@ function ModalVariant({
       ...(category && { copy_category: category }),
       ...(slug && { copy_slug: slug }),
     },
-    customAnalyticsEvent: 'newsletter_subscription_post_copy',
     successMessage: 'Check your inbox for a welcome email',
-    showToasts: true, // Let hook handle all toast notifications based on actual async results
+    showToasts: true,
     logContext: {
       variant: 'modal',
       copyType,
@@ -567,10 +578,18 @@ function ModalVariant({
       const now = Date.now();
       setShowTime(now);
 
-      trackEvent('email_modal_shown', {
-        trigger_source: 'post_copy',
-        copy_type: copyType,
-        session_copy_count: 1,
+      trackInteraction({
+        content_type: null,
+        content_slug: null,
+        interaction_type: 'click',
+        metadata: {
+          action: 'email_modal_shown',
+          trigger_source: 'post_copy',
+          copy_type: copyType,
+          session_copy_count: 1,
+        },
+      }).catch(() => {
+        // Analytics failure should not affect UX
       });
     }
   }, [open, copyType]);
@@ -595,10 +614,18 @@ function ModalVariant({
     if (showTime) {
       const timeShown = Date.now() - showTime;
 
-      trackEvent('email_modal_dismissed', {
-        trigger_source: 'post_copy',
-        dismissal_method: 'maybe_later',
-        time_shown_ms: timeShown,
+      trackInteraction({
+        content_type: null,
+        content_slug: null,
+        interaction_type: 'click',
+        metadata: {
+          action: 'email_modal_dismissed',
+          trigger_source: 'post_copy',
+          dismissal_method: 'maybe_later',
+          time_shown_ms: timeShown,
+        },
+      }).catch(() => {
+        // Analytics failure should not affect UX
       });
     }
 
@@ -610,10 +637,18 @@ function ModalVariant({
     if (!open && showTime) {
       const timeShown = Date.now() - showTime;
 
-      trackEvent('email_modal_dismissed', {
-        trigger_source: 'post_copy',
-        dismissal_method: 'close_button',
-        time_shown_ms: timeShown,
+      trackInteraction({
+        content_type: null,
+        content_slug: null,
+        interaction_type: 'click',
+        metadata: {
+          action: 'email_modal_dismissed',
+          trigger_source: 'post_copy',
+          dismissal_method: 'close_button',
+          time_shown_ms: timeShown,
+        },
+      }).catch(() => {
+        // Analytics failure should not affect UX
       });
     }
 
@@ -648,7 +683,7 @@ function ModalVariant({
             />
           </div>
 
-          <div className="flex flex-col gap-3 sm:flex-row">
+          <div className={UI_CLASSES.FLEX_COL_SM_ROW_GAP_3}>
             <Button
               type="submit"
               disabled={isLoading || !email.trim()}

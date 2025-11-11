@@ -7,7 +7,8 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { memo } from 'react';
-import { UnifiedBadge } from '@/src/components/domain/unified-badge';
+import { JobsPromo } from '@/src/components/core/domain/jobs-promo';
+import { UnifiedBadge } from '@/src/components/core/domain/unified-badge';
 import { Button } from '@/src/components/primitives/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/card';
 import type { CategoryId } from '@/src/lib/config/category-config';
@@ -91,7 +92,7 @@ export const DetailSidebar = memo(function DetailSidebar({
             {showGitHubLink && githubUrl && (
               <Button variant="outline" className="w-full justify-start" asChild>
                 <a href={githubUrl} target="_blank" rel="noopener noreferrer">
-                  <Github className="mr-2 h-4 w-4" />
+                  <Github className={UI_CLASSES.ICON_SM_LEADING} />
                   View on GitHub
                 </a>
               </Button>
@@ -99,7 +100,7 @@ export const DetailSidebar = memo(function DetailSidebar({
             {hasDocumentationUrl && 'documentation_url' in item && item.documentation_url && (
               <Button variant="outline" className="w-full justify-start" asChild>
                 <a href={item.documentation_url} target="_blank" rel="noopener noreferrer">
-                  <ExternalLink className="mr-2 h-4 w-4" />
+                  <ExternalLink className={UI_CLASSES.ICON_SM_LEADING} />
                   Documentation
                 </a>
               </Button>
@@ -149,7 +150,7 @@ export const DetailSidebar = memo(function DetailSidebar({
                 <div>
                   <h4 className={'mb-1 font-medium'}>Temperature</h4>
                   <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                    <Thermometer className="h-3 w-3 text-orange-500" />
+                    <Thermometer className={`${UI_CLASSES.ICON_XS} text-orange-500`} />
                     <UnifiedBadge
                       variant="base"
                       style="outline"
@@ -247,6 +248,9 @@ export const DetailSidebar = memo(function DetailSidebar({
           </CardContent>
         </Card>
       )}
+
+      {/* Jobs Promotion */}
+      <JobsPromo />
     </div>
   );
 });

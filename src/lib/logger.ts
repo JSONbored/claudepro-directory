@@ -1,30 +1,24 @@
-/**
- * Pino Logger - Lightweight structured logging for Vercel
- * Replaces custom 461 LOC logger with 45 LOC pino wrapper
- */
+/** Pino-based structured logger for production and development */
 
 import pino from 'pino';
 
 const isDevelopment = process.env.NODE_ENV === 'development';
 
 // Configure pino with minimal setup
-const pinoInstance = pino({
-  level: isDevelopment ? 'debug' : 'info',
-  // Pretty print in development, JSON in production
-  ...(isDevelopment && {
-    transport: {
-      target: 'pino-pretty',
-      options: {
-        colorize: true,
-        translateTime: 'HH:MM:ss',
-        ignore: 'pid,hostname',
+// In development, use basic console output to avoid thread-stream issues with Turbopack
+const pinoInstance = isDevelopment
+  ? pino({
+      level: 'debug',
+      browser: {
+        disabled: true,
       },
-    },
-  }),
-  browser: {
-    disabled: true,
-  },
-});
+    })
+  : pino({
+      level: 'info',
+      browser: {
+        disabled: true,
+      },
+    });
 
 type LogContext = Record<string, string | number | boolean>;
 

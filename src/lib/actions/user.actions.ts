@@ -529,3 +529,68 @@ export const getUserIdentities = authedAction
       throw error;
     }
   });
+
+/**
+ * Unlink OAuth Provider Action
+ * Removes an OAuth identity from the user's account
+ * Database RPC validates that at least 1 provider remains (prevents lockout)
+ */
+export const unlinkOAuthProvider = authedAction
+  .metadata({ actionName: 'unlinkOAuthProvider', category: 'user' })
+  .schema(
+    z.object({
+      provider: z.string().min(1, 'Provider name is required'),
+    })
+  )
+  .action(async ({ parsedInput: { provider }, ctx }) => {
+    const supabase = await createClient();
+
+    try {
+      const { data, error } = await supabase.rpc('unlink_oauth_provider', {
+        p_provider: provider,
+      });
+
+      if (error) {
+        logger.error('Failed to unlink OAuth provider', error, {
+          userId: ctx.userId,
+          provider,
+        });
+        return {
+          success: false,
+          error: error.message || 'Failed to unlink provider',
+        };
+      }
+
+      // Database RPC returns JSONB with success/error
+      const result = data as {
+        success: boolean;
+        error?: string;
+        message?: string;
+        provider?: string;
+        remaining_providers?: number;
+      };
+
+      if (!result.success) {
+        return {
+          success: false,
+          error: result.error || 'Failed to unlink provider',
+        };
+      }
+
+      // Revalidate account settings page
+      revalidatePath('/account/settings');
+
+      return {
+        success: true,
+        message: result.message || `Successfully unlinked ${provider}`,
+        remainingProviders: result.remaining_providers,
+      };
+    } catch (error) {
+      logger.error(
+        'Failed to unlink OAuth provider',
+        error instanceof Error ? error : new Error(String(error)),
+        { userId: ctx.userId, provider }
+      );
+      throw error;
+    }
+  });

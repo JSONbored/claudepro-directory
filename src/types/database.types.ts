@@ -1,85 +1,13 @@
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
 export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: '13.0.5';
+  };
   public: {
     Tables: {
-      analytics_event_categories: {
-        Row: {
-          active: boolean;
-          created_at: string;
-          description: string;
-          display_order: number;
-          id: string;
-          name: string;
-          updated_at: string;
-        };
-        Insert: {
-          active?: boolean;
-          created_at?: string;
-          description: string;
-          display_order: number;
-          id?: string;
-          name: string;
-          updated_at?: string;
-        };
-        Update: {
-          active?: boolean;
-          created_at?: string;
-          description?: string;
-          display_order?: number;
-          id?: string;
-          name?: string;
-          updated_at?: string;
-        };
-        Relationships: [];
-      };
-      analytics_events: {
-        Row: {
-          category: string;
-          created_at: string;
-          debug_only: boolean;
-          description: string;
-          enabled: boolean;
-          event_name: string;
-          id: string;
-          payload_schema: Json | null;
-          sample_rate: number | null;
-          updated_at: string;
-        };
-        Insert: {
-          category: string;
-          created_at?: string;
-          debug_only?: boolean;
-          description: string;
-          enabled?: boolean;
-          event_name: string;
-          id?: string;
-          payload_schema?: Json | null;
-          sample_rate?: number | null;
-          updated_at?: string;
-        };
-        Update: {
-          category?: string;
-          created_at?: string;
-          debug_only?: boolean;
-          description?: string;
-          enabled?: boolean;
-          event_name?: string;
-          id?: string;
-          payload_schema?: Json | null;
-          sample_rate?: number | null;
-          updated_at?: string;
-        };
-        Relationships: [
-          {
-            foreignKeyName: 'analytics_events_category_fkey';
-            columns: ['category'];
-            isOneToOne: false;
-            referencedRelation: 'analytics_event_categories';
-            referencedColumns: ['name'];
-          },
-        ];
-      };
       announcement_dismissals: {
         Row: {
           announcement_id: string;
@@ -585,6 +513,7 @@ export type Database = {
           featured: boolean | null;
           id: string;
           industry: string | null;
+          json_ld: Json | null;
           logo: string | null;
           name: string;
           owner_id: string | null;
@@ -601,6 +530,7 @@ export type Database = {
           featured?: boolean | null;
           id?: string;
           industry?: string | null;
+          json_ld?: Json | null;
           logo?: string | null;
           name: string;
           owner_id?: string | null;
@@ -617,6 +547,7 @@ export type Database = {
           featured?: boolean | null;
           id?: string;
           industry?: string | null;
+          json_ld?: Json | null;
           logo?: string | null;
           name?: string;
           owner_id?: string | null;
@@ -876,8 +807,6 @@ export type Database = {
           submitter_ip: unknown;
           tags: string[] | null;
           updated_at: string;
-          webhook_announcement_sent_at: string | null;
-          webhook_notification_sent_at: string | null;
         };
         Insert: {
           approved_slug?: string | null;
@@ -904,8 +833,6 @@ export type Database = {
           submitter_ip?: unknown;
           tags?: string[] | null;
           updated_at?: string;
-          webhook_announcement_sent_at?: string | null;
-          webhook_notification_sent_at?: string | null;
         };
         Update: {
           approved_slug?: string | null;
@@ -932,8 +859,6 @@ export type Database = {
           submitter_ip?: unknown;
           tags?: string[] | null;
           updated_at?: string;
-          webhook_announcement_sent_at?: string | null;
-          webhook_notification_sent_at?: string | null;
         };
         Relationships: [];
       };
@@ -1069,60 +994,6 @@ export type Database = {
           status?: string;
           total_steps?: number;
           updated_at?: string;
-        };
-        Relationships: [];
-      };
-      featured_configs: {
-        Row: {
-          calculated_at: string;
-          calculation_metadata: Json | null;
-          content_slug: string;
-          content_type: string;
-          created_at: string;
-          engagement_score: number | null;
-          final_score: number;
-          freshness_score: number | null;
-          id: string;
-          rank: number;
-          rating_score: number | null;
-          trending_score: number | null;
-          updated_at: string;
-          week_end: string;
-          week_start: string;
-        };
-        Insert: {
-          calculated_at?: string;
-          calculation_metadata?: Json | null;
-          content_slug: string;
-          content_type: string;
-          created_at?: string;
-          engagement_score?: number | null;
-          final_score: number;
-          freshness_score?: number | null;
-          id?: string;
-          rank: number;
-          rating_score?: number | null;
-          trending_score?: number | null;
-          updated_at?: string;
-          week_end: string;
-          week_start: string;
-        };
-        Update: {
-          calculated_at?: string;
-          calculation_metadata?: Json | null;
-          content_slug?: string;
-          content_type?: string;
-          created_at?: string;
-          engagement_score?: number | null;
-          final_score?: number;
-          freshness_score?: number | null;
-          id?: string;
-          rank?: number;
-          rating_score?: number | null;
-          trending_score?: number | null;
-          updated_at?: string;
-          week_end?: string;
-          week_start?: string;
         };
         Relationships: [];
       };
@@ -1384,8 +1255,11 @@ export type Database = {
           expires_at: string | null;
           featured: boolean | null;
           id: string;
+          is_placeholder: boolean;
+          json_ld: Json | null;
           link: string;
           location: string | null;
+          locked_price: number | null;
           order: number | null;
           payment_amount: number | null;
           payment_date: string | null;
@@ -1393,6 +1267,9 @@ export type Database = {
           payment_reference: string | null;
           payment_status: string;
           plan: string;
+          polar_customer_id: string | null;
+          polar_order_id: string | null;
+          polar_subscription_id: string | null;
           posted_at: string | null;
           remote: boolean | null;
           requirements: Json;
@@ -1401,6 +1278,9 @@ export type Database = {
           slug: string;
           status: Database['public']['Enums']['job_status'];
           tags: Json;
+          tier: string;
+          tier_price: number | null;
+          tier_upgraded_at: string | null;
           title: string;
           type: string;
           updated_at: string;
@@ -1424,8 +1304,11 @@ export type Database = {
           expires_at?: string | null;
           featured?: boolean | null;
           id?: string;
+          is_placeholder?: boolean;
+          json_ld?: Json | null;
           link: string;
           location?: string | null;
+          locked_price?: number | null;
           order?: number | null;
           payment_amount?: number | null;
           payment_date?: string | null;
@@ -1433,6 +1316,9 @@ export type Database = {
           payment_reference?: string | null;
           payment_status?: string;
           plan?: string;
+          polar_customer_id?: string | null;
+          polar_order_id?: string | null;
+          polar_subscription_id?: string | null;
           posted_at?: string | null;
           remote?: boolean | null;
           requirements?: Json;
@@ -1441,6 +1327,9 @@ export type Database = {
           slug?: string;
           status?: Database['public']['Enums']['job_status'];
           tags?: Json;
+          tier?: string;
+          tier_price?: number | null;
+          tier_upgraded_at?: string | null;
           title: string;
           type: string;
           updated_at?: string;
@@ -1464,8 +1353,11 @@ export type Database = {
           expires_at?: string | null;
           featured?: boolean | null;
           id?: string;
+          is_placeholder?: boolean;
+          json_ld?: Json | null;
           link?: string;
           location?: string | null;
+          locked_price?: number | null;
           order?: number | null;
           payment_amount?: number | null;
           payment_date?: string | null;
@@ -1473,6 +1365,9 @@ export type Database = {
           payment_reference?: string | null;
           payment_status?: string;
           plan?: string;
+          polar_customer_id?: string | null;
+          polar_order_id?: string | null;
+          polar_subscription_id?: string | null;
           posted_at?: string | null;
           remote?: boolean | null;
           requirements?: Json;
@@ -1481,6 +1376,9 @@ export type Database = {
           slug?: string;
           status?: Database['public']['Enums']['job_status'];
           tags?: Json;
+          tier?: string;
+          tier_price?: number | null;
+          tier_upgraded_at?: string | null;
           title?: string;
           type?: string;
           updated_at?: string;
@@ -1936,6 +1834,39 @@ export type Database = {
             referencedColumns: ['id'];
           },
         ];
+      };
+      search_queries: {
+        Row: {
+          created_at: string;
+          filters: Json | null;
+          id: string;
+          normalized_query: string | null;
+          query: string;
+          result_count: number | null;
+          session_id: string | null;
+          user_id: string | null;
+        };
+        Insert: {
+          created_at?: string;
+          filters?: Json | null;
+          id?: string;
+          normalized_query?: string | null;
+          query: string;
+          result_count?: number | null;
+          session_id?: string | null;
+          user_id?: string | null;
+        };
+        Update: {
+          created_at?: string;
+          filters?: Json | null;
+          id?: string;
+          normalized_query?: string | null;
+          query?: string;
+          result_count?: number | null;
+          session_id?: string | null;
+          user_id?: string | null;
+        };
+        Relationships: [];
       };
       sponsored_clicks: {
         Row: {
@@ -2494,8 +2425,8 @@ export type Database = {
       };
       user_interactions: {
         Row: {
-          content_slug: string;
-          content_type: string;
+          content_slug: string | null;
+          content_type: string | null;
           created_at: string;
           id: string;
           interaction_type: string;
@@ -2504,8 +2435,8 @@ export type Database = {
           user_id: string | null;
         };
         Insert: {
-          content_slug: string;
-          content_type: string;
+          content_slug?: string | null;
+          content_type?: string | null;
           created_at?: string;
           id?: string;
           interaction_type: string;
@@ -2514,8 +2445,8 @@ export type Database = {
           user_id?: string | null;
         };
         Update: {
-          content_slug?: string;
-          content_type?: string;
+          content_slug?: string | null;
+          content_type?: string | null;
           created_at?: string;
           id?: string;
           interaction_type?: string;
@@ -2965,20 +2896,6 @@ export type Database = {
         };
         Relationships: [];
       };
-      mv_trending_content: {
-        Row: {
-          bookmark_count: number | null;
-          category: string | null;
-          copy_count: number | null;
-          description: string | null;
-          last_refreshed: string | null;
-          latest_activity: string | null;
-          slug: string | null;
-          title: string | null;
-          view_count: number | null;
-        };
-        Relationships: [];
-      };
       mv_weekly_new_content: {
         Row: {
           category: string | null;
@@ -3019,6 +2936,10 @@ export type Database = {
         Args: { p_items: Json; p_user_id: string };
         Returns: Json;
       };
+      build_aggregate_rating_schema: {
+        Args: { p_content_slug: string; p_content_type: string };
+        Returns: Json;
+      };
       build_breadcrumb_json_ld: {
         Args: { p_category: string; p_slug: string };
         Returns: Json;
@@ -3040,8 +2961,13 @@ export type Database = {
         Args: { p_category: string; p_slug: string };
         Returns: Json;
       };
+      build_job_posting_schema: { Args: { p_job_id: string }; Returns: Json };
       build_learning_resource_schema: {
         Args: { p_category: string; p_slug: string };
+        Returns: Json;
+      };
+      build_organization_schema: {
+        Args: { p_company_id: string };
         Returns: Json;
       };
       build_person_schema: { Args: { p_slug: string }; Returns: Json };
@@ -3067,6 +2993,7 @@ export type Database = {
         Returns: number;
       };
       cancel_email_sequence: { Args: { p_email: string }; Returns: undefined };
+      check_digest_cooldown: { Args: never; Returns: boolean };
       check_vacuum_needed: {
         Args: never;
         Returns: {
@@ -3076,7 +3003,6 @@ export type Database = {
           needs_vacuum: boolean;
         }[];
       };
-      cleanup_old_interactions: { Args: never; Returns: number };
       diagnose_failing_section: {
         Args: { p_section_index: number; p_slug: string };
         Returns: string;
@@ -3084,6 +3010,13 @@ export type Database = {
       enroll_in_email_sequence: {
         Args: { p_email: string };
         Returns: undefined;
+      };
+      expire_jobs: {
+        Args: never;
+        Returns: {
+          expired_count: number;
+          expiring_soon_count: number;
+        }[];
       };
       extract_tags_for_search: { Args: { tags: Json }; Returns: string };
       filter_jobs: {
@@ -3223,7 +3156,7 @@ export type Database = {
       get_all_structured_data_configs: { Args: never; Returns: Json };
       get_analytics_summary:
         | {
-            Args: { p_category?: string; p_slug?: string };
+            Args: { p_category: string; p_slug: string };
             Returns: {
               bookmark_count: number | null;
               category: string | null;
@@ -3364,6 +3297,7 @@ export type Database = {
           isSetofReturn: true;
         };
       };
+      get_company_profile: { Args: { p_slug: string }; Returns: Json };
       get_content_detail_complete: {
         Args: { p_category: string; p_slug: string; p_user_id?: string };
         Returns: Json;
@@ -3477,8 +3411,11 @@ export type Database = {
           expires_at: string | null;
           featured: boolean | null;
           id: string;
+          is_placeholder: boolean;
+          json_ld: Json | null;
           link: string;
           location: string | null;
+          locked_price: number | null;
           order: number | null;
           payment_amount: number | null;
           payment_date: string | null;
@@ -3486,6 +3423,9 @@ export type Database = {
           payment_reference: string | null;
           payment_status: string;
           plan: string;
+          polar_customer_id: string | null;
+          polar_order_id: string | null;
+          polar_subscription_id: string | null;
           posted_at: string | null;
           remote: boolean | null;
           requirements: Json;
@@ -3494,6 +3434,9 @@ export type Database = {
           slug: string;
           status: Database['public']['Enums']['job_status'];
           tags: Json;
+          tier: string;
+          tier_price: number | null;
+          tier_upgraded_at: string | null;
           title: string;
           type: string;
           updated_at: string;
@@ -3531,30 +3474,6 @@ export type Database = {
         }[];
       };
       get_form_fields_grouped: { Args: { p_form_type: string }; Returns: Json };
-      get_gallery_trending: {
-        Args: {
-          p_category?: string;
-          p_days_back?: number;
-          p_limit?: number;
-          p_offset?: number;
-        };
-        Returns: {
-          author: string;
-          category: string;
-          copy_count: number;
-          created_at: string;
-          description: string;
-          last_interaction_at: string;
-          last_screenshot_at: string;
-          screenshot_count: number;
-          share_count: number;
-          slug: string;
-          tags: string[];
-          title: string;
-          trending_score: number;
-          view_count: number;
-        }[];
-      };
       get_generation_config: { Args: { p_category?: string }; Returns: Json };
       get_homepage_complete: {
         Args: { p_category_ids?: string[] };
@@ -3564,12 +3483,6 @@ export type Database = {
         Args: { p_category_ids: string[]; p_week_start?: string };
         Returns: Json;
       };
-      get_homepage_featured_only:
-        | {
-            Args: { p_all_configs_limit?: number; p_category_ids: string[] };
-            Returns: Json;
-          }
-        | { Args: { p_category_ids: string[] }; Returns: Json };
       get_job_detail: { Args: { p_slug: string }; Returns: Json };
       get_jobs_by_category: {
         Args: { p_category: string };
@@ -3589,8 +3502,11 @@ export type Database = {
           expires_at: string | null;
           featured: boolean | null;
           id: string;
+          is_placeholder: boolean;
+          json_ld: Json | null;
           link: string;
           location: string | null;
+          locked_price: number | null;
           order: number | null;
           payment_amount: number | null;
           payment_date: string | null;
@@ -3598,6 +3514,9 @@ export type Database = {
           payment_reference: string | null;
           payment_status: string;
           plan: string;
+          polar_customer_id: string | null;
+          polar_order_id: string | null;
+          polar_subscription_id: string | null;
           posted_at: string | null;
           remote: boolean | null;
           requirements: Json;
@@ -3606,6 +3525,9 @@ export type Database = {
           slug: string;
           status: Database['public']['Enums']['job_status'];
           tags: Json;
+          tier: string;
+          tier_price: number | null;
+          tier_upgraded_at: string | null;
           title: string;
           type: string;
           updated_at: string;
@@ -3655,6 +3577,20 @@ export type Database = {
         Returns: Json;
       };
       get_performance_baseline: { Args: never; Returns: Json };
+      get_popular_content: {
+        Args: { p_category?: string; p_limit?: number };
+        Returns: {
+          author: string;
+          category: string;
+          copy_count: number;
+          description: string;
+          popularity_score: number;
+          slug: string;
+          tags: string[];
+          title: string;
+          view_count: number;
+        }[];
+      };
       get_quiz_configuration: { Args: never; Returns: Json };
       get_recent_merged: { Args: { p_limit?: number }; Returns: Json };
       get_recommendations: {
@@ -3710,13 +3646,30 @@ export type Database = {
         };
         Returns: number;
       };
+      get_search_facets: {
+        Args: never;
+        Returns: {
+          all_tags: string[];
+          author_count: number;
+          authors: string[];
+          category: string;
+          content_count: number;
+          tag_count: number;
+        }[];
+      };
       get_search_suggestions: {
         Args: { p_limit?: number; p_query: string };
         Returns: {
           suggestion: string;
         }[];
       };
-      get_sidebar_guides_data: { Args: { p_limit?: number }; Returns: Json };
+      get_search_suggestions_from_history: {
+        Args: { p_limit?: number; p_query: string };
+        Returns: {
+          search_count: number;
+          suggestion: string;
+        }[];
+      };
       get_similar_content: {
         Args: {
           p_content_slug: string;
@@ -3770,26 +3723,23 @@ export type Database = {
           tag_count: number;
         }[];
       };
-      get_trending_content: {
-        Args: { p_limit?: number };
+      get_trending_metrics: {
+        Args: { p_category?: string; p_limit?: number };
         Returns: {
+          bookmarks_total: number;
           category: string;
-          description: string;
+          copies_total: number;
+          created_at: string;
+          days_old: number;
+          engagement_score: number;
+          freshness_score: number;
+          last_refreshed: string;
           slug: string;
-          title: string;
-          url: string;
-          view_count: number;
+          trending_score: number;
+          views_7d: number;
+          views_prev_7d: number;
+          views_total: number;
         }[];
-      };
-      get_trending_page: {
-        Args: {
-          p_category?: string;
-          p_limit?: number;
-          p_metric?: Database['public']['Enums']['trending_metric'];
-          p_page?: number;
-          p_period?: Database['public']['Enums']['trending_period'];
-        };
-        Returns: Json;
       };
       get_user_activity_summary: { Args: { p_user_id: string }; Returns: Json };
       get_user_activity_timeline: {
@@ -3813,6 +3763,7 @@ export type Database = {
         };
         Returns: Json;
       };
+      get_user_companies: { Args: { p_user_id: string }; Returns: Json };
       get_user_dashboard: { Args: { p_user_id: string }; Returns: Json };
       get_user_favorite_categories: {
         Args: { p_limit?: number; p_user_id: string };
@@ -3852,6 +3803,26 @@ export type Database = {
           isOneToOne: false;
           isSetofReturn: true;
         };
+      };
+      handle_polar_order_paid: {
+        Args: { webhook_data: Json; webhook_id: string };
+        Returns: undefined;
+      };
+      handle_polar_order_refunded: {
+        Args: { webhook_data: Json; webhook_id: string };
+        Returns: undefined;
+      };
+      handle_polar_subscription_canceled: {
+        Args: { webhook_data: Json; webhook_id: string };
+        Returns: undefined;
+      };
+      handle_polar_subscription_renewal: {
+        Args: { webhook_data: Json; webhook_id: string };
+        Returns: undefined;
+      };
+      handle_polar_subscription_revoked: {
+        Args: { webhook_data: Json; webhook_id: string };
+        Returns: undefined;
       };
       handle_webhook_bounce: {
         Args: { p_event_data: Json; p_webhook_id: string };
@@ -3897,7 +3868,7 @@ export type Database = {
       };
       invoke_edge_function: {
         Args: { action_header: string; function_name: string; payload?: Json };
-        Returns: string;
+        Returns: number;
       };
       is_admin: { Args: { p_user_id: string }; Returns: boolean };
       is_bookmarked: {
@@ -3938,10 +3909,6 @@ export type Database = {
         Args: { p_action: string; p_data: Json; p_user_id: string };
         Returns: Json;
       };
-      manage_job: {
-        Args: { p_action: string; p_data: Json; p_user_id: string };
-        Returns: Json;
-      };
       manage_review: {
         Args: { p_action: string; p_data: Json; p_user_id: string };
         Returns: Json;
@@ -3972,7 +3939,6 @@ export type Database = {
           total_updated: number;
         }[];
       };
-      process_pending_webhooks: { Args: never; Returns: Json };
       refresh_mv_site_urls: { Args: never; Returns: undefined };
       refresh_profile_from_oauth: { Args: { user_id: string }; Returns: Json };
       refresh_user_stats: {
@@ -4047,6 +4013,7 @@ export type Database = {
           featured: boolean | null;
           id: string;
           industry: string | null;
+          json_ld: Json | null;
           logo: string | null;
           name: string;
           owner_id: string | null;
@@ -4116,8 +4083,11 @@ export type Database = {
           expires_at: string | null;
           featured: boolean | null;
           id: string;
+          is_placeholder: boolean;
+          json_ld: Json | null;
           link: string;
           location: string | null;
+          locked_price: number | null;
           order: number | null;
           payment_amount: number | null;
           payment_date: string | null;
@@ -4125,6 +4095,9 @@ export type Database = {
           payment_reference: string | null;
           payment_status: string;
           plan: string;
+          polar_customer_id: string | null;
+          polar_order_id: string | null;
+          polar_subscription_id: string | null;
           posted_at: string | null;
           remote: boolean | null;
           requirements: Json;
@@ -4133,6 +4106,9 @@ export type Database = {
           slug: string;
           status: Database['public']['Enums']['job_status'];
           tags: Json;
+          tier: string;
+          tier_price: number | null;
+          tier_upgraded_at: string | null;
           title: string;
           type: string;
           updated_at: string;
@@ -4183,8 +4159,6 @@ export type Database = {
           isSetofReturn: true;
         };
       };
-      show_limit: { Args: never; Returns: number };
-      show_trgm: { Args: { '': string }; Returns: string[] };
       slug_to_title: { Args: { p_slug: string }; Returns: string };
       submit_content_for_review: {
         Args: {
@@ -4247,7 +4221,7 @@ export type Database = {
         Args: { p_data: Json; p_event_type: string; p_user_id: string };
         Returns: Json;
       };
-      unaccent: { Args: { '': string }; Returns: string };
+      unlink_oauth_provider: { Args: { p_provider: string }; Returns: Json };
       update_user_profile: {
         Args: {
           p_bio?: string;
@@ -4319,9 +4293,15 @@ export type Database = {
         | 'filter'
         | 'screenshot'
         | 'share'
-        | 'embed_generated'
         | 'download';
-      job_status: 'draft' | 'pending_review' | 'active' | 'expired' | 'rejected';
+      job_status:
+        | 'draft'
+        | 'pending_payment'
+        | 'pending_review'
+        | 'active'
+        | 'expired'
+        | 'rejected'
+        | 'deleted';
       newsletter_source:
         | 'footer'
         | 'homepage'
@@ -4357,7 +4337,7 @@ export type Database = {
         | 'testing-qa'
         | 'security-audit';
       webhook_direction: 'inbound' | 'outbound';
-      webhook_source: 'resend' | 'vercel' | 'discord' | 'supabase_db' | 'custom';
+      webhook_source: 'resend' | 'vercel' | 'discord' | 'supabase_db' | 'custom' | 'polar';
     };
     CompositeTypes: {
       [_ in never]: never;
@@ -4535,10 +4515,17 @@ export const Constants = {
         'filter',
         'screenshot',
         'share',
-        'embed_generated',
         'download',
       ],
-      job_status: ['draft', 'pending_review', 'active', 'expired', 'rejected'],
+      job_status: [
+        'draft',
+        'pending_payment',
+        'pending_review',
+        'active',
+        'expired',
+        'rejected',
+        'deleted',
+      ],
       newsletter_source: [
         'footer',
         'homepage',
@@ -4577,7 +4564,7 @@ export const Constants = {
         'security-audit',
       ],
       webhook_direction: ['inbound', 'outbound'],
-      webhook_source: ['resend', 'vercel', 'discord', 'supabase_db', 'custom'],
+      webhook_source: ['resend', 'vercel', 'discord', 'supabase_db', 'custom', 'polar'],
     },
   },
 } as const;

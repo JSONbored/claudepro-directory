@@ -1,5 +1,10 @@
 {
-  "ignoreCommand": "bash -c '[[ \"$VERCEL_GIT_COMMIT_REF\" == \"main\" || \"$VERCEL_GIT_COMMIT_REF\" == \"dev\" ]] && exit 1 || exit 0'",
+  "ignoreCommand": "bash -c '[[ \"$VERCEL_GIT_COMMIT_REF\" == \"main\" ]] && exit 1 || exit 0'",
+  "git": {
+    "deploymentEnabled": {
+      "main": true
+    }
+  },
   "installCommand": "pnpm install --frozen-lockfile",
   "buildCommand": "pnpm build",
   "outputDirectory": ".next",

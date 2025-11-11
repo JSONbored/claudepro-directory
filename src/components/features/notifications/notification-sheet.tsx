@@ -23,6 +23,7 @@ import {
   SheetTitle,
 } from '@/src/components/primitives/sheet';
 import { type NotificationStore, useNotificationStore } from '@/src/lib/stores/notification-store';
+import { DIMENSIONS } from '@/src/lib/ui-constants';
 import { NotificationList } from './notification-list';
 
 export function NotificationSheet() {
@@ -33,7 +34,7 @@ export function NotificationSheet() {
 
   return (
     <Sheet open={isSheetOpen} onOpenChange={(open) => !open && closeSheet()}>
-      <SheetContent side="bottom" className="max-h-[80vh]">
+      <SheetContent side="bottom" className={DIMENSIONS.MODAL_MAX}>
         <SheetHeader>
           <SheetTitle>Notifications</SheetTitle>
           <SheetDescription>
@@ -42,7 +43,7 @@ export function NotificationSheet() {
               : 'No new notifications'}
           </SheetDescription>
         </SheetHeader>
-        <div className="mt-6 max-h-[calc(80vh-8rem)] overflow-y-auto">
+        <div className={`mt-6 ${DIMENSIONS.NOTIFICATION_MAX} overflow-y-auto`}>
           <NotificationList />
         </div>
       </SheetContent>
