@@ -99,7 +99,7 @@
     "geist": "^1.5.1",
     "html2canvas-pro": "^1.5.13",
     "lucide-react": "^0.546.0",
-    "marked": "^16.4.2",
+    "marked": "^17.0.0",
     "motion": "^12.23.24",
     "next": "16.0.1",
     "next-safe-action": "^8.0.11",
