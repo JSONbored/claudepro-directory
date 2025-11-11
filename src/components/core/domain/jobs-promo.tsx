@@ -9,6 +9,7 @@ import { motion } from 'motion/react';
 import Link from 'next/link';
 import { Button } from '@/src/components/primitives/button';
 import { Card, CardContent } from '@/src/components/primitives/card';
+import { ROUTES } from '@/src/lib/constants';
 import { Check, TrendingUp } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
@@ -103,7 +104,7 @@ export function JobsPromo() {
             whileTap={{ scale: 0.98 }}
           >
             <Button asChild className="w-full">
-              <Link href="/contact">View Pricing & Post Job</Link>
+              <Link href={ROUTES.PARTNER}>View Pricing & Post Job</Link>
             </Button>
           </motion.div>
 

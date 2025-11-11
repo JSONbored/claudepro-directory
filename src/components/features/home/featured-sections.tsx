@@ -12,6 +12,7 @@
 import Link from 'next/link';
 import { type FC, memo, useMemo } from 'react';
 import { ConfigCard } from '@/src/components/core/domain/config-card';
+import { JobCard } from '@/src/components/core/domain/job-card';
 import { UnifiedCardGrid } from '@/src/components/core/domain/unified-card-grid';
 import {
   HOMEPAGE_FEATURED_CATEGORIES,
@@ -116,37 +117,11 @@ const FeaturedSectionsComponent: FC<FeaturedSectionsProps> = ({
               View all <ExternalLink className={UI_CLASSES.ICON_SM} />
             </Link>
           </div>
-          <UnifiedCardGrid
-            items={featuredJobs.slice(0, 6).map((job) => ({
-              id: job.id,
-              slug: job.slug,
-              title: job.title,
-              description: job.description,
-              category: job.category,
-              author: job.company,
-              author_profile_url: '',
-              tags: Array.isArray(job.tags)
-                ? job.tags.filter((t): t is string => typeof t === 'string')
-                : [],
-              source: 'jobs',
-              created_at: job.created_at,
-              updated_at: job.updated_at,
-              date_added: job.posted_at || job.created_at,
-              viewCount: job.view_count || 0,
-              copyCount: 0,
-              bookmark_count: 0,
-              combined_score: 0,
-              relevance_score: 0,
-              examples: null,
-              features: null,
-              use_cases: null,
-              _featured: job.featured ? { rank: 1, score: 100 } : null,
-            }))}
-            renderCard={(item, index) => <ConfigCard item={item} showBorderBeam={index < 3} />}
-            variant="normal"
-            ariaLabel="Featured Jobs"
-            prefetchCount={3}
-          />
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {featuredJobs.slice(0, 6).map((job) => (
+              <JobCard key={job.slug} job={job} />
+            ))}
+          </div>
         </div>
       )}
     </div>

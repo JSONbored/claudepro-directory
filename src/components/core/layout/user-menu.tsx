@@ -119,11 +119,11 @@ export function UserMenu({ className }: UserMenuProps) {
           asChild
           variant="ghost"
           size="sm"
-          className="border-accent/20 bg-accent/10 font-medium text-accent text-xs hover:bg-accent/20 hover:text-accent-foreground"
+          className="border-accent/20 bg-accent/10 font-medium text-accent text-xs hover:bg-accent hover:text-white"
         >
-          <Link href="/login" aria-label="Join free - Sign in with GitHub">
+          <Link href="/login" aria-label="Get started - Sign in with GitHub">
             <UserIcon className={UI_CLASSES.ICON_XS_LEADING} />
-            <span className="hidden lg:inline">Join Free</span>
+            <span className="hidden lg:inline">Get Started</span>
           </Link>
         </Button>
       </div>
