@@ -1,54 +1,11 @@
 'use client';
 
-/**
- * Recently Viewed Hook
- *
- * Performance-optimized hook for tracking and retrieving recently viewed content.
- *
- * FEATURES:
- * - Type-safe with database.types.ts
- * - Debounced localStorage writes (300ms) to minimize I/O
- * - LRU eviction (max 10 items)
- * - Zustand for reactive state management
- * - TTL-based expiration (30 days)
- * - Storage quota management
- * - Future-proof (can migrate to backend sync)
- *
- * PERFORMANCE:
- * - Debounced persistence prevents excessive writes
- * - Memoized selectors minimize re-renders
- * - Efficient LRU implementation
- * - Compressed storage format
- *
- * USAGE:
- * ```tsx
- * const { addRecentlyViewed, recentlyViewed, clearAll } = useRecentlyViewed();
- *
- * // Track a view
- * addRecentlyViewed({
- *   category: 'agent',
- *   slug: 'my-agent',
- *   title: 'My Agent',
- *   description: 'Description here'
- * });
- *
- * // Render list
- * {recentlyViewed.map(item => <Link href={`/${item.category}/${item.slug}`}>...)}
- * ```
- */
+/** Recently viewed content tracking with localStorage persistence and LRU eviction */
 
 import { useCallback, useEffect, useRef } from 'react';
 import { create } from 'zustand';
 import { logger } from '@/src/lib/logger';
 
-// =============================================================================
-// TYPES
-// =============================================================================
-
-/**
- * Content categories from database
- * These match the category field in the content table
- */
 export type RecentlyViewedCategory =
   | 'agent'
   | 'mcp'
@@ -59,28 +16,15 @@ export type RecentlyViewedCategory =
   | 'skill'
   | 'job';
 
-/**
- * Recently viewed item structure
- * Optimized for minimal storage footprint
- */
 export interface RecentlyViewedItem {
-  /** Content category (agent, mcp, etc.) */
   category: RecentlyViewedCategory;
-  /** Content slug (unique identifier) */
   slug: string;
-  /** Content title for display */
   title: string;
-  /** Short description (truncated to 150 chars for storage) */
   description: string;
-  /** ISO timestamp when viewed */
   viewedAt: string;
-  /** Optional tags (max 3 for storage efficiency) */
   tags?: string[];
 }
 
-/**
- * Zustand store state
- */
 interface RecentlyViewedState {
   items: RecentlyViewedItem[];
   isLoaded: boolean;
@@ -90,25 +34,12 @@ interface RecentlyViewedState {
   setLoaded: (loaded: boolean) => void;
 }
 
-// =============================================================================
-// CONSTANTS
-// =============================================================================
-
 const STORAGE_KEY = 'heyclaude_recently_viewed';
-const MAX_ITEMS = 10; // LRU limit
-const TTL_DAYS = 30; // Items older than this are auto-purged
-const DEBOUNCE_MS = 300; // Debounce localStorage writes
-const MAX_DESCRIPTION_LENGTH = 150; // Truncate to save storage
-const MAX_TAGS = 3; // Limit tags for storage efficiency
-
-// =============================================================================
-// ZUSTAND STORE
-// =============================================================================
-
-/**
- * Zustand store for reactive state management
- * Separate from localStorage for performance
- */
+const MAX_ITEMS = 10;
+const TTL_DAYS = 30;
+const DEBOUNCE_MS = 300;
+const MAX_DESCRIPTION_LENGTH = 150;
+const MAX_TAGS = 3;
 const useRecentlyViewedStore = create<RecentlyViewedState>((set) => ({
   items: [],
   isLoaded: false,

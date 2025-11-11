@@ -6,25 +6,15 @@ import { logger } from '@/src/lib/logger';
 // Force Node.js runtime for middleware
 export const runtime = 'nodejs';
 
-/**
- * Sanitize path for logging - removes sensitive information
- */
 function sanitizePathForLogging(path: string): string {
   return path
-    .replace(/\/api\/[^/]*\/[a-f0-9-]{36}/g, '/api/*/[UUID]') // Replace UUIDs
-    .replace(/\/api\/[^/]*\/\d+/g, '/api/*/[ID]') // Replace numeric IDs
-    .replace(/\?.*$/g, '') // Remove query parameters
-    .slice(0, 200); // Limit length for logging
+    .replace(/\/api\/[^/]*\/[a-f0-9-]{36}/g, '/api/*/[UUID]')
+    .replace(/\/api\/[^/]*\/\d+/g, '/api/*/[ID]')
+    .replace(/\?.*$/g, '')
+    .slice(0, 200);
 }
 
-/**
- * Simplified Middleware - Security with Cloudflare Enterprise
- *
- * Primary protection: Cloudflare Enterprise (WAF, bot detection, rate limiting, DDoS)
- * Middleware role: CVE mitigation + basic security headers
- *
- * Security headers are set in next.config.mjs for better performance
- */
+/** CVE-2025-29927 mitigation and security header middleware */
 
 export async function middleware(request: NextRequest) {
   const startTime = isDevelopment ? performance.now() : 0;

@@ -1,25 +1,11 @@
-/**
- * Floating Action Bar Configuration
- *
- * Centralized config for main FAB button and speed dial items.
- * Consolidates logic from:
- * - FloatingMobileSearch
- * - BackToTopButton
- * - NotificationFAB
- * - Navigation Create button
- *
- * @module components/features/fab/fab-config
- */
-
 'use client';
+
+/** FAB configuration for main button and speed dial actions */
 
 import { ArrowUp, Bell, Plus, Search } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import type { MainFABConfig, SpeedDialAction } from './fab.types';
 
-/**
- * Scroll to top with smooth behavior and error handling
- */
 export const handleScrollToTop = (): void => {
   try {
     window.scrollTo({
@@ -31,9 +17,6 @@ export const handleScrollToTop = (): void => {
   }
 };
 
-/**
- * Focus search input with scroll into view and error handling
- */
 export const handleSearchClick = (): void => {
   try {
     const searchInput = document.querySelector<HTMLInputElement>(
@@ -52,10 +35,6 @@ export const handleSearchClick = (): void => {
   }
 };
 
-/**
- * Main FAB configuration (Create button)
- * Navigates to /submit page
- */
 export const createMainFABConfig = (onNavigate: () => void): MainFABConfig => ({
   icon: Plus,
   label: 'Create new submission',

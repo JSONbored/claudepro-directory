@@ -1,24 +1,6 @@
-/**
- * Floating Action Bar Component
- *
- * Unified FAB system that consolidates:
- * - FloatingMobileSearch (search button)
- * - BackToTopButton (scroll to top)
- * - NotificationFAB (notification bell)
- * - Navigation Create button (moved from nav bar)
- *
- * Features:
- * - Single bottom-right FAB (z-60)
- * - Speed dial menu (expands upward)
- * - Scroll-aware visibility (hide on scroll down, show on scroll up)
- * - Responsive actions (mobile/desktop conditional items)
- * - Performance optimized (rAF throttling, passive listeners)
- * - Statsig feature flag controlled migration path
- *
- * @module components/features/fab/floating-action-bar
- */
-
 'use client';
+
+/** Unified floating action bar with scroll-aware speed dial menu */
 
 import { AnimatePresence, motion } from 'motion/react';
 import { useRouter } from 'next/navigation';
