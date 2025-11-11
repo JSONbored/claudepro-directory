@@ -227,13 +227,13 @@ export const CATEGORY_CONFIGS: Record<CategoryId, UnifiedCategoryConfig<Category
       configFormat: 'json' as 'json' | 'multi' | 'hook',
     },
     sections: {
-      features: false,
+      features: true,
       installation: false,
       use_cases: true,
       configuration: true,
       security: false,
-      troubleshooting: false,
-      examples: false,
+      troubleshooting: true,
+      examples: true,
     },
     metadata: {
       showGitHubLink: true,

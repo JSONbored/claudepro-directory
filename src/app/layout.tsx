@@ -37,8 +37,8 @@ import { LayoutContent } from '@/src/components/core/layout/layout-content';
 
 import { UmamiScript } from '@/src/components/core/shared/umami-script';
 import { APP_CONFIG } from '@/src/lib/constants';
-import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { featureFlags } from '@/src/lib/flags';
+import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 
 // Self-hosted fonts - no external requests, faster FCP, GDPR compliant
 const inter = localFont({
@@ -195,7 +195,10 @@ export default async function RootLayout({
         >
           <PostCopyEmailProvider>
             <ErrorBoundary>
-              <LayoutContent announcement={announcement} useFloatingActionBar={useFloatingActionBar}>
+              <LayoutContent
+                announcement={announcement}
+                useFloatingActionBar={useFloatingActionBar}
+              >
                 {children}
               </LayoutContent>
             </ErrorBoundary>

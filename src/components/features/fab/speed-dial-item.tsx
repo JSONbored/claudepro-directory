@@ -17,6 +17,7 @@
 'use client';
 
 import { motion } from 'motion/react';
+import { logger } from '@/src/lib/logger';
 import type { SpeedDialAction } from './fab.types';
 
 interface SpeedDialItemProps extends SpeedDialAction {
@@ -34,10 +35,7 @@ export function SpeedDialItem({
   delay = 0,
 }: SpeedDialItemProps) {
   // Responsive visibility classes
-  const visibilityClasses = [
-    mobileOnly && 'md:hidden',
-    desktopOnly && 'hidden md:flex',
-  ]
+  const visibilityClasses = [mobileOnly && 'md:hidden', desktopOnly && 'hidden md:flex']
     .filter(Boolean)
     .join(' ');
 
@@ -46,7 +44,7 @@ export function SpeedDialItem({
     try {
       onClick();
     } catch (error) {
-      console.error('[SpeedDialItem] Error in onClick handler:', error);
+      logger.error('[SpeedDialItem] Error in onClick handler', error as Error);
     }
   };
 
@@ -80,7 +78,7 @@ export function SpeedDialItem({
             stiffness: 500,
             damping: 20,
           }}
-          className="absolute -right-1 -top-1 flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white shadow-md"
+          className="-right-1 -top-1 absolute flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-red-500 px-1 font-bold text-[10px] text-white shadow-md"
         >
           {badge > 99 ? '99+' : badge}
         </motion.span>

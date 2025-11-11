@@ -173,11 +173,7 @@ const NavigationComponent = ({ hideCreateButton = false }: NavigationProps = {})
                   <UserMenu className={'hidden md:flex'} />
 
                   {/* Mobile Menu - Show ONLY below md: (< 768px) */}
-                  <NavigationMobile
-                    isActive={isActive}
-                    isOpen={isOpen}
-                    onOpenChange={setIsOpen}
-                  />
+                  <NavigationMobile isActive={isActive} isOpen={isOpen} onOpenChange={setIsOpen} />
                 </div>
               </div>
             </div>

@@ -10,6 +10,7 @@ import { CollectionDetailView } from '@/src/components/content/unified-detail-pa
 import { StructuredData } from '@/src/components/core/infra/structured-data';
 import { UnifiedTracker } from '@/src/components/core/infra/unified-tracker';
 import { RecentlyViewedTracker } from '@/src/components/features/navigation/recently-viewed-tracker';
+import type { RecentlyViewedCategory } from '@/src/hooks/use-recently-viewed';
 import {
   type CategoryId,
   getCategoryConfig,
@@ -21,7 +22,6 @@ import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createAnonClient } from '@/src/lib/supabase/server-anon';
 import type { Database } from '@/src/types/database.types';
-import type { RecentlyViewedCategory } from '@/src/hooks/use-recently-viewed';
 
 export const revalidate = false; // Static generation - zero database egress during serving
 

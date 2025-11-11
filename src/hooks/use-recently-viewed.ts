@@ -84,7 +84,9 @@ export interface RecentlyViewedItem {
 interface RecentlyViewedState {
   items: RecentlyViewedItem[];
   isLoaded: boolean;
-  setItems: (items: RecentlyViewedItem[] | ((currentItems: RecentlyViewedItem[]) => RecentlyViewedItem[])) => void;
+  setItems: (
+    items: RecentlyViewedItem[] | ((currentItems: RecentlyViewedItem[]) => RecentlyViewedItem[])
+  ) => void;
   setLoaded: (loaded: boolean) => void;
 }
 
@@ -110,9 +112,10 @@ const MAX_TAGS = 3; // Limit tags for storage efficiency
 const useRecentlyViewedStore = create<RecentlyViewedState>((set) => ({
   items: [],
   isLoaded: false,
-  setItems: (itemsOrUpdater) => set((state) => ({
-    items: typeof itemsOrUpdater === 'function' ? itemsOrUpdater(state.items) : itemsOrUpdater
-  })),
+  setItems: (itemsOrUpdater) =>
+    set((state) => ({
+      items: typeof itemsOrUpdater === 'function' ? itemsOrUpdater(state.items) : itemsOrUpdater,
+    })),
   setLoaded: (loaded) => set({ isLoaded: loaded }),
 }));
 
@@ -161,14 +164,17 @@ function loadFromStorage(): RecentlyViewedItem[] {
     const ttlMs = TTL_DAYS * 24 * 60 * 60 * 1000;
 
     const validItems = parsed.filter((item) => {
-      if (!item.slug || !item.category || !item.viewedAt) return false;
+      if (!(item.slug && item.category && item.viewedAt)) return false;
       const age = now - new Date(item.viewedAt).getTime();
       return age < ttlMs;
     });
 
     return validItems.slice(0, MAX_ITEMS);
   } catch (error) {
-    logger.error('Failed to load recently viewed', error instanceof Error ? error : new Error(String(error)));
+    logger.error(
+      'Failed to load recently viewed',
+      error instanceof Error ? error : new Error(String(error))
+    );
     return [];
   }
 }
@@ -194,7 +200,10 @@ function saveToStorage(items: RecentlyViewedItem[]): void {
         logger.error('Failed to save even after reduction');
       }
     } else {
-      logger.error('Failed to save recently viewed', error instanceof Error ? error : new Error(String(error)));
+      logger.error(
+        'Failed to save recently viewed',
+        error instanceof Error ? error : new Error(String(error))
+      );
     }
   }
 }

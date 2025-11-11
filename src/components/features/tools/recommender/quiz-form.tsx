@@ -28,8 +28,8 @@ type QuizQuestion = {
   }>;
 };
 
-import { ArrowLeft, ArrowRight, Sparkles } from '@/src/lib/icons';
 import { InlineSpinner } from '@/src/lib/components/loading-factory';
+import { ArrowLeft, ArrowRight, Sparkles } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { DIMENSIONS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { toasts } from '@/src/lib/utils/toast.utils';

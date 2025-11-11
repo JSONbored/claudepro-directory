@@ -222,7 +222,11 @@ export function NavigationDesktop({ isActive, onCommandPaletteOpen }: Navigation
           {/* Footer Links - Community, Partner Program, Consulting */}
           <DropdownMenuSeparator className="my-2.5" />
           <div className={UI_CLASSES.GRID_COLS_3_GAP_2}>
-            <Link href="/community" prefetch={true} className={UI_CLASSES.FLEX_INTERACTIVE_NAV_ITEM}>
+            <Link
+              href="/community"
+              prefetch={true}
+              className={UI_CLASSES.FLEX_INTERACTIVE_NAV_ITEM}
+            >
               <Users
                 className={`${UI_CLASSES.ICON_SM} text-muted-foreground transition-colors group-hover:text-accent`}
                 aria-hidden="true"

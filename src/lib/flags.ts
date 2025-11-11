@@ -1,6 +1,7 @@
-import { statsigAdapter, type StatsigUser } from '@flags-sdk/statsig';
-import { flag, dedupe } from 'flags/next';
+import { type StatsigUser, statsigAdapter } from '@flags-sdk/statsig';
 import type { Identify } from 'flags';
+import { dedupe, flag } from 'flags/next';
+import { logger } from '@/src/lib/logger';
 import { createClient } from '@/src/lib/supabase/server';
 
 /**
@@ -31,6 +32,16 @@ export const identify = dedupe((async () => {
 
     return baseUser;
   } catch (error) {
+    // Log auth failure for monitoring (important for debugging flag evaluation issues)
+    logger.error(
+      'Failed to identify user for feature flags, falling back to anonymous',
+      error as Error,
+      {
+        context: 'feature_flags',
+        fallback: 'anonymous',
+      }
+    );
+
     // Fallback to anonymous if auth fails
     return {
       userID: 'anonymous',

@@ -361,10 +361,10 @@ export function InlineSpinner({
 
   return (
     <div className={`flex items-center gap-2 ${className}`}>
-      <div
+      <output
         className={`${sizeClasses[size]} ${borderClasses[size]} animate-spin rounded-full border-primary border-t-transparent`}
-        role="status"
         aria-label={message || 'Loading'}
+        aria-live="polite"
       />
       {message && <span className="text-muted-foreground text-sm">{message}</span>}
     </div>

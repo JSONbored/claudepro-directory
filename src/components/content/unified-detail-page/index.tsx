@@ -7,8 +7,8 @@ import { Suspense } from 'react';
 import { JSONSectionRenderer } from '@/src/components/content/json-section-renderer';
 import { UnifiedContentSection } from '@/src/components/content/unified-content-section';
 import { UnifiedReview } from '@/src/components/core/domain/unified-review';
-import { RecentlyViewedSidebar } from '@/src/components/features/navigation/recently-viewed-sidebar';
 import { UnifiedNewsletterCapture } from '@/src/components/features/growth/unified-newsletter-capture';
+import { RecentlyViewedSidebar } from '@/src/components/features/navigation/recently-viewed-sidebar';
 import {
   type CategoryId,
   getCategoryConfig,

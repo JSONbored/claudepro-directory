@@ -26,10 +26,7 @@
  */
 
 import { useEffect } from 'react';
-import {
-  useRecentlyViewed,
-  type RecentlyViewedCategory,
-} from '@/src/hooks/use-recently-viewed';
+import { type RecentlyViewedCategory, useRecentlyViewed } from '@/src/hooks/use-recently-viewed';
 
 export interface RecentlyViewedTrackerProps {
   category: RecentlyViewedCategory;
@@ -49,7 +46,8 @@ export function RecentlyViewedTracker({
   const { addRecentlyViewed } = useRecentlyViewed();
 
   useEffect(() => {
-    // Track view on mount
+    // Track view on mount - runs when any of the content identifiers change
+    // This ensures we track the correct content when navigating between pages
     addRecentlyViewed({
       category,
       slug,
@@ -57,9 +55,7 @@ export function RecentlyViewedTracker({
       description,
       ...(tags && tags.length > 0 ? { tags } : {}),
     });
-    // Only run once on mount (don't track on every render)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [category, slug, title, description, tags, addRecentlyViewed]);
 
   // This component renders nothing (pure side-effect)
   return null;

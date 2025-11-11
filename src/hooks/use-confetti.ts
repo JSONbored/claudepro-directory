@@ -1,7 +1,7 @@
 'use client';
 
-import { useCallback } from 'react';
 import confetti from 'canvas-confetti';
+import { useCallback } from 'react';
 
 /**
  * Confetti hook for delightful celebration animations

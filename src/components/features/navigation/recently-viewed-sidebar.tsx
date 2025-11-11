@@ -25,12 +25,12 @@
  * ```
  */
 
-import { motion, AnimatePresence } from 'motion/react';
+import { AnimatePresence, motion } from 'motion/react';
 import Link from 'next/link';
 import { memo, useState } from 'react';
 import { UnifiedBadge } from '@/src/components/core/domain/unified-badge';
 import { Button } from '@/src/components/primitives/button';
-import { useRecentlyViewed, type RecentlyViewedItem } from '@/src/hooks/use-recently-viewed';
+import { type RecentlyViewedItem, useRecentlyViewed } from '@/src/hooks/use-recently-viewed';
 import { ChevronDown, ChevronUp, Clock, Trash, X } from '@/src/lib/icons';
 import { ANIMATION_CONSTANTS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';

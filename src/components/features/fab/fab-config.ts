@@ -13,8 +13,9 @@
 
 'use client';
 
-import { Plus, Search, ArrowUp, Bell } from '@/src/lib/icons';
-import type { SpeedDialAction, MainFABConfig } from './fab.types';
+import { ArrowUp, Bell, Plus, Search } from '@/src/lib/icons';
+import { logger } from '@/src/lib/logger';
+import type { MainFABConfig, SpeedDialAction } from './fab.types';
 
 /**
  * Scroll to top with smooth behavior and error handling
@@ -26,7 +27,7 @@ export const handleScrollToTop = (): void => {
       behavior: 'smooth',
     });
   } catch (error) {
-    console.error('[FAB] Error scrolling to top:', error);
+    logger.error('[FAB] Error scrolling to top', error as Error);
   }
 };
 
@@ -47,7 +48,7 @@ export const handleSearchClick = (): void => {
       });
     }
   } catch (error) {
-    console.error('[FAB] Error focusing search:', error);
+    logger.error('[FAB] Error focusing search', error as Error);
   }
 };
 

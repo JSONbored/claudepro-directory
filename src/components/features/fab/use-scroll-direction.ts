@@ -16,6 +16,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { logger } from '@/src/lib/logger';
 import type { ScrollState } from './fab.types';
 
 interface UseScrollDirectionOptions {
@@ -68,7 +69,7 @@ export function useScrollDirection({
             // FAB visible when:
             // 1. Scrolling up
             // 2. OR at top of page (< threshold)
-            const isVisible = !isScrollingDown || !isPastThreshold;
+            const isVisible = !(isScrollingDown && isPastThreshold);
 
             setScrollState((prev) => {
               // Only update if state actually changed (prevents unnecessary re-renders)
@@ -91,13 +92,11 @@ export function useScrollDirection({
 
             prevScrollY = currentScrollY;
           } catch (error) {
-            // Fail silently but log for debugging
-            console.error('[useScrollDirection] Error in rAF callback:', error);
+            logger.error('[useScrollDirection] Error in rAF callback', error as Error);
           }
         });
       } catch (error) {
-        // Fail silently but log for debugging
-        console.error('[useScrollDirection] Error in scroll handler:', error);
+        logger.error('[useScrollDirection] Error in scroll handler', error as Error);
       }
     };
 
@@ -105,7 +104,7 @@ export function useScrollDirection({
     try {
       handleScroll();
     } catch (error) {
-      console.error('[useScrollDirection] Error in initial scroll check:', error);
+      logger.error('[useScrollDirection] Error in initial scroll check', error as Error);
     }
 
     // Passive listener for better scroll performance

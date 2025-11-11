@@ -181,7 +181,9 @@ export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationM
                           onClick={() => onOpenChange(false)}
                           className={`flex w-full items-center rounded-xl border border-border/40 bg-card/50 px-5 py-4 font-medium text-muted-foreground text-sm ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT} hover:border-accent/30 hover:bg-accent/5 hover:text-foreground active:scale-[0.98]`}
                         >
-                          {IconComponent && <IconComponent className="mr-3 h-4 w-4 flex-shrink-0" />}
+                          {IconComponent && (
+                            <IconComponent className="mr-3 h-4 w-4 flex-shrink-0" />
+                          )}
                           <span>{link.label}</span>
                         </NavLink>
                       </motion.div>

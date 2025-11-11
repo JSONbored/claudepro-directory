@@ -20,13 +20,14 @@
 
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { AnimatePresence, motion } from 'motion/react';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import { logger } from '@/src/lib/logger';
 import { type NotificationStore, useNotificationStore } from '@/src/lib/stores/notification-store';
-import { useScrollDirection } from './use-scroll-direction';
 import { createMainFABConfig, createSpeedDialActions } from './fab-config';
 import { SpeedDialItem } from './speed-dial-item';
+import { useScrollDirection } from './use-scroll-direction';
 
 interface FloatingActionBarProps {
   /** Scroll threshold to show/hide FAB (px) */
@@ -50,7 +51,7 @@ export function FloatingActionBar({ threshold = 100 }: FloatingActionBarProps) {
       setIsExpanded(false); // Close speed dial on navigate
       router.push('/submit');
     } catch (error) {
-      console.error('[FloatingActionBar] Error navigating to /submit:', error);
+      logger.error('[FloatingActionBar] Error navigating to /submit', error as Error);
     }
   });
 
@@ -60,7 +61,7 @@ export function FloatingActionBar({ threshold = 100 }: FloatingActionBarProps) {
       setIsExpanded(false); // Close speed dial when opening notifications
       openNotificationSheet();
     } catch (error) {
-      console.error('[FloatingActionBar] Error opening notification sheet:', error);
+      logger.error('[FloatingActionBar] Error opening notification sheet', error as Error);
     }
   });
 
@@ -72,7 +73,7 @@ export function FloatingActionBar({ threshold = 100 }: FloatingActionBarProps) {
     try {
       setIsExpanded((prev) => !prev);
     } catch (error) {
-      console.error('[FloatingActionBar] Error toggling expansion:', error);
+      logger.error('[FloatingActionBar] Error toggling expansion', error as Error);
     }
   };
 
@@ -80,7 +81,7 @@ export function FloatingActionBar({ threshold = 100 }: FloatingActionBarProps) {
   const MainIcon = mainFAB.icon;
 
   return (
-    <div className="fixed bottom-6 right-6 z-60">
+    <div className="fixed right-6 bottom-6 z-60">
       {/* Speed Dial Items (expand upward) */}
       <AnimatePresence>
         {isExpanded && (
@@ -144,7 +145,7 @@ export function FloatingActionBar({ threshold = 100 }: FloatingActionBarProps) {
                   stiffness: 500,
                   damping: 20,
                 }}
-                className="absolute -right-1 -top-1 flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white shadow-md"
+                className="-right-1 -top-1 absolute flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-red-500 px-1 font-bold text-[10px] text-white shadow-md"
               >
                 {mainFAB.badge > 99 ? '99+' : mainFAB.badge}
               </motion.span>
