@@ -193,6 +193,41 @@ const nextConfig = {
   },
   async redirects() {
     return [
+      // HTTP to HTTPS redirect for non-www domain
+      {
+        source: '/:path*',
+        has: [
+          {
+            type: 'header',
+            key: 'x-forwarded-proto',
+            value: 'http',
+          },
+          {
+            type: 'host',
+            value: 'claudepro.directory',
+          },
+        ],
+        destination: 'https://claudepro.directory/:path*',
+        permanent: true,
+      },
+      // WWW to non-www canonical redirect (handles all www variants)
+      {
+        source: '/:path*',
+        has: [
+          {
+            type: 'host',
+            value: 'www.claudepro.directory',
+          },
+        ],
+        destination: 'https://claudepro.directory/:path*',
+        permanent: true,
+      },
+      // /guides/workflows subcategory redirect
+      {
+        source: '/guides/workflows/:path*',
+        destination: '/guides/:path*',
+        permanent: true,
+      },
       {
         source:
           '/guides/:subcategory(comparisons|troubleshooting|tutorials|use-cases|workflows)/:slug',
