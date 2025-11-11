@@ -961,6 +961,12 @@ export const BADGE_COLORS = {
     rejected: 'bg-red-500/10 text-red-400 border-red-500/20',
   },
 
+  memberType: {
+    owner: 'bg-purple-500/10 text-purple-400 border-purple-500/30',
+    contributor: 'bg-accent/10 text-accent border-accent/30',
+    member: 'text-muted-foreground border-muted-foreground/20',
+  },
+
   jobStatus: {
     active: 'bg-green-500/10 text-green-400 border-green-500/20',
     draft: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20',

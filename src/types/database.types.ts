@@ -513,6 +513,7 @@ export type Database = {
           featured: boolean | null;
           id: string;
           industry: string | null;
+          json_ld: Json | null;
           logo: string | null;
           name: string;
           owner_id: string | null;
@@ -529,6 +530,7 @@ export type Database = {
           featured?: boolean | null;
           id?: string;
           industry?: string | null;
+          json_ld?: Json | null;
           logo?: string | null;
           name: string;
           owner_id?: string | null;
@@ -545,6 +547,7 @@ export type Database = {
           featured?: boolean | null;
           id?: string;
           industry?: string | null;
+          json_ld?: Json | null;
           logo?: string | null;
           name?: string;
           owner_id?: string | null;
@@ -1253,6 +1256,7 @@ export type Database = {
           featured: boolean | null;
           id: string;
           is_placeholder: boolean;
+          json_ld: Json | null;
           link: string;
           location: string | null;
           locked_price: number | null;
@@ -1301,6 +1305,7 @@ export type Database = {
           featured?: boolean | null;
           id?: string;
           is_placeholder?: boolean;
+          json_ld?: Json | null;
           link: string;
           location?: string | null;
           locked_price?: number | null;
@@ -1349,6 +1354,7 @@ export type Database = {
           featured?: boolean | null;
           id?: string;
           is_placeholder?: boolean;
+          json_ld?: Json | null;
           link?: string;
           location?: string | null;
           locked_price?: number | null;
@@ -2930,6 +2936,10 @@ export type Database = {
         Args: { p_items: Json; p_user_id: string };
         Returns: Json;
       };
+      build_aggregate_rating_schema: {
+        Args: { p_content_slug: string; p_content_type: string };
+        Returns: Json;
+      };
       build_breadcrumb_json_ld: {
         Args: { p_category: string; p_slug: string };
         Returns: Json;
@@ -2951,8 +2961,13 @@ export type Database = {
         Args: { p_category: string; p_slug: string };
         Returns: Json;
       };
+      build_job_posting_schema: { Args: { p_job_id: string }; Returns: Json };
       build_learning_resource_schema: {
         Args: { p_category: string; p_slug: string };
+        Returns: Json;
+      };
+      build_organization_schema: {
+        Args: { p_company_id: string };
         Returns: Json;
       };
       build_person_schema: { Args: { p_slug: string }; Returns: Json };
@@ -2978,6 +2993,7 @@ export type Database = {
         Returns: number;
       };
       cancel_email_sequence: { Args: { p_email: string }; Returns: undefined };
+      check_digest_cooldown: { Args: never; Returns: boolean };
       check_vacuum_needed: {
         Args: never;
         Returns: {
@@ -3396,6 +3412,7 @@ export type Database = {
           featured: boolean | null;
           id: string;
           is_placeholder: boolean;
+          json_ld: Json | null;
           link: string;
           location: string | null;
           locked_price: number | null;
@@ -3486,6 +3503,7 @@ export type Database = {
           featured: boolean | null;
           id: string;
           is_placeholder: boolean;
+          json_ld: Json | null;
           link: string;
           location: string | null;
           locked_price: number | null;
@@ -3995,6 +4013,7 @@ export type Database = {
           featured: boolean | null;
           id: string;
           industry: string | null;
+          json_ld: Json | null;
           logo: string | null;
           name: string;
           owner_id: string | null;
@@ -4065,6 +4084,7 @@ export type Database = {
           featured: boolean | null;
           id: string;
           is_placeholder: boolean;
+          json_ld: Json | null;
           link: string;
           location: string | null;
           locked_price: number | null;
@@ -4201,6 +4221,7 @@ export type Database = {
         Args: { p_data: Json; p_event_type: string; p_user_id: string };
         Returns: Json;
       };
+      unlink_oauth_provider: { Args: { p_provider: string }; Returns: Json };
       update_user_profile: {
         Args: {
           p_bio?: string;

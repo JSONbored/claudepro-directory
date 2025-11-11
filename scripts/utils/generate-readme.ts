@@ -19,7 +19,7 @@ async function main() {
       throw new Error('Missing NEXT_PUBLIC_SUPABASE_URL environment variable');
     }
 
-    const edgeFunctionUrl = `${supabaseUrl}/functions/v1/readme-generator`;
+    const edgeFunctionUrl = `${supabaseUrl}/functions/v1/content-api/sitewide?format=readme`;
 
     console.log('📝 Generating README.md from edge function...\n');
 

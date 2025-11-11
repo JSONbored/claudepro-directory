@@ -20,7 +20,7 @@ import { UnifiedBadge } from '@/src/components/core/domain/unified-badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/src/components/primitives/avatar';
 import { Button } from '@/src/components/primitives/button';
 import { Award, ExternalLink, Users } from '@/src/lib/icons';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { BADGE_COLORS, UI_CLASSES } from '@/src/lib/ui-constants';
 import type { Tables } from '@/src/types/database.types';
 
 /**
@@ -31,6 +31,11 @@ export type UserProfile = Tables<'users'> & {
   total_contributions?: number;
   followers_count?: number;
   following_count?: number;
+  // Optional company data (from get_user_profile RPC)
+  company?: {
+    name: string;
+    logo: string | null;
+  } | null;
 };
 
 export interface ProfileCardProps {
@@ -43,20 +48,27 @@ export interface ProfileCardProps {
  * Member type badge configuration based on user role/activity
  */
 const getMemberBadge = (user: UserProfile) => {
-  // Check if user has a company (owner_id in companies table would need to be checked)
-  // For now, default to "Member" - can be enhanced with additional data
-  const contributionCount = user.total_contributions || 0;
-
-  if (contributionCount >= 10) {
+  // Priority 1: Company owner (highest status)
+  if (user.company) {
     return {
-      label: 'Contributor',
-      className: 'border-accent/30 bg-accent/10 text-accent',
+      label: 'Company Owner',
+      className: BADGE_COLORS.memberType.owner,
     };
   }
 
+  // Priority 2: Active contributor
+  const contributionCount = user.total_contributions || 0;
+  if (contributionCount >= 10) {
+    return {
+      label: 'Contributor',
+      className: BADGE_COLORS.memberType.contributor,
+    };
+  }
+
+  // Default: Member
   return {
     label: 'Member',
-    className: 'border-muted-foreground/20 text-muted-foreground',
+    className: BADGE_COLORS.memberType.member,
   };
 };
 

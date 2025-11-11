@@ -32,9 +32,6 @@
 # Public API Functions - No JWT Verification
 # =============================================================================
 
-[functions.llms-txt]
-verify_jwt = false  # Public API serving LLMs.txt documentation
-
 [functions.sitemap]
 verify_jwt = false  # Public sitemap.xml endpoint
 
@@ -47,17 +44,11 @@ verify_jwt = false  # Public health check endpoint
 [functions.feeds]
 verify_jwt = false  # Public RSS/Atom feed endpoints (changelog + all content categories)
 
-[functions.json-api]
-verify_jwt = false  # Public JSON API endpoint with JSON-LD structured data
-
-[functions.markdown-export]
-verify_jwt = false  # Public markdown export endpoint for all categories
-
 [functions.seo-api]
 verify_jwt = false  # Public SEO endpoint: metadata + pre-generated schemas (24hr cache)
 
-[functions.readme-generator]
-verify_jwt = false  # Public on-demand README generator (database-first, 15ms RPC)
+[functions.content-api]
+verify_jwt = false  # Unified content export API (json, markdown, llms-txt, readme, storage) - consolidates 4 functions
 
 [functions.trending]
 verify_jwt = false  # Public trending data with CDN caching (24hr s-maxage)
