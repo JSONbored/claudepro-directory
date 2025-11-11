@@ -108,12 +108,9 @@ const RecentlyViewedItemComponent = memo(function RecentlyViewedItemComponent({
         {item.tags && item.tags.length > 0 && (
           <div className="mt-1 flex flex-wrap gap-1">
             {item.tags.slice(0, 2).map((tag) => (
-              <span
-                key={tag}
-                className="rounded-full bg-muted px-1.5 py-0.5 text-[9px] text-muted-foreground"
-              >
+              <UnifiedBadge key={tag} variant="base" style="outline" className="text-[9px]">
                 {tag}
-              </span>
+              </UnifiedBadge>
             ))}
             {item.tags.length > 2 && (
               <span className="text-[9px] text-muted-foreground">+{item.tags.length - 2}</span>
