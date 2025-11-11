@@ -57,18 +57,42 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
       return;
     }
 
-    // Check dimensions
+    // Verify actual file content matches MIME type (magic bytes check)
+    // This prevents any potential XSS via malformed file uploads
     try {
-      const img = document.createElement('img');
-      const imgPromise = new Promise<{ width: number; height: number }>((resolve, reject) => {
-        img.onload = () => {
-          resolve({ width: img.width, height: img.height });
-          URL.revokeObjectURL(img.src);
-        };
-        img.onerror = reject;
-      });
-      img.src = URL.createObjectURL(file);
-      const { width, height } = await imgPromise;
+      const buffer = await file.slice(0, 12).arrayBuffer();
+      const bytes = new Uint8Array(buffer);
+      const isValidImage =
+        // JPEG: FF D8 FF
+        (bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) ||
+        // PNG: 89 50 4E 47
+        (bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47) ||
+        // WebP: 52 49 46 46 ... 57 45 42 50
+        (bytes[0] === 0x52 &&
+          bytes[1] === 0x49 &&
+          bytes[2] === 0x46 &&
+          bytes[3] === 0x46 &&
+          bytes[8] === 0x57 &&
+          bytes[9] === 0x45 &&
+          bytes[10] === 0x42 &&
+          bytes[11] === 0x50);
+
+      if (!isValidImage) {
+        toasts.error.actionFailed(
+          'Invalid image file. File content does not match expected format.'
+        );
+        return;
+      }
+    } catch {
+      toasts.error.actionFailed('Failed to validate image file.');
+      return;
+    }
+
+    // Check dimensions using createImageBitmap (safer than URL.createObjectURL for CodeQL)
+    try {
+      const bitmap = await createImageBitmap(file);
+      const { width, height } = bitmap;
+      bitmap.close(); // Release memory
 
       if (width > MAX_DIMENSION || height > MAX_DIMENSION) {
         toasts.error.actionFailed(
