@@ -79,7 +79,7 @@
     "@radix-ui/react-tooltip": "^1.2.8",
     "@radix-ui/react-use-controllable-state": "^1.2.2",
     "@radix-ui/react-visually-hidden": "^1.2.4",
-    "@react-email/components": "^0.5.7",
+    "@react-email/components": "^1.0.0",
     "@react-email/render": "^1.4.0",
     "@supabase/ssr": "^0.7.0",
     "@supabase/supabase-js": "^2.81.1",
