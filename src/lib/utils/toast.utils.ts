@@ -1,33 +1,8 @@
 /**
- * Toast Factory Utilities
- *
- * Centralized toast message creation with:
- * - Consistent messaging patterns across the app
- * - Reduced bundle size (2-3 KB saved by deduplicating common strings)
- * - Type-safe toast invocations
- * - Easy A/B testing and message updates
- *
- * Usage:
- * ```ts
- * import { toasts } from '@/src/lib/utils/toast.utils';
- *
- * // Instead of: toast.success('Profile updated successfully');
- * toasts.success.profileUpdated();
- *
- * // Instead of: toast.error('Failed to save. Please try again.');
- * toasts.error.saveFailed();
- *
- * // With dynamic content:
- * toasts.success.itemSaved('recommendation', 5);
- * ```
+ * Centralized toast message utilities for consistent UX
  */
 
 import { toast } from 'sonner';
-
-/**
- * Success Toast Messages
- * Common success scenarios across the application
- */
 export const successToasts = {
   // Profile & Auth
   profileUpdated: () => toast.success('Profile updated successfully'),
@@ -53,7 +28,6 @@ export const successToasts = {
   linkCopied: () => toast.success('Link copied to clipboard!'),
   codeCopied: () => toast.success('Code copied to clipboard!'),
   screenshotCopied: () => toast.success('Screenshot copied & downloaded!'),
-  embedCopied: () => toast.success('Embed code copied to clipboard!'),
 
   // Library & Bookmarks
   savedToLibrary: (count: number, total?: number) =>
@@ -70,10 +44,6 @@ export const successToasts = {
   actionCompleted: (action: string) => toast.success(`${action} completed successfully`),
 } as const;
 
-/**
- * Error Toast Messages
- * Common error scenarios with consistent fallback messages
- */
 export const errorToasts = {
   // Generic Failures
   saveFailed: (customMessage?: string) =>
@@ -110,7 +80,6 @@ export const errorToasts = {
   copyFailed: (item?: string) => toast.error(`Failed to copy${item ? ` ${item}` : ''}`),
   screenshotFailed: () => toast.error('Failed to generate screenshot'),
   shareFailed: () => toast.error('Failed to share'),
-  embedFailed: () => toast.error('Failed to copy embed code'),
 
   // Profile & User Actions
   profileUpdateFailed: () => toast.error('Failed to update profile'),
@@ -125,10 +94,6 @@ export const errorToasts = {
     toast.error(error instanceof Error ? error.message : fallback),
 } as const;
 
-/**
- * Info Toast Messages
- * Informational messages for user guidance
- */
 export const infoToasts = {
   comingSoon: (feature?: string) =>
     toast.info(feature ? `${feature} coming soon!` : 'Coming soon!'),
@@ -138,30 +103,18 @@ export const infoToasts = {
     toast.info(destination ? `Redirecting to ${destination}...` : 'Redirecting...'),
 } as const;
 
-/**
- * Warning Toast Messages
- * Non-critical warnings and alerts
- */
 export const warningToasts = {
   unsavedChanges: () => toast.warning('You have unsaved changes'),
   slowConnection: () => toast.warning('Slow connection detected. This may take longer than usual.'),
   limitReached: (limit: string) => toast.warning(`${limit} limit reached`),
 } as const;
 
-/**
- * Loading Toast Messages
- * Progress indicators for async operations
- */
 export const loadingToasts = {
   saving: () => toast.loading('Saving...'),
   loading: (action?: string) => toast.loading(action ? `${action}...` : 'Loading...'),
   processing: () => toast.loading('Processing...'),
 } as const;
 
-/**
- * Unified Toast API
- * Single import for all toast types
- */
 export const toasts = {
   success: successToasts,
   error: errorToasts,
@@ -172,10 +125,6 @@ export const toasts = {
   raw: toast,
 } as const;
 
-/**
- * Toast Promise Helper
- * Wrapper for toast.promise with consistent messaging
- */
 export const toastPromise = <T>(
   promise: Promise<T>,
   messages: {

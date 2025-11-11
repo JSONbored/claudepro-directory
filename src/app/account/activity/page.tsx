@@ -59,7 +59,7 @@ export default async function ActivityPage() {
           </CardHeader>
           <CardContent>
             <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-              <FileText className="h-5 w-5 text-blue-500" />
+              <FileText className={`${UI_CLASSES.ICON_MD} ${UI_CLASSES.ICON_INFO}`} />
               <span className="font-bold text-2xl">{summary.total_posts}</span>
             </div>
           </CardContent>
@@ -71,7 +71,7 @@ export default async function ActivityPage() {
           </CardHeader>
           <CardContent>
             <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-              <MessageSquare className="h-5 w-5 text-green-500" />
+              <MessageSquare className={`${UI_CLASSES.ICON_MD} ${UI_CLASSES.ICON_SUCCESS}`} />
               <span className="font-bold text-2xl">{summary.total_comments}</span>
             </div>
           </CardContent>
@@ -83,7 +83,7 @@ export default async function ActivityPage() {
           </CardHeader>
           <CardContent>
             <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-              <ThumbsUp className="h-5 w-5 text-orange-500" />
+              <ThumbsUp className={`${UI_CLASSES.ICON_MD} ${UI_CLASSES.ICON_WARNING}`} />
               <span className="font-bold text-2xl">{summary.total_votes}</span>
             </div>
           </CardContent>
@@ -95,7 +95,7 @@ export default async function ActivityPage() {
           </CardHeader>
           <CardContent>
             <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-              <GitPullRequest className="h-5 w-5 text-purple-500" />
+              <GitPullRequest className={`${UI_CLASSES.ICON_MD} ${UI_CLASSES.ICON_INFO}`} />
               <span className="font-bold text-2xl">
                 {summary.merged_submissions}/{summary.total_submissions}
               </span>

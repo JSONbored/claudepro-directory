@@ -11,22 +11,23 @@
 
 import Link from 'next/link';
 import { type FC, memo, useMemo } from 'react';
-import { ConfigCard } from '@/src/components/domain/config-card';
-import { UnifiedCardGrid } from '@/src/components/domain/unified-card-grid';
-import { Button } from '@/src/components/primitives/button';
+import { ConfigCard } from '@/src/components/core/domain/config-card';
+import { JobCard } from '@/src/components/core/domain/job-card';
+import { UnifiedCardGrid } from '@/src/components/core/domain/unified-card-grid';
 import {
   HOMEPAGE_FEATURED_CATEGORIES,
   type UnifiedCategoryConfig,
 } from '@/src/lib/config/category-config';
-import { ROUTES } from '@/src/lib/constants/routes';
-import { Briefcase, ExternalLink } from '@/src/lib/icons';
-import type { ContentItem } from '@/src/lib/types/component.types';
+import { ROUTES } from '@/src/lib/constants';
+import { ExternalLink } from '@/src/lib/icons';
+import type { DisplayableContent } from '@/src/lib/types/component.types';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import type { Tables } from '@/src/types/database-overrides';
 
 interface FeaturedSectionProps {
   title: string;
   href: string;
-  items: readonly ContentItem[];
+  items: readonly DisplayableContent[];
 }
 
 /**
@@ -50,7 +51,7 @@ const FeaturedSection: FC<FeaturedSectionProps> = memo(
         <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} mb-8`}>
           <h2 className={'font-bold text-2xl'}>{title}</h2>
           <Link href={href} className="flex items-center gap-2 text-accent hover:underline">
-            View all <ExternalLink className="h-4 w-4" />
+            View all <ExternalLink className={UI_CLASSES.ICON_SM} />
           </Link>
         </div>
         <UnifiedCardGrid
@@ -72,11 +73,16 @@ FeaturedSection.displayName = 'FeaturedSection';
  * This allows any number of categories without hardcoding
  */
 interface FeaturedSectionsProps {
-  categories: Record<string, readonly ContentItem[]>;
+  categories: Record<string, readonly DisplayableContent[]>;
   categoryConfigs: Record<string, UnifiedCategoryConfig>;
+  featuredJobs?: ReadonlyArray<Tables<'jobs'>>;
 }
 
-const FeaturedSectionsComponent: FC<FeaturedSectionsProps> = ({ categories, categoryConfigs }) => {
+const FeaturedSectionsComponent: FC<FeaturedSectionsProps> = ({
+  categories,
+  categoryConfigs,
+  featuredJobs = [],
+}) => {
   return (
     <div className={'mb-16 space-y-16'}>
       {/* Dynamically render featured sections based on HOMEPAGE_FEATURED_CATEGORIES */}
@@ -99,25 +105,25 @@ const FeaturedSectionsComponent: FC<FeaturedSectionsProps> = ({ categories, cate
         );
       })}
 
-      {/* Featured Jobs */}
-      <div>
-        <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} mb-8`}>
-          <h2 className={'font-bold text-2xl'}>Featured Jobs</h2>
-          <Link href={ROUTES.JOBS} className="flex items-center gap-2 text-accent hover:underline">
-            View all <ExternalLink className="h-4 w-4" />
-          </Link>
+      {/* Featured Jobs - Dynamic from database */}
+      {featuredJobs.length > 0 && (
+        <div>
+          <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} mb-8`}>
+            <h2 className={'font-bold text-2xl'}>Featured Jobs</h2>
+            <Link
+              href={ROUTES.JOBS}
+              className="flex items-center gap-2 text-accent hover:underline"
+            >
+              View all <ExternalLink className={UI_CLASSES.ICON_SM} />
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {featuredJobs.slice(0, 6).map((job) => (
+              <JobCard key={job.slug} job={job} />
+            ))}
+          </div>
         </div>
-        <div className={UI_CLASSES.CONTAINER_CARD_MUTED}>
-          <Briefcase className={'mx-auto mb-4 h-12 w-12 text-muted-foreground/50'} />
-          <h3 className={'mb-2 font-semibold text-lg'}>Find Your Next AI Role</h3>
-          <p className={'mb-6 text-muted-foreground'}>
-            Discover opportunities with companies building the future of AI
-          </p>
-          <Button asChild>
-            <Link href={ROUTES.JOBS}>Browse Job Opportunities</Link>
-          </Button>
-        </div>
-      </div>
+      )}
     </div>
   );
 };

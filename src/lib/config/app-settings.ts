@@ -5,6 +5,7 @@
  */
 
 import { unstable_cache } from 'next/cache';
+import { cache } from 'react';
 import { createAnonClient } from '@/src/lib/supabase/server-anon';
 import type { Tables } from '@/src/types/database.types';
 
@@ -43,36 +44,34 @@ const getCachedAppSettings = unstable_cache(fetchAppSettings, ['app-settings'], 
   tags: ['app-settings'],
 });
 
-export async function getAppSettings(
-  environment?: Environment,
-  category?: AppSetting['category']
-): Promise<AppSettingsMap> {
-  return getCachedAppSettings(environment, category);
-}
+export const getAppSettings = cache(
+  async (environment?: Environment, category?: AppSetting['category']): Promise<AppSettingsMap> => {
+    return getCachedAppSettings(environment, category);
+  }
+);
 
-export async function getAppSetting<T = unknown>(
-  key: string,
-  environment?: Environment
-): Promise<T | null> {
-  const settings = await getAppSettings(environment);
-  const setting = settings[key];
-  return setting ? (setting.value as T) : null;
-}
+export const getAppSetting = cache(
+  async <T = unknown>(key: string, environment?: Environment): Promise<T | null> => {
+    const settings = await getAppSettings(environment);
+    const setting = settings[key];
+    return setting ? (setting.value as T) : null;
+  }
+);
 
 // Typed helper functions for common settings
-export async function isFeatureEnabled(key: string, environment?: Environment): Promise<boolean> {
-  const value = await getAppSetting<boolean>(key, environment);
-  return value ?? false;
-}
+export const isFeatureEnabled = cache(
+  async (key: string, environment?: Environment): Promise<boolean> => {
+    const value = await getAppSetting<boolean>(key, environment);
+    return value ?? false;
+  }
+);
 
-export async function getConfigValue<T = string>(
-  key: string,
-  defaultValue: T,
-  environment?: Environment
-): Promise<T> {
-  const value = await getAppSetting<T>(key, environment);
-  return value ?? defaultValue;
-}
+export const getConfigValue = cache(
+  async <T = string>(key: string, defaultValue: T, environment?: Environment): Promise<T> => {
+    const value = await getAppSetting<T>(key, environment);
+    return value ?? defaultValue;
+  }
+);
 
 // Server-only environment detection
 export function getServerEnvironment(): Environment | undefined {

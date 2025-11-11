@@ -3,10 +3,12 @@
  */
 
 import { unstable_cache } from 'next/cache';
+import { cache } from 'react';
 import type { CategoryId } from '@/src/lib/config/category-config';
 import { logger } from '@/src/lib/logger';
 import { createAnonClient } from '@/src/lib/supabase/server-anon';
 import type { Tables } from '@/src/types/database.types';
+import type { GetEnrichedContentListReturn } from '@/src/types/database-overrides';
 
 export type ContentItem = Tables<'content'> | Tables<'jobs'>;
 export type ContentListItem = Tables<'content'>;
@@ -37,82 +39,82 @@ async function withErrorHandling<T>(
   }
 }
 
-export async function getContentByCategory(category: CategoryId): Promise<ContentItem[]> {
-  return withErrorHandling(
-    async () => {
-      const supabase = createAnonClient();
-      // Bandwidth optimized: use list RPC (excludes content/examples/discovery_metadata)
-      const { data, error } = await supabase.rpc('get_enriched_content_list', {
-        p_category: category,
-        p_limit: 1000,
-        p_offset: 0,
-      });
+export const getContentByCategory = cache(
+  async (category: CategoryId): Promise<GetEnrichedContentListReturn> => {
+    return withErrorHandling(
+      async () => {
+        const supabase = createAnonClient();
+        // Bandwidth optimized: use list RPC (excludes content/examples/discovery_metadata)
+        const { data, error } = await supabase.rpc('get_enriched_content_list', {
+          p_category: category,
+          p_limit: 1000,
+          p_offset: 0,
+        });
 
-      if (error) throw error;
-      return (data || []) as ContentItem[];
-    },
-    [],
-    `getContentByCategory(${category})`
-  );
-}
+        if (error) throw error;
+        return (data || []) as GetEnrichedContentListReturn;
+      },
+      [],
+      `getContentByCategory(${category})`
+    );
+  }
+);
 
-export async function getContentBySlug(
-  category: CategoryId,
-  slug: string
-): Promise<ContentItem | null> {
-  return unstable_cache(
-    () =>
-      withErrorHandling(
-        async () => {
-          const supabase = createAnonClient();
-          const { data, error } = await supabase.rpc('get_enriched_content', {
-            p_category: category,
-            p_slug: slug,
-            p_limit: 1,
-            p_offset: 0,
-          });
-          if (error) throw error;
-          const results = (data || []) as ContentItem[];
-          return results.length > 0 ? (results[0] ?? null) : null;
-        },
-        null,
-        `getContentBySlug(${category}, ${slug})`
-      ),
-    [`enriched-content-${category}-${slug}`],
-    {
-      revalidate: 3600,
-      tags: [`content-${category}`, `content-${category}-${slug}`],
-    }
-  )();
-}
+export const getContentBySlug = cache(
+  async (category: CategoryId, slug: string): Promise<ContentItem | null> => {
+    return unstable_cache(
+      () =>
+        withErrorHandling(
+          async () => {
+            const supabase = createAnonClient();
+            const { data, error } = await supabase.rpc('get_enriched_content', {
+              p_category: category,
+              p_slug: slug,
+              p_limit: 1,
+              p_offset: 0,
+            });
+            if (error) throw error;
+            const results = (data || []) as ContentItem[];
+            return results.length > 0 ? (results[0] ?? null) : null;
+          },
+          null,
+          `getContentBySlug(${category}, ${slug})`
+        ),
+      [`enriched-content-${category}-${slug}`],
+      {
+        revalidate: 3600,
+        tags: [`content-${category}`, `content-${category}-${slug}`],
+      }
+    )();
+  }
+);
 
-export async function getFullContentBySlug(
-  category: CategoryId,
-  slug: string
-): Promise<FullContentItem | null> {
-  return unstable_cache(
-    () =>
-      withErrorHandling(
-        async () => {
-          const supabase = createAnonClient();
-          const { data, error } = await supabase
-            .from('content')
-            .select('*')
-            .eq('category', category)
-            .eq('slug', slug)
-            .single();
-          if (error && error.code !== 'PGRST116') throw error;
-          return data ? (data as unknown as FullContentItem) : null;
-        },
-        null,
-        `getFullContentBySlug(${category}, ${slug})`
-      ),
-    [`content-full-${category}-${slug}`],
-    { revalidate: 3600, tags: [`content-${category}`, `content-${category}-${slug}`] }
-  )();
-}
+export const getFullContentBySlug = cache(
+  async (category: CategoryId, slug: string): Promise<FullContentItem | null> => {
+    return unstable_cache(
+      () =>
+        withErrorHandling(
+          async () => {
+            const supabase = createAnonClient();
+            const { data, error } = await supabase
+              .from('content')
+              .select('*')
+              .eq('category', category)
+              .eq('slug', slug)
+              .single();
+            if (error && error.code !== 'PGRST116') throw error;
+            return data ? (data as unknown as FullContentItem) : null;
+          },
+          null,
+          `getFullContentBySlug(${category}, ${slug})`
+        ),
+      [`content-full-${category}-${slug}`],
+      { revalidate: 3600, tags: [`content-${category}`, `content-${category}-${slug}`] }
+    )();
+  }
+);
 
-export async function getAllContent(filters?: ContentFilters): Promise<ContentItem[]> {
+export const getAllContent = cache(async (filters?: ContentFilters): Promise<ContentItem[]> => {
   return unstable_cache(
     () =>
       withErrorHandling(
@@ -169,9 +171,9 @@ export async function getAllContent(filters?: ContentFilters): Promise<ContentIt
     ].filter(Boolean) as string[],
     { revalidate: 3600, tags: ['content-all'] }
   )();
-}
+});
 
-export async function getContentCount(category?: CategoryId): Promise<number> {
+export const getContentCount = cache(async (category?: CategoryId): Promise<number> => {
   return unstable_cache(
     () =>
       withErrorHandling(
@@ -192,40 +194,9 @@ export async function getContentCount(category?: CategoryId): Promise<number> {
       tags: category ? [`content-${category}`] : ['content-all'],
     }
   )();
-}
+});
 
-export async function getContentWithAnalytics(
-  category?: CategoryId,
-  orderBy: 'popularity_score' | 'trending_score' | 'view_count' | 'created_at' = 'popularity_score',
-  limit = 20
-) {
-  return unstable_cache(
-    () =>
-      withErrorHandling(
-        async () => {
-          const supabase = createAnonClient();
-          let query = supabase
-            .from('mv_content_stats')
-            .select('*')
-            .order(orderBy, { ascending: false, nullsFirst: false })
-            .limit(limit);
-          if (category) query = query.eq('category', category);
-          const { data, error } = await query;
-          if (error) throw error;
-          return data || [];
-        },
-        [],
-        'getContentWithAnalytics'
-      ),
-    [`content-analytics-${category || 'all'}-${orderBy}-${limit}`],
-    {
-      revalidate: 3600,
-      tags: category ? [`content-${category}`] : ['content-all'],
-    }
-  )();
-}
-
-export async function getTrendingContent(category?: CategoryId, limit = 20) {
+export const getTrendingContent = cache(async (category?: CategoryId, limit = 20) => {
   return unstable_cache(
     () =>
       withErrorHandling(
@@ -258,8 +229,8 @@ export async function getTrendingContent(category?: CategoryId, limit = 20) {
       tags: category ? [`trending-${category}`] : ['trending-all'],
     }
   )();
-}
+});
 
-export async function getFilteredContent(filters: ContentFilters): Promise<ContentItem[]> {
+export const getFilteredContent = cache(async (filters: ContentFilters): Promise<ContentItem[]> => {
   return getAllContent(filters);
-}
+});

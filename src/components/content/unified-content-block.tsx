@@ -40,7 +40,7 @@
  * ```
  */
 
-import { UnifiedBadge } from '@/src/components/domain/unified-badge';
+import { UnifiedBadge } from '@/src/components/core/domain/unified-badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/src/components/primitives/avatar';
 import {
   Card,
@@ -122,7 +122,7 @@ function CaseStudyVariant(props: CaseStudyProps) {
           </div>
           {logo && (
             <div className={'flex h-16 w-16 items-center justify-center rounded-lg bg-muted'}>
-              <BookOpen className="h-8 w-8 text-muted-foreground" />
+              <BookOpen className={`${UI_CLASSES.ICON_XL} text-muted-foreground`} />
             </div>
           )}
         </div>
@@ -291,7 +291,7 @@ function TLDRVariant(props: TLDRSummaryProps) {
     >
       <CardHeader>
         <CardTitle className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-          <Zap className="h-5 w-5 text-primary" />
+          <Zap className={`${UI_CLASSES.ICON_MD} text-primary`} />
           {title}
         </CardTitle>
       </CardHeader>
@@ -386,7 +386,7 @@ function QuickReferenceVariant(props: QuickReferenceProps) {
     >
       <CardHeader>
         <CardTitle className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-          <BookOpen className="h-5 w-5 text-accent-foreground" />
+          <BookOpen className={`${UI_CLASSES.ICON_MD} text-accent-foreground`} />
           {title}
         </CardTitle>
         {description && <CardDescription itemProp="description">{description}</CardDescription>}
@@ -398,9 +398,7 @@ function QuickReferenceVariant(props: QuickReferenceProps) {
               key={`${item.label}-${index}`}
               itemScope
               itemType="https://schema.org/PropertyValue"
-              className={
-                'flex flex-col gap-2 rounded-lg border bg-card/50 p-3 sm:flex-row sm:items-start sm:gap-4'
-              }
+              className={`${UI_CLASSES.FLEX_COL_GAP_2} rounded-lg border bg-card/50 p-3 sm:flex-row sm:items-start sm:gap-4`}
             >
               <div className="sm:w-1/3">
                 <dt itemProp="name" className={`font-medium ${UI_CLASSES.TEXT_SM_MUTED}`}>

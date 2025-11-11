@@ -4,12 +4,13 @@
  */
 
 import { ProductionCodeBlock } from '@/src/components/content/production-code-block';
-import { UnifiedBadge } from '@/src/components/domain/unified-badge';
-import { UnifiedContentBox } from '@/src/components/domain/unified-content-box';
+import { UnifiedBadge } from '@/src/components/core/domain/unified-badge';
+import { UnifiedContentBox } from '@/src/components/core/domain/unified-content-box';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/card';
 import { highlightCode } from '@/src/lib/content/syntax-highlighting';
 import { Zap } from '@/src/lib/icons';
 import type { StepByStepGuideProps } from '@/src/lib/types/component.types';
+import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 export function StepByStepGuide(props: StepByStepGuideProps) {
   const { steps, title, description, totalTime } = props;
@@ -33,7 +34,7 @@ export function StepByStepGuide(props: StepByStepGuideProps) {
         )}
         {totalTime && (
           <div className={'flex items-center gap-2 text-muted-foreground text-sm'}>
-            <Zap className="h-4 w-4" />
+            <Zap className={UI_CLASSES.ICON_SM} />
             <span itemProp="totalTime">Total time: {totalTime}</span>
           </div>
         )}

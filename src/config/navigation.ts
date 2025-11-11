@@ -7,7 +7,6 @@ import {
   Briefcase,
   Building,
   Calendar,
-  Camera,
   FileText,
   Handshake,
   Layers,
@@ -124,13 +123,6 @@ export const SECONDARY_NAVIGATION: NavigationGroup[] = [
     heading: 'Discover',
     links: [
       {
-        label: 'Gallery',
-        href: '/gallery',
-        icon: Camera,
-        description: 'Code screenshot gallery',
-        isNew: true,
-      },
-      {
         label: 'Companies',
         href: '/companies',
         icon: Building,
@@ -170,7 +162,7 @@ export const SECONDARY_NAVIGATION: NavigationGroup[] = [
 
 export const ACTION_LINKS: NavigationLink[] = [
   {
-    label: 'Submit Config',
+    label: 'Create',
     href: '/submit',
     icon: PlusCircle,
     description: 'Share your configuration',

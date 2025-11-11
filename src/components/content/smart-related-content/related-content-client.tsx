@@ -5,14 +5,15 @@
  */
 
 import { useEffect, useState } from 'react';
-import { BaseCard } from '@/src/components/domain/base-card';
-import { UnifiedBadge } from '@/src/components/domain/unified-badge';
-import { UnifiedCardGrid } from '@/src/components/domain/unified-card-grid';
+import { BaseCard } from '@/src/components/core/domain/base-card';
+import { UnifiedBadge } from '@/src/components/core/domain/unified-badge';
+import { UnifiedCardGrid } from '@/src/components/core/domain/unified-card-grid';
 import type { CategoryId } from '@/src/lib/config/category-config';
 import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
 import { Sparkles } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { relatedContentService } from '@/src/lib/related-content/service';
+import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { getContentItemUrl } from '@/src/lib/utils/content.utils';
 import type { Database } from '@/src/types/database.types';
 
@@ -158,7 +159,7 @@ export function RelatedContentClient({
           <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
             <div className="flex items-center gap-3 sm:gap-4">
               <div className="flex-shrink-0 rounded-lg bg-primary/10 p-2">
-                <Sparkles className="h-5 w-5 text-primary sm:h-6 sm:w-6" />
+                <Sparkles className={`${UI_CLASSES.ICON_MD} text-primary sm:h-6 sm:w-6`} />
               </div>
               <div className="min-w-0">
                 <h2 className="mb-1 font-bold text-foreground text-xl sm:text-2xl" itemProp="name">

@@ -4,10 +4,11 @@
 
 import { revalidatePath } from 'next/cache';
 import { notFound, redirect } from 'next/navigation';
-import { JobForm } from '@/src/components/forms/job-form';
+import { JobForm } from '@/src/components/core/forms/job-form';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';
-import type { Json, Tables } from '@/src/types/database.types';
+import { UI_CLASSES } from '@/src/lib/ui-constants';
+import type { Tables } from '@/src/types/database.types';
 
 // Force dynamic rendering - requires authentication
 export const dynamic = 'force-dynamic';
@@ -45,35 +46,45 @@ export default async function EditJobPage({ params }: EditJobPageProps) {
     const supabase = await createClient();
     const {
       data: { user },
+      error: authError,
     } = await supabase.auth.getUser();
 
-    if (!user) throw new Error('You must be signed in to update jobs');
+    if (authError || !user) throw new Error('You must be signed in to update jobs');
 
-    const { data: rpcData, error } = await supabase.rpc('manage_job', {
-      p_action: 'update',
-      p_user_id: user.id,
-      p_data: { ...data, id: resolvedParams.id } as Json,
-    });
+    // Get JWT token for edge function authentication
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
 
-    if (error) throw new Error(error.message);
-
-    // Validate RPC response structure
-    if (!rpcData || typeof rpcData !== 'object' || !('success' in rpcData)) {
-      throw new Error('Invalid response from manage_job RPC');
+    if (!session?.access_token) {
+      throw new Error('No valid session found');
     }
 
-    const result = rpcData as {
+    // Call jobs-handler edge function directly
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/jobs-handler`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.access_token}`,
+          'X-Job-Action': 'update',
+        },
+        body: JSON.stringify({ ...data, id: resolvedParams.id }),
+      }
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
+      throw new Error(errorData.message || `Failed to update job: ${response.statusText}`);
+    }
+
+    const result = (await response.json()) as {
       success: boolean;
       job: Tables<'jobs'>;
     };
 
-    // Verify success is boolean
-    if (typeof result.success !== 'boolean') {
-      throw new Error('Invalid response: success field must be boolean');
-    }
-
     if (result.success) {
-      // When success is true, verify job object exists with required properties
       if (!result.job || typeof result.job !== 'object') {
         throw new Error('Invalid response: job object missing on successful update');
       }
@@ -95,7 +106,7 @@ export default async function EditJobPage({ params }: EditJobPageProps) {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="mb-2 font-bold text-3xl">Edit Job Listing</h1>
+        <h1 className={`mb-2 ${UI_CLASSES.HEADING_H2}`}>Edit Job Listing</h1>
         <p className="text-muted-foreground">Update your job posting details</p>
       </div>
       <JobForm

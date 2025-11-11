@@ -5,6 +5,7 @@
 
 import { logger } from '@/src/lib/logger';
 import { createClient } from '@/src/lib/supabase/client';
+import type { Database } from '@/src/types/database.types';
 
 const EDGE_BASE_URL = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1`;
 
@@ -79,13 +80,12 @@ async function callAnalyticsAction(action: string, data: Record<string, unknown>
   });
 }
 
-export async function trackInteraction(params: {
-  content_type: string;
-  content_slug: string;
-  interaction_type: string;
-  session_id?: string;
-  metadata?: Record<string, string | number | boolean>;
-}) {
+export async function trackInteraction(
+  params: Omit<
+    Database['public']['Tables']['user_interactions']['Insert'],
+    'id' | 'created_at' | 'user_id'
+  >
+) {
   return callAnalyticsAction('trackInteraction', params);
 }
 

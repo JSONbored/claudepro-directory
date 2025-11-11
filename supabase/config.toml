@@ -32,14 +32,8 @@
 # Public API Functions - No JWT Verification
 # =============================================================================
 
-[functions.llms-txt]
-verify_jwt = false  # Public API serving LLMs.txt documentation
-
 [functions.sitemap]
 verify_jwt = false  # Public sitemap.xml endpoint
-
-[functions.gallery]
-verify_jwt = false  # Public gallery endpoint
 
 [functions.content-paginated]
 verify_jwt = false  # Public content listing with optional auth
@@ -50,17 +44,17 @@ verify_jwt = false  # Public health check endpoint
 [functions.feeds]
 verify_jwt = false  # Public RSS/Atom feed endpoints (changelog + all content categories)
 
-[functions.json-api]
-verify_jwt = false  # Public JSON API endpoint with JSON-LD structured data
-
-[functions.markdown-export]
-verify_jwt = false  # Public markdown export endpoint for all categories
-
 [functions.seo-api]
 verify_jwt = false  # Public SEO endpoint: metadata + pre-generated schemas (24hr cache)
 
-[functions.readme-generator]
-verify_jwt = false  # Public on-demand README generator (database-first, 15ms RPC)
+[functions.content-api]
+verify_jwt = false  # Unified content export API (json, markdown, llms-txt, readme, storage) - consolidates 4 functions
+
+[functions.trending]
+verify_jwt = false  # Public trending data with CDN caching (24hr s-maxage)
+
+[functions.unified-search]
+verify_jwt = false  # Public search API with optional auth for analytics tracking (5min edge cache)
 
 # =============================================================================
 # Webhook Functions - No JWT Verification (Use Signature Verification)
@@ -85,8 +79,14 @@ verify_jwt = false  # Database-triggered webhook (internal)
 verify_jwt = false  # Vercel webhook with signature verification
 
 # =============================================================================
-# Authenticated Functions - Require JWT Verification
+# Authenticated Functions - Manual JWT Verification in Code
 # =============================================================================
+
+[functions.jobs-handler]
+verify_jwt = false  # Manual JWT verification via supabaseServiceRole.auth.getUser()
+
+[functions.companies-handler]
+verify_jwt = false  # GET: Public profiles (CDN cached). POST: Manual JWT verification via supabaseServiceRole.auth.getUser()
 
 [functions.analytics]
 verify_jwt = true  # Requires authenticated user for analytics tracking

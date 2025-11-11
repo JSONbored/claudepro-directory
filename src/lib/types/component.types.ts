@@ -7,10 +7,19 @@ import type { CategoryId } from '@/src/lib/config/category-config';
 import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
 import type { SearchResult } from '@/src/lib/search/server-search';
 import type { Database } from '@/src/types/database.types';
+import type {
+  GetEnrichedContentListReturn,
+  HomepageContentItem,
+} from '@/src/types/database-overrides';
 import type { SortOption } from './content-filter.types';
 import type { HomePageClientProps } from './page-props.types';
 
-export type DisplayableContent = ContentItem | SearchResult;
+export type EnrichedContentItem = GetEnrichedContentListReturn[number];
+export type DisplayableContent =
+  | ContentItem
+  | SearchResult
+  | EnrichedContentItem
+  | HomepageContentItem;
 
 export interface ConfigCardProps {
   item: DisplayableContent;
@@ -83,7 +92,7 @@ export interface TrendingContentProps {
   period?: 'day' | 'week' | 'month' | 'all';
 }
 
-export type ContentListServerProps<T extends ContentItem = ContentItem> = {
+export type ContentListServerProps<T extends DisplayableContent = EnrichedContentItem> = {
   title: string;
   description: string;
   icon: string;
@@ -114,6 +123,7 @@ export type ContentSearchClientProps<T extends DisplayableContent = DisplayableC
   title: string;
   icon: string;
   type?: string;
+  category?: string;
 };
 
 export type ContentSidebarProps<T extends ContentItem = ContentItem> = {

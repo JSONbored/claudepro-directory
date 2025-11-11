@@ -5,10 +5,27 @@
  * Database-first: displays data from get_user_identities() RPC
  */
 
-import type { ComponentType } from 'react';
-import { UnifiedBadge } from '@/src/components/domain/unified-badge';
+import { type ComponentType, useState, useTransition } from 'react';
+import { UnifiedBadge } from '@/src/components/core/domain/unified-badge';
 import { Button } from '@/src/components/primitives/button';
-import { CheckCircle, DiscordBrandIcon, GithubBrandIcon, GoogleBrandIcon } from '@/src/lib/icons';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/src/components/primitives/dialog';
+import { unlinkOAuthProvider } from '@/src/lib/actions/user.actions';
+import {
+  AlertTriangle,
+  CheckCircle,
+  DiscordBrandIcon,
+  GithubBrandIcon,
+  GoogleBrandIcon,
+} from '@/src/lib/icons';
+import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { errorToasts, successToasts } from '@/src/lib/utils/toast.utils';
 
 interface Identity {
   provider: string;
@@ -51,6 +68,10 @@ const PROVIDER_CONFIG: Record<
 };
 
 export function ConnectedAccountsClient({ identities }: ConnectedAccountsClientProps) {
+  const [isPending, startTransition] = useTransition();
+  const [unlinkDialogOpen, setUnlinkDialogOpen] = useState(false);
+  const [providerToUnlink, setProviderToUnlink] = useState<string | null>(null);
+
   const connectedProviders = new Set(identities.map((i) => i.provider));
   const availableProviders = Object.entries(PROVIDER_CONFIG);
 
@@ -60,18 +81,36 @@ export function ConnectedAccountsClient({ identities }: ConnectedAccountsClientP
     window.location.href = config.linkUrl;
   };
 
-  const handleUnlinkProvider = async (provider: string) => {
+  const openUnlinkDialog = (provider: string) => {
     if (connectedProviders.size <= 1) {
-      alert('You must keep at least one connected account to maintain access.');
+      errorToasts.actionFailed(
+        'unlink provider',
+        'You must keep at least one connected account to maintain access.'
+      );
       return;
     }
+    setProviderToUnlink(provider);
+    setUnlinkDialogOpen(true);
+  };
 
-    if (
-      confirm(`Are you sure you want to unlink your ${PROVIDER_CONFIG[provider]?.label} account?`)
-    ) {
-      // TODO: Implement unlink RPC function
-      alert('Unlinking not yet implemented - requires RPC function');
-    }
+  const handleUnlinkConfirm = () => {
+    if (!providerToUnlink) return;
+
+    startTransition(async () => {
+      const result = await unlinkOAuthProvider({ provider: providerToUnlink });
+
+      if (result?.data?.success) {
+        successToasts.actionCompleted('Provider unlinked');
+        setUnlinkDialogOpen(false);
+        setProviderToUnlink(null);
+        // Page will auto-revalidate via server action
+      } else {
+        errorToasts.actionFailed(
+          'unlink provider',
+          result?.data?.error || 'An unexpected error occurred'
+        );
+      }
+    });
   };
 
   return (
@@ -88,14 +127,14 @@ export function ConnectedAccountsClient({ identities }: ConnectedAccountsClientP
           >
             <div className="flex items-center gap-4">
               <div className="rounded-full border bg-accent/5 p-3">
-                <IconComponent className="h-6 w-6" />
+                <IconComponent className={UI_CLASSES.ICON_LG} />
               </div>
               <div>
                 <div className="flex items-center gap-2">
                   <h3 className="font-medium">{config.label}</h3>
                   {isConnected && (
                     <UnifiedBadge variant="base" style="default" className="gap-1">
-                      <CheckCircle className="h-3 w-3" />
+                      <CheckCircle className={UI_CLASSES.ICON_XS} />
                       Connected
                     </UnifiedBadge>
                   )}
@@ -117,7 +156,8 @@ export function ConnectedAccountsClient({ identities }: ConnectedAccountsClientP
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => handleUnlinkProvider(provider)}
+                    onClick={() => openUnlinkDialog(provider)}
+                    disabled={isPending}
                     className="text-destructive hover:bg-destructive/10"
                   >
                     Unlink
@@ -146,6 +186,38 @@ export function ConnectedAccountsClient({ identities }: ConnectedAccountsClientP
           <li>• Keep at least one provider connected to maintain access</li>
         </ul>
       </div>
+
+      {/* Unlink Confirmation Dialog */}
+      <Dialog open={unlinkDialogOpen} onOpenChange={setUnlinkDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="text-destructive" />
+              Unlink {providerToUnlink && PROVIDER_CONFIG[providerToUnlink]?.label} Account?
+            </DialogTitle>
+            <DialogDescription>
+              Are you sure you want to unlink your{' '}
+              {providerToUnlink && PROVIDER_CONFIG[providerToUnlink]?.label} account? You will no
+              longer be able to sign in using this provider.
+              <br />
+              <br />
+              You can re-link it later if needed.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setUnlinkDialogOpen(false)}
+              disabled={isPending}
+            >
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleUnlinkConfirm} disabled={isPending}>
+              {isPending ? 'Unlinking...' : 'Unlink Account'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

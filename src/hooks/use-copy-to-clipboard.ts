@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { TIME_CONSTANTS } from '@/src/lib/constants/timing';
+import { TIME_CONSTANTS } from '@/src/lib/constants';
 import { logger } from '@/src/lib/logger';
 
 export interface UseCopyToClipboardOptions {

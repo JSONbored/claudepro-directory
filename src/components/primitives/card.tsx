@@ -1,6 +1,7 @@
 import type * as React from 'react';
 import { memo } from 'react';
 
+import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
 
 const Card = memo(function Card({ className, ...props }: React.ComponentProps<'div'>) {
@@ -8,7 +9,8 @@ const Card = memo(function Card({ className, ...props }: React.ComponentProps<'d
     <div
       data-slot="card"
       className={cn(
-        'flex flex-col gap-6 rounded-xl border bg-card py-6 text-card-foreground shadow-sm',
+        UI_CLASSES.FLEX_COL_GAP_6,
+        'rounded-xl border bg-card py-6 text-card-foreground shadow-sm',
         className
       )}
       {...props}

@@ -1,6 +1,7 @@
 'use server';
 
 import { unstable_cache } from 'next/cache';
+import { cache } from 'react';
 import {
   FORM_FIELDS_CACHE_SECONDS,
   FORM_FIELDS_CACHE_TAG,
@@ -238,11 +239,9 @@ async function loadSubmissionFormConfig(): Promise<SubmissionFormConfig> {
   return config;
 }
 
-export const getSubmissionFormConfig = unstable_cache(
-  loadSubmissionFormConfig,
-  ['submission-form-config'],
-  {
+export const getSubmissionFormConfig = cache(async () => {
+  return unstable_cache(loadSubmissionFormConfig, ['submission-form-config'], {
     revalidate: FORM_FIELDS_CACHE_SECONDS,
     tags: [FORM_FIELDS_CACHE_TAG],
-  }
-);
+  })();
+});

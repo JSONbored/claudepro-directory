@@ -2,6 +2,7 @@
 
 import { Button } from '@/src/components/primitives/button';
 import { Search } from '@/src/lib/icons';
+import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 interface SearchTriggerProps {
   onClick?: () => void;
@@ -32,7 +33,9 @@ export function SearchTrigger({
         className={`group flex w-full max-w-md cursor-pointer items-center gap-3 rounded-lg border border-border bg-background px-4 py-2.5 text-muted-foreground transition-colors hover:border-border/80 hover:text-foreground ${className}
         `}
       >
-        <Search className="h-4 w-4 text-muted-foreground group-hover:text-foreground" />
+        <Search
+          className={`${UI_CLASSES.ICON_SM} text-muted-foreground ${UI_CLASSES.GROUP_HOVER_ACCENT}`}
+        />
         <span className={'flex-1 text-left text-sm'}>Search content...</span>
         {showShortcut && (
           <div className={'flex items-center gap-1 text-xs'}>
@@ -45,7 +48,7 @@ export function SearchTrigger({
 
   return (
     <Button variant={variant} onClick={onClick} className={`${sizeClasses[size]} ${className}`}>
-      <Search className="h-4 w-4" />
+      <Search className={UI_CLASSES.ICON_SM} />
       <span className="sr-only">Search</span>
       {showShortcut && size !== 'sm' && (
         <div className={'ml-2 flex items-center gap-1'}>

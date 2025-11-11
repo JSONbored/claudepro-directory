@@ -3,7 +3,7 @@
  */
 
 import { type NextRequest, NextResponse } from 'next/server';
-import { SECURITY_CONFIG } from '@/src/lib/constants/security';
+import { SECURITY_CONFIG } from '@/src/lib/constants';
 import { logger } from '@/src/lib/logger';
 import { createClient } from '@/src/lib/supabase/server';
 

@@ -55,7 +55,7 @@ We support security updates for the following versions:
 
 ### Automated Security
 
-- **GitHub Code Scanning**: Automated vulnerability detection on every push to `main` and `dev`
+- **GitHub Code Scanning**: Automated vulnerability detection on every push to `main`
 - **CodeQL Analysis**: Deep semantic code analysis for security issues
 - **Dependabot**: Automated dependency vulnerability alerts and updates
 - **Secret Scanning**: Prevents accidental credential commits

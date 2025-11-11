@@ -49,7 +49,6 @@ type InteractionType =
   | 'filter'
   | 'screenshot'
   | 'share'
-  | 'embed_generated'
   | 'download';
 
 function getContentItemUrl(category: string, slug: string): string {

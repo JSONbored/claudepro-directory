@@ -5,21 +5,21 @@
 
 import dynamicImport from 'next/dynamic';
 import { Suspense } from 'react';
+import { LazySection } from '@/src/components/core/infra/lazy-section';
 import { TopContributors } from '@/src/components/features/community/top-contributors';
 import { HomePageClient } from '@/src/components/features/home';
-import { LazySection } from '@/src/components/infra/lazy-section';
-import { LoadingSkeleton } from '@/src/components/primitives/loading-skeleton';
+import { HomePageLoading } from '@/src/lib/components/loading-factory';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 
 const RollingText = dynamicImport(
-  () => import('@/src/components/magic/rolling-text').then((mod) => mod.RollingText),
+  () => import('@/src/components/core/magic/rolling-text').then((mod) => mod.RollingText),
   {
     loading: () => <span className="text-accent">enthusiasts</span>,
   }
 );
 
 const NumberTicker = dynamicImport(
-  () => import('@/src/components/magic/number-ticker').then((mod) => mod.NumberTicker),
+  () => import('@/src/components/core/magic/number-ticker').then((mod) => mod.NumberTicker),
   {
     loading: () => <span className="font-semibold text-accent">0</span>,
   }
@@ -35,18 +35,14 @@ const UnifiedNewsletterCapture = dynamicImport(
   }
 );
 
-import { type CategoryId, getHomepageCategoryIds } from '@/src/lib/config/category-config';
-import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
+import { getHomepageCategoryIds } from '@/src/lib/config/category-config';
 import { logger } from '@/src/lib/logger';
 import { createAnonClient } from '@/src/lib/supabase/server-anon';
-import type { Tables } from '@/src/types/database.types';
+import type { GetHomepageCompleteReturn } from '@/src/types/database-overrides';
 
 export const metadata = generatePageMetadata('/');
 
-export const revalidate = 86400; // 24 hour ISR - fresh stats daily
-
-type CategoryMetadata = ContentItem & { category: CategoryId };
-type EnrichedMetadata = CategoryMetadata & { viewCount: number; copyCount: number };
+export const revalidate = false; // Static + on-demand ISR via content trigger
 
 interface HomePageProps {
   searchParams: Promise<{
@@ -56,26 +52,20 @@ interface HomePageProps {
 
 async function HomeContentSection({
   homepageContentData,
+  featuredJobs,
 }: {
-  homepageContentData: {
-    categoryData: Record<string, EnrichedMetadata[]>;
-    stats: Record<string, number>;
-    weekStart: string;
-  };
+  homepageContentData: GetHomepageCompleteReturn['content'];
+  featuredJobs: GetHomepageCompleteReturn['featured_jobs'];
 }) {
-  const categoryIds = getHomepageCategoryIds();
+  const categoryIds = getHomepageCategoryIds;
 
   try {
-    const enrichedData = homepageContentData;
-
-    const featuredByCategory = enrichedData.categoryData as Record<string, EnrichedMetadata[]>;
-    const initialData = enrichedData.categoryData as Record<string, unknown[]>;
-
     return (
       <HomePageClient
-        initialData={initialData as Record<string, ContentItem[]>}
-        featuredByCategory={featuredByCategory as Record<string, ContentItem[]>}
-        stats={enrichedData.stats}
+        initialData={homepageContentData.categoryData}
+        featuredByCategory={homepageContentData.categoryData}
+        stats={homepageContentData.stats}
+        featuredJobs={featuredJobs}
       />
     );
   } catch (error) {
@@ -83,16 +73,14 @@ async function HomeContentSection({
       'Homepage content section error',
       error instanceof Error ? error : new Error(String(error))
     );
-    const emptyData: Record<string, ContentItem[]> = {};
-    for (const id of categoryIds) {
-      emptyData[id] = [];
-    }
+    const emptyData: GetHomepageCompleteReturn['content']['categoryData'] = {};
 
     return (
       <HomePageClient
         initialData={emptyData}
         featuredByCategory={{}}
-        stats={Object.fromEntries(categoryIds.map((id) => [id, 0]))}
+        stats={Object.fromEntries(categoryIds.map((id: string) => [id, 0]))}
+        featuredJobs={[]}
       />
     );
   }
@@ -104,7 +92,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   // Consolidated homepage data: get_homepage_complete() returns everything (67% fewer DB calls)
   const supabase = createAnonClient();
   const { data: homepageData, error: homepageError } = await supabase.rpc('get_homepage_complete', {
-    p_category_ids: getHomepageCategoryIds(),
+    p_category_ids: [...getHomepageCategoryIds],
   });
 
   if (homepageError) {
@@ -115,14 +103,13 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   }
 
   // Extract member_count and top_contributors from consolidated response
-  type UserRow = Pick<Tables<'users'>, 'id' | 'slug' | 'name' | 'image' | 'bio' | 'work' | 'tier'>;
+  // Type-safe RPC return using centralized type definition
+  const homepageResult = homepageData as GetHomepageCompleteReturn | null;
 
-  const memberCount = homepageError
-    ? 0
-    : (homepageData as { member_count?: number })?.member_count || 0;
-  const topContributors = homepageError
-    ? []
-    : (homepageData as { top_contributors?: UserRow[] })?.top_contributors || [];
+  const memberCount = homepageError || !homepageResult ? 0 : homepageResult.member_count || 0;
+  const featuredJobs = homepageError || !homepageResult ? [] : homepageResult.featured_jobs || [];
+  const topContributors =
+    homepageError || !homepageResult ? [] : homepageResult.top_contributors || [];
 
   return (
     <div className={'min-h-screen bg-background'}>
@@ -139,11 +126,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
                 />
               </h1>
 
-              <p
-                className={
-                  'mx-auto max-w-3xl text-muted-foreground text-sm leading-relaxed sm:text-base lg:text-lg'
-                }
-              >
+              <p className="mx-auto max-w-3xl text-muted-foreground text-sm leading-relaxed sm:text-base lg:text-lg">
                 Join{' '}
                 <NumberTicker
                   value={memberCount}
@@ -159,23 +142,16 @@ export default async function HomePage({ searchParams }: HomePageProps) {
         </section>
 
         <div className={'relative'}>
-          <Suspense fallback={<LoadingSkeleton />}>
+          <Suspense fallback={<HomePageLoading />}>
             <HomeContentSection
               homepageContentData={
-                (
-                  homepageData as {
-                    content: {
-                      categoryData: Record<string, EnrichedMetadata[]>;
-                      stats: Record<string, number>;
-                      weekStart: string;
-                    };
-                  }
-                )?.content || {
+                homepageResult?.content || {
                   categoryData: {},
                   stats: {},
                   weekStart: '',
                 }
               }
+              featuredJobs={featuredJobs}
             />
           </Suspense>
         </div>

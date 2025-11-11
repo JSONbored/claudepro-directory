@@ -1,6 +1,7 @@
 import type * as React from 'react';
 
-import { baseBadgeVariants } from '@/src/components/domain/unified-badge';
+import { baseBadgeVariants } from '@/src/components/core/domain/unified-badge';
+import { ANIMATION_CONSTANTS } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
 
 /**
@@ -63,7 +64,7 @@ export function Announcement({
         'inline-flex items-center gap-2',
         'px-3 py-1.5',
         'text-sm',
-        'transition-all duration-200',
+        ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT,
         // Themed enhancements
         themed && ['shadow-sm hover:shadow-md', 'hover:scale-[1.02]', 'active:scale-[0.98]'],
         className

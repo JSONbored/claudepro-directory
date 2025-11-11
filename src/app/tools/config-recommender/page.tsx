@@ -19,7 +19,7 @@
 
 import type { Metadata } from 'next';
 import dynamic from 'next/dynamic';
-import { UnifiedBadge } from '@/src/components/domain/unified-badge';
+import { UnifiedBadge } from '@/src/components/core/domain/unified-badge';
 import {
   Card,
   CardContent,
@@ -38,7 +38,7 @@ const UnifiedNewsletterCapture = dynamic(
   }
 );
 
-import { QuizForm } from '@/src/components/tools/recommender/quiz-form';
+import { QuizForm } from '@/src/components/features/tools/recommender/quiz-form';
 import { BarChart, Clock, Sparkles, Target, Zap } from '@/src/lib/icons';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';

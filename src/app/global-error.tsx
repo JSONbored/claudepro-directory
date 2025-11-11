@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { logger } from '@/src/lib/logger';
+import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 export default function GlobalError({
   error,
@@ -33,9 +34,7 @@ export default function GlobalError({
             <button
               type="button"
               onClick={reset}
-              className={
-                'cursor-pointer rounded-md border-none bg-primary px-4 py-2 text-base text-primary-foreground transition-colors hover:bg-primary/90'
-              }
+              className={`cursor-pointer rounded-md border-none bg-primary ${UI_CLASSES.CONTAINER_PADDING_SM} text-base text-primary-foreground transition-colors hover:bg-primary/90`}
             >
               Reset Application
             </button>

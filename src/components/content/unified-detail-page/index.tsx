@@ -6,8 +6,9 @@
 import { Suspense } from 'react';
 import { JSONSectionRenderer } from '@/src/components/content/json-section-renderer';
 import { UnifiedContentSection } from '@/src/components/content/unified-content-section';
-import { UnifiedReview } from '@/src/components/domain/unified-review';
+import { UnifiedReview } from '@/src/components/core/domain/unified-review';
 import { UnifiedNewsletterCapture } from '@/src/components/features/growth/unified-newsletter-capture';
+import { RecentlyViewedSidebar } from '@/src/components/features/navigation/recently-viewed-sidebar';
 import {
   type CategoryId,
   getCategoryConfig,
@@ -34,8 +35,10 @@ export interface UnifiedDetailPageProps {
   item: ContentItem;
   relatedItems?: ContentItem[];
   viewCount?: number;
+  copyCount?: number;
   relatedItemsPromise?: Promise<ContentItem[]>;
   viewCountPromise?: Promise<number>;
+  collectionSections?: React.ReactNode;
 }
 
 async function ViewCountMetadata({
@@ -75,8 +78,10 @@ export async function UnifiedDetailPage({
   item,
   relatedItems = [],
   viewCount,
+  copyCount,
   relatedItemsPromise,
   viewCountPromise,
+  collectionSections,
 }: UnifiedDetailPageProps) {
   const config = await getCategoryConfig(item.category as CategoryId);
   const displayTitle = getDisplayTitle(item);
@@ -440,11 +445,13 @@ export async function UnifiedDetailPage({
 
       {/* Metadata - Stream view count if promise provided */}
       {viewCountPromise ? (
-        <Suspense fallback={<DetailMetadata item={item} viewCount={undefined} />}>
+        <Suspense
+          fallback={<DetailMetadata item={item} viewCount={undefined} copyCount={undefined} />}
+        >
           <ViewCountMetadata item={item} viewCountPromise={viewCountPromise} />
         </Suspense>
       ) : (
-        <DetailMetadata item={item} viewCount={viewCount} />
+        <DetailMetadata item={item} viewCount={viewCount} copyCount={copyCount} />
       )}
 
       {/* Main content */}
@@ -455,6 +462,9 @@ export async function UnifiedDetailPage({
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
           {/* Primary content */}
           <div className="space-y-8 lg:col-span-2">
+            {/* COLLECTIONS: Render collection-specific sections */}
+            {collectionSections}
+
             {/* GUIDES: Render structured sections from metadata using JSONSectionRenderer */}
             {guideSections && guideSections.length > 0 && (
               <JSONSectionRenderer
@@ -589,8 +599,9 @@ export async function UnifiedDetailPage({
             />
           </div>
 
-          {/* Sidebar - Stream related items if promise provided */}
+          {/* Sidebars - Related content + Recently Viewed */}
           <aside className="space-y-6 lg:sticky lg:top-24 lg:self-start">
+            {/* Detail Sidebar - Related content */}
             {relatedItemsPromise && config ? (
               <Suspense
                 fallback={
@@ -623,6 +634,9 @@ export async function UnifiedDetailPage({
                 }}
               />
             ) : null}
+
+            {/* Recently Viewed Sidebar */}
+            <RecentlyViewedSidebar />
           </aside>
         </div>
       </div>

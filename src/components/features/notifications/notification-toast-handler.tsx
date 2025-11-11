@@ -8,6 +8,7 @@ import { useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import { Bell } from '@/src/lib/icons';
 import { type NotificationStore, useNotificationStore } from '@/src/lib/stores/notification-store';
+import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 const SHOWN_KEY = 'notification-toasts-shown';
 
@@ -45,7 +46,7 @@ export function NotificationToastHandler() {
     if (toShow) {
       toast(toShow.title, {
         description: toShow.message,
-        icon: <Bell className="h-4 w-4" />,
+        icon: <Bell className={UI_CLASSES.ICON_SM} />,
         duration: 5000,
         action: toShow.action_label
           ? {

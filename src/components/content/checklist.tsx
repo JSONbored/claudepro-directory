@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { UnifiedBadge } from '@/src/components/domain/unified-badge';
+import { UnifiedBadge } from '@/src/components/core/domain/unified-badge';
 import {
   Card,
   CardContent,
@@ -48,9 +48,9 @@ export function Checklist(props: ChecklistProps) {
   };
 
   const typeIcons = {
-    prerequisites: <BookOpen className="h-5 w-5" />,
-    security: <AlertTriangle className="h-5 w-5" />,
-    testing: <CheckCircle className="h-5 w-5" />,
+    prerequisites: <BookOpen className={UI_CLASSES.ICON_MD} />,
+    security: <AlertTriangle className={UI_CLASSES.ICON_MD} />,
+    testing: <CheckCircle className={UI_CLASSES.ICON_MD} />,
   };
 
   return (
@@ -100,7 +100,7 @@ export function Checklist(props: ChecklistProps) {
                   }`}
                 >
                   {checkedItems.has(index) && (
-                    <CheckCircle className="h-3 w-3 text-primary-foreground" />
+                    <CheckCircle className={`${UI_CLASSES.ICON_XS} text-primary-foreground`} />
                   )}
                 </div>
               </button>

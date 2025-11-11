@@ -14,7 +14,7 @@
  */
 
 import { memo, useId } from 'react';
-import { UnifiedBadge } from '@/src/components/domain/unified-badge';
+import { UnifiedBadge } from '@/src/components/core/domain/unified-badge';
 import { Button } from '@/src/components/primitives/button';
 import { Label } from '@/src/components/primitives/label';
 import { ScrollArea } from '@/src/components/primitives/scroll-area';
