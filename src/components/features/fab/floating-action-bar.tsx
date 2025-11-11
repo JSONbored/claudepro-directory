@@ -38,14 +38,25 @@ export function FloatingActionBar({ threshold = 100 }: FloatingActionBarProps) {
   });
 
   // Speed dial actions config
-  const speedDialActions = createSpeedDialActions(unreadCount, () => {
-    try {
-      setIsExpanded(false); // Close speed dial when opening notifications
-      openNotificationSheet();
-    } catch (error) {
-      logger.error('[FloatingActionBar] Error opening notification sheet', error as Error);
+  const speedDialActions = createSpeedDialActions(
+    unreadCount,
+    () => {
+      try {
+        setIsExpanded(false); // Close speed dial when opening notifications
+        openNotificationSheet();
+      } catch (error) {
+        logger.error('[FloatingActionBar] Error opening notification sheet', error as Error);
+      }
+    },
+    () => {
+      try {
+        setIsExpanded(false); // Close speed dial on navigate
+        router.push('/submit');
+      } catch (error) {
+        logger.error('[FloatingActionBar] Error navigating to /submit', error as Error);
+      }
     }
-  });
+  );
 
   // Filter speed dial actions based on `show` property
   const visibleActions = speedDialActions.filter((action) => action.show !== false);

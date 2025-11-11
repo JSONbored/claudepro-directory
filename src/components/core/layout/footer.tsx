@@ -151,7 +151,7 @@ function FooterComponent() {
                   >
                     <Link
                       href={link.href}
-                      className={`link-accent-underline text-muted-foreground transition-colors hover:text-foreground ${RESPONSIVE_PATTERNS.TEXT_RESPONSIVE_MD}`}
+                      className={`link-accent-underline text-muted-foreground transition-colors hover:text-foreground ${UI_CLASSES.TEXT_XS}`}
                     >
                       {link.label}
                     </Link>
@@ -197,7 +197,7 @@ function FooterComponent() {
                   >
                     <Link
                       href={link.href}
-                      className={`inline-flex items-center gap-2 text-muted-foreground transition-colors hover:text-foreground ${RESPONSIVE_PATTERNS.TEXT_RESPONSIVE_MD}`}
+                      className={`inline-flex items-center gap-2 text-muted-foreground transition-colors hover:text-foreground ${UI_CLASSES.TEXT_XS}`}
                       aria-label={link.label}
                     >
                       {link.icon && <link.icon className={UI_CLASSES.ICON_SM} />}
@@ -244,7 +244,7 @@ function FooterComponent() {
                   >
                     <Link
                       href={link.href}
-                      className={`link-accent-underline text-muted-foreground transition-colors hover:text-foreground ${RESPONSIVE_PATTERNS.TEXT_RESPONSIVE_MD}`}
+                      className={`link-accent-underline text-muted-foreground transition-colors hover:text-foreground ${UI_CLASSES.TEXT_XS}`}
                     >
                       {link.label}
                     </Link>

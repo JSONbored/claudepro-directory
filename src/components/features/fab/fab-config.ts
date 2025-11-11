@@ -2,7 +2,7 @@
 
 /** FAB configuration for main button and speed dial actions */
 
-import { ArrowUp, Bell, Plus, Search } from '@/src/lib/icons';
+import { ArrowUp, Bell, FileText, Plus, Search } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import type { MainFABConfig, SpeedDialAction } from './fab.types';
 
@@ -48,8 +48,18 @@ export const createMainFABConfig = (onNavigate: () => void): MainFABConfig => ({
  */
 export const createSpeedDialActions = (
   unreadCount: number,
-  onNotificationsClick: () => void
+  onNotificationsClick: () => void,
+  onSubmitClick: () => void
 ): SpeedDialAction[] => [
+  // Submit - All breakpoints
+  {
+    id: 'submit',
+    icon: FileText,
+    label: 'Submit Content',
+    onClick: onSubmitClick,
+    show: true,
+  },
+
   // Search - All breakpoints
   {
     id: 'search',
