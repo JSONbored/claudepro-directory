@@ -10,6 +10,7 @@ import { useEffect, useState, useTransition } from 'react';
 import { usePostCopyEmail } from '@/src/components/core/infra/providers/post-copy-email-provider';
 import { Button } from '@/src/components/primitives/button';
 import { useButtonSuccess } from '@/src/hooks/use-button-success';
+import { useConfetti } from '@/src/hooks/use-confetti';
 import { useCopyToClipboard } from '@/src/hooks/use-copy-to-clipboard';
 import { trackUsage } from '@/src/lib/actions/content.actions';
 import { addBookmark, removeBookmark } from '@/src/lib/actions/user.actions';
@@ -626,6 +627,7 @@ function BookmarkButton({
   const [isBookmarked, setIsBookmarked] = useState(initialBookmarked);
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
+  const { celebrateBookmark } = useConfetti();
 
   // Note: Validate content type - only actual categories, NOT subcategories
   // Subcategories (tutorials, workflows, etc.) should be bookmarked as 'guides'
@@ -666,6 +668,8 @@ function BookmarkButton({
           if (result?.data?.success) {
             setIsBookmarked(true);
             toasts.success.bookmarkAdded();
+            // Celebrate with confetti! 🎉
+            celebrateBookmark();
           }
         }
 

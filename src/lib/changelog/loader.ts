@@ -1,7 +1,4 @@
-/**
- * Changelog Loader - Database-First Architecture
- * Calls get_changelog_entries() RPC - all enrichment in PostgreSQL.
- */
+/** Changelog entries loader via get_changelog_entries() RPC */
 
 import { unstable_cache } from 'next/cache';
 import { cache } from 'react';

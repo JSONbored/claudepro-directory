@@ -7,10 +7,12 @@ import { renderAsync } from 'npm:@react-email/components@0.0.22';
 import React from 'npm:react@18.3.1';
 import { Resend } from 'npm:resend@4.0.0';
 import { AUTH_HOOK_ENV, RESEND_ENV, validateEnvironment } from '../_shared/email-config.ts';
+import { CollectionShared } from '../_shared/templates/collection-shared.tsx';
 import { JobApproved } from '../_shared/templates/job-approved.tsx';
 import { JobExpired } from '../_shared/templates/job-expired.tsx';
 import { JobExpiring } from '../_shared/templates/job-expiring.tsx';
 import { JobPaymentConfirmed } from '../_shared/templates/job-payment-confirmed.tsx';
+import { JobPosted } from '../_shared/templates/job-posted.tsx';
 import { JobRejected } from '../_shared/templates/job-rejected.tsx';
 import { JobSubmitted } from '../_shared/templates/job-submitted.tsx';
 // React Email Templates
@@ -204,7 +206,7 @@ async function handleSubscribe(req: Request): Promise<Response> {
     );
 
     const { data: emailData, error: emailError } = await resend.emails.send({
-      from: 'ClaudePro Directory <hello@mail.claudepro.directory>',
+      from: 'Claude Pro Directory <hello@mail.claudepro.directory>',
       to: normalizedEmail,
       subject: 'Welcome to Claude Pro Directory! 🎉',
       html,
@@ -253,7 +255,7 @@ async function handleWelcome(req: Request): Promise<Response> {
     const html = await renderAsync(React.createElement(NewsletterWelcome, { email }));
 
     const { data, error } = await resend.emails.send({
-      from: 'ClaudePro Directory <hello@mail.claudepro.directory>',
+      from: 'Claude Pro Directory <hello@mail.claudepro.directory>',
       to: email,
       subject: 'Welcome to Claude Pro Directory! 🎉',
       html,
@@ -287,7 +289,7 @@ async function handleWelcome(req: Request): Promise<Response> {
   );
 
   const { data, error } = await resend.emails.send({
-    from: 'ClaudePro Directory <hello@mail.claudepro.directory>',
+    from: 'Claude Pro Directory <hello@mail.claudepro.directory>',
     to: verified.user.email,
     subject: 'Welcome to Claude Pro Directory! 🎉',
     html,
@@ -303,13 +305,108 @@ async function handleTransactional(req: Request): Promise<Response> {
   const payload = await req.json();
   const { type, email, data: emailData } = payload;
 
-  // TODO: Implement transactional email templates (job-posted, collection-shared)
-  console.log('Transactional email:', { type, email, emailData });
+  // Validate required fields
+  if (!(type && email)) {
+    return badRequestResponse('Missing required fields: type, email');
+  }
 
-  return successResponse({ sent: false, reason: 'not_implemented', type });
+  let template: React.ReactElement | null = null;
+  let subject = '';
+
+  // Route to appropriate template based on type
+  switch (type) {
+    case 'job-posted':
+      if (!(emailData?.jobTitle && emailData?.company && emailData?.jobSlug)) {
+        return badRequestResponse('Missing required job data');
+      }
+      template = React.createElement(JobPosted, {
+        jobTitle: emailData.jobTitle,
+        company: emailData.company,
+        userEmail: email,
+        jobSlug: emailData.jobSlug,
+      });
+      subject = `Your job posting "${emailData.jobTitle}" is now live!`;
+      break;
+
+    case 'collection-shared':
+      if (
+        !(
+          emailData?.collectionName &&
+          emailData?.senderName &&
+          emailData?.collectionSlug &&
+          emailData?.senderSlug &&
+          emailData?.itemCount
+        )
+      ) {
+        return badRequestResponse('Missing required collection data');
+      }
+      template = React.createElement(CollectionShared, {
+        collectionName: emailData.collectionName,
+        collectionDescription: emailData.collectionDescription || undefined,
+        senderName: emailData.senderName,
+        recipientEmail: email,
+        collectionSlug: emailData.collectionSlug,
+        senderSlug: emailData.senderSlug,
+        itemCount: emailData.itemCount,
+      });
+      subject = `${emailData.senderName} shared a collection with you`;
+      break;
+
+    default:
+      return badRequestResponse(`Unknown transactional email type: ${type}`);
+  }
+
+  // Render and send email
+  const html = await renderAsync(template);
+
+  // Determine from address based on type
+  const fromEmail =
+    type === 'job-posted'
+      ? 'Claude Pro Directory <jobs@mail.claudepro.directory>'
+      : 'Claude Pro Directory <community@mail.claudepro.directory>';
+
+  const { data, error } = await resend.emails.send({
+    from: fromEmail,
+    to: email,
+    subject,
+    html,
+  });
+
+  if (error) {
+    console.error('Failed to send transactional email:', error);
+    throw new Error(error.message);
+  }
+
+  return successResponse({ sent: true, id: data?.id, type });
 }
 
 async function handleDigest(): Promise<Response> {
+  // OPTION 1: Rate limiting protection - check last successful run timestamp
+  const { data: lastRunData } = await supabaseServiceRole
+    .from('app_settings')
+    .select('setting_value, updated_at')
+    .eq('setting_key', 'last_digest_email_timestamp')
+    .single();
+
+  if (lastRunData?.setting_value) {
+    const lastRunTimestamp = new Date(lastRunData.setting_value as string);
+    const hoursSinceLastRun = (Date.now() - lastRunTimestamp.getTime()) / (1000 * 60 * 60);
+
+    if (hoursSinceLastRun < 24) {
+      const nextAllowedAt = new Date(lastRunTimestamp.getTime() + 24 * 60 * 60 * 1000);
+      console.log(
+        `[RATE LIMITED] Last digest sent ${hoursSinceLastRun.toFixed(1)} hours ago. Next allowed at ${nextAllowedAt.toISOString()}`
+      );
+
+      return successResponse({
+        skipped: true,
+        reason: 'rate_limited',
+        hoursSinceLastRun: Math.round(hoursSinceLastRun * 10) / 10,
+        nextAllowedAt: nextAllowedAt.toISOString(),
+      });
+    }
+  }
+
   const previousWeekStart = getPreviousWeekStart();
 
   const { data: digest, error: digestError } = await supabaseServiceRole.rpc('get_weekly_digest', {
@@ -333,6 +430,21 @@ async function handleDigest(): Promise<Response> {
   }
 
   const results = await sendBatchDigest(subscribers, digestData);
+
+  // OPTION 1: Update last successful run timestamp after sending
+  const currentTimestamp = new Date().toISOString();
+  await supabaseServiceRole.from('app_settings').upsert({
+    setting_key: 'last_digest_email_timestamp',
+    setting_value: currentTimestamp,
+    setting_type: 'string',
+    environment: 'production',
+    enabled: true,
+    description: 'Timestamp of last successful weekly digest email send (used for rate limiting)',
+    category: 'email',
+    version: 1,
+  });
+
+  console.log(`[DIGEST SENT] Updated last_digest_email_timestamp to ${currentTimestamp}`);
 
   // BetterStack heartbeat
   const heartbeatUrl = Deno.env.get('BETTERSTACK_HEARTBEAT_WEEKLY_TASKS');
@@ -363,9 +475,9 @@ async function handleSequence(): Promise<Response> {
   let failedCount = 0;
 
   const STEP_SUBJECTS: Record<number, string> = {
-    2: 'Getting Started with ClaudePro Directory',
+    2: 'Getting Started with Claude Pro Directory',
     3: 'Power User Tips for Claude',
-    4: 'Join the ClaudePro Community',
+    4: 'Join the Claude Pro Community',
     5: 'Stay Engaged with ClaudePro',
   };
 
@@ -382,7 +494,7 @@ async function handleSequence(): Promise<Response> {
       const html = await renderAsync(React.createElement(Template, { email }));
 
       const result = await resend.emails.send({
-        from: 'ClaudePro Directory <noreply@claudepro.directory>',
+        from: 'Claude Pro Directory <noreply@claudepro.directory>',
         to: email,
         subject: STEP_SUBJECTS[step],
         html,
@@ -463,7 +575,7 @@ async function sendBatchDigest(subscribers: string[], digestData: WeeklyDigestDa
     try {
       const result = await resend.batch.send(
         batch.map((email) => ({
-          from: 'ClaudePro Directory <hello@mail.claudepro.directory>',
+          from: 'Claude Pro Directory <hello@mail.claudepro.directory>',
           to: email,
           subject: `This Week in Claude: ${digestData.weekOf}`,
           html,
@@ -502,7 +614,7 @@ async function handleJobSubmitted(req: Request): Promise<Response> {
   );
 
   const { data, error } = await resend.emails.send({
-    from: 'ClaudePro Directory <jobs@mail.claudepro.directory>',
+    from: 'Claude Pro Directory <jobs@mail.claudepro.directory>',
     to: userEmail,
     subject: `Job Submitted: ${jobTitle}`,
     html,
@@ -531,7 +643,7 @@ async function handleJobApproved(req: Request): Promise<Response> {
   );
 
   const { data, error } = await resend.emails.send({
-    from: 'ClaudePro Directory <jobs@mail.claudepro.directory>',
+    from: 'Claude Pro Directory <jobs@mail.claudepro.directory>',
     to: userEmail,
     subject: `Job Approved: ${jobTitle}`,
     html,
@@ -552,7 +664,7 @@ async function handleJobRejected(req: Request): Promise<Response> {
   );
 
   const { data, error } = await resend.emails.send({
-    from: 'ClaudePro Directory <jobs@mail.claudepro.directory>',
+    from: 'Claude Pro Directory <jobs@mail.claudepro.directory>',
     to: userEmail,
     subject: `Action Required: Update Your Job Posting - ${jobTitle}`,
     html,
@@ -581,7 +693,7 @@ async function handleJobExpiring(req: Request): Promise<Response> {
   );
 
   const { data, error } = await resend.emails.send({
-    from: 'ClaudePro Directory <jobs@mail.claudepro.directory>',
+    from: 'Claude Pro Directory <jobs@mail.claudepro.directory>',
     to: userEmail,
     subject: `Expiring Soon: ${jobTitle} (${daysRemaining} days remaining)`,
     html,
@@ -612,7 +724,7 @@ async function handleJobExpired(req: Request): Promise<Response> {
   );
 
   const { data, error } = await resend.emails.send({
-    from: 'ClaudePro Directory <jobs@mail.claudepro.directory>',
+    from: 'Claude Pro Directory <jobs@mail.claudepro.directory>',
     to: userEmail,
     subject: `Job Listing Expired: ${jobTitle}`,
     html,
@@ -653,7 +765,7 @@ async function handleJobPaymentConfirmed(req: Request): Promise<Response> {
   );
 
   const { data, error } = await resend.emails.send({
-    from: 'ClaudePro Directory <jobs@mail.claudepro.directory>',
+    from: 'Claude Pro Directory <jobs@mail.claudepro.directory>',
     to: userEmail,
     subject: `Your Job is Live: ${jobTitle}`,
     html,

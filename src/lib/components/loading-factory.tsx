@@ -329,6 +329,49 @@ export function DefaultLoading() {
 }
 
 /**
+ * Inline spinner for loading states within components
+ * Replaces custom animate-spin implementations
+ *
+ * @example
+ * ```tsx
+ * <InlineSpinner size="sm" message="Loading..." />
+ * <InlineSpinner size="md" /> // No message
+ * ```
+ */
+export function InlineSpinner({
+  size = 'md',
+  message,
+  className = '',
+}: {
+  size?: 'sm' | 'md' | 'lg';
+  message?: string;
+  className?: string;
+}) {
+  const sizeClasses = {
+    sm: 'h-4 w-4',
+    md: 'h-6 w-6',
+    lg: 'h-8 w-8',
+  };
+
+  const borderClasses = {
+    sm: 'border-2',
+    md: 'border-2',
+    lg: 'border-3',
+  };
+
+  return (
+    <div className={`flex items-center gap-2 ${className}`}>
+      <output
+        className={`${sizeClasses[size]} ${borderClasses[size]} animate-spin rounded-full border-primary border-t-transparent`}
+        aria-label={message || 'Loading'}
+        aria-live="polite"
+      />
+      {message && <span className="text-muted-foreground text-sm">{message}</span>}
+    </div>
+  );
+}
+
+/**
  * Export preset variants for common use cases
  */
 export const LoadingPresets = {

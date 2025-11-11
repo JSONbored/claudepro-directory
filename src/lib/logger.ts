@@ -1,7 +1,4 @@
-/**
- * Pino Logger - Lightweight structured logging for Vercel
- * Replaces custom 461 LOC logger with 45 LOC pino wrapper
- */
+/** Pino-based structured logger for production and development */
 
 import pino from 'pino';
 

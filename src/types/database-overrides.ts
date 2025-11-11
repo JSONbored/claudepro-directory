@@ -197,6 +197,10 @@ export type GetUserProfileReturn = {
     website: string | null;
     tier: string | null;
     created_at: string;
+    company: {
+      name: string;
+      logo: string | null;
+    } | null;
   };
   stats: {
     followerCount: number;

@@ -1,19 +1,6 @@
-/**
- * Unified Badge System
- *
- * Production-grade badge component with discriminated union pattern.
- * Consolidates badge.tsx, config-badge.tsx, sponsored-badge.tsx, and new-indicator.tsx
- *
- * Architecture:
- * - Type-safe discriminated unions (compiler enforces valid prop combinations)
- * - class-variance-authority for consistent styling
- * - Zero runtime overhead
- * - Excellent tree-shaking
- *
- * @module components/ui/unified-badge
- */
-
 'use client';
+
+/** Unified badge component with type-safe variants for categories, sources, status, and tags */
 
 import { cva } from 'class-variance-authority';
 import { motion } from 'motion/react';
@@ -51,9 +38,6 @@ const baseBadgeVariants = cva(
   }
 );
 
-/**
- * Category badge styles (from config-badge.tsx)
- */
 const categoryBadgeStyles = {
   rules: 'badge-category-rules',
   mcp: 'badge-category-mcp',
@@ -66,9 +50,6 @@ const categoryBadgeStyles = {
   skills: 'badge-category-skills',
 } as const;
 
-/**
- * Source badge styles (from config-badge.tsx)
- */
 const sourceBadgeStyles = {
   official: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
   partner: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
@@ -78,9 +59,6 @@ const sourceBadgeStyles = {
   other: 'bg-gray-500/10 text-gray-400 border-gray-500/20',
 } as const;
 
-/**
- * Status badge styles (from config-badge.tsx)
- */
 const statusBadgeStyles = {
   active: 'bg-accent text-accent-foreground shadow-lg shadow-primary/25',
   trending: 'bg-primary/10 text-primary border-primary/20',

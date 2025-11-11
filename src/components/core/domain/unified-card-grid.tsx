@@ -11,6 +11,7 @@ import { memo, useEffect } from 'react';
 import { ConfigCard } from '@/src/components/core/domain/config-card';
 import { ErrorBoundary } from '@/src/components/core/infra/error-boundary';
 import { useInfiniteScroll } from '@/src/hooks/use-infinite-scroll';
+import { InlineSpinner } from '@/src/lib/components/loading-factory';
 import type { DisplayableContent } from '@/src/lib/types/component.types';
 
 import { UI_CLASSES } from '@/src/lib/ui-constants';
@@ -112,12 +113,7 @@ function UnifiedCardGridComponent(props: UnifiedCardGridProps) {
   if (loading) {
     return (
       <output className="flex items-center justify-center py-12" aria-live="polite">
-        <div className="flex items-center gap-2">
-          <div
-            className={`${UI_CLASSES.ICON_SM} animate-spin rounded-full border-2 border-primary border-t-transparent`}
-          />
-          <p className="text-muted-foreground text-sm">{loadingMessage}</p>
-        </div>
+        <InlineSpinner size="sm" message={loadingMessage} />
       </output>
     );
   }
@@ -157,14 +153,7 @@ function UnifiedCardGridComponent(props: UnifiedCardGridProps) {
           aria-live="polite"
           aria-busy={isLoading}
         >
-          {isLoading && (
-            <div className="flex items-center gap-2">
-              <div
-                className={`${UI_CLASSES.ICON_SM} animate-spin rounded-full border-2 border-primary border-t-transparent`}
-              />
-              <p className="text-muted-foreground text-sm">{loadingMessage}</p>
-            </div>
-          )}
+          {isLoading && <InlineSpinner size="sm" message={loadingMessage} />}
         </div>
       )}
     </section>

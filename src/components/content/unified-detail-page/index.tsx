@@ -8,6 +8,7 @@ import { JSONSectionRenderer } from '@/src/components/content/json-section-rende
 import { UnifiedContentSection } from '@/src/components/content/unified-content-section';
 import { UnifiedReview } from '@/src/components/core/domain/unified-review';
 import { UnifiedNewsletterCapture } from '@/src/components/features/growth/unified-newsletter-capture';
+import { RecentlyViewedSidebar } from '@/src/components/features/navigation/recently-viewed-sidebar';
 import {
   type CategoryId,
   getCategoryConfig,
@@ -598,8 +599,9 @@ export async function UnifiedDetailPage({
             />
           </div>
 
-          {/* Sidebar - Stream related items if promise provided */}
+          {/* Sidebars - Related content + Recently Viewed */}
           <aside className="space-y-6 lg:sticky lg:top-24 lg:self-start">
+            {/* Detail Sidebar - Related content */}
             {relatedItemsPromise && config ? (
               <Suspense
                 fallback={
@@ -632,6 +634,9 @@ export async function UnifiedDetailPage({
                 }}
               />
             ) : null}
+
+            {/* Recently Viewed Sidebar */}
+            <RecentlyViewedSidebar />
           </aside>
         </div>
       </div>

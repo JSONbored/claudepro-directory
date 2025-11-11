@@ -128,7 +128,24 @@ export function DetailHeaderActions({
 
   // Handle action clicks based on type
   const handleActionClick = (action: SerializableAction) => {
-    // Generic toast for all action types
+    // Handle download action - check for storage_url
+    if (action.type === 'download' && 'storage_url' in item && item.storage_url) {
+      window.location.href = item.storage_url;
+      toasts.raw.success('Download started!', {
+        description: `Downloading ${item.title || item.slug} package...`,
+      });
+
+      trackInteraction({
+        interaction_type: 'download',
+        content_type: category,
+        content_slug: item.slug,
+      }).catch(() => {
+        // Intentional
+      });
+      return;
+    }
+
+    // Generic toast for other action types
     toasts.raw.success(`${action.label}`, {
       description: `Copy the ${typeName.toLowerCase()} content and follow the installation instructions.`,
     });

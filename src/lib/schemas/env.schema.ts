@@ -1,8 +1,4 @@
-/**
- * Production-grade environment variable validation
- * Ensures all environment variables are properly typed and validated at runtime
- * This prevents runtime errors from missing or malformed environment variables
- */
+/** Runtime environment variable validation schema */
 
 import { z } from 'zod';
 import { nonEmptyString, urlString } from '@/src/lib/schemas/primitives';

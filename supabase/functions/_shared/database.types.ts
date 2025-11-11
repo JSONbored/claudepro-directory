@@ -268,6 +268,42 @@ export interface Database {
         Args: { p_tool_name: string };
         Returns: string;
       };
+      // Sitemap functions
+      generate_sitemap_xml: {
+        Args: { p_base_url?: string };
+        Returns: string;
+      };
+      get_site_urls: {
+        Args: never;
+        Returns: {
+          changefreq: string;
+          lastmod: string;
+          path: string;
+          priority: number;
+        }[];
+      };
+      // Content API functions
+      get_api_content_full: {
+        Args: { p_category: string; p_slug: string; p_base_url?: string };
+        Returns: string; // Pre-stringified JSON
+      };
+      generate_markdown_export: {
+        Args: {
+          p_category: string;
+          p_slug: string;
+          p_include_metadata?: boolean;
+          p_include_footer?: boolean;
+        };
+        Returns: Json;
+      };
+      generate_item_llms_txt: {
+        Args: { p_category: string; p_slug: string };
+        Returns: string;
+      };
+      generate_readme_data: {
+        Args: never;
+        Returns: Json;
+      };
     };
     Tables: {
       content_submissions: {
@@ -506,6 +542,7 @@ export interface Database {
           discovery_metadata: Json | null;
           metadata: Json | null;
           git_hash: string | null;
+          storage_url: string | null;
         };
       };
       companies: {

@@ -28,7 +28,8 @@ type QuizQuestion = {
   }>;
 };
 
-import { ArrowLeft, ArrowRight, Loader2, Sparkles } from '@/src/lib/icons';
+import { InlineSpinner } from '@/src/lib/components/loading-factory';
+import { ArrowLeft, ArrowRight, Sparkles } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { DIMENSIONS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { toasts } from '@/src/lib/utils/toast.utils';
@@ -178,7 +179,7 @@ export function QuizForm() {
   if (!quizConfig) {
     return (
       <div className="flex items-center justify-center p-12">
-        <Loader2 className={`${UI_CLASSES.ICON_XL} animate-spin text-primary`} />
+        <InlineSpinner size="lg" />
       </div>
     );
   }
@@ -370,10 +371,7 @@ export function QuizForm() {
                 className={DIMENSIONS.MIN_W_INPUT}
               >
                 {isPending ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Generating...
-                  </>
+                  <InlineSpinner size="sm" message="Generating..." />
                 ) : (
                   <>
                     <Sparkles className={UI_CLASSES.ICON_SM_LEADING} />

@@ -37,6 +37,7 @@ import { LayoutContent } from '@/src/components/core/layout/layout-content';
 
 import { UmamiScript } from '@/src/components/core/shared/umami-script';
 import { APP_CONFIG } from '@/src/lib/constants';
+import { featureFlags } from '@/src/lib/flags';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 
 // Self-hosted fonts - no external requests, faster FCP, GDPR compliant
@@ -143,6 +144,9 @@ export default async function RootLayout({
   // Fetch announcement data server-side using anonymous client (ISR-safe)
   const announcement = await getActiveAnnouncement();
 
+  // Fetch feature flags server-side for A/B testing and gradual rollouts
+  const useFloatingActionBar = await featureFlags.floatingActionBar();
+
   return (
     <html
       lang="en"
@@ -191,7 +195,12 @@ export default async function RootLayout({
         >
           <PostCopyEmailProvider>
             <ErrorBoundary>
-              <LayoutContent announcement={announcement}>{children}</LayoutContent>
+              <LayoutContent
+                announcement={announcement}
+                useFloatingActionBar={useFloatingActionBar}
+              >
+                {children}
+              </LayoutContent>
             </ErrorBoundary>
             <Toaster />
             <NotificationToastHandler />

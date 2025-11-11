@@ -1,8 +1,4 @@
-/**
- * Category Configuration - Database-First Architecture
- * Single source of truth: category_configs table in PostgreSQL
- * Config generated at build time by scripts/build/generate-category-config.ts
- */
+/** Category configuration loader - database-first architecture */
 
 import { cache } from 'react';
 import {
