@@ -409,10 +409,16 @@ async function revalidateChangelogPage(): Promise<void> {
     return;
   }
 
-  const response = await fetch(
-    `${SITE_URL}/api/revalidate?path=/changelog&secret=${REVALIDATE_SECRET}`,
-    { method: 'POST' }
-  );
+  const response = await fetch(`${SITE_URL}/api/revalidate`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      secret: REVALIDATE_SECRET,
+      category: 'changelog',
+    }),
+  });
 
   if (!response.ok) {
     const errorText = await response.text();
