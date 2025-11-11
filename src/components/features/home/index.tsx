@@ -60,7 +60,12 @@ const UnifiedSearch = dynamic(
   }
 );
 
-function HomePageClientComponent({ initialData, featuredByCategory, stats }: HomePageClientProps) {
+function HomePageClientComponent({
+  initialData,
+  featuredByCategory,
+  stats,
+  featuredJobs = [],
+}: HomePageClientProps) {
   const [allConfigs, setAllConfigs] = useState<ContentItem[]>([]);
   const [isLoadingAllConfigs, setIsLoadingAllConfigs] = useState(false);
   const [hasMoreAllConfigs, setHasMoreAllConfigs] = useState(true);
@@ -343,6 +348,7 @@ function HomePageClientComponent({ initialData, featuredByCategory, stats }: Hom
           <LazyFeaturedSections
             categories={featuredByCategory || initialData}
             categoryConfigs={categoryConfigs}
+            featuredJobs={featuredJobs}
           />
         )}
 

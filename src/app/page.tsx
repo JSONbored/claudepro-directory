@@ -52,8 +52,10 @@ interface HomePageProps {
 
 async function HomeContentSection({
   homepageContentData,
+  featuredJobs,
 }: {
   homepageContentData: GetHomepageCompleteReturn['content'];
+  featuredJobs: GetHomepageCompleteReturn['featured_jobs'];
 }) {
   const categoryIds = getHomepageCategoryIds;
 
@@ -63,6 +65,7 @@ async function HomeContentSection({
         initialData={homepageContentData.categoryData}
         featuredByCategory={homepageContentData.categoryData}
         stats={homepageContentData.stats}
+        featuredJobs={featuredJobs}
       />
     );
   } catch (error) {
@@ -77,6 +80,7 @@ async function HomeContentSection({
         initialData={emptyData}
         featuredByCategory={{}}
         stats={Object.fromEntries(categoryIds.map((id: string) => [id, 0]))}
+        featuredJobs={[]}
       />
     );
   }
@@ -103,6 +107,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   const homepageResult = homepageData as GetHomepageCompleteReturn | null;
 
   const memberCount = homepageError || !homepageResult ? 0 : homepageResult.member_count || 0;
+  const featuredJobs = homepageError || !homepageResult ? [] : homepageResult.featured_jobs || [];
   const topContributors =
     homepageError || !homepageResult ? [] : homepageResult.top_contributors || [];
 
@@ -146,6 +151,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
                   weekStart: '',
                 }
               }
+              featuredJobs={featuredJobs}
             />
           </Suspense>
         </div>

@@ -14,7 +14,21 @@ import type { Database as DatabaseGenerated } from './database.types';
  */
 type DatabaseWithViewOverrides = {
   public: {
-    Tables: DatabaseGenerated['public']['Tables'];
+    Tables: Omit<DatabaseGenerated['public']['Tables'], 'jobs'> & {
+      jobs: {
+        Row: Omit<
+          DatabaseGenerated['public']['Tables']['jobs']['Row'],
+          'tags' | 'benefits' | 'requirements'
+        > & {
+          tags: string[];
+          benefits: string[];
+          requirements: string[];
+        };
+        Insert: DatabaseGenerated['public']['Tables']['jobs']['Insert'];
+        Update: DatabaseGenerated['public']['Tables']['jobs']['Update'];
+        Relationships: DatabaseGenerated['public']['Tables']['jobs']['Relationships'];
+      };
+    };
     Enums: DatabaseGenerated['public']['Enums'];
     Functions: Omit<DatabaseGenerated['public']['Functions'], 'submit_content_for_review'> & {
       submit_content_for_review: {
@@ -268,6 +282,8 @@ export type GetHomepageCompleteReturn = {
     weekStart: string;
   };
   member_count: number;
+  jobs_count: number;
+  featured_jobs: Array<Tables<'jobs'>>;
   top_contributors: Array<
     Pick<Tables<'users'>, 'id' | 'slug' | 'name' | 'image' | 'bio' | 'work' | 'tier'>
   >;

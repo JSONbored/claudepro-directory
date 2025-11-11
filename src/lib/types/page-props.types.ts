@@ -26,4 +26,6 @@ export interface HomePageClientProps {
   featuredByCategory?: GetHomepageCompleteReturn['content']['categoryData'];
   /** Content category statistics */
   stats?: GetHomepageCompleteReturn['content']['stats'];
+  /** Featured jobs from database (includes placeholders if no real jobs) */
+  featuredJobs?: GetHomepageCompleteReturn['featured_jobs'];
 }
