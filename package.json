@@ -80,7 +80,7 @@
     "@radix-ui/react-use-controllable-state": "^1.2.2",
     "@radix-ui/react-visually-hidden": "^1.2.4",
     "@react-email/components": "^0.5.7",
-    "@react-email/render": "^1.4.0",
+    "@react-email/render": "^2.0.0",
     "@supabase/ssr": "^0.7.0",
     "@supabase/supabase-js": "^2.81.1",
     "@tailwindcss/postcss": "^4.1.17",
