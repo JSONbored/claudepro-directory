@@ -98,7 +98,7 @@
     "flags": "^4.0.2",
     "geist": "^1.5.1",
     "html2canvas-pro": "^1.5.13",
-    "lucide-react": "^0.546.0",
+    "lucide-react": "^0.553.0",
     "marked": "^16.4.2",
     "motion": "^12.23.24",
     "next": "16.0.1",
