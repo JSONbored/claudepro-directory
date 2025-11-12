@@ -1,0 +1,54 @@
+/**
+ * Tab Animations and Interactions
+ * Enhances the tabbed detail layout with smooth transitions and accessibility
+ */
+
+/* Tab panel transitions with fade-in and slide-up */
+[role="tabpanel"] {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Tab list scroll snap on mobile for better UX */
+@media (max-width: 768px) {
+  [role="tablist"] {
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  [role="tab"] {
+    scroll-snap-align: start;
+  }
+}
+
+/* Enhanced focus states for keyboard navigation accessibility */
+[role="tab"]:focus-visible {
+  outline: 2px solid hsl(var(--accent));
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Active tab indicator animation */
+[role="tab"][data-state="active"] {
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Smooth hover transitions */
+[role="tab"]:hover {
+  transition: all 0.15s ease-in-out;
+}
+
+/* Tab panel content fade-in is already handled above, but ensure no layout shift */
+[role="tabpanel"][data-state="inactive"] {
+  display: none;
+}

@@ -3,9 +3,10 @@
 /**
  * Tabbed Detail Layout - Client component for tabbed content navigation
  * Maintains all content in DOM for SEO while providing tabbed UX
+ * Enhanced with mobile swipe gestures for improved touch UX
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/primitives/ui/tabs';
 import { trackInteraction } from '@/src/lib/edge/client';
 import type { TabbedDetailLayoutProps } from '@/src/lib/types/detail-tabs.types';
@@ -23,6 +24,8 @@ export function TabbedDetailLayout({ item, config, tabs, sectionData }: TabbedDe
   }, [tabs]);
 
   const [activeTab, setActiveTab] = useState<string>(getInitialTab);
+  const touchStartX = useRef<number>(0);
+  const touchEndX = useRef<number>(0);
 
   // Sync tab state with URL hash
   useEffect(() => {
@@ -65,6 +68,53 @@ export function TabbedDetailLayout({ item, config, tabs, sectionData }: TabbedDe
     [item.category, item.slug]
   );
 
+  // Mobile swipe gesture navigation
+  const goToNextTab = useCallback(() => {
+    const currentIndex = tabs.findIndex((tab) => tab.id === activeTab);
+    const nextTab = tabs[currentIndex + 1];
+    if (nextTab) {
+      handleTabChange(nextTab.id);
+    }
+  }, [activeTab, tabs, handleTabChange]);
+
+  const goToPreviousTab = useCallback(() => {
+    const currentIndex = tabs.findIndex((tab) => tab.id === activeTab);
+    const prevTab = tabs[currentIndex - 1];
+    if (prevTab) {
+      handleTabChange(prevTab.id);
+    }
+  }, [activeTab, tabs, handleTabChange]);
+
+  // Touch event handlers for swipe gestures
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    if (touch) {
+      touchStartX.current = touch.clientX;
+    }
+  }, []);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    if (touch) {
+      touchEndX.current = touch.clientX;
+    }
+  }, []);
+
+  const handleTouchEnd = useCallback(() => {
+    const swipeThreshold = 50; // Minimum swipe distance
+    const swipeDistance = touchStartX.current - touchEndX.current;
+
+    if (Math.abs(swipeDistance) < swipeThreshold) return;
+
+    if (swipeDistance > 0) {
+      // Swiped left - go to next tab
+      goToNextTab();
+    } else {
+      // Swiped right - go to previous tab
+      goToPreviousTab();
+    }
+  }, [goToNextTab, goToPreviousTab]);
+
   return (
     <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
       {/* Sticky tab bar */}
@@ -96,8 +146,13 @@ export function TabbedDetailLayout({ item, config, tabs, sectionData }: TabbedDe
         </div>
       </div>
 
-      {/* Tab content - all rendered in DOM for SEO */}
-      <div className="container mx-auto px-4 py-8">
+      {/* Tab content - all rendered in DOM for SEO, with swipe gesture support */}
+      <div
+        className="container mx-auto px-4 py-8"
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+      >
         {tabs.map((tab) => (
           <TabsContent
             key={tab.id}
