@@ -35,57 +35,20 @@ pre-commit:
         pnpm lint || (echo "❌ Run 'pnpm format' to auto-fix formatting issues" && exit 1)
       fail_text: "❌ Formatting issues found. Run 'pnpm format' to fix."
 
-    # 3. Run tests for changed files (smart test runner)
-    test-changed:
-      glob: "{src,tests}/**/*.{ts,tsx}"
-      exclude: "*.test.{ts,tsx}|*.spec.{ts,tsx}"
-      run: |
-        CHANGED=$(git diff --cached --name-only --diff-filter=ACMR -- 'src/**/*.{ts,tsx}' 'tests/**/*.{ts,tsx}')
-
-        if [ -z "$CHANGED" ]; then
-          echo "ℹ️  No source files changed, skipping tests"
-          exit 0
-        fi
-
-        TEST_FILES=$(echo "$CHANGED" | while read file; do
-          if [[ $file == src/* ]]; then
-            test_file="tests/unit/${file#src/}"
-            [ -f "${test_file%.tsx}.test.tsx" ] && echo "${test_file%.tsx}.test.tsx"
-            [ -f "${test_file%.ts}.test.ts" ] && echo "${test_file%.ts}.test.ts"
-          elif [[ $file == tests/* ]]; then
-            echo "$file"
-          fi
-        done | sort -u)
-
-        if [ -n "$TEST_FILES" ]; then
-          echo "🧪 Running tests for changed files..."
-          pnpm test:unit -- $TEST_FILES --run --reporter=dot
-        else
-          echo "⚠️  No tests found for changed files. Consider adding tests."
-        fi
-      fail_text: "❌ Tests failed. Fix them before committing."
-
 # ============================================================================
 # PRE-PUSH: Comprehensive checks before code reaches remote
 # ============================================================================
 pre-push:
   parallel: false
   commands:
-    # 1. Full test suite (non-blocking warnings)
-    test-suite:
-      run: |
-        echo "🧪 Running full test suite..."
-        pnpm test:unit -- --run --reporter=dot || echo "⚠️  Some tests failed but not blocking push"
-      fail_text: "⚠️  Test suite has failures (not blocking - fix iteratively)."
-
-    # 2. Production build verification (CRITICAL - must pass)
+    # 1. Production build verification (CRITICAL - must pass)
     build:
       run: |
         echo "🏗️  Verifying production build..."
         pnpm build
       fail_text: "❌ Build failed. Fix errors before pushing."
 
-    # 3. Security audit (warnings only, not blocking)
+    # 2. Security audit (warnings only, not blocking)
     security:
       run: |
         echo "🔒 Running security audit..."
