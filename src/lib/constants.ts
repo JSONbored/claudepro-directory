@@ -252,21 +252,25 @@ const SEARCH_CONFIG_FALLBACK = {
 } as const;
 
 /**
- * Get search configuration from database
- * Falls back to hardcoded values if database unavailable
+ * Get search configuration from Statsig Dynamic Configs
+ * Falls back to hardcoded values if Statsig unavailable
  */
 export async function getSearchConfig() {
-  const [debounceMs, threshold, maxResults] = await Promise.all([
-    getConfigValue<number>('search.debounce_ms', SEARCH_CONFIG_FALLBACK.debounceMs),
-    getConfigValue<number>('search.threshold', SEARCH_CONFIG_FALLBACK.threshold),
-    getConfigValue<number>('search.max_results', SEARCH_CONFIG_FALLBACK.maxResults),
-  ]);
-
-  return {
-    debounceMs,
-    threshold,
-    maxResults,
-  };
+  try {
+    const { searchConfigs } = await import('@/src/lib/flags');
+    const config = await searchConfigs();
+    return {
+      debounceMs: (config['search.debounce_ms'] as number) ?? SEARCH_CONFIG_FALLBACK.debounceMs,
+      threshold: (config['search.threshold'] as number) ?? SEARCH_CONFIG_FALLBACK.threshold,
+      maxResults: (config['search.max_results'] as number) ?? SEARCH_CONFIG_FALLBACK.maxResults,
+    };
+  } catch {
+    return {
+      debounceMs: SEARCH_CONFIG_FALLBACK.debounceMs,
+      threshold: SEARCH_CONFIG_FALLBACK.threshold,
+      maxResults: SEARCH_CONFIG_FALLBACK.maxResults,
+    };
+  }
 }
 
 // Export fallback for build-time usage (static generation)
@@ -619,3 +623,84 @@ export const ANIMATION_DURATIONS = {
     default: 15000, // 15 seconds (from border-beam component)
   },
 } as const;
+
+/**
+ * Get polling intervals from Statsig Dynamic Configs
+ * Falls back to hardcoded POLLING_INTERVALS if unavailable
+ */
+export async function getPollingIntervals() {
+  try {
+    const { pollingConfigs } = await import('@/src/lib/flags');
+    const config = await pollingConfigs();
+    return {
+      realtime: (config['polling.realtime_ms'] as number) ?? POLLING_INTERVALS.realtime,
+      badges: (config['polling.badges_ms'] as number) ?? POLLING_INTERVALS.badges,
+      status: {
+        health: (config['polling.status.health_ms'] as number) ?? POLLING_INTERVALS.status.health,
+        api: (config['polling.status.api_ms'] as number) ?? POLLING_INTERVALS.status.api,
+        database:
+          (config['polling.status.database_ms'] as number) ?? POLLING_INTERVALS.status.database,
+      },
+      analytics: {
+        views: (config['polling.analytics.views_ms'] as number) ?? POLLING_INTERVALS.analytics.views,
+        stats: (config['polling.analytics.stats_ms'] as number) ?? POLLING_INTERVALS.analytics.stats,
+      },
+    };
+  } catch {
+    return POLLING_INTERVALS;
+  }
+}
+
+/**
+ * Get animation durations from Statsig Dynamic Configs
+ * Falls back to hardcoded ANIMATION_DURATIONS if unavailable
+ */
+export async function getAnimationDurations() {
+  try {
+    const { animationConfigs } = await import('@/src/lib/flags');
+    const config = await animationConfigs();
+    return {
+      ticker: {
+        default:
+          (config['animation.ticker.default_ms'] as number) ?? ANIMATION_DURATIONS.ticker.default,
+        fast: (config['animation.ticker.fast_ms'] as number) ?? ANIMATION_DURATIONS.ticker.fast,
+        slow: (config['animation.ticker.slow_ms'] as number) ?? ANIMATION_DURATIONS.ticker.slow,
+      },
+      stagger: {
+        fast: (config['animation.stagger.fast_ms'] as number) ?? ANIMATION_DURATIONS.stagger.fast,
+        medium:
+          (config['animation.stagger.medium_ms'] as number) ?? ANIMATION_DURATIONS.stagger.medium,
+        slow: (config['animation.stagger.slow_ms'] as number) ?? ANIMATION_DURATIONS.stagger.slow,
+      },
+      beam: {
+        default:
+          (config['animation.beam.default_ms'] as number) ?? ANIMATION_DURATIONS.beam.default,
+      },
+    };
+  } catch {
+    return ANIMATION_DURATIONS;
+  }
+}
+
+/**
+ * Get timeout configurations from Statsig Dynamic Configs
+ * Falls back to hardcoded TIMEOUTS if unavailable
+ */
+export async function getTimeouts() {
+  try {
+    const { timeoutConfigs } = await import('@/src/lib/flags');
+    const config = await timeoutConfigs();
+    return {
+      api: TIMEOUTS.api, // Keep API timeouts hardcoded (not in Statsig yet)
+      ui: {
+        debounce: (config['timeout.ui.debounce_ms'] as number) ?? TIMEOUTS.ui.debounce,
+        tooltip: (config['timeout.ui.tooltip_ms'] as number) ?? TIMEOUTS.ui.tooltip,
+        animation: (config['timeout.ui.animation_ms'] as number) ?? TIMEOUTS.ui.animation,
+        transition: (config['timeout.ui.transition_ms'] as number) ?? TIMEOUTS.ui.transition,
+      },
+      test: TIMEOUTS.test, // Keep test timeouts hardcoded (not in Statsig yet)
+    };
+  } catch {
+    return TIMEOUTS;
+  }
+}

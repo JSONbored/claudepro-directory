@@ -117,3 +117,33 @@ export const NEWSLETTER_CTA_CONFIG = {
   buttonText: 'Subscribe',
   footerText: 'No spam. Unsubscribe anytime.',
 } as const;
+
+/**
+ * Get homepage featured categories from Statsig Dynamic Configs
+ * Falls back to hardcoded HOMEPAGE_FEATURED_CATEGORIES if unavailable
+ */
+export async function getHomepageFeaturedCategories(): Promise<readonly CategoryId[]> {
+  try {
+    const { homepageConfigs } = await import('@/src/lib/flags');
+    const config = await homepageConfigs();
+    const categories = config['homepage.featured_categories'] as string[];
+    return (categories ?? HOMEPAGE_FEATURED_CATEGORIES) as readonly CategoryId[];
+  } catch {
+    return HOMEPAGE_FEATURED_CATEGORIES;
+  }
+}
+
+/**
+ * Get homepage tab categories from Statsig Dynamic Configs
+ * Falls back to hardcoded HOMEPAGE_TAB_CATEGORIES if unavailable
+ */
+export async function getHomepageTabCategories(): Promise<readonly string[]> {
+  try {
+    const { homepageConfigs } = await import('@/src/lib/flags');
+    const config = await homepageConfigs();
+    const categories = config['homepage.tab_categories'] as string[];
+    return (categories ?? HOMEPAGE_TAB_CATEGORIES) as readonly string[];
+  } catch {
+    return HOMEPAGE_TAB_CATEGORIES;
+  }
+}

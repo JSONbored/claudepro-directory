@@ -235,3 +235,125 @@ export const pricingConfigs = createDynamicConfigGroup('pricing_configs', {
   'pricing.launch_discount_enabled': true,
   'pricing.launch_discount_end_date': '2025-12-31',
 });
+
+/**
+ * Polling Configs - Polling intervals for real-time updates
+ * Controls how frequently the app checks for updates
+ * Usage: const config = await pollingConfigs(); const interval = config['polling.badges_ms'];
+ */
+export const pollingConfigs = createDynamicConfigGroup('polling_configs', {
+  'polling.realtime_ms': 1000,
+  'polling.badges_ms': 30000,
+  'polling.status.health_ms': 60000,
+  'polling.status.api_ms': 30000,
+  'polling.status.database_ms': 120000,
+  'polling.analytics.views_ms': 60000,
+  'polling.analytics.stats_ms': 300000,
+});
+
+/**
+ * Animation Configs - Animation durations and delays
+ * Controls animation timing for consistent UX
+ * Usage: const config = await animationConfigs(); const duration = config['animation.ticker.default_ms'];
+ */
+export const animationConfigs = createDynamicConfigGroup('animation_configs', {
+  'animation.ticker.default_ms': 1500,
+  'animation.ticker.fast_ms': 1000,
+  'animation.ticker.slow_ms': 2000,
+  'animation.stagger.fast_ms': 100,
+  'animation.stagger.medium_ms': 200,
+  'animation.stagger.slow_ms': 300,
+  'animation.beam.default_ms': 15000,
+});
+
+/**
+ * Timeout Configs - UI interaction timeouts
+ * Controls debounce, tooltips, and transition timing
+ * Usage: const config = await timeoutConfigs(); const debounce = config['timeout.ui.debounce_ms'];
+ */
+export const timeoutConfigs = createDynamicConfigGroup('timeout_configs', {
+  'timeout.ui.debounce_ms': 150,
+  'timeout.ui.tooltip_ms': 300,
+  'timeout.ui.animation_ms': 300,
+  'timeout.ui.transition_ms': 200,
+});
+
+/**
+ * Toast Configs - Toast notification messages
+ * Enables copy testing and message updates without deploys
+ * Usage: const config = await toastConfigs(); const message = config['toast.copied'];
+ */
+export const toastConfigs = createDynamicConfigGroup('toast_configs', {
+  'toast.profile_updated': 'Profile updated successfully',
+  'toast.signed_out': 'Signed out successfully',
+  'toast.submission_created_title': 'Submission Created!',
+  'toast.submission_created_description': 'Your {contentType} has been submitted for review.',
+  'toast.template_applied_title': 'Template Applied!',
+  'toast.template_applied_description': 'Form has been pre-filled. Customize as needed.',
+  'toast.copied': 'Copied to clipboard!',
+  'toast.link_copied': 'Link copied to clipboard!',
+  'toast.code_copied': 'Code copied to clipboard!',
+  'toast.screenshot_copied': 'Screenshot copied & downloaded!',
+  'toast.bookmark_added': 'Bookmark added',
+  'toast.bookmark_removed': 'Bookmark removed',
+  'toast.changes_saved': 'Changes saved successfully',
+  'toast.save_failed': 'Failed to save. Please try again.',
+  'toast.required_fields': 'Please fill in all required fields',
+  'toast.auth_required': 'Please sign in to continue',
+  'toast.permission_denied': 'You do not have permission to perform this action',
+  'toast.submission_error_title': 'Submission Error',
+  'toast.submission_error_description': 'Failed to submit. Please try again.',
+  'toast.network_error': 'Network error. Please check your connection and try again.',
+  'toast.server_error': 'Server error. Please try again later.',
+  'toast.rate_limited': 'Too many requests. Please wait a moment and try again.',
+  'toast.screenshot_failed': 'Failed to generate screenshot',
+  'toast.profile_update_failed': 'Failed to update profile',
+  'toast.vote_update_failed': 'Failed to update vote',
+  'toast.coming_soon': 'Coming soon!',
+  'toast.redirecting': 'Redirecting...',
+  'toast.unsaved_changes': 'You have unsaved changes',
+  'toast.slow_connection': 'Slow connection detected. This may take longer than usual.',
+  'toast.saving': 'Saving...',
+  'toast.processing': 'Processing...',
+});
+
+/**
+ * Homepage Configs - Homepage layout and categories
+ * Controls which categories appear on homepage
+ * Usage: const config = await homepageConfigs(); const categories = config['homepage.featured_categories'];
+ */
+export const homepageConfigs = createDynamicConfigGroup('homepage_configs', {
+  'homepage.featured_categories': [
+    'agents',
+    'mcp',
+    'commands',
+    'rules',
+    'skills',
+    'collections',
+    'hooks',
+    'statuslines',
+  ] as string[],
+  'homepage.tab_categories': [
+    'all',
+    'agents',
+    'mcp',
+    'commands',
+    'rules',
+    'hooks',
+    'statuslines',
+    'collections',
+    'guides',
+    'community',
+  ] as string[],
+});
+
+/**
+ * Search Configs - Search functionality settings
+ * Controls search behavior and performance
+ * Usage: const config = await searchConfigs(); const debounce = config['search.debounce_ms'];
+ */
+export const searchConfigs = createDynamicConfigGroup('search_configs', {
+  'search.debounce_ms': 150,
+  'search.threshold': 0.3,
+  'search.max_results': 50,
+});
