@@ -12,7 +12,7 @@ import { motion, useScroll, useTransform } from 'motion/react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { memo, useEffect, useState } from 'react';
-import { UnifiedButton } from '@/src/components/core/domain/unified-button';
+import { GitHubStarsButton } from '@/src/components/buttons/external/github-stars-button';
 import { HeyClaudeLogo } from '@/src/components/core/layout/heyclaude-logo';
 import { NavigationCommandMenu } from '@/src/components/core/layout/navigation-command-menu';
 import { NavigationDesktop } from '@/src/components/core/layout/navigation-desktop';
@@ -165,8 +165,7 @@ const NavigationComponent = ({ hideCreateButton = false }: NavigationProps = {})
                     <DiscordIcon className={UI_CLASSES.ICON_XS} />
                   </Button>
 
-                  <UnifiedButton
-                    variant="github-stars"
+                  <GitHubStarsButton
                     className={`hidden md:flex ${UI_CLASSES.TEXT_XS}`}
                   />
 

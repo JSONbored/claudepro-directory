@@ -5,7 +5,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { UnifiedButton } from '@/src/components/core/domain/unified-button';
+import { AuthSignOutButton } from '@/src/components/buttons/auth/auth-signout-button';
 import { Button } from '@/src/components/primitives/button';
 import { Card } from '@/src/components/primitives/card';
 import {
@@ -110,7 +110,7 @@ export default async function AccountLayout({ children }: { children: React.Reac
                 View Profile
               </Link>
             )}
-            <UnifiedButton variant="auth-signout" />
+            <AuthSignOutButton />
           </div>
         </div>
       </div>

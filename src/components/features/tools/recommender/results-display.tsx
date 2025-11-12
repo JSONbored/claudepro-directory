@@ -7,9 +7,9 @@
 
 import Link from 'next/link';
 import { useState, useTransition } from 'react';
+import { BookmarkButton } from '@/src/components/buttons/interaction/bookmark-button';
 import { BaseCard } from '@/src/components/core/domain/base-card';
 import { UnifiedBadge } from '@/src/components/core/domain/unified-badge';
-import { UnifiedButton } from '@/src/components/core/domain/unified-button';
 import { Button } from '@/src/components/primitives/button';
 import {
   Card,
@@ -397,8 +397,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                   )}
 
                   <div className="${POSITION_PATTERNS.ABSOLUTE_BOTTOM_RIGHT_OFFSET} z-10">
-                    <UnifiedButton
-                      variant="bookmark"
+                    <BookmarkButton
                       contentType={result.category}
                       contentSlug={result.slug}
                       initialBookmarked={false}

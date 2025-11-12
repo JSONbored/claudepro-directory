@@ -1,6 +1,7 @@
 import Link from 'next/link';
+import { JobDeleteButton } from '@/src/components/buttons/jobs/job-delete-button';
+import { JobToggleButton } from '@/src/components/buttons/jobs/job-toggle-button';
 import { UnifiedBadge } from '@/src/components/core/domain/unified-badge';
-import { UnifiedButton } from '@/src/components/core/domain/unified-button';
 import { Button } from '@/src/components/primitives/button';
 import {
   Card,
@@ -182,14 +183,13 @@ export default async function MyJobsPage() {
                   )}
 
                   {job.status === 'active' && (
-                    <UnifiedButton
-                      variant="job-toggle"
+                    <JobToggleButton
                       jobId={job.id}
-                      currentStatus={job.status ?? 'draft'}
+                      currentStatus={job.status ?? 'paused'}
                     />
                   )}
 
-                  <UnifiedButton variant="job-delete" jobId={job.id} />
+                  <JobDeleteButton jobId={job.id} />
                 </div>
               </CardContent>
             </Card>

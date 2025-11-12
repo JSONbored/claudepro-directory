@@ -15,9 +15,10 @@
 
 import { useRouter } from 'next/navigation';
 import { memo, useCallback } from 'react';
+import { BookmarkButton } from '@/src/components/buttons/interaction/bookmark-button';
+import { CardCopyButton } from '@/src/components/buttons/interaction/card-copy-button';
 import { BaseCard } from '@/src/components/core/domain/base-card';
 import { UnifiedBadge } from '@/src/components/core/domain/unified-badge';
-import { UnifiedButton } from '@/src/components/core/domain/unified-button';
 import { UnifiedReview } from '@/src/components/core/domain/unified-review';
 import { BorderBeam } from '@/src/components/core/magic/border-beam';
 import { Button } from '@/src/components/primitives/button';
@@ -362,8 +363,7 @@ export const ConfigCard = memo(
 
               {/* Bookmark button with count overlay */}
               <div className="relative">
-                <UnifiedButton
-                  variant="bookmark"
+                <BookmarkButton
                   contentType={item.category || 'agents'}
                   contentSlug={item.slug}
                 />
@@ -379,8 +379,7 @@ export const ConfigCard = memo(
               {/* Copy button with count overlay */}
               {behavior.showCopyButton && (
                 <div className="relative">
-                  <UnifiedButton
-                    variant="card-copy"
+                  <CardCopyButton
                     url={`${typeof window !== 'undefined' ? window.location.origin : ''}${targetPath}`}
                     category={(item.category || 'agents') as CategoryId}
                     slug={item.slug}

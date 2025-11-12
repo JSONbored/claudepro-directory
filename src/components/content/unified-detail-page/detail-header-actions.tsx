@@ -14,8 +14,10 @@
 
 import { motion } from 'motion/react';
 import { useRouter } from 'next/navigation';
+import { CopyLLMsButton } from '@/src/components/buttons/content/copy-llms-button';
+import { CopyMarkdownButton } from '@/src/components/buttons/content/copy-markdown-button';
+import { DownloadMarkdownButton } from '@/src/components/buttons/content/download-markdown-button';
 import { UnifiedBadge } from '@/src/components/core/domain/unified-badge';
-import { UnifiedButton } from '@/src/components/core/domain/unified-button';
 import type { CopyType } from '@/src/components/features/growth/unified-newsletter-capture';
 import { Button } from '@/src/components/primitives/button';
 import { useCopyWithEmailCapture } from '@/src/hooks/use-copy-with-email-capture';
@@ -218,8 +220,7 @@ export function DetailHeaderActions({
           )}
 
           {/* Copy for AI button */}
-          <UnifiedButton
-            variant="copy-llms"
+          <CopyLLMsButton
             llmsTxtUrl={`/${category}/${item.slug}/llms.txt`}
             category={category}
             slug={item.slug}
@@ -229,8 +230,7 @@ export function DetailHeaderActions({
           />
 
           {/* Copy as Markdown button */}
-          <UnifiedButton
-            variant="copy-markdown"
+          <CopyMarkdownButton
             category={category}
             slug={item.slug}
             buttonVariant="outline"
@@ -239,8 +239,7 @@ export function DetailHeaderActions({
           />
 
           {/* Download Markdown button */}
-          <UnifiedButton
-            variant="download-markdown"
+          <DownloadMarkdownButton
             category={category}
             slug={item.slug}
             buttonVariant="outline"
