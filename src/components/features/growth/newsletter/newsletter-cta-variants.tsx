@@ -50,7 +50,7 @@ export type NewsletterCTAVariantProps =
 
 export function NewsletterCTAVariant(props: NewsletterCTAVariantProps) {
   const { variant, source, className, category, headline, description } = props;
-  const { count } = useNewsletterCount();
+  const { count, isLoading } = useNewsletterCount();
 
   // A/B test: CTA copy variant (aggressive vs social_proof vs value_focused)
   const ctaVariant = use(newsletterExperiments.ctaVariant());
@@ -102,7 +102,15 @@ export function NewsletterCTAVariant(props: NewsletterCTAVariantProps) {
           <p className="text-muted-foreground/80 text-sm">{NEWSLETTER_CTA_CONFIG.footerText}</p>
           <p className="flex items-center gap-1.5 text-muted-foreground/60 text-xs">
             <span className="inline-flex h-2 w-2 animate-pulse rounded-full bg-green-500" />
-            Join {subscriberCount} subscribers
+            {isLoading ? (
+              <span className="inline-flex items-center gap-1.5">
+                Join
+                <span className="inline-block h-3 w-12 animate-pulse rounded bg-muted-foreground/20" />
+                subscribers
+              </span>
+            ) : (
+              `Join ${subscriberCount} subscribers`
+            )}
           </p>
         </div>
       </div>
