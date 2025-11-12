@@ -19,8 +19,8 @@ import { BookmarkButton } from '@/src/components/core/buttons/interaction/bookma
 import { CardCopyButton } from '@/src/components/core/buttons/interaction/card-copy-button';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { BaseCard } from '@/src/components/core/domain/cards/content-card-base';
-import { UnifiedReview } from '@/src/components/core/domain/reviews/content-review-card';
 import { BorderBeam } from '@/src/components/primitives/animation/border-beam';
+import { ReviewRatingCompact } from '@/src/components/primitives/feedback/review-rating-compact';
 import { Button } from '@/src/components/primitives/ui/button';
 import { useCopyToClipboard } from '@/src/hooks/use-copy-to-clipboard';
 import { addBookmark } from '@/src/lib/actions/user.actions';
@@ -319,8 +319,7 @@ export const ConfigCard = memo(
                   }}
                   className="cursor-default border-0 bg-transparent p-0"
                 >
-                  <UnifiedReview
-                    variant="rating-compact"
+                  <ReviewRatingCompact
                     average={ratingData.average}
                     count={ratingData.count}
                     size="sm"

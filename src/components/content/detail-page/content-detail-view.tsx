@@ -6,7 +6,7 @@
 import { Suspense } from 'react';
 import { UnifiedContentSection } from '@/src/components/content/detail-section-variants';
 import { JSONSectionRenderer } from '@/src/components/content/json-to-sections';
-import { UnifiedReview } from '@/src/components/core/domain/reviews/content-review-card';
+import { ReviewListSection } from '@/src/components/core/domain/reviews/review-list-section';
 import { UnifiedNewsletterCapture } from '@/src/components/features/growth/newsletter-capture';
 import { RecentlyViewedSidebar } from '@/src/components/features/navigation/recently-viewed-sidebar';
 import {
@@ -582,11 +582,7 @@ export async function UnifiedDetailPage({
             {/* Reviews & Ratings Section */}
             {isValidCategory(item.category) && (
               <div className="mt-12 border-t pt-12">
-                <UnifiedReview
-                  variant="section"
-                  contentType={item.category}
-                  contentSlug={item.slug}
-                />
+                <ReviewListSection contentType={item.category} contentSlug={item.slug} />
               </div>
             )}
 
