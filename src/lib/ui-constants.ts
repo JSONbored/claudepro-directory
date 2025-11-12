@@ -791,6 +791,7 @@ export const POSITION_PATTERNS = {
  * </motion.div>
  * ```
  */
+/** Motion animation constants - spring physics tunable via Statsig animationConfigs */
 export const ANIMATION_CONSTANTS = {
   // ----- Spring Physics -----
   SPRING_DEFAULT: { type: 'spring' as const, stiffness: 400, damping: 17 },
@@ -979,11 +980,7 @@ export const BADGE_COLORS = {
 // SECTION 9: CARD BEHAVIORS & ICON MAPPING
 // ==========================================
 
-/**
- * CARD_BEHAVIORS - Card behavior configuration
- *
- * Defines different card interaction patterns (copy vs link actions).
- */
+/** Card behavior patterns - defaults tunable via Statsig componentConfigs */
 export const CARD_BEHAVIORS = {
   default: {
     primaryAction: 'copy' as const,

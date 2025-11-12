@@ -146,6 +146,10 @@ export default async function RootLayout({
 
   // Fetch feature flags server-side for A/B testing and gradual rollouts
   const useFloatingActionBar = await featureFlags.floatingActionBar();
+  const fabSubmitAction = await featureFlags.fabSubmitAction();
+  const fabSearchAction = await featureFlags.fabSearchAction();
+  const fabScrollToTop = await featureFlags.fabScrollToTop();
+  const fabNotifications = await featureFlags.fabNotifications();
 
   // Fetch newsletter experiment variants server-side
   const footerDelayVariant = await newsletterExperiments.footerDelay();
@@ -202,6 +206,12 @@ export default async function RootLayout({
               <LayoutContent
                 announcement={announcement}
                 useFloatingActionBar={useFloatingActionBar}
+                fabFlags={{
+                  showSubmit: fabSubmitAction,
+                  showSearch: fabSearchAction,
+                  showScrollToTop: fabScrollToTop,
+                  showNotifications: fabNotifications,
+                }}
                 footerDelayVariant={footerDelayVariant}
                 ctaVariant={ctaVariant}
               >

@@ -124,6 +124,14 @@ export const featureFlags = {
 
   // UI Components
   floatingActionBar: createFeatureFlag('floating_action_bar'),
+  fabSubmitAction: createFeatureFlag('fab_submit_action'),
+  fabSearchAction: createFeatureFlag('fab_search_action'),
+  fabScrollToTop: createFeatureFlag('fab_scroll_to_top'),
+  fabNotifications: createFeatureFlag('fab_notifications'),
+
+  // Infrastructure - Logging
+  loggerConsole: createFeatureFlag('logger_console'),
+  loggerVerbose: createFeatureFlag('logger_verbose'),
 };
 
 /**
@@ -179,6 +187,23 @@ export const appSettings = createDynamicConfigGroup('app_settings', {
   'search.enabled': true,
   'search.min_query_length': 2,
   'search.max_results': 50,
+});
+
+/**
+ * Component Configs - Component-level UI behavior settings
+ * Controls card behaviors, FAB actions, and other component-level configs
+ * Usage: const config = await componentConfigs(); const showCopy = config['cards.show_copy_button'];
+ */
+export const componentConfigs = createDynamicConfigGroup('component_configs', {
+  'cards.show_copy_button': true,
+  'cards.show_bookmark': true,
+  'cards.show_view_count': true,
+  'cards.show_copy_count': true,
+  'cards.show_rating': true,
+  'fab.show_submit_button': true,
+  'fab.show_search_button': true,
+  'fab.show_scroll_to_top': true,
+  'fab.show_notifications': true,
 });
 
 /**
@@ -275,7 +300,28 @@ export const animationConfigs = createDynamicConfigGroup('animation_configs', {
   'animation.stagger.medium_ms': 200,
   'animation.stagger.slow_ms': 300,
   'animation.beam.default_ms': 15000,
-  'animation.card_stagger_ms': 50, // Phase 3
+  'animation.card_stagger_ms': 50,
+  // Spring physics
+  'animation.spring.default.stiffness': 400,
+  'animation.spring.default.damping': 17,
+  'animation.spring.bouncy.stiffness': 500,
+  'animation.spring.bouncy.damping': 20,
+  'animation.spring.smooth.stiffness': 300,
+  'animation.spring.smooth.damping': 25,
+  // Confetti animations
+  'confetti.success.particle_count': 50,
+  'confetti.success.spread': 60,
+  'confetti.success.ticks': 150,
+  'confetti.celebration.particle_count': 100,
+  'confetti.celebration.spread': 70,
+  'confetti.celebration.ticks': 200,
+  'confetti.milestone.particle_count': 30,
+  'confetti.milestone.spread': 100,
+  'confetti.milestone.ticks': 200,
+  'confetti.milestone.scalar': 1.2,
+  'confetti.subtle.particle_count': 30,
+  'confetti.subtle.spread': 40,
+  'confetti.subtle.ticks': 100,
 });
 
 /**
@@ -288,7 +334,6 @@ export const timeoutConfigs = createDynamicConfigGroup('timeout_configs', {
   'timeout.ui.tooltip_ms': 300,
   'timeout.ui.animation_ms': 300,
   'timeout.ui.transition_ms': 200,
-  // Phase 3 - Interaction timing
   'timeout.prefetch_hover_ms': 100,
   'timeout.button_success_ms': 2000,
   'timeout.clipboard_reset_ms': 2000,
@@ -298,6 +343,27 @@ export const timeoutConfigs = createDynamicConfigGroup('timeout_configs', {
   'timeout.duplicate_check_debounce_ms': 500,
   'timeout.company_search_debounce_ms': 300,
   'timeout.badge_tooltip_delay_ms': 100,
+  // API timeouts
+  'timeout.api.default_ms': 5000,
+  'timeout.api.long_ms': 10000,
+  'timeout.api.short_ms': 2000,
+  // Test timeouts
+  'timeout.test.default_ms': 5000,
+  'timeout.test.long_ms': 10000,
+  'timeout.test.network_ms': 5000,
+  // Retry delays
+  'retry.api.initial_delay_ms': 1000,
+  'retry.api.exponential_delay_ms': 2000,
+  'retry.api.max_delay_ms': 10000,
+  'retry.email.send_delay_ms': 1000,
+  'retry.email.retry_delay_ms': 2000,
+  'retry.github.delay_ms': 1000,
+  'retry.resend.delay_ms': 1000,
+  'retry.external.delay_ms': 500,
+  'retry.database.query_spacing_ms': 100,
+  'retry.database.write_spacing_ms': 200,
+  'retry.database.transaction_retry_ms': 500,
+  'retry.build.max_retries': 3,
 });
 
 /**

@@ -54,6 +54,12 @@ interface LayoutContentProps {
   children: React.ReactNode;
   announcement: Tables<'announcements'> | null;
   useFloatingActionBar?: boolean;
+  fabFlags: {
+    showSubmit: boolean;
+    showSearch: boolean;
+    showScrollToTop: boolean;
+    showNotifications: boolean;
+  };
   footerDelayVariant: '10s' | '30s' | '60s';
   ctaVariant: 'aggressive' | 'social_proof' | 'value_focused';
 }
@@ -62,6 +68,7 @@ export function LayoutContent({
   children,
   announcement,
   useFloatingActionBar = false,
+  fabFlags,
   footerDelayVariant,
   ctaVariant,
 }: LayoutContentProps) {
@@ -105,7 +112,7 @@ export function LayoutContent({
         </main>
         <Footer />
         {/* Feature flag: Floating Action Bar (can be toggled on/off via Statsig) */}
-        {useFloatingActionBar && <FloatingActionBar />}
+        {useFloatingActionBar && <FloatingActionBar fabFlags={fabFlags} />}
         <NotificationSheet />
         <NewsletterFooterBar source="footer" showAfterDelay={delayMs} />
       </div>

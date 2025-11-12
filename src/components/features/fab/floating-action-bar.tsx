@@ -14,9 +14,16 @@ import { useScrollDirection } from './use-scroll-direction';
 interface FloatingActionBarProps {
   /** Scroll threshold to show/hide FAB (px) */
   threshold?: number;
+  /** Feature flags controlling which FAB actions to show */
+  fabFlags: {
+    showSubmit: boolean;
+    showSearch: boolean;
+    showScrollToTop: boolean;
+    showNotifications: boolean;
+  };
 }
 
-export function FloatingActionBar({ threshold = 100 }: FloatingActionBarProps) {
+export function FloatingActionBar({ threshold = 100, fabFlags }: FloatingActionBarProps) {
   const router = useRouter();
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -55,7 +62,8 @@ export function FloatingActionBar({ threshold = 100 }: FloatingActionBarProps) {
       } catch (error) {
         logger.error('[FloatingActionBar] Error navigating to /submit', error as Error);
       }
-    }
+    },
+    fabFlags
   );
 
   // Filter speed dial actions based on `show` property
