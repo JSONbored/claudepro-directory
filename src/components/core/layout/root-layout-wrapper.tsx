@@ -30,10 +30,10 @@ const NotificationSheet = dynamic(
   }
 );
 
-const UnifiedNewsletterCapture = dynamic(
+const NewsletterFooterBar = dynamic(
   () =>
-    import('@/src/components/features/growth/newsletter-capture').then((mod) => ({
-      default: mod.UnifiedNewsletterCapture,
+    import('@/src/components/features/growth/newsletter').then((mod) => ({
+      default: mod.NewsletterFooterBar,
     })),
   {
     loading: () => null,
@@ -99,7 +99,7 @@ export function LayoutContent({
         {/* Feature flag: Floating Action Bar (can be toggled on/off via Statsig) */}
         {useFloatingActionBar && <FloatingActionBar />}
         <NotificationSheet />
-        <UnifiedNewsletterCapture variant="footer-bar" source="footer" />
+        <NewsletterFooterBar source="footer" />
       </div>
     </>
   );

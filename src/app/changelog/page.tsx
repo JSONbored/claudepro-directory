@@ -28,10 +28,10 @@ import { StructuredData } from '@/src/components/core/infra/structured-data';
 import { NavLink } from '@/src/components/core/navigation/navigation-link';
 import { ChangelogListClient } from '@/src/components/features/changelog/changelog-list-client';
 
-const UnifiedNewsletterCapture = dynamic(
+const NewsletterCTAVariant = dynamic(
   () =>
-    import('@/src/components/features/growth/newsletter-capture').then((mod) => ({
-      default: mod.UnifiedNewsletterCapture,
+    import('@/src/components/features/growth/newsletter').then((mod) => ({
+      default: mod.NewsletterCTAVariant,
     })),
   {
     loading: () => <div className="h-32 animate-pulse rounded-lg bg-muted/20" />,
@@ -164,7 +164,7 @@ export default async function ChangelogPage() {
 
         {/* Email CTA - Footer section (matching homepage pattern) */}
         <section className={'mx-auto px-4 py-12'}>
-          <UnifiedNewsletterCapture source="content_page" variant="hero" context="changelog-page" />
+          <NewsletterCTAVariant source="content_page" variant="hero" />
         </section>
       </>
     );

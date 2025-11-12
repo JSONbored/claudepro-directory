@@ -10,10 +10,10 @@ import { SidebarActivityCard } from '@/src/components/core/forms/sidebar-activit
 import { SubmitPageHero } from '@/src/components/core/forms/submit-page-hero';
 import { getSubmissionFormConfig } from '@/src/lib/forms/submission-form-config';
 
-const UnifiedNewsletterCapture = dynamic(
+const NewsletterCTAVariant = dynamic(
   () =>
-    import('@/src/components/features/growth/newsletter-capture').then((mod) => ({
-      default: mod.UnifiedNewsletterCapture,
+    import('@/src/components/features/growth/newsletter').then((mod) => ({
+      default: mod.NewsletterCTAVariant,
     })),
   {
     loading: () => <div className="h-32 animate-pulse rounded-lg bg-muted/20" />,
@@ -181,7 +181,7 @@ export default async function SubmitPage() {
 
       {/* Email CTA - Footer section (matching homepage pattern) */}
       <section className={'container mx-auto px-4 py-12'}>
-        <UnifiedNewsletterCapture source="content_page" variant="hero" context="submit-page" />
+        <NewsletterCTAVariant source="content_page" variant="hero" />
       </section>
     </div>
   );

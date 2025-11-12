@@ -18,7 +18,6 @@ import { CopyLLMsButton } from '@/src/components/core/buttons/content/copy-llms-
 import { CopyMarkdownButton } from '@/src/components/core/buttons/content/copy-markdown-button';
 import { DownloadMarkdownButton } from '@/src/components/core/buttons/content/download-markdown-button';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
-import type { CopyType } from '@/src/components/features/growth/newsletter-capture';
 import { Button } from '@/src/components/primitives/ui/button';
 import { useCopyWithEmailCapture } from '@/src/hooks/use-copy-with-email-capture';
 import type { CategoryId } from '@/src/lib/config/category-config';
@@ -27,6 +26,7 @@ import { trackInteraction } from '@/src/lib/edge/client';
 import { ArrowLeft, Check, Copy } from '@/src/lib/icons';
 import { STATE_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { toasts } from '@/src/lib/utils/toast.utils';
+import type { CopyType } from '@/src/types/database-overrides';
 
 /**
  * Determine copy type based on content item structure

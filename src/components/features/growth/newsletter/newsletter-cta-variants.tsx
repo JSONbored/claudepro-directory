@@ -1,0 +1,175 @@
+'use client';
+
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/src/components/primitives/ui/card';
+import type { NewsletterSource } from '@/src/hooks/use-newsletter';
+import { NEWSLETTER_CTA_CONFIG } from '@/src/lib/config/category-config';
+import { Mail } from '@/src/lib/icons';
+import { DIMENSIONS, UI_CLASSES } from '@/src/lib/ui-constants';
+import { cn } from '@/src/lib/utils';
+import { NewsletterForm } from './newsletter-form';
+import { getContextualMessage } from './newsletter-utils';
+
+export interface NewsletterCTABaseProps {
+  source: NewsletterSource;
+  className?: string;
+  category?: string;
+  headline?: string;
+  description?: string;
+}
+
+export interface NewsletterHeroProps extends NewsletterCTABaseProps {
+  variant: 'hero';
+}
+
+export interface NewsletterInlineProps extends NewsletterCTABaseProps {
+  variant: 'inline';
+}
+
+export interface NewsletterMinimalProps extends NewsletterCTABaseProps {
+  variant: 'minimal';
+}
+
+export interface NewsletterCardProps extends NewsletterCTABaseProps {
+  variant: 'card';
+}
+
+export type NewsletterCTAVariantProps =
+  | NewsletterHeroProps
+  | NewsletterInlineProps
+  | NewsletterMinimalProps
+  | NewsletterCardProps;
+
+export function NewsletterCTAVariant(props: NewsletterCTAVariantProps) {
+  const { variant, source, className, category, headline, description } = props;
+
+  const { headline: defaultHeadline, description: defaultDescription } =
+    getContextualMessage(category);
+  const finalHeadline = headline || defaultHeadline;
+  const finalDescription = description || defaultDescription;
+
+  if (variant === 'hero') {
+    return (
+      <div
+        className={cn(
+          'w-full bg-gradient-to-br from-card/80 via-card/60 to-card/40',
+          'backdrop-blur-sm',
+          'rounded-2xl border border-border/30',
+          'shadow-black/5 shadow-lg',
+          'p-10 md:p-16',
+          'text-center',
+          className
+        )}
+      >
+        <div className="mb-6 flex justify-center">
+          <div className="rounded-2xl border border-accent/20 bg-accent/10 p-4 shadow-accent/10 shadow-md backdrop-blur-sm">
+            <Mail className={`${UI_CLASSES.ICON_XL} text-accent`} aria-hidden="true" />
+          </div>
+        </div>
+
+        <h2 className="mb-4 font-bold text-3xl text-foreground leading-tight tracking-tight md:text-4xl">
+          {finalHeadline}
+        </h2>
+
+        <p className="mx-auto mb-8 max-w-2xl text-base text-muted-foreground leading-relaxed md:text-lg">
+          {finalDescription}
+        </p>
+
+        <div className="mx-auto max-w-xl">
+          <NewsletterForm source={source} className="w-full" />
+        </div>
+
+        <p className="mt-6 text-muted-foreground/80 text-sm">{NEWSLETTER_CTA_CONFIG.footerText}</p>
+      </div>
+    );
+  }
+
+  if (variant === 'inline') {
+    return (
+      <Card
+        className={cn(
+          'border-primary/20 bg-gradient-to-br from-primary/5 via-accent/5 to-background/95',
+          'shadow-lg backdrop-blur-sm',
+          className
+        )}
+      >
+        <CardHeader className="pb-5">
+          <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3} mb-3`}>
+            <div className="rounded-lg border border-primary/20 bg-primary/10 p-2.5">
+              <Mail className={`${UI_CLASSES.ICON_MD} text-primary`} aria-hidden="true" />
+            </div>
+            <CardTitle className="font-bold text-xl">{finalHeadline}</CardTitle>
+          </div>
+          <CardDescription className="text-base leading-relaxed">
+            {finalDescription}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <NewsletterForm source={source} />
+          <div className="text-center text-muted-foreground text-xs">
+            <span>{NEWSLETTER_CTA_CONFIG.footerText}</span>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (variant === 'minimal') {
+    return (
+      <div
+        className={cn(
+          'flex flex-col items-stretch justify-between gap-4 p-4 sm:flex-row sm:items-center sm:p-5',
+          'rounded-lg border border-border/50 bg-accent/5',
+          className
+        )}
+      >
+        <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3} min-w-0 flex-1`}>
+          <Mail className={`${UI_CLASSES.ICON_MD} flex-shrink-0 text-primary`} aria-hidden="true" />
+          <div className="min-w-0 flex-1">
+            <p className="truncate font-medium text-sm">{finalHeadline}</p>
+            <p className="truncate text-muted-foreground text-xs">{finalDescription}</p>
+          </div>
+        </div>
+        <NewsletterForm
+          source={source}
+          className={`w-full sm:w-auto sm:${DIMENSIONS.MIN_W_NEWSLETTER_FORM} sm:${DIMENSIONS.NEWSLETTER_FORM_MAX}`}
+        />
+      </div>
+    );
+  }
+
+  if (variant === 'card') {
+    return (
+      <Card
+        className={cn(
+          'flex h-full flex-col border-primary/20 bg-gradient-to-br from-primary/5 via-accent/5 to-background/95',
+          'shadow-lg backdrop-blur-sm',
+          className
+        )}
+      >
+        <CardHeader className="flex-1">
+          <div className="mb-4">
+            <div className="inline-flex rounded-lg border border-primary/20 bg-primary/10 p-3">
+              <Mail className={`${UI_CLASSES.ICON_LG} text-primary`} aria-hidden="true" />
+            </div>
+          </div>
+          <CardTitle className="mb-3 font-bold text-xl">{finalHeadline}</CardTitle>
+          <CardDescription className="text-sm leading-relaxed">{finalDescription}</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <NewsletterForm source={source} />
+          <div className="text-center">
+            <p className="text-muted-foreground text-xs">{NEWSLETTER_CTA_CONFIG.footerText}</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return null;
+}

@@ -7,7 +7,7 @@ import { Suspense } from 'react';
 import { UnifiedContentSection } from '@/src/components/content/detail-section-variants';
 import { JSONSectionRenderer } from '@/src/components/content/json-to-sections';
 import { ReviewListSection } from '@/src/components/core/domain/reviews/review-list-section';
-import { UnifiedNewsletterCapture } from '@/src/components/features/growth/newsletter-capture';
+import { NewsletterCTAVariant } from '@/src/components/features/growth/newsletter';
 import { RecentlyViewedSidebar } from '@/src/components/features/navigation/recently-viewed-sidebar';
 import {
   type CategoryId,
@@ -587,12 +587,7 @@ export async function UnifiedDetailPage({
             )}
 
             {/* Email CTA - Inline variant */}
-            <UnifiedNewsletterCapture
-              source="content_page"
-              variant="inline"
-              context="content-detail"
-              category={item.category}
-            />
+            <NewsletterCTAVariant source="content_page" variant="inline" category={item.category} />
           </div>
 
           {/* Sidebars - Related content + Recently Viewed */}

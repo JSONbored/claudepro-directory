@@ -3,7 +3,7 @@ import { Suspense, useId } from 'react';
 import { ContentSearchClient } from '@/src/components/content/content-search';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { LazySection } from '@/src/components/core/infra/scroll-animated-section';
-import { UnifiedNewsletterCapture } from '@/src/components/features/growth/newsletter-capture';
+import { NewsletterCTAVariant } from '@/src/components/features/growth/newsletter';
 import { Skeleton } from '@/src/components/primitives/feedback/loading-skeleton';
 import { Button } from '@/src/components/primitives/ui/button';
 import { ROUTES } from '@/src/lib/constants';
@@ -141,12 +141,7 @@ export function ContentListServer<T extends DisplayableContent>({
       <section className={'container mx-auto px-4 py-12'}>
         <Suspense fallback={null}>
           <LazySection variant="fade-in" delay={0.15}>
-            <UnifiedNewsletterCapture
-              source="content_page"
-              variant="hero"
-              context="category-page"
-              category={type}
-            />
+            <NewsletterCTAVariant source="content_page" variant="hero" category={type} />
           </LazySection>
         </Suspense>
       </section>

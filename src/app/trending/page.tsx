@@ -15,10 +15,10 @@ import type { PagePropsWithSearchParams } from '@/src/lib/schemas/app.schema';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
-const UnifiedNewsletterCapture = dynamic(
+const NewsletterCTAVariant = dynamic(
   () =>
-    import('@/src/components/features/growth/newsletter-capture').then((mod) => ({
-      default: mod.UnifiedNewsletterCapture,
+    import('@/src/components/features/growth/newsletter').then((mod) => ({
+      default: mod.NewsletterCTAVariant,
     })),
   {
     loading: () => <div className="h-32 animate-pulse rounded-lg bg-muted/20" />,
@@ -146,10 +146,9 @@ export default async function TrendingPage({ searchParams }: PagePropsWithSearch
       <section className={'container mx-auto px-4 py-12'}>
         <Suspense fallback={null}>
           <LazySection variant="fade-in" delay={0.15}>
-            <UnifiedNewsletterCapture
+            <NewsletterCTAVariant
               source="content_page"
               variant="hero"
-              context="trending-page"
               headline="Never Miss Trending Tools"
               description="Get weekly updates on what's hot in the Claude community. No spam, unsubscribe anytime."
             />

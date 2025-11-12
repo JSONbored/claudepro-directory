@@ -26,11 +26,9 @@ const NumberTicker = dynamicImport(
   }
 );
 
-const UnifiedNewsletterCapture = dynamicImport(
+const NewsletterCTAVariant = dynamicImport(
   () =>
-    import('@/src/components/features/growth/newsletter-capture').then(
-      (mod) => mod.UnifiedNewsletterCapture
-    ),
+    import('@/src/components/features/growth/newsletter').then((mod) => mod.NewsletterCTAVariant),
   {
     loading: () => <div className="h-32 animate-pulse rounded-lg bg-muted/20" />,
   }
@@ -165,7 +163,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
       <section className={'container mx-auto px-4 py-12'}>
         <Suspense fallback={null}>
           <LazySection variant="fade-in" delay={0.15}>
-            <UnifiedNewsletterCapture variant="hero" source="homepage" context="homepage" />
+            <NewsletterCTAVariant variant="hero" source="homepage" />
           </LazySection>
         </Suspense>
       </section>
