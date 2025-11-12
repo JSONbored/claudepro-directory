@@ -4,6 +4,8 @@
  */
 
 import { Suspense } from 'react';
+import { TabbedDetailLayout } from '@/src/components/content/detail-tabs/tabbed-detail-layout';
+import type { ProcessedSectionData } from '@/src/lib/types/detail-tabs.types';
 import { UnifiedContentSection } from '@/src/components/content/detail-section-variants';
 import { JSONSectionRenderer } from '@/src/components/content/json-to-sections';
 import { ReviewListSection } from '@/src/components/core/domain/reviews/review-list-section';
@@ -39,6 +41,7 @@ export interface UnifiedDetailPageProps {
   relatedItemsPromise?: Promise<ContentItem[]>;
   viewCountPromise?: Promise<number>;
   collectionSections?: React.ReactNode;
+  tabsEnabled?: boolean;
 }
 
 async function ViewCountMetadata({
@@ -82,6 +85,7 @@ export async function UnifiedDetailPage({
   relatedItemsPromise,
   viewCountPromise,
   collectionSections,
+  tabsEnabled = false,
 }: UnifiedDetailPageProps) {
   const config = await getCategoryConfig(item.category as CategoryId);
   const displayTitle = getDisplayTitle(item);
@@ -433,6 +437,52 @@ export async function UnifiedDetailPage({
               No configuration found for content type: {item.category}
             </p>
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Check if we should use tabbed layout
+  const shouldUseTabs = tabsEnabled && config.detailPage.tabs && config.detailPage.tabs.length > 0;
+
+  // If tabs are enabled and configured, use tabbed layout
+  if (shouldUseTabs) {
+    const sectionData: ProcessedSectionData = {
+      contentData,
+      configData,
+      installationData,
+      examplesData,
+      features,
+      useCases,
+      requirements,
+      troubleshooting,
+      guideSections,
+      collectionSections,
+    };
+
+    return (
+      <div className={'min-h-screen bg-background'}>
+        <DetailHeader displayTitle={displayTitle} item={item} config={config} />
+        {viewCountPromise ? (
+          <Suspense
+            fallback={<DetailMetadata item={item} viewCount={undefined} copyCount={undefined} />}
+          >
+            <ViewCountMetadata item={item} viewCountPromise={viewCountPromise} />
+          </Suspense>
+        ) : (
+          <DetailMetadata item={item} viewCount={viewCount} copyCount={copyCount} />
+        )}
+
+        <TabbedDetailLayout
+          item={item}
+          config={config}
+          tabs={config.detailPage.tabs}
+          sectionData={sectionData}
+          relatedItems={relatedItems}
+        />
+
+        <div className="container mx-auto px-4 pb-8">
+          <NewsletterCTAVariant source="content_page" variant="inline" category={item.category} />
         </div>
       </div>
     );
