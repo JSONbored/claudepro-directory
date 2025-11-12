@@ -1,32 +1,27 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.2.7/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.3.5/schema.json",
   "files": {
     "includes": [
       "*.{ts,tsx,js,jsx,mjs,cjs}",
       "src/**/*",
-      "tests/**/*",
       "scripts/**/*.ts",
       "scripts/**/*.mjs",
       "scripts/utils/**/*.js",
       "content/**/*",
       "config/**/*",
-      "supabase/functions/**/*.ts"
-    ],
-    "experimentalScannerIgnores": [
-      ".next/**/*",
-      "out/**/*",
-      "dist/**/*",
-      "generated/**/*",
-      "src/generated/**/*",
-      "src/lib/schemas/generated/**/*",
-      "src/lib/schemas/generated/db-schemas.d.ts",
-      "src/types/database.types.ts",
-      "scripts/build/templates/**/*",
-      "scripts/build/templates/service-worker.template.js",
-      "node_modules/**/*",
-      "test-results/**/*",
-      "playwright-report/**/*",
-      "playwright/.cache/**/*"
+      "supabase/functions/**/*.ts",
+      "!!**/.next/**/*",
+      "!!**/out/**/*",
+      "!!**/dist/**/*",
+      "!!**/generated/**/*",
+      "!!**/src/generated/**/*",
+      "!!**/src/lib/schemas/generated/**/*",
+      "!!**/src/lib/schemas/generated/db-schemas.d.ts",
+      "!!**/src/types/database.types.ts",
+      "!!**/scripts/build/templates/**/*",
+      "!!**/scripts/build/templates/service-worker.template.js",
+      "!!**/node_modules/**/*",
+      "!!**/playwright-report/**/*"
     ],
     "ignoreUnknown": false
   },
@@ -53,8 +48,12 @@
     }
   },
   "css": {
+    "parser": {
+      "cssModules": false,
+      "tailwindDirectives": true
+    },
     "linter": {
-      "enabled": false
+      "enabled": true
     }
   },
   "linter": {
@@ -75,7 +74,7 @@
         "noCompareNegZero": "error",
         "noConfusingLabels": "error",
         "noConfusingVoidType": "error",
-        "noConstEnum": "off",
+        "noConstEnum": "error",
         "noControlCharactersInRegex": "error",
         "noDuplicateCase": "error",
         "noDuplicateClassMembers": "error",
@@ -377,8 +376,7 @@
     {
       "includes": [
         "src/lib/schemas/factories/client-input-schema.factory.ts",
-        "src/lib/security/html-sanitizer.ts",
-        "src/components/content-search-client.tsx"
+        "src/lib/security/html-sanitizer.ts"
       ],
       "linter": {
         "rules": {
@@ -393,7 +391,7 @@
       "linter": {
         "rules": {
           "suspicious": {
-            "noExplicitAny": "off"
+            "noExplicitAny": "error"
           }
         }
       }

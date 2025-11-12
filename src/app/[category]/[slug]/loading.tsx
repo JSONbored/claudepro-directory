@@ -1,4 +1,4 @@
-import { Skeleton } from '@/src/components/primitives/loading-skeleton';
+import { Skeleton } from '@/src/components/primitives/feedback/loading-skeleton';
 import { getSkeletonKeys } from '@/src/lib/utils/skeleton-keys';
 
 const CODE_LINE_KEYS = getSkeletonKeys(8);

@@ -307,9 +307,12 @@ function extractWebhookFields(
 
     case 'vercel':
       // Vercel webhook format
+      // Vercel sends createdAt as Unix timestamp in milliseconds - convert to ISO string
       return {
         type: payload.type || null,
-        createdAt: payload.createdAt || new Date().toISOString(),
+        createdAt: payload.createdAt
+          ? new Date(Number(payload.createdAt)).toISOString()
+          : new Date().toISOString(),
         idempotencyKey: payload.id || headers.get('x-vercel-id') || null,
       };
 

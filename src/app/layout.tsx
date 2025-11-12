@@ -29,13 +29,13 @@ const NotificationToastHandler = dynamic(
 );
 
 import { ErrorBoundary } from '@/src/components/core/infra/error-boundary';
-import { PostCopyEmailProvider } from '@/src/components/core/infra/providers/post-copy-email-provider';
+import { PostCopyEmailProvider } from '@/src/components/core/infra/providers/email-capture-modal-provider';
 import { PwaInstallTracker } from '@/src/components/core/infra/pwa-install-tracker';
 import { StructuredData } from '@/src/components/core/infra/structured-data';
 import { getActiveAnnouncement } from '@/src/components/core/layout/announcement-banner-server';
-import { LayoutContent } from '@/src/components/core/layout/layout-content';
+import { LayoutContent } from '@/src/components/core/layout/root-layout-wrapper';
 
-import { UmamiScript } from '@/src/components/core/shared/umami-script';
+import { UmamiScript } from '@/src/components/core/shared/analytics-script';
 import { APP_CONFIG } from '@/src/lib/constants';
 import { featureFlags } from '@/src/lib/flags';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';

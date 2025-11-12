@@ -22,6 +22,7 @@ import { OnboardingGettingStarted } from '../_shared/templates/onboarding-gettin
 import { OnboardingPowerTips } from '../_shared/templates/onboarding-power-tips.tsx';
 import { OnboardingStayEngaged } from '../_shared/templates/onboarding-stay-engaged.tsx';
 import { WeeklyDigest } from '../_shared/templates/weekly-digest.tsx';
+import { buildContactProperties, inferInitialTopics } from '../_shared/utils/resend-helpers.ts';
 import {
   badRequestResponse,
   errorResponse,
@@ -30,6 +31,7 @@ import {
   publicCorsHeaders,
   successResponse,
 } from '../_shared/utils/response.ts';
+import { syncContactSegment } from '../_shared/utils/segment-manager.ts';
 import { supabaseServiceRole } from '../_shared/utils/supabase-service-role.ts';
 
 validateEnvironment(['resend', 'auth-hook']);
@@ -124,16 +126,34 @@ async function handleSubscribe(req: Request): Promise<Response> {
   const normalizedEmail = email.toLowerCase().trim();
 
   try {
-    // Step 1: Add to Resend audience
+    // Step 1: Add to Resend audience with properties and topics
     let resendContactId: string | null = null;
     let syncStatus: 'synced' | 'failed' | 'skipped' = 'synced';
     let syncError: string | null = null;
+    let topicIds: string[] = [];
+
+    // Build contact properties from signup context (used for both Resend and database)
+    const contactProperties = buildContactProperties({
+      source,
+      copyType: copy_type,
+      copyCategory: copy_category,
+      referrer,
+    });
 
     try {
+      console.log(`[SUBSCRIBE] Creating Resend contact for: ${normalizedEmail}`);
+      console.log(
+        `[SUBSCRIBE] Context - source: ${source}, category: ${copy_category}, type: ${copy_type}`
+      );
+
+      console.log('[SUBSCRIBE] Contact properties:', contactProperties);
+
+      // Create contact with properties
       const { data: contact, error: resendError } = await resend.contacts.create({
         audienceId: RESEND_ENV.audienceId,
         email: normalizedEmail,
         unsubscribed: false,
+        properties: contactProperties,
       });
 
       if (resendError) {
@@ -142,22 +162,57 @@ async function handleSubscribe(req: Request): Promise<Response> {
           resendError.message?.includes('already exists') ||
           resendError.message?.includes('duplicate')
         ) {
-          console.log(`Email ${normalizedEmail} already in Resend audience - skipping sync`);
+          console.log(
+            `[SUBSCRIBE] Email ${normalizedEmail} already in Resend - skipping contact creation`
+          );
           syncStatus = 'skipped';
           syncError = 'Email already in audience';
         } else {
           // Other Resend errors - log but don't fail the entire request
-          console.error('Resend audience sync failed:', resendError);
+          console.error('[SUBSCRIBE] Resend contact creation failed:', resendError);
           syncStatus = 'failed';
           syncError = resendError.message || 'Unknown Resend error';
         }
       } else if (contact?.id) {
         resendContactId = contact.id;
-        console.log(`Added ${normalizedEmail} to Resend audience: ${resendContactId}`);
+        console.log(`[SUBSCRIBE] ✓ Contact created - ID: ${resendContactId}`);
+
+        // Step 1.5: Assign topics based on signup context
+        try {
+          topicIds = inferInitialTopics(source, copy_category);
+          console.log(`[SUBSCRIBE] Assigning ${topicIds.length} topics:`, topicIds);
+
+          if (topicIds.length > 0) {
+            const { error: topicError } = await resend.contacts.topics.update({
+              contactId: resendContactId,
+              topicIds,
+            });
+
+            if (topicError) {
+              console.error('[SUBSCRIBE] Failed to assign topics:', topicError);
+              // Don't fail subscription - topics can be managed later
+            } else {
+              console.log('[SUBSCRIBE] ✓ Topics assigned successfully');
+            }
+          }
+        } catch (topicException) {
+          console.error('[SUBSCRIBE] Topic assignment exception:', topicException);
+          // Don't fail subscription - non-critical
+        }
+
+        // Step 1.6: Assign to engagement segment
+        try {
+          const engagementScore = contactProperties.engagement_score as number;
+          await syncContactSegment(resend, resendContactId, engagementScore);
+          console.log('[SUBSCRIBE] ✓ Segment assigned successfully');
+        } catch (segmentException) {
+          console.error('[SUBSCRIBE] Segment assignment exception:', segmentException);
+          // Don't fail subscription - non-critical
+        }
       }
     } catch (resendException) {
       // Catch any unexpected Resend errors
-      console.error('Unexpected Resend error:', resendException);
+      console.error('[SUBSCRIBE] Unexpected Resend error:', resendException);
       syncStatus = 'failed';
       syncError = resendException instanceof Error ? resendException.message : 'Unknown error';
     }
@@ -176,6 +231,12 @@ async function handleSubscribe(req: Request): Promise<Response> {
         sync_status: syncStatus,
         sync_error: syncError,
         last_sync_at: new Date().toISOString(),
+        // Store engagement data in database
+        engagement_score: contactProperties.engagement_score as number,
+        primary_interest: contactProperties.primary_interest as string,
+        total_copies: contactProperties.total_copies as number,
+        last_active_at: new Date().toISOString(),
+        resend_topics: topicIds,
       })
       .select()
       .single();

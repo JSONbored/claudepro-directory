@@ -131,3 +131,30 @@ export async function generateConfigRecommendations(answers: {
     answers
   ) as Promise<ConfigRecommendationsResponse>;
 }
+
+// Newsletter analytics
+export type NewsletterEventType =
+  | 'modal_shown'
+  | 'modal_dismissed'
+  | 'signup_success'
+  | 'signup_error'
+  | 'scroll_trigger_shown'
+  | 'exit_intent_shown'
+  | 'footer_cta_shown';
+
+export async function trackNewsletterEvent(
+  eventType: NewsletterEventType,
+  metadata?: {
+    source?: string;
+    error?: string;
+    ctaVariant?: string;
+    copyTrigger?: string;
+    [key: string]: unknown;
+  }
+) {
+  return callAnalyticsAction('trackNewsletterEvent', {
+    event_type: eventType,
+    source: metadata?.source,
+    metadata,
+  });
+}

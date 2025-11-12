@@ -4,23 +4,23 @@
  */
 
 import dynamic from 'next/dynamic';
-import { JobsPromo } from '@/src/components/core/domain/jobs-promo';
+import { JobsPromo } from '@/src/components/core/domain/jobs/jobs-banner';
+import { SubmitFormClient } from '@/src/components/core/forms/content-submission-form';
 import { SidebarActivityCard } from '@/src/components/core/forms/sidebar-activity-card';
-import { SubmitFormClient } from '@/src/components/core/forms/submit-form-client';
 import { SubmitPageHero } from '@/src/components/core/forms/submit-page-hero';
 import { getSubmissionFormConfig } from '@/src/lib/forms/submission-form-config';
 
-const UnifiedNewsletterCapture = dynamic(
+const NewsletterCTAVariant = dynamic(
   () =>
-    import('@/src/components/features/growth/unified-newsletter-capture').then((mod) => ({
-      default: mod.UnifiedNewsletterCapture,
+    import('@/src/components/features/growth/newsletter').then((mod) => ({
+      default: mod.NewsletterCTAVariant,
     })),
   {
     loading: () => <div className="h-32 animate-pulse rounded-lg bg-muted/20" />,
   }
 );
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
 import { TrendingUp } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
@@ -181,7 +181,7 @@ export default async function SubmitPage() {
 
       {/* Email CTA - Footer section (matching homepage pattern) */}
       <section className={'container mx-auto px-4 py-12'}>
-        <UnifiedNewsletterCapture source="content_page" variant="hero" context="submit-page" />
+        <NewsletterCTAVariant source="content_page" variant="hero" />
       </section>
     </div>
   );

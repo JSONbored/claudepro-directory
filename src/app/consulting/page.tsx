@@ -2,7 +2,7 @@
  * Consulting Page - Database-First Architecture Specialist
  */
 
-import { ConsultingClient } from '@/src/components/features/consulting/consulting-client';
+import { ConsultingClient } from '@/src/components/features/consulting/consulting-page-content';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 
 export const metadata = generatePageMetadata('/consulting');

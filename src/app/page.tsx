@@ -5,31 +5,30 @@
 
 import dynamicImport from 'next/dynamic';
 import { Suspense } from 'react';
-import { LazySection } from '@/src/components/core/infra/lazy-section';
+import { LazySection } from '@/src/components/core/infra/scroll-animated-section';
 import { TopContributors } from '@/src/components/features/community/top-contributors';
-import { HomePageClient } from '@/src/components/features/home';
-import { HomePageLoading } from '@/src/lib/components/loading-factory';
+import { HomePageClient } from '@/src/components/features/home/home-sections';
+import { HomePageLoading } from '@/src/components/primitives/feedback/loading-factory';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 
 const RollingText = dynamicImport(
-  () => import('@/src/components/core/magic/rolling-text').then((mod) => mod.RollingText),
+  () => import('@/src/components/primitives/animation/rolling-text').then((mod) => mod.RollingText),
   {
     loading: () => <span className="text-accent">enthusiasts</span>,
   }
 );
 
 const NumberTicker = dynamicImport(
-  () => import('@/src/components/core/magic/number-ticker').then((mod) => mod.NumberTicker),
+  () =>
+    import('@/src/components/primitives/animation/number-ticker').then((mod) => mod.NumberTicker),
   {
     loading: () => <span className="font-semibold text-accent">0</span>,
   }
 );
 
-const UnifiedNewsletterCapture = dynamicImport(
+const NewsletterCTAVariant = dynamicImport(
   () =>
-    import('@/src/components/features/growth/unified-newsletter-capture').then(
-      (mod) => mod.UnifiedNewsletterCapture
-    ),
+    import('@/src/components/features/growth/newsletter').then((mod) => mod.NewsletterCTAVariant),
   {
     loading: () => <div className="h-32 animate-pulse rounded-lg bg-muted/20" />,
   }
@@ -164,7 +163,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
       <section className={'container mx-auto px-4 py-12'}>
         <Suspense fallback={null}>
           <LazySection variant="fade-in" delay={0.15}>
-            <UnifiedNewsletterCapture variant="hero" source="homepage" context="homepage" />
+            <NewsletterCTAVariant variant="hero" source="homepage" />
           </LazySection>
         </Suspense>
       </section>

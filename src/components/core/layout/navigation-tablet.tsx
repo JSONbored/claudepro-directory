@@ -5,8 +5,8 @@
  */
 
 import { motion } from 'motion/react';
-import { PrefetchLink } from '@/src/components/core/shared/prefetch-link';
-import { Button } from '@/src/components/primitives/button';
+import { PrefetchLink } from '@/src/components/core/navigation/prefetch-link';
+import { Button } from '@/src/components/primitives/ui/button';
 import { PRIMARY_NAVIGATION } from '@/src/config/navigation';
 import {
   ANIMATION_CONSTANTS,

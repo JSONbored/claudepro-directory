@@ -5,7 +5,7 @@
 'use client';
 
 import { motion } from 'motion/react';
-import { HeyClaudeLogo } from '@/src/components/core/layout/heyclaude-logo';
+import { HeyClaudeLogo } from '@/src/components/core/layout/brand-logo';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 export function AuthMobileHeader() {

@@ -6,7 +6,7 @@
 'use client';
 
 import { memo } from 'react';
-import { Card, CardContent } from '@/src/components/primitives/card';
+import { Card, CardContent } from '@/src/components/primitives/ui/card';
 import type { Activity } from '@/src/lib/actions/user.actions';
 import { FileText, GitPullRequest, MessageSquare, ThumbsUp } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';

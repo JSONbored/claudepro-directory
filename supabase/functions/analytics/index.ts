@@ -39,6 +39,13 @@ interface GenerateConfigRecommendationsBody {
   focusAreas?: string[];
 }
 
+interface TrackNewsletterEventBody {
+  action: 'trackNewsletterEvent';
+  event_type: NewsletterEventType;
+  source?: string;
+  metadata?: Record<string, unknown>;
+}
+
 type InteractionType =
   | 'view'
   | 'copy'
@@ -50,6 +57,15 @@ type InteractionType =
   | 'screenshot'
   | 'share'
   | 'download';
+
+type NewsletterEventType =
+  | 'modal_shown'
+  | 'modal_dismissed'
+  | 'signup_success'
+  | 'signup_error'
+  | 'scroll_trigger_shown'
+  | 'exit_intent_shown'
+  | 'footer_cta_shown';
 
 function getContentItemUrl(category: string, slug: string): string {
   return `${SITE_URL}/${category}/${slug}`;
@@ -85,6 +101,9 @@ Deno.serve(async (req) => {
 
       case 'generateConfigRecommendations':
         return await handleGenerateConfigRecommendations(supabaseServiceRole, body, corsHeaders);
+
+      case 'trackNewsletterEvent':
+        return await handleTrackNewsletterEvent(supabaseServiceRole, user, body, corsHeaders);
 
       default:
         return jsonResponse({ error: `Unknown action: ${action}` }, 400, corsHeaders);
@@ -198,4 +217,35 @@ async function handleGenerateConfigRecommendations(
   };
 
   return jsonResponse({ success: true, recommendations: response }, 200, corsHeaders);
+}
+
+async function handleTrackNewsletterEvent(
+  supabase: SupabaseClient,
+  user: AuthUser,
+  body: TrackNewsletterEventBody,
+  corsHeaders: Record<string, string>
+) {
+  const { event_type, source, metadata } = body;
+
+  // Insert newsletter event into analytics table
+  const { error } = await supabase.from('user_interactions').insert({
+    content_type: 'newsletter',
+    content_slug: 'newsletter_cta',
+    interaction_type: 'click', // Map newsletter events to 'click' interaction type
+    user_id: user?.id || null,
+    session_id: null,
+    metadata: {
+      event_type,
+      source,
+      ...metadata,
+    },
+  });
+
+  if (error) {
+    console.error('Failed to track newsletter event:', error);
+    return jsonResponse({ success: false, message: error.message }, 200, corsHeaders);
+  }
+
+  console.log('Newsletter event tracked:', { event_type, source, userId: user?.id || 'anonymous' });
+  return jsonResponse({ success: true }, 200, corsHeaders);
 }

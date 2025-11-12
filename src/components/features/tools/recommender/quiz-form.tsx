@@ -8,9 +8,9 @@
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, useTransition } from 'react';
 import { z } from 'zod';
-import { Button } from '@/src/components/primitives/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/card';
-import { Separator } from '@/src/components/primitives/separator';
+import { Button } from '@/src/components/primitives/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
+import { Separator } from '@/src/components/primitives/ui/separator';
 import { getQuizConfiguration } from '@/src/lib/actions/quiz.actions';
 import { generateConfigRecommendations } from '@/src/lib/edge/client';
 
@@ -28,7 +28,7 @@ type QuizQuestion = {
   }>;
 };
 
-import { InlineSpinner } from '@/src/lib/components/loading-factory';
+import { InlineSpinner } from '@/src/components/primitives/feedback/loading-factory';
 import { ArrowLeft, ArrowRight, Sparkles } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { DIMENSIONS, UI_CLASSES } from '@/src/lib/ui-constants';

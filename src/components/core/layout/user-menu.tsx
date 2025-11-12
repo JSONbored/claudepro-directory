@@ -24,8 +24,9 @@ import { motion } from 'motion/react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { Avatar, AvatarFallback, AvatarImage } from '@/src/components/primitives/avatar';
-import { Button } from '@/src/components/primitives/button';
+import { Skeleton } from '@/src/components/primitives/feedback/loading-skeleton';
+import { Avatar, AvatarFallback, AvatarImage } from '@/src/components/primitives/ui/avatar';
+import { Button } from '@/src/components/primitives/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -33,8 +34,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/src/components/primitives/dropdown-menu';
-import { Skeleton } from '@/src/components/primitives/loading-skeleton';
+} from '@/src/components/primitives/ui/dropdown-menu';
 import { Activity, BookOpen, LogOut, Settings, User as UserIcon } from '@/src/lib/icons';
 import { createClient } from '@/src/lib/supabase/client';
 import { ANIMATION_CONSTANTS, DIMENSIONS, UI_CLASSES } from '@/src/lib/ui-constants';

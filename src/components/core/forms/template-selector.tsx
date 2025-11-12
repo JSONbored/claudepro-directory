@@ -5,13 +5,13 @@
  */
 
 import { useEffect, useState } from 'react';
-import { Button } from '@/src/components/primitives/button';
+import { Button } from '@/src/components/primitives/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/src/components/primitives/dropdown-menu';
+} from '@/src/components/primitives/ui/dropdown-menu';
 import type { SubmissionContentType } from '@/src/lib/forms/types';
 import { ChevronDown, FileText } from '@/src/lib/icons';
 import { createClient } from '@/src/lib/supabase/client';

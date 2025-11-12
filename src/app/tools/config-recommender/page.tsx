@@ -19,19 +19,19 @@
 
 import type { Metadata } from 'next';
 import dynamic from 'next/dynamic';
-import { UnifiedBadge } from '@/src/components/core/domain/unified-badge';
+import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/src/components/primitives/card';
+} from '@/src/components/primitives/ui/card';
 
-const UnifiedNewsletterCapture = dynamic(
+const NewsletterCTAVariant = dynamic(
   () =>
-    import('@/src/components/features/growth/unified-newsletter-capture').then((mod) => ({
-      default: mod.UnifiedNewsletterCapture,
+    import('@/src/components/features/growth/newsletter').then((mod) => ({
+      default: mod.NewsletterCTAVariant,
     })),
   {
     loading: () => <div className="h-32 animate-pulse rounded-lg bg-muted/20" />,
@@ -214,11 +214,7 @@ export default async function ConfigRecommenderPage() {
 
       {/* Email CTA - Footer section (matching homepage pattern) */}
       <section className={'container mx-auto px-4 py-12'}>
-        <UnifiedNewsletterCapture
-          source="content_page"
-          variant="hero"
-          context="config-recommender-page"
-        />
+        <NewsletterCTAVariant source="content_page" variant="hero" />
       </section>
     </div>
   );

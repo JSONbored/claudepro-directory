@@ -16,8 +16,8 @@
 'use client';
 
 import { useCallback } from 'react';
-import { usePostCopyEmail } from '@/src/components/core/infra/providers/post-copy-email-provider';
-import type { CopyType } from '@/src/components/features/growth/unified-newsletter-capture';
+import { usePostCopyEmail } from '@/src/components/core/infra/providers/email-capture-modal-provider';
+import type { CopyType } from '@/src/types/database-overrides';
 import { type UseCopyToClipboardOptions, useCopyToClipboard } from './use-copy-to-clipboard';
 
 /**

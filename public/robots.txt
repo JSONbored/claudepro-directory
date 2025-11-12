@@ -87,5 +87,26 @@ Allow: /*/*/llms.txt
 Disallow: /admin*
 Disallow: /private*
 
+# ============================================================================
+# GOOGLE SEARCH CONSOLE OPTIMIZATION
+# ============================================================================
+
+# Block Next.js build artifacts from indexing
+Disallow: /_next/static/chunks/
+Disallow: /_next/static/css/
+Disallow: /_next/static/media/
+
+# Block false-positive path patterns (from old content examples)
+Disallow: /.claude/
+Disallow: /etc/
+Disallow: /tmp/
+Disallow: /proc/
+Disallow: /var/
+Disallow: /pages
+Disallow: /app
+Disallow: /src/
+Disallow: /vendor/
+Disallow: /target/
+
 # Sitemap location
 Sitemap: https://claudepro.directory/sitemap.xml

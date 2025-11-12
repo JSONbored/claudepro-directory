@@ -6,19 +6,19 @@
 import { unstable_cache } from 'next/cache';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
-import { JobCard } from '@/src/components/core/domain/job-card';
-import { JobsPromo } from '@/src/components/core/domain/jobs-promo';
-import { UnifiedBadge } from '@/src/components/core/domain/unified-badge';
-import { Button } from '@/src/components/primitives/button';
-import { Card, CardContent } from '@/src/components/primitives/card';
-import { Input } from '@/src/components/primitives/input';
+import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
+import { JobCard } from '@/src/components/core/domain/cards/job-card';
+import { JobsPromo } from '@/src/components/core/domain/jobs/jobs-banner';
+import { Button } from '@/src/components/primitives/ui/button';
+import { Card, CardContent } from '@/src/components/primitives/ui/card';
+import { Input } from '@/src/components/primitives/ui/input';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/src/components/primitives/select';
+} from '@/src/components/primitives/ui/select';
 import { ROUTES } from '@/src/lib/constants';
 import { Briefcase, Clock, Filter, MapPin, Plus, Search } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
@@ -28,10 +28,10 @@ import { createAnonClient } from '@/src/lib/supabase/server-anon';
 import { POSITION_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
 import type { Tables } from '@/src/types/database.types';
 
-const UnifiedNewsletterCapture = dynamic(
+const NewsletterCTAVariant = dynamic(
   () =>
-    import('@/src/components/features/growth/unified-newsletter-capture').then((mod) => ({
-      default: mod.UnifiedNewsletterCapture,
+    import('@/src/components/features/growth/newsletter').then((mod) => ({
+      default: mod.NewsletterCTAVariant,
     })),
   {
     loading: () => <div className="h-32 animate-pulse rounded-lg bg-muted/20" />,
@@ -391,7 +391,7 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
       </section>
 
       <section className={'container mx-auto px-4 py-12'}>
-        <UnifiedNewsletterCapture source="content_page" variant="hero" context="jobs-page" />
+        <NewsletterCTAVariant source="content_page" variant="hero" />
       </section>
     </div>
   );

@@ -1,3 +1,3 @@
-import { CategoryLoading } from '@/src/lib/components/loading-factory';
+import { CategoryLoading } from '@/src/components/primitives/feedback/loading-factory';
 
 export default CategoryLoading;

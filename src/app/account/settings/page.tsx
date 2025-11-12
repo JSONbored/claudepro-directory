@@ -4,14 +4,14 @@ import {
   ProfileEditForm,
   RefreshProfileButton,
 } from '@/src/components/core/forms/profile-edit-form';
-import { Button } from '@/src/components/primitives/button';
+import { Button } from '@/src/components/primitives/ui/button';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/src/components/primitives/card';
+} from '@/src/components/primitives/ui/card';
 
 /**
  * Settings Page - User profile and account management.

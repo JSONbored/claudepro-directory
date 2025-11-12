@@ -2,8 +2,8 @@
 
 import Link from 'next/link';
 import { useEffect } from 'react';
-import { Button } from '@/src/components/primitives/button';
-import { Card } from '@/src/components/primitives/card';
+import { Button } from '@/src/components/primitives/ui/button';
+import { Card } from '@/src/components/primitives/ui/card';
 import { ROUTES } from '@/src/lib/constants';
 import { AlertCircle, Home, RefreshCw, Search } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';

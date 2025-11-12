@@ -6,7 +6,7 @@
 'use client';
 
 import { useCallback, useState, useTransition } from 'react';
-import { trackInteraction } from '@/src/lib/edge/client';
+import { trackInteraction, trackNewsletterEvent } from '@/src/lib/edge/client';
 import { logger } from '@/src/lib/logger';
 import { toasts } from '@/src/lib/utils/toast.utils';
 import type { Enums } from '@/src/types/database.types';
@@ -14,6 +14,44 @@ import type { Enums } from '@/src/types/database.types';
 export type NewsletterSource = Enums<'newsletter_source'>;
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const MAX_RETRIES = 3;
+const INITIAL_RETRY_DELAY_MS = 1000;
+
+/**
+ * Retry helper with exponential backoff
+ * Only retries on network errors or 5xx server errors
+ */
+async function fetchWithRetry(
+  url: string,
+  options: RequestInit,
+  retries = MAX_RETRIES
+): Promise<Response> {
+  try {
+    const response = await fetch(url, options);
+
+    // Don't retry on client errors (4xx) - these are user/validation errors
+    if (!response.ok && response.status >= 400 && response.status < 500) {
+      return response;
+    }
+
+    // Retry on server errors (5xx)
+    if (!response.ok && response.status >= 500 && retries > 0) {
+      const delay = INITIAL_RETRY_DELAY_MS * (MAX_RETRIES - retries + 1);
+      await new Promise((resolve) => setTimeout(resolve, delay));
+      return fetchWithRetry(url, options, retries - 1);
+    }
+
+    return response;
+  } catch (error) {
+    // Retry on network errors
+    if (retries > 0) {
+      const delay = INITIAL_RETRY_DELAY_MS * (MAX_RETRIES - retries + 1);
+      await new Promise((resolve) => setTimeout(resolve, delay));
+      return fetchWithRetry(url, options, retries - 1);
+    }
+    throw error;
+  }
+}
 
 export interface UseNewsletterOptions {
   source: NewsletterSource;
@@ -82,7 +120,7 @@ export function useNewsletter(options: UseNewsletterOptions): UseNewsletterRetur
           throw new Error('Supabase URL not configured');
         }
 
-        const response = await fetch(`${SUPABASE_URL}/functions/v1/email-handler`, {
+        const response = await fetchWithRetry(`${SUPABASE_URL}/functions/v1/email-handler`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -105,17 +143,24 @@ export function useNewsletter(options: UseNewsletterOptions): UseNewsletterRetur
             });
           }
 
-          trackInteraction({
-            content_type: null,
-            content_slug: null,
-            interaction_type: 'newsletter_subscribe',
-            metadata: {
+          // Track newsletter signup success
+          Promise.all([
+            trackInteraction({
+              content_type: null,
+              content_slug: null,
+              interaction_type: 'newsletter_subscribe',
+              metadata: {
+                source,
+                subscription_id: result.subscription_id,
+                ...(referrer && { referrer }),
+                ...(metadata && metadata),
+              },
+            }),
+            trackNewsletterEvent('signup_success', {
               source,
-              subscription_id: result.subscription_id,
-              ...(referrer && { referrer }),
-              ...(metadata && metadata),
-            },
-          }).catch(() => {
+              ...metadata,
+            }),
+          ]).catch(() => {
             // Analytics failure should not affect UX
           });
 
@@ -133,6 +178,15 @@ export function useNewsletter(options: UseNewsletterOptions): UseNewsletterRetur
           }
 
           onError?.(errorMessage);
+
+          // Track newsletter signup error
+          trackNewsletterEvent('signup_error', {
+            source,
+            error: errorMessage,
+            ...metadata,
+          }).catch(() => {
+            // Analytics failure should not affect UX
+          });
 
           logger.error('Newsletter subscription failed', new Error(errorMessage), {
             component: 'useNewsletter',
@@ -155,6 +209,15 @@ export function useNewsletter(options: UseNewsletterOptions): UseNewsletterRetur
         }
 
         onError?.(errorMessage);
+
+        // Track newsletter signup error (exception)
+        trackNewsletterEvent('signup_error', {
+          source,
+          error: errorMessage,
+          ...metadata,
+        }).catch(() => {
+          // Analytics failure should not affect UX
+        });
 
         logger.error('Newsletter subscription error', err instanceof Error ? err : undefined, {
           component: 'useNewsletter',

@@ -5,7 +5,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/src/components/primitives/card';
+} from '@/src/components/primitives/ui/card';
 import { getUserIdentities } from '@/src/lib/actions/user.actions';
 
 /**

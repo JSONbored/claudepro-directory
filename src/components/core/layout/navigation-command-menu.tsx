@@ -10,7 +10,7 @@ import {
   CommandItem,
   CommandList,
   CommandSeparator,
-} from '@/src/components/primitives/command';
+} from '@/src/components/primitives/ui/command';
 import * as Icons from '@/src/lib/icons';
 import { createClient } from '@/src/lib/supabase/client';
 import { UI_CLASSES } from '@/src/lib/ui-constants';

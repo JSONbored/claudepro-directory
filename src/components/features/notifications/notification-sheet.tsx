@@ -21,7 +21,7 @@ import {
   SheetDescription,
   SheetHeader,
   SheetTitle,
-} from '@/src/components/primitives/sheet';
+} from '@/src/components/primitives/ui/sheet';
 import { type NotificationStore, useNotificationStore } from '@/src/lib/stores/notification-store';
 import { DIMENSIONS } from '@/src/lib/ui-constants';
 import { NotificationList } from './notification-list';

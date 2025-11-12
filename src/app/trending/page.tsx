@@ -5,8 +5,8 @@
 
 import dynamic from 'next/dynamic';
 import { Suspense } from 'react';
-import { UnifiedBadge } from '@/src/components/core/domain/unified-badge';
-import { LazySection } from '@/src/components/core/infra/lazy-section';
+import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
+import { LazySection } from '@/src/components/core/infra/scroll-animated-section';
 import { TrendingContent } from '@/src/components/core/shared/trending-content';
 import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
 import { Clock, Star, TrendingUp, Users } from '@/src/lib/icons';
@@ -15,10 +15,10 @@ import type { PagePropsWithSearchParams } from '@/src/lib/schemas/app.schema';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
-const UnifiedNewsletterCapture = dynamic(
+const NewsletterCTAVariant = dynamic(
   () =>
-    import('@/src/components/features/growth/unified-newsletter-capture').then((mod) => ({
-      default: mod.UnifiedNewsletterCapture,
+    import('@/src/components/features/growth/newsletter').then((mod) => ({
+      default: mod.NewsletterCTAVariant,
     })),
   {
     loading: () => <div className="h-32 animate-pulse rounded-lg bg-muted/20" />,
@@ -146,10 +146,9 @@ export default async function TrendingPage({ searchParams }: PagePropsWithSearch
       <section className={'container mx-auto px-4 py-12'}>
         <Suspense fallback={null}>
           <LazySection variant="fade-in" delay={0.15}>
-            <UnifiedNewsletterCapture
+            <NewsletterCTAVariant
               source="content_page"
               variant="hero"
-              context="trending-page"
               headline="Never Miss Trending Tools"
               description="Get weekly updates on what's hot in the Claude community. No spam, unsubscribe anytime."
             />

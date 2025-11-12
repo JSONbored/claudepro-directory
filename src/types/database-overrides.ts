@@ -161,6 +161,16 @@ export type Views<T extends keyof Database['public']['Views']> =
 export type Enums<T extends keyof Database['public']['Enums']> = Database['public']['Enums'][T];
 
 /**
+ * Application-specific types (not from database)
+ */
+
+/**
+ * Copy type for newsletter capture tracking
+ * Used in copy-to-clipboard actions and email capture modals
+ */
+export type CopyType = 'llmstxt' | 'markdown' | 'code' | 'link';
+
+/**
  * RPC Function Return Types
  *
  * PostgreSQL functions that return JSONB are typed as Json by default.

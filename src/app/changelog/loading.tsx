@@ -5,7 +5,10 @@
  * Shows placeholder cards matching the layout of ChangelogCard components.
  */
 
-import { PageHeaderSkeleton, Skeleton } from '@/src/components/primitives/loading-skeleton';
+import {
+  PageHeaderSkeleton,
+  Skeleton,
+} from '@/src/components/primitives/feedback/loading-skeleton';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 export default function ChangelogLoading() {
