@@ -129,20 +129,21 @@ async function handleSubscribe(req: Request): Promise<Response> {
     let resendContactId: string | null = null;
     let syncStatus: 'synced' | 'failed' | 'skipped' = 'synced';
     let syncError: string | null = null;
+    let topicIds: string[] = [];
+
+    // Build contact properties from signup context (used for both Resend and database)
+    const contactProperties = buildContactProperties({
+      source,
+      copyType: copy_type,
+      copyCategory: copy_category,
+      referrer,
+    });
 
     try {
       console.log(`[SUBSCRIBE] Creating Resend contact for: ${normalizedEmail}`);
       console.log(
         `[SUBSCRIBE] Context - source: ${source}, category: ${copy_category}, type: ${copy_type}`
       );
-
-      // Build contact properties from signup context
-      const contactProperties = buildContactProperties({
-        source,
-        copyType: copy_type,
-        copyCategory: copy_category,
-        referrer,
-      });
 
       console.log('[SUBSCRIBE] Contact properties:', contactProperties);
 
@@ -177,7 +178,7 @@ async function handleSubscribe(req: Request): Promise<Response> {
 
         // Step 1.5: Assign topics based on signup context
         try {
-          const topicIds = inferInitialTopics(source, copy_category);
+          topicIds = inferInitialTopics(source, copy_category);
           console.log(`[SUBSCRIBE] Assigning ${topicIds.length} topics:`, topicIds);
 
           if (topicIds.length > 0) {
@@ -219,6 +220,12 @@ async function handleSubscribe(req: Request): Promise<Response> {
         sync_status: syncStatus,
         sync_error: syncError,
         last_sync_at: new Date().toISOString(),
+        // Store engagement data in database
+        engagement_score: contactProperties.engagement_score as number,
+        primary_interest: contactProperties.primary_interest as string,
+        total_copies: contactProperties.total_copies as number,
+        last_active_at: new Date().toISOString(),
+        resend_topics: topicIds,
       })
       .select()
       .single();
