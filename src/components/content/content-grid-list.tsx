@@ -1,8 +1,8 @@
 import Link from 'next/link';
 import { Suspense, useId } from 'react';
-import { ContentSearchClient } from '@/src/components/content/content-search-client';
-import { UnifiedBadge } from '@/src/components/core/domain/badges/badge';
-import { LazySection } from '@/src/components/core/infra/lazy-section';
+import { ContentSearchClient } from '@/src/components/content/content-search';
+import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
+import { LazySection } from '@/src/components/core/infra/scroll-animated-section';
 import { UnifiedNewsletterCapture } from '@/src/components/features/growth/newsletter-capture';
 import { Skeleton } from '@/src/components/primitives/feedback/loading-skeleton';
 import { Button } from '@/src/components/primitives/ui/button';

@@ -36,7 +36,7 @@ export const LazyFeaturedSections = dynamic(
  */
 export const LazyTabsSection = dynamic(
   () =>
-    import('@/src/components/features/home/tabs-section').then((mod) => ({
+    import('@/src/components/features/home/homepage-tabs').then((mod) => ({
       default: mod.TabsSection,
     })),
   {
@@ -61,7 +61,7 @@ export const LazyTabsSection = dynamic(
  */
 export const LazySearchSection = dynamic(
   () =>
-    import('@/src/components/features/home/search-section').then((mod) => ({
+    import('@/src/components/features/home/homepage-search').then((mod) => ({
       default: mod.SearchSection,
     })),
   {

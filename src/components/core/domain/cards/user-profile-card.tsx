@@ -15,8 +15,8 @@
  */
 
 import { memo } from 'react';
-import { UnifiedBadge } from '@/src/components/core/domain/badges/badge';
-import { BaseCard } from '@/src/components/core/domain/cards/base-card';
+import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
+import { BaseCard } from '@/src/components/core/domain/cards/content-card-base';
 import { Avatar, AvatarFallback, AvatarImage } from '@/src/components/primitives/ui/avatar';
 import { Button } from '@/src/components/primitives/ui/button';
 import { Award, ExternalLink, Users } from '@/src/lib/icons';

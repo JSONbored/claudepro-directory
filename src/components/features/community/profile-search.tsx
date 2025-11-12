@@ -17,7 +17,10 @@
  */
 
 import { memo } from 'react';
-import { ProfileCard, type UserProfile } from '@/src/components/core/domain/cards/profile-card';
+import {
+  ProfileCard,
+  type UserProfile,
+} from '@/src/components/core/domain/cards/user-profile-card';
 
 export interface ProfileSearchClientProps {
   users: UserProfile[];

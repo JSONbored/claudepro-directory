@@ -20,7 +20,7 @@
  */
 
 import { useState } from 'react';
-import { UnifiedBadge } from '@/src/components/core/domain/badges/badge';
+import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { Button } from '@/src/components/primitives/ui/button';
 import { Input } from '@/src/components/primitives/ui/input';
 import { Label } from '@/src/components/primitives/ui/label';

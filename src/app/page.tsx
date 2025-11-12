@@ -5,7 +5,7 @@
 
 import dynamicImport from 'next/dynamic';
 import { Suspense } from 'react';
-import { LazySection } from '@/src/components/core/infra/lazy-section';
+import { LazySection } from '@/src/components/core/infra/scroll-animated-section';
 import { TopContributors } from '@/src/components/features/community/top-contributors';
 import { HomePageClient } from '@/src/components/features/home/home-sections';
 import { HomePageLoading } from '@/src/components/primitives/feedback/loading-factory';

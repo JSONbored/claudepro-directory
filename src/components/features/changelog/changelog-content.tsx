@@ -19,8 +19,8 @@
  */
 
 import { memo } from 'react';
-import { JSONSectionRenderer } from '@/src/components/content/json-section-renderer';
-import { UnifiedBadge } from '@/src/components/core/domain/badges/badge';
+import { JSONSectionRenderer } from '@/src/components/content/json-to-sections';
+import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import type { ChangelogEntry } from '@/src/lib/changelog/loader';
 import { parseChangelogChanges } from '@/src/lib/changelog/loader';
 import type { Database } from '@/src/types/database.types';

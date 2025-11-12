@@ -1,4 +1,4 @@
-import { NavLink } from '@/src/components/core/navigation/nav-link';
+import { NavLink } from '@/src/components/core/navigation/navigation-link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
 import { APP_CONFIG, SOCIAL_LINKS } from '@/src/lib/constants';
 import { DiscordIcon, Github, Mail, MessageSquare } from '@/src/lib/icons';

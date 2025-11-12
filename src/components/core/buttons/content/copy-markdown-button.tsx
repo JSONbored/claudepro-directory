@@ -7,7 +7,7 @@
 
 import { motion } from 'motion/react';
 import { useState } from 'react';
-import { usePostCopyEmail } from '@/src/components/core/infra/providers/post-copy-email-provider';
+import { usePostCopyEmail } from '@/src/components/core/infra/providers/email-capture-modal-provider';
 import { Button } from '@/src/components/primitives/ui/button';
 import { useButtonSuccess } from '@/src/hooks/use-button-success';
 import { useCopyToClipboard } from '@/src/hooks/use-copy-to-clipboard';

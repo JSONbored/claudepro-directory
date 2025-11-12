@@ -4,9 +4,9 @@
  */
 
 import dynamic from 'next/dynamic';
-import { JobsPromo } from '@/src/components/core/domain/jobs/jobs-promo';
+import { JobsPromo } from '@/src/components/core/domain/jobs/jobs-banner';
+import { SubmitFormClient } from '@/src/components/core/forms/content-submission-form';
 import { SidebarActivityCard } from '@/src/components/core/forms/sidebar-activity-card';
-import { SubmitFormClient } from '@/src/components/core/forms/submit-form-client';
 import { SubmitPageHero } from '@/src/components/core/forms/submit-page-hero';
 import { getSubmissionFormConfig } from '@/src/lib/forms/submission-form-config';
 

@@ -19,7 +19,7 @@
 
 import type { Metadata } from 'next';
 import dynamic from 'next/dynamic';
-import { UnifiedBadge } from '@/src/components/core/domain/badges/badge';
+import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import {
   Card,
   CardContent,

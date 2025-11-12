@@ -2,7 +2,7 @@
  * CodeBlockServer - Server-rendered code with Sugar High highlighting
  */
 
-import { ProductionCodeBlock } from '@/src/components/content/production-code-block';
+import { ProductionCodeBlock } from '@/src/components/content/interactive-code-block';
 import { highlightCode } from '@/src/lib/content/syntax-highlighting';
 
 export interface CodeBlockServerProps {

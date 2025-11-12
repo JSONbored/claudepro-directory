@@ -5,7 +5,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { UnifiedBadge } from '@/src/components/core/domain/badges/badge';
+import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { StructuredData } from '@/src/components/core/infra/structured-data';
 import { Button } from '@/src/components/primitives/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';

@@ -28,7 +28,7 @@
 import { AnimatePresence, motion } from 'motion/react';
 import Link from 'next/link';
 import { memo, useState } from 'react';
-import { UnifiedBadge } from '@/src/components/core/domain/badges/badge';
+import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { Button } from '@/src/components/primitives/ui/button';
 import { type RecentlyViewedItem, useRecentlyViewed } from '@/src/hooks/use-recently-viewed';
 import { ChevronDown, ChevronUp, Clock, Trash, X } from '@/src/lib/icons';

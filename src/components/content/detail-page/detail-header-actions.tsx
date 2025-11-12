@@ -17,7 +17,7 @@ import { useRouter } from 'next/navigation';
 import { CopyLLMsButton } from '@/src/components/core/buttons/content/copy-llms-button';
 import { CopyMarkdownButton } from '@/src/components/core/buttons/content/copy-markdown-button';
 import { DownloadMarkdownButton } from '@/src/components/core/buttons/content/download-markdown-button';
-import { UnifiedBadge } from '@/src/components/core/domain/badges/badge';
+import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import type { CopyType } from '@/src/components/features/growth/newsletter-capture';
 import { Button } from '@/src/components/primitives/ui/button';
 import { useCopyWithEmailCapture } from '@/src/hooks/use-copy-with-email-capture';

@@ -5,8 +5,8 @@
 
 import dynamic from 'next/dynamic';
 import { Suspense } from 'react';
-import { UnifiedBadge } from '@/src/components/core/domain/badges/badge';
-import { LazySection } from '@/src/components/core/infra/lazy-section';
+import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
+import { LazySection } from '@/src/components/core/infra/scroll-animated-section';
 import { TrendingContent } from '@/src/components/core/shared/trending-content';
 import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
 import { Clock, Star, TrendingUp, Users } from '@/src/lib/icons';

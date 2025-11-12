@@ -10,8 +10,8 @@
 
 import { useRouter } from 'next/navigation';
 import { useId, useState, useTransition } from 'react';
-import { UnifiedBadge } from '@/src/components/core/domain/badges/badge';
-import { FormField } from '@/src/components/core/forms/form-field';
+import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
+import { FormField } from '@/src/components/core/forms/form-field-wrapper';
 import { Button } from '@/src/components/primitives/ui/button';
 import { Checkbox } from '@/src/components/primitives/ui/checkbox';
 import { Label } from '@/src/components/primitives/ui/label';

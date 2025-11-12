@@ -7,8 +7,8 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { memo } from 'react';
-import { UnifiedBadge } from '@/src/components/core/domain/badges/badge';
-import { JobsPromo } from '@/src/components/core/domain/jobs/jobs-promo';
+import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
+import { JobsPromo } from '@/src/components/core/domain/jobs/jobs-banner';
 import { Button } from '@/src/components/primitives/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
 import type { CategoryId } from '@/src/lib/config/category-config';

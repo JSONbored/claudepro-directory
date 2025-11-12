@@ -3,7 +3,7 @@
  */
 
 import type { Metadata } from 'next';
-import { ContentSearchClient } from '@/src/components/content/content-search-client';
+import { ContentSearchClient } from '@/src/components/content/content-search';
 import type { SearchFilters } from '@/src/lib/search/server-search';
 import { searchContent } from '@/src/lib/search/server-search';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';

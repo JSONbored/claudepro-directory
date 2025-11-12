@@ -1,6 +1,6 @@
 import { Suspense } from 'react';
 import { ContributorsSidebar } from '@/src/components/features/community/contributors-sidebar';
-import { ProfileSearchClient } from '@/src/components/features/community/profile-search-client';
+import { ProfileSearchClient } from '@/src/components/features/community/profile-search';
 import { Skeleton } from '@/src/components/primitives/feedback/loading-skeleton';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';

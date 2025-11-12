@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { UnifiedBadge } from '@/src/components/core/domain/badges/badge';
-import { NavLink } from '@/src/components/core/navigation/nav-link';
+import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
+import { NavLink } from '@/src/components/core/navigation/navigation-link';
 import {
   Card,
   CardContent,

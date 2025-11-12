@@ -1,9 +1,9 @@
 import { Suspense } from 'react';
 import { AuthBrandPanel } from '@/src/components/core/auth/auth-brand-panel';
 import { AuthFormPanel } from '@/src/components/core/auth/auth-form-panel';
+import { SplitAuthLayout } from '@/src/components/core/auth/auth-layout';
 import { AuthMobileHeader } from '@/src/components/core/auth/auth-mobile-header';
 import { OAuthProviderButton } from '@/src/components/core/auth/oauth-provider-button';
-import { SplitAuthLayout } from '@/src/components/core/auth/split-auth-layout';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 
 export const metadata = generatePageMetadata('/login');

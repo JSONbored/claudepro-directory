@@ -7,7 +7,7 @@
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useId, useState, useTransition } from 'react';
-import { FormField } from '@/src/components/core/forms/form-field';
+import { FormField } from '@/src/components/core/forms/form-field-wrapper';
 import { Button } from '@/src/components/primitives/ui/button';
 import {
   Card,

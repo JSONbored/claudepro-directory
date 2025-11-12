@@ -7,8 +7,8 @@
 
 import { useId, useState, useTransition } from 'react';
 import { CompanySelector } from '@/src/components/core/forms/company-selector';
-import { FormField } from '@/src/components/core/forms/form-field';
-import { ListItemManager } from '@/src/components/core/forms/list-item-manager';
+import { FormField } from '@/src/components/core/forms/form-field-wrapper';
+import { ListItemManager } from '@/src/components/core/forms/list-items-editor';
 import { Button } from '@/src/components/primitives/ui/button';
 import {
   Card,

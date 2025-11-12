@@ -39,7 +39,7 @@
  */
 
 import { notFound } from 'next/navigation';
-import { ContentListServer } from '@/src/components/content/content-list-server';
+import { ContentListServer } from '@/src/components/content/content-grid-list';
 import {
   type CategoryId,
   getCategoryConfig,

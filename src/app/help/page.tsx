@@ -2,7 +2,7 @@
 
 import { motion } from 'motion/react';
 import Link from 'next/link';
-import { NavLink } from '@/src/components/core/navigation/nav-link';
+import { NavLink } from '@/src/components/core/navigation/navigation-link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
 import { APP_CONFIG } from '@/src/lib/constants';
 import { BookOpen, Code, FileText, HelpCircle, MessageSquare, Search } from '@/src/lib/icons';

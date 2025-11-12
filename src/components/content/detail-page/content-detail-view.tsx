@@ -4,9 +4,9 @@
  */
 
 import { Suspense } from 'react';
-import { UnifiedContentSection } from '@/src/components/content/content-section';
-import { JSONSectionRenderer } from '@/src/components/content/json-section-renderer';
-import { UnifiedReview } from '@/src/components/core/domain/reviews/review';
+import { UnifiedContentSection } from '@/src/components/content/detail-section-variants';
+import { JSONSectionRenderer } from '@/src/components/content/json-to-sections';
+import { UnifiedReview } from '@/src/components/core/domain/reviews/content-review-card';
 import { UnifiedNewsletterCapture } from '@/src/components/features/growth/newsletter-capture';
 import { RecentlyViewedSidebar } from '@/src/components/features/navigation/recently-viewed-sidebar';
 import {
@@ -29,7 +29,7 @@ import { getViewTransitionName } from '@/src/lib/utils/view-transitions.utils';
 import type { Database } from '@/src/types/database.types';
 import { DetailHeader } from './detail-header';
 import { DetailMetadata } from './detail-metadata';
-import { DetailSidebar } from './sidebar/detail-sidebar';
+import { DetailSidebar } from './sidebar/navigation-sidebar';
 
 export interface UnifiedDetailPageProps {
   item: ContentItem;

@@ -7,7 +7,7 @@
 
 import { usePathname } from 'next/navigation';
 import { memo, useCallback, useEffect, useId, useState } from 'react';
-import { UnifiedBadge } from '@/src/components/core/domain/badges/badge';
+import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { ErrorBoundary } from '@/src/components/core/infra/error-boundary';
 import { SearchFilterPanel } from '@/src/components/features/search/search-filter-panel';
 import { Button } from '@/src/components/primitives/ui/button';

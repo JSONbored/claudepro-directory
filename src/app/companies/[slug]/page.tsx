@@ -8,7 +8,7 @@ import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { UnifiedBadge } from '@/src/components/core/domain/badges/badge';
+import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { JobCard } from '@/src/components/core/domain/cards/job-card';
 import { StructuredData } from '@/src/components/core/infra/structured-data';
 import {

@@ -6,9 +6,9 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
-import { UnifiedBadge } from '@/src/components/core/domain/badges/badge';
-import { NavLink } from '@/src/components/core/navigation/nav-link';
-import { FollowButton } from '@/src/components/features/social/follow-button';
+import { FollowButton } from '@/src/components/core/buttons/social/follow-button';
+import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
+import { NavLink } from '@/src/components/core/navigation/navigation-link';
 import {
   Card,
   CardContent,

@@ -5,7 +5,7 @@
  * Used in 1 MDX file across the codebase - Specialized for troubleshooting documentation
  */
 
-import { UnifiedBadge } from '@/src/components/core/domain/badges/badge';
+import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import {
   Card,
   CardContent,

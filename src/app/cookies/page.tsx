@@ -1,4 +1,4 @@
-import { NavLink } from '@/src/components/core/navigation/nav-link';
+import { NavLink } from '@/src/components/core/navigation/navigation-link';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 
 export const metadata = generatePageMetadata('/cookies');

@@ -4,8 +4,8 @@
  */
 
 import { notFound } from 'next/navigation';
-import { CollectionDetailView } from '@/src/components/content/detail-page/collection-detail-view';
-import { UnifiedDetailPage } from '@/src/components/content/detail-page/detail-page';
+import { CollectionDetailView } from '@/src/components/content/detail-page/collection-view';
+import { UnifiedDetailPage } from '@/src/components/content/detail-page/content-detail-view';
 import { ReadProgress } from '@/src/components/content/read-progress';
 import { UnifiedTracker } from '@/src/components/core/infra/analytics-tracker';
 import { StructuredData } from '@/src/components/core/infra/structured-data';

@@ -5,9 +5,9 @@
  */
 
 import { useEffect, useState } from 'react';
-import { UnifiedBadge } from '@/src/components/core/domain/badges/badge';
-import { BaseCard } from '@/src/components/core/domain/cards/base-card';
+import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { UnifiedCardGrid } from '@/src/components/core/domain/cards/card-grid';
+import { BaseCard } from '@/src/components/core/domain/cards/content-card-base';
 import type { CategoryId } from '@/src/lib/config/category-config';
 import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
 import { Sparkles } from '@/src/lib/icons';

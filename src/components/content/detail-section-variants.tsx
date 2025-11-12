@@ -6,8 +6,8 @@
  */
 
 import { motion } from 'motion/react';
-import { ProductionCodeBlock } from '@/src/components/content/production-code-block';
-import { UnifiedBadge } from '@/src/components/core/domain/badges/badge';
+import { ProductionCodeBlock } from '@/src/components/content/interactive-code-block';
+import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import {
   Card,
   CardContent,

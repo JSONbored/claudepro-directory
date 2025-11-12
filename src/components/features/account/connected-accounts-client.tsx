@@ -6,7 +6,7 @@
  */
 
 import { type ComponentType, useState, useTransition } from 'react';
-import { UnifiedBadge } from '@/src/components/core/domain/badges/badge';
+import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { Button } from '@/src/components/primitives/ui/button';
 import {
   Dialog,

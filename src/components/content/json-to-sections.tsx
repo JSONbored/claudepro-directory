@@ -5,10 +5,10 @@
 'use client';
 
 import { Checklist } from '@/src/components/content/checklist';
-import { UnifiedContentBlock } from '@/src/components/content/content-block';
-import { ProductionCodeBlock } from '@/src/components/content/production-code-block';
+import { ProductionCodeBlock } from '@/src/components/content/interactive-code-block';
+import { UnifiedContentBlock } from '@/src/components/content/markdown-content-block';
 import { ComparisonTable } from '@/src/components/core/domain/comparison-table';
-import { UnifiedContentBox } from '@/src/components/core/domain/content/content-box';
+import { UnifiedContentBox } from '@/src/components/core/domain/content/featured-content-box';
 import type { Database } from '@/src/types/database.types';
 
 type ContentRow = Database['public']['Tables']['content']['Row'];

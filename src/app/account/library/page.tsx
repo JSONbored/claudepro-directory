@@ -4,8 +4,8 @@
  */
 
 import Link from 'next/link';
-import { UnifiedBadge } from '@/src/components/core/domain/badges/badge';
-import { NavLink } from '@/src/components/core/navigation/nav-link';
+import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
+import { NavLink } from '@/src/components/core/navigation/navigation-link';
 import { Button } from '@/src/components/primitives/ui/button';
 import {
   Card,

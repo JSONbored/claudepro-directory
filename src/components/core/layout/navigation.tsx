@@ -13,7 +13,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { memo, useEffect, useState } from 'react';
 import { GitHubStarsButton } from '@/src/components/core/buttons/external/github-stars-button';
-import { HeyClaudeLogo } from '@/src/components/core/layout/heyclaude-logo';
+import { HeyClaudeLogo } from '@/src/components/core/layout/brand-logo';
 import { NavigationCommandMenu } from '@/src/components/core/layout/navigation-command-menu';
 import { NavigationDesktop } from '@/src/components/core/layout/navigation-desktop';
 import { NavigationMobile } from '@/src/components/core/layout/navigation-mobile';

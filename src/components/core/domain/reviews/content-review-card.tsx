@@ -40,7 +40,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useId, useMemo, useState, useTransition } from 'react';
-import { BaseCard } from '@/src/components/core/domain/cards/base-card';
+import { BaseCard } from '@/src/components/core/domain/cards/content-card-base';
 import {
   ChartContainer,
   HorizontalBarChart,

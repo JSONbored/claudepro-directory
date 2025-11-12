@@ -27,7 +27,7 @@ import { notFound } from 'next/navigation';
 import { ReadProgress } from '@/src/components/content/read-progress';
 import { UnifiedTracker } from '@/src/components/core/infra/analytics-tracker';
 import { StructuredData } from '@/src/components/core/infra/structured-data';
-import { NavLink } from '@/src/components/core/navigation/nav-link';
+import { NavLink } from '@/src/components/core/navigation/navigation-link';
 import { ChangelogContent } from '@/src/components/features/changelog/changelog-content';
 import { Separator } from '@/src/components/primitives/ui/separator';
 import { getAllChangelogEntries, getChangelogEntryBySlug } from '@/src/lib/changelog/loader';
