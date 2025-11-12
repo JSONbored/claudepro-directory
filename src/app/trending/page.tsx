@@ -5,7 +5,7 @@
 
 import dynamic from 'next/dynamic';
 import { Suspense } from 'react';
-import { UnifiedBadge } from '@/src/components/core/domain/badges/unified-badge';
+import { UnifiedBadge } from '@/src/components/core/domain/badges/badge';
 import { LazySection } from '@/src/components/core/infra/lazy-section';
 import { TrendingContent } from '@/src/components/core/shared/trending-content';
 import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
@@ -17,7 +17,7 @@ import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 const UnifiedNewsletterCapture = dynamic(
   () =>
-    import('@/src/components/features/growth/unified-newsletter-capture').then((mod) => ({
+    import('@/src/components/features/growth/newsletter-capture').then((mod) => ({
       default: mod.UnifiedNewsletterCapture,
     })),
   {

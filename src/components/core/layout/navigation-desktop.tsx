@@ -5,7 +5,7 @@
  */
 
 import Link from 'next/link';
-import { UnifiedBadge } from '@/src/components/core/domain/badges/unified-badge';
+import { UnifiedBadge } from '@/src/components/core/domain/badges/badge';
 import { PrefetchLink } from '@/src/components/core/navigation/prefetch-link';
 import { SearchTrigger } from '@/src/components/features/search/search-trigger';
 import {

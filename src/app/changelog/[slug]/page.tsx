@@ -25,8 +25,8 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { ReadProgress } from '@/src/components/content/read-progress';
+import { UnifiedTracker } from '@/src/components/core/infra/analytics-tracker';
 import { StructuredData } from '@/src/components/core/infra/structured-data';
-import { UnifiedTracker } from '@/src/components/core/infra/unified-tracker';
 import { NavLink } from '@/src/components/core/navigation/nav-link';
 import { ChangelogContent } from '@/src/components/features/changelog/changelog-content';
 import { Separator } from '@/src/components/primitives/ui/separator';

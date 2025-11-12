@@ -7,7 +7,7 @@ import dynamicImport from 'next/dynamic';
 import { Suspense } from 'react';
 import { LazySection } from '@/src/components/core/infra/lazy-section';
 import { TopContributors } from '@/src/components/features/community/top-contributors';
-import { HomePageClient } from '@/src/components/features/home';
+import { HomePageClient } from '@/src/components/features/home/home-sections';
 import { HomePageLoading } from '@/src/components/primitives/feedback/loading-factory';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 
@@ -28,7 +28,7 @@ const NumberTicker = dynamicImport(
 
 const UnifiedNewsletterCapture = dynamicImport(
   () =>
-    import('@/src/components/features/growth/unified-newsletter-capture').then(
+    import('@/src/components/features/growth/newsletter-capture').then(
       (mod) => mod.UnifiedNewsletterCapture
     ),
   {

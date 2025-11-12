@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
-import { UnifiedBadge } from '@/src/components/core/domain/badges/unified-badge';
+import { UnifiedBadge } from '@/src/components/core/domain/badges/badge';
 import { CollectionItemManager } from '@/src/components/core/domain/collection-item-manager';
 import { Button } from '@/src/components/primitives/ui/button';
 import {

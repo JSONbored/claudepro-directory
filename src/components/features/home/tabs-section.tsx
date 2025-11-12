@@ -17,8 +17,8 @@
 import { motion } from 'motion/react';
 import Link from 'next/link';
 import { type FC, memo, useMemo } from 'react';
+import { UnifiedCardGrid } from '@/src/components/core/domain/cards/card-grid';
 import { ConfigCard } from '@/src/components/core/domain/cards/config-card';
-import { UnifiedCardGrid } from '@/src/components/core/domain/cards/unified-card-grid';
 import { Button } from '@/src/components/primitives/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/primitives/ui/tabs';
 import {

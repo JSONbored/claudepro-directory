@@ -4,10 +4,10 @@
  */
 
 import { Suspense } from 'react';
+import { UnifiedContentSection } from '@/src/components/content/content-section';
 import { JSONSectionRenderer } from '@/src/components/content/json-section-renderer';
-import { UnifiedContentSection } from '@/src/components/content/unified-content-section';
-import { UnifiedReview } from '@/src/components/core/domain/reviews/unified-review';
-import { UnifiedNewsletterCapture } from '@/src/components/features/growth/unified-newsletter-capture';
+import { UnifiedReview } from '@/src/components/core/domain/reviews/review';
+import { UnifiedNewsletterCapture } from '@/src/components/features/growth/newsletter-capture';
 import { RecentlyViewedSidebar } from '@/src/components/features/navigation/recently-viewed-sidebar';
 import {
   type CategoryId,

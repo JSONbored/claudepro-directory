@@ -19,7 +19,7 @@ import { createContext, type ReactNode, useCallback, useContext, useEffect, useS
 import {
   type CopyType,
   UnifiedNewsletterCapture,
-} from '@/src/components/features/growth/unified-newsletter-capture';
+} from '@/src/components/features/growth/newsletter-capture';
 
 /**
  * Modal context data structure

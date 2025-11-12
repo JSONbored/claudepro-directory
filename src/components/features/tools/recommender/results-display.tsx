@@ -8,7 +8,7 @@
 import Link from 'next/link';
 import { useState, useTransition } from 'react';
 import { BookmarkButton } from '@/src/components/core/buttons/interaction/bookmark-button';
-import { UnifiedBadge } from '@/src/components/core/domain/badges/unified-badge';
+import { UnifiedBadge } from '@/src/components/core/domain/badges/badge';
 import { BaseCard } from '@/src/components/core/domain/cards/base-card';
 import { Button } from '@/src/components/primitives/ui/button';
 import {

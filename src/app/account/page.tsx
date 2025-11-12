@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { UnifiedBadge } from '@/src/components/core/domain/badges/unified-badge';
+import { UnifiedBadge } from '@/src/components/core/domain/badges/badge';
 import { NavLink } from '@/src/components/core/navigation/nav-link';
 import {
   Card,

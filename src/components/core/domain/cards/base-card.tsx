@@ -27,7 +27,7 @@
 import { motion } from 'motion/react';
 import type { ReactNode } from 'react';
 import { memo } from 'react';
-import { UnifiedBadge } from '@/src/components/core/domain/badges/unified-badge';
+import { UnifiedBadge } from '@/src/components/core/domain/badges/badge';
 import { SwipeableCardWrapper } from '@/src/components/core/domain/cards/swipeable-card-wrapper';
 import { SponsoredTracker } from '@/src/components/features/sponsored/sponsored-tracker';
 import {

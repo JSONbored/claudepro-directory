@@ -30,7 +30,7 @@ import { ChangelogListClient } from '@/src/components/features/changelog/changel
 
 const UnifiedNewsletterCapture = dynamic(
   () =>
-    import('@/src/components/features/growth/unified-newsletter-capture').then((mod) => ({
+    import('@/src/components/features/growth/newsletter-capture').then((mod) => ({
       default: mod.UnifiedNewsletterCapture,
     })),
   {

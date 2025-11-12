@@ -15,7 +15,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { memo } from 'react';
-import { UnifiedBadge } from '@/src/components/core/domain/badges/unified-badge';
+import { UnifiedBadge } from '@/src/components/core/domain/badges/badge';
 import type { UserProfile } from '@/src/components/core/domain/cards/profile-card';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
 import { Award, Medal, TrendingUp } from '@/src/lib/icons';

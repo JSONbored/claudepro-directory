@@ -6,7 +6,7 @@
 
 import { motion } from 'motion/react';
 import Link from 'next/link';
-import { UnifiedBadge } from '@/src/components/core/domain/badges/unified-badge';
+import { UnifiedBadge } from '@/src/components/core/domain/badges/badge';
 import { HeyClaudeLogo } from '@/src/components/core/layout/heyclaude-logo';
 import { PrefetchLink } from '@/src/components/core/navigation/prefetch-link';
 import { Button } from '@/src/components/primitives/ui/button';

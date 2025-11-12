@@ -7,7 +7,7 @@
 'use client';
 
 import { motion } from 'motion/react';
-import { UnifiedBadge } from '@/src/components/core/domain/badges/unified-badge';
+import { UnifiedBadge } from '@/src/components/core/domain/badges/badge';
 import { NavLink } from '@/src/components/core/navigation/nav-link';
 import { Card, CardContent, CardHeader } from '@/src/components/primitives/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/primitives/ui/tabs';

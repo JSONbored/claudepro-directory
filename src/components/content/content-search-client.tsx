@@ -2,14 +2,14 @@
 
 import dynamic from 'next/dynamic';
 import { memo, useCallback, useEffect, useState } from 'react';
+import { UnifiedCardGrid } from '@/src/components/core/domain/cards/card-grid';
 import { ConfigCard } from '@/src/components/core/domain/cards/config-card';
-import { UnifiedCardGrid } from '@/src/components/core/domain/cards/unified-card-grid';
 import { ErrorBoundary } from '@/src/components/core/infra/error-boundary';
 import { Skeleton } from '@/src/components/primitives/feedback/loading-skeleton';
 
 const UnifiedSearch = dynamic(
   () =>
-    import('@/src/components/features/search/unified-search').then((mod) => ({
+    import('@/src/components/features/search/search').then((mod) => ({
       default: mod.UnifiedSearch,
     })),
   {

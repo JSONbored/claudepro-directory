@@ -4,11 +4,11 @@
  */
 
 import { notFound } from 'next/navigation';
-import { UnifiedDetailPage } from '@/src/components/content/detail-page';
 import { CollectionDetailView } from '@/src/components/content/detail-page/collection-detail-view';
+import { UnifiedDetailPage } from '@/src/components/content/detail-page/detail-page';
 import { ReadProgress } from '@/src/components/content/read-progress';
+import { UnifiedTracker } from '@/src/components/core/infra/analytics-tracker';
 import { StructuredData } from '@/src/components/core/infra/structured-data';
-import { UnifiedTracker } from '@/src/components/core/infra/unified-tracker';
 import { RecentlyViewedTracker } from '@/src/components/features/navigation/recently-viewed-tracker';
 import type { RecentlyViewedCategory } from '@/src/hooks/use-recently-viewed';
 import {

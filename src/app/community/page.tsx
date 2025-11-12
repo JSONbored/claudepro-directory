@@ -1,11 +1,11 @@
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
-import { UnifiedBadge } from '@/src/components/core/domain/badges/unified-badge';
+import { UnifiedBadge } from '@/src/components/core/domain/badges/badge';
 import { Button } from '@/src/components/primitives/ui/button';
 
 const UnifiedNewsletterCapture = dynamic(
   () =>
-    import('@/src/components/features/growth/unified-newsletter-capture').then((mod) => ({
+    import('@/src/components/features/growth/newsletter-capture').then((mod) => ({
       default: mod.UnifiedNewsletterCapture,
     })),
   {

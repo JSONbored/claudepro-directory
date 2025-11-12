@@ -6,7 +6,7 @@
 import { unstable_cache } from 'next/cache';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
-import { UnifiedBadge } from '@/src/components/core/domain/badges/unified-badge';
+import { UnifiedBadge } from '@/src/components/core/domain/badges/badge';
 import { JobCard } from '@/src/components/core/domain/cards/job-card';
 import { JobsPromo } from '@/src/components/core/domain/jobs/jobs-promo';
 import { Button } from '@/src/components/primitives/ui/button';
@@ -30,7 +30,7 @@ import type { Tables } from '@/src/types/database.types';
 
 const UnifiedNewsletterCapture = dynamic(
   () =>
-    import('@/src/components/features/growth/unified-newsletter-capture').then((mod) => ({
+    import('@/src/components/features/growth/newsletter-capture').then((mod) => ({
       default: mod.UnifiedNewsletterCapture,
     })),
   {

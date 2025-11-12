@@ -28,7 +28,7 @@ import {
   LazyFeaturedSections,
   LazySearchSection,
   LazyTabsSection,
-} from '@/src/components/features/home/lazy-homepage-sections';
+} from '@/src/components/features/home/lazy-home-sections';
 import { NumberTicker } from '@/src/components/primitives/animation/number-ticker';
 import {
   HomepageStatsSkeleton,
@@ -54,7 +54,7 @@ import { ANIMATION_CONSTANTS, UI_CLASSES } from '@/src/lib/ui-constants';
  */
 const UnifiedSearch = dynamic(
   () =>
-    import('@/src/components/features/search/unified-search').then((mod) => ({
+    import('@/src/components/features/search/search').then((mod) => ({
       default: mod.UnifiedSearch,
     })),
   {
