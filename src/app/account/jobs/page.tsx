@@ -183,10 +183,7 @@ export default async function MyJobsPage() {
                   )}
 
                   {job.status === 'active' && (
-                    <JobToggleButton
-                      jobId={job.id}
-                      currentStatus={job.status ?? 'paused'}
-                    />
+                    <JobToggleButton jobId={job.id} currentStatus={job.status ?? 'paused'} />
                   )}
 
                   <JobDeleteButton jobId={job.id} />

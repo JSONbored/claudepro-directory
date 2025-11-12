@@ -72,12 +72,9 @@ export function LayoutContent({
   // Auth routes: minimal wrapper with no height constraints for true fullscreen experience
   if (isAuthRoute) {
     return (
-      <>
-        {/* biome-ignore lint/correctness/useUniqueElementIds: Static ID required for skip navigation accessibility */}
-        <main id="main-content" className={`${DIMENSIONS.FULL_VIEWPORT} w-full overflow-hidden`}>
-          {children}
-        </main>
-      </>
+      <main id="main-content" className={`${DIMENSIONS.FULL_VIEWPORT} w-full overflow-hidden`}>
+        {children}
+      </main>
     );
   }
 
@@ -95,7 +92,6 @@ export function LayoutContent({
       <div className={'flex min-h-screen flex-col bg-background'}>
         {announcement && <AnnouncementBannerClient announcement={announcement} />}
         <Navigation hideCreateButton={useFloatingActionBar} />
-        {/* biome-ignore lint/correctness/useUniqueElementIds: Static ID required for skip navigation accessibility */}
         <main id="main-content" className="flex-1">
           {children}
         </main>

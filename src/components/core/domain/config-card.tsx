@@ -363,10 +363,7 @@ export const ConfigCard = memo(
 
               {/* Bookmark button with count overlay */}
               <div className="relative">
-                <BookmarkButton
-                  contentType={item.category || 'agents'}
-                  contentSlug={item.slug}
-                />
+                <BookmarkButton contentType={item.category || 'agents'} contentSlug={item.slug} />
                 {bookmarkCount !== undefined && bookmarkCount > 0 && (
                   <UnifiedBadge
                     variant="notification-count"

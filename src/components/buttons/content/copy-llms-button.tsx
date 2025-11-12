@@ -101,7 +101,7 @@ export function CopyLLMsButton({
           ) : isLoading ? (
             <motion.div
               animate={{ opacity: [1, 0.5, 1] }}
-              transition={{ duration: 1, repeat: Infinity, ease: 'easeInOut' }}
+              transition={{ duration: 1, repeat: Number.POSITIVE_INFINITY, ease: 'easeInOut' }}
             >
               <Sparkles className={UI_CLASSES.ICON_SM} />
             </motion.div>

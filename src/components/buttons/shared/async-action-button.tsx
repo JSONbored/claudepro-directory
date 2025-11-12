@@ -107,7 +107,7 @@ export function AsyncActionButton({
         ) : isLoading ? (
           <motion.div
             animate={{ opacity: [1, 0.5, 1] }}
-            transition={{ duration: 1, repeat: Infinity, ease: 'easeInOut' }}
+            transition={{ duration: 1, repeat: Number.POSITIVE_INFINITY, ease: 'easeInOut' }}
           >
             <Icon className={UI_CLASSES.ICON_SM} aria-hidden="true" />
           </motion.div>

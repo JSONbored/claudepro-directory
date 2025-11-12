@@ -165,9 +165,7 @@ const NavigationComponent = ({ hideCreateButton = false }: NavigationProps = {})
                     <DiscordIcon className={UI_CLASSES.ICON_XS} />
                   </Button>
 
-                  <GitHubStarsButton
-                    className={`hidden md:flex ${UI_CLASSES.TEXT_XS}`}
-                  />
+                  <GitHubStarsButton className={`hidden md:flex ${UI_CLASSES.TEXT_XS}`} />
 
                   <UserMenu className={'hidden md:flex'} />
 

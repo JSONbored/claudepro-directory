@@ -1,5 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.2.7/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.3.5/schema.json",
   "files": {
     "includes": [
       "*.{ts,tsx,js,jsx,mjs,cjs}",
@@ -10,23 +10,21 @@
       "scripts/utils/**/*.js",
       "content/**/*",
       "config/**/*",
-      "supabase/functions/**/*.ts"
-    ],
-    "experimentalScannerIgnores": [
-      ".next/**/*",
-      "out/**/*",
-      "dist/**/*",
-      "generated/**/*",
-      "src/generated/**/*",
-      "src/lib/schemas/generated/**/*",
-      "src/lib/schemas/generated/db-schemas.d.ts",
-      "src/types/database.types.ts",
-      "scripts/build/templates/**/*",
-      "scripts/build/templates/service-worker.template.js",
-      "node_modules/**/*",
-      "test-results/**/*",
-      "playwright-report/**/*",
-      "playwright/.cache/**/*"
+      "supabase/functions/**/*.ts",
+      "!!**/.next/**/*",
+      "!!**/out/**/*",
+      "!!**/dist/**/*",
+      "!!**/generated/**/*",
+      "!!**/src/generated/**/*",
+      "!!**/src/lib/schemas/generated/**/*",
+      "!!**/src/lib/schemas/generated/db-schemas.d.ts",
+      "!!**/src/types/database.types.ts",
+      "!!**/scripts/build/templates/**/*",
+      "!!**/scripts/build/templates/service-worker.template.js",
+      "!!**/node_modules/**/*",
+      "!!**/test-results/**/*",
+      "!!**/playwright-report/**/*",
+      "!!**/playwright/.cache/**/*"
     ],
     "ignoreUnknown": false
   },
@@ -53,6 +51,10 @@
     }
   },
   "css": {
+    "parser": {
+      "cssModules": false,
+      "tailwindDirectives": true
+    },
     "linter": {
       "enabled": false
     }
