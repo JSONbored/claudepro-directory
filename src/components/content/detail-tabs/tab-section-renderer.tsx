@@ -1,8 +1,9 @@
 /**
- * Tab Section Renderer - Maps section IDs to UnifiedContentSection components
- * Reuses existing section components for consistency and maintainability
+ * Tab Section Renderer - Maps section IDs to extracted section components
+ * Uses dynamic imports for optimal code splitting and performance
  */
 
+import dynamic from 'next/dynamic';
 import { UnifiedContentSection } from '@/src/components/content/detail-section-variants';
 import { JSONSectionRenderer } from '@/src/components/content/json-to-sections';
 import { ReviewListSection } from '@/src/components/core/domain/reviews/review-list-section';
@@ -11,6 +12,13 @@ import type { SectionId } from '@/src/lib/config/category-config.types';
 import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
 import type { Database } from '@/src/types/database.types';
 import type { ProcessedSectionData } from '@/src/lib/types/detail-tabs.types';
+
+// Dynamic imports for extracted sections (code splitting)
+const FeaturesSection = dynamic(() => import('@/src/components/content/sections/features-section'));
+const RequirementsSection = dynamic(() => import('@/src/components/content/sections/requirements-section'));
+const UseCasesSection = dynamic(() => import('@/src/components/content/sections/use-cases-section'));
+const SecuritySection = dynamic(() => import('@/src/components/content/sections/security-section'));
+const TroubleshootingSection = dynamic(() => import('@/src/components/content/sections/troubleshooting-section'));
 
 export interface TabSectionRendererProps {
   sectionId: SectionId;
@@ -59,42 +67,15 @@ export function TabSectionRenderer({
 
     case 'features':
       if (!config.sections.features || features.length === 0) return null;
-      return (
-        <UnifiedContentSection
-          variant="bullets"
-          title="Features"
-          description="Key capabilities and functionality"
-          items={features}
-          category={item.category as CategoryId}
-          bulletColor="primary"
-        />
-      );
+      return <FeaturesSection features={features} category={item.category as CategoryId} />;
 
     case 'requirements':
       if (requirements.length === 0) return null;
-      return (
-        <UnifiedContentSection
-          variant="bullets"
-          title="Requirements"
-          description="Prerequisites and dependencies"
-          items={requirements}
-          category={item.category as CategoryId}
-          bulletColor="orange"
-        />
-      );
+      return <RequirementsSection requirements={requirements} category={item.category as CategoryId} />;
 
     case 'use_cases':
       if (!config.sections.use_cases || useCases.length === 0) return null;
-      return (
-        <UnifiedContentSection
-          variant="bullets"
-          title="Use Cases"
-          description="Common scenarios and applications"
-          items={useCases}
-          category={item.category as CategoryId}
-          bulletColor="accent"
-        />
-      );
+      return <UseCasesSection useCases={useCases} category={item.category as CategoryId} />;
 
     case 'installation':
       if (!config.sections.installation || !installationData) return null;
@@ -128,26 +109,11 @@ export function TabSectionRenderer({
 
     case 'troubleshooting':
       if (!config.sections.troubleshooting || troubleshooting.length === 0) return null;
-      return (
-        <UnifiedContentSection
-          variant="troubleshooting"
-          items={troubleshooting}
-          description="Common issues and solutions"
-        />
-      );
+      return <TroubleshootingSection items={troubleshooting} />;
 
     case 'security':
       if (!config.sections.security || !('security' in item)) return null;
-      return (
-        <UnifiedContentSection
-          variant="bullets"
-          title="Security Best Practices"
-          description="Important security considerations"
-          items={item.security as string[]}
-          category={item.category as CategoryId}
-          bulletColor="orange"
-        />
-      );
+      return <SecuritySection securityItems={item.security as string[]} category={item.category as CategoryId} />;
 
     case 'reviews':
       return (
