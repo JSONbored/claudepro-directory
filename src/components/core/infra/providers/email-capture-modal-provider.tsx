@@ -109,8 +109,36 @@ export function PostCopyEmailProvider({ children }: PostCopyEmailProviderProps) 
     }
   }, []);
 
+  // Exit-intent detection (mouse leaving viewport)
+  useEffect(() => {
+    const handleMouseLeave = (e: MouseEvent) => {
+      // Only trigger on upward mouse movement (toward browser chrome)
+      if (e.clientY <= 10 && !hasShownThisSession) {
+        const dismissed = localStorage.getItem(STORAGE_KEY);
+        if (dismissed === 'true') return;
+
+        // Show modal with exit-intent context
+        setModalContext({
+          copyType: 'link',
+          category: 'exit-intent',
+        });
+        setIsOpen(true);
+        setHasShownThisSession(true);
+        sessionStorage.setItem(SESSION_KEY, 'true');
+      }
+    };
+
+    // Only attach listener on high-value pages (content pages, not homepage)
+    if (typeof window !== 'undefined' && window.location.pathname.includes('/')) {
+      document.addEventListener('mouseleave', handleMouseLeave);
+      return () => document.removeEventListener('mouseleave', handleMouseLeave);
+    }
+    return undefined;
+  }, [hasShownThisSession]);
+
   /**
    * Show modal with copy context
+   * Triggers after 2nd copy to prove value first (reduce friction)
    */
   const showModal = useCallback(
     (context: ModalContext) => {
@@ -119,7 +147,7 @@ export function PostCopyEmailProvider({ children }: PostCopyEmailProviderProps) 
       setCopyCount(newCount);
       sessionStorage.setItem('copy-count', String(newCount));
 
-      // Only show after 2nd copy action (prove value first)
+      // Only show after 2nd copy action (user has proven interest)
       if (newCount < 2) {
         return;
       }

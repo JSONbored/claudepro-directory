@@ -62,6 +62,19 @@ export const createFeatureFlag = (key: string) =>
   });
 
 /**
+ * Factory function to create experiments (A/B tests with variants)
+ */
+export const createExperiment = <T extends string>(key: string, defaultValue: T) =>
+  flag<T, StatsigUser>({
+    key,
+    adapter: statsigAdapter.experiment((exp) => exp.get('variant', defaultValue) as T, {
+      exposureLogging: true,
+    }),
+    identify,
+    defaultValue,
+  });
+
+/**
  * All feature flags - centralized
  * Usage: const enabled = await featureFlags.testFlag();
  */
@@ -91,4 +104,18 @@ export const featureFlags = {
 
   // UI Components
   floatingActionBar: createFeatureFlag('floating_action_bar'),
+};
+
+/**
+ * Newsletter A/B Test Experiments
+ */
+export const newsletterExperiments = {
+  // Footer delay timing test (10s vs 30s vs 60s)
+  footerDelay: createExperiment<'10s' | '30s' | '60s'>('newsletter_footer_delay', '30s'),
+
+  // CTA copy variant test (aggressive vs social_proof vs value_focused)
+  ctaVariant: createExperiment<'aggressive' | 'social_proof' | 'value_focused'>(
+    'newsletter_cta_variant',
+    'value_focused'
+  ),
 };

@@ -15,13 +15,15 @@
 import type { Resend } from 'npm:resend@4.0.0';
 
 /**
- * Resend Segment IDs (created in Resend dashboard)
- * UPDATE THESE with your actual segment IDs from Resend
+ * Production Resend Segment IDs
+ * - Active Subscribers (70+ engagement score)
+ * - New Subscribers (subscribed <7 days, any score)
+ * - At-Risk (0-39 engagement score, inactive)
  */
 export const RESEND_SEGMENT_IDS = {
-  high_engagement: 'REPLACE_WITH_HIGH_SEGMENT_ID',
-  medium_engagement: 'REPLACE_WITH_MEDIUM_SEGMENT_ID',
-  low_engagement: 'REPLACE_WITH_LOW_SEGMENT_ID',
+  high_engagement: '7757f565-bb4e-4a3e-bfd8-59f7636a6c14', // Active Subscribers
+  medium_engagement: '6fadc736-c46a-452e-b3bd-8bfedb83f988', // New Subscribers
+  low_engagement: '2d86c140-fdff-4f22-b9bf-7efa0f7897e9', // At-Risk
 } as const;
 
 /**

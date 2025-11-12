@@ -7,8 +7,10 @@
 
 import dynamic from 'next/dynamic';
 import { usePathname } from 'next/navigation';
+import { use } from 'react';
 import { AnnouncementBannerClient } from '@/src/components/core/layout/announcement-banner-client';
 import { Navigation } from '@/src/components/core/layout/navigation';
+import { newsletterExperiments } from '@/src/lib/flags';
 import { DIMENSIONS } from '@/src/lib/ui-constants';
 import type { Tables } from '@/src/types/database.types';
 
@@ -63,6 +65,11 @@ export function LayoutContent({
 }: LayoutContentProps) {
   const pathname = usePathname();
 
+  // A/B test: Footer delay timing (10s vs 30s vs 60s)
+  const footerDelayVariant = use(newsletterExperiments.footerDelay());
+  const delayMs =
+    footerDelayVariant === '10s' ? 10000 : footerDelayVariant === '60s' ? 60000 : 30000;
+
   // Auth route prefixes - Next.js strips route groups like (auth) from URLs
   const AUTH_ROUTE_PREFIXES = ['/login', '/auth-code-error', '/auth/'];
   const isAuthRoute = AUTH_ROUTE_PREFIXES.some((prefix) =>
@@ -99,7 +106,7 @@ export function LayoutContent({
         {/* Feature flag: Floating Action Bar (can be toggled on/off via Statsig) */}
         {useFloatingActionBar && <FloatingActionBar />}
         <NotificationSheet />
-        <NewsletterFooterBar source="footer" />
+        <NewsletterFooterBar source="footer" showAfterDelay={delayMs} />
       </div>
     </>
   );

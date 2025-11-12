@@ -17,9 +17,10 @@ export type {
 export { NewsletterCTAVariant } from './newsletter-cta-variants';
 export type { NewsletterFooterBarProps } from './newsletter-footer-bar';
 export { NewsletterFooterBar } from './newsletter-footer-bar';
-// Re-export props types for convenience
 export type { NewsletterFormProps } from './newsletter-form';
 export { NewsletterForm } from './newsletter-form';
 export type { NewsletterModalProps } from './newsletter-modal';
 export { NewsletterModal } from './newsletter-modal';
-export { getContextualMessage } from './newsletter-utils';
+export type { NewsletterScrollTriggerProps } from './newsletter-scroll-trigger';
+export { NewsletterScrollTrigger } from './newsletter-scroll-trigger';
+export { formatSubscriberCount, getContextualMessage } from './newsletter-utils';

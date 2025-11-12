@@ -1,5 +1,6 @@
 'use client';
 
+import { use } from 'react';
 import {
   Card,
   CardContent,
@@ -8,12 +9,14 @@ import {
   CardTitle,
 } from '@/src/components/primitives/ui/card';
 import type { NewsletterSource } from '@/src/hooks/use-newsletter';
+import { useNewsletterCount } from '@/src/hooks/use-newsletter-count';
 import { NEWSLETTER_CTA_CONFIG } from '@/src/lib/config/category-config';
+import { newsletterExperiments } from '@/src/lib/flags';
 import { Mail } from '@/src/lib/icons';
 import { DIMENSIONS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
 import { NewsletterForm } from './newsletter-form';
-import { getContextualMessage } from './newsletter-utils';
+import { formatSubscriberCount, getContextualMessage, getCTAVariantCopy } from './newsletter-utils';
 
 export interface NewsletterCTABaseProps {
   source: NewsletterSource;
@@ -47,11 +50,22 @@ export type NewsletterCTAVariantProps =
 
 export function NewsletterCTAVariant(props: NewsletterCTAVariantProps) {
   const { variant, source, className, category, headline, description } = props;
+  const { count } = useNewsletterCount();
 
-  const { headline: defaultHeadline, description: defaultDescription } =
+  // A/B test: CTA copy variant (aggressive vs social_proof vs value_focused)
+  const ctaVariant = use(newsletterExperiments.ctaVariant());
+  const subscriberCount = formatSubscriberCount(count);
+
+  // Copy priority: explicit prop > contextual (if category) > experiment variant > default
+  const { headline: contextHeadline, description: contextDescription } =
     getContextualMessage(category);
-  const finalHeadline = headline || defaultHeadline;
-  const finalDescription = description || defaultDescription;
+  const { headline: variantHeadline, description: variantDescription } = getCTAVariantCopy(
+    ctaVariant,
+    subscriberCount
+  );
+
+  const finalHeadline = headline || (category ? contextHeadline : variantHeadline);
+  const finalDescription = description || (category ? contextDescription : variantDescription);
 
   if (variant === 'hero') {
     return (
@@ -84,7 +98,13 @@ export function NewsletterCTAVariant(props: NewsletterCTAVariantProps) {
           <NewsletterForm source={source} className="w-full" />
         </div>
 
-        <p className="mt-6 text-muted-foreground/80 text-sm">{NEWSLETTER_CTA_CONFIG.footerText}</p>
+        <div className="mt-6 flex flex-col items-center gap-2">
+          <p className="text-muted-foreground/80 text-sm">{NEWSLETTER_CTA_CONFIG.footerText}</p>
+          <p className="flex items-center gap-1.5 text-muted-foreground/60 text-xs">
+            <span className="inline-flex h-2 w-2 animate-pulse rounded-full bg-green-500" />
+            Join {subscriberCount} subscribers
+          </p>
+        </div>
       </div>
     );
   }

@@ -18,12 +18,12 @@ export interface NewsletterFormProps {
 }
 
 export function NewsletterForm({ source, className }: NewsletterFormProps) {
-  const { celebrateSignup } = useConfetti();
+  const { fireConfetti } = useConfetti();
   const { email, setEmail, isSubmitting, subscribe, error } = useNewsletter({
     source,
     onSuccess: () => {
-      // Celebrate newsletter signup! 🎉
-      celebrateSignup();
+      // Subtle confetti animation for delightful success state
+      fireConfetti('subtle');
     },
   });
   const errorId = useId();

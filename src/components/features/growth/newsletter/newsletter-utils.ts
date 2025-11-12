@@ -1,5 +1,49 @@
 import { NEWSLETTER_CTA_CONFIG } from '@/src/lib/config/category-config';
 
+/**
+ * Format subscriber count for social proof display
+ * Rounds to nearest friendly number (14 → "14+", 1,234 → "1.2k+")
+ */
+export function formatSubscriberCount(count: number | null): string {
+  if (!count || count === 0) return '10+'; // Minimum social proof
+
+  if (count < 100) return `${count}+`;
+  if (count < 1000) return `${Math.floor(count / 10) * 10}+`;
+  if (count < 10000) return `${(count / 1000).toFixed(1)}k+`;
+  return `${Math.floor(count / 1000)}k+`;
+}
+
+/**
+ * CTA copy variants for A/B testing
+ * Returns headline/description based on experiment variant
+ */
+export function getCTAVariantCopy(
+  variant: 'aggressive' | 'social_proof' | 'value_focused',
+  subscriberCount: string
+): {
+  headline: string;
+  description: string;
+} {
+  const variants = {
+    aggressive: {
+      headline: `🚀 Join ${subscriberCount === '10+' ? '10,000+' : subscriberCount} Claude Power Users`,
+      description:
+        'Get exclusive tips, tools, and strategies before everyone else. Level up your Claude game.',
+    },
+    social_proof: {
+      headline: `${subscriberCount} subscribers already crushing it`,
+      description: 'Join the community getting weekly Claude updates, tools, and insider tips.',
+    },
+    value_focused: {
+      headline: 'Save 5 Hours/Week with Claude Tips',
+      description:
+        'Get actionable Claude workflows, tools, and productivity hacks delivered weekly.',
+    },
+  };
+
+  return variants[variant];
+}
+
 export function getContextualMessage(category?: string): {
   headline: string;
   description: string;
