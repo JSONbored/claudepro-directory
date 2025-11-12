@@ -31,6 +31,7 @@ import {
   publicCorsHeaders,
   successResponse,
 } from '../_shared/utils/response.ts';
+import { syncContactSegment } from '../_shared/utils/segment-manager.ts';
 import { supabaseServiceRole } from '../_shared/utils/supabase-service-role.ts';
 
 validateEnvironment(['resend', 'auth-hook']);
@@ -196,6 +197,16 @@ async function handleSubscribe(req: Request): Promise<Response> {
           }
         } catch (topicException) {
           console.error('[SUBSCRIBE] Topic assignment exception:', topicException);
+          // Don't fail subscription - non-critical
+        }
+
+        // Step 1.6: Assign to engagement segment
+        try {
+          const engagementScore = contactProperties.engagement_score as number;
+          await syncContactSegment(resend, resendContactId, engagementScore);
+          console.log('[SUBSCRIBE] ✓ Segment assigned successfully');
+        } catch (segmentException) {
+          console.error('[SUBSCRIBE] Segment assignment exception:', segmentException);
           // Don't fail subscription - non-critical
         }
       }
