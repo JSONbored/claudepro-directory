@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { Button } from '@/src/components/primitives/ui/button';
@@ -10,6 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/ui/card';
+import { pricingConfigs } from '@/src/lib/flags';
 import { SOCIAL_LINKS } from '@/src/lib/constants';
 import {
   BarChart,
@@ -26,6 +28,30 @@ import { ANIMATION_CONSTANTS, RESPONSIVE_PATTERNS, UI_CLASSES } from '@/src/lib/
 
 export default function PartnerPage() {
   const configCount = 282; // Static count for client component
+  const [pricing, setPricing] = useState({
+    jobsRegular: 249,
+    jobsDiscounted: 149,
+    jobsDurationDays: 30,
+    sponsoredRegular: 199,
+    sponsoredDiscounted: 119,
+  });
+
+  // Load pricing from Statsig
+  useEffect(() => {
+    pricingConfigs()
+      .then((config) => {
+        setPricing({
+          jobsRegular: (config['pricing.jobs.regular'] as number) ?? 249,
+          jobsDiscounted: (config['pricing.jobs.discounted'] as number) ?? 149,
+          jobsDurationDays: (config['pricing.jobs.duration_days'] as number) ?? 30,
+          sponsoredRegular: (config['pricing.sponsored.regular'] as number) ?? 199,
+          sponsoredDiscounted: (config['pricing.sponsored.discounted'] as number) ?? 119,
+        });
+      })
+      .catch(() => {
+        // Silent fail - use defaults
+      });
+  }, []);
 
   return (
     <div className={'container mx-auto px-4 py-12'}>
@@ -141,13 +167,15 @@ export default function PartnerPage() {
                 <div className={'rounded-lg border bg-muted/30 p-4'}>
                   <div className={'mb-2 flex items-baseline gap-2'}>
                     <span className={'font-bold text-muted-foreground text-xl line-through'}>
-                      $249
+                      ${pricing.jobsRegular}
                     </span>
-                    <span className={'font-bold text-3xl text-primary'}>$149</span>
+                    <span className={'font-bold text-3xl text-primary'}>
+                      ${pricing.jobsDiscounted}
+                    </span>
                     <span className={UI_CLASSES.TEXT_SM_MUTED}>/month</span>
                   </div>
                   <p className={UI_CLASSES.TEXT_XS_MUTED}>
-                    30-day featured placement • Launch pricing
+                    {pricing.jobsDurationDays}-day featured placement • Launch pricing
                   </p>
                 </div>
 
@@ -167,7 +195,7 @@ export default function PartnerPage() {
                   </div>
                   <div className={'flex items-start gap-2'}>
                     <Check className={`mt-0.5 ${UI_CLASSES.ICON_SM} ${UI_CLASSES.ICON_SUCCESS}`} />
-                    <p className={UI_CLASSES.TEXT_SM}>30-day visibility</p>
+                    <p className={UI_CLASSES.TEXT_SM}>{pricing.jobsDurationDays}-day visibility</p>
                   </div>
                   <div className={'flex items-start gap-2'}>
                     <Check className={`mt-0.5 ${UI_CLASSES.ICON_SM} ${UI_CLASSES.ICON_SUCCESS}`} />
@@ -216,9 +244,11 @@ export default function PartnerPage() {
                 <div className={'rounded-lg border bg-muted/30 p-4'}>
                   <div className={'mb-2 flex items-baseline gap-2'}>
                     <span className={'font-bold text-muted-foreground text-xl line-through'}>
-                      $199
+                      ${pricing.sponsoredRegular}
                     </span>
-                    <span className={'font-bold text-3xl text-primary'}>$119</span>
+                    <span className={'font-bold text-3xl text-primary'}>
+                      ${pricing.sponsoredDiscounted}
+                    </span>
                     <span className={UI_CLASSES.TEXT_SM_MUTED}>/month</span>
                   </div>
                   <p className={UI_CLASSES.TEXT_XS_MUTED}>Per listing • Launch pricing</p>

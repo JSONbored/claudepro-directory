@@ -4,9 +4,9 @@ import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Button } from '@/src/components/primitives/ui/button';
 import type { NewsletterSource } from '@/src/hooks/use-newsletter';
+import { appSettings } from '@/src/lib/flags';
 import { NEWSLETTER_CTA_CONFIG } from '@/src/lib/config/category-config';
 import { Mail, X } from '@/src/lib/icons';
-import { createClient } from '@/src/lib/supabase/client';
 import { DIMENSIONS, POSITION_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { NewsletterForm } from './newsletter-form';
 
@@ -49,21 +49,14 @@ export function NewsletterFooterBar({
   useEffect(() => {
     const loadExcludedPages = async () => {
       try {
-        const supabase = createClient();
-        const { data } = await supabase.rpc('get_app_settings', {
-          p_category: 'newsletter',
-        });
+        const config = await appSettings();
+        const excludedPages = config['newsletter.excluded_pages'] as string[];
 
-        if (data) {
-          const settings = data as Record<string, { value: unknown }>;
-          const excludedPages = settings['newsletter.excluded_pages']?.value;
-
-          if (Array.isArray(excludedPages) && excludedPages.length > 0) {
-            setPagesWithInlineCTA(excludedPages as string[]);
-          }
+        if (Array.isArray(excludedPages) && excludedPages.length > 0) {
+          setPagesWithInlineCTA(excludedPages);
         }
       } catch {
-        // Silent fail
+        // Silent fail - use defaults
       }
     };
 

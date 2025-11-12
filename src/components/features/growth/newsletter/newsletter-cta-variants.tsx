@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import {
   Card,
   CardContent,
@@ -14,7 +15,12 @@ import { Mail } from '@/src/lib/icons';
 import { DIMENSIONS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
 import { NewsletterForm } from './newsletter-form';
-import { formatSubscriberCount, getContextualMessage, getCTAVariantCopy } from './newsletter-utils';
+import {
+  formatSubscriberCount,
+  getContextualMessage,
+  getCTAVariantCopy,
+  loadNewsletterConfig,
+} from './newsletter-utils';
 
 export interface NewsletterCTABaseProps {
   source: NewsletterSource;
@@ -58,17 +64,30 @@ export function NewsletterCTAVariant(props: NewsletterCTAVariantProps) {
     ctaVariant: propCtaVariant,
   } = props;
   const { count, isLoading } = useNewsletterCount();
+  const [newsletterConfig, setNewsletterConfig] = useState<Record<string, unknown>>({});
+
+  // Load newsletter config from Statsig
+  useEffect(() => {
+    loadNewsletterConfig()
+      .then(setNewsletterConfig)
+      .catch(() => {
+        // Silent fail - uses hardcoded defaults
+      });
+  }, []);
 
   // Use prop if provided, otherwise default to 'value_focused'
   const ctaVariant = propCtaVariant || 'value_focused';
   const subscriberCount = formatSubscriberCount(count);
 
   // Copy priority: explicit prop > contextual (if category) > experiment variant > default
-  const { headline: contextHeadline, description: contextDescription } =
-    getContextualMessage(category);
+  const { headline: contextHeadline, description: contextDescription } = getContextualMessage(
+    category,
+    newsletterConfig
+  );
   const { headline: variantHeadline, description: variantDescription } = getCTAVariantCopy(
     ctaVariant,
-    subscriberCount
+    subscriberCount,
+    newsletterConfig
   );
 
   const finalHeadline = headline || (category ? contextHeadline : variantHeadline);
