@@ -1,6 +1,6 @@
 # Lefthook Configuration - Claude Pro Directory
-# Version: 2.0.2 (November 2025)
-# Database-first architecture: No JSON content validation needed
+# Version: 3.0.0 (November 2025)
+# Enhanced with auto-format, edge function type-check, and tech debt tracking
 
 # ============================================================================
 # OUTPUT CONTROL
@@ -19,21 +19,36 @@ pre-commit:
   parallel: true
   follow: true
   commands:
-    # 1. Type checking for TypeScript files
+    # 1. Type checking (Next.js/Node code)
     type-check:
       glob: "**/*.{ts,tsx}"
+      exclude: "supabase/functions/**"
       run: |
-        echo "🔍 Type checking..."
+        echo "🔍 Type checking Next.js code..."
         pnpm type-check
-      fail_text: "❌ Type errors found. Fix them before committing."
+      fail_text: "❌ Type errors found in Next.js code. Fix them before committing."
 
-    # 2. Format check (Biome)
-    format-check:
+    # 2. Type checking (Edge functions - Deno)
+    type-check-edge:
+      glob: "supabase/functions/**/*.ts"
+      run: |
+        echo "🦕 Type checking edge functions..."
+        if command -v deno &> /dev/null; then
+          pnpm type-check:edge
+        else
+          echo "⚠️  Deno not installed - skipping edge function type-check"
+          echo "   Install: brew install deno"
+        fi
+      fail_text: "❌ Type errors found in edge functions. Fix them before committing."
+
+    # 3. Auto-format with Biome (via ultracite)
+    format:
       glob: "**/*.{ts,tsx,js,jsx,json}"
       run: |
-        echo "✨ Checking code formatting..."
-        pnpm lint || (echo "❌ Run 'pnpm format' to auto-fix formatting issues" && exit 1)
-      fail_text: "❌ Formatting issues found. Run 'pnpm format' to fix."
+        echo "✨ Auto-formatting staged files..."
+        npx ultracite fix
+        git add -u
+      fail_text: "❌ Auto-formatting failed. Check for syntax errors."
 
 # ============================================================================
 # PRE-PUSH: Comprehensive checks before code reaches remote
@@ -41,22 +56,98 @@ pre-commit:
 pre-push:
   parallel: false
   commands:
-    # 1. Production build verification (CRITICAL - must pass)
+    # 1. Full type checking (all environments)
+    type-check-all:
+      run: |
+        echo "🔍 Type checking all code..."
+        echo ""
+        echo "→ Next.js/Node code..."
+        pnpm type-check
+
+        echo ""
+        echo "→ Edge functions..."
+        if command -v deno &> /dev/null; then
+          pnpm type-check:edge
+        else
+          echo "⚠️  Deno not installed - skipping edge function type-check"
+          echo "   Install: brew install deno"
+        fi
+      fail_text: "❌ Type errors found. Fix them before pushing."
+
+    # 2. Production build verification (graceful)
     build:
       run: |
         echo "🏗️  Verifying production build..."
+        if [ -z "$SUPABASE_URL" ] || [ -z "$NEXT_PUBLIC_SUPABASE_URL" ]; then
+          echo "⚠️  Supabase env vars not set - skipping build verification"
+          echo "   (CI will verify build with proper environment variables)"
+          echo ""
+          echo "   To run build locally, ensure these are set:"
+          echo "   - SUPABASE_URL"
+          echo "   - NEXT_PUBLIC_SUPABASE_URL"
+          echo "   - SUPABASE_ANON_KEY"
+          exit 0
+        fi
         pnpm build
       fail_text: "❌ Build failed. Fix errors before pushing."
 
-    # 2. Security audit (warnings only, not blocking)
-    security:
+    # 3. Technical debt analysis (non-blocking warnings)
+    tech-debt:
       run: |
-        echo "🔒 Running security audit..."
-        pnpm audit --audit-level=moderate --prod || true
-      fail_text: "⚠️  Security vulnerabilities found (not blocking)."
+        echo "📊 Analyzing technical debt..."
+        echo ""
+
+        # Check for unused exports (knip)
+        echo "🔍 Checking for unused exports..."
+        if command -v npx &> /dev/null; then
+          UNUSED=$(npx knip -c config/tools/knip.json --no-exit-code 2>/dev/null | grep -E "Unused (exports|types|dependencies)" | head -10 || true)
+          if [ -n "$UNUSED" ]; then
+            echo "$UNUSED"
+            echo "   ... (run 'pnpm analyze:unused' for full report)"
+          else
+            echo "   ✅ No unused exports detected"
+          fi
+        else
+          echo "   ⚠️  npx not available - skipping"
+        fi
+
+        echo ""
+
+        # Check for circular dependencies
+        echo "🔄 Checking for circular dependencies..."
+        CIRCULAR=$(npx madge --circular --extensions ts,tsx src/ 2>/dev/null || true)
+        if [ -n "$CIRCULAR" ]; then
+          echo "$CIRCULAR" | head -10
+          echo "   ... (run 'pnpm analyze:circular' for full report)"
+        else
+          echo "   ✅ No circular dependencies detected"
+        fi
+
+        echo ""
+
+        # Check for large files (>500 lines)
+        echo "📏 Checking for large files (>500 LOC)..."
+        LARGE_FILES=$(find src supabase/functions -name '*.ts' -o -name '*.tsx' 2>/dev/null | while read file; do
+          if [ -f "$file" ]; then
+            lines=$(wc -l < "$file" 2>/dev/null || echo 0)
+            if [ "$lines" -gt 500 ]; then
+              echo "   ⚠️  $file ($lines lines) - consider splitting"
+            fi
+          fi
+        done)
+
+        if [ -n "$LARGE_FILES" ]; then
+          echo "$LARGE_FILES" | head -10
+        else
+          echo "   ✅ No large files detected"
+        fi
+
+        echo ""
+        echo "✅ Tech debt analysis complete (warnings only - not blocking)"
+      fail_text: "ℹ️  Technical debt detected (not blocking - address iteratively)."
 
 # ============================================================================
-# COMMIT-MSG: Enforce conventional commits
+# COMMIT-MSG: Enforce conventional commits (with WIP support)
 # ============================================================================
 commit-msg:
   commands:
@@ -74,17 +165,24 @@ commit-msg:
           exit 0
         fi
 
+        # Allow WIP commits with reduced validation
+        if echo "$MSG" | grep -qE "^wip"; then
+          echo "ℹ️  WIP commit detected - reduced validation"
+          echo "   Remember to use proper conventional commit format when squashing/rebasing"
+          exit 0
+        fi
+
         # Validate conventional commit format
-        if ! echo "$MSG" | grep -qE "^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert|wip)(\(.+\))?: .{1,}"; then
+        if ! echo "$MSG" | grep -qE "^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\(.+\))?: .{1,}"; then
           echo "⚠️  Commit message doesn't follow Conventional Commits format"
           echo ""
           echo "Format: type(scope): description"
-          echo "Types: feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert|wip"
+          echo "Types: feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert"
           echo ""
           echo "Examples:"
           echo "  feat(auth): add Google OAuth"
           echo "  fix(api): resolve race condition"
-          echo "  wip: experimenting with new feature"
+          echo "  wip: experimenting with new feature (skips validation)"
           echo ""
           echo "💡 Tip: Set LEFTHOOK_EXCLUDE=commit-msg to skip this check"
           exit 1
@@ -115,14 +213,26 @@ min_version: 1.13.0
 # USAGE TIPS
 # ============================================================================
 # Skip specific commands:
-#   LEFTHOOK_EXCLUDE=test-changed,type-check git commit
+#   LEFTHOOK_EXCLUDE=type-check,format git commit
+#   LEFTHOOK_EXCLUDE=tech-debt git push
 #
 # Skip commit-msg validation:
 #   LEFTHOOK_EXCLUDE=commit-msg git commit
+#
+# Skip build verification (when env vars missing):
+#   LEFTHOOK_EXCLUDE=build git push
+#
+# Use WIP commits for rapid iteration:
+#   git commit -m "wip: testing new approach"
 #
 # Verbose debugging:
 #   LEFTHOOK_VERBOSE=1 git commit
 #
 # Skip all hooks (use sparingly):
 #   git commit --no-verify
+#   git push --no-verify
+#
+# Technical debt reports:
+#   pnpm analyze:unused    # Full unused exports report
+#   pnpm analyze:circular  # Full circular dependency report
 # ============================================================================
