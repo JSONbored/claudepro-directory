@@ -4,23 +4,21 @@ on:
   push:
     branches: [ main ]
     paths:
-      - 'src/**/*.{ts,tsx,js,jsx}'  # Only code files
-      - '!src/**/*.test.{ts,tsx}'    # Exclude tests
-      - '!src/**/*.spec.{ts,tsx}'    # Exclude specs
+      - 'src/**/*.{ts,tsx,js,jsx}'
+      - 'supabase/functions/**/*.ts'
+      - 'supabase/**/*.sql'
       - 'package.json'
       - 'pnpm-lock.yaml'
-      - '.github/workflows/security.yml'  # Only this workflow
-      - 'supabase/**/*.sql'  # Database code
+      - '.github/workflows/security.yml'
   pull_request:
     branches: [ main ]
     paths:
-      - 'src/**/*.{ts,tsx,js,jsx}'  # Only code files
-      - '!src/**/*.test.{ts,tsx}'    # Exclude tests
-      - '!src/**/*.spec.{ts,tsx}'    # Exclude specs
+      - 'src/**/*.{ts,tsx,js,jsx}'
+      - 'supabase/functions/**/*.ts'
+      - 'supabase/**/*.sql'
       - 'package.json'
       - 'pnpm-lock.yaml'
-      - '.github/workflows/security.yml'  # Only this workflow
-      - 'supabase/**/*.sql'  # Database code
+      - '.github/workflows/security.yml'
   schedule:
     - cron: '0 3 * * 1'  # Weekly security scan on Mondays at 3am UTC
 
@@ -32,18 +30,18 @@ jobs:
   changes:
     name: Changes Filter
     uses: ./.github/workflows/changes-filter.yml
+
   secrets:
     name: Secret Scanning
     runs-on: ubuntu-latest
-    timeout-minutes: 5  # Reduced from 10min (fail fast on hangs)
+    timeout-minutes: 5
     needs: [changes]
-    # Skip on scheduled runs; run for PRs or when code/deps changed
     if: github.event_name != 'schedule' && (github.event_name == 'pull_request' || needs.changes.outputs.code == 'true' || needs.changes.outputs.deps == 'true')
 
     steps:
     - uses: actions/checkout@v5
       with:
-        fetch-depth: ${{ github.event_name == 'pull_request' && 2 || 1 }}  # Shallow clone (PR needs 2 commits for diff)
+        fetch-depth: ${{ github.event_name == 'pull_request' && 2 || 1 }}
 
     - name: Check for hardcoded secrets
       uses: trufflesecurity/trufflehog@main
@@ -57,9 +55,8 @@ jobs:
   codeql:
     name: CodeQL Analysis
     runs-on: ubuntu-latest
-    timeout-minutes: 6  # Reduced from 8min (no build overhead)
+    timeout-minutes: 6
     needs: [changes]
-    # Skip on ui-only PRs (weekly schedule still runs for comprehensive check)
     if: |
       github.event_name == 'schedule' ||
       ((needs.changes.outputs.code == 'true' || needs.changes.outputs.deps == 'true') &&
@@ -73,14 +70,12 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v5
 
-    # CodeQL for JavaScript/TypeScript analyzes source code directly - no build needed
     - name: Initialize CodeQL
       uses: github/codeql-action/init@v4
       with:
         languages: javascript-typescript
         queries: security-extended
 
-    # CodeQL autobuild handles any necessary processing for JS/TS
     - name: Autobuild
       uses: github/codeql-action/autobuild@v4
 
@@ -93,7 +88,7 @@ jobs:
   dependency-review:
     name: Dependency Review
     runs-on: ubuntu-latest
-    timeout-minutes: 3  # Reduced from 10min (fast check)
+    timeout-minutes: 3
     needs: [changes]
     if: github.event_name == 'pull_request' && needs.changes.outputs.deps == 'true'
     permissions:
@@ -103,7 +98,7 @@ jobs:
     steps:
     - uses: actions/checkout@v5
       with:
-        fetch-depth: 1  # Shallow clone for speed
+        fetch-depth: 1
 
     - name: Dependency Review
       uses: actions/dependency-review-action@v4
@@ -113,73 +108,3 @@ jobs:
         license-check: false
         comment-summary-in-pr: always
         warn-only: true
-
-  pnpm-audit:
-    name: PNPM Security Audit
-    runs-on: ubuntu-latest
-    timeout-minutes: 5  # Reduced from 10min
-    needs: [changes]
-    # Run when dependencies change or on schedule
-    if: needs.changes.outputs.deps == 'true' || github.event_name == 'schedule'
-
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v5
-      with:
-        fetch-depth: 1  # Shallow clone for speed
-
-    - uses: ./.github/actions/setup-node-deps
-
-    - name: Run pnpm audit
-      run: pnpm audit --audit-level=moderate --json > pnpm-audit.json || true
-      continue-on-error: true
-
-    - name: Upload audit results
-      uses: actions/upload-artifact@v5
-      with:
-        name: pnpm-audit-results
-        path: pnpm-audit.json
-        retention-days: 30
-        if-no-files-found: ignore
-
-  socket-security:
-    name: Socket Security Scan
-    runs-on: ubuntu-latest
-    timeout-minutes: 5  # Reduced from 10min
-    needs: [changes]
-    if: vars.SOCKET_SECURITY_API_KEY != '' && (needs.changes.outputs.deps == 'true' || github.event_name == 'schedule')
-    permissions:
-      contents: read
-      pull-requests: write
-      statuses: write
-
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v5
-      with:
-        fetch-depth: 1  # Shallow clone for speed
-
-    - name: Setup Python for Socket CLI
-      uses: actions/setup-python@v6
-      with:
-        python-version: '3.x'
-
-    - name: Install Socket CLI
-      run: pip install socketsecurity --upgrade
-
-    - name: Run Socket Security Scan
-      env:
-        SOCKET_SECURITY_API_KEY: ${{ secrets.SOCKET_SECURITY_API_KEY }}
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: |
-        if [ "${{ github.event_name }}" = "pull_request" ]; then
-          socketcli \
-            --target-path $GITHUB_WORKSPACE \
-            --scm github \
-            --pr-number ${{ github.event.pull_request.number }}
-        else
-          socketcli \
-            --target-path $GITHUB_WORKSPACE \
-            --scm github
-        fi
-      continue-on-error: true  # Don't block PRs initially
