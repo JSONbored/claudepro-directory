@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { CollectionItemManager } from '@/src/components/core/domain/collection-items-editor';
+import { SimpleCopyButton } from '@/src/components/core/buttons/shared/simple-copy-button';
 import { Button } from '@/src/components/primitives/ui/button';
 import {
   Card,
@@ -97,17 +98,15 @@ export default async function CollectionDetailPage({ params }: CollectionPagePro
 
           <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
             {shareUrl && (
-              <Button
+              <SimpleCopyButton
+                content={shareUrl}
+                label="Share"
+                successMessage="Link copied to clipboard!"
                 variant="outline"
                 size="sm"
-                onClick={() => {
-                  navigator.clipboard.writeText(shareUrl);
-                }}
                 className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}
-              >
-                <Share2 className="h-4 w-4" />
-                Share
-              </Button>
+                iconClassName="h-4 w-4"
+              />
             )}
             <Link href={`/account/library/${slug}/edit`}>
               <Button variant="outline" size="sm" className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>

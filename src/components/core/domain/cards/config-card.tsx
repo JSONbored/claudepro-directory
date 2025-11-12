@@ -16,7 +16,7 @@
 import { useRouter } from 'next/navigation';
 import { memo, useCallback } from 'react';
 import { BookmarkButton } from '@/src/components/core/buttons/interaction/bookmark-button';
-import { CardCopyButton } from '@/src/components/core/buttons/interaction/card-copy-button';
+import { SimpleCopyButton } from '@/src/components/core/buttons/shared/simple-copy-button';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { BaseCard } from '@/src/components/core/domain/cards/content-card-base';
 import { BorderBeam } from '@/src/components/primitives/animation/border-beam';
@@ -375,11 +375,24 @@ export const ConfigCard = memo(
               {/* Copy button with count overlay */}
               {behavior.showCopyButton && (
                 <div className="relative">
-                  <CardCopyButton
-                    url={`${typeof window !== 'undefined' ? window.location.origin : ''}${targetPath}`}
-                    category={(item.category || 'agents') as CategoryId}
-                    slug={item.slug}
-                    title={displayTitle}
+                  <SimpleCopyButton
+                    content={`${typeof window !== 'undefined' ? window.location.origin : ''}${targetPath}`}
+                    successMessage="Link copied to clipboard!"
+                    errorMessage="Failed to copy link"
+                    variant="ghost"
+                    size="sm"
+                    className={UI_CLASSES.ICON_BUTTON_SM}
+                    iconClassName={UI_CLASSES.ICON_XS}
+                    ariaLabel={`Copy link to ${displayTitle}`}
+                    onCopySuccess={() => {
+                      trackInteraction({
+                        interaction_type: 'copy',
+                        content_type: item.category,
+                        content_slug: item.slug,
+                      }).catch(() => {
+                        // Analytics failures should not affect UX
+                      });
+                    }}
                   />
                   {behavior.showCopyCount && copyCount !== undefined && copyCount > 0 && (
                     <UnifiedBadge variant="notification-count" count={copyCount} type="copy" />

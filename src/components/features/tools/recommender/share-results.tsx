@@ -5,8 +5,8 @@
  * Modal for sharing recommendation results
  */
 
-import { useState } from 'react';
 import { Button } from '@/src/components/primitives/ui/button';
+import { SimpleCopyButton } from '@/src/components/core/buttons/shared/simple-copy-button';
 import {
   Dialog,
   DialogContent,
@@ -27,19 +27,6 @@ interface ShareResultsProps {
 }
 
 export function ShareResults({ shareUrl, resultCount, onClose }: ShareResultsProps) {
-  const [copied, setCopied] = useState(false);
-
-  const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(shareUrl);
-      setCopied(true);
-      toasts.success.linkCopied();
-      setTimeout(() => setCopied(false), 2000);
-    } catch (_error) {
-      toasts.error.copyFailed('link');
-    }
-  };
-
   const shareText = `I just found ${resultCount} perfect Claude configurations for my needs! 🚀`;
   const encodedShareText = encodeURIComponent(shareText);
   const encodedUrl = encodeURIComponent(shareUrl);
@@ -73,19 +60,19 @@ export function ShareResults({ shareUrl, resultCount, onClose }: ShareResultsPro
               className="flex-1"
               onClick={(e) => e.currentTarget.select()}
             />
-            <Button
-              type="button"
-              size="icon"
+            <SimpleCopyButton
+              content={shareUrl}
+              successMessage="Link copied to clipboard!"
+              errorMessage="Failed to copy link"
               variant="outline"
-              onClick={handleCopy}
+              size="icon"
               className="shrink-0"
-            >
-              {copied ? (
-                <Check className={`${UI_CLASSES.ICON_SM} text-green-600`} />
-              ) : (
-                <Copy className={UI_CLASSES.ICON_SM} />
-              )}
-            </Button>
+              iconClassName={UI_CLASSES.ICON_SM}
+              ariaLabel="Copy share link"
+              onCopySuccess={() => {
+                logger.info('Share link copied', { from: 'share-results-dialog' });
+              }}
+            />
           </div>
 
           {/* Social share buttons */}

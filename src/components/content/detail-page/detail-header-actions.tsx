@@ -14,16 +14,17 @@
 
 import { motion } from 'motion/react';
 import { useRouter } from 'next/navigation';
-import { CopyLLMsButton } from '@/src/components/core/buttons/content/copy-llms-button';
-import { CopyMarkdownButton } from '@/src/components/core/buttons/content/copy-markdown-button';
-import { DownloadMarkdownButton } from '@/src/components/core/buttons/content/download-markdown-button';
+import { ContentActionButton } from '@/src/components/core/buttons/shared/content-action-button';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { Button } from '@/src/components/primitives/ui/button';
+import { useCopyToClipboard } from '@/src/hooks/use-copy-to-clipboard';
 import { useCopyWithEmailCapture } from '@/src/hooks/use-copy-with-email-capture';
+import { usePostCopyEmail } from '@/src/hooks/use-post-copy-email';
 import type { CategoryId } from '@/src/lib/config/category-config';
 import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
 import { trackInteraction } from '@/src/lib/edge/client';
-import { ArrowLeft, Check, Copy } from '@/src/lib/icons';
+import { trackUsage } from '@/src/lib/analytics/track-usage';
+import { ArrowLeft, Check, Copy, Sparkles, FileText, Download } from '@/src/lib/icons';
 import { STATE_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { toasts } from '@/src/lib/utils/toast.utils';
 import type { CopyType } from '@/src/types/database-overrides';
@@ -78,6 +79,8 @@ export function DetailHeaderActions({
 }: DetailHeaderActionsProps) {
   const router = useRouter();
   const referrer = typeof window !== 'undefined' ? window.location.pathname : undefined;
+  const { copy: copyToClipboard } = useCopyToClipboard();
+  const { showModal } = usePostCopyEmail();
   const { copied, copy } = useCopyWithEmailCapture({
     emailContext: {
       copyType: determineCopyType(item),
@@ -220,29 +223,51 @@ export function DetailHeaderActions({
           )}
 
           {/* Copy for AI button */}
-          <CopyLLMsButton
-            llmsTxtUrl={`/${category}/${item.slug}/llms.txt`}
-            category={category}
-            slug={item.slug}
-            buttonVariant="outline"
+          <ContentActionButton
+            url={`/${category}/${item.slug}/llms.txt`}
+            action={async (content) => await copyToClipboard(content)}
+            label="Copy for AI"
+            successMessage="Copied llms.txt to clipboard!"
+            icon={Sparkles}
+            trackAnalytics={async () => await trackUsage(category, item.slug, 'llmstxt')}
+            variant="outline"
             size="default"
             className="min-w-0"
           />
 
           {/* Copy as Markdown button */}
-          <CopyMarkdownButton
-            category={category}
-            slug={item.slug}
-            buttonVariant="outline"
+          <ContentActionButton
+            url={`/${category}/${item.slug}.md?include_metadata=true&include_footer=false`}
+            action={async (content) => {
+              await copyToClipboard(content);
+              showModal();
+            }}
+            label="Copy Markdown"
+            successMessage="Copied markdown to clipboard!"
+            icon={FileText}
+            trackAnalytics={async () => await trackUsage(category, item.slug, 'copy')}
+            variant="outline"
             size="default"
             className="min-w-0"
           />
 
           {/* Download Markdown button */}
-          <DownloadMarkdownButton
-            category={category}
-            slug={item.slug}
-            buttonVariant="outline"
+          <ContentActionButton
+            url={`/${category}/${item.slug}.md`}
+            action={async (content) => {
+              const blob = new Blob([content], { type: 'text/markdown' });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = `${item.slug}.md`;
+              a.click();
+              URL.revokeObjectURL(url);
+            }}
+            label="Download"
+            successMessage="Downloaded markdown file!"
+            icon={Download}
+            trackAnalytics={async () => await trackUsage(category, item.slug, 'download_markdown')}
+            variant="outline"
             size="default"
             className="min-w-0"
           />
