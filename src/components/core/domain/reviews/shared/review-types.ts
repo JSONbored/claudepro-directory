@@ -1,4 +1,5 @@
 import type { CategoryId } from '@/src/lib/config/category-config';
+import { formConfigs } from '@/src/lib/flags';
 
 /**
  * Review Item from Database
@@ -91,6 +92,15 @@ export type ReviewProps =
   | ReviewRatingCompactProps;
 
 /**
- * Maximum review text length
+ * Maximum review text length (loaded from Dynamic Config)
  */
-export const MAX_REVIEW_LENGTH = 2000;
+export let MAX_REVIEW_LENGTH = 2000;
+
+// Load config from Statsig on module initialization
+formConfigs()
+  .then((config: Record<string, unknown>) => {
+    MAX_REVIEW_LENGTH = (config['form.max_review_length'] as number) ?? 2000;
+  })
+  .catch(() => {
+    // Use default if config load fails
+  });

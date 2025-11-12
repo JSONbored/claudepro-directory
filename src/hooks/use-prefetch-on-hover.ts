@@ -22,11 +22,24 @@
 
 import { useRouter } from 'next/navigation';
 import { useCallback, useRef } from 'react';
+import { timeoutConfigs } from '@/src/lib/flags';
+
+// Default value (will be overridden by Dynamic Config)
+let DEFAULT_PREFETCH_DELAY = 100;
+
+// Load config from Statsig on module initialization
+timeoutConfigs()
+  .then((config: Record<string, unknown>) => {
+    DEFAULT_PREFETCH_DELAY = (config['timeout.prefetch_hover_ms'] as number) ?? 100;
+  })
+  .catch(() => {
+    // Use default if config load fails
+  });
 
 export interface UsePrefetchOnHoverOptions {
   /**
    * Delay before prefetch (ms)
-   * @default 300 - Clear intent without wasting bandwidth
+   * @default 100 - Clear intent without wasting bandwidth (from Dynamic Config)
    */
   delay?: number;
 
@@ -85,7 +98,7 @@ export function usePrefetchOnHover(
   href: string,
   options: UsePrefetchOnHoverOptions = {}
 ): UsePrefetchOnHoverReturn {
-  const { delay = 300, disabled = false } = options;
+  const { delay = DEFAULT_PREFETCH_DELAY, disabled = false } = options;
   const router = useRouter();
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const prefetchedRef = useRef(false);

@@ -75,6 +75,26 @@ export const createExperiment = <T extends string>(key: string, defaultValue: T)
   });
 
 /**
+ * Factory function to create dynamic config groups (runtime-tunable values)
+ * Each config group returns a JSON object with multiple parameters
+ * Use for values that need to change without code deploys
+ */
+const createDynamicConfigGroup = <T extends Record<string, unknown>>(
+  configName: string,
+  defaults: T
+) =>
+  flag<T, StatsigUser>({
+    key: configName,
+    adapter: statsigAdapter.dynamicConfig((config) => {
+      // Merge Statsig values with defaults
+      const statsigValues = (config.value as Record<string, unknown>) || {};
+      return { ...defaults, ...statsigValues } as T;
+    }),
+    identify,
+    defaultValue: defaults,
+  });
+
+/**
  * All feature flags - centralized
  * Usage: const enabled = await featureFlags.testFlag();
  */
@@ -119,3 +139,289 @@ export const newsletterExperiments = {
     'value_focused'
   ),
 };
+
+/**
+ * Dynamic Configs - Runtime-tunable values
+ * Migrated from app_settings table and hardcoded constants
+ */
+
+/**
+ * App Settings (formerly from app_settings table)
+ * Replaces database queries with Statsig Dynamic Configs
+ * Usage: const config = await appSettings(); const pages = config['newsletter.excluded_pages'];
+ */
+export const appSettings = createDynamicConfigGroup('app_settings', {
+  'newsletter.excluded_pages': [
+    '/',
+    '/trending',
+    '/guides',
+    '/changelog',
+    '/community',
+    '/companies',
+    '/jobs',
+    '/partner',
+    '/submit',
+    '/tools/config-recommender',
+    '/agents/',
+    '/mcp/',
+    '/rules/',
+    '/commands/',
+    '/hooks/',
+    '/statuslines/',
+    '/collections/',
+  ] as string[],
+  'hooks.infinite_scroll.batch_size': 30,
+  'hooks.infinite_scroll.threshold': 0.1,
+  'date.current_month': new Date().toISOString().slice(0, 7),
+  'date.current_year': new Date().getFullYear(),
+  'date.current_date': new Date().toISOString().split('T')[0],
+  'date.last_reviewed': new Date().toISOString().split('T')[0],
+  'search.enabled': true,
+  'search.min_query_length': 2,
+  'search.max_results': 50,
+});
+
+/**
+ * Email Configs - Subject lines and email copy
+ * Enables A/B testing of email subjects without deploys
+ * Usage: const config = await emailConfigs(); const subject = config['email.subject.welcome'];
+ */
+export const emailConfigs = createDynamicConfigGroup('email_configs', {
+  'email.subject.welcome': 'Welcome to Claude Pro Directory! 🎉',
+  'email.subject.magic_link': 'Your Magic Link - Claude Pro Directory',
+  'email.subject.password_reset': 'Reset Your Password - Claude Pro Directory',
+  'email.subject.job_posted': 'Your Job Listing is Live!',
+  'email.subject.collection_shared': 'Someone shared a collection with you!',
+});
+
+/**
+ * Newsletter Configs - CTA copy and settings
+ * Powers contextual newsletter CTAs and variant testing
+ * Usage: const config = await newsletterConfigs(); const headline = config['newsletter.cta.aggressive.headline'];
+ */
+export const newsletterConfigs = createDynamicConfigGroup('newsletter_configs', {
+  'newsletter.cta.aggressive.headline': 'Join 500+ subscribers getting exclusive Claude configs',
+  'newsletter.cta.social_proof.headline': '500+ Claude users already subscribed',
+  'newsletter.cta.value_focused.headline': 'Get weekly Claude resources & updates',
+  'newsletter.cta.aggressive.description':
+    'Be the first to access new agents, MCP servers, and advanced prompts. Limited spots available.',
+  'newsletter.cta.social_proof.description':
+    'Join developers from Anthropic, Google, and leading AI companies who read our newsletter.',
+  'newsletter.cta.value_focused.description':
+    'Weekly roundup of the best Claude configurations, tutorials, and community highlights.',
+  'newsletter.contextual.agents.headline': 'Master Agents & Prompts',
+  'newsletter.contextual.agents.description':
+    'Get weekly agent templates, advanced prompting techniques, and expert tutorials delivered to your inbox.',
+  'newsletter.contextual.mcp.headline': 'MCP Integration Secrets',
+  'newsletter.contextual.mcp.description':
+    'Stay ahead with weekly MCP server tutorials, integration guides, and new server announcements.',
+  'newsletter.contextual.guides.headline': 'Level Up Your Claude Skills',
+  'newsletter.contextual.guides.description':
+    'Get in-depth guides, best practices, and expert tips for mastering Claude delivered weekly.',
+  'newsletter.footer_text': 'Free weekly newsletter • Unsubscribe anytime',
+  'newsletter.show_subscriber_count': true,
+  // Behavior settings (Phase 3)
+  'newsletter.footer_bar.show_after_delay_ms': 30000,
+  'newsletter.scroll_trigger.min_scroll_height_px': 500,
+  'newsletter.max_retries': 3,
+  'newsletter.initial_retry_delay_ms': 1000,
+  'newsletter.retry_backoff_multiplier': 2,
+  'newsletter.show_footer_bar': true,
+  'newsletter.show_scroll_trigger': true,
+});
+
+/**
+ * Pricing Configs - Partner page pricing display
+ * Enables pricing experiments without deploys
+ * Usage: const config = await pricingConfigs(); const price = config['pricing.jobs.regular'];
+ */
+export const pricingConfigs = createDynamicConfigGroup('pricing_configs', {
+  'pricing.jobs.regular': 249,
+  'pricing.jobs.discounted': 149,
+  'pricing.jobs.duration_days': 30,
+  'pricing.sponsored.regular': 199,
+  'pricing.sponsored.discounted': 119,
+  'pricing.launch_discount_percent': 40,
+  'pricing.launch_discount_enabled': true,
+  'pricing.launch_discount_end_date': '2025-12-31',
+});
+
+/**
+ * Polling Configs - Polling intervals for real-time updates
+ * Controls how frequently the app checks for updates
+ * Usage: const config = await pollingConfigs(); const interval = config['polling.badges_ms'];
+ */
+export const pollingConfigs = createDynamicConfigGroup('polling_configs', {
+  'polling.realtime_ms': 1000,
+  'polling.badges_ms': 30000,
+  'polling.status.health_ms': 60000,
+  'polling.status.api_ms': 30000,
+  'polling.status.database_ms': 120000,
+  'polling.analytics.views_ms': 60000,
+  'polling.analytics.stats_ms': 300000,
+  'polling.newsletter_count_ms': 300000, // Phase 3
+});
+
+/**
+ * Animation Configs - Animation durations and delays
+ * Controls animation timing for consistent UX
+ * Usage: const config = await animationConfigs(); const duration = config['animation.ticker.default_ms'];
+ */
+export const animationConfigs = createDynamicConfigGroup('animation_configs', {
+  'animation.ticker.default_ms': 1500,
+  'animation.ticker.fast_ms': 1000,
+  'animation.ticker.slow_ms': 2000,
+  'animation.stagger.fast_ms': 100,
+  'animation.stagger.medium_ms': 200,
+  'animation.stagger.slow_ms': 300,
+  'animation.beam.default_ms': 15000,
+  'animation.card_stagger_ms': 50, // Phase 3
+});
+
+/**
+ * Timeout Configs - UI interaction timeouts
+ * Controls debounce, tooltips, and transition timing
+ * Usage: const config = await timeoutConfigs(); const debounce = config['timeout.ui.debounce_ms'];
+ */
+export const timeoutConfigs = createDynamicConfigGroup('timeout_configs', {
+  'timeout.ui.debounce_ms': 150,
+  'timeout.ui.tooltip_ms': 300,
+  'timeout.ui.animation_ms': 300,
+  'timeout.ui.transition_ms': 200,
+  // Phase 3 - Interaction timing
+  'timeout.prefetch_hover_ms': 100,
+  'timeout.button_success_ms': 2000,
+  'timeout.clipboard_reset_ms': 2000,
+  'timeout.scroll_detection_threshold_ms': 100,
+  'timeout.scroll_detection_hysteresis_ms': 50,
+  'timeout.form_debounce_ms': 300,
+  'timeout.duplicate_check_debounce_ms': 500,
+  'timeout.company_search_debounce_ms': 300,
+  'timeout.badge_tooltip_delay_ms': 100,
+});
+
+/**
+ * Toast Configs - Toast notification messages
+ * Enables copy testing and message updates without deploys
+ * Usage: const config = await toastConfigs(); const message = config['toast.copied'];
+ */
+export const toastConfigs = createDynamicConfigGroup('toast_configs', {
+  'toast.profile_updated': 'Profile updated successfully',
+  'toast.signed_out': 'Signed out successfully',
+  'toast.submission_created_title': 'Submission Created!',
+  'toast.submission_created_description': 'Your {contentType} has been submitted for review.',
+  'toast.template_applied_title': 'Template Applied!',
+  'toast.template_applied_description': 'Form has been pre-filled. Customize as needed.',
+  'toast.copied': 'Copied to clipboard!',
+  'toast.link_copied': 'Link copied to clipboard!',
+  'toast.code_copied': 'Code copied to clipboard!',
+  'toast.screenshot_copied': 'Screenshot copied & downloaded!',
+  'toast.bookmark_added': 'Bookmark added',
+  'toast.bookmark_removed': 'Bookmark removed',
+  'toast.changes_saved': 'Changes saved successfully',
+  'toast.save_failed': 'Failed to save. Please try again.',
+  'toast.required_fields': 'Please fill in all required fields',
+  'toast.auth_required': 'Please sign in to continue',
+  'toast.permission_denied': 'You do not have permission to perform this action',
+  'toast.submission_error_title': 'Submission Error',
+  'toast.submission_error_description': 'Failed to submit. Please try again.',
+  'toast.network_error': 'Network error. Please check your connection and try again.',
+  'toast.server_error': 'Server error. Please try again later.',
+  'toast.rate_limited': 'Too many requests. Please wait a moment and try again.',
+  'toast.screenshot_failed': 'Failed to generate screenshot',
+  'toast.profile_update_failed': 'Failed to update profile',
+  'toast.vote_update_failed': 'Failed to update vote',
+  'toast.coming_soon': 'Coming soon!',
+  'toast.redirecting': 'Redirecting...',
+  'toast.unsaved_changes': 'You have unsaved changes',
+  'toast.slow_connection': 'Slow connection detected. This may take longer than usual.',
+  'toast.saving': 'Saving...',
+  'toast.processing': 'Processing...',
+});
+
+/**
+ * Homepage Configs - Homepage layout and categories
+ * Controls which categories appear on homepage
+ * Usage: const config = await homepageConfigs(); const categories = config['homepage.featured_categories'];
+ */
+export const homepageConfigs = createDynamicConfigGroup('homepage_configs', {
+  'homepage.featured_categories': [
+    'agents',
+    'mcp',
+    'commands',
+    'rules',
+    'skills',
+    'collections',
+    'hooks',
+    'statuslines',
+  ] as string[],
+  'homepage.tab_categories': [
+    'all',
+    'agents',
+    'mcp',
+    'commands',
+    'rules',
+    'hooks',
+    'statuslines',
+    'collections',
+    'guides',
+    'community',
+  ] as string[],
+});
+
+/**
+ * Search Configs - Search functionality settings
+ * Controls search behavior and performance
+ * Usage: const config = await searchConfigs(); const debounce = config['search.debounce_ms'];
+ */
+export const searchConfigs = createDynamicConfigGroup('search_configs', {
+  'search.debounce_ms': 150,
+  'search.threshold': 0.3,
+  'search.max_results': 50,
+});
+
+/**
+ * Form Configs - Form validation and limits (Phase 3)
+ * Controls file upload limits and form validation rules
+ * Usage: const config = await formConfigs(); const maxSize = config['form.max_file_size_mb'];
+ */
+export const formConfigs = createDynamicConfigGroup('form_configs', {
+  'form.max_file_size_mb': 5,
+  'form.max_image_dimension_px': 2048,
+  'form.max_review_length': 2000,
+  'form.min_review_length': 10,
+  'form.review_helpful_threshold': 3,
+  'form.review_auto_approve_score': 0.8,
+});
+
+/**
+ * Recently Viewed Configs - Recently viewed items settings (Phase 3)
+ * Controls storage and display of recently viewed content
+ * Usage: const config = await recentlyViewedConfigs(); const ttl = config['recently_viewed.ttl_days'];
+ */
+export const recentlyViewedConfigs = createDynamicConfigGroup('recently_viewed_configs', {
+  'recently_viewed.ttl_days': 30,
+  'recently_viewed.max_items': 10,
+  'recently_viewed.max_description_length': 150,
+  'recently_viewed.max_tags': 5,
+});
+
+/**
+ * Cache Configs - Cache TTL settings (Phase 3)
+ * Controls cache durations across the application
+ * Usage: const config = await cacheConfigs(); const ttl = config['cache.user_profile_ttl_s'];
+ */
+export const cacheConfigs = createDynamicConfigGroup('cache_configs', {
+  'cache.submission_form_fields_ttl_s': 21600, // 6 hours
+  'cache.category_stats_ttl_s': 300, // 5 minutes
+  'cache.trending_configs_ttl_s': 3600, // 1 hour
+  'cache.user_profile_ttl_s': 300, // 5 minutes
+  'cache.search_results_ttl_s': 1800, // 30 minutes
+  'cache.submission_review_ttl_s': 60, // 1 minute
+  'cache.company_list_ttl_s': 3600, // 1 hour
+  'cache.job_listings_ttl_s': 1800, // 30 minutes
+  'cache.collection_items_ttl_s': 1800, // 30 minutes
+  'cache.badge_counts_ttl_s': 300, // 5 minutes
+  'cache.analytics_stats_ttl_s': 600, // 10 minutes
+  'cache.newsletter_count_ttl_s': 300, // 5 minutes
+});

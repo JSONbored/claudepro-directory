@@ -36,7 +36,7 @@ export function AsyncActionButton({
   successLabel = 'Success!',
   icon: Icon,
   size = 'sm',
-  buttonVariant = 'outline',
+  variant = 'outline',
   className,
   showIcon = true,
   disabled = false,
@@ -93,7 +93,7 @@ export function AsyncActionButton({
 
   return (
     <Button
-      variant={buttonVariant}
+      variant={variant}
       size={size}
       onClick={handleClick}
       disabled={disabled || isLoading || isSuccess}

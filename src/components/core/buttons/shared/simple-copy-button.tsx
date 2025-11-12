@@ -1,10 +1,10 @@
 'use client';
 
+import { Check, Copy } from 'lucide-react';
 import { useState } from 'react';
-import { Copy, Check } from 'lucide-react';
-import { Button } from '@/components/primitives/ui/button';
+import { Button } from '@/src/components/primitives/ui/button';
+import { toasts } from '@/src/lib/utils/toast.utils';
 import type { ButtonStyleProps } from './button-types';
-import { toasts } from '@/lib/toasts';
 
 interface SimpleCopyButtonProps extends ButtonStyleProps {
   content: string;
@@ -57,13 +57,12 @@ export function SimpleCopyButton({
       disabled={disabled || copied}
       aria-label={ariaLabel || (copied ? 'Copied to clipboard' : `Copy ${label || 'content'}`)}
     >
-      {showIcon && (
-        copied ? (
+      {showIcon &&
+        (copied ? (
           <Check className={iconClassName} aria-hidden="true" />
         ) : (
           <Copy className={iconClassName} aria-hidden="true" />
-        )
-      )}
+        ))}
       {label && (copied ? 'Copied!' : label)}
     </Button>
   );

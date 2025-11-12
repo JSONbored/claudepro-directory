@@ -1,16 +1,16 @@
 'use client';
 
 /**
- * useInfiniteScroll Hook - Database-First Configuration
+ * useInfiniteScroll Hook - Statsig Dynamic Config
  * Production-grade infinite scroll using Intersection Observer API
- * Loads default batch_size and threshold from app_settings
+ * Loads default batch_size and threshold from Statsig
  *
  * @module hooks/use-infinite-scroll
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { appSettings } from '@/src/lib/flags';
 import { logger } from '@/src/lib/logger';
-import { createClient } from '@/src/lib/supabase/client';
 
 interface UseInfiniteScrollOptions {
   /** Total number of items available */
@@ -60,30 +60,22 @@ export function useInfiniteScroll({
   threshold,
   root = null,
 }: UseInfiniteScrollOptions): UseInfiniteScrollReturn {
-  // Hardcoded fallbacks (loaded from app_settings at mount)
-  const [dbDefaults, setDbDefaults] = useState({
+  // Hardcoded fallbacks (loaded from Statsig at mount)
+  const [configDefaults, setConfigDefaults] = useState({
     batchSize: 30,
     threshold: 0.1,
   });
 
-  // Load app_settings on mount (background, non-blocking)
+  // Load Statsig config on mount (background, non-blocking)
   useEffect(() => {
     const loadDefaults = async () => {
       try {
-        const supabase = createClient();
-        const { data } = await supabase.rpc('get_app_settings', {
-          p_category: 'hooks',
+        const config = await appSettings();
+
+        setConfigDefaults({
+          batchSize: (config['hooks.infinite_scroll.batch_size'] as number) ?? 30,
+          threshold: (config['hooks.infinite_scroll.threshold'] as number) ?? 0.1,
         });
-
-        if (data) {
-          const settings = data as Record<string, { value: unknown }>;
-
-          setDbDefaults({
-            batchSize: (settings['hooks.infinite_scroll.batch_size']?.value as number) ?? 30,
-            threshold:
-              (settings['hooks.infinite_scroll.load_more_threshold']?.value as number) ?? 0.1,
-          });
-        }
       } catch {
         // Silent fail - uses hardcoded fallbacks
       }
@@ -94,9 +86,9 @@ export function useInfiniteScroll({
     });
   }, []);
 
-  // Merge user options with database defaults (user options take precedence)
-  const finalBatchSize = batchSize ?? dbDefaults.batchSize;
-  const finalThreshold = threshold ?? dbDefaults.threshold;
+  // Merge user options with config defaults (user options take precedence)
+  const finalBatchSize = batchSize ?? configDefaults.batchSize;
+  const finalThreshold = threshold ?? configDefaults.threshold;
 
   // Validate threshold (shadcn-inspired production safety)
   const safeThreshold = useCallback(() => {

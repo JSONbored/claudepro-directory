@@ -16,15 +16,15 @@ import { motion } from 'motion/react';
 import { useRouter } from 'next/navigation';
 import { ContentActionButton } from '@/src/components/core/buttons/shared/content-action-button';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
+import { usePostCopyEmail } from '@/src/components/core/infra/providers/email-capture-modal-provider';
 import { Button } from '@/src/components/primitives/ui/button';
 import { useCopyToClipboard } from '@/src/hooks/use-copy-to-clipboard';
 import { useCopyWithEmailCapture } from '@/src/hooks/use-copy-with-email-capture';
-import { usePostCopyEmail } from '@/src/hooks/use-post-copy-email';
+import { trackUsage } from '@/src/lib/actions/content.actions';
 import type { CategoryId } from '@/src/lib/config/category-config';
 import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
 import { trackInteraction } from '@/src/lib/edge/client';
-import { trackUsage } from '@/src/lib/analytics/track-usage';
-import { ArrowLeft, Check, Copy, Sparkles, FileText, Download } from '@/src/lib/icons';
+import { ArrowLeft, Check, Copy, Download, FileText, Sparkles } from '@/src/lib/icons';
 import { STATE_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { toasts } from '@/src/lib/utils/toast.utils';
 import type { CopyType } from '@/src/types/database-overrides';
@@ -225,11 +225,19 @@ export function DetailHeaderActions({
           {/* Copy for AI button */}
           <ContentActionButton
             url={`/${category}/${item.slug}/llms.txt`}
-            action={async (content) => await copyToClipboard(content)}
+            action={async (content) => {
+              await copyToClipboard(content);
+            }}
             label="Copy for AI"
             successMessage="Copied llms.txt to clipboard!"
             icon={Sparkles}
-            trackAnalytics={async () => await trackUsage(category, item.slug, 'llmstxt')}
+            trackAnalytics={async () => {
+              await trackUsage({
+                content_type: category,
+                content_slug: item.slug,
+                action_type: 'llmstxt',
+              });
+            }}
             variant="outline"
             size="default"
             className="min-w-0"
@@ -240,12 +248,23 @@ export function DetailHeaderActions({
             url={`/${category}/${item.slug}.md?include_metadata=true&include_footer=false`}
             action={async (content) => {
               await copyToClipboard(content);
-              showModal();
+              showModal({
+                copyType: 'markdown',
+                category,
+                slug: item.slug,
+                ...(referrer && { referrer }),
+              });
             }}
             label="Copy Markdown"
             successMessage="Copied markdown to clipboard!"
             icon={FileText}
-            trackAnalytics={async () => await trackUsage(category, item.slug, 'copy')}
+            trackAnalytics={async () => {
+              await trackUsage({
+                content_type: category,
+                content_slug: item.slug,
+                action_type: 'copy',
+              });
+            }}
             variant="outline"
             size="default"
             className="min-w-0"
@@ -266,7 +285,13 @@ export function DetailHeaderActions({
             label="Download"
             successMessage="Downloaded markdown file!"
             icon={Download}
-            trackAnalytics={async () => await trackUsage(category, item.slug, 'download_markdown')}
+            trackAnalytics={async () => {
+              await trackUsage({
+                content_type: category,
+                content_slug: item.slug,
+                action_type: 'download_markdown',
+              });
+            }}
             variant="outline"
             size="default"
             className="min-w-0"

@@ -7,10 +7,8 @@
 
 import dynamic from 'next/dynamic';
 import { usePathname } from 'next/navigation';
-import { use } from 'react';
 import { AnnouncementBannerClient } from '@/src/components/core/layout/announcement-banner-client';
 import { Navigation } from '@/src/components/core/layout/navigation';
-import { newsletterExperiments } from '@/src/lib/flags';
 import { DIMENSIONS } from '@/src/lib/ui-constants';
 import type { Tables } from '@/src/types/database.types';
 
@@ -56,17 +54,20 @@ interface LayoutContentProps {
   children: React.ReactNode;
   announcement: Tables<'announcements'> | null;
   useFloatingActionBar?: boolean;
+  footerDelayVariant: '10s' | '30s' | '60s';
+  ctaVariant: 'aggressive' | 'social_proof' | 'value_focused';
 }
 
 export function LayoutContent({
   children,
   announcement,
   useFloatingActionBar = false,
+  footerDelayVariant,
+  ctaVariant,
 }: LayoutContentProps) {
   const pathname = usePathname();
 
-  // A/B test: Footer delay timing (10s vs 30s vs 60s)
-  const footerDelayVariant = use(newsletterExperiments.footerDelay());
+  // Convert variant to delay milliseconds
   const delayMs =
     footerDelayVariant === '10s' ? 10000 : footerDelayVariant === '60s' ? 60000 : 30000;
 

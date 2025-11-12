@@ -31,7 +31,7 @@ export function BookmarkButton({
   initialBookmarked = false,
   showLabel = false,
   size = 'sm',
-  buttonVariant = 'ghost',
+  variant = 'ghost',
   className,
   disabled = false,
 }: BookmarkButtonProps) {
@@ -101,7 +101,7 @@ export function BookmarkButton({
 
   return (
     <Button
-      variant={buttonVariant}
+      variant={variant}
       size={size}
       className={cn(UI_CLASSES.ICON_BUTTON_SM, className)}
       onClick={handleToggle}

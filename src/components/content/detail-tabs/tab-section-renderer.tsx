@@ -11,25 +11,8 @@ import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
 import type { ProcessedSectionData } from '@/src/lib/types/detail-tabs.types';
 import type { Database } from '@/src/types/database.types';
 
-// Dynamic imports for extracted sections (code splitting)
-const FeaturesSection = dynamic(() => import('@/src/components/content/sections/features-section'));
-const RequirementsSection = dynamic(
-  () => import('@/src/components/content/sections/requirements-section')
-);
-const UseCasesSection = dynamic(
-  () => import('@/src/components/content/sections/use-cases-section')
-);
-const SecuritySection = dynamic(() => import('@/src/components/content/sections/security-section'));
-const TroubleshootingSection = dynamic(
-  () => import('@/src/components/content/sections/troubleshooting-section')
-);
-const InstallationSection = dynamic(
-  () => import('@/src/components/content/sections/installation-section')
-);
-const ConfigurationSection = dynamic(
-  () => import('@/src/components/content/sections/configuration-section')
-);
-const ExamplesSection = dynamic(() => import('@/src/components/content/sections/examples-section'));
+// Dynamic import for unified section component (code splitting)
+const UnifiedSection = dynamic(() => import('@/src/components/content/sections/unified-section'));
 
 export interface TabSectionRendererProps {
   sectionId: SectionId;
@@ -78,26 +61,54 @@ export function TabSectionRenderer({
 
     case 'features':
       if (!config.sections.features || features.length === 0) return null;
-      return <FeaturesSection features={features} category={item.category as CategoryId} />;
+      return (
+        <UnifiedSection
+          variant="list"
+          title="Features"
+          description="Key capabilities and functionality"
+          items={features}
+          category={item.category as CategoryId}
+          dotColor="bg-primary"
+        />
+      );
 
     case 'requirements':
       if (requirements.length === 0) return null;
       return (
-        <RequirementsSection requirements={requirements} category={item.category as CategoryId} />
+        <UnifiedSection
+          variant="list"
+          title="Requirements"
+          description="Prerequisites and dependencies"
+          items={requirements}
+          category={item.category as CategoryId}
+          dotColor="bg-orange-500"
+        />
       );
 
     case 'use_cases':
       if (!config.sections.use_cases || useCases.length === 0) return null;
-      return <UseCasesSection useCases={useCases} category={item.category as CategoryId} />;
+      return (
+        <UnifiedSection
+          variant="list"
+          title="Use Cases"
+          description="Common scenarios and applications"
+          items={useCases}
+          category={item.category as CategoryId}
+          dotColor="bg-accent"
+        />
+      );
 
     case 'installation':
       if (!(config.sections.installation && installationData)) return null;
-      return <InstallationSection installationData={installationData} item={item} />;
+      return (
+        <UnifiedSection variant="installation" installationData={installationData} item={item} />
+      );
 
     case 'configuration':
       if (!(config.sections.configuration && configData)) return null;
       return (
-        <ConfigurationSection
+        <UnifiedSection
+          variant="configuration"
           {...(configData.format === 'multi'
             ? { format: 'multi' as const, configs: configData.configs }
             : configData.format === 'hook'
@@ -117,18 +128,30 @@ export function TabSectionRenderer({
 
     case 'examples':
       if (!(config.sections.examples && examplesData) || examplesData.length === 0) return null;
-      return <ExamplesSection examples={examplesData} />;
+      return <UnifiedSection variant="examples" examples={examplesData} />;
 
     case 'troubleshooting':
       if (!config.sections.troubleshooting || troubleshooting.length === 0) return null;
-      return <TroubleshootingSection items={troubleshooting} />;
+      return (
+        <UnifiedSection
+          variant="enhanced-list"
+          title="Troubleshooting"
+          description="Common issues and solutions"
+          items={troubleshooting}
+          dotColor="bg-red-500"
+        />
+      );
 
     case 'security':
       if (!(config.sections.security && 'security' in item)) return null;
       return (
-        <SecuritySection
-          securityItems={item.security as string[]}
+        <UnifiedSection
+          variant="list"
+          title="Security Best Practices"
+          description="Important security considerations"
+          items={item.security as string[]}
           category={item.category as CategoryId}
+          dotColor="bg-orange-500"
         />
       );
 

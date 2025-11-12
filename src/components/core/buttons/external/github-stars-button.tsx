@@ -20,7 +20,7 @@ export interface GitHubStarsButtonProps extends ButtonStyleProps {
 export function GitHubStarsButton({
   repoUrl = SOCIAL_LINKS.github,
   size = 'sm',
-  buttonVariant = 'ghost',
+  variant = 'ghost',
   className,
   disabled = false,
 }: GitHubStarsButtonProps) {
@@ -58,7 +58,7 @@ export function GitHubStarsButton({
 
   return (
     <Button
-      variant={buttonVariant}
+      variant={variant}
       size={size}
       onClick={handleClick}
       disabled={disabled}

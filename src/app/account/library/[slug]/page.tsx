@@ -1,9 +1,9 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
+import { SimpleCopyButton } from '@/src/components/core/buttons/shared/simple-copy-button';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { CollectionItemManager } from '@/src/components/core/domain/collection-items-editor';
-import { SimpleCopyButton } from '@/src/components/core/buttons/shared/simple-copy-button';
 import { Button } from '@/src/components/primitives/ui/button';
 import {
   Card,
@@ -13,7 +13,7 @@ import {
   CardTitle,
 } from '@/src/components/primitives/ui/card';
 import { APP_CONFIG, ROUTES } from '@/src/lib/constants';
-import { ArrowLeft, Edit, Share2 } from '@/src/lib/icons';
+import { ArrowLeft, Edit } from '@/src/lib/icons';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';

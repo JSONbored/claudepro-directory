@@ -7,7 +7,6 @@
  */
 
 import { z } from 'zod';
-import { getConfigValue } from '@/src/lib/config/app-settings';
 
 /**
  * Application Information
@@ -189,20 +188,19 @@ const DATE_CONFIG_FALLBACK = {
  * Falls back to hardcoded values if database unavailable
  */
 export async function getDateConfig() {
-  const [currentMonth, currentYear, currentDate, lastReviewed] = await Promise.all([
-    getConfigValue<string>('date.current_month', DATE_CONFIG_FALLBACK.currentMonth),
-    getConfigValue<number>('date.current_year', DATE_CONFIG_FALLBACK.currentYear),
-    getConfigValue<string>('date.current_date', DATE_CONFIG_FALLBACK.currentDate),
-    getConfigValue<string>('date.last_reviewed', DATE_CONFIG_FALLBACK.lastReviewed),
-  ]);
-
-  return {
-    currentMonth,
-    currentYear,
-    currentDate,
-    lastReviewed,
-    claudeModels: DATE_CONFIG_FALLBACK.claudeModels, // Models don't change, keep hardcoded
-  };
+  try {
+    const { appSettings } = await import('@/src/lib/flags');
+    const config = await appSettings();
+    return {
+      currentMonth: (config['date.current_month'] as string) ?? DATE_CONFIG_FALLBACK.currentMonth,
+      currentYear: (config['date.current_year'] as number) ?? DATE_CONFIG_FALLBACK.currentYear,
+      currentDate: (config['date.current_date'] as string) ?? DATE_CONFIG_FALLBACK.currentDate,
+      lastReviewed: (config['date.last_reviewed'] as string) ?? DATE_CONFIG_FALLBACK.lastReviewed,
+      claudeModels: DATE_CONFIG_FALLBACK.claudeModels,
+    };
+  } catch {
+    return DATE_CONFIG_FALLBACK;
+  }
 }
 
 /**
@@ -252,21 +250,25 @@ const SEARCH_CONFIG_FALLBACK = {
 } as const;
 
 /**
- * Get search configuration from database
- * Falls back to hardcoded values if database unavailable
+ * Get search configuration from Statsig Dynamic Configs
+ * Falls back to hardcoded values if Statsig unavailable
  */
 export async function getSearchConfig() {
-  const [debounceMs, threshold, maxResults] = await Promise.all([
-    getConfigValue<number>('search.debounce_ms', SEARCH_CONFIG_FALLBACK.debounceMs),
-    getConfigValue<number>('search.threshold', SEARCH_CONFIG_FALLBACK.threshold),
-    getConfigValue<number>('search.max_results', SEARCH_CONFIG_FALLBACK.maxResults),
-  ]);
-
-  return {
-    debounceMs,
-    threshold,
-    maxResults,
-  };
+  try {
+    const { searchConfigs } = await import('@/src/lib/flags');
+    const config = await searchConfigs();
+    return {
+      debounceMs: (config['search.debounce_ms'] as number) ?? SEARCH_CONFIG_FALLBACK.debounceMs,
+      threshold: (config['search.threshold'] as number) ?? SEARCH_CONFIG_FALLBACK.threshold,
+      maxResults: (config['search.max_results'] as number) ?? SEARCH_CONFIG_FALLBACK.maxResults,
+    };
+  } catch {
+    return {
+      debounceMs: SEARCH_CONFIG_FALLBACK.debounceMs,
+      threshold: SEARCH_CONFIG_FALLBACK.threshold,
+      maxResults: SEARCH_CONFIG_FALLBACK.maxResults,
+    };
+  }
 }
 
 // Export fallback for build-time usage (static generation)
@@ -552,6 +554,7 @@ export const SERVICE_DELAYS = {
 /**
  * Polling Intervals Configuration
  * Standardized intervals for periodic checks and updates
+ * SYNC: Keep in sync with polling_configs in flags.ts (Statsig Dynamic Configs)
  */
 export const POLLING_INTERVALS = {
   // Real-time updates
@@ -600,6 +603,7 @@ export const TIMEOUTS = {
 /**
  * Animation Durations Configuration
  * Standardized animation durations for consistent UX
+ * SYNC: Keep in sync with animation_configs in flags.ts (Statsig Dynamic Configs)
  */
 export const ANIMATION_DURATIONS = {
   // Number ticker animations
@@ -619,3 +623,86 @@ export const ANIMATION_DURATIONS = {
     default: 15000, // 15 seconds (from border-beam component)
   },
 } as const;
+
+/**
+ * Get polling intervals from Statsig Dynamic Configs
+ * Falls back to hardcoded POLLING_INTERVALS if unavailable
+ */
+export async function getPollingIntervals() {
+  try {
+    const { pollingConfigs } = await import('@/src/lib/flags');
+    const config = await pollingConfigs();
+    return {
+      realtime: (config['polling.realtime_ms'] as number) ?? POLLING_INTERVALS.realtime,
+      badges: (config['polling.badges_ms'] as number) ?? POLLING_INTERVALS.badges,
+      status: {
+        health: (config['polling.status.health_ms'] as number) ?? POLLING_INTERVALS.status.health,
+        api: (config['polling.status.api_ms'] as number) ?? POLLING_INTERVALS.status.api,
+        database:
+          (config['polling.status.database_ms'] as number) ?? POLLING_INTERVALS.status.database,
+      },
+      analytics: {
+        views:
+          (config['polling.analytics.views_ms'] as number) ?? POLLING_INTERVALS.analytics.views,
+        stats:
+          (config['polling.analytics.stats_ms'] as number) ?? POLLING_INTERVALS.analytics.stats,
+      },
+    };
+  } catch {
+    return POLLING_INTERVALS;
+  }
+}
+
+/**
+ * Get animation durations from Statsig Dynamic Configs
+ * Falls back to hardcoded ANIMATION_DURATIONS if unavailable
+ */
+export async function getAnimationDurations() {
+  try {
+    const { animationConfigs } = await import('@/src/lib/flags');
+    const config = await animationConfigs();
+    return {
+      ticker: {
+        default:
+          (config['animation.ticker.default_ms'] as number) ?? ANIMATION_DURATIONS.ticker.default,
+        fast: (config['animation.ticker.fast_ms'] as number) ?? ANIMATION_DURATIONS.ticker.fast,
+        slow: (config['animation.ticker.slow_ms'] as number) ?? ANIMATION_DURATIONS.ticker.slow,
+      },
+      stagger: {
+        fast: (config['animation.stagger.fast_ms'] as number) ?? ANIMATION_DURATIONS.stagger.fast,
+        medium:
+          (config['animation.stagger.medium_ms'] as number) ?? ANIMATION_DURATIONS.stagger.medium,
+        slow: (config['animation.stagger.slow_ms'] as number) ?? ANIMATION_DURATIONS.stagger.slow,
+      },
+      beam: {
+        default:
+          (config['animation.beam.default_ms'] as number) ?? ANIMATION_DURATIONS.beam.default,
+      },
+    };
+  } catch {
+    return ANIMATION_DURATIONS;
+  }
+}
+
+/**
+ * Get timeout configurations from Statsig Dynamic Configs
+ * Falls back to hardcoded TIMEOUTS if unavailable
+ */
+export async function getTimeouts() {
+  try {
+    const { timeoutConfigs } = await import('@/src/lib/flags');
+    const config = await timeoutConfigs();
+    return {
+      api: TIMEOUTS.api, // Keep API timeouts hardcoded (not in Statsig yet)
+      ui: {
+        debounce: (config['timeout.ui.debounce_ms'] as number) ?? TIMEOUTS.ui.debounce,
+        tooltip: (config['timeout.ui.tooltip_ms'] as number) ?? TIMEOUTS.ui.tooltip,
+        animation: (config['timeout.ui.animation_ms'] as number) ?? TIMEOUTS.ui.animation,
+        transition: (config['timeout.ui.transition_ms'] as number) ?? TIMEOUTS.ui.transition,
+      },
+      test: TIMEOUTS.test, // Keep test timeouts hardcoded (not in Statsig yet)
+    };
+  } catch {
+    return TIMEOUTS;
+  }
+}

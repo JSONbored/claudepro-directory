@@ -4,6 +4,7 @@
 
 import { useCallback, useEffect, useRef } from 'react';
 import { create } from 'zustand';
+import { recentlyViewedConfigs, timeoutConfigs } from '@/src/lib/flags';
 import { logger } from '@/src/lib/logger';
 
 export type RecentlyViewedCategory =
@@ -35,11 +36,27 @@ interface RecentlyViewedState {
 }
 
 const STORAGE_KEY = 'heyclaude_recently_viewed';
-const MAX_ITEMS = 10;
-const TTL_DAYS = 30;
-const DEBOUNCE_MS = 300;
-const MAX_DESCRIPTION_LENGTH = 150;
-const MAX_TAGS = 3;
+
+// Default values (will be overridden by Dynamic Configs)
+let MAX_ITEMS = 10;
+let TTL_DAYS = 30;
+let DEBOUNCE_MS = 300;
+let MAX_DESCRIPTION_LENGTH = 150;
+let MAX_TAGS = 5;
+
+// Load config from Statsig on module initialization
+Promise.all([recentlyViewedConfigs(), timeoutConfigs()])
+  .then(([recentlyViewed, timeout]: [Record<string, unknown>, Record<string, unknown>]) => {
+    MAX_ITEMS = (recentlyViewed['recently_viewed.max_items'] as number) ?? 10;
+    TTL_DAYS = (recentlyViewed['recently_viewed.ttl_days'] as number) ?? 30;
+    MAX_DESCRIPTION_LENGTH =
+      (recentlyViewed['recently_viewed.max_description_length'] as number) ?? 150;
+    MAX_TAGS = (recentlyViewed['recently_viewed.max_tags'] as number) ?? 5;
+    DEBOUNCE_MS = (timeout['timeout.form_debounce_ms'] as number) ?? 300;
+  })
+  .catch(() => {
+    // Use defaults if config load fails
+  });
 const useRecentlyViewedStore = create<RecentlyViewedState>((set) => ({
   items: [],
   isLoaded: false,

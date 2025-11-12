@@ -5,7 +5,7 @@
 
 export interface ButtonStyleProps {
   size?: 'default' | 'sm' | 'lg' | 'icon';
-  buttonVariant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
+  variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
   className?: string;
   disabled?: boolean;
 }

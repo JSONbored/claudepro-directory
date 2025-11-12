@@ -5,8 +5,8 @@
  * Modal for sharing recommendation results
  */
 
-import { Button } from '@/src/components/primitives/ui/button';
 import { SimpleCopyButton } from '@/src/components/core/buttons/shared/simple-copy-button';
+import { Button } from '@/src/components/primitives/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -15,10 +15,9 @@ import {
   DialogTitle,
 } from '@/src/components/primitives/ui/dialog';
 import { Input } from '@/src/components/primitives/ui/input';
-import { Check, Copy, Facebook, Linkedin, Mail, Share2, Twitter } from '@/src/lib/icons';
+import { Facebook, Linkedin, Mail, Share2, Twitter } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
-import { toasts } from '@/src/lib/utils/toast.utils';
 
 interface ShareResultsProps {
   shareUrl: string;

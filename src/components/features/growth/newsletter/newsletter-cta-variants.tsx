@@ -1,6 +1,6 @@
 'use client';
 
-import { use } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Card,
   CardContent,
@@ -11,12 +11,16 @@ import {
 import type { NewsletterSource } from '@/src/hooks/use-newsletter';
 import { useNewsletterCount } from '@/src/hooks/use-newsletter-count';
 import { NEWSLETTER_CTA_CONFIG } from '@/src/lib/config/category-config';
-import { newsletterExperiments } from '@/src/lib/flags';
 import { Mail } from '@/src/lib/icons';
 import { DIMENSIONS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
 import { NewsletterForm } from './newsletter-form';
-import { formatSubscriberCount, getContextualMessage, getCTAVariantCopy } from './newsletter-utils';
+import {
+  formatSubscriberCount,
+  getContextualMessage,
+  getCTAVariantCopy,
+  loadNewsletterConfig,
+} from './newsletter-utils';
 
 export interface NewsletterCTABaseProps {
   source: NewsletterSource;
@@ -24,6 +28,7 @@ export interface NewsletterCTABaseProps {
   category?: string;
   headline?: string;
   description?: string;
+  ctaVariant?: 'aggressive' | 'social_proof' | 'value_focused';
 }
 
 export interface NewsletterHeroProps extends NewsletterCTABaseProps {
@@ -49,19 +54,40 @@ export type NewsletterCTAVariantProps =
   | NewsletterCardProps;
 
 export function NewsletterCTAVariant(props: NewsletterCTAVariantProps) {
-  const { variant, source, className, category, headline, description } = props;
+  const {
+    variant,
+    source,
+    className,
+    category,
+    headline,
+    description,
+    ctaVariant: propCtaVariant,
+  } = props;
   const { count, isLoading } = useNewsletterCount();
+  const [newsletterConfig, setNewsletterConfig] = useState<Record<string, unknown>>({});
 
-  // A/B test: CTA copy variant (aggressive vs social_proof vs value_focused)
-  const ctaVariant = use(newsletterExperiments.ctaVariant());
+  // Load newsletter config from Statsig
+  useEffect(() => {
+    loadNewsletterConfig()
+      .then(setNewsletterConfig)
+      .catch(() => {
+        // Silent fail - uses hardcoded defaults
+      });
+  }, []);
+
+  // Use prop if provided, otherwise default to 'value_focused'
+  const ctaVariant = propCtaVariant || 'value_focused';
   const subscriberCount = formatSubscriberCount(count);
 
   // Copy priority: explicit prop > contextual (if category) > experiment variant > default
-  const { headline: contextHeadline, description: contextDescription } =
-    getContextualMessage(category);
+  const { headline: contextHeadline, description: contextDescription } = getContextualMessage(
+    category,
+    newsletterConfig
+  );
   const { headline: variantHeadline, description: variantDescription } = getCTAVariantCopy(
     ctaVariant,
-    subscriberCount
+    subscriberCount,
+    newsletterConfig
   );
 
   const finalHeadline = headline || (category ? contextHeadline : variantHeadline);
