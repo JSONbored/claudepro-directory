@@ -6,15 +6,7 @@
 import { Suspense } from 'react';
 import { TabbedDetailLayout } from '@/src/components/content/detail-tabs/tabbed-detail-layout';
 import { JSONSectionRenderer } from '@/src/components/content/json-to-sections';
-import ConfigurationSection from '@/src/components/content/sections/configuration-section';
-import ContentSection from '@/src/components/content/sections/content-section';
-import ExamplesSection from '@/src/components/content/sections/examples-section';
-import FeaturesSection from '@/src/components/content/sections/features-section';
-import InstallationSection from '@/src/components/content/sections/installation-section';
-import RequirementsSection from '@/src/components/content/sections/requirements-section';
-import SecuritySection from '@/src/components/content/sections/security-section';
-import TroubleshootingSection from '@/src/components/content/sections/troubleshooting-section';
-import UseCasesSection from '@/src/components/content/sections/use-cases-section';
+import UnifiedSection from '@/src/components/content/sections/unified-section';
 import { ReviewListSection } from '@/src/components/core/domain/reviews/review-list-section';
 import { NewsletterCTAVariant } from '@/src/components/features/growth/newsletter';
 import { RecentlyViewedSidebar } from '@/src/components/features/navigation/recently-viewed-sidebar';
@@ -535,7 +527,8 @@ export async function UnifiedDetailPage({
 
             {/* Content/Code section (non-guides) */}
             {contentData && config && (
-              <ContentSection
+              <UnifiedSection
+                variant="code"
                 title={`${config.typeName} Content`}
                 description={`The main content for this ${config.typeName.toLowerCase()}.`}
                 html={contentData.html}
@@ -547,28 +540,41 @@ export async function UnifiedDetailPage({
 
             {/* Features Section */}
             {config?.sections.features && features.length > 0 && (
-              <FeaturesSection
-                features={features as string[]}
+              <UnifiedSection
+                variant="list"
+                title="Features"
+                description="Key capabilities and functionality"
+                items={features as string[]}
                 category={item.category as CategoryId}
+                dotColor="bg-primary"
               />
             )}
 
             {/* Requirements Section */}
             {requirements.length > 0 && (
-              <RequirementsSection
-                requirements={requirements as string[]}
+              <UnifiedSection
+                variant="list"
+                title="Requirements"
+                description="Prerequisites and dependencies"
+                items={requirements as string[]}
                 category={item.category as CategoryId}
+                dotColor="bg-orange-500"
               />
             )}
 
             {/* Installation Section */}
             {config?.sections.installation && installationData && (
-              <InstallationSection installationData={installationData} item={item} />
+              <UnifiedSection
+                variant="installation"
+                installationData={installationData}
+                item={item}
+              />
             )}
 
             {/* Configuration Section */}
             {config?.sections.configuration && configData && (
-              <ConfigurationSection
+              <UnifiedSection
+                variant="configuration"
                 {...(configData.format === 'multi'
                   ? { format: 'multi' as const, configs: configData.configs }
                   : configData.format === 'hook'
@@ -588,31 +594,42 @@ export async function UnifiedDetailPage({
 
             {/* Use Cases Section */}
             {config?.sections.use_cases && useCases.length > 0 && (
-              <UseCasesSection
-                useCases={useCases as string[]}
+              <UnifiedSection
+                variant="list"
+                title="Use Cases"
+                description="Common scenarios and applications"
+                items={useCases as string[]}
                 category={item.category as CategoryId}
+                dotColor="bg-accent"
               />
             )}
 
             {/* Security Section (MCP-specific) */}
             {config?.sections.security && 'security' in item && (
-              <SecuritySection
-                securityItems={item.security as string[]}
+              <UnifiedSection
+                variant="list"
+                title="Security Best Practices"
+                description="Important security considerations"
+                items={item.security as string[]}
                 category={item.category as CategoryId}
+                dotColor="bg-orange-500"
               />
             )}
 
             {/* Troubleshooting Section */}
             {config?.sections.troubleshooting && troubleshooting.length > 0 && (
-              <TroubleshootingSection
-                items={troubleshooting as Array<string | { issue: string; solution: string }>}
+              <UnifiedSection
+                variant="enhanced-list"
+                title="Troubleshooting"
                 description="Common issues and solutions"
+                items={troubleshooting as Array<string | { issue: string; solution: string }>}
+                dotColor="bg-red-500"
               />
             )}
 
             {/* Usage Examples Section - GitHub-style code snippets with syntax highlighting */}
             {config?.sections.examples && examplesData && examplesData.length > 0 && (
-              <ExamplesSection examples={examplesData} />
+              <UnifiedSection variant="examples" examples={examplesData} />
             )}
 
             {/* Reviews & Ratings Section */}
