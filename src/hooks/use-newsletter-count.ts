@@ -36,10 +36,10 @@ export function useNewsletterCount(): UseNewsletterCountReturn {
       if (typeof window !== 'undefined') {
         const cachedCount = localStorage.getItem(CACHE_KEY);
         const cacheTs = localStorage.getItem(CACHE_TIMESTAMP_KEY);
-        const cacheAge = Date.now() - (cacheTs ? parseInt(cacheTs, 10) : 0);
+        const cacheAge = Date.now() - (cacheTs ? Number.parseInt(cacheTs, 10) : 0);
 
         if (cachedCount && cacheAge < CACHE_TTL_MS) {
-          setCount(parseInt(cachedCount, 10));
+          setCount(Number.parseInt(cachedCount, 10));
           setIsLoading(false);
           return;
         }

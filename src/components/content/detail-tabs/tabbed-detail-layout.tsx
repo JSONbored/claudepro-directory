@@ -5,19 +5,14 @@
  * Maintains all content in DOM for SEO while providing tabbed UX
  */
 
-import { useEffect, useState, useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/primitives/ui/tabs';
-import { TabSectionRenderer } from './tab-section-renderer';
 import { trackInteraction } from '@/src/lib/edge/client';
-import { cn } from '@/src/lib/utils';
 import type { TabbedDetailLayoutProps } from '@/src/lib/types/detail-tabs.types';
+import { cn } from '@/src/lib/utils';
+import { TabSectionRenderer } from './tab-section-renderer';
 
-export function TabbedDetailLayout({
-  item,
-  config,
-  tabs,
-  sectionData,
-}: TabbedDetailLayoutProps) {
+export function TabbedDetailLayout({ item, config, tabs, sectionData }: TabbedDetailLayoutProps) {
   // Get initial tab from URL hash or default to first tab
   const getInitialTab = useCallback(() => {
     if (tabs.length === 0) return '';

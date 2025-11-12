@@ -36,21 +36,23 @@ export const VALID_CATEGORIES = ALL_CATEGORY_IDS;
  * Cached with React cache() for request-level deduplication
  * Merges default tab configurations with generated configs
  */
-export const getCategoryConfig = cache((slug: CategoryId): UnifiedCategoryConfigValue | null => {
-  const baseConfig = CATEGORY_CONFIGS[slug];
-  if (!baseConfig) return null;
+export const getCategoryConfig = cache(
+  (slug: CategoryId): UnifiedCategoryConfig<CategoryId> | null => {
+    const baseConfig = CATEGORY_CONFIGS[slug];
+    if (!baseConfig) return null;
 
-  const tabs = getTabConfigForCategory(slug);
-  if (!tabs) return baseConfig;
+    const tabs = getTabConfigForCategory(slug);
+    if (!tabs) return baseConfig;
 
-  return {
-    ...baseConfig,
-    detailPage: {
-      ...baseConfig.detailPage,
-      tabs,
-    },
-  };
-});
+    return {
+      ...baseConfig,
+      detailPage: {
+        ...baseConfig.detailPage,
+        tabs,
+      },
+    };
+  }
+);
 
 /**
  * Check if category ID is valid (static)

@@ -2,10 +2,10 @@
  * Type definitions for tabbed detail layout components
  */
 
+import type { ReactNode } from 'react';
+import type { UnifiedCategoryConfig } from '@/src/lib/config/category-config';
 import type { CategoryId, TabConfig } from '@/src/lib/config/category-config.types';
 import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
-import type { UnifiedCategoryConfig } from '@/src/lib/config/category-config';
-import type { ReactNode } from 'react';
 
 /**
  * Pre-processed section data passed from server component
@@ -39,30 +39,30 @@ export interface ProcessedSectionData {
     | null;
 
   // Installation section data
-  installationData?: {
-    claudeCode: {
-      steps: Array<
-        | { type: 'command'; html: string; code: string }
-        | { type: 'text'; text: string }
-      >;
-      configPath?: Record<string, string>;
-      configFormat?: string;
-    } | null;
-    claudeDesktop: {
-      steps: Array<
-        | { type: 'command'; html: string; code: string }
-        | { type: 'text'; text: string }
-      >;
-      configPath?: Record<string, string>;
-    } | null;
-    sdk: {
-      steps: Array<
-        | { type: 'command'; html: string; code: string }
-        | { type: 'text'; text: string }
-      >;
-    } | null;
-    requirements?: string[];
-  } | null | undefined;
+  installationData?:
+    | {
+        claudeCode: {
+          steps: Array<
+            { type: 'command'; html: string; code: string } | { type: 'text'; text: string }
+          >;
+          configPath?: Record<string, string>;
+          configFormat?: string;
+        } | null;
+        claudeDesktop: {
+          steps: Array<
+            { type: 'command'; html: string; code: string } | { type: 'text'; text: string }
+          >;
+          configPath?: Record<string, string>;
+        } | null;
+        sdk: {
+          steps: Array<
+            { type: 'command'; html: string; code: string } | { type: 'text'; text: string }
+          >;
+        } | null;
+        requirements?: string[];
+      }
+    | null
+    | undefined;
 
   // Examples section data
   examplesData?: Array<{

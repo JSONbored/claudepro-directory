@@ -4,21 +4,32 @@
  */
 
 import dynamic from 'next/dynamic';
-import { UnifiedContentSection } from '@/src/components/content/detail-section-variants';
 import { JSONSectionRenderer } from '@/src/components/content/json-to-sections';
 import { ReviewListSection } from '@/src/components/core/domain/reviews/review-list-section';
-import type { CategoryId } from '@/src/lib/config/category-config.types';
-import type { SectionId } from '@/src/lib/config/category-config.types';
+import type { CategoryId, SectionId } from '@/src/lib/config/category-config.types';
 import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
-import type { Database } from '@/src/types/database.types';
 import type { ProcessedSectionData } from '@/src/lib/types/detail-tabs.types';
+import type { Database } from '@/src/types/database.types';
 
 // Dynamic imports for extracted sections (code splitting)
 const FeaturesSection = dynamic(() => import('@/src/components/content/sections/features-section'));
-const RequirementsSection = dynamic(() => import('@/src/components/content/sections/requirements-section'));
-const UseCasesSection = dynamic(() => import('@/src/components/content/sections/use-cases-section'));
+const RequirementsSection = dynamic(
+  () => import('@/src/components/content/sections/requirements-section')
+);
+const UseCasesSection = dynamic(
+  () => import('@/src/components/content/sections/use-cases-section')
+);
 const SecuritySection = dynamic(() => import('@/src/components/content/sections/security-section'));
-const TroubleshootingSection = dynamic(() => import('@/src/components/content/sections/troubleshooting-section'));
+const TroubleshootingSection = dynamic(
+  () => import('@/src/components/content/sections/troubleshooting-section')
+);
+const InstallationSection = dynamic(
+  () => import('@/src/components/content/sections/installation-section')
+);
+const ConfigurationSection = dynamic(
+  () => import('@/src/components/content/sections/configuration-section')
+);
+const ExamplesSection = dynamic(() => import('@/src/components/content/sections/examples-section'));
 
 export interface TabSectionRendererProps {
   sectionId: SectionId;
@@ -71,21 +82,22 @@ export function TabSectionRenderer({
 
     case 'requirements':
       if (requirements.length === 0) return null;
-      return <RequirementsSection requirements={requirements} category={item.category as CategoryId} />;
+      return (
+        <RequirementsSection requirements={requirements} category={item.category as CategoryId} />
+      );
 
     case 'use_cases':
       if (!config.sections.use_cases || useCases.length === 0) return null;
       return <UseCasesSection useCases={useCases} category={item.category as CategoryId} />;
 
     case 'installation':
-      if (!config.sections.installation || !installationData) return null;
-      return <UnifiedContentSection variant="installation" installationData={installationData} item={item} />;
+      if (!(config.sections.installation && installationData)) return null;
+      return <InstallationSection installationData={installationData} item={item} />;
 
     case 'configuration':
-      if (!config.sections.configuration || !configData) return null;
+      if (!(config.sections.configuration && configData)) return null;
       return (
-        <UnifiedContentSection
-          variant="configuration"
+        <ConfigurationSection
           {...(configData.format === 'multi'
             ? { format: 'multi' as const, configs: configData.configs }
             : configData.format === 'hook'
@@ -104,16 +116,21 @@ export function TabSectionRenderer({
       );
 
     case 'examples':
-      if (!config.sections.examples || !examplesData || examplesData.length === 0) return null;
-      return <UnifiedContentSection variant="examples" examples={examplesData} />;
+      if (!(config.sections.examples && examplesData) || examplesData.length === 0) return null;
+      return <ExamplesSection examples={examplesData} />;
 
     case 'troubleshooting':
       if (!config.sections.troubleshooting || troubleshooting.length === 0) return null;
       return <TroubleshootingSection items={troubleshooting} />;
 
     case 'security':
-      if (!config.sections.security || !('security' in item)) return null;
-      return <SecuritySection securityItems={item.security as string[]} category={item.category as CategoryId} />;
+      if (!(config.sections.security && 'security' in item)) return null;
+      return (
+        <SecuritySection
+          securityItems={item.security as string[]}
+          category={item.category as CategoryId}
+        />
+      );
 
     case 'reviews':
       return (

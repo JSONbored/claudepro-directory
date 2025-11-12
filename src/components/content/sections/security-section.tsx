@@ -14,18 +14,18 @@ import {
 } from '@/src/components/primitives/ui/card';
 import type { CategoryId } from '@/src/lib/config/category-config.types';
 import {
-  Sparkles,
-  Package,
-  Terminal,
-  FileText,
-  Code,
-  Zap,
   Bookmark,
-  Rocket,
   BookOpen,
-  Briefcase,
   Bot,
+  Briefcase,
+  Code,
+  FileText,
   type LucideIcon,
+  Package,
+  Rocket,
+  Sparkles,
+  Terminal,
+  Zap,
 } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
