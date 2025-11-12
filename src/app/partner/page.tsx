@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
+import { useEffect, useState } from 'react';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { Button } from '@/src/components/primitives/ui/button';
 import {
@@ -11,8 +11,8 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/ui/card';
-import { pricingConfigs } from '@/src/lib/flags';
 import { SOCIAL_LINKS } from '@/src/lib/constants';
+import { pricingConfigs } from '@/src/lib/flags';
 import {
   BarChart,
   Briefcase,

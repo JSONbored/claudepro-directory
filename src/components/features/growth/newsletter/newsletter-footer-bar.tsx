@@ -4,8 +4,8 @@ import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Button } from '@/src/components/primitives/ui/button';
 import type { NewsletterSource } from '@/src/hooks/use-newsletter';
-import { appSettings } from '@/src/lib/flags';
 import { NEWSLETTER_CTA_CONFIG } from '@/src/lib/config/category-config';
+import { appSettings, newsletterConfigs } from '@/src/lib/flags';
 import { Mail, X } from '@/src/lib/icons';
 import { DIMENSIONS, POSITION_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { NewsletterForm } from './newsletter-form';
@@ -20,7 +20,7 @@ export interface NewsletterFooterBarProps {
 export function NewsletterFooterBar({
   source,
   dismissible = true,
-  showAfterDelay = 3000,
+  showAfterDelay,
   respectInlineCTA = true,
 }: NewsletterFooterBarProps) {
   const pathname = usePathname();
@@ -45,25 +45,37 @@ export function NewsletterFooterBar({
     '/statuslines/',
     '/collections/',
   ]);
+  const [delayMs, setDelayMs] = useState(showAfterDelay ?? 30000);
 
   useEffect(() => {
-    const loadExcludedPages = async () => {
+    const loadConfigs = async () => {
       try {
-        const config = await appSettings();
-        const excludedPages = config['newsletter.excluded_pages'] as string[];
+        const [appConfig, newsletterConfig] = await Promise.all([
+          appSettings(),
+          newsletterConfigs(),
+        ]);
 
+        const excludedPages = appConfig['newsletter.excluded_pages'] as string[];
         if (Array.isArray(excludedPages) && excludedPages.length > 0) {
           setPagesWithInlineCTA(excludedPages);
+        }
+
+        // Load delay from config if not provided via props
+        if (showAfterDelay === undefined) {
+          const configDelay = newsletterConfig['newsletter.footer_bar.show_after_delay_ms'] as
+            | number
+            | undefined;
+          setDelayMs(configDelay ?? 30000);
         }
       } catch {
         // Silent fail - use defaults
       }
     };
 
-    loadExcludedPages().catch(() => {
+    loadConfigs().catch(() => {
       // Intentionally ignore errors
     });
-  }, []);
+  }, [showAfterDelay]);
 
   const hasInlineCTA =
     respectInlineCTA && pagesWithInlineCTA.some((page) => pathname?.startsWith(page));
@@ -76,7 +88,7 @@ export function NewsletterFooterBar({
     if (!isDismissed) {
       const timer = setTimeout(() => {
         setIsVisible(true);
-      }, showAfterDelay);
+      }, delayMs);
 
       return () => {
         clearTimeout(timer);
@@ -84,7 +96,7 @@ export function NewsletterFooterBar({
     }
 
     return undefined;
-  }, [showAfterDelay]);
+  }, [delayMs]);
 
   const handleDismiss = () => {
     setIsVisible(false);

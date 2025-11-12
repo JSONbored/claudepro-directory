@@ -18,6 +18,7 @@ import {
 } from '@/src/components/primitives/ui/card';
 import { SelectItem } from '@/src/components/primitives/ui/select';
 import { ROUTES } from '@/src/lib/constants';
+import { formConfigs } from '@/src/lib/flags';
 import { FileText, X } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { createClient } from '@/src/lib/supabase/client';
@@ -33,8 +34,20 @@ interface CompanyFormProps {
   mode: 'create' | 'edit';
 }
 
-const MAX_FILE_SIZE = 200 * 1024; // 200KB
-const MAX_DIMENSION = 512;
+// Default values (will be overridden by Dynamic Configs)
+let MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+let MAX_DIMENSION = 2048;
+
+// Load config from Statsig on module initialization
+formConfigs()
+  .then((config: Record<string, unknown>) => {
+    const maxMB = (config['form.max_file_size_mb'] as number) ?? 5;
+    MAX_FILE_SIZE = maxMB * 1024 * 1024;
+    MAX_DIMENSION = (config['form.max_image_dimension_px'] as number) ?? 2048;
+  })
+  .catch(() => {
+    // Use defaults if config load fails
+  });
 
 export function CompanyForm({ initialData, mode }: CompanyFormProps) {
   const router = useRouter();

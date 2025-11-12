@@ -1,5 +1,5 @@
-import { newsletterConfigs } from '@/src/lib/flags';
 import { NEWSLETTER_CTA_CONFIG } from '@/src/lib/config/category-config';
+import { newsletterConfigs } from '@/src/lib/flags';
 
 /**
  * Newsletter config type from Statsig

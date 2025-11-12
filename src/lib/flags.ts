@@ -174,6 +174,8 @@ export const appSettings = createDynamicConfigGroup('app_settings', {
   'hooks.infinite_scroll.threshold': 0.1,
   'date.current_month': new Date().toISOString().slice(0, 7),
   'date.current_year': new Date().getFullYear(),
+  'date.current_date': new Date().toISOString().split('T')[0],
+  'date.last_reviewed': new Date().toISOString().split('T')[0],
   'search.enabled': true,
   'search.min_query_length': 2,
   'search.max_results': 50,
@@ -218,6 +220,14 @@ export const newsletterConfigs = createDynamicConfigGroup('newsletter_configs', 
     'Get in-depth guides, best practices, and expert tips for mastering Claude delivered weekly.',
   'newsletter.footer_text': 'Free weekly newsletter • Unsubscribe anytime',
   'newsletter.show_subscriber_count': true,
+  // Behavior settings (Phase 3)
+  'newsletter.footer_bar.show_after_delay_ms': 30000,
+  'newsletter.scroll_trigger.min_scroll_height_px': 500,
+  'newsletter.max_retries': 3,
+  'newsletter.initial_retry_delay_ms': 1000,
+  'newsletter.retry_backoff_multiplier': 2,
+  'newsletter.show_footer_bar': true,
+  'newsletter.show_scroll_trigger': true,
 });
 
 /**
@@ -249,6 +259,7 @@ export const pollingConfigs = createDynamicConfigGroup('polling_configs', {
   'polling.status.database_ms': 120000,
   'polling.analytics.views_ms': 60000,
   'polling.analytics.stats_ms': 300000,
+  'polling.newsletter_count_ms': 300000, // Phase 3
 });
 
 /**
@@ -264,6 +275,7 @@ export const animationConfigs = createDynamicConfigGroup('animation_configs', {
   'animation.stagger.medium_ms': 200,
   'animation.stagger.slow_ms': 300,
   'animation.beam.default_ms': 15000,
+  'animation.card_stagger_ms': 50, // Phase 3
 });
 
 /**
@@ -276,6 +288,16 @@ export const timeoutConfigs = createDynamicConfigGroup('timeout_configs', {
   'timeout.ui.tooltip_ms': 300,
   'timeout.ui.animation_ms': 300,
   'timeout.ui.transition_ms': 200,
+  // Phase 3 - Interaction timing
+  'timeout.prefetch_hover_ms': 100,
+  'timeout.button_success_ms': 2000,
+  'timeout.clipboard_reset_ms': 2000,
+  'timeout.scroll_detection_threshold_ms': 100,
+  'timeout.scroll_detection_hysteresis_ms': 50,
+  'timeout.form_debounce_ms': 300,
+  'timeout.duplicate_check_debounce_ms': 500,
+  'timeout.company_search_debounce_ms': 300,
+  'timeout.badge_tooltip_delay_ms': 100,
 });
 
 /**
@@ -356,4 +378,50 @@ export const searchConfigs = createDynamicConfigGroup('search_configs', {
   'search.debounce_ms': 150,
   'search.threshold': 0.3,
   'search.max_results': 50,
+});
+
+/**
+ * Form Configs - Form validation and limits (Phase 3)
+ * Controls file upload limits and form validation rules
+ * Usage: const config = await formConfigs(); const maxSize = config['form.max_file_size_mb'];
+ */
+export const formConfigs = createDynamicConfigGroup('form_configs', {
+  'form.max_file_size_mb': 5,
+  'form.max_image_dimension_px': 2048,
+  'form.max_review_length': 2000,
+  'form.min_review_length': 10,
+  'form.review_helpful_threshold': 3,
+  'form.review_auto_approve_score': 0.8,
+});
+
+/**
+ * Recently Viewed Configs - Recently viewed items settings (Phase 3)
+ * Controls storage and display of recently viewed content
+ * Usage: const config = await recentlyViewedConfigs(); const ttl = config['recently_viewed.ttl_days'];
+ */
+export const recentlyViewedConfigs = createDynamicConfigGroup('recently_viewed_configs', {
+  'recently_viewed.ttl_days': 30,
+  'recently_viewed.max_items': 10,
+  'recently_viewed.max_description_length': 150,
+  'recently_viewed.max_tags': 5,
+});
+
+/**
+ * Cache Configs - Cache TTL settings (Phase 3)
+ * Controls cache durations across the application
+ * Usage: const config = await cacheConfigs(); const ttl = config['cache.user_profile_ttl_s'];
+ */
+export const cacheConfigs = createDynamicConfigGroup('cache_configs', {
+  'cache.submission_form_fields_ttl_s': 21600, // 6 hours
+  'cache.category_stats_ttl_s': 300, // 5 minutes
+  'cache.trending_configs_ttl_s': 3600, // 1 hour
+  'cache.user_profile_ttl_s': 300, // 5 minutes
+  'cache.search_results_ttl_s': 1800, // 30 minutes
+  'cache.submission_review_ttl_s': 60, // 1 minute
+  'cache.company_list_ttl_s': 3600, // 1 hour
+  'cache.job_listings_ttl_s': 1800, // 30 minutes
+  'cache.collection_items_ttl_s': 1800, // 30 minutes
+  'cache.badge_counts_ttl_s': 300, // 5 minutes
+  'cache.analytics_stats_ttl_s': 600, // 10 minutes
+  'cache.newsletter_count_ttl_s': 300, // 5 minutes
 });

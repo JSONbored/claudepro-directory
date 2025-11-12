@@ -7,6 +7,7 @@
 
 import { useCallback, useState, useTransition } from 'react';
 import { trackInteraction, trackNewsletterEvent } from '@/src/lib/edge/client';
+import { newsletterConfigs } from '@/src/lib/flags';
 import { logger } from '@/src/lib/logger';
 import { toasts } from '@/src/lib/utils/toast.utils';
 import type { Enums } from '@/src/types/database.types';
@@ -14,8 +15,22 @@ import type { Enums } from '@/src/types/database.types';
 export type NewsletterSource = Enums<'newsletter_source'>;
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const MAX_RETRIES = 3;
-const INITIAL_RETRY_DELAY_MS = 1000;
+
+// Default values (will be overridden by Dynamic Configs)
+let MAX_RETRIES = 3;
+let INITIAL_RETRY_DELAY_MS = 1000;
+let RETRY_BACKOFF_MULTIPLIER = 2;
+
+// Load retry config from Statsig on module initialization
+newsletterConfigs()
+  .then((config: Record<string, unknown>) => {
+    MAX_RETRIES = (config['newsletter.max_retries'] as number) ?? 3;
+    INITIAL_RETRY_DELAY_MS = (config['newsletter.initial_retry_delay_ms'] as number) ?? 1000;
+    RETRY_BACKOFF_MULTIPLIER = (config['newsletter.retry_backoff_multiplier'] as number) ?? 2;
+  })
+  .catch(() => {
+    // Use defaults if config load fails
+  });
 
 /**
  * Retry helper with exponential backoff
@@ -36,7 +51,7 @@ async function fetchWithRetry(
 
     // Retry on server errors (5xx)
     if (!response.ok && response.status >= 500 && retries > 0) {
-      const delay = INITIAL_RETRY_DELAY_MS * (MAX_RETRIES - retries + 1);
+      const delay = INITIAL_RETRY_DELAY_MS * RETRY_BACKOFF_MULTIPLIER ** (MAX_RETRIES - retries);
       await new Promise((resolve) => setTimeout(resolve, delay));
       return fetchWithRetry(url, options, retries - 1);
     }
@@ -45,7 +60,7 @@ async function fetchWithRetry(
   } catch (error) {
     // Retry on network errors
     if (retries > 0) {
-      const delay = INITIAL_RETRY_DELAY_MS * (MAX_RETRIES - retries + 1);
+      const delay = INITIAL_RETRY_DELAY_MS * RETRY_BACKOFF_MULTIPLIER ** (MAX_RETRIES - retries);
       await new Promise((resolve) => setTimeout(resolve, delay));
       return fetchWithRetry(url, options, retries - 1);
     }

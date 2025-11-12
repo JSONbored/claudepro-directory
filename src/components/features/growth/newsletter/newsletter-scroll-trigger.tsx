@@ -8,6 +8,7 @@
 import { motion, useScroll } from 'motion/react';
 import { useEffect, useState } from 'react';
 import type { NewsletterSource } from '@/src/hooks/use-newsletter';
+import { newsletterConfigs } from '@/src/lib/flags';
 import { NewsletterCTAVariant } from './newsletter-cta-variants';
 
 export interface NewsletterScrollTriggerProps {
@@ -20,7 +21,7 @@ export interface NewsletterScrollTriggerProps {
   threshold?: number;
   /**
    * Only show on long-form content (minimum scroll height)
-   * @default 2000px
+   * @default 500px (from Dynamic Config)
    */
   minScrollHeight?: number;
 }
@@ -29,16 +30,37 @@ export function NewsletterScrollTrigger({
   source,
   category,
   threshold = 0.6,
-  minScrollHeight = 2000,
+  minScrollHeight,
 }: NewsletterScrollTriggerProps) {
   const [isVisible, setIsVisible] = useState(false);
   const [hasTriggered, setHasTriggered] = useState(false);
+  const [scrollHeightThreshold, setScrollHeightThreshold] = useState(minScrollHeight ?? 500);
   const { scrollYProgress } = useScroll();
+
+  useEffect(() => {
+    const loadConfig = async () => {
+      if (minScrollHeight === undefined) {
+        try {
+          const config = await newsletterConfigs();
+          const configHeight = config['newsletter.scroll_trigger.min_scroll_height_px'] as
+            | number
+            | undefined;
+          setScrollHeightThreshold(configHeight ?? 500);
+        } catch {
+          // Silent fail - use default
+        }
+      }
+    };
+
+    loadConfig().catch(() => {
+      // Intentionally ignore errors
+    });
+  }, [minScrollHeight]);
 
   useEffect(() => {
     // Check if page is long enough for scroll trigger
     const documentHeight = document.documentElement.scrollHeight - window.innerHeight;
-    if (documentHeight < minScrollHeight) {
+    if (documentHeight < scrollHeightThreshold) {
       return;
     }
 
@@ -59,7 +81,7 @@ export function NewsletterScrollTrigger({
     });
 
     return () => unsubscribe();
-  }, [scrollYProgress, threshold, hasTriggered, minScrollHeight]);
+  }, [scrollYProgress, threshold, hasTriggered, scrollHeightThreshold]);
 
   if (!isVisible || hasTriggered) {
     return null;

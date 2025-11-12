@@ -16,8 +16,23 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { timeoutConfigs } from '@/src/lib/flags';
 import { logger } from '@/src/lib/logger';
 import type { ScrollState } from './fab.types';
+
+// Default values (will be overridden by Dynamic Config)
+let DEFAULT_SCROLL_THRESHOLD = 100;
+let DEFAULT_SCROLL_HYSTERESIS = 50;
+
+// Load config from Statsig on module initialization
+timeoutConfigs()
+  .then((config: Record<string, unknown>) => {
+    DEFAULT_SCROLL_THRESHOLD = (config['timeout.scroll_detection_threshold_ms'] as number) ?? 100;
+    DEFAULT_SCROLL_HYSTERESIS = (config['timeout.scroll_detection_hysteresis_ms'] as number) ?? 50;
+  })
+  .catch(() => {
+    // Use defaults if config load fails
+  });
 
 interface UseScrollDirectionOptions {
   /** Scroll threshold to show/hide FAB (px) */
@@ -31,8 +46,8 @@ interface UseScrollDirectionOptions {
  * Reuses optimization patterns from BackToTopButton
  */
 export function useScrollDirection({
-  threshold = 100,
-  hysteresis = 10,
+  threshold = DEFAULT_SCROLL_THRESHOLD,
+  hysteresis = DEFAULT_SCROLL_HYSTERESIS,
 }: UseScrollDirectionOptions = {}): ScrollState {
   const [scrollState, setScrollState] = useState<ScrollState>({
     scrollY: 0,

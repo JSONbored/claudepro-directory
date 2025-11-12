@@ -1,8 +1,20 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { TIME_CONSTANTS } from '@/src/lib/constants';
+import { timeoutConfigs } from '@/src/lib/flags';
 import { logger } from '@/src/lib/logger';
+
+// Default value (will be overridden by Dynamic Config)
+let DEFAULT_CLIPBOARD_RESET_DELAY = 2000;
+
+// Load config from Statsig on module initialization
+timeoutConfigs()
+  .then((config: Record<string, unknown>) => {
+    DEFAULT_CLIPBOARD_RESET_DELAY = (config['timeout.clipboard_reset_ms'] as number) ?? 2000;
+  })
+  .catch(() => {
+    // Use default if config load fails
+  });
 
 export interface UseCopyToClipboardOptions {
   /**
@@ -64,7 +76,7 @@ export interface UseCopyToClipboardReturn {
 export function useCopyToClipboard(
   options: UseCopyToClipboardOptions = {}
 ): UseCopyToClipboardReturn {
-  const { onSuccess, onError, resetDelay = 2 * TIME_CONSTANTS.SECOND, context } = options;
+  const { onSuccess, onError, resetDelay = DEFAULT_CLIPBOARD_RESET_DELAY, context } = options;
 
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState<Error | null>(null);

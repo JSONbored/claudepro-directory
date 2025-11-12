@@ -7,7 +7,6 @@
  */
 
 import { z } from 'zod';
-import { getConfigValue } from '@/src/lib/config/app-settings';
 
 /**
  * Application Information
@@ -189,20 +188,19 @@ const DATE_CONFIG_FALLBACK = {
  * Falls back to hardcoded values if database unavailable
  */
 export async function getDateConfig() {
-  const [currentMonth, currentYear, currentDate, lastReviewed] = await Promise.all([
-    getConfigValue<string>('date.current_month', DATE_CONFIG_FALLBACK.currentMonth),
-    getConfigValue<number>('date.current_year', DATE_CONFIG_FALLBACK.currentYear),
-    getConfigValue<string>('date.current_date', DATE_CONFIG_FALLBACK.currentDate),
-    getConfigValue<string>('date.last_reviewed', DATE_CONFIG_FALLBACK.lastReviewed),
-  ]);
-
-  return {
-    currentMonth,
-    currentYear,
-    currentDate,
-    lastReviewed,
-    claudeModels: DATE_CONFIG_FALLBACK.claudeModels, // Models don't change, keep hardcoded
-  };
+  try {
+    const { appSettings } = await import('@/src/lib/flags');
+    const config = await appSettings();
+    return {
+      currentMonth: (config['date.current_month'] as string) ?? DATE_CONFIG_FALLBACK.currentMonth,
+      currentYear: (config['date.current_year'] as number) ?? DATE_CONFIG_FALLBACK.currentYear,
+      currentDate: (config['date.current_date'] as string) ?? DATE_CONFIG_FALLBACK.currentDate,
+      lastReviewed: (config['date.last_reviewed'] as string) ?? DATE_CONFIG_FALLBACK.lastReviewed,
+      claudeModels: DATE_CONFIG_FALLBACK.claudeModels,
+    };
+  } catch {
+    return DATE_CONFIG_FALLBACK;
+  }
 }
 
 /**
@@ -556,6 +554,7 @@ export const SERVICE_DELAYS = {
 /**
  * Polling Intervals Configuration
  * Standardized intervals for periodic checks and updates
+ * SYNC: Keep in sync with polling_configs in flags.ts (Statsig Dynamic Configs)
  */
 export const POLLING_INTERVALS = {
   // Real-time updates
@@ -604,6 +603,7 @@ export const TIMEOUTS = {
 /**
  * Animation Durations Configuration
  * Standardized animation durations for consistent UX
+ * SYNC: Keep in sync with animation_configs in flags.ts (Statsig Dynamic Configs)
  */
 export const ANIMATION_DURATIONS = {
   // Number ticker animations
@@ -642,8 +642,10 @@ export async function getPollingIntervals() {
           (config['polling.status.database_ms'] as number) ?? POLLING_INTERVALS.status.database,
       },
       analytics: {
-        views: (config['polling.analytics.views_ms'] as number) ?? POLLING_INTERVALS.analytics.views,
-        stats: (config['polling.analytics.stats_ms'] as number) ?? POLLING_INTERVALS.analytics.stats,
+        views:
+          (config['polling.analytics.views_ms'] as number) ?? POLLING_INTERVALS.analytics.views,
+        stats:
+          (config['polling.analytics.stats_ms'] as number) ?? POLLING_INTERVALS.analytics.stats,
       },
     };
   } catch {

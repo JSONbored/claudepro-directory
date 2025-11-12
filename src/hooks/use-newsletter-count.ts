@@ -6,6 +6,7 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
+import { cacheConfigs, pollingConfigs } from '@/src/lib/flags';
 import { logger } from '@/src/lib/logger';
 import { createClient } from '@/src/lib/supabase/client';
 
@@ -17,8 +18,21 @@ export interface UseNewsletterCountReturn {
 
 const CACHE_KEY = 'newsletter_count';
 const CACHE_TIMESTAMP_KEY = 'newsletter_count_ts';
-const CACHE_TTL_MS = 60000; // 1 minute
-const POLL_INTERVAL_MS = 30000; // 30 seconds
+
+// Default values (will be overridden by Dynamic Configs)
+let CACHE_TTL_MS = 300000; // 5 minutes (300 seconds)
+let POLL_INTERVAL_MS = 300000; // 5 minutes
+
+// Load config from Statsig on module initialization
+Promise.all([cacheConfigs(), pollingConfigs()])
+  .then(([cache, polling]: [Record<string, unknown>, Record<string, unknown>]) => {
+    const cacheTtlSeconds = (cache['cache.newsletter_count_ttl_s'] as number) ?? 300;
+    CACHE_TTL_MS = cacheTtlSeconds * 1000;
+    POLL_INTERVAL_MS = (polling['polling.newsletter_count_ms'] as number) ?? 300000;
+  })
+  .catch(() => {
+    // Use defaults if config load fails
+  });
 
 /**
  * Hook to fetch and poll newsletter subscriber count
