@@ -1,12 +1,12 @@
 'use client';
 
-import { useState } from 'react';
 import { Check, type LucideIcon } from 'lucide-react';
-import { Button } from '@/components/primitives/ui/button';
 import { motion } from 'motion/react';
-import { useButtonSuccess } from '@/hooks/use-button-success';
+import { useState } from 'react';
+import { Button } from '@/src/components/primitives/ui/button';
+import { useButtonSuccess } from '@/src/hooks/use-button-success';
+import { toasts } from '@/src/lib/utils/toast.utils';
 import type { ButtonStyleProps } from './button-types';
-import { toasts } from '@/lib/toasts';
 
 interface ContentActionButtonProps extends ButtonStyleProps {
   url: string;

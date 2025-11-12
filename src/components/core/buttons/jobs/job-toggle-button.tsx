@@ -24,7 +24,7 @@ export function JobToggleButton({
   jobId,
   currentStatus,
   size = 'sm',
-  buttonVariant = 'ghost',
+  variant = 'ghost',
   className,
   disabled = false,
 }: JobToggleButtonProps) {
@@ -89,7 +89,7 @@ export function JobToggleButton({
 
   return (
     <Button
-      variant={buttonVariant}
+      variant={variant}
       size={size}
       onClick={handleToggle}
       disabled={disabled || isPending}

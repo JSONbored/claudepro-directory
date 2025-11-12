@@ -18,7 +18,7 @@ export type AuthSignOutButtonProps = ButtonStyleProps;
 
 export function AuthSignOutButton({
   size = 'sm',
-  buttonVariant = 'ghost',
+  variant = 'ghost',
   className,
   disabled = false,
 }: AuthSignOutButtonProps) {
@@ -46,7 +46,7 @@ export function AuthSignOutButton({
       onClick={handleSignOut}
       disabled={disabled || loading}
       size={size}
-      variant={buttonVariant}
+      variant={variant}
       className={className}
     >
       <LogOut className={UI_CLASSES.ICON_SM_LEADING} />

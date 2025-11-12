@@ -77,15 +77,21 @@ export type InstallProps = BaseProps & {
   variant: 'installation';
   installationData: {
     claudeCode?: {
-      steps: Array<{ type: 'command'; html: string; code: string } | { type: 'text'; text: string }>;
+      steps: Array<
+        { type: 'command'; html: string; code: string } | { type: 'text'; text: string }
+      >;
       configPath?: Record<string, string>;
     } | null;
     claudeDesktop?: {
-      steps: Array<{ type: 'command'; html: string; code: string } | { type: 'text'; text: string }>;
+      steps: Array<
+        { type: 'command'; html: string; code: string } | { type: 'text'; text: string }
+      >;
       configPath?: Record<string, string>;
     } | null;
     sdk?: {
-      steps: Array<{ type: 'command'; html: string; code: string } | { type: 'text'; text: string }>;
+      steps: Array<
+        { type: 'command'; html: string; code: string } | { type: 'text'; text: string }
+      >;
     } | null;
     requirements?: string[];
   };

@@ -23,7 +23,7 @@ export interface JobDeleteButtonProps extends ButtonStyleProps {
 export function JobDeleteButton({
   jobId,
   size = 'sm',
-  buttonVariant = 'ghost',
+  variant = 'ghost',
   className,
   disabled = false,
 }: JobDeleteButtonProps) {
@@ -91,7 +91,7 @@ export function JobDeleteButton({
 
   return (
     <Button
-      variant={buttonVariant}
+      variant={variant}
       size={size}
       onClick={handleDelete}
       disabled={disabled || isPending || isDeleting}
