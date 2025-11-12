@@ -4,8 +4,17 @@
  */
 
 import { Suspense } from 'react';
-import { UnifiedContentSection } from '@/src/components/content/detail-section-variants';
+import { TabbedDetailLayout } from '@/src/components/content/detail-tabs/tabbed-detail-layout';
 import { JSONSectionRenderer } from '@/src/components/content/json-to-sections';
+import ConfigurationSection from '@/src/components/content/sections/configuration-section';
+import ContentSection from '@/src/components/content/sections/content-section';
+import ExamplesSection from '@/src/components/content/sections/examples-section';
+import FeaturesSection from '@/src/components/content/sections/features-section';
+import InstallationSection from '@/src/components/content/sections/installation-section';
+import RequirementsSection from '@/src/components/content/sections/requirements-section';
+import SecuritySection from '@/src/components/content/sections/security-section';
+import TroubleshootingSection from '@/src/components/content/sections/troubleshooting-section';
+import UseCasesSection from '@/src/components/content/sections/use-cases-section';
 import { ReviewListSection } from '@/src/components/core/domain/reviews/review-list-section';
 import { NewsletterCTAVariant } from '@/src/components/features/growth/newsletter';
 import { RecentlyViewedSidebar } from '@/src/components/features/navigation/recently-viewed-sidebar';
@@ -18,6 +27,7 @@ import { detectLanguage } from '@/src/lib/content/language-detection';
 import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
 import { highlightCode } from '@/src/lib/content/syntax-highlighting';
 import type { InstallationSteps } from '@/src/lib/types/content-type-config';
+import type { ProcessedSectionData } from '@/src/lib/types/detail-tabs.types';
 import { getDisplayTitle } from '@/src/lib/utils';
 import {
   generateFilename,
@@ -39,6 +49,7 @@ export interface UnifiedDetailPageProps {
   relatedItemsPromise?: Promise<ContentItem[]>;
   viewCountPromise?: Promise<number>;
   collectionSections?: React.ReactNode;
+  tabsEnabled?: boolean;
 }
 
 async function ViewCountMetadata({
@@ -82,6 +93,7 @@ export async function UnifiedDetailPage({
   relatedItemsPromise,
   viewCountPromise,
   collectionSections,
+  tabsEnabled = false,
 }: UnifiedDetailPageProps) {
   const config = await getCategoryConfig(item.category as CategoryId);
   const displayTitle = getDisplayTitle(item);
@@ -438,6 +450,53 @@ export async function UnifiedDetailPage({
     );
   }
 
+  // Check if we should use tabbed layout
+  const configuredTabs = config.detailPage.tabs;
+  const shouldUseTabs = tabsEnabled && configuredTabs && configuredTabs.length > 0;
+
+  // If tabs are enabled and configured, use tabbed layout
+  if (shouldUseTabs && configuredTabs) {
+    const sectionData: ProcessedSectionData = {
+      contentData,
+      configData,
+      installationData,
+      examplesData,
+      features,
+      useCases,
+      requirements,
+      troubleshooting,
+      guideSections,
+      collectionSections,
+    };
+
+    return (
+      <div className={'min-h-screen bg-background'}>
+        <DetailHeader displayTitle={displayTitle} item={item} config={config} />
+        {viewCountPromise ? (
+          <Suspense
+            fallback={<DetailMetadata item={item} viewCount={undefined} copyCount={undefined} />}
+          >
+            <ViewCountMetadata item={item} viewCountPromise={viewCountPromise} />
+          </Suspense>
+        ) : (
+          <DetailMetadata item={item} viewCount={viewCount} copyCount={copyCount} />
+        )}
+
+        <TabbedDetailLayout
+          item={item}
+          config={config}
+          tabs={configuredTabs}
+          sectionData={sectionData}
+          relatedItems={relatedItems}
+        />
+
+        <div className="container mx-auto px-4 pb-8">
+          <NewsletterCTAVariant source="content_page" variant="inline" category={item.category} />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={'min-h-screen bg-background'}>
       {/* Header - Client component for interactivity */}
@@ -476,8 +535,7 @@ export async function UnifiedDetailPage({
 
             {/* Content/Code section (non-guides) */}
             {contentData && config && (
-              <UnifiedContentSection
-                variant="content"
+              <ContentSection
                 title={`${config.typeName} Content`}
                 description={`The main content for this ${config.typeName.toLowerCase()}.`}
                 html={contentData.html}
@@ -489,41 +547,28 @@ export async function UnifiedDetailPage({
 
             {/* Features Section */}
             {config?.sections.features && features.length > 0 && (
-              <UnifiedContentSection
-                variant="bullets"
-                title="Features"
-                description="Key capabilities and functionality"
-                items={features as string[]}
+              <FeaturesSection
+                features={features as string[]}
                 category={item.category as CategoryId}
-                bulletColor="primary"
               />
             )}
 
             {/* Requirements Section */}
             {requirements.length > 0 && (
-              <UnifiedContentSection
-                variant="bullets"
-                title="Requirements"
-                description="Prerequisites and dependencies"
-                items={requirements as string[]}
+              <RequirementsSection
+                requirements={requirements as string[]}
                 category={item.category as CategoryId}
-                bulletColor="orange"
               />
             )}
 
             {/* Installation Section */}
             {config?.sections.installation && installationData && (
-              <UnifiedContentSection
-                variant="installation"
-                installationData={installationData}
-                item={item}
-              />
+              <InstallationSection installationData={installationData} item={item} />
             )}
 
             {/* Configuration Section */}
             {config?.sections.configuration && configData && (
-              <UnifiedContentSection
-                variant="configuration"
+              <ConfigurationSection
                 {...(configData.format === 'multi'
                   ? { format: 'multi' as const, configs: configData.configs }
                   : configData.format === 'hook'
@@ -543,32 +588,23 @@ export async function UnifiedDetailPage({
 
             {/* Use Cases Section */}
             {config?.sections.use_cases && useCases.length > 0 && (
-              <UnifiedContentSection
-                variant="bullets"
-                title="Use Cases"
-                description="Common scenarios and applications"
-                items={useCases as string[]}
+              <UseCasesSection
+                useCases={useCases as string[]}
                 category={item.category as CategoryId}
-                bulletColor="accent"
               />
             )}
 
             {/* Security Section (MCP-specific) */}
             {config?.sections.security && 'security' in item && (
-              <UnifiedContentSection
-                variant="bullets"
-                title="Security Best Practices"
-                description="Important security considerations"
-                items={item.security as string[]}
+              <SecuritySection
+                securityItems={item.security as string[]}
                 category={item.category as CategoryId}
-                bulletColor="orange"
               />
             )}
 
             {/* Troubleshooting Section */}
             {config?.sections.troubleshooting && troubleshooting.length > 0 && (
-              <UnifiedContentSection
-                variant="troubleshooting"
+              <TroubleshootingSection
                 items={troubleshooting as Array<string | { issue: string; solution: string }>}
                 description="Common issues and solutions"
               />
@@ -576,7 +612,7 @@ export async function UnifiedDetailPage({
 
             {/* Usage Examples Section - GitHub-style code snippets with syntax highlighting */}
             {config?.sections.examples && examplesData && examplesData.length > 0 && (
-              <UnifiedContentSection variant="examples" examples={examplesData} />
+              <ExamplesSection examples={examplesData} />
             )}
 
             {/* Reviews & Ratings Section */}

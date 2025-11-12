@@ -13,6 +13,7 @@ import type {
   ContentType,
   UnifiedCategoryConfig,
 } from './category-config.types';
+import { getTabConfigForCategory } from './default-tab-configs';
 
 /**
  * Get all category configs (static, no database query)
@@ -33,10 +34,25 @@ export const VALID_CATEGORIES = ALL_CATEGORY_IDS;
 /**
  * Get category config by ID (static, no database query)
  * Cached with React cache() for request-level deduplication
+ * Merges default tab configurations with generated configs
  */
-export const getCategoryConfig = cache((slug: CategoryId): UnifiedCategoryConfigValue | null => {
-  return CATEGORY_CONFIGS[slug] || null;
-});
+export const getCategoryConfig = cache(
+  (slug: CategoryId): UnifiedCategoryConfig<CategoryId> | null => {
+    const baseConfig = CATEGORY_CONFIGS[slug];
+    if (!baseConfig) return null;
+
+    const tabs = getTabConfigForCategory(slug);
+    if (!tabs) return baseConfig;
+
+    return {
+      ...baseConfig,
+      detailPage: {
+        ...baseConfig.detailPage,
+        tabs,
+      },
+    };
+  }
+);
 
 /**
  * Check if category ID is valid (static)

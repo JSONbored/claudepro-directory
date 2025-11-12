@@ -12,6 +12,37 @@ type DatabaseCategoryConfig = Tables<'category_configs'>;
 
 export type CategoryId = DatabaseCategoryConfig['category'];
 
+/**
+ * Section identifier for content detail pages
+ */
+export type SectionId =
+  | 'description'
+  | 'features'
+  | 'requirements'
+  | 'use_cases'
+  | 'installation'
+  | 'configuration'
+  | 'examples'
+  | 'troubleshooting'
+  | 'security'
+  | 'reviews'
+  | 'related'
+  | 'collection_items'
+  | 'guide_sections';
+
+/**
+ * Tab configuration for detail pages
+ */
+export interface TabConfig {
+  readonly id: string;
+  readonly label: string;
+  readonly mobileLabel?: string;
+  readonly icon?: LucideIcon;
+  readonly sections: ReadonlyArray<SectionId>;
+  readonly lazy?: boolean;
+  readonly order: number;
+}
+
 export interface UnifiedCategoryConfig<TId extends string = string> {
   readonly id: TId;
   title: string;
@@ -43,6 +74,7 @@ export interface UnifiedCategoryConfig<TId extends string = string> {
   detailPage: {
     displayConfig: boolean;
     configFormat: 'json' | 'multi' | 'hook';
+    tabs?: ReadonlyArray<TabConfig>;
   };
   sections: {
     features: boolean;

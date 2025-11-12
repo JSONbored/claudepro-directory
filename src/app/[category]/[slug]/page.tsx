@@ -18,6 +18,7 @@ import {
   VALID_CATEGORIES,
 } from '@/src/lib/config/category-config';
 import { type ContentItem, getContentByCategory } from '@/src/lib/content/supabase-content-loader';
+import { featureFlags } from '@/src/lib/flags';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createAnonClient } from '@/src/lib/supabase/server-anon';
@@ -193,6 +194,9 @@ export default async function DetailPage({
   const copyCount = analytics?.copy_count || 0;
   const relatedItems = (response.related as ContentItem[]) || [];
 
+  // Check feature flag for tabbed detail pages
+  const tabsEnabled = await featureFlags.contentDetailTabs();
+
   // No transformation needed - displayTitle computed at build time
   // This eliminates runtime overhead and follows DRY principles
 
@@ -230,6 +234,7 @@ export default async function DetailPage({
         relatedItems={relatedItems}
         viewCount={viewCount}
         copyCount={copyCount}
+        tabsEnabled={tabsEnabled}
         collectionSections={
           category === 'collections' && fullItem && fullItem.category === 'collections' ? (
             <CollectionDetailView
