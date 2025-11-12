@@ -7,14 +7,14 @@
 
 import { motion } from 'motion/react';
 import { ProductionCodeBlock } from '@/src/components/content/production-code-block';
-import { UnifiedBadge } from '@/src/components/core/domain/unified-badge';
+import { UnifiedBadge } from '@/src/components/core/domain/badges/unified-badge';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/src/components/primitives/card';
+} from '@/src/components/primitives/ui/card';
 import type { CategoryId } from '@/src/lib/config/category-config';
 import {
   Bookmark,

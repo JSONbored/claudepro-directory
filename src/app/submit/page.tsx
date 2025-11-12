@@ -4,7 +4,7 @@
  */
 
 import dynamic from 'next/dynamic';
-import { JobsPromo } from '@/src/components/core/domain/jobs-promo';
+import { JobsPromo } from '@/src/components/core/domain/jobs/jobs-promo';
 import { SidebarActivityCard } from '@/src/components/core/forms/sidebar-activity-card';
 import { SubmitFormClient } from '@/src/components/core/forms/submit-form-client';
 import { SubmitPageHero } from '@/src/components/core/forms/submit-page-hero';
@@ -20,7 +20,7 @@ const UnifiedNewsletterCapture = dynamic(
   }
 );
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
 import { TrendingUp } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';

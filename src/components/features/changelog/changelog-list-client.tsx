@@ -6,10 +6,10 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
-import { BaseCard } from '@/src/components/core/domain/base-card';
-import { UnifiedBadge } from '@/src/components/core/domain/unified-badge';
+import { UnifiedBadge } from '@/src/components/core/domain/badges/unified-badge';
+import { BaseCard } from '@/src/components/core/domain/cards/base-card';
 import { CategoryFilter } from '@/src/components/features/changelog/category-filter';
-import { Tabs, TabsContent } from '@/src/components/primitives/tabs';
+import { Tabs, TabsContent } from '@/src/components/primitives/ui/tabs';
 import type { ChangelogCategory, ChangelogEntry } from '@/src/lib/changelog/loader';
 import {
   formatChangelogDateShort,

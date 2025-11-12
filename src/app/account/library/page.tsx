@@ -4,17 +4,17 @@
  */
 
 import Link from 'next/link';
-import { UnifiedBadge } from '@/src/components/core/domain/unified-badge';
-import { NavLink } from '@/src/components/core/shared/nav-link';
-import { Button } from '@/src/components/primitives/button';
+import { UnifiedBadge } from '@/src/components/core/domain/badges/unified-badge';
+import { NavLink } from '@/src/components/core/navigation/nav-link';
+import { Button } from '@/src/components/primitives/ui/button';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/src/components/primitives/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/primitives/tabs';
+} from '@/src/components/primitives/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/primitives/ui/tabs';
 import { ROUTES } from '@/src/lib/constants';
 import { Bookmark as BookmarkIcon, ExternalLink, FolderOpen, Layers, Plus } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';

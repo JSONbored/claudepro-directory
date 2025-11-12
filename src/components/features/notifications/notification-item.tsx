@@ -6,7 +6,7 @@
 
 import { motion } from 'motion/react';
 import Link from 'next/link';
-import { Button } from '@/src/components/primitives/button';
+import { Button } from '@/src/components/primitives/ui/button';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import type { Tables } from '@/src/types/database.types';
 

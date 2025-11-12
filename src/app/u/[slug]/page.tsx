@@ -6,8 +6,8 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
-import { UnifiedBadge } from '@/src/components/core/domain/unified-badge';
-import { NavLink } from '@/src/components/core/shared/nav-link';
+import { UnifiedBadge } from '@/src/components/core/domain/badges/unified-badge';
+import { NavLink } from '@/src/components/core/navigation/nav-link';
 import { FollowButton } from '@/src/components/features/social/follow-button';
 import {
   Card,
@@ -15,7 +15,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/src/components/primitives/card';
+} from '@/src/components/primitives/ui/card';
 import { FolderOpen, Globe, Users } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';

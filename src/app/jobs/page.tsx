@@ -6,19 +6,19 @@
 import { unstable_cache } from 'next/cache';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
-import { JobCard } from '@/src/components/core/domain/job-card';
-import { JobsPromo } from '@/src/components/core/domain/jobs-promo';
-import { UnifiedBadge } from '@/src/components/core/domain/unified-badge';
-import { Button } from '@/src/components/primitives/button';
-import { Card, CardContent } from '@/src/components/primitives/card';
-import { Input } from '@/src/components/primitives/input';
+import { UnifiedBadge } from '@/src/components/core/domain/badges/unified-badge';
+import { JobCard } from '@/src/components/core/domain/cards/job-card';
+import { JobsPromo } from '@/src/components/core/domain/jobs/jobs-promo';
+import { Button } from '@/src/components/primitives/ui/button';
+import { Card, CardContent } from '@/src/components/primitives/ui/card';
+import { Input } from '@/src/components/primitives/ui/input';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/src/components/primitives/select';
+} from '@/src/components/primitives/ui/select';
 import { ROUTES } from '@/src/lib/constants';
 import { Briefcase, Clock, Filter, MapPin, Plus, Search } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';

@@ -7,19 +7,19 @@
 
 import { usePathname } from 'next/navigation';
 import { memo, useCallback, useEffect, useId, useState } from 'react';
-import { UnifiedBadge } from '@/src/components/core/domain/unified-badge';
+import { UnifiedBadge } from '@/src/components/core/domain/badges/unified-badge';
 import { ErrorBoundary } from '@/src/components/core/infra/error-boundary';
 import { SearchFilterPanel } from '@/src/components/features/search/search-filter-panel';
-import { Button } from '@/src/components/primitives/button';
-import { Collapsible, CollapsibleContent } from '@/src/components/primitives/collapsible';
-import { Input } from '@/src/components/primitives/input';
+import { Button } from '@/src/components/primitives/ui/button';
+import { Collapsible, CollapsibleContent } from '@/src/components/primitives/ui/collapsible';
+import { Input } from '@/src/components/primitives/ui/input';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/src/components/primitives/select';
+} from '@/src/components/primitives/ui/select';
 import { useUnifiedSearch } from '@/src/hooks/use-unified-search';
 import { ChevronDown, ChevronUp, Filter, Search } from '@/src/lib/icons';
 import type { FilterState, UnifiedSearchProps } from '@/src/lib/types/component.types';

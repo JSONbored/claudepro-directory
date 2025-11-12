@@ -1,6 +1,6 @@
 'use client';
 
-import { Button } from '@/src/components/primitives/button';
+import { Button } from '@/src/components/primitives/ui/button';
 import { Search } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 

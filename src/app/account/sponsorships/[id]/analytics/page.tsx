@@ -1,12 +1,12 @@
 import { notFound } from 'next/navigation';
-import { UnifiedBadge } from '@/src/components/core/domain/unified-badge';
+import { UnifiedBadge } from '@/src/components/core/domain/badges/unified-badge';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/src/components/primitives/card';
+} from '@/src/components/primitives/ui/card';
 import { BarChart, Eye, MousePointer, TrendingUp } from '@/src/lib/icons';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';

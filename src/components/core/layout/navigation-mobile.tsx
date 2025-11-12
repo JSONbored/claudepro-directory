@@ -6,11 +6,16 @@
 
 import { motion } from 'motion/react';
 import Link from 'next/link';
-import { UnifiedBadge } from '@/src/components/core/domain/unified-badge';
+import { UnifiedBadge } from '@/src/components/core/domain/badges/unified-badge';
 import { HeyClaudeLogo } from '@/src/components/core/layout/heyclaude-logo';
-import { PrefetchLink } from '@/src/components/core/shared/prefetch-link';
-import { Button } from '@/src/components/primitives/button';
-import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/src/components/primitives/sheet';
+import { PrefetchLink } from '@/src/components/core/navigation/prefetch-link';
+import { Button } from '@/src/components/primitives/ui/button';
+import {
+  Sheet,
+  SheetContent,
+  SheetTitle,
+  SheetTrigger,
+} from '@/src/components/primitives/ui/sheet';
 import { ACTION_LINKS, PRIMARY_NAVIGATION, SECONDARY_NAVIGATION } from '@/src/config/navigation';
 import { SOCIAL_LINKS } from '@/src/lib/constants';
 import { DiscordIcon, Github, Menu } from '@/src/lib/icons';

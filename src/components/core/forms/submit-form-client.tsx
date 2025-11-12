@@ -14,12 +14,12 @@
 import { motion } from 'motion/react';
 import { useId, useState, useTransition } from 'react';
 import { z } from 'zod';
-import { Button } from '@/src/components/primitives/button';
-import { Card, CardContent } from '@/src/components/primitives/card';
-import { Input } from '@/src/components/primitives/input';
-import { Label } from '@/src/components/primitives/label';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/primitives/tabs';
-import { Textarea } from '@/src/components/primitives/textarea';
+import { Button } from '@/src/components/primitives/ui/button';
+import { Card, CardContent } from '@/src/components/primitives/ui/card';
+import { Input } from '@/src/components/primitives/ui/input';
+import { Label } from '@/src/components/primitives/ui/label';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/primitives/ui/tabs';
+import { Textarea } from '@/src/components/primitives/ui/textarea';
 import {
   SUBMISSION_CONTENT_TYPES,
   type SubmissionContentType,

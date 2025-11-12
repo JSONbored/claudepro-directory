@@ -1,11 +1,11 @@
 import Link from 'next/link';
 import { Suspense, useId } from 'react';
 import { ContentSearchClient } from '@/src/components/content/content-search-client';
-import { UnifiedBadge } from '@/src/components/core/domain/unified-badge';
+import { UnifiedBadge } from '@/src/components/core/domain/badges/unified-badge';
 import { LazySection } from '@/src/components/core/infra/lazy-section';
 import { UnifiedNewsletterCapture } from '@/src/components/features/growth/unified-newsletter-capture';
-import { Button } from '@/src/components/primitives/button';
-import { Skeleton } from '@/src/components/primitives/loading-skeleton';
+import { Skeleton } from '@/src/components/primitives/feedback/loading-skeleton';
+import { Button } from '@/src/components/primitives/ui/button';
 import { ROUTES } from '@/src/lib/constants';
 import { ExternalLink, HelpCircle } from '@/src/lib/icons';
 import type { ContentListServerProps, DisplayableContent } from '@/src/lib/types/component.types';

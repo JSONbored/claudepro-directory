@@ -19,9 +19,9 @@
  * - Maintainability: Hard → Easy
  */
 
-import { Input } from '@/src/components/primitives/input';
-import { Label } from '@/src/components/primitives/label';
-import { Textarea } from '@/src/components/primitives/textarea';
+import { Input } from '@/src/components/primitives/ui/input';
+import { Label } from '@/src/components/primitives/ui/label';
+import { Textarea } from '@/src/components/primitives/ui/textarea';
 import type { ContentTypeConfig, FieldDefinition, GridColumn } from '@/src/lib/forms/types';
 import { resolveFormIcon } from '@/src/lib/icons';
 import { getResponsiveGridClass, POSITION_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';

@@ -1,10 +1,10 @@
 'use client';
 
 import { memo, useId } from 'react';
-import { ConfigCard } from '@/src/components/core/domain/config-card';
-import { UnifiedBadge } from '@/src/components/core/domain/unified-badge';
-import { UnifiedCardGrid } from '@/src/components/core/domain/unified-card-grid';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/primitives/tabs';
+import { UnifiedBadge } from '@/src/components/core/domain/badges/unified-badge';
+import { ConfigCard } from '@/src/components/core/domain/cards/config-card';
+import { UnifiedCardGrid } from '@/src/components/core/domain/cards/unified-card-grid';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/primitives/ui/tabs';
 import { Clock, Star, TrendingUp } from '@/src/lib/icons';
 import type { ContentItem, TrendingContentProps } from '@/src/lib/types/component.types';
 

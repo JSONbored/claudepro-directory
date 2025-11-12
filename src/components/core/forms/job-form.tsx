@@ -7,25 +7,25 @@
 
 import { useId, useState, useTransition } from 'react';
 import { CompanySelector } from '@/src/components/core/forms/company-selector';
-import { FormField } from '@/src/components/core/forms/utilities/form-field';
-import { ListItemManager } from '@/src/components/core/forms/utilities/list-item-manager';
-import { Button } from '@/src/components/primitives/button';
+import { FormField } from '@/src/components/core/forms/form-field';
+import { ListItemManager } from '@/src/components/core/forms/list-item-manager';
+import { Button } from '@/src/components/primitives/ui/button';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/src/components/primitives/card';
-import { Checkbox } from '@/src/components/primitives/checkbox';
-import { Label } from '@/src/components/primitives/label';
+} from '@/src/components/primitives/ui/card';
+import { Checkbox } from '@/src/components/primitives/ui/checkbox';
+import { Label } from '@/src/components/primitives/ui/label';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/src/components/primitives/select';
+} from '@/src/components/primitives/ui/select';
 import { ROUTES } from '@/src/lib/constants';
 import { Star } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';

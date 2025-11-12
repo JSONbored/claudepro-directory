@@ -7,7 +7,7 @@
 'use client';
 
 import { motion } from 'motion/react';
-import { BorderBeam } from '@/src/components/core/magic/border-beam';
+import { BorderBeam } from '@/src/components/primitives/animation/border-beam';
 import { CheckCircle, Clock, Send, Sparkles, Users } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';

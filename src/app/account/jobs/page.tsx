@@ -1,15 +1,15 @@
 import Link from 'next/link';
-import { JobDeleteButton } from '@/src/components/buttons/jobs/job-delete-button';
-import { JobToggleButton } from '@/src/components/buttons/jobs/job-toggle-button';
-import { UnifiedBadge } from '@/src/components/core/domain/unified-badge';
-import { Button } from '@/src/components/primitives/button';
+import { JobDeleteButton } from '@/src/components/core/buttons/jobs/job-delete-button';
+import { JobToggleButton } from '@/src/components/core/buttons/jobs/job-toggle-button';
+import { UnifiedBadge } from '@/src/components/core/domain/badges/unified-badge';
+import { Button } from '@/src/components/primitives/ui/button';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/src/components/primitives/card';
+} from '@/src/components/primitives/ui/card';
 import { ROUTES } from '@/src/lib/constants';
 import { BarChart, Briefcase, Edit, ExternalLink, Eye, Plus } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';

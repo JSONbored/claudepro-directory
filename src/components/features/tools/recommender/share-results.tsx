@@ -6,15 +6,15 @@
  */
 
 import { useState } from 'react';
-import { Button } from '@/src/components/primitives/button';
+import { Button } from '@/src/components/primitives/ui/button';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '@/src/components/primitives/dialog';
-import { Input } from '@/src/components/primitives/input';
+} from '@/src/components/primitives/ui/dialog';
+import { Input } from '@/src/components/primitives/ui/input';
 import { Check, Copy, Facebook, Linkedin, Mail, Share2, Twitter } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { UI_CLASSES } from '@/src/lib/ui-constants';

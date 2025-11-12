@@ -8,8 +8,8 @@
 
 import { motion } from 'motion/react';
 import type { ReactNode } from 'react';
-import { BorderBeam } from '@/src/components/core/magic/border-beam';
-import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/card';
+import { BorderBeam } from '@/src/components/primitives/animation/border-beam';
+import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
 import type { LucideIcon } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';

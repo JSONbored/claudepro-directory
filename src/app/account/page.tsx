@@ -1,13 +1,13 @@
 import { z } from 'zod';
-import { UnifiedBadge } from '@/src/components/core/domain/unified-badge';
-import { NavLink } from '@/src/components/core/shared/nav-link';
+import { UnifiedBadge } from '@/src/components/core/domain/badges/unified-badge';
+import { NavLink } from '@/src/components/core/navigation/nav-link';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/src/components/primitives/card';
+} from '@/src/components/primitives/ui/card';
 import { ROUTES } from '@/src/lib/constants';
 import { Bookmark, Calendar } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';

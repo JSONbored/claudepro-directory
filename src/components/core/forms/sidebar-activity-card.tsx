@@ -7,10 +7,10 @@
 'use client';
 
 import { motion } from 'motion/react';
-import { UnifiedBadge } from '@/src/components/core/domain/unified-badge';
-import { NavLink } from '@/src/components/core/shared/nav-link';
-import { Card, CardContent, CardHeader } from '@/src/components/primitives/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/primitives/tabs';
+import { UnifiedBadge } from '@/src/components/core/domain/badges/unified-badge';
+import { NavLink } from '@/src/components/core/navigation/nav-link';
+import { Card, CardContent, CardHeader } from '@/src/components/primitives/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/primitives/ui/tabs';
 import { CheckCircle, Clock, Lightbulb } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';

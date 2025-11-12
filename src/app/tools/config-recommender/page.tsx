@@ -19,14 +19,14 @@
 
 import type { Metadata } from 'next';
 import dynamic from 'next/dynamic';
-import { UnifiedBadge } from '@/src/components/core/domain/unified-badge';
+import { UnifiedBadge } from '@/src/components/core/domain/badges/unified-badge';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/src/components/primitives/card';
+} from '@/src/components/primitives/ui/card';
 
 const UnifiedNewsletterCapture = dynamic(
   () =>

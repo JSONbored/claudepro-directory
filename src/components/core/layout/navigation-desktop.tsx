@@ -5,8 +5,8 @@
  */
 
 import Link from 'next/link';
-import { UnifiedBadge } from '@/src/components/core/domain/unified-badge';
-import { PrefetchLink } from '@/src/components/core/shared/prefetch-link';
+import { UnifiedBadge } from '@/src/components/core/domain/badges/unified-badge';
+import { PrefetchLink } from '@/src/components/core/navigation/prefetch-link';
 import { SearchTrigger } from '@/src/components/features/search/search-trigger';
 import {
   DropdownMenu,
@@ -16,7 +16,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/src/components/primitives/dropdown-menu';
+} from '@/src/components/primitives/ui/dropdown-menu';
 import { PRIMARY_NAVIGATION, SECONDARY_NAVIGATION } from '@/src/config/navigation';
 import { Briefcase, ChevronDown, Handshake, Users } from '@/src/lib/icons';
 import {

@@ -5,10 +5,10 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { UnifiedBadge } from '@/src/components/core/domain/unified-badge';
+import { UnifiedBadge } from '@/src/components/core/domain/badges/unified-badge';
 import { StructuredData } from '@/src/components/core/infra/structured-data';
-import { Button } from '@/src/components/primitives/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/card';
+import { Button } from '@/src/components/primitives/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
 import { ROUTES } from '@/src/lib/constants';
 import { getJobBySlug } from '@/src/lib/data/jobs';
 import {

@@ -4,9 +4,9 @@
 
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
-import { UnifiedBadge } from '@/src/components/core/domain/unified-badge';
-import { Button } from '@/src/components/primitives/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/card';
+import { UnifiedBadge } from '@/src/components/core/domain/badges/unified-badge';
+import { Button } from '@/src/components/primitives/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
 import { ROUTES } from '@/src/lib/constants';
 import { ArrowLeft, BarChart, ExternalLink, Eye } from '@/src/lib/icons';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';

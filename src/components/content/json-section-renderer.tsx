@@ -7,8 +7,8 @@
 import { Checklist } from '@/src/components/content/checklist';
 import { ProductionCodeBlock } from '@/src/components/content/production-code-block';
 import { UnifiedContentBlock } from '@/src/components/content/unified-content-block';
-import { ComparisonTable } from '@/src/components/core/comparison-table';
-import { UnifiedContentBox } from '@/src/components/core/domain/unified-content-box';
+import { ComparisonTable } from '@/src/components/core/domain/comparison-table';
+import { UnifiedContentBox } from '@/src/components/core/domain/content/unified-content-box';
 import type { Database } from '@/src/types/database.types';
 
 type ContentRow = Database['public']['Tables']['content']['Row'];

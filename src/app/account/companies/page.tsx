@@ -6,15 +6,15 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { UnifiedBadge } from '@/src/components/core/domain/unified-badge';
-import { Button } from '@/src/components/primitives/button';
+import { UnifiedBadge } from '@/src/components/core/domain/badges/unified-badge';
+import { Button } from '@/src/components/primitives/ui/button';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/src/components/primitives/card';
+} from '@/src/components/primitives/ui/card';
 import { ROUTES } from '@/src/lib/constants';
 import { Briefcase, Building2, Calendar, Edit, ExternalLink, Eye, Plus } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';

@@ -6,7 +6,7 @@ import {
   Announcement,
   AnnouncementTag,
   AnnouncementTitle,
-} from '@/src/components/primitives/announcement';
+} from '@/src/components/primitives/feedback/announcement';
 import { useAnnouncementDismissal } from '@/src/hooks/use-announcement-dismissal';
 import {
   AlertTriangle,

@@ -4,9 +4,9 @@
  */
 
 import { notFound } from 'next/navigation';
+import { UnifiedDetailPage } from '@/src/components/content/detail-page';
+import { CollectionDetailView } from '@/src/components/content/detail-page/collection-detail-view';
 import { ReadProgress } from '@/src/components/content/read-progress';
-import { UnifiedDetailPage } from '@/src/components/content/unified-detail-page';
-import { CollectionDetailView } from '@/src/components/content/unified-detail-page/collection-detail-view';
 import { StructuredData } from '@/src/components/core/infra/structured-data';
 import { UnifiedTracker } from '@/src/components/core/infra/unified-tracker';
 import { RecentlyViewedTracker } from '@/src/components/features/navigation/recently-viewed-tracker';

@@ -2,7 +2,7 @@
 
 import { motion } from 'motion/react';
 import { useEffect, useState } from 'react';
-import { Alert, AlertDescription, AlertTitle } from '@/src/components/primitives/alert';
+import { Alert, AlertDescription, AlertTitle } from '@/src/components/primitives/ui/alert';
 import { AlertTriangle } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 

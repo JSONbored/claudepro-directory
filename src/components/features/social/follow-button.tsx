@@ -14,7 +14,7 @@
 
 import { useOptimistic, useTransition } from 'react';
 import { toast } from 'sonner';
-import { Button } from '@/src/components/primitives/button';
+import { Button } from '@/src/components/primitives/ui/button';
 import { toggleFollow } from '@/src/lib/actions/user.actions';
 import { logger } from '@/src/lib/logger';
 

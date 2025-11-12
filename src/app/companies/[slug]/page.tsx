@@ -8,8 +8,8 @@ import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { JobCard } from '@/src/components/core/domain/job-card';
-import { UnifiedBadge } from '@/src/components/core/domain/unified-badge';
+import { UnifiedBadge } from '@/src/components/core/domain/badges/unified-badge';
+import { JobCard } from '@/src/components/core/domain/cards/job-card';
 import { StructuredData } from '@/src/components/core/infra/structured-data';
 import {
   Card,
@@ -17,7 +17,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/src/components/primitives/card';
+} from '@/src/components/primitives/ui/card';
 import { ROUTES } from '@/src/lib/constants';
 import { Briefcase, Building, Calendar, Globe, TrendingUp, Users } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';

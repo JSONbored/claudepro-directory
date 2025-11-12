@@ -13,7 +13,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTheme } from 'next-themes';
 import { memo, useEffect, useMemo, useState } from 'react';
-import { UnifiedBadge } from '@/src/components/core/domain/unified-badge';
+import { UnifiedBadge } from '@/src/components/core/domain/badges/unified-badge';
 import { HeyClaudeLogo } from '@/src/components/core/layout/heyclaude-logo';
 import { ThemeToggle } from '@/src/components/core/layout/theme-toggle';
 import { APP_CONFIG, EXTERNAL_SERVICES, ROUTES, SOCIAL_LINKS } from '@/src/lib/constants';

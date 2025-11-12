@@ -6,8 +6,8 @@
  */
 
 import { type ComponentType, useState, useTransition } from 'react';
-import { UnifiedBadge } from '@/src/components/core/domain/unified-badge';
-import { Button } from '@/src/components/primitives/button';
+import { UnifiedBadge } from '@/src/components/core/domain/badges/unified-badge';
+import { Button } from '@/src/components/primitives/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -15,7 +15,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/src/components/primitives/dialog';
+} from '@/src/components/primitives/ui/dialog';
 import { unlinkOAuthProvider } from '@/src/lib/actions/user.actions';
 import {
   AlertTriangle,

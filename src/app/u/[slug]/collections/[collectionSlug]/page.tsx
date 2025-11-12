@@ -6,17 +6,17 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { UnifiedBadge } from '@/src/components/core/domain/unified-badge';
-import { NavLink } from '@/src/components/core/shared/nav-link';
-import { Button } from '@/src/components/primitives/button';
+import { UnifiedBadge } from '@/src/components/core/domain/badges/unified-badge';
+import { NavLink } from '@/src/components/core/navigation/nav-link';
+import { Button } from '@/src/components/primitives/ui/button';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/src/components/primitives/card';
-import { Separator } from '@/src/components/primitives/separator';
+} from '@/src/components/primitives/ui/card';
+import { Separator } from '@/src/components/primitives/ui/separator';
 import { trackInteraction } from '@/src/lib/edge/client';
 import { ArrowLeft, ExternalLink } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';

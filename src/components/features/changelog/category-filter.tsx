@@ -5,8 +5,8 @@
 'use client';
 
 import { memo } from 'react';
-import { UnifiedBadge } from '@/src/components/core/domain/unified-badge';
-import { TabsList, TabsTrigger } from '@/src/components/primitives/tabs';
+import { UnifiedBadge } from '@/src/components/core/domain/badges/unified-badge';
+import { TabsList, TabsTrigger } from '@/src/components/primitives/ui/tabs';
 import type { ChangelogCategory } from '@/src/lib/changelog/loader';
 import { DIMENSIONS } from '@/src/lib/ui-constants';
 

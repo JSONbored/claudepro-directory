@@ -10,11 +10,11 @@
 
 import { useRouter } from 'next/navigation';
 import { useId, useState, useTransition } from 'react';
-import { UnifiedBadge } from '@/src/components/core/domain/unified-badge';
-import { FormField } from '@/src/components/core/forms/utilities/form-field';
-import { Button } from '@/src/components/primitives/button';
-import { Checkbox } from '@/src/components/primitives/checkbox';
-import { Label } from '@/src/components/primitives/label';
+import { UnifiedBadge } from '@/src/components/core/domain/badges/unified-badge';
+import { FormField } from '@/src/components/core/forms/form-field';
+import { Button } from '@/src/components/primitives/ui/button';
+import { Checkbox } from '@/src/components/primitives/ui/checkbox';
+import { Label } from '@/src/components/primitives/ui/label';
 import { createCollection, updateCollection } from '@/src/lib/actions/content.actions';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { toasts } from '@/src/lib/utils/toast.utils';

@@ -15,9 +15,9 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { memo } from 'react';
-import type { UserProfile } from '@/src/components/core/domain/profile-card';
-import { UnifiedBadge } from '@/src/components/core/domain/unified-badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/card';
+import { UnifiedBadge } from '@/src/components/core/domain/badges/unified-badge';
+import type { UserProfile } from '@/src/components/core/domain/cards/profile-card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
 import { Award, Medal, TrendingUp } from '@/src/lib/icons';
 import { POSITION_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
 

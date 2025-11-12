@@ -1,16 +1,16 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
-import { CollectionItemManager } from '@/src/components/core/collection-item-manager';
-import { UnifiedBadge } from '@/src/components/core/domain/unified-badge';
-import { Button } from '@/src/components/primitives/button';
+import { UnifiedBadge } from '@/src/components/core/domain/badges/unified-badge';
+import { CollectionItemManager } from '@/src/components/core/domain/collection-item-manager';
+import { Button } from '@/src/components/primitives/ui/button';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/src/components/primitives/card';
+} from '@/src/components/primitives/ui/card';
 import { APP_CONFIG, ROUTES } from '@/src/lib/constants';
 import { ArrowLeft, Edit, Share2 } from '@/src/lib/icons';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';

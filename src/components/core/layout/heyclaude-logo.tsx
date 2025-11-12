@@ -9,7 +9,7 @@
 
 'use client';
 
-import { HighlightText } from '@/src/components/primitives/highlight-text';
+import { HighlightText } from '@/src/components/primitives/display/highlight-text';
 import { RESPONSIVE_PATTERNS } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
 

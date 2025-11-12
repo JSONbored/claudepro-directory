@@ -7,16 +7,16 @@
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useId, useState, useTransition } from 'react';
-import { FormField } from '@/src/components/core/forms/utilities/form-field';
-import { Button } from '@/src/components/primitives/button';
+import { FormField } from '@/src/components/core/forms/form-field';
+import { Button } from '@/src/components/primitives/ui/button';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/src/components/primitives/card';
-import { SelectItem } from '@/src/components/primitives/select';
+} from '@/src/components/primitives/ui/card';
+import { SelectItem } from '@/src/components/primitives/ui/select';
 import { ROUTES } from '@/src/lib/constants';
 import { FileText, X } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';

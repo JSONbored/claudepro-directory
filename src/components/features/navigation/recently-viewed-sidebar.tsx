@@ -28,8 +28,8 @@
 import { AnimatePresence, motion } from 'motion/react';
 import Link from 'next/link';
 import { memo, useState } from 'react';
-import { UnifiedBadge } from '@/src/components/core/domain/unified-badge';
-import { Button } from '@/src/components/primitives/button';
+import { UnifiedBadge } from '@/src/components/core/domain/badges/unified-badge';
+import { Button } from '@/src/components/primitives/ui/button';
 import { type RecentlyViewedItem, useRecentlyViewed } from '@/src/hooks/use-recently-viewed';
 import { ChevronDown, ChevronUp, Clock, Trash, X } from '@/src/lib/icons';
 import { ANIMATION_CONSTANTS, UI_CLASSES } from '@/src/lib/ui-constants';

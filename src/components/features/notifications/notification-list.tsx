@@ -6,7 +6,7 @@
 
 import { AnimatePresence, motion } from 'motion/react';
 import { memo } from 'react';
-import { Button } from '@/src/components/primitives/button';
+import { Button } from '@/src/components/primitives/ui/button';
 import type { Tables } from '@/src/types/database.types';
 
 type Notification = Tables<'notifications'>;

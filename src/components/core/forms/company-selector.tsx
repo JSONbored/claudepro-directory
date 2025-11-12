@@ -6,10 +6,10 @@
 
 import { Building2, Plus, Search } from 'lucide-react';
 import { useCallback, useEffect, useId, useState } from 'react';
-import { Button } from '@/src/components/primitives/button';
-import { Input } from '@/src/components/primitives/input';
-import { Label } from '@/src/components/primitives/label';
-import { Popover, PopoverContent, PopoverTrigger } from '@/src/components/primitives/popover';
+import { Button } from '@/src/components/primitives/ui/button';
+import { Input } from '@/src/components/primitives/ui/input';
+import { Label } from '@/src/components/primitives/ui/label';
+import { Popover, PopoverContent, PopoverTrigger } from '@/src/components/primitives/ui/popover';
 import { createClient } from '@/src/lib/supabase/client';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import type { Database } from '@/src/types/database.types';

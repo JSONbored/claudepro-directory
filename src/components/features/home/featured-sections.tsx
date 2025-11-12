@@ -11,9 +11,9 @@
 
 import Link from 'next/link';
 import { type FC, memo, useMemo } from 'react';
-import { ConfigCard } from '@/src/components/core/domain/config-card';
-import { JobCard } from '@/src/components/core/domain/job-card';
-import { UnifiedCardGrid } from '@/src/components/core/domain/unified-card-grid';
+import { ConfigCard } from '@/src/components/core/domain/cards/config-card';
+import { JobCard } from '@/src/components/core/domain/cards/job-card';
+import { UnifiedCardGrid } from '@/src/components/core/domain/cards/unified-card-grid';
 import {
   HOMEPAGE_FEATURED_CATEGORIES,
   type UnifiedCategoryConfig,

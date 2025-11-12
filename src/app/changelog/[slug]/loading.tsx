@@ -5,8 +5,8 @@
  * Shows placeholder content matching the layout of the detail page.
  */
 
-import { Skeleton } from '@/src/components/primitives/loading-skeleton';
-import { Separator } from '@/src/components/primitives/separator';
+import { Skeleton } from '@/src/components/primitives/feedback/loading-skeleton';
+import { Separator } from '@/src/components/primitives/ui/separator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 export default function ChangelogEntryLoading() {

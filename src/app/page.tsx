@@ -8,18 +8,19 @@ import { Suspense } from 'react';
 import { LazySection } from '@/src/components/core/infra/lazy-section';
 import { TopContributors } from '@/src/components/features/community/top-contributors';
 import { HomePageClient } from '@/src/components/features/home';
-import { HomePageLoading } from '@/src/lib/components/loading-factory';
+import { HomePageLoading } from '@/src/components/primitives/feedback/loading-factory';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 
 const RollingText = dynamicImport(
-  () => import('@/src/components/core/magic/rolling-text').then((mod) => mod.RollingText),
+  () => import('@/src/components/primitives/animation/rolling-text').then((mod) => mod.RollingText),
   {
     loading: () => <span className="text-accent">enthusiasts</span>,
   }
 );
 
 const NumberTicker = dynamicImport(
-  () => import('@/src/components/core/magic/number-ticker').then((mod) => mod.NumberTicker),
+  () =>
+    import('@/src/components/primitives/animation/number-ticker').then((mod) => mod.NumberTicker),
   {
     loading: () => <span className="font-semibold text-accent">0</span>,
   }

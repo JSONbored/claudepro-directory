@@ -14,18 +14,18 @@
  */
 
 import { memo, useId } from 'react';
-import { UnifiedBadge } from '@/src/components/core/domain/unified-badge';
-import { Button } from '@/src/components/primitives/button';
-import { Label } from '@/src/components/primitives/label';
-import { ScrollArea } from '@/src/components/primitives/scroll-area';
+import { UnifiedBadge } from '@/src/components/core/domain/badges/unified-badge';
+import { Button } from '@/src/components/primitives/ui/button';
+import { Label } from '@/src/components/primitives/ui/label';
+import { ScrollArea } from '@/src/components/primitives/ui/scroll-area';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/src/components/primitives/select';
-import { Slider } from '@/src/components/primitives/slider';
+} from '@/src/components/primitives/ui/select';
+import { Slider } from '@/src/components/primitives/ui/slider';
 import type { FilterState } from '@/src/lib/types/component.types';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 

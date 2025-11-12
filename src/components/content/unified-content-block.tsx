@@ -40,16 +40,16 @@
  * ```
  */
 
-import { UnifiedBadge } from '@/src/components/core/domain/unified-badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/src/components/primitives/avatar';
+import { UnifiedBadge } from '@/src/components/core/domain/badges/unified-badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/src/components/primitives/ui/avatar';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/src/components/primitives/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/primitives/tabs';
+} from '@/src/components/primitives/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/primitives/ui/tabs';
 import { BookOpen, CheckCircle, Zap } from '@/src/lib/icons';
 import type {
   CaseStudyProps,

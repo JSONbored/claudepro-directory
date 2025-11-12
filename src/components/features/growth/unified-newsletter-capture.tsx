@@ -7,26 +7,26 @@
 
 import { usePathname } from 'next/navigation';
 import { useEffect, useId, useState } from 'react';
-import { Button } from '@/src/components/primitives/button';
+import { InlineSpinner } from '@/src/components/primitives/feedback/loading-factory';
+import { Button } from '@/src/components/primitives/ui/button';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/src/components/primitives/card';
-import { Input } from '@/src/components/primitives/input';
+} from '@/src/components/primitives/ui/card';
+import { Input } from '@/src/components/primitives/ui/input';
 import {
   Sheet,
   SheetContent,
   SheetDescription,
   SheetHeader,
   SheetTitle,
-} from '@/src/components/primitives/sheet';
+} from '@/src/components/primitives/ui/sheet';
 import { useConfetti } from '@/src/hooks/use-confetti';
 import type { NewsletterSource } from '@/src/hooks/use-newsletter';
 import { useNewsletter } from '@/src/hooks/use-newsletter';
-import { InlineSpinner } from '@/src/lib/components/loading-factory';
 import { NEWSLETTER_CTA_CONFIG } from '@/src/lib/config/category-config';
 import { trackInteraction } from '@/src/lib/edge/client';
 import { Mail, X } from '@/src/lib/icons';

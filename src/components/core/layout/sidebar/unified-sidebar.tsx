@@ -11,8 +11,8 @@
  */
 
 import Link from 'next/link';
-import { UnifiedBadge } from '@/src/components/core/domain/unified-badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/card';
+import { UnifiedBadge } from '@/src/components/core/domain/badges/unified-badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
 import { ROUTES } from '@/src/lib/constants';
 import { Clock, Sparkles, TrendingUp, Users } from '@/src/lib/icons';
 import type { RelatedGuide } from '@/src/lib/schemas/app.schema';

@@ -7,31 +7,31 @@
 
 import Link from 'next/link';
 import { useState, useTransition } from 'react';
-import { BookmarkButton } from '@/src/components/buttons/interaction/bookmark-button';
-import { BaseCard } from '@/src/components/core/domain/base-card';
-import { UnifiedBadge } from '@/src/components/core/domain/unified-badge';
-import { Button } from '@/src/components/primitives/button';
+import { BookmarkButton } from '@/src/components/core/buttons/interaction/bookmark-button';
+import { UnifiedBadge } from '@/src/components/core/domain/badges/unified-badge';
+import { BaseCard } from '@/src/components/core/domain/cards/base-card';
+import { Button } from '@/src/components/primitives/ui/button';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/src/components/primitives/card';
+} from '@/src/components/primitives/ui/card';
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from '@/src/components/primitives/collapsible';
-import { Separator } from '@/src/components/primitives/separator';
-import { Slider } from '@/src/components/primitives/slider';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/primitives/tabs';
+} from '@/src/components/primitives/ui/collapsible';
+import { Separator } from '@/src/components/primitives/ui/separator';
+import { Slider } from '@/src/components/primitives/ui/slider';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/primitives/ui/tabs';
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from '@/src/components/primitives/tooltip';
+} from '@/src/components/primitives/ui/tooltip';
 import { addBookmarkBatch } from '@/src/lib/actions/user.actions';
 import { ROUTES } from '@/src/lib/constants';
 import {
