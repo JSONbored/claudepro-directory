@@ -486,6 +486,7 @@ export const cacheConfigs = createDynamicConfigGroup('cache_configs', {
   'cache.changelog.ttl_seconds': 3600, // 1 hour
   'cache.changelog_detail.ttl_seconds': 7200, // 2 hours
   'cache.announcements.ttl_seconds': 1800, // 30 minutes
+  'cache.account.ttl_seconds': 300, // 5 minutes (user-specific data, shorter TTL)
 
   // Invalidation Tag Arrays
   'cache.invalidate.content_create': ['content', 'homepage', 'trending'] as string[],

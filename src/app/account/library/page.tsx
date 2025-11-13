@@ -1,8 +1,9 @@
 /**
- * Library Page - Database-First RPC Architecture
+ * Library Page - Database-First RPC Architecture with user-scoped edge caching
  * Single RPC call to get_user_library() replaces 2 separate queries
  */
 
+import { unstable_cache } from 'next/cache';
 import Link from 'next/link';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { NavLink } from '@/src/components/core/navigation/navigation-link';
@@ -16,6 +17,7 @@ import {
 } from '@/src/components/primitives/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/primitives/ui/tabs';
 import { ROUTES } from '@/src/lib/constants';
+import { cacheConfigs } from '@/src/lib/flags';
 import { Bookmark as BookmarkIcon, ExternalLink, FolderOpen, Layers, Plus } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
@@ -67,10 +69,24 @@ export default async function LibraryPage() {
 
   if (!user) return null;
 
-  // Single RPC call replaces 2 separate queries
-  const { data, error } = await supabase.rpc('get_user_library', {
-    p_user_id: user.id,
-  });
+  // Get Statsig-controlled TTL for account pages
+  const config = await cacheConfigs();
+  const ttl = config['cache.account.ttl_seconds'] as number;
+
+  // User-scoped edge-cached RPC call
+  const { data, error } = await unstable_cache(
+    async () => {
+      const supabase = await createClient();
+      return await supabase.rpc('get_user_library', {
+        p_user_id: user.id,
+      });
+    },
+    [`account-library-${user.id}`],
+    {
+      revalidate: ttl,
+      tags: [`user-${user.id}`, 'account', 'user-bookmarks'],
+    }
+  )();
 
   if (error) {
     logger.error('Failed to load user library', error, { userId: user.id });

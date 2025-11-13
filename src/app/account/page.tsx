@@ -1,3 +1,4 @@
+import { unstable_cache } from 'next/cache';
 import { z } from 'zod';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { NavLink } from '@/src/components/core/navigation/navigation-link';
@@ -9,6 +10,7 @@ import {
   CardTitle,
 } from '@/src/components/primitives/ui/card';
 import { ROUTES } from '@/src/lib/constants';
+import { cacheConfigs } from '@/src/lib/flags';
 import { Bookmark, Calendar } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
@@ -26,10 +28,25 @@ export default async function AccountDashboard() {
 
   if (!user) return null;
 
-  // Consolidated RPC: 2 queries → 1 (50% reduction)
-  const { data: dashboardData } = await supabase.rpc('get_account_dashboard', {
-    p_user_id: user.id,
-  });
+  // Get Statsig-controlled TTL for account pages
+  const config = await cacheConfigs();
+  const ttl = config['cache.account.ttl_seconds'] as number;
+
+  // User-scoped edge-cached RPC call
+  const { data: dashboardData } = await unstable_cache(
+    async () => {
+      const supabase = await createClient();
+      const { data } = await supabase.rpc('get_account_dashboard', {
+        p_user_id: user.id,
+      });
+      return { data };
+    },
+    [`account-dashboard-${user.id}`],
+    {
+      revalidate: ttl,
+      tags: [`user-${user.id}`, 'account'],
+    }
+  )();
 
   // Runtime validation schema for RPC response
   const DashboardResponseSchema = z.object({
