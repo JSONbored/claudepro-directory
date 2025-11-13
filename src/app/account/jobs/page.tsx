@@ -1,4 +1,3 @@
-import { unstable_cache } from 'next/cache';
 import Link from 'next/link';
 import { JobDeleteButton } from '@/src/components/core/buttons/jobs/job-delete-button';
 import { JobToggleButton } from '@/src/components/core/buttons/jobs/job-toggle-button';
@@ -12,7 +11,7 @@ import {
   CardTitle,
 } from '@/src/components/primitives/ui/card';
 import { ROUTES } from '@/src/lib/constants';
-import { cacheConfigs } from '@/src/lib/flags';
+import { getUserDashboard } from '@/src/lib/data/user-data';
 import { BarChart, Briefcase, Edit, ExternalLink, Eye, Plus } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
@@ -35,26 +34,13 @@ export default async function MyJobsPage() {
   let hasError = false;
 
   if (user) {
-    // Get Statsig-controlled TTL for account pages
-    const config = await cacheConfigs();
-    const ttl = config['cache.account.ttl_seconds'] as number;
-
     let data: unknown = null;
     let error: unknown = null;
 
     if (typeof supabase.rpc === 'function') {
-      // User-scoped edge-cached RPC call
-      ({ data, error } = await unstable_cache(
-        async () => {
-          const supabase = await createClient();
-          return await supabase.rpc('get_user_dashboard', { p_user_id: user.id });
-        },
-        [`account-jobs-${user.id}`],
-        {
-          revalidate: ttl,
-          tags: [`user-${user.id}`, 'account', 'jobs'],
-        }
-      )());
+      // User-scoped edge-cached RPC via centralized data layer
+      data = await getUserDashboard(user.id);
+      error = data === null ? { message: 'Failed to load dashboard' } : null;
     } else {
       logger.warn(
         'Supabase RPC unavailable (mock client fallback detected); skipping dashboard fetch.',
