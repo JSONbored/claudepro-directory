@@ -6,6 +6,7 @@ import { unstable_cache } from 'next/cache';
 import { cache } from 'react';
 import type { CategoryId } from '@/src/lib/config/category-config';
 import { logger } from '@/src/lib/logger';
+import { cachedRPCWithDedupe } from '@/src/lib/supabase/cached-rpc';
 import { createAnonClient } from '@/src/lib/supabase/server-anon';
 import type { Tables } from '@/src/types/database.types';
 import type { GetEnrichedContentListReturn } from '@/src/types/database-overrides';
@@ -39,26 +40,32 @@ async function withErrorHandling<T>(
   }
 }
 
-export const getContentByCategory = cache(
-  async (category: CategoryId): Promise<GetEnrichedContentListReturn> => {
-    return withErrorHandling(
-      async () => {
-        const supabase = createAnonClient();
-        // Bandwidth optimized: use list RPC (excludes content/examples/discovery_metadata)
-        const { data, error } = await supabase.rpc('get_enriched_content_list', {
+export async function getContentByCategory(
+  category: CategoryId
+): Promise<GetEnrichedContentListReturn> {
+  return withErrorHandling(
+    async () => {
+      // Edge-layer cached RPC call with Statsig-controlled TTL
+      const data = await cachedRPCWithDedupe<GetEnrichedContentListReturn>(
+        'get_enriched_content_list',
+        {
           p_category: category,
           p_limit: 1000,
           p_offset: 0,
-        });
+        },
+        {
+          tags: ['content', `content-${category}`],
+          ttlConfigKey: 'cache.content_list.ttl_seconds',
+          keySuffix: category,
+        }
+      );
 
-        if (error) throw error;
-        return (data || []) as GetEnrichedContentListReturn;
-      },
-      [],
-      `getContentByCategory(${category})`
-    );
-  }
-);
+      return (data || []) as GetEnrichedContentListReturn;
+    },
+    [],
+    `getContentByCategory(${category})`
+  );
+}
 
 export const getContentBySlug = cache(
   async (category: CategoryId, slug: string): Promise<ContentItem | null> => {
