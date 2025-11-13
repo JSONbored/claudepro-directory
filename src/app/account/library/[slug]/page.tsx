@@ -28,8 +28,6 @@ export async function generateMetadata({ params }: CollectionPageProps): Promise
   return generatePageMetadata('/account/library/:slug', { params: { slug } });
 }
 
-// Force dynamic rendering - requires authentication
-export const dynamic = 'force-dynamic';
 
 export default async function CollectionDetailPage({ params }: CollectionPageProps) {
   const { slug } = await params;

@@ -4,8 +4,6 @@ import { type CreateJobInput, createJob } from '@/src/lib/actions/jobs.actions';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
-// Force dynamic rendering - requires authentication
-export const dynamic = 'force-dynamic';
 
 export const metadata = generatePageMetadata('/account/jobs/new');
 

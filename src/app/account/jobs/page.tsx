@@ -20,8 +20,6 @@ import { formatRelativeDate } from '@/src/lib/utils/data.utils';
 import type { Tables } from '@/src/types/database.types';
 import type { GetUserDashboardReturn } from '@/src/types/database-overrides';
 
-// Force dynamic rendering - requires authentication
-export const dynamic = 'force-dynamic';
 
 export const metadata = generatePageMetadata('/account/jobs');
 

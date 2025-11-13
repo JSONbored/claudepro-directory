@@ -7,7 +7,6 @@ import { CompanyForm } from '@/src/components/core/forms/company-form';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';
 
-export const dynamic = 'force-dynamic';
 
 export const metadata = generatePageMetadata('/account/companies/new');
 
