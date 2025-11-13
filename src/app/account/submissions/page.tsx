@@ -9,6 +9,7 @@ import {
   CardTitle,
 } from '@/src/components/primitives/ui/card';
 import { ROUTES } from '@/src/lib/constants';
+import { getUserDashboard } from '@/src/lib/data/user-data';
 import { CheckCircle, Clock, ExternalLink, GitPullRequest, Send, XCircle } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
@@ -29,11 +30,12 @@ export default async function SubmissionsPage() {
   let hasError = false;
 
   if (user) {
-    const { data, error } = await supabase.rpc('get_user_dashboard', { p_user_id: user.id });
-    if (error) {
-      logger.error('Failed to fetch user dashboard', error);
+    // User-scoped edge-cached RPC via centralized data layer
+    const data = await getUserDashboard(user.id);
+    if (!data) {
+      logger.error('Failed to fetch user dashboard', new Error('Dashboard data is null'));
       hasError = true;
-    } else if (data) {
+    } else {
       // Trust database types - PostgreSQL validates structure
       const result = data as { submissions: Array<Tables<'submissions'>> };
       submissions = result.submissions || [];

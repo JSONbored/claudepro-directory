@@ -16,6 +16,7 @@ import {
   CardTitle,
 } from '@/src/components/primitives/ui/card';
 import { ROUTES } from '@/src/lib/constants';
+import { getUserCompanies } from '@/src/lib/data/user-data';
 import { Briefcase, Building2, Calendar, Edit, ExternalLink, Eye, Plus } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
@@ -41,26 +42,16 @@ export default async function CompaniesPage() {
   let hasError = false;
 
   if (user) {
-    let data: unknown = null;
-    let error: unknown = null;
+    // User-scoped edge-cached RPC via centralized data layer
+    const data = await getUserCompanies(user.id);
 
-    if (typeof supabase.rpc === 'function') {
-      ({ data, error } = await supabase.rpc('get_user_companies', { p_user_id: user.id }));
-    } else {
-      logger.warn(
-        'Supabase RPC unavailable (mock client fallback detected); skipping companies fetch.',
-        { context: 'CompaniesPage' }
-      );
-      companies = [];
-    }
-
-    if (error) {
+    if (!data) {
       logger.error(
         'Failed to fetch user companies',
-        error instanceof Error ? error : new Error(String(error))
+        new Error('Companies data is null')
       );
       hasError = true;
-    } else if (data !== null) {
+    } else {
       // Trust database types - PostgreSQL validates structure
       const result = data as { companies: Array<Tables<'companies'>> };
       companies = result.companies || [];

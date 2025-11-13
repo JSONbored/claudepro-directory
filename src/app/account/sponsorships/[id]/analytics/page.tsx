@@ -7,6 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/ui/card';
+import { getSponsorshipAnalytics } from '@/src/lib/data/user-data';
 import { BarChart, Eye, MousePointer, TrendingUp } from '@/src/lib/icons';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';
@@ -29,11 +30,8 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
 
   if (!user) return null;
 
-  // Consolidated RPC: 3 queries + TypeScript loops → 1 (75% reduction)
-  const { data: analyticsData } = await supabase.rpc('get_sponsorship_analytics', {
-    p_user_id: user.id,
-    p_sponsorship_id: id,
-  });
+  // User-scoped edge-cached RPC via centralized data layer
+  const analyticsData = await getSponsorshipAnalytics(user.id, id);
 
   if (!analyticsData) {
     notFound();

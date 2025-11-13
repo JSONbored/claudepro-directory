@@ -17,6 +17,7 @@ import {
  * Settings Page - User profile and account management.
  */
 
+import { getUserSettings } from '@/src/lib/data/user-data';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
@@ -33,10 +34,8 @@ export default async function SettingsPage() {
 
   if (!user) return null;
 
-  // Consolidated RPC: 2 parallel queries → 1 (50% reduction)
-  const { data: settingsData } = await supabase.rpc('get_user_settings', {
-    p_user_id: user.id,
-  });
+  // User-scoped edge-cached RPC via centralized data layer
+  const settingsData = await getUserSettings(user.id);
 
   // Type-safe RPC return using centralized type definition
   const settingsResult = settingsData as GetUserSettingsReturn;
