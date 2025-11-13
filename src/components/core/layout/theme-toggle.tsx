@@ -30,8 +30,18 @@ function isValidTheme(value: unknown): value is 'light' | 'dark' {
  */
 export function ThemeToggle() {
   const [theme, setTheme] = useState<'light' | 'dark' | null>(null);
+  const [transitionMs, setTransitionMs] = useState(200);
   const containerRef = useRef<HTMLDivElement>(null);
   const { startTransition, isSupported } = useViewTransition();
+
+  // Load transition duration from config
+  useEffect(() => {
+    import('@/src/lib/flags').then(({ timeoutConfigs }) =>
+      timeoutConfigs().then((config) => {
+        setTransitionMs((config['timeout.ui.transition_ms'] as number) ?? 200);
+      })
+    );
+  }, []);
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme');
@@ -152,7 +162,7 @@ export function ThemeToggle() {
 
       setTimeout(() => {
         document.documentElement.classList.remove('theme-transition');
-      }, 300);
+      }, transitionMs);
     }
   };
 
@@ -193,7 +203,7 @@ export function ThemeToggle() {
             document.documentElement.setAttribute('data-theme', newTheme);
             setTimeout(() => {
               document.documentElement.classList.remove('theme-transition');
-            }, 300);
+            }, transitionMs);
           }
         }}
         onClick={handleToggle}

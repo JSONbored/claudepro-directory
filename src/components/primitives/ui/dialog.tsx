@@ -16,13 +16,9 @@
 import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { motion } from 'motion/react';
 import type * as React from 'react';
+import { useEffect, useState } from 'react';
 import { X } from '@/src/lib/icons';
-import {
-  ANIMATION_CONSTANTS,
-  POSITION_PATTERNS,
-  STATE_PATTERNS,
-  UI_CLASSES,
-} from '@/src/lib/ui-constants';
+import { POSITION_PATTERNS, STATE_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
 
 const Dialog = DialogPrimitive.Root;
@@ -62,37 +58,58 @@ const DialogContent = ({
   ...props
 }: React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> & {
   ref?: React.RefObject<React.ElementRef<typeof DialogPrimitive.Content> | null>;
-}) => (
-  <DialogPortal>
-    <DialogOverlay />
-    <DialogPrimitive.Content ref={ref} asChild {...props}>
-      <motion.div
-        className={cn(
-          `${POSITION_PATTERNS.FIXED_CENTER} z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg sm:rounded-lg`,
-          className
-        )}
-        initial={{ opacity: 0, scale: 0.95, y: '-48%' }}
-        animate={{ opacity: 1, scale: 1, y: '-50%' }}
-        exit={{ opacity: 0, scale: 0.95, y: '-48%' }}
-        transition={ANIMATION_CONSTANTS.SPRING_SMOOTH}
-      >
-        {children}
-        <DialogPrimitive.Close
+}) => {
+  const [springSmooth, setSpringSmooth] = useState({
+    type: 'spring' as const,
+    stiffness: 300,
+    damping: 25,
+  });
+
+  useEffect(() => {
+    import('@/src/lib/flags')
+      .then(({ animationConfigs }) => animationConfigs())
+      .then((config) => {
+        setSpringSmooth({
+          type: 'spring' as const,
+          stiffness: (config['animation.spring.smooth.stiffness'] as number) ?? 300,
+          damping: (config['animation.spring.smooth.damping'] as number) ?? 25,
+        });
+      })
+      .catch(() => {});
+  }, []);
+
+  return (
+    <DialogPortal>
+      <DialogOverlay />
+      <DialogPrimitive.Content ref={ref} asChild {...props}>
+        <motion.div
           className={cn(
-            POSITION_PATTERNS.ABSOLUTE_TOP_RIGHT_OFFSET_XL,
-            'rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100',
-            STATE_PATTERNS.FOCUS_RING_OFFSET,
-            STATE_PATTERNS.DISABLED_STANDARD,
-            'data-[state=open]:bg-accent data-[state=open]:text-muted-foreground'
+            `${POSITION_PATTERNS.FIXED_CENTER} z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg sm:rounded-lg`,
+            className
           )}
+          initial={{ opacity: 0, scale: 0.95, y: '-48%' }}
+          animate={{ opacity: 1, scale: 1, y: '-50%' }}
+          exit={{ opacity: 0, scale: 0.95, y: '-48%' }}
+          transition={springSmooth}
         >
-          <X className={UI_CLASSES.ICON_SM} />
-          <span className="sr-only">Close</span>
-        </DialogPrimitive.Close>
-      </motion.div>
-    </DialogPrimitive.Content>
-  </DialogPortal>
-);
+          {children}
+          <DialogPrimitive.Close
+            className={cn(
+              POSITION_PATTERNS.ABSOLUTE_TOP_RIGHT_OFFSET_XL,
+              'rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100',
+              STATE_PATTERNS.FOCUS_RING_OFFSET,
+              STATE_PATTERNS.DISABLED_STANDARD,
+              'data-[state=open]:bg-accent data-[state=open]:text-muted-foreground'
+            )}
+          >
+            <X className={UI_CLASSES.ICON_SM} />
+            <span className="sr-only">Close</span>
+          </DialogPrimitive.Close>
+        </motion.div>
+      </DialogPrimitive.Content>
+    </DialogPortal>
+  );
+};
 DialogContent.displayName = DialogPrimitive.Content.displayName;
 
 const DialogHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (

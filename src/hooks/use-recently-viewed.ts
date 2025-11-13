@@ -52,7 +52,7 @@ Promise.all([recentlyViewedConfigs(), timeoutConfigs()])
     MAX_DESCRIPTION_LENGTH =
       (recentlyViewed['recently_viewed.max_description_length'] as number) ?? 150;
     MAX_TAGS = (recentlyViewed['recently_viewed.max_tags'] as number) ?? 5;
-    DEBOUNCE_MS = (timeout['timeout.form_debounce_ms'] as number) ?? 300;
+    DEBOUNCE_MS = (timeout['timeout.ui.form_debounce_ms'] as number) ?? 300;
   })
   .catch(() => {
     // Use defaults if config load fails

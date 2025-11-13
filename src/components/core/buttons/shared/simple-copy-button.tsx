@@ -42,7 +42,10 @@ export function SimpleCopyButton({
       toasts.raw.success(successMessage);
       onCopySuccess?.();
 
-      setTimeout(() => setCopied(false), 2000);
+      const { timeoutConfigs } = await import('@/src/lib/flags');
+      const config = await timeoutConfigs();
+      const resetDelay = (config['timeout.ui.clipboard_reset_delay_ms'] as number) || 2000;
+      setTimeout(() => setCopied(false), resetDelay);
     } catch (error) {
       toasts.raw.error(errorMessage);
     }

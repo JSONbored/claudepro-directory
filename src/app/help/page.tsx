@@ -2,11 +2,12 @@
 
 import { motion } from 'motion/react';
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
 import { NavLink } from '@/src/components/core/navigation/navigation-link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
 import { APP_CONFIG } from '@/src/lib/constants';
 import { BookOpen, Code, FileText, HelpCircle, MessageSquare, Search } from '@/src/lib/icons';
-import { ANIMATION_CONSTANTS, UI_CLASSES } from '@/src/lib/ui-constants';
+import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 const helpTopics = [
   {
@@ -92,6 +93,25 @@ const commonQuestions = [
 ];
 
 export default function HelpPage() {
+  const [springDefault, setSpringDefault] = useState({
+    type: 'spring' as const,
+    stiffness: 400,
+    damping: 17,
+  });
+
+  useEffect(() => {
+    import('@/src/lib/flags')
+      .then(({ animationConfigs }) => animationConfigs())
+      .then((config) => {
+        setSpringDefault({
+          type: 'spring' as const,
+          stiffness: (config['animation.spring.default.stiffness'] as number) ?? 400,
+          damping: (config['animation.spring.default.damping'] as number) ?? 17,
+        });
+      })
+      .catch(() => {});
+  }, []);
+
   return (
     <div className="container mx-auto max-w-6xl px-4 py-8 sm:py-12">
       <div className="mb-12 text-center">
@@ -163,7 +183,7 @@ export default function HelpPage() {
             <motion.div
               whileHover={{ y: -4, scale: 1.01 }}
               whileTap={{ scale: 0.99 }}
-              transition={ANIMATION_CONSTANTS.SPRING_DEFAULT}
+              transition={springDefault}
             >
               <Card className="h-full cursor-pointer">
                 <CardContent className="pt-6">
@@ -181,7 +201,7 @@ export default function HelpPage() {
             <motion.div
               whileHover={{ y: -4, scale: 1.01 }}
               whileTap={{ scale: 0.99 }}
-              transition={ANIMATION_CONSTANTS.SPRING_DEFAULT}
+              transition={springDefault}
             >
               <Card className="h-full cursor-pointer">
                 <CardContent className="pt-6">
@@ -199,7 +219,7 @@ export default function HelpPage() {
             <motion.div
               whileHover={{ y: -4, scale: 1.01 }}
               whileTap={{ scale: 0.99 }}
-              transition={ANIMATION_CONSTANTS.SPRING_DEFAULT}
+              transition={springDefault}
             >
               <Card className="h-full cursor-pointer">
                 <CardContent className="pt-6">

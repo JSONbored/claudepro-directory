@@ -184,9 +184,6 @@ export const appSettings = createDynamicConfigGroup('app_settings', {
   'date.current_year': new Date().getFullYear(),
   'date.current_date': new Date().toISOString().split('T')[0],
   'date.last_reviewed': new Date().toISOString().split('T')[0],
-  'search.enabled': true,
-  'search.min_query_length': 2,
-  'search.max_results': 50,
 });
 
 /**
@@ -300,7 +297,7 @@ export const animationConfigs = createDynamicConfigGroup('animation_configs', {
   'animation.stagger.medium_ms': 200,
   'animation.stagger.slow_ms': 300,
   'animation.beam.default_ms': 15000,
-  'animation.card_stagger_ms': 50,
+  'animation.card.stagger_ms': 100,
   // Spring physics
   'animation.spring.default.stiffness': 400,
   'animation.spring.default.damping': 17,
@@ -324,34 +321,27 @@ export const animationConfigs = createDynamicConfigGroup('animation_configs', {
   'confetti.subtle.ticks': 100,
 });
 
-/**
- * Timeout Configs - UI interaction timeouts
- * Controls debounce, tooltips, and transition timing
- * Usage: const config = await timeoutConfigs(); const debounce = config['timeout.ui.debounce_ms'];
- */
+/** Timeout Configs - UI/API timeouts and retry logic */
 export const timeoutConfigs = createDynamicConfigGroup('timeout_configs', {
   'timeout.ui.debounce_ms': 150,
   'timeout.ui.tooltip_ms': 300,
   'timeout.ui.animation_ms': 300,
   'timeout.ui.transition_ms': 200,
-  'timeout.prefetch_hover_ms': 100,
-  'timeout.button_success_ms': 2000,
-  'timeout.clipboard_reset_ms': 2000,
-  'timeout.scroll_detection_threshold_ms': 100,
-  'timeout.scroll_detection_hysteresis_ms': 50,
-  'timeout.form_debounce_ms': 300,
-  'timeout.duplicate_check_debounce_ms': 500,
-  'timeout.company_search_debounce_ms': 300,
-  'timeout.badge_tooltip_delay_ms': 100,
-  // API timeouts
+  'timeout.ui.prefetch_delay_ms': 300,
+  'timeout.ui.button_success_duration_ms': 2000,
+  'timeout.ui.clipboard_reset_delay_ms': 2000,
+  'timeout.ui.modal_close_delay_ms': 300,
+  'timeout.ui.dropdown_open_delay_ms': 200,
+  'timeout.ui.hover_activate_delay_ms': 150,
+  'timeout.ui.scroll_direction_threshold_px': 100,
+  'timeout.ui.scroll_hysteresis_px': 10,
+  'timeout.ui.form_debounce_ms': 300,
   'timeout.api.default_ms': 5000,
   'timeout.api.long_ms': 10000,
   'timeout.api.short_ms': 2000,
-  // Test timeouts
   'timeout.test.default_ms': 5000,
   'timeout.test.long_ms': 10000,
   'timeout.test.network_ms': 5000,
-  // Retry delays
   'retry.api.initial_delay_ms': 1000,
   'retry.api.exponential_delay_ms': 2000,
   'retry.api.max_delay_ms': 10000,
@@ -433,17 +423,6 @@ export const homepageConfigs = createDynamicConfigGroup('homepage_configs', {
     'guides',
     'community',
   ] as string[],
-});
-
-/**
- * Search Configs - Search functionality settings
- * Controls search behavior and performance
- * Usage: const config = await searchConfigs(); const debounce = config['search.debounce_ms'];
- */
-export const searchConfigs = createDynamicConfigGroup('search_configs', {
-  'search.debounce_ms': 150,
-  'search.threshold': 0.3,
-  'search.max_results': 50,
 });
 
 /**

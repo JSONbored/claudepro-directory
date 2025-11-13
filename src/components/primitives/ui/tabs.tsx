@@ -14,8 +14,9 @@
 import * as TabsPrimitive from '@radix-ui/react-tabs';
 import { motion } from 'motion/react';
 import type * as React from 'react';
+import { useEffect, useState } from 'react';
 
-import { ANIMATION_CONSTANTS, POSITION_PATTERNS, STATE_PATTERNS } from '@/src/lib/ui-constants';
+import { POSITION_PATTERNS, STATE_PATTERNS } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
 
 const Tabs = TabsPrimitive.Root;
@@ -44,24 +45,45 @@ const TabsTrigger = ({
   ...props
 }: React.ComponentPropsWithoutRef<typeof TabsPrimitive.Trigger> & {
   ref?: React.RefObject<React.ElementRef<typeof TabsPrimitive.Trigger> | null>;
-}) => (
-  <TabsPrimitive.Trigger
-    ref={ref}
-    className={cn(
-      `relative inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 font-medium text-sm ring-offset-background transition-colors ${STATE_PATTERNS.HOVER_TEXT_FOREGROUND} ${STATE_PATTERNS.FOCUS_RING} ${STATE_PATTERNS.DISABLED_STANDARD} data-[state=active]:text-foreground [&[data-state=active]>.tab-indicator]:block`,
-      className
-    )}
-    {...props}
-  >
-    {/* Morphing active indicator - only visible on active tab via CSS */}
-    <motion.span
-      layoutId="tabs-indicator"
-      className={`tab-indicator -z-10 ${POSITION_PATTERNS.ABSOLUTE_INSET} hidden rounded-sm bg-background shadow-sm`}
-      transition={ANIMATION_CONSTANTS.SPRING_BOUNCY}
-    />
-    {props.children}
-  </TabsPrimitive.Trigger>
-);
+}) => {
+  const [springBouncy, setSpringBouncy] = useState({
+    type: 'spring' as const,
+    stiffness: 500,
+    damping: 20,
+  });
+
+  useEffect(() => {
+    import('@/src/lib/flags')
+      .then(({ animationConfigs }) => animationConfigs())
+      .then((config) => {
+        setSpringBouncy({
+          type: 'spring' as const,
+          stiffness: (config['animation.spring.bouncy.stiffness'] as number) ?? 500,
+          damping: (config['animation.spring.bouncy.damping'] as number) ?? 20,
+        });
+      })
+      .catch(() => {});
+  }, []);
+
+  return (
+    <TabsPrimitive.Trigger
+      ref={ref}
+      className={cn(
+        `relative inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 font-medium text-sm ring-offset-background transition-colors ${STATE_PATTERNS.HOVER_TEXT_FOREGROUND} ${STATE_PATTERNS.FOCUS_RING} ${STATE_PATTERNS.DISABLED_STANDARD} data-[state=active]:text-foreground [&[data-state=active]>.tab-indicator]:block`,
+        className
+      )}
+      {...props}
+    >
+      {/* Morphing active indicator - only visible on active tab via CSS */}
+      <motion.span
+        layoutId="tabs-indicator"
+        className={`tab-indicator -z-10 ${POSITION_PATTERNS.ABSOLUTE_INSET} hidden rounded-sm bg-background shadow-sm`}
+        transition={springBouncy}
+      />
+      {props.children}
+    </TabsPrimitive.Trigger>
+  );
+};
 TabsTrigger.displayName = TabsPrimitive.Trigger.displayName;
 
 const TabsContent = ({

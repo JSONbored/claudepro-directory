@@ -18,9 +18,9 @@ import { Slot } from '@radix-ui/react-slot';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { AnimatePresence, motion } from 'motion/react';
 import type * as React from 'react';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
-import { ANIMATION_CONSTANTS, STATE_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
+import { STATE_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
 
 interface RippleType {
@@ -73,6 +73,23 @@ const Button = ({
   ...props
 }: ButtonProps & { ref?: React.RefObject<HTMLButtonElement | null> }) => {
   const [ripples, setRipples] = useState<RippleType[]>([]);
+  const [springDefault, setSpringDefault] = useState({
+    type: 'spring' as const,
+    stiffness: 400,
+    damping: 17,
+  });
+
+  useEffect(() => {
+    import('@/src/lib/flags').then(({ animationConfigs }) =>
+      animationConfigs().then((config) => {
+        setSpringDefault({
+          type: 'spring' as const,
+          stiffness: (config['animation.spring.default.stiffness'] as number) ?? 400,
+          damping: (config['animation.spring.default.damping'] as number) ?? 17,
+        });
+      })
+    );
+  }, []);
 
   const addRipple = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
     const button = event.currentTarget;
@@ -155,7 +172,7 @@ const Button = ({
     <motion.div
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
-      transition={ANIMATION_CONSTANTS.SPRING_DEFAULT}
+      transition={springDefault}
       style={{ display: 'inline-block' }}
     >
       {buttonElement}

@@ -240,41 +240,6 @@ export const DEV_CONFIG = {
 } as const;
 
 /**
- * Search Configuration - Database-First
- * Loads from app_settings table with hardcoded fallbacks
- */
-const SEARCH_CONFIG_FALLBACK = {
-  debounceMs: 150,
-  threshold: 0.3,
-  maxResults: 50,
-} as const;
-
-/**
- * Get search configuration from Statsig Dynamic Configs
- * Falls back to hardcoded values if Statsig unavailable
- */
-export async function getSearchConfig() {
-  try {
-    const { searchConfigs } = await import('@/src/lib/flags');
-    const config = await searchConfigs();
-    return {
-      debounceMs: (config['search.debounce_ms'] as number) ?? SEARCH_CONFIG_FALLBACK.debounceMs,
-      threshold: (config['search.threshold'] as number) ?? SEARCH_CONFIG_FALLBACK.threshold,
-      maxResults: (config['search.max_results'] as number) ?? SEARCH_CONFIG_FALLBACK.maxResults,
-    };
-  } catch {
-    return {
-      debounceMs: SEARCH_CONFIG_FALLBACK.debounceMs,
-      threshold: SEARCH_CONFIG_FALLBACK.threshold,
-      maxResults: SEARCH_CONFIG_FALLBACK.maxResults,
-    };
-  }
-}
-
-// Export fallback for build-time usage (static generation)
-export const SEARCH_CONFIG = SEARCH_CONFIG_FALLBACK;
-
-/**
  * Common Acronyms for Text Transformation
  * Used for proper capitalization of technical terms
  */
@@ -520,41 +485,11 @@ export const TIME_CONSTANTS = {
   DAY: 24 * 60 * 60 * 1000,
   WEEK: 7 * 24 * 60 * 60 * 1000,
 } as const;
-
-/**
- * Service Delays Configuration
- * Standardized delays for API calls, retries, and service interactions
- */
-export const SERVICE_DELAYS = {
-  // API retry delays
-  retry: {
-    initial: 1000, // 1 second
-    exponential: 2000, // Base for exponential backoff
-    maximum: 10000, // 10 seconds max
-  },
-  // Email service delays
-  email: {
-    send: 1000, // 1 second between sends
-    retry: 2000, // 2 seconds on failure
-  },
-  // External API delays
-  api: {
-    github: 1000, // 1 second (respect GitHub rate limits)
-    resend: 1000, // 1 second between requests
-    external: 500, // 500ms default for external APIs
-  },
-  // Database operation delays
-  database: {
-    query: 100, // 100ms between queries
-    write: 200, // 200ms between writes
-    transaction: 500, // 500ms for transaction retry
-  },
-} as const;
-
 /**
  * Polling Intervals Configuration
  * Standardized intervals for periodic checks and updates
  * SYNC: Keep in sync with polling_configs in flags.ts (Statsig Dynamic Configs)
+ * Note: analytics polling migrated to pollingConfigs - use getPollingIntervals()
  */
 export const POLLING_INTERVALS = {
   // Real-time updates
@@ -567,36 +502,20 @@ export const POLLING_INTERVALS = {
     api: 30000, // 30 seconds
     database: 120000, // 2 minutes
   },
-  // Analytics polling
-  analytics: {
-    views: 60000, // 1 minute
-    stats: 300000, // 5 minutes
-  },
 } as const;
 
 /**
- * Timeout Configuration
- * Standardized timeouts for various operations
+ * Timeout Configuration - UI timeouts only
+ * API and test timeouts migrated to Statsig timeoutConfigs
+ * Use getTimeouts() to access all timeout configurations with Statsig values
  */
 export const TIMEOUTS = {
-  // API timeouts
-  api: {
-    default: 5000, // 5 seconds
-    long: 10000, // 10 seconds
-    short: 2000, // 2 seconds
-  },
-  // UI interaction timeouts
+  // UI interaction timeouts (not migrated to Statsig - still used directly)
   ui: {
     debounce: 150, // Search debounce
     tooltip: 300, // Tooltip delay
     animation: 300, // Animation duration
     transition: 200, // Transition duration
-  },
-  // Test timeouts
-  test: {
-    default: 5000, // 5 seconds
-    long: 10000, // 10 seconds
-    network: 5000, // 5 seconds for network idle
   },
 } as const;
 
@@ -642,10 +561,8 @@ export async function getPollingIntervals() {
           (config['polling.status.database_ms'] as number) ?? POLLING_INTERVALS.status.database,
       },
       analytics: {
-        views:
-          (config['polling.analytics.views_ms'] as number) ?? POLLING_INTERVALS.analytics.views,
-        stats:
-          (config['polling.analytics.stats_ms'] as number) ?? POLLING_INTERVALS.analytics.stats,
+        views: (config['polling.analytics.views_ms'] as number) ?? 60000,
+        stats: (config['polling.analytics.stats_ms'] as number) ?? 300000,
       },
     };
   } catch {
@@ -693,14 +610,22 @@ export async function getTimeouts() {
     const { timeoutConfigs } = await import('@/src/lib/flags');
     const config = await timeoutConfigs();
     return {
-      api: TIMEOUTS.api, // Keep API timeouts hardcoded (not in Statsig yet)
+      api: {
+        default: (config['timeout.api.default_ms'] as number) ?? 5000,
+        long: (config['timeout.api.long_ms'] as number) ?? 10000,
+        short: (config['timeout.api.short_ms'] as number) ?? 2000,
+      },
       ui: {
         debounce: (config['timeout.ui.debounce_ms'] as number) ?? TIMEOUTS.ui.debounce,
         tooltip: (config['timeout.ui.tooltip_ms'] as number) ?? TIMEOUTS.ui.tooltip,
         animation: (config['timeout.ui.animation_ms'] as number) ?? TIMEOUTS.ui.animation,
         transition: (config['timeout.ui.transition_ms'] as number) ?? TIMEOUTS.ui.transition,
       },
-      test: TIMEOUTS.test, // Keep test timeouts hardcoded (not in Statsig yet)
+      test: {
+        default: (config['timeout.test.default_ms'] as number) ?? 5000,
+        long: (config['timeout.test.long_ms'] as number) ?? 10000,
+        network: (config['timeout.test.network_ms'] as number) ?? 5000,
+      },
     };
   } catch {
     return TIMEOUTS;

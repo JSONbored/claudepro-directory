@@ -1,20 +1,9 @@
 'use client';
 
-/**
- * ConfigCard Component - Refactored to use BaseCard
- *
- * Displays configuration content (agents, mcp, commands, rules, hooks, guides)
- * with consistent card structure using BaseCard component.
- *
- * Refactoring Benefits:
- * - Eliminates ~100 lines of duplicated code
- * - Leverages BaseCard for shared structure
- * - Maintains all existing features (sponsored tracking, view counts, etc.)
- * - Easier to maintain and extend
- */
+/** ConfigCard consuming componentConfigs for runtime-tunable card behaviors */
 
 import { useRouter } from 'next/navigation';
-import { memo, useCallback } from 'react';
+import { memo, useCallback, useEffect, useState } from 'react';
 import { BookmarkButton } from '@/src/components/core/buttons/interaction/bookmark-button';
 import { SimpleCopyButton } from '@/src/components/core/buttons/shared/simple-copy-button';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
@@ -30,7 +19,7 @@ import { Award, ExternalLink, Eye, Github, Layers, Sparkles } from '@/src/lib/ic
 import { logger } from '@/src/lib/logger';
 import { SEMANTIC_COLORS } from '@/src/lib/semantic-colors';
 import type { ConfigCardProps } from '@/src/lib/types/component.types';
-import { BADGE_COLORS, CARD_BEHAVIORS, UI_CLASSES } from '@/src/lib/ui-constants';
+import { BADGE_COLORS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { getDisplayTitle } from '@/src/lib/utils';
 import { formatViewCount, getContentItemUrl } from '@/src/lib/utils/content.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
@@ -60,9 +49,27 @@ export const ConfigCard = memo(
       },
     });
 
-    // Get behavior configuration for this content type
-    const behavior =
-      CARD_BEHAVIORS[item.category as keyof typeof CARD_BEHAVIORS] || CARD_BEHAVIORS.default;
+    const [cardConfig, setCardConfig] = useState({
+      showCopyButton: true,
+      showBookmark: true,
+      showViewCount: true,
+      showCopyCount: true,
+      showRating: false,
+    });
+
+    useEffect(() => {
+      import('@/src/lib/flags').then(({ componentConfigs }) =>
+        componentConfigs().then((config) => {
+          setCardConfig({
+            showCopyButton: (config['cards.show_copy_button'] as boolean) ?? true,
+            showBookmark: (config['cards.show_bookmark'] as boolean) ?? true,
+            showViewCount: (config['cards.show_view_count'] as boolean) ?? true,
+            showCopyCount: (config['cards.show_copy_count'] as boolean) ?? true,
+            showRating: (config['cards.show_rating'] as boolean) ?? false,
+          });
+        })
+      );
+    }, []);
 
     // Swipe gesture handlers for mobile quick actions
     const handleSwipeRightCopy = useCallback(async () => {
@@ -308,7 +315,7 @@ export const ConfigCard = memo(
           renderMetadataBadges={() => (
             <>
               {/* Rating badge - shows average rating and count */}
-              {behavior.showRating && hasRating && ratingData && (
+              {cardConfig.showRating && hasRating && ratingData && (
                 <button
                   type="button"
                   onClick={(e) => e.stopPropagation()}
@@ -361,19 +368,21 @@ export const ConfigCard = memo(
               )}
 
               {/* Bookmark button with count overlay */}
-              <div className="relative">
-                <BookmarkButton contentType={item.category || 'agents'} contentSlug={item.slug} />
-                {bookmarkCount !== undefined && bookmarkCount > 0 && (
-                  <UnifiedBadge
-                    variant="notification-count"
-                    count={bookmarkCount}
-                    type="bookmark"
-                  />
-                )}
-              </div>
+              {cardConfig.showBookmark && (
+                <div className="relative">
+                  <BookmarkButton contentType={item.category || 'agents'} contentSlug={item.slug} />
+                  {bookmarkCount !== undefined && bookmarkCount > 0 && (
+                    <UnifiedBadge
+                      variant="notification-count"
+                      count={bookmarkCount}
+                      type="bookmark"
+                    />
+                  )}
+                </div>
+              )}
 
               {/* Copy button with count overlay */}
-              {behavior.showCopyButton && (
+              {cardConfig.showCopyButton && (
                 <div className="relative">
                   <SimpleCopyButton
                     content={`${typeof window !== 'undefined' ? window.location.origin : ''}${targetPath}`}
@@ -394,7 +403,7 @@ export const ConfigCard = memo(
                       });
                     }}
                   />
-                  {behavior.showCopyCount && copyCount !== undefined && copyCount > 0 && (
+                  {cardConfig.showCopyCount && copyCount !== undefined && copyCount > 0 && (
                     <UnifiedBadge variant="notification-count" count={copyCount} type="copy" />
                   )}
                 </div>
@@ -410,11 +419,11 @@ export const ConfigCard = memo(
                     e.stopPropagation();
                     window.location.href = targetPath;
                   }}
-                  aria-label={`View details for ${displayTitle}${behavior.showViewCount && viewCount !== undefined && typeof viewCount === 'number' ? ` - ${formatViewCount(viewCount)}` : ''}`}
+                  aria-label={`View details for ${displayTitle}${cardConfig.showViewCount && viewCount !== undefined && typeof viewCount === 'number' ? ` - ${formatViewCount(viewCount)}` : ''}`}
                 >
                   <Eye className={UI_CLASSES.ICON_XS} aria-hidden="true" />
                 </Button>
-                {behavior.showViewCount &&
+                {cardConfig.showViewCount &&
                   viewCount !== undefined &&
                   typeof viewCount === 'number' &&
                   viewCount > 0 && (

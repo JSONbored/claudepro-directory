@@ -1,8 +1,7 @@
-import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { JobForm } from '@/src/components/core/forms/job-form';
+import { type CreateJobInput, createJob } from '@/src/lib/actions/jobs.actions';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 // Force dynamic rendering - requires authentication
@@ -11,68 +10,28 @@ export const dynamic = 'force-dynamic';
 export const metadata = generatePageMetadata('/account/jobs/new');
 
 export default function NewJobPage() {
-  const handleSubmit = async (data: Record<string, unknown>) => {
+  const handleSubmit = async (data: CreateJobInput) => {
     'use server';
 
-    const supabase = await createClient();
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
+    // Call createJob server action (calls create_job_with_payment RPC + Polar checkout)
+    const result = await createJob(data);
 
-    if (authError || !user) throw new Error('You must be signed in to create a job listing');
-
-    // Get JWT token for edge function authentication
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-
-    if (!session?.access_token) {
-      throw new Error('No valid session found');
+    if (result?.serverError) {
+      throw new Error(result.serverError);
     }
 
-    // Call jobs-handler edge function directly
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/jobs-handler`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${session.access_token}`,
-          'X-Job-Action': 'create',
-        },
-        body: JSON.stringify(data),
-      }
-    );
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
-      throw new Error(errorData.message || `Failed to create job: ${response.statusText}`);
-    }
-
-    const result = (await response.json()) as {
-      success: boolean;
-      job: { id: string; slug: string };
-      requiresPayment: boolean;
-      checkoutUrl?: string;
-      message: string;
-    };
-
-    if (result.success) {
-      revalidatePath('/jobs');
-      revalidatePath('/account/jobs');
-
-      // If requires payment, return checkout URL for client-side redirect
-      if (result.requiresPayment && result.checkoutUrl) {
+    if (result?.data?.success) {
+      // If requires payment and checkout URL exists, return for client redirect
+      if (result.data.requiresPayment && result.data.checkoutUrl) {
         return {
           success: true,
           requiresPayment: true,
-          checkoutUrl: result.checkoutUrl,
+          checkoutUrl: result.data.checkoutUrl,
           message: 'Redirecting to payment...',
         };
       }
 
-      // Standard plan - redirect to jobs list
+      // No payment required or Polar not configured - redirect to jobs list
       redirect('/account/jobs');
     }
 

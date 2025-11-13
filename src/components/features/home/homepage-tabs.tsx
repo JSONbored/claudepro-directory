@@ -1,33 +1,17 @@
 'use client';
 
-/**
- * TabsSection Component
- * SHA-2102: Extracted from home-page-client.tsx for better modularity
- * SHA-XXXX: Made dynamic using HOMEPAGE_TAB_CATEGORIES
- *
- * Production 2025 Architecture:
- * - Intersection Observer infinite scroll for progressive loading
- * - Loads items in batches as user scrolls
- * - Constant memory usage and 60fps performance
- * - Scales to 10,000+ items with same performance
- *
- * Adding a new tab now only requires updating HOMEPAGE_TAB_CATEGORIES
- */
+/** Homepage tabs consuming homepageConfigs for runtime-tunable tab categories */
 
 import { motion } from 'motion/react';
 import Link from 'next/link';
-import { type FC, memo, useMemo } from 'react';
+import { type FC, memo, useEffect, useMemo, useState } from 'react';
 import { UnifiedCardGrid } from '@/src/components/core/domain/cards/card-grid';
 import { ConfigCard } from '@/src/components/core/domain/cards/config-card';
 import { Button } from '@/src/components/primitives/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/primitives/ui/tabs';
-import {
-  HOMEPAGE_TAB_CATEGORIES,
-  type UnifiedCategoryConfig,
-} from '@/src/lib/config/category-config';
+import type { UnifiedCategoryConfig } from '@/src/lib/config/category-config';
 import { ROUTES } from '@/src/lib/constants';
 import type { DisplayableContent } from '@/src/lib/types/component.types';
-import { ANIMATION_CONSTANTS } from '@/src/lib/ui-constants';
 
 interface TabsSectionProps {
   activeTab: string;
@@ -46,10 +30,37 @@ const TabsSectionComponent: FC<TabsSectionProps> = ({
   onFetchMore,
   serverHasMore = false,
 }) => {
-  // Get content tabs (exclude 'community' which has custom content)
+  const [tabCategories, setTabCategories] = useState<readonly string[]>([]);
+  const [springDefault, setSpringDefault] = useState({
+    type: 'spring' as const,
+    stiffness: 400,
+    damping: 17,
+  });
+
+  useEffect(() => {
+    import('@/src/lib/config/category-config').then(({ getHomepageTabCategories }) =>
+      getHomepageTabCategories().then((categories) => {
+        setTabCategories(categories);
+      })
+    );
+  }, []);
+
+  useEffect(() => {
+    import('@/src/lib/flags')
+      .then(({ animationConfigs }) => animationConfigs())
+      .then((config) => {
+        setSpringDefault({
+          type: 'spring' as const,
+          stiffness: (config['animation.spring.default.stiffness'] as number) ?? 400,
+          damping: (config['animation.spring.default.damping'] as number) ?? 17,
+        });
+      })
+      .catch(() => {});
+  }, []);
+
   const contentTabs = useMemo(
-    () => HOMEPAGE_TAB_CATEGORIES.filter((tab) => tab !== 'community'),
-    []
+    () => tabCategories.filter((tab) => tab !== 'community'),
+    [tabCategories]
   );
 
   return (
@@ -57,7 +68,7 @@ const TabsSectionComponent: FC<TabsSectionProps> = ({
       {/* Tabs with horizontal scroll on mobile/tablet */}
       <TabsList className="scrollbar-hide w-full gap-1 overflow-x-auto lg:grid lg:w-auto lg:auto-cols-fr lg:grid-flow-col">
         <div className="flex min-w-max lg:contents lg:min-w-0">
-          {HOMEPAGE_TAB_CATEGORIES.map((tab) => {
+          {tabCategories.map((tab) => {
             let displayName = tab.charAt(0).toUpperCase() + tab.slice(1);
 
             if (tab !== 'all' && tab !== 'community') {
@@ -68,11 +79,7 @@ const TabsSectionComponent: FC<TabsSectionProps> = ({
             }
 
             return (
-              <motion.div
-                key={tab}
-                whileTap={{ scale: 0.95 }}
-                transition={ANIMATION_CONSTANTS.SPRING_DEFAULT}
-              >
+              <motion.div key={tab} whileTap={{ scale: 0.95 }} transition={springDefault}>
                 <TabsTrigger
                   value={tab}
                   className="whitespace-nowrap px-3 text-xs sm:px-4 sm:text-sm"

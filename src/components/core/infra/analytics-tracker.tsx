@@ -5,7 +5,7 @@
  * Tracks views and page views via server actions. Data stored in user_interactions table.
  */
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import type { CategoryId } from '@/src/lib/config/category-config';
 import { trackInteraction } from '@/src/lib/edge/client';
 import { logger } from '@/src/lib/logger';
@@ -83,11 +83,18 @@ export function UnifiedTracker(props: UnifiedTrackerProps) {
   return <PageViewVariant {...props} />;
 }
 
-function ViewVariant({
-  category,
-  slug,
-  delay = 1000,
-}: Extract<UnifiedTrackerProps, { variant: 'view' }>) {
+function ViewVariant({ category, slug, delay }: Extract<UnifiedTrackerProps, { variant: 'view' }>) {
+  const [actualDelay, setActualDelay] = useState(delay ?? 1000);
+
+  useEffect(() => {
+    if (delay === undefined) {
+      import('@/src/lib/flags').then(({ pollingConfigs }) =>
+        pollingConfigs().then((config) => {
+          setActualDelay((config['polling.realtime_ms'] as number) || 1000);
+        })
+      );
+    }
+  }, [delay]);
   useTrackingEffect(
     () => {
       return trackInteraction({
@@ -98,7 +105,7 @@ function ViewVariant({
         // Intentional
       });
     },
-    delay,
+    actualDelay,
     [category, slug]
   );
 

@@ -72,8 +72,18 @@ export function CompanySelector({ value, onChange, defaultCompanyName }: Company
   );
 
   useEffect(() => {
-    const timer = setTimeout(() => searchCompanies(searchQuery), 300);
-    return () => clearTimeout(timer);
+    const loadDebounce = async () => {
+      const { timeoutConfigs } = await import('@/src/lib/flags');
+      const config = await timeoutConfigs();
+      const debounceMs = (config['timeout.ui.form_debounce_ms'] as number) || 300;
+      const timer = setTimeout(() => searchCompanies(searchQuery), debounceMs);
+      return () => clearTimeout(timer);
+    };
+
+    const cleanup = loadDebounce();
+    return () => {
+      cleanup.then((fn) => fn?.());
+    };
   }, [searchQuery, searchCompanies]);
 
   const handleSelect = (company: Company) => {

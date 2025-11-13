@@ -67,14 +67,24 @@ function UnifiedSearchComponent({
   const filterPanelId = useId();
   const sortSelectId = useId();
 
+  const [debounceMs, setDebounceMs] = useState(150);
+
+  useEffect(() => {
+    import('@/src/lib/flags').then(({ timeoutConfigs }) =>
+      timeoutConfigs().then((config) => {
+        setDebounceMs((config['timeout.ui.debounce_ms'] as number) ?? 150);
+      })
+    );
+  }, []);
+
   useEffect(() => {
     const timer = setTimeout(() => {
       const sanitized = localSearchQuery.trim().slice(0, 100);
       onSearch?.(sanitized);
-    }, 150);
+    }, debounceMs);
 
     return () => clearTimeout(timer);
-  }, [localSearchQuery, onSearch]);
+  }, [localSearchQuery, onSearch, debounceMs]);
 
   useEffect(() => {
     if (!localSearchQuery || localSearchQuery.length === 0) {

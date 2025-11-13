@@ -4,8 +4,11 @@
  * Full-height menu with staggered animations
  */
 
+'use client';
+
 import { motion } from 'motion/react';
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { HeyClaudeLogo } from '@/src/components/core/layout/brand-logo';
 import { PrefetchLink } from '@/src/components/core/navigation/prefetch-link';
@@ -72,6 +75,25 @@ interface NavigationMobileProps {
 }
 
 export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationMobileProps) {
+  const [springDefault, setSpringDefault] = useState({
+    type: 'spring' as const,
+    stiffness: 400,
+    damping: 17,
+  });
+
+  useEffect(() => {
+    import('@/src/lib/flags')
+      .then(({ animationConfigs }) => animationConfigs())
+      .then((config) => {
+        setSpringDefault({
+          type: 'spring' as const,
+          stiffness: (config['animation.spring.default.stiffness'] as number) ?? 400,
+          damping: (config['animation.spring.default.damping'] as number) ?? 17,
+        });
+      })
+      .catch(() => {});
+  }, []);
+
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
       <SheetTrigger asChild>
@@ -92,7 +114,7 @@ export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationM
             if (info.offset.y > 100) onOpenChange(false);
           }}
           whileDrag={{ scale: 1.2, backgroundColor: 'hsl(var(--accent))' }}
-          transition={ANIMATION_CONSTANTS.SPRING_DEFAULT}
+          transition={springDefault}
         />
 
         <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
@@ -221,11 +243,7 @@ export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationM
                   color: 'accent',
                 },
               ].map((item) => (
-                <motion.div
-                  key={item.label}
-                  whileTap={{ scale: 0.9 }}
-                  transition={ANIMATION_CONSTANTS.SPRING_DEFAULT}
-                >
+                <motion.div key={item.label} whileTap={{ scale: 0.9 }} transition={springDefault}>
                   <Button
                     variant="outline"
                     size="lg"

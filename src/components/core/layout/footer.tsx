@@ -18,7 +18,7 @@ import { HeyClaudeLogo } from '@/src/components/core/layout/brand-logo';
 import { ThemeToggle } from '@/src/components/core/layout/theme-toggle';
 import { APP_CONFIG, EXTERNAL_SERVICES, ROUTES, SOCIAL_LINKS } from '@/src/lib/constants';
 import { DiscordIcon, ExternalLink, Github, Rss, Sparkles } from '@/src/lib/icons';
-import { ANIMATION_CONSTANTS, RESPONSIVE_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
+import { RESPONSIVE_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
 
 /**
  * Footer Component
@@ -33,6 +33,11 @@ function FooterComponent() {
   const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
+  const [springDefault, setSpringDefault] = useState({
+    type: 'spring' as const,
+    stiffness: 400,
+    damping: 17,
+  });
 
   // Context-aware RSS feed - shows most relevant feed for current page
   const rssFeed = useMemo(() => {
@@ -56,6 +61,19 @@ function FooterComponent() {
   // Wait for client-side mount to avoid hydration mismatch
   useEffect(() => {
     setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    import('@/src/lib/flags')
+      .then(({ animationConfigs }) => animationConfigs())
+      .then((config) => {
+        setSpringDefault({
+          type: 'spring' as const,
+          stiffness: (config['animation.spring.default.stiffness'] as number) ?? 400,
+          damping: (config['animation.spring.default.damping'] as number) ?? 17,
+        });
+      })
+      .catch(() => {});
   }, []);
 
   return (
@@ -146,7 +164,7 @@ function FooterComponent() {
                   <motion.div
                     whileHover={{ scale: 1.05, x: 3 }}
                     whileTap={{ scale: 0.95 }}
-                    transition={ANIMATION_CONSTANTS.SPRING_DEFAULT}
+                    transition={springDefault}
                     className="inline-block"
                   >
                     <Link
@@ -192,7 +210,7 @@ function FooterComponent() {
                   <motion.div
                     whileHover={{ scale: 1.05, x: 3 }}
                     whileTap={{ scale: 0.95 }}
-                    transition={ANIMATION_CONSTANTS.SPRING_DEFAULT}
+                    transition={springDefault}
                     className="inline-block"
                   >
                     <Link
@@ -239,7 +257,7 @@ function FooterComponent() {
                   <motion.div
                     whileHover={{ scale: 1.05, x: 3 }}
                     whileTap={{ scale: 0.95 }}
-                    transition={ANIMATION_CONSTANTS.SPRING_DEFAULT}
+                    transition={springDefault}
                     className="inline-block"
                   >
                     <Link

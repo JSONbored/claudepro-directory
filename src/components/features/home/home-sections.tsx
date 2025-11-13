@@ -1,24 +1,6 @@
 'use client';
 
-/**
- * Homepage Client Component
- * Database-First 2025 Architecture: Server data with client interactivity
- *
- * PERFORMANCE CRITICAL: This is the first page users see
- * Data fetched server-side, search redirects to /search page
- *
- * Architecture Changes (2025-10-30):
- * 1. ✅ Data fetched from content table (server-side in page.tsx)
- * 2. ✅ Search uses direct Supabase RPC (database-first, no API route)
- * 3. ✅ No client-side filtering - just display and navigation
- * 4. ✅ Client-only for animations and interactions
- *
- * Component Organization:
- * 1. ✅ Display server-fetched data
- * 2. ✅ Handle search navigation
- * 3. ✅ Interactive UI elements (motion, tabs)
- * Result: Hybrid architecture - server data, client UX
- */
+/** Homepage client consuming homepageConfigs for runtime-tunable featured categories */
 
 import { motion } from 'motion/react';
 import dynamic from 'next/dynamic';
@@ -35,16 +17,16 @@ import {
   Skeleton,
 } from '@/src/components/primitives/feedback/loading-skeleton';
 import {
+  type CategoryId,
   getCategoryConfigs,
   getCategoryStatsConfig,
-  HOMEPAGE_FEATURED_CATEGORIES,
 } from '@/src/lib/config/category-config';
 import { ROUTES } from '@/src/lib/constants';
 import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
 import { logger } from '@/src/lib/logger';
 import type { DisplayableContent, FilterState } from '@/src/lib/types/component.types';
 import type { HomePageClientProps } from '@/src/lib/types/page-props.types';
-import { ANIMATION_CONSTANTS, UI_CLASSES } from '@/src/lib/ui-constants';
+import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 /**
  * OPTIMIZATION (2025-10-22): Enabled SSR for UnifiedSearch
@@ -77,9 +59,36 @@ function HomePageClientComponent({
   const [isSearching, setIsSearching] = useState(false);
   const [filters, setFilters] = useState({});
   const [currentSearchQuery, setCurrentSearchQuery] = useState('');
+  const [featuredCategories, setFeaturedCategories] = useState<readonly CategoryId[]>([]);
+  const [springDefault, setSpringDefault] = useState({
+    type: 'spring' as const,
+    stiffness: 400,
+    damping: 17,
+  });
 
   const categoryStatsConfig = useMemo(() => getCategoryStatsConfig(), []);
   const categoryConfigs = useMemo(() => getCategoryConfigs(), []);
+
+  useEffect(() => {
+    import('@/src/lib/config/category-config').then(({ getHomepageFeaturedCategories }) =>
+      getHomepageFeaturedCategories().then((categories) => {
+        setFeaturedCategories(categories);
+      })
+    );
+  }, []);
+
+  useEffect(() => {
+    import('@/src/lib/flags')
+      .then(({ animationConfigs }) => animationConfigs())
+      .then((config) => {
+        setSpringDefault({
+          type: 'spring' as const,
+          stiffness: (config['animation.spring.default.stiffness'] as number) ?? 400,
+          damping: (config['animation.spring.default.damping'] as number) ?? 17,
+        });
+      })
+      .catch(() => {});
+  }, []);
 
   const fetchAllConfigs = useCallback(
     async (offset: number, limit = 30) => {
@@ -177,11 +186,10 @@ function HomePageClientComponent({
 
   // Create lookup maps dynamically for all featured categories
   // O(1) slug checking instead of O(n) array.some() calls
-  // Only used for non-search tab filtering
   const slugLookupMaps = useMemo(() => {
     const maps: Record<string, Set<string>> = {};
 
-    for (const category of HOMEPAGE_FEATURED_CATEGORIES) {
+    for (const category of featuredCategories) {
       const categoryData = initialData[category as keyof typeof initialData];
       if (categoryData && Array.isArray(categoryData)) {
         maps[category] = new Set(categoryData.map((item: DisplayableContent) => item.slug));
@@ -189,7 +197,7 @@ function HomePageClientComponent({
     }
 
     return maps;
-  }, [initialData]);
+  }, [initialData, featuredCategories]);
 
   // Filter results by active tab
   // Performance: When searching, DB filters by category (no client-side filtering needed)
@@ -271,7 +279,7 @@ function HomePageClientComponent({
                         <motion.div
                           className="flex min-w-fit items-center gap-2 whitespace-nowrap rounded-lg border border-border/40 bg-card/50 px-4 py-2.5 backdrop-blur-sm"
                           whileTap={{ scale: 0.95 }}
-                          transition={ANIMATION_CONSTANTS.SPRING_DEFAULT}
+                          transition={springDefault}
                         >
                           <Icon
                             className={`${UI_CLASSES.ICON_SM} flex-shrink-0 text-accent`}
@@ -311,11 +319,11 @@ function HomePageClientComponent({
                           y: -2,
                           borderColor: 'hsl(var(--accent) / 0.3)',
                           backgroundColor: 'hsl(var(--accent) / 0.05)',
-                          transition: ANIMATION_CONSTANTS.SPRING_DEFAULT,
+                          transition: springDefault,
                         }}
                         whileTap={{
                           scale: 0.98,
-                          transition: ANIMATION_CONSTANTS.SPRING_DEFAULT,
+                          transition: springDefault,
                         }}
                       >
                         <Icon
@@ -352,6 +360,7 @@ function HomePageClientComponent({
             categories={featuredByCategory || initialData}
             categoryConfigs={categoryConfigs}
             featuredJobs={featuredJobs}
+            featuredCategories={featuredCategories}
           />
         )}
 

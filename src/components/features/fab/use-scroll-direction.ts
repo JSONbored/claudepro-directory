@@ -27,8 +27,9 @@ let DEFAULT_SCROLL_HYSTERESIS = 50;
 // Load config from Statsig on module initialization
 timeoutConfigs()
   .then((config: Record<string, unknown>) => {
-    DEFAULT_SCROLL_THRESHOLD = (config['timeout.scroll_detection_threshold_ms'] as number) ?? 100;
-    DEFAULT_SCROLL_HYSTERESIS = (config['timeout.scroll_detection_hysteresis_ms'] as number) ?? 50;
+    DEFAULT_SCROLL_THRESHOLD =
+      (config['timeout.ui.scroll_direction_threshold_px'] as number) ?? 100;
+    DEFAULT_SCROLL_HYSTERESIS = (config['timeout.ui.scroll_hysteresis_px'] as number) ?? 10;
   })
   .catch(() => {
     // Use defaults if config load fails

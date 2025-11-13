@@ -66,32 +66,6 @@ export { ALL_CATEGORY_IDS as getAllCategoryIds };
 export { HOMEPAGE_CATEGORY_IDS as getHomepageCategoryIds };
 export { CACHEABLE_CATEGORY_IDS as getCacheableCategoryIds };
 
-export const HOMEPAGE_FEATURED_CATEGORIES = [
-  'agents',
-  'mcp',
-  'commands',
-  'rules',
-  'skills',
-  'collections',
-  'hooks',
-  'statuslines',
-] as const satisfies readonly CategoryId[];
-export const HOMEPAGE_TAB_CATEGORIES = [
-  'all',
-  'agents',
-  'mcp',
-  'commands',
-  'rules',
-  'hooks',
-  'statuslines',
-  'collections',
-  'guides',
-  'community',
-] as const;
-
-export type HomepageFeaturedCategory = (typeof HOMEPAGE_FEATURED_CATEGORIES)[number];
-export type HomepageTabCategory = (typeof HOMEPAGE_TAB_CATEGORIES)[number];
-
 /**
  * Get category stats config (static, no database query)
  * Cached with React cache() for request-level deduplication
@@ -118,32 +92,26 @@ export const NEWSLETTER_CTA_CONFIG = {
   footerText: 'No spam. Unsubscribe anytime.',
 } as const;
 
-/**
- * Get homepage featured categories from Statsig Dynamic Configs
- * Falls back to hardcoded HOMEPAGE_FEATURED_CATEGORIES if unavailable
- */
+/** Get homepage featured categories from Statsig homepageConfigs */
 export async function getHomepageFeaturedCategories(): Promise<readonly CategoryId[]> {
   try {
     const { homepageConfigs } = await import('@/src/lib/flags');
     const config = await homepageConfigs();
     const categories = config['homepage.featured_categories'] as string[];
-    return (categories ?? HOMEPAGE_FEATURED_CATEGORIES) as readonly CategoryId[];
+    return categories as readonly CategoryId[];
   } catch {
-    return HOMEPAGE_FEATURED_CATEGORIES;
+    return [];
   }
 }
 
-/**
- * Get homepage tab categories from Statsig Dynamic Configs
- * Falls back to hardcoded HOMEPAGE_TAB_CATEGORIES if unavailable
- */
+/** Get homepage tab categories from Statsig homepageConfigs */
 export async function getHomepageTabCategories(): Promise<readonly string[]> {
   try {
     const { homepageConfigs } = await import('@/src/lib/flags');
     const config = await homepageConfigs();
     const categories = config['homepage.tab_categories'] as string[];
-    return (categories ?? HOMEPAGE_TAB_CATEGORIES) as readonly string[];
+    return categories as readonly string[];
   } catch {
-    return HOMEPAGE_TAB_CATEGORIES;
+    return [];
   }
 }

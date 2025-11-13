@@ -33,9 +33,19 @@ function useDebounce<T>(value: T, delay: number): T {
 export function DuplicateWarning({ contentType: _contentType, name }: DuplicateWarningProps) {
   const [checking, setChecking] = useState(false);
   const [warning, setWarning] = useState<string | null>(null);
+  const [debounceMs, setDebounceMs] = useState(300);
 
-  // Debounce name input (500ms)
-  const debouncedName = useDebounce(name, 500);
+  // Load debounce value from config
+  useState(() => {
+    import('@/src/lib/flags').then(({ timeoutConfigs }) =>
+      timeoutConfigs().then((config) => {
+        const ms = (config['timeout.ui.form_debounce_ms'] as number) || 300;
+        setDebounceMs(ms);
+      })
+    );
+  });
+
+  const debouncedName = useDebounce(name, debounceMs);
 
   useEffect(() => {
     if (!debouncedName || debouncedName.length < 3) {

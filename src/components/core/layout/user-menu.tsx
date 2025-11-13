@@ -37,7 +37,7 @@ import {
 } from '@/src/components/primitives/ui/dropdown-menu';
 import { Activity, BookOpen, LogOut, Settings, User as UserIcon } from '@/src/lib/icons';
 import { createClient } from '@/src/lib/supabase/client';
-import { ANIMATION_CONSTANTS, DIMENSIONS, UI_CLASSES } from '@/src/lib/ui-constants';
+import { DIMENSIONS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { toasts } from '@/src/lib/utils/toast.utils';
 
 interface UserMenuProps {
@@ -48,6 +48,11 @@ export function UserMenu({ className }: UserMenuProps) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [signingOut, setSigningOut] = useState(false);
+  const [springDefault, setSpringDefault] = useState({
+    type: 'spring' as const,
+    stiffness: 400,
+    damping: 17,
+  });
   const router = useRouter();
   const supabase = createClient();
 
@@ -81,6 +86,19 @@ export function UserMenu({ className }: UserMenuProps) {
       subscription.unsubscribe();
     };
   }, [supabase]);
+
+  useEffect(() => {
+    import('@/src/lib/flags')
+      .then(({ animationConfigs }) => animationConfigs())
+      .then((config) => {
+        setSpringDefault({
+          type: 'spring' as const,
+          stiffness: (config['animation.spring.default.stiffness'] as number) ?? 400,
+          damping: (config['animation.spring.default.damping'] as number) ?? 17,
+        });
+      })
+      .catch(() => {});
+  }, []);
 
   const handleSignOut = async () => {
     setSigningOut(true);
@@ -149,7 +167,7 @@ export function UserMenu({ className }: UserMenuProps) {
           <motion.div
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
-            transition={ANIMATION_CONSTANTS.SPRING_DEFAULT}
+            transition={springDefault}
           >
             <Button
               variant="ghost"

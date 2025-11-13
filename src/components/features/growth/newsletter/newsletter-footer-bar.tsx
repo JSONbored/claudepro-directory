@@ -26,25 +26,7 @@ export function NewsletterFooterBar({
   const pathname = usePathname();
   const [isVisible, setIsVisible] = useState(false);
   const [isClient, setIsClient] = useState(false);
-  const [pagesWithInlineCTA, setPagesWithInlineCTA] = useState<string[]>([
-    '/',
-    '/trending',
-    '/guides',
-    '/changelog',
-    '/community',
-    '/companies',
-    '/jobs',
-    '/partner',
-    '/submit',
-    '/tools/config-recommender',
-    '/agents/',
-    '/mcp/',
-    '/rules/',
-    '/commands/',
-    '/hooks/',
-    '/statuslines/',
-    '/collections/',
-  ]);
+  const [pagesWithInlineCTA, setPagesWithInlineCTA] = useState<string[]>([]);
   const [delayMs, setDelayMs] = useState(showAfterDelay ?? 30000);
 
   useEffect(() => {

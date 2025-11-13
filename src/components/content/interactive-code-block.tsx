@@ -189,7 +189,10 @@ export function ProductionCodeBlock({
       return;
     }
 
-    setTimeout(() => setIsCopied(false), 2000);
+    const { timeoutConfigs } = await import('@/src/lib/flags');
+    const config = await timeoutConfigs();
+    const resetDelay = (config['timeout.ui.clipboard_reset_delay_ms'] as number) || 2000;
+    setTimeout(() => setIsCopied(false), resetDelay);
   };
 
   /**

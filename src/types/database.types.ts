@@ -3077,7 +3077,24 @@ export type Database = {
         Args: { p_category: string; p_slug: string }
         Returns: Json
       }
+      build_job_deleted_embed: {
+        Args: {
+          p_job_id: string
+          p_old_status: Database["public"]["Enums"]["job_status"]
+        }
+        Returns: Json
+      }
+      build_job_expiration_embed: { Args: { p_job_id: string }; Returns: Json }
       build_job_posting_schema: { Args: { p_job_id: string }; Returns: Json }
+      build_job_status_change_embed: {
+        Args: {
+          p_job_id: string
+          p_new_status: Database["public"]["Enums"]["job_status"]
+          p_old_status: Database["public"]["Enums"]["job_status"]
+        }
+        Returns: Json
+      }
+      build_job_submission_embed: { Args: { p_job_id: string }; Returns: Json }
       build_learning_resource_schema: {
         Args: { p_category: string; p_slug: string }
         Returns: Json
@@ -3104,6 +3121,10 @@ export type Database = {
         }
         Returns: number
       }
+      calculate_job_pricing: {
+        Args: { p_plan: string; p_tier: string }
+        Returns: number
+      }
       calculate_tag_similarity: {
         Args: { p_tags_a: string[]; p_tags_b: string[] }
         Returns: number
@@ -3118,6 +3139,19 @@ export type Database = {
           max_bloat_ratio: number
           needs_vacuum: boolean
         }[]
+      }
+      create_job_with_payment: {
+        Args: {
+          p_job_data: Json
+          p_plan?: string
+          p_tier?: string
+          p_user_id: string
+        }
+        Returns: Json
+      }
+      delete_job: {
+        Args: { p_job_id: string; p_user_id: string }
+        Returns: Json
       }
       diagnose_failing_section: {
         Args: { p_section_index: number; p_slug: string }
@@ -3176,6 +3210,7 @@ export type Database = {
         Args: { p_slug: string; p_title: string }
         Returns: Json
       }
+      generate_company_slug: { Args: { p_name: string }; Returns: string }
       generate_content_atom_feed: {
         Args: { p_category?: string; p_limit?: number }
         Returns: string
@@ -3675,6 +3710,10 @@ export type Database = {
           title: string
           url: string
         }[]
+      }
+      get_or_create_company: {
+        Args: { p_company_name: string; p_user_id: string }
+        Returns: string
       }
       get_pending_resend_syncs: {
         Args: { p_limit?: number }
@@ -4320,6 +4359,14 @@ export type Database = {
         }
         Returns: Json
       }
+      toggle_job_status: {
+        Args: {
+          p_job_id: string
+          p_new_status: Database["public"]["Enums"]["job_status"]
+          p_user_id: string
+        }
+        Returns: Json
+      }
       toggle_review_helpful: {
         Args: { p_helpful: boolean; p_review_id: string; p_user_id: string }
         Returns: Json
@@ -4338,6 +4385,10 @@ export type Database = {
         Returns: Json
       }
       unlink_oauth_provider: { Args: { p_provider: string }; Returns: Json }
+      update_job: {
+        Args: { p_job_id: string; p_updates: Json; p_user_id: string }
+        Returns: Json
+      }
       update_user_profile: {
         Args: {
           p_bio?: string

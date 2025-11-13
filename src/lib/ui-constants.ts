@@ -791,13 +791,8 @@ export const POSITION_PATTERNS = {
  * </motion.div>
  * ```
  */
-/** Motion animation constants - spring physics tunable via Statsig animationConfigs */
+/** Motion animation constants - easing and durations only (spring physics from animationConfigs) */
 export const ANIMATION_CONSTANTS = {
-  // ----- Spring Physics -----
-  SPRING_DEFAULT: { type: 'spring' as const, stiffness: 400, damping: 17 },
-  SPRING_BOUNCY: { type: 'spring' as const, stiffness: 500, damping: 20 },
-  SPRING_SMOOTH: { type: 'spring' as const, stiffness: 300, damping: 25 },
-
   // ----- Duration (for non-spring animations) -----
   DURATION_FAST: 0.15,
   DURATION_DEFAULT: 0.2,
@@ -977,36 +972,8 @@ export const BADGE_COLORS = {
 } as const;
 
 // ==========================================
-// SECTION 9: CARD BEHAVIORS & ICON MAPPING
+// SECTION 9: ICON MAPPING
 // ==========================================
-
-/** Card behavior patterns - defaults tunable via Statsig componentConfigs */
-export const CARD_BEHAVIORS = {
-  default: {
-    primaryAction: 'copy' as const,
-    showCopyButton: true,
-    showBookmark: true,
-    showViewCount: true,
-    showCopyCount: true,
-    showRating: false,
-  },
-  code: {
-    primaryAction: 'copy' as const,
-    showCopyButton: true,
-    showBookmark: true,
-    showViewCount: true,
-    showCopyCount: true,
-    showRating: false,
-  },
-  link: {
-    primaryAction: 'link' as const,
-    showCopyButton: false,
-    showBookmark: true,
-    showViewCount: true,
-    showCopyCount: false,
-    showRating: true,
-  },
-} as const;
 
 /**
  * ICON_NAME_MAP - Static icon name mapping
@@ -1046,7 +1013,6 @@ export type PositionPatternKey = keyof typeof POSITION_PATTERNS;
 export type BreakpointKey = keyof typeof BREAKPOINTS;
 export type ContainerBreakpointKey = keyof typeof CONTAINER_BREAKPOINTS;
 export type ViewportPresetKey = keyof typeof VIEWPORT_PRESETS;
-export type CardBehaviorKey = keyof typeof CARD_BEHAVIORS;
 export type JobType = keyof typeof BADGE_COLORS.jobType;
 export type DifficultyLevel = keyof typeof BADGE_COLORS.difficulty;
 export type CollectionType = keyof typeof BADGE_COLORS.collectionType;

@@ -194,8 +194,9 @@ export default async function DetailPage({
   const copyCount = analytics?.copy_count || 0;
   const relatedItems = (response.related as ContentItem[]) || [];
 
-  // Check feature flag for tabbed detail pages
+  // Check feature flags
   const tabsEnabled = await featureFlags.contentDetailTabs();
+  const recentlyViewedEnabled = await featureFlags.recentlyViewed();
 
   // No transformation needed - displayTitle computed at build time
   // This eliminates runtime overhead and follows DRY principles
@@ -211,23 +212,25 @@ export default async function DetailPage({
       <UnifiedTracker variant="page-view" category={category} slug={slug} />
       <StructuredData route={`/${category}/${slug}`} />
 
-      {/* Recently Viewed Tracking */}
-      <RecentlyViewedTracker
-        category={category as RecentlyViewedCategory}
-        slug={slug}
-        title={
-          ('display_title' in fullItem && fullItem.display_title) ||
-          ('title' in fullItem && fullItem.title) ||
-          slug
-        }
-        description={fullItem.description}
-        {...('tags' in fullItem &&
-        Array.isArray(fullItem.tags) &&
-        fullItem.tags.length > 0 &&
-        fullItem.tags.every((tag) => typeof tag === 'string')
-          ? { tags: (fullItem.tags as string[]).slice(0, 3) }
-          : {})}
-      />
+      {/* Recently Viewed Tracking - gated by feature flag */}
+      {recentlyViewedEnabled && (
+        <RecentlyViewedTracker
+          category={category as RecentlyViewedCategory}
+          slug={slug}
+          title={
+            ('display_title' in fullItem && fullItem.display_title) ||
+            ('title' in fullItem && fullItem.title) ||
+            slug
+          }
+          description={fullItem.description}
+          {...('tags' in fullItem &&
+          Array.isArray(fullItem.tags) &&
+          fullItem.tags.length > 0 &&
+          fullItem.tags.every((tag) => typeof tag === 'string')
+            ? { tags: (fullItem.tags as string[]).slice(0, 3) }
+            : {})}
+        />
+      )}
 
       <UnifiedDetailPage
         item={fullItem || itemData}

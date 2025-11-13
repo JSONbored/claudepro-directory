@@ -12,7 +12,7 @@
  */
 
 import { motion } from 'motion/react';
-import { useId, useState, useTransition } from 'react';
+import { useEffect, useId, useState, useTransition } from 'react';
 import { z } from 'zod';
 import { Button } from '@/src/components/primitives/ui/button';
 import { Card, CardContent } from '@/src/components/primitives/ui/card';
@@ -137,6 +137,36 @@ export function SubmitFormClient({ formConfig }: SubmitFormClientProps) {
     status: string;
     message: string;
   } | null>(null);
+
+  /** Animation configs */
+  const [springSmooth, setSpringSmooth] = useState({
+    type: 'spring' as const,
+    stiffness: 300,
+    damping: 25,
+  });
+  const [springBouncy, setSpringBouncy] = useState({
+    type: 'spring' as const,
+    stiffness: 500,
+    damping: 20,
+  });
+
+  useEffect(() => {
+    import('@/src/lib/flags')
+      .then(({ animationConfigs }) => animationConfigs())
+      .then((config) => {
+        setSpringSmooth({
+          type: 'spring' as const,
+          stiffness: (config['animation.spring.smooth.stiffness'] as number) ?? 300,
+          damping: (config['animation.spring.smooth.damping'] as number) ?? 25,
+        });
+        setSpringBouncy({
+          type: 'spring' as const,
+          stiffness: (config['animation.spring.bouncy.stiffness'] as number) ?? 500,
+          damping: (config['animation.spring.bouncy.damping'] as number) ?? 20,
+        });
+      })
+      .catch(() => {});
+  }, []);
 
   /**
    * Single ID prefix for ALL form fields
@@ -394,7 +424,7 @@ export function SubmitFormClient({ formConfig }: SubmitFormClientProps) {
         <motion.div
           initial={{ opacity: 0, scale: 0.9, y: -20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
-          transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+          transition={springSmooth}
         >
           <Card className={'mb-6 border-green-500/20 bg-green-500/5'}>
             <CardContent className={'pt-6'}>
@@ -402,7 +432,7 @@ export function SubmitFormClient({ formConfig }: SubmitFormClientProps) {
                 <motion.div
                   initial={{ scale: 0, rotate: -180 }}
                   animate={{ scale: 1, rotate: 0 }}
-                  transition={{ type: 'spring', stiffness: 500, damping: 15, delay: 0.2 }}
+                  transition={{ ...springBouncy, delay: 0.2 }}
                 >
                   <CheckCircle
                     className={`h-6 w-6 text-green-500 ${UI_CLASSES.FLEX_SHRINK_0_MT_0_5}`}
@@ -525,7 +555,7 @@ export function SubmitFormClient({ formConfig }: SubmitFormClientProps) {
                     className="-translate-y-1/2 absolute top-1/2 right-3"
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
-                    transition={{ type: 'spring', stiffness: 500, damping: 15 }}
+                    transition={springBouncy}
                   >
                     <CheckCircle className={cn(UI_CLASSES.ICON_SM, UI_CLASSES.ICON_SUCCESS)} />
                   </motion.div>

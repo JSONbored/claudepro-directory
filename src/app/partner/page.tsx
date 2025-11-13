@@ -24,7 +24,7 @@ import {
   MousePointer,
   Sparkles,
 } from '@/src/lib/icons';
-import { ANIMATION_CONSTANTS, RESPONSIVE_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
+import { RESPONSIVE_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
 
 export default function PartnerPage() {
   const configCount = 282; // Static count for client component
@@ -35,17 +35,30 @@ export default function PartnerPage() {
     sponsoredRegular: 199,
     sponsoredDiscounted: 119,
   });
+  const [springDefault, setSpringDefault] = useState({
+    type: 'spring' as const,
+    stiffness: 400,
+    damping: 17,
+  });
 
-  // Load pricing from Statsig
+  // Load pricing and animation configs from Statsig
   useEffect(() => {
-    pricingConfigs()
-      .then((config) => {
+    Promise.all([
+      pricingConfigs(),
+      import('@/src/lib/flags').then(({ animationConfigs }) => animationConfigs()),
+    ])
+      .then(([pricingConfig, animConfig]) => {
         setPricing({
-          jobsRegular: (config['pricing.jobs.regular'] as number) ?? 249,
-          jobsDiscounted: (config['pricing.jobs.discounted'] as number) ?? 149,
-          jobsDurationDays: (config['pricing.jobs.duration_days'] as number) ?? 30,
-          sponsoredRegular: (config['pricing.sponsored.regular'] as number) ?? 199,
-          sponsoredDiscounted: (config['pricing.sponsored.discounted'] as number) ?? 119,
+          jobsRegular: (pricingConfig['pricing.jobs.regular'] as number) ?? 249,
+          jobsDiscounted: (pricingConfig['pricing.jobs.discounted'] as number) ?? 149,
+          jobsDurationDays: (pricingConfig['pricing.jobs.duration_days'] as number) ?? 30,
+          sponsoredRegular: (pricingConfig['pricing.sponsored.regular'] as number) ?? 199,
+          sponsoredDiscounted: (pricingConfig['pricing.sponsored.discounted'] as number) ?? 119,
+        });
+        setSpringDefault({
+          type: 'spring' as const,
+          stiffness: (animConfig['animation.spring.default.stiffness'] as number) ?? 400,
+          damping: (animConfig['animation.spring.default.damping'] as number) ?? 17,
         });
       })
       .catch(() => {
@@ -141,7 +154,7 @@ export default function PartnerPage() {
           <motion.div
             whileHover={{ y: -4, scale: 1.01 }}
             whileTap={{ scale: 0.99 }}
-            transition={ANIMATION_CONSTANTS.SPRING_DEFAULT}
+            transition={springDefault}
           >
             <Card className={'relative overflow-hidden border-2'}>
               <CardHeader>
@@ -218,7 +231,7 @@ export default function PartnerPage() {
           <motion.div
             whileHover={{ y: -4, scale: 1.01 }}
             whileTap={{ scale: 0.99 }}
-            transition={ANIMATION_CONSTANTS.SPRING_DEFAULT}
+            transition={springDefault}
           >
             <Card className={'relative overflow-hidden border-2'}>
               <CardHeader>

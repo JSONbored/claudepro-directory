@@ -30,7 +30,7 @@ let DEFAULT_PREFETCH_DELAY = 100;
 // Load config from Statsig on module initialization
 timeoutConfigs()
   .then((config: Record<string, unknown>) => {
-    DEFAULT_PREFETCH_DELAY = (config['timeout.prefetch_hover_ms'] as number) ?? 100;
+    DEFAULT_PREFETCH_DELAY = (config['timeout.ui.prefetch_delay_ms'] as number) ?? 300;
   })
   .catch(() => {
     // Use default if config load fails

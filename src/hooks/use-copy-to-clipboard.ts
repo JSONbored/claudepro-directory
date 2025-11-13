@@ -10,7 +10,8 @@ let DEFAULT_CLIPBOARD_RESET_DELAY = 2000;
 // Load config from Statsig on module initialization
 timeoutConfigs()
   .then((config: Record<string, unknown>) => {
-    DEFAULT_CLIPBOARD_RESET_DELAY = (config['timeout.clipboard_reset_ms'] as number) ?? 2000;
+    DEFAULT_CLIPBOARD_RESET_DELAY =
+      (config['timeout.ui.clipboard_reset_delay_ms'] as number) ?? 2000;
   })
   .catch(() => {
     // Use default if config load fails

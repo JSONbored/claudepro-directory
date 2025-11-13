@@ -9,7 +9,7 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { appSettings } from '@/src/lib/flags';
+import { appSettings, timeoutConfigs } from '@/src/lib/flags';
 import { logger } from '@/src/lib/logger';
 
 interface UseInfiniteScrollOptions {
@@ -121,11 +121,20 @@ export function useInfiniteScroll({
 
     setIsLoading(true);
 
-    // Small delay for smooth UX and to batch rapid scroll events
-    setTimeout(() => {
-      setDisplayCount((prev) => Math.min(prev + finalBatchSize, totalItems));
-      setIsLoading(false);
-    }, 100);
+    timeoutConfigs()
+      .then((config) => {
+        const delay = (config['timeout.ui.transition_ms'] as number) ?? 200;
+        setTimeout(() => {
+          setDisplayCount((prev) => Math.min(prev + finalBatchSize, totalItems));
+          setIsLoading(false);
+        }, delay);
+      })
+      .catch(() => {
+        setTimeout(() => {
+          setDisplayCount((prev) => Math.min(prev + finalBatchSize, totalItems));
+          setIsLoading(false);
+        }, 200);
+      });
   }, [isLoading, hasMore, finalBatchSize, totalItems]);
 
   /**

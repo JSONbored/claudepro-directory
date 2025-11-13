@@ -1,7 +1,4 @@
-/**
- * Homepage - Database-First Configuration Directory
- * All content from Supabase with ISR caching, dynamic category loading from PostgreSQL.
- */
+/** Homepage consuming homepageConfigs for runtime-tunable categories */
 
 import dynamicImport from 'next/dynamic';
 import { Suspense } from 'react';
@@ -34,14 +31,14 @@ const NewsletterCTAVariant = dynamicImport(
   }
 );
 
-import { getHomepageCategoryIds } from '@/src/lib/config/category-config';
+import { getHomepageFeaturedCategories } from '@/src/lib/config/category-config';
 import { logger } from '@/src/lib/logger';
 import { createAnonClient } from '@/src/lib/supabase/server-anon';
 import type { GetHomepageCompleteReturn } from '@/src/types/database-overrides';
 
 export const metadata = generatePageMetadata('/');
 
-export const revalidate = false; // Static + on-demand ISR via content trigger
+export const revalidate = false;
 
 interface HomePageProps {
   searchParams: Promise<{
@@ -52,12 +49,12 @@ interface HomePageProps {
 async function HomeContentSection({
   homepageContentData,
   featuredJobs,
+  categoryIds,
 }: {
   homepageContentData: GetHomepageCompleteReturn['content'];
   featuredJobs: GetHomepageCompleteReturn['featured_jobs'];
+  categoryIds: readonly string[];
 }) {
-  const categoryIds = getHomepageCategoryIds;
-
   try {
     return (
       <HomePageClient
@@ -88,10 +85,11 @@ async function HomeContentSection({
 export default async function HomePage({ searchParams }: HomePageProps) {
   await searchParams;
 
-  // Consolidated homepage data: get_homepage_complete() returns everything (67% fewer DB calls)
+  const categoryIds = await getHomepageFeaturedCategories();
+
   const supabase = createAnonClient();
   const { data: homepageData, error: homepageError } = await supabase.rpc('get_homepage_complete', {
-    p_category_ids: [...getHomepageCategoryIds],
+    p_category_ids: [...categoryIds],
   });
 
   if (homepageError) {
@@ -151,6 +149,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
                 }
               }
               featuredJobs={featuredJobs}
+              categoryIds={categoryIds}
             />
           </Suspense>
         </div>

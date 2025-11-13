@@ -16,8 +16,9 @@ import * as SheetPrimitive from '@radix-ui/react-dialog';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { motion, useDragControls } from 'motion/react';
 import type * as React from 'react';
+import { useEffect, useState } from 'react';
 import { X } from '@/src/lib/icons';
-import { ANIMATION_CONSTANTS, POSITION_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
+import { POSITION_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
 
 import { cn } from '@/src/lib/utils';
 
@@ -81,6 +82,24 @@ const SheetContent = ({
 }) => {
   // Drag controls for gesture handling
   const dragControls = useDragControls();
+  const [springSmooth, setSpringSmooth] = useState({
+    type: 'spring' as const,
+    stiffness: 300,
+    damping: 25,
+  });
+
+  useEffect(() => {
+    import('@/src/lib/flags')
+      .then(({ animationConfigs }) => animationConfigs())
+      .then((config) => {
+        setSpringSmooth({
+          type: 'spring' as const,
+          stiffness: (config['animation.spring.smooth.stiffness'] as number) ?? 300,
+          damping: (config['animation.spring.smooth.damping'] as number) ?? 25,
+        });
+      })
+      .catch(() => {});
+  }, []);
 
   // Ensure side has a default value for type safety
   const sheetSide = side || 'right';
@@ -145,7 +164,7 @@ const SheetContent = ({
           dragElastic={dragConfig.dragElastic}
           dragMomentum={false}
           onDragEnd={handleDragEnd}
-          transition={ANIMATION_CONSTANTS.SPRING_SMOOTH}
+          transition={springSmooth}
         >
           {children}
           <SheetPrimitive.Close

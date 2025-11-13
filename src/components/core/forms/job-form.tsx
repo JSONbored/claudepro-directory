@@ -26,13 +26,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/src/components/primitives/ui/select';
+import type { CreateJobInput } from '@/src/lib/actions/jobs.actions';
 import { ROUTES } from '@/src/lib/constants';
 import { Star } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { toasts } from '@/src/lib/utils/toast.utils';
-import type { Database } from '@/src/types/database.types';
-
-type CreateJobInput = Database['public']['Tables']['jobs']['Insert'];
 
 interface JobFormProps {
   initialData?: Partial<CreateJobInput>;
@@ -86,7 +84,7 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
       requirements,
       benefits,
       link: formData.get('link') as string,
-      plan: formData.get('plan') as string,
+      plan: formData.get('plan') as 'one-time' | 'subscription',
       tier: isFeatured ? 'featured' : 'standard',
       ...(contactEmail && { contact_email: contactEmail }),
       ...(companyLogo && { company_logo: companyLogo }),

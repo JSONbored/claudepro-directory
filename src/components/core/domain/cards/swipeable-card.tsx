@@ -31,7 +31,7 @@ import type { ReactNode } from 'react';
 import { useEffect, useState } from 'react';
 import { Bookmark, Copy as CopyIcon } from '@/src/lib/icons';
 import { SEMANTIC_COLORS } from '@/src/lib/semantic-colors';
-import { ANIMATION_CONSTANTS, POSITION_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
+import { POSITION_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
 
 interface SwipeableCardWrapperProps {
   children: ReactNode;
@@ -54,6 +54,11 @@ export function SwipeableCardWrapper({
 }: SwipeableCardWrapperProps) {
   const [isMobile, setIsMobile] = useState(false);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+  const [springSmooth, setSpringSmooth] = useState({
+    type: 'spring' as const,
+    stiffness: 300,
+    damping: 25,
+  });
 
   // Detect mobile and reduced motion preference
   useEffect(() => {
@@ -79,6 +84,19 @@ export function SwipeableCardWrapper({
       window.removeEventListener('resize', checkMobile);
       mediaQuery.removeEventListener('change', handleChange);
     };
+  }, []);
+
+  useEffect(() => {
+    import('@/src/lib/flags')
+      .then(({ animationConfigs }) => animationConfigs())
+      .then((config) => {
+        setSpringSmooth({
+          type: 'spring' as const,
+          stiffness: (config['animation.spring.smooth.stiffness'] as number) ?? 300,
+          damping: (config['animation.spring.smooth.damping'] as number) ?? 25,
+        });
+      })
+      .catch(() => {});
   }, []);
 
   // Motion values for drag tracking
@@ -150,7 +168,7 @@ export function SwipeableCardWrapper({
             x.set(0);
           }
         }}
-        transition={ANIMATION_CONSTANTS.SPRING_SMOOTH}
+        transition={springSmooth}
         className="relative z-10"
       >
         {children}

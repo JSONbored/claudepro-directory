@@ -5,6 +5,7 @@
 import { cva } from 'class-variance-authority';
 import { motion } from 'motion/react';
 import type * as React from 'react';
+import { useEffect, useState } from 'react';
 import {
   Tooltip,
   TooltipContent,
@@ -194,12 +195,18 @@ export type UnifiedBadgeProps =
  * BadgeWrapper - Wrap badges with hover animation
  * Extracted to module scope to avoid nested component definition
  */
-const BadgeWrapper = ({ children }: { children: React.ReactNode }) => (
+const BadgeWrapper = ({
+  children,
+  springDefault,
+}: {
+  children: React.ReactNode;
+  springDefault: { type: 'spring'; stiffness: number; damping: number };
+}) => (
   <motion.div
     className="inline-block"
     whileHover={{
       y: -2,
-      transition: ANIMATION_CONSTANTS.SPRING_DEFAULT,
+      transition: springDefault,
     }}
     whileTap={{ scale: 0.95 }}
   >
@@ -208,10 +215,28 @@ const BadgeWrapper = ({ children }: { children: React.ReactNode }) => (
 );
 
 export function UnifiedBadge(props: UnifiedBadgeProps) {
+  const [springDefault, setSpringDefault] = useState({
+    type: 'spring' as const,
+    stiffness: 400,
+    damping: 17,
+  });
+
+  useEffect(() => {
+    import('@/src/lib/flags')
+      .then(({ animationConfigs }) => animationConfigs())
+      .then((config) => {
+        setSpringDefault({
+          type: 'spring' as const,
+          stiffness: (config['animation.spring.default.stiffness'] as number) ?? 400,
+          damping: (config['animation.spring.default.damping'] as number) ?? 17,
+        });
+      })
+      .catch(() => {});
+  }, []);
   // Base badge variant
   if (props.variant === 'base') {
     return (
-      <BadgeWrapper>
+      <BadgeWrapper springDefault={springDefault}>
         <div
           className={cn(
             baseBadgeVariants({ variant: props.style }),
@@ -228,7 +253,7 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
   // Category badge variant
   if (props.variant === 'category') {
     return (
-      <BadgeWrapper>
+      <BadgeWrapper springDefault={springDefault}>
         <div
           className={cn(
             `border font-medium text-xs ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT} hover:shadow-md hover:shadow-primary/20`,
@@ -245,7 +270,7 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
   // Source badge variant
   if (props.variant === 'source') {
     return (
-      <BadgeWrapper>
+      <BadgeWrapper springDefault={springDefault}>
         <div
           className={cn(
             `border font-medium text-xs ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT} hover:shadow-md hover:shadow-primary/20`,
@@ -262,7 +287,7 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
   // Status badge variant
   if (props.variant === 'status') {
     return (
-      <BadgeWrapper>
+      <BadgeWrapper springDefault={springDefault}>
         <div
           className={cn(
             `border font-medium text-xs ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT} hover:shadow-md hover:shadow-primary/20`,
