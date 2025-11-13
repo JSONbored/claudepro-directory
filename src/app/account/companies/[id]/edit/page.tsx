@@ -9,7 +9,6 @@ import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';
 import type { Tables } from '@/src/types/database.types';
 
-
 export const metadata = generatePageMetadata('/account/companies/:id/edit');
 
 interface EditCompanyPageProps {

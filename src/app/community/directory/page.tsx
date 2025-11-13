@@ -4,7 +4,6 @@ import { ProfileSearchClient } from '@/src/components/features/community/profile
 import { Skeleton } from '@/src/components/primitives/feedback/loading-skeleton';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { cachedRPCWithDedupe } from '@/src/lib/supabase/cached-rpc';
-import { createClient } from '@/src/lib/supabase/server';
 import type { Tables } from '@/src/types/database.types';
 
 export const metadata = generatePageMetadata('/community/directory');
@@ -21,12 +20,16 @@ async function CommunityDirectoryContent({ searchQuery }: { searchQuery: string 
 
   const rpcParams = searchQuery ? { p_search_query: searchQuery, p_limit: 100 } : { p_limit: 100 };
 
-  const directoryData = await cachedRPCWithDedupe<DirectoryResponse>('get_community_directory', rpcParams, {
-    tags: ['community', 'users'],
-    ttlConfigKey: 'cache.community.ttl_seconds',
-    keySuffix: searchQuery || 'all',
-    useAuthClient: true,
-  });
+  const directoryData = await cachedRPCWithDedupe<DirectoryResponse>(
+    'get_community_directory',
+    rpcParams,
+    {
+      tags: ['community', 'users'],
+      ttlConfigKey: 'cache.community.ttl_seconds',
+      keySuffix: searchQuery || 'all',
+      useAuthClient: true,
+    }
+  );
 
   const { all_users, top_contributors, new_members } = directoryData || {
     all_users: [],

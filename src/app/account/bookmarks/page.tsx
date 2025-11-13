@@ -1,7 +1,6 @@
 import { redirect } from 'next/navigation';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 
-
 export const metadata = generatePageMetadata('/account/bookmarks');
 
 /**

@@ -10,6 +10,7 @@ import { z } from 'zod';
 import { authedAction } from '@/src/lib/actions/safe-action';
 import { cacheConfigs } from '@/src/lib/flags';
 import { logger } from '@/src/lib/logger';
+import { revalidateCacheTags } from '@/src/lib/supabase/cache-helpers';
 import { Constants, type Enums } from '@/src/types/database.types';
 
 // TypeScript types for RPC function returns (database validates, TypeScript trusts)
@@ -141,7 +142,7 @@ export const updateProfile = authedAction
       // Statsig-powered cache invalidation
       const config = await cacheConfigs();
       const invalidateTags = config['cache.invalidate.user_update'] as string[];
-      invalidateTags.forEach((tag) => revalidateTag(tag));
+      revalidateCacheTags(invalidateTags);
 
       return result;
     } catch (error) {
@@ -173,7 +174,7 @@ export const refreshProfileFromOAuth = authedAction
       // Statsig-powered cache invalidation
       const config = await cacheConfigs();
       const invalidateTags = config['cache.invalidate.user_profile_oauth'] as string[];
-      invalidateTags.forEach((tag) => revalidateTag(tag));
+      revalidateCacheTags(invalidateTags);
 
       return { success: true, message: 'Profile refreshed from OAuth provider' };
     } catch (error) {
@@ -215,7 +216,7 @@ export const addBookmark = authedAction
       // Statsig-powered cache invalidation
       const config = await cacheConfigs();
       const invalidateTags = config['cache.invalidate.bookmark_create'] as string[];
-      invalidateTags.forEach((tag) => revalidateTag(tag));
+      revalidateCacheTags(invalidateTags);
 
       return data as { success: boolean; bookmark: unknown };
     } catch (error) {
@@ -260,8 +261,8 @@ export const removeBookmark = authedAction
       // Statsig-powered cache invalidation + user-specific tag
       const config = await cacheConfigs();
       const invalidateTags = config['cache.invalidate.bookmark_delete'] as string[];
-      invalidateTags.forEach((tag) => revalidateTag(tag));
-      revalidateTag(`user-${userId}`);
+      revalidateCacheTags(invalidateTags);
+      revalidateTag(`user-${userId}`, 'default');
 
       return data as { success: boolean };
     } catch (error) {
@@ -337,8 +338,8 @@ export const addBookmarkBatch = authedAction
       // Statsig-powered cache invalidation + user-specific tag
       const config = await cacheConfigs();
       const invalidateTags = config['cache.invalidate.bookmark_create'] as string[];
-      invalidateTags.forEach((tag) => revalidateTag(tag));
-      revalidateTag(`user-${userId}`);
+      revalidateCacheTags(invalidateTags);
+      revalidateTag(`user-${userId}`, 'default');
 
       return result;
     } catch (error) {
@@ -384,7 +385,7 @@ export const toggleFollow = authedAction
       // Statsig-powered cache invalidation
       const config = await cacheConfigs();
       const invalidateTags = config['cache.invalidate.follow'] as string[];
-      invalidateTags.forEach((tag) => revalidateTag(tag));
+      revalidateCacheTags(invalidateTags);
 
       return data as { success: boolean; action: string };
     } catch (error) {
@@ -614,7 +615,7 @@ export const unlinkOAuthProvider = authedAction
       // Statsig-powered cache invalidation
       const config = await cacheConfigs();
       const invalidateTags = config['cache.invalidate.oauth_unlink'] as string[];
-      invalidateTags.forEach((tag) => revalidateTag(tag));
+      revalidateCacheTags(invalidateTags);
 
       return {
         success: true,

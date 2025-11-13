@@ -22,7 +22,6 @@ import { featureFlags } from '@/src/lib/flags';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { cachedRPCWithDedupe } from '@/src/lib/supabase/cached-rpc';
-import { createAnonClient } from '@/src/lib/supabase/server-anon';
 import type { Database } from '@/src/types/database.types';
 
 export const revalidate = false; // Static generation - zero database egress during serving
@@ -85,14 +84,18 @@ export async function generateMetadata({
   }
 
   // Use consolidated RPC for metadata (anon client for ISR/static generation)
-  const data = await cachedRPCWithDedupe('get_content_detail_complete', {
-    p_category: category,
-    p_slug: slug,
-  }, {
-    tags: ['content', `content-${slug}`],
-    ttlConfigKey: 'cache.content_detail.ttl_seconds',
-    keySuffix: `${category}-${slug}`,
-  });
+  const data = await cachedRPCWithDedupe(
+    'get_content_detail_complete',
+    {
+      p_category: category,
+      p_slug: slug,
+    },
+    {
+      tags: ['content', `content-${slug}`],
+      ttlConfigKey: 'cache.content_detail.ttl_seconds',
+      keySuffix: `${category}-${slug}`,
+    }
+  );
 
   const itemMeta = data ? (data as { content: ContentItem }).content : null;
 
@@ -102,7 +105,6 @@ export async function generateMetadata({
       slug,
       phase: 'generateMetadata',
       hasData: !!data,
-      hasError: !!error,
     });
   }
 
@@ -138,14 +140,18 @@ export default async function DetailPage({
   // Consolidated RPC: 2-3 calls → 1 (50-67% reduction)
   // get_content_detail_complete() includes: content + analytics + related items + collection items
   // Use anon client for ISR/static generation (no cookies/auth)
-  const detailData = await cachedRPCWithDedupe('get_content_detail_complete', {
-    p_category: category,
-    p_slug: slug,
-  }, {
-    tags: ['content', `content-${slug}`],
-    ttlConfigKey: 'cache.content_detail.ttl_seconds',
-    keySuffix: `${category}-${slug}`,
-  });
+  const detailData = await cachedRPCWithDedupe(
+    'get_content_detail_complete',
+    {
+      p_category: category,
+      p_slug: slug,
+    },
+    {
+      tags: ['content', `content-${slug}`],
+      ttlConfigKey: 'cache.content_detail.ttl_seconds',
+      keySuffix: `${category}-${slug}`,
+    }
+  );
 
   if (!detailData) {
     logger.warn('No content data returned from RPC', {

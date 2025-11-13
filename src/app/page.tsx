@@ -34,7 +34,6 @@ const NewsletterCTAVariant = dynamicImport(
 import { getHomepageFeaturedCategories } from '@/src/lib/config/category-config';
 import { logger } from '@/src/lib/logger';
 import { cachedRPCWithDedupe } from '@/src/lib/supabase/cached-rpc';
-import { createAnonClient } from '@/src/lib/supabase/server-anon';
 import type { GetHomepageCompleteReturn } from '@/src/types/database-overrides';
 
 export const metadata = generatePageMetadata('/');
@@ -102,9 +101,9 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   // Type-safe RPC return using centralized type definition
   const homepageResult = homepageData;
 
-  const memberCount = !homepageResult ? 0 : homepageResult.member_count || 0;
-  const featuredJobs = !homepageResult ? [] : homepageResult.featured_jobs || [];
-  const topContributors = !homepageResult ? [] : homepageResult.top_contributors || [];
+  const memberCount = homepageResult ? homepageResult.member_count || 0 : 0;
+  const featuredJobs = homepageResult ? homepageResult.featured_jobs || [] : [];
+  const topContributors = homepageResult ? homepageResult.top_contributors || [] : [];
 
   return (
     <div className={'min-h-screen bg-background'}>

@@ -43,7 +43,7 @@ export async function cachedRPC<T = unknown>(
 
   // Fetch TTL from Statsig
   const config = await cacheConfigs();
-  const ttl = config[ttlConfigKey] as number;
+  const ttl = (config as Record<string, unknown>)[ttlConfigKey] as number;
 
   // Generate cache key
   const cacheKey = keySuffix
@@ -54,7 +54,7 @@ export async function cachedRPC<T = unknown>(
     async () => {
       try {
         const supabase = useAuthClient ? await createClient() : createAnonClient();
-        const { data, error } = await supabase.rpc(functionName, params);
+        const { data, error } = await supabase.rpc(functionName as any, params);
 
         if (error) {
           logger.error(`RPC call failed: ${functionName}`, error, {

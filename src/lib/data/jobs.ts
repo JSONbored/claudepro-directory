@@ -14,11 +14,15 @@ export type Job = Database['public']['Tables']['jobs']['Row'];
  */
 export async function getJobs(): Promise<Job[]> {
   try {
-    const data = await cachedRPCWithDedupe<Job[]>('get_jobs_list', {}, {
-      tags: ['jobs'],
-      ttlConfigKey: 'cache.jobs.ttl_seconds',
-      keySuffix: 'all',
-    });
+    const data = await cachedRPCWithDedupe<Job[]>(
+      'get_jobs_list',
+      {},
+      {
+        tags: ['jobs'],
+        ttlConfigKey: 'cache.jobs.ttl_seconds',
+        keySuffix: 'all',
+      }
+    );
 
     return (data || []) as Job[];
   } catch (error) {
@@ -56,11 +60,15 @@ export async function getJobBySlug(slug: string): Promise<Job | undefined> {
 /** Get featured jobs via edge-cached RPC */
 export async function getFeaturedJobs(): Promise<Job[]> {
   try {
-    const data = await cachedRPCWithDedupe<Job[]>('get_featured_jobs', {}, {
-      tags: ['jobs'],
-      ttlConfigKey: 'cache.jobs.ttl_seconds',
-      keySuffix: 'featured',
-    });
+    const data = await cachedRPCWithDedupe<Job[]>(
+      'get_featured_jobs',
+      {},
+      {
+        tags: ['jobs'],
+        ttlConfigKey: 'cache.jobs.ttl_seconds',
+        keySuffix: 'featured',
+      }
+    );
 
     return (data || []) as Job[];
   } catch (error) {
@@ -99,11 +107,15 @@ export async function getJobsByCategory(category: string): Promise<Job[]> {
 /** Get jobs count via edge-cached RPC */
 export async function getJobsCount(): Promise<number> {
   try {
-    const data = await cachedRPCWithDedupe<number>('get_jobs_count', {}, {
-      tags: ['jobs'],
-      ttlConfigKey: 'cache.jobs.ttl_seconds',
-      keySuffix: 'count',
-    });
+    const data = await cachedRPCWithDedupe<number>(
+      'get_jobs_count',
+      {},
+      {
+        tags: ['jobs'],
+        ttlConfigKey: 'cache.jobs.ttl_seconds',
+        keySuffix: 'count',
+      }
+    );
 
     return data || 0;
   } catch (error) {

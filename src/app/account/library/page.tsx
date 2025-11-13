@@ -23,7 +23,6 @@ import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
-
 export const metadata = generatePageMetadata('/account/library');
 
 type Bookmark = {
@@ -72,7 +71,9 @@ export default async function LibraryPage() {
   const data = await getUserLibrary(user.id);
 
   if (!data) {
-    logger.error('Failed to load user library', new Error('Library data is null'), { userId: user.id });
+    logger.error('Failed to load user library', new Error('Library data is null'), {
+      userId: user.id,
+    });
     return (
       <div className="space-y-6">
         <h1 className="font-bold text-3xl">My Library</h1>

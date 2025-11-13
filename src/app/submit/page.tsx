@@ -22,10 +22,8 @@ const NewsletterCTAVariant = dynamic(
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
 import { TrendingUp } from '@/src/lib/icons';
-import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { cachedRPCWithDedupe } from '@/src/lib/supabase/cached-rpc';
-import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
 import type { Database } from '@/src/types/database.types';
@@ -86,14 +84,18 @@ export const metadata = generatePageMetadata('/submit');
 export const revalidate = false;
 
 export default async function SubmitPage() {
-  const result = await cachedRPCWithDedupe<SubmissionDashboardResult>('get_submission_dashboard', {
-    p_recent_limit: 5,
-    p_contributors_limit: 5,
-  }, {
-    tags: ['content', 'homepage'],
-    ttlConfigKey: 'cache.content_list.ttl_seconds',
-    useAuthClient: true,
-  });
+  const result = await cachedRPCWithDedupe<SubmissionDashboardResult>(
+    'get_submission_dashboard',
+    {
+      p_recent_limit: 5,
+      p_contributors_limit: 5,
+    },
+    {
+      tags: ['content', 'homepage'],
+      ttlConfigKey: 'cache.content_list.ttl_seconds',
+      useAuthClient: true,
+    }
+  );
 
   const stats = result?.stats || { total: 0, pending: 0, merged_this_week: 0 };
   const recentMerged = (

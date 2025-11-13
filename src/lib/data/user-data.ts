@@ -3,8 +3,8 @@
  * Centralized location for all user-specific data fetching
  */
 
-import { cachedRPCWithDedupe } from '@/src/lib/supabase/cached-rpc';
 import { logger } from '@/src/lib/logger';
+import { cachedRPCWithDedupe } from '@/src/lib/supabase/cached-rpc';
 
 /**
  * Get user account dashboard data (bookmarks, profile, tier)

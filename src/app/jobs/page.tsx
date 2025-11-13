@@ -24,7 +24,6 @@ import { logger } from '@/src/lib/logger';
 import type { PagePropsWithSearchParams } from '@/src/lib/schemas/app.schema';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { cachedRPCWithDedupe } from '@/src/lib/supabase/cached-rpc';
-import { createAnonClient } from '@/src/lib/supabase/server-anon';
 import { POSITION_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
 import type { Tables } from '@/src/types/database.types';
 
@@ -52,7 +51,6 @@ export async function generateMetadata({ searchParams }: PagePropsWithSearchPara
 
 export default async function JobsPage({ searchParams }: PagePropsWithSearchParams) {
   const rawParams = await searchParams;
-  const supabase = createAnonClient();
 
   const searchQuery =
     (rawParams?.q as string) || (rawParams?.query as string) || (rawParams?.search as string);

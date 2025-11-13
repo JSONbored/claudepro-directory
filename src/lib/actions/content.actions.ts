@@ -10,6 +10,7 @@ import { z } from 'zod';
 import { authedAction, rateLimitedAction } from '@/src/lib/actions/safe-action';
 import { cacheConfigs } from '@/src/lib/flags';
 import { logger } from '@/src/lib/logger';
+import { revalidateCacheTags } from '@/src/lib/supabase/cache-helpers';
 import { createClient } from '@/src/lib/supabase/server';
 import type { Tables } from '@/src/types/database.types';
 
@@ -138,7 +139,7 @@ export const createCollection = authedAction
       // Statsig-powered cache invalidation
       const config = await cacheConfigs();
       const invalidateTags = config['cache.invalidate.collection_create'] as string[];
-      invalidateTags.forEach((tag) => revalidateTag(tag));
+      revalidateCacheTags(invalidateTags);
 
       return result;
     } catch (error) {
@@ -183,7 +184,7 @@ export const updateCollection = authedAction
       // Statsig-powered cache invalidation
       const config = await cacheConfigs();
       const invalidateTags = config['cache.invalidate.collection_update'] as string[];
-      invalidateTags.forEach((tag) => revalidateTag(tag));
+      revalidateCacheTags(invalidateTags);
 
       return result;
     } catch (error) {
@@ -223,7 +224,7 @@ export const deleteCollection = authedAction
       // Statsig-powered cache invalidation
       const config = await cacheConfigs();
       const invalidateTags = config['cache.invalidate.collection_delete'] as string[];
-      invalidateTags.forEach((tag) => revalidateTag(tag));
+      revalidateCacheTags(invalidateTags);
 
       return data as { success: boolean };
     } catch (error) {
@@ -262,7 +263,7 @@ export const addItemToCollection = authedAction
     // Statsig-powered cache invalidation
     const config = await cacheConfigs();
     const invalidateTags = config['cache.invalidate.collection_items'] as string[];
-    invalidateTags.forEach((tag) => revalidateTag(tag));
+    revalidateCacheTags(invalidateTags);
 
     return data as unknown as { success: boolean; item: Tables<'collection_items'> };
   });
@@ -290,7 +291,7 @@ export const removeItemFromCollection = authedAction
     // Statsig-powered cache invalidation
     const config = await cacheConfigs();
     const invalidateTags = config['cache.invalidate.collection_items'] as string[];
-    invalidateTags.forEach((tag) => revalidateTag(tag));
+    revalidateCacheTags(invalidateTags);
 
     return data as { success: boolean };
   });
@@ -341,7 +342,7 @@ export const reorderCollectionItems = authedAction
     // Statsig-powered cache invalidation
     const config = await cacheConfigs();
     const invalidateTags = config['cache.invalidate.collection_items'] as string[];
-    invalidateTags.forEach((tag) => revalidateTag(tag));
+    revalidateCacheTags(invalidateTags);
 
     return {
       success: true,
@@ -384,8 +385,8 @@ export const createReview = authedAction
     // Statsig-powered cache invalidation + content-specific tags
     const config = await cacheConfigs();
     const invalidateTags = config['cache.invalidate.review_create'] as string[];
-    invalidateTags.forEach((tag) => revalidateTag(tag));
-    revalidateTag(`reviews:${content_type}:${content_slug}`);
+    revalidateCacheTags(invalidateTags);
+    revalidateTag(`reviews:${content_type}:${content_slug}`, 'default');
 
     logger.info('Review created', {
       userId: ctx.userId,
@@ -429,8 +430,8 @@ export const updateReview = authedAction
     // Statsig-powered cache invalidation + content-specific tags
     const config = await cacheConfigs();
     const invalidateTags = config['cache.invalidate.review_update'] as string[];
-    invalidateTags.forEach((tag) => revalidateTag(tag));
-    revalidateTag(`reviews:${content_type}:${content_slug}`);
+    revalidateCacheTags(invalidateTags);
+    revalidateTag(`reviews:${content_type}:${content_slug}`, 'default');
 
     logger.info('Review updated', {
       userId: ctx.userId,
@@ -472,8 +473,8 @@ export const deleteReview = authedAction
     // Statsig-powered cache invalidation + content-specific tags
     const config = await cacheConfigs();
     const invalidateTags = config['cache.invalidate.review_delete'] as string[];
-    invalidateTags.forEach((tag) => revalidateTag(tag));
-    revalidateTag(`reviews:${result.content_type}:${result.content_slug}`);
+    revalidateCacheTags(invalidateTags);
+    revalidateTag(`reviews:${result.content_type}:${result.content_slug}`, 'default');
 
     logger.info('Review deleted', {
       userId: ctx.userId,
@@ -508,8 +509,8 @@ export const markReviewHelpful = authedAction
     // Statsig-powered cache invalidation + content-specific tags
     const config = await cacheConfigs();
     const invalidateTags = config['cache.invalidate.review_helpful'] as string[];
-    invalidateTags.forEach((tag) => revalidateTag(tag));
-    revalidateTag(`reviews:${result.content_type}:${result.content_slug}`);
+    revalidateCacheTags(invalidateTags);
+    revalidateTag(`reviews:${result.content_type}:${result.content_slug}`, 'default');
 
     return { success: result.success, helpful: result.helpful };
   });
@@ -608,7 +609,7 @@ export const trackUsage = rateLimitedAction
     // Statsig-powered cache invalidation (usage counters need cache refresh)
     const config = await cacheConfigs();
     const invalidateTags = config['cache.invalidate.usage_tracking'] as string[];
-    invalidateTags.forEach((tag) => revalidateTag(tag));
+    revalidateCacheTags(invalidateTags);
 
     return { success: true };
   });

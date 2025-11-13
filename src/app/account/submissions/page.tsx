@@ -17,7 +17,6 @@ import { createClient } from '@/src/lib/supabase/server';
 import { BADGE_COLORS, type SubmissionStatusType, UI_CLASSES } from '@/src/lib/ui-constants';
 import type { Tables } from '@/src/types/database.types';
 
-
 export const metadata = generatePageMetadata('/account/submissions');
 
 export default async function SubmissionsPage() {
@@ -32,13 +31,13 @@ export default async function SubmissionsPage() {
   if (user) {
     // User-scoped edge-cached RPC via centralized data layer
     const data = await getUserDashboard(user.id);
-    if (!data) {
-      logger.error('Failed to fetch user dashboard', new Error('Dashboard data is null'));
-      hasError = true;
-    } else {
+    if (data) {
       // Trust database types - PostgreSQL validates structure
       const result = data as { submissions: Array<Tables<'submissions'>> };
       submissions = result.submissions || [];
+    } else {
+      logger.error('Failed to fetch user dashboard', new Error('Dashboard data is null'));
+      hasError = true;
     }
   }
 

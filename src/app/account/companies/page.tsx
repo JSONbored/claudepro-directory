@@ -25,7 +25,6 @@ import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { formatRelativeDate } from '@/src/lib/utils/data.utils';
 import type { Tables } from '@/src/types/database.types';
 
-
 export const metadata = generatePageMetadata('/account/companies');
 
 export default async function CompaniesPage() {
@@ -45,16 +44,13 @@ export default async function CompaniesPage() {
     // User-scoped edge-cached RPC via centralized data layer
     const data = await getUserCompanies(user.id);
 
-    if (!data) {
-      logger.error(
-        'Failed to fetch user companies',
-        new Error('Companies data is null')
-      );
-      hasError = true;
-    } else {
+    if (data) {
       // Trust database types - PostgreSQL validates structure
       const result = data as { companies: Array<Tables<'companies'>> };
       companies = result.companies || [];
+    } else {
+      logger.error('Failed to fetch user companies', new Error('Companies data is null'));
+      hasError = true;
     }
   }
 

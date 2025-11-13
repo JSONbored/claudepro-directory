@@ -5,8 +5,8 @@
  * Secure server-side RPC calls for newsletter operations
  */
 
-import { cachedRPCWithDedupe } from '@/src/lib/supabase/cached-rpc';
 import { logger } from '@/src/lib/logger';
+import { cachedRPCWithDedupe } from '@/src/lib/supabase/cached-rpc';
 
 /**
  * Get newsletter subscriber count with edge caching

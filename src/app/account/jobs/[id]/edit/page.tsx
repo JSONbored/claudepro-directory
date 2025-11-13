@@ -11,7 +11,6 @@ import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import type { Tables } from '@/src/types/database.types';
 
-
 export const metadata = generatePageMetadata('/account/jobs/:id/edit');
 
 interface EditJobPageProps {

@@ -23,7 +23,6 @@ import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import type { GetUserSettingsReturn } from '@/src/types/database-overrides';
 
-
 export const metadata = generatePageMetadata('/account/settings');
 
 export default async function SettingsPage() {

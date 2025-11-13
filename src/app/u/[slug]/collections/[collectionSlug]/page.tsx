@@ -79,11 +79,17 @@ async function getCollectionDetail(
     ...(viewerId && { p_viewer_id: viewerId }),
   };
 
-  const data = await cachedRPCWithDedupe<CollectionDetailData>('get_user_collection_detail', rpcParams, {
-    tags: ['collections', `collection-${collectionSlug}`, `user-${slug}`],
-    ttlConfigKey: 'cache.content_list.ttl_seconds',
-    keySuffix: viewerId ? `${slug}-${collectionSlug}-viewer-${viewerId}` : `${slug}-${collectionSlug}`,
-  });
+  const data = await cachedRPCWithDedupe<CollectionDetailData>(
+    'get_user_collection_detail',
+    rpcParams,
+    {
+      tags: ['collections', `collection-${collectionSlug}`, `user-${slug}`],
+      ttlConfigKey: 'cache.content_list.ttl_seconds',
+      keySuffix: viewerId
+        ? `${slug}-${collectionSlug}-viewer-${viewerId}`
+        : `${slug}-${collectionSlug}`,
+    }
+  );
 
   if (!data) {
     logger.warn('Collection detail not found', { slug, collectionSlug });

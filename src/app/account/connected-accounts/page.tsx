@@ -15,7 +15,6 @@ import { getUserIdentities } from '@/src/lib/actions/user.actions';
 
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 
-
 export async function generateMetadata() {
   return await generatePageMetadata('/account/connected-accounts');
 }

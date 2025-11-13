@@ -21,7 +21,6 @@ import { formatRelativeDate } from '@/src/lib/utils/data.utils';
 import type { Tables } from '@/src/types/database.types';
 import type { GetUserDashboardReturn } from '@/src/types/database-overrides';
 
-
 export const metadata = generatePageMetadata('/account/jobs');
 
 export default async function MyJobsPage() {

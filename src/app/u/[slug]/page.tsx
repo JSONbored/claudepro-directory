@@ -56,11 +56,15 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
     ...(currentUser?.id && { p_viewer_id: currentUser.id }),
   };
 
-  const profileData = await cachedRPCWithDedupe<GetUserProfileReturn>('get_user_profile', rpcParams, {
-    tags: ['users', `user-${slug}`],
-    ttlConfigKey: 'cache.user_profile.ttl_seconds',
-    keySuffix: currentUser?.id ? `${slug}-viewer-${currentUser.id}` : slug,
-  });
+  const profileData = await cachedRPCWithDedupe<GetUserProfileReturn>(
+    'get_user_profile',
+    rpcParams,
+    {
+      tags: ['users', `user-${slug}`],
+      ttlConfigKey: 'cache.user_profile.ttl_seconds',
+      keySuffix: currentUser?.id ? `${slug}-viewer-${currentUser.id}` : slug,
+    }
+  );
 
   if (!profileData) {
     logger.warn('User profile not found', { slug });

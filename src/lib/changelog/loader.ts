@@ -1,8 +1,8 @@
 /** Changelog entries loader via get_changelog_entries() RPC with edge-layer caching */
 
 import { z } from 'zod';
-import { cachedRPCWithDedupe } from '@/src/lib/supabase/cached-rpc';
 import { logger } from '@/src/lib/logger';
+import { cachedRPCWithDedupe } from '@/src/lib/supabase/cached-rpc';
 import type { Tables } from '@/src/types/database.types';
 import type { GetChangelogEntriesReturn } from '@/src/types/database-overrides';
 
@@ -62,9 +62,13 @@ export async function getChangelog(): Promise<GetChangelogEntriesReturn> {
       }
     );
 
-    return (
-      data || { entries: [], total: 0, limit: 1000, offset: 0, hasMore: false }
-    ) as GetChangelogEntriesReturn;
+    return (data || {
+      entries: [],
+      total: 0,
+      limit: 1000,
+      offset: 0,
+      hasMore: false,
+    }) as GetChangelogEntriesReturn;
   } catch (error) {
     logger.error(
       'Failed to load changelog',

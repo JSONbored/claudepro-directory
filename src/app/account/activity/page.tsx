@@ -11,7 +11,6 @@ import { FileText, GitPullRequest, MessageSquare, ThumbsUp } from '@/src/lib/ico
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
-
 export const metadata = generatePageMetadata('/account/activity');
 
 export default async function ActivityPage() {

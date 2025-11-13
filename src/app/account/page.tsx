@@ -16,7 +16,6 @@ import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
-
 export const metadata = generatePageMetadata('/account');
 
 export default async function AccountDashboard() {

@@ -5,14 +5,15 @@
  * Secure server-side RPC calls for event tracking
  */
 
-import { createClient } from '@/src/lib/supabase/server';
 import { logger } from '@/src/lib/logger';
+import { createClient } from '@/src/lib/supabase/server';
 
 interface TrackSponsoredEventData {
   sponsored_id: string;
   page_url?: string;
   position?: number;
   target_url?: string;
+  [key: string]: string | number | undefined;
 }
 
 /**

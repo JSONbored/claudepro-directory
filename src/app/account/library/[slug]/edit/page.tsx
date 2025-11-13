@@ -19,7 +19,6 @@ export async function generateMetadata({ params }: EditCollectionPageProps): Pro
   return generatePageMetadata('/account/library/:slug/edit', { params: { slug } });
 }
 
-
 export default async function EditCollectionPage({ params }: EditCollectionPageProps) {
   const { slug } = await params;
   const supabase = await createClient();

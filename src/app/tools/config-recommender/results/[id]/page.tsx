@@ -10,7 +10,6 @@ import { APP_CONFIG, ROUTES } from '@/src/lib/constants';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { cachedRPCWithDedupe } from '@/src/lib/supabase/cached-rpc';
-import { createClient } from '@/src/lib/supabase/server';
 
 function decodeQuizAnswers(encoded: string) {
   try {
@@ -80,7 +79,8 @@ export default async function ResultsPage({ params, searchParams }: PageProps) {
       algorithm: string;
       summary: {
         topCategory: string;
-        avgScore: number;
+        avgMatchScore: number;
+        diversityScore: number;
         topTags: string[];
       };
     };
@@ -94,39 +94,20 @@ export default async function ResultsPage({ params, searchParams }: PageProps) {
       p_limit: 20,
     };
 
-    const enrichedResult = await cachedRPCWithDedupe<RecommendationsResult>('get_recommendations', rpcParams, {
-      tags: ['content', 'quiz'],
-      ttlConfigKey: 'cache.quiz.ttl_seconds',
-      keySuffix: `${answers.useCase}-${answers.experienceLevel}-${answers.toolPreferences.join('-')}`,
-      useAuthClient: true,
-    });
+    const enrichedResult = await cachedRPCWithDedupe<RecommendationsResult>(
+      'get_recommendations',
+      rpcParams,
+      {
+        tags: ['content', 'quiz'],
+        ttlConfigKey: 'cache.quiz.ttl_seconds',
+        keySuffix: `${answers.useCase}-${answers.experienceLevel}-${answers.toolPreferences.join('-')}`,
+        useAuthClient: true,
+      }
+    );
 
     if (!enrichedResult) {
       throw new Error('No recommendations returned');
     }
-
-    const result = enrichedResult as {
-      results: Array<{
-        slug: string;
-        title: string;
-        description: string;
-        category: string;
-        tags: string[];
-        author: string;
-        match_score: number;
-        match_percentage: number;
-        primary_reason: string;
-        rank: number;
-        reasons: Array<{ type: string; message: string }>;
-      }>;
-      totalMatches: number;
-      algorithm: string;
-      summary: {
-        topCategory: string;
-        avgMatchScore: number;
-        diversityScore: number;
-      };
-    };
 
     const recommendations = {
       ...enrichedResult,

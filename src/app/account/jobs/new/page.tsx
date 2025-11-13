@@ -4,7 +4,6 @@ import { type CreateJobInput, createJob } from '@/src/lib/actions/jobs.actions';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
-
 export const metadata = generatePageMetadata('/account/jobs/new');
 
 export default function NewJobPage() {
