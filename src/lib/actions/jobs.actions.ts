@@ -5,9 +5,10 @@
  * Thin orchestration layer calling PostgreSQL RPC functions + Polar.sh API
  */
 
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, revalidateTag } from 'next/cache';
 import { z } from 'zod';
 import { authedAction } from '@/src/lib/actions/safe-action';
+import { cacheConfigs } from '@/src/lib/flags';
 import { logger } from '@/src/lib/logger';
 import { createClient } from '@/src/lib/supabase/server';
 import type { Database } from '@/src/types/database.types';
@@ -192,6 +193,11 @@ export const createJob = authedAction
       revalidatePath('/account/jobs');
       revalidatePath('/jobs');
 
+      // Statsig-powered cache invalidation
+      const config = await cacheConfigs();
+      const invalidateTags = config['cache.invalidate.job_create'] as string[];
+      invalidateTags.forEach((tag) => revalidateTag(tag));
+
       return {
         success: true,
         jobId: result.job_id,
@@ -259,6 +265,11 @@ export const updateJob = authedAction
       revalidatePath(`/account/jobs/${job_id}/edit`);
       revalidatePath('/jobs');
 
+      // Statsig-powered cache invalidation
+      const config = await cacheConfigs();
+      const invalidateTags = config['cache.invalidate.job_update'] as string[];
+      invalidateTags.forEach((tag) => revalidateTag(tag));
+
       return {
         success: true,
         jobId: result.job_id,
@@ -317,6 +328,11 @@ export const deleteJob = authedAction
 
       revalidatePath('/account/jobs');
       revalidatePath('/jobs');
+
+      // Statsig-powered cache invalidation
+      const config = await cacheConfigs();
+      const invalidateTags = config['cache.invalidate.job_delete'] as string[];
+      invalidateTags.forEach((tag) => revalidateTag(tag));
 
       return {
         success: true,
@@ -381,6 +397,11 @@ export const toggleJobStatus = authedAction
 
       revalidatePath('/account/jobs');
       revalidatePath('/jobs');
+
+      // Statsig-powered cache invalidation
+      const config = await cacheConfigs();
+      const invalidateTags = config['cache.invalidate.job_status'] as string[];
+      invalidateTags.forEach((tag) => revalidateTag(tag));
 
       return {
         success: true,
