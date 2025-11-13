@@ -1,10 +1,12 @@
 /**
  * Supabase Content Loader - Queries unified content table
+ * Uses Statsig-controlled cache TTLs for all queries
  */
 
 import { unstable_cache } from 'next/cache';
 import { cache } from 'react';
 import type { CategoryId } from '@/src/lib/config/category-config';
+import { cacheConfigs } from '@/src/lib/flags';
 import { logger } from '@/src/lib/logger';
 import { cachedRPCWithDedupe } from '@/src/lib/supabase/cached-rpc';
 import { createAnonClient } from '@/src/lib/supabase/server-anon';
@@ -69,6 +71,9 @@ export async function getContentByCategory(
 
 export const getContentBySlug = cache(
   async (category: CategoryId, slug: string): Promise<ContentItem | null> => {
+    const config = await cacheConfigs();
+    const ttl = config['cache.content_detail.ttl_seconds'] as number;
+
     return unstable_cache(
       () =>
         withErrorHandling(
@@ -89,7 +94,7 @@ export const getContentBySlug = cache(
         ),
       [`enriched-content-${category}-${slug}`],
       {
-        revalidate: 3600,
+        revalidate: ttl,
         tags: [`content-${category}`, `content-${category}-${slug}`],
       }
     )();
@@ -98,6 +103,9 @@ export const getContentBySlug = cache(
 
 export const getFullContentBySlug = cache(
   async (category: CategoryId, slug: string): Promise<FullContentItem | null> => {
+    const config = await cacheConfigs();
+    const ttl = config['cache.content_detail.ttl_seconds'] as number;
+
     return unstable_cache(
       () =>
         withErrorHandling(
@@ -116,12 +124,15 @@ export const getFullContentBySlug = cache(
           `getFullContentBySlug(${category}, ${slug})`
         ),
       [`content-full-${category}-${slug}`],
-      { revalidate: 3600, tags: [`content-${category}`, `content-${category}-${slug}`] }
+      { revalidate: ttl, tags: [`content-${category}`, `content-${category}-${slug}`] }
     )();
   }
 );
 
 export const getAllContent = cache(async (filters?: ContentFilters): Promise<ContentItem[]> => {
+  const config = await cacheConfigs();
+  const ttl = config['cache.content_list.ttl_seconds'] as number;
+
   return unstable_cache(
     () =>
       withErrorHandling(
@@ -176,11 +187,14 @@ export const getAllContent = cache(async (filters?: ContentFilters): Promise<Con
       filters?.ascending?.toString(),
       filters?.limit?.toString(),
     ].filter(Boolean) as string[],
-    { revalidate: 3600, tags: ['content-all'] }
+    { revalidate: ttl, tags: ['content-all'] }
   )();
 });
 
 export const getContentCount = cache(async (category?: CategoryId): Promise<number> => {
+  const config = await cacheConfigs();
+  const ttl = config['cache.content_list.ttl_seconds'] as number;
+
   return unstable_cache(
     () =>
       withErrorHandling(
@@ -197,13 +211,16 @@ export const getContentCount = cache(async (category?: CategoryId): Promise<numb
       ),
     [`content-count-${category || 'all'}`],
     {
-      revalidate: 3600,
+      revalidate: ttl,
       tags: category ? [`content-${category}`] : ['content-all'],
     }
   )();
 });
 
 export const getTrendingContent = cache(async (category?: CategoryId, limit = 20) => {
+  const config = await cacheConfigs();
+  const ttl = config['cache.content_list.ttl_seconds'] as number;
+
   return unstable_cache(
     () =>
       withErrorHandling(
@@ -232,7 +249,7 @@ export const getTrendingContent = cache(async (category?: CategoryId, limit = 20
       ),
     [`trending-${category || 'all'}-${limit}`],
     {
-      revalidate: 3600,
+      revalidate: ttl,
       tags: category ? [`trending-${category}`] : ['trending-all'],
     }
   )();
