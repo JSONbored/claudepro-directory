@@ -24,6 +24,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primi
 import { TrendingUp } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
+import { cachedRPCWithDedupe } from '@/src/lib/supabase/cached-rpc';
 import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
@@ -85,31 +86,14 @@ export const metadata = generatePageMetadata('/submit');
 export const revalidate = false;
 
 export default async function SubmitPage() {
-  const supabase = await createClient();
-
-  let data: unknown;
-  let error: unknown;
-
-  if (typeof supabase.rpc === 'function') {
-    ({ data, error } = await supabase.rpc('get_submission_dashboard', {
-      p_recent_limit: 5,
-      p_contributors_limit: 5,
-    }));
-  } else {
-    logger.warn(
-      'Supabase RPC unavailable (mock client fallback detected); using empty submission dashboard data.'
-    );
-  }
-
-  if (error) {
-    logger.error(
-      'Failed to fetch submission dashboard',
-      error instanceof Error ? error : new Error(String(error))
-    );
-  }
-
-  // Trust database types - PostgreSQL validates structure
-  const result = (data as SubmissionDashboardResult | null) || null;
+  const result = await cachedRPCWithDedupe<SubmissionDashboardResult>('get_submission_dashboard', {
+    p_recent_limit: 5,
+    p_contributors_limit: 5,
+  }, {
+    tags: ['content', 'homepage'],
+    ttlConfigKey: 'cache.content_list.ttl_seconds',
+    useAuthClient: true,
+  });
 
   const stats = result?.stats || { total: 0, pending: 0, merged_this_week: 0 };
   const recentMerged = (

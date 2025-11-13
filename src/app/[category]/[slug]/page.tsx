@@ -85,20 +85,14 @@ export async function generateMetadata({
   }
 
   // Use consolidated RPC for metadata (anon client for ISR/static generation)
-  const supabase = createAnonClient();
-  const { data, error } = await supabase.rpc('get_content_detail_complete', {
+  const data = await cachedRPCWithDedupe('get_content_detail_complete', {
     p_category: category,
     p_slug: slug,
+  }, {
+    tags: ['content', `content-${slug}`],
+    ttlConfigKey: 'cache.content_detail.ttl_seconds',
+    keySuffix: `${category}-${slug}`,
   });
-
-  if (error) {
-    logger.error('Build-time RPC error in generateMetadata', error, {
-      category,
-      slug,
-      phase: 'generateMetadata',
-      rpcFunction: 'get_content_detail_complete',
-    });
-  }
 
   const itemMeta = data ? (data as { content: ContentItem }).content : null;
 
@@ -144,24 +138,14 @@ export default async function DetailPage({
   // Consolidated RPC: 2-3 calls → 1 (50-67% reduction)
   // get_content_detail_complete() includes: content + analytics + related items + collection items
   // Use anon client for ISR/static generation (no cookies/auth)
-  const supabase = createAnonClient();
-  const { data: detailData, error: detailError } = await supabase.rpc(
-    'get_content_detail_complete',
-    {
-      p_category: category,
-      p_slug: slug,
-    }
-  );
-
-  if (detailError) {
-    logger.error('RPC error loading content detail', detailError, {
-      category,
-      slug,
-      rpcFunction: 'get_content_detail_complete',
-      phase: 'page-render',
-    });
-    notFound();
-  }
+  const detailData = await cachedRPCWithDedupe('get_content_detail_complete', {
+    p_category: category,
+    p_slug: slug,
+  }, {
+    tags: ['content', `content-${slug}`],
+    ttlConfigKey: 'cache.content_detail.ttl_seconds',
+    keySuffix: `${category}-${slug}`,
+  });
 
   if (!detailData) {
     logger.warn('No content data returned from RPC', {

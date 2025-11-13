@@ -19,6 +19,7 @@ import {
 import { FolderOpen, Globe, Users } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
+import { cachedRPCWithDedupe } from '@/src/lib/supabase/cached-rpc';
 import { createAnonClient } from '@/src/lib/supabase/server-anon';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import type { GetUserProfileReturn } from '@/src/types/database-overrides';
@@ -50,14 +51,16 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
 
   // Consolidated RPC: 4 calls → 1 (75% reduction)
   // get_user_profile() includes: profile + stats + posts + collections + contributions
-  const { data: profileData, error } = await supabase.rpc('get_user_profile', {
+  const rpcParams = {
     p_user_slug: slug,
     ...(currentUser?.id && { p_viewer_id: currentUser.id }),
-  });
+  };
 
-  if (error) {
-    logger.error('Failed to load user profile', error);
-  }
+  const profileData = await cachedRPCWithDedupe<GetUserProfileReturn>('get_user_profile', rpcParams, {
+    tags: ['users', `user-${slug}`],
+    ttlConfigKey: 'cache.user_profile.ttl_seconds',
+    keySuffix: currentUser?.id ? `${slug}-viewer-${currentUser.id}` : slug,
+  });
 
   if (!profileData) {
     logger.warn('User profile not found', { slug });
@@ -65,8 +68,7 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
   }
 
   // Type-safe RPC return using centralized type definition
-  const data = profileData as GetUserProfileReturn;
-  const { profile, stats, collections, contributions, isFollowing } = data;
+  const { profile, stats, collections, contributions, isFollowing } = profileData;
 
   const { followerCount, followingCount } = stats;
 

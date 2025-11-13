@@ -9,6 +9,7 @@ import { ResultsDisplay } from '@/src/components/features/tools/recommender/resu
 import { APP_CONFIG, ROUTES } from '@/src/lib/constants';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
+import { cachedRPCWithDedupe } from '@/src/lib/supabase/cached-rpc';
 import { createClient } from '@/src/lib/supabase/server';
 
 function decodeQuizAnswers(encoded: string) {
@@ -61,20 +62,50 @@ export default async function ResultsPage({ params, searchParams }: PageProps) {
   }
 
   try {
-    const supabase = await createClient();
+    type RecommendationsResult = {
+      results: Array<{
+        slug: string;
+        title: string;
+        description: string;
+        category: string;
+        tags: string[];
+        author: string;
+        match_score: number;
+        match_percentage: number;
+        primary_reason: string;
+        rank: number;
+        reasons: Array<{ type: string; message: string }>;
+      }>;
+      totalMatches: number;
+      algorithm: string;
+      summary: {
+        topCategory: string;
+        avgScore: number;
+        topTags: string[];
+      };
+    };
 
-    const { data: dbResult, error } = await supabase.rpc('get_recommendations', {
+    const rpcParams = {
       p_use_case: answers.useCase,
       p_experience_level: answers.experienceLevel,
       p_tool_preferences: answers.toolPreferences,
       p_integrations: answers.integrations || [],
       p_focus_areas: answers.focusAreas || [],
       p_limit: 20,
+    };
+
+    const enrichedResult = await cachedRPCWithDedupe<RecommendationsResult>('get_recommendations', rpcParams, {
+      tags: ['content', 'quiz'],
+      ttlConfigKey: 'cache.quiz.ttl_seconds',
+      keySuffix: `${answers.useCase}-${answers.experienceLevel}-${answers.toolPreferences.join('-')}`,
+      useAuthClient: true,
     });
 
-    if (error) throw new Error(error.message);
+    if (!enrichedResult) {
+      throw new Error('No recommendations returned');
+    }
 
-    const enrichedResult = dbResult as {
+    const result = enrichedResult as {
       results: Array<{
         slug: string;
         title: string;
