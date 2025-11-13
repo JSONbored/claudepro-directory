@@ -92,7 +92,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
     'get_homepage_complete',
     { p_category_ids: [...categoryIds] },
     {
-      tags: ['homepage', 'content'],
+      tags: ['homepage', 'content', 'trending'],
       ttlConfigKey: 'cache.homepage.ttl_seconds',
       keySuffix: categoryIds.join('-'),
     }

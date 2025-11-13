@@ -457,25 +457,35 @@ export const recentlyViewedConfigs = createDynamicConfigGroup('recently_viewed_c
  * Usage: const config = await cacheConfigs(); const ttl = config['cache.homepage.ttl_seconds'];
  */
 export const cacheConfigs = createDynamicConfigGroup('cache_configs', {
-  // TTL Settings (in seconds)
-  'cache.homepage.ttl_seconds': 300, // 5 minutes
-  'cache.content_detail.ttl_seconds': 1800, // 30 minutes
-  'cache.content_list.ttl_seconds': 600, // 10 minutes
-  'cache.config_detail.ttl_seconds': 1800, // 30 minutes
-  'cache.config_list.ttl_seconds': 600, // 10 minutes
-  'cache.tool_detail.ttl_seconds': 1800, // 30 minutes
-  'cache.tool_list.ttl_seconds': 600, // 10 minutes
+  // TTL Settings (in seconds) - Optimized for low-traffic sites
+  'cache.homepage.ttl_seconds': 3600, // 1 hour
+  'cache.content_detail.ttl_seconds': 7200, // 2 hours
+  'cache.content_list.ttl_seconds': 1800, // 30 minutes
+  'cache.content_trending.ttl_seconds': 1800, // 30 minutes
+  'cache.config_detail.ttl_seconds': 7200, // 2 hours
+  'cache.config_list.ttl_seconds': 1800, // 30 minutes
+  'cache.tool_detail.ttl_seconds': 7200, // 2 hours
+  'cache.tool_list.ttl_seconds': 1800, // 30 minutes
   'cache.company_detail.ttl_seconds': 1800, // 30 minutes
-  'cache.company_list.ttl_seconds': 600, // 10 minutes
-  'cache.user_profile.ttl_seconds': 600, // 10 minutes
-  'cache.community.ttl_seconds': 600, // 10 minutes
-  'cache.article.ttl_seconds': 1800, // 30 minutes
-  'cache.boilerplate.ttl_seconds': 1800, // 30 minutes
-  'cache.course.ttl_seconds': 1800, // 30 minutes
-  'cache.book.ttl_seconds': 1800, // 30 minutes
+  'cache.company_list.ttl_seconds': 1800, // 30 minutes
+  'cache.user_profile.ttl_seconds': 1800, // 30 minutes
+  'cache.user_activity.ttl_seconds': 900, // 15 minutes
+  'cache.user_stats.ttl_seconds': 1800, // 30 minutes
+  'cache.user_bookmarks.ttl_seconds': 300, // 5 minutes (feels real-time)
+  'cache.user_submissions.ttl_seconds': 300, // 5 minutes
+  'cache.user_reviews.ttl_seconds': 300, // 5 minutes
+  'cache.community.ttl_seconds': 1800, // 30 minutes
+  'cache.article.ttl_seconds': 7200, // 2 hours
+  'cache.boilerplate.ttl_seconds': 7200, // 2 hours
+  'cache.course.ttl_seconds': 7200, // 2 hours
+  'cache.book.ttl_seconds': 7200, // 2 hours
   'cache.quiz.ttl_seconds': 3600, // 1 hour
   'cache.search.ttl_seconds': 3600, // 1 hour
   'cache.jobs.ttl_seconds': 1800, // 30 minutes
+  'cache.jobs_detail.ttl_seconds': 1800, // 30 minutes
+  'cache.changelog.ttl_seconds': 3600, // 1 hour
+  'cache.changelog_detail.ttl_seconds': 7200, // 2 hours
+  'cache.announcements.ttl_seconds': 1800, // 30 minutes
 
   // Invalidation Tag Arrays
   'cache.invalidate.content_create': ['content', 'homepage', 'trending'] as string[],
