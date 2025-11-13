@@ -3,12 +3,13 @@
 /**
  * Newsletter Subscriber Count Hook
  * Provides live subscriber count with localStorage caching and visibility-based polling
+ * Uses secure server action for data fetching
  */
 
 import { useEffect, useRef, useState } from 'react';
+import { getNewsletterCount } from '@/src/lib/actions/newsletter.actions';
 import { cacheConfigs, pollingConfigs } from '@/src/lib/flags';
 import { logger } from '@/src/lib/logger';
-import { createClient } from '@/src/lib/supabase/client';
 
 export interface UseNewsletterCountReturn {
   count: number | null;
@@ -59,26 +60,22 @@ export function useNewsletterCount(): UseNewsletterCountReturn {
         }
       }
 
-      // Fetch from database
+      // Fetch from server action
       try {
-        const supabase = createClient();
-        // Type assertion: RPC function will be created by user running SQL
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const { data, error: rpcError } = await supabase.rpc(
-          'get_newsletter_subscriber_count' as any
-        );
+        const newCount = await getNewsletterCount();
 
-        if (rpcError) throw rpcError;
+        if (newCount !== null) {
+          setCount(newCount);
+          setIsLoading(false);
+          setError(null);
 
-        const newCount = data as number;
-        setCount(newCount);
-        setIsLoading(false);
-        setError(null);
-
-        // Update cache
-        if (typeof window !== 'undefined') {
-          localStorage.setItem(CACHE_KEY, newCount.toString());
-          localStorage.setItem(CACHE_TIMESTAMP_KEY, Date.now().toString());
+          // Update cache
+          if (typeof window !== 'undefined') {
+            localStorage.setItem(CACHE_KEY, newCount.toString());
+            localStorage.setItem(CACHE_TIMESTAMP_KEY, Date.now().toString());
+          }
+        } else {
+          throw new Error('Failed to fetch newsletter count');
         }
       } catch (err) {
         logger.error('Failed to fetch newsletter count', err as Error, {

@@ -97,25 +97,13 @@ function HomePageClientComponent({
       setIsLoadingAllConfigs(true);
 
       try {
-        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-        const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+        const { fetchPaginatedContent } = await import('@/src/lib/actions/content.actions');
 
-        if (!(supabaseUrl && supabaseKey)) {
-          throw new Error('Missing Supabase environment variables');
-        }
-
-        const url = `${supabaseUrl}/functions/v1/content-paginated?offset=${offset}&limit=${limit}&category=all`;
-        const response = await fetch(url, {
-          headers: {
-            Authorization: `Bearer ${supabaseKey}`,
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-
-        const newItems: ContentItem[] = await response.json();
+        const newItems = (await fetchPaginatedContent({
+          offset,
+          limit,
+          category: 'all',
+        })) as ContentItem[];
 
         if (newItems.length < limit) {
           setHasMoreAllConfigs(false);

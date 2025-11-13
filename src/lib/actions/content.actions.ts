@@ -612,3 +612,48 @@ export const trackUsage = rateLimitedAction
 
     return { success: true };
   });
+
+// ============================================
+// CONTENT FETCHING ACTIONS
+// ============================================
+
+/**
+ * Fetch paginated content from edge function
+ * Secure server-side wrapper for content-paginated edge function
+ */
+export async function fetchPaginatedContent(params: {
+  offset: number;
+  limit: number;
+  category: string;
+}): Promise<unknown[]> {
+  try {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+    if (!(supabaseUrl && supabaseKey)) {
+      throw new Error('Missing Supabase environment variables');
+    }
+
+    const url = `${supabaseUrl}/functions/v1/content-paginated?offset=${params.offset}&limit=${params.limit}&category=${params.category}`;
+    const response = await fetch(url, {
+      headers: {
+        Authorization: `Bearer ${supabaseKey}`,
+      },
+      next: { revalidate: 300 }, // 5 minute cache
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    return data as unknown[];
+  } catch (error) {
+    logger.error(
+      'Failed to fetch paginated content',
+      error instanceof Error ? error : new Error(String(error)),
+      params
+    );
+    return [];
+  }
+}
