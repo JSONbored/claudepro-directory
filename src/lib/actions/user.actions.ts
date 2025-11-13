@@ -8,6 +8,7 @@
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { z } from 'zod';
 import { authedAction } from '@/src/lib/actions/safe-action';
+import { cacheConfigs } from '@/src/lib/flags';
 import { logger } from '@/src/lib/logger';
 import { Constants, type Enums } from '@/src/types/database.types';
 
@@ -137,6 +138,11 @@ export const updateProfile = authedAction
       revalidatePath('/account');
       revalidatePath('/account/settings');
 
+      // Statsig-powered cache invalidation
+      const config = await cacheConfigs();
+      const invalidateTags = config['cache.invalidate.user_update'] as string[];
+      invalidateTags.forEach((tag) => revalidateTag(tag));
+
       return result;
     } catch (error) {
       logger.error(
@@ -163,6 +169,11 @@ export const refreshProfileFromOAuth = authedAction
       if (profile?.slug) revalidatePath(`/u/${profile.slug}`);
       revalidatePath('/account');
       revalidatePath('/account/settings');
+
+      // Statsig-powered cache invalidation
+      const config = await cacheConfigs();
+      const invalidateTags = config['cache.invalidate.user_profile_oauth'] as string[];
+      invalidateTags.forEach((tag) => revalidateTag(tag));
 
       return { success: true, message: 'Profile refreshed from OAuth provider' };
     } catch (error) {
@@ -200,6 +211,11 @@ export const addBookmark = authedAction
 
       revalidatePath('/account');
       revalidatePath('/account/library');
+
+      // Statsig-powered cache invalidation
+      const config = await cacheConfigs();
+      const invalidateTags = config['cache.invalidate.bookmark_create'] as string[];
+      invalidateTags.forEach((tag) => revalidateTag(tag));
 
       return data as { success: boolean; bookmark: unknown };
     } catch (error) {
@@ -240,7 +256,12 @@ export const removeBookmark = authedAction
 
       revalidatePath('/account');
       revalidatePath('/account/library');
-      revalidateTag(`user-${userId}`, 'max');
+
+      // Statsig-powered cache invalidation + user-specific tag
+      const config = await cacheConfigs();
+      const invalidateTags = config['cache.invalidate.bookmark_delete'] as string[];
+      invalidateTags.forEach((tag) => revalidateTag(tag));
+      revalidateTag(`user-${userId}`);
 
       return data as { success: boolean };
     } catch (error) {
@@ -312,7 +333,12 @@ export const addBookmarkBatch = authedAction
 
       revalidatePath('/account');
       revalidatePath('/account/library');
-      revalidateTag(`user-${userId}`, 'max');
+
+      // Statsig-powered cache invalidation + user-specific tag
+      const config = await cacheConfigs();
+      const invalidateTags = config['cache.invalidate.bookmark_create'] as string[];
+      invalidateTags.forEach((tag) => revalidateTag(tag));
+      revalidateTag(`user-${userId}`);
 
       return result;
     } catch (error) {
@@ -354,6 +380,11 @@ export const toggleFollow = authedAction
 
       revalidatePath(`/u/${slug}`);
       revalidatePath('/account');
+
+      // Statsig-powered cache invalidation
+      const config = await cacheConfigs();
+      const invalidateTags = config['cache.invalidate.follow'] as string[];
+      invalidateTags.forEach((tag) => revalidateTag(tag));
 
       return data as { success: boolean; action: string };
     } catch (error) {
@@ -579,6 +610,11 @@ export const unlinkOAuthProvider = authedAction
 
       // Revalidate account settings page
       revalidatePath('/account/settings');
+
+      // Statsig-powered cache invalidation
+      const config = await cacheConfigs();
+      const invalidateTags = config['cache.invalidate.oauth_unlink'] as string[];
+      invalidateTags.forEach((tag) => revalidateTag(tag));
 
       return {
         success: true,
