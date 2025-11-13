@@ -3,7 +3,12 @@
  */
 
 import type { Database } from '../_shared/database.types.ts';
-import { sendDiscordWebhook } from '../_shared/utils/discord.ts';
+import {
+  buildChangelogEmbed,
+  type ChangelogSection,
+  type GitHubCommit,
+  sendDiscordWebhook,
+} from '../_shared/utils/discord.ts';
 import {
   errorResponse,
   methodNotAllowedResponse,
@@ -46,23 +51,7 @@ interface VercelWebhookPayload {
   };
 }
 
-interface GitHubCommit {
-  sha: string;
-  commit: {
-    author: {
-      name: string;
-      email: string;
-      date: string;
-    };
-    message: string;
-  };
-  html_url: string;
-}
-
-interface ChangelogSection {
-  title: string;
-  items: string[];
-}
+// GitHubCommit and ChangelogSection interfaces imported from discord.ts
 
 /**
  * Fetch commits from GitHub API between two commit hashes
@@ -267,138 +256,7 @@ function generateSlug(date: string, title: string): string {
   return `${date}-${titleSlug}`;
 }
 
-/**
- * Send Discord announcement with beautiful changelog embed
- */
-async function sendDiscordAnnouncement(params: {
-  slug: string;
-  title: string;
-  tldr: string;
-  sections: ChangelogSection[];
-  commits: GitHubCommit[];
-  date: string;
-}): Promise<void> {
-  if (!DISCORD_WEBHOOK_URL) {
-    console.warn('DISCORD_CHANGELOG_WEBHOOK_URL not set, skipping Discord announcement');
-    return;
-  }
-
-  const { slug, title, tldr, sections, commits, date } = params;
-
-  const contributors = [...new Set(commits.map((c) => c.commit.author.name))];
-
-  // Count items by section
-  const addedCount = sections.find((s) => s.title === 'Added')?.items.length || 0;
-  const changedCount = sections.find((s) => s.title === 'Changed')?.items.length || 0;
-  const fixedCount = sections.find((s) => s.title === 'Fixed')?.items.length || 0;
-
-  // Build engaging description with highlights
-  const highlights = [];
-  if (addedCount > 0)
-    highlights.push(`✨ **${addedCount}** new feature${addedCount === 1 ? '' : 's'}`);
-  if (changedCount > 0)
-    highlights.push(`🔧 **${changedCount}** improvement${changedCount === 1 ? '' : 's'}`);
-  if (fixedCount > 0)
-    highlights.push(`🐛 **${fixedCount}** bug fix${fixedCount === 1 ? '' : 'es'}`);
-
-  const description = highlights.join(' • ');
-
-  // Build fields with actual changelog content
-  const fields = [];
-
-  // TL;DR section
-  if (tldr && tldr.length > 0) {
-    fields.push({
-      name: '📝 TL;DR',
-      value: tldr.slice(0, 300) + (tldr.length > 300 ? '...' : ''),
-      inline: false,
-    });
-  }
-
-  // Added section
-  const addedSection = sections.find((s) => s.title === 'Added');
-  if (addedSection && addedSection.items.length > 0) {
-    const items = addedSection.items.slice(0, 5); // Max 5 items
-    const value = items
-      .map((item) => `• ${item.slice(0, 80)}${item.length > 80 ? '...' : ''}`)
-      .join('\n');
-    fields.push({
-      name: "✨ What's New",
-      value:
-        value +
-        (addedSection.items.length > 5 ? `\n*...and ${addedSection.items.length - 5} more*` : ''),
-      inline: false,
-    });
-  }
-
-  // Changed section
-  const changedSection = sections.find((s) => s.title === 'Changed');
-  if (changedSection && changedSection.items.length > 0) {
-    const items = changedSection.items.slice(0, 5);
-    const value = items
-      .map((item) => `• ${item.slice(0, 80)}${item.length > 80 ? '...' : ''}`)
-      .join('\n');
-    fields.push({
-      name: '🔧 Improvements',
-      value:
-        value +
-        (changedSection.items.length > 5
-          ? `\n*...and ${changedSection.items.length - 5} more*`
-          : ''),
-      inline: false,
-    });
-  }
-
-  // Fixed section
-  const fixedSection = sections.find((s) => s.title === 'Fixed');
-  if (fixedSection && fixedSection.items.length > 0) {
-    const items = fixedSection.items.slice(0, 5);
-    const value = items
-      .map((item) => `• ${item.slice(0, 80)}${item.length > 80 ? '...' : ''}`)
-      .join('\n');
-    fields.push({
-      name: '🐛 Bug Fixes',
-      value:
-        value +
-        (fixedSection.items.length > 5 ? `\n*...and ${fixedSection.items.length - 5} more*` : ''),
-      inline: false,
-    });
-  }
-
-  // Stats footer field
-  const latestCommit = commits[commits.length - 1];
-  const commitUrl = `https://github.com/${GITHUB_REPO_OWNER}/${GITHUB_REPO_NAME}/commit/${latestCommit.sha}`;
-  const shortSha = latestCommit.sha.slice(0, 7);
-
-  fields.push({
-    name: '📊 Release Stats',
-    value: `${commits.length} commit${commits.length === 1 ? '' : 's'} • ${contributors.length} contributor${contributors.length === 1 ? '' : 's'}\n[View commit \`${shortSha}\` on GitHub](${commitUrl})`,
-    inline: false,
-  });
-
-  const embed = {
-    title: `📋 ${title}`,
-    description,
-    color: 0x3ba55d, // Green for releases
-    url: `${SITE_URL}/changelog/${slug}`,
-    fields,
-    footer: {
-      text: `Claude Pro Directory • Released ${date}`,
-      icon_url: 'https://claudepro.directory/favicon.ico',
-    },
-    timestamp: new Date().toISOString(),
-  };
-
-  await sendDiscordWebhook(
-    DISCORD_WEBHOOK_URL,
-    {
-      content: '🚀 **New Release Deployed!**',
-      embeds: [embed],
-    },
-    'changelog_announcement',
-    undefined // no related_id for changelog announcements
-  );
-}
+// sendDiscordAnnouncement moved to shared utility: buildChangelogEmbed() in discord.ts
 
 /**
  * Revalidate /changelog page
@@ -598,15 +456,18 @@ Deno.serve(async (req) => {
 
     // 14. Send Discord announcement
     try {
-      await sendDiscordAnnouncement({
-        slug,
-        title,
-        tldr,
-        sections,
-        commits,
-        date,
-      });
-      console.log('Discord announcement sent successfully');
+      if (DISCORD_WEBHOOK_URL) {
+        const embed = buildChangelogEmbed({ slug, title, tldr, sections, commits, date });
+        await sendDiscordWebhook(
+          DISCORD_WEBHOOK_URL,
+          { content: '🚀 **New Release Deployed!**', embeds: [embed] },
+          'changelog_announcement',
+          changelogEntry.id
+        );
+        console.log('Discord announcement sent successfully');
+      } else {
+        console.warn('DISCORD_CHANGELOG_WEBHOOK_URL not set, skipping Discord announcement');
+      }
     } catch (error) {
       console.error('Discord announcement failed (non-fatal):', error);
       // Don't fail the whole operation if Discord fails

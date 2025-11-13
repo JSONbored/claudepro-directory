@@ -1346,6 +1346,7 @@ export type Database = {
           contact_email: string | null
           created_at: string
           description: string
+          discord_message_id: string | null
           experience: string | null
           expires_at: string | null
           featured: boolean | null
@@ -1395,6 +1396,7 @@ export type Database = {
           contact_email?: string | null
           created_at?: string
           description: string
+          discord_message_id?: string | null
           experience?: string | null
           expires_at?: string | null
           featured?: boolean | null
@@ -1444,6 +1446,7 @@ export type Database = {
           contact_email?: string | null
           created_at?: string
           description?: string
+          discord_message_id?: string | null
           experience?: string | null
           expires_at?: string | null
           featured?: boolean | null
@@ -3084,6 +3087,7 @@ export type Database = {
         }
         Returns: Json
       }
+      build_job_discord_embed: { Args: { p_job_id: string }; Returns: Json }
       build_job_expiration_embed: { Args: { p_job_id: string }; Returns: Json }
       build_job_posting_schema: { Args: { p_job_id: string }; Returns: Json }
       build_job_status_change_embed: {
@@ -3143,8 +3147,8 @@ export type Database = {
       create_job_with_payment: {
         Args: {
           p_job_data: Json
-          p_plan?: string
-          p_tier?: string
+          p_plan: string
+          p_tier: string
           p_user_id: string
         }
         Returns: Json
@@ -3558,6 +3562,7 @@ export type Database = {
           contact_email: string | null
           created_at: string
           description: string
+          discord_message_id: string | null
           experience: string | null
           expires_at: string | null
           featured: boolean | null
@@ -3649,6 +3654,7 @@ export type Database = {
           contact_email: string | null
           created_at: string
           description: string
+          discord_message_id: string | null
           experience: string | null
           expires_at: string | null
           featured: boolean | null
@@ -4234,6 +4240,7 @@ export type Database = {
           contact_email: string | null
           created_at: string
           description: string
+          discord_message_id: string | null
           experience: string | null
           expires_at: string | null
           featured: boolean | null

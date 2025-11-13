@@ -199,6 +199,13 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
               <SelectItem value="marketing">Marketing</SelectItem>
               <SelectItem value="sales">Sales</SelectItem>
               <SelectItem value="support">Support</SelectItem>
+              <SelectItem value="research">Research</SelectItem>
+              <SelectItem value="data">Data</SelectItem>
+              <SelectItem value="operations">Operations</SelectItem>
+              <SelectItem value="leadership">Leadership</SelectItem>
+              <SelectItem value="consulting">Consulting</SelectItem>
+              <SelectItem value="education">Education</SelectItem>
+              <SelectItem value="other">Other</SelectItem>
             </FormField>
 
             <FormField
