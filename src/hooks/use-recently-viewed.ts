@@ -4,7 +4,7 @@
 
 import { useCallback, useEffect, useRef } from 'react';
 import { create } from 'zustand';
-import { recentlyViewedConfigs, timeoutConfigs } from '@/src/lib/flags';
+import { getRecentlyViewedConfig, getTimeoutConfig } from '@/src/lib/actions/feature-flags.actions';
 import { logger } from '@/src/lib/logger';
 
 export type RecentlyViewedCategory =
@@ -37,16 +37,16 @@ interface RecentlyViewedState {
 
 const STORAGE_KEY = 'heyclaude_recently_viewed';
 
-// Default values (will be overridden by Dynamic Configs)
+// Configuration (loaded from Statsig via server actions)
 let MAX_ITEMS = 10;
 let TTL_DAYS = 30;
 let DEBOUNCE_MS = 300;
 let MAX_DESCRIPTION_LENGTH = 150;
 let MAX_TAGS = 5;
 
-// Load config from Statsig on module initialization
-Promise.all([recentlyViewedConfigs(), timeoutConfigs()])
-  .then(([recentlyViewed, timeout]: [Record<string, unknown>, Record<string, unknown>]) => {
+// Load configs on module initialization
+Promise.all([getRecentlyViewedConfig(), getTimeoutConfig()])
+  .then(([recentlyViewed, timeout]) => {
     MAX_ITEMS = (recentlyViewed['recently_viewed.max_items'] as number) ?? 10;
     TTL_DAYS = (recentlyViewed['recently_viewed.ttl_days'] as number) ?? 30;
     MAX_DESCRIPTION_LENGTH =

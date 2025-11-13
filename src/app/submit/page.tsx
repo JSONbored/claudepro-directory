@@ -1,6 +1,6 @@
 /**
  * Submit Page - Database-First Community Submissions
- * All stats/recent/contributors from Supabase server actions.
+ * All stats/recent/contributors from data layer with edge caching.
  */
 
 import dynamic from 'next/dynamic';
@@ -8,6 +8,8 @@ import { JobsPromo } from '@/src/components/core/domain/jobs/jobs-banner';
 import { SubmitFormClient } from '@/src/components/core/forms/content-submission-form';
 import { SidebarActivityCard } from '@/src/components/core/forms/sidebar-activity-card';
 import { SubmitPageHero } from '@/src/components/core/forms/submit-page-hero';
+import { getSubmissionDashboard } from '@/src/lib/data/submissions';
+import { getContentTemplates } from '@/src/lib/data/templates';
 import { getSubmissionFormConfig } from '@/src/lib/forms/submission-form-config';
 
 const NewsletterCTAVariant = dynamic(
@@ -23,28 +25,9 @@ const NewsletterCTAVariant = dynamic(
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
 import { TrendingUp } from '@/src/lib/icons';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-import { cachedRPCWithDedupe } from '@/src/lib/supabase/cached-rpc';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
 import type { Database } from '@/src/types/database.types';
-
-// Type for dashboard response - trust database validation
-type SubmissionDashboardResult = {
-  stats: { total: number; pending: number; merged_this_week: number };
-  recent: Array<{
-    id: string | number;
-    content_name: string;
-    content_type: string;
-    merged_at: string;
-    user?: { name: string; slug: string } | null;
-  }>;
-  contributors: Array<{
-    name: string;
-    slug: string;
-    rank: number;
-    mergedCount: number;
-  }>;
-};
 
 const SUBMISSION_TIPS = [
   'Be specific in your descriptions - help users understand what your config does',
@@ -84,34 +67,16 @@ export const metadata = generatePageMetadata('/submit');
 export const revalidate = false;
 
 export default async function SubmitPage() {
-  const result = await cachedRPCWithDedupe<SubmissionDashboardResult>(
-    'get_submission_dashboard',
-    {
-      p_recent_limit: 5,
-      p_contributors_limit: 5,
-    },
-    {
-      tags: ['content', 'homepage'],
-      ttlConfigKey: 'cache.content_list.ttl_seconds',
-      useAuthClient: true,
-    }
-  );
+  // Fetch all data via data layer (edge-cached)
+  const dashboardData = await getSubmissionDashboard(5, 5);
+  const formConfig = await getSubmissionFormConfig();
+  const templates = await getContentTemplates('agents');
 
-  const stats = result?.stats || { total: 0, pending: 0, merged_this_week: 0 };
-  const recentMerged = (
-    (result?.recent || []) as Array<{
-      id: string | number;
-      content_name: string;
-      content_type: Database['public']['Enums']['submission_type'];
-      merged_at: string;
-      user?: { name: string; slug: string } | null;
-    }>
-  ).map((submission) => ({
+  const stats = dashboardData?.stats || { total: 0, pending: 0, merged_this_week: 0 };
+  const recentMerged = (dashboardData?.recent || []).map((submission) => ({
     ...submission,
     merged_at_formatted: formatTimeAgo(submission.merged_at),
   }));
-
-  const formConfig = await getSubmissionFormConfig();
 
   return (
     <div className="container mx-auto max-w-7xl px-4 py-8 sm:py-12">
@@ -120,7 +85,7 @@ export default async function SubmitPage() {
 
       <div className="grid items-start gap-6 lg:grid-cols-[2fr_1fr] lg:gap-8">
         <div className="w-full min-w-0">
-          <SubmitFormClient formConfig={formConfig} />
+          <SubmitFormClient formConfig={formConfig} templates={templates} />
         </div>
 
         <aside className="w-full space-y-4 sm:space-y-6 lg:sticky lg:top-24 lg:h-fit">

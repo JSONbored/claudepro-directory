@@ -1,5 +1,5 @@
 import type { CategoryId } from '@/src/lib/config/category-config';
-import { formConfigs } from '@/src/lib/flags';
+import { getFormConfig } from '@/src/lib/actions/feature-flags.actions';
 
 /**
  * Review Item from Database
@@ -97,7 +97,7 @@ export type ReviewProps =
 export let MAX_REVIEW_LENGTH = 2000;
 
 // Load config from Statsig on module initialization
-formConfigs()
+getFormConfig()
   .then((config: Record<string, unknown>) => {
     MAX_REVIEW_LENGTH = (config['form.max_review_length'] as number) ?? 2000;
   })

@@ -37,6 +37,7 @@ import { LayoutContent } from '@/src/components/core/layout/root-layout-wrapper'
 
 import { UmamiScript } from '@/src/components/core/shared/analytics-script';
 import { APP_CONFIG } from '@/src/lib/constants';
+import { getNavigationMenu } from '@/src/lib/data/navigation';
 import { featureFlags, newsletterExperiments } from '@/src/lib/flags';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 
@@ -141,8 +142,9 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // Fetch announcement data server-side using anonymous client (ISR-safe)
+  // Fetch server data (ISR-safe, edge-cached)
   const announcement = await getActiveAnnouncement();
+  const navigationData = await getNavigationMenu();
 
   // Fetch feature flags server-side for A/B testing and gradual rollouts
   const useFloatingActionBar = await featureFlags.floatingActionBar();
@@ -205,6 +207,7 @@ export default async function RootLayout({
             <ErrorBoundary>
               <LayoutContent
                 announcement={announcement}
+                navigationData={navigationData}
                 useFloatingActionBar={useFloatingActionBar}
                 fabFlags={{
                   showSubmit: fabSubmitAction,

@@ -144,18 +144,30 @@ function HomePageClientComponent({
       setIsSearching(true);
 
       try {
-        const { searchContent } = await import('@/src/lib/edge/search-client');
-
         const effectiveTab = categoryOverride ?? activeTab;
         const categories =
           effectiveTab !== 'all' && effectiveTab !== 'community' ? [effectiveTab] : undefined;
 
-        const response = await searchContent(query.trim(), {
-          ...(categories && { categories }),
-          limit: 50,
-        });
+        const params = new URLSearchParams({ q: query.trim(), limit: '50' });
+        if (categories) {
+          params.set('categories', categories.join(','));
+        }
 
-        setSearchResults(response.results);
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/unified-search?${params.toString()}`,
+          {
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(`Search failed: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        setSearchResults(data.results);
       } catch (error) {
         logger.error('Search failed', error as Error, { source: 'HomePageSearch' });
         setSearchResults(allConfigs);

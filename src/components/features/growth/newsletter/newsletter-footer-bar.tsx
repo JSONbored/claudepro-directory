@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { Button } from '@/src/components/primitives/ui/button';
 import type { NewsletterSource } from '@/src/hooks/use-newsletter';
 import { NEWSLETTER_CTA_CONFIG } from '@/src/lib/config/category-config';
-import { appSettings, newsletterConfigs } from '@/src/lib/flags';
+import { getAppSettings, getNewsletterConfig } from '@/src/lib/actions/feature-flags.actions';
 import { Mail, X } from '@/src/lib/icons';
 import { DIMENSIONS, POSITION_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { NewsletterForm } from './newsletter-form';
@@ -33,8 +33,8 @@ export function NewsletterFooterBar({
     const loadConfigs = async () => {
       try {
         const [appConfig, newsletterConfig] = await Promise.all([
-          appSettings(),
-          newsletterConfigs(),
+          getAppSettings(),
+          getNewsletterConfig(),
         ]);
 
         const excludedPages = appConfig['newsletter.excluded_pages'] as string[];

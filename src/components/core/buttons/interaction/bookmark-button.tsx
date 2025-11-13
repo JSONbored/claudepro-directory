@@ -6,9 +6,9 @@ import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
 import { Button } from '@/src/components/primitives/ui/button';
 import { useConfetti } from '@/src/hooks/use-confetti';
+import { checkConfettiEnabled } from '@/src/lib/actions/feature-flags.actions';
 import { addBookmark, removeBookmark } from '@/src/lib/actions/user.actions';
 import { type CategoryId, isValidCategory } from '@/src/lib/config/category-config';
-import { featureFlags } from '@/src/lib/flags';
 import { Bookmark, BookmarkCheck } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
@@ -75,7 +75,7 @@ export function BookmarkButton({
             toasts.success.bookmarkAdded();
 
             // Confetti animation gated by feature flag
-            const confettiEnabled = await featureFlags.confettiAnimations();
+            const confettiEnabled = await checkConfettiEnabled();
             if (confettiEnabled) {
               celebrateBookmark();
             }

@@ -7,8 +7,8 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
+import { getCacheConfig, getPollingConfig } from '@/src/lib/actions/feature-flags.actions';
 import { getNewsletterCount } from '@/src/lib/actions/newsletter.actions';
-import { cacheConfigs, pollingConfigs } from '@/src/lib/flags';
 import { logger } from '@/src/lib/logger';
 
 export interface UseNewsletterCountReturn {
@@ -25,7 +25,7 @@ let CACHE_TTL_MS = 300000; // 5 minutes (300 seconds)
 let POLL_INTERVAL_MS = 300000; // 5 minutes
 
 // Load config from Statsig on module initialization
-Promise.all([cacheConfigs(), pollingConfigs()])
+Promise.all([getCacheConfig(), getPollingConfig()])
   .then(([cache, polling]: [Record<string, unknown>, Record<string, unknown>]) => {
     const cacheTtlSeconds = (cache['cache.newsletter_count_ttl_s'] as number) ?? 300;
     CACHE_TTL_MS = cacheTtlSeconds * 1000;

@@ -8,7 +8,7 @@
 import { motion, useScroll } from 'motion/react';
 import { useEffect, useState } from 'react';
 import type { NewsletterSource } from '@/src/hooks/use-newsletter';
-import { newsletterConfigs } from '@/src/lib/flags';
+import { getNewsletterConfig } from '@/src/lib/actions/feature-flags.actions';
 import { NewsletterCTAVariant } from './newsletter-cta-variants';
 
 export interface NewsletterScrollTriggerProps {
@@ -41,7 +41,7 @@ export function NewsletterScrollTrigger({
     const loadConfig = async () => {
       if (minScrollHeight === undefined) {
         try {
-          const config = await newsletterConfigs();
+          const config = await getNewsletterConfig();
           const configHeight = config['newsletter.scroll_trigger.min_scroll_height_px'] as
             | number
             | undefined;

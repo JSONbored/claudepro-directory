@@ -1,16 +1,40 @@
 import { type StatsigUser, statsigAdapter } from '@flags-sdk/statsig';
+import { createServerClient } from '@supabase/ssr';
 import type { Identify } from 'flags';
 import { dedupe, flag } from 'flags/next';
 import { logger } from '@/src/lib/logger';
-import { createClient } from '@/src/lib/supabase/server';
+import type { Database } from '@/src/types/database.types';
 
 /**
  * Identify function - provides user context for flag evaluation
  * Statsig uses this to do % rollouts, user targeting, etc.
+ *
+ * IMPORTANT: Uses headers/cookies provided by flags SDK (no next/headers import needed)
+ * This allows the function to work in both server and client contexts without build errors
  */
-export const identify = dedupe((async () => {
+export const identify = dedupe((async ({ headers, cookies }) => {
   try {
-    const supabase = await createClient();
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+    // Fallback to anonymous if env vars missing (development safety)
+    if (!(supabaseUrl && supabaseAnonKey)) {
+      return { userID: 'anonymous' };
+    }
+
+    // Create Supabase client using cookies provided by flags SDK
+    const supabase = createServerClient<Database>(supabaseUrl, supabaseAnonKey, {
+      cookies: {
+        getAll() {
+          return cookies.getAll();
+        },
+        setAll() {
+          // Flags SDK cookies are read-only, cannot set
+          // This is fine - auth cookies are already set by middleware/route handlers
+        },
+      },
+    });
+
     const {
       data: { user },
     } = await supabase.auth.getUser();
@@ -468,6 +492,10 @@ export const cacheConfigs = createDynamicConfigGroup('cache_configs', {
   'cache.tool_list.ttl_seconds': 1800, // 30 minutes
   'cache.company_detail.ttl_seconds': 1800, // 30 minutes
   'cache.company_list.ttl_seconds': 1800, // 30 minutes
+  'cache.related_content.ttl_seconds': 3600, // 1 hour (stable recommendations)
+  'cache.navigation.ttl_seconds': 7200, // 2 hours (rarely changes)
+  'cache.templates.ttl_seconds': 7200, // 2 hours (rarely changes)
+  'cache.submission_dashboard.ttl_seconds': 900, // 15 minutes (community activity updates)
   'cache.user_profile.ttl_seconds': 1800, // 30 minutes
   'cache.user_activity.ttl_seconds': 900, // 15 minutes
   'cache.user_stats.ttl_seconds': 1800, // 30 minutes
@@ -481,6 +509,8 @@ export const cacheConfigs = createDynamicConfigGroup('cache_configs', {
   'cache.book.ttl_seconds': 7200, // 2 hours
   'cache.quiz.ttl_seconds': 3600, // 1 hour
   'cache.search.ttl_seconds': 3600, // 1 hour
+  'cache.search_autocomplete.ttl_seconds': 3600, // 1 hour (suggestions from history)
+  'cache.search_facets.ttl_seconds': 3600, // 1 hour (available filters)
   'cache.jobs.ttl_seconds': 1800, // 30 minutes
   'cache.jobs_detail.ttl_seconds': 1800, // 30 minutes
   'cache.changelog.ttl_seconds': 3600, // 1 hour
@@ -508,10 +538,10 @@ export const cacheConfigs = createDynamicConfigGroup('cache_configs', {
   'cache.invalidate.follow': ['users'] as string[],
   'cache.invalidate.oauth_unlink': ['users'] as string[],
   'cache.invalidate.vote': ['content', 'trending'] as string[],
-  'cache.invalidate.job_create': ['jobs'] as string[],
-  'cache.invalidate.job_update': ['jobs'] as string[],
-  'cache.invalidate.job_delete': ['jobs'] as string[],
-  'cache.invalidate.job_status': ['jobs'] as string[],
+  'cache.invalidate.job_create': ['jobs', 'companies'] as string[],
+  'cache.invalidate.job_update': ['jobs', 'companies'] as string[],
+  'cache.invalidate.job_delete': ['jobs', 'companies'] as string[],
+  'cache.invalidate.job_status': ['jobs', 'companies'] as string[],
   'cache.invalidate.collection_create': ['collections', 'users'] as string[],
   'cache.invalidate.collection_update': ['collections', 'users'] as string[],
   'cache.invalidate.collection_delete': ['collections', 'users'] as string[],
@@ -519,6 +549,7 @@ export const cacheConfigs = createDynamicConfigGroup('cache_configs', {
   'cache.invalidate.review_create': ['content', 'homepage', 'trending'] as string[],
   'cache.invalidate.review_update': ['content'] as string[],
   'cache.invalidate.review_delete': ['content'] as string[],
+  'cache.invalidate.submission_create': ['submissions'] as string[],
   'cache.invalidate.review_helpful': ['content'] as string[],
   'cache.invalidate.usage_tracking': ['content'] as string[],
 });

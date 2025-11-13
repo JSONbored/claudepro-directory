@@ -1,12 +1,12 @@
 'use client';
 
 /**
- * Company Form Component - Calls companies-handler edge function with file upload
+ * Company Form Component - Uses server actions for CRUD operations
  */
 
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { useId, useState, useTransition } from 'react';
+import { useEffect, useId, useState, useTransition } from 'react';
 import { FormField } from '@/src/components/core/forms/form-field-wrapper';
 import { Button } from '@/src/components/primitives/ui/button';
 import {
@@ -17,8 +17,9 @@ import {
   CardTitle,
 } from '@/src/components/primitives/ui/card';
 import { SelectItem } from '@/src/components/primitives/ui/select';
+import { createCompany, updateCompany } from '@/src/lib/actions/companies.actions';
+import { getFormConfig } from '@/src/lib/actions/feature-flags.actions';
 import { ROUTES } from '@/src/lib/constants';
-import { formConfigs } from '@/src/lib/flags';
 import { FileText, X } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { createClient } from '@/src/lib/supabase/client';
@@ -26,7 +27,6 @@ import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { toasts } from '@/src/lib/utils/toast.utils';
 import type { Database } from '@/src/types/database.types';
 
-type CompanyInsert = Database['public']['Tables']['companies']['Insert'];
 type CompanyRow = Database['public']['Tables']['companies']['Row'];
 
 interface CompanyFormProps {
@@ -34,20 +34,9 @@ interface CompanyFormProps {
   mode: 'create' | 'edit';
 }
 
-// Default values (will be overridden by Dynamic Configs)
+// Form validation (loaded from Statsig via server action)
 let MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-let MAX_DIMENSION = 2048;
-
-// Load config from Statsig on module initialization
-formConfigs()
-  .then((config: Record<string, unknown>) => {
-    const maxMB = (config['form.max_file_size_mb'] as number) ?? 5;
-    MAX_FILE_SIZE = maxMB * 1024 * 1024;
-    MAX_DIMENSION = (config['form.max_image_dimension_px'] as number) ?? 2048;
-  })
-  .catch(() => {
-    // Use defaults if config load fails
-  });
+let MAX_DIMENSION = 2048; // 2048px
 
 export function CompanyForm({ initialData, mode }: CompanyFormProps) {
   const router = useRouter();
@@ -57,6 +46,19 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
   const [logoUrl, setLogoUrl] = useState<string | null>(initialData?.logo || null);
   const [logoPreview, setLogoPreview] = useState<string | null>(initialData?.logo || null);
   const [useCursorDate, setUseCursorDate] = useState<boolean>(!!initialData?.using_cursor_since);
+
+  // Load form validation config from Statsig on mount
+  useEffect(() => {
+    getFormConfig()
+      .then((config) => {
+        const maxMB = (config['form.max_file_size_mb'] as number) ?? 5;
+        MAX_FILE_SIZE = maxMB * 1024 * 1024;
+        MAX_DIMENSION = (config['form.max_image_dimension_px'] as number) ?? 2048;
+      })
+      .catch(() => {
+        // Use defaults if config load fails
+      });
+  }, []);
 
   const handleLogoUpload = async (file: File) => {
     // Client-side validation
@@ -175,7 +177,7 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
 
     const formData = new FormData(e.currentTarget);
 
-    const data: Partial<CompanyInsert> = {
+    const data = {
       name: formData.get('name') as string,
       website: (formData.get('website') as string) || null,
       logo: logoUrl, // Use uploaded logo URL from state
@@ -189,46 +191,35 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
 
     startTransition(async () => {
       try {
-        const supabase = createClient();
-        const {
-          data: { session },
-        } = await supabase.auth.getSession();
+        if (mode === 'create') {
+          // Create company via server action
+          const result = await createCompany(data);
 
-        if (!session) {
-          toasts.error.authRequired();
-          return;
-        }
+          if (result?.serverError || result?.validationErrors) {
+            throw new Error(result.serverError || 'Validation failed');
+          }
 
-        const action = mode === 'create' ? 'create' : 'update';
-        const payload = mode === 'edit' ? { ...data, id: initialData?.id } : data;
-
-        const url = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/companies-handler`;
-        const response = await fetch(url, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${session.access_token}`,
-            'X-Company-Action': action,
-          },
-          body: JSON.stringify(payload),
-        });
-
-        if (!response.ok) {
-          const error = await response.json();
-          throw new Error(error.error || 'Failed to save company');
-        }
-
-        const result = await response.json();
-
-        if (result.success || result.company) {
-          toasts.success.actionCompleted(
-            mode === 'create' ? 'Company created successfully!' : 'Company updated successfully!'
-          );
-          router.push(ROUTES.ACCOUNT_COMPANIES);
-          router.refresh();
+          toasts.success.actionCompleted('Company created successfully!');
         } else {
-          throw new Error('Unexpected response format');
+          // Update company via server action
+          if (!initialData?.id) {
+            throw new Error('Company ID is required for updates');
+          }
+
+          const result = await updateCompany({
+            id: initialData.id,
+            ...data,
+          });
+
+          if (result?.serverError || result?.validationErrors) {
+            throw new Error(result.serverError || 'Validation failed');
+          }
+
+          toasts.success.actionCompleted('Company updated successfully!');
         }
+
+        router.push(ROUTES.ACCOUNT_COMPANIES);
+        router.refresh();
       } catch (error) {
         toasts.error.fromError(error, 'Failed to save company');
       }

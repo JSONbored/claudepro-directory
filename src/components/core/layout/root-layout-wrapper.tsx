@@ -9,6 +9,7 @@ import dynamic from 'next/dynamic';
 import { usePathname } from 'next/navigation';
 import { AnnouncementBannerClient } from '@/src/components/core/layout/announcement-banner-client';
 import { Navigation } from '@/src/components/core/layout/navigation';
+import type { NavigationData } from '@/src/lib/data/navigation';
 import { DIMENSIONS } from '@/src/lib/ui-constants';
 import type { Tables } from '@/src/types/database.types';
 
@@ -53,6 +54,7 @@ const FloatingActionBar = dynamic(
 interface LayoutContentProps {
   children: React.ReactNode;
   announcement: Tables<'announcements'> | null;
+  navigationData: NavigationData;
   useFloatingActionBar?: boolean;
   fabFlags: {
     showSubmit: boolean;
@@ -67,6 +69,7 @@ interface LayoutContentProps {
 export function LayoutContent({
   children,
   announcement,
+  navigationData,
   useFloatingActionBar = false,
   fabFlags,
   footerDelayVariant,
@@ -106,7 +109,7 @@ export function LayoutContent({
       </a>
       <div className={'flex min-h-screen flex-col bg-background'}>
         {announcement && <AnnouncementBannerClient announcement={announcement} />}
-        <Navigation hideCreateButton={useFloatingActionBar} />
+        <Navigation hideCreateButton={useFloatingActionBar} navigationData={navigationData} />
         <main id="main-content" className="flex-1">
           {children}
         </main>

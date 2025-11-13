@@ -11,8 +11,8 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/ui/card';
+import { getAnimationConfig, getPricingConfig } from '@/src/lib/actions/feature-flags.actions';
 import { SOCIAL_LINKS } from '@/src/lib/constants';
-import { pricingConfigs } from '@/src/lib/flags';
 import {
   BarChart,
   Briefcase,
@@ -43,10 +43,7 @@ export default function PartnerPage() {
 
   // Load pricing and animation configs from Statsig
   useEffect(() => {
-    Promise.all([
-      pricingConfigs(),
-      import('@/src/lib/flags').then(({ animationConfigs }) => animationConfigs()),
-    ])
+    Promise.all([getPricingConfig(), getAnimationConfig()])
       .then(([pricingConfig, animConfig]) => {
         setPricing({
           jobsRegular: (pricingConfig['pricing.jobs.regular'] as number) ?? 249,

@@ -2,13 +2,13 @@
  * Shared button success state management with auto-reset
  */
 import { useCallback, useState } from 'react';
-import { timeoutConfigs } from '@/src/lib/flags';
+import { getTimeoutConfig } from '@/src/lib/actions/feature-flags.actions';
 
 // Default value (will be overridden by Dynamic Config)
 let DEFAULT_SUCCESS_DURATION = 2000;
 
 // Load config from Statsig on module initialization
-timeoutConfigs()
+getTimeoutConfig()
   .then((config: Record<string, unknown>) => {
     DEFAULT_SUCCESS_DURATION = (config['timeout.ui.button_success_duration_ms'] as number) ?? 2000;
   })

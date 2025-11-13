@@ -4,8 +4,18 @@
  *
  * Endpoints:
  * - GET /unified-search - Main search with filters, caching (5min), analytics tracking
+ *   Query params:
+ *     - q: Search query
+ *     - entities: Comma-separated list (content,company,job,user) - triggers federated search
+ *     - categories/tags/authors: Content-only filters
+ *     - sort: Content-only sorting (relevance, popularity, newest, alphabetical)
+ *     - limit/offset: Pagination
  * - GET /unified-search/autocomplete - Smart autocomplete from search history + content titles
  * - GET /unified-search/facets - Available filters (categories, tags, authors)
+ *
+ * Search Routing:
+ * - With entities param → search_unified() RPC (federated multi-entity search)
+ * - Without entities param → search_content_optimized() RPC (content-only with advanced filters)
  */
 
 import type { Database } from '../_shared/database.types.ts';
@@ -17,19 +27,22 @@ import {
 } from '../_shared/utils/response.ts';
 import { supabaseAnon } from '../_shared/utils/supabase.ts';
 
-type SearchResult = Database['public']['Functions']['search_content_optimized']['Returns'][number];
+type ContentSearchResult =
+  Database['public']['Functions']['search_content_optimized']['Returns'][number];
+type UnifiedSearchResult = Database['public']['Functions']['search_unified']['Returns'][number];
 type AutocompleteResult =
   Database['public']['Functions']['get_search_suggestions_from_history']['Returns'][number];
 type FacetResult = Database['public']['Functions']['get_search_facets']['Returns'][number];
 
 interface SearchResponse {
-  results: SearchResult[];
+  results: ContentSearchResult[] | UnifiedSearchResult[];
   query: string;
   filters: {
     categories?: string[];
     tags?: string[];
     authors?: string[];
     sort?: string;
+    entities?: string[];
   };
   pagination: {
     total: number;
@@ -41,6 +54,7 @@ interface SearchResponse {
     dbTime: number;
     totalTime: number;
   };
+  searchType: 'content' | 'unified';
 }
 
 interface AutocompleteResponse {
@@ -107,6 +121,7 @@ async function handleSearch(url: URL, startTime: number, req: Request): Promise<
   const categories = url.searchParams.get('categories')?.split(',').filter(Boolean);
   const tags = url.searchParams.get('tags')?.split(',').filter(Boolean);
   const authors = url.searchParams.get('authors')?.split(',').filter(Boolean);
+  const entities = url.searchParams.get('entities')?.split(',').filter(Boolean);
   const sort = url.searchParams.get('sort') || 'relevance';
   const limit = Math.min(
     Math.max(Number.parseInt(url.searchParams.get('limit') || '20', 10), 1),
@@ -114,36 +129,72 @@ async function handleSearch(url: URL, startTime: number, req: Request): Promise<
   );
   const offset = Math.max(Number.parseInt(url.searchParams.get('offset') || '0', 10), 0);
 
-  // Validate sort parameter
-  const validSorts = ['relevance', 'popularity', 'newest', 'alphabetical'];
-  if (!validSorts.includes(sort)) {
+  // Determine search type based on entities parameter
+  const searchType: 'content' | 'unified' = entities ? 'unified' : 'content';
+
+  // Validate entities if provided
+  const validEntities = ['content', 'company', 'job', 'user'];
+  if (entities && entities.some((e) => !validEntities.includes(e))) {
     return badRequestResponse(
-      `Invalid sort parameter. Must be one of: ${validSorts.join(', ')}`,
+      `Invalid entities parameter. Must be one of: ${validEntities.join(', ')}`,
       getWithAuthCorsHeaders
     );
   }
 
-  const dbStartTime = performance.now();
+  // Validate sort parameter (only applies to content search)
+  if (searchType === 'content') {
+    const validSorts = ['relevance', 'popularity', 'newest', 'alphabetical'];
+    if (!validSorts.includes(sort)) {
+      return badRequestResponse(
+        `Invalid sort parameter. Must be one of: ${validSorts.join(', ')}`,
+        getWithAuthCorsHeaders
+      );
+    }
+  }
 
-  // Call search RPC
-  const { data, error } = await supabaseAnon.rpc('search_content_optimized', {
-    p_query: query || undefined,
-    p_categories: categories,
-    p_tags: tags,
-    p_authors: authors,
-    p_sort: sort,
-    p_limit: limit,
-    p_offset: offset,
-  });
+  const dbStartTime = performance.now();
+  let data: ContentSearchResult[] | UnifiedSearchResult[];
+  let error: unknown;
+
+  // Route to appropriate RPC based on search type
+  if (searchType === 'unified') {
+    const { data: unifiedData, error: unifiedError } = await supabaseAnon.rpc('search_unified', {
+      p_query: query,
+      p_entities: entities || ['content', 'company', 'job', 'user'],
+      p_limit: limit,
+      p_offset: offset,
+    });
+    data = (unifiedData || []) as UnifiedSearchResult[];
+    error = unifiedError;
+  } else {
+    const { data: contentData, error: contentError } = await supabaseAnon.rpc(
+      'search_content_optimized',
+      {
+        p_query: query || undefined,
+        p_categories: categories,
+        p_tags: tags,
+        p_authors: authors,
+        p_sort: sort,
+        p_limit: limit,
+        p_offset: offset,
+      }
+    );
+    data = (contentData || []) as ContentSearchResult[];
+    error = contentError;
+  }
 
   const dbEndTime = performance.now();
 
   if (error) {
-    console.error('Search RPC error:', error);
-    return errorResponse(error, 'search_content_optimized', getWithAuthCorsHeaders);
+    console.error(`Search RPC error (${searchType}):`, error);
+    return errorResponse(
+      error,
+      searchType === 'unified' ? 'search_unified' : 'search_content_optimized',
+      getWithAuthCorsHeaders
+    );
   }
 
-  const results = (data || []) as SearchResult[];
+  const results = data;
 
   // Track search analytics (fire and forget)
   trackSearchAnalytics(
@@ -170,6 +221,7 @@ async function handleSearch(url: URL, startTime: number, req: Request): Promise<
       ...(categories && { categories }),
       ...(tags && { tags }),
       ...(authors && { authors }),
+      ...(entities && { entities }),
       sort,
     },
     pagination: {
@@ -182,6 +234,7 @@ async function handleSearch(url: URL, startTime: number, req: Request): Promise<
       dbTime: Math.round(dbEndTime - dbStartTime),
       totalTime: Math.round(totalTime),
     },
+    searchType,
   };
 
   return new Response(JSON.stringify(response), {

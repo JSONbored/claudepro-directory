@@ -20,6 +20,8 @@ import { Input } from '@/src/components/primitives/ui/input';
 import { Label } from '@/src/components/primitives/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/primitives/ui/tabs';
 import { Textarea } from '@/src/components/primitives/ui/textarea';
+import { submitContentForReview } from '@/src/lib/actions/content.actions';
+import type { Template } from '@/src/lib/data/templates';
 import {
   SUBMISSION_CONTENT_TYPES,
   type SubmissionContentType,
@@ -34,12 +36,11 @@ import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
 import { ParseStrategy, safeParse } from '@/src/lib/utils/data.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
-import type { Database, Json } from '@/src/types/database.types';
 import { DuplicateWarning } from './duplicate-warning';
 import { ContentTypeFieldRenderer } from './dynamic-form-field';
 import { ExamplesArrayInput } from './examples-array-input';
 import { FormSectionCard } from './form-section-card';
-import { type Template, TemplateSelector } from './template-selector';
+import { TemplateSelector } from './template-selector';
 
 /**
  * Examples array schema (Zod)
@@ -78,6 +79,7 @@ const FORM_TYPE_LABELS: Record<SubmissionContentType, string> = {
 
 interface SubmitFormClientProps {
   formConfig: SubmissionFormConfig;
+  templates: Template[];
 }
 
 /**
@@ -114,7 +116,7 @@ interface SubmitFormClientProps {
  * @see https://react.dev/reference/react-dom/components/input#controlling-an-input-with-a-state-variable
  * @see https://developer.mozilla.org/en-US/docs/Web/API/FormData
  */
-export function SubmitFormClient({ formConfig }: SubmitFormClientProps) {
+export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProps) {
   /**
    * Minimal React State (only what requires reactivity)
    */
@@ -318,76 +320,46 @@ export function SubmitFormClient({ formConfig }: SubmitFormClientProps) {
           }
         }
 
-        // Direct RPC call - database validates everything
-        const rpcArgs: Database['public']['Functions']['submit_content_for_review']['Args'] = {
-          p_submission_type: contentType,
-          p_name: submissionData.name as string,
-          p_description: submissionData.description as string,
-          p_category: submissionData.category as string,
-          p_author: submissionData.author as string,
-          // Cast to Json - database validates structure via CHECK constraints
-          p_content_data: submissionData as Json,
-        };
+        // Server action call - database validates everything
+        const tags = submissionData.tags
+          ? (submissionData.tags as string)
+              .split(',')
+              .map((tag) => tag.trim())
+              .filter((tag) => tag.length > 0)
+          : undefined;
 
-        if (submissionData.author_profile_url) {
-          rpcArgs.p_author_profile_url = submissionData.author_profile_url as string;
-        }
-        if (submissionData.github_url) {
-          rpcArgs.p_github_url = submissionData.github_url as string;
-        }
-        if (submissionData.tags) {
-          rpcArgs.p_tags = (submissionData.tags as string)
-            .split(',')
-            .map((tag) => tag.trim())
-            .filter((tag) => tag.length > 0);
-        }
+        const result = await submitContentForReview({
+          submission_type: contentType,
+          name: submissionData.name as string,
+          description: submissionData.description as string,
+          category: submissionData.category as string,
+          author: submissionData.author as string,
+          author_profile_url: submissionData.author_profile_url as string | undefined,
+          github_url: submissionData.github_url as string | undefined,
+          tags,
+          content_data: submissionData as unknown as Record<string, unknown>,
+        });
 
-        const { data, error } = await supabase.rpc('submit_content_for_review', rpcArgs);
-
-        if (error) {
-          logger.error('Submission RPC failed', new Error(error.message));
-          // Show generic error to user, full error is logged
+        if (result?.serverError || result?.validationErrors) {
+          logger.error(
+            'Submission server action failed',
+            new Error(result.serverError || 'Validation failed')
+          );
           toasts.error.submissionFailed(
-            'Failed to submit content. Please try again or contact support.'
+            result.serverError || 'Failed to submit content. Please try again or contact support.'
           );
           return;
         }
 
-        if (!data) {
-          toasts.error.submissionFailed('No data returned from submission');
-          return;
-        }
-
-        // Validate response structure
-        if (
-          !data ||
-          typeof data !== 'object' ||
-          !('success' in data) ||
-          typeof data.success !== 'boolean'
-        ) {
-          logger.error('Invalid RPC response structure', new Error(JSON.stringify(data)));
-          toasts.error.submissionFailed('Received invalid response from server');
-          return;
-        }
-
-        const result = data as {
-          success: boolean;
-          submission_id?: string;
-          status?: string;
-          message?: string;
-        };
-
-        if (result.success) {
-          if (!(result.submission_id && result.status)) {
-            logger.warn('Success response missing expected fields', {
-              submission_id: result.submission_id || 'missing',
-              status: result.status || 'missing',
-            });
+        if (result?.data?.success) {
+          if (!result.data.submissionId) {
+            logger.warn('Success response missing submission ID');
           }
+
           setSubmissionResult({
-            submission_id: result.submission_id || 'unknown',
-            status: result.status || 'pending',
-            message: result.message || 'Your submission has been received and is pending review!',
+            submission_id: result.data.submissionId || 'unknown',
+            status: 'pending',
+            message: 'Your submission has been received and is pending review!',
           });
 
           toasts.success.submissionCreated(contentType);
@@ -516,7 +488,7 @@ export function SubmitFormClient({ formConfig }: SubmitFormClientProps) {
 
             <div className={UI_CLASSES.SPACE_Y_2}>
               <Label>Quick Start</Label>
-              <TemplateSelector contentType={contentType} onSelect={handleTemplateSelect} />
+              <TemplateSelector templates={templates} onSelect={handleTemplateSelect} />
             </div>
           </div>
         </FormSectionCard>

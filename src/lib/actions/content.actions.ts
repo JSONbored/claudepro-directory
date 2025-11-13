@@ -12,7 +12,7 @@ import { cacheConfigs } from '@/src/lib/flags';
 import { logger } from '@/src/lib/logger';
 import { revalidateCacheTags } from '@/src/lib/supabase/cache-helpers';
 import { createClient } from '@/src/lib/supabase/server';
-import type { Tables } from '@/src/types/database.types';
+import type { Database, Tables } from '@/src/types/database.types';
 
 // Manual Zod schemas (database validates, Zod just provides type safety)
 const collectionSchema = z.object({
@@ -658,3 +658,88 @@ export async function fetchPaginatedContent(params: {
     return [];
   }
 }
+
+// =====================================================
+// CONTENT SUBMISSION ACTION
+// =====================================================
+
+/**
+ * Submit content for review
+ * Calls submit_content_for_review RPC with validation
+ */
+const submitContentSchema = z.object({
+  submission_type: z.string(),
+  name: z.string().min(2),
+  description: z.string().min(10),
+  category: z.string(),
+  author: z.string().min(2),
+  author_profile_url: z.string().url().optional(),
+  github_url: z.string().url().optional(),
+  tags: z.array(z.string()).optional(),
+  content_data: z.record(z.string(), z.unknown()), // Additional fields as JSONB
+});
+
+export const submitContentForReview = rateLimitedAction
+  .metadata({ actionName: 'submitContentForReview', category: 'content' })
+  .schema(submitContentSchema)
+  .action(async ({ parsedInput }) => {
+    try {
+      const supabase = await createClient();
+
+      const { data, error } = await supabase.rpc('submit_content_for_review', {
+        p_submission_type: parsedInput.submission_type,
+        p_name: parsedInput.name,
+        p_description: parsedInput.description,
+        p_category: parsedInput.category,
+        p_author: parsedInput.author,
+        ...(parsedInput.author_profile_url && {
+          p_author_profile_url: parsedInput.author_profile_url,
+        }),
+        ...(parsedInput.github_url && { p_github_url: parsedInput.github_url }),
+        ...(parsedInput.tags && { p_tags: parsedInput.tags }),
+        p_content_data:
+          parsedInput.content_data as Database['public']['Functions']['submit_content_for_review']['Args']['p_content_data'],
+      });
+
+      if (error) {
+        logger.error('Failed to submit content via RPC', new Error(error.message), {
+          submission_type: parsedInput.submission_type,
+          name: parsedInput.name,
+        });
+        throw new Error(error.message);
+      }
+
+      const result = data as unknown as { success: boolean; submission_id: string };
+
+      if (!result.success) {
+        throw new Error('Content submission failed');
+      }
+
+      logger.info('Content submitted successfully', {
+        submission_id: result.submission_id,
+        submission_type: parsedInput.submission_type,
+      });
+
+      // Invalidate submissions cache
+      const config = await cacheConfigs();
+      const invalidateTags = config['cache.invalidate.submission_create'] as string[];
+      revalidateCacheTags(invalidateTags);
+
+      revalidatePath('/account/submissions');
+
+      return {
+        success: true,
+        submissionId: result.submission_id,
+      };
+    } catch (error) {
+      logger.error(
+        'Failed to submit content',
+        error instanceof Error ? error : new Error(String(error)),
+        {
+          submission_type: parsedInput.submission_type,
+          name: parsedInput.name,
+        }
+      );
+      throw error;
+    }
+  });

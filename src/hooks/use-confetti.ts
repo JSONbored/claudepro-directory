@@ -2,7 +2,7 @@
 
 import confetti from 'canvas-confetti';
 import { useCallback } from 'react';
-import { animationConfigs } from '@/src/lib/flags';
+import { getAnimationConfig } from '@/src/lib/actions/feature-flags.actions';
 
 /** Confetti animations - config values from Statsig animationConfigs */
 
@@ -10,45 +10,45 @@ export type ConfettiVariant = 'success' | 'celebration' | 'milestone' | 'subtle'
 
 export function useConfetti() {
   const fireConfetti = useCallback(async (variant: ConfettiVariant = 'success') => {
-    const config = await animationConfigs();
+    const config = await getAnimationConfig();
 
     const configs: Record<ConfettiVariant, confetti.Options> = {
       // Green + gold for success actions (bookmark, save, etc)
       success: {
-        particleCount: config['confetti.success.particle_count'],
-        spread: config['confetti.success.spread'],
+        particleCount: config['confetti.success.particle_count'] as number,
+        spread: config['confetti.success.spread'] as number,
         origin: { y: 0.6 },
         colors: ['#10b981', '#fbbf24', '#34d399'],
-        ticks: config['confetti.success.ticks'],
+        ticks: config['confetti.success.ticks'] as number,
       },
 
       // Rainbow confetti for major milestones (submission approved, profile complete)
       celebration: {
-        particleCount: config['confetti.celebration.particle_count'],
-        spread: config['confetti.celebration.spread'],
+        particleCount: config['confetti.celebration.particle_count'] as number,
+        spread: config['confetti.celebration.spread'] as number,
         origin: { y: 0.6 },
         colors: ['#10b981', '#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b'],
-        ticks: config['confetti.celebration.ticks'],
+        ticks: config['confetti.celebration.ticks'] as number,
       },
 
       // Star emoji confetti for achievements
       milestone: {
-        particleCount: config['confetti.milestone.particle_count'],
-        spread: config['confetti.milestone.spread'],
+        particleCount: config['confetti.milestone.particle_count'] as number,
+        spread: config['confetti.milestone.spread'] as number,
         origin: { y: 0.6 },
         shapes: ['star'],
         colors: ['#fbbf24', '#f59e0b', '#fcd34d'],
-        ticks: config['confetti.milestone.ticks'],
-        scalar: config['confetti.milestone.scalar'],
+        ticks: config['confetti.milestone.ticks'] as number,
+        scalar: config['confetti.milestone.scalar'] as number,
       },
 
       // Subtle burst for low-key actions (newsletter signup)
       subtle: {
-        particleCount: config['confetti.subtle.particle_count'],
-        spread: config['confetti.subtle.spread'],
+        particleCount: config['confetti.subtle.particle_count'] as number,
+        spread: config['confetti.subtle.spread'] as number,
         origin: { y: 0.7 },
         colors: ['#3b82f6', '#8b5cf6'],
-        ticks: config['confetti.subtle.ticks'],
+        ticks: config['confetti.subtle.ticks'] as number,
         startVelocity: 20,
       },
     };
