@@ -15,7 +15,7 @@ export interface CachedRPCOptions {
   keySuffix?: string;
   /** Cache tags for invalidation */
   tags: string[];
-  /** TTL config key from cacheConfigs (e.g., 'cache.homepage_data_ttl_s') */
+  /** TTL config key from cacheConfigs (e.g., 'cache.homepage.ttl_seconds') */
   ttlConfigKey: string;
   /** Use authenticated client (default: false, uses anon client) */
   useAuthClient?: boolean;
@@ -29,8 +29,8 @@ export interface CachedRPCOptions {
  *   'get_homepage_complete',
  *   { p_limit: 10 },
  *   {
- *     tags: ['homepage', 'content-list'],
- *     ttlConfigKey: 'cache.homepage_data_ttl_s',
+ *     tags: ['homepage', 'content'],
+ *     ttlConfigKey: 'cache.homepage.ttl_seconds',
  *   }
  * );
  */

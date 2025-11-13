@@ -452,21 +452,49 @@ export const recentlyViewedConfigs = createDynamicConfigGroup('recently_viewed_c
 });
 
 /**
- * Cache Configs - Cache TTL settings (Phase 3)
- * Controls cache durations across the application
- * Usage: const config = await cacheConfigs(); const ttl = config['cache.user_profile_ttl_s'];
+ * Cache Configs - Cache TTL settings and invalidation rules
+ * Controls cache durations and invalidation tags across the application
+ * Usage: const config = await cacheConfigs(); const ttl = config['cache.homepage.ttl_seconds'];
  */
 export const cacheConfigs = createDynamicConfigGroup('cache_configs', {
-  'cache.submission_form_fields_ttl_s': 21600, // 6 hours
-  'cache.category_stats_ttl_s': 300, // 5 minutes
-  'cache.trending_configs_ttl_s': 3600, // 1 hour
-  'cache.user_profile_ttl_s': 300, // 5 minutes
-  'cache.search_results_ttl_s': 1800, // 30 minutes
-  'cache.submission_review_ttl_s': 60, // 1 minute
-  'cache.company_list_ttl_s': 3600, // 1 hour
-  'cache.job_listings_ttl_s': 1800, // 30 minutes
-  'cache.collection_items_ttl_s': 1800, // 30 minutes
-  'cache.badge_counts_ttl_s': 300, // 5 minutes
-  'cache.analytics_stats_ttl_s': 600, // 10 minutes
-  'cache.newsletter_count_ttl_s': 300, // 5 minutes
+  // TTL Settings (in seconds)
+  'cache.homepage.ttl_seconds': 300, // 5 minutes
+  'cache.content_detail.ttl_seconds': 1800, // 30 minutes
+  'cache.content_list.ttl_seconds': 600, // 10 minutes
+  'cache.config_detail.ttl_seconds': 1800, // 30 minutes
+  'cache.config_list.ttl_seconds': 600, // 10 minutes
+  'cache.tool_detail.ttl_seconds': 1800, // 30 minutes
+  'cache.tool_list.ttl_seconds': 600, // 10 minutes
+  'cache.company_detail.ttl_seconds': 1800, // 30 minutes
+  'cache.company_list.ttl_seconds': 600, // 10 minutes
+  'cache.user_profile.ttl_seconds': 600, // 10 minutes
+  'cache.community.ttl_seconds': 600, // 10 minutes
+  'cache.article.ttl_seconds': 1800, // 30 minutes
+  'cache.boilerplate.ttl_seconds': 1800, // 30 minutes
+  'cache.course.ttl_seconds': 1800, // 30 minutes
+  'cache.book.ttl_seconds': 1800, // 30 minutes
+  'cache.quiz.ttl_seconds': 3600, // 1 hour
+  'cache.search.ttl_seconds': 3600, // 1 hour
+  'cache.jobs.ttl_seconds': 1800, // 30 minutes
+
+  // Invalidation Tag Arrays
+  'cache.invalidate.content_create': ['content', 'homepage', 'trending'] as string[],
+  'cache.invalidate.content_update': ['content', 'homepage', 'trending'] as string[],
+  'cache.invalidate.content_delete': ['content', 'homepage', 'trending'] as string[],
+  'cache.invalidate.config_create': ['configs', 'homepage'] as string[],
+  'cache.invalidate.config_update': ['configs', 'homepage'] as string[],
+  'cache.invalidate.config_delete': ['configs', 'homepage'] as string[],
+  'cache.invalidate.tool_create': ['tools', 'homepage'] as string[],
+  'cache.invalidate.tool_update': ['tools', 'homepage'] as string[],
+  'cache.invalidate.tool_delete': ['tools', 'homepage'] as string[],
+  'cache.invalidate.company_create': ['companies'] as string[],
+  'cache.invalidate.company_update': ['companies'] as string[],
+  'cache.invalidate.company_delete': ['companies'] as string[],
+  'cache.invalidate.user_update': ['users'] as string[],
+  'cache.invalidate.bookmark_create': ['user-bookmarks'] as string[],
+  'cache.invalidate.bookmark_delete': ['user-bookmarks'] as string[],
+  'cache.invalidate.vote': ['content', 'trending'] as string[],
+  'cache.invalidate.collection_create': ['collections'] as string[],
+  'cache.invalidate.collection_update': ['collections'] as string[],
+  'cache.invalidate.collection_delete': ['collections'] as string[],
 });
