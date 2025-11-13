@@ -20,6 +20,7 @@ import { AnimatePresence, motion } from 'motion/react';
 import type * as React from 'react';
 import { useCallback, useEffect, useState } from 'react';
 
+import { getAnimationConfig } from '@/src/lib/actions/feature-flags.actions';
 import { STATE_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
 
@@ -80,15 +81,13 @@ const Button = ({
   });
 
   useEffect(() => {
-    import('@/src/lib/flags').then(({ animationConfigs }) =>
-      animationConfigs().then((config) => {
-        setSpringDefault({
-          type: 'spring' as const,
-          stiffness: (config['animation.spring.default.stiffness'] as number) ?? 400,
-          damping: (config['animation.spring.default.damping'] as number) ?? 17,
-        });
-      })
-    );
+    getAnimationConfig().then((config) => {
+      setSpringDefault({
+        type: 'spring' as const,
+        stiffness: (config['animation.spring.default.stiffness'] as number) ?? 400,
+        damping: (config['animation.spring.default.damping'] as number) ?? 17,
+      });
+    });
   }, []);
 
   const addRipple = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {

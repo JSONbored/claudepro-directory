@@ -95,8 +95,8 @@ export const NEWSLETTER_CTA_CONFIG = {
 /** Get homepage featured categories from Statsig homepageConfigs */
 export async function getHomepageFeaturedCategories(): Promise<readonly CategoryId[]> {
   try {
-    const { homepageConfigs } = await import('@/src/lib/flags');
-    const config = await homepageConfigs();
+    const { getHomepageConfig } = await import('@/src/lib/actions/feature-flags.actions');
+    const config = await getHomepageConfig();
     const categories = config['homepage.featured_categories'] as string[];
     return categories as readonly CategoryId[];
   } catch {
@@ -107,8 +107,8 @@ export async function getHomepageFeaturedCategories(): Promise<readonly Category
 /** Get homepage tab categories from Statsig homepageConfigs */
 export async function getHomepageTabCategories(): Promise<readonly string[]> {
   try {
-    const { homepageConfigs } = await import('@/src/lib/flags');
-    const config = await homepageConfigs();
+    const { getHomepageConfig } = await import('@/src/lib/actions/feature-flags.actions');
+    const config = await getHomepageConfig();
     const categories = config['homepage.tab_categories'] as string[];
     return categories as readonly string[];
   } catch {

@@ -9,6 +9,7 @@ import { UnifiedCardGrid } from '@/src/components/core/domain/cards/card-grid';
 import { ConfigCard } from '@/src/components/core/domain/cards/config-card';
 import { Button } from '@/src/components/primitives/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/primitives/ui/tabs';
+import { getAnimationConfig } from '@/src/lib/actions/feature-flags.actions';
 import type { UnifiedCategoryConfig } from '@/src/lib/config/category-config';
 import { ROUTES } from '@/src/lib/constants';
 import type { DisplayableContent } from '@/src/lib/types/component.types';
@@ -46,8 +47,7 @@ const TabsSectionComponent: FC<TabsSectionProps> = ({
   }, []);
 
   useEffect(() => {
-    import('@/src/lib/flags')
-      .then(({ animationConfigs }) => animationConfigs())
+    getAnimationConfig()
       .then((config) => {
         setSpringDefault({
           type: 'spring' as const,

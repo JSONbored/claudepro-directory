@@ -10,6 +10,7 @@ import { Button } from '@/src/components/primitives/ui/button';
 import { Input } from '@/src/components/primitives/ui/input';
 import { Label } from '@/src/components/primitives/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/src/components/primitives/ui/popover';
+import { getTimeoutConfig } from '@/src/lib/actions/feature-flags.actions';
 import { createClient } from '@/src/lib/supabase/client';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import type { Database } from '@/src/types/database.types';
@@ -73,8 +74,7 @@ export function CompanySelector({ value, onChange, defaultCompanyName }: Company
 
   useEffect(() => {
     const loadDebounce = async () => {
-      const { timeoutConfigs } = await import('@/src/lib/flags');
-      const config = await timeoutConfigs();
+      const config = await getTimeoutConfig();
       const debounceMs = (config['timeout.ui.form_debounce_ms'] as number) || 300;
       const timer = setTimeout(() => searchCompanies(searchQuery), debounceMs);
       return () => clearTimeout(timer);

@@ -17,9 +17,9 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { motion, useDragControls } from 'motion/react';
 import type * as React from 'react';
 import { useEffect, useState } from 'react';
+import { getAnimationConfig } from '@/src/lib/actions/feature-flags.actions';
 import { X } from '@/src/lib/icons';
 import { POSITION_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
-
 import { cn } from '@/src/lib/utils';
 
 const Sheet = SheetPrimitive.Root;
@@ -89,8 +89,7 @@ const SheetContent = ({
   });
 
   useEffect(() => {
-    import('@/src/lib/flags')
-      .then(({ animationConfigs }) => animationConfigs())
+    getAnimationConfig()
       .then((config) => {
         setSpringSmooth({
           type: 'spring' as const,

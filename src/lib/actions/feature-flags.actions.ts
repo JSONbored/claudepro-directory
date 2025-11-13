@@ -9,8 +9,10 @@ import {
   animationConfigs,
   appSettings,
   cacheConfigs,
+  componentConfigs,
   featureFlags,
   formConfigs,
+  homepageConfigs,
   newsletterConfigs,
   pollingConfigs,
   pricingConfigs,
@@ -123,6 +125,28 @@ export async function getCacheConfig(): Promise<Record<string, unknown>> {
 export async function getPollingConfig(): Promise<Record<string, unknown>> {
   try {
     return await pollingConfigs();
+  } catch {
+    return {};
+  }
+}
+
+/**
+ * Get component configuration from Statsig
+ */
+export async function getComponentConfig(): Promise<Record<string, unknown>> {
+  try {
+    return await componentConfigs();
+  } catch {
+    return {};
+  }
+}
+
+/**
+ * Get homepage configuration from Statsig
+ */
+export async function getHomepageConfig(): Promise<Record<string, unknown>> {
+  try {
+    return await homepageConfigs();
   } catch {
     return {};
   }

@@ -21,6 +21,7 @@ import { Label } from '@/src/components/primitives/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/primitives/ui/tabs';
 import { Textarea } from '@/src/components/primitives/ui/textarea';
 import { submitContentForReview } from '@/src/lib/actions/content.actions';
+import { getAnimationConfig } from '@/src/lib/actions/feature-flags.actions';
 import type { Template } from '@/src/lib/data/templates';
 import {
   SUBMISSION_CONTENT_TYPES,
@@ -153,8 +154,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
   });
 
   useEffect(() => {
-    import('@/src/lib/flags')
-      .then(({ animationConfigs }) => animationConfigs())
+    getAnimationConfig()
       .then((config) => {
         setSpringSmooth({
           type: 'spring' as const,

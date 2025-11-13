@@ -3,6 +3,7 @@
 import { motion } from 'motion/react';
 import { useEffect, useState } from 'react';
 import { Alert, AlertDescription, AlertTitle } from '@/src/components/primitives/ui/alert';
+import { getTimeoutConfig } from '@/src/lib/actions/feature-flags.actions';
 import { AlertTriangle } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
@@ -37,12 +38,10 @@ export function DuplicateWarning({ contentType: _contentType, name }: DuplicateW
 
   // Load debounce value from config
   useState(() => {
-    import('@/src/lib/flags').then(({ timeoutConfigs }) =>
-      timeoutConfigs().then((config) => {
-        const ms = (config['timeout.ui.form_debounce_ms'] as number) || 300;
-        setDebounceMs(ms);
-      })
-    );
+    getTimeoutConfig().then((config) => {
+      const ms = (config['timeout.ui.form_debounce_ms'] as number) || 300;
+      setDebounceMs(ms);
+    });
   });
 
   const debouncedName = useDebounce(name, debounceMs);

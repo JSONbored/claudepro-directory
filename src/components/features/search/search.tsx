@@ -21,6 +21,7 @@ import {
   SelectValue,
 } from '@/src/components/primitives/ui/select';
 import { useUnifiedSearch } from '@/src/hooks/use-unified-search';
+import { getTimeoutConfig } from '@/src/lib/actions/feature-flags.actions';
 import { ChevronDown, ChevronUp, Filter, Search } from '@/src/lib/icons';
 import type { FilterState, UnifiedSearchProps } from '@/src/lib/types/component.types';
 import { POSITION_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
@@ -70,11 +71,9 @@ function UnifiedSearchComponent({
   const [debounceMs, setDebounceMs] = useState(150);
 
   useEffect(() => {
-    import('@/src/lib/flags').then(({ timeoutConfigs }) =>
-      timeoutConfigs().then((config) => {
-        setDebounceMs((config['timeout.ui.debounce_ms'] as number) ?? 150);
-      })
-    );
+    getTimeoutConfig().then((config) => {
+      setDebounceMs((config['timeout.ui.debounce_ms'] as number) ?? 150);
+    });
   }, []);
 
   useEffect(() => {

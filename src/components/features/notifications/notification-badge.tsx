@@ -16,6 +16,7 @@
 
 import { AnimatePresence, motion } from 'motion/react';
 import { useEffect, useState } from 'react';
+import { getAnimationConfig } from '@/src/lib/actions/feature-flags.actions';
 import { type NotificationStore, useNotificationStore } from '@/src/lib/stores/notification-store';
 import { POSITION_PATTERNS } from '@/src/lib/ui-constants';
 
@@ -34,8 +35,7 @@ export function NotificationBadge({ className = '' }: NotificationBadgeProps) {
   });
 
   useEffect(() => {
-    import('@/src/lib/flags')
-      .then(({ animationConfigs }) => animationConfigs())
+    getAnimationConfig()
       .then((config) => {
         setSpringBouncy({
           type: 'spring' as const,

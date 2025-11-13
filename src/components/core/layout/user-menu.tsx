@@ -35,6 +35,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/src/components/primitives/ui/dropdown-menu';
+import { getAnimationConfig } from '@/src/lib/actions/feature-flags.actions';
 import { Activity, BookOpen, LogOut, Settings, User as UserIcon } from '@/src/lib/icons';
 import { createClient } from '@/src/lib/supabase/client';
 import { DIMENSIONS, UI_CLASSES } from '@/src/lib/ui-constants';
@@ -88,8 +89,7 @@ export function UserMenu({ className }: UserMenuProps) {
   }, [supabase]);
 
   useEffect(() => {
-    import('@/src/lib/flags')
-      .then(({ animationConfigs }) => animationConfigs())
+    getAnimationConfig()
       .then((config) => {
         setSpringDefault({
           type: 'spring' as const,

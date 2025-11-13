@@ -3,6 +3,7 @@
 import { Check, Copy } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/src/components/primitives/ui/button';
+import { getTimeoutConfig } from '@/src/lib/actions/feature-flags.actions';
 import { toasts } from '@/src/lib/utils/toast.utils';
 import type { ButtonStyleProps } from './button-types';
 
@@ -42,8 +43,7 @@ export function SimpleCopyButton({
       toasts.raw.success(successMessage);
       onCopySuccess?.();
 
-      const { timeoutConfigs } = await import('@/src/lib/flags');
-      const config = await timeoutConfigs();
+      const config = await getTimeoutConfig();
       const resetDelay = (config['timeout.ui.clipboard_reset_delay_ms'] as number) || 2000;
       setTimeout(() => setCopied(false), resetDelay);
     } catch (error) {

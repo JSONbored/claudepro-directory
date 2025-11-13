@@ -16,10 +16,12 @@ import {
   HomepageStatsSkeleton,
   Skeleton,
 } from '@/src/components/primitives/feedback/loading-skeleton';
+import { getAnimationConfig } from '@/src/lib/actions/feature-flags.actions';
 import {
   type CategoryId,
   getCategoryConfigs,
   getCategoryStatsConfig,
+  getHomepageFeaturedCategories,
 } from '@/src/lib/config/category-config';
 import { ROUTES } from '@/src/lib/constants';
 import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
@@ -70,16 +72,13 @@ function HomePageClientComponent({
   const categoryConfigs = useMemo(() => getCategoryConfigs(), []);
 
   useEffect(() => {
-    import('@/src/lib/config/category-config').then(({ getHomepageFeaturedCategories }) =>
-      getHomepageFeaturedCategories().then((categories) => {
-        setFeaturedCategories(categories);
-      })
-    );
+    getHomepageFeaturedCategories().then((categories) => {
+      setFeaturedCategories(categories);
+    });
   }, []);
 
   useEffect(() => {
-    import('@/src/lib/flags')
-      .then(({ animationConfigs }) => animationConfigs())
+    getAnimationConfig()
       .then((config) => {
         setSpringDefault({
           type: 'spring' as const,

@@ -12,6 +12,7 @@ import { BorderBeam } from '@/src/components/primitives/animation/border-beam';
 import { ReviewRatingCompact } from '@/src/components/primitives/feedback/review-rating-compact';
 import { Button } from '@/src/components/primitives/ui/button';
 import { useCopyToClipboard } from '@/src/hooks/use-copy-to-clipboard';
+import { getComponentConfig } from '@/src/lib/actions/feature-flags.actions';
 import { addBookmark } from '@/src/lib/actions/user.actions';
 import { type CategoryId, isValidCategory } from '@/src/lib/config/category-config';
 import { trackInteraction } from '@/src/lib/edge/client';
@@ -58,17 +59,15 @@ export const ConfigCard = memo(
     });
 
     useEffect(() => {
-      import('@/src/lib/flags').then(({ componentConfigs }) =>
-        componentConfigs().then((config) => {
-          setCardConfig({
-            showCopyButton: (config['cards.show_copy_button'] as boolean) ?? true,
-            showBookmark: (config['cards.show_bookmark'] as boolean) ?? true,
-            showViewCount: (config['cards.show_view_count'] as boolean) ?? true,
-            showCopyCount: (config['cards.show_copy_count'] as boolean) ?? true,
-            showRating: (config['cards.show_rating'] as boolean) ?? false,
-          });
-        })
-      );
+      getComponentConfig().then((config) => {
+        setCardConfig({
+          showCopyButton: (config['cards.show_copy_button'] as boolean) ?? true,
+          showBookmark: (config['cards.show_bookmark'] as boolean) ?? true,
+          showViewCount: (config['cards.show_view_count'] as boolean) ?? true,
+          showCopyCount: (config['cards.show_copy_count'] as boolean) ?? true,
+          showRating: (config['cards.show_rating'] as boolean) ?? false,
+        });
+      });
     }, []);
 
     // Swipe gesture handlers for mobile quick actions

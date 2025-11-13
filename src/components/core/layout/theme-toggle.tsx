@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Switch } from '@/src/components/primitives/ui/switch';
 import { useViewTransition } from '@/src/hooks/use-view-transition';
+import { getTimeoutConfig } from '@/src/lib/actions/feature-flags.actions';
 import { Moon, Sun } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
@@ -36,11 +37,9 @@ export function ThemeToggle() {
 
   // Load transition duration from config
   useEffect(() => {
-    import('@/src/lib/flags').then(({ timeoutConfigs }) =>
-      timeoutConfigs().then((config) => {
-        setTransitionMs((config['timeout.ui.transition_ms'] as number) ?? 200);
-      })
-    );
+    getTimeoutConfig().then((config) => {
+      setTransitionMs((config['timeout.ui.transition_ms'] as number) ?? 200);
+    });
   }, []);
 
   useEffect(() => {
