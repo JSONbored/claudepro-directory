@@ -66,14 +66,8 @@ verify_jwt = false  # Unified webhook router with HMAC SHA-1/SHA-256/Svix verifi
 [functions.email-handler]
 verify_jwt = false  # Uses Svix signature verification for auth hooks
 
-[functions.discord-error-relay]
-verify_jwt = false  # Database-triggered webhook (internal)
-
-[functions.discord-content-announcement]
-verify_jwt = false  # Database-triggered webhook (internal)
-
-[functions.discord-submission-notification]
-verify_jwt = false  # Database-triggered webhook (internal)
+[functions.discord-router]
+verify_jwt = false  # Unified Discord notification router (database-triggered, internal) - Handles ALL Discord notifications
 
 [functions.changelog-auto-sync]
 verify_jwt = false  # Vercel webhook with signature verification
@@ -81,9 +75,6 @@ verify_jwt = false  # Vercel webhook with signature verification
 # =============================================================================
 # Authenticated Functions - Manual JWT Verification in Code
 # =============================================================================
-
-[functions.jobs-handler]
-verify_jwt = false  # Manual JWT verification via supabaseServiceRole.auth.getUser()
 
 [functions.companies-handler]
 verify_jwt = false  # GET: Public profiles (CDN cached). POST: Manual JWT verification via supabaseServiceRole.auth.getUser()
