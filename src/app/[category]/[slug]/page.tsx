@@ -21,6 +21,7 @@ import { type ContentItem, getContentByCategory } from '@/src/lib/content/supaba
 import { featureFlags } from '@/src/lib/flags';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
+import { cachedRPCWithDedupe } from '@/src/lib/supabase/cached-rpc';
 import { createAnonClient } from '@/src/lib/supabase/server-anon';
 import type { Database } from '@/src/types/database.types';
 
