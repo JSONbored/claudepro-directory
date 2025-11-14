@@ -3250,6 +3250,30 @@ export type Database = {
       }
       generate_tool_llms_txt: { Args: { p_tool_name: string }; Returns: string }
       get_account_dashboard: { Args: { p_user_id: string }; Returns: Json }
+      get_active_announcement: {
+        Args: { p_now?: string }
+        Returns: {
+          active: boolean
+          created_at: string
+          dismissible: boolean
+          end_date: string | null
+          href: string | null
+          icon: string | null
+          id: string
+          priority: Database["public"]["Enums"]["announcement_priority"]
+          start_date: string | null
+          tag: string | null
+          title: string
+          updated_at: string
+          variant: Database["public"]["Enums"]["announcement_variant"]
+        }
+        SetofOptions: {
+          from: "*"
+          to: "announcements"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       get_active_notifications: {
         Args: { p_dismissed_ids?: string[] }
         Returns: {
@@ -3746,6 +3770,57 @@ export type Database = {
         }[]
       }
       get_quiz_configuration: { Args: never; Returns: Json }
+      get_recent_content: {
+        Args: { p_category?: string; p_days?: number; p_limit?: number }
+        Returns: {
+          author: string
+          author_profile_url: string | null
+          avg_rating: number | null
+          bookmark_count: number
+          category: string
+          content: string | null
+          copy_count: number
+          created_at: string
+          date_added: string
+          description: string
+          difficulty_score: number | null
+          display_title: string | null
+          documentation_url: string | null
+          download_url: string | null
+          examples: Json | null
+          features: string[] | null
+          git_hash: string | null
+          has_breaking_changes: boolean | null
+          has_prerequisites: boolean | null
+          has_troubleshooting: boolean | null
+          id: string
+          json_ld: Json | null
+          metadata: Json
+          og_type: string | null
+          popularity_score: number | null
+          reading_time: number | null
+          review_count: number
+          robots_follow: boolean | null
+          robots_index: boolean | null
+          seo_title: string | null
+          slug: string
+          source: string | null
+          storage_url: string | null
+          synced_at: string | null
+          tags: string[]
+          title: string | null
+          twitter_card: string | null
+          updated_at: string
+          use_cases: string[] | null
+          view_count: number
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "content"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       get_recent_merged: { Args: { p_limit?: number }; Returns: Json }
       get_recommendations: {
         Args: {
@@ -3877,6 +3952,57 @@ export type Database = {
           tag_count: number
         }[]
       }
+      get_trending_content: {
+        Args: { p_category?: string; p_limit?: number }
+        Returns: {
+          author: string
+          author_profile_url: string | null
+          avg_rating: number | null
+          bookmark_count: number
+          category: string
+          content: string | null
+          copy_count: number
+          created_at: string
+          date_added: string
+          description: string
+          difficulty_score: number | null
+          display_title: string | null
+          documentation_url: string | null
+          download_url: string | null
+          examples: Json | null
+          features: string[] | null
+          git_hash: string | null
+          has_breaking_changes: boolean | null
+          has_prerequisites: boolean | null
+          has_troubleshooting: boolean | null
+          id: string
+          json_ld: Json | null
+          metadata: Json
+          og_type: string | null
+          popularity_score: number | null
+          reading_time: number | null
+          review_count: number
+          robots_follow: boolean | null
+          robots_index: boolean | null
+          seo_title: string | null
+          slug: string
+          source: string | null
+          storage_url: string | null
+          synced_at: string | null
+          tags: string[]
+          title: string | null
+          twitter_card: string | null
+          updated_at: string
+          use_cases: string[] | null
+          view_count: number
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "content"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       get_trending_metrics: {
         Args: { p_category?: string; p_limit?: number }
         Returns: {
@@ -3892,6 +4018,24 @@ export type Database = {
           trending_score: number
           views_7d: number
           views_prev_7d: number
+          views_total: number
+        }[]
+      }
+      get_trending_metrics_with_content: {
+        Args: { p_category?: string; p_limit?: number }
+        Returns: {
+          author: string
+          bookmarks_total: number
+          category: string
+          copies_total: number
+          description: string
+          engagement_score: number
+          freshness_score: number
+          slug: string
+          source: string
+          tags: string[]
+          title: string
+          trending_score: number
           views_total: number
         }[]
       }

@@ -7,12 +7,7 @@ import {
   CardTitle,
 } from '@/src/components/primitives/ui/card';
 import { getUserIdentities } from '@/src/lib/actions/user.actions';
-
-/**
- * Connected Accounts Page - OAuth provider management
- * Single RPC call via get_user_identities() for minimal egress
- */
-
+import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 
 export async function generateMetadata() {
@@ -30,6 +25,19 @@ export default async function ConnectedAccountsPage() {
   );
 
   if (!result.data || result.serverError) {
+    if (result.serverError) {
+      const normalizedError =
+        typeof result.serverError === 'string'
+          ? new Error(result.serverError)
+          : new Error(JSON.stringify(result.serverError));
+      logger.error(
+        'ConnectedAccountsPage: getUserIdentities returned serverError',
+        normalizedError
+      );
+    } else {
+      logger.warn('ConnectedAccountsPage: getUserIdentities returned no data');
+    }
+
     // Extract readable error message - handle both string and object cases
     const errorMessage = result.serverError
       ? typeof result.serverError === 'string'

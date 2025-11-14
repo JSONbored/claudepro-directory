@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import { JobForm } from '@/src/components/core/forms/job-form';
 import { type CreateJobInput, createJob } from '@/src/lib/actions/jobs.actions';
+import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
@@ -14,10 +15,22 @@ export default function NewJobPage() {
     const result = await createJob(data);
 
     if (result?.serverError) {
+      logger.error('NewJobPage: createJob failed', new Error(result.serverError), {
+        title: data.title,
+        company: data.company,
+      });
       throw new Error(result.serverError);
     }
 
-    if (result?.data?.success) {
+    if (!result?.data) {
+      logger.error('NewJobPage: createJob returned no data', undefined, {
+        title: data.title,
+        company: data.company,
+      });
+      return { success: false };
+    }
+
+    if (result.data.success) {
       // If requires payment and checkout URL exists, return for client redirect
       if (result.data.requiresPayment && result.data.checkoutUrl) {
         return {

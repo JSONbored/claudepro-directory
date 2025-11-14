@@ -19,13 +19,13 @@
  */
 
 import type { Database } from '../_shared/database.types.ts';
-import { getWithAuthCorsHeaders } from '../_shared/utils/cors.ts';
 import {
   badRequestResponse,
   errorResponse,
+  getWithAuthCorsHeaders,
   methodNotAllowedResponse,
-} from '../_shared/utils/response.ts';
-import { supabaseAnon } from '../_shared/utils/supabase.ts';
+} from '../_shared/utils/http.ts';
+import { supabaseAnon } from '../_shared/utils/supabase-clients.ts';
 
 type ContentSearchResult =
   Database['public']['Functions']['search_content_optimized']['Returns'][number];

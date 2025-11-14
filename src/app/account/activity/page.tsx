@@ -8,6 +8,7 @@ import {
 } from '@/src/components/primitives/ui/card';
 import { getActivitySummary, getActivityTimeline } from '@/src/lib/actions/user.actions';
 import { FileText, GitPullRequest, MessageSquare, ThumbsUp } from '@/src/lib/icons';
+import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
@@ -24,6 +25,22 @@ export default async function ActivityPage() {
   const timeline = timelineResult.status === 'fulfilled' ? timelineResult.value?.data : undefined;
 
   if (!(summary && timeline)) {
+    if (summaryResult.status === 'rejected') {
+      logger.error(
+        'ActivityPage: getActivitySummary failed',
+        summaryResult.reason instanceof Error
+          ? summaryResult.reason
+          : new Error(String(summaryResult.reason))
+      );
+    }
+    if (timelineResult.status === 'rejected') {
+      logger.error(
+        'ActivityPage: getActivityTimeline failed',
+        timelineResult.reason instanceof Error
+          ? timelineResult.reason
+          : new Error(String(timelineResult.reason))
+      );
+    }
     return (
       <div className="space-y-6">
         <div>

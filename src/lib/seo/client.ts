@@ -1,10 +1,10 @@
 /**
- * Unified SEO Client - Fetches metadata + schemas from seo-api edge function
+ * Unified SEO Client - Fetches metadata + schemas from data-api/seo
  */
 
 import { logger } from '@/src/lib/logger';
 
-const SEO_API_URL = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/seo-api`;
+const SEO_API_URL = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/data-api/seo`;
 
 export interface SEOMetadata {
   title: string;

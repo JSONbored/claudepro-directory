@@ -59,8 +59,8 @@ export async function generateMetadata({ params }: CompanyPageProps): Promise<Me
 export default async function CompanyPage({ params }: CompanyPageProps) {
   const { slug } = await params;
 
-  // Call Supabase Edge Function (benefits from CDN cache)
-  const url = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/companies-handler?slug=${slug}`;
+  // Call unified data-api (benefits from CDN cache)
+  const url = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/data-api/company?slug=${slug}`;
 
   const res = await fetch(url, {
     next: { revalidate: 1800 }, // Vercel ISR as fallback

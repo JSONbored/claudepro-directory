@@ -5,7 +5,9 @@
  * Secure server-side RPC calls for event tracking
  */
 
+import { cacheConfigs } from '@/src/lib/flags';
 import { logger } from '@/src/lib/logger';
+import { revalidateCacheTags } from '@/src/lib/supabase/cache-helpers';
 import { createClient } from '@/src/lib/supabase/server';
 
 interface TrackSponsoredEventData {
@@ -14,6 +16,21 @@ interface TrackSponsoredEventData {
   position?: number;
   target_url?: string;
   [key: string]: string | number | undefined;
+}
+
+async function invalidateSponsoredTrackingCaches(): Promise<void> {
+  try {
+    const config = await cacheConfigs();
+    const invalidateTags = config['cache.invalidate.sponsored_tracking'] as string[] | undefined;
+    if (invalidateTags?.length) {
+      revalidateCacheTags(invalidateTags);
+    }
+  } catch (error) {
+    logger.error(
+      'Failed to invalidate sponsored tracking caches',
+      error instanceof Error ? error : new Error(String(error))
+    );
+  }
 }
 
 /**
@@ -39,6 +56,7 @@ export async function trackSponsoredImpression(data: {
       p_user_id: '',
       p_data: eventData,
     });
+    await invalidateSponsoredTrackingCaches();
   } catch (error) {
     // Silent fail - impressions are best-effort
     logger.error(
@@ -70,6 +88,7 @@ export async function trackSponsoredClick(data: {
       p_user_id: '',
       p_data: eventData,
     });
+    await invalidateSponsoredTrackingCaches();
   } catch (error) {
     // Silent fail - clicks are best-effort
     logger.error(

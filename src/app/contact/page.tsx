@@ -2,6 +2,7 @@ import { NavLink } from '@/src/components/core/navigation/navigation-link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
 import { APP_CONFIG, SOCIAL_LINKS } from '@/src/lib/constants';
 import { DiscordIcon, Github, Mail, MessageSquare } from '@/src/lib/icons';
+import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 
 export const metadata = generatePageMetadata('/contact');
@@ -13,6 +14,10 @@ export const metadata = generatePageMetadata('/contact');
 export const revalidate = false;
 
 export default function ContactPage() {
+  if (!SOCIAL_LINKS.email) {
+    logger.warn('ContactPage: SOCIAL_LINKS.email is not configured');
+  }
+
   return (
     <div className="container mx-auto max-w-4xl px-4 py-8 sm:py-12">
       <div className="mb-8 text-center">

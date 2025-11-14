@@ -32,6 +32,7 @@
 'use client';
 
 import { useCallback, useMemo } from 'react';
+import { logger } from '@/src/lib/logger';
 
 interface UseViewTransitionReturn {
   /**
@@ -82,10 +83,10 @@ export function useViewTransition(): UseViewTransitionReturn {
       try {
         return document.startViewTransition(updateCallback);
       } catch (error) {
-        // Fallback on error (suppress console warning in production)
         if (process.env.NODE_ENV === 'development') {
-          // biome-ignore lint/suspicious/noConsole: Development-only warning for debugging view transitions
-          console.warn('View Transition failed, falling back to instant update:', error);
+          logger.warn('View Transition failed, falling back to instant update', {
+            error: error instanceof Error ? error.message : String(error),
+          });
         }
         Promise.resolve(updateCallback()).catch(() => {
           // Silently handle errors in fallback mode

@@ -9,6 +9,7 @@ import {
 } from '@/src/components/primitives/ui/card';
 import { getSponsorshipAnalytics } from '@/src/lib/data/user-data';
 import { BarChart, Eye, MousePointer, TrendingUp } from '@/src/lib/icons';
+import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
@@ -27,12 +28,19 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) return null;
+  if (!user) {
+    logger.warn('SponsorshipAnalyticsPage: unauthenticated access attempt', { sponsorshipId: id });
+    return null;
+  }
 
   // User-scoped edge-cached RPC via centralized data layer
   const analyticsData = await getSponsorshipAnalytics(user.id, id);
 
   if (!analyticsData) {
+    logger.warn('SponsorshipAnalyticsPage: analytics not found or inaccessible', {
+      sponsorshipId: id,
+      userId: user.id,
+    });
     notFound();
   }
 

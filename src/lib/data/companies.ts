@@ -1,7 +1,11 @@
+'use server';
+
 /**
  * Companies data layer - Edge-cached RPC wrappers
  */
 
+import { unstable_cache } from 'next/cache';
+import { cacheConfigs } from '@/src/lib/flags';
 import { logger } from '@/src/lib/logger';
 import { cachedRPCWithDedupe } from '@/src/lib/supabase/cached-rpc';
 import type { Database } from '@/src/types/database.types';
@@ -41,6 +45,17 @@ interface CompaniesListResult {
   companies: CompanyWithStats[];
   total: number;
 }
+
+export type CompanySearchResult = {
+  id: string;
+  name: string;
+  slug: string | null;
+  description: string | null;
+};
+
+const EDGE_SEARCH_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
+  ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/unified-search`
+  : null;
 
 /**
  * Get company profile with active jobs and stats (public, cached)
@@ -96,4 +111,66 @@ export async function getCompaniesList(limit = 50, offset = 0): Promise<Companie
     );
     return { companies: [], total: 0 };
   }
+}
+
+async function fetchCompanySearchResults(
+  query: string,
+  limit: number
+): Promise<CompanySearchResult[]> {
+  if (!EDGE_SEARCH_URL) {
+    throw new Error('Supabase URL is not configured for company search');
+  }
+
+  const params = new URLSearchParams();
+  params.set('q', query);
+  params.set('entities', 'company');
+  params.set('limit', String(limit));
+
+  const response = await fetch(`${EDGE_SEARCH_URL}?${params.toString()}`, {
+    headers: { 'Content-Type': 'application/json' },
+    cache: 'no-store',
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    logger.error('Company search fetch failed', new Error(errorText || response.statusText), {
+      status: response.status,
+      query,
+    });
+    throw new Error('Company search failed');
+  }
+
+  const data = (await response.json()) as {
+    results?: Array<{ id: string; title: string; slug: string | null; description: string | null }>;
+  };
+
+  return (data.results ?? []).map((entity) => ({
+    id: entity.id,
+    name: entity.title || entity.slug || '',
+    slug: entity.slug,
+    description: entity.description,
+  }));
+}
+
+/**
+ * Search companies via unified-search edge function (cached)
+ */
+export async function searchCompanies(query: string, limit = 10): Promise<CompanySearchResult[]> {
+  const trimmed = query.trim();
+  if (trimmed.length < 2) {
+    return [];
+  }
+
+  const normalized = trimmed.toLowerCase();
+  const config = await cacheConfigs();
+  const ttl = (config['cache.company_search.ttl_seconds'] as number) ?? 300;
+
+  return unstable_cache(
+    () => fetchCompanySearchResults(trimmed, limit),
+    [`company-search-${normalized}-${limit}`],
+    {
+      revalidate: ttl,
+      tags: ['company-search'],
+    }
+  )();
 }

@@ -22,7 +22,6 @@ import { OnboardingGettingStarted } from '../_shared/templates/onboarding-gettin
 import { OnboardingPowerTips } from '../_shared/templates/onboarding-power-tips.tsx';
 import { OnboardingStayEngaged } from '../_shared/templates/onboarding-stay-engaged.tsx';
 import { WeeklyDigest } from '../_shared/templates/weekly-digest.tsx';
-import { buildContactProperties, inferInitialTopics } from '../_shared/utils/resend-helpers.ts';
 import {
   badRequestResponse,
   errorResponse,
@@ -30,14 +29,17 @@ import {
   methodNotAllowedResponse,
   publicCorsHeaders,
   successResponse,
-} from '../_shared/utils/response.ts';
+} from '../_shared/utils/http.ts';
+import { buildContactProperties, inferInitialTopics } from '../_shared/utils/resend-helpers.ts';
 import { syncContactSegment } from '../_shared/utils/segment-manager.ts';
-import { supabaseServiceRole } from '../_shared/utils/supabase-service-role.ts';
+import { supabaseServiceRole } from '../_shared/utils/supabase-clients.ts';
 
 validateEnvironment(['resend', 'auth-hook']);
 
 const resend = new Resend(RESEND_ENV.apiKey);
 const hookSecret = AUTH_HOOK_ENV.secret.replace('v1,whsec_', '');
+const NEWSLETTER_COUNT_TTL_SECONDS = Number(Deno.env.get('NEWSLETTER_COUNT_TTL_S') ?? '300');
+let newsletterCountCache: { value: number; expiresAt: number } | null = null;
 
 Deno.serve(async (req: Request) => {
   // Handle CORS preflight - Use public headers (no Authorization to avoid CSRF)
@@ -70,6 +72,8 @@ Deno.serve(async (req: Request) => {
         return await handleDigest();
       case 'sequence':
         return await handleSequence();
+      case 'get-count':
+        return await handleGetNewsletterCount();
       // Job lifecycle emails
       case 'job-submitted':
         return await handleJobSubmitted(req);
@@ -836,4 +840,40 @@ async function handleJobPaymentConfirmed(req: Request): Promise<Response> {
   if (error) throw new Error(error.message);
 
   return successResponse({ sent: true, id: data?.id, jobId });
+}
+
+async function getCachedNewsletterCount(): Promise<number> {
+  const now = Date.now();
+  if (newsletterCountCache && newsletterCountCache.expiresAt > now) {
+    return newsletterCountCache.value;
+  }
+
+  const { data, error } = await supabaseServiceRole.rpc('get_newsletter_subscriber_count');
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  const count = (data as number) ?? 0;
+  newsletterCountCache = {
+    value: count,
+    expiresAt: now + NEWSLETTER_COUNT_TTL_SECONDS * 1000,
+  };
+  return count;
+}
+
+async function handleGetNewsletterCount(): Promise<Response> {
+  try {
+    const count = await getCachedNewsletterCount();
+    const cacheControl = `public, max-age=${NEWSLETTER_COUNT_TTL_SECONDS}, stale-while-revalidate=${NEWSLETTER_COUNT_TTL_SECONDS}`;
+    const headers = {
+      ...publicCorsHeaders,
+      'Cache-Control': cacheControl,
+      'CDN-Cache-Control': cacheControl,
+      'Vercel-CDN-Cache-Control': `public, s-maxage=${NEWSLETTER_COUNT_TTL_SECONDS}, stale-while-revalidate=${NEWSLETTER_COUNT_TTL_SECONDS}`,
+    };
+
+    return jsonResponse({ count }, 200, headers);
+  } catch (error) {
+    return errorResponse(error, 'handleGetNewsletterCount');
+  }
 }

@@ -6,6 +6,7 @@ import { headers } from 'next/headers';
 import { createSafeActionClient, DEFAULT_SERVER_ERROR_MESSAGE } from 'next-safe-action';
 import { z } from 'zod';
 import { logger } from '@/src/lib/logger';
+import { logActionFailure, normalizeError } from '@/src/lib/utils/error.utils';
 
 const actionMetadataSchema = z.object({
   actionName: z.string().min(1),
@@ -19,13 +20,14 @@ export const actionClient = createSafeActionClient({
     return actionMetadataSchema;
   },
   handleServerError(error) {
-    logger.error('Server action error', error instanceof Error ? error : new Error(String(error)), {
-      errorType: error.constructor?.name || 'Unknown',
+    const normalized = normalizeError(error);
+    logger.error('Server action error', normalized, {
+      errorType: normalized.constructor?.name || 'Unknown',
     });
     if (process.env.NODE_ENV === 'production') {
       return DEFAULT_SERVER_ERROR_MESSAGE;
     }
-    return error.message || DEFAULT_SERVER_ERROR_MESSAGE;
+    return normalized.message || DEFAULT_SERVER_ERROR_MESSAGE;
   },
 }).use(async ({ next }) => {
   const startTime = performance.now();
@@ -40,7 +42,19 @@ export const actionClient = createSafeActionClient({
   });
 });
 
-export const rateLimitedAction = actionClient.use(async ({ next, metadata }) => {
+const loggedAction = actionClient.use(async ({ next, metadata }) => {
+  try {
+    return await next();
+  } catch (error) {
+    const actionName = metadata?.actionName ?? 'unknown';
+    logActionFailure(actionName, error, {
+      category: metadata?.category ?? 'uncategorized',
+    });
+    throw error;
+  }
+});
+
+export const rateLimitedAction = loggedAction.use(async ({ next, metadata }) => {
   const parsedMetadata = actionMetadataSchema.safeParse(metadata);
   if (!parsedMetadata.success) {
     logger.error('Invalid action metadata', new Error(parsedMetadata.error.message), {

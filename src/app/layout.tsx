@@ -36,6 +36,7 @@ import { StructuredData } from '@/src/components/core/infra/structured-data';
 import { getActiveAnnouncement } from '@/src/components/core/layout/announcement-banner-server';
 import { LayoutContent } from '@/src/components/core/layout/root-layout-wrapper';
 import { UmamiScript } from '@/src/components/core/shared/analytics-script';
+import { NotificationsProvider } from '@/src/components/providers/notifications-provider';
 import { APP_CONFIG } from '@/src/lib/constants';
 import { getNavigationMenu } from '@/src/lib/data/navigation';
 import { featureFlags, newsletterExperiments } from '@/src/lib/flags';
@@ -165,10 +166,18 @@ export default async function RootLayout({
   const fabSearchAction = await featureFlags.fabSearchAction();
   const fabScrollToTop = await featureFlags.fabScrollToTop();
   const fabNotifications = await featureFlags.fabNotifications();
+  const notificationsProviderFlag = await featureFlags.notificationsProvider();
+  const notificationsSheetFlag = await featureFlags.notificationsSheet();
+  const notificationsToastsFlag = await featureFlags.notificationsToasts();
 
   // Fetch newsletter experiment variants server-side
   const footerDelayVariant = await newsletterExperiments.footerDelay();
   const ctaVariant = await newsletterExperiments.ctaVariant();
+
+  const notificationsEnabled = notificationsProviderFlag ?? true;
+  const notificationsSheetEnabled = notificationsSheetFlag ?? true;
+  const notificationsToastsEnabled = notificationsToastsFlag ?? true;
+  const fabNotificationsEnabled = Boolean(fabNotifications && notificationsEnabled);
 
   return (
     <html
@@ -217,26 +226,35 @@ export default async function RootLayout({
           enableColorScheme={false}
         >
           <PostCopyEmailProvider>
-            <ErrorBoundary>
-              <LayoutContent
-                announcement={announcement}
-                navigationData={navigationData}
-                useFloatingActionBar={useFloatingActionBar}
-                fabFlags={{
-                  showSubmit: fabSubmitAction,
-                  showSearch: fabSearchAction,
-                  showScrollToTop: fabScrollToTop,
-                  showNotifications: fabNotifications,
-                }}
-                footerDelayVariant={footerDelayVariant}
-                ctaVariant={ctaVariant}
-              >
-                {children}
-              </LayoutContent>
-            </ErrorBoundary>
-            <Toaster />
-            <NotificationToastHandler />
-            {/* Newsletter capture is conditionally rendered in LayoutContent for non-auth pages */}
+            <NotificationsProvider
+              flags={{
+                enableNotifications: notificationsEnabled,
+                enableSheet: notificationsSheetEnabled,
+                enableToasts: notificationsToastsEnabled,
+                enableFab: fabNotificationsEnabled,
+              }}
+            >
+              <ErrorBoundary>
+                <LayoutContent
+                  announcement={announcement}
+                  navigationData={navigationData}
+                  useFloatingActionBar={useFloatingActionBar}
+                  fabFlags={{
+                    showSubmit: fabSubmitAction,
+                    showSearch: fabSearchAction,
+                    showScrollToTop: fabScrollToTop,
+                    showNotifications: fabNotificationsEnabled,
+                  }}
+                  footerDelayVariant={footerDelayVariant}
+                  ctaVariant={ctaVariant}
+                >
+                  {children}
+                </LayoutContent>
+              </ErrorBoundary>
+              <Toaster />
+              <NotificationToastHandler />
+              {/* Newsletter capture is conditionally rendered in LayoutContent for non-auth pages */}
+            </NotificationsProvider>
           </PostCopyEmailProvider>
         </ThemeProvider>
         <Analytics />

@@ -6,6 +6,7 @@
 
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { useAction } from 'next-safe-action/hooks';
 import { useEffect, useId, useState, useTransition } from 'react';
 import { FormField } from '@/src/components/core/forms/form-field-wrapper';
 import { Button } from '@/src/components/primitives/ui/button';
@@ -17,17 +18,22 @@ import {
   CardTitle,
 } from '@/src/components/primitives/ui/card';
 import { SelectItem } from '@/src/components/primitives/ui/select';
-import { createCompany, updateCompany } from '@/src/lib/actions/companies.actions';
+import {
+  createCompany,
+  updateCompany,
+  uploadCompanyLogoAction,
+} from '@/src/lib/actions/companies.actions';
 import { getFormConfig } from '@/src/lib/actions/feature-flags.actions';
 import { ROUTES } from '@/src/lib/constants';
 import { FileText, X } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
-import { createClient } from '@/src/lib/supabase/client';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { toasts } from '@/src/lib/utils/toast.utils';
 import type { Database } from '@/src/types/database.types';
 
 type CompanyRow = Database['public']['Tables']['companies']['Row'];
+
+type AllowedImageMimeType = 'image/jpeg' | 'image/png' | 'image/webp';
 
 interface CompanyFormProps {
   initialData?: Partial<CompanyRow>;
@@ -38,6 +44,18 @@ interface CompanyFormProps {
 let MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 let MAX_DIMENSION = 2048; // 2048px
 
+async function fileToBase64(file: File) {
+  const buffer = await file.arrayBuffer();
+  let binary = '';
+  const bytes = new Uint8Array(buffer);
+  const chunkSize = 0x8000;
+  for (let i = 0; i < bytes.length; i += chunkSize) {
+    const chunk = bytes.subarray(i, i + chunkSize);
+    binary += String.fromCharCode(...chunk);
+  }
+  return btoa(binary);
+}
+
 export function CompanyForm({ initialData, mode }: CompanyFormProps) {
   const router = useRouter();
   const logoUploadId = useId();
@@ -46,6 +64,7 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
   const [logoUrl, setLogoUrl] = useState<string | null>(initialData?.logo || null);
   const [logoPreview, setLogoPreview] = useState<string | null>(initialData?.logo || null);
   const [useCursorDate, setUseCursorDate] = useState<boolean>(!!initialData?.using_cursor_since);
+  const { executeAsync: uploadLogo } = useAction(uploadCompanyLogoAction);
 
   // Load form validation config from Statsig on mount
   useEffect(() => {
@@ -124,46 +143,30 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
     setIsUploadingLogo(true);
 
     try {
-      const supabase = createClient();
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
+      const fileBase64 = await fileToBase64(file);
+      const result = await uploadLogo({
+        fileName: file.name,
+        mimeType: file.type as AllowedImageMimeType,
+        fileBase64,
+        companyId: initialData?.id,
+        oldLogoUrl: logoUrl ?? undefined,
+      });
 
-      if (!session) {
-        toasts.error.authRequired();
-        return;
+      if (result?.serverError) {
+        throw new Error(result.serverError);
       }
 
-      const uploadFormData = new FormData();
-      uploadFormData.append('file', file);
-      if (initialData?.id) {
-        uploadFormData.append('companyId', initialData.id);
-        if (logoUrl) {
-          uploadFormData.append('oldLogoUrl', logoUrl);
-        }
+      if (result?.validationErrors) {
+        throw new Error('Logo upload failed validation.');
       }
 
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/companies-handler`,
-        {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${session.access_token}`,
-            'X-Company-Action': 'upload-logo',
-          },
-          body: uploadFormData,
-        }
-      );
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Upload failed');
+      const uploaded = result?.data;
+      if (!uploaded?.publicUrl) {
+        throw new Error('Upload response was missing a public URL.');
       }
 
-      const result = await response.json();
-
-      setLogoUrl(result.publicUrl);
-      setLogoPreview(result.publicUrl);
+      setLogoUrl(uploaded.publicUrl);
+      setLogoPreview(uploaded.publicUrl);
       toasts.success.actionCompleted('Logo uploaded successfully!');
     } catch (error) {
       toasts.error.fromError(error, 'Failed to upload logo');

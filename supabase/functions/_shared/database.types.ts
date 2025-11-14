@@ -484,6 +484,79 @@ export interface Database {
           user_agent?: string | null;
         };
       };
+      notification_dismissals: {
+        Row: {
+          created_at: string;
+          dismissed_at: string;
+          notification_id: string;
+          updated_at: string;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          dismissed_at?: string;
+          notification_id: string;
+          updated_at?: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          dismissed_at?: string;
+          notification_id?: string;
+          updated_at?: string;
+          user_id?: string;
+        };
+      };
+      notifications: {
+        Row: {
+          action_href: string | null;
+          action_label: string | null;
+          action_onclick: string | null;
+          active: boolean;
+          created_at: string;
+          expires_at: string | null;
+          icon: string | null;
+          id: string;
+          message: string;
+          metadata: Json | null;
+          priority: Database['public']['Enums']['notification_priority'];
+          title: string;
+          type: Database['public']['Enums']['notification_type'];
+          updated_at: string;
+        };
+        Insert: {
+          action_href?: string | null;
+          action_label?: string | null;
+          action_onclick?: string | null;
+          active?: boolean;
+          created_at?: string;
+          expires_at?: string | null;
+          icon?: string | null;
+          id?: string;
+          message: string;
+          metadata?: Json | null;
+          priority?: Database['public']['Enums']['notification_priority'];
+          title: string;
+          type?: Database['public']['Enums']['notification_type'];
+          updated_at?: string;
+        };
+        Update: {
+          action_href?: string | null;
+          action_label?: string | null;
+          action_onclick?: string | null;
+          active?: boolean;
+          created_at?: string;
+          expires_at?: string | null;
+          icon?: string | null;
+          id?: string;
+          message?: string;
+          metadata?: Json | null;
+          priority?: Database['public']['Enums']['notification_priority'];
+          title?: string;
+          type?: Database['public']['Enums']['notification_type'];
+          updated_at?: string;
+        };
+      };
       webhook_events: {
         Row: {
           created_at: string;
@@ -866,6 +939,8 @@ export interface Database {
     Enums: {
       job_status: 'draft' | 'pending_review' | 'active' | 'expired' | 'rejected' | 'deleted';
       newsletter_source: 'homepage' | 'content_page' | 'api' | 'import';
+      notification_priority: 'high' | 'medium' | 'low';
+      notification_type: 'announcement' | 'feedback';
       webhook_direction: 'inbound' | 'outbound';
       webhook_source: 'resend' | 'vercel' | 'discord' | 'supabase_db' | 'custom' | 'polar';
     };

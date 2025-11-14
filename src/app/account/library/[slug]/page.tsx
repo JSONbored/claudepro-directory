@@ -15,6 +15,7 @@ import {
 import { APP_CONFIG, ROUTES } from '@/src/lib/constants';
 import { getCollectionDetail } from '@/src/lib/data/user-data';
 import { ArrowLeft, Edit } from '@/src/lib/icons';
+import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
@@ -38,6 +39,7 @@ export default async function CollectionDetailPage({ params }: CollectionPagePro
   } = await supabase.auth.getUser();
 
   if (!user) {
+    logger.warn('CollectionDetailPage: unauthenticated access attempt', { slug });
     redirect('/login');
   }
 
@@ -45,6 +47,10 @@ export default async function CollectionDetailPage({ params }: CollectionPagePro
   const collectionData = await getCollectionDetail(user.id, slug);
 
   if (!collectionData) {
+    logger.warn('CollectionDetailPage: collection not found or inaccessible', {
+      slug,
+      userId: user.id,
+    });
     notFound();
   }
 

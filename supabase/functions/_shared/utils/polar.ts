@@ -1,7 +1,8 @@
+import { fetchWithRetry } from './integrations/http.ts';
+
 /**
  * Polar.sh API utilities - checkout session creation with metadata
  */
-
 interface CreateCheckoutParams {
   productPriceId: string;
   jobId: string;
@@ -37,7 +38,8 @@ export async function createPolarCheckout(
     polarEnvironment === 'sandbox' ? 'https://sandbox-api.polar.sh' : 'https://api.polar.sh';
 
   try {
-    const response = await fetch(`${apiUrl}/v1/checkouts/custom`, {
+    const { response } = await fetchWithRetry({
+      url: `${apiUrl}/v1/checkouts/custom`,
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

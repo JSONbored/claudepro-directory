@@ -6,8 +6,8 @@
 
 import { useEffect, useRef } from 'react';
 import { toast } from 'sonner';
+import { useNotificationsContext } from '@/src/components/providers/notifications-provider';
 import { Bell } from '@/src/lib/icons';
-import { type NotificationStore, useNotificationStore } from '@/src/lib/stores/notification-store';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 const SHOWN_KEY = 'notification-toasts-shown';
@@ -32,10 +32,11 @@ function markShown(id: string): void {
 }
 
 export function NotificationToastHandler() {
-  const notifications = useNotificationStore((state: NotificationStore) => state.notifications);
+  const { notifications, flags } = useNotificationsContext();
   const shownRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
+    if (!flags.enableToasts) return;
     if (!window.matchMedia('(min-width: 768px)').matches) return;
 
     const persistedShown = getShownIds();
@@ -63,7 +64,7 @@ export function NotificationToastHandler() {
       markShown(toShow.id);
       shownRef.current.add(toShow.id);
     }
-  }, [notifications]);
+  }, [notifications, flags.enableToasts]);
 
   return null;
 }

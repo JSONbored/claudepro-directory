@@ -10,11 +10,14 @@ import { Button } from '@/src/components/primitives/ui/button';
 import { Input } from '@/src/components/primitives/ui/input';
 import { Label } from '@/src/components/primitives/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/src/components/primitives/ui/popover';
-import { createCompany, getCompanyByIdAction } from '@/src/lib/actions/companies.actions';
-import { getTimeoutConfig } from '@/src/lib/actions/feature-flags.actions';
-import { searchCompaniesEdge } from '@/src/lib/edge/search-client';
+import {
+  createCompany,
+  getCompanyByIdAction,
+  searchCompaniesAction,
+} from '@/src/lib/actions/companies.actions';
 import { logger } from '@/src/lib/logger';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 import type { Database } from '@/src/types/database.types';
 
 type Company = Pick<
@@ -28,6 +31,8 @@ interface CompanySelectorProps {
   defaultCompanyName?: string | undefined; // For legacy text field migration
 }
 
+const DEFAULT_DEBOUNCE_MS = 300;
+
 export function CompanySelector({ value, onChange, defaultCompanyName }: CompanySelectorProps) {
   const buttonId = useId();
   const nameInputId = useId();
@@ -37,14 +42,10 @@ export function CompanySelector({ value, onChange, defaultCompanyName }: Company
   const [companies, setCompanies] = useState<Company[]>([]);
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
   const [isSearching, setIsSearching] = useState(false);
+  const [debounceMs, setDebounceMs] = useState(DEFAULT_DEBOUNCE_MS);
   const [showCreateForm, setShowCreateForm] = useState(false);
 
   const [, startTransition] = useTransition();
-
-  const normalizeError = useCallback(
-    (error: unknown): Error => (error instanceof Error ? error : new Error(String(error))),
-    []
-  );
 
   // Load selected company on mount
   useEffect(() => {
@@ -75,30 +76,38 @@ export function CompanySelector({ value, onChange, defaultCompanyName }: Company
 
   // Debounced search
   const searchCompanies = useCallback(async (query: string) => {
-    if (!query.trim() || query.length < 2) {
+    const trimmed = query.trim();
+    if (trimmed.length < 2) {
       setCompanies([]);
+      setIsSearching(false);
       return;
     }
 
     setIsSearching(true);
     try {
-      const results = await searchCompaniesEdge(query, 10);
+      const result = await searchCompaniesAction({ query: trimmed, limit: 10 });
+      const payload = result?.data as { companies?: Company[]; debounceMs?: number } | undefined;
+      const companies = payload?.companies ?? [];
       setCompanies(
-        results.map((company) => ({
-          id: company.id,
-          name: company.name,
-          slug: company.slug ?? '',
-          description: company.description ?? null,
-          website: null,
-          logo: null,
-        }))
+        companies.map(
+          (company): Company => ({
+            id: company.id,
+            name: company.name,
+            slug: company.slug ?? '',
+            description: company.description ?? null,
+            website: null,
+            logo: null,
+          })
+        )
       );
+
+      if (typeof payload?.debounceMs === 'number' && payload.debounceMs > 0) {
+        setDebounceMs(payload.debounceMs);
+      }
     } catch (error) {
-      logger.error(
-        'CompanySelector: unified search failed',
-        error instanceof Error ? error : new Error(String(error)),
-        { query }
-      );
+      logger.error('CompanySelector: unified search failed', normalizeError(error), {
+        query: trimmed,
+      });
       setCompanies([]);
     } finally {
       setIsSearching(false);
@@ -106,32 +115,28 @@ export function CompanySelector({ value, onChange, defaultCompanyName }: Company
   }, []);
 
   useEffect(() => {
-    let timer: ReturnType<typeof setTimeout> | undefined;
+    const trimmed = searchQuery.trim();
+    if (trimmed.length < 2) {
+      setCompanies([]);
+      setIsSearching(false);
+      return undefined;
+    }
+
     let cancelled = false;
-
-    const scheduleSearch = async () => {
-      try {
-        const config = await getTimeoutConfig();
-        if (cancelled) return;
-        const debounceMs = (config['timeout.ui.form_debounce_ms'] as number) || 300;
-        timer = setTimeout(() => searchCompanies(searchQuery), debounceMs);
-      } catch (error) {
-        logger.error('CompanySelector: failed to load debounce config', normalizeError(error));
-        timer = setTimeout(() => searchCompanies(searchQuery), 300);
-      }
-    };
-
-    scheduleSearch().catch((error) => {
-      logger.error('CompanySelector: unexpected error scheduling search', normalizeError(error));
-    });
+    const timer = setTimeout(() => {
+      if (cancelled) return;
+      searchCompanies(searchQuery).catch((error) => {
+        logger.error('CompanySelector: search execution failed', normalizeError(error), {
+          query: searchQuery,
+        });
+      });
+    }, debounceMs);
 
     return () => {
       cancelled = true;
-      if (timer) {
-        clearTimeout(timer);
-      }
+      clearTimeout(timer);
     };
-  }, [searchQuery, searchCompanies, normalizeError]);
+  }, [debounceMs, searchCompanies, searchQuery]);
 
   const handleSelect = (company: Company) => {
     setSelectedCompany(company);

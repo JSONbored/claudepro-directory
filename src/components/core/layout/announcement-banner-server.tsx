@@ -9,7 +9,7 @@ import { unstable_cache } from 'next/cache';
 import { cache } from 'react';
 import { cacheConfigs } from '@/src/lib/flags';
 import { logger } from '@/src/lib/logger';
-import { createAnonClient } from '@/src/lib/supabase/server-anon';
+import { cachedRPCWithDedupe } from '@/src/lib/supabase/cached-rpc';
 import type { Tables } from '@/src/types/database.types';
 
 /**
@@ -23,28 +23,22 @@ export const getActiveAnnouncement = cache(async (): Promise<Tables<'announcemen
   return unstable_cache(
     async () => {
       try {
-        const supabase = createAnonClient();
-        const now = new Date().toISOString();
-
-        const { data, error } = await supabase
-          .from('announcements')
-          .select('*')
-          .eq('active', true)
-          .or(`start_date.is.null,start_date.lte.${now}`)
-          .or(`end_date.is.null,end_date.gte.${now}`)
-          .order('priority', { ascending: false })
-          .order('start_date', { ascending: false })
-          .limit(1)
-          .maybeSingle();
-
-        if (error) {
-          logger.error('Failed to load announcement', error, { source: 'AnnouncementBanner' });
-          return null;
-        }
-
-        return data;
-      } catch (_error) {
-        // Mock client or connection error - silently fail
+        const data = await cachedRPCWithDedupe<Tables<'announcements'> | null>(
+          'get_active_announcement',
+          {},
+          {
+            tags: ['announcements'],
+            ttlConfigKey: 'cache.announcements.ttl_seconds',
+            keySuffix: 'active',
+          }
+        );
+        return data ?? null;
+      } catch (error) {
+        logger.error(
+          'Failed to load announcement',
+          error instanceof Error ? error : new Error(String(error)),
+          { source: 'AnnouncementBanner' }
+        );
         return null;
       }
     },

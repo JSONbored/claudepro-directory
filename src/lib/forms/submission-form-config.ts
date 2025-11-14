@@ -20,7 +20,7 @@ import type {
 } from '@/src/lib/forms/types';
 import { SUBMISSION_CONTENT_TYPES } from '@/src/lib/forms/types';
 import { logger } from '@/src/lib/logger';
-import { createAnonClient } from '@/src/lib/supabase/server-anon';
+import { cachedRPCWithDedupe } from '@/src/lib/supabase/cached-rpc';
 import type { Database } from '@/src/types/database.types';
 
 type RpcRow =
@@ -172,26 +172,27 @@ function emptySection(): SubmissionFormSection {
 }
 
 async function fetchFieldsForContentType(
-  supabase: ReturnType<typeof createAnonClient>,
   contentType: SubmissionContentType
 ): Promise<SubmissionFormSection> {
-  if (!supabase || typeof supabase.rpc !== 'function') {
-    return emptySection();
-  }
+  const data = await cachedRPCWithDedupe<RpcRows>(
+    'get_form_fields_for_content_type',
+    { p_content_type: contentType },
+    {
+      tags: ['templates', `submission-${contentType}`],
+      ttlConfigKey: 'cache.templates.ttl_seconds',
+      keySuffix: contentType,
+    }
+  );
 
-  const { data, error } = await supabase.rpc('get_form_fields_for_content_type', {
-    p_content_type: contentType,
-  });
-
-  if (error) {
-    logger.error('Failed to load form fields', error, {
+  if (!data) {
+    logger.error('Failed to load form fields', new Error('RPC returned null'), {
       contentType,
       source: 'SubmissionFormConfig',
     });
     return emptySection();
   }
 
-  const rows = (data ?? []) as RpcRows;
+  const rows = data;
   const section = emptySection();
 
   for (const row of rows) {
@@ -223,10 +224,9 @@ async function fetchFieldsForContentType(
 }
 
 async function loadSubmissionFormConfig(): Promise<SubmissionFormConfig> {
-  const supabase = createAnonClient();
   const entries = await Promise.all(
     SUBMISSION_CONTENT_TYPES.map(async (contentType) => {
-      const section = await fetchFieldsForContentType(supabase, contentType);
+      const section = await fetchFieldsForContentType(contentType);
       return [contentType, section] as const;
     })
   );

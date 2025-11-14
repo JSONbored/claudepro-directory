@@ -4,6 +4,7 @@
 
 import { redirect } from 'next/navigation';
 import { CompanyForm } from '@/src/components/core/forms/company-form';
+import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';
 
@@ -16,6 +17,7 @@ export default async function NewCompanyPage() {
   } = await supabase.auth.getUser();
 
   if (!user) {
+    logger.warn('NewCompanyPage: unauthenticated access attempt');
     redirect('/login');
   }
 

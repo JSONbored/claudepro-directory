@@ -3,13 +3,13 @@
  * Modes: page (trending page with 3 tabs), sidebar (widget)
  */
 
-import { getWithAuthCorsHeaders } from '../_shared/utils/cors.ts';
 import {
   errorResponse,
+  getWithAuthCorsHeaders,
   jsonResponse,
   methodNotAllowedResponse,
-} from '../_shared/utils/response.ts';
-import { supabaseAnon } from '../_shared/utils/supabase.ts';
+} from '../_shared/utils/http.ts';
+import { supabaseAnon } from '../_shared/utils/supabase-clients.ts';
 
 Deno.serve(async (req: Request) => {
   if (req.method === 'OPTIONS') {
@@ -60,7 +60,7 @@ Deno.serve(async (req: Request) => {
     // SIDEBAR MODE: Trending + Recent for sidebar widget
     if (mode === 'sidebar') {
       const { data: trendingData, error: trendingError } = await supabaseAnon.rpc(
-        'get_trending_metrics',
+        'get_trending_metrics_with_content',
         {
           p_category: category || 'guides',
           p_limit: limit,
@@ -72,52 +72,41 @@ Deno.serve(async (req: Request) => {
         return errorResponse(trendingError, 'sidebar-trending', getWithAuthCorsHeaders);
       }
 
-      const { data: recentData, error: recentError } = await supabaseAnon
-        .from('content')
-        .select('slug, title, created_at')
-        .eq('category', category || 'guides')
-        .order('created_at', { ascending: false })
-        .limit(limit);
+      const { data: recentData, error: recentError } = await supabaseAnon.rpc(
+        'get_recent_content',
+        {
+          p_category: category || 'guides',
+          p_limit: limit,
+          p_days: 30,
+        }
+      );
 
       if (recentError) {
         console.error('Sidebar recent query error:', recentError);
         return errorResponse(recentError, 'sidebar-recent', getWithAuthCorsHeaders);
       }
 
-      // Get titles for trending items (need JOIN with content table)
-      const trendingSlugs = trendingData.map((item) => item.slug);
-      const { data: trendingContent, error: trendingContentError } = await supabaseAnon
-        .from('content')
-        .select('slug, title')
-        .in('slug', trendingSlugs);
-
-      if (trendingContentError) {
-        console.error('Sidebar trending content query error:', trendingContentError);
-        return errorResponse(
-          trendingContentError,
-          'sidebar-trending-content',
-          getWithAuthCorsHeaders
-        );
-      }
-
-      // Build title map
-      const titleMap = new Map(trendingContent.map((item) => [item.slug, item.title]));
-
-      const trending = trendingData.map((item) => ({
-        title: titleMap.get(item.slug) || item.slug,
+      const trending = (trendingData || []).map((item) => ({
+        title: item.title || item.slug,
         slug: `/${item.category}/${item.slug}`,
-        views: `${item.views_total.toLocaleString()} views`,
+        views: `${Number(item.views_total ?? 0).toLocaleString()} views`,
       }));
 
-      const recent = recentData.map((item) => ({
-        title: item.title,
-        slug: `/${category || 'guides'}/${item.slug}`,
-        date: new Date(item.created_at).toLocaleDateString('en-US', {
-          month: 'short',
-          day: 'numeric',
-          year: 'numeric',
-        }),
-      }));
+      const recent = (recentData || []).map((item) => {
+        const createdAt = item.created_at ?? item.date_added ?? null;
+        const displayCategory = item.category ?? category ?? 'guides';
+        return {
+          title: item.title,
+          slug: `/${displayCategory}/${item.slug}`,
+          date: createdAt
+            ? new Date(createdAt).toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric',
+              })
+            : '',
+        };
+      });
 
       return new Response(JSON.stringify({ trending, recent }), {
         status: 200,
@@ -132,9 +121,9 @@ Deno.serve(async (req: Request) => {
 
     // PAGE MODE: Trending page with 3 tabs
     if (tab === 'trending') {
-      // Query get_trending_metrics RPC for metrics
+      // Query get_trending_metrics_with_content RPC for combined data
       const { data: metricsData, error: metricsError } = await supabaseAnon.rpc(
-        'get_trending_metrics',
+        'get_trending_metrics_with_content',
         {
           p_category: category,
           p_limit: limit,
@@ -146,45 +135,21 @@ Deno.serve(async (req: Request) => {
         return errorResponse(metricsError, 'trending-tab-metrics', getWithAuthCorsHeaders);
       }
 
-      // Get corresponding content data
-      const contentKeys = metricsData.map((item) => ({ category: item.category, slug: item.slug }));
-      const { data: contentData, error: contentError } = await supabaseAnon
-        .from('content')
-        .select('category, slug, title, description, author, tags, source')
-        .or(contentKeys.map((k) => `and(category.eq.${k.category},slug.eq.${k.slug})`).join(','));
-
-      if (contentError) {
-        console.error('Trending content query error:', contentError);
-        return errorResponse(contentError, 'trending-tab-content', getWithAuthCorsHeaders);
-      }
-
-      // Build content map
-      const contentMap = new Map(
-        contentData.map((item) => [`${item.category}:${item.slug}`, item])
-      );
-
-      const trending = metricsData
-        .map((item) => {
-          const content = contentMap.get(`${item.category}:${item.slug}`);
-          if (!content) return null;
-
-          return {
-            category: item.category,
-            slug: item.slug,
-            title: content.title,
-            description: content.description,
-            author: content.author,
-            tags: content.tags,
-            source: content.source,
-            viewCount: item.views_total,
-            copyCount: item.copies_total,
-            bookmarkCount: item.bookmarks_total,
-            trendingScore: item.trending_score,
-            engagementScore: item.engagement_score,
-            freshnessScore: item.freshness_score,
-          };
-        })
-        .filter((item) => item !== null);
+      const trending = (metricsData || []).map((item) => ({
+        category: item.category,
+        slug: item.slug,
+        title: item.title,
+        description: item.description,
+        author: item.author,
+        tags: item.tags,
+        source: item.source,
+        viewCount: item.views_total,
+        copyCount: item.copies_total,
+        bookmarkCount: item.bookmarks_total,
+        trendingScore: item.trending_score,
+        engagementScore: item.engagement_score,
+        freshnessScore: item.freshness_score,
+      }));
 
       return new Response(JSON.stringify({ trending, totalCount: trending.length }), {
         status: 200,
@@ -232,27 +197,18 @@ Deno.serve(async (req: Request) => {
     }
 
     if (tab === 'recent') {
-      let query = supabaseAnon
-        .from('content')
-        .select(
-          'category, slug, title, description, author, tags, source, date_added, view_count, copy_count'
-        )
-        .gte('date_added', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString())
-        .order('date_added', { ascending: false })
-        .limit(limit);
-
-      if (category) {
-        query = query.eq('category', category);
-      }
-
-      const { data, error } = await query;
+      const { data, error } = await supabaseAnon.rpc('get_recent_content', {
+        p_category: category,
+        p_limit: limit,
+        p_days: 30,
+      });
 
       if (error) {
         console.error('Recent tab query error:', error);
         return errorResponse(error, 'recent-tab', getWithAuthCorsHeaders);
       }
 
-      const recent = data.map((item) => ({
+      const recent = (data || []).map((item) => ({
         category: item.category,
         slug: item.slug,
         title: item.title,
@@ -260,7 +216,7 @@ Deno.serve(async (req: Request) => {
         author: item.author,
         tags: item.tags,
         source: item.source,
-        dateAdded: item.date_added,
+        dateAdded: item.date_added ?? item.created_at,
         viewCount: item.view_count,
         copyCount: item.copy_count,
       }));

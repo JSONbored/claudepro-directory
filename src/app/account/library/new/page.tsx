@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primi
 import { ROUTES } from '@/src/lib/constants';
 import { getUserBookmarksForCollections } from '@/src/lib/data/user-data';
 import { ArrowLeft } from '@/src/lib/icons';
+import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';
 
@@ -18,10 +19,16 @@ export default async function NewCollectionPage() {
   } = await supabase.auth.getUser();
 
   if (!user) {
+    logger.warn('NewCollectionPage: unauthenticated access attempt');
     redirect('/login');
   }
 
   const bookmarks = await getUserBookmarksForCollections(user.id);
+  if (!bookmarks) {
+    logger.warn('NewCollectionPage: getUserBookmarksForCollections returned null', {
+      userId: user.id,
+    });
+  }
 
   return (
     <div className="space-y-6">

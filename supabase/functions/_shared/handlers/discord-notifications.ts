@@ -1,27 +1,30 @@
 import type { Database } from '../database.types.ts';
 import {
+  createDiscordMessageWithLogging,
+  sendDiscordWebhook,
+  updateDiscordMessage as updateDiscordMessageUtil,
+} from '../utils/discord/client.ts';
+import {
   buildChangelogEmbed,
   buildContentEmbed,
   buildErrorEmbed,
   buildSubmissionEmbed,
-  createDiscordMessageWithLogging,
   type GitHubCommit,
-  sendDiscordWebhook,
-  updateDiscordMessage as updateDiscordMessageUtil,
-} from '../utils/discord.ts';
+} from '../utils/discord/embeds.ts';
+import { insertNotification } from '../utils/notifications-service.ts';
 import {
   badRequestResponse,
   discordCorsHeaders,
   errorResponse,
   successResponse,
 } from '../utils/response.ts';
-import { supabaseServiceRole } from '../utils/supabase-service-role.ts';
+import { SITE_URL, supabaseServiceRole } from '../utils/supabase-clients.ts';
 import {
   type DatabaseWebhookPayload,
   didStatusChangeTo,
   filterEventType,
   validateWebhookUrl,
-} from '../utils/webhook-handler.ts';
+} from '../utils/webhook/database-events.ts';
 
 type JobRow = Database['public']['Tables']['jobs']['Row'];
 type ContentSubmission = Database['public']['Tables']['content_submissions']['Row'];
@@ -282,6 +285,22 @@ async function handleContentNotification(req: Request): Promise<Response> {
     }
   );
 
+  await insertNotification({
+    id: content.id,
+    title: content.display_title ?? content.title,
+    message: content.description ?? payload.record.description ?? 'New content just dropped.',
+    type: 'announcement',
+    priority: 'medium',
+    action_label: 'View content',
+    action_href: `${SITE_URL}/${content.category}/${content.slug}`,
+    metadata: {
+      content_id: content.id,
+      category: content.category,
+      slug: content.slug,
+      source: 'content-notification',
+    },
+  });
+
   return successResponse({ content_id: content.id }, 200, discordCorsHeaders);
 }
 
@@ -377,6 +396,21 @@ async function handleChangelogNotification(req: Request): Promise<Response> {
       },
     }
   );
+
+  await insertNotification({
+    id: entry.id,
+    title: entry.title,
+    message: entry.summary ?? 'We just published new release notes.',
+    type: 'announcement',
+    priority: 'medium',
+    action_label: 'View changelog',
+    action_href: `${SITE_URL}/changelog/${entry.slug}`,
+    metadata: {
+      slug: entry.slug,
+      changelog_id: entry.id,
+      source: 'changelog-notification',
+    },
+  });
 
   return successResponse({ changelog_id: entry.id }, 200, discordCorsHeaders);
 }

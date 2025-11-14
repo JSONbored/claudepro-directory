@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primi
 import { ROUTES } from '@/src/lib/constants';
 import { getUserJobById } from '@/src/lib/data/user-data';
 import { ArrowLeft, BarChart, ExternalLink, Eye } from '@/src/lib/icons';
+import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';
 import { BADGE_COLORS, type JobStatusType, UI_CLASSES } from '@/src/lib/ui-constants';
@@ -29,10 +30,21 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPageProps
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) redirect('/login');
+  if (!user) {
+    logger.warn('JobAnalyticsPage: unauthenticated access attempt', {
+      jobId: resolvedParams.id,
+    });
+    redirect('/login');
+  }
 
   const job = await getUserJobById(user.id, resolvedParams.id);
-  if (!job) notFound();
+  if (!job) {
+    logger.warn('JobAnalyticsPage: job not found or not owned by user', {
+      jobId: resolvedParams.id,
+      userId: user.id,
+    });
+    notFound();
+  }
 
   const viewCount = job.view_count ?? 0;
   const clickCount = job.click_count ?? 0;

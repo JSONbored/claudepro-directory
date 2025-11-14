@@ -11,6 +11,7 @@ import {
 import { ROUTES } from '@/src/lib/constants';
 import { getUserSponsorships } from '@/src/lib/data/user-data';
 import { BarChart, Eye, MousePointer, TrendingUp } from '@/src/lib/icons';
+import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
@@ -23,12 +24,36 @@ export default async function SponsorshipsPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) return null;
+  if (!user) {
+    logger.warn('SponsorshipsPage: unauthenticated access attempt');
+    return null;
+  }
 
   const sponsorships = await getUserSponsorships(user.id);
 
-  if (sponsorships.length === 0) {
-    return null;
+  if (!sponsorships || sponsorships.length === 0) {
+    logger.info('SponsorshipsPage: user has no sponsorships', { userId: user.id });
+    return (
+      <div className="space-y-6">
+        <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
+          <div>
+            <h1 className="mb-2 font-bold text-3xl">Sponsorships</h1>
+            <p className="text-muted-foreground">No active campaigns yet</p>
+          </div>
+          <Button variant="outline" asChild>
+            <Link href={ROUTES.PARTNER}>
+              <TrendingUp className="mr-2 h-4 w-4" />
+              Become a Sponsor
+            </Link>
+          </Button>
+        </div>
+        <Card>
+          <CardContent className="py-12 text-center text-muted-foreground">
+            You haven't launched any sponsorship campaigns yet.
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   const orderedSponsorships = [...sponsorships].sort(

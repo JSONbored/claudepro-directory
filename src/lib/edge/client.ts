@@ -3,9 +3,16 @@
  * Consolidated pattern for analytics, reputation, and future Edge calls (SHA-4198)
  */
 
+import {
+  generateConfigRecommendationsAction,
+  getSimilarConfigsAction,
+  type TrackInteractionParams,
+  trackInteractionAction,
+  trackNewsletterEventAction,
+} from '@/src/lib/actions/analytics.actions';
 import { logger } from '@/src/lib/logger';
 import { createClient } from '@/src/lib/supabase/client';
-import type { Database, Json } from '@/src/types/database.types';
+import type { Json } from '@/src/types/database.types';
 
 const EDGE_BASE_URL = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1`;
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://claudepro.directory';
@@ -72,67 +79,8 @@ export async function callEdgeFunction<T = unknown>(
   return response.json();
 }
 
-type TrackInteractionResult = Database['public']['Functions']['track_user_interaction']['Returns'];
-
-interface TrackInteractionParams
-  extends Omit<
-    Database['public']['Tables']['user_interactions']['Insert'],
-    'id' | 'created_at' | 'user_id'
-  > {}
-
-async function invokeTrackInteractionRpc(params: TrackInteractionParams) {
-  const supabase = createClient();
-  const contentType = params.content_type ?? 'unknown';
-  const contentSlug = params.content_slug ?? 'unknown';
-
-  const { data, error } = await supabase.rpc('track_user_interaction', {
-    p_content_type: contentType,
-    p_content_slug: contentSlug,
-    p_interaction_type: params.interaction_type,
-    ...(params.session_id ? { p_session_id: params.session_id } : {}),
-    ...(params.metadata ? { p_metadata: params.metadata as Json } : {}),
-  });
-
-  if (error) {
-    const message = typeof error.message === 'string' ? error.message : 'Unknown Supabase error';
-    logger.error('Failed to track interaction', error, {
-      contentType,
-      contentSlug,
-      interactionType: params.interaction_type,
-    });
-    throw new Error(message);
-  }
-
-  const typedData = (data as TrackInteractionResult | null) ?? {
-    success: true,
-  };
-
-  return typedData;
-}
-
 export async function trackInteraction(params: TrackInteractionParams) {
-  return invokeTrackInteractionRpc(params);
-}
-
-interface SimilarItem {
-  slug: string;
-  title: string;
-  description?: string;
-  category: string;
-  score?: number;
-  tags?: string[];
-  similarity_factors?: Json;
-  calculated_at?: string;
-  url?: string;
-}
-
-interface SimilarContentResult {
-  similar_items: SimilarItem[];
-  source_item: {
-    slug: string;
-    category: string;
-  };
-  algorithm_version?: string;
+  return trackInteractionAction(params);
 }
 
 export async function getSimilarConfigs(params: {
@@ -140,27 +88,18 @@ export async function getSimilarConfigs(params: {
   content_slug: string;
   limit?: number;
 }) {
-  const supabase = createClient();
-  const { data, error } = await supabase.rpc('get_similar_content', {
-    p_content_type: params.content_type,
-    p_content_slug: params.content_slug,
-    p_limit: params.limit ?? 6,
-  });
-
-  if (error) {
-    logger.error('Failed to load similar configs', error, params);
-    throw new Error(error.message);
+  const data = await getSimilarConfigsAction(params);
+  if (!data) {
+    return {
+      similar_items: [],
+      source_item: { slug: params.content_slug, category: params.content_type },
+      algorithm_version: 'unknown',
+    };
   }
 
-  const typedData = (data as unknown as SimilarContentResult | null) ?? {
-    similar_items: [],
-    source_item: { slug: params.content_slug, category: params.content_type },
-    algorithm_version: 'unknown',
-  };
-
   return {
-    ...typedData,
-    similar_items: (typedData.similar_items || []).map((item) => ({
+    ...data,
+    similar_items: (data.similar_items || []).map((item) => ({
       ...item,
       url: `${SITE_URL}/${item.category}/${item.slug}`,
     })),
@@ -217,46 +156,16 @@ export async function generateConfigRecommendations(answers: {
   integrations?: string[];
   focusAreas?: string[];
 }): Promise<ConfigRecommendationsResponse> {
-  const supabase = createClient();
-  const { data, error } = await supabase.rpc('get_recommendations', {
-    p_use_case: answers.useCase,
-    p_experience_level: answers.experienceLevel,
-    p_tool_preferences: answers.toolPreferences,
-    p_integrations: answers.integrations ?? [],
-    p_focus_areas: answers.focusAreas ?? [],
-    p_limit: 20,
-  });
-
-  if (error) {
-    logger.error('Failed to generate config recommendations', error, {
-      useCase: answers.useCase,
-      experienceLevel: answers.experienceLevel,
-    });
-    throw new Error(error.message);
-  }
-
-  const typedData = (data as unknown as RecommendationsPayload | null) ?? {
-    results: [],
-    summary: null,
-    algorithm: 'unknown',
-    totalMatches: 0,
-  };
-
-  const responseId = `rec_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
-
+  const payload = await generateConfigRecommendationsAction(answers);
   return {
-    success: true,
+    success: payload.success,
     recommendations: {
-      ...typedData,
-      answers: {
-        useCase: answers.useCase,
-        experienceLevel: answers.experienceLevel,
-        toolPreferences: answers.toolPreferences,
-        integrations: answers.integrations ?? [],
-        focusAreas: answers.focusAreas ?? [],
-      },
-      id: responseId,
-      generatedAt: new Date().toISOString(),
+      ...payload.recommendations,
+      results:
+        payload.recommendations.results?.map((item) => ({
+          ...item,
+          url: `${SITE_URL}/${item.category}/${item.slug}`,
+        })) ?? [],
     },
   };
 }
@@ -281,15 +190,5 @@ export async function trackNewsletterEvent(
     [key: string]: unknown;
   }
 ) {
-  return invokeTrackInteractionRpc({
-    content_type: 'newsletter',
-    content_slug: 'newsletter_cta',
-    interaction_type: 'click',
-    session_id: null,
-    metadata: {
-      event_type: eventType,
-      source: metadata?.source,
-      ...metadata,
-    },
-  });
+  return trackNewsletterEventAction(eventType, metadata);
 }

@@ -10,19 +10,6 @@ const EDGE_SEARCH_URL = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/un
 type ContentSearchResult =
   Database['public']['Functions']['search_content_optimized']['Returns'][number];
 
-type UnifiedSearchEntity = {
-  entity_type: string;
-  id: string;
-  title: string;
-  description: string | null;
-  slug: string | null;
-  category: string | null;
-  tags: string[] | null;
-  created_at: string | null;
-  relevance_score?: number | null;
-  engagement_score?: number | null;
-};
-
 interface UnifiedSearchResponse<T> {
   results: T[];
 }
@@ -68,32 +55,4 @@ export async function searchContent(query: string, filters: SearchFilters = {}) 
   if (filters.p_offset) params.set('offset', String(filters.p_offset));
 
   return callUnifiedSearch<ContentSearchResult>(params);
-}
-
-export type CompanySearchResult = {
-  id: string;
-  name: string;
-  slug?: string | null;
-  description?: string | null;
-};
-
-export async function searchCompaniesEdge(
-  query: string,
-  limit = 10
-): Promise<CompanySearchResult[]> {
-  const trimmed = query.trim();
-  if (!trimmed) return [];
-
-  const params = new URLSearchParams();
-  params.set('q', trimmed);
-  params.set('entities', 'company');
-  params.set('limit', String(limit));
-
-  const entities = await callUnifiedSearch<UnifiedSearchEntity>(params);
-  return entities.map((entity) => ({
-    id: entity.id,
-    name: entity.title || entity.slug || '',
-    slug: entity.slug,
-    description: entity.description,
-  }));
 }

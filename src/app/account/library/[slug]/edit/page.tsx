@@ -6,6 +6,7 @@ import { Button } from '@/src/components/primitives/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
 import { getCollectionDetail } from '@/src/lib/data/user-data';
 import { ArrowLeft } from '@/src/lib/icons';
+import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';
 import type { Tables } from '@/src/types/database.types';
@@ -28,6 +29,7 @@ export default async function EditCollectionPage({ params }: EditCollectionPageP
   } = await supabase.auth.getUser();
 
   if (!user) {
+    logger.warn('EditCollectionPage: unauthenticated access attempt', { slug });
     redirect('/login');
   }
 
@@ -35,6 +37,10 @@ export default async function EditCollectionPage({ params }: EditCollectionPageP
   const collectionData = await getCollectionDetail(user.id, slug);
 
   if (!collectionData) {
+    logger.warn('EditCollectionPage: collection not found or inaccessible', {
+      slug,
+      userId: user.id,
+    });
     notFound();
   }
 

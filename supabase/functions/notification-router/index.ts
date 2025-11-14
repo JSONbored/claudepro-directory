@@ -14,9 +14,13 @@ import {
   successResponse,
   unauthorizedResponse,
   webhookCorsHeaders,
-} from '../_shared/utils/response.ts';
-import { supabaseServiceRole } from '../_shared/utils/supabase-service-role.ts';
-import { ingestWebhookEvent, WebhookIngestError } from '../_shared/utils/webhook-ingest.ts';
+} from '../_shared/utils/http.ts';
+import {
+  dismissNotificationsForUser,
+  getActiveNotificationsForUser,
+} from '../_shared/utils/notifications-service.ts';
+import { supabaseServiceRole } from '../_shared/utils/supabase-clients.ts';
+import { ingestWebhookEvent, WebhookIngestError } from '../_shared/utils/webhook/ingest.ts';
 
 type RouteContext = {
   pathname: string;
@@ -50,6 +54,12 @@ const routeDefinitions: RouteDefinition[] = [
     match: (_, ctx) => ctx.pathname.startsWith('/active-notifications'),
     cors: notificationCorsHeaders,
     handler: (req) => handleActiveNotifications(req),
+  },
+  {
+    name: 'dismiss-notifications',
+    match: (_, ctx) => ctx.pathname.startsWith('/dismiss'),
+    cors: notificationCorsHeaders,
+    handler: (req) => handleDismissNotifications(req),
   },
   {
     name: 'changelog-sync',
@@ -128,25 +138,82 @@ async function handleActiveNotifications(req: Request): Promise<Response> {
         .filter(Boolean)
     : [];
 
-  const { data, error } = await supabaseServiceRole.rpc('get_active_notifications', {
-    p_dismissed_ids: dismissedIds,
-  });
+  try {
+    const notifications = await getActiveNotificationsForUser(user.id, dismissedIds);
 
-  if (error) {
+    return successResponse(
+      {
+        notifications,
+      },
+      200,
+      notificationCorsHeaders
+    );
+  } catch (error) {
     return errorResponse(
       error,
       'notification-router:active-notifications',
       notificationCorsHeaders
     );
   }
+}
 
-  return successResponse(
-    {
-      notifications: data ?? [],
-    },
-    200,
-    notificationCorsHeaders
-  );
+async function handleDismissNotifications(req: Request): Promise<Response> {
+  const methodError = requireMethod(req, 'POST', notificationCorsHeaders);
+  if (methodError) {
+    return methodError;
+  }
+
+  const authHeader = req.headers.get('Authorization');
+  const token = authHeader?.startsWith('Bearer ') ? authHeader.replace('Bearer ', '').trim() : null;
+
+  if (!token) {
+    return unauthorizedResponse('Missing Authorization header', notificationCorsHeaders);
+  }
+
+  const {
+    data: { user },
+    error: authError,
+  } = await supabaseServiceRole.auth.getUser(token);
+
+  if (authError || !user) {
+    return unauthorizedResponse('Invalid or expired token', notificationCorsHeaders);
+  }
+
+  let payload: unknown;
+  try {
+    payload = await req.json();
+  } catch (error) {
+    return badRequestResponse(
+      `Invalid JSON payload: ${(error as Error).message}`,
+      notificationCorsHeaders
+    );
+  }
+
+  const notificationIds =
+    typeof payload === 'object' &&
+    payload !== null &&
+    Array.isArray((payload as { notificationIds?: unknown[] }).notificationIds)
+      ? (payload as { notificationIds: unknown[] }).notificationIds
+          .map((id) => (typeof id === 'string' ? id.trim() : ''))
+          .filter(Boolean)
+      : [];
+
+  if (notificationIds.length === 0) {
+    return badRequestResponse('notificationIds array is required', notificationCorsHeaders);
+  }
+
+  try {
+    await dismissNotificationsForUser(user.id, notificationIds);
+    return successResponse(
+      {
+        dismissed: notificationIds.length,
+      },
+      200,
+      notificationCorsHeaders
+    );
+  } catch (error) {
+    return errorResponse(error, 'notification-router:dismiss', notificationCorsHeaders);
+  }
 }
 
 async function handleExternalWebhook(req: Request): Promise<Response> {
@@ -158,26 +225,36 @@ async function handleExternalWebhook(req: Request): Promise<Response> {
   try {
     const body = await req.text();
     const result = await ingestWebhookEvent(body, req.headers);
+    const cors = result.cors ?? webhookCorsHeaders;
+
+    const logContext = {
+      source: result.source,
+      duplicate: result.duplicate,
+      receivedAt: new Date().toISOString(),
+    };
 
     if (result.duplicate) {
-      console.log('Webhook already processed (idempotent)');
+      console.log('[notification-router] Webhook already processed', logContext);
     } else {
-      console.log(`Webhook routed: source=${result.source}`);
+      console.log('[notification-router] Webhook routed', logContext);
     }
 
     return successResponse(
       { message: 'OK', source: result.source, duplicate: result.duplicate },
       200,
-      webhookCorsHeaders
+      cors
     );
   } catch (error) {
     if (error instanceof WebhookIngestError) {
       if (error.status === 'unauthorized') {
+        console.warn('[notification-router] Unauthorized webhook', { message: error.message });
         return unauthorizedResponse(error.message, webhookCorsHeaders);
       }
+      console.warn('[notification-router] Bad webhook payload', { message: error.message });
       return badRequestResponse(error.message, webhookCorsHeaders);
     }
 
+    console.error('[notification-router] Unexpected webhook error', error);
     return errorResponse(error, 'notification-router:webhook', webhookCorsHeaders);
   }
 }

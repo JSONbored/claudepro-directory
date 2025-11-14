@@ -15,7 +15,6 @@ import { getUserDashboard } from '@/src/lib/data/user-data';
 import { BarChart, Briefcase, Edit, ExternalLink, Eye, Plus } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-import { createClient } from '@/src/lib/supabase/server';
 import { BADGE_COLORS, type JobStatusType, UI_CLASSES } from '@/src/lib/ui-constants';
 import { formatRelativeDate } from '@/src/lib/utils/data.utils';
 import type { Tables } from '@/src/types/database.types';
@@ -24,50 +23,13 @@ import type { GetUserDashboardReturn } from '@/src/types/database-overrides';
 export const metadata = generatePageMetadata('/account/jobs');
 
 export default async function MyJobsPage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const data = (await getUserDashboard('me')) as GetUserDashboardReturn | null;
+  const jobs: Array<Tables<'jobs'>> = data?.jobs || [];
 
-  let jobs: Array<Tables<'jobs'>> = [];
-  let hasError = false;
-
-  if (user) {
-    let data: unknown = null;
-    let error: unknown = null;
-
-    if (typeof supabase.rpc === 'function') {
-      // User-scoped edge-cached RPC via centralized data layer
-      data = await getUserDashboard(user.id);
-      error = data === null ? { message: 'Failed to load dashboard' } : null;
-    } else {
-      logger.warn(
-        'Supabase RPC unavailable (mock client fallback detected); skipping dashboard fetch.',
-        { context: 'MyJobsPage' }
-      );
-      // Mock client case - set empty jobs array to avoid misleading validation errors
-      jobs = [];
-    }
-
-    if (error) {
-      logger.error(
-        'Failed to fetch user dashboard',
-        error instanceof Error ? error : new Error(String(error))
-      );
-      hasError = true;
-    } else if (data !== null) {
-      // Type-safe RPC return using centralized type definition
-      const result = data as GetUserDashboardReturn;
-      jobs = result.jobs || [];
-    }
-  }
-
-  if (hasError) {
-    return (
-      <div className="space-y-6">
-        <div className="text-destructive">Failed to load jobs. Please try again later.</div>
-      </div>
-    );
+  if (!data) {
+    logger.warn('MyJobsPage: getUserDashboard returned no data', {
+      route: '/account/jobs',
+    });
   }
 
   const getStatusColor = (status: string) => {

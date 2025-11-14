@@ -3,9 +3,14 @@
 import { z } from 'zod';
 import { authedAction } from '@/src/lib/actions/safe-action';
 import { logger } from '@/src/lib/logger';
+import { dismissNotifications, getActiveNotifications } from '@/src/lib/notifications/service';
 
 const getActiveNotificationsSchema = z.object({
   dismissedIds: z.array(z.string()).optional(),
+});
+
+const dismissNotificationsSchema = z.object({
+  notificationIds: z.array(z.string().min(1, 'Notification ID required')),
 });
 
 export type ActiveNotification = {
@@ -31,21 +36,36 @@ export const getActiveNotificationsAction = authedAction
   .schema(getActiveNotificationsSchema)
   .action(async ({ parsedInput, ctx }) => {
     try {
-      const { createClient } = await import('@/src/lib/supabase/server');
-      const supabase = await createClient();
-
-      const { data, error } = await supabase.rpc('get_active_notifications', {
-        p_dismissed_ids: parsedInput.dismissedIds ?? [],
+      return await getActiveNotifications({
+        userId: ctx.userId,
+        ...(parsedInput.dismissedIds ? { dismissedIds: parsedInput.dismissedIds } : {}),
       });
-
-      if (error) {
-        throw new Error(error.message);
-      }
-
-      return (data || []) as ActiveNotification[];
     } catch (error) {
       logger.error(
         'Failed to load active notifications',
+        error instanceof Error ? error : new Error(String(error)),
+        { userId: ctx.userId }
+      );
+      throw error;
+    }
+  });
+
+export const dismissNotificationsAction = authedAction
+  .metadata({
+    actionName: 'dismissNotifications',
+    category: 'user',
+  })
+  .schema(dismissNotificationsSchema)
+  .action(async ({ parsedInput, ctx }) => {
+    try {
+      await dismissNotifications({
+        userId: ctx.userId,
+        notificationIds: parsedInput.notificationIds,
+      });
+      return { success: true };
+    } catch (error) {
+      logger.error(
+        'Failed to dismiss notifications',
         error instanceof Error ? error : new Error(String(error)),
         { userId: ctx.userId }
       );

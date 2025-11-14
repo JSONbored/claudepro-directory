@@ -19,6 +19,7 @@ import {
 
 import { ensureUserRecord } from '@/src/lib/actions/user.actions';
 import { getUserSettings } from '@/src/lib/data/user-data';
+import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
@@ -32,7 +33,10 @@ export default async function SettingsPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) return null;
+  if (!user) {
+    logger.warn('SettingsPage: unauthenticated access attempt');
+    return null;
+  }
 
   // User-scoped edge-cached RPC via centralized data layer
   const settingsData = await getUserSettings(user.id);
@@ -44,6 +48,7 @@ export default async function SettingsPage() {
 
   // Initialize user if missing (consolidated - no more profiles table)
   if (!userData) {
+    logger.warn('SettingsPage: user_data missing, invoking ensureUserRecord', { userId: user.id });
     await ensureUserRecord({
       id: user.id,
       email: user.email ?? null,
@@ -52,7 +57,17 @@ export default async function SettingsPage() {
     });
   }
 
-  if (!profile) return null;
+  if (!profile) {
+    logger.error('SettingsPage: profile missing from getUserSettings response', undefined, {
+      userId: user.id,
+    });
+    return (
+      <div className="space-y-6">
+        <h1 className="font-bold text-3xl">Settings</h1>
+        <p className="text-destructive">Unable to load profile. Please try again later.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

@@ -55,6 +55,15 @@ export async function cachedRPC<T = unknown>(
       'cache.jobs.ttl_seconds': 1800,
       'cache.jobs_detail.ttl_seconds': 1800,
       'cache.changelog_list.ttl_seconds': 3600,
+      'cache.recommendations.ttl_seconds': 3600,
+      'cache.newsletter_count_ttl_s': 300,
+      'cache.company_profile.ttl_seconds': 1800,
+      'cache.content_export.ttl_seconds': 604800,
+      'cache.content_paginated.ttl_seconds': 86400,
+      'cache.feeds.ttl_seconds': 600,
+      'cache.seo.ttl_seconds': 86400,
+      'cache.sitemap.ttl_seconds': 86400,
+      'cache.status.ttl_seconds': 60,
     };
     ttl = BUILD_TIME_DEFAULTS[ttlConfigKey] || 3600;
   }

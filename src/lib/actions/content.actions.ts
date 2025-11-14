@@ -11,6 +11,7 @@ import { authedAction, rateLimitedAction } from '@/src/lib/actions/safe-action';
 import { cacheConfigs } from '@/src/lib/flags';
 import { logger } from '@/src/lib/logger';
 import { revalidateCacheTags } from '@/src/lib/supabase/cache-helpers';
+import { cachedRPCWithDedupe } from '@/src/lib/supabase/cached-rpc';
 import { createClient } from '@/src/lib/supabase/server';
 import type { Database, Tables } from '@/src/types/database.types';
 
@@ -531,28 +532,31 @@ export const getReviewsWithStats = rateLimitedAction
     const { createClient } = await import('@/src/lib/supabase/server');
     const supabase = await createClient();
 
-    // Get current user (optional - for helpful vote status)
     const {
       data: { user },
     } = await supabase.auth.getUser();
 
-    // Use optimized RPC - single query for reviews + aggregate stats
-    const { data, error } = await supabase.rpc('get_reviews_with_stats', {
-      p_content_type: content_type,
-      p_content_slug: content_slug,
-      ...(sort_by && { p_sort_by: sort_by }),
-      ...(offset !== undefined && { p_offset: offset }),
-      ...(limit !== undefined && { p_limit: limit }),
-      ...(user?.id && { p_user_id: user.id }),
-    });
+    const data = await cachedRPCWithDedupe(
+      'get_reviews_with_stats',
+      {
+        p_content_type: content_type,
+        p_content_slug: content_slug,
+        ...(sort_by && { p_sort_by: sort_by }),
+        ...(offset !== undefined && { p_offset: offset }),
+        ...(limit !== undefined && { p_limit: limit }),
+        ...(user?.id && { p_user_id: user.id }),
+      },
+      {
+        tags: ['content', `content-${content_slug}`, 'reviews'],
+        ttlConfigKey: 'cache.reviews.ttl_seconds',
+        keySuffix: `${content_type}-${content_slug}-${sort_by ?? 'default'}-${limit ?? 'all'}-${
+          offset ?? 0
+        }-${user?.id ?? 'anon'}`,
+        useAuthClient: true,
+      }
+    );
 
-    if (error) {
-      logger.error('Failed to fetch reviews with stats', new Error(error.message), {
-        content_type,
-        content_slug,
-        sort_by,
-        error: error.message,
-      });
+    if (!data) {
       throw new Error('Failed to fetch reviews. Please try again.');
     }
 
@@ -619,8 +623,7 @@ export const trackUsage = rateLimitedAction
 // ============================================
 
 /**
- * Fetch paginated content from edge function
- * Secure server-side wrapper for content-paginated edge function
+ * Fetch paginated content via data-api (content/paginated)
  */
 export async function fetchPaginatedContent(params: {
   offset: number;
@@ -635,7 +638,7 @@ export async function fetchPaginatedContent(params: {
       throw new Error('Missing Supabase environment variables');
     }
 
-    const url = `${supabaseUrl}/functions/v1/content-paginated?offset=${params.offset}&limit=${params.limit}&category=${params.category}`;
+    const url = `${supabaseUrl}/functions/v1/data-api/content/paginated?offset=${params.offset}&limit=${params.limit}&category=${params.category}`;
     const response = await fetch(url, {
       headers: {
         Authorization: `Bearer ${supabaseKey}`,

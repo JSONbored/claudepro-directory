@@ -1,0 +1,49 @@
+export interface SvixVerificationInput {
+  rawBody: string;
+  svixId: string;
+  svixTimestamp: string;
+  svixSignature: string;
+  secret: string;
+}
+
+/**
+ * Verify Svix-compatible signatures (Resend, Polar)
+ */
+export async function verifySvixSignature({
+  rawBody,
+  svixId,
+  svixTimestamp,
+  svixSignature,
+  secret,
+}: SvixVerificationInput): Promise<boolean> {
+  try {
+    const signatures = svixSignature.split(' ').map((sig) => sig.split(',')[1]);
+    const signedContent = `${svixId}.${svixTimestamp}.${rawBody}`;
+
+    let secretBytes: Uint8Array;
+    if (secret.startsWith('whsec_')) {
+      const base64Secret = secret.substring(6);
+      secretBytes = Uint8Array.from(atob(base64Secret), (c) => c.charCodeAt(0));
+    } else {
+      const encoder = new TextEncoder();
+      secretBytes = encoder.encode(secret);
+    }
+
+    const key = await crypto.subtle.importKey(
+      'raw',
+      secretBytes,
+      { name: 'HMAC', hash: 'SHA-256' },
+      false,
+      ['sign']
+    );
+
+    const encoder = new TextEncoder();
+    const signatureBuffer = await crypto.subtle.sign('HMAC', key, encoder.encode(signedContent));
+    const expectedSignature = btoa(String.fromCharCode(...new Uint8Array(signatureBuffer)));
+
+    return signatures.some((sig) => sig === expectedSignature);
+  } catch (error) {
+    console.error('Svix signature verification error:', error);
+    return false;
+  }
+}

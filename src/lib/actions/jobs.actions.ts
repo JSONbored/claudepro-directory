@@ -5,7 +5,7 @@
  * Thin orchestration layer calling PostgreSQL RPC functions + Polar.sh API
  */
 
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, revalidateTag } from 'next/cache';
 import { z } from 'zod';
 import { authedAction } from '@/src/lib/actions/safe-action';
 import { cacheConfigs } from '@/src/lib/flags';
@@ -198,6 +198,11 @@ export const createJob = authedAction
       const config = await cacheConfigs();
       const invalidateTags = config['cache.invalidate.job_create'] as string[];
       revalidateCacheTags(invalidateTags);
+      if (result.company_id) {
+        revalidateTag(`company-${result.company_id}`, 'default');
+        revalidateTag(`company-id-${result.company_id}`, 'default');
+      }
+      revalidateTag(`job-${result.job_id}`, 'default');
 
       return {
         success: true,
@@ -270,6 +275,12 @@ export const updateJob = authedAction
       const config = await cacheConfigs();
       const invalidateTags = config['cache.invalidate.job_update'] as string[];
       revalidateCacheTags(invalidateTags);
+      const companyId = updates.company_id ?? parsedInput.company_id ?? null;
+      if (companyId) {
+        revalidateTag(`company-${companyId}`, 'default');
+        revalidateTag(`company-id-${companyId}`, 'default');
+      }
+      revalidateTag(`job-${job_id}`, 'default');
 
       return {
         success: true,
@@ -334,6 +345,7 @@ export const deleteJob = authedAction
       const config = await cacheConfigs();
       const invalidateTags = config['cache.invalidate.job_delete'] as string[];
       revalidateCacheTags(invalidateTags);
+      revalidateTag(`job-${result.job_id}`, 'default');
 
       return {
         success: true,
@@ -403,6 +415,7 @@ export const toggleJobStatus = authedAction
       const config = await cacheConfigs();
       const invalidateTags = config['cache.invalidate.job_status'] as string[];
       revalidateCacheTags(invalidateTags);
+      revalidateTag(`job-${parsedInput.job_id}`, 'default');
 
       return {
         success: true,

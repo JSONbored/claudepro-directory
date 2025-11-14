@@ -1,6 +1,6 @@
 import type { Database, Json } from '../database.types.ts';
 import type { ChangelogSection, GitHubCommit } from './discord.ts';
-import { SITE_URL } from './supabase-service-role.ts';
+import { SITE_URL } from './supabase-clients.ts';
 
 const GITHUB_TOKEN = Deno.env.get('GITHUB_TOKEN');
 const GITHUB_REPO_OWNER = Deno.env.get('GITHUB_REPO_OWNER');

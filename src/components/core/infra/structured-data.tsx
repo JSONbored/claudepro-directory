@@ -1,5 +1,5 @@
 /**
- * Unified Structured Data - Renders pre-generated Schema.org JSON-LD from seo-api
+ * Unified Structured Data - Renders pre-generated Schema.org JSON-LD from data-api/seo
  */
 
 import Script from 'next/script';

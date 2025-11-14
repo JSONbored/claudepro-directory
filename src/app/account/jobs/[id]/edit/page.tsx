@@ -7,6 +7,7 @@ import { notFound, redirect } from 'next/navigation';
 import { JobForm } from '@/src/components/core/forms/job-form';
 import { type UpdateJobInput, updateJob } from '@/src/lib/actions/jobs.actions';
 import { getUserJobById } from '@/src/lib/data/user-data';
+import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
@@ -28,7 +29,13 @@ export default async function EditJobPage({ params }: EditJobPageProps) {
   if (!user) redirect('/login');
 
   const job = await getUserJobById(user.id, resolvedParams.id);
-  if (!job) notFound();
+  if (!job) {
+    logger.warn('EditJobPage: job not found or not owned by user', {
+      jobId: resolvedParams.id,
+      userId: user.id,
+    });
+    notFound();
+  }
 
   const handleSubmit = async (data: Omit<UpdateJobInput, 'job_id'>) => {
     'use server';
@@ -40,10 +47,22 @@ export default async function EditJobPage({ params }: EditJobPageProps) {
     });
 
     if (result?.serverError) {
+      logger.error('EditJobPage: updateJob failed', new Error(result.serverError), {
+        jobId: resolvedParams.id,
+        userId: user.id,
+      });
       throw new Error(result.serverError);
     }
 
-    if (result?.data?.success) {
+    if (!result?.data) {
+      logger.error('EditJobPage: updateJob returned no data', undefined, {
+        jobId: resolvedParams.id,
+        userId: user.id,
+      });
+      return { success: false };
+    }
+
+    if (result.data.success) {
       redirect('/account/jobs');
     }
 

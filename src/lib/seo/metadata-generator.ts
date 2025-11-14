@@ -29,7 +29,7 @@ export async function generatePageMetadata(
     }
   }
 
-  // Fetch metadata from unified seo-api edge function
+  // Fetch metadata from unified data-api/seo endpoint
   const config: SEOMetadata = await fetchMetadata(resolvedRoute);
 
   const canonicalUrl = buildCanonicalUrl(resolvedRoute);

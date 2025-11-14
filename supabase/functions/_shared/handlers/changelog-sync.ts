@@ -11,7 +11,9 @@ import {
   transformSectionsToChanges,
   type VercelWebhookPayload,
 } from '../utils/changelog.ts';
-import { buildChangelogEmbed, sendDiscordWebhook } from '../utils/discord.ts';
+import { sendDiscordWebhook } from '../utils/discord/client.ts';
+import { buildChangelogEmbed } from '../utils/discord/embeds.ts';
+import { insertNotification } from '../utils/notifications-service.ts';
 import {
   badRequestResponse,
   changelogCorsHeaders,
@@ -19,7 +21,7 @@ import {
   successResponse,
   unauthorizedResponse,
 } from '../utils/response.ts';
-import { supabaseServiceRole } from '../utils/supabase-service-role.ts';
+import { SITE_URL, supabaseServiceRole } from '../utils/supabase-clients.ts';
 import { verifyVercelSignature } from '../utils/vercel.ts';
 
 const VERCEL_WEBHOOK_SECRET = Deno.env.get('VERCEL_WEBHOOK_SECRET');
@@ -134,6 +136,21 @@ export async function handleChangelogSyncRequest(req: Request): Promise<Response
         }
       );
     }
+
+    await insertNotification({
+      id: data.id,
+      title: data.title,
+      message: tldr || 'We just shipped a fresh Claude Pro Directory release.',
+      type: 'announcement',
+      priority: 'high',
+      action_label: 'Read release notes',
+      action_href: `${SITE_URL}/changelog/${data.slug}`,
+      metadata: {
+        slug: data.slug,
+        changelog_id: data.id,
+        source: 'changelog-sync',
+      },
+    });
 
     await revalidateChangelogPages(data.slug);
 

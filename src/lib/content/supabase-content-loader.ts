@@ -9,7 +9,6 @@ import type { CategoryId } from '@/src/lib/config/category-config';
 import { cacheConfigs } from '@/src/lib/flags';
 import { logger } from '@/src/lib/logger';
 import { cachedRPCWithDedupe } from '@/src/lib/supabase/cached-rpc';
-import { createAnonClient } from '@/src/lib/supabase/server-anon';
 import type { Tables } from '@/src/types/database.types';
 import type { GetEnrichedContentListReturn } from '@/src/types/database-overrides';
 
@@ -78,15 +77,21 @@ export const getContentBySlug = cache(
       () =>
         withErrorHandling(
           async () => {
-            const supabase = createAnonClient();
-            const { data, error } = await supabase.rpc('get_enriched_content', {
-              p_category: category,
-              p_slug: slug,
-              p_limit: 1,
-              p_offset: 0,
-            });
-            if (error) throw error;
-            const results = (data || []) as ContentItem[];
+            const data = await cachedRPCWithDedupe<ContentItem[]>(
+              'get_enriched_content',
+              {
+                p_category: category,
+                p_slug: slug,
+                p_limit: 1,
+                p_offset: 0,
+              },
+              {
+                tags: [`content-${category}`, `content-${category}-${slug}`],
+                ttlConfigKey: 'cache.content_detail.ttl_seconds',
+                keySuffix: `${category}-${slug}`,
+              }
+            );
+            const results = data || [];
             return results.length > 0 ? (results[0] ?? null) : null;
           },
           null,
@@ -110,15 +115,19 @@ export const getFullContentBySlug = cache(
       () =>
         withErrorHandling(
           async () => {
-            const supabase = createAnonClient();
-            const { data, error } = await supabase
-              .from('content')
-              .select('*')
-              .eq('category', category)
-              .eq('slug', slug)
-              .single();
-            if (error && error.code !== 'PGRST116') throw error;
-            return data ? (data as unknown as FullContentItem) : null;
+            const data = await cachedRPCWithDedupe<FullContentItem | null>(
+              'get_full_content_by_slug',
+              {
+                p_category: category,
+                p_slug: slug,
+              },
+              {
+                tags: [`content-${category}`, `content-${category}-${slug}`],
+                ttlConfigKey: 'cache.content_detail.ttl_seconds',
+                keySuffix: `${category}-${slug}-full`,
+              }
+            );
+            return data ?? null;
           },
           null,
           `getFullContentBySlug(${category}, ${slug})`
@@ -137,42 +146,19 @@ export const getAllContent = cache(async (filters?: ContentFilters): Promise<Con
     () =>
       withErrorHandling(
         async () => {
-          const supabase = createAnonClient();
-          // Optimized: Select only commonly needed columns for list views (13/37 columns = 65% reduction)
-          let query = supabase
-            .from('content')
-            .select(
-              'id, category, slug, title, display_title, description, author, date_added, tags, features, use_cases, created_at, updated_at'
-            );
+          const data = await cachedRPCWithDedupe<ContentItem[]>(
+            'get_all_content',
+            {
+              filters,
+            },
+            {
+              tags: ['content-all'],
+              ttlConfigKey: 'cache.content_list.ttl_seconds',
+              keySuffix: JSON.stringify(filters ?? {}),
+            }
+          );
 
-          if (filters?.category) {
-            query = Array.isArray(filters.category)
-              ? query.in('category', filters.category)
-              : query.eq('category', filters.category);
-          }
-          if (filters?.tags?.length) query = query.overlaps('tags', filters.tags);
-          if (filters?.author) {
-            query = Array.isArray(filters.author)
-              ? query.in('author', filters.author)
-              : query.eq('author', filters.author);
-          }
-          if (filters?.sourceTable) {
-            query = Array.isArray(filters.sourceTable)
-              ? query.in('source_table', filters.sourceTable)
-              : query.eq('source_table', filters.sourceTable);
-          }
-          if (filters?.search) {
-            query = query.textSearch('fts_vector', filters.search, { type: 'websearch' });
-          }
-
-          query = query.order(filters?.orderBy || 'slug', {
-            ascending: filters?.ascending ?? true,
-          });
-          if (filters?.limit) query = query.limit(filters.limit);
-
-          const { data, error } = await query;
-          if (error) throw error;
-          return (data as unknown as ContentItem[]) || [];
+          return data || [];
         },
         [],
         'getAllContent'
@@ -199,12 +185,18 @@ export const getContentCount = cache(async (category?: CategoryId): Promise<numb
     () =>
       withErrorHandling(
         async () => {
-          const supabase = createAnonClient();
-          let query = supabase.from('content').select('*', { count: 'exact', head: true });
-          if (category) query = query.eq('category', category);
-          const { count, error } = await query;
-          if (error) throw error;
-          return count || 0;
+          const data = await cachedRPCWithDedupe<number>(
+            'get_content_count',
+            {
+              p_category: category ?? null,
+            },
+            {
+              tags: category ? [`content-${category}`] : ['content-all'],
+              ttlConfigKey: 'cache.content_list.ttl_seconds',
+              keySuffix: category ?? 'all',
+            }
+          );
+          return data ?? 0;
         },
         0,
         `getContentCount(${category || 'all'})`
@@ -225,27 +217,23 @@ export const getTrendingContent = cache(async (category?: CategoryId, limit = 20
     () =>
       withErrorHandling(
         async () => {
-          const supabase = createAnonClient();
-
-          // Use denormalized popularity_score column (3-10x faster than client-side calculation)
-          // Score computed via trigger: view_count + bookmark_count*5 + review_count*3 + recency boost
-          let query = supabase
-            .from('content')
-            .select(
-              'category, slug, title, display_title, description, author, tags, created_at, view_count, bookmark_count, review_count, avg_rating, popularity_score'
-            )
-            .order('popularity_score', { ascending: false })
-            .limit(limit);
-
-          if (category) query = query.eq('category', category);
-
-          const { data, error } = await query;
-          if (error) throw error;
+          const data = await cachedRPCWithDedupe<ContentListItem[]>(
+            'get_trending_content',
+            {
+              p_category: category ?? null,
+              p_limit: limit,
+            },
+            {
+              tags: category ? [`trending-${category}`] : ['trending-all'],
+              ttlConfigKey: 'cache.content_list.ttl_seconds',
+              keySuffix: `${category ?? 'all'}-${limit}`,
+            }
+          );
 
           return data || [];
         },
         [],
-        'getTrendingContent'
+        `getTrendingContent(${category ?? 'all'}, ${limit})`
       ),
     [`trending-${category || 'all'}-${limit}`],
     {

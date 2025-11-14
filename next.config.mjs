@@ -381,36 +381,36 @@ const nextConfig = {
   async rewrites() {
     const supabaseUrl =
       process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://hgtjdifxfapoltfflowc.supabase.co';
-    const contentApi = `${supabaseUrl}/functions/v1/content-api`;
+    const contentApi = `${supabaseUrl}/functions/v1/data-api/content`;
 
     return [
       // Sitemap.xml - proxy to edge function
       {
         source: '/sitemap.xml',
-        destination: `${supabaseUrl}/functions/v1/sitemap`,
+        destination: `${supabaseUrl}/functions/v1/data-api/sitemap`,
       },
-      { source: '/rss.xml', destination: `${supabaseUrl}/functions/v1/feeds?type=rss` },
-      { source: '/atom.xml', destination: `${supabaseUrl}/functions/v1/feeds?type=atom` },
+      { source: '/rss.xml', destination: `${supabaseUrl}/functions/v1/data-api/feeds?type=rss` },
+      { source: '/atom.xml', destination: `${supabaseUrl}/functions/v1/data-api/feeds?type=atom` },
       {
         source: '/changelog/rss.xml',
-        destination: `${supabaseUrl}/functions/v1/feeds?type=rss&category=changelog`,
+        destination: `${supabaseUrl}/functions/v1/data-api/feeds?type=rss&category=changelog`,
       },
       {
         source: '/changelog/atom.xml',
-        destination: `${supabaseUrl}/functions/v1/feeds?type=atom&category=changelog`,
+        destination: `${supabaseUrl}/functions/v1/data-api/feeds?type=atom&category=changelog`,
       },
       {
         source:
           '/:category(agents|commands|hooks|mcp|rules|skills|statuslines|collections|guides)/rss.xml',
-        destination: `${supabaseUrl}/functions/v1/feeds?type=rss&category=:category`,
+        destination: `${supabaseUrl}/functions/v1/data-api/feeds?type=rss&category=:category`,
       },
       {
         source:
           '/:category(agents|commands|hooks|mcp|rules|skills|statuslines|collections|guides)/atom.xml',
-        destination: `${supabaseUrl}/functions/v1/feeds?type=atom&category=:category`,
+        destination: `${supabaseUrl}/functions/v1/data-api/feeds?type=atom&category=:category`,
       },
 
-      // LLMs.txt rewrites → content-api
+      // LLMs.txt rewrites → data-api content routes
       { source: '/llms.txt', destination: `${contentApi}/sitewide?format=llms-txt` },
       {
         source: '/changelog/llms.txt',
@@ -435,14 +435,14 @@ const nextConfig = {
         destination: `${contentApi}/:category/:slug?format=llms-txt`,
       },
 
-      // JSON API rewrites → content-api
+      // JSON API rewrites → data-api content routes
       {
         source:
           '/:category(agents|commands|hooks|mcp|rules|skills|statuslines|collections|guides)/:slug.json',
         destination: `${contentApi}/:category/:slug?format=json`,
       },
 
-      // Markdown export rewrites → content-api
+      // Markdown export rewrites → data-api content routes
       {
         source:
           '/:category(agents|commands|hooks|mcp|rules|skills|statuslines|collections|guides)/:slug.md',

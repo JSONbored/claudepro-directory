@@ -7,6 +7,7 @@
  */
 
 import { z } from 'zod';
+import { getContentCount } from '@/src/lib/content/supabase-content-loader';
 
 /**
  * Application Information
@@ -369,10 +370,7 @@ export const EXTERNAL_SERVICES = externalServicesSchema.parse({
  * Cached with Next.js fetch cache (24hr revalidation)
  */
 export async function getContentDescription(): Promise<string> {
-  const { createAnonClient } = await import('@/src/lib/supabase/server-anon');
-  const supabase = createAnonClient();
-
-  const { count } = await supabase.from('content').select('*', { count: 'exact', head: true });
+  const count = await getContentCount();
 
   if (!count) {
     throw new Error('Failed to fetch content count for description');

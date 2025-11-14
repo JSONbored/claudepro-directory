@@ -1,0 +1,56 @@
+import {
+  buildCacheHeaders,
+  errorResponse,
+  getOnlyCorsHeaders,
+  methodNotAllowedResponse,
+} from '../../_shared/utils/http.ts';
+import { supabaseAnon } from '../../_shared/utils/supabase-clients.ts';
+
+const CORS = getOnlyCorsHeaders;
+
+interface HealthStatus {
+  status: 'healthy' | 'degraded' | 'unhealthy';
+  timestamp: string;
+  apiVersion: string;
+  checks: Record<string, unknown>;
+}
+
+export async function handleStatusRoute(
+  segments: string[],
+  _url: URL,
+  method: string
+): Promise<Response> {
+  if (segments.length > 0) {
+    return methodNotAllowedResponse('GET', CORS);
+  }
+
+  if (method !== 'GET') {
+    return methodNotAllowedResponse('GET', CORS);
+  }
+
+  const { data, error } = await supabaseAnon.rpc('get_api_health');
+  if (error) {
+    return errorResponse(error, 'data-api:get_api_health', CORS);
+  }
+
+  const health = data as HealthStatus | null;
+  if (
+    !health ||
+    typeof health.status !== 'string' ||
+    !['healthy', 'degraded', 'unhealthy'].includes(health.status)
+  ) {
+    return errorResponse(new Error('Invalid health status'), 'data-api:get_api_health', CORS);
+  }
+
+  const statusCode = health.status === 'healthy' ? 200 : health.status === 'degraded' ? 200 : 503;
+
+  return new Response(JSON.stringify(health), {
+    status: statusCode,
+    headers: {
+      'Content-Type': 'application/json; charset=utf-8',
+      'X-Generated-By': 'supabase.rpc.get_api_health',
+      ...CORS,
+      ...buildCacheHeaders('status'),
+    },
+  });
+}
