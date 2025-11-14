@@ -1,8 +1,5 @@
-'use client';
-
-import { motion } from 'motion/react';
-import { useEffect, useState } from 'react';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
+import { HoverCard } from '@/src/components/primitives/animation/hover-card';
 import { Button } from '@/src/components/primitives/ui/button';
 import {
   Card,
@@ -11,7 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/ui/card';
-import { getAnimationConfig, getPricingConfig } from '@/src/lib/actions/feature-flags.actions';
+import { getPricingConfig } from '@/src/lib/actions/feature-flags.actions';
 import { SOCIAL_LINKS } from '@/src/lib/constants';
 import {
   BarChart,
@@ -26,42 +23,17 @@ import {
 } from '@/src/lib/icons';
 import { RESPONSIVE_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
 
-export default function PartnerPage() {
-  const configCount = 282; // Static count for client component
-  const [pricing, setPricing] = useState({
-    jobsRegular: 249,
-    jobsDiscounted: 149,
-    jobsDurationDays: 30,
-    sponsoredRegular: 199,
-    sponsoredDiscounted: 119,
-  });
-  const [springDefault, setSpringDefault] = useState({
-    type: 'spring' as const,
-    stiffness: 400,
-    damping: 17,
-  });
+export default async function PartnerPage() {
+  const configCount = 282;
 
-  // Load pricing and animation configs from Statsig
-  useEffect(() => {
-    Promise.all([getPricingConfig(), getAnimationConfig()])
-      .then(([pricingConfig, animConfig]) => {
-        setPricing({
-          jobsRegular: (pricingConfig['pricing.jobs.regular'] as number) ?? 249,
-          jobsDiscounted: (pricingConfig['pricing.jobs.discounted'] as number) ?? 149,
-          jobsDurationDays: (pricingConfig['pricing.jobs.duration_days'] as number) ?? 30,
-          sponsoredRegular: (pricingConfig['pricing.sponsored.regular'] as number) ?? 199,
-          sponsoredDiscounted: (pricingConfig['pricing.sponsored.discounted'] as number) ?? 119,
-        });
-        setSpringDefault({
-          type: 'spring' as const,
-          stiffness: (animConfig['animation.spring.default.stiffness'] as number) ?? 400,
-          damping: (animConfig['animation.spring.default.damping'] as number) ?? 17,
-        });
-      })
-      .catch(() => {
-        // Silent fail - use defaults
-      });
-  }, []);
+  const pricingConfig = await getPricingConfig();
+  const pricing = {
+    jobsRegular: (pricingConfig['pricing.jobs.regular'] as number) ?? 249,
+    jobsDiscounted: (pricingConfig['pricing.jobs.discounted'] as number) ?? 149,
+    jobsDurationDays: (pricingConfig['pricing.jobs.duration_days'] as number) ?? 30,
+    sponsoredRegular: (pricingConfig['pricing.sponsored.regular'] as number) ?? 199,
+    sponsoredDiscounted: (pricingConfig['pricing.sponsored.discounted'] as number) ?? 119,
+  };
 
   return (
     <div className={'container mx-auto px-4 py-12'}>
@@ -148,11 +120,7 @@ export default function PartnerPage() {
         <h2 className={'mb-8 text-center font-bold text-3xl'}>Simple, Transparent Pricing</h2>
         <div className={'grid gap-8 md:grid-cols-2'}>
           {/* Job Listings */}
-          <motion.div
-            whileHover={{ y: -4, scale: 1.01 }}
-            whileTap={{ scale: 0.99 }}
-            transition={springDefault}
-          >
+          <HoverCard variant="strong">
             <Card className={'relative overflow-hidden border-2'}>
               <CardHeader>
                 <div className={'mb-4 flex items-start justify-between'}>
@@ -222,14 +190,10 @@ export default function PartnerPage() {
                 </Button>
               </CardContent>
             </Card>
-          </motion.div>
+          </HoverCard>
 
           {/* Sponsored Listings */}
-          <motion.div
-            whileHover={{ y: -4, scale: 1.01 }}
-            whileTap={{ scale: 0.99 }}
-            transition={springDefault}
-          >
+          <HoverCard variant="strong">
             <Card className={'relative overflow-hidden border-2'}>
               <CardHeader>
                 <div className={'mb-4 flex items-start justify-between'}>
@@ -299,7 +263,7 @@ export default function PartnerPage() {
                 </Button>
               </CardContent>
             </Card>
-          </motion.div>
+          </HoverCard>
         </div>
       </div>
 

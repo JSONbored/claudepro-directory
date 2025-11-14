@@ -15,7 +15,7 @@ import { createClient } from '@/src/lib/supabase/server';
 import type { Database } from '@/src/types/database.types';
 
 // Minimal Zod schemas (database CHECK constraints do real validation)
-export const createJobSchema = z.object({
+const createJobSchema = z.object({
   title: z.string(),
   company: z.string(),
   company_id: z.string().uuid().optional().nullable(),
@@ -37,7 +37,7 @@ export const createJobSchema = z.object({
   tier: z.enum(['standard', 'featured']),
 });
 
-export const updateJobSchema = z.object({
+const updateJobSchema = z.object({
   job_id: z.string().uuid(),
   title: z.string().optional(),
   company: z.string().optional(),

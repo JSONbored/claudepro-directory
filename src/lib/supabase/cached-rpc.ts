@@ -41,7 +41,7 @@ export async function cachedRPC<T = unknown>(
 ): Promise<T | null> {
   const { keySuffix, tags, ttlConfigKey, useAuthClient = false } = options;
 
-  // Fetch TTL from Statsig
+  // Fetch TTL from Statsig (works at build time via anonymous user fallback in identify())
   const config = await cacheConfigs();
   const ttl = (config as Record<string, unknown>)[ttlConfigKey] as number;
 

@@ -14,6 +14,12 @@ import type { Database } from '@/src/types/database.types';
  */
 export const identify = dedupe((async ({ headers, cookies }) => {
   try {
+    // Build-time detection: If cookies/headers unavailable (static generation), return anonymous immediately
+    // This prevents warnings about missing request context during build
+    if (!(cookies && headers)) {
+      return { userID: 'anonymous' };
+    }
+
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 

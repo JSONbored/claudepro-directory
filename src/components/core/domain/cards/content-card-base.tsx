@@ -24,12 +24,12 @@
  * @module components/shared/base-card
  */
 
-import { motion } from 'motion/react';
 import type { ReactNode } from 'react';
 import { memo } from 'react';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { SwipeableCardWrapper } from '@/src/components/core/domain/cards/swipeable-card';
 import { SponsoredTracker } from '@/src/components/features/sponsored/sponsored-tracker';
+import { HoverCard } from '@/src/components/primitives/animation/hover-card';
 import {
   Card,
   CardContent,
@@ -437,23 +437,13 @@ export const BaseCard = memo(
       </Card>
     );
 
-    // Wrap card with motion animations if navigation is enabled
+    // Wrap card with hover animation if navigation is enabled
     const motionCard = disableNavigation ? (
       cardElement
     ) : (
-      <motion.div
-        whileHover={{
-          y: -2,
-          transition: { duration: 0.2, ease: [0.4, 0, 0.2, 1] },
-        }}
-        whileTap={{
-          y: 0,
-          transition: { duration: 0.15, ease: [0.4, 0, 0.2, 1] },
-        }}
-        style={{ willChange: 'transform' }}
-      >
+      <HoverCard variant="gentle" disabled={disableNavigation}>
         {cardElement}
-      </motion.div>
+      </HoverCard>
     );
 
     // Optionally wrap with swipeable gestures for mobile quick actions

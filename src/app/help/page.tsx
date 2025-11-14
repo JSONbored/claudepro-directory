@@ -1,11 +1,7 @@
-'use client';
-
-import { motion } from 'motion/react';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
 import { NavLink } from '@/src/components/core/navigation/navigation-link';
+import { HoverCard } from '@/src/components/primitives/animation/hover-card';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
-import { getAnimationConfig } from '@/src/lib/actions/feature-flags.actions';
 import { APP_CONFIG } from '@/src/lib/constants';
 import { BookOpen, Code, FileText, HelpCircle, MessageSquare, Search } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
@@ -94,24 +90,6 @@ const commonQuestions = [
 ];
 
 export default function HelpPage() {
-  const [springDefault, setSpringDefault] = useState({
-    type: 'spring' as const,
-    stiffness: 400,
-    damping: 17,
-  });
-
-  useEffect(() => {
-    getAnimationConfig()
-      .then((config) => {
-        setSpringDefault({
-          type: 'spring' as const,
-          stiffness: (config['animation.spring.default.stiffness'] as number) ?? 400,
-          damping: (config['animation.spring.default.damping'] as number) ?? 17,
-        });
-      })
-      .catch(() => {});
-  }, []);
-
   return (
     <div className="container mx-auto max-w-6xl px-4 py-8 sm:py-12">
       <div className="mb-12 text-center">
@@ -180,11 +158,7 @@ export default function HelpPage() {
         <h2 className="mb-6 font-semibold text-2xl">Quick Actions</h2>
         <div className="grid gap-4 md:grid-cols-3">
           <Link href="/search" className="block">
-            <motion.div
-              whileHover={{ y: -4, scale: 1.01 }}
-              whileTap={{ scale: 0.99 }}
-              transition={springDefault}
-            >
+            <HoverCard variant="strong">
               <Card className="h-full cursor-pointer">
                 <CardContent className="pt-6">
                   <div className="mb-2 flex items-center gap-3">
@@ -194,15 +168,11 @@ export default function HelpPage() {
                   <p className="text-muted-foreground text-sm">Find configurations and resources</p>
                 </CardContent>
               </Card>
-            </motion.div>
+            </HoverCard>
           </Link>
 
           <Link href="/guides" className="block">
-            <motion.div
-              whileHover={{ y: -4, scale: 1.01 }}
-              whileTap={{ scale: 0.99 }}
-              transition={springDefault}
-            >
+            <HoverCard variant="strong">
               <Card className="h-full cursor-pointer">
                 <CardContent className="pt-6">
                   <div className="mb-2 flex items-center gap-3">
@@ -212,15 +182,11 @@ export default function HelpPage() {
                   <p className="text-muted-foreground text-sm">Browse tutorials and how-tos</p>
                 </CardContent>
               </Card>
-            </motion.div>
+            </HoverCard>
           </Link>
 
           <Link href="/contact" className="block">
-            <motion.div
-              whileHover={{ y: -4, scale: 1.01 }}
-              whileTap={{ scale: 0.99 }}
-              transition={springDefault}
-            >
+            <HoverCard variant="strong">
               <Card className="h-full cursor-pointer">
                 <CardContent className="pt-6">
                   <div className="mb-2 flex items-center gap-3">
@@ -230,7 +196,7 @@ export default function HelpPage() {
                   <p className="text-muted-foreground text-sm">Get help from our team</p>
                 </CardContent>
               </Card>
-            </motion.div>
+            </HoverCard>
           </Link>
         </div>
       </section>

@@ -1,150 +1,143 @@
 'use client';
 
-import { memo, useId } from 'react';
+/**
+ * Trending Content Tabs - Client component due to Radix Tabs + motion animations
+ */
+
+import { useId } from 'react';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { UnifiedCardGrid } from '@/src/components/core/domain/cards/card-grid';
 import { ConfigCard } from '@/src/components/core/domain/cards/config-card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/primitives/ui/tabs';
 import { Clock, Star, TrendingUp } from '@/src/lib/icons';
-import type { ContentItem, TrendingContentProps } from '@/src/lib/types/component.types';
+import type { TrendingContentProps } from '@/src/lib/types/component.types';
 
-/**
- * Trending Content Component
- *
- * Performance Optimizations:
- * - Memoized to prevent unnecessary re-renders when parent state changes
- * - Only re-renders when trending/popular/recent data actually changes
- * - Renders 10-20+ ConfigCard items per tab (expensive DOM operations)
- */
-function TrendingContentComponent({ trending, popular, recent }: TrendingContentProps) {
-  // Generate unique IDs for headings
+interface TabConfig {
+  value: string;
+  label: string;
+  heading: string;
+  icon: typeof TrendingUp;
+  emptyMessage: string;
+}
+
+const TAB_CONFIGS: TabConfig[] = [
+  {
+    value: 'trending',
+    label: 'Trending',
+    heading: 'Trending This Week',
+    icon: TrendingUp,
+    emptyMessage: 'No trending content available yet. Check back soon!',
+  },
+  {
+    value: 'popular',
+    label: 'Popular',
+    heading: 'Most Popular',
+    icon: Star,
+    emptyMessage: 'No popular content available yet. Check back soon!',
+  },
+  {
+    value: 'recent',
+    label: 'Recent',
+    heading: 'Recently Added',
+    icon: Clock,
+    emptyMessage: 'No recent content available yet. Check back soon!',
+  },
+];
+
+export function TrendingContent({ trending, popular, recent }: TrendingContentProps) {
+  // Map data to tab configs
+  const tabData = {
+    trending: trending || [],
+    popular: popular || [],
+    recent: recent || [],
+  };
+
+  // Generate unique IDs for headings (accessibility)
   const trendingHeadingId = useId();
   const popularHeadingId = useId();
   const recentHeadingId = useId();
-
-  // Removed unused getConfigType function
+  const headingIds = {
+    trending: trendingHeadingId,
+    popular: popularHeadingId,
+    recent: recentHeadingId,
+  };
 
   return (
     <Tabs defaultValue="trending" className="space-y-8">
       <TabsList
-        className={'mx-auto grid w-full max-w-md grid-cols-3'}
+        className="mx-auto grid w-full max-w-md grid-cols-3"
         role="tablist"
         aria-label="Trending content categories"
       >
-        <TabsTrigger value="trending" aria-label="View trending configurations">
-          <TrendingUp className={'mr-2 h-4 w-4'} aria-hidden="true" />
-          Trending
-        </TabsTrigger>
-        <TabsTrigger value="popular" aria-label="View most popular configurations">
-          <Star className={'mr-2 h-4 w-4'} aria-hidden="true" />
-          Popular
-        </TabsTrigger>
-        <TabsTrigger value="recent" aria-label="View recently added configurations">
-          <Clock className={'mr-2 h-4 w-4'} aria-hidden="true" />
-          Recent
-        </TabsTrigger>
+        {TAB_CONFIGS.map((config) => {
+          const Icon = config.icon;
+          return (
+            <TabsTrigger
+              key={config.value}
+              value={config.value}
+              aria-label={`View ${config.label.toLowerCase()} configurations`}
+            >
+              <Icon className="mr-2 h-4 w-4" aria-hidden="true" />
+              {config.label}
+            </TabsTrigger>
+          );
+        })}
       </TabsList>
 
-      <TabsContent
-        value="trending"
-        className="space-y-8"
-        role="tabpanel"
-        aria-labelledby={trendingHeadingId}
-      >
-        <div>
-          <h2 id={trendingHeadingId} className={'mb-4 font-bold text-2xl'}>
-            Trending This Week
-          </h2>
-          <UnifiedCardGrid
-            items={trending || []}
-            variant="list"
-            emptyMessage="No trending content available yet. Check back soon!"
-            ariaLabel="Trending content"
-            prefetchCount={3}
-            renderCard={(item, index) => (
-              <div key={item.slug} className="relative">
-                {index < 3 && (
-                  <UnifiedBadge
-                    className={'-top-2 -right-2 absolute z-10'}
-                    variant="base"
-                    style="default"
-                    aria-label={`Rank ${index + 1}`}
-                  >
-                    #{index + 1}
-                  </UnifiedBadge>
-                )}
-                <ConfigCard
-                  item={{ ...item, position: index } as unknown as ContentItem}
-                  variant="default"
-                  showCategory={true}
-                  showActions={false}
-                />
-              </div>
-            )}
-          />
-        </div>
-      </TabsContent>
+      {TAB_CONFIGS.map((config) => {
+        const items = tabData[config.value as keyof typeof tabData];
+        const headingId = headingIds[config.value as keyof typeof headingIds];
+        const showRankBadge = config.value === 'trending';
 
-      <TabsContent
-        value="popular"
-        className="space-y-8"
-        role="tabpanel"
-        aria-labelledby={popularHeadingId}
-      >
-        <div>
-          <h2 id={popularHeadingId} className={'mb-4 font-bold text-2xl'}>
-            Most Popular
-          </h2>
-          <UnifiedCardGrid
-            items={popular || []}
-            variant="list"
-            emptyMessage="No popular content available yet. Check back soon!"
-            ariaLabel="Popular content"
-            prefetchCount={3}
-            renderCard={(item, index) => (
-              <ConfigCard
-                key={item.slug}
-                item={{ ...item, position: index } as unknown as ContentItem}
-                variant="default"
-                showCategory={true}
-                showActions={false}
-              />
-            )}
-          />
-        </div>
-      </TabsContent>
+        return (
+          <TabsContent
+            key={config.value}
+            value={config.value}
+            className="space-y-8"
+            role="tabpanel"
+            aria-labelledby={headingId}
+          >
+            <div>
+              <h2 id={headingId} className="mb-4 font-bold text-2xl">
+                {config.heading}
+              </h2>
+              <UnifiedCardGrid
+                items={items}
+                variant="list"
+                emptyMessage={config.emptyMessage}
+                ariaLabel={`${config.label} content`}
+                prefetchCount={3}
+                renderCard={(item, index) => {
+                  // ConfigCard accepts DisplayableContent union type
+                  // ContentItem is part of that union, so spread is type-safe
+                  const cardItem = { ...item, position: index };
 
-      <TabsContent
-        value="recent"
-        className="space-y-8"
-        role="tabpanel"
-        aria-labelledby={recentHeadingId}
-      >
-        <div>
-          <h2 id={recentHeadingId} className={'mb-4 font-bold text-2xl'}>
-            Recently Added
-          </h2>
-          <UnifiedCardGrid
-            items={recent || []}
-            variant="list"
-            emptyMessage="No recent content available yet. Check back soon!"
-            ariaLabel="Recent content"
-            prefetchCount={3}
-            renderCard={(item, index) => (
-              <ConfigCard
-                key={item.slug}
-                item={{ ...item, position: index } as unknown as ContentItem}
-                variant="default"
-                showCategory={true}
-                showActions={false}
+                  return (
+                    <div key={item.slug} className="relative">
+                      {showRankBadge && index < 3 && (
+                        <UnifiedBadge
+                          className="absolute -top-2 -right-2 z-10"
+                          variant="base"
+                          style="default"
+                          aria-label={`Rank ${index + 1}`}
+                        >
+                          #{index + 1}
+                        </UnifiedBadge>
+                      )}
+                      <ConfigCard
+                        item={cardItem}
+                        variant="default"
+                        showCategory={true}
+                        showActions={false}
+                      />
+                    </div>
+                  );
+                }}
               />
-            )}
-          />
-        </div>
-      </TabsContent>
+            </div>
+          </TabsContent>
+        );
+      })}
     </Tabs>
   );
 }
-
-// Export memoized component
-export const TrendingContent = memo(TrendingContentComponent);

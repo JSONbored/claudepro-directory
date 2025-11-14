@@ -1,11 +1,7 @@
 /**
- * Activity Timeline Component - Database-First
+ * Activity Timeline Component - Database-First (Server Component)
  * Uses Activity type from user.actions (based on get_user_activity_timeline RPC)
  */
-
-'use client';
-
-import { memo } from 'react';
 import { Card, CardContent } from '@/src/components/primitives/ui/card';
 import type { Activity } from '@/src/lib/actions/user.actions';
 import { FileText, GitPullRequest, MessageSquare, ThumbsUp } from '@/src/lib/icons';
@@ -23,10 +19,7 @@ const ACTIVITY_CONFIG = {
   submission: { icon: GitPullRequest, label: 'Submitted' },
 } as const;
 
-export const ActivityTimeline = memo(function ActivityTimeline({
-  activities,
-  limit,
-}: ActivityTimelineProps) {
+export function ActivityTimeline({ activities, limit }: ActivityTimelineProps) {
   const displayActivities = limit ? activities.slice(0, limit) : activities;
 
   if (!displayActivities || displayActivities.length === 0) {
@@ -90,4 +83,4 @@ export const ActivityTimeline = memo(function ActivityTimeline({
       })}
     </div>
   );
-});
+}
