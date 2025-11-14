@@ -41,9 +41,23 @@ export async function cachedRPC<T = unknown>(
 ): Promise<T | null> {
   const { keySuffix, tags, ttlConfigKey, useAuthClient = false } = options;
 
-  // Fetch TTL from Statsig (works at build time via anonymous user fallback in identify())
-  const config = await cacheConfigs();
-  const ttl = (config as Record<string, unknown>)[ttlConfigKey] as number;
+  // Fetch TTL from Statsig (runtime) or use defaults (build time)
+  let ttl: number;
+  try {
+    const config = await cacheConfigs();
+    ttl = (config as Record<string, unknown>)[ttlConfigKey] as number;
+  } catch {
+    // Build time: headers() unavailable, use hardcoded defaults matching Statsig config
+    const BUILD_TIME_DEFAULTS: Record<string, number> = {
+      'cache.homepage.ttl_seconds': 3600,
+      'cache.content_detail.ttl_seconds': 7200,
+      'cache.content_list.ttl_seconds': 1800,
+      'cache.jobs.ttl_seconds': 1800,
+      'cache.jobs_detail.ttl_seconds': 1800,
+      'cache.changelog_list.ttl_seconds': 3600,
+    };
+    ttl = BUILD_TIME_DEFAULTS[ttlConfigKey] || 3600;
+  }
 
   // Generate cache key
   const cacheKey = keySuffix

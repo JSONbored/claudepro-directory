@@ -80,10 +80,14 @@ export async function generatePageMetadata(
     },
   };
 
-  logger.info(`✅ Metadata generated for ${resolvedRoute}`, {
-    titleLength: metadata.title ? String(metadata.title).length : 0,
-    descLength: metadata.description?.length || 0,
-  });
+  // Only log during development, not during production builds
+  // This prevents 400+ JSON log lines cluttering the build output
+  if (process.env.NODE_ENV === 'development') {
+    logger.info(`✅ Metadata generated for ${resolvedRoute}`, {
+      titleLength: metadata.title ? String(metadata.title).length : 0,
+      descLength: metadata.description?.length || 0,
+    });
+  }
 
   return metadata;
 }

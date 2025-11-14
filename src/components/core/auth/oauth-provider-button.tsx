@@ -16,6 +16,7 @@ interface OAuthProviderButtonProps {
   provider: 'github' | 'google' | 'discord';
   redirectTo?: string | undefined;
   className?: string;
+  newsletterOptIn?: boolean;
 }
 
 const PROVIDER_CONFIG = {
@@ -33,7 +34,12 @@ const PROVIDER_CONFIG = {
   },
 } as const;
 
-export function OAuthProviderButton({ provider, redirectTo, className }: OAuthProviderButtonProps) {
+export function OAuthProviderButton({
+  provider,
+  redirectTo,
+  className,
+  newsletterOptIn = false,
+}: OAuthProviderButtonProps) {
   const [loading, setLoading] = useState(false);
   const supabase = createClient();
 
@@ -43,10 +49,16 @@ export function OAuthProviderButton({ provider, redirectTo, className }: OAuthPr
   const handleSignIn = async () => {
     setLoading(true);
 
+    const callbackUrl = new URL(`${window.location.origin}/auth/callback`);
+    callbackUrl.searchParams.set('newsletter', newsletterOptIn ? 'true' : 'false');
+    if (redirectTo) {
+      callbackUrl.searchParams.set('next', redirectTo);
+    }
+
     const { error } = await supabase.auth.signInWithOAuth({
       provider,
       options: {
-        redirectTo: `${window.location.origin}/auth/callback${redirectTo ? `?next=${encodeURIComponent(redirectTo)}` : ''}`,
+        redirectTo: callbackUrl.toString(),
       },
     });
 

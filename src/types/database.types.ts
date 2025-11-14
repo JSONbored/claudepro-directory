@@ -4505,6 +4505,7 @@ export type Database = {
         | "inline"
         | "post_copy"
         | "resend_import"
+        | "oauth_signup"
       notification_priority: "high" | "medium" | "low"
       notification_type: "announcement" | "feedback"
       sort_direction: "asc" | "desc"
@@ -4757,6 +4758,7 @@ export const Constants = {
         "inline",
         "post_copy",
         "resend_import",
+        "oauth_signup",
       ],
       notification_priority: ["high", "medium", "low"],
       notification_type: ["announcement", "feedback"],

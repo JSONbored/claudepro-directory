@@ -7,10 +7,14 @@
 
 import dynamic from 'next/dynamic';
 import { usePathname } from 'next/navigation';
+import { useEffect } from 'react';
 import { AnnouncementBannerClient } from '@/src/components/core/layout/announcement-banner-client';
 import { Navigation } from '@/src/components/core/layout/navigation';
+import { useConfetti } from '@/src/hooks/use-confetti';
+import { checkConfettiEnabled } from '@/src/lib/actions/feature-flags.actions';
 import type { NavigationData } from '@/src/lib/data/navigation';
 import { DIMENSIONS } from '@/src/lib/ui-constants';
+import { toasts } from '@/src/lib/utils/toast.utils';
 import type { Tables } from '@/src/types/database.types';
 
 const Footer = dynamic(
@@ -76,6 +80,7 @@ export function LayoutContent({
   ctaVariant,
 }: LayoutContentProps) {
   const pathname = usePathname();
+  const { fireConfetti } = useConfetti();
 
   // Convert variant to delay milliseconds
   const delayMs =
@@ -86,6 +91,33 @@ export function LayoutContent({
   const isAuthRoute = AUTH_ROUTE_PREFIXES.some((prefix) =>
     prefix.endsWith('/') ? pathname.startsWith(prefix) : pathname === prefix
   );
+
+  useEffect(() => {
+    if (isAuthRoute) return;
+
+    const cookieMatch = document.cookie.match(/newsletter_opt_in=([^;]+)/);
+    if (!cookieMatch) return;
+
+    const value = cookieMatch[1];
+    if (value !== 'success') return;
+
+    // Remove cookie immediately to avoid duplicate toasts
+    document.cookie = 'newsletter_opt_in=; Max-Age=0; Path=/';
+
+    toasts.raw.success("You're in!", {
+      description: "We'll send the next Claude drop on Monday.",
+    });
+
+    checkConfettiEnabled()
+      .then((enabled) => {
+        if (enabled) {
+          fireConfetti('subtle');
+        }
+      })
+      .catch(() => {
+        // Silent fail - confetti is a nice-to-have
+      });
+  }, [fireConfetti, isAuthRoute]);
 
   // Auth routes: minimal wrapper with no height constraints for true fullscreen experience
   if (isAuthRoute) {
