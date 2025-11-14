@@ -4,17 +4,14 @@
 
 import { redirect } from 'next/navigation';
 import { CompanyForm } from '@/src/components/core/forms/company-form';
+import { getAuthenticatedUser } from '@/src/lib/auth/get-authenticated-user';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-import { createClient } from '@/src/lib/supabase/server';
 
 export const metadata = generatePageMetadata('/account/companies/new');
 
 export default async function NewCompanyPage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { user } = await getAuthenticatedUser({ context: 'NewCompanyPage' });
 
   if (!user) {
     logger.warn('NewCompanyPage: unauthenticated access attempt');

@@ -1,7 +1,9 @@
 import { NavLink } from '@/src/components/core/navigation/navigation-link';
 import { APP_CONFIG } from '@/src/lib/constants';
+import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 
 export const metadata = generatePageMetadata('/terms');
 
@@ -11,7 +13,23 @@ export const metadata = generatePageMetadata('/terms');
  */
 export const revalidate = false;
 
+function getLastUpdatedDate(): string {
+  try {
+    return new Date().toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to format terms last updated date');
+    logger.error('TermsPage: last updated date formatting failed', normalized);
+    return 'Unavailable';
+  }
+}
+
 export default function TermsPage() {
+  const lastUpdated = getLastUpdatedDate();
+
   return (
     <div className={`container mx-auto max-w-4xl ${UI_CLASSES.PADDING_X_DEFAULT} py-8 sm:py-12`}>
       <div className="prose prose-invert max-w-none">
@@ -19,12 +37,7 @@ export default function TermsPage() {
           Terms of Service
         </h1>
         <p className={`${UI_CLASSES.MARGIN_RELAXED} text-muted-foreground`}>
-          Last updated:{' '}
-          {new Date().toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-          })}
+          Last updated: {lastUpdated}
         </p>
 
         <section className={UI_CLASSES.MARGIN_RELAXED}>

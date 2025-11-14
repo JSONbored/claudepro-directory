@@ -21,12 +21,27 @@ import {
   MousePointer,
   Sparkles,
 } from '@/src/lib/icons';
+import { logger } from '@/src/lib/logger';
 import { RESPONSIVE_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 
 export default async function PartnerPage() {
   const configCount = 282;
 
-  const pricingConfig = await getPricingConfig();
+  let pricingConfig: Awaited<ReturnType<typeof getPricingConfig>> | null = null;
+  try {
+    pricingConfig = await getPricingConfig();
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to load pricing config');
+    logger.error('PartnerPage: getPricingConfig failed', normalized);
+    throw normalized;
+  }
+
+  if (!pricingConfig) {
+    logger.error('PartnerPage: pricing config is undefined');
+    throw new Error('Pricing configuration unavailable');
+  }
+
   const pricing = {
     jobsRegular: (pricingConfig['pricing.jobs.regular'] as number) ?? 249,
     jobsDiscounted: (pricingConfig['pricing.jobs.discounted'] as number) ?? 149,
@@ -34,6 +49,10 @@ export default async function PartnerPage() {
     sponsoredRegular: (pricingConfig['pricing.sponsored.regular'] as number) ?? 199,
     sponsoredDiscounted: (pricingConfig['pricing.sponsored.discounted'] as number) ?? 119,
   };
+
+  if (!SOCIAL_LINKS.partnerEmail) {
+    logger.warn('PartnerPage: partnerEmail is not configured');
+  }
 
   return (
     <div className={'container mx-auto px-4 py-12'}>

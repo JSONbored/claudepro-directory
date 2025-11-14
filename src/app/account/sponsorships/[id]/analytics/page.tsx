@@ -7,11 +7,11 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/ui/card';
+import { getAuthenticatedUser } from '@/src/lib/auth/get-authenticated-user';
 import { getSponsorshipAnalytics } from '@/src/lib/data/user-data';
 import { BarChart, Eye, MousePointer, TrendingUp } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import type { Tables } from '@/src/types/database.types';
 
@@ -23,10 +23,7 @@ interface AnalyticsPageProps {
 
 export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPageProps) {
   const { id } = await params;
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { user } = await getAuthenticatedUser({ context: 'SponsorshipAnalyticsPage' });
 
   if (!user) {
     logger.warn('SponsorshipAnalyticsPage: unauthenticated access attempt', { sponsorshipId: id });

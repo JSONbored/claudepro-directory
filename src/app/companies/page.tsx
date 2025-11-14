@@ -24,8 +24,10 @@ import {
 import { ROUTES } from '@/src/lib/constants';
 import { getCompaniesList } from '@/src/lib/data/companies';
 import { Briefcase, Building, ExternalLink, Plus, Star, TrendingUp } from '@/src/lib/icons';
+import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 
 export async function generateMetadata() {
   return await generatePageMetadata('/companies');
@@ -36,7 +38,23 @@ export const revalidate = false;
 
 export default async function CompaniesPage() {
   // Single RPC call via edge-cached data layer
-  const { companies } = await getCompaniesList(50, 0);
+  let companiesResponse: Awaited<ReturnType<typeof getCompaniesList>> | null = null;
+  try {
+    companiesResponse = await getCompaniesList(50, 0);
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to load companies list');
+    logger.error('CompaniesPage: getCompaniesList failed', normalized, {
+      limit: 50,
+      offset: 0,
+    });
+    throw normalized;
+  }
+
+  if (!(companiesResponse && companiesResponse.companies)) {
+    logger.warn('CompaniesPage: companies response is empty', { limit: 50, offset: 0 });
+  }
+
+  const companies = companiesResponse?.companies ?? [];
 
   return (
     <div className={'min-h-screen bg-background'}>

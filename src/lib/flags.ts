@@ -2,6 +2,7 @@ import { type StatsigUser, statsigAdapter } from '@flags-sdk/statsig';
 import { createServerClient } from '@supabase/ssr';
 import type { Identify } from 'flags';
 import { dedupe, flag } from 'flags/next';
+import { getAuthenticatedUserFromClient } from '@/src/lib/auth/get-authenticated-user';
 import { logger } from '@/src/lib/logger';
 import type { Database } from '@/src/types/database.types';
 
@@ -41,9 +42,9 @@ export const identify = dedupe((async ({ headers, cookies }) => {
       },
     });
 
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const { user } = await getAuthenticatedUserFromClient(supabase, {
+      context: 'feature_flags_identify',
+    });
 
     const baseUser: StatsigUser = {
       userID: user?.id || 'anonymous',

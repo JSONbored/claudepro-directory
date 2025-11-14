@@ -15,13 +15,14 @@ import {
   CardTitle,
 } from '@/src/components/primitives/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/primitives/ui/tabs';
+import { getAuthenticatedUser } from '@/src/lib/auth/get-authenticated-user';
 import { ROUTES } from '@/src/lib/constants';
 import { getUserLibrary } from '@/src/lib/data/user-data';
 import { Bookmark as BookmarkIcon, ExternalLink, FolderOpen, Layers, Plus } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 
 export const metadata = generatePageMetadata('/account/library');
 
@@ -60,31 +61,66 @@ type LibraryData = {
 };
 
 export default async function LibraryPage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { user } = await getAuthenticatedUser({ context: 'LibraryPage' });
 
-  if (!user) return null;
-
-  // User-scoped edge-cached RPC via centralized data layer
-  const data = await getUserLibrary(user.id);
-
-  if (!data) {
-    logger.error('Failed to load user library', new Error('Library data is null'), {
-      userId: user.id,
-    });
+  if (!user) {
+    logger.warn('LibraryPage: unauthenticated access attempt detected');
     return (
       <div className="space-y-6">
-        <h1 className="font-bold text-3xl">My Library</h1>
-        <p className="text-muted-foreground">Unable to load library. Please try again later.</p>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-2xl">Sign in required</CardTitle>
+            <CardDescription>Please sign in to view your library.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button asChild>
+              <Link href={ROUTES.LOGIN}>Go to login</Link>
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
-  const libraryData = data as LibraryData;
-  const { bookmarks, collections, stats } = libraryData;
+  // User-scoped edge-cached RPC via centralized data layer
+  let data: LibraryData | null = null;
+  try {
+    const response = await getUserLibrary(user.id);
+    if (response) {
+      data = response as LibraryData;
+    } else {
+      logger.warn('LibraryPage: getUserLibrary returned null', { userId: user.id });
+    }
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to load user library');
+    logger.error('LibraryPage: getUserLibrary threw', normalized, { userId: user.id });
+  }
+
+  if (!data) {
+    return (
+      <div className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-2xl">My Library</CardTitle>
+            <CardDescription>
+              Unable to load your library right now. Please refresh or try again later.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button asChild variant="outline">
+              <Link href={ROUTES.ACCOUNT}>Back to dashboard</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  const { bookmarks, collections, stats } = data;
   const { bookmarkCount, collectionCount } = stats;
+  if (!(bookmarks?.length || collections?.length)) {
+    logger.info('LibraryPage: library returned no bookmarks or collections', { userId: user.id });
+  }
 
   return (
     <div className="space-y-6">

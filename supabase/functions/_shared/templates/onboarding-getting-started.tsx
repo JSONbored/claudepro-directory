@@ -8,27 +8,22 @@
 
 import React from 'npm:react@18.3.1';
 import { Button, Hr, Section, Text } from 'npm:@react-email/components@0.0.22';
-import { addUTMToURL } from '../utils/email-utm.ts';
-import { EMAIL_UTM_TEMPLATES } from '../utils/utm-templates.ts';
-import { BaseLayout } from '../layouts/base-layout.tsx';
+import { addUTMToURL } from '../utils/email/email-utm.ts';
+import { EMAIL_UTM_TEMPLATES } from '../utils/email/utm-templates.ts';
+import { BaseLayout, renderEmailTemplate } from '../utils/email/base-template.tsx';
 import {
-  cardStyle,
   contentSection,
   dividerStyle,
   footerNoteSection,
   footerNoteStyle,
-  headingStyle,
-  heroSection,
-  listItemStyle,
-  listStyle,
   paragraphStyle,
   primaryButtonStyle,
   secondaryButtonStyle,
   sectionTitleStyle,
   strongStyle,
-  subheadingStyle,
-} from '../utils/common-styles.ts';
-import { borderRadius, brandColors, emailTheme, spacing, typography } from '../utils/theme.ts';
+} from '../utils/email/common-styles.ts';
+import { BulletListSection, HeroBlock, StepCardList } from '../utils/email/components/sections.tsx';
+import { borderRadius, emailTheme, spacing, typography } from '../utils/email/theme.ts';
 
 export interface OnboardingGettingStartedProps {
   /**
@@ -44,93 +39,83 @@ export function OnboardingGettingStarted({ email }: OnboardingGettingStartedProp
   const baseUrl = 'https://claudepro.directory';
   const utm = EMAIL_UTM_TEMPLATES.ONBOARDING_GETTING_STARTED;
 
+  const quickStartSteps = [
+    {
+      step: 1,
+      title: 'Browse Top Agents',
+      description:
+        'Start with our most popular AI agents for code review, API building, and documentation.',
+      cta: {
+        label: 'View Top Agents',
+        href: addUTMToURL(`${baseUrl}/agents`, { ...utm, content: 'step_1_agents' }),
+      },
+    },
+    {
+      step: 2,
+      title: 'Try MCP Servers',
+      description:
+        "Extend Claude's capabilities with Model Context Protocol servers for real-time data and workflows.",
+      cta: {
+        label: 'Explore MCP Servers',
+        href: addUTMToURL(`${baseUrl}/mcp`, { ...utm, content: 'step_2_mcp' }),
+      },
+    },
+    {
+      step: 3,
+      title: 'Add Custom Rules',
+      description:
+        "Define coding standards, response formats, and project guidelines so Claude understands your workflow.",
+      cta: {
+        label: 'Browse Rules',
+        href: addUTMToURL(`${baseUrl}/rules`, { ...utm, content: 'step_3_rules' }),
+      },
+    },
+  ] as const;
+
+  const featuredItems = [
+    {
+      title: 'API Builder Agent',
+      description: 'Generate REST APIs with best practices baked in.',
+    },
+    {
+      title: 'Code Reviewer',
+      description: 'Automated code review with security checks.',
+    },
+    {
+      title: 'Database Specialist',
+      description: 'SQL optimization and schema design guidance.',
+    },
+  ] as const;
+
   return (
     <BaseLayout
       preview="Getting Started with Claude Pro Directory - Your Quick Start Guide"
       utm={utm}
     >
-      {/* Hero section */}
-      <Section style={heroSection}>
-        <Text style={headingStyle}>Ready to Supercharge Claude? 🚀</Text>
-        <Text style={subheadingStyle}>
-          Let's get you started with the best configurations and tools
-        </Text>
-      </Section>
+      <HeroBlock
+        title="Ready to Supercharge Claude? 🚀"
+        subtitle="Let's get you started with the best configurations and tools."
+      />
 
       <Hr style={dividerStyle} />
 
-      {/* Quick Start Guide */}
-      <Section style={contentSection}>
-        <Text style={sectionTitleStyle}>Quick Start in 3 Steps</Text>
-
-        <Section style={cardStyle}>
-          <Text style={stepNumberStyle}>1</Text>
-          <Text style={stepTitleStyle}>Browse Top Agents</Text>
-          <Text style={stepDescStyle}>
-            Start with our most popular AI agents. These pre-configured prompts help Claude handle
-            specific tasks like code review, API building, and technical documentation.
-          </Text>
-          <Button
-            href={addUTMToURL(`${baseUrl}/agents`, { ...utm, content: 'step_1_agents' })}
-            style={stepButtonStyle}
-          >
-            View Top Agents
-          </Button>
-        </Section>
-
-        <Section style={cardStyle}>
-          <Text style={stepNumberStyle}>2</Text>
-          <Text style={stepTitleStyle}>Try MCP Servers</Text>
-          <Text style={stepDescStyle}>
-            Model Context Protocol (MCP) servers extend Claude's capabilities with real-time data,
-            tool integrations, and custom workflows.
-          </Text>
-          <Button
-            href={addUTMToURL(`${baseUrl}/mcp`, { ...utm, content: 'step_2_mcp' })}
-            style={stepButtonStyle}
-          >
-            Explore MCP Servers
-          </Button>
-        </Section>
-
-        <Section style={cardStyle}>
-          <Text style={stepNumberStyle}>3</Text>
-          <Text style={stepTitleStyle}>Add Custom Rules</Text>
-          <Text style={stepDescStyle}>
-            Customize Claude's behavior with rules that define coding standards, response formats,
-            and project-specific guidelines.
-          </Text>
-          <Button
-            href={addUTMToURL(`${baseUrl}/rules`, { ...utm, content: 'step_3_rules' })}
-            style={stepButtonStyle}
-          >
-            Browse Rules
-          </Button>
-        </Section>
-      </Section>
+      <StepCardList title="Quick Start in 3 Steps" steps={quickStartSteps} />
 
       <Hr style={dividerStyle} />
 
-      {/* Featured Content */}
       <Section style={contentSection}>
         <Text style={sectionTitleStyle}>🌟 Start With These</Text>
         <Text style={paragraphStyle}>Our community's most loved configurations for beginners:</Text>
+      </Section>
 
-        <ul style={listStyle}>
-          <li style={listItemStyle}>
-            <strong style={strongStyle}>API Builder Agent</strong> - Generate REST APIs with best
-            practices
-          </li>
-          <li style={listItemStyle}>
-            <strong style={strongStyle}>Code Reviewer</strong> - Automated code review with security
-            checks
-          </li>
-          <li style={listItemStyle}>
-            <strong style={strongStyle}>Database Specialist</strong> - SQL optimization and schema
-            design
-          </li>
-        </ul>
+      <BulletListSection
+        items={featuredItems.map((item) => ({
+          title: item.title,
+          description: item.description,
+        }))}
+      />
 
+      <Section style={contentSection}>
         <Button
           href={addUTMToURL(`${baseUrl}/trending`, { ...utm, content: 'trending_cta' })}
           style={primaryButtonStyle}
@@ -141,12 +126,10 @@ export function OnboardingGettingStarted({ email }: OnboardingGettingStartedProp
 
       <Hr style={dividerStyle} />
 
-      {/* Help Section */}
       <Section style={helpSection}>
         <Text style={helpTitleStyle}>Need Help Getting Started?</Text>
         <Text style={paragraphStyle}>
-          Check out our tutorials and guides for step-by-step instructions on using Claude
-          configurations effectively.
+          Check out our tutorials and guides for step-by-step instructions on using Claude configurations effectively.
         </Text>
         <Button
           href={addUTMToURL(`${baseUrl}/guides/tutorials`, { ...utm, content: 'tutorials_cta' })}
@@ -156,7 +139,6 @@ export function OnboardingGettingStarted({ email }: OnboardingGettingStartedProp
         </Button>
       </Section>
 
-      {/* Footer note */}
       <Section style={footerNoteSection}>
         <Text style={footerNoteStyle}>
           📧 <strong style={strongStyle}>{email}</strong>
@@ -168,44 +150,6 @@ export function OnboardingGettingStarted({ email }: OnboardingGettingStartedProp
     </BaseLayout>
   );
 }
-
-/**
- * Template-specific custom styles
- * (Styles specific to numbered step workflow patterns)
- */
-
-const stepNumberStyle: React.CSSProperties = {
-  fontSize: typography.fontSize['2xl'],
-  fontWeight: typography.fontWeight.bold,
-  color: brandColors.primary,
-  margin: `0 0 ${spacing.xs} 0`,
-};
-
-const stepTitleStyle: React.CSSProperties = {
-  fontSize: typography.fontSize.lg,
-  fontWeight: typography.fontWeight.semibold,
-  color: emailTheme.textPrimary,
-  margin: `0 0 ${spacing.sm} 0`,
-};
-
-const stepDescStyle: React.CSSProperties = {
-  fontSize: typography.fontSize.sm,
-  color: emailTheme.textSecondary,
-  lineHeight: typography.lineHeight.relaxed,
-  margin: `0 0 ${spacing.md} 0`,
-};
-
-const stepButtonStyle: React.CSSProperties = {
-  backgroundColor: brandColors.primary,
-  color: '#ffffff',
-  fontWeight: typography.fontWeight.medium,
-  fontSize: typography.fontSize.sm,
-  padding: `${spacing.sm} ${spacing.lg}`,
-  borderRadius: borderRadius.sm,
-  textDecoration: 'none',
-  display: 'inline-block',
-  border: 'none',
-};
 
 const helpSection: React.CSSProperties = {
   textAlign: 'center',
@@ -223,7 +167,8 @@ const helpTitleStyle: React.CSSProperties = {
   margin: `0 0 ${spacing.sm} 0`,
 };
 
-/**
- * Export default for easier imports
- */
 export default OnboardingGettingStarted;
+
+export function renderOnboardingGettingStartedEmail(props: OnboardingGettingStartedProps) {
+  return renderEmailTemplate(OnboardingGettingStarted, props);
+}

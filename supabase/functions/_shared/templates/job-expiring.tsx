@@ -5,9 +5,9 @@
 
 import React from 'npm:react@18.3.1';
 import { Button, Hr, Section, Text } from 'npm:@react-email/components@0.0.22';
-import { addUTMToURL } from '../utils/email-utm.ts';
-import { EMAIL_UTM_TEMPLATES } from '../utils/utm-templates.ts';
-import { BaseLayout } from '../layouts/base-layout.tsx';
+import { addUTMToURL } from '../utils/email/email-utm.ts';
+import { EMAIL_UTM_TEMPLATES } from '../utils/email/utm-templates.ts';
+import { BaseLayout, renderEmailTemplate } from '../utils/email/base-template.tsx';
 import {
   contentSection,
   ctaSection,
@@ -20,7 +20,9 @@ import {
   secondaryButtonStyle,
   strongStyle,
   subheadingStyle,
-} from '../utils/common-styles.ts';
+} from '../utils/email/common-styles.ts';
+import { JobDetailsSection } from '../utils/email/components/job.tsx';
+import { formatEmailDate, pluralize } from '../utils/email/formatters.ts';
 
 export interface JobExpiringProps {
   jobTitle: string;
@@ -44,6 +46,8 @@ export function JobExpiring({
   const baseUrl = 'https://claudepro.directory';
   const utm = EMAIL_UTM_TEMPLATES.ONBOARDING_WELCOME;
   const jobUrl = `${baseUrl}/jobs/${jobId}`;
+  const expiresLabel = formatEmailDate(expiresAt);
+  const dayWord = pluralize(daysRemaining, 'day');
 
   return (
     <BaseLayout
@@ -53,27 +57,19 @@ export function JobExpiring({
       <Section style={contentSection}>
         <Text style={headingStyle}>⏰ Job Listing Expiring Soon</Text>
         <Text style={subheadingStyle}>
-          Your job posting will expire in {daysRemaining} day{daysRemaining !== 1 ? 's' : ''}.
+          Your job posting will expire in {daysRemaining} {dayWord}.
         </Text>
       </Section>
 
       <Hr style={dividerStyle} />
 
-      <Section style={contentSection}>
-        <Text style={paragraphStyle}>
-          <strong style={strongStyle}>Position:</strong> {jobTitle}
-        </Text>
-        <Text style={paragraphStyle}>
-          <strong style={strongStyle}>Company:</strong> {company}
-        </Text>
-        <Text style={paragraphStyle}>
-          <strong style={strongStyle}>Expires:</strong> {new Date(expiresAt).toLocaleDateString('en-US', {
-            month: 'long',
-            day: 'numeric',
-            year: 'numeric',
-          })}
-        </Text>
-      </Section>
+      <JobDetailsSection
+        items={[
+          { label: 'Position', value: jobTitle },
+          { label: 'Company', value: company },
+          { label: 'Expires', value: expiresLabel },
+        ]}
+      />
 
       <Hr style={dividerStyle} />
 
@@ -106,4 +102,8 @@ export function JobExpiring({
       </Section>
     </BaseLayout>
   );
+}
+
+export function renderJobExpiringEmail(props: JobExpiringProps) {
+  return renderEmailTemplate(JobExpiring, props);
 }

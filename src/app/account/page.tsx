@@ -1,6 +1,8 @@
+import Link from 'next/link';
 import { z } from 'zod';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { NavLink } from '@/src/components/core/navigation/navigation-link';
+import { Button } from '@/src/components/primitives/ui/button';
 import {
   Card,
   CardContent,
@@ -8,26 +10,56 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/ui/card';
+import { getAuthenticatedUser } from '@/src/lib/auth/get-authenticated-user';
 import { ROUTES } from '@/src/lib/constants';
 import { getAccountDashboard } from '@/src/lib/data/user-data';
 import { Bookmark, Calendar } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 
 export const metadata = generatePageMetadata('/account');
 
 export default async function AccountDashboard() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { user } = await getAuthenticatedUser({ context: 'AccountDashboard' });
 
-  if (!user) return null;
+  if (!user) {
+    logger.warn('AccountDashboard: unauthenticated access attempt detected');
+    return (
+      <div className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-2xl">Sign in required</CardTitle>
+            <CardDescription>Please sign in to view your dashboard.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button asChild>
+              <Link href={ROUTES.LOGIN}>Go to login</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   // User-scoped edge-cached RPC via centralized data layer
-  const dashboardData = await getAccountDashboard(user.id);
+  let dashboardData: Awaited<ReturnType<typeof getAccountDashboard>> | null = null;
+  let fetchError = false;
+  try {
+    dashboardData = await getAccountDashboard(user.id);
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to load account dashboard data');
+    logger.error('AccountDashboard: getAccountDashboard threw', normalized, {
+      userId: user.id,
+    });
+    fetchError = true;
+  }
+
+  if (!dashboardData) {
+    logger.error('AccountDashboard: dashboard data is null', undefined, { userId: user.id });
+    fetchError = true;
+  }
 
   // Runtime validation schema for RPC response
   const DashboardResponseSchema = z.object({
@@ -42,22 +74,35 @@ export default async function AccountDashboard() {
   type DashboardResponse = z.infer<typeof DashboardResponseSchema>;
 
   // Validate and fallback on error
-  let validatedData: DashboardResponse;
+  let validatedData: DashboardResponse | null = null;
   try {
     validatedData = DashboardResponseSchema.parse(dashboardData);
   } catch (error) {
-    logger.error(
-      'Invalid dashboard response structure',
-      error instanceof Error ? error : new Error(String(error))
+    const normalized = normalizeError(error, 'Invalid dashboard response structure');
+    logger.error('AccountDashboard: dashboard response validation failed', normalized, {
+      userId: user.id,
+    });
+    fetchError = true;
+  }
+
+  if (fetchError || !validatedData) {
+    return (
+      <div className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-2xl">Dashboard unavailable</CardTitle>
+            <CardDescription>
+              We couldn&apos;t load your account data. Please refresh the page or try again later.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button asChild>
+              <Link href={ROUTES.HOME}>Go to home</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
     );
-    validatedData = {
-      bookmark_count: 0,
-      profile: {
-        name: null,
-        tier: null,
-        created_at: new Date().toISOString(),
-      },
-    };
   }
 
   const { bookmark_count, profile } = validatedData;

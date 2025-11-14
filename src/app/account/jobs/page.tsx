@@ -10,6 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/ui/card';
+import { getAuthenticatedUser } from '@/src/lib/auth/get-authenticated-user';
 import { ROUTES } from '@/src/lib/constants';
 import { getUserDashboard } from '@/src/lib/data/user-data';
 import { BarChart, Briefcase, Edit, ExternalLink, Eye, Plus } from '@/src/lib/icons';
@@ -17,19 +18,72 @@ import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { BADGE_COLORS, type JobStatusType, UI_CLASSES } from '@/src/lib/ui-constants';
 import { formatRelativeDate } from '@/src/lib/utils/data.utils';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 import type { Tables } from '@/src/types/database.types';
 import type { GetUserDashboardReturn } from '@/src/types/database-overrides';
 
 export const metadata = generatePageMetadata('/account/jobs');
 
 export default async function MyJobsPage() {
-  const data = (await getUserDashboard('me')) as GetUserDashboardReturn | null;
-  const jobs: Array<Tables<'jobs'>> = data?.jobs || [];
+  const { user } = await getAuthenticatedUser({ context: 'MyJobsPage' });
+
+  if (!user) {
+    logger.warn('MyJobsPage: unauthenticated access attempt detected');
+    return (
+      <div className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-2xl">Sign in required</CardTitle>
+            <CardDescription>Please sign in to manage your job listings.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button asChild>
+              <Link href={ROUTES.LOGIN}>Go to login</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  let data: GetUserDashboardReturn | null = null;
+  let fetchError = false;
+  try {
+    data = (await getUserDashboard(user.id)) as GetUserDashboardReturn | null;
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to load user dashboard for jobs');
+    logger.error('MyJobsPage: getUserDashboard threw', normalized, { userId: user.id });
+    fetchError = true;
+  }
 
   if (!data) {
-    logger.warn('MyJobsPage: getUserDashboard returned no data', {
-      route: '/account/jobs',
-    });
+    logger.warn('MyJobsPage: getUserDashboard returned no data', { userId: user.id });
+    fetchError = true;
+  }
+
+  if (fetchError) {
+    return (
+      <div className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-2xl">Job listings unavailable</CardTitle>
+            <CardDescription>
+              We couldn&apos;t load your job dashboard. Please refresh or try again later.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button asChild variant="outline">
+              <Link href={ROUTES.ACCOUNT}>Back to dashboard</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  const jobs: Array<Tables<'jobs'>> = data?.jobs || [];
+  if (jobs.length === 0) {
+    logger.info('MyJobsPage: user has no job listings', { userId: user.id });
   }
 
   const getStatusColor = (status: string) => {

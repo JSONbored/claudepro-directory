@@ -21,10 +21,11 @@ import {
   Preview,
   Section,
   Text,
+  renderAsync,
 } from 'npm:@react-email/components@0.0.22';
-import { addUTMToURL } from '../utils/email-utm.ts';
-import type { EmailUTMParams } from '../utils/utm-templates.ts';
-import { borderRadius, brandColors, emailTheme, spacing, typography } from '../utils/theme.ts';
+import { addUTMToURL } from './email-utm.ts';
+import type { EmailUTMParams } from './utm-templates.ts';
+import { borderRadius, brandColors, emailTheme, spacing, typography } from './theme.ts';
 
 export interface BaseLayoutProps {
   /**
@@ -143,6 +144,25 @@ export function BaseLayout({
       </Body>
     </Html>
   );
+}
+
+/**
+ * Render any email template component or element to HTML using React Email's `renderAsync`.
+ * Accepts either a component + props or a pre-constructed React element.
+ */
+export async function renderEmailTemplate<TProps>(
+  template: React.ComponentType<TProps> | React.ReactElement,
+  props?: TProps
+): Promise<string> {
+  if (React.isValidElement(template)) {
+    return renderAsync(template);
+  }
+
+  if (!props) {
+    throw new Error('renderEmailTemplate requires props when you pass a component reference.');
+  }
+
+  return renderAsync(React.createElement(template, props));
 }
 
 /**

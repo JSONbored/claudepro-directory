@@ -18,28 +18,72 @@ import {
  */
 
 import { ensureUserRecord } from '@/src/lib/actions/user.actions';
+import { getAuthenticatedUser } from '@/src/lib/auth/get-authenticated-user';
+import { ROUTES } from '@/src/lib/constants';
 import { getUserSettings } from '@/src/lib/data/user-data';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 import type { GetUserSettingsReturn } from '@/src/types/database-overrides';
 
 export const metadata = generatePageMetadata('/account/settings');
 
 export default async function SettingsPage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { user } = await getAuthenticatedUser({ context: 'SettingsPage' });
 
   if (!user) {
     logger.warn('SettingsPage: unauthenticated access attempt');
-    return null;
+    return (
+      <div className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-2xl">Sign in required</CardTitle>
+            <CardDescription>Please sign in to manage your account settings.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button asChild>
+              <Link href={ROUTES.LOGIN}>Go to login</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   // User-scoped edge-cached RPC via centralized data layer
-  const settingsData = await getUserSettings(user.id);
+  let settingsData: GetUserSettingsReturn | null = null;
+  try {
+    const response = await getUserSettings(user.id);
+    if (response) {
+      settingsData = response as GetUserSettingsReturn;
+    } else {
+      logger.warn('SettingsPage: getUserSettings returned null', { userId: user.id });
+    }
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to load user settings');
+    logger.error('SettingsPage: getUserSettings threw', normalized, { userId: user.id });
+  }
+
+  if (!settingsData) {
+    return (
+      <div className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-2xl">Settings</CardTitle>
+            <CardDescription>
+              We couldn&apos;t load your account settings. Please refresh or try again later.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button asChild variant="outline">
+              <Link href={ROUTES.ACCOUNT}>Back to dashboard</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   // Type-safe RPC return using centralized type definition
   const settingsResult = settingsData as GetUserSettingsReturn;

@@ -5,9 +5,9 @@
 
 import React from 'npm:react@18.3.1';
 import { Button, Hr, Section, Text } from 'npm:@react-email/components@0.0.22';
-import { addUTMToURL } from '../utils/email-utm.ts';
-import { EMAIL_UTM_TEMPLATES } from '../utils/utm-templates.ts';
-import { BaseLayout } from '../layouts/base-layout.tsx';
+import { addUTMToURL } from '../utils/email/email-utm.ts';
+import { EMAIL_UTM_TEMPLATES } from '../utils/email/utm-templates.ts';
+import { BaseLayout, renderEmailTemplate } from '../utils/email/base-template.tsx';
 import {
   contentSection,
   ctaSection,
@@ -17,7 +17,8 @@ import {
   primaryButtonStyle,
   strongStyle,
   subheadingStyle,
-} from '../utils/common-styles.ts';
+} from '../utils/email/common-styles.ts';
+import { JobDetailsSection } from '../utils/email/components/job.tsx';
 
 export interface JobRejectedProps {
   jobTitle: string;
@@ -52,14 +53,12 @@ export function JobRejected({
 
       <Hr style={dividerStyle} />
 
-      <Section style={contentSection}>
-        <Text style={paragraphStyle}>
-          <strong style={strongStyle}>Position:</strong> {jobTitle}
-        </Text>
-        <Text style={paragraphStyle}>
-          <strong style={strongStyle}>Company:</strong> {company}
-        </Text>
-      </Section>
+      <JobDetailsSection
+        items={[
+          { label: 'Position', value: jobTitle },
+          { label: 'Company', value: company },
+        ]}
+      />
 
       {rejectionReason && (
         <>
@@ -89,4 +88,8 @@ export function JobRejected({
       </Section>
     </BaseLayout>
   );
+}
+
+export function renderJobRejectedEmail(props: JobRejectedProps) {
+  return renderEmailTemplate(JobRejected, props);
 }

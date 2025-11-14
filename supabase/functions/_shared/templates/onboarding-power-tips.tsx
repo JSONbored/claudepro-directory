@@ -8,29 +8,24 @@
 
 import React from 'npm:react@18.3.1';
 import { Button, Hr, Section, Text } from 'npm:@react-email/components@0.0.22';
-import { addUTMToURL } from '../utils/email-utm.ts';
-import { EMAIL_UTM_TEMPLATES } from '../utils/utm-templates.ts';
-import { BaseLayout } from '../layouts/base-layout.tsx';
+import { addUTMToURL } from '../utils/email/email-utm.ts';
+import { EMAIL_UTM_TEMPLATES } from '../utils/email/utm-templates.ts';
+import { BaseLayout, renderEmailTemplate } from '../utils/email/base-template.tsx';
 import {
-  cardStyle,
   contentSection,
   ctaSection,
   ctaTitleStyle,
   dividerStyle,
   footerNoteSection,
   footerNoteStyle,
-  headingStyle,
-  heroSection,
-  listItemStyle,
-  listStyle,
   paragraphStyle,
   primaryButtonStyle,
   secondaryButtonStyle,
   sectionTitleStyle,
   strongStyle,
-  subheadingStyle,
-} from '../utils/common-styles.ts';
-import { borderRadius, brandColors, emailTheme, spacing, typography } from '../utils/theme.ts';
+} from '../utils/email/common-styles.ts';
+import { BulletListSection, HeroBlock, CardListSection } from '../utils/email/components/sections.tsx';
+import { borderRadius, emailTheme, spacing, typography } from '../utils/email/theme.ts';
 
 export interface OnboardingPowerTipsProps {
   /**
@@ -38,6 +33,34 @@ export interface OnboardingPowerTipsProps {
    */
   email: string;
 }
+
+const POWER_TIPS = [
+  {
+    emoji: '🔌',
+    title: 'Combine Multiple MCP Servers',
+    description:
+      'Stack GitHub + Filesystem + Database MCP for a full-stack workspace. Pro tip: start with 2-3 servers, then add more as you master each one.',
+  },
+  {
+    emoji: '📝',
+    title: 'Create Custom Rule Sets',
+    description:
+      'Define coding standards, response formats, and best practices once and let Claude follow them automatically.',
+  },
+  {
+    emoji: '🎯',
+    title: 'Master Context Windows',
+    description:
+      'Use hooks and commands to inject relevant files and dependencies so Claude always knows your project state.',
+  },
+] as const;
+
+const BEST_PRACTICES = [
+  { title: 'Start Small', description: 'Master one configuration before combining multiple tools.' },
+  { title: 'Document Everything', description: 'Keep notes on which setups work best for each task.' },
+  { title: 'Iterate Often', description: 'Refine prompts and rules based on real results.' },
+  { title: 'Share Back', description: 'Submit your winning configurations to help the community.' },
+] as const;
 
 /**
  * Power User Tips Email Component (Step 3 of 5)
@@ -48,88 +71,36 @@ export function OnboardingPowerTips({ email }: OnboardingPowerTipsProps) {
 
   return (
     <BaseLayout preview="Power User Tips - Advanced Claude Techniques & Best Practices" utm={utm}>
-      {/* Hero section */}
-      <Section style={heroSection}>
-        <Text style={headingStyle}>Level Up Your Claude Game 💪</Text>
-        <Text style={subheadingStyle}>
-          Advanced techniques to get the most out of your AI assistant
-        </Text>
-      </Section>
+      <HeroBlock
+        title="Level Up Your Claude Game 💪"
+        subtitle="Advanced techniques to get the most out of your AI assistant."
+      />
 
       <Hr style={dividerStyle} />
 
-      {/* Power Tips */}
-      <Section style={contentSection}>
-        <Text style={sectionTitleStyle}>🚀 Power User Tips</Text>
-
-        <Section style={cardStyle}>
-          <Text style={tipIconStyle}>🔌</Text>
-          <Text style={tipTitleStyle}>Combine Multiple MCP Servers</Text>
-          <Text style={tipDescStyle}>
-            Stack MCP servers for powerful workflows. For example: GitHub MCP + Filesystem MCP +
-            Database MCP = Complete full-stack development environment.
-          </Text>
-          <Text style={tipCodeStyle}>
-            💡 Pro Tip: Start with 2-3 servers, then add more as you master each one.
-          </Text>
-        </Section>
-
-        <Section style={cardStyle}>
-          <Text style={tipIconStyle}>📝</Text>
-          <Text style={tipTitleStyle}>Create Custom Rule Sets</Text>
-          <Text style={tipDescStyle}>
-            Build project-specific rules that define your coding standards, response formats, and
-            best practices. Claude will automatically apply them to every interaction.
-          </Text>
-          <Text style={tipCodeStyle}>
-            💡 Pro Tip: Use rules for code style guides, security requirements, and team
-            conventions.
-          </Text>
-        </Section>
-
-        <Section style={cardStyle}>
-          <Text style={tipIconStyle}>🎯</Text>
-          <Text style={tipTitleStyle}>Master Context Windows</Text>
-          <Text style={tipDescStyle}>
-            Use hooks and commands to automatically inject relevant context. This keeps Claude
-            informed about your project structure, dependencies, and requirements.
-          </Text>
-          <Text style={tipCodeStyle}>
-            💡 Pro Tip: Create hooks that run on project load to set up your ideal Claude
-            environment.
-          </Text>
-        </Section>
-      </Section>
+      <CardListSection
+        title="🚀 Power User Tips"
+        cards={POWER_TIPS.map((tip) => ({
+          title: `${tip.emoji} ${tip.title}`,
+          description: tip.description,
+        }))}
+      />
 
       <Hr style={dividerStyle} />
 
-      {/* Best Practices */}
       <Section style={contentSection}>
         <Text style={sectionTitleStyle}>✨ Best Practices from the Community</Text>
-
-        <ul style={listStyle}>
-          <li style={listItemStyle}>
-            <strong style={strongStyle}>Start Small:</strong> Master one configuration before
-            combining multiple tools
-          </li>
-          <li style={listItemStyle}>
-            <strong style={strongStyle}>Document Everything:</strong> Keep notes on which
-            configurations work best for different tasks
-          </li>
-          <li style={listItemStyle}>
-            <strong style={strongStyle}>Iterate Often:</strong> Refine your prompts and rules based
-            on results
-          </li>
-          <li style={listItemStyle}>
-            <strong style={strongStyle}>Share Back:</strong> Submit your successful configurations
-            to help others
-          </li>
-        </ul>
       </Section>
+
+      <BulletListSection
+        items={BEST_PRACTICES.map((item) => ({
+          title: item.title,
+          description: item.description,
+        }))}
+      />
 
       <Hr style={dividerStyle} />
 
-      {/* Advanced Resources */}
       <Section style={ctaSection}>
         <Text style={ctaTitleStyle}>Explore Advanced Features</Text>
         <Text style={paragraphStyle}>
@@ -153,16 +124,13 @@ export function OnboardingPowerTips({ email }: OnboardingPowerTipsProps) {
 
       <Hr style={dividerStyle} />
 
-      {/* Community Spotlight Teaser */}
       <Section style={teaserSection}>
         <Text style={teaserTitleStyle}>Coming Up Next...</Text>
         <Text style={teaserDescStyle}>
-          In our next email, we'll introduce you to the ClaudePro community and show you how to
-          contribute your own configurations. Stay tuned! 🎉
+          In our next email, we'll introduce you to the ClaudePro community and show you how to contribute your own configurations. Stay tuned! 🎉
         </Text>
       </Section>
 
-      {/* Footer note */}
       <Section style={footerNoteSection}>
         <Text style={footerNoteStyle}>
           📧 <strong style={strongStyle}>{email}</strong>
@@ -172,39 +140,6 @@ export function OnboardingPowerTips({ email }: OnboardingPowerTipsProps) {
     </BaseLayout>
   );
 }
-
-/**
- * Template-specific custom styles
- * (Styles specific to tip card patterns and teaser sections)
- */
-
-const tipIconStyle: React.CSSProperties = {
-  fontSize: typography.fontSize['2xl'],
-  margin: `0 0 ${spacing.xs} 0`,
-  display: 'block',
-};
-
-const tipTitleStyle: React.CSSProperties = {
-  fontSize: typography.fontSize.lg,
-  fontWeight: typography.fontWeight.semibold,
-  color: emailTheme.textPrimary,
-  margin: `0 0 ${spacing.sm} 0`,
-};
-
-const tipDescStyle: React.CSSProperties = {
-  fontSize: typography.fontSize.base,
-  color: emailTheme.textSecondary,
-  lineHeight: typography.lineHeight.relaxed,
-  margin: `0 0 ${spacing.sm} 0`,
-};
-
-const tipCodeStyle: React.CSSProperties = {
-  fontSize: typography.fontSize.sm,
-  color: brandColors.primary,
-  fontStyle: 'italic',
-  lineHeight: typography.lineHeight.relaxed,
-  margin: 0,
-};
 
 const teaserSection: React.CSSProperties = {
   backgroundColor: emailTheme.bgTertiary,
@@ -218,7 +153,7 @@ const teaserSection: React.CSSProperties = {
 const teaserTitleStyle: React.CSSProperties = {
   fontSize: typography.fontSize.xl,
   fontWeight: typography.fontWeight.semibold,
-  color: brandColors.primary,
+  color: emailTheme.textPrimary,
   margin: `0 0 ${spacing.sm} 0`,
 };
 
@@ -229,7 +164,8 @@ const teaserDescStyle: React.CSSProperties = {
   margin: 0,
 };
 
-/**
- * Export default for easier imports
- */
 export default OnboardingPowerTips;
+
+export function renderOnboardingPowerTipsEmail(props: OnboardingPowerTipsProps) {
+  return renderEmailTemplate(OnboardingPowerTips, props);
+}

@@ -8,6 +8,7 @@
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { z } from 'zod';
 import { authedAction } from '@/src/lib/actions/safe-action';
+import { getAuthenticatedUser } from '@/src/lib/auth/get-authenticated-user';
 import { cacheConfigs } from '@/src/lib/flags';
 import { logger } from '@/src/lib/logger';
 import { revalidateCacheTags } from '@/src/lib/supabase/cache-helpers';
@@ -284,10 +285,7 @@ export const removeBookmark = authedAction
   });
 
 export async function isBookmarked(content_type: string, content_slug: string): Promise<boolean> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { user } = await getAuthenticatedUser({ context: 'isBookmarked' });
   if (!user) return false;
 
   const data = await cachedRPCWithDedupe<boolean>(
@@ -413,10 +411,7 @@ export const toggleFollow = authedAction
   });
 
 export async function isFollowing(user_id: string): Promise<boolean> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { user } = await getAuthenticatedUser({ context: 'isFollowing' });
   if (!user) return false;
 
   const data = await cachedRPCWithDedupe<boolean>(

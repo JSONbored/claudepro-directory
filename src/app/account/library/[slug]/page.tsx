@@ -12,12 +12,12 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/ui/card';
+import { getAuthenticatedUser } from '@/src/lib/auth/get-authenticated-user';
 import { APP_CONFIG, ROUTES } from '@/src/lib/constants';
 import { getCollectionDetail } from '@/src/lib/data/user-data';
 import { ArrowLeft, Edit } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import type { Tables } from '@/src/types/database.types';
 
@@ -32,11 +32,7 @@ export async function generateMetadata({ params }: CollectionPageProps): Promise
 
 export default async function CollectionDetailPage({ params }: CollectionPageProps) {
   const { slug } = await params;
-  const supabase = await createClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { user } = await getAuthenticatedUser({ context: 'CollectionDetailPage' });
 
   if (!user) {
     logger.warn('CollectionDetailPage: unauthenticated access attempt', { slug });

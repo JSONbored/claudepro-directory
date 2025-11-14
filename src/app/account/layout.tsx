@@ -9,6 +9,7 @@ import { AuthSignOutButton } from '@/src/components/core/buttons/auth/auth-signo
 import { Button } from '@/src/components/primitives/ui/button';
 import { Card } from '@/src/components/primitives/ui/card';
 import { ensureUserRecord } from '@/src/lib/actions/user.actions';
+import { getAuthenticatedUserFromClient } from '@/src/lib/auth/get-authenticated-user';
 import { getUserSettings, getUserSponsorships } from '@/src/lib/data/user-data';
 import {
   Activity,
@@ -28,12 +29,10 @@ import type { GetUserSettingsReturn } from '@/src/types/database-overrides';
 export default async function AccountLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
 
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser();
-
-  if (userError || !user) redirect('/login');
+  const { user } = await getAuthenticatedUserFromClient(supabase, {
+    context: 'AccountLayout',
+  });
+  if (!user) redirect('/login');
 
   const {
     data: { session },

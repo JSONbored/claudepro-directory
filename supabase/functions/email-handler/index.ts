@@ -30,8 +30,8 @@ import {
   publicCorsHeaders,
   successResponse,
 } from '../_shared/utils/http.ts';
+import { syncContactSegment } from '../_shared/utils/integrations/segment-manager.ts';
 import { buildContactProperties, inferInitialTopics } from '../_shared/utils/resend-helpers.ts';
-import { syncContactSegment } from '../_shared/utils/segment-manager.ts';
 import { supabaseServiceRole } from '../_shared/utils/supabase-clients.ts';
 
 validateEnvironment(['resend', 'auth-hook']);

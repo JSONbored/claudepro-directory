@@ -7,12 +7,12 @@ import { notFound, redirect } from 'next/navigation';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { Button } from '@/src/components/primitives/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
+import { getAuthenticatedUser } from '@/src/lib/auth/get-authenticated-user';
 import { ROUTES } from '@/src/lib/constants';
 import { getUserJobById } from '@/src/lib/data/user-data';
 import { ArrowLeft, BarChart, ExternalLink, Eye } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-import { createClient } from '@/src/lib/supabase/server';
 import { BADGE_COLORS, type JobStatusType, UI_CLASSES } from '@/src/lib/ui-constants';
 import { formatRelativeDate } from '@/src/lib/utils/data.utils';
 
@@ -24,11 +24,7 @@ interface JobAnalyticsPageProps {
 
 export default async function JobAnalyticsPage({ params }: JobAnalyticsPageProps) {
   const resolvedParams = await params;
-  const supabase = await createClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { user } = await getAuthenticatedUser({ context: 'JobAnalyticsPage' });
 
   if (!user) {
     logger.warn('JobAnalyticsPage: unauthenticated access attempt', {

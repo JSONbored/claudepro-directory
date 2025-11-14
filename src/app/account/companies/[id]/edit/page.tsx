@@ -4,10 +4,10 @@
 
 import { notFound, redirect } from 'next/navigation';
 import { CompanyForm } from '@/src/components/core/forms/company-form';
+import { getAuthenticatedUser } from '@/src/lib/auth/get-authenticated-user';
 import { getUserCompanyById } from '@/src/lib/data/user-data';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-import { createClient } from '@/src/lib/supabase/server';
 
 export const metadata = generatePageMetadata('/account/companies/:id/edit');
 
@@ -17,10 +17,7 @@ interface EditCompanyPageProps {
 
 export default async function EditCompanyPage({ params }: EditCompanyPageProps) {
   const { id } = await params;
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { user } = await getAuthenticatedUser({ context: 'EditCompanyPage' });
 
   if (!user) {
     redirect('/login');

@@ -5,6 +5,7 @@
 import { headers } from 'next/headers';
 import { createSafeActionClient, DEFAULT_SERVER_ERROR_MESSAGE } from 'next-safe-action';
 import { z } from 'zod';
+import { getAuthenticatedUserFromClient } from '@/src/lib/auth/get-authenticated-user';
 import { logger } from '@/src/lib/logger';
 import { logActionFailure, normalizeError } from '@/src/lib/utils/error.utils';
 
@@ -71,12 +72,11 @@ export const authedAction = rateLimitedAction.use(async ({ next, metadata }) => 
   const { createClient } = await import('@/src/lib/supabase/server');
   const supabase = await createClient();
 
-  const {
-    data: { user },
-    error,
-  } = await supabase.auth.getUser();
+  const authResult = await getAuthenticatedUserFromClient(supabase, {
+    context: metadata?.actionName || 'authedAction',
+  });
 
-  if (error || !user) {
+  if (!authResult.user) {
     const headersList = await headers();
     const clientIP =
       headersList.get('cf-connecting-ip') ||
@@ -89,17 +89,17 @@ export const authedAction = rateLimitedAction.use(async ({ next, metadata }) => 
       clientIP,
       path: referer,
       actionName: metadata?.actionName || 'unknown',
-      reason: error?.message || 'No valid session',
-      errorCode: error?.name || 'AUTH_REQUIRED',
+      reason: authResult.error?.message || 'No valid session',
+      errorCode: authResult.error?.name || 'AUTH_REQUIRED',
     });
 
     throw new Error('Unauthorized. Please sign in to continue.');
   }
 
   const authCtx: { userId: string; userEmail?: string } = {
-    userId: user.id,
+    userId: authResult.user.id,
   };
-  if (user.email) authCtx.userEmail = user.email;
+  if (authResult.user.email) authCtx.userEmail = authResult.user.email;
 
   return next({
     ctx: authCtx,

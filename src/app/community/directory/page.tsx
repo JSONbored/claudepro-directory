@@ -2,8 +2,10 @@ import { Suspense } from 'react';
 import { ContributorsSidebar } from '@/src/components/features/community/contributors-sidebar';
 import { ProfileSearchClient } from '@/src/components/features/community/profile-search';
 import { Skeleton } from '@/src/components/primitives/feedback/loading-skeleton';
+import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { cachedRPCWithDedupe } from '@/src/lib/supabase/cached-rpc';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 import type { Tables } from '@/src/types/database.types';
 
 export const metadata = generatePageMetadata('/community/directory');
@@ -20,16 +22,31 @@ async function CommunityDirectoryContent({ searchQuery }: { searchQuery: string 
 
   const rpcParams = searchQuery ? { p_search_query: searchQuery, p_limit: 100 } : { p_limit: 100 };
 
-  const directoryData = await cachedRPCWithDedupe<DirectoryResponse>(
-    'get_community_directory',
-    rpcParams,
-    {
-      tags: ['community', 'users'],
-      ttlConfigKey: 'cache.community.ttl_seconds',
-      keySuffix: searchQuery || 'all',
-      useAuthClient: true,
-    }
-  );
+  let directoryData: DirectoryResponse | null = null;
+  try {
+    directoryData = await cachedRPCWithDedupe<DirectoryResponse>(
+      'get_community_directory',
+      rpcParams,
+      {
+        tags: ['community', 'users'],
+        ttlConfigKey: 'cache.community.ttl_seconds',
+        keySuffix: searchQuery || 'all',
+        useAuthClient: true,
+      }
+    );
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to load community directory');
+    logger.error('CommunityDirectoryContent: get_community_directory RPC failed', normalized, {
+      hasQuery: Boolean(searchQuery),
+    });
+    throw normalized;
+  }
+
+  if (!directoryData) {
+    logger.warn('CommunityDirectoryContent: directory data response is empty', {
+      hasQuery: Boolean(searchQuery),
+    });
+  }
 
   const { all_users, top_contributors, new_members } = directoryData || {
     all_users: [],

@@ -6,7 +6,9 @@ import type { Metadata } from 'next';
 import { ContentSearchClient } from '@/src/components/content/content-search';
 import type { SearchFilters } from '@/src/lib/edge/search-client';
 import { searchContent } from '@/src/lib/edge/search-client';
+import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 
 export const revalidate = false;
 
@@ -50,7 +52,17 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   if (author) filters.p_authors = [author];
   filters.p_limit = 50;
 
-  const results = await searchContent(query, filters);
+  let results: Awaited<ReturnType<typeof searchContent>> = [];
+  try {
+    results = await searchContent(query, filters);
+  } catch (error) {
+    const normalized = normalizeError(error, 'Search content fetch failed');
+    logger.error('SearchPage: searchContent invocation failed', normalized, {
+      query,
+      hasFilters: Object.keys(filters).length > 0,
+    });
+    throw normalized;
+  }
 
   return (
     <main className="container mx-auto px-4 py-8">

@@ -22,6 +22,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/primi
 import { Textarea } from '@/src/components/primitives/ui/textarea';
 import { submitContentForReview } from '@/src/lib/actions/content.actions';
 import { getAnimationConfig } from '@/src/lib/actions/feature-flags.actions';
+import { useAuthenticatedUser } from '@/src/lib/auth/use-authenticated-user';
 import type { Template } from '@/src/lib/data/templates';
 import {
   SUBMISSION_CONTENT_TYPES,
@@ -32,7 +33,6 @@ import {
 } from '@/src/lib/forms/types';
 import { CheckCircle, Code, FileText, Github, Layers, Send, Sparkles } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
-import { createClient } from '@/src/lib/supabase/client';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
 import { ParseStrategy, safeParse } from '@/src/lib/utils/data.utils';
@@ -152,6 +152,10 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
     stiffness: 500,
     damping: 20,
   });
+  const { user } = useAuthenticatedUser({
+    context: 'ContentSubmissionForm',
+    subscribe: false,
+  });
 
   useEffect(() => {
     getAnimationConfig()
@@ -256,8 +260,9 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
 
     if (template.type === 'command') {
       const cmdInput = form.querySelector('[name="commandContent"]') as HTMLTextAreaElement;
-      if (cmdInput && typeof template.commandContent === 'string')
+      if (cmdInput && typeof template.commandContent === 'string') {
         cmdInput.value = template.commandContent;
+      }
     }
 
     toasts.success.templateApplied();
@@ -268,13 +273,6 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
 
     startTransition(async () => {
       try {
-        const supabase = createClient();
-
-        // Check authentication
-        const {
-          data: { user },
-        } = await supabase.auth.getUser();
-
         if (!user) {
           toasts.error.submissionFailed('You must be signed in to submit content');
           return;

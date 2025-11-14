@@ -4,11 +4,11 @@ import { notFound, redirect } from 'next/navigation';
 import { CollectionForm } from '@/src/components/core/forms/collection-form';
 import { Button } from '@/src/components/primitives/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
+import { getAuthenticatedUser } from '@/src/lib/auth/get-authenticated-user';
 import { getCollectionDetail } from '@/src/lib/data/user-data';
 import { ArrowLeft } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-import { createClient } from '@/src/lib/supabase/server';
 import type { Tables } from '@/src/types/database.types';
 
 interface EditCollectionPageProps {
@@ -22,11 +22,7 @@ export async function generateMetadata({ params }: EditCollectionPageProps): Pro
 
 export default async function EditCollectionPage({ params }: EditCollectionPageProps) {
   const { slug } = await params;
-  const supabase = await createClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { user } = await getAuthenticatedUser({ context: 'EditCollectionPage' });
 
   if (!user) {
     logger.warn('EditCollectionPage: unauthenticated access attempt', { slug });

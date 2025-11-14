@@ -12,9 +12,9 @@
 
 import React from 'npm:react@18.3.1';
 import { Button, Hr, Section, Text } from 'npm:@react-email/components@0.0.22';
-import { addUTMToURL } from '../utils/email-utm.ts';
-import { EMAIL_UTM_TEMPLATES } from '../utils/utm-templates.ts';
-import { BaseLayout } from '../layouts/base-layout.tsx';
+import { addUTMToURL } from '../utils/email/email-utm.ts';
+import { EMAIL_UTM_TEMPLATES } from '../utils/email/utm-templates.ts';
+import { BaseLayout, renderEmailTemplate } from '../utils/email/base-template.tsx';
 import {
   contentSection,
   ctaSection,
@@ -32,7 +32,31 @@ import {
   sectionTitleStyle,
   strongStyle,
   subheadingStyle,
-} from '../utils/common-styles.ts';
+} from '../utils/email/common-styles.ts';
+import { BulletListSection, HeroBlock } from '../utils/email/components/sections.tsx';
+
+const WHAT_TO_EXPECT = [
+  {
+    emoji: '🤖',
+    title: 'New Claude Agents',
+    description: 'Discover powerful AI configurations',
+  },
+  {
+    emoji: '🔌',
+    title: 'MCP Servers',
+    description: 'Latest Model Context Protocol integrations',
+  },
+  {
+    emoji: '📚',
+    title: 'Guides & Tutorials',
+    description: 'Learn advanced Claude techniques',
+  },
+  {
+    emoji: '💡',
+    title: 'Tips & Tricks',
+    description: 'Productivity hacks from the community',
+  },
+] as const;
 
 export interface NewsletterWelcomeProps {
   /**
@@ -67,43 +91,27 @@ export function NewsletterWelcome({ email }: NewsletterWelcomeProps) {
       preview="Welcome to Claude Pro Directory! Get weekly updates on new tools & guides."
       utm={utm}
     >
-      {/* Hero section */}
-      <Section style={heroSection}>
-        <Text style={headingStyle}>Welcome to Claude Pro Directory! 🎉</Text>
-        <Text style={subheadingStyle}>
-          You're now subscribed to weekly updates on the best Claude agents, MCP servers, and
-          productivity tools.
-        </Text>
-      </Section>
+      <HeroBlock
+        title="Welcome to Claude Pro Directory! 🎉"
+        subtitle="You're now subscribed to weekly updates on the best Claude agents, MCP servers, and productivity tools."
+      />
 
       <Hr style={dividerStyle} />
 
-      {/* What to expect section */}
       <Section style={contentSection}>
         <Text style={sectionTitleStyle}>What to Expect</Text>
         <Text style={paragraphStyle}>
           Every week, you'll receive a carefully curated email featuring:
         </Text>
-
-        <ul style={listStyle}>
-          <li style={listItemStyle}>
-            <strong style={strongStyle}>🤖 New Claude Agents</strong> - Discover powerful AI
-            configurations
-          </li>
-          <li style={listItemStyle}>
-            <strong style={strongStyle}>🔌 MCP Servers</strong> - Latest Model Context Protocol
-            integrations
-          </li>
-          <li style={listItemStyle}>
-            <strong style={strongStyle}>📚 Guides & Tutorials</strong> - Learn advanced Claude
-            techniques
-          </li>
-          <li style={listItemStyle}>
-            <strong style={strongStyle}>💡 Tips & Tricks</strong> - Productivity hacks from the
-            community
-          </li>
-        </ul>
       </Section>
+
+      <BulletListSection
+        items={WHAT_TO_EXPECT.map((item) => ({
+          emoji: item.emoji,
+          title: item.title,
+          description: item.description,
+        }))}
+      />
 
       <Hr style={dividerStyle} />
 
@@ -149,3 +157,7 @@ export function NewsletterWelcome({ email }: NewsletterWelcomeProps) {
  * Export default for easier imports
  */
 export default NewsletterWelcome;
+
+export function renderNewsletterWelcomeEmail(props: NewsletterWelcomeProps) {
+  return renderEmailTemplate(NewsletterWelcome, props);
+}

@@ -6,10 +6,10 @@
 import { notFound, redirect } from 'next/navigation';
 import { JobForm } from '@/src/components/core/forms/job-form';
 import { type UpdateJobInput, updateJob } from '@/src/lib/actions/jobs.actions';
+import { getAuthenticatedUser } from '@/src/lib/auth/get-authenticated-user';
 import { getUserJobById } from '@/src/lib/data/user-data';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 export const metadata = generatePageMetadata('/account/jobs/:id/edit');
@@ -20,11 +20,7 @@ interface EditJobPageProps {
 
 export default async function EditJobPage({ params }: EditJobPageProps) {
   const resolvedParams = await params;
-  const supabase = await createClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { user } = await getAuthenticatedUser({ context: 'EditJobPage' });
 
   if (!user) redirect('/login');
 

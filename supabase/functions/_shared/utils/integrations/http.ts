@@ -19,6 +19,12 @@ export interface FetchWithRetryResult {
 const DEFAULT_ATTEMPTS = 3;
 const DEFAULT_BASE_DELAY_MS = 1000;
 
+export interface RetryOptions {
+  attempts?: number;
+  baseDelayMs?: number;
+  onRetry?: (attempt: number, error: Error, delay: number) => void;
+}
+
 export async function fetchWithRetry({
   url,
   method = 'GET',
@@ -68,6 +74,40 @@ export async function fetchWithRetry({
   }
 
   throw lastError ?? new Error('fetchWithRetry exceeded attempts');
+}
+
+export async function runWithRetry<T>(
+  fn: () => Promise<T>,
+  { attempts = DEFAULT_ATTEMPTS, baseDelayMs = DEFAULT_BASE_DELAY_MS, onRetry }: RetryOptions = {}
+): Promise<T> {
+  let lastError: Error | null = null;
+
+  for (let attempt = 0; attempt <= attempts; attempt++) {
+    try {
+      return await fn();
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error('Unknown retry error');
+    }
+
+    if (attempt < attempts) {
+      const delay = baseDelayMs * 2 ** attempt;
+      const errorForRetry = lastError ?? new Error('Unknown retry error');
+      if (onRetry) {
+        onRetry(attempt + 1, errorForRetry, delay);
+      } else {
+        console.warn('[runWithRetry] retrying operation', {
+          attempt: attempt + 1,
+          attempts,
+          delay,
+          lastError: errorForRetry.message,
+        });
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, delay));
+    }
+  }
+
+  throw lastError ?? new Error('runWithRetry exceeded attempts');
 }
 
 function shouldRetry(status: number, retryOn?: number[], noRetryOn?: number[]): boolean {

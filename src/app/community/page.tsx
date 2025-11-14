@@ -16,6 +16,7 @@ const NewsletterCTAVariant = dynamic(
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
 import { ROUTES, SOCIAL_LINKS } from '@/src/lib/constants';
 import { Github, MessageCircle, MessageSquare, Twitter, Users } from '@/src/lib/icons';
+import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
@@ -28,6 +29,13 @@ export const metadata = generatePageMetadata('/community');
 export const revalidate = false;
 
 export default function CommunityPage() {
+  if (!SOCIAL_LINKS.discord) {
+    logger.warn('CommunityPage: SOCIAL_LINKS.discord is not configured');
+  }
+  if (!SOCIAL_LINKS.twitter) {
+    logger.warn('CommunityPage: SOCIAL_LINKS.twitter is not configured');
+  }
+
   return (
     <div className={'min-h-screen bg-background'}>
       {/* Hero Section */}

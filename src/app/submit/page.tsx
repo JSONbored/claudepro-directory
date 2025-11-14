@@ -24,9 +24,11 @@ const NewsletterCTAVariant = dynamic(
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
 import { TrendingUp } from '@/src/lib/icons';
+import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 import type { Database } from '@/src/types/database.types';
 
 const SUBMISSION_TIPS = [
@@ -68,9 +70,53 @@ export const revalidate = false;
 
 export default async function SubmitPage() {
   // Fetch all data via data layer (edge-cached)
-  const dashboardData = await getSubmissionDashboard(5, 5);
-  const formConfig = await getSubmissionFormConfig();
-  const templates = await getContentTemplates('agents');
+  let dashboardData: Awaited<ReturnType<typeof getSubmissionDashboard>> | null = null;
+  try {
+    dashboardData = await getSubmissionDashboard(5, 5);
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to load submission dashboard');
+    logger.error('SubmitPage: getSubmissionDashboard failed', normalized, {
+      recentCount: 5,
+      statsCount: 5,
+    });
+    throw normalized;
+  }
+
+  if (!dashboardData) {
+    logger.warn('SubmitPage: getSubmissionDashboard returned no data', {
+      recentCount: 5,
+      statsCount: 5,
+    });
+  }
+
+  let formConfig: Awaited<ReturnType<typeof getSubmissionFormConfig>> | null = null;
+  try {
+    formConfig = await getSubmissionFormConfig();
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to load submission form config');
+    logger.error('SubmitPage: getSubmissionFormConfig failed', normalized);
+    throw normalized;
+  }
+
+  if (!formConfig) {
+    logger.error('SubmitPage: submission form config is undefined');
+    throw new Error('Submission form configuration is unavailable');
+  }
+
+  let templates: Awaited<ReturnType<typeof getContentTemplates>> | null = null;
+  try {
+    templates = await getContentTemplates('agents');
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to load submission templates');
+    logger.error('SubmitPage: getContentTemplates failed', normalized, { category: 'agents' });
+    throw normalized;
+  }
+
+  if (!templates || templates.length === 0) {
+    logger.warn('SubmitPage: no templates returned from getContentTemplates', {
+      category: 'agents',
+    });
+  }
 
   const stats = dashboardData?.stats || { total: 0, pending: 0, merged_this_week: 0 };
   const recentMerged = (dashboardData?.recent || []).map((submission) => ({

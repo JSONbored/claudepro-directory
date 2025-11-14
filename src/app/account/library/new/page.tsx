@@ -3,20 +3,17 @@ import { redirect } from 'next/navigation';
 import { CollectionForm } from '@/src/components/core/forms/collection-form';
 import { Button } from '@/src/components/primitives/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
+import { getAuthenticatedUser } from '@/src/lib/auth/get-authenticated-user';
 import { ROUTES } from '@/src/lib/constants';
 import { getUserBookmarksForCollections } from '@/src/lib/data/user-data';
 import { ArrowLeft } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-import { createClient } from '@/src/lib/supabase/server';
 
 export const metadata = generatePageMetadata('/account/library/new');
 
 export default async function NewCollectionPage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { user } = await getAuthenticatedUser({ context: 'NewCollectionPage' });
 
   if (!user) {
     logger.warn('NewCollectionPage: unauthenticated access attempt');

@@ -1,4 +1,6 @@
+import Link from 'next/link';
 import { ConnectedAccountsClient } from '@/src/components/features/account/connected-accounts-client';
+import { Button } from '@/src/components/primitives/ui/button';
 import {
   Card,
   CardContent,
@@ -7,15 +9,46 @@ import {
   CardTitle,
 } from '@/src/components/primitives/ui/card';
 import { getUserIdentities } from '@/src/lib/actions/user.actions';
+import { getAuthenticatedUser } from '@/src/lib/auth/get-authenticated-user';
+import { ROUTES } from '@/src/lib/constants';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 
 export async function generateMetadata() {
   return await generatePageMetadata('/account/connected-accounts');
 }
 
 export default async function ConnectedAccountsPage() {
-  const result = await getUserIdentities();
+  const { user } = await getAuthenticatedUser({ context: 'ConnectedAccountsPage' });
+
+  if (!user) {
+    logger.warn('ConnectedAccountsPage: unauthenticated access attempt detected');
+    return (
+      <div className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-2xl">Sign in required</CardTitle>
+            <CardDescription>Please sign in to manage your connected accounts.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button asChild>
+              <Link href={ROUTES.LOGIN}>Go to login</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  let result;
+  try {
+    result = await getUserIdentities();
+  } catch (error) {
+    const normalized = normalizeError(error, 'getUserIdentities invocation failed');
+    logger.error('ConnectedAccountsPage: getUserIdentities threw', normalized, { userId: user.id });
+    result = { data: null, serverError: normalized.message };
+  }
 
   const pageHeader = (
     <div>
@@ -26,36 +59,43 @@ export default async function ConnectedAccountsPage() {
 
   if (!result.data || result.serverError) {
     if (result.serverError) {
-      const normalizedError =
-        typeof result.serverError === 'string'
-          ? new Error(result.serverError)
-          : new Error(JSON.stringify(result.serverError));
-      logger.error(
-        'ConnectedAccountsPage: getUserIdentities returned serverError',
-        normalizedError
-      );
+      const normalized = normalizeError(result.serverError, 'Connected accounts server error');
+      logger.error('ConnectedAccountsPage: getUserIdentities returned serverError', normalized, {
+        userId: user.id,
+      });
     } else {
-      logger.warn('ConnectedAccountsPage: getUserIdentities returned no data');
+      logger.warn('ConnectedAccountsPage: getUserIdentities returned no data', {
+        userId: user.id,
+      });
     }
 
-    // Extract readable error message - handle both string and object cases
-    const errorMessage = result.serverError
-      ? typeof result.serverError === 'string'
+    const errorMessage =
+      result.serverError && typeof result.serverError === 'string'
         ? result.serverError
-        : (result.serverError as { message?: string }).message ||
-          String(result.serverError) ||
-          'Failed to load connected accounts. Please try again later.'
-      : 'Failed to load connected accounts. Please try again later.';
+        : 'Failed to load connected accounts. Please try again later.';
 
     return (
       <div className="space-y-6">
         {pageHeader}
-        <div className="text-destructive">{errorMessage}</div>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-2xl">Connected accounts unavailable</CardTitle>
+            <CardDescription>{errorMessage}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button asChild variant="outline">
+              <Link href={ROUTES.ACCOUNT_SETTINGS}>Go to settings</Link>
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
   const identities = result.data.identities || [];
+  if (identities.length === 0) {
+    logger.info('ConnectedAccountsPage: no OAuth identities found', { userId: user.id });
+  }
 
   return (
     <div className="space-y-6">

@@ -8,6 +8,7 @@
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { z } from 'zod';
 import { authedAction, rateLimitedAction } from '@/src/lib/actions/safe-action';
+import { getAuthenticatedUserFromClient } from '@/src/lib/auth/get-authenticated-user';
 import { cacheConfigs } from '@/src/lib/flags';
 import { logger } from '@/src/lib/logger';
 import { revalidateCacheTags } from '@/src/lib/supabase/cache-helpers';
@@ -531,10 +532,9 @@ export const getReviewsWithStats = rateLimitedAction
     const { content_type, content_slug, sort_by, limit, offset } = parsedInput;
     const { createClient } = await import('@/src/lib/supabase/server');
     const supabase = await createClient();
-
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const { user } = await getAuthenticatedUserFromClient(supabase, {
+      context: 'getReviewsWithStats',
+    });
 
     const data = await cachedRPCWithDedupe(
       'get_reviews_with_stats',
@@ -585,10 +585,9 @@ export const trackUsage = rateLimitedAction
   )
   .action(async ({ parsedInput }) => {
     const supabase = await createClient();
-
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const { user } = await getAuthenticatedUserFromClient(supabase, {
+      context: 'trackUsage',
+    });
 
     const interactionType = parsedInput.action_type === 'copy' ? 'copy' : 'download';
 

@@ -8,28 +8,56 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/ui/card';
+import { getAuthenticatedUser } from '@/src/lib/auth/get-authenticated-user';
 import { ROUTES } from '@/src/lib/constants';
 import { getUserSponsorships } from '@/src/lib/data/user-data';
 import { BarChart, Eye, MousePointer, TrendingUp } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 
 export const metadata = generatePageMetadata('/account/sponsorships');
 
 export default async function SponsorshipsPage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { user } = await getAuthenticatedUser({ context: 'SponsorshipsPage' });
 
   if (!user) {
     logger.warn('SponsorshipsPage: unauthenticated access attempt');
-    return null;
+    return (
+      <div className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-2xl">Sign in required</CardTitle>
+            <CardDescription>Please sign in to manage your sponsorship campaigns.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button asChild>
+              <Link href={ROUTES.LOGIN}>Go to login</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
-  const sponsorships = await getUserSponsorships(user.id);
+  let sponsorships: Awaited<ReturnType<typeof getUserSponsorships>> | null = null;
+  let fetchError = false;
+  try {
+    sponsorships = await getUserSponsorships(user.id);
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to load user sponsorships');
+    logger.error('SponsorshipsPage: getUserSponsorships threw', normalized, { userId: user.id });
+    fetchError = true;
+  }
+
+  if (fetchError) {
+    return (
+      <div className="space-y-6">
+        <div className="text-destructive">Failed to load sponsorships. Please try again later.</div>
+      </div>
+    );
+  }
 
   if (!sponsorships || sponsorships.length === 0) {
     logger.info('SponsorshipsPage: user has no sponsorships', { userId: user.id });

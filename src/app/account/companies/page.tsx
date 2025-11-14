@@ -5,7 +5,6 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { redirect } from 'next/navigation';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { Button } from '@/src/components/primitives/ui/button';
 import {
@@ -15,51 +14,83 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/ui/card';
+import { getAuthenticatedUser } from '@/src/lib/auth/get-authenticated-user';
 import { ROUTES } from '@/src/lib/constants';
 import { getUserCompanies } from '@/src/lib/data/user-data';
 import { Briefcase, Building2, Calendar, Edit, ExternalLink, Eye, Plus } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { formatRelativeDate } from '@/src/lib/utils/data.utils';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 import type { Tables } from '@/src/types/database.types';
 
 export const metadata = generatePageMetadata('/account/companies');
 
 export default async function CompaniesPage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { user } = await getAuthenticatedUser({ context: 'CompaniesPage' });
 
   if (!user) {
-    redirect('/login');
+    logger.warn('CompaniesPage: unauthenticated access attempt detected');
+    return (
+      <div className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-2xl">Sign in required</CardTitle>
+            <CardDescription>Please sign in to manage your companies.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button asChild>
+              <Link href={ROUTES.LOGIN}>Go to login</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   let companies: Array<Tables<'companies'>> = [];
   let hasError = false;
 
-  if (user) {
-    // User-scoped edge-cached RPC via centralized data layer
+  // User-scoped edge-cached RPC via centralized data layer
+  try {
     const data = await getUserCompanies(user.id);
 
     if (data) {
-      // Trust database types - PostgreSQL validates structure
       const result = data as { companies: Array<Tables<'companies'>> };
       companies = result.companies || [];
     } else {
-      logger.error('Failed to fetch user companies', new Error('Companies data is null'));
+      logger.warn('CompaniesPage: getUserCompanies returned null', { userId: user.id });
       hasError = true;
     }
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to fetch user companies');
+    logger.error('CompaniesPage: getUserCompanies threw', normalized, { userId: user.id });
+    hasError = true;
   }
 
   if (hasError) {
     return (
       <div className="space-y-6">
-        <div className="text-destructive">Failed to load companies. Please try again later.</div>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-2xl">Companies unavailable</CardTitle>
+            <CardDescription>
+              We couldn&apos;t load your companies. Please refresh the page or try again later.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button asChild variant="outline">
+              <Link href={ROUTES.ACCOUNT}>Back to dashboard</Link>
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     );
+  }
+
+  if (companies.length === 0) {
+    logger.info('CompaniesPage: user has no companies', { userId: user.id });
   }
 
   return (

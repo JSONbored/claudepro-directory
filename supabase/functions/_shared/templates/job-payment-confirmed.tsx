@@ -5,9 +5,9 @@
 
 import React from 'npm:react@18.3.1';
 import { Button, Hr, Section, Text } from 'npm:@react-email/components@0.0.22';
-import { addUTMToURL } from '../utils/email-utm.ts';
-import { EMAIL_UTM_TEMPLATES } from '../utils/utm-templates.ts';
-import { BaseLayout } from '../layouts/base-layout.tsx';
+import { addUTMToURL } from '../utils/email/email-utm.ts';
+import { EMAIL_UTM_TEMPLATES } from '../utils/email/utm-templates.ts';
+import { BaseLayout, renderEmailTemplate } from '../utils/email/base-template.tsx';
 import {
   contentSection,
   ctaSection,
@@ -20,7 +20,9 @@ import {
   secondaryButtonStyle,
   strongStyle,
   subheadingStyle,
-} from '../utils/common-styles.ts';
+} from '../utils/email/common-styles.ts';
+import { JobDetailsSection } from '../utils/email/components/job.tsx';
+import { formatCurrency, formatEmailDate } from '../utils/email/formatters.ts';
 
 export interface JobPaymentConfirmedProps {
   jobTitle: string;
@@ -48,6 +50,9 @@ export function JobPaymentConfirmed({
   const utm = EMAIL_UTM_TEMPLATES.ONBOARDING_WELCOME;
   const jobUrl = `${baseUrl}/jobs/${jobSlug}`;
   const analyticsUrl = `${baseUrl}/account/jobs`;
+  const planLabel = plan.charAt(0).toUpperCase() + plan.slice(1);
+  const paymentLabel = `${formatCurrency(paymentAmount)} on ${formatEmailDate(paymentDate)}`;
+  const expiresLabel = formatEmailDate(expiresAt);
 
   return (
     <BaseLayout
@@ -63,33 +68,15 @@ export function JobPaymentConfirmed({
 
       <Hr style={dividerStyle} />
 
-      <Section style={contentSection}>
-        <Text style={paragraphStyle}>
-          <strong style={strongStyle}>Position:</strong> {jobTitle}
-        </Text>
-        <Text style={paragraphStyle}>
-          <strong style={strongStyle}>Company:</strong> {company}
-        </Text>
-        <Text style={paragraphStyle}>
-          <strong style={strongStyle}>Plan:</strong> {plan.charAt(0).toUpperCase() + plan.slice(1)}
-        </Text>
-        <Text style={paragraphStyle}>
-          <strong style={strongStyle}>Payment:</strong> ${paymentAmount} on{' '}
-          {new Date(paymentDate).toLocaleDateString('en-US', {
-            month: 'long',
-            day: 'numeric',
-            year: 'numeric',
-          })}
-        </Text>
-        <Text style={paragraphStyle}>
-          <strong style={strongStyle}>Active Until:</strong>{' '}
-          {new Date(expiresAt).toLocaleDateString('en-US', {
-            month: 'long',
-            day: 'numeric',
-            year: 'numeric',
-          })}
-        </Text>
-      </Section>
+      <JobDetailsSection
+        items={[
+          { label: 'Position', value: jobTitle },
+          { label: 'Company', value: company },
+          { label: 'Plan', value: planLabel },
+          { label: 'Payment', value: paymentLabel },
+          { label: 'Active Until', value: expiresLabel },
+        ]}
+      />
 
       <Hr style={dividerStyle} />
 
@@ -120,4 +107,8 @@ export function JobPaymentConfirmed({
       </Section>
     </BaseLayout>
   );
+}
+
+export function renderJobPaymentConfirmedEmail(props: JobPaymentConfirmedProps) {
+  return renderEmailTemplate(JobPaymentConfirmed, props);
 }

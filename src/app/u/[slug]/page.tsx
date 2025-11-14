@@ -16,6 +16,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/ui/card';
+import { getAuthenticatedUserFromClient } from '@/src/lib/auth/get-authenticated-user';
 import { FolderOpen, Globe, Users } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
@@ -45,9 +46,9 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
   const supabase = createAnonClient();
 
   // Get current user (if logged in)
-  const {
-    data: { user: currentUser },
-  } = await supabase.auth.getUser();
+  const { user: currentUser } = await getAuthenticatedUserFromClient(supabase, {
+    context: 'UserProfilePage',
+  });
 
   // Consolidated RPC: 4 calls → 1 (75% reduction)
   // get_user_profile() includes: profile + stats + posts + collections + contributions

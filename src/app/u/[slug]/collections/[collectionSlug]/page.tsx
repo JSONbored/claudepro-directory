@@ -17,6 +17,7 @@ import {
   CardTitle,
 } from '@/src/components/primitives/ui/card';
 import { Separator } from '@/src/components/primitives/ui/separator';
+import { getAuthenticatedUserFromClient } from '@/src/lib/auth/get-authenticated-user';
 import { trackInteraction } from '@/src/lib/edge/client';
 import { ArrowLeft, ExternalLink } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
@@ -117,9 +118,9 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
 
   // Get current user (if logged in) for ownership check
   const supabase = createAnonClient();
-  const {
-    data: { user: currentUser },
-  } = await supabase.auth.getUser();
+  const { user: currentUser } = await getAuthenticatedUserFromClient(supabase, {
+    context: 'PublicCollectionPage',
+  });
 
   // Single RPC call replaces 3 separate queries (user, collection, items)
   const collectionData = await getCollectionDetail(slug, collectionSlug, currentUser?.id);

@@ -8,37 +8,57 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/ui/card';
+import { getAuthenticatedUser } from '@/src/lib/auth/get-authenticated-user';
 import { ROUTES } from '@/src/lib/constants';
 import { getUserDashboard } from '@/src/lib/data/user-data';
 import { CheckCircle, Clock, ExternalLink, GitPullRequest, Send, XCircle } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-import { createClient } from '@/src/lib/supabase/server';
 import { BADGE_COLORS, type SubmissionStatusType, UI_CLASSES } from '@/src/lib/ui-constants';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 import type { Tables } from '@/src/types/database.types';
 
 export const metadata = generatePageMetadata('/account/submissions');
 
 export default async function SubmissionsPage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { user } = await getAuthenticatedUser({ context: 'SubmissionsPage' });
+
+  if (!user) {
+    logger.warn('SubmissionsPage: unauthenticated access attempt');
+    return (
+      <div className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-2xl">Sign in required</CardTitle>
+            <CardDescription>Please sign in to view and manage your submissions.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button asChild>
+              <Link href={ROUTES.LOGIN}>Go to login</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   let submissions: Array<Tables<'submissions'>> = [];
   let hasError = false;
-
-  if (user) {
-    // User-scoped edge-cached RPC via centralized data layer
+  try {
     const data = await getUserDashboard(user.id);
     if (data) {
-      // Trust database types - PostgreSQL validates structure
       const result = data as { submissions: Array<Tables<'submissions'>> };
       submissions = result.submissions || [];
     } else {
-      logger.error('Failed to fetch user dashboard', new Error('Dashboard data is null'));
+      logger.error('SubmissionsPage: getUserDashboard returned null', undefined, {
+        userId: user.id,
+      });
       hasError = true;
     }
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to load submissions from dashboard');
+    logger.error('SubmissionsPage: getUserDashboard threw', normalized, { userId: user.id });
+    hasError = true;
   }
 
   if (hasError) {
