@@ -31,26 +31,50 @@ export interface NotificationStore {
   cleanup: () => void;
 }
 
+const supabase = createClient();
+const EDGE_NOTIFICATIONS_URL = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/notification-router/active-notifications`;
+
+async function fetchNotifications(dismissedIds: string[]): Promise<Notification[]> {
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+
+  if (!session) {
+    throw new Error('User session not found');
+  }
+
+  const params = new URLSearchParams();
+  if (dismissedIds.length > 0) {
+    params.set('dismissed', dismissedIds.join(','));
+  }
+
+  const response = await fetch(`${EDGE_NOTIFICATIONS_URL}?${params.toString()}`, {
+    headers: {
+      Authorization: `Bearer ${session.access_token}`,
+      'Content-Type': 'application/json',
+    },
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || 'Failed to fetch notifications');
+  }
+
+  const data = (await response.json()) as { notifications?: Notification[] };
+  return data.notifications || [];
+}
+
 export const useNotificationStore = create<NotificationStore>()(
   persist(
     (set, get) => {
       const refreshFromDatabase = async () => {
-        const supabase = createClient();
         const { dismissedIds } = get();
 
         try {
-          const { data, error } = await supabase.rpc('get_active_notifications', {
-            p_dismissed_ids: dismissedIds,
-          });
-
-          if (error) {
-            logger.error('Failed to refresh notifications', error);
-            return;
-          }
-
+          const notifications = await fetchNotifications(dismissedIds);
           set({
-            notifications: data || [],
-            unreadCount: (data || []).length,
+            notifications,
+            unreadCount: notifications.length,
           });
         } catch (error) {
           logger.error(
@@ -68,8 +92,6 @@ export const useNotificationStore = create<NotificationStore>()(
         channel: null,
 
         initializeRealtime: () => {
-          const supabase = createClient();
-
           const channel = supabase
             .channel('notifications-realtime', {
               config: {

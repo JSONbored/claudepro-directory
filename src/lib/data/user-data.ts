@@ -5,6 +5,7 @@
 
 import { logger } from '@/src/lib/logger';
 import { cachedRPCWithDedupe } from '@/src/lib/supabase/cached-rpc';
+import type { Tables } from '@/src/types/database.types';
 
 /**
  * Get user account dashboard data (bookmarks, profile, tier)
@@ -59,6 +60,19 @@ export async function getUserLibrary(userId: string) {
 }
 
 /**
+ * Convenience helper for collection workflows
+ */
+export async function getUserBookmarksForCollections(
+  userId: string
+): Promise<Tables<'bookmarks'>[]> {
+  const data = (await getUserLibrary(userId)) as
+    | { bookmarks?: Tables<'bookmarks'>[] }
+    | null
+    | undefined;
+  return data?.bookmarks || [];
+}
+
+/**
  * Get user dashboard data (includes jobs)
  */
 export async function getUserDashboard(userId: string) {
@@ -82,6 +96,17 @@ export async function getUserDashboard(userId: string) {
     );
     return null;
   }
+}
+
+/**
+ * Convenience helper for owned job lookups by ID
+ */
+export async function getUserJobById(
+  userId: string,
+  jobId: string
+): Promise<Tables<'jobs'> | null> {
+  const data = (await getUserDashboard(userId)) as { jobs?: Tables<'jobs'>[] } | null | undefined;
+  return data?.jobs?.find((job) => job.id === jobId) ?? null;
 }
 
 /**
@@ -186,4 +211,44 @@ export async function getUserCompanies(userId: string) {
     );
     return null;
   }
+}
+
+/**
+ * Get user sponsorships
+ */
+export async function getUserSponsorships(userId: string): Promise<Tables<'sponsored_content'>[]> {
+  try {
+    const data = await cachedRPCWithDedupe<Array<Tables<'sponsored_content'>>>(
+      'get_user_sponsorships',
+      { p_user_id: userId },
+      {
+        tags: ['users', `user-${userId}`, 'sponsorships'],
+        ttlConfigKey: 'cache.account.ttl_seconds',
+        keySuffix: `sponsorships-${userId}`,
+        useAuthClient: true,
+      }
+    );
+    return data || [];
+  } catch (error) {
+    logger.error(
+      'Error in getUserSponsorships',
+      error instanceof Error ? error : new Error(String(error)),
+      { userId }
+    );
+    return [];
+  }
+}
+
+/**
+ * Convenience helper for owned company lookups by ID
+ */
+export async function getUserCompanyById(
+  userId: string,
+  companyId: string
+): Promise<Tables<'companies'> | null> {
+  const data = (await getUserCompanies(userId)) as
+    | { companies?: Tables<'companies'>[] }
+    | null
+    | undefined;
+  return data?.companies?.find((company) => company.id === companyId) ?? null;
 }

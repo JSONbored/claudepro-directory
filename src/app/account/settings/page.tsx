@@ -17,6 +17,7 @@ import {
  * Settings Page - User profile and account management.
  */
 
+import { ensureUserRecord } from '@/src/lib/actions/user.actions';
 import { getUserSettings } from '@/src/lib/data/user-data';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';
@@ -43,13 +44,11 @@ export default async function SettingsPage() {
 
   // Initialize user if missing (consolidated - no more profiles table)
   if (!userData) {
-    await supabase.from('users').upsert({
+    await ensureUserRecord({
       id: user.id,
       email: user.email ?? null,
       name: user.user_metadata?.full_name ?? user.user_metadata?.name ?? null,
       image: user.user_metadata?.avatar_url ?? user.user_metadata?.picture ?? null,
-      profile_public: true,
-      follow_email: true,
     });
   }
 

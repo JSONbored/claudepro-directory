@@ -63,6 +63,9 @@ verify_jwt = false  # Public search API with optional auth for analytics trackin
 [functions.webhook-router]
 verify_jwt = false  # Unified webhook router with HMAC SHA-1/SHA-256/Svix verification (replaces resend-webhook)
 
+[functions.notification-router]
+verify_jwt = false  # Consolidated Discord + webhook + changelog router
+
 [functions.email-handler]
 verify_jwt = false  # Uses Svix signature verification for auth hooks
 

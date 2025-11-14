@@ -9,8 +9,29 @@
  */
 export const publicCorsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, X-Email-Action',
+  'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, X-Email-Action, Authorization',
+};
+export const notificationCorsHeaders = {
+  ...publicCorsHeaders,
+  'Access-Control-Allow-Headers':
+    'Content-Type, Authorization, X-Discord-Notification-Type, X-Notification-Type, svix-id, svix-timestamp, svix-signature, x-vercel-signature, webhook-id, webhook-timestamp, webhook-signature',
+};
+
+export const discordCorsHeaders = {
+  ...publicCorsHeaders,
+  'Access-Control-Allow-Headers': 'Content-Type, X-Discord-Notification-Type',
+};
+
+export const webhookCorsHeaders = {
+  ...publicCorsHeaders,
+  'Access-Control-Allow-Headers':
+    'Content-Type, svix-id, svix-timestamp, svix-signature, x-vercel-signature, webhook-id, webhook-timestamp, webhook-signature',
+};
+
+export const changelogCorsHeaders = {
+  ...publicCorsHeaders,
+  'Access-Control-Allow-Headers': 'Content-Type, x-vercel-signature',
 };
 
 /**
@@ -80,6 +101,17 @@ export function methodNotAllowedResponse(
       ...cors,
     },
   });
+}
+
+export function requireMethod(
+  req: Request,
+  method: 'GET' | 'POST' | 'PUT' | 'DELETE',
+  cors = publicCorsHeaders
+): Response | null {
+  if (req.method !== method) {
+    return methodNotAllowedResponse(method, cors);
+  }
+  return null;
 }
 
 export function badRequestResponse(message: string, cors = publicCorsHeaders): Response {

@@ -631,3 +631,33 @@ export const unlinkOAuthProvider = authedAction
       throw error;
     }
   });
+
+export async function ensureUserRecord(params: {
+  id: string;
+  email: string | null;
+  name?: string | null;
+  image?: string | null;
+}) {
+  'use server';
+
+  const supabase = await createClient();
+  const payload = {
+    id: params.id,
+    email: params.email,
+    name: params.name ?? null,
+    image: params.image ?? null,
+    profile_public: true,
+    follow_email: true,
+  };
+
+  const { error } = await supabase.from('users').upsert(payload, { onConflict: 'id' });
+  if (error) {
+    throw new Error(`Failed to ensure user record: ${error.message}`);
+  }
+
+  const config = await cacheConfigs();
+  const invalidateTags = config['cache.invalidate.user_update'] as string[] | undefined;
+  if (invalidateTags?.length) {
+    revalidateCacheTags(invalidateTags);
+  }
+}

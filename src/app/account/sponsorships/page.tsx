@@ -9,6 +9,7 @@ import {
   CardTitle,
 } from '@/src/components/primitives/ui/card';
 import { ROUTES } from '@/src/lib/constants';
+import { getUserSponsorships } from '@/src/lib/data/user-data';
 import { BarChart, Eye, MousePointer, TrendingUp } from '@/src/lib/icons';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';
@@ -24,18 +25,15 @@ export default async function SponsorshipsPage() {
 
   if (!user) return null;
 
-  // Get user's sponsored content (they can only see their own campaigns)
-  const { data: sponsorships } = await supabase
-    .from('sponsored_content')
-    .select('*')
-    .eq('user_id', user.id)
-    .order('created_at', { ascending: false });
+  const sponsorships = await getUserSponsorships(user.id);
 
-  // If user has no sponsorships, don't show this page
-  // (Admin manually adds campaigns after payment, then user can access)
-  if (!sponsorships || sponsorships.length === 0) {
-    return null; // Or redirect to /partner page
+  if (sponsorships.length === 0) {
+    return null;
   }
+
+  const orderedSponsorships = [...sponsorships].sort(
+    (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+  );
 
   return (
     <div className="space-y-6">
@@ -56,7 +54,7 @@ export default async function SponsorshipsPage() {
       </div>
 
       <div className="grid gap-4">
-        {sponsorships.map((sponsorship) => {
+        {orderedSponsorships.map((sponsorship) => {
           const isActive =
             sponsorship.active &&
             new Date(sponsorship.start_date) <= new Date() &&

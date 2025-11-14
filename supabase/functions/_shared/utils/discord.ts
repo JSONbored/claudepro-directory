@@ -113,14 +113,23 @@ interface WebhookEventRecord {
  * Send Discord webhook with exponential backoff retry and webhook_events logging
  * Logs all outbound Discord webhooks to webhook_events table with direction='outbound'
  */
+interface DiscordWebhookLogOptions {
+  relatedId?: string;
+  metadata?: Record<string, unknown>;
+  logType?: string;
+}
+
 export async function sendDiscordWebhook(
   webhookUrl: string,
   payload: unknown,
   webhookType: string,
-  relatedId?: string
+  options: DiscordWebhookLogOptions = {}
 ): Promise<{ status: number; retryCount: number }> {
+  const { relatedId, metadata, logType } = options;
   let lastError: Error | null = null;
   let webhookEventId: string | null = null;
+  const logPayload = metadata ?? payload;
+  const eventType = logType ?? webhookType;
 
   // Create initial webhook_events log entry
   const { data: logData, error: logError } = await supabase
@@ -128,8 +137,8 @@ export async function sendDiscordWebhook(
     .insert({
       source: 'discord',
       direction: 'outbound',
-      type: webhookType,
-      data: payload as Database['public']['Tables']['webhook_events']['Insert']['data'],
+      type: eventType,
+      data: logPayload as Database['public']['Tables']['webhook_events']['Insert']['data'],
       created_at: new Date().toISOString(),
       processed: false,
       related_id: relatedId || null,
@@ -206,6 +215,88 @@ export async function sendDiscordWebhook(
   }
 
   throw lastError || new Error('Max retries exceeded');
+}
+
+interface DiscordMessageCreateOptions extends DiscordWebhookLogOptions {
+  waitForResponse?: boolean;
+}
+
+export interface DiscordMessageCreateResult {
+  status: number;
+  messageId: string;
+  retryCount: number;
+  rawResponse?: Record<string, unknown>;
+}
+
+/**
+ * Create Discord message using ?wait=true to capture message ID, with webhook_events logging
+ */
+export async function createDiscordMessageWithLogging(
+  webhookUrl: string,
+  payload: Record<string, unknown>,
+  webhookType: string,
+  options: DiscordMessageCreateOptions = {}
+): Promise<DiscordMessageCreateResult> {
+  const { relatedId, metadata, logType, waitForResponse = true } = options;
+  const logPayload = metadata ? { ...metadata } : payload;
+  const eventType = logType ?? `${webhookType}_create`;
+
+  const webhookEventId = await logOutboundWebhookEvent(eventType, logPayload, relatedId);
+  const targetUrl = waitForResponse ? `${webhookUrl}?wait=true` : webhookUrl;
+
+  const response = await fetch(targetUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+
+  const responseText = await response.text();
+  const parsedResponse =
+    responseText && response.headers.get('Content-Type')?.includes('application/json')
+      ? (JSON.parse(responseText) as Record<string, unknown>)
+      : undefined;
+
+  if (!response.ok) {
+    console.error('Failed to send Discord message:', {
+      status: response.status,
+      error: responseText,
+      webhookType,
+    });
+
+    if (webhookEventId) {
+      await updateWebhookEventStatus(
+        webhookEventId,
+        false,
+        response.status,
+        `Discord API error: ${response.statusText} - ${responseText}`,
+        parsedResponse
+      );
+    }
+
+    throw new Error(`Discord API error: ${response.statusText}`);
+  }
+
+  const messageId =
+    (parsedResponse?.id as string | undefined) ??
+    (parsedResponse?.message_id as string | undefined);
+
+  if (!messageId) {
+    console.warn('Discord response missing message ID');
+  }
+
+  if (webhookEventId) {
+    await updateWebhookEventStatus(webhookEventId, true, response.status, undefined, {
+      message_id: messageId,
+      response: parsedResponse,
+    });
+  }
+
+  return {
+    status: response.status,
+    messageId: messageId ?? '',
+    retryCount: 0,
+    rawResponse: parsedResponse,
+  };
 }
 
 /**

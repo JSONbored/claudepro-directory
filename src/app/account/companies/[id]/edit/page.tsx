@@ -4,10 +4,10 @@
 
 import { notFound, redirect } from 'next/navigation';
 import { CompanyForm } from '@/src/components/core/forms/company-form';
+import { getUserCompanyById } from '@/src/lib/data/user-data';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';
-import type { Tables } from '@/src/types/database.types';
 
 export const metadata = generatePageMetadata('/account/companies/:id/edit');
 
@@ -26,15 +26,9 @@ export default async function EditCompanyPage({ params }: EditCompanyPageProps) 
     redirect('/login');
   }
 
-  // Fetch company with ownership verification
-  const { data: company, error } = await supabase
-    .from('companies')
-    .select('*')
-    .eq('id', id)
-    .eq('owner_id', user.id)
-    .single();
+  const company = await getUserCompanyById(user.id, id);
 
-  if (error || !company) {
+  if (!company) {
     logger.warn('Company not found or access denied', { companyId: id, userId: user.id });
     notFound();
   }
@@ -46,7 +40,7 @@ export default async function EditCompanyPage({ params }: EditCompanyPageProps) 
         <p className="text-muted-foreground">Update your company profile information</p>
       </div>
 
-      <CompanyForm mode="edit" initialData={company as Tables<'companies'>} />
+      <CompanyForm mode="edit" initialData={company} />
     </div>
   );
 }

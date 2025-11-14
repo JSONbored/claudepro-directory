@@ -8,12 +8,12 @@ import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge
 import { Button } from '@/src/components/primitives/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
 import { ROUTES } from '@/src/lib/constants';
+import { getUserJobById } from '@/src/lib/data/user-data';
 import { ArrowLeft, BarChart, ExternalLink, Eye } from '@/src/lib/icons';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';
 import { BADGE_COLORS, type JobStatusType, UI_CLASSES } from '@/src/lib/ui-constants';
 import { formatRelativeDate } from '@/src/lib/utils/data.utils';
-import type { Database } from '@/src/types/database.types';
 
 export const metadata = generatePageMetadata('/account/jobs/:id/analytics');
 
@@ -31,16 +31,8 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPageProps
 
   if (!user) redirect('/login');
 
-  const { data, error } = await supabase
-    .from('jobs')
-    .select('*')
-    .eq('id', resolvedParams.id)
-    .eq('user_id', user.id)
-    .single();
-
-  if (error || !data) notFound();
-
-  const job = data as Database['public']['Tables']['jobs']['Row'];
+  const job = await getUserJobById(user.id, resolvedParams.id);
+  if (!job) notFound();
 
   const viewCount = job.view_count ?? 0;
   const clickCount = job.click_count ?? 0;

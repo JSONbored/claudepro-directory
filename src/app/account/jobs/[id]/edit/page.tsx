@@ -6,10 +6,10 @@
 import { notFound, redirect } from 'next/navigation';
 import { JobForm } from '@/src/components/core/forms/job-form';
 import { type UpdateJobInput, updateJob } from '@/src/lib/actions/jobs.actions';
+import { getUserJobById } from '@/src/lib/data/user-data';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
-import type { Tables } from '@/src/types/database.types';
 
 export const metadata = generatePageMetadata('/account/jobs/:id/edit');
 
@@ -27,17 +27,8 @@ export default async function EditJobPage({ params }: EditJobPageProps) {
 
   if (!user) redirect('/login');
 
-  // Fetch job with ownership verification
-  const { data, error } = await supabase
-    .from('jobs')
-    .select('*')
-    .eq('id', resolvedParams.id)
-    .eq('user_id', user.id)
-    .single();
-
-  if (error || !data) notFound();
-
-  const job = data as Tables<'jobs'>;
+  const job = await getUserJobById(user.id, resolvedParams.id);
+  if (!job) notFound();
 
   const handleSubmit = async (data: Omit<UpdateJobInput, 'job_id'>) => {
     'use server';

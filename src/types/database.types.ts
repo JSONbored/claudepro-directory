@@ -3938,6 +3938,30 @@ export type Database = {
         Returns: Json
       }
       get_user_settings: { Args: { p_user_id: string }; Returns: Json }
+      get_user_sponsorships: {
+        Args: { p_user_id: string }
+        Returns: {
+          active: boolean | null
+          click_count: number | null
+          content_id: string
+          content_type: string
+          created_at: string
+          end_date: string
+          id: string
+          impression_count: number | null
+          impression_limit: number | null
+          start_date: string
+          tier: string
+          updated_at: string
+          user_id: string | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "sponsored_content"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       get_week_end: { Args: { week_start: string }; Returns: string }
       get_weekly_digest: { Args: { p_week_start?: string }; Returns: Json }
       get_weekly_new_content: {
@@ -4404,6 +4428,16 @@ export type Database = {
       }
       track_sponsored_event: {
         Args: { p_data: Json; p_event_type: string; p_user_id: string }
+        Returns: Json
+      }
+      track_user_interaction: {
+        Args: {
+          p_content_slug: string
+          p_content_type: string
+          p_interaction_type: string
+          p_metadata?: Json
+          p_session_id?: string
+        }
         Returns: Json
       }
       unlink_oauth_provider: { Args: { p_provider: string }; Returns: Json }

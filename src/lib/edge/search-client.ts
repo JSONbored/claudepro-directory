@@ -10,8 +10,21 @@ const EDGE_SEARCH_URL = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/un
 type ContentSearchResult =
   Database['public']['Functions']['search_content_optimized']['Returns'][number];
 
-interface UnifiedSearchResponse {
-  results: ContentSearchResult[];
+type UnifiedSearchEntity = {
+  entity_type: string;
+  id: string;
+  title: string;
+  description: string | null;
+  slug: string | null;
+  category: string | null;
+  tags: string[] | null;
+  created_at: string | null;
+  relevance_score?: number | null;
+  engagement_score?: number | null;
+};
+
+interface UnifiedSearchResponse<T> {
+  results: T[];
 }
 
 export type SearchFilters = {
@@ -25,16 +38,7 @@ export type SearchFilters = {
 
 export type SearchResult = ContentSearchResult;
 
-export async function searchContent(query: string, filters: SearchFilters = {}) {
-  const params = new URLSearchParams();
-  if (query.trim()) params.set('q', query.trim());
-  if (filters.p_categories?.length) params.set('categories', filters.p_categories.join(','));
-  if (filters.p_tags?.length) params.set('tags', filters.p_tags.join(','));
-  if (filters.p_authors?.length) params.set('authors', filters.p_authors.join(','));
-  if (filters.sort) params.set('sort', filters.sort);
-  params.set('limit', String(filters.p_limit ?? 50));
-  if (filters.p_offset) params.set('offset', String(filters.p_offset));
-
+async function callUnifiedSearch<T>(params: URLSearchParams): Promise<T[]> {
   const response = await fetch(`${EDGE_SEARCH_URL}?${params.toString()}`, {
     headers: { 'Content-Type': 'application/json' },
     next: { revalidate: 300, tags: ['search'] },
@@ -49,6 +53,47 @@ export async function searchContent(query: string, filters: SearchFilters = {}) 
     throw new Error(`Unified search failed: ${response.statusText}`);
   }
 
-  const data = (await response.json()) as UnifiedSearchResponse;
+  const data = (await response.json()) as UnifiedSearchResponse<T>;
   return data.results ?? [];
+}
+
+export async function searchContent(query: string, filters: SearchFilters = {}) {
+  const params = new URLSearchParams();
+  if (query.trim()) params.set('q', query.trim());
+  if (filters.p_categories?.length) params.set('categories', filters.p_categories.join(','));
+  if (filters.p_tags?.length) params.set('tags', filters.p_tags.join(','));
+  if (filters.p_authors?.length) params.set('authors', filters.p_authors.join(','));
+  if (filters.sort) params.set('sort', filters.sort);
+  params.set('limit', String(filters.p_limit ?? 50));
+  if (filters.p_offset) params.set('offset', String(filters.p_offset));
+
+  return callUnifiedSearch<ContentSearchResult>(params);
+}
+
+export type CompanySearchResult = {
+  id: string;
+  name: string;
+  slug?: string | null;
+  description?: string | null;
+};
+
+export async function searchCompaniesEdge(
+  query: string,
+  limit = 10
+): Promise<CompanySearchResult[]> {
+  const trimmed = query.trim();
+  if (!trimmed) return [];
+
+  const params = new URLSearchParams();
+  params.set('q', trimmed);
+  params.set('entities', 'company');
+  params.set('limit', String(limit));
+
+  const entities = await callUnifiedSearch<UnifiedSearchEntity>(params);
+  return entities.map((entity) => ({
+    id: entity.id,
+    name: entity.title || entity.slug || '',
+    slug: entity.slug,
+    description: entity.description,
+  }));
 }

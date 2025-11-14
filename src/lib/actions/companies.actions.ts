@@ -248,3 +248,19 @@ export const deleteCompany = authedAction
       throw error;
     }
   });
+
+export async function getCompanyByIdAction(companyId: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('companies')
+    .select('id, name, slug, logo, website, description')
+    .eq('id', companyId)
+    .maybeSingle();
+
+  if (error) {
+    logger.error('Failed to fetch company by ID', error, { companyId });
+    return null;
+  }
+
+  return data;
+}

@@ -4,6 +4,7 @@ import { CollectionForm } from '@/src/components/core/forms/collection-form';
 import { Button } from '@/src/components/primitives/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
 import { ROUTES } from '@/src/lib/constants';
+import { getUserBookmarksForCollections } from '@/src/lib/data/user-data';
 import { ArrowLeft } from '@/src/lib/icons';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';
@@ -20,12 +21,7 @@ export default async function NewCollectionPage() {
     redirect('/login');
   }
 
-  // Get user's bookmarks to display as options
-  const { data: bookmarks } = await supabase
-    .from('bookmarks')
-    .select('*')
-    .eq('user_id', user.id)
-    .order('created_at', { ascending: false });
+  const bookmarks = await getUserBookmarksForCollections(user.id);
 
   return (
     <div className="space-y-6">
