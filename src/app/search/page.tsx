@@ -4,8 +4,8 @@
 
 import type { Metadata } from 'next';
 import { ContentSearchClient } from '@/src/components/content/content-search';
-import type { SearchFilters } from '@/src/lib/search/server-search';
-import { searchContent } from '@/src/lib/search/server-search';
+import type { SearchFilters } from '@/src/lib/edge/search-client';
+import { searchContent } from '@/src/lib/edge/search-client';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 
 export const revalidate = false;
