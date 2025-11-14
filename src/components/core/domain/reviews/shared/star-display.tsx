@@ -1,5 +1,3 @@
-'use client';
-
 import { Star } from '@/src/lib/icons';
 
 /**

@@ -68,6 +68,7 @@ export async function updateWebhookEventStatus(
       response_payload:
         responsePayload as Database['public']['Tables']['webhook_events']['Update']['response_payload'],
       retry_count: retryCount,
+      success,
     })
     .eq('id', webhookEventId);
 }

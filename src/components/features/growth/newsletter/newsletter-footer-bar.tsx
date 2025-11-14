@@ -4,8 +4,8 @@ import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Button } from '@/src/components/primitives/ui/button';
 import type { NewsletterSource } from '@/src/hooks/use-newsletter';
+import { getAppSettings, getNewsletterConfig } from '@/src/lib/actions/feature-flags.actions';
 import { NEWSLETTER_CTA_CONFIG } from '@/src/lib/config/category-config';
-import { appSettings, newsletterConfigs } from '@/src/lib/flags';
 import { Mail, X } from '@/src/lib/icons';
 import { DIMENSIONS, POSITION_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { NewsletterForm } from './newsletter-form';
@@ -15,6 +15,7 @@ export interface NewsletterFooterBarProps {
   dismissible?: boolean;
   showAfterDelay?: number;
   respectInlineCTA?: boolean;
+  ctaVariant?: 'aggressive' | 'social_proof' | 'value_focused';
 }
 
 export function NewsletterFooterBar({
@@ -22,6 +23,7 @@ export function NewsletterFooterBar({
   dismissible = true,
   showAfterDelay,
   respectInlineCTA = true,
+  ctaVariant = 'value_focused',
 }: NewsletterFooterBarProps) {
   const pathname = usePathname();
   const [isVisible, setIsVisible] = useState(false);
@@ -33,8 +35,8 @@ export function NewsletterFooterBar({
     const loadConfigs = async () => {
       try {
         const [appConfig, newsletterConfig] = await Promise.all([
-          appSettings(),
-          newsletterConfigs(),
+          getAppSettings(),
+          getNewsletterConfig(),
         ]);
 
         const excludedPages = appConfig['newsletter.excluded_pages'] as string[];
@@ -106,9 +108,19 @@ export function NewsletterFooterBar({
             </div>
             <div>
               <p className="font-semibold text-base text-foreground">
-                {NEWSLETTER_CTA_CONFIG.headline}
+                {ctaVariant === 'aggressive'
+                  ? "⚡ Don't miss out!"
+                  : ctaVariant === 'social_proof'
+                    ? '✨ Join 12,000+ Claude builders'
+                    : NEWSLETTER_CTA_CONFIG.headline}
               </p>
-              <p className="text-muted-foreground text-sm">{NEWSLETTER_CTA_CONFIG.description}</p>
+              <p className="text-muted-foreground text-sm">
+                {ctaVariant === 'aggressive'
+                  ? 'Get weekly AI updates before everyone else'
+                  : ctaVariant === 'social_proof'
+                    ? 'The best Claude resources, curated weekly'
+                    : NEWSLETTER_CTA_CONFIG.description}
+              </p>
             </div>
           </div>
           <div className="flex flex-shrink-0 items-center gap-3">
@@ -136,7 +148,11 @@ export function NewsletterFooterBar({
                 aria-hidden="true"
               />
               <p className="font-medium text-foreground text-sm">
-                {NEWSLETTER_CTA_CONFIG.headline}
+                {ctaVariant === 'aggressive'
+                  ? "⚡ Don't miss out!"
+                  : ctaVariant === 'social_proof'
+                    ? '✨ Join 12k+ builders'
+                    : NEWSLETTER_CTA_CONFIG.headline}
               </p>
             </div>
             {dismissible && (

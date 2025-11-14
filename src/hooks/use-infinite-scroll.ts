@@ -9,7 +9,7 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { appSettings, timeoutConfigs } from '@/src/lib/flags';
+import { getAppSettings, getTimeoutConfig } from '@/src/lib/actions/feature-flags.actions';
 import { logger } from '@/src/lib/logger';
 
 interface UseInfiniteScrollOptions {
@@ -70,7 +70,7 @@ export function useInfiniteScroll({
   useEffect(() => {
     const loadDefaults = async () => {
       try {
-        const config = await appSettings();
+        const config = await getAppSettings();
 
         setConfigDefaults({
           batchSize: (config['hooks.infinite_scroll.batch_size'] as number) ?? 30,
@@ -121,7 +121,7 @@ export function useInfiniteScroll({
 
     setIsLoading(true);
 
-    timeoutConfigs()
+    getTimeoutConfig()
       .then((config) => {
         const delay = (config['timeout.ui.transition_ms'] as number) ?? 200;
         setTimeout(() => {

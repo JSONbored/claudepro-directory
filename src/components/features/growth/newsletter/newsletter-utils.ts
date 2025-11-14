@@ -1,5 +1,5 @@
+import { getNewsletterConfig } from '@/src/lib/actions/feature-flags.actions';
 import { NEWSLETTER_CTA_CONFIG } from '@/src/lib/config/category-config';
-import { newsletterConfigs } from '@/src/lib/flags';
 
 /**
  * Newsletter config type from Statsig
@@ -130,7 +130,7 @@ export function getContextualMessage(
  */
 export async function loadNewsletterConfig(): Promise<NewsletterConfig> {
   try {
-    return await newsletterConfigs();
+    return await getNewsletterConfig();
   } catch {
     return {}; // Fall back to hardcoded defaults
   }

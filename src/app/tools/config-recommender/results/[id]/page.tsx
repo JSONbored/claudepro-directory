@@ -9,7 +9,7 @@ import { ResultsDisplay } from '@/src/components/features/tools/recommender/resu
 import { APP_CONFIG, ROUTES } from '@/src/lib/constants';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-import { createClient } from '@/src/lib/supabase/server';
+import { cachedRPCWithDedupe } from '@/src/lib/supabase/cached-rpc';
 
 function decodeQuizAnswers(encoded: string) {
   try {
@@ -61,20 +61,7 @@ export default async function ResultsPage({ params, searchParams }: PageProps) {
   }
 
   try {
-    const supabase = await createClient();
-
-    const { data: dbResult, error } = await supabase.rpc('get_recommendations', {
-      p_use_case: answers.useCase,
-      p_experience_level: answers.experienceLevel,
-      p_tool_preferences: answers.toolPreferences,
-      p_integrations: answers.integrations || [],
-      p_focus_areas: answers.focusAreas || [],
-      p_limit: 20,
-    });
-
-    if (error) throw new Error(error.message);
-
-    const enrichedResult = dbResult as {
+    type RecommendationsResult = {
       results: Array<{
         slug: string;
         title: string;
@@ -94,8 +81,33 @@ export default async function ResultsPage({ params, searchParams }: PageProps) {
         topCategory: string;
         avgMatchScore: number;
         diversityScore: number;
+        topTags: string[];
       };
     };
+
+    const rpcParams = {
+      p_use_case: answers.useCase,
+      p_experience_level: answers.experienceLevel,
+      p_tool_preferences: answers.toolPreferences,
+      p_integrations: answers.integrations || [],
+      p_focus_areas: answers.focusAreas || [],
+      p_limit: 20,
+    };
+
+    const enrichedResult = await cachedRPCWithDedupe<RecommendationsResult>(
+      'get_recommendations',
+      rpcParams,
+      {
+        tags: ['content', 'quiz'],
+        ttlConfigKey: 'cache.quiz.ttl_seconds',
+        keySuffix: `${answers.useCase}-${answers.experienceLevel}-${answers.toolPreferences.join('-')}`,
+        useAuthClient: true,
+      }
+    );
+
+    if (!enrichedResult) {
+      throw new Error('No recommendations returned');
+    }
 
     const recommendations = {
       ...enrichedResult,

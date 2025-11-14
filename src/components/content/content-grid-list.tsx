@@ -3,7 +3,7 @@ import { Suspense, useId } from 'react';
 import { ContentSearchClient } from '@/src/components/content/content-search';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { LazySection } from '@/src/components/core/infra/scroll-animated-section';
-import { NewsletterCTAVariant } from '@/src/components/features/growth/newsletter';
+import { NewsletterCTAVariant } from '@/src/components/features/growth/newsletter/newsletter-cta-variants';
 import { Skeleton } from '@/src/components/primitives/feedback/loading-skeleton';
 import { Button } from '@/src/components/primitives/ui/button';
 import { ROUTES } from '@/src/lib/constants';

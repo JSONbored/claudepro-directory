@@ -33,7 +33,6 @@ import {
 } from '../_shared/utils/webhook-handler.ts';
 
 type JobRow = Database['public']['Tables']['jobs']['Row'];
-type ContentRow = Database['public']['Tables']['content']['Row'];
 type ContentSubmission = Database['public']['Tables']['content_submissions']['Row'];
 interface WebhookEventRecord {
   id: string;
@@ -239,11 +238,16 @@ async function updateJobDiscordMessage(
   embedData: unknown,
   webhookUrl: string
 ): Promise<Response> {
+  if (!job.discord_message_id) {
+    console.log(`No discord_message_id for job ${job.id}, creating new message`);
+    return await createJobDiscordMessage(job, embedData, webhookUrl);
+  }
+
   console.log(`Updating Discord message: ${job.discord_message_id} for job: ${job.id}`);
 
   const result = await updateDiscordMessageUtil(
     webhookUrl,
-    job.discord_message_id!,
+    job.discord_message_id,
     { embeds: [embedData] },
     'job_notification',
     job.id,

@@ -28,8 +28,8 @@ import type {
 import { ICON_NAME_MAP } from '@/src/lib/ui-constants';
 
 /**
- * Content Search Client - Edge Function Integration
- * Migrated from client-side filtering to unified-search edge function
+ * Content Search Client - Server Actions Integration
+ * Uses cached server actions for optimized search
  */
 function ContentSearchClientComponent<T extends DisplayableContent>({
   items,
@@ -53,14 +53,29 @@ function ContentSearchClientComponent<T extends DisplayableContent>({
       }
 
       try {
-        const { searchContent } = await import('@/src/lib/edge/search-client');
-
-        const response = await searchContent(query.trim(), {
-          ...(category && { categories: [category] }),
-          limit: 100,
+        const params = new URLSearchParams({
+          q: query.trim(),
+          limit: '100',
         });
+        if (category) {
+          params.set('categories', category);
+        }
 
-        setSearchResults(response.results as T[]);
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/unified-search?${params.toString()}`,
+          {
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(`Search failed: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        setSearchResults(data.results as T[]);
       } catch (error) {
         logger.error('Content search failed', error as Error, { source: 'ContentSearchClient' });
         setSearchResults(items);

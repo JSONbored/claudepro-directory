@@ -5,9 +5,9 @@
 
 'use client';
 
-import { useCallback, useState, useTransition } from 'react';
+import { useCallback, useEffect, useState, useTransition } from 'react';
+import { getNewsletterConfig } from '@/src/lib/actions/feature-flags.actions';
 import { trackInteraction, trackNewsletterEvent } from '@/src/lib/edge/client';
-import { newsletterConfigs } from '@/src/lib/flags';
 import { logger } from '@/src/lib/logger';
 import { toasts } from '@/src/lib/utils/toast.utils';
 import type { Enums } from '@/src/types/database.types';
@@ -16,21 +16,10 @@ export type NewsletterSource = Enums<'newsletter_source'>;
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 
-// Default values (will be overridden by Dynamic Configs)
+// Retry configuration (loaded from Statsig via server action)
 let MAX_RETRIES = 3;
 let INITIAL_RETRY_DELAY_MS = 1000;
 let RETRY_BACKOFF_MULTIPLIER = 2;
-
-// Load retry config from Statsig on module initialization
-newsletterConfigs()
-  .then((config: Record<string, unknown>) => {
-    MAX_RETRIES = (config['newsletter.max_retries'] as number) ?? 3;
-    INITIAL_RETRY_DELAY_MS = (config['newsletter.initial_retry_delay_ms'] as number) ?? 1000;
-    RETRY_BACKOFF_MULTIPLIER = (config['newsletter.retry_backoff_multiplier'] as number) ?? 2;
-  })
-  .catch(() => {
-    // Use defaults if config load fails
-  });
 
 /**
  * Retry helper with exponential backoff
@@ -110,6 +99,19 @@ export function useNewsletter(options: UseNewsletterOptions): UseNewsletterRetur
   const [email, setEmail] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+
+  // Load retry config from Statsig on mount
+  useEffect(() => {
+    getNewsletterConfig()
+      .then((config) => {
+        MAX_RETRIES = (config['newsletter.max_retries'] as number) ?? 3;
+        INITIAL_RETRY_DELAY_MS = (config['newsletter.initial_retry_delay_ms'] as number) ?? 1000;
+        RETRY_BACKOFF_MULTIPLIER = (config['newsletter.retry_backoff_multiplier'] as number) ?? 2;
+      })
+      .catch(() => {
+        // Use defaults if config load fails
+      });
+  }, []);
 
   const reset = useCallback(() => {
     setEmail('');

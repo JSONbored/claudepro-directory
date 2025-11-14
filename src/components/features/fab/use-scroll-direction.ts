@@ -16,7 +16,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { timeoutConfigs } from '@/src/lib/flags';
+import { getTimeoutConfig } from '@/src/lib/actions/feature-flags.actions';
 import { logger } from '@/src/lib/logger';
 import type { ScrollState } from './fab.types';
 
@@ -25,7 +25,7 @@ let DEFAULT_SCROLL_THRESHOLD = 100;
 let DEFAULT_SCROLL_HYSTERESIS = 50;
 
 // Load config from Statsig on module initialization
-timeoutConfigs()
+getTimeoutConfig()
   .then((config: Record<string, unknown>) => {
     DEFAULT_SCROLL_THRESHOLD =
       (config['timeout.ui.scroll_direction_threshold_px'] as number) ?? 100;

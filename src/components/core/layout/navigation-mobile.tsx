@@ -20,8 +20,10 @@ import {
   SheetTrigger,
 } from '@/src/components/primitives/ui/sheet';
 import { ACTION_LINKS, PRIMARY_NAVIGATION, SECONDARY_NAVIGATION } from '@/src/config/navigation';
+import { getAnimationConfig } from '@/src/lib/actions/feature-flags.actions';
 import { SOCIAL_LINKS } from '@/src/lib/constants';
 import { DiscordIcon, Github, Menu } from '@/src/lib/icons';
+import { logger } from '@/src/lib/logger';
 import {
   ANIMATION_CONSTANTS,
   DIMENSIONS,
@@ -82,8 +84,7 @@ export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationM
   });
 
   useEffect(() => {
-    import('@/src/lib/flags')
-      .then(({ animationConfigs }) => animationConfigs())
+    getAnimationConfig()
       .then((config) => {
         setSpringDefault({
           type: 'spring' as const,
@@ -91,7 +92,9 @@ export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationM
           damping: (config['animation.spring.default.damping'] as number) ?? 17,
         });
       })
-      .catch(() => {});
+      .catch((error) => {
+        logger.error('NavigationMobile: failed to load animation config', error);
+      });
   }, []);
 
   return (

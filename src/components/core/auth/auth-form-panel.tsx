@@ -11,12 +11,14 @@ interface AuthFormPanelProps {
   title?: string;
   description?: string;
   children: ReactNode;
+  afterContent?: ReactNode;
 }
 
 export function AuthFormPanel({
   title = 'Sign in',
   description = 'Choose your preferred sign-in method',
   children,
+  afterContent,
 }: AuthFormPanelProps) {
   return (
     <div className="w-full">
@@ -39,6 +41,17 @@ export function AuthFormPanel({
       >
         {children}
       </motion.div>
+
+      {afterContent && (
+        <motion.div
+          className="mt-8"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.6 }}
+        >
+          {afterContent}
+        </motion.div>
+      )}
     </div>
   );
 }

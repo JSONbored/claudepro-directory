@@ -16,10 +16,12 @@ import {
   HomepageStatsSkeleton,
   Skeleton,
 } from '@/src/components/primitives/feedback/loading-skeleton';
+import { getAnimationConfig } from '@/src/lib/actions/feature-flags.actions';
 import {
   type CategoryId,
   getCategoryConfigs,
   getCategoryStatsConfig,
+  getHomepageFeaturedCategories,
 } from '@/src/lib/config/category-config';
 import { ROUTES } from '@/src/lib/constants';
 import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
@@ -70,16 +72,13 @@ function HomePageClientComponent({
   const categoryConfigs = useMemo(() => getCategoryConfigs(), []);
 
   useEffect(() => {
-    import('@/src/lib/config/category-config').then(({ getHomepageFeaturedCategories }) =>
-      getHomepageFeaturedCategories().then((categories) => {
-        setFeaturedCategories(categories);
-      })
-    );
+    getHomepageFeaturedCategories().then((categories) => {
+      setFeaturedCategories(categories);
+    });
   }, []);
 
   useEffect(() => {
-    import('@/src/lib/flags')
-      .then(({ animationConfigs }) => animationConfigs())
+    getAnimationConfig()
       .then((config) => {
         setSpringDefault({
           type: 'spring' as const,
@@ -87,7 +86,9 @@ function HomePageClientComponent({
           damping: (config['animation.spring.default.damping'] as number) ?? 17,
         });
       })
-      .catch(() => {});
+      .catch((error) => {
+        logger.error('HomePageClient: failed to load animation config', error);
+      });
   }, []);
 
   const fetchAllConfigs = useCallback(
@@ -97,25 +98,13 @@ function HomePageClientComponent({
       setIsLoadingAllConfigs(true);
 
       try {
-        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-        const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+        const { fetchPaginatedContent } = await import('@/src/lib/actions/content.actions');
 
-        if (!(supabaseUrl && supabaseKey)) {
-          throw new Error('Missing Supabase environment variables');
-        }
-
-        const url = `${supabaseUrl}/functions/v1/content-paginated?offset=${offset}&limit=${limit}&category=all`;
-        const response = await fetch(url, {
-          headers: {
-            Authorization: `Bearer ${supabaseKey}`,
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-
-        const newItems: ContentItem[] = await response.json();
+        const newItems = (await fetchPaginatedContent({
+          offset,
+          limit,
+          category: 'all',
+        })) as ContentItem[];
 
         if (newItems.length < limit) {
           setHasMoreAllConfigs(false);
@@ -156,18 +145,30 @@ function HomePageClientComponent({
       setIsSearching(true);
 
       try {
-        const { searchContent } = await import('@/src/lib/edge/search-client');
-
         const effectiveTab = categoryOverride ?? activeTab;
         const categories =
           effectiveTab !== 'all' && effectiveTab !== 'community' ? [effectiveTab] : undefined;
 
-        const response = await searchContent(query.trim(), {
-          ...(categories && { categories }),
-          limit: 50,
-        });
+        const params = new URLSearchParams({ q: query.trim(), limit: '50' });
+        if (categories) {
+          params.set('categories', categories.join(','));
+        }
 
-        setSearchResults(response.results);
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/unified-search?${params.toString()}`,
+          {
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(`Search failed: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        setSearchResults(data.results);
       } catch (error) {
         logger.error('Search failed', error as Error, { source: 'HomePageSearch' });
         setSearchResults(allConfigs);

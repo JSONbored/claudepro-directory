@@ -9,14 +9,12 @@ import {
   CardTitle,
 } from '@/src/components/primitives/ui/card';
 import { ROUTES } from '@/src/lib/constants';
+import { getAccountDashboard } from '@/src/lib/data/user-data';
 import { Bookmark, Calendar } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
-
-// Force dynamic rendering - requires authentication
-export const dynamic = 'force-dynamic';
 
 export const metadata = generatePageMetadata('/account');
 
@@ -28,10 +26,8 @@ export default async function AccountDashboard() {
 
   if (!user) return null;
 
-  // Consolidated RPC: 2 queries → 1 (50% reduction)
-  const { data: dashboardData } = await supabase.rpc('get_account_dashboard', {
-    p_user_id: user.id,
-  });
+  // User-scoped edge-cached RPC via centralized data layer
+  const dashboardData = await getAccountDashboard(user.id);
 
   // Runtime validation schema for RPC response
   const DashboardResponseSchema = z.object({

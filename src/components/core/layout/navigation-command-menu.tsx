@@ -11,91 +11,32 @@ import {
   CommandList,
   CommandSeparator,
 } from '@/src/components/primitives/ui/command';
+import type { NavigationData, NavigationItem } from '@/src/lib/data/navigation';
 import * as Icons from '@/src/lib/icons';
-import { createClient } from '@/src/lib/supabase/client';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 /**
- * Command palette navigation - Database-first (get_navigation_menu RPC)
+ * Command palette navigation - Uses server-provided data from getNavigationMenu()
  */
 
-interface NavigationItem {
-  path: string;
-  title: string;
-  description: string;
-  iconName: string;
-  group: 'primary' | 'secondary' | 'actions';
-}
-
-interface NavigationData {
-  primary: NavigationItem[];
-  secondary: NavigationItem[];
-  actions: NavigationItem[];
-}
 interface NavigationCommandMenuProps {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
-  /** Navigation data from server (optional) - falls back to client fetch if not provided */
-  initialData?: NavigationData;
+  /** Navigation data from server (required) */
+  navigationData: NavigationData;
 }
 
 export function NavigationCommandMenu({
   open: controlledOpen,
   onOpenChange,
-  initialData,
-}: NavigationCommandMenuProps = {}) {
+  navigationData,
+}: NavigationCommandMenuProps) {
   const [internalOpen, setInternalOpen] = useState(false);
-  const [navData, setNavData] = useState<NavigationData>(
-    initialData ?? {
-      primary: [],
-      secondary: [],
-      actions: [],
-    }
-  );
-  const [isLoading, setIsLoading] = useState(!initialData);
   const router = useRouter();
   const inputId = useId();
 
   const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
   const setOpen = onOpenChange || setInternalOpen;
-
-  // Fetch navigation data from database (only if not provided via props)
-  useEffect(() => {
-    // Skip client-side fetch if server data was provided
-    if (initialData) return;
-
-    let isMounted = true;
-
-    async function fetchNavData() {
-      try {
-        const supabase = createClient();
-        const { data, error } = await supabase.rpc('get_navigation_menu');
-
-        if (error || !data || !isMounted) return;
-
-        if (isMounted) {
-          setNavData(data as unknown as NavigationData);
-        }
-      } catch {
-        // Silent fail
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
-      }
-    }
-
-    fetchNavData().catch(() => {
-      // Silent fail - uses initial data fallback
-      if (isMounted) {
-        setIsLoading(false);
-      }
-    });
-
-    return () => {
-      isMounted = false;
-    };
-  }, [initialData]);
 
   // Keyboard shortcut handler (⌘K / Ctrl+K)
   useEffect(() => {
@@ -156,24 +97,24 @@ export function NavigationCommandMenu({
       <CommandList>
         <CommandEmpty>No results found.</CommandEmpty>
 
-        {!isLoading && navData.primary.length > 0 && (
+        {navigationData.primary.length > 0 && (
           <>
             <CommandGroup heading="Primary Navigation">
-              {navData.primary.map(renderItem)}
+              {navigationData.primary.map(renderItem)}
             </CommandGroup>
             <CommandSeparator />
           </>
         )}
 
-        {!isLoading && navData.secondary.length > 0 && (
+        {navigationData.secondary.length > 0 && (
           <>
-            <CommandGroup heading="More">{navData.secondary.map(renderItem)}</CommandGroup>
+            <CommandGroup heading="More">{navigationData.secondary.map(renderItem)}</CommandGroup>
             <CommandSeparator />
           </>
         )}
 
-        {!isLoading && navData.actions.length > 0 && (
-          <CommandGroup heading="Actions">{navData.actions.map(renderItem)}</CommandGroup>
+        {navigationData.actions.length > 0 && (
+          <CommandGroup heading="Actions">{navigationData.actions.map(renderItem)}</CommandGroup>
         )}
       </CommandList>
     </CommandDialog>

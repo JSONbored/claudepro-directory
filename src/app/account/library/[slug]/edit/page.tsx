@@ -4,6 +4,7 @@ import { notFound, redirect } from 'next/navigation';
 import { CollectionForm } from '@/src/components/core/forms/collection-form';
 import { Button } from '@/src/components/primitives/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
+import { getCollectionDetail } from '@/src/lib/data/user-data';
 import { ArrowLeft } from '@/src/lib/icons';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';
@@ -18,9 +19,6 @@ export async function generateMetadata({ params }: EditCollectionPageProps): Pro
   return generatePageMetadata('/account/library/:slug/edit', { params: { slug } });
 }
 
-// Force dynamic rendering - requires authentication
-export const dynamic = 'force-dynamic';
-
 export default async function EditCollectionPage({ params }: EditCollectionPageProps) {
   const { slug } = await params;
   const supabase = await createClient();
@@ -33,11 +31,8 @@ export default async function EditCollectionPage({ params }: EditCollectionPageP
     redirect('/login');
   }
 
-  // Consolidated RPC: 2 queries → 1 (50% reduction)
-  const { data: collectionData } = await supabase.rpc('get_collection_detail_with_items', {
-    p_user_id: user.id,
-    p_slug: slug,
-  });
+  // User-scoped edge-cached RPC via centralized data layer
+  const collectionData = await getCollectionDetail(user.id, slug);
 
   if (!collectionData) {
     notFound();

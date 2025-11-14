@@ -15,7 +15,8 @@ import * as TabsPrimitive from '@radix-ui/react-tabs';
 import { motion } from 'motion/react';
 import type * as React from 'react';
 import { useEffect, useState } from 'react';
-
+import { getAnimationConfig } from '@/src/lib/actions/feature-flags.actions';
+import { logger } from '@/src/lib/logger';
 import { POSITION_PATTERNS, STATE_PATTERNS } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
 
@@ -53,8 +54,7 @@ const TabsTrigger = ({
   });
 
   useEffect(() => {
-    import('@/src/lib/flags')
-      .then(({ animationConfigs }) => animationConfigs())
+    getAnimationConfig()
       .then((config) => {
         setSpringBouncy({
           type: 'spring' as const,
@@ -62,7 +62,9 @@ const TabsTrigger = ({
           damping: (config['animation.spring.bouncy.damping'] as number) ?? 20,
         });
       })
-      .catch(() => {});
+      .catch((error) => {
+        logger.error('TabsTrigger: failed to load animation config', error);
+      });
   }, []);
 
   return (

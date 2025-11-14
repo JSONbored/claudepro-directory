@@ -181,6 +181,7 @@ const nextConfig = {
         'node:zlib': false,
         crypto: false,
         zlib: false,
+        async_hooks: false,
       };
     }
 

@@ -22,6 +22,7 @@ import { UserMenu } from '@/src/components/core/layout/user-menu';
 import { Button } from '@/src/components/primitives/ui/button';
 import { ACTION_LINKS } from '@/src/config/navigation';
 import { ROUTES } from '@/src/lib/constants';
+import type { NavigationData } from '@/src/lib/data/navigation';
 import { DiscordIcon } from '@/src/lib/icons';
 import {
   ANIMATION_CONSTANTS,
@@ -33,9 +34,11 @@ import {
 interface NavigationProps {
   /** Hide Create button when FloatingActionBar is enabled */
   hideCreateButton?: boolean;
+  /** Navigation data from server (required) */
+  navigationData: NavigationData;
 }
 
-const NavigationComponent = ({ hideCreateButton = false }: NavigationProps = {}) => {
+const NavigationComponent = ({ hideCreateButton = false, navigationData }: NavigationProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
@@ -94,7 +97,11 @@ const NavigationComponent = ({ hideCreateButton = false }: NavigationProps = {})
       </a>
 
       {/* Global Command Menu (⌘K) */}
-      <NavigationCommandMenu open={commandPaletteOpen} onOpenChange={setCommandPaletteOpen} />
+      <NavigationCommandMenu
+        open={commandPaletteOpen}
+        onOpenChange={setCommandPaletteOpen}
+        navigationData={navigationData}
+      />
 
       <motion.header
         className={`${POSITION_PATTERNS.STICKY_TOP} z-50 w-full px-3 pt-1 pb-3 will-change-transform contain-layout`}

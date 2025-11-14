@@ -1,5 +1,3 @@
-'use client';
-
 /**
  * Navigation link with orange underline animation pattern
  */

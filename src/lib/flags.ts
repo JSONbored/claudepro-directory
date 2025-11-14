@@ -1,16 +1,46 @@
 import { type StatsigUser, statsigAdapter } from '@flags-sdk/statsig';
+import { createServerClient } from '@supabase/ssr';
 import type { Identify } from 'flags';
 import { dedupe, flag } from 'flags/next';
 import { logger } from '@/src/lib/logger';
-import { createClient } from '@/src/lib/supabase/server';
+import type { Database } from '@/src/types/database.types';
 
 /**
  * Identify function - provides user context for flag evaluation
  * Statsig uses this to do % rollouts, user targeting, etc.
+ *
+ * IMPORTANT: Uses headers/cookies provided by flags SDK (no next/headers import needed)
+ * This allows the function to work in both server and client contexts without build errors
  */
-export const identify = dedupe((async () => {
+export const identify = dedupe((async ({ headers, cookies }) => {
   try {
-    const supabase = await createClient();
+    // Build-time detection: If cookies/headers unavailable (static generation), return anonymous immediately
+    // This prevents warnings about missing request context during build
+    if (!(cookies && headers)) {
+      return { userID: 'anonymous' };
+    }
+
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+    // Fallback to anonymous if env vars missing (development safety)
+    if (!(supabaseUrl && supabaseAnonKey)) {
+      return { userID: 'anonymous' };
+    }
+
+    // Create Supabase client using cookies provided by flags SDK
+    const supabase = createServerClient<Database>(supabaseUrl, supabaseAnonKey, {
+      cookies: {
+        getAll() {
+          return cookies.getAll();
+        },
+        setAll() {
+          // Flags SDK cookies are read-only, cannot set
+          // This is fine - auth cookies are already set by middleware/route handlers
+        },
+      },
+    });
+
     const {
       data: { user },
     } = await supabase.auth.getUser();
@@ -452,21 +482,80 @@ export const recentlyViewedConfigs = createDynamicConfigGroup('recently_viewed_c
 });
 
 /**
- * Cache Configs - Cache TTL settings (Phase 3)
- * Controls cache durations across the application
- * Usage: const config = await cacheConfigs(); const ttl = config['cache.user_profile_ttl_s'];
+ * Cache Configs - Cache TTL settings and invalidation rules
+ * Controls cache durations and invalidation tags across the application
+ * Usage: const config = await cacheConfigs(); const ttl = config['cache.homepage.ttl_seconds'];
  */
 export const cacheConfigs = createDynamicConfigGroup('cache_configs', {
-  'cache.submission_form_fields_ttl_s': 21600, // 6 hours
-  'cache.category_stats_ttl_s': 300, // 5 minutes
-  'cache.trending_configs_ttl_s': 3600, // 1 hour
-  'cache.user_profile_ttl_s': 300, // 5 minutes
-  'cache.search_results_ttl_s': 1800, // 30 minutes
-  'cache.submission_review_ttl_s': 60, // 1 minute
-  'cache.company_list_ttl_s': 3600, // 1 hour
-  'cache.job_listings_ttl_s': 1800, // 30 minutes
-  'cache.collection_items_ttl_s': 1800, // 30 minutes
-  'cache.badge_counts_ttl_s': 300, // 5 minutes
-  'cache.analytics_stats_ttl_s': 600, // 10 minutes
-  'cache.newsletter_count_ttl_s': 300, // 5 minutes
+  // TTL Settings (in seconds) - Optimized for low-traffic sites
+  'cache.homepage.ttl_seconds': 3600, // 1 hour
+  'cache.content_detail.ttl_seconds': 7200, // 2 hours
+  'cache.content_list.ttl_seconds': 1800, // 30 minutes
+  'cache.content_trending.ttl_seconds': 1800, // 30 minutes
+  'cache.config_detail.ttl_seconds': 7200, // 2 hours
+  'cache.config_list.ttl_seconds': 1800, // 30 minutes
+  'cache.tool_detail.ttl_seconds': 7200, // 2 hours
+  'cache.tool_list.ttl_seconds': 1800, // 30 minutes
+  'cache.company_detail.ttl_seconds': 1800, // 30 minutes
+  'cache.company_list.ttl_seconds': 1800, // 30 minutes
+  'cache.related_content.ttl_seconds': 3600, // 1 hour (stable recommendations)
+  'cache.navigation.ttl_seconds': 7200, // 2 hours (rarely changes)
+  'cache.templates.ttl_seconds': 7200, // 2 hours (rarely changes)
+  'cache.submission_dashboard.ttl_seconds': 900, // 15 minutes (community activity updates)
+  'cache.user_profile.ttl_seconds': 1800, // 30 minutes
+  'cache.user_activity.ttl_seconds': 900, // 15 minutes
+  'cache.user_stats.ttl_seconds': 1800, // 30 minutes
+  'cache.user_bookmarks.ttl_seconds': 300, // 5 minutes (feels real-time)
+  'cache.user_submissions.ttl_seconds': 300, // 5 minutes
+  'cache.user_reviews.ttl_seconds': 300, // 5 minutes
+  'cache.community.ttl_seconds': 1800, // 30 minutes
+  'cache.article.ttl_seconds': 7200, // 2 hours
+  'cache.boilerplate.ttl_seconds': 7200, // 2 hours
+  'cache.course.ttl_seconds': 7200, // 2 hours
+  'cache.book.ttl_seconds': 7200, // 2 hours
+  'cache.quiz.ttl_seconds': 3600, // 1 hour
+  'cache.search.ttl_seconds': 3600, // 1 hour
+  'cache.search_autocomplete.ttl_seconds': 3600, // 1 hour (suggestions from history)
+  'cache.search_facets.ttl_seconds': 3600, // 1 hour (available filters)
+  'cache.jobs.ttl_seconds': 1800, // 30 minutes
+  'cache.jobs_detail.ttl_seconds': 1800, // 30 minutes
+  'cache.changelog.ttl_seconds': 3600, // 1 hour
+  'cache.changelog_detail.ttl_seconds': 7200, // 2 hours
+  'cache.announcements.ttl_seconds': 1800, // 30 minutes
+  'cache.account.ttl_seconds': 300, // 5 minutes (user-specific data, shorter TTL)
+
+  // Invalidation Tag Arrays
+  'cache.invalidate.content_create': ['content', 'homepage', 'trending'] as string[],
+  'cache.invalidate.content_update': ['content', 'homepage', 'trending'] as string[],
+  'cache.invalidate.content_delete': ['content', 'homepage', 'trending'] as string[],
+  'cache.invalidate.config_create': ['configs', 'homepage'] as string[],
+  'cache.invalidate.config_update': ['configs', 'homepage'] as string[],
+  'cache.invalidate.config_delete': ['configs', 'homepage'] as string[],
+  'cache.invalidate.tool_create': ['tools', 'homepage'] as string[],
+  'cache.invalidate.tool_update': ['tools', 'homepage'] as string[],
+  'cache.invalidate.tool_delete': ['tools', 'homepage'] as string[],
+  'cache.invalidate.company_create': ['companies'] as string[],
+  'cache.invalidate.company_update': ['companies'] as string[],
+  'cache.invalidate.company_delete': ['companies'] as string[],
+  'cache.invalidate.user_update': ['users'] as string[],
+  'cache.invalidate.user_profile_oauth': ['users'] as string[],
+  'cache.invalidate.bookmark_create': ['user-bookmarks', 'users'] as string[],
+  'cache.invalidate.bookmark_delete': ['user-bookmarks', 'users'] as string[],
+  'cache.invalidate.follow': ['users'] as string[],
+  'cache.invalidate.oauth_unlink': ['users'] as string[],
+  'cache.invalidate.vote': ['content', 'trending'] as string[],
+  'cache.invalidate.job_create': ['jobs', 'companies'] as string[],
+  'cache.invalidate.job_update': ['jobs', 'companies'] as string[],
+  'cache.invalidate.job_delete': ['jobs', 'companies'] as string[],
+  'cache.invalidate.job_status': ['jobs', 'companies'] as string[],
+  'cache.invalidate.collection_create': ['collections', 'users'] as string[],
+  'cache.invalidate.collection_update': ['collections', 'users'] as string[],
+  'cache.invalidate.collection_delete': ['collections', 'users'] as string[],
+  'cache.invalidate.collection_items': ['collections', 'users'] as string[],
+  'cache.invalidate.review_create': ['content', 'homepage', 'trending'] as string[],
+  'cache.invalidate.review_update': ['content'] as string[],
+  'cache.invalidate.review_delete': ['content'] as string[],
+  'cache.invalidate.submission_create': ['submissions'] as string[],
+  'cache.invalidate.review_helpful': ['content'] as string[],
+  'cache.invalidate.usage_tracking': ['content'] as string[],
 });

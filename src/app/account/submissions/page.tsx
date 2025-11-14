@@ -9,15 +9,13 @@ import {
   CardTitle,
 } from '@/src/components/primitives/ui/card';
 import { ROUTES } from '@/src/lib/constants';
+import { getUserDashboard } from '@/src/lib/data/user-data';
 import { CheckCircle, Clock, ExternalLink, GitPullRequest, Send, XCircle } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';
 import { BADGE_COLORS, type SubmissionStatusType, UI_CLASSES } from '@/src/lib/ui-constants';
 import type { Tables } from '@/src/types/database.types';
-
-// Force dynamic rendering - requires authentication
-export const dynamic = 'force-dynamic';
 
 export const metadata = generatePageMetadata('/account/submissions');
 
@@ -31,14 +29,15 @@ export default async function SubmissionsPage() {
   let hasError = false;
 
   if (user) {
-    const { data, error } = await supabase.rpc('get_user_dashboard', { p_user_id: user.id });
-    if (error) {
-      logger.error('Failed to fetch user dashboard', error);
-      hasError = true;
-    } else if (data) {
+    // User-scoped edge-cached RPC via centralized data layer
+    const data = await getUserDashboard(user.id);
+    if (data) {
       // Trust database types - PostgreSQL validates structure
       const result = data as { submissions: Array<Tables<'submissions'>> };
       submissions = result.submissions || [];
+    } else {
+      logger.error('Failed to fetch user dashboard', new Error('Dashboard data is null'));
+      hasError = true;
     }
   }
 

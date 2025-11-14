@@ -168,7 +168,7 @@ export function TabSectionRenderer({
 
     case 'collection_items':
       // Collection sections passed as pre-rendered React nodes
-      return collectionSections ? <>{collectionSections}</> : null;
+      return collectionSections ? collectionSections : null;
 
     case 'guide_sections':
       if (!guideSections || guideSections.length === 0) return null;

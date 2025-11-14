@@ -1,5 +1,5 @@
 /**
- * Library Page - Database-First RPC Architecture
+ * Library Page - Database-First RPC Architecture with user-scoped edge caching
  * Single RPC call to get_user_library() replaces 2 separate queries
  */
 
@@ -16,14 +16,12 @@ import {
 } from '@/src/components/primitives/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/primitives/ui/tabs';
 import { ROUTES } from '@/src/lib/constants';
+import { getUserLibrary } from '@/src/lib/data/user-data';
 import { Bookmark as BookmarkIcon, ExternalLink, FolderOpen, Layers, Plus } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
-
-// Force dynamic rendering - requires authentication
-export const dynamic = 'force-dynamic';
 
 export const metadata = generatePageMetadata('/account/library');
 
@@ -69,13 +67,13 @@ export default async function LibraryPage() {
 
   if (!user) return null;
 
-  // Single RPC call replaces 2 separate queries
-  const { data, error } = await supabase.rpc('get_user_library', {
-    p_user_id: user.id,
-  });
+  // User-scoped edge-cached RPC via centralized data layer
+  const data = await getUserLibrary(user.id);
 
-  if (error) {
-    logger.error('Failed to load user library', error, { userId: user.id });
+  if (!data) {
+    logger.error('Failed to load user library', new Error('Library data is null'), {
+      userId: user.id,
+    });
     return (
       <div className="space-y-6">
         <h1 className="font-bold text-3xl">My Library</h1>

@@ -8,9 +8,11 @@
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { z } from 'zod';
 import { authedAction, rateLimitedAction } from '@/src/lib/actions/safe-action';
+import { cacheConfigs } from '@/src/lib/flags';
 import { logger } from '@/src/lib/logger';
+import { revalidateCacheTags } from '@/src/lib/supabase/cache-helpers';
 import { createClient } from '@/src/lib/supabase/server';
-import type { Tables } from '@/src/types/database.types';
+import type { Database, Tables } from '@/src/types/database.types';
 
 // Manual Zod schemas (database validates, Zod just provides type safety)
 const collectionSchema = z.object({
@@ -134,6 +136,11 @@ export const createCollection = authedAction
       revalidatePath('/account/library');
       if (result.collection?.is_public) revalidatePath('/u/[slug]', 'page');
 
+      // Statsig-powered cache invalidation
+      const config = await cacheConfigs();
+      const invalidateTags = config['cache.invalidate.collection_create'] as string[];
+      revalidateCacheTags(invalidateTags);
+
       return result;
     } catch (error) {
       logger.error(
@@ -174,6 +181,11 @@ export const updateCollection = authedAction
       revalidatePath(`/account/library/${result.collection.slug}`);
       if (result.collection.is_public) revalidatePath('/u/[slug]', 'page');
 
+      // Statsig-powered cache invalidation
+      const config = await cacheConfigs();
+      const invalidateTags = config['cache.invalidate.collection_update'] as string[];
+      revalidateCacheTags(invalidateTags);
+
       return result;
     } catch (error) {
       logger.error(
@@ -209,6 +221,11 @@ export const deleteCollection = authedAction
       revalidatePath('/account/library');
       revalidatePath('/u/[slug]', 'page');
 
+      // Statsig-powered cache invalidation
+      const config = await cacheConfigs();
+      const invalidateTags = config['cache.invalidate.collection_delete'] as string[];
+      revalidateCacheTags(invalidateTags);
+
       return data as { success: boolean };
     } catch (error) {
       logger.error(
@@ -243,6 +260,11 @@ export const addItemToCollection = authedAction
     revalidatePath('/account/library/[slug]', 'page');
     revalidatePath('/u/[slug]', 'page');
 
+    // Statsig-powered cache invalidation
+    const config = await cacheConfigs();
+    const invalidateTags = config['cache.invalidate.collection_items'] as string[];
+    revalidateCacheTags(invalidateTags);
+
     return data as unknown as { success: boolean; item: Tables<'collection_items'> };
   });
 
@@ -265,6 +287,11 @@ export const removeItemFromCollection = authedAction
     revalidatePath('/account/library');
     revalidatePath('/account/library/[slug]', 'page');
     revalidatePath('/u/[slug]', 'page');
+
+    // Statsig-powered cache invalidation
+    const config = await cacheConfigs();
+    const invalidateTags = config['cache.invalidate.collection_items'] as string[];
+    revalidateCacheTags(invalidateTags);
 
     return data as { success: boolean };
   });
@@ -312,6 +339,11 @@ export const reorderCollectionItems = authedAction
     revalidatePath('/account/library/[slug]', 'page');
     revalidatePath('/u/[slug]', 'page');
 
+    // Statsig-powered cache invalidation
+    const config = await cacheConfigs();
+    const invalidateTags = config['cache.invalidate.collection_items'] as string[];
+    revalidateCacheTags(invalidateTags);
+
     return {
       success: true,
       updated: result.updated,
@@ -349,7 +381,12 @@ export const createReview = authedAction
 
     revalidatePath(`/${content_type}/${content_slug}`);
     revalidatePath(`/${content_type}`);
-    revalidateTag(`reviews:${content_type}:${content_slug}`, 'max');
+
+    // Statsig-powered cache invalidation + content-specific tags
+    const config = await cacheConfigs();
+    const invalidateTags = config['cache.invalidate.review_create'] as string[];
+    revalidateCacheTags(invalidateTags);
+    revalidateTag(`reviews:${content_type}:${content_slug}`, 'default');
 
     logger.info('Review created', {
       userId: ctx.userId,
@@ -389,7 +426,12 @@ export const updateReview = authedAction
 
     revalidatePath(`/${content_type}/${content_slug}`);
     revalidatePath(`/${content_type}`);
-    revalidateTag(`reviews:${content_type}:${content_slug}`, 'max');
+
+    // Statsig-powered cache invalidation + content-specific tags
+    const config = await cacheConfigs();
+    const invalidateTags = config['cache.invalidate.review_update'] as string[];
+    revalidateCacheTags(invalidateTags);
+    revalidateTag(`reviews:${content_type}:${content_slug}`, 'default');
 
     logger.info('Review updated', {
       userId: ctx.userId,
@@ -427,7 +469,12 @@ export const deleteReview = authedAction
 
     revalidatePath(`/${result.content_type}/${result.content_slug}`);
     revalidatePath(`/${result.content_type}`);
-    revalidateTag(`reviews:${result.content_type}:${result.content_slug}`, 'max');
+
+    // Statsig-powered cache invalidation + content-specific tags
+    const config = await cacheConfigs();
+    const invalidateTags = config['cache.invalidate.review_delete'] as string[];
+    revalidateCacheTags(invalidateTags);
+    revalidateTag(`reviews:${result.content_type}:${result.content_slug}`, 'default');
 
     logger.info('Review deleted', {
       userId: ctx.userId,
@@ -458,7 +505,12 @@ export const markReviewHelpful = authedAction
       content_slug: string;
     };
     revalidatePath(`/${result.content_type}/${result.content_slug}`);
-    revalidateTag(`reviews:${result.content_type}:${result.content_slug}`, 'max');
+
+    // Statsig-powered cache invalidation + content-specific tags
+    const config = await cacheConfigs();
+    const invalidateTags = config['cache.invalidate.review_helpful'] as string[];
+    revalidateCacheTags(invalidateTags);
+    revalidateTag(`reviews:${result.content_type}:${result.content_slug}`, 'default');
 
     return { success: result.success, helpful: result.helpful };
   });
@@ -553,5 +605,141 @@ export const trackUsage = rateLimitedAction
     }
 
     revalidatePath(`/${parsedInput.content_type}/${parsedInput.content_slug}`);
+
+    // Statsig-powered cache invalidation (usage counters need cache refresh)
+    const config = await cacheConfigs();
+    const invalidateTags = config['cache.invalidate.usage_tracking'] as string[];
+    revalidateCacheTags(invalidateTags);
+
     return { success: true };
+  });
+
+// ============================================
+// CONTENT FETCHING ACTIONS
+// ============================================
+
+/**
+ * Fetch paginated content from edge function
+ * Secure server-side wrapper for content-paginated edge function
+ */
+export async function fetchPaginatedContent(params: {
+  offset: number;
+  limit: number;
+  category: string;
+}): Promise<unknown[]> {
+  try {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+    if (!(supabaseUrl && supabaseKey)) {
+      throw new Error('Missing Supabase environment variables');
+    }
+
+    const url = `${supabaseUrl}/functions/v1/content-paginated?offset=${params.offset}&limit=${params.limit}&category=${params.category}`;
+    const response = await fetch(url, {
+      headers: {
+        Authorization: `Bearer ${supabaseKey}`,
+      },
+      next: { revalidate: 300 }, // 5 minute cache
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    return data as unknown[];
+  } catch (error) {
+    logger.error(
+      'Failed to fetch paginated content',
+      error instanceof Error ? error : new Error(String(error)),
+      params
+    );
+    return [];
+  }
+}
+
+// =====================================================
+// CONTENT SUBMISSION ACTION
+// =====================================================
+
+/**
+ * Submit content for review
+ * Calls submit_content_for_review RPC with validation
+ */
+const submitContentSchema = z.object({
+  submission_type: z.string(),
+  name: z.string().min(2),
+  description: z.string().min(10),
+  category: z.string(),
+  author: z.string().min(2),
+  author_profile_url: z.string().url().optional(),
+  github_url: z.string().url().optional(),
+  tags: z.array(z.string()).optional(),
+  content_data: z.record(z.string(), z.unknown()), // Additional fields as JSONB
+});
+
+export const submitContentForReview = rateLimitedAction
+  .metadata({ actionName: 'submitContentForReview', category: 'content' })
+  .schema(submitContentSchema)
+  .action(async ({ parsedInput }) => {
+    try {
+      const supabase = await createClient();
+
+      const { data, error } = await supabase.rpc('submit_content_for_review', {
+        p_submission_type: parsedInput.submission_type,
+        p_name: parsedInput.name,
+        p_description: parsedInput.description,
+        p_category: parsedInput.category,
+        p_author: parsedInput.author,
+        ...(parsedInput.author_profile_url && {
+          p_author_profile_url: parsedInput.author_profile_url,
+        }),
+        ...(parsedInput.github_url && { p_github_url: parsedInput.github_url }),
+        ...(parsedInput.tags && { p_tags: parsedInput.tags }),
+        p_content_data:
+          parsedInput.content_data as Database['public']['Functions']['submit_content_for_review']['Args']['p_content_data'],
+      });
+
+      if (error) {
+        logger.error('Failed to submit content via RPC', new Error(error.message), {
+          submission_type: parsedInput.submission_type,
+          name: parsedInput.name,
+        });
+        throw new Error(error.message);
+      }
+
+      const result = data as unknown as { success: boolean; submission_id: string };
+
+      if (!result.success) {
+        throw new Error('Content submission failed');
+      }
+
+      logger.info('Content submitted successfully', {
+        submission_id: result.submission_id,
+        submission_type: parsedInput.submission_type,
+      });
+
+      // Invalidate submissions cache
+      const config = await cacheConfigs();
+      const invalidateTags = config['cache.invalidate.submission_create'] as string[];
+      revalidateCacheTags(invalidateTags);
+
+      revalidatePath('/account/submissions');
+
+      return {
+        success: true,
+        submissionId: result.submission_id,
+      };
+    } catch (error) {
+      logger.error(
+        'Failed to submit content',
+        error instanceof Error ? error : new Error(String(error)),
+        {
+          submission_type: parsedInput.submission_type,
+          name: parsedInput.name,
+        }
+      );
+      throw error;
+    }
   });

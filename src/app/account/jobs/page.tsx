@@ -11,6 +11,7 @@ import {
   CardTitle,
 } from '@/src/components/primitives/ui/card';
 import { ROUTES } from '@/src/lib/constants';
+import { getUserDashboard } from '@/src/lib/data/user-data';
 import { BarChart, Briefcase, Edit, ExternalLink, Eye, Plus } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
@@ -19,9 +20,6 @@ import { BADGE_COLORS, type JobStatusType, UI_CLASSES } from '@/src/lib/ui-const
 import { formatRelativeDate } from '@/src/lib/utils/data.utils';
 import type { Tables } from '@/src/types/database.types';
 import type { GetUserDashboardReturn } from '@/src/types/database-overrides';
-
-// Force dynamic rendering - requires authentication
-export const dynamic = 'force-dynamic';
 
 export const metadata = generatePageMetadata('/account/jobs');
 
@@ -39,7 +37,9 @@ export default async function MyJobsPage() {
     let error: unknown = null;
 
     if (typeof supabase.rpc === 'function') {
-      ({ data, error } = await supabase.rpc('get_user_dashboard', { p_user_id: user.id }));
+      // User-scoped edge-cached RPC via centralized data layer
+      data = await getUserDashboard(user.id);
+      error = data === null ? { message: 'Failed to load dashboard' } : null;
     } else {
       logger.warn(
         'Supabase RPC unavailable (mock client fallback detected); skipping dashboard fetch.',

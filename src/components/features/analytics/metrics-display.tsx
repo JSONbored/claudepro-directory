@@ -1,7 +1,5 @@
-'use client';
-
 /**
- * MetricsDisplay - Lightweight KPI metrics visualization
+ * MetricsDisplay - Lightweight KPI metrics visualization (Server Component)
  * Replaces Tremor with custom components for better performance
  */
 

@@ -25,7 +25,9 @@ const NumberTicker = dynamicImport(
 
 const NewsletterCTAVariant = dynamicImport(
   () =>
-    import('@/src/components/features/growth/newsletter').then((mod) => mod.NewsletterCTAVariant),
+    import('@/src/components/features/growth/newsletter/newsletter-cta-variants').then((mod) => ({
+      default: mod.NewsletterCTAVariant,
+    })),
   {
     loading: () => <div className="h-32 animate-pulse rounded-lg bg-muted/20" />,
   }
@@ -33,7 +35,7 @@ const NewsletterCTAVariant = dynamicImport(
 
 import { getHomepageFeaturedCategories } from '@/src/lib/config/category-config';
 import { logger } from '@/src/lib/logger';
-import { createAnonClient } from '@/src/lib/supabase/server-anon';
+import { cachedRPCWithDedupe } from '@/src/lib/supabase/cached-rpc';
 import type { GetHomepageCompleteReturn } from '@/src/types/database-overrides';
 
 export const metadata = generatePageMetadata('/');
@@ -87,26 +89,23 @@ export default async function HomePage({ searchParams }: HomePageProps) {
 
   const categoryIds = await getHomepageFeaturedCategories();
 
-  const supabase = createAnonClient();
-  const { data: homepageData, error: homepageError } = await supabase.rpc('get_homepage_complete', {
-    p_category_ids: [...categoryIds],
-  });
-
-  if (homepageError) {
-    logger.error('Homepage RPC error', homepageError, {
-      rpcFunction: 'get_homepage_complete',
-      phase: 'homepage-render',
-    });
-  }
+  const homepageData = await cachedRPCWithDedupe<GetHomepageCompleteReturn>(
+    'get_homepage_complete',
+    { p_category_ids: [...categoryIds] },
+    {
+      tags: ['homepage', 'content', 'trending'],
+      ttlConfigKey: 'cache.homepage.ttl_seconds',
+      keySuffix: categoryIds.join('-'),
+    }
+  );
 
   // Extract member_count and top_contributors from consolidated response
   // Type-safe RPC return using centralized type definition
-  const homepageResult = homepageData as GetHomepageCompleteReturn | null;
+  const homepageResult = homepageData;
 
-  const memberCount = homepageError || !homepageResult ? 0 : homepageResult.member_count || 0;
-  const featuredJobs = homepageError || !homepageResult ? [] : homepageResult.featured_jobs || [];
-  const topContributors =
-    homepageError || !homepageResult ? [] : homepageResult.top_contributors || [];
+  const memberCount = homepageResult ? homepageResult.member_count || 0 : 0;
+  const featuredJobs = homepageResult ? homepageResult.featured_jobs || [] : [];
+  const topContributors = homepageResult ? homepageResult.top_contributors || [] : [];
 
   return (
     <div className={'min-h-screen bg-background'}>

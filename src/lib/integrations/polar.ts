@@ -11,6 +11,8 @@
  * - POLAR_PRODUCT_PRICE_SUBSCRIPTION_FEATURED
  */
 
+import { logger } from '@/src/lib/logger';
+
 interface CreateCheckoutParams {
   productPriceId: string;
   jobId: string;
@@ -40,7 +42,7 @@ export async function createPolarCheckout(
   const polarEnvironment = process.env.POLAR_ENVIRONMENT || 'production';
 
   if (!polarAccessToken) {
-    console.error('POLAR_ACCESS_TOKEN not configured');
+    logger.error('Polar: POLAR_ACCESS_TOKEN not configured');
     return { error: 'Payment system not configured. Please contact support.' };
   }
 
@@ -69,7 +71,7 @@ export async function createPolarCheckout(
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('Polar checkout creation failed:', {
+      logger.error('Polar checkout creation failed', new Error(response.statusText), {
         status: response.status,
         error: errorText,
       });
@@ -78,7 +80,7 @@ export async function createPolarCheckout(
 
     const session = (await response.json()) as PolarCheckoutResponse;
 
-    console.log('Polar checkout session created:', {
+    logger.info('Polar checkout session created', {
       sessionId: session.id,
       jobId: params.jobId,
       userId: params.userId,
@@ -89,7 +91,7 @@ export async function createPolarCheckout(
       sessionId: session.id,
     };
   } catch (error) {
-    console.error('Polar checkout creation error:', error);
+    logger.error('Polar checkout creation error', error as Error);
     return { error: 'Failed to create checkout session. Please try again.' };
   }
 }
@@ -119,7 +121,7 @@ export function getPolarProductPriceId(plan: string, tier: string): string | nul
   const priceId = productPriceIds[key];
 
   if (!priceId) {
-    console.warn(`Polar product price ID not configured for: ${key}`);
+    logger.warn(`Polar product price ID not configured for: ${key}`);
     return null;
   }
 
@@ -144,7 +146,7 @@ export function validatePolarConfig(): { configured: boolean; missing?: string[]
   const missing = requiredVars.filter((varName) => !process.env[varName]);
 
   if (missing.length > 0) {
-    console.warn('Polar configuration incomplete. Missing:', missing);
+    logger.warn('Polar configuration incomplete', { missing: missing.join(', ') });
     return { configured: false, missing };
   }
 

@@ -3,12 +3,13 @@
 /**
  * Newsletter Subscriber Count Hook
  * Provides live subscriber count with localStorage caching and visibility-based polling
+ * Uses secure server action for data fetching
  */
 
 import { useEffect, useRef, useState } from 'react';
-import { cacheConfigs, pollingConfigs } from '@/src/lib/flags';
+import { getCacheConfig, getPollingConfig } from '@/src/lib/actions/feature-flags.actions';
+import { getNewsletterCount } from '@/src/lib/actions/newsletter.actions';
 import { logger } from '@/src/lib/logger';
-import { createClient } from '@/src/lib/supabase/client';
 
 export interface UseNewsletterCountReturn {
   count: number | null;
@@ -24,7 +25,7 @@ let CACHE_TTL_MS = 300000; // 5 minutes (300 seconds)
 let POLL_INTERVAL_MS = 300000; // 5 minutes
 
 // Load config from Statsig on module initialization
-Promise.all([cacheConfigs(), pollingConfigs()])
+Promise.all([getCacheConfig(), getPollingConfig()])
   .then(([cache, polling]: [Record<string, unknown>, Record<string, unknown>]) => {
     const cacheTtlSeconds = (cache['cache.newsletter_count_ttl_s'] as number) ?? 300;
     CACHE_TTL_MS = cacheTtlSeconds * 1000;
@@ -59,26 +60,22 @@ export function useNewsletterCount(): UseNewsletterCountReturn {
         }
       }
 
-      // Fetch from database
+      // Fetch from server action
       try {
-        const supabase = createClient();
-        // Type assertion: RPC function will be created by user running SQL
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const { data, error: rpcError } = await supabase.rpc(
-          'get_newsletter_subscriber_count' as any
-        );
+        const newCount = await getNewsletterCount();
 
-        if (rpcError) throw rpcError;
+        if (newCount !== null) {
+          setCount(newCount);
+          setIsLoading(false);
+          setError(null);
 
-        const newCount = data as number;
-        setCount(newCount);
-        setIsLoading(false);
-        setError(null);
-
-        // Update cache
-        if (typeof window !== 'undefined') {
-          localStorage.setItem(CACHE_KEY, newCount.toString());
-          localStorage.setItem(CACHE_TIMESTAMP_KEY, Date.now().toString());
+          // Update cache
+          if (typeof window !== 'undefined') {
+            localStorage.setItem(CACHE_KEY, newCount.toString());
+            localStorage.setItem(CACHE_TIMESTAMP_KEY, Date.now().toString());
+          }
+        } else {
+          throw new Error('Failed to fetch newsletter count');
         }
       } catch (err) {
         logger.error('Failed to fetch newsletter count', err as Error, {
@@ -90,10 +87,16 @@ export function useNewsletterCount(): UseNewsletterCountReturn {
     };
 
     // Initial fetch
-    fetchCount();
+    fetchCount().catch((err) => {
+      logger.error('Newsletter count initial fetch failed', err);
+    });
 
     // Start polling
-    intervalRef.current = setInterval(fetchCount, POLL_INTERVAL_MS);
+    intervalRef.current = setInterval(() => {
+      fetchCount().catch((err) => {
+        logger.error('Newsletter count polling failed', err);
+      });
+    }, POLL_INTERVAL_MS);
 
     // Visibility API: Pause polling when tab is hidden
     const handleVisibilityChange = () => {
@@ -104,9 +107,15 @@ export function useNewsletterCount(): UseNewsletterCountReturn {
         }
       } else {
         // Resume polling when tab becomes visible
-        fetchCount();
+        fetchCount().catch((err) => {
+          logger.error('Newsletter count visibility resume failed', err);
+        });
         if (!intervalRef.current) {
-          intervalRef.current = setInterval(fetchCount, POLL_INTERVAL_MS);
+          intervalRef.current = setInterval(() => {
+            fetchCount().catch((err) => {
+              logger.error('Newsletter count polling failed', err);
+            });
+          }, POLL_INTERVAL_MS);
         }
       }
     };

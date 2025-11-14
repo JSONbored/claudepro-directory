@@ -8,6 +8,7 @@ import { motion } from 'motion/react';
 import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { LinkedinShareButton, TwitterShareButton } from 'react-share';
+import { getTimeoutConfig } from '@/src/lib/actions/feature-flags.actions';
 import { APP_CONFIG } from '@/src/lib/constants';
 import { trackInteraction } from '@/src/lib/edge/client';
 import { Camera, Check, ChevronDown, Copy, Linkedin, Share2, Twitter } from '@/src/lib/icons';
@@ -189,8 +190,7 @@ export function ProductionCodeBlock({
       return;
     }
 
-    const { timeoutConfigs } = await import('@/src/lib/flags');
-    const config = await timeoutConfigs();
+    const config = await getTimeoutConfig();
     const resetDelay = (config['timeout.ui.clipboard_reset_delay_ms'] as number) || 2000;
     setTimeout(() => setIsCopied(false), resetDelay);
   };

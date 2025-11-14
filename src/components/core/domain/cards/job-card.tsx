@@ -1,8 +1,5 @@
-'use client';
-
 import Image from 'next/image';
 import Link from 'next/link';
-import { memo } from 'react';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { Button } from '@/src/components/primitives/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
@@ -11,7 +8,7 @@ import type { JobCardProps } from '@/src/lib/types/component.types';
 import { BADGE_COLORS, type JobType, UI_CLASSES } from '@/src/lib/ui-constants';
 import { formatRelativeDate } from '@/src/lib/utils/data.utils';
 
-export const JobCard = memo(({ job }: JobCardProps) => {
+export function JobCard({ job }: JobCardProps) {
   const isFeatured = job.tier === 'featured';
 
   return (
@@ -141,6 +138,4 @@ export const JobCard = memo(({ job }: JobCardProps) => {
       </CardContent>
     </Card>
   );
-});
-
-JobCard.displayName = 'JobCard';
+}

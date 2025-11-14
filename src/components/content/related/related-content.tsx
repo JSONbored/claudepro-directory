@@ -10,9 +10,9 @@ import { UnifiedCardGrid } from '@/src/components/core/domain/cards/card-grid';
 import { BaseCard } from '@/src/components/core/domain/cards/content-card-base';
 import type { CategoryId } from '@/src/lib/config/category-config';
 import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
+import { getRelatedContent } from '@/src/lib/data/related-content';
 import { Sparkles } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
-import { relatedContentService } from '@/src/lib/related-content/service';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { getContentItemUrl } from '@/src/lib/utils/content.utils';
 import type { Database } from '@/src/types/database.types';
@@ -97,7 +97,7 @@ export function RelatedContentClient({
   useEffect(() => {
     const fetchRelatedContent = async () => {
       try {
-        const response = await relatedContentService.getRelatedContent({
+        const response = await getRelatedContent({
           currentPath: pathname,
           currentCategory: getCategoryFromPath(pathname),
           currentTags,

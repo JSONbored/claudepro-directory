@@ -27,6 +27,17 @@ export interface ChangelogListClientProps {
 export function ChangelogListClient({ entries, categoryCounts }: ChangelogListClientProps) {
   const [activeCategory, setActiveCategory] = useState<'All' | ChangelogCategory>('All');
 
+  // Filter entries based on active category
+  const filteredEntries =
+    activeCategory === 'All'
+      ? entries
+      : entries.filter((entry) => {
+          if (!entry.changes || typeof entry.changes !== 'object') return false;
+          const changes = entry.changes as Record<string, unknown>;
+          const categoryChanges = changes[activeCategory];
+          return Array.isArray(categoryChanges) && categoryChanges.length > 0;
+        });
+
   return (
     <Tabs
       value={activeCategory}
@@ -40,7 +51,7 @@ export function ChangelogListClient({ entries, categoryCounts }: ChangelogListCl
       />
 
       <TabsContent value={activeCategory} className="mt-6">
-        {entries.length === 0 ? (
+        {filteredEntries.length === 0 ? (
           <output className="flex items-center justify-center py-12" aria-live="polite">
             <p className="text-lg text-muted-foreground">
               No changelog entries found for {activeCategory.toLowerCase()} category.
@@ -48,7 +59,7 @@ export function ChangelogListClient({ entries, categoryCounts }: ChangelogListCl
           </output>
         ) : (
           <div className="grid grid-cols-1 gap-6">
-            {entries.map((entry) => {
+            {filteredEntries.map((entry) => {
               const targetPath = getChangelogPath(entry.slug);
               const nonEmptyCategories = getNonEmptyCategories(entry.changes);
               const displayDate = getRelativeTime(entry.release_date);

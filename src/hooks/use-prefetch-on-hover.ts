@@ -21,20 +21,11 @@
  */
 
 import { useRouter } from 'next/navigation';
-import { useCallback, useRef } from 'react';
-import { timeoutConfigs } from '@/src/lib/flags';
+import { useCallback, useEffect, useRef } from 'react';
+import { getTimeoutConfig } from '@/src/lib/actions/feature-flags.actions';
 
-// Default value (will be overridden by Dynamic Config)
+// Prefetch delay (loaded from Statsig via server action)
 let DEFAULT_PREFETCH_DELAY = 100;
-
-// Load config from Statsig on module initialization
-timeoutConfigs()
-  .then((config: Record<string, unknown>) => {
-    DEFAULT_PREFETCH_DELAY = (config['timeout.ui.prefetch_delay_ms'] as number) ?? 300;
-  })
-  .catch(() => {
-    // Use default if config load fails
-  });
 
 export interface UsePrefetchOnHoverOptions {
   /**
@@ -102,6 +93,17 @@ export function usePrefetchOnHover(
   const router = useRouter();
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const prefetchedRef = useRef(false);
+
+  // Load prefetch delay from Statsig on mount
+  useEffect(() => {
+    getTimeoutConfig()
+      .then((config) => {
+        DEFAULT_PREFETCH_DELAY = (config['timeout.ui.prefetch_delay_ms'] as number) ?? 100;
+      })
+      .catch(() => {
+        // Use default if config load fails
+      });
+  }, []);
 
   const handleMouseEnter = useCallback(() => {
     // Skip if disabled or already prefetched

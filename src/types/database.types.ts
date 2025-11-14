@@ -523,7 +523,6 @@ export type Database = {
           logo: string | null
           name: string
           owner_id: string | null
-          search_vector: unknown
           size: string | null
           slug: string
           updated_at: string
@@ -540,7 +539,6 @@ export type Database = {
           logo?: string | null
           name: string
           owner_id?: string | null
-          search_vector?: unknown
           size?: string | null
           slug: string
           updated_at?: string
@@ -557,7 +555,6 @@ export type Database = {
           logo?: string | null
           name?: string
           owner_id?: string | null
-          search_vector?: unknown
           size?: string | null
           slug?: string
           updated_at?: string
@@ -592,7 +589,6 @@ export type Database = {
           download_url: string | null
           examples: Json | null
           features: string[] | null
-          fts_vector: unknown
           git_hash: string | null
           has_breaking_changes: boolean | null
           has_prerequisites: boolean | null
@@ -635,7 +631,6 @@ export type Database = {
           download_url?: string | null
           examples?: Json | null
           features?: string[] | null
-          fts_vector?: unknown
           git_hash?: string | null
           has_breaking_changes?: boolean | null
           has_prerequisites?: boolean | null
@@ -678,7 +673,6 @@ export type Database = {
           download_url?: string | null
           examples?: Json | null
           features?: string[] | null
-          fts_vector?: unknown
           git_hash?: string | null
           has_breaking_changes?: boolean | null
           has_prerequisites?: boolean | null
@@ -1370,7 +1364,6 @@ export type Database = {
           remote: boolean | null
           requirements: Json
           salary: string | null
-          search_vector: unknown
           slug: string
           status: Database["public"]["Enums"]["job_status"]
           tags: Json
@@ -1420,7 +1413,6 @@ export type Database = {
           remote?: boolean | null
           requirements?: Json
           salary?: string | null
-          search_vector?: unknown
           slug?: string
           status?: Database["public"]["Enums"]["job_status"]
           tags?: Json
@@ -1470,7 +1462,6 @@ export type Database = {
           remote?: boolean | null
           requirements?: Json
           salary?: string | null
-          search_vector?: unknown
           slug?: string
           status?: Database["public"]["Enums"]["job_status"]
           tags?: Json
@@ -2728,7 +2719,6 @@ export type Database = {
           name: string | null
           profile_public: boolean | null
           public: boolean | null
-          search_vector: unknown
           slug: string | null
           social_x_link: string | null
           status: string | null
@@ -2755,7 +2745,6 @@ export type Database = {
           name?: string | null
           profile_public?: boolean | null
           public?: boolean | null
-          search_vector?: unknown
           slug?: string | null
           social_x_link?: string | null
           status?: string | null
@@ -2782,7 +2771,6 @@ export type Database = {
           name?: string | null
           profile_public?: boolean | null
           public?: boolean | null
-          search_vector?: unknown
           slug?: string | null
           social_x_link?: string | null
           status?: string | null
@@ -3015,6 +3003,22 @@ export type Database = {
         }
         Relationships: []
       }
+      mv_unified_search: {
+        Row: {
+          category: string | null
+          created_at: string | null
+          description: string | null
+          engagement_score: number | null
+          entity_type: string | null
+          id: string | null
+          search_vector: unknown
+          slug: string | null
+          tags: string[] | null
+          title: string | null
+          view_count: number | null
+        }
+        Relationships: []
+      }
       mv_weekly_new_content: {
         Row: {
           category: string | null
@@ -3080,25 +3084,8 @@ export type Database = {
         Args: { p_category: string; p_slug: string }
         Returns: Json
       }
-      build_job_deleted_embed: {
-        Args: {
-          p_job_id: string
-          p_old_status: Database["public"]["Enums"]["job_status"]
-        }
-        Returns: Json
-      }
       build_job_discord_embed: { Args: { p_job_id: string }; Returns: Json }
-      build_job_expiration_embed: { Args: { p_job_id: string }; Returns: Json }
       build_job_posting_schema: { Args: { p_job_id: string }; Returns: Json }
-      build_job_status_change_embed: {
-        Args: {
-          p_job_id: string
-          p_new_status: Database["public"]["Enums"]["job_status"]
-          p_old_status: Database["public"]["Enums"]["job_status"]
-        }
-        Returns: Json
-      }
-      build_job_submission_embed: { Args: { p_job_id: string }; Returns: Json }
       build_learning_resource_schema: {
         Args: { p_category: string; p_slug: string }
         Returns: Json
@@ -3151,6 +3138,10 @@ export type Database = {
           p_tier: string
           p_user_id: string
         }
+        Returns: Json
+      }
+      delete_company: {
+        Args: { p_company_id: string; p_user_id: string }
         Returns: Json
       }
       delete_job: {
@@ -3420,6 +3411,10 @@ export type Database = {
         Args: { p_limit?: number; p_search_query?: string }
         Returns: Json
       }
+      get_companies_list: {
+        Args: { p_limit?: number; p_offset?: number }
+        Returns: Json
+      }
       get_company_job_stats: {
         Args: { p_company_slug?: string }
         Returns: {
@@ -3586,7 +3581,6 @@ export type Database = {
           remote: boolean | null
           requirements: Json
           salary: string | null
-          search_vector: unknown
           slug: string
           status: Database["public"]["Enums"]["job_status"]
           tags: Json
@@ -3678,7 +3672,6 @@ export type Database = {
           remote: boolean | null
           requirements: Json
           salary: string | null
-          search_vector: unknown
           slug: string
           status: Database["public"]["Enums"]["job_status"]
           tags: Json
@@ -4009,6 +4002,10 @@ export type Database = {
         Args: { p_event_data: Json; p_webhook_id: string }
         Returns: undefined
       }
+      immutable_array_to_string: {
+        Args: { arr: string[]; delimiter: string }
+        Returns: string
+      }
       import_redis_seed_data: {
         Args: { redis_data: Json }
         Returns: {
@@ -4102,6 +4099,7 @@ export type Database = {
       }
       refresh_mv_site_urls: { Args: never; Returns: undefined }
       refresh_profile_from_oauth: { Args: { user_id: string }; Returns: Json }
+      refresh_unified_search_mv: { Args: never; Returns: undefined }
       refresh_user_stats: {
         Args: never
         Returns: {
@@ -4178,7 +4176,6 @@ export type Database = {
           logo: string | null
           name: string
           owner_id: string | null
-          search_vector: unknown
           size: string | null
           slug: string
           updated_at: string
@@ -4264,7 +4261,6 @@ export type Database = {
           remote: boolean | null
           requirements: Json
           salary: string | null
-          search_vector: unknown
           slug: string
           status: Database["public"]["Enums"]["job_status"]
           tags: Json
@@ -4285,6 +4281,26 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      search_unified: {
+        Args: {
+          p_entities?: string[]
+          p_limit?: number
+          p_offset?: number
+          p_query: string
+        }
+        Returns: {
+          category: string
+          created_at: string
+          description: string
+          engagement_score: number
+          entity_type: string
+          id: string
+          relevance_score: number
+          slug: string
+          tags: string[]
+          title: string
+        }[]
+      }
       search_users: {
         Args: { result_limit?: number; search_query: string }
         Returns: {
@@ -4304,7 +4320,6 @@ export type Database = {
           name: string | null
           profile_public: boolean | null
           public: boolean | null
-          search_vector: unknown
           slug: string | null
           social_x_link: string | null
           status: string | null
@@ -4490,6 +4505,7 @@ export type Database = {
         | "inline"
         | "post_copy"
         | "resend_import"
+        | "oauth_signup"
       notification_priority: "high" | "medium" | "low"
       notification_type: "announcement" | "feedback"
       sort_direction: "asc" | "desc"
@@ -4742,6 +4758,7 @@ export const Constants = {
         "inline",
         "post_copy",
         "resend_import",
+        "oauth_signup",
       ],
       notification_priority: ["high", "medium", "low"],
       notification_type: ["announcement", "feedback"],

@@ -6,6 +6,7 @@
  */
 
 import { useEffect, useState } from 'react';
+import { getPollingConfig } from '@/src/lib/actions/feature-flags.actions';
 import type { CategoryId } from '@/src/lib/config/category-config';
 import { trackInteraction } from '@/src/lib/edge/client';
 import { logger } from '@/src/lib/logger';
@@ -88,11 +89,9 @@ function ViewVariant({ category, slug, delay }: Extract<UnifiedTrackerProps, { v
 
   useEffect(() => {
     if (delay === undefined) {
-      import('@/src/lib/flags').then(({ pollingConfigs }) =>
-        pollingConfigs().then((config) => {
-          setActualDelay((config['polling.realtime_ms'] as number) || 1000);
-        })
-      );
+      getPollingConfig().then((config) => {
+        setActualDelay((config['polling.realtime_ms'] as number) || 1000);
+      });
     }
   }, [delay]);
   useTrackingEffect(
