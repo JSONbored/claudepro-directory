@@ -116,7 +116,7 @@ export function TrendingContent({ trending, popular, recent }: TrendingContentPr
                     <div key={item.slug} className="relative">
                       {showRankBadge && index < 3 && (
                         <UnifiedBadge
-                          className="absolute -top-2 -right-2 z-10"
+                          className="-top-2 -right-2 absolute z-10"
                           variant="base"
                           style="default"
                           aria-label={`Rank ${index + 1}`}

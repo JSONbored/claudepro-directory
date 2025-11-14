@@ -64,19 +64,19 @@ export function NewsletterOptInTile({
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-3">
           <div className="flex flex-wrap items-center gap-3">
-            <span className="inline-flex items-center rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-white/90">
+            <span className="inline-flex items-center rounded-full bg-white/10 px-3 py-1 font-semibold text-white/90 text-xs">
               {badgeLabel}
             </span>
-            <span className="text-xs text-muted-foreground">Weekly drop of Claude upgrades</span>
+            <span className="text-muted-foreground text-xs">Weekly drop of Claude upgrades</span>
           </div>
           <div>
-            <p className="text-xl font-semibold text-foreground">{resolvedHeadline}</p>
-            <p className="text-sm text-muted-foreground">{resolvedDescription}</p>
+            <p className="font-semibold text-foreground text-xl">{resolvedHeadline}</p>
+            <p className="text-muted-foreground text-sm">{resolvedDescription}</p>
           </div>
         </div>
 
         {!!resolvedBenefits.length && (
-          <ul className="space-y-2 text-sm text-foreground/90">
+          <ul className="space-y-2 text-foreground/90 text-sm">
             {resolvedBenefits.map((benefit) => (
               <li key={benefit} className="flex items-center gap-2">
                 <span className="text-accent">•</span>
@@ -88,7 +88,7 @@ export function NewsletterOptInTile({
 
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <label
-            className="flex cursor-pointer items-center gap-3 text-sm font-medium text-foreground"
+            className="flex cursor-pointer items-center gap-3 font-medium text-foreground text-sm"
             onClick={(event) => event.stopPropagation()}
           >
             <Checkbox
@@ -98,7 +98,7 @@ export function NewsletterOptInTile({
             />
             Send me the weekly Claude upgrade drop
           </label>
-          <span className="text-xs text-muted-foreground">{resolvedSafetyCopy}</span>
+          <span className="text-muted-foreground text-xs">{resolvedSafetyCopy}</span>
         </div>
       </div>
       <div

@@ -36,7 +36,7 @@ export interface CachedRPCOptions {
  */
 export async function cachedRPC<T = unknown>(
   functionName: string,
-  params: Record<string, unknown> = {},
+  params: Record<string, unknown>,
   options: CachedRPCOptions
 ): Promise<T | null> {
   const { keySuffix, tags, ttlConfigKey, useAuthClient = false } = options;
