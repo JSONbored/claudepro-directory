@@ -86,7 +86,9 @@ function HomePageClientComponent({
           damping: (config['animation.spring.default.damping'] as number) ?? 17,
         });
       })
-      .catch(() => {});
+      .catch((error) => {
+        logger.error('HomePageClient: failed to load animation config', error);
+      });
   }, []);
 
   const fetchAllConfigs = useCallback(

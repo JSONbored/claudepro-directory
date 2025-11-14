@@ -68,7 +68,8 @@ export async function cachedRPC<T = unknown>(
     async () => {
       try {
         const supabase = useAuthClient ? await createClient() : createAnonClient();
-        const { data, error } = await supabase.rpc(functionName as any, params);
+        // Type assertion needed as Supabase's RPC types don't support dynamic function names
+        const { data, error } = await supabase.rpc(functionName as never, params as never);
 
         if (error) {
           logger.error(`RPC call failed: ${functionName}`, error, {

@@ -167,7 +167,9 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
           damping: (config['animation.spring.bouncy.damping'] as number) ?? 20,
         });
       })
-      .catch(() => {});
+      .catch((error) => {
+        logger.error('SubmitFormClient: failed to load animation config', error);
+      });
   }, []);
 
   /**

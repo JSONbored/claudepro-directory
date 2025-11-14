@@ -58,10 +58,18 @@ export function useConfetti() {
   }, []);
 
   // Preset functions for common actions
-  const celebrateBookmark = useCallback(() => void fireConfetti('success'), [fireConfetti]);
-  const celebrateSubmission = useCallback(() => void fireConfetti('celebration'), [fireConfetti]);
-  const celebrateMilestone = useCallback(() => void fireConfetti('milestone'), [fireConfetti]);
-  const celebrateSignup = useCallback(() => void fireConfetti('subtle'), [fireConfetti]);
+  const celebrateBookmark = useCallback(() => {
+    fireConfetti('success');
+  }, [fireConfetti]);
+  const celebrateSubmission = useCallback(() => {
+    fireConfetti('celebration');
+  }, [fireConfetti]);
+  const celebrateMilestone = useCallback(() => {
+    fireConfetti('milestone');
+  }, [fireConfetti]);
+  const celebrateSignup = useCallback(() => {
+    fireConfetti('subtle');
+  }, [fireConfetti]);
 
   return {
     fireConfetti,

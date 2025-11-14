@@ -14,6 +14,7 @@ import {
 } from '@/src/components/primitives/ui/tooltip';
 import { getAnimationConfig } from '@/src/lib/actions/feature-flags.actions';
 import { Star, TrendingUp, Zap } from '@/src/lib/icons';
+import { logger } from '@/src/lib/logger';
 import { SEMANTIC_COLORS } from '@/src/lib/semantic-colors';
 import { ANIMATION_CONSTANTS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
@@ -231,7 +232,9 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
           damping: (config['animation.spring.default.damping'] as number) ?? 17,
         });
       })
-      .catch(() => {});
+      .catch((error) => {
+        logger.error('UnifiedBadge: failed to load animation config', error);
+      });
   }, []);
   // Base badge variant
   if (props.variant === 'base') {

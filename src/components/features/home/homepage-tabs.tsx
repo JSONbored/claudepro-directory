@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/primi
 import { getAnimationConfig } from '@/src/lib/actions/feature-flags.actions';
 import type { UnifiedCategoryConfig } from '@/src/lib/config/category-config';
 import { ROUTES } from '@/src/lib/constants';
+import { logger } from '@/src/lib/logger';
 import type { DisplayableContent } from '@/src/lib/types/component.types';
 
 interface TabsSectionProps {
@@ -39,11 +40,21 @@ const TabsSectionComponent: FC<TabsSectionProps> = ({
   });
 
   useEffect(() => {
-    import('@/src/lib/config/category-config').then(({ getHomepageTabCategories }) =>
-      getHomepageTabCategories().then((categories) => {
+    async function loadCategories() {
+      try {
+        const { getHomepageTabCategories } = await import('@/src/lib/config/category-config');
+        const categories = await getHomepageTabCategories();
         setTabCategories(categories);
-      })
-    );
+      } catch (error) {
+        logger.error(
+          'Homepage Tabs: failed to load tab categories',
+          error instanceof Error ? error : new Error(String(error))
+        );
+      }
+    }
+    loadCategories().catch((err) => {
+      logger.error('Homepage Tabs: failed to initialize categories', err);
+    });
   }, []);
 
   useEffect(() => {
@@ -55,7 +66,9 @@ const TabsSectionComponent: FC<TabsSectionProps> = ({
           damping: (config['animation.spring.default.damping'] as number) ?? 17,
         });
       })
-      .catch(() => {});
+      .catch((error) => {
+        logger.error('Homepage Tabs: failed to load animation config', error);
+      });
   }, []);
 
   const contentTabs = useMemo(

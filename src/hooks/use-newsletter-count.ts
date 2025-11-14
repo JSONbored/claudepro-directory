@@ -87,10 +87,16 @@ export function useNewsletterCount(): UseNewsletterCountReturn {
     };
 
     // Initial fetch
-    fetchCount();
+    fetchCount().catch((err) => {
+      logger.error('Newsletter count initial fetch failed', err);
+    });
 
     // Start polling
-    intervalRef.current = setInterval(fetchCount, POLL_INTERVAL_MS);
+    intervalRef.current = setInterval(() => {
+      fetchCount().catch((err) => {
+        logger.error('Newsletter count polling failed', err);
+      });
+    }, POLL_INTERVAL_MS);
 
     // Visibility API: Pause polling when tab is hidden
     const handleVisibilityChange = () => {
@@ -101,9 +107,15 @@ export function useNewsletterCount(): UseNewsletterCountReturn {
         }
       } else {
         // Resume polling when tab becomes visible
-        fetchCount();
+        fetchCount().catch((err) => {
+          logger.error('Newsletter count visibility resume failed', err);
+        });
         if (!intervalRef.current) {
-          intervalRef.current = setInterval(fetchCount, POLL_INTERVAL_MS);
+          intervalRef.current = setInterval(() => {
+            fetchCount().catch((err) => {
+              logger.error('Newsletter count polling failed', err);
+            });
+          }, POLL_INTERVAL_MS);
         }
       }
     };

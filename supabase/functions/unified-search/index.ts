@@ -134,7 +134,7 @@ async function handleSearch(url: URL, startTime: number, req: Request): Promise<
 
   // Validate entities if provided
   const validEntities = ['content', 'company', 'job', 'user'];
-  if (entities && entities.some((e) => !validEntities.includes(e))) {
+  if (entities?.some((e) => !validEntities.includes(e))) {
     return badRequestResponse(
       `Invalid entities parameter. Must be one of: ${validEntities.join(', ')}`,
       getWithAuthCorsHeaders

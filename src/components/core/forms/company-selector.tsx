@@ -11,6 +11,7 @@ import { Input } from '@/src/components/primitives/ui/input';
 import { Label } from '@/src/components/primitives/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/src/components/primitives/ui/popover';
 import { getTimeoutConfig } from '@/src/lib/actions/feature-flags.actions';
+import { logger } from '@/src/lib/logger';
 import { createClient } from '@/src/lib/supabase/client';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import type { Database } from '@/src/types/database.types';
@@ -35,6 +36,11 @@ export function CompanySelector({ value, onChange, defaultCompanyName }: Company
   const [showCreateForm, setShowCreateForm] = useState(false);
 
   const supabase = createClient();
+
+  const normalizeError = useCallback(
+    (error: unknown): Error => (error instanceof Error ? error : new Error(String(error))),
+    []
+  );
 
   // Load selected company on mount
   useEffect(() => {
@@ -73,18 +79,32 @@ export function CompanySelector({ value, onChange, defaultCompanyName }: Company
   );
 
   useEffect(() => {
-    const loadDebounce = async () => {
-      const config = await getTimeoutConfig();
-      const debounceMs = (config['timeout.ui.form_debounce_ms'] as number) || 300;
-      const timer = setTimeout(() => searchCompanies(searchQuery), debounceMs);
-      return () => clearTimeout(timer);
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    let cancelled = false;
+
+    const scheduleSearch = async () => {
+      try {
+        const config = await getTimeoutConfig();
+        if (cancelled) return;
+        const debounceMs = (config['timeout.ui.form_debounce_ms'] as number) || 300;
+        timer = setTimeout(() => searchCompanies(searchQuery), debounceMs);
+      } catch (error) {
+        logger.error('CompanySelector: failed to load debounce config', normalizeError(error));
+        timer = setTimeout(() => searchCompanies(searchQuery), 300);
+      }
     };
 
-    const cleanup = loadDebounce();
+    scheduleSearch().catch((error) => {
+      logger.error('CompanySelector: unexpected error scheduling search', normalizeError(error));
+    });
+
     return () => {
-      cleanup.then((fn) => fn?.());
+      cancelled = true;
+      if (timer) {
+        clearTimeout(timer);
+      }
     };
-  }, [searchQuery, searchCompanies]);
+  }, [searchQuery, searchCompanies, normalizeError]);
 
   const handleSelect = (company: Company) => {
     setSelectedCompany(company);

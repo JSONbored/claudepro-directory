@@ -30,7 +30,7 @@ import { ChangelogListClient } from '@/src/components/features/changelog/changel
 
 const NewsletterCTAVariant = dynamic(
   () =>
-    import('@/src/components/features/growth/newsletter').then((mod) => ({
+    import('@/src/components/features/growth/newsletter/newsletter-cta-variants').then((mod) => ({
       default: mod.NewsletterCTAVariant,
     })),
   {

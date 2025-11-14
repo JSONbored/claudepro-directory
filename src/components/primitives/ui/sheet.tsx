@@ -19,6 +19,7 @@ import type * as React from 'react';
 import { useEffect, useState } from 'react';
 import { getAnimationConfig } from '@/src/lib/actions/feature-flags.actions';
 import { X } from '@/src/lib/icons';
+import { logger } from '@/src/lib/logger';
 import { POSITION_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
 
@@ -97,7 +98,9 @@ const SheetContent = ({
           damping: (config['animation.spring.smooth.damping'] as number) ?? 25,
         });
       })
-      .catch(() => {});
+      .catch((error) => {
+        logger.error('SheetContent: failed to load animation config', error);
+      });
   }, []);
 
   // Ensure side has a default value for type safety

@@ -25,7 +25,9 @@ const NumberTicker = dynamicImport(
 
 const NewsletterCTAVariant = dynamicImport(
   () =>
-    import('@/src/components/features/growth/newsletter').then((mod) => mod.NewsletterCTAVariant),
+    import('@/src/components/features/growth/newsletter/newsletter-cta-variants').then((mod) => ({
+      default: mod.NewsletterCTAVariant,
+    })),
   {
     loading: () => <div className="h-32 animate-pulse rounded-lg bg-muted/20" />,
   }

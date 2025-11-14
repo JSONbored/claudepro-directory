@@ -12,5 +12,7 @@ import { revalidateTag } from 'next/cache';
  * revalidateCacheTags(tags);
  */
 export function revalidateCacheTags(tags: string[]): void {
-  tags.forEach((tag) => revalidateTag(tag, 'default'));
+  for (const tag of tags) {
+    revalidateTag(tag, 'default');
+  }
 }

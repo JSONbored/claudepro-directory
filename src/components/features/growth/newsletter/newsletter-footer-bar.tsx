@@ -15,6 +15,7 @@ export interface NewsletterFooterBarProps {
   dismissible?: boolean;
   showAfterDelay?: number;
   respectInlineCTA?: boolean;
+  ctaVariant?: 'aggressive' | 'social_proof' | 'value_focused';
 }
 
 export function NewsletterFooterBar({
@@ -22,6 +23,7 @@ export function NewsletterFooterBar({
   dismissible = true,
   showAfterDelay,
   respectInlineCTA = true,
+  ctaVariant = 'value_focused',
 }: NewsletterFooterBarProps) {
   const pathname = usePathname();
   const [isVisible, setIsVisible] = useState(false);
@@ -106,9 +108,19 @@ export function NewsletterFooterBar({
             </div>
             <div>
               <p className="font-semibold text-base text-foreground">
-                {NEWSLETTER_CTA_CONFIG.headline}
+                {ctaVariant === 'aggressive'
+                  ? "⚡ Don't miss out!"
+                  : ctaVariant === 'social_proof'
+                    ? '✨ Join 12,000+ Claude builders'
+                    : NEWSLETTER_CTA_CONFIG.headline}
               </p>
-              <p className="text-muted-foreground text-sm">{NEWSLETTER_CTA_CONFIG.description}</p>
+              <p className="text-muted-foreground text-sm">
+                {ctaVariant === 'aggressive'
+                  ? 'Get weekly AI updates before everyone else'
+                  : ctaVariant === 'social_proof'
+                    ? 'The best Claude resources, curated weekly'
+                    : NEWSLETTER_CTA_CONFIG.description}
+              </p>
             </div>
           </div>
           <div className="flex flex-shrink-0 items-center gap-3">
@@ -136,7 +148,11 @@ export function NewsletterFooterBar({
                 aria-hidden="true"
               />
               <p className="font-medium text-foreground text-sm">
-                {NEWSLETTER_CTA_CONFIG.headline}
+                {ctaVariant === 'aggressive'
+                  ? "⚡ Don't miss out!"
+                  : ctaVariant === 'social_proof'
+                    ? '✨ Join 12k+ builders'
+                    : NEWSLETTER_CTA_CONFIG.headline}
               </p>
             </div>
             {dismissible && (

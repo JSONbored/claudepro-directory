@@ -13,6 +13,7 @@ import { Navigation } from '@/src/components/core/layout/navigation';
 import { useConfetti } from '@/src/hooks/use-confetti';
 import { checkConfettiEnabled } from '@/src/lib/actions/feature-flags.actions';
 import type { NavigationData } from '@/src/lib/data/navigation';
+import { logger } from '@/src/lib/logger';
 import { DIMENSIONS } from '@/src/lib/ui-constants';
 import { toasts } from '@/src/lib/utils/toast.utils';
 import type { Tables } from '@/src/types/database.types';
@@ -37,7 +38,7 @@ const NotificationSheet = dynamic(
 
 const NewsletterFooterBar = dynamic(
   () =>
-    import('@/src/components/features/growth/newsletter').then((mod) => ({
+    import('@/src/components/features/growth/newsletter/newsletter-footer-bar').then((mod) => ({
       default: mod.NewsletterFooterBar,
     })),
   {
@@ -54,6 +55,44 @@ const FloatingActionBar = dynamic(
     loading: () => null,
   }
 );
+
+const NEWSLETTER_OPT_IN_COOKIE = 'newsletter_opt_in';
+const NEWSLETTER_OPT_IN_SEEN_FLAG = 'newsletter_opt_in_seen';
+
+const buildStorageErrorContext = (error: unknown) => ({
+  error: error instanceof Error ? error.message : String(error),
+});
+
+type WindowWithCookieStore = Window &
+  typeof globalThis & {
+    cookieStore?: {
+      delete?: (name: string) => Promise<void>;
+    };
+  };
+
+async function clearNewsletterOptInCookie() {
+  if (typeof window === 'undefined') return;
+
+  const cookieStoreApi = (window as WindowWithCookieStore).cookieStore;
+  if (cookieStoreApi?.delete) {
+    await cookieStoreApi.delete(NEWSLETTER_OPT_IN_COOKIE);
+    return;
+  }
+
+  const response = await fetch('/api/newsletter-opt-in/clear', {
+    method: 'POST',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(
+      `Failed to clear ${NEWSLETTER_OPT_IN_COOKIE} cookie: ${response.status} ${response.statusText}`
+    );
+  }
+}
 
 interface LayoutContentProps {
   children: React.ReactNode;
@@ -95,14 +134,32 @@ export function LayoutContent({
   useEffect(() => {
     if (isAuthRoute) return;
 
+    let hasSeenToast = false;
+    try {
+      hasSeenToast = sessionStorage.getItem(NEWSLETTER_OPT_IN_SEEN_FLAG) === 'true';
+    } catch (error) {
+      logger.warn(
+        'LayoutContent: unable to read newsletter toast flag from sessionStorage',
+        buildStorageErrorContext(error)
+      );
+    }
+
+    if (hasSeenToast) return;
+
     const cookieMatch = document.cookie.match(/newsletter_opt_in=([^;]+)/);
     if (!cookieMatch) return;
 
     const value = cookieMatch[1];
     if (value !== 'success') return;
 
-    // Remove cookie immediately to avoid duplicate toasts
-    document.cookie = 'newsletter_opt_in=; Max-Age=0; Path=/';
+    try {
+      sessionStorage.setItem(NEWSLETTER_OPT_IN_SEEN_FLAG, 'true');
+    } catch (error) {
+      logger.warn(
+        'LayoutContent: unable to set newsletter toast flag',
+        buildStorageErrorContext(error)
+      );
+    }
 
     toasts.raw.success("You're in!", {
       description: "We'll send the next Claude drop on Monday.",
@@ -117,6 +174,10 @@ export function LayoutContent({
       .catch(() => {
         // Silent fail - confetti is a nice-to-have
       });
+
+    clearNewsletterOptInCookie().catch((error) => {
+      logger.error('LayoutContent: failed to clear newsletter opt-in cookie', error);
+    });
   }, [fireConfetti, isAuthRoute]);
 
   // Auth routes: minimal wrapper with no height constraints for true fullscreen experience
@@ -149,7 +210,7 @@ export function LayoutContent({
         {/* Feature flag: Floating Action Bar (can be toggled on/off via Statsig) */}
         {useFloatingActionBar && <FloatingActionBar fabFlags={fabFlags} />}
         <NotificationSheet />
-        <NewsletterFooterBar source="footer" showAfterDelay={delayMs} />
+        <NewsletterFooterBar source="footer" showAfterDelay={delayMs} ctaVariant={ctaVariant} />
       </div>
     </>
   );

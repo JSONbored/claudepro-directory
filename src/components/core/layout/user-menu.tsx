@@ -37,6 +37,7 @@ import {
 } from '@/src/components/primitives/ui/dropdown-menu';
 import { getAnimationConfig } from '@/src/lib/actions/feature-flags.actions';
 import { Activity, BookOpen, LogOut, Settings, User as UserIcon } from '@/src/lib/icons';
+import { logger } from '@/src/lib/logger';
 import { createClient } from '@/src/lib/supabase/client';
 import { DIMENSIONS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { toasts } from '@/src/lib/utils/toast.utils';
@@ -97,7 +98,9 @@ export function UserMenu({ className }: UserMenuProps) {
           damping: (config['animation.spring.default.damping'] as number) ?? 17,
         });
       })
-      .catch(() => {});
+      .catch((error) => {
+        logger.error('UserMenu: failed to load animation config', error);
+      });
   }, []);
 
   const handleSignOut = async () => {

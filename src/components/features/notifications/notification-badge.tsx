@@ -17,6 +17,7 @@
 import { AnimatePresence, motion } from 'motion/react';
 import { useEffect, useState } from 'react';
 import { getAnimationConfig } from '@/src/lib/actions/feature-flags.actions';
+import { logger } from '@/src/lib/logger';
 import { type NotificationStore, useNotificationStore } from '@/src/lib/stores/notification-store';
 import { POSITION_PATTERNS } from '@/src/lib/ui-constants';
 
@@ -43,7 +44,9 @@ export function NotificationBadge({ className = '' }: NotificationBadgeProps) {
           damping: (config['animation.spring.bouncy.damping'] as number) ?? 20,
         });
       })
-      .catch(() => {});
+      .catch((error) => {
+        logger.error('NotificationBadge: failed to load animation config', error);
+      });
   }, []);
 
   if (unreadCount === 0) return null;

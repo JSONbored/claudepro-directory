@@ -2,6 +2,7 @@
 
 import type { CheckedState } from '@radix-ui/react-checkbox';
 import { motion } from 'motion/react';
+import { useId } from 'react';
 import { Checkbox } from '@/src/components/primitives/ui/checkbox';
 import { cn } from '@/src/lib/utils';
 
@@ -37,6 +38,8 @@ export function NewsletterOptInTile({
       : ['Curated Claude workflows & MCP servers', 'Power tips from top Claude builders'];
   const resolvedSafetyCopy = safetyCopy ?? 'No spam. Unsubscribe anytime.';
   const resolvedBadgePrefix = badgePrefix ?? '✨ Trusted by';
+
+  const checkboxId = useId();
 
   const badgeLabel = isLoadingCount
     ? '✨ Loading Claude builders…'
@@ -88,10 +91,14 @@ export function NewsletterOptInTile({
 
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <label
+            htmlFor={checkboxId}
             className="flex cursor-pointer items-center gap-3 font-medium text-foreground text-sm"
             onClick={(event) => event.stopPropagation()}
+            onKeyDown={(event) => event.stopPropagation()}
+            onKeyUp={(event) => event.stopPropagation()}
           >
             <Checkbox
+              id={checkboxId}
               checked={checked}
               onCheckedChange={handleCheckboxChange}
               aria-label="Opt into weekly Claude newsletter"

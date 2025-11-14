@@ -8,7 +8,7 @@ import { TabbedDetailLayout } from '@/src/components/content/detail-tabs/tabbed-
 import { JSONSectionRenderer } from '@/src/components/content/json-to-sections';
 import UnifiedSection from '@/src/components/content/sections/unified-section';
 import { ReviewListSection } from '@/src/components/core/domain/reviews/review-list-section';
-import { NewsletterCTAVariant } from '@/src/components/features/growth/newsletter';
+import { NewsletterCTAVariant } from '@/src/components/features/growth/newsletter/newsletter-cta-variants';
 import { RecentlyViewedSidebar } from '@/src/components/features/navigation/recently-viewed-sidebar';
 import {
   type CategoryId,
