@@ -5,7 +5,7 @@
 
 import React from 'npm:react@18.3.1';
 import { Button, Hr, Section, Text } from 'npm:@react-email/components@0.0.22';
-import { addUTMToURL } from '../utils/email/email-utm.ts';
+import { buildEmailCtaUrl } from '../utils/email/cta.ts';
 import { EMAIL_UTM_TEMPLATES } from '../utils/email/utm-templates.ts';
 import { BaseLayout, renderEmailTemplate } from '../utils/email/base-template.tsx';
 import {
@@ -89,14 +89,11 @@ export function JobApproved({
       </Section>
 
       <Section style={ctaSection}>
-        {paymentUrl && (
-          <Button
-            href={addUTMToURL(paymentUrl, utm)}
-            style={primaryButtonStyle}
-          >
-            Complete Payment ({amountLabel})
-          </Button>
-        )}
+          {paymentUrl && (
+            <Button href={buildEmailCtaUrl(paymentUrl, utm)} style={primaryButtonStyle}>
+              Complete Payment ({amountLabel})
+            </Button>
+          )}
       </Section>
     </BaseLayout>
   );

@@ -5,7 +5,7 @@
 
 import React from 'npm:react@18.3.1';
 import { Button, Hr, Section, Text } from 'npm:@react-email/components@0.0.22';
-import { addUTMToURL } from '../utils/email/email-utm.ts';
+import { buildEmailCtaUrl } from '../utils/email/cta.ts';
 import { EMAIL_UTM_TEMPLATES } from '../utils/email/utm-templates.ts';
 import { BaseLayout, renderEmailTemplate } from '../utils/email/base-template.tsx';
 import {
@@ -123,7 +123,7 @@ export function OnboardingCommunity({ email }: OnboardingCommunityProps) {
         cta: step.cta
           ? {
               ...step.cta,
-              href: addUTMToURL(`${baseUrl}/submit`, { ...utm, content: 'submit_cta' }),
+              href: buildEmailCtaUrl(`${baseUrl}/submit`, utm, { content: 'submit_cta' }),
             }
           : undefined,
       }))} />
@@ -144,7 +144,7 @@ export function OnboardingCommunity({ email }: OnboardingCommunityProps) {
 
       <Section style={contentSection}>
         <Button
-          href={addUTMToURL(`${baseUrl}/community`, { ...utm, content: 'community_cta' })}
+          href={buildEmailCtaUrl(`${baseUrl}/community`, utm, { content: 'community_cta' })}
           style={secondaryButtonStyle}
         >
           See All Community Contributions
@@ -161,8 +161,7 @@ export function OnboardingCommunity({ email }: OnboardingCommunityProps) {
 
         <div style={connectLinksStyle}>
           <Button
-            href={addUTMToURL('https://github.com/yourusername/claudepro-directory', {
-              ...utm,
+            href={buildEmailCtaUrl('https://github.com/yourusername/claudepro-directory', utm, {
               content: 'github_link',
             })}
             style={linkButtonStyle}
@@ -170,8 +169,7 @@ export function OnboardingCommunity({ email }: OnboardingCommunityProps) {
             GitHub
           </Button>
           <Button
-            href={addUTMToURL('https://twitter.com/claudeprodirectory', {
-              ...utm,
+            href={buildEmailCtaUrl('https://twitter.com/claudeprodirectory', utm, {
               content: 'twitter_link',
             })}
             style={linkButtonStyle}

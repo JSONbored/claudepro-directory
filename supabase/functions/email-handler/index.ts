@@ -3,25 +3,33 @@
  */
 
 import { Webhook } from 'https://esm.sh/standardwebhooks@1.0.0';
-import { renderAsync } from 'npm:@react-email/components@0.0.22';
-import React from 'npm:react@18.3.1';
+import type { FC } from 'npm:react@18.3.1';
 import { Resend } from 'npm:resend@4.0.0';
 import { AUTH_HOOK_ENV, RESEND_ENV, validateEnvironment } from '../_shared/email-config.ts';
-import { CollectionShared } from '../_shared/templates/collection-shared.tsx';
-import { JobApproved } from '../_shared/templates/job-approved.tsx';
-import { JobExpired } from '../_shared/templates/job-expired.tsx';
-import { JobExpiring } from '../_shared/templates/job-expiring.tsx';
-import { JobPaymentConfirmed } from '../_shared/templates/job-payment-confirmed.tsx';
-import { JobPosted } from '../_shared/templates/job-posted.tsx';
-import { JobRejected } from '../_shared/templates/job-rejected.tsx';
-import { JobSubmitted } from '../_shared/templates/job-submitted.tsx';
+import {
+  CollectionShared,
+  renderCollectionSharedEmail,
+} from '../_shared/templates/collection-shared.tsx';
+import { JobApproved, renderJobApprovedEmail } from '../_shared/templates/job-approved.tsx';
+import { JobExpired, renderJobExpiredEmail } from '../_shared/templates/job-expired.tsx';
+import { JobExpiring, renderJobExpiringEmail } from '../_shared/templates/job-expiring.tsx';
+import {
+  JobPaymentConfirmed,
+  renderJobPaymentConfirmedEmail,
+} from '../_shared/templates/job-payment-confirmed.tsx';
+import { JobPosted, renderJobPostedEmail } from '../_shared/templates/job-posted.tsx';
+import { JobRejected, renderJobRejectedEmail } from '../_shared/templates/job-rejected.tsx';
+import { JobSubmitted, renderJobSubmittedEmail } from '../_shared/templates/job-submitted.tsx';
 // React Email Templates
-import { NewsletterWelcome } from '../_shared/templates/newsletter-welcome.tsx';
+import {
+  NewsletterWelcome,
+  renderNewsletterWelcomeEmail,
+} from '../_shared/templates/newsletter-welcome.tsx';
 import { OnboardingCommunity } from '../_shared/templates/onboarding-community.tsx';
 import { OnboardingGettingStarted } from '../_shared/templates/onboarding-getting-started.tsx';
 import { OnboardingPowerTips } from '../_shared/templates/onboarding-power-tips.tsx';
 import { OnboardingStayEngaged } from '../_shared/templates/onboarding-stay-engaged.tsx';
-import { WeeklyDigest } from '../_shared/templates/weekly-digest.tsx';
+import { renderWeeklyDigestEmail, WeeklyDigest } from '../_shared/templates/weekly-digest.tsx';
 import {
   badRequestResponse,
   errorResponse,
@@ -266,9 +274,7 @@ async function handleSubscribe(req: Request): Promise<Response> {
     }
 
     // Step 3: Send welcome email
-    const html = await renderAsync(
-      React.createElement(NewsletterWelcome, { email: normalizedEmail })
-    );
+    const html = await renderNewsletterWelcomeEmail({ email: normalizedEmail });
 
     const { data: emailData, error: emailError } = await resend.emails.send({
       from: 'Claude Pro Directory <hello@mail.claudepro.directory>',
@@ -317,7 +323,7 @@ async function handleWelcome(req: Request): Promise<Response> {
     const payload = await req.json();
     const { email, subscription_id } = payload;
 
-    const html = await renderAsync(React.createElement(NewsletterWelcome, { email }));
+    const html = await renderNewsletterWelcomeEmail({ email });
 
     const { data, error } = await resend.emails.send({
       from: 'Claude Pro Directory <hello@mail.claudepro.directory>',
@@ -349,9 +355,7 @@ async function handleWelcome(req: Request): Promise<Response> {
     return badRequestResponse('Invalid webhook signature');
   }
 
-  const html = await renderAsync(
-    React.createElement(NewsletterWelcome, { email: verified.user.email })
-  );
+  const html = await renderNewsletterWelcomeEmail({ email: verified.user.email });
 
   const { data, error } = await resend.emails.send({
     from: 'Claude Pro Directory <hello@mail.claudepro.directory>',
@@ -375,7 +379,7 @@ async function handleTransactional(req: Request): Promise<Response> {
     return badRequestResponse('Missing required fields: type, email');
   }
 
-  let template: React.ReactElement | null = null;
+  let html: string | null = null;
   let subject = '';
 
   // Route to appropriate template based on type
@@ -384,7 +388,7 @@ async function handleTransactional(req: Request): Promise<Response> {
       if (!(emailData?.jobTitle && emailData?.company && emailData?.jobSlug)) {
         return badRequestResponse('Missing required job data');
       }
-      template = React.createElement(JobPosted, {
+      html = await renderJobPostedEmail({
         jobTitle: emailData.jobTitle,
         company: emailData.company,
         userEmail: email,
@@ -405,7 +409,7 @@ async function handleTransactional(req: Request): Promise<Response> {
       ) {
         return badRequestResponse('Missing required collection data');
       }
-      template = React.createElement(CollectionShared, {
+      html = await renderCollectionSharedEmail({
         collectionName: emailData.collectionName,
         collectionDescription: emailData.collectionDescription || undefined,
         senderName: emailData.senderName,
@@ -422,7 +426,9 @@ async function handleTransactional(req: Request): Promise<Response> {
   }
 
   // Render and send email
-  const html = await renderAsync(template);
+  if (!html) {
+    return badRequestResponse('Unsupported transactional template');
+  }
 
   // Determine from address based on type
   const fromEmail =
@@ -546,7 +552,7 @@ async function handleSequence(): Promise<Response> {
     5: 'Stay Engaged with ClaudePro',
   };
 
-  const STEP_TEMPLATES: Record<number, React.FC<{ email: string }>> = {
+  const STEP_TEMPLATES: Record<number, FC<{ email: string }>> = {
     2: OnboardingGettingStarted,
     3: OnboardingPowerTips,
     4: OnboardingCommunity,
@@ -556,7 +562,7 @@ async function handleSequence(): Promise<Response> {
   for (const { id, email, step } of dueEmails) {
     try {
       const Template = STEP_TEMPLATES[step];
-      const html = await renderAsync(React.createElement(Template, { email }));
+      const html = await renderEmailTemplate(Template, { email });
 
       const result = await resend.emails.send({
         from: 'Claude Pro Directory <noreply@claudepro.directory>',
@@ -630,7 +636,7 @@ async function sendBatchDigest(subscribers: string[], digestData: WeeklyDigestDa
   let success = 0;
   let failed = 0;
 
-  const html = await renderAsync(React.createElement(WeeklyDigest, digestData));
+  const html = await renderWeeklyDigestEmail(digestData);
 
   // Use Resend batch API (up to 100 recipients) instead of sequential sending
   const batchSize = 100;
@@ -674,9 +680,7 @@ async function handleJobSubmitted(req: Request): Promise<Response> {
   const payload = await req.json();
   const { jobTitle, company, userEmail, jobId } = payload;
 
-  const html = await renderAsync(
-    React.createElement(JobSubmitted, { jobTitle, company, userEmail, jobId })
-  );
+  const html = await renderJobSubmittedEmail({ jobTitle, company, userEmail, jobId });
 
   const { data, error } = await resend.emails.send({
     from: 'Claude Pro Directory <jobs@mail.claudepro.directory>',
@@ -695,17 +699,15 @@ async function handleJobApproved(req: Request): Promise<Response> {
   const payload = await req.json();
   const { jobTitle, company, userEmail, jobId, plan, paymentAmount, paymentUrl } = payload;
 
-  const html = await renderAsync(
-    React.createElement(JobApproved, {
-      jobTitle,
-      company,
-      userEmail,
-      jobId,
-      plan,
-      paymentAmount,
-      paymentUrl,
-    })
-  );
+  const html = await renderJobApprovedEmail({
+    jobTitle,
+    company,
+    userEmail,
+    jobId,
+    plan,
+    paymentAmount,
+    paymentUrl,
+  });
 
   const { data, error } = await resend.emails.send({
     from: 'Claude Pro Directory <jobs@mail.claudepro.directory>',
@@ -724,9 +726,13 @@ async function handleJobRejected(req: Request): Promise<Response> {
   const payload = await req.json();
   const { jobTitle, company, userEmail, jobId, rejectionReason } = payload;
 
-  const html = await renderAsync(
-    React.createElement(JobRejected, { jobTitle, company, userEmail, jobId, rejectionReason })
-  );
+  const html = await renderJobRejectedEmail({
+    jobTitle,
+    company,
+    userEmail,
+    jobId,
+    rejectionReason,
+  });
 
   const { data, error } = await resend.emails.send({
     from: 'Claude Pro Directory <jobs@mail.claudepro.directory>',
@@ -745,17 +751,15 @@ async function handleJobExpiring(req: Request): Promise<Response> {
   const payload = await req.json();
   const { jobTitle, company, userEmail, jobId, expiresAt, daysRemaining, renewalUrl } = payload;
 
-  const html = await renderAsync(
-    React.createElement(JobExpiring, {
-      jobTitle,
-      company,
-      userEmail,
-      jobId,
-      expiresAt,
-      daysRemaining,
-      renewalUrl,
-    })
-  );
+  const html = await renderJobExpiringEmail({
+    jobTitle,
+    company,
+    userEmail,
+    jobId,
+    expiresAt,
+    daysRemaining,
+    renewalUrl,
+  });
 
   const { data, error } = await resend.emails.send({
     from: 'Claude Pro Directory <jobs@mail.claudepro.directory>',
@@ -775,18 +779,16 @@ async function handleJobExpired(req: Request): Promise<Response> {
   const { jobTitle, company, userEmail, jobId, expiredAt, viewCount, clickCount, repostUrl } =
     payload;
 
-  const html = await renderAsync(
-    React.createElement(JobExpired, {
-      jobTitle,
-      company,
-      userEmail,
-      jobId,
-      expiredAt,
-      viewCount,
-      clickCount,
-      repostUrl,
-    })
-  );
+  const html = await renderJobExpiredEmail({
+    jobTitle,
+    company,
+    userEmail,
+    jobId,
+    expiredAt,
+    viewCount,
+    clickCount,
+    repostUrl,
+  });
 
   const { data, error } = await resend.emails.send({
     from: 'Claude Pro Directory <jobs@mail.claudepro.directory>',
@@ -815,19 +817,17 @@ async function handleJobPaymentConfirmed(req: Request): Promise<Response> {
     expiresAt,
   } = payload;
 
-  const html = await renderAsync(
-    React.createElement(JobPaymentConfirmed, {
-      jobTitle,
-      company,
-      userEmail,
-      jobId,
-      jobSlug,
-      plan,
-      paymentAmount,
-      paymentDate,
-      expiresAt,
-    })
-  );
+  const html = await renderJobPaymentConfirmedEmail({
+    jobTitle,
+    company,
+    userEmail,
+    jobId,
+    jobSlug,
+    plan,
+    paymentAmount,
+    paymentDate,
+    expiresAt,
+  });
 
   const { data, error } = await resend.emails.send({
     from: 'Claude Pro Directory <jobs@mail.claudepro.directory>',

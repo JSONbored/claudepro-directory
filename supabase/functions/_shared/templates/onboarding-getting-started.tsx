@@ -8,7 +8,7 @@
 
 import React from 'npm:react@18.3.1';
 import { Button, Hr, Section, Text } from 'npm:@react-email/components@0.0.22';
-import { addUTMToURL } from '../utils/email/email-utm.ts';
+import { buildEmailCtaUrl } from '../utils/email/cta.ts';
 import { EMAIL_UTM_TEMPLATES } from '../utils/email/utm-templates.ts';
 import { BaseLayout, renderEmailTemplate } from '../utils/email/base-template.tsx';
 import {
@@ -47,7 +47,7 @@ export function OnboardingGettingStarted({ email }: OnboardingGettingStartedProp
         'Start with our most popular AI agents for code review, API building, and documentation.',
       cta: {
         label: 'View Top Agents',
-        href: addUTMToURL(`${baseUrl}/agents`, { ...utm, content: 'step_1_agents' }),
+        href: buildEmailCtaUrl(`${baseUrl}/agents`, utm, { content: 'step_1_agents' }),
       },
     },
     {
@@ -57,7 +57,7 @@ export function OnboardingGettingStarted({ email }: OnboardingGettingStartedProp
         "Extend Claude's capabilities with Model Context Protocol servers for real-time data and workflows.",
       cta: {
         label: 'Explore MCP Servers',
-        href: addUTMToURL(`${baseUrl}/mcp`, { ...utm, content: 'step_2_mcp' }),
+        href: buildEmailCtaUrl(`${baseUrl}/mcp`, utm, { content: 'step_2_mcp' }),
       },
     },
     {
@@ -67,7 +67,7 @@ export function OnboardingGettingStarted({ email }: OnboardingGettingStartedProp
         "Define coding standards, response formats, and project guidelines so Claude understands your workflow.",
       cta: {
         label: 'Browse Rules',
-        href: addUTMToURL(`${baseUrl}/rules`, { ...utm, content: 'step_3_rules' }),
+        href: buildEmailCtaUrl(`${baseUrl}/rules`, utm, { content: 'step_3_rules' }),
       },
     },
   ] as const;
@@ -117,7 +117,7 @@ export function OnboardingGettingStarted({ email }: OnboardingGettingStartedProp
 
       <Section style={contentSection}>
         <Button
-          href={addUTMToURL(`${baseUrl}/trending`, { ...utm, content: 'trending_cta' })}
+          href={buildEmailCtaUrl(`${baseUrl}/trending`, utm, { content: 'trending_cta' })}
           style={primaryButtonStyle}
         >
           See All Trending
@@ -132,7 +132,7 @@ export function OnboardingGettingStarted({ email }: OnboardingGettingStartedProp
           Check out our tutorials and guides for step-by-step instructions on using Claude configurations effectively.
         </Text>
         <Button
-          href={addUTMToURL(`${baseUrl}/guides/tutorials`, { ...utm, content: 'tutorials_cta' })}
+          href={buildEmailCtaUrl(`${baseUrl}/guides/tutorials`, utm, { content: 'tutorials_cta' })}
           style={secondaryButtonStyle}
         >
           View Tutorials

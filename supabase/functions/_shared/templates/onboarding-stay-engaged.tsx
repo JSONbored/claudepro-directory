@@ -5,7 +5,7 @@
 
 import React from 'npm:react@18.3.1';
 import { Button, Hr, Section, Text } from 'npm:@react-email/components@0.0.22';
-import { addUTMToURL } from '../utils/email/email-utm.ts';
+import { buildEmailCtaUrl } from '../utils/email/cta.ts';
 import { EMAIL_UTM_TEMPLATES } from '../utils/email/utm-templates.ts';
 import { BaseLayout, renderEmailTemplate } from '../utils/email/base-template.tsx';
 import {
@@ -93,10 +93,10 @@ export function OnboardingStayEngaged({ email }: OnboardingStayEngagedProps) {
             description: item.description,
           }))}
         />
-        <Button
-          href={addUTMToURL(`${baseUrl}/feedback`, { ...utm, content: 'feedback_cta' })}
-          style={primaryButtonStyle}
-        >
+          <Button
+            href={buildEmailCtaUrl(`${baseUrl}/feedback`, utm, { content: 'feedback_cta' })}
+            style={primaryButtonStyle}
+          >
           Share Your Feedback
         </Button>
       </Section>
@@ -110,14 +110,14 @@ export function OnboardingStayEngaged({ email }: OnboardingStayEngagedProps) {
         </Text>
 
         <Button
-          href={addUTMToURL(baseUrl, { ...utm, content: 'browse_cta' })}
+          href={buildEmailCtaUrl(baseUrl, utm, { content: 'browse_cta' })}
           style={secondaryButtonStyle}
         >
           Browse Directory
         </Button>
 
         <Button
-          href={addUTMToURL(`${baseUrl}/trending`, { ...utm, content: 'trending_cta' })}
+          href={buildEmailCtaUrl(`${baseUrl}/trending`, utm, { content: 'trending_cta' })}
           style={secondaryButtonStyle}
         >
           View Trending
