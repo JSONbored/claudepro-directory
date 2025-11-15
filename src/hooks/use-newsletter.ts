@@ -109,9 +109,9 @@ export function useNewsletter(options: UseNewsletterOptions): UseNewsletterRetur
   useEffect(() => {
     getNewsletterConfig()
       .then((config) => {
-        MAX_RETRIES = config['newsletter.max_retries'] ?? 3;
-        INITIAL_RETRY_DELAY_MS = config['newsletter.initial_retry_delay_ms'] ?? 1000;
-        RETRY_BACKOFF_MULTIPLIER = config['newsletter.retry_backoff_multiplier'] ?? 2;
+        MAX_RETRIES = config['newsletter.max_retries'];
+        INITIAL_RETRY_DELAY_MS = config['newsletter.initial_retry_delay_ms'];
+        RETRY_BACKOFF_MULTIPLIER = config['newsletter.retry_backoff_multiplier'];
       })
       .catch((error) => {
         logClientWarning('useNewsletter: failed to load retry config', error, { source });

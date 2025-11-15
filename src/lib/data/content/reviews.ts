@@ -38,8 +38,8 @@ export async function getReviewsWithStatsData(
         contentType,
         contentSlug,
         hasSort: Boolean(sortBy),
-        limit,
-        offset,
+        ...(typeof limit === 'number' ? { limit } : {}),
+        ...(typeof offset === 'number' ? { offset } : {}),
         hasUser: Boolean(userId),
       },
     }

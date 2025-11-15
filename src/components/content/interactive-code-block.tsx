@@ -171,6 +171,8 @@ export function ProductionCodeBlock({
     setNeedsCollapse(lines > maxLines);
   }, [code, maxLines]);
 
+  const CLIPBOARD_RESET_DEFAULT_MS = 2000;
+
   const handleCopy = async () => {
     setIsCopied(true);
 
@@ -195,9 +197,13 @@ export function ProductionCodeBlock({
       return;
     }
 
-    const config = await getTimeoutConfig();
-    const resetDelay = (config['timeout.ui.clipboard_reset_delay_ms'] as number) || 2000;
-    setTimeout(() => setIsCopied(false), resetDelay);
+    try {
+      const config = await getTimeoutConfig();
+      setTimeout(() => setIsCopied(false), config['timeout.ui.clipboard_reset_delay_ms']);
+    } catch (error) {
+      logger.error('ProductionCodeBlock: failed to load timeout config', normalizeError(error));
+      setTimeout(() => setIsCopied(false), CLIPBOARD_RESET_DEFAULT_MS);
+    }
   };
 
   /**

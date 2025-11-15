@@ -39,9 +39,13 @@ export function ThemeToggle() {
 
   // Load transition duration from config
   useEffect(() => {
-    getTimeoutConfig().then((config) => {
-      setTransitionMs((config['timeout.ui.transition_ms'] as number) ?? 200);
-    });
+    getTimeoutConfig()
+      .then((config) => {
+        setTransitionMs(config['timeout.ui.transition_ms']);
+      })
+      .catch((error) => {
+        logClientWarning('ThemeToggle: failed to load transition config', error);
+      });
   }, []);
 
   useEffect(() => {

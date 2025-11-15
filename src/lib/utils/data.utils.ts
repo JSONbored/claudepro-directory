@@ -25,6 +25,26 @@ export type ParseOptions = z.infer<typeof parseOptionsSchema>;
 
 const MAX_SAFE_SIZE = 10_000_000;
 
+function isStringArray(value: unknown): value is string[] {
+  return Array.isArray(value) && value.every((item) => typeof item === 'string');
+}
+
+function isFiniteNumber(value: unknown): value is number {
+  return typeof value === 'number' && Number.isFinite(value);
+}
+
+export function ensureStringArray(value: unknown, fallback: readonly string[] = []): string[] {
+  return isStringArray(value) ? [...value] : [...fallback];
+}
+
+export function ensureString(value: unknown, fallback = ''): string {
+  return typeof value === 'string' && value.trim().length > 0 ? value : fallback;
+}
+
+export function ensureNumber(value: unknown, fallback = 0): number {
+  return isFiniteNumber(value) ? value : fallback;
+}
+
 function parseWithDevalue<T = unknown>(str: string): T {
   try {
     return devalueParse(str) as T;

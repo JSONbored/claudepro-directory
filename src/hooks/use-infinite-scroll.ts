@@ -74,8 +74,8 @@ export function useInfiniteScroll({
         const config = await getAppSettings();
 
         setConfigDefaults({
-          batchSize: (config['hooks.infinite_scroll.batch_size'] as number) ?? 30,
-          threshold: (config['hooks.infinite_scroll.threshold'] as number) ?? 0.1,
+          batchSize: config['hooks.infinite_scroll.batch_size'],
+          threshold: config['hooks.infinite_scroll.threshold'],
         });
       } catch (error) {
         logClientWarning('useInfiniteScroll: failed to load defaults', error);
@@ -124,7 +124,7 @@ export function useInfiniteScroll({
 
     getTimeoutConfig()
       .then((config) => {
-        const delay = (config['timeout.ui.transition_ms'] as number) ?? 200;
+        const delay = config['timeout.ui.transition_ms'];
         setTimeout(() => {
           setDisplayCount((prev) => Math.min(prev + finalBatchSize, totalItems));
           setIsLoading(false);

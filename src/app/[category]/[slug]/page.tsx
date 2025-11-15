@@ -22,6 +22,7 @@ import { type ContentDetailResult, getContentDetailComplete } from '@/src/lib/da
 import { featureFlags } from '@/src/lib/flags';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
+import { ensureStringArray } from '@/src/lib/utils/data.utils';
 import { normalizeError } from '@/src/lib/utils/error.utils';
 import type { Database } from '@/src/types/database.types';
 
@@ -224,11 +225,11 @@ export default async function DetailPage({
             slug
           }
           description={fullItem.description}
-          {...('tags' in fullItem &&
-          Array.isArray(fullItem.tags) &&
-          fullItem.tags.length > 0 &&
-          fullItem.tags.every((tag) => typeof tag === 'string')
-            ? { tags: (fullItem.tags as string[]).slice(0, 3) }
+          {...('tags' in fullItem
+            ? (() => {
+                const tags = ensureStringArray(fullItem.tags).slice(0, 3);
+                return tags.length ? { tags } : {};
+              })()
             : {})}
         />
       )}

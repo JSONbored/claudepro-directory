@@ -99,8 +99,8 @@ export let MAX_REVIEW_LENGTH = 2000;
 
 // Load config from Statsig on module initialization
 getFormConfig()
-  .then((config: Record<string, unknown>) => {
-    MAX_REVIEW_LENGTH = (config['form.max_review_length'] as number) ?? 2000;
+  .then((config) => {
+    MAX_REVIEW_LENGTH = config['form.max_review_length'];
   })
   .catch((error) => {
     logClientWarning('ReviewTypes: failed to load form config', error);

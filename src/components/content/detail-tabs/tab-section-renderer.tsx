@@ -9,6 +9,7 @@ import { ReviewListSection } from '@/src/components/core/domain/reviews/review-l
 import type { CategoryId, SectionId } from '@/src/lib/data/config/category/category-config.types';
 import type { ContentItem } from '@/src/lib/data/content';
 import type { ProcessedSectionData } from '@/src/lib/types/detail-tabs.types';
+import { ensureStringArray } from '@/src/lib/utils/data.utils';
 import type { Database } from '@/src/types/database.types';
 
 // Dynamic import for unified section component (code splitting)
@@ -142,18 +143,21 @@ export function TabSectionRenderer({
         />
       );
 
-    case 'security':
+    case 'security': {
       if (!(config.sections.security && 'security' in item)) return null;
+      const securityItems = ensureStringArray(item.security);
+      if (securityItems.length === 0) return null;
       return (
         <UnifiedSection
           variant="list"
           title="Security Best Practices"
           description="Important security considerations"
-          items={item.security as string[]}
+          items={securityItems}
           category={item.category as CategoryId}
           dotColor="bg-orange-500"
         />
       );
+    }
 
     case 'reviews':
       return (

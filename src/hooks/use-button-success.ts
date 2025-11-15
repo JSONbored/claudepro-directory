@@ -10,8 +10,8 @@ let DEFAULT_SUCCESS_DURATION = 2000;
 
 // Load config from Statsig on module initialization
 getTimeoutConfig()
-  .then((config: Record<string, unknown>) => {
-    DEFAULT_SUCCESS_DURATION = (config['timeout.ui.button_success_duration_ms'] as number) ?? 2000;
+  .then((config) => {
+    DEFAULT_SUCCESS_DURATION = config['timeout.ui.button_success_duration_ms'];
   })
   .catch((error) => {
     logClientWarning('useButtonSuccess: failed to load success duration', error);

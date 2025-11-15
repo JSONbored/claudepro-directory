@@ -39,8 +39,8 @@ export function NotificationBadge({ className = '' }: NotificationBadgeProps) {
       .then((config) => {
         setSpringBouncy({
           type: 'spring' as const,
-          stiffness: (config['animation.spring.bouncy.stiffness'] as number) ?? 500,
-          damping: (config['animation.spring.bouncy.damping'] as number) ?? 20,
+          stiffness: config['animation.spring.bouncy.stiffness'],
+          damping: config['animation.spring.bouncy.damping'],
         });
       })
       .catch((error) => {

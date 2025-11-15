@@ -57,13 +57,13 @@ type RecommendationResponse = {
     title: string;
     description: string;
     category: string;
-    tags?: string[];
-    author?: string;
-    match_score?: number;
-    match_percentage?: number;
-    primary_reason?: string;
-    rank?: number;
-    reasons?: Array<{ type: string; message: string }>;
+    tags?: string[] | null;
+    author?: string | null;
+    match_score?: number | null;
+    match_percentage?: number | null;
+    primary_reason?: string | null;
+    rank?: number | null;
+    reasons?: Array<{ type: string; message: string }> | null;
   }>;
   totalMatches: number;
   answers: {
@@ -81,6 +81,7 @@ type RecommendationResponse = {
     topCategory?: string;
     avgMatchScore?: number;
     diversityScore?: number;
+    topTags?: string[];
   };
 };
 
@@ -348,7 +349,18 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                 category: result.category as Database['public']['Enums']['content_category'],
                 slug: result.slug,
               });
-              const matchScore = result.match_score;
+              const matchScore = typeof result.match_score === 'number' ? result.match_score : 0;
+              const rank = typeof result.rank === 'number' ? result.rank : null;
+              const tags = Array.isArray(result.tags)
+                ? result.tags.filter((tag): tag is string => typeof tag === 'string')
+                : [];
+              const reasons = Array.isArray(result.reasons) ? result.reasons : [];
+              const primaryReason =
+                result.primary_reason ?? 'Hand-picked based on your preferences.';
+              const author =
+                typeof result.author === 'string' && result.author.length > 0
+                  ? result.author
+                  : undefined;
               const getMatchScoreColor = (score: number) => {
                 if (score >= 90) return UI_CLASSES.SCORE_EXCELLENT;
                 if (score >= 75) return UI_CLASSES.SCORE_GOOD;
@@ -364,7 +376,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
 
               return (
                 <div key={result.slug} className="relative">
-                  <div className="${POSITION_PATTERNS.ABSOLUTE_TOP_RIGHT_OFFSET_XL} z-10">
+                  <div className={`${POSITION_PATTERNS.ABSOLUTE_TOP_RIGHT_OFFSET_XL} z-10`}>
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
@@ -384,19 +396,19 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                     </TooltipProvider>
                   </div>
 
-                  {result.rank <= 3 && (
-                    <div className="${POSITION_PATTERNS.ABSOLUTE_TOP_LEFT_OFFSET_XL} z-10">
+                  {rank !== null && rank <= 3 && (
+                    <div className={`${POSITION_PATTERNS.ABSOLUTE_TOP_LEFT_OFFSET_XL} z-10`}>
                       <UnifiedBadge
                         variant="base"
                         style="outline"
                         className="bg-background/80 backdrop-blur-sm"
                       >
-                        <Award className={UI_CLASSES.ICON_XS_LEADING} />#{result.rank}
+                        <Award className={UI_CLASSES.ICON_XS_LEADING} />#{rank}
                       </UnifiedBadge>
                     </div>
                   )}
 
-                  <div className="${POSITION_PATTERNS.ABSOLUTE_BOTTOM_RIGHT_OFFSET} z-10">
+                  <div className={`${POSITION_PATTERNS.ABSOLUTE_BOTTOM_RIGHT_OFFSET} z-10`}>
                     <BookmarkButton
                       contentType={result.category}
                       contentSlug={result.slug}
@@ -414,9 +426,9 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                       displayTitle={result.title}
                       description={result.description}
                       ariaLabel={`${result.title} - ${matchScore}% match`}
-                      tags={result.tags}
+                      {...(tags.length ? { tags } : {})}
                       maxVisibleTags={4}
-                      author={result.author}
+                      {...(author ? { author } : {})}
                       className="relative overflow-hidden transition-all hover:shadow-lg"
                       renderTopBadges={() => (
                         <UnifiedBadge variant="base" style="outline" className="w-fit capitalize">
@@ -433,26 +445,22 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                             />
                             <div>
                               <p className="font-medium text-sm">Why recommended:</p>
-                              <p className="text-muted-foreground text-sm">
-                                {result.primary_reason}
-                              </p>
+                              <p className="text-muted-foreground text-sm">{primaryReason}</p>
                             </div>
                           </div>
 
-                          {result.reasons && result.reasons.length > 1 && (
+                          {reasons.length > 1 && (
                             <div className="flex flex-wrap gap-1">
-                              {result.reasons
-                                .slice(1, 4)
-                                .map((reason: { type: string; message: string }) => (
-                                  <UnifiedBadge
-                                    key={reason.message}
-                                    variant="base"
-                                    style="secondary"
-                                    className="text-xs"
-                                  >
-                                    {reason.message}
-                                  </UnifiedBadge>
-                                ))}
+                              {reasons.slice(1, 4).map((reason) => (
+                                <UnifiedBadge
+                                  key={`${result.slug}-${reason.message}`}
+                                  variant="base"
+                                  style="secondary"
+                                  className="text-xs"
+                                >
+                                  {reason.message}
+                                </UnifiedBadge>
+                              ))}
                             </div>
                           )}
                         </>

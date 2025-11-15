@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { Button } from '@/src/components/primitives/ui/button';
 import { getTimeoutConfig } from '@/src/lib/actions/feature-flags.actions';
 import { logger } from '@/src/lib/logger';
+import { logClientWarning } from '@/src/lib/utils/error.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
 import type { ButtonStyleProps } from './button-types';
 
@@ -44,8 +45,13 @@ export function SimpleCopyButton({
       toasts.raw.success(successMessage);
       onCopySuccess?.();
 
-      const config = await getTimeoutConfig();
-      const resetDelay = (config['timeout.ui.clipboard_reset_delay_ms'] as number) || 2000;
+      let resetDelay = 2000;
+      try {
+        const config = await getTimeoutConfig();
+        resetDelay = config['timeout.ui.clipboard_reset_delay_ms'];
+      } catch (configError) {
+        logClientWarning('SimpleCopyButton: failed to load timeout config', configError);
+      }
       setTimeout(() => setCopied(false), resetDelay);
     } catch (error) {
       const normalizedError = error instanceof Error ? error : new Error(String(error));

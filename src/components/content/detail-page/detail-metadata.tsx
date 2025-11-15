@@ -13,7 +13,7 @@ import type { ContentItem } from '@/src/lib/data/content';
 import { Calendar, Copy, Eye, Tag, User } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { formatCopyCount, formatViewCount } from '@/src/lib/utils/content.utils';
-import { formatDate } from '@/src/lib/utils/data.utils';
+import { ensureStringArray, formatDate } from '@/src/lib/utils/data.utils';
 
 export interface DetailMetadataProps {
   item: ContentItem;
@@ -34,6 +34,7 @@ export function DetailMetadata({ item, viewCount, copyCount }: DetailMetadataPro
     viewCount !== undefined ||
     copyCount !== undefined;
   const hasTags = 'tags' in item && Array.isArray(item.tags) && item.tags.length > 0;
+  const tags = hasTags ? ensureStringArray(item.tags) : [];
 
   if (!(hasMetadata || hasTags)) return null;
 
@@ -78,12 +79,11 @@ export function DetailMetadata({ item, viewCount, copyCount }: DetailMetadataPro
           )}
         </div>
       )}
-
       {/* Tags */}
-      {hasTags && 'tags' in item && Array.isArray(item.tags) && (
+      {hasTags && tags.length > 0 && (
         <div className={UI_CLASSES.FLEX_WRAP_GAP_2}>
           <Tag className={`${UI_CLASSES.ICON_SM} text-muted-foreground`} />
-          {(item.tags as string[]).map((tag: string) => (
+          {tags.map((tag) => (
             <UnifiedBadge key={tag} variant="base" style="outline" className="text-xs">
               {tag}
             </UnifiedBadge>

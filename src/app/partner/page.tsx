@@ -8,8 +8,9 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/ui/card';
-import { getPricingConfig } from '@/src/lib/actions/feature-flags.actions';
 import { SOCIAL_LINKS } from '@/src/lib/data/config/constants';
+import { getPartnerPricing } from '@/src/lib/data/marketing/pricing';
+import { getPartnerHeroStats } from '@/src/lib/data/marketing/site';
 import {
   BarChart,
   Briefcase,
@@ -26,29 +27,17 @@ import { RESPONSIVE_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { normalizeError } from '@/src/lib/utils/error.utils';
 
 export default async function PartnerPage() {
-  const configCount = 282;
-
-  let pricingConfig: Awaited<ReturnType<typeof getPricingConfig>> | null = null;
+  let pricing: Awaited<ReturnType<typeof getPartnerPricing>>;
   try {
-    pricingConfig = await getPricingConfig();
+    pricing = await getPartnerPricing();
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load pricing config');
-    logger.error('PartnerPage: getPricingConfig failed', normalized);
+    logger.error('PartnerPage: getPartnerPricing failed', normalized);
     throw normalized;
   }
 
-  if (!pricingConfig) {
-    logger.error('PartnerPage: pricing config is undefined');
-    throw new Error('Pricing configuration unavailable');
-  }
-
-  const pricing = {
-    jobsRegular: (pricingConfig['pricing.jobs.regular'] as number) ?? 249,
-    jobsDiscounted: (pricingConfig['pricing.jobs.discounted'] as number) ?? 149,
-    jobsDurationDays: (pricingConfig['pricing.jobs.duration_days'] as number) ?? 30,
-    sponsoredRegular: (pricingConfig['pricing.sponsored.regular'] as number) ?? 199,
-    sponsoredDiscounted: (pricingConfig['pricing.sponsored.discounted'] as number) ?? 119,
-  };
+  const heroStats = await getPartnerHeroStats();
+  const configCount = heroStats.configurationCount;
 
   if (!SOCIAL_LINKS.partnerEmail) {
     logger.warn('PartnerPage: partnerEmail is not configured');
@@ -75,7 +64,7 @@ export default async function PartnerPage() {
               <p
                 className={`mb-1 ${UI_CLASSES.HEADING_H3.split(' ').slice(0, 2).join(' ')} text-primary`}
               >
-                3,000+
+                {heroStats.monthlyVisitors.toLocaleString()}+
               </p>
               <p className={UI_CLASSES.TEXT_SM_MUTED}>Monthly Visitors</p>
             </CardContent>
@@ -85,7 +74,7 @@ export default async function PartnerPage() {
               <p
                 className={`mb-1 ${UI_CLASSES.HEADING_H3.split(' ').slice(0, 2).join(' ')} text-primary`}
               >
-                16,000+
+                {heroStats.monthlyPageViews.toLocaleString()}+
               </p>
               <p className={UI_CLASSES.TEXT_SM_MUTED}>Page Views</p>
             </CardContent>
@@ -120,9 +109,11 @@ export default async function PartnerPage() {
                 <Sparkles className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <p className={'font-semibold text-lg'}>Launch Pricing: 40% Off Everything</p>
+                <p className={'font-semibold text-lg'}>
+                  Launch Pricing: {pricing.launch.discountPercent}% Off Everything
+                </p>
                 <p className="text-muted-foreground text-sm">
-                  Ends December 31st, 2025 • Simple monthly billing, cancel anytime
+                  Ends {pricing.launch.endDate} • Simple monthly billing, cancel anytime
                 </p>
               </div>
             </div>
@@ -164,15 +155,15 @@ export default async function PartnerPage() {
                 <div className={'rounded-lg border bg-muted/30 p-4'}>
                   <div className={'mb-2 flex items-baseline gap-2'}>
                     <span className={'font-bold text-muted-foreground text-xl line-through'}>
-                      ${pricing.jobsRegular}
+                      ${pricing.jobs.regular}
                     </span>
                     <span className={'font-bold text-3xl text-primary'}>
-                      ${pricing.jobsDiscounted}
+                      ${pricing.jobs.discounted}
                     </span>
                     <span className={UI_CLASSES.TEXT_SM_MUTED}>/month</span>
                   </div>
                   <p className={UI_CLASSES.TEXT_XS_MUTED}>
-                    {pricing.jobsDurationDays}-day featured placement • Launch pricing
+                    {pricing.jobs.durationDays}-day featured placement • Launch pricing
                   </p>
                 </div>
 
@@ -192,7 +183,7 @@ export default async function PartnerPage() {
                   </div>
                   <div className={'flex items-start gap-2'}>
                     <Check className={`mt-0.5 ${UI_CLASSES.ICON_SM} ${UI_CLASSES.ICON_SUCCESS}`} />
-                    <p className={UI_CLASSES.TEXT_SM}>{pricing.jobsDurationDays}-day visibility</p>
+                    <p className={UI_CLASSES.TEXT_SM}>{pricing.jobs.durationDays}-day visibility</p>
                   </div>
                   <div className={'flex items-start gap-2'}>
                     <Check className={`mt-0.5 ${UI_CLASSES.ICON_SM} ${UI_CLASSES.ICON_SUCCESS}`} />
@@ -237,10 +228,10 @@ export default async function PartnerPage() {
                 <div className={'rounded-lg border bg-muted/30 p-4'}>
                   <div className={'mb-2 flex items-baseline gap-2'}>
                     <span className={'font-bold text-muted-foreground text-xl line-through'}>
-                      ${pricing.sponsoredRegular}
+                      ${pricing.sponsored.regular}
                     </span>
                     <span className={'font-bold text-3xl text-primary'}>
-                      ${pricing.sponsoredDiscounted}
+                      ${pricing.sponsored.discounted}
                     </span>
                     <span className={UI_CLASSES.TEXT_SM_MUTED}>/month</span>
                   </div>

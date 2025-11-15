@@ -192,7 +192,7 @@ export const newsletterExperiments = {
  * Replaces database queries with Statsig Dynamic Configs
  * Usage: const config = await appSettings(); const pages = config['newsletter.excluded_pages'];
  */
-export const appSettings = createDynamicConfigGroup('app_settings', {
+export const APP_SETTINGS_DEFAULTS = {
   'newsletter.excluded_pages': [
     '/',
     '/trending',
@@ -218,14 +218,15 @@ export const appSettings = createDynamicConfigGroup('app_settings', {
   'date.current_year': new Date().getFullYear(),
   'date.current_date': new Date().toISOString().split('T')[0],
   'date.last_reviewed': new Date().toISOString().split('T')[0],
-});
+} as const;
+export const appSettings = createDynamicConfigGroup('app_settings', APP_SETTINGS_DEFAULTS);
 
 /**
  * Component Configs - Component-level UI behavior settings
  * Controls card behaviors, FAB actions, and other component-level configs
  * Usage: const config = await componentConfigs(); const showCopy = config['cards.show_copy_button'];
  */
-export const componentConfigs = createDynamicConfigGroup('component_configs', {
+export const COMPONENT_CONFIG_DEFAULTS = {
   'cards.show_copy_button': true,
   'cards.show_bookmark': true,
   'cards.show_view_count': true,
@@ -235,7 +236,11 @@ export const componentConfigs = createDynamicConfigGroup('component_configs', {
   'fab.show_search_button': true,
   'fab.show_scroll_to_top': true,
   'fab.show_notifications': true,
-});
+} as const;
+export const componentConfigs = createDynamicConfigGroup(
+  'component_configs',
+  COMPONENT_CONFIG_DEFAULTS
+);
 
 /**
  * Email Configs - Subject lines and email copy
@@ -255,7 +260,7 @@ export const emailConfigs = createDynamicConfigGroup('email_configs', {
  * Powers contextual newsletter CTAs and variant testing
  * Usage: const config = await newsletterConfigs(); const headline = config['newsletter.cta.aggressive.headline'];
  */
-export const newsletterConfigs = createDynamicConfigGroup('newsletter_configs', {
+export const NEWSLETTER_CONFIG_DEFAULTS = {
   'newsletter.cta.aggressive.headline': 'Join 500+ subscribers getting exclusive Claude configs',
   'newsletter.cta.social_proof.headline': '500+ Claude users already subscribed',
   'newsletter.cta.value_focused.headline': 'Get weekly Claude resources & updates',
@@ -284,14 +289,18 @@ export const newsletterConfigs = createDynamicConfigGroup('newsletter_configs', 
   'newsletter.retry_backoff_multiplier': 2,
   'newsletter.show_footer_bar': true,
   'newsletter.show_scroll_trigger': true,
-});
+} as const;
+export const newsletterConfigs = createDynamicConfigGroup(
+  'newsletter_configs',
+  NEWSLETTER_CONFIG_DEFAULTS
+);
 
 /**
  * Pricing Configs - Partner page pricing display
  * Enables pricing experiments without deploys
  * Usage: const config = await pricingConfigs(); const price = config['pricing.jobs.regular'];
  */
-export const pricingConfigs = createDynamicConfigGroup('pricing_configs', {
+export const PRICING_CONFIG_DEFAULTS = {
   'pricing.jobs.regular': 249,
   'pricing.jobs.discounted': 149,
   'pricing.jobs.duration_days': 30,
@@ -300,14 +309,15 @@ export const pricingConfigs = createDynamicConfigGroup('pricing_configs', {
   'pricing.launch_discount_percent': 40,
   'pricing.launch_discount_enabled': true,
   'pricing.launch_discount_end_date': '2025-12-31',
-});
+} as const;
+export const pricingConfigs = createDynamicConfigGroup('pricing_configs', PRICING_CONFIG_DEFAULTS);
 
 /**
  * Polling Configs - Polling intervals for real-time updates
  * Controls how frequently the app checks for updates
  * Usage: const config = await pollingConfigs(); const interval = config['polling.badges_ms'];
  */
-export const pollingConfigs = createDynamicConfigGroup('polling_configs', {
+export const POLLING_CONFIG_DEFAULTS = {
   'polling.realtime_ms': 1000,
   'polling.badges_ms': 30000,
   'polling.status.health_ms': 60000,
@@ -316,14 +326,15 @@ export const pollingConfigs = createDynamicConfigGroup('polling_configs', {
   'polling.analytics.views_ms': 60000,
   'polling.analytics.stats_ms': 300000,
   'polling.newsletter_count_ms': 300000, // Phase 3
-});
+} as const;
+export const pollingConfigs = createDynamicConfigGroup('polling_configs', POLLING_CONFIG_DEFAULTS);
 
 /**
  * Animation Configs - Animation durations and delays
  * Controls animation timing for consistent UX
  * Usage: const config = await animationConfigs(); const duration = config['animation.ticker.default_ms'];
  */
-export const animationConfigs = createDynamicConfigGroup('animation_configs', {
+export const ANIMATION_CONFIG_DEFAULTS = {
   'animation.ticker.default_ms': 1500,
   'animation.ticker.fast_ms': 1000,
   'animation.ticker.slow_ms': 2000,
@@ -353,10 +364,14 @@ export const animationConfigs = createDynamicConfigGroup('animation_configs', {
   'confetti.subtle.particle_count': 30,
   'confetti.subtle.spread': 40,
   'confetti.subtle.ticks': 100,
-});
+} as const;
+export const animationConfigs = createDynamicConfigGroup(
+  'animation_configs',
+  ANIMATION_CONFIG_DEFAULTS
+);
 
 /** Timeout Configs - UI/API timeouts and retry logic */
-export const timeoutConfigs = createDynamicConfigGroup('timeout_configs', {
+export const TIMEOUT_CONFIG_DEFAULTS = {
   'timeout.ui.debounce_ms': 150,
   'timeout.ui.tooltip_ms': 300,
   'timeout.ui.animation_ms': 300,
@@ -388,14 +403,15 @@ export const timeoutConfigs = createDynamicConfigGroup('timeout_configs', {
   'retry.database.write_spacing_ms': 200,
   'retry.database.transaction_retry_ms': 500,
   'retry.build.max_retries': 3,
-});
+} as const;
+export const timeoutConfigs = createDynamicConfigGroup('timeout_configs', TIMEOUT_CONFIG_DEFAULTS);
 
 /**
  * Toast Configs - Toast notification messages
  * Enables copy testing and message updates without deploys
  * Usage: const config = await toastConfigs(); const message = config['toast.copied'];
  */
-export const toastConfigs = createDynamicConfigGroup('toast_configs', {
+export const TOAST_CONFIG_DEFAULTS = {
   'toast.profile_updated': 'Profile updated successfully',
   'toast.signed_out': 'Signed out successfully',
   'toast.submission_created_title': 'Submission Created!',
@@ -427,14 +443,15 @@ export const toastConfigs = createDynamicConfigGroup('toast_configs', {
   'toast.slow_connection': 'Slow connection detected. This may take longer than usual.',
   'toast.saving': 'Saving...',
   'toast.processing': 'Processing...',
-});
+} as const;
+export const toastConfigs = createDynamicConfigGroup('toast_configs', TOAST_CONFIG_DEFAULTS);
 
 /**
  * Homepage Configs - Homepage layout and categories
  * Controls which categories appear on homepage
  * Usage: const config = await homepageConfigs(); const categories = config['homepage.featured_categories'];
  */
-export const homepageConfigs = createDynamicConfigGroup('homepage_configs', {
+export const HOMEPAGE_CONFIG_DEFAULTS = {
   'homepage.featured_categories': [
     'agents',
     'mcp',
@@ -457,33 +474,42 @@ export const homepageConfigs = createDynamicConfigGroup('homepage_configs', {
     'guides',
     'community',
   ] as string[],
-});
+} as const;
+export const homepageConfigs = createDynamicConfigGroup(
+  'homepage_configs',
+  HOMEPAGE_CONFIG_DEFAULTS
+);
 
 /**
  * Form Configs - Form validation and limits (Phase 3)
  * Controls file upload limits and form validation rules
  * Usage: const config = await formConfigs(); const maxSize = config['form.max_file_size_mb'];
  */
-export const formConfigs = createDynamicConfigGroup('form_configs', {
+export const FORM_CONFIG_DEFAULTS = {
   'form.max_file_size_mb': 5,
   'form.max_image_dimension_px': 2048,
   'form.max_review_length': 2000,
   'form.min_review_length': 10,
   'form.review_helpful_threshold': 3,
   'form.review_auto_approve_score': 0.8,
-});
+} as const;
+export const formConfigs = createDynamicConfigGroup('form_configs', FORM_CONFIG_DEFAULTS);
 
 /**
  * Recently Viewed Configs - Recently viewed items settings (Phase 3)
  * Controls storage and display of recently viewed content
  * Usage: const config = await recentlyViewedConfigs(); const ttl = config['recently_viewed.ttl_days'];
  */
-export const recentlyViewedConfigs = createDynamicConfigGroup('recently_viewed_configs', {
+export const RECENTLY_VIEWED_CONFIG_DEFAULTS = {
   'recently_viewed.ttl_days': 30,
   'recently_viewed.max_items': 10,
   'recently_viewed.max_description_length': 150,
   'recently_viewed.max_tags': 5,
-});
+} as const;
+export const recentlyViewedConfigs = createDynamicConfigGroup(
+  'recently_viewed_configs',
+  RECENTLY_VIEWED_CONFIG_DEFAULTS
+);
 
 /**
  * Cache Configs - Cache TTL settings and invalidation rules

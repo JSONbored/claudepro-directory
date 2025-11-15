@@ -1,5 +1,6 @@
 import { getNewsletterConfig } from '@/src/lib/actions/feature-flags.actions';
 import { NEWSLETTER_CTA_CONFIG } from '@/src/lib/data/config/category';
+import { ensureString } from '@/src/lib/utils/data.utils';
 
 /**
  * Newsletter config type from Statsig
@@ -32,31 +33,36 @@ export function getCTAVariantCopy(
   headline: string;
   description: string;
 } {
-  // Use Statsig config if provided, otherwise fall back to hardcoded defaults
   const variants = {
     aggressive: {
-      headline:
-        (config?.['newsletter.cta.aggressive.headline'] as string) ||
-        `🚀 Join ${subscriberCount === '10+' ? '10,000+' : subscriberCount} Claude Power Users`,
-      description:
-        (config?.['newsletter.cta.aggressive.description'] as string) ||
-        'Get exclusive tips, tools, and strategies before everyone else. Level up your Claude game.',
+      headline: ensureString(
+        config?.['newsletter.cta.aggressive.headline'],
+        `🚀 Join ${subscriberCount === '10+' ? '10,000+' : subscriberCount} Claude Power Users`
+      ),
+      description: ensureString(
+        config?.['newsletter.cta.aggressive.description'],
+        'Get exclusive tips, tools, and strategies before everyone else. Level up your Claude game.'
+      ),
     },
     social_proof: {
-      headline:
-        (config?.['newsletter.cta.social_proof.headline'] as string) ||
-        `${subscriberCount} subscribers already crushing it`,
-      description:
-        (config?.['newsletter.cta.social_proof.description'] as string) ||
-        'Join the community getting weekly Claude updates, tools, and insider tips.',
+      headline: ensureString(
+        config?.['newsletter.cta.social_proof.headline'],
+        `${subscriberCount} subscribers already crushing it`
+      ),
+      description: ensureString(
+        config?.['newsletter.cta.social_proof.description'],
+        'Join the community getting weekly Claude updates, tools, and insider tips.'
+      ),
     },
     value_focused: {
-      headline:
-        (config?.['newsletter.cta.value_focused.headline'] as string) ||
-        'Save 5 Hours/Week with Claude Tips',
-      description:
-        (config?.['newsletter.cta.value_focused.description'] as string) ||
-        'Get actionable Claude workflows, tools, and productivity hacks delivered weekly.',
+      headline: ensureString(
+        config?.['newsletter.cta.value_focused.headline'],
+        'Save 5 Hours/Week with Claude Tips'
+      ),
+      description: ensureString(
+        config?.['newsletter.cta.value_focused.description'],
+        'Get actionable Claude workflows, tools, and productivity hacks delivered weekly.'
+      ),
     },
   };
 
@@ -76,18 +82,24 @@ export function getContextualMessage(
 } {
   const messages = {
     agents: {
-      headline:
-        (config?.['newsletter.contextual.agents.headline'] as string) || 'Get New AI Agents Weekly',
-      description:
-        (config?.['newsletter.contextual.agents.description'] as string) ||
-        'Discover powerful Claude agents delivered to your inbox every week.',
+      headline: ensureString(
+        config?.['newsletter.contextual.agents.headline'],
+        'Get New AI Agents Weekly'
+      ),
+      description: ensureString(
+        config?.['newsletter.contextual.agents.description'],
+        'Discover powerful Claude agents delivered to your inbox every week.'
+      ),
     },
     mcp: {
-      headline:
-        (config?.['newsletter.contextual.mcp.headline'] as string) || 'New MCP Servers Weekly',
-      description:
-        (config?.['newsletter.contextual.mcp.description'] as string) ||
-        'Never miss a Model Context Protocol integration. Get weekly updates.',
+      headline: ensureString(
+        config?.['newsletter.contextual.mcp.headline'],
+        'New MCP Servers Weekly'
+      ),
+      description: ensureString(
+        config?.['newsletter.contextual.mcp.description'],
+        'Never miss a Model Context Protocol integration. Get weekly updates.'
+      ),
     },
     commands: {
       headline: 'Supercharge Your Workflow',
@@ -102,11 +114,14 @@ export function getContextualMessage(
       description: 'Get the latest automation hooks delivered weekly.',
     },
     guides: {
-      headline:
-        (config?.['newsletter.contextual.guides.headline'] as string) || 'More Guides Like This',
-      description:
-        (config?.['newsletter.contextual.guides.description'] as string) ||
-        'Get tutorials, tips, and guides delivered to your inbox weekly.',
+      headline: ensureString(
+        config?.['newsletter.contextual.guides.headline'],
+        'More Guides Like This'
+      ),
+      description: ensureString(
+        config?.['newsletter.contextual.guides.description'],
+        'Get tutorials, tips, and guides delivered to your inbox weekly.'
+      ),
     },
     default: {
       headline: NEWSLETTER_CTA_CONFIG.headline,
@@ -118,10 +133,7 @@ export function getContextualMessage(
     return messages.default;
   }
 
-  return messages[category as keyof typeof messages] as {
-    headline: string;
-    description: string;
-  };
+  return messages[category as keyof typeof messages];
 }
 
 /**

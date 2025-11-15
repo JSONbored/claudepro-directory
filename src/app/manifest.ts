@@ -1,8 +1,9 @@
 import type { MetadataRoute } from 'next';
-import { APP_CONFIG, getContentDescription } from '@/src/lib/data/config/constants';
+import { APP_CONFIG } from '@/src/lib/data/config/constants';
+import { getContentDescriptionCopy } from '@/src/lib/data/marketing/site';
 
 export default async function manifest(): Promise<MetadataRoute.Manifest> {
-  const description = await getContentDescription();
+  const description = await getContentDescriptionCopy();
 
   return {
     name: APP_CONFIG.name,

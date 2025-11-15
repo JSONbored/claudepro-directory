@@ -72,8 +72,8 @@ const DialogContent = ({
       .then((config) => {
         setSpringSmooth({
           type: 'spring' as const,
-          stiffness: (config['animation.spring.smooth.stiffness'] as number) ?? 300,
-          damping: (config['animation.spring.smooth.damping'] as number) ?? 25,
+          stiffness: config['animation.spring.smooth.stiffness'],
+          damping: config['animation.spring.smooth.damping'],
         });
       })
       .catch((error) => {

@@ -18,6 +18,7 @@ import { ExternalLink, Github, Thermometer } from '@/src/lib/icons';
 import { BADGE_COLORS, type CategoryType, UI_CLASSES } from '@/src/lib/ui-constants';
 import { getDisplayTitle } from '@/src/lib/utils';
 import { getContentItemUrl } from '@/src/lib/utils/content.utils';
+import { ensureStringArray } from '@/src/lib/utils/data.utils';
 
 /**
  * Props for DetailSidebar
@@ -78,6 +79,7 @@ export const DetailSidebar = memo(function DetailSidebar({
   const hasPackage = !!packageName;
   const hasAuth = 'requiresAuth' in metadata;
   const hasPermissions = 'permissions' in metadata;
+  const permissions = hasPermissions ? ensureStringArray(metadata.permissions) : [];
   const hasSource = 'source' in item && item.source;
 
   return (
@@ -183,11 +185,11 @@ export const DetailSidebar = memo(function DetailSidebar({
               </div>
             )}
 
-            {hasPermissions && (metadata.permissions as string[])?.length > 0 && (
+            {hasPermissions && permissions.length > 0 && (
               <div>
                 <h4 className={'mb-1 font-medium'}>Permissions</h4>
                 <div className="flex flex-wrap gap-1">
-                  {(metadata.permissions as string[]).map((perm: string) => (
+                  {permissions.map((perm) => (
                     <UnifiedBadge key={perm} variant="base" style="outline" className="text-xs">
                       {perm}
                     </UnifiedBadge>

@@ -11,6 +11,7 @@ import { getUserJobById } from '@/src/lib/data/account/user-data';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { ensureStringArray } from '@/src/lib/utils/data.utils';
 import { normalizeError } from '@/src/lib/utils/error.utils';
 
 export const metadata = generatePageMetadata('/account/jobs/:id/edit');
@@ -108,9 +109,9 @@ export default async function EditJobPage({ params }: EditJobPageProps) {
           workplace: job.workplace,
           experience: job.experience,
           category: job.category,
-          tags: Array.isArray(job.tags) ? (job.tags as string[]) : [],
-          requirements: Array.isArray(job.requirements) ? (job.requirements as string[]) : [],
-          benefits: Array.isArray(job.benefits) ? (job.benefits as string[]) : [],
+          tags: ensureStringArray(job.tags),
+          requirements: ensureStringArray(job.requirements),
+          benefits: ensureStringArray(job.benefits),
           link: job.link,
           contact_email: job.contact_email,
           company_logo: job.company_logo,

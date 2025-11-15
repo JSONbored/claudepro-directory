@@ -9,6 +9,7 @@ import { getAppSettings, getNewsletterConfig } from '@/src/lib/actions/feature-f
 import { NEWSLETTER_CTA_CONFIG } from '@/src/lib/data/config/category';
 import { Mail, X } from '@/src/lib/icons';
 import { DIMENSIONS, POSITION_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
+import { ensureNumber, ensureStringArray } from '@/src/lib/utils/data.utils';
 import { NewsletterForm } from './newsletter-form';
 
 export interface NewsletterFooterBarProps {
@@ -46,16 +47,17 @@ export function NewsletterFooterBar({
           getNewsletterConfig(),
         ]);
 
-        const excludedPages = appConfig['newsletter.excluded_pages'] as string[];
-        if (Array.isArray(excludedPages) && excludedPages.length > 0) {
+        const excludedPages = ensureStringArray(appConfig['newsletter.excluded_pages']);
+        if (excludedPages.length > 0) {
           setPagesWithInlineCTA(excludedPages);
         }
 
         if (showAfterDelay === undefined) {
-          const configDelay = newsletterConfig['newsletter.footer_bar.show_after_delay_ms'] as
-            | number
-            | undefined;
-          setDelayMs(configDelay ?? 30000);
+          const configDelay = ensureNumber(
+            newsletterConfig['newsletter.footer_bar.show_after_delay_ms'],
+            30000
+          );
+          setDelayMs(configDelay);
         }
       },
       {

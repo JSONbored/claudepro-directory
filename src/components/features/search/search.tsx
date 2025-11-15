@@ -74,7 +74,7 @@ function UnifiedSearchComponent({
   useEffect(() => {
     getTimeoutConfig()
       .then((config) => {
-        setDebounceMs((config['timeout.ui.debounce_ms'] as number) ?? 150);
+        setDebounceMs(config['timeout.ui.debounce_ms']);
       })
       .catch((error) => {
         logClientWarning('UnifiedSearchComponent: failed to load debounce config', error);

@@ -48,12 +48,11 @@ let MAX_TAGS = 5;
 // Load configs on module initialization
 Promise.all([getRecentlyViewedConfig(), getTimeoutConfig()])
   .then(([recentlyViewed, timeout]) => {
-    MAX_ITEMS = (recentlyViewed['recently_viewed.max_items'] as number) ?? 10;
-    TTL_DAYS = (recentlyViewed['recently_viewed.ttl_days'] as number) ?? 30;
-    MAX_DESCRIPTION_LENGTH =
-      (recentlyViewed['recently_viewed.max_description_length'] as number) ?? 150;
-    MAX_TAGS = (recentlyViewed['recently_viewed.max_tags'] as number) ?? 5;
-    DEBOUNCE_MS = (timeout['timeout.ui.form_debounce_ms'] as number) ?? 300;
+    MAX_ITEMS = recentlyViewed['recently_viewed.max_items'];
+    TTL_DAYS = recentlyViewed['recently_viewed.ttl_days'];
+    MAX_DESCRIPTION_LENGTH = recentlyViewed['recently_viewed.max_description_length'];
+    MAX_TAGS = recentlyViewed['recently_viewed.max_tags'];
+    DEBOUNCE_MS = timeout['timeout.ui.form_debounce_ms'];
   })
   .catch((error) => {
     logClientWarning('useRecentlyViewed: failed to load configs', error);

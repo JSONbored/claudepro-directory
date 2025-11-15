@@ -23,6 +23,7 @@ import type { ConfigCardProps } from '@/src/lib/types/component.types';
 import { BADGE_COLORS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { getDisplayTitle } from '@/src/lib/utils';
 import { formatViewCount, getContentItemUrl } from '@/src/lib/utils/content.utils';
+import { ensureStringArray } from '@/src/lib/utils/data.utils';
 import { logClientWarning, logUnhandledPromise } from '@/src/lib/utils/error.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
 
@@ -63,11 +64,11 @@ export const ConfigCard = memo(
       getComponentConfig()
         .then((config) => {
           setCardConfig({
-            showCopyButton: (config['cards.show_copy_button'] as boolean) ?? true,
-            showBookmark: (config['cards.show_bookmark'] as boolean) ?? true,
-            showViewCount: (config['cards.show_view_count'] as boolean) ?? true,
-            showCopyCount: (config['cards.show_copy_count'] as boolean) ?? true,
-            showRating: (config['cards.show_rating'] as boolean) ?? false,
+            showCopyButton: config['cards.show_copy_button'],
+            showBookmark: config['cards.show_bookmark'],
+            showViewCount: config['cards.show_view_count'],
+            showCopyCount: config['cards.show_copy_count'],
+            showRating: config['cards.show_rating'],
           });
         })
         .catch((error) => {
@@ -166,6 +167,7 @@ export const ConfigCard = memo(
     const collectionType = 'collectionType' in item ? item.collectionType : undefined;
     const collectionDifficulty = 'difficulty' in item ? item.difficulty : undefined;
     const itemCount = 'itemCount' in item ? item.itemCount : undefined;
+    const tags = 'tags' in item ? ensureStringArray(item.tags) : [];
 
     // Collection type label mapping (tree-shakeable)
     const COLLECTION_TYPE_LABELS = isCollection
@@ -199,9 +201,7 @@ export const ConfigCard = memo(
             ? { authorProfileUrl: item.author_profile_url }
             : {})}
           {...('source' in item && item.source ? { source: item.source as string } : {})}
-          {...('tags' in item && item.tags && Array.isArray(item.tags)
-            ? { tags: item.tags as string[] }
-            : {})}
+          {...(tags.length ? { tags } : {})}
           variant={variant}
           showActions={showActions}
           ariaLabel={`${displayTitle} - ${item.category} by ${('author' in item && item.author) || 'Community'}`}

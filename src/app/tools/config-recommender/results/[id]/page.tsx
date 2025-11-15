@@ -7,7 +7,10 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { ResultsDisplay } from '@/src/components/features/tools/recommender/results-display';
 import { APP_CONFIG } from '@/src/lib/data/config/constants';
-import { getConfigRecommendations } from '@/src/lib/data/tools/recommendations';
+import {
+  getConfigRecommendations,
+  type RecommendationItem,
+} from '@/src/lib/data/tools/recommendations';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { normalizeError } from '@/src/lib/utils/error.utils';
@@ -23,6 +26,47 @@ function decodeQuizAnswers(encoded: string) {
     });
     throw normalized;
   }
+}
+
+function isRecommendationReason(value: unknown): value is { type: string; message: string } {
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
+
+  const record = value as Record<string, unknown>;
+  return typeof record.type === 'string' && typeof record.message === 'string';
+}
+
+function normalizeRecommendationResults(results: RecommendationItem[]) {
+  return results.map((item) => {
+    const tags =
+      Array.isArray(item.tags) && item.tags.length > 0
+        ? item.tags.filter((tag): tag is string => typeof tag === 'string')
+        : undefined;
+
+    const reasons =
+      Array.isArray(item.reasons) && item.reasons.length > 0
+        ? item.reasons
+            .map((reason) => (isRecommendationReason(reason) ? reason : null))
+            .filter((reason): reason is { type: string; message: string } => Boolean(reason))
+        : undefined;
+
+    return {
+      slug: item.slug,
+      title: item.title,
+      description: item.description,
+      category: item.category,
+      ...(tags ? { tags } : {}),
+      ...(item.author ? { author: item.author } : {}),
+      ...(typeof item.match_score === 'number' ? { match_score: item.match_score } : {}),
+      ...(typeof item.match_percentage === 'number'
+        ? { match_percentage: item.match_percentage }
+        : {}),
+      ...(item.primary_reason ? { primary_reason: item.primary_reason } : {}),
+      ...(typeof item.rank === 'number' ? { rank: item.rank } : {}),
+      ...(reasons && reasons.length ? { reasons } : {}),
+    };
+  });
 }
 
 interface PageProps {
@@ -89,6 +133,7 @@ export default async function ResultsPage({ params, searchParams }: PageProps) {
 
   const recommendations = {
     ...enrichedResult,
+    results: normalizeRecommendationResults(enrichedResult.results),
     answers,
     id: resolvedParams.id,
     generatedAt: new Date().toISOString(),

@@ -71,9 +71,9 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
   useEffect(() => {
     getFormConfig()
       .then((config) => {
-        const maxMB = (config['form.max_file_size_mb'] as number) ?? 5;
+        const maxMB = config['form.max_file_size_mb'];
         MAX_FILE_SIZE = maxMB * 1024 * 1024;
-        MAX_DIMENSION = (config['form.max_image_dimension_px'] as number) ?? 2048;
+        MAX_DIMENSION = config['form.max_image_dimension_px'];
       })
       .catch((error) => {
         logClientWarning('CompanyForm: failed to load form config', error);

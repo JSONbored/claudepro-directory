@@ -92,7 +92,7 @@ function ViewVariant({ category, slug, delay }: Extract<UnifiedTrackerProps, { v
     if (delay === undefined) {
       getPollingConfig()
         .then((config) => {
-          setActualDelay((config['polling.realtime_ms'] as number) || 1000);
+          setActualDelay(config['polling.realtime_ms']);
         })
         .catch((error) => {
           logClientWarning('UnifiedTracker: failed to load polling config', error);

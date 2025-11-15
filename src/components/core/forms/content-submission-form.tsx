@@ -162,13 +162,13 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
       .then((config) => {
         setSpringSmooth({
           type: 'spring' as const,
-          stiffness: (config['animation.spring.smooth.stiffness'] as number) ?? 300,
-          damping: (config['animation.spring.smooth.damping'] as number) ?? 25,
+          stiffness: config['animation.spring.smooth.stiffness'],
+          damping: config['animation.spring.smooth.damping'],
         });
         setSpringBouncy({
           type: 'spring' as const,
-          stiffness: (config['animation.spring.bouncy.stiffness'] as number) ?? 500,
-          damping: (config['animation.spring.bouncy.damping'] as number) ?? 20,
+          stiffness: config['animation.spring.bouncy.stiffness'],
+          damping: config['animation.spring.bouncy.damping'],
         });
       })
       .catch((error) => {

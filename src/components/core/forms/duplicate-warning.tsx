@@ -6,6 +6,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/src/components/primitives
 import { getTimeoutConfig } from '@/src/lib/actions/feature-flags.actions';
 import { AlertTriangle } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { logClientWarning } from '@/src/lib/utils/error.utils';
 
 interface DuplicateWarningProps {
   contentType: string;
@@ -37,12 +38,15 @@ export function DuplicateWarning({ contentType: _contentType, name }: DuplicateW
   const [debounceMs, setDebounceMs] = useState(300);
 
   // Load debounce value from config
-  useState(() => {
-    getTimeoutConfig().then((config) => {
-      const ms = (config['timeout.ui.form_debounce_ms'] as number) || 300;
-      setDebounceMs(ms);
-    });
-  });
+  useEffect(() => {
+    getTimeoutConfig()
+      .then((config) => {
+        setDebounceMs(config['timeout.ui.form_debounce_ms']);
+      })
+      .catch((error) => {
+        logClientWarning('DuplicateWarning: failed to load form debounce config', error);
+      });
+  }, []);
 
   const debouncedName = useDebounce(name, debounceMs);
 

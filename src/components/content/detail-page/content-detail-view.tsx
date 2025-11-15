@@ -28,6 +28,7 @@ import {
   generateMultiFormatFilename,
   transformMcpConfigForDisplay,
 } from '@/src/lib/utils/content.utils';
+import { ensureStringArray } from '@/src/lib/utils/data.utils';
 import { normalizeError } from '@/src/lib/utils/error.utils';
 import { getViewTransitionName } from '@/src/lib/utils/view-transitions.utils';
 import type { Database } from '@/src/types/database.types';
@@ -112,12 +113,12 @@ export async function UnifiedDetailPage({
 
   const useCases = (() => {
     const cases = ('use_cases' in item && item.use_cases) || metadata.use_cases;
-    return Array.isArray(cases) && cases.length > 0 ? cases : [];
+    return ensureStringArray(cases);
   })();
 
   const features = (() => {
     const feats = ('features' in item && item.features) || metadata.features;
-    return Array.isArray(feats) && feats.length > 0 ? feats : [];
+    return ensureStringArray(feats);
   })();
 
   const troubleshooting = (() => {
@@ -127,8 +128,10 @@ export async function UnifiedDetailPage({
 
   const requirements = (() => {
     const reqs = ('requirements' in item && item.requirements) || metadata.requirements;
-    return Array.isArray(reqs) && reqs.length > 0 ? reqs : [];
+    return ensureStringArray(reqs);
   })();
+
+  const securityItems = 'security' in item && item.security ? ensureStringArray(item.security) : [];
 
   // Pre-process content highlighting
   const contentData = await (async () => {
@@ -561,7 +564,7 @@ export async function UnifiedDetailPage({
                 variant="list"
                 title="Features"
                 description="Key capabilities and functionality"
-                items={features as string[]}
+                items={features}
                 category={item.category as CategoryId}
                 dotColor="bg-primary"
               />
@@ -573,7 +576,7 @@ export async function UnifiedDetailPage({
                 variant="list"
                 title="Requirements"
                 description="Prerequisites and dependencies"
-                items={requirements as string[]}
+                items={requirements}
                 category={item.category as CategoryId}
                 dotColor="bg-orange-500"
               />
@@ -615,19 +618,19 @@ export async function UnifiedDetailPage({
                 variant="list"
                 title="Use Cases"
                 description="Common scenarios and applications"
-                items={useCases as string[]}
+                items={useCases}
                 category={item.category as CategoryId}
                 dotColor="bg-accent"
               />
             )}
 
             {/* Security Section (MCP-specific) */}
-            {config?.sections.security && 'security' in item && (
+            {config?.sections.security && securityItems.length > 0 && (
               <UnifiedSection
                 variant="list"
                 title="Security Best Practices"
                 description="Important security considerations"
-                items={item.security as string[]}
+                items={securityItems}
                 category={item.category as CategoryId}
                 dotColor="bg-orange-500"
               />

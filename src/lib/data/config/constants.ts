@@ -7,7 +7,6 @@
  */
 
 import { z } from 'zod';
-import { getContentCount } from '@/src/lib/data/content';
 
 /**
  * Application Information
@@ -364,20 +363,6 @@ export const EXTERNAL_SERVICES = externalServicesSchema.parse({
     www: 'https://www.claudepro.directory',
   },
 });
-
-/**
- * Get dynamic SEO description with live content count from database
- * Cached with Next.js fetch cache (24hr revalidation)
- */
-export async function getContentDescription(): Promise<string> {
-  const count = await getContentCount();
-
-  if (!count) {
-    throw new Error('Failed to fetch content count for description');
-  }
-
-  return `Open-source directory of ${count}+ Claude AI configurations. Community-driven collection of MCP servers, automation hooks, custom commands, agents, and rules.`;
-}
 
 /**
  * Route Constants

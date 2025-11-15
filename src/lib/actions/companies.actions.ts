@@ -8,11 +8,11 @@
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { z } from 'zod';
 import { invalidateByKeys, runRpc } from '@/src/lib/actions/action-helpers';
+import { getTimeoutConfigValue } from '@/src/lib/actions/feature-flags.actions';
 import { authedAction } from '@/src/lib/actions/safe-action';
 import { getCompanyAdminProfile } from '@/src/lib/data/companies/admin';
 import { searchCompanies } from '@/src/lib/data/companies/public';
 import type { CacheInvalidateKey } from '@/src/lib/data/config/cache-config';
-import { timeoutConfigs } from '@/src/lib/flags';
 import { logger } from '@/src/lib/logger';
 import {
   deleteImageFromStorage,
@@ -270,9 +270,7 @@ export const searchCompaniesAction = authedAction
     try {
       const limit = parsedInput.limit ?? 10;
       const companies = await searchCompanies(parsedInput.query, limit);
-      const timeoutConfig = await timeoutConfigs();
-      const debounceMs =
-        (timeoutConfig['timeout.ui.form_debounce_ms'] as number | undefined) ?? 300;
+      const debounceMs = await getTimeoutConfigValue('timeout.ui.form_debounce_ms');
 
       return { companies, debounceMs };
     } catch (error) {

@@ -4,12 +4,17 @@
  */
 
 import {
+  getAnimationConfig,
+  getAppSettings,
+  getPollingConfig,
+  getTimeoutConfig,
+} from '@/src/lib/actions/feature-flags.actions';
+import {
   ANIMATION_DURATIONS,
   DATE_CONFIG,
   POLLING_INTERVALS,
   TIMEOUTS,
 } from '@/src/lib/data/config/constants';
-import { animationConfigs, appSettings, pollingConfigs, timeoutConfigs } from '@/src/lib/flags';
 
 /**
  * Get current date configuration from database
@@ -17,12 +22,12 @@ import { animationConfigs, appSettings, pollingConfigs, timeoutConfigs } from '@
  */
 export async function getDateConfig() {
   try {
-    const config = await appSettings();
+    const config = await getAppSettings();
     return {
-      currentMonth: (config['date.current_month'] as string) ?? DATE_CONFIG.currentMonth,
-      currentYear: (config['date.current_year'] as number) ?? DATE_CONFIG.currentYear,
-      currentDate: (config['date.current_date'] as string) ?? DATE_CONFIG.currentDate,
-      lastReviewed: (config['date.last_reviewed'] as string) ?? DATE_CONFIG.lastReviewed,
+      currentMonth: config['date.current_month'],
+      currentYear: config['date.current_year'],
+      currentDate: config['date.current_date'],
+      lastReviewed: config['date.last_reviewed'],
       claudeModels: DATE_CONFIG.claudeModels,
     };
   } catch {
@@ -47,19 +52,18 @@ export async function getDateStrings() {
  */
 export async function getPollingIntervals() {
   try {
-    const config = await pollingConfigs();
+    const config = await getPollingConfig();
     return {
-      realtime: (config['polling.realtime_ms'] as number) ?? POLLING_INTERVALS.realtime,
-      badges: (config['polling.badges_ms'] as number) ?? POLLING_INTERVALS.badges,
+      realtime: config['polling.realtime_ms'],
+      badges: config['polling.badges_ms'],
       status: {
-        health: (config['polling.status.health_ms'] as number) ?? POLLING_INTERVALS.status.health,
-        api: (config['polling.status.api_ms'] as number) ?? POLLING_INTERVALS.status.api,
-        database:
-          (config['polling.status.database_ms'] as number) ?? POLLING_INTERVALS.status.database,
+        health: config['polling.status.health_ms'],
+        api: config['polling.status.api_ms'],
+        database: config['polling.status.database_ms'],
       },
       analytics: {
-        views: (config['polling.analytics.views_ms'] as number) ?? 60000,
-        stats: (config['polling.analytics.stats_ms'] as number) ?? 300000,
+        views: config['polling.analytics.views_ms'],
+        stats: config['polling.analytics.stats_ms'],
       },
     };
   } catch {
@@ -73,23 +77,20 @@ export async function getPollingIntervals() {
  */
 export async function getAnimationDurations() {
   try {
-    const config = await animationConfigs();
+    const config = await getAnimationConfig();
     return {
       ticker: {
-        default:
-          (config['animation.ticker.default_ms'] as number) ?? ANIMATION_DURATIONS.ticker.default,
-        fast: (config['animation.ticker.fast_ms'] as number) ?? ANIMATION_DURATIONS.ticker.fast,
-        slow: (config['animation.ticker.slow_ms'] as number) ?? ANIMATION_DURATIONS.ticker.slow,
+        default: config['animation.ticker.default_ms'],
+        fast: config['animation.ticker.fast_ms'],
+        slow: config['animation.ticker.slow_ms'],
       },
       stagger: {
-        fast: (config['animation.stagger.fast_ms'] as number) ?? ANIMATION_DURATIONS.stagger.fast,
-        medium:
-          (config['animation.stagger.medium_ms'] as number) ?? ANIMATION_DURATIONS.stagger.medium,
-        slow: (config['animation.stagger.slow_ms'] as number) ?? ANIMATION_DURATIONS.stagger.slow,
+        fast: config['animation.stagger.fast_ms'],
+        medium: config['animation.stagger.medium_ms'],
+        slow: config['animation.stagger.slow_ms'],
       },
       beam: {
-        default:
-          (config['animation.beam.default_ms'] as number) ?? ANIMATION_DURATIONS.beam.default,
+        default: config['animation.beam.default_ms'],
       },
     };
   } catch {
@@ -103,23 +104,23 @@ export async function getAnimationDurations() {
  */
 export async function getTimeouts() {
   try {
-    const config = await timeoutConfigs();
+    const config = await getTimeoutConfig();
     return {
       api: {
-        default: (config['timeout.api.default_ms'] as number) ?? 5000,
-        long: (config['timeout.api.long_ms'] as number) ?? 10000,
-        short: (config['timeout.api.short_ms'] as number) ?? 2000,
+        default: config['timeout.api.default_ms'],
+        long: config['timeout.api.long_ms'],
+        short: config['timeout.api.short_ms'],
       },
       ui: {
-        debounce: (config['timeout.ui.debounce_ms'] as number) ?? TIMEOUTS.ui.debounce,
-        tooltip: (config['timeout.ui.tooltip_ms'] as number) ?? TIMEOUTS.ui.tooltip,
-        animation: (config['timeout.ui.animation_ms'] as number) ?? TIMEOUTS.ui.animation,
-        transition: (config['timeout.ui.transition_ms'] as number) ?? TIMEOUTS.ui.transition,
+        debounce: config['timeout.ui.debounce_ms'],
+        tooltip: config['timeout.ui.tooltip_ms'],
+        animation: config['timeout.ui.animation_ms'],
+        transition: config['timeout.ui.transition_ms'],
       },
       test: {
-        default: (config['timeout.test.default_ms'] as number) ?? 5000,
-        long: (config['timeout.test.long_ms'] as number) ?? 10000,
-        network: (config['timeout.test.network_ms'] as number) ?? 5000,
+        default: config['timeout.test.default_ms'],
+        long: config['timeout.test.long_ms'],
+        network: config['timeout.test.network_ms'],
       },
     };
   } catch {

@@ -31,8 +31,8 @@ import type { ContentItem } from '@/src/lib/data/content';
 import { getContentBySlug } from '@/src/lib/data/content';
 import { AlertTriangle, CheckCircle } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
-
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { ensureStringArray } from '@/src/lib/utils/data.utils';
 import type { Database } from '@/src/types/database.types';
 
 interface ItemWithData {
@@ -122,8 +122,8 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
     categories: Object.keys(itemsByCategory).length,
   });
 
-  const prerequisites = metadata.prerequisites as string[] | undefined;
-  const installationOrder = metadata.installation_order as string[] | undefined;
+  const prerequisites = ensureStringArray(metadata.prerequisites);
+  const installationOrder = ensureStringArray(metadata.installation_order);
   const compatibility = metadata.compatibility as
     | { claudeDesktop?: boolean; claudeCode?: boolean }
     | undefined;

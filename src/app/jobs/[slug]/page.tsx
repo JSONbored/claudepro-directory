@@ -26,6 +26,7 @@ import type { PageProps } from '@/src/lib/schemas/app.schema';
 import { slugParamsSchema } from '@/src/lib/schemas/app.schema';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { ensureStringArray } from '@/src/lib/utils/data.utils';
 import { normalizeError } from '@/src/lib/utils/error.utils';
 
 export async function generateMetadata({
@@ -44,7 +45,7 @@ export async function generateMetadata({
 
   return generatePageMetadata('/jobs/:slug', {
     params: { slug },
-    item: job ? { ...job, tags: job.tags as string[] } : undefined,
+    item: job ? { ...job, tags: ensureStringArray(job.tags) } : undefined,
     slug,
   });
 }
@@ -99,9 +100,9 @@ export default async function JobPage({ params }: PageProps) {
     notFound();
   }
 
-  const tags = job.tags as unknown as string[];
-  const requirements = job.requirements as unknown as string[];
-  const benefits = job.benefits as unknown as string[];
+  const tags = ensureStringArray(job.tags);
+  const requirements = ensureStringArray(job.requirements);
+  const benefits = ensureStringArray(job.benefits);
 
   return (
     <>

@@ -99,7 +99,7 @@ export function usePrefetchOnHover(
   useEffect(() => {
     getTimeoutConfig()
       .then((config) => {
-        DEFAULT_PREFETCH_DELAY = (config['timeout.ui.prefetch_delay_ms'] as number) ?? 100;
+        DEFAULT_PREFETCH_DELAY = config['timeout.ui.prefetch_delay_ms'];
       })
       .catch((error) => {
         logClientWarning('usePrefetchOnHover: failed to load prefetch delay', error);

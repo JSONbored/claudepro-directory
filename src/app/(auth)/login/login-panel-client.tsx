@@ -9,6 +9,7 @@ import {
   loadNewsletterConfig,
 } from '@/src/components/features/growth/newsletter/newsletter-utils';
 import { useNewsletterCount } from '@/src/hooks/use-newsletter-count';
+import { ensureString } from '@/src/lib/utils/data.utils';
 import { logClientWarning } from '@/src/lib/utils/error.utils';
 
 interface LoginPanelClientProps {
@@ -29,20 +30,26 @@ export function LoginPanelClient({ redirectTo }: LoginPanelClientProps) {
       });
   }, []);
 
-  const tileHeadline =
-    (newsletterConfig['newsletter.login_tile.headline'] as string) ||
-    'Your weekly Claude upgrade drop';
-  const tileDescription =
-    (newsletterConfig['newsletter.login_tile.description'] as string) ||
-    'New MCP servers, pro prompts, and community playbooks — no fluff, just signal.';
+  const tileHeadline = ensureString(
+    newsletterConfig['newsletter.login_tile.headline'],
+    'Your weekly Claude upgrade drop'
+  );
+  const tileDescription = ensureString(
+    newsletterConfig['newsletter.login_tile.description'],
+    'New MCP servers, pro prompts, and community playbooks — no fluff, just signal.'
+  );
   const tileBenefits = [
-    newsletterConfig['newsletter.login_tile.benefit_primary'] as string,
-    newsletterConfig['newsletter.login_tile.benefit_secondary'] as string,
-  ].filter((benefit): benefit is string => Boolean(benefit));
-  const tileSafety =
-    (newsletterConfig['newsletter.login_tile.safety'] as string) || 'No spam. Unsubscribe anytime.';
-  const badgePrefix =
-    (newsletterConfig['newsletter.login_tile.badge_prefix'] as string) || '✨ Trusted by';
+    ensureString(newsletterConfig['newsletter.login_tile.benefit_primary']),
+    ensureString(newsletterConfig['newsletter.login_tile.benefit_secondary']),
+  ].filter((benefit) => Boolean(benefit));
+  const tileSafety = ensureString(
+    newsletterConfig['newsletter.login_tile.safety'],
+    'No spam. Unsubscribe anytime.'
+  );
+  const badgePrefix = ensureString(
+    newsletterConfig['newsletter.login_tile.badge_prefix'],
+    '✨ Trusted by'
+  );
 
   return (
     <AuthFormPanel

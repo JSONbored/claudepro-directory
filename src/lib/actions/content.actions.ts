@@ -630,7 +630,7 @@ export const getReviewsWithStats = rateLimitedAction
       sortBy: sort_by,
       limit,
       offset,
-      userId: user?.id ?? undefined,
+      ...(user?.id ? { userId: user.id } : {}),
     });
 
     if (!data) {
