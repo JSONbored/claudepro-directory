@@ -12,7 +12,7 @@ import {
 } from '@/src/components/primitives/ui/sheet';
 import type { NewsletterSource } from '@/src/hooks/use-newsletter';
 import { useNewsletter } from '@/src/hooks/use-newsletter';
-import { NEWSLETTER_CTA_CONFIG } from '@/src/lib/config/category-config';
+import { NEWSLETTER_CTA_CONFIG } from '@/src/lib/data/config/category';
 import { trackInteraction } from '@/src/lib/edge/client';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';

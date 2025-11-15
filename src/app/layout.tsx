@@ -52,8 +52,8 @@ import { getActiveAnnouncement } from '@/src/components/core/layout/announcement
 import { LayoutContent } from '@/src/components/core/layout/root-layout-wrapper';
 import { UmamiScript } from '@/src/components/core/shared/analytics-script';
 import { NotificationsProvider } from '@/src/components/providers/notifications-provider';
-import { APP_CONFIG } from '@/src/lib/constants';
-import { getNavigationMenu } from '@/src/lib/data/navigation';
+import { APP_CONFIG } from '@/src/lib/data/config/constants';
+import { getNavigationMenu } from '@/src/lib/data/content/navigation';
 import { featureFlags, newsletterExperiments } from '@/src/lib/flags';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 

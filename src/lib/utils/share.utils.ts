@@ -118,9 +118,11 @@ export async function shareNative(options: ShareOptions): Promise<boolean> {
       // User cancelled sharing
       return false;
     }
-    logger.warn('shareNative: navigator.share failed', normalizeError(error), {
+    const normalized = normalizeError(error, 'navigator.share failed');
+    logger.warn('shareNative: navigator.share failed', {
       platform: options.platform,
       url: options.url,
+      error: normalized.message,
     });
     // Fallback to copy link
     return await copyShareLink(options);
@@ -140,9 +142,11 @@ export async function copyShareLink(options: ShareOptions): Promise<boolean> {
     await navigator.clipboard.writeText(shareUrl);
     return true;
   } catch (error) {
-    logger.warn('copyShareLink failed', normalizeError(error), {
+    const normalized = normalizeError(error, 'copyShareLink failed');
+    logger.warn('copyShareLink failed', {
       platform: options.platform,
       url: options.url,
+      error: normalized.message,
     });
     return false;
   }
@@ -184,9 +188,11 @@ export async function trackShare(options: {
       },
     });
   } catch (error) {
-    logger.warn('trackShare failed', normalizeError(error), {
+    const normalized = normalizeError(error, 'trackShare failed');
+    logger.warn('trackShare failed', {
       platform: options.platform,
       url: options.url,
+      error: normalized.message,
     });
     // Silent fail - don't block user action
   }

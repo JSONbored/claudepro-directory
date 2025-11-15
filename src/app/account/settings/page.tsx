@@ -19,8 +19,8 @@ import {
 
 import { ensureUserRecord } from '@/src/lib/actions/user.actions';
 import { getAuthenticatedUser } from '@/src/lib/auth/get-authenticated-user';
-import { ROUTES } from '@/src/lib/constants';
-import { getUserSettings } from '@/src/lib/data/user-data';
+import { getUserSettings } from '@/src/lib/data/account/user-data';
+import { ROUTES } from '@/src/lib/data/config/constants';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';

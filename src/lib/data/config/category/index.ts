@@ -97,8 +97,10 @@ export async function getHomepageFeaturedCategories(): Promise<readonly Category
   try {
     const { getHomepageConfig } = await import('@/src/lib/actions/feature-flags.actions');
     const config = await getHomepageConfig();
-    const categories = config['homepage.featured_categories'] as string[];
-    return categories as readonly CategoryId[];
+    const categories = config['homepage.featured_categories'].filter((slug): slug is CategoryId =>
+      isValidCategory(slug)
+    );
+    return categories;
   } catch {
     return [];
   }
@@ -109,8 +111,7 @@ export async function getHomepageTabCategories(): Promise<readonly string[]> {
   try {
     const { getHomepageConfig } = await import('@/src/lib/actions/feature-flags.actions');
     const config = await getHomepageConfig();
-    const categories = config['homepage.tab_categories'] as string[];
-    return categories as readonly string[];
+    return config['homepage.tab_categories'];
   } catch {
     return [];
   }

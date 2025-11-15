@@ -27,7 +27,7 @@ import {
   SelectValue,
 } from '@/src/components/primitives/ui/select';
 import type { CreateJobInput } from '@/src/lib/actions/jobs.actions';
-import { ROUTES } from '@/src/lib/constants';
+import { ROUTES } from '@/src/lib/data/config/constants';
 import { Star } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { logClientWarning } from '@/src/lib/utils/error.utils';

@@ -6,8 +6,8 @@
 import dynamic from 'next/dynamic';
 import { JSONSectionRenderer } from '@/src/components/content/json-to-sections';
 import { ReviewListSection } from '@/src/components/core/domain/reviews/review-list-section';
-import type { CategoryId, SectionId } from '@/src/lib/config/category-config.types';
-import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
+import type { CategoryId, SectionId } from '@/src/lib/data/config/category/category-config.types';
+import type { ContentItem } from '@/src/lib/data/content';
 import type { ProcessedSectionData } from '@/src/lib/types/detail-tabs.types';
 import type { Database } from '@/src/types/database.types';
 

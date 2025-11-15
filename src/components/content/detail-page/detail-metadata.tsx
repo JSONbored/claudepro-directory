@@ -8,8 +8,8 @@
  */
 
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
-import { SOCIAL_LINKS } from '@/src/lib/constants';
-import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
+import { SOCIAL_LINKS } from '@/src/lib/data/config/constants';
+import type { ContentItem } from '@/src/lib/data/content';
 import { Calendar, Copy, Eye, Tag, User } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { formatCopyCount, formatViewCount } from '@/src/lib/utils/content.utils';

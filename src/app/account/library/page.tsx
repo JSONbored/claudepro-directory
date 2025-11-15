@@ -16,8 +16,8 @@ import {
 } from '@/src/components/primitives/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/primitives/ui/tabs';
 import { getAuthenticatedUser } from '@/src/lib/auth/get-authenticated-user';
-import { ROUTES } from '@/src/lib/constants';
-import { getUserLibrary } from '@/src/lib/data/user-data';
+import { getUserLibrary } from '@/src/lib/data/account/user-data';
+import { ROUTES } from '@/src/lib/data/config/constants';
 import { Bookmark as BookmarkIcon, ExternalLink, FolderOpen, Layers, Plus } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';

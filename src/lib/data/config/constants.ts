@@ -7,7 +7,7 @@
  */
 
 import { z } from 'zod';
-import { getContentCount } from '@/src/lib/content/supabase-content-loader';
+import { getContentCount } from '@/src/lib/data/content';
 
 /**
  * Application Information

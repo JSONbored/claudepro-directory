@@ -1,5 +1,8 @@
+import { randomUUID } from 'node:crypto';
 import { supabaseServiceRole } from '../clients/supabase.ts';
 import type { Database } from '../database.types.ts';
+
+const MAX_NOTIFICATION_IDS = 50;
 
 type NotificationRecord = Database['public']['Tables']['notifications']['Row'];
 type NotificationPriority = Database['public']['Enums']['notification_priority'];
@@ -24,12 +27,21 @@ export async function getActiveNotificationsForUser(
   userId: string,
   dismissedIds: string[]
 ): Promise<NotificationRecord[]> {
+  const sanitizedDismissedIds = Array.from(
+    new Set(dismissedIds.map((id) => id.trim()).filter(Boolean))
+  ).slice(0, MAX_NOTIFICATION_IDS);
+
   const { data, error } = await supabaseServiceRole.rpc('get_active_notifications', {
     p_user_id: userId,
-    dismissed_ids: dismissedIds,
+    dismissed_ids: sanitizedDismissedIds,
   });
 
   if (error) {
+    console.error('[notifications] get_active_notifications failed', {
+      userId,
+      dismissedCount: sanitizedDismissedIds.length,
+      error,
+    });
     throw error;
   }
 
@@ -77,18 +89,38 @@ export async function insertNotification(
 }
 
 export async function dismissNotificationsForUser(userId: string, notificationIds: string[]) {
-  if (notificationIds.length === 0) return;
+  const sanitizedIds = Array.from(
+    new Set(notificationIds.map((id) => id.trim()).filter(Boolean))
+  ).slice(0, MAX_NOTIFICATION_IDS);
+
+  if (sanitizedIds.length === 0) {
+    console.warn('[notifications] dismissNotificationsForUser called without IDs', { userId });
+    return;
+  }
 
   const { error } = await supabaseServiceRole.from('notification_dismissals').upsert(
-    notificationIds.map((notificationId) => ({
+    sanitizedIds.map((notificationId) => ({
       notification_id: notificationId,
       user_id: userId,
     }))
   );
 
   if (error) {
+    console.error('[notifications] Failed to dismiss notifications', { userId, error });
     throw error;
   }
+
+  console.info('[notifications] Dismissed notifications', {
+    userId,
+    dismissCount: sanitizedIds.length,
+  });
+}
+
+export function createNotificationTrace(fields?: Record<string, unknown>) {
+  return {
+    traceId: randomUUID(),
+    ...(fields ?? {}),
+  };
 }
 
 function isConflictError(error: unknown): error is {

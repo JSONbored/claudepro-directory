@@ -6,6 +6,7 @@ import type { Database } from '../_shared/database.types.ts';
 import { handleChangelogSyncRequest } from '../_shared/handlers/changelog/handler.ts';
 import { handleDiscordNotification } from '../_shared/handlers/discord/handler.ts';
 import {
+  createNotificationTrace,
   dismissNotificationsForUser,
   getActiveNotificationsForUser,
 } from '../_shared/notifications/service.ts';
@@ -121,11 +122,16 @@ async function handleActiveNotifications(ctx: NotificationRouterContext): Promis
     : [];
 
   try {
+    const trace = createNotificationTrace({
+      dismissedCount: dismissedIds.length,
+      userId: authResult.user.id,
+    });
     const notifications = await getActiveNotificationsForUser(authResult.user.id, dismissedIds);
 
     return successResponse(
       {
         notifications,
+        traceId: trace.traceId,
       },
       200,
       notificationCorsHeaders
@@ -159,24 +165,33 @@ async function handleDismissNotifications(ctx: NotificationRouterContext): Promi
     );
   }
 
-  const notificationIds =
+  const sanitizedIds =
     typeof payload === 'object' &&
     payload !== null &&
     Array.isArray((payload as { notificationIds?: unknown[] }).notificationIds)
-      ? (payload as { notificationIds: unknown[] }).notificationIds
-          .map((id) => (typeof id === 'string' ? id.trim() : ''))
-          .filter(Boolean)
+      ? Array.from(
+          new Set(
+            (payload as { notificationIds: unknown[] }).notificationIds
+              .map((id) => (typeof id === 'string' ? id.trim() : ''))
+              .filter(Boolean)
+          )
+        ).slice(0, 50)
       : [];
 
-  if (notificationIds.length === 0) {
+  if (sanitizedIds.length === 0) {
     return badRequestResponse('notificationIds array is required', notificationCorsHeaders);
   }
 
   try {
-    await dismissNotificationsForUser(authResult.user.id, notificationIds);
+    const trace = createNotificationTrace({
+      dismissRequestCount: sanitizedIds.length,
+      userId: authResult.user.id,
+    });
+    await dismissNotificationsForUser(authResult.user.id, sanitizedIds);
     return successResponse(
       {
-        dismissed: notificationIds.length,
+        dismissed: sanitizedIds.length,
+        traceId: trace.traceId,
       },
       200,
       notificationCorsHeaders

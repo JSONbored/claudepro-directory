@@ -9,7 +9,7 @@ import { useCallback, useEffect, useState, useTransition } from 'react';
 import { getNewsletterConfig } from '@/src/lib/actions/feature-flags.actions';
 import { trackInteraction, trackNewsletterEvent } from '@/src/lib/edge/client';
 import { logger } from '@/src/lib/logger';
-import { logClientWarning, logUnhandledPromise } from '@/src/lib/utils/error.utils';
+import { logClientWarning } from '@/src/lib/utils/error.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
 import type { Enums } from '@/src/types/database.types';
 
@@ -109,9 +109,9 @@ export function useNewsletter(options: UseNewsletterOptions): UseNewsletterRetur
   useEffect(() => {
     getNewsletterConfig()
       .then((config) => {
-        MAX_RETRIES = (config['newsletter.max_retries'] as number) ?? 3;
-        INITIAL_RETRY_DELAY_MS = (config['newsletter.initial_retry_delay_ms'] as number) ?? 1000;
-        RETRY_BACKOFF_MULTIPLIER = (config['newsletter.retry_backoff_multiplier'] as number) ?? 2;
+        MAX_RETRIES = config['newsletter.max_retries'] ?? 3;
+        INITIAL_RETRY_DELAY_MS = config['newsletter.initial_retry_delay_ms'] ?? 1000;
+        RETRY_BACKOFF_MULTIPLIER = config['newsletter.retry_backoff_multiplier'] ?? 2;
       })
       .catch((error) => {
         logClientWarning('useNewsletter: failed to load retry config', error, { source });

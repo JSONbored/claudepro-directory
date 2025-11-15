@@ -33,7 +33,7 @@ import {
   TooltipTrigger,
 } from '@/src/components/primitives/ui/tooltip';
 import { addBookmarkBatch } from '@/src/lib/actions/user.actions';
-import { ROUTES } from '@/src/lib/constants';
+import { ROUTES } from '@/src/lib/data/config/constants';
 import {
   ArrowRight,
   Award,
@@ -57,13 +57,13 @@ type RecommendationResponse = {
     title: string;
     description: string;
     category: string;
-    tags: string[];
-    author: string;
-    match_score: number;
-    match_percentage: number;
-    primary_reason: string;
-    rank: number;
-    reasons: Array<{ type: string; message: string }>;
+    tags?: string[];
+    author?: string;
+    match_score?: number;
+    match_percentage?: number;
+    primary_reason?: string;
+    rank?: number;
+    reasons?: Array<{ type: string; message: string }>;
   }>;
   totalMatches: number;
   answers: {
@@ -78,9 +78,9 @@ type RecommendationResponse = {
   generatedAt: string;
   algorithm: string;
   summary: {
-    topCategory: string;
-    avgMatchScore: number;
-    diversityScore: number;
+    topCategory?: string;
+    avgMatchScore?: number;
+    diversityScore?: number;
   };
 };
 
@@ -136,7 +136,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
 
   const filteredResults = results
     .filter((r) => selectedCategory === 'all' || r.category === selectedCategory)
-    .filter((r) => r.match_score >= minScore)
+    .filter((r) => (r.match_score ?? 0) >= minScore)
     .slice(0, maxResults);
 
   const categories = ['all', ...new Set(results.map((r) => r.category))];
@@ -158,14 +158,14 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
         <div className={'flex-wrap items-center justify-center gap-3'}>
           <UnifiedBadge variant="base" style="secondary" className="text-sm">
             <TrendingUp className={UI_CLASSES.ICON_XS_LEADING} />
-            {summary.avgMatchScore}% Avg Match
+            {(summary.avgMatchScore ?? 0).toFixed(0)}% Avg Match
           </UnifiedBadge>
           <UnifiedBadge variant="base" style="secondary" className="text-sm">
             <BarChart className={UI_CLASSES.ICON_XS_LEADING} />
-            {summary.diversityScore}% Diversity
+            {(summary.diversityScore ?? 0).toFixed(0)}% Diversity
           </UnifiedBadge>
           <UnifiedBadge variant="base" style="outline" className="text-sm">
-            Top Category: {summary.topCategory}
+            Top Category: {summary.topCategory ?? 'General'}
           </UnifiedBadge>
         </div>
 

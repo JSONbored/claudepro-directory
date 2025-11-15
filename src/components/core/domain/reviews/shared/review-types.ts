@@ -1,5 +1,5 @@
 import { getFormConfig } from '@/src/lib/actions/feature-flags.actions';
-import type { CategoryId } from '@/src/lib/config/category-config';
+import type { CategoryId } from '@/src/lib/data/config/category';
 import { logClientWarning } from '@/src/lib/utils/error.utils';
 
 /**

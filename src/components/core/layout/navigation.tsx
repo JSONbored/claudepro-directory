@@ -21,8 +21,8 @@ import { NavigationTablet } from '@/src/components/core/layout/navigation-tablet
 import { UserMenu } from '@/src/components/core/layout/user-menu';
 import { Button } from '@/src/components/primitives/ui/button';
 import { ACTION_LINKS } from '@/src/config/navigation';
-import { ROUTES } from '@/src/lib/constants';
-import type { NavigationData } from '@/src/lib/data/navigation';
+import { ROUTES } from '@/src/lib/data/config/constants';
+import type { NavigationData } from '@/src/lib/data/content/navigation';
 import { DiscordIcon } from '@/src/lib/icons';
 import {
   ANIMATION_CONSTANTS,

@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { NavLink } from '@/src/components/core/navigation/navigation-link';
 import { HoverCard } from '@/src/components/primitives/animation/hover-card';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
-import { APP_CONFIG } from '@/src/lib/constants';
+import { APP_CONFIG } from '@/src/lib/data/config/constants';
 import { BookOpen, Code, FileText, HelpCircle, MessageSquare, Search } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { UI_CLASSES } from '@/src/lib/ui-constants';

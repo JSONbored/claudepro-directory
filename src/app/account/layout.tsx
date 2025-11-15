@@ -10,7 +10,7 @@ import { Button } from '@/src/components/primitives/ui/button';
 import { Card } from '@/src/components/primitives/ui/card';
 import { ensureUserRecord } from '@/src/lib/actions/user.actions';
 import { getAuthenticatedUserFromClient } from '@/src/lib/auth/get-authenticated-user';
-import { getUserSettings, getUserSponsorships } from '@/src/lib/data/user-data';
+import { getUserSettings, getUserSponsorships } from '@/src/lib/data/account/user-data';
 import {
   Activity,
   Bookmark,

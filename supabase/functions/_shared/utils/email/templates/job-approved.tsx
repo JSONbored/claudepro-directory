@@ -4,24 +4,22 @@
  */
 
 import React from 'npm:react@18.3.1';
-import { Button, Hr, Section, Text } from 'npm:@react-email/components@0.0.22';
-import { buildEmailCtaUrl } from '../cta.ts';
+import { Hr, Section, Text } from 'npm:@react-email/components@0.0.22';
 import { EMAIL_UTM_TEMPLATES } from '../utm-templates.ts';
 import { BaseLayout, renderEmailTemplate } from '../base-template.tsx';
 import {
   contentSection,
-  ctaSection,
   dividerStyle,
   headingStyle,
   listItemStyle,
   listStyle,
   paragraphStyle,
-  primaryButtonStyle,
   strongStyle,
   subheadingStyle,
 } from '../common-styles.ts';
 import { JobDetailsSection } from '../components/job.tsx';
 import { formatCurrency } from '../formatters.ts';
+import { EmailCtaSection } from '../components/cta.tsx';
 
 export interface JobApprovedProps {
   jobTitle: string;
@@ -88,13 +86,20 @@ export function JobApproved({
         </ul>
       </Section>
 
-      <Section style={ctaSection}>
-          {paymentUrl && (
-            <Button href={buildEmailCtaUrl(paymentUrl, utm)} style={primaryButtonStyle}>
-              Complete Payment ({amountLabel})
-            </Button>
-          )}
-      </Section>
+        <EmailCtaSection
+          utm={utm}
+          buttons={
+            paymentUrl
+              ? [
+                  {
+                    preset: 'primaryDirectory', // label overridden below, href uses paymentUrl
+                    variant: 'primary' as const,
+                    overrides: { href: paymentUrl, label: `Complete Payment (${amountLabel})`, contentKey: 'payment_cta' },
+                  },
+                ]
+              : []
+          }
+        />
     </BaseLayout>
   );
 }

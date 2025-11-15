@@ -8,7 +8,7 @@ import { useConfetti } from '@/src/hooks/use-confetti';
 import type { NewsletterSource } from '@/src/hooks/use-newsletter';
 import { useNewsletter } from '@/src/hooks/use-newsletter';
 import { checkConfettiEnabled } from '@/src/lib/actions/feature-flags.actions';
-import { NEWSLETTER_CTA_CONFIG } from '@/src/lib/config/category-config';
+import { NEWSLETTER_CTA_CONFIG } from '@/src/lib/data/config/category';
 import { Mail } from '@/src/lib/icons';
 import { DIMENSIONS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';

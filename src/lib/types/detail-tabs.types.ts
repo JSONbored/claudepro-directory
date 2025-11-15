@@ -3,9 +3,9 @@
  */
 
 import type { ReactNode } from 'react';
-import type { UnifiedCategoryConfig } from '@/src/lib/config/category-config';
-import type { CategoryId, TabConfig } from '@/src/lib/config/category-config.types';
-import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
+import type { UnifiedCategoryConfig } from '@/src/lib/data/config/category';
+import type { CategoryId, TabConfig } from '@/src/lib/data/config/category/category-config.types';
+import type { ContentItem } from '@/src/lib/data/content';
 
 /**
  * Pre-processed section data passed from server component

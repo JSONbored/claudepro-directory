@@ -1,6 +1,6 @@
 import { NavLink } from '@/src/components/core/navigation/navigation-link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
-import { APP_CONFIG, SOCIAL_LINKS } from '@/src/lib/constants';
+import { APP_CONFIG, SOCIAL_LINKS } from '@/src/lib/data/config/constants';
 import { DiscordIcon, Github, Mail, MessageSquare } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';

@@ -10,7 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/ui/card';
-import type { CategoryId } from '@/src/lib/config/category-config.types';
+import type { CategoryId } from '@/src/lib/data/config/category/category-config.types';
 import {
   Bookmark,
   BookOpen,

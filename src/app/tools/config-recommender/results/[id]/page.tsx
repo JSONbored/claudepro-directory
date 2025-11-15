@@ -6,10 +6,10 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { ResultsDisplay } from '@/src/components/features/tools/recommender/results-display';
-import { APP_CONFIG } from '@/src/lib/constants';
+import { APP_CONFIG } from '@/src/lib/data/config/constants';
+import { getConfigRecommendations } from '@/src/lib/data/tools/recommendations';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-import { cachedRPCWithDedupe } from '@/src/lib/supabase/cached-rpc';
 import { normalizeError } from '@/src/lib/utils/error.utils';
 
 function decodeQuizAnswers(encoded: string) {
@@ -60,65 +60,20 @@ export default async function ResultsPage({ params, searchParams }: PageProps) {
   try {
     answers = decodeQuizAnswers(resolvedSearchParams.answers);
   } catch (error) {
-    logger.error('ConfigRecommenderResults: failed to decode quiz answers', error, {
+    const normalized = normalizeError(error, 'Failed to decode quiz answers');
+    logger.error('ConfigRecommenderResults: failed to decode quiz answers', normalized, {
       resultId: resolvedParams.id,
     });
     notFound();
   }
 
-  type RecommendationsResult = {
-    results: Array<{
-      slug: string;
-      title: string;
-      description: string;
-      category: string;
-      tags: string[];
-      author: string;
-      match_score: number;
-      match_percentage: number;
-      primary_reason: string;
-      rank: number;
-      reasons: Array<{ type: string; message: string }>;
-    }>;
-    totalMatches: number;
-    algorithm: string;
-    summary: {
-      topCategory: string;
-      avgMatchScore: number;
-      diversityScore: number;
-      topTags: string[];
-    };
-  };
-
-  const rpcParams = {
-    p_use_case: answers.useCase,
-    p_experience_level: answers.experienceLevel,
-    p_tool_preferences: answers.toolPreferences,
-    p_integrations: answers.integrations || [],
-    p_focus_areas: answers.focusAreas || [],
-    p_limit: 20,
-  };
-
-  let enrichedResult: RecommendationsResult | null = null;
-  try {
-    enrichedResult = await cachedRPCWithDedupe<RecommendationsResult>(
-      'get_recommendations',
-      rpcParams,
-      {
-        tags: ['content', 'quiz'],
-        ttlConfigKey: 'cache.quiz.ttl_seconds',
-        keySuffix: `${answers.useCase}-${answers.experienceLevel}-${answers.toolPreferences.join('-')}`,
-        useAuthClient: true,
-      }
-    );
-  } catch (error) {
-    const normalized = normalizeError(error, 'Failed to fetch configuration recommendations');
-    logger.error('ConfigRecommenderResults: get_recommendations threw', normalized, {
-      resultId: resolvedParams.id,
-      useCase: answers.useCase,
-    });
-    throw normalized;
-  }
+  const enrichedResult = await getConfigRecommendations({
+    useCase: answers.useCase,
+    experienceLevel: answers.experienceLevel,
+    toolPreferences: answers.toolPreferences,
+    integrations: answers.integrations,
+    focusAreas: answers.focusAreas,
+  });
 
   if (!enrichedResult) {
     logger.error(

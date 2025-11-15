@@ -7,14 +7,19 @@
 
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { z } from 'zod';
+import { resolveInvalidateTags as resolveCacheInvalidateTags } from '@/src/lib/actions/action-helpers';
 import { authedAction } from '@/src/lib/actions/safe-action';
 import { getAuthenticatedUser } from '@/src/lib/auth/get-authenticated-user';
-import { cacheConfigs } from '@/src/lib/flags';
-import { logger } from '@/src/lib/logger';
+import {
+  type CacheConfigPromise,
+  type CacheInvalidateKey,
+  getCacheConfigSnapshot,
+} from '@/src/lib/data/config/cache-config';
 import { revalidateCacheTags } from '@/src/lib/supabase/cache-helpers';
 import { cachedRPCWithDedupe } from '@/src/lib/supabase/cached-rpc';
+import { createClient } from '@/src/lib/supabase/server';
 import { logActionFailure } from '@/src/lib/utils/error.utils';
-import { Constants, type Enums } from '@/src/types/database.types';
+import { Constants, type Database, type Enums, type Tables } from '@/src/types/database.types';
 
 // TypeScript types for RPC function returns (database validates, TypeScript trusts)
 type ActivitySummary = {
@@ -82,7 +87,118 @@ type ActivityTimelineResponse = {
   total: number;
 };
 
-import { createClient } from '@/src/lib/supabase/server';
+type UserSurface = 'account' | 'library' | 'settings';
+type PublicRpc = keyof Database['public']['Functions'] | 'ensure_user_record';
+
+const USER_SURFACE_PATHS: Record<UserSurface, string> = {
+  account: '/account',
+  library: '/account/library',
+  settings: '/account/settings',
+};
+
+interface RunUserRpcContext {
+  action: string;
+  userId?: string;
+  meta?: Record<string, unknown>;
+}
+
+async function invalidateUserCaches({
+  cacheConfigPromise,
+  invalidateKeys,
+  extraTags,
+  userIds,
+}: {
+  cacheConfigPromise?: CacheConfigPromise;
+  invalidateKeys?: CacheInvalidateKey[];
+  extraTags?: string[];
+  userIds?: Array<string | null | undefined>;
+}): Promise<void> {
+  const tags = new Set(extraTags ?? []);
+  if (invalidateKeys?.length) {
+    const resolved = await resolveCacheInvalidateTags(invalidateKeys, cacheConfigPromise);
+    for (const tag of resolved) {
+      tags.add(tag);
+    }
+  }
+
+  if (tags.size) {
+    await revalidateCacheTags([...tags]);
+  }
+
+  if (userIds?.length) {
+    await Promise.allSettled(
+      userIds
+        .filter((id): id is string => Boolean(id))
+        .map((id) => revalidateTag(`user-${id}`, 'default'))
+    );
+  }
+}
+
+async function revalidateUserSurfaces({
+  slug,
+  accountSections,
+}: {
+  slug?: string | null;
+  accountSections?: UserSurface[];
+}): Promise<void> {
+  const paths = new Set<string>();
+  if (slug) {
+    paths.add(`/u/${slug}`);
+  }
+  if (accountSections) {
+    for (const section of accountSections) {
+      const path = USER_SURFACE_PATHS[section];
+      if (path) {
+        paths.add(path);
+      }
+    }
+  }
+
+  if (!paths.size) {
+    return;
+  }
+
+  await Promise.allSettled([...paths].map((path) => revalidatePath(path)));
+}
+
+async function runUserRpc<ResultType>(
+  rpcName: PublicRpc,
+  args: Record<string, unknown>,
+  context: RunUserRpcContext
+): Promise<ResultType> {
+  const supabase = await createClient();
+
+  try {
+    const { data, error } = await supabase.rpc(rpcName, args);
+    if (error) {
+      throw new Error(error.message);
+    }
+    return data as ResultType;
+  } catch (error) {
+    throw logActionFailure(context.action, error, {
+      rpc: rpcName,
+      userId: context.userId,
+      ...(context.meta ?? {}),
+    });
+  }
+}
+
+async function cachedUserData<ResultType>(
+  rpcName: PublicRpc,
+  args: Record<string, unknown>,
+  cacheOptions: Parameters<typeof cachedRPCWithDedupe>[2],
+  context: RunUserRpcContext
+): Promise<ResultType | null | undefined> {
+  try {
+    return await cachedRPCWithDedupe<ResultType>(rpcName, args, cacheOptions);
+  } catch (error) {
+    throw logActionFailure(context.action, error, {
+      rpc: rpcName,
+      userId: context.userId,
+      ...(context.meta ?? {}),
+    });
+  }
+}
 
 // Manual Zod schemas (database validates, Zod just provides type safety)
 const bookmarkSchema = z.object({
@@ -112,12 +228,11 @@ export const updateProfile = authedAction
     })
   )
   .action(async ({ parsedInput, ctx }) => {
-    try {
-      const { userId } = ctx;
-      const supabase = await createClient();
-
-      const { data, error } = await supabase.rpc('update_user_profile', {
-        p_user_id: userId,
+    const cacheConfigPromise = getCacheConfigSnapshot();
+    const result = await runUserRpc<{ success: boolean; profile: { slug: string } }>(
+      'update_user_profile',
+      {
+        p_user_id: ctx.userId,
         ...(parsedInput.display_name && { p_display_name: parsedInput.display_name }),
         ...(parsedInput.bio !== undefined && { p_bio: parsedInput.bio }),
         ...(parsedInput.work !== undefined && { p_work: parsedInput.work }),
@@ -130,59 +245,51 @@ export const updateProfile = authedAction
           p_profile_public: parsedInput.profile_public,
         }),
         ...(parsedInput.follow_email !== undefined && { p_follow_email: parsedInput.follow_email }),
-      });
-
-      if (error) {
-        throw new Error(`Failed to update profile: ${error.message}`);
-      }
-
-      const result = data as { success: boolean; profile: { slug: string } };
-
-      revalidatePath(`/u/${result.profile.slug}`);
-      revalidatePath('/account');
-      revalidatePath('/account/settings');
-
-      // Statsig-powered cache invalidation
-      const config = await cacheConfigs();
-      const invalidateTags = config['cache.invalidate.user_update'] as string[];
-      revalidateCacheTags(invalidateTags);
-      revalidateTag(`user-${userId}`, 'default');
-
-      return result;
-    } catch (error) {
-      throw logActionFailure('user.updateProfile', error, {
+      },
+      {
+        action: 'user.updateProfile',
         userId: ctx.userId,
-        hasDisplayName: Boolean(parsedInput.display_name),
-      });
-    }
+        meta: { hasDisplayName: Boolean(parsedInput.display_name) },
+      }
+    );
+
+    await revalidateUserSurfaces({
+      slug: result.profile.slug ?? null,
+      accountSections: ['account', 'settings'],
+    });
+
+    await invalidateUserCaches({
+      cacheConfigPromise,
+      invalidateKeys: ['cache.invalidate.user_update'],
+      userIds: [ctx.userId],
+    });
+
+    return result;
   });
 
 export const refreshProfileFromOAuth = authedAction
   .metadata({ actionName: 'refreshProfileFromOAuth', category: 'user' })
   .schema(z.void())
   .action(async ({ ctx }) => {
-    try {
-      const supabase = await createClient();
-      const { data, error } = await supabase.rpc('refresh_profile_from_oauth', {
-        user_id: ctx.userId,
-      });
-      if (error) throw new Error(`Failed to refresh profile from OAuth: ${error.message}`);
+    const cacheConfigPromise = getCacheConfigSnapshot();
+    const profile = await runUserRpc<{ slug: string } | null>(
+      'refresh_profile_from_oauth',
+      { user_id: ctx.userId },
+      { action: 'user.refreshProfileFromOAuth', userId: ctx.userId }
+    );
 
-      const profile = data as { slug: string } | null;
-      if (profile?.slug) revalidatePath(`/u/${profile.slug}`);
-      revalidatePath('/account');
-      revalidatePath('/account/settings');
+    await revalidateUserSurfaces({
+      slug: profile?.slug ?? null,
+      accountSections: ['account', 'settings'],
+    });
 
-      // Statsig-powered cache invalidation
-      const config = await cacheConfigs();
-      const invalidateTags = config['cache.invalidate.user_profile_oauth'] as string[];
-      revalidateCacheTags(invalidateTags);
-      revalidateTag(`user-${ctx.userId}`, 'default');
+    await invalidateUserCaches({
+      cacheConfigPromise,
+      invalidateKeys: ['cache.invalidate.user_profile_oauth'],
+      userIds: [ctx.userId],
+    });
 
-      return { success: true, message: 'Profile refreshed from OAuth provider' };
-    } catch (error) {
-      throw logActionFailure('user.refreshProfileFromOAuth', error, { userId: ctx.userId });
-    }
+    return { success: true, message: 'Profile refreshed from OAuth provider' };
   });
 
 export const addBookmark = authedAction
@@ -192,39 +299,33 @@ export const addBookmark = authedAction
   })
   .schema(bookmarkSchema)
   .action(async ({ parsedInput, ctx }) => {
-    try {
-      const { content_type, content_slug, notes } = parsedInput;
-      const { userId } = ctx;
-      const supabase = await createClient();
+    const cacheConfigPromise = getCacheConfigSnapshot();
+    const { content_type, content_slug, notes } = parsedInput;
 
-      const { data, error } = await supabase.rpc('add_bookmark', {
-        p_user_id: userId,
+    const data = await runUserRpc<{ success: boolean; bookmark: unknown }>(
+      'add_bookmark',
+      {
+        p_user_id: ctx.userId,
         p_content_type: content_type,
         p_content_slug: content_slug,
         ...(notes && { p_notes: notes }),
-      });
-
-      if (error) {
-        throw new Error(`Failed to create bookmark: ${error.message}`);
-      }
-
-      revalidatePath('/account');
-      revalidatePath('/account/library');
-
-      // Statsig-powered cache invalidation
-      const config = await cacheConfigs();
-      const invalidateTags = config['cache.invalidate.bookmark_create'] as string[];
-      revalidateCacheTags(invalidateTags);
-      revalidateTag(`user-${userId}`, 'default');
-
-      return data as { success: boolean; bookmark: unknown };
-    } catch (error) {
-      throw logActionFailure('user.addBookmark', error, {
+      },
+      {
+        action: 'user.addBookmark',
         userId: ctx.userId,
-        contentType: parsedInput.content_type,
-        contentSlug: parsedInput.content_slug,
-      });
-    }
+        meta: { contentType: content_type, contentSlug: content_slug },
+      }
+    );
+
+    await revalidateUserSurfaces({ accountSections: ['account', 'library'] });
+    await invalidateUserCaches({
+      cacheConfigPromise,
+      invalidateKeys: ['cache.invalidate.bookmark_create'],
+      extraTags: ['user-bookmarks', `content-${content_slug}`],
+      userIds: [ctx.userId],
+    });
+
+    return data;
   });
 
 export const removeBookmark = authedAction
@@ -234,45 +335,39 @@ export const removeBookmark = authedAction
   })
   .schema(bookmarkSchema.pick({ content_type: true, content_slug: true }))
   .action(async ({ parsedInput, ctx }) => {
-    try {
-      const { content_type, content_slug } = parsedInput;
-      const { userId } = ctx;
-      const supabase = await createClient();
+    const cacheConfigPromise = getCacheConfigSnapshot();
+    const { content_type, content_slug } = parsedInput;
 
-      const { data, error } = await supabase.rpc('remove_bookmark', {
-        p_user_id: userId,
+    const data = await runUserRpc<{ success: boolean }>(
+      'remove_bookmark',
+      {
+        p_user_id: ctx.userId,
         p_content_type: content_type,
         p_content_slug: content_slug,
-      });
-
-      if (error) {
-        throw new Error(`Failed to delete bookmark: ${error.message}`);
-      }
-
-      revalidatePath('/account');
-      revalidatePath('/account/library');
-
-      // Statsig-powered cache invalidation + user-specific tag
-      const config = await cacheConfigs();
-      const invalidateTags = config['cache.invalidate.bookmark_delete'] as string[];
-      revalidateCacheTags(invalidateTags);
-      revalidateTag(`user-${userId}`, 'default');
-
-      return data as { success: boolean };
-    } catch (error) {
-      throw logActionFailure('user.removeBookmark', error, {
+      },
+      {
+        action: 'user.removeBookmark',
         userId: ctx.userId,
-        contentType: parsedInput.content_type,
-        contentSlug: parsedInput.content_slug,
-      });
-    }
+        meta: { contentType: content_type, contentSlug: content_slug },
+      }
+    );
+
+    await revalidateUserSurfaces({ accountSections: ['account', 'library'] });
+    await invalidateUserCaches({
+      cacheConfigPromise,
+      invalidateKeys: ['cache.invalidate.bookmark_delete'],
+      extraTags: ['user-bookmarks', `content-${content_slug}`],
+      userIds: [ctx.userId],
+    });
+
+    return data;
   });
 
 export async function isBookmarked(content_type: string, content_slug: string): Promise<boolean> {
   const { user } = await getAuthenticatedUser({ context: 'isBookmarked' });
   if (!user) return false;
 
-  const data = await cachedRPCWithDedupe<boolean>(
+  const data = await cachedUserData<boolean>(
     'is_bookmarked',
     {
       p_user_id: user.id,
@@ -283,6 +378,11 @@ export async function isBookmarked(content_type: string, content_slug: string): 
       tags: ['user-bookmarks', `user-${user.id}`, `content-${content_slug}`],
       ttlConfigKey: 'cache.user_bookmarks.ttl_seconds',
       keySuffix: `${user.id}-${content_type}-${content_slug}`,
+    },
+    {
+      action: 'user.isBookmarked',
+      userId: user.id,
+      meta: { contentType: content_type, contentSlug: content_slug },
     }
   );
 
@@ -311,37 +411,33 @@ export const addBookmarkBatch = authedAction
     })
   )
   .action(async ({ parsedInput, ctx }) => {
-    try {
-      const { userId } = ctx;
-      const supabase = await createClient();
-
-      const { data, error } = await supabase.rpc('batch_add_bookmarks', {
-        p_user_id: userId,
+    const cacheConfigPromise = getCacheConfigSnapshot();
+    const result = await runUserRpc<{
+      success: boolean;
+      saved_count: number;
+      total_requested: number;
+    }>(
+      'batch_add_bookmarks',
+      {
+        p_user_id: ctx.userId,
         p_items: JSON.stringify(parsedInput.items),
-      });
-
-      if (error) {
-        throw new Error(`Failed to save bookmarks: ${error.message}`);
-      }
-
-      const result = data as { success: boolean; saved_count: number; total_requested: number };
-
-      revalidatePath('/account');
-      revalidatePath('/account/library');
-
-      // Statsig-powered cache invalidation + user-specific tag
-      const config = await cacheConfigs();
-      const invalidateTags = config['cache.invalidate.bookmark_create'] as string[];
-      revalidateCacheTags(invalidateTags);
-      revalidateTag(`user-${userId}`, 'default');
-
-      return result;
-    } catch (error) {
-      throw logActionFailure('user.addBookmarkBatch', error, {
+      },
+      {
+        action: 'user.addBookmarkBatch',
         userId: ctx.userId,
-        itemCount: parsedInput.items.length,
-      });
-    }
+        meta: { itemCount: parsedInput.items.length },
+      }
+    );
+
+    await revalidateUserSurfaces({ accountSections: ['account', 'library'] });
+    await invalidateUserCaches({
+      cacheConfigPromise,
+      invalidateKeys: ['cache.invalidate.bookmark_create'],
+      extraTags: ['user-bookmarks'],
+      userIds: [ctx.userId],
+    });
+
+    return result;
   });
 
 const followSchema = z.object({
@@ -357,46 +453,40 @@ export const toggleFollow = authedAction
   })
   .schema(followSchema)
   .action(async ({ parsedInput: { action, user_id, slug }, ctx }) => {
-    try {
-      const { userId } = ctx;
-      const supabase = await createClient();
-
-      const { data, error } = await supabase.rpc('toggle_follow', {
-        p_follower_id: userId,
+    const cacheConfigPromise = getCacheConfigSnapshot();
+    const result = await runUserRpc<{ success: boolean; action: string }>(
+      'toggle_follow',
+      {
+        p_follower_id: ctx.userId,
         p_following_id: user_id,
         p_action: action,
-      });
-
-      if (error) {
-        throw new Error(`Failed to ${action} user: ${error.message}`);
+      },
+      {
+        action: 'user.toggleFollow',
+        userId: ctx.userId,
+        meta: { targetUserId: user_id, followAction: action },
       }
+    );
 
-      revalidatePath(`/u/${slug}`);
-      revalidatePath('/account');
+    await revalidateUserSurfaces({
+      slug,
+      accountSections: ['account'],
+    });
+    await invalidateUserCaches({
+      cacheConfigPromise,
+      invalidateKeys: ['cache.invalidate.follow'],
+      extraTags: ['users'],
+      userIds: [ctx.userId, user_id],
+    });
 
-      // Statsig-powered cache invalidation
-      const config = await cacheConfigs();
-      const invalidateTags = config['cache.invalidate.follow'] as string[];
-      revalidateCacheTags(invalidateTags);
-      revalidateTag(`user-${userId}`, 'default');
-      revalidateTag(`user-${user_id}`, 'default');
-
-      return data as { success: boolean; action: string };
-    } catch (error) {
-      logger.error(
-        `Failed to ${action} user`,
-        error instanceof Error ? error : new Error(String(error)),
-        { userId: ctx.userId, targetUserId: user_id, action }
-      );
-      throw error;
-    }
+    return result;
   });
 
 export async function isFollowing(user_id: string): Promise<boolean> {
   const { user } = await getAuthenticatedUser({ context: 'isFollowing' });
   if (!user) return false;
 
-  const data = await cachedRPCWithDedupe<boolean>(
+  const data = await cachedUserData<boolean>(
     'is_following',
     {
       follower_id: user.id,
@@ -406,6 +496,11 @@ export async function isFollowing(user_id: string): Promise<boolean> {
       tags: ['users', `user-${user.id}`, `user-${user_id}`],
       ttlConfigKey: 'cache.user_profile.ttl_seconds',
       keySuffix: `${user.id}-${user_id}`,
+    },
+    {
+      action: 'user.isFollowing',
+      userId: user.id,
+      meta: { targetUserId: user_id },
     }
   );
 
@@ -429,7 +524,7 @@ export const getBookmarkStatusBatch = authedAction
     })
   )
   .action(async ({ parsedInput, ctx }) => {
-    const data = await cachedRPCWithDedupe<
+    const data = await cachedUserData<
       { content_type: string; content_slug: string; is_bookmarked: boolean }[]
     >(
       'is_bookmarked_batch',
@@ -441,6 +536,11 @@ export const getBookmarkStatusBatch = authedAction
         tags: ['user-bookmarks', `user-${ctx.userId}`],
         ttlConfigKey: 'cache.user_bookmarks.ttl_seconds',
         keySuffix: `${ctx.userId}-${JSON.stringify(parsedInput.items)}`,
+      },
+      {
+        action: 'user.getBookmarkStatusBatch',
+        userId: ctx.userId,
+        meta: { itemCount: parsedInput.items.length },
       }
     );
 
@@ -461,7 +561,7 @@ export const getFollowStatusBatch = authedAction
     })
   )
   .action(async ({ parsedInput, ctx }) => {
-    const data = await cachedRPCWithDedupe<{ followed_user_id: string; is_following: boolean }[]>(
+    const data = await cachedUserData<{ followed_user_id: string; is_following: boolean }[]>(
       'is_following_batch',
       {
         p_follower_id: ctx.userId,
@@ -471,6 +571,11 @@ export const getFollowStatusBatch = authedAction
         tags: ['users', `user-${ctx.userId}`],
         ttlConfigKey: 'cache.user_profile.ttl_seconds',
         keySuffix: `${ctx.userId}-${parsedInput.user_ids.sort().join('-')}`,
+      },
+      {
+        action: 'user.getFollowStatusBatch',
+        userId: ctx.userId,
+        meta: { itemCount: parsedInput.user_ids.length },
       }
     );
 
@@ -481,100 +586,104 @@ export const getActivitySummary = authedAction
   .metadata({ actionName: 'getActivitySummary', category: 'user' })
   .schema(z.void())
   .action(async ({ ctx }) => {
-    try {
-      const data = await cachedRPCWithDedupe<ActivitySummary>(
-        'get_user_activity_summary',
-        {
-          p_user_id: ctx.userId,
-        },
-        {
-          tags: ['user-activity', `user-${ctx.userId}`],
-          ttlConfigKey: 'cache.user_activity.ttl_seconds',
-          keySuffix: `${ctx.userId}-summary`,
-        }
-      );
+    const data = await cachedUserData<ActivitySummary>(
+      'get_user_activity_summary',
+      {
+        p_user_id: ctx.userId,
+      },
+      {
+        tags: ['user-activity', `user-${ctx.userId}`],
+        ttlConfigKey: 'cache.user_activity.ttl_seconds',
+        keySuffix: `${ctx.userId}-summary`,
+      },
+      {
+        action: 'user.getActivitySummary',
+        userId: ctx.userId,
+      }
+    );
 
-      if (!data) throw new Error('Failed to fetch user activity summary');
-
-      return data;
-    } catch (error) {
-      logger.error(
-        'Failed to get activity summary',
-        error instanceof Error ? error : new Error(String(error)),
+    if (!data) {
+      throw logActionFailure(
+        'user.getActivitySummary',
+        new Error('Failed to fetch user activity summary'),
         { userId: ctx.userId }
       );
-      throw error;
     }
+
+    return data;
   });
 
 export const getActivityTimeline = authedAction
   .metadata({ actionName: 'getActivityTimeline', category: 'user' })
   .schema(activityFilterSchema)
   .action(async ({ parsedInput: { type, limit = 20, offset = 0 }, ctx }) => {
-    try {
-      const data = await cachedRPCWithDedupe<ActivityTimelineResponse>(
-        'get_user_activity_timeline',
-        {
-          p_user_id: ctx.userId,
-          ...(type && { p_type: type }),
-          p_limit: limit,
-          p_offset: offset,
-        },
-        {
-          tags: ['user-activity', `user-${ctx.userId}`],
-          ttlConfigKey: 'cache.user_activity.ttl_seconds',
-          keySuffix: `${ctx.userId}-${type ?? 'all'}-${limit}-${offset}`,
-        }
-      );
+    const data = await cachedUserData<ActivityTimelineResponse>(
+      'get_user_activity_timeline',
+      {
+        p_user_id: ctx.userId,
+        ...(type && { p_type: type }),
+        p_limit: limit,
+        p_offset: offset,
+      },
+      {
+        tags: ['user-activity', `user-${ctx.userId}`],
+        ttlConfigKey: 'cache.user_activity.ttl_seconds',
+        keySuffix: `${ctx.userId}-${type ?? 'all'}-${limit}-${offset}`,
+      },
+      {
+        action: 'user.getActivityTimeline',
+        userId: ctx.userId,
+        meta: { type: type ?? 'all', limit, offset },
+      }
+    );
 
-      if (!data) throw new Error('Failed to fetch activity timeline');
-
-      return data;
-    } catch (error) {
-      logger.error(
-        'Failed to get activity timeline',
-        error instanceof Error ? error : new Error(String(error)),
-        { userId: ctx.userId, type: type || 'all', limit, offset }
+    if (!data) {
+      throw logActionFailure(
+        'user.getActivityTimeline',
+        new Error('Failed to fetch activity timeline'),
+        { userId: ctx.userId, type: type ?? 'all', limit, offset }
       );
-      throw error;
     }
+
+    return data;
   });
 
 export const getUserIdentities = authedAction
   .metadata({ actionName: 'getUserIdentities', category: 'user' })
   .schema(z.void())
   .action(async ({ ctx }) => {
-    try {
-      const data = await cachedRPCWithDedupe<{
-        identities: Array<{
-          provider: string;
-          email: string;
-          created_at: string;
-          last_sign_in_at: string;
-        }>;
-      }>(
-        'get_user_identities',
-        {
-          p_user_id: ctx.userId,
-        },
-        {
-          tags: ['users', `user-${ctx.userId}`],
-          ttlConfigKey: 'cache.user_stats.ttl_seconds',
-          keySuffix: `${ctx.userId}-identities`,
-        }
-      );
+    const data = await cachedUserData<{
+      identities: Array<{
+        provider: string;
+        email: string;
+        created_at: string;
+        last_sign_in_at: string;
+      }>;
+    }>(
+      'get_user_identities',
+      {
+        p_user_id: ctx.userId,
+      },
+      {
+        tags: ['users', `user-${ctx.userId}`],
+        ttlConfigKey: 'cache.user_stats.ttl_seconds',
+        keySuffix: `${ctx.userId}-identities`,
+      },
+      {
+        action: 'user.getUserIdentities',
+        userId: ctx.userId,
+      }
+    );
 
-      if (!data) throw new Error('Failed to fetch user identities');
-
-      return data;
-    } catch (error) {
-      logger.error(
-        'Failed to get user identities',
-        error instanceof Error ? error : new Error(String(error)),
+    if (!data) {
+      throw logActionFailure(
+        'user.getUserIdentities',
+        new Error('Failed to fetch user identities'),
         { userId: ctx.userId }
       );
-      throw error;
     }
+
+    return data;
   });
 
 /**
@@ -590,62 +699,42 @@ export const unlinkOAuthProvider = authedAction
     })
   )
   .action(async ({ parsedInput: { provider }, ctx }) => {
-    const supabase = await createClient();
-
-    try {
-      const { data, error } = await supabase.rpc('unlink_oauth_provider', {
-        p_provider: provider,
-      });
-
-      if (error) {
-        logger.error('Failed to unlink OAuth provider', error, {
-          userId: ctx.userId,
-          provider,
-        });
-        return {
-          success: false,
-          error: error.message || 'Failed to unlink provider',
-        };
+    const cacheConfigPromise = getCacheConfigSnapshot();
+    const result = await runUserRpc<{
+      success: boolean;
+      error?: string;
+      message?: string;
+      provider?: string;
+      remaining_providers?: number;
+    }>(
+      'unlink_oauth_provider',
+      { p_provider: provider },
+      {
+        action: 'user.unlinkOAuthProvider',
+        userId: ctx.userId,
+        meta: { provider },
       }
+    );
 
-      // Database RPC returns JSONB with success/error
-      const result = data as {
-        success: boolean;
-        error?: string;
-        message?: string;
-        provider?: string;
-        remaining_providers?: number;
-      };
-
-      if (!result.success) {
-        return {
-          success: false,
-          error: result.error || 'Failed to unlink provider',
-        };
-      }
-
-      // Revalidate account settings page
-      revalidatePath('/account/settings');
-
-      // Statsig-powered cache invalidation
-      const config = await cacheConfigs();
-      const invalidateTags = config['cache.invalidate.oauth_unlink'] as string[];
-      revalidateCacheTags(invalidateTags);
-      revalidateTag(`user-${ctx.userId}`, 'default');
-
+    if (!result.success) {
       return {
-        success: true,
-        message: result.message || `Successfully unlinked ${provider}`,
-        remainingProviders: result.remaining_providers,
+        success: false,
+        error: result.error || 'Failed to unlink provider',
       };
-    } catch (error) {
-      logger.error(
-        'Failed to unlink OAuth provider',
-        error instanceof Error ? error : new Error(String(error)),
-        { userId: ctx.userId, provider }
-      );
-      throw error;
     }
+
+    await revalidateUserSurfaces({ accountSections: ['settings'] });
+    await invalidateUserCaches({
+      cacheConfigPromise,
+      invalidateKeys: ['cache.invalidate.oauth_unlink'],
+      userIds: [ctx.userId],
+    });
+
+    return {
+      success: true,
+      message: result.message || `Successfully unlinked ${provider}`,
+      remainingProviders: result.remaining_providers,
+    };
   });
 
 export async function ensureUserRecord(params: {
@@ -656,25 +745,26 @@ export async function ensureUserRecord(params: {
 }) {
   'use server';
 
-  const supabase = await createClient();
-  const payload = {
-    id: params.id,
-    email: params.email,
-    name: params.name ?? null,
-    image: params.image ?? null,
-    profile_public: true,
-    follow_email: true,
-  };
+  const cacheConfigPromise = getCacheConfigSnapshot();
+  await runUserRpc<Tables<'users'>>(
+    'ensure_user_record',
+    {
+      p_id: params.id,
+      p_email: params.email,
+      p_name: params.name ?? null,
+      p_image: params.image ?? null,
+      p_profile_public: true,
+      p_follow_email: true,
+    },
+    {
+      action: 'user.ensureUserRecord',
+      userId: params.id,
+    }
+  );
 
-  const { error } = await supabase.from('users').upsert(payload, { onConflict: 'id' });
-  if (error) {
-    throw new Error(`Failed to ensure user record: ${error.message}`);
-  }
-
-  const config = await cacheConfigs();
-  const invalidateTags = config['cache.invalidate.user_update'] as string[] | undefined;
-  if (invalidateTags?.length) {
-    revalidateCacheTags(invalidateTags);
-  }
-  revalidateTag(`user-${params.id}`, 'default');
+  await invalidateUserCaches({
+    cacheConfigPromise,
+    invalidateKeys: ['cache.invalidate.user_update'],
+    userIds: [params.id],
+  });
 }

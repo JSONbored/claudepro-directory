@@ -10,14 +10,14 @@ import UnifiedSection from '@/src/components/content/sections/unified-section';
 import { ReviewListSection } from '@/src/components/core/domain/reviews/review-list-section';
 import { NewsletterCTAVariant } from '@/src/components/features/growth/newsletter/newsletter-cta-variants';
 import { RecentlyViewedSidebar } from '@/src/components/features/navigation/recently-viewed-sidebar';
+import { detectLanguage } from '@/src/lib/content/language-detection';
+import { highlightCode } from '@/src/lib/content/syntax-highlighting';
 import {
   type CategoryId,
   getCategoryConfig,
   isValidCategory,
-} from '@/src/lib/config/category-config';
-import { detectLanguage } from '@/src/lib/content/language-detection';
-import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
-import { highlightCode } from '@/src/lib/content/syntax-highlighting';
+} from '@/src/lib/data/config/category';
+import type { ContentItem } from '@/src/lib/data/content';
 import { logger } from '@/src/lib/logger';
 import type { InstallationSteps } from '@/src/lib/types/content-type-config';
 import type { ProcessedSectionData } from '@/src/lib/types/detail-tabs.types';
@@ -47,9 +47,11 @@ export interface UnifiedDetailPageProps {
 }
 
 function logDetailProcessingWarning(section: string, error: unknown, item: ContentItem): void {
-  logger.warn(`UnifiedDetailPage: ${section} processing failed`, normalizeError(error), {
+  const normalized = normalizeError(error, `${section} processing failed`);
+  logger.warn(`UnifiedDetailPage: ${section} processing failed`, {
     category: item.category,
     slug: item.slug ?? 'unknown',
+    error: normalized.message,
   });
 }
 

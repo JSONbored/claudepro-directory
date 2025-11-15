@@ -44,8 +44,8 @@ import {
   type CategoryId,
   getCategoryConfig,
   isValidCategory,
-} from '@/src/lib/config/category-config';
-import { getContentByCategory } from '@/src/lib/content/supabase-content-loader';
+} from '@/src/lib/data/config/category';
+import { getContentByCategory } from '@/src/lib/data/content';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { normalizeError } from '@/src/lib/utils/error.utils';
@@ -74,7 +74,7 @@ export const revalidate = false;
  */
 export async function generateStaticParams() {
   try {
-    const { VALID_CATEGORIES } = await import('@/src/lib/config/category-config');
+    const { VALID_CATEGORIES } = await import('@/src/lib/data/config/category');
 
     return VALID_CATEGORIES.map((category) => ({
       category,

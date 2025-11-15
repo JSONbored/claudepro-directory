@@ -4,23 +4,21 @@
  */
 
 import React from 'npm:react@18.3.1';
-import { Button, Hr, Section, Text } from 'npm:@react-email/components@0.0.22';
-import { buildEmailCtaUrl } from '../cta.ts';
+import { Hr, Section, Text } from 'npm:@react-email/components@0.0.22';
 import { EMAIL_UTM_TEMPLATES } from '../utm-templates.ts';
 import { BaseLayout, renderEmailTemplate } from '../base-template.tsx';
 import {
   contentSection,
-  ctaSection,
   dividerStyle,
   headingStyle,
   listItemStyle,
   listStyle,
   paragraphStyle,
-  primaryButtonStyle,
   strongStyle,
   subheadingStyle,
 } from '../common-styles.ts';
 import { JobDetailsSection } from '../components/job.tsx';
+import { EmailCtaSection } from '../components/cta.tsx';
 
 export interface JobSubmittedProps {
   jobTitle: string;
@@ -73,11 +71,20 @@ export function JobSubmitted({ jobTitle, company, userEmail, jobId }: JobSubmitt
         </ul>
       </Section>
 
-        <Section style={ctaSection}>
-          <Button href={buildEmailCtaUrl(`${baseUrl}/account/jobs`, utm)} style={primaryButtonStyle}>
-            View My Jobs
-          </Button>
-        </Section>
+        <EmailCtaSection
+          utm={utm}
+          buttons={[
+            {
+              preset: 'primaryDirectory',
+              variant: 'primary',
+              overrides: {
+                href: `${baseUrl}/account/jobs`,
+                label: 'View My Jobs',
+                contentKey: 'view_jobs_cta',
+              },
+            },
+          ]}
+        />
     </BaseLayout>
   );
 }

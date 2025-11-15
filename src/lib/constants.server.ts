@@ -3,8 +3,13 @@
  * Functions that require Statsig flags (server-only)
  */
 
+import {
+  ANIMATION_DURATIONS,
+  DATE_CONFIG,
+  POLLING_INTERVALS,
+  TIMEOUTS,
+} from '@/src/lib/data/config/constants';
 import { animationConfigs, appSettings, pollingConfigs, timeoutConfigs } from '@/src/lib/flags';
-import { ANIMATION_DURATIONS, DATE_CONFIG, POLLING_INTERVALS, TIMEOUTS } from './constants';
 
 /**
  * Get current date configuration from database

@@ -23,7 +23,7 @@ import { Textarea } from '@/src/components/primitives/ui/textarea';
 import { submitContentForReview } from '@/src/lib/actions/content.actions';
 import { getAnimationConfig } from '@/src/lib/actions/feature-flags.actions';
 import { useAuthenticatedUser } from '@/src/lib/auth/use-authenticated-user';
-import type { Template } from '@/src/lib/data/templates';
+import type { Template } from '@/src/lib/data/content/templates';
 import {
   SUBMISSION_CONTENT_TYPES,
   type SubmissionContentType,

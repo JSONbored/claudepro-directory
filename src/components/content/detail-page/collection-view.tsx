@@ -26,9 +26,9 @@ import { Suspense } from 'react';
 import { ConfigCard } from '@/src/components/core/domain/cards/config-card';
 import { Skeleton } from '@/src/components/primitives/feedback/loading-skeleton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
-import { getCategoryConfigs, isValidCategory } from '@/src/lib/config/category-config';
-import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
-import { getContentBySlug } from '@/src/lib/content/supabase-content-loader';
+import { getCategoryConfigs, isValidCategory } from '@/src/lib/data/config/category';
+import type { ContentItem } from '@/src/lib/data/content';
+import { getContentBySlug } from '@/src/lib/data/content';
 import { AlertTriangle, CheckCircle } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 

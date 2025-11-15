@@ -3,7 +3,7 @@
  */
 
 import type { Metadata } from 'next';
-import { APP_CONFIG } from '@/src/lib/constants';
+import { APP_CONFIG } from '@/src/lib/data/config/constants';
 import { logger } from '@/src/lib/logger';
 import { generateOGImageUrl, OG_IMAGE_DIMENSIONS } from '@/src/lib/og/url-generator';
 import { fetchMetadata, type SEOMetadata } from '@/src/lib/seo/client';

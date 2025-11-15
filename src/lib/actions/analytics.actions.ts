@@ -5,9 +5,12 @@
  * Moves all analytics-related Supabase RPC calls off the client bundle.
  */
 
-import { logger } from '@/src/lib/logger';
-import { cachedRPCWithDedupe } from '@/src/lib/supabase/cached-rpc';
-import { createClient } from '@/src/lib/supabase/server';
+import { runRpc } from '@/src/lib/actions/action-helpers';
+import { getSimilarContent, type SimilarContentResult } from '@/src/lib/data/content/similar';
+import {
+  getConfigRecommendations,
+  type RecommendationsResult,
+} from '@/src/lib/data/tools/recommendations';
 import type { Database, Json } from '@/src/types/database.types';
 
 export type TrackInteractionParams = Omit<
@@ -16,26 +19,27 @@ export type TrackInteractionParams = Omit<
 >;
 
 export async function trackInteractionAction(params: TrackInteractionParams) {
-  const supabase = await createClient();
   const contentType = params.content_type ?? 'unknown';
   const contentSlug = params.content_slug ?? 'unknown';
 
-  const { error } = await supabase.rpc('track_user_interaction', {
-    p_content_type: contentType,
-    p_content_slug: contentSlug,
-    p_interaction_type: params.interaction_type,
-    ...(params.session_id ? { p_session_id: params.session_id } : {}),
-    ...(params.metadata ? { p_metadata: params.metadata as Json } : {}),
-  });
-
-  if (error) {
-    logger.error('trackInteractionAction failed', error, {
-      contentType,
-      contentSlug,
-      interactionType: params.interaction_type,
-    });
-    throw new Error(error.message);
-  }
+  await runRpc<void>(
+    'track_user_interaction',
+    {
+      p_content_type: contentType,
+      p_content_slug: contentSlug,
+      p_interaction_type: params.interaction_type,
+      ...(params.session_id ? { p_session_id: params.session_id } : {}),
+      ...(params.metadata ? { p_metadata: params.metadata as Json } : {}),
+    },
+    {
+      action: 'analytics.trackInteraction',
+      meta: {
+        contentType,
+        contentSlug,
+        interactionType: params.interaction_type,
+      },
+    }
+  );
 }
 
 export async function trackNewsletterEventAction(
@@ -55,53 +59,22 @@ export async function trackNewsletterEventAction(
   });
 }
 
-interface SimilarItem {
-  slug: string;
-  title: string;
-  description?: string;
-  category: string;
-  score?: number;
-  tags?: string[];
-  similarity_factors?: Json;
-  calculated_at?: string;
-  url?: string;
-}
-
-interface SimilarContentResult {
-  similar_items: SimilarItem[];
-  source_item: {
-    slug: string;
-    category: string;
-  };
-  algorithm_version?: string;
-}
-
 export async function getSimilarConfigsAction(params: {
   content_type: string;
   content_slug: string;
   limit?: number;
-}) {
-  const data = await cachedRPCWithDedupe<SimilarContentResult>(
-    'get_similar_content',
-    {
-      p_content_type: params.content_type,
-      p_content_slug: params.content_slug,
-      p_limit: params.limit ?? 6,
-    },
-    {
-      tags: ['content', `content-${params.content_slug}`],
-      ttlConfigKey: 'cache.content_detail.ttl_seconds',
-      keySuffix: `${params.content_type}-${params.content_slug}-${params.limit ?? 6}`,
-    }
-  );
-
-  return data;
+}): Promise<SimilarContentResult | null> {
+  return getSimilarContent({
+    contentType: params.content_type,
+    contentSlug: params.content_slug,
+    ...(params.limit ? { limit: params.limit } : {}),
+  });
 }
 
-interface RecommendationsSummary {
-  topCategory?: string | null;
-  avgMatchScore?: number | null;
-  diversityScore?: number | null;
+interface RecommendationSummary {
+  topCategory: string;
+  avgMatchScore: number;
+  diversityScore: number;
 }
 
 interface RecommendationItem {
@@ -109,20 +82,20 @@ interface RecommendationItem {
   title: string;
   description: string;
   category: string;
-  tags?: string[] | null;
-  author?: string | null;
-  match_score?: number | null;
-  match_percentage?: number | null;
-  primary_reason?: string | null;
-  rank?: number | null;
-  reasons?: Json;
+  tags: string[];
+  author: string;
+  match_score: number;
+  match_percentage: number;
+  primary_reason: string;
+  rank: number;
+  reasons: Array<{ type: string; message: string }>;
 }
 
 interface RecommendationsPayload {
   results: RecommendationItem[];
   totalMatches: number;
   algorithm: string;
-  summary: RecommendationsSummary | null;
+  summary: RecommendationSummary;
 }
 
 export interface ConfigRecommendationsResponse {
@@ -147,37 +120,63 @@ export async function generateConfigRecommendationsAction(answers: {
   integrations?: string[];
   focusAreas?: string[];
 }): Promise<ConfigRecommendationsResponse> {
-  const keySuffix = [
-    answers.useCase,
-    answers.experienceLevel,
-    answers.toolPreferences.join(','),
-    (answers.integrations ?? []).join(','),
-    (answers.focusAreas ?? []).join(','),
-  ].join('|');
-
-  const data = await cachedRPCWithDedupe<RecommendationsPayload>(
-    'get_recommendations',
-    {
-      p_use_case: answers.useCase,
-      p_experience_level: answers.experienceLevel,
-      p_tool_preferences: answers.toolPreferences,
-      p_integrations: answers.integrations ?? [],
-      p_focus_areas: answers.focusAreas ?? [],
-      p_limit: 20,
-    },
-    {
-      tags: ['recommendations'],
-      ttlConfigKey: 'cache.recommendations.ttl_seconds',
-      keySuffix,
-    }
-  );
+  const data = await getConfigRecommendations({
+    useCase: answers.useCase,
+    experienceLevel: answers.experienceLevel,
+    toolPreferences: answers.toolPreferences,
+    integrations: answers.integrations ?? [],
+    focusAreas: answers.focusAreas ?? [],
+  });
 
   const responseId = `rec_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
+  const fallback: RecommendationsResult = {
+    results: [],
+    totalMatches: 0,
+    algorithm: 'unknown',
+    summary: {
+      topCategory: '',
+      avgMatchScore: 0,
+      diversityScore: 0,
+      topTags: [],
+    },
+  };
+
+  const source = data ?? fallback;
+  const normalizedResults: RecommendationItem[] = source.results.map((item) => {
+    const tags: string[] = Array.isArray(item.tags) ? item.tags : [];
+    const reasons = Array.isArray(item.reasons)
+      ? (item.reasons as Array<{ type: string; message: string }>)
+      : [];
+    return {
+      slug: item.slug,
+      title: item.title,
+      description: item.description,
+      category: item.category,
+      tags,
+      author: item.author ?? 'Unknown',
+      match_score: item.match_score ?? 0,
+      match_percentage: item.match_percentage ?? 0,
+      primary_reason: item.primary_reason ?? 'Recommendation',
+      rank: item.rank ?? 0,
+      reasons,
+    };
+  });
+  const normalizedSummary: RecommendationSummary = {
+    topCategory: source.summary?.topCategory ?? '',
+    avgMatchScore: source.summary?.avgMatchScore ?? 0,
+    diversityScore: source.summary?.diversityScore ?? 0,
+  };
+  const payload: RecommendationsPayload = {
+    results: normalizedResults,
+    totalMatches: source.totalMatches,
+    algorithm: source.algorithm,
+    summary: normalizedSummary,
+  };
 
   return {
     success: true,
     recommendations: {
-      ...(data ?? { results: [], summary: null, algorithm: 'unknown', totalMatches: 0 }),
+      ...payload,
       answers: {
         useCase: answers.useCase,
         experienceLevel: answers.experienceLevel,

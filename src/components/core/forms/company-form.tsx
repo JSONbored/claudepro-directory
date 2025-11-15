@@ -24,7 +24,7 @@ import {
   uploadCompanyLogoAction,
 } from '@/src/lib/actions/companies.actions';
 import { getFormConfig } from '@/src/lib/actions/feature-flags.actions';
-import { ROUTES } from '@/src/lib/constants';
+import { ROUTES } from '@/src/lib/data/config/constants';
 import { FileText, X } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { UI_CLASSES } from '@/src/lib/ui-constants';

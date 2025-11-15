@@ -33,9 +33,9 @@ const NewsletterCTAVariant = dynamicImport(
   }
 );
 
-import { getHomepageFeaturedCategories } from '@/src/lib/config/category-config';
+import { getHomepageFeaturedCategories } from '@/src/lib/data/config/category';
+import { getHomepageData } from '@/src/lib/data/content/homepage';
 import { logger } from '@/src/lib/logger';
-import { cachedRPCWithDedupe } from '@/src/lib/supabase/cached-rpc';
 import type { GetHomepageCompleteReturn } from '@/src/types/database-overrides';
 
 export const metadata = generatePageMetadata('/');
@@ -89,23 +89,13 @@ export default async function HomePage({ searchParams }: HomePageProps) {
 
   const categoryIds = await getHomepageFeaturedCategories();
 
-  const homepageData = await cachedRPCWithDedupe<GetHomepageCompleteReturn>(
-    'get_homepage_complete',
-    { p_category_ids: [...categoryIds] },
-    {
-      tags: ['homepage', 'content', 'trending'],
-      ttlConfigKey: 'cache.homepage.ttl_seconds',
-      keySuffix: categoryIds.join('-'),
-    }
-  );
-
   // Extract member_count and top_contributors from consolidated response
   // Type-safe RPC return using centralized type definition
-  const homepageResult = homepageData;
+  const homepageResult = await getHomepageData(categoryIds);
 
-  const memberCount = homepageResult ? homepageResult.member_count || 0 : 0;
-  const featuredJobs = homepageResult ? homepageResult.featured_jobs || [] : [];
-  const topContributors = homepageResult ? homepageResult.top_contributors || [] : [];
+  const memberCount = homepageResult?.member_count ?? 0;
+  const featuredJobs = homepageResult?.featured_jobs ?? [];
+  const topContributors = homepageResult?.top_contributors ?? [];
 
   return (
     <div className={'min-h-screen bg-background'}>
@@ -141,7 +131,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
           <Suspense fallback={<HomePageLoading />}>
             <HomeContentSection
               homepageContentData={
-                homepageResult?.content || {
+                homepageResult?.content ?? {
                   categoryData: {},
                   stats: {},
                   weekStart: '',

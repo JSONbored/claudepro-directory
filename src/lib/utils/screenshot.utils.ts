@@ -225,8 +225,8 @@ export async function generateCodeScreenshot(
   } catch (error) {
     logger.error('generateCodeScreenshot failed', normalizeError(error), {
       hasElement: Boolean(element),
-      category,
-      title,
+      category: category ?? 'unknown',
+      title: title ?? 'untitled',
     });
     throw new Error(
       `Screenshot generation failed: ${error instanceof Error ? error.message : 'Unknown error'}`

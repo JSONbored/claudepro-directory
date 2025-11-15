@@ -10,8 +10,8 @@ import { ConfigCard } from '@/src/components/core/domain/cards/config-card';
 import { Button } from '@/src/components/primitives/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/primitives/ui/tabs';
 import { getAnimationConfig } from '@/src/lib/actions/feature-flags.actions';
-import type { UnifiedCategoryConfig } from '@/src/lib/config/category-config';
-import { ROUTES } from '@/src/lib/constants';
+import type { UnifiedCategoryConfig } from '@/src/lib/data/config/category';
+import { ROUTES } from '@/src/lib/data/config/constants';
 import { logger } from '@/src/lib/logger';
 import type { DisplayableContent } from '@/src/lib/types/component.types';
 
@@ -42,7 +42,7 @@ const TabsSectionComponent: FC<TabsSectionProps> = ({
   useEffect(() => {
     async function loadCategories() {
       try {
-        const { getHomepageTabCategories } = await import('@/src/lib/config/category-config');
+        const { getHomepageTabCategories } = await import('@/src/lib/data/config/category');
         const categories = await getHomepageTabCategories();
         setTabCategories(categories);
       } catch (error) {

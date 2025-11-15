@@ -9,7 +9,7 @@ import {
   CardTitle,
 } from '@/src/components/primitives/ui/card';
 import { getPricingConfig } from '@/src/lib/actions/feature-flags.actions';
-import { SOCIAL_LINKS } from '@/src/lib/constants';
+import { SOCIAL_LINKS } from '@/src/lib/data/config/constants';
 import {
   BarChart,
   Briefcase,

@@ -90,3 +90,9 @@ supabase/schema.sql
 
 # Turborepo
 .turbo
+
+supabase/functions/deno.lock
+
+supabase/functions/_shared/utils/email/templates/template-map.json
+
+src/lib/data/README.md

@@ -5,7 +5,7 @@
 import { notFound, redirect } from 'next/navigation';
 import { CompanyForm } from '@/src/components/core/forms/company-form';
 import { getAuthenticatedUser } from '@/src/lib/auth/get-authenticated-user';
-import { getUserCompanyById } from '@/src/lib/data/user-data';
+import { getUserCompanyById } from '@/src/lib/data/account/user-data';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { normalizeError } from '@/src/lib/utils/error.utils';

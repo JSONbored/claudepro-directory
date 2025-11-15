@@ -24,6 +24,9 @@ import {
 } from '../common-styles.ts';
 import { BulletListSection, HeroBlock, StepCardList } from '../components/sections.tsx';
 import { borderRadius, emailTheme, spacing, typography } from '../theme.ts';
+import { EmailFooterNote } from '../components/footer-note.tsx';
+import { buildOnboardingFooter } from '../config/footer-presets.ts';
+import { EmailCtaSection } from '../components/cta.tsx';
 
 export interface OnboardingGettingStartedProps {
   /**
@@ -115,14 +118,16 @@ export function OnboardingGettingStarted({ email }: OnboardingGettingStartedProp
         }))}
       />
 
-      <Section style={contentSection}>
-        <Button
-          href={buildEmailCtaUrl(`${baseUrl}/trending`, utm, { content: 'trending_cta' })}
-          style={primaryButtonStyle}
-        >
-          See All Trending
-        </Button>
-      </Section>
+        <EmailCtaSection
+          utm={utm}
+          buttons={[
+            {
+              preset: 'viewTrending',
+              variant: 'primary',
+              overrides: { label: 'See All Trending' },
+            },
+          ]}
+        />
 
       <Hr style={dividerStyle} />
 
@@ -139,14 +144,7 @@ export function OnboardingGettingStarted({ email }: OnboardingGettingStartedProp
         </Button>
       </Section>
 
-      <Section style={footerNoteSection}>
-        <Text style={footerNoteStyle}>
-          📧 <strong style={strongStyle}>{email}</strong>
-        </Text>
-        <Text style={footerNoteStyle}>
-          This is part 2 of your 5-email onboarding series. Next up: Power User Tips!
-        </Text>
-      </Section>
+        <EmailFooterNote lines={buildOnboardingFooter('step2', { email })} />
     </BaseLayout>
   );
 }

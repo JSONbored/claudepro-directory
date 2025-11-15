@@ -18,11 +18,14 @@ import {
 } from '@/src/components/primitives/ui/card';
 import { Separator } from '@/src/components/primitives/ui/separator';
 import { getAuthenticatedUserFromClient } from '@/src/lib/auth/get-authenticated-user';
+import {
+  type CollectionDetailData,
+  getPublicCollectionDetail,
+} from '@/src/lib/data/community/collections';
 import { trackInteraction } from '@/src/lib/edge/client';
 import { ArrowLeft, ExternalLink } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-import { cachedRPCWithDedupe } from '@/src/lib/supabase/cached-rpc';
 import { createAnonClient } from '@/src/lib/supabase/server-anon';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { logUnhandledPromise, normalizeError } from '@/src/lib/utils/error.utils';
@@ -35,92 +38,15 @@ interface PublicCollectionPageProps {
   params: Promise<{ slug: string; collectionSlug: string }>;
 }
 
-type CollectionDetailData = {
-  user: {
-    id: string;
-    slug: string;
-    name: string;
-    image: string | null;
-    tier: string;
-  };
-  collection: {
-    id: string;
-    user_id: string;
-    slug: string;
-    name: string;
-    description: string | null;
-    is_public: boolean;
-    item_count: number;
-    view_count: number;
-    created_at: string;
-    updated_at: string;
-  };
-  items: Array<{
-    id: string;
-    collection_id: string;
-    content_type: string;
-    content_slug: string;
-    notes: string | null;
-    order: number;
-    added_at: string;
-  }>;
-  isOwner: boolean;
-};
-
-/**
- * Fetch collection detail using optimized RPC
- */
-async function getCollectionDetail(
-  slug: string,
-  collectionSlug: string,
-  viewerId?: string
-): Promise<CollectionDetailData | null> {
-  const rpcParams = {
-    p_user_slug: slug,
-    p_collection_slug: collectionSlug,
-    ...(viewerId && { p_viewer_id: viewerId }),
-  };
-
-  try {
-    const data = await cachedRPCWithDedupe<CollectionDetailData>(
-      'get_user_collection_detail',
-      rpcParams,
-      {
-        tags: ['collections', `collection-${collectionSlug}`, `user-${slug}`],
-        ttlConfigKey: 'cache.content_list.ttl_seconds',
-        keySuffix: viewerId
-          ? `${slug}-${collectionSlug}-viewer-${viewerId}`
-          : `${slug}-${collectionSlug}`,
-      }
-    );
-
-    if (!data) {
-      logger.warn('PublicCollectionPage: collection detail RPC returned null', {
-        slug,
-        collectionSlug,
-        viewerId,
-      });
-      return null;
-    }
-
-    return data;
-  } catch (error) {
-    const normalized = normalizeError(error, 'Failed to load user collection detail');
-    logger.error('PublicCollectionPage: get_user_collection_detail threw', normalized, {
-      slug,
-      collectionSlug,
-      viewerId,
-    });
-    throw normalized;
-  }
-}
-
 export async function generateMetadata({ params }: PublicCollectionPageProps): Promise<Metadata> {
   const { slug, collectionSlug } = await params;
 
   let collectionData: CollectionDetailData | null = null;
   try {
-    collectionData = await getCollectionDetail(slug, collectionSlug);
+    collectionData = await getPublicCollectionDetail({
+      userSlug: slug,
+      collectionSlug,
+    });
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load collection detail for metadata');
     logger.error('PublicCollectionPage: metadata fetch failed', normalized, {
@@ -149,13 +75,17 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
   // Single RPC call replaces 3 separate queries (user, collection, items)
   let collectionData: CollectionDetailData | null = null;
   try {
-    collectionData = await getCollectionDetail(slug, collectionSlug, currentUser?.id);
+    collectionData = await getPublicCollectionDetail({
+      userSlug: slug,
+      collectionSlug,
+      ...(currentUser?.id ? { viewerId: currentUser.id } : {}),
+    });
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load collection detail for page render');
-    logger.error('PublicCollectionPage: getCollectionDetail threw', normalized, {
+    logger.error('PublicCollectionPage: getPublicCollectionDetail threw', normalized, {
       slug,
       collectionSlug,
-      viewerId: currentUser?.id,
+      ...(currentUser?.id ? { viewerId: currentUser.id } : {}),
     });
     throw normalized;
   }
@@ -165,7 +95,7 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
     notFound();
   }
 
-  const { user: profileUser, collection, items, isOwner } = collectionData;
+  const { user: profileUser, collection, items, isOwner } = collectionData as CollectionDetailData;
 
   // Track view (async, non-blocking)
   trackInteraction({

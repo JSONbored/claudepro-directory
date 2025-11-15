@@ -1,4 +1,4 @@
-import type { CategoryId } from '@/src/lib/config/category-config.types';
+import type { CategoryId } from '@/src/lib/data/config/category/category-config.types';
 import type { LucideIcon } from '@/src/lib/icons';
 import type { ContentItem } from '@/src/lib/types/component.types';
 

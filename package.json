@@ -53,6 +53,7 @@
     "lint:auth-guards": "tsx scripts/lint/check-auth-guards.ts",
     "format": "ultracite fix",
     "email:dev": "email dev --dir src/emails --port 3001",
+    "email:upload": "deno run --env-file=.env.edge.local -A supabase/functions/_shared/scripts/upload-resend-templates.ts",
     "prepare": "command -v lefthook >/dev/null 2>&1 && lefthook install || echo 'Skipping lefthook install (not available)'",
     "analyze:architecture": "npx skott --displayMode=webapp",
     "analyze:unused": "npx knip -c config/tools/knip.json",

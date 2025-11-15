@@ -4,7 +4,7 @@
 
 import { type NextRequest, NextResponse } from 'next/server';
 import { subscribeViaOAuth } from '@/src/lib/actions/newsletter.actions';
-import { SECURITY_CONFIG } from '@/src/lib/constants';
+import { SECURITY_CONFIG } from '@/src/lib/data/config/constants';
 import { logger } from '@/src/lib/logger';
 import { createClient } from '@/src/lib/supabase/server';
 
@@ -55,6 +55,7 @@ export async function GET(request: NextRequest) {
             logger.warn('Newsletter opt-in via auth callback failed', {
               userId: user.id,
               error: newsletterResult.error ?? 'unknown_error',
+              ...(newsletterResult.traceId ? { traceId: newsletterResult.traceId } : {}),
             });
           }
         } else {

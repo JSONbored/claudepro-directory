@@ -9,7 +9,7 @@ import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge
 import { StructuredData } from '@/src/components/core/infra/structured-data';
 import { Button } from '@/src/components/primitives/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
-import { ROUTES } from '@/src/lib/constants';
+import { ROUTES } from '@/src/lib/data/config/constants';
 import { getJobBySlug } from '@/src/lib/data/jobs';
 import {
   ArrowLeft,

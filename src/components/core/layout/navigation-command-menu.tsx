@@ -11,7 +11,7 @@ import {
   CommandList,
   CommandSeparator,
 } from '@/src/components/primitives/ui/command';
-import type { NavigationData, NavigationItem } from '@/src/lib/data/navigation';
+import type { NavigationData, NavigationItem } from '@/src/lib/data/content/navigation';
 import * as Icons from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 

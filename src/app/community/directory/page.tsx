@@ -2,41 +2,25 @@ import { Suspense } from 'react';
 import { ContributorsSidebar } from '@/src/components/features/community/contributors-sidebar';
 import { ProfileSearchClient } from '@/src/components/features/community/profile-search';
 import { Skeleton } from '@/src/components/primitives/feedback/loading-skeleton';
+import {
+  type CommunityDirectoryResult,
+  getCommunityDirectory,
+} from '@/src/lib/data/community/directory';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-import { cachedRPCWithDedupe } from '@/src/lib/supabase/cached-rpc';
 import { normalizeError } from '@/src/lib/utils/error.utils';
-import type { Tables } from '@/src/types/database.types';
 
 export const metadata = generatePageMetadata('/community/directory');
 
 export const revalidate = false;
 
 async function CommunityDirectoryContent({ searchQuery }: { searchQuery: string }) {
-  // Consolidated RPC: 3 queries + TypeScript deduplication → 1 (67% reduction)
-  type DirectoryResponse = {
-    all_users: Array<Tables<'users'>>;
-    top_contributors: Array<Tables<'users'>>;
-    new_members: Array<Tables<'users'>>;
-  };
-
-  const rpcParams = searchQuery ? { p_search_query: searchQuery, p_limit: 100 } : { p_limit: 100 };
-
-  let directoryData: DirectoryResponse | null = null;
+  let directoryData: CommunityDirectoryResult | null = null;
   try {
-    directoryData = await cachedRPCWithDedupe<DirectoryResponse>(
-      'get_community_directory',
-      rpcParams,
-      {
-        tags: ['community', 'users'],
-        ttlConfigKey: 'cache.community.ttl_seconds',
-        keySuffix: searchQuery || 'all',
-        useAuthClient: true,
-      }
-    );
+    directoryData = await getCommunityDirectory({ searchQuery, limit: 100 });
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load community directory');
-    logger.error('CommunityDirectoryContent: get_community_directory RPC failed', normalized, {
+    logger.error('CommunityDirectoryContent: getCommunityDirectory failed', normalized, {
       hasQuery: Boolean(searchQuery),
     });
     throw normalized;
@@ -48,7 +32,7 @@ async function CommunityDirectoryContent({ searchQuery }: { searchQuery: string 
     });
   }
 
-  const { all_users, top_contributors, new_members } = directoryData || {
+  const { all_users, top_contributors, new_members } = directoryData ?? {
     all_users: [],
     top_contributors: [],
     new_members: [],

@@ -12,7 +12,7 @@ import { AnnouncementBannerClient } from '@/src/components/core/layout/announcem
 import { Navigation } from '@/src/components/core/layout/navigation';
 import { useConfetti } from '@/src/hooks/use-confetti';
 import { checkConfettiEnabled } from '@/src/lib/actions/feature-flags.actions';
-import type { NavigationData } from '@/src/lib/data/navigation';
+import type { NavigationData } from '@/src/lib/data/content/navigation';
 import { logger } from '@/src/lib/logger';
 import { DIMENSIONS } from '@/src/lib/ui-constants';
 import { logClientWarning } from '@/src/lib/utils/error.utils';

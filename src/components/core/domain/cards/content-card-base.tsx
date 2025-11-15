@@ -38,7 +38,7 @@ import {
   CardTitle,
 } from '@/src/components/primitives/ui/card';
 import { type UseCardNavigationOptions, useCardNavigation } from '@/src/hooks/use-card-navigation';
-import { APP_CONFIG, SOCIAL_LINKS } from '@/src/lib/constants';
+import { APP_CONFIG, SOCIAL_LINKS } from '@/src/lib/data/config/constants';
 import { POSITION_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { getViewTransitionName } from '@/src/lib/utils/view-transitions.utils';
 

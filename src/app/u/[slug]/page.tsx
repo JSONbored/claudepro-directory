@@ -17,10 +17,10 @@ import {
   CardTitle,
 } from '@/src/components/primitives/ui/card';
 import { getAuthenticatedUserFromClient } from '@/src/lib/auth/get-authenticated-user';
+import { getPublicUserProfile } from '@/src/lib/data/community/profile';
 import { FolderOpen, Globe, Users } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-import { cachedRPCWithDedupe } from '@/src/lib/supabase/cached-rpc';
 import { createAnonClient } from '@/src/lib/supabase/server-anon';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { normalizeError } from '@/src/lib/utils/error.utils';
@@ -51,25 +51,17 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
     context: 'UserProfilePage',
   });
 
-  // Consolidated RPC: 4 calls → 1 (75% reduction)
-  // get_user_profile() includes: profile + stats + posts + collections + contributions
-  const rpcParams = {
-    p_user_slug: slug,
-    ...(currentUser?.id && { p_viewer_id: currentUser.id }),
-  };
-
   let profileData: GetUserProfileReturn | null = null;
   try {
-    profileData = await cachedRPCWithDedupe<GetUserProfileReturn>('get_user_profile', rpcParams, {
-      tags: ['users', `user-${slug}`],
-      ttlConfigKey: 'cache.user_profile.ttl_seconds',
-      keySuffix: currentUser?.id ? `${slug}-viewer-${currentUser.id}` : slug,
+    profileData = await getPublicUserProfile({
+      slug,
+      ...(currentUser?.id ? { viewerId: currentUser.id } : {}),
     });
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load user profile detail');
     logger.error('UserProfilePage: get_user_profile threw', normalized, {
       slug,
-      viewerId: currentUser?.id,
+      ...(currentUser?.id ? { viewerId: currentUser.id } : {}),
     });
     throw normalized;
   }

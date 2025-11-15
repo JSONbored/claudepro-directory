@@ -14,7 +14,7 @@ const NewsletterCTAVariant = dynamic(
 );
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
-import { ROUTES, SOCIAL_LINKS } from '@/src/lib/constants';
+import { ROUTES, SOCIAL_LINKS } from '@/src/lib/data/config/constants';
 import { Github, MessageCircle, MessageSquare, Twitter, Users } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';

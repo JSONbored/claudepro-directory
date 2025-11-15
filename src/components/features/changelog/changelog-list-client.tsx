@@ -10,13 +10,13 @@ import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge
 import { BaseCard } from '@/src/components/core/domain/cards/content-card-base';
 import { CategoryFilter } from '@/src/components/features/changelog/changelog-category-filter';
 import { Tabs, TabsContent } from '@/src/components/primitives/ui/tabs';
-import type { ChangelogCategory, ChangelogEntry } from '@/src/lib/changelog/loader';
 import {
   formatChangelogDateShort,
   getChangelogPath,
   getNonEmptyCategories,
   getRelativeTime,
 } from '@/src/lib/changelog/utils';
+import type { ChangelogCategory, ChangelogEntry } from '@/src/lib/data/changelog';
 import { ArrowRight, Calendar } from '@/src/lib/icons';
 import { BADGE_COLORS, UI_CLASSES } from '@/src/lib/ui-constants';
 

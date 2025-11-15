@@ -7,7 +7,7 @@ import { notFound, redirect } from 'next/navigation';
 import { JobForm } from '@/src/components/core/forms/job-form';
 import { type UpdateJobInput, updateJob } from '@/src/lib/actions/jobs.actions';
 import { getAuthenticatedUser } from '@/src/lib/auth/get-authenticated-user';
-import { getUserJobById } from '@/src/lib/data/user-data';
+import { getUserJobById } from '@/src/lib/data/account/user-data';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';

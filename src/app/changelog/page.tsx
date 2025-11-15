@@ -38,8 +38,8 @@ const NewsletterCTAVariant = dynamic(
   }
 );
 
-import { getAllChangelogEntries } from '@/src/lib/changelog/loader';
-import { APP_CONFIG } from '@/src/lib/constants';
+import { getAllChangelogEntries } from '@/src/lib/data/changelog';
+import { APP_CONFIG } from '@/src/lib/data/config/constants';
 import { ArrowLeft } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';

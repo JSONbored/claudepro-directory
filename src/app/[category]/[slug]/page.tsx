@@ -16,12 +16,12 @@ import {
   getCategoryConfig,
   isValidCategory,
   VALID_CATEGORIES,
-} from '@/src/lib/config/category-config';
-import { type ContentItem, getContentByCategory } from '@/src/lib/content/supabase-content-loader';
+} from '@/src/lib/data/config/category';
+import { type ContentItem, getContentByCategory } from '@/src/lib/data/content';
+import { type ContentDetailResult, getContentDetailComplete } from '@/src/lib/data/content/detail';
 import { featureFlags } from '@/src/lib/flags';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-import { cachedRPCWithDedupe } from '@/src/lib/supabase/cached-rpc';
 import { normalizeError } from '@/src/lib/utils/error.utils';
 import type { Database } from '@/src/types/database.types';
 
@@ -84,20 +84,10 @@ export async function generateMetadata({
     });
   }
 
-  let data: unknown | null = null;
+  let itemMeta: ContentItem | null = null;
   try {
-    data = await cachedRPCWithDedupe(
-      'get_content_detail_complete',
-      {
-        p_category: category,
-        p_slug: slug,
-      },
-      {
-        tags: ['content', `content-${slug}`],
-        ttlConfigKey: 'cache.content_detail.ttl_seconds',
-        keySuffix: `${category}-${slug}`,
-      }
-    );
+    const data = await getContentDetailComplete({ category, slug });
+    itemMeta = data?.content ?? null;
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load content detail for metadata');
     logger.error('DetailPage: metadata RPC threw', normalized, {
@@ -106,14 +96,12 @@ export async function generateMetadata({
     });
   }
 
-  const itemMeta = data ? (data as { content: ContentItem }).content : null;
-
   if (!itemMeta) {
     logger.warn('No content found in generateMetadata', {
       category,
       slug,
       phase: 'generateMetadata',
-      hasData: !!data,
+      hasData: false,
     });
   }
 
@@ -171,28 +159,7 @@ export default async function DetailPage({
   // Consolidated RPC: 2-3 calls → 1 (50-67% reduction)
   // get_content_detail_complete() includes: content + analytics + related items + collection items
   // Use anon client for ISR/static generation (no cookies/auth)
-  let detailData: unknown | null = null;
-  try {
-    detailData = await cachedRPCWithDedupe(
-      'get_content_detail_complete',
-      {
-        p_category: category,
-        p_slug: slug,
-      },
-      {
-        tags: ['content', `content-${slug}`],
-        ttlConfigKey: 'cache.content_detail.ttl_seconds',
-        keySuffix: `${category}-${slug}`,
-      }
-    );
-  } catch (error) {
-    const normalized = normalizeError(error, 'Failed to load content detail');
-    logger.error('DetailPage: get_content_detail_complete threw', normalized, {
-      category,
-      slug,
-    });
-    throw normalized;
-  }
+  const detailData = await getContentDetailComplete({ category, slug });
 
   if (!detailData) {
     logger.error(
@@ -207,7 +174,7 @@ export default async function DetailPage({
   }
 
   // Extract data from RPC response (returns Json type, cast to expected structure)
-  const response = detailData as Record<string, unknown>;
+  const response = detailData as ContentDetailResult;
   const fullItem = response.content as ContentItem;
   const itemData = fullItem;
 

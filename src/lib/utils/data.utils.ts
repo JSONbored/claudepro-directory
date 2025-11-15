@@ -218,9 +218,11 @@ export function formatDate(date: string | Date, style: DateFormatStyle = 'long')
       day: 'numeric',
     });
   } catch (error) {
-    logger.warn('formatDate failed', normalizeError(error), {
+    const normalized = normalizeError(error, 'formatDate failed');
+    logger.warn('formatDate failed', {
       input: typeof date === 'string' ? date : date.toString(),
       style,
+      error: normalized.message,
     });
     return typeof date === 'string' ? date : date.toString();
   }
@@ -274,9 +276,11 @@ export function formatRelativeDate(date: string | Date, options: RelativeDateOpt
     }
     return `${diffYears} ${diffYears === 1 ? 'year' : 'years'} ago`;
   } catch (error) {
-    logger.warn('formatRelativeDate failed', normalizeError(error), {
+    const normalized = normalizeError(error, 'formatRelativeDate failed');
+    logger.warn('formatRelativeDate failed', {
       input: typeof date === 'string' ? date : date.toString(),
       style,
+      error: normalized.message,
     });
     return typeof date === 'string' ? date : date.toString();
   }

@@ -22,9 +22,9 @@ import {
   getCategoryConfigs,
   getCategoryStatsConfig,
   getHomepageFeaturedCategories,
-} from '@/src/lib/config/category-config';
-import { ROUTES } from '@/src/lib/constants';
-import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
+} from '@/src/lib/data/config/category';
+import { ROUTES } from '@/src/lib/data/config/constants';
+import type { ContentItem } from '@/src/lib/data/content';
 import { logger } from '@/src/lib/logger';
 import type { DisplayableContent, FilterState } from '@/src/lib/types/component.types';
 import type { HomePageClientProps } from '@/src/lib/types/page-props.types';

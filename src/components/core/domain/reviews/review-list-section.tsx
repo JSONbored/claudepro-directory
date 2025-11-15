@@ -12,7 +12,7 @@ import {
   getReviewsWithStats,
   markReviewHelpful,
 } from '@/src/lib/actions/content.actions';
-import { isValidCategory } from '@/src/lib/config/category-config';
+import { isValidCategory } from '@/src/lib/data/config/category';
 import { Edit, Star, ThumbsUp, Trash } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { formatDistanceToNow } from '@/src/lib/utils/data.utils';

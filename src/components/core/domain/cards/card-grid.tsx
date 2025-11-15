@@ -12,9 +12,9 @@ import { ConfigCard } from '@/src/components/core/domain/cards/config-card';
 import { ErrorBoundary } from '@/src/components/core/infra/error-boundary';
 import { InlineSpinner } from '@/src/components/primitives/feedback/loading-factory';
 import { useInfiniteScroll } from '@/src/hooks/use-infinite-scroll';
-import type { DisplayableContent } from '@/src/lib/types/component types';
+import type { DisplayableContent } from '@/src/lib/types/component.types';
+import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { logUnhandledPromise } from '@/src/lib/utils/error.utils';
-import { UI_CLASSES } from '@/src.lib/ui-constants';
 
 export type GridVariant = 'normal' | 'tight' | 'wide' | 'list';
 

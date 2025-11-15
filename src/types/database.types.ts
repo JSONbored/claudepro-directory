@@ -3156,6 +3156,48 @@ export type Database = {
         Args: { p_email: string }
         Returns: undefined
       }
+      ensure_user_record: {
+        Args: {
+          p_email?: string
+          p_follow_email?: boolean
+          p_id: string
+          p_image?: string
+          p_name?: string
+          p_profile_public?: boolean
+        }
+        Returns: {
+          bio: string | null
+          bookmark_count: number
+          created_at: string
+          display_name: string | null
+          email: string | null
+          follow_email: boolean | null
+          follower_count: number
+          following_count: number
+          hero: string | null
+          id: string
+          image: string | null
+          interests: Json | null
+          json_ld: Json | null
+          name: string | null
+          profile_public: boolean | null
+          public: boolean | null
+          slug: string | null
+          social_x_link: string | null
+          status: string | null
+          submission_count: number
+          tier: string | null
+          updated_at: string
+          website: string | null
+          work: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "users"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       expire_jobs: {
         Args: never
         Returns: {
@@ -3438,6 +3480,24 @@ export type Database = {
       get_companies_list: {
         Args: { p_limit?: number; p_offset?: number }
         Returns: Json
+      }
+      get_company_admin_profile: {
+        Args: { p_company_id: string }
+        Returns: {
+          created_at: string
+          description: string
+          featured: boolean
+          id: string
+          industry: string
+          logo: string
+          name: string
+          owner_id: string
+          size: string
+          slug: string
+          updated_at: string
+          using_cursor_since: string
+          website: string
+        }[]
       }
       get_company_job_stats: {
         Args: { p_company_slug?: string }
@@ -3914,6 +3974,13 @@ export type Database = {
           lastmod: string
           path: string
           priority: number
+        }[]
+      }
+      get_skill_storage_path: {
+        Args: { p_slug: string }
+        Returns: {
+          bucket: string
+          object_path: string
         }[]
       }
       get_sponsorship_analytics: {

@@ -26,6 +26,7 @@ import {
 import { addUTMToURL } from './email-utm.ts';
 import type { EmailUTMParams } from './utm-templates.ts';
 import { borderRadius, brandColors, emailTheme, spacing, typography } from './theme.ts';
+import { HeyClaudeEmailLogo } from './components/heyclaude-logo.tsx';
 
 export interface BaseLayoutProps {
   /**
@@ -92,14 +93,12 @@ export function BaseLayout({
       <Body style={bodyStyle}>
         <Container style={containerStyle}>
           {/* Header with Claude branding */}
-          <Section style={headerStyle}>
-            <Link href={utmLink(baseUrl, 'header_logo')} style={logoLinkStyle}>
-              <Text style={logoTextStyle}>
-                <span style={logoClaudeStyle}>Claude</span>
-                <span style={logoProStyle}>Pro</span>
-              </Text>
-            </Link>
-          </Section>
+            <Section style={headerStyle}>
+              <Link href={utmLink(baseUrl, 'header_logo')} style={logoLinkStyle}>
+                <HeyClaudeEmailLogo size="md" />
+              </Link>
+              <Text style={taglineStyle}>The ultimate Claude directory</Text>
+            </Section>
 
           {/* Main content area */}
           <Section style={contentStyle}>{children}</Section>
@@ -117,12 +116,12 @@ export function BaseLayout({
                     </Link>
                     .
                   </Text>
-                  <Text style={footerTextStyle}>
-                    <Link href="{{unsubscribe_url}}" style={footerLinkStyle}>
+                    <Text style={footerTextStyle}>
+                      <Link href="{{{UNSUBSCRIBE_URL}}}" style={footerLinkStyle}>
                       Unsubscribe
                     </Link>
                     {' · '}
-                    <Link href="{{preferences_url}}" style={footerLinkStyle}>
+                      <Link href="{{{PREFERENCES_URL}}}" style={footerLinkStyle}>
                       Email Preferences
                     </Link>
                     {' · '}
@@ -197,19 +196,12 @@ const logoLinkStyle: React.CSSProperties = {
   display: 'inline-block',
 };
 
-const logoTextStyle: React.CSSProperties = {
-  fontSize: typography.fontSize['2xl'],
-  fontWeight: typography.fontWeight.bold,
-  letterSpacing: '-0.02em',
-  margin: 0,
-};
-
-const logoClaudeStyle: React.CSSProperties = {
-  color: emailTheme.textPrimary,
-};
-
-const logoProStyle: React.CSSProperties = {
-  color: brandColors.primary,
+const taglineStyle: React.CSSProperties = {
+  marginTop: spacing.sm,
+  fontSize: typography.fontSize.sm,
+  color: emailTheme.textSecondary,
+  textTransform: 'uppercase',
+  letterSpacing: '0.2em',
 };
 
 const contentStyle: React.CSSProperties = {

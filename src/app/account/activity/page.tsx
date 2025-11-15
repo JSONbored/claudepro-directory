@@ -10,7 +10,7 @@ import {
 } from '@/src/components/primitives/ui/card';
 import { getActivitySummary, getActivityTimeline } from '@/src/lib/actions/user.actions';
 import { getAuthenticatedUser } from '@/src/lib/auth/get-authenticated-user';
-import { ROUTES } from '@/src/lib/constants';
+import { ROUTES } from '@/src/lib/data/config/constants';
 import { FileText, GitPullRequest, MessageSquare, ThumbsUp } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';

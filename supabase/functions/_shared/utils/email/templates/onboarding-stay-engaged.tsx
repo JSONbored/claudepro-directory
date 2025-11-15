@@ -10,8 +10,6 @@ import { EMAIL_UTM_TEMPLATES } from '../utm-templates.ts';
 import { BaseLayout, renderEmailTemplate } from '../base-template.tsx';
 import {
   contentSection,
-  ctaSection,
-  ctaTitleStyle,
   dividerStyle,
   footerNoteSection,
   footerNoteStyle,
@@ -22,6 +20,9 @@ import {
 } from '../common-styles.ts';
 import { BulletListSection, HeroBlock, CardListSection } from '../components/sections.tsx';
 import { borderRadius, emailTheme, spacing, typography } from '../theme.ts';
+import { EmailFooterNote } from '../components/footer-note.tsx';
+import { buildOnboardingFooter } from '../config/footer-presets.ts';
+import { EmailCtaSection } from '../components/cta.tsx';
 
 export interface OnboardingStayEngagedProps {
   email: string;
@@ -103,26 +104,15 @@ export function OnboardingStayEngaged({ email }: OnboardingStayEngagedProps) {
 
       <Hr style={dividerStyle} />
 
-      <Section style={ctaSection}>
-        <Text style={ctaTitleStyle}>Stay Connected</Text>
-        <Text style={paragraphStyle}>
-          Continue exploring new configurations and join our growing community.
-        </Text>
-
-        <Button
-          href={buildEmailCtaUrl(baseUrl, utm, { content: 'browse_cta' })}
-          style={secondaryButtonStyle}
-        >
-          Browse Directory
-        </Button>
-
-        <Button
-          href={buildEmailCtaUrl(`${baseUrl}/trending`, utm, { content: 'trending_cta' })}
-          style={secondaryButtonStyle}
-        >
-          View Trending
-        </Button>
-      </Section>
+        <EmailCtaSection
+          utm={utm}
+          title="Stay Connected"
+          description="Continue exploring new configurations and join our growing community."
+          buttons={[
+            { preset: 'browseDirectory', variant: 'secondary' },
+            { preset: 'viewTrending', variant: 'secondary' },
+          ]}
+        />
 
       <Hr style={dividerStyle} />
 
@@ -133,17 +123,17 @@ export function OnboardingStayEngaged({ email }: OnboardingStayEngagedProps) {
         </Text>
       </Section>
 
-      <Section style={footerNoteSection}>
-        <Text style={footerNoteStyle}>
-          📧 <strong style={strongStyle}>{email}</strong>
-        </Text>
-        <Text style={footerNoteStyle}>
-          This was the final email in your onboarding series. You'll continue to receive weekly digests with the latest content.
-        </Text>
-      </Section>
+        <EmailFooterNote lines={buildOnboardingFooter('step5', { email })} />
     </BaseLayout>
   );
 }
+
+const ctaTitleStyle: React.CSSProperties = {
+  fontSize: typography.fontSize.xl,
+  fontWeight: typography.fontWeight.semibold,
+  color: emailTheme.textPrimary,
+  margin: `0 0 ${spacing.md} 0`,
+};
 
 const journeySection: React.CSSProperties = {
   backgroundColor: emailTheme.bgTertiary,

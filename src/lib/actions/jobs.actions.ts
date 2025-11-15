@@ -7,11 +7,10 @@
 
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { z } from 'zod';
+import { invalidateByKeys, runRpc } from '@/src/lib/actions/action-helpers';
 import { authedAction } from '@/src/lib/actions/safe-action';
-import { cacheConfigs } from '@/src/lib/flags';
+import type { CacheInvalidateKey } from '@/src/lib/data/config/cache-config';
 import { logger } from '@/src/lib/logger';
-import { revalidateCacheTags } from '@/src/lib/supabase/cache-helpers';
-import { createClient } from '@/src/lib/supabase/server';
 import { logActionFailure } from '@/src/lib/utils/error.utils';
 import type { Database } from '@/src/types/database.types';
 
@@ -80,6 +79,16 @@ const toggleJobStatusSchema = z.object({
   ]),
 });
 
+async function invalidateJobCaches(options: {
+  keys?: CacheInvalidateKey[];
+  extraTags?: string[];
+}): Promise<void> {
+  await invalidateByKeys({
+    ...(options.keys ? { invalidateKeys: options.keys } : {}),
+    ...(options.extraTags ? { extraTags: options.extraTags } : {}),
+  });
+}
+
 // =====================================================
 // JOB CRUD ACTIONS
 // =====================================================
@@ -96,30 +105,28 @@ export const createJob = authedAction
   .schema(createJobSchema)
   .action(async ({ parsedInput, ctx }) => {
     try {
-      const supabase = await createClient();
-
-      // Call RPC function (handles company auto-linking, pricing calculation)
-      const { data, error } = await supabase.rpc('create_job_with_payment', {
-        p_user_id: ctx.userId,
-        p_job_data: parsedInput,
-        p_tier: parsedInput.tier,
-        p_plan: parsedInput.plan,
-      });
-
-      if (error) {
-        throw logActionFailure('jobs.createJob.rpc', new Error(error.message), {
-          userId: ctx.userId,
-          title: parsedInput.title,
-        });
-      }
-
-      const result = data as unknown as {
+      type CreateJobRpcResult = {
         success: boolean;
         job_id: string;
         company_id: string;
         payment_amount: number;
         requires_payment: boolean;
       };
+
+      const result = await runRpc<CreateJobRpcResult>(
+        'create_job_with_payment',
+        {
+          p_user_id: ctx.userId,
+          p_job_data: parsedInput,
+          p_tier: parsedInput.tier,
+          p_plan: parsedInput.plan,
+        },
+        {
+          action: 'jobs.createJob.rpc',
+          userId: ctx.userId,
+          meta: { title: parsedInput.title },
+        }
+      );
 
       if (!result.success) {
         throw new Error('Job creation failed');
@@ -195,9 +202,9 @@ export const createJob = authedAction
       revalidatePath('/jobs');
 
       // Statsig-powered cache invalidation
-      const config = await cacheConfigs();
-      const invalidateTags = config['cache.invalidate.job_create'] as string[];
-      revalidateCacheTags(invalidateTags);
+      await invalidateJobCaches({
+        keys: ['cache.invalidate.job_create'],
+      });
       if (result.company_id) {
         revalidateTag(`company-${result.company_id}`, 'default');
         revalidateTag(`company-id-${result.company_id}`, 'default');
@@ -229,28 +236,26 @@ export const updateJob = authedAction
   .schema(updateJobSchema)
   .action(async ({ parsedInput, ctx }) => {
     try {
-      const supabase = await createClient();
-
       const { job_id, ...updates } = parsedInput;
 
-      // Call RPC function (handles ownership check, validation)
-      const { data, error } = await supabase.rpc('update_job', {
-        p_job_id: job_id,
-        p_user_id: ctx.userId,
-        p_updates: updates,
-      });
-
-      if (error) {
-        throw logActionFailure('jobs.updateJob.rpc', new Error(error.message), {
-          userId: ctx.userId,
-          jobId: job_id,
-        });
-      }
-
-      const result = data as unknown as {
+      type UpdateJobRpcResult = {
         success: boolean;
         job_id: string;
       };
+
+      const result = await runRpc<UpdateJobRpcResult>(
+        'update_job',
+        {
+          p_job_id: job_id,
+          p_user_id: ctx.userId,
+          p_updates: updates,
+        },
+        {
+          action: 'jobs.updateJob.rpc',
+          userId: ctx.userId,
+          meta: { jobId: job_id },
+        }
+      );
 
       if (!result.success) {
         throw new Error('Job update failed');
@@ -266,9 +271,9 @@ export const updateJob = authedAction
       revalidatePath('/jobs');
 
       // Statsig-powered cache invalidation
-      const config = await cacheConfigs();
-      const invalidateTags = config['cache.invalidate.job_update'] as string[];
-      revalidateCacheTags(invalidateTags);
+      await invalidateJobCaches({
+        keys: ['cache.invalidate.job_update'],
+      });
       const companyId = updates.company_id ?? parsedInput.company_id ?? null;
       if (companyId) {
         revalidateTag(`company-${companyId}`, 'default');
@@ -297,25 +302,23 @@ export const deleteJob = authedAction
   .schema(deleteJobSchema)
   .action(async ({ parsedInput, ctx }) => {
     try {
-      const supabase = await createClient();
-
-      // Call RPC function (handles ownership check, soft delete)
-      const { data, error } = await supabase.rpc('delete_job', {
-        p_job_id: parsedInput.job_id,
-        p_user_id: ctx.userId,
-      });
-
-      if (error) {
-        throw logActionFailure('jobs.deleteJob.rpc', new Error(error.message), {
-          userId: ctx.userId,
-          jobId: parsedInput.job_id,
-        });
-      }
-
-      const result = data as unknown as {
+      type DeleteJobRpcResult = {
         success: boolean;
         job_id: string;
       };
+
+      const result = await runRpc<DeleteJobRpcResult>(
+        'delete_job',
+        {
+          p_job_id: parsedInput.job_id,
+          p_user_id: ctx.userId,
+        },
+        {
+          action: 'jobs.deleteJob.rpc',
+          userId: ctx.userId,
+          meta: { jobId: parsedInput.job_id },
+        }
+      );
 
       if (!result.success) {
         throw new Error('Job deletion failed');
@@ -330,9 +333,9 @@ export const deleteJob = authedAction
       revalidatePath('/jobs');
 
       // Statsig-powered cache invalidation
-      const config = await cacheConfigs();
-      const invalidateTags = config['cache.invalidate.job_delete'] as string[];
-      revalidateCacheTags(invalidateTags);
+      await invalidateJobCaches({
+        keys: ['cache.invalidate.job_delete'],
+      });
       revalidateTag(`job-${result.job_id}`, 'default');
 
       return {
@@ -356,28 +359,28 @@ export const toggleJobStatus = authedAction
   .schema(toggleJobStatusSchema)
   .action(async ({ parsedInput, ctx }) => {
     try {
-      const supabase = await createClient();
-
-      // Call RPC function (handles ownership check, status transitions)
-      const { data, error } = await supabase.rpc('toggle_job_status', {
-        p_job_id: parsedInput.job_id,
-        p_user_id: ctx.userId,
-        p_new_status: parsedInput.new_status,
-      });
-
-      if (error) {
-        throw logActionFailure('jobs.toggleJobStatus.rpc', new Error(error.message), {
-          userId: ctx.userId,
-          jobId: parsedInput.job_id,
-          newStatus: parsedInput.new_status,
-        });
-      }
-
-      const result = data as unknown as {
+      type ToggleJobStatusRpcResult = {
         success: boolean;
         old_status: Database['public']['Enums']['job_status'];
         new_status: Database['public']['Enums']['job_status'];
       };
+
+      const result = await runRpc<ToggleJobStatusRpcResult>(
+        'toggle_job_status',
+        {
+          p_job_id: parsedInput.job_id,
+          p_user_id: ctx.userId,
+          p_new_status: parsedInput.new_status,
+        },
+        {
+          action: 'jobs.toggleJobStatus.rpc',
+          userId: ctx.userId,
+          meta: {
+            jobId: parsedInput.job_id,
+            newStatus: parsedInput.new_status,
+          },
+        }
+      );
 
       if (!result.success) {
         throw new Error('Job status toggle failed');
@@ -394,9 +397,9 @@ export const toggleJobStatus = authedAction
       revalidatePath('/jobs');
 
       // Statsig-powered cache invalidation
-      const config = await cacheConfigs();
-      const invalidateTags = config['cache.invalidate.job_status'] as string[];
-      revalidateCacheTags(invalidateTags);
+      await invalidateJobCaches({
+        keys: ['cache.invalidate.job_status'],
+      });
       revalidateTag(`job-${parsedInput.job_id}`, 'default');
 
       return {

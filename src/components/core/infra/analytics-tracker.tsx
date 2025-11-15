@@ -7,7 +7,7 @@
 
 import { useEffect, useState } from 'react';
 import { getPollingConfig } from '@/src/lib/actions/feature-flags.actions';
-import type { CategoryId } from '@/src/lib/config/category-config';
+import type { CategoryId } from '@/src/lib/data/config/category';
 import { trackInteraction } from '@/src/lib/edge/client';
 import { logger } from '@/src/lib/logger';
 import { logClientWarning, logUnhandledPromise } from '@/src/lib/utils/error.utils';

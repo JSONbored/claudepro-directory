@@ -33,9 +33,11 @@ export const highlightCode = cache(
 
       return `<div class="code-block-wrapper"><pre class="code-block-pre"><code class="sugar-high">${highlighted}</code></pre></div>`;
     } catch (error) {
-      logger.warn('highlightCode: highlight failed', normalizeError(error), {
+      const normalized = normalizeError(error, 'highlightCode failed');
+      logger.warn('highlightCode: highlight failed', {
         preview: code.slice(0, 80),
         language: _language,
+        error: normalized.message,
       });
       const escapedCode = code
         .replace(/&/g, '&amp;')

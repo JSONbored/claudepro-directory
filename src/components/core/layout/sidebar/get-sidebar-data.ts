@@ -3,7 +3,7 @@
  * Uses cached trending helper (shared with data-api) for internal consistency.
  */
 
-import { getTrendingPageData } from '@/src/lib/data/trending';
+import { getTrendingPageData } from '@/src/lib/data/content/trending';
 import { logger } from '@/src/lib/logger';
 import { normalizeError } from '@/src/lib/utils/error.utils';
 

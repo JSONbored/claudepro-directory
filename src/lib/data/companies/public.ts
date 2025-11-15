@@ -1,13 +1,13 @@
 'use server';
 
 /**
- * Companies data layer - Edge-cached RPC wrappers
+ * Companies data layer - Edge/public RPC wrappers
  */
 
 import { unstable_cache } from 'next/cache';
-import { cacheConfigs } from '@/src/lib/flags';
+import { getCacheTtl } from '@/src/lib/data/config/cache-config';
+import { fetchCachedRpc } from '@/src/lib/data/helpers';
 import { logger } from '@/src/lib/logger';
-import { cachedRPCWithDedupe } from '@/src/lib/supabase/cached-rpc';
 import type { Database } from '@/src/types/database.types';
 
 type CompanyRow = Database['public']['Tables']['companies']['Row'];
@@ -57,60 +57,34 @@ const EDGE_SEARCH_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
   ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/unified-search`
   : null;
 
-/**
- * Get company profile with active jobs and stats (public, cached)
- * Uses get_company_profile() RPC which leverages company_job_stats materialized view
- */
 export async function getCompanyProfile(slug: string): Promise<CompanyProfile | null> {
-  try {
-    const data = await cachedRPCWithDedupe<CompanyProfile>(
-      'get_company_profile',
-      { p_slug: slug },
-      {
-        tags: ['companies', 'jobs', `company-${slug}`],
-        ttlConfigKey: 'cache.company_detail.ttl_seconds',
-        keySuffix: slug,
-        useAuthClient: false, // Public data
-      }
-    );
-
-    return data;
-  } catch (error) {
-    logger.error(
-      'Error in getCompanyProfile',
-      error instanceof Error ? error : new Error(String(error)),
-      { slug }
-    );
-    return null;
-  }
+  return fetchCachedRpc<CompanyProfile | null>(
+    { p_slug: slug },
+    {
+      rpcName: 'get_company_profile',
+      tags: ['companies', 'jobs', `company-${slug}`],
+      ttlKey: 'cache.company_detail.ttl_seconds',
+      keySuffix: slug,
+      useAuthClient: false,
+      fallback: null,
+      logMeta: { slug },
+    }
+  );
 }
 
-/**
- * Get paginated companies list with stats (public, cached)
- * Uses get_companies_list() RPC - single optimized query with materialized view join
- */
 export async function getCompaniesList(limit = 50, offset = 0): Promise<CompaniesListResult> {
-  try {
-    const data = await cachedRPCWithDedupe<CompaniesListResult>(
-      'get_companies_list',
-      { p_limit: limit, p_offset: offset },
-      {
-        tags: ['companies', 'jobs'],
-        ttlConfigKey: 'cache.company_list.ttl_seconds',
-        keySuffix: `list-${limit}-${offset}`,
-        useAuthClient: false, // Public data
-      }
-    );
-
-    return data || { companies: [], total: 0 };
-  } catch (error) {
-    logger.error(
-      'Error in getCompaniesList',
-      error instanceof Error ? error : new Error(String(error)),
-      { limit, offset }
-    );
-    return { companies: [], total: 0 };
-  }
+  return fetchCachedRpc<CompaniesListResult>(
+    { p_limit: limit, p_offset: offset },
+    {
+      rpcName: 'get_companies_list',
+      tags: ['companies', 'jobs'],
+      ttlKey: 'cache.company_list.ttl_seconds',
+      keySuffix: `list-${limit}-${offset}`,
+      useAuthClient: false,
+      fallback: { companies: [], total: 0 },
+      logMeta: { limit, offset },
+    }
+  );
 }
 
 async function fetchCompanySearchResults(
@@ -152,9 +126,6 @@ async function fetchCompanySearchResults(
   }));
 }
 
-/**
- * Search companies via unified-search edge function (cached)
- */
 export async function searchCompanies(query: string, limit = 10): Promise<CompanySearchResult[]> {
   const trimmed = query.trim();
   if (trimmed.length < 2) {
@@ -162,8 +133,7 @@ export async function searchCompanies(query: string, limit = 10): Promise<Compan
   }
 
   const normalized = trimmed.toLowerCase();
-  const config = await cacheConfigs();
-  const ttl = (config['cache.company_search.ttl_seconds'] as number) ?? 300;
+  const ttl = await getCacheTtl('cache.company_search.ttl_seconds');
 
   return unstable_cache(
     () => fetchCompanySearchResults(trimmed, limit),

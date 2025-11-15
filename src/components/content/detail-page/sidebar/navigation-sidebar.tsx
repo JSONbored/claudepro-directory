@@ -11,9 +11,9 @@ import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge
 import { JobsPromo } from '@/src/components/core/domain/jobs/jobs-banner';
 import { Button } from '@/src/components/primitives/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
-import type { CategoryId } from '@/src/lib/config/category-config';
-import { SOCIAL_LINKS } from '@/src/lib/constants';
-import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
+import type { CategoryId } from '@/src/lib/data/config/category';
+import { SOCIAL_LINKS } from '@/src/lib/data/config/constants';
+import type { ContentItem } from '@/src/lib/data/content';
 import { ExternalLink, Github, Thermometer } from '@/src/lib/icons';
 import { BADGE_COLORS, type CategoryType, UI_CLASSES } from '@/src/lib/ui-constants';
 import { getDisplayTitle } from '@/src/lib/utils';

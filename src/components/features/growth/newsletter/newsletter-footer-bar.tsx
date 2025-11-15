@@ -6,7 +6,7 @@ import { Button } from '@/src/components/primitives/ui/button';
 import { useLoggedAsync } from '@/src/hooks/use-logged-async';
 import type { NewsletterSource } from '@/src/hooks/use-newsletter';
 import { getAppSettings, getNewsletterConfig } from '@/src/lib/actions/feature-flags.actions';
-import { NEWSLETTER_CTA_CONFIG } from '@/src/lib/config/category-config';
+import { NEWSLETTER_CTA_CONFIG } from '@/src/lib/data/config/category';
 import { Mail, X } from '@/src/lib/icons';
 import { DIMENSIONS, POSITION_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { NewsletterForm } from './newsletter-form';

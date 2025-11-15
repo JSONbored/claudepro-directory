@@ -7,10 +7,12 @@
 
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { z } from 'zod';
+import { invalidateByKeys, runRpc } from '@/src/lib/actions/action-helpers';
 import { authedAction } from '@/src/lib/actions/safe-action';
-import { searchCompanies } from '@/src/lib/data/companies';
-import { getCompanyAdminProfile } from '@/src/lib/data/company';
-import { cacheConfigs, timeoutConfigs } from '@/src/lib/flags';
+import { getCompanyAdminProfile } from '@/src/lib/data/companies/admin';
+import { searchCompanies } from '@/src/lib/data/companies/public';
+import type { CacheInvalidateKey } from '@/src/lib/data/config/cache-config';
+import { timeoutConfigs } from '@/src/lib/flags';
 import { logger } from '@/src/lib/logger';
 import {
   deleteImageFromStorage,
@@ -20,8 +22,7 @@ import {
   validateImageBuffer,
 } from '@/src/lib/storage/image-storage';
 import { createClient as createSupabaseAdminClient } from '@/src/lib/supabase/admin-client';
-import { revalidateCacheTags } from '@/src/lib/supabase/cache-helpers';
-import { createClient as createSupabaseServerClient } from '@/src/lib/supabase/server';
+import { logActionFailure } from '@/src/lib/utils/error.utils';
 
 // Minimal Zod schemas - database CHECK constraints do real validation
 const companyDataSchema = z.object({
@@ -59,6 +60,16 @@ const uploadLogoSchema = z.object({
 export type CreateCompanyInput = z.infer<typeof companyDataSchema>;
 export type UpdateCompanyInput = z.infer<typeof updateCompanySchema>;
 
+async function invalidateCompanyCaches(options: {
+  keys?: CacheInvalidateKey[];
+  extraTags?: string[];
+}) {
+  await invalidateByKeys({
+    ...(options.keys ? { invalidateKeys: options.keys } : {}),
+    ...(options.extraTags ? { extraTags: options.extraTags } : {}),
+  });
+}
+
 // =====================================================
 // COMPANY CRUD ACTIONS
 // =====================================================
@@ -72,24 +83,7 @@ export const createCompany = authedAction
   .schema(companyDataSchema)
   .action(async ({ parsedInput, ctx }) => {
     try {
-      const supabase = await createSupabaseServerClient();
-
-      // Call RPC function (handles slug generation, validation)
-      const { data, error } = await supabase.rpc('manage_company', {
-        p_action: 'create',
-        p_user_id: ctx.userId,
-        p_data: parsedInput,
-      });
-
-      if (error) {
-        logger.error('Failed to create company via RPC', new Error(error.message), {
-          userId: ctx.userId,
-          name: parsedInput.name,
-        });
-        throw new Error(error.message);
-      }
-
-      const result = data as unknown as {
+      type ManageCompanyCreateResult = {
         success: boolean;
         company: {
           id: string;
@@ -98,6 +92,20 @@ export const createCompany = authedAction
           [key: string]: unknown;
         };
       };
+
+      const result = await runRpc<ManageCompanyCreateResult>(
+        'manage_company',
+        {
+          p_action: 'create',
+          p_user_id: ctx.userId,
+          p_data: parsedInput,
+        },
+        {
+          action: 'companies.createCompany.rpc',
+          userId: ctx.userId,
+          meta: { name: parsedInput.name },
+        }
+      );
 
       if (!result.success) {
         throw new Error('Company creation failed');
@@ -112,10 +120,9 @@ export const createCompany = authedAction
       revalidatePath('/account/companies');
       revalidatePath('/companies');
 
-      // Statsig-powered cache invalidation
-      const config = await cacheConfigs();
-      const invalidateTags = config['cache.invalidate.company_create'] as string[];
-      revalidateCacheTags(invalidateTags);
+      await invalidateCompanyCaches({
+        keys: ['cache.invalidate.company_create'],
+      });
       revalidateTag(`company-${result.company.slug}`, 'default');
       revalidateTag(`company-id-${result.company.id}`, 'default');
 
@@ -125,15 +132,10 @@ export const createCompany = authedAction
         company: result.company,
       };
     } catch (error) {
-      logger.error(
-        'Failed to create company',
-        error instanceof Error ? error : new Error(String(error)),
-        {
-          userId: ctx.userId,
-          name: parsedInput.name,
-        }
-      );
-      throw error;
+      throw logActionFailure('companies.createCompany', error, {
+        userId: ctx.userId,
+        name: parsedInput.name,
+      });
     }
   });
 
@@ -146,25 +148,9 @@ export const updateCompany = authedAction
   .schema(updateCompanySchema)
   .action(async ({ parsedInput, ctx }) => {
     try {
-      const supabase = await createSupabaseServerClient();
       const { id, ...updates } = parsedInput;
 
-      // Call RPC function (handles ownership check, validation)
-      const { data, error } = await supabase.rpc('manage_company', {
-        p_action: 'update',
-        p_user_id: ctx.userId,
-        p_data: { id, ...updates },
-      });
-
-      if (error) {
-        logger.error('Failed to update company via RPC', new Error(error.message), {
-          userId: ctx.userId,
-          companyId: id,
-        });
-        throw new Error(error.message);
-      }
-
-      const result = data as unknown as {
+      type ManageCompanyUpdateResult = {
         success: boolean;
         company: {
           id: string;
@@ -173,6 +159,20 @@ export const updateCompany = authedAction
           [key: string]: unknown;
         };
       };
+
+      const result = await runRpc<ManageCompanyUpdateResult>(
+        'manage_company',
+        {
+          p_action: 'update',
+          p_user_id: ctx.userId,
+          p_data: { id, ...updates },
+        },
+        {
+          action: 'companies.updateCompany.rpc',
+          userId: ctx.userId,
+          meta: { companyId: id },
+        }
+      );
 
       if (!result.success) {
         throw new Error('Company update failed');
@@ -187,10 +187,9 @@ export const updateCompany = authedAction
       revalidatePath(`/companies/${result.company.slug}`);
       revalidatePath('/companies');
 
-      // Statsig-powered cache invalidation
-      const config = await cacheConfigs();
-      const invalidateTags = config['cache.invalidate.company_update'] as string[];
-      revalidateCacheTags(invalidateTags);
+      await invalidateCompanyCaches({
+        keys: ['cache.invalidate.company_update'],
+      });
       revalidateTag(`company-${result.company.slug}`, 'default');
       revalidateTag(`company-id-${result.company.id}`, 'default');
 
@@ -200,15 +199,10 @@ export const updateCompany = authedAction
         company: result.company,
       };
     } catch (error) {
-      logger.error(
-        'Failed to update company',
-        error instanceof Error ? error : new Error(String(error)),
-        {
-          userId: ctx.userId,
-          companyId: parsedInput.id,
-        }
-      );
-      throw error;
+      throw logActionFailure('companies.updateCompany', error, {
+        userId: ctx.userId,
+        companyId: parsedInput.id,
+      });
     }
   });
 
@@ -221,26 +215,23 @@ export const deleteCompany = authedAction
   .schema(deleteCompanySchema)
   .action(async ({ parsedInput, ctx }) => {
     try {
-      const supabase = await createSupabaseServerClient();
-
-      // Call RPC function (handles ownership check, active jobs check, soft delete)
-      const { data, error } = await supabase.rpc('delete_company', {
-        p_company_id: parsedInput.company_id,
-        p_user_id: ctx.userId,
-      });
-
-      if (error) {
-        logger.error('Failed to delete company via RPC', new Error(error.message), {
-          userId: ctx.userId,
-          companyId: parsedInput.company_id,
-        });
-        throw new Error(error.message);
-      }
-
-      const result = data as unknown as {
+      type DeleteCompanyResult = {
         success: boolean;
         company_id: string;
       };
+
+      const result = await runRpc<DeleteCompanyResult>(
+        'delete_company',
+        {
+          p_company_id: parsedInput.company_id,
+          p_user_id: ctx.userId,
+        },
+        {
+          action: 'companies.deleteCompany.rpc',
+          userId: ctx.userId,
+          meta: { companyId: parsedInput.company_id },
+        }
+      );
 
       if (!result.success) {
         throw new Error('Company deletion failed');
@@ -254,10 +245,9 @@ export const deleteCompany = authedAction
       revalidatePath('/account/companies');
       revalidatePath('/companies');
 
-      // Statsig-powered cache invalidation
-      const config = await cacheConfigs();
-      const invalidateTags = config['cache.invalidate.company_delete'] as string[];
-      revalidateCacheTags(invalidateTags);
+      await invalidateCompanyCaches({
+        keys: ['cache.invalidate.company_delete'],
+      });
       revalidateTag(`company-${parsedInput.company_id}`, 'default');
       revalidateTag(`company-id-${parsedInput.company_id}`, 'default');
 
@@ -266,15 +256,10 @@ export const deleteCompany = authedAction
         companyId: result.company_id,
       };
     } catch (error) {
-      logger.error(
-        'Failed to delete company',
-        error instanceof Error ? error : new Error(String(error)),
-        {
-          userId: ctx.userId,
-          companyId: parsedInput.company_id,
-        }
-      );
-      throw error;
+      throw logActionFailure('companies.deleteCompany', error, {
+        userId: ctx.userId,
+        companyId: parsedInput.company_id,
+      });
     }
   });
 
@@ -291,12 +276,9 @@ export const searchCompaniesAction = authedAction
 
       return { companies, debounceMs };
     } catch (error) {
-      logger.error(
-        'Failed to search companies',
-        error instanceof Error ? error : new Error(String(error)),
-        { query: parsedInput.query }
-      );
-      throw error;
+      throw logActionFailure('companies.searchCompanies', error, {
+        query: parsedInput.query,
+      });
     }
   });
 
@@ -344,35 +326,39 @@ export const uploadCompanyLogoAction = authedAction
       }
     }
 
-    const supabaseAdmin = await createSupabaseAdminClient();
-    const uploadResult = await uploadImageToStorage({
-      bucket: 'company-logos',
-      data: buffer,
-      mimeType,
-      userId: ctx.userId,
-      fileName,
-      supabase: supabaseAdmin,
-    });
-
-    if (!(uploadResult.success && uploadResult.publicUrl)) {
-      const companyIdForLog = companyId ?? 'unassigned';
-      logger.error('Company logo upload failed', new Error(uploadResult.error || 'Upload failed'), {
+    try {
+      const supabaseAdmin = await createSupabaseAdminClient();
+      const uploadResult = await uploadImageToStorage({
+        bucket: 'company-logos',
+        data: buffer,
+        mimeType,
         userId: ctx.userId,
-        companyId: companyIdForLog,
+        fileName,
+        supabase: supabaseAdmin,
       });
-      throw new Error(uploadResult.error || 'Failed to upload logo.');
-    }
 
-    if (oldLogoUrl) {
-      const existingPath = extractPathFromUrl(oldLogoUrl, 'company-logos');
-      if (existingPath) {
-        await deleteImageFromStorage('company-logos', existingPath, supabaseAdmin);
+      if (!(uploadResult.success && uploadResult.publicUrl)) {
+        throw new Error(uploadResult.error || 'Failed to upload logo.');
       }
-    }
 
-    return {
-      success: true,
-      publicUrl: uploadResult.publicUrl,
-      path: uploadResult.path,
-    };
+      if (oldLogoUrl) {
+        const existingPath = extractPathFromUrl(oldLogoUrl, 'company-logos');
+        if (existingPath) {
+          await deleteImageFromStorage('company-logos', existingPath, supabaseAdmin);
+        }
+      }
+
+      return {
+        success: true,
+        publicUrl: uploadResult.publicUrl,
+        path: uploadResult.path,
+      };
+    } catch (error) {
+      throw logActionFailure('companies.uploadCompanyLogo', error, {
+        userId: ctx.userId,
+        companyId: companyId ?? 'unassigned',
+        fileName,
+        mimeType,
+      });
+    }
   });

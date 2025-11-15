@@ -21,7 +21,7 @@ import {
 } from '@/src/components/primitives/ui/sheet';
 import { ACTION_LINKS, PRIMARY_NAVIGATION, SECONDARY_NAVIGATION } from '@/src/config/navigation';
 import { getAnimationConfig } from '@/src/lib/actions/feature-flags.actions';
-import { SOCIAL_LINKS } from '@/src/lib/constants';
+import { SOCIAL_LINKS } from '@/src/lib/data/config/constants';
 import { DiscordIcon, Github, Menu } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import {

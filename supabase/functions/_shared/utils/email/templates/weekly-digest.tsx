@@ -4,24 +4,20 @@
  */
 
 import React from 'npm:react@18.3.1';
-import { Button, Hr, Section, Text } from 'npm:@react-email/components@0.0.22';
-import { buildEmailCtaUrl } from '../cta.ts';
+import { Hr, Section, Text } from 'npm:@react-email/components@0.0.22';
 import { EMAIL_UTM_TEMPLATES } from '../utm-templates.ts';
 import { BaseLayout, renderEmailTemplate } from '../base-template.tsx';
 import {
   contentSection,
-  ctaSection,
-  ctaTitleStyle,
   dividerStyle,
-  footerNoteSection,
-  footerNoteStyle,
   paragraphStyle,
-  primaryButtonStyle,
-  secondaryButtonStyle,
   sectionTitleStyle,
-  strongStyle,
 } from '../common-styles.ts';
 import { CardListSection, HeroBlock } from '../components/sections.tsx';
+import { EmailCtaSection } from '../components/cta.tsx';
+import { EmailFooterNote } from '../components/footer-note.tsx';
+import { buildSubscriptionFooter } from '../config/footer-presets.ts';
+import { buildEmailCtaUrl } from '../cta.ts';
 
 export interface DigestContentItem {
   title: string;
@@ -126,34 +122,19 @@ export function WeeklyDigest({
         </>
       ) : null}
 
-      <Section style={ctaSection}>
-        <Text style={ctaTitleStyle}>Explore More</Text>
-        <Text style={paragraphStyle}>
-          Browse the complete directory to discover even more tools and configurations.
-        </Text>
-
-        <Button href={buildEmailCtaUrl(baseUrl, utm, { content: 'browse_cta' })} style={primaryButtonStyle}>
-          Browse Directory
-        </Button>
-
-        <Button
-          href={buildEmailCtaUrl(`${baseUrl}/trending`, utm, { content: 'trending_cta' })}
-          style={secondaryButtonStyle}
-        >
-          View All Trending
-        </Button>
-      </Section>
+        <EmailCtaSection
+          utm={utm}
+          title="Explore More"
+          description="Browse the complete directory to discover even more tools and configurations."
+          buttons={[
+            { preset: 'browseDirectory', variant: 'primary' },
+            { preset: 'viewTrending', variant: 'secondary' },
+          ]}
+        />
 
       <Hr style={dividerStyle} />
 
-      <Section style={footerNoteSection}>
-        <Text style={footerNoteStyle}>
-          📧 Subscribed with: <strong style={strongStyle}>{email}</strong>
-        </Text>
-        <Text style={footerNoteStyle}>
-          You're receiving this because you subscribed to weekly updates from ClaudePro Directory. You can unsubscribe anytime using the links at the bottom of this email.
-        </Text>
-      </Section>
+        <EmailFooterNote lines={buildSubscriptionFooter('weeklyDigest', { email })} />
     </BaseLayout>
   );
 }

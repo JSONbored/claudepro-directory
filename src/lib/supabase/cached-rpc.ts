@@ -5,7 +5,7 @@
 
 import { unstable_cache } from 'next/cache';
 import { cache } from 'react';
-import { cacheConfigs } from '@/src/lib/flags';
+import { type CacheTtlKey, getCacheTtl } from '@/src/lib/data/config/cache-config';
 import { logger } from '@/src/lib/logger';
 import { createClient } from '@/src/lib/supabase/server';
 import { createAnonClient } from '@/src/lib/supabase/server-anon';
@@ -16,7 +16,7 @@ export interface CachedRPCOptions {
   /** Cache tags for invalidation */
   tags: string[];
   /** TTL config key from cacheConfigs (e.g., 'cache.homepage.ttl_seconds') */
-  ttlConfigKey: string;
+  ttlConfigKey: CacheTtlKey;
   /** Use authenticated client (default: false, uses anon client) */
   useAuthClient?: boolean;
 }
@@ -42,31 +42,7 @@ export async function cachedRPC<T = unknown>(
   const { keySuffix, tags, ttlConfigKey, useAuthClient = false } = options;
 
   // Fetch TTL from Statsig (runtime) or use defaults (build time)
-  let ttl: number;
-  try {
-    const config = await cacheConfigs();
-    ttl = (config as Record<string, unknown>)[ttlConfigKey] as number;
-  } catch {
-    // Build time: headers() unavailable, use hardcoded defaults matching Statsig config
-    const BUILD_TIME_DEFAULTS: Record<string, number> = {
-      'cache.homepage.ttl_seconds': 3600,
-      'cache.content_detail.ttl_seconds': 7200,
-      'cache.content_list.ttl_seconds': 1800,
-      'cache.jobs.ttl_seconds': 1800,
-      'cache.jobs_detail.ttl_seconds': 1800,
-      'cache.changelog_list.ttl_seconds': 3600,
-      'cache.recommendations.ttl_seconds': 3600,
-      'cache.newsletter_count_ttl_s': 300,
-      'cache.company_profile.ttl_seconds': 1800,
-      'cache.content_export.ttl_seconds': 604800,
-      'cache.content_paginated.ttl_seconds': 86400,
-      'cache.feeds.ttl_seconds': 600,
-      'cache.seo.ttl_seconds': 86400,
-      'cache.sitemap.ttl_seconds': 86400,
-      'cache.status.ttl_seconds': 60,
-    };
-    ttl = BUILD_TIME_DEFAULTS[ttlConfigKey] || 3600;
-  }
+  const ttl = await getCacheTtl(ttlConfigKey);
 
   // Generate cache key
   const cacheKey = keySuffix

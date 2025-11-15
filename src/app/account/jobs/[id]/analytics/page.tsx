@@ -8,8 +8,8 @@ import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge
 import { Button } from '@/src/components/primitives/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
 import { getAuthenticatedUser } from '@/src/lib/auth/get-authenticated-user';
-import { ROUTES } from '@/src/lib/constants';
-import { getUserJobById } from '@/src/lib/data/user-data';
+import { getUserJobById } from '@/src/lib/data/account/user-data';
+import { ROUTES } from '@/src/lib/data/config/constants';
 import { ArrowLeft, BarChart, ExternalLink, Eye } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';

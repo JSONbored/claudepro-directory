@@ -98,7 +98,10 @@ export function NotificationsProvider({
         return;
       }
 
-      setNotifications((latest?.data as NotificationRecord[]) ?? []);
+      const payload = latest?.data as
+        | { notifications?: NotificationRecord[]; traceId?: string }
+        | undefined;
+      setNotifications(payload?.notifications ?? []);
     } catch (error) {
       logger.error(
         '[NotificationsProvider] Failed to refresh notifications',

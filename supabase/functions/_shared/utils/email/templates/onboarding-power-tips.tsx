@@ -13,8 +13,6 @@ import { EMAIL_UTM_TEMPLATES } from '../utm-templates.ts';
 import { BaseLayout, renderEmailTemplate } from '../base-template.tsx';
 import {
   contentSection,
-  ctaSection,
-  ctaTitleStyle,
   dividerStyle,
   footerNoteSection,
   footerNoteStyle,
@@ -26,6 +24,9 @@ import {
 } from '../common-styles.ts';
 import { BulletListSection, HeroBlock, CardListSection } from '../components/sections.tsx';
 import { borderRadius, emailTheme, spacing, typography } from '../theme.ts';
+import { EmailFooterNote } from '../components/footer-note.tsx';
+import { buildOnboardingFooter } from '../config/footer-presets.ts';
+import { EmailCtaSection } from '../components/cta.tsx';
 
 export interface OnboardingPowerTipsProps {
   /**
@@ -101,26 +102,15 @@ export function OnboardingPowerTips({ email }: OnboardingPowerTipsProps) {
 
       <Hr style={dividerStyle} />
 
-      <Section style={ctaSection}>
-        <Text style={ctaTitleStyle}>Explore Advanced Features</Text>
-        <Text style={paragraphStyle}>
-          Dive deeper into MCP servers, custom hooks, and advanced automation techniques.
-        </Text>
-
-          <Button
-            href={buildEmailCtaUrl(`${baseUrl}/mcp`, utm, { content: 'mcp_cta' })}
-            style={primaryButtonStyle}
-          >
-          Browse MCP Servers
-        </Button>
-
-        <Button
-            href={buildEmailCtaUrl(`${baseUrl}/hooks`, utm, { content: 'hooks_cta' })}
-          style={secondaryButtonStyle}
-        >
-          Explore Hooks
-        </Button>
-      </Section>
+        <EmailCtaSection
+          utm={utm}
+          title="Explore Advanced Features"
+          description="Dive deeper into MCP servers, custom hooks, and advanced automation techniques."
+          buttons={[
+            { preset: 'mcpHighlights', variant: 'primary' },
+            { preset: 'hooksShowcase', variant: 'secondary' },
+          ]}
+        />
 
       <Hr style={dividerStyle} />
 
@@ -131,12 +121,7 @@ export function OnboardingPowerTips({ email }: OnboardingPowerTipsProps) {
         </Text>
       </Section>
 
-      <Section style={footerNoteSection}>
-        <Text style={footerNoteStyle}>
-          📧 <strong style={strongStyle}>{email}</strong>
-        </Text>
-        <Text style={footerNoteStyle}>This is part 3 of your 5-email onboarding series.</Text>
-      </Section>
+        <EmailFooterNote lines={buildOnboardingFooter('step3', { email })} />
     </BaseLayout>
   );
 }

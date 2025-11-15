@@ -8,9 +8,9 @@ import { JobsPromo } from '@/src/components/core/domain/jobs/jobs-banner';
 import { SubmitFormClient } from '@/src/components/core/forms/content-submission-form';
 import { SidebarActivityCard } from '@/src/components/core/forms/sidebar-activity-card';
 import { SubmitPageHero } from '@/src/components/core/forms/submit-page-hero';
-import { getSubmissionDashboard } from '@/src/lib/data/submissions';
-import { getContentTemplates } from '@/src/lib/data/templates';
-import { getSubmissionFormConfig } from '@/src/lib/forms/submission-form-config';
+import { getSubmissionDashboard } from '@/src/lib/data/account/submissions';
+import { getContentTemplates } from '@/src/lib/data/content/templates';
+import { getSubmissionFormFields } from '@/src/lib/data/forms/submission-form-fields';
 
 const NewsletterCTAVariant = dynamic(
   () =>
@@ -89,12 +89,12 @@ export default async function SubmitPage() {
     });
   }
 
-  let formConfig: Awaited<ReturnType<typeof getSubmissionFormConfig>> | null = null;
+  let formConfig: Awaited<ReturnType<typeof getSubmissionFormFields>> | null = null;
   try {
-    formConfig = await getSubmissionFormConfig();
+    formConfig = await getSubmissionFormFields();
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load submission form config');
-    logger.error('SubmitPage: getSubmissionFormConfig failed', normalized);
+    logger.error('SubmitPage: getSubmissionFormFields failed', normalized);
     throw normalized;
   }
 

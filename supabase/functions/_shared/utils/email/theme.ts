@@ -11,27 +11,27 @@
  * Based on Claude Desktop dark theme
  */
 export const darkTheme = {
-  // Backgrounds
-  bgPrimary: '#3a3a3c', // oklch(24% 0.008 60) converted
-  bgSecondary: '#48484a', // oklch(28% 0.006 60) converted
-  bgTertiary: '#555557', // oklch(32% 0.008 60) converted
-  bgQuaternary: '#636366', // oklch(36% 0.009 60) converted
-  bgSelected: '#707075', // oklch(40% 0.01 60) converted
-  bgCode: '#2c2c2e', // oklch(20% 0.005 60) converted
-  bgOverlay: 'rgba(28, 28, 30, 0.8)', // oklch(18% 0.005 0 / 0.8) converted
+  // Backgrounds – Claude desktop palette
+  bgPrimary: '#22231E',
+  bgSecondary: '#2B2B28',
+  bgTertiary: '#1B1B18',
+  bgQuaternary: '#2F2F2B',
+  bgSelected: '#3A3A34',
+  bgCode: '#2B2B28',
+  bgOverlay: 'rgba(34, 35, 30, 0.9)',
 
   // Text
-  textPrimary: '#f0f0f2', // oklch(94% 0.005 60) converted
-  textSecondary: '#c7c7cc', // oklch(78% 0.008 60) converted
-  textTertiary: '#9c9ca1', // oklch(62% 0.01 60) converted
-  textDisabled: '#6e6e73', // oklch(48% 0.012 60) converted
-  textInverse: '#fafafa', // oklch(98% 0.003 90) converted
+  textPrimary: '#E9EBE6',
+  textSecondary: '#C2C5BD',
+  textTertiary: '#8F928A',
+  textDisabled: '#5E6059',
+  textInverse: '#1A1B17',
 
   // Borders
-  borderDefault: 'rgba(76, 76, 79, 0.5)', // oklch(30% 0.005 60 / 0.5) converted
-  borderLight: 'rgba(71, 71, 74, 0.3)', // oklch(28% 0.005 60 / 0.3) converted
-  borderMedium: 'rgba(87, 87, 90, 0.6)', // oklch(34% 0.008 60 / 0.6) converted
-  borderStrong: '#ff6b35', // Claude orange - oklch(62% 0.155 42) converted
+  borderDefault: 'rgba(233, 235, 230, 0.08)',
+  borderLight: 'rgba(233, 235, 230, 0.14)',
+  borderMedium: 'rgba(233, 235, 230, 0.24)',
+  borderStrong: '#FF6F4A',
 } as const;
 
 /**
@@ -68,17 +68,27 @@ export const lightTheme = {
  */
 export const brandColors = {
   // Claude Orange - Primary brand color
-  primary: '#ff6b35', // oklch(62% 0.155 42) converted
-  primaryHover: '#ff7d4d', // oklch(66% 0.145 42) converted
-  primaryActive: '#f35829', // oklch(57% 0.16 42) converted
-  primaryLight: '#ff9366', // oklch(70% 0.135 45) converted
-  primaryMuted: '#d65a2b', // oklch(48% 0.142 37) converted
+  primary: '#FF6F4A',
+  primaryHover: '#FF825F',
+  primaryActive: '#F15A36',
+  primaryLight: '#FF9B76',
+  primaryMuted: '#D65A2B',
 
   // Semantic colors
   success: '#34c759', // Green for success states
   warning: '#ff9500', // Orange for warnings
   error: '#ff3b30', // Red for errors
   info: '#007aff', // Blue for information
+} as const;
+
+/**
+ * Gradient & texture tokens for emails
+ */
+export const gradients = {
+  hero: 'linear-gradient(150deg, #1A1B17 0%, #262621 45%, #2F2F2B 100%)',
+  heroHighlight: 'linear-gradient(118deg, #FFB595 0%, #FF6F4A 55%, #FF8A65 100%)',
+  surface: 'linear-gradient(160deg, rgba(233,235,230,0.03), rgba(233,235,230,0))',
+  borderGlow: 'linear-gradient(120deg, rgba(255,111,74,0.4), rgba(255,111,74,0))',
 } as const;
 
 /**

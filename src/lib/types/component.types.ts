@@ -3,8 +3,8 @@
  * Database function validate_content_metadata() enforces all validation rules
  */
 
-import type { CategoryId } from '@/src/lib/config/category-config';
-import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
+import type { CategoryId } from '@/src/lib/data/config/category';
+import type { ContentItem } from '@/src/lib/data/content';
 import type { SearchResult } from '@/src/lib/edge/search-client';
 import type { Database } from '@/src/types/database.types';
 import type {

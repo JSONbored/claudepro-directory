@@ -21,8 +21,8 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/ui/card';
-import { ROUTES } from '@/src/lib/constants';
-import { getCompaniesList } from '@/src/lib/data/companies';
+import { getCompaniesList } from '@/src/lib/data/companies/public';
+import { ROUTES } from '@/src/lib/data/config/constants';
 import { Briefcase, Building, ExternalLink, Plus, Star, TrendingUp } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';

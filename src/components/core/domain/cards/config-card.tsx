@@ -14,7 +14,7 @@ import { Button } from '@/src/components/primitives/ui/button';
 import { useCopyToClipboard } from '@/src/hooks/use-copy-to-clipboard';
 import { getComponentConfig } from '@/src/lib/actions/feature-flags.actions';
 import { addBookmark } from '@/src/lib/actions/user.actions';
-import { type CategoryId, isValidCategory } from '@/src/lib/config/category-config';
+import { type CategoryId, isValidCategory } from '@/src/lib/data/config/category';
 import { trackInteraction } from '@/src/lib/edge/client';
 import { Award, ExternalLink, Eye, Github, Layers, Sparkles } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';

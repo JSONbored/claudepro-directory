@@ -2,6 +2,7 @@
 
 import { unstable_cache } from 'next/cache';
 import { cache } from 'react';
+import { fetchCachedRpc } from '@/src/lib/data/helpers';
 import {
   FORM_FIELDS_CACHE_SECONDS,
   FORM_FIELDS_CACHE_TAG,
@@ -20,7 +21,6 @@ import type {
 } from '@/src/lib/forms/types';
 import { SUBMISSION_CONTENT_TYPES } from '@/src/lib/forms/types';
 import { logger } from '@/src/lib/logger';
-import { cachedRPCWithDedupe } from '@/src/lib/supabase/cached-rpc';
 import type { Database } from '@/src/types/database.types';
 
 type RpcRow =
@@ -174,13 +174,15 @@ function emptySection(): SubmissionFormSection {
 async function fetchFieldsForContentType(
   contentType: SubmissionContentType
 ): Promise<SubmissionFormSection> {
-  const data = await cachedRPCWithDedupe<RpcRows>(
-    'get_form_fields_for_content_type',
+  const data = await fetchCachedRpc<RpcRows | null>(
     { p_content_type: contentType },
     {
+      rpcName: 'get_form_fields_for_content_type',
       tags: ['templates', `submission-${contentType}`],
-      ttlConfigKey: 'cache.templates.ttl_seconds',
+      ttlKey: 'cache.templates.ttl_seconds',
       keySuffix: contentType,
+      fallback: null,
+      logMeta: { contentType },
     }
   );
 
@@ -223,7 +225,7 @@ async function fetchFieldsForContentType(
   return section;
 }
 
-async function loadSubmissionFormConfig(): Promise<SubmissionFormConfig> {
+async function loadSubmissionFormFields(): Promise<SubmissionFormConfig> {
   const entries = await Promise.all(
     SUBMISSION_CONTENT_TYPES.map(async (contentType) => {
       const section = await fetchFieldsForContentType(contentType);
@@ -239,8 +241,8 @@ async function loadSubmissionFormConfig(): Promise<SubmissionFormConfig> {
   return config;
 }
 
-export const getSubmissionFormConfig = cache(async () => {
-  return unstable_cache(loadSubmissionFormConfig, ['submission-form-config'], {
+export const getSubmissionFormFields = cache(async () => {
+  return unstable_cache(loadSubmissionFormFields, ['submission-form-config'], {
     revalidate: FORM_FIELDS_CACHE_SECONDS,
     tags: [FORM_FIELDS_CACHE_TAG],
   })();

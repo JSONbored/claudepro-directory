@@ -1,5 +1,5 @@
 import type { MetadataRoute } from 'next';
-import { APP_CONFIG, getContentDescription } from '@/src/lib/constants';
+import { APP_CONFIG, getContentDescription } from '@/src/lib/data/config/constants';
 
 export default async function manifest(): Promise<MetadataRoute.Manifest> {
   const description = await getContentDescription();

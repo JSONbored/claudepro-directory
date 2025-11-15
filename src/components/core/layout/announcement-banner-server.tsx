@@ -7,9 +7,9 @@
 
 import { unstable_cache } from 'next/cache';
 import { cache } from 'react';
-import { cacheConfigs } from '@/src/lib/flags';
+import { getActiveAnnouncement as fetchActiveAnnouncement } from '@/src/lib/data/announcements';
+import { getCacheTtl } from '@/src/lib/data/config/cache-config';
 import { logger } from '@/src/lib/logger';
-import { cachedRPCWithDedupe } from '@/src/lib/supabase/cached-rpc';
 import type { Tables } from '@/src/types/database.types';
 
 /**
@@ -17,22 +17,12 @@ import type { Tables } from '@/src/types/database.types';
  * Edge-layer cached with Statsig-controlled TTL + React cache for deduplication
  */
 export const getActiveAnnouncement = cache(async (): Promise<Tables<'announcements'> | null> => {
-  const config = await cacheConfigs();
-  const ttl = config['cache.announcements.ttl_seconds'] as number;
+  const ttl = await getCacheTtl('cache.announcements.ttl_seconds');
 
   return unstable_cache(
     async () => {
       try {
-        const data = await cachedRPCWithDedupe<Tables<'announcements'> | null>(
-          'get_active_announcement',
-          {},
-          {
-            tags: ['announcements'],
-            ttlConfigKey: 'cache.announcements.ttl_seconds',
-            keySuffix: 'active',
-          }
-        );
-        return data ?? null;
+        return await fetchActiveAnnouncement();
       } catch (error) {
         logger.error(
           'Failed to load announcement',

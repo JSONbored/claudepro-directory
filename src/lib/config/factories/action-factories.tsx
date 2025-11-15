@@ -21,8 +21,8 @@
  */
 
 import type { ReactNode } from 'react';
-import { SOCIAL_LINKS } from '@/src/lib/constants';
-import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
+import { SOCIAL_LINKS } from '@/src/lib/data/config/constants';
+import type { ContentItem } from '@/src/lib/data/content';
 import { Download, Layers, Server, Terminal, Webhook } from '@/src/lib/icons';
 
 import type { ActionButtonConfig } from '@/src/lib/types/content-type-config';
@@ -244,7 +244,7 @@ export function createStorageDownloadAction(label: string, icon: ReactNode): Act
  *
  * @example
  * ```tsx
- * import { SOCIAL_LINKS } from '@/src/lib/constants';
+ * import { SOCIAL_LINKS } from '@/src/lib/data/config/constants';
  *
  * // hooks category
  * primaryAction: createGitHubLinkAction(

@@ -5,9 +5,10 @@
  * Secure server-side RPC calls for newsletter operations
  */
 
+import { traceMeta } from '@/src/lib/actions/action-helpers';
+import { getNewsletterSubscriberCount } from '@/src/lib/data/newsletter';
 import { logger } from '@/src/lib/logger';
 import { env } from '@/src/lib/schemas/env.schema';
-import { cachedRPCWithDedupe } from '@/src/lib/supabase/cached-rpc';
 
 /**
  * Get newsletter subscriber count with edge caching
@@ -15,17 +16,7 @@ import { cachedRPCWithDedupe } from '@/src/lib/supabase/cached-rpc';
  */
 export async function getNewsletterCount(): Promise<number | null> {
   try {
-    const data = await cachedRPCWithDedupe(
-      'get_newsletter_subscriber_count',
-      {},
-      {
-        tags: ['newsletter', 'stats'],
-        ttlConfigKey: 'cache.newsletter_count_ttl_s',
-        keySuffix: 'newsletter-count',
-        useAuthClient: false, // Public endpoint
-      }
-    );
-    return (data as number) || null;
+    return await getNewsletterSubscriberCount();
   } catch (error) {
     logger.error(
       'Error in getNewsletterCount',
@@ -43,6 +34,7 @@ interface SubscribeViaOAuthParams {
 interface SubscribeViaOAuthResult {
   success: boolean;
   error?: string;
+  traceId?: string;
 }
 
 /**
@@ -53,15 +45,16 @@ export async function subscribeViaOAuth({
   email,
   metadata,
 }: SubscribeViaOAuthParams): Promise<SubscribeViaOAuthResult> {
+  const trace = traceMeta({ email });
   const supabaseUrl = env.NEXT_PUBLIC_SUPABASE_URL;
 
   if (!supabaseUrl) {
-    logger.error('subscribeViaOAuth missing NEXT_PUBLIC_SUPABASE_URL env');
-    return { success: false, error: 'Supabase URL not configured' };
+    logger.error('subscribeViaOAuth missing NEXT_PUBLIC_SUPABASE_URL env', undefined, trace);
+    return { success: false, error: 'Supabase URL not configured', traceId: trace.traceId };
   }
 
   if (!email?.includes('@')) {
-    return { success: false, error: 'Invalid email address' };
+    return { success: false, error: 'Invalid email address', traceId: trace.traceId };
   }
 
   try {
@@ -86,21 +79,22 @@ export async function subscribeViaOAuth({
     if (!(response.ok && result?.success)) {
       const errorMessage = result?.error || response.statusText || 'Unknown error';
       logger.warn('subscribeViaOAuth failed', {
-        email,
         status: response.status,
         error: errorMessage,
+        ...trace,
       });
-      return { success: false, error: errorMessage };
+      return { success: false, error: errorMessage, traceId: trace.traceId };
     }
 
-    return { success: true };
+    return { success: true, traceId: trace.traceId };
   } catch (error) {
     logger.error('subscribeViaOAuth exception', error instanceof Error ? error : undefined, {
-      email,
+      ...trace,
     });
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Failed to subscribe',
+      traceId: trace.traceId,
     };
   }
 }

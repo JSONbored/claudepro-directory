@@ -17,9 +17,13 @@ import {
   primaryButtonStyle,
   secondaryButtonStyle,
   strongStyle,
+  sectionTitleStyle,
 } from '../common-styles.ts';
 import { BulletListSection, HeroBlock, StepCardList } from '../components/sections.tsx';
 import { borderRadius, emailTheme, spacing, typography } from '../theme.ts';
+import { EmailFooterNote } from '../components/footer-note.tsx';
+import { buildOnboardingFooter } from '../config/footer-presets.ts';
+import { EmailCtaSection } from '../components/cta.tsx';
 
 export interface OnboardingCommunityProps {
   email: string;
@@ -142,49 +146,32 @@ export function OnboardingCommunity({ email }: OnboardingCommunityProps) {
         }))}
       />
 
-      <Section style={contentSection}>
-        <Button
-          href={buildEmailCtaUrl(`${baseUrl}/community`, utm, { content: 'community_cta' })}
-          style={secondaryButtonStyle}
-        >
-          See All Community Contributions
-        </Button>
-      </Section>
+        <EmailCtaSection
+          utm={utm}
+          buttons={[
+            { preset: 'communityShowcase', variant: 'secondary' },
+          ]}
+        />
 
       <Hr style={dividerStyle} />
 
-      <Section style={connectSection}>
-        <Text style={connectTitleStyle}>Stay Connected</Text>
-        <Text style={paragraphStyle}>
-          Join discussions, get help, and share your experiences with other Claude users.
-        </Text>
+        <Section style={connectSection}>
+          <Text style={connectTitleStyle}>Stay Connected</Text>
+          <Text style={paragraphStyle}>
+            Join discussions, get help, and share your experiences with other Claude users.
+          </Text>
+          <div style={connectLinksStyle}>
+            <EmailCtaSection
+              utm={utm}
+              buttons={[
+                { preset: 'githubCommunity', variant: 'secondary' },
+                { preset: 'twitterCommunity', variant: 'secondary' },
+              ]}
+            />
+          </div>
+        </Section>
 
-        <div style={connectLinksStyle}>
-          <Button
-            href={buildEmailCtaUrl('https://github.com/yourusername/claudepro-directory', utm, {
-              content: 'github_link',
-            })}
-            style={linkButtonStyle}
-          >
-            GitHub
-          </Button>
-          <Button
-            href={buildEmailCtaUrl('https://twitter.com/claudeprodirectory', utm, {
-              content: 'twitter_link',
-            })}
-            style={linkButtonStyle}
-          >
-            Twitter
-          </Button>
-        </div>
-      </Section>
-
-      <Section style={footerNoteSection}>
-        <Text style={footerNoteStyle}>
-          📧 <strong style={strongStyle}>{email}</strong>
-        </Text>
-        <Text style={footerNoteStyle}>This is part 4 of your 5-email onboarding series. One more to go!</Text>
-      </Section>
+        <EmailFooterNote lines={buildOnboardingFooter('step4', { email })} />
     </BaseLayout>
   );
 }
