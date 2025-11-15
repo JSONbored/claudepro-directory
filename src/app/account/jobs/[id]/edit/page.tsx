@@ -11,6 +11,7 @@ import { getUserJobById } from '@/src/lib/data/user-data';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 
 export const metadata = generatePageMetadata('/account/jobs/:id/edit');
 
@@ -22,9 +23,22 @@ export default async function EditJobPage({ params }: EditJobPageProps) {
   const resolvedParams = await params;
   const { user } = await getAuthenticatedUser({ context: 'EditJobPage' });
 
-  if (!user) redirect('/login');
+  if (!user) {
+    logger.warn('EditJobPage: unauthenticated access attempt', { jobId: resolvedParams.id });
+    redirect('/login');
+  }
 
-  const job = await getUserJobById(user.id, resolvedParams.id);
+  let job: Awaited<ReturnType<typeof getUserJobById>> | null = null;
+  try {
+    job = await getUserJobById(user.id, resolvedParams.id);
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to load user job for edit page');
+    logger.error('EditJobPage: getUserJobById threw', normalized, {
+      jobId: resolvedParams.id,
+      userId: user.id,
+    });
+    throw normalized;
+  }
   if (!job) {
     logger.warn('EditJobPage: job not found or not owned by user', {
       jobId: resolvedParams.id,
@@ -36,18 +50,28 @@ export default async function EditJobPage({ params }: EditJobPageProps) {
   const handleSubmit = async (data: Omit<UpdateJobInput, 'job_id'>) => {
     'use server';
 
-    // Call updateJob server action (calls update_job RPC with ownership verification)
-    const result = await updateJob({
-      job_id: resolvedParams.id,
-      ...data,
-    });
-
-    if (result?.serverError) {
-      logger.error('EditJobPage: updateJob failed', new Error(result.serverError), {
+    let result;
+    try {
+      result = await updateJob({
+        job_id: resolvedParams.id,
+        ...data,
+      });
+    } catch (error) {
+      const normalized = normalizeError(error, 'updateJob server action failed');
+      logger.error('EditJobPage: updateJob threw', normalized, {
         jobId: resolvedParams.id,
         userId: user.id,
       });
-      throw new Error(result.serverError);
+      throw normalized;
+    }
+
+    if (result?.serverError) {
+      const normalized = normalizeError(result.serverError, 'updateJob server error response');
+      logger.error('EditJobPage: updateJob returned serverError', normalized, {
+        jobId: resolvedParams.id,
+        userId: user.id,
+      });
+      throw normalized;
     }
 
     if (!result?.data) {

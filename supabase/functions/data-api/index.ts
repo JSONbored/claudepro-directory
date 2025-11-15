@@ -10,6 +10,7 @@ import { handleFeedsRoute } from './routes/feeds.ts';
 import { handleSeoRoute } from './routes/seo.ts';
 import { handleSitemapRoute } from './routes/sitemap.ts';
 import { handleStatusRoute } from './routes/status.ts';
+import { handleTrendingRoute } from './routes/trending.ts';
 
 const BASE_CORS = getOnlyCorsHeaders;
 
@@ -73,6 +74,9 @@ Deno.serve(async (req) => {
         break;
       case 'company':
         response = await handleCompanyRoute(rest, url, normalizedMethod);
+        break;
+      case 'trending':
+        response = await handleTrendingRoute(rest, url, normalizedMethod);
         break;
       default:
         response = jsonResponse(

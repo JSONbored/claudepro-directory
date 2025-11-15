@@ -1,7 +1,11 @@
 /**
- * Server-side sidebar data fetching - Edge Function Architecture
- * Calls trending edge function with CDN caching - all logic in PostgreSQL + edge function
+ * Server-side sidebar data fetching
+ * Uses cached trending helper (shared with data-api) for internal consistency.
  */
+
+import { getTrendingPageData } from '@/src/lib/data/trending';
+import { logger } from '@/src/lib/logger';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 
 interface TrendingGuide {
   title: string;
@@ -21,27 +25,30 @@ interface SidebarData {
 }
 
 export async function getSidebarData(limit = 5): Promise<SidebarData> {
-  const baseUrl =
-    process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://hgtjdifxfapoltfflowc.supabase.co';
-
   try {
-    const response = await fetch(
-      `${baseUrl}/functions/v1/trending?mode=sidebar&category=guides&limit=${limit}`,
-      {
-        next: { revalidate: 86400, tags: ['trending'] },
-      }
-    );
+    const data = await getTrendingPageData({ category: 'guides', limit });
+    const trending = (data.trending || []).slice(0, limit).map((item) => ({
+      title: item.title ?? item.slug,
+      slug: `/${item.category ?? 'guides'}/${item.slug}`,
+      views: `${Number((item as { viewCount?: number }).viewCount ?? 0).toLocaleString()} views`,
+    }));
 
-    if (!response.ok) {
-      return { trending: [], recent: [] };
-    }
+    const recent = (data.recent || []).slice(0, limit).map((item) => ({
+      title: item.title ?? item.slug,
+      slug: `/${item.category ?? 'guides'}/${item.slug}`,
+      date: item.created_at
+        ? new Date(item.created_at).toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+          })
+        : '',
+    }));
 
-    const data = await response.json();
-    return {
-      trending: data.trending || [],
-      recent: data.recent || [],
-    };
-  } catch {
+    return { trending, recent };
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to load sidebar trending data');
+    logger.error('SidebarData: trending fetch failed', normalized, { limit });
     return { trending: [], recent: [] };
   }
 }

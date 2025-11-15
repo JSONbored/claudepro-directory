@@ -19,6 +19,7 @@ import { ArrowLeft, Edit } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 import type { Tables } from '@/src/types/database.types';
 
 interface CollectionPageProps {
@@ -40,7 +41,17 @@ export default async function CollectionDetailPage({ params }: CollectionPagePro
   }
 
   // User-scoped edge-cached RPC via centralized data layer
-  const collectionData = await getCollectionDetail(user.id, slug);
+  let collectionData: Awaited<ReturnType<typeof getCollectionDetail>> | null = null;
+  try {
+    collectionData = await getCollectionDetail(user.id, slug);
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to load collection detail for account view');
+    logger.error('CollectionDetailPage: getCollectionDetail threw', normalized, {
+      userId: user.id,
+      slug,
+    });
+    throw normalized;
+  }
 
   if (!collectionData) {
     logger.warn('CollectionDetailPage: collection not found or inaccessible', {

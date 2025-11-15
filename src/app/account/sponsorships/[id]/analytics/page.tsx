@@ -13,6 +13,7 @@ import { BarChart, Eye, MousePointer, TrendingUp } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 import type { Tables } from '@/src/types/database.types';
 
 export const metadata = generatePageMetadata('/account/sponsorships/:id/analytics');
@@ -31,7 +32,17 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
   }
 
   // User-scoped edge-cached RPC via centralized data layer
-  const analyticsData = await getSponsorshipAnalytics(user.id, id);
+  let analyticsData: Awaited<ReturnType<typeof getSponsorshipAnalytics>> | null = null;
+  try {
+    analyticsData = await getSponsorshipAnalytics(user.id, id);
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to load sponsorship analytics');
+    logger.error('SponsorshipAnalyticsPage: getSponsorshipAnalytics threw', normalized, {
+      sponsorshipId: id,
+      userId: user.id,
+    });
+    throw normalized;
+  }
 
   if (!analyticsData) {
     logger.warn('SponsorshipAnalyticsPage: analytics not found or inaccessible', {

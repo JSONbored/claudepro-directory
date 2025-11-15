@@ -1,3 +1,4 @@
+import { supabaseAnon } from '../../_shared/clients/supabase.ts';
 import {
   badRequestResponse,
   buildCacheHeaders,
@@ -5,7 +6,6 @@ import {
   getOnlyCorsHeaders,
   methodNotAllowedResponse,
 } from '../../_shared/utils/http.ts';
-import { supabaseAnon } from '../../_shared/utils/supabase-clients.ts';
 
 const CORS = getOnlyCorsHeaders;
 

@@ -9,6 +9,7 @@ import { getCollectionDetail } from '@/src/lib/data/user-data';
 import { ArrowLeft } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 import type { Tables } from '@/src/types/database.types';
 
 interface EditCollectionPageProps {
@@ -30,7 +31,17 @@ export default async function EditCollectionPage({ params }: EditCollectionPageP
   }
 
   // User-scoped edge-cached RPC via centralized data layer
-  const collectionData = await getCollectionDetail(user.id, slug);
+  let collectionData: Awaited<ReturnType<typeof getCollectionDetail>> | null = null;
+  try {
+    collectionData = await getCollectionDetail(user.id, slug);
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to load collection detail for edit page');
+    logger.error('EditCollectionPage: getCollectionDetail threw', normalized, {
+      slug,
+      userId: user.id,
+    });
+    throw normalized;
+  }
 
   if (!collectionData) {
     logger.warn('EditCollectionPage: collection not found or inaccessible', {

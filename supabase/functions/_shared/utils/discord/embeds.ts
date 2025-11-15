@@ -1,5 +1,5 @@
+import { SITE_URL } from '../../clients/supabase.ts';
 import type { Database } from '../../database.types.ts';
-import { SITE_URL } from '../supabase-clients.ts';
 
 const CATEGORY_COLORS: Record<string, number> = {
   agents: 0x5865f2,

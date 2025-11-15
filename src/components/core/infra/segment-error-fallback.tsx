@@ -64,8 +64,8 @@ export function SegmentErrorFallback({
             </div>
           )}
           {isDev && error && (
-            <div className="rounded-lg border border-dashed border-muted-foreground/30 bg-muted/30 p-4">
-              <p className="mb-2 font-semibold text-sm text-muted-foreground">Error details</p>
+            <div className="rounded-lg border border-muted-foreground/30 border-dashed bg-muted/30 p-4">
+              <p className="mb-2 font-semibold text-muted-foreground text-sm">Error details</p>
               <pre className="whitespace-pre-wrap break-words text-destructive text-xs">
                 {error.message}
               </pre>

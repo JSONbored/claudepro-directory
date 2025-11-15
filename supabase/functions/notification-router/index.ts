@@ -2,8 +2,13 @@
  * Notification Router - Consolidated Discord + webhook + changelog handling.
  */
 
-import { handleChangelogSyncRequest } from '../_shared/handlers/changelog-sync.ts';
-import { handleDiscordNotification } from '../_shared/handlers/discord-notifications.ts';
+import { supabaseServiceRole } from '../_shared/clients/supabase.ts';
+import { handleChangelogSyncRequest } from '../_shared/handlers/changelog/handler.ts';
+import { handleDiscordNotification } from '../_shared/handlers/discord/handler.ts';
+import {
+  dismissNotificationsForUser,
+  getActiveNotificationsForUser,
+} from '../_shared/notifications/service.ts';
 import {
   badRequestResponse,
   changelogCorsHeaders,
@@ -15,11 +20,6 @@ import {
   unauthorizedResponse,
   webhookCorsHeaders,
 } from '../_shared/utils/http.ts';
-import {
-  dismissNotificationsForUser,
-  getActiveNotificationsForUser,
-} from '../_shared/utils/notifications-service.ts';
-import { supabaseServiceRole } from '../_shared/utils/supabase-clients.ts';
 import { ingestWebhookEvent, WebhookIngestError } from '../_shared/utils/webhook/ingest.ts';
 
 type RouteContext = {

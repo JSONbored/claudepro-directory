@@ -148,6 +148,8 @@ const CACHE_PRESETS = {
   sitemap: { ttl: 60 * 60 * 24, stale: 60 * 60 * 48 }, // 1d / 2d
   status: { ttl: 60, stale: 120 }, // 1m / 2m
   company_profile: { ttl: 60 * 30, stale: 60 * 60 }, // 30m / 1h
+  trending_page: { ttl: 60 * 60, stale: 60 * 60 * 6 }, // 1h / 6h
+  trending_sidebar: { ttl: 600, stale: 3600 }, // 10m / 1h
 } as const;
 
 export type CachePresetKey = keyof typeof CACHE_PRESETS;

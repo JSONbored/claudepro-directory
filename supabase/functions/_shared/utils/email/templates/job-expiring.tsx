@@ -5,9 +5,9 @@
 
 import React from 'npm:react@18.3.1';
 import { Button, Hr, Section, Text } from 'npm:@react-email/components@0.0.22';
-import { buildEmailCtaUrl } from '../utils/email/cta.ts';
-import { EMAIL_UTM_TEMPLATES } from '../utils/email/utm-templates.ts';
-import { BaseLayout, renderEmailTemplate } from '../utils/email/base-template.tsx';
+import { buildEmailCtaUrl } from '../cta.ts';
+import { EMAIL_UTM_TEMPLATES } from '../utm-templates.ts';
+import { BaseLayout, renderEmailTemplate } from '../base-template.tsx';
 import {
   contentSection,
   ctaSection,
@@ -20,9 +20,9 @@ import {
   secondaryButtonStyle,
   strongStyle,
   subheadingStyle,
-} from '../utils/email/common-styles.ts';
-import { JobDetailsSection } from '../utils/email/components/job.tsx';
-import { formatEmailDate, pluralize } from '../utils/email/formatters.ts';
+} from '../common-styles.ts';
+import { JobDetailsSection } from '../components/job.tsx';
+import { formatEmailDate, pluralize } from '../formatters.ts';
 
 export interface JobExpiringProps {
   jobTitle: string;

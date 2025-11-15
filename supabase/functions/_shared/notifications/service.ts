@@ -1,5 +1,5 @@
+import { supabaseServiceRole } from '../clients/supabase.ts';
 import type { Database } from '../database.types.ts';
-import { supabaseServiceRole } from './supabase-clients.ts';
 
 type NotificationRecord = Database['public']['Tables']['notifications']['Row'];
 type NotificationPriority = Database['public']['Enums']['notification_priority'];

@@ -1,4 +1,5 @@
-import { VALID_CONTENT_CATEGORIES } from '../../_shared/constants/categories.ts';
+import { supabaseAnon } from '../../_shared/clients/supabase.ts';
+import { VALID_CONTENT_CATEGORIES } from '../../_shared/config/constants/categories.ts';
 import {
   badRequestResponse,
   buildCacheHeaders,
@@ -7,7 +8,6 @@ import {
   jsonResponse,
   methodNotAllowedResponse,
 } from '../../_shared/utils/http.ts';
-import { supabaseAnon } from '../../_shared/utils/supabase-clients.ts';
 
 const CORS = getOnlyCorsHeaders;
 const SUPPORTED_TYPES = new Set(['rss', 'atom']);

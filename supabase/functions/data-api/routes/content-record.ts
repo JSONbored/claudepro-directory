@@ -1,3 +1,4 @@
+import { SITE_URL, supabaseAnon } from '../../_shared/clients/supabase.ts';
 import {
   badRequestResponse,
   buildCacheHeaders,
@@ -5,8 +6,7 @@ import {
   getOnlyCorsHeaders,
   getWithAcceptCorsHeaders,
 } from '../../_shared/utils/http.ts';
-import { proxyStorageFile } from '../../_shared/utils/storage-proxy.ts';
-import { SITE_URL, supabaseAnon } from '../../_shared/utils/supabase-clients.ts';
+import { proxyStorageFile } from '../../_shared/utils/storage/proxy.ts';
 
 const CORS_JSON = getOnlyCorsHeaders;
 const CORS_MARKDOWN = getWithAcceptCorsHeaders;

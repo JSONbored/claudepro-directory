@@ -8,6 +8,7 @@ import { getAuthenticatedUser } from '@/src/lib/auth/get-authenticated-user';
 import { getUserCompanyById } from '@/src/lib/data/user-data';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 
 export const metadata = generatePageMetadata('/account/companies/:id/edit');
 
@@ -20,10 +21,21 @@ export default async function EditCompanyPage({ params }: EditCompanyPageProps) 
   const { user } = await getAuthenticatedUser({ context: 'EditCompanyPage' });
 
   if (!user) {
+    logger.warn('EditCompanyPage: unauthenticated access attempt', { companyId: id });
     redirect('/login');
   }
 
-  const company = await getUserCompanyById(user.id, id);
+  let company: Awaited<ReturnType<typeof getUserCompanyById>> | null = null;
+  try {
+    company = await getUserCompanyById(user.id, id);
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to load company for edit page');
+    logger.error('EditCompanyPage: getUserCompanyById threw', normalized, {
+      companyId: id,
+      userId: user.id,
+    });
+    throw normalized;
+  }
 
   if (!company) {
     logger.warn('Company not found or access denied', { companyId: id, userId: user.id });

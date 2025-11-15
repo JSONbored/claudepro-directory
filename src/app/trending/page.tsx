@@ -1,6 +1,6 @@
 /**
- * Trending Page - Edge Function Architecture
- * Calls trending edge function with CDN caching - all logic in PostgreSQL + edge function
+ * Trending Page - Cached server helper + data API parity
+ * Server component uses getTrendingPageData (cached RPC). Data API exposes the same payload for external consumers.
  */
 
 import dynamic from 'next/dynamic';
@@ -8,7 +8,8 @@ import { Suspense } from 'react';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { LazySection } from '@/src/components/core/infra/scroll-animated-section';
 import { TrendingContent } from '@/src/components/core/shared/trending-content';
-import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
+import { isValidCategory } from '@/src/lib/config/category-config';
+import { getTrendingPageData } from '@/src/lib/data/trending';
 import { Clock, Star, TrendingUp, Users } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import type { PagePropsWithSearchParams } from '@/src/lib/schemas/app.schema';
@@ -31,53 +32,25 @@ export const metadata = generatePageMetadata('/trending');
 
 export default async function TrendingPage({ searchParams }: PagePropsWithSearchParams) {
   const rawParams = await searchParams;
-  const category = rawParams?.category as string | undefined;
+  const categoryParam = rawParams?.category as string | undefined;
   const limit = Math.min(Number(rawParams?.limit) || 12, 100);
+  const normalizedCategory = categoryParam && isValidCategory(categoryParam) ? categoryParam : null;
+
+  if (categoryParam && !normalizedCategory) {
+    logger.warn('TrendingPage: invalid category parameter provided', {
+      category: categoryParam,
+    });
+  }
 
   logger.info('Trending page accessed', {
-    category: category || 'all',
+    category: normalizedCategory ?? 'all',
     limit,
   });
 
-  // Fetch from edge function (with CDN caching)
-  const baseUrl =
-    process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://hgtjdifxfapoltfflowc.supabase.co';
-
-  const [trendingData, popularData, recentData] = await Promise.all([
-    fetch(
-      `${baseUrl}/functions/v1/trending?mode=page&tab=trending${category ? `&category=${category}` : ''}&limit=${limit}`,
-      {
-        next: { revalidate: 86400, tags: ['trending'] },
-      }
-    )
-      .then((r) => r.json())
-      .catch(() => ({ trending: [], totalCount: 0 })),
-
-    fetch(
-      `${baseUrl}/functions/v1/trending?mode=page&tab=popular${category ? `&category=${category}` : ''}&limit=${limit}`,
-      {
-        next: { revalidate: 86400, tags: ['trending'] },
-      }
-    )
-      .then((r) => r.json())
-      .catch(() => ({ popular: [] })),
-
-    fetch(
-      `${baseUrl}/functions/v1/trending?mode=page&tab=recent${category ? `&category=${category}` : ''}&limit=${limit}`,
-      {
-        next: { revalidate: 86400, tags: ['trending'] },
-      }
-    )
-      .then((r) => r.json())
-      .catch(() => ({ recent: [] })),
-  ]);
-
-  const pageData = {
-    trending: (trendingData.trending || []) as ContentItem[],
-    popular: (popularData.popular || []) as ContentItem[],
-    recent: (recentData.recent || []) as ContentItem[],
-    totalCount: trendingData.totalCount || 0,
-  };
+  const pageData = await getTrendingPageData({
+    category: normalizedCategory,
+    limit,
+  });
 
   const pageTitleId = 'trending-page-title';
 

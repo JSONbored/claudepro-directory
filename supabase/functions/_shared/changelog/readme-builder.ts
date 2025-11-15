@@ -1,4 +1,4 @@
-import { SITE_URL } from './supabase.ts';
+import { SITE_URL } from '../clients/supabase.ts';
 
 export interface ReadmeCategory {
   category: string;

@@ -10,19 +10,19 @@ import {
   revalidateChangelogPages,
   transformSectionsToChanges,
   type VercelWebhookPayload,
-} from '../utils/changelog.ts';
-import { sendDiscordWebhook } from '../utils/discord/client.ts';
-import { buildChangelogEmbed } from '../utils/discord/embeds.ts';
-import { insertNotification } from '../utils/notifications-service.ts';
+} from '../../changelog/service.ts';
+import { SITE_URL, supabaseServiceRole } from '../../clients/supabase.ts';
+import { insertNotification } from '../../notifications/service.ts';
+import { sendDiscordWebhook } from '../../utils/discord/client.ts';
+import { buildChangelogEmbed } from '../../utils/discord/embeds.ts';
 import {
   badRequestResponse,
   changelogCorsHeaders,
   errorResponse,
   successResponse,
   unauthorizedResponse,
-} from '../utils/response.ts';
-import { SITE_URL, supabaseServiceRole } from '../utils/supabase-clients.ts';
-import { verifyVercelSignature } from '../utils/vercel.ts';
+} from '../../utils/http.ts';
+import { verifyVercelSignature } from '../../utils/integrations/vercel.ts';
 
 const VERCEL_WEBHOOK_SECRET = Deno.env.get('VERCEL_WEBHOOK_SECRET');
 const DISCORD_CHANGELOG_WEBHOOK_URL = Deno.env.get('DISCORD_CHANGELOG_WEBHOOK_URL');

@@ -18,6 +18,7 @@
  * - Without entities param → search_content_optimized() RPC (content-only with advanced filters)
  */
 
+import { supabaseAnon } from '../_shared/clients/supabase.ts';
 import type { Database } from '../_shared/database.types.ts';
 import {
   badRequestResponse,
@@ -25,7 +26,6 @@ import {
   getWithAuthCorsHeaders,
   methodNotAllowedResponse,
 } from '../_shared/utils/http.ts';
-import { supabaseAnon } from '../_shared/utils/supabase-clients.ts';
 
 type ContentSearchResult =
   Database['public']['Functions']['search_content_optimized']['Returns'][number];

@@ -23,6 +23,7 @@ import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { cachedRPCWithDedupe } from '@/src/lib/supabase/cached-rpc';
 import { createAnonClient } from '@/src/lib/supabase/server-anon';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 import type { GetUserProfileReturn } from '@/src/types/database-overrides';
 
 interface UserProfilePageProps {
@@ -57,18 +58,24 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
     ...(currentUser?.id && { p_viewer_id: currentUser.id }),
   };
 
-  const profileData = await cachedRPCWithDedupe<GetUserProfileReturn>(
-    'get_user_profile',
-    rpcParams,
-    {
+  let profileData: GetUserProfileReturn | null = null;
+  try {
+    profileData = await cachedRPCWithDedupe<GetUserProfileReturn>('get_user_profile', rpcParams, {
       tags: ['users', `user-${slug}`],
       ttlConfigKey: 'cache.user_profile.ttl_seconds',
       keySuffix: currentUser?.id ? `${slug}-viewer-${currentUser.id}` : slug,
-    }
-  );
+    });
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to load user profile detail');
+    logger.error('UserProfilePage: get_user_profile threw', normalized, {
+      slug,
+      viewerId: currentUser?.id,
+    });
+    throw normalized;
+  }
 
   if (!profileData) {
-    logger.warn('User profile not found', { slug });
+    logger.warn('UserProfilePage: user profile not found', { slug });
     notFound();
   }
 

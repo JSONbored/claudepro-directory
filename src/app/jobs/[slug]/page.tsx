@@ -26,6 +26,7 @@ import type { PageProps } from '@/src/lib/schemas/app.schema';
 import { slugParamsSchema } from '@/src/lib/schemas/app.schema';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 
 export async function generateMetadata({
   params,
@@ -33,7 +34,13 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const job = await getJobBySlug(slug);
+  let job: Awaited<ReturnType<typeof getJobBySlug>> | null = null;
+  try {
+    job = await getJobBySlug(slug);
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to load job for metadata');
+    logger.error('JobPage: getJobBySlug threw in generateMetadata', normalized, { slug });
+  }
 
   return generatePageMetadata('/jobs/:slug', {
     params: { slug },
@@ -44,14 +51,20 @@ export async function generateMetadata({
 
 export async function generateStaticParams() {
   const { getJobs } = await import('@/src/lib/data/jobs');
-  const jobs = await getJobs();
+  try {
+    const jobs = await getJobs();
 
-  if (jobs.length === 0) {
-    logger.warn('No jobs available - returning placeholder param');
+    if (jobs.length === 0) {
+      logger.warn('generateStaticParams: no jobs available, returning placeholder', {});
+      return [{ slug: 'placeholder' }];
+    }
+
+    return jobs.map((job) => ({ slug: job.slug }));
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to load jobs for static params');
+    logger.error('JobPage: getJobs threw in generateStaticParams', normalized);
     return [{ slug: 'placeholder' }];
   }
-
-  return jobs.map((job) => ({ slug: job.slug }));
 }
 
 export default async function JobPage({ params }: PageProps) {
@@ -72,9 +85,17 @@ export default async function JobPage({ params }: PageProps) {
   }
 
   const { slug } = validationResult.data;
-  const job = await getJobBySlug(slug);
+  let job: Awaited<ReturnType<typeof getJobBySlug>> | null = null;
+  try {
+    job = await getJobBySlug(slug);
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to load job detail');
+    logger.error('JobPage: getJobBySlug threw', normalized, { slug });
+    throw normalized;
+  }
 
   if (!job) {
+    logger.warn('JobPage: job not found', { slug });
     notFound();
   }
 

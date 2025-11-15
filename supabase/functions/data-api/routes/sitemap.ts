@@ -1,3 +1,4 @@
+import { SITE_URL, supabaseAnon } from '../../_shared/clients/supabase.ts';
 import {
   badRequestResponse,
   buildCacheHeaders,
@@ -6,7 +7,6 @@ import {
   jsonResponse,
   methodNotAllowedResponse,
 } from '../../_shared/utils/http.ts';
-import { SITE_URL, supabaseAnon } from '../../_shared/utils/supabase-clients.ts';
 
 const CORS = getOnlyCorsHeaders;
 const INDEXNOW_API_URL = 'https://api.indexnow.org/IndexNow';

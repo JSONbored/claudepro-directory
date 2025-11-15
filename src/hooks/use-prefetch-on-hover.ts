@@ -23,6 +23,7 @@
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef } from 'react';
 import { getTimeoutConfig } from '@/src/lib/actions/feature-flags.actions';
+import { logClientWarning } from '@/src/lib/utils/error.utils';
 
 // Prefetch delay (loaded from Statsig via server action)
 let DEFAULT_PREFETCH_DELAY = 100;
@@ -100,8 +101,8 @@ export function usePrefetchOnHover(
       .then((config) => {
         DEFAULT_PREFETCH_DELAY = (config['timeout.ui.prefetch_delay_ms'] as number) ?? 100;
       })
-      .catch(() => {
-        // Use default if config load fails
+      .catch((error) => {
+        logClientWarning('usePrefetchOnHover: failed to load prefetch delay', error);
       });
   }, []);
 

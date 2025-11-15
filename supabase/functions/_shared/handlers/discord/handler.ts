@@ -1,30 +1,30 @@
-import type { Database } from '../database.types.ts';
+import { SITE_URL, supabaseServiceRole } from '../../clients/supabase.ts';
+import type { Database } from '../../database.types.ts';
+import { insertNotification } from '../../notifications/service.ts';
 import {
   createDiscordMessageWithLogging,
   sendDiscordWebhook,
   updateDiscordMessage as updateDiscordMessageUtil,
-} from '../utils/discord/client.ts';
+} from '../../utils/discord/client.ts';
 import {
   buildChangelogEmbed,
   buildContentEmbed,
   buildErrorEmbed,
   buildSubmissionEmbed,
   type GitHubCommit,
-} from '../utils/discord/embeds.ts';
-import { insertNotification } from '../utils/notifications-service.ts';
+} from '../../utils/discord/embeds.ts';
 import {
   badRequestResponse,
   discordCorsHeaders,
   errorResponse,
   successResponse,
-} from '../utils/response.ts';
-import { SITE_URL, supabaseServiceRole } from '../utils/supabase-clients.ts';
+} from '../../utils/http.ts';
 import {
   type DatabaseWebhookPayload,
   didStatusChangeTo,
   filterEventType,
   validateWebhookUrl,
-} from '../utils/webhook/database-events.ts';
+} from '../../utils/webhook/database-events.ts';
 
 type JobRow = Database['public']['Tables']['jobs']['Row'];
 type ContentSubmission = Database['public']['Tables']['content_submissions']['Row'];

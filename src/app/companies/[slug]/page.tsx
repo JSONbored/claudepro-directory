@@ -23,6 +23,7 @@ import { Briefcase, Building, Calendar, Globe, TrendingUp, Users } from '@/src/l
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 import type { Tables } from '@/src/types/database.types';
 
 interface CompanyPageProps {
@@ -62,23 +63,48 @@ export default async function CompanyPage({ params }: CompanyPageProps) {
   // Call unified data-api (benefits from CDN cache)
   const url = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/data-api/company?slug=${slug}`;
 
-  const res = await fetch(url, {
-    next: { revalidate: 1800 }, // Vercel ISR as fallback
-  });
+  let res: Response;
+  try {
+    res = await fetch(url, {
+      next: { revalidate: 1800 }, // Vercel ISR as fallback
+    });
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to fetch company profile from data-api');
+    logger.error('CompanyPage: data-api fetch threw', normalized, { slug, url });
+    throw normalized;
+  }
 
   if (!res.ok) {
     if (res.status === 404) {
-      logger.warn('Company not found', { slug });
+      logger.warn('CompanyPage: company not found', { slug });
       notFound();
     }
-    logger.error('Failed to load company profile', new Error(`HTTP ${res.status}`), {
+    const err = new Error(`Company data-api responded with ${res.status}`);
+    logger.error('CompanyPage: data-api returned non-200', err, {
       slug,
       status: res.status,
+      url,
     });
-    throw new Error('Failed to load company profile');
+    throw err;
   }
 
-  const profile = (await res.json()) as CompanyProfile;
+  let profile: CompanyProfile | null = null;
+  try {
+    profile = (await res.json()) as CompanyProfile;
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to parse company profile payload');
+    logger.error('CompanyPage: JSON parse failed', normalized, { slug });
+    throw normalized;
+  }
+
+  if (!profile?.company) {
+    logger.error(
+      'CompanyPage: parsed profile is invalid',
+      new Error('Company profile payload missing'),
+      { slug }
+    );
+    notFound();
+  }
   const { company, active_jobs, stats } = profile;
 
   return (

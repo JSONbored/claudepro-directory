@@ -84,9 +84,9 @@ export interface UnifiedSearchProps {
 }
 
 export interface TrendingContentProps {
-  trending?: ContentItem[];
-  popular?: ContentItem[];
-  recent?: ContentItem[];
+  trending?: DisplayableContent[];
+  popular?: DisplayableContent[];
+  recent?: DisplayableContent[];
   category?: CategoryId;
   limit?: number;
   period?: 'day' | 'week' | 'month' | 'all';

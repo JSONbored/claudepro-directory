@@ -5,31 +5,23 @@
 import { Webhook } from 'https://esm.sh/standardwebhooks@1.0.0';
 import type { FC } from 'npm:react@18.3.1';
 import { Resend } from 'npm:resend@4.0.0';
-import { AUTH_HOOK_ENV, RESEND_ENV, validateEnvironment } from '../_shared/email-config.ts';
-import {
-  CollectionShared,
-  renderCollectionSharedEmail,
-} from '../_shared/templates/collection-shared.tsx';
-import { JobApproved, renderJobApprovedEmail } from '../_shared/templates/job-approved.tsx';
-import { JobExpired, renderJobExpiredEmail } from '../_shared/templates/job-expired.tsx';
-import { JobExpiring, renderJobExpiringEmail } from '../_shared/templates/job-expiring.tsx';
-import {
-  JobPaymentConfirmed,
-  renderJobPaymentConfirmedEmail,
-} from '../_shared/templates/job-payment-confirmed.tsx';
-import { JobPosted, renderJobPostedEmail } from '../_shared/templates/job-posted.tsx';
-import { JobRejected, renderJobRejectedEmail } from '../_shared/templates/job-rejected.tsx';
-import { JobSubmitted, renderJobSubmittedEmail } from '../_shared/templates/job-submitted.tsx';
+import { supabaseServiceRole } from '../_shared/clients/supabase.ts';
+import { AUTH_HOOK_ENV, RESEND_ENV, validateEnvironment } from '../_shared/config/email-config.ts';
+import { renderCollectionSharedEmail } from '../_shared/utils/email/templates/collection-shared.tsx';
+import { renderJobApprovedEmail } from '../_shared/utils/email/templates/job-approved.tsx';
+import { renderJobExpiredEmail } from '../_shared/utils/email/templates/job-expired.tsx';
+import { renderJobExpiringEmail } from '../_shared/utils/email/templates/job-expiring.tsx';
+import { renderJobPaymentConfirmedEmail } from '../_shared/utils/email/templates/job-payment-confirmed.tsx';
+import { renderJobPostedEmail } from '../_shared/utils/email/templates/job-posted.tsx';
+import { renderJobRejectedEmail } from '../_shared/utils/email/templates/job-rejected.tsx';
+import { renderJobSubmittedEmail } from '../_shared/utils/email/templates/job-submitted.tsx';
 // React Email Templates
-import {
-  NewsletterWelcome,
-  renderNewsletterWelcomeEmail,
-} from '../_shared/templates/newsletter-welcome.tsx';
-import { OnboardingCommunity } from '../_shared/templates/onboarding-community.tsx';
-import { OnboardingGettingStarted } from '../_shared/templates/onboarding-getting-started.tsx';
-import { OnboardingPowerTips } from '../_shared/templates/onboarding-power-tips.tsx';
-import { OnboardingStayEngaged } from '../_shared/templates/onboarding-stay-engaged.tsx';
-import { renderWeeklyDigestEmail, WeeklyDigest } from '../_shared/templates/weekly-digest.tsx';
+import { renderNewsletterWelcomeEmail } from '../_shared/utils/email/templates/newsletter-welcome.tsx';
+import { OnboardingCommunity } from '../_shared/utils/email/templates/onboarding-community.tsx';
+import { OnboardingGettingStarted } from '../_shared/utils/email/templates/onboarding-getting-started.tsx';
+import { OnboardingPowerTips } from '../_shared/utils/email/templates/onboarding-power-tips.tsx';
+import { OnboardingStayEngaged } from '../_shared/utils/email/templates/onboarding-stay-engaged.tsx';
+import { renderWeeklyDigestEmail } from '../_shared/utils/email/templates/weekly-digest.tsx';
 import {
   badRequestResponse,
   errorResponse,
@@ -38,9 +30,11 @@ import {
   publicCorsHeaders,
   successResponse,
 } from '../_shared/utils/http.ts';
-import { syncContactSegment } from '../_shared/utils/integrations/segment-manager.ts';
-import { buildContactProperties, inferInitialTopics } from '../_shared/utils/resend-helpers.ts';
-import { supabaseServiceRole } from '../_shared/utils/supabase-clients.ts';
+import {
+  buildContactProperties,
+  inferInitialTopics,
+  syncContactSegment,
+} from '../_shared/utils/integrations/resend.ts';
 
 validateEnvironment(['resend', 'auth-hook']);
 

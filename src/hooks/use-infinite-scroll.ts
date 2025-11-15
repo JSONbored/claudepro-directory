@@ -11,6 +11,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { getAppSettings, getTimeoutConfig } from '@/src/lib/actions/feature-flags.actions';
 import { logger } from '@/src/lib/logger';
+import { logClientWarning } from '@/src/lib/utils/error.utils';
 
 interface UseInfiniteScrollOptions {
   /** Total number of items available */
@@ -76,13 +77,13 @@ export function useInfiniteScroll({
           batchSize: (config['hooks.infinite_scroll.batch_size'] as number) ?? 30,
           threshold: (config['hooks.infinite_scroll.threshold'] as number) ?? 0.1,
         });
-      } catch {
-        // Silent fail - uses hardcoded fallbacks
+      } catch (error) {
+        logClientWarning('useInfiniteScroll: failed to load defaults', error);
       }
     };
 
-    loadDefaults().catch(() => {
-      // Silent fail - uses hardcoded fallbacks
+    loadDefaults().catch((error) => {
+      logClientWarning('useInfiniteScroll: loadDefaults promise rejected', error);
     });
   }, []);
 
@@ -129,13 +130,14 @@ export function useInfiniteScroll({
           setIsLoading(false);
         }, delay);
       })
-      .catch(() => {
+      .catch((error) => {
+        logClientWarning('useInfiniteScroll: failed to load transition timeout', error);
         setTimeout(() => {
           setDisplayCount((prev) => Math.min(prev + finalBatchSize, totalItems));
           setIsLoading(false);
         }, 200);
       });
-  }, [isLoading, hasMore, finalBatchSize, totalItems]);
+  }, [finalBatchSize, hasMore, isLoading, totalItems]);
 
   /**
    * Callback ref for sentinel element

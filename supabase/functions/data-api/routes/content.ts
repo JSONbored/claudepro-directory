@@ -1,4 +1,6 @@
-import { VALID_CONTENT_CATEGORIES } from '../../_shared/constants/categories.ts';
+import { buildReadmeMarkdown, type ReadmeData } from '../../_shared/changelog/readme-builder.ts';
+import { supabaseAnon } from '../../_shared/clients/supabase.ts';
+import { VALID_CONTENT_CATEGORIES } from '../../_shared/config/constants/categories.ts';
 import {
   badRequestResponse,
   buildCacheHeaders,
@@ -7,8 +9,6 @@ import {
   jsonResponse,
   methodNotAllowedResponse,
 } from '../../_shared/utils/http.ts';
-import { buildReadmeMarkdown, type ReadmeData } from '../../_shared/utils/readme-builder.ts';
-import { supabaseAnon } from '../../_shared/utils/supabase-clients.ts';
 import { handlePaginatedContent } from './content-paginated.ts';
 import { handleRecordExport } from './content-record.ts';
 

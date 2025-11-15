@@ -93,4 +93,4 @@ Render sample payloads for each category before shipping:
 4. **Weekly digest** – Provide `personalized/new/trending` datasets, confirm each card button points to the right URL and includes its slug in `utm_content`.
 5. **Email handler smoke test** – Use the local script (`scripts/email-preview.ts`) to render each template via `renderEmailTemplate` so the handler path stays in sync.
 
-Record findings in the release checklist (or `supabase/functions/_shared/templates/README.md` if we add one later).
+Record findings in the release checklist (or `supabase/functions/_shared/utils/email/templates/README.md` if we add one later).

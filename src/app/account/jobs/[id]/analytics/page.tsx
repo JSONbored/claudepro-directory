@@ -15,6 +15,7 @@ import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { BADGE_COLORS, type JobStatusType, UI_CLASSES } from '@/src/lib/ui-constants';
 import { formatRelativeDate } from '@/src/lib/utils/data.utils';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 
 export const metadata = generatePageMetadata('/account/jobs/:id/analytics');
 
@@ -33,7 +34,17 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPageProps
     redirect('/login');
   }
 
-  const job = await getUserJobById(user.id, resolvedParams.id);
+  let job: Awaited<ReturnType<typeof getUserJobById>> | null = null;
+  try {
+    job = await getUserJobById(user.id, resolvedParams.id);
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to load job analytics detail');
+    logger.error('JobAnalyticsPage: getUserJobById threw', normalized, {
+      jobId: resolvedParams.id,
+      userId: user.id,
+    });
+    throw normalized;
+  }
   if (!job) {
     logger.warn('JobAnalyticsPage: job not found or not owned by user', {
       jobId: resolvedParams.id,

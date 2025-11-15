@@ -10,6 +10,7 @@ import { useEffect, useRef, useState } from 'react';
 import { getCacheConfig, getPollingConfig } from '@/src/lib/actions/feature-flags.actions';
 import { getNewsletterCount } from '@/src/lib/actions/newsletter.actions';
 import { logger } from '@/src/lib/logger';
+import { logClientWarning } from '@/src/lib/utils/error.utils';
 
 export interface UseNewsletterCountReturn {
   count: number | null;
@@ -31,8 +32,8 @@ Promise.all([getCacheConfig(), getPollingConfig()])
     CACHE_TTL_MS = cacheTtlSeconds * 1000;
     POLL_INTERVAL_MS = (polling['polling.newsletter_count_ms'] as number) ?? 300000;
   })
-  .catch(() => {
-    // Use defaults if config load fails
+  .catch((error) => {
+    logClientWarning('useNewsletterCount: failed to load cache/polling config', error);
   });
 
 /**
@@ -88,13 +89,13 @@ export function useNewsletterCount(): UseNewsletterCountReturn {
 
     // Initial fetch
     fetchCount().catch((err) => {
-      logger.error('Newsletter count initial fetch failed', err);
+      logClientWarning('useNewsletterCount: initial fetch failed', err);
     });
 
     // Start polling
     intervalRef.current = setInterval(() => {
       fetchCount().catch((err) => {
-        logger.error('Newsletter count polling failed', err);
+        logClientWarning('useNewsletterCount: polling fetch failed', err);
       });
     }, POLL_INTERVAL_MS);
 
@@ -108,12 +109,12 @@ export function useNewsletterCount(): UseNewsletterCountReturn {
       } else {
         // Resume polling when tab becomes visible
         fetchCount().catch((err) => {
-          logger.error('Newsletter count visibility resume failed', err);
+          logClientWarning('useNewsletterCount: resume fetch failed', err);
         });
         if (!intervalRef.current) {
           intervalRef.current = setInterval(() => {
             fetchCount().catch((err) => {
-              logger.error('Newsletter count polling failed', err);
+              logClientWarning('useNewsletterCount: polling fetch failed', err);
             });
           }, POLL_INTERVAL_MS);
         }

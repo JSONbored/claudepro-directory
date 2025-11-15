@@ -50,7 +50,7 @@ export default async function CompaniesPage() {
     throw normalized;
   }
 
-  if (!(companiesResponse && companiesResponse.companies)) {
+  if (!companiesResponse?.companies) {
     logger.warn('CompaniesPage: companies response is empty', { limit: 50, offset: 0 });
   }
 

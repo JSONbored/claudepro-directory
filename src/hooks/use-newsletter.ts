@@ -9,6 +9,7 @@ import { useCallback, useEffect, useState, useTransition } from 'react';
 import { getNewsletterConfig } from '@/src/lib/actions/feature-flags.actions';
 import { trackInteraction, trackNewsletterEvent } from '@/src/lib/edge/client';
 import { logger } from '@/src/lib/logger';
+import { logClientWarning, logUnhandledPromise } from '@/src/lib/utils/error.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
 import type { Enums } from '@/src/types/database.types';
 
@@ -108,10 +109,10 @@ export function useNewsletter(options: UseNewsletterOptions): UseNewsletterRetur
         INITIAL_RETRY_DELAY_MS = (config['newsletter.initial_retry_delay_ms'] as number) ?? 1000;
         RETRY_BACKOFF_MULTIPLIER = (config['newsletter.retry_backoff_multiplier'] as number) ?? 2;
       })
-      .catch(() => {
-        // Use defaults if config load fails
+      .catch((error) => {
+        logClientWarning('useNewsletter: failed to load retry config', error, { source });
       });
-  }, []);
+  }, [source]);
 
   const reset = useCallback(() => {
     setEmail('');
@@ -177,8 +178,8 @@ export function useNewsletter(options: UseNewsletterOptions): UseNewsletterRetur
               source,
               ...metadata,
             }),
-          ]).catch(() => {
-            // Analytics failure should not affect UX
+          ]).catch((error) => {
+            logClientWarning('useNewsletter: signup success tracking failed', error, { source });
           });
 
           reset();
@@ -201,8 +202,8 @@ export function useNewsletter(options: UseNewsletterOptions): UseNewsletterRetur
             source,
             error: errorMessage,
             ...metadata,
-          }).catch(() => {
-            // Analytics failure should not affect UX
+          }).catch((error) => {
+            logClientWarning('useNewsletter: signup error tracking failed', error, { source });
           });
 
           logger.error('Newsletter subscription failed', new Error(errorMessage), {
@@ -232,8 +233,8 @@ export function useNewsletter(options: UseNewsletterOptions): UseNewsletterRetur
           source,
           error: errorMessage,
           ...metadata,
-        }).catch(() => {
-          // Analytics failure should not affect UX
+        }).catch((error) => {
+          logClientWarning('useNewsletter: exception tracking failed', error, { source });
         });
 
         logger.error('Newsletter subscription error', err instanceof Error ? err : undefined, {

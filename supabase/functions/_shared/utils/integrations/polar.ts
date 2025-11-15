@@ -1,4 +1,4 @@
-import { fetchWithRetry } from './integrations/http.ts';
+import { fetchWithRetry } from './http-client.ts';
 
 /**
  * Polar.sh API utilities - checkout session creation with metadata

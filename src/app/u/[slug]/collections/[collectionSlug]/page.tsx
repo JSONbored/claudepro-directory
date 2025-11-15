@@ -25,6 +25,7 @@ import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { cachedRPCWithDedupe } from '@/src/lib/supabase/cached-rpc';
 import { createAnonClient } from '@/src/lib/supabase/server-anon';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 import type { Tables } from '@/src/types/database.types';
 
 // Collection pages may have private content
@@ -80,30 +81,53 @@ async function getCollectionDetail(
     ...(viewerId && { p_viewer_id: viewerId }),
   };
 
-  const data = await cachedRPCWithDedupe<CollectionDetailData>(
-    'get_user_collection_detail',
-    rpcParams,
-    {
-      tags: ['collections', `collection-${collectionSlug}`, `user-${slug}`],
-      ttlConfigKey: 'cache.content_list.ttl_seconds',
-      keySuffix: viewerId
-        ? `${slug}-${collectionSlug}-viewer-${viewerId}`
-        : `${slug}-${collectionSlug}`,
+  try {
+    const data = await cachedRPCWithDedupe<CollectionDetailData>(
+      'get_user_collection_detail',
+      rpcParams,
+      {
+        tags: ['collections', `collection-${collectionSlug}`, `user-${slug}`],
+        ttlConfigKey: 'cache.content_list.ttl_seconds',
+        keySuffix: viewerId
+          ? `${slug}-${collectionSlug}-viewer-${viewerId}`
+          : `${slug}-${collectionSlug}`,
+      }
+    );
+
+    if (!data) {
+      logger.warn('PublicCollectionPage: collection detail RPC returned null', {
+        slug,
+        collectionSlug,
+        viewerId,
+      });
+      return null;
     }
-  );
 
-  if (!data) {
-    logger.warn('Collection detail not found', { slug, collectionSlug });
-    return null;
+    return data;
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to load user collection detail');
+    logger.error('PublicCollectionPage: get_user_collection_detail threw', normalized, {
+      slug,
+      collectionSlug,
+      viewerId,
+    });
+    throw normalized;
   }
-
-  return data;
 }
 
 export async function generateMetadata({ params }: PublicCollectionPageProps): Promise<Metadata> {
   const { slug, collectionSlug } = await params;
 
-  const collectionData = await getCollectionDetail(slug, collectionSlug);
+  let collectionData: CollectionDetailData | null = null;
+  try {
+    collectionData = await getCollectionDetail(slug, collectionSlug);
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to load collection detail for metadata');
+    logger.error('PublicCollectionPage: metadata fetch failed', normalized, {
+      slug,
+      collectionSlug,
+    });
+  }
 
   return generatePageMetadata('/u/:slug/collections/:collectionSlug', {
     params: { slug, collectionSlug },
@@ -123,9 +147,21 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
   });
 
   // Single RPC call replaces 3 separate queries (user, collection, items)
-  const collectionData = await getCollectionDetail(slug, collectionSlug, currentUser?.id);
+  let collectionData: CollectionDetailData | null = null;
+  try {
+    collectionData = await getCollectionDetail(slug, collectionSlug, currentUser?.id);
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to load collection detail for page render');
+    logger.error('PublicCollectionPage: getCollectionDetail threw', normalized, {
+      slug,
+      collectionSlug,
+      viewerId: currentUser?.id,
+    });
+    throw normalized;
+  }
 
   if (!collectionData) {
+    logger.warn('PublicCollectionPage: collection detail not found', { slug, collectionSlug });
     notFound();
   }
 
