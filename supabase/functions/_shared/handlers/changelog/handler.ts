@@ -134,49 +134,94 @@ export async function handleChangelogSyncRequest(req: Request): Promise<Response
       );
     }
 
-    if (DISCORD_CHANGELOG_WEBHOOK_URL) {
-      const embed = buildChangelogEmbed({
-        slug: data.slug,
-        title: data.title,
-        tldr,
-        sections,
-        commits: conventionalCommits,
-        date: data.release_date ?? new Date().toISOString(),
+    // Enqueue job for async processing (Discord, notifications, revalidation)
+    const queueJob = {
+      entryId: data.id,
+      slug: data.slug,
+      title: data.title,
+      tldr,
+      sections,
+      commits: conventionalCommits,
+      releaseDate: data.release_date ?? new Date().toISOString(),
+      metadata,
+    };
+
+    const { error: queueError } = await supabaseServiceRole.schema('pgmq_public').rpc('send', {
+      queue_name: 'changelog_release',
+      msg: queueJob,
+    });
+
+    if (queueError) {
+      // Fallback: Execute side effects synchronously if queue fails
+      console.warn('[changelog-sync] Queue enqueue failed, falling back to sync execution', {
+        error: queueError.message,
+        changelog_id: data.id,
       });
 
-      await sendDiscordWebhook(
-        DISCORD_CHANGELOG_WEBHOOK_URL,
-        {
-          content: '🚀 **New Release Deployed**',
-          embeds: [embed],
-        },
-        'changelog_notification',
-        {
-          relatedId: data.id,
-          metadata: {
-            changelog_id: data.id,
-            slug: data.slug,
+      // Execute side effects synchronously (backward compatibility)
+      if (DISCORD_CHANGELOG_WEBHOOK_URL) {
+        const embed = buildChangelogEmbed({
+          slug: data.slug,
+          title: data.title,
+          tldr,
+          sections,
+          commits: conventionalCommits,
+          date: data.release_date ?? new Date().toISOString(),
+        });
+
+        await sendDiscordWebhook(
+          DISCORD_CHANGELOG_WEBHOOK_URL,
+          {
+            content: '🚀 **New Release Deployed**',
+            embeds: [embed],
           },
-        }
+          'changelog_notification',
+          {
+            relatedId: data.id,
+            metadata: {
+              changelog_id: data.id,
+              slug: data.slug,
+            },
+          }
+        );
+      }
+
+      await insertNotification({
+        id: data.id,
+        title: data.title,
+        message: tldr || 'We just shipped a fresh Claude Pro Directory release.',
+        type: 'announcement',
+        priority: 'high',
+        action_label: 'Read release notes',
+        action_href: `${SITE_URL}/changelog/${data.slug}`,
+        metadata: {
+          slug: data.slug,
+          changelog_id: data.id,
+          source: 'changelog-sync',
+        },
+      });
+
+      await revalidateChangelogPages(data.slug);
+
+      return successResponse(
+        {
+          inserted: true,
+          changelog_id: data.id,
+          sections: sections.length,
+          commits: conventionalCommits.length,
+          queue_enqueued: false,
+          fallback_sync: true,
+        },
+        200,
+        changelogCorsHeaders
       );
     }
 
-    await insertNotification({
-      id: data.id,
-      title: data.title,
-      message: tldr || 'We just shipped a fresh Claude Pro Directory release.',
-      type: 'announcement',
-      priority: 'high',
-      action_label: 'Read release notes',
-      action_href: `${SITE_URL}/changelog/${data.slug}`,
-      metadata: {
-        slug: data.slug,
-        changelog_id: data.id,
-        source: 'changelog-sync',
-      },
+    // Queue enqueue succeeded - return immediately (worker will process async)
+    console.log('[changelog-sync] Job enqueued successfully', {
+      changelog_id: data.id,
+      slug: data.slug,
     });
-
-    await revalidateChangelogPages(data.slug);
 
     return successResponse(
       {
@@ -184,6 +229,7 @@ export async function handleChangelogSyncRequest(req: Request): Promise<Response
         changelog_id: data.id,
         sections: sections.length,
         commits: conventionalCommits.length,
+        queue_enqueued: true,
       },
       200,
       changelogCorsHeaders

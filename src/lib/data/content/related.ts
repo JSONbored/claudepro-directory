@@ -5,6 +5,7 @@
 
 import { fetchCachedRpc } from '@/src/lib/data/helpers';
 import type { Database } from '@/src/types/database.types';
+import type { GetRelatedContentReturn } from '@/src/types/database-overrides';
 
 type RelatedContentItem = Database['public']['Functions']['get_related_content']['Returns'][number];
 
@@ -19,19 +20,7 @@ export interface RelatedContentInput {
 }
 
 export interface RelatedContentResult {
-  items: Array<{
-    category: string;
-    slug: string;
-    title: string;
-    description: string;
-    author: string;
-    date_added: string;
-    tags: string[];
-    score: number;
-    match_type: string;
-    views: number;
-    matched_tags: string[];
-  }>;
+  items: GetRelatedContentReturn;
 }
 
 /**
@@ -62,7 +51,7 @@ export async function getRelatedContent(input: RelatedContentInput): Promise<Rel
   const validItems = data.filter((item) => item.title && item.slug && item.category);
 
   return {
-    items: validItems.map((item) => ({
+    items: validItems.map((item): GetRelatedContentReturn[number] => ({
       category: item.category,
       slug: item.slug,
       title: item.title,

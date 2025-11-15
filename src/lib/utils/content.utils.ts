@@ -4,6 +4,7 @@
 
 import type { CategoryId } from '@/src/lib/data/config/category';
 import type { ContentItem } from '@/src/lib/data/content';
+import type { GetContentDetailCompleteReturn } from '@/src/types/database-overrides';
 
 const normalizeSlug = (value: string): string =>
   value
@@ -78,7 +79,7 @@ const MCP_SECTION_LABELS = {
 } as const;
 
 export interface FilenameGeneratorOptions {
-  item: ContentItem;
+  item: ContentItem | GetContentDetailCompleteReturn['content'];
   language: string;
   format?: 'json' | 'multi' | 'hook';
   section?: string;
@@ -168,7 +169,7 @@ export function generateFilename(options: FilenameGeneratorOptions): string {
 }
 
 export function generateMultiFormatFilename(
-  item: ContentItem,
+  item: ContentItem | GetContentDetailCompleteReturn['content'],
   sectionKey: string,
   language: string
 ): string {
@@ -184,7 +185,7 @@ export function generateMultiFormatFilename(
 }
 
 export function generateHookFilename(
-  item: ContentItem,
+  item: ContentItem | GetContentDetailCompleteReturn['content'],
   contentType: 'hookConfig' | 'scriptContent',
   language: string
 ): string {

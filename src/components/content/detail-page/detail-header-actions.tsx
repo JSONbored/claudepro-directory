@@ -28,17 +28,38 @@ import { ArrowLeft, Check, Copy, Download, FileText, Sparkles } from '@/src/lib/
 import { STATE_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { logUnhandledPromise } from '@/src/lib/utils/error.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
-import type { CopyType } from '@/src/types/database-overrides';
+import type { CopyType, GetContentDetailCompleteReturn } from '@/src/types/database-overrides';
 
 /**
  * Determine copy type based on content item structure
  */
-function determineCopyType(item: ContentItem): CopyType {
+function determineCopyType(
+  item: ContentItem | GetContentDetailCompleteReturn['content']
+): CopyType {
   // Check if item has content or configuration (indicates code/config copy)
   if ('content' in item && item.content) return 'code';
   if ('configuration' in item && item.configuration) return 'code';
   // Default to link for other types
   return 'link';
+}
+
+/**
+ * Safely extracts content or configuration from item as a string for copying
+ */
+function getContentForCopy(item: ContentItem | GetContentDetailCompleteReturn['content']): string {
+  // Check for content first
+  if ('content' in item && typeof item.content === 'string') {
+    return item.content;
+  }
+
+  // Fall back to configuration
+  if ('configuration' in item) {
+    const cfg = item.configuration;
+    if (typeof cfg === 'string') return cfg;
+    if (cfg != null) return JSON.stringify(cfg, null, 2);
+  }
+
+  return '';
 }
 
 /**
@@ -50,7 +71,7 @@ export interface SerializableAction {
 }
 
 export interface DetailHeaderActionsProps {
-  item: ContentItem;
+  item: ContentItem | GetContentDetailCompleteReturn['content'];
   typeName: string;
   category: CategoryId;
   hasContent: boolean;
@@ -112,15 +133,7 @@ export function DetailHeaderActions({
     }
 
     // Default copy logic
-    const contentToCopy =
-      ('content' in item ? (item as { content?: string }).content : '') ??
-      ('configuration' in item
-        ? typeof (item as unknown as { configuration?: unknown }).configuration === 'string'
-          ? (item as unknown as { configuration?: string }).configuration
-          : JSON.stringify((item as unknown as { configuration?: unknown }).configuration, null, 2)
-        : '') ??
-      '';
-
+    const contentToCopy = getContentForCopy(item);
     await copy(contentToCopy);
 
     trackInteraction({

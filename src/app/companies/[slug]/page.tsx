@@ -18,34 +18,16 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/ui/card';
+import { getCompanyProfile } from '@/src/lib/data/companies/public';
 import { ROUTES } from '@/src/lib/data/config/constants';
 import { Briefcase, Building, Calendar, Globe, TrendingUp, Users } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { normalizeError } from '@/src/lib/utils/error.utils';
-import type { Tables } from '@/src/types/database.types';
 
 interface CompanyPageProps {
   params: Promise<{ slug: string }>;
-}
-
-type CompanyRow = Tables<'companies'>;
-
-interface CompanyProfile {
-  company: CompanyRow;
-  active_jobs: Tables<'jobs'>[];
-  stats: {
-    total_jobs: number;
-    active_jobs: number;
-    featured_jobs: number;
-    remote_jobs: number;
-    avg_salary_min: number | null;
-    total_views: number;
-    total_clicks: number;
-    click_through_rate: number;
-    latest_job_posted_at: string | null;
-  };
 }
 
 export const revalidate = 1800; // 30min ISR (fallback if edge function cache misses)
@@ -60,51 +42,20 @@ export async function generateMetadata({ params }: CompanyPageProps): Promise<Me
 export default async function CompanyPage({ params }: CompanyPageProps) {
   const { slug } = await params;
 
-  // Call unified data-api (benefits from CDN cache)
-  const url = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/data-api/company?slug=${slug}`;
-
-  let res: Response;
+  let profile;
   try {
-    res = await fetch(url, {
-      next: { revalidate: 1800 }, // Vercel ISR as fallback
-    });
+    profile = await getCompanyProfile(slug);
   } catch (error) {
-    const normalized = normalizeError(error, 'Failed to fetch company profile from data-api');
-    logger.error('CompanyPage: data-api fetch threw', normalized, { slug, url });
-    throw normalized;
-  }
-
-  if (!res.ok) {
-    if (res.status === 404) {
-      logger.warn('CompanyPage: company not found', { slug });
-      notFound();
-    }
-    const err = new Error(`Company data-api responded with ${res.status}`);
-    logger.error('CompanyPage: data-api returned non-200', err, {
-      slug,
-      status: res.status,
-      url,
-    });
-    throw err;
-  }
-
-  let profile: CompanyProfile | null = null;
-  try {
-    profile = (await res.json()) as CompanyProfile;
-  } catch (error) {
-    const normalized = normalizeError(error, 'Failed to parse company profile payload');
-    logger.error('CompanyPage: JSON parse failed', normalized, { slug });
+    const normalized = normalizeError(error, 'Failed to load company profile');
+    logger.error('CompanyPage: getCompanyProfile threw', normalized, { slug });
     throw normalized;
   }
 
   if (!profile?.company) {
-    logger.error(
-      'CompanyPage: parsed profile is invalid',
-      new Error('Company profile payload missing'),
-      { slug }
-    );
+    logger.warn('CompanyPage: company not found', { slug });
     notFound();
   }
+
   const { company, active_jobs, stats } = profile;
 
   return (
@@ -241,7 +192,7 @@ export default async function CompanyPage({ params }: CompanyPageProps) {
                     <span className="font-semibold text-green-600">{stats.active_jobs || 0}</span>
                   </div>
 
-                  {stats.remote_jobs > 0 && (
+                  {stats.remote_jobs && stats.remote_jobs > 0 && (
                     <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
                       <span className={UI_CLASSES.TEXT_SM_MUTED}>Remote Positions</span>
                       <span className="font-semibold">{stats.remote_jobs}</span>
@@ -259,7 +210,9 @@ export default async function CompanyPage({ params }: CompanyPageProps) {
 
                   <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
                     <span className={UI_CLASSES.TEXT_SM_MUTED}>Total Views</span>
-                    <span className="font-semibold">{stats.total_views.toLocaleString()}</span>
+                    <span className="font-semibold">
+                      {(stats.total_views ?? 0).toLocaleString()}
+                    </span>
                   </div>
 
                   {stats.latest_job_posted_at && (

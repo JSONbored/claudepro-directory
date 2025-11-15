@@ -31,14 +31,14 @@ import {
 import { ensureStringArray } from '@/src/lib/utils/data.utils';
 import { normalizeError } from '@/src/lib/utils/error.utils';
 import { getViewTransitionName } from '@/src/lib/utils/view-transitions.utils';
-import type { Database } from '@/src/types/database.types';
+import type { GetContentDetailCompleteReturn } from '@/src/types/database-overrides';
 import { DetailHeader } from './detail-header';
 import { DetailMetadata } from './detail-metadata';
 import { DetailSidebar } from './sidebar/navigation-sidebar';
 
 export interface UnifiedDetailPageProps {
-  item: ContentItem;
-  relatedItems?: ContentItem[];
+  item: ContentItem | GetContentDetailCompleteReturn['content'];
+  relatedItems?: ContentItem[] | GetContentDetailCompleteReturn['related'];
   viewCount?: number;
   copyCount?: number;
   relatedItemsPromise?: Promise<ContentItem[]>;
@@ -47,7 +47,11 @@ export interface UnifiedDetailPageProps {
   tabsEnabled?: boolean;
 }
 
-function logDetailProcessingWarning(section: string, error: unknown, item: ContentItem): void {
+function logDetailProcessingWarning(
+  section: string,
+  error: unknown,
+  item: ContentItem | GetContentDetailCompleteReturn['content']
+): void {
   const normalized = normalizeError(error, `${section} processing failed`);
   logger.warn(`UnifiedDetailPage: ${section} processing failed`, {
     category: item.category,
@@ -56,11 +60,35 @@ function logDetailProcessingWarning(section: string, error: unknown, item: Conte
   });
 }
 
+/**
+ * Safely extracts configuration from item or metadata as a string
+ */
+function getConfigurationAsString(
+  item: ContentItem | GetContentDetailCompleteReturn['content'],
+  metadata: Record<string, unknown>
+): string | null {
+  // Check top-level item first
+  if ('configuration' in item) {
+    const cfg = item.configuration;
+    if (typeof cfg === 'string') return cfg;
+    if (cfg != null) return JSON.stringify(cfg, null, 2);
+  }
+
+  // Fall back to metadata
+  if (metadata.configuration) {
+    const cfg = metadata.configuration;
+    if (typeof cfg === 'string') return cfg;
+    if (typeof cfg === 'object') return JSON.stringify(cfg, null, 2);
+  }
+
+  return null;
+}
+
 async function ViewCountMetadata({
   item,
   viewCountPromise,
 }: {
-  item: ContentItem;
+  item: ContentItem | GetContentDetailCompleteReturn['content'];
   viewCountPromise: Promise<number>;
 }) {
   const viewCount = await viewCountPromise;
@@ -72,7 +100,7 @@ async function SidebarWithRelated({
   relatedItemsPromise,
   config,
 }: {
-  item: ContentItem;
+  item: ContentItem | GetContentDetailCompleteReturn['content'];
   relatedItemsPromise: Promise<ContentItem[]>;
   config: {
     typeName: string;
@@ -144,15 +172,9 @@ export async function UnifiedDetailPage({
     let content = '';
     if ('content' in item && typeof (item as { content?: string }).content === 'string') {
       content = (item as { content: string }).content;
-    } else if (
-      ('configuration' in item && (item as unknown as { configuration?: unknown }).configuration) ||
-      metadata.configuration
-    ) {
-      const cfg =
-        ('configuration' in item &&
-          (item as unknown as { configuration?: unknown }).configuration) ||
-        metadata.configuration;
-      content = typeof cfg === 'string' ? cfg : JSON.stringify(cfg, null, 2);
+    } else {
+      const cfg = getConfigurationAsString(item, metadata);
+      if (cfg) content = cfg;
     }
 
     if (!content) return null;
@@ -396,7 +418,9 @@ export async function UnifiedDetailPage({
   })();
 
   // GUIDES: Pre-process sections with server-side syntax highlighting
-  const guideSections = await (async () => {
+  const guideSections = await (async (): Promise<Array<
+    Record<string, unknown> & { html?: string }
+  > | null> => {
     if (item.category !== 'guides') return null;
 
     const metadata = 'metadata' in item ? (item.metadata as Record<string, unknown>) : null;
@@ -538,11 +562,7 @@ export async function UnifiedDetailPage({
 
             {/* GUIDES: Render structured sections from metadata using JSONSectionRenderer */}
             {guideSections && guideSections.length > 0 && (
-              <JSONSectionRenderer
-                sections={
-                  guideSections as unknown as Database['public']['Tables']['content']['Row']['metadata']
-                }
-              />
+              <JSONSectionRenderer sections={guideSections} />
             )}
 
             {/* Content/Code section (non-guides) */}

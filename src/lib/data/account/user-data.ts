@@ -13,6 +13,7 @@ import type {
   GetUserDashboardReturn,
   GetUserLibraryReturn,
   GetUserSettingsReturn,
+  GetUserSponsorshipsReturn,
 } from '@/src/types/database-overrides';
 
 const ACCOUNT_TTL_KEY = 'cache.account.ttl_seconds';
@@ -201,8 +202,8 @@ export async function getUserCompanies(userId: string): Promise<GetUserCompanies
 /**
  * Get user sponsorships
  */
-export async function getUserSponsorships(userId: string): Promise<Tables<'sponsored_content'>[]> {
-  const data = await fetchCachedRpc<Array<Tables<'sponsored_content'>> | null>(
+export async function getUserSponsorships(userId: string): Promise<GetUserSponsorshipsReturn> {
+  const data = await fetchCachedRpc<GetUserSponsorshipsReturn | null>(
     { p_user_id: userId },
     {
       rpcName: 'get_user_sponsorships',

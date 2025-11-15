@@ -604,4 +604,5 @@ export const cacheConfigs = createDynamicConfigGroup('cache_configs', {
   'cache.invalidate.contact_submission': ['contact', 'submissions'] as string[],
   'cache.invalidate.review_helpful': ['content'] as string[],
   'cache.invalidate.usage_tracking': ['content'] as string[],
+  'cache.invalidate.changelog': ['changelog'] as string[],
 });

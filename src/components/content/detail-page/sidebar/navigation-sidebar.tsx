@@ -19,13 +19,14 @@ import { BADGE_COLORS, type CategoryType, UI_CLASSES } from '@/src/lib/ui-consta
 import { getDisplayTitle } from '@/src/lib/utils';
 import { getContentItemUrl } from '@/src/lib/utils/content.utils';
 import { ensureStringArray } from '@/src/lib/utils/data.utils';
+import type { GetContentDetailCompleteReturn } from '@/src/types/database-overrides';
 
 /**
  * Props for DetailSidebar
  */
 export interface DetailSidebarProps {
-  item: ContentItem;
-  relatedItems: ContentItem[];
+  item: ContentItem | GetContentDetailCompleteReturn['content'];
+  relatedItems: ContentItem[] | GetContentDetailCompleteReturn['related'];
   config: {
     typeName: string;
     metadata?:
@@ -38,8 +39,8 @@ export interface DetailSidebarProps {
   };
   customRenderer?:
     | ((
-        item: ContentItem,
-        relatedItems: ContentItem[],
+        item: ContentItem | GetContentDetailCompleteReturn['content'],
+        relatedItems: ContentItem[] | GetContentDetailCompleteReturn['related'],
         router: ReturnType<typeof useRouter>
       ) => React.ReactNode)
     | undefined;

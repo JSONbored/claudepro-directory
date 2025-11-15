@@ -1,26 +1,23 @@
 'use server';
 
-import type { ContentItem } from '@/src/lib/data/content';
 import { fetchCachedRpc } from '@/src/lib/data/helpers';
 import { logger } from '@/src/lib/logger';
 import { normalizeError } from '@/src/lib/utils/error.utils';
+import type { GetContentDetailCompleteReturn } from '@/src/types/database-overrides';
 
-export interface ContentDetailResult {
-  content: ContentItem;
-  analytics?: { view_count: number; copy_count: number } | null;
-  related?: ContentItem[];
-  collection?: ContentItem;
-  collection_items?: ContentItem[];
-}
+/**
+ * @deprecated Use GetContentDetailCompleteReturn instead
+ */
+export type ContentDetailResult = GetContentDetailCompleteReturn;
 
 export async function getContentDetailComplete(input: {
   category: string;
   slug: string;
-}): Promise<ContentDetailResult | null> {
+}): Promise<GetContentDetailCompleteReturn | null> {
   const { category, slug } = input;
 
   try {
-    return fetchCachedRpc<ContentDetailResult | null>(
+    return fetchCachedRpc<GetContentDetailCompleteReturn | null>(
       {
         p_category: category,
         p_slug: slug,

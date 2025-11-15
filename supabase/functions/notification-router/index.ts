@@ -2,6 +2,10 @@
  * Notification Router - Discord handlers, changelog sync, notification APIs, webhooks.
  */
 
+import { revalidateChangelogPages } from '../_shared/changelog/service.ts';
+import { SITE_URL, supabaseServiceRole } from '../_shared/clients/supabase.ts';
+import { edgeEnv } from '../_shared/config/env.ts';
+import { getCacheConfigStringArray } from '../_shared/config/statsig-cache.ts';
 import type { Database } from '../_shared/database.types.ts';
 import { handleChangelogSyncRequest } from '../_shared/handlers/changelog/handler.ts';
 import { handleDiscordNotification } from '../_shared/handlers/discord/handler.ts';
@@ -9,9 +13,16 @@ import {
   createNotificationTrace,
   dismissNotificationsForUser,
   getActiveNotificationsForUser,
+  insertNotification,
 } from '../_shared/notifications/service.ts';
 import { trackInteractionEdge } from '../_shared/utils/analytics/tracker.ts';
 import { requireAuthUser } from '../_shared/utils/auth.ts';
+import { sendDiscordWebhook } from '../_shared/utils/discord/client.ts';
+import {
+  buildChangelogEmbed,
+  type ChangelogSection,
+  type GitHubCommit,
+} from '../_shared/utils/discord/embeds.ts';
 import {
   badRequestResponse,
   changelogCorsHeaders,
@@ -91,6 +102,13 @@ const router = createRouter<NotificationRouterContext>({
       match: (ctx) =>
         ctx.pathname.startsWith('/changelog-sync') || ctx.notificationType === 'changelog-sync',
       handler: (ctx) => handleChangelogSyncRequest(ctx.request),
+    },
+    {
+      name: 'changelog-release-worker',
+      methods: ['POST', 'OPTIONS'],
+      cors: notificationCorsHeaders,
+      match: (ctx) => ctx.pathname.startsWith('/changelog-release-worker'),
+      handler: () => handleChangelogReleaseQueue(),
     },
   ],
   defaultRoute: {
@@ -306,4 +324,369 @@ function logWebhookAnalytics(
       message: error instanceof Error ? error.message : String(error),
     });
   });
+}
+
+/**
+ * Changelog Release Queue Worker
+ * Processes changelog release jobs from Supabase Queue (pgmq)
+ */
+const QUEUE_NAME = 'changelog_release';
+const BATCH_SIZE = 5;
+const DISCORD_CHANGELOG_WEBHOOK_URL = edgeEnv.discord.changelog;
+const REVALIDATE_SECRET = edgeEnv.revalidate.secret;
+
+interface ChangelogReleaseJob {
+  entryId: string;
+  slug: string;
+  title: string;
+  tldr: string;
+  sections: ChangelogSection[];
+  commits: GitHubCommit[];
+  releaseDate: string;
+  metadata: unknown;
+}
+
+interface QueueMessage {
+  msg_id: bigint;
+  read_ct: number;
+  vt: string;
+  enqueued_at: string;
+  message: ChangelogReleaseJob;
+}
+
+async function processChangelogRelease(message: QueueMessage): Promise<{
+  success: boolean;
+  errors: string[];
+}> {
+  const { msg_id, message: job } = message;
+  const errors: string[] = [];
+  let discordSuccess = false;
+  let notificationSuccess = false;
+  let cacheInvalidationSuccess = false;
+  let revalidationSuccess = false;
+
+  // Create structured log context (reused in all logs)
+  const logContext = {
+    job_id: msg_id.toString(),
+    entry_id: job.entryId,
+    slug: job.slug,
+    attempt: message.read_ct,
+    enqueued_at: message.enqueued_at,
+  };
+
+  const startTime = Date.now();
+
+  console.log('[notification-router] Processing changelog release job', logContext);
+
+  // 1. Send Discord webhook (non-critical)
+  if (DISCORD_CHANGELOG_WEBHOOK_URL) {
+    try {
+      const embed = buildChangelogEmbed({
+        slug: job.slug,
+        title: job.title,
+        tldr: job.tldr,
+        sections: job.sections,
+        commits: job.commits,
+        date: job.releaseDate,
+      });
+
+      await sendDiscordWebhook(
+        DISCORD_CHANGELOG_WEBHOOK_URL,
+        {
+          content: '🚀 **New Release Deployed**',
+          embeds: [embed],
+        },
+        'changelog_notification',
+        {
+          relatedId: job.entryId,
+          metadata: {
+            changelog_id: job.entryId,
+            slug: job.slug,
+            msg_id: msg_id.toString(),
+          },
+        }
+      );
+
+      discordSuccess = true;
+      console.log('[notification-router] Discord webhook sent', {
+        ...logContext,
+        success: discordSuccess,
+      });
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      errors.push(`Discord: ${errorMsg}`);
+      console.error('[notification-router] Discord webhook failed', {
+        ...logContext,
+        error: errorMsg,
+      });
+    }
+  }
+
+  // 2. Insert notification (idempotent, critical path)
+  try {
+    await insertNotification({
+      id: job.entryId,
+      title: job.title,
+      message: job.tldr || 'We just shipped a fresh Claude Pro Directory release.',
+      type: 'announcement',
+      priority: 'high',
+      action_label: 'Read release notes',
+      action_href: `${SITE_URL}/changelog/${job.slug}`,
+      metadata: {
+        slug: job.slug,
+        changelog_id: job.entryId,
+        source: 'changelog-release-worker',
+        msg_id: msg_id.toString(),
+      },
+    });
+
+    notificationSuccess = true;
+    console.log('[notification-router] Notification inserted', {
+      ...logContext,
+      success: notificationSuccess,
+    });
+  } catch (error) {
+    const errorMsg = error instanceof Error ? error.message : String(error);
+    errors.push(`Notification: ${errorMsg}`);
+    console.error('[notification-router] Notification insert failed', {
+      ...logContext,
+      error: errorMsg,
+    });
+
+    // Track failure immediately (critical path failure)
+    trackInteractionEdge({
+      interactionType: 'changelog_release_failure',
+      contentType: 'changelog',
+      contentSlug: job.slug,
+      metadata: {
+        entryId: job.entryId,
+        msg_id: msg_id.toString(),
+        attempt: message.read_ct,
+        enqueued_at: message.enqueued_at,
+        processed_at: new Date().toISOString(),
+        errors,
+        discordSuccess,
+        notificationSuccess,
+      },
+    }).catch((analyticsError) => {
+      console.warn('[notification-router] Analytics tracking failed', {
+        ...logContext,
+        error: analyticsError instanceof Error ? analyticsError.message : String(analyticsError),
+      });
+    });
+  }
+
+  // 3. Invalidate cache tags (non-critical, after notification insert)
+  if (notificationSuccess) {
+    try {
+      // Fetch tags from Statsig (with fallback to default)
+      const cacheTags = getCacheConfigStringArray(
+        'cache.invalidate.changelog',
+        ['changelog'] // Fallback default
+      );
+
+      if (REVALIDATE_SECRET && cacheTags.length > 0) {
+        const revalidateUrl = `${SITE_URL}/api/revalidate`;
+        const response = await fetch(revalidateUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            secret: REVALIDATE_SECRET,
+            category: 'changelog',
+            slug: job.slug,
+            tags: cacheTags,
+          }),
+        });
+
+        if (response.ok) {
+          cacheInvalidationSuccess = true;
+          console.log('[notification-router] Cache tags invalidated', {
+            ...logContext,
+            success: cacheInvalidationSuccess,
+            tags: cacheTags,
+          });
+        } else {
+          const errorText = await response.text();
+          console.warn('[notification-router] Cache invalidation failed', {
+            ...logContext,
+            status: response.status,
+            error: errorText,
+            tags: cacheTags,
+          });
+          errors.push(`Cache invalidation: ${response.status} ${errorText}`);
+        }
+      } else if (!REVALIDATE_SECRET) {
+        console.warn('[notification-router] Cache invalidation skipped (no secret)', logContext);
+      }
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      console.warn('[notification-router] Cache invalidation error', {
+        ...logContext,
+        error: errorMsg,
+      });
+      errors.push(`Cache invalidation: ${errorMsg}`);
+      // Non-critical, don't fail the job
+    }
+  }
+
+  // 4. Revalidate Next.js pages (non-critical)
+  try {
+    await revalidateChangelogPages(job.slug);
+    revalidationSuccess = true;
+    console.log('[notification-router] Pages revalidated', {
+      ...logContext,
+      success: revalidationSuccess,
+    });
+  } catch (error) {
+    const errorMsg = error instanceof Error ? error.message : String(error);
+    errors.push(`Revalidation: ${errorMsg}`);
+    console.warn('[notification-router] Revalidation failed', {
+      ...logContext,
+      error: errorMsg,
+    });
+  }
+
+  // 5. Track analytics (success/partial)
+  if (notificationSuccess) {
+    const durationMs = Date.now() - startTime;
+    trackInteractionEdge({
+      interactionType:
+        errors.length === 0 ? 'changelog_release_success' : 'changelog_release_partial',
+      contentType: 'changelog',
+      contentSlug: job.slug,
+      metadata: {
+        entryId: job.entryId,
+        msg_id: msg_id.toString(),
+        attempt: message.read_ct,
+        enqueued_at: message.enqueued_at,
+        processed_at: new Date().toISOString(),
+        duration_ms: durationMs,
+        discordSuccess,
+        notificationSuccess,
+        cacheInvalidationSuccess,
+        revalidationSuccess,
+        errors: errors.length > 0 ? errors : undefined,
+      },
+    }).catch((error) => {
+      console.warn('[notification-router] Analytics tracking failed', {
+        ...logContext,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    });
+  }
+
+  // Success if notification inserted (most critical)
+  const success = notificationSuccess || errors.length === 0;
+  const durationMs = Date.now() - startTime;
+
+  console.log('[notification-router] Changelog release job completed', {
+    ...logContext,
+    success,
+    errors: errors.length > 0 ? errors : undefined,
+    discordSuccess,
+    notificationSuccess,
+    cacheInvalidationSuccess,
+    revalidationSuccess,
+    duration_ms: durationMs,
+  });
+
+  return { success, errors };
+}
+
+async function deleteQueueMessage(msgId: bigint): Promise<void> {
+  try {
+    const { error } = await supabaseServiceRole.schema('pgmq_public').rpc('delete', {
+      queue_name: QUEUE_NAME,
+      msg_id: msgId,
+    });
+
+    if (error) {
+      throw error;
+    }
+  } catch (error) {
+    console.error('[notification-router] Failed to delete queue message', {
+      msg_id: msgId.toString(),
+      error: error instanceof Error ? error.message : String(error),
+    });
+    // Don't throw - message will remain in queue for retry
+  }
+}
+
+async function handleChangelogReleaseQueue(): Promise<Response> {
+  try {
+    // Read messages from queue
+    const { data: messages, error: readError } = await supabaseServiceRole
+      .schema('pgmq_public')
+      .rpc('read', {
+        queue_name: QUEUE_NAME,
+        sleep_seconds: 0,
+        n: BATCH_SIZE,
+      });
+
+    if (readError) {
+      console.error('[notification-router] Queue read error', { error: readError.message });
+      return errorResponse(
+        new Error(`Failed to read queue: ${readError.message}`),
+        'notification-router:queue-read'
+      );
+    }
+
+    if (!messages || messages.length === 0) {
+      return successResponse({ message: 'No messages in queue', processed: 0 }, 200);
+    }
+
+    console.log(`[notification-router] Processing ${messages.length} changelog release jobs`);
+
+    const results = [];
+
+    // Process each message
+    for (const message of messages as QueueMessage[]) {
+      try {
+        const result = await processChangelogRelease(message);
+
+        if (result.success) {
+          await deleteQueueMessage(message.msg_id);
+          results.push({
+            msg_id: message.msg_id.toString(),
+            status: 'success',
+            errors: result.errors,
+          });
+        } else {
+          // Leave in queue for retry
+          results.push({
+            msg_id: message.msg_id.toString(),
+            status: 'failed',
+            errors: result.errors,
+            will_retry: true,
+          });
+        }
+      } catch (error) {
+        const errorMsg = error instanceof Error ? error.message : String(error);
+        console.error('[notification-router] Unexpected error processing message', {
+          msg_id: message.msg_id.toString(),
+          error: errorMsg,
+        });
+        results.push({
+          msg_id: message.msg_id.toString(),
+          status: 'error',
+          error: errorMsg,
+          will_retry: true,
+        });
+      }
+    }
+
+    return successResponse(
+      {
+        message: `Processed ${messages.length} messages`,
+        processed: messages.length,
+        results,
+      },
+      200
+    );
+  } catch (error) {
+    console.error('[notification-router] Fatal queue processing error', {
+      error: error instanceof Error ? error.message : String(error),
+    });
+    return errorResponse(error, 'notification-router:queue-fatal');
+  }
 }

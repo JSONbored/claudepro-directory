@@ -1,37 +1,22 @@
 'use server';
 
 import { fetchCachedRpc } from '@/src/lib/data/helpers';
-import type { Json } from '@/src/types/database.types';
+import type { GetSimilarContentReturn } from '@/src/types/database-overrides';
 
-export interface SimilarItem {
-  slug: string;
-  title: string;
-  description?: string;
-  category: string;
-  score?: number;
-  tags?: string[];
-  similarity_factors?: Json;
-  calculated_at?: string;
-  url?: string;
-}
-
-export interface SimilarContentResult {
-  similar_items: SimilarItem[];
-  source_item: {
-    slug: string;
-    category: string;
-  };
-  algorithm_version?: string;
-}
+/**
+ * SimilarContentResult type alias for backward compatibility
+ * @deprecated Use GetSimilarContentReturn instead
+ */
+export type SimilarContentResult = GetSimilarContentReturn;
 
 export async function getSimilarContent(input: {
   contentType: string;
   contentSlug: string;
   limit?: number;
-}): Promise<SimilarContentResult | null> {
+}): Promise<GetSimilarContentReturn | null> {
   const { contentType, contentSlug, limit = 6 } = input;
 
-  return fetchCachedRpc<SimilarContentResult | null>(
+  return fetchCachedRpc<GetSimilarContentReturn | null>(
     {
       p_content_type: contentType,
       p_content_slug: contentSlug,

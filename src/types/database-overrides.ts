@@ -300,8 +300,52 @@ export type GetHomepageCompleteReturn = {
 };
 
 /**
- * get_changelog_entries RPC return type
- * Returns paginated changelog entries with metadata
+ * get_changelog_overview RPC return type
+ * Returns paginated changelog entries with metadata, featured entries, and category counts
+ * Replaces: get_changelog_entries + get_changelog_metadata
+ */
+export type GetChangelogOverviewReturn = {
+  entries: Array<Tables<'changelog'>>;
+  metadata: {
+    totalEntries: number;
+    dateRange: {
+      earliest: string;
+      latest: string;
+    };
+    categoryCounts: {
+      Added?: number;
+      Changed?: number;
+      Fixed?: number;
+      Removed?: number;
+      Deprecated?: number;
+      Security?: number;
+    };
+  };
+  featured: Array<Tables<'changelog'>>;
+  pagination: {
+    total: number;
+    limit: number;
+    offset: number;
+    hasMore: boolean;
+  };
+};
+
+/**
+ * get_changelog_detail RPC return type
+ * Returns single changelog entry by slug with categories built from JSONB
+ * Replaces: get_changelog_entry_by_slug
+ */
+export type GetChangelogDetailReturn = {
+  entry:
+    | (Tables<'changelog'> & {
+        categories: Record<string, string[]>;
+      })
+    | null;
+};
+
+/**
+ * @deprecated Use GetChangelogOverviewReturn instead
+ * get_changelog_entries RPC return type (legacy)
  */
 export type GetChangelogEntriesReturn = {
   entries: Array<Tables<'changelog'>>;
@@ -312,8 +356,8 @@ export type GetChangelogEntriesReturn = {
 };
 
 /**
- * get_changelog_entry_by_slug RPC return type
- * Returns single changelog entry by slug
+ * @deprecated Use GetChangelogDetailReturn instead
+ * get_changelog_entry_by_slug RPC return type (legacy)
  */
 export type GetChangelogEntryBySlugReturn = Tables<'changelog'> | null;
 
@@ -820,6 +864,35 @@ export type GetContentTemplatesReturn = Array<{
   tags?: string;
   [key: string]: unknown; // Allow additional dynamic fields
 }>;
+
+/**
+ * get_user_sponsorships RPC return type
+ * Returns array of sponsored content items owned by user
+ */
+export type GetUserSponsorshipsReturn = Array<Tables<'sponsored_content'>>;
+
+/**
+ * get_similar_content RPC return type
+ * Returns similar content items with similarity scores and metadata
+ */
+export type GetSimilarContentReturn = {
+  similar_items: Array<{
+    slug: string;
+    title: string;
+    description?: string;
+    category: string;
+    score?: number;
+    tags?: string[];
+    similarity_factors?: DatabaseGenerated['public']['Tables']['content']['Row']['metadata'];
+    calculated_at?: string;
+    url?: string;
+  }>;
+  source_item: {
+    slug: string;
+    category: string;
+  };
+  algorithm_version?: string;
+};
 
 /**
  * get_active_notifications RPC return type

@@ -1,10 +1,14 @@
-/** Changelog entries loader via get_changelog_entries() RPC with edge-layer caching */
+/** Changelog entries loader via get_changelog_overview() and get_changelog_detail() RPCs with edge-layer caching */
 
 import { z } from 'zod';
 import { fetchCachedRpc } from '@/src/lib/data/helpers';
 import { logger } from '@/src/lib/logger';
 import type { Tables } from '@/src/types/database.types';
-import type { GetChangelogEntriesReturn } from '@/src/types/database-overrides';
+import type {
+  GetChangelogDetailReturn,
+  GetChangelogEntriesReturn,
+  GetChangelogOverviewReturn,
+} from '@/src/types/database-overrides';
 
 // Zod schema for changelog entry changes structure (JSONB validation)
 const changeItemSchema = z.object({
@@ -51,137 +55,169 @@ const CHANGELOG_TAG = 'changelog';
 const CHANGELOG_TTL_KEY = 'cache.changelog.ttl_seconds';
 const CHANGELOG_DETAIL_TTL_KEY = 'cache.changelog_detail.ttl_seconds';
 
-function createEmptyResult(limit: number, offset = 0): GetChangelogEntriesReturn {
+function createEmptyOverview(limit: number, offset = 0): GetChangelogOverviewReturn {
   return {
     entries: [],
-    total: 0,
-    limit,
-    offset,
-    hasMore: false,
+    metadata: {
+      totalEntries: 0,
+      dateRange: { earliest: '', latest: '' },
+      categoryCounts: {},
+    },
+    featured: [],
+    pagination: {
+      total: 0,
+      limit,
+      offset,
+      hasMore: false,
+    },
   };
 }
 
-export async function getChangelog(): Promise<GetChangelogEntriesReturn> {
-  const limit = 1000;
-  return fetchCachedRpc<GetChangelogEntriesReturn>(
+/**
+ * Get changelog overview with entries, metadata, and featured entries
+ * Optimized single RPC call that replaces get_changelog_entries + get_changelog_metadata
+ */
+export async function getChangelogOverview(
+  options: {
+    category?: string;
+    publishedOnly?: boolean;
+    featuredOnly?: boolean;
+    limit?: number;
+    offset?: number;
+  } = {}
+): Promise<GetChangelogOverviewReturn> {
+  const { category, publishedOnly = true, featuredOnly = false, limit = 50, offset = 0 } = options;
+
+  return fetchCachedRpc<GetChangelogOverviewReturn>(
     {
-      p_published_only: true,
+      p_category: category ?? null,
+      p_published_only: publishedOnly,
+      p_featured_only: featuredOnly,
       p_limit: limit,
+      p_offset: offset,
     },
     {
-      rpcName: 'get_changelog_entries',
-      tags: [CHANGELOG_TAG],
+      rpcName: 'get_changelog_overview',
+      tags: [CHANGELOG_TAG, ...(category ? [`changelog-category-${category}`] : [])],
       ttlKey: CHANGELOG_TTL_KEY,
-      keySuffix: 'published-1000',
-      fallback: createEmptyResult(limit),
-      logMeta: { publishedOnly: true, limit },
+      keySuffix: category
+        ? `category-${category}-${limit}-${offset}`
+        : `overview-${limit}-${offset}`,
+      fallback: createEmptyOverview(limit, offset),
+      logMeta: {
+        ...(category ? { category } : {}),
+        publishedOnly,
+        featuredOnly,
+        limit,
+        offset,
+      },
     }
   );
 }
 
-export async function getAllChangelogEntries(): Promise<ChangelogEntry[]> {
-  const limit = 10000;
-  const result = await fetchCachedRpc<GetChangelogEntriesReturn>(
-    {
-      p_published_only: false,
-      p_limit: limit,
-    },
-    {
-      rpcName: 'get_changelog_entries',
-      tags: [CHANGELOG_TAG],
-      ttlKey: CHANGELOG_TTL_KEY,
-      keySuffix: 'all',
-      fallback: createEmptyResult(limit),
-      logMeta: { publishedOnly: false, limit },
-    }
-  );
-
-  return result.entries || [];
-}
-
+/**
+ * Get changelog entry by slug with categories built from JSONB
+ * Optimized single RPC call that replaces get_changelog_entry_by_slug
+ */
 export async function getChangelogEntryBySlug(slug: string): Promise<ChangelogEntry | null> {
-  return fetchCachedRpc<ChangelogEntry | null>(
+  const result = await fetchCachedRpc<GetChangelogDetailReturn>(
     { p_slug: slug },
     {
-      rpcName: 'get_changelog_entry_by_slug',
+      rpcName: 'get_changelog_detail',
       tags: [CHANGELOG_TAG, `changelog-${slug}`],
       ttlKey: CHANGELOG_DETAIL_TTL_KEY,
       keySuffix: slug,
-      fallback: null,
+      fallback: { entry: null },
       logMeta: { slug },
     }
   );
+
+  return result.entry;
 }
 
+/**
+ * @deprecated Use getChangelogOverview() instead
+ * Get paginated changelog entries (backward compatibility)
+ */
+export async function getChangelog(): Promise<GetChangelogEntriesReturn> {
+  const limit = 1000;
+  const overview = await getChangelogOverview({
+    publishedOnly: true,
+    limit,
+    offset: 0,
+  });
+
+  // Convert to old format for backward compatibility
+  return {
+    entries: overview.entries,
+    total: overview.pagination.total,
+    limit: overview.pagination.limit,
+    offset: overview.pagination.offset,
+    hasMore: overview.pagination.hasMore,
+  };
+}
+
+/**
+ * Get all changelog entries (for static generation)
+ */
+export async function getAllChangelogEntries(): Promise<ChangelogEntry[]> {
+  const limit = 10000;
+  const overview = await getChangelogOverview({
+    publishedOnly: false,
+    limit,
+    offset: 0,
+  });
+
+  return overview.entries;
+}
+
+/**
+ * Get recent changelog entries
+ */
 export async function getRecentChangelogEntries(limit = 5): Promise<ChangelogEntry[]> {
-  const result = await fetchCachedRpc<GetChangelogEntriesReturn>(
-    {
-      p_published_only: true,
-      p_limit: limit,
-    },
-    {
-      rpcName: 'get_changelog_entries',
-      tags: [CHANGELOG_TAG],
-      ttlKey: CHANGELOG_TTL_KEY,
-      keySuffix: `recent-${limit}`,
-      fallback: createEmptyResult(limit),
-      logMeta: { publishedOnly: true, limit, label: 'recent' },
-    }
-  );
+  const overview = await getChangelogOverview({
+    publishedOnly: true,
+    limit,
+    offset: 0,
+  });
 
-  return result.entries || [];
+  return overview.entries;
 }
 
+/**
+ * Get changelog entries by category
+ */
 export async function getChangelogEntriesByCategory(category: string): Promise<ChangelogEntry[]> {
   const limit = 1000;
-  const result = await fetchCachedRpc<GetChangelogEntriesReturn>(
-    {
-      p_category: category,
-      p_published_only: true,
-      p_limit: limit,
-    },
-    {
-      rpcName: 'get_changelog_entries',
-      tags: [CHANGELOG_TAG, `changelog-category-${category}`],
-      ttlKey: CHANGELOG_TTL_KEY,
-      keySuffix: `category-${category}`,
-      fallback: createEmptyResult(limit),
-      logMeta: { category, publishedOnly: true, limit },
-    }
-  );
+  const overview = await getChangelogOverview({
+    category,
+    publishedOnly: true,
+    limit,
+    offset: 0,
+  });
 
-  return result.entries || [];
+  return overview.entries;
 }
 
+/**
+ * Get featured changelog entries
+ */
 export async function getFeaturedChangelogEntries(limit = 3): Promise<ChangelogEntry[]> {
-  const result = await fetchCachedRpc<{ entries: ChangelogEntry[] }>(
-    {
-      p_published_only: true,
-      p_featured_only: true,
-      p_limit: limit,
-    },
-    {
-      rpcName: 'get_changelog_entries',
-      tags: [CHANGELOG_TAG],
-      ttlKey: CHANGELOG_TTL_KEY,
-      keySuffix: `featured-${limit}`,
-      fallback: { entries: [] },
-      logMeta: { featuredOnly: true, limit },
-    }
-  );
+  const overview = await getChangelogOverview({
+    publishedOnly: true,
+    featuredOnly: true,
+    limit,
+    offset: 0,
+  });
 
-  return result.entries || [];
+  return overview.featured;
 }
 
+/**
+ * @deprecated Use getChangelogOverview().metadata instead
+ * Get changelog metadata (backward compatibility)
+ */
 export async function getChangelogMetadata() {
-  return fetchCachedRpc<unknown>(
-    {},
-    {
-      rpcName: 'get_changelog_metadata',
-      tags: [CHANGELOG_TAG],
-      ttlKey: CHANGELOG_TTL_KEY,
-      keySuffix: 'metadata',
-      fallback: null,
-    }
-  );
+  const overview = await getChangelogOverview({ limit: 1, offset: 0 });
+  return overview.metadata;
 }

@@ -10,14 +10,14 @@ import type { CategoryId, SectionId } from '@/src/lib/data/config/category/categ
 import type { ContentItem } from '@/src/lib/data/content';
 import type { ProcessedSectionData } from '@/src/lib/types/detail-tabs.types';
 import { ensureStringArray } from '@/src/lib/utils/data.utils';
-import type { Database } from '@/src/types/database.types';
+import type { GetContentDetailCompleteReturn } from '@/src/types/database-overrides';
 
 // Dynamic import for unified section component (code splitting)
 const UnifiedSection = dynamic(() => import('@/src/components/content/sections/unified-section'));
 
 export interface TabSectionRendererProps {
   sectionId: SectionId;
-  item: ContentItem;
+  item: ContentItem | GetContentDetailCompleteReturn['content'];
   sectionData: ProcessedSectionData;
   config: {
     typeName: string;
@@ -176,13 +176,9 @@ export function TabSectionRenderer({
 
     case 'guide_sections':
       if (!guideSections || guideSections.length === 0) return null;
-      return (
-        <JSONSectionRenderer
-          sections={
-            guideSections as unknown as Database['public']['Tables']['content']['Row']['metadata']
-          }
-        />
-      );
+      // guideSections is already a processed array of sections with html
+      // JSONSectionRenderer accepts arrays (checks Array.isArray internally)
+      return <JSONSectionRenderer sections={guideSections} />;
 
     default:
       return null;

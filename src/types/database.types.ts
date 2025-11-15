@@ -351,44 +351,6 @@ export type Database = {
         }
         Relationships: []
       }
-      changelog_changes: {
-        Row: {
-          category: string
-          change_text: string
-          changelog_entry_id: string
-          created_at: string | null
-          display_order: number
-          id: string
-          updated_at: string | null
-        }
-        Insert: {
-          category: string
-          change_text: string
-          changelog_entry_id: string
-          created_at?: string | null
-          display_order?: number
-          id?: string
-          updated_at?: string | null
-        }
-        Update: {
-          category?: string
-          change_text?: string
-          changelog_entry_id?: string
-          created_at?: string | null
-          display_order?: number
-          id?: string
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "changelog_changes_changelog_entry_id_fkey"
-            columns: ["changelog_entry_id"]
-            isOneToOne: false
-            referencedRelation: "changelog"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       collection_items: {
         Row: {
           added_at: string
@@ -3491,7 +3453,8 @@ export type Database = {
         Args: { p_category: string }
         Returns: string
       }
-      get_changelog_entries: {
+      get_changelog_detail: { Args: { p_slug: string }; Returns: Json }
+      get_changelog_overview: {
         Args: {
           p_category?: string
           p_featured_only?: boolean
@@ -3501,8 +3464,6 @@ export type Database = {
         }
         Returns: Json
       }
-      get_changelog_entry_by_slug: { Args: { p_slug: string }; Returns: Json }
-      get_changelog_metadata: { Args: never; Returns: Json }
       get_changelog_with_category_stats: {
         Args: { p_category?: string; p_limit?: number; p_offset?: number }
         Returns: Json

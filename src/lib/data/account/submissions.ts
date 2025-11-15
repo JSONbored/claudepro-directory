@@ -3,30 +3,13 @@
  */
 
 import { fetchCachedRpc } from '@/src/lib/data/helpers';
-import type { Database } from '@/src/types/database.types';
-
-export type SubmissionDashboardData = {
-  stats: { total: number; pending: number; merged_this_week: number };
-  recent: Array<{
-    id: string | number;
-    content_name: string;
-    content_type: Database['public']['Enums']['submission_type'];
-    merged_at: string;
-    user?: { name: string; slug: string } | null;
-  }>;
-  contributors: Array<{
-    name: string;
-    slug: string;
-    rank: number;
-    mergedCount: number;
-  }>;
-};
+import type { GetSubmissionDashboardReturn } from '@/src/types/database-overrides';
 
 export async function getSubmissionDashboard(
   recentLimit = 5,
   contributorsLimit = 5
-): Promise<SubmissionDashboardData | null> {
-  return fetchCachedRpc<SubmissionDashboardData | null>(
+): Promise<GetSubmissionDashboardReturn | null> {
+  return fetchCachedRpc<GetSubmissionDashboardReturn | null>(
     {
       p_recent_limit: recentLimit,
       p_contributors_limit: contributorsLimit,

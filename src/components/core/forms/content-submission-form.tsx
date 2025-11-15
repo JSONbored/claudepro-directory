@@ -337,7 +337,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
           author_profile_url: submissionData.author_profile_url as string | undefined,
           github_url: submissionData.github_url as string | undefined,
           tags,
-          content_data: submissionData as unknown as Record<string, unknown>,
+          content_data: submissionData,
         });
 
         if (result?.serverError || result?.validationErrors) {

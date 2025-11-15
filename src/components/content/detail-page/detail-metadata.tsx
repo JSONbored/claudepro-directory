@@ -14,9 +14,10 @@ import { Calendar, Copy, Eye, Tag, User } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { formatCopyCount, formatViewCount } from '@/src/lib/utils/content.utils';
 import { ensureStringArray, formatDate } from '@/src/lib/utils/data.utils';
+import type { GetContentDetailCompleteReturn } from '@/src/types/database-overrides';
 
 export interface DetailMetadataProps {
-  item: ContentItem;
+  item: ContentItem | GetContentDetailCompleteReturn['content'];
   viewCount?: number | undefined;
   copyCount?: number | undefined;
 }

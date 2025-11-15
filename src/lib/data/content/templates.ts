@@ -4,22 +4,19 @@
  */
 
 import { fetchCachedRpc } from '@/src/lib/data/helpers';
+import type { GetContentTemplatesReturn } from '@/src/types/database-overrides';
 
-export interface Template {
-  id: string;
-  type: string;
-  name: string;
-  description: string;
-  category?: string;
-  tags?: string;
-  [key: string]: unknown;
-}
+/**
+ * Template type alias for backward compatibility
+ * @deprecated Use GetContentTemplatesReturn[number] instead
+ */
+export type Template = GetContentTemplatesReturn[number];
 
 /**
  * Get content templates for a specific category via edge-cached RPC
  */
-export async function getContentTemplates(category: string): Promise<Template[]> {
-  return fetchCachedRpc<Template[]>(
+export async function getContentTemplates(category: string): Promise<GetContentTemplatesReturn> {
+  return fetchCachedRpc<GetContentTemplatesReturn>(
     { p_category: category },
     {
       rpcName: 'get_content_templates',

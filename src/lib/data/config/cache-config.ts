@@ -89,6 +89,7 @@ const CACHE_INVALIDATE_KEYS = [
   'cache.invalidate.contact_submission',
   'cache.invalidate.review_helpful',
   'cache.invalidate.usage_tracking',
+  'cache.invalidate.changelog',
 ] as const;
 
 export type CacheTtlKey = (typeof CACHE_TTL_KEYS)[number];
@@ -188,6 +189,7 @@ const CACHE_INVALIDATE_DEFAULTS: Record<CacheInvalidateKey, readonly string[]> =
   'cache.invalidate.contact_submission': ['contact', 'submissions'],
   'cache.invalidate.review_helpful': ['content'],
   'cache.invalidate.usage_tracking': ['content'],
+  'cache.invalidate.changelog': ['changelog'],
 };
 
 let cacheConfigPromise: CacheConfigPromise | null = null;

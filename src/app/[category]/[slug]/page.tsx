@@ -17,8 +17,8 @@ import {
   isValidCategory,
   VALID_CATEGORIES,
 } from '@/src/lib/data/config/category';
-import { type ContentItem, getContentByCategory } from '@/src/lib/data/content';
-import { type ContentDetailResult, getContentDetailComplete } from '@/src/lib/data/content/detail';
+import { getContentByCategory } from '@/src/lib/data/content';
+import { getContentDetailComplete } from '@/src/lib/data/content/detail';
 import { featureFlags } from '@/src/lib/flags';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
@@ -85,27 +85,6 @@ export async function generateMetadata({
     });
   }
 
-  let itemMeta: ContentItem | null = null;
-  try {
-    const data = await getContentDetailComplete({ category, slug });
-    itemMeta = data?.content ?? null;
-  } catch (error) {
-    const normalized = normalizeError(error, 'Failed to load content detail for metadata');
-    logger.error('DetailPage: metadata RPC threw', normalized, {
-      category,
-      slug,
-    });
-  }
-
-  if (!itemMeta) {
-    logger.warn('No content found in generateMetadata', {
-      category,
-      slug,
-      phase: 'generateMetadata',
-      hasData: false,
-    });
-  }
-
   let config: Awaited<ReturnType<typeof getCategoryConfig>> | null = null;
   try {
     config = await getCategoryConfig(category as CategoryId);
@@ -120,7 +99,6 @@ export async function generateMetadata({
 
   return generatePageMetadata('/:category/:slug', {
     params: { category, slug },
-    item: itemMeta ?? undefined,
     categoryConfig: config ?? undefined,
     category,
     slug,
@@ -174,10 +152,8 @@ export default async function DetailPage({
     notFound();
   }
 
-  // Extract data from RPC response (returns Json type, cast to expected structure)
-  const response = detailData as ContentDetailResult;
-  const fullItem = response.content as ContentItem;
-  const itemData = fullItem;
+  // detailData is already typed as GetContentDetailCompleteReturn | null
+  const { content: fullItem, analytics, related } = detailData;
 
   // Null safety: If content doesn't exist in database, return 404
   if (!fullItem) {
@@ -186,15 +162,13 @@ export default async function DetailPage({
       slug,
       rpcFunction: 'get_content_detail_complete',
       phase: 'page-render',
-      hasResponse: !!response,
     });
     notFound();
   }
 
-  const analytics = response.analytics as { view_count: number; copy_count: number } | null;
   const viewCount = analytics?.view_count || 0;
   const copyCount = analytics?.copy_count || 0;
-  const relatedItems = (response.related as ContentItem[]) || [];
+  const relatedItems = related || [];
 
   // Check feature flags
   const tabsEnabled = await featureFlags.contentDetailTabs();
@@ -235,7 +209,7 @@ export default async function DetailPage({
       )}
 
       <UnifiedDetailPage
-        item={fullItem || itemData}
+        item={fullItem}
         relatedItems={relatedItems}
         viewCount={viewCount}
         copyCount={copyCount}

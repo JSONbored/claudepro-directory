@@ -1,6 +1,7 @@
 import type { CategoryId } from '@/src/lib/data/config/category/category-config.types';
 import type { LucideIcon } from '@/src/lib/icons';
 import type { ContentItem } from '@/src/lib/types/component.types';
+import type { GetContentDetailCompleteReturn } from '@/src/types/database-overrides';
 
 type BaseProps = { className?: string };
 
@@ -95,7 +96,7 @@ export type InstallProps = BaseProps & {
     } | null;
     requirements?: string[];
   };
-  item: ContentItem;
+  item: ContentItem | GetContentDetailCompleteReturn['content'];
 };
 
 export type UnifiedSectionProps =
