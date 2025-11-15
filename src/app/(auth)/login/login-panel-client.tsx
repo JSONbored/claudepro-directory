@@ -9,6 +9,7 @@ import {
   loadNewsletterConfig,
 } from '@/src/components/features/growth/newsletter/newsletter-utils';
 import { useNewsletterCount } from '@/src/hooks/use-newsletter-count';
+import { logClientWarning } from '@/src/lib/utils/error.utils';
 
 interface LoginPanelClientProps {
   redirectTo?: string | undefined;
@@ -23,8 +24,8 @@ export function LoginPanelClient({ redirectTo }: LoginPanelClientProps) {
   useEffect(() => {
     loadNewsletterConfig()
       .then((config) => setNewsletterConfig(config))
-      .catch(() => {
-        // Silent fail - defaults are fine
+      .catch((error) => {
+        logClientWarning('LoginPanelClient: failed to load newsletter config', error);
       });
   }, []);
 

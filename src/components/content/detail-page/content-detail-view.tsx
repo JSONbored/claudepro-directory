@@ -18,6 +18,7 @@ import {
 import { detectLanguage } from '@/src/lib/content/language-detection';
 import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
 import { highlightCode } from '@/src/lib/content/syntax-highlighting';
+import { logger } from '@/src/lib/logger';
 import type { InstallationSteps } from '@/src/lib/types/content-type-config';
 import type { ProcessedSectionData } from '@/src/lib/types/detail-tabs.types';
 import { getDisplayTitle } from '@/src/lib/utils';
@@ -27,6 +28,7 @@ import {
   generateMultiFormatFilename,
   transformMcpConfigForDisplay,
 } from '@/src/lib/utils/content.utils';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 import { getViewTransitionName } from '@/src/lib/utils/view-transitions.utils';
 import type { Database } from '@/src/types/database.types';
 import { DetailHeader } from './detail-header';
@@ -42,6 +44,13 @@ export interface UnifiedDetailPageProps {
   viewCountPromise?: Promise<number>;
   collectionSections?: React.ReactNode;
   tabsEnabled?: boolean;
+}
+
+function logDetailProcessingWarning(section: string, error: unknown, item: ContentItem): void {
+  logger.warn(`UnifiedDetailPage: ${section} processing failed`, normalizeError(error), {
+    category: item.category,
+    slug: item.slug ?? 'unknown',
+  });
 }
 
 async function ViewCountMetadata({
@@ -151,7 +160,8 @@ export async function UnifiedDetailPage({
       const html = highlightCode(content, language);
 
       return { html, code: content, language, filename };
-    } catch (_error) {
+    } catch (error) {
+      logDetailProcessingWarning('contentData', error, item);
       return null;
     }
   })();
@@ -195,7 +205,8 @@ export async function UnifiedDetailPage({
             (c): c is { key: string; html: string; code: string; filename: string } => c !== null
           ),
         };
-      } catch (_error) {
+      } catch (error) {
+        logDetailProcessingWarning('configData.multi', error, item);
         return null;
       }
     }
@@ -233,7 +244,8 @@ export async function UnifiedDetailPage({
                 }
               : null,
         };
-      } catch (_error) {
+      } catch (error) {
+        logDetailProcessingWarning('configData.hook', error, item);
         return null;
       }
     }
@@ -244,7 +256,8 @@ export async function UnifiedDetailPage({
       const filename = generateFilename({ item, language: 'json' });
 
       return { format: 'json' as const, html, code, filename };
-    } catch (_error) {
+    } catch (error) {
+      logDetailProcessingWarning('configData.json', error, item);
       return null;
     }
   })();
@@ -300,7 +313,8 @@ export async function UnifiedDetailPage({
       );
 
       return highlightedExamples;
-    } catch (_error) {
+    } catch (error) {
+      logDetailProcessingWarning('examplesData', error, item);
       return null;
     }
   })();
@@ -370,7 +384,8 @@ export async function UnifiedDetailPage({
         sdk: sdkSteps ? { steps: sdkSteps } : null,
         ...(installation.requirements && { requirements: installation.requirements }),
       };
-    } catch (_error) {
+    } catch (error) {
+      logDetailProcessingWarning('installationData', error, item);
       return null;
     }
   })();

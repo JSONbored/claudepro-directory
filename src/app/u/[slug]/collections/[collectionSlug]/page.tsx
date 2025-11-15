@@ -25,7 +25,7 @@ import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { cachedRPCWithDedupe } from '@/src/lib/supabase/cached-rpc';
 import { createAnonClient } from '@/src/lib/supabase/server-anon';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
-import { normalizeError } from '@/src/lib/utils/error.utils';
+import { logUnhandledPromise, normalizeError } from '@/src/lib/utils/error.utils';
 import type { Tables } from '@/src/types/database.types';
 
 // Collection pages may have private content
@@ -172,8 +172,8 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
     interaction_type: 'view',
     content_type: 'guides',
     content_slug: `user-collection-${slug}-${collectionSlug}`,
-  }).catch(() => {
-    // Ignore tracking errors
+  }).catch((error) => {
+    logUnhandledPromise('PublicCollectionPage:view-tracking', error, { slug, collectionSlug });
   });
 
   return (

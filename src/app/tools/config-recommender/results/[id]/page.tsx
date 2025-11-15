@@ -18,6 +18,9 @@ function decodeQuizAnswers(encoded: string) {
     return JSON.parse(json);
   } catch (error) {
     const normalized = normalizeError(error, 'Invalid quiz answers encoding');
+    logger.error('ConfigRecommenderResults: decodeQuizAnswers failed', normalized, {
+      encodedLength: encoded.length,
+    });
     throw normalized;
   }
 }

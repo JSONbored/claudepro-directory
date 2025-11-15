@@ -4,6 +4,8 @@
 
 import { cache } from 'react';
 import { highlight } from 'sugar-high';
+import { logger } from '@/src/lib/logger';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 
 export const highlightCode = cache(
   (code: string, _language = 'javascript', showLineNumbers = true): string => {
@@ -30,7 +32,11 @@ export const highlightCode = cache(
       }
 
       return `<div class="code-block-wrapper"><pre class="code-block-pre"><code class="sugar-high">${highlighted}</code></pre></div>`;
-    } catch (_error) {
+    } catch (error) {
+      logger.warn('highlightCode: highlight failed', normalizeError(error), {
+        preview: code.slice(0, 80),
+        language: _language,
+      });
       const escapedCode = code
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')

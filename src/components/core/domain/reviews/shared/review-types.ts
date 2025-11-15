@@ -1,5 +1,6 @@
 import { getFormConfig } from '@/src/lib/actions/feature-flags.actions';
 import type { CategoryId } from '@/src/lib/config/category-config';
+import { logClientWarning } from '@/src/lib/utils/error.utils';
 
 /**
  * Review Item from Database
@@ -101,6 +102,6 @@ getFormConfig()
   .then((config: Record<string, unknown>) => {
     MAX_REVIEW_LENGTH = (config['form.max_review_length'] as number) ?? 2000;
   })
-  .catch(() => {
-    // Use default if config load fails
+  .catch((error) => {
+    logClientWarning('ReviewTypes: failed to load form config', error);
   });

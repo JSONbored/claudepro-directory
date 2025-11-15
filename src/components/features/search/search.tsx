@@ -26,6 +26,7 @@ import { ChevronDown, ChevronUp, Filter, Search } from '@/src/lib/icons';
 import type { FilterState, UnifiedSearchProps } from '@/src/lib/types/component.types';
 import { POSITION_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
+import { logClientWarning, logUnhandledPromise } from '@/src/lib/utils/error.utils';
 
 export type { FilterState };
 
@@ -71,9 +72,13 @@ function UnifiedSearchComponent({
   const [debounceMs, setDebounceMs] = useState(150);
 
   useEffect(() => {
-    getTimeoutConfig().then((config) => {
-      setDebounceMs((config['timeout.ui.debounce_ms'] as number) ?? 150);
-    });
+    getTimeoutConfig()
+      .then((config) => {
+        setDebounceMs((config['timeout.ui.debounce_ms'] as number) ?? 150);
+      })
+      .catch((error) => {
+        logClientWarning('UnifiedSearchComponent: failed to load debounce config', error);
+      });
   }, []);
 
   useEffect(() => {
@@ -107,8 +112,13 @@ function UnifiedSearchComponent({
               },
             })
           )
-          .catch(() => {
-            // Intentional
+          .catch((error) => {
+            logUnhandledPromise('UnifiedSearchComponent: search tracking failed', error, {
+              query: sanitized,
+              category,
+              resultCount,
+              activeFilterCount,
+            });
           });
       }
     }, 500);

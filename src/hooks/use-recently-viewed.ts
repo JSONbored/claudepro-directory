@@ -6,6 +6,7 @@ import { useCallback, useEffect, useRef } from 'react';
 import { create } from 'zustand';
 import { getRecentlyViewedConfig, getTimeoutConfig } from '@/src/lib/actions/feature-flags.actions';
 import { logger } from '@/src/lib/logger';
+import { logClientWarning } from '@/src/lib/utils/error.utils';
 
 export type RecentlyViewedCategory =
   | 'agent'
@@ -54,8 +55,8 @@ Promise.all([getRecentlyViewedConfig(), getTimeoutConfig()])
     MAX_TAGS = (recentlyViewed['recently_viewed.max_tags'] as number) ?? 5;
     DEBOUNCE_MS = (timeout['timeout.ui.form_debounce_ms'] as number) ?? 300;
   })
-  .catch(() => {
-    // Use defaults if config load fails
+  .catch((error) => {
+    logClientWarning('useRecentlyViewed: failed to load configs', error);
   });
 const useRecentlyViewedStore = create<RecentlyViewedState>((set) => ({
   items: [],

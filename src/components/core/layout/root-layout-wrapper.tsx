@@ -15,6 +15,7 @@ import { checkConfettiEnabled } from '@/src/lib/actions/feature-flags.actions';
 import type { NavigationData } from '@/src/lib/data/navigation';
 import { logger } from '@/src/lib/logger';
 import { DIMENSIONS } from '@/src/lib/ui-constants';
+import { logClientWarning } from '@/src/lib/utils/error.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
 import type { Tables } from '@/src/types/database.types';
 
@@ -171,8 +172,8 @@ export function LayoutContent({
           fireConfetti('subtle');
         }
       })
-      .catch(() => {
-        // Silent fail - confetti is a nice-to-have
+      .catch((error) => {
+        logClientWarning('LayoutContent: confetti check failed', error);
       });
 
     clearNewsletterOptInCookie().catch((error) => {

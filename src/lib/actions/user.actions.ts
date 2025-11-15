@@ -13,6 +13,7 @@ import { cacheConfigs } from '@/src/lib/flags';
 import { logger } from '@/src/lib/logger';
 import { revalidateCacheTags } from '@/src/lib/supabase/cache-helpers';
 import { cachedRPCWithDedupe } from '@/src/lib/supabase/cached-rpc';
+import { logActionFailure } from '@/src/lib/utils/error.utils';
 import { Constants, type Enums } from '@/src/types/database.types';
 
 // TypeScript types for RPC function returns (database validates, TypeScript trusts)
@@ -149,12 +150,10 @@ export const updateProfile = authedAction
 
       return result;
     } catch (error) {
-      logger.error(
-        'Failed to update user profile',
-        error instanceof Error ? error : new Error(String(error)),
-        { userId: ctx.userId, hasDisplayName: !!parsedInput.display_name }
-      );
-      throw error;
+      throw logActionFailure('user.updateProfile', error, {
+        userId: ctx.userId,
+        hasDisplayName: Boolean(parsedInput.display_name),
+      });
     }
   });
 
@@ -182,12 +181,7 @@ export const refreshProfileFromOAuth = authedAction
 
       return { success: true, message: 'Profile refreshed from OAuth provider' };
     } catch (error) {
-      logger.error(
-        'Failed to refresh profile from OAuth',
-        error instanceof Error ? error : new Error(String(error)),
-        { userId: ctx.userId }
-      );
-      throw error;
+      throw logActionFailure('user.refreshProfileFromOAuth', error, { userId: ctx.userId });
     }
   });
 
@@ -225,16 +219,11 @@ export const addBookmark = authedAction
 
       return data as { success: boolean; bookmark: unknown };
     } catch (error) {
-      logger.error(
-        'Failed to add bookmark',
-        error instanceof Error ? error : new Error(String(error)),
-        {
-          userId: ctx.userId,
-          contentType: parsedInput.content_type,
-          contentSlug: parsedInput.content_slug,
-        }
-      );
-      throw error;
+      throw logActionFailure('user.addBookmark', error, {
+        userId: ctx.userId,
+        contentType: parsedInput.content_type,
+        contentSlug: parsedInput.content_slug,
+      });
     }
   });
 
@@ -271,16 +260,11 @@ export const removeBookmark = authedAction
 
       return data as { success: boolean };
     } catch (error) {
-      logger.error(
-        'Failed to remove bookmark',
-        error instanceof Error ? error : new Error(String(error)),
-        {
-          userId: ctx.userId,
-          contentType: parsedInput.content_type,
-          contentSlug: parsedInput.content_slug,
-        }
-      );
-      throw error;
+      throw logActionFailure('user.removeBookmark', error, {
+        userId: ctx.userId,
+        contentType: parsedInput.content_type,
+        contentSlug: parsedInput.content_slug,
+      });
     }
   });
 
@@ -353,12 +337,10 @@ export const addBookmarkBatch = authedAction
 
       return result;
     } catch (error) {
-      logger.error(
-        'Failed to batch add bookmarks',
-        error instanceof Error ? error : new Error(String(error)),
-        { userId: ctx.userId, itemCount: parsedInput.items.length }
-      );
-      throw error;
+      throw logActionFailure('user.addBookmarkBatch', error, {
+        userId: ctx.userId,
+        itemCount: parsedInput.items.length,
+      });
     }
   });
 

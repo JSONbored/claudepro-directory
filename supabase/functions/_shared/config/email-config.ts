@@ -1,3 +1,5 @@
+import { edgeEnv } from './env.ts';
+
 /**
  * Shared Email Configuration for Supabase Edge Functions
  *
@@ -110,24 +112,24 @@ export function getEmailConfig(template: EmailTemplate) {
  * Centralized access with fallback validation
  */
 export const SUPABASE_ENV = {
-  url: Deno.env.get('SUPABASE_URL') ?? '',
-  anonKey: Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-  serviceRoleKey: Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+  url: edgeEnv.supabase.url,
+  anonKey: edgeEnv.supabase.anonKey,
+  serviceRoleKey: edgeEnv.supabase.serviceRoleKey,
 } as const;
 
 /**
  * Resend environment variables
  */
 export const RESEND_ENV = {
-  apiKey: Deno.env.get('RESEND_API_KEY') ?? '',
-  audienceId: Deno.env.get('RESEND_AUDIENCE_ID') ?? '',
+  apiKey: edgeEnv.resend.apiKey ?? '',
+  audienceId: edgeEnv.resend.audienceId ?? '',
 } as const;
 
 /**
  * Auth Hook environment variables
  */
 export const AUTH_HOOK_ENV = {
-  secret: Deno.env.get('SEND_EMAIL_HOOK_SECRET') ?? '',
+  secret: edgeEnv.sendEmailHook.secret ?? '',
 } as const;
 
 /**
@@ -160,7 +162,7 @@ export function validateEnvironment(required: ('supabase' | 'resend' | 'auth-hoo
  * Base URL for application links
  * Uses environment variable with fallback
  */
-export const APP_URL = Deno.env.get('APP_URL') ?? 'https://claudepro.directory';
+export const APP_URL = edgeEnv.site.appUrl;
 
 /**
  * Email rate limits (Resend free tier)

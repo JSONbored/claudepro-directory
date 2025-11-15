@@ -2,6 +2,9 @@
  * Consolidated HTTP helpers: CORS presets, JSON responses, cache headers.
  */
 
+import { edgeEnv } from '../config/env.ts';
+import { getCacheConfigNumber } from '../config/statsig-cache.ts';
+
 /* ----------------------------- CORS PRESETS ----------------------------- */
 
 export const publicCorsHeaders = {
@@ -60,7 +63,7 @@ export function getAuthenticatedCorsHeaders(requestOrigin: string | null): Recor
   const allowedOrigins = [
     'https://claudepro.directory',
     'https://www.claudepro.directory',
-    ...(Deno.env.get('NODE_ENV') === 'development' ? ['http://localhost:3000'] : []),
+    ...(edgeEnv.nodeEnv === 'development' ? ['http://localhost:3000'] : []),
   ];
 
   const origin = allowedOrigins.includes(requestOrigin || '')
@@ -140,7 +143,7 @@ export function requireMethod(
 
 /* ----------------------------- CACHE HELPERS ----------------------------- */
 
-const CACHE_PRESETS = {
+const DEFAULT_CACHE_PRESETS = {
   content_export: { ttl: 60 * 60 * 24 * 7, stale: 60 * 60 * 24 * 14 }, // 7d / 14d
   content_paginated: { ttl: 60 * 60 * 24, stale: 60 * 60 * 48 }, // 1d / 2d
   feeds: { ttl: 600, stale: 3600 }, // 10m / 1h
@@ -152,16 +155,37 @@ const CACHE_PRESETS = {
   trending_sidebar: { ttl: 600, stale: 3600 }, // 10m / 1h
 } as const;
 
-export type CachePresetKey = keyof typeof CACHE_PRESETS;
+const CACHE_PRESET_CONFIG_MAP: Partial<Record<CachePresetKey, string>> = {
+  content_export: 'cache.content_export.ttl_seconds',
+  content_paginated: 'cache.content_paginated.ttl_seconds',
+  feeds: 'cache.feeds.ttl_seconds',
+  seo: 'cache.seo.ttl_seconds',
+  sitemap: 'cache.sitemap.ttl_seconds',
+  status: 'cache.status.ttl_seconds',
+  company_profile: 'cache.company_profile.ttl_seconds',
+  trending_page: 'cache.trending_page.ttl_seconds',
+  trending_sidebar: 'cache.trending_sidebar.ttl_seconds',
+};
+
+export type CachePresetKey = keyof typeof DEFAULT_CACHE_PRESETS;
+
+function resolveCachePreset(key: CachePresetKey, overrides?: { ttl?: number; stale?: number }) {
+  const defaults = DEFAULT_CACHE_PRESETS[key];
+  const configKey = CACHE_PRESET_CONFIG_MAP[key];
+  const ttlFromConfig = configKey ? getCacheConfigNumber(configKey, defaults.ttl) : defaults.ttl;
+
+  const ttl = Math.max(1, overrides?.ttl ?? ttlFromConfig);
+  const stale = Math.max(ttl, overrides?.stale ?? defaults.stale);
+
+  return { ttl, stale };
+}
 
 export function buildCacheHeaders(
   key: CachePresetKey,
   overrides?: Partial<{ ttl: number; stale: number }>
 ): Record<string, string> {
-  const preset = CACHE_PRESETS[key];
-  const ttl = Math.max(1, overrides?.ttl ?? preset.ttl);
-  const stale = Math.max(ttl, overrides?.stale ?? preset.stale);
-  const value = `public, s-maxage=${ttl}, stale-while-revalidate=${stale}`;
+  const preset = resolveCachePreset(key, overrides);
+  const value = `public, s-maxage=${preset.ttl}, stale-while-revalidate=${preset.stale}`;
 
   return {
     'Cache-Control': value,
@@ -171,5 +195,5 @@ export function buildCacheHeaders(
 }
 
 export function getCacheTtlSeconds(key: CachePresetKey): number {
-  return CACHE_PRESETS[key].ttl;
+  return resolveCachePreset(key).ttl;
 }

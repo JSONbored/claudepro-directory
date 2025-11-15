@@ -11,6 +11,7 @@
 
 import { useEffect, useRef } from 'react';
 import { trackSponsoredClick, trackSponsoredImpression } from '@/src/lib/actions/tracking.actions';
+import { logUnhandledPromise } from '@/src/lib/utils/error.utils';
 
 interface SponsoredTrackerProps {
   /** UUID of the sponsored campaign */
@@ -51,8 +52,11 @@ export function SponsoredTracker({
             sponsoredId,
             pageUrl: pageUrl || (typeof window !== 'undefined' ? window.location.pathname : ''),
             position: position ?? 0,
-          }).catch(() => {
-            // Silent fail - impressions are best-effort
+          }).catch((error) => {
+            logUnhandledPromise('SponsoredTracker: impression failed', error, {
+              sponsoredId,
+              position: position ?? 0,
+            });
           });
         }
       },
@@ -79,8 +83,8 @@ export function SponsoredTracker({
       trackSponsoredClick({
         sponsoredId,
         targetUrl,
-      }).catch(() => {
-        // Silent fail - clicks are best-effort
+      }).catch((error) => {
+        logUnhandledPromise('SponsoredTracker: click failed', error, { sponsoredId });
       });
     };
 

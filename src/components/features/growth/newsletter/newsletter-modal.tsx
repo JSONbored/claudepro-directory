@@ -16,6 +16,7 @@ import { NEWSLETTER_CTA_CONFIG } from '@/src/lib/config/category-config';
 import { trackInteraction } from '@/src/lib/edge/client';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
+import { logUnhandledPromise } from '@/src/lib/utils/error.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
 import type { CopyType } from '@/src/types/database-overrides';
 
@@ -73,8 +74,10 @@ export function NewsletterModal({
           copy_type: copyType,
           session_copy_count: 1,
         },
-      }).catch(() => {
-        // Analytics failure should not affect UX
+      }).catch((error) => {
+        logUnhandledPromise('NewsletterModal: modal shown tracking failed', error, {
+          copyType,
+        });
       });
     }
   }, [open, copyType]);
@@ -107,8 +110,10 @@ export function NewsletterModal({
           dismissal_method: 'maybe_later',
           time_shown_ms: timeShown,
         },
-      }).catch(() => {
-        // Analytics failure should not affect UX
+      }).catch((error) => {
+        logUnhandledPromise('NewsletterModal: maybe later tracking failed', error, {
+          copyType,
+        });
       });
     }
 
@@ -130,8 +135,10 @@ export function NewsletterModal({
           dismissal_method: 'close_button',
           time_shown_ms: timeShown,
         },
-      }).catch(() => {
-        // Analytics failure should not affect UX
+      }).catch((error) => {
+        logUnhandledPromise('NewsletterModal: close tracking failed', error, {
+          copyType,
+        });
       });
     }
 

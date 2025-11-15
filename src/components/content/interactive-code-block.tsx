@@ -14,6 +14,7 @@ import { trackInteraction } from '@/src/lib/edge/client';
 import { Camera, Check, ChevronDown, Copy, Linkedin, Share2, Twitter } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { logUnhandledPromise, normalizeError } from '@/src/lib/utils/error.utils';
 import {
   copyScreenshotToClipboard,
   downloadScreenshot,
@@ -181,11 +182,15 @@ export function ProductionCodeBlock({
         interaction_type: 'copy',
         content_type: category,
         content_slug: slug,
-      }).catch(() => {
-        // Intentional
+      }).catch((error) => {
+        logUnhandledPromise('interactive-code-block:copy', error, { category, slug });
       });
-    } catch (_err) {
+    } catch (error) {
       setIsCopied(false);
+      logger.error('ProductionCodeBlock: copy failed', normalizeError(error), {
+        category,
+        slug,
+      });
       toasts.error.copyFailed('code');
       return;
     }
@@ -242,8 +247,11 @@ export function ProductionCodeBlock({
           width: screenshot.width,
           height: screenshot.height,
         },
-      }).catch(() => {
-        // Intentional
+      }).catch((error) => {
+        logUnhandledPromise('interactive-code-block:screenshot', error, {
+          category,
+          slug,
+        });
       });
     } catch (error) {
       toasts.error.screenshotFailed();
@@ -276,8 +284,12 @@ export function ProductionCodeBlock({
         }
       }
 
-      trackShare({ platform, category, slug, url: currentUrl }).catch(() => {
-        // Intentional
+      trackShare({ platform, category, slug, url: currentUrl }).catch((error) => {
+        logUnhandledPromise('interactive-code-block:share', error, {
+          platform,
+          category,
+          slug,
+        });
       });
 
       setIsShareOpen(false);

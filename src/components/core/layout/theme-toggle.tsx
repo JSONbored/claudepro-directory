@@ -7,6 +7,7 @@ import { getTimeoutConfig } from '@/src/lib/actions/feature-flags.actions';
 import { Moon, Sun } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { logClientWarning } from '@/src/lib/utils/error.utils';
 
 /**
  * Type guard for theme validation
@@ -147,8 +148,8 @@ export function ThemeToggle() {
               durationMs: Number((endTime - startTime).toFixed(2)),
             });
           })
-          .catch(() => {
-            // Silently ignore animation errors
+          .catch((error) => {
+            logClientWarning('ThemeToggle: view transition animation failed', error);
           });
       }
     } else {

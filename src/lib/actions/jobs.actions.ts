@@ -12,6 +12,7 @@ import { cacheConfigs } from '@/src/lib/flags';
 import { logger } from '@/src/lib/logger';
 import { revalidateCacheTags } from '@/src/lib/supabase/cache-helpers';
 import { createClient } from '@/src/lib/supabase/server';
+import { logActionFailure } from '@/src/lib/utils/error.utils';
 import type { Database } from '@/src/types/database.types';
 
 // Minimal Zod schemas (database CHECK constraints do real validation)
@@ -106,11 +107,10 @@ export const createJob = authedAction
       });
 
       if (error) {
-        logger.error('Failed to create job via RPC', new Error(error.message), {
+        throw logActionFailure('jobs.createJob.rpc', new Error(error.message), {
           userId: ctx.userId,
           title: parsedInput.title,
         });
-        throw new Error(error.message);
       }
 
       const result = data as unknown as {
@@ -213,15 +213,10 @@ export const createJob = authedAction
         checkoutUrl, // Polar-hosted checkout page URL (or null if not configured yet)
       };
     } catch (error) {
-      logger.error(
-        'Failed to create job',
-        error instanceof Error ? error : new Error(String(error)),
-        {
-          userId: ctx.userId,
-          title: parsedInput.title,
-        }
-      );
-      throw error;
+      throw logActionFailure('jobs.createJob', error, {
+        userId: ctx.userId,
+        title: parsedInput.title,
+      });
     }
   });
 
@@ -246,11 +241,10 @@ export const updateJob = authedAction
       });
 
       if (error) {
-        logger.error('Failed to update job via RPC', new Error(error.message), {
+        throw logActionFailure('jobs.updateJob.rpc', new Error(error.message), {
           userId: ctx.userId,
           jobId: job_id,
         });
-        throw new Error(error.message);
       }
 
       const result = data as unknown as {
@@ -287,15 +281,10 @@ export const updateJob = authedAction
         jobId: result.job_id,
       };
     } catch (error) {
-      logger.error(
-        'Failed to update job',
-        error instanceof Error ? error : new Error(String(error)),
-        {
-          userId: ctx.userId,
-          jobId: parsedInput.job_id,
-        }
-      );
-      throw error;
+      throw logActionFailure('jobs.updateJob', error, {
+        userId: ctx.userId,
+        jobId: parsedInput.job_id,
+      });
     }
   });
 
@@ -317,11 +306,10 @@ export const deleteJob = authedAction
       });
 
       if (error) {
-        logger.error('Failed to delete job via RPC', new Error(error.message), {
+        throw logActionFailure('jobs.deleteJob.rpc', new Error(error.message), {
           userId: ctx.userId,
           jobId: parsedInput.job_id,
         });
-        throw new Error(error.message);
       }
 
       const result = data as unknown as {
@@ -352,15 +340,10 @@ export const deleteJob = authedAction
         jobId: result.job_id,
       };
     } catch (error) {
-      logger.error(
-        'Failed to delete job',
-        error instanceof Error ? error : new Error(String(error)),
-        {
-          userId: ctx.userId,
-          jobId: parsedInput.job_id,
-        }
-      );
-      throw error;
+      throw logActionFailure('jobs.deleteJob', error, {
+        userId: ctx.userId,
+        jobId: parsedInput.job_id,
+      });
     }
   });
 
@@ -383,12 +366,11 @@ export const toggleJobStatus = authedAction
       });
 
       if (error) {
-        logger.error('Failed to toggle job status via RPC', new Error(error.message), {
+        throw logActionFailure('jobs.toggleJobStatus.rpc', new Error(error.message), {
           userId: ctx.userId,
           jobId: parsedInput.job_id,
           newStatus: parsedInput.new_status,
         });
-        throw new Error(error.message);
       }
 
       const result = data as unknown as {
@@ -423,15 +405,10 @@ export const toggleJobStatus = authedAction
         newStatus: result.new_status,
       };
     } catch (error) {
-      logger.error(
-        'Failed to toggle job status',
-        error instanceof Error ? error : new Error(String(error)),
-        {
-          userId: ctx.userId,
-          jobId: parsedInput.job_id,
-          newStatus: parsedInput.new_status,
-        }
-      );
-      throw error;
+      throw logActionFailure('jobs.toggleJobStatus', error, {
+        userId: ctx.userId,
+        jobId: parsedInput.job_id,
+        newStatus: parsedInput.new_status,
+      });
     }
   });

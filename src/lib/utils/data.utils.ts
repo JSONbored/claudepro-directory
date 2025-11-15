@@ -6,6 +6,7 @@
 import { parse as devalueParse } from 'devalue';
 import { z } from 'zod';
 import { logger } from '@/src/lib/logger';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 
 export enum ParseStrategy {
   DEVALUE = 'devalue',
@@ -216,7 +217,11 @@ export function formatDate(date: string | Date, style: DateFormatStyle = 'long')
       month: style === 'long' ? 'long' : 'short',
       day: 'numeric',
     });
-  } catch {
+  } catch (error) {
+    logger.warn('formatDate failed', normalizeError(error), {
+      input: typeof date === 'string' ? date : date.toString(),
+      style,
+    });
     return typeof date === 'string' ? date : date.toString();
   }
 }
@@ -268,7 +273,11 @@ export function formatRelativeDate(date: string | Date, options: RelativeDateOpt
       return `${diffMonths} ${diffMonths === 1 ? 'month' : 'months'} ago`;
     }
     return `${diffYears} ${diffYears === 1 ? 'year' : 'years'} ago`;
-  } catch {
+  } catch (error) {
+    logger.warn('formatRelativeDate failed', normalizeError(error), {
+      input: typeof date === 'string' ? date : date.toString(),
+      style,
+    });
     return typeof date === 'string' ? date : date.toString();
   }
 }

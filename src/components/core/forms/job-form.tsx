@@ -30,6 +30,7 @@ import type { CreateJobInput } from '@/src/lib/actions/jobs.actions';
 import { ROUTES } from '@/src/lib/constants';
 import { Star } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { logClientWarning } from '@/src/lib/utils/error.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
 
 interface JobFormProps {
@@ -102,6 +103,11 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
           );
         }
       } catch (error) {
+        logClientWarning('JobForm: submit failed', error, {
+          title: jobData.title,
+          company: jobData.company,
+          plan: jobData.plan,
+        });
         toasts.error.fromError(error, 'Failed to save job');
       }
     });

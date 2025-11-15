@@ -1,3 +1,4 @@
+import { getOptionalEnv } from '../../config/env.ts';
 import type { Database } from '../../database.types.ts';
 import { webhookCorsHeaders } from '../http.ts';
 import { verifyVercelSignature } from '../vercel.ts';
@@ -189,7 +190,7 @@ export async function resolveWebhookRequest(
     };
   }
 
-  const secret = Deno.env.get(provider.secretEnvKey);
+  const secret = getOptionalEnv(provider.secretEnvKey);
   if (!secret) {
     return {
       kind: 'error',

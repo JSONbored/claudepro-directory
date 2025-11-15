@@ -1,5 +1,5 @@
-import type { Database } from '../../database.types.ts';
 import { supabaseServiceRole } from '../../clients/supabase.ts';
+import type { Database } from '../../database.types.ts';
 import { resolveWebhookRequest, type WebhookRegistryError } from './registry.ts';
 
 type WebhookPayload = Record<string, unknown>;

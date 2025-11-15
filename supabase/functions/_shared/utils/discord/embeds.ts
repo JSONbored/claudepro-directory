@@ -1,4 +1,5 @@
 import { SITE_URL } from '../../clients/supabase.ts';
+import { edgeEnv } from '../../config/env.ts';
 import type { Database } from '../../database.types.ts';
 
 const CATEGORY_COLORS: Record<string, number> = {
@@ -54,7 +55,7 @@ export interface ChangelogSection {
 }
 
 const SUPABASE_PROJECT_ID =
-  Deno.env.get('SUPABASE_URL')?.match(/https:\/\/([^.]+)\.supabase\.co/)?.[1] || 'unknown';
+  edgeEnv.supabase.url.match(/https:\/\/([^.]+)\.supabase\.co/)?.[1] || 'unknown';
 
 export function buildContentEmbed(content: ContentRow) {
   const {
@@ -224,8 +225,8 @@ export function buildChangelogEmbed(params: {
 
   if (commits.length > 0) {
     const latestCommit = commits[commits.length - 1];
-    const repoOwner = Deno.env.get('GITHUB_REPO_OWNER') || 'unknown';
-    const repoName = Deno.env.get('GITHUB_REPO_NAME') || 'unknown';
+    const repoOwner = edgeEnv.github.repoOwner || 'unknown';
+    const repoName = edgeEnv.github.repoName || 'unknown';
     const commitUrl = `https://github.com/${repoOwner}/${repoName}/commit/${latestCommit.sha}`;
     const shortSha = latestCommit.sha.slice(0, 7);
 

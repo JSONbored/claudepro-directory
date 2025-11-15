@@ -23,6 +23,7 @@ import type { ConfigCardProps } from '@/src/lib/types/component.types';
 import { BADGE_COLORS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { getDisplayTitle } from '@/src/lib/utils';
 import { formatViewCount, getContentItemUrl } from '@/src/lib/utils/content.utils';
+import { logClientWarning, logUnhandledPromise } from '@/src/lib/utils/error.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
 
 export const ConfigCard = memo(
@@ -59,15 +60,19 @@ export const ConfigCard = memo(
     });
 
     useEffect(() => {
-      getComponentConfig().then((config) => {
-        setCardConfig({
-          showCopyButton: (config['cards.show_copy_button'] as boolean) ?? true,
-          showBookmark: (config['cards.show_bookmark'] as boolean) ?? true,
-          showViewCount: (config['cards.show_view_count'] as boolean) ?? true,
-          showCopyCount: (config['cards.show_copy_count'] as boolean) ?? true,
-          showRating: (config['cards.show_rating'] as boolean) ?? false,
+      getComponentConfig()
+        .then((config) => {
+          setCardConfig({
+            showCopyButton: (config['cards.show_copy_button'] as boolean) ?? true,
+            showBookmark: (config['cards.show_bookmark'] as boolean) ?? true,
+            showViewCount: (config['cards.show_view_count'] as boolean) ?? true,
+            showCopyCount: (config['cards.show_copy_count'] as boolean) ?? true,
+            showRating: (config['cards.show_rating'] as boolean) ?? false,
+          });
+        })
+        .catch((error) => {
+          logClientWarning('ConfigCard: failed to load component config', error);
         });
-      });
     }, []);
 
     // Swipe gesture handlers for mobile quick actions
@@ -80,8 +85,11 @@ export const ConfigCard = memo(
         interaction_type: 'copy',
         content_type: item.category,
         content_slug: item.slug,
-      }).catch(() => {
-        // Intentionally empty - analytics failures should not affect UX
+      }).catch((error) => {
+        logUnhandledPromise('ConfigCard: swipe copy tracking failed', error, {
+          category: item.category,
+          slug: item.slug,
+        });
       });
 
       toasts.success.copied();
@@ -111,15 +119,15 @@ export const ConfigCard = memo(
           router.refresh();
         }
       } catch (error) {
+        logger.error('ConfigCard: Failed to add bookmark via swipe', error as Error, {
+          contentType: validatedCategory,
+          contentSlug: item.slug,
+        });
         if (error instanceof Error && error.message.includes('signed in')) {
           toasts.error.authRequired();
         } else {
           toasts.error.actionFailed('bookmark');
         }
-        logger.error('Failed to add bookmark via swipe', error as Error, {
-          contentType: validatedCategory,
-          contentSlug: item.slug,
-        });
       }
     }, [item.category, item.slug, router]);
 
@@ -397,8 +405,11 @@ export const ConfigCard = memo(
                         interaction_type: 'copy',
                         content_type: item.category,
                         content_slug: item.slug,
-                      }).catch(() => {
-                        // Analytics failures should not affect UX
+                      }).catch((error) => {
+                        logUnhandledPromise('ConfigCard: copy button tracking failed', error, {
+                          category: item.category,
+                          slug: item.slug,
+                        });
                       });
                     }}
                   />

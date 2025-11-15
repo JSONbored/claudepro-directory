@@ -10,6 +10,7 @@ import { getPollingConfig } from '@/src/lib/actions/feature-flags.actions';
 import type { CategoryId } from '@/src/lib/config/category-config';
 import { trackInteraction } from '@/src/lib/edge/client';
 import { logger } from '@/src/lib/logger';
+import { logClientWarning, logUnhandledPromise } from '@/src/lib/utils/error.utils';
 
 export type UnifiedTrackerProps =
   | {
@@ -89,9 +90,13 @@ function ViewVariant({ category, slug, delay }: Extract<UnifiedTrackerProps, { v
 
   useEffect(() => {
     if (delay === undefined) {
-      getPollingConfig().then((config) => {
-        setActualDelay((config['polling.realtime_ms'] as number) || 1000);
-      });
+      getPollingConfig()
+        .then((config) => {
+          setActualDelay((config['polling.realtime_ms'] as number) || 1000);
+        })
+        .catch((error) => {
+          logClientWarning('UnifiedTracker: failed to load polling config', error);
+        });
     }
   }, [delay]);
   useTrackingEffect(
@@ -100,8 +105,8 @@ function ViewVariant({ category, slug, delay }: Extract<UnifiedTrackerProps, { v
         interaction_type: 'view',
         content_type: category,
         content_slug: slug,
-      }).catch(() => {
-        // Intentional
+      }).catch((error) => {
+        logUnhandledPromise('UnifiedTracker:view', error, { category, slug });
       });
     },
     actualDelay,
@@ -127,8 +132,12 @@ function PageViewVariant({
           page: typeof window !== 'undefined' ? window.location.pathname : `/${category}/${slug}`,
           source: sourcePage || 'direct',
         },
-      }).catch(() => {
-        // Intentional
+      }).catch((error) => {
+        logUnhandledPromise('UnifiedTracker:page-view', error, {
+          category,
+          slug,
+          source: sourcePage || 'direct',
+        });
       });
     },
     delay,

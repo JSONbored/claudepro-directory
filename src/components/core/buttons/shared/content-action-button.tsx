@@ -5,6 +5,7 @@ import { motion } from 'motion/react';
 import { useState } from 'react';
 import { Button } from '@/src/components/primitives/ui/button';
 import { useButtonSuccess } from '@/src/hooks/use-button-success';
+import { logClientWarning } from '@/src/lib/utils/error.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
 import type { ButtonStyleProps } from './button-types';
 
@@ -48,6 +49,7 @@ export function ContentActionButton({
 
       if (trackAnalytics) await trackAnalytics();
     } catch (error) {
+      logClientWarning('ContentActionButton: action failed', error, { url, label });
       toasts.raw.error(error instanceof Error ? error.message : 'Action failed');
     } finally {
       setIsLoading(false);

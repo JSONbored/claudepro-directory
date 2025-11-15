@@ -1,4 +1,5 @@
 import { SITE_URL, supabaseServiceRole } from '../../clients/supabase.ts';
+import { edgeEnv } from '../../config/env.ts';
 import type { Database } from '../../database.types.ts';
 import { insertNotification } from '../../notifications/service.ts';
 import {
@@ -68,10 +69,7 @@ export async function handleDiscordNotification(
 }
 
 async function handleJobNotification(req: Request): Promise<Response> {
-  const webhookUrl = validateWebhookUrl(
-    Deno.env.get('DISCORD_WEBHOOK_JOBS'),
-    'DISCORD_WEBHOOK_JOBS'
-  );
+  const webhookUrl = validateWebhookUrl(edgeEnv.discord.jobs, 'DISCORD_WEBHOOK_JOBS');
   if (webhookUrl instanceof Response) {
     return errorResponse(
       new Error('Discord webhook not configured'),
@@ -191,7 +189,7 @@ async function updateJobDiscordMessage(
 }
 
 async function handleSubmissionNotification(req: Request): Promise<Response> {
-  const webhookUrl = validateWebhookUrl(Deno.env.get('DISCORD_WEBHOOK_URL'), 'DISCORD_WEBHOOK_URL');
+  const webhookUrl = validateWebhookUrl(edgeEnv.discord.defaultWebhook, 'DISCORD_WEBHOOK_URL');
   if (webhookUrl instanceof Response) {
     return errorResponse(
       new Error('Discord webhook not configured'),
@@ -235,7 +233,7 @@ async function handleSubmissionNotification(req: Request): Promise<Response> {
 
 async function handleContentNotification(req: Request): Promise<Response> {
   const webhookUrl = validateWebhookUrl(
-    Deno.env.get('DISCORD_ANNOUNCEMENTS_WEBHOOK_URL'),
+    edgeEnv.discord.announcements,
     'DISCORD_ANNOUNCEMENTS_WEBHOOK_URL'
   );
   if (webhookUrl instanceof Response) {
@@ -306,7 +304,7 @@ async function handleContentNotification(req: Request): Promise<Response> {
 
 async function handleErrorNotification(req: Request): Promise<Response> {
   const webhookUrl = validateWebhookUrl(
-    Deno.env.get('DISCORD_EDGE_FUNCTION_ERRORS_WEBHOOK'),
+    edgeEnv.discord.errors,
     'DISCORD_EDGE_FUNCTION_ERRORS_WEBHOOK'
   );
   if (webhookUrl instanceof Response) {
@@ -350,10 +348,7 @@ async function handleErrorNotification(req: Request): Promise<Response> {
 }
 
 async function handleChangelogNotification(req: Request): Promise<Response> {
-  const webhookUrl = validateWebhookUrl(
-    Deno.env.get('DISCORD_CHANGELOG_WEBHOOK_URL'),
-    'DISCORD_CHANGELOG_WEBHOOK_URL'
-  );
+  const webhookUrl = validateWebhookUrl(edgeEnv.discord.changelog, 'DISCORD_CHANGELOG_WEBHOOK_URL');
   if (webhookUrl instanceof Response) {
     return errorResponse(
       new Error('Discord webhook not configured'),

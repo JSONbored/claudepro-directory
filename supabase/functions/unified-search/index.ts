@@ -20,6 +20,7 @@
 
 import { supabaseAnon } from '../_shared/clients/supabase.ts';
 import type { Database } from '../_shared/database.types.ts';
+import { trackSearchQueryEdge } from '../_shared/utils/analytics/tracker.ts';
 import {
   badRequestResponse,
   errorResponse,
@@ -204,12 +205,14 @@ async function handleSearch(url: URL, startTime: number, req: Request): Promise<
       tags,
       authors,
       sort,
+      entities,
     },
     results.length,
-    req
-  ).catch((err) => {
-    // Silent fail - don't block response
-    console.error('Analytics tracking failed:', err);
+    req.headers.get('Authorization')
+  ).catch((error) => {
+    console.warn('[unified-search] analytics tracking failed', {
+      message: error instanceof Error ? error.message : String(error),
+    });
   });
 
   const totalTime = performance.now() - startTime;
@@ -345,33 +348,22 @@ async function handleFacets(startTime: number): Promise<Response> {
  */
 async function trackSearchAnalytics(
   query: string,
-  filters: { categories?: string[]; tags?: string[]; authors?: string[]; sort?: string },
+  filters: {
+    categories?: string[];
+    tags?: string[];
+    authors?: string[];
+    sort?: string;
+    entities?: string[];
+  },
   resultCount: number,
-  req: Request
+  authorizationHeader: string | null
 ): Promise<void> {
-  // Only track if there's a query
   if (!query) return;
 
-  // Get user ID from auth header if present
-  const authHeader = req.headers.get('Authorization');
-  let userId: string | null = null;
-
-  if (authHeader) {
-    try {
-      const { data } = await supabaseAnon.auth.getUser(authHeader.replace('Bearer ', ''));
-      userId = data.user?.id || null;
-    } catch {
-      // Ignore auth errors - track as anonymous
-    }
-  }
-
-  // Insert to search_queries table
-  await supabaseAnon.from('search_queries').insert({
+  await trackSearchQueryEdge({
     query,
-    filters:
-      filters as unknown as Database['public']['Tables']['search_queries']['Insert']['filters'],
-    result_count: resultCount,
-    user_id: userId,
-    session_id: null, // Could add session tracking later
+    filters: filters as Database['public']['Tables']['search_queries']['Insert']['filters'],
+    resultCount,
+    authorizationHeader,
   });
 }

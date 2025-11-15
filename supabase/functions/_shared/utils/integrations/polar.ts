@@ -1,3 +1,4 @@
+import { edgeEnv } from '../../config/env.ts';
 import { fetchWithRetry } from './http-client.ts';
 
 /**
@@ -26,8 +27,8 @@ interface PolarCheckoutResponse {
 export async function createPolarCheckout(
   params: CreateCheckoutParams
 ): Promise<{ url: string; sessionId: string } | { error: string }> {
-  const polarAccessToken = Deno.env.get('POLAR_ACCESS_TOKEN');
-  const polarEnvironment = Deno.env.get('POLAR_ENVIRONMENT') || 'production';
+  const polarAccessToken = edgeEnv.polar.accessToken;
+  const polarEnvironment = edgeEnv.polar.environment;
 
   if (!polarAccessToken) {
     console.error('POLAR_ACCESS_TOKEN not configured');
@@ -91,11 +92,11 @@ export async function createPolarCheckout(
 export function getPolarProductPriceId(plan: string, tier: string): string | null {
   const productPriceIds = {
     // One-time payments
-    'one-time_standard': Deno.env.get('POLAR_PRODUCT_PRICE_ONETIME_STANDARD'),
-    'one-time_featured': Deno.env.get('POLAR_PRODUCT_PRICE_ONETIME_FEATURED'),
+    'one-time_standard': edgeEnv.polar.productPrices.oneTimeStandard,
+    'one-time_featured': edgeEnv.polar.productPrices.oneTimeFeatured,
     // Subscription payments
-    subscription_standard: Deno.env.get('POLAR_PRODUCT_PRICE_SUBSCRIPTION_STANDARD'),
-    subscription_featured: Deno.env.get('POLAR_PRODUCT_PRICE_SUBSCRIPTION_FEATURED'),
+    subscription_standard: edgeEnv.polar.productPrices.subscriptionStandard,
+    subscription_featured: edgeEnv.polar.productPrices.subscriptionFeatured,
   };
 
   const key = `${plan}_${tier}` as keyof typeof productPriceIds;

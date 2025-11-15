@@ -127,30 +127,22 @@ async function handleStorageFormat(category: string, slug: string): Promise<Resp
     return badRequestResponse(`Storage format not supported for category '${category}'`, CORS_JSON);
   }
 
-  const { data: content, error } = await supabaseAnon
-    .from('content')
-    .select('storage_url')
-    .eq('category', category)
-    .eq('slug', slug)
-    .single();
+  const { data, error } = await supabaseAnon.rpc('get_skill_storage_path', {
+    p_slug: slug,
+  });
 
-  if (error || !content?.storage_url) {
+  if (error) {
+    return errorResponse(error, 'data-api:get_skill_storage_path', CORS_JSON);
+  }
+
+  const location = Array.isArray(data) ? data[0] : data;
+  if (!(location?.bucket && location?.object_path)) {
     return badRequestResponse('Storage file not found', CORS_JSON);
   }
 
-  const match = content.storage_url.match(/\/storage\/v1\/object\/public\/([^/]+)\/(.+)$/);
-  if (!match) {
-    return errorResponse(
-      new Error('Invalid storage URL format'),
-      'data-api:storage_format',
-      CORS_JSON
-    );
-  }
-
-  const [, bucket, path] = match;
   return proxyStorageFile({
-    bucket,
-    path,
+    bucket: location.bucket,
+    path: location.object_path,
     cacheControl: 'public, max-age=31536000, immutable',
   });
 }

@@ -12,6 +12,7 @@ import {
   type VercelWebhookPayload,
 } from '../../changelog/service.ts';
 import { SITE_URL, supabaseServiceRole } from '../../clients/supabase.ts';
+import { edgeEnv } from '../../config/env.ts';
 import { insertNotification } from '../../notifications/service.ts';
 import { sendDiscordWebhook } from '../../utils/discord/client.ts';
 import { buildChangelogEmbed } from '../../utils/discord/embeds.ts';
@@ -24,8 +25,8 @@ import {
 } from '../../utils/http.ts';
 import { verifyVercelSignature } from '../../utils/integrations/vercel.ts';
 
-const VERCEL_WEBHOOK_SECRET = Deno.env.get('VERCEL_WEBHOOK_SECRET');
-const DISCORD_CHANGELOG_WEBHOOK_URL = Deno.env.get('DISCORD_CHANGELOG_WEBHOOK_URL');
+const VERCEL_WEBHOOK_SECRET = edgeEnv.vercel.webhookSecret;
+const DISCORD_CHANGELOG_WEBHOOK_URL = edgeEnv.discord.changelog;
 
 export async function handleChangelogSyncRequest(req: Request): Promise<Response> {
   try {

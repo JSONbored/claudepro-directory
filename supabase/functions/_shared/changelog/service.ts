@@ -1,11 +1,12 @@
 import { SITE_URL } from '../clients/supabase.ts';
+import { edgeEnv } from '../config/env.ts';
 import type { Database, Json } from '../database.types.ts';
 import type { ChangelogSection, GitHubCommit } from '../utils/discord/embeds.ts';
 
-const GITHUB_TOKEN = Deno.env.get('GITHUB_TOKEN');
-const GITHUB_REPO_OWNER = Deno.env.get('GITHUB_REPO_OWNER');
-const GITHUB_REPO_NAME = Deno.env.get('GITHUB_REPO_NAME');
-const REVALIDATE_SECRET = Deno.env.get('REVALIDATE_SECRET');
+const GITHUB_TOKEN = edgeEnv.github.token;
+const GITHUB_REPO_OWNER = edgeEnv.github.repoOwner;
+const GITHUB_REPO_NAME = edgeEnv.github.repoName;
+const REVALIDATE_SECRET = edgeEnv.revalidate.secret;
 
 export interface VercelWebhookPayload {
   type: string;

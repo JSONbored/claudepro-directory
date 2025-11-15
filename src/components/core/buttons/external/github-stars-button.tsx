@@ -11,6 +11,7 @@ import { SOCIAL_LINKS } from '@/src/lib/constants';
 import { Github } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
+import { logClientWarning } from '@/src/lib/utils/error.utils';
 import type { ButtonStyleProps } from '../shared/button-types';
 
 export interface GitHubStarsButtonProps extends ButtonStyleProps {
@@ -49,7 +50,10 @@ export function GitHubStarsButton({
           data && typeof data.stargazers_count === 'number' ? data.stargazers_count : null;
         setStars(count);
       })
-      .catch(() => setStars(null));
+      .catch((error) => {
+        logClientWarning('GitHubStarsButton: failed to fetch star count', error, { apiUrl });
+        setStars(null);
+      });
   }, [repoUrl]);
 
   const handleClick = () => {

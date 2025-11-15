@@ -33,6 +33,7 @@
 
 import { useCallback, useMemo } from 'react';
 import { logger } from '@/src/lib/logger';
+import { logClientWarning } from '@/src/lib/utils/error.utils';
 
 interface UseViewTransitionReturn {
   /**
@@ -73,8 +74,8 @@ export function useViewTransition(): UseViewTransitionReturn {
     (updateCallback: () => void | Promise<void>): ViewTransition | undefined => {
       // Fallback: Execute immediately without animation
       if (!isSupported) {
-        Promise.resolve(updateCallback()).catch(() => {
-          // Silently handle errors in fallback mode
+        Promise.resolve(updateCallback()).catch((error) => {
+          logClientWarning('useViewTransition: fallback update failed (unsupported)', error);
         });
         return undefined;
       }
@@ -88,8 +89,11 @@ export function useViewTransition(): UseViewTransitionReturn {
             error: error instanceof Error ? error.message : String(error),
           });
         }
-        Promise.resolve(updateCallback()).catch(() => {
-          // Silently handle errors in fallback mode
+        Promise.resolve(updateCallback()).catch((fallbackError) => {
+          logClientWarning(
+            'useViewTransition: fallback update failed after ViewTransition error',
+            fallbackError
+          );
         });
         return undefined;
       }

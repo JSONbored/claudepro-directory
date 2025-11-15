@@ -18,6 +18,7 @@
 import { useEffect, useState } from 'react';
 import { getTimeoutConfig } from '@/src/lib/actions/feature-flags.actions';
 import { logger } from '@/src/lib/logger';
+import { logClientWarning } from '@/src/lib/utils/error.utils';
 import type { ScrollState } from './fab.types';
 
 // Default values (will be overridden by Dynamic Config)
@@ -31,8 +32,8 @@ getTimeoutConfig()
       (config['timeout.ui.scroll_direction_threshold_px'] as number) ?? 100;
     DEFAULT_SCROLL_HYSTERESIS = (config['timeout.ui.scroll_hysteresis_px'] as number) ?? 10;
   })
-  .catch(() => {
-    // Use defaults if config load fails
+  .catch((error) => {
+    logClientWarning('useScrollDirection: failed to load timeout config', error);
   });
 
 interface UseScrollDirectionOptions {

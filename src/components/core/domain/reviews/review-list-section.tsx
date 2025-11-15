@@ -16,7 +16,7 @@ import { isValidCategory } from '@/src/lib/config/category-config';
 import { Edit, Star, ThumbsUp, Trash } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { formatDistanceToNow } from '@/src/lib/utils/data.utils';
-import { logUnhandledPromise } from '@/src/lib/utils/error.utils';
+import { logClientWarning, logUnhandledPromise } from '@/src/lib/utils/error.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
 import { ReviewRatingHistogram } from './review-rating-histogram';
 import type { ReviewItem, ReviewSectionProps } from './shared/review-types';
@@ -82,7 +82,13 @@ export function ReviewListSection({
             setAggregateRating(responseData.aggregateRating);
           }
         }
-      } catch (_error) {
+      } catch (error) {
+        logClientWarning('ReviewListSection: failed to load reviews', error, {
+          contentType,
+          contentSlug,
+          sortBy: sort,
+          page: pageNum,
+        });
         toasts.error.reviewActionFailed('load');
       } finally {
         setIsLoading(false);
@@ -144,7 +150,12 @@ export function ReviewListSection({
         });
         router.refresh();
       }
-    } catch (_error) {
+    } catch (error) {
+      logClientWarning('ReviewListSection: delete failed', error, {
+        reviewId,
+        contentType,
+        contentSlug,
+      });
       toasts.error.reviewActionFailed('delete');
     }
   };
@@ -317,7 +328,10 @@ function ReviewCardItem({
                   try {
                     await markReviewHelpful({ review_id: review.id, helpful: true });
                     toasts.success.actionCompleted('mark as helpful');
-                  } catch (_error) {
+                  } catch (error) {
+                    logClientWarning('ReviewListSection: markReviewHelpful failed', error, {
+                      reviewId: review.id,
+                    });
                     toasts.error.reviewActionFailed('vote');
                   }
                 }}

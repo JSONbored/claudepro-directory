@@ -26,6 +26,7 @@ import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
 import { trackInteraction } from '@/src/lib/edge/client';
 import { ArrowLeft, Check, Copy, Download, FileText, Sparkles } from '@/src/lib/icons';
 import { STATE_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
+import { logUnhandledPromise } from '@/src/lib/utils/error.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
 import type { CopyType } from '@/src/types/database-overrides';
 
@@ -126,8 +127,11 @@ export function DetailHeaderActions({
       interaction_type: 'copy',
       content_type: category,
       content_slug: item.slug,
-    }).catch(() => {
-      // Intentional
+    }).catch((error) => {
+      logUnhandledPromise('trackInteraction:copy-content', error, {
+        slug: item.slug,
+        category,
+      });
     });
   };
 
@@ -144,8 +148,11 @@ export function DetailHeaderActions({
         interaction_type: 'download',
         content_type: category,
         content_slug: item.slug,
-      }).catch(() => {
-        // Intentional
+      }).catch((error) => {
+        logUnhandledPromise('trackInteraction:download', error, {
+          slug: item.slug,
+          category,
+        });
       });
       return;
     }

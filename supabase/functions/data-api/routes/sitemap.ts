@@ -1,4 +1,5 @@
 import { SITE_URL, supabaseAnon } from '../../_shared/clients/supabase.ts';
+import { edgeEnv } from '../../_shared/config/env.ts';
 import {
   badRequestResponse,
   buildCacheHeaders,
@@ -10,8 +11,8 @@ import {
 
 const CORS = getOnlyCorsHeaders;
 const INDEXNOW_API_URL = 'https://api.indexnow.org/IndexNow';
-const INDEXNOW_API_KEY = Deno.env.get('INDEXNOW_API_KEY');
-const INDEXNOW_TRIGGER_KEY = Deno.env.get('INDEXNOW_TRIGGER_KEY');
+const INDEXNOW_API_KEY = edgeEnv.indexNow.apiKey;
+const INDEXNOW_TRIGGER_KEY = edgeEnv.indexNow.triggerKey;
 
 export async function handleSitemapRoute(
   segments: string[],

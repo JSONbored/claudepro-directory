@@ -28,6 +28,7 @@ import { ROUTES } from '@/src/lib/constants';
 import { FileText, X } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { logClientWarning } from '@/src/lib/utils/error.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
 import type { Database } from '@/src/types/database.types';
 
@@ -74,8 +75,8 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
         MAX_FILE_SIZE = maxMB * 1024 * 1024;
         MAX_DIMENSION = (config['form.max_image_dimension_px'] as number) ?? 2048;
       })
-      .catch(() => {
-        // Use defaults if config load fails
+      .catch((error) => {
+        logClientWarning('CompanyForm: failed to load form config', error);
       });
   }, []);
 
@@ -169,6 +170,10 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
       setLogoPreview(uploaded.publicUrl);
       toasts.success.actionCompleted('Logo uploaded successfully!');
     } catch (error) {
+      logClientWarning('CompanyForm: logo upload failed', error, {
+        fileName: file.name,
+        companyId: initialData?.id,
+      });
       toasts.error.fromError(error, 'Failed to upload logo');
     } finally {
       setIsUploadingLogo(false);
@@ -224,6 +229,10 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
         router.push(ROUTES.ACCOUNT_COMPANIES);
         router.refresh();
       } catch (error) {
+        logClientWarning('CompanyForm: save failed', error, {
+          mode,
+          companyId: initialData?.id,
+        });
         toasts.error.fromError(error, 'Failed to save company');
       }
     });

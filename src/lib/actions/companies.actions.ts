@@ -5,10 +5,11 @@
  * Thin orchestration layer calling PostgreSQL RPC functions (manage_company, delete_company)
  */
 
-import { revalidatePath, revalidateTag, unstable_cache } from 'next/cache';
+import { revalidatePath, revalidateTag } from 'next/cache';
 import { z } from 'zod';
 import { authedAction } from '@/src/lib/actions/safe-action';
 import { searchCompanies } from '@/src/lib/data/companies';
+import { getCompanyAdminProfile } from '@/src/lib/data/company';
 import { cacheConfigs, timeoutConfigs } from '@/src/lib/flags';
 import { logger } from '@/src/lib/logger';
 import {
@@ -304,31 +305,20 @@ export async function getCompanyByIdAction(companyId: string) {
     return null;
   }
 
-  const config = await cacheConfigs();
-  const ttl = (config['cache.company_detail.ttl_seconds'] as number) || 1800;
+  const profile = await getCompanyAdminProfile(companyId);
+  if (!profile) {
+    logger.warn('getCompanyByIdAction: company not found', { companyId });
+    return null;
+  }
 
-  const fetchCompany = async () => {
-    const supabase = await createSupabaseServerClient();
-    const { data, error } = await supabase
-      .from('companies')
-      .select('id, name, slug, logo, website, description')
-      .eq('id', companyId)
-      .maybeSingle();
-
-    if (error) {
-      logger.error('Failed to fetch company by ID', error, { companyId });
-      return null;
-    }
-
-    return data;
+  return {
+    id: profile.id,
+    name: profile.name,
+    slug: profile.slug,
+    logo: profile.logo,
+    website: profile.website,
+    description: profile.description,
   };
-
-  const cachedLookup = unstable_cache(fetchCompany, [`company-by-id-${companyId}`], {
-    revalidate: ttl,
-    tags: ['companies', `company-id-${companyId}`],
-  });
-
-  return cachedLookup();
 }
 
 export const uploadCompanyLogoAction = authedAction
@@ -344,21 +334,7 @@ export const uploadCompanyLogoAction = authedAction
     }
 
     if (companyId) {
-      const supabase = await createSupabaseServerClient();
-      const { data: company, error } = await supabase
-        .from('companies')
-        .select('id, owner_id')
-        .eq('id', companyId)
-        .maybeSingle();
-
-      if (error) {
-        logger.error('Failed to verify company ownership before logo upload', error, {
-          companyId,
-          userId: ctx.userId,
-        });
-        throw new Error('Unable to verify company ownership.');
-      }
-
+      const company = await getCompanyAdminProfile(companyId);
       if (!company) {
         throw new Error('Company not found.');
       }

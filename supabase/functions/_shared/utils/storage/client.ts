@@ -1,6 +1,6 @@
 import type { SupabaseClient } from 'jsr:@supabase/supabase-js@2';
-import type { Database } from '../../database.types.ts';
 import { supabaseAnon, supabaseServiceRole } from '../../clients/supabase.ts';
+import type { Database } from '../../database.types.ts';
 
 export type StorageServiceClient = SupabaseClient<Database>;
 

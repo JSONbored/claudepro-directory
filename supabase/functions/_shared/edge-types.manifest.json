@@ -1,0 +1,30 @@
+{
+  "tables": [
+    "newsletter_subscriptions",
+    "webhook_events",
+    "content",
+    "content_submissions",
+    "notifications",
+    "changelog_entries",
+    "jobs",
+    "search_queries"
+  ],
+  "functions": [
+    "search_content_optimized",
+    "search_unified",
+    "get_search_suggestions_from_history",
+    "get_search_facets",
+    "get_weekly_digest",
+    "get_due_sequence_emails"
+  ],
+  "enums": [
+    "newsletter_source",
+    "notification_priority",
+    "notification_type",
+    "submission_status",
+    "submission_type",
+    "job_status",
+    "webhook_direction",
+    "webhook_source"
+  ]
+}

@@ -3,6 +3,7 @@
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Button } from '@/src/components/primitives/ui/button';
+import { useLoggedAsync } from '@/src/hooks/use-logged-async';
 import type { NewsletterSource } from '@/src/hooks/use-newsletter';
 import { getAppSettings, getNewsletterConfig } from '@/src/lib/actions/feature-flags.actions';
 import { NEWSLETTER_CTA_CONFIG } from '@/src/lib/config/category-config';
@@ -30,10 +31,16 @@ export function NewsletterFooterBar({
   const [isClient, setIsClient] = useState(false);
   const [pagesWithInlineCTA, setPagesWithInlineCTA] = useState<string[]>([]);
   const [delayMs, setDelayMs] = useState(showAfterDelay ?? 30000);
+  const loadConfigs = useLoggedAsync({
+    scope: 'NewsletterFooterBar',
+    defaultMessage: 'Failed to load newsletter footer configs',
+    defaultLevel: 'warn',
+    defaultRethrow: false,
+  });
 
   useEffect(() => {
-    const loadConfigs = async () => {
-      try {
+    loadConfigs(
+      async () => {
         const [appConfig, newsletterConfig] = await Promise.all([
           getAppSettings(),
           getNewsletterConfig(),
@@ -44,22 +51,22 @@ export function NewsletterFooterBar({
           setPagesWithInlineCTA(excludedPages);
         }
 
-        // Load delay from config if not provided via props
         if (showAfterDelay === undefined) {
           const configDelay = newsletterConfig['newsletter.footer_bar.show_after_delay_ms'] as
             | number
             | undefined;
           setDelayMs(configDelay ?? 30000);
         }
-      } catch {
-        // Silent fail - use defaults
+      },
+      {
+        context: {
+          pathname,
+          respectInlineCTA,
+          dismissible,
+        },
       }
-    };
-
-    loadConfigs().catch(() => {
-      // Intentionally ignore errors
-    });
-  }, [showAfterDelay]);
+    );
+  }, [dismissible, loadConfigs, pathname, respectInlineCTA, showAfterDelay]);
 
   const hasInlineCTA =
     respectInlineCTA && pagesWithInlineCTA.some((page) => pathname?.startsWith(page));

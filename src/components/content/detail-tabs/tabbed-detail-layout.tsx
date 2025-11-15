@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/primi
 import { trackInteraction } from '@/src/lib/edge/client';
 import type { TabbedDetailLayoutProps } from '@/src/lib/types/detail-tabs.types';
 import { cn } from '@/src/lib/utils';
+import { logUnhandledPromise } from '@/src/lib/utils/error.utils';
 import { TabSectionRenderer } from './tab-section-renderer';
 
 export function TabbedDetailLayout({ item, config, tabs, sectionData }: TabbedDetailLayoutProps) {
@@ -61,8 +62,11 @@ export function TabbedDetailLayout({ item, config, tabs, sectionData }: TabbedDe
           tab_id: value,
           tab_action: 'switch',
         },
-      }).catch(() => {
-        // Analytics failure should not affect UX
+      }).catch((error) => {
+        logUnhandledPromise('trackInteraction:tabbed-detail', error, {
+          tabId: value,
+          slug: item.slug,
+        });
       });
     },
     [item.category, item.slug]

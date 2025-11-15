@@ -29,29 +29,8 @@
 # Public API Functions - No JWT Verification
 # =============================================================================
 
-[functions.sitemap]
-verify_jwt = false  # Public sitemap.xml endpoint
-
-[functions.content-paginated]
-verify_jwt = false  # Public content listing with optional auth
-
-[functions.status]
-verify_jwt = false  # Public health check endpoint
-
-[functions.feeds]
-verify_jwt = false  # Public RSS/Atom feed endpoints (changelog + all content categories)
-
-[functions.seo-api]
-verify_jwt = false  # Public SEO endpoint: metadata + pre-generated schemas (24hr cache)
-
-[functions.content-api]
-verify_jwt = false  # Unified content export API (json, markdown, llms-txt, readme, storage) - consolidates 4 functions
-
 [functions.data-api]
-verify_jwt = false  # Consolidated read-only data access layer (content exports, SEO, feeds, sitemap, status)
-
-[functions.trending]
-verify_jwt = false  # Public trending data with CDN caching (24hr s-maxage)
+verify_jwt = false  # Consolidated read-only data access layer (content exports, SEO, feeds, sitemap, status, company, trending)
 
 [functions.unified-search]
 verify_jwt = false  # Public search API with optional auth for analytics tracking (5min edge cache)

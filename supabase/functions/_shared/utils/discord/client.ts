@@ -1,5 +1,5 @@
-import type { Database } from '../../database.types.ts';
 import { supabaseServiceRole } from '../../clients/supabase.ts';
+import type { Database } from '../../database.types.ts';
 
 const MAX_RETRIES = 3;
 const INITIAL_RETRY_DELAY_MS = 1000;

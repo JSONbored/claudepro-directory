@@ -1,10 +1,23 @@
 // Dynamic imports for Vercel monitoring tools
 // Load at page bottom to avoid blocking initial render (30KB bundle, 50-100ms TTI gain)
-const Analytics = (await import('@vercel/analytics/next').catch(() => ({ Analytics: () => null })))
-  .Analytics;
+const Analytics = (
+  await import('@vercel/analytics/next').catch((error) => {
+    const normalized = normalizeError(error, 'Failed to load @vercel/analytics/next');
+    logger.error('RootLayout: Analytics dynamic import failed', normalized, {
+      module: '@vercel/analytics/next',
+    });
+    return { Analytics: () => null } as Awaited<typeof import('@vercel/analytics/next')>;
+  })
+).Analytics;
 
 const SpeedInsights = (
-  await import('@vercel/speed-insights/next').catch(() => ({ SpeedInsights: () => null }))
+  await import('@vercel/speed-insights/next').catch((error) => {
+    const normalized = normalizeError(error, 'Failed to load @vercel/speed-insights/next');
+    logger.error('RootLayout: SpeedInsights dynamic import failed', normalized, {
+      module: '@vercel/speed-insights/next',
+    });
+    return { SpeedInsights: () => null } as Awaited<typeof import('@vercel/speed-insights/next')>;
+  })
 ).SpeedInsights;
 
 import type { Metadata } from 'next';
@@ -17,6 +30,8 @@ import './micro-interactions.css';
 import './sugar-high.css';
 import dynamic from 'next/dynamic';
 import { Toaster } from 'sonner';
+import { logger } from '@/src/lib/logger';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 
 const NotificationToastHandler = dynamic(
   () =>

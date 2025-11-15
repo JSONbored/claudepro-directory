@@ -127,6 +127,15 @@ export async function createClient() {
               cookieCount: cookiesToSet.length,
               errorMessage: error.message,
             });
+          } else {
+            logger.error(
+              'Failed to set auth cookies in Route Handler (non-Error exception)',
+              new Error(String(error)),
+              {
+                context: 'supabase_server_client',
+                cookieCount: cookiesToSet.length,
+              }
+            );
           }
         }
       },

@@ -54,6 +54,10 @@ async function fetchWithRetry(
       await new Promise((resolve) => setTimeout(resolve, delay));
       return fetchWithRetry(url, options, retries - 1);
     }
+    logger.error('fetchWithRetry: request failed', error as Error, {
+      url,
+      attempt: MAX_RETRIES - retries + 1,
+    });
     throw error;
   }
 }

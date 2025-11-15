@@ -6,6 +6,9 @@
  * Integrates with react-share for social platforms
  */
 
+import { logger } from '@/src/lib/logger';
+import { normalizeError } from '@/src/lib/utils/error.utils';
+
 export type SharePlatform = 'twitter' | 'linkedin' | 'reddit' | 'facebook' | 'copy_link' | 'native';
 
 export interface ShareOptions {
@@ -115,6 +118,10 @@ export async function shareNative(options: ShareOptions): Promise<boolean> {
       // User cancelled sharing
       return false;
     }
+    logger.warn('shareNative: navigator.share failed', normalizeError(error), {
+      platform: options.platform,
+      url: options.url,
+    });
     // Fallback to copy link
     return await copyShareLink(options);
   }
@@ -132,7 +139,11 @@ export async function copyShareLink(options: ShareOptions): Promise<boolean> {
     const shareUrl = generateShareUrl(options);
     await navigator.clipboard.writeText(shareUrl);
     return true;
-  } catch {
+  } catch (error) {
+    logger.warn('copyShareLink failed', normalizeError(error), {
+      platform: options.platform,
+      url: options.url,
+    });
     return false;
   }
 }
@@ -172,7 +183,11 @@ export async function trackShare(options: {
         url: options.url,
       },
     });
-  } catch {
+  } catch (error) {
+    logger.warn('trackShare failed', normalizeError(error), {
+      platform: options.platform,
+      url: options.url,
+    });
     // Silent fail - don't block user action
   }
 }

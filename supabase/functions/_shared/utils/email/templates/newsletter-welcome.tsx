@@ -11,29 +11,25 @@
  */
 
 import React from 'npm:react@18.3.1';
-import { Button, Hr, Section, Text } from 'npm:@react-email/components@0.0.22';
-import { buildEmailCtaUrl } from '../cta.ts';
+import { Hr, Section, Text } from 'npm:@react-email/components@0.0.22';
 import { EMAIL_UTM_TEMPLATES } from '../utm-templates.ts';
 import { BaseLayout, renderEmailTemplate } from '../base-template.tsx';
 import {
   contentSection,
-  ctaSection,
-  ctaTitleStyle,
   dividerStyle,
-  footerNoteSection,
-  footerNoteStyle,
   headingStyle,
   heroSection,
   listItemStyle,
   listStyle,
   paragraphStyle,
-  primaryButtonStyle,
-  secondaryButtonStyle,
   sectionTitleStyle,
-  strongStyle,
   subheadingStyle,
 } from '../common-styles.ts';
 import { BulletListSection, HeroBlock } from '../components/sections.tsx';
+import { EmailCtaSection } from '../components/cta.tsx';
+import { EmailFooterNote } from '../components/footer-note.tsx';
+import { buildSubscriptionFooter } from '../config/footer-presets.ts';
+import { buildEmailCtaUrl } from '../cta.ts';
 
 const WHAT_TO_EXPECT = [
   {
@@ -115,40 +111,21 @@ export function NewsletterWelcome({ email }: NewsletterWelcomeProps) {
 
       <Hr style={dividerStyle} />
 
-      {/* Call to action */}
-      <Section style={ctaSection}>
-        <Text style={ctaTitleStyle}>Get Started Now</Text>
-        <Text style={paragraphStyle}>
-          Explore our directory and discover tools that will supercharge your Claude experience.
-        </Text>
-
-          <Button
-            href={buildEmailCtaUrl(baseUrl, utm, { content: 'primary_cta' })}
-            style={primaryButtonStyle}
-          >
-          Browse the Directory
-        </Button>
-
-        <Button
-            href={buildEmailCtaUrl(`${baseUrl}/trending`, utm, { content: 'trending_cta' })}
-          style={secondaryButtonStyle}
-        >
-          View Trending Tools
-        </Button>
-      </Section>
+        {/* Call to action */}
+        <EmailCtaSection
+          utm={utm}
+          title="Get Started Now"
+          description="Explore our directory and discover tools that will supercharge your Claude experience."
+          buttons={[
+            { preset: 'primaryDirectory', variant: 'primary' },
+            { preset: 'viewTrending', variant: 'secondary' },
+          ]}
+        />
 
       <Hr style={dividerStyle} />
 
       {/* Footer note */}
-      <Section style={footerNoteSection}>
-        <Text style={footerNoteStyle}>
-          📧 Subscribed with: <strong style={strongStyle}>{email}</strong>
-        </Text>
-        <Text style={footerNoteStyle}>
-          You can update your email preferences or unsubscribe anytime using the links at the bottom
-          of this email.
-        </Text>
-      </Section>
+        <EmailFooterNote lines={buildSubscriptionFooter('newsletterWelcome', { email })} />
     </BaseLayout>
   );
 }

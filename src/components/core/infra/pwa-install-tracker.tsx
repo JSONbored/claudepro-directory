@@ -22,6 +22,7 @@
 
 import { useEffect } from 'react';
 import { trackInteraction } from '@/src/lib/edge/client';
+import { logUnhandledPromise } from '@/src/lib/utils/error.utils';
 
 export function PwaInstallTracker() {
   useEffect(() => {
@@ -35,8 +36,8 @@ export function PwaInstallTracker() {
           platform: navigator.platform || 'unknown',
           user_agent: navigator.userAgent,
         },
-      }).catch(() => {
-        // Analytics failure should not affect UX
+      }).catch((error) => {
+        logUnhandledPromise('PwaInstallTracker: installable event failed', error);
       });
     };
 
@@ -50,8 +51,8 @@ export function PwaInstallTracker() {
           platform: navigator.platform || 'unknown',
           timestamp: new Date().toISOString(),
         },
-      }).catch(() => {
-        // Analytics failure should not affect UX
+      }).catch((error) => {
+        logUnhandledPromise('PwaInstallTracker: installed event failed', error);
       });
     };
 
@@ -66,8 +67,8 @@ export function PwaInstallTracker() {
             platform: navigator.platform || 'unknown',
             timestamp: new Date().toISOString(),
           },
-        }).catch(() => {
-          // Analytics failure should not affect UX
+        }).catch((error) => {
+          logUnhandledPromise('PwaInstallTracker: launch event failed', error);
         });
       }
     };

@@ -13,6 +13,7 @@ import { Bookmark, BookmarkCheck } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
+import { logClientWarning } from '@/src/lib/utils/error.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
 import type { ButtonStyleProps } from '../shared/button-types';
 
@@ -84,6 +85,11 @@ export function BookmarkButton({
 
         router.refresh();
       } catch (error) {
+        logClientWarning('BookmarkButton: toggle failed', error, {
+          contentType,
+          contentSlug,
+          wasBookmarked: isBookmarked,
+        });
         if (error instanceof Error && error.message.includes('signed in')) {
           toasts.raw.error('Please sign in to bookmark content', {
             action: {

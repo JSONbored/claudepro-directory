@@ -17,6 +17,7 @@ import { Checkbox } from '@/src/components/primitives/ui/checkbox';
 import { Label } from '@/src/components/primitives/ui/label';
 import { createCollection, updateCollection } from '@/src/lib/actions/content.actions';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { logClientWarning } from '@/src/lib/utils/error.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
 import type { Tables } from '@/src/types/database.types';
 
@@ -107,6 +108,10 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
           }
         }
       } catch (error) {
+        logClientWarning('CollectionForm: save failed', error, {
+          mode,
+          collectionId: collection?.id,
+        });
         toasts.error.fromError(error, 'Failed to save collection');
       }
     });

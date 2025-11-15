@@ -7,6 +7,7 @@ import type { FC } from 'npm:react@18.3.1';
 import { Resend } from 'npm:resend@4.0.0';
 import { supabaseServiceRole } from '../_shared/clients/supabase.ts';
 import { AUTH_HOOK_ENV, RESEND_ENV, validateEnvironment } from '../_shared/config/email-config.ts';
+import { edgeEnv } from '../_shared/config/env.ts';
 import { renderCollectionSharedEmail } from '../_shared/utils/email/templates/collection-shared.tsx';
 import { renderJobApprovedEmail } from '../_shared/utils/email/templates/job-approved.tsx';
 import { renderJobExpiredEmail } from '../_shared/utils/email/templates/job-expired.tsx';
@@ -40,7 +41,7 @@ validateEnvironment(['resend', 'auth-hook']);
 
 const resend = new Resend(RESEND_ENV.apiKey);
 const hookSecret = AUTH_HOOK_ENV.secret.replace('v1,whsec_', '');
-const NEWSLETTER_COUNT_TTL_SECONDS = Number(Deno.env.get('NEWSLETTER_COUNT_TTL_S') ?? '300');
+const NEWSLETTER_COUNT_TTL_SECONDS = edgeEnv.newsletter.countTtlSeconds;
 let newsletterCountCache: { value: number; expiresAt: number } | null = null;
 
 Deno.serve(async (req: Request) => {
@@ -512,7 +513,7 @@ async function handleDigest(): Promise<Response> {
   console.log(`[DIGEST SENT] Updated last_digest_email_timestamp to ${currentTimestamp}`);
 
   // BetterStack heartbeat
-  const heartbeatUrl = Deno.env.get('BETTERSTACK_HEARTBEAT_WEEKLY_TASKS');
+  const heartbeatUrl = edgeEnv.betterstack.weeklyTasks;
   if (heartbeatUrl) {
     await fetch(results.failed === 0 ? heartbeatUrl : `${heartbeatUrl}/fail`, { method: 'GET' });
   }
@@ -591,7 +592,7 @@ async function handleSequence(): Promise<Response> {
   }
 
   // BetterStack heartbeat
-  const heartbeatUrl = Deno.env.get('BETTERSTACK_HEARTBEAT_EMAIL_SEQUENCES');
+  const heartbeatUrl = edgeEnv.betterstack.emailSequences;
   if (heartbeatUrl) {
     await fetch(failedCount === 0 ? heartbeatUrl : `${heartbeatUrl}/fail`, { method: 'GET' });
   }

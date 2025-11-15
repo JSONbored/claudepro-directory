@@ -29,6 +29,7 @@ import { logger } from '@/src/lib/logger';
 import type { DisplayableContent, FilterState } from '@/src/lib/types/component.types';
 import type { HomePageClientProps } from '@/src/lib/types/page-props.types';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { logClientWarning, logUnhandledPromise } from '@/src/lib/utils/error.utils';
 
 /**
  * OPTIMIZATION (2025-10-22): Enabled SSR for UnifiedSearch
@@ -72,9 +73,13 @@ function HomePageClientComponent({
   const categoryConfigs = useMemo(() => getCategoryConfigs(), []);
 
   useEffect(() => {
-    getHomepageFeaturedCategories().then((categories) => {
-      setFeaturedCategories(categories);
-    });
+    getHomepageFeaturedCategories()
+      .then((categories) => {
+        setFeaturedCategories(categories);
+      })
+      .catch((error) => {
+        logClientWarning('HomePageClient: failed to load featured categories', error);
+      });
   }, []);
 
   useEffect(() => {
@@ -126,8 +131,8 @@ function HomePageClientComponent({
 
   useEffect(() => {
     if (activeTab === 'all' && allConfigs.length === 0 && !isLoadingAllConfigs) {
-      fetchAllConfigs(0).catch(() => {
-        // Error already logged in fetchAllConfigs
+      fetchAllConfigs(0).catch((error) => {
+        logUnhandledPromise('HomePageClient: initial fetchAllConfigs failed', error);
       });
     }
   }, [activeTab, allConfigs.length, fetchAllConfigs, isLoadingAllConfigs]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -228,8 +233,10 @@ function HomePageClientComponent({
       setActiveTab(value);
       // If currently searching, re-run search with new category filter (DB-side)
       if (isSearching && currentSearchQuery) {
-        handleSearch(currentSearchQuery, value).catch(() => {
-          // Silent fail - search will retry on next user interaction
+        handleSearch(currentSearchQuery, value).catch((error) => {
+          logUnhandledPromise('HomePageClient: search retry failed', error, {
+            tab: value,
+          });
         });
       }
     },
@@ -238,8 +245,8 @@ function HomePageClientComponent({
 
   // Handle clear search
   const handleClearSearch = useCallback(() => {
-    handleSearch('').catch(() => {
-      // Silent fail - search cleared on error
+    handleSearch('').catch((error) => {
+      logUnhandledPromise('HomePageClient: clear search failed', error);
     });
   }, [handleSearch]);
 

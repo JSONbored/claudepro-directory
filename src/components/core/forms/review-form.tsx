@@ -13,6 +13,7 @@ import { Textarea } from '@/src/components/primitives/ui/textarea';
 import { createReview, updateReview } from '@/src/lib/actions/content.actions';
 import { Star } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { logClientWarning } from '@/src/lib/utils/error.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
 
 /**
@@ -82,6 +83,11 @@ export function ReviewForm({
           }
         }
       } catch (error) {
+        logClientWarning('ReviewForm: submit failed', error, {
+          contentType,
+          contentSlug,
+          isEditing,
+        });
         if (error instanceof Error && error.message.includes('signed in')) {
           toasts.raw.error('Please sign in to write a review', {
             action: {

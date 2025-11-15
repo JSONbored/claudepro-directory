@@ -4,6 +4,7 @@ import type { User } from '@supabase/supabase-js';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { logger } from '@/src/lib/logger';
 import { createClient } from '@/src/lib/supabase/client';
+import { logClientWarning } from '@/src/lib/utils/error.utils';
 
 type AuthStatus = 'loading' | 'authenticated' | 'unauthenticated';
 
@@ -70,8 +71,10 @@ export function useAuthenticatedUser(
       setError(result.error);
     };
 
-    init().catch(() => {
-      // fetchUser already logs errors internally
+    init().catch((error) => {
+      logClientWarning('useAuthenticatedUser: initial fetch failed', error, {
+        context: contextLabel,
+      });
     });
 
     let subscription: { unsubscribe: () => void } | undefined;
