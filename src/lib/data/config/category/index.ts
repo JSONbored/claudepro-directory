@@ -1,6 +1,7 @@
 /** Category configuration loader - database-first architecture */
 
 import { cache } from 'react';
+import { getHomepageConfig } from '@/src/lib/actions/feature-flags.actions';
 import {
   ALL_CATEGORY_IDS,
   CACHEABLE_CATEGORY_IDS,
@@ -95,7 +96,6 @@ export const NEWSLETTER_CTA_CONFIG = {
 /** Get homepage featured categories from Statsig homepageConfigs */
 export async function getHomepageFeaturedCategories(): Promise<readonly CategoryId[]> {
   try {
-    const { getHomepageConfig } = await import('@/src/lib/actions/feature-flags.actions');
     const config = await getHomepageConfig();
     const categories = config['homepage.featured_categories'].filter((slug): slug is CategoryId =>
       isValidCategory(slug)
@@ -109,7 +109,6 @@ export async function getHomepageFeaturedCategories(): Promise<readonly Category
 /** Get homepage tab categories from Statsig homepageConfigs */
 export async function getHomepageTabCategories(): Promise<readonly string[]> {
   try {
-    const { getHomepageConfig } = await import('@/src/lib/actions/feature-flags.actions');
     const config = await getHomepageConfig();
     return config['homepage.tab_categories'];
   } catch {

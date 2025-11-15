@@ -8,13 +8,15 @@ import {
   CardTitle,
 } from '@/src/components/primitives/ui/card';
 import { getAuthenticatedUser } from '@/src/lib/auth/get-authenticated-user';
-import { getSponsorshipAnalytics } from '@/src/lib/data/account/user-data';
+import {
+  getSponsorshipAnalytics,
+  type SponsorshipAnalytics,
+} from '@/src/lib/data/account/user-data';
 import { BarChart, Eye, MousePointer, TrendingUp } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { normalizeError } from '@/src/lib/utils/error.utils';
-import type { Tables } from '@/src/types/database.types';
 
 export const metadata = generatePageMetadata('/account/sponsorships/:id/analytics');
 
@@ -31,8 +33,7 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
     return null;
   }
 
-  // User-scoped edge-cached RPC via centralized data layer
-  let analyticsData: Awaited<ReturnType<typeof getSponsorshipAnalytics>> | null = null;
+  let analyticsData: SponsorshipAnalytics | null = null;
   try {
     analyticsData = await getSponsorshipAnalytics(user.id, id);
   } catch (error) {
@@ -52,23 +53,7 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
     notFound();
   }
 
-  // Type assertion to database-generated Json type
-  type AnalyticsResponse = {
-    sponsorship: Tables<'sponsored_content'>;
-    daily_stats: Array<{
-      date: string;
-      impressions: number;
-      clicks: number;
-    }>;
-    computed_metrics: {
-      ctr: number;
-      days_active: number;
-      avg_impressions_per_day: number;
-    };
-  };
-
-  const { sponsorship, daily_stats, computed_metrics } =
-    analyticsData as unknown as AnalyticsResponse;
+  const { sponsorship, daily_stats, computed_metrics } = analyticsData;
 
   const impressionCount = sponsorship.impression_count ?? 0;
   const clickCount = sponsorship.click_count ?? 0;

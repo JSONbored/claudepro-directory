@@ -10,7 +10,6 @@ import { ArrowLeft } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { normalizeError } from '@/src/lib/utils/error.utils';
-import type { Tables } from '@/src/types/database.types';
 
 interface EditCollectionPageProps {
   params: Promise<{ slug: string }>;
@@ -30,8 +29,7 @@ export default async function EditCollectionPage({ params }: EditCollectionPageP
     redirect('/login');
   }
 
-  // User-scoped edge-cached RPC via centralized data layer
-  let collectionData: Awaited<ReturnType<typeof getCollectionDetail>> | null = null;
+  let collectionData = null;
   try {
     collectionData = await getCollectionDetail(user.id, slug);
   } catch (error) {
@@ -51,14 +49,7 @@ export default async function EditCollectionPage({ params }: EditCollectionPageP
     notFound();
   }
 
-  // Type assertion to database-generated Json type
-  type CollectionResponse = {
-    collection: Tables<'user_collections'>;
-    items: Array<Tables<'collection_items'>>;
-    bookmarks: Array<Tables<'bookmarks'>>;
-  };
-
-  const { collection, bookmarks } = collectionData as unknown as CollectionResponse;
+  const { collection, bookmarks } = collectionData;
 
   return (
     <div className="space-y-6">

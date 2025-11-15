@@ -21,12 +21,14 @@
  */
 
 import type { ReactNode } from 'react';
-import { SOCIAL_LINKS } from '@/src/lib/data/config/constants';
 import type { ContentItem } from '@/src/lib/data/content';
+import { getSocialLinks } from '@/src/lib/data/marketing/contact';
 import { Download, Layers, Server, Terminal, Webhook } from '@/src/lib/icons';
 
 import type { ActionButtonConfig } from '@/src/lib/types/content-type-config';
 import { toasts } from '@/src/lib/utils/toast.utils';
+
+const SOCIAL_LINK_SNAPSHOT = getSocialLinks();
 
 /**
  * Content extractor function type
@@ -244,13 +246,15 @@ export function createStorageDownloadAction(label: string, icon: ReactNode): Act
  *
  * @example
  * ```tsx
- * import { SOCIAL_LINKS } from '@/src/lib/data/config/constants';
+ * import { getSocialLinks } from '@/src/lib/data/marketing/contact';
+ *
+ * const socialLinks = getSocialLinks();
  *
  * // hooks category
  * primaryAction: createGitHubLinkAction(
  *   'View on GitHub',
  *   <Webhook className={`h-4 w-4 mr-2`} />,
- *   `${SOCIAL_LINKS.github}/blob/main/content/hooks/{slug}.json`
+ *   `${socialLinks.github}/blob/main/content/hooks/{slug}.json`
  * )
  * ```
  */
@@ -337,7 +341,7 @@ export const commonActions = {
    */
   viewHookOnGitHub: () =>
     createGitHubLinkAction(
-      `${SOCIAL_LINKS.github}/blob/main/content/hooks/{slug}.json`,
+      `${SOCIAL_LINK_SNAPSHOT.github}/blob/main/content/hooks/{slug}.json`,
       'View on GitHub',
       <Webhook className={'mr-2 h-4 w-4'} />
     ),

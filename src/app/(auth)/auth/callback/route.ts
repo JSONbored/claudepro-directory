@@ -4,6 +4,7 @@
 
 import { type NextRequest, NextResponse } from 'next/server';
 import { subscribeViaOAuth } from '@/src/lib/actions/newsletter.actions';
+import { refreshProfileFromOAuthServer } from '@/src/lib/actions/user.actions';
 import { SECURITY_CONFIG } from '@/src/lib/data/config/constants';
 import { logger } from '@/src/lib/logger';
 import { createClient } from '@/src/lib/supabase/server';
@@ -22,6 +23,7 @@ export async function GET(request: NextRequest) {
   const next = isValidRedirect ? nextParam : '/';
 
   if (code) {
+    // biome-ignore lint/correctness/noSuspiciousAwait: OAuth callback must instantiate a server Supabase client directly for session exchange.
     const supabase = await createClient();
     const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
@@ -30,7 +32,7 @@ export async function GET(request: NextRequest) {
       let shouldSetNewsletterCookie = false;
 
       try {
-        await supabase.rpc('refresh_profile_from_oauth', { user_id: user.id });
+        await refreshProfileFromOAuthServer(user.id);
         logger.info('Auth callback refreshed profile from OAuth', { userId: user.id });
       } catch (refreshError) {
         logger.warn('Auth callback failed to refresh profile', {

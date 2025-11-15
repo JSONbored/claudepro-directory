@@ -44,6 +44,18 @@ export async function checkConfettiEnabled(): Promise<boolean> {
   );
 }
 
+/**
+ * Check if contact terminal feature is enabled
+ * Used for gradual rollout of interactive terminal on /contact page
+ */
+export async function checkContactTerminalEnabled(): Promise<boolean> {
+  return fetchWithLogging(
+    'contactTerminalEnabled',
+    () => featureFlags.contactTerminalEnabled(),
+    () => false
+  );
+}
+
 type ConfigRecord = Record<string, unknown>;
 
 function createTypedConfigAccessor<const Schema extends ConfigRecord>({

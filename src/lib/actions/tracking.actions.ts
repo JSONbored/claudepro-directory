@@ -61,7 +61,7 @@ export async function trackSponsoredImpression(data: {
       }
     );
     await invalidateSponsoredTrackingCaches();
-  } catch (error) {
+  } catch (_error) {
     // logActionFailure already captured the error; impressions are best-effort.
   }
 }
@@ -96,7 +96,7 @@ export async function trackSponsoredClick(data: {
       }
     );
     await invalidateSponsoredTrackingCaches();
-  } catch (error) {
+  } catch (_error) {
     // logActionFailure already captured the error; clicks are best-effort.
   }
 }

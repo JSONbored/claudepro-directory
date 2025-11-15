@@ -24,9 +24,9 @@ import {
 } from '@/src/lib/icons';
 import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
-import type { GetUserSettingsReturn } from '@/src/types/database-overrides';
 
 export default async function AccountLayout({ children }: { children: React.ReactNode }) {
+  // biome-ignore lint/correctness/noSuspiciousAwait: Account layout must instantiate the server client to refresh sessions + auth state.
   const supabase = await createClient();
 
   const { user } = await getAuthenticatedUserFromClient(supabase, {
@@ -49,7 +49,7 @@ export default async function AccountLayout({ children }: { children: React.Reac
     user.user_metadata?.full_name ?? user.user_metadata?.name ?? user.email ?? null;
   const userImageMetadata = user.user_metadata?.avatar_url ?? user.user_metadata?.picture ?? null;
 
-  let settings = (await getUserSettings(user.id)) as GetUserSettingsReturn | null;
+  let settings = await getUserSettings(user.id);
   let profile = settings?.user_data ?? null;
 
   if (!profile) {
@@ -59,7 +59,7 @@ export default async function AccountLayout({ children }: { children: React.Reac
       name: userNameMetadata,
       image: userImageMetadata,
     });
-    settings = (await getUserSettings(user.id)) as GetUserSettingsReturn | null;
+    settings = await getUserSettings(user.id);
     profile = settings?.user_data ?? null;
   }
 

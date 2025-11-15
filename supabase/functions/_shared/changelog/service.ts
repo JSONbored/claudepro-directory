@@ -30,8 +30,83 @@ export interface VercelWebhookPayload {
   };
 }
 
-export type ChangelogInsert = Database['public']['Tables']['changelog_entries']['Insert'];
-export type ChangelogRow = Database['public']['Tables']['changelog_entries']['Row'];
+export type ChangelogInsert = Database['public']['Tables']['changelog']['Insert'];
+export type ChangelogRow = Database['public']['Tables']['changelog']['Row'];
+
+interface BuildChangelogMetadataParams {
+  sections: ChangelogSection[];
+  releaseDate: string;
+  deploymentUrl: string;
+  branch: string;
+  commitSha: string;
+  commitCount: number;
+  contributors: string[];
+}
+
+function escapeHtml(input: string): string {
+  return input
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function buildStructuredSections(sections: ChangelogSection[]): Json[] {
+  return sections
+    .filter((section) => Array.isArray(section.items) && section.items.length > 0)
+    .flatMap((section) => {
+      const listItems = section.items.map((item) => `<li>${escapeHtml(item)}</li>`).join('');
+      if (!listItems) {
+        return [];
+      }
+      return [
+        {
+          type: 'heading',
+          level: 3,
+          content: section.title,
+        },
+        {
+          type: 'text',
+          content: `<ul>${listItems}</ul>`,
+        },
+      ];
+    }) as Json[];
+}
+
+export function buildChangelogMetadata(params: BuildChangelogMetadataParams): Json {
+  const structuredSections = buildStructuredSections(params.sections);
+
+  const metadata: Record<string, Json> = {
+    release: {
+      date: params.releaseDate,
+      branch: params.branch,
+      deployment_url: params.deploymentUrl,
+    },
+    git: {
+      commit_sha: params.commitSha,
+      commit_count: params.commitCount,
+      contributors: params.contributors,
+    },
+  };
+
+  if (structuredSections.length > 0) {
+    metadata.sections = structuredSections;
+  }
+
+  return metadata;
+}
+
+export function deriveChangelogKeywords(
+  sections: ChangelogSection[],
+  branch?: string
+): string[] | undefined {
+  const baseKeywords = ['changelog', 'release'];
+  const sectionKeywords = sections.map((section) => section.title.toLowerCase());
+  const branchKeyword = branch ? [branch] : [];
+  const keywords = Array.from(new Set([...baseKeywords, ...sectionKeywords, ...branchKeyword]));
+  return keywords.length ? keywords : undefined;
+}
 
 export async function fetchCommitsFromGitHub(
   baseHash: string,

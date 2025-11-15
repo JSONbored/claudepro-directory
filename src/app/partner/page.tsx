@@ -8,7 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/ui/card';
-import { SOCIAL_LINKS } from '@/src/lib/data/config/constants';
+import { getPartnerContactChannels, getPartnerCtas } from '@/src/lib/data/marketing/contact';
 import { getPartnerPricing } from '@/src/lib/data/marketing/pricing';
 import { getPartnerHeroStats } from '@/src/lib/data/marketing/site';
 import {
@@ -39,9 +39,8 @@ export default async function PartnerPage() {
   const heroStats = await getPartnerHeroStats();
   const configCount = heroStats.configurationCount;
 
-  if (!SOCIAL_LINKS.partnerEmail) {
-    logger.warn('PartnerPage: partnerEmail is not configured');
-  }
+  const partnerContacts = getPartnerContactChannels();
+  const partnerCtas = getPartnerCtas();
 
   return (
     <div className={'container mx-auto px-4 py-12'}>
@@ -50,7 +49,7 @@ export default async function PartnerPage() {
         <h1
           className={`mb-4 ${RESPONSIVE_PATTERNS.TEXT_RESPONSIVE_2XL} ${UI_CLASSES.HEADING_H1.split(' ')[1]}`}
         >
-          Reach 3,000+ Claude AI Developers
+          Reach {heroStats.monthlyVisitors.toLocaleString()}+ Claude AI Developers
         </h1>
         <p className={`mb-6 ${UI_CLASSES.TEXT_BODY_LG} text-muted-foreground`}>
           The largest directory of Claude configurations. Attract engineers building the future of
@@ -193,7 +192,7 @@ export default async function PartnerPage() {
 
                 {/* CTA */}
                 <Button className="w-full" size="lg" asChild>
-                  <a href={`mailto:${SOCIAL_LINKS.partnerEmail}?subject=Job Listing - Get Started`}>
+                  <a href={partnerCtas.jobListing.href}>
                     <Mail className={'mr-2 h-4 w-4'} />
                     Post a Job
                   </a>
@@ -264,9 +263,7 @@ export default async function PartnerPage() {
 
                 {/* CTA */}
                 <Button className="w-full" size="lg" variant="default" asChild>
-                  <a
-                    href={`mailto:${SOCIAL_LINKS.partnerEmail}?subject=Sponsored Listing - Get Started`}
-                  >
+                  <a href={partnerCtas.sponsoredListing.href}>
                     <Mail className={'mr-2 h-4 w-4'} />
                     Get Featured
                   </a>
@@ -349,14 +346,16 @@ export default async function PartnerPage() {
       <div className={'mx-auto max-w-2xl text-center'}>
         <Card className="border-primary/20 bg-gradient-to-r from-primary/10 to-primary/5">
           <CardContent className="pt-8 pb-8">
-            <h2 className={'mb-4 font-bold text-2xl'}>Ready to Reach 3,000+ AI Engineers?</h2>
+            <h2 className={'mb-4 font-bold text-2xl'}>
+              Ready to Reach {heroStats.monthlyVisitors.toLocaleString()}+ AI Engineers?
+            </h2>
             <p className={'mb-6 text-muted-foreground'}>
               Get started with launch pricing (40% off) before December 31st, 2025
             </p>
             <Button size="lg" asChild>
-              <a href={`mailto:${SOCIAL_LINKS.partnerEmail}?subject=Partnership Inquiry`}>
+              <a href={partnerCtas.partnershipInquiry.href}>
                 <Mail className={'mr-2 h-4 w-4'} />
-                Email: partner@claudepro.directory
+                Email: {partnerContacts.partnerEmail}
               </a>
             </Button>
             <p className={`${UI_CLASSES.TEXT_XS_MUTED} mt-4`}>

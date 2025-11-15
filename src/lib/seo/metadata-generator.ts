@@ -4,9 +4,9 @@
 
 import type { Metadata } from 'next';
 import { APP_CONFIG } from '@/src/lib/data/config/constants';
+import { fetchMetadata, type SEOMetadata } from '@/src/lib/data/seo/client';
 import { logger } from '@/src/lib/logger';
 import { generateOGImageUrl, OG_IMAGE_DIMENSIONS } from '@/src/lib/og/url-generator';
-import { fetchMetadata, type SEOMetadata } from '@/src/lib/seo/client';
 
 interface MetadataContext {
   params?: Record<string, string | string[]>;

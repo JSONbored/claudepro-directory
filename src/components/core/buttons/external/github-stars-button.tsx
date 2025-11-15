@@ -7,7 +7,7 @@
 
 import { useEffect, useState } from 'react';
 import { Button } from '@/src/components/primitives/ui/button';
-import { SOCIAL_LINKS } from '@/src/lib/data/config/constants';
+import { getSocialLinks } from '@/src/lib/data/marketing/contact';
 import { Github } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
@@ -18,8 +18,10 @@ export interface GitHubStarsButtonProps extends ButtonStyleProps {
   repoUrl?: string;
 }
 
+const SOCIAL_LINK_SNAPSHOT = getSocialLinks();
+
 export function GitHubStarsButton({
-  repoUrl = SOCIAL_LINKS.github,
+  repoUrl = SOCIAL_LINK_SNAPSHOT.github,
   size = 'sm',
   variant = 'ghost',
   className,

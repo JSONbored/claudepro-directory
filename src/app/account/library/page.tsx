@@ -23,42 +23,9 @@ import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { normalizeError } from '@/src/lib/utils/error.utils';
+import type { GetUserLibraryReturn } from '@/src/types/database-overrides';
 
 export const metadata = generatePageMetadata('/account/library');
-
-type Bookmark = {
-  id: string;
-  user_id: string;
-  content_type: string;
-  content_slug: string;
-  notes: string | null;
-  created_at: string;
-  updated_at: string;
-};
-
-type UserCollection = {
-  id: string;
-  user_id: string;
-  slug: string;
-  name: string;
-  description: string | null;
-  is_public: boolean;
-  item_count: number;
-  view_count: number;
-  created_at: string;
-  updated_at: string;
-};
-
-type LibraryData = {
-  bookmarks: Bookmark[];
-  collections: UserCollection[];
-  stats: {
-    bookmarkCount: number;
-    collectionCount: number;
-    totalCollectionItems: number;
-    totalCollectionViews: number;
-  };
-};
 
 export default async function LibraryPage() {
   const { user } = await getAuthenticatedUser({ context: 'LibraryPage' });
@@ -82,13 +49,10 @@ export default async function LibraryPage() {
     );
   }
 
-  // User-scoped edge-cached RPC via centralized data layer
-  let data: LibraryData | null = null;
+  let data: GetUserLibraryReturn | null = null;
   try {
-    const response = await getUserLibrary(user.id);
-    if (response) {
-      data = response as LibraryData;
-    } else {
+    data = await getUserLibrary(user.id);
+    if (!data) {
       logger.warn('LibraryPage: getUserLibrary returned null', { userId: user.id });
     }
   } catch (error) {
@@ -116,7 +80,14 @@ export default async function LibraryPage() {
     );
   }
 
-  const { bookmarks, collections, stats } = data;
+  const bookmarks = data.bookmarks ?? [];
+  const collections = data.collections ?? [];
+  const stats = data.stats ?? {
+    bookmarkCount: bookmarks.length,
+    collectionCount: collections.length,
+    totalCollectionItems: 0,
+    totalCollectionViews: 0,
+  };
   const { bookmarkCount, collectionCount } = stats;
   if (!(bookmarks?.length || collections?.length)) {
     logger.info('LibraryPage: library returned no bookmarks or collections', { userId: user.id });

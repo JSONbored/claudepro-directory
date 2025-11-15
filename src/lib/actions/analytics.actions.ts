@@ -189,3 +189,49 @@ export async function generateConfigRecommendationsAction(answers: {
     },
   };
 }
+
+/**
+ * Track terminal command execution
+ * Used by interactive contact terminal
+ */
+export async function trackTerminalCommandAction(params: {
+  command_id: string;
+  action_type: string;
+  success: boolean;
+  error_reason?: string;
+  execution_time_ms?: number;
+}) {
+  return trackInteractionAction({
+    content_type: 'terminal',
+    content_slug: 'contact-terminal',
+    interaction_type: 'command',
+    metadata: {
+      command_id: params.command_id,
+      action_type: params.action_type,
+      success: params.success,
+      error_reason: params.error_reason,
+      execution_time_ms: params.execution_time_ms,
+    } as Json,
+  });
+}
+
+/**
+ * Track terminal form submission
+ * Used when contact form is submitted via terminal
+ */
+export async function trackTerminalFormSubmissionAction(params: {
+  category: string;
+  success: boolean;
+  error?: string;
+}) {
+  return trackInteractionAction({
+    content_type: 'terminal',
+    content_slug: 'contact-form',
+    interaction_type: 'submit',
+    metadata: {
+      category: params.category,
+      success: params.success,
+      error: params.error,
+    } as Json,
+  });
+}

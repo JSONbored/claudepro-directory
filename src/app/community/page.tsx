@@ -14,7 +14,8 @@ const NewsletterCTAVariant = dynamic(
 );
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
-import { ROUTES, SOCIAL_LINKS } from '@/src/lib/data/config/constants';
+import { ROUTES } from '@/src/lib/data/config/constants';
+import { getContactChannels } from '@/src/lib/data/marketing/contact';
 import { Github, MessageCircle, MessageSquare, Twitter, Users } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
@@ -29,11 +30,12 @@ export const metadata = generatePageMetadata('/community');
 export const revalidate = false;
 
 export default function CommunityPage() {
-  if (!SOCIAL_LINKS.discord) {
-    logger.warn('CommunityPage: SOCIAL_LINKS.discord is not configured');
+  const channels = getContactChannels();
+  if (!channels.discord) {
+    logger.warn('CommunityPage: Discord channel is not configured');
   }
-  if (!SOCIAL_LINKS.twitter) {
-    logger.warn('CommunityPage: SOCIAL_LINKS.twitter is not configured');
+  if (!channels.twitter) {
+    logger.warn('CommunityPage: Twitter channel is not configured');
   }
 
   return (
@@ -60,19 +62,19 @@ export default function CommunityPage() {
 
             <div className={'flex flex-wrap justify-center gap-4'}>
               <Button size="lg" asChild>
-                <a href={SOCIAL_LINKS.github} target="_blank" rel="noopener noreferrer">
+                <a href={channels.github} target="_blank" rel="noopener noreferrer">
                   <Github className={'mr-2 h-5 w-5'} />
                   GitHub
                 </a>
               </Button>
               <Button size="lg" variant="outline" asChild>
-                <a href={SOCIAL_LINKS.discord} target="_blank" rel="noopener noreferrer">
+                <a href={channels.discord} target="_blank" rel="noopener noreferrer">
                   <MessageSquare className={'mr-2 h-5 w-5'} />
                   Discord
                 </a>
               </Button>
               <Button size="lg" variant="outline" asChild>
-                <a href={SOCIAL_LINKS.twitter} target="_blank" rel="noopener noreferrer">
+                <a href={channels.twitter} target="_blank" rel="noopener noreferrer">
                   <Twitter className={'mr-2 h-5 w-5'} />X (Twitter)
                 </a>
               </Button>

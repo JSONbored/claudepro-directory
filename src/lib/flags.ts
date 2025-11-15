@@ -148,6 +148,7 @@ export const featureFlags = {
   contentDetailTabs: createFeatureFlag('content_detail_tabs'),
   interactiveOnboarding: createFeatureFlag('interactive_onboarding'),
   configPlayground: createFeatureFlag('config_playground'),
+  contactTerminalEnabled: createFeatureFlag('contact_terminal_enabled'),
 
   // Infrastructure
   publicAPI: createFeatureFlag('public_api'),
@@ -564,6 +565,7 @@ export const cacheConfigs = createDynamicConfigGroup('cache_configs', {
   'cache.newsletter_count_ttl_s': 300, // 5 minutes (subscriber count)
   'cache.company_search.ttl_seconds': 300, // 5 minutes (company selector search)
   'cache.notifications.ttl_seconds': 300, // 5 minutes (user notification cache)
+  'cache.contact.ttl_seconds': 3600, // 1 hour (contact terminal commands)
 
   // Invalidation Tag Arrays
   'cache.invalidate.content_create': ['content', 'homepage', 'trending'] as string[],
@@ -599,6 +601,7 @@ export const cacheConfigs = createDynamicConfigGroup('cache_configs', {
   'cache.invalidate.notifications': ['notifications'] as string[],
   'cache.invalidate.review_delete': ['content'] as string[],
   'cache.invalidate.submission_create': ['submissions'] as string[],
+  'cache.invalidate.contact_submission': ['contact', 'submissions'] as string[],
   'cache.invalidate.review_helpful': ['content'] as string[],
   'cache.invalidate.usage_tracking': ['content'] as string[],
 });

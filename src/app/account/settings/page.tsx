@@ -51,13 +51,10 @@ export default async function SettingsPage() {
     );
   }
 
-  // User-scoped edge-cached RPC via centralized data layer
   let settingsData: GetUserSettingsReturn | null = null;
   try {
-    const response = await getUserSettings(user.id);
-    if (response) {
-      settingsData = response as GetUserSettingsReturn;
-    } else {
+    settingsData = await getUserSettings(user.id);
+    if (!settingsData) {
       logger.warn('SettingsPage: getUserSettings returned null', { userId: user.id });
     }
   } catch (error) {
@@ -86,9 +83,8 @@ export default async function SettingsPage() {
   }
 
   // Type-safe RPC return using centralized type definition
-  const settingsResult = settingsData as GetUserSettingsReturn;
-  const userData = settingsResult?.user_data;
-  const profile = settingsResult?.profile;
+  const userData = settingsData.user_data;
+  const profile = settingsData.profile;
 
   // Initialize user if missing (consolidated - no more profiles table)
   if (!userData) {

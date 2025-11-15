@@ -428,7 +428,7 @@ export interface Database {
         Relationships: [];
       };
 
-      changelog_entries: {
+      changelog: {
         Row: {
           canonical_url: string | null;
           changes: Json;
@@ -442,6 +442,7 @@ export interface Database {
           id: string;
           json_ld: Json | null;
           keywords: string[] | null;
+          metadata: Json | null;
           og_image: string | null;
           og_type: string | null;
           published: boolean;
@@ -469,6 +470,7 @@ export interface Database {
           id?: string;
           json_ld?: Json | null;
           keywords?: string[] | null;
+          metadata?: Json | null;
           og_image?: string | null;
           og_type?: string | null;
           published?: boolean;
@@ -496,6 +498,7 @@ export interface Database {
           id?: string;
           json_ld?: Json | null;
           keywords?: string[] | null;
+          metadata?: Json | null;
           og_image?: string | null;
           og_type?: string | null;
           published?: boolean;

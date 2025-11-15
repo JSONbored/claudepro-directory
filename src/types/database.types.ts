@@ -266,73 +266,88 @@ export type Database = {
       }
       changelog: {
         Row: {
-          category: string
+          canonical_url: string | null
+          changes: Json
           commit_count: number | null
+          content: string
           contributors: string[] | null
           created_at: string
-          date_added: string
-          date_published: string | null
-          date_updated: string | null
-          description: string
-          featured: boolean | null
+          description: string | null
+          featured: boolean
           git_commit_sha: string | null
-          git_hash: string | null
-          git_tag: string | null
           id: string
-          sections: Json
+          json_ld: Json | null
+          keywords: string[] | null
+          metadata: Json | null
+          og_image: string | null
+          og_type: string | null
+          published: boolean
+          raw_content: string
+          release_date: string
+          robots_follow: boolean | null
+          robots_index: boolean | null
           slug: string
           source: string | null
-          synced_at: string | null
-          tags: string[]
           title: string
+          tldr: string | null
+          twitter_card: string | null
           updated_at: string
-          version: string | null
         }
         Insert: {
-          category?: string
+          canonical_url?: string | null
+          changes?: Json
           commit_count?: number | null
+          content: string
           contributors?: string[] | null
           created_at?: string
-          date_added: string
-          date_published?: string | null
-          date_updated?: string | null
-          description: string
-          featured?: boolean | null
+          description?: string | null
+          featured?: boolean
           git_commit_sha?: string | null
-          git_hash?: string | null
-          git_tag?: string | null
           id?: string
-          sections: Json
+          json_ld?: Json | null
+          keywords?: string[] | null
+          metadata?: Json | null
+          og_image?: string | null
+          og_type?: string | null
+          published?: boolean
+          raw_content: string
+          release_date: string
+          robots_follow?: boolean | null
+          robots_index?: boolean | null
           slug: string
           source?: string | null
-          synced_at?: string | null
-          tags: string[]
           title: string
+          tldr?: string | null
+          twitter_card?: string | null
           updated_at?: string
-          version?: string | null
         }
         Update: {
-          category?: string
+          canonical_url?: string | null
+          changes?: Json
           commit_count?: number | null
+          content?: string
           contributors?: string[] | null
           created_at?: string
-          date_added?: string
-          date_published?: string | null
-          date_updated?: string | null
-          description?: string
-          featured?: boolean | null
+          description?: string | null
+          featured?: boolean
           git_commit_sha?: string | null
-          git_hash?: string | null
-          git_tag?: string | null
           id?: string
-          sections?: Json
+          json_ld?: Json | null
+          keywords?: string[] | null
+          metadata?: Json | null
+          og_image?: string | null
+          og_type?: string | null
+          published?: boolean
+          raw_content?: string
+          release_date?: string
+          robots_follow?: boolean | null
+          robots_index?: boolean | null
           slug?: string
           source?: string | null
-          synced_at?: string | null
-          tags?: string[]
           title?: string
+          tldr?: string | null
+          twitter_card?: string | null
           updated_at?: string
-          version?: string | null
         }
         Relationships: []
       }
@@ -369,94 +384,10 @@ export type Database = {
             foreignKeyName: "changelog_changes_changelog_entry_id_fkey"
             columns: ["changelog_entry_id"]
             isOneToOne: false
-            referencedRelation: "changelog_entries"
+            referencedRelation: "changelog"
             referencedColumns: ["id"]
           },
         ]
-      }
-      changelog_entries: {
-        Row: {
-          canonical_url: string | null
-          changes: Json
-          commit_count: number | null
-          content: string
-          contributors: string[] | null
-          created_at: string
-          description: string | null
-          featured: boolean
-          git_commit_sha: string | null
-          id: string
-          json_ld: Json | null
-          keywords: string[] | null
-          og_image: string | null
-          og_type: string | null
-          published: boolean
-          raw_content: string
-          release_date: string
-          robots_follow: boolean | null
-          robots_index: boolean | null
-          slug: string
-          source: string | null
-          title: string
-          tldr: string | null
-          twitter_card: string | null
-          updated_at: string
-        }
-        Insert: {
-          canonical_url?: string | null
-          changes?: Json
-          commit_count?: number | null
-          content: string
-          contributors?: string[] | null
-          created_at?: string
-          description?: string | null
-          featured?: boolean
-          git_commit_sha?: string | null
-          id?: string
-          json_ld?: Json | null
-          keywords?: string[] | null
-          og_image?: string | null
-          og_type?: string | null
-          published?: boolean
-          raw_content: string
-          release_date: string
-          robots_follow?: boolean | null
-          robots_index?: boolean | null
-          slug: string
-          source?: string | null
-          title: string
-          tldr?: string | null
-          twitter_card?: string | null
-          updated_at?: string
-        }
-        Update: {
-          canonical_url?: string | null
-          changes?: Json
-          commit_count?: number | null
-          content?: string
-          contributors?: string[] | null
-          created_at?: string
-          description?: string | null
-          featured?: boolean
-          git_commit_sha?: string | null
-          id?: string
-          json_ld?: Json | null
-          keywords?: string[] | null
-          og_image?: string | null
-          og_type?: string | null
-          published?: boolean
-          raw_content?: string
-          release_date?: string
-          robots_follow?: boolean | null
-          robots_index?: boolean | null
-          slug?: string
-          source?: string | null
-          title?: string
-          tldr?: string | null
-          twitter_card?: string | null
-          updated_at?: string
-        }
-        Relationships: []
       }
       collection_items: {
         Row: {
@@ -570,6 +501,117 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      contact_commands: {
+        Row: {
+          action_type: Database["public"]["Enums"]["contact_action_type"]
+          action_value: string | null
+          aliases: string[] | null
+          category: string
+          command_id: string
+          command_text: string
+          confetti_variant:
+            | Database["public"]["Enums"]["confetti_variant"]
+            | null
+          created_at: string | null
+          description: string | null
+          display_order: number
+          icon_name: string | null
+          id: string
+          is_active: boolean | null
+          metadata: Json | null
+          requires_auth: boolean | null
+          updated_at: string | null
+        }
+        Insert: {
+          action_type: Database["public"]["Enums"]["contact_action_type"]
+          action_value?: string | null
+          aliases?: string[] | null
+          category?: string
+          command_id: string
+          command_text: string
+          confetti_variant?:
+            | Database["public"]["Enums"]["confetti_variant"]
+            | null
+          created_at?: string | null
+          description?: string | null
+          display_order: number
+          icon_name?: string | null
+          id?: string
+          is_active?: boolean | null
+          metadata?: Json | null
+          requires_auth?: boolean | null
+          updated_at?: string | null
+        }
+        Update: {
+          action_type?: Database["public"]["Enums"]["contact_action_type"]
+          action_value?: string | null
+          aliases?: string[] | null
+          category?: string
+          command_id?: string
+          command_text?: string
+          confetti_variant?:
+            | Database["public"]["Enums"]["confetti_variant"]
+            | null
+          created_at?: string | null
+          description?: string | null
+          display_order?: number
+          icon_name?: string | null
+          id?: string
+          is_active?: boolean | null
+          metadata?: Json | null
+          requires_auth?: boolean | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      contact_submissions: {
+        Row: {
+          category: Database["public"]["Enums"]["contact_category"]
+          created_at: string | null
+          email: string
+          id: string
+          message: string
+          metadata: Json | null
+          name: string
+          responded_by: string | null
+          response_sent_at: string | null
+          session_id: string | null
+          status: Database["public"]["Enums"]["submission_status"]
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          category?: Database["public"]["Enums"]["contact_category"]
+          created_at?: string | null
+          email: string
+          id?: string
+          message: string
+          metadata?: Json | null
+          name: string
+          responded_by?: string | null
+          response_sent_at?: string | null
+          session_id?: string | null
+          status?: Database["public"]["Enums"]["submission_status"]
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["contact_category"]
+          created_at?: string | null
+          email?: string
+          id?: string
+          message?: string
+          metadata?: Json | null
+          name?: string
+          responded_by?: string | null
+          response_sent_at?: string | null
+          session_id?: string | null
+          status?: Database["public"]["Enums"]["submission_status"]
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
       }
       content: {
         Row: {
@@ -3532,6 +3574,7 @@ export type Database = {
         }
       }
       get_company_profile: { Args: { p_slug: string }; Returns: Json }
+      get_contact_commands: { Args: never; Returns: Json }
       get_content_detail_complete: {
         Args: { p_category: string; p_slug: string; p_user_id?: string }
         Returns: Json
@@ -4259,6 +4302,19 @@ export type Database = {
         }
         Returns: undefined
       }
+      insert_contact_submission: {
+        Args: {
+          p_category: Database["public"]["Enums"]["contact_category"]
+          p_email: string
+          p_message: string
+          p_metadata?: Json
+          p_name: string
+        }
+        Returns: {
+          submission_id: string
+          success: boolean
+        }[]
+      }
       invoke_edge_function: {
         Args: { action_header: string; function_name: string; payload?: Json }
         Returns: number
@@ -4682,6 +4738,14 @@ export type Database = {
         | "Removed"
         | "Fixed"
         | "Security"
+      confetti_variant: "success" | "celebration" | "milestone" | "subtle"
+      contact_action_type:
+        | "internal"
+        | "external"
+        | "route"
+        | "sheet"
+        | "easter-egg"
+      contact_category: "bug" | "feature" | "partnership" | "general" | "other"
       content_category:
         | "agents"
         | "mcp"
@@ -4929,6 +4993,15 @@ export const Constants = {
         "Fixed",
         "Security",
       ],
+      confetti_variant: ["success", "celebration", "milestone", "subtle"],
+      contact_action_type: [
+        "internal",
+        "external",
+        "route",
+        "sheet",
+        "easter-egg",
+      ],
+      contact_category: ["bug", "feature", "partnership", "general", "other"],
       content_category: [
         "agents",
         "mcp",

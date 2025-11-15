@@ -85,7 +85,7 @@ async function generateFeedPayload(
       return {
         xml: data,
         contentType: 'application/rss+xml; charset=utf-8',
-        source: 'PostgreSQL changelog_entries (rss)',
+        source: 'PostgreSQL changelog (rss)',
       };
     }
     const { data, error } = await supabaseAnon.rpc('generate_changelog_atom_feed', {
@@ -97,7 +97,7 @@ async function generateFeedPayload(
     return {
       xml: data,
       contentType: 'application/atom+xml; charset=utf-8',
-      source: 'PostgreSQL changelog_entries (atom)',
+      source: 'PostgreSQL changelog (atom)',
     };
   }
 

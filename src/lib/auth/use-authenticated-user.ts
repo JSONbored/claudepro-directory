@@ -92,7 +92,7 @@ export function useAuthenticatedUser(
       active = false;
       subscription?.unsubscribe();
     };
-  }, [fetchUser, subscribe, supabase]);
+  }, [fetchUser, subscribe, supabase, contextLabel]);
 
   return {
     user,

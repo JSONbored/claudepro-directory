@@ -1,5 +1,6 @@
 import { NavLink } from '@/src/components/core/navigation/navigation-link';
 import { APP_CONFIG } from '@/src/lib/data/config/constants';
+import { getContactChannels } from '@/src/lib/data/marketing/contact';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
@@ -29,6 +30,7 @@ function getLastUpdatedDate(): string {
 
 export default function TermsPage() {
   const lastUpdated = getLastUpdatedDate();
+  const channels = getContactChannels();
 
   return (
     <div className={`container mx-auto max-w-4xl ${UI_CLASSES.PADDING_X_DEFAULT} py-8 sm:py-12`}>
@@ -169,6 +171,7 @@ export default function TermsPage() {
           <h2 className={`${UI_CLASSES.MARGIN_DEFAULT} font-semibold text-2xl`}>11. Contact Us</h2>
           <p className={UI_CLASSES.MARGIN_DEFAULT}>
             If you have questions about these Terms of Service, please{' '}
+            <NavLink href={`mailto:${channels.email}`}>{channels.email}</NavLink> or{' '}
             <NavLink href="/contact">contact us</NavLink>.
           </p>
         </section>

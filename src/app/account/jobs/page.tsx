@@ -49,7 +49,7 @@ export default async function MyJobsPage() {
   let data: GetUserDashboardReturn | null = null;
   let fetchError = false;
   try {
-    data = (await getUserDashboard(user.id)) as GetUserDashboardReturn | null;
+    data = await getUserDashboard(user.id);
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load user dashboard for jobs');
     logger.error('MyJobsPage: getUserDashboard threw', normalized, { userId: user.id });

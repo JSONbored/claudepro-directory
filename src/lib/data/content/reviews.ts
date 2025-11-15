@@ -1,6 +1,7 @@
 'use server';
 
 import { fetchCachedRpc } from '@/src/lib/data/helpers';
+import type { GetReviewsWithStatsReturn } from '@/src/types/database-overrides';
 
 interface ReviewsWithStatsParams {
   contentType: string;
@@ -13,10 +14,10 @@ interface ReviewsWithStatsParams {
 
 export async function getReviewsWithStatsData(
   params: ReviewsWithStatsParams
-): Promise<unknown | null> {
+): Promise<GetReviewsWithStatsReturn | null> {
   const { contentType, contentSlug, sortBy, limit, offset, userId } = params;
 
-  return fetchCachedRpc<unknown | null>(
+  return fetchCachedRpc<GetReviewsWithStatsReturn | null>(
     {
       p_content_type: contentType,
       p_content_slug: contentSlug,

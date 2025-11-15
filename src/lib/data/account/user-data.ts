@@ -3,16 +3,36 @@
  * Centralized location for all user-specific data fetching
  */
 
+import { z } from 'zod';
 import { fetchCachedRpc } from '@/src/lib/data/helpers';
 import type { Tables } from '@/src/types/database.types';
+import type {
+  GetAccountDashboardReturn,
+  GetCollectionDetailWithItemsReturn,
+  GetUserCompaniesReturn,
+  GetUserDashboardReturn,
+  GetUserLibraryReturn,
+  GetUserSettingsReturn,
+} from '@/src/types/database-overrides';
 
 const ACCOUNT_TTL_KEY = 'cache.account.ttl_seconds';
+
+const accountDashboardSchema = z.object({
+  bookmark_count: z.number().catch(0),
+  profile: z.object({
+    name: z.string().nullable().catch(null),
+    tier: z.string().nullable().catch(null),
+    created_at: z.string(),
+  }),
+});
 
 /**
  * Get user account dashboard data (bookmarks, profile, tier)
  */
-export async function getAccountDashboard(userId: string) {
-  return fetchCachedRpc<unknown | null>(
+export async function getAccountDashboard(
+  userId: string
+): Promise<GetAccountDashboardReturn | null> {
+  const result = await fetchCachedRpc<GetAccountDashboardReturn | null>(
     { p_user_id: userId },
     {
       rpcName: 'get_account_dashboard',
@@ -24,13 +44,16 @@ export async function getAccountDashboard(userId: string) {
       logMeta: { userId },
     }
   );
+
+  if (!result) return null;
+  return accountDashboardSchema.parse(result);
 }
 
 /**
  * Get user library (bookmarks + collections)
  */
-export async function getUserLibrary(userId: string) {
-  return fetchCachedRpc<unknown | null>(
+export async function getUserLibrary(userId: string): Promise<GetUserLibraryReturn | null> {
+  return fetchCachedRpc<GetUserLibraryReturn | null>(
     { p_user_id: userId },
     {
       rpcName: 'get_user_library',
@@ -50,18 +73,15 @@ export async function getUserLibrary(userId: string) {
 export async function getUserBookmarksForCollections(
   userId: string
 ): Promise<Tables<'bookmarks'>[]> {
-  const data = (await getUserLibrary(userId)) as
-    | { bookmarks?: Tables<'bookmarks'>[] }
-    | null
-    | undefined;
-  return data?.bookmarks || [];
+  const data = await getUserLibrary(userId);
+  return data?.bookmarks ?? [];
 }
 
 /**
  * Get user dashboard data (includes jobs)
  */
-export async function getUserDashboard(userId: string) {
-  return fetchCachedRpc<unknown | null>(
+export async function getUserDashboard(userId: string): Promise<GetUserDashboardReturn | null> {
+  return fetchCachedRpc<GetUserDashboardReturn | null>(
     { p_user_id: userId },
     {
       rpcName: 'get_user_dashboard',
@@ -82,15 +102,18 @@ export async function getUserJobById(
   userId: string,
   jobId: string
 ): Promise<Tables<'jobs'> | null> {
-  const data = (await getUserDashboard(userId)) as { jobs?: Tables<'jobs'>[] } | null | undefined;
+  const data = await getUserDashboard(userId);
   return data?.jobs?.find((job) => job.id === jobId) ?? null;
 }
 
 /**
  * Get collection detail with items and bookmarks
  */
-export async function getCollectionDetail(userId: string, slug: string) {
-  return fetchCachedRpc<unknown | null>(
+export async function getCollectionDetail(
+  userId: string,
+  slug: string
+): Promise<GetCollectionDetailWithItemsReturn | null> {
+  return fetchCachedRpc<GetCollectionDetailWithItemsReturn | null>(
     { p_user_id: userId, p_slug: slug },
     {
       rpcName: 'get_collection_detail_with_items',
@@ -107,8 +130,8 @@ export async function getCollectionDetail(userId: string, slug: string) {
 /**
  * Get user settings (profile + user data)
  */
-export async function getUserSettings(userId: string) {
-  return fetchCachedRpc<unknown | null>(
+export async function getUserSettings(userId: string): Promise<GetUserSettingsReturn | null> {
+  return fetchCachedRpc<GetUserSettingsReturn | null>(
     { p_user_id: userId },
     {
       rpcName: 'get_user_settings',
@@ -125,8 +148,25 @@ export async function getUserSettings(userId: string) {
 /**
  * Get sponsorship analytics
  */
-export async function getSponsorshipAnalytics(userId: string, sponsorshipId: string) {
-  return fetchCachedRpc<unknown | null>(
+export interface SponsorshipAnalytics {
+  sponsorship: Tables<'sponsored_content'>;
+  daily_stats: Array<{
+    date: string;
+    impressions: number;
+    clicks: number;
+  }>;
+  computed_metrics: {
+    ctr: number;
+    days_active: number;
+    avg_impressions_per_day: number;
+  };
+}
+
+export async function getSponsorshipAnalytics(
+  userId: string,
+  sponsorshipId: string
+): Promise<SponsorshipAnalytics | null> {
+  return fetchCachedRpc<SponsorshipAnalytics | null>(
     { p_user_id: userId, p_sponsorship_id: sponsorshipId },
     {
       rpcName: 'get_sponsorship_analytics',
@@ -143,8 +183,8 @@ export async function getSponsorshipAnalytics(userId: string, sponsorshipId: str
 /**
  * Get user companies
  */
-export async function getUserCompanies(userId: string) {
-  return fetchCachedRpc<unknown | null>(
+export async function getUserCompanies(userId: string): Promise<GetUserCompaniesReturn | null> {
+  return fetchCachedRpc<GetUserCompaniesReturn | null>(
     { p_user_id: userId },
     {
       rpcName: 'get_user_companies',
@@ -184,9 +224,6 @@ export async function getUserCompanyById(
   userId: string,
   companyId: string
 ): Promise<Tables<'companies'> | null> {
-  const data = (await getUserCompanies(userId)) as
-    | { companies?: Tables<'companies'>[] }
-    | null
-    | undefined;
+  const data = await getUserCompanies(userId);
   return data?.companies?.find((company) => company.id === companyId) ?? null;
 }

@@ -38,13 +38,16 @@ import {
   CardTitle,
 } from '@/src/components/primitives/ui/card';
 import { type UseCardNavigationOptions, useCardNavigation } from '@/src/hooks/use-card-navigation';
-import { APP_CONFIG, SOCIAL_LINKS } from '@/src/lib/data/config/constants';
+import { APP_CONFIG } from '@/src/lib/data/config/constants';
+import { getSocialLinks } from '@/src/lib/data/marketing/contact';
 import { POSITION_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { getViewTransitionName } from '@/src/lib/utils/view-transitions.utils';
 
 /**
  * Props for BaseCard component
  */
+const SOCIAL_LINK_SNAPSHOT = getSocialLinks();
+
 export interface BaseCardProps {
   /**
    * Target path for card navigation (optional for review cards)
@@ -69,7 +72,7 @@ export interface BaseCardProps {
 
   /**
    * Author profile URL (GitHub, personal site, etc.)
-   * Falls back to SOCIAL_LINKS.authorProfile if not provided
+   * Falls back to marketing contact helper snapshot if not provided
    */
   authorProfileUrl?: string;
 
@@ -408,7 +411,7 @@ export const BaseCard = memo(
                   <span>
                     by{' '}
                     <a
-                      href={authorProfileUrl || SOCIAL_LINKS.authorProfile}
+                      href={authorProfileUrl || SOCIAL_LINK_SNAPSHOT.authorProfile}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="transition-colors hover:text-foreground hover:underline"

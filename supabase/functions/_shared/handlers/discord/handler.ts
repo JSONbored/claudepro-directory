@@ -357,7 +357,7 @@ async function handleChangelogNotification(req: Request): Promise<Response> {
     );
   }
 
-  const payload: DatabaseWebhookPayload<Database['public']['Tables']['changelog_entries']['Row']> =
+  const payload: DatabaseWebhookPayload<Database['public']['Tables']['changelog']['Row']> =
     await req.json();
   const entry = payload.record;
 

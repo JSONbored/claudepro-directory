@@ -12,8 +12,8 @@ import { JobsPromo } from '@/src/components/core/domain/jobs/jobs-banner';
 import { Button } from '@/src/components/primitives/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
 import type { CategoryId } from '@/src/lib/data/config/category';
-import { SOCIAL_LINKS } from '@/src/lib/data/config/constants';
 import type { ContentItem } from '@/src/lib/data/content';
+import { getSocialLinks } from '@/src/lib/data/marketing/contact';
 import { ExternalLink, Github, Thermometer } from '@/src/lib/icons';
 import { BADGE_COLORS, type CategoryType, UI_CLASSES } from '@/src/lib/ui-constants';
 import { getDisplayTitle } from '@/src/lib/utils';
@@ -51,6 +51,8 @@ export interface DetailSidebarProps {
  * Orchestrates sidebar rendering using composable sidebar cards.
  * Supports custom renderers for special cases (agents, MCP with extra metadata)
  */
+const SOCIAL_LINK_SNAPSHOT = getSocialLinks();
+
 export const DetailSidebar = memo(function DetailSidebar({
   item,
   relatedItems,
@@ -66,9 +68,9 @@ export const DetailSidebar = memo(function DetailSidebar({
 
   // Default sidebar using SidebarCard with inline configuration
   const githubUrl = config.metadata?.githubPathPrefix
-    ? `${SOCIAL_LINKS.github}/blob/main/${config.metadata.githubPathPrefix}/${item.slug}.json`
+    ? `${SOCIAL_LINK_SNAPSHOT.github}/blob/main/${config.metadata.githubPathPrefix}/${item.slug}.json`
     : item.category
-      ? `${SOCIAL_LINKS.github}/blob/main/content/${item.category}/${item.slug}.json`
+      ? `${SOCIAL_LINK_SNAPSHOT.github}/blob/main/content/${item.category}/${item.slug}.json`
       : null;
 
   const showGitHubLink = config.metadata?.showGitHubLink ?? true;

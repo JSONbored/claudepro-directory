@@ -8,8 +8,8 @@
  */
 
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
-import { SOCIAL_LINKS } from '@/src/lib/data/config/constants';
 import type { ContentItem } from '@/src/lib/data/content';
+import { getSocialLinks } from '@/src/lib/data/marketing/contact';
 import { Calendar, Copy, Eye, Tag, User } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { formatCopyCount, formatViewCount } from '@/src/lib/utils/content.utils';
@@ -27,6 +27,8 @@ export interface DetailMetadataProps {
  * Renders author, date, view count, copy count, and tags metadata for a content item
  * No React.memo needed - server components don't re-render
  */
+const SOCIAL_LINK_SNAPSHOT = getSocialLinks();
+
 export function DetailMetadata({ item, viewCount, copyCount }: DetailMetadataProps) {
   const hasMetadata =
     ('author' in item && item.author) ||
@@ -49,7 +51,7 @@ export function DetailMetadata({ item, viewCount, copyCount }: DetailMetadataPro
               <a
                 href={
                   ('author_profile_url' in item && item.author_profile_url) ||
-                  SOCIAL_LINKS.authorProfile
+                  SOCIAL_LINK_SNAPSHOT.authorProfile
                 }
                 target="_blank"
                 rel="noopener noreferrer"

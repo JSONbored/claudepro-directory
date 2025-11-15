@@ -1,4 +1,12 @@
 import { type CollectionSharedProps, renderCollectionSharedEmail } from './collection-shared.tsx';
+import {
+  type ContactSubmissionAdminProps,
+  renderContactSubmissionAdminEmail,
+} from './contact-submission-admin.tsx';
+import {
+  type ContactSubmissionUserProps,
+  renderContactSubmissionUserEmail,
+} from './contact-submission-user.tsx';
 import { type JobApprovedProps, renderJobApprovedEmail } from './job-approved.tsx';
 import { type JobExpiredProps, renderJobExpiredEmail } from './job-expired.tsx';
 import { type JobExpiringProps, renderJobExpiringEmail } from './job-expiring.tsx';
@@ -35,6 +43,7 @@ const JOBS_FROM = 'Claude Pro Directory <jobs@mail.claudepro.directory>';
 const COMMUNITY_FROM = 'Claude Pro Directory <community@mail.claudepro.directory>';
 const HELLO_FROM = 'Claude Pro Directory <hello@mail.claudepro.directory>';
 const ONBOARDING_FROM = 'Claude Pro Directory <noreply@claudepro.directory>';
+const CONTACT_FROM = 'Claude Pro Directory <contact@mail.claudepro.directory>';
 
 export type EmailTemplateSlug =
   | 'job-submitted'
@@ -50,9 +59,11 @@ export type EmailTemplateSlug =
   | 'onboarding-power-tips'
   | 'onboarding-community'
   | 'onboarding-stay-engaged'
-  | 'weekly-digest';
+  | 'weekly-digest'
+  | 'contact-submission-admin'
+  | 'contact-submission-user';
 
-export type EmailTemplateCategory = 'jobs' | 'community' | 'newsletter' | 'onboarding';
+export type EmailTemplateCategory = 'jobs' | 'community' | 'newsletter' | 'onboarding' | 'contact';
 
 export interface EmailTemplateDefinition<TProps> {
   slug: EmailTemplateSlug;
@@ -321,6 +332,39 @@ export const EMAIL_TEMPLATE_MANIFEST: EmailTemplateDefinition<unknown>[] = [
       ],
     }),
     render: (props) => renderWeeklyDigestEmail(props as WeeklyDigestProps),
+  },
+  {
+    slug: 'contact-submission-admin',
+    displayName: 'Contact – Admin Notification',
+    description: 'Notifies admins of new contact form submissions via terminal.',
+    category: 'contact',
+    from: CONTACT_FROM,
+    replyTo: undefined,
+    buildSubject: (props: ContactSubmissionAdminProps) =>
+      `New Contact: ${props.category} - ${props.name}`,
+    buildSampleData: (): ContactSubmissionAdminProps => ({
+      submissionId: 'sub_12345',
+      name: 'Sarah Johnson',
+      email: 'sarah@techcorp.com',
+      category: 'partnership',
+      message:
+        'Hi! We love Claude Pro Directory and would like to discuss a potential partnership opportunity.',
+      submittedAt: now.toISOString(),
+    }),
+    render: (props) => renderContactSubmissionAdminEmail(props as ContactSubmissionAdminProps),
+  },
+  {
+    slug: 'contact-submission-user',
+    displayName: 'Contact – User Confirmation',
+    description: 'Confirms receipt of contact form submission.',
+    category: 'contact',
+    from: HELLO_FROM,
+    buildSubject: () => 'We received your message!',
+    buildSampleData: (): ContactSubmissionUserProps => ({
+      name: 'Sarah Johnson',
+      category: 'partnership',
+    }),
+    render: (props) => renderContactSubmissionUserEmail(props as ContactSubmissionUserProps),
   },
 ];
 

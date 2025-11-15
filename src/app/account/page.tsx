@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import { z } from 'zod';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { NavLink } from '@/src/components/core/navigation/navigation-link';
 import { Button } from '@/src/components/primitives/ui/button';
@@ -43,9 +42,7 @@ export default async function AccountDashboard() {
     );
   }
 
-  // User-scoped edge-cached RPC via centralized data layer
-  let dashboardData: Awaited<ReturnType<typeof getAccountDashboard>> | null = null;
-  let fetchError = false;
+  let dashboardData: Awaited<ReturnType<typeof getAccountDashboard>> = null;
   try {
     dashboardData = await getAccountDashboard(user.id);
   } catch (error) {
@@ -53,39 +50,10 @@ export default async function AccountDashboard() {
     logger.error('AccountDashboard: getAccountDashboard threw', normalized, {
       userId: user.id,
     });
-    fetchError = true;
   }
 
   if (!dashboardData) {
     logger.error('AccountDashboard: dashboard data is null', undefined, { userId: user.id });
-    fetchError = true;
-  }
-
-  // Runtime validation schema for RPC response
-  const DashboardResponseSchema = z.object({
-    bookmark_count: z.number(),
-    profile: z.object({
-      name: z.string().nullable(),
-      tier: z.string().nullable(),
-      created_at: z.string(),
-    }),
-  });
-
-  type DashboardResponse = z.infer<typeof DashboardResponseSchema>;
-
-  // Validate and fallback on error
-  let validatedData: DashboardResponse | null = null;
-  try {
-    validatedData = DashboardResponseSchema.parse(dashboardData);
-  } catch (error) {
-    const normalized = normalizeError(error, 'Invalid dashboard response structure');
-    logger.error('AccountDashboard: dashboard response validation failed', normalized, {
-      userId: user.id,
-    });
-    fetchError = true;
-  }
-
-  if (fetchError || !validatedData) {
     return (
       <div className="space-y-6">
         <Card>
@@ -105,7 +73,7 @@ export default async function AccountDashboard() {
     );
   }
 
-  const { bookmark_count, profile } = validatedData;
+  const { bookmark_count, profile } = dashboardData;
 
   const bookmarkCount = bookmark_count;
   const accountAge = profile?.created_at

@@ -21,7 +21,7 @@ import {
 } from '@/src/components/primitives/ui/sheet';
 import { ACTION_LINKS, PRIMARY_NAVIGATION, SECONDARY_NAVIGATION } from '@/src/config/navigation';
 import { getAnimationConfig } from '@/src/lib/actions/feature-flags.actions';
-import { SOCIAL_LINKS } from '@/src/lib/data/config/constants';
+import { getContactChannels } from '@/src/lib/data/marketing/contact';
 import { DiscordIcon, Github, Menu } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import {
@@ -75,6 +75,8 @@ interface NavigationMobileProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
 }
+
+const CONTACT_CHANNELS = getContactChannels();
 
 export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationMobileProps) {
   const [springDefault, setSpringDefault] = useState({
@@ -235,13 +237,13 @@ export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationM
               {[
                 {
                   icon: DiscordIcon,
-                  onClick: () => window.open('https://discord.gg/Ax3Py4YDrq', '_blank'),
+                  onClick: () => window.open(CONTACT_CHANNELS.discord, '_blank'),
                   label: 'Discord',
                   color: 'discord',
                 },
                 {
                   icon: Github,
-                  onClick: () => window.open(SOCIAL_LINKS.github, '_blank'),
+                  onClick: () => window.open(CONTACT_CHANNELS.github, '_blank'),
                   label: 'GitHub',
                   color: 'accent',
                 },

@@ -267,29 +267,38 @@ export const updateProfile = authedAction
     return result;
   });
 
+async function refreshProfileFromOAuthInternal(userId: string) {
+  const cacheConfigPromise = getCacheConfigSnapshot();
+  const profile = await runUserRpc<{ slug: string } | null>(
+    'refresh_profile_from_oauth',
+    { user_id: userId },
+    { action: 'user.refreshProfileFromOAuth', userId }
+  );
+
+  await revalidateUserSurfaces({
+    slug: profile?.slug ?? null,
+    accountSections: ['account', 'settings'],
+  });
+
+  await invalidateUserCaches({
+    cacheConfigPromise,
+    invalidateKeys: ['cache.invalidate.user_profile_oauth'],
+    userIds: [userId],
+  });
+
+  return { success: true, slug: profile?.slug ?? null };
+}
+
+export async function refreshProfileFromOAuthServer(userId: string) {
+  return refreshProfileFromOAuthInternal(userId);
+}
+
 export const refreshProfileFromOAuth = authedAction
   .metadata({ actionName: 'refreshProfileFromOAuth', category: 'user' })
   .schema(z.void())
   .action(async ({ ctx }) => {
-    const cacheConfigPromise = getCacheConfigSnapshot();
-    const profile = await runUserRpc<{ slug: string } | null>(
-      'refresh_profile_from_oauth',
-      { user_id: ctx.userId },
-      { action: 'user.refreshProfileFromOAuth', userId: ctx.userId }
-    );
-
-    await revalidateUserSurfaces({
-      slug: profile?.slug ?? null,
-      accountSections: ['account', 'settings'],
-    });
-
-    await invalidateUserCaches({
-      cacheConfigPromise,
-      invalidateKeys: ['cache.invalidate.user_profile_oauth'],
-      userIds: [ctx.userId],
-    });
-
-    return { success: true, message: 'Profile refreshed from OAuth provider' };
+    const result = await refreshProfileFromOAuthInternal(ctx.userId);
+    return { success: true, message: 'Profile refreshed from OAuth provider', slug: result.slug };
   });
 
 export const addBookmark = authedAction

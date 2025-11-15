@@ -64,7 +64,7 @@ function normalizeRecommendationResults(results: RecommendationItem[]) {
         : {}),
       ...(item.primary_reason ? { primary_reason: item.primary_reason } : {}),
       ...(typeof item.rank === 'number' ? { rank: item.rank } : {}),
-      ...(reasons && reasons.length ? { reasons } : {}),
+      ...(reasons?.length ? { reasons } : {}),
     };
   });
 }

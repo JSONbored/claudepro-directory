@@ -9,6 +9,8 @@ import { supabaseServiceRole } from '../_shared/clients/supabase.ts';
 import { AUTH_HOOK_ENV, RESEND_ENV, validateEnvironment } from '../_shared/config/email-config.ts';
 import { edgeEnv } from '../_shared/config/env.ts';
 import { renderCollectionSharedEmail } from '../_shared/utils/email/templates/collection-shared.tsx';
+import { renderContactSubmissionAdminEmail } from '../_shared/utils/email/templates/contact-submission-admin.tsx';
+import { renderContactSubmissionUserEmail } from '../_shared/utils/email/templates/contact-submission-user.tsx';
 import { renderJobApprovedEmail } from '../_shared/utils/email/templates/job-approved.tsx';
 import { renderJobExpiredEmail } from '../_shared/utils/email/templates/job-expired.tsx';
 import { renderJobExpiringEmail } from '../_shared/utils/email/templates/job-expiring.tsx';
@@ -90,6 +92,9 @@ Deno.serve(async (req: Request) => {
         return await handleJobExpired(req);
       case 'job-payment-confirmed':
         return await handleJobPaymentConfirmed(req);
+      // Contact form submissions
+      case 'contact-submission':
+        return await handleContactSubmission(req);
       default:
         return badRequestResponse(`Unknown action: ${action}`);
     }
@@ -870,5 +875,75 @@ async function handleGetNewsletterCount(): Promise<Response> {
     return jsonResponse({ count }, 200, headers);
   } catch (error) {
     return errorResponse(error, 'handleGetNewsletterCount');
+  }
+}
+
+/**
+ * Contact Form Submission Handler
+ * Sends notification to admin and confirmation to user
+ * Database insert is handled by contact-form.actions.ts before this is called
+ */
+async function handleContactSubmission(req: Request): Promise<Response> {
+  const payload = await req.json();
+  const { submissionId, name, email, category, message } = payload;
+
+  if (!(submissionId && name && email && category && message)) {
+    return badRequestResponse(
+      'Missing required fields: submissionId, name, email, category, message'
+    );
+  }
+
+  try {
+    // Send admin notification email
+    const adminHtml = await renderContactSubmissionAdminEmail({
+      submissionId,
+      name,
+      email,
+      category,
+      message,
+      submittedAt: new Date().toISOString(),
+    });
+
+    const { error: adminError } = await resend.emails.send({
+      from: 'Claude Pro Directory <contact@mail.claudepro.directory>',
+      to: 'hi@claudepro.directory',
+      subject: `New Contact: ${category} - ${name}`,
+      html: adminHtml,
+      tags: [{ name: 'type', value: 'contact-admin' }],
+    });
+
+    if (adminError) {
+      console.error('Admin notification email failed:', adminError);
+      // Don't fail - continue to user confirmation
+    }
+
+    // Send user confirmation email
+    const userHtml = await renderContactSubmissionUserEmail({
+      name,
+      category,
+    });
+
+    const { data: userData, error: userError } = await resend.emails.send({
+      from: 'Claude Pro Directory <hello@mail.claudepro.directory>',
+      to: email,
+      subject: 'We received your message!',
+      html: userHtml,
+      tags: [{ name: 'type', value: 'contact-confirmation' }],
+    });
+
+    if (userError) {
+      console.error('User confirmation email failed:', userError);
+    }
+
+    return successResponse({
+      sent: true,
+      submission_id: submissionId,
+      admin_email_sent: !adminError,
+      user_email_sent: !userError,
+      user_email_id: userData?.id || null,
+    });
+  } catch (error) {
+    console.error('Contact submission email failed:', error);
+    return errorResponse(error, 'handleContactSubmission');
   }
 }

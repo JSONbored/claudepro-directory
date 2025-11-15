@@ -18,6 +18,7 @@ import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { formatDistanceToNow } from '@/src/lib/utils/data.utils';
 import { logClientWarning, logUnhandledPromise } from '@/src/lib/utils/error.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
+import type { ReviewsAggregateRating } from '@/src/types/database-overrides';
 import { ReviewRatingHistogram } from './review-rating-histogram';
 import type { ReviewItem, ReviewSectionProps } from './shared/review-types';
 import { StarDisplay } from './shared/star-display';
@@ -39,11 +40,7 @@ export function ReviewListSection({
   );
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
-  const [aggregateRating, setAggregateRating] = useState<{
-    count: number;
-    average: number;
-    distribution: Record<string, number>;
-  } | null>(null);
+  const [aggregateRating, setAggregateRating] = useState<ReviewsAggregateRating | null>(null);
   const [editingReviewId, setEditingReviewId] = useState<string | null>(null);
   const router = useRouter();
 
@@ -63,23 +60,12 @@ export function ReviewListSection({
         });
 
         if (result?.data) {
-          const responseData = result.data as unknown as {
-            reviews: ReviewItem[];
-            hasMore: boolean;
-            aggregateRating: {
-              count: number;
-              average: number;
-              distribution: Record<string, number>;
-            };
-          };
-          setReviews((prev) =>
-            pageNum === 1 ? responseData.reviews : [...prev, ...responseData.reviews]
-          );
-          setHasMore(responseData.hasMore);
+          const { reviews: nextReviews, hasMore, aggregateRating: agg } = result.data;
+          setReviews((prev) => (pageNum === 1 ? nextReviews : [...prev, ...nextReviews]));
+          setHasMore(Boolean(hasMore));
 
-          // Also update aggregate rating (no separate call needed!)
-          if (responseData.aggregateRating) {
-            setAggregateRating(responseData.aggregateRating);
+          if (agg) {
+            setAggregateRating(agg);
           }
         }
       } catch (error) {

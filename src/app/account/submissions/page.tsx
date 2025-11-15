@@ -47,8 +47,7 @@ export default async function SubmissionsPage() {
   try {
     const data = await getUserDashboard(user.id);
     if (data) {
-      const result = data as { submissions: Array<Tables<'submissions'>> };
-      submissions = result.submissions || [];
+      submissions = data.submissions ?? [];
     } else {
       logger.error('SubmissionsPage: getUserDashboard returned null', undefined, {
         userId: user.id,

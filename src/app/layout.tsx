@@ -43,7 +43,6 @@ const NotificationToastHandler = dynamic(
   }
 );
 
-import { unstable_cache } from 'next/cache';
 import { ErrorBoundary } from '@/src/components/core/infra/error-boundary';
 import { PostCopyEmailProvider } from '@/src/components/core/infra/providers/email-capture-modal-provider';
 import { PwaInstallTracker } from '@/src/components/core/infra/pwa-install-tracker';
@@ -54,8 +53,8 @@ import { UmamiScript } from '@/src/components/core/shared/analytics-script';
 import { NotificationsProvider } from '@/src/components/providers/notifications-provider';
 import { APP_CONFIG } from '@/src/lib/data/config/constants';
 import { getNavigationMenu } from '@/src/lib/data/content/navigation';
+import { getHomeMetadata } from '@/src/lib/data/seo/homepage';
 import { featureFlags, newsletterExperiments } from '@/src/lib/flags';
-import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 
 // Self-hosted fonts - no external requests, faster FCP, GDPR compliant
 const inter = localFont({
@@ -93,22 +92,9 @@ const geistMono = localFont({
   weight: '100 900',
 });
 
-// Cache homepage metadata during build to prevent 379 redundant calls
-// This reduces edge function calls from 779 to ~406 (48% reduction in egress!)
-const getCachedHomeMetadata = unstable_cache(
-  async () => {
-    return await generatePageMetadata('/');
-  },
-  ['layout-home-metadata'],
-  {
-    revalidate: 86400, // 24 hours - same as our edge function cache
-    tags: ['homepage-metadata'],
-  }
-);
-
 // Generate homepage metadata from centralized registry
 export async function generateMetadata(): Promise<Metadata> {
-  const homeMetadata = await getCachedHomeMetadata();
+  const homeMetadata = await getHomeMetadata();
 
   return {
     ...homeMetadata,

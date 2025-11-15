@@ -23,7 +23,7 @@ import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { formatRelativeDate } from '@/src/lib/utils/data.utils';
 import { normalizeError } from '@/src/lib/utils/error.utils';
-import type { Tables } from '@/src/types/database.types';
+import type { GetUserCompaniesReturn } from '@/src/types/database-overrides';
 
 export const metadata = generatePageMetadata('/account/companies');
 
@@ -49,7 +49,7 @@ export default async function CompaniesPage() {
     );
   }
 
-  let companies: Array<Tables<'companies'>> = [];
+  let companies: GetUserCompaniesReturn['companies'] = [];
   let hasError = false;
 
   // User-scoped edge-cached RPC via centralized data layer
@@ -57,8 +57,7 @@ export default async function CompaniesPage() {
     const data = await getUserCompanies(user.id);
 
     if (data) {
-      const result = data as { companies: Array<Tables<'companies'>> };
-      companies = result.companies || [];
+      companies = data.companies ?? [];
     } else {
       logger.warn('CompaniesPage: getUserCompanies returned null', { userId: user.id });
       hasError = true;
@@ -129,24 +128,15 @@ export default async function CompaniesPage() {
       ) : (
         <div className="grid gap-4">
           {companies.map((company) => {
-            const companyData = company as Tables<'companies'> & {
-              stats?: {
-                total_jobs?: number;
-                active_jobs?: number;
-                total_views?: number;
-                total_clicks?: number;
-                latest_job_posted_at?: string | null;
-              };
-            };
             return (
-              <Card key={companyData.id}>
+              <Card key={company.id}>
                 <CardHeader>
                   <div className={UI_CLASSES.FLEX_ITEMS_START_JUSTIFY_BETWEEN}>
                     <div className="flex flex-1 items-start gap-4">
-                      {companyData.logo ? (
+                      {company.logo ? (
                         <Image
-                          src={companyData.logo}
-                          alt={`${companyData.name} logo`}
+                          src={company.logo}
+                          alt={`${company.name} logo`}
                           width={64}
                           height={64}
                           className="h-16 w-16 rounded-lg border object-cover"
@@ -159,25 +149,25 @@ export default async function CompaniesPage() {
                       )}
                       <div className="flex-1">
                         <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                          <CardTitle>{companyData.name}</CardTitle>
-                          {companyData.featured && (
+                          <CardTitle>{company.name}</CardTitle>
+                          {company.featured && (
                             <UnifiedBadge variant="base" style="default">
                               Featured
                             </UnifiedBadge>
                           )}
                         </div>
                         <CardDescription className="mt-1">
-                          {companyData.description || 'No description provided'}
+                          {company.description || 'No description provided'}
                         </CardDescription>
-                        {companyData.website && (
+                        {company.website && (
                           <a
-                            href={companyData.website}
+                            href={company.website}
                             target="_blank"
                             rel="noopener noreferrer"
                             className={`mt-2 inline-flex items-center gap-1 text-sm ${UI_CLASSES.LINK_ACCENT}`}
                           >
                             <ExternalLink className="h-3 w-3" />
-                            {companyData.website.replace(/^https?:\/\//, '')}
+                            {company.website.replace(/^https?:\/\//, '')}
                           </a>
                         )}
                       </div>
@@ -189,31 +179,31 @@ export default async function CompaniesPage() {
                   <div className={'mb-4 flex flex-wrap gap-4 text-muted-foreground text-sm'}>
                     <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
                       <Briefcase className="h-4 w-4" />
-                      {companyData.stats?.active_jobs || 0} active job
-                      {(companyData.stats?.active_jobs || 0) !== 1 ? 's' : ''}
+                      {company.stats?.active_jobs || 0} active job
+                      {(company.stats?.active_jobs || 0) !== 1 ? 's' : ''}
                     </div>
                     <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
                       <Eye className="h-4 w-4" />
-                      {(companyData.stats?.total_views || 0).toLocaleString()} views
+                      {(company.stats?.total_views || 0).toLocaleString()} views
                     </div>
-                    {companyData.stats?.latest_job_posted_at && (
+                    {company.stats?.latest_job_posted_at && (
                       <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
                         <Calendar className="h-4 w-4" />
-                        Last job posted {formatRelativeDate(companyData.stats.latest_job_posted_at)}
+                        Last job posted {formatRelativeDate(company.stats.latest_job_posted_at)}
                       </div>
                     )}
                   </div>
 
                   <div className={UI_CLASSES.FLEX_GAP_2}>
                     <Button variant="outline" size="sm" asChild>
-                      <Link href={`${ROUTES.ACCOUNT_COMPANIES}/${companyData.id}/edit`}>
+                      <Link href={`${ROUTES.ACCOUNT_COMPANIES}/${company.id}/edit`}>
                         <Edit className="mr-1 h-3 w-3" />
                         Edit
                       </Link>
                     </Button>
 
                     <Button variant="ghost" size="sm" asChild>
-                      <Link href={`/companies/${companyData.slug}`}>
+                      <Link href={`/companies/${company.slug}`}>
                         <ExternalLink className="mr-1 h-3 w-3" />
                         View Profile
                       </Link>

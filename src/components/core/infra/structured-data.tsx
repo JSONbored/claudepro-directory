@@ -3,7 +3,7 @@
  */
 
 import Script from 'next/script';
-import { fetchSchemas } from '@/src/lib/seo/client';
+import { fetchSchemas } from '@/src/lib/data/seo/client';
 import { serializeJsonLd } from '@/src/lib/utils/jsonld.utils';
 
 interface StructuredDataProps {

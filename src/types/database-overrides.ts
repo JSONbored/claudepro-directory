@@ -304,7 +304,7 @@ export type GetHomepageCompleteReturn = {
  * Returns paginated changelog entries with metadata
  */
 export type GetChangelogEntriesReturn = {
-  entries: Array<Tables<'changelog_entries'>>;
+  entries: Array<Tables<'changelog'>>;
   total: number;
   limit: number;
   offset: number;
@@ -315,7 +315,7 @@ export type GetChangelogEntriesReturn = {
  * get_changelog_entry_by_slug RPC return type
  * Returns single changelog entry by slug
  */
-export type GetChangelogEntryBySlugReturn = Tables<'changelog_entries'> | null;
+export type GetChangelogEntryBySlugReturn = Tables<'changelog'> | null;
 
 /**
  * get_content_detail_complete RPC return type
@@ -420,19 +420,48 @@ export type GetJobsListReturn = Array<Tables<'jobs'>>;
 
 /**
  * get_collection_detail_with_items RPC return type
- * Returns collection details with items
+ * Returns collection details with items + available bookmarks
  */
 export type GetCollectionDetailWithItemsReturn = {
   collection: Tables<'user_collections'>;
-  items: Array<{
-    id: string;
-    content_type: string;
-    content_slug: string;
-    order: number;
-    added_at: string;
-    title: string;
-    description: string;
-  }>;
+  items: Array<
+    Tables<'collection_items'> & {
+      title: string;
+      description: string;
+    }
+  >;
+  bookmarks: Array<Tables<'bookmarks'>>;
+};
+
+/**
+ * Reviews RPC return types
+ */
+export type ReviewItem = {
+  id: string;
+  user_id: string;
+  content_type: string;
+  content_slug: string;
+  rating: number;
+  review_text: string | null;
+  helpful_count: number;
+  created_at: string;
+  updated_at: string;
+  user_profile?: {
+    username: string | null;
+    avatar_url: string | null;
+  } | null;
+};
+
+export type ReviewsAggregateRating = {
+  count: number;
+  average: number;
+  distribution: Record<string, number>;
+};
+
+export type GetReviewsWithStatsReturn = {
+  reviews: ReviewItem[];
+  hasMore: boolean;
+  aggregateRating: ReviewsAggregateRating | null;
 };
 
 /**
@@ -528,6 +557,12 @@ export type GetUserIdentitiesReturn = Array<{
 export type GetUserLibraryReturn = {
   bookmarks: Array<Tables<'bookmarks'>>;
   collections: Array<Tables<'user_collections'>>;
+  stats: {
+    bookmarkCount: number;
+    collectionCount: number;
+    totalCollectionItems: number;
+    totalCollectionViews: number;
+  };
 };
 
 /**
@@ -699,7 +734,17 @@ export type GetAccountDashboardReturn = {
  * Structure from usage: /src/app/account/companies/page.tsx:67
  */
 export type GetUserCompaniesReturn = {
-  companies: Array<Tables<'companies'>>;
+  companies: Array<
+    Tables<'companies'> & {
+      stats?: {
+        total_jobs?: number;
+        active_jobs?: number;
+        total_views?: number;
+        total_clicks?: number;
+        latest_job_posted_at?: string | null;
+      };
+    }
+  >;
 };
 
 /**

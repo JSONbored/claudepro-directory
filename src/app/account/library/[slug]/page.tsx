@@ -20,7 +20,6 @@ import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { normalizeError } from '@/src/lib/utils/error.utils';
-import type { Tables } from '@/src/types/database.types';
 
 interface CollectionPageProps {
   params: Promise<{ slug: string }>;
@@ -40,8 +39,7 @@ export default async function CollectionDetailPage({ params }: CollectionPagePro
     redirect('/login');
   }
 
-  // User-scoped edge-cached RPC via centralized data layer
-  let collectionData: Awaited<ReturnType<typeof getCollectionDetail>> | null = null;
+  let collectionData = null;
   try {
     collectionData = await getCollectionDetail(user.id, slug);
   } catch (error) {
@@ -61,14 +59,7 @@ export default async function CollectionDetailPage({ params }: CollectionPagePro
     notFound();
   }
 
-  // Type assertion to database-generated Json type
-  type CollectionResponse = {
-    collection: Tables<'user_collections'>;
-    items: Array<Tables<'collection_items'>>;
-    bookmarks: Array<Tables<'bookmarks'>>;
-  };
-
-  const { collection, items, bookmarks } = collectionData as unknown as CollectionResponse;
+  const { collection, items, bookmarks } = collectionData;
 
   const shareUrl = collection.is_public
     ? `${APP_CONFIG.url}/u/${user.id}/collections/${collection.slug}`

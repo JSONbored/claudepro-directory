@@ -49,6 +49,7 @@ const CACHE_TTL_KEYS = [
   'cache.newsletter_count_ttl_s',
   'cache.company_search.ttl_seconds',
   'cache.notifications.ttl_seconds',
+  'cache.contact.ttl_seconds',
 ] as const;
 
 const CACHE_INVALIDATE_KEYS = [
@@ -85,6 +86,7 @@ const CACHE_INVALIDATE_KEYS = [
   'cache.invalidate.notifications',
   'cache.invalidate.review_delete',
   'cache.invalidate.submission_create',
+  'cache.invalidate.contact_submission',
   'cache.invalidate.review_helpful',
   'cache.invalidate.usage_tracking',
 ] as const;
@@ -146,6 +148,7 @@ const BUILD_TIME_TTL_DEFAULTS: Record<CacheTtlKey, number> = {
   'cache.newsletter_count_ttl_s': 300,
   'cache.company_search.ttl_seconds': 300,
   'cache.notifications.ttl_seconds': 300,
+  'cache.contact.ttl_seconds': 3600,
 };
 
 const CACHE_INVALIDATE_DEFAULTS: Record<CacheInvalidateKey, readonly string[]> = {
@@ -182,6 +185,7 @@ const CACHE_INVALIDATE_DEFAULTS: Record<CacheInvalidateKey, readonly string[]> =
   'cache.invalidate.notifications': ['notifications'],
   'cache.invalidate.review_delete': ['content'],
   'cache.invalidate.submission_create': ['submissions'],
+  'cache.invalidate.contact_submission': ['contact', 'submissions'],
   'cache.invalidate.review_helpful': ['content'],
   'cache.invalidate.usage_tracking': ['content'],
 };

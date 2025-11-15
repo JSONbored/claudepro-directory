@@ -503,7 +503,7 @@ export const CATEGORY_CONFIGS: Record<CategoryId, UnifiedCategoryConfig<Category
       type: 'scroll',
     },
     urlSlug: 'changelog',
-    contentLoader: 'changelog_entries',
+    contentLoader: 'changelog',
   },
   collections: {
     id: 'collections' as const,

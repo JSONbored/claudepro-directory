@@ -2,24 +2,7 @@ import { getFormConfig } from '@/src/lib/actions/feature-flags.actions';
 import type { CategoryId } from '@/src/lib/data/config/category';
 import { logClientWarning } from '@/src/lib/utils/error.utils';
 
-/**
- * Review Item from Database
- */
-export interface ReviewItem {
-  id: string;
-  user_id: string;
-  content_type: string;
-  content_slug: string;
-  rating: number;
-  review_text: string | null;
-  helpful_count: number;
-  created_at: string;
-  updated_at: string;
-  user_profile?: {
-    username: string | null;
-    avatar_url: string | null;
-  } | null;
-}
+export type { ReviewItem } from '@/src/types/database-overrides';
 
 /**
  * Props for review form variant

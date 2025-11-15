@@ -21,7 +21,7 @@ const changesSchema = z.object({
 });
 
 // Use database type directly - no custom extensions
-export type ChangelogEntry = Tables<'changelog_entries'>;
+export type ChangelogEntry = Tables<'changelog'>;
 
 // Validated changes type (for runtime use after parsing)
 export type ChangelogChanges = z.infer<typeof changesSchema>;

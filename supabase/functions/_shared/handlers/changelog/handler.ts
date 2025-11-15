@@ -1,6 +1,8 @@
 import {
+  buildChangelogMetadata,
   type ChangelogInsert,
   type ChangelogRow,
+  deriveChangelogKeywords,
   fetchCommitsFromGitHub,
   filterConventionalCommits,
   generateMarkdownContent,
@@ -77,25 +79,46 @@ export async function handleChangelogSyncRequest(req: Request): Promise<Response
     const title = inferTitle(conventionalCommits);
     const tldr = generateTldr(conventionalCommits);
     const changes = transformSectionsToChanges(sections);
+    const releaseDate = new Date().toISOString().split('T')[0];
+    const slug = `${releaseDate}-${payload.payload.deployment.id.slice(-6)}`;
+    const branch = payload.payload.deployment.meta?.branch || 'main';
+    const deploymentUrl = payload.payload.deployment.url;
+    const contributors = [
+      ...new Set(conventionalCommits.map((commit) => commit.commit.author.name)),
+    ];
+    const metadata = buildChangelogMetadata({
+      sections,
+      releaseDate,
+      deploymentUrl,
+      branch,
+      commitSha: headCommit,
+      commitCount: conventionalCommits.length,
+      contributors,
+    });
+    const keywords = deriveChangelogKeywords(sections, branch);
 
     const changelogEntry: ChangelogInsert = {
       title,
-      summary: tldr,
+      slug,
+      tldr,
+      description: tldr || title,
       content: markdownContent,
+      raw_content: markdownContent,
       changes,
-      published_at: new Date().toISOString(),
-      release_tag: payload.payload.deployment.meta?.commitId || '',
-      vercel_deployment_url: payload.payload.deployment.url,
-      branch: payload.payload.deployment.meta?.branch || 'main',
-      commit_hash: headCommit,
-      slug: `${new Date().toISOString().split('T')[0]}-${payload.payload.deployment.id.slice(-6)}`,
-      author: 'Automated Release',
-      automated: true,
-      deployment_id: payload.payload.deployment.id,
+      release_date: releaseDate,
+      published: true,
+      featured: false,
+      source: 'automation',
+      metadata,
+      keywords,
+      commit_count: conventionalCommits.length,
+      contributors,
+      git_commit_sha: headCommit,
+      canonical_url: `${SITE_URL}/changelog/${slug}`,
     };
 
     const { data, error } = await supabaseServiceRole
-      .from('changelog_entries')
+      .from('changelog')
       .insert(changelogEntry)
       .select('*')
       .single<ChangelogRow>();
@@ -118,7 +141,7 @@ export async function handleChangelogSyncRequest(req: Request): Promise<Response
         tldr,
         sections,
         commits: conventionalCommits,
-        date: data.published_at ?? new Date().toISOString(),
+        date: data.release_date ?? new Date().toISOString(),
       });
 
       await sendDiscordWebhook(
