@@ -1,6 +1,8 @@
 'use server';
 
 import { cacheConfigs } from '@/src/lib/flags';
+import { logger } from '@/src/lib/logger';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 
 const CACHE_TTL_KEYS = [
   'cache.homepage.ttl_seconds',
@@ -204,7 +206,15 @@ async function loadCacheConfig(): Promise<CacheConfig> {
     return await cacheConfigPromise;
   } catch (error) {
     cacheConfigPromise = null;
-    throw error;
+    const normalized = normalizeError(error, 'Failed to load cache config from Statsig');
+    logger.error('loadCacheConfig failed', normalized, {
+      source: 'cache-config.ts',
+    });
+    // Return fallback config (same as getCacheConfigSnapshot)
+    return {
+      ...(BUILD_TIME_TTL_DEFAULTS as Record<CacheTtlKey, number>),
+      ...(CACHE_INVALIDATE_DEFAULTS as Record<CacheInvalidateKey, readonly string[]>),
+    } as CacheConfig;
   }
 }
 

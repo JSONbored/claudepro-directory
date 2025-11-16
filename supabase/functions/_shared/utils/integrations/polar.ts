@@ -1,4 +1,5 @@
 import { edgeEnv } from '../../config/env.ts';
+import { createUtilityContext } from '../logging.ts';
 import { fetchWithRetry } from './http-client.ts';
 
 /**
@@ -27,11 +28,16 @@ interface PolarCheckoutResponse {
 export async function createPolarCheckout(
   params: CreateCheckoutParams
 ): Promise<{ url: string; sessionId: string } | { error: string }> {
+  const logContext = createUtilityContext('polar', 'create-checkout', {
+    jobId: params.jobId,
+    userId: params.userId,
+  });
+
   const polarAccessToken = edgeEnv.polar.accessToken;
   const polarEnvironment = edgeEnv.polar.environment;
 
   if (!polarAccessToken) {
-    console.error('POLAR_ACCESS_TOKEN not configured');
+    console.error('POLAR_ACCESS_TOKEN not configured', logContext);
     return { error: 'Payment system not configured' };
   }
 
@@ -57,11 +63,13 @@ export async function createPolarCheckout(
           source: 'claudepro_directory',
         },
       }),
+      logContext,
     });
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('Polar checkout creation failed:', {
+      console.error('Polar checkout creation failed', {
+        ...logContext,
         status: response.status,
         error: errorText,
       });
@@ -70,10 +78,9 @@ export async function createPolarCheckout(
 
     const session = (await response.json()) as PolarCheckoutResponse;
 
-    console.log('Polar checkout session created:', {
+    console.log('Polar checkout session created', {
+      ...logContext,
       sessionId: session.id,
-      jobId: params.jobId,
-      userId: params.userId,
     });
 
     return {
@@ -81,7 +88,10 @@ export async function createPolarCheckout(
       sessionId: session.id,
     };
   } catch (error) {
-    console.error('Polar checkout creation error:', error);
+    console.error('Polar checkout creation error', {
+      ...logContext,
+      error: error instanceof Error ? error.message : String(error),
+    });
     return { error: 'Failed to create checkout session' };
   }
 }

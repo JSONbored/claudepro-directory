@@ -169,3 +169,22 @@ export function withDuration(base: BaseLogContext, startTime: number): BaseLogCo
     duration_ms: Date.now() - startTime,
   };
 }
+
+/**
+ * Create logContext for shared utility functions
+ * Use this for generic utilities that don't belong to a specific function
+ */
+export function createUtilityContext(
+  utilityName: string,
+  action: string,
+  options?: Record<string, unknown>
+): BaseLogContext {
+  return {
+    function: 'shared-utils',
+    action: `${utilityName}.${action}`,
+    request_id: crypto.randomUUID(),
+    started_at: new Date().toISOString(),
+    utility: utilityName,
+    ...options,
+  };
+}

@@ -6,6 +6,7 @@
 import type { Resend } from 'npm:resend@4.0.0';
 
 import type { NewsletterSource } from '../../database.types.ts';
+import { createUtilityContext } from '../logging.ts';
 import { runWithRetry } from './http-client.ts';
 
 /**
@@ -191,7 +192,11 @@ export async function syncContactSegment(
       );
     }
   } catch (error) {
-    console.error('[Resend] Segment sync failed', { contactId, error });
+    const logContext = createUtilityContext('resend', 'sync-contact-segment', { contactId });
+    console.error('[Resend] Segment sync failed', {
+      ...logContext,
+      error: error instanceof Error ? error.message : String(error),
+    });
   }
 }
 
@@ -249,7 +254,8 @@ export async function updateContactEngagement(
     );
 
     if (!contact) {
-      console.warn('[Resend] contact not found', { email });
+      const logContext = createUtilityContext('resend', 'update-contact-engagement', { email });
+      console.warn('[Resend] contact not found', logContext);
       return;
     }
 
@@ -272,7 +278,11 @@ export async function updateContactEngagement(
       await syncContactSegment(resend, contact.id, newScore);
     }
   } catch (error) {
-    console.error('[Resend] failed to update contact', { email, error });
+    const logContext = createUtilityContext('resend', 'update-contact-engagement', { email });
+    console.error('[Resend] failed to update contact', {
+      ...logContext,
+      error: error instanceof Error ? error.message : String(error),
+    });
   }
 }
 

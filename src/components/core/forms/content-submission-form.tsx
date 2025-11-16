@@ -35,6 +35,7 @@ import { logger } from '@/src/lib/logger';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
 import { ParseStrategy, safeParse } from '@/src/lib/utils/data.utils';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
 import type {
   ContentCategory,
@@ -350,7 +351,15 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
         if (result?.serverError || result?.validationErrors) {
           logger.error(
             'Submission server action failed',
-            new Error(result.serverError || 'Validation failed')
+            new Error(result.serverError || 'Validation failed'),
+            {
+              component: 'SubmitFormClient',
+              contentType,
+              submissionType: contentType,
+              hasName: !!submissionData.name,
+              hasDescription: !!submissionData.description,
+              hasAuthor: !!submissionData.author,
+            }
           );
           toasts.error.submissionFailed(
             result.serverError || 'Failed to submit content. Please try again or contact support.'
@@ -360,7 +369,10 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
 
         if (result?.data?.success) {
           if (!result.data.submissionId) {
-            logger.warn('Success response missing submission ID');
+            logger.warn('Success response missing submission ID', {
+              component: 'SubmitFormClient',
+              contentType,
+            });
           }
 
           setSubmissionResult({
@@ -373,10 +385,13 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }
       } catch (error) {
-        logger.error(
-          'Submission failed',
-          error instanceof Error ? error : new Error(String(error))
-        );
+        const normalized = normalizeError(error, 'Content submission failed');
+        logger.error('Submission failed', normalized, {
+          component: 'SubmitFormClient',
+          contentType,
+          hasName: !!name,
+          hasDescription: !!description,
+        });
         toasts.error.submissionFailed(error instanceof Error ? error.message : undefined);
       }
     });

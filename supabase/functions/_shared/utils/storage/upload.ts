@@ -1,6 +1,7 @@
 import type { SupabaseClient } from 'jsr:@supabase/supabase-js@2';
 
 import type { Database } from '../../database.types.ts';
+import { createUtilityContext } from '../logging.ts';
 import {
   type BuildStorageObjectPathOptions,
   buildStorageObjectPath,
@@ -104,7 +105,11 @@ export async function uploadObject({
     });
 
     if (error) {
-      console.error('[Storage] Upload failed:', error);
+      const logContext = createUtilityContext('storage-upload', 'upload', { bucket, targetPath });
+      console.error('[Storage] Upload failed', {
+        ...logContext,
+        error: error.message,
+      });
       return { success: false, error: error.message };
     }
 
@@ -116,7 +121,11 @@ export async function uploadObject({
       publicUrl,
     };
   } catch (error) {
-    console.error('[Storage] Upload error:', error);
+    const logContext = createUtilityContext('storage-upload', 'upload', { bucket, targetPath });
+    console.error('[Storage] Upload error', {
+      ...logContext,
+      error: error instanceof Error ? error.message : 'Unknown storage upload error',
+    });
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown storage upload error',

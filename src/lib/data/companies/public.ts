@@ -8,6 +8,7 @@ import { unstable_cache } from 'next/cache';
 import { getCacheTtl } from '@/src/lib/data/config/cache-config';
 import { fetchCachedRpc } from '@/src/lib/data/helpers';
 import { logger } from '@/src/lib/logger';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 import type { Database } from '@/src/types/database.types';
 import type { Tables } from '@/src/types/database-overrides';
 
@@ -94,38 +95,59 @@ async function fetchCompanySearchResults(
   limit: number
 ): Promise<CompanySearchResult[]> {
   if (!EDGE_SEARCH_URL) {
-    throw new Error('Supabase URL is not configured for company search');
+    logger.warn('Company search: Supabase URL not configured', { query, limit });
+    return [];
   }
 
-  const params = new URLSearchParams();
-  params.set('q', query);
-  params.set('entities', 'company');
-  params.set('limit', String(limit));
+  try {
+    const params = new URLSearchParams();
+    params.set('q', query);
+    params.set('entities', 'company');
+    params.set('limit', String(limit));
 
-  const response = await fetch(`${EDGE_SEARCH_URL}?${params.toString()}`, {
-    headers: { 'Content-Type': 'application/json' },
-    cache: 'no-store',
-  });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    logger.error('Company search fetch failed', new Error(errorText || response.statusText), {
-      status: response.status,
-      query,
+    const response = await fetch(`${EDGE_SEARCH_URL}?${params.toString()}`, {
+      headers: { 'Content-Type': 'application/json' },
+      cache: 'no-store',
     });
-    throw new Error('Company search failed');
+
+    if (!response.ok) {
+      const errorText = await response.text().catch(() => 'Unable to read response body');
+      const normalized = normalizeError(
+        new Error(errorText || response.statusText),
+        'Company search API failed'
+      );
+      logger.error('Company search fetch failed', normalized, {
+        status: response.status,
+        query,
+        limit,
+        responseBody: errorText.slice(0, 200), // First 200 chars for context
+      });
+      return [];
+    }
+
+    const data = (await response.json()) as {
+      results?: Array<{
+        id: string;
+        title: string;
+        slug: string | null;
+        description: string | null;
+      }>;
+    };
+
+    return (data.results ?? []).map((entity) => ({
+      id: entity.id,
+      name: entity.title || entity.slug || '',
+      slug: entity.slug,
+      description: entity.description,
+    }));
+  } catch (error) {
+    const normalized = normalizeError(error, 'Company search fetch error');
+    logger.error('Company search fetch failed', normalized, {
+      query,
+      limit,
+    });
+    return [];
   }
-
-  const data = (await response.json()) as {
-    results?: Array<{ id: string; title: string; slug: string | null; description: string | null }>;
-  };
-
-  return (data.results ?? []).map((entity) => ({
-    id: entity.id,
-    name: entity.title || entity.slug || '',
-    slug: entity.slug,
-    description: entity.description,
-  }));
 }
 
 export async function searchCompanies(query: string, limit = 10): Promise<CompanySearchResult[]> {

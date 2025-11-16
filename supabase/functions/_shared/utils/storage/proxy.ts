@@ -1,3 +1,4 @@
+import { createUtilityContext } from '../logging.ts';
 import { getStorageAnonClient } from './client.ts';
 
 export interface StorageProxyOptions {
@@ -48,9 +49,9 @@ export async function proxyStorageFile(options: StorageProxyOptions): Promise<Re
     const detectedContentType = contentType ?? detectContentType(path);
     const resolvedFileName = fileName ?? path.split('/').pop() ?? 'download';
 
+    const logContext = createUtilityContext('storage-proxy', 'download', { bucket, path });
     console.log('[Storage] Proxy download', {
-      bucket,
-      path,
+      ...logContext,
       size: data.size,
       contentType: detectedContentType,
       cacheControl,
@@ -69,7 +70,11 @@ export async function proxyStorageFile(options: StorageProxyOptions): Promise<Re
       }),
     });
   } catch (error) {
-    console.error('[Storage] Proxy error:', error);
+    const logContext = createUtilityContext('storage-proxy', 'download', { bucket, path });
+    console.error('[Storage] Proxy error', {
+      ...logContext,
+      error: error instanceof Error ? error.message : String(error),
+    });
     return buildErrorResponse(
       {
         error: 'proxy_failed',

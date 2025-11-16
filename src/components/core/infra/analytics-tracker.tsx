@@ -10,7 +10,7 @@ import { getPollingConfig } from '@/src/lib/actions/feature-flags.actions';
 import type { CategoryId } from '@/src/lib/data/config/category';
 import { trackInteraction } from '@/src/lib/edge/client';
 import { logger } from '@/src/lib/logger';
-import { logClientWarning, logUnhandledPromise } from '@/src/lib/utils/error.utils';
+import { logClientWarning, logUnhandledPromise, normalizeError } from '@/src/lib/utils/error.utils';
 
 export type UnifiedTrackerProps =
   | {
@@ -38,16 +38,18 @@ function useTrackingEffect(
         const result = trackingFn();
         if (result instanceof Promise) {
           result.catch((error) => {
+            const normalized = normalizeError(error, 'Analytics tracking failed');
             logger.warn('Analytics tracking failed', {
               source: 'UnifiedTracker',
-              error: String(error),
+              error: normalized.message,
             });
           });
         }
       } catch (error) {
+        const normalized = normalizeError(error, 'Analytics tracking failed');
         logger.warn('Analytics tracking failed', {
           source: 'UnifiedTracker',
-          error: String(error),
+          error: normalized.message,
         });
       }
       return;
@@ -58,16 +60,18 @@ function useTrackingEffect(
         const result = trackingFn();
         if (result instanceof Promise) {
           result.catch((error) => {
+            const normalized = normalizeError(error, 'Analytics tracking failed');
             logger.warn('Analytics tracking failed', {
               source: 'UnifiedTracker',
-              error: String(error),
+              error: normalized.message,
             });
           });
         }
       } catch (error) {
+        const normalized = normalizeError(error, 'Analytics tracking failed');
         logger.warn('Analytics tracking failed', {
           source: 'UnifiedTracker',
-          error: String(error),
+          error: normalized.message,
         });
       }
     }, delay);

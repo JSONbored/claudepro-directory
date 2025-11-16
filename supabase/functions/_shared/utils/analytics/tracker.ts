@@ -2,6 +2,7 @@ import { supabaseServiceRole } from '../../clients/supabase.ts';
 import type { Database } from '../../database.types.ts';
 import { getAuthUserFromHeader } from '../auth.ts';
 import { runWithRetry } from '../integrations/http-client.ts';
+import { createUtilityContext } from '../logging.ts';
 
 type SearchQueryInsert = Database['public']['Tables']['search_queries']['Insert'];
 
@@ -11,10 +12,12 @@ const RETRY_OPTIONS = {
 };
 
 async function executeWithRetry<T>(fn: () => Promise<T>, context: string): Promise<T | null> {
+  const logContext = createUtilityContext('analytics-tracker', context);
   try {
-    return await runWithRetry(fn, RETRY_OPTIONS);
+    return await runWithRetry(fn, { ...RETRY_OPTIONS, logContext });
   } catch (error) {
     console.warn(`[analytics] ${context} failed`, {
+      ...logContext,
       message: error instanceof Error ? error.message : String(error),
     });
     return null;

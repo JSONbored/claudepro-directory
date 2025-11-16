@@ -8,6 +8,7 @@ import { refreshProfileFromOAuthServer } from '@/src/lib/actions/user.actions';
 import { SECURITY_CONFIG } from '@/src/lib/data/config/constants';
 import { logger } from '@/src/lib/logger';
 import { createClient } from '@/src/lib/supabase/server';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
@@ -34,9 +35,11 @@ export async function GET(request: NextRequest) {
         await refreshProfileFromOAuthServer(user.id);
         logger.info('Auth callback refreshed profile from OAuth', { userId: user.id });
       } catch (refreshError) {
+        const normalized = normalizeError(refreshError, 'Failed to refresh profile from OAuth');
         logger.warn('Auth callback failed to refresh profile', {
           userId: user.id,
-          error: refreshError instanceof Error ? refreshError.message : 'Unknown error',
+          route: 'auth/callback',
+          errorMessage: normalized.message,
         });
       }
 
@@ -99,9 +102,23 @@ export async function GET(request: NextRequest) {
       return response;
     }
 
-    logger.error('Auth callback exchange failed', error?.message ?? 'Unknown error');
+    const normalized = normalizeError(error, error?.message ?? 'Auth callback exchange failed');
+    logger.error('Auth callback exchange failed', normalized, {
+      route: 'auth/callback',
+      hasCode: true,
+      ...(error?.code && { errorCode: String(error.code) }),
+      ...(error?.message && { errorMessage: error.message }),
+    });
   } else {
-    logger.error('Auth callback no code provided');
+    const normalized = normalizeError(
+      new Error('No authorization code provided'),
+      'Auth callback missing code'
+    );
+    logger.error('Auth callback no code provided', normalized, {
+      route: 'auth/callback',
+      hasCode: false,
+      origin,
+    });
   }
 
   return NextResponse.redirect(`${origin}/auth/auth-code-error`);

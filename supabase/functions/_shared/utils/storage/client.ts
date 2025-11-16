@@ -1,6 +1,7 @@
 import type { SupabaseClient } from 'jsr:@supabase/supabase-js@2';
 import { supabaseAnon, supabaseServiceRole } from '../../clients/supabase.ts';
 import type { Database } from '../../database.types.ts';
+import { createUtilityContext } from '../logging.ts';
 
 export type StorageServiceClient = SupabaseClient<Database>;
 
@@ -118,13 +119,27 @@ export async function deleteStorageObjects(
     const { error } = await getStorageServiceClient().storage.from(bucket).remove(paths);
 
     if (error) {
-      console.error('[Storage] Delete failed:', error);
+      const logContext = createUtilityContext('storage-client', 'delete', {
+        bucket,
+        pathCount: paths.length,
+      });
+      console.error('[Storage] Delete failed', {
+        ...logContext,
+        error: error.message,
+      });
       return { success: false, error: error.message };
     }
 
     return { success: true };
   } catch (error) {
-    console.error('[Storage] Delete error:', error);
+    const logContext = createUtilityContext('storage-client', 'delete', {
+      bucket,
+      pathCount: paths.length,
+    });
+    console.error('[Storage] Delete error', {
+      ...logContext,
+      error: error instanceof Error ? error.message : 'Unknown storage delete error',
+    });
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown storage delete error',
@@ -147,13 +162,27 @@ export async function createSignedStorageUrl(
       });
 
     if (error) {
-      console.error('[Storage] Signed URL error:', error);
+      const logContext = createUtilityContext('storage-client', 'create-signed-url', {
+        bucket,
+        path,
+      });
+      console.error('[Storage] Signed URL error', {
+        ...logContext,
+        error: error.message,
+      });
       return { success: false, error: error.message };
     }
 
     return { success: true, signedUrl: data?.signedUrl };
   } catch (error) {
-    console.error('[Storage] Signed URL exception:', error);
+    const logContext = createUtilityContext('storage-client', 'create-signed-url', {
+      bucket,
+      path,
+    });
+    console.error('[Storage] Signed URL exception', {
+      ...logContext,
+      error: error instanceof Error ? error.message : 'Unknown signed URL error',
+    });
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown signed URL error',

@@ -117,7 +117,10 @@ export function useNewsletter(options: UseNewsletterOptions): UseNewsletterRetur
         }
       })
       .catch((error) => {
-        logClientWarning('useNewsletter: failed to load retry config', error, { source });
+        logClientWarning('useNewsletter: failed to load retry config', error, {
+          source,
+          hook: 'useNewsletter',
+        });
       });
   }, [source]);
 
@@ -145,6 +148,9 @@ export function useNewsletter(options: UseNewsletterOptions): UseNewsletterRetur
           throw new Error('Supabase URL not configured');
         }
 
+        // Normalize email
+        const normalizedEmail = email.toLowerCase().trim();
+
         const response = await fetchWithRetry(`${SUPABASE_URL}/functions/v1/email-handler`, {
           method: 'POST',
           headers: {
@@ -152,7 +158,7 @@ export function useNewsletter(options: UseNewsletterOptions): UseNewsletterRetur
             'X-Email-Action': 'subscribe',
           },
           body: JSON.stringify({
-            email,
+            email: normalizedEmail,
             source,
             ...(referrer && { referrer }),
             ...(metadata && metadata),
@@ -186,7 +192,11 @@ export function useNewsletter(options: UseNewsletterOptions): UseNewsletterRetur
               ...metadata,
             }),
           ]).catch((error) => {
-            logClientWarning('useNewsletter: signup success tracking failed', error, { source });
+            logClientWarning('useNewsletter: signup success tracking failed', error, {
+              source,
+              email: normalizedEmail,
+              subscriptionId: result.subscription_id,
+            });
           });
 
           reset();

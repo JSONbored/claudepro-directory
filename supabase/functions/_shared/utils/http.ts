@@ -4,6 +4,7 @@
 
 import { edgeEnv } from '../config/env.ts';
 import { getCacheConfigNumber } from '../config/statsig-cache.ts';
+import { createUtilityContext } from './logging.ts';
 
 /* ----------------------------- CORS PRESETS ----------------------------- */
 
@@ -96,7 +97,11 @@ export function successResponse(data: unknown, status = 200, cors = publicCorsHe
 }
 
 export function errorResponse(error: unknown, context: string, cors = publicCorsHeaders): Response {
-  console.error(`${context} failed:`, error);
+  const logContext = createUtilityContext('http-utils', 'error-response', { context });
+  console.error(`${context} failed`, {
+    ...logContext,
+    error: error instanceof Error ? error.message : String(error),
+  });
   return jsonResponse(
     {
       error: 'Internal Server Error',

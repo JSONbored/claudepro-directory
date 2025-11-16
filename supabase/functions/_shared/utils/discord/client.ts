@@ -1,6 +1,7 @@
 import { supabaseServiceRole } from '../../clients/supabase.ts';
 import type { Database } from '../../database.types.ts';
 import type { BaseLogContext } from '../logging.ts';
+import { createUtilityContext } from '../logging.ts';
 
 const MAX_RETRIES = 3;
 const INITIAL_RETRY_DELAY_MS = 1000;
@@ -43,10 +44,9 @@ export async function logOutboundWebhookEvent(
     .single();
 
   if (logError) {
+    const context = createUtilityContext('discord-client', 'log-outbound-webhook-event', { type });
     console.error('[discord-client] Failed to log webhook event', {
-      function: 'discord-client',
-      action: 'log-outbound-webhook-event',
-      type,
+      ...context,
       error: logError instanceof Error ? logError.message : String(logError),
     });
     return null;

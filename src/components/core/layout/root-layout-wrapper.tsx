@@ -14,7 +14,7 @@ import { useConfetti } from '@/src/hooks/use-confetti';
 import { checkConfettiEnabled } from '@/src/lib/actions/feature-flags.actions';
 import { logger } from '@/src/lib/logger';
 import { DIMENSIONS } from '@/src/lib/ui-constants';
-import { logClientWarning } from '@/src/lib/utils/error.utils';
+import { logClientWarning, normalizeError } from '@/src/lib/utils/error.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
 import type { Tables } from '@/src/types/database.types';
 import type { GetNavigationMenuReturn } from '@/src/types/database-overrides';
@@ -176,13 +176,21 @@ export function LayoutContent({
         }
       })
       .catch((error) => {
-        logClientWarning('LayoutContent: confetti check failed', error);
+        logClientWarning('LayoutContent: confetti check failed', error, {
+          component: 'LayoutContent',
+          pathname,
+        });
       });
 
     clearNewsletterOptInCookie().catch((error) => {
-      logger.error('LayoutContent: failed to clear newsletter opt-in cookie', error);
+      const normalized = normalizeError(error, 'Failed to clear newsletter opt-in cookie');
+      logger.error('LayoutContent: failed to clear newsletter opt-in cookie', normalized, {
+        component: 'LayoutContent',
+        pathname,
+        cookieName: NEWSLETTER_OPT_IN_COOKIE,
+      });
     });
-  }, [fireConfetti, isAuthRoute]);
+  }, [fireConfetti, isAuthRoute, pathname]);
 
   // Auth routes: minimal wrapper with no height constraints for true fullscreen experience
   if (isAuthRoute) {

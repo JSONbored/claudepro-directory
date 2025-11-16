@@ -1,3 +1,5 @@
+import { createUtilityContext } from '../logging.ts';
+
 export interface FetchWithRetryOptions {
   url: string;
   method?: string;
@@ -9,6 +11,7 @@ export interface FetchWithRetryOptions {
     retryOn?: number[];
     noRetryOn?: number[];
   };
+  logContext?: ReturnType<typeof createUtilityContext>;
 }
 
 export interface FetchWithRetryResult {
@@ -23,6 +26,7 @@ export interface RetryOptions {
   attempts?: number;
   baseDelayMs?: number;
   onRetry?: (attempt: number, error: Error, delay: number) => void;
+  logContext?: ReturnType<typeof createUtilityContext>;
 }
 
 export async function fetchWithRetry({
@@ -31,11 +35,14 @@ export async function fetchWithRetry({
   headers,
   body,
   retry,
+  logContext,
 }: FetchWithRetryOptions): Promise<FetchWithRetryResult> {
   const attempts = retry?.attempts ?? DEFAULT_ATTEMPTS;
   const baseDelay = retry?.baseDelayMs ?? DEFAULT_BASE_DELAY_MS;
   const retryOn = retry?.retryOn;
   const noRetryOn = retry?.noRetryOn;
+
+  const context = logContext ?? createUtilityContext('fetchWithRetry', 'fetch', { url, method });
 
   let lastError: Error | null = null;
 
@@ -63,7 +70,7 @@ export async function fetchWithRetry({
     if (attempt < attempts) {
       const delay = baseDelay * 2 ** attempt;
       console.warn('[fetchWithRetry] retrying request', {
-        url,
+        ...context,
         attempt: attempt + 1,
         attempts,
         delay,
@@ -78,8 +85,14 @@ export async function fetchWithRetry({
 
 export async function runWithRetry<T>(
   fn: () => Promise<T>,
-  { attempts = DEFAULT_ATTEMPTS, baseDelayMs = DEFAULT_BASE_DELAY_MS, onRetry }: RetryOptions = {}
+  {
+    attempts = DEFAULT_ATTEMPTS,
+    baseDelayMs = DEFAULT_BASE_DELAY_MS,
+    onRetry,
+    logContext,
+  }: RetryOptions = {}
 ): Promise<T> {
+  const context = logContext ?? createUtilityContext('runWithRetry', 'retry');
   let lastError: Error | null = null;
 
   for (let attempt = 0; attempt <= attempts; attempt++) {
@@ -96,6 +109,7 @@ export async function runWithRetry<T>(
         onRetry(attempt + 1, errorForRetry, delay);
       } else {
         console.warn('[runWithRetry] retrying operation', {
+          ...context,
           attempt: attempt + 1,
           attempts,
           delay,

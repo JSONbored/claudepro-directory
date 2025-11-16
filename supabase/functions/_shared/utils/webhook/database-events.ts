@@ -6,12 +6,17 @@ export interface DatabaseWebhookPayload<T = Record<string, unknown>> {
   schema: string;
 }
 
+import { createUtilityContext } from '../logging.ts';
+
 export function validateWebhookUrl(
   envVar: string | undefined,
   envVarName: string
 ): string | Response {
   if (!envVar) {
-    console.error(`${envVarName} environment variable not set`);
+    const logContext = createUtilityContext('webhook-utils', 'validate-webhook-url', {
+      envVarName,
+    });
+    console.error(`${envVarName} environment variable not set`, logContext);
     return new Response('Discord webhook not configured', { status: 500 });
   }
   return envVar;

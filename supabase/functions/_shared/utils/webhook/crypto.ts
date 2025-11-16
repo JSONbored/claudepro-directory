@@ -1,3 +1,5 @@
+import { createUtilityContext } from '../logging.ts';
+
 export interface SvixVerificationInput {
   rawBody: string;
   svixId: string;
@@ -43,7 +45,11 @@ export async function verifySvixSignature({
 
     return signatures.some((sig) => sig === expectedSignature);
   } catch (error) {
-    console.error('Svix signature verification error:', error);
+    const logContext = createUtilityContext('webhook-crypto', 'verify-svix-signature');
+    console.error('Svix signature verification error', {
+      ...logContext,
+      error: error instanceof Error ? error.message : String(error),
+    });
     return false;
   }
 }

@@ -33,9 +33,9 @@ async function callUnifiedSearch<T>(params: URLSearchParams): Promise<T[]> {
 
   if (!response.ok) {
     const errorText = await response.text();
-    logger.error('Unified search edge call failed', undefined, {
+    logger.error('Unified search edge call failed', new Error(errorText), {
       status: response.status,
-      errorText,
+      url: EDGE_SEARCH_URL,
     });
     throw new Error(`Unified search failed: ${response.statusText}`);
   }

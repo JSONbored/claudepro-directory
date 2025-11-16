@@ -49,7 +49,7 @@ import {
 import { Check, X } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { cn } from '@/src/lib/utils';
-import { logUnhandledPromise } from '@/src/lib/utils/error.utils';
+import { logUnhandledPromise, normalizeError } from '@/src/lib/utils/error.utils';
 import type { Database } from '@/src/types/database.types';
 
 type ContactCommand = {
@@ -124,12 +124,18 @@ export function ContactTerminal() {
       }
       if (result?.serverError) {
         // Error already logged by safe-action middleware
-        logger.error('Failed to load terminal commands', new Error(result.serverError));
+        logger.error('Failed to load terminal commands', new Error(result.serverError), {
+          component: 'ContactTerminal',
+          action: 'loadCommands',
+        });
         setLoadError('Failed to load commands. Please refresh the page.');
         addOutput('error', 'Failed to load commands. Please refresh the page.');
       }
     } catch (error) {
-      logger.error('Failed to load terminal commands', error as Error);
+      logger.error('Failed to load terminal commands', error as Error, {
+        component: 'ContactTerminal',
+        action: 'loadCommands',
+      });
       setLoadError('Failed to load commands. Please refresh the page.');
       addOutput('error', 'Failed to load commands. Please refresh the page.');
     } finally {
@@ -354,7 +360,14 @@ export function ContactTerminal() {
       }
     } catch (error) {
       addOutput('error', 'An error occurred. Please try again.', <X className="h-3 w-3" />);
-      logger.error('Contact form submission failed', error as Error);
+      const normalized = normalizeError(error, 'Contact form submission failed');
+      logger.error('Contact form submission failed', normalized, {
+        component: 'ContactTerminal',
+        category: selectedCategory,
+        hasName: !!name,
+        hasEmail: !!email,
+        hasMessage: !!message,
+      });
       trackTerminalFormSubmissionAction({
         category: selectedCategory,
         success: false,
