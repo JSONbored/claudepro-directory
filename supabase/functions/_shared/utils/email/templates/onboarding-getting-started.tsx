@@ -42,7 +42,12 @@ export function OnboardingGettingStarted({ email }: OnboardingGettingStartedProp
   const baseUrl = 'https://claudepro.directory';
   const utm = EMAIL_UTM_TEMPLATES.ONBOARDING_GETTING_STARTED;
 
-  const quickStartSteps = [
+  const quickStartSteps: Array<{
+    step: number;
+    title: string;
+    description: string;
+    cta: { label: string; href: string };
+  }> = [
     {
       step: 1,
       title: 'Browse Top Agents',
@@ -73,7 +78,7 @@ export function OnboardingGettingStarted({ email }: OnboardingGettingStartedProp
         href: buildEmailCtaUrl(`${baseUrl}/rules`, utm, { content: 'step_3_rules' }),
       },
     },
-  ] as const;
+  ];
 
   const featuredItems = [
     {
@@ -166,4 +171,10 @@ const helpTitleStyle: React.CSSProperties = {
 };
 
 export default OnboardingGettingStarted;
+
+export async function renderOnboardingGettingStartedEmail(
+  props: OnboardingGettingStartedProps
+): Promise<string> {
+  return renderEmailTemplate(OnboardingGettingStarted, props);
+}
 

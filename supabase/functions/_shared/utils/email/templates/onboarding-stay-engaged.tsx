@@ -35,7 +35,7 @@ const JOURNEY_RECAP = [
   'The ClaudePro community and how to contribute',
 ] as const;
 
-const WHATS_NEW = [
+const WHATS_NEW: Array<{ title: string; description: string }> = [
   {
     title: 'Weekly Digests',
     description:
@@ -49,7 +49,7 @@ const WHATS_NEW = [
     title: 'More Integrations',
     description: 'New MCP servers and integrations are added regularly—check back often.',
   },
-] as const;
+];
 
 const FEEDBACK_PROMPTS = [
   { title: 'Most valuable features', description: 'What do you rely on every week?' },
@@ -181,4 +181,10 @@ const thankYouTextStyle: React.CSSProperties = {
 };
 
 export default OnboardingStayEngaged;
+
+export async function renderOnboardingStayEngagedEmail(
+  props: OnboardingStayEngagedProps
+): Promise<string> {
+  return renderEmailTemplate(OnboardingStayEngaged, props);
+}
 

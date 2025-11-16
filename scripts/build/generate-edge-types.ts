@@ -133,10 +133,17 @@ function formatSection(entries: string[]): string {
   return entries.map((block) => `      ${block.trimStart()}`).join('\n\n');
 }
 
+// Extract PostgrestVersion from source
+const postgrestVersionMatch = source.match(/PostgrestVersion:\s*"([^"]+)"/);
+const postgrestVersion = postgrestVersionMatch?.[1] ?? '13.0.5';
+
 const outputLines = [
   `${header}${jsonDefinition}`,
   '',
   'export interface Database {',
+  '  __InternalSupabase: {',
+  `    PostgrestVersion: '${postgrestVersion}';`,
+  '  };',
   '  public: {',
   '    Tables: {',
   formatSection(tablesOutput),

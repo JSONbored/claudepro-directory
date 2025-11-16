@@ -35,6 +35,9 @@ verify_jwt = false  # Consolidated read-only data access layer (content exports,
 [functions.unified-search]
 verify_jwt = false  # Public search API with optional auth for analytics tracking (5min edge cache)
 
+[functions.transform-api]
+verify_jwt = false  # Public transform API for syntax highlighting and data transformations (immutable edge cache)
+
 # =============================================================================
 # Webhook/Notification Functions - No JWT Verification (Use Signature Verification)
 # =============================================================================

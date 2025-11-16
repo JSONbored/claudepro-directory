@@ -1,24 +1,37 @@
 // Dynamic imports for Vercel monitoring tools
 // Load at page bottom to avoid blocking initial render (30KB bundle, 50-100ms TTI gain)
-const Analytics = (
-  await import('@vercel/analytics/next').catch((error) => {
-    const normalized = normalizeError(error, 'Failed to load @vercel/analytics/next');
-    logger.error('RootLayout: Analytics dynamic import failed', normalized, {
-      module: '@vercel/analytics/next',
-    });
-    return { Analytics: () => null } as Awaited<typeof import('@vercel/analytics/next')>;
-  })
-).Analytics;
+// Using Next.js dynamic() for proper code splitting (not top-level await)
+const Analytics = dynamic(
+  () =>
+    import('@vercel/analytics/next')
+      .then((mod) => mod.Analytics)
+      .catch((error) => {
+        const normalized = normalizeError(error, 'Failed to load @vercel/analytics/next');
+        logger.error('RootLayout: Analytics dynamic import failed', normalized, {
+          module: '@vercel/analytics/next',
+        });
+        return () => null;
+      }),
+  {
+    ssr: false, // Analytics only needed client-side
+  }
+);
 
-const SpeedInsights = (
-  await import('@vercel/speed-insights/next').catch((error) => {
-    const normalized = normalizeError(error, 'Failed to load @vercel/speed-insights/next');
-    logger.error('RootLayout: SpeedInsights dynamic import failed', normalized, {
-      module: '@vercel/speed-insights/next',
-    });
-    return { SpeedInsights: () => null } as Awaited<typeof import('@vercel/speed-insights/next')>;
-  })
-).SpeedInsights;
+const SpeedInsights = dynamic(
+  () =>
+    import('@vercel/speed-insights/next')
+      .then((mod) => mod.SpeedInsights)
+      .catch((error) => {
+        const normalized = normalizeError(error, 'Failed to load @vercel/speed-insights/next');
+        logger.error('RootLayout: SpeedInsights dynamic import failed', normalized, {
+          module: '@vercel/speed-insights/next',
+        });
+        return () => null;
+      }),
+  {
+    ssr: false, // Speed insights only needed client-side
+  }
+);
 
 import type { Metadata } from 'next';
 import localFont from 'next/font/local';
@@ -47,14 +60,13 @@ import { ErrorBoundary } from '@/src/components/core/infra/error-boundary';
 import { PostCopyEmailProvider } from '@/src/components/core/infra/providers/email-capture-modal-provider';
 import { Pulse } from '@/src/components/core/infra/pulse';
 import { StructuredData } from '@/src/components/core/infra/structured-data';
-import { getActiveAnnouncement } from '@/src/components/core/layout/announcement-banner-server';
 import { LayoutContent } from '@/src/components/core/layout/root-layout-wrapper';
 import { UmamiScript } from '@/src/components/core/shared/analytics-script';
 import { NotificationsProvider } from '@/src/components/providers/notifications-provider';
 import { APP_CONFIG } from '@/src/lib/data/config/constants';
-import { getNavigationMenu } from '@/src/lib/data/content/navigation';
+import { getLayoutData } from '@/src/lib/data/layout/data';
+import { getLayoutFlags } from '@/src/lib/data/layout/flags';
 import { getHomeMetadata } from '@/src/lib/data/seo/homepage';
-import { featureFlags, newsletterExperiments } from '@/src/lib/flags';
 
 // Self-hosted fonts - no external requests, faster FCP, GDPR compliant
 const inter = localFont({
@@ -157,28 +169,61 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // Fetch server data (ISR-safe, edge-cached)
-  const announcement = await getActiveAnnouncement();
-  const navigationData = await getNavigationMenu();
+  // Fetch layout data and flags in parallel using Promise.allSettled
+  // This ensures graceful degradation if one fails (partial success handling)
+  const [layoutDataResult, layoutFlagsResult] = await Promise.allSettled([
+    getLayoutData(),
+    getLayoutFlags(),
+  ]);
 
-  // Fetch feature flags server-side for A/B testing and gradual rollouts
-  const useFloatingActionBar = await featureFlags.floatingActionBar();
-  const fabSubmitAction = await featureFlags.fabSubmitAction();
-  const fabSearchAction = await featureFlags.fabSearchAction();
-  const fabScrollToTop = await featureFlags.fabScrollToTop();
-  const fabNotifications = await featureFlags.fabNotifications();
-  const notificationsProviderFlag = await featureFlags.notificationsProvider();
-  const notificationsSheetFlag = await featureFlags.notificationsSheet();
-  const notificationsToastsFlag = await featureFlags.notificationsToasts();
+  // Extract layout data with fallbacks
+  const layoutData =
+    layoutDataResult.status === 'fulfilled'
+      ? layoutDataResult.value
+      : {
+          announcement: null,
+          navigationData: {
+            primary: [],
+            secondary: [],
+            actions: [],
+          },
+        };
 
-  // Fetch newsletter experiment variants server-side
-  const footerDelayVariant = await newsletterExperiments.footerDelay();
-  const ctaVariant = await newsletterExperiments.ctaVariant();
+  // Extract layout flags with fallbacks
+  const layoutFlags =
+    layoutFlagsResult.status === 'fulfilled'
+      ? layoutFlagsResult.value
+      : {
+          useFloatingActionBar: false,
+          fabSubmitAction: false,
+          fabSearchAction: false,
+          fabScrollToTop: false,
+          fabNotifications: false,
+          notificationsProvider: true,
+          notificationsSheet: true,
+          notificationsToasts: true,
+          footerDelayVariant: '30s' as const,
+          ctaVariant: 'value_focused' as const,
+          notificationsEnabled: true,
+          notificationsSheetEnabled: true,
+          notificationsToastsEnabled: true,
+          fabNotificationsEnabled: false,
+        };
 
-  const notificationsEnabled = notificationsProviderFlag ?? true;
-  const notificationsSheetEnabled = notificationsSheetFlag ?? true;
-  const notificationsToastsEnabled = notificationsToastsFlag ?? true;
-  const fabNotificationsEnabled = Boolean(fabNotifications && notificationsEnabled);
+  // Log any failures for monitoring (but don't block render)
+  if (layoutDataResult.status === 'rejected') {
+    const normalized = normalizeError(layoutDataResult.reason, 'Failed to load layout data');
+    logger.error('RootLayout: layout data fetch failed', normalized, {
+      source: 'root-layout',
+    });
+  }
+
+  if (layoutFlagsResult.status === 'rejected') {
+    const normalized = normalizeError(layoutFlagsResult.reason, 'Failed to load layout flags');
+    logger.error('RootLayout: layout flags fetch failed', normalized, {
+      source: 'root-layout',
+    });
+  }
 
   return (
     <html
@@ -229,25 +274,25 @@ export default async function RootLayout({
           <PostCopyEmailProvider>
             <NotificationsProvider
               flags={{
-                enableNotifications: notificationsEnabled,
-                enableSheet: notificationsSheetEnabled,
-                enableToasts: notificationsToastsEnabled,
-                enableFab: fabNotificationsEnabled,
+                enableNotifications: layoutFlags.notificationsEnabled,
+                enableSheet: layoutFlags.notificationsSheetEnabled,
+                enableToasts: layoutFlags.notificationsToastsEnabled,
+                enableFab: layoutFlags.fabNotificationsEnabled,
               }}
             >
               <ErrorBoundary>
                 <LayoutContent
-                  announcement={announcement}
-                  navigationData={navigationData}
-                  useFloatingActionBar={useFloatingActionBar}
+                  announcement={layoutData.announcement}
+                  navigationData={layoutData.navigationData}
+                  useFloatingActionBar={layoutFlags.useFloatingActionBar}
                   fabFlags={{
-                    showSubmit: fabSubmitAction,
-                    showSearch: fabSearchAction,
-                    showScrollToTop: fabScrollToTop,
-                    showNotifications: fabNotificationsEnabled,
+                    showSubmit: layoutFlags.fabSubmitAction,
+                    showSearch: layoutFlags.fabSearchAction,
+                    showScrollToTop: layoutFlags.fabScrollToTop,
+                    showNotifications: layoutFlags.fabNotificationsEnabled,
                   }}
-                  footerDelayVariant={footerDelayVariant}
-                  ctaVariant={ctaVariant}
+                  footerDelayVariant={layoutFlags.footerDelayVariant}
+                  ctaVariant={layoutFlags.ctaVariant}
                 >
                   {children}
                 </LayoutContent>
@@ -258,8 +303,6 @@ export default async function RootLayout({
             </NotificationsProvider>
           </PostCopyEmailProvider>
         </ThemeProvider>
-        <Analytics />
-        <SpeedInsights />
         {/* Umami Analytics - Privacy-focused analytics (production only) */}
         {/* Suspense boundary for analytics - streams after critical content */}
         <Suspense fallback={null}>{await UmamiScript()}</Suspense>
@@ -268,6 +311,9 @@ export default async function RootLayout({
         <Pulse variant="pwa-launch" />
         {/* Service Worker Registration for PWA Support */}
         <script src="/scripts/service-worker-init.js" defer />
+        {/* Vercel Analytics & Speed Insights - Loaded at page bottom for optimal performance */}
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );

@@ -38,19 +38,32 @@ export async function getAuthUserFromHeader(
   return getUserFromToken(token);
 }
 
+type CorsHeaders = Record<
+  'Access-Control-Allow-Origin' | 'Access-Control-Allow-Methods' | 'Access-Control-Allow-Headers',
+  string
+>;
+
 export async function requireAuthUser(
   request: Request,
-  options: { cors?: Record<string, string>; errorMessage?: string } = {}
+  options: { cors?: CorsHeaders; errorMessage?: string } = {}
 ): Promise<AuthResult> {
   const { cors, errorMessage } = options;
   const authHeader = request.headers.get('Authorization');
 
   const authResult = await getAuthUserFromHeader(authHeader);
   if (!authResult) {
+    // Convert CorsHeaders to Record<string, string> for unauthorizedResponse
+    const corsHeaders = cors
+      ? {
+          'Access-Control-Allow-Origin': cors['Access-Control-Allow-Origin'],
+          'Access-Control-Allow-Methods': cors['Access-Control-Allow-Methods'],
+          'Access-Control-Allow-Headers': cors['Access-Control-Allow-Headers'],
+        }
+      : undefined;
     return {
       response: unauthorizedResponse(
         errorMessage ?? 'Missing or invalid Authorization header',
-        cors
+        corsHeaders
       ),
     };
   }

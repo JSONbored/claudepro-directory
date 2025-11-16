@@ -5,7 +5,10 @@
 
 import type { Resend } from 'npm:resend@4.0.0';
 
-import type { NewsletterSource } from '../../database.types.ts';
+import type { Database } from '../../database-overrides.ts';
+
+type NewsletterSource = Database['public']['Enums']['newsletter_source'];
+
 import { createUtilityContext } from '../logging.ts';
 import { runWithRetry } from './http-client.ts';
 
@@ -123,9 +126,11 @@ export function buildContactProperties(params: {
   referrer?: string | null;
 }): Record<string, string | number> {
   const { source, copyType, copyCategory, referrer } = params;
+  // Ensure source is string | null (not undefined) for database compatibility
+  const sourceValue: string | null = source ?? null;
 
   return {
-    signup_source: source || 'unknown',
+    signup_source: sourceValue || 'unknown',
     copy_type: copyType || 'none',
     primary_interest: copyCategory || 'general',
     signup_page: referrer || '/',
@@ -150,7 +155,9 @@ const SEGMENT_RETRY = {
   baseDelayMs: 750,
 };
 
-export function determineSegmentByEngagement(engagementScore: number): string | null {
+export function determineSegmentByEngagement(
+  engagementScore: number
+): (typeof RESEND_SEGMENT_IDS)[keyof typeof RESEND_SEGMENT_IDS] | null {
   if (engagementScore >= 70) return RESEND_SEGMENT_IDS.high_engagement;
   if (engagementScore >= 40) return RESEND_SEGMENT_IDS.medium_engagement;
   if (engagementScore >= 0) return RESEND_SEGMENT_IDS.low_engagement;
@@ -169,12 +176,23 @@ export async function syncContactSegment(
     const currentSegmentIds = await listSegmentsWithRetry(resend, contactId);
 
     for (const segmentId of currentSegmentIds) {
-      if (segmentId !== targetSegment && managedSegmentIds.has(segmentId)) {
+      const typedSegmentId =
+        segmentId as (typeof RESEND_SEGMENT_IDS)[keyof typeof RESEND_SEGMENT_IDS];
+      if (typedSegmentId !== targetSegment && managedSegmentIds.has(typedSegmentId)) {
         await runWithRetry(
           () =>
-            resend.contacts.segments.remove({
-              contactId,
-              segmentId,
+            (
+              resend.contacts as unknown as {
+                segments: {
+                  remove: (args: {
+                    id: string;
+                    segmentId: string;
+                  }) => Promise<{ data: unknown; error: unknown }>;
+                };
+              }
+            ).segments.remove({
+              id: contactId,
+              segmentId: typedSegmentId,
             }),
           SEGMENT_RETRY
         );
@@ -184,8 +202,17 @@ export async function syncContactSegment(
     if (targetSegment && !currentSegmentIds.includes(targetSegment)) {
       await runWithRetry(
         () =>
-          resend.contacts.segments.add({
-            contactId,
+          (
+            resend.contacts as unknown as {
+              segments: {
+                add: (args: {
+                  id: string;
+                  segmentId: string;
+                }) => Promise<{ data: unknown; error: unknown }>;
+              };
+            }
+          ).segments.add({
+            id: contactId,
             segmentId: targetSegment,
           }),
         SEGMENT_RETRY
@@ -248,23 +275,48 @@ export async function updateContactEngagement(
     | 'visit_page'
 ): Promise<void> {
   try {
-    const { data: contact } = await runWithRetry(
-      () => resend.contacts.get({ email }),
-      SEGMENT_RETRY
-    );
+    // Resend API requires audienceId for contacts.get
+    // Type assertion needed because Resend types may not include all fields
+    type ResendContact = {
+      id?: string;
+      email?: string;
+      properties?: {
+        engagement_score?: number;
+        [key: string]: unknown;
+      };
+      [key: string]: unknown;
+    };
 
-    if (!contact) {
+    // Resend API types don't fully expose all fields - use type assertions for proper typing
+    type ResendContactResponse = {
+      data: ResendContact | null;
+      error: unknown;
+    };
+    type ResendContactsApi = {
+      get: (args: { email: string; audienceId?: string }) => Promise<ResendContactResponse>;
+      update: (args: {
+        email: string;
+        properties?: Record<string, unknown>;
+        audienceId?: string;
+      }) => Promise<{ data: unknown; error: unknown }>;
+    };
+
+    const contactsApi = resend.contacts as unknown as ResendContactsApi;
+    const { data: contact } = await runWithRetry(() => contactsApi.get({ email }), SEGMENT_RETRY);
+
+    if (!contact?.data) {
       const logContext = createUtilityContext('resend', 'update-contact-engagement', { email });
       console.warn('[Resend] contact not found', logContext);
       return;
     }
 
-    const currentScore = (contact.properties?.engagement_score as number) || 50;
+    const contactData = contact.data as ResendContact;
+    const currentScore = (contactData.properties?.engagement_score as number) || 50;
     const newScore = calculateEngagementChange(currentScore, activityType);
 
     await runWithRetry(
       () =>
-        resend.contacts.update({
+        contactsApi.update({
           email,
           properties: {
             engagement_score: newScore,
@@ -274,8 +326,8 @@ export async function updateContactEngagement(
       SEGMENT_RETRY
     );
 
-    if (contact.id) {
-      await syncContactSegment(resend, contact.id, newScore);
+    if (contactData.id) {
+      await syncContactSegment(resend, contactData.id, newScore);
     }
   } catch (error) {
     const logContext = createUtilityContext('resend', 'update-contact-engagement', { email });
@@ -289,11 +341,21 @@ export async function updateContactEngagement(
 async function listSegmentsWithRetry(resend: Resend, contactId: string): Promise<string[]> {
   const { data } = await runWithRetry(
     () =>
-      resend.contacts.segments.list({
-        contactId,
+      (
+        resend.contacts as unknown as {
+          segments: {
+            list: (args: {
+              id: string;
+            }) => Promise<{ data: { data?: Array<{ id: string }> } | null; error: unknown }>;
+          };
+        }
+      ).segments.list({
+        id: contactId,
       }),
     SEGMENT_RETRY
   );
 
-  return data?.data?.map((segment) => segment.id) ?? [];
+  return (
+    (data as { data?: Array<{ id: string }> } | null)?.data?.map((segment) => segment.id) ?? []
+  );
 }

@@ -1,5 +1,5 @@
 import { getOptionalEnv } from '../../config/env.ts';
-import type { Database } from '../../database.types.ts';
+import type { Database } from '../../database-overrides.ts';
 import { webhookCorsHeaders } from '../http.ts';
 import { verifyVercelSignature } from '../integrations/vercel.ts';
 import { verifySvixSignature } from './crypto.ts';

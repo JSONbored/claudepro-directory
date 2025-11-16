@@ -22,11 +22,11 @@ export interface SEOMetadata {
   isOverride: boolean;
 }
 
-export interface SEOSchema {
-  '@context': string;
-  '@type': string;
-  [key: string]: unknown;
-}
+/**
+ * SEOSchema - Pre-serialized JSON-LD string from edge function (XSS-protected)
+ * Edge function handles all serialization and XSS protection
+ */
+export type SEOSchema = string;
 
 export interface SEOResponse {
   metadata: SEOMetadata;

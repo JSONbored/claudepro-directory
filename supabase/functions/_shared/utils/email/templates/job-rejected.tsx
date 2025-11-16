@@ -83,13 +83,18 @@ export function JobRejected({
           utm={utm}
           buttons={[
             {
-              preset: 'primaryDirectory',
-              variant: 'primary',
+              preset: 'primaryDirectory' as const,
+              variant: 'primary' as const,
               overrides: { href: editUrl, label: 'Edit Job Listing', contentKey: 'edit_job_cta' },
             },
           ]}
         />
     </BaseLayout>
   );
+}
+
+export async function renderJobRejectedEmail(props: JobRejectedProps): Promise<string> {
+  const { renderEmailTemplate } = await import('../base-template.tsx');
+  return renderEmailTemplate(JobRejected, props);
 }
 

@@ -92,7 +92,7 @@ export function JobApproved({
             paymentUrl
               ? [
                   {
-                    preset: 'primaryDirectory', // label overridden below, href uses paymentUrl
+                    preset: 'primaryDirectory' as const, // label overridden below, href uses paymentUrl
                     variant: 'primary' as const,
                     overrides: { href: paymentUrl, label: `Complete Payment (${amountLabel})`, contentKey: 'payment_cta' },
                   },
@@ -102,5 +102,10 @@ export function JobApproved({
         />
     </BaseLayout>
   );
+}
+
+export async function renderJobApprovedEmail(props: JobApprovedProps): Promise<string> {
+  const { renderEmailTemplate } = await import('../base-template.tsx');
+  return renderEmailTemplate(JobApproved, props);
 }
 

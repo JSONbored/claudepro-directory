@@ -72,9 +72,9 @@ export interface EmailTemplateDefinition<TProps> {
   category: EmailTemplateCategory;
   from: string;
   replyTo?: string;
-  buildSubject: (props: TProps) => string;
+  buildSubject: (props: unknown) => string;
   buildSampleData: () => TProps;
-  render: (props: TProps) => Promise<string>;
+  render: (props: unknown) => Promise<string>;
 }
 
 const now = new Date('2025-01-15T12:00:00.000Z');
@@ -87,14 +87,16 @@ export const EMAIL_TEMPLATE_MANIFEST: EmailTemplateDefinition<unknown>[] = [
     description: 'Confirms receipt of a newly submitted job listing and outlines next steps.',
     category: 'jobs',
     from: JOBS_FROM,
-    buildSubject: (props: JobSubmittedProps) => `Job Submitted: ${props.jobTitle}`,
+    buildSubject: (props: unknown) => `Job Submitted: ${(props as JobSubmittedProps).jobTitle}`,
     buildSampleData: (): JobSubmittedProps => ({
       jobTitle: 'Senior Research Engineer',
       company: 'Anthropic Labs',
       userEmail: 'talentlead@example.com',
       jobId: 'job_12345',
     }),
-    render: (props) => renderJobSubmittedEmail(props as JobSubmittedProps),
+    render: (props: unknown) => {
+      return renderJobSubmittedEmail(props as JobSubmittedProps);
+    },
   },
   {
     slug: 'job-approved',
@@ -102,7 +104,7 @@ export const EMAIL_TEMPLATE_MANIFEST: EmailTemplateDefinition<unknown>[] = [
     description: 'Sent when a job has been reviewed and payment is required before publishing.',
     category: 'jobs',
     from: JOBS_FROM,
-    buildSubject: (props: JobApprovedProps) => `Job Approved: ${props.jobTitle}`,
+    buildSubject: (props: unknown) => `Job Approved: ${(props as JobApprovedProps).jobTitle}`,
     buildSampleData: (): JobApprovedProps => ({
       jobTitle: 'Senior Research Engineer',
       company: 'Anthropic Labs',
@@ -112,7 +114,9 @@ export const EMAIL_TEMPLATE_MANIFEST: EmailTemplateDefinition<unknown>[] = [
       paymentAmount: 399,
       paymentUrl: 'https://claudepro.directory/jobs/job_12345/pay',
     }),
-    render: (props) => renderJobApprovedEmail(props as JobApprovedProps),
+    render: (props: unknown) => {
+      return renderJobApprovedEmail(props as JobApprovedProps);
+    },
   },
   {
     slug: 'job-rejected',
@@ -120,8 +124,10 @@ export const EMAIL_TEMPLATE_MANIFEST: EmailTemplateDefinition<unknown>[] = [
     description: 'Notifies the poster that edits are required before the job can go live.',
     category: 'jobs',
     from: JOBS_FROM,
-    buildSubject: (props: JobRejectedProps) =>
-      `Action Required: Update Your Job Posting - ${props.jobTitle}`,
+    buildSubject: (props: unknown) => {
+      const typedProps = props as JobRejectedProps;
+      return `Action Required: Update Your Job Posting - ${typedProps.jobTitle}`;
+    },
     buildSampleData: (): JobRejectedProps => ({
       jobTitle: 'Senior Research Engineer',
       company: 'Anthropic Labs',
@@ -129,7 +135,9 @@ export const EMAIL_TEMPLATE_MANIFEST: EmailTemplateDefinition<unknown>[] = [
       jobId: 'job_12345',
       rejectionReason: 'Please add salary range and clarify required Claude experience.',
     }),
-    render: (props) => renderJobRejectedEmail(props as JobRejectedProps),
+    render: (props: unknown) => {
+      return renderJobRejectedEmail(props as JobRejectedProps);
+    },
   },
   {
     slug: 'job-expiring',
@@ -137,8 +145,10 @@ export const EMAIL_TEMPLATE_MANIFEST: EmailTemplateDefinition<unknown>[] = [
     description: 'Reminder that a job listing is about to expire with quick renewal links.',
     category: 'jobs',
     from: JOBS_FROM,
-    buildSubject: (props: JobExpiringProps) =>
-      `Expiring Soon: ${props.jobTitle} (${props.daysRemaining} days remaining)`,
+    buildSubject: (props: unknown) => {
+      const typedProps = props as JobExpiringProps;
+      return `Expiring Soon: ${typedProps.jobTitle} (${typedProps.daysRemaining} days remaining)`;
+    },
     buildSampleData: (): JobExpiringProps => ({
       jobTitle: 'Senior Research Engineer',
       company: 'Anthropic Labs',
@@ -148,7 +158,9 @@ export const EMAIL_TEMPLATE_MANIFEST: EmailTemplateDefinition<unknown>[] = [
       daysRemaining: 3,
       renewalUrl: 'https://claudepro.directory/account/jobs/job_12345/renew',
     }),
-    render: (props) => renderJobExpiringEmail(props as JobExpiringProps),
+    render: (props: unknown) => {
+      return renderJobExpiringEmail(props as JobExpiringProps);
+    },
   },
   {
     slug: 'job-expired',
@@ -156,7 +168,7 @@ export const EMAIL_TEMPLATE_MANIFEST: EmailTemplateDefinition<unknown>[] = [
     description: 'Performance summary after a job expires with a CTA to repost.',
     category: 'jobs',
     from: JOBS_FROM,
-    buildSubject: (props: JobExpiredProps) => `Job Listing Expired: ${props.jobTitle}`,
+    buildSubject: (props: unknown) => `Job Listing Expired: ${(props as JobExpiredProps).jobTitle}`,
     buildSampleData: (): JobExpiredProps => ({
       jobTitle: 'Senior Research Engineer',
       company: 'Anthropic Labs',
@@ -167,7 +179,9 @@ export const EMAIL_TEMPLATE_MANIFEST: EmailTemplateDefinition<unknown>[] = [
       clickCount: 287,
       repostUrl: 'https://claudepro.directory/account/jobs/job_12345/repost',
     }),
-    render: (props) => renderJobExpiredEmail(props as JobExpiredProps),
+    render: (props: unknown) => {
+      return renderJobExpiredEmail(props as JobExpiredProps);
+    },
   },
   {
     slug: 'job-payment-confirmed',
@@ -175,7 +189,8 @@ export const EMAIL_TEMPLATE_MANIFEST: EmailTemplateDefinition<unknown>[] = [
     description: 'Confirms payment receipt, highlights analytics, and links to the live listing.',
     category: 'jobs',
     from: JOBS_FROM,
-    buildSubject: (props: JobPaymentConfirmedProps) => `Your Job is Live: ${props.jobTitle}`,
+    buildSubject: (props: unknown) =>
+      `Your Job is Live: ${(props as JobPaymentConfirmedProps).jobTitle}`,
     buildSampleData: (): JobPaymentConfirmedProps => ({
       jobTitle: 'Senior Research Engineer',
       company: 'Anthropic Labs',
@@ -187,7 +202,9 @@ export const EMAIL_TEMPLATE_MANIFEST: EmailTemplateDefinition<unknown>[] = [
       paymentDate: iso(new Date(now.getTime() - 6 * 60 * 60 * 1000)),
       expiresAt: iso(new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000)),
     }),
-    render: (props) => renderJobPaymentConfirmedEmail(props as JobPaymentConfirmedProps),
+    render: (props: unknown) => {
+      return renderJobPaymentConfirmedEmail(props as JobPaymentConfirmedProps);
+    },
   },
   {
     slug: 'job-posted',
@@ -195,14 +212,17 @@ export const EMAIL_TEMPLATE_MANIFEST: EmailTemplateDefinition<unknown>[] = [
     description: 'Transactional email confirming that a listing is live.',
     category: 'jobs',
     from: JOBS_FROM,
-    buildSubject: (props: JobPostedProps) => `Your job posting "${props.jobTitle}" is now live!`,
+    buildSubject: (props: unknown) =>
+      `Your job posting "${(props as JobPostedProps).jobTitle}" is now live!`,
     buildSampleData: (): JobPostedProps => ({
       jobTitle: 'Senior Research Engineer',
       company: 'Anthropic Labs',
       userEmail: 'talentlead@example.com',
       jobSlug: 'anthropic-senior-research-engineer',
     }),
-    render: (props) => renderJobPostedEmail(props as JobPostedProps),
+    render: (props: unknown) => {
+      return renderJobPostedEmail(props as JobPostedProps);
+    },
   },
   {
     slug: 'collection-shared',
@@ -211,8 +231,10 @@ export const EMAIL_TEMPLATE_MANIFEST: EmailTemplateDefinition<unknown>[] = [
     category: 'community',
     from: COMMUNITY_FROM,
     replyTo: 'community@mail.claudepro.directory',
-    buildSubject: (props: CollectionSharedProps) =>
-      `${props.senderName} shared a collection with you`,
+    buildSubject: (props: unknown) => {
+      const typedProps = props as CollectionSharedProps;
+      return `${typedProps.senderName} shared a collection with you`;
+    },
     buildSampleData: (): CollectionSharedProps => ({
       collectionName: 'Claude Agents for Product Teams',
       collectionDescription: 'Curated automations for research, planning, and content ops.',
@@ -222,7 +244,9 @@ export const EMAIL_TEMPLATE_MANIFEST: EmailTemplateDefinition<unknown>[] = [
       senderSlug: 'mia',
       itemCount: 12,
     }),
-    render: (props) => renderCollectionSharedEmail(props as CollectionSharedProps),
+    render: (props: unknown) => {
+      return renderCollectionSharedEmail(props as CollectionSharedProps);
+    },
   },
   {
     slug: 'newsletter-welcome',
@@ -235,7 +259,9 @@ export const EMAIL_TEMPLATE_MANIFEST: EmailTemplateDefinition<unknown>[] = [
       email: 'subscriber@example.com',
       source: 'footer',
     }),
-    render: (props) => renderNewsletterWelcomeEmail(props as NewsletterWelcomeProps),
+    render: (props: unknown) => {
+      return renderNewsletterWelcomeEmail(props as NewsletterWelcomeProps);
+    },
   },
   {
     slug: 'onboarding-getting-started',
@@ -245,7 +271,8 @@ export const EMAIL_TEMPLATE_MANIFEST: EmailTemplateDefinition<unknown>[] = [
     from: ONBOARDING_FROM,
     buildSubject: () => 'Getting Started with Claude Pro Directory',
     buildSampleData: (): OnboardingGettingStartedProps => ({ email: 'founder@example.com' }),
-    render: (props) => renderOnboardingGettingStartedEmail(props as OnboardingGettingStartedProps),
+    render: (props: unknown) =>
+      renderOnboardingGettingStartedEmail(props as OnboardingGettingStartedProps),
   },
   {
     slug: 'onboarding-power-tips',
@@ -255,7 +282,9 @@ export const EMAIL_TEMPLATE_MANIFEST: EmailTemplateDefinition<unknown>[] = [
     from: ONBOARDING_FROM,
     buildSubject: () => 'Power User Tips for Claude',
     buildSampleData: (): OnboardingPowerTipsProps => ({ email: 'founder@example.com' }),
-    render: (props) => renderOnboardingPowerTipsEmail(props as OnboardingPowerTipsProps),
+    render: (props: unknown) => {
+      return renderOnboardingPowerTipsEmail(props as OnboardingPowerTipsProps);
+    },
   },
   {
     slug: 'onboarding-community',
@@ -265,7 +294,9 @@ export const EMAIL_TEMPLATE_MANIFEST: EmailTemplateDefinition<unknown>[] = [
     from: ONBOARDING_FROM,
     buildSubject: () => 'Join the Claude Pro Community',
     buildSampleData: (): OnboardingCommunityProps => ({ email: 'founder@example.com' }),
-    render: (props) => renderOnboardingCommunityEmail(props as OnboardingCommunityProps),
+    render: (props: unknown) => {
+      return renderOnboardingCommunityEmail(props as OnboardingCommunityProps);
+    },
   },
   {
     slug: 'onboarding-stay-engaged',
@@ -275,7 +306,8 @@ export const EMAIL_TEMPLATE_MANIFEST: EmailTemplateDefinition<unknown>[] = [
     from: ONBOARDING_FROM,
     buildSubject: () => 'Stay Engaged with ClaudePro',
     buildSampleData: (): OnboardingStayEngagedProps => ({ email: 'founder@example.com' }),
-    render: (props) => renderOnboardingStayEngagedEmail(props as OnboardingStayEngagedProps),
+    render: (props: unknown) =>
+      renderOnboardingStayEngagedEmail(props as OnboardingStayEngagedProps),
   },
   {
     slug: 'weekly-digest',
@@ -283,7 +315,7 @@ export const EMAIL_TEMPLATE_MANIFEST: EmailTemplateDefinition<unknown>[] = [
     description: 'Weekly roundup of new, trending, and personalized content.',
     category: 'newsletter',
     from: HELLO_FROM,
-    buildSubject: (props: WeeklyDigestProps) => `This Week in Claude: ${props.weekOf}`,
+    buildSubject: (props: unknown) => `This Week in Claude: ${(props as WeeklyDigestProps).weekOf}`,
     buildSampleData: (): WeeklyDigestProps => ({
       email: 'subscriber@example.com',
       weekOf: 'January 13, 2025',
@@ -331,7 +363,9 @@ export const EMAIL_TEMPLATE_MANIFEST: EmailTemplateDefinition<unknown>[] = [
         },
       ],
     }),
-    render: (props) => renderWeeklyDigestEmail(props as WeeklyDigestProps),
+    render: (props: unknown) => {
+      return renderWeeklyDigestEmail(props as WeeklyDigestProps);
+    },
   },
   {
     slug: 'contact-submission-admin',
@@ -340,8 +374,10 @@ export const EMAIL_TEMPLATE_MANIFEST: EmailTemplateDefinition<unknown>[] = [
     category: 'contact',
     from: CONTACT_FROM,
     replyTo: undefined,
-    buildSubject: (props: ContactSubmissionAdminProps) =>
-      `New Contact: ${props.category} - ${props.name}`,
+    buildSubject: (props: unknown) => {
+      const typedProps = props as ContactSubmissionAdminProps;
+      return `New Contact: ${typedProps.category} - ${typedProps.name}`;
+    },
     buildSampleData: (): ContactSubmissionAdminProps => ({
       submissionId: 'sub_12345',
       name: 'Sarah Johnson',
@@ -351,7 +387,8 @@ export const EMAIL_TEMPLATE_MANIFEST: EmailTemplateDefinition<unknown>[] = [
         'Hi! We love Claude Pro Directory and would like to discuss a potential partnership opportunity.',
       submittedAt: now.toISOString(),
     }),
-    render: (props) => renderContactSubmissionAdminEmail(props as ContactSubmissionAdminProps),
+    render: (props: unknown) =>
+      renderContactSubmissionAdminEmail(props as ContactSubmissionAdminProps),
   },
   {
     slug: 'contact-submission-user',
@@ -364,7 +401,8 @@ export const EMAIL_TEMPLATE_MANIFEST: EmailTemplateDefinition<unknown>[] = [
       name: 'Sarah Johnson',
       category: 'partnership',
     }),
-    render: (props) => renderContactSubmissionUserEmail(props as ContactSubmissionUserProps),
+    render: (props: unknown) =>
+      renderContactSubmissionUserEmail(props as ContactSubmissionUserProps),
   },
 ];
 

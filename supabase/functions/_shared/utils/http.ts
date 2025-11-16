@@ -96,7 +96,11 @@ export function successResponse(data: unknown, status = 200, cors = publicCorsHe
   return jsonResponse(data, status, cors);
 }
 
-export function errorResponse(error: unknown, context: string, cors = publicCorsHeaders): Response {
+export function errorResponse(
+  error: unknown,
+  context: string,
+  cors: Record<string, string> = publicCorsHeaders
+): Response {
   const logContext = createUtilityContext('http-utils', 'error-response', { context });
   console.error(`${context} failed`, {
     ...logContext,
@@ -123,7 +127,7 @@ export function unauthorizedResponse(message = 'Unauthorized', cors = publicCors
 
 export function methodNotAllowedResponse(
   allowedMethod = 'POST',
-  cors = publicCorsHeaders
+  cors: Record<string, string> = publicCorsHeaders
 ): Response {
   return new Response(JSON.stringify({ error: 'Method not allowed', allowed: allowedMethod }), {
     status: 405,

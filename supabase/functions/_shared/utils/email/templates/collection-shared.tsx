@@ -98,8 +98,8 @@ export function CollectionShared({
           utm={utm}
           buttons={[
             {
-              preset: 'primaryDirectory',
-              variant: 'primary',
+              preset: 'primaryDirectory' as const,
+              variant: 'primary' as const,
               overrides: { href: collectionUrl, label: 'View Collection', contentKey: 'view_collection_cta' },
             },
           ]}
@@ -121,5 +121,12 @@ export function CollectionShared({
       </Section>
     </BaseLayout>
   );
+}
+
+export async function renderCollectionSharedEmail(
+  props: CollectionSharedProps
+): Promise<string> {
+  const { renderEmailTemplate } = await import('../base-template.tsx');
+  return renderEmailTemplate(CollectionShared, props);
 }
 

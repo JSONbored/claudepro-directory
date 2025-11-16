@@ -1,4 +1,5 @@
-import { supabaseAnon } from '../../_shared/clients/supabase.ts';
+import type { Database as DatabaseGenerated } from '../../_shared/database.types.ts';
+import { callRpc } from '../../_shared/database-overrides.ts';
 import {
   buildCacheHeaders,
   errorResponse,
@@ -28,7 +29,11 @@ export async function handleStatusRoute(
     return methodNotAllowedResponse('GET', CORS);
   }
 
-  const { data, error } = await supabaseAnon.rpc('get_api_health');
+  const { data, error } = await callRpc(
+    'get_api_health',
+    {} as DatabaseGenerated['public']['Functions']['get_api_health']['Args'],
+    true
+  );
   if (error) {
     return errorResponse(error, 'data-api:get_api_health', CORS);
   }

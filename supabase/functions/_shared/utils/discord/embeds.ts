@@ -1,6 +1,6 @@
 import { SITE_URL } from '../../clients/supabase.ts';
 import { edgeEnv } from '../../config/env.ts';
-import type { Database } from '../../database.types.ts';
+import type { Database } from '../../database-overrides.ts';
 
 const CATEGORY_COLORS: Record<string, number> = {
   agents: 0x5865f2,

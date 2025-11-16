@@ -241,3 +241,97 @@ export async function trackUsage(params: {
     logger.warn('trackUsage failed', { error: result.serverError });
   }
 }
+
+// ============================================
+// TRANSFORM API - Data Transformations
+// ============================================
+
+const EDGE_TRANSFORM_URL = `${EDGE_BASE_URL}/transform-api`;
+
+export interface HighlightCodeOptions {
+  language?: string;
+  showLineNumbers?: boolean;
+}
+
+export interface HighlightCodeResponse {
+  html: string;
+  cached: boolean;
+  cacheKey?: string;
+  error?: string;
+}
+
+/**
+ * Highlight code syntax - Edge function with aggressive caching
+ *
+ * This function calls the edge function to highlight code, which:
+ * - Processes highlighting at the edge (faster, cached)
+ * - Returns pre-rendered HTML ready for display
+ * - Uses immutable caching (same code = same output, cached forever)
+ *
+ * @param code - Code string to highlight
+ * @param options - Highlighting options (language, showLineNumbers)
+ * @returns Highlighted HTML string
+ *
+ * @example
+ * ```typescript
+ * const html = await highlightCodeEdge('const x = 1;', { language: 'javascript' });
+ * ```
+ */
+export async function highlightCodeEdge(
+  code: string,
+  options: HighlightCodeOptions = {}
+): Promise<string> {
+  const { language = 'javascript', showLineNumbers = true } = options;
+
+  // Handle empty code (same as original implementation)
+  if (!code || code.trim() === '') {
+    return '<pre class="sugar-high-empty"><code>No code provided</code></pre>';
+  }
+
+  try {
+    const response = await fetch(`${EDGE_TRANSFORM_URL}/content/highlight`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code, language, showLineNumbers }),
+      next: {
+        revalidate: 31536000, // 1 year (immutable cache - same code = same output)
+        tags: ['transform:highlight'],
+      },
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Highlight failed: ${response.status} ${errorText}`);
+    }
+
+    const data = (await response.json()) as HighlightCodeResponse;
+
+    // If edge function returned an error but still provided HTML (fallback), log it
+    if (data.error) {
+      logger.warn('Edge highlighting used fallback', {
+        error: data.error,
+        language,
+        codePreview: code.slice(0, 80),
+      });
+    }
+
+    return data.html;
+  } catch (error) {
+    // Fallback: escape code (same as current implementation)
+    const normalized = error instanceof Error ? error : new Error(String(error));
+    logger.warn('Edge highlighting failed, using fallback', {
+      error: normalized.message,
+      language,
+      codePreview: code.slice(0, 80),
+    });
+
+    const escapedCode = code
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+
+    return `<pre class="code-block-pre code-block-fallback"><code>${escapedCode}</code></pre>`;
+  }
+}

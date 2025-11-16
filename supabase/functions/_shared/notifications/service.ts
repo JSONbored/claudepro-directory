@@ -1,12 +1,14 @@
 import { randomUUID } from 'node:crypto';
 import { supabaseServiceRole } from '../clients/supabase.ts';
-import type { Database } from '../database.types.ts';
+import type { Database as DatabaseGenerated } from '../database.types.ts';
+import type { Database, Tables } from '../database-overrides.ts';
+import { callRpc, insertTable, upsertTable } from '../database-overrides.ts';
 import { invalidateCacheByKey } from '../utils/cache.ts';
 import type { BaseLogContext } from '../utils/logging.ts';
 
 const MAX_NOTIFICATION_IDS = 50;
 
-type NotificationRecord = Database['public']['Tables']['notifications']['Row'];
+type NotificationRecord = Tables<'notifications'>;
 type NotificationPriority = Database['public']['Enums']['notification_priority'];
 type NotificationType = Database['public']['Enums']['notification_type'];
 
@@ -34,10 +36,10 @@ export async function getActiveNotificationsForUser(
     new Set(dismissedIds.map((id) => id.trim()).filter(Boolean))
   ).slice(0, MAX_NOTIFICATION_IDS);
 
-  const { data, error } = await supabaseServiceRole.rpc('get_active_notifications', {
-    p_user_id: userId,
-    dismissed_ids: sanitizedDismissedIds,
-  });
+  const rpcArgs = {
+    p_dismissed_ids: sanitizedDismissedIds,
+  } satisfies DatabaseGenerated['public']['Functions']['get_active_notifications']['Args'];
+  const { data, error } = await callRpc('get_active_notifications', rpcArgs);
 
   if (error) {
     console.error('[notifications] get_active_notifications failed', {
@@ -71,11 +73,11 @@ export async function insertNotification(
     metadata: payload.metadata ?? null,
   };
 
-  const { data, error } = await supabaseServiceRole
-    .from('notifications')
-    .insert(record)
-    .select('*')
-    .single<NotificationRecord>();
+  // Use type-safe helper to ensure proper type inference
+  const insertData =
+    record satisfies DatabaseGenerated['public']['Tables']['notifications']['Insert'];
+  const result = await insertTable('notifications', insertData);
+  const { data, error } = await result.select('*').single<NotificationRecord>();
 
   if (error || !data) {
     if (isConflictError(error) && record.id) {
@@ -130,12 +132,12 @@ export async function dismissNotificationsForUser(
     return;
   }
 
-  const { error } = await supabaseServiceRole.from('notification_dismissals').upsert(
-    sanitizedIds.map((notificationId) => ({
-      notification_id: notificationId,
-      user_id: userId,
-    }))
-  );
+  // Use type-safe helper to ensure proper type inference
+  const upsertData = sanitizedIds.map((notificationId) => ({
+    notification_id: notificationId,
+    user_id: userId,
+  })) satisfies DatabaseGenerated['public']['Tables']['notification_dismissals']['Insert'][];
+  const { error } = await upsertTable('notification_dismissals', upsertData);
 
   if (error) {
     console.error('[notifications] Failed to dismiss notifications', {

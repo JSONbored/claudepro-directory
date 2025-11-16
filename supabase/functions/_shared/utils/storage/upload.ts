@@ -1,6 +1,6 @@
 import type { SupabaseClient } from 'jsr:@supabase/supabase-js@2';
 
-import type { Database } from '../../database.types.ts';
+import type { Database } from '../../database-overrides.ts';
 import { createUtilityContext } from '../logging.ts';
 import {
   type BuildStorageObjectPathOptions,
@@ -83,6 +83,13 @@ export async function uploadObject({
   client = getStorageServiceClient(),
   validationPolicy,
 }: UploadObjectOptions): Promise<StorageUploadResult> {
+  const targetPath =
+    objectPath ??
+    buildStorageObjectPath({
+      extension: mimeType.split('/')[1],
+      ...pathOptions,
+    });
+
   try {
     if (validationPolicy) {
       const validation = validateBufferAgainstPolicy(buffer, mimeType, validationPolicy);
@@ -90,13 +97,6 @@ export async function uploadObject({
         return { success: false, error: validation.error };
       }
     }
-
-    const targetPath =
-      objectPath ??
-      buildStorageObjectPath({
-        extension: mimeType.split('/')[1],
-        ...pathOptions,
-      });
 
     const { data, error } = await client.storage.from(bucket).upload(targetPath, buffer, {
       contentType: mimeType,

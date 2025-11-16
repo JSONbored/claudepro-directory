@@ -38,11 +38,8 @@ export function createRouter<C extends RouterContext>(options: RouterOptions<C>)
       if (options.onNoMatch) {
         return options.onNoMatch(context);
       }
-      return errorResponse(
-        new Error('Not Found'),
-        'router:not_found',
-        options.defaultCors ?? publicCorsHeaders
-      );
+      const defaultCors: Record<string, string> = options.defaultCors ?? publicCorsHeaders;
+      return errorResponse(new Error('Not Found'), 'router:not_found', defaultCors);
     }
 
     const allowedMethods = route.methods?.length ? route.methods : DEFAULT_METHODS;
@@ -53,7 +50,9 @@ export function createRouter<C extends RouterContext>(options: RouterOptions<C>)
         : context.originalMethod;
 
     if (!allowedMethods.includes(normalizedMethod)) {
-      return methodNotAllowedResponse(normalizedMethod, route.cors ?? options.defaultCors);
+      const corsHeaders: Record<string, string> =
+        route.cors ?? options.defaultCors ?? publicCorsHeaders;
+      return methodNotAllowedResponse(normalizedMethod, corsHeaders);
     }
 
     if (context.originalMethod === 'OPTIONS') {

@@ -151,3 +151,9 @@ const teaserDescStyle: React.CSSProperties = {
 
 export default OnboardingPowerTips;
 
+export async function renderOnboardingPowerTipsEmail(
+  props: OnboardingPowerTipsProps
+): Promise<string> {
+  return renderEmailTemplate(OnboardingPowerTips, props);
+}
+

@@ -1,6 +1,6 @@
 import { SITE_URL } from '../clients/supabase.ts';
 import { edgeEnv } from '../config/env.ts';
-import type { Database, Json } from '../database.types.ts';
+import type { Database as DatabaseGenerated, Json } from '../database.types.ts';
 import { invalidateCacheByKey } from '../utils/cache.ts';
 import type { ChangelogSection, GitHubCommit } from '../utils/discord/embeds.ts';
 
@@ -31,8 +31,10 @@ export interface VercelWebhookPayload {
   };
 }
 
-export type ChangelogInsert = Database['public']['Tables']['changelog']['Insert'];
-export type ChangelogRow = Database['public']['Tables']['changelog']['Row'];
+// Use DatabaseGenerated directly to match the Supabase client type
+// This ensures type compatibility with createClient<DatabaseGenerated>
+export type ChangelogInsert = DatabaseGenerated['public']['Tables']['changelog']['Insert'];
+export type ChangelogRow = DatabaseGenerated['public']['Tables']['changelog']['Row'];
 
 interface BuildChangelogMetadataParams {
   sections: ChangelogSection[];
@@ -267,7 +269,7 @@ export async function revalidateChangelogPages(
             secret: REVALIDATE_SECRET,
             category: 'changelog',
             slug: path === '/changelog' ? undefined : slug,
-          }),
+          }) as string,
         });
 
         if (!response.ok) {

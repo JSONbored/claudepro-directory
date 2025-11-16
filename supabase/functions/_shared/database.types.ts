@@ -7,6 +7,9 @@
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
 export interface Database {
+  __InternalSupabase: {
+    PostgrestVersion: '13.0.5';
+  };
   public: {
     Tables: {
       newsletter_subscriptions: {

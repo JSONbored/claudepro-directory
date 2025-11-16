@@ -109,6 +109,13 @@ export function ContactSubmissionUser({ name, category }: ContactSubmissionUserP
   );
 }
 
+export async function renderContactSubmissionUserEmail(
+  props: ContactSubmissionUserProps
+): Promise<string> {
+  const { renderEmailTemplate } = await import('../base-template.tsx');
+  return renderEmailTemplate(ContactSubmissionUser, props);
+}
+
 
 // Custom styles for this template
 const whatsNextSectionStyle: React.CSSProperties = {

@@ -1,5 +1,7 @@
-import { SITE_URL, supabaseAnon } from '../../_shared/clients/supabase.ts';
+import { SITE_URL } from '../../_shared/clients/supabase.ts';
 import { edgeEnv } from '../../_shared/config/env.ts';
+import type { Database as DatabaseGenerated } from '../../_shared/database.types.ts';
+import { callRpc } from '../../_shared/database-overrides.ts';
 import {
   badRequestResponse,
   buildCacheHeaders,
@@ -41,25 +43,33 @@ async function handleSitemapGet(url: URL, _logContext?: BaseLogContext): Promise
   const format = (url.searchParams.get('format') || 'xml').toLowerCase();
 
   if (format === 'json') {
-    const { data: urls, error } = await supabaseAnon.rpc('get_site_urls');
+    const { data: urls, error } = await callRpc(
+      'get_site_urls',
+      {} as DatabaseGenerated['public']['Functions']['get_site_urls']['Args'],
+      true
+    );
     if (error) {
       return errorResponse(error, 'data-api:get_site_urls', CORS);
     }
-    if (!urls || urls.length === 0) {
+    type SiteUrlsResult = DatabaseGenerated['public']['Functions']['get_site_urls']['Returns'];
+    const typedUrls = (urls as SiteUrlsResult) || [];
+    if (!(typedUrls && Array.isArray(typedUrls)) || typedUrls.length === 0) {
       return jsonResponse({ error: 'No URLs returned from database' }, 500, CORS);
     }
 
     return jsonResponse(
       {
-        urls: urls.map((u) => ({
-          path: u.path,
-          loc: `${SITE_URL}${u.path}`,
-          lastmod: u.lastmod,
-          changefreq: u.changefreq,
-          priority: u.priority,
-        })),
+        urls: typedUrls.map(
+          (u: { path: string; lastmod?: string; changefreq?: string; priority?: number }) => ({
+            path: u.path,
+            loc: `${SITE_URL}${u.path}`,
+            lastmod: u.lastmod,
+            changefreq: u.changefreq,
+            priority: u.priority,
+          })
+        ),
         meta: {
-          total: urls.length,
+          total: typedUrls.length,
           generated: new Date().toISOString(),
         },
       },
@@ -73,9 +83,10 @@ async function handleSitemapGet(url: URL, _logContext?: BaseLogContext): Promise
     );
   }
 
-  const { data, error } = await supabaseAnon.rpc('generate_sitemap_xml', {
+  const rpcArgs = {
     p_base_url: SITE_URL,
-  });
+  } satisfies DatabaseGenerated['public']['Functions']['generate_sitemap_xml']['Args'];
+  const { data, error } = await callRpc('generate_sitemap_xml', rpcArgs, true);
 
   if (error) {
     return errorResponse(error, 'data-api:generate_sitemap_xml', CORS);
@@ -121,16 +132,21 @@ async function handleSitemapIndexNow(req: Request, logContext?: BaseLogContext):
     );
   }
 
-  const { data: urls, error } = await supabaseAnon.rpc('get_site_urls');
+  const { data: urls, error } = await callRpc(
+    'get_site_urls',
+    {} as DatabaseGenerated['public']['Functions']['get_site_urls']['Args'],
+    true
+  );
   if (error) {
     return errorResponse(error, 'data-api:get_site_urls', CORS);
   }
-
-  if (!urls || urls.length === 0) {
+  type SiteUrlsResult = DatabaseGenerated['public']['Functions']['get_site_urls']['Returns'];
+  const typedUrls = (urls as SiteUrlsResult) || [];
+  if (!(typedUrls && Array.isArray(typedUrls)) || typedUrls.length === 0) {
     return jsonResponse({ error: 'No URLs to submit to IndexNow' }, 500, CORS);
   }
 
-  const urlList = urls.map((u) => `${SITE_URL}${u.path}`).slice(0, 10000);
+  const urlList = typedUrls.map((u: { path: string }) => `${SITE_URL}${u.path}`).slice(0, 10000);
   const payload = {
     host: new URL(SITE_URL).host,
     key: INDEXNOW_API_KEY,

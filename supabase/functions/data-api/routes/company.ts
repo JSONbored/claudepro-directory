@@ -1,4 +1,5 @@
-import { supabaseAnon } from '../../_shared/clients/supabase.ts';
+import type { Database as DatabaseGenerated } from '../../_shared/database.types.ts';
+import { callRpc } from '../../_shared/database-overrides.ts';
 import {
   badRequestResponse,
   buildCacheHeaders,
@@ -28,9 +29,10 @@ export async function handleCompanyRoute(
     return badRequestResponse('Company slug is required', CORS);
   }
 
-  const { data: profile, error } = await supabaseAnon.rpc('get_company_profile', {
+  const rpcArgs = {
     p_slug: slug,
-  });
+  } satisfies DatabaseGenerated['public']['Functions']['get_company_profile']['Args'];
+  const { data: profile, error } = await callRpc('get_company_profile', rpcArgs, true);
 
   if (error) {
     return errorResponse(error, 'data-api:get_company_profile', CORS);

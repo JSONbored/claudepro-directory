@@ -1,6 +1,7 @@
 import { buildReadmeMarkdown, type ReadmeData } from '../../_shared/changelog/readme-builder.ts';
-import { supabaseAnon } from '../../_shared/clients/supabase.ts';
 import { VALID_CONTENT_CATEGORIES } from '../../_shared/config/constants/categories.ts';
+import type { Database as DatabaseGenerated } from '../../_shared/database.types.ts';
+import { callRpc } from '../../_shared/database-overrides.ts';
 import {
   badRequestResponse,
   buildCacheHeaders,
@@ -42,7 +43,10 @@ export async function handleContentRoute(
     if (first === 'changelog') {
       return handleChangelogIndex(format);
     }
-    if (VALID_CONTENT_CATEGORIES.includes(first)) {
+    if (
+      first &&
+      VALID_CONTENT_CATEGORIES.includes(first as (typeof VALID_CONTENT_CATEGORIES)[number])
+    ) {
       return handleCategoryOnly(first, format);
     }
   }
@@ -55,7 +59,10 @@ export async function handleContentRoute(
     if (first === 'tools') {
       return handleToolLlmsTxt(second, format);
     }
-    if (VALID_CONTENT_CATEGORIES.includes(first)) {
+    if (
+      first &&
+      VALID_CONTENT_CATEGORIES.includes(first as (typeof VALID_CONTENT_CATEGORIES)[number])
+    ) {
       return handleRecordExport(first, second, url);
     }
     return badRequestResponse(
@@ -93,7 +100,11 @@ async function handleSitewideContent(url: URL, logContext?: BaseLogContext): Pro
 }
 
 async function handleSitewideReadme(logContext?: BaseLogContext): Promise<Response> {
-  const { data, error } = await supabaseAnon.rpc('generate_readme_data');
+  const { data, error } = await callRpc(
+    'generate_readme_data',
+    {} as DatabaseGenerated['public']['Functions']['generate_readme_data']['Args'],
+    true
+  );
 
   if (error) {
     return errorResponse(error, 'data-api:generate_readme_data', CORS);
@@ -107,12 +118,22 @@ async function handleSitewideReadme(logContext?: BaseLogContext): Promise<Respon
     );
   }
 
-  const markdown = buildReadmeMarkdown(data as ReadmeData);
+  // Validate data structure before using
+  if (!data || typeof data !== 'object' || !('categories' in data)) {
+    return jsonResponse(
+      { error: 'README generation failed', message: 'Invalid data structure' },
+      500,
+      CORS
+    );
+  }
+  // Type assertion needed - RPC returns Json type which needs conversion
+  const readmeData = data as unknown as ReadmeData;
+  const markdown = buildReadmeMarkdown(readmeData);
 
   console.log('[data-api] Sitewide readme generated', {
     ...(logContext || {}),
     bytes: markdown.length,
-    categories: (data as ReadmeData).categories.length,
+    categories: readmeData.categories.length,
   });
 
   return new Response(markdown, {
@@ -127,15 +148,19 @@ async function handleSitewideReadme(logContext?: BaseLogContext): Promise<Respon
 }
 
 async function handleSitewideLlmsTxt(logContext?: BaseLogContext): Promise<Response> {
-  const { data, error } = await supabaseAnon.rpc('generate_sitewide_llms_txt');
+  const { data, error } = await callRpc(
+    'generate_sitewide_llms_txt',
+    {} as DatabaseGenerated['public']['Functions']['generate_sitewide_llms_txt']['Args'],
+    true
+  );
 
   if (error) {
     return errorResponse(error, 'data-api:generate_sitewide_llms_txt', CORS);
   }
 
-  if (!data) {
+  if (!data || typeof data !== 'string') {
     return jsonResponse(
-      { error: 'Sitewide LLMs export failed', message: 'RPC returned null' },
+      { error: 'Sitewide LLMs export failed', message: 'RPC returned null or invalid' },
       500,
       CORS
     );
@@ -159,28 +184,28 @@ async function handleSitewideLlmsTxt(logContext?: BaseLogContext): Promise<Respo
   });
 }
 
-function handleChangelogIndex(format: string): Promise<Response> {
+async function handleChangelogIndex(format: string): Promise<Response> {
   if (format === 'llms-changelog') {
     return handleChangelogLlmsTxt();
   }
   return badRequestResponse(`Invalid format '${format}' for changelog index`, CORS);
 }
 
-function handleCategoryOnly(category: string, format: string): Promise<Response> {
+async function handleCategoryOnly(category: string, format: string): Promise<Response> {
   if (format === 'llms-category') {
     return handleCategoryLlmsTxt(category);
   }
   return badRequestResponse(`Invalid format '${format}' for category-only route`, CORS);
 }
 
-function handleChangelogEntry(slug: string, format: string): Promise<Response> {
+async function handleChangelogEntry(slug: string, format: string): Promise<Response> {
   if (format === 'llms-entry') {
     return handleChangelogEntryLlmsTxt(slug);
   }
   return badRequestResponse(`Invalid format '${format}' for changelog entry`, CORS);
 }
 
-function handleToolLlmsTxt(tool: string, format: string): Promise<Response> {
+async function handleToolLlmsTxt(tool: string, format: string): Promise<Response> {
   if (format === 'llms-tool') {
     return handleToolLlms(tool);
   }
@@ -188,16 +213,17 @@ function handleToolLlmsTxt(tool: string, format: string): Promise<Response> {
 }
 
 async function handleCategoryLlmsTxt(category: string): Promise<Response> {
-  const { data, error } = await supabaseAnon.rpc('generate_category_llms_txt', {
+  const rpcArgs = {
     p_category: category,
-  });
+  } satisfies DatabaseGenerated['public']['Functions']['generate_category_llms_txt']['Args'];
+  const { data, error } = await callRpc('generate_category_llms_txt', rpcArgs, true);
 
   if (error) {
     return errorResponse(error, 'data-api:generate_category_llms_txt', CORS);
   }
 
-  if (!data) {
-    return badRequestResponse('Category LLMs.txt not found', CORS);
+  if (!data || typeof data !== 'string') {
+    return badRequestResponse('Category LLMs.txt not found or invalid', CORS);
   }
 
   const formatted = data.replace(/\\n/g, '\n');
@@ -213,14 +239,18 @@ async function handleCategoryLlmsTxt(category: string): Promise<Response> {
 }
 
 async function handleChangelogLlmsTxt(): Promise<Response> {
-  const { data, error } = await supabaseAnon.rpc('generate_changelog_llms_txt');
+  const { data, error } = await callRpc(
+    'generate_changelog_llms_txt',
+    {} as DatabaseGenerated['public']['Functions']['generate_changelog_llms_txt']['Args'],
+    true
+  );
 
   if (error) {
     return errorResponse(error, 'data-api:generate_changelog_llms_txt', CORS);
   }
 
-  if (!data) {
-    return badRequestResponse('Changelog LLMs.txt not found', CORS);
+  if (!data || typeof data !== 'string') {
+    return badRequestResponse('Changelog LLMs.txt not found or invalid', CORS);
   }
 
   const formatted = data.replace(/\\n/g, '\n');
@@ -236,16 +266,17 @@ async function handleChangelogLlmsTxt(): Promise<Response> {
 }
 
 async function handleChangelogEntryLlmsTxt(slug: string): Promise<Response> {
-  const { data, error } = await supabaseAnon.rpc('generate_changelog_entry_llms_txt', {
+  const rpcArgs = {
     p_slug: slug,
-  });
+  } satisfies DatabaseGenerated['public']['Functions']['generate_changelog_entry_llms_txt']['Args'];
+  const { data, error } = await callRpc('generate_changelog_entry_llms_txt', rpcArgs, true);
 
   if (error) {
     return errorResponse(error, 'data-api:generate_changelog_entry_llms_txt', CORS);
   }
 
-  if (!data) {
-    return badRequestResponse('Changelog entry LLMs.txt not found', CORS);
+  if (!data || typeof data !== 'string') {
+    return badRequestResponse('Changelog entry LLMs.txt not found or invalid', CORS);
   }
 
   const formatted = data.replace(/\\n/g, '\n');
@@ -261,9 +292,10 @@ async function handleChangelogEntryLlmsTxt(slug: string): Promise<Response> {
 }
 
 async function handleToolLlms(tool: string): Promise<Response> {
-  const { data, error } = await supabaseAnon.rpc('generate_tool_llms_txt', {
+  const rpcArgs = {
     p_tool_name: tool,
-  });
+  } satisfies DatabaseGenerated['public']['Functions']['generate_tool_llms_txt']['Args'];
+  const { data, error } = await callRpc('generate_tool_llms_txt', rpcArgs, true);
 
   if (error) {
     return errorResponse(error, 'data-api:generate_tool_llms_txt', CORS);

@@ -36,8 +36,9 @@ export interface BaseLayoutProps {
 
   /**
    * Main email content
+   * Provided automatically via JSX children
    */
-  children: React.ReactNode;
+  children?: React.ReactNode;
 
   /**
    * Whether to show footer with unsubscribe link
@@ -75,6 +76,9 @@ export function BaseLayout({
   customFooter,
   utm,
 }: BaseLayoutProps) {
+  if (!children) {
+    throw new Error('BaseLayout requires children content');
+  }
   const baseUrl = 'https://claudepro.directory';
 
   // Helper to add UTM to URL if utm params are provided

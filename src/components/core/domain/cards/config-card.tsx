@@ -8,6 +8,7 @@ import { BookmarkButton } from '@/src/components/core/buttons/interaction/bookma
 import { SimpleCopyButton } from '@/src/components/core/buttons/shared/simple-copy-button';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { BaseCard } from '@/src/components/core/domain/cards/content-card-base';
+import { HighlightedText } from '@/src/components/core/shared/highlighted-text';
 import { BorderBeam } from '@/src/components/primitives/animation/border-beam';
 import { ReviewRatingCompact } from '@/src/components/primitives/feedback/review-rating-compact';
 import { Button } from '@/src/components/primitives/ui/button';
@@ -25,7 +26,6 @@ import { getDisplayTitle } from '@/src/lib/utils';
 import { formatViewCount, getContentItemUrl } from '@/src/lib/utils/content.utils';
 import { ensureStringArray } from '@/src/lib/utils/data.utils';
 import { logClientWarning, logUnhandledPromise } from '@/src/lib/utils/error.utils';
-import { highlightSearchTerms } from '@/src/lib/utils/search-highlight';
 import { toasts } from '@/src/lib/utils/toast.utils';
 import type { ContentCategory } from '@/src/types/database-overrides';
 
@@ -42,49 +42,63 @@ export const ConfigCard = memo(
   }: ConfigCardProps) => {
     const displayTitle = getDisplayTitle(item);
 
-    // Memoize highlighted text for performance (only recompute when query/text changes)
-    const highlightedTitle = useMemo(
-      () => (searchQuery?.trim() ? highlightSearchTerms(displayTitle, searchQuery) : displayTitle),
-      [displayTitle, searchQuery]
-    );
+    // Use pre-highlighted HTML from edge function (unified-search)
+    // All highlighting is now done server-side at the edge
+    const highlightedTitle = useMemo(() => {
+      if ('title_highlighted' in item && item.title_highlighted) {
+        return <HighlightedText html={item.title_highlighted as string} fallback={displayTitle} />;
+      }
+      return displayTitle;
+    }, [displayTitle, item]);
 
-    const highlightedDescription = useMemo(
-      () =>
-        searchQuery?.trim() && item.description
-          ? highlightSearchTerms(item.description, searchQuery)
-          : item.description,
-      [item.description, searchQuery]
-    );
+    const highlightedDescription = useMemo(() => {
+      if ('description_highlighted' in item && item.description_highlighted && item.description) {
+        return (
+          <HighlightedText
+            html={item.description_highlighted as string}
+            fallback={item.description}
+          />
+        );
+      }
+      return item.description;
+    }, [item.description, item]);
 
-    // Get tags from item (must be declared before use in useMemo)
+    // Get tags from item
     const tags = ensureStringArray(
       'tags' in item ? (item.tags as string[] | null | undefined) : []
     );
 
-    // Highlight tags if search query matches
+    // Use pre-highlighted tags from edge function
     const highlightedTags = useMemo(() => {
-      if (!(searchQuery?.trim() && tags.length)) {
-        return [];
+      if (!tags.length) return [];
+
+      if ('tags_highlighted' in item && item.tags_highlighted) {
+        const highlightedTagsArray = item.tags_highlighted as string[];
+        return tags.map((tag, index) => ({
+          original: tag,
+          highlighted: <HighlightedText html={highlightedTagsArray[index] || tag} fallback={tag} />,
+        }));
       }
+
+      // No highlighting - return original tags
       return tags.map((tag) => ({
         original: tag,
-        highlighted: highlightSearchTerms(tag, searchQuery, {
-          wholeWordsOnly: false, // Allow partial matches in tags
-          enableAnimation: true,
-        }),
+        highlighted: tag,
       }));
-    }, [tags, searchQuery]);
+    }, [tags, item]);
 
-    // Highlight author if search query matches
+    // Use pre-highlighted author from edge function
     const highlightedAuthor = useMemo(() => {
-      if (!(searchQuery?.trim() && 'author' in item && item.author)) {
+      if (!('author' in item && item.author)) {
         return null;
       }
-      return highlightSearchTerms(item.author, searchQuery, {
-        wholeWordsOnly: false, // Allow partial matches in author names
-        enableAnimation: true,
-      });
-    }, [item, searchQuery]);
+
+      if ('author_highlighted' in item && item.author_highlighted) {
+        return <HighlightedText html={item.author_highlighted as string} fallback={item.author} />;
+      }
+
+      return item.author;
+    }, [item]);
 
     // Initialize pulse hook (must be before useEffect that uses it)
     const pulse = usePulse();
@@ -93,13 +107,12 @@ export const ConfigCard = memo(
     const hasTrackedHighlight = useRef(false);
     useEffect(() => {
       if (searchQuery?.trim() && !hasTrackedHighlight.current) {
-        // Check if any highlighting occurred
+        // Check if any highlighting occurred (edge function provides pre-highlighted fields)
         const hasHighlights =
-          highlightedTitle !== displayTitle ||
-          (highlightedDescription !== item.description && item.description) ||
-          (highlightedTags.length > 0 &&
-            highlightedTags.some((t) => typeof t === 'object' && t.highlighted !== t.original)) ||
-          highlightedAuthor !== null;
+          ('title_highlighted' in item && item.title_highlighted) ||
+          ('description_highlighted' in item && item.description_highlighted) ||
+          ('tags_highlighted' in item && item.tags_highlighted) ||
+          ('author_highlighted' in item && item.author_highlighted);
 
         if (hasHighlights) {
           hasTrackedHighlight.current = true;
@@ -110,15 +123,16 @@ export const ConfigCard = memo(
               slug: item.slug,
               query: searchQuery.trim(),
               metadata: {
-                has_title_highlight: highlightedTitle !== displayTitle,
-                has_description_highlight:
-                  highlightedDescription !== item.description && !!item.description,
-                has_tag_highlight:
-                  highlightedTags.length > 0 &&
-                  highlightedTags.some(
-                    (t) => typeof t === 'object' && t.highlighted !== t.original
-                  ),
-                has_author_highlight: highlightedAuthor !== null,
+                has_title_highlight: Boolean('title_highlighted' in item && item.title_highlighted),
+                has_description_highlight: Boolean(
+                  'description_highlighted' in item &&
+                    item.description_highlighted &&
+                    item.description
+                ),
+                has_tag_highlight: Boolean('tags_highlighted' in item && item.tags_highlighted),
+                has_author_highlight: Boolean(
+                  'author_highlighted' in item && item.author_highlighted
+                ),
               },
             })
             .catch((error) => {
@@ -129,18 +143,7 @@ export const ConfigCard = memo(
             });
         }
       }
-    }, [
-      searchQuery,
-      highlightedTitle,
-      displayTitle,
-      highlightedDescription,
-      item.description,
-      highlightedTags,
-      highlightedAuthor,
-      item.category,
-      item.slug,
-      pulse,
-    ]);
+    }, [searchQuery, item, pulse]);
     const targetPath = getContentItemUrl({
       category: item.category as CategoryId,
       slug: item.slug,
@@ -338,7 +341,7 @@ export const ConfigCard = memo(
           description={highlightedDescription}
           {...('author' in item && item.author
             ? {
-                author: highlightedAuthor || item.author,
+                author: highlightedAuthor ?? item.author,
               }
             : {})}
           {...('author_profile_url' in item && item.author_profile_url
@@ -347,11 +350,8 @@ export const ConfigCard = memo(
           {...('source' in item && item.source ? { source: item.source as string } : {})}
           {...(tags.length
             ? {
-                tags: highlightedTags.map((t) =>
-                  typeof t === 'string' ? t : (t.highlighted as string)
-                ),
-                highlightedTags: highlightedTags,
-                searchQuery,
+                tags: highlightedTags.map((t) => t.original),
+                ...(highlightedTags.length > 0 ? { highlightedTags } : {}),
               }
             : {})}
           variant={variant}

@@ -163,6 +163,13 @@ export function NewsletterWelcome({ email }: NewsletterWelcomeProps) {
  */
 export default NewsletterWelcome;
 
+export async function renderNewsletterWelcomeEmail(
+  props: NewsletterWelcomeProps
+): Promise<string> {
+  const { renderEmailTemplate } = await import('../base-template.tsx');
+  return renderEmailTemplate(NewsletterWelcome, props);
+}
+
 
 const heroShellStyle: React.CSSProperties = {
   backgroundColor: emailTheme.bgSecondary,

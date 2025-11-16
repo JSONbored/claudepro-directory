@@ -40,6 +40,8 @@ export function EmailCtaButton({ utm, preset, variant = 'primary', overrides }: 
 export interface EmailCtaSectionButtonConfig
   extends Omit<EmailCtaButtonProps, 'utm' | 'overrides'> {
   overrides?: Partial<EmailCtaPreset>;
+  // Note: 'key' is a special React prop and should NOT be included in this interface
+  // It's handled separately in the map function
 }
 
 export interface EmailCtaSectionProps {
@@ -56,15 +58,20 @@ export function EmailCtaSection({ utm, title, description, buttons }: EmailCtaSe
     <Section style={ctaSection}>
       {title ? <Text style={ctaTitleStyle}>{title}</Text> : null}
       {description ? <Text style={paragraphStyle}>{description}</Text> : null}
-      {buttons.map((button) => (
-        <EmailCtaButton
-          key={`${button.preset}-${button.variant ?? 'primary'}`}
-          utm={utm}
-          preset={button.preset}
-          variant={button.variant}
-          overrides={button.overrides}
-        />
-      ))}
+      {buttons.map((button, index) => {
+        // Generate React key from button props (key is a special React prop, not part of component props)
+        const reactKey = `${button.preset}-${button.variant ?? 'primary'}-${index}`;
+        // React's key prop is special and handled separately - TypeScript may complain but this is correct
+        return (
+          <EmailCtaButton
+            {...({ key: reactKey } as { key: string })}
+            utm={utm}
+            preset={button.preset}
+            variant={button.variant}
+            overrides={button.overrides}
+          />
+        );
+      })}
     </Section>
   );
 }

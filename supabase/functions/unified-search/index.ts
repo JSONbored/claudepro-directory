@@ -18,8 +18,9 @@
  * - Without entities param → search_content_optimized() RPC (content-only with advanced filters)
  */
 
-import { supabaseAnon } from '../_shared/clients/supabase.ts';
-import type { Database } from '../_shared/database.types.ts';
+import type { Database as DatabaseGenerated } from '../_shared/database.types.ts';
+import type { Database, RpcReturns } from '../_shared/database-overrides.ts';
+import { callRpc } from '../_shared/database-overrides.ts';
 import { enqueueSearchAnalytics } from '../_shared/utils/analytics/pulse.ts';
 import {
   badRequestResponse,
@@ -28,16 +29,28 @@ import {
 } from '../_shared/utils/http.ts';
 import { createSearchContext, withDuration } from '../_shared/utils/logging.ts';
 import { createRouter, type HttpMethod, type RouterContext } from '../_shared/utils/router.ts';
+import {
+  highlightSearchTerms,
+  highlightSearchTermsArray,
+} from '../_shared/utils/search-highlight.ts';
 
-type ContentSearchResult =
-  Database['public']['Functions']['search_content_optimized']['Returns'][number];
-type UnifiedSearchResult = Database['public']['Functions']['search_unified']['Returns'][number];
-type AutocompleteResult =
-  Database['public']['Functions']['get_search_suggestions_from_history']['Returns'][number];
-type FacetResult = Database['public']['Functions']['get_search_facets']['Returns'][number];
+type ContentSearchResult = RpcReturns<'search_content_optimized'>[number];
+type UnifiedSearchResult = RpcReturns<'search_unified'>[number];
+type AutocompleteResult = RpcReturns<'get_search_suggestions_from_history'>[number];
+type FacetResult = RpcReturns<'get_search_facets'>[number];
+
+interface HighlightedSearchResult {
+  // Original fields
+  [key: string]: unknown;
+  // Highlighted fields (HTML strings)
+  title_highlighted?: string;
+  description_highlighted?: string;
+  author_highlighted?: string;
+  tags_highlighted?: string[];
+}
 
 interface SearchResponse {
-  results: ContentSearchResult[] | UnifiedSearchResult[];
+  results: HighlightedSearchResult[];
   query: string;
   filters: {
     categories?: string[];
@@ -184,26 +197,33 @@ async function handleSearch(url: URL, startTime: number, req: Request): Promise<
 
   // Route to appropriate RPC based on search type
   if (searchType === 'unified') {
-    const { data: unifiedData, error: unifiedError } = await supabaseAnon.rpc('search_unified', {
+    const rpcArgs = {
       p_query: query,
       p_entities: entities || ['content', 'company', 'job', 'user'],
       p_limit: limit,
       p_offset: offset,
-    });
+    } satisfies DatabaseGenerated['public']['Functions']['search_unified']['Args'];
+    const { data: unifiedData, error: unifiedError } = await callRpc(
+      'search_unified',
+      rpcArgs,
+      true
+    );
     data = (unifiedData || []) as UnifiedSearchResult[];
     error = unifiedError;
   } else {
-    const { data: contentData, error: contentError } = await supabaseAnon.rpc(
+    const rpcArgs = {
+      p_query: query || undefined,
+      p_categories: categories,
+      p_tags: tags,
+      p_authors: authors,
+      p_sort: sort,
+      p_limit: limit,
+      p_offset: offset,
+    } satisfies DatabaseGenerated['public']['Functions']['search_content_optimized']['Args'];
+    const { data: contentData, error: contentError } = await callRpc(
       'search_content_optimized',
-      {
-        p_query: query || undefined,
-        p_categories: categories,
-        p_tags: tags,
-        p_authors: authors,
-        p_sort: sort,
-        p_limit: limit,
-        p_offset: offset,
-      }
+      rpcArgs,
+      true
     );
     data = (contentData || []) as ContentSearchResult[];
     error = contentError;
@@ -225,6 +245,43 @@ async function handleSearch(url: URL, startTime: number, req: Request): Promise<
   }
 
   const results = data;
+
+  // Apply search term highlighting if query provided
+  const highlightedResults: HighlightedSearchResult[] = query.trim()
+    ? results.map((result) => {
+        const highlighted: HighlightedSearchResult = { ...result };
+
+        // Highlight title
+        if (result.title) {
+          highlighted.title_highlighted = highlightSearchTerms(result.title, query, {
+            wholeWordsOnly: true,
+          });
+        }
+
+        // Highlight description
+        if (result.description) {
+          highlighted.description_highlighted = highlightSearchTerms(result.description, query, {
+            wholeWordsOnly: true,
+          });
+        }
+
+        // Highlight author (content search only)
+        if ('author' in result && result.author && typeof result.author === 'string') {
+          highlighted.author_highlighted = highlightSearchTerms(result.author, query, {
+            wholeWordsOnly: false, // Allow partial matches in author names
+          });
+        }
+
+        // Highlight tags
+        if (result.tags && Array.isArray(result.tags) && result.tags.length > 0) {
+          highlighted.tags_highlighted = highlightSearchTermsArray(result.tags, query, {
+            wholeWordsOnly: false, // Allow partial matches in tags
+          });
+        }
+
+        return highlighted;
+      })
+    : results.map((result) => ({ ...result }));
 
   // Track search analytics (fire and forget)
   trackSearchAnalytics(
@@ -252,10 +309,11 @@ async function handleSearch(url: URL, startTime: number, req: Request): Promise<
     ...withDuration(logContext, startTime),
     resultCount: results.length,
     searchType,
+    highlighted: query.trim().length > 0,
   });
 
   const response: SearchResponse = {
-    results,
+    results: highlightedResults,
     query,
     filters: {
       ...(categories && { categories }),
@@ -311,10 +369,11 @@ async function handleAutocomplete(url: URL, startTime: number): Promise<Response
   }
 
   // Call autocomplete RPC (uses search history + content titles)
-  const { data, error } = await supabaseAnon.rpc('get_search_suggestions_from_history', {
+  const rpcArgs = {
     p_query: query,
     p_limit: limit,
-  });
+  } satisfies DatabaseGenerated['public']['Functions']['get_search_suggestions_from_history']['Args'];
+  const { data, error } = await callRpc('get_search_suggestions_from_history', rpcArgs, true);
 
   if (error) {
     console.error('[unified-search] Autocomplete RPC error', {
@@ -366,7 +425,11 @@ async function handleFacets(startTime: number): Promise<Response> {
   });
 
   // Call facets RPC
-  const { data, error } = await supabaseAnon.rpc('get_search_facets');
+  const { data, error } = await callRpc(
+    'get_search_facets',
+    {} as DatabaseGenerated['public']['Functions']['get_search_facets']['Args'],
+    true
+  );
 
   if (error) {
     console.error('[unified-search] Facets RPC error', {

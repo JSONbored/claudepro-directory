@@ -98,7 +98,7 @@ export function JobExpired({
             repostUrl
               ? [
                   {
-                    preset: 'primaryDirectory',
+                    preset: 'primaryDirectory' as const,
                     variant: 'primary' as const,
                     overrides: {
                       href: repostUrl,
@@ -112,5 +112,10 @@ export function JobExpired({
         />
     </BaseLayout>
   );
+}
+
+export async function renderJobExpiredEmail(props: JobExpiredProps): Promise<string> {
+  const { renderEmailTemplate } = await import('../base-template.tsx');
+  return renderEmailTemplate(JobExpired, props);
 }
 

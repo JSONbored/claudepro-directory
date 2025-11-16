@@ -1,5 +1,6 @@
-import { supabaseAnon } from '../../_shared/clients/supabase.ts';
 import { VALID_CONTENT_CATEGORIES } from '../../_shared/config/constants/categories.ts';
+import type { Database as DatabaseGenerated } from '../../_shared/database.types.ts';
+import { callRpc } from '../../_shared/database-overrides.ts';
 import {
   badRequestResponse,
   buildCacheHeaders,
@@ -160,7 +161,9 @@ function parseCategory(value: string | null): string | null {
   if (!value || value === 'all') {
     return null;
   }
-  return VALID_CONTENT_CATEGORIES.includes(value) ? value : null;
+  return VALID_CONTENT_CATEGORIES.includes(value as (typeof VALID_CONTENT_CATEGORIES)[number])
+    ? value
+    : null;
 }
 
 function clampLimit(rawLimit: number): number {
@@ -171,10 +174,11 @@ function clampLimit(rawLimit: number): number {
 }
 
 async function fetchTrendingMetrics(category: string | null, limit: number) {
-  const { data, error } = await supabaseAnon.rpc('get_trending_metrics_with_content', {
-    p_category: category,
+  const rpcArgs = {
+    p_category: category ?? undefined,
     p_limit: limit,
-  });
+  } satisfies DatabaseGenerated['public']['Functions']['get_trending_metrics_with_content']['Args'];
+  const { data, error } = await callRpc('get_trending_metrics_with_content', rpcArgs, true);
 
   if (error) {
     throw error;
@@ -184,10 +188,11 @@ async function fetchTrendingMetrics(category: string | null, limit: number) {
 }
 
 async function fetchPopularContent(category: string | null, limit: number) {
-  const { data, error } = await supabaseAnon.rpc('get_popular_content', {
-    p_category: category,
+  const rpcArgs = {
+    p_category: category ?? undefined,
     p_limit: limit,
-  });
+  } satisfies DatabaseGenerated['public']['Functions']['get_popular_content']['Args'];
+  const { data, error } = await callRpc('get_popular_content', rpcArgs, true);
 
   if (error) {
     throw error;
@@ -197,11 +202,12 @@ async function fetchPopularContent(category: string | null, limit: number) {
 }
 
 async function fetchRecentContent(category: string | null, limit: number) {
-  const { data, error } = await supabaseAnon.rpc('get_recent_content', {
-    p_category: category,
+  const rpcArgs = {
+    p_category: category ?? undefined,
     p_limit: limit,
     p_days: 30,
-  });
+  } satisfies DatabaseGenerated['public']['Functions']['get_recent_content']['Args'];
+  const { data, error } = await callRpc('get_recent_content', rpcArgs, true);
 
   if (error) {
     throw error;

@@ -81,8 +81,8 @@ export function JobPosted({ jobTitle, company, userEmail, jobSlug }: JobPostedPr
           utm={utm}
           buttons={[
             {
-              preset: 'primaryDirectory',
-              variant: 'primary',
+              preset: 'primaryDirectory' as const,
+              variant: 'primary' as const,
               overrides: { href: jobUrl, label: 'View Job Listing', contentKey: 'view_listing_live' },
             },
           ]}
@@ -104,5 +104,10 @@ export function JobPosted({ jobTitle, company, userEmail, jobSlug }: JobPostedPr
       </Section>
     </BaseLayout>
   );
+}
+
+export async function renderJobPostedEmail(props: JobPostedProps): Promise<string> {
+  const { renderEmailTemplate } = await import('../base-template.tsx');
+  return renderEmailTemplate(JobPosted, props);
 }
 

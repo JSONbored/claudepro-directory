@@ -75,8 +75,8 @@ export function JobSubmitted({ jobTitle, company, userEmail, jobId }: JobSubmitt
           utm={utm}
           buttons={[
             {
-              preset: 'primaryDirectory',
-              variant: 'primary',
+              preset: 'primaryDirectory' as const,
+              variant: 'primary' as const,
               overrides: {
                 href: `${baseUrl}/account/jobs`,
                 label: 'View My Jobs',
@@ -87,5 +87,10 @@ export function JobSubmitted({ jobTitle, company, userEmail, jobId }: JobSubmitt
         />
     </BaseLayout>
   );
+}
+
+export async function renderJobSubmittedEmail(props: JobSubmittedProps): Promise<string> {
+  const { renderEmailTemplate } = await import('../base-template.tsx');
+  return renderEmailTemplate(JobSubmitted, props);
 }
 

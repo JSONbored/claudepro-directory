@@ -182,15 +182,17 @@ async function uploadTemplates() {
       await delay(REQUEST_SPACING_MS);
       const idToUpdate = templateId; // Store in const to avoid non-null assertion
       const updateResult = await callWithRateLimitRetry(
-        () =>
-          resend.templates.update(idToUpdate, {
+        async () => {
+          const result = resend.templates.update(idToUpdate, {
             name: definition.displayName,
             subject,
             html,
             from: definition.from,
             replyTo: definition.replyTo,
             variables: DEFAULT_TEMPLATE_VARIABLES,
-          }),
+          });
+          return (await result) as { error: unknown; data: unknown };
+        },
         slug,
         'update template'
       );
@@ -198,25 +200,31 @@ async function uploadTemplates() {
     } else {
       await delay(REQUEST_SPACING_MS);
       const createResult = await callWithRateLimitRetry(
-        () =>
-          resend.templates.create({
+        async () => {
+          const result = resend.templates.create({
             name: definition.displayName,
             subject,
             html,
             from: definition.from,
             replyTo: definition.replyTo,
             variables: DEFAULT_TEMPLATE_VARIABLES,
-          }),
+          });
+          // Resend's ChainableTemplateResult needs to be awaited or converted
+          return (await result) as { error: unknown; data: { id: string } };
+        },
         slug,
         'create template'
       );
       ensureSuccess(createResult, `create template (${slug})`);
-      templateId = (createResult as { data: { id: string } }).data.id;
+      templateId = createResult.data.id;
     }
 
     await delay(REQUEST_SPACING_MS);
     const publishResult = await callWithRateLimitRetry(
-      () => resend.templates.publish(templateId),
+      async () => {
+        const result = resend.templates.publish(templateId);
+        return (await result) as { error: unknown; data: unknown };
+      },
       slug,
       'publish template'
     );

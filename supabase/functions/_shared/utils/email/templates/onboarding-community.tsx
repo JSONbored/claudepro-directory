@@ -35,7 +35,12 @@ const COMMUNITY_STATS = [
   { label: 'MCP Servers', value: '50+' },
 ] as const;
 
-const CONTRIBUTION_STEPS = [
+const CONTRIBUTION_STEPS: Array<{
+  step: number;
+  title: string;
+  description: string;
+  cta?: { label: string; href: string };
+}> = [
   {
     step: 1,
     title: 'Test Your Configuration',
@@ -55,7 +60,7 @@ const CONTRIBUTION_STEPS = [
       href: '#submit',
     },
   },
-] as const;
+];
 
 const FEATURED_ITEMS = [
   {
@@ -243,4 +248,10 @@ const linkButtonStyle: React.CSSProperties = {
 };
 
 export default OnboardingCommunity;
+
+export async function renderOnboardingCommunityEmail(
+  props: OnboardingCommunityProps
+): Promise<string> {
+  return renderEmailTemplate(OnboardingCommunity, props);
+}
 

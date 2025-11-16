@@ -1,8 +1,8 @@
-import { supabaseServiceRole } from '../../clients/supabase.ts';
-import type { Database } from '../../database.types.ts';
+import type { TablesInsert } from '../../database-overrides.ts';
 import { getAuthUserFromHeader } from '../auth.ts';
+import { pgmqSend } from '../pgmq-client.ts';
 
-type SearchQueryInsert = Database['public']['Tables']['search_queries']['Insert'];
+type SearchQueryInsert = TablesInsert<'search_queries'>;
 
 export interface TrackSearchQueryEdgeParams {
   query: string;
@@ -39,9 +39,8 @@ export async function enqueueSearchAnalytics({
 
   // Enqueue to user_interactions queue with interaction_type='search'
   // Worker will process and route to search_queries table
-  const { error } = await supabaseServiceRole.schema('pgmq_public').rpc('send', {
-    queue_name: 'user_interactions',
-    msg: {
+  try {
+    await pgmqSend('user_interactions', {
       user_id: resolvedUserId ?? null,
       content_type: null,
       content_slug: null,
@@ -52,12 +51,10 @@ export async function enqueueSearchAnalytics({
         filters: filters ?? null,
         result_count: resultCount,
       },
-    },
-  });
-
-  if (error) {
+    });
+  } catch (error) {
     console.warn('[analytics] Failed to enqueue search analytics', {
-      error: error.message,
+      error: error instanceof Error ? error.message : String(error),
       query: query.substring(0, 50),
     });
   }

@@ -8,6 +8,9 @@ import { Resend } from 'npm:resend@4.0.0';
 import { supabaseServiceRole } from '../_shared/clients/supabase.ts';
 import { AUTH_HOOK_ENV, RESEND_ENV, validateEnvironment } from '../_shared/config/email-config.ts';
 import { edgeEnv } from '../_shared/config/env.ts';
+import type { Database as DatabaseGenerated } from '../_shared/database.types.ts';
+import type { Database } from '../_shared/database-overrides.ts';
+import { callRpc, insertTable, upsertTable } from '../_shared/database-overrides.ts';
 import { invalidateCacheByKey } from '../_shared/utils/cache.ts';
 import { renderEmailTemplate } from '../_shared/utils/email/base-template.tsx';
 import { CollectionShared } from '../_shared/utils/email/templates/collection-shared.tsx';
@@ -20,7 +23,10 @@ import { JobPaymentConfirmed } from '../_shared/utils/email/templates/job-paymen
 import { JobPosted } from '../_shared/utils/email/templates/job-posted.tsx';
 import { JobRejected } from '../_shared/utils/email/templates/job-rejected.tsx';
 import { JobSubmitted } from '../_shared/utils/email/templates/job-submitted.tsx';
-import { NewsletterWelcome } from '../_shared/utils/email/templates/newsletter-welcome.tsx';
+import {
+  NewsletterWelcome,
+  renderNewsletterWelcomeEmail,
+} from '../_shared/utils/email/templates/newsletter-welcome.tsx';
 import { OnboardingCommunity } from '../_shared/utils/email/templates/onboarding-community.tsx';
 import { OnboardingGettingStarted } from '../_shared/utils/email/templates/onboarding-getting-started.tsx';
 import { OnboardingPowerTips } from '../_shared/utils/email/templates/onboarding-power-tips.tsx';
@@ -77,31 +83,31 @@ const router = createRouter<EmailHandlerContext>({
       name: 'subscribe',
       methods: ['POST', 'OPTIONS'],
       match: (ctx) => ctx.action === 'subscribe',
-      handler: (ctx) => handleSubscribe(ctx.request),
+      handler: async (ctx) => await handleSubscribe(ctx.request),
     },
     {
       name: 'welcome',
       methods: ['POST', 'OPTIONS'],
       match: (ctx) => ctx.action === 'welcome',
-      handler: (ctx) => handleWelcome(ctx.request),
+      handler: async (ctx) => await handleWelcome(ctx.request),
     },
     {
       name: 'transactional',
       methods: ['POST', 'OPTIONS'],
       match: (ctx) => ctx.action === 'transactional',
-      handler: (ctx) => handleTransactional(ctx.request),
+      handler: async (ctx) => await handleTransactional(ctx.request),
     },
     {
       name: 'digest',
       methods: ['POST', 'OPTIONS'],
       match: (ctx) => ctx.action === 'digest',
-      handler: () => handleDigest(),
+      handler: async () => await handleDigest(),
     },
     {
       name: 'sequence',
       methods: ['POST', 'OPTIONS'],
       match: (ctx) => ctx.action === 'sequence',
-      handler: () => handleSequence(),
+      handler: async () => await handleSequence(),
     },
     {
       name: 'get-count',
@@ -122,11 +128,11 @@ const router = createRouter<EmailHandlerContext>({
           'job-expired',
           'job-payment-confirmed',
         ].includes(ctx.action),
-      handler: (ctx) => {
+      handler: async (ctx) => {
         if (!ctx.action) {
           return badRequestResponse('Missing action');
         }
-        return handleJobLifecycleEmail(ctx.request, ctx.action);
+        return await handleJobLifecycleEmail(ctx.request, ctx.action);
       },
     },
     {
@@ -189,8 +195,9 @@ async function handleSubscribe(req: Request): Promise<Response> {
     let topicIds: string[] = [];
 
     // Build contact properties from signup context (used for both Resend and database)
+    // Convert undefined to null for source to match expected type
     const contactProperties = buildContactProperties({
-      source,
+      source: source ?? null,
       copyType: copy_type,
       copyCategory: copy_category,
       referrer,
@@ -206,7 +213,17 @@ async function handleSubscribe(req: Request): Promise<Response> {
       });
 
       // Create contact with properties
-      const { data: contact, error: resendError } = await resend.contacts.create({
+      // Resend API types may not include all fields - use type assertion
+      type ResendContactsCreateApi = {
+        create: (args: {
+          audienceId: string;
+          email: string;
+          unsubscribed?: boolean;
+          properties?: Record<string, unknown>;
+        }) => Promise<{ data: { id: string } | null; error: { message?: string } | null }>;
+      };
+      const contactsApi = resend.contacts as unknown as ResendContactsCreateApi;
+      const { data: contact, error: resendError } = await contactsApi.create({
         audienceId: RESEND_ENV.audienceId,
         email: normalizedEmail,
         unsubscribed: false,
@@ -244,7 +261,7 @@ async function handleSubscribe(req: Request): Promise<Response> {
 
         // Step 1.5: Assign topics based on signup context
         try {
-          topicIds = inferInitialTopics(source, copy_category);
+          topicIds = inferInitialTopics(source ?? null, copy_category);
           console.log('[email-handler] Assigning topics', {
             ...logContext,
             topic_count: topicIds.length,
@@ -252,7 +269,17 @@ async function handleSubscribe(req: Request): Promise<Response> {
           });
 
           if (topicIds.length > 0) {
-            const { error: topicError } = await resend.contacts.topics.update({
+            // Resend API types may not include topics - use type assertion
+            type ResendContactsTopicsApi = {
+              topics: {
+                update: (args: {
+                  contactId: string;
+                  topicIds: string[];
+                }) => Promise<{ data: unknown; error: { message?: string } | null }>;
+              };
+            };
+            const contactsWithTopics = resend.contacts as unknown as ResendContactsTopicsApi;
+            const { error: topicError } = await contactsWithTopics.topics.update({
               contactId: resendContactId,
               topicIds,
             });
@@ -303,9 +330,8 @@ async function handleSubscribe(req: Request): Promise<Response> {
     }
 
     // Step 2: Insert into database (rate limiting handled by BEFORE INSERT trigger)
-    const { data: subscription, error: dbError } = await supabaseServiceRole
-      .from('newsletter_subscriptions')
-      .insert({
+    const insertData: DatabaseGenerated['public']['Tables']['newsletter_subscriptions']['Insert'] =
+      {
         email: normalizedEmail,
         source: source || 'footer',
         referrer: referrer || null,
@@ -322,17 +348,28 @@ async function handleSubscribe(req: Request): Promise<Response> {
         total_copies: contactProperties.total_copies as number,
         last_active_at: new Date().toISOString(),
         resend_topics: topicIds,
-      })
-      .select()
-      .single();
+      };
+    // Use type-safe helper to ensure proper type inference
+    const validatedInsertData =
+      insertData satisfies DatabaseGenerated['public']['Tables']['newsletter_subscriptions']['Insert'];
+    const result = await insertTable('newsletter_subscriptions', validatedInsertData);
+    const { data: subscription, error: dbError } = await result
+      .select('*')
+      .single<DatabaseGenerated['public']['Tables']['newsletter_subscriptions']['Row']>();
 
     if (dbError) {
       // Handle specific database errors
-      if (dbError.code === '23505') {
+      // Type guard for Supabase PostgrestError which has 'code' and 'message' properties
+      const isPostgrestError = typeof dbError === 'object' && dbError !== null && 'code' in dbError;
+      if (isPostgrestError && dbError.code === '23505') {
         // Email already exists (UNIQUE constraint violation)
         return badRequestResponse('This email is already subscribed to our newsletter');
       }
-      if (dbError.message?.includes('Rate limit')) {
+      const errorMessage =
+        isPostgrestError && 'message' in dbError && typeof dbError.message === 'string'
+          ? dbError.message
+          : String(dbError);
+      if (errorMessage.includes('Rate limit')) {
         // Rate limit exceeded (triggered by database trigger)
         return jsonResponse(
           {
@@ -343,7 +380,7 @@ async function handleSubscribe(req: Request): Promise<Response> {
           publicCorsHeaders
         );
       }
-      throw new Error(`Database insert failed: ${dbError.message}`);
+      throw new Error(`Database insert failed: ${errorMessage}`);
     }
 
     // Step 2.5: Invalidate cache after successful subscription insert
@@ -359,13 +396,13 @@ async function handleSubscribe(req: Request): Promise<Response> {
     // Step 3: Send welcome email
     const html = await renderEmailTemplate(NewsletterWelcome, { email: normalizedEmail });
 
-    const { data: emailData, error: emailError } = await resend.emails.send({
+    const { data: emailData, error: emailError } = (await resend.emails.send({
       from: 'Claude Pro Directory <hello@mail.claudepro.directory>',
       to: normalizedEmail,
       subject: 'Welcome to Claude Pro Directory! 🎉',
       html,
       tags: [{ name: 'type', value: 'newsletter' }],
-    });
+    })) as { data: { id: string } | null; error: { message: string } | null };
 
     if (emailError) {
       // Log email error but don't fail the request - subscription is saved
@@ -377,15 +414,21 @@ async function handleSubscribe(req: Request): Promise<Response> {
 
     // Step 4: Enroll in onboarding sequence
     try {
-      await supabaseServiceRole.rpc('enroll_in_email_sequence', {
+      const enrollArgs = {
         p_email: normalizedEmail,
-      });
+      } satisfies DatabaseGenerated['public']['Functions']['enroll_in_email_sequence']['Args'];
+      await callRpc('enroll_in_email_sequence', enrollArgs);
     } catch (sequenceError) {
       // Log sequence error but don't fail - subscription is saved
       console.error('[email-handler] Sequence enrollment failed', {
         ...logContext,
         error: sequenceError instanceof Error ? sequenceError.message : String(sequenceError),
       });
+    }
+
+    // Ensure subscription is not null before accessing properties
+    if (!subscription) {
+      throw new Error('Subscription insert succeeded but no data returned');
     }
 
     // Return success with final log
@@ -451,9 +494,10 @@ async function handleWelcome(req: Request): Promise<Response> {
 
     // Enroll in onboarding sequence
     try {
-      await supabaseServiceRole.rpc('enroll_in_email_sequence', {
+      const enrollArgs = {
         p_email: email,
-      });
+      } satisfies DatabaseGenerated['public']['Functions']['enroll_in_email_sequence']['Args'];
+      await callRpc('enroll_in_email_sequence', enrollArgs);
     } catch (sequenceError) {
       console.error('[email-handler] Sequence enrollment failed', {
         ...logContext,
@@ -616,8 +660,20 @@ async function handleDigest(): Promise<Response> {
   const logContext = createEmailHandlerContext('digest');
 
   // OPTION 1: Rate limiting protection - check last successful run timestamp
-  const { data: lastRunData } = await supabaseServiceRole
-    .from('app_settings')
+  // Type assertion needed for app_settings table access
+  type AppSettingsRow = DatabaseGenerated['public']['Tables']['app_settings']['Row'];
+  const { data: lastRunData } = await (
+    supabaseServiceRole.from('app_settings') as unknown as {
+      select: (columns: string) => {
+        eq: (
+          column: string,
+          value: string
+        ) => {
+          single: () => Promise<{ data: AppSettingsRow | null; error: unknown }>;
+        };
+      };
+    }
+  )
     .select('setting_value, updated_at')
     .eq('setting_key', 'last_digest_email_timestamp')
     .single();
@@ -645,17 +701,36 @@ async function handleDigest(): Promise<Response> {
 
   const previousWeekStart = getPreviousWeekStart();
 
-  const { data: digest, error: digestError } = await supabaseServiceRole.rpc('get_weekly_digest', {
+  const digestArgs = {
     p_week_start: previousWeekStart,
-  });
+  } satisfies DatabaseGenerated['public']['Functions']['get_weekly_digest']['Args'];
+  const { data: digest, error: digestError } = await callRpc('get_weekly_digest', digestArgs);
 
   if (digestError) throw digestError;
 
-  const digestData = digest as
-    | Database['public']['Functions']['get_weekly_digest']['Returns']
-    | null;
+  // Type the RPC return properly
+  type WeeklyDigestReturn =
+    DatabaseGenerated['public']['Functions']['get_weekly_digest']['Returns'];
+  if (!digest || typeof digest !== 'object' || digest === null) {
+    return successResponse({ skipped: true, reason: 'invalid_data' });
+  }
+  const digestData = digest as WeeklyDigestReturn;
 
-  if (!(digestData && (digestData.newContent?.length || digestData.trendingContent?.length))) {
+  // Runtime check for required properties with proper type narrowing
+  const hasNewContent =
+    digestData !== null &&
+    typeof digestData === 'object' &&
+    'newContent' in digestData &&
+    Array.isArray(digestData.newContent) &&
+    digestData.newContent.length > 0;
+  const hasTrendingContent =
+    digestData !== null &&
+    typeof digestData === 'object' &&
+    'trendingContent' in digestData &&
+    Array.isArray(digestData.trendingContent) &&
+    digestData.trendingContent.length > 0;
+
+  if (!(hasNewContent || hasTrendingContent)) {
     return successResponse({ skipped: true, reason: 'no_content' });
   }
 
@@ -669,7 +744,7 @@ async function handleDigest(): Promise<Response> {
 
   // OPTION 1: Update last successful run timestamp after sending
   const currentTimestamp = new Date().toISOString();
-  await supabaseServiceRole.from('app_settings').upsert({
+  const upsertData = {
     setting_key: 'last_digest_email_timestamp',
     setting_value: currentTimestamp,
     setting_type: 'string',
@@ -678,7 +753,8 @@ async function handleDigest(): Promise<Response> {
     description: 'Timestamp of last successful weekly digest email send (used for rate limiting)',
     category: 'email',
     version: 1,
-  });
+  } satisfies DatabaseGenerated['public']['Tables']['app_settings']['Insert'];
+  await upsertTable('app_settings', upsertData);
 
   console.log('[email-handler] Digest completed', {
     ...withDuration(logContext, startTime),
@@ -705,7 +781,10 @@ async function handleSequence(): Promise<Response> {
   const startTime = Date.now();
   const logContext = createEmailHandlerContext('sequence');
 
-  const { data, error } = await supabaseServiceRole.rpc('get_due_sequence_emails');
+  const { data, error } = await callRpc(
+    'get_due_sequence_emails',
+    {} as DatabaseGenerated['public']['Functions']['get_due_sequence_emails']['Args']
+  );
 
   if (error) {
     console.error('[email-handler] Failed to fetch due sequence emails', {
@@ -715,13 +794,38 @@ async function handleSequence(): Promise<Response> {
     throw error;
   }
 
-  const dueEmails =
-    (data as Database['public']['Functions']['get_due_sequence_emails']['Returns']) || [];
+  // Type the RPC return properly
+  type DueSequenceEmailsReturn =
+    DatabaseGenerated['public']['Functions']['get_due_sequence_emails']['Returns'];
+  if (!(data && Array.isArray(data))) {
+    return successResponse({ sent: 0, failed: 0 });
+  }
+  const dueEmailsRaw = data as DueSequenceEmailsReturn;
 
-  if (dueEmails.length === 0) {
+  // Runtime check to ensure dueEmails is an array
+  if (!Array.isArray(dueEmailsRaw) || dueEmailsRaw.length === 0) {
     console.log('[email-handler] No due sequence emails', logContext);
     return successResponse({ sent: 0, failed: 0 });
   }
+
+  // Type guard and cast to properly typed array
+  type DueEmailItem = { id: string; email: string; step: number };
+  const dueEmails = dueEmailsRaw.map((item) => {
+    if (
+      typeof item === 'object' &&
+      item !== null &&
+      'id' in item &&
+      'email' in item &&
+      'step' in item
+    ) {
+      return {
+        id: String(item.id),
+        email: String(item.email),
+        step: Number(item.step),
+      } as DueEmailItem;
+    }
+    throw new Error('Invalid due email item structure');
+  });
 
   console.log('[email-handler] Processing sequence emails', {
     ...logContext,
@@ -763,17 +867,19 @@ async function handleSequence(): Promise<Response> {
 
       if (result.error) throw new Error(result.error.message);
 
-      await supabaseServiceRole.rpc('mark_sequence_email_processed', {
+      const markProcessedArgs = {
         p_schedule_id: id,
         p_email: email,
         p_step: step,
         p_success: true,
-      });
+      } satisfies DatabaseGenerated['public']['Functions']['mark_sequence_email_processed']['Args'];
+      await callRpc('mark_sequence_email_processed', markProcessedArgs);
 
-      await supabaseServiceRole.rpc('schedule_next_sequence_step', {
+      const scheduleNextArgs = {
         p_email: email,
         p_current_step: step,
-      });
+      } satisfies DatabaseGenerated['public']['Functions']['schedule_next_sequence_step']['Args'];
+      await callRpc('schedule_next_sequence_step', scheduleNextArgs);
 
       sentCount++;
     } catch (error) {
@@ -814,7 +920,10 @@ function getPreviousWeekStart(): string {
 }
 
 async function getAllSubscribers(): Promise<string[]> {
-  const { data, error } = await supabaseServiceRole.rpc('get_active_subscribers');
+  const { data, error } = await callRpc(
+    'get_active_subscribers',
+    {} as DatabaseGenerated['public']['Functions']['get_active_subscribers']['Args']
+  );
 
   if (error) {
     console.error('[email-handler] Failed to fetch subscribers', {
@@ -1025,17 +1134,22 @@ async function getCachedNewsletterCount(): Promise<number> {
     return newsletterCountCache.value;
   }
 
-  const { data, error } = await supabaseServiceRole.rpc('get_newsletter_subscriber_count');
+  // Direct query to newsletter_subscriptions table instead of non-existent RPC
+  const { count, error } = await supabaseServiceRole
+    .from('newsletter_subscriptions')
+    .select('*', { count: 'exact', head: true });
+
   if (error) {
-    throw new Error(error.message);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    throw new Error(`Failed to get newsletter count: ${errorMessage}`);
   }
 
-  const count = (data as number) ?? 0;
+  const subscriberCount = count ?? 0;
   newsletterCountCache = {
-    value: count,
+    value: subscriberCount,
     expiresAt: now + NEWSLETTER_COUNT_TTL_SECONDS * 1000,
   };
-  return count;
+  return subscriberCount;
 }
 
 async function handleGetNewsletterCount(): Promise<Response> {

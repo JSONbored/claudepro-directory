@@ -13,8 +13,10 @@ import {
   transformSectionsToChanges,
   type VercelWebhookPayload,
 } from '../../changelog/service.ts';
-import { SITE_URL, supabaseServiceRole } from '../../clients/supabase.ts';
+import { SITE_URL } from '../../clients/supabase.ts';
 import { edgeEnv } from '../../config/env.ts';
+import type { Database as DatabaseGenerated } from '../../database.types.ts';
+import { insertTable } from '../../database-overrides.ts';
 import { insertNotification } from '../../notifications/service.ts';
 import { sendDiscordWebhook } from '../../utils/discord/client.ts';
 import { buildChangelogEmbed } from '../../utils/discord/embeds.ts';
@@ -27,6 +29,7 @@ import {
 } from '../../utils/http.ts';
 import { verifyVercelSignature } from '../../utils/integrations/vercel.ts';
 import { createChangelogHandlerContext, withContext } from '../../utils/logging.ts';
+import { pgmqSend } from '../../utils/pgmq-client.ts';
 
 const VERCEL_WEBHOOK_SECRET = edgeEnv.vercel.webhookSecret;
 const DISCORD_CHANGELOG_WEBHOOK_URL = edgeEnv.discord.changelog;
@@ -126,11 +129,11 @@ export async function handleChangelogSyncRequest(req: Request): Promise<Response
       canonical_url: `${SITE_URL}/changelog/${slug}`,
     };
 
-    const { data, error } = await supabaseServiceRole
-      .from('changelog')
-      .insert(changelogEntry)
-      .select('*')
-      .single<ChangelogRow>();
+    // Use type-safe helper to ensure proper type inference
+    const insertData =
+      changelogEntry satisfies DatabaseGenerated['public']['Tables']['changelog']['Insert'];
+    const result = await insertTable('changelog', insertData);
+    const { data, error } = await result.select('*').single<ChangelogRow>();
 
     if (error) {
       return errorResponse(error, 'changelog-sync:insert', changelogCorsHeaders);
@@ -155,10 +158,16 @@ export async function handleChangelogSyncRequest(req: Request): Promise<Response
       metadata,
     };
 
-    const { error: queueError } = await supabaseServiceRole.schema('pgmq_public').rpc('send', {
-      queue_name: 'changelog_release',
-      msg: queueJob,
-    });
+    let queueError: Error | null = null;
+    try {
+      await pgmqSend('changelog_release', queueJob);
+    } catch (err) {
+      queueError = err instanceof Error ? err : new Error(String(err));
+      console.error('[changelog-handler] Failed to enqueue changelog release', {
+        ...updatedContext,
+        error: queueError.message,
+      });
+    }
 
     // Update logContext with changelog info
     const finalContext = withContext(updatedContext, {

@@ -31,9 +31,12 @@ export async function verifySvixSignature({
       secretBytes = encoder.encode(secret);
     }
 
+    // Type assertion needed for Deno's Web Crypto API - 'raw' format is valid but TypeScript may not infer correctly
+    // The importKey method has overloads that require specific format types, but 'raw' is valid for HMAC
+    // Ensure secretBytes is compatible with BufferSource (Uint8Array extends ArrayBufferView which is BufferSource)
     const key = await crypto.subtle.importKey(
-      'raw',
-      secretBytes,
+      'raw' as const,
+      secretBytes as BufferSource,
       { name: 'HMAC', hash: 'SHA-256' },
       false,
       ['sign']

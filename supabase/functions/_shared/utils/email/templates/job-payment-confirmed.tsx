@@ -98,13 +98,13 @@ export function JobPaymentConfirmed({
           utm={utm}
           buttons={[
             {
-              preset: 'primaryDirectory',
-              variant: 'primary',
+              preset: 'primaryDirectory' as const,
+              variant: 'primary' as const,
               overrides: { href: jobUrl, label: 'View Live Listing', contentKey: 'view_listing_live' },
             },
             {
-              preset: 'primaryDirectory',
-              variant: 'secondary',
+              preset: 'primaryDirectory' as const,
+              variant: 'secondary' as const,
               overrides: {
                 href: analyticsUrl,
                 label: 'View Analytics',
@@ -115,5 +115,12 @@ export function JobPaymentConfirmed({
         />
     </BaseLayout>
   );
+}
+
+export async function renderJobPaymentConfirmedEmail(
+  props: JobPaymentConfirmedProps
+): Promise<string> {
+  const { renderEmailTemplate } = await import('../base-template.tsx');
+  return renderEmailTemplate(JobPaymentConfirmed, props);
 }
 

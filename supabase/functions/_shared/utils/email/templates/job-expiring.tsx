@@ -93,20 +93,25 @@ export function JobExpiring({
             ...(renewalUrl
               ? [
                   {
-                    preset: 'primaryDirectory',
+                    preset: 'primaryDirectory' as const,
                     variant: 'primary' as const,
                     overrides: { href: renewalUrl, label: 'Renew Listing ($99)', contentKey: 'renewal_cta' },
                   },
                 ]
               : []),
             {
-              preset: 'primaryDirectory',
-              variant: 'secondary',
+              preset: 'primaryDirectory' as const,
+              variant: 'secondary' as const,
               overrides: { href: jobUrl, label: 'View Listing', contentKey: 'view_listing_cta' },
             },
           ]}
         />
     </BaseLayout>
   );
+}
+
+export async function renderJobExpiringEmail(props: JobExpiringProps): Promise<string> {
+  const { renderEmailTemplate } = await import('../base-template.tsx');
+  return renderEmailTemplate(JobExpiring, props);
 }
 

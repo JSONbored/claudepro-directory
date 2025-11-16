@@ -1,4 +1,5 @@
-import { supabaseAnon } from '../../_shared/clients/supabase.ts';
+import type { Database as DatabaseGenerated } from '../../_shared/database.types.ts';
+import { callRpc } from '../../_shared/database-overrides.ts';
 import {
   badRequestResponse,
   buildCacheHeaders,
@@ -21,19 +22,29 @@ export async function handlePaginatedContent(url: URL): Promise<Response> {
     return badRequestResponse('limit must be between 1 and 100', CORS);
   }
 
-  const category = categoryParam === 'all' ? null : categoryParam;
+  const category = categoryParam === 'all' ? undefined : categoryParam;
 
-  const { data, error } = await supabaseAnon.rpc('get_content_paginated_slim', {
+  const rpcArgs = {
     p_category: category,
     p_limit: limitParam,
     p_offset: offsetParam,
-  });
+    p_order_by: undefined,
+    p_order_direction: undefined,
+  } satisfies DatabaseGenerated['public']['Functions']['get_content_paginated_slim']['Args'];
+  const { data, error } = await callRpc('get_content_paginated_slim', rpcArgs, true);
 
   if (error) {
     return errorResponse(error, 'data-api:get_content_paginated_slim', CORS);
   }
 
-  const items = data?.items ?? [];
+  // Type-safe access to RPC return value - ensure items array is properly typed
+  type PaginatedResult =
+    DatabaseGenerated['public']['Functions']['get_content_paginated_slim']['Returns'];
+  const result = data as PaginatedResult;
+  const items =
+    result && typeof result === 'object' && 'items' in result && Array.isArray(result.items)
+      ? result.items
+      : [];
 
   return new Response(JSON.stringify(items), {
     status: 200,

@@ -1,6 +1,8 @@
 import { SITE_URL, supabaseServiceRole } from '../../clients/supabase.ts';
 import { edgeEnv } from '../../config/env.ts';
-import type { Database } from '../../database.types.ts';
+import type { Database as DatabaseGenerated } from '../../database.types.ts';
+import type { Database } from '../../database-overrides.ts';
+import { callRpc, updateTable } from '../../database-overrides.ts';
 import { insertNotification } from '../../notifications/service.ts';
 import { invalidateCacheByKey } from '../../utils/cache.ts';
 import {
@@ -95,10 +97,10 @@ async function handleJobNotification(req: Request): Promise<Response> {
     );
   }
 
-  const { data: embedData, error: embedError } = await supabaseServiceRole.rpc(
-    'build_job_discord_embed',
-    { p_job_id: job.id }
-  );
+  const rpcArgs = {
+    p_job_id: job.id,
+  } satisfies DatabaseGenerated['public']['Functions']['build_job_discord_embed']['Args'];
+  const { data: embedData, error: embedError } = await callRpc('build_job_discord_embed', rpcArgs);
 
   if (embedError || !embedData) {
     const logContext = createDiscordHandlerContext('job-notification', {
@@ -147,10 +149,11 @@ async function createJobDiscordMessage(
     throw new Error('Discord response missing message ID');
   }
 
-  const { error: updateError } = await supabaseServiceRole
-    .from('jobs')
-    .update({ discord_message_id: messageId })
-    .eq('id', job.id);
+  // Use type-safe helper to ensure proper type inference
+  const updateData = {
+    discord_message_id: messageId,
+  } satisfies DatabaseGenerated['public']['Tables']['jobs']['Update'];
+  const { error: updateError } = await updateTable('jobs', updateData, job.id);
 
   if (updateError) {
     const logContext = createDiscordHandlerContext('job-notification', {
@@ -197,7 +200,11 @@ async function updateJobDiscordMessage(
   );
 
   if (result.deleted) {
-    await supabaseServiceRole.from('jobs').update({ discord_message_id: null }).eq('id', job.id);
+    // Use type-safe helper to ensure proper type inference
+    const nullUpdateData = {
+      discord_message_id: null,
+    } satisfies DatabaseGenerated['public']['Tables']['jobs']['Update'];
+    await updateTable('jobs', nullUpdateData, job.id);
     return await createJobDiscordMessage(job, embedData, webhookUrl);
   }
 
@@ -289,8 +296,8 @@ async function handleContentNotification(req: Request): Promise<Response> {
       'id, category, slug, title, display_title, description, author, author_profile_url, tags, date_added'
     )
     .eq('category', payload.record.category)
-    .eq('slug', payload.record.auto_slug ?? '')
-    .single();
+    .eq('slug', payload.record.approved_slug ?? '')
+    .single<Database['public']['Tables']['content']['Row']>();
 
   // Create logContext after fetching content
   const logContext = createDiscordHandlerContext('content-notification', {
@@ -303,9 +310,9 @@ async function handleContentNotification(req: Request): Promise<Response> {
     console.error('[discord-handler] Failed to fetch content', {
       ...logContext,
       error: contentError instanceof Error ? contentError.message : String(contentError),
-      auto_slug: payload.record.auto_slug,
+      approved_slug: payload.record.approved_slug,
     });
-    throw new Error(`Content not found for slug: ${payload.record.auto_slug}`);
+    throw new Error(`Content not found for slug: ${payload.record.approved_slug ?? 'unknown'}`);
   }
 
   // Update logContext with actual content data
@@ -334,7 +341,7 @@ async function handleContentNotification(req: Request): Promise<Response> {
   await insertNotification(
     {
       id: content.id,
-      title: content.display_title ?? content.title,
+      title: content.display_title ?? content.title ?? 'New content',
       message: content.description ?? payload.record.description ?? 'New content just dropped.',
       type: 'announcement',
       priority: 'medium',
@@ -456,10 +463,10 @@ async function handleChangelogNotification(req: Request): Promise<Response> {
   const embed = buildChangelogEmbed({
     slug: entry.slug,
     title: entry.title,
-    tldr: entry.summary ?? '',
+    tldr: entry.tldr ?? '',
     sections,
     commits: [] as GitHubCommit[],
-    date: entry.published_at ?? entry.created_at ?? new Date().toISOString(),
+    date: entry.release_date ?? entry.created_at ?? new Date().toISOString(),
   });
 
   await sendDiscordWebhook(
@@ -480,7 +487,7 @@ async function handleChangelogNotification(req: Request): Promise<Response> {
     {
       id: entry.id,
       title: entry.title,
-      message: entry.summary ?? 'We just published new release notes.',
+      message: entry.tldr ?? entry.description ?? 'We just published new release notes.',
       type: 'announcement',
       priority: 'medium',
       action_label: 'View changelog',

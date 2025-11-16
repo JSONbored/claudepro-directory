@@ -1,8 +1,8 @@
 import { supabaseServiceRole } from '../../clients/supabase.ts';
-import type { Database } from '../../database.types.ts';
+import type { Database as DatabaseGenerated } from '../../database.types.ts';
+import type { Database } from '../../database-overrides.ts';
 import { resolveWebhookRequest, type WebhookRegistryError } from './registry.ts';
 
-type WebhookPayload = Record<string, unknown>;
 type WebhookSource = Database['public']['Enums']['webhook_source'];
 
 export class WebhookIngestError extends Error {
@@ -38,18 +38,28 @@ export async function ingestWebhookEvent(
     cors,
   } = resolution;
 
-  const { error } = await supabaseServiceRole.from('webhook_events').insert({
+  const insertData = {
     source: provider,
     direction: 'inbound',
     type,
-    data: payload as WebhookPayload,
+    data: payload as DatabaseGenerated['public']['Tables']['webhook_events']['Insert']['data'],
     created_at: createdAt || new Date().toISOString(),
     svix_id: idempotencyKey,
     processed: false,
-  });
+  } satisfies DatabaseGenerated['public']['Tables']['webhook_events']['Insert'];
+  // Use direct insert for immediate error feedback (we don't need returned data)
+  // Type assertion needed due to Supabase client type inference limitation
+  const { error } = await (
+    supabaseServiceRole.from('webhook_events') as unknown as {
+      insert: (
+        values: DatabaseGenerated['public']['Tables']['webhook_events']['Insert']
+      ) => Promise<{ error: unknown }>;
+    }
+  ).insert(insertData);
 
   if (error) {
-    if (error.code === '23505') {
+    // Type guard for Supabase PostgrestError which has a 'code' property
+    if (typeof error === 'object' && error !== null && 'code' in error && error.code === '23505') {
       return { source: provider, duplicate: true, cors };
     }
     throw error;

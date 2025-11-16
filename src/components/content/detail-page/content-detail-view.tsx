@@ -1,6 +1,6 @@
 /**
  * Unified Detail Page - Server-rendered content with streaming SSR
- * highlightCode() uses React cache() memoization (0ms for duplicates)
+ * Uses edge function for syntax highlighting (cached, fast)
  */
 
 import { Suspense } from 'react';
@@ -11,13 +11,13 @@ import { ReviewListSection } from '@/src/components/core/domain/reviews/review-l
 import { NewsletterCTAVariant } from '@/src/components/features/growth/newsletter/newsletter-cta-variants';
 import { RecentlyViewedSidebar } from '@/src/components/features/navigation/recently-viewed-sidebar';
 import { detectLanguage } from '@/src/lib/content/language-detection';
-import { highlightCode } from '@/src/lib/content/syntax-highlighting';
 import {
   type CategoryId,
   getCategoryConfig,
   isValidCategory,
 } from '@/src/lib/data/config/category';
 import type { ContentItem } from '@/src/lib/data/content';
+import { highlightCodeEdge } from '@/src/lib/edge/client';
 import { logger } from '@/src/lib/logger';
 import type { InstallationSteps } from '@/src/lib/types/content-type-config';
 import type { ProcessedSectionData } from '@/src/lib/types/detail-tabs.types';
@@ -187,7 +187,7 @@ export async function UnifiedDetailPage({
         'language' in item ? (item as { language?: string }).language : undefined;
       const language = await detectLanguage(content, languageHint);
       const filename = generateFilename({ item, language });
-      const html = highlightCode(content, language);
+      const html = await highlightCodeEdge(content, { language });
 
       return { html, code: content, language, filename };
     } catch (error) {
@@ -214,20 +214,22 @@ export async function UnifiedDetailPage({
       };
 
       try {
-        const highlightedConfigs = Object.entries(config).map(([key, value]) => {
-          if (!value) return null;
+        const highlightedConfigs = await Promise.all(
+          Object.entries(config).map(async ([key, value]) => {
+            if (!value) return null;
 
-          const displayValue =
-            key === 'claudeDesktop' || key === 'claudeCode'
-              ? transformMcpConfigForDisplay(value as Record<string, unknown>)
-              : value;
+            const displayValue =
+              key === 'claudeDesktop' || key === 'claudeCode'
+                ? transformMcpConfigForDisplay(value as Record<string, unknown>)
+                : value;
 
-          const code = JSON.stringify(displayValue, null, 2);
-          const html = highlightCode(code, 'json');
-          const filename = generateMultiFormatFilename(item, key, 'json');
+            const code = JSON.stringify(displayValue, null, 2);
+            const html = await highlightCodeEdge(code, { language: 'json' });
+            const filename = generateMultiFormatFilename(item, key, 'json');
 
-          return { key, html, code, filename };
-        });
+            return { key, html, code, filename };
+          })
+        );
 
         return {
           format: 'multi' as const,
@@ -249,12 +251,14 @@ export async function UnifiedDetailPage({
       };
 
       try {
-        const highlightedHookConfig = config.hookConfig
-          ? highlightCode(JSON.stringify(config.hookConfig, null, 2), 'json')
-          : null;
-        const highlightedScript = config.scriptContent
-          ? highlightCode(config.scriptContent, 'bash')
-          : null;
+        const [highlightedHookConfig, highlightedScript] = await Promise.all([
+          config.hookConfig
+            ? highlightCodeEdge(JSON.stringify(config.hookConfig, null, 2), { language: 'json' })
+            : Promise.resolve(null),
+          config.scriptContent
+            ? highlightCodeEdge(config.scriptContent, { language: 'bash' })
+            : Promise.resolve(null),
+        ]);
 
         return {
           format: 'hook' as const,
@@ -282,7 +286,7 @@ export async function UnifiedDetailPage({
 
     try {
       const code = JSON.stringify(configuration, null, 2);
-      const html = highlightCode(code, 'json');
+      const html = await highlightCodeEdge(code, { language: 'json' });
       const filename = generateFilename({ item, language: 'json' });
 
       return { format: 'json' as const, html, code, filename };
@@ -312,7 +316,7 @@ export async function UnifiedDetailPage({
 
       const highlightedExamples = await Promise.all(
         examples.map(async (example) => {
-          const html = highlightCode(example.code, example.language);
+          const html = await highlightCodeEdge(example.code, { language: example.language });
           // Generate filename from title
           const filename = `${example.title
             .toLowerCase()
@@ -361,35 +365,41 @@ export async function UnifiedDetailPage({
     };
 
     try {
-      const claudeCodeSteps = installation.claudeCode?.steps
-        ? installation.claudeCode.steps.map((step) => {
-            if (isCommandStep(step)) {
-              const html = highlightCode(step, 'bash');
-              return { type: 'command' as const, html, code: step };
-            }
-            return { type: 'text' as const, text: step };
-          })
-        : null;
-
-      const claudeDesktopSteps = installation.claudeDesktop?.steps
-        ? installation.claudeDesktop.steps.map((step) => {
-            if (isCommandStep(step)) {
-              const html = highlightCode(step, 'bash');
-              return { type: 'command' as const, html, code: step };
-            }
-            return { type: 'text' as const, text: step };
-          })
-        : null;
-
-      const sdkSteps = installation.sdk?.steps
-        ? installation.sdk.steps.map((step) => {
-            if (isCommandStep(step)) {
-              const html = highlightCode(step, 'bash');
-              return { type: 'command' as const, html, code: step };
-            }
-            return { type: 'text' as const, text: step };
-          })
-        : null;
+      const [claudeCodeSteps, claudeDesktopSteps, sdkSteps] = await Promise.all([
+        installation.claudeCode?.steps
+          ? Promise.all(
+              installation.claudeCode.steps.map(async (step) => {
+                if (isCommandStep(step)) {
+                  const html = await highlightCodeEdge(step, { language: 'bash' });
+                  return { type: 'command' as const, html, code: step };
+                }
+                return { type: 'text' as const, text: step };
+              })
+            )
+          : Promise.resolve(null),
+        installation.claudeDesktop?.steps
+          ? Promise.all(
+              installation.claudeDesktop.steps.map(async (step) => {
+                if (isCommandStep(step)) {
+                  const html = await highlightCodeEdge(step, { language: 'bash' });
+                  return { type: 'command' as const, html, code: step };
+                }
+                return { type: 'text' as const, text: step };
+              })
+            )
+          : Promise.resolve(null),
+        installation.sdk?.steps
+          ? Promise.all(
+              installation.sdk.steps.map(async (step) => {
+                if (isCommandStep(step)) {
+                  const html = await highlightCodeEdge(step, { language: 'bash' });
+                  return { type: 'command' as const, html, code: step };
+                }
+                return { type: 'text' as const, text: step };
+              })
+            )
+          : Promise.resolve(null),
+      ]);
 
       return {
         claudeCode: claudeCodeSteps
@@ -441,14 +451,18 @@ export async function UnifiedDetailPage({
     return await Promise.all(
       sections.map(async (section) => {
         if (section.type === 'code' && section.code) {
-          const html = highlightCode(section.code, section.language || 'text');
+          const html = await highlightCodeEdge(section.code, {
+            language: section.language || 'text',
+          });
           return { ...section, html };
         }
 
         if (section.type === 'code_group' && section.tabs) {
           const tabs = await Promise.all(
             section.tabs.map(async (tab) => {
-              const html = highlightCode(tab.code, tab.language || 'text');
+              const html = await highlightCodeEdge(tab.code, {
+                language: tab.language || 'text',
+              });
               return { ...tab, html };
             })
           );
@@ -459,7 +473,9 @@ export async function UnifiedDetailPage({
           const steps = await Promise.all(
             section.steps.map(async (step) => {
               if (step.code) {
-                const html = highlightCode(step.code, step.language || 'bash');
+                const html = await highlightCodeEdge(step.code, {
+                  language: step.language || 'bash',
+                });
                 return { ...step, html };
               }
               return step;

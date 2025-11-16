@@ -97,8 +97,8 @@ export function ContactSubmissionAdmin({
         utm={utm}
         buttons={[
           {
-            preset: 'primaryDirectory',
-            variant: 'primary',
+            preset: 'primaryDirectory' as const,
+            variant: 'primary' as const,
             overrides: {
               href: `${baseUrl}/admin/contact/${submissionId}`,
               label: 'View in Admin Dashboard',
@@ -126,6 +126,13 @@ export function ContactSubmissionAdmin({
       </Section>
     </BaseLayout>
   );
+}
+
+export async function renderContactSubmissionAdminEmail(
+  props: ContactSubmissionAdminProps
+): Promise<string> {
+  const { renderEmailTemplate } = await import('../base-template.tsx');
+  return renderEmailTemplate(ContactSubmissionAdmin, props);
 }
 
 

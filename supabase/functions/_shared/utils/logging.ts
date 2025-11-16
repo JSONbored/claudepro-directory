@@ -69,7 +69,14 @@ export function createSearchContext(options?: {
  */
 export function createNotificationRouterContext(
   action: string,
-  options?: { jobId?: string; entryId?: string; slug?: string; attempt?: number }
+  options?: {
+    jobId?: string;
+    entryId?: string;
+    slug?: string;
+    attempt?: number;
+    userId?: string;
+    source?: string;
+  }
 ): BaseLogContext {
   return {
     function: 'notification-router',
@@ -80,6 +87,8 @@ export function createNotificationRouterContext(
     ...(options?.entryId && { entry_id: options.entryId }),
     ...(options?.slug && { slug: options.slug }),
     ...(options?.attempt !== undefined && { attempt: options.attempt }),
+    ...(options?.userId && { user_id: options.userId }),
+    ...(options?.source && { source: options.source }),
   };
 }
 
@@ -186,5 +195,22 @@ export function createUtilityContext(
     started_at: new Date().toISOString(),
     utility: utilityName,
     ...options,
+  };
+}
+
+/**
+ * Create logContext for transform-api routes
+ */
+export function createTransformApiContext(
+  route: string,
+  options?: { path?: string; method?: string }
+): BaseLogContext {
+  return {
+    function: 'transform-api',
+    action: route,
+    request_id: crypto.randomUUID(),
+    started_at: new Date().toISOString(),
+    ...(options?.path && { path: options.path }),
+    ...(options?.method && { method: options.method }),
   };
 }

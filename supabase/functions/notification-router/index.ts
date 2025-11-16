@@ -11,6 +11,8 @@ import {
   getCacheConfigNumber,
   getCacheConfigStringArray,
 } from '../_shared/config/statsig-cache.ts';
+import type { Database as DatabaseGenerated, Json } from '../_shared/database.types.ts';
+import { callRpc } from '../_shared/database-overrides.ts';
 import { handleChangelogSyncRequest } from '../_shared/handlers/changelog/handler.ts';
 import { handleDiscordNotification } from '../_shared/handlers/discord/handler.ts';
 import {
@@ -37,6 +39,8 @@ import {
   webhookCorsHeaders,
 } from '../_shared/utils/http.ts';
 import { updateContactEngagement } from '../_shared/utils/integrations/resend.ts';
+import { createNotificationRouterContext } from '../_shared/utils/logging.ts';
+import { pgmqDelete, pgmqRead } from '../_shared/utils/pgmq-client.ts';
 import { createRouter, type HttpMethod, type RouterContext } from '../_shared/utils/router.ts';
 import { ingestWebhookEvent, WebhookIngestError } from '../_shared/utils/webhook/ingest.ts';
 
@@ -126,6 +130,7 @@ const router = createRouter<NotificationRouterContext>({
     name: 'webhook',
     methods: ['POST', 'OPTIONS'],
     cors: webhookCorsHeaders,
+    match: () => true, // Default route matches all unmatched requests
     handler: (ctx) => handleExternalWebhook(ctx),
   },
 });
@@ -264,10 +269,17 @@ async function handleExternalWebhook(ctx: NotificationRouterContext): Promise<Re
       });
     }
 
+    // CORS headers are Record<string, string> but successResponse expects specific type
+    // Use type assertion to satisfy type checker - runtime behavior is correct
+    type CorsHeadersType = {
+      'Access-Control-Allow-Origin': string;
+      'Access-Control-Allow-Methods': string;
+      'Access-Control-Allow-Headers': string;
+    };
     return successResponse(
       { message: 'OK', source: result.source, duplicate: result.duplicate },
       200,
-      cors
+      cors as CorsHeadersType
     );
   } catch (error) {
     const logContext = createNotificationRouterContext('external-webhook', {
@@ -337,13 +349,11 @@ async function processChangelogRelease(message: QueueMessage): Promise<{
   let revalidationSuccess = false;
 
   // Create structured log context (reused in all logs)
-  const logContext = {
-    job_id: msg_id.toString(),
-    entry_id: job.entryId,
+  const logContext = createNotificationRouterContext('changelog-release-worker', {
+    entryId: job.entryId,
     slug: job.slug,
     attempt: message.read_ct,
-    enqueued_at: message.enqueued_at,
-  };
+  });
 
   const startTime = Date.now();
 
@@ -544,14 +554,7 @@ async function processChangelogRelease(message: QueueMessage): Promise<{
 
 async function deleteQueueMessage(msgId: bigint): Promise<void> {
   try {
-    const { error } = await supabaseServiceRole.schema('pgmq_public').rpc('delete', {
-      queue_name: QUEUE_NAME,
-      msg_id: msgId,
-    });
-
-    if (error) {
-      throw error;
-    }
+    await pgmqDelete(QUEUE_NAME, msgId);
   } catch (error) {
     console.error('[notification-router] Failed to delete queue message', {
       msg_id: msgId.toString(),
@@ -564,13 +567,8 @@ async function deleteQueueMessage(msgId: bigint): Promise<void> {
 async function handleChangelogReleaseQueue(): Promise<Response> {
   try {
     // Read messages from queue
-    const { data: messages, error: readError } = await supabaseServiceRole
-      .schema('pgmq_public')
-      .rpc('read', {
-        queue_name: QUEUE_NAME,
-        sleep_seconds: 0,
-        n: BATCH_SIZE,
-      });
+    const messages = await pgmqRead(QUEUE_NAME, { sleep_seconds: 0, n: BATCH_SIZE });
+    const readError = messages === null ? new Error('Failed to read queue messages') : null;
 
     if (readError) {
       console.error('[notification-router] Queue read error', { error: readError.message });
@@ -589,7 +587,14 @@ async function handleChangelogReleaseQueue(): Promise<Response> {
     const results = [];
 
     // Process each message
-    for (const message of messages as QueueMessage[]) {
+    for (const msg of messages || []) {
+      const message: QueueMessage = {
+        msg_id: msg.msg_id,
+        read_ct: msg.read_ct,
+        vt: msg.vt,
+        enqueued_at: msg.enqueued_at,
+        message: msg.message as unknown as ChangelogReleaseJob,
+      };
       try {
         const result = await processChangelogRelease(message);
 
@@ -692,7 +697,22 @@ async function processSearchEventsBatch(messages: PulseQueueMessage[]): Promise<
     });
 
     // Batch insert into search_queries table
-    const { error } = await supabaseServiceRole.from('search_queries').insert(searchQueries);
+    // Use direct insert for batch operations (insertTable helper doesn't support arrays)
+    const insertData: DatabaseGenerated['public']['Tables']['search_queries']['Insert'][] =
+      searchQueries.map((q) => ({
+        query: q.query,
+        filters: (q.filters ?? null) as Json | null,
+        result_count: q.result_count ?? null,
+        user_id: q.user_id ?? null,
+        session_id: q.session_id ?? null,
+      }));
+    const { error } = await (
+      supabaseServiceRole.from('search_queries') as unknown as {
+        insert: (
+          values: DatabaseGenerated['public']['Tables']['search_queries']['Insert'][]
+        ) => Promise<{ error: unknown }>;
+      }
+    ).insert(insertData);
 
     if (error) {
       throw error;
@@ -755,7 +775,10 @@ async function updateResendEngagement(messages: PulseQueueMessage[]): Promise<vo
 
   // Create email map
   const emailMap = new Map<string, string>();
-  for (const sub of subscriptions) {
+  for (const sub of subscriptions as Array<{
+    user_id: string | null;
+    email: string;
+  }>) {
     if (sub.user_id && sub.email) {
       emailMap.set(sub.user_id, sub.email);
     }
@@ -786,14 +809,16 @@ async function processUserInteractionsBatch(messages: PulseQueueMessage[]): Prom
 
   try {
     // Extract events from messages and convert to JSONB array format
-    const events = messages.map((msg) => msg.message as Record<string, unknown>);
+    // Convert PulseEvent to Json-compatible format for RPC
+    const events = messages.map((msg) => msg.message as unknown as Json);
 
     // Batch insert all events in single transaction
-    const { data: result, error: batchError } = await supabaseServiceRole.rpc(
+    const rpcArgs = {
+      p_interactions: events,
+    } satisfies DatabaseGenerated['public']['Functions']['batch_insert_user_interactions']['Args'];
+    const { data: result, error: batchError } = await callRpc(
       'batch_insert_user_interactions',
-      {
-        p_interactions: events,
-      }
+      rpcArgs
     );
 
     if (batchError) {
@@ -886,12 +911,20 @@ async function processSponsoredEventsBatch(messages: PulseQueueMessage[]): Promi
 
     // Batch insert impressions
     if (impressions.length > 0) {
-      const { error: impressionsError } = await supabaseServiceRole
-        .from('sponsored_impressions')
-        .insert(impressions);
+      const insertData: DatabaseGenerated['public']['Tables']['sponsored_impressions']['Insert'][] =
+        impressions;
+      const { error: impressionsError } = await (
+        supabaseServiceRole.from('sponsored_impressions') as unknown as {
+          insert: (
+            values: DatabaseGenerated['public']['Tables']['sponsored_impressions']['Insert'][]
+          ) => Promise<{ error: unknown }>;
+        }
+      ).insert(insertData);
 
       if (impressionsError) {
-        errors.push(`Sponsored impressions insert failed: ${impressionsError.message}`);
+        const errorMessage =
+          impressionsError instanceof Error ? impressionsError.message : String(impressionsError);
+        errors.push(`Sponsored impressions insert failed: ${errorMessage}`);
         failed += impressions.length;
       } else {
         inserted += impressions.length;
@@ -900,12 +933,20 @@ async function processSponsoredEventsBatch(messages: PulseQueueMessage[]): Promi
 
     // Batch insert clicks
     if (clicks.length > 0) {
-      const { error: clicksError } = await supabaseServiceRole
-        .from('sponsored_clicks')
-        .insert(clicks);
+      const insertData: DatabaseGenerated['public']['Tables']['sponsored_clicks']['Insert'][] =
+        clicks;
+      const { error: clicksError } = await (
+        supabaseServiceRole.from('sponsored_clicks') as unknown as {
+          insert: (
+            values: DatabaseGenerated['public']['Tables']['sponsored_clicks']['Insert'][]
+          ) => Promise<{ error: unknown }>;
+        }
+      ).insert(insertData);
 
       if (clicksError) {
-        errors.push(`Sponsored clicks insert failed: ${clicksError.message}`);
+        const errorMessage =
+          clicksError instanceof Error ? clicksError.message : String(clicksError);
+        errors.push(`Sponsored clicks insert failed: ${errorMessage}`);
         failed += clicks.length;
       } else {
         inserted += clicks.length;
@@ -985,19 +1026,9 @@ async function deletePulseMessages(msgIds: bigint[]): Promise<void> {
   // Delete all processed messages
   for (const msgId of msgIds) {
     try {
-      const { error } = await supabaseServiceRole.schema('pgmq_public').rpc('delete', {
-        queue_name: PULSE_QUEUE_NAME,
-        msg_id: msgId,
-      });
-
-      if (error) {
-        console.warn('[notification-router] Failed to delete pulse message', {
-          msg_id: msgId.toString(),
-          error: error.message,
-        });
-      }
+      await pgmqDelete(PULSE_QUEUE_NAME, msgId);
     } catch (error) {
-      console.warn('[notification-router] Exception deleting pulse message', {
+      console.warn('[notification-router] Failed to delete pulse message', {
         msg_id: msgId.toString(),
         error: error instanceof Error ? error.message : String(error),
       });
@@ -1020,13 +1051,11 @@ async function handlePulseQueue(): Promise<Response> {
 
   try {
     // Read messages from queue
-    const { data: messages, error: readError } = await supabaseServiceRole
-      .schema('pgmq_public')
-      .rpc('read', {
-        queue_name: PULSE_QUEUE_NAME,
-        sleep_seconds: 0,
-        n: safeBatchSize,
-      });
+    const messages = await pgmqRead(PULSE_QUEUE_NAME, {
+      sleep_seconds: 0,
+      n: safeBatchSize,
+    });
+    const readError = messages === null ? new Error('Failed to read pulse queue messages') : null;
 
     if (readError) {
       console.error('[notification-router] Pulse queue read error', {
@@ -1045,7 +1074,13 @@ async function handlePulseQueue(): Promise<Response> {
 
     console.log(`[notification-router] Processing ${messages.length} pulse events`, logContext);
 
-    const pulseMessages = messages as PulseQueueMessage[];
+    const pulseMessages: PulseQueueMessage[] = (messages || []).map((msg) => ({
+      msg_id: msg.msg_id,
+      read_ct: msg.read_ct,
+      vt: msg.vt,
+      enqueued_at: msg.enqueued_at,
+      message: msg.message as unknown as PulseEvent,
+    }));
 
     // Process batch
     const result = await processPulseBatch(pulseMessages);

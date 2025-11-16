@@ -1,5 +1,6 @@
-import { supabaseAnon } from '../../_shared/clients/supabase.ts';
 import { VALID_CONTENT_CATEGORIES } from '../../_shared/config/constants/categories.ts';
+import type { Database as DatabaseGenerated } from '../../_shared/database.types.ts';
+import { callRpc } from '../../_shared/database-overrides.ts';
 import {
   badRequestResponse,
   buildCacheHeaders,
@@ -40,7 +41,11 @@ export async function handleFeedsRoute(
     return badRequestResponse('Missing or invalid type. Valid types: rss, atom', CORS);
   }
 
-  if (category && category !== 'changelog' && !VALID_CONTENT_CATEGORIES.includes(category)) {
+  if (
+    category &&
+    category !== 'changelog' &&
+    !VALID_CONTENT_CATEGORIES.includes(category as (typeof VALID_CONTENT_CATEGORIES)[number])
+  ) {
     return badRequestResponse(
       `Invalid category parameter. Valid categories: changelog, ${VALID_CONTENT_CATEGORIES.join(', ')}, or omit for site-wide feed`,
       CORS
@@ -76,9 +81,10 @@ async function generateFeedPayload(
 ): Promise<{ xml: string; contentType: string; source: string }> {
   if (category === 'changelog') {
     if (type === 'rss') {
-      const { data, error } = await supabaseAnon.rpc('generate_changelog_rss_feed', {
+      const rpcArgs = {
         p_limit: 50,
-      });
+      } satisfies DatabaseGenerated['public']['Functions']['generate_changelog_rss_feed']['Args'];
+      const { data, error } = await callRpc('generate_changelog_rss_feed', rpcArgs, true);
       if (error || !data) {
         throw error ?? new Error('generate_changelog_rss_feed returned null');
       }
@@ -88,9 +94,10 @@ async function generateFeedPayload(
         source: 'PostgreSQL changelog (rss)',
       };
     }
-    const { data, error } = await supabaseAnon.rpc('generate_changelog_atom_feed', {
+    const rpcArgs2 = {
       p_limit: 50,
-    });
+    } satisfies DatabaseGenerated['public']['Functions']['generate_changelog_atom_feed']['Args'];
+    const { data, error } = await callRpc('generate_changelog_atom_feed', rpcArgs2, true);
     if (error || !data) {
       throw error ?? new Error('generate_changelog_atom_feed returned null');
     }
@@ -102,10 +109,11 @@ async function generateFeedPayload(
   }
 
   if (type === 'rss') {
-    const { data, error } = await supabaseAnon.rpc('generate_content_rss_feed', {
-      p_category: category,
+    const rpcArgs3 = {
+      p_category: category ?? undefined,
       p_limit: 50,
-    });
+    } satisfies DatabaseGenerated['public']['Functions']['generate_content_rss_feed']['Args'];
+    const { data, error } = await callRpc('generate_content_rss_feed', rpcArgs3, true);
     if (error || !data) {
       throw error ?? new Error('generate_content_rss_feed returned null');
     }
@@ -116,10 +124,11 @@ async function generateFeedPayload(
     };
   }
 
-  const { data, error } = await supabaseAnon.rpc('generate_content_atom_feed', {
-    p_category: category,
+  const rpcArgs4 = {
+    p_category: category ?? undefined,
     p_limit: 50,
-  });
+  } satisfies DatabaseGenerated['public']['Functions']['generate_content_atom_feed']['Args'];
+  const { data, error } = await callRpc('generate_content_atom_feed', rpcArgs4, true);
   if (error || !data) {
     throw error ?? new Error('generate_content_atom_feed returned null');
   }
