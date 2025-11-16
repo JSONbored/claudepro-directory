@@ -8,12 +8,13 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/ui/card';
-import type { NewsletterSource } from '@/src/hooks/use-newsletter';
+import { useLoggedAsync } from '@/src/hooks/use-logged-async';
 import { useNewsletterCount } from '@/src/hooks/use-newsletter-count';
-import { NEWSLETTER_CTA_CONFIG } from '@/src/lib/config/category-config';
+import { NEWSLETTER_CTA_CONFIG } from '@/src/lib/data/config/category';
 import { Mail } from '@/src/lib/icons';
 import { DIMENSIONS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
+import type { NewsletterSource } from '@/src/types/database-overrides';
 import { NewsletterForm } from './newsletter-form';
 import {
   formatSubscriberCount,
@@ -65,15 +66,28 @@ export function NewsletterCTAVariant(props: NewsletterCTAVariantProps) {
   } = props;
   const { count, isLoading } = useNewsletterCount();
   const [newsletterConfig, setNewsletterConfig] = useState<Record<string, unknown>>({});
+  const loadConfig = useLoggedAsync({
+    scope: 'NewsletterCTAVariant',
+    defaultMessage: 'Failed to load newsletter config',
+    defaultLevel: 'warn',
+    defaultRethrow: false,
+  });
 
   // Load newsletter config from Statsig
   useEffect(() => {
-    loadNewsletterConfig()
-      .then(setNewsletterConfig)
-      .catch(() => {
-        // Silent fail - uses hardcoded defaults
-      });
-  }, []);
+    loadConfig(
+      async () => {
+        const config = await loadNewsletterConfig();
+        setNewsletterConfig(config);
+      },
+      {
+        context: {
+          variant,
+          category,
+        },
+      }
+    );
+  }, [category, loadConfig, variant]);
 
   // Use prop if provided, otherwise default to 'value_focused'
   const ctaVariant = propCtaVariant || 'value_focused';

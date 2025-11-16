@@ -29,9 +29,11 @@
 import { motion, useMotionValue, useTransform } from 'motion/react';
 import type { ReactNode } from 'react';
 import { useEffect, useState } from 'react';
+import { getAnimationConfig } from '@/src/lib/actions/feature-flags.actions';
 import { Bookmark, Copy as CopyIcon } from '@/src/lib/icons';
+import { logger } from '@/src/lib/logger';
 import { SEMANTIC_COLORS } from '@/src/lib/semantic-colors';
-import { ANIMATION_CONSTANTS, POSITION_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
+import { POSITION_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
 
 interface SwipeableCardWrapperProps {
   children: ReactNode;
@@ -54,6 +56,11 @@ export function SwipeableCardWrapper({
 }: SwipeableCardWrapperProps) {
   const [isMobile, setIsMobile] = useState(false);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+  const [springSmooth, setSpringSmooth] = useState({
+    type: 'spring' as const,
+    stiffness: 300,
+    damping: 25,
+  });
 
   // Detect mobile and reduced motion preference
   useEffect(() => {
@@ -79,6 +86,22 @@ export function SwipeableCardWrapper({
       window.removeEventListener('resize', checkMobile);
       mediaQuery.removeEventListener('change', handleChange);
     };
+  }, []);
+
+  useEffect(() => {
+    getAnimationConfig({})
+      .then((result) => {
+        if (!result?.data) return;
+        const config = result.data;
+        setSpringSmooth({
+          type: 'spring' as const,
+          stiffness: config['animation.spring.smooth.stiffness'],
+          damping: config['animation.spring.smooth.damping'],
+        });
+      })
+      .catch((error) => {
+        logger.error('SwipeableCardWrapper: failed to load animation config', error);
+      });
   }, []);
 
   // Motion values for drag tracking
@@ -150,7 +173,7 @@ export function SwipeableCardWrapper({
             x.set(0);
           }
         }}
-        transition={ANIMATION_CONSTANTS.SPRING_SMOOTH}
+        transition={springSmooth}
         className="relative z-10"
       >
         {children}

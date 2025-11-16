@@ -32,6 +32,8 @@
 'use client';
 
 import { useCallback, useMemo } from 'react';
+import { logger } from '@/src/lib/logger';
+import { logClientWarning } from '@/src/lib/utils/error.utils';
 
 interface UseViewTransitionReturn {
   /**
@@ -72,8 +74,8 @@ export function useViewTransition(): UseViewTransitionReturn {
     (updateCallback: () => void | Promise<void>): ViewTransition | undefined => {
       // Fallback: Execute immediately without animation
       if (!isSupported) {
-        Promise.resolve(updateCallback()).catch(() => {
-          // Silently handle errors in fallback mode
+        Promise.resolve(updateCallback()).catch((error) => {
+          logClientWarning('useViewTransition: fallback update failed (unsupported)', error);
         });
         return undefined;
       }
@@ -82,13 +84,16 @@ export function useViewTransition(): UseViewTransitionReturn {
       try {
         return document.startViewTransition(updateCallback);
       } catch (error) {
-        // Fallback on error (suppress console warning in production)
         if (process.env.NODE_ENV === 'development') {
-          // biome-ignore lint/suspicious/noConsole: Development-only warning for debugging view transitions
-          console.warn('View Transition failed, falling back to instant update:', error);
+          logger.warn('View Transition failed, falling back to instant update', {
+            error: error instanceof Error ? error.message : String(error),
+          });
         }
-        Promise.resolve(updateCallback()).catch(() => {
-          // Silently handle errors in fallback mode
+        Promise.resolve(updateCallback()).catch((fallbackError) => {
+          logClientWarning(
+            'useViewTransition: fallback update failed after ViewTransition error',
+            fallbackError
+          );
         });
         return undefined;
       }

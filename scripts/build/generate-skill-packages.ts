@@ -16,6 +16,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createClient } from '@supabase/supabase-js';
 import archiver from 'archiver';
+import { logger } from '@/src/lib/logger';
 import { transformSkillToMarkdown } from '@/src/lib/transformers/skill-to-md';
 import type { Database } from '@/src/types/database.types';
 import { computeHash, hasHashChanged, setHash } from '../utils/build-cache.js';
@@ -177,18 +178,18 @@ async function uploadToStorage(skill: SkillRow, zipBuffer: Buffer): Promise<stri
  * OPTIMIZED Main execution with parallel processing and content hashing
  */
 async function main() {
-  console.log('🚀 Generating Claude Desktop skill packages (database-first, optimized)...\n');
-  console.log('═'.repeat(80));
+  logger.info('🚀 Generating Claude Desktop skill packages (database-first, optimized)...\n');
+  logger.info('═'.repeat(80));
 
   const startTime = performance.now();
 
   // 1. Load skills from database
-  console.log('\n📊 Loading skills from database...');
+  logger.info('\n📊 Loading skills from database...');
   const skills = await loadAllSkillsFromDatabase();
-  console.log(`✅ Found ${skills.length} skills in database\n`);
+  logger.info(`✅ Found ${skills.length} skills in database\n`, { skillCount: skills.length });
 
   // 2. OPTIMIZATION: Filter skills using content hash (not storage API)
-  console.log('🔍 Computing content hashes and filtering changed skills...');
+  logger.info('🔍 Computing content hashes and filtering changed skills...');
   const skillsToRebuild: Array<{ skill: SkillRow; skillMd: string; hash: string }> = [];
 
   for (const skill of skills) {
@@ -201,14 +202,19 @@ async function main() {
   }
 
   if (skillsToRebuild.length === 0) {
-    console.log('✨ All skills up to date! No rebuild needed.\n');
-    console.log('💡 Content hashes match - zero ZIPs regenerated\n');
+    logger.info('✨ All skills up to date! No rebuild needed.\n');
+    logger.info('💡 Content hashes match - zero ZIPs regenerated\n');
     return;
   }
 
-  console.log(`🔄 Rebuilding ${skillsToRebuild.length}/${skills.length} skills\n`);
-  console.log(`⚡ Processing ${CONCURRENCY} skills concurrently...\n`);
-  console.log('═'.repeat(80));
+  logger.info(`🔄 Rebuilding ${skillsToRebuild.length}/${skills.length} skills\n`, {
+    rebuilding: skillsToRebuild.length,
+    total: skills.length,
+  });
+  logger.info(`⚡ Processing ${CONCURRENCY} skills concurrently...\n`, {
+    concurrency: CONCURRENCY,
+  });
+  logger.info('═'.repeat(80));
 
   // 3. OPTIMIZATION: Process in parallel batches
   const allResults: Array<{ slug: string; status: 'success' | 'error'; message: string }> = [];
@@ -222,9 +228,15 @@ async function main() {
     // Log progress
     for (const result of batchResults) {
       if (result.status === 'success') {
-        console.log(`✅ ${result.slug} (${result.message})`);
+        logger.info(`✅ ${result.slug} (${result.message})`, {
+          slug: result.slug,
+          message: result.message,
+        });
       } else {
-        console.error(`❌ ${result.slug}: ${result.message}`);
+        logger.error(`❌ ${result.slug}: ${result.message}`, undefined, {
+          slug: result.slug,
+          message: result.message,
+        });
       }
     }
   }
@@ -235,29 +247,38 @@ async function main() {
   const successCount = allResults.filter((r) => r.status === 'success').length;
   const failCount = allResults.filter((r) => r.status === 'error').length;
 
-  console.log(`\n${'═'.repeat(80)}`);
-  console.log('\n📊 BUILD SUMMARY:\n');
-  console.log(`   Total skills: ${skills.length}`);
-  console.log(`   ✅ Built: ${successCount}/${skillsToRebuild.length}`);
-  console.log(`   ⏭️  Skipped: ${skills.length - skillsToRebuild.length} (content unchanged)`);
-  console.log(`   ❌ Failed: ${failCount}/${skillsToRebuild.length}`);
-  console.log(`   ⏱️  Duration: ${duration}s`);
-  console.log(`   ⚡ Concurrency: ${CONCURRENCY} parallel uploads`);
-  console.log('   🗄️  Storage: Supabase Storage (source of truth)');
+  logger.info(`\n${'═'.repeat(80)}`);
+  logger.info('\n📊 BUILD SUMMARY:\n');
+  logger.info(`   Total skills: ${skills.length}`);
+  logger.info(`   ✅ Built: ${successCount}/${skillsToRebuild.length}`);
+  logger.info(`   ⏭️  Skipped: ${skills.length - skillsToRebuild.length} (content unchanged)`);
+  logger.info(`   ❌ Failed: ${failCount}/${skillsToRebuild.length}`);
+  logger.info(`   ⏱️  Duration: ${duration}s`);
+  logger.info(`   ⚡ Concurrency: ${CONCURRENCY} parallel uploads`);
+  logger.info('   🗄️  Storage: Supabase Storage (source of truth)', {
+    total: skills.length,
+    built: successCount,
+    skipped: skills.length - skillsToRebuild.length,
+    failed: failCount,
+    duration: `${duration}s`,
+    concurrency: CONCURRENCY,
+  });
 
   if (failCount > 0) {
-    console.log('\n❌ FAILED BUILDS:\n');
+    logger.error('\n❌ FAILED BUILDS:\n', undefined, { failCount });
     const failedResults = allResults.filter((r) => r.status === 'error');
     for (const r of failedResults) {
-      console.log(`   ${r.slug}: ${r.message}`);
+      logger.error(`   ${r.slug}: ${r.message}`, undefined, { slug: r.slug, message: r.message });
     }
     process.exit(1);
   }
 
-  console.log('\n✨ Build complete! Next run will skip unchanged skills.\n');
+  logger.info('\n✨ Build complete! Next run will skip unchanged skills.\n');
 }
 
 main().catch((error) => {
-  console.error('Fatal error:', error);
+  logger.error('Fatal error in skill package generation', error, {
+    script: 'generate-skill-packages',
+  });
   process.exit(1);
 });

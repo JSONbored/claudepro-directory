@@ -1,28 +1,17 @@
 'use client';
 
-/**
- * FeaturedSections Component
- * SHA-2102: Extracted from home-page-client.tsx for better modularity
- * SHA-XXXX: Made dynamic using HOMEPAGE_FEATURED_CATEGORIES
- *
- * Displays featured content sections dynamically based on category config
- * Adding a new featured category now only requires updating HOMEPAGE_FEATURED_CATEGORIES
- */
+/** Featured sections consuming homepageConfigs for runtime-tunable categories */
 
 import Link from 'next/link';
 import { type FC, memo, useMemo } from 'react';
 import { UnifiedCardGrid } from '@/src/components/core/domain/cards/card-grid';
 import { ConfigCard } from '@/src/components/core/domain/cards/config-card';
 import { JobCard } from '@/src/components/core/domain/cards/job-card';
-import {
-  HOMEPAGE_FEATURED_CATEGORIES,
-  type UnifiedCategoryConfig,
-} from '@/src/lib/config/category-config';
-import { ROUTES } from '@/src/lib/constants';
+import { ROUTES } from '@/src/lib/data/config/constants';
 import { ExternalLink } from '@/src/lib/icons';
-import type { DisplayableContent } from '@/src/lib/types/component.types';
+import type { DisplayableContent, UnifiedCategoryConfig } from '@/src/lib/types/component.types';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
-import type { Tables } from '@/src/types/database-overrides';
+import type { ContentCategory, Tables } from '@/src/types/database-overrides';
 
 interface FeaturedSectionProps {
   title: string;
@@ -68,25 +57,22 @@ const FeaturedSection: FC<FeaturedSectionProps> = memo(
 
 FeaturedSection.displayName = 'FeaturedSection';
 
-/**
- * Props now accept a dynamic record of categories to content items
- * This allows any number of categories without hardcoding
- */
 interface FeaturedSectionsProps {
   categories: Record<string, readonly DisplayableContent[]>;
   categoryConfigs: Record<string, UnifiedCategoryConfig>;
   featuredJobs?: ReadonlyArray<Tables<'jobs'>>;
+  featuredCategories: readonly ContentCategory[];
 }
 
 const FeaturedSectionsComponent: FC<FeaturedSectionsProps> = ({
   categories,
   categoryConfigs,
   featuredJobs = [],
+  featuredCategories,
 }) => {
   return (
     <div className={'mb-16 space-y-16'}>
-      {/* Dynamically render featured sections based on HOMEPAGE_FEATURED_CATEGORIES */}
-      {HOMEPAGE_FEATURED_CATEGORIES.map((categorySlug) => {
+      {featuredCategories.map((categorySlug) => {
         const items = categories[categorySlug];
         const config = categoryConfigs[categorySlug];
 

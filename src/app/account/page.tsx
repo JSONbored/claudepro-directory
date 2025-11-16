@@ -1,6 +1,7 @@
-import { z } from 'zod';
+import Link from 'next/link';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { NavLink } from '@/src/components/core/navigation/navigation-link';
+import { Button } from '@/src/components/primitives/ui/button';
 import {
   Card,
   CardContent,
@@ -8,63 +9,72 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/ui/card';
-import { ROUTES } from '@/src/lib/constants';
+import { getAuthenticatedUser } from '@/src/lib/auth/get-authenticated-user';
+import { getAccountDashboard } from '@/src/lib/data/account/user-data';
+import { ROUTES } from '@/src/lib/data/config/constants';
 import { Bookmark, Calendar } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
-
-// Force dynamic rendering - requires authentication
-export const dynamic = 'force-dynamic';
+import { normalizeError } from '@/src/lib/utils/error.utils';
+import { USER_TIER_VALUES, type UserTier } from '@/src/types/database-overrides';
 
 export const metadata = generatePageMetadata('/account');
 
 export default async function AccountDashboard() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { user } = await getAuthenticatedUser({ context: 'AccountDashboard' });
 
-  if (!user) return null;
-
-  // Consolidated RPC: 2 queries → 1 (50% reduction)
-  const { data: dashboardData } = await supabase.rpc('get_account_dashboard', {
-    p_user_id: user.id,
-  });
-
-  // Runtime validation schema for RPC response
-  const DashboardResponseSchema = z.object({
-    bookmark_count: z.number(),
-    profile: z.object({
-      name: z.string().nullable(),
-      tier: z.string().nullable(),
-      created_at: z.string(),
-    }),
-  });
-
-  type DashboardResponse = z.infer<typeof DashboardResponseSchema>;
-
-  // Validate and fallback on error
-  let validatedData: DashboardResponse;
-  try {
-    validatedData = DashboardResponseSchema.parse(dashboardData);
-  } catch (error) {
-    logger.error(
-      'Invalid dashboard response structure',
-      error instanceof Error ? error : new Error(String(error))
+  if (!user) {
+    logger.warn('AccountDashboard: unauthenticated access attempt detected');
+    return (
+      <div className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-2xl">Sign in required</CardTitle>
+            <CardDescription>Please sign in to view your dashboard.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button asChild={true}>
+              <Link href={ROUTES.LOGIN}>Go to login</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
     );
-    validatedData = {
-      bookmark_count: 0,
-      profile: {
-        name: null,
-        tier: null,
-        created_at: new Date().toISOString(),
-      },
-    };
   }
 
-  const { bookmark_count, profile } = validatedData;
+  let dashboardData: Awaited<ReturnType<typeof getAccountDashboard>> = null;
+  try {
+    dashboardData = await getAccountDashboard(user.id);
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to load account dashboard data');
+    logger.error('AccountDashboard: getAccountDashboard threw', normalized, {
+      userId: user.id,
+    });
+  }
+
+  if (!dashboardData) {
+    logger.error('AccountDashboard: dashboard data is null', undefined, { userId: user.id });
+    return (
+      <div className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-2xl">Dashboard unavailable</CardTitle>
+            <CardDescription>
+              We couldn&apos;t load your account data. Please refresh the page or try again later.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button asChild={true}>
+              <Link href={ROUTES.HOME}>Go to home</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  const { bookmark_count, profile } = dashboardData;
 
   const bookmarkCount = bookmark_count;
   const accountAge = profile?.created_at
@@ -100,11 +110,16 @@ export default async function AccountDashboard() {
           <CardContent>
             <UnifiedBadge
               variant="base"
-              style={profile?.tier === 'pro' ? 'default' : 'secondary'}
+              style={
+                (profile?.tier as UserTier | undefined) === USER_TIER_VALUES[1]
+                  ? 'default'
+                  : 'secondary'
+              }
               className="mt-2"
             >
               {profile?.tier
-                ? profile.tier.charAt(0).toUpperCase() + profile.tier.slice(1)
+                ? (profile.tier as UserTier).charAt(0).toUpperCase() +
+                  (profile.tier as UserTier).slice(1)
                 : 'Free'}
             </UnifiedBadge>
             <p className={'mt-2 text-muted-foreground text-xs'}>Membership level</p>

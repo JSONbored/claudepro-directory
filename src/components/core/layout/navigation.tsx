@@ -21,7 +21,7 @@ import { NavigationTablet } from '@/src/components/core/layout/navigation-tablet
 import { UserMenu } from '@/src/components/core/layout/user-menu';
 import { Button } from '@/src/components/primitives/ui/button';
 import { ACTION_LINKS } from '@/src/config/navigation';
-import { ROUTES } from '@/src/lib/constants';
+import { ROUTES } from '@/src/lib/data/config/constants';
 import { DiscordIcon } from '@/src/lib/icons';
 import {
   ANIMATION_CONSTANTS,
@@ -29,13 +29,16 @@ import {
   RESPONSIVE_PATTERNS,
   UI_CLASSES,
 } from '@/src/lib/ui-constants';
+import type { GetGetNavigationMenuReturn } from '@/src/types/database-overrides';
 
 interface NavigationProps {
   /** Hide Create button when FloatingActionBar is enabled */
   hideCreateButton?: boolean;
+  /** Navigation data from server (required) */
+  navigationData: GetGetNavigationMenuReturn;
 }
 
-const NavigationComponent = ({ hideCreateButton = false }: NavigationProps = {}) => {
+const NavigationComponent = ({ hideCreateButton = false, navigationData }: NavigationProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
@@ -94,7 +97,11 @@ const NavigationComponent = ({ hideCreateButton = false }: NavigationProps = {})
       </a>
 
       {/* Global Command Menu (⌘K) */}
-      <NavigationCommandMenu open={commandPaletteOpen} onOpenChange={setCommandPaletteOpen} />
+      <NavigationCommandMenu
+        open={commandPaletteOpen}
+        onOpenChange={setCommandPaletteOpen}
+        navigationData={navigationData}
+      />
 
       <motion.header
         className={`${POSITION_PATTERNS.STICKY_TOP} z-50 w-full px-3 pt-1 pb-3 will-change-transform contain-layout`}
@@ -142,7 +149,7 @@ const NavigationComponent = ({ hideCreateButton = false }: NavigationProps = {})
                       return (
                         <Button
                           key={link.href}
-                          asChild
+                          asChild={true}
                           variant="outline"
                           size="sm"
                           className={`hidden md:flex ${UI_CLASSES.TEXT_XS}`}

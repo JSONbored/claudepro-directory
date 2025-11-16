@@ -2,18 +2,21 @@
  * Shared button success state management with auto-reset
  */
 import { useCallback, useState } from 'react';
-import { timeoutConfigs } from '@/src/lib/flags';
+import { getTimeoutConfig } from '@/src/lib/actions/feature-flags.actions';
+import { logClientWarning } from '@/src/lib/utils/error.utils';
 
 // Default value (will be overridden by Dynamic Config)
 let DEFAULT_SUCCESS_DURATION = 2000;
 
 // Load config from Statsig on module initialization
-timeoutConfigs()
-  .then((config: Record<string, unknown>) => {
-    DEFAULT_SUCCESS_DURATION = (config['timeout.button_success_ms'] as number) ?? 2000;
+getTimeoutConfig({})
+  .then((result) => {
+    if (result?.data) {
+      DEFAULT_SUCCESS_DURATION = result.data['timeout.ui.button_success_duration_ms'];
+    }
   })
-  .catch(() => {
-    // Use default if config load fails
+  .catch((error) => {
+    logClientWarning('useButtonSuccess: failed to load success duration', error);
   });
 
 export function useButtonSuccess(duration = DEFAULT_SUCCESS_DURATION) {

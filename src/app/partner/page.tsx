@@ -1,8 +1,5 @@
-'use client';
-
-import { motion } from 'motion/react';
-import { useEffect, useState } from 'react';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
+import { HoverCard } from '@/src/components/primitives/animation/hover-card';
 import { Button } from '@/src/components/primitives/ui/button';
 import {
   Card,
@@ -11,8 +8,9 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/ui/card';
-import { SOCIAL_LINKS } from '@/src/lib/constants';
-import { pricingConfigs } from '@/src/lib/flags';
+import { getPartnerContactChannels, getPartnerCtas } from '@/src/lib/data/marketing/contact';
+import { getPartnerPricing } from '@/src/lib/data/marketing/pricing';
+import { getPartnerHeroStats } from '@/src/lib/data/marketing/site';
 import {
   BarChart,
   Briefcase,
@@ -24,34 +22,25 @@ import {
   MousePointer,
   Sparkles,
 } from '@/src/lib/icons';
-import { ANIMATION_CONSTANTS, RESPONSIVE_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
+import { logger } from '@/src/lib/logger';
+import { RESPONSIVE_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 
-export default function PartnerPage() {
-  const configCount = 282; // Static count for client component
-  const [pricing, setPricing] = useState({
-    jobsRegular: 249,
-    jobsDiscounted: 149,
-    jobsDurationDays: 30,
-    sponsoredRegular: 199,
-    sponsoredDiscounted: 119,
-  });
+export default async function PartnerPage() {
+  let pricing: Awaited<ReturnType<typeof getPartnerPricing>>;
+  try {
+    pricing = await getPartnerPricing();
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to load pricing config');
+    logger.error('PartnerPage: getPartnerPricing failed', normalized);
+    throw normalized;
+  }
 
-  // Load pricing from Statsig
-  useEffect(() => {
-    pricingConfigs()
-      .then((config) => {
-        setPricing({
-          jobsRegular: (config['pricing.jobs.regular'] as number) ?? 249,
-          jobsDiscounted: (config['pricing.jobs.discounted'] as number) ?? 149,
-          jobsDurationDays: (config['pricing.jobs.duration_days'] as number) ?? 30,
-          sponsoredRegular: (config['pricing.sponsored.regular'] as number) ?? 199,
-          sponsoredDiscounted: (config['pricing.sponsored.discounted'] as number) ?? 119,
-        });
-      })
-      .catch(() => {
-        // Silent fail - use defaults
-      });
-  }, []);
+  const heroStats = await getPartnerHeroStats();
+  const configCount = heroStats.configurationCount;
+
+  const partnerContacts = getPartnerContactChannels();
+  const partnerCtas = getPartnerCtas();
 
   return (
     <div className={'container mx-auto px-4 py-12'}>
@@ -60,7 +49,7 @@ export default function PartnerPage() {
         <h1
           className={`mb-4 ${RESPONSIVE_PATTERNS.TEXT_RESPONSIVE_2XL} ${UI_CLASSES.HEADING_H1.split(' ')[1]}`}
         >
-          Reach 3,000+ Claude AI Developers
+          Reach {heroStats.monthlyVisitors.toLocaleString()}+ Claude AI Developers
         </h1>
         <p className={`mb-6 ${UI_CLASSES.TEXT_BODY_LG} text-muted-foreground`}>
           The largest directory of Claude configurations. Attract engineers building the future of
@@ -74,7 +63,7 @@ export default function PartnerPage() {
               <p
                 className={`mb-1 ${UI_CLASSES.HEADING_H3.split(' ').slice(0, 2).join(' ')} text-primary`}
               >
-                3,000+
+                {heroStats.monthlyVisitors.toLocaleString()}+
               </p>
               <p className={UI_CLASSES.TEXT_SM_MUTED}>Monthly Visitors</p>
             </CardContent>
@@ -84,7 +73,7 @@ export default function PartnerPage() {
               <p
                 className={`mb-1 ${UI_CLASSES.HEADING_H3.split(' ').slice(0, 2).join(' ')} text-primary`}
               >
-                16,000+
+                {heroStats.monthlyPageViews.toLocaleString()}+
               </p>
               <p className={UI_CLASSES.TEXT_SM_MUTED}>Page Views</p>
             </CardContent>
@@ -119,9 +108,11 @@ export default function PartnerPage() {
                 <Sparkles className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <p className={'font-semibold text-lg'}>Launch Pricing: 40% Off Everything</p>
+                <p className={'font-semibold text-lg'}>
+                  Launch Pricing: {pricing.launch.discountPercent}% Off Everything
+                </p>
                 <p className="text-muted-foreground text-sm">
-                  Ends December 31st, 2025 • Simple monthly billing, cancel anytime
+                  Ends {pricing.launch.endDate} • Simple monthly billing, cancel anytime
                 </p>
               </div>
             </div>
@@ -138,11 +129,7 @@ export default function PartnerPage() {
         <h2 className={'mb-8 text-center font-bold text-3xl'}>Simple, Transparent Pricing</h2>
         <div className={'grid gap-8 md:grid-cols-2'}>
           {/* Job Listings */}
-          <motion.div
-            whileHover={{ y: -4, scale: 1.01 }}
-            whileTap={{ scale: 0.99 }}
-            transition={ANIMATION_CONSTANTS.SPRING_DEFAULT}
-          >
+          <HoverCard variant="strong">
             <Card className={'relative overflow-hidden border-2'}>
               <CardHeader>
                 <div className={'mb-4 flex items-start justify-between'}>
@@ -167,15 +154,15 @@ export default function PartnerPage() {
                 <div className={'rounded-lg border bg-muted/30 p-4'}>
                   <div className={'mb-2 flex items-baseline gap-2'}>
                     <span className={'font-bold text-muted-foreground text-xl line-through'}>
-                      ${pricing.jobsRegular}
+                      ${pricing.jobs.regular}
                     </span>
                     <span className={'font-bold text-3xl text-primary'}>
-                      ${pricing.jobsDiscounted}
+                      ${pricing.jobs.discounted}
                     </span>
                     <span className={UI_CLASSES.TEXT_SM_MUTED}>/month</span>
                   </div>
                   <p className={UI_CLASSES.TEXT_XS_MUTED}>
-                    {pricing.jobsDurationDays}-day featured placement • Launch pricing
+                    {pricing.jobs.durationDays}-day featured placement • Launch pricing
                   </p>
                 </div>
 
@@ -195,7 +182,7 @@ export default function PartnerPage() {
                   </div>
                   <div className={'flex items-start gap-2'}>
                     <Check className={`mt-0.5 ${UI_CLASSES.ICON_SM} ${UI_CLASSES.ICON_SUCCESS}`} />
-                    <p className={UI_CLASSES.TEXT_SM}>{pricing.jobsDurationDays}-day visibility</p>
+                    <p className={UI_CLASSES.TEXT_SM}>{pricing.jobs.durationDays}-day visibility</p>
                   </div>
                   <div className={'flex items-start gap-2'}>
                     <Check className={`mt-0.5 ${UI_CLASSES.ICON_SM} ${UI_CLASSES.ICON_SUCCESS}`} />
@@ -204,22 +191,18 @@ export default function PartnerPage() {
                 </div>
 
                 {/* CTA */}
-                <Button className="w-full" size="lg" asChild>
-                  <a href={`mailto:${SOCIAL_LINKS.partnerEmail}?subject=Job Listing - Get Started`}>
+                <Button className="w-full" size="lg" asChild={true}>
+                  <a href={partnerCtas.jobListing.href}>
                     <Mail className={'mr-2 h-4 w-4'} />
                     Post a Job
                   </a>
                 </Button>
               </CardContent>
             </Card>
-          </motion.div>
+          </HoverCard>
 
           {/* Sponsored Listings */}
-          <motion.div
-            whileHover={{ y: -4, scale: 1.01 }}
-            whileTap={{ scale: 0.99 }}
-            transition={ANIMATION_CONSTANTS.SPRING_DEFAULT}
-          >
+          <HoverCard variant="strong">
             <Card className={'relative overflow-hidden border-2'}>
               <CardHeader>
                 <div className={'mb-4 flex items-start justify-between'}>
@@ -244,10 +227,10 @@ export default function PartnerPage() {
                 <div className={'rounded-lg border bg-muted/30 p-4'}>
                   <div className={'mb-2 flex items-baseline gap-2'}>
                     <span className={'font-bold text-muted-foreground text-xl line-through'}>
-                      ${pricing.sponsoredRegular}
+                      ${pricing.sponsored.regular}
                     </span>
                     <span className={'font-bold text-3xl text-primary'}>
-                      ${pricing.sponsoredDiscounted}
+                      ${pricing.sponsored.discounted}
                     </span>
                     <span className={UI_CLASSES.TEXT_SM_MUTED}>/month</span>
                   </div>
@@ -279,17 +262,15 @@ export default function PartnerPage() {
                 </div>
 
                 {/* CTA */}
-                <Button className="w-full" size="lg" variant="default" asChild>
-                  <a
-                    href={`mailto:${SOCIAL_LINKS.partnerEmail}?subject=Sponsored Listing - Get Started`}
-                  >
+                <Button className="w-full" size="lg" variant="default" asChild={true}>
+                  <a href={partnerCtas.sponsoredListing.href}>
                     <Mail className={'mr-2 h-4 w-4'} />
                     Get Featured
                   </a>
                 </Button>
               </CardContent>
             </Card>
-          </motion.div>
+          </HoverCard>
         </div>
       </div>
 
@@ -365,14 +346,16 @@ export default function PartnerPage() {
       <div className={'mx-auto max-w-2xl text-center'}>
         <Card className="border-primary/20 bg-gradient-to-r from-primary/10 to-primary/5">
           <CardContent className="pt-8 pb-8">
-            <h2 className={'mb-4 font-bold text-2xl'}>Ready to Reach 3,000+ AI Engineers?</h2>
+            <h2 className={'mb-4 font-bold text-2xl'}>
+              Ready to Reach {heroStats.monthlyVisitors.toLocaleString()}+ AI Engineers?
+            </h2>
             <p className={'mb-6 text-muted-foreground'}>
               Get started with launch pricing (40% off) before December 31st, 2025
             </p>
-            <Button size="lg" asChild>
-              <a href={`mailto:${SOCIAL_LINKS.partnerEmail}?subject=Partnership Inquiry`}>
+            <Button size="lg" asChild={true}>
+              <a href={partnerCtas.partnershipInquiry.href}>
                 <Mail className={'mr-2 h-4 w-4'} />
-                Email: partner@claudepro.directory
+                Email: {partnerContacts.partnerEmail}
               </a>
             </Button>
             <p className={`${UI_CLASSES.TEXT_XS_MUTED} mt-4`}>

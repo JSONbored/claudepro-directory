@@ -1,13 +1,4 @@
-/**
- * View Transitions API Styles
- *
- * Native browser animations for smooth page morphing.
- * Baseline support as of October 2025 (Chrome 111+, Firefox 144+, Safari 18+).
- *
- * Progressive enhancement: Falls back gracefully in unsupported browsers.
- *
- * @see https://developer.mozilla.org/en-US/docs/Web/API/View_Transitions_API
- */
+/* View Transitions API styles (progressive enhancement, Chrome/Edge/Firefox/Safari). */
 
 /* ===========================
  * Default Transition (All elements)
@@ -161,11 +152,11 @@
  * =========================== */
 
 @media (prefers-reduced-motion: reduce) {
-  ::view-transition-old(*),
-  ::view-transition-new(*) {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
+  html ::view-transition-old(*),
+  html ::view-transition-new(*) {
+    animation-duration: 0.01ms;
+    animation-iteration-count: 1;
+    transition-duration: 0.01ms;
   }
 }
 

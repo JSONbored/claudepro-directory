@@ -1,23 +1,24 @@
 'use client';
 
 /**
- * Job Toggle Button
- * Toggles job listing between active and paused states
+ * Job Toggle Button - Database-First Architecture
+ * Uses toggleJobStatus server action (calls toggle_job_status RPC)
  */
 
 import { useRouter } from 'next/navigation';
 import { useTransition } from 'react';
 import { Button } from '@/src/components/primitives/ui/button';
+import { toggleJobStatus } from '@/src/lib/actions/jobs.actions';
 import { Pause, Play } from '@/src/lib/icons';
-import { logger } from '@/src/lib/logger';
-import { createClient } from '@/src/lib/supabase/client';
+import type { ButtonStyleProps } from '@/src/lib/types/component.types';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { logClientWarning } from '@/src/lib/utils/error.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
-import type { ButtonStyleProps } from '../shared/button-types';
+import type { JobStatus } from '@/src/types/database-overrides';
 
 export interface JobToggleButtonProps extends ButtonStyleProps {
   jobId: string;
-  currentStatus: 'active' | 'paused';
+  currentStatus: JobStatus;
 }
 
 export function JobToggleButton({
@@ -30,59 +31,33 @@ export function JobToggleButton({
 }: JobToggleButtonProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const supabase = createClient();
 
   const handleToggle = () => {
-    const newStatus = currentStatus === 'active' ? 'draft' : 'active';
+    // Toggle between 'active' and 'draft' status
+    const newStatus: JobStatus =
+      currentStatus === ('active' as JobStatus) ? ('draft' as JobStatus) : ('active' as JobStatus);
 
     startTransition(async () => {
       try {
-        const {
-          data: { session },
-        } = await supabase.auth.getSession();
+        const result = await toggleJobStatus({
+          job_id: jobId,
+          new_status: newStatus,
+        });
 
-        if (!session?.access_token) {
-          throw new Error('You must be signed in to manage jobs');
-        }
-
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/jobs-handler`,
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${session.access_token}`,
-              'X-Job-Action': 'toggle',
-            },
-            body: JSON.stringify({
-              id: jobId,
-              status: newStatus,
-            }),
-          }
-        );
-
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
-          throw new Error(errorData.message || 'Failed to toggle job status');
-        }
-
-        const result = (await response.json()) as { success: boolean };
-
-        if (result.success) {
+        if (result?.data?.success) {
           toasts.success.actionCompleted(
-            newStatus === 'active' ? 'Job listing resumed' : 'Job listing paused'
+            newStatus === ('active' as JobStatus) ? 'Job listing resumed' : 'Job listing paused'
           );
           router.refresh();
         } else {
           toasts.error.actionFailed('update job status');
         }
       } catch (error) {
-        logger.error(
-          'Failed to toggle job status',
-          error instanceof Error ? error : new Error(String(error)),
-          { jobId, newStatus }
-        );
-        toasts.error.serverError();
+        logClientWarning('JobToggleButton: toggle failed', error, {
+          jobId,
+          newStatus,
+        });
+        toasts.error.fromError(error, 'Failed to toggle job status');
       }
     });
   };
@@ -95,7 +70,7 @@ export function JobToggleButton({
       disabled={disabled || isPending}
       className={className}
     >
-      {currentStatus === 'active' ? (
+      {currentStatus === ('active' as JobStatus) ? (
         <>
           <Pause className={UI_CLASSES.ICON_XS_LEADING} />
           Pause

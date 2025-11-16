@@ -19,14 +19,32 @@ import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge
 import { BaseCard } from '@/src/components/core/domain/cards/content-card-base';
 import { Avatar, AvatarFallback, AvatarImage } from '@/src/components/primitives/ui/avatar';
 import { Button } from '@/src/components/primitives/ui/button';
+import { usePulse } from '@/src/hooks/use-pulse';
 import { Award, ExternalLink, Users } from '@/src/lib/icons';
 import { BADGE_COLORS, UI_CLASSES } from '@/src/lib/ui-constants';
-import type { Tables } from '@/src/types/database.types';
+import { logUnhandledPromise } from '@/src/lib/utils/error.utils';
+import type { Json, Tables } from '@/src/types/database.types';
 
 /**
  * User profile data with runtime-added stats from materialized views
+ * Supports both full user records and simplified user objects from RPCs
  */
-export type UserProfile = Tables<'users'> & {
+export type UserProfile = (
+  | Tables<'users'>
+  | {
+      id: string;
+      slug: string;
+      name: string;
+      image: string | null;
+      bio: string | null;
+      work: string | null;
+      tier: 'free' | 'pro' | 'enterprise';
+      created_at: string;
+      interests?: string[] | null;
+      website?: string | null;
+      social_x_link?: string | null;
+    }
+) & {
   // Runtime-added stats (from materialized view)
   total_contributions?: number;
   followers_count?: number;
@@ -36,6 +54,10 @@ export type UserProfile = Tables<'users'> & {
     name: string;
     logo: string | null;
   } | null;
+  // Optional fields that may be missing from simplified user objects
+  interests?: string[] | null;
+  website?: string | null;
+  social_x_link?: string | null;
 };
 
 export interface ProfileCardProps {
@@ -73,6 +95,7 @@ const getMemberBadge = (user: UserProfile) => {
 };
 
 function ProfileCardComponent({ user, variant = 'default', showActions = true }: ProfileCardProps) {
+  const pulse = usePulse();
   const memberBadge = getMemberBadge(user);
   const slug = user.slug || 'unknown';
   const username = `@${slug}`;
@@ -129,8 +152,9 @@ function ProfileCardComponent({ user, variant = 'default', showActions = true }:
           </UnifiedBadge>
 
           {/* Top interests (max 2) */}
-          {Array.isArray(user.interests) &&
-            user.interests
+          {user.interests &&
+            Array.isArray(user.interests) &&
+            (user.interests as Json[])
               .slice(0, 2)
               .filter((interest): interest is string => typeof interest === 'string')
               .map((interest) => (
@@ -182,6 +206,22 @@ function ProfileCardComponent({ user, variant = 'default', showActions = true }:
               className={`${UI_CLASSES.ICON_BUTTON_SM} ${UI_CLASSES.BUTTON_GHOST_ICON}`}
               onClick={(e) => {
                 e.stopPropagation();
+                pulse
+                  .click({
+                    category: null,
+                    slug: null,
+                    metadata: {
+                      action: 'external_link',
+                      link_type: 'website',
+                      target_url: user.website as string,
+                      user_slug: slug,
+                    },
+                  })
+                  .catch((error) => {
+                    logUnhandledPromise('UserProfileCard: website link click pulse failed', error, {
+                      user_slug: slug,
+                    });
+                  });
                 window.open(user.website as string, '_blank');
               }}
               aria-label={`Visit ${displayName}'s website`}
@@ -198,6 +238,22 @@ function ProfileCardComponent({ user, variant = 'default', showActions = true }:
               className={`${UI_CLASSES.ICON_BUTTON_SM} ${UI_CLASSES.BUTTON_GHOST_ICON}`}
               onClick={(e) => {
                 e.stopPropagation();
+                pulse
+                  .click({
+                    category: null,
+                    slug: null,
+                    metadata: {
+                      action: 'external_link',
+                      link_type: 'social',
+                      target_url: user.social_x_link as string,
+                      user_slug: slug,
+                    },
+                  })
+                  .catch((error) => {
+                    logUnhandledPromise('UserProfileCard: social link click pulse failed', error, {
+                      user_slug: slug,
+                    });
+                  });
                 window.open(user.social_x_link as string, '_blank');
               }}
               aria-label={`Visit ${displayName} on X/Twitter`}

@@ -8,12 +8,15 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/primitives/ui/tabs';
-import { trackInteraction } from '@/src/lib/edge/client';
-import type { TabbedDetailLayoutProps } from '@/src/lib/types/detail-tabs.types';
+import { usePulse } from '@/src/hooks/use-pulse';
+import type { TabbedDetailLayoutProps } from '@/src/lib/types/component.types';
 import { cn } from '@/src/lib/utils';
+import { logUnhandledPromise } from '@/src/lib/utils/error.utils';
+import type { ContentCategory } from '@/src/types/database-overrides';
 import { TabSectionRenderer } from './tab-section-renderer';
 
 export function TabbedDetailLayout({ item, config, tabs, sectionData }: TabbedDetailLayoutProps) {
+  const pulse = usePulse();
   // Get initial tab from URL hash or default to first tab
   const getInitialTab = useCallback(() => {
     if (tabs.length === 0) return '';
@@ -53,19 +56,23 @@ export function TabbedDetailLayout({ item, config, tabs, sectionData }: TabbedDe
       }
 
       // Track tab switch
-      trackInteraction({
-        interaction_type: 'click',
-        content_type: item.category,
-        content_slug: item.slug,
-        metadata: {
-          tab_id: value,
-          tab_action: 'switch',
-        },
-      }).catch(() => {
-        // Analytics failure should not affect UX
-      });
+      pulse
+        .click({
+          category: item.category as ContentCategory,
+          slug: item.slug,
+          metadata: {
+            tab_id: value,
+            tab_action: 'switch',
+          },
+        })
+        .catch((error) => {
+          logUnhandledPromise('trackInteraction:tabbed-detail', error, {
+            tabId: value,
+            slug: item.slug,
+          });
+        });
     },
-    [item.category, item.slug]
+    [item.category, item.slug, pulse]
   );
 
   // Mobile swipe gesture navigation
@@ -118,7 +125,7 @@ export function TabbedDetailLayout({ item, config, tabs, sectionData }: TabbedDe
   return (
     <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
       {/* Sticky tab bar */}
-      <div className="sticky top-16 z-10 -mx-4 border-b bg-background/95 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="-mx-4 sticky top-16 z-10 border-b bg-background/95 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto">
           <TabsList className="h-auto w-full justify-start rounded-none border-0 bg-transparent p-0">
             {tabs.map((tab) => {
@@ -130,7 +137,7 @@ export function TabbedDetailLayout({ item, config, tabs, sectionData }: TabbedDe
                   key={tab.id}
                   value={tab.id}
                   className={cn(
-                    'relative rounded-none border-b-2 border-transparent px-4 py-3',
+                    'relative rounded-none border-transparent border-b-2 px-4 py-3',
                     'data-[state=active]:border-primary data-[state=active]:bg-transparent',
                     'hover:bg-muted/50',
                     // Mobile optimization
@@ -159,7 +166,7 @@ export function TabbedDetailLayout({ item, config, tabs, sectionData }: TabbedDe
             value={tab.id}
             className="mt-0 space-y-8"
             // Keep in DOM but hide when not active (SEO)
-            forceMount
+            forceMount={true}
             hidden={activeTab !== tab.id}
           >
             {tab.sections.map((sectionId) => (

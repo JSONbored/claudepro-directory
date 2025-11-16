@@ -33,6 +33,7 @@ import { execSync } from 'node:child_process';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { logger } from '@/src/lib/logger';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -65,14 +66,22 @@ function checkGitCliff(): boolean {
  * Install git-cliff via Homebrew (macOS)
  */
 function installGitCliff(): void {
-  console.log('📦 Installing git-cliff via Homebrew...\n');
+  logger.info('📦 Installing git-cliff via Homebrew...\n', { script: 'changelog-generate-entry' });
 
   try {
     execSync('brew install git-cliff', { stdio: 'inherit' });
-    console.log('\n✅ git-cliff installed successfully!\n');
+    logger.info('\n✅ git-cliff installed successfully!\n', { script: 'changelog-generate-entry' });
   } catch {
-    console.error('❌ Failed to install git-cliff');
-    console.error('   Please install manually: https://git-cliff.org/docs/installation\n');
+    logger.error('❌ Failed to install git-cliff', undefined, {
+      script: 'changelog-generate-entry',
+    });
+    logger.error(
+      '   Please install manually: https://git-cliff.org/docs/installation\n',
+      undefined,
+      {
+        script: 'changelog-generate-entry',
+      }
+    );
     process.exit(1);
   }
 }
@@ -103,7 +112,7 @@ function generateChangelog(options: GenerateOptions): string {
   // Build command with quoted config path
   const command = `git-cliff --config "${CONFIG_PATH}" ${args.join(' ')}`;
 
-  console.log('🔨 Generating changelog...\n');
+  logger.info('🔨 Generating changelog...\n', { script: 'changelog-generate-entry' });
 
   try {
     const output = execSync(command, {
@@ -114,7 +123,13 @@ function generateChangelog(options: GenerateOptions): string {
 
     return output.trim();
   } catch (error) {
-    console.error('❌ Failed to generate changelog');
+    logger.error(
+      '❌ Failed to generate changelog',
+      error instanceof Error ? error : new Error(String(error)),
+      {
+        script: 'changelog-generate-entry',
+      }
+    );
     throw error;
   }
 }
@@ -145,7 +160,7 @@ function prependToChangelog(newEntry: string): void {
     writeFileSync(CHANGELOG_PATH, lines.join('\n'), 'utf-8');
   }
 
-  console.log('✅ Updated CHANGELOG.md\n');
+  logger.info('✅ Updated CHANGELOG.md\n', { script: 'changelog-generate-entry' });
 }
 
 /**
@@ -193,7 +208,10 @@ function parseArgs(): GenerateOptions {
         process.exit(0);
         break;
       default:
-        console.error(`Unknown option: ${arg}\n`);
+        logger.error(`Unknown option: ${arg}\n`, undefined, {
+          script: 'changelog-generate-entry',
+          option: arg,
+        });
         showHelp();
         process.exit(1);
     }
@@ -208,7 +226,7 @@ function parseArgs(): GenerateOptions {
  * Show help message
  */
 function showHelp(): void {
-  console.log(`
+  logger.info(`
 Changelog Entry Generator
 
 Usage:
@@ -244,21 +262,26 @@ Documentation: https://git-cliff.org/docs/usage
  * Main
  */
 async function main() {
-  console.log('📝 Changelog Entry Generator\n');
+  logger.info('📝 Changelog Entry Generator\n', { script: 'changelog-generate-entry' });
 
   // Parse options
   const options = parseArgs();
 
   // Check if git-cliff is installed
   if (!checkGitCliff()) {
-    console.log('⚠️  git-cliff not found\n');
+    logger.warn('⚠️  git-cliff not found\n', { script: 'changelog-generate-entry' });
     installGitCliff();
   }
 
   // Verify config exists
   if (!existsSync(CONFIG_PATH)) {
-    console.error(`❌ Configuration not found: ${CONFIG_PATH}`);
-    console.error('   Run: npm run changelog:init\n');
+    logger.error(`❌ Configuration not found: ${CONFIG_PATH}`, undefined, {
+      script: 'changelog-generate-entry',
+      configPath: CONFIG_PATH,
+    });
+    logger.error('   Run: npm run changelog:init\n', undefined, {
+      script: 'changelog-generate-entry',
+    });
     process.exit(1);
   }
 
@@ -267,36 +290,56 @@ async function main() {
     const newEntry = generateChangelog(options);
 
     if (!newEntry || newEntry.length === 0) {
-      console.log('ℹ️  No commits found matching criteria\n');
-      console.log('   Tip: Ensure commits follow conventional format (feat:, fix:, etc.)\n');
+      logger.info('ℹ️  No commits found matching criteria\n', {
+        script: 'changelog-generate-entry',
+      });
+      logger.info('   Tip: Ensure commits follow conventional format (feat:, fix:, etc.)\n', {
+        script: 'changelog-generate-entry',
+      });
       return;
     }
 
     if (options.dryRun) {
-      console.log('🔍 Dry Run - Generated Entry:\n');
-      console.log('─'.repeat(80));
-      console.log(newEntry);
-      console.log('─'.repeat(80));
-      console.log('\n✅ Preview complete (no files modified)\n');
+      logger.info('🔍 Dry Run - Generated Entry:\n', { script: 'changelog-generate-entry' });
+      logger.info('─'.repeat(80));
+      logger.info(newEntry);
+      logger.info('─'.repeat(80));
+      logger.info('\n✅ Preview complete (no files modified)\n', {
+        script: 'changelog-generate-entry',
+      });
       return;
     }
 
     // Prepend to CHANGELOG.md
     prependToChangelog(newEntry);
 
-    console.log('✅ Changelog generation complete!\n');
-    console.log('Next steps:');
-    console.log('  1. Review CHANGELOG.md for accuracy');
-    console.log('  2. Enhance TL;DR and Technical Details sections');
-    console.log('  3. Run: npm run build:content (triggers cache invalidation)');
-    console.log('  4. Commit: git add CHANGELOG.md && git commit -m "chore: update changelog"\n');
+    logger.info('✅ Changelog generation complete!\n', { script: 'changelog-generate-entry' });
+    logger.info('Next steps:');
+    logger.info('  1. Review CHANGELOG.md for accuracy');
+    logger.info('  2. Enhance TL;DR and Technical Details sections');
+    logger.info('  3. Run: npm run build:content (triggers cache invalidation)');
+    logger.info('  4. Commit: git add CHANGELOG.md && git commit -m "chore: update changelog"\n', {
+      script: 'changelog-generate-entry',
+    });
   } catch (error) {
-    console.error('❌ Generation failed:', error);
+    logger.error(
+      '❌ Generation failed',
+      error instanceof Error ? error : new Error(String(error)),
+      {
+        script: 'changelog-generate-entry',
+      }
+    );
     process.exit(1);
   }
 }
 
 main().catch((error) => {
-  console.error('❌ Unhandled error in main:', error);
+  logger.error(
+    '❌ Unhandled error in main',
+    error instanceof Error ? error : new Error(String(error)),
+    {
+      script: 'changelog-generate-entry',
+    }
+  );
   process.exit(1);
 });

@@ -5,32 +5,20 @@
 
 'use client';
 
-import { useCallback, useState, useTransition } from 'react';
-import { trackInteraction, trackNewsletterEvent } from '@/src/lib/edge/client';
-import { newsletterConfigs } from '@/src/lib/flags';
+import { useCallback, useEffect, useState, useTransition } from 'react';
+import { usePulse } from '@/src/hooks/use-pulse';
+import { getNewsletterConfig } from '@/src/lib/actions/feature-flags.actions';
 import { logger } from '@/src/lib/logger';
+import { logClientWarning } from '@/src/lib/utils/error.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
-import type { Enums } from '@/src/types/database.types';
-
-export type NewsletterSource = Enums<'newsletter_source'>;
+import type { NewsletterSource } from '@/src/types/database-overrides';
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 
-// Default values (will be overridden by Dynamic Configs)
+// Retry configuration (loaded from Statsig via server action)
 let MAX_RETRIES = 3;
 let INITIAL_RETRY_DELAY_MS = 1000;
 let RETRY_BACKOFF_MULTIPLIER = 2;
-
-// Load retry config from Statsig on module initialization
-newsletterConfigs()
-  .then((config: Record<string, unknown>) => {
-    MAX_RETRIES = (config['newsletter.max_retries'] as number) ?? 3;
-    INITIAL_RETRY_DELAY_MS = (config['newsletter.initial_retry_delay_ms'] as number) ?? 1000;
-    RETRY_BACKOFF_MULTIPLIER = (config['newsletter.retry_backoff_multiplier'] as number) ?? 2;
-  })
-  .catch(() => {
-    // Use defaults if config load fails
-  });
 
 /**
  * Retry helper with exponential backoff
@@ -64,6 +52,10 @@ async function fetchWithRetry(
       await new Promise((resolve) => setTimeout(resolve, delay));
       return fetchWithRetry(url, options, retries - 1);
     }
+    logger.error('fetchWithRetry: request failed', error as Error, {
+      url,
+      attempt: MAX_RETRIES - retries + 1,
+    });
     throw error;
   }
 }
@@ -110,6 +102,26 @@ export function useNewsletter(options: UseNewsletterOptions): UseNewsletterRetur
   const [email, setEmail] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+  const pulse = usePulse();
+
+  // Load retry config from Statsig on mount
+  useEffect(() => {
+    getNewsletterConfig({})
+      .then((result) => {
+        if (result?.data) {
+          const config = result.data;
+          MAX_RETRIES = config['newsletter.max_retries'];
+          INITIAL_RETRY_DELAY_MS = config['newsletter.initial_retry_delay_ms'];
+          RETRY_BACKOFF_MULTIPLIER = config['newsletter.retry_backoff_multiplier'];
+        }
+      })
+      .catch((error) => {
+        logClientWarning('useNewsletter: failed to load retry config', error, {
+          source,
+          hook: 'useNewsletter',
+        });
+      });
+  }, [source]);
 
   const reset = useCallback(() => {
     setEmail('');
@@ -135,6 +147,9 @@ export function useNewsletter(options: UseNewsletterOptions): UseNewsletterRetur
           throw new Error('Supabase URL not configured');
         }
 
+        // Normalize email
+        const normalizedEmail = email.toLowerCase().trim();
+
         const response = await fetchWithRetry(`${SUPABASE_URL}/functions/v1/email-handler`, {
           method: 'POST',
           headers: {
@@ -142,7 +157,7 @@ export function useNewsletter(options: UseNewsletterOptions): UseNewsletterRetur
             'X-Email-Action': 'subscribe',
           },
           body: JSON.stringify({
-            email,
+            email: normalizedEmail,
             source,
             ...(referrer && { referrer }),
             ...(metadata && metadata),
@@ -160,10 +175,8 @@ export function useNewsletter(options: UseNewsletterOptions): UseNewsletterRetur
 
           // Track newsletter signup success
           Promise.all([
-            trackInteraction({
-              content_type: null,
-              content_slug: null,
-              interaction_type: 'newsletter_subscribe',
+            pulse.newsletter({
+              event: 'subscribe',
               metadata: {
                 source,
                 subscription_id: result.subscription_id,
@@ -171,12 +184,19 @@ export function useNewsletter(options: UseNewsletterOptions): UseNewsletterRetur
                 ...(metadata && metadata),
               },
             }),
-            trackNewsletterEvent('signup_success', {
-              source,
-              ...metadata,
+            pulse.newsletter({
+              event: 'signup_success',
+              metadata: {
+                source,
+                ...metadata,
+              },
             }),
-          ]).catch(() => {
-            // Analytics failure should not affect UX
+          ]).catch((error) => {
+            logClientWarning('useNewsletter: signup success tracking failed', error, {
+              source,
+              email: normalizedEmail,
+              subscriptionId: result.subscription_id,
+            });
           });
 
           reset();
@@ -195,13 +215,18 @@ export function useNewsletter(options: UseNewsletterOptions): UseNewsletterRetur
           onError?.(errorMessage);
 
           // Track newsletter signup error
-          trackNewsletterEvent('signup_error', {
-            source,
-            error: errorMessage,
-            ...metadata,
-          }).catch(() => {
-            // Analytics failure should not affect UX
-          });
+          pulse
+            .newsletter({
+              event: 'signup_error',
+              metadata: {
+                source,
+                error: errorMessage,
+                ...metadata,
+              },
+            })
+            .catch((error) => {
+              logClientWarning('useNewsletter: signup error tracking failed', error, { source });
+            });
 
           logger.error('Newsletter subscription failed', new Error(errorMessage), {
             component: 'useNewsletter',
@@ -226,13 +251,18 @@ export function useNewsletter(options: UseNewsletterOptions): UseNewsletterRetur
         onError?.(errorMessage);
 
         // Track newsletter signup error (exception)
-        trackNewsletterEvent('signup_error', {
-          source,
-          error: errorMessage,
-          ...metadata,
-        }).catch(() => {
-          // Analytics failure should not affect UX
-        });
+        pulse
+          .newsletter({
+            event: 'signup_error',
+            metadata: {
+              source,
+              error: errorMessage,
+              ...metadata,
+            },
+          })
+          .catch((error) => {
+            logClientWarning('useNewsletter: exception tracking failed', error, { source });
+          });
 
         logger.error('Newsletter subscription error', err instanceof Error ? err : undefined, {
           component: 'useNewsletter',
@@ -252,6 +282,7 @@ export function useNewsletter(options: UseNewsletterOptions): UseNewsletterRetur
     reset,
     metadata,
     logContext,
+    pulse,
   ]);
 
   return {

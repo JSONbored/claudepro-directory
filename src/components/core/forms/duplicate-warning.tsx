@@ -3,11 +3,14 @@
 import { motion } from 'motion/react';
 import { useEffect, useState } from 'react';
 import { Alert, AlertDescription, AlertTitle } from '@/src/components/primitives/ui/alert';
+import { getTimeoutConfig } from '@/src/lib/actions/feature-flags.actions';
 import { AlertTriangle } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { logClientWarning } from '@/src/lib/utils/error.utils';
+import type { ContentCategory } from '@/src/types/database-overrides';
 
 interface DuplicateWarningProps {
-  contentType: string;
+  contentType: ContentCategory;
   name: string;
 }
 
@@ -33,9 +36,22 @@ function useDebounce<T>(value: T, delay: number): T {
 export function DuplicateWarning({ contentType: _contentType, name }: DuplicateWarningProps) {
   const [checking, setChecking] = useState(false);
   const [warning, setWarning] = useState<string | null>(null);
+  const [debounceMs, setDebounceMs] = useState(300);
 
-  // Debounce name input (500ms)
-  const debouncedName = useDebounce(name, 500);
+  // Load debounce value from config
+  useEffect(() => {
+    getTimeoutConfig({})
+      .then((result) => {
+        if (!result?.data) return;
+        const config = result.data;
+        setDebounceMs(config['timeout.ui.form_debounce_ms']);
+      })
+      .catch((error) => {
+        logClientWarning('DuplicateWarning: failed to load form debounce config', error);
+      });
+  }, []);
+
+  const debouncedName = useDebounce(name, debounceMs);
 
   useEffect(() => {
     if (!debouncedName || debouncedName.length < 3) {

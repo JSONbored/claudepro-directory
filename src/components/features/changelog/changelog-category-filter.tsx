@@ -4,11 +4,11 @@
 
 'use client';
 
-import { memo } from 'react';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { TabsList, TabsTrigger } from '@/src/components/primitives/ui/tabs';
-import type { ChangelogCategory } from '@/src/lib/changelog/loader';
+import type { ChangelogCategory } from '@/src/lib/data/changelog';
 import { DIMENSIONS } from '@/src/lib/ui-constants';
+import { CHANGELOG_CATEGORY_VALUES } from '@/src/types/database-overrides';
 
 export interface CategoryFilterProps {
   activeCategory: 'All' | ChangelogCategory;
@@ -16,17 +16,9 @@ export interface CategoryFilterProps {
   categoryCounts: Record<string, number>;
 }
 
-const FILTER_CATEGORIES = [
-  'All',
-  'Added',
-  'Changed',
-  'Fixed',
-  'Removed',
-  'Deprecated',
-  'Security',
-] as const;
+const FILTER_CATEGORIES = ['All', ...CHANGELOG_CATEGORY_VALUES] as const;
 
-export const CategoryFilter = memo(({ activeCategory, categoryCounts }: CategoryFilterProps) => {
+export function CategoryFilter({ activeCategory, categoryCounts }: CategoryFilterProps) {
   return (
     <TabsList className="grid w-full gap-1 lg:w-auto lg:auto-cols-fr lg:grid-flow-col">
       {FILTER_CATEGORIES.map((category) => (
@@ -43,6 +35,4 @@ export const CategoryFilter = memo(({ activeCategory, categoryCounts }: Category
       ))}
     </TabsList>
   );
-});
-
-CategoryFilter.displayName = 'CategoryFilter';
+}

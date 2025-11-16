@@ -2,7 +2,8 @@
  * Changelog Utilities - Date formatting and URL generation for changelog entries
  */
 
-import { APP_CONFIG } from '@/src/lib/constants';
+import { APP_CONFIG } from '@/src/lib/data/config/constants';
+import type { ChangelogCategory } from '@/src/types/database-overrides';
 
 export function formatChangelogDate(isoDate: string): string {
   try {
@@ -72,20 +73,24 @@ export function getChangelogPath(slug: string): string {
   return `/changelog/${slug}`;
 }
 
-export function getNonEmptyCategories(
-  categories: unknown
-): Array<'Added' | 'Changed' | 'Deprecated' | 'Removed' | 'Fixed' | 'Security'> {
-  const nonEmpty: Array<'Added' | 'Changed' | 'Deprecated' | 'Removed' | 'Fixed' | 'Security'> = [];
+export function getNonEmptyCategories(categories: unknown): ChangelogCategory[] {
+  const nonEmpty: ChangelogCategory[] = [];
 
   const cats = categories as Record<string, unknown>;
   if (!cats) return nonEmpty;
 
-  if (Array.isArray(cats.Added) && cats.Added.length > 0) nonEmpty.push('Added');
-  if (Array.isArray(cats.Changed) && cats.Changed.length > 0) nonEmpty.push('Changed');
-  if (Array.isArray(cats.Deprecated) && cats.Deprecated.length > 0) nonEmpty.push('Deprecated');
-  if (Array.isArray(cats.Removed) && cats.Removed.length > 0) nonEmpty.push('Removed');
-  if (Array.isArray(cats.Fixed) && cats.Fixed.length > 0) nonEmpty.push('Fixed');
-  if (Array.isArray(cats.Security) && cats.Security.length > 0) nonEmpty.push('Security');
+  if (Array.isArray(cats.Added) && cats.Added.length > 0)
+    nonEmpty.push('Added' as ChangelogCategory);
+  if (Array.isArray(cats.Changed) && cats.Changed.length > 0)
+    nonEmpty.push('Changed' as ChangelogCategory);
+  if (Array.isArray(cats.Deprecated) && cats.Deprecated.length > 0)
+    nonEmpty.push('Deprecated' as ChangelogCategory);
+  if (Array.isArray(cats.Removed) && cats.Removed.length > 0)
+    nonEmpty.push('Removed' as ChangelogCategory);
+  if (Array.isArray(cats.Fixed) && cats.Fixed.length > 0)
+    nonEmpty.push('Fixed' as ChangelogCategory);
+  if (Array.isArray(cats.Security) && cats.Security.length > 0)
+    nonEmpty.push('Security' as ChangelogCategory);
 
   return nonEmpty;
 }

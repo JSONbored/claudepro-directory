@@ -7,8 +7,10 @@
 
 import { motion, useScroll } from 'motion/react';
 import { useEffect, useState } from 'react';
-import type { NewsletterSource } from '@/src/hooks/use-newsletter';
-import { newsletterConfigs } from '@/src/lib/flags';
+import { useLoggedAsync } from '@/src/hooks/use-logged-async';
+import { getNewsletterConfigValue } from '@/src/lib/actions/feature-flags.actions';
+import { ensureNumber } from '@/src/lib/utils/data.utils';
+import type { NewsletterSource } from '@/src/types/database-overrides';
 import { NewsletterCTAVariant } from './newsletter-cta-variants';
 
 export interface NewsletterScrollTriggerProps {
@@ -36,26 +38,37 @@ export function NewsletterScrollTrigger({
   const [hasTriggered, setHasTriggered] = useState(false);
   const [scrollHeightThreshold, setScrollHeightThreshold] = useState(minScrollHeight ?? 500);
   const { scrollYProgress } = useScroll();
+  const loadScrollConfig = useLoggedAsync({
+    scope: 'NewsletterScrollTrigger',
+    defaultMessage: 'Failed to load newsletter scroll config',
+    defaultLevel: 'warn',
+    defaultRethrow: false,
+  });
 
   useEffect(() => {
-    const loadConfig = async () => {
-      if (minScrollHeight === undefined) {
-        try {
-          const config = await newsletterConfigs();
-          const configHeight = config['newsletter.scroll_trigger.min_scroll_height_px'] as
-            | number
-            | undefined;
-          setScrollHeightThreshold(configHeight ?? 500);
-        } catch {
-          // Silent fail - use default
-        }
-      }
-    };
+    if (minScrollHeight !== undefined) {
+      setScrollHeightThreshold(minScrollHeight);
+      return;
+    }
 
-    loadConfig().catch(() => {
-      // Intentionally ignore errors
-    });
-  }, [minScrollHeight]);
+    loadScrollConfig(
+      async () => {
+        const result = await getNewsletterConfigValue({
+          key: 'newsletter.scroll_trigger.min_scroll_height_px',
+        });
+        // getNewsletterConfigValue returns the typed value from defaults
+        // Use ensureNumber to safely validate and fallback to 500 if invalid
+        const configHeight = ensureNumber(result?.data, 500);
+        setScrollHeightThreshold(configHeight);
+      },
+      {
+        context: {
+          source,
+          category,
+        },
+      }
+    );
+  }, [category, loadScrollConfig, minScrollHeight, source]);
 
   useEffect(() => {
     // Check if page is long enough for scroll trigger

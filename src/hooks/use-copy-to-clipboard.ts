@@ -1,19 +1,22 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { timeoutConfigs } from '@/src/lib/flags';
+import { getTimeoutConfig } from '@/src/lib/actions/feature-flags.actions';
 import { logger } from '@/src/lib/logger';
+import { logClientWarning } from '@/src/lib/utils/error.utils';
 
-// Default value (will be overridden by Dynamic Config)
+// Clipboard reset delay (loaded from Statsig via server action)
 let DEFAULT_CLIPBOARD_RESET_DELAY = 2000;
 
 // Load config from Statsig on module initialization
-timeoutConfigs()
-  .then((config: Record<string, unknown>) => {
-    DEFAULT_CLIPBOARD_RESET_DELAY = (config['timeout.clipboard_reset_ms'] as number) ?? 2000;
+getTimeoutConfig({})
+  .then((result) => {
+    if (result?.data) {
+      DEFAULT_CLIPBOARD_RESET_DELAY = result.data['timeout.ui.clipboard_reset_delay_ms'];
+    }
   })
-  .catch(() => {
-    // Use default if config load fails
+  .catch((error) => {
+    logClientWarning('useCopyToClipboard: failed to load timeout config', error);
   });
 
 export interface UseCopyToClipboardOptions {

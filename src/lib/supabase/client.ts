@@ -7,6 +7,7 @@
  */
 
 import { createBrowserClient } from '@supabase/ssr';
+import { logger } from '@/src/lib/logger';
 import type { Database } from '@/src/types/database.types';
 
 export function createClient() {
@@ -16,9 +17,8 @@ export function createClient() {
   // In development without env vars, return a mock client that won't crash
   if (!(supabaseUrl && supabaseAnonKey)) {
     if (process.env.NODE_ENV === 'development') {
-      // biome-ignore lint/suspicious/noConsole: Intentional development warning for missing Supabase credentials
-      console.warn(
-        '⚠️  Supabase env vars not found - using mock client for development. Auth features will not work.'
+      logger.warn(
+        'Supabase env vars not found - using mock browser client for development. Auth features will not work.'
       );
       // Return a mock client that matches the Supabase client interface
       return {

@@ -16,9 +16,11 @@ import * as SheetPrimitive from '@radix-ui/react-dialog';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { motion, useDragControls } from 'motion/react';
 import type * as React from 'react';
+import { useEffect, useState } from 'react';
+import { getAnimationConfig } from '@/src/lib/actions/feature-flags.actions';
 import { X } from '@/src/lib/icons';
-import { ANIMATION_CONSTANTS, POSITION_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
-
+import { logger } from '@/src/lib/logger';
+import { POSITION_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
 
 const Sheet = SheetPrimitive.Root;
@@ -81,6 +83,27 @@ const SheetContent = ({
 }) => {
   // Drag controls for gesture handling
   const dragControls = useDragControls();
+  const [springSmooth, setSpringSmooth] = useState({
+    type: 'spring' as const,
+    stiffness: 300,
+    damping: 25,
+  });
+
+  useEffect(() => {
+    getAnimationConfig({})
+      .then((result) => {
+        if (!result?.data) return;
+        const config = result.data;
+        setSpringSmooth({
+          type: 'spring' as const,
+          stiffness: config['animation.spring.smooth.stiffness'],
+          damping: config['animation.spring.smooth.damping'],
+        });
+      })
+      .catch((error) => {
+        logger.error('SheetContent: failed to load animation config', error);
+      });
+  }, []);
 
   // Ensure side has a default value for type safety
   const sheetSide = side || 'right';
@@ -136,7 +159,7 @@ const SheetContent = ({
   return (
     <SheetPortal>
       <SheetOverlay />
-      <SheetPrimitive.Content ref={ref} asChild {...props}>
+      <SheetPrimitive.Content ref={ref} asChild={true} {...props}>
         <motion.div
           className={cn(sheetVariants({ side: sheetSide }), className)}
           drag={dragConfig.drag}
@@ -145,11 +168,11 @@ const SheetContent = ({
           dragElastic={dragConfig.dragElastic}
           dragMomentum={false}
           onDragEnd={handleDragEnd}
-          transition={ANIMATION_CONSTANTS.SPRING_SMOOTH}
+          transition={springSmooth}
         >
           {children}
           <SheetPrimitive.Close
-            data-radix-sheet-close
+            data-radix-sheet-close={true}
             className={`${POSITION_PATTERNS.ABSOLUTE_TOP_RIGHT_OFFSET_XL} rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary`}
           >
             <X className={UI_CLASSES.ICON_SM} />

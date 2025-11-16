@@ -1,17 +1,17 @@
-'use client';
-
 import Image from 'next/image';
 import Link from 'next/link';
-import { memo } from 'react';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { Button } from '@/src/components/primitives/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
+import { usePulse } from '@/src/hooks/use-pulse';
 import { Building, Clock, DollarSign, ExternalLink, MapPin, Star } from '@/src/lib/icons';
 import type { JobCardProps } from '@/src/lib/types/component.types';
 import { BADGE_COLORS, type JobType, UI_CLASSES } from '@/src/lib/ui-constants';
-import { formatRelativeDate } from '@/src/lib/utils/data.utils';
+import { ensureStringArray, formatRelativeDate } from '@/src/lib/utils/data.utils';
+import { logUnhandledPromise } from '@/src/lib/utils/error.utils';
 
-export const JobCard = memo(({ job }: JobCardProps) => {
+export function JobCard({ job }: JobCardProps) {
+  const pulse = usePulse();
   const isFeatured = job.tier === 'featured';
 
   return (
@@ -81,15 +81,17 @@ export const JobCard = memo(({ job }: JobCardProps) => {
           </div>
 
           <div className={`flex flex-col items-end ${UI_CLASSES.SPACE_COMPACT}`}>
-            <UnifiedBadge
-              variant="base"
-              style="default"
-              className={
-                BADGE_COLORS.jobType[job.type as JobType] || 'bg-muted text-muted-foreground'
-              }
-            >
-              {job.type.replace('-', ' ')}
-            </UnifiedBadge>
+            {job.type && (
+              <UnifiedBadge
+                variant="base"
+                style="default"
+                className={
+                  BADGE_COLORS.jobType[job.type as JobType] || 'bg-muted text-muted-foreground'
+                }
+              >
+                {job.type.replace('-', ' ')}
+              </UnifiedBadge>
+            )}
             {job.remote && (
               <UnifiedBadge variant="base" style="secondary">
                 Remote
@@ -108,8 +110,9 @@ export const JobCard = memo(({ job }: JobCardProps) => {
 
         <div className={UI_CLASSES.MARGIN_DEFAULT}>
           <div className={UI_CLASSES.FLEX_WRAP_GAP_2}>
-            {Array.isArray(job.tags) &&
-              (job.tags as string[]).slice(0, 4).map((tag: string) => (
+            {ensureStringArray(job.tags)
+              .slice(0, 4)
+              .map((tag: string) => (
                 <UnifiedBadge
                   key={tag}
                   variant="base"
@@ -128,19 +131,55 @@ export const JobCard = memo(({ job }: JobCardProps) => {
         </div>
 
         <div className={`flex ${UI_CLASSES.SPACE_DEFAULT}`}>
-          <Button asChild className="flex-1">
-            <a href={job.link} target="_blank" rel="noopener noreferrer">
+          <Button
+            asChild={true}
+            className="flex-1"
+            onClick={() => {
+              pulse
+                .click({
+                  category: 'jobs',
+                  slug: job.slug,
+                  metadata: {
+                    action: 'apply_now',
+                    target_url: job.link,
+                    external_link: true,
+                  },
+                })
+                .catch((error) => {
+                  logUnhandledPromise('JobCard: apply now click pulse failed', error, {
+                    slug: job.slug,
+                  });
+                });
+            }}
+          >
+            <a href={job.link || '#'} target="_blank" rel="noopener noreferrer">
               Apply Now
               <ExternalLink className={`ml-2 ${UI_CLASSES.ICON_SM}`} />
             </a>
           </Button>
-          <Button variant="outline" asChild>
+          <Button
+            variant="outline"
+            asChild={true}
+            onClick={() => {
+              pulse
+                .click({
+                  category: 'jobs',
+                  slug: job.slug,
+                  metadata: {
+                    action: 'view_details',
+                  },
+                })
+                .catch((error) => {
+                  logUnhandledPromise('JobCard: view details click pulse failed', error, {
+                    slug: job.slug,
+                  });
+                });
+            }}
+          >
             <Link href={`/jobs/${job.slug}`}>View Details</Link>
           </Button>
         </div>
       </CardContent>
     </Card>
   );
-});
-
-JobCard.displayName = 'JobCard';
+}

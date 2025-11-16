@@ -17,47 +17,97 @@ import {
  * Settings Page - User profile and account management.
  */
 
+import { ensureUserRecord } from '@/src/lib/actions/user.actions';
+import { getAuthenticatedUser } from '@/src/lib/auth/get-authenticated-user';
+import { getUserSettings } from '@/src/lib/data/account/user-data';
+import { ROUTES } from '@/src/lib/data/config/constants';
+import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
-import type { GetUserSettingsReturn } from '@/src/types/database-overrides';
-
-// Force dynamic rendering - requires authentication
-export const dynamic = 'force-dynamic';
+import { normalizeError } from '@/src/lib/utils/error.utils';
+import type { GetGetUserSettingsReturn } from '@/src/types/database-overrides';
 
 export const metadata = generatePageMetadata('/account/settings');
 
 export default async function SettingsPage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { user } = await getAuthenticatedUser({ context: 'SettingsPage' });
 
-  if (!user) return null;
+  if (!user) {
+    logger.warn('SettingsPage: unauthenticated access attempt');
+    return (
+      <div className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-2xl">Sign in required</CardTitle>
+            <CardDescription>Please sign in to manage your account settings.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button asChild={true}>
+              <Link href={ROUTES.LOGIN}>Go to login</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
-  // Consolidated RPC: 2 parallel queries → 1 (50% reduction)
-  const { data: settingsData } = await supabase.rpc('get_user_settings', {
-    p_user_id: user.id,
-  });
+  let settingsData: GetGetUserSettingsReturn | null = null;
+  try {
+    settingsData = await getUserSettings(user.id);
+    if (!settingsData) {
+      logger.warn('SettingsPage: getUserSettings returned null', { userId: user.id });
+    }
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to load user settings');
+    logger.error('SettingsPage: getUserSettings threw', normalized, { userId: user.id });
+  }
+
+  if (!settingsData) {
+    return (
+      <div className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-2xl">Settings</CardTitle>
+            <CardDescription>
+              We couldn&apos;t load your account settings. Please refresh or try again later.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button asChild={true} variant="outline">
+              <Link href={ROUTES.ACCOUNT}>Back to dashboard</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   // Type-safe RPC return using centralized type definition
-  const settingsResult = settingsData as GetUserSettingsReturn;
-  const userData = settingsResult?.user_data;
-  const profile = settingsResult?.profile;
+  const userData = settingsData.user_data;
+  const profile = settingsData.profile;
 
   // Initialize user if missing (consolidated - no more profiles table)
   if (!userData) {
-    await supabase.from('users').upsert({
+    logger.warn('SettingsPage: user_data missing, invoking ensureUserRecord', { userId: user.id });
+    await ensureUserRecord({
       id: user.id,
       email: user.email ?? null,
       name: user.user_metadata?.full_name ?? user.user_metadata?.name ?? null,
       image: user.user_metadata?.avatar_url ?? user.user_metadata?.picture ?? null,
-      profile_public: true,
-      follow_email: true,
     });
   }
 
-  if (!profile) return null;
+  if (!profile) {
+    logger.error('SettingsPage: profile missing from getUserSettings response', undefined, {
+      userId: user.id,
+    });
+    return (
+      <div className="space-y-6">
+        <h1 className="font-bold text-3xl">Settings</h1>
+        <p className="text-destructive">Unable to load profile. Please try again later.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -132,7 +182,7 @@ export default async function SettingsPage() {
                 width={64}
                 height={64}
                 className="h-16 w-16 rounded-full object-cover"
-                priority
+                priority={true}
               />
               <div>
                 <p className="text-sm">

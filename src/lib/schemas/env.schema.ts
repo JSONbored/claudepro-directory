@@ -1,31 +1,8 @@
 /** Runtime environment variable validation schema */
 
 import { z } from 'zod';
+import { logger } from '@/src/lib/logger';
 import { nonEmptyString, urlString } from '@/src/lib/schemas/primitives';
-
-// Logger import - must be lazy to avoid circular dependency during env initialization
-function getLogger(): {
-  error: (msg: string) => void;
-  warn: (msg: string) => void;
-} {
-  try {
-    // Lazy load to avoid circular dependency
-    const loggerModule = require('../logger');
-    return loggerModule.logger;
-  } catch {
-    // Fallback to console if logger is not available during early initialization
-    return {
-      error: (msg: string) => {
-        // biome-ignore lint/suspicious/noConsole: Fallback for early initialization before logger is available
-        console.error(msg);
-      },
-      warn: (msg: string) => {
-        // biome-ignore lint/suspicious/noConsole: Fallback for early initialization before logger is available
-        console.warn(msg);
-      },
-    };
-  }
-}
 
 /**
  * Server-side environment variables schema
@@ -253,10 +230,9 @@ function validateEnv(): Env {
   const parsed = envSchema.safeParse(process.env);
 
   if (!parsed.success) {
-    const log = getLogger();
     const errorDetails = JSON.stringify(parsed.error.flatten().fieldErrors, null, 2);
 
-    log.error(`Invalid environment variables detected: ${errorDetails}`);
+    logger.error(`Invalid environment variables detected: ${errorDetails}`);
 
     // In production, we should fail fast on invalid env vars
     if (process.env.NODE_ENV === 'production') {
@@ -264,7 +240,7 @@ function validateEnv(): Env {
     }
 
     // In development, warn but continue with defaults
-    log.warn('Using default values for missing environment variables');
+    logger.warn('Using default values for missing environment variables');
     cachedEnv = envSchema.parse({
       ...process.env,
       NODE_ENV: process.env.NODE_ENV || 'development',
@@ -284,10 +260,9 @@ function validateEnv(): Env {
     const missingRequiredEnvs = productionRequiredEnvs.filter((envVar) => !process.env[envVar]);
 
     if (missingRequiredEnvs.length > 0) {
-      const log = getLogger();
       const missingVars = missingRequiredEnvs.join(', ');
 
-      log.error('Missing required production environment variables for security features');
+      logger.error('Missing required production environment variables for security features');
       throw new Error(
         `Missing required production environment variables: ${missingVars}. These are required for security and functionality in production.`
       );

@@ -21,9 +21,10 @@
 import { memo } from 'react';
 import { JSONSectionRenderer } from '@/src/components/content/json-to-sections';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
-import type { ChangelogEntry } from '@/src/lib/changelog/loader';
-import { parseChangelogChanges } from '@/src/lib/changelog/loader';
+import type { ChangelogEntry } from '@/src/lib/data/changelog';
+import { parseChangelogChanges } from '@/src/lib/data/changelog';
 import type { Database } from '@/src/types/database.types';
+import type { ChangelogCategory } from '@/src/types/database-overrides';
 
 type ContentRow = Database['public']['Tables']['content']['Row'];
 type GuideSection = ContentRow['metadata'];
@@ -61,14 +62,26 @@ export const ChangelogContent = memo(({ entry, sections }: ChangelogContentProps
   // Parse changes JSONB field with type safety
   const changes = parseChangelogChanges(entry.changes);
 
+  const metadataSections =
+    sections ??
+    (Array.isArray((entry.metadata as { sections?: GuideSection[] } | null)?.sections)
+      ? ((entry.metadata as { sections?: GuideSection[] }).sections as GuideSection[])
+      : undefined);
+
   // Get non-empty categories for badge display
-  const nonEmptyCategories = [];
-  if (changes.Added && changes.Added.length > 0) nonEmptyCategories.push('Added');
-  if (changes.Changed && changes.Changed.length > 0) nonEmptyCategories.push('Changed');
-  if (changes.Deprecated && changes.Deprecated.length > 0) nonEmptyCategories.push('Deprecated');
-  if (changes.Removed && changes.Removed.length > 0) nonEmptyCategories.push('Removed');
-  if (changes.Fixed && changes.Fixed.length > 0) nonEmptyCategories.push('Fixed');
-  if (changes.Security && changes.Security.length > 0) nonEmptyCategories.push('Security');
+  const nonEmptyCategories: ChangelogCategory[] = [];
+  if (changes.Added && changes.Added.length > 0)
+    nonEmptyCategories.push('Added' as ChangelogCategory);
+  if (changes.Changed && changes.Changed.length > 0)
+    nonEmptyCategories.push('Changed' as ChangelogCategory);
+  if (changes.Deprecated && changes.Deprecated.length > 0)
+    nonEmptyCategories.push('Deprecated' as ChangelogCategory);
+  if (changes.Removed && changes.Removed.length > 0)
+    nonEmptyCategories.push('Removed' as ChangelogCategory);
+  if (changes.Fixed && changes.Fixed.length > 0)
+    nonEmptyCategories.push('Fixed' as ChangelogCategory);
+  if (changes.Security && changes.Security.length > 0)
+    nonEmptyCategories.push('Security' as ChangelogCategory);
 
   return (
     <article className={'max-w-none space-y-6'}>
@@ -89,9 +102,9 @@ export const ChangelogContent = memo(({ entry, sections }: ChangelogContentProps
       )}
 
       {/* Main Content - Rendered as JSON Sections */}
-      {sections && sections.length > 0 ? (
+      {metadataSections && metadataSections.length > 0 ? (
         <div className="prose prose-slate dark:prose-invert max-w-none">
-          <JSONSectionRenderer sections={sections} />
+          <JSONSectionRenderer sections={metadataSections} />
         </div>
       ) : (
         // Fallback for entries without sections (shouldn't happen after build)
