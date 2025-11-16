@@ -4,32 +4,60 @@
  *
  * Endpoints:
  * - GET /unified-search - Main search with filters, caching (5min), analytics tracking
+ *   Query params:
+ *     - q: Search query
+ *     - entities: Comma-separated list (content,company,job,user) - triggers federated search
+ *     - categories/tags/authors: Content-only filters
+ *     - sort: Content-only sorting (relevance, popularity, newest, alphabetical)
+ *     - limit/offset: Pagination
  * - GET /unified-search/autocomplete - Smart autocomplete from search history + content titles
  * - GET /unified-search/facets - Available filters (categories, tags, authors)
+ *
+ * Search Routing:
+ * - With entities param → search_unified() RPC (federated multi-entity search)
+ * - Without entities param → search_content_optimized() RPC (content-only with advanced filters)
  */
 
-import type { Database } from '../_shared/database.types.ts';
-import { getWithAuthCorsHeaders } from '../_shared/utils/cors.ts';
+import type { Database as DatabaseGenerated } from '../_shared/database.types.ts';
+import type { Database, RpcReturns } from '../_shared/database-overrides.ts';
+import { callRpc } from '../_shared/database-overrides.ts';
+import { enqueueSearchAnalytics } from '../_shared/utils/analytics/pulse.ts';
 import {
   badRequestResponse,
   errorResponse,
-  methodNotAllowedResponse,
-} from '../_shared/utils/response.ts';
-import { supabaseAnon } from '../_shared/utils/supabase.ts';
+  getWithAuthCorsHeaders,
+} from '../_shared/utils/http.ts';
+import { createSearchContext, withDuration } from '../_shared/utils/logging.ts';
+import { createRouter, type HttpMethod, type RouterContext } from '../_shared/utils/router.ts';
+import {
+  highlightSearchTerms,
+  highlightSearchTermsArray,
+} from '../_shared/utils/search-highlight.ts';
 
-type SearchResult = Database['public']['Functions']['search_content_optimized']['Returns'][number];
-type AutocompleteResult =
-  Database['public']['Functions']['get_search_suggestions_from_history']['Returns'][number];
-type FacetResult = Database['public']['Functions']['get_search_facets']['Returns'][number];
+type ContentSearchResult = RpcReturns<'search_content_optimized'>[number];
+type UnifiedSearchResult = RpcReturns<'search_unified'>[number];
+type AutocompleteResult = RpcReturns<'get_search_suggestions_from_history'>[number];
+type FacetResult = RpcReturns<'get_search_facets'>[number];
+
+interface HighlightedSearchResult {
+  // Original fields
+  [key: string]: unknown;
+  // Highlighted fields (HTML strings)
+  title_highlighted?: string;
+  description_highlighted?: string;
+  author_highlighted?: string;
+  tags_highlighted?: string[];
+}
 
 interface SearchResponse {
-  results: SearchResult[];
+  results: HighlightedSearchResult[];
   query: string;
   filters: {
     categories?: string[];
     tags?: string[];
     authors?: string[];
     sort?: string;
+    entities?: string[];
   };
   pagination: {
     total: number;
@@ -41,6 +69,7 @@ interface SearchResponse {
     dbTime: number;
     totalTime: number;
   };
+  searchType: 'content' | 'unified';
 }
 
 interface AutocompleteResponse {
@@ -61,39 +90,56 @@ interface FacetsResponse {
   }>;
 }
 
-Deno.serve(async (req: Request) => {
-  const startTime = performance.now();
+interface UnifiedSearchContext extends RouterContext {
+  pathname: string;
+  startTime: number;
+}
 
-  // Handle CORS preflight
-  if (req.method === 'OPTIONS') {
-    return new Response(null, {
-      status: 200,
-      headers: getWithAuthCorsHeaders,
-    });
-  }
+const router = createRouter<UnifiedSearchContext>({
+  buildContext: (request) => {
+    const url = new URL(request.url);
+    const originalMethod = request.method.toUpperCase() as HttpMethod;
+    const normalizedMethod = (originalMethod === 'HEAD' ? 'GET' : originalMethod) as HttpMethod;
 
-  // Only allow GET requests
-  if (req.method !== 'GET') {
-    return methodNotAllowedResponse('GET', getWithAuthCorsHeaders);
-  }
-
-  try {
-    const url = new URL(req.url);
-    const pathname = url.pathname;
-
-    // Route to appropriate handler
-    if (pathname.endsWith('/autocomplete')) {
-      return await handleAutocomplete(url, startTime);
-    }
-
-    if (pathname.endsWith('/facets')) {
-      return await handleFacets(startTime);
-    }
-
+    return {
+      request,
+      url,
+      method: normalizedMethod,
+      originalMethod,
+      pathname: url.pathname,
+      startTime: performance.now(),
+    };
+  },
+  defaultCors: getWithAuthCorsHeaders,
+  onNoMatch: (ctx) => {
     // Default: main search endpoint
-    return await handleSearch(url, startTime, req);
+    return handleSearch(ctx.url, ctx.startTime, ctx.request);
+  },
+  routes: [
+    {
+      name: 'autocomplete',
+      methods: ['GET', 'HEAD', 'OPTIONS'],
+      match: (ctx) => ctx.pathname.endsWith('/autocomplete'),
+      handler: (ctx) => handleAutocomplete(ctx.url, ctx.startTime),
+    },
+    {
+      name: 'facets',
+      methods: ['GET', 'HEAD', 'OPTIONS'],
+      match: (ctx) => ctx.pathname.endsWith('/facets'),
+      handler: (ctx) => handleFacets(ctx.startTime),
+    },
+  ],
+});
+
+Deno.serve(async (request) => {
+  try {
+    return await router(request);
   } catch (error) {
-    console.error('Unified search error:', error);
+    const logContext = createSearchContext();
+    console.error('[unified-search] Unified search error', {
+      ...logContext,
+      error: error instanceof Error ? error.message : String(error),
+    });
     return errorResponse(error, 'unified-search', getWithAuthCorsHeaders);
   }
 });
@@ -107,6 +153,7 @@ async function handleSearch(url: URL, startTime: number, req: Request): Promise<
   const categories = url.searchParams.get('categories')?.split(',').filter(Boolean);
   const tags = url.searchParams.get('tags')?.split(',').filter(Boolean);
   const authors = url.searchParams.get('authors')?.split(',').filter(Boolean);
+  const entities = url.searchParams.get('entities')?.split(',').filter(Boolean);
   const sort = url.searchParams.get('sort') || 'relevance';
   const limit = Math.min(
     Math.max(Number.parseInt(url.searchParams.get('limit') || '20', 10), 1),
@@ -114,36 +161,127 @@ async function handleSearch(url: URL, startTime: number, req: Request): Promise<
   );
   const offset = Math.max(Number.parseInt(url.searchParams.get('offset') || '0', 10), 0);
 
-  // Validate sort parameter
-  const validSorts = ['relevance', 'popularity', 'newest', 'alphabetical'];
-  if (!validSorts.includes(sort)) {
+  // Determine search type based on entities parameter
+  const searchType: 'content' | 'unified' = entities ? 'unified' : 'content';
+
+  // Create logContext
+  const logContext = createSearchContext({
+    query,
+    searchType,
+    filters: { categories, tags, authors, entities, sort },
+  });
+
+  // Validate entities if provided
+  const validEntities = ['content', 'company', 'job', 'user'];
+  if (entities?.some((e) => !validEntities.includes(e))) {
     return badRequestResponse(
-      `Invalid sort parameter. Must be one of: ${validSorts.join(', ')}`,
+      `Invalid entities parameter. Must be one of: ${validEntities.join(', ')}`,
       getWithAuthCorsHeaders
     );
   }
 
-  const dbStartTime = performance.now();
+  // Validate sort parameter (only applies to content search)
+  if (searchType === 'content') {
+    const validSorts = ['relevance', 'popularity', 'newest', 'alphabetical'];
+    if (!validSorts.includes(sort)) {
+      return badRequestResponse(
+        `Invalid sort parameter. Must be one of: ${validSorts.join(', ')}`,
+        getWithAuthCorsHeaders
+      );
+    }
+  }
 
-  // Call search RPC
-  const { data, error } = await supabaseAnon.rpc('search_content_optimized', {
-    p_query: query || undefined,
-    p_categories: categories,
-    p_tags: tags,
-    p_authors: authors,
-    p_sort: sort,
-    p_limit: limit,
-    p_offset: offset,
-  });
+  const dbStartTime = performance.now();
+  let data: ContentSearchResult[] | UnifiedSearchResult[];
+  let error: unknown;
+
+  // Route to appropriate RPC based on search type
+  if (searchType === 'unified') {
+    const rpcArgs = {
+      p_query: query,
+      p_entities: entities || ['content', 'company', 'job', 'user'],
+      p_limit: limit,
+      p_offset: offset,
+    } satisfies DatabaseGenerated['public']['Functions']['search_unified']['Args'];
+    const { data: unifiedData, error: unifiedError } = await callRpc(
+      'search_unified',
+      rpcArgs,
+      true
+    );
+    data = (unifiedData || []) as UnifiedSearchResult[];
+    error = unifiedError;
+  } else {
+    const rpcArgs = {
+      p_query: query || undefined,
+      p_categories: categories,
+      p_tags: tags,
+      p_authors: authors,
+      p_sort: sort,
+      p_limit: limit,
+      p_offset: offset,
+    } satisfies DatabaseGenerated['public']['Functions']['search_content_optimized']['Args'];
+    const { data: contentData, error: contentError } = await callRpc(
+      'search_content_optimized',
+      rpcArgs,
+      true
+    );
+    data = (contentData || []) as ContentSearchResult[];
+    error = contentError;
+  }
 
   const dbEndTime = performance.now();
 
   if (error) {
-    console.error('Search RPC error:', error);
-    return errorResponse(error, 'search_content_optimized', getWithAuthCorsHeaders);
+    console.error('[unified-search] Search RPC error', {
+      ...logContext,
+      searchType,
+      error: error instanceof Error ? error.message : String(error),
+    });
+    return errorResponse(
+      error,
+      searchType === 'unified' ? 'search_unified' : 'search_content_optimized',
+      getWithAuthCorsHeaders
+    );
   }
 
-  const results = (data || []) as SearchResult[];
+  const results = data;
+
+  // Apply search term highlighting if query provided
+  const highlightedResults: HighlightedSearchResult[] = query.trim()
+    ? results.map((result) => {
+        const highlighted: HighlightedSearchResult = { ...result };
+
+        // Highlight title
+        if (result.title) {
+          highlighted.title_highlighted = highlightSearchTerms(result.title, query, {
+            wholeWordsOnly: true,
+          });
+        }
+
+        // Highlight description
+        if (result.description) {
+          highlighted.description_highlighted = highlightSearchTerms(result.description, query, {
+            wholeWordsOnly: true,
+          });
+        }
+
+        // Highlight author (content search only)
+        if ('author' in result && result.author && typeof result.author === 'string') {
+          highlighted.author_highlighted = highlightSearchTerms(result.author, query, {
+            wholeWordsOnly: false, // Allow partial matches in author names
+          });
+        }
+
+        // Highlight tags
+        if (result.tags && Array.isArray(result.tags) && result.tags.length > 0) {
+          highlighted.tags_highlighted = highlightSearchTermsArray(result.tags, query, {
+            wholeWordsOnly: false, // Allow partial matches in tags
+          });
+        }
+
+        return highlighted;
+      })
+    : results.map((result) => ({ ...result }));
 
   // Track search analytics (fire and forget)
   trackSearchAnalytics(
@@ -153,23 +291,35 @@ async function handleSearch(url: URL, startTime: number, req: Request): Promise<
       tags,
       authors,
       sort,
+      entities,
     },
     results.length,
-    req
-  ).catch((err) => {
-    // Silent fail - don't block response
-    console.error('Analytics tracking failed:', err);
+    req.headers.get('Authorization')
+  ).catch((error) => {
+    console.warn('[unified-search] Analytics tracking failed', {
+      ...logContext,
+      error: error instanceof Error ? error.message : String(error),
+    });
   });
 
   const totalTime = performance.now() - startTime;
 
+  // Log successful search completion
+  console.log('[unified-search] Search completed', {
+    ...withDuration(logContext, startTime),
+    resultCount: results.length,
+    searchType,
+    highlighted: query.trim().length > 0,
+  });
+
   const response: SearchResponse = {
-    results,
+    results: highlightedResults,
     query,
     filters: {
       ...(categories && { categories }),
       ...(tags && { tags }),
       ...(authors && { authors }),
+      ...(entities && { entities }),
       sort,
     },
     pagination: {
@@ -182,6 +332,7 @@ async function handleSearch(url: URL, startTime: number, req: Request): Promise<
       dbTime: Math.round(dbEndTime - dbStartTime),
       totalTime: Math.round(totalTime),
     },
+    searchType,
   };
 
   return new Response(JSON.stringify(response), {
@@ -206,19 +357,29 @@ async function handleAutocomplete(url: URL, startTime: number): Promise<Response
     20
   );
 
+  // Create logContext
+  const logContext = createSearchContext({
+    query,
+    searchType: 'autocomplete',
+  });
+
   // Require at least 2 characters
   if (query.length < 2) {
     return badRequestResponse('Query must be at least 2 characters', getWithAuthCorsHeaders);
   }
 
   // Call autocomplete RPC (uses search history + content titles)
-  const { data, error } = await supabaseAnon.rpc('get_search_suggestions_from_history', {
+  const rpcArgs = {
     p_query: query,
     p_limit: limit,
-  });
+  } satisfies DatabaseGenerated['public']['Functions']['get_search_suggestions_from_history']['Args'];
+  const { data, error } = await callRpc('get_search_suggestions_from_history', rpcArgs, true);
 
   if (error) {
-    console.error('Autocomplete RPC error:', error);
+    console.error('[unified-search] Autocomplete RPC error', {
+      ...logContext,
+      error: error instanceof Error ? error.message : String(error),
+    });
     return errorResponse(error, 'get_search_suggestions_from_history', getWithAuthCorsHeaders);
   }
 
@@ -229,6 +390,12 @@ async function handleAutocomplete(url: URL, startTime: number): Promise<Response
   }));
 
   const totalTime = performance.now() - startTime;
+
+  // Log successful autocomplete
+  console.log('[unified-search] Autocomplete completed', {
+    ...withDuration(logContext, startTime),
+    suggestionCount: suggestions.length,
+  });
 
   const response: AutocompleteResponse = {
     suggestions,
@@ -252,11 +419,23 @@ async function handleAutocomplete(url: URL, startTime: number): Promise<Response
  * Facets endpoint - available filters for search UI
  */
 async function handleFacets(startTime: number): Promise<Response> {
+  // Create logContext
+  const logContext = createSearchContext({
+    searchType: 'facets',
+  });
+
   // Call facets RPC
-  const { data, error } = await supabaseAnon.rpc('get_search_facets');
+  const { data, error } = await callRpc(
+    'get_search_facets',
+    {} as DatabaseGenerated['public']['Functions']['get_search_facets']['Args'],
+    true
+  );
 
   if (error) {
-    console.error('Facets RPC error:', error);
+    console.error('[unified-search] Facets RPC error', {
+      ...logContext,
+      error: error instanceof Error ? error.message : String(error),
+    });
     return errorResponse(error, 'get_search_facets', getWithAuthCorsHeaders);
   }
 
@@ -268,6 +447,12 @@ async function handleFacets(startTime: number): Promise<Response> {
   }));
 
   const totalTime = performance.now() - startTime;
+
+  // Log successful facets retrieval
+  console.log('[unified-search] Facets completed', {
+    ...withDuration(logContext, startTime),
+    facetCount: facets.length,
+  });
 
   const response: FacetsResponse = {
     facets,
@@ -287,38 +472,34 @@ async function handleFacets(startTime: number): Promise<Response> {
 }
 
 /**
- * Track search analytics to search_queries table
+ * Track search analytics - Queue-Based
+ * Enqueues to user_interactions queue for batched processing (98% egress reduction)
  * Fire and forget - don't block response
  */
 async function trackSearchAnalytics(
   query: string,
-  filters: { categories?: string[]; tags?: string[]; authors?: string[]; sort?: string },
+  filters: {
+    categories?: string[];
+    tags?: string[];
+    authors?: string[];
+    sort?: string;
+    entities?: string[];
+  },
   resultCount: number,
-  req: Request
+  authorizationHeader: string | null
 ): Promise<void> {
-  // Only track if there's a query
   if (!query) return;
 
-  // Get user ID from auth header if present
-  const authHeader = req.headers.get('Authorization');
-  let userId: string | null = null;
-
-  if (authHeader) {
-    try {
-      const { data } = await supabaseAnon.auth.getUser(authHeader.replace('Bearer ', ''));
-      userId = data.user?.id || null;
-    } catch {
-      // Ignore auth errors - track as anonymous
-    }
-  }
-
-  // Insert to search_queries table
-  await supabaseAnon.from('search_queries').insert({
+  // Enqueue to queue instead of direct insert
+  enqueueSearchAnalytics({
     query,
-    filters:
-      filters as unknown as Database['public']['Tables']['search_queries']['Insert']['filters'],
-    result_count: resultCount,
-    user_id: userId,
-    session_id: null, // Could add session tracking later
+    filters: filters as Database['public']['Tables']['search_queries']['Insert']['filters'],
+    resultCount,
+    authorizationHeader,
+  }).catch((error) => {
+    console.warn('[unified-search] Failed to enqueue search analytics', {
+      error: error instanceof Error ? error.message : String(error),
+      query: query.substring(0, 50),
+    });
   });
 }

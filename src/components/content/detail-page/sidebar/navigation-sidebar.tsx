@@ -11,20 +11,27 @@ import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge
 import { JobsPromo } from '@/src/components/core/domain/jobs/jobs-banner';
 import { Button } from '@/src/components/primitives/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
-import type { CategoryId } from '@/src/lib/config/category-config';
-import { SOCIAL_LINKS } from '@/src/lib/constants';
-import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
+import { usePulse } from '@/src/hooks/use-pulse';
+import type { CategoryId } from '@/src/lib/data/config/category';
+import type { ContentItem } from '@/src/lib/data/content';
+import { getSocialLinks } from '@/src/lib/data/marketing/contact';
 import { ExternalLink, Github, Thermometer } from '@/src/lib/icons';
 import { BADGE_COLORS, type CategoryType, UI_CLASSES } from '@/src/lib/ui-constants';
 import { getDisplayTitle } from '@/src/lib/utils';
 import { getContentItemUrl } from '@/src/lib/utils/content.utils';
+import { ensureStringArray, getMetadata } from '@/src/lib/utils/data.utils';
+import { logUnhandledPromise } from '@/src/lib/utils/error.utils';
+import type {
+  ContentCategory,
+  GetContentDetailCompleteReturn,
+} from '@/src/types/database-overrides';
 
 /**
  * Props for DetailSidebar
  */
 export interface DetailSidebarProps {
-  item: ContentItem;
-  relatedItems: ContentItem[];
+  item: ContentItem | GetContentDetailCompleteReturn['content'];
+  relatedItems: ContentItem[] | GetContentDetailCompleteReturn['related'];
   config: {
     typeName: string;
     metadata?:
@@ -37,8 +44,8 @@ export interface DetailSidebarProps {
   };
   customRenderer?:
     | ((
-        item: ContentItem,
-        relatedItems: ContentItem[],
+        item: ContentItem | GetContentDetailCompleteReturn['content'],
+        relatedItems: ContentItem[] | GetContentDetailCompleteReturn['related'],
         router: ReturnType<typeof useRouter>
       ) => React.ReactNode)
     | undefined;
@@ -50,6 +57,8 @@ export interface DetailSidebarProps {
  * Orchestrates sidebar rendering using composable sidebar cards.
  * Supports custom renderers for special cases (agents, MCP with extra metadata)
  */
+const SOCIAL_LINK_SNAPSHOT = getSocialLinks();
+
 export const DetailSidebar = memo(function DetailSidebar({
   item,
   relatedItems,
@@ -57,6 +66,7 @@ export const DetailSidebar = memo(function DetailSidebar({
   customRenderer,
 }: DetailSidebarProps) {
   const router = useRouter();
+  const pulse = usePulse();
 
   // Use custom renderer if provided
   if (customRenderer) {
@@ -65,19 +75,20 @@ export const DetailSidebar = memo(function DetailSidebar({
 
   // Default sidebar using SidebarCard with inline configuration
   const githubUrl = config.metadata?.githubPathPrefix
-    ? `${SOCIAL_LINKS.github}/blob/main/${config.metadata.githubPathPrefix}/${item.slug}.json`
+    ? `${SOCIAL_LINK_SNAPSHOT.github}/blob/main/${config.metadata.githubPathPrefix}/${item.slug}.json`
     : item.category
-      ? `${SOCIAL_LINKS.github}/blob/main/content/${item.category}/${item.slug}.json`
+      ? `${SOCIAL_LINK_SNAPSHOT.github}/blob/main/content/${item.category}/${item.slug}.json`
       : null;
 
   const showGitHubLink = config.metadata?.showGitHubLink ?? true;
   const hasDocumentationUrl = 'documentation_url' in item && item.documentation_url;
-  const metadata = ('metadata' in item && (item.metadata as Record<string, unknown>)) || {};
+  const metadata = getMetadata(item);
   const hasConfiguration = metadata.configuration && typeof metadata.configuration === 'object';
   const packageName = metadata.package as string | undefined;
   const hasPackage = !!packageName;
   const hasAuth = 'requiresAuth' in metadata;
   const hasPermissions = 'permissions' in metadata;
+  const permissions = hasPermissions ? ensureStringArray(metadata.permissions) : [];
   const hasSource = 'source' in item && item.source;
 
   return (
@@ -90,7 +101,33 @@ export const DetailSidebar = memo(function DetailSidebar({
           </CardHeader>
           <CardContent className="space-y-3">
             {showGitHubLink && githubUrl && (
-              <Button variant="outline" className="w-full justify-start" asChild>
+              <Button
+                variant="outline"
+                className="w-full justify-start"
+                onClick={() => {
+                  pulse
+                    .click({
+                      category: (item.category as ContentCategory) || null,
+                      slug: item.slug || null,
+                      metadata: {
+                        action: 'external_link',
+                        link_type: 'github',
+                        target_url: githubUrl,
+                      },
+                    })
+                    .catch((error) => {
+                      logUnhandledPromise(
+                        'NavigationSidebar: GitHub link click pulse failed',
+                        error,
+                        {
+                          category: item.category,
+                          slug: item.slug,
+                        }
+                      );
+                    });
+                }}
+                asChild
+              >
                 <a href={githubUrl} target="_blank" rel="noopener noreferrer">
                   <Github className={UI_CLASSES.ICON_SM_LEADING} />
                   View on GitHub
@@ -98,7 +135,33 @@ export const DetailSidebar = memo(function DetailSidebar({
               </Button>
             )}
             {hasDocumentationUrl && 'documentation_url' in item && item.documentation_url && (
-              <Button variant="outline" className="w-full justify-start" asChild>
+              <Button
+                variant="outline"
+                className="w-full justify-start"
+                onClick={() => {
+                  pulse
+                    .click({
+                      category: (item.category as ContentCategory) || null,
+                      slug: item.slug || null,
+                      metadata: {
+                        action: 'external_link',
+                        link_type: 'documentation',
+                        target_url: item.documentation_url as string,
+                      },
+                    })
+                    .catch((error) => {
+                      logUnhandledPromise(
+                        'NavigationSidebar: documentation link click pulse failed',
+                        error,
+                        {
+                          category: item.category,
+                          slug: item.slug,
+                        }
+                      );
+                    });
+                }}
+                asChild
+              >
                 <a href={item.documentation_url} target="_blank" rel="noopener noreferrer">
                   <ExternalLink className={UI_CLASSES.ICON_SM_LEADING} />
                   Documentation
@@ -183,11 +246,11 @@ export const DetailSidebar = memo(function DetailSidebar({
               </div>
             )}
 
-            {hasPermissions && (metadata.permissions as string[])?.length > 0 && (
+            {hasPermissions && permissions.length > 0 && (
               <div>
                 <h4 className={'mb-1 font-medium'}>Permissions</h4>
                 <div className="flex flex-wrap gap-1">
-                  {(metadata.permissions as string[]).map((perm: string) => (
+                  {permissions.map((perm) => (
                     <UnifiedBadge key={perm} variant="base" style="outline" className="text-xs">
                       {perm}
                     </UnifiedBadge>

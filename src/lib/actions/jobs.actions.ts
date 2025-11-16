@@ -5,15 +5,22 @@
  * Thin orchestration layer calling PostgreSQL RPC functions + Polar.sh API
  */
 
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, revalidateTag } from 'next/cache';
 import { z } from 'zod';
+import { invalidateByKeys, runRpc } from '@/src/lib/actions/action-helpers';
 import { authedAction } from '@/src/lib/actions/safe-action';
+import type { CacheInvalidateKey } from '@/src/lib/data/config/cache-config';
 import { logger } from '@/src/lib/logger';
-import { createClient } from '@/src/lib/supabase/server';
-import type { Database } from '@/src/types/database.types';
+import { logActionFailure } from '@/src/lib/utils/error.utils';
+import {
+  JOB_CATEGORY_VALUES,
+  JOB_STATUS_VALUES,
+  type JobCategory,
+  type JobStatus,
+} from '@/src/types/database-overrides';
 
 // Minimal Zod schemas (database CHECK constraints do real validation)
-export const createJobSchema = z.object({
+const createJobSchema = z.object({
   title: z.string(),
   company: z.string(),
   company_id: z.string().uuid().optional().nullable(),
@@ -24,7 +31,7 @@ export const createJobSchema = z.object({
   type: z.string(),
   workplace: z.string().optional().nullable(),
   experience: z.string().optional().nullable(),
-  category: z.string(),
+  category: z.enum([...JOB_CATEGORY_VALUES] as [JobCategory, ...JobCategory[]]),
   tags: z.array(z.string()),
   requirements: z.array(z.string()),
   benefits: z.array(z.string()),
@@ -35,7 +42,7 @@ export const createJobSchema = z.object({
   tier: z.enum(['standard', 'featured']),
 });
 
-export const updateJobSchema = z.object({
+const updateJobSchema = z.object({
   job_id: z.string().uuid(),
   title: z.string().optional(),
   company: z.string().optional(),
@@ -47,7 +54,7 @@ export const updateJobSchema = z.object({
   type: z.string().optional(),
   workplace: z.string().optional().nullable(),
   experience: z.string().optional().nullable(),
-  category: z.string().optional(),
+  category: z.enum([...JOB_CATEGORY_VALUES] as [JobCategory, ...JobCategory[]]).optional(),
   tags: z.array(z.string()).optional(),
   requirements: z.array(z.string()).optional(),
   benefits: z.array(z.string()).optional(),
@@ -66,16 +73,18 @@ const deleteJobSchema = z.object({
 
 const toggleJobStatusSchema = z.object({
   job_id: z.string().uuid(),
-  new_status: z.enum([
-    'draft',
-    'pending_payment',
-    'pending_review',
-    'active',
-    'expired',
-    'rejected',
-    'deleted',
-  ]),
+  new_status: z.enum([...JOB_STATUS_VALUES] as [JobStatus, ...JobStatus[]]),
 });
+
+async function invalidateJobCaches(options: {
+  keys?: CacheInvalidateKey[];
+  extraTags?: string[];
+}): Promise<void> {
+  await invalidateByKeys({
+    ...(options.keys ? { invalidateKeys: options.keys } : {}),
+    ...(options.extraTags ? { extraTags: options.extraTags } : {}),
+  });
+}
 
 // =====================================================
 // JOB CRUD ACTIONS
@@ -93,31 +102,28 @@ export const createJob = authedAction
   .schema(createJobSchema)
   .action(async ({ parsedInput, ctx }) => {
     try {
-      const supabase = await createClient();
-
-      // Call RPC function (handles company auto-linking, pricing calculation)
-      const { data, error } = await supabase.rpc('create_job_with_payment', {
-        p_user_id: ctx.userId,
-        p_job_data: parsedInput,
-        p_tier: parsedInput.tier,
-        p_plan: parsedInput.plan,
-      });
-
-      if (error) {
-        logger.error('Failed to create job via RPC', new Error(error.message), {
-          userId: ctx.userId,
-          title: parsedInput.title,
-        });
-        throw new Error(error.message);
-      }
-
-      const result = data as unknown as {
+      type CreateJobRpcResult = {
         success: boolean;
         job_id: string;
         company_id: string;
         payment_amount: number;
         requires_payment: boolean;
       };
+
+      const result = await runRpc<CreateJobRpcResult>(
+        'create_job_with_payment',
+        {
+          p_user_id: ctx.userId,
+          p_job_data: parsedInput,
+          p_tier: parsedInput.tier,
+          p_plan: parsedInput.plan,
+        },
+        {
+          action: 'jobs.createJob.rpc',
+          userId: ctx.userId,
+          meta: { title: parsedInput.title },
+        }
+      );
 
       if (!result.success) {
         throw new Error('Job creation failed');
@@ -192,6 +198,16 @@ export const createJob = authedAction
       revalidatePath('/account/jobs');
       revalidatePath('/jobs');
 
+      // Statsig-powered cache invalidation
+      await invalidateJobCaches({
+        keys: ['cache.invalidate.job_create'],
+      });
+      if (result.company_id) {
+        revalidateTag(`company-${result.company_id}`, 'default');
+        revalidateTag(`company-id-${result.company_id}`, 'default');
+      }
+      revalidateTag(`job-${result.job_id}`, 'default');
+
       return {
         success: true,
         jobId: result.job_id,
@@ -201,15 +217,10 @@ export const createJob = authedAction
         checkoutUrl, // Polar-hosted checkout page URL (or null if not configured yet)
       };
     } catch (error) {
-      logger.error(
-        'Failed to create job',
-        error instanceof Error ? error : new Error(String(error)),
-        {
-          userId: ctx.userId,
-          title: parsedInput.title,
-        }
-      );
-      throw error;
+      throw logActionFailure('jobs.createJob', error, {
+        userId: ctx.userId,
+        title: parsedInput.title,
+      });
     }
   });
 
@@ -222,29 +233,26 @@ export const updateJob = authedAction
   .schema(updateJobSchema)
   .action(async ({ parsedInput, ctx }) => {
     try {
-      const supabase = await createClient();
-
       const { job_id, ...updates } = parsedInput;
 
-      // Call RPC function (handles ownership check, validation)
-      const { data, error } = await supabase.rpc('update_job', {
-        p_job_id: job_id,
-        p_user_id: ctx.userId,
-        p_updates: updates,
-      });
-
-      if (error) {
-        logger.error('Failed to update job via RPC', new Error(error.message), {
-          userId: ctx.userId,
-          jobId: job_id,
-        });
-        throw new Error(error.message);
-      }
-
-      const result = data as unknown as {
+      type UpdateJobRpcResult = {
         success: boolean;
         job_id: string;
       };
+
+      const result = await runRpc<UpdateJobRpcResult>(
+        'update_job',
+        {
+          p_job_id: job_id,
+          p_user_id: ctx.userId,
+          p_updates: updates,
+        },
+        {
+          action: 'jobs.updateJob.rpc',
+          userId: ctx.userId,
+          meta: { jobId: job_id },
+        }
+      );
 
       if (!result.success) {
         throw new Error('Job update failed');
@@ -259,20 +267,26 @@ export const updateJob = authedAction
       revalidatePath(`/account/jobs/${job_id}/edit`);
       revalidatePath('/jobs');
 
+      // Statsig-powered cache invalidation
+      await invalidateJobCaches({
+        keys: ['cache.invalidate.job_update'],
+      });
+      const companyId = updates.company_id ?? parsedInput.company_id ?? null;
+      if (companyId) {
+        revalidateTag(`company-${companyId}`, 'default');
+        revalidateTag(`company-id-${companyId}`, 'default');
+      }
+      revalidateTag(`job-${job_id}`, 'default');
+
       return {
         success: true,
         jobId: result.job_id,
       };
     } catch (error) {
-      logger.error(
-        'Failed to update job',
-        error instanceof Error ? error : new Error(String(error)),
-        {
-          userId: ctx.userId,
-          jobId: parsedInput.job_id,
-        }
-      );
-      throw error;
+      throw logActionFailure('jobs.updateJob', error, {
+        userId: ctx.userId,
+        jobId: parsedInput.job_id,
+      });
     }
   });
 
@@ -285,26 +299,23 @@ export const deleteJob = authedAction
   .schema(deleteJobSchema)
   .action(async ({ parsedInput, ctx }) => {
     try {
-      const supabase = await createClient();
-
-      // Call RPC function (handles ownership check, soft delete)
-      const { data, error } = await supabase.rpc('delete_job', {
-        p_job_id: parsedInput.job_id,
-        p_user_id: ctx.userId,
-      });
-
-      if (error) {
-        logger.error('Failed to delete job via RPC', new Error(error.message), {
-          userId: ctx.userId,
-          jobId: parsedInput.job_id,
-        });
-        throw new Error(error.message);
-      }
-
-      const result = data as unknown as {
+      type DeleteJobRpcResult = {
         success: boolean;
         job_id: string;
       };
+
+      const result = await runRpc<DeleteJobRpcResult>(
+        'delete_job',
+        {
+          p_job_id: parsedInput.job_id,
+          p_user_id: ctx.userId,
+        },
+        {
+          action: 'jobs.deleteJob.rpc',
+          userId: ctx.userId,
+          meta: { jobId: parsedInput.job_id },
+        }
+      );
 
       if (!result.success) {
         throw new Error('Job deletion failed');
@@ -318,20 +329,21 @@ export const deleteJob = authedAction
       revalidatePath('/account/jobs');
       revalidatePath('/jobs');
 
+      // Statsig-powered cache invalidation
+      await invalidateJobCaches({
+        keys: ['cache.invalidate.job_delete'],
+      });
+      revalidateTag(`job-${result.job_id}`, 'default');
+
       return {
         success: true,
         jobId: result.job_id,
       };
     } catch (error) {
-      logger.error(
-        'Failed to delete job',
-        error instanceof Error ? error : new Error(String(error)),
-        {
-          userId: ctx.userId,
-          jobId: parsedInput.job_id,
-        }
-      );
-      throw error;
+      throw logActionFailure('jobs.deleteJob', error, {
+        userId: ctx.userId,
+        jobId: parsedInput.job_id,
+      });
     }
   });
 
@@ -344,29 +356,28 @@ export const toggleJobStatus = authedAction
   .schema(toggleJobStatusSchema)
   .action(async ({ parsedInput, ctx }) => {
     try {
-      const supabase = await createClient();
-
-      // Call RPC function (handles ownership check, status transitions)
-      const { data, error } = await supabase.rpc('toggle_job_status', {
-        p_job_id: parsedInput.job_id,
-        p_user_id: ctx.userId,
-        p_new_status: parsedInput.new_status,
-      });
-
-      if (error) {
-        logger.error('Failed to toggle job status via RPC', new Error(error.message), {
-          userId: ctx.userId,
-          jobId: parsedInput.job_id,
-          newStatus: parsedInput.new_status,
-        });
-        throw new Error(error.message);
-      }
-
-      const result = data as unknown as {
+      type ToggleJobStatusRpcResult = {
         success: boolean;
-        old_status: Database['public']['Enums']['job_status'];
-        new_status: Database['public']['Enums']['job_status'];
+        old_status: JobStatus;
+        new_status: JobStatus;
       };
+
+      const result = await runRpc<ToggleJobStatusRpcResult>(
+        'toggle_job_status',
+        {
+          p_job_id: parsedInput.job_id,
+          p_user_id: ctx.userId,
+          p_new_status: parsedInput.new_status,
+        },
+        {
+          action: 'jobs.toggleJobStatus.rpc',
+          userId: ctx.userId,
+          meta: {
+            jobId: parsedInput.job_id,
+            newStatus: parsedInput.new_status,
+          },
+        }
+      );
 
       if (!result.success) {
         throw new Error('Job status toggle failed');
@@ -382,21 +393,22 @@ export const toggleJobStatus = authedAction
       revalidatePath('/account/jobs');
       revalidatePath('/jobs');
 
+      // Statsig-powered cache invalidation
+      await invalidateJobCaches({
+        keys: ['cache.invalidate.job_status'],
+      });
+      revalidateTag(`job-${parsedInput.job_id}`, 'default');
+
       return {
         success: true,
         oldStatus: result.old_status,
         newStatus: result.new_status,
       };
     } catch (error) {
-      logger.error(
-        'Failed to toggle job status',
-        error instanceof Error ? error : new Error(String(error)),
-        {
-          userId: ctx.userId,
-          jobId: parsedInput.job_id,
-          newStatus: parsedInput.new_status,
-        }
-      );
-      throw error;
+      throw logActionFailure('jobs.toggleJobStatus', error, {
+        userId: ctx.userId,
+        jobId: parsedInput.job_id,
+        newStatus: parsedInput.new_status,
+      });
     }
   });

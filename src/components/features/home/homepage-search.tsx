@@ -20,12 +20,14 @@ interface SearchSectionProps {
   isSearching: boolean;
   filteredResults: readonly DisplayableContent[];
   onClearSearch: () => void;
+  searchQuery?: string;
 }
 
 const SearchSectionComponent: FC<SearchSectionProps> = ({
   isSearching,
   filteredResults,
   onClearSearch,
+  searchQuery,
 }) => {
   if (!isSearching) return null;
 
@@ -51,7 +53,13 @@ const SearchSectionComponent: FC<SearchSectionProps> = ({
           ariaLabel="Search results"
           keyExtractor={(item) => item.slug}
           renderCard={(item) => (
-            <ConfigCard item={item} variant="default" showCategory={true} showActions={true} />
+            <ConfigCard
+              item={item}
+              variant="default"
+              showCategory={true}
+              showActions={true}
+              {...(searchQuery ? { searchQuery } : {})}
+            />
           )}
         />
       ) : (

@@ -1,9 +1,10 @@
 /**
  * CodeBlockServer - Server-rendered code with Sugar High highlighting
+ * Uses edge function for syntax highlighting (cached, fast)
  */
 
 import { ProductionCodeBlock } from '@/src/components/content/interactive-code-block';
-import { highlightCode } from '@/src/lib/content/syntax-highlighting';
+import { highlightCodeEdge } from '@/src/lib/edge/client';
 
 export interface CodeBlockServerProps {
   code: string;
@@ -14,7 +15,7 @@ export interface CodeBlockServerProps {
   className?: string;
 }
 
-export function CodeBlockServer({
+export async function CodeBlockServer({
   code,
   language = 'text',
   filename,
@@ -22,7 +23,7 @@ export function CodeBlockServer({
   showLineNumbers = true,
   className = '',
 }: CodeBlockServerProps) {
-  const highlightedHtml = highlightCode(code, language, showLineNumbers);
+  const highlightedHtml = await highlightCodeEdge(code, { language, showLineNumbers });
 
   return (
     <ProductionCodeBlock

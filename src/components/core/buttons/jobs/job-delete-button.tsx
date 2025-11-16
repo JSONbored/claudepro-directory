@@ -12,6 +12,7 @@ import { deleteJob } from '@/src/lib/actions/jobs.actions';
 import { Trash } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
+import { logClientWarning } from '@/src/lib/utils/error.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
 import type { ButtonStyleProps } from '../shared/button-types';
 
@@ -50,6 +51,7 @@ export function JobDeleteButton({
           setIsDeleting(false);
         }
       } catch (error) {
+        logClientWarning('JobDeleteButton: failed to delete job', error, { jobId });
         toasts.error.fromError(error, 'Failed to delete job');
         setIsDeleting(false);
       }

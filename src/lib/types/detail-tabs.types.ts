@@ -3,9 +3,10 @@
  */
 
 import type { ReactNode } from 'react';
-import type { UnifiedCategoryConfig } from '@/src/lib/config/category-config';
-import type { CategoryId, TabConfig } from '@/src/lib/config/category-config.types';
-import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
+import type { UnifiedCategoryConfig } from '@/src/lib/data/config/category';
+import type { CategoryId, TabConfig } from '@/src/lib/data/config/category/category-config.types';
+import type { ContentItem } from '@/src/lib/data/content';
+import type { GetContentDetailCompleteReturn, Tables } from '@/src/types/database-overrides';
 
 /**
  * Pre-processed section data passed from server component
@@ -81,17 +82,20 @@ export interface ProcessedSectionData {
   troubleshooting?: Array<string | { issue: string; solution: string }>;
 
   // Special content types
-  guideSections?: unknown[] | null;
+  guideSections?: Array<Record<string, unknown> & { html?: string }> | null;
   collectionSections?: ReactNode;
 }
 
 /**
  * Props for TabbedDetailLayout component
+ *
+ * Note: TabbedDetailLayout is only used for content detail pages, never for jobs.
+ * So we narrow the type to exclude Tables<'jobs'> to ensure proper type safety.
  */
 export interface TabbedDetailLayoutProps {
-  item: ContentItem;
+  item: Tables<'content'> | GetContentDetailCompleteReturn['content'];
   config: UnifiedCategoryConfig<CategoryId>;
   tabs: ReadonlyArray<TabConfig>;
   sectionData: ProcessedSectionData;
-  relatedItems?: ContentItem[];
+  relatedItems?: ContentItem[] | GetContentDetailCompleteReturn['related'];
 }

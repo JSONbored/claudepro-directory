@@ -5,8 +5,8 @@
 import { AnimatePresence, motion } from 'motion/react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { useNotificationsContext } from '@/src/components/providers/notifications-provider';
 import { logger } from '@/src/lib/logger';
-import { type NotificationStore, useNotificationStore } from '@/src/lib/stores/notification-store';
 import { createMainFABConfig, createSpeedDialActions } from './fab-config';
 import { SpeedDialItem } from './speed-dial-item';
 import { useScrollDirection } from './use-scroll-direction';
@@ -31,8 +31,7 @@ export function FloatingActionBar({ threshold = 100, fabFlags }: FloatingActionB
   const scrollState = useScrollDirection({ threshold });
 
   // Notification state
-  const unreadCount = useNotificationStore((state: NotificationStore) => state.unreadCount);
-  const openNotificationSheet = useNotificationStore((state: NotificationStore) => state.openSheet);
+  const { unreadCount, openSheet: openNotificationSheet, flags } = useNotificationsContext();
 
   // Main FAB config (Create button)
   const mainFAB = createMainFABConfig(() => {
@@ -63,7 +62,10 @@ export function FloatingActionBar({ threshold = 100, fabFlags }: FloatingActionB
         logger.error('[FloatingActionBar] Error navigating to /submit', error as Error);
       }
     },
-    fabFlags
+    {
+      ...fabFlags,
+      showNotifications: fabFlags.showNotifications && flags.enableFab,
+    }
   );
 
   // Filter speed dial actions based on `show` property

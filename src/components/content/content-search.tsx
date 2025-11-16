@@ -28,8 +28,8 @@ import type {
 import { ICON_NAME_MAP } from '@/src/lib/ui-constants';
 
 /**
- * Content Search Client - Edge Function Integration
- * Migrated from client-side filtering to unified-search edge function
+ * Content Search Client - Server Actions Integration
+ * Uses cached server actions for optimized search
  */
 function ContentSearchClientComponent<T extends DisplayableContent>({
   items,
@@ -53,14 +53,18 @@ function ContentSearchClientComponent<T extends DisplayableContent>({
       }
 
       try {
-        const { searchContent } = await import('@/src/lib/edge/search-client');
+        const { searchUnifiedClient } = await import('@/src/lib/edge/search-client');
 
-        const response = await searchContent(query.trim(), {
-          ...(category && { categories: [category] }),
-          limit: 100,
+        const result = await searchUnifiedClient({
+          query: query.trim(),
+          entities: category ? [category as 'content'] : ['content'],
+          filters: {
+            limit: 100,
+            ...(category ? { categories: [category] } : {}),
+          },
         });
 
-        setSearchResults(response.results as T[]);
+        setSearchResults(result.results as T[]);
       } catch (error) {
         logger.error('Content search failed', error as Error, { source: 'ContentSearchClient' });
         setSearchResults(items);
@@ -112,7 +116,13 @@ function ContentSearchClientComponent<T extends DisplayableContent>({
             ariaLabel="Search results"
             keyExtractor={(item) => item.slug}
             renderCard={(item) => (
-              <ConfigCard item={item} variant="default" showCategory={true} showActions={true} />
+              <ConfigCard
+                item={item}
+                variant="default"
+                showCategory={true}
+                showActions={true}
+                searchQuery={searchQuery}
+              />
             )}
           />
         </ErrorBoundary>

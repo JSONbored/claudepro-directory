@@ -56,22 +56,12 @@ pre-commit:
 pre-push:
   parallel: false
   commands:
-    # 1. Full type checking (all environments)
+    # 1. Full type checking (Next.js/Node code only)
+    # Note: Edge function type-checking runs in pre-commit hook (can be skipped via GitKraken UI)
     type-check-all:
       run: |
-        echo "🔍 Type checking all code..."
-        echo ""
-        echo "→ Next.js/Node code..."
+        echo "🔍 Type checking Next.js/Node code..."
         pnpm type-check
-
-        echo ""
-        echo "→ Edge functions..."
-        if command -v deno &> /dev/null; then
-          pnpm type-check:edge
-        else
-          echo "⚠️  Deno not installed - skipping edge function type-check"
-          echo "   Install: brew install deno"
-        fi
       fail_text: "❌ Type errors found. Fix them before pushing."
 
     # 2. Production build verification (graceful)

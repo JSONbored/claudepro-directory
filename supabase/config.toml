@@ -2,29 +2,26 @@
 # This file persists JWT verification settings across redeployments
 
 # =============================================================================
-# Unified Webhook Architecture (Database-First)
+# Unified Notification + Webhook Architecture (Database-First)
 # =============================================================================
-# All webhooks flow through a unified architecture:
+# All inbound/outbound notifications now flow through `notification-router`:
 #
-# INBOUND WEBHOOKS (External → Us):
-#   1. External service (Resend/Vercel) → webhook-router edge function
-#   2. webhook-router verifies signature (HMAC SHA-256/SHA-1)
-#   3. webhook-router inserts to webhook_events table (direction='inbound')
-#   4. PostgreSQL trigger routes to appropriate handler based on source enum
-#   5. Business logic edge functions process the event
+# INBOUND (external → us):
+#   1. Service (Resend, Vercel, Polar, etc.) → `/functions/v1/notification-router`
+#   2. Router verifies signatures via `_shared/utils/webhook/registry.ts`
+#   3. Events are persisted to `webhook_events` with idempotency + auditing
+#   4. Shared handlers (Discord notifications, changelog sync, ingest) execute business logic
 #
-# OUTBOUND WEBHOOKS (Us → External):
-#   1. Database trigger or edge function calls sendDiscordWebhook() utility
-#   2. Utility logs to webhook_events table (direction='outbound')
-#   3. Utility sends to Discord with exponential backoff retry
-#   4. Success/failure logged back to webhook_events
+# OUTBOUND (us → external):
+#   1. Database trigger or edge handler calls `sendDiscordWebhook()` / `createDiscordMessageWithLogging()`
+#   2. Helper logs outbound payloads to `webhook_events`
+#   3. Discord call executes with retry + status updates
 #
 # BENEFITS:
-#   - Single source of truth for ALL webhook activity (webhook_events table)
-#   - Centralized signature verification (webhook-router)
-#   - Shared utilities (Discord webhooks, CORS, validation, response patterns)
-#   - Complete audit trail (both directions tracked)
-#   - 217 LOC reduction (-12%) with 548 lines of duplicated code eliminated
+#   - Single edge entrypoint (`notification-router`) for Discord, changelog, inbound webhooks, and active-notification fetches
+#   - Shared utilities live under `_shared/*`, reducing duplication
+#   - Complete audit trail (both directions) via `webhook_events`
+#   - Easier deploys (one function) and consistent CORS/signature policy
 #
 # =============================================================================
 
@@ -32,52 +29,28 @@
 # Public API Functions - No JWT Verification
 # =============================================================================
 
-[functions.sitemap]
-verify_jwt = false  # Public sitemap.xml endpoint
-
-[functions.content-paginated]
-verify_jwt = false  # Public content listing with optional auth
-
-[functions.status]
-verify_jwt = false  # Public health check endpoint
-
-[functions.feeds]
-verify_jwt = false  # Public RSS/Atom feed endpoints (changelog + all content categories)
-
-[functions.seo-api]
-verify_jwt = false  # Public SEO endpoint: metadata + pre-generated schemas (24hr cache)
-
-[functions.content-api]
-verify_jwt = false  # Unified content export API (json, markdown, llms-txt, readme, storage) - consolidates 4 functions
-
-[functions.trending]
-verify_jwt = false  # Public trending data with CDN caching (24hr s-maxage)
+[functions.data-api]
+verify_jwt = false  # Consolidated read-only data access layer (content exports, SEO, feeds, sitemap, status, company, trending)
 
 [functions.unified-search]
 verify_jwt = false  # Public search API with optional auth for analytics tracking (5min edge cache)
 
+[functions.transform-api]
+verify_jwt = false  # Public transform API for syntax highlighting and data transformations (immutable edge cache)
+
 # =============================================================================
-# Webhook Functions - No JWT Verification (Use Signature Verification)
+# Webhook/Notification Functions - No JWT Verification (Use Signature Verification)
 # =============================================================================
 
-[functions.webhook-router]
-verify_jwt = false  # Unified webhook router with HMAC SHA-1/SHA-256/Svix verification (replaces resend-webhook)
+[functions.notification-router]
+verify_jwt = false  # Consolidated Discord + external webhook ingest + changelog sync + active notification fetches
 
 [functions.email-handler]
 verify_jwt = false  # Uses Svix signature verification for auth hooks
 
-[functions.discord-router]
-verify_jwt = false  # Unified Discord notification router (database-triggered, internal) - Handles ALL Discord notifications
-
-[functions.changelog-auto-sync]
-verify_jwt = false  # Vercel webhook with signature verification
-
 # =============================================================================
 # Authenticated Functions - Manual JWT Verification in Code
 # =============================================================================
-
-[functions.companies-handler]
-verify_jwt = false  # GET: Public profiles (CDN cached). POST: Manual JWT verification via supabaseServiceRole.auth.getUser()
 
 [functions.analytics]
 verify_jwt = true  # Requires authenticated user for analytics tracking

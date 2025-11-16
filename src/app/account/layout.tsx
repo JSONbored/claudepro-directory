@@ -8,6 +8,9 @@ import { redirect } from 'next/navigation';
 import { AuthSignOutButton } from '@/src/components/core/buttons/auth/auth-signout-button';
 import { Button } from '@/src/components/primitives/ui/button';
 import { Card } from '@/src/components/primitives/ui/card';
+import { ensureUserRecord } from '@/src/lib/actions/user.actions';
+import { getAuthenticatedUserFromClient } from '@/src/lib/auth/get-authenticated-user';
+import { getUserSettings, getUserSponsorships } from '@/src/lib/data/account/user-data';
 import {
   Activity,
   Bookmark,
@@ -21,19 +24,14 @@ import {
 } from '@/src/lib/icons';
 import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
-import type { Database } from '@/src/types/database.types';
-
-type Tables<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]['Row'];
 
 export default async function AccountLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
 
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser();
-
-  if (userError || !user) redirect('/login');
+  const { user } = await getAuthenticatedUserFromClient(supabase, {
+    context: 'AccountLayout',
+  });
+  if (!user) redirect('/login');
 
   const {
     data: { session },
@@ -46,41 +44,26 @@ export default async function AccountLayout({ children }: { children: React.Reac
     }
   }
 
-  let profile: Pick<Tables<'users'>, 'name' | 'slug' | 'image'> | null = null;
+  const userNameMetadata =
+    user.user_metadata?.full_name ?? user.user_metadata?.name ?? user.email ?? null;
+  const userImageMetadata = user.user_metadata?.avatar_url ?? user.user_metadata?.picture ?? null;
 
-  const { data: existingProfile } = await supabase
-    .from('users')
-    .select('name, slug, image')
-    .eq('id', user.id)
-    .maybeSingle();
+  let settings = await getUserSettings(user.id);
+  let profile = settings?.user_data ?? null;
 
-  if (existingProfile) {
-    profile = existingProfile;
-  } else {
-    const userInsert: Database['public']['Tables']['users']['Insert'] = {
+  if (!profile) {
+    await ensureUserRecord({
       id: user.id,
       email: user.email ?? null,
-      name: user.user_metadata?.full_name ?? user.user_metadata?.name ?? null,
-      image: user.user_metadata?.avatar_url ?? user.user_metadata?.picture ?? null,
-    };
-
-    await supabase.from('users').upsert(userInsert);
-
-    const { data: newProfile } = await supabase
-      .from('users')
-      .select('name, slug, image')
-      .eq('id', user.id)
-      .single();
-    profile = newProfile;
+      name: userNameMetadata,
+      image: userImageMetadata,
+    });
+    settings = await getUserSettings(user.id);
+    profile = settings?.user_data ?? null;
   }
 
-  const { data: sponsorships } = await supabase
-    .from('sponsored_content')
-    .select('id')
-    .eq('user_id', user.id)
-    .limit(1);
-
-  const hasSponsorships = sponsorships && sponsorships.length > 0;
+  const sponsorships = await getUserSponsorships(user.id);
+  const hasSponsorships = sponsorships.length > 0;
 
   const navigation = [
     { name: 'Dashboard', href: '/account', icon: Home },
@@ -134,7 +117,7 @@ export default async function AccountLayout({ children }: { children: React.Reac
                 </div>
               )}
               <div>
-                <p className="font-medium">{profile?.name || user.email}</p>
+                <p className="font-medium">{profile?.name || userNameMetadata}</p>
                 <p className={UI_CLASSES.TEXT_XS_MUTED}>{user.email}</p>
               </div>
             </div>

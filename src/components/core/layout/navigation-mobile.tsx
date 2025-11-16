@@ -20,8 +20,10 @@ import {
   SheetTrigger,
 } from '@/src/components/primitives/ui/sheet';
 import { ACTION_LINKS, PRIMARY_NAVIGATION, SECONDARY_NAVIGATION } from '@/src/config/navigation';
-import { SOCIAL_LINKS } from '@/src/lib/constants';
+import { getAnimationConfig } from '@/src/lib/actions/feature-flags.actions';
+import { getContactChannels } from '@/src/lib/data/marketing/contact';
 import { DiscordIcon, Github, Menu } from '@/src/lib/icons';
+import { logger } from '@/src/lib/logger';
 import {
   ANIMATION_CONSTANTS,
   DIMENSIONS,
@@ -74,6 +76,8 @@ interface NavigationMobileProps {
   onOpenChange: (open: boolean) => void;
 }
 
+const CONTACT_CHANNELS = getContactChannels();
+
 export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationMobileProps) {
   const [springDefault, setSpringDefault] = useState({
     type: 'spring' as const,
@@ -82,16 +86,19 @@ export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationM
   });
 
   useEffect(() => {
-    import('@/src/lib/flags')
-      .then(({ animationConfigs }) => animationConfigs())
-      .then((config) => {
+    getAnimationConfig({})
+      .then((result) => {
+        if (!result?.data) return;
+        const config = result.data;
         setSpringDefault({
           type: 'spring' as const,
-          stiffness: (config['animation.spring.default.stiffness'] as number) ?? 400,
-          damping: (config['animation.spring.default.damping'] as number) ?? 17,
+          stiffness: config['animation.spring.default.stiffness'],
+          damping: config['animation.spring.default.damping'],
         });
       })
-      .catch(() => {});
+      .catch((error) => {
+        logger.error('NavigationMobile: failed to load animation config', error);
+      });
   }, []);
 
   return (
@@ -232,13 +239,13 @@ export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationM
               {[
                 {
                   icon: DiscordIcon,
-                  onClick: () => window.open('https://discord.gg/Ax3Py4YDrq', '_blank'),
+                  onClick: () => window.open(CONTACT_CHANNELS.discord, '_blank'),
                   label: 'Discord',
                   color: 'discord',
                 },
                 {
                   icon: Github,
-                  onClick: () => window.open(SOCIAL_LINKS.github, '_blank'),
+                  onClick: () => window.open(CONTACT_CHANNELS.github, '_blank'),
                   label: 'GitHub',
                   color: 'accent',
                 },

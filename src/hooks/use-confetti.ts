@@ -2,7 +2,7 @@
 
 import confetti from 'canvas-confetti';
 import { useCallback } from 'react';
-import { animationConfigs } from '@/src/lib/flags';
+import { getAnimationConfig } from '@/src/lib/actions/feature-flags.actions';
 
 /** Confetti animations - config values from Statsig animationConfigs */
 
@@ -10,7 +10,9 @@ export type ConfettiVariant = 'success' | 'celebration' | 'milestone' | 'subtle'
 
 export function useConfetti() {
   const fireConfetti = useCallback(async (variant: ConfettiVariant = 'success') => {
-    const config = await animationConfigs();
+    const result = await getAnimationConfig({});
+    if (!result?.data) return;
+    const config = result.data;
 
     const configs: Record<ConfettiVariant, confetti.Options> = {
       // Green + gold for success actions (bookmark, save, etc)
@@ -58,10 +60,18 @@ export function useConfetti() {
   }, []);
 
   // Preset functions for common actions
-  const celebrateBookmark = useCallback(() => void fireConfetti('success'), [fireConfetti]);
-  const celebrateSubmission = useCallback(() => void fireConfetti('celebration'), [fireConfetti]);
-  const celebrateMilestone = useCallback(() => void fireConfetti('milestone'), [fireConfetti]);
-  const celebrateSignup = useCallback(() => void fireConfetti('subtle'), [fireConfetti]);
+  const celebrateBookmark = useCallback(() => {
+    fireConfetti('success');
+  }, [fireConfetti]);
+  const celebrateSubmission = useCallback(() => {
+    fireConfetti('celebration');
+  }, [fireConfetti]);
+  const celebrateMilestone = useCallback(() => {
+    fireConfetti('milestone');
+  }, [fireConfetti]);
+  const celebrateSignup = useCallback(() => {
+    fireConfetti('subtle');
+  }, [fireConfetti]);
 
   return {
     fireConfetti,

@@ -1,6 +1,8 @@
-'use client';
+/**
+ * Visual rating distribution histogram (Server Component)
+ * Shows average rating and distribution across 1-5 stars
+ */
 
-import { useMemo } from 'react';
 import {
   ChartContainer,
   HorizontalBarChart,
@@ -11,29 +13,23 @@ import { Card } from '@/src/components/primitives/ui/card';
 import { Star } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
-/**
- * Visual rating distribution histogram
- * Shows average rating and distribution across 1-5 stars
- */
 export function ReviewRatingHistogram({
   distribution,
   totalReviews,
   averageRating,
 }: Omit<ReviewHistogramProps, 'variant'>) {
-  // Memoize chart data to prevent unnecessary recalculation
-  const chartData = useMemo(() => {
-    return [5, 4, 3, 2, 1].map((stars) => {
-      const count = distribution[String(stars)] || 0;
-      const percentage = totalReviews > 0 ? (count / totalReviews) * 100 : 0;
+  // Calculate chart data (no memoization needed - server components render once)
+  const chartData = [5, 4, 3, 2, 1].map((stars) => {
+    const count = distribution[String(stars)] || 0;
+    const percentage = totalReviews > 0 ? (count / totalReviews) * 100 : 0;
 
-      return {
-        label: `${stars} ★`,
-        value: count,
-        formattedLabel: `${percentage.toFixed(1)}%`,
-        fill: 'hsl(var(--chart-1))',
-      };
-    });
-  }, [distribution, totalReviews]);
+    return {
+      label: `${stars} ★`,
+      value: count,
+      formattedLabel: `${percentage.toFixed(1)}%`,
+      fill: 'hsl(var(--chart-1))',
+    };
+  });
 
   if (totalReviews === 0) {
     return (

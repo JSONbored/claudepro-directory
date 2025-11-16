@@ -9,8 +9,10 @@ import { UnifiedCardGrid } from '@/src/components/core/domain/cards/card-grid';
 import { ConfigCard } from '@/src/components/core/domain/cards/config-card';
 import { Button } from '@/src/components/primitives/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/primitives/ui/tabs';
-import type { UnifiedCategoryConfig } from '@/src/lib/config/category-config';
-import { ROUTES } from '@/src/lib/constants';
+import { getAnimationConfig } from '@/src/lib/actions/feature-flags.actions';
+import type { UnifiedCategoryConfig } from '@/src/lib/data/config/category';
+import { ROUTES } from '@/src/lib/data/config/constants';
+import { logger } from '@/src/lib/logger';
 import type { DisplayableContent } from '@/src/lib/types/component.types';
 
 interface TabsSectionProps {
@@ -38,24 +40,37 @@ const TabsSectionComponent: FC<TabsSectionProps> = ({
   });
 
   useEffect(() => {
-    import('@/src/lib/config/category-config').then(({ getHomepageTabCategories }) =>
-      getHomepageTabCategories().then((categories) => {
+    async function loadCategories() {
+      try {
+        const { getHomepageTabCategories } = await import('@/src/lib/data/config/category');
+        const categories = await getHomepageTabCategories();
         setTabCategories(categories);
-      })
-    );
+      } catch (error) {
+        logger.error(
+          'Homepage Tabs: failed to load tab categories',
+          error instanceof Error ? error : new Error(String(error))
+        );
+      }
+    }
+    loadCategories().catch((err) => {
+      logger.error('Homepage Tabs: failed to initialize categories', err);
+    });
   }, []);
 
   useEffect(() => {
-    import('@/src/lib/flags')
-      .then(({ animationConfigs }) => animationConfigs())
-      .then((config) => {
+    getAnimationConfig({})
+      .then((result) => {
+        if (!result?.data) return;
+        const config = result.data;
         setSpringDefault({
           type: 'spring' as const,
-          stiffness: (config['animation.spring.default.stiffness'] as number) ?? 400,
-          damping: (config['animation.spring.default.damping'] as number) ?? 17,
+          stiffness: config['animation.spring.default.stiffness'],
+          damping: config['animation.spring.default.damping'],
         });
       })
-      .catch(() => {});
+      .catch((error) => {
+        logger.error('Homepage Tabs: failed to load animation config', error);
+      });
   }, []);
 
   const contentTabs = useMemo(

@@ -1,24 +1,8 @@
-import type { CategoryId } from '@/src/lib/config/category-config';
-import { formConfigs } from '@/src/lib/flags';
+import { getFormConfig } from '@/src/lib/actions/feature-flags.actions';
+import type { CategoryId } from '@/src/lib/data/config/category';
+import { logClientWarning } from '@/src/lib/utils/error.utils';
 
-/**
- * Review Item from Database
- */
-export interface ReviewItem {
-  id: string;
-  user_id: string;
-  content_type: string;
-  content_slug: string;
-  rating: number;
-  review_text: string | null;
-  helpful_count: number;
-  created_at: string;
-  updated_at: string;
-  user_profile?: {
-    username: string | null;
-    avatar_url: string | null;
-  } | null;
-}
+export type { ReviewItem } from '@/src/types/database-overrides';
 
 /**
  * Props for review form variant
@@ -97,10 +81,12 @@ export type ReviewProps =
 export let MAX_REVIEW_LENGTH = 2000;
 
 // Load config from Statsig on module initialization
-formConfigs()
-  .then((config: Record<string, unknown>) => {
-    MAX_REVIEW_LENGTH = (config['form.max_review_length'] as number) ?? 2000;
+getFormConfig({})
+  .then((result) => {
+    if (result?.data) {
+      MAX_REVIEW_LENGTH = result.data['form.max_review_length'];
+    }
   })
-  .catch(() => {
-    // Use default if config load fails
+  .catch((error) => {
+    logClientWarning('ReviewTypes: failed to load form config', error);
   });

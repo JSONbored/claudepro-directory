@@ -10,7 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/ui/card';
-import type { CategoryId } from '@/src/lib/config/category-config.types';
+import type { CategoryId } from '@/src/lib/data/config/category/category-config.types';
 import {
   Bookmark,
   BookOpen,
@@ -95,23 +95,24 @@ function List({ items, color }: { items: string[]; color: string }) {
   );
 }
 
-function EnhancedList({
-  items,
-  color,
-}: {
-  items: Array<string | { issue: string; solution: string }>;
-  color: string;
-}) {
+type EnhancedListItem = string | { issue: string; solution: string };
+
+const getEnhancedListKey = (item: EnhancedListItem, index: number) =>
+  typeof item === 'string'
+    ? `enhanced-string-${item.slice(0, 50)}-${index}`
+    : `enhanced-object-${item.issue}-${item.solution.slice(0, 50)}-${index}`;
+
+function EnhancedList({ items, color }: { items: EnhancedListItem[]; color: string }) {
   return (
     <ul className="space-y-4">
-      {items.map((item, i) =>
+      {items.map((item, index) =>
         typeof item === 'string' ? (
-          <li key={i} className={UI_CLASSES.FLEX_ITEMS_START_GAP_3}>
+          <li key={getEnhancedListKey(item, index)} className={UI_CLASSES.FLEX_ITEMS_START_GAP_3}>
             <div className={cn('mt-2 h-1.5 w-1.5 flex-shrink-0 rounded-full', color)} />
             <span className="text-sm leading-relaxed">{item}</span>
           </li>
         ) : (
-          <li key={i} className="space-y-2">
+          <li key={getEnhancedListKey(item, index)} className="space-y-2">
             <div className={UI_CLASSES.FLEX_ITEMS_START_GAP_3}>
               <div className={cn('mt-2 h-1.5 w-1.5 flex-shrink-0 rounded-full', color)} />
               <div className="space-y-1">
@@ -126,35 +127,44 @@ function EnhancedList({
   );
 }
 
+type PlatformStep =
+  | { type: 'command'; html: string; code: string }
+  | { type: 'text'; text: string };
+
 function Platform({
   name,
   steps,
   paths,
 }: {
   name: string;
-  steps: Array<{ type: 'command'; html: string; code: string } | { type: 'text'; text: string }>;
+  steps: PlatformStep[];
   paths?: Record<string, string>;
 }) {
+  const getStepKey = (step: PlatformStep, index: number) =>
+    step.type === 'command'
+      ? `platform-${name.toLowerCase()}-command-${step.code}-${index}`
+      : `platform-${name.toLowerCase()}-text-${step.text}-${index}`;
+
   return (
     <div className="space-y-4">
       <h4 className="font-medium">{name}</h4>
       <div className="space-y-3">
-        {steps.map((s, i) =>
-          s.type === 'command' ? (
-            <div key={i} className="space-y-2">
-              <div className="text-muted-foreground text-sm">Step {i + 1}: Run command</div>
+        {steps.map((step, index) =>
+          step.type === 'command' ? (
+            <div key={getStepKey(step, index)} className="space-y-2">
+              <div className="text-muted-foreground text-sm">Step {index + 1}: Run command</div>
               <ProductionCodeBlock
-                html={s.html}
-                code={s.code}
+                html={step.html}
+                code={step.code}
                 language="bash"
-                filename={`${name.toLowerCase()}-${i + 1}.sh`}
+                filename={`${name.toLowerCase()}-${index + 1}.sh`}
                 maxLines={10}
               />
             </div>
           ) : (
-            <div key={i} className="flex items-start gap-3">
+            <div key={getStepKey(step, index)} className="flex items-start gap-3">
               <div className="mt-2 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-primary" />
-              <span className="text-sm leading-relaxed">{s.text}</span>
+              <span className="text-sm leading-relaxed">{step.text}</span>
             </div>
           )
         )}

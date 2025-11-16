@@ -33,7 +33,9 @@ import {
   TooltipTrigger,
 } from '@/src/components/primitives/ui/tooltip';
 import { addBookmarkBatch } from '@/src/lib/actions/user.actions';
-import { ROUTES } from '@/src/lib/constants';
+import type { CategoryId } from '@/src/lib/data/config/category';
+import { isValidCategory } from '@/src/lib/data/config/category';
+import { ROUTES } from '@/src/lib/data/config/constants';
 import {
   ArrowRight,
   Award,
@@ -49,7 +51,6 @@ import {
 } from '@/src/lib/icons';
 import { POSITION_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { getContentItemUrl } from '@/src/lib/utils/content.utils';
-import type { Database } from '@/src/types/database.types';
 
 type RecommendationResponse = {
   results: Array<{
@@ -57,13 +58,13 @@ type RecommendationResponse = {
     title: string;
     description: string;
     category: string;
-    tags: string[];
-    author: string;
-    match_score: number;
-    match_percentage: number;
-    primary_reason: string;
-    rank: number;
-    reasons: Array<{ type: string; message: string }>;
+    tags?: string[] | null;
+    author?: string | null;
+    match_score?: number | null;
+    match_percentage?: number | null;
+    primary_reason?: string | null;
+    rank?: number | null;
+    reasons?: Array<{ type: string; message: string }> | null;
   }>;
   totalMatches: number;
   answers: {
@@ -78,9 +79,10 @@ type RecommendationResponse = {
   generatedAt: string;
   algorithm: string;
   summary: {
-    topCategory: string;
-    avgMatchScore: number;
-    diversityScore: number;
+    topCategory?: string;
+    avgMatchScore?: number;
+    diversityScore?: number;
+    topTags?: string[];
   };
 };
 
@@ -105,10 +107,14 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
   const handleSaveAll = () => {
     startTransition(async () => {
       try {
-        const items = results.map((result) => ({
-          content_type: result.category as Database['public']['Enums']['content_category'],
-          content_slug: result.slug,
-        }));
+        const items = results
+          .filter((result): result is typeof result & { category: CategoryId } =>
+            isValidCategory(result.category)
+          )
+          .map((result) => ({
+            content_type: result.category,
+            content_slug: result.slug,
+          }));
 
         const response = await addBookmarkBatch({ items });
 
@@ -136,7 +142,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
 
   const filteredResults = results
     .filter((r) => selectedCategory === 'all' || r.category === selectedCategory)
-    .filter((r) => r.match_score >= minScore)
+    .filter((r) => (r.match_score ?? 0) >= minScore)
     .slice(0, maxResults);
 
   const categories = ['all', ...new Set(results.map((r) => r.category))];
@@ -158,14 +164,14 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
         <div className={'flex-wrap items-center justify-center gap-3'}>
           <UnifiedBadge variant="base" style="secondary" className="text-sm">
             <TrendingUp className={UI_CLASSES.ICON_XS_LEADING} />
-            {summary.avgMatchScore}% Avg Match
+            {(summary.avgMatchScore ?? 0).toFixed(0)}% Avg Match
           </UnifiedBadge>
           <UnifiedBadge variant="base" style="secondary" className="text-sm">
             <BarChart className={UI_CLASSES.ICON_XS_LEADING} />
-            {summary.diversityScore}% Diversity
+            {(summary.diversityScore ?? 0).toFixed(0)}% Diversity
           </UnifiedBadge>
           <UnifiedBadge variant="base" style="outline" className="text-sm">
-            Top Category: {summary.topCategory}
+            Top Category: {summary.topCategory ?? 'General'}
           </UnifiedBadge>
         </div>
 
@@ -343,109 +349,120 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
 
         <TabsContent value={selectedCategory} className="mt-6">
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {filteredResults.map((result) => {
-              const targetPath = getContentItemUrl({
-                category: result.category as Database['public']['Enums']['content_category'],
-                slug: result.slug,
-              });
-              const matchScore = result.match_score;
-              const getMatchScoreColor = (score: number) => {
-                if (score >= 90) return UI_CLASSES.SCORE_EXCELLENT;
-                if (score >= 75) return UI_CLASSES.SCORE_GOOD;
-                if (score >= 60) return UI_CLASSES.SCORE_FAIR;
-                return 'text-muted-foreground';
-              };
-              const getMatchGradient = (score: number) => {
-                if (score >= 90) return 'from-green-500/20 to-transparent';
-                if (score >= 75) return 'from-blue-500/20 to-transparent';
-                if (score >= 60) return 'from-yellow-500/20 to-transparent';
-                return 'from-muted/20 to-transparent';
-              };
+            {filteredResults
+              .filter((result): result is typeof result & { category: CategoryId } =>
+                isValidCategory(result.category)
+              )
+              .map((result) => {
+                const targetPath = getContentItemUrl({
+                  category: result.category,
+                  slug: result.slug,
+                });
+                const matchScore = typeof result.match_score === 'number' ? result.match_score : 0;
+                const rank = typeof result.rank === 'number' ? result.rank : null;
+                const tags = Array.isArray(result.tags)
+                  ? result.tags.filter((tag): tag is string => typeof tag === 'string')
+                  : [];
+                const reasons = Array.isArray(result.reasons) ? result.reasons : [];
+                const primaryReason =
+                  result.primary_reason ?? 'Hand-picked based on your preferences.';
+                const author =
+                  typeof result.author === 'string' && result.author.length > 0
+                    ? result.author
+                    : undefined;
+                const getMatchScoreColor = (score: number) => {
+                  if (score >= 90) return UI_CLASSES.SCORE_EXCELLENT;
+                  if (score >= 75) return UI_CLASSES.SCORE_GOOD;
+                  if (score >= 60) return UI_CLASSES.SCORE_FAIR;
+                  return 'text-muted-foreground';
+                };
+                const getMatchGradient = (score: number) => {
+                  if (score >= 90) return 'from-green-500/20 to-transparent';
+                  if (score >= 75) return 'from-blue-500/20 to-transparent';
+                  if (score >= 60) return 'from-yellow-500/20 to-transparent';
+                  return 'from-muted/20 to-transparent';
+                };
 
-              return (
-                <div key={result.slug} className="relative">
-                  <div className="${POSITION_PATTERNS.ABSOLUTE_TOP_RIGHT_OFFSET_XL} z-10">
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <UnifiedBadge
-                            variant="base"
-                            style="secondary"
-                            className={`${getMatchScoreColor(matchScore)} px-3 py-1 font-bold text-base`}
-                          >
-                            <Sparkles className={UI_CLASSES.ICON_XS_LEADING} />
-                            {matchScore}%
-                          </UnifiedBadge>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Match Score: How well this fits your needs</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </div>
-
-                  {result.rank <= 3 && (
-                    <div className="${POSITION_PATTERNS.ABSOLUTE_TOP_LEFT_OFFSET_XL} z-10">
-                      <UnifiedBadge
-                        variant="base"
-                        style="outline"
-                        className="bg-background/80 backdrop-blur-sm"
-                      >
-                        <Award className={UI_CLASSES.ICON_XS_LEADING} />#{result.rank}
-                      </UnifiedBadge>
+                return (
+                  <div key={result.slug} className="relative">
+                    <div className={`${POSITION_PATTERNS.ABSOLUTE_TOP_RIGHT_OFFSET_XL} z-10`}>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <UnifiedBadge
+                              variant="base"
+                              style="secondary"
+                              className={`${getMatchScoreColor(matchScore)} px-3 py-1 font-bold text-base`}
+                            >
+                              <Sparkles className={UI_CLASSES.ICON_XS_LEADING} />
+                              {matchScore}%
+                            </UnifiedBadge>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Match Score: How well this fits your needs</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
                     </div>
-                  )}
 
-                  <div className="${POSITION_PATTERNS.ABSOLUTE_BOTTOM_RIGHT_OFFSET} z-10">
-                    <BookmarkButton
-                      contentType={result.category}
-                      contentSlug={result.slug}
-                      initialBookmarked={false}
-                    />
-                  </div>
-
-                  <div
-                    className={`${POSITION_PATTERNS.ABSOLUTE_INSET} bg-gradient-to-br ${getMatchGradient(matchScore)} pointer-events-none opacity-50`}
-                  />
-
-                  <Link href={targetPath}>
-                    <BaseCard
-                      targetPath={targetPath}
-                      displayTitle={result.title}
-                      description={result.description}
-                      ariaLabel={`${result.title} - ${matchScore}% match`}
-                      tags={result.tags}
-                      maxVisibleTags={4}
-                      author={result.author}
-                      className="relative overflow-hidden transition-all hover:shadow-lg"
-                      renderTopBadges={() => (
-                        <UnifiedBadge variant="base" style="outline" className="w-fit capitalize">
-                          {result.category}
+                    {rank !== null && rank <= 3 && (
+                      <div className={`${POSITION_PATTERNS.ABSOLUTE_TOP_LEFT_OFFSET_XL} z-10`}>
+                        <UnifiedBadge
+                          variant="base"
+                          style="outline"
+                          className="bg-background/80 backdrop-blur-sm"
+                        >
+                          <Award className={UI_CLASSES.ICON_XS_LEADING} />#{rank}
                         </UnifiedBadge>
-                      )}
-                      renderContent={() => (
-                        <>
-                          <div
-                            className={`${UI_CLASSES.FLEX_ITEMS_START_GAP_2} mb-3 rounded-lg bg-accent/50 p-3`}
-                          >
-                            <Info
-                              className={`h-4 w-4 text-primary ${UI_CLASSES.FLEX_SHRINK_0_MT_0_5}`}
-                            />
-                            <div>
-                              <p className="font-medium text-sm">Why recommended:</p>
-                              <p className="text-muted-foreground text-sm">
-                                {result.primary_reason}
-                              </p>
-                            </div>
-                          </div>
+                      </div>
+                    )}
 
-                          {result.reasons && result.reasons.length > 1 && (
-                            <div className="flex flex-wrap gap-1">
-                              {result.reasons
-                                .slice(1, 4)
-                                .map((reason: { type: string; message: string }) => (
+                    <div className={`${POSITION_PATTERNS.ABSOLUTE_BOTTOM_RIGHT_OFFSET} z-10`}>
+                      <BookmarkButton
+                        contentType={result.category}
+                        contentSlug={result.slug}
+                        initialBookmarked={false}
+                      />
+                    </div>
+
+                    <div
+                      className={`${POSITION_PATTERNS.ABSOLUTE_INSET} bg-gradient-to-br ${getMatchGradient(matchScore)} pointer-events-none opacity-50`}
+                    />
+
+                    <Link href={targetPath}>
+                      <BaseCard
+                        targetPath={targetPath}
+                        displayTitle={result.title}
+                        description={result.description}
+                        ariaLabel={`${result.title} - ${matchScore}% match`}
+                        {...(tags.length ? { tags } : {})}
+                        maxVisibleTags={4}
+                        {...(author ? { author } : {})}
+                        className="relative overflow-hidden transition-all hover:shadow-lg"
+                        renderTopBadges={() => (
+                          <UnifiedBadge variant="base" style="outline" className="w-fit capitalize">
+                            {result.category}
+                          </UnifiedBadge>
+                        )}
+                        renderContent={() => (
+                          <>
+                            <div
+                              className={`${UI_CLASSES.FLEX_ITEMS_START_GAP_2} mb-3 rounded-lg bg-accent/50 p-3`}
+                            >
+                              <Info
+                                className={`h-4 w-4 text-primary ${UI_CLASSES.FLEX_SHRINK_0_MT_0_5}`}
+                              />
+                              <div>
+                                <p className="font-medium text-sm">Why recommended:</p>
+                                <p className="text-muted-foreground text-sm">{primaryReason}</p>
+                              </div>
+                            </div>
+
+                            {reasons.length > 1 && (
+                              <div className="flex flex-wrap gap-1">
+                                {reasons.slice(1, 4).map((reason) => (
                                   <UnifiedBadge
-                                    key={reason.message}
+                                    key={`${result.slug}-${reason.message}`}
                                     variant="base"
                                     style="secondary"
                                     className="text-xs"
@@ -453,31 +470,31 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                                     {reason.message}
                                   </UnifiedBadge>
                                 ))}
-                            </div>
-                          )}
-                        </>
-                      )}
-                      customMetadataText={
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="group -mx-4 -mb-4 mt-2 w-full"
-                          asChild
-                        >
-                          <span className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_CENTER_GAP_2}>
-                            View Details
-                            <ArrowRight
-                              className={`${UI_CLASSES.ICON_SM} transition-transform group-hover:translate-x-1`}
-                            />
-                          </span>
-                        </Button>
-                      }
-                      showActions={false}
-                    />
-                  </Link>
-                </div>
-              );
-            })}
+                              </div>
+                            )}
+                          </>
+                        )}
+                        customMetadataText={
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="group -mx-4 -mb-4 mt-2 w-full"
+                            asChild
+                          >
+                            <span className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_CENTER_GAP_2}>
+                              View Details
+                              <ArrowRight
+                                className={`${UI_CLASSES.ICON_SM} transition-transform group-hover:translate-x-1`}
+                              />
+                            </span>
+                          </Button>
+                        }
+                        showActions={false}
+                      />
+                    </Link>
+                  </div>
+                );
+              })}
           </div>
 
           {filteredResults.length === 0 && (

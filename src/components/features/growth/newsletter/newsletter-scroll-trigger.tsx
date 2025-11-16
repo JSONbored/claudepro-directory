@@ -7,8 +7,9 @@
 
 import { motion, useScroll } from 'motion/react';
 import { useEffect, useState } from 'react';
+import { useLoggedAsync } from '@/src/hooks/use-logged-async';
 import type { NewsletterSource } from '@/src/hooks/use-newsletter';
-import { newsletterConfigs } from '@/src/lib/flags';
+import { getNewsletterConfig } from '@/src/lib/actions/feature-flags.actions';
 import { NewsletterCTAVariant } from './newsletter-cta-variants';
 
 export interface NewsletterScrollTriggerProps {
@@ -36,26 +37,38 @@ export function NewsletterScrollTrigger({
   const [hasTriggered, setHasTriggered] = useState(false);
   const [scrollHeightThreshold, setScrollHeightThreshold] = useState(minScrollHeight ?? 500);
   const { scrollYProgress } = useScroll();
+  const loadScrollConfig = useLoggedAsync({
+    scope: 'NewsletterScrollTrigger',
+    defaultMessage: 'Failed to load newsletter scroll config',
+    defaultLevel: 'warn',
+    defaultRethrow: false,
+  });
 
   useEffect(() => {
-    const loadConfig = async () => {
-      if (minScrollHeight === undefined) {
-        try {
-          const config = await newsletterConfigs();
+    if (minScrollHeight !== undefined) {
+      setScrollHeightThreshold(minScrollHeight);
+      return;
+    }
+
+    loadScrollConfig(
+      async () => {
+        const result = await getNewsletterConfig({});
+        if (result?.data) {
+          const config = result.data;
           const configHeight = config['newsletter.scroll_trigger.min_scroll_height_px'] as
             | number
             | undefined;
           setScrollHeightThreshold(configHeight ?? 500);
-        } catch {
-          // Silent fail - use default
         }
+      },
+      {
+        context: {
+          source,
+          category,
+        },
       }
-    };
-
-    loadConfig().catch(() => {
-      // Intentionally ignore errors
-    });
-  }, [minScrollHeight]);
+    );
+  }, [category, loadScrollConfig, minScrollHeight, source]);
 
   useEffect(() => {
     // Check if page is long enough for scroll trigger

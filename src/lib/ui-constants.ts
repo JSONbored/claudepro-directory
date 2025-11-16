@@ -955,6 +955,7 @@ export const BADGE_COLORS = {
     approved: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
     merged: 'bg-green-500/10 text-green-400 border-green-500/20',
     rejected: 'bg-red-500/10 text-red-400 border-red-500/20',
+    spam: 'bg-gray-500/10 text-gray-400 border-gray-500/20',
   },
 
   memberType: {
@@ -964,10 +965,13 @@ export const BADGE_COLORS = {
   },
 
   jobStatus: {
-    active: 'bg-green-500/10 text-green-400 border-green-500/20',
     draft: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20',
-    paused: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
+    pending_payment: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
+    pending_review: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+    active: 'bg-green-500/10 text-green-400 border-green-500/20',
     expired: 'bg-red-500/10 text-red-400 border-red-500/20',
+    rejected: 'bg-red-500/10 text-red-400 border-red-500/20',
+    deleted: 'bg-gray-500/10 text-gray-400 border-gray-500/20',
   },
 } as const;
 
@@ -1020,7 +1024,6 @@ export type ChangelogCategory = keyof typeof BADGE_COLORS.changelogCategory;
 export type StatusType = keyof typeof BADGE_COLORS.status;
 export type CategoryType = keyof typeof BADGE_COLORS.category;
 export type SubmissionStatusType = keyof typeof BADGE_COLORS.submissionStatus;
-export type JobStatusType = keyof typeof BADGE_COLORS.jobStatus;
 
 // ==========================================
 // UTILITY FUNCTIONS

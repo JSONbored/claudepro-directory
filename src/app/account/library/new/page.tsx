@@ -3,32 +3,29 @@ import { redirect } from 'next/navigation';
 import { CollectionForm } from '@/src/components/core/forms/collection-form';
 import { Button } from '@/src/components/primitives/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
-import { ROUTES } from '@/src/lib/constants';
+import { getAuthenticatedUser } from '@/src/lib/auth/get-authenticated-user';
+import { getUserBookmarksForCollections } from '@/src/lib/data/account/user-data';
+import { ROUTES } from '@/src/lib/data/config/constants';
 import { ArrowLeft } from '@/src/lib/icons';
+import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-import { createClient } from '@/src/lib/supabase/server';
-
-// Force dynamic rendering - requires authentication
-export const dynamic = 'force-dynamic';
 
 export const metadata = generatePageMetadata('/account/library/new');
 
 export default async function NewCollectionPage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { user } = await getAuthenticatedUser({ context: 'NewCollectionPage' });
 
   if (!user) {
+    logger.warn('NewCollectionPage: unauthenticated access attempt');
     redirect('/login');
   }
 
-  // Get user's bookmarks to display as options
-  const { data: bookmarks } = await supabase
-    .from('bookmarks')
-    .select('*')
-    .eq('user_id', user.id)
-    .order('created_at', { ascending: false });
+  const bookmarks = await getUserBookmarksForCollections(user.id);
+  if (!bookmarks) {
+    logger.warn('NewCollectionPage: getUserBookmarksForCollections returned null', {
+      userId: user.id,
+    });
+  }
 
   return (
     <div className="space-y-6">

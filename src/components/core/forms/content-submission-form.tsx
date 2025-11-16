@@ -20,6 +20,9 @@ import { Input } from '@/src/components/primitives/ui/input';
 import { Label } from '@/src/components/primitives/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/primitives/ui/tabs';
 import { Textarea } from '@/src/components/primitives/ui/textarea';
+import { submitContentForReview } from '@/src/lib/actions/content.actions';
+import { getAnimationConfig } from '@/src/lib/actions/feature-flags.actions';
+import { useAuthenticatedUser } from '@/src/lib/auth/use-authenticated-user';
 import {
   SUBMISSION_CONTENT_TYPES,
   type SubmissionContentType,
@@ -29,17 +32,22 @@ import {
 } from '@/src/lib/forms/types';
 import { CheckCircle, Code, FileText, Github, Layers, Send, Sparkles } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
-import { createClient } from '@/src/lib/supabase/client';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
 import { ParseStrategy, safeParse } from '@/src/lib/utils/data.utils';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
-import type { Database, Json } from '@/src/types/database.types';
+import type {
+  ContentCategory,
+  GetContentTemplatesReturn,
+  SubmissionStatus,
+  SubmissionType,
+} from '@/src/types/database-overrides';
 import { DuplicateWarning } from './duplicate-warning';
 import { ContentTypeFieldRenderer } from './dynamic-form-field';
 import { ExamplesArrayInput } from './examples-array-input';
 import { FormSectionCard } from './form-section-card';
-import { type Template, TemplateSelector } from './template-selector';
+import { TemplateSelector } from './template-selector';
 
 /**
  * Examples array schema (Zod)
@@ -47,7 +55,7 @@ import { type Template, TemplateSelector } from './template-selector';
  */
 const examplesArraySchema = z.array(z.string());
 
-const DEFAULT_CONTENT_TYPE: SubmissionContentType = 'agents';
+const DEFAULT_CONTENT_TYPE: SubmissionContentType = 'agents' as SubmissionType;
 
 const EMPTY_SECTION: SubmissionFormSection = {
   nameField: null,
@@ -78,6 +86,7 @@ const FORM_TYPE_LABELS: Record<SubmissionContentType, string> = {
 
 interface SubmitFormClientProps {
   formConfig: SubmissionFormConfig;
+  templates: GetContentTemplatesReturn;
 }
 
 /**
@@ -114,7 +123,7 @@ interface SubmitFormClientProps {
  * @see https://react.dev/reference/react-dom/components/input#controlling-an-input-with-a-state-variable
  * @see https://developer.mozilla.org/en-US/docs/Web/API/FormData
  */
-export function SubmitFormClient({ formConfig }: SubmitFormClientProps) {
+export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProps) {
   /**
    * Minimal React State (only what requires reactivity)
    */
@@ -134,7 +143,7 @@ export function SubmitFormClient({ formConfig }: SubmitFormClientProps) {
   /** Submission result for success message display */
   const [submissionResult, setSubmissionResult] = useState<{
     submission_id: string;
-    status: string;
+    status: SubmissionStatus;
     message: string;
   } | null>(null);
 
@@ -149,23 +158,30 @@ export function SubmitFormClient({ formConfig }: SubmitFormClientProps) {
     stiffness: 500,
     damping: 20,
   });
+  const { user } = useAuthenticatedUser({
+    context: 'ContentSubmissionForm',
+    subscribe: false,
+  });
 
   useEffect(() => {
-    import('@/src/lib/flags')
-      .then(({ animationConfigs }) => animationConfigs())
-      .then((config) => {
+    getAnimationConfig({})
+      .then((result) => {
+        if (!result?.data) return;
+        const config = result.data;
         setSpringSmooth({
           type: 'spring' as const,
-          stiffness: (config['animation.spring.smooth.stiffness'] as number) ?? 300,
-          damping: (config['animation.spring.smooth.damping'] as number) ?? 25,
+          stiffness: config['animation.spring.smooth.stiffness'],
+          damping: config['animation.spring.smooth.damping'],
         });
         setSpringBouncy({
           type: 'spring' as const,
-          stiffness: (config['animation.spring.bouncy.stiffness'] as number) ?? 500,
-          damping: (config['animation.spring.bouncy.damping'] as number) ?? 20,
+          stiffness: config['animation.spring.bouncy.stiffness'],
+          damping: config['animation.spring.bouncy.damping'],
         });
       })
-      .catch(() => {});
+      .catch((error) => {
+        logger.error('SubmitFormClient: failed to load animation config', error);
+      });
   }, []);
 
   /**
@@ -176,7 +192,7 @@ export function SubmitFormClient({ formConfig }: SubmitFormClientProps) {
 
   // Handle template selection
   // Templates are type-safe discriminated unions for UI pre-fill convenience
-  const handleTemplateSelect = (template: Template) => {
+  const handleTemplateSelect = (template: GetContentTemplatesReturn[number]) => {
     // Pre-fill form with template data using name attributes
     // NOTE: Cannot use querySelector('#id') because useId() generates dynamic IDs like ':r0:'
     const form = document.querySelector('form') as HTMLFormElement;
@@ -252,8 +268,9 @@ export function SubmitFormClient({ formConfig }: SubmitFormClientProps) {
 
     if (template.type === 'command') {
       const cmdInput = form.querySelector('[name="commandContent"]') as HTMLTextAreaElement;
-      if (cmdInput && typeof template.commandContent === 'string')
+      if (cmdInput && typeof template.commandContent === 'string') {
         cmdInput.value = template.commandContent;
+      }
     }
 
     toasts.success.templateApplied();
@@ -264,13 +281,6 @@ export function SubmitFormClient({ formConfig }: SubmitFormClientProps) {
 
     startTransition(async () => {
       try {
-        const supabase = createClient();
-
-        // Check authentication
-        const {
-          data: { user },
-        } = await supabase.auth.getUser();
-
         if (!user) {
           toasts.error.submissionFailed('You must be signed in to submit content');
           return;
@@ -318,86 +328,70 @@ export function SubmitFormClient({ formConfig }: SubmitFormClientProps) {
           }
         }
 
-        // Direct RPC call - database validates everything
-        const rpcArgs: Database['public']['Functions']['submit_content_for_review']['Args'] = {
-          p_submission_type: contentType,
-          p_name: submissionData.name as string,
-          p_description: submissionData.description as string,
-          p_category: submissionData.category as string,
-          p_author: submissionData.author as string,
-          // Cast to Json - database validates structure via CHECK constraints
-          p_content_data: submissionData as Json,
-        };
+        // Server action call - database validates everything
+        const tags = submissionData.tags
+          ? (submissionData.tags as string)
+              .split(',')
+              .map((tag) => tag.trim())
+              .filter((tag) => tag.length > 0)
+          : undefined;
 
-        if (submissionData.author_profile_url) {
-          rpcArgs.p_author_profile_url = submissionData.author_profile_url as string;
-        }
-        if (submissionData.github_url) {
-          rpcArgs.p_github_url = submissionData.github_url as string;
-        }
-        if (submissionData.tags) {
-          rpcArgs.p_tags = (submissionData.tags as string)
-            .split(',')
-            .map((tag) => tag.trim())
-            .filter((tag) => tag.length > 0);
-        }
+        const result = await submitContentForReview({
+          submission_type: contentType,
+          name: submissionData.name as string,
+          description: submissionData.description as string,
+          category: submissionData.category as ContentCategory,
+          author: submissionData.author as string,
+          author_profile_url: submissionData.author_profile_url as string | undefined,
+          github_url: submissionData.github_url as string | undefined,
+          tags,
+          content_data: submissionData,
+        });
 
-        const { data, error } = await supabase.rpc('submit_content_for_review', rpcArgs);
-
-        if (error) {
-          logger.error('Submission RPC failed', new Error(error.message));
-          // Show generic error to user, full error is logged
+        if (result?.serverError || result?.validationErrors) {
+          logger.error(
+            'Submission server action failed',
+            new Error(result.serverError || 'Validation failed'),
+            {
+              component: 'SubmitFormClient',
+              contentType,
+              submissionType: contentType,
+              hasName: !!submissionData.name,
+              hasDescription: !!submissionData.description,
+              hasAuthor: !!submissionData.author,
+            }
+          );
           toasts.error.submissionFailed(
-            'Failed to submit content. Please try again or contact support.'
+            result.serverError || 'Failed to submit content. Please try again or contact support.'
           );
           return;
         }
 
-        if (!data) {
-          toasts.error.submissionFailed('No data returned from submission');
-          return;
-        }
-
-        // Validate response structure
-        if (
-          !data ||
-          typeof data !== 'object' ||
-          !('success' in data) ||
-          typeof data.success !== 'boolean'
-        ) {
-          logger.error('Invalid RPC response structure', new Error(JSON.stringify(data)));
-          toasts.error.submissionFailed('Received invalid response from server');
-          return;
-        }
-
-        const result = data as {
-          success: boolean;
-          submission_id?: string;
-          status?: string;
-          message?: string;
-        };
-
-        if (result.success) {
-          if (!(result.submission_id && result.status)) {
-            logger.warn('Success response missing expected fields', {
-              submission_id: result.submission_id || 'missing',
-              status: result.status || 'missing',
+        if (result?.data?.success) {
+          if (!result.data.submissionId) {
+            logger.warn('Success response missing submission ID', {
+              component: 'SubmitFormClient',
+              contentType,
             });
           }
+
           setSubmissionResult({
-            submission_id: result.submission_id || 'unknown',
-            status: result.status || 'pending',
-            message: result.message || 'Your submission has been received and is pending review!',
+            submission_id: result.data.submissionId || 'unknown',
+            status: 'pending',
+            message: 'Your submission has been received and is pending review!',
           });
 
           toasts.success.submissionCreated(contentType);
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }
       } catch (error) {
-        logger.error(
-          'Submission failed',
-          error instanceof Error ? error : new Error(String(error))
-        );
+        const normalized = normalizeError(error, 'Content submission failed');
+        logger.error('Submission failed', normalized, {
+          component: 'SubmitFormClient',
+          contentType,
+          hasName: !!name,
+          hasDescription: !!description,
+        });
         toasts.error.submissionFailed(error instanceof Error ? error.message : undefined);
       }
     });
@@ -516,7 +510,7 @@ export function SubmitFormClient({ formConfig }: SubmitFormClientProps) {
 
             <div className={UI_CLASSES.SPACE_Y_2}>
               <Label>Quick Start</Label>
-              <TemplateSelector contentType={contentType} onSelect={handleTemplateSelect} />
+              <TemplateSelector templates={templates} onSelect={handleTemplateSelect} />
             </div>
           </div>
         </FormSectionCard>

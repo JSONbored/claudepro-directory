@@ -15,7 +15,7 @@ type ContentRow = Database['public']['Tables']['content']['Row'];
 type GuideSections = ContentRow['metadata'];
 
 interface JSONSectionRendererProps {
-  sections: GuideSections;
+  sections: GuideSections | Section[] | Array<Record<string, unknown> & { html?: string }>;
 }
 
 interface CodeTab {

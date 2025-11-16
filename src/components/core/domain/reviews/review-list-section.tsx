@@ -12,11 +12,13 @@ import {
   getReviewsWithStats,
   markReviewHelpful,
 } from '@/src/lib/actions/content.actions';
-import { isValidCategory } from '@/src/lib/config/category-config';
+import { isValidCategory } from '@/src/lib/data/config/category';
 import { Edit, Star, ThumbsUp, Trash } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { formatDistanceToNow } from '@/src/lib/utils/data.utils';
+import { logClientWarning, logUnhandledPromise } from '@/src/lib/utils/error.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
+import type { ReviewsAggregateRating } from '@/src/types/database-overrides';
 import { ReviewRatingHistogram } from './review-rating-histogram';
 import type { ReviewItem, ReviewSectionProps } from './shared/review-types';
 import { StarDisplay } from './shared/star-display';
@@ -38,11 +40,7 @@ export function ReviewListSection({
   );
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
-  const [aggregateRating, setAggregateRating] = useState<{
-    count: number;
-    average: number;
-    distribution: Record<string, number>;
-  } | null>(null);
+  const [aggregateRating, setAggregateRating] = useState<ReviewsAggregateRating | null>(null);
   const [editingReviewId, setEditingReviewId] = useState<string | null>(null);
   const router = useRouter();
 
@@ -62,26 +60,21 @@ export function ReviewListSection({
         });
 
         if (result?.data) {
-          const responseData = result.data as unknown as {
-            reviews: ReviewItem[];
-            hasMore: boolean;
-            aggregateRating: {
-              count: number;
-              average: number;
-              distribution: Record<string, number>;
-            };
-          };
-          setReviews((prev) =>
-            pageNum === 1 ? responseData.reviews : [...prev, ...responseData.reviews]
-          );
-          setHasMore(responseData.hasMore);
+          const { reviews: nextReviews, hasMore, aggregateRating: agg } = result.data;
+          setReviews((prev) => (pageNum === 1 ? nextReviews : [...prev, ...nextReviews]));
+          setHasMore(Boolean(hasMore));
 
-          // Also update aggregate rating (no separate call needed!)
-          if (responseData.aggregateRating) {
-            setAggregateRating(responseData.aggregateRating);
+          if (agg) {
+            setAggregateRating(agg);
           }
         }
-      } catch (_error) {
+      } catch (error) {
+        logClientWarning('ReviewListSection: failed to load reviews', error, {
+          contentType,
+          contentSlug,
+          sortBy: sort,
+          page: pageNum,
+        });
         toasts.error.reviewActionFailed('load');
       } finally {
         setIsLoading(false);
@@ -92,17 +85,24 @@ export function ReviewListSection({
 
   // Initial load - useEffect for async operations (fire-and-forget pattern)
   useEffect(() => {
-    loadReviewsWithStats(1, sortBy).catch(() => {
-      // Silent fail - reviews remain in initial state
+    loadReviewsWithStats(1, sortBy).catch((error) => {
+      logUnhandledPromise('ReviewListSection initial load', error, {
+        contentType,
+        contentSlug,
+      });
     });
-  }, [loadReviewsWithStats, sortBy]);
+  }, [contentSlug, contentType, loadReviewsWithStats, sortBy]);
 
   // Handle sort change
   const handleSortChange = (newSort: typeof sortBy) => {
     setSortBy(newSort);
     setPage(1);
-    loadReviewsWithStats(1, newSort).catch(() => {
-      // Silent fail - reviews remain in current state
+    loadReviewsWithStats(1, newSort).catch((error) => {
+      logUnhandledPromise('ReviewListSection sort change', error, {
+        contentType,
+        contentSlug,
+        newSort,
+      });
     });
   };
 
@@ -110,8 +110,13 @@ export function ReviewListSection({
   const handleLoadMore = () => {
     const nextPage = page + 1;
     setPage(nextPage);
-    loadReviewsWithStats(nextPage, sortBy).catch(() => {
-      // Silent fail - pagination remains in current state
+    loadReviewsWithStats(nextPage, sortBy).catch((error) => {
+      logUnhandledPromise('ReviewListSection load more', error, {
+        contentType,
+        contentSlug,
+        nextPage,
+        sortBy,
+      });
     });
   };
 
@@ -123,12 +128,20 @@ export function ReviewListSection({
         toasts.success.itemDeleted('Review');
         setReviews((prev) => prev.filter((r) => r.id !== reviewId));
         // Refresh stats after deletion
-        loadReviewsWithStats(1, sortBy).catch(() => {
-          // Silent fail - review already removed from UI
+        loadReviewsWithStats(1, sortBy).catch((error) => {
+          logUnhandledPromise('ReviewListSection refresh after delete', error, {
+            contentType,
+            contentSlug,
+          });
         });
         router.refresh();
       }
-    } catch (_error) {
+    } catch (error) {
+      logClientWarning('ReviewListSection: delete failed', error, {
+        reviewId,
+        contentType,
+        contentSlug,
+      });
       toasts.error.reviewActionFailed('delete');
     }
   };
@@ -301,7 +314,10 @@ function ReviewCardItem({
                   try {
                     await markReviewHelpful({ review_id: review.id, helpful: true });
                     toasts.success.actionCompleted('mark as helpful');
-                  } catch (_error) {
+                  } catch (error) {
+                    logClientWarning('ReviewListSection: markReviewHelpful failed', error, {
+                      reviewId: review.id,
+                    });
                     toasts.error.reviewActionFailed('vote');
                   }
                 }}

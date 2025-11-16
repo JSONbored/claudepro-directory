@@ -3,8 +3,11 @@
 import { useEffect, useRef, useState } from 'react';
 import { Switch } from '@/src/components/primitives/ui/switch';
 import { useViewTransition } from '@/src/hooks/use-view-transition';
+import { getTimeoutConfig } from '@/src/lib/actions/feature-flags.actions';
 import { Moon, Sun } from '@/src/lib/icons';
+import { logger } from '@/src/lib/logger';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { logClientWarning } from '@/src/lib/utils/error.utils';
 
 /**
  * Type guard for theme validation
@@ -36,11 +39,15 @@ export function ThemeToggle() {
 
   // Load transition duration from config
   useEffect(() => {
-    import('@/src/lib/flags').then(({ timeoutConfigs }) =>
-      timeoutConfigs().then((config) => {
-        setTransitionMs((config['timeout.ui.transition_ms'] as number) ?? 200);
+    getTimeoutConfig({})
+      .then((result) => {
+        if (!result?.data) return;
+        const config = result.data;
+        setTransitionMs(config['timeout.ui.transition_ms']);
       })
-    );
+      .catch((error) => {
+        logClientWarning('ThemeToggle: failed to load transition config', error);
+      });
   }, []);
 
   useEffect(() => {
@@ -143,13 +150,12 @@ export function ThemeToggle() {
         transition.finished
           .then(() => {
             const endTime = performance.now();
-            // biome-ignore lint/suspicious/noConsole: Development-only performance monitoring
-            console.log(
-              `[Theme Toggle] Animation completed in ${(endTime - startTime).toFixed(2)}ms`
-            );
+            logger.info('[Theme Toggle] Animation completed', {
+              durationMs: Number((endTime - startTime).toFixed(2)),
+            });
           })
-          .catch(() => {
-            // Silently ignore animation errors
+          .catch((error) => {
+            logClientWarning('ThemeToggle: view transition animation failed', error);
           });
       }
     } else {

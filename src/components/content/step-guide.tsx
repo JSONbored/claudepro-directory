@@ -1,25 +1,27 @@
 /**
  * StepByStepGuide - Server-rendered tutorial steps with syntax highlighting
- * Uses React cache() memoization for highlightCode() (0ms overhead for duplicates)
+ * Uses edge function for syntax highlighting (cached, fast)
  */
 
 import { ProductionCodeBlock } from '@/src/components/content/interactive-code-block';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { UnifiedContentBox } from '@/src/components/core/domain/content/featured-content-box';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
-import { highlightCode } from '@/src/lib/content/syntax-highlighting';
+import { highlightCodeEdge } from '@/src/lib/edge/client';
 import { Zap } from '@/src/lib/icons';
 import type { StepByStepGuideProps } from '@/src/lib/types/component.types';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
-export function StepByStepGuide(props: StepByStepGuideProps) {
+export async function StepByStepGuide(props: StepByStepGuideProps) {
   const { steps, title, description, totalTime } = props;
 
-  const highlightedSteps = steps.map((step) => {
-    if (!step.code) return { ...step, highlightedHtml: null };
-    const html = highlightCode(step.code, 'bash');
-    return { ...step, highlightedHtml: html };
-  });
+  const highlightedSteps = await Promise.all(
+    steps.map(async (step) => {
+      if (!step.code) return { ...step, highlightedHtml: null };
+      const html = await highlightCodeEdge(step.code, { language: 'bash' });
+      return { ...step, highlightedHtml: html };
+    })
+  );
 
   return (
     <section itemScope itemType="https://schema.org/HowTo" className="my-8">

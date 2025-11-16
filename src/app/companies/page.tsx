@@ -6,7 +6,7 @@ import { Button } from '@/src/components/primitives/ui/button';
 
 const NewsletterCTAVariant = dynamic(
   () =>
-    import('@/src/components/features/growth/newsletter').then((mod) => ({
+    import('@/src/components/features/growth/newsletter/newsletter-cta-variants').then((mod) => ({
       default: mod.NewsletterCTAVariant,
     })),
   {
@@ -21,47 +21,40 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/ui/card';
-import { ROUTES } from '@/src/lib/constants';
+import { getCompaniesList } from '@/src/lib/data/companies/public';
+import { ROUTES } from '@/src/lib/data/config/constants';
 import { Briefcase, Building, ExternalLink, Plus, Star, TrendingUp } from '@/src/lib/icons';
+import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-import { createClient as createAdminClient } from '@/src/lib/supabase/admin-client';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
-import type { Database } from '@/src/types/database.types';
-
-// Database-first types (from generated database schema)
-type CompanyJobStats = Database['public']['Views']['company_job_stats']['Row'];
+import { normalizeError } from '@/src/lib/utils/error.utils';
 
 export async function generateMetadata() {
   return await generatePageMetadata('/companies');
 }
 
-// Page is fully static - updates only on deployment (not when materialized view refreshes)
-// To see hourly DB updates: implement revalidatePath('/companies') via webhook or cron
+// Edge-cached via data layer (30min TTL from Statsig)
 export const revalidate = false;
 
 export default async function CompaniesPage() {
-  const supabase = await createAdminClient();
-
-  // Fetch companies - Optimized: Select only needed columns (9/14 = 36% reduction)
-  const { data: companies } = await supabase
-    .from('companies')
-    .select('id, slug, name, logo, website, description, size, industry, featured, created_at')
-    .order('featured', { ascending: false })
-    .order('created_at', { ascending: false });
-
-  // Fetch job stats using materialized view (performance optimized)
-  const companyIds = companies?.map((c) => c.id) || [];
-
-  let stats: CompanyJobStats[] = [];
-  if (companyIds.length > 0) {
-    const { data } = await supabase
-      .from('company_job_stats')
-      .select('*')
-      .in('company_id', companyIds);
-    stats = data || [];
+  // Single RPC call via edge-cached data layer
+  let companiesResponse: Awaited<ReturnType<typeof getCompaniesList>> | null = null;
+  try {
+    companiesResponse = await getCompaniesList(50, 0);
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to load companies list');
+    logger.error('CompaniesPage: getCompaniesList failed', normalized, {
+      limit: 50,
+      offset: 0,
+    });
+    throw normalized;
   }
 
-  const statsMap = new Map(stats.map((stat) => [stat.company_id, stat]));
+  if (!companiesResponse?.companies) {
+    logger.warn('CompaniesPage: companies response is empty', { limit: 50, offset: 0 });
+  }
+
+  const companies = companiesResponse?.companies ?? [];
 
   return (
     <div className={'min-h-screen bg-background'}>
@@ -165,34 +158,29 @@ export default async function CompaniesPage() {
                     </p>
                   )}
 
-                  {/* Job Statistics from Materialized View */}
-                  {(() => {
-                    const stats = statsMap.get(company.id);
-                    if (stats && (stats.active_jobs ?? 0) > 0) {
-                      return (
-                        <div className={'mb-4 flex flex-wrap gap-2'}>
-                          <UnifiedBadge variant="base" style="secondary" className="text-xs">
-                            <Briefcase className="mr-1 h-3 w-3" />
-                            {stats.active_jobs} Active {stats.active_jobs === 1 ? 'Job' : 'Jobs'}
-                          </UnifiedBadge>
+                  {/* Job Statistics from RPC (company_job_stats materialized view) */}
+                  {company.stats && company.stats.active_jobs > 0 && (
+                    <div className={'mb-4 flex flex-wrap gap-2'}>
+                      <UnifiedBadge variant="base" style="secondary" className="text-xs">
+                        <Briefcase className="mr-1 h-3 w-3" />
+                        {company.stats.active_jobs} Active{' '}
+                        {company.stats.active_jobs === 1 ? 'Job' : 'Jobs'}
+                      </UnifiedBadge>
 
-                          {stats.total_views !== null && stats.total_views > 0 && (
-                            <UnifiedBadge variant="base" style="outline" className="text-xs">
-                              <TrendingUp className="mr-1 h-3 w-3" />
-                              {stats.total_views.toLocaleString()} views
-                            </UnifiedBadge>
-                          )}
+                      {company.stats.total_views > 0 && (
+                        <UnifiedBadge variant="base" style="outline" className="text-xs">
+                          <TrendingUp className="mr-1 h-3 w-3" />
+                          {company.stats.total_views.toLocaleString()} views
+                        </UnifiedBadge>
+                      )}
 
-                          {stats.remote_jobs !== null && stats.remote_jobs > 0 && (
-                            <UnifiedBadge variant="base" style="outline" className="text-xs">
-                              {stats.remote_jobs} Remote
-                            </UnifiedBadge>
-                          )}
-                        </div>
-                      );
-                    }
-                    return null;
-                  })()}
+                      {company.stats.remote_jobs > 0 && (
+                        <UnifiedBadge variant="base" style="outline" className="text-xs">
+                          {company.stats.remote_jobs} Remote
+                        </UnifiedBadge>
+                      )}
+                    </div>
+                  )}
 
                   <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
                     {company.size && (

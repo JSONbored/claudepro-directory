@@ -7,8 +7,8 @@ import { Input } from '@/src/components/primitives/ui/input';
 import { useConfetti } from '@/src/hooks/use-confetti';
 import type { NewsletterSource } from '@/src/hooks/use-newsletter';
 import { useNewsletter } from '@/src/hooks/use-newsletter';
-import { NEWSLETTER_CTA_CONFIG } from '@/src/lib/config/category-config';
-import { featureFlags } from '@/src/lib/flags';
+import { checkConfettiEnabled } from '@/src/lib/actions/feature-flags.actions';
+import { NEWSLETTER_CTA_CONFIG } from '@/src/lib/data/config/category';
 import { Mail } from '@/src/lib/icons';
 import { DIMENSIONS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
@@ -24,8 +24,8 @@ export function NewsletterForm({ source, className }: NewsletterFormProps) {
     source,
     onSuccess: async () => {
       // Confetti gated by feature flag
-      const confettiEnabled = await featureFlags.confettiAnimations();
-      if (confettiEnabled) {
+      const confettiResult = await checkConfettiEnabled({});
+      if (confettiResult?.data) {
         fireConfetti('subtle');
       }
     },

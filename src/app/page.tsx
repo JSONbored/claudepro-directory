@@ -25,15 +25,17 @@ const NumberTicker = dynamicImport(
 
 const NewsletterCTAVariant = dynamicImport(
   () =>
-    import('@/src/components/features/growth/newsletter').then((mod) => mod.NewsletterCTAVariant),
+    import('@/src/components/features/growth/newsletter/newsletter-cta-variants').then((mod) => ({
+      default: mod.NewsletterCTAVariant,
+    })),
   {
     loading: () => <div className="h-32 animate-pulse rounded-lg bg-muted/20" />,
   }
 );
 
-import { getHomepageFeaturedCategories } from '@/src/lib/config/category-config';
+import { getHomepageFeaturedCategories } from '@/src/lib/data/config/category';
+import { getHomepageData } from '@/src/lib/data/content/homepage';
 import { logger } from '@/src/lib/logger';
-import { createAnonClient } from '@/src/lib/supabase/server-anon';
 import type { GetHomepageCompleteReturn } from '@/src/types/database-overrides';
 
 export const metadata = generatePageMetadata('/');
@@ -69,13 +71,18 @@ async function HomeContentSection({
       'Homepage content section error',
       error instanceof Error ? error : new Error(String(error))
     );
-    const emptyData: GetHomepageCompleteReturn['content']['categoryData'] = {};
+    const emptyData: GetHomepageCompleteReturn['content']['categoryData'] =
+      {} as GetHomepageCompleteReturn['content']['categoryData'];
 
     return (
       <HomePageClient
         initialData={emptyData}
-        featuredByCategory={{}}
-        stats={Object.fromEntries(categoryIds.map((id: string) => [id, 0]))}
+        featuredByCategory={{} as GetHomepageCompleteReturn['content']['categoryData']}
+        stats={
+          Object.fromEntries(
+            categoryIds.map((id: string) => [id, 0])
+          ) as GetHomepageCompleteReturn['content']['stats']
+        }
         featuredJobs={[]}
       />
     );
@@ -87,26 +94,13 @@ export default async function HomePage({ searchParams }: HomePageProps) {
 
   const categoryIds = await getHomepageFeaturedCategories();
 
-  const supabase = createAnonClient();
-  const { data: homepageData, error: homepageError } = await supabase.rpc('get_homepage_complete', {
-    p_category_ids: [...categoryIds],
-  });
-
-  if (homepageError) {
-    logger.error('Homepage RPC error', homepageError, {
-      rpcFunction: 'get_homepage_complete',
-      phase: 'homepage-render',
-    });
-  }
-
   // Extract member_count and top_contributors from consolidated response
   // Type-safe RPC return using centralized type definition
-  const homepageResult = homepageData as GetHomepageCompleteReturn | null;
+  const homepageResult = await getHomepageData(categoryIds);
 
-  const memberCount = homepageError || !homepageResult ? 0 : homepageResult.member_count || 0;
-  const featuredJobs = homepageError || !homepageResult ? [] : homepageResult.featured_jobs || [];
-  const topContributors =
-    homepageError || !homepageResult ? [] : homepageResult.top_contributors || [];
+  const memberCount = homepageResult?.member_count ?? 0;
+  const featuredJobs = homepageResult?.featured_jobs ?? [];
+  const topContributors = homepageResult?.top_contributors ?? [];
 
   return (
     <div className={'min-h-screen bg-background'}>
@@ -142,11 +136,12 @@ export default async function HomePage({ searchParams }: HomePageProps) {
           <Suspense fallback={<HomePageLoading />}>
             <HomeContentSection
               homepageContentData={
-                homepageResult?.content || {
-                  categoryData: {},
-                  stats: {},
+                homepageResult?.content ??
+                ({
+                  categoryData: {} as GetHomepageCompleteReturn['content']['categoryData'],
+                  stats: {} as GetHomepageCompleteReturn['content']['stats'],
                   weekStart: '',
-                }
+                } as GetHomepageCompleteReturn['content'])
               }
               featuredJobs={featuredJobs}
               categoryIds={categoryIds}
@@ -156,7 +151,30 @@ export default async function HomePage({ searchParams }: HomePageProps) {
       </div>
 
       {Array.isArray(topContributors) && topContributors.length > 0 && (
-        <TopContributors contributors={topContributors as never[]} />
+        <TopContributors
+          contributors={topContributors.map((contributor) => ({
+            ...contributor,
+            // Add required fields with defaults for UserProfile type
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            email: null,
+            display_name: null,
+            website: null,
+            social_x_link: null,
+            interests: null,
+            profile_public: false,
+            follow_email: false,
+            bookmark_count: 0,
+            follower_count: 0,
+            following_count: 0,
+            submission_count: 0,
+            hero: null,
+            public: false,
+            status: null,
+            json_ld: null,
+            // Optional UserProfile extension fields are omitted (not set to undefined)
+          }))}
+        />
       )}
 
       <section className={'container mx-auto px-4 py-12'}>

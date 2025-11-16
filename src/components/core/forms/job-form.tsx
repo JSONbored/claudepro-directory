@@ -27,10 +27,13 @@ import {
   SelectValue,
 } from '@/src/components/primitives/ui/select';
 import type { CreateJobInput } from '@/src/lib/actions/jobs.actions';
-import { ROUTES } from '@/src/lib/constants';
+import { ROUTES } from '@/src/lib/data/config/constants';
 import { Star } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { ensureStringArray } from '@/src/lib/utils/data.utils';
+import { logClientWarning } from '@/src/lib/utils/error.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
+import type { JobCategory } from '@/src/types/database-overrides';
 
 interface JobFormProps {
   initialData?: Partial<CreateJobInput>;
@@ -46,15 +49,11 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
   const [companyId, setCompanyId] = useState<string | null>(initialData?.company_id || null);
   const [companyName, setCompanyName] = useState<string>(initialData?.company || '');
   const [isFeatured, setIsFeatured] = useState<boolean>(initialData?.tier === 'featured');
-  const [tags, setTags] = useState<string[]>(
-    Array.isArray(initialData?.tags) ? (initialData.tags as string[]) : []
-  );
+  const [tags, setTags] = useState<string[]>(ensureStringArray(initialData?.tags));
   const [requirements, setRequirements] = useState<string[]>(
-    Array.isArray(initialData?.requirements) ? (initialData.requirements as string[]) : []
+    ensureStringArray(initialData?.requirements)
   );
-  const [benefits, setBenefits] = useState<string[]>(
-    Array.isArray(initialData?.benefits) ? (initialData.benefits as string[]) : []
-  );
+  const [benefits, setBenefits] = useState<string[]>(ensureStringArray(initialData?.benefits));
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -79,7 +78,7 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
       type: formData.get('type') as string,
       ...(workplace && { workplace }),
       ...(experience && { experience }),
-      category: formData.get('category') as string,
+      category: formData.get('category') as JobCategory,
       tags,
       requirements,
       benefits,
@@ -102,6 +101,11 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
           );
         }
       } catch (error) {
+        logClientWarning('JobForm: submit failed', error, {
+          title: jobData.title,
+          company: jobData.company,
+          plan: jobData.plan,
+        });
         toasts.error.fromError(error, 'Failed to save job');
       }
     });

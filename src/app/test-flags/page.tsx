@@ -1,11 +1,19 @@
 import { featureFlags } from '@/src/lib/flags';
+import { logger } from '@/src/lib/logger';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 
 /**
  * Feature Flag Test Page
  * Visit /test-flags to verify Statsig integration
  */
 export default async function TestFlagsPage() {
-  const testEnabled = await featureFlags.testFlag();
+  let testEnabled = false;
+  try {
+    testEnabled = await featureFlags.testFlag();
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to evaluate test flag');
+    logger.error('TestFlagsPage: featureFlags.testFlag failed', normalized);
+  }
 
   return (
     <div className="container mx-auto px-4 py-12">

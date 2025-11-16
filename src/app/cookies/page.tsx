@@ -1,5 +1,7 @@
 import { NavLink } from '@/src/components/core/navigation/navigation-link';
+import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 
 export const metadata = generatePageMetadata('/cookies');
 
@@ -9,19 +11,28 @@ export const metadata = generatePageMetadata('/cookies');
  */
 export const revalidate = false;
 
+function getLastUpdatedDate(): string {
+  try {
+    return new Date().toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to format cookies last updated date');
+    logger.error('CookiesPage: last updated date formatting failed', normalized);
+    return 'Unavailable';
+  }
+}
+
 export default function CookiesPage() {
+  const lastUpdated = getLastUpdatedDate();
+
   return (
     <div className="container mx-auto max-w-4xl px-4 py-8 sm:py-12">
       <div className="prose prose-invert max-w-none">
         <h1 className="mb-6 font-bold text-3xl sm:text-4xl">Cookie Policy</h1>
-        <p className="mb-8 text-muted-foreground">
-          Last updated:{' '}
-          {new Date().toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-          })}
-        </p>
+        <p className="mb-8 text-muted-foreground">Last updated: {lastUpdated}</p>
 
         <section className="mb-8">
           <h2 className="mb-4 font-semibold text-2xl">1. What Are Cookies</h2>

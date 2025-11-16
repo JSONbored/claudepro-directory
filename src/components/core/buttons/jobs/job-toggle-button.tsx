@@ -11,12 +11,14 @@ import { Button } from '@/src/components/primitives/ui/button';
 import { toggleJobStatus } from '@/src/lib/actions/jobs.actions';
 import { Pause, Play } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { logClientWarning } from '@/src/lib/utils/error.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
+import type { JobStatus } from '@/src/types/database-overrides';
 import type { ButtonStyleProps } from '../shared/button-types';
 
 export interface JobToggleButtonProps extends ButtonStyleProps {
   jobId: string;
-  currentStatus: 'active' | 'paused';
+  currentStatus: JobStatus;
 }
 
 export function JobToggleButton({
@@ -31,7 +33,8 @@ export function JobToggleButton({
   const [isPending, startTransition] = useTransition();
 
   const handleToggle = () => {
-    const newStatus = currentStatus === 'active' ? 'draft' : 'active';
+    // Toggle between 'active' and 'draft' status
+    const newStatus: JobStatus = currentStatus === 'active' ? 'draft' : 'active';
 
     startTransition(async () => {
       try {
@@ -49,6 +52,10 @@ export function JobToggleButton({
           toasts.error.actionFailed('update job status');
         }
       } catch (error) {
+        logClientWarning('JobToggleButton: toggle failed', error, {
+          jobId,
+          newStatus,
+        });
         toasts.error.fromError(error, 'Failed to toggle job status');
       }
     });

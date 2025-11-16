@@ -1,6 +1,6 @@
 /**
  * Unified Detail Page - Server-rendered content with streaming SSR
- * highlightCode() uses React cache() memoization (0ms for duplicates)
+ * Uses edge function for syntax highlighting (cached, fast)
  */
 
 import { Suspense } from 'react';
@@ -8,16 +8,17 @@ import { TabbedDetailLayout } from '@/src/components/content/detail-tabs/tabbed-
 import { JSONSectionRenderer } from '@/src/components/content/json-to-sections';
 import UnifiedSection from '@/src/components/content/sections/unified-section';
 import { ReviewListSection } from '@/src/components/core/domain/reviews/review-list-section';
-import { NewsletterCTAVariant } from '@/src/components/features/growth/newsletter';
+import { NewsletterCTAVariant } from '@/src/components/features/growth/newsletter/newsletter-cta-variants';
 import { RecentlyViewedSidebar } from '@/src/components/features/navigation/recently-viewed-sidebar';
+import { detectLanguage } from '@/src/lib/content/language-detection';
 import {
   type CategoryId,
   getCategoryConfig,
   isValidCategory,
-} from '@/src/lib/config/category-config';
-import { detectLanguage } from '@/src/lib/content/language-detection';
-import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
-import { highlightCode } from '@/src/lib/content/syntax-highlighting';
+} from '@/src/lib/data/config/category';
+import type { ContentItem } from '@/src/lib/data/content';
+import { highlightCodeEdge } from '@/src/lib/edge/client';
+import { logger } from '@/src/lib/logger';
 import type { InstallationSteps } from '@/src/lib/types/content-type-config';
 import type { ProcessedSectionData } from '@/src/lib/types/detail-tabs.types';
 import { getDisplayTitle } from '@/src/lib/utils';
@@ -27,15 +28,21 @@ import {
   generateMultiFormatFilename,
   transformMcpConfigForDisplay,
 } from '@/src/lib/utils/content.utils';
+import { ensureStringArray, getMetadata } from '@/src/lib/utils/data.utils';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 import { getViewTransitionName } from '@/src/lib/utils/view-transitions.utils';
-import type { Database } from '@/src/types/database.types';
+import type { GetContentDetailCompleteReturn, Tables } from '@/src/types/database-overrides';
 import { DetailHeader } from './detail-header';
 import { DetailMetadata } from './detail-metadata';
 import { DetailSidebar } from './sidebar/navigation-sidebar';
 
+/**
+ * UnifiedDetailPage is only used for content detail pages, never for jobs.
+ * So we narrow the type to exclude Tables<'jobs'> to ensure proper type safety.
+ */
 export interface UnifiedDetailPageProps {
-  item: ContentItem;
-  relatedItems?: ContentItem[];
+  item: Tables<'content'> | GetContentDetailCompleteReturn['content'];
+  relatedItems?: ContentItem[] | GetContentDetailCompleteReturn['related'];
   viewCount?: number;
   copyCount?: number;
   relatedItemsPromise?: Promise<ContentItem[]>;
@@ -44,11 +51,48 @@ export interface UnifiedDetailPageProps {
   tabsEnabled?: boolean;
 }
 
+function logDetailProcessingWarning(
+  section: string,
+  error: unknown,
+  item: Tables<'content'> | GetContentDetailCompleteReturn['content']
+): void {
+  const normalized = normalizeError(error, `${section} processing failed`);
+  logger.warn(`UnifiedDetailPage: ${section} processing failed`, {
+    category: item.category,
+    slug: item.slug ?? 'unknown',
+    error: normalized.message,
+  });
+}
+
+/**
+ * Safely extracts configuration from item or metadata as a string
+ */
+function getConfigurationAsString(
+  item: Tables<'content'> | GetContentDetailCompleteReturn['content'],
+  metadata: Record<string, unknown>
+): string | null {
+  // Check top-level item first
+  if ('configuration' in item) {
+    const cfg = item.configuration;
+    if (typeof cfg === 'string') return cfg;
+    if (cfg != null) return JSON.stringify(cfg, null, 2);
+  }
+
+  // Fall back to metadata
+  if (metadata.configuration) {
+    const cfg = metadata.configuration;
+    if (typeof cfg === 'string') return cfg;
+    if (typeof cfg === 'object') return JSON.stringify(cfg, null, 2);
+  }
+
+  return null;
+}
+
 async function ViewCountMetadata({
   item,
   viewCountPromise,
 }: {
-  item: ContentItem;
+  item: Tables<'content'> | GetContentDetailCompleteReturn['content'];
   viewCountPromise: Promise<number>;
 }) {
   const viewCount = await viewCountPromise;
@@ -60,7 +104,7 @@ async function SidebarWithRelated({
   relatedItemsPromise,
   config,
 }: {
-  item: ContentItem;
+  item: Tables<'content'> | GetContentDetailCompleteReturn['content'];
   relatedItemsPromise: Promise<ContentItem[]>;
   config: {
     typeName: string;
@@ -89,8 +133,7 @@ export async function UnifiedDetailPage({
 }: UnifiedDetailPageProps) {
   const config = await getCategoryConfig(item.category as CategoryId);
   const displayTitle = getDisplayTitle(item);
-  const metadata =
-    'metadata' in item && item.metadata ? (item.metadata as Record<string, unknown>) : {};
+  const metadata = getMetadata(item);
 
   const installation = (() => {
     const inst = ('installation' in item && item.installation) || metadata.installation;
@@ -101,12 +144,12 @@ export async function UnifiedDetailPage({
 
   const useCases = (() => {
     const cases = ('use_cases' in item && item.use_cases) || metadata.use_cases;
-    return Array.isArray(cases) && cases.length > 0 ? cases : [];
+    return ensureStringArray(cases);
   })();
 
   const features = (() => {
     const feats = ('features' in item && item.features) || metadata.features;
-    return Array.isArray(feats) && feats.length > 0 ? feats : [];
+    return ensureStringArray(feats);
   })();
 
   const troubleshooting = (() => {
@@ -116,8 +159,10 @@ export async function UnifiedDetailPage({
 
   const requirements = (() => {
     const reqs = ('requirements' in item && item.requirements) || metadata.requirements;
-    return Array.isArray(reqs) && reqs.length > 0 ? reqs : [];
+    return ensureStringArray(reqs);
   })();
+
+  const securityItems = 'security' in item && item.security ? ensureStringArray(item.security) : [];
 
   // Pre-process content highlighting
   const contentData = await (async () => {
@@ -130,15 +175,9 @@ export async function UnifiedDetailPage({
     let content = '';
     if ('content' in item && typeof (item as { content?: string }).content === 'string') {
       content = (item as { content: string }).content;
-    } else if (
-      ('configuration' in item && (item as unknown as { configuration?: unknown }).configuration) ||
-      metadata.configuration
-    ) {
-      const cfg =
-        ('configuration' in item &&
-          (item as unknown as { configuration?: unknown }).configuration) ||
-        metadata.configuration;
-      content = typeof cfg === 'string' ? cfg : JSON.stringify(cfg, null, 2);
+    } else {
+      const cfg = getConfigurationAsString(item, metadata);
+      if (cfg) content = cfg;
     }
 
     if (!content) return null;
@@ -148,10 +187,11 @@ export async function UnifiedDetailPage({
         'language' in item ? (item as { language?: string }).language : undefined;
       const language = await detectLanguage(content, languageHint);
       const filename = generateFilename({ item, language });
-      const html = highlightCode(content, language);
+      const html = await highlightCodeEdge(content, { language });
 
       return { html, code: content, language, filename };
-    } catch (_error) {
+    } catch (error) {
+      logDetailProcessingWarning('contentData', error, item);
       return null;
     }
   })();
@@ -174,20 +214,22 @@ export async function UnifiedDetailPage({
       };
 
       try {
-        const highlightedConfigs = Object.entries(config).map(([key, value]) => {
-          if (!value) return null;
+        const highlightedConfigs = await Promise.all(
+          Object.entries(config).map(async ([key, value]) => {
+            if (!value) return null;
 
-          const displayValue =
-            key === 'claudeDesktop' || key === 'claudeCode'
-              ? transformMcpConfigForDisplay(value as Record<string, unknown>)
-              : value;
+            const displayValue =
+              key === 'claudeDesktop' || key === 'claudeCode'
+                ? transformMcpConfigForDisplay(value as Record<string, unknown>)
+                : value;
 
-          const code = JSON.stringify(displayValue, null, 2);
-          const html = highlightCode(code, 'json');
-          const filename = generateMultiFormatFilename(item, key, 'json');
+            const code = JSON.stringify(displayValue, null, 2);
+            const html = await highlightCodeEdge(code, { language: 'json' });
+            const filename = generateMultiFormatFilename(item, key, 'json');
 
-          return { key, html, code, filename };
-        });
+            return { key, html, code, filename };
+          })
+        );
 
         return {
           format: 'multi' as const,
@@ -195,7 +237,8 @@ export async function UnifiedDetailPage({
             (c): c is { key: string; html: string; code: string; filename: string } => c !== null
           ),
         };
-      } catch (_error) {
+      } catch (error) {
+        logDetailProcessingWarning('configData.multi', error, item);
         return null;
       }
     }
@@ -208,12 +251,14 @@ export async function UnifiedDetailPage({
       };
 
       try {
-        const highlightedHookConfig = config.hookConfig
-          ? highlightCode(JSON.stringify(config.hookConfig, null, 2), 'json')
-          : null;
-        const highlightedScript = config.scriptContent
-          ? highlightCode(config.scriptContent, 'bash')
-          : null;
+        const [highlightedHookConfig, highlightedScript] = await Promise.all([
+          config.hookConfig
+            ? highlightCodeEdge(JSON.stringify(config.hookConfig, null, 2), { language: 'json' })
+            : Promise.resolve(null),
+          config.scriptContent
+            ? highlightCodeEdge(config.scriptContent, { language: 'bash' })
+            : Promise.resolve(null),
+        ]);
 
         return {
           format: 'hook' as const,
@@ -233,18 +278,20 @@ export async function UnifiedDetailPage({
                 }
               : null,
         };
-      } catch (_error) {
+      } catch (error) {
+        logDetailProcessingWarning('configData.hook', error, item);
         return null;
       }
     }
 
     try {
       const code = JSON.stringify(configuration, null, 2);
-      const html = highlightCode(code, 'json');
+      const html = await highlightCodeEdge(code, { language: 'json' });
       const filename = generateFilename({ item, language: 'json' });
 
       return { format: 'json' as const, html, code, filename };
-    } catch (_error) {
+    } catch (error) {
+      logDetailProcessingWarning('configData.json', error, item);
       return null;
     }
   })();
@@ -269,7 +316,7 @@ export async function UnifiedDetailPage({
 
       const highlightedExamples = await Promise.all(
         examples.map(async (example) => {
-          const html = highlightCode(example.code, example.language);
+          const html = await highlightCodeEdge(example.code, { language: example.language });
           // Generate filename from title
           const filename = `${example.title
             .toLowerCase()
@@ -300,7 +347,8 @@ export async function UnifiedDetailPage({
       );
 
       return highlightedExamples;
-    } catch (_error) {
+    } catch (error) {
+      logDetailProcessingWarning('examplesData', error, item);
       return null;
     }
   })();
@@ -317,35 +365,41 @@ export async function UnifiedDetailPage({
     };
 
     try {
-      const claudeCodeSteps = installation.claudeCode?.steps
-        ? installation.claudeCode.steps.map((step) => {
-            if (isCommandStep(step)) {
-              const html = highlightCode(step, 'bash');
-              return { type: 'command' as const, html, code: step };
-            }
-            return { type: 'text' as const, text: step };
-          })
-        : null;
-
-      const claudeDesktopSteps = installation.claudeDesktop?.steps
-        ? installation.claudeDesktop.steps.map((step) => {
-            if (isCommandStep(step)) {
-              const html = highlightCode(step, 'bash');
-              return { type: 'command' as const, html, code: step };
-            }
-            return { type: 'text' as const, text: step };
-          })
-        : null;
-
-      const sdkSteps = installation.sdk?.steps
-        ? installation.sdk.steps.map((step) => {
-            if (isCommandStep(step)) {
-              const html = highlightCode(step, 'bash');
-              return { type: 'command' as const, html, code: step };
-            }
-            return { type: 'text' as const, text: step };
-          })
-        : null;
+      const [claudeCodeSteps, claudeDesktopSteps, sdkSteps] = await Promise.all([
+        installation.claudeCode?.steps
+          ? Promise.all(
+              installation.claudeCode.steps.map(async (step) => {
+                if (isCommandStep(step)) {
+                  const html = await highlightCodeEdge(step, { language: 'bash' });
+                  return { type: 'command' as const, html, code: step };
+                }
+                return { type: 'text' as const, text: step };
+              })
+            )
+          : Promise.resolve(null),
+        installation.claudeDesktop?.steps
+          ? Promise.all(
+              installation.claudeDesktop.steps.map(async (step) => {
+                if (isCommandStep(step)) {
+                  const html = await highlightCodeEdge(step, { language: 'bash' });
+                  return { type: 'command' as const, html, code: step };
+                }
+                return { type: 'text' as const, text: step };
+              })
+            )
+          : Promise.resolve(null),
+        installation.sdk?.steps
+          ? Promise.all(
+              installation.sdk.steps.map(async (step) => {
+                if (isCommandStep(step)) {
+                  const html = await highlightCodeEdge(step, { language: 'bash' });
+                  return { type: 'command' as const, html, code: step };
+                }
+                return { type: 'text' as const, text: step };
+              })
+            )
+          : Promise.resolve(null),
+      ]);
 
       return {
         claudeCode: claudeCodeSteps
@@ -370,19 +424,22 @@ export async function UnifiedDetailPage({
         sdk: sdkSteps ? { steps: sdkSteps } : null,
         ...(installation.requirements && { requirements: installation.requirements }),
       };
-    } catch (_error) {
+    } catch (error) {
+      logDetailProcessingWarning('installationData', error, item);
       return null;
     }
   })();
 
   // GUIDES: Pre-process sections with server-side syntax highlighting
-  const guideSections = await (async () => {
+  const guideSections = await (async (): Promise<Array<
+    Record<string, unknown> & { html?: string }
+  > | null> => {
     if (item.category !== 'guides') return null;
 
-    const metadata = 'metadata' in item ? (item.metadata as Record<string, unknown>) : null;
-    if (!(metadata?.sections && Array.isArray(metadata.sections))) return null;
+    const itemMetadata = getMetadata(item);
+    if (!(itemMetadata?.sections && Array.isArray(itemMetadata.sections))) return null;
 
-    const sections = metadata.sections as Array<{
+    const sections = itemMetadata.sections as Array<{
       type: string;
       code?: string;
       language?: string;
@@ -394,14 +451,18 @@ export async function UnifiedDetailPage({
     return await Promise.all(
       sections.map(async (section) => {
         if (section.type === 'code' && section.code) {
-          const html = highlightCode(section.code, section.language || 'text');
+          const html = await highlightCodeEdge(section.code, {
+            language: section.language || 'text',
+          });
           return { ...section, html };
         }
 
         if (section.type === 'code_group' && section.tabs) {
           const tabs = await Promise.all(
             section.tabs.map(async (tab) => {
-              const html = highlightCode(tab.code, tab.language || 'text');
+              const html = await highlightCodeEdge(tab.code, {
+                language: tab.language || 'text',
+              });
               return { ...tab, html };
             })
           );
@@ -412,7 +473,9 @@ export async function UnifiedDetailPage({
           const steps = await Promise.all(
             section.steps.map(async (step) => {
               if (step.code) {
-                const html = highlightCode(step.code, step.language || 'bash');
+                const html = await highlightCodeEdge(step.code, {
+                  language: step.language || 'bash',
+                });
                 return { ...step, html };
               }
               return step;
@@ -518,11 +581,7 @@ export async function UnifiedDetailPage({
 
             {/* GUIDES: Render structured sections from metadata using JSONSectionRenderer */}
             {guideSections && guideSections.length > 0 && (
-              <JSONSectionRenderer
-                sections={
-                  guideSections as unknown as Database['public']['Tables']['content']['Row']['metadata']
-                }
-              />
+              <JSONSectionRenderer sections={guideSections} />
             )}
 
             {/* Content/Code section (non-guides) */}
@@ -544,7 +603,7 @@ export async function UnifiedDetailPage({
                 variant="list"
                 title="Features"
                 description="Key capabilities and functionality"
-                items={features as string[]}
+                items={features}
                 category={item.category as CategoryId}
                 dotColor="bg-primary"
               />
@@ -556,7 +615,7 @@ export async function UnifiedDetailPage({
                 variant="list"
                 title="Requirements"
                 description="Prerequisites and dependencies"
-                items={requirements as string[]}
+                items={requirements}
                 category={item.category as CategoryId}
                 dotColor="bg-orange-500"
               />
@@ -598,19 +657,19 @@ export async function UnifiedDetailPage({
                 variant="list"
                 title="Use Cases"
                 description="Common scenarios and applications"
-                items={useCases as string[]}
+                items={useCases}
                 category={item.category as CategoryId}
                 dotColor="bg-accent"
               />
             )}
 
             {/* Security Section (MCP-specific) */}
-            {config?.sections.security && 'security' in item && (
+            {config?.sections.security && securityItems.length > 0 && (
               <UnifiedSection
                 variant="list"
                 title="Security Best Practices"
                 description="Important security considerations"
-                items={item.security as string[]}
+                items={securityItems}
                 category={item.category as CategoryId}
                 dotColor="bg-orange-500"
               />

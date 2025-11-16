@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useEffect } from 'react';
 import { Button } from '@/src/components/primitives/ui/button';
 import { Card } from '@/src/components/primitives/ui/card';
-import { ROUTES } from '@/src/lib/constants';
+import { ROUTES } from '@/src/lib/data/config/constants';
 import { AlertCircle, Home, RefreshCw, Search } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { UI_CLASSES } from '@/src/lib/ui-constants';

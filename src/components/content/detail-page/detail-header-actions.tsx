@@ -20,24 +20,45 @@ import { usePostCopyEmail } from '@/src/components/core/infra/providers/email-ca
 import { Button } from '@/src/components/primitives/ui/button';
 import { useCopyToClipboard } from '@/src/hooks/use-copy-to-clipboard';
 import { useCopyWithEmailCapture } from '@/src/hooks/use-copy-with-email-capture';
-import { trackUsage } from '@/src/lib/actions/content.actions';
-import type { CategoryId } from '@/src/lib/config/category-config';
-import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
-import { trackInteraction } from '@/src/lib/edge/client';
+import { usePulse } from '@/src/hooks/use-pulse';
+import type { CategoryId } from '@/src/lib/data/config/category';
+import type { ContentItem } from '@/src/lib/data/content';
 import { ArrowLeft, Check, Copy, Download, FileText, Sparkles } from '@/src/lib/icons';
 import { STATE_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
+import { logUnhandledPromise } from '@/src/lib/utils/error.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
-import type { CopyType } from '@/src/types/database-overrides';
+import type { CopyType, GetContentDetailCompleteReturn } from '@/src/types/database-overrides';
 
 /**
  * Determine copy type based on content item structure
  */
-function determineCopyType(item: ContentItem): CopyType {
+function determineCopyType(
+  item: ContentItem | GetContentDetailCompleteReturn['content']
+): CopyType {
   // Check if item has content or configuration (indicates code/config copy)
   if ('content' in item && item.content) return 'code';
   if ('configuration' in item && item.configuration) return 'code';
   // Default to link for other types
   return 'link';
+}
+
+/**
+ * Safely extracts content or configuration from item as a string for copying
+ */
+function getContentForCopy(item: ContentItem | GetContentDetailCompleteReturn['content']): string {
+  // Check for content first
+  if ('content' in item && typeof item.content === 'string') {
+    return item.content;
+  }
+
+  // Fall back to configuration
+  if ('configuration' in item) {
+    const cfg = item.configuration;
+    if (typeof cfg === 'string') return cfg;
+    if (cfg != null) return JSON.stringify(cfg, null, 2);
+  }
+
+  return '';
 }
 
 /**
@@ -49,7 +70,7 @@ export interface SerializableAction {
 }
 
 export interface DetailHeaderActionsProps {
-  item: ContentItem;
+  item: ContentItem | GetContentDetailCompleteReturn['content'];
   typeName: string;
   category: CategoryId;
   hasContent: boolean;
@@ -81,6 +102,7 @@ export function DetailHeaderActions({
   const referrer = typeof window !== 'undefined' ? window.location.pathname : undefined;
   const { copy: copyToClipboard } = useCopyToClipboard();
   const { showModal } = usePostCopyEmail();
+  const pulse = usePulse();
   const { copied, copy } = useCopyWithEmailCapture({
     emailContext: {
       copyType: determineCopyType(item),
@@ -111,23 +133,14 @@ export function DetailHeaderActions({
     }
 
     // Default copy logic
-    const contentToCopy =
-      ('content' in item ? (item as { content?: string }).content : '') ??
-      ('configuration' in item
-        ? typeof (item as unknown as { configuration?: unknown }).configuration === 'string'
-          ? (item as unknown as { configuration?: string }).configuration
-          : JSON.stringify((item as unknown as { configuration?: unknown }).configuration, null, 2)
-        : '') ??
-      '';
-
+    const contentToCopy = getContentForCopy(item);
     await copy(contentToCopy);
 
-    trackInteraction({
-      interaction_type: 'copy',
-      content_type: category,
-      content_slug: item.slug,
-    }).catch(() => {
-      // Intentional
+    pulse.copy({ category, slug: item.slug }).catch((error) => {
+      logUnhandledPromise('trackInteraction:copy-content', error, {
+        slug: item.slug,
+        category,
+      });
     });
   };
 
@@ -140,12 +153,11 @@ export function DetailHeaderActions({
         description: `Downloading ${item.title || item.slug} package...`,
       });
 
-      trackInteraction({
-        interaction_type: 'download',
-        content_type: category,
-        content_slug: item.slug,
-      }).catch(() => {
-        // Intentional
+      pulse.download({ category, slug: item.slug, action_type: 'download_zip' }).catch((error) => {
+        logUnhandledPromise('trackInteraction:download', error, {
+          slug: item.slug,
+          category,
+        });
       });
       return;
     }
@@ -232,11 +244,7 @@ export function DetailHeaderActions({
             successMessage="Copied llms.txt to clipboard!"
             icon={Sparkles}
             trackAnalytics={async () => {
-              await trackUsage({
-                content_type: category,
-                content_slug: item.slug,
-                action_type: 'llmstxt',
-              });
+              await pulse.copy({ category, slug: item.slug, metadata: { action_type: 'llmstxt' } });
             }}
             variant="outline"
             size="default"
@@ -259,11 +267,7 @@ export function DetailHeaderActions({
             successMessage="Copied markdown to clipboard!"
             icon={FileText}
             trackAnalytics={async () => {
-              await trackUsage({
-                content_type: category,
-                content_slug: item.slug,
-                action_type: 'copy',
-              });
+              await pulse.copy({ category, slug: item.slug, metadata: { action_type: 'copy' } });
             }}
             variant="outline"
             size="default"
@@ -286,11 +290,7 @@ export function DetailHeaderActions({
             successMessage="Downloaded markdown file!"
             icon={Download}
             trackAnalytics={async () => {
-              await trackUsage({
-                content_type: category,
-                content_slug: item.slug,
-                action_type: 'download_markdown',
-              });
+              await pulse.download({ category, slug: item.slug, action_type: 'download_markdown' });
             }}
             variant="outline"
             size="default"

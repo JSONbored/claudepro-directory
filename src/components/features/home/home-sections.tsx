@@ -16,17 +16,20 @@ import {
   HomepageStatsSkeleton,
   Skeleton,
 } from '@/src/components/primitives/feedback/loading-skeleton';
+import { getAnimationConfig } from '@/src/lib/actions/feature-flags.actions';
 import {
   type CategoryId,
   getCategoryConfigs,
   getCategoryStatsConfig,
-} from '@/src/lib/config/category-config';
-import { ROUTES } from '@/src/lib/constants';
-import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
+  getHomepageFeaturedCategories,
+} from '@/src/lib/data/config/category';
+import { ROUTES } from '@/src/lib/data/config/constants';
+import type { ContentItem } from '@/src/lib/data/content';
 import { logger } from '@/src/lib/logger';
 import type { DisplayableContent, FilterState } from '@/src/lib/types/component.types';
 import type { HomePageClientProps } from '@/src/lib/types/page-props.types';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { logClientWarning, logUnhandledPromise } from '@/src/lib/utils/error.utils';
 
 /**
  * OPTIMIZATION (2025-10-22): Enabled SSR for UnifiedSearch
@@ -70,24 +73,29 @@ function HomePageClientComponent({
   const categoryConfigs = useMemo(() => getCategoryConfigs(), []);
 
   useEffect(() => {
-    import('@/src/lib/config/category-config').then(({ getHomepageFeaturedCategories }) =>
-      getHomepageFeaturedCategories().then((categories) => {
+    getHomepageFeaturedCategories()
+      .then((categories) => {
         setFeaturedCategories(categories);
       })
-    );
+      .catch((error) => {
+        logClientWarning('HomePageClient: failed to load featured categories', error);
+      });
   }, []);
 
   useEffect(() => {
-    import('@/src/lib/flags')
-      .then(({ animationConfigs }) => animationConfigs())
-      .then((config) => {
+    getAnimationConfig({})
+      .then((result) => {
+        if (!result?.data) return;
+        const config = result.data;
         setSpringDefault({
           type: 'spring' as const,
-          stiffness: (config['animation.spring.default.stiffness'] as number) ?? 400,
-          damping: (config['animation.spring.default.damping'] as number) ?? 17,
+          stiffness: config['animation.spring.default.stiffness'],
+          damping: config['animation.spring.default.damping'],
         });
       })
-      .catch(() => {});
+      .catch((error) => {
+        logger.error('HomePageClient: failed to load animation config', error);
+      });
   }, []);
 
   const fetchAllConfigs = useCallback(
@@ -97,25 +105,22 @@ function HomePageClientComponent({
       setIsLoadingAllConfigs(true);
 
       try {
-        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-        const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+        const { fetchPaginatedContent } = await import('@/src/lib/actions/content.actions');
 
-        if (!(supabaseUrl && supabaseKey)) {
-          throw new Error('Missing Supabase environment variables');
-        }
-
-        const url = `${supabaseUrl}/functions/v1/content-paginated?offset=${offset}&limit=${limit}&category=all`;
-        const response = await fetch(url, {
-          headers: {
-            Authorization: `Bearer ${supabaseKey}`,
-          },
+        const result = await fetchPaginatedContent({
+          offset,
+          limit,
+          category: null,
         });
 
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        if (result?.serverError) {
+          // Error already logged by safe-action middleware
+          logger.error('Failed to load content', new Error(result.serverError), {
+            source: 'fetchAllConfigs',
+          });
         }
 
-        const newItems: ContentItem[] = await response.json();
+        const newItems = (result?.data ?? []) as ContentItem[];
 
         if (newItems.length < limit) {
           setHasMoreAllConfigs(false);
@@ -137,8 +142,8 @@ function HomePageClientComponent({
 
   useEffect(() => {
     if (activeTab === 'all' && allConfigs.length === 0 && !isLoadingAllConfigs) {
-      fetchAllConfigs(0).catch(() => {
-        // Error already logged in fetchAllConfigs
+      fetchAllConfigs(0).catch((error) => {
+        logUnhandledPromise('HomePageClient: initial fetchAllConfigs failed', error);
       });
     }
   }, [activeTab, allConfigs.length, fetchAllConfigs, isLoadingAllConfigs]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -156,18 +161,22 @@ function HomePageClientComponent({
       setIsSearching(true);
 
       try {
-        const { searchContent } = await import('@/src/lib/edge/search-client');
+        const { searchUnifiedClient } = await import('@/src/lib/edge/search-client');
 
         const effectiveTab = categoryOverride ?? activeTab;
         const categories =
           effectiveTab !== 'all' && effectiveTab !== 'community' ? [effectiveTab] : undefined;
 
-        const response = await searchContent(query.trim(), {
-          ...(categories && { categories }),
-          limit: 50,
+        const result = await searchUnifiedClient({
+          query: query.trim(),
+          entities: ['content'],
+          filters: {
+            limit: 50,
+            ...(categories ? { categories } : {}),
+          },
         });
 
-        setSearchResults(response.results);
+        setSearchResults(result.results as DisplayableContent[]);
       } catch (error) {
         logger.error('Search failed', error as Error, { source: 'HomePageSearch' });
         setSearchResults(allConfigs);
@@ -227,8 +236,10 @@ function HomePageClientComponent({
       setActiveTab(value);
       // If currently searching, re-run search with new category filter (DB-side)
       if (isSearching && currentSearchQuery) {
-        handleSearch(currentSearchQuery, value).catch(() => {
-          // Silent fail - search will retry on next user interaction
+        handleSearch(currentSearchQuery, value).catch((error) => {
+          logUnhandledPromise('HomePageClient: search retry failed', error, {
+            tab: value,
+          });
         });
       }
     },
@@ -237,8 +248,8 @@ function HomePageClientComponent({
 
   // Handle clear search
   const handleClearSearch = useCallback(() => {
-    handleSearch('').catch(() => {
-      // Silent fail - search cleared on error
+    handleSearch('').catch((error) => {
+      logUnhandledPromise('HomePageClient: clear search failed', error);
     });
   }, [handleSearch]);
 
@@ -352,6 +363,7 @@ function HomePageClientComponent({
           isSearching={isSearching}
           filteredResults={filteredResults}
           onClearSearch={handleClearSearch}
+          searchQuery={currentSearchQuery}
         />
 
         {/* Featured Content Sections - Render immediately (above the fold) */}

@@ -1,10 +1,9 @@
 'use client';
 
 /**
- * Template Selector - Fetches curated starter templates from database via get_content_templates RPC
+ * Template Selector - Uses server-provided template data
  */
 
-import { useEffect, useState } from 'react';
 import { Button } from '@/src/components/primitives/ui/button';
 import {
   DropdownMenu,
@@ -12,68 +11,17 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/src/components/primitives/ui/dropdown-menu';
-import type { SubmissionContentType } from '@/src/lib/forms/types';
 import { ChevronDown, FileText } from '@/src/lib/icons';
-import { createClient } from '@/src/lib/supabase/client';
 import { DIMENSIONS, UI_CLASSES } from '@/src/lib/ui-constants';
-
-export interface Template {
-  id: string;
-  type: string;
-  name: string;
-  description: string;
-  category?: string;
-  tags?: string;
-  [key: string]: unknown;
-}
+import type { GetContentTemplatesReturn } from '@/src/types/database-overrides';
 
 interface TemplateSelectorProps {
-  contentType: SubmissionContentType;
-  onSelect: (template: Template) => void;
+  templates: GetContentTemplatesReturn;
+  onSelect: (template: GetContentTemplatesReturn[number]) => void;
 }
 
-export function TemplateSelector({ contentType, onSelect }: TemplateSelectorProps) {
-  const [templates, setTemplates] = useState<Template[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    let isMounted = true;
-
-    async function fetchTemplates() {
-      try {
-        const supabase = createClient();
-        const { data, error } = await supabase.rpc('get_content_templates', {
-          p_category: contentType,
-        });
-
-        if (error) throw error;
-
-        if (isMounted && data) {
-          setTemplates(Array.isArray(data) ? (data as Template[]) : []);
-        }
-      } catch {
-        if (isMounted) {
-          setTemplates([]);
-        }
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
-      }
-    }
-
-    fetchTemplates().catch(() => {
-      if (isMounted) {
-        setIsLoading(false);
-      }
-    });
-
-    return () => {
-      isMounted = false;
-    };
-  }, [contentType]);
-
-  if (isLoading || templates.length === 0) {
+export function TemplateSelector({ templates, onSelect }: TemplateSelectorProps) {
+  if (templates.length === 0) {
     return null;
   }
 

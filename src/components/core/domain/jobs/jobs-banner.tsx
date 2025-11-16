@@ -9,7 +9,7 @@ import { motion } from 'motion/react';
 import Link from 'next/link';
 import { Button } from '@/src/components/primitives/ui/button';
 import { Card, CardContent } from '@/src/components/primitives/ui/card';
-import { ROUTES } from '@/src/lib/constants';
+import { ROUTES } from '@/src/lib/data/config/constants';
 import { Check, TrendingUp } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';

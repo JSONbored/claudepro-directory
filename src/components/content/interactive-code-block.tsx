@@ -8,11 +8,13 @@ import { motion } from 'motion/react';
 import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { LinkedinShareButton, TwitterShareButton } from 'react-share';
-import { APP_CONFIG } from '@/src/lib/constants';
-import { trackInteraction } from '@/src/lib/edge/client';
+import { usePulse } from '@/src/hooks/use-pulse';
+import { getTimeoutConfig } from '@/src/lib/actions/feature-flags.actions';
+import { APP_CONFIG } from '@/src/lib/data/config/constants';
 import { Camera, Check, ChevronDown, Copy, Linkedin, Share2, Twitter } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { logUnhandledPromise, normalizeError } from '@/src/lib/utils/error.utils';
 import {
   copyScreenshotToClipboard,
   downloadScreenshot,
@@ -24,9 +26,9 @@ import {
   generateShareText,
   generateShareUrl,
   type SharePlatform,
-  trackShare,
 } from '@/src/lib/utils/share.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
+import type { ContentCategory } from '@/src/types/database-overrides';
 
 export interface ProductionCodeBlockProps {
   /** Pre-rendered HTML from Sugar High (server-side) */
@@ -152,6 +154,7 @@ export function ProductionCodeBlock({
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [needsCollapse, setNeedsCollapse] = useState(false);
   const preRef = useRef<HTMLDivElement>(null);
+  const pulse = usePulse();
   const codeBlockRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
 
@@ -169,6 +172,8 @@ export function ProductionCodeBlock({
     setNeedsCollapse(lines > maxLines);
   }, [code, maxLines]);
 
+  const CLIPBOARD_RESET_DEFAULT_MS = 2000;
+
   const handleCopy = async () => {
     setIsCopied(true);
 
@@ -176,23 +181,30 @@ export function ProductionCodeBlock({
       await navigator.clipboard.writeText(code);
       toasts.success.codeCopied();
 
-      trackInteraction({
-        interaction_type: 'copy',
-        content_type: category,
-        content_slug: slug,
-      }).catch(() => {
-        // Intentional
+      pulse.copy({ category: category as ContentCategory, slug }).catch((error) => {
+        logUnhandledPromise('interactive-code-block:copy', error, { category, slug });
       });
-    } catch (_err) {
+    } catch (error) {
       setIsCopied(false);
+      logger.error('ProductionCodeBlock: copy failed', normalizeError(error), {
+        category,
+        slug,
+      });
       toasts.error.copyFailed('code');
       return;
     }
 
-    const { timeoutConfigs } = await import('@/src/lib/flags');
-    const config = await timeoutConfigs();
-    const resetDelay = (config['timeout.ui.clipboard_reset_delay_ms'] as number) || 2000;
-    setTimeout(() => setIsCopied(false), resetDelay);
+    try {
+      const result = await getTimeoutConfig({});
+      if (result?.data) {
+        setTimeout(() => setIsCopied(false), result.data['timeout.ui.clipboard_reset_delay_ms']);
+      } else {
+        setTimeout(() => setIsCopied(false), CLIPBOARD_RESET_DEFAULT_MS);
+      }
+    } catch (error) {
+      logger.error('ProductionCodeBlock: failed to load timeout config', normalizeError(error));
+      setTimeout(() => setIsCopied(false), CLIPBOARD_RESET_DEFAULT_MS);
+    }
   };
 
   /**
@@ -234,17 +246,21 @@ export function ProductionCodeBlock({
       // Also trigger download for user convenience
       downloadScreenshot(screenshot.dataUrl, screenshotFilename);
 
-      trackInteraction({
-        interaction_type: 'screenshot',
-        content_type: category,
-        content_slug: slug,
-        metadata: {
-          width: screenshot.width,
-          height: screenshot.height,
-        },
-      }).catch(() => {
-        // Intentional
-      });
+      pulse
+        .screenshot({
+          category: category as ContentCategory,
+          slug,
+          metadata: {
+            width: screenshot.width,
+            height: screenshot.height,
+          },
+        })
+        .catch((error) => {
+          logUnhandledPromise('interactive-code-block:screenshot', error, {
+            category,
+            slug,
+          });
+        });
     } catch (error) {
       toasts.error.screenshotFailed();
       logger.error('Screenshot generation failed', error as Error);
@@ -276,8 +292,12 @@ export function ProductionCodeBlock({
         }
       }
 
-      trackShare({ platform, category, slug, url: currentUrl }).catch(() => {
-        // Intentional
+      pulse.share({ platform, category, slug, url: currentUrl }).catch((error) => {
+        logUnhandledPromise('interactive-code-block:share', error, {
+          platform,
+          category,
+          slug,
+        });
       });
 
       setIsShareOpen(false);

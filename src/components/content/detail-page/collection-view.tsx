@@ -26,13 +26,13 @@ import { Suspense } from 'react';
 import { ConfigCard } from '@/src/components/core/domain/cards/config-card';
 import { Skeleton } from '@/src/components/primitives/feedback/loading-skeleton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
-import { getCategoryConfigs, isValidCategory } from '@/src/lib/config/category-config';
-import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
-import { getContentBySlug } from '@/src/lib/content/supabase-content-loader';
+import { getCategoryConfigs, isValidCategory } from '@/src/lib/data/config/category';
+import type { ContentItem } from '@/src/lib/data/content';
+import { getContentBySlug } from '@/src/lib/data/content';
 import { AlertTriangle, CheckCircle } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
-
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { ensureStringArray, getMetadata } from '@/src/lib/utils/data.utils';
 import type { Database } from '@/src/types/database.types';
 
 interface ItemWithData {
@@ -63,7 +63,7 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
   // Load category configs once (single RPC call)
   const categoryConfigs = await getCategoryConfigs();
 
-  const metadata = (collection.metadata as Record<string, unknown>) || {};
+  const metadata = getMetadata(collection);
   const items =
     (metadata.items as Array<{ category: string; slug: string; reason?: string }>) || [];
 
@@ -122,8 +122,8 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
     categories: Object.keys(itemsByCategory).length,
   });
 
-  const prerequisites = metadata.prerequisites as string[] | undefined;
-  const installationOrder = metadata.installation_order as string[] | undefined;
+  const prerequisites = ensureStringArray(metadata.prerequisites);
+  const installationOrder = ensureStringArray(metadata.installation_order);
   const compatibility = metadata.compatibility as
     | { claudeDesktop?: boolean; claudeCode?: boolean }
     | undefined;

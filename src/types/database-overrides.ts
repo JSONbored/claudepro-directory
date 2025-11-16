@@ -7,14 +7,23 @@
  * Solution: Manually override view Row types while preserving all other generated types.
  */
 
-import type { Database as DatabaseGenerated } from './database.types';
+import type { DisplayableContent } from '@/src/lib/types/component.types';
+import type { Database as DatabaseGenerated, Json } from './database.types';
 
 /**
  * Override view nullability - preserve Tables, Enums, Functions
  */
 type DatabaseWithViewOverrides = {
   public: {
-    Tables: Omit<DatabaseGenerated['public']['Tables'], 'jobs'> & {
+    Tables: Omit<DatabaseGenerated['public']['Tables'], 'content' | 'jobs'> & {
+      content: {
+        Row: Omit<DatabaseGenerated['public']['Tables']['content']['Row'], 'category'> & {
+          category: DatabaseGenerated['public']['Enums']['content_category'];
+        };
+        Insert: DatabaseGenerated['public']['Tables']['content']['Insert'];
+        Update: DatabaseGenerated['public']['Tables']['content']['Update'];
+        Relationships: DatabaseGenerated['public']['Tables']['content']['Relationships'];
+      };
       jobs: {
         Row: Omit<
           DatabaseGenerated['public']['Tables']['jobs']['Row'],
@@ -30,20 +39,33 @@ type DatabaseWithViewOverrides = {
       };
     };
     Enums: DatabaseGenerated['public']['Enums'];
-    Functions: Omit<DatabaseGenerated['public']['Functions'], 'submit_content_for_review'> & {
+    Functions: Omit<
+      DatabaseGenerated['public']['Functions'],
+      'submit_content_for_review' | 'track_user_interaction'
+    > & {
       submit_content_for_review: {
         Args: {
           p_author: string;
           p_author_profile_url?: string | null;
-          p_category: string;
+          p_category: DatabaseGenerated['public']['Enums']['content_category'];
           p_content_data: DatabaseGenerated['public']['Functions']['submit_content_for_review']['Args']['p_content_data'];
           p_description: string;
           p_github_url?: string | null;
           p_name: string;
-          p_submission_type: string;
+          p_submission_type: DatabaseGenerated['public']['Enums']['submission_type'];
           p_tags?: string[] | null;
         };
         Returns: DatabaseGenerated['public']['Functions']['submit_content_for_review']['Returns'];
+      };
+      track_user_interaction: {
+        Args: {
+          p_content_type: string;
+          p_content_slug: string;
+          p_interaction_type: DatabaseGenerated['public']['Enums']['interaction_type'];
+          p_session_id?: string | null;
+          p_metadata?: Json | null;
+        };
+        Returns: DatabaseGenerated['public']['Functions']['track_user_interaction']['Returns'];
       };
     };
     Views: {
@@ -61,7 +83,7 @@ type DatabaseWithViewOverrides = {
           slug: string;
           title: string;
           description: string;
-          category: string;
+          category: ContentCategory;
           author: string;
           date_added: string;
           tags: string[];
@@ -90,7 +112,7 @@ type DatabaseWithViewOverrides = {
           slug: string;
           title: string;
           description: string;
-          category: string;
+          category: ContentCategory;
           author: string;
           date_added: string;
           tags: string[];
@@ -161,6 +183,148 @@ export type Views<T extends keyof Database['public']['Views']> =
 export type Enums<T extends keyof Database['public']['Enums']> = Database['public']['Enums'][T];
 
 /**
+ * Common enum type aliases (for convenience)
+ * Extracted from database enums for easier usage throughout the codebase
+ */
+export type SubmissionStatus = Enums<'submission_status'>;
+export type SubmissionType = Enums<'submission_type'>;
+export type ContentCategory = Enums<'content_category'>;
+export type JobStatus = Enums<'job_status'>;
+/**
+ * Job listing categories (from jobs.category CHECK constraint)
+ * These are different from ContentCategory - they categorize individual job postings
+ * (engineering, design, product, etc.) not content types (agents, mcp, rules, etc.)
+ */
+export type JobCategory =
+  | 'engineering'
+  | 'design'
+  | 'product'
+  | 'marketing'
+  | 'sales'
+  | 'support'
+  | 'research'
+  | 'data'
+  | 'operations'
+  | 'leadership'
+  | 'consulting'
+  | 'education'
+  | 'other';
+export type SortOption = Enums<'sort_option'>;
+export type SortDirection = Enums<'sort_direction'>;
+export type InteractionType = Enums<'interaction_type'>;
+export type NewsletterSource = Enums<'newsletter_source'>;
+export type NotificationPriority = Enums<'notification_priority'>;
+export type NotificationType = Enums<'notification_type'>;
+export type ContactCategory = Enums<'contact_category'>;
+export type ContactActionType = Enums<'contact_action_type'>;
+export type TrendingMetric = Enums<'trending_metric'>;
+export type TrendingPeriod = Enums<'trending_period'>;
+export type AnnouncementPriority = Enums<'announcement_priority'>;
+export type AnnouncementVariant = Enums<'announcement_variant'>;
+export type ChangelogCategory = Enums<'changelog_category'>;
+export type ConfettiVariant = Enums<'confetti_variant'>;
+export type ExperienceLevel = Enums<'experience_level'>;
+export type FieldScope = Enums<'field_scope'>;
+export type FieldType = Enums<'field_type'>;
+export type FormFieldType = Enums<'form_field_type'>;
+export type FormGridColumn = Enums<'form_grid_column'>;
+export type FormIconPosition = Enums<'form_icon_position'>;
+export type GridColumn = Enums<'grid_column'>;
+export type GuideSubcategory = Enums<'guide_subcategory'>;
+export type IconPosition = Enums<'icon_position'>;
+export type IntegrationType = Enums<'integration_type'>;
+export type UseCaseType = Enums<'use_case_type'>;
+export type WebhookDirection = Enums<'webhook_direction'>;
+export type WebhookSource = Enums<'webhook_source'>;
+
+/**
+ * Enum value arrays (for runtime use, e.g., Zod schemas)
+ * These arrays are extracted from database enums and validated by TypeScript
+ *
+ * Note: Zod's z.enum() requires a tuple with at least one element [T, ...T[]]
+ * These arrays satisfy that requirement and are type-checked against the enum
+ */
+export const CONTENT_CATEGORY_VALUES = [
+  'agents',
+  'mcp',
+  'rules',
+  'commands',
+  'hooks',
+  'statuslines',
+  'skills',
+  'collections',
+  'guides',
+  'jobs',
+  'changelog',
+] as const satisfies readonly ContentCategory[];
+
+/**
+ * Job listing category values (from jobs.category CHECK constraint)
+ * These are different from ContentCategory - they categorize individual job postings
+ */
+export const JOB_CATEGORY_VALUES = [
+  'engineering',
+  'design',
+  'product',
+  'marketing',
+  'sales',
+  'support',
+  'research',
+  'data',
+  'operations',
+  'leadership',
+  'consulting',
+  'education',
+  'other',
+] as const satisfies readonly JobCategory[];
+
+export const SUBMISSION_TYPE_VALUES = [
+  'agents',
+  'mcp',
+  'rules',
+  'commands',
+  'hooks',
+  'statuslines',
+  'skills',
+] as const satisfies readonly SubmissionType[];
+
+export const JOB_STATUS_VALUES = [
+  'draft',
+  'pending_payment',
+  'pending_review',
+  'active',
+  'expired',
+  'rejected',
+  'deleted',
+] as const satisfies readonly JobStatus[];
+
+export const SUBMISSION_STATUS_VALUES = [
+  'pending',
+  'approved',
+  'rejected',
+  'spam',
+  'merged',
+] as const satisfies readonly SubmissionStatus[];
+
+export const INTERACTION_TYPE_VALUES = [
+  'view',
+  'copy',
+  'bookmark',
+  'click',
+  'time_spent',
+  'search',
+  'filter',
+  'screenshot',
+  'share',
+  'download',
+  'pwa_installed',
+  'pwa_launched',
+  'newsletter_subscribe',
+  'contact_interact',
+  'contact_submit',
+] as const satisfies readonly InteractionType[];
+
+/**
  * Application-specific types (not from database)
  */
 
@@ -200,9 +364,26 @@ export type GetUserSettingsReturn = {
 /**
  * get_user_dashboard RPC return type
  * Returns user's submissions, companies, and job listings
+ *
+ * Note: submissions are from content_submissions table, mapped to match legacy structure
  */
 export type GetUserDashboardReturn = {
-  submissions: Array<Tables<'submissions'>>;
+  submissions: Array<{
+    id: string;
+    user_id: string;
+    content_type: string; // Mapped from submission_type
+    content_slug: string; // Mapped from approved_slug
+    content_name: string; // Mapped from name
+    pr_number: number | null;
+    pr_url: string | null; // Mapped from github_pr_url
+    branch_name: string | null;
+    status: SubmissionStatus; // Mapped from submission_status enum
+    submission_data: Json; // Mapped from content_data
+    rejection_reason: string | null; // Mapped from moderator_notes
+    created_at: string;
+    updated_at: string;
+    merged_at: string | null;
+  }>;
   companies: Array<Tables<'companies'>>;
   jobs: Array<Tables<'jobs'>>;
 };
@@ -244,7 +425,7 @@ export type GetUserProfileReturn = {
   }>;
   contributions: Array<{
     id: string;
-    content_type: string;
+    content_type: ContentCategory;
     slug: string;
     name: string;
     description: string | null;
@@ -276,7 +457,7 @@ export type HomepageContentItem = {
   source: string;
   created_at: string;
   date_added: string;
-  category: string;
+  category: ContentCategory;
   viewCount: number;
   copyCount: number;
   _featured: {
@@ -287,8 +468,8 @@ export type HomepageContentItem = {
 
 export type GetHomepageCompleteReturn = {
   content: {
-    categoryData: Record<string, Array<HomepageContentItem>>;
-    stats: Record<string, number>;
+    categoryData: Record<ContentCategory, Array<HomepageContentItem>>;
+    stats: Record<ContentCategory, number>;
     weekStart: string;
   };
   member_count: number;
@@ -300,11 +481,55 @@ export type GetHomepageCompleteReturn = {
 };
 
 /**
- * get_changelog_entries RPC return type
- * Returns paginated changelog entries with metadata
+ * get_changelog_overview RPC return type
+ * Returns paginated changelog entries with metadata, featured entries, and category counts
+ * Replaces: get_changelog_entries + get_changelog_metadata
+ */
+export type GetChangelogOverviewReturn = {
+  entries: Array<Tables<'changelog'>>;
+  metadata: {
+    totalEntries: number;
+    dateRange: {
+      earliest: string;
+      latest: string;
+    };
+    categoryCounts: {
+      Added?: number;
+      Changed?: number;
+      Fixed?: number;
+      Removed?: number;
+      Deprecated?: number;
+      Security?: number;
+    };
+  };
+  featured: Array<Tables<'changelog'>>;
+  pagination: {
+    total: number;
+    limit: number;
+    offset: number;
+    hasMore: boolean;
+  };
+};
+
+/**
+ * get_changelog_detail RPC return type
+ * Returns single changelog entry by slug with categories built from JSONB
+ * Replaces: get_changelog_entry_by_slug
+ */
+export type GetChangelogDetailReturn = {
+  entry:
+    | (Tables<'changelog'> & {
+        categories: Record<string, string[]>;
+      })
+    | null;
+};
+
+/**
+ * @deprecated Use GetChangelogOverviewReturn instead
+ * get_changelog_entries RPC return type (legacy)
  */
 export type GetChangelogEntriesReturn = {
-  entries: Array<Tables<'changelog_entries'>>;
+  entries: Array<Tables<'changelog'>>;
   total: number;
   limit: number;
   offset: number;
@@ -312,10 +537,10 @@ export type GetChangelogEntriesReturn = {
 };
 
 /**
- * get_changelog_entry_by_slug RPC return type
- * Returns single changelog entry by slug
+ * @deprecated Use GetChangelogDetailReturn instead
+ * get_changelog_entry_by_slug RPC return type (legacy)
  */
-export type GetChangelogEntryBySlugReturn = Tables<'changelog_entries'> | null;
+export type GetChangelogEntryBySlugReturn = Tables<'changelog'> | null;
 
 /**
  * get_content_detail_complete RPC return type
@@ -325,7 +550,6 @@ export type GetContentDetailCompleteReturn = {
   content: Pick<
     Tables<'content'>,
     | 'id'
-    | 'category'
     | 'slug'
     | 'title'
     | 'display_title'
@@ -345,7 +569,9 @@ export type GetContentDetailCompleteReturn = {
     | 'popularity_score'
     | 'created_at'
     | 'updated_at'
-  >;
+  > & {
+    category: ContentCategory;
+  };
   analytics: {
     view_count: number;
     copy_count: number;
@@ -353,7 +579,7 @@ export type GetContentDetailCompleteReturn = {
     is_bookmarked: boolean;
   };
   related: Array<{
-    category: string;
+    category: ContentCategory;
     slug: string;
     title: string;
     description: string;
@@ -368,7 +594,7 @@ export type GetContentDetailCompleteReturn = {
   collection_items: Array<{
     id: string;
     collection_id: string;
-    content_type: string;
+    content_type: ContentCategory;
     content_slug: string;
     order: number;
     added_at: string;
@@ -391,7 +617,7 @@ export type GetEnrichedContentListReturn = Array<{
   description: string;
   author: string;
   author_profile_url: string | null;
-  category: string;
+  category: ContentCategory;
   tags: string[];
   source_table: string;
   created_at: string;
@@ -420,19 +646,48 @@ export type GetJobsListReturn = Array<Tables<'jobs'>>;
 
 /**
  * get_collection_detail_with_items RPC return type
- * Returns collection details with items
+ * Returns collection details with items + available bookmarks
  */
 export type GetCollectionDetailWithItemsReturn = {
   collection: Tables<'user_collections'>;
-  items: Array<{
-    id: string;
-    content_type: string;
-    content_slug: string;
-    order: number;
-    added_at: string;
-    title: string;
-    description: string;
-  }>;
+  items: Array<
+    Tables<'collection_items'> & {
+      title: string;
+      description: string;
+    }
+  >;
+  bookmarks: Array<Tables<'bookmarks'>>;
+};
+
+/**
+ * Reviews RPC return types
+ */
+export type ReviewItem = {
+  id: string;
+  user_id: string;
+  content_type: ContentCategory;
+  content_slug: string;
+  rating: number;
+  review_text: string | null;
+  helpful_count: number;
+  created_at: string;
+  updated_at: string;
+  user_profile?: {
+    username: string | null;
+    avatar_url: string | null;
+  } | null;
+};
+
+export type ReviewsAggregateRating = {
+  count: number;
+  average: number;
+  distribution: Record<string, number>;
+};
+
+export type GetReviewsWithStatsReturn = {
+  reviews: ReviewItem[];
+  hasMore: boolean;
+  aggregateRating: ReviewsAggregateRating | null;
 };
 
 /**
@@ -443,7 +698,7 @@ export type SearchContentOptimizedReturn = Array<{
   slug: string;
   title: string;
   description: string;
-  category: string;
+  category: ContentCategory;
   author: string;
   author_profile_url: string | null;
   date_added: string;
@@ -480,7 +735,7 @@ export type AddBookmarkReturn = { success: boolean; bookmark_id?: string; error?
 export type RemoveBookmarkReturn = { success: boolean; error?: string };
 export type IsBookmarkedReturn = boolean;
 export type IsBookmarkedBatchReturn = Array<{
-  content_type: string;
+  content_type: ContentCategory;
   content_slug: string;
   is_bookmarked: boolean;
 }>;
@@ -515,7 +770,7 @@ export type GetUserActivityTimelineReturn = Array<{
   id: string;
   type: string;
   action: string;
-  content_type: string | null;
+  content_type: ContentCategory | null;
   content_slug: string | null;
   created_at: string;
   metadata: DatabaseGenerated['public']['Tables']['content']['Row']['metadata'];
@@ -528,6 +783,12 @@ export type GetUserIdentitiesReturn = Array<{
 export type GetUserLibraryReturn = {
   bookmarks: Array<Tables<'bookmarks'>>;
   collections: Array<Tables<'user_collections'>>;
+  stats: {
+    bookmarkCount: number;
+    collectionCount: number;
+    totalCollectionItems: number;
+    totalCollectionViews: number;
+  };
 };
 
 /**
@@ -553,7 +814,7 @@ export type FilterJobsReturn = {
  * Miscellaneous RPC return types
  */
 export type GetRelatedContentReturn = Array<{
-  category: string;
+  category: ContentCategory;
   slug: string;
   title: string;
   description: string;
@@ -584,18 +845,172 @@ export type GetQuizConfigurationReturn = {
     id: string;
     question: string;
     options: string[];
-    category: string;
+    category: ContentCategory;
   }>;
 };
 
-export type GetRecommendationsReturn = Array<{
+/**
+ * get_recommendations RPC return type
+ * Returns personalized configuration recommendations with match scores and reasons
+ *
+ * Structure from usage: /src/lib/data/tools/recommendations.ts:20-30
+ */
+export type GetRecommendationsReturn = {
+  results: Array<{
+    slug: string;
+    title: string;
+    description: string;
+    category: ContentCategory;
+    tags?: string[] | null;
+    author?: string | null;
+    match_score?: number | null;
+    match_percentage?: number | null;
+    primary_reason?: string | null;
+    rank?: number | null;
+    reasons?: Json | null;
+  }>;
+  totalMatches: number;
+  algorithm: string;
+  summary: {
+    topCategory?: string;
+    avgMatchScore?: number;
+    diversityScore?: number;
+    topTags?: string[];
+  };
+};
+
+/**
+ * get_contact_commands RPC return type
+ * Returns available terminal commands for contact page
+ *
+ * Structure from usage: /src/components/features/contact/contact-terminal.tsx:113-120
+ */
+export type GetContactCommandsReturn = {
+  commands: Array<{
+    id: string;
+    text: string;
+    description: string | null;
+    category: ContentCategory;
+    iconName: string | null;
+    actionType: string;
+    actionValue: string | null;
+    confettiVariant: string | null;
+    requiresAuth: boolean;
+    aliases: string[];
+  }>;
+};
+
+/**
+ * get_form_fields_for_content_type RPC return type
+ * Returns form field definitions for content submission forms
+ *
+ * Structure from database.types.ts - already has specific return type (not Json)
+ */
+export type GetFormFieldsForContentTypeReturn = Array<{
+  field_name: string;
+  field_order: number;
+  field_properties: Json;
+  field_scope: DatabaseGenerated['public']['Enums']['field_scope'];
+  field_type: DatabaseGenerated['public']['Enums']['field_type'];
+  grid_column: DatabaseGenerated['public']['Enums']['grid_column'];
+  help_text: string;
+  icon: string;
+  icon_position: DatabaseGenerated['public']['Enums']['icon_position'];
   id: string;
+  label: string;
+  placeholder: string;
+  required: boolean;
+  select_options: Json;
+}>;
+
+/**
+ * get_content_paginated_slim RPC return type
+ * Returns paginated content items for infinite scroll
+ *
+ * Structure from usage: /src/lib/data/content/paginated.ts:12-15
+ */
+export type GetPaginatedContentReturn = {
+  items?: DisplayableContent[];
+  total_count?: number;
+};
+
+/**
+ * get_company_admin_profile RPC return type
+ * Returns company profile for admin/editing purposes
+ *
+ * Structure from database.types.ts - returns array, but helper normalizes to single object
+ */
+export type GetCompanyAdminProfileReturn = {
+  id: string;
+  owner_id: string;
+  name: string;
   slug: string;
-  title: string;
+  logo: string;
+  website: string;
   description: string;
-  category: string;
-  score: number;
-  reason: string;
+  size: string;
+  industry: string;
+  using_cursor_since: string;
+  featured: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
+/**
+ * get_trending_metrics_with_content RPC return type
+ * Returns trending content with engagement metrics
+ *
+ * Structure from database.types.ts
+ */
+export type GetTrendingMetricsReturn = Array<{
+  author: string;
+  bookmarks_total: number;
+  category: ContentCategory;
+  copies_total: number;
+  description: string;
+  engagement_score: number;
+  freshness_score: number;
+  slug: string;
+  source: string;
+  tags: string[];
+  title: string;
+  trending_score: number;
+  views_total: number;
+}>;
+
+/**
+ * get_popular_content RPC return type
+ * Returns popular content sorted by view/copy counts
+ *
+ * Structure from database.types.ts
+ */
+export type GetPopularContentReturn = Array<{
+  author: string;
+  category: ContentCategory;
+  copy_count: number;
+  description: string;
+  popularity_score: number;
+  slug: string;
+  tags: string[];
+  title: string;
+  view_count: number;
+}>;
+
+/**
+ * get_recent_content RPC return type
+ * Returns recently added content (simplified - only fields used in trending page)
+ *
+ * Structure from usage: /src/lib/data/content/trending.ts:46-54
+ * Full RPC returns many more fields, but trending page only uses these
+ */
+export type GetRecentContentReturn = Array<{
+  category: ContentCategory | null;
+  slug: string;
+  title: string | null;
+  description: string | null;
+  author: string | null;
+  tags: string[] | null;
+  created_at: string | null;
 }>;
 
 export type TrackSponsoredEventReturn = { success: boolean };
@@ -665,7 +1080,7 @@ export type GetSubmissionDashboardReturn = {
   recent: Array<{
     id: string | number;
     content_name: string;
-    content_type: string;
+    content_type: DatabaseGenerated['public']['Enums']['submission_type'];
     merged_at: string;
     user?: { name: string; slug: string } | null;
   }>;
@@ -699,7 +1114,17 @@ export type GetAccountDashboardReturn = {
  * Structure from usage: /src/app/account/companies/page.tsx:67
  */
 export type GetUserCompaniesReturn = {
-  companies: Array<Tables<'companies'>>;
+  companies: Array<
+    Tables<'companies'> & {
+      stats?: {
+        total_jobs?: number;
+        active_jobs?: number;
+        total_views?: number;
+        total_clicks?: number;
+        latest_job_posted_at?: string | null;
+      };
+    }
+  >;
 };
 
 /**
@@ -731,7 +1156,7 @@ export type GetUserCollectionDetailReturn = {
   items: Array<{
     id: string;
     collection_id: string;
-    content_type: string;
+    content_type: ContentCategory;
     content_slug: string;
     notes: string | null;
     order: number;
@@ -775,6 +1200,35 @@ export type GetContentTemplatesReturn = Array<{
   tags?: string;
   [key: string]: unknown; // Allow additional dynamic fields
 }>;
+
+/**
+ * get_user_sponsorships RPC return type
+ * Returns array of sponsored content items owned by user
+ */
+export type GetUserSponsorshipsReturn = Array<Tables<'sponsored_content'>>;
+
+/**
+ * get_similar_content RPC return type
+ * Returns similar content items with similarity scores and metadata
+ */
+export type GetSimilarContentReturn = {
+  similar_items: Array<{
+    slug: string;
+    title: string;
+    description?: string;
+    category: ContentCategory;
+    score?: number;
+    tags?: string[];
+    similarity_factors?: DatabaseGenerated['public']['Tables']['content']['Row']['metadata'];
+    calculated_at?: string;
+    url?: string;
+  }>;
+  source_item: {
+    slug: string;
+    category: ContentCategory;
+  };
+  algorithm_version?: string;
+};
 
 /**
  * get_active_notifications RPC return type

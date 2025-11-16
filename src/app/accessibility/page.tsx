@@ -1,6 +1,9 @@
 import { NavLink } from '@/src/components/core/navigation/navigation-link';
-import { APP_CONFIG, SOCIAL_LINKS } from '@/src/lib/constants';
+import { APP_CONFIG } from '@/src/lib/data/config/constants';
+import { getContactChannels } from '@/src/lib/data/marketing/contact';
+import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 
 export const metadata = generatePageMetadata('/accessibility');
 
@@ -10,19 +13,29 @@ export const metadata = generatePageMetadata('/accessibility');
  */
 export const revalidate = false;
 
+function getLastUpdatedDate(): string {
+  try {
+    return new Date().toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to format accessibility last updated date');
+    logger.error('AccessibilityPage: last updated date formatting failed', normalized);
+    return 'Unavailable';
+  }
+}
+
 export default function AccessibilityPage() {
+  const lastUpdated = getLastUpdatedDate();
+  const channels = getContactChannels();
+
   return (
     <div className="container mx-auto max-w-4xl px-4 py-8 sm:py-12">
       <div className="prose prose-invert max-w-none">
         <h1 className="mb-6 font-bold text-3xl sm:text-4xl">Accessibility Statement</h1>
-        <p className="mb-8 text-muted-foreground">
-          Last updated:{' '}
-          {new Date().toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-          })}
-        </p>
+        <p className="mb-8 text-muted-foreground">Last updated: {lastUpdated}</p>
 
         <section className="mb-8">
           <h2 className="mb-4 font-semibold text-2xl">Our Commitment</h2>
@@ -140,18 +153,14 @@ export default function AccessibilityPage() {
           </p>
           <ul className="list-disc space-y-2 pl-6">
             <li>
-              Email: <NavLink href={`mailto:${SOCIAL_LINKS.email}`}>{SOCIAL_LINKS.email}</NavLink>
+              Email: <NavLink href={`mailto:${channels.email}`}>{channels.email}</NavLink>
             </li>
             <li>
               Contact form: <NavLink href="/contact">Contact Us</NavLink>
             </li>
             <li>
               GitHub Issues:{' '}
-              <NavLink
-                href={`${SOCIAL_LINKS.github}/issues`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
+              <NavLink href={`${channels.github}/issues`} target="_blank" rel="noopener noreferrer">
                 Report an Issue
               </NavLink>
             </li>

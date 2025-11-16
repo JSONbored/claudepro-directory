@@ -5,7 +5,9 @@
 import { headers } from 'next/headers';
 import { createSafeActionClient, DEFAULT_SERVER_ERROR_MESSAGE } from 'next-safe-action';
 import { z } from 'zod';
+import { getAuthenticatedUserFromClient } from '@/src/lib/auth/get-authenticated-user';
 import { logger } from '@/src/lib/logger';
+import { logActionFailure, normalizeError } from '@/src/lib/utils/error.utils';
 
 const actionMetadataSchema = z.object({
   actionName: z.string().min(1),
@@ -19,13 +21,14 @@ export const actionClient = createSafeActionClient({
     return actionMetadataSchema;
   },
   handleServerError(error) {
-    logger.error('Server action error', error instanceof Error ? error : new Error(String(error)), {
-      errorType: error.constructor?.name || 'Unknown',
+    const normalized = normalizeError(error);
+    logger.error('Server action error', normalized, {
+      errorType: normalized.constructor?.name || 'Unknown',
     });
     if (process.env.NODE_ENV === 'production') {
       return DEFAULT_SERVER_ERROR_MESSAGE;
     }
-    return error.message || DEFAULT_SERVER_ERROR_MESSAGE;
+    return normalized.message || DEFAULT_SERVER_ERROR_MESSAGE;
   },
 }).use(async ({ next }) => {
   const startTime = performance.now();
@@ -40,7 +43,19 @@ export const actionClient = createSafeActionClient({
   });
 });
 
-export const rateLimitedAction = actionClient.use(async ({ next, metadata }) => {
+const loggedAction = actionClient.use(async ({ next, metadata }) => {
+  try {
+    return await next();
+  } catch (error) {
+    const actionName = metadata?.actionName ?? 'unknown';
+    logActionFailure(actionName, error, {
+      category: metadata?.category ?? 'uncategorized',
+    });
+    throw error;
+  }
+});
+
+export const rateLimitedAction = loggedAction.use(async ({ next, metadata }) => {
   const parsedMetadata = actionMetadataSchema.safeParse(metadata);
   if (!parsedMetadata.success) {
     logger.error('Invalid action metadata', new Error(parsedMetadata.error.message), {
@@ -57,12 +72,11 @@ export const authedAction = rateLimitedAction.use(async ({ next, metadata }) => 
   const { createClient } = await import('@/src/lib/supabase/server');
   const supabase = await createClient();
 
-  const {
-    data: { user },
-    error,
-  } = await supabase.auth.getUser();
+  const authResult = await getAuthenticatedUserFromClient(supabase, {
+    context: metadata?.actionName || 'authedAction',
+  });
 
-  if (error || !user) {
+  if (!authResult.user) {
     const headersList = await headers();
     const clientIP =
       headersList.get('cf-connecting-ip') ||
@@ -75,17 +89,17 @@ export const authedAction = rateLimitedAction.use(async ({ next, metadata }) => 
       clientIP,
       path: referer,
       actionName: metadata?.actionName || 'unknown',
-      reason: error?.message || 'No valid session',
-      errorCode: error?.name || 'AUTH_REQUIRED',
+      reason: authResult.error?.message || 'No valid session',
+      errorCode: authResult.error?.name || 'AUTH_REQUIRED',
     });
 
     throw new Error('Unauthorized. Please sign in to continue.');
   }
 
   const authCtx: { userId: string; userEmail?: string } = {
-    userId: user.id,
+    userId: authResult.user.id,
   };
-  if (user.email) authCtx.userEmail = user.email;
+  if (authResult.user.email) authCtx.userEmail = authResult.user.email;
 
   return next({
     ctx: authCtx,

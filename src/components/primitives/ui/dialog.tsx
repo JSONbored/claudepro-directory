@@ -17,7 +17,9 @@ import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { motion } from 'motion/react';
 import type * as React from 'react';
 import { useEffect, useState } from 'react';
+import { getAnimationConfig } from '@/src/lib/actions/feature-flags.actions';
 import { X } from '@/src/lib/icons';
+import { logger } from '@/src/lib/logger';
 import { POSITION_PATTERNS, STATE_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
 
@@ -66,16 +68,19 @@ const DialogContent = ({
   });
 
   useEffect(() => {
-    import('@/src/lib/flags')
-      .then(({ animationConfigs }) => animationConfigs())
-      .then((config) => {
+    getAnimationConfig({})
+      .then((result) => {
+        if (!result?.data) return;
+        const config = result.data;
         setSpringSmooth({
           type: 'spring' as const,
-          stiffness: (config['animation.spring.smooth.stiffness'] as number) ?? 300,
-          damping: (config['animation.spring.smooth.damping'] as number) ?? 25,
+          stiffness: config['animation.spring.smooth.stiffness'],
+          damping: config['animation.spring.smooth.damping'],
         });
       })
-      .catch(() => {});
+      .catch((error) => {
+        logger.error('DialogContent: failed to load animation config', error);
+      });
   }, []);
 
   return (

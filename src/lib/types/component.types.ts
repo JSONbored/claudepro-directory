@@ -3,15 +3,16 @@
  * Database function validate_content_metadata() enforces all validation rules
  */
 
-import type { CategoryId } from '@/src/lib/config/category-config';
-import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
-import type { SearchResult } from '@/src/lib/search/server-search';
-import type { Database } from '@/src/types/database.types';
+import type { CategoryId } from '@/src/lib/data/config/category';
+import type { ContentItem } from '@/src/lib/data/content';
+import type { SearchResult } from '@/src/lib/edge/search-client';
 import type {
+  ContentCategory,
   GetEnrichedContentListReturn,
   HomepageContentItem,
+  SortOption,
+  Tables,
 } from '@/src/types/database-overrides';
-import type { SortOption } from './content-filter.types';
 import type { HomePageClientProps } from './page-props.types';
 
 export type EnrichedContentItem = GetEnrichedContentListReturn[number];
@@ -30,6 +31,8 @@ export interface ConfigCardProps {
   enableSwipeGestures?: boolean;
   useViewTransitions?: boolean;
   showBorderBeam?: boolean;
+  /** Optional search query for highlighting search terms in title/description */
+  searchQuery?: string;
 }
 
 export type { HomePageClientProps, ContentItem };
@@ -59,12 +62,12 @@ export interface ErrorFallbackProps {
 }
 
 export interface JobCardProps {
-  job: Database['public']['Tables']['jobs']['Row'];
+  job: Tables<'jobs'>;
 }
 
 export interface FilterState {
-  sort?: string;
-  category?: string;
+  sort?: SortOption;
+  category?: ContentCategory;
   author?: string;
   dateRange?: string;
   popularity?: [number, number];
@@ -84,9 +87,9 @@ export interface UnifiedSearchProps {
 }
 
 export interface TrendingContentProps {
-  trending?: ContentItem[];
-  popular?: ContentItem[];
-  recent?: ContentItem[];
+  trending?: DisplayableContent[];
+  popular?: DisplayableContent[];
+  recent?: DisplayableContent[];
   category?: CategoryId;
   limit?: number;
   period?: 'day' | 'week' | 'month' | 'all';

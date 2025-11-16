@@ -1,6 +1,6 @@
 /**
  * Submit Page - Database-First Community Submissions
- * All stats/recent/contributors from Supabase server actions.
+ * All stats/recent/contributors from data layer with edge caching.
  */
 
 import dynamic from 'next/dynamic';
@@ -8,11 +8,13 @@ import { JobsPromo } from '@/src/components/core/domain/jobs/jobs-banner';
 import { SubmitFormClient } from '@/src/components/core/forms/content-submission-form';
 import { SidebarActivityCard } from '@/src/components/core/forms/sidebar-activity-card';
 import { SubmitPageHero } from '@/src/components/core/forms/submit-page-hero';
-import { getSubmissionFormConfig } from '@/src/lib/forms/submission-form-config';
+import { getSubmissionDashboard } from '@/src/lib/data/account/submissions';
+import { getContentTemplates } from '@/src/lib/data/content/templates';
+import { getSubmissionFormFields } from '@/src/lib/data/forms/submission-form-fields';
 
 const NewsletterCTAVariant = dynamic(
   () =>
-    import('@/src/components/features/growth/newsletter').then((mod) => ({
+    import('@/src/components/features/growth/newsletter/newsletter-cta-variants').then((mod) => ({
       default: mod.NewsletterCTAVariant,
     })),
   {
@@ -24,28 +26,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primi
 import { TrendingUp } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 import type { Database } from '@/src/types/database.types';
-
-// Type for dashboard response - trust database validation
-type SubmissionDashboardResult = {
-  stats: { total: number; pending: number; merged_this_week: number };
-  recent: Array<{
-    id: string | number;
-    content_name: string;
-    content_type: string;
-    merged_at: string;
-    user?: { name: string; slug: string } | null;
-  }>;
-  contributors: Array<{
-    name: string;
-    slug: string;
-    rank: number;
-    mergedCount: number;
-  }>;
-};
 
 const SUBMISSION_TIPS = [
   'Be specific in your descriptions - help users understand what your config does',
@@ -85,47 +69,62 @@ export const metadata = generatePageMetadata('/submit');
 export const revalidate = false;
 
 export default async function SubmitPage() {
-  const supabase = await createClient();
-
-  let data: unknown;
-  let error: unknown;
-
-  if (typeof supabase.rpc === 'function') {
-    ({ data, error } = await supabase.rpc('get_submission_dashboard', {
-      p_recent_limit: 5,
-      p_contributors_limit: 5,
-    }));
-  } else {
-    logger.warn(
-      'Supabase RPC unavailable (mock client fallback detected); using empty submission dashboard data.'
-    );
+  // Fetch all data via data layer (edge-cached)
+  let dashboardData: Awaited<ReturnType<typeof getSubmissionDashboard>> | null = null;
+  try {
+    dashboardData = await getSubmissionDashboard(5, 5);
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to load submission dashboard');
+    logger.error('SubmitPage: getSubmissionDashboard failed', normalized, {
+      recentCount: 5,
+      statsCount: 5,
+    });
+    throw normalized;
   }
 
-  if (error) {
-    logger.error(
-      'Failed to fetch submission dashboard',
-      error instanceof Error ? error : new Error(String(error))
-    );
+  if (!dashboardData) {
+    logger.warn('SubmitPage: getSubmissionDashboard returned no data', {
+      recentCount: 5,
+      statsCount: 5,
+    });
   }
 
-  // Trust database types - PostgreSQL validates structure
-  const result = (data as SubmissionDashboardResult | null) || null;
+  let formConfig: Awaited<ReturnType<typeof getSubmissionFormFields>> | null = null;
+  try {
+    formConfig = await getSubmissionFormFields();
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to load submission form config');
+    logger.error('SubmitPage: getSubmissionFormFields failed', normalized);
+    throw normalized;
+  }
 
-  const stats = result?.stats || { total: 0, pending: 0, merged_this_week: 0 };
-  const recentMerged = (
-    (result?.recent || []) as Array<{
-      id: string | number;
-      content_name: string;
-      content_type: Database['public']['Enums']['submission_type'];
-      merged_at: string;
-      user?: { name: string; slug: string } | null;
-    }>
-  ).map((submission) => ({
+  if (!formConfig) {
+    logger.error('SubmitPage: submission form config is undefined');
+    throw new Error('Submission form configuration is unavailable');
+  }
+
+  let templates: Awaited<ReturnType<typeof getContentTemplates>> | null = null;
+  try {
+    templates = await getContentTemplates('agents');
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to load submission templates');
+    logger.error('SubmitPage: getContentTemplates failed', normalized, {
+      category: 'agents',
+    });
+    throw normalized;
+  }
+
+  if (!templates || templates.length === 0) {
+    logger.warn('SubmitPage: no templates returned from getContentTemplates', {
+      category: 'agents',
+    });
+  }
+
+  const stats = dashboardData?.stats || { total: 0, pending: 0, merged_this_week: 0 };
+  const recentMerged = (dashboardData?.recent || []).map((submission) => ({
     ...submission,
     merged_at_formatted: formatTimeAgo(submission.merged_at),
   }));
-
-  const formConfig = await getSubmissionFormConfig();
 
   return (
     <div className="container mx-auto max-w-7xl px-4 py-8 sm:py-12">
@@ -134,7 +133,7 @@ export default async function SubmitPage() {
 
       <div className="grid items-start gap-6 lg:grid-cols-[2fr_1fr] lg:gap-8">
         <div className="w-full min-w-0">
-          <SubmitFormClient formConfig={formConfig} />
+          <SubmitFormClient formConfig={formConfig} templates={templates} />
         </div>
 
         <aside className="w-full space-y-4 sm:space-y-6 lg:sticky lg:top-24 lg:h-fit">

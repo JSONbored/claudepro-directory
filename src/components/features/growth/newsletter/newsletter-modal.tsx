@@ -12,10 +12,11 @@ import {
 } from '@/src/components/primitives/ui/sheet';
 import type { NewsletterSource } from '@/src/hooks/use-newsletter';
 import { useNewsletter } from '@/src/hooks/use-newsletter';
-import { NEWSLETTER_CTA_CONFIG } from '@/src/lib/config/category-config';
-import { trackInteraction } from '@/src/lib/edge/client';
+import { usePulse } from '@/src/hooks/use-pulse';
+import { NEWSLETTER_CTA_CONFIG } from '@/src/lib/data/config/category';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
+import { logUnhandledPromise } from '@/src/lib/utils/error.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
 import type { CopyType } from '@/src/types/database-overrides';
 
@@ -37,6 +38,7 @@ export function NewsletterModal({
   slug,
 }: NewsletterModalProps) {
   const [showTime, setShowTime] = useState<number | null>(null);
+  const pulse = usePulse();
 
   const { email, setEmail, isSubmitting, subscribe } = useNewsletter({
     source,
@@ -63,21 +65,24 @@ export function NewsletterModal({
       const now = Date.now();
       setShowTime(now);
 
-      trackInteraction({
-        content_type: null,
-        content_slug: null,
-        interaction_type: 'click',
-        metadata: {
-          action: 'email_modal_shown',
-          trigger_source: 'post_copy',
-          copy_type: copyType,
-          session_copy_count: 1,
-        },
-      }).catch(() => {
-        // Analytics failure should not affect UX
-      });
+      pulse
+        .click({
+          category: null,
+          slug: null,
+          metadata: {
+            action: 'email_modal_shown',
+            trigger_source: 'post_copy',
+            copy_type: copyType,
+            session_copy_count: 1,
+          },
+        })
+        .catch((error) => {
+          logUnhandledPromise('NewsletterModal: modal shown tracking failed', error, {
+            copyType,
+          });
+        });
     }
-  }, [open, copyType]);
+  }, [open, copyType, pulse]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -97,19 +102,22 @@ export function NewsletterModal({
     if (showTime) {
       const timeShown = Date.now() - showTime;
 
-      trackInteraction({
-        content_type: null,
-        content_slug: null,
-        interaction_type: 'click',
-        metadata: {
-          action: 'email_modal_dismissed',
-          trigger_source: 'post_copy',
-          dismissal_method: 'maybe_later',
-          time_shown_ms: timeShown,
-        },
-      }).catch(() => {
-        // Analytics failure should not affect UX
-      });
+      pulse
+        .click({
+          category: null,
+          slug: null,
+          metadata: {
+            action: 'email_modal_dismissed',
+            trigger_source: 'post_copy',
+            dismissal_method: 'maybe_later',
+            time_shown_ms: timeShown,
+          },
+        })
+        .catch((error) => {
+          logUnhandledPromise('NewsletterModal: maybe later tracking failed', error, {
+            copyType,
+          });
+        });
     }
 
     onOpenChange(false);
@@ -120,19 +128,22 @@ export function NewsletterModal({
     if (!open && showTime) {
       const timeShown = Date.now() - showTime;
 
-      trackInteraction({
-        content_type: null,
-        content_slug: null,
-        interaction_type: 'click',
-        metadata: {
-          action: 'email_modal_dismissed',
-          trigger_source: 'post_copy',
-          dismissal_method: 'close_button',
-          time_shown_ms: timeShown,
-        },
-      }).catch(() => {
-        // Analytics failure should not affect UX
-      });
+      pulse
+        .click({
+          category: null,
+          slug: null,
+          metadata: {
+            action: 'email_modal_dismissed',
+            trigger_source: 'post_copy',
+            dismissal_method: 'close_button',
+            time_shown_ms: timeShown,
+          },
+        })
+        .catch((error) => {
+          logUnhandledPromise('NewsletterModal: close tracking failed', error, {
+            copyType,
+          });
+        });
     }
 
     onOpenChange(open);

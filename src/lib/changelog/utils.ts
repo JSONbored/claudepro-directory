@@ -2,7 +2,7 @@
  * Changelog Utilities - Date formatting and URL generation for changelog entries
  */
 
-import { APP_CONFIG } from '@/src/lib/constants';
+import { APP_CONFIG } from '@/src/lib/data/config/constants';
 
 export function formatChangelogDate(isoDate: string): string {
   try {

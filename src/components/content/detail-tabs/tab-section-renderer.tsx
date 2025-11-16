@@ -6,17 +6,18 @@
 import dynamic from 'next/dynamic';
 import { JSONSectionRenderer } from '@/src/components/content/json-to-sections';
 import { ReviewListSection } from '@/src/components/core/domain/reviews/review-list-section';
-import type { CategoryId, SectionId } from '@/src/lib/config/category-config.types';
-import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
+import type { CategoryId, SectionId } from '@/src/lib/data/config/category/category-config.types';
+import type { ContentItem } from '@/src/lib/data/content';
 import type { ProcessedSectionData } from '@/src/lib/types/detail-tabs.types';
-import type { Database } from '@/src/types/database.types';
+import { ensureStringArray } from '@/src/lib/utils/data.utils';
+import type { GetContentDetailCompleteReturn } from '@/src/types/database-overrides';
 
 // Dynamic import for unified section component (code splitting)
 const UnifiedSection = dynamic(() => import('@/src/components/content/sections/unified-section'));
 
 export interface TabSectionRendererProps {
   sectionId: SectionId;
-  item: ContentItem;
+  item: ContentItem | GetContentDetailCompleteReturn['content'];
   sectionData: ProcessedSectionData;
   config: {
     typeName: string;
@@ -142,18 +143,21 @@ export function TabSectionRenderer({
         />
       );
 
-    case 'security':
+    case 'security': {
       if (!(config.sections.security && 'security' in item)) return null;
+      const securityItems = ensureStringArray(item.security);
+      if (securityItems.length === 0) return null;
       return (
         <UnifiedSection
           variant="list"
           title="Security Best Practices"
           description="Important security considerations"
-          items={item.security as string[]}
+          items={securityItems}
           category={item.category as CategoryId}
           dotColor="bg-orange-500"
         />
       );
+    }
 
     case 'reviews':
       return (
@@ -168,17 +172,13 @@ export function TabSectionRenderer({
 
     case 'collection_items':
       // Collection sections passed as pre-rendered React nodes
-      return collectionSections ? <>{collectionSections}</> : null;
+      return collectionSections ? collectionSections : null;
 
     case 'guide_sections':
       if (!guideSections || guideSections.length === 0) return null;
-      return (
-        <JSONSectionRenderer
-          sections={
-            guideSections as unknown as Database['public']['Tables']['content']['Row']['metadata']
-          }
-        />
-      );
+      // guideSections is already a processed array of sections with html
+      // JSONSectionRenderer accepts arrays (checks Array.isArray internally)
+      return <JSONSectionRenderer sections={guideSections} />;
 
     default:
       return null;

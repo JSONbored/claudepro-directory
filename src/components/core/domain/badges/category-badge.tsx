@@ -12,7 +12,10 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/src/components/primitives/ui/tooltip';
+import { getAnimationConfig } from '@/src/lib/actions/feature-flags.actions';
+import type { CategoryId } from '@/src/lib/data/config/category';
 import { Star, TrendingUp, Zap } from '@/src/lib/icons';
+import { logger } from '@/src/lib/logger';
 import { SEMANTIC_COLORS } from '@/src/lib/semantic-colors';
 import { ANIMATION_CONSTANTS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
@@ -39,6 +42,8 @@ const baseBadgeVariants = cva(
   }
 );
 
+// Category badge styles - only for categories that have badge styles defined
+// Note: 'changelog' and 'jobs' are ContentCategory but not CategoryId (no badge styles)
 const categoryBadgeStyles = {
   rules: 'badge-category-rules',
   mcp: 'badge-category-mcp',
@@ -49,7 +54,7 @@ const categoryBadgeStyles = {
   collections: 'badge-category-collections',
   guides: 'badge-category-guides',
   skills: 'badge-category-skills',
-} as const;
+} as const satisfies Partial<Record<CategoryId, string>>;
 
 const sourceBadgeStyles = {
   official: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
@@ -95,16 +100,7 @@ export type UnifiedBadgeProps =
   | {
       /** Category/content-type badge */
       variant: 'category';
-      category:
-        | 'rules'
-        | 'mcp'
-        | 'agents'
-        | 'commands'
-        | 'hooks'
-        | 'statuslines'
-        | 'collections'
-        | 'guides'
-        | 'skills';
+      category: CategoryId;
       children: React.ReactNode;
       className?: string;
     }
@@ -137,6 +133,7 @@ export type UnifiedBadgeProps =
       onClick?: () => void;
       onRemove?: () => void;
       className?: string;
+      children?: React.ReactNode; // Optional children for highlighted content
     }
   | {
       /** New indicator (animated dot with tooltip) */
@@ -222,16 +219,19 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
   });
 
   useEffect(() => {
-    import('@/src/lib/flags')
-      .then(({ animationConfigs }) => animationConfigs())
-      .then((config) => {
+    getAnimationConfig({})
+      .then((result) => {
+        if (!result?.data) return;
+        const config = result.data;
         setSpringDefault({
           type: 'spring' as const,
-          stiffness: (config['animation.spring.default.stiffness'] as number) ?? 400,
-          damping: (config['animation.spring.default.damping'] as number) ?? 17,
+          stiffness: config['animation.spring.default.stiffness'],
+          damping: config['animation.spring.default.damping'],
         });
       })
-      .catch(() => {});
+      .catch((error) => {
+        logger.error('UnifiedBadge: failed to load animation config', error);
+      });
   }, []);
   // Base badge variant
   if (props.variant === 'base') {
@@ -257,7 +257,8 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
         <div
           className={cn(
             `border font-medium text-xs ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT} hover:shadow-md hover:shadow-primary/20`,
-            categoryBadgeStyles[props.category],
+            categoryBadgeStyles[props.category as keyof typeof categoryBadgeStyles] ??
+              'badge-category-rules',
             props.className
           )}
         >
@@ -360,7 +361,7 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
           )}
           onClick={handleClick}
         >
-          {props.tag}
+          {props.children || props.tag}
           {props.onRemove && (
             <button
               type="button"
@@ -388,7 +389,7 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
         )}
         onClick={handleClick}
       >
-        {props.tag}
+        {props.children || props.tag}
         {props.onRemove && (
           <button
             type="button"

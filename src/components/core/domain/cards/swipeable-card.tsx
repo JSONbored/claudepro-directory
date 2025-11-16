@@ -29,7 +29,9 @@
 import { motion, useMotionValue, useTransform } from 'motion/react';
 import type { ReactNode } from 'react';
 import { useEffect, useState } from 'react';
+import { getAnimationConfig } from '@/src/lib/actions/feature-flags.actions';
 import { Bookmark, Copy as CopyIcon } from '@/src/lib/icons';
+import { logger } from '@/src/lib/logger';
 import { SEMANTIC_COLORS } from '@/src/lib/semantic-colors';
 import { POSITION_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
 
@@ -87,16 +89,19 @@ export function SwipeableCardWrapper({
   }, []);
 
   useEffect(() => {
-    import('@/src/lib/flags')
-      .then(({ animationConfigs }) => animationConfigs())
-      .then((config) => {
+    getAnimationConfig({})
+      .then((result) => {
+        if (!result?.data) return;
+        const config = result.data;
         setSpringSmooth({
           type: 'spring' as const,
-          stiffness: (config['animation.spring.smooth.stiffness'] as number) ?? 300,
-          damping: (config['animation.spring.smooth.damping'] as number) ?? 25,
+          stiffness: config['animation.spring.smooth.stiffness'],
+          damping: config['animation.spring.smooth.damping'],
         });
       })
-      .catch(() => {});
+      .catch((error) => {
+        logger.error('SwipeableCardWrapper: failed to load animation config', error);
+      });
   }, []);
 
   // Motion values for drag tracking

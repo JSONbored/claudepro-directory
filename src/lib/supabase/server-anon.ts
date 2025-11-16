@@ -15,6 +15,7 @@
  */
 
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
+import { logger } from '@/src/lib/logger';
 import type { Database } from '@/src/types/database.types';
 
 export function createAnonClient() {
@@ -24,10 +25,10 @@ export function createAnonClient() {
   // In development without env vars, return a mock client
   if (!(supabaseUrl && supabaseAnonKey)) {
     if (process.env.NODE_ENV === 'development') {
-      // biome-ignore lint/suspicious/noConsole: Intentional development warning for missing Supabase credentials
-      console.warn(
-        '⚠️  Supabase env vars not found - using mock anon client for development. Database features will not work.'
-      );
+      logger.warn('createAnonClient: Supabase env vars missing, falling back to mock client', {
+        supabaseUrlPresent: Boolean(supabaseUrl),
+        supabaseAnonKeyPresent: Boolean(supabaseAnonKey),
+      });
 
       type MockQueryResult = Promise<{ data: null; error: null }>;
       const promise = Promise.resolve({ data: null, error: null }) as MockQueryResult;
@@ -87,8 +88,6 @@ export function createAnonClient() {
       'Missing required Supabase environment variables: NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY'
     );
   }
-
-  // Note: No logger here - logger uses Date which breaks ISR static generation
 
   return createSupabaseClient<Database>(supabaseUrl, supabaseAnonKey, {
     auth: {

@@ -19,7 +19,6 @@
  * @module components/layout/user-menu
  */
 
-import type { User } from '@supabase/supabase-js';
 import { motion } from 'motion/react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -35,8 +34,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/src/components/primitives/ui/dropdown-menu';
+import { getAnimationConfig } from '@/src/lib/actions/feature-flags.actions';
+import { useAuthenticatedUser } from '@/src/lib/auth/use-authenticated-user';
 import { Activity, BookOpen, LogOut, Settings, User as UserIcon } from '@/src/lib/icons';
-import { createClient } from '@/src/lib/supabase/client';
+import { logger } from '@/src/lib/logger';
 import { DIMENSIONS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { toasts } from '@/src/lib/utils/toast.utils';
 
@@ -45,8 +46,6 @@ interface UserMenuProps {
 }
 
 export function UserMenu({ className }: UserMenuProps) {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
   const [signingOut, setSigningOut] = useState(false);
   const [springDefault, setSpringDefault] = useState({
     type: 'spring' as const,
@@ -54,50 +53,26 @@ export function UserMenu({ className }: UserMenuProps) {
     damping: 17,
   });
   const router = useRouter();
-  const supabase = createClient();
-
-  // Check auth state on mount
-  useEffect(() => {
-    const getUser = async () => {
-      try {
-        const {
-          data: { user },
-        } = await supabase.auth.getUser();
-        setUser(user);
-      } catch {
-        // Fail silently - user menu will show sign in state
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    getUser().catch(() => {
-      // Error already handled in try-catch
-    });
-
-    // Listen for auth changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [supabase]);
+  const { user, status, supabaseClient } = useAuthenticatedUser({
+    context: 'UserMenu',
+  });
+  const loading = status === 'loading';
+  const supabase = supabaseClient;
 
   useEffect(() => {
-    import('@/src/lib/flags')
-      .then(({ animationConfigs }) => animationConfigs())
-      .then((config) => {
+    getAnimationConfig({})
+      .then((result) => {
+        if (!result?.data) return;
+        const config = result.data;
         setSpringDefault({
           type: 'spring' as const,
-          stiffness: (config['animation.spring.default.stiffness'] as number) ?? 400,
-          damping: (config['animation.spring.default.damping'] as number) ?? 17,
+          stiffness: config['animation.spring.default.stiffness'],
+          damping: config['animation.spring.default.damping'],
         });
       })
-      .catch(() => {});
+      .catch((error) => {
+        logger.error('UserMenu: failed to load animation config', error);
+      });
   }, []);
 
   const handleSignOut = async () => {

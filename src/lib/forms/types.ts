@@ -1,8 +1,13 @@
-import type { Enums } from '@/src/types/database.types';
+import type {
+  FormFieldType,
+  FormGridColumn,
+  FormIconPosition,
+  SubmissionType,
+} from '@/src/types/database-overrides';
 
-export type FieldType = Enums<'form_field_type'>;
-export type GridColumn = Enums<'form_grid_column'>;
-export type IconPosition = Enums<'form_icon_position'>;
+export type FieldType = FormFieldType;
+export type GridColumn = FormGridColumn;
+export type IconPosition = FormIconPosition;
 
 export interface SelectOption {
   value: string;
@@ -56,7 +61,17 @@ export interface ContentTypeConfig {
   fields: FieldDefinition[];
 }
 
-export const SUBMISSION_CONTENT_TYPES = [
+/**
+ * Submission content type - extracted from database enum
+ * Use this type for type-safe submission content categories
+ */
+export type SubmissionContentType = SubmissionType;
+
+/**
+ * Submission content types array (for runtime use, e.g., form dropdowns)
+ * TypeScript will validate that all values match the database enum
+ */
+export const SUBMISSION_CONTENT_TYPES: readonly SubmissionType[] = [
   'agents',
   'mcp',
   'rules',
@@ -65,8 +80,6 @@ export const SUBMISSION_CONTENT_TYPES = [
   'statuslines',
   'skills',
 ] as const;
-
-export type SubmissionContentType = (typeof SUBMISSION_CONTENT_TYPES)[number];
 
 export interface SubmissionFormSection {
   nameField: TextFieldDefinition | null;

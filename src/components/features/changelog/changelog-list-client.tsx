@@ -10,13 +10,13 @@ import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge
 import { BaseCard } from '@/src/components/core/domain/cards/content-card-base';
 import { CategoryFilter } from '@/src/components/features/changelog/changelog-category-filter';
 import { Tabs, TabsContent } from '@/src/components/primitives/ui/tabs';
-import type { ChangelogCategory, ChangelogEntry } from '@/src/lib/changelog/loader';
 import {
   formatChangelogDateShort,
   getChangelogPath,
   getNonEmptyCategories,
   getRelativeTime,
 } from '@/src/lib/changelog/utils';
+import type { ChangelogCategory, ChangelogEntry } from '@/src/lib/data/changelog';
 import { ArrowRight, Calendar } from '@/src/lib/icons';
 import { BADGE_COLORS, UI_CLASSES } from '@/src/lib/ui-constants';
 
@@ -26,6 +26,17 @@ export interface ChangelogListClientProps {
 }
 export function ChangelogListClient({ entries, categoryCounts }: ChangelogListClientProps) {
   const [activeCategory, setActiveCategory] = useState<'All' | ChangelogCategory>('All');
+
+  // Filter entries based on active category
+  const filteredEntries =
+    activeCategory === 'All'
+      ? entries
+      : entries.filter((entry) => {
+          if (!entry.changes || typeof entry.changes !== 'object') return false;
+          const changes = entry.changes as Record<string, unknown>;
+          const categoryChanges = changes[activeCategory];
+          return Array.isArray(categoryChanges) && categoryChanges.length > 0;
+        });
 
   return (
     <Tabs
@@ -40,7 +51,7 @@ export function ChangelogListClient({ entries, categoryCounts }: ChangelogListCl
       />
 
       <TabsContent value={activeCategory} className="mt-6">
-        {entries.length === 0 ? (
+        {filteredEntries.length === 0 ? (
           <output className="flex items-center justify-center py-12" aria-live="polite">
             <p className="text-lg text-muted-foreground">
               No changelog entries found for {activeCategory.toLowerCase()} category.
@@ -48,7 +59,7 @@ export function ChangelogListClient({ entries, categoryCounts }: ChangelogListCl
           </output>
         ) : (
           <div className="grid grid-cols-1 gap-6">
-            {entries.map((entry) => {
+            {filteredEntries.map((entry) => {
               const targetPath = getChangelogPath(entry.slug);
               const nonEmptyCategories = getNonEmptyCategories(entry.changes);
               const displayDate = getRelativeTime(entry.release_date);

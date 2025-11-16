@@ -7,16 +7,14 @@
 import { AnimatePresence, motion } from 'motion/react';
 import { memo } from 'react';
 import { Button } from '@/src/components/primitives/ui/button';
+import { useNotificationsContext } from '@/src/components/providers/notifications-provider';
 import type { Tables } from '@/src/types/database.types';
-
-type Notification = Tables<'notifications'>;
-
-import { type NotificationStore, useNotificationStore } from '@/src/lib/stores/notification-store';
 import { NotificationItem } from './notification-item';
 
+type NotificationRecord = Tables<'notifications'>;
+
 function NotificationListComponent() {
-  const notifications = useNotificationStore((state: NotificationStore) => state.notifications);
-  const dismissAll = useNotificationStore((state: NotificationStore) => state.dismissAll);
+  const { notifications, dismissAll } = useNotificationsContext();
 
   if (notifications.length === 0) {
     return (
@@ -37,7 +35,7 @@ function NotificationListComponent() {
       )}
 
       <AnimatePresence mode="popLayout">
-        {notifications.map((notification: Notification) => (
+        {notifications.map((notification: NotificationRecord) => (
           <motion.div key={notification.id} layout>
             <NotificationItem notification={notification} />
           </motion.div>

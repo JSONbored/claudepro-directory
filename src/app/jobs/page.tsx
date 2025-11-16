@@ -3,7 +3,6 @@
  * Single RPC call to filter_jobs() - all filtering in PostgreSQL
  */
 
-import { unstable_cache } from 'next/cache';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
@@ -19,18 +18,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/src/components/primitives/ui/select';
-import { ROUTES } from '@/src/lib/constants';
+import { ROUTES } from '@/src/lib/data/config/constants';
+import { getFilteredJobs, type JobsFilterResult } from '@/src/lib/data/jobs';
 import { Briefcase, Clock, Filter, MapPin, Plus, Search } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import type { PagePropsWithSearchParams } from '@/src/lib/schemas/app.schema';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-import { createAnonClient } from '@/src/lib/supabase/server-anon';
 import { POSITION_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
-import type { Tables } from '@/src/types/database.types';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 
 const NewsletterCTAVariant = dynamic(
   () =>
-    import('@/src/components/features/growth/newsletter').then((mod) => ({
+    import('@/src/components/features/growth/newsletter/newsletter-cta-variants').then((mod) => ({
       default: mod.NewsletterCTAVariant,
     })),
   {
@@ -52,7 +51,6 @@ export async function generateMetadata({ searchParams }: PagePropsWithSearchPara
 
 export default async function JobsPage({ searchParams }: PagePropsWithSearchParams) {
   const rawParams = await searchParams;
-  const supabase = createAnonClient();
 
   const searchQuery =
     (rawParams?.q as string) || (rawParams?.query as string) || (rawParams?.search as string);
@@ -73,43 +71,32 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
     limit,
   });
 
-  // Enhanced RPC: 2 queries → 1 (50% reduction)
-  // Wrapped in unstable_cache for additional performance boost
-  const { data: jobsData, error } = await unstable_cache(
-    async () => {
-      return supabase.rpc('filter_jobs', {
-        ...(searchQuery && { p_search_query: searchQuery }),
-        ...(category && category !== 'all' && { p_category: category }),
-        ...(employment && employment !== 'any' && { p_employment_type: employment }),
-        ...(remote && { p_remote_only: remote }),
-        ...(experience && experience !== 'any' && { p_experience_level: experience }),
-        p_limit: limit,
-        p_offset: offset,
-      });
-    },
-    [
-      `jobs-${searchQuery || ''}-${category || ''}-${employment || ''}-${remote}-${experience || ''}-${page}-${limit}`,
-    ],
-    {
-      revalidate: 1800, // 30 minutes (matches page ISR)
-      tags: ['jobs', ...(category ? [`jobs-${category}`] : [])],
-    }
-  )();
-
-  if (error) {
-    logger.error('Failed to load jobs page data', error);
+  let jobsResponse: JobsFilterResult | null = null;
+  try {
+    jobsResponse = await getFilteredJobs({
+      ...(searchQuery ? { searchQuery } : {}),
+      ...(category ? { category } : {}),
+      ...(employment ? { employment } : {}),
+      ...(experience ? { experience } : {}),
+      remote,
+      limit,
+      offset,
+    });
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to load jobs list');
+    logger.error('JobsPage: getFilteredJobs failed', normalized, {
+      hasSearch: Boolean(searchQuery),
+      category: category || 'all',
+      employment: employment || 'any',
+      experience: experience || 'any',
+      remote,
+      page,
+      limit,
+    });
   }
 
-  // Type assertion to database-generated Json type
-  type JobsResponse = {
-    jobs: Array<Tables<'jobs'>>;
-    total_count: number;
-  };
-
-  const { jobs, total_count } = (jobsData || {
-    jobs: [],
-    total_count: 0,
-  }) as unknown as JobsResponse;
+  const jobs = jobsResponse?.jobs ?? [];
+  const total_count = jobsResponse?.total_count ?? 0;
 
   const totalJobs = total_count;
 

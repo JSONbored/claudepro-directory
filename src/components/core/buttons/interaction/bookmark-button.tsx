@@ -6,18 +6,21 @@ import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
 import { Button } from '@/src/components/primitives/ui/button';
 import { useConfetti } from '@/src/hooks/use-confetti';
+import { usePulse } from '@/src/hooks/use-pulse';
+import { checkConfettiEnabled } from '@/src/lib/actions/feature-flags.actions';
 import { addBookmark, removeBookmark } from '@/src/lib/actions/user.actions';
-import { type CategoryId, isValidCategory } from '@/src/lib/config/category-config';
-import { featureFlags } from '@/src/lib/flags';
+import { type CategoryId, isValidCategory } from '@/src/lib/data/config/category';
 import { Bookmark, BookmarkCheck } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
+import { logClientWarning } from '@/src/lib/utils/error.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
+import type { ContentCategory } from '@/src/types/database-overrides';
 import type { ButtonStyleProps } from '../shared/button-types';
 
 export interface BookmarkButtonProps extends ButtonStyleProps {
-  contentType: string;
+  contentType: ContentCategory;
   contentSlug: string;
   initialBookmarked?: boolean;
   showLabel?: boolean;
@@ -37,6 +40,7 @@ export function BookmarkButton({
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
   const { celebrateBookmark } = useConfetti();
+  const pulse = usePulse();
 
   const handleToggle = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -63,6 +67,20 @@ export function BookmarkButton({
           if (result?.data?.success) {
             setIsBookmarked(false);
             toasts.success.bookmarkRemoved();
+
+            // Track bookmark removal
+            pulse
+              .bookmark({
+                category: validatedCategory,
+                slug: contentSlug,
+                action: 'remove',
+              })
+              .catch((error) => {
+                logClientWarning('BookmarkButton: bookmark removal tracking failed', error, {
+                  contentType,
+                  contentSlug,
+                });
+              });
           }
         } else {
           const result = await addBookmark({
@@ -74,9 +92,23 @@ export function BookmarkButton({
             setIsBookmarked(true);
             toasts.success.bookmarkAdded();
 
+            // Track bookmark addition
+            pulse
+              .bookmark({
+                category: validatedCategory,
+                slug: contentSlug,
+                action: 'add',
+              })
+              .catch((error) => {
+                logClientWarning('BookmarkButton: bookmark addition tracking failed', error, {
+                  contentType,
+                  contentSlug,
+                });
+              });
+
             // Confetti animation gated by feature flag
-            const confettiEnabled = await featureFlags.confettiAnimations();
-            if (confettiEnabled) {
+            const confettiResult = await checkConfettiEnabled({});
+            if (confettiResult?.data) {
               celebrateBookmark();
             }
           }
@@ -84,6 +116,11 @@ export function BookmarkButton({
 
         router.refresh();
       } catch (error) {
+        logClientWarning('BookmarkButton: toggle failed', error, {
+          contentType,
+          contentSlug,
+          wasBookmarked: isBookmarked,
+        });
         if (error instanceof Error && error.message.includes('signed in')) {
           toasts.raw.error('Please sign in to bookmark content', {
             action: {

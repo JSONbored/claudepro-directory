@@ -6,13 +6,14 @@
 import { notFound, redirect } from 'next/navigation';
 import { JobForm } from '@/src/components/core/forms/job-form';
 import { type UpdateJobInput, updateJob } from '@/src/lib/actions/jobs.actions';
+import { getAuthenticatedUser } from '@/src/lib/auth/get-authenticated-user';
+import { getUserJobById } from '@/src/lib/data/account/user-data';
+import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
-import type { Tables } from '@/src/types/database.types';
-
-// Force dynamic rendering - requires authentication
-export const dynamic = 'force-dynamic';
+import { ensureStringArray } from '@/src/lib/utils/data.utils';
+import { normalizeError } from '@/src/lib/utils/error.utils';
+import type { JobCategory } from '@/src/types/database-overrides';
 
 export const metadata = generatePageMetadata('/account/jobs/:id/edit');
 
@@ -22,40 +23,68 @@ interface EditJobPageProps {
 
 export default async function EditJobPage({ params }: EditJobPageProps) {
   const resolvedParams = await params;
-  const supabase = await createClient();
+  const { user } = await getAuthenticatedUser({ context: 'EditJobPage' });
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  if (!user) {
+    logger.warn('EditJobPage: unauthenticated access attempt', { jobId: resolvedParams.id });
+    redirect('/login');
+  }
 
-  if (!user) redirect('/login');
-
-  // Fetch job with ownership verification
-  const { data, error } = await supabase
-    .from('jobs')
-    .select('*')
-    .eq('id', resolvedParams.id)
-    .eq('user_id', user.id)
-    .single();
-
-  if (error || !data) notFound();
-
-  const job = data as Tables<'jobs'>;
+  let job: Awaited<ReturnType<typeof getUserJobById>> | null = null;
+  try {
+    job = await getUserJobById(user.id, resolvedParams.id);
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to load user job for edit page');
+    logger.error('EditJobPage: getUserJobById threw', normalized, {
+      jobId: resolvedParams.id,
+      userId: user.id,
+    });
+    throw normalized;
+  }
+  if (!job) {
+    logger.warn('EditJobPage: job not found or not owned by user', {
+      jobId: resolvedParams.id,
+      userId: user.id,
+    });
+    notFound();
+  }
 
   const handleSubmit = async (data: Omit<UpdateJobInput, 'job_id'>) => {
     'use server';
 
-    // Call updateJob server action (calls update_job RPC with ownership verification)
-    const result = await updateJob({
-      job_id: resolvedParams.id,
-      ...data,
-    });
-
-    if (result?.serverError) {
-      throw new Error(result.serverError);
+    let result: Awaited<ReturnType<typeof updateJob>>;
+    try {
+      result = await updateJob({
+        job_id: resolvedParams.id,
+        ...data,
+      });
+    } catch (error) {
+      const normalized = normalizeError(error, 'updateJob server action failed');
+      logger.error('EditJobPage: updateJob threw', normalized, {
+        jobId: resolvedParams.id,
+        userId: user.id,
+      });
+      throw normalized;
     }
 
-    if (result?.data?.success) {
+    if (result?.serverError) {
+      const normalized = normalizeError(result.serverError, 'updateJob server error response');
+      logger.error('EditJobPage: updateJob returned serverError', normalized, {
+        jobId: resolvedParams.id,
+        userId: user.id,
+      });
+      throw normalized;
+    }
+
+    if (!result?.data) {
+      logger.error('EditJobPage: updateJob returned no data', undefined, {
+        jobId: resolvedParams.id,
+        userId: user.id,
+      });
+      return { success: false };
+    }
+
+    if (result.data.success) {
       redirect('/account/jobs');
     }
 
@@ -80,10 +109,10 @@ export default async function EditJobPage({ params }: EditJobPageProps) {
           type: job.type,
           workplace: job.workplace,
           experience: job.experience,
-          category: job.category,
-          tags: Array.isArray(job.tags) ? (job.tags as string[]) : [],
-          requirements: Array.isArray(job.requirements) ? (job.requirements as string[]) : [],
-          benefits: Array.isArray(job.benefits) ? (job.benefits as string[]) : [],
+          category: job.category as JobCategory,
+          tags: ensureStringArray(job.tags),
+          requirements: ensureStringArray(job.requirements),
+          benefits: ensureStringArray(job.benefits),
           link: job.link,
           contact_email: job.contact_email,
           company_logo: job.company_logo,

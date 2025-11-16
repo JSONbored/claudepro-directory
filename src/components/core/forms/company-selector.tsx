@@ -5,22 +5,33 @@
  */
 
 import { Building2, Plus, Search } from 'lucide-react';
-import { useCallback, useEffect, useId, useState } from 'react';
+import { useCallback, useEffect, useId, useState, useTransition } from 'react';
 import { Button } from '@/src/components/primitives/ui/button';
 import { Input } from '@/src/components/primitives/ui/input';
 import { Label } from '@/src/components/primitives/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/src/components/primitives/ui/popover';
-import { createClient } from '@/src/lib/supabase/client';
+import {
+  createCompany,
+  getCompanyByIdAction,
+  searchCompaniesAction,
+} from '@/src/lib/actions/companies.actions';
+import { logger } from '@/src/lib/logger';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 import type { Database } from '@/src/types/database.types';
 
-type Company = Database['public']['Tables']['companies']['Row'];
+type Company = Pick<
+  Database['public']['Tables']['companies']['Row'],
+  'id' | 'name' | 'slug' | 'website' | 'description' | 'logo'
+>;
 
 interface CompanySelectorProps {
   value?: string | null; // company_id
   onChange: (companyId: string | null, companyName: string) => void;
   defaultCompanyName?: string | undefined; // For legacy text field migration
 }
+
+const DEFAULT_DEBOUNCE_MS = 300;
 
 export function CompanySelector({ value, onChange, defaultCompanyName }: CompanySelectorProps) {
   const buttonId = useId();
@@ -31,60 +42,109 @@ export function CompanySelector({ value, onChange, defaultCompanyName }: Company
   const [companies, setCompanies] = useState<Company[]>([]);
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
   const [isSearching, setIsSearching] = useState(false);
+  const [debounceMs, setDebounceMs] = useState(DEFAULT_DEBOUNCE_MS);
   const [showCreateForm, setShowCreateForm] = useState(false);
 
-  const supabase = createClient();
+  const [, startTransition] = useTransition();
 
   // Load selected company on mount
   useEffect(() => {
-    if (value) {
-      supabase
-        .from('companies')
-        .select('*')
-        .eq('id', value)
-        .single()
-        .then(({ data }) => {
-          if (data) setSelectedCompany(data);
-        });
+    if (!value) {
+      setSelectedCompany(null);
+      return;
     }
-  }, [value, supabase]);
+
+    let cancelled = false;
+    getCompanyByIdAction({ companyId: value })
+      .then((result) => {
+        if (!cancelled && result?.data) {
+          setSelectedCompany(result.data as Company);
+        }
+        if (result?.serverError) {
+          // Error already logged by safe-action middleware
+          logger.error(
+            'CompanySelector: failed to load selected company',
+            new Error(result.serverError),
+            { companyId: value }
+          );
+        }
+      })
+      .catch((error) => {
+        logger.error(
+          'CompanySelector: failed to load selected company',
+          error instanceof Error ? error : new Error(String(error)),
+          { companyId: value }
+        );
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [value]);
 
   // Debounced search
-  const searchCompanies = useCallback(
-    async (query: string) => {
-      if (!query.trim() || query.length < 2) {
-        setCompanies([]);
-        return;
-      }
-
-      setIsSearching(true);
-      const { data } = await supabase
-        .from('companies')
-        .select('*')
-        .ilike('name', `%${query}%`)
-        .order('name')
-        .limit(10);
-
-      setCompanies(data || []);
+  const searchCompanies = useCallback(async (query: string) => {
+    const trimmed = query.trim();
+    if (trimmed.length < 2) {
+      setCompanies([]);
       setIsSearching(false);
-    },
-    [supabase]
-  );
+      return;
+    }
+
+    setIsSearching(true);
+    try {
+      const result = await searchCompaniesAction({ query: trimmed, limit: 10 });
+      const payload = result?.data as { companies?: Company[]; debounceMs?: number } | undefined;
+      const companies = payload?.companies ?? [];
+      setCompanies(
+        companies.map(
+          (company): Company => ({
+            id: company.id,
+            name: company.name,
+            slug: company.slug ?? '',
+            description: company.description ?? null,
+            website: null,
+            logo: null,
+          })
+        )
+      );
+
+      if (typeof payload?.debounceMs === 'number' && payload.debounceMs > 0) {
+        setDebounceMs(payload.debounceMs);
+      }
+    } catch (error) {
+      logger.error('CompanySelector: unified search failed', normalizeError(error), {
+        query: trimmed,
+      });
+      setCompanies([]);
+    } finally {
+      setIsSearching(false);
+    }
+  }, []);
 
   useEffect(() => {
-    const loadDebounce = async () => {
-      const { timeoutConfigs } = await import('@/src/lib/flags');
-      const config = await timeoutConfigs();
-      const debounceMs = (config['timeout.ui.form_debounce_ms'] as number) || 300;
-      const timer = setTimeout(() => searchCompanies(searchQuery), debounceMs);
-      return () => clearTimeout(timer);
-    };
+    const trimmed = searchQuery.trim();
+    if (trimmed.length < 2) {
+      setCompanies([]);
+      setIsSearching(false);
+      return undefined;
+    }
 
-    const cleanup = loadDebounce();
+    let cancelled = false;
+    const timer = setTimeout(() => {
+      if (cancelled) return;
+      searchCompanies(searchQuery).catch((error) => {
+        logger.error('CompanySelector: search execution failed', normalizeError(error), {
+          query: searchQuery,
+        });
+      });
+    }, debounceMs);
+
     return () => {
-      cleanup.then((fn) => fn?.());
+      cancelled = true;
+      clearTimeout(timer);
     };
-  }, [searchQuery, searchCompanies]);
+  }, [debounceMs, searchCompanies, searchQuery]);
 
   const handleSelect = (company: Company) => {
     setSelectedCompany(company);
@@ -96,29 +156,43 @@ export function CompanySelector({ value, onChange, defaultCompanyName }: Company
   const handleCreate = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    const name = formData.get('name') as string;
-    const website = formData.get('website') as string;
+    const name = (formData.get('name') as string) || '';
+    const website = (formData.get('website') as string) || '';
 
     if (!name.trim()) return;
 
-    // Create company via database (slug auto-generated by trigger)
-    const { data, error } = await supabase
-      .from('companies')
-      .insert({
-        name: name.trim(),
-        website: website.trim() || null,
-        slug: name
-          .toLowerCase()
-          .replace(/[^a-z0-9]+/g, '-')
-          .replace(/^-|-$/g, ''),
-      })
-      .select()
-      .single();
+    startTransition(async () => {
+      try {
+        const result = await createCompany({
+          name: name.trim(),
+          website: website.trim() || null,
+          logo: null,
+          description: null,
+          size: null,
+          industry: null,
+          using_cursor_since: null,
+        });
 
-    if (!error && data) {
-      handleSelect(data);
-      setShowCreateForm(false);
-    }
+        if (result?.data?.company) {
+          const newCompany: Company = {
+            id: result.data.company.id,
+            name: result.data.company.name,
+            slug: result.data.company.slug ?? '',
+            description: null,
+            website: website.trim() || null,
+            logo: null,
+          };
+          handleSelect(newCompany);
+          setShowCreateForm(false);
+        }
+      } catch (error) {
+        logger.error(
+          'CompanySelector: failed to create company',
+          error instanceof Error ? error : new Error(String(error)),
+          { name }
+        );
+      }
+    });
   };
 
   return (

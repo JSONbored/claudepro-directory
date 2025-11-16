@@ -7,7 +7,7 @@
  * @module lib/og/url-generator
  */
 
-import { APP_CONFIG } from '@/src/lib/constants';
+import { APP_CONFIG } from '@/src/lib/data/config/constants';
 
 /**
  * OpenGraph image dimensions

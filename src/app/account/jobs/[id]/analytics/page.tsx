@@ -7,16 +7,16 @@ import { notFound, redirect } from 'next/navigation';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { Button } from '@/src/components/primitives/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
-import { ROUTES } from '@/src/lib/constants';
+import { getAuthenticatedUser } from '@/src/lib/auth/get-authenticated-user';
+import { getUserJobById } from '@/src/lib/data/account/user-data';
+import { ROUTES } from '@/src/lib/data/config/constants';
 import { ArrowLeft, BarChart, ExternalLink, Eye } from '@/src/lib/icons';
+import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-import { createClient } from '@/src/lib/supabase/server';
-import { BADGE_COLORS, type JobStatusType, UI_CLASSES } from '@/src/lib/ui-constants';
+import { BADGE_COLORS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { formatRelativeDate } from '@/src/lib/utils/data.utils';
-import type { Database } from '@/src/types/database.types';
-
-// Force dynamic rendering - requires authentication
-export const dynamic = 'force-dynamic';
+import { normalizeError } from '@/src/lib/utils/error.utils';
+import type { JobStatus } from '@/src/types/database-overrides';
 
 export const metadata = generatePageMetadata('/account/jobs/:id/analytics');
 
@@ -26,31 +26,40 @@ interface JobAnalyticsPageProps {
 
 export default async function JobAnalyticsPage({ params }: JobAnalyticsPageProps) {
   const resolvedParams = await params;
-  const supabase = await createClient();
+  const { user } = await getAuthenticatedUser({ context: 'JobAnalyticsPage' });
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  if (!user) {
+    logger.warn('JobAnalyticsPage: unauthenticated access attempt', {
+      jobId: resolvedParams.id,
+    });
+    redirect('/login');
+  }
 
-  if (!user) redirect('/login');
-
-  const { data, error } = await supabase
-    .from('jobs')
-    .select('*')
-    .eq('id', resolvedParams.id)
-    .eq('user_id', user.id)
-    .single();
-
-  if (error || !data) notFound();
-
-  const job = data as Database['public']['Tables']['jobs']['Row'];
+  let job: Awaited<ReturnType<typeof getUserJobById>> | null = null;
+  try {
+    job = await getUserJobById(user.id, resolvedParams.id);
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to load job analytics detail');
+    logger.error('JobAnalyticsPage: getUserJobById threw', normalized, {
+      jobId: resolvedParams.id,
+      userId: user.id,
+    });
+    throw normalized;
+  }
+  if (!job) {
+    logger.warn('JobAnalyticsPage: job not found or not owned by user', {
+      jobId: resolvedParams.id,
+      userId: user.id,
+    });
+    notFound();
+  }
 
   const viewCount = job.view_count ?? 0;
   const clickCount = job.click_count ?? 0;
   const ctr = viewCount > 0 ? ((clickCount / viewCount) * 100).toFixed(2) : '0.00';
 
-  const getStatusColor = (status: string) => {
-    return BADGE_COLORS.jobStatus[status as JobStatusType] || 'bg-muted';
+  const getStatusColor = (status: JobStatus) => {
+    return BADGE_COLORS.jobStatus[status] || 'bg-muted';
   };
 
   return (
@@ -85,7 +94,7 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPageProps
             <UnifiedBadge
               variant="base"
               style="outline"
-              className={getStatusColor(job.status ?? 'draft')}
+              className={getStatusColor((job.status ?? 'draft') as JobStatus)}
             >
               {job.status ?? 'draft'}
             </UnifiedBadge>

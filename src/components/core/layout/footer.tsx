@@ -16,8 +16,11 @@ import { memo, useEffect, useMemo, useState } from 'react';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { HeyClaudeLogo } from '@/src/components/core/layout/brand-logo';
 import { ThemeToggle } from '@/src/components/core/layout/theme-toggle';
-import { APP_CONFIG, EXTERNAL_SERVICES, ROUTES, SOCIAL_LINKS } from '@/src/lib/constants';
+import { getAnimationConfig } from '@/src/lib/actions/feature-flags.actions';
+import { APP_CONFIG, EXTERNAL_SERVICES, ROUTES } from '@/src/lib/data/config/constants';
+import { getContactChannels } from '@/src/lib/data/marketing/contact';
 import { DiscordIcon, ExternalLink, Github, Rss, Sparkles } from '@/src/lib/icons';
+import { logger } from '@/src/lib/logger';
 import { RESPONSIVE_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
 
 /**
@@ -28,6 +31,8 @@ import { RESPONSIVE_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
  * @remarks
  * Includes llms.txt link for AI assistant discoverability per LLMs.txt specification
  */
+const CONTACT_CHANNELS = getContactChannels();
+
 function FooterComponent() {
   const currentYear = new Date().getFullYear();
   const { resolvedTheme } = useTheme();
@@ -64,16 +69,19 @@ function FooterComponent() {
   }, []);
 
   useEffect(() => {
-    import('@/src/lib/flags')
-      .then(({ animationConfigs }) => animationConfigs())
-      .then((config) => {
+    getAnimationConfig({})
+      .then((result) => {
+        if (!result?.data) return;
+        const config = result.data;
         setSpringDefault({
           type: 'spring' as const,
-          stiffness: (config['animation.spring.default.stiffness'] as number) ?? 400,
-          damping: (config['animation.spring.default.damping'] as number) ?? 17,
+          stiffness: config['animation.spring.default.stiffness'],
+          damping: config['animation.spring.default.damping'],
         });
       })
-      .catch(() => {});
+      .catch((error) => {
+        logger.error('Footer: failed to load animation config', error);
+      });
   }, []);
 
   return (
@@ -102,8 +110,8 @@ function FooterComponent() {
             <div className={UI_CLASSES.FLEX_COL_MD_ITEMS_START}>
               <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_4}>
                 {[
-                  { href: SOCIAL_LINKS.github || '#', icon: Github, label: 'GitHub' },
-                  { href: SOCIAL_LINKS.discord || '#', icon: DiscordIcon, label: 'Discord' },
+                  { href: CONTACT_CHANNELS.github, icon: Github, label: 'GitHub' },
+                  { href: CONTACT_CHANNELS.discord, icon: DiscordIcon, label: 'Discord' },
                 ].map((social) => (
                   <Link
                     key={social.label}

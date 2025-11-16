@@ -8,8 +8,8 @@
  */
 
 import type { ReactNode } from 'react';
-import type { CategoryId } from '@/src/lib/config/category-config';
-import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
+import type { CategoryId } from '@/src/lib/data/config/category';
+import type { ContentItem } from '@/src/lib/data/content';
 import type { LucideIcon } from '@/src/lib/icons';
 
 /**
@@ -120,7 +120,7 @@ export interface ContentTypeConfig {
  * Type-safe content type discriminator
  * Re-exported from canonical category configuration
  */
-export type { CategoryId } from '@/src/lib/config/category-config';
+export type { CategoryId } from '@/src/lib/data/config/category';
 
 /**
  * Configuration registry type

@@ -16,7 +16,9 @@
 
 import { AnimatePresence, motion } from 'motion/react';
 import { useEffect, useState } from 'react';
-import { type NotificationStore, useNotificationStore } from '@/src/lib/stores/notification-store';
+import { useNotificationsContext } from '@/src/components/providers/notifications-provider';
+import { getAnimationConfig } from '@/src/lib/actions/feature-flags.actions';
+import { logger } from '@/src/lib/logger';
 import { POSITION_PATTERNS } from '@/src/lib/ui-constants';
 
 interface NotificationBadgeProps {
@@ -25,8 +27,7 @@ interface NotificationBadgeProps {
 }
 
 export function NotificationBadge({ className = '' }: NotificationBadgeProps) {
-  // ✅ Select stable state value (not function call)
-  const unreadCount = useNotificationStore((state: NotificationStore) => state.unreadCount);
+  const { unreadCount, flags } = useNotificationsContext();
   const [springBouncy, setSpringBouncy] = useState({
     type: 'spring' as const,
     stiffness: 500,
@@ -34,18 +35,22 @@ export function NotificationBadge({ className = '' }: NotificationBadgeProps) {
   });
 
   useEffect(() => {
-    import('@/src/lib/flags')
-      .then(({ animationConfigs }) => animationConfigs())
-      .then((config) => {
+    getAnimationConfig({})
+      .then((result) => {
+        if (!result?.data) return;
+        const config = result.data;
         setSpringBouncy({
           type: 'spring' as const,
-          stiffness: (config['animation.spring.bouncy.stiffness'] as number) ?? 500,
-          damping: (config['animation.spring.bouncy.damping'] as number) ?? 20,
+          stiffness: config['animation.spring.bouncy.stiffness'],
+          damping: config['animation.spring.bouncy.damping'],
         });
       })
-      .catch(() => {});
+      .catch((error) => {
+        logger.error('NotificationBadge: failed to load animation config', error);
+      });
   }, []);
 
+  if (!flags.enableNotifications) return null;
   if (unreadCount === 0) return null;
 
   return (

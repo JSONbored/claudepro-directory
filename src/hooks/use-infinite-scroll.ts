@@ -9,8 +9,9 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { appSettings, timeoutConfigs } from '@/src/lib/flags';
+import { getAppSettings, getTimeoutConfig } from '@/src/lib/actions/feature-flags.actions';
 import { logger } from '@/src/lib/logger';
+import { logClientWarning } from '@/src/lib/utils/error.utils';
 
 interface UseInfiniteScrollOptions {
   /** Total number of items available */
@@ -70,19 +71,21 @@ export function useInfiniteScroll({
   useEffect(() => {
     const loadDefaults = async () => {
       try {
-        const config = await appSettings();
-
-        setConfigDefaults({
-          batchSize: (config['hooks.infinite_scroll.batch_size'] as number) ?? 30,
-          threshold: (config['hooks.infinite_scroll.threshold'] as number) ?? 0.1,
-        });
-      } catch {
-        // Silent fail - uses hardcoded fallbacks
+        const result = await getAppSettings({});
+        if (result?.data) {
+          const config = result.data;
+          setConfigDefaults({
+            batchSize: config['hooks.infinite_scroll.batch_size'],
+            threshold: config['hooks.infinite_scroll.threshold'],
+          });
+        }
+      } catch (error) {
+        logClientWarning('useInfiniteScroll: failed to load defaults', error);
       }
     };
 
-    loadDefaults().catch(() => {
-      // Silent fail - uses hardcoded fallbacks
+    loadDefaults().catch((error) => {
+      logClientWarning('useInfiniteScroll: loadDefaults promise rejected', error);
     });
   }, []);
 
@@ -121,21 +124,22 @@ export function useInfiniteScroll({
 
     setIsLoading(true);
 
-    timeoutConfigs()
-      .then((config) => {
-        const delay = (config['timeout.ui.transition_ms'] as number) ?? 200;
+    getTimeoutConfig({})
+      .then((result) => {
+        const delay = result?.data?.['timeout.ui.transition_ms'] ?? 200;
         setTimeout(() => {
           setDisplayCount((prev) => Math.min(prev + finalBatchSize, totalItems));
           setIsLoading(false);
         }, delay);
       })
-      .catch(() => {
+      .catch((error) => {
+        logClientWarning('useInfiniteScroll: failed to load transition timeout', error);
         setTimeout(() => {
           setDisplayCount((prev) => Math.min(prev + finalBatchSize, totalItems));
           setIsLoading(false);
         }, 200);
       });
-  }, [isLoading, hasMore, finalBatchSize, totalItems]);
+  }, [finalBatchSize, hasMore, isLoading, totalItems]);
 
   /**
    * Callback ref for sentinel element

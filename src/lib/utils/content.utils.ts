@@ -2,8 +2,12 @@
  * Content Utilities - Database-First Architecture
  */
 
-import type { CategoryId } from '@/src/lib/config/category-config';
-import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
+import type { CategoryId } from '@/src/lib/data/config/category';
+import type { ContentItem } from '@/src/lib/data/content';
+import type {
+  ContentCategory,
+  GetContentDetailCompleteReturn,
+} from '@/src/types/database-overrides';
 
 const normalizeSlug = (value: string): string =>
   value
@@ -78,7 +82,7 @@ const MCP_SECTION_LABELS = {
 } as const;
 
 export interface FilenameGeneratorOptions {
-  item: ContentItem;
+  item: ContentItem | GetContentDetailCompleteReturn['content'];
   language: string;
   format?: 'json' | 'multi' | 'hook';
   section?: string;
@@ -115,22 +119,25 @@ interface FilenameRule {
   useHookType?: boolean;
 }
 
-const FILENAME_RULES: Partial<Record<string, FilenameRule>> = {
+const FILENAME_RULES: Partial<Record<ContentCategory | string, FilenameRule>> = {
   mcp: { suffix: '-config' },
   agents: { suffix: '-config' },
   commands: { suffix: '-config' },
   rules: { suffix: '-config' },
   hooks: { suffix: '', useHookType: true },
   guides: { suffix: '' },
+  statuslines: { suffix: '' },
+  collections: { suffix: '' },
+  skills: { suffix: '' },
+  jobs: { suffix: '' },
+  changelog: { suffix: '' },
+  // Legacy subcategory values (not in enum but used in guides)
   tutorials: { suffix: '' },
   comparisons: { suffix: '' },
   workflows: { suffix: '' },
   'use-cases': { suffix: '' },
   troubleshooting: { suffix: '' },
-  statuslines: { suffix: '' },
-  collections: { suffix: '' },
-  skills: { suffix: '' },
-};
+} as const;
 
 export function generateFilename(options: FilenameGeneratorOptions): string {
   const { item, language, format, section } = options;
@@ -168,7 +175,7 @@ export function generateFilename(options: FilenameGeneratorOptions): string {
 }
 
 export function generateMultiFormatFilename(
-  item: ContentItem,
+  item: ContentItem | GetContentDetailCompleteReturn['content'],
   sectionKey: string,
   language: string
 ): string {
@@ -184,7 +191,7 @@ export function generateMultiFormatFilename(
 }
 
 export function generateHookFilename(
-  item: ContentItem,
+  item: ContentItem | GetContentDetailCompleteReturn['content'],
   contentType: 'hookConfig' | 'scriptContent',
   language: string
 ): string {
