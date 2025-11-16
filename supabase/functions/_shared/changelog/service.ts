@@ -1,6 +1,7 @@
 import { SITE_URL } from '../clients/supabase.ts';
 import { edgeEnv } from '../config/env.ts';
 import type { Database, Json } from '../database.types.ts';
+import { invalidateCacheByKey } from '../utils/cache.ts';
 import type { ChangelogSection, GitHubCommit } from '../utils/discord/embeds.ts';
 
 const GITHUB_TOKEN = edgeEnv.github.token;
@@ -227,23 +228,67 @@ export function formatCommitRange(base: string, head: string): string {
   return `${base.slice(0, 7)}...${head.slice(0, 7)}`;
 }
 
-export async function revalidateChangelogPages(slug: string) {
+export async function revalidateChangelogPages(
+  slug: string,
+  options?: { invalidateTags?: boolean }
+) {
   if (!REVALIDATE_SECRET) return;
 
-  const urls = [
-    `${SITE_URL}/api/revalidate?secret=${REVALIDATE_SECRET}&path=/changelog`,
-    `${SITE_URL}/api/revalidate?secret=${REVALIDATE_SECRET}&path=/changelog/${slug}`,
-  ];
+  // Tag invalidation (new, optional, defaults to true)
+  if (options?.invalidateTags !== false) {
+    await invalidateCacheByKey('cache.invalidate.changelog', ['changelog'], {
+      category: 'changelog',
+      slug,
+      logContext: {
+        function: 'changelog-service',
+        action: 'revalidate',
+        slug,
+      },
+    }).catch((error) => {
+      console.warn('[changelog-service] Cache tag invalidation failed', {
+        function: 'changelog-service',
+        action: 'revalidate',
+        slug,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    });
+  }
+
+  // Path revalidation (existing behavior, modernized to use body-based API)
+  const paths = ['/changelog', `/changelog/${slug}`];
 
   await Promise.all(
-    urls.map(async (revalidateUrl) => {
+    paths.map(async (path) => {
       try {
-        const response = await fetch(revalidateUrl, { method: 'POST' });
+        const response = await fetch(`${SITE_URL}/api/revalidate`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            secret: REVALIDATE_SECRET,
+            category: 'changelog',
+            slug: path === '/changelog' ? undefined : slug,
+          }),
+        });
+
         if (!response.ok) {
-          console.error('Failed to revalidate path:', revalidateUrl, await response.text());
+          const errorText = await response.text();
+          console.error('[changelog-service] Failed to revalidate path', {
+            function: 'changelog-service',
+            action: 'revalidate',
+            slug,
+            path,
+            status: response.status,
+            error: errorText,
+          });
         }
       } catch (error) {
-        console.error('Revalidate error:', error);
+        console.error('[changelog-service] Revalidate error', {
+          function: 'changelog-service',
+          action: 'revalidate',
+          slug,
+          path,
+          error: error instanceof Error ? error.message : String(error),
+        });
       }
     })
   );

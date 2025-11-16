@@ -9,9 +9,11 @@ import { getCacheTtl } from '@/src/lib/data/config/cache-config';
 import { fetchCachedRpc } from '@/src/lib/data/helpers';
 import { logger } from '@/src/lib/logger';
 import type { Database } from '@/src/types/database.types';
+import type { Tables } from '@/src/types/database-overrides';
 
-type CompanyRow = Database['public']['Tables']['companies']['Row'];
-type JobRow = Database['public']['Tables']['jobs']['Row'];
+type CompanyRow = Tables<'companies'>;
+type JobRow = Tables<'jobs'>;
+// Use direct database type for views (not overridden in database-overrides.ts)
 type CompanyJobStatsRow = Database['public']['Views']['company_job_stats']['Row'];
 
 interface CompanyProfile {

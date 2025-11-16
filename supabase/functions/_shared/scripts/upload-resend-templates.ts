@@ -180,9 +180,10 @@ async function uploadTemplates() {
 
     if (templateId) {
       await delay(REQUEST_SPACING_MS);
+      const idToUpdate = templateId; // Store in const to avoid non-null assertion
       const updateResult = await callWithRateLimitRetry(
         () =>
-          resend.templates.update(templateId!, {
+          resend.templates.update(idToUpdate, {
             name: definition.displayName,
             subject,
             html,

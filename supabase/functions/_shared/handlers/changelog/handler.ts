@@ -26,14 +26,23 @@ import {
   unauthorizedResponse,
 } from '../../utils/http.ts';
 import { verifyVercelSignature } from '../../utils/integrations/vercel.ts';
+import { createChangelogHandlerContext, withContext } from '../../utils/logging.ts';
 
 const VERCEL_WEBHOOK_SECRET = edgeEnv.vercel.webhookSecret;
 const DISCORD_CHANGELOG_WEBHOOK_URL = edgeEnv.discord.changelog;
 
 export async function handleChangelogSyncRequest(req: Request): Promise<Response> {
+  const logContext = createChangelogHandlerContext();
+
   try {
     const body = await req.text();
     const payload = JSON.parse(body) as VercelWebhookPayload;
+
+    // Update logContext with deployment info
+    const updatedContext = withContext(logContext, {
+      deployment_id: payload.payload.deployment.id,
+      branch: payload.payload.deployment.meta?.branch,
+    });
 
     const signature = req.headers.get('x-vercel-signature');
     if (!(signature && VERCEL_WEBHOOK_SECRET)) {
@@ -151,11 +160,17 @@ export async function handleChangelogSyncRequest(req: Request): Promise<Response
       msg: queueJob,
     });
 
+    // Update logContext with changelog info
+    const finalContext = withContext(updatedContext, {
+      changelog_id: data.id,
+      slug: data.slug,
+    });
+
     if (queueError) {
       // Fallback: Execute side effects synchronously if queue fails
-      console.warn('[changelog-sync] Queue enqueue failed, falling back to sync execution', {
+      console.warn('[changelog-handler] Queue enqueue failed, falling back to sync execution', {
+        ...finalContext,
         error: queueError.message,
-        changelog_id: data.id,
       });
 
       // Execute side effects synchronously (backward compatibility)
@@ -182,26 +197,30 @@ export async function handleChangelogSyncRequest(req: Request): Promise<Response
               changelog_id: data.id,
               slug: data.slug,
             },
+            logContext: finalContext,
           }
         );
       }
 
-      await insertNotification({
-        id: data.id,
-        title: data.title,
-        message: tldr || 'We just shipped a fresh Claude Pro Directory release.',
-        type: 'announcement',
-        priority: 'high',
-        action_label: 'Read release notes',
-        action_href: `${SITE_URL}/changelog/${data.slug}`,
-        metadata: {
-          slug: data.slug,
-          changelog_id: data.id,
-          source: 'changelog-sync',
+      await insertNotification(
+        {
+          id: data.id,
+          title: data.title,
+          message: tldr || 'We just shipped a fresh Claude Pro Directory release.',
+          type: 'announcement',
+          priority: 'high',
+          action_label: 'Read release notes',
+          action_href: `${SITE_URL}/changelog/${data.slug}`,
+          metadata: {
+            slug: data.slug,
+            changelog_id: data.id,
+            source: 'changelog-sync',
+          },
         },
-      });
+        finalContext
+      );
 
-      await revalidateChangelogPages(data.slug);
+      await revalidateChangelogPages(data.slug, { invalidateTags: true });
 
       return successResponse(
         {
@@ -218,10 +237,7 @@ export async function handleChangelogSyncRequest(req: Request): Promise<Response
     }
 
     // Queue enqueue succeeded - return immediately (worker will process async)
-    console.log('[changelog-sync] Job enqueued successfully', {
-      changelog_id: data.id,
-      slug: data.slug,
-    });
+    console.log('[changelog-handler] Job enqueued successfully', finalContext);
 
     return successResponse(
       {

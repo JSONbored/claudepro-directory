@@ -95,7 +95,7 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
     notFound();
   }
 
-  const { user: profileUser, collection, items, isOwner } = collectionData as CollectionDetailData;
+  const { user: profileUser, collection, items, isOwner } = collectionData;
 
   // Track view (async, non-blocking)
   trackInteraction({

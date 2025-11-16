@@ -71,12 +71,14 @@ export function useInfiniteScroll({
   useEffect(() => {
     const loadDefaults = async () => {
       try {
-        const config = await getAppSettings();
-
-        setConfigDefaults({
-          batchSize: config['hooks.infinite_scroll.batch_size'],
-          threshold: config['hooks.infinite_scroll.threshold'],
-        });
+        const result = await getAppSettings({});
+        if (result?.data) {
+          const config = result.data;
+          setConfigDefaults({
+            batchSize: config['hooks.infinite_scroll.batch_size'],
+            threshold: config['hooks.infinite_scroll.threshold'],
+          });
+        }
       } catch (error) {
         logClientWarning('useInfiniteScroll: failed to load defaults', error);
       }
@@ -122,9 +124,9 @@ export function useInfiniteScroll({
 
     setIsLoading(true);
 
-    getTimeoutConfig()
-      .then((config) => {
-        const delay = config['timeout.ui.transition_ms'];
+    getTimeoutConfig({})
+      .then((result) => {
+        const delay = result?.data?.['timeout.ui.transition_ms'] ?? 200;
         setTimeout(() => {
           setDisplayCount((prev) => Math.min(prev + finalBatchSize, totalItems));
           setIsLoading(false);

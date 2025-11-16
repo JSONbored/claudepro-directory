@@ -1,6 +1,8 @@
 import { randomUUID } from 'node:crypto';
 import { supabaseServiceRole } from '../clients/supabase.ts';
 import type { Database } from '../database.types.ts';
+import { invalidateCacheByKey } from '../utils/cache.ts';
+import type { BaseLogContext } from '../utils/logging.ts';
 
 const MAX_NOTIFICATION_IDS = 50;
 
@@ -25,7 +27,8 @@ export interface NotificationInsertPayload {
 
 export async function getActiveNotificationsForUser(
   userId: string,
-  dismissedIds: string[]
+  dismissedIds: string[],
+  logContext?: BaseLogContext
 ): Promise<NotificationRecord[]> {
   const sanitizedDismissedIds = Array.from(
     new Set(dismissedIds.map((id) => id.trim()).filter(Boolean))
@@ -38,9 +41,10 @@ export async function getActiveNotificationsForUser(
 
   if (error) {
     console.error('[notifications] get_active_notifications failed', {
-      userId,
+      ...(logContext || {}),
+      user_id: userId,
       dismissedCount: sanitizedDismissedIds.length,
-      error,
+      error: error instanceof Error ? error.message : String(error),
     });
     throw error;
   }
@@ -49,7 +53,8 @@ export async function getActiveNotificationsForUser(
 }
 
 export async function insertNotification(
-  payload: NotificationInsertPayload
+  payload: NotificationInsertPayload,
+  logContext?: BaseLogContext
 ): Promise<NotificationRecord> {
   const record = {
     id: payload.id ?? crypto.randomUUID(),
@@ -76,25 +81,52 @@ export async function insertNotification(
     if (isConflictError(error) && record.id) {
       const existing = await getNotificationById(record.id);
       if (existing) {
-        console.info('[notifications] Reusing existing notification', { id: existing.id });
+        console.info('[notifications] Reusing existing notification', {
+          ...(logContext || {}),
+          notification_id: existing.id,
+        });
         return existing;
       }
     }
-    console.error('[notifications] Failed to insert notification', error);
+    console.error('[notifications] Failed to insert notification', {
+      ...(logContext || {}),
+      error: error instanceof Error ? error.message : String(error),
+    });
     throw error ?? new Error('Unknown notification insert error');
   }
 
-  console.info('[notifications] Inserted notification', { id: data.id, title: data.title });
+  // Invalidate cache after successful insert
+  await invalidateCacheByKey('cache.invalidate.notifications', ['notifications'], {
+    logContext,
+  }).catch((cacheError) => {
+    console.warn('[notifications] Cache invalidation failed', {
+      ...(logContext || {}),
+      error: cacheError instanceof Error ? cacheError.message : String(cacheError),
+    });
+  });
+
+  console.info('[notifications] Inserted notification', {
+    ...(logContext || {}),
+    notification_id: data.id,
+    title: data.title,
+  });
   return data;
 }
 
-export async function dismissNotificationsForUser(userId: string, notificationIds: string[]) {
+export async function dismissNotificationsForUser(
+  userId: string,
+  notificationIds: string[],
+  logContext?: BaseLogContext
+) {
   const sanitizedIds = Array.from(
     new Set(notificationIds.map((id) => id.trim()).filter(Boolean))
   ).slice(0, MAX_NOTIFICATION_IDS);
 
   if (sanitizedIds.length === 0) {
-    console.warn('[notifications] dismissNotificationsForUser called without IDs', { userId });
+    console.warn('[notifications] dismissNotificationsForUser called without IDs', {
+      ...(logContext || {}),
+      user_id: userId,
+    });
     return;
   }
 
@@ -106,12 +138,27 @@ export async function dismissNotificationsForUser(userId: string, notificationId
   );
 
   if (error) {
-    console.error('[notifications] Failed to dismiss notifications', { userId, error });
+    console.error('[notifications] Failed to dismiss notifications', {
+      ...(logContext || {}),
+      user_id: userId,
+      error: error instanceof Error ? error.message : String(error),
+    });
     throw error;
   }
 
+  // Invalidate cache after successful dismiss
+  await invalidateCacheByKey('cache.invalidate.notifications', ['notifications'], {
+    logContext,
+  }).catch((cacheError) => {
+    console.warn('[notifications] Cache invalidation failed', {
+      ...(logContext || {}),
+      error: cacheError instanceof Error ? cacheError.message : String(cacheError),
+    });
+  });
+
   console.info('[notifications] Dismissed notifications', {
-    userId,
+    ...(logContext || {}),
+    user_id: userId,
     dismissCount: sanitizedIds.length,
   });
 }
@@ -142,7 +189,10 @@ async function getNotificationById(id: string): Promise<NotificationRecord | nul
     .single<NotificationRecord>();
 
   if (error) {
-    console.error('[notifications] Failed to load existing notification', error);
+    console.error('[notifications] Failed to load existing notification', {
+      notification_id: id,
+      error: error instanceof Error ? error.message : String(error),
+    });
     return null;
   }
 

@@ -86,8 +86,10 @@ export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationM
   });
 
   useEffect(() => {
-    getAnimationConfig()
-      .then((config) => {
+    getAnimationConfig({})
+      .then((result) => {
+        if (!result?.data) return;
+        const config = result.data;
         setSpringDefault({
           type: 'spring' as const,
           stiffness: config['animation.spring.default.stiffness'],

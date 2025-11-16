@@ -3,7 +3,7 @@
  */
 
 import { type NextRequest, NextResponse } from 'next/server';
-import { subscribeViaOAuth } from '@/src/lib/actions/newsletter.actions';
+import { subscribeViaOAuthAction } from '@/src/lib/actions/newsletter.actions';
 import { refreshProfileFromOAuthServer } from '@/src/lib/actions/user.actions';
 import { SECURITY_CONFIG } from '@/src/lib/data/config/constants';
 import { logger } from '@/src/lib/logger';
@@ -23,7 +23,6 @@ export async function GET(request: NextRequest) {
   const next = isValidRedirect ? nextParam : '/';
 
   if (code) {
-    // biome-ignore lint/correctness/noSuspiciousAwait: OAuth callback must instantiate a server Supabase client directly for session exchange.
     const supabase = await createClient();
     const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
@@ -43,7 +42,7 @@ export async function GET(request: NextRequest) {
 
       if (shouldSubscribeToNewsletter) {
         if (user.email) {
-          const newsletterResult = await subscribeViaOAuth({
+          const newsletterResult = await subscribeViaOAuthAction({
             email: user.email,
             metadata: {
               referrer: `${origin}${next}`,
@@ -51,13 +50,17 @@ export async function GET(request: NextRequest) {
             },
           });
 
-          if (newsletterResult.success) {
+          if (newsletterResult?.serverError) {
+            logger.warn('Newsletter opt-in via auth callback failed', {
+              userId: user.id,
+              error: newsletterResult.serverError,
+            });
+          } else if (newsletterResult?.data?.success) {
             shouldSetNewsletterCookie = true;
           } else {
             logger.warn('Newsletter opt-in via auth callback failed', {
               userId: user.id,
-              error: newsletterResult.error ?? 'unknown_error',
-              ...(newsletterResult.traceId ? { traceId: newsletterResult.traceId } : {}),
+              error: 'Unknown error',
             });
           }
         } else {

@@ -7,19 +7,20 @@
 
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { z } from 'zod';
-import { resolveInvalidateTags as resolveCacheInvalidateTags } from '@/src/lib/actions/action-helpers';
+import {
+  resolveInvalidateTags as resolveCacheInvalidateTags,
+  runRpc,
+} from '@/src/lib/actions/action-helpers';
 import { authedAction } from '@/src/lib/actions/safe-action';
-import { getAuthenticatedUser } from '@/src/lib/auth/get-authenticated-user';
 import {
   type CacheConfigPromise,
   type CacheInvalidateKey,
   getCacheConfigSnapshot,
 } from '@/src/lib/data/config/cache-config';
+import { fetchCachedRpc } from '@/src/lib/data/helpers';
 import { revalidateCacheTags } from '@/src/lib/supabase/cache-helpers';
-import { cachedRPCWithDedupe } from '@/src/lib/supabase/cached-rpc';
-import { createClient } from '@/src/lib/supabase/server';
-import { logActionFailure } from '@/src/lib/utils/error.utils';
-import { Constants, type Database, type Enums, type Tables } from '@/src/types/database.types';
+import type { Enums, Tables } from '@/src/types/database.types';
+import { CONTENT_CATEGORY_VALUES, type ContentCategory } from '@/src/types/database-overrides';
 
 // TypeScript types for RPC function returns (database validates, TypeScript trusts)
 type ActivitySummary = {
@@ -88,19 +89,12 @@ type ActivityTimelineResponse = {
 };
 
 type UserSurface = 'account' | 'library' | 'settings';
-type PublicRpc = keyof Database['public']['Functions'] | 'ensure_user_record';
 
 const USER_SURFACE_PATHS: Record<UserSurface, string> = {
   account: '/account',
   library: '/account/library',
   settings: '/account/settings',
 };
-
-interface RunUserRpcContext {
-  action: string;
-  userId?: string;
-  meta?: Record<string, unknown>;
-}
 
 async function invalidateUserCaches({
   cacheConfigPromise,
@@ -161,48 +155,31 @@ async function revalidateUserSurfaces({
   await Promise.allSettled([...paths].map((path) => revalidatePath(path)));
 }
 
-async function runUserRpc<ResultType>(
-  rpcName: PublicRpc,
-  args: Record<string, unknown>,
-  context: RunUserRpcContext
-): Promise<ResultType> {
-  const supabase = await createClient();
-
-  try {
-    const { data, error } = await supabase.rpc(rpcName, args);
-    if (error) {
-      throw new Error(error.message);
-    }
-    return data as ResultType;
-  } catch (error) {
-    throw logActionFailure(context.action, error, {
-      rpc: rpcName,
-      userId: context.userId,
-      ...(context.meta ?? {}),
-    });
-  }
-}
-
 async function cachedUserData<ResultType>(
-  rpcName: PublicRpc,
+  rpcName: string,
   args: Record<string, unknown>,
-  cacheOptions: Parameters<typeof cachedRPCWithDedupe>[2],
-  context: RunUserRpcContext
-): Promise<ResultType | null | undefined> {
-  try {
-    return await cachedRPCWithDedupe<ResultType>(rpcName, args, cacheOptions);
-  } catch (error) {
-    throw logActionFailure(context.action, error, {
-      rpc: rpcName,
-      userId: context.userId,
-      ...(context.meta ?? {}),
-    });
-  }
+  options: {
+    tags: string[];
+    ttlConfigKey: string;
+    keySuffix: string;
+    useAuthClient?: boolean;
+  },
+  fallback: ResultType
+): Promise<ResultType> {
+  return fetchCachedRpc<ResultType>(args, {
+    rpcName,
+    tags: options.tags,
+    ttlKey: options.ttlConfigKey as Parameters<typeof fetchCachedRpc>[1]['ttlKey'],
+    keySuffix: options.keySuffix,
+    useAuthClient: options.useAuthClient ?? true,
+    fallback,
+    logMeta: { namespace: 'user-actions' },
+  });
 }
 
 // Manual Zod schemas (database validates, Zod just provides type safety)
 const bookmarkSchema = z.object({
-  content_type: z.string(),
+  content_type: z.enum([...CONTENT_CATEGORY_VALUES] as [ContentCategory, ...ContentCategory[]]),
   content_slug: z
     .string()
     .max(200)
@@ -211,10 +188,7 @@ const bookmarkSchema = z.object({
 });
 
 export const updateProfile = authedAction
-  .metadata({
-    actionName: 'updateProfile' as const,
-    category: 'user' as const,
-  })
+  .metadata({ actionName: 'updateProfile', category: 'user' })
   .schema(
     z.object({
       display_name: z.string().optional(),
@@ -229,7 +203,7 @@ export const updateProfile = authedAction
   )
   .action(async ({ parsedInput, ctx }) => {
     const cacheConfigPromise = getCacheConfigSnapshot();
-    const result = await runUserRpc<{ success: boolean; profile: { slug: string } }>(
+    const result = await runRpc<{ success: boolean; profile: { slug: string } }>(
       'update_user_profile',
       {
         p_user_id: ctx.userId,
@@ -269,7 +243,7 @@ export const updateProfile = authedAction
 
 async function refreshProfileFromOAuthInternal(userId: string) {
   const cacheConfigPromise = getCacheConfigSnapshot();
-  const profile = await runUserRpc<{ slug: string } | null>(
+  const profile = await runRpc<{ slug: string } | null>(
     'refresh_profile_from_oauth',
     { user_id: userId },
     { action: 'user.refreshProfileFromOAuth', userId }
@@ -311,7 +285,7 @@ export const addBookmark = authedAction
     const cacheConfigPromise = getCacheConfigSnapshot();
     const { content_type, content_slug, notes } = parsedInput;
 
-    const data = await runUserRpc<{ success: boolean; bookmark: unknown }>(
+    const data = await runRpc<{ success: boolean; bookmark: unknown }>(
       'add_bookmark',
       {
         p_user_id: ctx.userId,
@@ -347,7 +321,7 @@ export const removeBookmark = authedAction
     const cacheConfigPromise = getCacheConfigSnapshot();
     const { content_type, content_slug } = parsedInput;
 
-    const data = await runUserRpc<{ success: boolean }>(
+    const data = await runRpc<{ success: boolean }>(
       'remove_bookmark',
       {
         p_user_id: ctx.userId,
@@ -372,31 +346,36 @@ export const removeBookmark = authedAction
     return data;
   });
 
-export async function isBookmarked(content_type: string, content_slug: string): Promise<boolean> {
-  const { user } = await getAuthenticatedUser({ context: 'isBookmarked' });
-  if (!user) return false;
+export const isBookmarkedAction = authedAction
+  .metadata({ actionName: 'isBookmarked', category: 'user' })
+  .schema(
+    z.object({
+      content_type: z.enum([...CONTENT_CATEGORY_VALUES] as [ContentCategory, ...ContentCategory[]]),
+      content_slug: z
+        .string()
+        .max(200)
+        .regex(/^[a-zA-Z0-9\-_/]+$/),
+    })
+  )
+  .action(async ({ parsedInput, ctx }) => {
+    const data = await cachedUserData<boolean>(
+      'is_bookmarked',
+      {
+        p_user_id: ctx.userId,
+        p_content_type: parsedInput.content_type,
+        p_content_slug: parsedInput.content_slug,
+      },
+      {
+        tags: ['user-bookmarks', `user-${ctx.userId}`, `content-${parsedInput.content_slug}`],
+        ttlConfigKey: 'cache.user_bookmarks.ttl_seconds',
+        keySuffix: `${ctx.userId}-${parsedInput.content_type}-${parsedInput.content_slug}`,
+        useAuthClient: true,
+      },
+      false
+    );
 
-  const data = await cachedUserData<boolean>(
-    'is_bookmarked',
-    {
-      p_user_id: user.id,
-      p_content_type: content_type,
-      p_content_slug: content_slug,
-    },
-    {
-      tags: ['user-bookmarks', `user-${user.id}`, `content-${content_slug}`],
-      ttlConfigKey: 'cache.user_bookmarks.ttl_seconds',
-      keySuffix: `${user.id}-${content_type}-${content_slug}`,
-    },
-    {
-      action: 'user.isBookmarked',
-      userId: user.id,
-      meta: { contentType: content_type, contentSlug: content_slug },
-    }
-  );
-
-  return data ?? false;
-}
+    return data;
+  });
 
 export const addBookmarkBatch = authedAction
   .metadata({
@@ -408,9 +387,9 @@ export const addBookmarkBatch = authedAction
       items: z
         .array(
           z.object({
-            content_type: z.enum([...Constants.public.Enums.content_category] as [
-              Enums<'content_category'>,
-              ...Enums<'content_category'>[],
+            content_type: z.enum([...CONTENT_CATEGORY_VALUES] as [
+              ContentCategory,
+              ...ContentCategory[],
             ]),
             content_slug: z.string().min(1),
           })
@@ -421,7 +400,7 @@ export const addBookmarkBatch = authedAction
   )
   .action(async ({ parsedInput, ctx }) => {
     const cacheConfigPromise = getCacheConfigSnapshot();
-    const result = await runUserRpc<{
+    const result = await runRpc<{
       success: boolean;
       saved_count: number;
       total_requested: number;
@@ -463,7 +442,7 @@ export const toggleFollow = authedAction
   .schema(followSchema)
   .action(async ({ parsedInput: { action, user_id, slug }, ctx }) => {
     const cacheConfigPromise = getCacheConfigSnapshot();
-    const result = await runUserRpc<{ success: boolean; action: string }>(
+    const result = await runRpc<{ success: boolean; action: string }>(
       'toggle_follow',
       {
         p_follower_id: ctx.userId,
@@ -491,30 +470,31 @@ export const toggleFollow = authedAction
     return result;
   });
 
-export async function isFollowing(user_id: string): Promise<boolean> {
-  const { user } = await getAuthenticatedUser({ context: 'isFollowing' });
-  if (!user) return false;
+export const isFollowingAction = authedAction
+  .metadata({ actionName: 'isFollowing', category: 'user' })
+  .schema(
+    z.object({
+      user_id: z.string().uuid(),
+    })
+  )
+  .action(async ({ parsedInput, ctx }) => {
+    const data = await cachedUserData<boolean>(
+      'is_following',
+      {
+        follower_id: ctx.userId,
+        following_id: parsedInput.user_id,
+      },
+      {
+        tags: ['users', `user-${ctx.userId}`, `user-${parsedInput.user_id}`],
+        ttlConfigKey: 'cache.user_profile.ttl_seconds',
+        keySuffix: `${ctx.userId}-${parsedInput.user_id}`,
+        useAuthClient: true,
+      },
+      false
+    );
 
-  const data = await cachedUserData<boolean>(
-    'is_following',
-    {
-      follower_id: user.id,
-      following_id: user_id,
-    },
-    {
-      tags: ['users', `user-${user.id}`, `user-${user_id}`],
-      ttlConfigKey: 'cache.user_profile.ttl_seconds',
-      keySuffix: `${user.id}-${user_id}`,
-    },
-    {
-      action: 'user.isFollowing',
-      userId: user.id,
-      meta: { targetUserId: user_id },
-    }
-  );
-
-  return data ?? false;
-}
+    return data;
+  });
 
 /**
  * Batch check bookmark status for multiple items - Database-First
@@ -526,7 +506,10 @@ export const getBookmarkStatusBatch = authedAction
     z.object({
       items: z.array(
         z.object({
-          content_type: z.string(),
+          content_type: z.enum([...CONTENT_CATEGORY_VALUES] as [
+            ContentCategory,
+            ...ContentCategory[],
+          ]),
           content_slug: z.string(),
         })
       ),
@@ -545,12 +528,9 @@ export const getBookmarkStatusBatch = authedAction
         tags: ['user-bookmarks', `user-${ctx.userId}`],
         ttlConfigKey: 'cache.user_bookmarks.ttl_seconds',
         keySuffix: `${ctx.userId}-${JSON.stringify(parsedInput.items)}`,
+        useAuthClient: true,
       },
-      {
-        action: 'user.getBookmarkStatusBatch',
-        userId: ctx.userId,
-        meta: { itemCount: parsedInput.items.length },
-      }
+      []
     );
 
     return new Map(
@@ -580,12 +560,9 @@ export const getFollowStatusBatch = authedAction
         tags: ['users', `user-${ctx.userId}`],
         ttlConfigKey: 'cache.user_profile.ttl_seconds',
         keySuffix: `${ctx.userId}-${parsedInput.user_ids.sort().join('-')}`,
+        useAuthClient: true,
       },
-      {
-        action: 'user.getFollowStatusBatch',
-        userId: ctx.userId,
-        meta: { itemCount: parsedInput.user_ids.length },
-      }
+      []
     );
 
     return new Map((data || []).map((row) => [row.followed_user_id, row.is_following]));
@@ -604,20 +581,17 @@ export const getActivitySummary = authedAction
         tags: ['user-activity', `user-${ctx.userId}`],
         ttlConfigKey: 'cache.user_activity.ttl_seconds',
         keySuffix: `${ctx.userId}-summary`,
+        useAuthClient: true,
       },
       {
-        action: 'user.getActivitySummary',
-        userId: ctx.userId,
+        total_posts: 0,
+        total_comments: 0,
+        total_votes: 0,
+        total_submissions: 0,
+        merged_submissions: 0,
+        total_activity: 0,
       }
     );
-
-    if (!data) {
-      throw logActionFailure(
-        'user.getActivitySummary',
-        new Error('Failed to fetch user activity summary'),
-        { userId: ctx.userId }
-      );
-    }
 
     return data;
   });
@@ -638,21 +612,14 @@ export const getActivityTimeline = authedAction
         tags: ['user-activity', `user-${ctx.userId}`],
         ttlConfigKey: 'cache.user_activity.ttl_seconds',
         keySuffix: `${ctx.userId}-${type ?? 'all'}-${limit}-${offset}`,
+        useAuthClient: true,
       },
       {
-        action: 'user.getActivityTimeline',
-        userId: ctx.userId,
-        meta: { type: type ?? 'all', limit, offset },
+        activities: [],
+        hasMore: false,
+        total: 0,
       }
     );
-
-    if (!data) {
-      throw logActionFailure(
-        'user.getActivityTimeline',
-        new Error('Failed to fetch activity timeline'),
-        { userId: ctx.userId, type: type ?? 'all', limit, offset }
-      );
-    }
 
     return data;
   });
@@ -677,20 +644,10 @@ export const getUserIdentities = authedAction
         tags: ['users', `user-${ctx.userId}`],
         ttlConfigKey: 'cache.user_stats.ttl_seconds',
         keySuffix: `${ctx.userId}-identities`,
+        useAuthClient: true,
       },
-      {
-        action: 'user.getUserIdentities',
-        userId: ctx.userId,
-      }
+      { identities: [] }
     );
-
-    if (!data) {
-      throw logActionFailure(
-        'user.getUserIdentities',
-        new Error('Failed to fetch user identities'),
-        { userId: ctx.userId }
-      );
-    }
 
     return data;
   });
@@ -709,7 +666,7 @@ export const unlinkOAuthProvider = authedAction
   )
   .action(async ({ parsedInput: { provider }, ctx }) => {
     const cacheConfigPromise = getCacheConfigSnapshot();
-    const result = await runUserRpc<{
+    const result = await runRpc<{
       success: boolean;
       error?: string;
       message?: string;
@@ -755,7 +712,7 @@ export async function ensureUserRecord(params: {
   'use server';
 
   const cacheConfigPromise = getCacheConfigSnapshot();
-  await runUserRpc<Tables<'users'>>(
+  await runRpc<Tables<'users'>>(
     'ensure_user_record',
     {
       p_id: params.id,

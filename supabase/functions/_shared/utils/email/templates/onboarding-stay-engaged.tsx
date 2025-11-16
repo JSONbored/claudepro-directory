@@ -182,6 +182,3 @@ const thankYouTextStyle: React.CSSProperties = {
 
 export default OnboardingStayEngaged;
 
-export function renderOnboardingStayEngagedEmail(props: OnboardingStayEngagedProps) {
-  return renderEmailTemplate(OnboardingStayEngaged, props);
-}

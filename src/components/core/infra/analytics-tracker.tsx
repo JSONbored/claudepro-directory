@@ -90,8 +90,10 @@ function ViewVariant({ category, slug, delay }: Extract<UnifiedTrackerProps, { v
 
   useEffect(() => {
     if (delay === undefined) {
-      getPollingConfig()
-        .then((config) => {
+      getPollingConfig({})
+        .then((result) => {
+          if (!result?.data) return;
+          const config = result.data;
           setActualDelay(config['polling.realtime_ms']);
         })
         .catch((error) => {

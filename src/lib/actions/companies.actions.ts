@@ -9,7 +9,7 @@ import { revalidatePath, revalidateTag } from 'next/cache';
 import { z } from 'zod';
 import { invalidateByKeys, runRpc } from '@/src/lib/actions/action-helpers';
 import { getTimeoutConfigValue } from '@/src/lib/actions/feature-flags.actions';
-import { authedAction } from '@/src/lib/actions/safe-action';
+import { authedAction, rateLimitedAction } from '@/src/lib/actions/safe-action';
 import { getCompanyAdminProfile } from '@/src/lib/data/companies/admin';
 import { searchCompanies } from '@/src/lib/data/companies/public';
 import type { CacheInvalidateKey } from '@/src/lib/data/config/cache-config';
@@ -270,7 +270,8 @@ export const searchCompaniesAction = authedAction
     try {
       const limit = parsedInput.limit ?? 10;
       const companies = await searchCompanies(parsedInput.query, limit);
-      const debounceMs = await getTimeoutConfigValue('timeout.ui.form_debounce_ms');
+      const debounceResult = await getTimeoutConfigValue({ key: 'timeout.ui.form_debounce_ms' });
+      const debounceMs = debounceResult?.data ?? 300;
 
       return { companies, debounceMs };
     } catch (error) {
@@ -280,26 +281,34 @@ export const searchCompaniesAction = authedAction
     }
   });
 
-export async function getCompanyByIdAction(companyId: string) {
-  if (!companyId) {
-    return null;
-  }
+/**
+ * Get company by ID
+ * Public action - no authentication required
+ */
+export const getCompanyByIdAction = rateLimitedAction
+  .schema(z.object({ companyId: z.string().uuid() }))
+  .metadata({ actionName: 'companies.getCompanyById', category: 'content' })
+  .action(async ({ parsedInput }) => {
+    try {
+      const profile = await getCompanyAdminProfile(parsedInput.companyId);
+      if (!profile) {
+        // Return null instead of throwing - safe-action middleware handles logging
+        return null;
+      }
 
-  const profile = await getCompanyAdminProfile(companyId);
-  if (!profile) {
-    logger.warn('getCompanyByIdAction: company not found', { companyId });
-    return null;
-  }
-
-  return {
-    id: profile.id,
-    name: profile.name,
-    slug: profile.slug,
-    logo: profile.logo,
-    website: profile.website,
-    description: profile.description,
-  };
-}
+      return {
+        id: profile.id,
+        name: profile.name,
+        slug: profile.slug,
+        logo: profile.logo,
+        website: profile.website,
+        description: profile.description,
+      };
+    } catch {
+      // Fallback to null on error (safe-action middleware handles logging)
+      return null;
+    }
+  });
 
 export const uploadCompanyLogoAction = authedAction
   .metadata({ actionName: 'uploadCompanyLogo', category: 'content' })

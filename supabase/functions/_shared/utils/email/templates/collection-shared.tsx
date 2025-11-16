@@ -7,7 +7,7 @@ import React from 'npm:react@18.3.1';
 import { Hr, Section, Text } from 'npm:@react-email/components@0.0.22';
 import { buildEmailCtaUrl } from '../cta.ts';
 import { EMAIL_UTM_TEMPLATES } from '../utm-templates.ts';
-import { BaseLayout, renderEmailTemplate } from '../base-template.tsx';
+import { BaseLayout } from '../base-template.tsx';
 import {
   contentSection,
   dividerStyle,
@@ -123,6 +123,3 @@ export function CollectionShared({
   );
 }
 
-export function renderCollectionSharedEmail(props: CollectionSharedProps) {
-  return renderEmailTemplate(CollectionShared, props);
-}

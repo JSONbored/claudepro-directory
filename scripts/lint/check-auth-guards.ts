@@ -20,7 +20,8 @@ function run() {
       typeof error === 'object' &&
       error !== null &&
       'status' in error &&
-      (error as any).status === 1
+      typeof (error as { status?: unknown }).status === 'number' &&
+      (error as { status: number }).status === 1
     ) {
       return;
     }

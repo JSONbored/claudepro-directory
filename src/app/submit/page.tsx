@@ -108,7 +108,9 @@ export default async function SubmitPage() {
     templates = await getContentTemplates('agents');
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load submission templates');
-    logger.error('SubmitPage: getContentTemplates failed', normalized, { category: 'agents' });
+    logger.error('SubmitPage: getContentTemplates failed', normalized, {
+      category: 'agents',
+    });
     throw normalized;
   }
 

@@ -18,7 +18,11 @@ export interface PartnerPricing {
 }
 
 export async function getPartnerPricing(): Promise<PartnerPricing> {
-  const config = await getPricingConfig();
+  const result = await getPricingConfig({});
+  if (!result?.data) {
+    throw new Error('Failed to load pricing config');
+  }
+  const config = result.data;
 
   return {
     jobs: {

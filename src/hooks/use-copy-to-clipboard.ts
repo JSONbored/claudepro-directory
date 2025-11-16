@@ -9,9 +9,11 @@ import { logClientWarning } from '@/src/lib/utils/error.utils';
 let DEFAULT_CLIPBOARD_RESET_DELAY = 2000;
 
 // Load config from Statsig on module initialization
-getTimeoutConfig()
-  .then((config) => {
-    DEFAULT_CLIPBOARD_RESET_DELAY = config['timeout.ui.clipboard_reset_delay_ms'];
+getTimeoutConfig({})
+  .then((result) => {
+    if (result?.data) {
+      DEFAULT_CLIPBOARD_RESET_DELAY = result.data['timeout.ui.clipboard_reset_delay_ms'];
+    }
   })
   .catch((error) => {
     logClientWarning('useCopyToClipboard: failed to load timeout config', error);

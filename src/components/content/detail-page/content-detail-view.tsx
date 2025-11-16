@@ -28,7 +28,7 @@ import {
   generateMultiFormatFilename,
   transformMcpConfigForDisplay,
 } from '@/src/lib/utils/content.utils';
-import { ensureStringArray } from '@/src/lib/utils/data.utils';
+import { ensureStringArray, getMetadata } from '@/src/lib/utils/data.utils';
 import { normalizeError } from '@/src/lib/utils/error.utils';
 import { getViewTransitionName } from '@/src/lib/utils/view-transitions.utils';
 import type { GetContentDetailCompleteReturn } from '@/src/types/database-overrides';
@@ -129,8 +129,7 @@ export async function UnifiedDetailPage({
 }: UnifiedDetailPageProps) {
   const config = await getCategoryConfig(item.category as CategoryId);
   const displayTitle = getDisplayTitle(item);
-  const metadata =
-    'metadata' in item && item.metadata ? (item.metadata as Record<string, unknown>) : {};
+  const metadata = getMetadata(item);
 
   const installation = (() => {
     const inst = ('installation' in item && item.installation) || metadata.installation;
@@ -423,10 +422,10 @@ export async function UnifiedDetailPage({
   > | null> => {
     if (item.category !== 'guides') return null;
 
-    const metadata = 'metadata' in item ? (item.metadata as Record<string, unknown>) : null;
-    if (!(metadata?.sections && Array.isArray(metadata.sections))) return null;
+    const itemMetadata = getMetadata(item);
+    if (!(itemMetadata?.sections && Array.isArray(itemMetadata.sections))) return null;
 
-    const sections = metadata.sections as Array<{
+    const sections = itemMetadata.sections as Array<{
       type: string;
       code?: string;
       language?: string;

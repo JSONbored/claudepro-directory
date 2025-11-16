@@ -19,6 +19,7 @@
 import { useCallback, useState } from 'react';
 import { useLocalStorage } from '@/src/hooks/use-local-storage';
 import type { FilterState } from '@/src/lib/types/component.types';
+import type { SortOption } from '@/src/types/database-overrides';
 
 export interface UseUnifiedSearchOptions {
   initialSort?: FilterState['sort'];
@@ -53,13 +54,16 @@ export function useUnifiedSearch({
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   // Persist sort preference in localStorage
-  const { value: savedSort, setValue: setSavedSort } = useLocalStorage<string>('user-pref-sort', {
-    defaultValue: initialSort,
-    syncAcrossTabs: true,
-  });
+  const { value: savedSort, setValue: setSavedSort } = useLocalStorage<SortOption>(
+    'user-pref-sort',
+    {
+      defaultValue: (initialSort as SortOption) || 'trending',
+      syncAcrossTabs: true,
+    }
+  );
 
   const [filters, setFilters] = useState<FilterState>(() => ({
-    sort: savedSort,
+    sort: savedSort || initialSort,
   }));
 
   // Calculate active filter count
@@ -101,8 +105,8 @@ export function useUnifiedSearch({
       const newFilters = { ...filters, [key]: value };
       setFilters(newFilters);
       // Persist sort preference
-      if (key === 'sort' && typeof value === 'string') {
-        setSavedSort(value);
+      if (key === 'sort' && value) {
+        setSavedSort(value as SortOption);
       }
       onFiltersChange?.(newFilters);
     },
@@ -131,7 +135,7 @@ export function useUnifiedSearch({
   // Clear all filters (keep sort)
   const clearFilters = useCallback(() => {
     const clearedFilters: FilterState = {
-      sort: filters.sort || 'trending',
+      sort: filters.sort || ('trending' as SortOption),
     };
     setFilters(clearedFilters);
     onFiltersChange?.(clearedFilters);

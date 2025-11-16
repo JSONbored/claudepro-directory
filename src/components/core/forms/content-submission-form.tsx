@@ -23,7 +23,6 @@ import { Textarea } from '@/src/components/primitives/ui/textarea';
 import { submitContentForReview } from '@/src/lib/actions/content.actions';
 import { getAnimationConfig } from '@/src/lib/actions/feature-flags.actions';
 import { useAuthenticatedUser } from '@/src/lib/auth/use-authenticated-user';
-import type { Template } from '@/src/lib/data/content/templates';
 import {
   SUBMISSION_CONTENT_TYPES,
   type SubmissionContentType,
@@ -37,6 +36,12 @@ import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
 import { ParseStrategy, safeParse } from '@/src/lib/utils/data.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
+import type {
+  ContentCategory,
+  GetContentTemplatesReturn,
+  SubmissionStatus,
+  SubmissionType,
+} from '@/src/types/database-overrides';
 import { DuplicateWarning } from './duplicate-warning';
 import { ContentTypeFieldRenderer } from './dynamic-form-field';
 import { ExamplesArrayInput } from './examples-array-input';
@@ -49,7 +54,7 @@ import { TemplateSelector } from './template-selector';
  */
 const examplesArraySchema = z.array(z.string());
 
-const DEFAULT_CONTENT_TYPE: SubmissionContentType = 'agents';
+const DEFAULT_CONTENT_TYPE: SubmissionContentType = 'agents' as SubmissionType;
 
 const EMPTY_SECTION: SubmissionFormSection = {
   nameField: null,
@@ -80,7 +85,7 @@ const FORM_TYPE_LABELS: Record<SubmissionContentType, string> = {
 
 interface SubmitFormClientProps {
   formConfig: SubmissionFormConfig;
-  templates: Template[];
+  templates: GetContentTemplatesReturn;
 }
 
 /**
@@ -137,7 +142,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
   /** Submission result for success message display */
   const [submissionResult, setSubmissionResult] = useState<{
     submission_id: string;
-    status: string;
+    status: SubmissionStatus;
     message: string;
   } | null>(null);
 
@@ -158,8 +163,10 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
   });
 
   useEffect(() => {
-    getAnimationConfig()
-      .then((config) => {
+    getAnimationConfig({})
+      .then((result) => {
+        if (!result?.data) return;
+        const config = result.data;
         setSpringSmooth({
           type: 'spring' as const,
           stiffness: config['animation.spring.smooth.stiffness'],
@@ -184,7 +191,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
 
   // Handle template selection
   // Templates are type-safe discriminated unions for UI pre-fill convenience
-  const handleTemplateSelect = (template: Template) => {
+  const handleTemplateSelect = (template: GetContentTemplatesReturn[number]) => {
     // Pre-fill form with template data using name attributes
     // NOTE: Cannot use querySelector('#id') because useId() generates dynamic IDs like ':r0:'
     const form = document.querySelector('form') as HTMLFormElement;
@@ -332,7 +339,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
           submission_type: contentType,
           name: submissionData.name as string,
           description: submissionData.description as string,
-          category: submissionData.category as string,
+          category: submissionData.category as ContentCategory,
           author: submissionData.author as string,
           author_profile_url: submissionData.author_profile_url as string | undefined,
           github_url: submissionData.github_url as string | undefined,

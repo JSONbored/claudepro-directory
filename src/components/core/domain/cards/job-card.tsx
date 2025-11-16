@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primi
 import { Building, Clock, DollarSign, ExternalLink, MapPin, Star } from '@/src/lib/icons';
 import type { JobCardProps } from '@/src/lib/types/component.types';
 import { BADGE_COLORS, type JobType, UI_CLASSES } from '@/src/lib/ui-constants';
-import { formatRelativeDate } from '@/src/lib/utils/data.utils';
+import { ensureStringArray, formatRelativeDate } from '@/src/lib/utils/data.utils';
 
 export function JobCard({ job }: JobCardProps) {
   const isFeatured = job.tier === 'featured';
@@ -105,8 +105,9 @@ export function JobCard({ job }: JobCardProps) {
 
         <div className={UI_CLASSES.MARGIN_DEFAULT}>
           <div className={UI_CLASSES.FLEX_WRAP_GAP_2}>
-            {Array.isArray(job.tags) &&
-              (job.tags as string[]).slice(0, 4).map((tag: string) => (
+            {ensureStringArray(job.tags)
+              .slice(0, 4)
+              .map((tag: string) => (
                 <UnifiedBadge
                   key={tag}
                   variant="base"

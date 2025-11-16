@@ -24,7 +24,8 @@ export default async function ContactPage() {
   }
 
   // Check if terminal feature is enabled
-  const terminalEnabled = await checkContactTerminalEnabled();
+  const terminalResult = await checkContactTerminalEnabled({});
+  const terminalEnabled = terminalResult?.data ?? false;
 
   return (
     <div className="container mx-auto max-w-6xl px-4 py-8 sm:py-12">

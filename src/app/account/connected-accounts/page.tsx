@@ -41,7 +41,7 @@ export default async function ConnectedAccountsPage() {
     );
   }
 
-  let result;
+  let result: Awaited<ReturnType<typeof getUserIdentities>> | { data: null; serverError: string };
   try {
     result = await getUserIdentities();
   } catch (error) {

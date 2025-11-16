@@ -55,10 +55,18 @@ export function CompanySelector({ value, onChange, defaultCompanyName }: Company
     }
 
     let cancelled = false;
-    getCompanyByIdAction(value)
-      .then((company) => {
-        if (!cancelled && company) {
-          setSelectedCompany(company as Company);
+    getCompanyByIdAction({ companyId: value })
+      .then((result) => {
+        if (!cancelled && result?.data) {
+          setSelectedCompany(result.data as Company);
+        }
+        if (result?.serverError) {
+          // Error already logged by safe-action middleware
+          logger.error(
+            'CompanySelector: failed to load selected company',
+            new Error(result.serverError),
+            { companyId: value }
+          );
         }
       })
       .catch((error) => {

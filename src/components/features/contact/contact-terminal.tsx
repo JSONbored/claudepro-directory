@@ -40,12 +40,12 @@ import {
 } from '@/src/components/primitives/ui/sheet';
 import { Textarea } from '@/src/components/primitives/ui/textarea';
 import { useConfetti } from '@/src/hooks/use-confetti';
+import { getContactCommands } from '@/src/lib/actions/contact.actions';
+import { submitContactForm } from '@/src/lib/actions/contact-form.actions';
 import {
   trackTerminalCommandAction,
   trackTerminalFormSubmissionAction,
-} from '@/src/lib/actions/analytics.actions';
-import { getContactCommands } from '@/src/lib/actions/contact.actions';
-import { submitContactForm } from '@/src/lib/actions/contact-form.actions';
+} from '@/src/lib/actions/pulse.actions';
 import { Check, X } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { cn } from '@/src/lib/utils';
@@ -110,17 +110,23 @@ export function ContactTerminal() {
   const loadCommands = useCallback(async () => {
     try {
       setIsLoading(true);
-      const result = await getContactCommands();
-      if (
-        result &&
-        typeof result === 'object' &&
-        'commands' in result &&
-        Array.isArray(result.commands)
-      ) {
-        setCommands(result.commands as ContactCommand[]);
-        setLoadError(null);
+      const result = await getContactCommands({});
+      if (result?.data && Array.isArray(result.data.commands)) {
+        setCommands(result.data.commands as ContactCommand[]);
+        if (result.data.commands.length === 0) {
+          setLoadError('No commands available');
+          addOutput('error', 'No commands available');
+        } else {
+          setLoadError(null);
+        }
       } else {
         throw new Error('Invalid commands response');
+      }
+      if (result?.serverError) {
+        // Error already logged by safe-action middleware
+        logger.error('Failed to load terminal commands', new Error(result.serverError));
+        setLoadError('Failed to load commands. Please refresh the page.');
+        addOutput('error', 'Failed to load commands. Please refresh the page.');
       }
     } catch (error) {
       logger.error('Failed to load terminal commands', error as Error);
@@ -164,12 +170,14 @@ export function ContactTerminal() {
     if (!command) {
       addOutput('error', `Command not found: "${commandText}"`, <X className="h-3 w-3" />);
       addOutput('output', 'Type for suggestions or try: help, report-bug, request-feature');
-      await trackTerminalCommandAction({
+      trackTerminalCommandAction({
         command_id: 'unknown',
         action_type: 'unknown',
         success: false,
         error_reason: 'command_not_found',
         execution_time_ms: Date.now() - startTime,
+      }).catch(() => {
+        // Fire-and-forget tracking
       });
       return;
     }
@@ -226,11 +234,13 @@ export function ContactTerminal() {
         fireConfetti(command.confettiVariant as 'success' | 'celebration' | 'milestone' | 'subtle');
       }
 
-      await trackTerminalCommandAction({
+      trackTerminalCommandAction({
         command_id: command.id,
         action_type: command.actionType,
         success: true,
         execution_time_ms: Date.now() - startTime,
+      }).catch(() => {
+        // Fire-and-forget tracking
       });
     } catch (error) {
       addOutput(
@@ -239,12 +249,14 @@ export function ContactTerminal() {
         <X className="h-3 w-3" />
       );
       logger.error('Terminal command execution failed', error as Error, { commandId: command.id });
-      await trackTerminalCommandAction({
+      trackTerminalCommandAction({
         command_id: command.id,
         action_type: command.actionType,
         success: false,
         error_reason: error instanceof Error ? error.message : 'unknown_error',
         execution_time_ms: Date.now() - startTime,
+      }).catch(() => {
+        // Fire-and-forget tracking
       });
     }
   };
@@ -323,26 +335,32 @@ export function ContactTerminal() {
         );
         setIsSheetOpen(false);
         fireConfetti('success');
-        await trackTerminalFormSubmissionAction({
+        trackTerminalFormSubmissionAction({
           category: selectedCategory,
           success: true,
+        }).catch(() => {
+          // Fire-and-forget tracking
         });
         (e.target as HTMLFormElement).reset();
       } else {
         addOutput('error', result.error || 'Failed to send message.', <X className="h-3 w-3" />);
-        await trackTerminalFormSubmissionAction({
+        trackTerminalFormSubmissionAction({
           category: selectedCategory,
           success: false,
           ...(result.error && { error: result.error }),
+        }).catch(() => {
+          // Fire-and-forget tracking
         });
       }
     } catch (error) {
       addOutput('error', 'An error occurred. Please try again.', <X className="h-3 w-3" />);
       logger.error('Contact form submission failed', error as Error);
-      await trackTerminalFormSubmissionAction({
+      trackTerminalFormSubmissionAction({
         category: selectedCategory,
         success: false,
         ...(error instanceof Error && { error: error.message }),
+      }).catch(() => {
+        // Fire-and-forget tracking
       });
     } finally {
       setIsSubmitting(false);

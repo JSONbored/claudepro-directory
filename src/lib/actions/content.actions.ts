@@ -16,8 +16,14 @@ import { getReviewsWithStatsData } from '@/src/lib/data/content/reviews';
 import { logger } from '@/src/lib/logger';
 import { createClient } from '@/src/lib/supabase/server';
 import type { DisplayableContent } from '@/src/lib/types/component.types';
-import { logActionFailure, normalizeError } from '@/src/lib/utils/error.utils';
+import { logActionFailure } from '@/src/lib/utils/error.utils';
 import type { Database, Tables } from '@/src/types/database.types';
+import {
+  CONTENT_CATEGORY_VALUES,
+  type ContentCategory,
+  SUBMISSION_TYPE_VALUES,
+  type SubmissionType,
+} from '@/src/types/database-overrides';
 
 // Manual Zod schemas (database validates, Zod just provides type safety)
 const collectionSchema = z.object({
@@ -33,7 +39,7 @@ const collectionSchema = z.object({
 
 const collectionItemSchema = z.object({
   collection_id: z.string(),
-  content_type: z.string(),
+  content_type: z.enum([...CONTENT_CATEGORY_VALUES] as [ContentCategory, ...ContentCategory[]]),
   content_slug: z
     .string()
     .max(200)
@@ -43,19 +49,7 @@ const collectionItemSchema = z.object({
 });
 
 const reviewSchema = z.object({
-  content_type: z.enum([
-    'agents',
-    'mcp',
-    'rules',
-    'commands',
-    'hooks',
-    'statuslines',
-    'collections',
-    'guides',
-    'skills',
-    'jobs',
-    'changelog',
-  ]),
+  content_type: z.enum([...CONTENT_CATEGORY_VALUES] as [ContentCategory, ...ContentCategory[]]),
   content_slug: z
     .string()
     .max(200)
@@ -65,19 +59,7 @@ const reviewSchema = z.object({
 });
 
 const getReviewsSchema = z.object({
-  content_type: z.enum([
-    'agents',
-    'mcp',
-    'rules',
-    'commands',
-    'hooks',
-    'statuslines',
-    'collections',
-    'guides',
-    'skills',
-    'jobs',
-    'changelog',
-  ]),
+  content_type: z.enum([...CONTENT_CATEGORY_VALUES] as [ContentCategory, ...ContentCategory[]]),
   content_slug: z
     .string()
     .max(200)
@@ -655,7 +637,7 @@ export const trackUsage = rateLimitedAction
   .metadata({ actionName: 'trackUsage', category: 'content' })
   .schema(
     z.object({
-      content_type: z.string(),
+      content_type: z.enum([...CONTENT_CATEGORY_VALUES] as [ContentCategory, ...ContentCategory[]]),
       content_slug: z.string(),
       action_type: z.enum(['copy', 'download_zip', 'download_markdown', 'llmstxt']),
     })
@@ -700,36 +682,36 @@ export const trackUsage = rateLimitedAction
 // CONTENT FETCHING ACTIONS
 // ============================================
 
+const fetchPaginatedContentSchema = z.object({
+  offset: z.number().int().min(0).default(0),
+  limit: z.number().int().min(1).max(100).default(30),
+  category: z
+    .enum([...CONTENT_CATEGORY_VALUES] as [ContentCategory, ...ContentCategory[]])
+    .nullable()
+    .default(null),
+});
+
 /**
  * Fetch paginated content via cached RPC (get_content_paginated_slim)
+ * Public action - no authentication required
  */
-export async function fetchPaginatedContent(params: {
-  offset: number;
-  limit: number;
-  category: string;
-}): Promise<DisplayableContent[]> {
-  const safeOffset = Math.max(params.offset ?? 0, 0);
-  const safeLimit = Math.min(Math.max(params.limit ?? 30, 1), 100);
-  const normalizedCategory = !params.category || params.category === 'all' ? null : params.category;
+export const fetchPaginatedContent = rateLimitedAction
+  .schema(fetchPaginatedContentSchema)
+  .metadata({ actionName: 'content.fetchPaginatedContent', category: 'content' })
+  .action(async ({ parsedInput }) => {
+    try {
+      const data = await getPaginatedContentData({
+        category: parsedInput.category,
+        limit: parsedInput.limit,
+        offset: parsedInput.offset,
+      });
 
-  try {
-    const data = await getPaginatedContentData({
-      category: normalizedCategory,
-      limit: safeLimit,
-      offset: safeOffset,
-    });
-
-    return (data?.items ?? []) as DisplayableContent[];
-  } catch (error) {
-    const normalized = normalizeError(error, 'Failed to fetch paginated content');
-    logger.error('fetchPaginatedContent: cached RPC failed', normalized, {
-      category: normalizedCategory ?? 'all',
-      offset: safeOffset,
-      limit: safeLimit,
-    });
-    return [];
-  }
-}
+      return (data?.items ?? []) as DisplayableContent[];
+    } catch {
+      // Fallback to empty array on error (safe-action middleware handles logging)
+      return [];
+    }
+  });
 
 // =====================================================
 // CONTENT SUBMISSION ACTION
@@ -740,10 +722,10 @@ export async function fetchPaginatedContent(params: {
  * Calls submit_content_for_review RPC with validation
  */
 const submitContentSchema = z.object({
-  submission_type: z.string(),
+  submission_type: z.enum([...SUBMISSION_TYPE_VALUES] as [SubmissionType, ...SubmissionType[]]),
   name: z.string().min(2),
   description: z.string().min(10),
-  category: z.string(),
+  category: z.enum([...CONTENT_CATEGORY_VALUES] as [ContentCategory, ...ContentCategory[]]),
   author: z.string().min(2),
   author_profile_url: z.string().url().optional(),
   github_url: z.string().url().optional(),

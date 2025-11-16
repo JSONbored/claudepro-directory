@@ -13,6 +13,7 @@ import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { ensureStringArray } from '@/src/lib/utils/data.utils';
 import { normalizeError } from '@/src/lib/utils/error.utils';
+import type { JobCategory } from '@/src/types/database-overrides';
 
 export const metadata = generatePageMetadata('/account/jobs/:id/edit');
 
@@ -51,7 +52,7 @@ export default async function EditJobPage({ params }: EditJobPageProps) {
   const handleSubmit = async (data: Omit<UpdateJobInput, 'job_id'>) => {
     'use server';
 
-    let result;
+    let result: Awaited<ReturnType<typeof updateJob>>;
     try {
       result = await updateJob({
         job_id: resolvedParams.id,
@@ -108,7 +109,7 @@ export default async function EditJobPage({ params }: EditJobPageProps) {
           type: job.type,
           workplace: job.workplace,
           experience: job.experience,
-          category: job.category,
+          category: job.category as JobCategory,
           tags: ensureStringArray(job.tags),
           requirements: ensureStringArray(job.requirements),
           benefits: ensureStringArray(job.benefits),

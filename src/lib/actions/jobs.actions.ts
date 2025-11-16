@@ -12,7 +12,12 @@ import { authedAction } from '@/src/lib/actions/safe-action';
 import type { CacheInvalidateKey } from '@/src/lib/data/config/cache-config';
 import { logger } from '@/src/lib/logger';
 import { logActionFailure } from '@/src/lib/utils/error.utils';
-import type { Database } from '@/src/types/database.types';
+import {
+  JOB_CATEGORY_VALUES,
+  JOB_STATUS_VALUES,
+  type JobCategory,
+  type JobStatus,
+} from '@/src/types/database-overrides';
 
 // Minimal Zod schemas (database CHECK constraints do real validation)
 const createJobSchema = z.object({
@@ -26,7 +31,7 @@ const createJobSchema = z.object({
   type: z.string(),
   workplace: z.string().optional().nullable(),
   experience: z.string().optional().nullable(),
-  category: z.string(),
+  category: z.enum([...JOB_CATEGORY_VALUES] as [JobCategory, ...JobCategory[]]),
   tags: z.array(z.string()),
   requirements: z.array(z.string()),
   benefits: z.array(z.string()),
@@ -49,7 +54,7 @@ const updateJobSchema = z.object({
   type: z.string().optional(),
   workplace: z.string().optional().nullable(),
   experience: z.string().optional().nullable(),
-  category: z.string().optional(),
+  category: z.enum([...JOB_CATEGORY_VALUES] as [JobCategory, ...JobCategory[]]).optional(),
   tags: z.array(z.string()).optional(),
   requirements: z.array(z.string()).optional(),
   benefits: z.array(z.string()).optional(),
@@ -68,15 +73,7 @@ const deleteJobSchema = z.object({
 
 const toggleJobStatusSchema = z.object({
   job_id: z.string().uuid(),
-  new_status: z.enum([
-    'draft',
-    'pending_payment',
-    'pending_review',
-    'active',
-    'expired',
-    'rejected',
-    'deleted',
-  ]),
+  new_status: z.enum([...JOB_STATUS_VALUES] as [JobStatus, ...JobStatus[]]),
 });
 
 async function invalidateJobCaches(options: {
@@ -361,8 +358,8 @@ export const toggleJobStatus = authedAction
     try {
       type ToggleJobStatusRpcResult = {
         success: boolean;
-        old_status: Database['public']['Enums']['job_status'];
-        new_status: Database['public']['Enums']['job_status'];
+        old_status: JobStatus;
+        new_status: JobStatus;
       };
 
       const result = await runRpc<ToggleJobStatusRpcResult>(

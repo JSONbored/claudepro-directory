@@ -167,6 +167,3 @@ const helpTitleStyle: React.CSSProperties = {
 
 export default OnboardingGettingStarted;
 
-export function renderOnboardingGettingStartedEmail(props: OnboardingGettingStartedProps) {
-  return renderEmailTemplate(OnboardingGettingStarted, props);
-}

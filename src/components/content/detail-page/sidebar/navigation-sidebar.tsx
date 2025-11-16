@@ -18,7 +18,7 @@ import { ExternalLink, Github, Thermometer } from '@/src/lib/icons';
 import { BADGE_COLORS, type CategoryType, UI_CLASSES } from '@/src/lib/ui-constants';
 import { getDisplayTitle } from '@/src/lib/utils';
 import { getContentItemUrl } from '@/src/lib/utils/content.utils';
-import { ensureStringArray } from '@/src/lib/utils/data.utils';
+import { ensureStringArray, getMetadata } from '@/src/lib/utils/data.utils';
 import type { GetContentDetailCompleteReturn } from '@/src/types/database-overrides';
 
 /**
@@ -76,7 +76,7 @@ export const DetailSidebar = memo(function DetailSidebar({
 
   const showGitHubLink = config.metadata?.showGitHubLink ?? true;
   const hasDocumentationUrl = 'documentation_url' in item && item.documentation_url;
-  const metadata = ('metadata' in item && (item.metadata as Record<string, unknown>)) || {};
+  const metadata = getMetadata(item);
   const hasConfiguration = metadata.configuration && typeof metadata.configuration === 'object';
   const packageName = metadata.package as string | undefined;
   const hasPackage = !!packageName;

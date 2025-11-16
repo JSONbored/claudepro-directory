@@ -25,8 +25,9 @@ import {
   badRequestResponse,
   errorResponse,
   getWithAuthCorsHeaders,
-  methodNotAllowedResponse,
 } from '../_shared/utils/http.ts';
+import { createSearchContext, withDuration } from '../_shared/utils/logging.ts';
+import { createRouter, type HttpMethod, type RouterContext } from '../_shared/utils/router.ts';
 
 type ContentSearchResult =
   Database['public']['Functions']['search_content_optimized']['Returns'][number];
@@ -76,39 +77,56 @@ interface FacetsResponse {
   }>;
 }
 
-Deno.serve(async (req: Request) => {
-  const startTime = performance.now();
+interface UnifiedSearchContext extends RouterContext {
+  pathname: string;
+  startTime: number;
+}
 
-  // Handle CORS preflight
-  if (req.method === 'OPTIONS') {
-    return new Response(null, {
-      status: 200,
-      headers: getWithAuthCorsHeaders,
-    });
-  }
+const router = createRouter<UnifiedSearchContext>({
+  buildContext: (request) => {
+    const url = new URL(request.url);
+    const originalMethod = request.method.toUpperCase() as HttpMethod;
+    const normalizedMethod = (originalMethod === 'HEAD' ? 'GET' : originalMethod) as HttpMethod;
 
-  // Only allow GET requests
-  if (req.method !== 'GET') {
-    return methodNotAllowedResponse('GET', getWithAuthCorsHeaders);
-  }
-
-  try {
-    const url = new URL(req.url);
-    const pathname = url.pathname;
-
-    // Route to appropriate handler
-    if (pathname.endsWith('/autocomplete')) {
-      return await handleAutocomplete(url, startTime);
-    }
-
-    if (pathname.endsWith('/facets')) {
-      return await handleFacets(startTime);
-    }
-
+    return {
+      request,
+      url,
+      method: normalizedMethod,
+      originalMethod,
+      pathname: url.pathname,
+      startTime: performance.now(),
+    };
+  },
+  defaultCors: getWithAuthCorsHeaders,
+  onNoMatch: (ctx) => {
     // Default: main search endpoint
-    return await handleSearch(url, startTime, req);
+    return handleSearch(ctx.url, ctx.startTime, ctx.request);
+  },
+  routes: [
+    {
+      name: 'autocomplete',
+      methods: ['GET', 'HEAD', 'OPTIONS'],
+      match: (ctx) => ctx.pathname.endsWith('/autocomplete'),
+      handler: (ctx) => handleAutocomplete(ctx.url, ctx.startTime),
+    },
+    {
+      name: 'facets',
+      methods: ['GET', 'HEAD', 'OPTIONS'],
+      match: (ctx) => ctx.pathname.endsWith('/facets'),
+      handler: (ctx) => handleFacets(ctx.startTime),
+    },
+  ],
+});
+
+Deno.serve(async (request) => {
+  try {
+    return await router(request);
   } catch (error) {
-    console.error('Unified search error:', error);
+    const logContext = createSearchContext();
+    console.error('[unified-search] Unified search error', {
+      ...logContext,
+      error: error instanceof Error ? error.message : String(error),
+    });
     return errorResponse(error, 'unified-search', getWithAuthCorsHeaders);
   }
 });
@@ -132,6 +150,13 @@ async function handleSearch(url: URL, startTime: number, req: Request): Promise<
 
   // Determine search type based on entities parameter
   const searchType: 'content' | 'unified' = entities ? 'unified' : 'content';
+
+  // Create logContext
+  const logContext = createSearchContext({
+    query,
+    searchType,
+    filters: { categories, tags, authors, entities, sort },
+  });
 
   // Validate entities if provided
   const validEntities = ['content', 'company', 'job', 'user'];
@@ -187,7 +212,11 @@ async function handleSearch(url: URL, startTime: number, req: Request): Promise<
   const dbEndTime = performance.now();
 
   if (error) {
-    console.error(`Search RPC error (${searchType}):`, error);
+    console.error('[unified-search] Search RPC error', {
+      ...logContext,
+      searchType,
+      error: error instanceof Error ? error.message : String(error),
+    });
     return errorResponse(
       error,
       searchType === 'unified' ? 'search_unified' : 'search_content_optimized',
@@ -210,12 +239,20 @@ async function handleSearch(url: URL, startTime: number, req: Request): Promise<
     results.length,
     req.headers.get('Authorization')
   ).catch((error) => {
-    console.warn('[unified-search] analytics tracking failed', {
-      message: error instanceof Error ? error.message : String(error),
+    console.warn('[unified-search] Analytics tracking failed', {
+      ...logContext,
+      error: error instanceof Error ? error.message : String(error),
     });
   });
 
   const totalTime = performance.now() - startTime;
+
+  // Log successful search completion
+  console.log('[unified-search] Search completed', {
+    ...withDuration(logContext, startTime),
+    resultCount: results.length,
+    searchType,
+  });
 
   const response: SearchResponse = {
     results,
@@ -262,6 +299,12 @@ async function handleAutocomplete(url: URL, startTime: number): Promise<Response
     20
   );
 
+  // Create logContext
+  const logContext = createSearchContext({
+    query,
+    searchType: 'autocomplete',
+  });
+
   // Require at least 2 characters
   if (query.length < 2) {
     return badRequestResponse('Query must be at least 2 characters', getWithAuthCorsHeaders);
@@ -274,7 +317,10 @@ async function handleAutocomplete(url: URL, startTime: number): Promise<Response
   });
 
   if (error) {
-    console.error('Autocomplete RPC error:', error);
+    console.error('[unified-search] Autocomplete RPC error', {
+      ...logContext,
+      error: error instanceof Error ? error.message : String(error),
+    });
     return errorResponse(error, 'get_search_suggestions_from_history', getWithAuthCorsHeaders);
   }
 
@@ -285,6 +331,12 @@ async function handleAutocomplete(url: URL, startTime: number): Promise<Response
   }));
 
   const totalTime = performance.now() - startTime;
+
+  // Log successful autocomplete
+  console.log('[unified-search] Autocomplete completed', {
+    ...withDuration(logContext, startTime),
+    suggestionCount: suggestions.length,
+  });
 
   const response: AutocompleteResponse = {
     suggestions,
@@ -308,11 +360,19 @@ async function handleAutocomplete(url: URL, startTime: number): Promise<Response
  * Facets endpoint - available filters for search UI
  */
 async function handleFacets(startTime: number): Promise<Response> {
+  // Create logContext
+  const logContext = createSearchContext({
+    searchType: 'facets',
+  });
+
   // Call facets RPC
   const { data, error } = await supabaseAnon.rpc('get_search_facets');
 
   if (error) {
-    console.error('Facets RPC error:', error);
+    console.error('[unified-search] Facets RPC error', {
+      ...logContext,
+      error: error instanceof Error ? error.message : String(error),
+    });
     return errorResponse(error, 'get_search_facets', getWithAuthCorsHeaders);
   }
 
@@ -324,6 +384,12 @@ async function handleFacets(startTime: number): Promise<Response> {
   }));
 
   const totalTime = performance.now() - startTime;
+
+  // Log successful facets retrieval
+  console.log('[unified-search] Facets completed', {
+    ...withDuration(logContext, startTime),
+    facetCount: facets.length,
+  });
 
   const response: FacetsResponse = {
     facets,

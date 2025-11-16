@@ -32,7 +32,7 @@ import { getContentBySlug } from '@/src/lib/data/content';
 import { AlertTriangle, CheckCircle } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
-import { ensureStringArray } from '@/src/lib/utils/data.utils';
+import { ensureStringArray, getMetadata } from '@/src/lib/utils/data.utils';
 import type { Database } from '@/src/types/database.types';
 
 interface ItemWithData {
@@ -63,7 +63,7 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
   // Load category configs once (single RPC call)
   const categoryConfigs = await getCategoryConfigs();
 
-  const metadata = (collection.metadata as Record<string, unknown>) || {};
+  const metadata = getMetadata(collection);
   const items =
     (metadata.items as Array<{ category: string; slug: string; reason?: string }>) || [];
 

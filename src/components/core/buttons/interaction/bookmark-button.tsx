@@ -15,10 +15,11 @@ import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
 import { logClientWarning } from '@/src/lib/utils/error.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
+import type { ContentCategory } from '@/src/types/database-overrides';
 import type { ButtonStyleProps } from '../shared/button-types';
 
 export interface BookmarkButtonProps extends ButtonStyleProps {
-  contentType: string;
+  contentType: ContentCategory;
   contentSlug: string;
   initialBookmarked?: boolean;
   showLabel?: boolean;
@@ -76,8 +77,8 @@ export function BookmarkButton({
             toasts.success.bookmarkAdded();
 
             // Confetti animation gated by feature flag
-            const confettiEnabled = await checkConfettiEnabled();
-            if (confettiEnabled) {
+            const confettiResult = await checkConfettiEnabled({});
+            if (confettiResult?.data) {
               celebrateBookmark();
             }
           }

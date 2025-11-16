@@ -27,24 +27,24 @@ async function main() {
     const content = await fs.readFile(file, 'utf8');
 
     if (!allowedSocialLinksFiles.has(relative) && content.includes(socialLinksToken)) {
-      collectLines(content, socialLinksToken).forEach((line) => {
+      for (const line of collectLines(content, socialLinksToken)) {
         violations.push({
           file: relative,
           line,
           message: `Disallowed ${socialLinksToken} usage outside data layer.`,
         });
-      });
+      }
     }
 
     const barrelMatches = content.match(marketingBarrelRegex);
     if (barrelMatches) {
-      collectLines(content, '@/src/lib/data/marketing').forEach((line) => {
+      for (const line of collectLines(content, '@/src/lib/data/marketing')) {
         violations.push({
           file: relative,
           line,
           message: 'Importing from "@/src/lib/data/marketing" barrel is prohibited.',
         });
-      });
+      }
     }
   });
 
@@ -73,11 +73,11 @@ async function walk(dir: string, onFile: (filePath: string) => Promise<void>): P
 
 function collectLines(content: string, needle: string): number[] {
   const lines: number[] = [];
-  content.split('\n').forEach((line, index) => {
+  for (const [index, line] of content.split('\n').entries()) {
     if (line.includes(needle)) {
       lines.push(index + 1);
     }
-  });
+  }
   return lines;
 }
 

@@ -61,8 +61,10 @@ export const ConfigCard = memo(
     });
 
     useEffect(() => {
-      getComponentConfig()
-        .then((config) => {
+      getComponentConfig({})
+        .then((result) => {
+          if (!result?.data) return;
+          const config = result.data;
           setCardConfig({
             showCopyButton: config['cards.show_copy_button'],
             showBookmark: config['cards.show_bookmark'],
@@ -163,7 +165,7 @@ export const ConfigCard = memo(
     const hasRating = ratingData && ratingData.count > 0;
 
     // Extract collection-specific metadata (tree-shakeable - only loaded for collections)
-    const isCollection = item.category === 'collections';
+    const isCollection = item.category === ('collections' as const);
     const collectionType = 'collectionType' in item ? item.collectionType : undefined;
     const collectionDifficulty = 'difficulty' in item ? item.difficulty : undefined;
     const itemCount = 'itemCount' in item ? item.itemCount : undefined;
@@ -213,112 +215,109 @@ export const ConfigCard = memo(
           onSwipeLeft={handleSwipeLeftBookmark}
           useViewTransitions={useViewTransitions}
           viewTransitionSlug={item.slug}
-          renderTopBadges={() => (
-            <>
-              {showCategory && (
-                <UnifiedBadge
-                  variant="category"
-                  category={
-                    (item.category || 'agents') as
-                      | 'hooks'
-                      | 'agents'
-                      | 'mcp'
-                      | 'rules'
-                      | 'commands'
-                      | 'guides'
-                      | 'collections'
-                      | 'skills'
-                      | 'statuslines'
-                  }
-                >
-                  {item.category === 'mcp'
-                    ? 'MCP'
-                    : item.category === 'agents'
-                      ? 'Agent'
-                      : item.category === 'commands'
-                        ? 'Command'
-                        : item.category === 'hooks'
-                          ? 'Hook'
-                          : item.category === 'rules'
-                            ? 'Rule'
-                            : item.category === 'statuslines'
-                              ? 'Statusline'
-                              : item.category === 'collections'
-                                ? 'Collection'
-                                : item.category === 'guides'
-                                  ? 'Guide'
-                                  : item.category === 'skills'
-                                    ? 'Skill'
-                                    : 'Agent'}
-                </UnifiedBadge>
-              )}
-
-              {/* Collection-specific badges (tree-shakeable) */}
-              {isCollection && collectionType && COLLECTION_TYPE_LABELS && (
-                <UnifiedBadge
-                  variant="base"
-                  style="outline"
-                  className={`${UI_CLASSES.TEXT_BADGE} ${BADGE_COLORS.collectionType[collectionType as keyof typeof BADGE_COLORS.collectionType] || ''}`}
-                >
-                  <Layers className={UI_CLASSES.ICON_XS_LEADING} aria-hidden="true" />
-                  {COLLECTION_TYPE_LABELS[collectionType as keyof typeof COLLECTION_TYPE_LABELS]}
-                </UnifiedBadge>
-              )}
-
-              {isCollection &&
-                collectionDifficulty &&
-                (collectionDifficulty === 'beginner' ||
-                  collectionDifficulty === 'intermediate' ||
-                  collectionDifficulty === 'advanced') && (
-                  <UnifiedBadge
-                    variant="base"
-                    style="outline"
-                    className={`${UI_CLASSES.TEXT_BADGE} ${BADGE_COLORS.difficulty[collectionDifficulty as 'beginner' | 'intermediate' | 'advanced']}`}
-                  >
-                    {collectionDifficulty}
+          renderTopBadges={() => {
+            // Runtime type guard ensures category is valid CategoryId (excludes 'changelog' and 'jobs')
+            // Type assertion is safe because isValidCategory() validates at runtime
+            const rawCategory = item.category;
+            const category: CategoryId = (isValidCategory(rawCategory)
+              ? rawCategory
+              : 'agents') as unknown as CategoryId;
+            return (
+              <>
+                {showCategory && (
+                  <UnifiedBadge variant="category" category={category}>
+                    {item.category === 'mcp'
+                      ? 'MCP'
+                      : item.category === 'agents'
+                        ? 'Agent'
+                        : item.category === 'commands'
+                          ? 'Command'
+                          : item.category === 'hooks'
+                            ? 'Hook'
+                            : item.category === 'rules'
+                              ? 'Rule'
+                              : item.category === 'statuslines'
+                                ? 'Statusline'
+                                : item.category === 'collections'
+                                  ? 'Collection'
+                                  : item.category === 'guides'
+                                    ? 'Guide'
+                                    : item.category === 'skills'
+                                      ? 'Skill'
+                                      : 'Agent'}
                   </UnifiedBadge>
                 )}
 
-              {isCollection && itemCount !== undefined && typeof itemCount === 'number' && (
-                <UnifiedBadge
-                  variant="base"
-                  style="outline"
-                  className={`${UI_CLASSES.BADGE_METADATA} ${UI_CLASSES.TEXT_BADGE}`}
-                >
-                  {itemCount} {itemCount === 1 ? 'item' : 'items'}
-                </UnifiedBadge>
-              )}
+                {/* Collection-specific badges (tree-shakeable) */}
+                {isCollection && collectionType && COLLECTION_TYPE_LABELS && (
+                  <UnifiedBadge
+                    variant="base"
+                    style="outline"
+                    className={`${UI_CLASSES.TEXT_BADGE} ${BADGE_COLORS.collectionType[collectionType as keyof typeof BADGE_COLORS.collectionType] || ''}`}
+                  >
+                    <Layers className={UI_CLASSES.ICON_XS_LEADING} aria-hidden="true" />
+                    {COLLECTION_TYPE_LABELS[collectionType as keyof typeof COLLECTION_TYPE_LABELS]}
+                  </UnifiedBadge>
+                )}
 
-              {/* Featured badge - weekly algorithm selection */}
-              {isFeatured && (
-                <UnifiedBadge
-                  variant="base"
-                  style="secondary"
-                  className={`fade-in slide-in-from-top-2 animate-in ${UI_CLASSES.SPACE_TIGHT} font-semibold shadow-sm transition-all duration-300 hover:from-amber-500/15 hover:to-yellow-500/15 hover:shadow-md ${SEMANTIC_COLORS.FEATURED}`}
-                >
-                  {featuredRank && featuredRank <= 3 ? (
-                    <Award className={`${UI_CLASSES.ICON_XS} text-amber-500`} aria-hidden="true" />
-                  ) : (
-                    <Sparkles className={UI_CLASSES.ICON_XS} aria-hidden="true" />
+                {isCollection &&
+                  collectionDifficulty &&
+                  (collectionDifficulty === 'beginner' ||
+                    collectionDifficulty === 'intermediate' ||
+                    collectionDifficulty === 'advanced') && (
+                    <UnifiedBadge
+                      variant="base"
+                      style="outline"
+                      className={`${UI_CLASSES.TEXT_BADGE} ${BADGE_COLORS.difficulty[collectionDifficulty as 'beginner' | 'intermediate' | 'advanced']}`}
+                    >
+                      {collectionDifficulty}
+                    </UnifiedBadge>
                   )}
-                  Featured
-                  {featuredRank && <span className="text-xs opacity-75">#{featuredRank}</span>}
-                </UnifiedBadge>
-              )}
-              {isSponsored && sponsorTier && (
-                <UnifiedBadge
-                  variant="sponsored"
-                  tier={sponsorTier as 'featured' | 'promoted' | 'spotlight'}
-                  showIcon
-                />
-              )}
 
-              {/* New indicator - 0-7 days old content (server-computed) */}
-              {'isNew' in item && item.isNew && (
-                <UnifiedBadge variant="new-indicator" label="New content" className="ml-0.5" />
-              )}
-            </>
-          )}
+                {isCollection && itemCount !== undefined && typeof itemCount === 'number' && (
+                  <UnifiedBadge
+                    variant="base"
+                    style="outline"
+                    className={`${UI_CLASSES.BADGE_METADATA} ${UI_CLASSES.TEXT_BADGE}`}
+                  >
+                    {itemCount} {itemCount === 1 ? 'item' : 'items'}
+                  </UnifiedBadge>
+                )}
+
+                {/* Featured badge - weekly algorithm selection */}
+                {isFeatured && (
+                  <UnifiedBadge
+                    variant="base"
+                    style="secondary"
+                    className={`fade-in slide-in-from-top-2 animate-in ${UI_CLASSES.SPACE_TIGHT} font-semibold shadow-sm transition-all duration-300 hover:from-amber-500/15 hover:to-yellow-500/15 hover:shadow-md ${SEMANTIC_COLORS.FEATURED}`}
+                  >
+                    {featuredRank && featuredRank <= 3 ? (
+                      <Award
+                        className={`${UI_CLASSES.ICON_XS} text-amber-500`}
+                        aria-hidden="true"
+                      />
+                    ) : (
+                      <Sparkles className={UI_CLASSES.ICON_XS} aria-hidden="true" />
+                    )}
+                    Featured
+                    {featuredRank && <span className="text-xs opacity-75">#{featuredRank}</span>}
+                  </UnifiedBadge>
+                )}
+                {isSponsored && sponsorTier && (
+                  <UnifiedBadge
+                    variant="sponsored"
+                    tier={sponsorTier as 'featured' | 'promoted' | 'spotlight'}
+                    showIcon
+                  />
+                )}
+
+                {/* New indicator - 0-7 days old content (server-computed) */}
+                {'isNew' in item && item.isNew && (
+                  <UnifiedBadge variant="new-indicator" label="New content" className="ml-0.5" />
+                )}
+              </>
+            );
+          }}
           renderMetadataBadges={() => (
             <>
               {/* Rating badge - shows average rating and count */}
@@ -377,7 +376,10 @@ export const ConfigCard = memo(
               {/* Bookmark button with count overlay */}
               {cardConfig.showBookmark && (
                 <div className="relative">
-                  <BookmarkButton contentType={item.category || 'agents'} contentSlug={item.slug} />
+                  <BookmarkButton
+                    contentType={isValidCategory(item.category) ? item.category : 'agents'}
+                    contentSlug={item.slug}
+                  />
                   {bookmarkCount !== undefined && bookmarkCount > 0 && (
                     <UnifiedBadge
                       variant="notification-count"

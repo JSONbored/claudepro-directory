@@ -244,6 +244,3 @@ const linkButtonStyle: React.CSSProperties = {
 
 export default OnboardingCommunity;
 
-export function renderOnboardingCommunityEmail(props: OnboardingCommunityProps) {
-  return renderEmailTemplate(OnboardingCommunity, props);
-}

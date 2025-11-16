@@ -309,3 +309,30 @@ export function formatRelativeDate(date: string | Date, options: RelativeDateOpt
 export function formatDistanceToNow(date: Date): string {
   return formatRelativeDate(date, { style: 'detailed' });
 }
+
+/**
+ * Safely extracts metadata from a content item or collection
+ * Returns a normalized Record<string, unknown> with fallback to empty object
+ *
+ * @param item - Content item or collection that may contain a metadata field
+ * @returns Normalized metadata object, never null/undefined
+ *
+ * @example
+ * ```ts
+ * const metadata = getMetadata(item);
+ * const config = metadata.configuration;
+ * const tags = ensureStringArray(metadata.tags);
+ * ```
+ */
+export function getMetadata(
+  item: { metadata?: unknown } | Record<string, unknown>
+): Record<string, unknown> {
+  if ('metadata' in item && item.metadata) {
+    return typeof item.metadata === 'object' &&
+      item.metadata !== null &&
+      !Array.isArray(item.metadata)
+      ? (item.metadata as Record<string, unknown>)
+      : {};
+  }
+  return {};
+}

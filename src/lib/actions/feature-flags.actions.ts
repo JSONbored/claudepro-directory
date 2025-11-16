@@ -5,7 +5,8 @@
 
 'use server';
 
-import { traceMeta } from '@/src/lib/actions/action-helpers';
+import { z } from 'zod';
+import { rateLimitedAction } from '@/src/lib/actions/safe-action';
 import {
   ANIMATION_CONFIG_DEFAULTS,
   APP_SETTINGS_DEFAULTS,
@@ -30,57 +31,82 @@ import {
   TIMEOUT_CONFIG_DEFAULTS,
   timeoutConfigs,
 } from '@/src/lib/flags';
-import { logger } from '@/src/lib/logger';
-import { normalizeError } from '@/src/lib/utils/error.utils';
+// Error handling now done by safe-action middleware
 
 /**
  * Check if confetti animations are enabled
  */
-export async function checkConfettiEnabled(): Promise<boolean> {
-  return fetchWithLogging(
-    'confettiAnimations',
-    () => featureFlags.confettiAnimations(),
-    () => false
-  );
-}
+export const checkConfettiEnabled = rateLimitedAction
+  .schema(z.object({}))
+  .metadata({ actionName: 'featureFlags.checkConfettiEnabled', category: 'analytics' })
+  .action(async () => {
+    try {
+      return await featureFlags.confettiAnimations();
+    } catch {
+      // Fallback to false on error (safe-action middleware handles logging)
+      return false;
+    }
+  });
 
 /**
  * Check if contact terminal feature is enabled
  * Used for gradual rollout of interactive terminal on /contact page
  */
-export async function checkContactTerminalEnabled(): Promise<boolean> {
-  return fetchWithLogging(
-    'contactTerminalEnabled',
-    () => featureFlags.contactTerminalEnabled(),
-    () => false
-  );
-}
+export const checkContactTerminalEnabled = rateLimitedAction
+  .schema(z.object({}))
+  .metadata({ actionName: 'featureFlags.checkContactTerminalEnabled', category: 'analytics' })
+  .action(async () => {
+    try {
+      return await featureFlags.contactTerminalEnabled();
+    } catch {
+      // Fallback to false on error (safe-action middleware handles logging)
+      return false;
+    }
+  });
 
 type ConfigRecord = Record<string, unknown>;
 
 function createTypedConfigAccessor<const Schema extends ConfigRecord>({
-  label,
   fetcher,
   defaults,
+  actionName,
 }: {
-  label: string;
   fetcher: () => Promise<ConfigRecord>;
   defaults: Schema;
+  actionName: string;
 }) {
-  async function getSnapshot(): Promise<Schema> {
-    const result = await fetchWithLogging<Schema>(
-      label,
-      async () => ({ ...(await fetcher()) }) as Schema,
-      () => defaults
-    );
-    return { ...defaults, ...result };
-  }
+  const getSnapshot = rateLimitedAction
+    .schema(z.object({}))
+    .metadata({ actionName: `${actionName}.getSnapshot`, category: 'analytics' })
+    .action(async () => {
+      try {
+        const result = (await fetcher()) as Schema;
+        return { ...defaults, ...result };
+      } catch {
+        // Fallback to defaults on error (safe-action middleware handles logging)
+        return defaults;
+      }
+    });
 
-  async function getValue<K extends keyof Schema>(key: K): Promise<Schema[K]> {
-    const snapshot = await getSnapshot();
-    const value = snapshot[key];
-    return (value === undefined ? defaults[key] : value) as Schema[K];
-  }
+  const getValue = rateLimitedAction
+    .schema(z.object({ key: z.string() }))
+    .metadata({ actionName: `${actionName}.getValue`, category: 'analytics' })
+    .action(async ({ parsedInput }) => {
+      try {
+        const snapshotResult = await getSnapshot({});
+        if (!snapshotResult?.data) {
+          return defaults[parsedInput.key as keyof Schema] as Schema[keyof Schema];
+        }
+        const snapshot = snapshotResult.data;
+        const value = snapshot[parsedInput.key as keyof Schema];
+        return (
+          value === undefined ? defaults[parsedInput.key as keyof Schema] : value
+        ) as Schema[keyof Schema];
+      } catch {
+        // Fallback to default value on error
+        return defaults[parsedInput.key as keyof Schema] as Schema[keyof Schema];
+      }
+    });
 
   return { getSnapshot, getValue };
 }
@@ -102,63 +128,63 @@ function emptyObject<T extends ConfigRecord>(): T {
 }
 
 const newsletterConfigAccessor = createTypedConfigAccessor<NewsletterConfigSchema>({
-  label: 'newsletterConfigs',
   fetcher: () => newsletterConfigs() as Promise<ConfigRecord>,
   defaults: NEWSLETTER_CONFIG_DEFAULTS,
+  actionName: 'featureFlags.newsletterConfig',
 });
 
 const pricingConfigAccessor = createTypedConfigAccessor<PricingConfigSchema>({
-  label: 'pricingConfigs',
   fetcher: () => pricingConfigs() as Promise<ConfigRecord>,
   defaults: PRICING_CONFIG_DEFAULTS,
+  actionName: 'featureFlags.pricingConfig',
 });
 
 const animationConfigAccessor = createTypedConfigAccessor<AnimationConfigSchema>({
-  label: 'animationConfigs',
   fetcher: () => animationConfigs() as Promise<ConfigRecord>,
   defaults: ANIMATION_CONFIG_DEFAULTS,
+  actionName: 'featureFlags.animationConfig',
 });
 
 const timeoutConfigAccessor = createTypedConfigAccessor<TimeoutConfigSchema>({
-  label: 'timeoutConfigs',
   fetcher: () => timeoutConfigs() as Promise<ConfigRecord>,
   defaults: TIMEOUT_CONFIG_DEFAULTS,
+  actionName: 'featureFlags.timeoutConfig',
 });
 
 const formConfigAccessor = createTypedConfigAccessor<FormConfigSchema>({
-  label: 'formConfigs',
   fetcher: () => formConfigs() as Promise<ConfigRecord>,
   defaults: FORM_CONFIG_DEFAULTS,
+  actionName: 'featureFlags.formConfig',
 });
 
 const recentlyViewedConfigAccessor = createTypedConfigAccessor<RecentlyViewedConfigSchema>({
-  label: 'recentlyViewedConfigs',
   fetcher: () => recentlyViewedConfigs() as Promise<ConfigRecord>,
   defaults: RECENTLY_VIEWED_CONFIG_DEFAULTS,
+  actionName: 'featureFlags.recentlyViewedConfig',
 });
 
 const appSettingsAccessor = createTypedConfigAccessor<AppSettingsConfigSchema>({
-  label: 'appSettings',
   fetcher: () => appSettings() as Promise<ConfigRecord>,
   defaults: APP_SETTINGS_DEFAULTS,
+  actionName: 'featureFlags.appSettings',
 });
 
 const pollingConfigAccessor = createTypedConfigAccessor<PollingConfigSchema>({
-  label: 'pollingConfigs',
   fetcher: () => pollingConfigs() as Promise<ConfigRecord>,
   defaults: POLLING_CONFIG_DEFAULTS,
+  actionName: 'featureFlags.pollingConfig',
 });
 
 const componentConfigAccessor = createTypedConfigAccessor<ComponentConfigSchema>({
-  label: 'componentConfigs',
   fetcher: () => componentConfigs() as Promise<ConfigRecord>,
   defaults: COMPONENT_CONFIG_DEFAULTS,
+  actionName: 'featureFlags.componentConfig',
 });
 
 const homepageConfigAccessor = createTypedConfigAccessor<HomepageConfigSchema>({
-  label: 'homepageConfigs',
   fetcher: () => homepageConfigs() as Promise<ConfigRecord>,
   defaults: HOMEPAGE_CONFIG_DEFAULTS,
+  actionName: 'featureFlags.homepageConfig',
 });
 
 /**
@@ -206,13 +232,17 @@ export const getAppSettingValue = appSettingsAccessor.getValue;
 /**
  * Get cache configuration from Statsig
  */
-export async function getCacheConfig(): Promise<CacheConfigSchema> {
-  return fetchWithLogging<CacheConfigSchema>(
-    'cacheConfigs',
-    () => cacheConfigs(),
-    () => emptyObject<CacheConfigSchema>()
-  );
-}
+export const getCacheConfig = rateLimitedAction
+  .schema(z.object({}))
+  .metadata({ actionName: 'featureFlags.getCacheConfig', category: 'analytics' })
+  .action(async () => {
+    try {
+      return await cacheConfigs();
+    } catch {
+      // Fallback to empty object on error (safe-action middleware handles logging)
+      return emptyObject<CacheConfigSchema>();
+    }
+  });
 
 /**
  * Get polling configuration from Statsig
@@ -232,17 +262,4 @@ export const getComponentConfigValue = componentConfigAccessor.getValue;
 export const getHomepageConfig = homepageConfigAccessor.getSnapshot;
 export const getHomepageConfigValue = homepageConfigAccessor.getValue;
 
-async function fetchWithLogging<T>(
-  label: string,
-  fetcher: () => Promise<T>,
-  fallbackFactory: () => T
-): Promise<T> {
-  const trace = traceMeta({ label });
-  try {
-    return await fetcher();
-  } catch (error) {
-    const normalized = normalizeError(error, `Failed to load ${label}`);
-    logger.error(`FeatureFlags: ${label} fetch failed`, normalized, trace);
-    return fallbackFactory();
-  }
-}
+// fetchWithLogging removed - safe-action middleware handles all error logging

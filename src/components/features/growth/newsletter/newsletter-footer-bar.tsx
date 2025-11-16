@@ -42,17 +42,21 @@ export function NewsletterFooterBar({
   useEffect(() => {
     loadConfigs(
       async () => {
-        const [appConfig, newsletterConfig] = await Promise.all([
-          getAppSettings(),
-          getNewsletterConfig(),
+        const [appConfigResult, newsletterConfigResult] = await Promise.all([
+          getAppSettings({}),
+          getNewsletterConfig({}),
         ]);
 
-        const excludedPages = ensureStringArray(appConfig['newsletter.excluded_pages']);
-        if (excludedPages.length > 0) {
-          setPagesWithInlineCTA(excludedPages);
+        if (appConfigResult?.data) {
+          const appConfig = appConfigResult.data;
+          const excludedPages = ensureStringArray(appConfig['newsletter.excluded_pages']);
+          if (excludedPages.length > 0) {
+            setPagesWithInlineCTA(excludedPages);
+          }
         }
 
-        if (showAfterDelay === undefined) {
+        if (showAfterDelay === undefined && newsletterConfigResult?.data) {
+          const newsletterConfig = newsletterConfigResult.data;
           const configDelay = ensureNumber(
             newsletterConfig['newsletter.footer_bar.show_after_delay_ms'],
             30000

@@ -97,9 +97,11 @@ export function usePrefetchOnHover(
 
   // Load prefetch delay from Statsig on mount
   useEffect(() => {
-    getTimeoutConfig()
-      .then((config) => {
-        DEFAULT_PREFETCH_DELAY = config['timeout.ui.prefetch_delay_ms'];
+    getTimeoutConfig({})
+      .then((result) => {
+        if (result?.data) {
+          DEFAULT_PREFETCH_DELAY = result.data['timeout.ui.prefetch_delay_ms'];
+        }
       })
       .catch((error) => {
         logClientWarning('usePrefetchOnHover: failed to load prefetch delay', error);

@@ -8,6 +8,7 @@ import {
   jsonResponse,
   methodNotAllowedResponse,
 } from '../../_shared/utils/http.ts';
+import type { BaseLogContext } from '../../_shared/utils/logging.ts';
 
 const CORS = getOnlyCorsHeaders;
 const INDEXNOW_API_URL = 'https://api.indexnow.org/IndexNow';
@@ -18,24 +19,25 @@ export async function handleSitemapRoute(
   segments: string[],
   url: URL,
   method: string,
-  req: Request
+  req: Request,
+  logContext?: BaseLogContext
 ): Promise<Response> {
   if (segments.length > 0) {
     return badRequestResponse('Sitemap path does not accept nested segments', CORS);
   }
 
   if (method === 'GET') {
-    return handleSitemapGet(url);
+    return handleSitemapGet(url, logContext);
   }
 
   if (method === 'POST') {
-    return handleSitemapIndexNow(req);
+    return handleSitemapIndexNow(req, logContext);
   }
 
   return methodNotAllowedResponse('GET, POST', CORS);
 }
 
-async function handleSitemapGet(url: URL): Promise<Response> {
+async function handleSitemapGet(url: URL, _logContext?: BaseLogContext): Promise<Response> {
   const format = (url.searchParams.get('format') || 'xml').toLowerCase();
 
   if (format === 'json') {
@@ -96,7 +98,7 @@ async function handleSitemapGet(url: URL): Promise<Response> {
   });
 }
 
-async function handleSitemapIndexNow(req: Request): Promise<Response> {
+async function handleSitemapIndexNow(req: Request, logContext?: BaseLogContext): Promise<Response> {
   const triggerKey = req.headers.get('X-IndexNow-Trigger-Key');
 
   if (!INDEXNOW_TRIGGER_KEY) {
@@ -155,7 +157,8 @@ async function handleSitemapIndexNow(req: Request): Promise<Response> {
     );
   }
 
-  console.log('[data-api] indexnow submitted', {
+  console.log('[data-api] IndexNow submitted', {
+    ...(logContext || {}),
     submitted: urlList.length,
     status: response.status,
   });

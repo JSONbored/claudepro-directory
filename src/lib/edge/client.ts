@@ -9,10 +9,11 @@ import {
   type TrackInteractionParams,
   trackInteractionAction,
   trackNewsletterEventAction,
-} from '@/src/lib/actions/analytics.actions';
+} from '@/src/lib/actions/pulse.actions';
 import { logger } from '@/src/lib/logger';
 import { createClient } from '@/src/lib/supabase/client';
 import type { Json } from '@/src/types/database.types';
+import type { ContentCategory } from '@/src/types/database-overrides';
 
 const EDGE_BASE_URL = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1`;
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://claudepro.directory';
@@ -79,16 +80,21 @@ export async function callEdgeFunction<T = unknown>(
   return response.json();
 }
 
-export async function trackInteraction(params: TrackInteractionParams) {
-  return trackInteractionAction(params);
+export async function trackInteraction(params: TrackInteractionParams): Promise<void> {
+  const result = await trackInteractionAction(params);
+  if (result?.serverError) {
+    logger.warn('trackInteraction failed', { error: result.serverError });
+  }
 }
 
 export async function getSimilarConfigs(params: {
-  content_type: string;
+  content_type: ContentCategory;
   content_slug: string;
   limit?: number;
 }) {
-  const data = await getSimilarConfigsAction(params);
+  const result = await getSimilarConfigsAction(params);
+  const data = result?.data;
+
   if (!data) {
     return {
       similar_items: [],
@@ -156,7 +162,31 @@ export async function generateConfigRecommendations(answers: {
   integrations?: string[];
   focusAreas?: string[];
 }): Promise<ConfigRecommendationsResponse> {
-  const payload = await generateConfigRecommendationsAction(answers);
+  const result = await generateConfigRecommendationsAction(answers);
+  const payload = result?.data;
+
+  if (!payload) {
+    // Return error response if action failed
+    return {
+      success: false,
+      recommendations: {
+        results: [],
+        totalMatches: 0,
+        algorithm: 'unknown',
+        summary: {},
+        answers: {
+          useCase: answers.useCase,
+          experienceLevel: answers.experienceLevel,
+          toolPreferences: answers.toolPreferences,
+          integrations: answers.integrations ?? [],
+          focusAreas: answers.focusAreas ?? [],
+        },
+        id: `error_${Date.now()}`,
+        generatedAt: new Date().toISOString(),
+      },
+    };
+  }
+
   return {
     success: payload.success,
     recommendations: {
@@ -190,5 +220,8 @@ export async function trackNewsletterEvent(
     [key: string]: unknown;
   }
 ) {
-  return trackNewsletterEventAction(eventType, metadata);
+  const result = await trackNewsletterEventAction({ eventType, metadata });
+  if (result?.serverError) {
+    logger.warn('trackNewsletterEvent failed', { error: result.serverError, eventType });
+  }
 }

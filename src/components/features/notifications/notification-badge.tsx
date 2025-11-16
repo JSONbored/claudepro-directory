@@ -35,8 +35,10 @@ export function NotificationBadge({ className = '' }: NotificationBadgeProps) {
   });
 
   useEffect(() => {
-    getAnimationConfig()
-      .then((config) => {
+    getAnimationConfig({})
+      .then((result) => {
+        if (!result?.data) return;
+        const config = result.data;
         setSpringBouncy({
           type: 'spring' as const,
           stiffness: config['animation.spring.bouncy.stiffness'],

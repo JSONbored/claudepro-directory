@@ -16,11 +16,11 @@ import { ROUTES } from '@/src/lib/data/config/constants';
 import { BarChart, Briefcase, Edit, ExternalLink, Eye, Plus } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-import { BADGE_COLORS, type JobStatusType, UI_CLASSES } from '@/src/lib/ui-constants';
+import { BADGE_COLORS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { formatRelativeDate } from '@/src/lib/utils/data.utils';
 import { normalizeError } from '@/src/lib/utils/error.utils';
 import type { Tables } from '@/src/types/database.types';
-import type { GetUserDashboardReturn } from '@/src/types/database-overrides';
+import type { GetUserDashboardReturn, JobStatus } from '@/src/types/database-overrides';
 
 export const metadata = generatePageMetadata('/account/jobs');
 
@@ -86,8 +86,8 @@ export default async function MyJobsPage() {
     logger.info('MyJobsPage: user has no job listings', { userId: user.id });
   }
 
-  const getStatusColor = (status: string) => {
-    return BADGE_COLORS.jobStatus[status as JobStatusType] || 'bg-muted';
+  const getStatusColor = (status: JobStatus) => {
+    return BADGE_COLORS.jobStatus[status] || 'bg-muted';
   };
 
   const getPlanBadge = (plan: string) => {
@@ -150,7 +150,7 @@ export default async function MyJobsPage() {
                       <UnifiedBadge
                         variant="base"
                         style="outline"
-                        className={getStatusColor(job.status ?? 'draft')}
+                        className={getStatusColor((job.status ?? 'draft') as JobStatus)}
                       >
                         {job.status ?? 'draft'}
                       </UnifiedBadge>
@@ -199,7 +199,10 @@ export default async function MyJobsPage() {
                   )}
 
                   {job.status === 'active' && (
-                    <JobToggleButton jobId={job.id} currentStatus={job.status ?? 'paused'} />
+                    <JobToggleButton
+                      jobId={job.id}
+                      currentStatus={(job.status ?? 'draft') as JobStatus}
+                    />
                   )}
 
                   <JobDeleteButton jobId={job.id} />

@@ -2,6 +2,7 @@ import { SITE_URL, supabaseServiceRole } from '../../clients/supabase.ts';
 import { edgeEnv } from '../../config/env.ts';
 import type { Database } from '../../database.types.ts';
 import { insertNotification } from '../../notifications/service.ts';
+import { invalidateCacheByKey } from '../../utils/cache.ts';
 import {
   createDiscordMessageWithLogging,
   sendDiscordWebhook,
@@ -20,6 +21,7 @@ import {
   errorResponse,
   successResponse,
 } from '../../utils/http.ts';
+import { createDiscordHandlerContext, withContext } from '../../utils/logging.ts';
 import {
   type DatabaseWebhookPayload,
   didStatusChangeTo,
@@ -99,7 +101,13 @@ async function handleJobNotification(req: Request): Promise<Response> {
   );
 
   if (embedError || !embedData) {
-    console.error('Failed to build embed:', embedError);
+    const logContext = createDiscordHandlerContext('job-notification', {
+      jobId: job.id,
+    });
+    console.error('[discord-handler] Failed to build embed', {
+      ...logContext,
+      error: embedError instanceof Error ? embedError.message : String(embedError),
+    });
     throw new Error('Embed generation failed');
   }
 
@@ -114,6 +122,10 @@ async function createJobDiscordMessage(
   embedData: unknown,
   webhookUrl: string
 ): Promise<Response> {
+  const logContext = createDiscordHandlerContext('job-notification', {
+    jobId: job.id,
+  });
+
   const payload = { embeds: [embedData] };
   const { messageId } = await createDiscordMessageWithLogging(
     webhookUrl,
@@ -127,6 +139,7 @@ async function createJobDiscordMessage(
         action: 'create',
       },
       logType: 'job_notification_create',
+      logContext,
     }
   );
 
@@ -140,7 +153,13 @@ async function createJobDiscordMessage(
     .eq('id', job.id);
 
   if (updateError) {
-    console.error('Failed to store discord_message_id:', updateError);
+    const logContext = createDiscordHandlerContext('job-notification', {
+      jobId: job.id,
+    });
+    console.error('[discord-handler] Failed to store discord_message_id', {
+      ...logContext,
+      error: updateError instanceof Error ? updateError.message : String(updateError),
+    });
   }
 
   return successResponse(
@@ -159,6 +178,10 @@ async function updateJobDiscordMessage(
   embedData: unknown,
   webhookUrl: string
 ): Promise<Response> {
+  const logContext = createDiscordHandlerContext('job-notification', {
+    jobId: job.id,
+  });
+
   if (!job.discord_message_id) {
     return await createJobDiscordMessage(job, embedData, webhookUrl);
   }
@@ -169,7 +192,8 @@ async function updateJobDiscordMessage(
     { embeds: [embedData] },
     'job_notification',
     job.id,
-    { action: 'update', job_id: job.id, status: job.status }
+    { action: 'update', job_id: job.id, status: job.status },
+    logContext
   );
 
   if (result.deleted) {
@@ -213,6 +237,10 @@ async function handleSubmissionNotification(req: Request): Promise<Response> {
     return successResponse({ skipped: true, reason: 'Spam detected' }, 200, discordCorsHeaders);
   }
 
+  const logContext = createDiscordHandlerContext('submission-notification', {
+    contentId: payload.record.id,
+  });
+
   const embed = buildSubmissionEmbed(payload.record);
   await sendDiscordWebhook(
     webhookUrl,
@@ -225,6 +253,7 @@ async function handleSubmissionNotification(req: Request): Promise<Response> {
         submission_type: payload.record.submission_type,
         category: payload.record.category,
       },
+      logContext,
     }
   );
 
@@ -263,10 +292,28 @@ async function handleContentNotification(req: Request): Promise<Response> {
     .eq('slug', payload.record.auto_slug ?? '')
     .single();
 
+  // Create logContext after fetching content
+  const logContext = createDiscordHandlerContext('content-notification', {
+    contentId: content?.id,
+    category: content?.category,
+    slug: content?.slug,
+  });
+
   if (contentError || !content) {
-    console.error('Failed to fetch content:', contentError);
+    console.error('[discord-handler] Failed to fetch content', {
+      ...logContext,
+      error: contentError instanceof Error ? contentError.message : String(contentError),
+      auto_slug: payload.record.auto_slug,
+    });
     throw new Error(`Content not found for slug: ${payload.record.auto_slug}`);
   }
+
+  // Update logContext with actual content data
+  const updatedContext = withContext(logContext, {
+    content_id: content.id,
+    category: content.category,
+    slug: content.slug,
+  });
 
   const embed = buildContentEmbed(content);
   await sendDiscordWebhook(
@@ -280,23 +327,48 @@ async function handleContentNotification(req: Request): Promise<Response> {
         category: content.category,
         slug: content.slug,
       },
+      logContext: updatedContext,
     }
   );
 
-  await insertNotification({
-    id: content.id,
-    title: content.display_title ?? content.title,
-    message: content.description ?? payload.record.description ?? 'New content just dropped.',
-    type: 'announcement',
-    priority: 'medium',
-    action_label: 'View content',
-    action_href: `${SITE_URL}/${content.category}/${content.slug}`,
-    metadata: {
-      content_id: content.id,
-      category: content.category,
-      slug: content.slug,
-      source: 'content-notification',
+  await insertNotification(
+    {
+      id: content.id,
+      title: content.display_title ?? content.title,
+      message: content.description ?? payload.record.description ?? 'New content just dropped.',
+      type: 'announcement',
+      priority: 'medium',
+      action_label: 'View content',
+      action_href: `${SITE_URL}/${content.category}/${content.slug}`,
+      metadata: {
+        content_id: content.id,
+        category: content.category,
+        slug: content.slug,
+        source: 'content-notification',
+      },
     },
+    updatedContext
+  );
+
+  // Invalidate cache after notification insert
+  await invalidateCacheByKey('cache.invalidate.notifications', ['notifications'], {
+    logContext: updatedContext,
+  }).catch((error) => {
+    console.warn('[discord-handler] Cache invalidation failed', {
+      ...updatedContext,
+      error: error instanceof Error ? error.message : String(error),
+    });
+  });
+
+  await invalidateCacheByKey(
+    'cache.invalidate.content_create',
+    ['content', 'homepage', 'trending'],
+    { category: content.category, slug: content.slug, logContext: updatedContext }
+  ).catch((error) => {
+    console.warn('[discord-handler] Cache invalidation failed', {
+      ...updatedContext,
+      error: error instanceof Error ? error.message : String(error),
+    });
   });
 
   return successResponse({ content_id: content.id }, 200, discordCorsHeaders);
@@ -329,6 +401,10 @@ async function handleErrorNotification(req: Request): Promise<Response> {
     return successResponse({ skipped: true, reason: 'No error present' }, 200, discordCorsHeaders);
   }
 
+  const logContext = createDiscordHandlerContext('error-notification', {
+    contentId: payload.record.id,
+  });
+
   const embed = buildErrorEmbed(payload.record);
   await sendDiscordWebhook(
     webhookUrl,
@@ -341,6 +417,7 @@ async function handleErrorNotification(req: Request): Promise<Response> {
         type: payload.record.type,
         error: payload.record.error,
       },
+      logContext,
     }
   );
 
@@ -360,6 +437,12 @@ async function handleChangelogNotification(req: Request): Promise<Response> {
   const payload: DatabaseWebhookPayload<Database['public']['Tables']['changelog']['Row']> =
     await req.json();
   const entry = payload.record;
+
+  // Create logContext
+  const logContext = createDiscordHandlerContext('changelog-notification', {
+    changelogId: entry.id,
+    slug: entry.slug,
+  });
 
   if (!entry) {
     return badRequestResponse('Missing changelog record', discordCorsHeaders);
@@ -389,22 +472,47 @@ async function handleChangelogNotification(req: Request): Promise<Response> {
         changelog_id: entry.id,
         slug: entry.slug,
       },
+      logContext,
     }
   );
 
-  await insertNotification({
-    id: entry.id,
-    title: entry.title,
-    message: entry.summary ?? 'We just published new release notes.',
-    type: 'announcement',
-    priority: 'medium',
-    action_label: 'View changelog',
-    action_href: `${SITE_URL}/changelog/${entry.slug}`,
-    metadata: {
-      slug: entry.slug,
-      changelog_id: entry.id,
-      source: 'changelog-notification',
+  await insertNotification(
+    {
+      id: entry.id,
+      title: entry.title,
+      message: entry.summary ?? 'We just published new release notes.',
+      type: 'announcement',
+      priority: 'medium',
+      action_label: 'View changelog',
+      action_href: `${SITE_URL}/changelog/${entry.slug}`,
+      metadata: {
+        slug: entry.slug,
+        changelog_id: entry.id,
+        source: 'changelog-notification',
+      },
     },
+    logContext
+  );
+
+  // Invalidate cache after notification insert
+  await invalidateCacheByKey('cache.invalidate.notifications', ['notifications'], {
+    logContext,
+  }).catch((error) => {
+    console.warn('[discord-handler] Cache invalidation failed', {
+      ...logContext,
+      error: error instanceof Error ? error.message : String(error),
+    });
+  });
+
+  await invalidateCacheByKey('cache.invalidate.changelog', ['changelog'], {
+    category: 'changelog',
+    slug: entry.slug,
+    logContext,
+  }).catch((error) => {
+    console.warn('[discord-handler] Cache invalidation failed', {
+      ...logContext,
+      error: error instanceof Error ? error.message : String(error),
+    });
   });
 
   return successResponse({ changelog_id: entry.id }, 200, discordCorsHeaders);

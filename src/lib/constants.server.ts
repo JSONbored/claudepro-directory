@@ -22,7 +22,11 @@ import {
  */
 export async function getDateConfig() {
   try {
-    const config = await getAppSettings();
+    const result = await getAppSettings({});
+    if (!result?.data) {
+      return DATE_CONFIG;
+    }
+    const config = result.data;
     return {
       currentMonth: config['date.current_month'],
       currentYear: config['date.current_year'],
@@ -52,7 +56,11 @@ export async function getDateStrings() {
  */
 export async function getPollingIntervals() {
   try {
-    const config = await getPollingConfig();
+    const result = await getPollingConfig({});
+    if (!result?.data) {
+      return POLLING_INTERVALS;
+    }
+    const config = result.data;
     return {
       realtime: config['polling.realtime_ms'],
       badges: config['polling.badges_ms'],
@@ -77,7 +85,11 @@ export async function getPollingIntervals() {
  */
 export async function getAnimationDurations() {
   try {
-    const config = await getAnimationConfig();
+    const result = await getAnimationConfig({});
+    if (!result?.data) {
+      return ANIMATION_DURATIONS;
+    }
+    const config = result.data;
     return {
       ticker: {
         default: config['animation.ticker.default_ms'],
@@ -104,7 +116,11 @@ export async function getAnimationDurations() {
  */
 export async function getTimeouts() {
   try {
-    const config = await getTimeoutConfig();
+    const result = await getTimeoutConfig({});
+    if (!result?.data) {
+      return TIMEOUTS;
+    }
+    const config = result.data;
     return {
       api: {
         default: config['timeout.api.default_ms'],

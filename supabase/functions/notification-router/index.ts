@@ -5,8 +5,10 @@
 import { revalidateChangelogPages } from '../_shared/changelog/service.ts';
 import { SITE_URL, supabaseServiceRole } from '../_shared/clients/supabase.ts';
 import { edgeEnv } from '../_shared/config/env.ts';
-import { getCacheConfigStringArray } from '../_shared/config/statsig-cache.ts';
-import type { Database } from '../_shared/database.types.ts';
+import {
+  getCacheConfigNumber,
+  getCacheConfigStringArray,
+} from '../_shared/config/statsig-cache.ts';
 import { handleChangelogSyncRequest } from '../_shared/handlers/changelog/handler.ts';
 import { handleDiscordNotification } from '../_shared/handlers/discord/handler.ts';
 import {
@@ -15,7 +17,6 @@ import {
   getActiveNotificationsForUser,
   insertNotification,
 } from '../_shared/notifications/service.ts';
-import { trackInteractionEdge } from '../_shared/utils/analytics/tracker.ts';
 import { requireAuthUser } from '../_shared/utils/auth.ts';
 import { sendDiscordWebhook } from '../_shared/utils/discord/client.ts';
 import {
@@ -110,6 +111,13 @@ const router = createRouter<NotificationRouterContext>({
       match: (ctx) => ctx.pathname.startsWith('/changelog-release-worker'),
       handler: () => handleChangelogReleaseQueue(),
     },
+    {
+      name: 'tracking-queue-worker',
+      methods: ['POST', 'OPTIONS'],
+      cors: notificationCorsHeaders,
+      match: (ctx) => ctx.pathname.startsWith('/tracking-queue-worker'),
+      handler: () => handleTrackingQueue(),
+    },
   ],
   defaultRoute: {
     name: 'webhook',
@@ -144,7 +152,14 @@ async function handleActiveNotifications(ctx: NotificationRouterContext): Promis
       dismissedCount: dismissedIds.length,
       userId: authResult.user.id,
     });
-    const notifications = await getActiveNotificationsForUser(authResult.user.id, dismissedIds);
+    const logContext = createNotificationRouterContext('get-active-notifications', {
+      userId: authResult.user.id,
+    });
+    const notifications = await getActiveNotificationsForUser(
+      authResult.user.id,
+      dismissedIds,
+      logContext
+    );
 
     return successResponse(
       {
@@ -205,7 +220,10 @@ async function handleDismissNotifications(ctx: NotificationRouterContext): Promi
       dismissRequestCount: sanitizedIds.length,
       userId: authResult.user.id,
     });
-    await dismissNotificationsForUser(authResult.user.id, sanitizedIds);
+    const logContext = createNotificationRouterContext('dismiss-notifications', {
+      userId: authResult.user.id,
+    });
+    await dismissNotificationsForUser(authResult.user.id, sanitizedIds, logContext);
     return successResponse(
       {
         dismissed: sanitizedIds.length,
@@ -225,32 +243,22 @@ async function handleExternalWebhook(ctx: NotificationRouterContext): Promise<Re
     const result = await ingestWebhookEvent(body, ctx.request.headers);
     const cors = result.cors ?? webhookCorsHeaders;
 
-    const logContext = {
+    const logContext = createNotificationRouterContext('external-webhook', {
       source: result.source,
-      duplicate: result.duplicate,
-      receivedAt: new Date().toISOString(),
-    };
+    });
 
     if (result.duplicate) {
-      console.log('[notification-router] Webhook already processed', logContext);
-      logWebhookAnalytics(
-        {
-          source: result.source,
-          status: 'duplicate',
-          metadata: logContext,
-        },
-        ctx.pathname
-      );
+      console.log('[notification-router] Webhook already processed', {
+        ...logContext,
+        duplicate: result.duplicate,
+        received_at: new Date().toISOString(),
+      });
     } else {
-      console.log('[notification-router] Webhook routed', logContext);
-      logWebhookAnalytics(
-        {
-          source: result.source,
-          status: 'ingest',
-          metadata: logContext,
-        },
-        ctx.pathname
-      );
+      console.log('[notification-router] Webhook routed', {
+        ...logContext,
+        duplicate: result.duplicate,
+        received_at: new Date().toISOString(),
+      });
     }
 
     return successResponse(
@@ -259,71 +267,31 @@ async function handleExternalWebhook(ctx: NotificationRouterContext): Promise<Re
       cors
     );
   } catch (error) {
+    const logContext = createNotificationRouterContext('external-webhook', {
+      source: ctx.notificationType ?? ctx.discordNotificationType ?? 'unknown',
+    });
+
     if (error instanceof WebhookIngestError) {
       if (error.status === 'unauthorized') {
-        console.warn('[notification-router] Unauthorized webhook', { message: error.message });
-        logWebhookAnalytics(
-          {
-            source: ctx.notificationType ?? ctx.discordNotificationType ?? 'unknown',
-            status: 'error',
-            metadata: { message: error.message, status: error.status },
-          },
-          ctx.pathname
-        );
+        console.warn('[notification-router] Unauthorized webhook', {
+          ...logContext,
+          message: error.message,
+        });
         return unauthorizedResponse(error.message, webhookCorsHeaders);
       }
-      console.warn('[notification-router] Bad webhook payload', { message: error.message });
-      logWebhookAnalytics(
-        {
-          source: ctx.notificationType ?? ctx.discordNotificationType ?? 'unknown',
-          status: 'error',
-          metadata: { message: error.message, status: error.status },
-        },
-        ctx.pathname
-      );
+      console.warn('[notification-router] Bad webhook payload', {
+        ...logContext,
+        message: error.message,
+      });
       return badRequestResponse(error.message, webhookCorsHeaders);
     }
 
-    console.error('[notification-router] Unexpected webhook error', error);
-    logWebhookAnalytics(
-      {
-        source: ctx.notificationType ?? ctx.discordNotificationType ?? 'unknown',
-        status: 'error',
-        metadata: { message: error instanceof Error ? error.message : String(error) },
-      },
-      ctx.pathname
-    );
+    console.error('[notification-router] Unexpected webhook error', {
+      ...logContext,
+      error: error instanceof Error ? error.message : String(error),
+    });
     return errorResponse(error, 'notification-router:webhook', webhookCorsHeaders);
   }
-}
-
-type WebhookInteractionMetadata =
-  Database['public']['Tables']['user_interactions']['Insert']['metadata'];
-
-function logWebhookAnalytics(
-  event: {
-    source: string | null;
-    status: 'ingest' | 'duplicate' | 'error';
-    metadata?: Record<string, unknown>;
-  },
-  path: string
-) {
-  const metadata: WebhookInteractionMetadata = {
-    path,
-    source: event.source ?? 'unknown',
-    ...(event.metadata ?? {}),
-  };
-
-  trackInteractionEdge({
-    contentType: 'webhook',
-    contentSlug: event.source ?? 'unknown',
-    interactionType: `webhook_${event.status}`,
-    metadata,
-  }).catch((error) => {
-    console.warn('[notification-router] analytics logging failed', {
-      message: error instanceof Error ? error.message : String(error),
-    });
-  });
 }
 
 /**
@@ -404,6 +372,7 @@ async function processChangelogRelease(message: QueueMessage): Promise<{
             slug: job.slug,
             msg_id: msg_id.toString(),
           },
+          logContext,
         }
       );
 
@@ -424,21 +393,24 @@ async function processChangelogRelease(message: QueueMessage): Promise<{
 
   // 2. Insert notification (idempotent, critical path)
   try {
-    await insertNotification({
-      id: job.entryId,
-      title: job.title,
-      message: job.tldr || 'We just shipped a fresh Claude Pro Directory release.',
-      type: 'announcement',
-      priority: 'high',
-      action_label: 'Read release notes',
-      action_href: `${SITE_URL}/changelog/${job.slug}`,
-      metadata: {
-        slug: job.slug,
-        changelog_id: job.entryId,
-        source: 'changelog-release-worker',
-        msg_id: msg_id.toString(),
+    await insertNotification(
+      {
+        id: job.entryId,
+        title: job.title,
+        message: job.tldr || 'We just shipped a fresh Claude Pro Directory release.',
+        type: 'announcement',
+        priority: 'high',
+        action_label: 'Read release notes',
+        action_href: `${SITE_URL}/changelog/${job.slug}`,
+        metadata: {
+          slug: job.slug,
+          changelog_id: job.entryId,
+          source: 'changelog-release-worker',
+          msg_id: msg_id.toString(),
+        },
       },
-    });
+      logContext
+    );
 
     notificationSuccess = true;
     console.log('[notification-router] Notification inserted', {
@@ -451,28 +423,6 @@ async function processChangelogRelease(message: QueueMessage): Promise<{
     console.error('[notification-router] Notification insert failed', {
       ...logContext,
       error: errorMsg,
-    });
-
-    // Track failure immediately (critical path failure)
-    trackInteractionEdge({
-      interactionType: 'changelog_release_failure',
-      contentType: 'changelog',
-      contentSlug: job.slug,
-      metadata: {
-        entryId: job.entryId,
-        msg_id: msg_id.toString(),
-        attempt: message.read_ct,
-        enqueued_at: message.enqueued_at,
-        processed_at: new Date().toISOString(),
-        errors,
-        discordSuccess,
-        notificationSuccess,
-      },
-    }).catch((analyticsError) => {
-      console.warn('[notification-router] Analytics tracking failed', {
-        ...logContext,
-        error: analyticsError instanceof Error ? analyticsError.message : String(analyticsError),
-      });
     });
   }
 
@@ -531,7 +481,7 @@ async function processChangelogRelease(message: QueueMessage): Promise<{
 
   // 4. Revalidate Next.js pages (non-critical)
   try {
-    await revalidateChangelogPages(job.slug);
+    await revalidateChangelogPages(job.slug, { invalidateTags: true });
     revalidationSuccess = true;
     console.log('[notification-router] Pages revalidated', {
       ...logContext,
@@ -546,33 +496,29 @@ async function processChangelogRelease(message: QueueMessage): Promise<{
     });
   }
 
-  // 5. Track analytics (success/partial)
+  // 5. Log completion (success/partial)
   if (notificationSuccess) {
     const durationMs = Date.now() - startTime;
-    trackInteractionEdge({
-      interactionType:
-        errors.length === 0 ? 'changelog_release_success' : 'changelog_release_partial',
-      contentType: 'changelog',
-      contentSlug: job.slug,
-      metadata: {
-        entryId: job.entryId,
-        msg_id: msg_id.toString(),
-        attempt: message.read_ct,
-        enqueued_at: message.enqueued_at,
-        processed_at: new Date().toISOString(),
+    if (errors.length === 0) {
+      console.log('[notification-router] Changelog release completed successfully', {
+        ...logContext,
         duration_ms: durationMs,
         discordSuccess,
         notificationSuccess,
         cacheInvalidationSuccess,
         revalidationSuccess,
-        errors: errors.length > 0 ? errors : undefined,
-      },
-    }).catch((error) => {
-      console.warn('[notification-router] Analytics tracking failed', {
-        ...logContext,
-        error: error instanceof Error ? error.message : String(error),
       });
-    });
+    } else {
+      console.warn('[notification-router] Changelog release completed with partial errors', {
+        ...logContext,
+        duration_ms: durationMs,
+        errors,
+        discordSuccess,
+        notificationSuccess,
+        cacheInvalidationSuccess,
+        revalidationSuccess,
+      });
+    }
   }
 
   // Success if notification inserted (most critical)
@@ -688,5 +634,199 @@ async function handleChangelogReleaseQueue(): Promise<Response> {
       error: error instanceof Error ? error.message : String(error),
     });
     return errorResponse(error, 'notification-router:queue-fatal');
+  }
+}
+
+/**
+ * Tracking Queue Worker
+ * Processes user_interactions queue in batches for hyper-optimized egress reduction
+ * Batch size is configurable via Statsig dynamic config (queue.tracking.batch_size)
+ * Default: 100 events per batch
+ */
+const TRACKING_QUEUE_NAME = 'user_interactions';
+const TRACKING_BATCH_SIZE_DEFAULT = 100; // Fallback if Statsig config unavailable
+
+interface TrackingEvent {
+  user_id?: string | null;
+  content_type: string | null;
+  content_slug: string | null;
+  interaction_type: string;
+  session_id?: string | null;
+  metadata?: unknown | null;
+}
+
+interface TrackingQueueMessage {
+  msg_id: bigint;
+  read_ct: number;
+  vt: string;
+  enqueued_at: string;
+  message: TrackingEvent;
+}
+
+async function processTrackingBatch(messages: TrackingQueueMessage[]): Promise<{
+  success: boolean;
+  inserted: number;
+  failed: number;
+  errors: string[];
+}> {
+  const errors: string[] = [];
+  let inserted = 0;
+  let failed = 0;
+
+  try {
+    // Extract events from messages and convert to JSONB array format
+    const events = messages.map((msg) => msg.message as Record<string, unknown>);
+
+    // Batch insert all events in single transaction
+    const { data: result, error: batchError } = await supabaseServiceRole.rpc(
+      'batch_insert_user_interactions',
+      {
+        p_interactions: events,
+      }
+    );
+
+    if (batchError) {
+      throw batchError;
+    }
+
+    // Parse result from RPC (returns jsonb with inserted, failed, total, errors)
+    const batchResult = result as {
+      inserted?: number;
+      failed?: number;
+      total?: number;
+      errors?: Array<{ interaction: unknown; error: string }>;
+    };
+
+    inserted = batchResult.inserted ?? 0;
+    failed = batchResult.failed ?? 0;
+
+    if (batchResult.errors && Array.isArray(batchResult.errors)) {
+      for (const err of batchResult.errors) {
+        errors.push(`Interaction failed: ${err.error}`);
+      }
+    }
+
+    return { success: inserted > 0, inserted, failed, errors };
+  } catch (error) {
+    const errorMsg = error instanceof Error ? error.message : String(error);
+    errors.push(`Batch insert failed: ${errorMsg}`);
+    console.error('[notification-router] Tracking batch insert error', {
+      error: errorMsg,
+      message_count: messages.length,
+    });
+    return { success: false, inserted: 0, failed: messages.length, errors };
+  }
+}
+
+async function deleteTrackingMessages(msgIds: bigint[]): Promise<void> {
+  // Delete all processed messages
+  for (const msgId of msgIds) {
+    try {
+      const { error } = await supabaseServiceRole.schema('pgmq_public').rpc('delete', {
+        queue_name: TRACKING_QUEUE_NAME,
+        msg_id: msgId,
+      });
+
+      if (error) {
+        console.warn('[notification-router] Failed to delete tracking message', {
+          msg_id: msgId.toString(),
+          error: error.message,
+        });
+      }
+    } catch (error) {
+      console.warn('[notification-router] Exception deleting tracking message', {
+        msg_id: msgId.toString(),
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
+}
+
+async function handleTrackingQueue(): Promise<Response> {
+  // Get batch size from Statsig dynamic config (with fallback)
+  const batchSize = getCacheConfigNumber('queue.tracking.batch_size', TRACKING_BATCH_SIZE_DEFAULT);
+
+  // Validate batch size (safety limits)
+  const safeBatchSize = Math.max(1, Math.min(batchSize, 500)); // Between 1 and 500
+
+  const logContext = {
+    queue: TRACKING_QUEUE_NAME,
+    batch_size: safeBatchSize,
+    config_source: batchSize !== TRACKING_BATCH_SIZE_DEFAULT ? 'statsig' : 'default',
+  };
+
+  try {
+    // Read messages from queue
+    const { data: messages, error: readError } = await supabaseServiceRole
+      .schema('pgmq_public')
+      .rpc('read', {
+        queue_name: TRACKING_QUEUE_NAME,
+        sleep_seconds: 0,
+        n: safeBatchSize,
+      });
+
+    if (readError) {
+      console.error('[notification-router] Tracking queue read error', {
+        ...logContext,
+        error: readError.message,
+      });
+      return errorResponse(
+        new Error(`Failed to read tracking queue: ${readError.message}`),
+        'notification-router:tracking-queue-read'
+      );
+    }
+
+    if (!messages || messages.length === 0) {
+      return successResponse({ message: 'No messages in tracking queue', processed: 0 }, 200);
+    }
+
+    console.log(`[notification-router] Processing ${messages.length} tracking events`, logContext);
+
+    const trackingMessages = messages as TrackingQueueMessage[];
+
+    // Process batch
+    const result = await processTrackingBatch(trackingMessages);
+
+    if (result.success && result.inserted > 0) {
+      // Delete successfully processed messages
+      // Note: We delete ALL messages in the batch (even if some failed in the RPC)
+      // because the RPC handles partial failures internally and returns which ones succeeded
+      // Failed ones within the batch are logged but the message is still consumed
+      // If the entire batch fails, we don't delete (handled below)
+      const msgIds = trackingMessages.map((msg) => msg.msg_id);
+      await deleteTrackingMessages(msgIds);
+    } else if (result.inserted === 0) {
+      // All failed - don't delete, let them retry via queue visibility timeout
+      console.warn('[notification-router] All tracking events failed, will retry', {
+        ...logContext,
+        failed: result.failed,
+        errors: result.errors,
+      });
+    }
+
+    console.log('[notification-router] Tracking batch processed', {
+      ...logContext,
+      processed: messages.length,
+      inserted: result.inserted,
+      failed: result.failed,
+      errors: result.errors.length > 0 ? result.errors : undefined,
+    });
+
+    return successResponse(
+      {
+        message: `Processed ${messages.length} tracking events`,
+        processed: messages.length,
+        inserted: result.inserted,
+        failed: result.failed,
+        errors: result.errors.length > 0 ? result.errors : undefined,
+      },
+      200
+    );
+  } catch (error) {
+    console.error('[notification-router] Fatal tracking queue processing error', {
+      ...logContext,
+      error: error instanceof Error ? error.message : String(error),
+    });
+    return errorResponse(error, 'notification-router:tracking-queue-fatal');
   }
 }

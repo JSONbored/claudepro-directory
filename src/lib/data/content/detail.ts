@@ -1,14 +1,10 @@
 'use server';
 
 import { fetchCachedRpc } from '@/src/lib/data/helpers';
+import { generateContentCacheKey, generateContentTags } from '@/src/lib/data/helpers-utils';
 import { logger } from '@/src/lib/logger';
 import { normalizeError } from '@/src/lib/utils/error.utils';
 import type { GetContentDetailCompleteReturn } from '@/src/types/database-overrides';
-
-/**
- * @deprecated Use GetContentDetailCompleteReturn instead
- */
-export type ContentDetailResult = GetContentDetailCompleteReturn;
 
 export async function getContentDetailComplete(input: {
   category: string;
@@ -24,9 +20,9 @@ export async function getContentDetailComplete(input: {
       },
       {
         rpcName: 'get_content_detail_complete',
-        tags: ['content', `content-${slug}`],
+        tags: generateContentTags(category, slug),
         ttlKey: 'cache.content_detail.ttl_seconds',
-        keySuffix: `${category}-${slug}`,
+        keySuffix: generateContentCacheKey(category, slug),
         fallback: null,
         logMeta: { category, slug },
       }

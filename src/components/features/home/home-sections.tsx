@@ -83,8 +83,10 @@ function HomePageClientComponent({
   }, []);
 
   useEffect(() => {
-    getAnimationConfig()
-      .then((config) => {
+    getAnimationConfig({})
+      .then((result) => {
+        if (!result?.data) return;
+        const config = result.data;
         setSpringDefault({
           type: 'spring' as const,
           stiffness: config['animation.spring.default.stiffness'],
@@ -105,11 +107,20 @@ function HomePageClientComponent({
       try {
         const { fetchPaginatedContent } = await import('@/src/lib/actions/content.actions');
 
-        const newItems = (await fetchPaginatedContent({
+        const result = await fetchPaginatedContent({
           offset,
           limit,
-          category: 'all',
-        })) as ContentItem[];
+          category: null,
+        });
+
+        if (result?.serverError) {
+          // Error already logged by safe-action middleware
+          logger.error('Failed to load content', new Error(result.serverError), {
+            source: 'fetchAllConfigs',
+          });
+        }
+
+        const newItems = (result?.data ?? []) as ContentItem[];
 
         if (newItems.length < limit) {
           setHasMoreAllConfigs(false);

@@ -212,8 +212,9 @@ export const APP_SETTINGS_DEFAULTS = {
     '/hooks/',
     '/statuslines/',
     '/collections/',
-  ] as string[],
+  ] as const satisfies readonly string[],
   'hooks.infinite_scroll.batch_size': 30,
+  'queue.tracking.batch_size': 100, // User interactions queue batch size (hyper-optimized egress reduction)
   'hooks.infinite_scroll.threshold': 0.1,
   'date.current_month': new Date().toISOString().slice(0, 7),
   'date.current_year': new Date().getFullYear(),
@@ -462,7 +463,7 @@ export const HOMEPAGE_CONFIG_DEFAULTS = {
     'collections',
     'hooks',
     'statuslines',
-  ] as string[],
+  ] as const satisfies readonly string[],
   'homepage.tab_categories': [
     'all',
     'agents',
@@ -474,7 +475,7 @@ export const HOMEPAGE_CONFIG_DEFAULTS = {
     'collections',
     'guides',
     'community',
-  ] as string[],
+  ] as const satisfies readonly string[],
 } as const;
 export const homepageConfigs = createDynamicConfigGroup(
   'homepage_configs',
@@ -605,4 +606,5 @@ export const cacheConfigs = createDynamicConfigGroup('cache_configs', {
   'cache.invalidate.review_helpful': ['content'] as string[],
   'cache.invalidate.usage_tracking': ['content'] as string[],
   'cache.invalidate.changelog': ['changelog'] as string[],
+  'cache.invalidate.newsletter_subscribe': ['newsletter'] as string[],
 });

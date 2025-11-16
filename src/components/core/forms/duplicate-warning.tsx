@@ -7,9 +7,10 @@ import { getTimeoutConfig } from '@/src/lib/actions/feature-flags.actions';
 import { AlertTriangle } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { logClientWarning } from '@/src/lib/utils/error.utils';
+import type { ContentCategory } from '@/src/types/database-overrides';
 
 interface DuplicateWarningProps {
-  contentType: string;
+  contentType: ContentCategory;
   name: string;
 }
 
@@ -39,8 +40,10 @@ export function DuplicateWarning({ contentType: _contentType, name }: DuplicateW
 
   // Load debounce value from config
   useEffect(() => {
-    getTimeoutConfig()
-      .then((config) => {
+    getTimeoutConfig({})
+      .then((result) => {
+        if (!result?.data) return;
+        const config = result.data;
         setDebounceMs(config['timeout.ui.form_debounce_ms']);
       })
       .catch((error) => {

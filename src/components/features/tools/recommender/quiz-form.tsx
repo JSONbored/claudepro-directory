@@ -13,6 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primi
 import { Separator } from '@/src/components/primitives/ui/separator';
 import { getQuizConfiguration } from '@/src/lib/actions/quiz.actions';
 import { generateConfigRecommendations } from '@/src/lib/edge/client';
+import type { GetQuizConfigurationReturn } from '@/src/types/database-overrides';
 
 type QuizQuestion = {
   id: string;
@@ -27,6 +28,31 @@ type QuizQuestion = {
     iconName: string | null;
   }>;
 };
+
+function mapQuizConfigToQuestions(
+  config: GetQuizConfigurationReturn | null
+): QuizQuestion[] | null {
+  if (!config?.questions) {
+    return null;
+  }
+
+  // GetQuizConfigurationReturn has simpler structure - map to QuizQuestion format
+  // Note: This is a type mismatch - the RPC returns a different structure than expected
+  // This should be addressed in a future refactor to align RPC return with component needs
+  return config.questions.map((q, index) => ({
+    id: q.id,
+    question: q.question,
+    description: null,
+    required: true,
+    displayOrder: index,
+    options: q.options.map((opt) => ({
+      value: opt,
+      label: opt,
+      description: null,
+      iconName: null,
+    })),
+  }));
+}
 
 import { InlineSpinner } from '@/src/components/primitives/feedback/loading-factory';
 import { ArrowLeft, ArrowRight, Sparkles } from '@/src/lib/icons';
@@ -66,8 +92,18 @@ export function QuizForm() {
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
-    getQuizConfiguration()
-      .then((data) => setQuizConfig(data as QuizQuestion[]))
+    getQuizConfiguration({})
+      .then((result) => {
+        if (result?.data) {
+          const mapped = mapQuizConfigToQuestions(result.data);
+          setQuizConfig(mapped);
+        }
+        if (result?.serverError) {
+          // Error already logged by safe-action middleware
+          logger.error('Failed to load quiz configuration', new Error(result.serverError));
+          toasts.error.actionFailed('load quiz');
+        }
+      })
       .catch((err) => {
         logger.error('Failed to load quiz configuration', err);
         toasts.error.actionFailed('load quiz');

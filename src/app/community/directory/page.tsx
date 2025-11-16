@@ -2,20 +2,18 @@ import { Suspense } from 'react';
 import { ContributorsSidebar } from '@/src/components/features/community/contributors-sidebar';
 import { ProfileSearchClient } from '@/src/components/features/community/profile-search';
 import { Skeleton } from '@/src/components/primitives/feedback/loading-skeleton';
-import {
-  type CommunityDirectoryResult,
-  getCommunityDirectory,
-} from '@/src/lib/data/community/directory';
+import { getCommunityDirectory } from '@/src/lib/data/community/directory';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { normalizeError } from '@/src/lib/utils/error.utils';
+import type { GetCommunityDirectoryReturn } from '@/src/types/database-overrides';
 
 export const metadata = generatePageMetadata('/community/directory');
 
 export const revalidate = false;
 
 async function CommunityDirectoryContent({ searchQuery }: { searchQuery: string }) {
-  let directoryData: CommunityDirectoryResult | null = null;
+  let directoryData: GetCommunityDirectoryReturn | null = null;
   try {
     directoryData = await getCommunityDirectory({ searchQuery, limit: 100 });
   } catch (error) {

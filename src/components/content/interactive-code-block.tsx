@@ -198,8 +198,12 @@ export function ProductionCodeBlock({
     }
 
     try {
-      const config = await getTimeoutConfig();
-      setTimeout(() => setIsCopied(false), config['timeout.ui.clipboard_reset_delay_ms']);
+      const result = await getTimeoutConfig({});
+      if (result?.data) {
+        setTimeout(() => setIsCopied(false), result.data['timeout.ui.clipboard_reset_delay_ms']);
+      } else {
+        setTimeout(() => setIsCopied(false), CLIPBOARD_RESET_DEFAULT_MS);
+      }
     } catch (error) {
       logger.error('ProductionCodeBlock: failed to load timeout config', normalizeError(error));
       setTimeout(() => setIsCopied(false), CLIPBOARD_RESET_DEFAULT_MS);

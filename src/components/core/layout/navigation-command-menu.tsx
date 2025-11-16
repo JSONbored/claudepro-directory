@@ -11,9 +11,9 @@ import {
   CommandList,
   CommandSeparator,
 } from '@/src/components/primitives/ui/command';
-import type { NavigationData, NavigationItem } from '@/src/lib/data/content/navigation';
 import * as Icons from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import type { GetNavigationMenuReturn } from '@/src/types/database-overrides';
 
 /**
  * Command palette navigation - Uses server-provided data from getNavigationMenu()
@@ -23,7 +23,7 @@ interface NavigationCommandMenuProps {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   /** Navigation data from server (required) */
-  navigationData: NavigationData;
+  navigationData: GetNavigationMenuReturn;
 }
 
 export function NavigationCommandMenu({
@@ -71,7 +71,7 @@ export function NavigationCommandMenu({
     return null;
   };
 
-  const renderItem = (item: NavigationItem) => (
+  const renderItem = (item: GetNavigationMenuReturn['primary'][number]) => (
     <CommandItem
       key={item.path}
       onSelect={() => handleSelect(item.path)}

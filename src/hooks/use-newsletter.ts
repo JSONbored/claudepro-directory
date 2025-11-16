@@ -107,11 +107,14 @@ export function useNewsletter(options: UseNewsletterOptions): UseNewsletterRetur
 
   // Load retry config from Statsig on mount
   useEffect(() => {
-    getNewsletterConfig()
-      .then((config) => {
-        MAX_RETRIES = config['newsletter.max_retries'];
-        INITIAL_RETRY_DELAY_MS = config['newsletter.initial_retry_delay_ms'];
-        RETRY_BACKOFF_MULTIPLIER = config['newsletter.retry_backoff_multiplier'];
+    getNewsletterConfig({})
+      .then((result) => {
+        if (result?.data) {
+          const config = result.data;
+          MAX_RETRIES = config['newsletter.max_retries'];
+          INITIAL_RETRY_DELAY_MS = config['newsletter.initial_retry_delay_ms'];
+          RETRY_BACKOFF_MULTIPLIER = config['newsletter.retry_backoff_multiplier'];
+        }
       })
       .catch((error) => {
         logClientWarning('useNewsletter: failed to load retry config', error, { source });

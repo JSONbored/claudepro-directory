@@ -33,6 +33,7 @@ import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { ensureStringArray } from '@/src/lib/utils/data.utils';
 import { logClientWarning } from '@/src/lib/utils/error.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
+import type { JobCategory } from '@/src/types/database-overrides';
 
 interface JobFormProps {
   initialData?: Partial<CreateJobInput>;
@@ -77,7 +78,7 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
       type: formData.get('type') as string,
       ...(workplace && { workplace }),
       ...(experience && { experience }),
-      category: formData.get('category') as string,
+      category: formData.get('category') as JobCategory,
       tags,
       requirements,
       benefits,

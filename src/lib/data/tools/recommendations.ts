@@ -1,33 +1,7 @@
 'use server';
 
 import { fetchCachedRpc } from '@/src/lib/data/helpers';
-import type { Json } from '@/src/types/database.types';
-
-export interface RecommendationItem {
-  slug: string;
-  title: string;
-  description: string;
-  category: string;
-  tags?: string[] | null;
-  author?: string | null;
-  match_score?: number | null;
-  match_percentage?: number | null;
-  primary_reason?: string | null;
-  rank?: number | null;
-  reasons?: Json;
-}
-
-export interface RecommendationsResult {
-  results: RecommendationItem[];
-  totalMatches: number;
-  algorithm: string;
-  summary: {
-    topCategory?: string;
-    avgMatchScore?: number;
-    diversityScore?: number;
-    topTags?: string[];
-  };
-}
+import type { GetRecommendationsReturn } from '@/src/types/database-overrides';
 
 export interface RecommendationInput {
   useCase: string;
@@ -41,7 +15,7 @@ export interface RecommendationInput {
 
 export async function getConfigRecommendations(
   input: RecommendationInput
-): Promise<RecommendationsResult | null> {
+): Promise<GetRecommendationsReturn | null> {
   const {
     useCase,
     experienceLevel,
@@ -52,7 +26,7 @@ export async function getConfigRecommendations(
     viewerId,
   } = input;
 
-  return fetchCachedRpc<RecommendationsResult | null>(
+  return fetchCachedRpc<GetRecommendationsReturn | null>(
     {
       p_use_case: useCase,
       p_experience_level: experienceLevel,

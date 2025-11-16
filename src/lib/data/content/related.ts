@@ -4,8 +4,9 @@
  */
 
 import { fetchCachedRpc } from '@/src/lib/data/helpers';
+import { generateContentCacheKey, generateContentTags } from '@/src/lib/data/helpers-utils';
 import type { Database } from '@/src/types/database.types';
-import type { GetRelatedContentReturn } from '@/src/types/database-overrides';
+import type { ContentCategory, GetRelatedContentReturn } from '@/src/types/database-overrides';
 
 type RelatedContentItem = Database['public']['Functions']['get_related_content']['Returns'][number];
 
@@ -39,9 +40,9 @@ export async function getRelatedContent(input: RelatedContentInput): Promise<Rel
     },
     {
       rpcName: 'get_related_content',
-      tags: ['content', 'related-content', `content-${input.currentCategory}`],
+      tags: generateContentTags(input.currentCategory, null, ['related-content']),
       ttlKey: 'cache.related_content.ttl_seconds',
-      keySuffix: `${input.currentCategory}-${currentSlug}-${input.limit || 3}`,
+      keySuffix: generateContentCacheKey(input.currentCategory, currentSlug, input.limit || 3),
       useAuthClient: false,
       fallback: [],
       logMeta: { category: input.currentCategory, slug: currentSlug },
@@ -52,7 +53,7 @@ export async function getRelatedContent(input: RelatedContentInput): Promise<Rel
 
   return {
     items: validItems.map((item): GetRelatedContentReturn[number] => ({
-      category: item.category,
+      category: item.category as ContentCategory,
       slug: item.slug,
       title: item.title,
       description: item.description || '',

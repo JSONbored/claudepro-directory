@@ -90,8 +90,10 @@ const SheetContent = ({
   });
 
   useEffect(() => {
-    getAnimationConfig()
-      .then((config) => {
+    getAnimationConfig({})
+      .then((result) => {
+        if (!result?.data) return;
+        const config = result.data;
         setSpringSmooth({
           type: 'spring' as const,
           stiffness: config['animation.spring.smooth.stiffness'],

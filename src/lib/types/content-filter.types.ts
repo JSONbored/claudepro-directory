@@ -2,10 +2,10 @@
  * Content filter types - database validates via CHECK constraints.
  */
 
-import type { Enums } from '@/src/types/database.types';
+import type { SortDirection, SortOption } from '@/src/types/database-overrides';
 
-export type SortOption = Enums<'sort_option'>;
-export type SortDirection = Enums<'sort_direction'>;
+// Re-export for convenience (these are now defined in database-overrides.ts)
+export type { SortOption, SortDirection };
 
 export type ContentFilterOptions = {
   categories: string[];

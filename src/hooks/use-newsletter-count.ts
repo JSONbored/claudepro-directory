@@ -8,7 +8,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { getCacheConfig, getPollingConfig } from '@/src/lib/actions/feature-flags.actions';
-import { getNewsletterCount } from '@/src/lib/actions/newsletter.actions';
+import { getNewsletterCountAction } from '@/src/lib/actions/newsletter.actions';
 import { logger } from '@/src/lib/logger';
 import { logClientWarning } from '@/src/lib/utils/error.utils';
 
@@ -26,12 +26,23 @@ let CACHE_TTL_MS = 300000; // 5 minutes (300 seconds)
 let POLL_INTERVAL_MS = 300000; // 5 minutes
 
 // Load config from Statsig on module initialization
-Promise.all([getCacheConfig(), getPollingConfig()])
-  .then(([cache, polling]: [Record<string, unknown>, Record<string, unknown>]) => {
-    const cacheTtlSeconds = (cache['cache.newsletter_count_ttl_s'] as number) ?? 300;
-    CACHE_TTL_MS = cacheTtlSeconds * 1000;
-    POLL_INTERVAL_MS = (polling['polling.newsletter_count_ms'] as number) ?? 300000;
-  })
+Promise.all([getCacheConfig({}), getPollingConfig({})])
+  .then(
+    ([cacheResult, pollingResult]: [
+      Awaited<ReturnType<typeof getCacheConfig>>,
+      Awaited<ReturnType<typeof getPollingConfig>>,
+    ]) => {
+      if (cacheResult?.data) {
+        const cache = cacheResult.data as Record<string, unknown>;
+        const cacheTtlSeconds = (cache['cache.newsletter_count_ttl_s'] as number) ?? 300;
+        CACHE_TTL_MS = cacheTtlSeconds * 1000;
+      }
+      if (pollingResult?.data) {
+        const polling = pollingResult.data as Record<string, unknown>;
+        POLL_INTERVAL_MS = (polling['polling.newsletter_count_ms'] as number) ?? 300000;
+      }
+    }
+  )
   .catch((error) => {
     logClientWarning('useNewsletterCount: failed to load cache/polling config', error);
   });
@@ -63,7 +74,13 @@ export function useNewsletterCount(): UseNewsletterCountReturn {
 
       // Fetch from server action
       try {
-        const newCount = await getNewsletterCount();
+        const result = await getNewsletterCountAction({});
+
+        if (result?.serverError) {
+          throw new Error(result.serverError);
+        }
+
+        const newCount = result?.data ?? null;
 
         if (newCount !== null) {
           setCount(newCount);

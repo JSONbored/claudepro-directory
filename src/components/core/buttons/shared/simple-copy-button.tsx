@@ -47,8 +47,10 @@ export function SimpleCopyButton({
 
       let resetDelay = 2000;
       try {
-        const config = await getTimeoutConfig();
-        resetDelay = config['timeout.ui.clipboard_reset_delay_ms'];
+        const result = await getTimeoutConfig({});
+        if (result?.data) {
+          resetDelay = result.data['timeout.ui.clipboard_reset_delay_ms'];
+        }
       } catch (configError) {
         logClientWarning('SimpleCopyButton: failed to load timeout config', configError);
       }

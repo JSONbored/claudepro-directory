@@ -52,11 +52,14 @@ export function NewsletterScrollTrigger({
 
     loadScrollConfig(
       async () => {
-        const config = await getNewsletterConfig();
-        const configHeight = config['newsletter.scroll_trigger.min_scroll_height_px'] as
-          | number
-          | undefined;
-        setScrollHeightThreshold(configHeight ?? 500);
+        const result = await getNewsletterConfig({});
+        if (result?.data) {
+          const config = result.data;
+          const configHeight = config['newsletter.scroll_trigger.min_scroll_height_px'] as
+            | number
+            | undefined;
+          setScrollHeightThreshold(configHeight ?? 500);
+        }
       },
       {
         context: {

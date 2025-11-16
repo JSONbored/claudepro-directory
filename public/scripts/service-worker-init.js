@@ -253,10 +253,7 @@
     deferredPrompt = e;
 
     log("[PWA] Install prompt ready");
-
-    // Optionally show custom install UI
-    // You can dispatch a custom event here for your React components
-    window.dispatchEvent(new CustomEvent("pwa-installable"));
+    // Note: We no longer track 'pwa-installable' events - only track actual installs
   });
 
   // Track the installation

@@ -1,5 +1,5 @@
-import { trackInteractionEdge } from '../_shared/utils/analytics/tracker.ts';
 import { getOnlyCorsHeaders, jsonResponse } from '../_shared/utils/http.ts';
+import { createDataApiContext } from '../_shared/utils/logging.ts';
 import { createRouter, type HttpMethod, type RouterContext } from '../_shared/utils/router.ts';
 import { handleCompanyRoute } from './routes/company.ts';
 import { handleContentRoute } from './routes/content.ts';
@@ -61,9 +61,14 @@ const router = createRouter<DataApiContext>({
       cors: BASE_CORS,
       match: (ctx) => ctx.segments[0] === 'content',
       handler: (ctx) =>
-        respondWithAnalytics(ctx, 'content', () =>
-          handleContentRoute(ctx.segments.slice(1), ctx.url, ctx.method)
-        ),
+        respondWithAnalytics(ctx, 'content', async () => {
+          const logContext = createDataApiContext('content', {
+            path: ctx.pathname,
+            method: ctx.method,
+            resource: ctx.segments.length > 1 ? ctx.segments[1] : undefined,
+          });
+          return handleContentRoute(ctx.segments.slice(1), ctx.url, ctx.method, logContext);
+        }),
     },
     {
       name: 'feeds',
@@ -81,9 +86,13 @@ const router = createRouter<DataApiContext>({
       cors: BASE_CORS,
       match: (ctx) => ctx.segments[0] === 'seo',
       handler: (ctx) =>
-        respondWithAnalytics(ctx, 'seo', () =>
-          handleSeoRoute(ctx.segments.slice(1), ctx.url, ctx.method)
-        ),
+        respondWithAnalytics(ctx, 'seo', async () => {
+          const logContext = createDataApiContext('seo', {
+            path: ctx.pathname,
+            method: ctx.method,
+          });
+          return handleSeoRoute(ctx.segments.slice(1), ctx.url, ctx.method, logContext);
+        }),
     },
     {
       name: 'sitemap',
@@ -91,9 +100,19 @@ const router = createRouter<DataApiContext>({
       cors: BASE_CORS,
       match: (ctx) => ctx.segments[0] === 'sitemap',
       handler: (ctx) =>
-        respondWithAnalytics(ctx, 'sitemap', () =>
-          handleSitemapRoute(ctx.segments.slice(1), ctx.url, ctx.method, ctx.request)
-        ),
+        respondWithAnalytics(ctx, 'sitemap', async () => {
+          const logContext = createDataApiContext('sitemap', {
+            path: ctx.pathname,
+            method: ctx.method,
+          });
+          return handleSitemapRoute(
+            ctx.segments.slice(1),
+            ctx.url,
+            ctx.method,
+            ctx.request,
+            logContext
+          );
+        }),
     },
     {
       name: 'status',
@@ -167,39 +186,38 @@ function respondWithAnalytics(
   handler: () => Promise<Response>
 ): Promise<Response> {
   const startedAt = performance.now();
+  const logContext = createDataApiContext(routeName, {
+    path: ctx.pathname,
+    method: ctx.method,
+    resource: ctx.segments.length > 1 ? ctx.segments[1] : undefined,
+  });
 
   const logEvent = (status: number, outcome: 'success' | 'error', error?: unknown) => {
-    const metadata: Record<string, unknown> = {
+    const durationMs = Math.round(performance.now() - startedAt);
+    const logData: Record<string, unknown> = {
       route: routeName,
       path: ctx.pathname || '/',
       method: ctx.method,
       status,
-      duration_ms: Math.round(performance.now() - startedAt),
+      duration_ms: durationMs,
     };
 
     const query = ctx.searchParams.toString();
     if (query) {
-      metadata.query = query;
+      logData.query = query;
     }
     if (ctx.segments.length > 1) {
-      metadata.resource = ctx.segments[1];
+      logData.resource = ctx.segments[1];
     }
     if (error) {
-      metadata.error = error instanceof Error ? error.message : String(error);
+      logData.error = error instanceof Error ? error.message : String(error);
     }
 
-    trackInteractionEdge({
-      contentType: 'data-api',
-      contentSlug: routeName,
-      interactionType: outcome === 'success' ? 'edge_route_hit' : 'edge_route_error',
-      metadata,
-      authorizationHeader: ctx.request.headers.get('Authorization'),
-    }).catch((analyticsError) => {
-      console.warn('[data-api] analytics logging failed', {
-        route: routeName,
-        message: analyticsError instanceof Error ? analyticsError.message : String(analyticsError),
-      });
-    });
+    if (outcome === 'success') {
+      console.log('[data-api] Route hit', { ...logContext, ...logData });
+    } else {
+      console.error('[data-api] Route error', { ...logContext, ...logData });
+    }
   };
 
   return handler()

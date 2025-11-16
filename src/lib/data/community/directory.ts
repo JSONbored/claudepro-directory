@@ -1,21 +1,15 @@
 'use server';
 
 import { fetchCachedRpc } from '@/src/lib/data/helpers';
-import type { Tables } from '@/src/types/database.types';
-
-export interface CommunityDirectoryResult {
-  all_users: Array<Tables<'users'>>;
-  top_contributors: Array<Tables<'users'>>;
-  new_members: Array<Tables<'users'>>;
-}
+import type { GetCommunityDirectoryReturn } from '@/src/types/database-overrides';
 
 export async function getCommunityDirectory(options: {
   searchQuery?: string;
   limit?: number;
-}): Promise<CommunityDirectoryResult | null> {
+}): Promise<GetCommunityDirectoryReturn | null> {
   const { searchQuery, limit = 100 } = options;
 
-  return fetchCachedRpc<CommunityDirectoryResult | null>(
+  return fetchCachedRpc<GetCommunityDirectoryReturn | null>(
     {
       ...(searchQuery ? { p_search_query: searchQuery } : {}),
       p_limit: limit,

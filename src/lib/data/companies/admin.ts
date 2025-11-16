@@ -1,32 +1,19 @@
 import { fetchCachedRpc } from '@/src/lib/data/helpers';
+import { normalizeRpcResult } from '@/src/lib/data/helpers-utils';
 import { logger } from '@/src/lib/logger';
-
-export interface CompanyAdminProfile {
-  id: string;
-  owner_id: string | null;
-  name: string | null;
-  slug: string | null;
-  logo: string | null;
-  website: string | null;
-  description: string | null;
-  size: string | null;
-  industry: string | null;
-  using_cursor_since: string | null;
-  featured: boolean | null;
-  created_at: string | null;
-  updated_at: string | null;
-}
+import type { GetCompanyAdminProfileReturn } from '@/src/types/database-overrides';
 
 const COMPANY_DETAIL_TTL_KEY = 'cache.company_detail.ttl_seconds';
 
 export async function getCompanyAdminProfile(
   companyId: string
-): Promise<CompanyAdminProfile | null> {
+): Promise<GetCompanyAdminProfileReturn | null> {
   if (!companyId) {
     return null;
   }
 
-  const data = await fetchCachedRpc<CompanyAdminProfile[] | CompanyAdminProfile | null>(
+  // RPC returns array, but we normalize to single object
+  const data = await fetchCachedRpc<GetCompanyAdminProfileReturn[] | null>(
     { p_company_id: companyId },
     {
       rpcName: 'get_company_admin_profile',
@@ -39,11 +26,11 @@ export async function getCompanyAdminProfile(
     }
   );
 
-  const record = Array.isArray(data) ? (data[0] ?? null) : data;
-  if (!record) {
+  const normalized = normalizeRpcResult(data);
+  if (!normalized) {
     logger.warn('getCompanyAdminProfile: company not found', { companyId });
     return null;
   }
 
-  return record;
+  return normalized;
 }

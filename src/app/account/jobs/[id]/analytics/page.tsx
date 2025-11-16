@@ -13,9 +13,10 @@ import { ROUTES } from '@/src/lib/data/config/constants';
 import { ArrowLeft, BarChart, ExternalLink, Eye } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-import { BADGE_COLORS, type JobStatusType, UI_CLASSES } from '@/src/lib/ui-constants';
+import { BADGE_COLORS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { formatRelativeDate } from '@/src/lib/utils/data.utils';
 import { normalizeError } from '@/src/lib/utils/error.utils';
+import type { JobStatus } from '@/src/types/database-overrides';
 
 export const metadata = generatePageMetadata('/account/jobs/:id/analytics');
 
@@ -57,8 +58,8 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPageProps
   const clickCount = job.click_count ?? 0;
   const ctr = viewCount > 0 ? ((clickCount / viewCount) * 100).toFixed(2) : '0.00';
 
-  const getStatusColor = (status: string) => {
-    return BADGE_COLORS.jobStatus[status as JobStatusType] || 'bg-muted';
+  const getStatusColor = (status: JobStatus) => {
+    return BADGE_COLORS.jobStatus[status] || 'bg-muted';
   };
 
   return (
@@ -93,7 +94,7 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPageProps
             <UnifiedBadge
               variant="base"
               style="outline"
-              className={getStatusColor(job.status ?? 'draft')}
+              className={getStatusColor((job.status ?? 'draft') as JobStatus)}
             >
               {job.status ?? 'draft'}
             </UnifiedBadge>

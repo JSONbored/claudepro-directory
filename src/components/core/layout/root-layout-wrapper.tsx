@@ -12,12 +12,12 @@ import { AnnouncementBannerClient } from '@/src/components/core/layout/announcem
 import { Navigation } from '@/src/components/core/layout/navigation';
 import { useConfetti } from '@/src/hooks/use-confetti';
 import { checkConfettiEnabled } from '@/src/lib/actions/feature-flags.actions';
-import type { NavigationData } from '@/src/lib/data/content/navigation';
 import { logger } from '@/src/lib/logger';
 import { DIMENSIONS } from '@/src/lib/ui-constants';
 import { logClientWarning } from '@/src/lib/utils/error.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
 import type { Tables } from '@/src/types/database.types';
+import type { GetNavigationMenuReturn } from '@/src/types/database-overrides';
 
 const Footer = dynamic(
   () => import('@/src/components/core/layout/footer').then((mod) => ({ default: mod.Footer })),
@@ -98,7 +98,7 @@ async function clearNewsletterOptInCookie() {
 interface LayoutContentProps {
   children: React.ReactNode;
   announcement: Tables<'announcements'> | null;
-  navigationData: NavigationData;
+  navigationData: GetNavigationMenuReturn;
   useFloatingActionBar?: boolean;
   fabFlags: {
     showSubmit: boolean;
@@ -166,10 +166,13 @@ export function LayoutContent({
       description: "We'll send the next Claude drop on Monday.",
     });
 
-    checkConfettiEnabled()
-      .then((enabled) => {
-        if (enabled) {
+    checkConfettiEnabled({})
+      .then((result) => {
+        if (result?.data) {
           fireConfetti('subtle');
+        }
+        if (result?.serverError) {
+          logClientWarning('LayoutContent: confetti check failed', new Error(result.serverError));
         }
       })
       .catch((error) => {

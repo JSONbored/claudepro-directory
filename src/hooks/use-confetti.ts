@@ -10,7 +10,9 @@ export type ConfettiVariant = 'success' | 'celebration' | 'milestone' | 'subtle'
 
 export function useConfetti() {
   const fireConfetti = useCallback(async (variant: ConfettiVariant = 'success') => {
-    const config = await getAnimationConfig();
+    const result = await getAnimationConfig({});
+    if (!result?.data) return;
+    const config = result.data;
 
     const configs: Record<ConfettiVariant, confetti.Options> = {
       // Green + gold for success actions (bookmark, save, etc)

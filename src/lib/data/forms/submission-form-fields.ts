@@ -21,11 +21,10 @@ import type {
 } from '@/src/lib/forms/types';
 import { SUBMISSION_CONTENT_TYPES } from '@/src/lib/forms/types';
 import { logger } from '@/src/lib/logger';
-import type { Database } from '@/src/types/database.types';
+import type { GetFormFieldsForContentTypeReturn } from '@/src/types/database-overrides';
 
-type RpcRow =
-  Database['public']['Functions']['get_form_fields_for_content_type']['Returns'][number];
-type RpcRows = Database['public']['Functions']['get_form_fields_for_content_type']['Returns'];
+type RpcRow = GetFormFieldsForContentTypeReturn[number];
+type RpcRows = GetFormFieldsForContentTypeReturn;
 
 type FieldProperties = Record<string, unknown>;
 

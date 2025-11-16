@@ -6,6 +6,18 @@ import type { Metadata } from 'next';
 import { ContentSearchClient } from '@/src/components/content/content-search';
 import type { SearchFilters } from '@/src/lib/edge/search-client';
 import { searchContent } from '@/src/lib/edge/search-client';
+
+const VALID_SORT_OPTIONS: SearchFilters['sort'][] = [
+  'relevance',
+  'popularity',
+  'newest',
+  'alphabetical',
+];
+
+function isValidSort(value: string | undefined): value is SearchFilters['sort'] {
+  return value !== undefined && VALID_SORT_OPTIONS.includes(value as SearchFilters['sort']);
+}
+
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { normalizeError } from '@/src/lib/utils/error.utils';
@@ -42,11 +54,13 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   const categories = resolvedParams.category?.split(',').filter(Boolean);
   const tags = resolvedParams.tags?.split(',').filter(Boolean);
   const author = resolvedParams.author;
-  const sort = resolvedParams.sort as SearchFilters['sort'];
 
   const filters: SearchFilters = {};
 
-  if (sort) filters.sort = sort;
+  const validatedSort = isValidSort(resolvedParams.sort) ? resolvedParams.sort : undefined;
+  if (validatedSort) {
+    filters.sort = validatedSort;
+  }
   if (categories && categories.length > 0) filters.p_categories = categories;
   if (tags && tags.length > 0) filters.p_tags = tags;
   if (author) filters.p_authors = [author];

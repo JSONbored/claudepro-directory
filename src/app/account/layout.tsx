@@ -26,7 +26,6 @@ import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 export default async function AccountLayout({ children }: { children: React.ReactNode }) {
-  // biome-ignore lint/correctness/noSuspiciousAwait: Account layout must instantiate the server client to refresh sessions + auth state.
   const supabase = await createClient();
 
   const { user } = await getAuthenticatedUserFromClient(supabase, {

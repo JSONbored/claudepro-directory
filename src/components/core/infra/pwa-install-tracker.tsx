@@ -8,7 +8,6 @@
  * and stores them in user_interactions table.
  *
  * Events Tracked:
- * - pwa_installable: Browser shows PWA can be installed
  * - pwa_installed: User successfully installed PWA
  * - pwa_launched: App opened in standalone mode (from home screen)
  *
@@ -26,21 +25,6 @@ import { logUnhandledPromise } from '@/src/lib/utils/error.utils';
 
 export function PwaInstallTracker() {
   useEffect(() => {
-    // Track when PWA becomes installable
-    const handleInstallable = () => {
-      trackInteraction({
-        content_type: null,
-        content_slug: null,
-        interaction_type: 'pwa_installable',
-        metadata: {
-          platform: navigator.platform || 'unknown',
-          user_agent: navigator.userAgent,
-        },
-      }).catch((error) => {
-        logUnhandledPromise('PwaInstallTracker: installable event failed', error);
-      });
-    };
-
     // Track successful installation
     const handleInstalled = () => {
       trackInteraction({
@@ -74,14 +58,12 @@ export function PwaInstallTracker() {
     };
 
     // Listen for PWA events dispatched by service-worker-init.js
-    window.addEventListener('pwa-installable', handleInstallable);
     window.addEventListener('pwa-installed', handleInstalled);
 
     // Check standalone mode on mount
     handleStandaloneLaunch();
 
     return () => {
-      window.removeEventListener('pwa-installable', handleInstallable);
       window.removeEventListener('pwa-installed', handleInstalled);
     };
   }, []);

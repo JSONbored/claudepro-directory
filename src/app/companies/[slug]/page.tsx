@@ -42,7 +42,7 @@ export async function generateMetadata({ params }: CompanyPageProps): Promise<Me
 export default async function CompanyPage({ params }: CompanyPageProps) {
   const { slug } = await params;
 
-  let profile;
+  let profile: Awaited<ReturnType<typeof getCompanyProfile>>;
   try {
     profile = await getCompanyProfile(slug);
   } catch (error) {

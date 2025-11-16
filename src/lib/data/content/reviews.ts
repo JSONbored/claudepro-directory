@@ -1,10 +1,11 @@
 'use server';
 
 import { fetchCachedRpc } from '@/src/lib/data/helpers';
-import type { GetReviewsWithStatsReturn } from '@/src/types/database-overrides';
+import { generateContentCacheKey } from '@/src/lib/data/helpers-utils';
+import type { ContentCategory, GetReviewsWithStatsReturn } from '@/src/types/database-overrides';
 
 interface ReviewsWithStatsParams {
-  contentType: string;
+  contentType: ContentCategory;
   contentSlug: string;
   sortBy?: string;
   limit?: number;
@@ -30,9 +31,7 @@ export async function getReviewsWithStatsData(
       rpcName: 'get_reviews_with_stats',
       tags: ['content', `content-${contentSlug}`, 'reviews'],
       ttlKey: 'cache.user_reviews.ttl_seconds',
-      keySuffix: `${contentType}-${contentSlug}-${sortBy ?? 'default'}-${limit ?? 'all'}-${
-        offset ?? 0
-      }-${userId ?? 'anon'}`,
+      keySuffix: `${generateContentCacheKey(contentType, contentSlug, limit, offset)}-${sortBy ?? 'default'}-${userId ?? 'anon'}`,
       useAuthClient: true,
       fallback: null,
       logMeta: {

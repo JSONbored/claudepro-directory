@@ -6,13 +6,15 @@ import {
   getOnlyCorsHeaders,
   methodNotAllowedResponse,
 } from '../../_shared/utils/http.ts';
+import type { BaseLogContext } from '../../_shared/utils/logging.ts';
 
 const CORS = getOnlyCorsHeaders;
 
 export async function handleSeoRoute(
   segments: string[],
   url: URL,
-  method: string
+  method: string,
+  logContext?: BaseLogContext
 ): Promise<Response> {
   if (method !== 'GET') {
     return methodNotAllowedResponse('GET', CORS);
@@ -47,7 +49,8 @@ export async function handleSeoRoute(
 
   const responseBody = JSON.stringify(data);
 
-  console.log('[data-api] seo generated', {
+  console.log('[data-api] SEO generated', {
+    ...(logContext || {}),
     route,
     include,
     bytes: responseBody.length,

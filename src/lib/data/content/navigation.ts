@@ -4,27 +4,14 @@
  */
 
 import { fetchCachedRpc } from '@/src/lib/data/helpers';
-
-export interface NavigationItem {
-  path: string;
-  title: string;
-  description: string;
-  iconName: string;
-  group: 'primary' | 'secondary' | 'actions';
-}
-
-export interface NavigationData {
-  primary: NavigationItem[];
-  secondary: NavigationItem[];
-  actions: NavigationItem[];
-}
+import type { GetNavigationMenuReturn } from '@/src/types/database-overrides';
 
 /**
  * Get navigation menu data via edge-cached RPC
  * Used by command palette and navigation components
  */
-export async function getNavigationMenu(): Promise<NavigationData> {
-  return fetchCachedRpc<NavigationData>(
+export async function getNavigationMenu(): Promise<GetNavigationMenuReturn> {
+  return fetchCachedRpc<GetNavigationMenuReturn>(
     {},
     {
       rpcName: 'get_navigation_menu',

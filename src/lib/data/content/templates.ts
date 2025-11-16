@@ -4,18 +4,11 @@
  */
 
 import { fetchCachedRpc } from '@/src/lib/data/helpers';
-import type { GetContentTemplatesReturn } from '@/src/types/database-overrides';
+import type { ContentCategory, GetContentTemplatesReturn } from '@/src/types/database-overrides';
 
-/**
- * Template type alias for backward compatibility
- * @deprecated Use GetContentTemplatesReturn[number] instead
- */
-export type Template = GetContentTemplatesReturn[number];
-
-/**
- * Get content templates for a specific category via edge-cached RPC
- */
-export async function getContentTemplates(category: string): Promise<GetContentTemplatesReturn> {
+export async function getContentTemplates(
+  category: ContentCategory
+): Promise<GetContentTemplatesReturn> {
   return fetchCachedRpc<GetContentTemplatesReturn>(
     { p_category: category },
     {

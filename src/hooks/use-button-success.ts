@@ -9,9 +9,11 @@ import { logClientWarning } from '@/src/lib/utils/error.utils';
 let DEFAULT_SUCCESS_DURATION = 2000;
 
 // Load config from Statsig on module initialization
-getTimeoutConfig()
-  .then((config) => {
-    DEFAULT_SUCCESS_DURATION = config['timeout.ui.button_success_duration_ms'];
+getTimeoutConfig({})
+  .then((result) => {
+    if (result?.data) {
+      DEFAULT_SUCCESS_DURATION = result.data['timeout.ui.button_success_duration_ms'];
+    }
   })
   .catch((error) => {
     logClientWarning('useButtonSuccess: failed to load success duration', error);

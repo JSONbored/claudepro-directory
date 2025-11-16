@@ -72,8 +72,10 @@ function UnifiedSearchComponent({
   const [debounceMs, setDebounceMs] = useState(150);
 
   useEffect(() => {
-    getTimeoutConfig()
-      .then((config) => {
+    getTimeoutConfig({})
+      .then((result) => {
+        if (!result?.data) return;
+        const config = result.data;
         setDebounceMs(config['timeout.ui.debounce_ms']);
       })
       .catch((error) => {

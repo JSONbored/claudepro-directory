@@ -4,7 +4,10 @@
 
 import type { CategoryId } from '@/src/lib/data/config/category';
 import type { ContentItem } from '@/src/lib/data/content';
-import type { GetContentDetailCompleteReturn } from '@/src/types/database-overrides';
+import type {
+  ContentCategory,
+  GetContentDetailCompleteReturn,
+} from '@/src/types/database-overrides';
 
 const normalizeSlug = (value: string): string =>
   value
@@ -116,22 +119,25 @@ interface FilenameRule {
   useHookType?: boolean;
 }
 
-const FILENAME_RULES: Partial<Record<string, FilenameRule>> = {
+const FILENAME_RULES: Partial<Record<ContentCategory | string, FilenameRule>> = {
   mcp: { suffix: '-config' },
   agents: { suffix: '-config' },
   commands: { suffix: '-config' },
   rules: { suffix: '-config' },
   hooks: { suffix: '', useHookType: true },
   guides: { suffix: '' },
+  statuslines: { suffix: '' },
+  collections: { suffix: '' },
+  skills: { suffix: '' },
+  jobs: { suffix: '' },
+  changelog: { suffix: '' },
+  // Legacy subcategory values (not in enum but used in guides)
   tutorials: { suffix: '' },
   comparisons: { suffix: '' },
   workflows: { suffix: '' },
   'use-cases': { suffix: '' },
   troubleshooting: { suffix: '' },
-  statuslines: { suffix: '' },
-  collections: { suffix: '' },
-  skills: { suffix: '' },
-};
+} as const;
 
 export function generateFilename(options: FilenameGeneratorOptions): string {
   const { item, language, format, section } = options;

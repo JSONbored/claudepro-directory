@@ -71,13 +71,18 @@ async function HomeContentSection({
       'Homepage content section error',
       error instanceof Error ? error : new Error(String(error))
     );
-    const emptyData: GetHomepageCompleteReturn['content']['categoryData'] = {};
+    const emptyData: GetHomepageCompleteReturn['content']['categoryData'] =
+      {} as GetHomepageCompleteReturn['content']['categoryData'];
 
     return (
       <HomePageClient
         initialData={emptyData}
-        featuredByCategory={{}}
-        stats={Object.fromEntries(categoryIds.map((id: string) => [id, 0]))}
+        featuredByCategory={{} as GetHomepageCompleteReturn['content']['categoryData']}
+        stats={
+          Object.fromEntries(
+            categoryIds.map((id: string) => [id, 0])
+          ) as GetHomepageCompleteReturn['content']['stats']
+        }
         featuredJobs={[]}
       />
     );
@@ -131,11 +136,12 @@ export default async function HomePage({ searchParams }: HomePageProps) {
           <Suspense fallback={<HomePageLoading />}>
             <HomeContentSection
               homepageContentData={
-                homepageResult?.content ?? {
-                  categoryData: {},
-                  stats: {},
+                homepageResult?.content ??
+                ({
+                  categoryData: {} as GetHomepageCompleteReturn['content']['categoryData'],
+                  stats: {} as GetHomepageCompleteReturn['content']['stats'],
                   weekStart: '',
-                }
+                } as GetHomepageCompleteReturn['content'])
               }
               featuredJobs={featuredJobs}
               categoryIds={categoryIds}
@@ -145,7 +151,30 @@ export default async function HomePage({ searchParams }: HomePageProps) {
       </div>
 
       {Array.isArray(topContributors) && topContributors.length > 0 && (
-        <TopContributors contributors={topContributors as never[]} />
+        <TopContributors
+          contributors={topContributors.map((contributor) => ({
+            ...contributor,
+            // Add required fields with defaults for UserProfile type
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            email: null,
+            display_name: null,
+            website: null,
+            social_x_link: null,
+            interests: null,
+            profile_public: false,
+            follow_email: false,
+            bookmark_count: 0,
+            follower_count: 0,
+            following_count: 0,
+            submission_count: 0,
+            hero: null,
+            public: false,
+            status: null,
+            json_ld: null,
+            // Optional UserProfile extension fields are omitted (not set to undefined)
+          }))}
+        />
       )}
 
       <section className={'container mx-auto px-4 py-12'}>

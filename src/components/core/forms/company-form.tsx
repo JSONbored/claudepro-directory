@@ -69,8 +69,10 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
 
   // Load form validation config from Statsig on mount
   useEffect(() => {
-    getFormConfig()
-      .then((config) => {
+    getFormConfig({})
+      .then((result) => {
+        if (!result?.data) return;
+        const config = result.data;
         const maxMB = config['form.max_file_size_mb'];
         MAX_FILE_SIZE = maxMB * 1024 * 1024;
         MAX_DIMENSION = config['form.max_image_dimension_px'];

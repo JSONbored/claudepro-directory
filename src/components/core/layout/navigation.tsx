@@ -22,7 +22,6 @@ import { UserMenu } from '@/src/components/core/layout/user-menu';
 import { Button } from '@/src/components/primitives/ui/button';
 import { ACTION_LINKS } from '@/src/config/navigation';
 import { ROUTES } from '@/src/lib/data/config/constants';
-import type { NavigationData } from '@/src/lib/data/content/navigation';
 import { DiscordIcon } from '@/src/lib/icons';
 import {
   ANIMATION_CONSTANTS,
@@ -30,12 +29,13 @@ import {
   RESPONSIVE_PATTERNS,
   UI_CLASSES,
 } from '@/src/lib/ui-constants';
+import type { GetNavigationMenuReturn } from '@/src/types/database-overrides';
 
 interface NavigationProps {
   /** Hide Create button when FloatingActionBar is enabled */
   hideCreateButton?: boolean;
   /** Navigation data from server (required) */
-  navigationData: NavigationData;
+  navigationData: GetNavigationMenuReturn;
 }
 
 const NavigationComponent = ({ hideCreateButton = false, navigationData }: NavigationProps) => {

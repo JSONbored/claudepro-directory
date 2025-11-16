@@ -1,7 +1,14 @@
 import type { CategoryId } from '@/src/lib/data/config/category';
+import { isValidCategory } from '@/src/lib/data/config/category';
 import { fetchCachedRpc } from '@/src/lib/data/helpers';
+import { generateContentCacheKey } from '@/src/lib/data/helpers-utils';
 import type { DisplayableContent } from '@/src/lib/types/component.types';
-import type { HomepageContentItem } from '@/src/types/database-overrides';
+import type {
+  GetPopularContentReturn,
+  GetRecentContentReturn,
+  GetTrendingMetricsReturn,
+  HomepageContentItem,
+} from '@/src/types/database-overrides';
 
 interface TrendingPageParams {
   category?: CategoryId | null;
@@ -14,44 +21,6 @@ interface TrendingPageDataResult {
   recent: DisplayableContent[];
   totalCount: number;
 }
-
-type TrendingMetricRow = {
-  category: string | null;
-  slug: string;
-  title: string | null;
-  description: string | null;
-  author: string | null;
-  tags: string[] | null;
-  source: string | null;
-  views_total: number | null;
-  copies_total: number | null;
-  bookmarks_total: number | null;
-  trending_score: number | null;
-  engagement_score: number | null;
-  freshness_score: number | null;
-};
-
-type PopularContentRow = {
-  category: string | null;
-  slug: string;
-  title: string | null;
-  description: string | null;
-  author: string | null;
-  tags: string[] | null;
-  view_count: number | null;
-  copy_count: number | null;
-  popularity_score: number | null;
-};
-
-type RecentContentRow = {
-  category: string | null;
-  slug: string;
-  title: string | null;
-  description: string | null;
-  author: string | null;
-  tags: string[] | null;
-  created_at: string | null;
-};
 
 const TTL_CONFIG_KEY = 'cache.content_list.ttl_seconds';
 const DEFAULT_CATEGORY: CategoryId = 'agents';
@@ -83,8 +52,8 @@ export async function getTrendingPageData(
 async function fetchTrendingMetrics(
   category: CategoryId | null,
   limit: number
-): Promise<TrendingMetricRow[]> {
-  return fetchCachedRpc<TrendingMetricRow[]>(
+): Promise<GetTrendingMetricsReturn> {
+  return fetchCachedRpc<GetTrendingMetricsReturn>(
     {
       p_category: category,
       p_limit: limit,
@@ -93,7 +62,7 @@ async function fetchTrendingMetrics(
       rpcName: 'get_trending_metrics_with_content',
       tags: ['trending', 'trending-page'],
       ttlKey: TTL_CONFIG_KEY,
-      keySuffix: `metrics-${category ?? 'all'}-${limit}`,
+      keySuffix: `metrics-${generateContentCacheKey(category, null, limit)}`,
       fallback: [],
       logMeta: { category: category ?? 'all', limit },
     }
@@ -103,8 +72,8 @@ async function fetchTrendingMetrics(
 async function fetchPopularContent(
   category: CategoryId | null,
   limit: number
-): Promise<PopularContentRow[]> {
-  return fetchCachedRpc<PopularContentRow[]>(
+): Promise<GetPopularContentReturn> {
+  return fetchCachedRpc<GetPopularContentReturn>(
     {
       p_category: category,
       p_limit: limit,
@@ -113,7 +82,7 @@ async function fetchPopularContent(
       rpcName: 'get_popular_content',
       tags: ['trending', 'trending-popular'],
       ttlKey: TTL_CONFIG_KEY,
-      keySuffix: `popular-${category ?? 'all'}-${limit}`,
+      keySuffix: `popular-${generateContentCacheKey(category, null, limit)}`,
       fallback: [],
       logMeta: { category: category ?? 'all', limit },
     }
@@ -123,8 +92,8 @@ async function fetchPopularContent(
 async function fetchRecentContent(
   category: CategoryId | null,
   limit: number
-): Promise<RecentContentRow[]> {
-  return fetchCachedRpc<RecentContentRow[]>(
+): Promise<GetRecentContentReturn> {
+  return fetchCachedRpc<GetRecentContentReturn>(
     {
       p_category: category,
       p_limit: limit,
@@ -134,7 +103,7 @@ async function fetchRecentContent(
       rpcName: 'get_recent_content',
       tags: ['trending', 'trending-recent'],
       ttlKey: TTL_CONFIG_KEY,
-      keySuffix: `recent-${category ?? 'all'}-${limit}`,
+      keySuffix: `recent-${generateContentCacheKey(category, null, limit)}`,
       fallback: [],
       logMeta: { category: category ?? 'all', limit },
     }
@@ -142,13 +111,15 @@ async function fetchRecentContent(
 }
 
 function mapTrendingMetrics(
-  rows: TrendingMetricRow[],
+  rows: GetTrendingMetricsReturn,
   category: CategoryId | null
 ): DisplayableContent[] {
-  return rows.map((row, index) =>
-    toHomepageContentItem({
+  return rows.map((row, index) => {
+    const resolvedCategory = row.category ?? category ?? DEFAULT_CATEGORY;
+    const validCategory = isValidCategory(resolvedCategory) ? resolvedCategory : DEFAULT_CATEGORY;
+    return toHomepageContentItem({
       slug: row.slug,
-      category: (row.category ?? category ?? DEFAULT_CATEGORY) as CategoryId,
+      category: validCategory,
       title: row.title,
       description: row.description,
       author: row.author,
@@ -158,18 +129,20 @@ function mapTrendingMetrics(
       copyCount: row.copies_total,
       featuredScore: row.trending_score ?? row.freshness_score ?? row.engagement_score,
       featuredRank: index + 1,
-    })
-  );
+    });
+  });
 }
 
 function mapPopularContent(
-  rows: PopularContentRow[],
+  rows: GetPopularContentReturn,
   category: CategoryId | null
 ): DisplayableContent[] {
-  return rows.map((row, index) =>
-    toHomepageContentItem({
+  return rows.map((row, index) => {
+    const resolvedCategory = row.category ?? category ?? DEFAULT_CATEGORY;
+    const validCategory = isValidCategory(resolvedCategory) ? resolvedCategory : DEFAULT_CATEGORY;
+    return toHomepageContentItem({
       slug: row.slug,
-      category: (row.category ?? category ?? DEFAULT_CATEGORY) as CategoryId,
+      category: validCategory,
       title: row.title,
       description: row.description,
       author: row.author,
@@ -178,18 +151,20 @@ function mapPopularContent(
       copyCount: row.copy_count,
       featuredScore: row.popularity_score,
       featuredRank: index + 1,
-    })
-  );
+    });
+  });
 }
 
 function mapRecentContent(
-  rows: RecentContentRow[],
+  rows: GetRecentContentReturn,
   category: CategoryId | null
 ): DisplayableContent[] {
-  return rows.map((row, index) =>
-    toHomepageContentItem({
+  return rows.map((row, index) => {
+    const resolvedCategory = row.category ?? category ?? DEFAULT_CATEGORY;
+    const validCategory = isValidCategory(resolvedCategory) ? resolvedCategory : DEFAULT_CATEGORY;
+    return toHomepageContentItem({
       slug: row.slug,
-      category: (row.category ?? category ?? DEFAULT_CATEGORY) as CategoryId,
+      category: validCategory,
       title: row.title,
       description: row.description,
       author: row.author,
@@ -197,8 +172,8 @@ function mapRecentContent(
       created_at: row.created_at,
       date_added: row.created_at,
       featuredRank: index + 1,
-    })
-  );
+    });
+  });
 }
 
 function toHomepageContentItem(input: {

@@ -2274,65 +2274,6 @@ export type Database = {
         }
         Relationships: []
       }
-      submissions: {
-        Row: {
-          branch_name: string | null
-          content_name: string
-          content_slug: string
-          content_type: string
-          created_at: string
-          id: string
-          merged_at: string | null
-          pr_number: number | null
-          pr_url: string | null
-          rejection_reason: string | null
-          status: string
-          submission_data: Json
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          branch_name?: string | null
-          content_name: string
-          content_slug: string
-          content_type: string
-          created_at?: string
-          id?: string
-          merged_at?: string | null
-          pr_number?: number | null
-          pr_url?: string | null
-          rejection_reason?: string | null
-          status?: string
-          submission_data: Json
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          branch_name?: string | null
-          content_name?: string
-          content_slug?: string
-          content_type?: string
-          created_at?: string
-          id?: string
-          merged_at?: string | null
-          pr_number?: number | null
-          pr_url?: string | null
-          rejection_reason?: string | null
-          status?: string
-          submission_data?: Json
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "submissions_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       subscriptions: {
         Row: {
           cancel_at_period_end: boolean | null
@@ -2543,7 +2484,7 @@ export type Database = {
           content_type: string | null
           created_at: string
           id: string
-          interaction_type: string
+          interaction_type: Database["public"]["Enums"]["interaction_type"]
           metadata: Json | null
           session_id: string | null
           user_id: string | null
@@ -2553,7 +2494,7 @@ export type Database = {
           content_type?: string | null
           created_at?: string
           id?: string
-          interaction_type: string
+          interaction_type: Database["public"]["Enums"]["interaction_type"]
           metadata?: Json | null
           session_id?: string | null
           user_id?: string | null
@@ -2563,7 +2504,7 @@ export type Database = {
           content_type?: string | null
           created_at?: string
           id?: string
-          interaction_type?: string
+          interaction_type?: Database["public"]["Enums"]["interaction_type"]
           metadata?: Json | null
           session_id?: string | null
           user_id?: string | null
@@ -3063,6 +3004,10 @@ export type Database = {
         Args: { p_items: Json; p_user_id: string }
         Returns: Json
       }
+      batch_insert_user_interactions: {
+        Args: { p_interactions: Json[] }
+        Returns: Json
+      }
       build_aggregate_rating_schema: {
         Args: { p_content_slug: string; p_content_type: string }
         Returns: Json
@@ -3370,37 +3315,17 @@ export type Database = {
         }[]
       }
       get_all_structured_data_configs: { Args: never; Returns: Json }
-      get_analytics_summary:
-        | {
-            Args: { p_category: string; p_slug: string }
-            Returns: {
-              bookmark_count: number | null
-              category: string | null
-              copy_count: number | null
-              last_interaction_at: string | null
-              last_viewed_at: string | null
-              slug: string | null
-              total_time_spent_seconds: number | null
-              view_count: number | null
-            }[]
-            SetofOptions: {
-              from: "*"
-              to: "mv_analytics_summary"
-              isOneToOne: false
-              isSetofReturn: true
-            }
-          }
-        | {
-            Args: { p_category?: string }
-            Returns: {
-              avg_popularity: number
-              category: string
-              total_bookmarks: number
-              total_copies: number
-              total_items: number
-              total_views: number
-            }[]
-          }
+      get_analytics_summary: {
+        Args: { p_category?: string }
+        Returns: {
+          avg_popularity: number
+          category: string
+          total_bookmarks: number
+          total_copies: number
+          total_items: number
+          total_views: number
+        }[]
+      }
       get_api_content_full: {
         Args: { p_base_url?: string; p_category: string; p_slug: string }
         Returns: string
@@ -4598,7 +4523,7 @@ export type Database = {
           p_description: string
           p_github_url?: string
           p_name: string
-          p_submission_type: string
+          p_submission_type: Database["public"]["Enums"]["submission_type"]
           p_tags?: string[]
         }
         Returns: Json
@@ -4759,6 +4684,11 @@ export type Database = {
         | "screenshot"
         | "share"
         | "download"
+        | "pwa_installed"
+        | "pwa_launched"
+        | "newsletter_subscribe"
+        | "contact_interact"
+        | "contact_submit"
       job_status:
         | "draft"
         | "pending_payment"
@@ -5019,6 +4949,11 @@ export const Constants = {
         "screenshot",
         "share",
         "download",
+        "pwa_installed",
+        "pwa_launched",
+        "newsletter_subscribe",
+        "contact_interact",
+        "contact_submit",
       ],
       job_status: [
         "draft",

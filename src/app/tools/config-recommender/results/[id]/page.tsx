@@ -7,13 +7,11 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { ResultsDisplay } from '@/src/components/features/tools/recommender/results-display';
 import { APP_CONFIG } from '@/src/lib/data/config/constants';
-import {
-  getConfigRecommendations,
-  type RecommendationItem,
-} from '@/src/lib/data/tools/recommendations';
+import { getConfigRecommendations } from '@/src/lib/data/tools/recommendations';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { normalizeError } from '@/src/lib/utils/error.utils';
+import type { GetRecommendationsReturn } from '@/src/types/database-overrides';
 
 function decodeQuizAnswers(encoded: string) {
   try {
@@ -37,7 +35,7 @@ function isRecommendationReason(value: unknown): value is { type: string; messag
   return typeof record.type === 'string' && typeof record.message === 'string';
 }
 
-function normalizeRecommendationResults(results: RecommendationItem[]) {
+function normalizeRecommendationResults(results: GetRecommendationsReturn['results']) {
   return results.map((item) => {
     const tags =
       Array.isArray(item.tags) && item.tags.length > 0

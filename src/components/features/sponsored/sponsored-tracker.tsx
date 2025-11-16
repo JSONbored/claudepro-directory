@@ -10,7 +10,7 @@
  */
 
 import { useEffect, useRef } from 'react';
-import { trackSponsoredClick, trackSponsoredImpression } from '@/src/lib/actions/tracking.actions';
+import { trackSponsoredClick, trackSponsoredImpression } from '@/src/lib/actions/pulse.actions';
 import { logUnhandledPromise } from '@/src/lib/utils/error.utils';
 
 interface SponsoredTrackerProps {

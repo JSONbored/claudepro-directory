@@ -4,9 +4,9 @@
  */
 
 import { fetchCachedRpc } from '@/src/lib/data/helpers';
-import type { Database } from '@/src/types/database.types';
+import type { Tables } from '@/src/types/database-overrides';
 
-export type Job = Database['public']['Tables']['jobs']['Row'];
+export type Job = Tables<'jobs'>;
 
 export interface JobsFilterOptions {
   searchQuery?: string;

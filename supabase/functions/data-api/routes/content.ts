@@ -9,6 +9,7 @@ import {
   jsonResponse,
   methodNotAllowedResponse,
 } from '../../_shared/utils/http.ts';
+import type { BaseLogContext } from '../../_shared/utils/logging.ts';
 import { handlePaginatedContent } from './content-paginated.ts';
 import { handleRecordExport } from './content-record.ts';
 
@@ -17,7 +18,8 @@ const CORS = getOnlyCorsHeaders;
 export async function handleContentRoute(
   segments: string[],
   url: URL,
-  method: string
+  method: string,
+  logContext?: BaseLogContext
 ): Promise<Response> {
   if (method !== 'GET') {
     return methodNotAllowedResponse('GET', CORS);
@@ -32,7 +34,7 @@ export async function handleContentRoute(
   if (segments.length === 1) {
     const [first] = segments;
     if (first === 'sitewide') {
-      return handleSitewideContent(url);
+      return handleSitewideContent(url, logContext);
     }
     if (first === 'paginated') {
       return handlePaginatedContent(url);
@@ -73,15 +75,15 @@ export async function handleContentRoute(
   );
 }
 
-async function handleSitewideContent(url: URL): Promise<Response> {
+async function handleSitewideContent(url: URL, logContext?: BaseLogContext): Promise<Response> {
   const format = (url.searchParams.get('format') || 'readme').toLowerCase();
 
   if (format === 'readme') {
-    return handleSitewideReadme();
+    return handleSitewideReadme(logContext);
   }
 
   if (format === 'llms' || format === 'llms-txt') {
-    return handleSitewideLlmsTxt();
+    return handleSitewideLlmsTxt(logContext);
   }
 
   return badRequestResponse(
@@ -90,7 +92,7 @@ async function handleSitewideContent(url: URL): Promise<Response> {
   );
 }
 
-async function handleSitewideReadme(): Promise<Response> {
+async function handleSitewideReadme(logContext?: BaseLogContext): Promise<Response> {
   const { data, error } = await supabaseAnon.rpc('generate_readme_data');
 
   if (error) {
@@ -107,7 +109,8 @@ async function handleSitewideReadme(): Promise<Response> {
 
   const markdown = buildReadmeMarkdown(data as ReadmeData);
 
-  console.log('[data-api] sitewide readme generated', {
+  console.log('[data-api] Sitewide readme generated', {
+    ...(logContext || {}),
     bytes: markdown.length,
     categories: (data as ReadmeData).categories.length,
   });
@@ -123,7 +126,7 @@ async function handleSitewideReadme(): Promise<Response> {
   });
 }
 
-async function handleSitewideLlmsTxt(): Promise<Response> {
+async function handleSitewideLlmsTxt(logContext?: BaseLogContext): Promise<Response> {
   const { data, error } = await supabaseAnon.rpc('generate_sitewide_llms_txt');
 
   if (error) {
@@ -140,7 +143,8 @@ async function handleSitewideLlmsTxt(): Promise<Response> {
 
   const formatted = data.replace(/\\n/g, '\n');
 
-  console.log('[data-api] sitewide llms generated', {
+  console.log('[data-api] Sitewide llms generated', {
+    ...(logContext || {}),
     bytes: formatted.length,
   });
 

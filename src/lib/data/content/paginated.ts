@@ -1,7 +1,8 @@
 'use server';
 
 import { fetchCachedRpc } from '@/src/lib/data/helpers';
-import type { DisplayableContent } from '@/src/lib/types/component.types';
+import { generateContentCacheKey, generateContentTags } from '@/src/lib/data/helpers-utils';
+import type { GetPaginatedContentReturn } from '@/src/types/database-overrides';
 
 interface PaginatedContentParams {
   category?: string | null;
@@ -9,17 +10,12 @@ interface PaginatedContentParams {
   offset: number;
 }
 
-interface PaginatedContentResponse {
-  items?: DisplayableContent[];
-  total_count?: number;
-}
-
 export async function getPaginatedContent({
   category,
   limit,
   offset,
-}: PaginatedContentParams): Promise<PaginatedContentResponse | null> {
-  return fetchCachedRpc<PaginatedContentResponse | null>(
+}: PaginatedContentParams): Promise<GetPaginatedContentReturn | null> {
+  return fetchCachedRpc<GetPaginatedContentReturn | null>(
     {
       p_category: category,
       p_limit: limit,
@@ -27,9 +23,9 @@ export async function getPaginatedContent({
     },
     {
       rpcName: 'get_content_paginated_slim',
-      tags: ['content', 'content-paginated', category ? `content-${category}` : 'content-all'],
+      tags: generateContentTags(category, null, ['content-paginated']),
       ttlKey: 'cache.content_paginated.ttl_seconds',
-      keySuffix: `${category ?? 'all'}-${limit}-${offset}`,
+      keySuffix: generateContentCacheKey(category, null, limit, offset),
       fallback: null,
       logMeta: { category: category ?? 'all', limit, offset },
     }

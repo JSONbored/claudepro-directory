@@ -6,7 +6,7 @@
 import React from 'npm:react@18.3.1';
 import { Hr, Section, Text } from 'npm:@react-email/components@0.0.22';
 import { EMAIL_UTM_TEMPLATES } from '../utm-templates.ts';
-import { BaseLayout, renderEmailTemplate } from '../base-template.tsx';
+import { BaseLayout } from '../base-template.tsx';
 import {
   contentSection,
   dividerStyle,
@@ -104,6 +104,3 @@ export function JobApproved({
   );
 }
 
-export function renderJobApprovedEmail(props: JobApprovedProps) {
-  return renderEmailTemplate(JobApproved, props);
-}

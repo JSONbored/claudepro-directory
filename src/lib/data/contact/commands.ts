@@ -1,12 +1,10 @@
 'use server';
 
 import { fetchCachedRpc } from '@/src/lib/data/helpers';
-import type { Database } from '@/src/types/database.types';
+import type { GetContactCommandsReturn } from '@/src/types/database-overrides';
 
-type ContactCommandsResult = Database['public']['Functions']['get_contact_commands']['Returns'];
-
-export async function fetchContactCommands(): Promise<ContactCommandsResult | null> {
-  return fetchCachedRpc<ContactCommandsResult | null>(
+export async function fetchContactCommands(): Promise<GetContactCommandsReturn | null> {
+  return fetchCachedRpc<GetContactCommandsReturn | null>(
     {},
     {
       rpcName: 'get_contact_commands',

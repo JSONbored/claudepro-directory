@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
       slug: slug || null,
       pathCount: paths.length,
       tagCount: invalidatedTags.length,
-      tags: invalidatedTags.length > 0 ? invalidatedTags : undefined,
+      ...(invalidatedTags.length > 0 && { tags: invalidatedTags.join(', ') }),
     });
 
     return NextResponse.json({

@@ -1,16 +1,11 @@
 'use server';
 
 import { fetchCachedRpc } from '@/src/lib/data/helpers';
-import type { GetSimilarContentReturn } from '@/src/types/database-overrides';
-
-/**
- * SimilarContentResult type alias for backward compatibility
- * @deprecated Use GetSimilarContentReturn instead
- */
-export type SimilarContentResult = GetSimilarContentReturn;
+import { generateContentCacheKey } from '@/src/lib/data/helpers-utils';
+import type { ContentCategory, GetSimilarContentReturn } from '@/src/types/database-overrides';
 
 export async function getSimilarContent(input: {
-  contentType: string;
+  contentType: ContentCategory;
   contentSlug: string;
   limit?: number;
 }): Promise<GetSimilarContentReturn | null> {
@@ -26,7 +21,7 @@ export async function getSimilarContent(input: {
       rpcName: 'get_similar_content',
       tags: ['content', 'similar', `content-${contentSlug}`],
       ttlKey: 'cache.content_detail.ttl_seconds',
-      keySuffix: `${contentType}-${contentSlug}-${limit}`,
+      keySuffix: generateContentCacheKey(contentType, contentSlug, limit),
       fallback: null,
       logMeta: { contentType, contentSlug, limit },
     }
