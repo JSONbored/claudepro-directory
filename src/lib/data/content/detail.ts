@@ -4,16 +4,16 @@ import { fetchCachedRpc } from '@/src/lib/data/helpers';
 import { generateContentCacheKey, generateContentTags } from '@/src/lib/data/helpers-utils';
 import { logger } from '@/src/lib/logger';
 import { normalizeError } from '@/src/lib/utils/error.utils';
-import type { GetContentDetailCompleteReturn } from '@/src/types/database-overrides';
+import type { GetGetContentDetailCompleteReturn } from '@/src/types/database-overrides';
 
 export async function getContentDetailComplete(input: {
   category: string;
   slug: string;
-}): Promise<GetContentDetailCompleteReturn | null> {
+}): Promise<GetGetContentDetailCompleteReturn | null> {
   const { category, slug } = input;
 
   try {
-    return fetchCachedRpc<'get_content_detail_complete', GetContentDetailCompleteReturn | null>(
+    return fetchCachedRpc<'get_content_detail_complete', GetGetContentDetailCompleteReturn | null>(
       {
         p_category: category,
         p_slug: slug,

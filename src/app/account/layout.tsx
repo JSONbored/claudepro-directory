@@ -9,7 +9,7 @@ import { AuthSignOutButton } from '@/src/components/core/buttons/auth/auth-signo
 import { Button } from '@/src/components/primitives/ui/button';
 import { Card } from '@/src/components/primitives/ui/card';
 import { ensureUserRecord } from '@/src/lib/actions/user.actions';
-import { getAuthenticatedUserFromClient } from '@/src/lib/auth/get-authenticated-user';
+import { getAuthenticatedUser } from '@/src/lib/auth/get-authenticated-user';
 import { getUserSettings, getUserSponsorships } from '@/src/lib/data/account/user-data';
 import {
   Activity,
@@ -22,17 +22,19 @@ import {
   TrendingUp,
   User,
 } from '@/src/lib/icons';
+import { logger } from '@/src/lib/logger';
 import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 
 export default async function AccountLayout({ children }: { children: React.ReactNode }) {
-  const supabase = await createClient();
-
-  const { user } = await getAuthenticatedUserFromClient(supabase, {
+  const { user } = await getAuthenticatedUser({
+    requireUser: true,
     context: 'AccountLayout',
   });
   if (!user) redirect('/login');
 
+  const supabase = await createClient();
   const {
     data: { session },
   } = await supabase.auth.getSession();
@@ -48,21 +50,60 @@ export default async function AccountLayout({ children }: { children: React.Reac
     user.user_metadata?.full_name ?? user.user_metadata?.name ?? user.email ?? null;
   const userImageMetadata = user.user_metadata?.avatar_url ?? user.user_metadata?.picture ?? null;
 
-  let settings = await getUserSettings(user.id);
-  let profile = settings?.user_data ?? null;
-
-  if (!profile) {
-    await ensureUserRecord({
-      id: user.id,
-      email: user.email ?? null,
-      name: userNameMetadata,
-      image: userImageMetadata,
-    });
+  let settings: Awaited<ReturnType<typeof getUserSettings>> = null;
+  let profile: NonNullable<Awaited<ReturnType<typeof getUserSettings>>>['user_data'] | null = null;
+  try {
     settings = await getUserSettings(user.id);
-    profile = settings?.user_data ?? null;
+    if (settings) {
+      profile = settings.user_data ?? null;
+    } else {
+      logger.warn('AccountLayout: getUserSettings returned null', { userId: user.id });
+    }
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to load user settings in account layout');
+    logger.error('AccountLayout: getUserSettings threw', normalized, { userId: user.id });
   }
 
-  const sponsorships = await getUserSponsorships(user.id);
+  if (!profile) {
+    try {
+      await ensureUserRecord({
+        id: user.id,
+        email: user.email ?? null,
+        name: userNameMetadata,
+        image: userImageMetadata,
+      });
+      settings = await getUserSettings(user.id);
+      if (settings) {
+        profile = settings.user_data ?? null;
+      } else {
+        logger.warn('AccountLayout: getUserSettings returned null after ensureUserRecord', {
+          userId: user.id,
+        });
+      }
+    } catch (error) {
+      const normalized = normalizeError(
+        error,
+        'Failed to ensure user record or reload settings in account layout'
+      );
+      logger.error('AccountLayout: ensureUserRecord or getUserSettings threw', normalized, {
+        userId: user.id,
+      });
+    }
+  }
+
+  let sponsorships: Awaited<ReturnType<typeof getUserSponsorships>> = [];
+  try {
+    sponsorships = await getUserSponsorships(user.id);
+    if (!sponsorships) {
+      logger.warn('AccountLayout: getUserSponsorships returned null', { userId: user.id });
+      sponsorships = [];
+    }
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to load user sponsorships in account layout');
+    logger.error('AccountLayout: getUserSponsorships threw', normalized, { userId: user.id });
+    sponsorships = [];
+  }
+
   const hasSponsorships = sponsorships.length > 0;
 
   const navigation = [

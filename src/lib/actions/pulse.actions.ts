@@ -15,20 +15,19 @@
  */
 
 import { z } from 'zod';
-import { rateLimitedAction } from '@/src/lib/actions/safe-action';
-import { getAuthenticatedUser } from '@/src/lib/auth/get-authenticated-user';
+import { optionalAuthAction, rateLimitedAction } from '@/src/lib/actions/safe-action';
 import { getSimilarContent } from '@/src/lib/data/content/similar';
 import { getConfigRecommendations } from '@/src/lib/data/tools/recommendations';
 import { logger } from '@/src/lib/logger';
 import { normalizeError } from '@/src/lib/utils/error.utils';
-import { enqueuePulseEvent } from '@/src/lib/utils/pulse';
+import { enqueuePulseEventServer } from '@/src/lib/utils/pulse';
 import type { Json } from '@/src/types/database.types';
 import type {
   ContactCategory,
   Database,
   ExperienceLevel,
   FocusAreaType,
-  GetRecommendationsReturn,
+  GetGetRecommendationsReturn,
   InteractionType,
 } from '@/src/types/database-overrides';
 import {
@@ -55,8 +54,8 @@ export type TrackInteractionParams = Omit<
   'id' | 'created_at' | 'user_id'
 >;
 
-type RecommendationItem = GetRecommendationsReturn['results'][number];
-type RecommendationsPayload = GetRecommendationsReturn;
+type RecommendationItem = NonNullable<GetGetRecommendationsReturn>['results'][number];
+type RecommendationsPayload = NonNullable<GetGetRecommendationsReturn>;
 
 export interface ConfigRecommendationsResponse {
   success: boolean;
@@ -155,19 +154,16 @@ const generateConfigRecommendationsSchema = z.object({
  * Enqueues to pulse queue → Worker processes in batches (hyper-optimized)
  * Fire-and-forget, non-blocking
  */
-export const trackInteractionAction = rateLimitedAction
+export const trackInteractionAction = optionalAuthAction
   .metadata({ actionName: 'pulse.trackInteraction', category: 'analytics' })
   .schema(trackInteractionSchema)
-  .action(async ({ parsedInput }) => {
+  .action(async ({ parsedInput, ctx }) => {
     const contentType = parsedInput.content_type ?? 'unknown';
     const contentSlug = parsedInput.content_slug ?? 'unknown';
-
-    // Get user ID if authenticated (optional - tracking works without auth)
-    const { user } = await getAuthenticatedUser({ requireUser: false });
-    const userId = user?.id ?? null;
+    const userId = ctx.userId ?? null;
 
     // Enqueue to queue (fast, non-blocking)
-    await enqueuePulseEvent({
+    await enqueuePulseEventServer({
       user_id: userId,
       content_type: contentType,
       content_slug: contentSlug,
@@ -181,21 +177,19 @@ export const trackInteractionAction = rateLimitedAction
  * Track newsletter-specific events
  * Enqueues to queue (hyper-optimized batching)
  */
-export const trackNewsletterEventAction = rateLimitedAction
+export const trackNewsletterEventAction = optionalAuthAction
   .metadata({ actionName: 'pulse.trackNewsletterEvent', category: 'analytics' })
   .schema(trackNewsletterEventSchema)
-  .action(async ({ parsedInput }) => {
+  .action(async ({ parsedInput, ctx }) => {
     const metadataPayload: Record<string, unknown> = {
       event_type: parsedInput.eventType,
       ...(parsedInput.metadata ?? {}),
     };
 
-    // Get user ID if authenticated (optional - tracking works without auth)
-    const { user } = await getAuthenticatedUser({ requireUser: false });
-    const userId = user?.id ?? null;
+    const userId = ctx.userId ?? null;
 
     // Enqueue to queue (fast, non-blocking)
-    await enqueuePulseEvent({
+    await enqueuePulseEventServer({
       user_id: userId,
       content_type: 'newsletter',
       content_slug: 'newsletter_cta',
@@ -210,16 +204,14 @@ export const trackNewsletterEventAction = rateLimitedAction
  * Used by interactive contact terminal (e.g., typing "help", "report-bug")
  * Enqueues to queue (hyper-optimized batching)
  */
-export const trackTerminalCommandAction = rateLimitedAction
+export const trackTerminalCommandAction = optionalAuthAction
   .metadata({ actionName: 'pulse.trackTerminalCommand', category: 'analytics' })
   .schema(trackTerminalCommandSchema)
-  .action(async ({ parsedInput }) => {
-    // Get user ID if authenticated (optional - tracking works without auth)
-    const { user } = await getAuthenticatedUser({ requireUser: false });
-    const userId = user?.id ?? null;
+  .action(async ({ parsedInput, ctx }) => {
+    const userId = ctx.userId ?? null;
 
     // Enqueue to queue (fast, non-blocking)
-    await enqueuePulseEvent({
+    await enqueuePulseEventServer({
       user_id: userId,
       content_type: 'terminal',
       content_slug: 'contact-terminal',
@@ -242,16 +234,14 @@ export const trackTerminalCommandAction = rateLimitedAction
  * Used when contact form is submitted via terminal
  * Enqueues to queue (hyper-optimized batching)
  */
-export const trackTerminalFormSubmissionAction = rateLimitedAction
+export const trackTerminalFormSubmissionAction = optionalAuthAction
   .metadata({ actionName: 'pulse.trackTerminalFormSubmission', category: 'analytics' })
   .schema(trackTerminalFormSubmissionSchema)
-  .action(async ({ parsedInput }) => {
-    // Get user ID if authenticated (optional - tracking works without auth)
-    const { user } = await getAuthenticatedUser({ requireUser: false });
-    const userId = user?.id ?? null;
+  .action(async ({ parsedInput, ctx }) => {
+    const userId = ctx.userId ?? null;
 
     // Enqueue to queue (fast, non-blocking)
-    await enqueuePulseEvent({
+    await enqueuePulseEventServer({
       user_id: userId,
       content_type: 'terminal',
       content_slug: 'contact-form',
@@ -270,17 +260,17 @@ export const trackTerminalFormSubmissionAction = rateLimitedAction
  * Enqueues to pulse queue → Worker processes in batches (hyper-optimized)
  * Fire-and-forget, non-blocking
  */
-export const trackUsageAction = rateLimitedAction
+export const trackUsageAction = optionalAuthAction
   .metadata({ actionName: 'pulse.trackUsage', category: 'analytics' })
   .schema(trackUsageSchema)
-  .action(async ({ parsedInput }) => {
-    const { user } = await getAuthenticatedUser({ requireUser: false });
+  .action(async ({ parsedInput, ctx }) => {
+    const userId = ctx.userId ?? null;
     const interactionType = parsedInput.action_type === 'copy' ? 'copy' : 'download';
 
     // Enqueue to queue instead of direct RPC
     // This provides 98% egress reduction via batched processing
-    await enqueuePulseEvent({
-      user_id: user?.id ?? null,
+    await enqueuePulseEventServer({
+      user_id: userId,
       content_type: parsedInput.content_type,
       content_slug: parsedInput.content_slug,
       interaction_type: interactionType,
@@ -303,16 +293,16 @@ export const trackUsageAction = rateLimitedAction
  * Enqueues to pulse queue → Worker processes in batches (hyper-optimized)
  * Fire-and-forget, non-blocking
  */
-export const trackSponsoredImpression = rateLimitedAction
+export const trackSponsoredImpression = optionalAuthAction
   .metadata({ actionName: 'pulse.trackSponsoredImpression', category: 'analytics' })
   .schema(trackSponsoredImpressionSchema)
-  .action(async ({ parsedInput }) => {
-    const { user } = await getAuthenticatedUser({ requireUser: false });
+  .action(async ({ parsedInput, ctx }) => {
+    const userId = ctx.userId ?? null;
 
     // Enqueue to queue instead of direct RPC
     // This provides 98% egress reduction via batched processing
-    await enqueuePulseEvent({
-      user_id: user?.id ?? null,
+    await enqueuePulseEventServer({
+      user_id: userId,
       content_type: 'sponsored',
       content_slug: parsedInput.sponsoredId,
       interaction_type: 'view', // Use 'view' for impressions (or add 'sponsored_impression' to enum if needed)
@@ -333,16 +323,16 @@ export const trackSponsoredImpression = rateLimitedAction
  * Enqueues to pulse queue → Worker processes in batches (hyper-optimized)
  * Fire-and-forget, non-blocking
  */
-export const trackSponsoredClick = rateLimitedAction
+export const trackSponsoredClick = optionalAuthAction
   .metadata({ actionName: 'pulse.trackSponsoredClick', category: 'analytics' })
   .schema(trackSponsoredClickSchema)
-  .action(async ({ parsedInput }) => {
-    const { user } = await getAuthenticatedUser({ requireUser: false });
+  .action(async ({ parsedInput, ctx }) => {
+    const userId = ctx.userId ?? null;
 
     // Enqueue to queue instead of direct RPC
     // This provides 98% egress reduction via batched processing
-    await enqueuePulseEvent({
-      user_id: user?.id ?? null,
+    await enqueuePulseEventServer({
+      user_id: userId,
       content_type: 'sponsored',
       content_slug: parsedInput.sponsoredId,
       interaction_type: 'click',
@@ -411,11 +401,15 @@ export const generateConfigRecommendationsAction = rateLimitedAction
       });
 
       const responseId = `rec_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
-      const fallback: GetRecommendationsReturn = {
+      const fallback: NonNullable<GetGetRecommendationsReturn> = {
         results: [],
         totalMatches: 0,
         algorithm: 'unknown',
-        summary: {},
+        summary: {
+          topCategory: null,
+          avgMatchScore: 0,
+          diversityScore: 0,
+        },
       };
 
       const source = data ?? fallback;

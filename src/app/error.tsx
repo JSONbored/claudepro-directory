@@ -8,6 +8,7 @@ import { ROUTES } from '@/src/lib/data/config/constants';
 import { AlertCircle, Home, RefreshCw, Search } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 
 export default function ErrorBoundary({
   error,
@@ -17,12 +18,14 @@ export default function ErrorBoundary({
   reset: () => void;
 }) {
   useEffect(() => {
-    logger.error('Application error boundary triggered', error, {
+    const normalized = normalizeError(error, 'Application error boundary triggered');
+    logger.error('GlobalErrorBoundary: application crashed', normalized, {
       errorDigest: error.digest || 'no-digest',
       digestAvailable: Boolean(error.digest),
       userAgent: typeof window !== 'undefined' ? window.navigator?.userAgent || '' : '',
       url: typeof window !== 'undefined' ? window.location?.href || '' : '',
       timestamp: new Date().toISOString(),
+      segment: 'global',
     });
   }, [error]);
 

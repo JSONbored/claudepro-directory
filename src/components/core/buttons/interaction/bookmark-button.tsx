@@ -9,15 +9,15 @@ import { useConfetti } from '@/src/hooks/use-confetti';
 import { usePulse } from '@/src/hooks/use-pulse';
 import { checkConfettiEnabled } from '@/src/lib/actions/feature-flags.actions';
 import { addBookmark, removeBookmark } from '@/src/lib/actions/user.actions';
-import { type CategoryId, isValidCategory } from '@/src/lib/data/config/category';
+import { isValidCategory } from '@/src/lib/data/config/category';
 import { Bookmark, BookmarkCheck } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
+import type { ButtonStyleProps } from '@/src/lib/types/component.types';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
 import { logClientWarning } from '@/src/lib/utils/error.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
 import type { ContentCategory } from '@/src/types/database-overrides';
-import type { ButtonStyleProps } from '../shared/button-types';
 
 export interface BookmarkButtonProps extends ButtonStyleProps {
   contentType: ContentCategory;
@@ -54,7 +54,7 @@ export function BookmarkButton({
       return;
     }
 
-    const validatedCategory = contentType as CategoryId;
+    const validatedCategory = contentType as ContentCategory;
 
     startTransition(async () => {
       try {

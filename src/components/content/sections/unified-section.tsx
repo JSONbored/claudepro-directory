@@ -10,7 +10,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/ui/card';
-import type { CategoryId } from '@/src/lib/data/config/category/category-config.types';
 import {
   Bookmark,
   BookOpen,
@@ -26,11 +25,12 @@ import {
   Terminal,
   Zap,
 } from '@/src/lib/icons';
+import type { UnifiedSectionProps } from '@/src/lib/types/component.types';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
-import type { UnifiedSectionProps } from './unified-section.types';
+import type { ContentCategory } from '@/src/types/database-overrides';
 
-const ICONS: Record<CategoryId, LucideIcon> = {
+const ICONS: Record<ContentCategory, LucideIcon> = {
   agents: Sparkles,
   mcp: Package,
   commands: Terminal,
@@ -55,7 +55,7 @@ function Wrapper({
   title: string;
   description?: string;
   icon?: LucideIcon;
-  category?: CategoryId;
+  category?: ContentCategory;
   className?: string;
   children: React.ReactNode;
 }) {

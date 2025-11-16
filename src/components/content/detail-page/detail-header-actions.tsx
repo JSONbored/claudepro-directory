@@ -21,19 +21,22 @@ import { Button } from '@/src/components/primitives/ui/button';
 import { useCopyToClipboard } from '@/src/hooks/use-copy-to-clipboard';
 import { useCopyWithEmailCapture } from '@/src/hooks/use-copy-with-email-capture';
 import { usePulse } from '@/src/hooks/use-pulse';
-import type { CategoryId } from '@/src/lib/data/config/category';
 import type { ContentItem } from '@/src/lib/data/content';
 import { ArrowLeft, Check, Copy, Download, FileText, Sparkles } from '@/src/lib/icons';
 import { STATE_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { logUnhandledPromise } from '@/src/lib/utils/error.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
-import type { CopyType, GetContentDetailCompleteReturn } from '@/src/types/database-overrides';
+import type {
+  ContentCategory,
+  CopyType,
+  GetGetContentDetailCompleteReturn,
+} from '@/src/types/database-overrides';
 
 /**
  * Determine copy type based on content item structure
  */
 function determineCopyType(
-  item: ContentItem | GetContentDetailCompleteReturn['content']
+  item: ContentItem | GetGetContentDetailCompleteReturn['content']
 ): CopyType {
   // Check if item has content or configuration (indicates code/config copy)
   if ('content' in item && item.content) return 'code';
@@ -45,7 +48,9 @@ function determineCopyType(
 /**
  * Safely extracts content or configuration from item as a string for copying
  */
-function getContentForCopy(item: ContentItem | GetContentDetailCompleteReturn['content']): string {
+function getContentForCopy(
+  item: ContentItem | GetGetContentDetailCompleteReturn['content']
+): string {
   // Check for content first
   if ('content' in item && typeof item.content === 'string') {
     return item.content;
@@ -70,9 +75,9 @@ export interface SerializableAction {
 }
 
 export interface DetailHeaderActionsProps {
-  item: ContentItem | GetContentDetailCompleteReturn['content'];
+  item: ContentItem | GetGetContentDetailCompleteReturn['content'];
   typeName: string;
-  category: CategoryId;
+  category: ContentCategory;
   hasContent: boolean;
   displayTitle: string;
   primaryAction: SerializableAction;

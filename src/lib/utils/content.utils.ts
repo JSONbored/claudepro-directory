@@ -2,7 +2,7 @@
  * Content Utilities - Database-First Architecture
  */
 
-import type { CategoryId } from '@/src/lib/data/config/category';
+import type { ContentCategory } from '@/src/types/database-overrides';
 
 export function formatViewCount(count: number): string {
   if (count >= 1000) {
@@ -19,7 +19,7 @@ export function formatCopyCount(count: number): string {
 }
 
 export function getContentItemUrl(item: {
-  category: CategoryId;
+  category: ContentCategory;
   slug: string;
   subcategory?: string | null | undefined;
 }): string {

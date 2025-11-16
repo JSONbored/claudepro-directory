@@ -23,23 +23,23 @@
 
 import { useEffect, useState } from 'react';
 import { getPollingConfig } from '@/src/lib/actions/feature-flags.actions';
-import type { CategoryId } from '@/src/lib/data/config/category';
 import { trackInteraction } from '@/src/lib/edge/client';
 import { logger } from '@/src/lib/logger';
 import { logClientWarning, logUnhandledPromise, normalizeError } from '@/src/lib/utils/error.utils';
 import type { Json } from '@/src/types/database.types';
+import type { ContentCategory } from '@/src/types/database-overrides';
 
 export type PulseProps =
   | {
       variant: 'view';
-      category: CategoryId;
+      category: ContentCategory;
       slug: string;
       delay?: number;
       metadata?: Record<string, unknown>;
     }
   | {
       variant: 'page-view';
-      category: CategoryId;
+      category: ContentCategory;
       slug: string;
       sourcePage?: string;
       delay?: number;

@@ -23,7 +23,7 @@ import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { formatRelativeDate } from '@/src/lib/utils/data.utils';
 import { normalizeError } from '@/src/lib/utils/error.utils';
-import type { GetUserCompaniesReturn } from '@/src/types/database-overrides';
+import type { GetGetUserCompaniesReturn } from '@/src/types/database-overrides';
 
 export const metadata = generatePageMetadata('/account/companies');
 
@@ -49,7 +49,7 @@ export default async function CompaniesPage() {
     );
   }
 
-  let companies: GetUserCompaniesReturn['companies'] = [];
+  let companies: GetGetUserCompaniesReturn['companies'] = [];
   let hasError = false;
 
   // User-scoped edge-cached RPC via centralized data layer

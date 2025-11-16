@@ -20,7 +20,6 @@ import {
   isContactCategory,
   isNewsletterSource,
   SETTING_TYPE_VALUES,
-  type SettingType,
   type Tables,
   upsertTable,
 } from '../_shared/database-overrides.ts';

@@ -8,8 +8,7 @@
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { z } from 'zod';
 import { invalidateByKeys, runRpc } from '@/src/lib/actions/action-helpers';
-import { authedAction, rateLimitedAction } from '@/src/lib/actions/safe-action';
-import { getAuthenticatedUserFromClient } from '@/src/lib/auth/get-authenticated-user';
+import { authedAction, optionalAuthAction, rateLimitedAction } from '@/src/lib/actions/safe-action';
 import type { CacheInvalidateKey } from '@/src/lib/data/config/cache-config';
 import { getPaginatedContent as getPaginatedContentData } from '@/src/lib/data/content/paginated';
 import { getReviewsWithStatsData } from '@/src/lib/data/content/reviews';
@@ -588,19 +587,14 @@ export const markReviewHelpful = authedAction
  * Uses single RPC call instead of separate getReviews + getAggregateRating
  * Replaces 2 queries with 1
  */
-export const getReviewsWithStats = rateLimitedAction
+export const getReviewsWithStats = optionalAuthAction
   .metadata({
     actionName: 'getReviewsWithStats',
     category: 'content',
   })
   .schema(getReviewsSchema)
-  .action(async ({ parsedInput }) => {
+  .action(async ({ parsedInput, ctx }) => {
     const { content_type, content_slug, sort_by, limit, offset } = parsedInput;
-    const { createClient } = await import('@/src/lib/supabase/server');
-    const supabase = await createClient();
-    const { user } = await getAuthenticatedUserFromClient(supabase, {
-      context: 'getReviewsWithStats',
-    });
 
     const data = await getReviewsWithStatsData({
       contentType: content_type,
@@ -608,7 +602,7 @@ export const getReviewsWithStats = rateLimitedAction
       sortBy: sort_by,
       limit,
       offset,
-      ...(user?.id ? { userId: user.id } : {}),
+      ...(ctx.userId ? { userId: ctx.userId } : {}),
     });
 
     if (!data) {

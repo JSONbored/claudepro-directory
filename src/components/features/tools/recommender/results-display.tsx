@@ -33,7 +33,6 @@ import {
   TooltipTrigger,
 } from '@/src/components/primitives/ui/tooltip';
 import { addBookmarkBatch } from '@/src/lib/actions/user.actions';
-import type { CategoryId } from '@/src/lib/data/config/category';
 import { isValidCategory } from '@/src/lib/data/config/category';
 import { ROUTES } from '@/src/lib/data/config/constants';
 import {
@@ -52,6 +51,7 @@ import {
 import { POSITION_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { getContentItemUrl } from '@/src/lib/utils/content.utils';
 import type {
+  ContentCategory,
   ExperienceLevel,
   FocusAreaType,
   IntegrationType,
@@ -114,7 +114,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
     startTransition(async () => {
       try {
         const items = results
-          .filter((result): result is typeof result & { category: CategoryId } =>
+          .filter((result): result is typeof result & { category: ContentCategory } =>
             isValidCategory(result.category)
           )
           .map((result) => ({
@@ -356,7 +356,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
         <TabsContent value={selectedCategory} className="mt-6">
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {filteredResults
-              .filter((result): result is typeof result & { category: CategoryId } =>
+              .filter((result): result is typeof result & { category: ContentCategory } =>
                 isValidCategory(result.category)
               )
               .map((result) => {

@@ -41,7 +41,7 @@ export function createRateLimitErrorResponse(
   const { preset, cors = publicCorsHeaders, errorResponseType = 'json' } = options;
   const config = RATE_LIMIT_PRESETS[preset];
 
-  const headers = {
+  const headers: Record<string, string> = {
     ...cors,
     'X-RateLimit-Limit': String(config.maxRequests),
     'X-RateLimit-Remaining': String(rateLimit.remaining),
@@ -53,12 +53,7 @@ export function createRateLimitErrorResponse(
     return badRequestResponse(
       `Rate limit exceeded. Retry after ${rateLimit.retryAfter} seconds`,
       cors,
-      {
-        'X-RateLimit-Limit': String(config.maxRequests),
-        'X-RateLimit-Remaining': String(rateLimit.remaining),
-        'X-RateLimit-Reset': new Date(rateLimit.resetAt).toISOString(),
-        ...(rateLimit.retryAfter && { 'Retry-After': String(rateLimit.retryAfter) }),
-      }
+      headers
     );
   }
 
@@ -70,12 +65,7 @@ export function createRateLimitErrorResponse(
     },
     429,
     cors,
-    {
-      'X-RateLimit-Limit': String(config.maxRequests),
-      'X-RateLimit-Remaining': String(rateLimit.remaining),
-      'X-RateLimit-Reset': new Date(rateLimit.resetAt).toISOString(),
-      ...(rateLimit.retryAfter && { 'Retry-After': String(rateLimit.retryAfter) }),
-    }
+    headers
   );
 }
 

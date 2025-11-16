@@ -5,10 +5,10 @@
 
 import { fetchCachedRpc } from '@/src/lib/data/helpers';
 import { logger } from '@/src/lib/logger';
-import { createClient } from '@/src/lib/supabase/server';
 import type {
-  FilterJobsReturn,
-  GetJobDetailReturn,
+  GetFilterJobsReturn,
+  GetGetJobDetailReturn,
+  GetGetJobsListReturn,
   Tables,
 } from '@/src/types/database-overrides';
 
@@ -24,14 +24,14 @@ export interface JobsFilterOptions {
   offset: number;
 }
 
-// JobsFilterResult matches FilterJobsReturn from database-overrides.ts
-export type JobsFilterResult = FilterJobsReturn;
+// JobsFilterResult matches GetFilterJobsReturn from database-overrides.ts
+export type JobsFilterResult = GetFilterJobsReturn;
 
 /**
  * Get all active jobs via edge-cached RPC
  */
 export async function getJobs(): Promise<Job[]> {
-  return fetchCachedRpc<'get_jobs_list', Job[]>(
+  const data = await fetchCachedRpc<'get_jobs_list', GetGetJobsListReturn>(
     {},
     {
       rpcName: 'get_jobs_list',
@@ -41,13 +41,29 @@ export async function getJobs(): Promise<Job[]> {
       fallback: [],
     }
   );
+  // Map GetGetJobsListReturn to Job (Tables<'jobs'>)
+  // GetGetJobsListReturn is a simplified structure, so we need to map it
+  return data.map((item) => ({
+    ...item,
+    // Add missing fields with defaults
+    active: item.active ?? true,
+    admin_notes: null,
+    benefits: item.benefits ?? null,
+    click_count: null,
+    company_id: null,
+    company_logo: null,
+    contact_email: item.contact_email ?? null,
+    expires_at: item.expires_at ?? new Date().toISOString(),
+    is_placeholder: false,
+    workplace: item.remote ? 'Remote' : 'On-site',
+  })) as Job[];
 }
 
 /**
  * Get a job by slug via edge-cached RPC
  */
 export async function getJobBySlug(slug: string): Promise<Job | undefined> {
-  const data = await fetchCachedRpc<'get_job_detail', GetJobDetailReturn>(
+  const data = await fetchCachedRpc<'get_job_detail', GetGetJobDetailReturn>(
     { p_slug: slug },
     {
       rpcName: 'get_job_detail',
@@ -59,7 +75,22 @@ export async function getJobBySlug(slug: string): Promise<Job | undefined> {
     }
   );
 
-  return data ?? undefined;
+  if (!data) return undefined;
+
+  // Map GetGetJobDetailReturn to Job (Tables<'jobs'>)
+  return {
+    ...data,
+    // Add missing fields with defaults
+    active: data.active ?? true,
+    admin_notes: null,
+    benefits: data.benefits ?? null,
+    click_count: null,
+    company_id: null,
+    company_logo: null,
+    expires_at: data.expires_at ?? new Date().toISOString(),
+    is_placeholder: false,
+    workplace: data.remote ? 'Remote' : 'On-site',
+  } as Job;
 }
 
 /** Get featured jobs via edge-cached RPC */
@@ -109,7 +140,7 @@ export async function getJobsCount(): Promise<number> {
 /** Filter jobs via filter_jobs RPC */
 export async function getFilteredJobs(
   options: JobsFilterOptions
-): Promise<FilterJobsReturn | null> {
+): Promise<GetFilterJobsReturn | null> {
   const { searchQuery, category, employment, experience, remote, limit, offset } = options;
 
   const rpcParams = {
@@ -122,37 +153,35 @@ export async function getFilteredJobs(
     p_offset: offset,
   };
 
-  const result = await fetchCachedRpc<'filter_jobs', FilterJobsReturn>(
-    rpcParams,
-    {
-      rpcName: 'filter_jobs',
-      tags: ['jobs', ...(category && category !== 'all' ? [`jobs-${category}`] : [])],
-      ttlKey: 'cache.jobs.ttl_seconds',
-      keySuffix: [
-        searchQuery || 'none',
-        category || 'all',
-        employment || 'any',
-        experience || 'any',
-        remote ? 'remote' : 'onsite',
-        limit,
-        offset,
-      ].join('|'),
-      fallback: null,
-      logMeta: {
-        hasSearch: Boolean(searchQuery),
-        category: category || 'all',
-        employment: employment || 'any',
-        experience: experience || 'any',
-        remote: Boolean(remote),
-        limit,
-        offset,
-      },
-    }
-  );
+  const result = await fetchCachedRpc<'filter_jobs', GetFilterJobsReturn | null>(rpcParams, {
+    rpcName: 'filter_jobs',
+    tags: ['jobs', ...(category && category !== 'all' ? [`jobs-${category}`] : [])],
+    ttlKey: 'cache.jobs.ttl_seconds',
+    keySuffix: [
+      searchQuery || 'none',
+      category || 'all',
+      employment || 'any',
+      experience || 'any',
+      remote ? 'remote' : 'onsite',
+      limit,
+      offset,
+    ].join('|'),
+    fallback: null,
+    logMeta: {
+      hasSearch: Boolean(searchQuery),
+      category: category || 'all',
+      employment: employment || 'any',
+      experience: experience || 'any',
+      remote: Boolean(remote),
+      limit,
+      offset,
+    },
+  });
 
-  // Track search analytics (fire and forget) - only if search query provided
+  // Pulse search events (fire and forget) - only if search query provided
   if (searchQuery && result) {
-    trackJobsSearchAnalytics(
+    const { pulseJobSearch } = await import('@/src/lib/utils/pulse');
+    pulseJobSearch(
       searchQuery,
       {
         ...(category ? { category } : {}),
@@ -162,8 +191,8 @@ export async function getFilteredJobs(
       },
       result.total_count
     ).catch((error) => {
-      // Don't block on analytics - just log warning
-      logger.warn('Failed to track jobs search analytics', {
+      // Don't block - just log warning
+      logger.warn('Failed to pulse jobs search', {
         error: error instanceof Error ? error.message : String(error),
         query: searchQuery.substring(0, 50),
       });
@@ -171,64 +200,4 @@ export async function getFilteredJobs(
   }
 
   return result;
-}
-
-/**
- * Track jobs search analytics - Queue-Based
- * Enqueues to pulse queue for batched processing (98% egress reduction)
- * Fire and forget - non-blocking
- */
-async function trackJobsSearchAnalytics(
-  query: string,
-  filters: {
-    category?: string;
-    employment?: string;
-    experience?: string;
-    remote?: boolean;
-  },
-  resultCount: number
-): Promise<void> {
-  if (!query.trim()) return;
-
-  try {
-    const supabase = await createClient();
-
-    // Get current user if authenticated
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    // Build filters object for analytics
-    const filtersJson = {
-      ...(filters.category && filters.category !== 'all' ? { category: filters.category } : {}),
-      ...(filters.employment && filters.employment !== 'any'
-        ? { employment: filters.employment }
-        : {}),
-      ...(filters.experience && filters.experience !== 'any'
-        ? { experience: filters.experience }
-        : {}),
-      ...(filters.remote !== undefined ? { remote: filters.remote } : {}),
-      entity: 'job', // Mark as job search
-    };
-
-    // Enqueue to queue instead of direct insert
-    const { enqueuePulseEvent } = await import('@/src/lib/utils/pulse');
-    await enqueuePulseEvent({
-      user_id: user?.id ?? null,
-      content_type: null,
-      content_slug: null,
-      interaction_type: 'search',
-      session_id: null,
-      metadata: {
-        query: query.trim(),
-        filters: Object.keys(filtersJson).length > 0 ? filtersJson : null,
-        result_count: resultCount,
-      },
-    });
-  } catch (error) {
-    // Silently fail - analytics should never block search
-    logger.warn('Jobs search analytics tracking error', {
-      error: error instanceof Error ? error.message : String(error),
-    });
-  }
 }

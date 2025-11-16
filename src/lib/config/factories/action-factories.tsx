@@ -25,7 +25,7 @@ import type { ContentItem } from '@/src/lib/data/content';
 import { getSocialLinks } from '@/src/lib/data/marketing/contact';
 import { Download, Layers, Server, Terminal, Webhook } from '@/src/lib/icons';
 
-import type { ActionButtonConfig } from '@/src/lib/types/content-type-config';
+import type { ActionButtonConfig } from '@/src/lib/types/component.types';
 import { toasts } from '@/src/lib/utils/toast.utils';
 
 const SOCIAL_LINK_SNAPSHOT = getSocialLinks();

@@ -184,26 +184,26 @@ export default async function CompanyPage({ params }: CompanyPageProps) {
                 <CardContent className="space-y-4">
                   <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
                     <span className={UI_CLASSES.TEXT_SM_MUTED}>Total Jobs Posted</span>
-                    <span className="font-semibold">{stats.total_jobs || 0}</span>
+                    <span className="font-semibold">{stats?.total_jobs || 0}</span>
                   </div>
 
                   <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
                     <span className={UI_CLASSES.TEXT_SM_MUTED}>Active Openings</span>
-                    <span className="font-semibold text-green-600">{stats.active_jobs || 0}</span>
+                    <span className="font-semibold text-green-600">{stats?.active_jobs || 0}</span>
                   </div>
 
-                  {stats.remote_jobs && stats.remote_jobs > 0 && (
+                  {stats?.remote_jobs && stats.remote_jobs > 0 && (
                     <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
                       <span className={UI_CLASSES.TEXT_SM_MUTED}>Remote Positions</span>
                       <span className="font-semibold">{stats.remote_jobs}</span>
                     </div>
                   )}
 
-                  {stats.avg_salary_min && (
+                  {stats?.avg_salary_min && (
                     <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
                       <span className={UI_CLASSES.TEXT_SM_MUTED}>Avg. Salary</span>
                       <span className="font-semibold">
-                        ${(stats.avg_salary_min / 1000).toFixed(0)}k+
+                        ${((stats.avg_salary_min ?? 0) / 1000).toFixed(0)}k+
                       </span>
                     </div>
                   )}
@@ -211,11 +211,11 @@ export default async function CompanyPage({ params }: CompanyPageProps) {
                   <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
                     <span className={UI_CLASSES.TEXT_SM_MUTED}>Total Views</span>
                     <span className="font-semibold">
-                      {(stats.total_views ?? 0).toLocaleString()}
+                      {(stats?.total_views ?? 0).toLocaleString()}
                     </span>
                   </div>
 
-                  {stats.latest_job_posted_at && (
+                  {stats?.latest_job_posted_at && (
                     <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
                       <span className={UI_CLASSES.TEXT_SM_MUTED}>Latest Posting</span>
                       <span className="font-semibold text-sm">

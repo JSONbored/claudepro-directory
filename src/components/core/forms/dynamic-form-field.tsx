@@ -22,8 +22,8 @@
 import { Input } from '@/src/components/primitives/ui/input';
 import { Label } from '@/src/components/primitives/ui/label';
 import { Textarea } from '@/src/components/primitives/ui/textarea';
-import type { ContentTypeConfig, FieldDefinition, GridColumn } from '@/src/lib/forms/types';
 import { resolveFormIcon } from '@/src/lib/icons';
+import type { FieldDefinition, FormFieldConfig, GridColumn } from '@/src/lib/types/component.types';
 import { getResponsiveGridClass, POSITION_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
 
 // ============================================================================
@@ -213,7 +213,7 @@ export interface ContentTypeFieldRendererProps {
   /**
    * Field configuration for the content type
    */
-  config: ContentTypeConfig;
+  config: FormFieldConfig;
 
   /**
    * Form ID for generating field IDs

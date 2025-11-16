@@ -6,14 +6,14 @@ import { getCommunityDirectory } from '@/src/lib/data/community/directory';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { normalizeError } from '@/src/lib/utils/error.utils';
-import type { GetCommunityDirectoryReturn } from '@/src/types/database-overrides';
+import type { GetGetCommunityDirectoryReturn } from '@/src/types/database-overrides';
 
 export const metadata = generatePageMetadata('/community/directory');
 
 export const revalidate = false;
 
 async function CommunityDirectoryContent({ searchQuery }: { searchQuery: string }) {
-  let directoryData: GetCommunityDirectoryReturn | null = null;
+  let directoryData: GetGetCommunityDirectoryReturn | null = null;
   try {
     directoryData = await getCommunityDirectory({ searchQuery, limit: 100 });
   } catch (error) {

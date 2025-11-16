@@ -13,7 +13,7 @@ import {
 } from '@/src/components/primitives/ui/command';
 import * as Icons from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
-import type { GetNavigationMenuReturn } from '@/src/types/database-overrides';
+import type { GetGetNavigationMenuReturn } from '@/src/types/database-overrides';
 
 /**
  * Command palette navigation - Uses server-provided data from getNavigationMenu()
@@ -23,7 +23,7 @@ interface NavigationCommandMenuProps {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   /** Navigation data from server (required) */
-  navigationData: GetNavigationMenuReturn;
+  navigationData: GetGetNavigationMenuReturn;
 }
 
 export function NavigationCommandMenu({
@@ -57,7 +57,8 @@ export function NavigationCommandMenu({
   };
 
   // Dynamic icon mapper
-  const getIcon = (iconName: string) => {
+  const getIcon = (iconName: string | null | undefined) => {
+    if (!iconName) return null;
     const IconModule = Icons as Record<string, unknown>;
     const Icon = IconModule[iconName];
 
@@ -71,7 +72,12 @@ export function NavigationCommandMenu({
     return null;
   };
 
-  const renderItem = (item: GetNavigationMenuReturn['primary'][number]) => (
+  const renderItem = (
+    item:
+      | GetGetNavigationMenuReturn['primary'][number]
+      | GetGetNavigationMenuReturn['secondary'][number]
+      | GetGetNavigationMenuReturn['actions'][number]
+  ) => (
     <CommandItem
       key={item.path}
       onSelect={() => handleSelect(item.path)}
@@ -81,11 +87,13 @@ export function NavigationCommandMenu({
         {getIcon(item.iconName)}
         <div className="flex flex-col items-start">
           <span>{item.title}</span>
-          <span
-            className={`text-muted-foreground text-xs transition-colors ${UI_CLASSES.GROUP_HOVER_ACCENT}`}
-          >
-            {item.description}
-          </span>
+          {item.description && (
+            <span
+              className={`text-muted-foreground text-xs transition-colors ${UI_CLASSES.GROUP_HOVER_ACCENT}`}
+            >
+              {item.description}
+            </span>
+          )}
         </div>
       </span>
     </CommandItem>

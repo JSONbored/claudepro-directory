@@ -209,13 +209,13 @@ async function handleSearch(url: URL, startTime: number, req: Request): Promise<
 
   // Validate limit parameter
   const limitValidation = validateLimit(url.searchParams.get('limit'), 1, 100, 20);
-  if (!limitValidation.valid) {
+  if (!limitValidation.valid || limitValidation.limit === undefined) {
     return badRequestResponse(
       limitValidation.error ?? 'Invalid limit parameter',
       getWithAuthCorsHeaders
     );
   }
-  const limit = limitValidation.limit!;
+  const limit = limitValidation.limit;
 
   // Validate offset parameter
   const offsetParam = url.searchParams.get('offset');
@@ -426,13 +426,13 @@ async function handleAutocomplete(url: URL, startTime: number): Promise<Response
 
   // Validate limit parameter
   const limitValidation = validateLimit(url.searchParams.get('limit'), 1, 20, 10);
-  if (!limitValidation.valid) {
+  if (!limitValidation.valid || limitValidation.limit === undefined) {
     return badRequestResponse(
       limitValidation.error ?? 'Invalid limit parameter',
       getWithAuthCorsHeaders
     );
   }
-  const limit = limitValidation.limit!;
+  const limit = limitValidation.limit;
 
   // Create logContext
   const logContext = createSearchContext({

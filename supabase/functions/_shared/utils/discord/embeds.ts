@@ -219,7 +219,7 @@ export function buildChangelogEmbed(params: {
   const changedCount = sections.find((s) => s.title === 'Changed')?.items.length || 0;
   const fixedCount = sections.find((s) => s.title === 'Fixed')?.items.length || 0;
 
-  const highlights = [];
+  const highlights: string[] = [];
   if (addedCount > 0)
     highlights.push(`✨ **${addedCount}** new feature${addedCount === 1 ? '' : 's'}`);
   if (changedCount > 0)
@@ -228,7 +228,7 @@ export function buildChangelogEmbed(params: {
     highlights.push(`🐛 **${fixedCount}** bug fix${fixedCount === 1 ? '' : 'es'}`);
 
   const description = highlights.join(' • ');
-  const fields = [];
+  const fields: Array<{ name: string; value: string; inline: boolean }> = [];
 
   if (tldr && tldr.length > 0) {
     fields.push({

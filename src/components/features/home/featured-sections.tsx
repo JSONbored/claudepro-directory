@@ -7,12 +7,11 @@ import { type FC, memo, useMemo } from 'react';
 import { UnifiedCardGrid } from '@/src/components/core/domain/cards/card-grid';
 import { ConfigCard } from '@/src/components/core/domain/cards/config-card';
 import { JobCard } from '@/src/components/core/domain/cards/job-card';
-import type { CategoryId, UnifiedCategoryConfig } from '@/src/lib/data/config/category';
 import { ROUTES } from '@/src/lib/data/config/constants';
 import { ExternalLink } from '@/src/lib/icons';
-import type { DisplayableContent } from '@/src/lib/types/component.types';
+import type { DisplayableContent, UnifiedCategoryConfig } from '@/src/lib/types/component.types';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
-import type { Tables } from '@/src/types/database-overrides';
+import type { ContentCategory, Tables } from '@/src/types/database-overrides';
 
 interface FeaturedSectionProps {
   title: string;
@@ -62,7 +61,7 @@ interface FeaturedSectionsProps {
   categories: Record<string, readonly DisplayableContent[]>;
   categoryConfigs: Record<string, UnifiedCategoryConfig>;
   featuredJobs?: ReadonlyArray<Tables<'jobs'>>;
-  featuredCategories: readonly CategoryId[];
+  featuredCategories: readonly ContentCategory[];
 }
 
 const FeaturedSectionsComponent: FC<FeaturedSectionsProps> = ({

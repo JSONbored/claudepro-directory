@@ -2,16 +2,13 @@
 
 import { useRouter } from 'next/navigation';
 import { useId, useState, useTransition } from 'react';
-import {
-  MAX_REVIEW_LENGTH,
-  type ReviewFormProps,
-} from '@/src/components/core/domain/reviews/shared/review-types';
 import { Rating, RatingButton } from '@/src/components/primitives/feedback/rating';
 import { Button } from '@/src/components/primitives/ui/button';
 import { Label } from '@/src/components/primitives/ui/label';
 import { Textarea } from '@/src/components/primitives/ui/textarea';
 import { createReview, updateReview } from '@/src/lib/actions/content.actions';
 import { Star } from '@/src/lib/icons';
+import { MAX_REVIEW_LENGTH, type ReviewFormProps } from '@/src/lib/types/component.types';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { logClientWarning } from '@/src/lib/utils/error.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';

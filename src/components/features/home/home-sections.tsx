@@ -18,7 +18,7 @@ import {
 } from '@/src/components/primitives/feedback/loading-skeleton';
 import { getAnimationConfig } from '@/src/lib/actions/feature-flags.actions';
 import {
-  type CategoryId,
+  type ContentCategory,
   getCategoryConfigs,
   getCategoryStatsConfig,
   getHomepageFeaturedCategories,
@@ -26,8 +26,11 @@ import {
 import { ROUTES } from '@/src/lib/data/config/constants';
 import type { ContentItem } from '@/src/lib/data/content';
 import { logger } from '@/src/lib/logger';
-import type { DisplayableContent, FilterState } from '@/src/lib/types/component.types';
-import type { HomePageClientProps } from '@/src/lib/types/page-props.types';
+import type {
+  DisplayableContent,
+  FilterState,
+  HomePageClientProps,
+} from '@/src/lib/types/component.types';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { logClientWarning, logUnhandledPromise } from '@/src/lib/utils/error.utils';
 
@@ -62,7 +65,7 @@ function HomePageClientComponent({
   const [isSearching, setIsSearching] = useState(false);
   const [filters, setFilters] = useState({});
   const [currentSearchQuery, setCurrentSearchQuery] = useState('');
-  const [featuredCategories, setFeaturedCategories] = useState<readonly CategoryId[]>([]);
+  const [featuredCategories, setFeaturedCategories] = useState<readonly ContentCategory[]>([]);
   const [springDefault, setSpringDefault] = useState({
     type: 'spring' as const,
     stiffness: 400,
@@ -297,7 +300,14 @@ function HomePageClientComponent({
                             aria-hidden="true"
                           />
                           <span className="font-medium text-sm">
-                            <NumberTicker value={stats[categoryId] || 0} delay={delay} />
+                            <NumberTicker
+                              value={
+                                typeof stats[categoryId] === 'number'
+                                  ? stats[categoryId]
+                                  : stats[categoryId]?.total || 0
+                              }
+                              delay={delay}
+                            />
                           </span>
                         </motion.div>
                       </Link>
@@ -342,7 +352,14 @@ function HomePageClientComponent({
                           aria-hidden="true"
                         />
                         <span className={`transition-colors ${UI_CLASSES.GROUP_HOVER_ACCENT}`}>
-                          <NumberTicker value={stats[categoryId] || 0} delay={delay} />{' '}
+                          <NumberTicker
+                            value={
+                              typeof stats[categoryId] === 'number'
+                                ? stats[categoryId]
+                                : stats[categoryId]?.total || 0
+                            }
+                            delay={delay}
+                          />{' '}
                           {displayText}
                         </span>
                       </motion.div>

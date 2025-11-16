@@ -19,7 +19,8 @@ import {
   Terminal,
   Webhook,
 } from '@/src/lib/icons';
-import type { CategoryId, UnifiedCategoryConfig } from './category-config.types';
+import type { UnifiedCategoryConfig } from '@/src/lib/types/component.types';
+import type { ContentCategory } from '@/src/types/database-overrides';
 
 const ICON_MAP: Record<string, LucideIcon> = {
   Sparkles,
@@ -37,7 +38,7 @@ const ICON_MAP: Record<string, LucideIcon> = {
  * Static category configurations (generated at build time)
  * ZERO runtime database queries - 100% faster than unstable_cache
  */
-export const CATEGORY_CONFIGS: Record<CategoryId, UnifiedCategoryConfig<CategoryId>> = {
+export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<ContentCategory>> = {
   mcp: {
     id: 'mcp' as const,
     title: 'MCP Server',

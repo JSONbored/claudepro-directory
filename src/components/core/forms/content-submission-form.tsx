@@ -23,15 +23,15 @@ import { Textarea } from '@/src/components/primitives/ui/textarea';
 import { submitContentForReview } from '@/src/lib/actions/content.actions';
 import { getAnimationConfig } from '@/src/lib/actions/feature-flags.actions';
 import { useAuthenticatedUser } from '@/src/lib/auth/use-authenticated-user';
+import { CheckCircle, Code, FileText, Github, Layers, Send, Sparkles } from '@/src/lib/icons';
+import { logger } from '@/src/lib/logger';
 import {
   SUBMISSION_CONTENT_TYPES,
   type SubmissionContentType,
   type SubmissionFormConfig,
   type SubmissionFormSection,
   type TextFieldDefinition,
-} from '@/src/lib/forms/types';
-import { CheckCircle, Code, FileText, Github, Layers, Send, Sparkles } from '@/src/lib/icons';
-import { logger } from '@/src/lib/logger';
+} from '@/src/lib/types/component.types';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
 import { ParseStrategy, safeParse } from '@/src/lib/utils/data.utils';
@@ -39,7 +39,7 @@ import { normalizeError } from '@/src/lib/utils/error.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
 import type {
   ContentCategory,
-  GetContentTemplatesReturn,
+  GetGetContentTemplatesReturn,
   SubmissionStatus,
   SubmissionType,
 } from '@/src/types/database-overrides';
@@ -86,7 +86,7 @@ const FORM_TYPE_LABELS: Record<SubmissionContentType, string> = {
 
 interface SubmitFormClientProps {
   formConfig: SubmissionFormConfig;
-  templates: GetContentTemplatesReturn;
+  templates: GetGetContentTemplatesReturn;
 }
 
 /**
@@ -192,7 +192,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
 
   // Handle template selection
   // Templates are type-safe discriminated unions for UI pre-fill convenience
-  const handleTemplateSelect = (template: GetContentTemplatesReturn[number]) => {
+  const handleTemplateSelect = (template: GetGetContentTemplatesReturn[number]) => {
     // Pre-fill form with template data using name attributes
     // NOTE: Cannot use querySelector('#id') because useId() generates dynamic IDs like ':r0:'
     const form = document.querySelector('form') as HTMLFormElement;
@@ -204,7 +204,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
     if (nameInput) nameInput.value = template.name;
 
     const descInput = form.querySelector('[name="description"]') as HTMLTextAreaElement;
-    if (descInput) descInput.value = template.description;
+    if (descInput) descInput.value = template.description || '';
 
     const categoryInput = form.querySelector('[name="category"]') as HTMLInputElement;
     if (categoryInput && template.category) categoryInput.value = template.category;

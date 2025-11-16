@@ -14,6 +14,7 @@
  *   pnpm cache:clear -- "db-*"
  */
 
+import { logger } from '@/src/lib/logger';
 import {
   clearAllHashes,
   clearHash,
@@ -26,7 +27,8 @@ const command = process.argv[2];
 const arg = process.argv[3];
 
 function showHelp(): void {
-  console.log(`
+  logger.info(
+    `
 🔧 Build Cache CLI - Introspection and Management Tool
 
 Usage:
@@ -47,7 +49,9 @@ Package.json shortcuts:
   pnpm cache:info
   pnpm cache:clear
   pnpm cache:clear -- "skill:*"
-`);
+`,
+    { script: 'build-cache-cli' }
+  );
 }
 
 function main() {
@@ -62,12 +66,24 @@ function main() {
       const stats = getCacheStats();
 
       if (stats.totalEntries > 0) {
-        console.log('📊 Statistics:');
-        console.log(`   Total Entries: ${stats.totalEntries}`);
-        console.log(`   Oldest: ${stats.oldestEntry || 'N/A'}`);
-        console.log(`   Newest: ${stats.newestEntry || 'N/A'}`);
-        console.log(`   Total Build Time Saved: ${(stats.totalDuration / 1000).toFixed(1)}s`);
-        console.log('');
+        logger.info('📊 Statistics:');
+        logger.info(`   Total Entries: ${stats.totalEntries}`, {
+          script: 'build-cache-cli',
+          totalEntries: stats.totalEntries,
+        });
+        logger.info(`   Oldest: ${stats.oldestEntry || 'N/A'}`, {
+          script: 'build-cache-cli',
+          oldestEntry: stats.oldestEntry,
+        });
+        logger.info(`   Newest: ${stats.newestEntry || 'N/A'}`, {
+          script: 'build-cache-cli',
+          newestEntry: stats.newestEntry,
+        });
+        logger.info(`   Total Build Time Saved: ${(stats.totalDuration / 1000).toFixed(1)}s`, {
+          script: 'build-cache-cli',
+          totalDuration: `${(stats.totalDuration / 1000).toFixed(1)}s`,
+        });
+        logger.info('');
       }
       break;
     }
@@ -90,33 +106,48 @@ function main() {
         const matchingKeys = keys.filter((k) => pattern.test(k));
 
         if (matchingKeys.length === 0) {
-          console.log(`ℹ️  No caches matching pattern: ${arg}`);
+          logger.info(`ℹ️  No caches matching pattern: ${arg}`, {
+            script: 'build-cache-cli',
+            pattern: arg,
+          });
           return;
         }
 
-        console.log(`🗑️  Clearing ${matchingKeys.length} cache(s) matching: ${arg}`);
+        logger.info(`🗑️  Clearing ${matchingKeys.length} cache(s) matching: ${arg}`, {
+          script: 'build-cache-cli',
+          pattern: arg,
+          count: matchingKeys.length,
+        });
         for (const key of matchingKeys) {
           clearHash(key);
-          console.log(`   ✓ Cleared: ${key}`);
+          logger.info(`   ✓ Cleared: ${key}`, { script: 'build-cache-cli', clearedKey: key });
         }
-        console.log('');
+        logger.info('');
       } else {
         // Clear all caches
         const stats = getCacheStats();
         if (stats.totalEntries === 0) {
-          console.log('ℹ️  Cache already empty\n');
+          logger.info('ℹ️  Cache already empty\n', { script: 'build-cache-cli' });
           return;
         }
 
         clearAllHashes();
-        console.log(`✅ Cleared all ${stats.totalEntries} cache(s)\n`);
+        logger.info(`✅ Cleared all ${stats.totalEntries} cache(s)\n`, {
+          script: 'build-cache-cli',
+          clearedCount: stats.totalEntries,
+        });
       }
       break;
     }
 
     default: {
-      console.error(`❌ Unknown command: ${command}`);
-      console.error('   Run with --help to see available commands\n');
+      logger.error(`❌ Unknown command: ${command}`, undefined, {
+        script: 'build-cache-cli',
+        command,
+      });
+      logger.error('   Run with --help to see available commands\n', undefined, {
+        script: 'build-cache-cli',
+      });
       process.exit(1);
     }
   }

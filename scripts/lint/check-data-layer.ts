@@ -1,6 +1,7 @@
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { logger } from '@/src/lib/logger';
 
 type Violation = {
   file: string;
@@ -49,9 +50,17 @@ async function main() {
   });
 
   if (violations.length) {
-    console.error('Data layer lint violations detected:\n');
+    logger.error('Data layer lint violations detected:\n', undefined, {
+      script: 'check-data-layer',
+      violationCount: violations.length,
+    });
     for (const violation of violations) {
-      console.error(`- ${violation.file}:${violation.line} ${violation.message}`);
+      logger.error(`- ${violation.file}:${violation.line} ${violation.message}`, undefined, {
+        script: 'check-data-layer',
+        file: violation.file,
+        line: violation.line,
+        message: violation.message,
+      });
     }
     process.exit(1);
   }
@@ -86,6 +95,12 @@ function normalizeRelative(relativePath: string): string {
 }
 
 main().catch((error) => {
-  console.error('Failed to run data layer lint:', error);
+  logger.error(
+    'Failed to run data layer lint',
+    error instanceof Error ? error : new Error(String(error)),
+    {
+      script: 'check-data-layer',
+    }
+  );
   process.exit(1);
 });

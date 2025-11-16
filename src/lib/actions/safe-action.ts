@@ -96,10 +96,56 @@ export const authedAction = rateLimitedAction.use(async ({ next, metadata }) => 
     throw new Error('Unauthorized. Please sign in to continue.');
   }
 
-  const authCtx: { userId: string; userEmail?: string } = {
+  // Get session token for edge function calls
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+  const authToken = session?.access_token;
+
+  const authCtx: { userId: string; userEmail?: string; authToken?: string } = {
     userId: authResult.user.id,
   };
   if (authResult.user.email) authCtx.userEmail = authResult.user.email;
+  if (authToken) authCtx.authToken = authToken;
+
+  return next({
+    ctx: authCtx,
+  });
+});
+
+/**
+ * Optional Auth Action - Public action with optional user context
+ * Provides ctx.user, ctx.userId, ctx.userEmail, ctx.authToken if user is authenticated
+ * Does not throw if no user (unlike authedAction)
+ */
+export const optionalAuthAction = rateLimitedAction.use(async ({ next, metadata }) => {
+  const { createClient } = await import('@/src/lib/supabase/server');
+  const supabase = await createClient();
+
+  const authResult = await getAuthenticatedUserFromClient(supabase, {
+    context: metadata?.actionName || 'optionalAuthAction',
+  });
+
+  // Get session token for edge function calls (if available)
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+  const authToken = session?.access_token;
+
+  const authCtx: {
+    user: import('@supabase/supabase-js').User | null;
+    userId?: string;
+    userEmail?: string;
+    authToken?: string;
+  } = {
+    user: authResult.user ?? null,
+  };
+
+  if (authResult.user) {
+    authCtx.userId = authResult.user.id;
+    if (authResult.user.email) authCtx.userEmail = authResult.user.email;
+    if (authToken) authCtx.authToken = authToken;
+  }
 
   return next({
     ctx: authCtx,

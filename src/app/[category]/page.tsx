@@ -41,7 +41,7 @@
 import { notFound } from 'next/navigation';
 import { ContentListServer } from '@/src/components/content/content-grid-list';
 import {
-  type CategoryId,
+  type ContentCategory,
   getCategoryConfig,
   isValidCategory,
 } from '@/src/lib/data/config/category';
@@ -127,7 +127,7 @@ export async function generateMetadata({ params }: { params: Promise<{ category:
 
   let categoryConfig: Awaited<ReturnType<typeof getCategoryConfig>> | null = null;
   try {
-    categoryConfig = await getCategoryConfig(category as CategoryId);
+    categoryConfig = await getCategoryConfig(category as ContentCategory);
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load category config for metadata');
     logger.error('CategoryPage: category config lookup failed in metadata', normalized, {
@@ -173,7 +173,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
 
   let config: Awaited<ReturnType<typeof getCategoryConfig>> | null = null;
   try {
-    config = await getCategoryConfig(category as CategoryId);
+    config = await getCategoryConfig(category as ContentCategory);
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load category config for page render');
     logger.error('CategoryPage: getCategoryConfig threw', normalized, { category });

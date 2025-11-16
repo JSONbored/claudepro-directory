@@ -14,7 +14,7 @@ import { normalizeError } from '@/src/lib/utils/error.utils';
 import type {
   ExperienceLevel,
   FocusAreaType,
-  GetRecommendationsReturn,
+  GetGetRecommendationsReturn,
   IntegrationType,
   UseCaseType,
 } from '@/src/types/database-overrides';
@@ -52,7 +52,7 @@ function isRecommendationReason(value: unknown): value is { type: string; messag
   return typeof record.type === 'string' && typeof record.message === 'string';
 }
 
-function normalizeRecommendationResults(results: GetRecommendationsReturn['results']) {
+function normalizeRecommendationResults(results: GetGetRecommendationsReturn['results']) {
   return results.map((item) => {
     const tags =
       Array.isArray(item.tags) && item.tags.length > 0
@@ -69,7 +69,7 @@ function normalizeRecommendationResults(results: GetRecommendationsReturn['resul
     return {
       slug: item.slug,
       title: item.title,
-      description: item.description,
+      description: item.description ?? '',
       category: item.category,
       ...(tags ? { tags } : {}),
       ...(item.author ? { author: item.author } : {}),
@@ -134,7 +134,7 @@ export default async function ResultsPage({ params, searchParams }: PageProps) {
     ...(answers.p_focus_areas && { focusAreas: answers.p_focus_areas }),
   });
 
-  if (!enrichedResult) {
+  if (!enrichedResult?.results) {
     logger.error(
       'ConfigRecommenderResults: get_recommendations returned no data',
       new Error('Recommendations result is null'),
@@ -152,6 +152,11 @@ export default async function ResultsPage({ params, searchParams }: PageProps) {
     answers,
     id: resolvedParams.id,
     generatedAt: new Date().toISOString(),
+    summary: {
+      topCategory: enrichedResult.summary.topCategory ?? '',
+      avgMatchScore: enrichedResult.summary.avgMatchScore,
+      diversityScore: enrichedResult.summary.diversityScore,
+    },
   };
 
   const shareUrl = `${APP_CONFIG.url}/tools/config-recommender/results/${resolvedParams.id}?answers=${resolvedSearchParams.answers}`;

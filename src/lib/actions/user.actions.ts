@@ -22,9 +22,9 @@ import { revalidateCacheTags } from '@/src/lib/supabase/cache-helpers';
 import type { Enums, Tables } from '@/src/types/database.types';
 import type {
   Database,
-  GetUserActivitySummaryReturn,
-  GetUserActivityTimelineReturn,
-  GetUserIdentitiesReturn,
+  GetGetUserActivitySummaryReturn,
+  GetGetUserActivityTimelineReturn,
+  GetGetUserIdentitiesReturn,
 } from '@/src/types/database-overrides';
 import { CONTENT_CATEGORY_VALUES, type ContentCategory } from '@/src/types/database-overrides';
 
@@ -570,7 +570,7 @@ export const getActivitySummary = authedAction
   .metadata({ actionName: 'getActivitySummary', category: 'user' })
   .schema(z.void())
   .action(async ({ ctx }) => {
-    const data = await cachedUserData<'get_user_activity_summary', GetUserActivitySummaryReturn>(
+    const data = await cachedUserData<'get_user_activity_summary', GetGetUserActivitySummaryReturn>(
       'get_user_activity_summary',
       {
         p_user_id: ctx.userId,
@@ -598,7 +598,10 @@ export const getActivityTimeline = authedAction
   .metadata({ actionName: 'getActivityTimeline', category: 'user' })
   .schema(activityFilterSchema)
   .action(async ({ parsedInput: { type, limit = 20, offset = 0 }, ctx }) => {
-    const data = await cachedUserData<'get_user_activity_timeline', GetUserActivityTimelineReturn>(
+    const data = await cachedUserData<
+      'get_user_activity_timeline',
+      GetGetUserActivityTimelineReturn
+    >(
       'get_user_activity_timeline',
       {
         p_user_id: ctx.userId,
@@ -626,7 +629,7 @@ export const getUserIdentities = authedAction
   .metadata({ actionName: 'getUserIdentities', category: 'user' })
   .schema(z.void())
   .action(async ({ ctx }) => {
-    const data = await cachedUserData<'get_user_identities', GetUserIdentitiesReturn>(
+    const data = await cachedUserData<'get_user_identities', GetGetUserIdentitiesReturn>(
       'get_user_identities',
       {
         p_user_id: ctx.userId,

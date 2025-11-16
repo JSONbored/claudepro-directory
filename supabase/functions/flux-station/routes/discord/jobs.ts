@@ -32,7 +32,13 @@ export async function handleDiscordJobs(_req: Request): Promise<Response> {
       return successResponse({ message: 'No messages in queue', processed: 0 }, 200);
     }
 
-    const results = [];
+    const results: Array<{
+      msg_id: string;
+      status: 'success' | 'skipped' | 'failed';
+      reason?: string;
+      errors?: string[];
+      will_retry?: boolean;
+    }> = [];
     for (const msg of messages) {
       try {
         const payload = msg.message as {
@@ -120,7 +126,7 @@ export async function handleDiscordJobs(_req: Request): Promise<Response> {
         results.push({
           msg_id: msg.msg_id.toString(),
           status: 'failed',
-          error: errorMsg,
+          errors: [errorMsg],
           will_retry: true,
         });
       }

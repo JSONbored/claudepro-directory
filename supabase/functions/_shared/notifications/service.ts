@@ -1,12 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { supabaseServiceRole } from '../clients/supabase.ts';
 import type { Database as DatabaseGenerated } from '../database.types.ts';
-import type {
-  Database,
-  NotificationPriority,
-  NotificationType,
-  Tables,
-} from '../database-overrides.ts';
+import type { NotificationPriority, NotificationType, Tables } from '../database-overrides.ts';
 import {
   callRpc,
   insertTable,

@@ -3,7 +3,8 @@
  * Maps categories to their default tab layouts based on section availability
  */
 
-import type { CategoryId, TabConfig } from './category-config.types';
+import type { TabConfig } from '@/src/lib/types/component.types';
+import type { ContentCategory } from '@/src/types/database-overrides';
 
 /**
  * Standard tabs for technical content (agents, mcp, hooks, statuslines, skills)
@@ -127,7 +128,9 @@ const COLLECTION_TABS: ReadonlyArray<TabConfig> = [
 /**
  * Category to tab layout mapping
  */
-export const DEFAULT_TAB_CONFIGS: Readonly<Record<CategoryId, ReadonlyArray<TabConfig> | null>> = {
+export const DEFAULT_TAB_CONFIGS: Readonly<
+  Record<ContentCategory, ReadonlyArray<TabConfig> | null>
+> = {
   // Standard technical content
   agents: STANDARD_TABS,
   mcp: STANDARD_TABS,
@@ -151,13 +154,15 @@ export const DEFAULT_TAB_CONFIGS: Readonly<Record<CategoryId, ReadonlyArray<TabC
 /**
  * Get tab configuration for a category
  */
-export function getTabConfigForCategory(categoryId: CategoryId): ReadonlyArray<TabConfig> | null {
+export function getTabConfigForCategory(
+  categoryId: ContentCategory
+): ReadonlyArray<TabConfig> | null {
   return DEFAULT_TAB_CONFIGS[categoryId] ?? null;
 }
 
 /**
  * Check if category supports tabs
  */
-export function categorySupportsTabbing(categoryId: CategoryId): boolean {
+export function categorySupportsTabbing(categoryId: ContentCategory): boolean {
   return DEFAULT_TAB_CONFIGS[categoryId] !== null;
 }

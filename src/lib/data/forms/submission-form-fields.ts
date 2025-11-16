@@ -7,6 +7,7 @@ import {
   FORM_FIELDS_CACHE_SECONDS,
   FORM_FIELDS_CACHE_TAG,
 } from '@/src/lib/forms/submission-form-config.constants';
+import { logger } from '@/src/lib/logger';
 import type {
   FieldDefinition,
   GridColumn,
@@ -18,10 +19,9 @@ import type {
   SubmissionFormSection,
   TextareaFieldDefinition,
   TextFieldDefinition,
-} from '@/src/lib/forms/types';
-import { SUBMISSION_CONTENT_TYPES } from '@/src/lib/forms/types';
-import { logger } from '@/src/lib/logger';
-import type { GetFormFieldsForContentTypeReturn } from '@/src/types/database-overrides';
+} from '@/src/lib/types/component.types';
+import { SUBMISSION_CONTENT_TYPES } from '@/src/lib/types/component.types';
+import type { GetGetFormFieldsForContentTypeReturn } from '@/src/types/database-overrides';
 import {
   FIELD_SCOPE_VALUES,
   FIELD_TYPE_VALUES,
@@ -29,8 +29,8 @@ import {
   type FieldType,
 } from '@/src/types/database-overrides';
 
-type RpcRow = GetFormFieldsForContentTypeReturn[number];
-type RpcRows = GetFormFieldsForContentTypeReturn;
+type RpcRow = GetGetFormFieldsForContentTypeReturn[number];
+type RpcRows = GetGetFormFieldsForContentTypeReturn;
 
 type FieldProperties = Record<string, unknown>;
 

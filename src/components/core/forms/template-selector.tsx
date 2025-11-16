@@ -13,11 +13,11 @@ import {
 } from '@/src/components/primitives/ui/dropdown-menu';
 import { ChevronDown, FileText } from '@/src/lib/icons';
 import { DIMENSIONS, UI_CLASSES } from '@/src/lib/ui-constants';
-import type { GetContentTemplatesReturn } from '@/src/types/database-overrides';
+import type { GetGetContentTemplatesReturn } from '@/src/types/database-overrides';
 
 interface TemplateSelectorProps {
-  templates: GetContentTemplatesReturn;
-  onSelect: (template: GetContentTemplatesReturn[number]) => void;
+  templates: GetGetContentTemplatesReturn;
+  onSelect: (template: GetGetContentTemplatesReturn[number]) => void;
 }
 
 export function TemplateSelector({ templates, onSelect }: TemplateSelectorProps) {

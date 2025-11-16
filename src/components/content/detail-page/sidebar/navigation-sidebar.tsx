@@ -12,7 +12,6 @@ import { JobsPromo } from '@/src/components/core/domain/jobs/jobs-banner';
 import { Button } from '@/src/components/primitives/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
 import { usePulse } from '@/src/hooks/use-pulse';
-import type { CategoryId } from '@/src/lib/data/config/category';
 import type { ContentItem } from '@/src/lib/data/content';
 import { getSocialLinks } from '@/src/lib/data/marketing/contact';
 import { ExternalLink, Github, Thermometer } from '@/src/lib/icons';
@@ -23,15 +22,15 @@ import { ensureStringArray, getMetadata } from '@/src/lib/utils/data.utils';
 import { logUnhandledPromise } from '@/src/lib/utils/error.utils';
 import type {
   ContentCategory,
-  GetContentDetailCompleteReturn,
+  GetGetContentDetailCompleteReturn,
 } from '@/src/types/database-overrides';
 
 /**
  * Props for DetailSidebar
  */
 export interface DetailSidebarProps {
-  item: ContentItem | GetContentDetailCompleteReturn['content'];
-  relatedItems: ContentItem[] | GetContentDetailCompleteReturn['related'];
+  item: ContentItem | GetGetContentDetailCompleteReturn['content'];
+  relatedItems: ContentItem[] | GetGetContentDetailCompleteReturn['related'];
   config: {
     typeName: string;
     metadata?:
@@ -44,8 +43,8 @@ export interface DetailSidebarProps {
   };
   customRenderer?:
     | ((
-        item: ContentItem | GetContentDetailCompleteReturn['content'],
-        relatedItems: ContentItem[] | GetContentDetailCompleteReturn['related'],
+        item: ContentItem | GetGetContentDetailCompleteReturn['content'],
+        relatedItems: ContentItem[] | GetGetContentDetailCompleteReturn['related'],
         router: ReturnType<typeof useRouter>
       ) => React.ReactNode)
     | undefined;
@@ -291,7 +290,7 @@ export const DetailSidebar = memo(function DetailSidebar({
                 <Link
                   key={relatedSlug}
                   href={getContentItemUrl({
-                    category: relatedCategory as CategoryId,
+                    category: relatedCategory as ContentCategory,
                     slug: relatedSlug,
                   })}
                   className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} block w-full cursor-pointer rounded-lg border border-border p-3 text-left transition-colors hover:bg-muted/50`}

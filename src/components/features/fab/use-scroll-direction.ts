@@ -18,8 +18,8 @@
 import { useEffect, useState } from 'react';
 import { getTimeoutConfig } from '@/src/lib/actions/feature-flags.actions';
 import { logger } from '@/src/lib/logger';
+import type { ScrollState } from '@/src/lib/types/component.types';
 import { logClientWarning } from '@/src/lib/utils/error.utils';
-import type { ScrollState } from './fab.types';
 
 // Default values (will be overridden by Dynamic Config)
 let DEFAULT_SCROLL_THRESHOLD = 100;

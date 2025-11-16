@@ -18,7 +18,7 @@ import {
   CardTitle,
 } from '@/src/components/primitives/ui/card';
 import { Separator } from '@/src/components/primitives/ui/separator';
-import { getAuthenticatedUserFromClient } from '@/src/lib/auth/get-authenticated-user';
+import { getAuthenticatedUser } from '@/src/lib/auth/get-authenticated-user';
 import {
   type CollectionDetailData,
   getPublicCollectionDetail,
@@ -26,7 +26,6 @@ import {
 import { ArrowLeft, ExternalLink } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-import { createAnonClient } from '@/src/lib/supabase/server-anon';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { normalizeError } from '@/src/lib/utils/error.utils';
 import type { Tables } from '@/src/types/database.types';
@@ -67,8 +66,8 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
   const { slug, collectionSlug } = await params;
 
   // Get current user (if logged in) for ownership check
-  const supabase = createAnonClient();
-  const { user: currentUser } = await getAuthenticatedUserFromClient(supabase, {
+  const { user: currentUser } = await getAuthenticatedUser({
+    requireUser: false,
     context: 'PublicCollectionPage',
   });
 

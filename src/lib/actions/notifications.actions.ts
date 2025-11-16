@@ -89,9 +89,22 @@ export const dismissNotificationsAction = authedAction
     }
 
     try {
+      // Use auth token from authedAction context (no client creation needed)
+      if (!ctx.authToken) {
+        throw logActionFailure(
+          'notifications.dismissNotifications',
+          new Error('User must be authenticated to dismiss notifications'),
+          {
+            userId: ctx.userId,
+            ...meta,
+          }
+        );
+      }
+
       const dismissed = await dismissNotifications({
         userId: ctx.userId,
         notificationIds: uniqueIds,
+        authToken: ctx.authToken,
       });
       return {
         success: true,

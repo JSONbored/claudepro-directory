@@ -10,11 +10,11 @@ import { useState, useTransition } from 'react';
 import { Button } from '@/src/components/primitives/ui/button';
 import { deleteJob } from '@/src/lib/actions/jobs.actions';
 import { Trash } from '@/src/lib/icons';
+import type { ButtonStyleProps } from '@/src/lib/types/component.types';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
 import { logClientWarning } from '@/src/lib/utils/error.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
-import type { ButtonStyleProps } from '../shared/button-types';
 
 export interface JobDeleteButtonProps extends ButtonStyleProps {
   jobId: string;

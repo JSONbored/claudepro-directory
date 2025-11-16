@@ -17,7 +17,7 @@ import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { BADGE_COLORS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { normalizeError } from '@/src/lib/utils/error.utils';
 import type {
-  GetUserDashboardReturn,
+  GetGetUserDashboardReturn,
   SubmissionStatus,
   SubmissionType,
 } from '@/src/types/database-overrides';
@@ -46,7 +46,7 @@ export default async function SubmissionsPage() {
     );
   }
 
-  let submissions: GetUserDashboardReturn['submissions'] = [];
+  let submissions: GetGetUserDashboardReturn['submissions'] = [];
   let hasError = false;
   try {
     const data = await getUserDashboard(user.id);
@@ -149,7 +149,7 @@ export default async function SubmissionsPage() {
                 <div className={UI_CLASSES.FLEX_ITEMS_START_JUSTIFY_BETWEEN}>
                   <div className="flex-1">
                     <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                      {getStatusBadge(submission.status)}
+                      {getStatusBadge(submission.status as SubmissionStatus)}
                       <UnifiedBadge variant="base" style="outline" className="text-xs">
                         {getTypeLabel(submission.content_type as SubmissionType)}
                       </UnifiedBadge>

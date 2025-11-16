@@ -9,9 +9,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/primitives/ui/tabs';
 import { usePulse } from '@/src/hooks/use-pulse';
-import type { TabbedDetailLayoutProps } from '@/src/lib/types/detail-tabs.types';
+import type { TabbedDetailLayoutProps } from '@/src/lib/types/component.types';
 import { cn } from '@/src/lib/utils';
 import { logUnhandledPromise } from '@/src/lib/utils/error.utils';
+import type { ContentCategory } from '@/src/types/database-overrides';
 import { TabSectionRenderer } from './tab-section-renderer';
 
 export function TabbedDetailLayout({ item, config, tabs, sectionData }: TabbedDetailLayoutProps) {
@@ -57,7 +58,7 @@ export function TabbedDetailLayout({ item, config, tabs, sectionData }: TabbedDe
       // Track tab switch
       pulse
         .click({
-          category: item.category,
+          category: item.category as ContentCategory,
           slug: item.slug,
           metadata: {
             tab_id: value,

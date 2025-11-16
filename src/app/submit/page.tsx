@@ -29,7 +29,7 @@ import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
 import { normalizeError } from '@/src/lib/utils/error.utils';
-import type { Database } from '@/src/types/database.types';
+import type { ContentCategory } from '@/src/types/database-overrides';
 
 const SUBMISSION_TIPS = [
   'Be specific in your descriptions - help users understand what your config does',
@@ -39,7 +39,7 @@ const SUBMISSION_TIPS = [
   'Tag appropriately - tags help users discover your work',
 ];
 
-const TYPE_LABELS: Record<Database['public']['Enums']['submission_type'], string> = {
+const TYPE_LABELS: Partial<Record<ContentCategory, string>> = {
   agents: 'Agent',
   mcp: 'MCP',
   rules: 'Rule',
@@ -123,6 +123,7 @@ export default async function SubmitPage() {
   const stats = dashboardData?.stats || { total: 0, pending: 0, merged_this_week: 0 };
   const recentMerged = (dashboardData?.recent || []).map((submission) => ({
     ...submission,
+    content_type: submission.content_type as ContentCategory,
     merged_at_formatted: formatTimeAgo(submission.merged_at),
   }));
 

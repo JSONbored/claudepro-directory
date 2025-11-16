@@ -49,6 +49,10 @@
  * @description Dismiss notifications for authenticated user
  * @env None - Uses database operations only
  *
+ * @route POST /notifications/create
+ * @description Create a new notification (global, visible to all users)
+ * @env None - Uses database operations only (auth optional for logging)
+ *
  * @route POST /webhook
  * @description Default route for external webhooks (catches all unmatched POST requests)
  * @env VERCEL_WEBHOOK_SECRET - If source is Vercel
@@ -69,6 +73,7 @@ import { handleDiscordDirect } from './routes/discord/direct.ts';
 import { handleDiscordJobs } from './routes/discord/jobs.ts';
 import { handleDiscordSubmissions } from './routes/discord/submissions.ts';
 import { handleActiveNotifications } from './routes/notifications/active.ts';
+import { handleCreateNotification } from './routes/notifications/create.ts';
 import { handleDismissNotifications } from './routes/notifications/dismiss.ts';
 import { handlePulse } from './routes/pulse.ts';
 import { handleRevalidation } from './routes/revalidation.ts';
@@ -296,6 +301,24 @@ const router = createRouter<FluxStationContext>({
           });
         }
         return handleDismissNotifications(ctx.request);
+      },
+    },
+    {
+      name: 'create-notification',
+      methods: ['POST', 'OPTIONS'],
+      match: (ctx) => ctx.pathname.startsWith('/notifications/create'),
+      handler: async (ctx) => {
+        // Rate limiting for user routes
+        const rateLimit = checkRateLimit(ctx.request, USER_ROUTE_RATE_LIMIT);
+        if (!rateLimit.allowed) {
+          return errorResponse(new Error('Rate limit exceeded'), 'flux-station:rate-limit', {
+            'Retry-After': String(rateLimit.retryAfter ?? 60),
+            'X-RateLimit-Limit': String(USER_ROUTE_RATE_LIMIT.maxRequests),
+            'X-RateLimit-Remaining': String(rateLimit.remaining),
+            'X-RateLimit-Reset': String(rateLimit.resetAt),
+          });
+        }
+        return handleCreateNotification(ctx.request);
       },
     },
     {

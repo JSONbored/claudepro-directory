@@ -23,12 +23,28 @@ import { usePulse } from '@/src/hooks/use-pulse';
 import { Award, ExternalLink, Users } from '@/src/lib/icons';
 import { BADGE_COLORS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { logUnhandledPromise } from '@/src/lib/utils/error.utils';
-import type { Tables } from '@/src/types/database.types';
+import type { Json, Tables } from '@/src/types/database.types';
 
 /**
  * User profile data with runtime-added stats from materialized views
+ * Supports both full user records and simplified user objects from RPCs
  */
-export type UserProfile = Tables<'users'> & {
+export type UserProfile = (
+  | Tables<'users'>
+  | {
+      id: string;
+      slug: string;
+      name: string;
+      image: string | null;
+      bio: string | null;
+      work: string | null;
+      tier: 'free' | 'pro' | 'enterprise';
+      created_at: string;
+      interests?: string[] | null;
+      website?: string | null;
+      social_x_link?: string | null;
+    }
+) & {
   // Runtime-added stats (from materialized view)
   total_contributions?: number;
   followers_count?: number;
@@ -38,6 +54,10 @@ export type UserProfile = Tables<'users'> & {
     name: string;
     logo: string | null;
   } | null;
+  // Optional fields that may be missing from simplified user objects
+  interests?: string[] | null;
+  website?: string | null;
+  social_x_link?: string | null;
 };
 
 export interface ProfileCardProps {
@@ -132,8 +152,9 @@ function ProfileCardComponent({ user, variant = 'default', showActions = true }:
           </UnifiedBadge>
 
           {/* Top interests (max 2) */}
-          {Array.isArray(user.interests) &&
-            user.interests
+          {user.interests &&
+            Array.isArray(user.interests) &&
+            (user.interests as Json[])
               .slice(0, 2)
               .filter((interest): interest is string => typeof interest === 'string')
               .map((interest) => (

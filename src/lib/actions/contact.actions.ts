@@ -8,7 +8,7 @@
 import { z } from 'zod';
 import { rateLimitedAction } from '@/src/lib/actions/safe-action';
 import { fetchContactCommands } from '@/src/lib/data/contact/commands';
-import type { GetContactCommandsReturn } from '@/src/types/database-overrides';
+import type { GetGetContactCommandsReturn } from '@/src/types/database-overrides';
 
 /**
  * Get contact terminal commands
@@ -21,9 +21,9 @@ export const getContactCommands = rateLimitedAction
     try {
       const data = await fetchContactCommands();
       // Return empty commands structure if data is null (graceful fallback)
-      return (data ?? { commands: [] }) as GetContactCommandsReturn;
+      return (data ?? { commands: [] }) as GetGetContactCommandsReturn;
     } catch {
       // Fallback to empty commands on error (safe-action middleware handles logging)
-      return { commands: [] } as GetContactCommandsReturn;
+      return { commands: [] } as GetGetContactCommandsReturn;
     }
   });

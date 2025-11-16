@@ -3,9 +3,9 @@
  * Uses Activity type from user.actions (based on get_user_activity_timeline RPC)
  */
 import { Card, CardContent } from '@/src/components/primitives/ui/card';
-import type { GetUserActivityTimelineReturn } from '@/src/types/database-overrides';
+import type { GetGetUserActivityTimelineReturn } from '@/src/types/database-overrides';
 
-type Activity = GetUserActivityTimelineReturn['activities'][number];
+type Activity = GetGetUserActivityTimelineReturn['activities'][number];
 
 import { FileText, GitPullRequest, MessageSquare, ThumbsUp } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
@@ -52,12 +52,20 @@ export function ActivityTimeline({ activities, limit }: ActivityTimelineProps) {
 
         // Determine title based on activity type
         let title = '';
-        if (activity.type === 'post' && activity.title) {
+        if (activity.type === 'post' && activity.title && typeof activity.title === 'string') {
           title = activity.title;
-        } else if (activity.type === 'comment' && activity.body) {
+        } else if (
+          activity.type === 'comment' &&
+          activity.body &&
+          typeof activity.body === 'string'
+        ) {
           const bodyLength = activity.body.length;
           title = activity.body.substring(0, 100) + (bodyLength > 100 ? '...' : '');
-        } else if (activity.type === 'submission' && activity.title) {
+        } else if (
+          activity.type === 'submission' &&
+          activity.title &&
+          typeof activity.title === 'string'
+        ) {
           title = activity.title;
         } else if (activity.type === 'vote' && activity.vote_type) {
           title = `${activity.vote_type} vote`;

@@ -1,38 +1,3 @@
-// Dynamic imports for Vercel monitoring tools
-// Load at page bottom to avoid blocking initial render (30KB bundle, 50-100ms TTI gain)
-// Using Next.js dynamic() for proper code splitting (not top-level await)
-const Analytics = dynamic(
-  () =>
-    import('@vercel/analytics/next')
-      .then((mod) => mod.Analytics)
-      .catch((error) => {
-        const normalized = normalizeError(error, 'Failed to load @vercel/analytics/next');
-        logger.error('RootLayout: Analytics dynamic import failed', normalized, {
-          module: '@vercel/analytics/next',
-        });
-        return () => null;
-      }),
-  {
-    ssr: false, // Analytics only needed client-side
-  }
-);
-
-const SpeedInsights = dynamic(
-  () =>
-    import('@vercel/speed-insights/next')
-      .then((mod) => mod.SpeedInsights)
-      .catch((error) => {
-        const normalized = normalizeError(error, 'Failed to load @vercel/speed-insights/next');
-        logger.error('RootLayout: SpeedInsights dynamic import failed', normalized, {
-          module: '@vercel/speed-insights/next',
-        });
-        return () => null;
-      }),
-  {
-    ssr: false, // Speed insights only needed client-side
-  }
-);
-
 import type { Metadata } from 'next';
 import localFont from 'next/font/local';
 import { ThemeProvider } from 'next-themes';
@@ -59,9 +24,9 @@ const NotificationToastHandler = dynamic(
 import { ErrorBoundary } from '@/src/components/core/infra/error-boundary';
 import { PostCopyEmailProvider } from '@/src/components/core/infra/providers/email-capture-modal-provider';
 import { Pulse } from '@/src/components/core/infra/pulse';
+import { PulseCannon } from '@/src/components/core/infra/pulse-cannon';
 import { StructuredData } from '@/src/components/core/infra/structured-data';
 import { LayoutContent } from '@/src/components/core/layout/root-layout-wrapper';
-import { UmamiScript } from '@/src/components/core/shared/analytics-script';
 import { NotificationsProvider } from '@/src/components/providers/notifications-provider';
 import { APP_CONFIG } from '@/src/lib/data/config/constants';
 import { getLayoutData } from '@/src/lib/data/layout/data';
@@ -303,17 +268,14 @@ export default async function RootLayout({
             </NotificationsProvider>
           </PostCopyEmailProvider>
         </ThemeProvider>
-        {/* Umami Analytics - Privacy-focused analytics (production only) */}
-        {/* Suspense boundary for analytics - streams after critical content */}
-        <Suspense fallback={null}>{await UmamiScript()}</Suspense>
-        {/* PWA Install Tracking - Tracks PWA installation events */}
+        {/* Pulse Cannon - Unified pulse loading system (loads after page idle) */}
+        {/* Zero initial bundle impact - all pulse services lazy-loaded */}
+        <PulseCannon />
+        {/* PWA Pulse - PWA installation and launch events */}
         <Pulse variant="pwa-install" />
         <Pulse variant="pwa-launch" />
         {/* Service Worker Registration for PWA Support */}
         <script src="/scripts/service-worker-init.js" defer={true} />
-        {/* Vercel Analytics & Speed Insights - Loaded at page bottom for optimal performance */}
-        <Analytics />
-        <SpeedInsights />
       </body>
     </html>
   );

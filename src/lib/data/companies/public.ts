@@ -10,11 +10,11 @@ import { fetchCachedRpc } from '@/src/lib/data/helpers';
 import { logger } from '@/src/lib/logger';
 import { normalizeError } from '@/src/lib/utils/error.utils';
 import type {
-  GetCompaniesListReturn,
-  GetCompanyProfileReturn,
+  GetGetCompaniesListReturn,
+  GetGetCompanyProfileReturn,
 } from '@/src/types/database-overrides';
 
-// CompaniesListResult type moved to database-overrides.ts as GetCompaniesListReturn
+// CompaniesListResult type moved to database-overrides.ts as GetGetCompaniesListReturn
 
 export type CompanySearchResult = {
   id: string;
@@ -25,8 +25,8 @@ export type CompanySearchResult = {
 
 // EDGE_SEARCH_URL removed - now using unified search helper
 
-export async function getCompanyProfile(slug: string): Promise<GetCompanyProfileReturn> {
-  return fetchCachedRpc<'get_company_profile', GetCompanyProfileReturn>(
+export async function getCompanyProfile(slug: string): Promise<GetGetCompanyProfileReturn | null> {
+  const result = await fetchCachedRpc<'get_company_profile', GetGetCompanyProfileReturn>(
     { p_slug: slug },
     {
       rpcName: 'get_company_profile',
@@ -34,14 +34,29 @@ export async function getCompanyProfile(slug: string): Promise<GetCompanyProfile
       ttlKey: 'cache.company_detail.ttl_seconds',
       keySuffix: slug,
       useAuthClient: false,
-      fallback: null,
+      fallback: {
+        company: null as never,
+        active_jobs: [],
+        stats: {
+          total_jobs: null,
+          active_jobs: null,
+          featured_jobs: null,
+          remote_jobs: null,
+          avg_salary_min: null,
+          total_views: null,
+          total_clicks: null,
+          click_through_rate: null,
+          latest_job_posted_at: null,
+        },
+      },
       logMeta: { slug },
     }
   );
+  return result.company ? result : null;
 }
 
-export async function getCompaniesList(limit = 50, offset = 0): Promise<GetCompaniesListReturn> {
-  return fetchCachedRpc<'get_companies_list', GetCompaniesListReturn>(
+export async function getCompaniesList(limit = 50, offset = 0): Promise<GetGetCompaniesListReturn> {
+  return fetchCachedRpc<'get_companies_list', GetGetCompaniesListReturn>(
     { p_limit: limit, p_offset: offset },
     {
       rpcName: 'get_companies_list',

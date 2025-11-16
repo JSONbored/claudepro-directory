@@ -14,6 +14,7 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { logger } from '@/src/lib/logger';
 
 interface Manifest {
   tables?: string[];
@@ -159,4 +160,7 @@ const outputLines = [
 ];
 
 writeFileSync(OUTPUT_PATH, `${outputLines.join('\n').trimEnd()}\n`);
-console.log('✔ Generated _shared/database.types.ts from manifest');
+logger.info('✔ Generated _shared/database.types.ts from manifest', {
+  script: 'generate-edge-types',
+  outputPath: OUTPUT_PATH,
+});

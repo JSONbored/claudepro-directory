@@ -14,19 +14,19 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/primi
 import { CheckCircle, Clock, Lightbulb } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
-import type { Database } from '@/src/types/database.types';
+import type { ContentCategory } from '@/src/types/database-overrides';
 
 interface SidebarActivityCardProps {
   recentMerged: Array<{
     id: string | number;
     content_name: string;
-    content_type: Database['public']['Enums']['submission_type'];
+    content_type: ContentCategory;
     merged_at: string;
     merged_at_formatted?: string;
     user?: { name: string; slug: string } | null;
   }>;
   tips: string[];
-  typeLabels: Record<Database['public']['Enums']['submission_type'], string>;
+  typeLabels: Partial<Record<ContentCategory, string>>;
 }
 
 /**

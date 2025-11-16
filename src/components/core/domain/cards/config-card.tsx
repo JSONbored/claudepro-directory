@@ -16,7 +16,7 @@ import { useCopyToClipboard } from '@/src/hooks/use-copy-to-clipboard';
 import { usePulse } from '@/src/hooks/use-pulse';
 import { getComponentConfig } from '@/src/lib/actions/feature-flags.actions';
 import { addBookmark } from '@/src/lib/actions/user.actions';
-import { type CategoryId, isValidCategory } from '@/src/lib/data/config/category';
+import { isValidCategory } from '@/src/lib/data/config/category';
 import { Award, ExternalLink, Eye, Github, Layers, Sparkles } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { SEMANTIC_COLORS } from '@/src/lib/semantic-colors';
@@ -145,7 +145,7 @@ export const ConfigCard = memo(
       }
     }, [searchQuery, item, pulse]);
     const targetPath = getContentItemUrl({
-      category: item.category as CategoryId,
+      category: item.category as ContentCategory,
       slug: item.slug,
       subcategory:
         'subcategory' in item ? (item.subcategory as string | null | undefined) : undefined,
@@ -367,12 +367,12 @@ export const ConfigCard = memo(
           viewTransitionSlug={item.slug}
           onBeforeNavigate={handleCardClickPulse}
           renderTopBadges={() => {
-            // Runtime type guard ensures category is valid CategoryId (excludes 'changelog' and 'jobs')
+            // Runtime type guard ensures category is valid ContentCategory (excludes 'changelog' and 'jobs')
             // Type assertion is safe because isValidCategory() validates at runtime
             const rawCategory = item.category;
-            const category: CategoryId = (isValidCategory(rawCategory)
+            const category: ContentCategory = (isValidCategory(rawCategory)
               ? rawCategory
-              : 'agents') as unknown as CategoryId;
+              : 'agents') as unknown as ContentCategory;
             return (
               <>
                 {showCategory && (

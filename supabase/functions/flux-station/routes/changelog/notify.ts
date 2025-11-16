@@ -318,7 +318,12 @@ export async function handleChangelogNotify(_req: Request): Promise<Response> {
 
     console.log(`[flux-station] Processing ${messages.length} changelog release jobs`);
 
-    const results = [];
+    const results: Array<{
+      msg_id: string;
+      status: 'success' | 'failed';
+      errors: string[];
+      will_retry?: boolean;
+    }> = [];
 
     // Process each message
     for (const msg of messages || []) {
@@ -356,8 +361,8 @@ export async function handleChangelogNotify(_req: Request): Promise<Response> {
         });
         results.push({
           msg_id: message.msg_id.toString(),
-          status: 'error',
-          error: errorMsg,
+          status: 'failed',
+          errors: [errorMsg],
           will_retry: true,
         });
       }

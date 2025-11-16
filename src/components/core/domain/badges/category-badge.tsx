@@ -13,12 +13,12 @@ import {
   TooltipTrigger,
 } from '@/src/components/primitives/ui/tooltip';
 import { getAnimationConfig } from '@/src/lib/actions/feature-flags.actions';
-import type { CategoryId } from '@/src/lib/data/config/category';
 import { Star, TrendingUp, Zap } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { SEMANTIC_COLORS } from '@/src/lib/semantic-colors';
 import { ANIMATION_CONSTANTS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
+import type { ContentCategory } from '@/src/types/database-overrides';
 
 /**
  * Base badge variants (from original badge.tsx)
@@ -43,7 +43,7 @@ const baseBadgeVariants = cva(
 );
 
 // Category badge styles - only for categories that have badge styles defined
-// Note: 'changelog' and 'jobs' are ContentCategory but not CategoryId (no badge styles)
+// Note: 'changelog' and 'jobs' are ContentCategory but don't have badge styles
 const categoryBadgeStyles = {
   rules: 'badge-category-rules',
   mcp: 'badge-category-mcp',
@@ -54,7 +54,7 @@ const categoryBadgeStyles = {
   collections: 'badge-category-collections',
   guides: 'badge-category-guides',
   skills: 'badge-category-skills',
-} as const satisfies Partial<Record<CategoryId, string>>;
+} as const satisfies Partial<Record<ContentCategory, string>>;
 
 const sourceBadgeStyles = {
   official: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
@@ -100,7 +100,7 @@ export type UnifiedBadgeProps =
   | {
       /** Category/content-type badge */
       variant: 'category';
-      category: CategoryId;
+      category: ContentCategory;
       children: React.ReactNode;
       className?: string;
     }

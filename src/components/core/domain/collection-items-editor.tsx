@@ -25,12 +25,12 @@ import {
   removeItemFromCollection,
   reorderCollectionItems,
 } from '@/src/lib/actions/content.actions';
-import type { CategoryId } from '@/src/lib/data/config/category';
 import { ArrowDown, ArrowUp, ExternalLink, Plus, Trash } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { logClientWarning } from '@/src/lib/utils/error.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
 import type { Tables } from '@/src/types/database.types';
+import type { ContentCategory } from '@/src/types/database-overrides';
 
 type CollectionItem = Tables<'collection_items'>;
 type Bookmark = Tables<'bookmarks'>;
@@ -74,7 +74,7 @@ export function CollectionItemManager({
         // Server-side schema validation handles content_type validation via categoryIdSchema
         const result = await addItemToCollection({
           collection_id: collectionId,
-          content_type: bookmark.content_type as CategoryId,
+          content_type: bookmark.content_type as ContentCategory,
           content_slug: bookmark.content_slug,
           order: items.length, // Add to end
         });

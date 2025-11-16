@@ -4,7 +4,7 @@
 
 import { ArrowUp, Bell, FileText, Plus, Search } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
-import type { MainFABConfig, SpeedDialAction } from './fab.types';
+import type { MainFABConfig, SpeedDialAction } from '@/src/lib/types/component.types';
 
 export const handleScrollToTop = (): void => {
   try {

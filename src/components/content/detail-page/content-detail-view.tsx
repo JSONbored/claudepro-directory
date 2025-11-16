@@ -10,16 +10,11 @@ import UnifiedSection from '@/src/components/content/sections/unified-section';
 import { ReviewListSection } from '@/src/components/core/domain/reviews/review-list-section';
 import { NewsletterCTAVariant } from '@/src/components/features/growth/newsletter/newsletter-cta-variants';
 import { RecentlyViewedSidebar } from '@/src/components/features/navigation/recently-viewed-sidebar';
-import {
-  type CategoryId,
-  getCategoryConfig,
-  isValidCategory,
-} from '@/src/lib/data/config/category';
+import { getCategoryConfig, isValidCategory } from '@/src/lib/data/config/category';
 import type { ContentItem } from '@/src/lib/data/content';
 import { highlightCodeEdge, processContentEdge } from '@/src/lib/edge/client';
 import { logger } from '@/src/lib/logger';
-import type { InstallationSteps } from '@/src/lib/types/content-type-config';
-import type { ProcessedSectionData } from '@/src/lib/types/detail-tabs.types';
+import type { InstallationSteps, ProcessedSectionData } from '@/src/lib/types/component.types';
 import { getDisplayTitle } from '@/src/lib/utils';
 import { transformMcpConfigForDisplay } from '@/src/lib/utils/content.utils';
 import { ensureStringArray, getMetadata } from '@/src/lib/utils/data.utils';
@@ -27,7 +22,7 @@ import { normalizeError } from '@/src/lib/utils/error.utils';
 import { getViewTransitionName } from '@/src/lib/utils/view-transitions.utils';
 import type {
   ContentCategory,
-  GetContentDetailCompleteReturn,
+  GetGetContentDetailCompleteReturn,
   Tables,
 } from '@/src/types/database-overrides';
 import { DetailHeader } from './detail-header';
@@ -39,8 +34,8 @@ import { DetailSidebar } from './sidebar/navigation-sidebar';
  * So we narrow the type to exclude Tables<'jobs'> to ensure proper type safety.
  */
 export interface UnifiedDetailPageProps {
-  item: Tables<'content'> | GetContentDetailCompleteReturn['content'];
-  relatedItems?: ContentItem[] | GetContentDetailCompleteReturn['related'];
+  item: Tables<'content'> | GetGetContentDetailCompleteReturn['content'];
+  relatedItems?: ContentItem[] | GetGetContentDetailCompleteReturn['related'];
   viewCount?: number;
   copyCount?: number;
   relatedItemsPromise?: Promise<ContentItem[]>;
@@ -52,7 +47,7 @@ export interface UnifiedDetailPageProps {
 function logDetailProcessingWarning(
   section: string,
   error: unknown,
-  item: Tables<'content'> | GetContentDetailCompleteReturn['content']
+  item: Tables<'content'> | GetGetContentDetailCompleteReturn['content']
 ): void {
   const normalized = normalizeError(error, `${section} processing failed`);
   logger.warn(`UnifiedDetailPage: ${section} processing failed`, {
@@ -66,7 +61,7 @@ function logDetailProcessingWarning(
  * Safely extracts configuration from item or metadata as a string
  */
 function getConfigurationAsString(
-  item: Tables<'content'> | GetContentDetailCompleteReturn['content'],
+  item: Tables<'content'> | GetGetContentDetailCompleteReturn['content'],
   metadata: Record<string, unknown>
 ): string | null {
   // Check top-level item first
@@ -90,7 +85,7 @@ async function ViewCountMetadata({
   item,
   viewCountPromise,
 }: {
-  item: Tables<'content'> | GetContentDetailCompleteReturn['content'];
+  item: Tables<'content'> | GetGetContentDetailCompleteReturn['content'];
   viewCountPromise: Promise<number>;
 }) {
   const viewCount = await viewCountPromise;
@@ -102,7 +97,7 @@ async function SidebarWithRelated({
   relatedItemsPromise,
   config,
 }: {
-  item: Tables<'content'> | GetContentDetailCompleteReturn['content'];
+  item: Tables<'content'> | GetGetContentDetailCompleteReturn['content'];
   relatedItemsPromise: Promise<ContentItem[]>;
   config: {
     typeName: string;
@@ -129,7 +124,7 @@ export async function UnifiedDetailPage({
   collectionSections,
   tabsEnabled = false,
 }: UnifiedDetailPageProps) {
-  const config = await getCategoryConfig(item.category as CategoryId);
+  const config = await getCategoryConfig(item.category as ContentCategory);
   const displayTitle = getDisplayTitle(item);
   const metadata = getMetadata(item);
 
@@ -691,7 +686,7 @@ export async function UnifiedDetailPage({
                 title="Features"
                 description="Key capabilities and functionality"
                 items={features}
-                category={item.category as CategoryId}
+                category={item.category as ContentCategory}
                 dotColor="bg-primary"
               />
             )}
@@ -703,7 +698,7 @@ export async function UnifiedDetailPage({
                 title="Requirements"
                 description="Prerequisites and dependencies"
                 items={requirements}
-                category={item.category as CategoryId}
+                category={item.category as ContentCategory}
                 dotColor="bg-orange-500"
               />
             )}
@@ -745,7 +740,7 @@ export async function UnifiedDetailPage({
                 title="Use Cases"
                 description="Common scenarios and applications"
                 items={useCases}
-                category={item.category as CategoryId}
+                category={item.category as ContentCategory}
                 dotColor="bg-accent"
               />
             )}
@@ -757,7 +752,7 @@ export async function UnifiedDetailPage({
                 title="Security Best Practices"
                 description="Important security considerations"
                 items={securityItems}
-                category={item.category as CategoryId}
+                category={item.category as ContentCategory}
                 dotColor="bg-orange-500"
               />
             )}

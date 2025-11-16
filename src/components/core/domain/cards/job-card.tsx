@@ -152,7 +152,7 @@ export function JobCard({ job }: JobCardProps) {
                 });
             }}
           >
-            <a href={job.link} target="_blank" rel="noopener noreferrer">
+            <a href={job.link || '#'} target="_blank" rel="noopener noreferrer">
               Apply Now
               <ExternalLink className={`ml-2 ${UI_CLASSES.ICON_SM}`} />
             </a>

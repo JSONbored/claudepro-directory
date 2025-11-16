@@ -5,7 +5,7 @@
 
 import { fetchCachedRpc } from '@/src/lib/data/helpers';
 import { generateContentCacheKey, generateContentTags } from '@/src/lib/data/helpers-utils';
-import type { ContentCategory, GetRelatedContentReturn } from '@/src/types/database-overrides';
+import type { GetGetRelatedContentReturn } from '@/src/types/database-overrides';
 
 export interface RelatedContentInput {
   currentPath: string;
@@ -18,7 +18,7 @@ export interface RelatedContentInput {
 }
 
 export interface RelatedContentResult {
-  items: GetRelatedContentReturn;
+  items: GetGetRelatedContentReturn; // Return RPC result directly with scoring fields
 }
 
 /**
@@ -27,7 +27,7 @@ export interface RelatedContentResult {
 export async function getRelatedContent(input: RelatedContentInput): Promise<RelatedContentResult> {
   const currentSlug = input.currentPath.split('/').pop() || '';
 
-  const data = await fetchCachedRpc<'get_related_content', GetRelatedContentReturn>(
+  const data = await fetchCachedRpc<'get_related_content', GetGetRelatedContentReturn>(
     {
       p_category: input.currentCategory,
       p_slug: currentSlug,
@@ -46,16 +46,10 @@ export async function getRelatedContent(input: RelatedContentInput): Promise<Rel
     }
   );
 
-  // RPC returns GetRelatedContentReturn directly (already properly typed)
-  // Filter and return valid items, ensuring category is valid ContentCategory
-  const validItems = data
-    .filter((item) => item.title && item.slug && item.category)
-    .map((item) => ({
-      ...item,
-      category: item.category as ContentCategory, // Database returns string, cast to ContentCategory
-    }));
+  // Filter out invalid items
+  const validItems = data.filter((item) => Boolean(item.title && item.slug && item.category));
 
   return {
-    items: validItems as GetRelatedContentReturn,
+    items: validItems,
   };
 }

@@ -5,9 +5,9 @@ import { useState } from 'react';
 import { Button } from '@/src/components/primitives/ui/button';
 import { getTimeoutConfig } from '@/src/lib/actions/feature-flags.actions';
 import { logger } from '@/src/lib/logger';
+import type { ButtonStyleProps } from '@/src/lib/types/component.types';
 import { logClientWarning } from '@/src/lib/utils/error.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
-import type { ButtonStyleProps } from './button-types';
 
 interface SimpleCopyButtonProps extends ButtonStyleProps {
   content: string;

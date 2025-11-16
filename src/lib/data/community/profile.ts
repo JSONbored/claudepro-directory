@@ -3,16 +3,16 @@
 import { fetchCachedRpc } from '@/src/lib/data/helpers';
 import { logger } from '@/src/lib/logger';
 import { normalizeError } from '@/src/lib/utils/error.utils';
-import type { GetUserProfileReturn } from '@/src/types/database-overrides';
+import type { GetGetUserProfileReturn } from '@/src/types/database-overrides';
 
 export async function getPublicUserProfile(input: {
   slug: string;
   viewerId?: string;
-}): Promise<GetUserProfileReturn | null> {
+}): Promise<GetGetUserProfileReturn | null> {
   const { slug, viewerId } = input;
 
   try {
-    return await fetchCachedRpc<'get_user_profile', GetUserProfileReturn | null>(
+    return await fetchCachedRpc<'get_user_profile', GetGetUserProfileReturn | null>(
       {
         p_user_slug: slug,
         ...(viewerId ? { p_viewer_id: viewerId } : {}),

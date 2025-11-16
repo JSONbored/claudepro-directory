@@ -3,10 +3,10 @@
 import { fetchCachedRpc } from '@/src/lib/data/helpers';
 import { logger } from '@/src/lib/logger';
 import { normalizeError } from '@/src/lib/utils/error.utils';
-import type { GetUserCollectionDetailReturn } from '@/src/types/database-overrides';
+import type { GetGetUserCollectionDetailReturn } from '@/src/types/database-overrides';
 
-// CollectionDetailData matches GetUserCollectionDetailReturn (excluding null)
-export type CollectionDetailData = NonNullable<GetUserCollectionDetailReturn>;
+// CollectionDetailData matches GetGetUserCollectionDetailReturn (excluding null)
+export type CollectionDetailData = NonNullable<GetGetUserCollectionDetailReturn>;
 
 export async function getPublicCollectionDetail(input: {
   userSlug: string;
@@ -16,7 +16,10 @@ export async function getPublicCollectionDetail(input: {
   const { userSlug, collectionSlug, viewerId } = input;
 
   try {
-    const data = await fetchCachedRpc<'get_user_collection_detail', GetUserCollectionDetailReturn>(
+    const data = await fetchCachedRpc<
+      'get_user_collection_detail',
+      GetGetUserCollectionDetailReturn
+    >(
       {
         p_user_slug: userSlug,
         p_collection_slug: collectionSlug,

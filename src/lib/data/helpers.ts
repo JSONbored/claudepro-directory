@@ -39,7 +39,7 @@ interface CachedRpcOptions<Result> {
  *
  * @example
  * // Explicit Result type - specify both T and Result
- * const data = await fetchCachedRpc<'get_account_dashboard', GetAccountDashboardReturn | null>(
+ * const data = await fetchCachedRpc<'get_account_dashboard', GetGetAccountDashboardReturn | null>(
  *   { p_user_id: userId },
  *   {
  *     rpcName: 'get_account_dashboard',

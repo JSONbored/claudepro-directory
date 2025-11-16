@@ -3,13 +3,13 @@
  */
 
 import { fetchCachedRpc } from '@/src/lib/data/helpers';
-import type { GetSubmissionDashboardReturn } from '@/src/types/database-overrides';
+import type { GetGetSubmissionDashboardReturn } from '@/src/types/database-overrides';
 
 export async function getSubmissionDashboard(
   recentLimit = 5,
   contributorsLimit = 5
-): Promise<GetSubmissionDashboardReturn | null> {
-  return fetchCachedRpc<'get_submission_dashboard', GetSubmissionDashboardReturn | null>(
+): Promise<GetGetSubmissionDashboardReturn | null> {
+  return fetchCachedRpc<'get_submission_dashboard', GetGetSubmissionDashboardReturn | null>(
     {
       p_recent_limit: recentLimit,
       p_contributors_limit: contributorsLimit,

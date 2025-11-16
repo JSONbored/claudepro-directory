@@ -6,9 +6,8 @@ import { logger } from '@/src/lib/logger';
 import type { Tables } from '@/src/types/database.types';
 import type {
   ChangelogCategory,
-  GetChangelogDetailReturn,
-  GetChangelogEntriesReturn,
-  GetChangelogOverviewReturn,
+  GetGetChangelogDetailReturn,
+  GetGetChangelogOverviewReturn,
 } from '@/src/types/database-overrides';
 
 // Zod schema for changelog entry changes structure (JSONB validation)
@@ -51,7 +50,7 @@ const CHANGELOG_TAG = 'changelog';
 const CHANGELOG_TTL_KEY = 'cache.changelog.ttl_seconds';
 const CHANGELOG_DETAIL_TTL_KEY = 'cache.changelog_detail.ttl_seconds';
 
-function createEmptyOverview(limit: number, offset = 0): GetChangelogOverviewReturn {
+function createEmptyOverview(limit: number, offset = 0): GetGetChangelogOverviewReturn {
   return {
     entries: [],
     metadata: {
@@ -81,10 +80,10 @@ export async function getChangelogOverview(
     limit?: number;
     offset?: number;
   } = {}
-): Promise<GetChangelogOverviewReturn> {
+): Promise<GetGetChangelogOverviewReturn> {
   const { category, publishedOnly = true, featuredOnly = false, limit = 50, offset = 0 } = options;
 
-  return fetchCachedRpc<'get_changelog_overview', GetChangelogOverviewReturn>(
+  return fetchCachedRpc<'get_changelog_overview', GetGetChangelogOverviewReturn>(
     {
       ...(category ? { p_category: category } : {}),
       p_published_only: publishedOnly,
@@ -116,7 +115,7 @@ export async function getChangelogOverview(
  * Optimized single RPC call that replaces get_changelog_entry_by_slug
  */
 export async function getChangelogEntryBySlug(slug: string): Promise<ChangelogEntry | null> {
-  const result = await fetchCachedRpc<'get_changelog_detail', GetChangelogDetailReturn>(
+  const result = await fetchCachedRpc<'get_changelog_detail', GetGetChangelogDetailReturn>(
     { p_slug: slug },
     {
       rpcName: 'get_changelog_detail',
@@ -128,14 +127,38 @@ export async function getChangelogEntryBySlug(slug: string): Promise<ChangelogEn
     }
   );
 
-  return result.entry;
+  if (!result.entry) return null;
+
+  // Map RPC return to full Tables<'changelog'> structure
+  return {
+    ...result.entry,
+    canonical_url: null,
+    commit_count: null,
+    contributors: null,
+    git_commit_sha: null,
+    json_ld: null,
+    og_image: null,
+    og_type: null,
+    robots_follow: null,
+    robots_index: null,
+    source: null,
+    twitter_card: null,
+    content: result.entry.content ?? '',
+    changes: result.entry.changes,
+  } as unknown as ChangelogEntry;
 }
 
 /**
  * @deprecated Use getChangelogOverview() instead
  * Get paginated changelog entries (backward compatibility)
  */
-export async function getChangelog(): Promise<GetChangelogEntriesReturn> {
+export async function getChangelog(): Promise<{
+  entries: GetGetChangelogOverviewReturn['entries'];
+  total: number;
+  limit: number;
+  offset: number;
+  hasMore: boolean;
+}> {
   const limit = 1000;
   const overview = await getChangelogOverview({
     publishedOnly: true,

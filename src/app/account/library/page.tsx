@@ -23,7 +23,7 @@ import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { normalizeError } from '@/src/lib/utils/error.utils';
-import type { GetUserLibraryReturn } from '@/src/types/database-overrides';
+import type { GetGetUserLibraryReturn } from '@/src/types/database-overrides';
 
 export const metadata = generatePageMetadata('/account/library');
 
@@ -49,7 +49,7 @@ export default async function LibraryPage() {
     );
   }
 
-  let data: GetUserLibraryReturn | null = null;
+  let data: GetGetUserLibraryReturn | null = null;
   try {
     data = await getUserLibrary(user.id);
     if (!data) {

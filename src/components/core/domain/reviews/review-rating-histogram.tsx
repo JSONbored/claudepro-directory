@@ -7,10 +7,10 @@ import {
   ChartContainer,
   HorizontalBarChart,
 } from '@/src/components/core/domain/charts/horizontal-bar-chart';
-import type { ReviewHistogramProps } from '@/src/components/core/domain/reviews/shared/review-types';
 import { StarDisplay } from '@/src/components/core/domain/reviews/shared/star-display';
 import { Card } from '@/src/components/primitives/ui/card';
 import { Star } from '@/src/lib/icons';
+import type { ReviewHistogramProps } from '@/src/lib/types/component.types';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 export function ReviewRatingHistogram({

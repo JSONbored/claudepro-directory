@@ -2160,8 +2160,8 @@ packages:
   css-line-break@2.1.0:
     resolution: {integrity: sha512-FHcKFCZcAha3LwfVBhCQbW2nCNbkZXn7KVUJcsT5/P8YmfsVja0FMPJr0B903j/E69HUphKiV9iQArX8SDYA4w==}
 
-  csstype@3.2.1:
-    resolution: {integrity: sha512-98XGutrXoh75MlgLihlNxAGbUuFQc7l1cqcnEZlLNKc0UrVdPndgmaDmYTDDh929VS/eqTZV0rozmhu2qqT1/g==}
+  csstype@3.2.2:
+    resolution: {integrity: sha512-D80T+tiqkd/8B0xNlbstWDG4x6aqVfO52+OlSUNIdkTvmNw0uQpJLeos2J/2XvpyidAFuTPmpad+tUxLndwj6g==}
 
   dateformat@4.6.3:
     resolution: {integrity: sha512-2P0p0pFGzHS5EMnhdxQi7aJN+iMheud0UhG4dlE1DLAlvL8JHjJJTX/CSm4JXwV0Ka5nGk3zC5mcb5bUQUxxMA==}
@@ -5216,7 +5216,7 @@ snapshots:
 
   '@types/react@19.2.5':
     dependencies:
-      csstype: 3.2.1
+      csstype: 3.2.2
 
   '@types/readdir-glob@1.1.5':
     dependencies:
@@ -5415,7 +5415,7 @@ snapshots:
     dependencies:
       utrie: 1.0.2
 
-  csstype@3.2.1: {}
+  csstype@3.2.2: {}
 
   dateformat@4.6.3: {}
 

@@ -6,18 +6,20 @@
 import dynamic from 'next/dynamic';
 import { JSONSectionRenderer } from '@/src/components/content/json-to-sections';
 import { ReviewListSection } from '@/src/components/core/domain/reviews/review-list-section';
-import type { CategoryId, SectionId } from '@/src/lib/data/config/category/category-config.types';
 import type { ContentItem } from '@/src/lib/data/content';
-import type { ProcessedSectionData } from '@/src/lib/types/detail-tabs.types';
+import type { ProcessedSectionData, SectionId } from '@/src/lib/types/component.types';
 import { ensureStringArray } from '@/src/lib/utils/data.utils';
-import type { GetContentDetailCompleteReturn } from '@/src/types/database-overrides';
+import type {
+  ContentCategory,
+  GetGetContentDetailCompleteReturn,
+} from '@/src/types/database-overrides';
 
 // Dynamic import for unified section component (code splitting)
 const UnifiedSection = dynamic(() => import('@/src/components/content/sections/unified-section'));
 
 export interface TabSectionRendererProps {
   sectionId: SectionId;
-  item: ContentItem | GetContentDetailCompleteReturn['content'];
+  item: ContentItem | GetGetContentDetailCompleteReturn['content'];
   sectionData: ProcessedSectionData;
   config: {
     typeName: string;
@@ -68,7 +70,7 @@ export function TabSectionRenderer({
           title="Features"
           description="Key capabilities and functionality"
           items={features}
-          category={item.category as CategoryId}
+          category={item.category as ContentCategory}
           dotColor="bg-primary"
         />
       );
@@ -81,7 +83,7 @@ export function TabSectionRenderer({
           title="Requirements"
           description="Prerequisites and dependencies"
           items={requirements}
-          category={item.category as CategoryId}
+          category={item.category as ContentCategory}
           dotColor="bg-orange-500"
         />
       );
@@ -94,7 +96,7 @@ export function TabSectionRenderer({
           title="Use Cases"
           description="Common scenarios and applications"
           items={useCases}
-          category={item.category as CategoryId}
+          category={item.category as ContentCategory}
           dotColor="bg-accent"
         />
       );
@@ -153,7 +155,7 @@ export function TabSectionRenderer({
           title="Security Best Practices"
           description="Important security considerations"
           items={securityItems}
-          category={item.category as CategoryId}
+          category={item.category as ContentCategory}
           dotColor="bg-orange-500"
         />
       );
@@ -162,7 +164,10 @@ export function TabSectionRenderer({
     case 'reviews':
       return (
         <div className="border-t pt-8">
-          <ReviewListSection contentType={item.category as CategoryId} contentSlug={item.slug} />
+          <ReviewListSection
+            contentType={item.category as ContentCategory}
+            contentSlug={item.slug}
+          />
         </div>
       );
 

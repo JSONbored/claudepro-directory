@@ -5,9 +5,9 @@ import { motion } from 'motion/react';
 import { useState } from 'react';
 import { Button } from '@/src/components/primitives/ui/button';
 import { useButtonSuccess } from '@/src/hooks/use-button-success';
+import type { ButtonStyleProps } from '@/src/lib/types/component.types';
 import { logClientWarning } from '@/src/lib/utils/error.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
-import type { ButtonStyleProps } from './button-types';
 
 interface ContentActionButtonProps extends ButtonStyleProps {
   url: string;

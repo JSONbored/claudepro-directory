@@ -16,15 +16,14 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/ui/card';
-import { getAuthenticatedUserFromClient } from '@/src/lib/auth/get-authenticated-user';
+import { getAuthenticatedUser } from '@/src/lib/auth/get-authenticated-user';
 import { getPublicUserProfile } from '@/src/lib/data/community/profile';
 import { FolderOpen, Globe, Users } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-import { createAnonClient } from '@/src/lib/supabase/server-anon';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { normalizeError } from '@/src/lib/utils/error.utils';
-import type { GetUserProfileReturn } from '@/src/types/database-overrides';
+import type { GetGetUserProfileReturn } from '@/src/types/database-overrides';
 
 interface UserProfilePageProps {
   params: Promise<{ slug: string }>;
@@ -44,14 +43,13 @@ export async function generateMetadata({ params }: UserProfilePageProps): Promis
 
 export default async function UserProfilePage({ params }: UserProfilePageProps) {
   const { slug } = await params;
-  const supabase = createAnonClient();
 
-  // Get current user (if logged in)
-  const { user: currentUser } = await getAuthenticatedUserFromClient(supabase, {
+  const { user: currentUser } = await getAuthenticatedUser({
+    requireUser: false,
     context: 'UserProfilePage',
   });
 
-  let profileData: GetUserProfileReturn | null = null;
+  let profileData: GetGetUserProfileReturn | null = null;
   try {
     profileData = await getPublicUserProfile({
       slug,

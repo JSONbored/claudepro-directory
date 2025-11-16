@@ -4,7 +4,7 @@ import { fetchCachedRpc } from '@/src/lib/data/helpers';
 import type {
   ExperienceLevel,
   FocusAreaType,
-  GetRecommendationsReturn,
+  GetGetRecommendationsReturn,
   IntegrationType,
   UseCaseType,
 } from '@/src/types/database-overrides';
@@ -21,7 +21,7 @@ export interface RecommendationInput {
 
 export async function getConfigRecommendations(
   input: RecommendationInput
-): Promise<GetRecommendationsReturn | null> {
+): Promise<GetGetRecommendationsReturn | null> {
   const {
     useCase,
     experienceLevel,
@@ -32,7 +32,7 @@ export async function getConfigRecommendations(
     viewerId,
   } = input;
 
-  return fetchCachedRpc<'get_recommendations', GetRecommendationsReturn | null>(
+  return fetchCachedRpc<'get_recommendations', GetGetRecommendationsReturn | null>(
     {
       p_use_case: useCase,
       p_experience_level: experienceLevel,

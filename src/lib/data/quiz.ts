@@ -1,10 +1,10 @@
 'use server';
 
 import { fetchCachedRpc } from '@/src/lib/data/helpers';
-import type { GetQuizConfigurationReturn } from '@/src/types/database-overrides';
+import type { GetGetQuizConfigurationReturn } from '@/src/types/database-overrides';
 
-export async function fetchQuizConfiguration(): Promise<GetQuizConfigurationReturn | null> {
-  return fetchCachedRpc<'get_quiz_configuration', GetQuizConfigurationReturn | null>(
+export async function fetchQuizConfiguration(): Promise<GetGetQuizConfigurationReturn | null> {
+  return fetchCachedRpc<'get_quiz_configuration', GetGetQuizConfigurationReturn | null>(
     {},
     {
       rpcName: 'get_quiz_configuration',

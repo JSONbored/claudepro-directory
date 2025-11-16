@@ -13,6 +13,7 @@ import { readFile, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { z } from 'zod';
+import { logger } from '@/src/lib/logger';
 import { ALL_CATEGORY_IDS } from '../../src/lib/config/category-config.generated.js';
 import { SECURITY_CONFIG } from '../../src/lib/constants.js';
 import { ParseStrategy, safeParse } from '../../src/lib/utils/data.utils.js';
@@ -25,7 +26,9 @@ const TEMPLATE_PATH = join(__dirname, 'templates', 'service-worker.template.js')
 
 async function generateServiceWorker() {
   const startTime = Date.now();
-  console.log('🔧 Generating service worker from category_configs table...');
+  logger.info('🔧 Generating service worker from category_configs table...', {
+    script: 'generate-service-worker',
+  });
 
   try {
     // Load service worker template
@@ -47,7 +50,11 @@ async function generateServiceWorker() {
 
     // Get all category IDs from generated config (build-time safe, no database call)
     const categoryIds = ALL_CATEGORY_IDS;
-    console.log(`📦 Found ${categoryIds.length} categories: ${categoryIds.join(', ')}`);
+    logger.info(`📦 Found ${categoryIds.length} categories: ${categoryIds.join(', ')}`, {
+      script: 'generate-service-worker',
+      categoryCount: categoryIds.length,
+      categories: categoryIds,
+    });
 
     // Generate content routes array
     // MODERNIZATION: All categories from registry, no special cases
@@ -67,8 +74,13 @@ async function generateServiceWorker() {
     });
 
     if (!hasHashChanged('service-worker', inputHash)) {
-      console.log('✓ Service worker unchanged (inputs identical), skipping generation');
-      console.log(`✅ Service worker up-to-date (${Date.now() - startTime}ms)`);
+      logger.info('✓ Service worker unchanged (inputs identical), skipping generation', {
+        script: 'generate-service-worker',
+      });
+      logger.info(`✅ Service worker up-to-date (${Date.now() - startTime}ms)`, {
+        script: 'generate-service-worker',
+        duration: `${Date.now() - startTime}ms`,
+      });
       return true;
     }
 
@@ -92,16 +104,29 @@ async function generateServiceWorker() {
       duration,
       files: [outputPath],
     });
-    console.log(`✅ Service worker generated in ${duration}ms`);
-    console.log(`📝 Output: ${outputPath}`);
-    console.log(`🎯 Categories: ${categoryIds.length} routes cached`);
-    console.log(`🔒 Origins: ${SECURITY_CONFIG.allowedOrigins.length} origins allowed`);
+    logger.info(`✅ Service worker generated in ${duration}ms`, {
+      script: 'generate-service-worker',
+      duration: `${duration}ms`,
+    });
+    logger.info(`📝 Output: ${outputPath}`, { script: 'generate-service-worker', outputPath });
+    logger.info(`🎯 Categories: ${categoryIds.length} routes cached`, {
+      script: 'generate-service-worker',
+      categoryCount: categoryIds.length,
+    });
+    logger.info(`🔒 Origins: ${SECURITY_CONFIG.allowedOrigins.length} origins allowed`, {
+      script: 'generate-service-worker',
+      originCount: SECURITY_CONFIG.allowedOrigins.length,
+    });
 
     return true;
   } catch (err) {
-    console.error('❌ Service worker generation failed:', err);
-    console.error('Error details:', err instanceof Error ? err.message : String(err));
-    console.error('Stack trace:', err instanceof Error ? err.stack : 'N/A');
+    logger.error(
+      '❌ Service worker generation failed',
+      err instanceof Error ? err : new Error(String(err)),
+      {
+        script: 'generate-service-worker',
+      }
+    );
     throw err;
   }
 }
@@ -115,15 +140,17 @@ const isMainModule = currentFilePath === executedFilePath;
 if (isMainModule) {
   generateServiceWorker()
     .then(() => {
-      console.log('🎉 Service worker generation complete!');
+      logger.info('🎉 Service worker generation complete!', { script: 'generate-service-worker' });
       process.exit(0);
     })
     .catch((err) => {
-      console.error('💥 Service worker generation failed:', err);
-      console.error('Error details:', err instanceof Error ? err.message : String(err));
-      if (err instanceof Error && err.stack) {
-        console.error('Stack trace:', err.stack);
-      }
+      logger.error(
+        '💥 Service worker generation failed',
+        err instanceof Error ? err : new Error(String(err)),
+        {
+          script: 'generate-service-worker',
+        }
+      );
       process.exit(1);
     });
 }

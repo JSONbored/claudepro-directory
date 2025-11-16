@@ -2,16 +2,16 @@
 
 import { fetchCachedRpc } from '@/src/lib/data/helpers';
 import { generateContentCacheKey } from '@/src/lib/data/helpers-utils';
-import type { ContentCategory, GetSimilarContentReturn } from '@/src/types/database-overrides';
+import type { ContentCategory, GetGetSimilarContentReturn } from '@/src/types/database-overrides';
 
 export async function getSimilarContent(input: {
   contentType: ContentCategory;
   contentSlug: string;
   limit?: number;
-}): Promise<GetSimilarContentReturn | null> {
+}): Promise<GetGetSimilarContentReturn | null> {
   const { contentType, contentSlug, limit = 6 } = input;
 
-  return fetchCachedRpc<'get_similar_content', GetSimilarContentReturn | null>(
+  return fetchCachedRpc<'get_similar_content', GetGetSimilarContentReturn | null>(
     {
       p_content_type: contentType,
       p_content_slug: contentSlug,

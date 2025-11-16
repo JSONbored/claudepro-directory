@@ -29,7 +29,7 @@ export default async function EditCollectionPage({ params }: EditCollectionPageP
     redirect('/login');
   }
 
-  let collectionData = null;
+  let collectionData: Awaited<ReturnType<typeof getCollectionDetail>> = null;
   try {
     collectionData = await getCollectionDetail(user.id, slug);
   } catch (error) {

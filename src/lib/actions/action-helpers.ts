@@ -13,7 +13,7 @@ import {
 import { revalidateCacheTags } from '@/src/lib/supabase/cache-helpers';
 import { createClient } from '@/src/lib/supabase/server';
 import { logActionFailure } from '@/src/lib/utils/error.utils';
-import type { Database } from '@/src/types/database-overrides';
+import type { Database } from '@/src/types/database.types';
 
 type PublicRpc = keyof Database['public']['Functions'] | 'ensure_user_record';
 

@@ -20,7 +20,7 @@ import { BADGE_COLORS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { formatRelativeDate } from '@/src/lib/utils/data.utils';
 import { normalizeError } from '@/src/lib/utils/error.utils';
 import type { Tables } from '@/src/types/database.types';
-import type { GetUserDashboardReturn, JobStatus } from '@/src/types/database-overrides';
+import type { GetGetUserDashboardReturn, JobStatus } from '@/src/types/database-overrides';
 
 export const metadata = generatePageMetadata('/account/jobs');
 
@@ -46,7 +46,7 @@ export default async function MyJobsPage() {
     );
   }
 
-  let data: GetUserDashboardReturn | null = null;
+  let data: GetGetUserDashboardReturn | null = null;
   let fetchError = false;
   try {
     data = await getUserDashboard(user.id);

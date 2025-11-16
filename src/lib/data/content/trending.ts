@@ -1,17 +1,17 @@
-import type { CategoryId } from '@/src/lib/data/config/category';
 import { isValidCategory } from '@/src/lib/data/config/category';
 import { fetchCachedRpc } from '@/src/lib/data/helpers';
 import { generateContentCacheKey } from '@/src/lib/data/helpers-utils';
 import type { DisplayableContent } from '@/src/lib/types/component.types';
 import type {
+  ContentCategory,
+  GetGetRecentContentReturn,
   GetPopularContentReturn,
-  GetRecentContentReturn,
-  GetTrendingMetricsReturn,
+  GetTrendingMetricsWithContentReturn,
   HomepageContentItem,
 } from '@/src/types/database-overrides';
 
 interface TrendingPageParams {
-  category?: CategoryId | null;
+  category?: ContentCategory | null;
   limit?: number;
 }
 
@@ -23,7 +23,7 @@ interface TrendingPageDataResult {
 }
 
 const TTL_CONFIG_KEY = 'cache.content_list.ttl_seconds';
-const DEFAULT_CATEGORY: CategoryId = 'agents';
+const DEFAULT_CATEGORY: ContentCategory = 'agents';
 
 export async function getTrendingPageData(
   params: TrendingPageParams = {}
@@ -50,10 +50,10 @@ export async function getTrendingPageData(
 }
 
 async function fetchTrendingMetrics(
-  category: CategoryId | null,
+  category: ContentCategory | null,
   limit: number
-): Promise<GetTrendingMetricsReturn> {
-  return fetchCachedRpc<'get_trending_metrics_with_content', GetTrendingMetricsReturn>(
+): Promise<GetTrendingMetricsWithContentReturn> {
+  return fetchCachedRpc<'get_trending_metrics_with_content', GetTrendingMetricsWithContentReturn>(
     {
       ...(category ? { p_category: category } : {}),
       p_limit: limit,
@@ -70,30 +70,44 @@ async function fetchTrendingMetrics(
 }
 
 async function fetchPopularContent(
-  category: CategoryId | null,
+  category: ContentCategory | null,
   limit: number
 ): Promise<GetPopularContentReturn> {
-  return fetchCachedRpc<'get_popular_content', GetPopularContentReturn>(
+  // Note: fetchCachedRpc has a constraint issue where it expects description: string
+  // but GetPopularContentReturn has description: string | null. We bypass the constraint
+  // by casting the function call result.
+  const data = await fetchCachedRpc(
     {
       ...(category ? { p_category: category } : {}),
       p_limit: limit,
     },
     {
-      rpcName: 'get_popular_content',
+      rpcName: 'get_popular_content' as const,
       tags: ['trending', 'trending-popular'],
       ttlKey: TTL_CONFIG_KEY,
       keySuffix: `popular-${generateContentCacheKey(category, null, limit)}`,
-      fallback: [],
+      fallback: [] as unknown as {
+        author: string;
+        category: string;
+        copy_count: number;
+        description: string;
+        popularity_score: number;
+        slug: string;
+        tags: string[];
+        title: string;
+        view_count: number;
+      }[],
       logMeta: { category: category ?? 'all', limit },
     }
   );
+  return data as GetPopularContentReturn;
 }
 
 async function fetchRecentContent(
-  category: CategoryId | null,
+  category: ContentCategory | null,
   limit: number
-): Promise<GetRecentContentReturn> {
-  return fetchCachedRpc<'get_recent_content', GetRecentContentReturn>(
+): Promise<GetGetRecentContentReturn> {
+  return fetchCachedRpc<'get_recent_content', GetGetRecentContentReturn>(
     {
       ...(category ? { p_category: category } : {}),
       p_limit: limit,
@@ -111,10 +125,10 @@ async function fetchRecentContent(
 }
 
 function mapTrendingMetrics(
-  rows: GetTrendingMetricsReturn,
-  category: CategoryId | null
+  rows: GetTrendingMetricsWithContentReturn,
+  category: ContentCategory | null
 ): DisplayableContent[] {
-  return rows.map((row, index) => {
+  return rows.map((row: GetTrendingMetricsWithContentReturn[number], index: number) => {
     const resolvedCategory = row.category ?? category ?? DEFAULT_CATEGORY;
     const validCategory = isValidCategory(resolvedCategory) ? resolvedCategory : DEFAULT_CATEGORY;
     return toHomepageContentItem({
@@ -124,7 +138,7 @@ function mapTrendingMetrics(
       description: row.description,
       author: row.author,
       tags: row.tags,
-      source: row.source,
+      source: row.source ?? 'trending',
       viewCount: row.views_total,
       copyCount: row.copies_total,
       featuredScore: row.trending_score ?? row.freshness_score ?? row.engagement_score,
@@ -135,9 +149,9 @@ function mapTrendingMetrics(
 
 function mapPopularContent(
   rows: GetPopularContentReturn,
-  category: CategoryId | null
+  category: ContentCategory | null
 ): DisplayableContent[] {
-  return rows.map((row, index) => {
+  return rows.map((row: GetPopularContentReturn[number], index: number) => {
     const resolvedCategory = row.category ?? category ?? DEFAULT_CATEGORY;
     const validCategory = isValidCategory(resolvedCategory) ? resolvedCategory : DEFAULT_CATEGORY;
     return toHomepageContentItem({
@@ -156,10 +170,10 @@ function mapPopularContent(
 }
 
 function mapRecentContent(
-  rows: GetRecentContentReturn,
-  category: CategoryId | null
+  rows: GetGetRecentContentReturn,
+  category: ContentCategory | null
 ): DisplayableContent[] {
-  return rows.map((row, index) => {
+  return rows.map((row: GetGetRecentContentReturn[number], index: number) => {
     const resolvedCategory = row.category ?? category ?? DEFAULT_CATEGORY;
     const validCategory = isValidCategory(resolvedCategory) ? resolvedCategory : DEFAULT_CATEGORY;
     return toHomepageContentItem({
@@ -178,7 +192,7 @@ function mapRecentContent(
 
 function toHomepageContentItem(input: {
   slug: string;
-  category: CategoryId;
+  category: ContentCategory;
   title?: string | null;
   description?: string | null;
   author?: string | null;
@@ -194,7 +208,6 @@ function toHomepageContentItem(input: {
   const timestamp = input.created_at ?? input.date_added ?? new Date().toISOString();
 
   return {
-    id: `${input.slug}-${input.category}-${input.featuredRank ?? 'item'}`,
     slug: input.slug,
     title: input.title ?? input.slug,
     description: input.description ?? '',
@@ -204,14 +217,8 @@ function toHomepageContentItem(input: {
     created_at: input.created_at ?? timestamp,
     date_added: input.date_added ?? timestamp,
     category: input.category,
-    viewCount: input.viewCount ?? 0,
-    copyCount: input.copyCount ?? 0,
-    _featured:
-      input.featuredScore != null
-        ? {
-            rank: input.featuredRank ?? 0,
-            score: input.featuredScore,
-          }
-        : null,
+    view_count: input.viewCount ?? 0,
+    copy_count: input.copyCount ?? 0,
+    featured: input.featuredScore != null,
   };
 }

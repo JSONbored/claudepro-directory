@@ -1,7 +1,7 @@
 'use client';
 
-import type { ReviewRatingCompactProps } from '@/src/components/core/domain/reviews/shared/review-types';
 import { Star } from '@/src/lib/icons';
+import type { ReviewRatingCompactProps } from '@/src/lib/types/component.types';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 /**

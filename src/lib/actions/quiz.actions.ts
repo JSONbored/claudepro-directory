@@ -8,7 +8,7 @@
 import { z } from 'zod';
 import { rateLimitedAction } from '@/src/lib/actions/safe-action';
 import { fetchQuizConfiguration } from '@/src/lib/data/quiz';
-import type { GetQuizConfigurationReturn } from '@/src/types/database-overrides';
+import type { GetGetQuizConfigurationReturn } from '@/src/types/database-overrides';
 
 /**
  * Get quiz configuration
@@ -20,10 +20,10 @@ export const getQuizConfiguration = rateLimitedAction
   .action(async () => {
     try {
       const data = await fetchQuizConfiguration();
-      // Return empty questions structure if data is null (graceful fallback)
-      return (data ?? { questions: [] }) as GetQuizConfigurationReturn;
+      // Return empty array if data is null (graceful fallback)
+      return (data ?? []) as GetGetQuizConfigurationReturn;
     } catch {
-      // Fallback to empty questions on error (safe-action middleware handles logging)
-      return { questions: [] } as GetQuizConfigurationReturn;
+      // Fallback to empty array on error (safe-action middleware handles logging)
+      return [] as GetGetQuizConfigurationReturn;
     }
   });

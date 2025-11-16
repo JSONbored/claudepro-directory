@@ -16,7 +16,7 @@ import { generateConfigRecommendations } from '@/src/lib/edge/client';
 import type {
   ExperienceLevel,
   FocusAreaType,
-  GetQuizConfigurationReturn,
+  GetGetQuizConfigurationReturn,
   IntegrationType,
   UseCaseType,
 } from '@/src/types/database-overrides';
@@ -42,26 +42,23 @@ type QuizQuestion = {
 };
 
 function mapQuizConfigToQuestions(
-  config: GetQuizConfigurationReturn | null
+  config: GetGetQuizConfigurationReturn | null
 ): QuizQuestion[] | null {
-  if (!config?.questions) {
+  if (!(config && Array.isArray(config)) || config.length === 0) {
     return null;
   }
 
-  // GetQuizConfigurationReturn has simpler structure - map to QuizQuestion format
-  // Note: This is a type mismatch - the RPC returns a different structure than expected
-  // This should be addressed in a future refactor to align RPC return with component needs
-  return config.questions.map((q, index) => ({
+  return config.map((q) => ({
     id: q.id,
     question: q.question,
-    description: null,
-    required: true,
-    displayOrder: index,
+    description: q.description,
+    required: q.required,
+    displayOrder: q.displayOrder,
     options: q.options.map((opt) => ({
-      value: opt,
-      label: opt,
-      description: null,
-      iconName: null,
+      value: opt.value,
+      label: opt.label,
+      description: opt.description,
+      iconName: opt.iconName,
     })),
   }));
 }

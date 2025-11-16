@@ -39,7 +39,7 @@ export default async function CollectionDetailPage({ params }: CollectionPagePro
     redirect('/login');
   }
 
-  let collectionData = null;
+  let collectionData: Awaited<ReturnType<typeof getCollectionDetail>> = null;
   try {
     collectionData = await getCollectionDetail(user.id, slug);
   } catch (error) {

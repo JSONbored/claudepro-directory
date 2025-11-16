@@ -3,14 +3,14 @@
  * Shared utilities for common patterns across data layer helpers
  */
 
-import type { CategoryId } from '@/src/lib/data/config/category';
+import type { ContentCategory } from '@/src/types/database-overrides';
 
 /**
  * Generate content cache tags with category and optional slug
  * Common pattern: ['content', `content-${category}`, `content-${category}-${slug}`]
  */
 export function generateContentTags(
-  category?: CategoryId | string | null,
+  category?: ContentCategory | string | null,
   slug?: string | null,
   additionalTags: string[] = []
 ): string[] {
@@ -36,7 +36,7 @@ export function generateContentTags(
  * - `${category ?? 'all'}-${limit}-${offset}` for pagination
  */
 export function generateContentCacheKey(
-  category?: CategoryId | string | null,
+  category?: ContentCategory | string | null,
   slug?: string | null,
   limit?: number | null,
   offset?: number | null,

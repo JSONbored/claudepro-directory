@@ -201,6 +201,7 @@ export async function generateConfigRecommendations(answers: {
       results:
         payload.recommendations.results?.map((item) => ({
           ...item,
+          description: item.description ?? '',
           url: `${SITE_URL}/${item.category}/${item.slug}`,
         })) ?? [],
     },

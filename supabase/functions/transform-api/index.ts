@@ -3,7 +3,7 @@
  * Handles syntax highlighting, content processing, and other expensive operations
  */
 
-import { badRequestResponse, jsonResponse } from '../_shared/utils/http.ts';
+import { jsonResponse } from '../_shared/utils/http.ts';
 import { createTransformApiContext } from '../_shared/utils/logging.ts';
 import { checkRateLimit, RATE_LIMIT_PRESETS } from '../_shared/utils/rate-limit.ts';
 import {

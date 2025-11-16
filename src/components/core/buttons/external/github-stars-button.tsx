@@ -10,10 +10,10 @@ import { Button } from '@/src/components/primitives/ui/button';
 import { usePulse } from '@/src/hooks/use-pulse';
 import { getSocialLinks } from '@/src/lib/data/marketing/contact';
 import { Github } from '@/src/lib/icons';
+import type { ButtonStyleProps } from '@/src/lib/types/component.types';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
 import { logClientWarning, logUnhandledPromise } from '@/src/lib/utils/error.utils';
-import type { ButtonStyleProps } from '../shared/button-types';
 
 export interface GitHubStarsButtonProps extends ButtonStyleProps {
   repoUrl?: string;

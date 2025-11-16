@@ -4,12 +4,12 @@
  */
 
 import { fetchCachedRpc } from '@/src/lib/data/helpers';
-import type { ContentCategory, GetContentTemplatesReturn } from '@/src/types/database-overrides';
+import type { ContentCategory, GetGetContentTemplatesReturn } from '@/src/types/database-overrides';
 
 export async function getContentTemplates(
   category: ContentCategory
-): Promise<GetContentTemplatesReturn> {
-  return fetchCachedRpc<'get_content_templates', GetContentTemplatesReturn>(
+): Promise<GetGetContentTemplatesReturn> {
+  return fetchCachedRpc<'get_content_templates', GetGetContentTemplatesReturn>(
     { p_category: category },
     {
       rpcName: 'get_content_templates',

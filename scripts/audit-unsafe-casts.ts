@@ -6,6 +6,7 @@
 
 import { readdirSync, readFileSync, statSync } from 'fs';
 import { join } from 'path';
+import { logger } from '@/src/lib/logger';
 
 const UNSAFE_PATTERNS = [
   /as\s+unknown\s+as/gi,
@@ -55,10 +56,10 @@ function findUnsafeCasts(filePath: string): Finding[] {
     const content = readFileSync(filePath, 'utf-8');
     const lines = content.split('\n');
 
-    lines.forEach((line, index) => {
-      UNSAFE_PATTERNS.forEach((pattern) => {
+    for (const [index, line] of lines.entries()) {
+      for (const pattern of UNSAFE_PATTERNS) {
         const matches = [...line.matchAll(pattern)];
-        matches.forEach((match) => {
+        for (const match of matches) {
           if (match.index !== undefined) {
             const isAcceptable = isAcceptableContext(line);
             findings.push({
@@ -70,11 +71,18 @@ function findUnsafeCasts(filePath: string): Finding[] {
               isAcceptable,
             });
           }
-        });
-      });
-    });
+        }
+      }
+    }
   } catch (error) {
-    console.error(`Error reading ${filePath}:`, error);
+    logger.error(
+      `Error reading ${filePath}`,
+      error instanceof Error ? error : new Error(String(error)),
+      {
+        script: 'audit-unsafe-casts',
+        filePath,
+      }
+    );
   }
 
   return findings;
@@ -106,34 +114,67 @@ function main() {
   const srcDir = join(process.cwd(), 'src');
   const supabaseDir = join(process.cwd(), 'supabase');
 
-  console.log('🔍 Scanning for unsafe type casts...\n');
+  logger.info('🔍 Scanning for unsafe type casts...\n', { script: 'audit-unsafe-casts' });
 
   const findings = [...scanDirectory(srcDir), ...scanDirectory(supabaseDir)];
 
   const acceptable = findings.filter((f) => f.isAcceptable);
   const unacceptable = findings.filter((f) => !f.isAcceptable);
 
-  console.log('\n📊 Summary:');
-  console.log(`   Total findings: ${findings.length}`);
-  console.log(`   Acceptable: ${acceptable.length}`);
-  console.log(`   ⚠️  Needs review: ${unacceptable.length}\n`);
+  logger.info('\n📊 Summary:');
+  logger.info(`   Total findings: ${findings.length}`, {
+    script: 'audit-unsafe-casts',
+    totalFindings: findings.length,
+  });
+  logger.info(`   Acceptable: ${acceptable.length}`, {
+    script: 'audit-unsafe-casts',
+    acceptableCount: acceptable.length,
+  });
+  logger.info(`   ⚠️  Needs review: ${unacceptable.length}\n`, {
+    script: 'audit-unsafe-casts',
+    unacceptableCount: unacceptable.length,
+  });
 
   if (unacceptable.length > 0) {
-    console.log('⚠️  Unsafe casts that need review:\n');
-    unacceptable.forEach((finding) => {
-      console.log(`   ${finding.file}:${finding.line}:${finding.column}`);
-      console.log(`   Pattern: ${finding.pattern}`);
-      console.log(`   Context: ${finding.context.substring(0, 80)}...\n`);
-    });
+    logger.warn('⚠️  Unsafe casts that need review:\n', { script: 'audit-unsafe-casts' });
+    for (const finding of unacceptable) {
+      logger.warn(`   ${finding.file}:${finding.line}:${finding.column}`, {
+        script: 'audit-unsafe-casts',
+        file: finding.file,
+        line: finding.line,
+        column: finding.column,
+      });
+      logger.warn(`   Pattern: ${finding.pattern}`, {
+        script: 'audit-unsafe-casts',
+        pattern: finding.pattern,
+      });
+      logger.warn(`   Context: ${finding.context.substring(0, 80)}...\n`, {
+        script: 'audit-unsafe-casts',
+        context: finding.context.substring(0, 80),
+      });
+    }
   }
 
   if (acceptable.length > 0) {
-    console.log('\n✅ Acceptable casts (documented exceptions):\n');
-    acceptable.forEach((finding) => {
-      console.log(`   ${finding.file}:${finding.line}:${finding.column}`);
-      console.log(`   Pattern: ${finding.pattern}`);
-      console.log(`   Context: ${finding.context.substring(0, 80)}...\n`);
+    logger.info('\n✅ Acceptable casts (documented exceptions):\n', {
+      script: 'audit-unsafe-casts',
     });
+    for (const finding of acceptable) {
+      logger.info(`   ${finding.file}:${finding.line}:${finding.column}`, {
+        script: 'audit-unsafe-casts',
+        file: finding.file,
+        line: finding.line,
+        column: finding.column,
+      });
+      logger.info(`   Pattern: ${finding.pattern}`, {
+        script: 'audit-unsafe-casts',
+        pattern: finding.pattern,
+      });
+      logger.info(`   Context: ${finding.context.substring(0, 80)}...\n`, {
+        script: 'audit-unsafe-casts',
+        context: finding.context.substring(0, 80),
+      });
+    }
   }
 
   process.exit(unacceptable.length > 0 ? 1 : 0);

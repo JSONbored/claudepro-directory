@@ -13,7 +13,7 @@ import type { CacheInvalidateKey } from '@/src/lib/data/config/cache-config';
 import { logger } from '@/src/lib/logger';
 import { logActionFailure } from '@/src/lib/utils/error.utils';
 import {
-  JOB_CATEGORY_VALUES,
+  JOBCATEGORY_VALUES as JOB_CATEGORY_VALUES,
   JOB_STATUS_VALUES,
   type JobCategory,
   type JobStatus,

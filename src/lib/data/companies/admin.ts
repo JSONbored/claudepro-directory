@@ -1,13 +1,13 @@
 import { fetchCachedRpc } from '@/src/lib/data/helpers';
 import { normalizeRpcResult } from '@/src/lib/data/helpers-utils';
 import { logger } from '@/src/lib/logger';
-import type { GetCompanyAdminProfileReturn } from '@/src/types/database-overrides';
+import type { GetGetCompanyAdminProfileReturn } from '@/src/types/database-overrides';
 
 const COMPANY_DETAIL_TTL_KEY = 'cache.company_detail.ttl_seconds';
 
 export async function getCompanyAdminProfile(
   companyId: string
-): Promise<GetCompanyAdminProfileReturn | null> {
+): Promise<GetGetCompanyAdminProfileReturn | null> {
   if (!companyId) {
     return null;
   }
@@ -15,7 +15,7 @@ export async function getCompanyAdminProfile(
   // RPC returns array, but we normalize to single object
   const data = await fetchCachedRpc<
     'get_company_admin_profile',
-    GetCompanyAdminProfileReturn[] | null
+    GetGetCompanyAdminProfileReturn[] | null
   >(
     { p_company_id: companyId },
     {

@@ -10,9 +10,9 @@ import { useState } from 'react';
 import { Button } from '@/src/components/primitives/ui/button';
 import { LogOut } from '@/src/lib/icons';
 import { createClient } from '@/src/lib/supabase/client';
+import type { ButtonStyleProps } from '@/src/lib/types/component.types';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { toasts } from '@/src/lib/utils/toast.utils';
-import type { ButtonStyleProps } from '../shared/button-types';
 
 export type AuthSignOutButtonProps = ButtonStyleProps;
 

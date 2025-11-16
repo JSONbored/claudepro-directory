@@ -1,6 +1,7 @@
 #!/usr/bin/env tsx
 
 import { execSync } from 'node:child_process';
+import { logger } from '@/src/lib/logger';
 
 const ALLOWLIST = new Set([
   'src/lib/auth/get-authenticated-user.ts',
@@ -26,7 +27,13 @@ function run() {
       return;
     }
 
-    console.error('Failed to run ripgrep for auth guard enforcement.', error);
+    logger.error(
+      'Failed to run ripgrep for auth guard enforcement.',
+      error instanceof Error ? error : new Error(String(error)),
+      {
+        script: 'check-auth-guards',
+      }
+    );
     process.exit(1);
   }
 
@@ -40,12 +47,21 @@ function run() {
     });
 
   if (violations.length > 0) {
-    console.error('❌ Detected direct supabase.auth.getUser() usage outside approved helpers:\n');
+    logger.error(
+      '❌ Detected direct supabase.auth.getUser() usage outside approved helpers:\n',
+      undefined,
+      {
+        script: 'check-auth-guards',
+        violationCount: violations.length,
+      }
+    );
     for (const violation of violations) {
-      console.error(`  - ${violation}`);
+      logger.error(`  - ${violation}`, undefined, { script: 'check-auth-guards', violation });
     }
-    console.error(
-      '\nPlease use getAuthenticatedUser() (server) or useAuthenticatedUser() (client) instead.'
+    logger.error(
+      '\nPlease use getAuthenticatedUser() (server) or useAuthenticatedUser() (client) instead.',
+      undefined,
+      { script: 'check-auth-guards' }
     );
     process.exit(1);
   }

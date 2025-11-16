@@ -36,7 +36,7 @@ const NewsletterCTAVariant = dynamicImport(
 import { getHomepageFeaturedCategories } from '@/src/lib/data/config/category';
 import { getHomepageData } from '@/src/lib/data/content/homepage';
 import { logger } from '@/src/lib/logger';
-import type { GetHomepageCompleteReturn } from '@/src/types/database-overrides';
+import type { GetGetHomepageCompleteReturn } from '@/src/types/database-overrides';
 
 export const metadata = generatePageMetadata('/');
 
@@ -53,8 +53,8 @@ async function HomeContentSection({
   featuredJobs,
   categoryIds,
 }: {
-  homepageContentData: GetHomepageCompleteReturn['content'];
-  featuredJobs: GetHomepageCompleteReturn['featured_jobs'];
+  homepageContentData: GetGetHomepageCompleteReturn['content'];
+  featuredJobs: GetGetHomepageCompleteReturn['featured_jobs'];
   categoryIds: readonly string[];
 }) {
   try {
@@ -71,17 +71,17 @@ async function HomeContentSection({
       'Homepage content section error',
       error instanceof Error ? error : new Error(String(error))
     );
-    const emptyData: GetHomepageCompleteReturn['content']['categoryData'] =
-      {} as GetHomepageCompleteReturn['content']['categoryData'];
+    const emptyData: GetGetHomepageCompleteReturn['content']['categoryData'] =
+      {} as GetGetHomepageCompleteReturn['content']['categoryData'];
 
     return (
       <HomePageClient
         initialData={emptyData}
-        featuredByCategory={{} as GetHomepageCompleteReturn['content']['categoryData']}
+        featuredByCategory={{} as GetGetHomepageCompleteReturn['content']['categoryData']}
         stats={
           Object.fromEntries(
-            categoryIds.map((id: string) => [id, 0])
-          ) as GetHomepageCompleteReturn['content']['stats']
+            categoryIds.map((id: string) => [id, { total: 0, featured: 0 }])
+          ) as GetGetHomepageCompleteReturn['content']['stats']
         }
         featuredJobs={[]}
       />
@@ -138,52 +138,25 @@ export default async function HomePage({ searchParams }: HomePageProps) {
               homepageContentData={
                 homepageResult?.content ??
                 ({
-                  categoryData: {} as GetHomepageCompleteReturn['content']['categoryData'],
-                  stats: {} as GetHomepageCompleteReturn['content']['stats'],
+                  categoryData: {} as GetGetHomepageCompleteReturn['content']['categoryData'],
+                  stats: {} as GetGetHomepageCompleteReturn['content']['stats'],
                   weekStart: '',
-                } as GetHomepageCompleteReturn['content'])
+                } as GetGetHomepageCompleteReturn['content'])
               }
               featuredJobs={featuredJobs}
               categoryIds={categoryIds}
             />
           </Suspense>
         </div>
+
+        <LazySection>
+          <TopContributors contributors={topContributors} />
+        </LazySection>
+
+        <LazySection>
+          <NewsletterCTAVariant variant="hero" source="homepage" />
+        </LazySection>
       </div>
-
-      {Array.isArray(topContributors) && topContributors.length > 0 && (
-        <TopContributors
-          contributors={topContributors.map((contributor) => ({
-            ...contributor,
-            // Add required fields with defaults for UserProfile type
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-            email: null,
-            display_name: null,
-            website: null,
-            social_x_link: null,
-            interests: null,
-            profile_public: false,
-            follow_email: false,
-            bookmark_count: 0,
-            follower_count: 0,
-            following_count: 0,
-            submission_count: 0,
-            hero: null,
-            public: false,
-            status: null,
-            json_ld: null,
-            // Optional UserProfile extension fields are omitted (not set to undefined)
-          }))}
-        />
-      )}
-
-      <section className={'container mx-auto px-4 py-12'}>
-        <Suspense fallback={null}>
-          <LazySection variant="fade-in" delay={0.15}>
-            <NewsletterCTAVariant variant="hero" source="homepage" />
-          </LazySection>
-        </Suspense>
-      </section>
     </div>
   );
 }

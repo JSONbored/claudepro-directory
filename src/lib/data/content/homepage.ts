@@ -3,13 +3,13 @@
 import { fetchCachedRpc } from '@/src/lib/data/helpers';
 import { logger } from '@/src/lib/logger';
 import { normalizeError } from '@/src/lib/utils/error.utils';
-import type { GetHomepageCompleteReturn } from '@/src/types/database-overrides';
+import type { GetGetHomepageCompleteReturn } from '@/src/types/database-overrides';
 
 export async function getHomepageData(
   categoryIds: readonly string[]
-): Promise<GetHomepageCompleteReturn | null> {
+): Promise<GetGetHomepageCompleteReturn | null> {
   try {
-    return fetchCachedRpc<'get_homepage_complete', GetHomepageCompleteReturn | null>(
+    return fetchCachedRpc<'get_homepage_complete', GetGetHomepageCompleteReturn | null>(
       {
         p_category_ids: [...categoryIds],
       },

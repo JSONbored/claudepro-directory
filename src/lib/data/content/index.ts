@@ -6,21 +6,23 @@
 import { unstable_cache } from 'next/cache';
 import { cache } from 'react';
 import { getCacheTtl } from '@/src/lib/data/config/cache-config';
-import type { CategoryId } from '@/src/lib/data/config/category';
 import { fetchCachedRpc } from '@/src/lib/data/helpers';
 import { generateContentCacheKey, generateContentTags } from '@/src/lib/data/helpers-utils';
 import type { Tables } from '@/src/types/database.types';
-import type { GetEnrichedContentListReturn } from '@/src/types/database-overrides';
+import type {
+  ContentCategory,
+  GetGetEnrichedContentListReturn,
+} from '@/src/types/database-overrides';
 
 export type ContentItem = Tables<'content'> | Tables<'jobs'>;
 
 // Type alias for enriched content items (from RPCs)
-export type EnrichedContentItem = GetEnrichedContentListReturn[number];
+export type EnrichedContentItem = GetGetEnrichedContentListReturn[number];
 export type ContentListItem = Tables<'content'>;
 export type FullContentItem = ContentItem;
 
 export interface ContentFilters {
-  category?: CategoryId | CategoryId[];
+  category?: ContentCategory | ContentCategory[];
   tags?: string[];
   author?: string | string[];
   sourceTable?: string | string[];
@@ -31,9 +33,9 @@ export interface ContentFilters {
 }
 
 export async function getContentByCategory(
-  category: CategoryId
-): Promise<GetEnrichedContentListReturn> {
-  return fetchCachedRpc<'get_enriched_content_list', GetEnrichedContentListReturn>(
+  category: ContentCategory
+): Promise<GetGetEnrichedContentListReturn> {
+  return fetchCachedRpc<'get_enriched_content_list', GetGetEnrichedContentListReturn>(
     {
       p_category: category,
       p_limit: 1000,
@@ -51,12 +53,12 @@ export async function getContentByCategory(
 }
 
 export const getContentBySlug = cache(
-  async (category: CategoryId, slug: string): Promise<ContentItem | null> => {
+  async (category: ContentCategory, slug: string): Promise<ContentItem | null> => {
     const ttl = await getCacheTtl('cache.content_detail.ttl_seconds');
 
     return unstable_cache(
       async () => {
-        const data = await fetchCachedRpc<'get_enriched_content', GetEnrichedContentListReturn>(
+        const data = await fetchCachedRpc<'get_enriched_content', GetGetEnrichedContentListReturn>(
           {
             p_category: category,
             p_slug: slug,
@@ -88,7 +90,7 @@ export const getContentBySlug = cache(
 // Use get_content_detail_complete or get_enriched_content instead
 // This function is currently unused - consider removing or implementing with existing RPC
 export const getFullContentBySlug = cache(
-  async (category: CategoryId, slug: string): Promise<FullContentItem | null> => {
+  async (category: ContentCategory, slug: string): Promise<FullContentItem | null> => {
     // Fallback to getContentBySlug for now
     return getContentBySlug(category, slug);
   }
@@ -96,11 +98,11 @@ export const getFullContentBySlug = cache(
 
 // TODO: RPC 'get_all_content' does not exist - using get_content_paginated instead
 export const getAllContent = cache(
-  async (filters?: ContentFilters): Promise<GetEnrichedContentListReturn> => {
+  async (filters?: ContentFilters): Promise<GetGetEnrichedContentListReturn> => {
     const filterMeta = filters ? { filterKeys: Object.keys(filters).length } : undefined;
     const category = Array.isArray(filters?.category) ? filters.category[0] : filters?.category;
     const author = Array.isArray(filters?.author) ? filters.author[0] : filters?.author;
-    return fetchCachedRpc<'get_content_paginated', GetEnrichedContentListReturn>(
+    return fetchCachedRpc<'get_content_paginated', GetGetEnrichedContentListReturn>(
       {
         ...(category ? { p_category: category } : {}),
         ...(author ? { p_author: author } : {}),
@@ -125,10 +127,10 @@ export const getAllContent = cache(
 
 // TODO: RPC 'get_content_count' does not exist - derive count from paginated result
 // Consider creating a dedicated count RPC for better performance
-export const getContentCount = cache(async (category?: CategoryId): Promise<number> => {
+export const getContentCount = cache(async (category?: ContentCategory): Promise<number> => {
   // Use get_content_paginated with limit=1 to get total (if RPC returns pagination metadata)
   // For now, return a placeholder - this needs a proper count RPC
-  const data = await fetchCachedRpc<'get_content_paginated', GetEnrichedContentListReturn>(
+  const data = await fetchCachedRpc<'get_content_paginated', GetGetEnrichedContentListReturn>(
     {
       ...(category ? { p_category: category } : {}),
       p_limit: 1,
@@ -148,7 +150,7 @@ export const getContentCount = cache(async (category?: CategoryId): Promise<numb
   return data.length;
 });
 
-export const getTrendingContent = cache(async (category?: CategoryId, limit = 20) => {
+export const getTrendingContent = cache(async (category?: ContentCategory, limit = 20) => {
   return fetchCachedRpc<'get_trending_content', ContentListItem[]>(
     {
       ...(category ? { p_category: category } : {}),
@@ -166,7 +168,7 @@ export const getTrendingContent = cache(async (category?: CategoryId, limit = 20
 });
 
 export const getFilteredContent = cache(
-  async (filters: ContentFilters): Promise<GetEnrichedContentListReturn> => {
+  async (filters: ContentFilters): Promise<GetGetEnrichedContentListReturn> => {
     return getAllContent(filters);
   }
 );

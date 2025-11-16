@@ -10,6 +10,7 @@ import { Terminal } from '@/src/components/primitives/display/terminal';
 import { Button } from '@/src/components/primitives/ui/button';
 import { AlertTriangle } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 
 interface Props {
   children: ReactNode;
@@ -31,8 +32,13 @@ export class ContactTerminalErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: { componentStack?: string }) {
-    logger.error('ContactTerminal error boundary caught error', error, {
+    const normalized = normalizeError(error, 'Contact terminal error boundary triggered');
+    logger.error('ContactTerminal error boundary caught error', normalized, {
       componentStack: errorInfo.componentStack || 'unknown',
+      segment: 'contact-terminal',
+      userAgent: typeof window !== 'undefined' ? window.navigator?.userAgent || '' : '',
+      url: typeof window !== 'undefined' ? window.location?.href || '' : '',
+      timestamp: new Date().toISOString(),
     });
   }
 
