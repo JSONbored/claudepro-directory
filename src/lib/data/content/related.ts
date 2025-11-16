@@ -5,10 +5,7 @@
 
 import { fetchCachedRpc } from '@/src/lib/data/helpers';
 import { generateContentCacheKey, generateContentTags } from '@/src/lib/data/helpers-utils';
-import type { Database } from '@/src/types/database.types';
 import type { ContentCategory, GetRelatedContentReturn } from '@/src/types/database-overrides';
-
-type RelatedContentItem = Database['public']['Functions']['get_related_content']['Returns'][number];
 
 export interface RelatedContentInput {
   currentPath: string;
@@ -30,7 +27,7 @@ export interface RelatedContentResult {
 export async function getRelatedContent(input: RelatedContentInput): Promise<RelatedContentResult> {
   const currentSlug = input.currentPath.split('/').pop() || '';
 
-  const data = await fetchCachedRpc<RelatedContentItem[]>(
+  const data = await fetchCachedRpc<'get_related_content', GetRelatedContentReturn>(
     {
       p_category: input.currentCategory,
       p_slug: currentSlug,
@@ -49,23 +46,16 @@ export async function getRelatedContent(input: RelatedContentInput): Promise<Rel
     }
   );
 
-  const validItems = data.filter((item) => item.title && item.slug && item.category);
+  // RPC returns GetRelatedContentReturn directly (already properly typed)
+  // Filter and return valid items, ensuring category is valid ContentCategory
+  const validItems = data
+    .filter((item) => item.title && item.slug && item.category)
+    .map((item) => ({
+      ...item,
+      category: item.category as ContentCategory, // Database returns string, cast to ContentCategory
+    }));
 
   return {
-    items: validItems.map((item): GetRelatedContentReturn[number] => ({
-      category: item.category as ContentCategory,
-      slug: item.slug,
-      title: item.title,
-      description: item.description || '',
-      author: item.author || 'Community',
-      date_added: item.date_added
-        ? new Date(item.date_added).toISOString()
-        : new Date().toISOString(),
-      tags: item.tags || [],
-      score: Number(item.score) || 0,
-      match_type: item.match_type || 'same_category',
-      views: Number(item.views) || 0,
-      matched_tags: item.matched_tags || [],
-    })),
+    items: validItems as GetRelatedContentReturn,
   };
 }

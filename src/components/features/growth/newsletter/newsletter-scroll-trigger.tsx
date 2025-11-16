@@ -8,8 +8,9 @@
 import { motion, useScroll } from 'motion/react';
 import { useEffect, useState } from 'react';
 import { useLoggedAsync } from '@/src/hooks/use-logged-async';
-import type { NewsletterSource } from '@/src/hooks/use-newsletter';
-import { getNewsletterConfig } from '@/src/lib/actions/feature-flags.actions';
+import { getNewsletterConfigValue } from '@/src/lib/actions/feature-flags.actions';
+import { ensureNumber } from '@/src/lib/utils/data.utils';
+import type { NewsletterSource } from '@/src/types/database-overrides';
 import { NewsletterCTAVariant } from './newsletter-cta-variants';
 
 export interface NewsletterScrollTriggerProps {
@@ -52,14 +53,13 @@ export function NewsletterScrollTrigger({
 
     loadScrollConfig(
       async () => {
-        const result = await getNewsletterConfig({});
-        if (result?.data) {
-          const config = result.data;
-          const configHeight = config['newsletter.scroll_trigger.min_scroll_height_px'] as
-            | number
-            | undefined;
-          setScrollHeightThreshold(configHeight ?? 500);
-        }
+        const result = await getNewsletterConfigValue({
+          key: 'newsletter.scroll_trigger.min_scroll_height_px',
+        });
+        // getNewsletterConfigValue returns the typed value from defaults
+        // Use ensureNumber to safely validate and fallback to 500 if invalid
+        const configHeight = ensureNumber(result?.data, 500);
+        setScrollHeightThreshold(configHeight);
       },
       {
         context: {

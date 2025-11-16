@@ -149,7 +149,7 @@ export function RelatedContentClient({
 
   return (
     <section
-      itemScope
+      itemScope={true}
       itemType="https://schema.org/ItemList"
       className="my-12"
       aria-label="Related content"
@@ -202,8 +202,8 @@ export function RelatedContentClient({
               displayTitle={relatedItem.title ?? relatedItem.slug}
               description={relatedItem.description}
               tags={relatedItem.matchDetails?.matchedTags?.slice(0, 2) ?? []}
-              topAccent
-              compactMode
+              topAccent={true}
+              compactMode={true}
               ariaLabel={`Related: ${relatedItem.title}`}
               renderTopBadges={() => (
                 <div className="flex w-full items-center justify-between gap-2">

@@ -38,7 +38,7 @@ const DialogOverlay = ({
 }: React.ComponentPropsWithoutRef<typeof DialogPrimitive.Overlay> & {
   ref?: React.RefObject<React.ElementRef<typeof DialogPrimitive.Overlay> | null>;
 }) => (
-  <DialogPrimitive.Overlay ref={ref} asChild {...props}>
+  <DialogPrimitive.Overlay ref={ref} asChild={true} {...props}>
     <motion.div
       className={cn(
         `${POSITION_PATTERNS.FIXED_INSET} z-50 bg-black/80 backdrop-blur-sm`,
@@ -86,7 +86,7 @@ const DialogContent = ({
   return (
     <DialogPortal>
       <DialogOverlay />
-      <DialogPrimitive.Content ref={ref} asChild {...props}>
+      <DialogPrimitive.Content ref={ref} asChild={true} {...props}>
         <motion.div
           className={cn(
             `${POSITION_PATTERNS.FIXED_CENTER} z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg sm:rounded-lg`,

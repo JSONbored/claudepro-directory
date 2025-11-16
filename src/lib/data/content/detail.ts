@@ -13,7 +13,7 @@ export async function getContentDetailComplete(input: {
   const { category, slug } = input;
 
   try {
-    return fetchCachedRpc<GetContentDetailCompleteReturn | null>(
+    return fetchCachedRpc<'get_content_detail_complete', GetContentDetailCompleteReturn | null>(
       {
         p_category: category,
         p_slug: slug,

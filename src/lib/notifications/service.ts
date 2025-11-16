@@ -1,14 +1,14 @@
 import { randomUUID } from 'node:crypto';
 import { type NotificationRecord, revalidateNotificationCache } from '@/src/lib/data/notifications';
 import { createClient } from '@/src/lib/supabase/server';
-import type { Database } from '@/src/types/database.types';
+import type { NotificationPriority, NotificationType } from '@/src/types/database-overrides';
 
 export interface NotificationCreateInput {
   id?: string;
   title: string;
   message: string;
-  type: Database['public']['Enums']['notification_type'];
-  priority?: Database['public']['Enums']['notification_priority'];
+  type: NotificationType;
+  priority?: NotificationPriority;
   action_label?: string | null;
   action_href?: string | null;
   action_onclick?: string | null;

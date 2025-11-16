@@ -1,8 +1,8 @@
-import { SITE_URL, supabaseServiceRole } from '../../clients/supabase.ts';
+import { supabaseServiceRole } from '../../clients/supabase.ts';
 import { edgeEnv } from '../../config/env.ts';
 import type { Database as DatabaseGenerated } from '../../database.types.ts';
 import type { Database } from '../../database-overrides.ts';
-import { callRpc, updateTable } from '../../database-overrides.ts';
+import { callRpc, NOTIFICATION_TYPE_VALUES, updateTable } from '../../database-overrides.ts';
 import { insertNotification } from '../../notifications/service.ts';
 import { invalidateCacheByKey } from '../../utils/cache.ts';
 import {
@@ -17,6 +17,7 @@ import {
   buildSubmissionEmbed,
   type GitHubCommit,
 } from '../../utils/discord/embeds.ts';
+import { errorToString } from '../../utils/error-handling.ts';
 import {
   badRequestResponse,
   discordCorsHeaders,
@@ -33,6 +34,293 @@ import {
 
 type JobRow = Database['public']['Tables']['jobs']['Row'];
 type ContentSubmission = Database['public']['Tables']['content_submissions']['Row'];
+
+/**
+ * Direct handler for job notifications (called from Realtime subscriptions)
+ * Accepts payload directly instead of Request object
+ */
+export async function handleJobNotificationDirect(
+  payload: DatabaseWebhookPayload<JobRow>
+): Promise<void> {
+  const webhookUrl = validateWebhookUrl(edgeEnv.discord.jobs, 'DISCORD_WEBHOOK_JOBS');
+  if (webhookUrl instanceof Response) {
+    console.error('[discord-handler] Discord webhook not configured for jobs');
+    return;
+  }
+
+  const job = payload.record;
+
+  if (job.is_placeholder) {
+    console.log('[discord-handler] Skipping placeholder job', { jobId: job.id });
+    return;
+  }
+
+  if (!job.status || job.status === 'draft') {
+    console.log('[discord-handler] Skipping draft job', { jobId: job.id });
+    return;
+  }
+
+  const rpcArgs = {
+    p_job_id: job.id,
+  } satisfies DatabaseGenerated['public']['Functions']['build_job_discord_embed']['Args'];
+  const { data: embedData, error: embedError } = await callRpc('build_job_discord_embed', rpcArgs);
+
+  if (embedError || !embedData) {
+    const logContext = createDiscordHandlerContext('job-notification', {
+      jobId: job.id,
+    });
+    console.error('[discord-handler] Failed to build embed', {
+      ...logContext,
+      error: embedError instanceof Error ? embedError.message : String(embedError),
+    });
+    return;
+  }
+
+  if (job.discord_message_id) {
+    await updateJobDiscordMessageDirect(job, embedData, webhookUrl);
+  } else {
+    await createJobDiscordMessageDirect(job, embedData, webhookUrl);
+  }
+}
+
+async function createJobDiscordMessageDirect(
+  job: JobRow,
+  embedData: unknown,
+  webhookUrl: string
+): Promise<void> {
+  const logContext = createDiscordHandlerContext('job-notification', {
+    jobId: job.id,
+  });
+
+  const payload = { embeds: [embedData] };
+  const { messageId } = await createDiscordMessageWithLogging(
+    webhookUrl,
+    payload,
+    'job_notification',
+    {
+      relatedId: job.id,
+      metadata: {
+        job_id: job.id,
+        status: job.status,
+        action: 'create',
+      },
+      logType: 'job_notification_create',
+      logContext,
+    }
+  );
+
+  if (!messageId) {
+    console.error('[discord-handler] Discord response missing message ID', logContext);
+    return;
+  }
+
+  const updateData = {
+    discord_message_id: messageId,
+  } satisfies DatabaseGenerated['public']['Tables']['jobs']['Update'];
+  const { error: updateError } = await updateTable('jobs', updateData, job.id);
+
+  if (updateError) {
+    console.error('[discord-handler] Failed to store discord_message_id', {
+      ...logContext,
+      error: updateError instanceof Error ? updateError.message : String(updateError),
+    });
+  }
+}
+
+async function updateJobDiscordMessageDirect(
+  job: JobRow,
+  embedData: unknown,
+  webhookUrl: string
+): Promise<void> {
+  const logContext = createDiscordHandlerContext('job-notification', {
+    jobId: job.id,
+  });
+
+  if (!job.discord_message_id) {
+    await createJobDiscordMessageDirect(job, embedData, webhookUrl);
+    return;
+  }
+
+  const result = await updateDiscordMessageUtil(
+    webhookUrl,
+    job.discord_message_id,
+    { embeds: [embedData] },
+    'job_notification',
+    job.id,
+    { action: 'update', job_id: job.id, status: job.status },
+    logContext
+  );
+
+  if (result.deleted) {
+    const nullUpdateData = {
+      discord_message_id: null,
+    } satisfies DatabaseGenerated['public']['Tables']['jobs']['Update'];
+    await updateTable('jobs', nullUpdateData, job.id);
+    await createJobDiscordMessageDirect(job, embedData, webhookUrl);
+  }
+}
+
+/**
+ * Direct handler for submission notifications (called from Realtime subscriptions)
+ */
+export async function handleSubmissionNotificationDirect(
+  payload: DatabaseWebhookPayload<ContentSubmission>
+): Promise<void> {
+  const webhookUrl = validateWebhookUrl(edgeEnv.discord.defaultWebhook, 'DISCORD_WEBHOOK_URL');
+  if (webhookUrl instanceof Response) {
+    console.error('[discord-handler] Discord webhook not configured for submissions');
+    return;
+  }
+
+  if (!filterEventType(payload, ['INSERT'])) {
+    console.log('[discord-handler] Skipping non-INSERT submission event', {
+      type: payload.type,
+      submissionId: payload.record.id,
+    });
+    return;
+  }
+
+  const SPAM_THRESHOLD = 0.7;
+  if (payload.record.spam_score !== null && payload.record.spam_score > SPAM_THRESHOLD) {
+    console.log('[discord-handler] Skipping spam submission', {
+      submissionId: payload.record.id,
+      spamScore: payload.record.spam_score,
+    });
+    return;
+  }
+
+  const logContext = createDiscordHandlerContext('submission-notification', {
+    contentId: payload.record.id,
+  });
+
+  const embed = buildSubmissionEmbed(payload.record);
+  await sendDiscordWebhook(
+    webhookUrl,
+    { content: '🆕 **New Content Submission**', embeds: [embed] },
+    'submission_notification',
+    {
+      relatedId: payload.record.id,
+      metadata: {
+        submission_id: payload.record.id,
+        submission_type: payload.record.submission_type,
+        category: payload.record.category,
+      },
+      logContext,
+    }
+  );
+}
+
+/**
+ * Direct handler for content announcements (called from Realtime subscriptions)
+ */
+export async function handleContentNotificationDirect(
+  payload: DatabaseWebhookPayload<ContentSubmission>
+): Promise<void> {
+  const webhookUrl = validateWebhookUrl(
+    edgeEnv.discord.announcements,
+    'DISCORD_ANNOUNCEMENTS_WEBHOOK_URL'
+  );
+  if (webhookUrl instanceof Response) {
+    console.error('[discord-handler] Discord webhook not configured for announcements');
+    return;
+  }
+
+  if (!didStatusChangeTo(payload, 'merged')) {
+    console.log('[discord-handler] Skipping non-merged submission', {
+      submissionId: payload.record.id,
+      status: payload.record.status,
+    });
+    return;
+  }
+
+  const { data: content, error: contentError } = await supabaseServiceRole
+    .from('content')
+    .select(
+      'id, category, slug, title, display_title, description, author, author_profile_url, tags, date_added'
+    )
+    .eq('category', payload.record.category)
+    .eq('slug', payload.record.approved_slug ?? '')
+    .single<Database['public']['Tables']['content']['Row']>();
+
+  const logContext = createDiscordHandlerContext('content-notification', {
+    contentId: content?.id,
+    category: content?.category,
+    slug: content?.slug,
+  });
+
+  if (contentError || !content) {
+    console.error('[discord-handler] Failed to fetch content', {
+      ...logContext,
+      error: errorToString(contentError),
+      approved_slug: payload.record.approved_slug,
+    });
+    return;
+  }
+
+  const updatedContext = withContext(logContext, {
+    content_id: content.id,
+    category: content.category,
+    slug: content.slug,
+  });
+
+  const embed = buildContentEmbed(content);
+  await sendDiscordWebhook(
+    webhookUrl,
+    { content: '🎉 **New Content Added to Claude Pro Directory!**', embeds: [embed] },
+    'content_announcement',
+    {
+      relatedId: content.id,
+      metadata: {
+        content_id: content.id,
+        category: content.category,
+        slug: content.slug,
+      },
+      logContext: updatedContext,
+    }
+  );
+
+  // Insert notification (same as original handler)
+  await insertNotification(
+    {
+      id: content.id,
+      title: content.display_title ?? content.title ?? 'New content',
+      message: content.description ?? payload.record.description ?? 'New content just dropped.',
+      type: NOTIFICATION_TYPE_VALUES[0], // 'announcement'
+      priority: 'medium',
+      action_label: 'View content',
+      // Database constraint requires action_href to start with '/' (relative path) or be NULL
+      action_href: `/${content.category}/${content.slug}`,
+      metadata: {
+        content_id: content.id,
+        category: content.category,
+        slug: content.slug,
+        source: 'content-notification',
+      },
+    },
+    updatedContext
+  );
+
+  // Invalidate cache after notification insert (same as original handler)
+  await invalidateCacheByKey('cache.invalidate.notifications', ['notifications'], {
+    logContext: updatedContext,
+  }).catch((error) => {
+    console.warn('[discord-handler] Cache invalidation failed', {
+      ...updatedContext,
+      error: errorToString(error),
+    });
+  });
+
+  await invalidateCacheByKey(
+    'cache.invalidate.content_create',
+    ['content', 'homepage', 'trending'],
+    { category: content.category, slug: content.slug, logContext: updatedContext }
+  ).catch((error) => {
+    console.warn('[discord-handler] Cache invalidation failed', {
+      ...updatedContext,
+      error: errorToString(error),
+    });
+  });
+}
 
 interface WebhookEventRecord {
   id: string;
@@ -343,10 +631,11 @@ async function handleContentNotification(req: Request): Promise<Response> {
       id: content.id,
       title: content.display_title ?? content.title ?? 'New content',
       message: content.description ?? payload.record.description ?? 'New content just dropped.',
-      type: 'announcement',
+      type: NOTIFICATION_TYPE_VALUES[0], // 'announcement'
       priority: 'medium',
       action_label: 'View content',
-      action_href: `${SITE_URL}/${content.category}/${content.slug}`,
+      // Database constraint requires action_href to start with '/' (relative path) or be NULL
+      action_href: `/${content.category}/${content.slug}`,
       metadata: {
         content_id: content.id,
         category: content.category,
@@ -363,7 +652,7 @@ async function handleContentNotification(req: Request): Promise<Response> {
   }).catch((error) => {
     console.warn('[discord-handler] Cache invalidation failed', {
       ...updatedContext,
-      error: error instanceof Error ? error.message : String(error),
+      error: errorToString(error),
     });
   });
 
@@ -374,7 +663,7 @@ async function handleContentNotification(req: Request): Promise<Response> {
   ).catch((error) => {
     console.warn('[discord-handler] Cache invalidation failed', {
       ...updatedContext,
-      error: error instanceof Error ? error.message : String(error),
+      error: errorToString(error),
     });
   });
 
@@ -488,10 +777,11 @@ async function handleChangelogNotification(req: Request): Promise<Response> {
       id: entry.id,
       title: entry.title,
       message: entry.tldr ?? entry.description ?? 'We just published new release notes.',
-      type: 'announcement',
+      type: NOTIFICATION_TYPE_VALUES[0], // 'announcement'
       priority: 'medium',
       action_label: 'View changelog',
-      action_href: `${SITE_URL}/changelog/${entry.slug}`,
+      // Database constraint requires action_href to start with '/' (relative path) or be NULL
+      action_href: `/changelog/${entry.slug}`,
       metadata: {
         slug: entry.slug,
         changelog_id: entry.id,
@@ -507,7 +797,7 @@ async function handleChangelogNotification(req: Request): Promise<Response> {
   }).catch((error) => {
     console.warn('[discord-handler] Cache invalidation failed', {
       ...logContext,
-      error: error instanceof Error ? error.message : String(error),
+      error: errorToString(error),
     });
   });
 
@@ -518,7 +808,7 @@ async function handleChangelogNotification(req: Request): Promise<Response> {
   }).catch((error) => {
     console.warn('[discord-handler] Cache invalidation failed', {
       ...logContext,
-      error: error instanceof Error ? error.message : String(error),
+      error: errorToString(error),
     });
   });
 

@@ -24,15 +24,23 @@ import { callRpc } from '../_shared/database-overrides.ts';
 import { enqueueSearchAnalytics } from '../_shared/utils/analytics/pulse.ts';
 import {
   badRequestResponse,
+  buildCacheHeaders,
   errorResponse,
   getWithAuthCorsHeaders,
 } from '../_shared/utils/http.ts';
+import { validateLimit, validateQueryString } from '../_shared/utils/input-validation.ts';
 import { createSearchContext, withDuration } from '../_shared/utils/logging.ts';
+import { checkRateLimit, RATE_LIMIT_PRESETS } from '../_shared/utils/rate-limit.ts';
+import {
+  applyRateLimitHeaders,
+  createRateLimitErrorResponse,
+} from '../_shared/utils/rate-limit-middleware.ts';
 import { createRouter, type HttpMethod, type RouterContext } from '../_shared/utils/router.ts';
 import {
   highlightSearchTerms,
   highlightSearchTermsArray,
 } from '../_shared/utils/search-highlight.ts';
+import { buildSecurityHeaders } from '../_shared/utils/security-headers.ts';
 
 type ContentSearchResult = RpcReturns<'search_content_optimized'>[number];
 type UnifiedSearchResult = RpcReturns<'search_unified'>[number];
@@ -112,21 +120,55 @@ const router = createRouter<UnifiedSearchContext>({
   },
   defaultCors: getWithAuthCorsHeaders,
   onNoMatch: (ctx) => {
-    // Default: main search endpoint
-    return handleSearch(ctx.url, ctx.startTime, ctx.request);
+    const rateLimit = checkRateLimit(ctx.request, RATE_LIMIT_PRESETS.search);
+    if (!rateLimit.allowed) {
+      return createRateLimitErrorResponse(rateLimit, {
+        preset: 'search',
+        cors: getWithAuthCorsHeaders,
+        errorResponseType: 'badRequest',
+      });
+    }
+    return handleSearch(ctx.url, ctx.startTime, ctx.request).then((response) => {
+      applyRateLimitHeaders(response, rateLimit, 'search');
+      return response;
+    });
   },
   routes: [
     {
       name: 'autocomplete',
       methods: ['GET', 'HEAD', 'OPTIONS'],
       match: (ctx) => ctx.pathname.endsWith('/autocomplete'),
-      handler: (ctx) => handleAutocomplete(ctx.url, ctx.startTime),
+      handler: async (ctx) => {
+        const rateLimit = checkRateLimit(ctx.request, RATE_LIMIT_PRESETS.search);
+        if (!rateLimit.allowed) {
+          return createRateLimitErrorResponse(rateLimit, {
+            preset: 'search',
+            cors: getWithAuthCorsHeaders,
+            errorResponseType: 'badRequest',
+          });
+        }
+        const response = await handleAutocomplete(ctx.url, ctx.startTime);
+        applyRateLimitHeaders(response, rateLimit, 'search');
+        return response;
+      },
     },
     {
       name: 'facets',
       methods: ['GET', 'HEAD', 'OPTIONS'],
       match: (ctx) => ctx.pathname.endsWith('/facets'),
-      handler: (ctx) => handleFacets(ctx.startTime),
+      handler: async (ctx) => {
+        const rateLimit = checkRateLimit(ctx.request, RATE_LIMIT_PRESETS.search);
+        if (!rateLimit.allowed) {
+          return createRateLimitErrorResponse(rateLimit, {
+            preset: 'search',
+            cors: getWithAuthCorsHeaders,
+            errorResponseType: 'badRequest',
+          });
+        }
+        const response = await handleFacets(ctx.startTime);
+        applyRateLimitHeaders(response, rateLimit, 'search');
+        return response;
+      },
     },
   ],
 });
@@ -148,6 +190,15 @@ Deno.serve(async (request) => {
  * Main search endpoint with analytics tracking and caching
  */
 async function handleSearch(url: URL, startTime: number, req: Request): Promise<Response> {
+  // Validate query string
+  const queryStringValidation = validateQueryString(url);
+  if (!queryStringValidation.valid) {
+    return badRequestResponse(
+      queryStringValidation.error ?? 'Invalid query string',
+      getWithAuthCorsHeaders
+    );
+  }
+
   // Parse and validate query parameters
   const query = url.searchParams.get('q')?.trim() || '';
   const categories = url.searchParams.get('categories')?.split(',').filter(Boolean);
@@ -155,11 +206,23 @@ async function handleSearch(url: URL, startTime: number, req: Request): Promise<
   const authors = url.searchParams.get('authors')?.split(',').filter(Boolean);
   const entities = url.searchParams.get('entities')?.split(',').filter(Boolean);
   const sort = url.searchParams.get('sort') || 'relevance';
-  const limit = Math.min(
-    Math.max(Number.parseInt(url.searchParams.get('limit') || '20', 10), 1),
-    100
-  );
-  const offset = Math.max(Number.parseInt(url.searchParams.get('offset') || '0', 10), 0);
+
+  // Validate limit parameter
+  const limitValidation = validateLimit(url.searchParams.get('limit'), 1, 100, 20);
+  if (!limitValidation.valid) {
+    return badRequestResponse(
+      limitValidation.error ?? 'Invalid limit parameter',
+      getWithAuthCorsHeaders
+    );
+  }
+  const limit = limitValidation.limit!;
+
+  // Validate offset parameter
+  const offsetParam = url.searchParams.get('offset');
+  const offset = offsetParam ? Math.max(Number.parseInt(offsetParam, 10), 0) : 0;
+  if (Number.isNaN(offset)) {
+    return badRequestResponse('Invalid offset parameter', getWithAuthCorsHeaders);
+  }
 
   // Determine search type based on entities parameter
   const searchType: 'content' | 'unified' = entities ? 'unified' : 'content';
@@ -339,9 +402,8 @@ async function handleSearch(url: URL, startTime: number, req: Request): Promise<
     status: 200,
     headers: {
       'Content-Type': 'application/json',
-      // Edge caching: 5 minutes + stale-while-revalidate
-      'Cache-Control': 'public, max-age=300, s-maxage=300, stale-while-revalidate=60',
-      'CDN-Cache-Control': 'max-age=300',
+      ...buildSecurityHeaders(),
+      ...buildCacheHeaders('search'),
       ...getWithAuthCorsHeaders,
     },
   });
@@ -351,11 +413,26 @@ async function handleSearch(url: URL, startTime: number, req: Request): Promise<
  * Autocomplete endpoint - smart suggestions from search history + content titles
  */
 async function handleAutocomplete(url: URL, startTime: number): Promise<Response> {
+  // Validate query string
+  const queryStringValidation = validateQueryString(url);
+  if (!queryStringValidation.valid) {
+    return badRequestResponse(
+      queryStringValidation.error ?? 'Invalid query string',
+      getWithAuthCorsHeaders
+    );
+  }
+
   const query = url.searchParams.get('q')?.trim() || '';
-  const limit = Math.min(
-    Math.max(Number.parseInt(url.searchParams.get('limit') || '10', 10), 1),
-    20
-  );
+
+  // Validate limit parameter
+  const limitValidation = validateLimit(url.searchParams.get('limit'), 1, 20, 10);
+  if (!limitValidation.valid) {
+    return badRequestResponse(
+      limitValidation.error ?? 'Invalid limit parameter',
+      getWithAuthCorsHeaders
+    );
+  }
+  const limit = limitValidation.limit!;
 
   // Create logContext
   const logContext = createSearchContext({
@@ -406,9 +483,8 @@ async function handleAutocomplete(url: URL, startTime: number): Promise<Response
     status: 200,
     headers: {
       'Content-Type': 'application/json',
-      // Longer cache for autocomplete (1 hour)
-      'Cache-Control': 'public, max-age=3600, s-maxage=3600',
-      'CDN-Cache-Control': 'max-age=3600',
+      ...buildSecurityHeaders(),
+      ...buildCacheHeaders('search_autocomplete'),
       'X-Response-Time': `${Math.round(totalTime)}ms`,
       ...getWithAuthCorsHeaders,
     },
@@ -462,9 +538,8 @@ async function handleFacets(startTime: number): Promise<Response> {
     status: 200,
     headers: {
       'Content-Type': 'application/json',
-      // Long cache for facets (1 hour)
-      'Cache-Control': 'public, max-age=3600, s-maxage=3600',
-      'CDN-Cache-Control': 'max-age=3600',
+      ...buildSecurityHeaders(),
+      ...buildCacheHeaders('search_facets'),
       'X-Response-Time': `${Math.round(totalTime)}ms`,
       ...getWithAuthCorsHeaders,
     },
@@ -473,7 +548,7 @@ async function handleFacets(startTime: number): Promise<Response> {
 
 /**
  * Track search analytics - Queue-Based
- * Enqueues to user_interactions queue for batched processing (98% egress reduction)
+ * Enqueues to pulse queue for batched processing (98% egress reduction)
  * Fire and forget - don't block response
  */
 async function trackSearchAnalytics(

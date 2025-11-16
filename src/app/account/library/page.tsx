@@ -40,7 +40,7 @@ export default async function LibraryPage() {
             <CardDescription>Please sign in to view your library.</CardDescription>
           </CardHeader>
           <CardContent>
-            <Button asChild>
+            <Button asChild={true}>
               <Link href={ROUTES.LOGIN}>Go to login</Link>
             </Button>
           </CardContent>
@@ -71,7 +71,7 @@ export default async function LibraryPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button asChild variant="outline">
+            <Button asChild={true} variant="outline">
               <Link href={ROUTES.ACCOUNT}>Back to dashboard</Link>
             </Button>
           </CardContent>

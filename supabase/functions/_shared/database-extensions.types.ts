@@ -39,7 +39,7 @@ interface PgmqPublicSchema {
     delete: {
       Args: {
         queue_name: string;
-        msg_id: bigint;
+        message_id: bigint; // pgmq.delete uses 'message_id' parameter name
       };
       Returns: boolean | null;
     };

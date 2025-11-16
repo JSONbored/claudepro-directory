@@ -65,7 +65,7 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPageProps
   return (
     <div className="space-y-6">
       <div>
-        <Button variant="ghost" size="sm" asChild className="mb-4">
+        <Button variant="ghost" size="sm" asChild={true} className="mb-4">
           <Link href={ROUTES.ACCOUNT_JOBS}>
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Jobs
@@ -77,7 +77,7 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPageProps
             <p className="text-muted-foreground">{job.title}</p>
           </div>
           {job.slug && (
-            <Button variant="outline" asChild>
+            <Button variant="outline" asChild={true}>
               <Link href={`/jobs/${job.slug}`}>
                 <ExternalLink className="mr-2 h-4 w-4" />
                 View Listing
@@ -94,9 +94,9 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPageProps
             <UnifiedBadge
               variant="base"
               style="outline"
-              className={getStatusColor((job.status ?? 'draft') as JobStatus)}
+              className={getStatusColor((job.status ?? ('draft' as JobStatus)) as JobStatus)}
             >
-              {job.status ?? 'draft'}
+              {job.status ?? ('draft' as JobStatus)}
             </UnifiedBadge>
           </div>
         </CardHeader>

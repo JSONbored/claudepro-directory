@@ -14,7 +14,13 @@ import {
 import { logger } from '@/src/lib/logger';
 import { createClient } from '@/src/lib/supabase/client';
 import type { Json } from '@/src/types/database.types';
-import type { ContentCategory } from '@/src/types/database-overrides';
+import type {
+  ContentCategory,
+  ExperienceLevel,
+  FocusAreaType,
+  IntegrationType,
+  UseCaseType,
+} from '@/src/types/database-overrides';
 
 const EDGE_BASE_URL = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1`;
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://claudepro.directory';
@@ -147,21 +153,21 @@ export interface ConfigRecommendationsResponse {
     id: string;
     generatedAt: string;
     answers: {
-      useCase: string;
-      experienceLevel: string;
+      useCase: UseCaseType;
+      experienceLevel: ExperienceLevel;
       toolPreferences: string[];
-      integrations: string[];
-      focusAreas: string[];
+      integrations: IntegrationType[];
+      focusAreas: FocusAreaType[];
     };
   };
 }
 
 export async function generateConfigRecommendations(answers: {
-  useCase: string;
-  experienceLevel: string;
+  useCase: UseCaseType;
+  experienceLevel: ExperienceLevel;
   toolPreferences: string[];
-  integrations?: string[];
-  focusAreas?: string[];
+  integrations?: IntegrationType[];
+  focusAreas?: FocusAreaType[];
 }): Promise<ConfigRecommendationsResponse> {
   const result = await generateConfigRecommendationsAction(answers);
   const payload = result?.data;
@@ -229,7 +235,7 @@ export async function trackNewsletterEvent(
 
 /**
  * Track content usage (copy, download) - Queue-Based
- * Enqueues to user_interactions queue for batched processing
+ * Enqueues to pulse queue for batched processing
  */
 export async function trackUsage(params: {
   content_type: ContentCategory;
@@ -257,6 +263,33 @@ export interface HighlightCodeResponse {
   html: string;
   cached: boolean;
   cacheKey?: string;
+  error?: string;
+}
+
+export interface ProcessContentItem {
+  category: string;
+  slug?: string | null;
+  name?: string | null;
+  hook_type?: string | null;
+}
+
+export interface ProcessContentOptions {
+  operation: 'full' | 'filename' | 'highlight';
+  code?: string;
+  language?: string;
+  languageHint?: string;
+  showLineNumbers?: boolean;
+  item?: ProcessContentItem;
+  format?: 'json' | 'multi' | 'hook';
+  section?: string;
+  sectionKey?: string;
+  contentType?: 'hookConfig' | 'scriptContent';
+}
+
+export interface ProcessContentResponse {
+  html?: string;
+  language?: string;
+  filename?: string;
   error?: string;
 }
 
@@ -333,5 +366,142 @@ export async function highlightCodeEdge(
       .replace(/'/g, '&#039;');
 
     return `<pre class="code-block-pre code-block-fallback"><code>${escapedCode}</code></pre>`;
+  }
+}
+
+/**
+ * Process content - Batched language detection, filename generation, and highlighting
+ *
+ * This function calls the edge function to process content, which:
+ * - Supports 3 operation modes: 'full' (batched), 'filename' (filename only), 'highlight' (highlight only)
+ * - Processes at the edge (faster, cached)
+ * - Uses immutable caching (same input = same output, cached forever)
+ *
+ * @param options - Processing options (operation mode, code, item, etc.)
+ * @returns Processed content with html, language, and/or filename based on operation mode
+ *
+ * @example
+ * ```typescript
+ * // Full batched processing
+ * const result = await processContentEdge({
+ *   operation: 'full',
+ *   code: 'const x = 1;',
+ *   languageHint: 'typescript',
+ *   item: { category: 'agents', slug: 'my-agent' }
+ * });
+ * // Returns: { html, language, filename }
+ *
+ * // Filename only
+ * const filename = await processContentEdge({
+ *   operation: 'filename',
+ *   language: 'json',
+ *   item: { category: 'mcp', slug: 'my-mcp' },
+ *   format: 'multi',
+ *   sectionKey: 'claudeDesktop'
+ * });
+ * // Returns: { filename }
+ * ```
+ */
+export async function processContentEdge(
+  options: ProcessContentOptions
+): Promise<ProcessContentResponse> {
+  const {
+    operation,
+    code,
+    language,
+    languageHint,
+    showLineNumbers = true,
+    item,
+    format,
+    section,
+    sectionKey,
+    contentType,
+  } = options;
+
+  // Validate required fields based on operation
+  if (operation === 'full' || operation === 'highlight') {
+    if (!code || code.trim() === '') {
+      return {
+        html: '<pre class="sugar-high-empty"><code>No code provided</code></pre>',
+      };
+    }
+  }
+
+  if (operation === 'full' || operation === 'filename') {
+    if (!item?.category) {
+      throw new Error('Item with category is required for full and filename operations');
+    }
+  }
+
+  try {
+    const response = await fetch(`${EDGE_TRANSFORM_URL}/content/process`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        operation,
+        code,
+        language,
+        languageHint,
+        showLineNumbers,
+        item,
+        format,
+        section,
+        sectionKey,
+        contentType,
+      }),
+      next: {
+        revalidate: 31536000, // 1 year (immutable cache - same input = same output)
+        tags: ['transform:process'],
+      },
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Content processing failed: ${response.status} ${errorText}`);
+    }
+
+    const data = (await response.json()) as ProcessContentResponse;
+
+    // If edge function returned an error, log it
+    if (data.error) {
+      logger.warn('Edge content processing returned error', {
+        error: data.error,
+        operation,
+        ...(language && { language }),
+        ...(code && { codePreview: code.slice(0, 80) }),
+      });
+    }
+
+    return data;
+  } catch (error) {
+    // Fallback handling based on operation
+    const normalized = error instanceof Error ? error : new Error(String(error));
+    logger.warn('Edge content processing failed', {
+      error: normalized.message,
+      operation,
+      ...(language && { language }),
+      ...(code && { codePreview: code.slice(0, 80) }),
+    });
+
+    // For highlight operations, provide fallback HTML
+    if (operation === 'full' || operation === 'highlight') {
+      const escapedCode = (code || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+
+      return {
+        html: `<pre class="code-block-pre code-block-fallback"><code>${escapedCode}</code></pre>`,
+        language: language || 'text',
+        ...(item && {
+          filename: `${item.slug || 'untitled'}.${language || 'txt'}`,
+        }),
+      };
+    }
+
+    // For filename-only operations, throw error (no fallback)
+    throw normalized;
   }
 }

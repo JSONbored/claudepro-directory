@@ -53,9 +53,9 @@ async function fetchTrendingMetrics(
   category: CategoryId | null,
   limit: number
 ): Promise<GetTrendingMetricsReturn> {
-  return fetchCachedRpc<GetTrendingMetricsReturn>(
+  return fetchCachedRpc<'get_trending_metrics_with_content', GetTrendingMetricsReturn>(
     {
-      p_category: category,
+      ...(category ? { p_category: category } : {}),
       p_limit: limit,
     },
     {
@@ -73,9 +73,9 @@ async function fetchPopularContent(
   category: CategoryId | null,
   limit: number
 ): Promise<GetPopularContentReturn> {
-  return fetchCachedRpc<GetPopularContentReturn>(
+  return fetchCachedRpc<'get_popular_content', GetPopularContentReturn>(
     {
-      p_category: category,
+      ...(category ? { p_category: category } : {}),
       p_limit: limit,
     },
     {
@@ -93,9 +93,9 @@ async function fetchRecentContent(
   category: CategoryId | null,
   limit: number
 ): Promise<GetRecentContentReturn> {
-  return fetchCachedRpc<GetRecentContentReturn>(
+  return fetchCachedRpc<'get_recent_content', GetRecentContentReturn>(
     {
-      p_category: category,
+      ...(category ? { p_category: category } : {}),
       p_limit: limit,
       p_days: 30,
     },

@@ -22,6 +22,12 @@ import type {
 import { SUBMISSION_CONTENT_TYPES } from '@/src/lib/forms/types';
 import { logger } from '@/src/lib/logger';
 import type { GetFormFieldsForContentTypeReturn } from '@/src/types/database-overrides';
+import {
+  FIELD_SCOPE_VALUES,
+  FIELD_TYPE_VALUES,
+  type FieldScope,
+  type FieldType,
+} from '@/src/types/database-overrides';
 
 type RpcRow = GetFormFieldsForContentTypeReturn[number];
 type RpcRows = GetFormFieldsForContentTypeReturn;
@@ -115,16 +121,15 @@ function mapField(row: RpcRow): FieldDefinition | null {
     iconPosition: mapIconPosition(row.icon_position),
   };
 
-  switch (row.field_type) {
-    case 'text': {
+  switch (row.field_type as FieldType) {
+    case FIELD_TYPE_VALUES[0]: // 'text'
       return {
         ...base,
         type: 'text',
         defaultValue: getStringProperty(props, ['defaultValue', 'default_value']),
       } as TextFieldDefinition;
-    }
 
-    case 'textarea': {
+    case FIELD_TYPE_VALUES[1]: // 'textarea'
       return {
         ...base,
         type: 'textarea',
@@ -132,9 +137,9 @@ function mapField(row: RpcRow): FieldDefinition | null {
         monospace: getBooleanProperty(props, ['monospace']) ?? false,
         defaultValue: getStringProperty(props, ['defaultValue', 'default_value']),
       } as TextareaFieldDefinition;
-    }
 
-    case 'number': {
+    case FIELD_TYPE_VALUES[2]: {
+      // 'number'
       const defaultValue = getNumberProperty(props, ['defaultValue', 'default_value']);
       const fallbackString = getStringProperty(props, ['defaultValue', 'default_value']);
       return {
@@ -147,14 +152,13 @@ function mapField(row: RpcRow): FieldDefinition | null {
       } as NumberFieldDefinition;
     }
 
-    case 'select': {
+    case FIELD_TYPE_VALUES[3]: // 'select'
       return {
         ...base,
         type: 'select',
         options: mapSelectOptions(row.select_options),
         defaultValue: getStringProperty(props, ['defaultValue', 'default_value']),
       } as SelectFieldDefinition;
-    }
 
     default:
       return null;
@@ -173,7 +177,7 @@ function emptySection(): SubmissionFormSection {
 async function fetchFieldsForContentType(
   contentType: SubmissionContentType
 ): Promise<SubmissionFormSection> {
-  const data = await fetchCachedRpc<RpcRows | null>(
+  const data = await fetchCachedRpc<'get_form_fields_for_content_type', RpcRows | null>(
     { p_content_type: contentType },
     {
       rpcName: 'get_form_fields_for_content_type',
@@ -200,19 +204,23 @@ async function fetchFieldsForContentType(
     const field = mapField(row);
     if (!field) continue;
 
-    if (row.field_scope === 'common' && field.name === 'name' && field.type === 'text') {
+    if (
+      row.field_scope === FIELD_SCOPE_VALUES[0] &&
+      field.name === 'name' &&
+      field.type === FIELD_TYPE_VALUES[0]
+    ) {
       section.nameField = field;
       continue;
     }
 
-    switch (row.field_scope) {
-      case 'common':
+    switch (row.field_scope as FieldScope) {
+      case FIELD_SCOPE_VALUES[0]: // 'common'
         section.common.push(field);
         break;
-      case 'type_specific':
+      case FIELD_SCOPE_VALUES[1]: // 'type_specific'
         section.typeSpecific.push(field);
         break;
-      case 'tags':
+      case FIELD_SCOPE_VALUES[2]: // 'tags'
         section.tags.push(field);
         break;
       default:

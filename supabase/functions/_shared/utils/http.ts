@@ -4,7 +4,9 @@
 
 import { edgeEnv } from '../config/env.ts';
 import { getCacheConfigNumber } from '../config/statsig-cache.ts';
+import { errorToString } from './error-handling.ts';
 import { createUtilityContext } from './logging.ts';
+import { buildSecurityHeaders } from './security-headers.ts';
 
 /* ----------------------------- CORS PRESETS ----------------------------- */
 
@@ -84,11 +86,19 @@ export function getAuthenticatedCorsHeaders(requestOrigin: string | null): Recor
 export function jsonResponse(
   data: unknown,
   status: number,
-  corsHeaders: Record<string, string>
+  corsHeaders: Record<string, string>,
+  additionalHeaders?: Record<string, string>
 ): Response {
+  const securityHeaders = buildSecurityHeaders();
+
   return new Response(JSON.stringify(data), {
     status,
-    headers: { 'Content-Type': 'application/json', ...corsHeaders },
+    headers: {
+      'Content-Type': 'application/json; charset=utf-8',
+      ...securityHeaders,
+      ...corsHeaders,
+      ...additionalHeaders,
+    },
   });
 }
 
@@ -102,14 +112,20 @@ export function errorResponse(
   cors: Record<string, string> = publicCorsHeaders
 ): Response {
   const logContext = createUtilityContext('http-utils', 'error-response', { context });
+  const errorMsg = errorToString(error);
   console.error(`${context} failed`, {
     ...logContext,
-    error: error instanceof Error ? error.message : String(error),
+    error: errorMsg,
   });
+
+  // Don't expose internal error details in production
+  const isTimeout = error instanceof Error && error.name === 'TimeoutError';
+  const message = isTimeout ? 'Request timeout' : 'Internal Server Error';
+
   return jsonResponse(
     {
-      error: 'Internal Server Error',
-      message: error instanceof Error ? error.message : 'Unknown error',
+      error: message,
+      message: isTimeout ? errorMsg : undefined,
       context,
     },
     500,
@@ -117,8 +133,12 @@ export function errorResponse(
   );
 }
 
-export function badRequestResponse(message: string, cors = publicCorsHeaders): Response {
-  return jsonResponse({ error: 'Bad Request', message }, 400, cors);
+export function badRequestResponse(
+  message: string,
+  cors = publicCorsHeaders,
+  additionalHeaders?: Record<string, string>
+): Response {
+  return jsonResponse({ error: 'Bad Request', message }, 400, cors, additionalHeaders);
 }
 
 export function unauthorizedResponse(message = 'Unauthorized', cors = publicCorsHeaders): Response {
@@ -129,11 +149,13 @@ export function methodNotAllowedResponse(
   allowedMethod = 'POST',
   cors: Record<string, string> = publicCorsHeaders
 ): Response {
+  const securityHeaders = buildSecurityHeaders();
   return new Response(JSON.stringify({ error: 'Method not allowed', allowed: allowedMethod }), {
     status: 405,
     headers: {
-      'Content-Type': 'application/json',
+      'Content-Type': 'application/json; charset=utf-8',
       Allow: allowedMethod,
+      ...securityHeaders,
       ...cors,
     },
   });
@@ -162,6 +184,10 @@ const DEFAULT_CACHE_PRESETS = {
   company_profile: { ttl: 60 * 30, stale: 60 * 60 }, // 30m / 1h
   trending_page: { ttl: 60 * 60, stale: 60 * 60 * 6 }, // 1h / 6h
   trending_sidebar: { ttl: 600, stale: 3600 }, // 10m / 1h
+  search: { ttl: 300, stale: 60 }, // 5m / 1m
+  search_autocomplete: { ttl: 3600, stale: 3600 }, // 1h / 1h
+  search_facets: { ttl: 3600, stale: 3600 }, // 1h / 1h
+  transform: { ttl: 60 * 60 * 24 * 365, stale: 60 * 60 * 24 * 365 }, // 1y / 1y (immutable)
 } as const;
 
 const CACHE_PRESET_CONFIG_MAP: Partial<Record<CachePresetKey, string>> = {
@@ -174,6 +200,10 @@ const CACHE_PRESET_CONFIG_MAP: Partial<Record<CachePresetKey, string>> = {
   company_profile: 'cache.company_profile.ttl_seconds',
   trending_page: 'cache.trending_page.ttl_seconds',
   trending_sidebar: 'cache.trending_sidebar.ttl_seconds',
+  search: 'cache.search.ttl_seconds',
+  search_autocomplete: 'cache.search_autocomplete.ttl_seconds',
+  search_facets: 'cache.search_facets.ttl_seconds',
+  transform: 'cache.transform.ttl_seconds',
 };
 
 export type CachePresetKey = keyof typeof DEFAULT_CACHE_PRESETS;

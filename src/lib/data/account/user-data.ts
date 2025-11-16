@@ -9,12 +9,15 @@ import type { Tables } from '@/src/types/database.types';
 import type {
   GetAccountDashboardReturn,
   GetCollectionDetailWithItemsReturn,
+  GetSponsorshipAnalyticsReturn,
   GetUserCompaniesReturn,
   GetUserDashboardReturn,
   GetUserLibraryReturn,
   GetUserSettingsReturn,
   GetUserSponsorshipsReturn,
+  UserTier,
 } from '@/src/types/database-overrides';
+import { USER_TIER_VALUES } from '@/src/types/database-overrides';
 
 const ACCOUNT_TTL_KEY = 'cache.account.ttl_seconds';
 
@@ -22,7 +25,10 @@ const accountDashboardSchema = z.object({
   bookmark_count: z.number().catch(0),
   profile: z.object({
     name: z.string().nullable().catch(null),
-    tier: z.string().nullable().catch(null),
+    tier: z
+      .enum([...USER_TIER_VALUES] as [UserTier, ...UserTier[]])
+      .nullable()
+      .catch(null),
     created_at: z.string(),
   }),
 });
@@ -33,7 +39,7 @@ const accountDashboardSchema = z.object({
 export async function getAccountDashboard(
   userId: string
 ): Promise<GetAccountDashboardReturn | null> {
-  const result = await fetchCachedRpc<GetAccountDashboardReturn | null>(
+  const result = await fetchCachedRpc<'get_account_dashboard', GetAccountDashboardReturn | null>(
     { p_user_id: userId },
     {
       rpcName: 'get_account_dashboard',
@@ -54,7 +60,7 @@ export async function getAccountDashboard(
  * Get user library (bookmarks + collections)
  */
 export async function getUserLibrary(userId: string): Promise<GetUserLibraryReturn | null> {
-  return fetchCachedRpc<GetUserLibraryReturn | null>(
+  return fetchCachedRpc<'get_user_library', GetUserLibraryReturn | null>(
     { p_user_id: userId },
     {
       rpcName: 'get_user_library',
@@ -82,7 +88,7 @@ export async function getUserBookmarksForCollections(
  * Get user dashboard data (includes jobs)
  */
 export async function getUserDashboard(userId: string): Promise<GetUserDashboardReturn | null> {
-  return fetchCachedRpc<GetUserDashboardReturn | null>(
+  return fetchCachedRpc<'get_user_dashboard', GetUserDashboardReturn | null>(
     { p_user_id: userId },
     {
       rpcName: 'get_user_dashboard',
@@ -114,7 +120,10 @@ export async function getCollectionDetail(
   userId: string,
   slug: string
 ): Promise<GetCollectionDetailWithItemsReturn | null> {
-  return fetchCachedRpc<GetCollectionDetailWithItemsReturn | null>(
+  return fetchCachedRpc<
+    'get_collection_detail_with_items',
+    GetCollectionDetailWithItemsReturn | null
+  >(
     { p_user_id: userId, p_slug: slug },
     {
       rpcName: 'get_collection_detail_with_items',
@@ -132,7 +141,7 @@ export async function getCollectionDetail(
  * Get user settings (profile + user data)
  */
 export async function getUserSettings(userId: string): Promise<GetUserSettingsReturn | null> {
-  return fetchCachedRpc<GetUserSettingsReturn | null>(
+  return fetchCachedRpc<'get_user_settings', GetUserSettingsReturn | null>(
     { p_user_id: userId },
     {
       rpcName: 'get_user_settings',
@@ -149,25 +158,13 @@ export async function getUserSettings(userId: string): Promise<GetUserSettingsRe
 /**
  * Get sponsorship analytics
  */
-export interface SponsorshipAnalytics {
-  sponsorship: Tables<'sponsored_content'>;
-  daily_stats: Array<{
-    date: string;
-    impressions: number;
-    clicks: number;
-  }>;
-  computed_metrics: {
-    ctr: number;
-    days_active: number;
-    avg_impressions_per_day: number;
-  };
-}
+export interface SponsorshipAnalytics extends GetSponsorshipAnalyticsReturn {}
 
 export async function getSponsorshipAnalytics(
   userId: string,
   sponsorshipId: string
-): Promise<SponsorshipAnalytics | null> {
-  return fetchCachedRpc<SponsorshipAnalytics | null>(
+): Promise<GetSponsorshipAnalyticsReturn | null> {
+  return fetchCachedRpc<'get_sponsorship_analytics', GetSponsorshipAnalyticsReturn | null>(
     { p_user_id: userId, p_sponsorship_id: sponsorshipId },
     {
       rpcName: 'get_sponsorship_analytics',
@@ -185,7 +182,7 @@ export async function getSponsorshipAnalytics(
  * Get user companies
  */
 export async function getUserCompanies(userId: string): Promise<GetUserCompaniesReturn | null> {
-  return fetchCachedRpc<GetUserCompaniesReturn | null>(
+  return fetchCachedRpc<'get_user_companies', GetUserCompaniesReturn | null>(
     { p_user_id: userId },
     {
       rpcName: 'get_user_companies',
@@ -203,7 +200,7 @@ export async function getUserCompanies(userId: string): Promise<GetUserCompanies
  * Get user sponsorships
  */
 export async function getUserSponsorships(userId: string): Promise<GetUserSponsorshipsReturn> {
-  const data = await fetchCachedRpc<GetUserSponsorshipsReturn | null>(
+  const data = await fetchCachedRpc<'get_user_sponsorships', GetUserSponsorshipsReturn | null>(
     { p_user_id: userId },
     {
       rpcName: 'get_user_sponsorships',

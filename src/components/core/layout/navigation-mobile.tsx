@@ -103,7 +103,7 @@ export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationM
 
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
-      <SheetTrigger asChild>
+      <SheetTrigger asChild={true}>
         <Button variant="ghost" size="sm" className="md:hidden" aria-label="Open mobile menu">
           <Menu className={UI_CLASSES.ICON_LG} />
         </Button>

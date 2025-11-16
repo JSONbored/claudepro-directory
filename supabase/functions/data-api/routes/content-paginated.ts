@@ -6,6 +6,7 @@ import {
   errorResponse,
   getOnlyCorsHeaders,
 } from '../../_shared/utils/http.ts';
+import { buildSecurityHeaders } from '../../_shared/utils/security-headers.ts';
 
 const CORS = getOnlyCorsHeaders;
 
@@ -51,6 +52,7 @@ export async function handlePaginatedContent(url: URL): Promise<Response> {
     headers: {
       'Content-Type': 'application/json; charset=utf-8',
       'X-Generated-By': 'supabase.rpc.get_content_paginated_slim',
+      ...buildSecurityHeaders(),
       ...CORS,
       ...buildCacheHeaders('content_paginated'),
     },

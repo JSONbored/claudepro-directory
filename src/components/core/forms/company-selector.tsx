@@ -201,7 +201,7 @@ export function CompanySelector({ value, onChange, defaultCompanyName }: Company
         Company <span className="text-destructive">*</span>
       </Label>
       <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
+        <PopoverTrigger asChild={true}>
           <Button
             id={buttonId}
             variant="outline"
@@ -231,7 +231,7 @@ export function CompanySelector({ value, onChange, defaultCompanyName }: Company
                   id={nameInputId}
                   name="name"
                   placeholder="e.g., Acme Corp"
-                  required
+                  required={true}
                   defaultValue={searchQuery}
                 />
               </div>

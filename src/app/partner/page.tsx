@@ -191,7 +191,7 @@ export default async function PartnerPage() {
                 </div>
 
                 {/* CTA */}
-                <Button className="w-full" size="lg" asChild>
+                <Button className="w-full" size="lg" asChild={true}>
                   <a href={partnerCtas.jobListing.href}>
                     <Mail className={'mr-2 h-4 w-4'} />
                     Post a Job
@@ -262,7 +262,7 @@ export default async function PartnerPage() {
                 </div>
 
                 {/* CTA */}
-                <Button className="w-full" size="lg" variant="default" asChild>
+                <Button className="w-full" size="lg" variant="default" asChild={true}>
                   <a href={partnerCtas.sponsoredListing.href}>
                     <Mail className={'mr-2 h-4 w-4'} />
                     Get Featured
@@ -352,7 +352,7 @@ export default async function PartnerPage() {
             <p className={'mb-6 text-muted-foreground'}>
               Get started with launch pricing (40% off) before December 31st, 2025
             </p>
-            <Button size="lg" asChild>
+            <Button size="lg" asChild={true}>
               <a href={partnerCtas.partnershipInquiry.href}>
                 <Mail className={'mr-2 h-4 w-4'} />
                 Email: {partnerContacts.partnerEmail}

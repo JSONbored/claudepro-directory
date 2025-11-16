@@ -1,6 +1,6 @@
 import type { Database as DatabaseGenerated } from '../../database.types.ts';
 import type { Database } from '../../database-overrides.ts';
-import { insertTable, updateTable } from '../../database-overrides.ts';
+import { insertTable, updateTable, WEBHOOK_DIRECTION_VALUES } from '../../database-overrides.ts';
 import type { BaseLogContext } from '../logging.ts';
 import { createUtilityContext } from '../logging.ts';
 
@@ -32,14 +32,14 @@ export async function logOutboundWebhookEvent(
 ): Promise<string | null> {
   const insertData = {
     source: 'discord',
-    direction: 'outbound',
+    direction: WEBHOOK_DIRECTION_VALUES[1], // 'outbound'
     type,
     data: data as Database['public']['Tables']['webhook_events']['Insert']['data'],
     created_at: new Date().toISOString(),
     processed: false,
     related_id: relatedId || null,
   } satisfies DatabaseGenerated['public']['Tables']['webhook_events']['Insert'];
-  const result = await insertTable('webhook_events', insertData);
+  const result = insertTable('webhook_events', insertData);
   const { data: logData, error: logError } = await result.select('id').single<{ id: string }>();
 
   if (logError) {
@@ -89,14 +89,14 @@ export async function sendDiscordWebhook(
 
   const insertData2 = {
     source: 'discord',
-    direction: 'outbound',
+    direction: WEBHOOK_DIRECTION_VALUES[1], // 'outbound'
     type: eventType,
     data: logPayload as Database['public']['Tables']['webhook_events']['Insert']['data'],
     created_at: new Date().toISOString(),
     processed: false,
     related_id: relatedId || null,
   } satisfies DatabaseGenerated['public']['Tables']['webhook_events']['Insert'];
-  const result2 = await insertTable('webhook_events', insertData2);
+  const result2 = insertTable('webhook_events', insertData2);
   const { data: logData, error: logError } = await result2.select('id').single<{ id: string }>();
 
   if (!logError && logData) {

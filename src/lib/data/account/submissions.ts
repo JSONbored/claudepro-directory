@@ -9,7 +9,7 @@ export async function getSubmissionDashboard(
   recentLimit = 5,
   contributorsLimit = 5
 ): Promise<GetSubmissionDashboardReturn | null> {
-  return fetchCachedRpc<GetSubmissionDashboardReturn | null>(
+  return fetchCachedRpc<'get_submission_dashboard', GetSubmissionDashboardReturn | null>(
     {
       p_recent_limit: recentLimit,
       p_contributors_limit: contributorsLimit,

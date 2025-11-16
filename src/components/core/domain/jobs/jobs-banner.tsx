@@ -103,7 +103,7 @@ export function JobsPromo() {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
-            <Button asChild className="w-full">
+            <Button asChild={true} className="w-full">
               <Link href={ROUTES.PARTNER}>View Pricing & Post Job</Link>
             </Button>
           </motion.div>

@@ -11,9 +11,7 @@ import { getNewsletterConfig } from '@/src/lib/actions/feature-flags.actions';
 import { logger } from '@/src/lib/logger';
 import { logClientWarning } from '@/src/lib/utils/error.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
-import type { Enums } from '@/src/types/database.types';
-
-export type NewsletterSource = Enums<'newsletter_source'>;
+import type { NewsletterSource } from '@/src/types/database-overrides';
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 

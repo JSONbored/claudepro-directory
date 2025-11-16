@@ -5,7 +5,7 @@
  *
  * Consolidated tracking component that replaces UnifiedTracker and PwaInstallTracker.
  * Tracks views, page views, and PWA events via server actions.
- * Data stored in user_interactions table via queue-based system.
+ * Data stored in user_interactions table via pulse queue-based system.
  *
  * Variants:
  * - view: Content view tracking (with delay from Statsig)

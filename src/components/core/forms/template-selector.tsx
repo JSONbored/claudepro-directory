@@ -27,7 +27,7 @@ export function TemplateSelector({ templates, onSelect }: TemplateSelectorProps)
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
+      <DropdownMenuTrigger asChild={true}>
         <Button variant="outline" className="w-full justify-between" type="button">
           <span className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
             <FileText className={UI_CLASSES.ICON_SM} />

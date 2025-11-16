@@ -109,7 +109,7 @@ export default async function AccountLayout({ children }: { children: React.Reac
                   width={48}
                   height={48}
                   className="h-12 w-12 rounded-full object-cover"
-                  priority
+                  priority={true}
                 />
               ) : (
                 <div className="flex h-12 w-12 items-center justify-center rounded-full bg-accent">

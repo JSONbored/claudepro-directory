@@ -14,7 +14,7 @@ export interface TrackSearchQueryEdgeParams {
 }
 
 /**
- * Enqueue search analytics to user_interactions queue
+ * Enqueue search analytics to pulse queue
  * Queue-based tracking for optimal egress reduction (98% reduction via batching)
  */
 export async function enqueueSearchAnalytics({
@@ -37,10 +37,10 @@ export async function enqueueSearchAnalytics({
     }
   }
 
-  // Enqueue to user_interactions queue with interaction_type='search'
+  // Enqueue to pulse queue with interaction_type='search'
   // Worker will process and route to search_queries table
   try {
-    await pgmqSend('user_interactions', {
+    await pgmqSend('pulse', {
       user_id: resolvedUserId ?? null,
       content_type: null,
       content_slug: null,

@@ -37,7 +37,7 @@ export default async function MyJobsPage() {
             <CardDescription>Please sign in to manage your job listings.</CardDescription>
           </CardHeader>
           <CardContent>
-            <Button asChild>
+            <Button asChild={true}>
               <Link href={ROUTES.LOGIN}>Go to login</Link>
             </Button>
           </CardContent>
@@ -72,7 +72,7 @@ export default async function MyJobsPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button asChild variant="outline">
+            <Button asChild={true} variant="outline">
               <Link href={ROUTES.ACCOUNT}>Back to dashboard</Link>
             </Button>
           </CardContent>
@@ -115,7 +115,7 @@ export default async function MyJobsPage() {
             {jobs.length} {jobs.length === 1 ? 'listing' : 'listings'}
           </p>
         </div>
-        <Button asChild>
+        <Button asChild={true}>
           <Link href={ROUTES.ACCOUNT_JOBS_NEW}>
             <Plus className="mr-2 h-4 w-4" />
             Post a Job
@@ -131,7 +131,7 @@ export default async function MyJobsPage() {
             <p className={'mb-4 max-w-md text-center text-muted-foreground'}>
               Post your first job listing to reach talented developers in the Claude community
             </p>
-            <Button asChild>
+            <Button asChild={true}>
               <Link href={ROUTES.ACCOUNT_JOBS_NEW}>
                 <Plus className="mr-2 h-4 w-4" />
                 Post Your First Job
@@ -150,9 +150,11 @@ export default async function MyJobsPage() {
                       <UnifiedBadge
                         variant="base"
                         style="outline"
-                        className={getStatusColor((job.status ?? 'draft') as JobStatus)}
+                        className={getStatusColor(
+                          (job.status ?? ('draft' as JobStatus)) as JobStatus
+                        )}
                       >
-                        {job.status ?? 'draft'}
+                        {job.status ?? ('draft' as JobStatus)}
                       </UnifiedBadge>
                       {getPlanBadge(job.plan ?? 'standard')}
                     </div>
@@ -175,14 +177,14 @@ export default async function MyJobsPage() {
                 </div>
 
                 <div className={UI_CLASSES.FLEX_GAP_2}>
-                  <Button variant="outline" size="sm" asChild>
+                  <Button variant="outline" size="sm" asChild={true}>
                     <Link href={`/account/jobs/${job.id}/edit`}>
                       <Edit className="mr-1 h-3 w-3" />
                       Edit
                     </Link>
                   </Button>
 
-                  <Button variant="outline" size="sm" asChild>
+                  <Button variant="outline" size="sm" asChild={true}>
                     <Link href={`/account/jobs/${job.id}/analytics`}>
                       <BarChart className="mr-1 h-3 w-3" />
                       Analytics
@@ -190,7 +192,7 @@ export default async function MyJobsPage() {
                   </Button>
 
                   {job.slug && (
-                    <Button variant="ghost" size="sm" asChild>
+                    <Button variant="ghost" size="sm" asChild={true}>
                       <Link href={`/jobs/${job.slug}`}>
                         <ExternalLink className="mr-1 h-3 w-3" />
                         View
@@ -198,10 +200,10 @@ export default async function MyJobsPage() {
                     </Button>
                   )}
 
-                  {job.status === 'active' && (
+                  {job.status === ('active' as JobStatus) && (
                     <JobToggleButton
                       jobId={job.id}
-                      currentStatus={(job.status ?? 'draft') as JobStatus}
+                      currentStatus={(job.status ?? ('draft' as JobStatus)) as JobStatus}
                     />
                   )}
 

@@ -4,10 +4,10 @@
 # =============================================================================
 # Unified Notification + Webhook Architecture (Database-First)
 # =============================================================================
-# All inbound/outbound notifications now flow through `notification-router`:
+# All inbound/outbound notifications now flow through `flux-station`:
 #
 # INBOUND (external → us):
-#   1. Service (Resend, Vercel, Polar, etc.) → `/functions/v1/notification-router`
+#   1. Service (Resend, Vercel, Polar, etc.) → `/functions/v1/flux-station`
 #   2. Router verifies signatures via `_shared/utils/webhook/registry.ts`
 #   3. Events are persisted to `webhook_events` with idempotency + auditing
 #   4. Shared handlers (Discord notifications, changelog sync, ingest) execute business logic
@@ -18,7 +18,7 @@
 #   3. Discord call executes with retry + status updates
 #
 # BENEFITS:
-#   - Single edge entrypoint (`notification-router`) for Discord, changelog, inbound webhooks, and active-notification fetches
+#   - Single edge entrypoint (`flux-station`) for Discord, changelog, inbound webhooks, queue workers, and active-notification fetches
 #   - Shared utilities live under `_shared/*`, reducing duplication
 #   - Complete audit trail (both directions) via `webhook_events`
 #   - Easier deploys (one function) and consistent CORS/signature policy
@@ -42,8 +42,8 @@ verify_jwt = false  # Public transform API for syntax highlighting and data tran
 # Webhook/Notification Functions - No JWT Verification (Use Signature Verification)
 # =============================================================================
 
-[functions.notification-router]
-verify_jwt = false  # Consolidated Discord + external webhook ingest + changelog sync + active notification fetches
+[functions.flux-station]
+verify_jwt = false  # Unified notification and queue processing edge function (Discord, webhooks, changelog, queue workers, notifications)
 
 [functions.email-handler]
 verify_jwt = false  # Uses Svix signature verification for auth hooks

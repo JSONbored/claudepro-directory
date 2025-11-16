@@ -11,7 +11,7 @@ export async function getSimilarContent(input: {
 }): Promise<GetSimilarContentReturn | null> {
   const { contentType, contentSlug, limit = 6 } = input;
 
-  return fetchCachedRpc<GetSimilarContentReturn | null>(
+  return fetchCachedRpc<'get_similar_content', GetSimilarContentReturn | null>(
     {
       p_content_type: contentType,
       p_content_slug: contentSlug,

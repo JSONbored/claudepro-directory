@@ -5,9 +5,7 @@
 
 import type { Resend } from 'npm:resend@4.0.0';
 
-import type { Database } from '../../database-overrides.ts';
-
-type NewsletterSource = Database['public']['Enums']['newsletter_source'];
+import type { NewsletterSource } from '../../database-overrides.ts';
 
 import { createUtilityContext } from '../logging.ts';
 import { runWithRetry } from './http-client.ts';
@@ -32,7 +30,7 @@ export const RESEND_TOPIC_IDS = {
  * Auto-assigns relevant topics to maximize engagement
  */
 export function inferInitialTopics(
-  source: NewsletterSource | string | null,
+  _source: NewsletterSource | null,
   copyCategory?: string | null
 ): string[] {
   const topics: string[] = [];
@@ -61,10 +59,9 @@ export function inferInitialTopics(
     }
   }
 
-  // Add source-specific topics
-  if (source === 'job_board') {
-    topics.push(RESEND_TOPIC_IDS.job_board);
-  }
+  // Add source-specific topics (only for valid enum values)
+  // Note: RESEND_TOPIC_IDS.job_board exists but is not assigned via newsletter_source enum
+  // Job board subscriptions should use a valid enum value like 'homepage' or 'content_page'
 
   // Deduplicate
   return [...new Set(topics)];
@@ -75,27 +72,33 @@ export function inferInitialTopics(
  * Higher score for more intentional signups
  */
 export function calculateInitialEngagementScore(
-  source: NewsletterSource | string | null,
+  source: NewsletterSource | null,
   copyType?: string | null
 ): number {
   let score = 50; // Neutral baseline
 
   // High-intent sources get higher scores
-  switch (source) {
-    case 'post_copy':
-      score += 15; // They copied something - highly engaged
-      break;
-    case 'hero':
-    case 'inline':
-      score += 10; // Direct subscription from CTA
-      break;
-    case 'footer':
-    case 'footer-bar':
-      score += 5; // Less prominent, still intentional
-      break;
-    case 'modal':
-      score -= 5; // Could be accidental/pressured
-      break;
+  if (source) {
+    switch (source) {
+      case 'post_copy':
+        score += 15; // They copied something - highly engaged
+        break;
+      case 'inline':
+        score += 10; // Direct subscription from CTA
+        break;
+      case 'footer':
+        score += 5; // Less prominent, still intentional
+        break;
+      case 'modal':
+        score -= 5; // Could be accidental/pressured
+        break;
+      // Other enum values don't affect score
+      case 'homepage':
+      case 'content_page':
+      case 'resend_import':
+      case 'oauth_signup':
+        break;
+    }
   }
 
   // Copy type indicates engagement level
@@ -120,13 +123,13 @@ export function calculateInitialEngagementScore(
  * Maps our database fields to Resend custom properties
  */
 export function buildContactProperties(params: {
-  source: NewsletterSource | string | null;
+  source: NewsletterSource | null;
   copyType?: string | null;
   copyCategory?: string | null;
   referrer?: string | null;
 }): Record<string, string | number> {
   const { source, copyType, copyCategory, referrer } = params;
-  // Ensure source is string | null (not undefined) for database compatibility
+  // Convert NewsletterSource | null to string | null for database compatibility
   const sourceValue: string | null = source ?? null;
 
   return {

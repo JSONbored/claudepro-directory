@@ -3,10 +3,16 @@
  * Handles syntax highlighting, content processing, and other expensive operations
  */
 
-import { jsonResponse } from '../_shared/utils/http.ts';
+import { badRequestResponse, jsonResponse } from '../_shared/utils/http.ts';
 import { createTransformApiContext } from '../_shared/utils/logging.ts';
+import { checkRateLimit, RATE_LIMIT_PRESETS } from '../_shared/utils/rate-limit.ts';
+import {
+  applyRateLimitHeaders,
+  createRateLimitErrorResponse,
+} from '../_shared/utils/rate-limit-middleware.ts';
 import { createRouter, type HttpMethod, type RouterContext } from '../_shared/utils/router.ts';
 import { handleContentHighlight } from './routes/content.ts';
+import { handleContentProcess } from './routes/content-process.ts';
 
 // Allow POST for transformation requests
 const BASE_CORS = {
@@ -26,7 +32,15 @@ const router = createRouter<TransformApiContext>({
     const url = new URL(request.url);
     const originalMethod = request.method.toUpperCase() as HttpMethod;
     const normalizedMethod = (originalMethod === 'HEAD' ? 'GET' : originalMethod) as HttpMethod;
-    const pathname = url.pathname.replace(/^\/transform-api/, '') || '/';
+
+    // Strict pathname normalization (prevent path traversal)
+    let pathname = url.pathname;
+    if (pathname.startsWith('/functions/v1/transform-api')) {
+      pathname = pathname.slice('/functions/v1/transform-api'.length);
+    } else if (pathname.startsWith('/transform-api')) {
+      pathname = pathname.slice('/transform-api'.length);
+    }
+    pathname = pathname || '/';
     const segments =
       pathname === '/' ? [] : pathname.replace(/^\/+/, '').split('/').filter(Boolean);
 
@@ -64,14 +78,48 @@ const router = createRouter<TransformApiContext>({
       methods: ['POST', 'OPTIONS'],
       cors: BASE_CORS,
       match: (ctx) => ctx.segments[0] === 'content' && ctx.segments[1] === 'highlight',
-      handler: (ctx) =>
-        respondWithAnalytics(ctx, 'content-highlight', async () => {
+      handler: async (ctx) => {
+        const rateLimit = checkRateLimit(ctx.request, RATE_LIMIT_PRESETS.transform);
+        if (!rateLimit.allowed) {
+          return createRateLimitErrorResponse(rateLimit, {
+            preset: 'transform',
+            cors: BASE_CORS,
+          });
+        }
+        return respondWithAnalytics(ctx, 'content-highlight', async () => {
           const logContext = createTransformApiContext('content-highlight', {
             path: ctx.pathname,
             method: ctx.method,
           });
-          return handleContentHighlight(ctx.request, logContext);
-        }),
+          const response = await handleContentHighlight(ctx.request, logContext);
+          applyRateLimitHeaders(response, rateLimit, 'transform');
+          return response;
+        });
+      },
+    },
+    {
+      name: 'content-process',
+      methods: ['POST', 'OPTIONS'],
+      cors: BASE_CORS,
+      match: (ctx) => ctx.segments[0] === 'content' && ctx.segments[1] === 'process',
+      handler: async (ctx) => {
+        const rateLimit = checkRateLimit(ctx.request, RATE_LIMIT_PRESETS.transform);
+        if (!rateLimit.allowed) {
+          return createRateLimitErrorResponse(rateLimit, {
+            preset: 'transform',
+            cors: BASE_CORS,
+          });
+        }
+        return respondWithAnalytics(ctx, 'content-process', async () => {
+          const logContext = createTransformApiContext('content-process', {
+            path: ctx.pathname,
+            method: ctx.method,
+          });
+          const response = await handleContentProcess(ctx.request, logContext);
+          applyRateLimitHeaders(response, rateLimit, 'transform');
+          return response;
+        });
+      },
     },
   ],
 });
@@ -86,6 +134,12 @@ async function handleDirectoryIndex(ctx: TransformApiContext): Promise<Response>
         {
           path: 'content/highlight',
           description: 'Syntax highlighting for code blocks',
+          method: 'POST',
+        },
+        {
+          path: 'content/process',
+          description:
+            'Batched content processing (language detection + filename generation + highlighting)',
           method: 'POST',
         },
       ],

@@ -5,13 +5,13 @@ import { InlineSpinner } from '@/src/components/primitives/feedback/loading-fact
 import { Button } from '@/src/components/primitives/ui/button';
 import { Input } from '@/src/components/primitives/ui/input';
 import { useConfetti } from '@/src/hooks/use-confetti';
-import type { NewsletterSource } from '@/src/hooks/use-newsletter';
 import { useNewsletter } from '@/src/hooks/use-newsletter';
 import { checkConfettiEnabled } from '@/src/lib/actions/feature-flags.actions';
 import { NEWSLETTER_CTA_CONFIG } from '@/src/lib/data/config/category';
 import { Mail } from '@/src/lib/icons';
 import { DIMENSIONS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
+import type { NewsletterSource } from '@/src/types/database-overrides';
 
 export interface NewsletterFormProps {
   source: NewsletterSource;
@@ -50,7 +50,7 @@ export function NewsletterForm({ source, className }: NewsletterFormProps) {
               onChange={(e) => setEmail(e.target.value)}
               onFocus={() => setIsFocused(true)}
               onBlur={() => setIsFocused(false)}
-              required
+              required={true}
               disabled={isSubmitting}
               className={cn(
                 `${DIMENSIONS.BUTTON_LG} min-w-0 px-5 text-base`,

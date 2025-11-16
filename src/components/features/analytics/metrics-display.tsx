@@ -52,7 +52,7 @@ export function MetricsDisplay(props: MetricsDisplayProps) {
   const validMetrics = metrics;
 
   return (
-    <section itemScope itemType="https://schema.org/Dataset" className="my-12">
+    <section itemScope={true} itemType="https://schema.org/Dataset" className="my-12">
       {(title || description) && (
         <div className="mb-8 text-center">
           {title && (

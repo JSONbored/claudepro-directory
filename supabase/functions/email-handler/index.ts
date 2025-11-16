@@ -9,8 +9,22 @@ import { supabaseServiceRole } from '../_shared/clients/supabase.ts';
 import { AUTH_HOOK_ENV, RESEND_ENV, validateEnvironment } from '../_shared/config/email-config.ts';
 import { edgeEnv } from '../_shared/config/env.ts';
 import type { Database as DatabaseGenerated } from '../_shared/database.types.ts';
-import type { Database } from '../_shared/database-overrides.ts';
-import { callRpc, insertTable, upsertTable } from '../_shared/database-overrides.ts';
+import type { Database, NewsletterSource } from '../_shared/database-overrides.ts';
+import {
+  type ContactCategory,
+  callRpc,
+  ENVIRONMENT_VALUES,
+  type GetDueSequenceEmailsReturn,
+  type GetWeeklyDigestReturn,
+  insertTable,
+  isContactCategory,
+  isNewsletterSource,
+  SETTING_TYPE_VALUES,
+  type SettingType,
+  type Tables,
+  upsertTable,
+} from '../_shared/database-overrides.ts';
+import { batchProcess } from '../_shared/utils/batch-processor.ts';
 import { invalidateCacheByKey } from '../_shared/utils/cache.ts';
 import { renderEmailTemplate } from '../_shared/utils/email/base-template.tsx';
 import { CollectionShared } from '../_shared/utils/email/templates/collection-shared.tsx';
@@ -39,13 +53,22 @@ import {
   publicCorsHeaders,
   successResponse,
 } from '../_shared/utils/http.ts';
+import { MAX_BODY_SIZE, validateBodySize } from '../_shared/utils/input-validation.ts';
 import {
   buildContactProperties,
   inferInitialTopics,
   syncContactSegment,
 } from '../_shared/utils/integrations/resend.ts';
 import { createEmailHandlerContext, withDuration } from '../_shared/utils/logging.ts';
+import { parseJsonBody } from '../_shared/utils/parse-json-body.ts';
+import { checkRateLimit, RATE_LIMIT_PRESETS } from '../_shared/utils/rate-limit.ts';
+import {
+  applyRateLimitHeaders,
+  createRateLimitErrorResponse,
+} from '../_shared/utils/rate-limit-middleware.ts';
 import { createRouter, type HttpMethod, type RouterContext } from '../_shared/utils/router.ts';
+import { TIMEOUT_PRESETS, withTimeout } from '../_shared/utils/timeout.ts';
+import { validateEmail } from '../_shared/utils/validate-email.ts';
 
 validateEnvironment(['resend', 'auth-hook']);
 
@@ -83,19 +106,52 @@ const router = createRouter<EmailHandlerContext>({
       name: 'subscribe',
       methods: ['POST', 'OPTIONS'],
       match: (ctx) => ctx.action === 'subscribe',
-      handler: async (ctx) => await handleSubscribe(ctx.request),
+      handler: async (ctx) => {
+        const rateLimit = checkRateLimit(ctx.request, RATE_LIMIT_PRESETS.email);
+        if (!rateLimit.allowed) {
+          return createRateLimitErrorResponse(rateLimit, {
+            preset: 'email',
+            cors: publicCorsHeaders,
+          });
+        }
+        const response = await handleSubscribe(ctx.request);
+        applyRateLimitHeaders(response, rateLimit, 'email');
+        return response;
+      },
     },
     {
       name: 'welcome',
       methods: ['POST', 'OPTIONS'],
       match: (ctx) => ctx.action === 'welcome',
-      handler: async (ctx) => await handleWelcome(ctx.request),
+      handler: async (ctx) => {
+        const rateLimit = checkRateLimit(ctx.request, RATE_LIMIT_PRESETS.email);
+        if (!rateLimit.allowed) {
+          return createRateLimitErrorResponse(rateLimit, {
+            preset: 'email',
+            cors: publicCorsHeaders,
+          });
+        }
+        const response = await handleWelcome(ctx.request);
+        applyRateLimitHeaders(response, rateLimit, 'email');
+        return response;
+      },
     },
     {
       name: 'transactional',
       methods: ['POST', 'OPTIONS'],
       match: (ctx) => ctx.action === 'transactional',
-      handler: async (ctx) => await handleTransactional(ctx.request),
+      handler: async (ctx) => {
+        const rateLimit = checkRateLimit(ctx.request, RATE_LIMIT_PRESETS.email);
+        if (!rateLimit.allowed) {
+          return createRateLimitErrorResponse(rateLimit, {
+            preset: 'email',
+            cors: publicCorsHeaders,
+          });
+        }
+        const response = await handleTransactional(ctx.request);
+        applyRateLimitHeaders(response, rateLimit, 'email');
+        return response;
+      },
     },
     {
       name: 'digest',
@@ -132,14 +188,34 @@ const router = createRouter<EmailHandlerContext>({
         if (!ctx.action) {
           return badRequestResponse('Missing action');
         }
-        return await handleJobLifecycleEmail(ctx.request, ctx.action);
+        const rateLimit = checkRateLimit(ctx.request, RATE_LIMIT_PRESETS.email);
+        if (!rateLimit.allowed) {
+          return createRateLimitErrorResponse(rateLimit, {
+            preset: 'email',
+            cors: publicCorsHeaders,
+          });
+        }
+        const response = await handleJobLifecycleEmail(ctx.request, ctx.action);
+        applyRateLimitHeaders(response, rateLimit, 'email');
+        return response;
       },
     },
     {
       name: 'contact-submission',
       methods: ['POST', 'OPTIONS'],
       match: (ctx) => ctx.action === 'contact-submission',
-      handler: (ctx) => handleContactSubmission(ctx.request),
+      handler: async (ctx) => {
+        const rateLimit = checkRateLimit(ctx.request, RATE_LIMIT_PRESETS.email);
+        if (!rateLimit.allowed) {
+          return createRateLimitErrorResponse(rateLimit, {
+            preset: 'email',
+            cors: publicCorsHeaders,
+          });
+        }
+        const response = await handleContactSubmission(ctx.request);
+        applyRateLimitHeaders(response, rateLimit, 'email');
+        return response;
+      },
     },
   ],
 });
@@ -158,29 +234,35 @@ type SubscribePayload = Pick<
 async function handleSubscribe(req: Request): Promise<Response> {
   const startTime = Date.now();
 
-  // Parse and validate JSON body
-  let payload: unknown;
-  try {
-    payload = await req.json();
-  } catch {
-    return badRequestResponse('Valid JSON body is required');
+  // Parse and validate JSON body with size validation
+  const parseResult = await parseJsonBody<SubscribePayload>(req, {
+    maxSize: MAX_BODY_SIZE.default,
+    cors: publicCorsHeaders,
+  });
+
+  if (!parseResult.success) {
+    return parseResult.response;
   }
 
-  if (!payload || typeof payload !== 'object' || Array.isArray(payload)) {
-    return badRequestResponse('Valid JSON body is required');
+  const { email, source, referrer, copy_type, copy_category, copy_slug } = parseResult.data;
+
+  // Validate email format using shared utility
+  const emailValidation = validateEmail(email);
+  if (!(emailValidation.valid && emailValidation.normalized)) {
+    return badRequestResponse(emailValidation.error ?? 'Valid email address is required');
   }
 
-  const { email, source, referrer, copy_type, copy_category, copy_slug } =
-    payload as SubscribePayload;
-
-  // Validate email format
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!email || typeof email !== 'string' || !emailRegex.test(email)) {
-    return badRequestResponse('Valid email address is required');
+  // Validate source is a valid newsletter_source enum value (if provided)
+  if (source !== null && source !== undefined) {
+    if (typeof source !== 'string' || !isNewsletterSource(source)) {
+      return badRequestResponse(
+        'Invalid source value. Must be one of: footer, homepage, modal, content_page, inline, post_copy, resend_import, oauth_signup'
+      );
+    }
   }
 
-  // Normalize email
-  const normalizedEmail = email.toLowerCase().trim();
+  // Use normalized email from validation
+  const normalizedEmail = emailValidation.normalized;
 
   // Create logContext at function start
   const logContext = createEmailHandlerContext('subscribe', {
@@ -195,9 +277,14 @@ async function handleSubscribe(req: Request): Promise<Response> {
     let topicIds: string[] = [];
 
     // Build contact properties from signup context (used for both Resend and database)
-    // Convert undefined to null for source to match expected type
+    // Source is already validated above, convert to NewsletterSource | null
+    const validatedSource: NewsletterSource | null =
+      source && typeof source === 'string' && isNewsletterSource(source)
+        ? (source as NewsletterSource)
+        : null;
+
     const contactProperties = buildContactProperties({
-      source: source ?? null,
+      source: validatedSource,
       copyType: copy_type,
       copyCategory: copy_category,
       referrer,
@@ -223,12 +310,16 @@ async function handleSubscribe(req: Request): Promise<Response> {
         }) => Promise<{ data: { id: string } | null; error: { message?: string } | null }>;
       };
       const contactsApi = resend.contacts as unknown as ResendContactsCreateApi;
-      const { data: contact, error: resendError } = await contactsApi.create({
-        audienceId: RESEND_ENV.audienceId,
-        email: normalizedEmail,
-        unsubscribed: false,
-        properties: contactProperties,
-      });
+      const { data: contact, error: resendError } = await withTimeout(
+        contactsApi.create({
+          audienceId: RESEND_ENV.audienceId,
+          email: normalizedEmail,
+          unsubscribed: false,
+          properties: contactProperties,
+        }),
+        TIMEOUT_PRESETS.external,
+        'Resend contact creation timed out'
+      );
 
       if (resendError) {
         // If email already exists in Resend, that's OK - just log it
@@ -261,7 +352,7 @@ async function handleSubscribe(req: Request): Promise<Response> {
 
         // Step 1.5: Assign topics based on signup context
         try {
-          topicIds = inferInitialTopics(source ?? null, copy_category);
+          topicIds = inferInitialTopics(validatedSource, copy_category);
           console.log('[email-handler] Assigning topics', {
             ...logContext,
             topic_count: topicIds.length,
@@ -279,10 +370,14 @@ async function handleSubscribe(req: Request): Promise<Response> {
               };
             };
             const contactsWithTopics = resend.contacts as unknown as ResendContactsTopicsApi;
-            const { error: topicError } = await contactsWithTopics.topics.update({
-              contactId: resendContactId,
-              topicIds,
-            });
+            const { error: topicError } = await withTimeout(
+              contactsWithTopics.topics.update({
+                contactId: resendContactId,
+                topicIds,
+              }),
+              TIMEOUT_PRESETS.external,
+              'Resend topic assignment timed out'
+            );
 
             if (topicError) {
               console.error('[email-handler] Failed to assign topics', {
@@ -306,7 +401,11 @@ async function handleSubscribe(req: Request): Promise<Response> {
         // Step 1.6: Assign to engagement segment
         try {
           const engagementScore = contactProperties.engagement_score as number;
-          await syncContactSegment(resend, resendContactId, engagementScore);
+          await withTimeout(
+            syncContactSegment(resend, resendContactId, engagementScore),
+            TIMEOUT_PRESETS.external,
+            'Resend segment assignment timed out'
+          );
           console.log('[email-handler] Segment assigned successfully', logContext);
         } catch (segmentException) {
           console.error('[email-handler] Segment assignment exception', {
@@ -330,10 +429,13 @@ async function handleSubscribe(req: Request): Promise<Response> {
     }
 
     // Step 2: Insert into database (rate limiting handled by BEFORE INSERT trigger)
+    // Use validated source (defaults to 'footer' if not provided or invalid)
+    const finalSource: NewsletterSource = validatedSource ?? ('footer' as NewsletterSource);
+
     const insertData: DatabaseGenerated['public']['Tables']['newsletter_subscriptions']['Insert'] =
       {
         email: normalizedEmail,
-        source: source || 'footer',
+        source: finalSource,
         referrer: referrer || null,
         copy_type: copy_type || null,
         copy_category: copy_category || null,
@@ -352,7 +454,7 @@ async function handleSubscribe(req: Request): Promise<Response> {
     // Use type-safe helper to ensure proper type inference
     const validatedInsertData =
       insertData satisfies DatabaseGenerated['public']['Tables']['newsletter_subscriptions']['Insert'];
-    const result = await insertTable('newsletter_subscriptions', validatedInsertData);
+    const result = insertTable('newsletter_subscriptions', validatedInsertData);
     const { data: subscription, error: dbError } = await result
       .select('*')
       .single<DatabaseGenerated['public']['Tables']['newsletter_subscriptions']['Row']>();
@@ -396,13 +498,17 @@ async function handleSubscribe(req: Request): Promise<Response> {
     // Step 3: Send welcome email
     const html = await renderEmailTemplate(NewsletterWelcome, { email: normalizedEmail });
 
-    const { data: emailData, error: emailError } = (await resend.emails.send({
-      from: 'Claude Pro Directory <hello@mail.claudepro.directory>',
-      to: normalizedEmail,
-      subject: 'Welcome to Claude Pro Directory! 🎉',
-      html,
-      tags: [{ name: 'type', value: 'newsletter' }],
-    })) as { data: { id: string } | null; error: { message: string } | null };
+    const { data: emailData, error: emailError } = (await withTimeout(
+      resend.emails.send({
+        from: 'Claude Pro Directory <hello@mail.claudepro.directory>',
+        to: normalizedEmail,
+        subject: 'Welcome to Claude Pro Directory! 🎉',
+        html,
+        tags: [{ name: 'type', value: 'newsletter' }],
+      }),
+      TIMEOUT_PRESETS.external,
+      'Resend email send timed out'
+    )) as { data: { id: string } | null; error: { message: string } | null };
 
     if (emailError) {
       // Log email error but don't fail the request - subscription is saved
@@ -466,7 +572,16 @@ async function handleWelcome(req: Request): Promise<Response> {
 
   // Newsletter subscription trigger
   if (triggerSource === 'newsletter_subscription') {
-    const payload = await req.json();
+    const parseResult = await parseJsonBody<{ email: string; subscription_id: string }>(req, {
+      maxSize: MAX_BODY_SIZE.default,
+      cors: publicCorsHeaders,
+    });
+
+    if (!parseResult.success) {
+      return parseResult.response;
+    }
+
+    const payload = parseResult.data;
     const { email, subscription_id } = payload;
 
     const logContext = createEmailHandlerContext('welcome', {
@@ -476,20 +591,24 @@ async function handleWelcome(req: Request): Promise<Response> {
 
     const html = await renderEmailTemplate(NewsletterWelcome, { email });
 
-    const { data, error } = await resend.emails.send({
-      from: 'Claude Pro Directory <hello@mail.claudepro.directory>',
-      to: email,
-      subject: 'Welcome to Claude Pro Directory! 🎉',
-      html,
-      tags: [{ name: 'type', value: 'newsletter' }],
-    });
+    const { data, error } = await withTimeout(
+      resend.emails.send({
+        from: 'Claude Pro Directory <hello@mail.claudepro.directory>',
+        to: email,
+        subject: 'Welcome to Claude Pro Directory! 🎉',
+        html,
+        tags: [{ name: 'type', value: 'newsletter' }],
+      }),
+      TIMEOUT_PRESETS.external,
+      'Resend welcome email send timed out'
+    );
 
     if (error) {
       console.error('[email-handler] Welcome email failed', {
         ...logContext,
         error: error.message || 'Unknown error',
       });
-      throw new Error(error.message);
+      return errorResponse(new Error(error.message || 'Welcome email failed'), 'handleWelcome');
     }
 
     // Enroll in onboarding sequence
@@ -516,7 +635,26 @@ async function handleWelcome(req: Request): Promise<Response> {
   }
 
   // Auth hook trigger (OAuth signup)
+  // Validate body size for webhook payload
+  const contentLength = req.headers.get('content-length');
+  const bodySizeValidation = validateBodySize(contentLength, MAX_BODY_SIZE.webhook);
+  if (!bodySizeValidation.valid) {
+    return badRequestResponse(
+      bodySizeValidation.error ?? 'Request body too large',
+      publicCorsHeaders
+    );
+  }
+
   const payloadText = await req.text();
+
+  // Double-check size after reading
+  if (payloadText.length > MAX_BODY_SIZE.webhook) {
+    return badRequestResponse(
+      `Request body too large (max ${MAX_BODY_SIZE.webhook} bytes)`,
+      publicCorsHeaders
+    );
+  }
+
   const headers = Object.fromEntries(req.headers);
   const wh = new Webhook(hookSecret);
 
@@ -529,13 +667,17 @@ async function handleWelcome(req: Request): Promise<Response> {
 
   const html = await renderNewsletterWelcomeEmail({ email: verified.user.email });
 
-  const { data, error } = await resend.emails.send({
-    from: 'Claude Pro Directory <hello@mail.claudepro.directory>',
-    to: verified.user.email,
-    subject: 'Welcome to Claude Pro Directory! 🎉',
-    html,
-    tags: [{ name: 'type', value: 'auth' }],
-  });
+  const { data, error } = await withTimeout(
+    resend.emails.send({
+      from: 'Claude Pro Directory <hello@mail.claudepro.directory>',
+      to: verified.user.email,
+      subject: 'Welcome to Claude Pro Directory! 🎉',
+      html,
+      tags: [{ name: 'type', value: 'auth' }],
+    }),
+    TIMEOUT_PRESETS.external,
+    'Resend auth welcome email send timed out'
+  );
 
   const logContext = createEmailHandlerContext('welcome', {
     email: verified.user.email,
@@ -547,7 +689,7 @@ async function handleWelcome(req: Request): Promise<Response> {
       user_id: verified.user.id,
       error: error.message || 'Unknown error',
     });
-    throw new Error(error.message);
+    return errorResponse(new Error(error.message || 'Welcome email failed'), 'handleWelcome');
   }
 
   console.log('[email-handler] Welcome email sent', {
@@ -561,7 +703,21 @@ async function handleWelcome(req: Request): Promise<Response> {
 
 async function handleTransactional(req: Request): Promise<Response> {
   const startTime = Date.now();
-  const payload = await req.json();
+
+  const parseResult = await parseJsonBody<{
+    type: string;
+    email: string;
+    data: Record<string, unknown>;
+  }>(req, {
+    maxSize: MAX_BODY_SIZE.default,
+    cors: publicCorsHeaders,
+  });
+
+  if (!parseResult.success) {
+    return parseResult.response;
+  }
+
+  const payload = parseResult.data;
   const { type, email, data: emailData } = payload;
 
   const logContext = createEmailHandlerContext('transactional', {
@@ -630,12 +786,16 @@ async function handleTransactional(req: Request): Promise<Response> {
       ? 'Claude Pro Directory <jobs@mail.claudepro.directory>'
       : 'Claude Pro Directory <community@mail.claudepro.directory>';
 
-  const { data, error } = await resend.emails.send({
-    from: fromEmail,
-    to: email,
-    subject,
-    html,
-  });
+  const { data, error } = await withTimeout(
+    resend.emails.send({
+      from: fromEmail,
+      to: email,
+      subject,
+      html,
+    }),
+    TIMEOUT_PRESETS.external,
+    'Resend transactional email send timed out'
+  );
 
   if (error) {
     console.error('[email-handler] Failed to send transactional email', {
@@ -643,7 +803,10 @@ async function handleTransactional(req: Request): Promise<Response> {
       type,
       error: error.message || 'Unknown error',
     });
-    throw new Error(error.message);
+    return errorResponse(
+      new Error(error.message || 'Transactional email failed'),
+      'handleTransactional'
+    );
   }
 
   console.log('[email-handler] Transactional email sent', {
@@ -661,7 +824,7 @@ async function handleDigest(): Promise<Response> {
 
   // OPTION 1: Rate limiting protection - check last successful run timestamp
   // Type assertion needed for app_settings table access
-  type AppSettingsRow = DatabaseGenerated['public']['Tables']['app_settings']['Row'];
+  type AppSettingsRow = Pick<Tables<'app_settings'>, 'setting_value' | 'updated_at'>;
   const { data: lastRunData } = await (
     supabaseServiceRole.from('app_settings') as unknown as {
       select: (columns: string) => {
@@ -709,12 +872,10 @@ async function handleDigest(): Promise<Response> {
   if (digestError) throw digestError;
 
   // Type the RPC return properly
-  type WeeklyDigestReturn =
-    DatabaseGenerated['public']['Functions']['get_weekly_digest']['Returns'];
   if (!digest || typeof digest !== 'object' || digest === null) {
     return successResponse({ skipped: true, reason: 'invalid_data' });
   }
-  const digestData = digest as WeeklyDigestReturn;
+  const digestData = digest as GetWeeklyDigestReturn;
 
   // Runtime check for required properties with proper type narrowing
   const hasNewContent =
@@ -747,8 +908,8 @@ async function handleDigest(): Promise<Response> {
   const upsertData = {
     setting_key: 'last_digest_email_timestamp',
     setting_value: currentTimestamp,
-    setting_type: 'string',
-    environment: 'production',
+    setting_type: SETTING_TYPE_VALUES[1], // 'string'
+    environment: ENVIRONMENT_VALUES[2], // 'production'
     enabled: true,
     description: 'Timestamp of last successful weekly digest email send (used for rate limiting)',
     category: 'email',
@@ -764,10 +925,19 @@ async function handleDigest(): Promise<Response> {
     last_digest_timestamp: currentTimestamp,
   });
 
-  // BetterStack heartbeat
+  // BetterStack heartbeat with timeout
   const heartbeatUrl = edgeEnv.betterstack.weeklyTasks;
   if (heartbeatUrl) {
-    await fetch(results.failed === 0 ? heartbeatUrl : `${heartbeatUrl}/fail`, { method: 'GET' });
+    await withTimeout(
+      fetch(results.failed === 0 ? heartbeatUrl : `${heartbeatUrl}/fail`, { method: 'GET' }),
+      TIMEOUT_PRESETS.external,
+      'BetterStack heartbeat timed out'
+    ).catch((error) => {
+      console.warn('[email-handler] BetterStack heartbeat failed', {
+        ...logContext,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    });
   }
 
   return successResponse({
@@ -795,12 +965,10 @@ async function handleSequence(): Promise<Response> {
   }
 
   // Type the RPC return properly
-  type DueSequenceEmailsReturn =
-    DatabaseGenerated['public']['Functions']['get_due_sequence_emails']['Returns'];
   if (!(data && Array.isArray(data))) {
     return successResponse({ sent: 0, failed: 0 });
   }
-  const dueEmailsRaw = data as DueSequenceEmailsReturn;
+  const dueEmailsRaw = data as GetDueSequenceEmailsReturn;
 
   // Runtime check to ensure dueEmails is an array
   if (!Array.isArray(dueEmailsRaw) || dueEmailsRaw.length === 0) {
@@ -808,32 +976,21 @@ async function handleSequence(): Promise<Response> {
     return successResponse({ sent: 0, failed: 0 });
   }
 
-  // Type guard and cast to properly typed array
-  type DueEmailItem = { id: string; email: string; step: number };
-  const dueEmails = dueEmailsRaw.map((item) => {
-    if (
+  // Type guard to ensure array items match expected structure
+  const dueEmails = dueEmailsRaw.filter((item): item is GetDueSequenceEmailsReturn[number] => {
+    return (
       typeof item === 'object' &&
       item !== null &&
-      'id' in item &&
-      'email' in item &&
-      'step' in item
-    ) {
-      return {
-        id: String(item.id),
-        email: String(item.email),
-        step: Number(item.step),
-      } as DueEmailItem;
-    }
-    throw new Error('Invalid due email item structure');
+      typeof item.id === 'string' &&
+      typeof item.email === 'string' &&
+      typeof item.step === 'number'
+    );
   });
 
   console.log('[email-handler] Processing sequence emails', {
     ...logContext,
     due_count: dueEmails.length,
   });
-
-  let sentCount = 0;
-  let failedCount = 0;
 
   const STEP_SUBJECTS: Record<number, string> = {
     2: 'Getting Started with Claude Pro Directory',
@@ -849,23 +1006,35 @@ async function handleSequence(): Promise<Response> {
     5: OnboardingStayEngaged,
   };
 
-  for (const { id, email, step } of dueEmails) {
-    try {
+  // Use batch processor for concurrent email sending with error handling
+  const results = await batchProcess(
+    dueEmails,
+    async ({ id, email, step }) => {
       const Template = STEP_TEMPLATES[step];
+      if (!Template) {
+        throw new Error(`Unknown step: ${step}`);
+      }
+
       const html = await renderEmailTemplate(Template, { email });
 
-      const result = await resend.emails.send({
-        from: 'Claude Pro Directory <noreply@claudepro.directory>',
-        to: email,
-        subject: STEP_SUBJECTS[step],
-        html,
-        tags: [
-          { name: 'template', value: 'onboarding_sequence' },
-          { name: 'step', value: step.toString() },
-        ],
-      });
+      const result = await withTimeout(
+        resend.emails.send({
+          from: 'Claude Pro Directory <noreply@claudepro.directory>',
+          to: email,
+          subject: STEP_SUBJECTS[step],
+          html,
+          tags: [
+            { name: 'template', value: 'onboarding_sequence' },
+            { name: 'step', value: step.toString() },
+          ],
+        }),
+        TIMEOUT_PRESETS.external,
+        'Resend sequence email send timed out'
+      );
 
-      if (result.error) throw new Error(result.error.message);
+      if (result.error) {
+        throw new Error(result.error.message);
+      }
 
       const markProcessedArgs = {
         p_schedule_id: id,
@@ -880,18 +1049,24 @@ async function handleSequence(): Promise<Response> {
         p_current_step: step,
       } satisfies DatabaseGenerated['public']['Functions']['schedule_next_sequence_step']['Args'];
       await callRpc('schedule_next_sequence_step', scheduleNextArgs);
-
-      sentCount++;
-    } catch (error) {
-      console.error('[email-handler] Failed to send sequence email', {
-        ...logContext,
-        step,
-        email,
-        error: error instanceof Error ? error.message : String(error),
-      });
-      failedCount++;
+    },
+    {
+      concurrency: 5, // Process 5 emails concurrently
+      retries: 0, // Don't retry failed emails (they'll be picked up next run)
+      onError: (item, error, attempt) => {
+        console.error('[email-handler] Failed to send sequence email', {
+          ...logContext,
+          step: item.step,
+          email: item.email,
+          attempt,
+          error: error instanceof Error ? error.message : String(error),
+        });
+      },
     }
-  }
+  );
+
+  const sentCount = results.successCount;
+  const failedCount = results.failedCount;
 
   console.log('[email-handler] Sequence emails completed', {
     ...withDuration(logContext, startTime),
@@ -900,10 +1075,19 @@ async function handleSequence(): Promise<Response> {
     total: dueEmails.length,
   });
 
-  // BetterStack heartbeat
+  // BetterStack heartbeat with timeout
   const heartbeatUrl = edgeEnv.betterstack.emailSequences;
   if (heartbeatUrl) {
-    await fetch(failedCount === 0 ? heartbeatUrl : `${heartbeatUrl}/fail`, { method: 'GET' });
+    await withTimeout(
+      fetch(failedCount === 0 ? heartbeatUrl : `${heartbeatUrl}/fail`, { method: 'GET' }),
+      TIMEOUT_PRESETS.external,
+      'BetterStack heartbeat timed out'
+    ).catch((error) => {
+      console.warn('[email-handler] BetterStack heartbeat failed', {
+        ...logContext,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    });
   }
 
   return successResponse({ sent: sentCount, failed: failedCount });
@@ -937,22 +1121,16 @@ async function getAllSubscribers(): Promise<string[]> {
   return data || [];
 }
 
-interface WeeklyDigestData {
-  weekOf?: string;
-  newContent?: Array<{ category: string; slug: string; title: string; description?: string }>;
-  trendingContent?: Array<{ category: string; slug: string; title: string; description?: string }>;
-}
-
-async function sendBatchDigest(subscribers: string[], digestData: WeeklyDigestData) {
+async function sendBatchDigest(subscribers: string[], digestData: GetWeeklyDigestReturn) {
   let success = 0;
   let failed = 0;
 
   // Render once for all subscribers (same content)
   const html = await renderEmailTemplate(WeeklyDigest, {
     email: subscribers[0] || '', // First email for template (not used in rendering)
-    weekOf: digestData.weekOf || '',
-    newContent: digestData.newContent || [],
-    trendingContent: digestData.trendingContent || [],
+    weekOf: digestData.weekOf,
+    newContent: digestData.newContent,
+    trendingContent: digestData.trendingContent,
   });
 
   // Use Resend batch API (up to 100 recipients) instead of sequential sending
@@ -961,14 +1139,18 @@ async function sendBatchDigest(subscribers: string[], digestData: WeeklyDigestDa
     const batch = subscribers.slice(i, i + batchSize);
 
     try {
-      const result = await resend.batch.send(
-        batch.map((email) => ({
-          from: 'Claude Pro Directory <hello@mail.claudepro.directory>',
-          to: email,
-          subject: `This Week in Claude: ${digestData.weekOf}`,
-          html,
-          tags: [{ name: 'type', value: 'weekly_digest' }],
-        }))
+      const result = await withTimeout(
+        resend.batch.send(
+          batch.map((email) => ({
+            from: 'Claude Pro Directory <hello@mail.claudepro.directory>',
+            to: email,
+            subject: `This Week in Claude: ${digestData.weekOf}`,
+            html,
+            tags: [{ name: 'type', value: 'weekly_digest' }],
+          }))
+        ),
+        TIMEOUT_PRESETS.external * 2, // Longer timeout for batch operations
+        'Resend batch digest send timed out'
       );
 
       if (result.error) {
@@ -1086,7 +1268,19 @@ const JOB_EMAIL_CONFIGS: Record<string, JobEmailConfig> = {
 
 async function handleJobLifecycleEmail(req: Request, action: string): Promise<Response> {
   const startTime = Date.now();
-  const payload = await req.json();
+
+  const parseResult = await parseJsonBody<
+    { userEmail: string; jobId: string } & Record<string, unknown>
+  >(req, {
+    maxSize: MAX_BODY_SIZE.default,
+    cors: publicCorsHeaders,
+  });
+
+  if (!parseResult.success) {
+    return parseResult.response;
+  }
+
+  const payload = parseResult.data;
   const { userEmail, jobId } = payload as { userEmail: string; jobId: string };
 
   const config = JOB_EMAIL_CONFIGS[action];
@@ -1102,13 +1296,17 @@ async function handleJobLifecycleEmail(req: Request, action: string): Promise<Re
   const html = await renderEmailTemplate(config.template, props);
   const subject = config.buildSubject(payload);
 
-  const { data, error } = await resend.emails.send({
-    from: 'Claude Pro Directory <jobs@mail.claudepro.directory>',
-    to: userEmail,
-    subject,
-    html,
-    tags: [{ name: 'type', value: action }],
-  });
+  const { data, error } = await withTimeout(
+    resend.emails.send({
+      from: 'Claude Pro Directory <jobs@mail.claudepro.directory>',
+      to: userEmail,
+      subject,
+      html,
+      tags: [{ name: 'type', value: action }],
+    }),
+    TIMEOUT_PRESETS.external,
+    'Resend job lifecycle email send timed out'
+  );
 
   if (error) {
     console.error(`[email-handler] ${action} email failed`, {
@@ -1116,7 +1314,10 @@ async function handleJobLifecycleEmail(req: Request, action: string): Promise<Re
       job_id: jobId,
       error: error.message || 'Unknown error',
     });
-    throw new Error(error.message);
+    return errorResponse(
+      new Error(error.message || `${action} email failed`),
+      'handleJobLifecycleEmail'
+    );
   }
 
   console.log(`[email-handler] ${action} email sent`, {
@@ -1185,7 +1386,23 @@ async function handleGetNewsletterCount(): Promise<Response> {
  */
 async function handleContactSubmission(req: Request): Promise<Response> {
   const startTime = Date.now();
-  const payload = await req.json();
+
+  const parseResult = await parseJsonBody<{
+    submissionId: string;
+    name: string;
+    email: string;
+    category: string;
+    message: string;
+  }>(req, {
+    maxSize: MAX_BODY_SIZE.default,
+    cors: publicCorsHeaders,
+  });
+
+  if (!parseResult.success) {
+    return parseResult.response;
+  }
+
+  const payload = parseResult.data;
   const { submissionId, name, email, category, message } = payload;
 
   const logContext = createEmailHandlerContext('contact-submission', {
@@ -1198,24 +1415,37 @@ async function handleContactSubmission(req: Request): Promise<Response> {
     );
   }
 
+  // Validate category is a valid contact_category enum value
+  if (typeof category !== 'string' || !isContactCategory(category)) {
+    return badRequestResponse(
+      'Invalid category value. Must be one of: bug, feature, partnership, general, other'
+    );
+  }
+
+  const validatedCategory: ContactCategory = category as ContactCategory;
+
   try {
     // Send admin notification email
     const adminHtml = await renderEmailTemplate(ContactSubmissionAdmin, {
       submissionId,
       name,
       email,
-      category,
+      category: validatedCategory,
       message,
       submittedAt: new Date().toISOString(),
     });
 
-    const { error: adminError } = await resend.emails.send({
-      from: 'Claude Pro Directory <contact@mail.claudepro.directory>',
-      to: 'hi@claudepro.directory',
-      subject: `New Contact: ${category} - ${name}`,
-      html: adminHtml,
-      tags: [{ name: 'type', value: 'contact-admin' }],
-    });
+    const { error: adminError } = await withTimeout(
+      resend.emails.send({
+        from: 'Claude Pro Directory <contact@mail.claudepro.directory>',
+        to: 'hi@claudepro.directory',
+        subject: `New Contact: ${validatedCategory} - ${name}`,
+        html: adminHtml,
+        tags: [{ name: 'type', value: 'contact-admin' }],
+      }),
+      TIMEOUT_PRESETS.external,
+      'Resend contact admin email send timed out'
+    );
 
     if (adminError) {
       console.error('[email-handler] Admin notification email failed', {
@@ -1229,16 +1459,20 @@ async function handleContactSubmission(req: Request): Promise<Response> {
     // Send user confirmation email
     const userHtml = await renderEmailTemplate(ContactSubmissionUser, {
       name,
-      category,
+      category: validatedCategory,
     });
 
-    const { data: userData, error: userError } = await resend.emails.send({
-      from: 'Claude Pro Directory <hello@mail.claudepro.directory>',
-      to: email,
-      subject: 'We received your message!',
-      html: userHtml,
-      tags: [{ name: 'type', value: 'contact-confirmation' }],
-    });
+    const { data: userData, error: userError } = await withTimeout(
+      resend.emails.send({
+        from: 'Claude Pro Directory <hello@mail.claudepro.directory>',
+        to: email,
+        subject: 'We received your message!',
+        html: userHtml,
+        tags: [{ name: 'type', value: 'contact-confirmation' }],
+      }),
+      TIMEOUT_PRESETS.external,
+      'Resend contact user email send timed out'
+    );
 
     if (userError) {
       console.error('[email-handler] User confirmation email failed', {

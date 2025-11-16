@@ -70,7 +70,7 @@ export function NotificationItem({ notification }: NotificationItemProps) {
           {notification.action_label && (
             <div className="pt-2">
               {notification.action_href ? (
-                <Button asChild variant="outline" size="sm" onClick={handleActionClick}>
+                <Button asChild={true} variant="outline" size="sm" onClick={handleActionClick}>
                   <Link href={notification.action_href}>{notification.action_label}</Link>
                 </Button>
               ) : (

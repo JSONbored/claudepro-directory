@@ -369,7 +369,7 @@ const nextConfig = {
       // Sitemap.xml - proxy to edge function
       {
         source: '/sitemap.xml',
-        destination: `${supabaseUrl}/functions/v1/data-api/sitemap`,
+        destination: `${supabaseUrl}/functions/v1/data-api/sitemap.xml`,
       },
       { source: '/rss.xml', destination: `${supabaseUrl}/functions/v1/data-api/feeds?type=rss` },
       { source: '/atom.xml', destination: `${supabaseUrl}/functions/v1/data-api/feeds?type=atom` },

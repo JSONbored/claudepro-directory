@@ -1,20 +1,14 @@
 import type { Database as DatabaseGenerated } from '../../_shared/database.types.ts';
-import { callRpc } from '../../_shared/database-overrides.ts';
+import { callRpc, type GetApiHealthReturn } from '../../_shared/database-overrides.ts';
 import {
   buildCacheHeaders,
   errorResponse,
   getOnlyCorsHeaders,
   methodNotAllowedResponse,
 } from '../../_shared/utils/http.ts';
+import { buildSecurityHeaders } from '../../_shared/utils/security-headers.ts';
 
 const CORS = getOnlyCorsHeaders;
-
-interface HealthStatus {
-  status: 'healthy' | 'degraded' | 'unhealthy';
-  timestamp: string;
-  apiVersion: string;
-  checks: Record<string, unknown>;
-}
 
 export async function handleStatusRoute(
   segments: string[],
@@ -38,15 +32,14 @@ export async function handleStatusRoute(
     return errorResponse(error, 'data-api:get_api_health', CORS);
   }
 
-  const health = data as HealthStatus | null;
-  if (
-    !health ||
-    typeof health.status !== 'string' ||
-    !['healthy', 'degraded', 'unhealthy'].includes(health.status)
-  ) {
-    return errorResponse(new Error('Invalid health status'), 'data-api:get_api_health', CORS);
+  if (!data) {
+    return errorResponse(new Error('Health check returned null'), 'data-api:get_api_health', CORS);
   }
 
+  // Type assertion to our return type (callRpc returns Json, we know the structure)
+  const health = data as GetApiHealthReturn;
+
+  // Determine HTTP status code based on health status
   const statusCode = health.status === 'healthy' ? 200 : health.status === 'degraded' ? 200 : 503;
 
   return new Response(JSON.stringify(health), {
@@ -54,6 +47,7 @@ export async function handleStatusRoute(
     headers: {
       'Content-Type': 'application/json; charset=utf-8',
       'X-Generated-By': 'supabase.rpc.get_api_health',
+      ...buildSecurityHeaders(),
       ...CORS,
       ...buildCacheHeaders('status'),
     },

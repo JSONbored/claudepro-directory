@@ -32,7 +32,7 @@ export default async function SponsorshipsPage() {
             <CardDescription>Please sign in to manage your sponsorship campaigns.</CardDescription>
           </CardHeader>
           <CardContent>
-            <Button asChild>
+            <Button asChild={true}>
               <Link href={ROUTES.LOGIN}>Go to login</Link>
             </Button>
           </CardContent>
@@ -68,7 +68,7 @@ export default async function SponsorshipsPage() {
             <h1 className="mb-2 font-bold text-3xl">Sponsorships</h1>
             <p className="text-muted-foreground">No active campaigns yet</p>
           </div>
-          <Button variant="outline" asChild>
+          <Button variant="outline" asChild={true}>
             <Link href={ROUTES.PARTNER}>
               <TrendingUp className="mr-2 h-4 w-4" />
               Become a Sponsor
@@ -98,7 +98,7 @@ export default async function SponsorshipsPage() {
             {sponsorships?.length === 1 ? 'campaign' : 'campaigns'}
           </p>
         </div>
-        <Button variant="outline" asChild>
+        <Button variant="outline" asChild={true}>
           <Link href={ROUTES.PARTNER}>
             <TrendingUp className="mr-2 h-4 w-4" />
             Become a Sponsor
@@ -131,7 +131,7 @@ export default async function SponsorshipsPage() {
                       <UnifiedBadge
                         variant="sponsored"
                         tier={sponsorship.tier as 'featured' | 'promoted' | 'spotlight'}
-                        showIcon
+                        showIcon={true}
                       />
                       {isActive ? (
                         <UnifiedBadge variant="base" className={UI_CLASSES.STATUS_APPROVED}>
@@ -156,7 +156,7 @@ export default async function SponsorshipsPage() {
                       {new Date(sponsorship.end_date).toLocaleDateString()}
                     </CardDescription>
                   </div>
-                  <Button variant="outline" size="sm" asChild>
+                  <Button variant="outline" size="sm" asChild={true}>
                     <Link href={`/account/sponsorships/${sponsorship.id}/analytics`}>
                       <BarChart className="mr-1 h-3 w-3" />
                       Analytics

@@ -61,19 +61,19 @@ export default function CommunityPage() {
             </p>
 
             <div className={'flex flex-wrap justify-center gap-4'}>
-              <Button size="lg" asChild>
+              <Button size="lg" asChild={true}>
                 <a href={channels.github} target="_blank" rel="noopener noreferrer">
                   <Github className={'mr-2 h-5 w-5'} />
                   GitHub
                 </a>
               </Button>
-              <Button size="lg" variant="outline" asChild>
+              <Button size="lg" variant="outline" asChild={true}>
                 <a href={channels.discord} target="_blank" rel="noopener noreferrer">
                   <MessageSquare className={'mr-2 h-5 w-5'} />
                   Discord
                 </a>
               </Button>
-              <Button size="lg" variant="outline" asChild>
+              <Button size="lg" variant="outline" asChild={true}>
                 <a href={channels.twitter} target="_blank" rel="noopener noreferrer">
                   <Twitter className={'mr-2 h-5 w-5'} />X (Twitter)
                 </a>
@@ -157,7 +157,7 @@ export default function CommunityPage() {
                 </p>
               </div>
               <div className="pt-4">
-                <Button asChild>
+                <Button asChild={true}>
                   <Link href={ROUTES.SUBMIT}>Submit Your Configuration</Link>
                 </Button>
               </div>

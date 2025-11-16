@@ -37,7 +37,7 @@ export default async function SubmissionsPage() {
             <CardDescription>Please sign in to view and manage your submissions.</CardDescription>
           </CardHeader>
           <CardContent>
-            <Button asChild>
+            <Button asChild={true}>
               <Link href={ROUTES.LOGIN}>Go to login</Link>
             </Button>
           </CardContent>
@@ -116,7 +116,7 @@ export default async function SubmissionsPage() {
             {submissions.length} {submissions.length === 1 ? 'submission' : 'submissions'}
           </p>
         </div>
-        <Button asChild>
+        <Button asChild={true}>
           <Link href={ROUTES.SUBMIT}>
             <Send className={`mr-2 ${UI_CLASSES.ICON_SM}`} />
             New Submission
@@ -133,7 +133,7 @@ export default async function SubmissionsPage() {
               Share your Claude configurations with the community! Your contributions help everyone
               build better AI workflows.
             </p>
-            <Button asChild>
+            <Button asChild={true}>
               <Link href={ROUTES.SUBMIT}>
                 <Send className={`mr-2 ${UI_CLASSES.ICON_SM}`} />
                 Submit Your First Configuration
@@ -179,14 +179,17 @@ export default async function SubmissionsPage() {
                   )}
                 </div>
 
-                {submission.status === 'rejected' && submission.rejection_reason && (
-                  <div className="mb-4 rounded border border-red-500/20 bg-red-500/10 p-3">
-                    <p className={'mb-1 font-medium text-red-400 text-sm'}>Rejection Reason:</p>
-                    <p className={'text-muted-foreground text-sm'}>{submission.rejection_reason}</p>
-                  </div>
-                )}
+                {submission.status === ('rejected' as SubmissionStatus) &&
+                  submission.rejection_reason && (
+                    <div className="mb-4 rounded border border-red-500/20 bg-red-500/10 p-3">
+                      <p className={'mb-1 font-medium text-red-400 text-sm'}>Rejection Reason:</p>
+                      <p className={'text-muted-foreground text-sm'}>
+                        {submission.rejection_reason}
+                      </p>
+                    </div>
+                  )}
 
-                {submission.status === 'merged' && (
+                {submission.status === ('merged' as SubmissionStatus) && (
                   <div className="mb-4 rounded border border-green-500/20 bg-green-500/10 p-3">
                     <p className={'font-medium text-green-400 text-sm'}>
                       🎉 Your contribution is now live on ClaudePro Directory!
@@ -196,7 +199,7 @@ export default async function SubmissionsPage() {
 
                 <div className={UI_CLASSES.FLEX_GAP_2}>
                   {submission.pr_url && (
-                    <Button variant="outline" size="sm" asChild>
+                    <Button variant="outline" size="sm" asChild={true}>
                       <a href={submission.pr_url} target="_blank" rel="noopener noreferrer">
                         <GitPullRequest className="mr-1 h-3 w-3" />
                         View PR
@@ -205,8 +208,8 @@ export default async function SubmissionsPage() {
                     </Button>
                   )}
 
-                  {submission.status === 'merged' && (
-                    <Button variant="outline" size="sm" asChild>
+                  {submission.status === ('merged' as SubmissionStatus) && (
+                    <Button variant="outline" size="sm" asChild={true}>
                       <Link href={`/${submission.content_type}/${submission.content_slug}`}>
                         <ExternalLink className="mr-1 h-3 w-3" />
                         View Live

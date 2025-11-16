@@ -34,6 +34,11 @@ import { ensureStringArray } from '@/src/lib/utils/data.utils';
 import { logClientWarning } from '@/src/lib/utils/error.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
 import type { JobCategory } from '@/src/types/database-overrides';
+import {
+  isWorkplaceType,
+  WORKPLACE_TYPE_VALUES,
+  type WorkplaceType,
+} from '@/src/types/database-overrides';
 
 interface JobFormProps {
   initialData?: Partial<CreateJobInput>;
@@ -62,10 +67,17 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
 
     const location = formData.get('location') as string;
     const salary = formData.get('salary') as string;
-    const workplace = formData.get('workplace') as string;
+    const workplaceRaw = formData.get('workplace') as string;
     const experience = formData.get('experience') as string;
     const contactEmail = formData.get('contact_email') as string;
     const companyLogo = formData.get('company_logo') as string;
+
+    // Validate workplace type
+    const workplace: WorkplaceType | null | undefined = workplaceRaw
+      ? isWorkplaceType(workplaceRaw)
+        ? workplaceRaw
+        : null
+      : null;
 
     const jobData: CreateJobInput = {
       title: formData.get('title') as string,
@@ -124,7 +136,7 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
             label="Job Title"
             name="title"
             {...(initialData?.title && { defaultValue: initialData.title })}
-            required
+            required={true}
             placeholder="e.g., Senior AI Engineer"
           />
 
@@ -143,7 +155,7 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
               label="Employment Type"
               name="type"
               defaultValue={initialData?.type || 'full-time'}
-              required
+              required={true}
             >
               <SelectItem value="full-time">Full Time</SelectItem>
               <SelectItem value="part-time">Part Time</SelectItem>
@@ -156,12 +168,17 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
               variant="select"
               label="Workplace"
               name="workplace"
-              defaultValue={initialData?.workplace || 'Remote'}
-              required
+              defaultValue={
+                (initialData?.workplace as WorkplaceType | undefined) ||
+                (WORKPLACE_TYPE_VALUES[0] as WorkplaceType)
+              }
+              required={true}
             >
-              <SelectItem value="Remote">Remote</SelectItem>
-              <SelectItem value="On site">On site</SelectItem>
-              <SelectItem value="Hybrid">Hybrid</SelectItem>
+              {WORKPLACE_TYPE_VALUES.map((value) => (
+                <SelectItem key={value} value={value}>
+                  {value}
+                </SelectItem>
+              ))}
             </FormField>
           </div>
 
@@ -195,7 +212,7 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
               label="Category"
               name="category"
               defaultValue={initialData?.category || 'engineering'}
-              required
+              required={true}
             >
               <SelectItem value="engineering">Engineering</SelectItem>
               <SelectItem value="design">Design</SelectItem>
@@ -226,7 +243,7 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
             label="Job Description"
             name="description"
             {...(initialData?.description && { defaultValue: initialData.description })}
-            required
+            required={true}
             rows={6}
             placeholder="Describe the role, responsibilities, and what makes this opportunity great..."
             description="Minimum 50 characters"
@@ -283,8 +300,8 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
             placeholder="e.g., AI, Python, Remote"
             minItems={1}
             maxItems={10}
-            noDuplicates
-            showCounter
+            noDuplicates={true}
+            showCounter={true}
             badgeStyle="outline"
           />
         </CardContent>
@@ -302,7 +319,7 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
             name="link"
             type="url"
             {...(initialData?.link && { defaultValue: initialData.link })}
-            required
+            required={true}
             placeholder="https://company.com/careers/apply"
           />
 
@@ -396,7 +413,7 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
         >
           {isPending ? 'Saving...' : submitLabel}
         </Button>
-        <Button type="button" variant="outline" asChild>
+        <Button type="button" variant="outline" asChild={true}>
           <a href={ROUTES.ACCOUNT_JOBS}>Cancel</a>
         </Button>
       </div>

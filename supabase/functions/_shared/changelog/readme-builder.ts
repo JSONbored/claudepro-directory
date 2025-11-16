@@ -1,19 +1,5 @@
 import { SITE_URL } from '../clients/supabase.ts';
-
-export interface ReadmeCategory {
-  category: string;
-  title: string;
-  description: string;
-  icon_name: string;
-  url_slug: string;
-  items: Array<{ title: string; slug: string; description: string }>;
-}
-
-export interface ReadmeData {
-  categories: ReadmeCategory[];
-  totalCount: number;
-  categoryBreakdown: Record<string, number>;
-}
+import type { GenerateReadmeDataReturn } from '../database-overrides.ts';
 
 const ICON_EMOJI_MAP: Record<string, string> = {
   Sparkles: '🤖',
@@ -27,7 +13,7 @@ const ICON_EMOJI_MAP: Record<string, string> = {
   Code: '💻',
 };
 
-export function buildReadmeMarkdown(data: ReadmeData): string {
+export function buildReadmeMarkdown(data: GenerateReadmeDataReturn): string {
   const { categories, totalCount } = data;
 
   const categorySections = categories

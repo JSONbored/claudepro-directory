@@ -162,7 +162,7 @@ export function ReadProgress({
       aria-valuemin={0}
       aria-valuemax={100}
       aria-valuenow={Math.round(scrollYProgress.get() * 100)}
-      suppressHydrationWarning
+      suppressHydrationWarning={true}
     />
   );
 }

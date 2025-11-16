@@ -42,10 +42,11 @@ export async function getActiveNotifications({
   userId,
   dismissedIds = [],
 }: NotificationFetchParams): Promise<NotificationRecord[]> {
-  return fetchCachedRpc<NotificationRecord[]>(
+  // Note: get_active_notifications RPC only accepts p_dismissed_ids (notifications are global, not user-specific)
+  // userId is used for cache key generation only
+  return fetchCachedRpc<'get_active_notifications', NotificationRecord[]>(
     {
-      p_user_id: userId,
-      dismissed_ids: dismissedIds,
+      p_dismissed_ids: dismissedIds,
     },
     {
       rpcName: 'get_active_notifications',

@@ -9,6 +9,7 @@ import { type CacheTtlKey, getCacheTtl } from '@/src/lib/data/config/cache-confi
 import { logger } from '@/src/lib/logger';
 import { createClient } from '@/src/lib/supabase/server';
 import { createAnonClient } from '@/src/lib/supabase/server-anon';
+import type { Database } from '@/src/types/database-overrides';
 
 export interface CachedRPCOptions {
   /** Cache key suffix (will be prepended with function name) */
@@ -22,7 +23,22 @@ export interface CachedRPCOptions {
 }
 
 /**
+ * Type-safe RPC client interface
+ * Works around Supabase's type inference limitations while preserving runtime behavior
+ */
+type RpcClient = {
+  rpc: <T extends keyof Database['public']['Functions']>(
+    name: T,
+    args: Database['public']['Functions'][T]['Args']
+  ) => Promise<{
+    data: Database['public']['Functions'][T]['Returns'] | null;
+    error: unknown;
+  }>;
+};
+
+/**
  * Wraps a Supabase RPC call with edge-layer caching
+ * Uses centralized Database types for full type safety
  *
  * @example
  * const data = await cachedRPC(
@@ -34,11 +50,11 @@ export interface CachedRPCOptions {
  *   }
  * );
  */
-export async function cachedRPC<T = unknown>(
-  functionName: string,
-  params: Record<string, unknown>,
+export async function cachedRPC<T extends keyof Database['public']['Functions']>(
+  functionName: T,
+  params: Database['public']['Functions'][T]['Args'],
   options: CachedRPCOptions
-): Promise<T | null> {
+): Promise<Database['public']['Functions'][T]['Returns'] | null> {
   const { keySuffix, tags, ttlConfigKey, useAuthClient = false } = options;
 
   // Fetch TTL from Statsig (runtime) or use defaults (build time)
@@ -46,30 +62,41 @@ export async function cachedRPC<T = unknown>(
 
   // Generate cache key
   const cacheKey = keySuffix
-    ? `rpc-${functionName}-${keySuffix}`
-    : `rpc-${functionName}-${JSON.stringify(params)}`;
+    ? `rpc-${String(functionName)}-${keySuffix}`
+    : `rpc-${String(functionName)}-${JSON.stringify(params)}`;
 
   return unstable_cache(
     async () => {
       try {
         const supabase = useAuthClient ? await createClient() : createAnonClient();
-        // Type assertion needed as Supabase's RPC types don't support dynamic function names
-        const { data, error } = await supabase.rpc(functionName as never, params as never);
+        // Use satisfies to validate params type, then use the client directly
+        const validatedParams = params satisfies Database['public']['Functions'][T]['Args'];
+        // The Supabase client may infer 'never' but we validate the params type with satisfies
+        // Type assertion needed due to Supabase client type inference limitation
+        // Params are validated with satisfies, but client infers 'never' - this is a known Supabase limitation
+        const { data, error } = await (supabase as unknown as RpcClient).rpc(
+          functionName,
+          validatedParams
+        );
 
         if (error) {
-          logger.error(`RPC call failed: ${functionName}`, error, {
-            functionName,
-            params: JSON.stringify(params),
-          });
+          logger.error(
+            `RPC call failed: ${String(functionName)}`,
+            error instanceof Error ? error : new Error(String(error)),
+            {
+              functionName: String(functionName),
+              params: JSON.stringify(params),
+            }
+          );
           return null;
         }
 
-        return data as T;
+        return data;
       } catch (error) {
         logger.error(
-          `Cached RPC error: ${functionName}`,
+          `Cached RPC error: ${String(functionName)}`,
           error instanceof Error ? error : new Error(String(error)),
-          { functionName }
+          { functionName: String(functionName) }
         );
         return null;
       }

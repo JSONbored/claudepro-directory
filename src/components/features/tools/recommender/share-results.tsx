@@ -38,7 +38,7 @@ export function ShareResults({ shareUrl, resultCount, onClose }: ShareResultsPro
   };
 
   return (
-    <Dialog open onOpenChange={onClose}>
+    <Dialog open={true} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
@@ -54,7 +54,7 @@ export function ShareResults({ shareUrl, resultCount, onClose }: ShareResultsPro
           {/* Copy link */}
           <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
             <Input
-              readOnly
+              readOnly={true}
               value={shareUrl}
               className="flex-1"
               onClick={(e) => e.currentTarget.select()}
@@ -76,7 +76,7 @@ export function ShareResults({ shareUrl, resultCount, onClose }: ShareResultsPro
 
           {/* Social share buttons */}
           <div className="grid grid-cols-2 gap-3">
-            <Button variant="outline" size="sm" asChild className="gap-2">
+            <Button variant="outline" size="sm" asChild={true} className="gap-2">
               <a
                 href={shareLinks.twitter}
                 target="_blank"
@@ -90,7 +90,7 @@ export function ShareResults({ shareUrl, resultCount, onClose }: ShareResultsPro
               </a>
             </Button>
 
-            <Button variant="outline" size="sm" asChild className="gap-2">
+            <Button variant="outline" size="sm" asChild={true} className="gap-2">
               <a
                 href={shareLinks.linkedin}
                 target="_blank"
@@ -104,7 +104,7 @@ export function ShareResults({ shareUrl, resultCount, onClose }: ShareResultsPro
               </a>
             </Button>
 
-            <Button variant="outline" size="sm" asChild className="gap-2">
+            <Button variant="outline" size="sm" asChild={true} className="gap-2">
               <a
                 href={shareLinks.facebook}
                 target="_blank"
@@ -118,7 +118,7 @@ export function ShareResults({ shareUrl, resultCount, onClose }: ShareResultsPro
               </a>
             </Button>
 
-            <Button variant="outline" size="sm" asChild className="gap-2">
+            <Button variant="outline" size="sm" asChild={true} className="gap-2">
               <a
                 href={shareLinks.email}
                 onClick={() => {

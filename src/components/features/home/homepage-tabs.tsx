@@ -119,7 +119,7 @@ const TabsSectionComponent: FC<TabsSectionProps> = ({
             <UnifiedCardGrid
               items={filteredResults}
               variant="normal"
-              infiniteScroll
+              infiniteScroll={true}
               batchSize={30}
               emptyMessage={`No ${categoryName} found. Try adjusting your filters.`}
               ariaLabel={`${categoryName} results`}
@@ -149,7 +149,7 @@ const TabsSectionComponent: FC<TabsSectionProps> = ({
         </div>
 
         <div className={'pt-8 text-center'}>
-          <Button variant="outline" asChild>
+          <Button variant="outline" asChild={true}>
             <Link href={ROUTES.COMMUNITY}>View All Contributors</Link>
           </Button>
         </div>

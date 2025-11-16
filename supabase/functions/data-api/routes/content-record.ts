@@ -1,6 +1,6 @@
 import { SITE_URL } from '../../_shared/clients/supabase.ts';
 import type { Database as DatabaseGenerated } from '../../_shared/database.types.ts';
-import { callRpc } from '../../_shared/database-overrides.ts';
+import { callRpc, type GenerateMarkdownExportReturn } from '../../_shared/database-overrides.ts';
 import {
   badRequestResponse,
   buildCacheHeaders,
@@ -8,6 +8,7 @@ import {
   getOnlyCorsHeaders,
   getWithAcceptCorsHeaders,
 } from '../../_shared/utils/http.ts';
+import { buildSecurityHeaders } from '../../_shared/utils/security-headers.ts';
 import { proxyStorageFile } from '../../_shared/utils/storage/proxy.ts';
 
 const CORS_JSON = getOnlyCorsHeaders;
@@ -62,6 +63,7 @@ async function handleJsonFormat(category: string, slug: string): Promise<Respons
     headers: {
       'Content-Type': 'application/json; charset=utf-8',
       'X-Generated-By': 'supabase.rpc.get_api_content_full',
+      ...buildSecurityHeaders(),
       ...CORS_JSON,
       ...buildCacheHeaders('content_export'),
     },
@@ -84,36 +86,27 @@ async function handleMarkdownFormat(category: string, slug: string, url: URL): P
     return errorResponse(error, 'data-api:generate_markdown_export', CORS_MARKDOWN);
   }
 
-  type MarkdownExportResult =
-    DatabaseGenerated['public']['Functions']['generate_markdown_export']['Returns'];
-  const result = data as MarkdownExportResult;
-  if (
-    !(
-      result &&
-      typeof result === 'object' &&
-      'success' in result &&
-      result.success &&
-      'markdown' in result &&
-      result.markdown
-    )
-  ) {
-    const errorMsg =
-      result && typeof result === 'object' && 'error' in result && typeof result.error === 'string'
-        ? result.error
-        : 'Failed to generate markdown';
-    return badRequestResponse(errorMsg, CORS_MARKDOWN);
+  if (!data) {
+    return badRequestResponse('Markdown generation failed: RPC returned null', CORS_MARKDOWN);
   }
 
-  // Type-safe markdown response - result.markdown is Json type, ensure it's a string
-  const markdownContent =
-    typeof result.markdown === 'string' ? result.markdown : String(result.markdown);
-  return new Response(markdownContent, {
+  // Type assertion to our return type (callRpc returns Json, we know the structure)
+  const result = data as GenerateMarkdownExportReturn;
+
+  // Use type narrowing with discriminated union
+  if (!result.success) {
+    return badRequestResponse(result.error, CORS_MARKDOWN);
+  }
+
+  // TypeScript narrows to success case - all fields are properly typed
+  return new Response(result.markdown, {
     status: 200,
     headers: {
       'Content-Type': 'text/markdown; charset=utf-8',
-      'Content-Disposition': `inline; filename="${(result as { filename?: string }).filename || 'export.md'}"`,
+      'Content-Disposition': `inline; filename="${result.filename}"`,
       'X-Generated-By': 'supabase.rpc.generate_markdown_export',
-      'X-Content-ID': (result as { content_id?: string }).content_id || '',
+      'X-Content-ID': result.content_id,
+      ...buildSecurityHeaders(),
       ...CORS_MARKDOWN,
       ...buildCacheHeaders('content_export'),
     },
@@ -143,6 +136,7 @@ async function handleItemLlmsTxt(category: string, slug: string): Promise<Respon
     headers: {
       'Content-Type': 'text/plain; charset=utf-8',
       'X-Generated-By': 'supabase.rpc.generate_item_llms_txt',
+      ...buildSecurityHeaders(),
       ...CORS_JSON,
       ...buildCacheHeaders('content_export'),
     },

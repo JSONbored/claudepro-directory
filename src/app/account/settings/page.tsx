@@ -42,7 +42,7 @@ export default async function SettingsPage() {
             <CardDescription>Please sign in to manage your account settings.</CardDescription>
           </CardHeader>
           <CardContent>
-            <Button asChild>
+            <Button asChild={true}>
               <Link href={ROUTES.LOGIN}>Go to login</Link>
             </Button>
           </CardContent>
@@ -73,7 +73,7 @@ export default async function SettingsPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button asChild variant="outline">
+            <Button asChild={true} variant="outline">
               <Link href={ROUTES.ACCOUNT}>Back to dashboard</Link>
             </Button>
           </CardContent>
@@ -182,7 +182,7 @@ export default async function SettingsPage() {
                 width={64}
                 height={64}
                 className="h-16 w-16 rounded-full object-cover"
-                priority
+                priority={true}
               />
               <div>
                 <p className="text-sm">

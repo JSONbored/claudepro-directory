@@ -27,7 +27,7 @@ import { formatViewCount, getContentItemUrl } from '@/src/lib/utils/content.util
 import { ensureStringArray } from '@/src/lib/utils/data.utils';
 import { logClientWarning, logUnhandledPromise } from '@/src/lib/utils/error.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
-import type { ContentCategory } from '@/src/types/database-overrides';
+import type { ContentCategory, ExperienceLevel } from '@/src/types/database-overrides';
 
 export const ConfigCard = memo(
   ({
@@ -377,25 +377,35 @@ export const ConfigCard = memo(
               <>
                 {showCategory && (
                   <UnifiedBadge variant="category" category={category}>
-                    {item.category === 'mcp'
-                      ? 'MCP'
-                      : item.category === 'agents'
-                        ? 'Agent'
-                        : item.category === 'commands'
-                          ? 'Command'
-                          : item.category === 'hooks'
-                            ? 'Hook'
-                            : item.category === 'rules'
-                              ? 'Rule'
-                              : item.category === 'statuslines'
-                                ? 'Statusline'
-                                : item.category === 'collections'
-                                  ? 'Collection'
-                                  : item.category === 'guides'
-                                    ? 'Guide'
-                                    : item.category === 'skills'
-                                      ? 'Skill'
-                                      : 'Agent'}
+                    {(() => {
+                      const cat = item.category as ContentCategory;
+                      switch (cat) {
+                        case 'mcp':
+                          return 'MCP';
+                        case 'agents':
+                          return 'Agent';
+                        case 'commands':
+                          return 'Command';
+                        case 'hooks':
+                          return 'Hook';
+                        case 'rules':
+                          return 'Rule';
+                        case 'statuslines':
+                          return 'Statusline';
+                        case 'collections':
+                          return 'Collection';
+                        case 'guides':
+                          return 'Guide';
+                        case 'skills':
+                          return 'Skill';
+                        case 'jobs':
+                          return 'Job';
+                        case 'changelog':
+                          return 'Changelog';
+                        default:
+                          return 'Agent';
+                      }
+                    })()}
                   </UnifiedBadge>
                 )}
 
@@ -419,7 +429,7 @@ export const ConfigCard = memo(
                     <UnifiedBadge
                       variant="base"
                       style="outline"
-                      className={`${UI_CLASSES.TEXT_BADGE} ${BADGE_COLORS.difficulty[collectionDifficulty as 'beginner' | 'intermediate' | 'advanced']}`}
+                      className={`${UI_CLASSES.TEXT_BADGE} ${BADGE_COLORS.difficulty[collectionDifficulty as ExperienceLevel]}`}
                     >
                       {collectionDifficulty}
                     </UnifiedBadge>
@@ -458,7 +468,7 @@ export const ConfigCard = memo(
                   <UnifiedBadge
                     variant="sponsored"
                     tier={sponsorTier as 'featured' | 'promoted' | 'spotlight'}
-                    showIcon
+                    showIcon={true}
                   />
                 )}
 

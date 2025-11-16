@@ -32,7 +32,7 @@ export default async function ConnectedAccountsPage() {
             <CardDescription>Please sign in to manage your connected accounts.</CardDescription>
           </CardHeader>
           <CardContent>
-            <Button asChild>
+            <Button asChild={true}>
               <Link href={ROUTES.LOGIN}>Go to login</Link>
             </Button>
           </CardContent>
@@ -83,7 +83,7 @@ export default async function ConnectedAccountsPage() {
             <CardDescription>{errorMessage}</CardDescription>
           </CardHeader>
           <CardContent>
-            <Button asChild variant="outline">
+            <Button asChild={true} variant="outline">
               <Link href={ROUTES.ACCOUNT_SETTINGS}>Go to settings</Link>
             </Button>
           </CardContent>

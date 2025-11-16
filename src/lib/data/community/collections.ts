@@ -3,28 +3,10 @@
 import { fetchCachedRpc } from '@/src/lib/data/helpers';
 import { logger } from '@/src/lib/logger';
 import { normalizeError } from '@/src/lib/utils/error.utils';
-import type { Tables } from '@/src/types/database.types';
+import type { GetUserCollectionDetailReturn } from '@/src/types/database-overrides';
 
-export interface CollectionDetailData {
-  user: {
-    id: string;
-    slug: string;
-    name: string;
-    image: string | null;
-    tier: string;
-  };
-  collection: Tables<'user_collections'>;
-  items: Array<{
-    id: string;
-    collection_id: string;
-    content_type: string;
-    content_slug: string;
-    notes: string | null;
-    order: number;
-    added_at: string;
-  }>;
-  isOwner: boolean;
-}
+// CollectionDetailData matches GetUserCollectionDetailReturn (excluding null)
+export type CollectionDetailData = NonNullable<GetUserCollectionDetailReturn>;
 
 export async function getPublicCollectionDetail(input: {
   userSlug: string;
@@ -34,7 +16,7 @@ export async function getPublicCollectionDetail(input: {
   const { userSlug, collectionSlug, viewerId } = input;
 
   try {
-    const data = await fetchCachedRpc<CollectionDetailData | null>(
+    const data = await fetchCachedRpc<'get_user_collection_detail', GetUserCollectionDetailReturn>(
       {
         p_user_slug: userSlug,
         p_collection_slug: collectionSlug,

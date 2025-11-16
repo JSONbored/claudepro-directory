@@ -158,7 +158,7 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
               </UnifiedBadge>
             </div>
 
-            <Button variant="outline" size="sm" asChild>
+            <Button variant="outline" size="sm" asChild={true}>
               <Link href={ROUTES.PARTNER} className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
                 <Plus className="h-3 w-3" />
                 Post a Job
@@ -232,7 +232,7 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
                       type="button"
                       variant={remote ? 'default' : 'outline'}
                       className="flex-1"
-                      asChild
+                      asChild={true}
                     >
                       <Link
                         href={buildFilterUrl({
@@ -304,7 +304,7 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
                         </Link>
                       </UnifiedBadge>
                     )}
-                    <Button variant="ghost" size="sm" asChild>
+                    <Button variant="ghost" size="sm" asChild={true}>
                       <Link href={ROUTES.JOBS} className="text-xs">
                         Clear All
                       </Link>
@@ -333,13 +333,13 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
                     are posted.
                   </p>
                   <div className="flex gap-4">
-                    <Button asChild>
+                    <Button asChild={true}>
                       <Link href={ROUTES.PARTNER}>
                         <Plus className="mr-2 h-4 w-4" />
                         Post the First Job
                       </Link>
                     </Button>
-                    <Button variant="outline" asChild>
+                    <Button variant="outline" asChild={true}>
                       <Link href={ROUTES.COMMUNITY}>Join Community</Link>
                     </Button>
                   </div>
@@ -353,7 +353,7 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
                   <p className={'mb-6 max-w-md text-center text-muted-foreground'}>
                     No jobs match your current filters. Try adjusting your search criteria.
                   </p>
-                  <Button variant="outline" asChild>
+                  <Button variant="outline" asChild={true}>
                     <Link href={ROUTES.JOBS}>Clear All Filters</Link>
                   </Button>
                 </CardContent>

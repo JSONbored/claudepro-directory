@@ -1,16 +1,25 @@
 import { randomUUID } from 'node:crypto';
 import { supabaseServiceRole } from '../clients/supabase.ts';
 import type { Database as DatabaseGenerated } from '../database.types.ts';
-import type { Database, Tables } from '../database-overrides.ts';
-import { callRpc, insertTable, upsertTable } from '../database-overrides.ts';
+import type {
+  Database,
+  NotificationPriority,
+  NotificationType,
+  Tables,
+} from '../database-overrides.ts';
+import {
+  callRpc,
+  insertTable,
+  NOTIFICATION_TYPE_VALUES,
+  upsertTable,
+} from '../database-overrides.ts';
 import { invalidateCacheByKey } from '../utils/cache.ts';
+import { errorToString } from '../utils/error-handling.ts';
 import type { BaseLogContext } from '../utils/logging.ts';
 
 const MAX_NOTIFICATION_IDS = 50;
 
 type NotificationRecord = Tables<'notifications'>;
-type NotificationPriority = Database['public']['Enums']['notification_priority'];
-type NotificationType = Database['public']['Enums']['notification_type'];
 
 export interface NotificationInsertPayload {
   id?: string;
@@ -46,7 +55,7 @@ export async function getActiveNotificationsForUser(
       ...(logContext || {}),
       user_id: userId,
       dismissedCount: sanitizedDismissedIds.length,
-      error: error instanceof Error ? error.message : String(error),
+      error: errorToString(error),
     });
     throw error;
   }
@@ -63,20 +72,21 @@ export async function insertNotification(
     title: payload.title,
     message: payload.message,
     priority: payload.priority ?? 'medium',
-    type: payload.type ?? 'announcement',
+    type: payload.type ?? NOTIFICATION_TYPE_VALUES[0], // Default to 'announcement'
     action_label: payload.action_label ?? null,
     action_href: payload.action_href ?? null,
     action_onclick: payload.action_onclick ?? null,
     icon: payload.icon ?? null,
     expires_at: payload.expires_at ?? null,
     active: payload.active ?? true,
-    metadata: payload.metadata ?? null,
+    // Note: metadata column doesn't exist in notifications table schema
+    // Keeping metadata in interface for backward compatibility but not inserting it
   };
 
   // Use type-safe helper to ensure proper type inference
   const insertData =
     record satisfies DatabaseGenerated['public']['Tables']['notifications']['Insert'];
-  const result = await insertTable('notifications', insertData);
+  const result = insertTable('notifications', insertData);
   const { data, error } = await result.select('*').single<NotificationRecord>();
 
   if (error || !data) {
@@ -92,7 +102,7 @@ export async function insertNotification(
     }
     console.error('[notifications] Failed to insert notification', {
       ...(logContext || {}),
-      error: error instanceof Error ? error.message : String(error),
+      error: errorToString(error),
     });
     throw error ?? new Error('Unknown notification insert error');
   }
@@ -143,7 +153,7 @@ export async function dismissNotificationsForUser(
     console.error('[notifications] Failed to dismiss notifications', {
       ...(logContext || {}),
       user_id: userId,
-      error: error instanceof Error ? error.message : String(error),
+      error: errorToString(error),
     });
     throw error;
   }
@@ -193,7 +203,7 @@ async function getNotificationById(id: string): Promise<NotificationRecord | nul
   if (error) {
     console.error('[notifications] Failed to load existing notification', {
       notification_id: id,
-      error: error instanceof Error ? error.message : String(error),
+      error: errorToString(error),
     });
     return null;
   }

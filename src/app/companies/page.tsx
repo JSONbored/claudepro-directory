@@ -84,7 +84,7 @@ export default async function CompaniesPage() {
               </UnifiedBadge>
             </div>
 
-            <Button variant="outline" asChild>
+            <Button variant="outline" asChild={true}>
               <Link href={ROUTES.ACCOUNT_COMPANIES}>
                 <Plus className="mr-2 h-4 w-4" />
                 Add Your Company
@@ -104,7 +104,7 @@ export default async function CompaniesPage() {
               <p className={'mb-4 max-w-md text-center text-muted-foreground'}>
                 Be the first company to join the directory!
               </p>
-              <Button asChild>
+              <Button asChild={true}>
                 <Link href={ROUTES.ACCOUNT_COMPANIES}>
                   <Plus className="mr-2 h-4 w-4" />
                   Add Your Company
@@ -190,7 +190,7 @@ export default async function CompaniesPage() {
                     )}
 
                     {company.website && (
-                      <Button variant="ghost" size="sm" asChild>
+                      <Button variant="ghost" size="sm" asChild={true}>
                         <a href={company.website} target="_blank" rel="noopener noreferrer">
                           <ExternalLink className="h-3 w-3" />
                         </a>

@@ -126,7 +126,7 @@ export const DetailSidebar = memo(function DetailSidebar({
                       );
                     });
                 }}
-                asChild
+                asChild={true}
               >
                 <a href={githubUrl} target="_blank" rel="noopener noreferrer">
                   <Github className={UI_CLASSES.ICON_SM_LEADING} />
@@ -160,7 +160,7 @@ export const DetailSidebar = memo(function DetailSidebar({
                       );
                     });
                 }}
-                asChild
+                asChild={true}
               >
                 <a href={item.documentation_url} target="_blank" rel="noopener noreferrer">
                   <ExternalLink className={UI_CLASSES.ICON_SM_LEADING} />
@@ -190,7 +190,7 @@ export const DetailSidebar = memo(function DetailSidebar({
                     BADGE_COLORS.category.default
                   }`}
                 >
-                  {item.category === 'mcp'
+                  {item.category === ('mcp' as ContentCategory)
                     ? 'MCP Server'
                     : item.category.charAt(0).toUpperCase() + item.category.slice(1)}
                 </UnifiedBadge>

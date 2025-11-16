@@ -149,7 +149,7 @@ const NavigationComponent = ({ hideCreateButton = false, navigationData }: Navig
                       return (
                         <Button
                           key={link.href}
-                          asChild
+                          asChild={true}
                           variant="outline"
                           size="sm"
                           className={`hidden md:flex ${UI_CLASSES.TEXT_XS}`}

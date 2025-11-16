@@ -113,7 +113,7 @@ export default async function JobPage({ params }: PageProps) {
       <div className={'min-h-screen bg-background'}>
         <div className={'border-border/50 border-b bg-card/30'}>
           <div className="container mx-auto px-4 py-8">
-            <Button variant="ghost" asChild className="mb-6">
+            <Button variant="ghost" asChild={true} className="mb-6">
               <Link href={ROUTES.JOBS}>
                 <ArrowLeft className={'mr-2 h-4 w-4'} />
                 Back to Jobs
@@ -219,14 +219,14 @@ export default async function JobPage({ params }: PageProps) {
                   <CardTitle>Apply for this position</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2">
-                  <Button className="w-full" asChild>
+                  <Button className="w-full" asChild={true}>
                     <a href={job.link} target="_blank" rel="noopener noreferrer">
                       <ExternalLink className={'mr-2 h-4 w-4'} />
                       Apply Now
                     </a>
                   </Button>
                   {job.contact_email && (
-                    <Button variant="outline" className="w-full" asChild>
+                    <Button variant="outline" className="w-full" asChild={true}>
                       <a href={`mailto:${job.contact_email}`}>
                         <Building2 className={'mr-2 h-4 w-4'} />
                         Contact Company

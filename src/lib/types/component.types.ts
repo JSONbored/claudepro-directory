@@ -8,10 +8,12 @@ import type { ContentItem } from '@/src/lib/data/content';
 import type { SearchResult } from '@/src/lib/edge/search-client';
 import type {
   ContentCategory,
+  GetCompanyProfileReturn,
   GetEnrichedContentListReturn,
   HomepageContentItem,
   SortOption,
   Tables,
+  TrendingPeriod,
 } from '@/src/types/database-overrides';
 import type { HomePageClientProps } from './page-props.types';
 
@@ -61,8 +63,15 @@ export interface ErrorFallbackProps {
   resetErrorBoundary: () => void;
 }
 
+/**
+ * Job card props - accepts either full job row or subset from RPC returns
+ * The RPC get_company_profile returns a subset of job fields, so we need
+ * to support both the full type and the subset type.
+ */
+export type JobCardJobType = NonNullable<GetCompanyProfileReturn>['active_jobs'][number];
+
 export interface JobCardProps {
-  job: Tables<'jobs'>;
+  job: Tables<'jobs'> | JobCardJobType;
 }
 
 export interface FilterState {
@@ -92,7 +101,7 @@ export interface TrendingContentProps {
   recent?: DisplayableContent[];
   category?: CategoryId;
   limit?: number;
-  period?: 'day' | 'week' | 'month' | 'all';
+  period?: TrendingPeriod;
 }
 
 export type ContentListServerProps<T extends DisplayableContent = EnrichedContentItem> = {

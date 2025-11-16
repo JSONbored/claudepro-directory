@@ -51,6 +51,12 @@ import {
 } from '@/src/lib/icons';
 import { POSITION_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { getContentItemUrl } from '@/src/lib/utils/content.utils';
+import type {
+  ExperienceLevel,
+  FocusAreaType,
+  IntegrationType,
+  UseCaseType,
+} from '@/src/types/database-overrides';
 
 type RecommendationResponse = {
   results: Array<{
@@ -68,11 +74,11 @@ type RecommendationResponse = {
   }>;
   totalMatches: number;
   answers: {
-    useCase: string;
-    experienceLevel: string;
+    useCase: UseCaseType;
+    experienceLevel: ExperienceLevel;
     toolPreferences: string[];
-    integrations?: string[];
-    focusAreas?: string[];
+    integrations?: IntegrationType[];
+    focusAreas?: FocusAreaType[];
     teamSize?: string;
   };
   id: string;
@@ -195,7 +201,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
             <Share2 className={UI_CLASSES.ICON_SM} />
             Share Results
           </Button>
-          <Button variant="outline" size="sm" asChild>
+          <Button variant="outline" size="sm" asChild={true}>
             <Link href={ROUTES.TOOLS_CONFIG_RECOMMENDER} className="gap-2">
               <RefreshCw className={UI_CLASSES.ICON_SM} />
               Start Over
@@ -205,7 +211,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
       </div>
 
       <Collapsible open={showRefinePanel} onOpenChange={setShowRefinePanel}>
-        <CollapsibleTrigger asChild>
+        <CollapsibleTrigger asChild={true}>
           <Button variant="ghost" size="sm" className="w-full gap-2">
             <Settings className={UI_CLASSES.ICON_SM} />
             Adjust Preferences
@@ -388,7 +394,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                     <div className={`${POSITION_PATTERNS.ABSOLUTE_TOP_RIGHT_OFFSET_XL} z-10`}>
                       <TooltipProvider>
                         <Tooltip>
-                          <TooltipTrigger asChild>
+                          <TooltipTrigger asChild={true}>
                             <UnifiedBadge
                               variant="base"
                               style="secondary"
@@ -479,7 +485,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                             variant="ghost"
                             size="sm"
                             className="group -mx-4 -mb-4 mt-2 w-full"
-                            asChild
+                            asChild={true}
                           >
                             <span className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_CENTER_GAP_2}>
                               View Details
@@ -520,13 +526,13 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
             instructions, examples, and documentation.
           </p>
           <div className={UI_CLASSES.FLEX_WRAP_GAP_3}>
-            <Button asChild>
+            <Button asChild={true}>
               <Link href="/" className="gap-2">
                 Browse All Configs
                 <ArrowRight className={UI_CLASSES.ICON_SM} />
               </Link>
             </Button>
-            <Button variant="outline" asChild>
+            <Button variant="outline" asChild={true}>
               <Link href={ROUTES.GUIDES}>View Setup Guides</Link>
             </Button>
           </div>

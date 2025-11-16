@@ -24,7 +24,7 @@ export async function StepByStepGuide(props: StepByStepGuideProps) {
   );
 
   return (
-    <section itemScope itemType="https://schema.org/HowTo" className="my-8">
+    <section itemScope={true} itemType="https://schema.org/HowTo" className="my-8">
       <div className="mb-6">
         <h2 className={'mb-2 font-bold text-2xl'} itemProp="name">
           {title}
@@ -57,7 +57,7 @@ export async function StepByStepGuide(props: StepByStepGuideProps) {
               )}
 
               <Card
-                itemScope
+                itemScope={true}
                 itemType="https://schema.org/HowToStep"
                 className="border-2 border-primary/20 bg-gradient-to-br from-card via-card/80 to-transparent transition-all duration-300 hover:shadow-2xl"
               >

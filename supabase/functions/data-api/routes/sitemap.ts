@@ -10,7 +10,10 @@ import {
   jsonResponse,
   methodNotAllowedResponse,
 } from '../../_shared/utils/http.ts';
+import { fetchWithRetry } from '../../_shared/utils/integrations/http-client.ts';
 import type { BaseLogContext } from '../../_shared/utils/logging.ts';
+import { buildSecurityHeaders } from '../../_shared/utils/security-headers.ts';
+import { TIMEOUT_PRESETS, withTimeout } from '../../_shared/utils/timeout.ts';
 
 const CORS = getOnlyCorsHeaders;
 const INDEXNOW_API_URL = 'https://api.indexnow.org/IndexNow';
@@ -103,6 +106,7 @@ async function handleSitemapGet(url: URL, _logContext?: BaseLogContext): Promise
       'X-Robots-Tag': 'index, follow',
       'X-Generated-By': 'supabase.rpc.generate_sitemap_xml',
       'X-Content-Source': 'PostgreSQL mv_site_urls',
+      ...buildSecurityHeaders(),
       ...CORS,
       ...buildCacheHeaders('sitemap'),
     },
@@ -154,37 +158,73 @@ async function handleSitemapIndexNow(req: Request, logContext?: BaseLogContext):
     urlList,
   };
 
-  const response = await fetch(INDEXNOW_API_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-  });
+  // Make IndexNow call non-blocking with timeout and retry
+  try {
+    const fetchPromise = fetchWithRetry({
+      url: INDEXNOW_API_URL,
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+      retry: {
+        attempts: 2,
+        baseDelayMs: 1000,
+        retryOn: [500, 502, 503, 504],
+        noRetryOn: [400, 401, 403, 404],
+      },
+      logContext,
+    });
 
-  if (!response.ok) {
-    const text = await response.text();
+    // Use timeout to prevent hanging
+    const { response: finalResponse } = await withTimeout(
+      fetchPromise,
+      TIMEOUT_PRESETS.external,
+      'IndexNow request timed out'
+    );
+
+    if (!finalResponse.ok) {
+      const text = await finalResponse.text();
+      return jsonResponse(
+        {
+          error: 'IndexNow request failed',
+          status: finalResponse.status,
+          body: text,
+        },
+        502,
+        CORS
+      );
+    }
+
+    console.log('[data-api] IndexNow submitted', {
+      ...(logContext || {}),
+      submitted: urlList.length,
+      status: finalResponse.status,
+    });
+
     return jsonResponse(
       {
-        error: 'IndexNow request failed',
-        status: response.status,
-        body: text,
+        ok: true,
+        submitted: urlList.length,
       },
-      502,
+      200,
+      CORS
+    );
+  } catch (error) {
+    // Log error but return success to avoid blocking
+    console.error('[data-api] IndexNow submission failed', {
+      ...(logContext || {}),
+      error: error instanceof Error ? error.message : String(error),
+      submitted: urlList.length,
+    });
+
+    // Return success even if IndexNow fails (non-blocking)
+    return jsonResponse(
+      {
+        ok: true,
+        submitted: urlList.length,
+        warning: 'IndexNow submission may have failed, but URLs were queued',
+      },
+      200,
       CORS
     );
   }
-
-  console.log('[data-api] IndexNow submitted', {
-    ...(logContext || {}),
-    submitted: urlList.length,
-    status: response.status,
-  });
-
-  return jsonResponse(
-    {
-      ok: true,
-      submitted: urlList.length,
-    },
-    200,
-    CORS
-  );
 }

@@ -1,62 +1,61 @@
-import {
-  buildChangelogMetadata,
-  type ChangelogInsert,
-  type ChangelogRow,
-  deriveChangelogKeywords,
-  fetchCommitsFromGitHub,
-  filterConventionalCommits,
-  generateMarkdownContent,
-  generateTldr,
-  groupCommitsByType,
-  inferTitle,
-  revalidateChangelogPages,
-  transformSectionsToChanges,
-  type VercelWebhookPayload,
-} from '../../changelog/service.ts';
-import { SITE_URL } from '../../clients/supabase.ts';
-import { edgeEnv } from '../../config/env.ts';
-import type { Database as DatabaseGenerated } from '../../database.types.ts';
-import { insertTable } from '../../database-overrides.ts';
-import { insertNotification } from '../../notifications/service.ts';
-import { sendDiscordWebhook } from '../../utils/discord/client.ts';
-import { buildChangelogEmbed } from '../../utils/discord/embeds.ts';
+import type { VercelWebhookPayload } from '../../changelog/service.ts';
+import { supabaseServiceRole } from '../../clients/supabase.ts';
 import {
   badRequestResponse,
   changelogCorsHeaders,
   errorResponse,
   successResponse,
-  unauthorizedResponse,
 } from '../../utils/http.ts';
-import { verifyVercelSignature } from '../../utils/integrations/vercel.ts';
 import { createChangelogHandlerContext, withContext } from '../../utils/logging.ts';
 import { pgmqSend } from '../../utils/pgmq-client.ts';
-
-const VERCEL_WEBHOOK_SECRET = edgeEnv.vercel.webhookSecret;
-const DISCORD_CHANGELOG_WEBHOOK_URL = edgeEnv.discord.changelog;
+import {
+  ingestWebhookEvent,
+  WebhookIngestError,
+  type WebhookIngestResult,
+} from '../../utils/webhook/ingest.ts';
 
 export async function handleChangelogSyncRequest(req: Request): Promise<Response> {
   const logContext = createChangelogHandlerContext();
 
   try {
     const body = await req.text();
-    const payload = JSON.parse(body) as VercelWebhookPayload;
+
+    // Parse payload early to extract deployment_id for logging
+    let payload: VercelWebhookPayload;
+    try {
+      payload = JSON.parse(body) as VercelWebhookPayload;
+    } catch (_parseError) {
+      return badRequestResponse('Invalid JSON payload', changelogCorsHeaders);
+    }
 
     // Update logContext with deployment info
     const updatedContext = withContext(logContext, {
-      deployment_id: payload.payload.deployment.id,
-      branch: payload.payload.deployment.meta?.branch,
+      deployment_id: payload.payload?.deployment?.id,
+      branch: payload.payload?.deployment?.meta?.branch,
     });
 
-    const signature = req.headers.get('x-vercel-signature');
-    if (!(signature && VERCEL_WEBHOOK_SECRET)) {
-      return unauthorizedResponse('Missing Vercel signature', changelogCorsHeaders);
+    // Ingest webhook event (validates signature, stores in webhook_events table)
+    let ingestResult: WebhookIngestResult;
+    try {
+      ingestResult = await ingestWebhookEvent(body, req.headers);
+    } catch (error) {
+      if (error instanceof WebhookIngestError) {
+        return errorResponse(error, 'changelog-sync:ingest', changelogCorsHeaders);
+      }
+      throw error;
     }
 
-    const verified = await verifyVercelSignature(body, signature, VERCEL_WEBHOOK_SECRET);
-    if (!verified) {
-      return unauthorizedResponse('Invalid Vercel signature', changelogCorsHeaders);
+    // If duplicate webhook, return early (idempotent)
+    if (ingestResult.duplicate) {
+      console.log('[changelog-handler] Duplicate webhook detected, skipping', updatedContext);
+      return successResponse(
+        { skipped: true, reason: 'Duplicate webhook', duplicate: true },
+        200,
+        changelogCorsHeaders
+      );
     }
 
+    // Validate webhook type before processing
     if (payload.type !== 'deployment.succeeded') {
       return successResponse(
         { skipped: true, reason: `Unsupported webhook type: ${payload.type}` },
@@ -65,196 +64,77 @@ export async function handleChangelogSyncRequest(req: Request): Promise<Response
       );
     }
 
-    const baseCommit = payload.payload.deployment.meta?.previousCommitId;
-    const headCommit = payload.payload.deployment.meta?.commitId;
-
-    if (!(baseCommit && headCommit)) {
-      return badRequestResponse(
-        'Missing commit metadata in deployment payload',
-        changelogCorsHeaders
-      );
-    }
-
-    const commits = await fetchCommitsFromGitHub(baseCommit, headCommit);
-    const conventionalCommits = filterConventionalCommits(commits);
-
-    if (conventionalCommits.length === 0) {
-      return successResponse(
-        { skipped: true, reason: 'No conventional commits found in deployment range' },
-        200,
-        changelogCorsHeaders
-      );
-    }
-
-    const sections = groupCommitsByType(conventionalCommits);
-    const markdownContent = generateMarkdownContent(sections);
-    const title = inferTitle(conventionalCommits);
-    const tldr = generateTldr(conventionalCommits);
-    const changes = transformSectionsToChanges(sections);
-    const releaseDate = new Date().toISOString().split('T')[0];
-    const slug = `${releaseDate}-${payload.payload.deployment.id.slice(-6)}`;
-    const branch = payload.payload.deployment.meta?.branch || 'main';
-    const deploymentUrl = payload.payload.deployment.url;
-    const contributors = [
-      ...new Set(conventionalCommits.map((commit) => commit.commit.author.name)),
-    ];
-    const metadata = buildChangelogMetadata({
-      sections,
-      releaseDate,
-      deploymentUrl,
-      branch,
-      commitSha: headCommit,
-      commitCount: conventionalCommits.length,
-      contributors,
-    });
-    const keywords = deriveChangelogKeywords(sections, branch);
-
-    const changelogEntry: ChangelogInsert = {
-      title,
-      slug,
-      tldr,
-      description: tldr || title,
-      content: markdownContent,
-      raw_content: markdownContent,
-      changes,
-      release_date: releaseDate,
-      published: true,
-      featured: false,
-      source: 'automation',
-      metadata,
-      keywords,
-      commit_count: conventionalCommits.length,
-      contributors,
-      git_commit_sha: headCommit,
-      canonical_url: `${SITE_URL}/changelog/${slug}`,
-    };
-
-    // Use type-safe helper to ensure proper type inference
-    const insertData =
-      changelogEntry satisfies DatabaseGenerated['public']['Tables']['changelog']['Insert'];
-    const result = await insertTable('changelog', insertData);
-    const { data, error } = await result.select('*').single<ChangelogRow>();
-
-    if (error) {
-      return errorResponse(error, 'changelog-sync:insert', changelogCorsHeaders);
-    }
-    if (!data) {
+    // Extract idempotency key (svix_id) to query webhook_events table
+    // Vercel webhook uses payload.id or x-vercel-id header as idempotency key
+    const idempotencyKey = payload.id || req.headers.get('x-vercel-id');
+    if (!idempotencyKey) {
+      console.error('[changelog-handler] Missing idempotency key', updatedContext);
       return errorResponse(
-        new Error('Failed to insert changelog entry'),
-        'changelog-sync:insert-empty',
+        new Error('Missing idempotency key in webhook'),
+        'changelog-sync:missing-idempotency-key',
         changelogCorsHeaders
       );
     }
 
-    // Enqueue job for async processing (Discord, notifications, revalidation)
+    // Query webhook_events table to get the inserted webhook_event_id
+    const { data: webhookEvent, error: webhookError } = await supabaseServiceRole
+      .from('webhook_events')
+      .select('id')
+      .eq('svix_id', idempotencyKey)
+      .eq('source', 'vercel')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single<{ id: string }>();
+
+    if (webhookError || !webhookEvent) {
+      console.error('[changelog-handler] Failed to retrieve webhook event ID', {
+        ...updatedContext,
+        idempotencyKey,
+        error: webhookError instanceof Error ? webhookError.message : String(webhookError),
+      });
+      return errorResponse(
+        new Error('Failed to retrieve webhook event ID'),
+        'changelog-sync:webhook-query',
+        changelogCorsHeaders
+      );
+    }
+
+    // Extract deployment_id for logging
+    const deploymentId = payload.payload?.deployment?.id;
+
+    // Enqueue minimal job to changelog_process queue
     const queueJob = {
-      entryId: data.id,
-      slug: data.slug,
-      title: data.title,
-      tldr,
-      sections,
-      commits: conventionalCommits,
-      releaseDate: data.release_date ?? new Date().toISOString(),
-      metadata,
+      webhook_event_id: webhookEvent.id,
+      deployment_id: deploymentId,
     };
 
-    let queueError: Error | null = null;
     try {
-      await pgmqSend('changelog_release', queueJob);
-    } catch (err) {
-      queueError = err instanceof Error ? err : new Error(String(err));
-      console.error('[changelog-handler] Failed to enqueue changelog release', {
+      await pgmqSend('changelog_process', queueJob);
+      console.log('[changelog-handler] Webhook processing job enqueued', {
         ...updatedContext,
-        error: queueError.message,
+        webhook_event_id: webhookEvent.id,
       });
-    }
-
-    // Update logContext with changelog info
-    const finalContext = withContext(updatedContext, {
-      changelog_id: data.id,
-      slug: data.slug,
-    });
-
-    if (queueError) {
-      // Fallback: Execute side effects synchronously if queue fails
-      console.warn('[changelog-handler] Queue enqueue failed, falling back to sync execution', {
-        ...finalContext,
-        error: queueError.message,
+    } catch (queueError) {
+      const errorMsg = queueError instanceof Error ? queueError.message : String(queueError);
+      console.error('[changelog-handler] Failed to enqueue webhook processing job', {
+        ...updatedContext,
+        webhook_event_id: webhookEvent.id,
+        error: errorMsg,
       });
-
-      // Execute side effects synchronously (backward compatibility)
-      if (DISCORD_CHANGELOG_WEBHOOK_URL) {
-        const embed = buildChangelogEmbed({
-          slug: data.slug,
-          title: data.title,
-          tldr,
-          sections,
-          commits: conventionalCommits,
-          date: data.release_date ?? new Date().toISOString(),
-        });
-
-        await sendDiscordWebhook(
-          DISCORD_CHANGELOG_WEBHOOK_URL,
-          {
-            content: '🚀 **New Release Deployed**',
-            embeds: [embed],
-          },
-          'changelog_notification',
-          {
-            relatedId: data.id,
-            metadata: {
-              changelog_id: data.id,
-              slug: data.slug,
-            },
-            logContext: finalContext,
-          }
-        );
-      }
-
-      await insertNotification(
-        {
-          id: data.id,
-          title: data.title,
-          message: tldr || 'We just shipped a fresh Claude Pro Directory release.',
-          type: 'announcement',
-          priority: 'high',
-          action_label: 'Read release notes',
-          action_href: `${SITE_URL}/changelog/${data.slug}`,
-          metadata: {
-            slug: data.slug,
-            changelog_id: data.id,
-            source: 'changelog-sync',
-          },
-        },
-        finalContext
-      );
-
-      await revalidateChangelogPages(data.slug, { invalidateTags: true });
-
-      return successResponse(
-        {
-          inserted: true,
-          changelog_id: data.id,
-          sections: sections.length,
-          commits: conventionalCommits.length,
-          queue_enqueued: false,
-          fallback_sync: true,
-        },
-        200,
+      return errorResponse(
+        new Error(`Failed to enqueue processing job: ${errorMsg}`),
+        'changelog-sync:enqueue',
         changelogCorsHeaders
       );
     }
 
-    // Queue enqueue succeeded - return immediately (worker will process async)
-    console.log('[changelog-handler] Job enqueued successfully', finalContext);
-
+    // Return success immediately (processing happens asynchronously in worker)
     return successResponse(
       {
-        inserted: true,
-        changelog_id: data.id,
-        sections: sections.length,
-        commits: conventionalCommits.length,
+        ingested: true,
+        webhook_event_id: webhookEvent.id,
         queue_enqueued: true,
+        message: 'Webhook received and queued for processing',
       },
       200,
       changelogCorsHeaders

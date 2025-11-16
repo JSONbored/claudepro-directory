@@ -402,7 +402,7 @@ async function syncConfigSubmissions() {
 }
 
 // Legacy sync functions removed - endpoints /api/track and /actions/track do not exist
-// Analytics tracking is now handled via queue-based pulse system (user_interactions queue)
+// Analytics tracking is now handled via queue-based pulse system (pulse queue)
 
 // Periodic background sync (fallback)
 self.addEventListener("message", (event) => {

@@ -20,6 +20,7 @@ import type { Database, Tables } from '@/src/types/database.types';
 import {
   CONTENT_CATEGORY_VALUES,
   type ContentCategory,
+  type ReorderCollectionItemsReturn,
   SUBMISSION_TYPE_VALUES,
   type SubmissionType,
 } from '@/src/types/database-overrides';
@@ -340,11 +341,7 @@ export const reorderCollectionItems = authedAction
     const { userId } = ctx;
 
     try {
-      const result = await runRpc<{
-        success: boolean;
-        updated: number;
-        errors: unknown[];
-      }>(
+      const result = await runRpc<ReorderCollectionItemsReturn>(
         'reorder_collection_items',
         {
           p_collection_id: collection_id,
@@ -359,10 +356,10 @@ export const reorderCollectionItems = authedAction
       );
 
       if (!result.success) {
-        throw new Error('Failed to reorder collection items');
+        throw new Error(result.error || 'Failed to reorder collection items');
       }
 
-      if (result.errors && Array.isArray(result.errors) && result.errors.length > 0) {
+      if (result.errors.length > 0) {
         logger.warn('Some items failed to reorder', undefined, {
           errorCount: result.errors.length,
         });

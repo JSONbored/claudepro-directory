@@ -13,7 +13,10 @@ export async function getCompanyAdminProfile(
   }
 
   // RPC returns array, but we normalize to single object
-  const data = await fetchCachedRpc<GetCompanyAdminProfileReturn[] | null>(
+  const data = await fetchCachedRpc<
+    'get_company_admin_profile',
+    GetCompanyAdminProfileReturn[] | null
+  >(
     { p_company_id: companyId },
     {
       rpcName: 'get_company_admin_profile',

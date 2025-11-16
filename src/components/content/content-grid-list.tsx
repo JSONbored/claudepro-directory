@@ -72,7 +72,7 @@ function ContentHeroSection<T extends DisplayableContent>({
             ))}
           </ul>
 
-          <Button variant="outline" size="sm" asChild>
+          <Button variant="outline" size="sm" asChild={true}>
             <Link
               href={ROUTES.SUBMIT}
               className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}

@@ -494,7 +494,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
                     setContentType(e.target.value as SubmissionContentType);
                     setName(''); // Reset name when type changes
                   }}
-                  required
+                  required={true}
                   className={
                     'flex h-10 w-full rounded-md border border-input bg-background py-2 pr-3 pl-10 text-sm'
                   }
@@ -580,7 +580,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                     placeholder="Describe what your configuration does and how to use it..."
-                    required
+                    required={true}
                     rows={6}
                     className="resize-y font-sans"
                   />

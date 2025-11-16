@@ -81,15 +81,17 @@ export function JobCard({ job }: JobCardProps) {
           </div>
 
           <div className={`flex flex-col items-end ${UI_CLASSES.SPACE_COMPACT}`}>
-            <UnifiedBadge
-              variant="base"
-              style="default"
-              className={
-                BADGE_COLORS.jobType[job.type as JobType] || 'bg-muted text-muted-foreground'
-              }
-            >
-              {job.type.replace('-', ' ')}
-            </UnifiedBadge>
+            {job.type && (
+              <UnifiedBadge
+                variant="base"
+                style="default"
+                className={
+                  BADGE_COLORS.jobType[job.type as JobType] || 'bg-muted text-muted-foreground'
+                }
+              >
+                {job.type.replace('-', ' ')}
+              </UnifiedBadge>
+            )}
             {job.remote && (
               <UnifiedBadge variant="base" style="secondary">
                 Remote
@@ -130,7 +132,7 @@ export function JobCard({ job }: JobCardProps) {
 
         <div className={`flex ${UI_CLASSES.SPACE_DEFAULT}`}>
           <Button
-            asChild
+            asChild={true}
             className="flex-1"
             onClick={() => {
               pulse
@@ -157,7 +159,7 @@ export function JobCard({ job }: JobCardProps) {
           </Button>
           <Button
             variant="outline"
-            asChild
+            asChild={true}
             onClick={() => {
               pulse
                 .click({

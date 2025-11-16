@@ -17,6 +17,8 @@ import {
   JOB_STATUS_VALUES,
   type JobCategory,
   type JobStatus,
+  WORKPLACE_TYPE_VALUES,
+  type WorkplaceType,
 } from '@/src/types/database-overrides';
 
 // Minimal Zod schemas (database CHECK constraints do real validation)
@@ -29,7 +31,10 @@ const createJobSchema = z.object({
   salary: z.string().optional().nullable(),
   remote: z.boolean().optional(),
   type: z.string(),
-  workplace: z.string().optional().nullable(),
+  workplace: z
+    .enum([...WORKPLACE_TYPE_VALUES] as [WorkplaceType, ...WorkplaceType[]])
+    .optional()
+    .nullable(),
   experience: z.string().optional().nullable(),
   category: z.enum([...JOB_CATEGORY_VALUES] as [JobCategory, ...JobCategory[]]),
   tags: z.array(z.string()),

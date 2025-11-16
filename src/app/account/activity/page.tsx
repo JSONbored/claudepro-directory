@@ -34,7 +34,7 @@ export default async function ActivityPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button asChild>
+            <Button asChild={true}>
               <Link href={ROUTES.LOGIN}>Go to login</Link>
             </Button>
           </CardContent>
@@ -85,7 +85,7 @@ export default async function ActivityPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button asChild>
+            <Button asChild={true}>
               <Link href={ROUTES.ACCOUNT}>Back to dashboard</Link>
             </Button>
           </CardContent>
@@ -94,8 +94,8 @@ export default async function ActivityPage() {
     );
   }
 
-  const { activities } = timeline;
-  if (!activities || activities.length === 0) {
+  const activities = timeline.activities || [];
+  if (activities.length === 0) {
     logger.warn('ActivityPage: activity timeline returned no activities', { userId: user.id });
   }
 

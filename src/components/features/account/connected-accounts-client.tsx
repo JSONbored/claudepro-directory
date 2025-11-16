@@ -27,12 +27,9 @@ import {
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { errorToasts, successToasts } from '@/src/lib/utils/toast.utils';
 
-interface Identity {
-  provider: string;
-  email: string;
-  created_at: string;
-  last_sign_in_at: string;
-}
+import type { GetUserIdentitiesReturn } from '@/src/types/database-overrides';
+
+type Identity = GetUserIdentitiesReturn['identities'][number];
 
 interface ConnectedAccountsClientProps {
   identities: Identity[];

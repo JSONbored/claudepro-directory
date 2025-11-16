@@ -416,7 +416,7 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
     return (
       <TooltipProvider delayDuration={delayDuration}>
         <Tooltip>
-          <TooltipTrigger asChild>
+          <TooltipTrigger asChild={true}>
             <output className={cn('relative flex h-2 w-2', props.className)} aria-label={label}>
               <span className="sr-only">{label}</span>
               <span

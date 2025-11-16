@@ -1,7 +1,11 @@
-import { buildReadmeMarkdown, type ReadmeData } from '../../_shared/changelog/readme-builder.ts';
-import { VALID_CONTENT_CATEGORIES } from '../../_shared/config/constants/categories.ts';
+import { buildReadmeMarkdown } from '../../_shared/changelog/readme-builder.ts';
 import type { Database as DatabaseGenerated } from '../../_shared/database.types.ts';
-import { callRpc } from '../../_shared/database-overrides.ts';
+import {
+  CONTENT_CATEGORY_VALUES,
+  type ContentCategory,
+  callRpc,
+  type GenerateReadmeDataReturn,
+} from '../../_shared/database-overrides.ts';
 import {
   badRequestResponse,
   buildCacheHeaders,
@@ -11,6 +15,7 @@ import {
   methodNotAllowedResponse,
 } from '../../_shared/utils/http.ts';
 import type { BaseLogContext } from '../../_shared/utils/logging.ts';
+import { buildSecurityHeaders } from '../../_shared/utils/security-headers.ts';
 import { handlePaginatedContent } from './content-paginated.ts';
 import { handleRecordExport } from './content-record.ts';
 
@@ -43,10 +48,7 @@ export async function handleContentRoute(
     if (first === 'changelog') {
       return handleChangelogIndex(format);
     }
-    if (
-      first &&
-      VALID_CONTENT_CATEGORIES.includes(first as (typeof VALID_CONTENT_CATEGORIES)[number])
-    ) {
+    if (first && CONTENT_CATEGORY_VALUES.includes(first as ContentCategory)) {
       return handleCategoryOnly(first, format);
     }
   }
@@ -59,14 +61,11 @@ export async function handleContentRoute(
     if (first === 'tools') {
       return handleToolLlmsTxt(second, format);
     }
-    if (
-      first &&
-      VALID_CONTENT_CATEGORIES.includes(first as (typeof VALID_CONTENT_CATEGORIES)[number])
-    ) {
+    if (first && CONTENT_CATEGORY_VALUES.includes(first as ContentCategory)) {
       return handleRecordExport(first, second, url);
     }
     return badRequestResponse(
-      `Invalid category '${first}'. Valid categories: ${VALID_CONTENT_CATEGORIES.join(', ')}`,
+      `Invalid category '${first}'. Valid categories: ${CONTENT_CATEGORY_VALUES.join(', ')}`,
       CORS
     );
   }
@@ -126,8 +125,8 @@ async function handleSitewideReadme(logContext?: BaseLogContext): Promise<Respon
       CORS
     );
   }
-  // Type assertion needed - RPC returns Json type which needs conversion
-  const readmeData = data as unknown as ReadmeData;
+
+  const readmeData = data as GenerateReadmeDataReturn;
   const markdown = buildReadmeMarkdown(readmeData);
 
   console.log('[data-api] Sitewide readme generated', {
@@ -141,6 +140,7 @@ async function handleSitewideReadme(logContext?: BaseLogContext): Promise<Respon
     headers: {
       'Content-Type': 'text/markdown; charset=utf-8',
       'X-Generated-By': 'supabase.rpc.generate_readme_data',
+      ...buildSecurityHeaders(),
       ...CORS,
       ...buildCacheHeaders('content_export'),
     },
@@ -178,6 +178,7 @@ async function handleSitewideLlmsTxt(logContext?: BaseLogContext): Promise<Respo
     headers: {
       'Content-Type': 'text/plain; charset=utf-8',
       'X-Generated-By': 'supabase.rpc.generate_sitewide_llms_txt',
+      ...buildSecurityHeaders(),
       ...CORS,
       ...buildCacheHeaders('content_export'),
     },
@@ -232,6 +233,7 @@ async function handleCategoryLlmsTxt(category: string): Promise<Response> {
     headers: {
       'Content-Type': 'text/plain; charset=utf-8',
       'X-Generated-By': 'supabase.rpc.generate_category_llms_txt',
+      ...buildSecurityHeaders(),
       ...CORS,
       ...buildCacheHeaders('content_export'),
     },
@@ -259,6 +261,7 @@ async function handleChangelogLlmsTxt(): Promise<Response> {
     headers: {
       'Content-Type': 'text/plain; charset=utf-8',
       'X-Generated-By': 'supabase.rpc.generate_changelog_llms_txt',
+      ...buildSecurityHeaders(),
       ...CORS,
       ...buildCacheHeaders('content_export'),
     },
@@ -285,6 +288,7 @@ async function handleChangelogEntryLlmsTxt(slug: string): Promise<Response> {
     headers: {
       'Content-Type': 'text/plain; charset=utf-8',
       'X-Generated-By': 'supabase.rpc.generate_changelog_entry_llms_txt',
+      ...buildSecurityHeaders(),
       ...CORS,
       ...buildCacheHeaders('content_export'),
     },
@@ -311,6 +315,7 @@ async function handleToolLlms(tool: string): Promise<Response> {
     headers: {
       'Content-Type': 'text/plain; charset=utf-8',
       'X-Generated-By': 'supabase.rpc.generate_tool_llms_txt',
+      ...buildSecurityHeaders(),
       ...CORS,
       ...buildCacheHeaders('content_export'),
     },

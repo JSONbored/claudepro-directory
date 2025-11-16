@@ -6,7 +6,11 @@
 import { fetchCachedRpc } from '@/src/lib/data/helpers';
 import { logger } from '@/src/lib/logger';
 import { createClient } from '@/src/lib/supabase/server';
-import type { Tables } from '@/src/types/database-overrides';
+import type {
+  FilterJobsReturn,
+  GetJobDetailReturn,
+  Tables,
+} from '@/src/types/database-overrides';
 
 export type Job = Tables<'jobs'>;
 
@@ -20,16 +24,14 @@ export interface JobsFilterOptions {
   offset: number;
 }
 
-export interface JobsFilterResult {
-  jobs: Job[];
-  total_count: number;
-}
+// JobsFilterResult matches FilterJobsReturn from database-overrides.ts
+export type JobsFilterResult = FilterJobsReturn;
 
 /**
  * Get all active jobs via edge-cached RPC
  */
 export async function getJobs(): Promise<Job[]> {
-  return fetchCachedRpc<Job[]>(
+  return fetchCachedRpc<'get_jobs_list', Job[]>(
     {},
     {
       rpcName: 'get_jobs_list',
@@ -45,14 +47,14 @@ export async function getJobs(): Promise<Job[]> {
  * Get a job by slug via edge-cached RPC
  */
 export async function getJobBySlug(slug: string): Promise<Job | undefined> {
-  const data = await fetchCachedRpc<Job | undefined>(
+  const data = await fetchCachedRpc<'get_job_detail', GetJobDetailReturn>(
     { p_slug: slug },
     {
       rpcName: 'get_job_detail',
       tags: ['jobs', `jobs-${slug}`],
       ttlKey: 'cache.jobs_detail.ttl_seconds',
       keySuffix: slug,
-      fallback: undefined,
+      fallback: null,
       logMeta: { slug },
     }
   );
@@ -62,7 +64,7 @@ export async function getJobBySlug(slug: string): Promise<Job | undefined> {
 
 /** Get featured jobs via edge-cached RPC */
 export async function getFeaturedJobs(): Promise<Job[]> {
-  return fetchCachedRpc<Job[]>(
+  return fetchCachedRpc<'get_featured_jobs', Job[]>(
     {},
     {
       rpcName: 'get_featured_jobs',
@@ -76,7 +78,7 @@ export async function getFeaturedJobs(): Promise<Job[]> {
 
 /** Get jobs by category via edge-cached RPC */
 export async function getJobsByCategory(category: string): Promise<Job[]> {
-  return fetchCachedRpc<Job[]>(
+  return fetchCachedRpc<'get_jobs_by_category', Job[]>(
     { p_category: category },
     {
       rpcName: 'get_jobs_by_category',
@@ -91,7 +93,7 @@ export async function getJobsByCategory(category: string): Promise<Job[]> {
 
 /** Get jobs count via edge-cached RPC */
 export async function getJobsCount(): Promise<number> {
-  const data = await fetchCachedRpc<number | null>(
+  const data = await fetchCachedRpc<'get_jobs_count', number | null>(
     {},
     {
       rpcName: 'get_jobs_count',
@@ -107,7 +109,7 @@ export async function getJobsCount(): Promise<number> {
 /** Filter jobs via filter_jobs RPC */
 export async function getFilteredJobs(
   options: JobsFilterOptions
-): Promise<JobsFilterResult | null> {
+): Promise<FilterJobsReturn | null> {
   const { searchQuery, category, employment, experience, remote, limit, offset } = options;
 
   const rpcParams = {
@@ -120,30 +122,33 @@ export async function getFilteredJobs(
     p_offset: offset,
   };
 
-  const result = await fetchCachedRpc<JobsFilterResult | null>(rpcParams, {
-    rpcName: 'filter_jobs',
-    tags: ['jobs', ...(category && category !== 'all' ? [`jobs-${category}`] : [])],
-    ttlKey: 'cache.jobs.ttl_seconds',
-    keySuffix: [
-      searchQuery || 'none',
-      category || 'all',
-      employment || 'any',
-      experience || 'any',
-      remote ? 'remote' : 'onsite',
-      limit,
-      offset,
-    ].join('|'),
-    fallback: null,
-    logMeta: {
-      hasSearch: Boolean(searchQuery),
-      category: category || 'all',
-      employment: employment || 'any',
-      experience: experience || 'any',
-      remote: Boolean(remote),
-      limit,
-      offset,
-    },
-  });
+  const result = await fetchCachedRpc<'filter_jobs', FilterJobsReturn>(
+    rpcParams,
+    {
+      rpcName: 'filter_jobs',
+      tags: ['jobs', ...(category && category !== 'all' ? [`jobs-${category}`] : [])],
+      ttlKey: 'cache.jobs.ttl_seconds',
+      keySuffix: [
+        searchQuery || 'none',
+        category || 'all',
+        employment || 'any',
+        experience || 'any',
+        remote ? 'remote' : 'onsite',
+        limit,
+        offset,
+      ].join('|'),
+      fallback: null,
+      logMeta: {
+        hasSearch: Boolean(searchQuery),
+        category: category || 'all',
+        employment: employment || 'any',
+        experience: experience || 'any',
+        remote: Boolean(remote),
+        limit,
+        offset,
+      },
+    }
+  );
 
   // Track search analytics (fire and forget) - only if search query provided
   if (searchQuery && result) {
@@ -170,7 +175,7 @@ export async function getFilteredJobs(
 
 /**
  * Track jobs search analytics - Queue-Based
- * Enqueues to user_interactions queue for batched processing (98% egress reduction)
+ * Enqueues to pulse queue for batched processing (98% egress reduction)
  * Fire and forget - non-blocking
  */
 async function trackJobsSearchAnalytics(

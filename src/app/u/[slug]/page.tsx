@@ -90,7 +90,7 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                   width={96}
                   height={96}
                   className="h-24 w-24 rounded-full border-4 border-background object-cover"
-                  priority
+                  priority={true}
                 />
               ) : (
                 <div className="flex h-24 w-24 items-center justify-center rounded-full border-4 border-background bg-accent font-bold text-2xl">
@@ -115,7 +115,7 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                       <span>•</span>
                       <NavLink
                         href={profile.website}
-                        external
+                        external={true}
                         className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}
                       >
                         <Globe className="h-4 w-4" />

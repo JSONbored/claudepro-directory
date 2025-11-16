@@ -228,7 +228,7 @@ export default async function RootLayout({
   return (
     <html
       lang="en"
-      suppressHydrationWarning
+      suppressHydrationWarning={true}
       className={`${inter.variable} ${geist.variable} ${geistMono.variable} font-sans`}
     >
       <head>
@@ -266,7 +266,7 @@ export default async function RootLayout({
         <ThemeProvider
           attribute="data-theme"
           defaultTheme="dark"
-          enableSystem
+          enableSystem={true}
           storageKey="claudepro-theme"
           disableTransitionOnChange={false}
           enableColorScheme={false}
@@ -310,7 +310,7 @@ export default async function RootLayout({
         <Pulse variant="pwa-install" />
         <Pulse variant="pwa-launch" />
         {/* Service Worker Registration for PWA Support */}
-        <script src="/scripts/service-worker-init.js" defer />
+        <script src="/scripts/service-worker-init.js" defer={true} />
         {/* Vercel Analytics & Speed Insights - Loaded at page bottom for optimal performance */}
         <Analytics />
         <SpeedInsights />

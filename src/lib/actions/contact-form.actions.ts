@@ -11,12 +11,13 @@ import { invalidateByKeys, runRpc } from '@/src/lib/actions/action-helpers';
 import { logger } from '@/src/lib/logger';
 import { env } from '@/src/lib/schemas/env.schema';
 import { logActionFailure } from '@/src/lib/utils/error.utils';
+import { CONTACT_CATEGORY_VALUES, type ContactCategory } from '@/src/types/database-overrides';
 
 // Minimal Zod schema - database CHECK constraints do real validation
 const contactFormSchema = z.object({
   name: z.string().min(1).max(255),
   email: z.string().email(),
-  category: z.enum(['general', 'bug', 'feature', 'partnership', 'other']),
+  category: z.enum([...CONTACT_CATEGORY_VALUES] as [ContactCategory, ...ContactCategory[]]),
   message: z.string().min(10).max(5000),
   metadata: z.record(z.string(), z.unknown()).optional(),
 });

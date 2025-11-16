@@ -9,12 +9,12 @@ import {
   CardTitle,
 } from '@/src/components/primitives/ui/card';
 import { useLoggedAsync } from '@/src/hooks/use-logged-async';
-import type { NewsletterSource } from '@/src/hooks/use-newsletter';
 import { useNewsletterCount } from '@/src/hooks/use-newsletter-count';
 import { NEWSLETTER_CTA_CONFIG } from '@/src/lib/data/config/category';
 import { Mail } from '@/src/lib/icons';
 import { DIMENSIONS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
+import type { NewsletterSource } from '@/src/types/database-overrides';
 import { NewsletterForm } from './newsletter-form';
 import {
   formatSubscriberCount,

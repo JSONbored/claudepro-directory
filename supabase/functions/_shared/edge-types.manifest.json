@@ -11,7 +11,8 @@
     "sponsored_impressions",
     "sponsored_clicks",
     "app_settings",
-    "notification_dismissals"
+    "notification_dismissals",
+    "companies"
   ],
   "functions": [
     "search_content_optimized",
@@ -59,6 +60,27 @@
     "submission_type",
     "job_status",
     "webhook_direction",
-    "webhook_source"
+    "webhook_source",
+    "setting_type",
+    "workplace_type",
+    "user_tier",
+    "payment_status",
+    "environment",
+    "content_category",
+    "sort_option",
+    "sort_direction",
+    "contact_category",
+    "contact_action_type",
+    "trending_metric",
+    "trending_period",
+    "use_case_type",
+    "integration_type",
+    "guide_subcategory",
+    "changelog_category",
+    "experience_level",
+    "focus_area_type",
+    "announcement_priority",
+    "announcement_variant",
+    "confetti_variant"
   ]
 }

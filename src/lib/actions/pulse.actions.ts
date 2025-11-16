@@ -24,14 +24,26 @@ import { normalizeError } from '@/src/lib/utils/error.utils';
 import { enqueuePulseEvent } from '@/src/lib/utils/pulse';
 import type { Json } from '@/src/types/database.types';
 import type {
+  ContactCategory,
   Database,
+  ExperienceLevel,
+  FocusAreaType,
   GetRecommendationsReturn,
   InteractionType,
 } from '@/src/types/database-overrides';
 import {
+  CONTACT_ACTION_TYPE_VALUES,
+  CONTACT_CATEGORY_VALUES,
   CONTENT_CATEGORY_VALUES,
+  type ContactActionType,
   type ContentCategory,
+  EXPERIENCE_LEVEL_VALUES,
+  FOCUS_AREA_TYPE_VALUES,
+  INTEGRATION_TYPE_VALUES,
   INTERACTION_TYPE_VALUES,
+  type IntegrationType,
+  USE_CASE_TYPE_VALUES,
+  type UseCaseType,
 } from '@/src/types/database-overrides';
 
 // ============================================
@@ -52,11 +64,11 @@ export interface ConfigRecommendationsResponse {
     id: string;
     generatedAt: string;
     answers: {
-      useCase: string;
-      experienceLevel: string;
+      useCase: UseCaseType;
+      experienceLevel: ExperienceLevel;
       toolPreferences: string[];
-      integrations: string[];
-      focusAreas: string[];
+      integrations: IntegrationType[];
+      focusAreas: FocusAreaType[];
     };
   };
 }
@@ -80,14 +92,17 @@ const trackNewsletterEventSchema = z.object({
 
 const trackTerminalCommandSchema = z.object({
   command_id: z.string(),
-  action_type: z.string(),
+  action_type: z.enum([...CONTACT_ACTION_TYPE_VALUES] as [
+    ContactActionType,
+    ...ContactActionType[],
+  ]),
   success: z.boolean(),
   error_reason: z.string().optional(),
   execution_time_ms: z.number().int().nonnegative().optional(),
 });
 
 const trackTerminalFormSubmissionSchema = z.object({
-  category: z.string(), // contact_category enum (bug, feature, partnership, general, other) - will be fixed when we migrate contact_category enum
+  category: z.enum([...CONTACT_CATEGORY_VALUES] as [ContactCategory, ...ContactCategory[]]),
   success: z.boolean(),
   error: z.string().optional(),
 });
@@ -116,11 +131,15 @@ const getSimilarConfigsSchema = z.object({
 });
 
 const generateConfigRecommendationsSchema = z.object({
-  useCase: z.string().min(1),
-  experienceLevel: z.string().min(1),
+  useCase: z.enum([...USE_CASE_TYPE_VALUES] as [UseCaseType, ...UseCaseType[]]),
+  experienceLevel: z.enum([...EXPERIENCE_LEVEL_VALUES] as [ExperienceLevel, ...ExperienceLevel[]]),
   toolPreferences: z.array(z.string()),
-  integrations: z.array(z.string()).optional(),
-  focusAreas: z.array(z.string()).optional(),
+  integrations: z
+    .array(z.enum([...INTEGRATION_TYPE_VALUES] as [IntegrationType, ...IntegrationType[]]))
+    .optional(),
+  focusAreas: z
+    .array(z.enum([...FOCUS_AREA_TYPE_VALUES] as [FocusAreaType, ...FocusAreaType[]]))
+    .optional(),
 });
 
 // Note: Cache invalidation for sponsored tracking removed
@@ -133,7 +152,7 @@ const generateConfigRecommendationsSchema = z.object({
 
 /**
  * Track user interaction (view, click, share, etc.)
- * Enqueues to user_interactions queue → Worker processes in batches (hyper-optimized)
+ * Enqueues to pulse queue → Worker processes in batches (hyper-optimized)
  * Fire-and-forget, non-blocking
  */
 export const trackInteractionAction = rateLimitedAction
@@ -248,7 +267,7 @@ export const trackTerminalFormSubmissionAction = rateLimitedAction
 
 /**
  * Track content usage (copy, download) - Queue-Based
- * Enqueues to user_interactions queue → Worker processes in batches (hyper-optimized)
+ * Enqueues to pulse queue → Worker processes in batches (hyper-optimized)
  * Fire-and-forget, non-blocking
  */
 export const trackUsageAction = rateLimitedAction
@@ -281,7 +300,7 @@ export const trackUsageAction = rateLimitedAction
 
 /**
  * Track sponsored content impression - Queue-Based
- * Enqueues to user_interactions queue → Worker processes in batches (hyper-optimized)
+ * Enqueues to pulse queue → Worker processes in batches (hyper-optimized)
  * Fire-and-forget, non-blocking
  */
 export const trackSponsoredImpression = rateLimitedAction
@@ -311,7 +330,7 @@ export const trackSponsoredImpression = rateLimitedAction
 
 /**
  * Track sponsored content click - Queue-Based
- * Enqueues to user_interactions queue → Worker processes in batches (hyper-optimized)
+ * Enqueues to pulse queue → Worker processes in batches (hyper-optimized)
  * Fire-and-forget, non-blocking
  */
 export const trackSponsoredClick = rateLimitedAction

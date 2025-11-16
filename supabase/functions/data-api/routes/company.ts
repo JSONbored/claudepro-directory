@@ -1,5 +1,5 @@
 import type { Database as DatabaseGenerated } from '../../_shared/database.types.ts';
-import { callRpc } from '../../_shared/database-overrides.ts';
+import { callRpc, type GetCompanyProfileReturn } from '../../_shared/database-overrides.ts';
 import {
   badRequestResponse,
   buildCacheHeaders,
@@ -8,6 +8,7 @@ import {
   jsonResponse,
   methodNotAllowedResponse,
 } from '../../_shared/utils/http.ts';
+import { buildSecurityHeaders } from '../../_shared/utils/security-headers.ts';
 
 const CORS = getOnlyCorsHeaders;
 
@@ -32,11 +33,13 @@ export async function handleCompanyRoute(
   const rpcArgs = {
     p_slug: slug,
   } satisfies DatabaseGenerated['public']['Functions']['get_company_profile']['Args'];
-  const { data: profile, error } = await callRpc('get_company_profile', rpcArgs, true);
+  const { data: profileRaw, error } = await callRpc('get_company_profile', rpcArgs, true);
 
   if (error) {
     return errorResponse(error, 'data-api:get_company_profile', CORS);
   }
+
+  const profile = profileRaw as GetCompanyProfileReturn;
 
   if (!profile) {
     return jsonResponse({ error: 'Company not found' }, 404, CORS);
@@ -47,6 +50,7 @@ export async function handleCompanyRoute(
     headers: {
       'Content-Type': 'application/json; charset=utf-8',
       'X-Generated-By': 'supabase.rpc.get_company_profile',
+      ...buildSecurityHeaders(),
       ...CORS,
       ...buildCacheHeaders('company_profile'),
     },

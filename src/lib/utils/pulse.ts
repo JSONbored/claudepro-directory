@@ -7,7 +7,7 @@ import { logger } from '@/src/lib/logger';
 import { createClient } from '@/src/lib/supabase/client';
 import type { Json } from '@/src/types/database.types';
 
-const PULSE_QUEUE_NAME = 'user_interactions';
+const PULSE_QUEUE_NAME = 'pulse';
 
 /**
  * Enqueue pulse event to Supabase Queue

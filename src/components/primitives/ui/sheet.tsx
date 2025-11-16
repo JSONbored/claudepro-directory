@@ -159,7 +159,7 @@ const SheetContent = ({
   return (
     <SheetPortal>
       <SheetOverlay />
-      <SheetPrimitive.Content ref={ref} asChild {...props}>
+      <SheetPrimitive.Content ref={ref} asChild={true} {...props}>
         <motion.div
           className={cn(sheetVariants({ side: sheetSide }), className)}
           drag={dragConfig.drag}
@@ -172,7 +172,7 @@ const SheetContent = ({
         >
           {children}
           <SheetPrimitive.Close
-            data-radix-sheet-close
+            data-radix-sheet-close={true}
             className={`${POSITION_PATTERNS.ABSOLUTE_TOP_RIGHT_OFFSET_XL} rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary`}
           >
             <X className={UI_CLASSES.ICON_SM} />

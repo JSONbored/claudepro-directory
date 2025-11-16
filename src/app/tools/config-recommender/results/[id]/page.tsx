@@ -11,12 +11,29 @@ import { getConfigRecommendations } from '@/src/lib/data/tools/recommendations';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { normalizeError } from '@/src/lib/utils/error.utils';
-import type { GetRecommendationsReturn } from '@/src/types/database-overrides';
+import type {
+  ExperienceLevel,
+  FocusAreaType,
+  GetRecommendationsReturn,
+  IntegrationType,
+  UseCaseType,
+} from '@/src/types/database-overrides';
 
-function decodeQuizAnswers(encoded: string) {
+// Type matching QuizAnswers from quiz-form.tsx
+type DecodedQuizAnswers = {
+  useCase: UseCaseType;
+  experienceLevel: ExperienceLevel;
+  toolPreferences: string[];
+  p_integrations?: IntegrationType[];
+  p_focus_areas?: FocusAreaType[];
+  teamSize?: string;
+  timestamp?: string;
+};
+
+function decodeQuizAnswers(encoded: string): DecodedQuizAnswers {
   try {
     const json = Buffer.from(encoded, 'base64url').toString('utf-8');
-    return JSON.parse(json);
+    return JSON.parse(json) as DecodedQuizAnswers;
   } catch (error) {
     const normalized = normalizeError(error, 'Invalid quiz answers encoding');
     logger.error('ConfigRecommenderResults: decodeQuizAnswers failed', normalized, {
@@ -98,7 +115,7 @@ export default async function ResultsPage({ params, searchParams }: PageProps) {
     notFound();
   }
 
-  let answers: ReturnType<typeof decodeQuizAnswers>;
+  let answers: DecodedQuizAnswers;
   try {
     answers = decodeQuizAnswers(resolvedSearchParams.answers);
   } catch (error) {
@@ -113,8 +130,8 @@ export default async function ResultsPage({ params, searchParams }: PageProps) {
     useCase: answers.useCase,
     experienceLevel: answers.experienceLevel,
     toolPreferences: answers.toolPreferences,
-    integrations: answers.integrations,
-    focusAreas: answers.focusAreas,
+    ...(answers.p_integrations && { integrations: answers.p_integrations }),
+    ...(answers.p_focus_areas && { focusAreas: answers.p_focus_areas }),
   });
 
   if (!enrichedResult) {

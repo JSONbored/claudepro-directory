@@ -118,23 +118,35 @@ export function buildSubmissionEmbed(submission: SubmissionRow) {
     created_at,
   } = submission;
 
-  const color = CATEGORY_COLORS[category] || CATEGORY_COLORS.agents;
+  // Safety checks for required fields
+  const safeId = id || 'unknown';
+  const safeName = name || 'Untitled Submission';
+  const safeDescription = description
+    ? description.slice(0, 300) + (description.length > 300 ? '...' : '')
+    : 'No description provided.';
+  const safeCategory = category || 'unknown';
+  const safeSubmissionType = submission_type || 'unknown';
+  const safeAuthor = author || 'Unknown';
+  const safeAuthorField =
+    author_profile_url && author ? `[${author}](${author_profile_url})` : safeAuthor;
+  const safeCreatedAt = created_at ? new Date(created_at).toISOString() : new Date().toISOString();
+
+  const color = CATEGORY_COLORS[safeCategory] || CATEGORY_COLORS.agents;
   const dashboardUrl = `https://supabase.com/dashboard/project/${SUPABASE_PROJECT_ID}/editor/${encodeURIComponent(
     'content_submissions'
-  )}?filter=id%3Aeq%3A${id}`;
-  const authorField = author_profile_url ? `[${author}](${author_profile_url})` : author;
+  )}?filter=id%3Aeq%3A${safeId}`;
 
   const fields = [
-    { name: '📝 Type', value: `\`${submission_type}\``, inline: true },
-    { name: '📂 Category', value: `\`${category}\``, inline: true },
-    { name: '👤 Author', value: authorField, inline: true },
+    { name: '📝 Type', value: `\`${safeSubmissionType}\``, inline: true },
+    { name: '📂 Category', value: `\`${safeCategory}\``, inline: true },
+    { name: '👤 Author', value: safeAuthorField, inline: true },
   ];
 
   if (github_url) {
     fields.push({ name: '🔗 GitHub', value: `[View Repository](${github_url})`, inline: false });
   }
 
-  if (tags && tags.length > 0) {
+  if (tags && Array.isArray(tags) && tags.length > 0) {
     fields.push({
       name: '🏷️ Tags',
       value: tags.map((tag) => `\`${tag}\``).join(', '),
@@ -153,12 +165,12 @@ export function buildSubmissionEmbed(submission: SubmissionRow) {
   });
 
   return {
-    title: `${CATEGORY_EMOJIS[category] || '📄'} ${name}`,
-    description: description.slice(0, 300) + (description.length > 300 ? '...' : ''),
+    title: `${CATEGORY_EMOJIS[safeCategory] || '📄'} ${safeName}`,
+    description: safeDescription,
     color,
     fields,
-    footer: { text: `Submission ID: ${id.slice(0, 8)}` },
-    timestamp: new Date(created_at).toISOString(),
+    footer: { text: `Submission ID: ${safeId.slice(0, 8)}` },
+    timestamp: safeCreatedAt,
   };
 }
 
@@ -194,7 +206,14 @@ export function buildChangelogEmbed(params: {
   date: string;
 }) {
   const { slug, title, tldr, sections, commits, date } = params;
-  const contributors = [...new Set(commits.map((c) => c.commit.author.name))];
+  // Safely extract contributors, filtering out commits without author info
+  const contributors = [
+    ...new Set(
+      commits
+        .map((c) => c.commit?.author?.name)
+        .filter((name): name is string => typeof name === 'string' && name.length > 0)
+    ),
+  ];
 
   const addedCount = sections.find((s) => s.title === 'Added')?.items.length || 0;
   const changedCount = sections.find((s) => s.title === 'Changed')?.items.length || 0;
@@ -225,18 +244,21 @@ export function buildChangelogEmbed(params: {
 
   if (commits.length > 0) {
     const latestCommit = commits[commits.length - 1];
-    const repoOwner = edgeEnv.github.repoOwner || 'unknown';
-    const repoName = edgeEnv.github.repoName || 'unknown';
-    const commitUrl = `https://github.com/${repoOwner}/${repoName}/commit/${latestCommit.sha}`;
-    const shortSha = latestCommit.sha.slice(0, 7);
+    // Safety check: ensure commit has sha property
+    if (latestCommit?.sha) {
+      const repoOwner = edgeEnv.github.repoOwner || 'unknown';
+      const repoName = edgeEnv.github.repoName || 'unknown';
+      const commitUrl = `https://github.com/${repoOwner}/${repoName}/commit/${latestCommit.sha}`;
+      const shortSha = latestCommit.sha.slice(0, 7);
 
-    fields.push({
-      name: '📊 Release Stats',
-      value: `${commits.length} commit${commits.length === 1 ? '' : 's'} • ${
-        contributors.length
-      } contributor${contributors.length === 1 ? '' : 's'}\n[View commit \`${shortSha}\` on GitHub](${commitUrl})`,
-      inline: false,
-    });
+      fields.push({
+        name: '📊 Release Stats',
+        value: `${commits.length} commit${commits.length === 1 ? '' : 's'} • ${
+          contributors.length
+        } contributor${contributors.length === 1 ? '' : 's'}\n[View commit \`${shortSha}\` on GitHub](${commitUrl})`,
+        inline: false,
+      });
+    }
   }
 
   return {

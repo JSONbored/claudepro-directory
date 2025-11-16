@@ -82,12 +82,43 @@ export async function fetchSEO(
 
     const data = await response.json();
 
-    // Handle backward compatibility - if no metadata wrapper, entire response is metadata
-    if (!data.metadata && data.title) {
-      return { metadata: data as SEOMetadata, schemas: data.schemas || [] };
+    // Transform RPC response to client-side SEOResponse format
+    // RPC returns either: { title, description, ... } OR { metadata: {...}, schemas: [...] }
+    if ('metadata' in data && data.metadata) {
+      // Case: metadata+schemas response
+      return {
+        metadata: {
+          ...data.metadata,
+          // Add default values for fields not in RPC return
+          authors: null,
+          publishedTime: null,
+          modifiedTime: null,
+          shouldAddLlmsTxt: false,
+          isOverride: false,
+        } as SEOMetadata,
+        schemas: Array.isArray(data.schemas)
+          ? data.schemas.map((s: unknown) => (typeof s === 'string' ? s : JSON.stringify(s)))
+          : [],
+      };
+    }
+    if ('title' in data) {
+      // Case: metadata-only response (discriminated union case 1)
+      return {
+        metadata: {
+          ...data,
+          // Add default values for fields not in RPC return
+          authors: null,
+          publishedTime: null,
+          modifiedTime: null,
+          shouldAddLlmsTxt: false,
+          isOverride: false,
+        } as SEOMetadata,
+        schemas: [],
+      };
     }
 
-    return data;
+    // Fallback to default if structure is unexpected
+    return DEFAULT_SEO_RESPONSE;
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to fetch SEO from edge function');
     logger.error('Failed to fetch SEO from edge function', normalized, {

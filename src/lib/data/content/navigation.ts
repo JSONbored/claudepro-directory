@@ -11,20 +11,17 @@ import type { GetNavigationMenuReturn } from '@/src/types/database-overrides';
  * Used by command palette and navigation components
  */
 export async function getNavigationMenu(): Promise<GetNavigationMenuReturn> {
-  return fetchCachedRpc<GetNavigationMenuReturn>(
-    {},
-    {
-      rpcName: 'get_navigation_menu',
-      tags: ['navigation', 'ui'],
-      ttlKey: 'cache.navigation.ttl_seconds',
-      keySuffix: 'menu',
-      useAuthClient: false,
-      fallback: {
-        primary: [],
-        secondary: [],
-        actions: [],
-      },
-      logMeta: { namespace: 'navigation' },
-    }
-  );
+  return fetchCachedRpc<'get_navigation_menu', GetNavigationMenuReturn>(undefined as never, {
+    rpcName: 'get_navigation_menu',
+    tags: ['navigation', 'ui'],
+    ttlKey: 'cache.navigation.ttl_seconds',
+    keySuffix: 'menu',
+    useAuthClient: false,
+    fallback: {
+      primary: [],
+      secondary: [],
+      actions: [],
+    },
+    logMeta: { namespace: 'navigation' },
+  });
 }

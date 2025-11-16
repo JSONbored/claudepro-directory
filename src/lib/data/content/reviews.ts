@@ -18,7 +18,7 @@ export async function getReviewsWithStatsData(
 ): Promise<GetReviewsWithStatsReturn | null> {
   const { contentType, contentSlug, sortBy, limit, offset, userId } = params;
 
-  return fetchCachedRpc<GetReviewsWithStatsReturn | null>(
+  return fetchCachedRpc<'get_reviews_with_stats', GetReviewsWithStatsReturn | null>(
     {
       p_content_type: contentType,
       p_content_slug: contentSlug,

@@ -1,6 +1,7 @@
 import { supabaseServiceRole } from '../../clients/supabase.ts';
 import type { Database as DatabaseGenerated } from '../../database.types.ts';
 import type { Database } from '../../database-overrides.ts';
+import { WEBHOOK_DIRECTION_VALUES } from '../../database-overrides.ts';
 import { resolveWebhookRequest, type WebhookRegistryError } from './registry.ts';
 
 type WebhookSource = Database['public']['Enums']['webhook_source'];
@@ -40,7 +41,7 @@ export async function ingestWebhookEvent(
 
   const insertData = {
     source: provider,
-    direction: 'inbound',
+    direction: WEBHOOK_DIRECTION_VALUES[0], // 'inbound'
     type,
     data: payload as DatabaseGenerated['public']['Tables']['webhook_events']['Insert']['data'],
     created_at: createdAt || new Date().toISOString(),

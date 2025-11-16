@@ -40,7 +40,7 @@ export default async function CompaniesPage() {
             <CardDescription>Please sign in to manage your companies.</CardDescription>
           </CardHeader>
           <CardContent>
-            <Button asChild>
+            <Button asChild={true}>
               <Link href={ROUTES.LOGIN}>Go to login</Link>
             </Button>
           </CardContent>
@@ -79,7 +79,7 @@ export default async function CompaniesPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button asChild variant="outline">
+            <Button asChild={true} variant="outline">
               <Link href={ROUTES.ACCOUNT}>Back to dashboard</Link>
             </Button>
           </CardContent>
@@ -101,7 +101,7 @@ export default async function CompaniesPage() {
             {companies.length} {companies.length === 1 ? 'company' : 'companies'}
           </p>
         </div>
-        <Button asChild>
+        <Button asChild={true}>
           <Link href={`${ROUTES.ACCOUNT_COMPANIES}/new`}>
             <Plus className="mr-2 h-4 w-4" />
             Add Company
@@ -117,7 +117,7 @@ export default async function CompaniesPage() {
             <p className={'mb-4 max-w-md text-center text-muted-foreground'}>
               Create a company profile to showcase your organization and post job listings
             </p>
-            <Button asChild>
+            <Button asChild={true}>
               <Link href={`${ROUTES.ACCOUNT_COMPANIES}/new`}>
                 <Plus className="mr-2 h-4 w-4" />
                 Create Your First Company
@@ -140,7 +140,7 @@ export default async function CompaniesPage() {
                           width={64}
                           height={64}
                           className="h-16 w-16 rounded-lg border object-cover"
-                          priority
+                          priority={true}
                         />
                       ) : (
                         <div className="flex h-16 w-16 items-center justify-center rounded-lg border bg-accent">
@@ -195,14 +195,14 @@ export default async function CompaniesPage() {
                   </div>
 
                   <div className={UI_CLASSES.FLEX_GAP_2}>
-                    <Button variant="outline" size="sm" asChild>
+                    <Button variant="outline" size="sm" asChild={true}>
                       <Link href={`${ROUTES.ACCOUNT_COMPANIES}/${company.id}/edit`}>
                         <Edit className="mr-1 h-3 w-3" />
                         Edit
                       </Link>
                     </Button>
 
-                    <Button variant="ghost" size="sm" asChild>
+                    <Button variant="ghost" size="sm" asChild={true}>
                       <Link href={`/companies/${company.slug}`}>
                         <ExternalLink className="mr-1 h-3 w-3" />
                         View Profile

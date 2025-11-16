@@ -6,7 +6,7 @@ import type { Tables } from '@/src/types/database.types';
 export type Announcement = Tables<'announcements'>;
 
 export async function getActiveAnnouncement(): Promise<Announcement | null> {
-  return fetchCachedRpc<Announcement | null>(
+  return fetchCachedRpc<'get_active_announcement', Announcement | null>(
     {},
     {
       rpcName: 'get_active_announcement',

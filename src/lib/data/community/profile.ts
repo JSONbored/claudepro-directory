@@ -12,7 +12,7 @@ export async function getPublicUserProfile(input: {
   const { slug, viewerId } = input;
 
   try {
-    return await fetchCachedRpc<GetUserProfileReturn | null>(
+    return await fetchCachedRpc<'get_user_profile', GetUserProfileReturn | null>(
       {
         p_user_slug: slug,
         ...(viewerId ? { p_viewer_id: viewerId } : {}),

@@ -165,7 +165,7 @@ export function TabbedDetailLayout({ item, config, tabs, sectionData }: TabbedDe
             value={tab.id}
             className="mt-0 space-y-8"
             // Keep in DOM but hide when not active (SEO)
-            forceMount
+            forceMount={true}
             hidden={activeTab !== tab.id}
           >
             {tab.sections.map((sectionId) => (

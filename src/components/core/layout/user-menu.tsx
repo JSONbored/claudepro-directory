@@ -109,7 +109,7 @@ export function UserMenu({ className }: UserMenuProps) {
     return (
       <div className={className}>
         <Button
-          asChild
+          asChild={true}
           variant="ghost"
           size="sm"
           className="border-accent/20 bg-accent/10 font-medium text-accent text-xs hover:bg-accent hover:text-white"
@@ -138,7 +138,7 @@ export function UserMenu({ className }: UserMenuProps) {
   return (
     <div className={className}>
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
+        <DropdownMenuTrigger asChild={true}>
           <motion.div
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
@@ -162,7 +162,7 @@ export function UserMenu({ className }: UserMenuProps) {
         <DropdownMenuContent
           className={`${DIMENSIONS.DROPDOWN_SM} sm:${DIMENSIONS.DROPDOWN_MD}`}
           align="end"
-          forceMount
+          forceMount={true}
         >
           {/* User Info */}
           <DropdownMenuLabel className="font-normal">
@@ -175,21 +175,21 @@ export function UserMenu({ className }: UserMenuProps) {
           <DropdownMenuSeparator />
 
           {/* Navigation Links */}
-          <DropdownMenuItem asChild>
+          <DropdownMenuItem asChild={true}>
             <Link href="/account/settings">
               <Settings className={UI_CLASSES.ICON_SM_LEADING} />
               <span>Settings</span>
             </Link>
           </DropdownMenuItem>
 
-          <DropdownMenuItem asChild>
+          <DropdownMenuItem asChild={true}>
             <Link href="/account/library">
               <BookOpen className={UI_CLASSES.ICON_SM_LEADING} />
               <span>Library</span>
             </Link>
           </DropdownMenuItem>
 
-          <DropdownMenuItem asChild>
+          <DropdownMenuItem asChild={true}>
             <Link href="/account/activity">
               <Activity className={UI_CLASSES.ICON_SM_LEADING} />
               <span>Activity</span>

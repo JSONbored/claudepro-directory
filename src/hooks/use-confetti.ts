@@ -3,10 +3,9 @@
 import confetti from 'canvas-confetti';
 import { useCallback } from 'react';
 import { getAnimationConfig } from '@/src/lib/actions/feature-flags.actions';
+import type { ConfettiVariant } from '@/src/types/database-overrides';
 
 /** Confetti animations - config values from Statsig animationConfigs */
-
-export type ConfettiVariant = 'success' | 'celebration' | 'milestone' | 'subtle';
 
 export function useConfetti() {
   const fireConfetti = useCallback(async (variant: ConfettiVariant = 'success') => {

@@ -253,7 +253,7 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
             label="Company Name"
             name="name"
             defaultValue={initialData?.name || ''}
-            required
+            required={true}
             placeholder="e.g., Acme Corporation"
           />
 
@@ -281,7 +281,7 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
                   <Image
                     src={logoPreview}
                     alt="Company logo preview"
-                    fill
+                    fill={true}
                     className="object-cover"
                   />
                 </div>

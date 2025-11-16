@@ -547,7 +547,7 @@ export interface Database {
           payment_date: string | null;
           payment_method: string | null;
           payment_reference: string | null;
-          payment_status: string;
+          payment_status: Database['public']['Enums']['payment_status'] | null;
           plan: string;
           polar_customer_id: string | null;
           polar_order_id: string | null;
@@ -567,7 +567,7 @@ export interface Database {
           updated_at: string;
           user_id: string | null;
           view_count: number | null;
-          workplace: string | null;
+          workplace: Database['public']['Enums']['workplace_type'] | null;
         };
         Insert: {
           active?: boolean | null;
@@ -596,7 +596,7 @@ export interface Database {
           payment_date?: string | null;
           payment_method?: string | null;
           payment_reference?: string | null;
-          payment_status?: string;
+          payment_status?: Database['public']['Enums']['payment_status'] | null;
           plan?: string;
           polar_customer_id?: string | null;
           polar_order_id?: string | null;
@@ -616,7 +616,7 @@ export interface Database {
           updated_at?: string;
           user_id?: string | null;
           view_count?: number | null;
-          workplace?: string | null;
+          workplace?: Database['public']['Enums']['workplace_type'] | null;
         };
         Update: {
           active?: boolean | null;
@@ -645,7 +645,7 @@ export interface Database {
           payment_date?: string | null;
           payment_method?: string | null;
           payment_reference?: string | null;
-          payment_status?: string;
+          payment_status?: Database['public']['Enums']['payment_status'] | null;
           plan?: string;
           polar_customer_id?: string | null;
           polar_order_id?: string | null;
@@ -665,7 +665,7 @@ export interface Database {
           updated_at?: string;
           user_id?: string | null;
           view_count?: number | null;
-          workplace?: string | null;
+          workplace?: Database['public']['Enums']['workplace_type'] | null;
         };
         Relationships: [
           {
@@ -829,10 +829,10 @@ export interface Database {
           created_at: string;
           description: string;
           enabled: boolean;
-          environment: string;
+          environment: Database['public']['Enums']['environment'] | null;
           previous_value: Json | null;
           setting_key: string;
-          setting_type: string;
+          setting_type: Database['public']['Enums']['setting_type'];
           setting_value: Json;
           updated_at: string;
           version: number;
@@ -842,10 +842,10 @@ export interface Database {
           created_at?: string;
           description: string;
           enabled?: boolean;
-          environment: string;
+          environment?: Database['public']['Enums']['environment'] | null;
           previous_value?: Json | null;
           setting_key: string;
-          setting_type: string;
+          setting_type: Database['public']['Enums']['setting_type'];
           setting_value?: Json;
           updated_at?: string;
           version?: number;
@@ -855,10 +855,10 @@ export interface Database {
           created_at?: string;
           description?: string;
           enabled?: boolean;
-          environment?: string;
+          environment?: Database['public']['Enums']['environment'] | null;
           previous_value?: Json | null;
           setting_key?: string;
-          setting_type?: string;
+          setting_type?: Database['public']['Enums']['setting_type'];
           setting_value?: Json;
           updated_at?: string;
           version?: number;
@@ -894,6 +894,66 @@ export interface Database {
             columns: ['notification_id'];
             isOneToOne: false;
             referencedRelation: 'notifications';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+
+      companies: {
+        Row: {
+          created_at: string;
+          description: string | null;
+          featured: boolean | null;
+          id: string;
+          industry: string | null;
+          json_ld: Json | null;
+          logo: string | null;
+          name: string;
+          owner_id: string | null;
+          size: string | null;
+          slug: string;
+          updated_at: string;
+          using_cursor_since: string | null;
+          website: string | null;
+        };
+        Insert: {
+          created_at?: string;
+          description?: string | null;
+          featured?: boolean | null;
+          id?: string;
+          industry?: string | null;
+          json_ld?: Json | null;
+          logo?: string | null;
+          name: string;
+          owner_id?: string | null;
+          size?: string | null;
+          slug: string;
+          updated_at?: string;
+          using_cursor_since?: string | null;
+          website?: string | null;
+        };
+        Update: {
+          created_at?: string;
+          description?: string | null;
+          featured?: boolean | null;
+          id?: string;
+          industry?: string | null;
+          json_ld?: Json | null;
+          logo?: string | null;
+          name?: string;
+          owner_id?: string | null;
+          size?: string | null;
+          slug?: string;
+          updated_at?: string;
+          using_cursor_since?: string | null;
+          website?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'companies_owner_id_fkey';
+            columns: ['owner_id'];
+            isOneToOne: false;
+            referencedRelation: 'users';
             referencedColumns: ['id'];
           },
         ];
@@ -1249,6 +1309,94 @@ export interface Database {
       webhook_direction: 'inbound' | 'outbound';
 
       webhook_source: 'resend' | 'vercel' | 'discord' | 'supabase_db' | 'custom' | 'polar';
+
+      setting_type: 'boolean' | 'string' | 'number' | 'json';
+
+      workplace_type: 'Remote' | 'On site' | 'Hybrid';
+
+      user_tier: 'free' | 'pro' | 'enterprise';
+
+      payment_status: 'unpaid' | 'paid' | 'refunded';
+
+      environment: 'development' | 'preview' | 'production';
+
+      content_category:
+        | 'agents'
+        | 'mcp'
+        | 'rules'
+        | 'commands'
+        | 'hooks'
+        | 'statuslines'
+        | 'skills'
+        | 'collections'
+        | 'guides'
+        | 'jobs'
+        | 'changelog';
+
+      sort_option:
+        | 'relevance'
+        | 'date'
+        | 'popularity'
+        | 'name'
+        | 'updated'
+        | 'created'
+        | 'views'
+        | 'trending';
+
+      sort_direction: 'asc' | 'desc';
+
+      contact_category: 'bug' | 'feature' | 'partnership' | 'general' | 'other';
+
+      contact_action_type: 'internal' | 'external' | 'route' | 'sheet' | 'easter-egg';
+
+      trending_metric: 'views' | 'likes' | 'shares' | 'downloads' | 'all';
+
+      trending_period: 'today' | 'week' | 'month' | 'year' | 'all';
+
+      use_case_type:
+        | 'code-review'
+        | 'api-development'
+        | 'frontend-development'
+        | 'data-science'
+        | 'content-creation'
+        | 'devops-infrastructure'
+        | 'general-development'
+        | 'testing-qa'
+        | 'security-audit';
+
+      integration_type:
+        | 'github'
+        | 'database'
+        | 'cloud-aws'
+        | 'cloud-gcp'
+        | 'cloud-azure'
+        | 'communication'
+        | 'none';
+
+      guide_subcategory:
+        | 'tutorials'
+        | 'comparisons'
+        | 'workflows'
+        | 'use-cases'
+        | 'troubleshooting';
+
+      changelog_category: 'Added' | 'Changed' | 'Deprecated' | 'Removed' | 'Fixed' | 'Security';
+
+      experience_level: 'beginner' | 'intermediate' | 'advanced';
+
+      focus_area_type:
+        | 'security'
+        | 'performance'
+        | 'documentation'
+        | 'testing'
+        | 'code-quality'
+        | 'automation';
+
+      announcement_priority: 'high' | 'medium' | 'low';
+
+      announcement_variant: 'default' | 'outline' | 'secondary' | 'destructive';
+
+      confetti_variant: 'success' | 'celebration' | 'milestone' | 'subtle';
     };
   };
 }

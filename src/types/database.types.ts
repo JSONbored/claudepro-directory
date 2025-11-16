@@ -100,10 +100,10 @@ export type Database = {
           created_at: string
           description: string
           enabled: boolean
-          environment: string
+          environment: Database["public"]["Enums"]["environment"] | null
           previous_value: Json | null
           setting_key: string
-          setting_type: string
+          setting_type: Database["public"]["Enums"]["setting_type"]
           setting_value: Json
           updated_at: string
           version: number
@@ -113,10 +113,10 @@ export type Database = {
           created_at?: string
           description: string
           enabled?: boolean
-          environment: string
+          environment?: Database["public"]["Enums"]["environment"] | null
           previous_value?: Json | null
           setting_key: string
-          setting_type: string
+          setting_type: Database["public"]["Enums"]["setting_type"]
           setting_value?: Json
           updated_at?: string
           version?: number
@@ -126,10 +126,10 @@ export type Database = {
           created_at?: string
           description?: string
           enabled?: boolean
-          environment?: string
+          environment?: Database["public"]["Enums"]["environment"] | null
           previous_value?: Json | null
           setting_key?: string
-          setting_type?: string
+          setting_type?: Database["public"]["Enums"]["setting_type"]
           setting_value?: Json
           updated_at?: string
           version?: number
@@ -1359,7 +1359,7 @@ export type Database = {
           payment_date: string | null
           payment_method: string | null
           payment_reference: string | null
-          payment_status: string
+          payment_status: Database["public"]["Enums"]["payment_status"] | null
           plan: string
           polar_customer_id: string | null
           polar_order_id: string | null
@@ -1379,7 +1379,7 @@ export type Database = {
           updated_at: string
           user_id: string | null
           view_count: number | null
-          workplace: string | null
+          workplace: Database["public"]["Enums"]["workplace_type"] | null
         }
         Insert: {
           active?: boolean | null
@@ -1408,7 +1408,7 @@ export type Database = {
           payment_date?: string | null
           payment_method?: string | null
           payment_reference?: string | null
-          payment_status?: string
+          payment_status?: Database["public"]["Enums"]["payment_status"] | null
           plan?: string
           polar_customer_id?: string | null
           polar_order_id?: string | null
@@ -1428,7 +1428,7 @@ export type Database = {
           updated_at?: string
           user_id?: string | null
           view_count?: number | null
-          workplace?: string | null
+          workplace?: Database["public"]["Enums"]["workplace_type"] | null
         }
         Update: {
           active?: boolean | null
@@ -1457,7 +1457,7 @@ export type Database = {
           payment_date?: string | null
           payment_method?: string | null
           payment_reference?: string | null
-          payment_status?: string
+          payment_status?: Database["public"]["Enums"]["payment_status"] | null
           plan?: string
           polar_customer_id?: string | null
           polar_order_id?: string | null
@@ -1477,7 +1477,7 @@ export type Database = {
           updated_at?: string
           user_id?: string | null
           view_count?: number | null
-          workplace?: string | null
+          workplace?: Database["public"]["Enums"]["workplace_type"] | null
         }
         Relationships: [
           {
@@ -2343,7 +2343,7 @@ export type Database = {
           css_classes: string
           display_order: number
           label: string
-          tier: string
+          tier: Database["public"]["Enums"]["user_tier"] | null
           updated_at: string
         }
         Insert: {
@@ -2352,7 +2352,7 @@ export type Database = {
           css_classes: string
           display_order: number
           label: string
-          tier: string
+          tier?: Database["public"]["Enums"]["user_tier"] | null
           updated_at?: string
         }
         Update: {
@@ -2361,7 +2361,7 @@ export type Database = {
           css_classes?: string
           display_order?: number
           label?: string
-          tier?: string
+          tier?: Database["public"]["Enums"]["user_tier"] | null
           updated_at?: string
         }
         Relationships: []
@@ -2668,7 +2668,7 @@ export type Database = {
           social_x_link: string | null
           status: string | null
           submission_count: number
-          tier: string | null
+          tier: Database["public"]["Enums"]["user_tier"] | null
           updated_at: string
           website: string | null
           work: string | null
@@ -2694,7 +2694,7 @@ export type Database = {
           social_x_link?: string | null
           status?: string | null
           submission_count?: number
-          tier?: string | null
+          tier?: Database["public"]["Enums"]["user_tier"] | null
           updated_at?: string
           website?: string | null
           work?: string | null
@@ -2720,7 +2720,7 @@ export type Database = {
           social_x_link?: string | null
           status?: string | null
           submission_count?: number
-          tier?: string | null
+          tier?: Database["public"]["Enums"]["user_tier"] | null
           updated_at?: string
           website?: string | null
           work?: string | null
@@ -3135,7 +3135,7 @@ export type Database = {
           social_x_link: string | null
           status: string | null
           submission_count: number
-          tier: string | null
+          tier: Database["public"]["Enums"]["user_tier"] | null
           updated_at: string
           website: string | null
           work: string | null
@@ -3427,38 +3427,6 @@ export type Database = {
           website: string
         }[]
       }
-      get_company_job_stats: {
-        Args: { p_company_slug?: string }
-        Returns: {
-          active_jobs: number | null
-          avg_salary_min: number | null
-          click_through_rate: number | null
-          company_id: string | null
-          company_name: string | null
-          company_slug: string | null
-          contract_jobs: number | null
-          featured_jobs: number | null
-          first_job_posted_at: string | null
-          full_time_jobs: number | null
-          internship_jobs: number | null
-          last_refreshed_at: string | null
-          latest_job_posted_at: string | null
-          part_time_jobs: number | null
-          remote_jobs: number | null
-          total_clicks: number | null
-          total_jobs: number | null
-          total_views: number | null
-          workplace_hybrid: number | null
-          workplace_onsite: number | null
-          workplace_remote: number | null
-        }[]
-        SetofOptions: {
-          from: "*"
-          to: "company_job_stats"
-          isOneToOne: false
-          isSetofReturn: true
-        }
-      }
       get_company_profile: { Args: { p_slug: string }; Returns: Json }
       get_contact_commands: { Args: never; Returns: Json }
       get_content_detail_complete: {
@@ -3585,7 +3553,7 @@ export type Database = {
           payment_date: string | null
           payment_method: string | null
           payment_reference: string | null
-          payment_status: string
+          payment_status: Database["public"]["Enums"]["payment_status"] | null
           plan: string
           polar_customer_id: string | null
           polar_order_id: string | null
@@ -3605,7 +3573,7 @@ export type Database = {
           updated_at: string
           user_id: string | null
           view_count: number | null
-          workplace: string | null
+          workplace: Database["public"]["Enums"]["workplace_type"] | null
         }[]
         SetofOptions: {
           from: "*"
@@ -3676,7 +3644,7 @@ export type Database = {
           payment_date: string | null
           payment_method: string | null
           payment_reference: string | null
-          payment_status: string
+          payment_status: Database["public"]["Enums"]["payment_status"] | null
           plan: string
           polar_customer_id: string | null
           polar_order_id: string | null
@@ -3696,7 +3664,7 @@ export type Database = {
           updated_at: string
           user_id: string | null
           view_count: number | null
-          workplace: string | null
+          workplace: Database["public"]["Enums"]["workplace_type"] | null
         }[]
         SetofOptions: {
           from: "*"
@@ -4433,7 +4401,7 @@ export type Database = {
           payment_date: string | null
           payment_method: string | null
           payment_reference: string | null
-          payment_status: string
+          payment_status: Database["public"]["Enums"]["payment_status"] | null
           plan: string
           polar_customer_id: string | null
           polar_order_id: string | null
@@ -4453,7 +4421,7 @@ export type Database = {
           updated_at: string
           user_id: string | null
           view_count: number | null
-          workplace: string | null
+          workplace: Database["public"]["Enums"]["workplace_type"] | null
         }[]
         SetofOptions: {
           from: "*"
@@ -4505,7 +4473,7 @@ export type Database = {
           social_x_link: string | null
           status: string | null
           submission_count: number
-          tier: string | null
+          tier: Database["public"]["Enums"]["user_tier"] | null
           updated_at: string
           website: string | null
           work: string | null
@@ -4639,6 +4607,7 @@ export type Database = {
         | "guides"
         | "jobs"
         | "changelog"
+      environment: "development" | "preview" | "production"
       experience_level: "beginner" | "intermediate" | "advanced"
       field_scope: "common" | "type_specific" | "tags"
       field_type: "text" | "textarea" | "number" | "select"
@@ -4703,6 +4672,8 @@ export type Database = {
         | "oauth_signup"
       notification_priority: "high" | "medium" | "low"
       notification_type: "announcement" | "feedback"
+      payment_status: "unpaid" | "paid" | "refunded"
+      setting_type: "boolean" | "string" | "number" | "json"
       sort_direction: "asc" | "desc"
       sort_option:
         | "relevance"
@@ -4734,6 +4705,7 @@ export type Database = {
         | "general-development"
         | "testing-qa"
         | "security-audit"
+      user_tier: "free" | "pro" | "enterprise"
       webhook_direction: "inbound" | "outbound"
       webhook_source:
         | "resend"
@@ -4742,6 +4714,7 @@ export type Database = {
         | "supabase_db"
         | "custom"
         | "polar"
+      workplace_type: "Remote" | "On site" | "Hybrid"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -4901,6 +4874,7 @@ export const Constants = {
         "jobs",
         "changelog",
       ],
+      environment: ["development", "preview", "production"],
       experience_level: ["beginner", "intermediate", "advanced"],
       field_scope: ["common", "type_specific", "tags"],
       field_type: ["text", "textarea", "number", "select"],
@@ -4971,6 +4945,8 @@ export const Constants = {
       ],
       notification_priority: ["high", "medium", "low"],
       notification_type: ["announcement", "feedback"],
+      payment_status: ["unpaid", "paid", "refunded"],
+      setting_type: ["boolean", "string", "number", "json"],
       sort_direction: ["asc", "desc"],
       sort_option: [
         "relevance",
@@ -5005,6 +4981,7 @@ export const Constants = {
         "testing-qa",
         "security-audit",
       ],
+      user_tier: ["free", "pro", "enterprise"],
       webhook_direction: ["inbound", "outbound"],
       webhook_source: [
         "resend",
@@ -5014,6 +4991,7 @@ export const Constants = {
         "custom",
         "polar",
       ],
+      workplace_type: ["Remote", "On site", "Hybrid"],
     },
   },
 } as const

@@ -18,10 +18,11 @@ import {
 } from '../common-styles.ts';
 import { buildEmailCtaUrl } from '../cta.ts';
 import { brandColors, emailTheme, spacing, typography } from '../theme.ts';
+import type { ContactCategory } from '../../../database-overrides.ts';
 
 export interface ContactSubmissionUserProps {
   name: string;
-  category: string;
+  category: ContactCategory;
 }
 
 export function ContactSubmissionUser({ name, category }: ContactSubmissionUserProps) {
@@ -29,7 +30,7 @@ export function ContactSubmissionUser({ name, category }: ContactSubmissionUserP
   const utm = EMAIL_UTM_TEMPLATES.ONBOARDING_WELCOME;
 
   // Category-specific response messages
-  const categoryMessages: Record<string, string> = {
+  const categoryMessages: Record<ContactCategory, string> = {
     bug: "We'll investigate the issue and follow up with you shortly.",
     feature: "We'll review your suggestion and consider it for our roadmap.",
     partnership: "We're excited to explore opportunities with you!",
@@ -37,7 +38,7 @@ export function ContactSubmissionUser({ name, category }: ContactSubmissionUserP
     other: "We'll review your message and respond soon.",
   };
 
-  const responseMessage = categoryMessages[category] || categoryMessages.general;
+  const responseMessage = categoryMessages[category];
 
   return (
     <BaseLayout

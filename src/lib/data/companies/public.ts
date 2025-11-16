@@ -9,45 +9,12 @@ import { getCacheTtl } from '@/src/lib/data/config/cache-config';
 import { fetchCachedRpc } from '@/src/lib/data/helpers';
 import { logger } from '@/src/lib/logger';
 import { normalizeError } from '@/src/lib/utils/error.utils';
-import type { Database } from '@/src/types/database.types';
-import type { Tables } from '@/src/types/database-overrides';
+import type {
+  GetCompaniesListReturn,
+  GetCompanyProfileReturn,
+} from '@/src/types/database-overrides';
 
-type CompanyRow = Tables<'companies'>;
-type JobRow = Tables<'jobs'>;
-// Use direct database type for views (not overridden in database-overrides.ts)
-type CompanyJobStatsRow = Database['public']['Views']['company_job_stats']['Row'];
-
-interface CompanyProfile {
-  company: CompanyRow;
-  active_jobs: JobRow[];
-  stats: Omit<CompanyJobStatsRow, 'company_id' | 'company_slug' | 'company_name'>;
-}
-
-interface CompanyWithStats {
-  id: string;
-  slug: string;
-  name: string;
-  logo: string | null;
-  website: string | null;
-  description: string | null;
-  size: string | null;
-  industry: string | null;
-  featured: boolean;
-  created_at: string;
-  stats: {
-    active_jobs: number;
-    total_jobs: number;
-    remote_jobs: number;
-    total_views: number;
-    total_clicks: number;
-    latest_job_posted_at: string | null;
-  } | null;
-}
-
-interface CompaniesListResult {
-  companies: CompanyWithStats[];
-  total: number;
-}
+// CompaniesListResult type moved to database-overrides.ts as GetCompaniesListReturn
 
 export type CompanySearchResult = {
   id: string;
@@ -58,8 +25,8 @@ export type CompanySearchResult = {
 
 // EDGE_SEARCH_URL removed - now using unified search helper
 
-export async function getCompanyProfile(slug: string): Promise<CompanyProfile | null> {
-  return fetchCachedRpc<CompanyProfile | null>(
+export async function getCompanyProfile(slug: string): Promise<GetCompanyProfileReturn> {
+  return fetchCachedRpc<'get_company_profile', GetCompanyProfileReturn>(
     { p_slug: slug },
     {
       rpcName: 'get_company_profile',
@@ -73,8 +40,8 @@ export async function getCompanyProfile(slug: string): Promise<CompanyProfile | 
   );
 }
 
-export async function getCompaniesList(limit = 50, offset = 0): Promise<CompaniesListResult> {
-  return fetchCachedRpc<CompaniesListResult>(
+export async function getCompaniesList(limit = 50, offset = 0): Promise<GetCompaniesListReturn> {
+  return fetchCachedRpc<'get_companies_list', GetCompaniesListReturn>(
     { p_limit: limit, p_offset: offset },
     {
       rpcName: 'get_companies_list',

@@ -9,7 +9,7 @@ export async function getHomepageData(
   categoryIds: readonly string[]
 ): Promise<GetHomepageCompleteReturn | null> {
   try {
-    return fetchCachedRpc<GetHomepageCompleteReturn | null>(
+    return fetchCachedRpc<'get_homepage_complete', GetHomepageCompleteReturn | null>(
       {
         p_category_ids: [...categoryIds],
       },

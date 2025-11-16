@@ -1,14 +1,20 @@
 'use server';
 
 import { fetchCachedRpc } from '@/src/lib/data/helpers';
-import type { GetRecommendationsReturn } from '@/src/types/database-overrides';
+import type {
+  ExperienceLevel,
+  FocusAreaType,
+  GetRecommendationsReturn,
+  IntegrationType,
+  UseCaseType,
+} from '@/src/types/database-overrides';
 
 export interface RecommendationInput {
-  useCase: string;
-  experienceLevel: string;
+  useCase: UseCaseType;
+  experienceLevel: ExperienceLevel;
   toolPreferences: string[];
-  integrations?: string[];
-  focusAreas?: string[];
+  integrations?: IntegrationType[];
+  focusAreas?: FocusAreaType[];
   limit?: number;
   viewerId?: string;
 }
@@ -26,7 +32,7 @@ export async function getConfigRecommendations(
     viewerId,
   } = input;
 
-  return fetchCachedRpc<GetRecommendationsReturn | null>(
+  return fetchCachedRpc<'get_recommendations', GetRecommendationsReturn | null>(
     {
       p_use_case: useCase,
       p_experience_level: experienceLevel,

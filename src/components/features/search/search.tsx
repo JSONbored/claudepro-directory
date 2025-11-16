@@ -28,7 +28,7 @@ import type { FilterState, UnifiedSearchProps } from '@/src/lib/types/component.
 import { POSITION_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
 import { logClientWarning, logUnhandledPromise } from '@/src/lib/utils/error.utils';
-import type { ContentCategory } from '@/src/types/database-overrides';
+import type { ContentCategory, SortOption } from '@/src/types/database-overrides';
 
 export type { FilterState };
 
@@ -195,7 +195,7 @@ function UnifiedSearchComponent({
 
   const handleSortChange = useCallback(
     (value: FilterState['sort']) => {
-      const newFilters = { ...filters, sort: value || 'trending' };
+      const newFilters = { ...filters, sort: value || ('trending' as SortOption) };
       handleFiltersChange(newFilters);
 
       // Track sort filter change
@@ -204,7 +204,7 @@ function UnifiedSearchComponent({
         .filter({
           category,
           filters: {
-            sort: value || 'trending',
+            sort: value || ('trending' as SortOption),
           },
           metadata: {
             filterType: 'sort',

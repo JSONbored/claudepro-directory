@@ -10,28 +10,26 @@ import UnifiedSection from '@/src/components/content/sections/unified-section';
 import { ReviewListSection } from '@/src/components/core/domain/reviews/review-list-section';
 import { NewsletterCTAVariant } from '@/src/components/features/growth/newsletter/newsletter-cta-variants';
 import { RecentlyViewedSidebar } from '@/src/components/features/navigation/recently-viewed-sidebar';
-import { detectLanguage } from '@/src/lib/content/language-detection';
 import {
   type CategoryId,
   getCategoryConfig,
   isValidCategory,
 } from '@/src/lib/data/config/category';
 import type { ContentItem } from '@/src/lib/data/content';
-import { highlightCodeEdge } from '@/src/lib/edge/client';
+import { highlightCodeEdge, processContentEdge } from '@/src/lib/edge/client';
 import { logger } from '@/src/lib/logger';
 import type { InstallationSteps } from '@/src/lib/types/content-type-config';
 import type { ProcessedSectionData } from '@/src/lib/types/detail-tabs.types';
 import { getDisplayTitle } from '@/src/lib/utils';
-import {
-  generateFilename,
-  generateHookFilename,
-  generateMultiFormatFilename,
-  transformMcpConfigForDisplay,
-} from '@/src/lib/utils/content.utils';
+import { transformMcpConfigForDisplay } from '@/src/lib/utils/content.utils';
 import { ensureStringArray, getMetadata } from '@/src/lib/utils/data.utils';
 import { normalizeError } from '@/src/lib/utils/error.utils';
 import { getViewTransitionName } from '@/src/lib/utils/view-transitions.utils';
-import type { GetContentDetailCompleteReturn, Tables } from '@/src/types/database-overrides';
+import type {
+  ContentCategory,
+  GetContentDetailCompleteReturn,
+  Tables,
+} from '@/src/types/database-overrides';
 import { DetailHeader } from './detail-header';
 import { DetailMetadata } from './detail-metadata';
 import { DetailSidebar } from './sidebar/navigation-sidebar';
@@ -167,7 +165,7 @@ export async function UnifiedDetailPage({
   // Pre-process content highlighting
   const contentData = await (async () => {
     // GUIDES: Skip content processing - structured sections rendered separately
-    if (item.category === 'guides') {
+    if (item.category === ('guides' as ContentCategory)) {
       return null;
     }
 
@@ -185,11 +183,31 @@ export async function UnifiedDetailPage({
     try {
       const languageHint =
         'language' in item ? (item as { language?: string }).language : undefined;
-      const language = await detectLanguage(content, languageHint);
-      const filename = generateFilename({ item, language });
-      const html = await highlightCodeEdge(content, { language });
 
-      return { html, code: content, language, filename };
+      // Batched processing: detectLanguage + generateFilename + highlightCodeEdge
+      const result = await processContentEdge({
+        operation: 'full',
+        code: content,
+        ...(languageHint && { languageHint }),
+        item: {
+          category: item.category,
+          slug: item.slug ?? null,
+          name: 'name' in item ? ((item as { name?: string }).name ?? null) : null,
+          hook_type:
+            'hook_type' in item ? ((item as { hook_type?: string }).hook_type ?? null) : null,
+        },
+      });
+
+      if (!(result.html && result.language && result.filename)) {
+        throw new Error('Content processing returned incomplete result');
+      }
+
+      return {
+        html: result.html,
+        code: content,
+        language: result.language,
+        filename: result.filename,
+      };
     } catch (error) {
       logDetailProcessingWarning('contentData', error, item);
       return null;
@@ -202,7 +220,12 @@ export async function UnifiedDetailPage({
     const configuration = ('configuration' in item && item.configuration) || metadata.configuration;
     if (!configuration) return null;
 
-    const format = item.category === 'mcp' ? 'multi' : item.category === 'hooks' ? 'hook' : 'json';
+    const format =
+      item.category === ('mcp' as ContentCategory)
+        ? 'multi'
+        : item.category === ('hooks' as ContentCategory)
+          ? 'hook'
+          : 'json';
 
     // Multi-format configuration (MCP servers)
     if (format === 'multi') {
@@ -224,10 +247,28 @@ export async function UnifiedDetailPage({
                 : value;
 
             const code = JSON.stringify(displayValue, null, 2);
-            const html = await highlightCodeEdge(code, { language: 'json' });
-            const filename = generateMultiFormatFilename(item, key, 'json');
 
-            return { key, html, code, filename };
+            // Highlight code and generate filename in parallel
+            const [html, filenameResult] = await Promise.all([
+              highlightCodeEdge(code, { language: 'json' }),
+              processContentEdge({
+                operation: 'filename',
+                language: 'json',
+                item: {
+                  category: item.category,
+                  slug: item.slug ?? null,
+                  name: 'name' in item ? ((item as { name?: string }).name ?? null) : null,
+                  hook_type:
+                    'hook_type' in item
+                      ? ((item as { hook_type?: string }).hook_type ?? null)
+                      : null,
+                },
+                format: 'multi',
+                sectionKey: key,
+              }),
+            ]);
+
+            return { key, html, code, filename: filenameResult.filename || 'config.json' };
           })
         );
 
@@ -251,14 +292,41 @@ export async function UnifiedDetailPage({
       };
 
       try {
-        const [highlightedHookConfig, highlightedScript] = await Promise.all([
-          config.hookConfig
-            ? highlightCodeEdge(JSON.stringify(config.hookConfig, null, 2), { language: 'json' })
-            : Promise.resolve(null),
-          config.scriptContent
-            ? highlightCodeEdge(config.scriptContent, { language: 'bash' })
-            : Promise.resolve(null),
-        ]);
+        const itemData = {
+          category: item.category,
+          slug: item.slug ?? null,
+          name: 'name' in item ? ((item as { name?: string }).name ?? null) : null,
+          hook_type:
+            'hook_type' in item ? ((item as { hook_type?: string }).hook_type ?? null) : null,
+        };
+
+        const [highlightedHookConfig, highlightedScript, hookConfigFilename, scriptFilename] =
+          await Promise.all([
+            config.hookConfig
+              ? highlightCodeEdge(JSON.stringify(config.hookConfig, null, 2), { language: 'json' })
+              : Promise.resolve(null),
+            config.scriptContent
+              ? highlightCodeEdge(config.scriptContent, { language: 'bash' })
+              : Promise.resolve(null),
+            config.hookConfig
+              ? processContentEdge({
+                  operation: 'filename',
+                  language: 'json',
+                  item: itemData,
+                  format: 'hook',
+                  contentType: 'hookConfig',
+                })
+              : Promise.resolve(null),
+            config.scriptContent
+              ? processContentEdge({
+                  operation: 'filename',
+                  language: 'bash',
+                  item: itemData,
+                  format: 'hook',
+                  contentType: 'scriptContent',
+                })
+              : Promise.resolve(null),
+          ]);
 
         return {
           format: 'hook' as const,
@@ -266,7 +334,7 @@ export async function UnifiedDetailPage({
             ? {
                 html: highlightedHookConfig,
                 code: JSON.stringify(config.hookConfig, null, 2),
-                filename: generateHookFilename(item, 'hookConfig', 'json'),
+                filename: hookConfigFilename?.filename || 'hook-config.json',
               }
             : null,
           scriptContent:
@@ -274,7 +342,7 @@ export async function UnifiedDetailPage({
               ? {
                   html: highlightedScript,
                   code: config.scriptContent,
-                  filename: generateHookFilename(item, 'scriptContent', 'bash'),
+                  filename: scriptFilename?.filename || 'hook-script.sh',
                 }
               : null,
         };
@@ -286,10 +354,29 @@ export async function UnifiedDetailPage({
 
     try {
       const code = JSON.stringify(configuration, null, 2);
-      const html = await highlightCodeEdge(code, { language: 'json' });
-      const filename = generateFilename({ item, language: 'json' });
 
-      return { format: 'json' as const, html, code, filename };
+      // Highlight code and generate filename in parallel
+      const [html, filenameResult] = await Promise.all([
+        highlightCodeEdge(code, { language: 'json' }),
+        processContentEdge({
+          operation: 'filename',
+          language: 'json',
+          item: {
+            category: item.category,
+            slug: item.slug ?? null,
+            name: 'name' in item ? ((item as { name?: string }).name ?? null) : null,
+            hook_type:
+              'hook_type' in item ? ((item as { hook_type?: string }).hook_type ?? null) : null,
+          },
+        }),
+      ]);
+
+      return {
+        format: 'json' as const,
+        html,
+        code,
+        filename: filenameResult.filename || 'config.json',
+      };
     } catch (error) {
       logDetailProcessingWarning('configData.json', error, item);
       return null;
@@ -434,7 +521,7 @@ export async function UnifiedDetailPage({
   const guideSections = await (async (): Promise<Array<
     Record<string, unknown> & { html?: string }
   > | null> => {
-    if (item.category !== 'guides') return null;
+    if (item.category !== ('guides' as ContentCategory)) return null;
 
     const itemMetadata = getMetadata(item);
     if (!(itemMetadata?.sections && Array.isArray(itemMetadata.sections))) return null;

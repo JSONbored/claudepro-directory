@@ -34,7 +34,8 @@ export function JobToggleButton({
 
   const handleToggle = () => {
     // Toggle between 'active' and 'draft' status
-    const newStatus: JobStatus = currentStatus === 'active' ? 'draft' : 'active';
+    const newStatus: JobStatus =
+      currentStatus === ('active' as JobStatus) ? ('draft' as JobStatus) : ('active' as JobStatus);
 
     startTransition(async () => {
       try {
@@ -45,7 +46,7 @@ export function JobToggleButton({
 
         if (result?.data?.success) {
           toasts.success.actionCompleted(
-            newStatus === 'active' ? 'Job listing resumed' : 'Job listing paused'
+            newStatus === ('active' as JobStatus) ? 'Job listing resumed' : 'Job listing paused'
           );
           router.refresh();
         } else {
@@ -69,7 +70,7 @@ export function JobToggleButton({
       disabled={disabled || isPending}
       className={className}
     >
-      {currentStatus === 'active' ? (
+      {currentStatus === ('active' as JobStatus) ? (
         <>
           <Pause className={UI_CLASSES.ICON_XS_LEADING} />
           Pause

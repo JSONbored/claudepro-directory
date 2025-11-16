@@ -10,7 +10,6 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/src/components/primitives/ui/sheet';
-import type { NewsletterSource } from '@/src/hooks/use-newsletter';
 import { useNewsletter } from '@/src/hooks/use-newsletter';
 import { usePulse } from '@/src/hooks/use-pulse';
 import { NEWSLETTER_CTA_CONFIG } from '@/src/lib/data/config/category';
@@ -18,7 +17,7 @@ import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
 import { logUnhandledPromise } from '@/src/lib/utils/error.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
-import type { CopyType } from '@/src/types/database-overrides';
+import type { CopyType, NewsletterSource } from '@/src/types/database-overrides';
 
 export interface NewsletterModalProps {
   source: NewsletterSource;
@@ -171,7 +170,7 @@ export function NewsletterModal({
               className="h-12 text-base"
               autoComplete="email"
               aria-label="Email address"
-              required
+              required={true}
             />
           </div>
 

@@ -47,7 +47,7 @@ const SearchSectionComponent: FC<SearchSectionProps> = ({
         <UnifiedCardGrid
           items={filteredResults}
           variant="normal"
-          infiniteScroll
+          infiniteScroll={true}
           batchSize={30}
           emptyMessage="No results found"
           ariaLabel="Search results"

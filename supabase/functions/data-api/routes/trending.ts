@@ -1,6 +1,9 @@
-import { VALID_CONTENT_CATEGORIES } from '../../_shared/config/constants/categories.ts';
 import type { Database as DatabaseGenerated } from '../../_shared/database.types.ts';
-import { callRpc } from '../../_shared/database-overrides.ts';
+import {
+  CONTENT_CATEGORY_VALUES,
+  type ContentCategory,
+  callRpc,
+} from '../../_shared/database-overrides.ts';
 import {
   badRequestResponse,
   buildCacheHeaders,
@@ -161,9 +164,7 @@ function parseCategory(value: string | null): string | null {
   if (!value || value === 'all') {
     return null;
   }
-  return VALID_CONTENT_CATEGORIES.includes(value as (typeof VALID_CONTENT_CATEGORIES)[number])
-    ? value
-    : null;
+  return CONTENT_CATEGORY_VALUES.includes(value as ContentCategory) ? value : null;
 }
 
 function clampLimit(rawLimit: number): number {

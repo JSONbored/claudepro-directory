@@ -257,7 +257,7 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
               <article
                 key={`${ex.title}-${i}`}
                 className="space-y-3"
-                itemScope
+                itemScope={true}
                 itemType="https://schema.org/SoftwareSourceCode"
               >
                 <div className="space-y-1">

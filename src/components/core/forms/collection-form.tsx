@@ -128,8 +128,8 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
         value={name}
         onChange={(e) => handleNameChange(e.target.value)}
         maxLength={100}
-        showCharCount
-        required
+        showCharCount={true}
+        required={true}
         disabled={isPending}
       />
 
@@ -154,7 +154,7 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
         value={description}
         onChange={(e) => setDescription(e.target.value)}
         maxLength={500}
-        showCharCount
+        showCharCount={true}
         rows={3}
         disabled={isPending}
       />

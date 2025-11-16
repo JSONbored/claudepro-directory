@@ -15,9 +15,9 @@ export async function getPaginatedContent({
   limit,
   offset,
 }: PaginatedContentParams): Promise<GetPaginatedContentReturn | null> {
-  return fetchCachedRpc<GetPaginatedContentReturn | null>(
+  return fetchCachedRpc<'get_content_paginated_slim', GetPaginatedContentReturn | null>(
     {
-      p_category: category,
+      ...(category ? { p_category: category } : {}),
       p_limit: limit,
       p_offset: offset,
     },

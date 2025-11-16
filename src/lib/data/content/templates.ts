@@ -9,7 +9,7 @@ import type { ContentCategory, GetContentTemplatesReturn } from '@/src/types/dat
 export async function getContentTemplates(
   category: ContentCategory
 ): Promise<GetContentTemplatesReturn> {
-  return fetchCachedRpc<GetContentTemplatesReturn>(
+  return fetchCachedRpc<'get_content_templates', GetContentTemplatesReturn>(
     { p_category: category },
     {
       rpcName: 'get_content_templates',

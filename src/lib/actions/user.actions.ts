@@ -20,17 +20,13 @@ import {
 import { fetchCachedRpc } from '@/src/lib/data/helpers';
 import { revalidateCacheTags } from '@/src/lib/supabase/cache-helpers';
 import type { Enums, Tables } from '@/src/types/database.types';
+import type {
+  Database,
+  GetUserActivitySummaryReturn,
+  GetUserActivityTimelineReturn,
+  GetUserIdentitiesReturn,
+} from '@/src/types/database-overrides';
 import { CONTENT_CATEGORY_VALUES, type ContentCategory } from '@/src/types/database-overrides';
-
-// TypeScript types for RPC function returns (database validates, TypeScript trusts)
-type ActivitySummary = {
-  total_posts: number;
-  total_comments: number;
-  total_votes: number;
-  total_submissions: number;
-  merged_submissions: number;
-  total_activity: number;
-};
 
 // Activity filter schema (query parameters - NOT stored data, validation is useful here)
 const activityFilterSchema = z.object({
@@ -81,12 +77,6 @@ type SubmissionActivity = BaseActivity & {
 };
 
 export type Activity = PostActivity | CommentActivity | VoteActivity | SubmissionActivity;
-
-type ActivityTimelineResponse = {
-  activities: Activity[];
-  hasMore: boolean;
-  total: number;
-};
 
 type UserSurface = 'account' | 'library' | 'settings';
 
@@ -155,9 +145,13 @@ async function revalidateUserSurfaces({
   await Promise.allSettled([...paths].map((path) => revalidatePath(path)));
 }
 
-async function cachedUserData<ResultType>(
-  rpcName: string,
-  args: Record<string, unknown>,
+async function cachedUserData<
+  T extends keyof Database['public']['Functions'],
+  ResultType extends
+    Database['public']['Functions'][T]['Returns'] = Database['public']['Functions'][T]['Returns'],
+>(
+  rpcName: T,
+  args: Database['public']['Functions'][T]['Args'],
   options: {
     tags: string[];
     ttlConfigKey: string;
@@ -166,7 +160,7 @@ async function cachedUserData<ResultType>(
   },
   fallback: ResultType
 ): Promise<ResultType> {
-  return fetchCachedRpc<ResultType>(args, {
+  return fetchCachedRpc<T, ResultType>(args, {
     rpcName,
     tags: options.tags,
     ttlKey: options.ttlConfigKey as Parameters<typeof fetchCachedRpc>[1]['ttlKey'],
@@ -358,7 +352,7 @@ export const isBookmarkedAction = authedAction
     })
   )
   .action(async ({ parsedInput, ctx }) => {
-    const data = await cachedUserData<boolean>(
+    const data = await cachedUserData<'is_bookmarked', boolean>(
       'is_bookmarked',
       {
         p_user_id: ctx.userId,
@@ -478,7 +472,7 @@ export const isFollowingAction = authedAction
     })
   )
   .action(async ({ parsedInput, ctx }) => {
-    const data = await cachedUserData<boolean>(
+    const data = await cachedUserData<'is_following', boolean>(
       'is_following',
       {
         follower_id: ctx.userId,
@@ -517,6 +511,7 @@ export const getBookmarkStatusBatch = authedAction
   )
   .action(async ({ parsedInput, ctx }) => {
     const data = await cachedUserData<
+      'is_bookmarked_batch',
       { content_type: string; content_slug: string; is_bookmarked: boolean }[]
     >(
       'is_bookmarked_batch',
@@ -550,7 +545,10 @@ export const getFollowStatusBatch = authedAction
     })
   )
   .action(async ({ parsedInput, ctx }) => {
-    const data = await cachedUserData<{ followed_user_id: string; is_following: boolean }[]>(
+    const data = await cachedUserData<
+      'is_following_batch',
+      { followed_user_id: string; is_following: boolean }[]
+    >(
       'is_following_batch',
       {
         p_follower_id: ctx.userId,
@@ -572,7 +570,7 @@ export const getActivitySummary = authedAction
   .metadata({ actionName: 'getActivitySummary', category: 'user' })
   .schema(z.void())
   .action(async ({ ctx }) => {
-    const data = await cachedUserData<ActivitySummary>(
+    const data = await cachedUserData<'get_user_activity_summary', GetUserActivitySummaryReturn>(
       'get_user_activity_summary',
       {
         p_user_id: ctx.userId,
@@ -600,7 +598,7 @@ export const getActivityTimeline = authedAction
   .metadata({ actionName: 'getActivityTimeline', category: 'user' })
   .schema(activityFilterSchema)
   .action(async ({ parsedInput: { type, limit = 20, offset = 0 }, ctx }) => {
-    const data = await cachedUserData<ActivityTimelineResponse>(
+    const data = await cachedUserData<'get_user_activity_timeline', GetUserActivityTimelineReturn>(
       'get_user_activity_timeline',
       {
         p_user_id: ctx.userId,
@@ -628,14 +626,7 @@ export const getUserIdentities = authedAction
   .metadata({ actionName: 'getUserIdentities', category: 'user' })
   .schema(z.void())
   .action(async ({ ctx }) => {
-    const data = await cachedUserData<{
-      identities: Array<{
-        provider: string;
-        email: string;
-        created_at: string;
-        last_sign_in_at: string;
-      }>;
-    }>(
+    const data = await cachedUserData<'get_user_identities', GetUserIdentitiesReturn>(
       'get_user_identities',
       {
         p_user_id: ctx.userId,

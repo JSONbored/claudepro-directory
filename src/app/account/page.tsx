@@ -17,6 +17,7 @@ import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { normalizeError } from '@/src/lib/utils/error.utils';
+import { USER_TIER_VALUES, type UserTier } from '@/src/types/database-overrides';
 
 export const metadata = generatePageMetadata('/account');
 
@@ -33,7 +34,7 @@ export default async function AccountDashboard() {
             <CardDescription>Please sign in to view your dashboard.</CardDescription>
           </CardHeader>
           <CardContent>
-            <Button asChild>
+            <Button asChild={true}>
               <Link href={ROUTES.LOGIN}>Go to login</Link>
             </Button>
           </CardContent>
@@ -64,7 +65,7 @@ export default async function AccountDashboard() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button asChild>
+            <Button asChild={true}>
               <Link href={ROUTES.HOME}>Go to home</Link>
             </Button>
           </CardContent>
@@ -109,11 +110,16 @@ export default async function AccountDashboard() {
           <CardContent>
             <UnifiedBadge
               variant="base"
-              style={profile?.tier === 'pro' ? 'default' : 'secondary'}
+              style={
+                (profile?.tier as UserTier | undefined) === USER_TIER_VALUES[1]
+                  ? 'default'
+                  : 'secondary'
+              }
               className="mt-2"
             >
               {profile?.tier
-                ? profile.tier.charAt(0).toUpperCase() + profile.tier.slice(1)
+                ? (profile.tier as UserTier).charAt(0).toUpperCase() +
+                  (profile.tier as UserTier).slice(1)
                 : 'Free'}
             </UnifiedBadge>
             <p className={'mt-2 text-muted-foreground text-xs'}>Membership level</p>

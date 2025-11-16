@@ -110,7 +110,7 @@ function ContentSearchClientComponent<T extends DisplayableContent>({
           <UnifiedCardGrid
             items={filteredItems}
             variant="normal"
-            infiniteScroll
+            infiniteScroll={true}
             batchSize={30}
             emptyMessage={`No ${title.toLowerCase()} found`}
             ariaLabel="Search results"

@@ -5,6 +5,7 @@ import { fetchCachedRpc } from '@/src/lib/data/helpers';
 import { logger } from '@/src/lib/logger';
 import type { Tables } from '@/src/types/database.types';
 import type {
+  ChangelogCategory,
   GetChangelogDetailReturn,
   GetChangelogEntriesReturn,
   GetChangelogOverviewReturn,
@@ -30,13 +31,8 @@ export type ChangelogEntry = Tables<'changelog'>;
 // Validated changes type (for runtime use after parsing)
 export type ChangelogChanges = z.infer<typeof changesSchema>;
 
-export type ChangelogCategory =
-  | 'Added'
-  | 'Changed'
-  | 'Deprecated'
-  | 'Removed'
-  | 'Fixed'
-  | 'Security';
+// Re-export from database-overrides.ts for convenience
+export type { ChangelogCategory } from '@/src/types/database-overrides';
 
 // Helper to safely parse changes JSONB field
 export function parseChangelogChanges(changes: unknown): ChangelogChanges {
@@ -79,7 +75,7 @@ function createEmptyOverview(limit: number, offset = 0): GetChangelogOverviewRet
  */
 export async function getChangelogOverview(
   options: {
-    category?: string;
+    category?: ChangelogCategory;
     publishedOnly?: boolean;
     featuredOnly?: boolean;
     limit?: number;
@@ -88,9 +84,9 @@ export async function getChangelogOverview(
 ): Promise<GetChangelogOverviewReturn> {
   const { category, publishedOnly = true, featuredOnly = false, limit = 50, offset = 0 } = options;
 
-  return fetchCachedRpc<GetChangelogOverviewReturn>(
+  return fetchCachedRpc<'get_changelog_overview', GetChangelogOverviewReturn>(
     {
-      p_category: category ?? null,
+      ...(category ? { p_category: category } : {}),
       p_published_only: publishedOnly,
       p_featured_only: featuredOnly,
       p_limit: limit,
@@ -120,7 +116,7 @@ export async function getChangelogOverview(
  * Optimized single RPC call that replaces get_changelog_entry_by_slug
  */
 export async function getChangelogEntryBySlug(slug: string): Promise<ChangelogEntry | null> {
-  const result = await fetchCachedRpc<GetChangelogDetailReturn>(
+  const result = await fetchCachedRpc<'get_changelog_detail', GetChangelogDetailReturn>(
     { p_slug: slug },
     {
       rpcName: 'get_changelog_detail',
@@ -187,7 +183,9 @@ export async function getRecentChangelogEntries(limit = 5): Promise<ChangelogEnt
 /**
  * Get changelog entries by category
  */
-export async function getChangelogEntriesByCategory(category: string): Promise<ChangelogEntry[]> {
+export async function getChangelogEntriesByCategory(
+  category: ChangelogCategory
+): Promise<ChangelogEntry[]> {
   const limit = 1000;
   const overview = await getChangelogOverview({
     category,

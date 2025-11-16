@@ -64,7 +64,7 @@ export async function pgmqRead(
 export async function pgmqDelete(queueName: string, msgId: bigint): Promise<boolean | null> {
   const { data, error } = await pgmqSupabaseClient.schema('pgmq_public').rpc('delete', {
     queue_name: queueName,
-    msg_id: msgId,
+    message_id: msgId, // pgmq.delete uses 'message_id' not 'msg_id'
   });
 
   if (error) throw error;

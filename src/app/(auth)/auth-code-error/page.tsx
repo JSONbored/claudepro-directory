@@ -52,10 +52,10 @@ export default function AuthCodeError({
         </CardDescription>
       </CardHeader>
       <CardContent className={UI_CLASSES.FLEX_COL_GAP_2}>
-        <Button asChild>
+        <Button asChild={true}>
           <Link href={ROUTES.LOGIN}>Try Again</Link>
         </Button>
-        <Button variant="outline" asChild>
+        <Button variant="outline" asChild={true}>
           <Link href={ROUTES.HOME}>Return Home</Link>
         </Button>
       </CardContent>

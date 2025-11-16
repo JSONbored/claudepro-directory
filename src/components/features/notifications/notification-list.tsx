@@ -36,7 +36,7 @@ function NotificationListComponent() {
 
       <AnimatePresence mode="popLayout">
         {notifications.map((notification: NotificationRecord) => (
-          <motion.div key={notification.id} layout>
+          <motion.div key={notification.id} layout={true}>
             <NotificationItem notification={notification} />
           </motion.div>
         ))}

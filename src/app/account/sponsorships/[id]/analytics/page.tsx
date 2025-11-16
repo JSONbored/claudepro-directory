@@ -79,7 +79,7 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
           <UnifiedBadge
             variant="sponsored"
             tier={sponsorship.tier as 'featured' | 'promoted' | 'spotlight'}
-            showIcon
+            showIcon={true}
           />
           <h1 className="font-bold text-3xl">Sponsorship Analytics</h1>
         </div>
@@ -194,7 +194,7 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
                 <UnifiedBadge
                   variant="sponsored"
                   tier={sponsorship.tier as 'featured' | 'promoted' | 'spotlight'}
-                  showIcon
+                  showIcon={true}
                 />
               </div>
             </div>

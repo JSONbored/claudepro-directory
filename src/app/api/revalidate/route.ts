@@ -1,12 +1,15 @@
 /**
- * On-Demand ISR Revalidation - Database-First Architecture
- * Called by PostgreSQL trigger when content changes
+ * On-Demand ISR Revalidation - Realtime-Based Architecture
+ * Called by edge function via Supabase Realtime (logical replication)
  *
- * Payload format from PostgreSQL trigger:
+ * Flow: Database Trigger → Table Change → Realtime (postgres_changes) → Edge Function → This API Route
+ *
+ * Payload format from edge function:
  * {
  *   "secret": "REVALIDATE_SECRET",
  *   "category": "agents",
- *   "slug": "code-reviewer"
+ *   "slug": "code-reviewer",
+ *   "tags": ["content", "homepage", "trending"]
  * }
  */
 

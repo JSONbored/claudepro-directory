@@ -18,12 +18,13 @@ import {
   subheadingStyle,
 } from '../common-styles.ts';
 import { EmailCtaSection } from '../components/cta.tsx';
+import type { ContactCategory } from '../../../database-overrides.ts';
 
 export interface ContactSubmissionAdminProps {
   submissionId: string;
   name: string;
   email: string;
-  category: string;
+  category: ContactCategory;
   message: string;
   submittedAt: string;
 }
@@ -44,7 +45,7 @@ export function ContactSubmissionAdmin({
   });
 
   // Category emoji mapping
-  const categoryEmoji: Record<string, string> = {
+  const categoryEmoji: Record<ContactCategory, string> = {
     bug: '🐛',
     feature: '💡',
     partnership: '🤝',

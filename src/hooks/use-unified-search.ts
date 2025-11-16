@@ -46,7 +46,7 @@ export interface UseUnifiedSearchReturn {
 }
 
 export function useUnifiedSearch({
-  initialSort = 'trending',
+  initialSort = 'trending' as SortOption,
   onSearchChange,
   onFiltersChange,
 }: UseUnifiedSearchOptions = {}): UseUnifiedSearchReturn {
@@ -57,7 +57,7 @@ export function useUnifiedSearch({
   const { value: savedSort, setValue: setSavedSort } = useLocalStorage<SortOption>(
     'user-pref-sort',
     {
-      defaultValue: (initialSort as SortOption) || 'trending',
+      defaultValue: (initialSort as SortOption) || ('trending' as SortOption),
       syncAcrossTabs: true,
     }
   );

@@ -1020,7 +1020,8 @@ export type ViewportPresetKey = keyof typeof VIEWPORT_PRESETS;
 export type JobType = keyof typeof BADGE_COLORS.jobType;
 export type DifficultyLevel = keyof typeof BADGE_COLORS.difficulty;
 export type CollectionType = keyof typeof BADGE_COLORS.collectionType;
-export type ChangelogCategory = keyof typeof BADGE_COLORS.changelogCategory;
+// Re-export from database-overrides.ts for type safety
+export type { ChangelogCategory } from '@/src/types/database-overrides';
 export type StatusType = keyof typeof BADGE_COLORS.status;
 export type CategoryType = keyof typeof BADGE_COLORS.category;
 export type SubmissionStatusType = keyof typeof BADGE_COLORS.submissionStatus;

@@ -54,7 +54,7 @@ export function SegmentErrorFallback({
               {links.map((link) => (
                 <Button
                   key={`${link.href}-${link.label}`}
-                  asChild
+                  asChild={true}
                   variant={link.variant ?? 'outline'}
                   className="w-full sm:w-auto"
                 >

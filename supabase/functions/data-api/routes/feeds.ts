@@ -1,6 +1,9 @@
-import { VALID_CONTENT_CATEGORIES } from '../../_shared/config/constants/categories.ts';
 import type { Database as DatabaseGenerated } from '../../_shared/database.types.ts';
-import { callRpc } from '../../_shared/database-overrides.ts';
+import {
+  CONTENT_CATEGORY_VALUES,
+  type ContentCategory,
+  callRpc,
+} from '../../_shared/database-overrides.ts';
 import {
   badRequestResponse,
   buildCacheHeaders,
@@ -9,6 +12,7 @@ import {
   jsonResponse,
   methodNotAllowedResponse,
 } from '../../_shared/utils/http.ts';
+import { buildSecurityHeaders } from '../../_shared/utils/security-headers.ts';
 
 const CORS = getOnlyCorsHeaders;
 const SUPPORTED_TYPES = new Set(['rss', 'atom']);
@@ -44,10 +48,10 @@ export async function handleFeedsRoute(
   if (
     category &&
     category !== 'changelog' &&
-    !VALID_CONTENT_CATEGORIES.includes(category as (typeof VALID_CONTENT_CATEGORIES)[number])
+    !CONTENT_CATEGORY_VALUES.includes(category as ContentCategory)
   ) {
     return badRequestResponse(
-      `Invalid category parameter. Valid categories: changelog, ${VALID_CONTENT_CATEGORIES.join(', ')}, or omit for site-wide feed`,
+      `Invalid category parameter. Valid categories: changelog, ${CONTENT_CATEGORY_VALUES.join(', ')}, or omit for site-wide feed`,
       CORS
     );
   }
@@ -65,6 +69,7 @@ export async function handleFeedsRoute(
     return new Response(payload.xml, {
       status: 200,
       headers: {
+        ...buildSecurityHeaders(),
         ...headers,
         'Content-Type': payload.contentType,
         'X-Content-Source': payload.source,

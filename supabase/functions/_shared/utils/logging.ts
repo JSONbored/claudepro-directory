@@ -65,7 +65,7 @@ export function createSearchContext(options?: {
 }
 
 /**
- * Create logContext for notification-router
+ * Create logContext for edge functions (legacy name - used by flux-station and other functions)
  */
 export function createNotificationRouterContext(
   action: string,
@@ -79,7 +79,7 @@ export function createNotificationRouterContext(
   }
 ): BaseLogContext {
   return {
-    function: 'notification-router',
+    function: 'flux-station',
     action,
     request_id: crypto.randomUUID(),
     started_at: new Date().toISOString(),

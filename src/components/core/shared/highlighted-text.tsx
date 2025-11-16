@@ -37,7 +37,7 @@ export const HighlightedText = memo(({ html, fallback, className = '' }: Highlig
       className={className}
       // biome-ignore lint/security/noDangerouslySetInnerHtml: HTML is pre-sanitized by edge function with XSS protection
       dangerouslySetInnerHTML={{ __html: html }}
-      suppressHydrationWarning
+      suppressHydrationWarning={true}
     />
   );
 });

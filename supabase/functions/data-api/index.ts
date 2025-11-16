@@ -1,5 +1,7 @@
 import { getOnlyCorsHeaders, jsonResponse } from '../_shared/utils/http.ts';
+import { validatePathSegments, validateQueryString } from '../_shared/utils/input-validation.ts';
 import { createDataApiContext } from '../_shared/utils/logging.ts';
+import { checkRateLimit, RATE_LIMIT_PRESETS } from '../_shared/utils/rate-limit.ts';
 import { createRouter, type HttpMethod, type RouterContext } from '../_shared/utils/router.ts';
 import { handleCompanyRoute } from './routes/company.ts';
 import { handleContentRoute } from './routes/content.ts';
@@ -22,9 +24,35 @@ const router = createRouter<DataApiContext>({
     const url = new URL(request.url);
     const originalMethod = request.method.toUpperCase() as HttpMethod;
     const normalizedMethod = (originalMethod === 'HEAD' ? 'GET' : originalMethod) as HttpMethod;
-    const pathname = url.pathname.replace(/^\/data-api/, '') || '/';
+
+    // Normalize pathname: remove /functions/v1/data-api or /data-api prefix
+    // SECURITY: Use strict prefix matching to prevent path traversal
+    let pathname = url.pathname;
+
+    // Match /functions/v1/data-api prefix (Supabase Edge Function path)
+    if (pathname.startsWith('/functions/v1/data-api')) {
+      pathname = pathname.slice('/functions/v1/data-api'.length);
+    }
+    // Match /data-api prefix (direct call path)
+    else if (pathname.startsWith('/data-api')) {
+      pathname = pathname.slice('/data-api'.length);
+    }
+    // If pathname doesn't start with expected prefixes, keep as-is (for root routes)
+
+    pathname = pathname || '/';
     const segments =
       pathname === '/' ? [] : pathname.replace(/^\/+/, '').split('/').filter(Boolean);
+
+    // Input validation
+    const queryValidation = validateQueryString(url);
+    if (!queryValidation.valid) {
+      throw new Error(queryValidation.error);
+    }
+
+    const pathValidation = validatePathSegments(segments);
+    if (!pathValidation.valid) {
+      throw new Error(pathValidation.error);
+    }
 
     return {
       request,
@@ -62,12 +90,49 @@ const router = createRouter<DataApiContext>({
       match: (ctx) => ctx.segments[0] === 'content',
       handler: (ctx) =>
         respondWithAnalytics(ctx, 'content', async () => {
+          // Rate limiting for content endpoints
+          const rateLimit = checkRateLimit(ctx.request, RATE_LIMIT_PRESETS.public);
+          if (!rateLimit.allowed) {
+            return jsonResponse(
+              {
+                error: 'Too Many Requests',
+                message: 'Rate limit exceeded',
+                retryAfter: rateLimit.retryAfter,
+              },
+              429,
+              BASE_CORS,
+              {
+                'Retry-After': String(rateLimit.retryAfter ?? 60),
+                'X-RateLimit-Limit': String(RATE_LIMIT_PRESETS.public.maxRequests),
+                'X-RateLimit-Remaining': String(rateLimit.remaining),
+                'X-RateLimit-Reset': String(rateLimit.resetAt),
+              }
+            );
+          }
+
           const logContext = createDataApiContext('content', {
             path: ctx.pathname,
             method: ctx.method,
             resource: ctx.segments.length > 1 ? ctx.segments[1] : undefined,
           });
-          return handleContentRoute(ctx.segments.slice(1), ctx.url, ctx.method, logContext);
+
+          const response = await handleContentRoute(
+            ctx.segments.slice(1),
+            ctx.url,
+            ctx.method,
+            logContext
+          );
+
+          // Add rate limit headers
+          const headers = new Headers(response.headers);
+          headers.set('X-RateLimit-Limit', String(RATE_LIMIT_PRESETS.public.maxRequests));
+          headers.set('X-RateLimit-Remaining', String(rateLimit.remaining));
+          headers.set('X-RateLimit-Reset', String(rateLimit.resetAt));
+
+          return new Response(response.body, {
+            status: response.status,
+            headers,
+          });
         }),
     },
     {
@@ -98,20 +163,59 @@ const router = createRouter<DataApiContext>({
       name: 'sitemap',
       methods: ['GET', 'HEAD', 'POST', 'OPTIONS'],
       cors: BASE_CORS,
-      match: (ctx) => ctx.segments[0] === 'sitemap',
+      match: (ctx) => {
+        const firstSegment = ctx.segments[0];
+        // Match both 'sitemap' and 'sitemap.xml'
+        return firstSegment === 'sitemap' || firstSegment === 'sitemap.xml';
+      },
       handler: (ctx) =>
         respondWithAnalytics(ctx, 'sitemap', async () => {
+          // Rate limiting: heavier for sitemap, stricter for POST
+          const preset =
+            ctx.method === 'POST' ? RATE_LIMIT_PRESETS.indexnow : RATE_LIMIT_PRESETS.heavy;
+
+          const rateLimit = checkRateLimit(ctx.request, preset);
+          if (!rateLimit.allowed) {
+            return jsonResponse(
+              {
+                error: 'Too Many Requests',
+                message: 'Rate limit exceeded',
+                retryAfter: rateLimit.retryAfter,
+              },
+              429,
+              BASE_CORS,
+              {
+                'Retry-After': String(rateLimit.retryAfter ?? 60),
+                'X-RateLimit-Limit': String(preset.maxRequests),
+                'X-RateLimit-Remaining': String(rateLimit.remaining),
+                'X-RateLimit-Reset': String(rateLimit.resetAt),
+              }
+            );
+          }
+
           const logContext = createDataApiContext('sitemap', {
             path: ctx.pathname,
             method: ctx.method,
           });
-          return handleSitemapRoute(
+
+          const response = await handleSitemapRoute(
             ctx.segments.slice(1),
             ctx.url,
             ctx.method,
             ctx.request,
             logContext
           );
+
+          // Add rate limit headers
+          const headers = new Headers(response.headers);
+          headers.set('X-RateLimit-Limit', String(preset.maxRequests));
+          headers.set('X-RateLimit-Remaining', String(rateLimit.remaining));
+          headers.set('X-RateLimit-Reset', String(rateLimit.resetAt));
+
+          return new Response(response.body, {
+            status: response.status,
+            headers,
+          });
         }),
     },
     {
@@ -147,7 +251,30 @@ const router = createRouter<DataApiContext>({
   ],
 });
 
-Deno.serve((request) => router(request));
+Deno.serve(async (request) => {
+  try {
+    // Wrap router with rate limiting and error handling
+    return await router(request);
+  } catch (error) {
+    // Handle validation errors from buildContext
+    if (
+      error instanceof Error &&
+      (error.message.includes('too long') || error.message.includes('invalid'))
+    ) {
+      return jsonResponse(
+        {
+          error: 'Bad Request',
+          message: error.message,
+        },
+        400,
+        BASE_CORS
+      );
+    }
+
+    // Re-throw to let router handle it
+    throw error;
+  }
+});
 
 async function handleDirectoryIndex(ctx: DataApiContext): Promise<Response> {
   const response = jsonResponse(

@@ -271,7 +271,7 @@ function ReviewCardItem({
       author=""
       variant="review"
       showActions={false}
-      disableNavigation
+      disableNavigation={true}
       ariaLabel={`Review by ${review.user_profile?.username || 'Anonymous'}`}
       renderContent={() => (
         <div className="space-y-3">

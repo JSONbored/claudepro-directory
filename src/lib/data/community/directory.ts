@@ -58,7 +58,7 @@ export async function getCommunityDirectory(options: {
   }
 
   // No search query or unified-search failed → use optimized RPC for directory listing
-  return fetchCachedRpc<GetCommunityDirectoryReturn | null>(
+  return fetchCachedRpc<'get_community_directory', GetCommunityDirectoryReturn | null>(
     {
       p_limit: limit,
     },
@@ -79,7 +79,7 @@ export async function getCommunityDirectory(options: {
 
 /**
  * Track user search analytics - Queue-Based
- * Enqueues to user_interactions queue for batched processing (98% egress reduction)
+ * Enqueues to pulse queue for batched processing (98% egress reduction)
  * Fire and forget - non-blocking
  */
 async function trackUserSearchAnalytics(query: string, resultCount: number): Promise<void> {
