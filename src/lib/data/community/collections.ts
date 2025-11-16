@@ -3,10 +3,12 @@
 import { fetchCachedRpc } from '@/src/lib/data/helpers';
 import { logger } from '@/src/lib/logger';
 import { normalizeError } from '@/src/lib/utils/error.utils';
-import type { GetGetUserCollectionDetailReturn } from '@/src/types/database-overrides';
+import type {
+  CollectionDetailData,
+  GetGetUserCollectionDetailReturn,
+} from '@/src/types/database-overrides';
 
-// CollectionDetailData matches GetGetUserCollectionDetailReturn (excluding null)
-export type CollectionDetailData = NonNullable<GetGetUserCollectionDetailReturn>;
+export type { CollectionDetailData };
 
 export async function getPublicCollectionDetail(input: {
   userSlug: string;

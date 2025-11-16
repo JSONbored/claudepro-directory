@@ -26,15 +26,12 @@ export default function AuthCodeError({
 }: {
   searchParams?: AuthCodeErrorSearchParams;
 }) {
-  if (searchParams) {
-    logger.error('AuthCodeErrorPage rendered', undefined, {
-      code: searchParams.code || 'unknown',
-      provider: searchParams.provider || 'unknown',
-      hasMessage: Boolean(searchParams.message),
-    });
-  } else {
-    logger.error('AuthCodeErrorPage rendered without search params');
-  }
+  logger.error('AuthCodeErrorPage rendered', undefined, {
+    code: searchParams?.code || 'unknown',
+    provider: searchParams?.provider || 'unknown',
+    hasMessage: Boolean(searchParams?.message),
+    hasSearchParams: Boolean(searchParams),
+  });
 
   return (
     <Card className="w-full max-w-md">

@@ -16,9 +16,12 @@ import {
   getNonEmptyCategories,
   getRelativeTime,
 } from '@/src/lib/changelog/utils';
-import type { ChangelogCategory, ChangelogEntry } from '@/src/lib/data/changelog';
 import { ArrowRight, Calendar } from '@/src/lib/icons';
 import { BADGE_COLORS, UI_CLASSES } from '@/src/lib/ui-constants';
+import type { Tables } from '@/src/types/database.types';
+import type { ChangelogCategory } from '@/src/types/database-overrides';
+
+type ChangelogEntry = Tables<'changelog'>;
 
 export interface ChangelogListClientProps {
   entries: ChangelogEntry[];

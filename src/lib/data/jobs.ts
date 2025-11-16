@@ -12,8 +12,6 @@ import type {
   Tables,
 } from '@/src/types/database-overrides';
 
-export type Job = Tables<'jobs'>;
-
 export interface JobsFilterOptions {
   searchQuery?: string;
   category?: string;
@@ -30,7 +28,7 @@ export type JobsFilterResult = GetFilterJobsReturn;
 /**
  * Get all active jobs via edge-cached RPC
  */
-export async function getJobs(): Promise<Job[]> {
+export async function getJobs(): Promise<Tables<'jobs'>[]> {
   const data = await fetchCachedRpc<'get_jobs_list', GetGetJobsListReturn>(
     {},
     {
@@ -41,7 +39,7 @@ export async function getJobs(): Promise<Job[]> {
       fallback: [],
     }
   );
-  // Map GetGetJobsListReturn to Job (Tables<'jobs'>)
+  // Map GetGetJobsListReturn to Tables<'jobs'>
   // GetGetJobsListReturn is a simplified structure, so we need to map it
   return data.map((item) => ({
     ...item,
@@ -56,13 +54,13 @@ export async function getJobs(): Promise<Job[]> {
     expires_at: item.expires_at ?? new Date().toISOString(),
     is_placeholder: false,
     workplace: item.remote ? 'Remote' : 'On-site',
-  })) as Job[];
+  })) as Tables<'jobs'>[];
 }
 
 /**
  * Get a job by slug via edge-cached RPC
  */
-export async function getJobBySlug(slug: string): Promise<Job | undefined> {
+export async function getJobBySlug(slug: string): Promise<Tables<'jobs'> | undefined> {
   const data = await fetchCachedRpc<'get_job_detail', GetGetJobDetailReturn>(
     { p_slug: slug },
     {
@@ -77,7 +75,7 @@ export async function getJobBySlug(slug: string): Promise<Job | undefined> {
 
   if (!data) return undefined;
 
-  // Map GetGetJobDetailReturn to Job (Tables<'jobs'>)
+  // Map GetGetJobDetailReturn to Tables<'jobs'>
   return {
     ...data,
     // Add missing fields with defaults
@@ -90,12 +88,12 @@ export async function getJobBySlug(slug: string): Promise<Job | undefined> {
     expires_at: data.expires_at ?? new Date().toISOString(),
     is_placeholder: false,
     workplace: data.remote ? 'Remote' : 'On-site',
-  } as Job;
+  } as Tables<'jobs'>;
 }
 
 /** Get featured jobs via edge-cached RPC */
-export async function getFeaturedJobs(): Promise<Job[]> {
-  return fetchCachedRpc<'get_featured_jobs', Job[]>(
+export async function getFeaturedJobs(): Promise<Tables<'jobs'>[]> {
+  return fetchCachedRpc<'get_featured_jobs', Tables<'jobs'>[]>(
     {},
     {
       rpcName: 'get_featured_jobs',
@@ -108,8 +106,8 @@ export async function getFeaturedJobs(): Promise<Job[]> {
 }
 
 /** Get jobs by category via edge-cached RPC */
-export async function getJobsByCategory(category: string): Promise<Job[]> {
-  return fetchCachedRpc<'get_jobs_by_category', Job[]>(
+export async function getJobsByCategory(category: string): Promise<Tables<'jobs'>[]> {
+  return fetchCachedRpc<'get_jobs_by_category', Tables<'jobs'>[]>(
     { p_category: category },
     {
       rpcName: 'get_jobs_by_category',

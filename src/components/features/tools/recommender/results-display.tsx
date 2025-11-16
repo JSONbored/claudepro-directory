@@ -49,7 +49,7 @@ import {
   TrendingUp,
 } from '@/src/lib/icons';
 import { POSITION_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
-import { getContentItemUrl } from '@/src/lib/utils/content.utils';
+import { getContentItemUrl, sanitizeSlug } from '@/src/lib/utils/content.utils';
 import type {
   ContentCategory,
   ExperienceLevel,
@@ -362,7 +362,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
               .map((result) => {
                 const targetPath = getContentItemUrl({
                   category: result.category,
-                  slug: result.slug,
+                  slug: sanitizeSlug(result.slug),
                 });
                 const matchScore = typeof result.match_score === 'number' ? result.match_score : 0;
                 const rank = typeof result.rank === 'number' ? result.rank : null;

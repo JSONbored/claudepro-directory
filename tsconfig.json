@@ -2,6 +2,11 @@
   "$schema": "https://json.schemastore.org/tsconfig",
   "extends": "./config/build/tsconfig.json",
   "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./*"],
+      "@/src/*": ["./src/*"]
+    },
     "plugins": [
       {
         "name": "next"

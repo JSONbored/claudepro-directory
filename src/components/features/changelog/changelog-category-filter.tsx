@@ -6,8 +6,8 @@
 
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { TabsList, TabsTrigger } from '@/src/components/primitives/ui/tabs';
-import type { ChangelogCategory } from '@/src/lib/data/changelog';
 import { DIMENSIONS } from '@/src/lib/ui-constants';
+import type { ChangelogCategory } from '@/src/types/database-overrides';
 import { CHANGELOG_CATEGORY_VALUES } from '@/src/types/database-overrides';
 
 export interface CategoryFilterProps {

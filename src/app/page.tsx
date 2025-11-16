@@ -40,7 +40,12 @@ import type { GetGetHomepageCompleteReturn } from '@/src/types/database-override
 
 export const metadata = generatePageMetadata('/');
 
-export const revalidate = false;
+/**
+ * ISR Configuration: Homepage revalidates every 60 seconds
+ * This ensures dynamic data (featured content, jobs, stats) stays fresh
+ * while still benefiting from edge caching for performance
+ */
+export const revalidate = 60;
 
 interface HomePageProps {
   searchParams: Promise<{

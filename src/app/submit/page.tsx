@@ -123,7 +123,7 @@ export default async function SubmitPage() {
   const stats = dashboardData?.stats || { total: 0, pending: 0, merged_this_week: 0 };
   const recentMerged = (dashboardData?.recent || []).map((submission) => ({
     ...submission,
-    content_type: submission.content_type as ContentCategory,
+    content_type: submission.content_type,
     merged_at_formatted: formatTimeAgo(submission.merged_at),
   }));
 

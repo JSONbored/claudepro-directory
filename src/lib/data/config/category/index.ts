@@ -4,6 +4,7 @@ import { cache } from 'react';
 import { getHomepageConfig } from '@/src/lib/actions/feature-flags.actions';
 import type { CategoryStatsConfig, UnifiedCategoryConfig } from '@/src/lib/types/component.types';
 import type { ContentCategory, ContentType } from '@/src/types/database-overrides';
+import { isContentCategory } from '@/src/types/database-overrides';
 import {
   ALL_CATEGORY_IDS,
   CACHEABLE_CATEGORY_IDS,
@@ -54,9 +55,10 @@ export const getCategoryConfig = cache(
 
 /**
  * Check if category ID is valid (static)
+ * Uses isContentCategory from database-overrides.ts as single source of truth
  */
 export function isValidCategory(category: string): category is ContentCategory {
-  return VALID_CATEGORIES.includes(category as ContentCategory);
+  return isContentCategory(category);
 }
 
 // Direct exports (already immutable from generated file)

@@ -158,7 +158,7 @@ export default async function CompaniesPage() {
                     </p>
                   )}
 
-                  {/* Job Statistics from RPC (company_job_stats materialized view) */}
+                  {/* Job Statistics from RPC/data layer (getCompanyProfile RPC) */}
                   {company.stats && company.stats.active_jobs > 0 && (
                     <div className={'mb-4 flex flex-wrap gap-2'}>
                       <UnifiedBadge variant="base" style="secondary" className="text-xs">

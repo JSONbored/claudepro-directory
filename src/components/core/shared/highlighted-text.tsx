@@ -5,6 +5,7 @@
  * Used when search results come with pre-highlighted fields from unified-search
  */
 
+import DOMPurify from 'dompurify';
 import { memo } from 'react';
 
 interface HighlightedTextProps {
@@ -29,14 +30,18 @@ export const HighlightedText = memo(({ html, fallback, className = '' }: Highlig
     return null;
   }
 
-  // Edge function provides safe HTML (XSS-protected via escapeHtml)
-  // We use dangerouslySetInnerHTML because the HTML is trusted (generated server-side)
-  // The HTML is pre-sanitized by the edge function, so this is safe
+  // Sanitize HTML to prevent XSS. Only allow <mark> tags for highlighting.
+  // This provides defense-in-depth even though edge function pre-sanitizes.
+  const safeHtml = DOMPurify.sanitize(html, {
+    ALLOWED_TAGS: ['mark'],
+    ALLOWED_ATTR: [],
+  });
+
   return (
     <span
       className={className}
-      // biome-ignore lint/security/noDangerouslySetInnerHtml: HTML is pre-sanitized by edge function with XSS protection
-      dangerouslySetInnerHTML={{ __html: html }}
+      // biome-ignore lint/security/noDangerouslySetInnerHtml: HTML is sanitized with DOMPurify, only <mark> tags allowed
+      dangerouslySetInnerHTML={{ __html: safeHtml }}
       suppressHydrationWarning={true}
     />
   );

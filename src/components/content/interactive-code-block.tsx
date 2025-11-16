@@ -10,6 +10,7 @@ import { useEffect, useRef, useState } from 'react';
 import { LinkedinShareButton, TwitterShareButton } from 'react-share';
 import { usePulse } from '@/src/hooks/use-pulse';
 import { getTimeoutConfig } from '@/src/lib/actions/feature-flags.actions';
+import { isValidCategory } from '@/src/lib/data/config/category';
 import { APP_CONFIG } from '@/src/lib/data/config/constants';
 import { Camera, Check, ChevronDown, Copy, Linkedin, Share2, Twitter } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
@@ -160,7 +161,8 @@ export function ProductionCodeBlock({
 
   // Extract category and slug from pathname for tracking
   const pathParts = pathname?.split('/').filter(Boolean) || [];
-  const category = pathParts[0] || 'unknown';
+  const rawCategory = pathParts[0] || 'unknown';
+  const category: ContentCategory = isValidCategory(rawCategory) ? rawCategory : 'agents';
   const slug = pathParts[1] || 'unknown';
 
   // Calculate current URL for sharing (needed during render for react-share components)
@@ -181,7 +183,7 @@ export function ProductionCodeBlock({
       await navigator.clipboard.writeText(code);
       toasts.success.codeCopied();
 
-      pulse.copy({ category: category as ContentCategory, slug }).catch((error) => {
+      pulse.copy({ category, slug }).catch((error) => {
         logUnhandledPromise('interactive-code-block:copy', error, { category, slug });
       });
     } catch (error) {
@@ -248,7 +250,7 @@ export function ProductionCodeBlock({
 
       pulse
         .screenshot({
-          category: category as ContentCategory,
+          category,
           slug,
           metadata: {
             width: screenshot.width,

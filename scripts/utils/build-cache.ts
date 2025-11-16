@@ -276,6 +276,5 @@ export function printCache(): void {
         files: entry.metadata.files,
       });
     }
-    logger.info('');
   }
 }

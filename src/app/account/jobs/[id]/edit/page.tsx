@@ -13,37 +13,36 @@ import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { ensureStringArray } from '@/src/lib/utils/data.utils';
 import { normalizeError } from '@/src/lib/utils/error.utils';
-import type { JobCategory } from '@/src/types/database-overrides';
+import type { JobCategory, JobPlan, JobTier, Tables } from '@/src/types/database-overrides';
 
 export const metadata = generatePageMetadata('/account/jobs/:id/edit');
 
 interface EditJobPageProps {
-  params: Promise<{ id: string }>;
+  params: { id: string };
 }
 
 export default async function EditJobPage({ params }: EditJobPageProps) {
-  const resolvedParams = await params;
   const { user } = await getAuthenticatedUser({ context: 'EditJobPage' });
 
   if (!user) {
-    logger.warn('EditJobPage: unauthenticated access attempt', { jobId: resolvedParams.id });
+    logger.warn('EditJobPage: unauthenticated access attempt', { jobId: params.id });
     redirect('/login');
   }
 
-  let job: Awaited<ReturnType<typeof getUserJobById>> | null = null;
+  let job: Tables<'jobs'> | null = null;
   try {
-    job = await getUserJobById(user.id, resolvedParams.id);
+    job = await getUserJobById(user.id, params.id);
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load user job for edit page');
     logger.error('EditJobPage: getUserJobById threw', normalized, {
-      jobId: resolvedParams.id,
+      jobId: params.id,
       userId: user.id,
     });
     throw normalized;
   }
   if (!job) {
     logger.warn('EditJobPage: job not found or not owned by user', {
-      jobId: resolvedParams.id,
+      jobId: params.id,
       userId: user.id,
     });
     notFound();
@@ -55,13 +54,13 @@ export default async function EditJobPage({ params }: EditJobPageProps) {
     let result: Awaited<ReturnType<typeof updateJob>>;
     try {
       result = await updateJob({
-        job_id: resolvedParams.id,
+        job_id: params.id,
         ...data,
       });
     } catch (error) {
       const normalized = normalizeError(error, 'updateJob server action failed');
       logger.error('EditJobPage: updateJob threw', normalized, {
-        jobId: resolvedParams.id,
+        jobId: params.id,
         userId: user.id,
       });
       throw normalized;
@@ -70,15 +69,16 @@ export default async function EditJobPage({ params }: EditJobPageProps) {
     if (result?.serverError) {
       const normalized = normalizeError(result.serverError, 'updateJob server error response');
       logger.error('EditJobPage: updateJob returned serverError', normalized, {
-        jobId: resolvedParams.id,
+        jobId: params.id,
         userId: user.id,
       });
       throw normalized;
     }
 
     if (!result?.data) {
-      logger.error('EditJobPage: updateJob returned no data', undefined, {
-        jobId: resolvedParams.id,
+      const error = new Error('updateJob returned no data');
+      logger.error('EditJobPage: updateJob returned no data', error, {
+        jobId: params.id,
         userId: user.id,
       });
       return { success: false };
@@ -109,15 +109,15 @@ export default async function EditJobPage({ params }: EditJobPageProps) {
           type: job.type,
           workplace: job.workplace,
           experience: job.experience,
-          category: job.category as JobCategory,
+          category: (job.category as JobCategory) ?? undefined,
           tags: ensureStringArray(job.tags),
           requirements: ensureStringArray(job.requirements),
           benefits: ensureStringArray(job.benefits),
           link: job.link,
           contact_email: job.contact_email,
           company_logo: job.company_logo,
-          plan: job.plan as 'one-time' | 'subscription',
-          tier: job.tier as 'standard' | 'featured',
+          plan: job.plan as JobPlan,
+          tier: job.tier as JobTier,
         }}
         onSubmit={handleSubmit}
         submitLabel="Update Job Listing"

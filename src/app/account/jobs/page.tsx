@@ -150,11 +150,9 @@ export default async function MyJobsPage() {
                       <UnifiedBadge
                         variant="base"
                         style="outline"
-                        className={getStatusColor(
-                          (job.status ?? ('draft' as JobStatus)) as JobStatus
-                        )}
+                        className={getStatusColor(job.status ?? 'draft')}
                       >
-                        {job.status ?? ('draft' as JobStatus)}
+                        {job.status ?? 'draft'}
                       </UnifiedBadge>
                       {getPlanBadge(job.plan ?? 'standard')}
                     </div>
@@ -200,11 +198,8 @@ export default async function MyJobsPage() {
                     </Button>
                   )}
 
-                  {job.status === ('active' as JobStatus) && (
-                    <JobToggleButton
-                      jobId={job.id}
-                      currentStatus={(job.status ?? ('draft' as JobStatus)) as JobStatus}
-                    />
+                  {(job.status === 'active' || job.status === 'draft') && (
+                    <JobToggleButton jobId={job.id} currentStatus={job.status ?? 'draft'} />
                   )}
 
                   <JobDeleteButton jobId={job.id} />

@@ -1,6 +1,6 @@
 /**
- * Library Page - Database-First RPC Architecture with user-scoped edge caching
- * Single RPC call to get_user_library() replaces 2 separate queries
+ * Library Page - User-scoped library view with edge caching
+ * Uses getUserLibrary data function for fetching bookmarks and collections
  */
 
 import Link from 'next/link';
@@ -89,7 +89,7 @@ export default async function LibraryPage() {
     totalCollectionViews: 0,
   };
   const { bookmarkCount, collectionCount } = stats;
-  if (!(bookmarks?.length || collections?.length)) {
+  if (!(bookmarks.length || collections.length)) {
     logger.info('LibraryPage: library returned no bookmarks or collections', { userId: user.id });
   }
 

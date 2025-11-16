@@ -158,8 +158,6 @@ export async function getUserSettings(userId: string): Promise<GetGetUserSetting
 /**
  * Get sponsorship analytics
  */
-export type SponsorshipAnalytics = GetGetSponsorshipAnalyticsReturn;
-
 export async function getSponsorshipAnalytics(
   userId: string,
   sponsorshipId: string

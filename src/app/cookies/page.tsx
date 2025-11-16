@@ -1,7 +1,6 @@
 import { NavLink } from '@/src/components/core/navigation/navigation-link';
-import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-import { normalizeError } from '@/src/lib/utils/error.utils';
+import { getLastUpdatedDate } from '@/src/lib/utils/data.utils';
 
 export const metadata = generatePageMetadata('/cookies');
 
@@ -10,20 +9,6 @@ export const metadata = generatePageMetadata('/cookies');
  * revalidate: false = Cache forever (no automatic revalidation)
  */
 export const revalidate = false;
-
-function getLastUpdatedDate(): string {
-  try {
-    return new Date().toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-  } catch (error) {
-    const normalized = normalizeError(error, 'Failed to format cookies last updated date');
-    logger.error('CookiesPage: last updated date formatting failed', normalized);
-    return 'Unavailable';
-  }
-}
 
 export default function CookiesPage() {
   const lastUpdated = getLastUpdatedDate();

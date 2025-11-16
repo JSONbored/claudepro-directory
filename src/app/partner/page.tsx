@@ -350,7 +350,8 @@ export default async function PartnerPage() {
               Ready to Reach {heroStats.monthlyVisitors.toLocaleString()}+ AI Engineers?
             </h2>
             <p className={'mb-6 text-muted-foreground'}>
-              Get started with launch pricing (40% off) before December 31st, 2025
+              Get started with launch pricing ({pricing.launch.discountPercent}% off) before{' '}
+              {pricing.launch.endDate}
             </p>
             <Button size="lg" asChild={true}>
               <a href={partnerCtas.partnershipInquiry.href}>

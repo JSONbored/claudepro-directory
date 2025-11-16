@@ -8,15 +8,13 @@ import {
   CardTitle,
 } from '@/src/components/primitives/ui/card';
 import { getAuthenticatedUser } from '@/src/lib/auth/get-authenticated-user';
-import {
-  getSponsorshipAnalytics,
-  type SponsorshipAnalytics,
-} from '@/src/lib/data/account/user-data';
+import { getSponsorshipAnalytics } from '@/src/lib/data/account/user-data';
 import { BarChart, Eye, MousePointer, TrendingUp } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { POSITION_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { normalizeError } from '@/src/lib/utils/error.utils';
+import type { SponsorshipAnalytics } from '@/src/types/database-overrides';
 
 export const metadata = generatePageMetadata('/account/sponsorships/:id/analytics');
 
@@ -227,20 +225,24 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
                     {/* Impressions bar */}
                     <div className="relative h-8 overflow-hidden rounded bg-muted">
                       <div
-                        className="${POSITION_PATTERNS.ABSOLUTE_TOP_LEFT} h-full bg-primary/30 transition-all"
+                        className={`${POSITION_PATTERNS.ABSOLUTE_TOP_LEFT} h-full bg-primary/30 transition-all`}
                         style={{ width: `${(impressions / maxImpressions) * 100}%` }}
                       />
-                      <div className="${POSITION_PATTERNS.ABSOLUTE_INSET} flex items-center px-2 text-xs">
+                      <div
+                        className={`${POSITION_PATTERNS.ABSOLUTE_INSET} flex items-center px-2 text-xs`}
+                      >
                         {impressions > 0 && `${impressions} views`}
                       </div>
                     </div>
                     {/* Clicks bar */}
                     <div className="relative h-8 overflow-hidden rounded bg-muted">
                       <div
-                        className="${POSITION_PATTERNS.ABSOLUTE_TOP_LEFT} h-full bg-accent/50 transition-all"
+                        className={`${POSITION_PATTERNS.ABSOLUTE_TOP_LEFT} h-full bg-accent/50 transition-all`}
                         style={{ width: `${impressions > 0 ? (clicks / impressions) * 100 : 0}%` }}
                       />
-                      <div className="${POSITION_PATTERNS.ABSOLUTE_INSET} flex items-center px-2 text-xs">
+                      <div
+                        className={`${POSITION_PATTERNS.ABSOLUTE_INSET} flex items-center px-2 text-xs`}
+                      >
                         {clicks > 0 && `${clicks} clicks`}
                       </div>
                     </div>

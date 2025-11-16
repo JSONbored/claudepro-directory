@@ -27,7 +27,54 @@ import { formatViewCount, getContentItemUrl } from '@/src/lib/utils/content.util
 import { ensureStringArray } from '@/src/lib/utils/data.utils';
 import { logClientWarning, logUnhandledPromise } from '@/src/lib/utils/error.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
-import type { ContentCategory, ExperienceLevel } from '@/src/types/database-overrides';
+import type { ContentCategory } from '@/src/types/database-overrides';
+import { isExperienceLevel } from '@/src/types/database-overrides';
+
+/**
+ * Validate repository URL is safe for opening
+ * Only allows HTTPS URLs from trusted repository hosts (GitHub, GitLab)
+ */
+function isSafeRepositoryUrl(url: string): boolean {
+  try {
+    const u = new URL(url);
+    return (
+      u.protocol === 'https:' &&
+      (u.hostname === 'github.com' ||
+        u.hostname === 'www.github.com' ||
+        u.hostname === 'gitlab.com' ||
+        u.hostname === 'www.gitlab.com')
+    );
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Validate documentation URL is safe for opening
+ * Only allows HTTPS URLs
+ */
+function isTrustedDocumentationUrl(url: string): boolean {
+  try {
+    const parsed = new URL(url);
+    return parsed.protocol === 'https:';
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Validate category and slug are safe for URL construction
+ * Only allows alphanumeric, hyphens, and underscores
+ */
+function isSafeCategoryAndSlug(category: unknown, slug: unknown): boolean {
+  const SAFE = /^[a-zA-Z0-9_-]+$/;
+  return (
+    typeof category === 'string' &&
+    typeof slug === 'string' &&
+    SAFE.test(category) &&
+    SAFE.test(slug)
+  );
+}
 
 export const ConfigCard = memo(
   ({
@@ -117,9 +164,10 @@ export const ConfigCard = memo(
         if (hasHighlights) {
           hasTrackedHighlight.current = true;
           // Track highlight interaction (non-blocking)
+          const category = isValidCategory(item.category) ? item.category : 'agents';
           pulse
             .search({
-              category: item.category as ContentCategory,
+              category,
               slug: item.slug,
               query: searchQuery.trim(),
               metadata: {
@@ -137,15 +185,16 @@ export const ConfigCard = memo(
             })
             .catch((error) => {
               logUnhandledPromise('ConfigCard: highlight analytics pulse failed', error, {
-                category: item.category,
+                category,
                 slug: item.slug,
               });
             });
         }
       }
     }, [searchQuery, item, pulse]);
+    const category = isValidCategory(item.category) ? item.category : 'agents';
     const targetPath = getContentItemUrl({
-      category: item.category as ContentCategory,
+      category,
       slug: item.slug,
       subcategory:
         'subcategory' in item ? (item.subcategory as string | null | undefined) : undefined,
@@ -158,9 +207,10 @@ export const ConfigCard = memo(
 
     // Track card clicks
     const handleCardClickPulse = useCallback(() => {
+      const category = isValidCategory(item.category) ? item.category : 'agents';
       pulse
         .click({
-          category: item.category as ContentCategory,
+          category,
           slug: item.slug,
           metadata: {
             action: 'card_click',
@@ -216,15 +266,16 @@ export const ConfigCard = memo(
       await copy(url);
 
       // Track user interaction for analytics and personalization
-      pulse.copy({ category: item.category as ContentCategory, slug: item.slug }).catch((error) => {
+      const category = isValidCategory(item.category) ? item.category : 'agents';
+      pulse.copy({ category, slug: item.slug }).catch((error) => {
         logUnhandledPromise('ConfigCard: swipe copy pulse failed', error, {
-          category: item.category,
+          category,
           slug: item.slug,
         });
       });
 
       toasts.success.copied();
-    }, [targetPath, copy, item.category, item.slug, pulse]);
+    }, [targetPath, copy, item, pulse]);
 
     const handleSwipeLeftBookmark = useCallback(async () => {
       // Type guard validation
@@ -370,16 +421,13 @@ export const ConfigCard = memo(
             // Runtime type guard ensures category is valid ContentCategory (excludes 'changelog' and 'jobs')
             // Type assertion is safe because isValidCategory() validates at runtime
             const rawCategory = item.category;
-            const category: ContentCategory = (isValidCategory(rawCategory)
-              ? rawCategory
-              : 'agents') as unknown as ContentCategory;
+            const category: ContentCategory = isValidCategory(rawCategory) ? rawCategory : 'agents';
             return (
               <>
                 {showCategory && (
                   <UnifiedBadge variant="category" category={category}>
                     {(() => {
-                      const cat = item.category as ContentCategory;
-                      switch (cat) {
+                      switch (category) {
                         case 'mcp':
                           return 'MCP';
                         case 'agents':
@@ -423,13 +471,12 @@ export const ConfigCard = memo(
 
                 {isCollection &&
                   collectionDifficulty &&
-                  (collectionDifficulty === 'beginner' ||
-                    collectionDifficulty === 'intermediate' ||
-                    collectionDifficulty === 'advanced') && (
+                  typeof collectionDifficulty === 'string' &&
+                  isExperienceLevel(collectionDifficulty) && (
                     <UnifiedBadge
                       variant="base"
                       style="outline"
-                      className={`${UI_CLASSES.TEXT_BADGE} ${BADGE_COLORS.difficulty[collectionDifficulty as ExperienceLevel]}`}
+                      className={`${UI_CLASSES.TEXT_BADGE} ${BADGE_COLORS.difficulty[collectionDifficulty]}`}
                     >
                       {collectionDifficulty}
                     </UnifiedBadge>
@@ -511,9 +558,10 @@ export const ConfigCard = memo(
                   className={`${UI_CLASSES.ICON_BUTTON_SM} ${UI_CLASSES.BUTTON_GHOST_ICON}`}
                   onClick={(e) => {
                     e.stopPropagation();
+                    const category = isValidCategory(item.category) ? item.category : 'agents';
                     pulse
                       .click({
-                        category: item.category as ContentCategory,
+                        category,
                         slug: item.slug,
                         metadata: {
                           action: 'external_link',
@@ -523,11 +571,19 @@ export const ConfigCard = memo(
                       })
                       .catch((error) => {
                         logUnhandledPromise('ConfigCard: GitHub link click pulse failed', error, {
-                          category: item.category,
+                          category,
                           slug: item.slug,
                         });
                       });
-                    window.open(item.repository as string, '_blank');
+                    if (isSafeRepositoryUrl(item.repository as string)) {
+                      window.open(item.repository as string, '_blank');
+                    } else {
+                      logClientWarning('ConfigCard: Unsafe repository URL blocked', {
+                        url: item.repository,
+                        slug: item.slug,
+                      });
+                      toasts.raw.error('Repository link is invalid or untrusted.');
+                    }
                   }}
                   aria-label={`View ${displayTitle} repository on GitHub`}
                 >
@@ -542,9 +598,10 @@ export const ConfigCard = memo(
                   className={`${UI_CLASSES.ICON_BUTTON_SM} ${UI_CLASSES.BUTTON_GHOST_ICON}`}
                   onClick={(e) => {
                     e.stopPropagation();
+                    const category = isValidCategory(item.category) ? item.category : 'agents';
                     pulse
                       .click({
-                        category: item.category as ContentCategory,
+                        category,
                         slug: item.slug,
                         metadata: {
                           action: 'external_link',
@@ -557,12 +614,21 @@ export const ConfigCard = memo(
                           'ConfigCard: documentation link click pulse failed',
                           error,
                           {
-                            category: item.category,
+                            category,
                             slug: item.slug,
                           }
                         );
                       });
-                    window.open(item.documentation_url as string, '_blank');
+                    if (isTrustedDocumentationUrl(item.documentation_url as string)) {
+                      window.open(item.documentation_url as string, '_blank');
+                    } else {
+                      logClientWarning('ConfigCard: Blocked untrusted documentation URL', {
+                        url: item.documentation_url,
+                      });
+                      toasts.raw.error?.('Invalid or unsafe documentation link.', {
+                        description: 'Documentation link is not available.',
+                      });
+                    }
                   }}
                   aria-label={`View ${displayTitle} documentation`}
                 >
@@ -600,14 +666,13 @@ export const ConfigCard = memo(
                     iconClassName={UI_CLASSES.ICON_XS}
                     ariaLabel={`Copy link to ${displayTitle}`}
                     onCopySuccess={() => {
-                      pulse
-                        .copy({ category: item.category as ContentCategory, slug: item.slug })
-                        .catch((error) => {
-                          logUnhandledPromise('ConfigCard: copy button pulse failed', error, {
-                            category: item.category,
-                            slug: item.slug,
-                          });
+                      const category = isValidCategory(item.category) ? item.category : 'agents';
+                      pulse.copy({ category, slug: item.slug }).catch((error) => {
+                        logUnhandledPromise('ConfigCard: copy button pulse failed', error, {
+                          category,
+                          slug: item.slug,
                         });
+                      });
                     }}
                   />
                   {cardConfig.showCopyCount && copyCount !== undefined && copyCount > 0 && (
@@ -624,7 +689,16 @@ export const ConfigCard = memo(
                   className={`${UI_CLASSES.ICON_BUTTON_SM} ${UI_CLASSES.BUTTON_GHOST_ICON}`}
                   onClick={(e) => {
                     e.stopPropagation();
-                    window.location.href = targetPath;
+                    // Only redirect if category and slug are valid
+                    if (isSafeCategoryAndSlug(item.category, item.slug)) {
+                      window.location.href = targetPath;
+                    } else {
+                      logClientWarning('ConfigCard: Blocked potentially unsafe redirect', {
+                        attemptedCategory: item.category,
+                        attemptedSlug: item.slug,
+                        targetPath,
+                      });
+                    }
                   }}
                   aria-label={`View details for ${displayTitle}${cardConfig.showViewCount && viewCount !== undefined && typeof viewCount === 'number' ? ` - ${formatViewCount(viewCount)}` : ''}`}
                 >

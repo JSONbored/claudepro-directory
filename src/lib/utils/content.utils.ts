@@ -18,6 +18,15 @@ export function formatCopyCount(count: number): string {
   return `${count} used`;
 }
 
+/**
+ * Sanitize a slug to ensure it is safe for use in URLs
+ * Allows only letters, numbers, hyphens, and underscores
+ */
+export function sanitizeSlug(slug: string): string {
+  // Remove any character that is not URL-friendly
+  return slug.replace(/[^a-zA-Z0-9-_]/g, '');
+}
+
 export function getContentItemUrl(item: {
   category: ContentCategory;
   slug: string;

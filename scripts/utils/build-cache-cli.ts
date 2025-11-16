@@ -83,7 +83,6 @@ function main() {
           script: 'build-cache-cli',
           totalDuration: `${(stats.totalDuration / 1000).toFixed(1)}s`,
         });
-        logger.info('');
       }
       break;
     }
@@ -122,7 +121,6 @@ function main() {
           clearHash(key);
           logger.info(`   ✓ Cleared: ${key}`, { script: 'build-cache-cli', clearedKey: key });
         }
-        logger.info('');
       } else {
         // Clear all caches
         const stats = getCacheStats();

@@ -26,7 +26,7 @@ const TEMPLATE_PATH = join(__dirname, 'templates', 'service-worker.template.js')
 
 async function generateServiceWorker() {
   const startTime = Date.now();
-  logger.info('🔧 Generating service worker from category_configs table...', {
+  logger.info('🔧 Generating service worker from generated category config...', {
     script: 'generate-service-worker',
   });
 

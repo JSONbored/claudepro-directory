@@ -106,11 +106,18 @@ function modernizeFile(filePath: string): boolean {
       changed = true;
     }
 
-    // Update type references in code
-    const typeRefRegex = new RegExp(`\\b${oldName}\\b`, 'g');
-    if (typeRefRegex.test(updated) && !updated.includes(`import.*${oldName}`)) {
-      updated = updated.replace(typeRefRegex, newName);
-      changed = true;
+    // Update type references in code (but skip import lines which are already handled)
+    const importLineRegex = new RegExp(
+      `^\\s*import\\s+(?:type\\s+)?\\{[^}]*\\b${oldName}\\b[^}]*\\}\\s+from`,
+      'gm'
+    );
+    const hasImportLine = importLineRegex.test(updated);
+    if (!hasImportLine) {
+      const typeRefRegex = new RegExp(`\\b${oldName}\\b`, 'g');
+      if (typeRefRegex.test(updated)) {
+        updated = updated.replace(typeRefRegex, newName);
+        changed = true;
+      }
     }
   }
 

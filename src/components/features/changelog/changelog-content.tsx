@@ -21,11 +21,11 @@
 import { memo } from 'react';
 import { JSONSectionRenderer } from '@/src/components/content/json-to-sections';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
-import type { ChangelogEntry } from '@/src/lib/data/changelog';
 import { parseChangelogChanges } from '@/src/lib/data/changelog';
-import type { Database } from '@/src/types/database.types';
+import type { Database, Tables } from '@/src/types/database.types';
 import type { ChangelogCategory } from '@/src/types/database-overrides';
 
+type ChangelogEntry = Tables<'changelog'>;
 type ContentRow = Database['public']['Tables']['content']['Row'];
 type GuideSection = ContentRow['metadata'];
 

@@ -10,6 +10,7 @@ import { useEffect, useState } from 'react';
 import { useLoggedAsync } from '@/src/hooks/use-logged-async';
 import { getNewsletterConfigValue } from '@/src/lib/actions/feature-flags.actions';
 import { ensureNumber } from '@/src/lib/utils/data.utils';
+import { logUnhandledPromise } from '@/src/lib/utils/error.utils';
 import type { NewsletterSource } from '@/src/types/database-overrides';
 import { NewsletterCTAVariant } from './newsletter-cta-variants';
 
@@ -67,7 +68,12 @@ export function NewsletterScrollTrigger({
           category,
         },
       }
-    );
+    ).catch((error) => {
+      logUnhandledPromise('NewsletterScrollTrigger: loadScrollConfig failed', error, {
+        source,
+        category,
+      });
+    });
   }, [category, loadScrollConfig, minScrollHeight, source]);
 
   useEffect(() => {

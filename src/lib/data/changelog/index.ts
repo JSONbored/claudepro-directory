@@ -3,11 +3,11 @@
 import { z } from 'zod';
 import { fetchCachedRpc } from '@/src/lib/data/helpers';
 import { logger } from '@/src/lib/logger';
-import type { Tables } from '@/src/types/database.types';
 import type {
   ChangelogCategory,
   GetGetChangelogDetailReturn,
   GetGetChangelogOverviewReturn,
+  Tables,
 } from '@/src/types/database-overrides';
 
 // Zod schema for changelog entry changes structure (JSONB validation)
@@ -23,9 +23,6 @@ const changesSchema = z.object({
   Deprecated: z.array(changeItemSchema).optional(),
   Security: z.array(changeItemSchema).optional(),
 });
-
-// Use database type directly - no custom extensions
-export type ChangelogEntry = Tables<'changelog'>;
 
 // Validated changes type (for runtime use after parsing)
 export type ChangelogChanges = z.infer<typeof changesSchema>;
@@ -114,7 +111,7 @@ export async function getChangelogOverview(
  * Get changelog entry by slug with categories built from JSONB
  * Optimized single RPC call that replaces get_changelog_entry_by_slug
  */
-export async function getChangelogEntryBySlug(slug: string): Promise<ChangelogEntry | null> {
+export async function getChangelogEntryBySlug(slug: string): Promise<Tables<'changelog'> | null> {
   const result = await fetchCachedRpc<'get_changelog_detail', GetGetChangelogDetailReturn>(
     { p_slug: slug },
     {
@@ -145,7 +142,7 @@ export async function getChangelogEntryBySlug(slug: string): Promise<ChangelogEn
     twitter_card: null,
     content: result.entry.content ?? '',
     changes: result.entry.changes,
-  } as unknown as ChangelogEntry;
+  } as unknown as Tables<'changelog'>;
 }
 
 /**
@@ -179,7 +176,7 @@ export async function getChangelog(): Promise<{
 /**
  * Get all changelog entries (for static generation)
  */
-export async function getAllChangelogEntries(): Promise<ChangelogEntry[]> {
+export async function getAllChangelogEntries(): Promise<Tables<'changelog'>[]> {
   const limit = 10000;
   const overview = await getChangelogOverview({
     publishedOnly: false,
@@ -193,7 +190,7 @@ export async function getAllChangelogEntries(): Promise<ChangelogEntry[]> {
 /**
  * Get recent changelog entries
  */
-export async function getRecentChangelogEntries(limit = 5): Promise<ChangelogEntry[]> {
+export async function getRecentChangelogEntries(limit = 5): Promise<Tables<'changelog'>[]> {
   const overview = await getChangelogOverview({
     publishedOnly: true,
     limit,
@@ -208,7 +205,7 @@ export async function getRecentChangelogEntries(limit = 5): Promise<ChangelogEnt
  */
 export async function getChangelogEntriesByCategory(
   category: ChangelogCategory
-): Promise<ChangelogEntry[]> {
+): Promise<Tables<'changelog'>[]> {
   const limit = 1000;
   const overview = await getChangelogOverview({
     category,
@@ -223,7 +220,7 @@ export async function getChangelogEntriesByCategory(
 /**
  * Get featured changelog entries
  */
-export async function getFeaturedChangelogEntries(limit = 3): Promise<ChangelogEntry[]> {
+export async function getFeaturedChangelogEntries(limit = 3): Promise<Tables<'changelog'>[]> {
   const overview = await getChangelogOverview({
     publishedOnly: true,
     featuredOnly: true,

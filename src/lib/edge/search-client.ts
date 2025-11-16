@@ -8,7 +8,7 @@
 
 import { getCacheTtl } from '@/src/lib/data/config/cache-config';
 import { logger } from '@/src/lib/logger';
-import type { Database } from '@/src/types/database.types';
+import type { Database } from '@/src/types/database-overrides';
 
 const EDGE_SEARCH_URL = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/unified-search`;
 

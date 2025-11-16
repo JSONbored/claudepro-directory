@@ -19,6 +19,26 @@ interface ContentActionButtonProps extends ButtonStyleProps {
   trackAnalytics?: () => Promise<void>;
 }
 
+/**
+ * Validate URL is safe for fetch (prevents SSRF)
+ * Only allows relative URLs or absolute URLs from same origin
+ */
+function isSafeFetchUrl(url: string): boolean {
+  try {
+    // Allow relative URLs
+    if (url.startsWith('/')) return true;
+    // For absolute URLs, must be same origin
+    if (typeof window !== 'undefined') {
+      const urlObj = new URL(url, window.location.origin);
+      return urlObj.origin === window.location.origin;
+    }
+    // Server-side: only allow relative URLs
+    return url.startsWith('/');
+  } catch {
+    return false;
+  }
+}
+
 export function ContentActionButton({
   url,
   action,
@@ -36,6 +56,12 @@ export function ContentActionButton({
   const { isSuccess, triggerSuccess } = useButtonSuccess();
 
   const handleClick = async () => {
+    if (!isSafeFetchUrl(url)) {
+      logClientWarning('ContentActionButton: Unsafe URL blocked', { url, label });
+      toasts.raw.error('Invalid or unsafe URL');
+      return;
+    }
+
     setIsLoading(true);
     try {
       const response = await fetch(url);

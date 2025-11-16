@@ -21,34 +21,33 @@ import type { JobStatus } from '@/src/types/database-overrides';
 export const metadata = generatePageMetadata('/account/jobs/:id/analytics');
 
 interface JobAnalyticsPageProps {
-  params: Promise<{ id: string }>;
+  params: { id: string };
 }
 
 export default async function JobAnalyticsPage({ params }: JobAnalyticsPageProps) {
-  const resolvedParams = await params;
   const { user } = await getAuthenticatedUser({ context: 'JobAnalyticsPage' });
 
   if (!user) {
     logger.warn('JobAnalyticsPage: unauthenticated access attempt', {
-      jobId: resolvedParams.id,
+      jobId: params.id,
     });
     redirect('/login');
   }
 
   let job: Awaited<ReturnType<typeof getUserJobById>> | null = null;
   try {
-    job = await getUserJobById(user.id, resolvedParams.id);
+    job = await getUserJobById(user.id, params.id);
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load job analytics detail');
     logger.error('JobAnalyticsPage: getUserJobById threw', normalized, {
-      jobId: resolvedParams.id,
+      jobId: params.id,
       userId: user.id,
     });
     throw normalized;
   }
   if (!job) {
     logger.warn('JobAnalyticsPage: job not found or not owned by user', {
-      jobId: resolvedParams.id,
+      jobId: params.id,
       userId: user.id,
     });
     notFound();
@@ -61,6 +60,8 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPageProps
   const getStatusColor = (status: JobStatus) => {
     return BADGE_COLORS.jobStatus[status] || 'bg-muted';
   };
+
+  const status: JobStatus = job.status ?? 'draft';
 
   return (
     <div className="space-y-6">
@@ -91,12 +92,8 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPageProps
         <CardHeader>
           <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
             <CardTitle>Listing Details</CardTitle>
-            <UnifiedBadge
-              variant="base"
-              style="outline"
-              className={getStatusColor((job.status ?? ('draft' as JobStatus)) as JobStatus)}
-            >
-              {job.status ?? ('draft' as JobStatus)}
+            <UnifiedBadge variant="base" style="outline" className={getStatusColor(status)}>
+              {status}
             </UnifiedBadge>
           </div>
         </CardHeader>

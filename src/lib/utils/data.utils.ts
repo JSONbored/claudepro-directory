@@ -311,6 +311,24 @@ export function formatDistanceToNow(date: Date): string {
 }
 
 /**
+ * Get formatted last updated date for legal pages (cookies, privacy)
+ * Returns current date in "Month Day, Year" format (e.g., "November 15, 2025")
+ */
+export function getLastUpdatedDate(): string {
+  try {
+    return new Date().toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to format last updated date');
+    logger.error('getLastUpdatedDate: date formatting failed', normalized);
+    return 'Unavailable';
+  }
+}
+
+/**
  * Safely extracts metadata from a content item or collection
  * Returns a normalized Record<string, unknown> with fallback to empty object
  *

@@ -33,9 +33,12 @@ import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { ensureStringArray } from '@/src/lib/utils/data.utils';
 import { logClientWarning } from '@/src/lib/utils/error.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
-import type { JobCategory } from '@/src/types/database-overrides';
 import {
   isWorkplaceType,
+  JOB_PLAN_VALUES,
+  type JobCategory,
+  type JobPlan,
+  type JobTier,
   WORKPLACE_TYPE_VALUES,
   type WorkplaceType,
 } from '@/src/types/database-overrides';
@@ -95,8 +98,14 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
       requirements,
       benefits,
       link: formData.get('link') as string,
-      plan: formData.get('plan') as 'one-time' | 'subscription',
-      tier: isFeatured ? 'featured' : 'standard',
+      plan: (() => {
+        const planRaw = formData.get('plan');
+        if (typeof planRaw === 'string' && JOB_PLAN_VALUES.includes(planRaw as JobPlan)) {
+          return planRaw as JobPlan;
+        }
+        throw new Error('Invalid job plan');
+      })(),
+      tier: (isFeatured ? 'featured' : 'standard') as JobTier,
       ...(contactEmail && { contact_email: contactEmail }),
       ...(companyLogo && { company_logo: companyLogo }),
     };

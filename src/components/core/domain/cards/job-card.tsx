@@ -10,6 +10,24 @@ import { BADGE_COLORS, type JobType, UI_CLASSES } from '@/src/lib/ui-constants';
 import { ensureStringArray, formatRelativeDate } from '@/src/lib/utils/data.utils';
 import { logUnhandledPromise } from '@/src/lib/utils/error.utils';
 
+/**
+ * Validate job link is safe for use in href
+ * Only allows absolute HTTPS URLs
+ */
+function getSafeJobLink(link?: string | null): string {
+  if (!link || typeof link !== 'string') return '#';
+  try {
+    const url = new URL(link, 'https://example.com');
+    // Only allow HTTPS protocol
+    if (url.protocol === 'https:') {
+      return link;
+    }
+  } catch {
+    // Invalid URL
+  }
+  return '#';
+}
+
 export function JobCard({ job }: JobCardProps) {
   const pulse = usePulse();
   const isFeatured = job.tier === 'featured';
@@ -152,7 +170,7 @@ export function JobCard({ job }: JobCardProps) {
                 });
             }}
           >
-            <a href={job.link || '#'} target="_blank" rel="noopener noreferrer">
+            <a href={getSafeJobLink(job.link)} target="_blank" rel="noopener noreferrer">
               Apply Now
               <ExternalLink className={`ml-2 ${UI_CLASSES.ICON_SM}`} />
             </a>

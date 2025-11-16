@@ -129,6 +129,57 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
+const DEFAULT_LAYOUT_DATA: {
+  announcement: null;
+  navigationData: {
+    primary: Array<{
+      path: string;
+      title: string;
+      description: string | null;
+      iconName: string | null;
+      group: 'primary';
+    }>;
+    secondary: Array<{
+      path: string;
+      title: string;
+      description: string | null;
+      iconName: string | null;
+      group: 'secondary';
+    }>;
+    actions: Array<{
+      path: string;
+      title: string;
+      description: string | null;
+      iconName: string | null;
+      group: 'actions';
+    }>;
+  };
+} = {
+  announcement: null,
+  navigationData: {
+    primary: [],
+    secondary: [],
+    actions: [],
+  },
+};
+
+const DEFAULT_LAYOUT_FLAGS = {
+  useFloatingActionBar: false,
+  fabSubmitAction: false,
+  fabSearchAction: false,
+  fabScrollToTop: false,
+  fabNotifications: false,
+  notificationsProvider: true,
+  notificationsSheet: true,
+  notificationsToasts: true,
+  footerDelayVariant: '30s' as const,
+  ctaVariant: 'value_focused' as const,
+  notificationsEnabled: true,
+  notificationsSheetEnabled: true,
+  notificationsToastsEnabled: true,
+  fabNotificationsEnabled: false,
+} as const;
+
 export default async function RootLayout({
   children,
 }: Readonly<{
@@ -143,37 +194,11 @@ export default async function RootLayout({
 
   // Extract layout data with fallbacks
   const layoutData =
-    layoutDataResult.status === 'fulfilled'
-      ? layoutDataResult.value
-      : {
-          announcement: null,
-          navigationData: {
-            primary: [],
-            secondary: [],
-            actions: [],
-          },
-        };
+    layoutDataResult.status === 'fulfilled' ? layoutDataResult.value : DEFAULT_LAYOUT_DATA;
 
   // Extract layout flags with fallbacks
   const layoutFlags =
-    layoutFlagsResult.status === 'fulfilled'
-      ? layoutFlagsResult.value
-      : {
-          useFloatingActionBar: false,
-          fabSubmitAction: false,
-          fabSearchAction: false,
-          fabScrollToTop: false,
-          fabNotifications: false,
-          notificationsProvider: true,
-          notificationsSheet: true,
-          notificationsToasts: true,
-          footerDelayVariant: '30s' as const,
-          ctaVariant: 'value_focused' as const,
-          notificationsEnabled: true,
-          notificationsSheetEnabled: true,
-          notificationsToastsEnabled: true,
-          fabNotificationsEnabled: false,
-        };
+    layoutFlagsResult.status === 'fulfilled' ? layoutFlagsResult.value : DEFAULT_LAYOUT_FLAGS;
 
   // Log any failures for monitoring (but don't block render)
   if (layoutDataResult.status === 'rejected') {

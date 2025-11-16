@@ -91,7 +91,7 @@ interface PageProps {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { id } = await params;
-  const baseMetadata = generatePageMetadata('/tools/config-recommender/results/:id', {
+  const baseMetadata = await generatePageMetadata('/tools/config-recommender/results/:id', {
     params: { id },
   });
 

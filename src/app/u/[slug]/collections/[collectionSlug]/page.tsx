@@ -159,7 +159,7 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
               </Card>
             ) : (
               <div className="grid gap-4">
-                {items.map((item, index) => (
+                {items.map((item: CollectionDetailData['items'][number], index: number) => (
                   <Card key={item.id}>
                     <CardHeader>
                       <div className="flex items-start gap-4">

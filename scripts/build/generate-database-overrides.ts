@@ -664,12 +664,37 @@ function _hasManualRpcDefinition(rpcName: string, skeletonsContent: string): boo
     .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
     .join('')}Return`;
 
+  // Validate typeName format to prevent ReDoS
+  if (!/^[A-Z][A-Za-z0-9_]*Return$/.test(typeName)) {
+    return false;
+  }
+
   // Check if it's a real definition (not just TODO)
-  const typePattern = new RegExp(`export type ${typeName}\\s*=\\s*[^{]*\\{[^}]*\\}`, 's');
-  return (
-    typePattern.test(skeletonsContent) &&
-    !skeletonsContent.includes('// TODO: Replace with actual structure')
-  );
+  // Use simple substring/indexOf checks instead of complex regex
+  const exportTypeMarker = `export type ${typeName}`;
+  const exportIndex = skeletonsContent.indexOf(exportTypeMarker);
+  if (exportIndex === -1) {
+    return false;
+  }
+
+  // Check for balanced braces after the type name
+  const afterMarker = skeletonsContent.slice(exportIndex + exportTypeMarker.length);
+  let braceCount = 0;
+  let foundOpenBrace = false;
+  for (const char of afterMarker) {
+    if (char === '{') {
+      braceCount++;
+      foundOpenBrace = true;
+    } else if (char === '}') {
+      braceCount--;
+      if (foundOpenBrace && braceCount === 0) {
+        // Found a complete type definition
+        return !skeletonsContent.includes('// TODO: Replace with actual structure');
+      }
+    }
+  }
+
+  return false;
 }
 
 function generateRpcSkeleton(rpc: RpcFunction): string {

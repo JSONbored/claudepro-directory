@@ -425,12 +425,17 @@ function main() {
   const runTypes = onlyTypes || !(onlyDump || skipTypes);
 
   logger.info('🔄 Database Schema Sync\n', { script: 'sync-database-schema' });
-  logger.info('Configuration:');
-  logger.info(`  Force regeneration: ${isForce ? 'Yes' : 'No'}`);
-  logger.info(`  Schema dump: ${runDump ? 'Yes' : 'No'}`);
-  logger.info(`  Type generation: ${runTypes ? 'Yes' : 'No'}\n`, {
+  logger.info('Configuration:', { script: 'sync-database-schema' });
+  logger.info(`  Force regeneration: ${isForce ? 'Yes' : 'No'}`, {
+    script: 'sync-database-schema',
     force: isForce,
+  });
+  logger.info(`  Schema dump: ${runDump ? 'Yes' : 'No'}`, {
+    script: 'sync-database-schema',
     runDump,
+  });
+  logger.info(`  Type generation: ${runTypes ? 'Yes' : 'No'}\n`, {
+    script: 'sync-database-schema',
     runTypes,
   });
 

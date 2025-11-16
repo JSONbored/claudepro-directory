@@ -814,7 +814,7 @@ export type DatabaseWithTableOverrides = {
           features: string[];
           tags: string[];
           use_cases: string[];
-          category: DatabaseGenerated['public']['Enums']['content_category'];
+          category: ContentCategory;
         };
         Insert: DatabaseGenerated['public']['Tables']['content']['Insert'];
         Update: DatabaseGenerated['public']['Tables']['content']['Update'];
@@ -957,11 +957,14 @@ export type DatabaseWithTableOverrides = {
       jobs: {
         Row: Omit<
           DatabaseGenerated['public']['Tables']['jobs']['Row'],
-          'payment_status' | 'status' | 'workplace'
+          'payment_status' | 'status' | 'workplace' | 'category' | 'plan' | 'tier'
         > & {
           payment_status: DatabaseGenerated['public']['Enums']['payment_status'];
           status: DatabaseGenerated['public']['Enums']['job_status'];
           workplace: DatabaseGenerated['public']['Enums']['workplace_type'];
+          category: JobCategory;
+          plan: JobPlan;
+          tier: JobTier;
         };
         Insert: DatabaseGenerated['public']['Tables']['jobs']['Insert'];
         Update: DatabaseGenerated['public']['Tables']['jobs']['Update'];
@@ -1067,6 +1070,26 @@ export function isJobCategory(value: string): value is JobCategory {
   return JOBCATEGORY_VALUES.includes(value as JobCategory);
 }
 
+/**
+ * Job plan type (CHECK constraint values)
+ */
+export type JobPlan = 'one-time' | 'subscription';
+
+/**
+ * Valid values for jobs.plan CHECK constraint
+ */
+export const JOB_PLAN_VALUES = ['one-time', 'subscription'] as const satisfies readonly JobPlan[];
+
+/**
+ * Job tier type (CHECK constraint values)
+ */
+export type JobTier = 'standard' | 'featured';
+
+/**
+ * Valid values for jobs.tier CHECK constraint
+ */
+export const JOB_TIER_VALUES = ['standard', 'featured'] as const satisfies readonly JobTier[];
+
 // ============================================================================
 // RPC Return Types
 // ============================================================================
@@ -1081,7 +1104,7 @@ export type AddBookmarkReturn = {
   bookmark: {
     id: string;
     user_id: string;
-    content_type: string;
+    content_type: ContentCategory;
     content_slug: string;
     notes: string | null;
     created_at: string;
@@ -1097,7 +1120,7 @@ export type ApproveSubmissionReturn = {
   submission_id: string;
   content_id: string;
   slug: string;
-  category: string;
+  category: ContentCategory;
   message: string;
 };
 
@@ -1456,8 +1479,8 @@ export type CreateJobWithPaymentReturn = {
   company_id: string;
   payment_amount: number;
   requires_payment: boolean;
-  tier: string;
-  plan: string;
+  tier: JobTier;
+  plan: JobPlan;
 };
 
 /**
@@ -1691,17 +1714,17 @@ export type GetGetApiHealthReturn = {
   apiVersion: string;
   checks: {
     database: {
-      status: string;
+      status: SubmissionStatus;
       latency: number;
       error?: string;
     };
     contentTable: {
-      status: string;
+      status: SubmissionStatus;
       count: number;
       error?: string;
     };
     categoryConfigs: {
-      status: string;
+      status: SubmissionStatus;
       count: number;
       error?: string;
     };
@@ -2040,9 +2063,10 @@ export type GetGetCompanyProfileReturn = {
     type: string | null;
     workplace: WorkplaceType;
     experience: ExperienceLevel;
-    category: string | null;
+    category: JobCategory | null;
     tags: string[];
-    tier: string | null;
+    plan: JobPlan;
+    tier: JobTier | null;
     posted_at: string;
     expires_at: string;
     view_count: number;
@@ -2364,7 +2388,7 @@ export type GetGetJobDetailReturn = {
   remote: boolean;
   salary: string | null;
   type: string | null;
-  category: string | null;
+  category: JobCategory | null;
   tags: string[];
   requirements: string[] | null;
   benefits: string[] | null;
@@ -2374,6 +2398,8 @@ export type GetGetJobDetailReturn = {
   expires_at: string;
   active: boolean;
   status: JobStatus;
+  plan: JobPlan;
+  tier: JobTier;
   order: number;
   created_at: string;
   updated_at: string;
@@ -2392,7 +2418,7 @@ export type GetGetJobsListReturn = Array<{
   remote: boolean;
   salary: string | null;
   type: string | null;
-  category: string | null;
+  category: JobCategory | null;
   tags: string[];
   requirements: string[] | null;
   benefits: string[] | null;
@@ -2402,6 +2428,8 @@ export type GetGetJobsListReturn = Array<{
   expires_at: string;
   active: boolean;
   status: JobStatus;
+  plan: JobPlan;
+  tier: JobTier;
   order: number;
   created_at: string;
   updated_at: string;
@@ -2632,7 +2660,7 @@ export type GetGetRecentContentReturn = Array<Tables<'content'>>;
  * get_popular_content RPC return type
  */
 export type GetPopularContentReturn = Array<{
-  category: string;
+  category: ContentCategory;
   slug: string;
   title: string;
   description: string | null;
@@ -2647,7 +2675,7 @@ export type GetPopularContentReturn = Array<{
  * get_trending_metrics RPC return type (metrics only, no content fields)
  */
 export type GetTrendingMetricsReturn = Array<{
-  category: string;
+  category: ContentCategory;
   slug: string;
   created_at: string;
   days_old: number;
@@ -2666,7 +2694,7 @@ export type GetTrendingMetricsReturn = Array<{
  * get_trending_metrics_with_content RPC return type (includes content fields)
  */
 export type GetTrendingMetricsWithContentReturn = Array<{
-  category: string;
+  category: ContentCategory;
   slug: string;
   title: string;
   description: string;
@@ -2795,7 +2823,7 @@ export type GetGetSubmissionDashboardReturn = {
   recent: Array<{
     id: string;
     content_name: string;
-    content_type: string;
+    content_type: SubmissionType;
     merged_at: string;
     user: {
       name: string;
@@ -2944,13 +2972,13 @@ export type GetGetUserDashboardReturn = {
   submissions: Array<{
     id: string;
     user_id: string;
-    content_type: string;
+    content_type: SubmissionType;
     content_slug: string;
     content_name: string;
     pr_number: string | null;
     pr_url: string | null;
     branch_name: string | null;
-    status: string;
+    status: SubmissionStatus;
     submission_data: Json;
     rejection_reason: string | null;
     created_at: string;
@@ -3053,7 +3081,7 @@ export type GetGetUserProfileReturn = {
   }>;
   contributions: Array<{
     id: string;
-    content_type: string;
+    content_type: ContentCategory;
     slug: string;
     name: string;
     description: string | null;
@@ -3184,7 +3212,7 @@ export type RefreshProfileFromOauthReturn = { success: boolean; updated: boolean
 export type RejectSubmissionReturn = {
   success: boolean;
   submission_id: string;
-  status: string;
+  status: SubmissionStatus;
 };
 
 /**
@@ -3247,8 +3275,8 @@ export type ToggleFollowReturn = { success: boolean; is_following: boolean; erro
 export type ToggleJobStatusReturn = {
   success: boolean;
   job_id: string;
-  old_status: string;
-  new_status: string;
+  old_status: JobStatus;
+  new_status: JobStatus;
   message: string;
 };
 
@@ -3259,7 +3287,7 @@ export type ToggleJobStatusReturn = {
 export type ToggleReviewHelpfulReturn = {
   success: boolean;
   helpful: boolean;
-  content_type: string;
+  content_type: ContentCategory;
   content_slug: string;
 };
 
@@ -3785,8 +3813,44 @@ type DatabaseWithViewOverrides = {
         Args: DatabaseGenerated['public']['Functions']['get_database_fingerprint']['Args'];
         Returns: GetGetDatabaseFingerprintReturn;
       };
-      // search_content_optimized and search_by_popularity return TABLE (SETOF), not JSONB
-      // Already properly typed in database.types.ts - no override needed
+      // search_content_optimized returns TABLE (SETOF) - override category to ContentCategory
+      search_content_optimized: {
+        Args: DatabaseGenerated['public']['Functions']['search_content_optimized']['Args'];
+        Returns: Array<
+          Omit<
+            DatabaseGenerated['public']['Functions']['search_content_optimized']['Returns'][number],
+            'category'
+          > & {
+            category: ContentCategory;
+          }
+        >;
+      };
+      // search_unified returns TABLE (SETOF) - override category to ContentCategory
+      search_unified: {
+        Args: DatabaseGenerated['public']['Functions']['search_unified']['Args'];
+        Returns: Array<
+          Omit<
+            DatabaseGenerated['public']['Functions']['search_unified']['Returns'][number],
+            'category'
+          > & {
+            category: ContentCategory;
+          }
+        >;
+      };
+      // search_jobs returns TABLE (SETOF) - override category, plan, tier to proper types
+      search_jobs: {
+        Args: DatabaseGenerated['public']['Functions']['search_jobs']['Args'];
+        Returns: Array<
+          Omit<
+            DatabaseGenerated['public']['Functions']['search_jobs']['Returns'][number],
+            'category' | 'plan' | 'tier'
+          > & {
+            category: JobCategory;
+            plan: JobPlan;
+            tier: JobTier;
+          }
+        >;
+      };
     };
     Views: {
       /**
@@ -3871,6 +3935,12 @@ export type Database = DatabaseWithViewOverrides;
 export type ContentType = Tables<'content'> | Tables<'jobs'>;
 
 /**
+ * ContentItem alias for ContentType (backward compatibility)
+ * Use ContentType directly in new code
+ */
+export type ContentItem = ContentType;
+
+/**
  * Application-specific types (not from database)
  */
 export type CopyType = 'llmstxt' | 'markdown' | 'code' | 'link';
@@ -3896,3 +3966,30 @@ export type ReviewsAggregateRating = {
     '5': number;
   };
 };
+
+/**
+ * ============================================================================
+ * RPC Return Type Extractions
+ * ============================================================================
+ * Types extracted from RPC return types for reuse throughout the application
+ */
+
+/**
+ * Enriched content item type (from get_enriched_content_list RPC)
+ */
+export type EnrichedContentItem = GetGetEnrichedContentListReturn[number];
+
+/**
+ * Sponsorship analytics type
+ */
+export type SponsorshipAnalytics = GetGetSponsorshipAnalyticsReturn;
+
+/**
+ * Collection detail data type
+ */
+export type CollectionDetailData = NonNullable<GetGetUserCollectionDetailReturn>;
+
+/**
+ * Job card job type (from get_company_profile RPC active_jobs)
+ */
+export type JobCardJobType = NonNullable<GetGetCompanyProfileReturn>['active_jobs'][number];

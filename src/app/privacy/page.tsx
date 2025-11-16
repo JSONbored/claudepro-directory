@@ -1,8 +1,7 @@
 import { NavLink } from '@/src/components/core/navigation/navigation-link';
 import { APP_CONFIG } from '@/src/lib/data/config/constants';
-import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-import { normalizeError } from '@/src/lib/utils/error.utils';
+import { getLastUpdatedDate } from '@/src/lib/utils/data.utils';
 
 export const metadata = generatePageMetadata('/privacy');
 
@@ -11,20 +10,6 @@ export const metadata = generatePageMetadata('/privacy');
  * revalidate: false = Cache forever (no automatic revalidation)
  */
 export const revalidate = false;
-
-function getLastUpdatedDate(): string {
-  try {
-    return new Date().toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-  } catch (error) {
-    const normalized = normalizeError(error, 'Failed to format privacy last updated date');
-    logger.error('PrivacyPage: last updated date formatting failed', normalized);
-    return 'Unavailable';
-  }
-}
 
 export default function PrivacyPage() {
   const lastUpdated = getLastUpdatedDate();

@@ -12,10 +12,12 @@ export const metadata = generatePageMetadata('/community/directory');
 
 export const revalidate = false;
 
+const DEFAULT_DIRECTORY_LIMIT = 100;
+
 async function CommunityDirectoryContent({ searchQuery }: { searchQuery: string }) {
   let directoryData: GetGetCommunityDirectoryReturn | null = null;
   try {
-    directoryData = await getCommunityDirectory({ searchQuery, limit: 100 });
+    directoryData = await getCommunityDirectory({ searchQuery, limit: DEFAULT_DIRECTORY_LIMIT });
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load community directory');
     logger.error('CommunityDirectoryContent: getCommunityDirectory failed', normalized, {
@@ -30,15 +32,15 @@ async function CommunityDirectoryContent({ searchQuery }: { searchQuery: string 
     });
   }
 
-  const { all_users, top_contributors, new_members } = directoryData ?? {
+  const {
+    all_users: allUsers,
+    top_contributors: topContributors,
+    new_members: newMembers,
+  } = directoryData ?? {
     all_users: [],
     top_contributors: [],
     new_members: [],
   };
-
-  const allUsers = all_users;
-  const topContributors = top_contributors;
-  const newMembers = new_members;
 
   return (
     <div className="container mx-auto px-4 py-8">

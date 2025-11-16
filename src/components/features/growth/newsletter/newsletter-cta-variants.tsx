@@ -14,6 +14,7 @@ import { NEWSLETTER_CTA_CONFIG } from '@/src/lib/data/config/category';
 import { Mail } from '@/src/lib/icons';
 import { DIMENSIONS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
+import { logUnhandledPromise } from '@/src/lib/utils/error.utils';
 import type { NewsletterSource } from '@/src/types/database-overrides';
 import { NewsletterForm } from './newsletter-form';
 import {
@@ -86,7 +87,12 @@ export function NewsletterCTAVariant(props: NewsletterCTAVariantProps) {
           category,
         },
       }
-    );
+    ).catch((error) => {
+      logUnhandledPromise('NewsletterCTAVariant: loadConfig failed', error, {
+        variant,
+        category,
+      });
+    });
   }, [category, loadConfig, variant]);
 
   // Use prop if provided, otherwise default to 'value_focused'

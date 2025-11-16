@@ -45,25 +45,35 @@ export async function GET(request: NextRequest) {
 
       if (shouldSubscribeToNewsletter) {
         if (user.email) {
-          const newsletterResult = await subscribeViaOAuthAction({
-            email: user.email,
-            metadata: {
-              referrer: `${origin}${next}`,
-              trigger_source: 'auth_callback',
-            },
-          });
-
-          if (newsletterResult?.serverError) {
-            logger.warn('Newsletter opt-in via auth callback failed', {
-              userId: user.id,
-              error: newsletterResult.serverError,
+          try {
+            const newsletterResult = await subscribeViaOAuthAction({
+              email: user.email,
+              metadata: {
+                referrer: `${origin}${next}`,
+                trigger_source: 'auth_callback',
+              },
             });
-          } else if (newsletterResult?.data?.success) {
-            shouldSetNewsletterCookie = true;
-          } else {
-            logger.warn('Newsletter opt-in via auth callback failed', {
+
+            if (newsletterResult?.serverError) {
+              logger.warn('Newsletter opt-in via auth callback failed', {
+                userId: user.id,
+                error: newsletterResult.serverError,
+              });
+            } else if (newsletterResult?.data?.success) {
+              shouldSetNewsletterCookie = true;
+            } else {
+              logger.warn('Newsletter opt-in via auth callback failed', {
+                userId: user.id,
+                error: 'Unknown error',
+              });
+            }
+          } catch (subscribeError) {
+            const normalizedSubscribeError = normalizeError(
+              subscribeError,
+              'Newsletter opt-in via auth callback threw'
+            );
+            logger.error('Newsletter opt-in via auth callback threw', normalizedSubscribeError, {
               userId: user.id,
-              error: 'Unknown error',
             });
           }
         } else {

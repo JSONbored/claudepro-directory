@@ -24,7 +24,6 @@ import {
   getHomepageFeaturedCategories,
 } from '@/src/lib/data/config/category';
 import { ROUTES } from '@/src/lib/data/config/constants';
-import type { ContentItem } from '@/src/lib/data/content';
 import { logger } from '@/src/lib/logger';
 import type {
   DisplayableContent,
@@ -33,6 +32,7 @@ import type {
 } from '@/src/lib/types/component.types';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { logClientWarning, logUnhandledPromise } from '@/src/lib/utils/error.utils';
+import type { ContentItem } from '@/src/types/database-overrides';
 
 /**
  * OPTIMIZATION (2025-10-22): Enabled SSR for UnifiedSearch

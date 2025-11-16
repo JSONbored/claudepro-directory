@@ -8,13 +8,15 @@
  */
 
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
-import type { ContentItem } from '@/src/lib/data/content';
 import { getSocialLinks } from '@/src/lib/data/marketing/contact';
 import { Calendar, Copy, Eye, Tag, User } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { formatCopyCount, formatViewCount } from '@/src/lib/utils/content.utils';
 import { ensureStringArray, formatDate } from '@/src/lib/utils/data.utils';
-import type { GetGetContentDetailCompleteReturn } from '@/src/types/database-overrides';
+import type {
+  ContentItem,
+  GetGetContentDetailCompleteReturn,
+} from '@/src/types/database-overrides';
 
 export interface DetailMetadataProps {
   item: ContentItem | GetGetContentDetailCompleteReturn['content'];
@@ -29,6 +31,25 @@ export interface DetailMetadataProps {
  * No React.memo needed - server components don't re-render
  */
 const SOCIAL_LINK_SNAPSHOT = getSocialLinks();
+
+/**
+ * Validate that author profile URL is safe for use in href
+ * Only allows relative paths or absolute URLs with https:// protocol
+ */
+function isSafeAuthorProfileUrl(url: string | undefined | null): boolean {
+  if (!url || typeof url !== 'string') return false;
+  try {
+    // Block dangerous protocols
+    if (/^(javascript|data|vbscript):/i.test(url.trim())) return false;
+    // Allow relative paths
+    if (url.startsWith('/')) return true;
+    // Allow absolute HTTPS URLs
+    const parsed = new URL(url);
+    return parsed.protocol === 'https:';
+  } catch {
+    return false;
+  }
+}
 
 export function DetailMetadata({ item, viewCount, copyCount }: DetailMetadataProps) {
   const hasMetadata =
@@ -51,7 +72,9 @@ export function DetailMetadata({ item, viewCount, copyCount }: DetailMetadataPro
               <User className={UI_CLASSES.ICON_SM} />
               <a
                 href={
-                  ('author_profile_url' in item && item.author_profile_url) ||
+                  ('author_profile_url' in item &&
+                    isSafeAuthorProfileUrl(item.author_profile_url) &&
+                    item.author_profile_url) ||
                   SOCIAL_LINK_SNAPSHOT.authorProfile
                 }
                 target="_blank"

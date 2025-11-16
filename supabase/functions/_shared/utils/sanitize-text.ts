@@ -3,6 +3,7 @@
  * Removes XSS vectors and normalizes user input
  */
 
+import sanitizeHtml from 'npm:sanitize-html@2.17.0';
 import { createUtilityContext } from './logging.ts';
 
 export interface SanitizeTextOptions {
@@ -38,15 +39,27 @@ export function sanitizeText(text: unknown, options: SanitizeTextOptions = {}): 
   sanitized = sanitized.replace(/\.\./g, '');
   sanitized = sanitized.replace(/\/\/+/g, '/');
 
-  // Remove HTML tags if not allowed
-  if (!allowHtml) {
-    // Remove script tags and event handlers
-    sanitized = sanitized.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
-    sanitized = sanitized.replace(/on\w+\s*=\s*["'][^"']*["']/gi, '');
-    sanitized = sanitized.replace(/<[^>]+>/g, '');
+  // Sanitize HTML tags
+  if (allowHtml) {
+    // Allow only a minimal set of safe tags
+    sanitized = sanitizeHtml(sanitized, {
+      allowedTags: ['b', 'i', 'em', 'strong', 'a', 'ul', 'ol', 'li', 'br', 'span', 'p'],
+      allowedAttributes: {
+        a: ['href', 'title', 'target'],
+        span: ['style'],
+      },
+      allowedSchemes: ['http', 'https', 'mailto'],
+      allowIframeTag: false,
+    });
+  } else {
+    // Remove ALL HTML tags and attributes
+    sanitized = sanitizeHtml(sanitized, {
+      allowedTags: [],
+      allowedAttributes: {},
+    });
   }
 
-  // Remove javascript: protocol
+  // Remove dangerous protocols (javascript:, data:, vbscript:)
   sanitized = sanitized.replace(/javascript:/gi, '');
 
   // Normalize whitespace
@@ -92,9 +105,10 @@ export function sanitizeUrl(url: unknown): string {
   // Remove null bytes
   sanitized = sanitized.replace(/\0/g, '');
 
-  // Remove javascript: protocol
+  // Remove dangerous protocols (javascript:, data:, vbscript:)
   sanitized = sanitized.replace(/javascript:/gi, '');
   sanitized = sanitized.replace(/data:/gi, '');
+  sanitized = sanitized.replace(/vbscript:/gi, '');
 
   // Remove path traversal
   sanitized = sanitized.replace(/\.\./g, '');

@@ -34,7 +34,8 @@ const source = readFileSync(SOURCE_TYPES_PATH, 'utf-8');
 const tablesStart = source.indexOf('    Tables: {');
 const functionsStart = source.indexOf('    Functions: {', tablesStart);
 const enumsStart = source.indexOf('    Enums: {', functionsStart);
-const enumsEnd = source.indexOf('    CompositeTypes:', enumsStart) || source.length;
+const compositeTypesIndex = source.indexOf('    CompositeTypes:', enumsStart);
+const enumsEnd = compositeTypesIndex === -1 ? source.length : compositeTypesIndex;
 
 if (tablesStart === -1 || functionsStart === -1 || enumsStart === -1) {
   throw new Error('Failed to locate Tables/Functions/Enums sections in database.types.ts');

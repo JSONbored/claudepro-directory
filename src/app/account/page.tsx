@@ -17,7 +17,6 @@ import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { normalizeError } from '@/src/lib/utils/error.utils';
-import { USER_TIER_VALUES, type UserTier } from '@/src/types/database-overrides';
 
 export const metadata = generatePageMetadata('/account');
 
@@ -108,20 +107,18 @@ export default async function AccountDashboard() {
             <CardTitle className="text-sm">Tier</CardTitle>
           </CardHeader>
           <CardContent>
-            <UnifiedBadge
-              variant="base"
-              style={
-                (profile?.tier as UserTier | undefined) === USER_TIER_VALUES[1]
-                  ? 'default'
-                  : 'secondary'
-              }
-              className="mt-2"
-            >
-              {profile?.tier
-                ? (profile.tier as UserTier).charAt(0).toUpperCase() +
-                  (profile.tier as UserTier).slice(1)
-                : 'Free'}
-            </UnifiedBadge>
+            {(() => {
+              const tier = profile?.tier;
+              return (
+                <UnifiedBadge
+                  variant="base"
+                  style={tier === 'pro' ? 'default' : 'secondary'}
+                  className="mt-2"
+                >
+                  {tier ? tier.charAt(0).toUpperCase() + tier.slice(1) : 'Free'}
+                </UnifiedBadge>
+              );
+            })()}
             <p className={'mt-2 text-muted-foreground text-xs'}>Membership level</p>
           </CardContent>
         </Card>

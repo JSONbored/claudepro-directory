@@ -72,16 +72,19 @@ export default async function SubmissionsPage() {
     );
   }
 
-  const getStatusBadge = (status: SubmissionStatus) => {
-    const variants: Record<SubmissionStatus, { icon: typeof Clock; label: string }> = {
-      pending: { icon: Clock, label: 'Pending Review' },
-      approved: { icon: CheckCircle, label: 'Approved' },
-      merged: { icon: CheckCircle, label: 'Merged ✓' },
-      rejected: { icon: XCircle, label: 'Rejected' },
-      spam: { icon: XCircle, label: 'Spam' },
-    };
+  const SUBMISSION_STATUS_VARIANTS: Record<
+    SubmissionStatus,
+    { icon: typeof Clock; label: string }
+  > = {
+    pending: { icon: Clock, label: 'Pending Review' },
+    approved: { icon: CheckCircle, label: 'Approved' },
+    merged: { icon: CheckCircle, label: 'Merged ✓' },
+    rejected: { icon: XCircle, label: 'Rejected' },
+    spam: { icon: XCircle, label: 'Spam' },
+  };
 
-    const variant = variants[status] || variants.pending;
+  const getStatusBadge = (status: SubmissionStatus) => {
+    const variant = SUBMISSION_STATUS_VARIANTS[status] || SUBMISSION_STATUS_VARIANTS.pending;
     const Icon = variant.icon;
     const colorClass =
       BADGE_COLORS.submissionStatus[status] || BADGE_COLORS.submissionStatus.pending;
@@ -143,44 +146,46 @@ export default async function SubmissionsPage() {
         </Card>
       ) : (
         <div className="grid gap-4">
-          {submissions.map((submission) => (
-            <Card key={submission.id}>
-              <CardHeader>
-                <div className={UI_CLASSES.FLEX_ITEMS_START_JUSTIFY_BETWEEN}>
-                  <div className="flex-1">
-                    <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                      {getStatusBadge(submission.status as SubmissionStatus)}
-                      <UnifiedBadge variant="base" style="outline" className="text-xs">
-                        {getTypeLabel(submission.content_type as SubmissionType)}
-                      </UnifiedBadge>
+          {submissions.map((submission) => {
+            const status = submission.status;
+            const type = submission.content_type;
+            return (
+              <Card key={submission.id}>
+                <CardHeader>
+                  <div className={UI_CLASSES.FLEX_ITEMS_START_JUSTIFY_BETWEEN}>
+                    <div className="flex-1">
+                      <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+                        {getStatusBadge(status)}
+                        <UnifiedBadge variant="base" style="outline" className="text-xs">
+                          {getTypeLabel(type)}
+                        </UnifiedBadge>
+                      </div>
+                      <CardTitle className="mt-2">{submission.content_name}</CardTitle>
+                      <CardDescription className="mt-1">
+                        Slug: <code className="text-xs">{submission.content_slug}</code>
+                      </CardDescription>
                     </div>
-                    <CardTitle className="mt-2">{submission.content_name}</CardTitle>
-                    <CardDescription className="mt-1">
-                      Slug: <code className="text-xs">{submission.content_slug}</code>
-                    </CardDescription>
                   </div>
-                </div>
-              </CardHeader>
+                </CardHeader>
 
-              <CardContent>
-                <div className={'mb-4 flex flex-wrap gap-4 text-muted-foreground text-sm'}>
-                  <div>Submitted {new Date(submission.created_at).toLocaleDateString()}</div>
-                  {submission.merged_at && (
-                    <>
-                      <span>•</span>
-                      <div>Merged {new Date(submission.merged_at).toLocaleDateString()}</div>
-                    </>
-                  )}
-                  {submission.pr_number && (
-                    <>
-                      <span>•</span>
-                      <div>PR #{submission.pr_number}</div>
-                    </>
-                  )}
-                </div>
+                <CardContent>
+                  <div className={'mb-4 flex flex-wrap gap-4 text-muted-foreground text-sm'}>
+                    <div>Submitted {new Date(submission.created_at).toLocaleDateString()}</div>
+                    {submission.merged_at && (
+                      <>
+                        <span>•</span>
+                        <div>Merged {new Date(submission.merged_at).toLocaleDateString()}</div>
+                      </>
+                    )}
+                    {submission.pr_number && (
+                      <>
+                        <span>•</span>
+                        <div>PR #{submission.pr_number}</div>
+                      </>
+                    )}
+                  </div>
 
-                {submission.status === ('rejected' as SubmissionStatus) &&
-                  submission.rejection_reason && (
+                  {status === 'rejected' && submission.rejection_reason && (
                     <div className="mb-4 rounded border border-red-500/20 bg-red-500/10 p-3">
                       <p className={'mb-1 font-medium text-red-400 text-sm'}>Rejection Reason:</p>
                       <p className={'text-muted-foreground text-sm'}>
@@ -189,37 +194,38 @@ export default async function SubmissionsPage() {
                     </div>
                   )}
 
-                {submission.status === ('merged' as SubmissionStatus) && (
-                  <div className="mb-4 rounded border border-green-500/20 bg-green-500/10 p-3">
-                    <p className={'font-medium text-green-400 text-sm'}>
-                      🎉 Your contribution is now live on ClaudePro Directory!
-                    </p>
+                  {status === 'merged' && (
+                    <div className="mb-4 rounded border border-green-500/20 bg-green-500/10 p-3">
+                      <p className={'font-medium text-green-400 text-sm'}>
+                        🎉 Your contribution is now live on ClaudePro Directory!
+                      </p>
+                    </div>
+                  )}
+
+                  <div className={UI_CLASSES.FLEX_GAP_2}>
+                    {submission.pr_url && (
+                      <Button variant="outline" size="sm" asChild={true}>
+                        <a href={submission.pr_url} target="_blank" rel="noopener noreferrer">
+                          <GitPullRequest className="mr-1 h-3 w-3" />
+                          View PR
+                          <ExternalLink className="ml-1 h-3 w-3" />
+                        </a>
+                      </Button>
+                    )}
+
+                    {status === 'merged' && (
+                      <Button variant="outline" size="sm" asChild={true}>
+                        <Link href={`/${type}/${submission.content_slug}`}>
+                          <ExternalLink className="mr-1 h-3 w-3" />
+                          View Live
+                        </Link>
+                      </Button>
+                    )}
                   </div>
-                )}
-
-                <div className={UI_CLASSES.FLEX_GAP_2}>
-                  {submission.pr_url && (
-                    <Button variant="outline" size="sm" asChild={true}>
-                      <a href={submission.pr_url} target="_blank" rel="noopener noreferrer">
-                        <GitPullRequest className="mr-1 h-3 w-3" />
-                        View PR
-                        <ExternalLink className="ml-1 h-3 w-3" />
-                      </a>
-                    </Button>
-                  )}
-
-                  {submission.status === ('merged' as SubmissionStatus) && (
-                    <Button variant="outline" size="sm" asChild={true}>
-                      <Link href={`/${submission.content_type}/${submission.content_slug}`}>
-                        <ExternalLink className="mr-1 h-3 w-3" />
-                        View Live
-                      </Link>
-                    </Button>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       )}
 

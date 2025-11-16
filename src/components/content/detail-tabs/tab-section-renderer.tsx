@@ -6,11 +6,11 @@
 import dynamic from 'next/dynamic';
 import { JSONSectionRenderer } from '@/src/components/content/json-to-sections';
 import { ReviewListSection } from '@/src/components/core/domain/reviews/review-list-section';
-import type { ContentItem } from '@/src/lib/data/content';
+import { isValidCategory } from '@/src/lib/data/config/category';
 import type { ProcessedSectionData, SectionId } from '@/src/lib/types/component.types';
 import { ensureStringArray } from '@/src/lib/utils/data.utils';
 import type {
-  ContentCategory,
+  ContentItem,
   GetGetContentDetailCompleteReturn,
 } from '@/src/types/database-overrides';
 
@@ -70,7 +70,7 @@ export function TabSectionRenderer({
           title="Features"
           description="Key capabilities and functionality"
           items={features}
-          category={item.category as ContentCategory}
+          category={isValidCategory(item.category) ? item.category : 'agents'}
           dotColor="bg-primary"
         />
       );
@@ -83,7 +83,7 @@ export function TabSectionRenderer({
           title="Requirements"
           description="Prerequisites and dependencies"
           items={requirements}
-          category={item.category as ContentCategory}
+          category={isValidCategory(item.category) ? item.category : 'agents'}
           dotColor="bg-orange-500"
         />
       );
@@ -96,7 +96,7 @@ export function TabSectionRenderer({
           title="Use Cases"
           description="Common scenarios and applications"
           items={useCases}
-          category={item.category as ContentCategory}
+          category={isValidCategory(item.category) ? item.category : 'agents'}
           dotColor="bg-accent"
         />
       );
@@ -155,7 +155,7 @@ export function TabSectionRenderer({
           title="Security Best Practices"
           description="Important security considerations"
           items={securityItems}
-          category={item.category as ContentCategory}
+          category={isValidCategory(item.category) ? item.category : 'agents'}
           dotColor="bg-orange-500"
         />
       );
@@ -165,7 +165,7 @@ export function TabSectionRenderer({
       return (
         <div className="border-t pt-8">
           <ReviewListSection
-            contentType={item.category as ContentCategory}
+            contentType={isValidCategory(item.category) ? item.category : 'agents'}
             contentSlug={item.slug}
           />
         </div>

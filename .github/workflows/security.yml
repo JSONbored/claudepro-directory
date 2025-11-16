@@ -41,9 +41,11 @@ jobs:
     steps:
     - uses: actions/checkout@v5
       with:
+        ref: ${{ github.event.client_payload.deployment.gitSource.ref || github.ref }}
         fetch-depth: ${{ github.event_name == 'pull_request' && 2 || 1 }}
 
     - name: Check for hardcoded secrets
+      id: secrets
       uses: trufflesecurity/trufflehog@main
       with:
         path: ./
@@ -51,6 +53,14 @@ jobs:
         head: HEAD
         extra_args: --only-verified --exclude-paths=.github/trufflehog-exclude.txt
       continue-on-error: true
+
+    - name: Notify Vercel
+      if: github.event_name == 'push'
+      uses: vercel/repository-dispatch/actions/status@v1
+      with:
+        name: 'Vercel - heyclaude: security-secrets'
+        status: ${{ steps.secrets.outcome == 'success' && 'success' || 'failure' }}
+        description: ${{ steps.secrets.outcome == 'success' && 'Secret scanning passed' || 'Secret scanning found issues' }}
 
   codeql:
     name: CodeQL Analysis
@@ -69,6 +79,8 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v5
+      with:
+        ref: ${{ github.event.client_payload.deployment.gitSource.ref || github.ref }}
 
     - name: Initialize CodeQL
       uses: github/codeql-action/init@v4
@@ -80,10 +92,20 @@ jobs:
       uses: github/codeql-action/autobuild@v4
 
     - name: Perform CodeQL Analysis
+      id: codeql
       uses: github/codeql-action/analyze@v4
       with:
         category: "/language:javascript-typescript"
         upload: true
+      continue-on-error: true
+
+    - name: Notify Vercel
+      if: github.event_name == 'push'
+      uses: vercel/repository-dispatch/actions/status@v1
+      with:
+        name: 'Vercel - heyclaude: security-codeql'
+        status: ${{ steps.codeql.outcome == 'success' && 'success' || 'failure' }}
+        description: ${{ steps.codeql.outcome == 'success' && 'CodeQL analysis passed' || 'CodeQL analysis found issues' }}
 
   dependency-review:
     name: Dependency Review
@@ -108,3 +130,120 @@ jobs:
         license-check: false
         comment-summary-in-pr: always
         warn-only: true
+
+  type-check:
+    name: Type Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: [changes]
+    if: github.event_name == 'push' && (needs.changes.outputs.code == 'true' || needs.changes.outputs.deps == 'true')
+
+    steps:
+    - uses: actions/checkout@v5
+      with:
+        ref: ${{ github.event.client_payload.deployment.gitSource.ref || github.ref }}
+
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v4
+      with:
+        version: 10.22.0
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v6
+      with:
+        node-version: '22'
+        cache: 'pnpm'
+
+    - name: Install dependencies
+      run: pnpm install --frozen-lockfile
+
+    - name: Type check
+      id: type-check
+      run: pnpm type-check
+      continue-on-error: true
+
+    - name: Notify Vercel
+      if: github.event_name == 'push'
+      uses: vercel/repository-dispatch/actions/status@v1
+      with:
+        name: 'Vercel - heyclaude: type-check'
+        status: ${{ steps.type-check.outcome == 'success' && 'success' || 'failure' }}
+        description: ${{ steps.type-check.outcome == 'success' && 'Type check passed' || 'Type check failed' }}
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: [changes]
+    if: github.event_name == 'push' && (needs.changes.outputs.code == 'true' || needs.changes.outputs.deps == 'true')
+
+    steps:
+    - uses: actions/checkout@v5
+      with:
+        ref: ${{ github.event.client_payload.deployment.gitSource.ref || github.ref }}
+
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v4
+      with:
+        version: 10.22.0
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v6
+      with:
+        node-version: '22'
+        cache: 'pnpm'
+
+    - name: Install dependencies
+      run: pnpm install --frozen-lockfile
+
+    - name: Lint
+      id: lint
+      run: pnpm lint
+      continue-on-error: true
+
+    - name: Notify Vercel
+      if: github.event_name == 'push'
+      uses: vercel/repository-dispatch/actions/status@v1
+      with:
+        name: 'Vercel - heyclaude: lint'
+        status: ${{ steps.lint.outcome == 'success' && 'success' || 'failure' }}
+        description: ${{ steps.lint.outcome == 'success' && 'Lint passed' || 'Lint failed' }}
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: [changes]
+    if: github.event_name == 'push' && (needs.changes.outputs.code == 'true' || needs.changes.outputs.deps == 'true')
+
+    steps:
+    - uses: actions/checkout@v5
+      with:
+        ref: ${{ github.event.client_payload.deployment.gitSource.ref || github.ref }}
+
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v4
+      with:
+        version: 10.22.0
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v6
+      with:
+        node-version: '22'
+        cache: 'pnpm'
+
+    - name: Install dependencies
+      run: pnpm install --frozen-lockfile
+
+    - name: Build
+      id: build
+      run: pnpm build
+      continue-on-error: true
+
+    - name: Notify Vercel
+      if: github.event_name == 'push'
+      uses: vercel/repository-dispatch/actions/status@v1
+      with:
+        name: 'Vercel - heyclaude: build'
+        status: ${{ steps.build.outcome == 'success' && 'success' || 'failure' }}
+        description: ${{ steps.build.outcome == 'success' && 'Build passed' || 'Build failed' }}

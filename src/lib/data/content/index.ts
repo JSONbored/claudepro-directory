@@ -8,18 +8,14 @@ import { cache } from 'react';
 import { getCacheTtl } from '@/src/lib/data/config/cache-config';
 import { fetchCachedRpc } from '@/src/lib/data/helpers';
 import { generateContentCacheKey, generateContentTags } from '@/src/lib/data/helpers-utils';
-import type { Tables } from '@/src/types/database.types';
 import type {
   ContentCategory,
+  ContentType,
   GetGetEnrichedContentListReturn,
+  Tables,
 } from '@/src/types/database-overrides';
 
-export type ContentItem = Tables<'content'> | Tables<'jobs'>;
-
-// Type alias for enriched content items (from RPCs)
-export type EnrichedContentItem = GetGetEnrichedContentListReturn[number];
-export type ContentListItem = Tables<'content'>;
-export type FullContentItem = ContentItem;
+export type FullContentItem = ContentType;
 
 export interface ContentFilters {
   category?: ContentCategory | ContentCategory[];
@@ -53,7 +49,10 @@ export async function getContentByCategory(
 }
 
 export const getContentBySlug = cache(
-  async (category: ContentCategory, slug: string): Promise<ContentItem | null> => {
+  async (
+    category: ContentCategory,
+    slug: string
+  ): Promise<GetGetEnrichedContentListReturn[number] | null> => {
     const ttl = await getCacheTtl('cache.content_detail.ttl_seconds');
 
     return unstable_cache(
@@ -75,7 +74,7 @@ export const getContentBySlug = cache(
           }
         );
         // RPC returns array, extract first item or null
-        return (data?.[0] as ContentItem | undefined) ?? null;
+        return data?.[0] ?? null;
       },
       [`enriched-content-${category}-${slug}`],
       {
@@ -90,7 +89,10 @@ export const getContentBySlug = cache(
 // Use get_content_detail_complete or get_enriched_content instead
 // This function is currently unused - consider removing or implementing with existing RPC
 export const getFullContentBySlug = cache(
-  async (category: ContentCategory, slug: string): Promise<FullContentItem | null> => {
+  async (
+    category: ContentCategory,
+    slug: string
+  ): Promise<GetGetEnrichedContentListReturn[number] | null> => {
     // Fallback to getContentBySlug for now
     return getContentBySlug(category, slug);
   }
@@ -151,7 +153,7 @@ export const getContentCount = cache(async (category?: ContentCategory): Promise
 });
 
 export const getTrendingContent = cache(async (category?: ContentCategory, limit = 20) => {
-  return fetchCachedRpc<'get_trending_content', ContentListItem[]>(
+  return fetchCachedRpc<'get_trending_content', Tables<'content'>[]>(
     {
       ...(category ? { p_category: category } : {}),
       p_limit: limit,

@@ -9,6 +9,7 @@ import { NEWSLETTER_CTA_CONFIG } from '@/src/lib/data/config/category';
 import { Mail, X } from '@/src/lib/icons';
 import { DIMENSIONS, POSITION_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { ensureNumber, ensureStringArray } from '@/src/lib/utils/data.utils';
+import { logUnhandledPromise } from '@/src/lib/utils/error.utils';
 import type { NewsletterSource } from '@/src/types/database-overrides';
 import { NewsletterForm } from './newsletter-form';
 
@@ -71,7 +72,13 @@ export function NewsletterFooterBar({
           dismissible,
         },
       }
-    );
+    ).catch((error) => {
+      logUnhandledPromise('NewsletterFooterBar: loadConfigs failed', error, {
+        pathname,
+        respectInlineCTA,
+        dismissible,
+      });
+    });
   }, [dismissible, loadConfigs, pathname, respectInlineCTA, showAfterDelay]);
 
   const hasInlineCTA =

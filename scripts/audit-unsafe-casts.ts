@@ -9,11 +9,11 @@ import { join } from 'path';
 import { logger } from '@/src/lib/logger';
 
 const UNSAFE_PATTERNS = [
-  /as\s+unknown\s+as/gi,
-  /as\s+any\b/gi,
+  /as\s+unknown\s+as/g,
+  /as\s+any\b/g,
   // as never is acceptable in specific contexts (Args: never RPCs)
   // but we'll flag it for review
-  /as\s+never\b/gi,
+  /as\s+never\b/g,
 ];
 
 const EXCLUDE_PATTERNS = [
@@ -89,22 +89,41 @@ function findUnsafeCasts(filePath: string): Finding[] {
 }
 
 function scanDirectory(dir: string, findings: Finding[] = []): Finding[] {
-  const entries = readdirSync(dir);
+  try {
+    const entries = readdirSync(dir);
 
-  for (const entry of entries) {
-    const fullPath = join(dir, entry);
+    for (const entry of entries) {
+      const fullPath = join(dir, entry);
 
-    if (shouldExcludeFile(fullPath)) {
-      continue;
+      if (shouldExcludeFile(fullPath)) {
+        continue;
+      }
+
+      try {
+        const stat = statSync(fullPath);
+
+        if (stat.isDirectory()) {
+          scanDirectory(fullPath, findings);
+        } else if (stat.isFile() && /\.(ts|tsx)$/.test(entry)) {
+          findings.push(...findUnsafeCasts(fullPath));
+        }
+      } catch (statError) {
+        // Skip individual entries that fail (e.g., ENOENT, permissions)
+        if (statError instanceof Error && statError.code !== 'ENOENT') {
+          logger.warn(`Error accessing ${fullPath}`, {
+            script: 'audit-unsafe-casts',
+            filePath: fullPath,
+            error: statError.message,
+          });
+        }
+      }
     }
-
-    const stat = statSync(fullPath);
-
-    if (stat.isDirectory()) {
-      scanDirectory(fullPath, findings);
-    } else if (stat.isFile() && /\.(ts|tsx)$/.test(entry)) {
-      findings.push(...findUnsafeCasts(fullPath));
-    }
+  } catch (readdirError) {
+    logger.warn(`Error reading directory ${dir}`, {
+      script: 'audit-unsafe-casts',
+      directory: dir,
+      error: readdirError instanceof Error ? readdirError.message : String(readdirError),
+    });
   }
 
   return findings;
@@ -116,7 +135,40 @@ function main() {
 
   logger.info('🔍 Scanning for unsafe type casts...\n', { script: 'audit-unsafe-casts' });
 
-  const findings = [...scanDirectory(srcDir), ...scanDirectory(supabaseDir)];
+  const findings: Finding[] = [];
+
+  // Validate directory existence before scanning
+  try {
+    const srcStat = statSync(srcDir);
+    if (srcStat.isDirectory()) {
+      scanDirectory(srcDir, findings);
+    } else {
+      logger.warn(`src directory exists but is not a directory: ${srcDir}`, {
+        script: 'audit-unsafe-casts',
+      });
+    }
+  } catch (error) {
+    logger.warn(`src directory not found or inaccessible: ${srcDir}`, {
+      script: 'audit-unsafe-casts',
+      error: error instanceof Error ? error.message : String(error),
+    });
+  }
+
+  try {
+    const supabaseStat = statSync(supabaseDir);
+    if (supabaseStat.isDirectory()) {
+      scanDirectory(supabaseDir, findings);
+    } else {
+      logger.warn(`supabase directory exists but is not a directory: ${supabaseDir}`, {
+        script: 'audit-unsafe-casts',
+      });
+    }
+  } catch (error) {
+    logger.warn(`supabase directory not found or inaccessible: ${supabaseDir}`, {
+      script: 'audit-unsafe-casts',
+      error: error instanceof Error ? error.message : String(error),
+    });
+  }
 
   const acceptable = findings.filter((f) => f.isAcceptable);
   const unacceptable = findings.filter((f) => !f.isAcceptable);
@@ -148,9 +200,11 @@ function main() {
         script: 'audit-unsafe-casts',
         pattern: finding.pattern,
       });
-      logger.warn(`   Context: ${finding.context.substring(0, 80)}...\n`, {
+      const displayContext =
+        finding.context.length > 80 ? `${finding.context.substring(0, 80)}...` : finding.context;
+      logger.warn(`   Context: ${displayContext}\n`, {
         script: 'audit-unsafe-casts',
-        context: finding.context.substring(0, 80),
+        context: finding.context,
       });
     }
   }
@@ -170,9 +224,11 @@ function main() {
         script: 'audit-unsafe-casts',
         pattern: finding.pattern,
       });
-      logger.info(`   Context: ${finding.context.substring(0, 80)}...\n`, {
+      const displayContext =
+        finding.context.length > 80 ? `${finding.context.substring(0, 80)}...` : finding.context;
+      logger.info(`   Context: ${displayContext}\n`, {
         script: 'audit-unsafe-casts',
-        context: finding.context.substring(0, 80),
+        context: finding.context,
       });
     }
   }

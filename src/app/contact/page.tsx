@@ -70,8 +70,7 @@ export default async function ContactPage() {
               </p>
               <NavLink
                 href={`${channels.github}/discussions`}
-                target="_blank"
-                rel="noopener noreferrer"
+                external={true}
                 className="inline-flex items-center gap-2"
               >
                 Visit Discussions →
@@ -93,8 +92,7 @@ export default async function ContactPage() {
               </p>
               <NavLink
                 href={channels.discord}
-                target="_blank"
-                rel="noopener noreferrer"
+                external={true}
                 className="inline-flex items-center gap-2"
               >
                 Join Discord →
@@ -116,8 +114,7 @@ export default async function ContactPage() {
               </p>
               <NavLink
                 href={`${channels.github}/issues/new`}
-                target="_blank"
-                rel="noopener noreferrer"
+                external={true}
                 className="inline-flex items-center gap-2"
               >
                 Create Issue →
@@ -126,22 +123,28 @@ export default async function ContactPage() {
           </Card>
 
           {/* Email */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Mail className="h-5 w-5" />
-                Email Support
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="mb-4 text-muted-foreground">
-                For private inquiries, partnerships, or other matters, reach us via email.
-              </p>
-              <NavLink href={`mailto:${channels.email}`} className="inline-flex items-center gap-2">
-                {channels.email} →
-              </NavLink>
-            </CardContent>
-          </Card>
+          {channels.email && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Mail className="h-5 w-5" />
+                  Email Support
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="mb-4 text-muted-foreground">
+                  For private inquiries, partnerships, or other matters, reach us via email.
+                </p>
+                <NavLink
+                  href={`mailto:${channels.email}`}
+                  external={true}
+                  className="inline-flex items-center gap-2"
+                >
+                  {channels.email} →
+                </NavLink>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
 

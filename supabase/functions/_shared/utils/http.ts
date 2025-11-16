@@ -118,14 +118,13 @@ export function errorResponse(
     error: errorMsg,
   });
 
-  // Don't expose internal error details in production
+  // Never expose internal error details in HTTP responses
   const isTimeout = error instanceof Error && error.name === 'TimeoutError';
   const message = isTimeout ? 'Request timeout' : 'Internal Server Error';
 
   return jsonResponse(
     {
       error: message,
-      message: isTimeout ? errorMsg : undefined,
       context,
     },
     500,

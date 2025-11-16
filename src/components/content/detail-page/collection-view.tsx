@@ -27,19 +27,19 @@ import { ConfigCard } from '@/src/components/core/domain/cards/config-card';
 import { Skeleton } from '@/src/components/primitives/feedback/loading-skeleton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
 import { getCategoryConfigs, isValidCategory } from '@/src/lib/data/config/category';
-import type { ContentItem } from '@/src/lib/data/content';
 import { getContentBySlug } from '@/src/lib/data/content';
 import { AlertTriangle, CheckCircle } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { ensureStringArray, getMetadata } from '@/src/lib/utils/data.utils';
 import type { Database } from '@/src/types/database.types';
+import type { EnrichedContentItem } from '@/src/types/database-overrides';
 
 interface ItemWithData {
   category: string;
   slug: string;
   reason?: string;
-  data: ContentItem;
+  data: EnrichedContentItem;
 }
 
 /**

@@ -8,13 +8,13 @@ import { useEffect, useState } from 'react';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { UnifiedCardGrid } from '@/src/components/core/domain/cards/card-grid';
 import { BaseCard } from '@/src/components/core/domain/cards/content-card-base';
-import type { ContentItem } from '@/src/lib/data/content';
+import { isValidCategory } from '@/src/lib/data/config/category';
 import { getRelatedContent } from '@/src/lib/data/content/related';
 import { Sparkles } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { getContentItemUrl } from '@/src/lib/utils/content.utils';
-import type { ContentCategory } from '@/src/types/database-overrides';
+import type { ContentItem } from '@/src/types/database-overrides';
 
 type RelatedContentItem = ContentItem & {
   score?: number;
@@ -192,7 +192,7 @@ export function RelatedContentClient({
             <BaseCard
               key={`${relatedItem.category}-${relatedItem.slug}`}
               targetPath={getContentItemUrl({
-                category: relatedItem.category as ContentCategory,
+                category: isValidCategory(relatedItem.category) ? relatedItem.category : 'agents',
                 slug: relatedItem.slug,
               })}
               displayTitle={relatedItem.title ?? relatedItem.slug}

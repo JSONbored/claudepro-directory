@@ -153,14 +153,17 @@ export default function AccessibilityPage() {
           </p>
           <ul className="list-disc space-y-2 pl-6">
             <li>
-              Email: <NavLink href={`mailto:${channels.email}`}>{channels.email}</NavLink>
+              Email:{' '}
+              <NavLink href={`mailto:${channels.email}`} external={true}>
+                {channels.email}
+              </NavLink>
             </li>
             <li>
               Contact form: <NavLink href="/contact">Contact Us</NavLink>
             </li>
             <li>
               GitHub Issues:{' '}
-              <NavLink href={`${channels.github}/issues`} target="_blank" rel="noopener noreferrer">
+              <NavLink href={`${channels.github}/issues`} external={true}>
                 Report an Issue
               </NavLink>
             </li>
@@ -174,21 +177,9 @@ export default function AccessibilityPage() {
         <section className="mb-8">
           <h2 className="mb-4 font-semibold text-2xl">Formal Complaints</h2>
           <p className="mb-4">
-            If you are not satisfied with our response to your accessibility concern, you may file a
-            complaint with:
+            If you are not satisfied with our response to your accessibility concern, please contact
+            us directly through the channels listed above.
           </p>
-          <ul className="list-disc space-y-2 pl-6">
-            <li>
-              U.S. Department of Justice:{' '}
-              <NavLink
-                href="https://www.ada.gov/filing_complaint.htm"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                ADA Complaint Form
-              </NavLink>
-            </li>
-          </ul>
         </section>
 
         <section className="mb-8">

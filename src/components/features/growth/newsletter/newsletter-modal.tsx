@@ -94,7 +94,7 @@ export function NewsletterModal({
       return;
     }
 
-    subscribe();
+    await subscribe();
   };
 
   const handleMaybeLater = () => {

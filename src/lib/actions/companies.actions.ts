@@ -28,7 +28,11 @@ import { logActionFailure } from '@/src/lib/utils/error.utils';
 const companyDataSchema = z.object({
   name: z.string(),
   logo: z.string().url().optional().nullable(),
-  website: z.string().url().optional().nullable(),
+  website: z
+    .string()
+    .url({ protocol: /^https?$/ })
+    .optional()
+    .nullable(),
   description: z.string().optional().nullable(),
   size: z.string().optional().nullable(),
   industry: z.string().optional().nullable(),

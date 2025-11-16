@@ -2,10 +2,10 @@
  * DetailHeader - Server Component for header section
  */
 
-import type { ContentItem } from '@/src/lib/data/content';
+import { isValidCategory } from '@/src/lib/data/config/category';
 import type { UnifiedCategoryConfig } from '@/src/lib/types/component.types';
 import type {
-  ContentCategory,
+  ContentItem,
   GetGetContentDetailCompleteReturn,
 } from '@/src/types/database-overrides';
 import { DetailHeaderActions } from './detail-header-actions';
@@ -41,7 +41,7 @@ export function DetailHeader({ displayTitle, item, config, onCopyContent }: Deta
         <DetailHeaderActions
           item={item}
           typeName={config.typeName}
-          category={item.category as ContentCategory}
+          category={isValidCategory(item.category) ? item.category : 'agents'}
           hasContent={hasContent}
           onCopyContent={onCopyContent}
           displayTitle={displayTitle}

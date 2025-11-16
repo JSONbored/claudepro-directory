@@ -49,30 +49,24 @@ export default async function ActivityPage() {
     getActivityTimeline({ limit: 50, offset: 0 }),
   ]);
 
-  const summary = summaryResult.status === 'fulfilled' ? (summaryResult.value?.data ?? null) : null;
-  if (!summary) {
-    const reason =
-      summaryResult.status === 'rejected'
-        ? summaryResult.reason
-        : summaryResult.status === 'fulfilled'
-          ? (summaryResult.value?.serverError ?? new Error('Missing activity summary data'))
-          : new Error('Activity summary unavailable');
-    const normalized = normalizeError(reason, 'Failed to load activity summary');
-    logger.error('ActivityPage: getActivitySummary failed', normalized, { userId: user.id });
+  function handleActionResult<T>(
+    name: string,
+    result: PromiseSettledResult<{ data?: T | null; serverError?: unknown } | null>
+  ): T | null {
+    if (result.status === 'fulfilled') {
+      return result.value?.data ?? null;
+    }
+    // result.status === 'rejected' at this point
+    const reason = result.reason;
+    const normalized = normalizeError(reason, `Failed to load ${name}`);
+    if (user) {
+      logger.error(`ActivityPage: ${name} failed`, normalized, { userId: user.id });
+    }
+    return null;
   }
 
-  const timeline =
-    timelineResult.status === 'fulfilled' ? (timelineResult.value?.data ?? null) : null;
-  if (!timeline) {
-    const reason =
-      timelineResult.status === 'rejected'
-        ? timelineResult.reason
-        : timelineResult.status === 'fulfilled'
-          ? (timelineResult.value?.serverError ?? new Error('Missing activity timeline data'))
-          : new Error('Activity timeline unavailable');
-    const normalized = normalizeError(reason, 'Failed to load activity timeline');
-    logger.error('ActivityPage: getActivityTimeline failed', normalized, { userId: user.id });
-  }
+  const summary = handleActionResult('activity summary', summaryResult);
+  const timeline = handleActionResult('activity timeline', timelineResult);
 
   if (!(summary && timeline)) {
     return (

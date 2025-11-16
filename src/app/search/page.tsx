@@ -15,7 +15,7 @@ const VALID_SORT_OPTIONS: SearchFilters['sort'][] = [
 ];
 
 function isValidSort(value: string | undefined): value is SearchFilters['sort'] {
-  return value !== undefined && VALID_SORT_OPTIONS.includes(value as SearchFilters['sort']);
+  return VALID_SORT_OPTIONS.some((option) => option === value);
 }
 
 import { logger } from '@/src/lib/logger';
@@ -66,6 +66,12 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   if (author) filters.p_authors = [author];
   filters.p_limit = 50;
 
+  const hasUserFilters =
+    !!validatedSort ||
+    (categories && categories.length > 0) ||
+    (tags && tags.length > 0) ||
+    !!author;
+
   let results: Awaited<ReturnType<typeof searchContent>> = [];
   try {
     results = await searchContent(query, filters);
@@ -73,7 +79,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
     const normalized = normalizeError(error, 'Search content fetch failed');
     logger.error('SearchPage: searchContent invocation failed', normalized, {
       query,
-      hasFilters: Object.keys(filters).length > 0,
+      hasFilters: hasUserFilters,
     });
     throw normalized;
   }

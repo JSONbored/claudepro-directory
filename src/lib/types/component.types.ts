@@ -15,19 +15,19 @@
  */
 
 import type { ReactNode } from 'react';
-// EnrichedContentItem is now defined in src/lib/data/content/index.ts
-import type { ContentItem, EnrichedContentItem } from '@/src/lib/data/content';
 import type { SearchResult } from '@/src/lib/edge/search-client';
 import type { LucideIcon, LucideIcon as LucideIconType } from '@/src/lib/icons';
 import type {
   ContentCategory,
+  ContentItem,
+  EnrichedContentItem,
   FormFieldType,
   FormGridColumn,
   FormIconPosition,
-  GetGetCompanyProfileReturn,
   GetGetContentDetailCompleteReturn,
   GetGetHomepageCompleteReturn,
   HomepageContentItem,
+  JobCardJobType,
   SortOption,
   SubmissionType,
   Tables,
@@ -43,8 +43,6 @@ export type DisplayableContent =
   | SearchResult
   | EnrichedContentItem
   | HomepageContentItem;
-
-export type { ContentItem };
 
 export interface ConfigCardProps {
   item: DisplayableContent;
@@ -107,8 +105,6 @@ export interface ErrorFallbackProps {
  * The RPC get_company_profile returns a subset of job fields, so we need
  * to support both the full type and the subset type.
  */
-export type JobCardJobType = NonNullable<GetGetCompanyProfileReturn>['active_jobs'][number];
-
 export interface JobCardProps {
   job: Tables<'jobs'> | JobCardJobType;
 }

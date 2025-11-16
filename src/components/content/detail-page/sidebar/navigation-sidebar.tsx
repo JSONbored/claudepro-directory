@@ -12,7 +12,7 @@ import { JobsPromo } from '@/src/components/core/domain/jobs/jobs-banner';
 import { Button } from '@/src/components/primitives/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
 import { usePulse } from '@/src/hooks/use-pulse';
-import type { ContentItem } from '@/src/lib/data/content';
+import { isValidCategory } from '@/src/lib/data/config/category';
 import { getSocialLinks } from '@/src/lib/data/marketing/contact';
 import { ExternalLink, Github, Thermometer } from '@/src/lib/icons';
 import { BADGE_COLORS, type CategoryType, UI_CLASSES } from '@/src/lib/ui-constants';
@@ -21,7 +21,7 @@ import { getContentItemUrl } from '@/src/lib/utils/content.utils';
 import { ensureStringArray, getMetadata } from '@/src/lib/utils/data.utils';
 import { logUnhandledPromise } from '@/src/lib/utils/error.utils';
 import type {
-  ContentCategory,
+  ContentItem,
   GetGetContentDetailCompleteReturn,
 } from '@/src/types/database-overrides';
 
@@ -106,7 +106,7 @@ export const DetailSidebar = memo(function DetailSidebar({
                 onClick={() => {
                   pulse
                     .click({
-                      category: (item.category as ContentCategory) || null,
+                      category: isValidCategory(item.category) ? item.category : null,
                       slug: item.slug || null,
                       metadata: {
                         action: 'external_link',
@@ -140,7 +140,7 @@ export const DetailSidebar = memo(function DetailSidebar({
                 onClick={() => {
                   pulse
                     .click({
-                      category: (item.category as ContentCategory) || null,
+                      category: isValidCategory(item.category) ? item.category : null,
                       slug: item.slug || null,
                       metadata: {
                         action: 'external_link',
@@ -189,7 +189,7 @@ export const DetailSidebar = memo(function DetailSidebar({
                     BADGE_COLORS.category.default
                   }`}
                 >
-                  {item.category === ('mcp' as ContentCategory)
+                  {item.category === 'mcp'
                     ? 'MCP Server'
                     : item.category.charAt(0).toUpperCase() + item.category.slice(1)}
                 </UnifiedBadge>
@@ -279,9 +279,11 @@ export const DetailSidebar = memo(function DetailSidebar({
           <CardContent className="space-y-3">
             {relatedItems.slice(0, 5).map((relatedItem) => {
               const relatedCategory =
-                'category' in relatedItem && typeof relatedItem.category === 'string'
+                'category' in relatedItem &&
+                typeof relatedItem.category === 'string' &&
+                isValidCategory(relatedItem.category)
                   ? relatedItem.category
-                  : '';
+                  : 'agents';
               const relatedSlug =
                 'slug' in relatedItem && typeof relatedItem.slug === 'string'
                   ? relatedItem.slug
@@ -290,7 +292,7 @@ export const DetailSidebar = memo(function DetailSidebar({
                 <Link
                   key={relatedSlug}
                   href={getContentItemUrl({
-                    category: relatedCategory as ContentCategory,
+                    category: relatedCategory,
                     slug: relatedSlug,
                   })}
                   className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} block w-full cursor-pointer rounded-lg border border-border p-3 text-left transition-colors hover:bg-muted/50`}

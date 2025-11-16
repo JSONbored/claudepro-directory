@@ -4,6 +4,7 @@ import { type CreateJobInput, createJob } from '@/src/lib/actions/jobs.actions';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 
 export const metadata = generatePageMetadata('/account/jobs/new');
 
@@ -11,23 +12,35 @@ export default function NewJobPage() {
   const handleSubmit = async (data: CreateJobInput) => {
     'use server';
 
-    // Call createJob server action (calls create_job_with_payment RPC + Polar checkout)
-    const result = await createJob(data);
-
-    if (result?.serverError) {
-      logger.error('NewJobPage: createJob failed', new Error(result.serverError), {
+    let result: Awaited<ReturnType<typeof createJob>>;
+    try {
+      // Call createJob server action (calls create_job_with_payment RPC + Polar checkout)
+      result = await createJob(data);
+    } catch (error) {
+      const normalized = normalizeError(error, 'createJob server action failed');
+      logger.error('NewJobPage: createJob threw', normalized, {
         title: data.title,
         company: data.company,
       });
-      throw new Error(result.serverError);
+      throw normalized;
+    }
+
+    if (result?.serverError) {
+      const error = new Error(result.serverError);
+      logger.error('NewJobPage: createJob failed', error, {
+        title: data.title,
+        company: data.company,
+      });
+      throw error;
     }
 
     if (!result?.data) {
-      logger.error('NewJobPage: createJob returned no data', undefined, {
+      const error = new Error('createJob returned no data');
+      logger.error('NewJobPage: createJob returned no data', error, {
         title: data.title,
         company: data.company,
       });
-      return { success: false };
+      throw error;
     }
 
     if (result.data.success) {

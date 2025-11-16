@@ -42,16 +42,11 @@ export default async function SponsorshipsPage() {
   }
 
   let sponsorships: Awaited<ReturnType<typeof getUserSponsorships>> | null = null;
-  let fetchError = false;
   try {
     sponsorships = await getUserSponsorships(user.id);
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load user sponsorships');
     logger.error('SponsorshipsPage: getUserSponsorships threw', normalized, { userId: user.id });
-    fetchError = true;
-  }
-
-  if (fetchError) {
     return (
       <div className="space-y-6">
         <div className="text-destructive">Failed to load sponsorships. Please try again later.</div>
@@ -108,10 +103,11 @@ export default async function SponsorshipsPage() {
 
       <div className="grid gap-4">
         {orderedSponsorships.map((sponsorship) => {
+          const now = new Date();
           const isActive =
             sponsorship.active &&
-            new Date(sponsorship.start_date) <= new Date() &&
-            new Date(sponsorship.end_date) >= new Date();
+            new Date(sponsorship.start_date) <= now &&
+            new Date(sponsorship.end_date) >= now;
 
           const impressionCount = sponsorship.impression_count ?? 0;
           const clickCount = sponsorship.click_count ?? 0;

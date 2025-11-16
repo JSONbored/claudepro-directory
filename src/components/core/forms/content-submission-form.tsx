@@ -41,7 +41,6 @@ import type {
   ContentCategory,
   GetGetContentTemplatesReturn,
   SubmissionStatus,
-  SubmissionType,
 } from '@/src/types/database-overrides';
 import { DuplicateWarning } from './duplicate-warning';
 import { ContentTypeFieldRenderer } from './dynamic-form-field';
@@ -55,7 +54,7 @@ import { TemplateSelector } from './template-selector';
  */
 const examplesArraySchema = z.array(z.string());
 
-const DEFAULT_CONTENT_TYPE: SubmissionContentType = 'agents' as SubmissionType;
+const DEFAULT_CONTENT_TYPE: SubmissionContentType = 'agents';
 
 const EMPTY_SECTION: SubmissionFormSection = {
   nameField: null,

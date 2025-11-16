@@ -11,7 +11,6 @@ import { ReviewListSection } from '@/src/components/core/domain/reviews/review-l
 import { NewsletterCTAVariant } from '@/src/components/features/growth/newsletter/newsletter-cta-variants';
 import { RecentlyViewedSidebar } from '@/src/components/features/navigation/recently-viewed-sidebar';
 import { getCategoryConfig, isValidCategory } from '@/src/lib/data/config/category';
-import type { ContentItem } from '@/src/lib/data/content';
 import { highlightCodeEdge, processContentEdge } from '@/src/lib/edge/client';
 import { logger } from '@/src/lib/logger';
 import type { InstallationSteps, ProcessedSectionData } from '@/src/lib/types/component.types';
@@ -21,7 +20,7 @@ import { ensureStringArray, getMetadata } from '@/src/lib/utils/data.utils';
 import { normalizeError } from '@/src/lib/utils/error.utils';
 import { getViewTransitionName } from '@/src/lib/utils/view-transitions.utils';
 import type {
-  ContentCategory,
+  ContentItem,
   GetGetContentDetailCompleteReturn,
   Tables,
 } from '@/src/types/database-overrides';
@@ -124,7 +123,8 @@ export async function UnifiedDetailPage({
   collectionSections,
   tabsEnabled = false,
 }: UnifiedDetailPageProps) {
-  const config = await getCategoryConfig(item.category as ContentCategory);
+  const category = isValidCategory(item.category) ? item.category : 'agents';
+  const config = await getCategoryConfig(category);
   const displayTitle = getDisplayTitle(item);
   const metadata = getMetadata(item);
 
@@ -160,7 +160,7 @@ export async function UnifiedDetailPage({
   // Pre-process content highlighting
   const contentData = await (async () => {
     // GUIDES: Skip content processing - structured sections rendered separately
-    if (item.category === ('guides' as ContentCategory)) {
+    if (item.category === 'guides') {
       return null;
     }
 
@@ -215,12 +215,7 @@ export async function UnifiedDetailPage({
     const configuration = ('configuration' in item && item.configuration) || metadata.configuration;
     if (!configuration) return null;
 
-    const format =
-      item.category === ('mcp' as ContentCategory)
-        ? 'multi'
-        : item.category === ('hooks' as ContentCategory)
-          ? 'hook'
-          : 'json';
+    const format = item.category === 'mcp' ? 'multi' : item.category === 'hooks' ? 'hook' : 'json';
 
     // Multi-format configuration (MCP servers)
     if (format === 'multi') {
@@ -516,7 +511,7 @@ export async function UnifiedDetailPage({
   const guideSections = await (async (): Promise<Array<
     Record<string, unknown> & { html?: string }
   > | null> => {
-    if (item.category !== ('guides' as ContentCategory)) return null;
+    if (item.category !== 'guides') return null;
 
     const itemMetadata = getMetadata(item);
     if (!(itemMetadata?.sections && Array.isArray(itemMetadata.sections))) return null;
@@ -686,7 +681,7 @@ export async function UnifiedDetailPage({
                 title="Features"
                 description="Key capabilities and functionality"
                 items={features}
-                category={item.category as ContentCategory}
+                category={category}
                 dotColor="bg-primary"
               />
             )}
@@ -698,7 +693,7 @@ export async function UnifiedDetailPage({
                 title="Requirements"
                 description="Prerequisites and dependencies"
                 items={requirements}
-                category={item.category as ContentCategory}
+                category={category}
                 dotColor="bg-orange-500"
               />
             )}
@@ -740,7 +735,7 @@ export async function UnifiedDetailPage({
                 title="Use Cases"
                 description="Common scenarios and applications"
                 items={useCases}
-                category={item.category as ContentCategory}
+                category={category}
                 dotColor="bg-accent"
               />
             )}
@@ -752,7 +747,7 @@ export async function UnifiedDetailPage({
                 title="Security Best Practices"
                 description="Important security considerations"
                 items={securityItems}
-                category={item.category as ContentCategory}
+                category={category}
                 dotColor="bg-orange-500"
               />
             )}

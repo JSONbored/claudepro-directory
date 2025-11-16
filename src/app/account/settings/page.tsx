@@ -83,8 +83,8 @@ export default async function SettingsPage() {
   }
 
   // Type-safe RPC return using centralized type definition
-  const userData = settingsData.user_data;
-  const profile = settingsData.profile;
+  let userData = settingsData.user_data;
+  let profile = settingsData.profile;
 
   // Initialize user if missing (consolidated - no more profiles table)
   if (!userData) {
@@ -95,6 +95,15 @@ export default async function SettingsPage() {
       name: user.user_metadata?.full_name ?? user.user_metadata?.name ?? null,
       image: user.user_metadata?.avatar_url ?? user.user_metadata?.picture ?? null,
     });
+    const refreshed = await getUserSettings(user.id);
+    if (refreshed) {
+      userData = refreshed.user_data;
+      profile = refreshed.profile;
+    } else {
+      logger.warn('SettingsPage: getUserSettings returned null after ensureUserRecord', {
+        userId: user.id,
+      });
+    }
   }
 
   if (!profile) {

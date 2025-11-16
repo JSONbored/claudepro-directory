@@ -7,6 +7,7 @@
 import { writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { logger } from '@/src/lib/logger';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 import { ensureEnvVars } from '../utils/env.js';
 
 const README_PATH = join(process.cwd(), 'README.md');
@@ -45,19 +46,15 @@ async function main() {
       script: 'generate-readme',
     });
   } catch (error) {
-    logger.error(
-      '❌ Failed to generate README',
-      error instanceof Error ? error : new Error(String(error)),
-      {
-        script: 'generate-readme',
-      }
-    );
+    logger.error('❌ Failed to generate README', normalizeError(error), {
+      script: 'generate-readme',
+    });
     process.exit(1);
   }
 }
 
 main().catch((error) => {
-  logger.error('❌ Fatal error', error instanceof Error ? error : new Error(String(error)), {
+  logger.error('❌ Fatal error', normalizeError(error), {
     script: 'generate-readme',
   });
   process.exit(1);

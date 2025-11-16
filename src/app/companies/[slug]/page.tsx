@@ -184,12 +184,12 @@ export default async function CompanyPage({ params }: CompanyPageProps) {
                 <CardContent className="space-y-4">
                   <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
                     <span className={UI_CLASSES.TEXT_SM_MUTED}>Total Jobs Posted</span>
-                    <span className="font-semibold">{stats?.total_jobs || 0}</span>
+                    <span className="font-semibold">{stats?.total_jobs ?? 0}</span>
                   </div>
 
                   <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
                     <span className={UI_CLASSES.TEXT_SM_MUTED}>Active Openings</span>
-                    <span className="font-semibold text-green-600">{stats?.active_jobs || 0}</span>
+                    <span className="font-semibold text-green-600">{stats?.active_jobs ?? 0}</span>
                   </div>
 
                   {stats?.remote_jobs && stats.remote_jobs > 0 && (
@@ -248,7 +248,7 @@ export default async function CompanyPage({ params }: CompanyPageProps) {
                       rel="noopener noreferrer"
                       className={UI_CLASSES.LINK_ACCENT}
                     >
-                      Visit Website ?
+                      Visit Website
                     </a>
                   )}
                 </CardContent>

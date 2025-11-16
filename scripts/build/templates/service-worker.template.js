@@ -404,6 +404,9 @@ async function syncConfigSubmissions() {
 // Legacy sync functions removed - endpoints /api/track and /actions/track do not exist
 // Analytics tracking is now handled via queue-based pulse system (pulse queue)
 
+// Store interval ID at top of file
+let periodicSyncInterval = null;
+
 // Periodic background sync (fallback)
 self.addEventListener("message", (event) => {
   // Security: Validate origin before processing postMessage
@@ -414,7 +417,12 @@ self.addEventListener("message", (event) => {
   }
 
   if (event.data && event.data.type === "start-periodic-sync") {
-    setInterval(async () => {
+    // Clear existing interval if any
+    if (periodicSyncInterval) {
+      clearInterval(periodicSyncInterval);
+    }
+    
+    periodicSyncInterval = setInterval(async () => {
       const cache = await caches.open(FAILED_REQUESTS_STORE);
       const requests = await cache.keys();
 
