@@ -1,5 +1,5 @@
 /**
- * Library Page - Database-First RPC Architecture
+ * Library Page - Database-First RPC Architecture with user-scoped edge caching
  * Single RPC call to get_user_library() replaces 2 separate queries
  */
 
@@ -15,78 +15,83 @@ import {
   CardTitle,
 } from '@/src/components/primitives/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/primitives/ui/tabs';
-import { ROUTES } from '@/src/lib/constants';
+import { getAuthenticatedUser } from '@/src/lib/auth/get-authenticated-user';
+import { getUserLibrary } from '@/src/lib/data/account/user-data';
+import { ROUTES } from '@/src/lib/data/config/constants';
 import { Bookmark as BookmarkIcon, ExternalLink, FolderOpen, Layers, Plus } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
-
-// Force dynamic rendering - requires authentication
-export const dynamic = 'force-dynamic';
+import { normalizeError } from '@/src/lib/utils/error.utils';
+import type { GetGetUserLibraryReturn } from '@/src/types/database-overrides';
 
 export const metadata = generatePageMetadata('/account/library');
 
-type Bookmark = {
-  id: string;
-  user_id: string;
-  content_type: string;
-  content_slug: string;
-  notes: string | null;
-  created_at: string;
-  updated_at: string;
-};
-
-type UserCollection = {
-  id: string;
-  user_id: string;
-  slug: string;
-  name: string;
-  description: string | null;
-  is_public: boolean;
-  item_count: number;
-  view_count: number;
-  created_at: string;
-  updated_at: string;
-};
-
-type LibraryData = {
-  bookmarks: Bookmark[];
-  collections: UserCollection[];
-  stats: {
-    bookmarkCount: number;
-    collectionCount: number;
-    totalCollectionItems: number;
-    totalCollectionViews: number;
-  };
-};
-
 export default async function LibraryPage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { user } = await getAuthenticatedUser({ context: 'LibraryPage' });
 
-  if (!user) return null;
-
-  // Single RPC call replaces 2 separate queries
-  const { data, error } = await supabase.rpc('get_user_library', {
-    p_user_id: user.id,
-  });
-
-  if (error) {
-    logger.error('Failed to load user library', error, { userId: user.id });
+  if (!user) {
+    logger.warn('LibraryPage: unauthenticated access attempt detected');
     return (
       <div className="space-y-6">
-        <h1 className="font-bold text-3xl">My Library</h1>
-        <p className="text-muted-foreground">Unable to load library. Please try again later.</p>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-2xl">Sign in required</CardTitle>
+            <CardDescription>Please sign in to view your library.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button asChild={true}>
+              <Link href={ROUTES.LOGIN}>Go to login</Link>
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
-  const libraryData = data as LibraryData;
-  const { bookmarks, collections, stats } = libraryData;
+  let data: GetGetUserLibraryReturn | null = null;
+  try {
+    data = await getUserLibrary(user.id);
+    if (!data) {
+      logger.warn('LibraryPage: getUserLibrary returned null', { userId: user.id });
+    }
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to load user library');
+    logger.error('LibraryPage: getUserLibrary threw', normalized, { userId: user.id });
+  }
+
+  if (!data) {
+    return (
+      <div className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-2xl">My Library</CardTitle>
+            <CardDescription>
+              Unable to load your library right now. Please refresh or try again later.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button asChild={true} variant="outline">
+              <Link href={ROUTES.ACCOUNT}>Back to dashboard</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  const bookmarks = data.bookmarks ?? [];
+  const collections = data.collections ?? [];
+  const stats = data.stats ?? {
+    bookmarkCount: bookmarks.length,
+    collectionCount: collections.length,
+    totalCollectionItems: 0,
+    totalCollectionViews: 0,
+  };
   const { bookmarkCount, collectionCount } = stats;
+  if (!(bookmarks?.length || collections?.length)) {
+    logger.info('LibraryPage: library returned no bookmarks or collections', { userId: user.id });
+  }
 
   return (
     <div className="space-y-6">

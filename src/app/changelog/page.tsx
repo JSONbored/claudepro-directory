@@ -30,7 +30,7 @@ import { ChangelogListClient } from '@/src/components/features/changelog/changel
 
 const NewsletterCTAVariant = dynamic(
   () =>
-    import('@/src/components/features/growth/newsletter').then((mod) => ({
+    import('@/src/components/features/growth/newsletter/newsletter-cta-variants').then((mod) => ({
       default: mod.NewsletterCTAVariant,
     })),
   {
@@ -38,8 +38,8 @@ const NewsletterCTAVariant = dynamic(
   }
 );
 
-import { getAllChangelogEntries } from '@/src/lib/changelog/loader';
-import { APP_CONFIG } from '@/src/lib/constants';
+import { getChangelogOverview } from '@/src/lib/data/changelog';
+import { APP_CONFIG } from '@/src/lib/data/config/constants';
 import { ArrowLeft } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
@@ -86,33 +86,26 @@ export async function generateMetadata(): Promise<Metadata> {
  */
 export default async function ChangelogPage() {
   try {
-    // Load all changelog entries (database-cached)
-    const entries = await getAllChangelogEntries();
+    // Load changelog overview with entries, metadata, and featured (database-cached)
+    // This replaces getAllChangelogEntries() + client-side category counting
+    const overview = await getChangelogOverview({
+      publishedOnly: false, // Get all for static generation
+      limit: 10000,
+      offset: 0,
+    });
 
-    // Calculate category counts for filtering based on change types
+    const entries = overview.entries;
+
+    // Get category counts from metadata (database-calculated, not client-side)
     const categoryCounts: Record<string, number> = {
-      Added: 0,
-      Changed: 0,
-      Fixed: 0,
-      Removed: 0,
-      Deprecated: 0,
-      Security: 0,
+      All: overview.metadata.totalEntries,
+      Added: overview.metadata.categoryCounts.Added ?? 0,
+      Changed: overview.metadata.categoryCounts.Changed ?? 0,
+      Fixed: overview.metadata.categoryCounts.Fixed ?? 0,
+      Removed: overview.metadata.categoryCounts.Removed ?? 0,
+      Deprecated: overview.metadata.categoryCounts.Deprecated ?? 0,
+      Security: overview.metadata.categoryCounts.Security ?? 0,
     };
-
-    // Count entries that have changes in each category
-    for (const entry of entries) {
-      if (entry.changes && typeof entry.changes === 'object') {
-        const changes = entry.changes as Record<string, unknown>;
-        for (const category of Object.keys(categoryCounts)) {
-          const categoryChanges = changes[category];
-          if (Array.isArray(categoryChanges) && categoryChanges.length > 0) {
-            if (typeof categoryCounts[category] === 'number') {
-              categoryCounts[category]++;
-            }
-          }
-        }
-      }
-    }
 
     return (
       <>

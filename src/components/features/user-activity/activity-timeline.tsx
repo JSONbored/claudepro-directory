@@ -1,13 +1,12 @@
 /**
- * Activity Timeline Component - Database-First
+ * Activity Timeline Component - Database-First (Server Component)
  * Uses Activity type from user.actions (based on get_user_activity_timeline RPC)
  */
-
-'use client';
-
-import { memo } from 'react';
 import { Card, CardContent } from '@/src/components/primitives/ui/card';
-import type { Activity } from '@/src/lib/actions/user.actions';
+import type { GetGetUserActivityTimelineReturn } from '@/src/types/database-overrides';
+
+type Activity = GetGetUserActivityTimelineReturn['activities'][number];
+
 import { FileText, GitPullRequest, MessageSquare, ThumbsUp } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 
@@ -23,10 +22,7 @@ const ACTIVITY_CONFIG = {
   submission: { icon: GitPullRequest, label: 'Submitted' },
 } as const;
 
-export const ActivityTimeline = memo(function ActivityTimeline({
-  activities,
-  limit,
-}: ActivityTimelineProps) {
+export function ActivityTimeline({ activities, limit }: ActivityTimelineProps) {
   const displayActivities = limit ? activities.slice(0, limit) : activities;
 
   if (!displayActivities || displayActivities.length === 0) {
@@ -42,7 +38,9 @@ export const ActivityTimeline = memo(function ActivityTimeline({
   return (
     <div className="space-y-3">
       {displayActivities.map((activity) => {
-        const config = ACTIVITY_CONFIG[activity.type];
+        // Type guard for activity.type to ensure it's a valid key
+        const activityType = activity.type as keyof typeof ACTIVITY_CONFIG;
+        const config = ACTIVITY_CONFIG[activityType];
 
         // Guard against unknown activity types
         if (!config) {
@@ -54,16 +52,25 @@ export const ActivityTimeline = memo(function ActivityTimeline({
 
         // Determine title based on activity type
         let title = '';
-        if (activity.type === 'post') {
+        if (activity.type === 'post' && activity.title && typeof activity.title === 'string') {
           title = activity.title;
-        } else if (activity.type === 'comment') {
-          title = activity.body.substring(0, 100) + (activity.body.length > 100 ? '...' : '');
-        } else if (activity.type === 'submission') {
+        } else if (
+          activity.type === 'comment' &&
+          activity.body &&
+          typeof activity.body === 'string'
+        ) {
+          const bodyLength = activity.body.length;
+          title = activity.body.substring(0, 100) + (bodyLength > 100 ? '...' : '');
+        } else if (
+          activity.type === 'submission' &&
+          activity.title &&
+          typeof activity.title === 'string'
+        ) {
           title = activity.title;
-        } else if (activity.type === 'vote') {
+        } else if (activity.type === 'vote' && activity.vote_type) {
           title = `${activity.vote_type} vote`;
         } else {
-          // Fallback for unknown types
+          // Fallback for unknown types or missing fields
           title = 'Unknown activity';
         }
 
@@ -90,4 +97,4 @@ export const ActivityTimeline = memo(function ActivityTimeline({
       })}
     </div>
   );
-});
+}

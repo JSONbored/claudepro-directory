@@ -16,7 +16,7 @@
 'use client';
 
 import { createContext, type ReactNode, useCallback, useContext, useEffect, useState } from 'react';
-import { NewsletterModal } from '@/src/components/features/growth/newsletter';
+import { NewsletterModal } from '@/src/components/features/growth/newsletter/newsletter-modal';
 import type { CopyType } from '@/src/types/database-overrides';
 
 /**

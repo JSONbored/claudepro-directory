@@ -237,21 +237,18 @@ export function useLocalStorage<T>(
   // Warn developers if they accidentally try to store sensitive data in localStorage
   if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
     if (containsSensitivePattern(key)) {
-      // biome-ignore lint/suspicious/noConsole: Intentional security warning for developers
-      console.warn(
-        `🔒 SECURITY WARNING: localStorage key "${key}" contains a sensitive pattern (${PROHIBITED_LOCALSTORAGE_PATTERNS.filter((p) => key.toLowerCase().includes(p)).join(', ')}).\n` +
-          'localStorage is NOT encrypted and is vulnerable to XSS attacks.\n' +
-          'NEVER store passwords, tokens, API keys, or other sensitive data in localStorage.\n' +
-          'Use secure HttpOnly cookies or server-side sessions instead.\n' +
-          'See: https://owasp.org/www-community/vulnerabilities/Cross_Site_Scripting_(XSS)'
+      logger.warn(
+        'localStorage key matches sensitive pattern. Avoid storing secrets in localStorage.',
+        {
+          component: 'useLocalStorage',
+          key,
+          matchedPatterns: PROHIBITED_LOCALSTORAGE_PATTERNS.filter((p) =>
+            key.toLowerCase().includes(p)
+          ).join(', '),
+          guidance:
+            'localStorage is not encrypted; use HttpOnly cookies or server-side sessions for secrets.',
+        }
       );
-      logger.warn('localStorage used with potentially sensitive key', {
-        component: 'useLocalStorage',
-        key,
-        matchedPatterns: PROHIBITED_LOCALSTORAGE_PATTERNS.filter((p) =>
-          key.toLowerCase().includes(p)
-        ).join(', '),
-      });
     }
   }
 

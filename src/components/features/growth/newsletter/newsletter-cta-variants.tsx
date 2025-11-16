@@ -1,6 +1,6 @@
 'use client';
 
-import { use } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Card,
   CardContent,
@@ -8,15 +8,20 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/ui/card';
-import type { NewsletterSource } from '@/src/hooks/use-newsletter';
+import { useLoggedAsync } from '@/src/hooks/use-logged-async';
 import { useNewsletterCount } from '@/src/hooks/use-newsletter-count';
-import { NEWSLETTER_CTA_CONFIG } from '@/src/lib/config/category-config';
-import { newsletterExperiments } from '@/src/lib/flags';
+import { NEWSLETTER_CTA_CONFIG } from '@/src/lib/data/config/category';
 import { Mail } from '@/src/lib/icons';
 import { DIMENSIONS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
+import type { NewsletterSource } from '@/src/types/database-overrides';
 import { NewsletterForm } from './newsletter-form';
-import { formatSubscriberCount, getContextualMessage, getCTAVariantCopy } from './newsletter-utils';
+import {
+  formatSubscriberCount,
+  getContextualMessage,
+  getCTAVariantCopy,
+  loadNewsletterConfig,
+} from './newsletter-utils';
 
 export interface NewsletterCTABaseProps {
   source: NewsletterSource;
@@ -24,6 +29,7 @@ export interface NewsletterCTABaseProps {
   category?: string;
   headline?: string;
   description?: string;
+  ctaVariant?: 'aggressive' | 'social_proof' | 'value_focused';
 }
 
 export interface NewsletterHeroProps extends NewsletterCTABaseProps {
@@ -49,19 +55,53 @@ export type NewsletterCTAVariantProps =
   | NewsletterCardProps;
 
 export function NewsletterCTAVariant(props: NewsletterCTAVariantProps) {
-  const { variant, source, className, category, headline, description } = props;
+  const {
+    variant,
+    source,
+    className,
+    category,
+    headline,
+    description,
+    ctaVariant: propCtaVariant,
+  } = props;
   const { count, isLoading } = useNewsletterCount();
+  const [newsletterConfig, setNewsletterConfig] = useState<Record<string, unknown>>({});
+  const loadConfig = useLoggedAsync({
+    scope: 'NewsletterCTAVariant',
+    defaultMessage: 'Failed to load newsletter config',
+    defaultLevel: 'warn',
+    defaultRethrow: false,
+  });
 
-  // A/B test: CTA copy variant (aggressive vs social_proof vs value_focused)
-  const ctaVariant = use(newsletterExperiments.ctaVariant());
+  // Load newsletter config from Statsig
+  useEffect(() => {
+    loadConfig(
+      async () => {
+        const config = await loadNewsletterConfig();
+        setNewsletterConfig(config);
+      },
+      {
+        context: {
+          variant,
+          category,
+        },
+      }
+    );
+  }, [category, loadConfig, variant]);
+
+  // Use prop if provided, otherwise default to 'value_focused'
+  const ctaVariant = propCtaVariant || 'value_focused';
   const subscriberCount = formatSubscriberCount(count);
 
   // Copy priority: explicit prop > contextual (if category) > experiment variant > default
-  const { headline: contextHeadline, description: contextDescription } =
-    getContextualMessage(category);
+  const { headline: contextHeadline, description: contextDescription } = getContextualMessage(
+    category,
+    newsletterConfig
+  );
   const { headline: variantHeadline, description: variantDescription } = getCTAVariantCopy(
     ctaVariant,
-    subscriberCount
+    subscriberCount,
+    newsletterConfig
   );
 
   const finalHeadline = headline || (category ? contextHeadline : variantHeadline);

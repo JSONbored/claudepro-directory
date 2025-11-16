@@ -6,6 +6,7 @@
 
 import { execSync } from 'node:child_process';
 import { readFile } from 'node:fs/promises';
+import { logger } from '@/src/lib/logger';
 
 /**
  * Load required environment variables, pulling from Vercel only if missing
@@ -14,7 +15,7 @@ export async function ensureEnvVars(requiredVars: string[]): Promise<void> {
   const missingVars = requiredVars.filter((v) => !process.env[v]);
 
   if (missingVars.length === 0) {
-    console.log('✅ Environment variables already loaded');
+    logger.info('✅ Environment variables already loaded', { script: 'env' });
     return;
   }
 
@@ -22,8 +23,13 @@ export async function ensureEnvVars(requiredVars: string[]): Promise<void> {
   const isCI = process.env.CI === 'true' || process.env.GITHUB_ACTIONS === 'true';
 
   if (isCI) {
-    console.log(`⚠️  Missing environment variables in CI: ${missingVars.join(', ')}`);
-    console.log('These should be set as GitHub Secrets or Vercel Environment Variables');
+    logger.warn(`⚠️  Missing environment variables in CI: ${missingVars.join(', ')}`, {
+      script: 'env',
+      missingVars,
+    });
+    logger.warn('These should be set as GitHub Secrets or Vercel Environment Variables', {
+      script: 'env',
+    });
     throw new Error(
       `Missing required environment variables in CI: ${missingVars.join(', ')}\n` +
         'Set these in your CI environment or deployment platform.'
@@ -31,14 +37,27 @@ export async function ensureEnvVars(requiredVars: string[]): Promise<void> {
   }
 
   // Only try vercel env pull in local development
-  console.log(`📥 Loading environment variables (missing: ${missingVars.join(', ')})...`);
+  logger.info(`📥 Loading environment variables (missing: ${missingVars.join(', ')})...`, {
+    script: 'env',
+    missingVars,
+  });
 
   try {
     execSync('vercel env pull .env.local --yes', { stdio: 'inherit' });
   } catch (error) {
-    console.error('❌ Failed to pull environment variables from Vercel');
-    console.error('Make sure Vercel CLI is installed: npm i -g vercel');
-    console.error('Or manually create .env.local with required variables');
+    logger.error(
+      '❌ Failed to pull environment variables from Vercel',
+      error instanceof Error ? error : new Error(String(error)),
+      {
+        script: 'env',
+      }
+    );
+    logger.error('Make sure Vercel CLI is installed: npm i -g vercel', undefined, {
+      script: 'env',
+    });
+    logger.error('Or manually create .env.local with required variables', undefined, {
+      script: 'env',
+    });
     throw new Error(
       `Failed to load environment variables: ${error instanceof Error ? error.message : 'Unknown error'}`
     );
@@ -56,5 +75,5 @@ export async function ensureEnvVars(requiredVars: string[]): Promise<void> {
   );
 
   Object.assign(process.env, envVars);
-  console.log('✅ Environment variables loaded');
+  logger.info('✅ Environment variables loaded', { script: 'env' });
 }

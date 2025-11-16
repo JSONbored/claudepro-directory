@@ -2,35 +2,39 @@ import { Suspense } from 'react';
 import { ContributorsSidebar } from '@/src/components/features/community/contributors-sidebar';
 import { ProfileSearchClient } from '@/src/components/features/community/profile-search';
 import { Skeleton } from '@/src/components/primitives/feedback/loading-skeleton';
+import { getCommunityDirectory } from '@/src/lib/data/community/directory';
+import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-import { createClient } from '@/src/lib/supabase/server';
-import type { Tables } from '@/src/types/database.types';
+import { normalizeError } from '@/src/lib/utils/error.utils';
+import type { GetGetCommunityDirectoryReturn } from '@/src/types/database-overrides';
 
 export const metadata = generatePageMetadata('/community/directory');
 
 export const revalidate = false;
 
 async function CommunityDirectoryContent({ searchQuery }: { searchQuery: string }) {
-  const supabase = await createClient();
+  let directoryData: GetGetCommunityDirectoryReturn | null = null;
+  try {
+    directoryData = await getCommunityDirectory({ searchQuery, limit: 100 });
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to load community directory');
+    logger.error('CommunityDirectoryContent: getCommunityDirectory failed', normalized, {
+      hasQuery: Boolean(searchQuery),
+    });
+    throw normalized;
+  }
 
-  // Consolidated RPC: 3 queries + TypeScript deduplication → 1 (67% reduction)
-  const { data: directoryData } = await supabase.rpc(
-    'get_community_directory',
-    searchQuery ? { p_search_query: searchQuery, p_limit: 100 } : { p_limit: 100 }
-  );
+  if (!directoryData) {
+    logger.warn('CommunityDirectoryContent: directory data response is empty', {
+      hasQuery: Boolean(searchQuery),
+    });
+  }
 
-  // Type assertion to database-generated Json type
-  type DirectoryResponse = {
-    all_users: Array<Tables<'users'>>;
-    top_contributors: Array<Tables<'users'>>;
-    new_members: Array<Tables<'users'>>;
-  };
-
-  const { all_users, top_contributors, new_members } = (directoryData || {
+  const { all_users, top_contributors, new_members } = directoryData ?? {
     all_users: [],
     top_contributors: [],
     new_members: [],
-  }) as unknown as DirectoryResponse;
+  };
 
   const allUsers = all_users;
   const topContributors = top_contributors;

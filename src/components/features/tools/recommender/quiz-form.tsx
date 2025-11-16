@@ -13,6 +13,19 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primi
 import { Separator } from '@/src/components/primitives/ui/separator';
 import { getQuizConfiguration } from '@/src/lib/actions/quiz.actions';
 import { generateConfigRecommendations } from '@/src/lib/edge/client';
+import type {
+  ExperienceLevel,
+  FocusAreaType,
+  GetGetQuizConfigurationReturn,
+  IntegrationType,
+  UseCaseType,
+} from '@/src/types/database-overrides';
+import {
+  EXPERIENCE_LEVEL_VALUES,
+  FOCUS_AREA_TYPE_VALUES,
+  INTEGRATION_TYPE_VALUES,
+  USE_CASE_TYPE_VALUES,
+} from '@/src/types/database-overrides';
 
 type QuizQuestion = {
   id: string;
@@ -28,6 +41,28 @@ type QuizQuestion = {
   }>;
 };
 
+function mapQuizConfigToQuestions(
+  config: GetGetQuizConfigurationReturn | null
+): QuizQuestion[] | null {
+  if (!(config && Array.isArray(config)) || config.length === 0) {
+    return null;
+  }
+
+  return config.map((q) => ({
+    id: q.id,
+    question: q.question,
+    description: q.description,
+    required: q.required,
+    displayOrder: q.displayOrder,
+    options: q.options.map((opt) => ({
+      value: opt.value,
+      label: opt.label,
+      description: opt.description,
+      iconName: opt.iconName,
+    })),
+  }));
+}
+
 import { InlineSpinner } from '@/src/components/primitives/feedback/loading-factory';
 import { ArrowLeft, ArrowRight, Sparkles } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
@@ -38,11 +73,15 @@ import { QuizProgress } from './quiz-progress';
 
 // Manual Zod schema (database validates via RPC function)
 const quizAnswersSchema = z.object({
-  useCase: z.string(),
-  experienceLevel: z.string(),
+  useCase: z.enum([...USE_CASE_TYPE_VALUES] as [UseCaseType, ...UseCaseType[]]),
+  experienceLevel: z.enum([...EXPERIENCE_LEVEL_VALUES] as [ExperienceLevel, ...ExperienceLevel[]]),
   toolPreferences: z.array(z.string()).min(1).max(5),
-  p_integrations: z.array(z.string()).optional(),
-  p_focus_areas: z.array(z.string()).optional(),
+  p_integrations: z
+    .array(z.enum([...INTEGRATION_TYPE_VALUES] as [IntegrationType, ...IntegrationType[]]))
+    .optional(),
+  p_focus_areas: z
+    .array(z.enum([...FOCUS_AREA_TYPE_VALUES] as [FocusAreaType, ...FocusAreaType[]]))
+    .optional(),
   teamSize: z.string().optional(),
   timestamp: z.string().datetime().optional(),
 });
@@ -66,8 +105,18 @@ export function QuizForm() {
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
-    getQuizConfiguration()
-      .then((data) => setQuizConfig(data as QuizQuestion[]))
+    getQuizConfiguration({})
+      .then((result) => {
+        if (result?.data) {
+          const mapped = mapQuizConfigToQuestions(result.data);
+          setQuizConfig(mapped);
+        }
+        if (result?.serverError) {
+          // Error already logged by safe-action middleware
+          logger.error('Failed to load quiz configuration', new Error(result.serverError));
+          toasts.error.actionFailed('load quiz');
+        }
+      })
       .catch((err) => {
         logger.error('Failed to load quiz configuration', err);
         toasts.error.actionFailed('load quiz');
@@ -142,7 +191,15 @@ export function QuizForm() {
 
       startTransition(async () => {
         try {
-          const result = await generateConfigRecommendations(validatedAnswers);
+          const result = await generateConfigRecommendations({
+            useCase: validatedAnswers.useCase,
+            experienceLevel: validatedAnswers.experienceLevel,
+            toolPreferences: validatedAnswers.toolPreferences,
+            ...(validatedAnswers.p_integrations && {
+              integrations: validatedAnswers.p_integrations,
+            }),
+            ...(validatedAnswers.p_focus_areas && { focusAreas: validatedAnswers.p_focus_areas }),
+          });
 
           if (result?.success && result.recommendations) {
             const encoded = encodeQuizAnswers(validatedAnswers);

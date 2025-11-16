@@ -7,6 +7,8 @@
  */
 
 import html2canvas from 'html2canvas-pro';
+import { logger } from '@/src/lib/logger';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 
 export interface ScreenshotOptions {
   /** Element to screenshot */
@@ -221,6 +223,11 @@ export async function generateCodeScreenshot(
       height: img.height,
     };
   } catch (error) {
+    logger.error('generateCodeScreenshot failed', normalizeError(error), {
+      hasElement: Boolean(element),
+      category: category ?? 'unknown',
+      title: title ?? 'untitled',
+    });
     throw new Error(
       `Screenshot generation failed: ${error instanceof Error ? error.message : 'Unknown error'}`
     );
@@ -240,6 +247,7 @@ export async function copyScreenshotToClipboard(blob: Blob): Promise<void> {
     const clipboardItem = new ClipboardItem({ 'image/png': blob });
     await navigator.clipboard.write([clipboardItem]);
   } catch (error) {
+    logger.error('copyScreenshotToClipboard failed', normalizeError(error));
     throw new Error(
       `Failed to copy to clipboard: ${error instanceof Error ? error.message : 'Unknown error'}`
     );

@@ -1,12 +1,3 @@
-// Dynamic imports for Vercel monitoring tools
-// Load at page bottom to avoid blocking initial render (30KB bundle, 50-100ms TTI gain)
-const Analytics = (await import('@vercel/analytics/next').catch(() => ({ Analytics: () => null })))
-  .Analytics;
-
-const SpeedInsights = (
-  await import('@vercel/speed-insights/next').catch(() => ({ SpeedInsights: () => null }))
-).SpeedInsights;
-
 import type { Metadata } from 'next';
 import localFont from 'next/font/local';
 import { ThemeProvider } from 'next-themes';
@@ -17,6 +8,8 @@ import './micro-interactions.css';
 import './sugar-high.css';
 import dynamic from 'next/dynamic';
 import { Toaster } from 'sonner';
+import { logger } from '@/src/lib/logger';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 
 const NotificationToastHandler = dynamic(
   () =>
@@ -30,15 +23,15 @@ const NotificationToastHandler = dynamic(
 
 import { ErrorBoundary } from '@/src/components/core/infra/error-boundary';
 import { PostCopyEmailProvider } from '@/src/components/core/infra/providers/email-capture-modal-provider';
-import { PwaInstallTracker } from '@/src/components/core/infra/pwa-install-tracker';
+import { Pulse } from '@/src/components/core/infra/pulse';
+import { PulseCannon } from '@/src/components/core/infra/pulse-cannon';
 import { StructuredData } from '@/src/components/core/infra/structured-data';
-import { getActiveAnnouncement } from '@/src/components/core/layout/announcement-banner-server';
 import { LayoutContent } from '@/src/components/core/layout/root-layout-wrapper';
-
-import { UmamiScript } from '@/src/components/core/shared/analytics-script';
-import { APP_CONFIG } from '@/src/lib/constants';
-import { featureFlags } from '@/src/lib/flags';
-import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
+import { NotificationsProvider } from '@/src/components/providers/notifications-provider';
+import { APP_CONFIG } from '@/src/lib/data/config/constants';
+import { getLayoutData } from '@/src/lib/data/layout/data';
+import { getLayoutFlags } from '@/src/lib/data/layout/flags';
+import { getHomeMetadata } from '@/src/lib/data/seo/homepage';
 
 // Self-hosted fonts - no external requests, faster FCP, GDPR compliant
 const inter = localFont({
@@ -78,7 +71,7 @@ const geistMono = localFont({
 
 // Generate homepage metadata from centralized registry
 export async function generateMetadata(): Promise<Metadata> {
-  const homeMetadata = await generatePageMetadata('/');
+  const homeMetadata = await getHomeMetadata();
 
   return {
     ...homeMetadata,
@@ -141,16 +134,66 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // Fetch announcement data server-side using anonymous client (ISR-safe)
-  const announcement = await getActiveAnnouncement();
+  // Fetch layout data and flags in parallel using Promise.allSettled
+  // This ensures graceful degradation if one fails (partial success handling)
+  const [layoutDataResult, layoutFlagsResult] = await Promise.allSettled([
+    getLayoutData(),
+    getLayoutFlags(),
+  ]);
 
-  // Fetch feature flags server-side for A/B testing and gradual rollouts
-  const useFloatingActionBar = await featureFlags.floatingActionBar();
+  // Extract layout data with fallbacks
+  const layoutData =
+    layoutDataResult.status === 'fulfilled'
+      ? layoutDataResult.value
+      : {
+          announcement: null,
+          navigationData: {
+            primary: [],
+            secondary: [],
+            actions: [],
+          },
+        };
+
+  // Extract layout flags with fallbacks
+  const layoutFlags =
+    layoutFlagsResult.status === 'fulfilled'
+      ? layoutFlagsResult.value
+      : {
+          useFloatingActionBar: false,
+          fabSubmitAction: false,
+          fabSearchAction: false,
+          fabScrollToTop: false,
+          fabNotifications: false,
+          notificationsProvider: true,
+          notificationsSheet: true,
+          notificationsToasts: true,
+          footerDelayVariant: '30s' as const,
+          ctaVariant: 'value_focused' as const,
+          notificationsEnabled: true,
+          notificationsSheetEnabled: true,
+          notificationsToastsEnabled: true,
+          fabNotificationsEnabled: false,
+        };
+
+  // Log any failures for monitoring (but don't block render)
+  if (layoutDataResult.status === 'rejected') {
+    const normalized = normalizeError(layoutDataResult.reason, 'Failed to load layout data');
+    logger.error('RootLayout: layout data fetch failed', normalized, {
+      source: 'root-layout',
+    });
+  }
+
+  if (layoutFlagsResult.status === 'rejected') {
+    const normalized = normalizeError(layoutFlagsResult.reason, 'Failed to load layout flags');
+    logger.error('RootLayout: layout flags fetch failed', normalized, {
+      source: 'root-layout',
+    });
+  }
 
   return (
     <html
       lang="en"
-      suppressHydrationWarning
+      suppressHydrationWarning={true}
       className={`${inter.variable} ${geist.variable} ${geistMono.variable} font-sans`}
     >
       <head>
@@ -188,34 +231,51 @@ export default async function RootLayout({
         <ThemeProvider
           attribute="data-theme"
           defaultTheme="dark"
-          enableSystem
+          enableSystem={true}
           storageKey="claudepro-theme"
           disableTransitionOnChange={false}
           enableColorScheme={false}
         >
           <PostCopyEmailProvider>
-            <ErrorBoundary>
-              <LayoutContent
-                announcement={announcement}
-                useFloatingActionBar={useFloatingActionBar}
-              >
-                {children}
-              </LayoutContent>
-            </ErrorBoundary>
-            <Toaster />
-            <NotificationToastHandler />
-            {/* Newsletter capture is conditionally rendered in LayoutContent for non-auth pages */}
+            <NotificationsProvider
+              flags={{
+                enableNotifications: layoutFlags.notificationsEnabled,
+                enableSheet: layoutFlags.notificationsSheetEnabled,
+                enableToasts: layoutFlags.notificationsToastsEnabled,
+                enableFab: layoutFlags.fabNotificationsEnabled,
+              }}
+            >
+              <ErrorBoundary>
+                <LayoutContent
+                  announcement={layoutData.announcement}
+                  navigationData={layoutData.navigationData}
+                  useFloatingActionBar={layoutFlags.useFloatingActionBar}
+                  fabFlags={{
+                    showSubmit: layoutFlags.fabSubmitAction,
+                    showSearch: layoutFlags.fabSearchAction,
+                    showScrollToTop: layoutFlags.fabScrollToTop,
+                    showNotifications: layoutFlags.fabNotificationsEnabled,
+                  }}
+                  footerDelayVariant={layoutFlags.footerDelayVariant}
+                  ctaVariant={layoutFlags.ctaVariant}
+                >
+                  {children}
+                </LayoutContent>
+              </ErrorBoundary>
+              <Toaster />
+              <NotificationToastHandler />
+              {/* Newsletter capture is conditionally rendered in LayoutContent for non-auth pages */}
+            </NotificationsProvider>
           </PostCopyEmailProvider>
         </ThemeProvider>
-        <Analytics />
-        <SpeedInsights />
-        {/* Umami Analytics - Privacy-focused analytics (production only) */}
-        {/* Suspense boundary for analytics - streams after critical content */}
-        <Suspense fallback={null}>{await UmamiScript()}</Suspense>
-        {/* PWA Install Tracking - Tracks PWA installation events */}
-        <PwaInstallTracker />
+        {/* Pulse Cannon - Unified pulse loading system (loads after page idle) */}
+        {/* Zero initial bundle impact - all pulse services lazy-loaded */}
+        <PulseCannon />
+        {/* PWA Pulse - PWA installation and launch events */}
+        <Pulse variant="pwa-install" />
+        <Pulse variant="pwa-launch" />
         {/* Service Worker Registration for PWA Support */}
-        <script src="/scripts/service-worker-init.js" defer />
+        <script src="/scripts/service-worker-init.js" defer={true} />
       </body>
     </html>
   );

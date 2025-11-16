@@ -18,9 +18,11 @@ import { Slot } from '@radix-ui/react-slot';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { AnimatePresence, motion } from 'motion/react';
 import type * as React from 'react';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
-import { ANIMATION_CONSTANTS, STATE_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
+import { getAnimationConfig } from '@/src/lib/actions/feature-flags.actions';
+import { logger } from '@/src/lib/logger';
+import { STATE_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
 
 interface RippleType {
@@ -73,6 +75,27 @@ const Button = ({
   ...props
 }: ButtonProps & { ref?: React.RefObject<HTMLButtonElement | null> }) => {
   const [ripples, setRipples] = useState<RippleType[]>([]);
+  const [springDefault, setSpringDefault] = useState({
+    type: 'spring' as const,
+    stiffness: 400,
+    damping: 17,
+  });
+
+  useEffect(() => {
+    getAnimationConfig({})
+      .then((result) => {
+        if (!result?.data) return;
+        const config = result.data;
+        setSpringDefault({
+          type: 'spring' as const,
+          stiffness: config['animation.spring.default.stiffness'],
+          damping: config['animation.spring.default.damping'],
+        });
+      })
+      .catch((error) => {
+        logger.error('Button: failed to load animation config', error);
+      });
+  }, []);
 
   const addRipple = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
     const button = event.currentTarget;
@@ -155,7 +178,7 @@ const Button = ({
     <motion.div
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
-      transition={ANIMATION_CONSTANTS.SPRING_DEFAULT}
+      transition={springDefault}
       style={{ display: 'inline-block' }}
     >
       {buttonElement}

@@ -2,13 +2,17 @@
  * DetailHeader - Server Component for header section
  */
 
-import type { CategoryId, UnifiedCategoryConfig } from '@/src/lib/config/category-config';
-import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
+import type { ContentItem } from '@/src/lib/data/content';
+import type { UnifiedCategoryConfig } from '@/src/lib/types/component.types';
+import type {
+  ContentCategory,
+  GetGetContentDetailCompleteReturn,
+} from '@/src/types/database-overrides';
 import { DetailHeaderActions } from './detail-header-actions';
 
 export interface DetailHeaderProps {
   displayTitle: string;
-  item: ContentItem;
+  item: ContentItem | GetGetContentDetailCompleteReturn['content'];
   config: UnifiedCategoryConfig;
   onCopyContent?: (() => Promise<void>) | undefined;
 }
@@ -37,7 +41,7 @@ export function DetailHeader({ displayTitle, item, config, onCopyContent }: Deta
         <DetailHeaderActions
           item={item}
           typeName={config.typeName}
-          category={item.category as CategoryId}
+          category={item.category as ContentCategory}
           hasContent={hasContent}
           onCopyContent={onCopyContent}
           displayTitle={displayTitle}

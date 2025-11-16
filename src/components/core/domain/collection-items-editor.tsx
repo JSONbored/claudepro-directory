@@ -25,11 +25,12 @@ import {
   removeItemFromCollection,
   reorderCollectionItems,
 } from '@/src/lib/actions/content.actions';
-import type { CategoryId } from '@/src/lib/config/category-config';
 import { ArrowDown, ArrowUp, ExternalLink, Plus, Trash } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { logClientWarning } from '@/src/lib/utils/error.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
 import type { Tables } from '@/src/types/database.types';
+import type { ContentCategory } from '@/src/types/database-overrides';
 
 type CollectionItem = Tables<'collection_items'>;
 type Bookmark = Tables<'bookmarks'>;
@@ -73,7 +74,7 @@ export function CollectionItemManager({
         // Server-side schema validation handles content_type validation via categoryIdSchema
         const result = await addItemToCollection({
           collection_id: collectionId,
-          content_type: bookmark.content_type as CategoryId,
+          content_type: bookmark.content_type as ContentCategory,
           content_slug: bookmark.content_slug,
           order: items.length, // Add to end
         });
@@ -84,6 +85,10 @@ export function CollectionItemManager({
           router.refresh();
         }
       } catch (error) {
+        logClientWarning('CollectionItemManager: add failed', error, {
+          collectionId,
+          bookmarkId: bookmark.id,
+        });
         toasts.error.fromError(error, 'Failed to add item');
       }
     });
@@ -102,6 +107,10 @@ export function CollectionItemManager({
           router.refresh();
         }
       } catch (error) {
+        logClientWarning('CollectionItemManager: remove failed', error, {
+          collectionId,
+          itemId,
+        });
         toasts.error.fromError(error, 'Failed to remove item');
       }
     });
@@ -134,8 +143,11 @@ export function CollectionItemManager({
         });
         toasts.success.actionCompleted('Items reordered');
         router.refresh();
-      } catch (_error) {
+      } catch (error) {
         setItems(items); // Revert on error
+        logClientWarning('CollectionItemManager: reorder up failed', error, {
+          collectionId,
+        });
         toasts.error.actionFailed('reorder items');
       }
     });
@@ -168,8 +180,11 @@ export function CollectionItemManager({
         });
         toasts.success.actionCompleted('Items reordered');
         router.refresh();
-      } catch (_error) {
+      } catch (error) {
         setItems(items); // Revert on error
+        logClientWarning('CollectionItemManager: reorder down failed', error, {
+          collectionId,
+        });
         toasts.error.actionFailed('reorder items');
       }
     });

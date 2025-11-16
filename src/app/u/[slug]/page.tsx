@@ -16,12 +16,14 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/ui/card';
+import { getAuthenticatedUser } from '@/src/lib/auth/get-authenticated-user';
+import { getPublicUserProfile } from '@/src/lib/data/community/profile';
 import { FolderOpen, Globe, Users } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-import { createAnonClient } from '@/src/lib/supabase/server-anon';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
-import type { GetUserProfileReturn } from '@/src/types/database-overrides';
+import { normalizeError } from '@/src/lib/utils/error.utils';
+import type { GetGetUserProfileReturn } from '@/src/types/database-overrides';
 
 interface UserProfilePageProps {
   params: Promise<{ slug: string }>;
@@ -41,32 +43,34 @@ export async function generateMetadata({ params }: UserProfilePageProps): Promis
 
 export default async function UserProfilePage({ params }: UserProfilePageProps) {
   const { slug } = await params;
-  const supabase = createAnonClient();
 
-  // Get current user (if logged in)
-  const {
-    data: { user: currentUser },
-  } = await supabase.auth.getUser();
-
-  // Consolidated RPC: 4 calls → 1 (75% reduction)
-  // get_user_profile() includes: profile + stats + posts + collections + contributions
-  const { data: profileData, error } = await supabase.rpc('get_user_profile', {
-    p_user_slug: slug,
-    ...(currentUser?.id && { p_viewer_id: currentUser.id }),
+  const { user: currentUser } = await getAuthenticatedUser({
+    requireUser: false,
+    context: 'UserProfilePage',
   });
 
-  if (error) {
-    logger.error('Failed to load user profile', error);
+  let profileData: GetGetUserProfileReturn | null = null;
+  try {
+    profileData = await getPublicUserProfile({
+      slug,
+      ...(currentUser?.id ? { viewerId: currentUser.id } : {}),
+    });
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to load user profile detail');
+    logger.error('UserProfilePage: get_user_profile threw', normalized, {
+      slug,
+      ...(currentUser?.id ? { viewerId: currentUser.id } : {}),
+    });
+    throw normalized;
   }
 
   if (!profileData) {
-    logger.warn('User profile not found', { slug });
+    logger.warn('UserProfilePage: user profile not found', { slug });
     notFound();
   }
 
   // Type-safe RPC return using centralized type definition
-  const data = profileData as GetUserProfileReturn;
-  const { profile, stats, collections, contributions, isFollowing } = data;
+  const { profile, stats, collections, contributions, isFollowing } = profileData;
 
   const { followerCount, followingCount } = stats;
 
@@ -84,7 +88,7 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                   width={96}
                   height={96}
                   className="h-24 w-24 rounded-full border-4 border-background object-cover"
-                  priority
+                  priority={true}
                 />
               ) : (
                 <div className="flex h-24 w-24 items-center justify-center rounded-full border-4 border-background bg-accent font-bold text-2xl">
@@ -109,7 +113,7 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                       <span>•</span>
                       <NavLink
                         href={profile.website}
-                        external
+                        external={true}
                         className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}
                       >
                         <Globe className="h-4 w-4" />

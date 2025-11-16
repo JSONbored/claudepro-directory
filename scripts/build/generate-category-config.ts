@@ -15,6 +15,7 @@ import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createClient } from '@supabase/supabase-js';
+import { logger } from '@/src/lib/logger';
 import { computeHash, hasHashChanged, setHash } from '../utils/build-cache.js';
 import { ensureEnvVars } from '../utils/env.js';
 
@@ -56,7 +57,9 @@ interface DatabaseConfigWithFeatures {
 
 async function generateCategoryConfig() {
   const startTime = Date.now();
-  console.log('🔧 Generating static category config from PostgreSQL...\n');
+  logger.info('🔧 Generating static category config from PostgreSQL...\n', {
+    script: 'generate-category-config',
+  });
 
   try {
     // Load environment
@@ -72,7 +75,7 @@ async function generateCategoryConfig() {
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
     // Fetch category configs from database
-    console.log('📥 Fetching category configs from database...');
+    logger.info('📥 Fetching category configs from database...');
     const { data, error } = await supabase.rpc('get_category_configs_with_features');
 
     if (error) {
@@ -86,19 +89,24 @@ async function generateCategoryConfig() {
     const rawConfigs = data as unknown as Record<string, DatabaseConfigWithFeatures>;
     const categoryIds = Object.keys(rawConfigs);
 
-    console.log(`✅ Found ${categoryIds.length} categories: ${categoryIds.join(', ')}\n`);
+    logger.info(`✅ Found ${categoryIds.length} categories: ${categoryIds.join(', ')}\n`, {
+      categoryCount: categoryIds.length,
+      categories: categoryIds,
+    });
 
     // Generate content hash for change detection
     const contentHash = computeHash(data);
 
     if (!hasHashChanged('category-config', contentHash)) {
-      console.log('✓ Category config unchanged (database data identical), skipping generation');
-      console.log(`✅ Category config up-to-date (${Date.now() - startTime}ms)\n`);
+      logger.info('✓ Category config unchanged (database data identical), skipping generation');
+      logger.info(`✅ Category config up-to-date (${Date.now() - startTime}ms)\n`, {
+        duration: `${Date.now() - startTime}ms`,
+      });
       return true;
     }
 
     // Generate TypeScript file
-    console.log('📝 Generating TypeScript config file...');
+    logger.info('📝 Generating TypeScript config file...');
 
     const configEntries = Object.entries(rawConfigs)
       .map(([categoryId, dbConfig]) => {
@@ -259,13 +267,21 @@ export const CACHEABLE_CATEGORY_IDS = ${JSON.stringify(
       duration,
       files: [OUTPUT_FILE],
     });
-    console.log(`✅ Category config generated in ${duration}ms`);
-    console.log(`📝 Output: ${OUTPUT_FILE}`);
-    console.log(`🎯 Categories: ${categoryIds.length} configs cached\n`);
+    logger.info(`✅ Category config generated in ${duration}ms`, { duration: `${duration}ms` });
+    logger.info(`📝 Output: ${OUTPUT_FILE}`, { outputFile: OUTPUT_FILE });
+    logger.info(`🎯 Categories: ${categoryIds.length} configs cached\n`, {
+      categoryCount: categoryIds.length,
+    });
 
     return true;
   } catch (err) {
-    console.error('❌ Category config generation failed:', err);
+    logger.error(
+      '❌ Category config generation failed',
+      err instanceof Error ? err : new Error(String(err)),
+      {
+        script: 'generate-category-config',
+      }
+    );
     throw err;
   }
 }
@@ -273,10 +289,16 @@ export const CACHEABLE_CATEGORY_IDS = ${JSON.stringify(
 // Auto-run when executed directly
 generateCategoryConfig()
   .then(() => {
-    console.log('🎉 Category config generation complete!');
+    logger.info('🎉 Category config generation complete!', { script: 'generate-category-config' });
     process.exit(0);
   })
   .catch((err) => {
-    console.error('💥 Category config generation failed:', err);
+    logger.error(
+      '💥 Category config generation failed',
+      err instanceof Error ? err : new Error(String(err)),
+      {
+        script: 'generate-category-config',
+      }
+    );
     process.exit(1);
   });

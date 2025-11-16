@@ -6,6 +6,7 @@
 
 import { writeFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { logger } from '@/src/lib/logger';
 import { ensureEnvVars } from '../utils/env.js';
 
 const README_PATH = join(process.cwd(), 'README.md');
@@ -19,9 +20,9 @@ async function main() {
       throw new Error('Missing NEXT_PUBLIC_SUPABASE_URL environment variable');
     }
 
-    const edgeFunctionUrl = `${supabaseUrl}/functions/v1/content-api/sitewide?format=readme`;
+    const edgeFunctionUrl = `${supabaseUrl}/functions/v1/data-api/content/sitewide?format=readme`;
 
-    console.log('📝 Generating README.md from edge function...\n');
+    logger.info('📝 Generating README.md from edge function...\n', { script: 'generate-readme' });
 
     const response = await fetch(edgeFunctionUrl);
 
@@ -38,16 +39,26 @@ async function main() {
 
     writeFileSync(README_PATH, readme, 'utf-8');
 
-    console.log('✅ README.md generated successfully!');
-    console.log(`   Bytes: ${readme.length}`);
-    console.log('   Source: Supabase Edge Function (generate_readme_data RPC)');
+    logger.info('✅ README.md generated successfully!', { script: 'generate-readme' });
+    logger.info(`   Bytes: ${readme.length}`, { script: 'generate-readme', bytes: readme.length });
+    logger.info('   Source: Supabase Edge Function (generate_readme_data RPC)', {
+      script: 'generate-readme',
+    });
   } catch (error) {
-    console.error('❌ Failed to generate README:', error);
+    logger.error(
+      '❌ Failed to generate README',
+      error instanceof Error ? error : new Error(String(error)),
+      {
+        script: 'generate-readme',
+      }
+    );
     process.exit(1);
   }
 }
 
 main().catch((error) => {
-  console.error('❌ Fatal error:', error);
+  logger.error('❌ Fatal error', error instanceof Error ? error : new Error(String(error)), {
+    script: 'generate-readme',
+  });
   process.exit(1);
 });

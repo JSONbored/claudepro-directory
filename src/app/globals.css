@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "../styles/tabs.css";
 
 /* ================================================
    CLAUDE DESKTOP THEME SYSTEM - OKLCH Color Space
@@ -1038,6 +1039,53 @@
   }
 
   /* ========================================
+     SEARCH RESULT HIGHLIGHTING
+     ======================================== */
+
+  /* Base mark styling - semantic HTML5 element for search highlighting */
+  mark {
+    background-color: rgb(250 204 21 / 0.3); /* yellow-300 with 30% opacity */
+    color: inherit; /* Inherit text color for proper contrast */
+    padding: 0.125rem 0.25rem; /* Subtle padding */
+    border-radius: 0.25rem; /* Rounded corners */
+    font-weight: 500; /* Slightly bolder */
+    text-decoration: none; /* No underline */
+    box-decoration-break: clone; /* Ensure background wraps across lines */
+    -webkit-box-decoration-break: clone; /* Safari support */
+  }
+
+  /* Dark mode */
+  @media (prefers-color-scheme: dark) {
+    mark {
+      background-color: rgb(234 179 8 / 0.4); /* yellow-600 with 40% opacity */
+    }
+  }
+
+  /* High contrast mode support */
+  @media (prefers-contrast: high) {
+    mark {
+      background-color: rgb(250 204 21 / 0.5); /* More opaque for better visibility */
+      border: 1px solid rgb(234 179 8); /* Add border for clarity */
+    }
+  }
+
+  /* Reduced motion support */
+  @media (prefers-reduced-motion: reduce) {
+    mark {
+      transition: none; /* No transitions if user prefers reduced motion */
+    }
+  }
+
+  /* Print styles - remove highlighting for printing */
+  @media print {
+    mark {
+      background-color: transparent;
+      color: inherit;
+      font-weight: bold; /* Use bold instead of background for print */
+    }
+  }
+
+  /* ========================================
      PRODUCTION-GRADE CUSTOM SCROLLBARS
      ======================================== */
 
@@ -1286,20 +1334,7 @@
      Modern theme toggle animation for Chrome/Edge 111+
      ======================================== */
 
-  /**
-   * Circle Blur Animation for Theme Toggle
-   *
-   * Creates a dramatic circular expanding reveal with enhanced visual effects
-   * - Animates from click position (set via --x, --y CSS variables)
-   * - Expands from 0% to 200% to ensure full viewport coverage
-   * - Enhanced blur effect (8px to 0) for more prominent visual feedback
-   * - Scale transformation for added depth and emphasis
-   * - Slower duration (700ms) for smoother, more noticeable transition
-   *
-   * Browser Support:
-   * - Chrome/Edge 111+: Full animation with all effects
-   * - Firefox/Safari: Graceful fallback (instant transition with CSS fade)
-   */
+  /** Circle blur animation for theme toggle (progressive enhancement). */
   @supports (view-transition-name: root) {
     /* Disable old view animation (fade out instantly) */
     ::view-transition-old(root) {
@@ -1333,31 +1368,7 @@
      Baseline support as of October 2025
      ======================================== */
 
-  /**
-   * Smooth Card → Detail Page Morphing Animation
-   *
-   * Creates seamless transitions when navigating from card to detail page
-   * - Progressive enhancement: Works everywhere, enhanced where supported
-   * - Respects prefers-reduced-motion
-   * - Shared element transitions using view-transition-name
-   * - Smooth scale and fade animations
-   *
-   * Browser Support (Q4 2025):
-   * - ✅ Chrome 111+ (same-document transitions)
-   * - ✅ Edge 111+ (same-document transitions)
-   * - ✅ Firefox 144+ (same-document transitions)
-   * - ✅ Safari 18+ (same-document transitions)
-   *
-   * Usage:
-   * - Cards set view-transition-name: config-card-{slug}
-   * - Detail pages match with same transition name
-   * - navigateWithTransition() handles the API call
-   *
-   * Animation Flow:
-   * 1. Old view (card) scales down and fades out
-   * 2. New view (detail) scales up and fades in
-   * 3. Shared elements morph smoothly between states
-   */
+  /** Smooth card→detail morphing using view transitions (Prog. enhancement). */
   @supports (view-transition-name: none) {
     /* Root transition: Subtle cross-fade for layout context */
     ::view-transition-old(root),
@@ -1419,10 +1430,10 @@
 
   /* Respect prefers-reduced-motion */
   @media (prefers-reduced-motion: reduce) {
-    ::view-transition-old(*),
-    ::view-transition-new(*) {
-      animation-duration: 1ms !important;
-      animation-delay: 0s !important;
+    html ::view-transition-old(*),
+    html ::view-transition-new(*) {
+      animation-duration: 1ms;
+      animation-delay: 0s;
     }
   }
 }

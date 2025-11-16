@@ -1,6 +1,7 @@
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
-import { ACRONYMS } from './constants';
+import { ACRONYMS } from '@/src/lib/data/config/constants';
+import type { ContentCategory } from '@/src/types/database-overrides';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -132,7 +133,7 @@ export function getDisplayTitle(item: {
   const slug = item.slug || '';
   const baseTitle = slugToTitle(slug);
 
-  if (item.category === 'commands') {
+  if (item.category === ('commands' as ContentCategory)) {
     return `/${slug}`;
   }
 

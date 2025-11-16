@@ -1,24 +1,6 @@
 'use client';
 
-/**
- * Homepage Client Component
- * Database-First 2025 Architecture: Server data with client interactivity
- *
- * PERFORMANCE CRITICAL: This is the first page users see
- * Data fetched server-side, search redirects to /search page
- *
- * Architecture Changes (2025-10-30):
- * 1. ✅ Data fetched from content table (server-side in page.tsx)
- * 2. ✅ Search uses direct Supabase RPC (database-first, no API route)
- * 3. ✅ No client-side filtering - just display and navigation
- * 4. ✅ Client-only for animations and interactions
- *
- * Component Organization:
- * 1. ✅ Display server-fetched data
- * 2. ✅ Handle search navigation
- * 3. ✅ Interactive UI elements (motion, tabs)
- * Result: Hybrid architecture - server data, client UX
- */
+/** Homepage client consuming homepageConfigs for runtime-tunable featured categories */
 
 import { motion } from 'motion/react';
 import dynamic from 'next/dynamic';
@@ -34,17 +16,23 @@ import {
   HomepageStatsSkeleton,
   Skeleton,
 } from '@/src/components/primitives/feedback/loading-skeleton';
+import { getAnimationConfig } from '@/src/lib/actions/feature-flags.actions';
 import {
+  type ContentCategory,
   getCategoryConfigs,
   getCategoryStatsConfig,
-  HOMEPAGE_FEATURED_CATEGORIES,
-} from '@/src/lib/config/category-config';
-import { ROUTES } from '@/src/lib/constants';
-import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
+  getHomepageFeaturedCategories,
+} from '@/src/lib/data/config/category';
+import { ROUTES } from '@/src/lib/data/config/constants';
+import type { ContentItem } from '@/src/lib/data/content';
 import { logger } from '@/src/lib/logger';
-import type { DisplayableContent, FilterState } from '@/src/lib/types/component.types';
-import type { HomePageClientProps } from '@/src/lib/types/page-props.types';
-import { ANIMATION_CONSTANTS, UI_CLASSES } from '@/src/lib/ui-constants';
+import type {
+  DisplayableContent,
+  FilterState,
+  HomePageClientProps,
+} from '@/src/lib/types/component.types';
+import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { logClientWarning, logUnhandledPromise } from '@/src/lib/utils/error.utils';
 
 /**
  * OPTIMIZATION (2025-10-22): Enabled SSR for UnifiedSearch
@@ -77,9 +65,41 @@ function HomePageClientComponent({
   const [isSearching, setIsSearching] = useState(false);
   const [filters, setFilters] = useState({});
   const [currentSearchQuery, setCurrentSearchQuery] = useState('');
+  const [featuredCategories, setFeaturedCategories] = useState<readonly ContentCategory[]>([]);
+  const [springDefault, setSpringDefault] = useState({
+    type: 'spring' as const,
+    stiffness: 400,
+    damping: 17,
+  });
 
   const categoryStatsConfig = useMemo(() => getCategoryStatsConfig(), []);
   const categoryConfigs = useMemo(() => getCategoryConfigs(), []);
+
+  useEffect(() => {
+    getHomepageFeaturedCategories()
+      .then((categories) => {
+        setFeaturedCategories(categories);
+      })
+      .catch((error) => {
+        logClientWarning('HomePageClient: failed to load featured categories', error);
+      });
+  }, []);
+
+  useEffect(() => {
+    getAnimationConfig({})
+      .then((result) => {
+        if (!result?.data) return;
+        const config = result.data;
+        setSpringDefault({
+          type: 'spring' as const,
+          stiffness: config['animation.spring.default.stiffness'],
+          damping: config['animation.spring.default.damping'],
+        });
+      })
+      .catch((error) => {
+        logger.error('HomePageClient: failed to load animation config', error);
+      });
+  }, []);
 
   const fetchAllConfigs = useCallback(
     async (offset: number, limit = 30) => {
@@ -88,25 +108,22 @@ function HomePageClientComponent({
       setIsLoadingAllConfigs(true);
 
       try {
-        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-        const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+        const { fetchPaginatedContent } = await import('@/src/lib/actions/content.actions');
 
-        if (!(supabaseUrl && supabaseKey)) {
-          throw new Error('Missing Supabase environment variables');
-        }
-
-        const url = `${supabaseUrl}/functions/v1/content-paginated?offset=${offset}&limit=${limit}&category=all`;
-        const response = await fetch(url, {
-          headers: {
-            Authorization: `Bearer ${supabaseKey}`,
-          },
+        const result = await fetchPaginatedContent({
+          offset,
+          limit,
+          category: null,
         });
 
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        if (result?.serverError) {
+          // Error already logged by safe-action middleware
+          logger.error('Failed to load content', new Error(result.serverError), {
+            source: 'fetchAllConfigs',
+          });
         }
 
-        const newItems: ContentItem[] = await response.json();
+        const newItems = (result?.data ?? []) as ContentItem[];
 
         if (newItems.length < limit) {
           setHasMoreAllConfigs(false);
@@ -128,8 +145,8 @@ function HomePageClientComponent({
 
   useEffect(() => {
     if (activeTab === 'all' && allConfigs.length === 0 && !isLoadingAllConfigs) {
-      fetchAllConfigs(0).catch(() => {
-        // Error already logged in fetchAllConfigs
+      fetchAllConfigs(0).catch((error) => {
+        logUnhandledPromise('HomePageClient: initial fetchAllConfigs failed', error);
       });
     }
   }, [activeTab, allConfigs.length, fetchAllConfigs, isLoadingAllConfigs]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -147,18 +164,22 @@ function HomePageClientComponent({
       setIsSearching(true);
 
       try {
-        const { searchContent } = await import('@/src/lib/edge/search-client');
+        const { searchUnifiedClient } = await import('@/src/lib/edge/search-client');
 
         const effectiveTab = categoryOverride ?? activeTab;
         const categories =
           effectiveTab !== 'all' && effectiveTab !== 'community' ? [effectiveTab] : undefined;
 
-        const response = await searchContent(query.trim(), {
-          ...(categories && { categories }),
-          limit: 50,
+        const result = await searchUnifiedClient({
+          query: query.trim(),
+          entities: ['content'],
+          filters: {
+            limit: 50,
+            ...(categories ? { categories } : {}),
+          },
         });
 
-        setSearchResults(response.results);
+        setSearchResults(result.results as DisplayableContent[]);
       } catch (error) {
         logger.error('Search failed', error as Error, { source: 'HomePageSearch' });
         setSearchResults(allConfigs);
@@ -177,11 +198,10 @@ function HomePageClientComponent({
 
   // Create lookup maps dynamically for all featured categories
   // O(1) slug checking instead of O(n) array.some() calls
-  // Only used for non-search tab filtering
   const slugLookupMaps = useMemo(() => {
     const maps: Record<string, Set<string>> = {};
 
-    for (const category of HOMEPAGE_FEATURED_CATEGORIES) {
+    for (const category of featuredCategories) {
       const categoryData = initialData[category as keyof typeof initialData];
       if (categoryData && Array.isArray(categoryData)) {
         maps[category] = new Set(categoryData.map((item: DisplayableContent) => item.slug));
@@ -189,7 +209,7 @@ function HomePageClientComponent({
     }
 
     return maps;
-  }, [initialData]);
+  }, [initialData, featuredCategories]);
 
   // Filter results by active tab
   // Performance: When searching, DB filters by category (no client-side filtering needed)
@@ -219,8 +239,10 @@ function HomePageClientComponent({
       setActiveTab(value);
       // If currently searching, re-run search with new category filter (DB-side)
       if (isSearching && currentSearchQuery) {
-        handleSearch(currentSearchQuery, value).catch(() => {
-          // Silent fail - search will retry on next user interaction
+        handleSearch(currentSearchQuery, value).catch((error) => {
+          logUnhandledPromise('HomePageClient: search retry failed', error, {
+            tab: value,
+          });
         });
       }
     },
@@ -229,8 +251,8 @@ function HomePageClientComponent({
 
   // Handle clear search
   const handleClearSearch = useCallback(() => {
-    handleSearch('').catch(() => {
-      // Silent fail - search cleared on error
+    handleSearch('').catch((error) => {
+      logUnhandledPromise('HomePageClient: clear search failed', error);
     });
   }, [handleSearch]);
 
@@ -271,14 +293,21 @@ function HomePageClientComponent({
                         <motion.div
                           className="flex min-w-fit items-center gap-2 whitespace-nowrap rounded-lg border border-border/40 bg-card/50 px-4 py-2.5 backdrop-blur-sm"
                           whileTap={{ scale: 0.95 }}
-                          transition={ANIMATION_CONSTANTS.SPRING_DEFAULT}
+                          transition={springDefault}
                         >
                           <Icon
                             className={`${UI_CLASSES.ICON_SM} flex-shrink-0 text-accent`}
                             aria-hidden="true"
                           />
                           <span className="font-medium text-sm">
-                            <NumberTicker value={stats[categoryId] || 0} delay={delay} />
+                            <NumberTicker
+                              value={
+                                typeof stats[categoryId] === 'number'
+                                  ? stats[categoryId]
+                                  : stats[categoryId]?.total || 0
+                              }
+                              delay={delay}
+                            />
                           </span>
                         </motion.div>
                       </Link>
@@ -311,11 +340,11 @@ function HomePageClientComponent({
                           y: -2,
                           borderColor: 'hsl(var(--accent) / 0.3)',
                           backgroundColor: 'hsl(var(--accent) / 0.05)',
-                          transition: ANIMATION_CONSTANTS.SPRING_DEFAULT,
+                          transition: springDefault,
                         }}
                         whileTap={{
                           scale: 0.98,
-                          transition: ANIMATION_CONSTANTS.SPRING_DEFAULT,
+                          transition: springDefault,
                         }}
                       >
                         <Icon
@@ -323,7 +352,14 @@ function HomePageClientComponent({
                           aria-hidden="true"
                         />
                         <span className={`transition-colors ${UI_CLASSES.GROUP_HOVER_ACCENT}`}>
-                          <NumberTicker value={stats[categoryId] || 0} delay={delay} />{' '}
+                          <NumberTicker
+                            value={
+                              typeof stats[categoryId] === 'number'
+                                ? stats[categoryId]
+                                : stats[categoryId]?.total || 0
+                            }
+                            delay={delay}
+                          />{' '}
                           {displayText}
                         </span>
                       </motion.div>
@@ -344,6 +380,7 @@ function HomePageClientComponent({
           isSearching={isSearching}
           filteredResults={filteredResults}
           onClearSearch={handleClearSearch}
+          searchQuery={currentSearchQuery}
         />
 
         {/* Featured Content Sections - Render immediately (above the fold) */}
@@ -352,6 +389,7 @@ function HomePageClientComponent({
             categories={featuredByCategory || initialData}
             categoryConfigs={categoryConfigs}
             featuredJobs={featuredJobs}
+            featuredCategories={featuredCategories}
           />
         )}
 

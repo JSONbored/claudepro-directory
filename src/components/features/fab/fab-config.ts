@@ -4,7 +4,7 @@
 
 import { ArrowUp, Bell, FileText, Plus, Search } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
-import type { MainFABConfig, SpeedDialAction } from './fab.types';
+import type { MainFABConfig, SpeedDialAction } from '@/src/lib/types/component.types';
 
 export const handleScrollToTop = (): void => {
   try {
@@ -45,11 +45,18 @@ export const createMainFABConfig = (onNavigate: () => void): MainFABConfig => ({
  * Speed dial actions configuration
  * @param unreadCount - Notification count for conditional badge display
  * @param onNotificationsClick - Handler to open notifications sheet
+ * @param flags - Feature flags controlling which actions to show
  */
 export const createSpeedDialActions = (
   unreadCount: number,
   onNotificationsClick: () => void,
-  onSubmitClick: () => void
+  onSubmitClick: () => void,
+  flags: {
+    showSubmit: boolean;
+    showSearch: boolean;
+    showScrollToTop: boolean;
+    showNotifications: boolean;
+  }
 ): SpeedDialAction[] => [
   // Submit - All breakpoints
   {
@@ -57,7 +64,7 @@ export const createSpeedDialActions = (
     icon: FileText,
     label: 'Submit Content',
     onClick: onSubmitClick,
-    show: true,
+    show: flags.showSubmit,
   },
 
   // Search - All breakpoints
@@ -66,7 +73,7 @@ export const createSpeedDialActions = (
     icon: Search,
     label: 'Search (⌘K)',
     onClick: handleSearchClick,
-    show: true,
+    show: flags.showSearch,
   },
 
   // Scroll to Top - All breakpoints
@@ -75,7 +82,7 @@ export const createSpeedDialActions = (
     icon: ArrowUp,
     label: 'Scroll to top',
     onClick: handleScrollToTop,
-    show: true,
+    show: flags.showScrollToTop,
   },
 
   // Notifications - Mobile only, conditional on unread count
@@ -86,6 +93,6 @@ export const createSpeedDialActions = (
     onClick: onNotificationsClick,
     badge: unreadCount,
     mobileOnly: true,
-    show: unreadCount > 0,
+    show: flags.showNotifications && unreadCount > 0,
   },
 ];

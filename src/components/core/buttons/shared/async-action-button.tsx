@@ -12,10 +12,10 @@ import { useButtonSuccess } from '@/src/hooks/use-button-success';
 import { Check, type LucideIcon } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { SEMANTIC_COLORS } from '@/src/lib/semantic-colors';
+import type { AsyncActionHelpers, ButtonStyleProps } from '@/src/lib/types/component.types';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
-import type { AsyncActionHelpers, ButtonStyleProps } from './button-types';
 
 export interface AsyncActionButtonProps extends ButtonStyleProps {
   label: string;
@@ -36,7 +36,7 @@ export function AsyncActionButton({
   successLabel = 'Success!',
   icon: Icon,
   size = 'sm',
-  buttonVariant = 'outline',
+  variant = 'outline',
   className,
   showIcon = true,
   disabled = false,
@@ -93,7 +93,7 @@ export function AsyncActionButton({
 
   return (
     <Button
-      variant={buttonVariant}
+      variant={variant}
       size={size}
       onClick={handleClick}
       disabled={disabled || isLoading || isSuccess}

@@ -284,13 +284,11 @@ self.addEventListener("sync", (event) => {
 
   if (event.tag === "submit-config") {
     event.waitUntil(syncConfigSubmissions());
-  } else if (event.tag === "track-view") {
-    event.waitUntil(syncViewTracking());
-  } else if (event.tag === "analytics") {
-    event.waitUntil(syncAnalyticsData());
   } else if (event.tag.startsWith("retry-")) {
     event.waitUntil(retryFailedRequest(event.tag));
   }
+  // Legacy tags "track-view" and "analytics" removed - endpoints do not exist
+  // Analytics tracking is now handled via queue-based pulse system
 });
 
 // Store for failed requests
@@ -403,39 +401,8 @@ async function syncConfigSubmissions() {
   }
 }
 
-// Sync view tracking data
-async function syncViewTracking() {
-  log("Syncing view tracking data");
-  const cache = await caches.open(FAILED_REQUESTS_STORE);
-  const requests = await cache.keys();
-
-  const trackingRequests = requests.filter(
-    (req) =>
-      req.url.includes("/api/track") || req.url.includes("/actions/track"),
-  );
-
-  for (const request of trackingRequests) {
-    await retryFailedRequest(request.url);
-  }
-}
-
-// Sync analytics data
-async function syncAnalyticsData() {
-  log("Syncing analytics data");
-  const cache = await caches.open(FAILED_REQUESTS_STORE);
-  const requests = await cache.keys();
-
-  const analyticsRequests = requests.filter(
-    (req) =>
-      req.url.includes("umami") ||
-      req.url.includes("analytics") ||
-      req.url.includes("vitals"),
-  );
-
-  for (const request of analyticsRequests) {
-    await retryFailedRequest(request.url);
-  }
-}
+// Legacy sync functions removed - endpoints /api/track and /actions/track do not exist
+// Analytics tracking is now handled via queue-based pulse system (pulse queue)
 
 // Periodic background sync (fallback)
 self.addEventListener("message", (event) => {

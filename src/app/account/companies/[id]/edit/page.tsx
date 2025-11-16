@@ -4,12 +4,11 @@
 
 import { notFound, redirect } from 'next/navigation';
 import { CompanyForm } from '@/src/components/core/forms/company-form';
+import { getAuthenticatedUser } from '@/src/lib/auth/get-authenticated-user';
+import { getUserCompanyById } from '@/src/lib/data/account/user-data';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-import { createClient } from '@/src/lib/supabase/server';
-import type { Tables } from '@/src/types/database.types';
-
-export const dynamic = 'force-dynamic';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 
 export const metadata = generatePageMetadata('/account/companies/:id/edit');
 
@@ -19,24 +18,26 @@ interface EditCompanyPageProps {
 
 export default async function EditCompanyPage({ params }: EditCompanyPageProps) {
   const { id } = await params;
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { user } = await getAuthenticatedUser({ context: 'EditCompanyPage' });
 
   if (!user) {
+    logger.warn('EditCompanyPage: unauthenticated access attempt', { companyId: id });
     redirect('/login');
   }
 
-  // Fetch company with ownership verification
-  const { data: company, error } = await supabase
-    .from('companies')
-    .select('*')
-    .eq('id', id)
-    .eq('owner_id', user.id)
-    .single();
+  let company: Awaited<ReturnType<typeof getUserCompanyById>> | null = null;
+  try {
+    company = await getUserCompanyById(user.id, id);
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to load company for edit page');
+    logger.error('EditCompanyPage: getUserCompanyById threw', normalized, {
+      companyId: id,
+      userId: user.id,
+    });
+    throw normalized;
+  }
 
-  if (error || !company) {
+  if (!company) {
     logger.warn('Company not found or access denied', { companyId: id, userId: user.id });
     notFound();
   }
@@ -48,7 +49,7 @@ export default async function EditCompanyPage({ params }: EditCompanyPageProps) 
         <p className="text-muted-foreground">Update your company profile information</p>
       </div>
 
-      <CompanyForm mode="edit" initialData={company as Tables<'companies'>} />
+      <CompanyForm mode="edit" initialData={company} />
     </div>
   );
 }

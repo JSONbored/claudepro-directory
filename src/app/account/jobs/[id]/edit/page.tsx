@@ -1,17 +1,19 @@
 /**
- * Edit Job Page - Update existing job postings.
+ * Edit Job Page - Database-First Architecture
+ * Uses updateJob server action (calls update_job RPC)
  */
 
-import { revalidatePath } from 'next/cache';
 import { notFound, redirect } from 'next/navigation';
 import { JobForm } from '@/src/components/core/forms/job-form';
+import { type UpdateJobInput, updateJob } from '@/src/lib/actions/jobs.actions';
+import { getAuthenticatedUser } from '@/src/lib/auth/get-authenticated-user';
+import { getUserJobById } from '@/src/lib/data/account/user-data';
+import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
-import type { Tables } from '@/src/types/database.types';
-
-// Force dynamic rendering - requires authentication
-export const dynamic = 'force-dynamic';
+import { ensureStringArray } from '@/src/lib/utils/data.utils';
+import { normalizeError } from '@/src/lib/utils/error.utils';
+import type { JobCategory } from '@/src/types/database-overrides';
 
 export const metadata = generatePageMetadata('/account/jobs/:id/edit');
 
@@ -21,82 +23,68 @@ interface EditJobPageProps {
 
 export default async function EditJobPage({ params }: EditJobPageProps) {
   const resolvedParams = await params;
-  const supabase = await createClient();
+  const { user } = await getAuthenticatedUser({ context: 'EditJobPage' });
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  if (!user) {
+    logger.warn('EditJobPage: unauthenticated access attempt', { jobId: resolvedParams.id });
+    redirect('/login');
+  }
 
-  if (!user) redirect('/login');
+  let job: Awaited<ReturnType<typeof getUserJobById>> | null = null;
+  try {
+    job = await getUserJobById(user.id, resolvedParams.id);
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to load user job for edit page');
+    logger.error('EditJobPage: getUserJobById threw', normalized, {
+      jobId: resolvedParams.id,
+      userId: user.id,
+    });
+    throw normalized;
+  }
+  if (!job) {
+    logger.warn('EditJobPage: job not found or not owned by user', {
+      jobId: resolvedParams.id,
+      userId: user.id,
+    });
+    notFound();
+  }
 
-  const { data, error } = await supabase
-    .from('jobs')
-    .select('*')
-    .eq('id', resolvedParams.id)
-    .eq('user_id', user.id)
-    .single();
-
-  if (error || !data) notFound();
-
-  const job = data as Tables<'jobs'>;
-
-  const handleSubmit = async (data: Record<string, unknown>) => {
+  const handleSubmit = async (data: Omit<UpdateJobInput, 'job_id'>) => {
     'use server';
 
-    const supabase = await createClient();
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-
-    if (authError || !user) throw new Error('You must be signed in to update jobs');
-
-    // Get JWT token for edge function authentication
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-
-    if (!session?.access_token) {
-      throw new Error('No valid session found');
+    let result: Awaited<ReturnType<typeof updateJob>>;
+    try {
+      result = await updateJob({
+        job_id: resolvedParams.id,
+        ...data,
+      });
+    } catch (error) {
+      const normalized = normalizeError(error, 'updateJob server action failed');
+      logger.error('EditJobPage: updateJob threw', normalized, {
+        jobId: resolvedParams.id,
+        userId: user.id,
+      });
+      throw normalized;
     }
 
-    // Call jobs-handler edge function directly
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/jobs-handler`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${session.access_token}`,
-          'X-Job-Action': 'update',
-        },
-        body: JSON.stringify({ ...data, id: resolvedParams.id }),
-      }
-    );
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
-      throw new Error(errorData.message || `Failed to update job: ${response.statusText}`);
+    if (result?.serverError) {
+      const normalized = normalizeError(result.serverError, 'updateJob server error response');
+      logger.error('EditJobPage: updateJob returned serverError', normalized, {
+        jobId: resolvedParams.id,
+        userId: user.id,
+      });
+      throw normalized;
     }
 
-    const result = (await response.json()) as {
-      success: boolean;
-      job: Tables<'jobs'>;
-    };
+    if (!result?.data) {
+      logger.error('EditJobPage: updateJob returned no data', undefined, {
+        jobId: resolvedParams.id,
+        userId: user.id,
+      });
+      return { success: false };
+    }
 
-    if (result.success) {
-      if (!result.job || typeof result.job !== 'object') {
-        throw new Error('Invalid response: job object missing on successful update');
-      }
-
-      if (!result.job.slug || typeof result.job.slug !== 'string') {
-        throw new Error('Invalid response: job slug missing or invalid');
-      }
-
-      revalidatePath('/jobs');
-      revalidatePath(`/jobs/${result.job.slug}`);
-      revalidatePath('/account/jobs');
-
+    if (result.data.success) {
       redirect('/account/jobs');
     }
 
@@ -113,21 +101,23 @@ export default async function EditJobPage({ params }: EditJobPageProps) {
         initialData={{
           title: job.title,
           company: job.company,
+          company_id: job.company_id,
           location: job.location,
           description: job.description,
           salary: job.salary,
-          remote: job.remote,
+          remote: job.remote ?? undefined,
           type: job.type,
           workplace: job.workplace,
           experience: job.experience,
-          category: job.category,
-          tags: job.tags,
-          requirements: job.requirements,
-          benefits: job.benefits,
+          category: job.category as JobCategory,
+          tags: ensureStringArray(job.tags),
+          requirements: ensureStringArray(job.requirements),
+          benefits: ensureStringArray(job.benefits),
           link: job.link,
           contact_email: job.contact_email,
           company_logo: job.company_logo,
-          plan: job.plan,
+          plan: job.plan as 'one-time' | 'subscription',
+          tier: job.tier as 'standard' | 'featured',
         }}
         onSubmit={handleSubmit}
         submitLabel="Update Job Listing"

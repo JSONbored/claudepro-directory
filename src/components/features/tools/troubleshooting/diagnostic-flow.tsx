@@ -60,7 +60,7 @@ export function DiagnosticFlow(props: DiagnosticFlowProps) {
   const isComplete = currentStepData?.solution !== undefined;
 
   return (
-    <Card itemScope itemType="https://schema.org/HowTo" className="my-8">
+    <Card itemScope={true} itemType="https://schema.org/HowTo" className="my-8">
       <CardHeader>
         <CardTitle>{title}</CardTitle>
         {description && <CardDescription>{description}</CardDescription>}

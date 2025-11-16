@@ -35,6 +35,7 @@ import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import ora from 'ora';
+import { logger } from '@/src/lib/logger';
 import { computeHash, hasHashChanged, setHash } from '../utils/build-cache.js';
 
 // ============================================================================
@@ -119,10 +120,18 @@ function loadEnvConfig(): { projectId?: string; dbUrl?: string } {
   try {
     // Load from .env.db.local
     if (!existsSync('.env.db.local')) {
-      console.error('❌ Missing .env.db.local file');
-      console.error('Create it with:');
-      console.error('SUPABASE_PROJECT_ID="your-project-ref"');
-      console.error('POSTGRES_URL_NON_POOLING="postgres://..."  # For schema dumps only');
+      logger.error('❌ Missing .env.db.local file', undefined, { script: 'sync-database-schema' });
+      logger.error('Create it with:', undefined, { script: 'sync-database-schema' });
+      logger.error('SUPABASE_PROJECT_ID="your-project-ref"', undefined, {
+        script: 'sync-database-schema',
+      });
+      logger.error(
+        'POSTGRES_URL_NON_POOLING="postgres://..."  # For schema dumps only',
+        undefined,
+        {
+          script: 'sync-database-schema',
+        }
+      );
       return {};
     }
 
@@ -142,7 +151,13 @@ function loadEnvConfig(): { projectId?: string; dbUrl?: string } {
       dbUrl: envVars.POSTGRES_URL_NON_POOLING,
     };
   } catch (error) {
-    console.error('❌ Failed to load .env.db.local:', error);
+    logger.error(
+      '❌ Failed to load .env.db.local',
+      error instanceof Error ? error : new Error(String(error)),
+      {
+        script: 'sync-database-schema',
+      }
+    );
     return {};
   }
 }
@@ -161,7 +176,7 @@ function calculateSchemaHash(dbUrl: string): string | null {
 
     return computeHash(result);
   } catch {
-    console.warn('⚠️  Could not query database schema');
+    logger.warn('⚠️  Could not query database schema', { script: 'sync-database-schema' });
     return null;
   }
 }
@@ -204,9 +219,9 @@ function generateSchemaDump(isForce: boolean, cachedHash?: string | null): StepR
   const spinner = ora();
 
   try {
-    console.log(`\n${'='.repeat(80)}`);
-    console.log('🗂️  STEP 1: Schema Dump (supabase/schema.sql)');
-    console.log(`${'='.repeat(80)}\n`);
+    logger.info(`\n${'='.repeat(80)}`);
+    logger.info('🗂️  STEP 1: Schema Dump (supabase/schema.sql)');
+    logger.info(`${'='.repeat(80)}\n`);
 
     // Check if regeneration needed
     if (!isForce) {
@@ -263,7 +278,14 @@ function generateSchemaDump(isForce: boolean, cachedHash?: string | null): StepR
     };
   } catch (error) {
     spinner.fail('Schema dump failed');
-    console.error(`   ${error instanceof Error ? error.message : String(error)}`);
+    logger.error(
+      `   ${error instanceof Error ? error.message : String(error)}`,
+      error instanceof Error ? error : new Error(String(error)),
+      {
+        script: 'sync-database-schema',
+        step: 'Schema Dump',
+      }
+    );
     return {
       step: 'Schema Dump',
       success: false,
@@ -283,9 +305,9 @@ function generateTypes(isForce: boolean, cachedHash?: string | null): StepResult
   const spinner = ora();
 
   try {
-    console.log(`\n${'='.repeat(80)}`);
-    console.log('📘 STEP 2: TypeScript Types (src/types/database.types.ts)');
-    console.log(`${'='.repeat(80)}\n`);
+    logger.info(`\n${'='.repeat(80)}`);
+    logger.info('📘 STEP 2: TypeScript Types (src/types/database.types.ts)');
+    logger.info(`${'='.repeat(80)}\n`);
 
     // Check if regeneration needed
     if (!isForce) {
@@ -342,15 +364,40 @@ function generateTypes(isForce: boolean, cachedHash?: string | null): StepResult
 
     spinner.succeed(`Type generation complete (${duration}ms)`);
 
+    // Auto-generate all database overrides after type generation
+    spinner.start('Generating database overrides...');
+    try {
+      execSync('pnpm generate:db-overrides', {
+        encoding: 'utf-8',
+        stdio: 'pipe',
+        cwd: ROOT,
+      });
+      spinner.succeed('Database overrides generated');
+    } catch (error) {
+      spinner.warn('Database override generation failed (non-critical)');
+      logger.warn(`   ${error instanceof Error ? error.message : String(error)}`, {
+        script: 'sync-database-schema',
+        step: 'Database Overrides',
+      });
+      // Don't fail the whole process - override generation is optional
+    }
+
     return {
       step: 'TypeScript Types',
       success: true,
       skipped: false,
-      duration_ms: duration,
+      duration_ms: Math.round(performance.now() - startTime),
     };
   } catch (error) {
     spinner.fail('Type generation failed');
-    console.error(`   ${error instanceof Error ? error.message : String(error)}`);
+    logger.error(
+      `   ${error instanceof Error ? error.message : String(error)}`,
+      error instanceof Error ? error : new Error(String(error)),
+      {
+        script: 'sync-database-schema',
+        step: 'TypeScript Types',
+      }
+    );
     return {
       step: 'TypeScript Types',
       success: false,
@@ -377,11 +424,15 @@ function main() {
   const runDump = onlyDump || !(onlyTypes || skipDump);
   const runTypes = onlyTypes || !(onlyDump || skipTypes);
 
-  console.log('🔄 Database Schema Sync\n');
-  console.log('Configuration:');
-  console.log(`  Force regeneration: ${isForce ? 'Yes' : 'No'}`);
-  console.log(`  Schema dump: ${runDump ? 'Yes' : 'No'}`);
-  console.log(`  Type generation: ${runTypes ? 'Yes' : 'No'}\n`);
+  logger.info('🔄 Database Schema Sync\n', { script: 'sync-database-schema' });
+  logger.info('Configuration:');
+  logger.info(`  Force regeneration: ${isForce ? 'Yes' : 'No'}`);
+  logger.info(`  Schema dump: ${runDump ? 'Yes' : 'No'}`);
+  logger.info(`  Type generation: ${runTypes ? 'Yes' : 'No'}\n`, {
+    force: isForce,
+    runDump,
+    runTypes,
+  });
 
   const overallStartTime = performance.now();
   const results: StepResult[] = [];
@@ -392,7 +443,7 @@ function main() {
 
     // Early exit optimization: Check if anything needs regeneration
     if (!isForce && runDump && runTypes) {
-      console.log('🔍 Checking if database schema has changed...\n');
+      logger.info('🔍 Checking if database schema has changed...\n');
       cachedSchemaHashForRun = getSchemaHash();
 
       if (cachedSchemaHashForRun) {
@@ -402,13 +453,13 @@ function main() {
         );
 
         if (schemaUpToDate) {
-          console.log('✅ Database schema unchanged - all artifacts up to date');
-          console.log('   Use --force to regenerate anyway\n');
+          logger.info('✅ Database schema unchanged - all artifacts up to date');
+          logger.info('   Use --force to regenerate anyway\n');
           cleanup();
           return;
         }
 
-        console.log('📊 Database schema has changed - syncing artifacts\n');
+        logger.info('📊 Database schema has changed - syncing artifacts\n');
       }
     } else if (!isForce && (runDump || runTypes)) {
       // Pre-fetch schema hash if we'll need it (single query for both dump and types)
@@ -436,34 +487,47 @@ function main() {
     const skippedSteps = results.filter((r) => r.skipped).length;
     const failedSteps = results.filter((r) => !r.success).length;
 
-    console.log(`\n${'='.repeat(80)}`);
-    console.log('📊 Sync Summary');
-    console.log(`${'='.repeat(80)}\n`);
+    logger.info(`\n${'='.repeat(80)}`);
+    logger.info('📊 Sync Summary');
+    logger.info(`${'='.repeat(80)}\n`);
 
     for (const result of results) {
       const icon = result.success ? '✅' : '❌';
       const status = result.skipped ? 'SKIPPED' : result.success ? 'SUCCESS' : 'FAILED';
       const duration = result.duration_ms > 0 ? `(${result.duration_ms}ms)` : '';
 
-      console.log(`  ${icon} ${result.step}: ${status} ${duration}`);
+      logger.info(`  ${icon} ${result.step}: ${status} ${duration}`, {
+        step: result.step,
+        status,
+        duration: result.duration_ms,
+        reason: result.reason,
+      });
       if (result.reason) {
-        console.log(`     ${result.reason}`);
+        logger.info(`     ${result.reason}`);
       }
     }
 
-    console.log(`\nTotal Duration: ${overallDuration}ms (${(overallDuration / 1000).toFixed(2)}s)`);
-    console.log(
-      `Completed: ${completedSteps} | Skipped: ${skippedSteps} | Failed: ${failedSteps}\n`
+    logger.info(`\nTotal Duration: ${overallDuration}ms (${(overallDuration / 1000).toFixed(2)}s)`);
+    logger.info(
+      `Completed: ${completedSteps} | Skipped: ${skippedSteps} | Failed: ${failedSteps}\n`,
+      {
+        completed: completedSteps,
+        skipped: skippedSteps,
+        failed: failedSteps,
+        duration: `${overallDuration}ms`,
+      }
     );
 
     if (failedSteps === 0) {
-      console.log('✅ Database schema sync completed successfully!\n');
+      logger.info('✅ Database schema sync completed successfully!\n');
     } else {
-      console.error('❌ Database schema sync completed with errors\n');
+      logger.error('❌ Database schema sync completed with errors\n', undefined, { failedSteps });
       process.exit(1);
     }
   } catch (error) {
-    console.error('\n❌ Sync failed:', error instanceof Error ? error.message : String(error));
+    logger.error('\n❌ Sync failed', error instanceof Error ? error : new Error(String(error)), {
+      script: 'sync-database-schema',
+    });
     cleanup();
     process.exit(1);
   } finally {
@@ -474,7 +538,13 @@ function main() {
 try {
   main();
 } catch (error) {
-  console.error('❌ Unhandled error in main:', error);
+  logger.error(
+    '❌ Unhandled error in main',
+    error instanceof Error ? error : new Error(String(error)),
+    {
+      script: 'sync-database-schema',
+    }
+  );
   cleanup();
   process.exit(1);
 }

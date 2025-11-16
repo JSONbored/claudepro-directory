@@ -113,7 +113,7 @@ export function CategoryNavigationCard({
 
           return (
             <Tooltip key={key}>
-              <TooltipTrigger asChild>
+              <TooltipTrigger asChild={true}>
                 <Link
                   href={`${basePath}/${key}`}
                   className={`rounded-lg p-2 transition-all duration-200 ${

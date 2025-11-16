@@ -22,15 +22,14 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/src/components/primitives/ui/sheet';
-import { type NotificationStore, useNotificationStore } from '@/src/lib/stores/notification-store';
+import { useNotificationsContext } from '@/src/components/providers/notifications-provider';
 import { DIMENSIONS } from '@/src/lib/ui-constants';
 import { NotificationList } from './notification-list';
 
 export function NotificationSheet() {
-  const isSheetOpen = useNotificationStore((state: NotificationStore) => state.isSheetOpen);
-  const closeSheet = useNotificationStore((state: NotificationStore) => state.closeSheet);
-  // ✅ Select stable state value (not function call)
-  const unreadCount = useNotificationStore((state: NotificationStore) => state.unreadCount);
+  const { isSheetOpen, closeSheet, unreadCount, flags } = useNotificationsContext();
+
+  if (!flags.enableSheet) return null;
 
   return (
     <Sheet open={isSheetOpen} onOpenChange={(open) => !open && closeSheet()}>

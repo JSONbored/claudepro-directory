@@ -7,20 +7,23 @@ import { notFound } from 'next/navigation';
 import { CollectionDetailView } from '@/src/components/content/detail-page/collection-view';
 import { UnifiedDetailPage } from '@/src/components/content/detail-page/content-detail-view';
 import { ReadProgress } from '@/src/components/content/read-progress';
-import { UnifiedTracker } from '@/src/components/core/infra/analytics-tracker';
+import { Pulse } from '@/src/components/core/infra/pulse';
 import { StructuredData } from '@/src/components/core/infra/structured-data';
 import { RecentlyViewedTracker } from '@/src/components/features/navigation/recently-viewed-tracker';
 import type { RecentlyViewedCategory } from '@/src/hooks/use-recently-viewed';
 import {
-  type CategoryId,
+  type ContentCategory,
   getCategoryConfig,
   isValidCategory,
   VALID_CATEGORIES,
-} from '@/src/lib/config/category-config';
-import { type ContentItem, getContentByCategory } from '@/src/lib/content/supabase-content-loader';
+} from '@/src/lib/data/config/category';
+import { getContentByCategory } from '@/src/lib/data/content';
+import { getContentDetailComplete } from '@/src/lib/data/content/detail';
+import { featureFlags } from '@/src/lib/flags';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-import { createAnonClient } from '@/src/lib/supabase/server-anon';
+import { ensureStringArray } from '@/src/lib/utils/data.utils';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 import type { Database } from '@/src/types/database.types';
 
 export const revalidate = false; // Static generation - zero database egress during serving
@@ -82,39 +85,20 @@ export async function generateMetadata({
     });
   }
 
-  // Use consolidated RPC for metadata (anon client for ISR/static generation)
-  const supabase = createAnonClient();
-  const { data, error } = await supabase.rpc('get_content_detail_complete', {
-    p_category: category,
-    p_slug: slug,
-  });
-
-  if (error) {
-    logger.error('Build-time RPC error in generateMetadata', error, {
+  let config: Awaited<ReturnType<typeof getCategoryConfig>> | null = null;
+  try {
+    config = await getCategoryConfig(category as ContentCategory);
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to load category config for metadata');
+    logger.error('DetailPage: category config lookup failed', normalized, {
       category,
       slug,
       phase: 'generateMetadata',
-      rpcFunction: 'get_content_detail_complete',
     });
   }
-
-  const itemMeta = data ? (data as { content: ContentItem }).content : null;
-
-  if (!itemMeta) {
-    logger.warn('No content found in generateMetadata', {
-      category,
-      slug,
-      phase: 'generateMetadata',
-      hasData: !!data,
-      hasError: !!error,
-    });
-  }
-
-  const config = await getCategoryConfig(category as CategoryId);
 
   return generatePageMetadata('/:category/:slug', {
     params: { category, slug },
-    item: itemMeta ?? undefined,
     categoryConfig: config ?? undefined,
     category,
     slug,
@@ -133,48 +117,43 @@ export default async function DetailPage({
     notFound();
   }
 
-  const config = await getCategoryConfig(category as CategoryId);
+  let config: Awaited<ReturnType<typeof getCategoryConfig>> | null = null;
+  try {
+    config = await getCategoryConfig(category as ContentCategory);
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to load category config');
+    logger.error('DetailPage: category config lookup threw', normalized, {
+      category,
+      slug,
+    });
+  }
   if (!config) {
-    logger.warn('No category config found', { category, slug });
+    logger.error('DetailPage: missing category config', new Error('Category config is null'), {
+      category,
+      slug,
+    });
     notFound();
   }
 
   // Consolidated RPC: 2-3 calls → 1 (50-67% reduction)
   // get_content_detail_complete() includes: content + analytics + related items + collection items
   // Use anon client for ISR/static generation (no cookies/auth)
-  const supabase = createAnonClient();
-  const { data: detailData, error: detailError } = await supabase.rpc(
-    'get_content_detail_complete',
-    {
-      p_category: category,
-      p_slug: slug,
-    }
-  );
-
-  if (detailError) {
-    logger.error('RPC error loading content detail', detailError, {
-      category,
-      slug,
-      rpcFunction: 'get_content_detail_complete',
-      phase: 'page-render',
-    });
-    notFound();
-  }
+  const detailData = await getContentDetailComplete({ category, slug });
 
   if (!detailData) {
-    logger.warn('No content data returned from RPC', {
-      category,
-      slug,
-      rpcFunction: 'get_content_detail_complete',
-      phase: 'page-render',
-    });
+    logger.error(
+      'DetailPage: get_content_detail_complete returned null',
+      new Error('Content detail data is null'),
+      {
+        category,
+        slug,
+      }
+    );
     notFound();
   }
 
-  // Extract data from RPC response (returns Json type, cast to expected structure)
-  const response = detailData as Record<string, unknown>;
-  const fullItem = response.content as ContentItem;
-  const itemData = fullItem;
+  // detailData is already typed as GetGetContentDetailCompleteReturn | null
+  const { content: fullItem, analytics, related } = detailData;
 
   // Null safety: If content doesn't exist in database, return 404
   if (!fullItem) {
@@ -183,15 +162,17 @@ export default async function DetailPage({
       slug,
       rpcFunction: 'get_content_detail_complete',
       phase: 'page-render',
-      hasResponse: !!response,
     });
     notFound();
   }
 
-  const analytics = response.analytics as { view_count: number; copy_count: number } | null;
   const viewCount = analytics?.view_count || 0;
   const copyCount = analytics?.copy_count || 0;
-  const relatedItems = (response.related as ContentItem[]) || [];
+  const relatedItems = related || [];
+
+  // Check feature flags
+  const tabsEnabled = await featureFlags.contentDetailTabs();
+  const recentlyViewedEnabled = await featureFlags.recentlyViewed();
 
   // No transformation needed - displayTitle computed at build time
   // This eliminates runtime overhead and follows DRY principles
@@ -203,33 +184,36 @@ export default async function DetailPage({
       {/* Read Progress Bar - Shows reading progress at top of page */}
       <ReadProgress />
 
-      <UnifiedTracker variant="view" category={category} slug={slug} />
-      <UnifiedTracker variant="page-view" category={category} slug={slug} />
+      <Pulse variant="view" category={category} slug={slug} />
+      <Pulse variant="page-view" category={category} slug={slug} />
       <StructuredData route={`/${category}/${slug}`} />
 
-      {/* Recently Viewed Tracking */}
-      <RecentlyViewedTracker
-        category={category as RecentlyViewedCategory}
-        slug={slug}
-        title={
-          ('display_title' in fullItem && fullItem.display_title) ||
-          ('title' in fullItem && fullItem.title) ||
-          slug
-        }
-        description={fullItem.description}
-        {...('tags' in fullItem &&
-        Array.isArray(fullItem.tags) &&
-        fullItem.tags.length > 0 &&
-        fullItem.tags.every((tag) => typeof tag === 'string')
-          ? { tags: (fullItem.tags as string[]).slice(0, 3) }
-          : {})}
-      />
+      {/* Recently Viewed Tracking - gated by feature flag */}
+      {recentlyViewedEnabled && (
+        <RecentlyViewedTracker
+          category={category as RecentlyViewedCategory}
+          slug={slug}
+          title={
+            ('display_title' in fullItem && fullItem.display_title) ||
+            ('title' in fullItem && fullItem.title) ||
+            slug
+          }
+          description={fullItem.description}
+          {...('tags' in fullItem
+            ? (() => {
+                const tags = ensureStringArray(fullItem.tags).slice(0, 3);
+                return tags.length ? { tags } : {};
+              })()
+            : {})}
+        />
+      )}
 
       <UnifiedDetailPage
-        item={fullItem || itemData}
+        item={fullItem}
         relatedItems={relatedItems}
         viewCount={viewCount}
         copyCount={copyCount}
+        tabsEnabled={tabsEnabled}
         collectionSections={
           category === 'collections' && fullItem && fullItem.category === 'collections' ? (
             <CollectionDetailView

@@ -8,15 +8,16 @@
  */
 
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
-import { SOCIAL_LINKS } from '@/src/lib/constants';
-import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
+import type { ContentItem } from '@/src/lib/data/content';
+import { getSocialLinks } from '@/src/lib/data/marketing/contact';
 import { Calendar, Copy, Eye, Tag, User } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { formatCopyCount, formatViewCount } from '@/src/lib/utils/content.utils';
-import { formatDate } from '@/src/lib/utils/data.utils';
+import { ensureStringArray, formatDate } from '@/src/lib/utils/data.utils';
+import type { GetGetContentDetailCompleteReturn } from '@/src/types/database-overrides';
 
 export interface DetailMetadataProps {
-  item: ContentItem;
+  item: ContentItem | GetGetContentDetailCompleteReturn['content'];
   viewCount?: number | undefined;
   copyCount?: number | undefined;
 }
@@ -27,6 +28,8 @@ export interface DetailMetadataProps {
  * Renders author, date, view count, copy count, and tags metadata for a content item
  * No React.memo needed - server components don't re-render
  */
+const SOCIAL_LINK_SNAPSHOT = getSocialLinks();
+
 export function DetailMetadata({ item, viewCount, copyCount }: DetailMetadataProps) {
   const hasMetadata =
     ('author' in item && item.author) ||
@@ -34,6 +37,7 @@ export function DetailMetadata({ item, viewCount, copyCount }: DetailMetadataPro
     viewCount !== undefined ||
     copyCount !== undefined;
   const hasTags = 'tags' in item && Array.isArray(item.tags) && item.tags.length > 0;
+  const tags = hasTags ? ensureStringArray(item.tags) : [];
 
   if (!(hasMetadata || hasTags)) return null;
 
@@ -48,7 +52,7 @@ export function DetailMetadata({ item, viewCount, copyCount }: DetailMetadataPro
               <a
                 href={
                   ('author_profile_url' in item && item.author_profile_url) ||
-                  SOCIAL_LINKS.authorProfile
+                  SOCIAL_LINK_SNAPSHOT.authorProfile
                 }
                 target="_blank"
                 rel="noopener noreferrer"
@@ -78,12 +82,11 @@ export function DetailMetadata({ item, viewCount, copyCount }: DetailMetadataPro
           )}
         </div>
       )}
-
       {/* Tags */}
-      {hasTags && 'tags' in item && Array.isArray(item.tags) && (
+      {hasTags && tags.length > 0 && (
         <div className={UI_CLASSES.FLEX_WRAP_GAP_2}>
           <Tag className={`${UI_CLASSES.ICON_SM} text-muted-foreground`} />
-          {(item.tags as string[]).map((tag: string) => (
+          {tags.map((tag) => (
             <UnifiedBadge key={tag} variant="base" style="outline" className="text-xs">
               {tag}
             </UnifiedBadge>

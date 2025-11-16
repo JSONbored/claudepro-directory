@@ -4,7 +4,7 @@
  */
 
 import { z } from 'zod';
-import { SECURITY_CONFIG } from '@/src/lib/constants';
+import { SECURITY_CONFIG } from '@/src/lib/data/config/constants';
 
 export const nonEmptyString = z.string().min(1);
 export const shortString = z.string().min(1).max(100);
