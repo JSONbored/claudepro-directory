@@ -99,7 +99,7 @@ const DropdownMenuContent = ({
 
   return (
     <DropdownMenuPrimitive.Portal>
-      <DropdownMenuPrimitive.Content ref={ref} sideOffset={sideOffset} asChild {...props}>
+      <DropdownMenuPrimitive.Content ref={ref} sideOffset={sideOffset} asChild={true} {...props}>
         <motion.div
           className={cn(
             `z-50 ${DIMENSIONS.MIN_W_BUTTON} overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md will-change-transform`,
@@ -136,7 +136,7 @@ const DropdownMenuItem = ({
   };
 
   return (
-    <DropdownMenuPrimitive.Item ref={ref} asChild {...props}>
+    <DropdownMenuPrimitive.Item ref={ref} asChild={true} {...props}>
       <motion.div
         className={cn(
           'relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-orange-500/5 data-[disabled]:pointer-events-none data-[disabled]:opacity-50',

@@ -13,8 +13,8 @@ import { ErrorBoundary } from '@/src/components/core/infra/error-boundary';
 import { InlineSpinner } from '@/src/components/primitives/feedback/loading-factory';
 import { useInfiniteScroll } from '@/src/hooks/use-infinite-scroll';
 import type { DisplayableContent } from '@/src/lib/types/component.types';
-
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { logUnhandledPromise } from '@/src/lib/utils/error.utils';
 
 export type GridVariant = 'normal' | 'tight' | 'wide' | 'list';
 
@@ -94,8 +94,8 @@ function UnifiedCardGridComponent(props: UnifiedCardGridProps) {
 
   useEffect(() => {
     if (infiniteScroll && onFetchMore && displayCount >= items.length && serverHasMore) {
-      onFetchMore().catch(() => {
-        // Silent fail - pagination will retry on next scroll
+      onFetchMore().catch((error) => {
+        logUnhandledPromise('UnifiedCardGrid:onFetchMore', error);
       });
     }
   }, [displayCount, items.length, infiniteScroll, onFetchMore, serverHasMore]);

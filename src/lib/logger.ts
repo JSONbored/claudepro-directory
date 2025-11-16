@@ -4,19 +4,23 @@ import pino from 'pino';
 
 const isDevelopment = process.env.NODE_ENV === 'development';
 
+// Config via env vars (set from Statsig logger_console/logger_verbose flags)
+const loggerConsoleEnabled = process.env.NEXT_PUBLIC_LOGGER_CONSOLE === 'true';
+const loggerVerbose = process.env.NEXT_PUBLIC_LOGGER_VERBOSE === 'true';
+
 // Configure pino with minimal setup
 // In development, use basic console output to avoid thread-stream issues with Turbopack
 const pinoInstance = isDevelopment
   ? pino({
-      level: 'debug',
+      level: loggerVerbose ? 'debug' : 'info',
       browser: {
-        disabled: true,
+        disabled: !loggerConsoleEnabled,
       },
     })
   : pino({
-      level: 'info',
+      level: loggerVerbose ? 'debug' : 'info',
       browser: {
-        disabled: true,
+        disabled: !loggerConsoleEnabled,
       },
     });
 

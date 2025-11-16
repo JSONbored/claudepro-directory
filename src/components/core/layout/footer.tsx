@@ -16,9 +16,12 @@ import { memo, useEffect, useMemo, useState } from 'react';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { HeyClaudeLogo } from '@/src/components/core/layout/brand-logo';
 import { ThemeToggle } from '@/src/components/core/layout/theme-toggle';
-import { APP_CONFIG, EXTERNAL_SERVICES, ROUTES, SOCIAL_LINKS } from '@/src/lib/constants';
+import { getAnimationConfig } from '@/src/lib/actions/feature-flags.actions';
+import { APP_CONFIG, EXTERNAL_SERVICES, ROUTES } from '@/src/lib/data/config/constants';
+import { getContactChannels } from '@/src/lib/data/marketing/contact';
 import { DiscordIcon, ExternalLink, Github, Rss, Sparkles } from '@/src/lib/icons';
-import { ANIMATION_CONSTANTS, RESPONSIVE_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
+import { logger } from '@/src/lib/logger';
+import { RESPONSIVE_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
 
 /**
  * Footer Component
@@ -28,11 +31,18 @@ import { ANIMATION_CONSTANTS, RESPONSIVE_PATTERNS, UI_CLASSES } from '@/src/lib/
  * @remarks
  * Includes llms.txt link for AI assistant discoverability per LLMs.txt specification
  */
+const CONTACT_CHANNELS = getContactChannels();
+
 function FooterComponent() {
   const currentYear = new Date().getFullYear();
   const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
+  const [springDefault, setSpringDefault] = useState({
+    type: 'spring' as const,
+    stiffness: 400,
+    damping: 17,
+  });
 
   // Context-aware RSS feed - shows most relevant feed for current page
   const rssFeed = useMemo(() => {
@@ -56,6 +66,22 @@ function FooterComponent() {
   // Wait for client-side mount to avoid hydration mismatch
   useEffect(() => {
     setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    getAnimationConfig({})
+      .then((result) => {
+        if (!result?.data) return;
+        const config = result.data;
+        setSpringDefault({
+          type: 'spring' as const,
+          stiffness: config['animation.spring.default.stiffness'],
+          damping: config['animation.spring.default.damping'],
+        });
+      })
+      .catch((error) => {
+        logger.error('Footer: failed to load animation config', error);
+      });
   }, []);
 
   return (
@@ -84,8 +110,8 @@ function FooterComponent() {
             <div className={UI_CLASSES.FLEX_COL_MD_ITEMS_START}>
               <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_4}>
                 {[
-                  { href: SOCIAL_LINKS.github || '#', icon: Github, label: 'GitHub' },
-                  { href: SOCIAL_LINKS.discord || '#', icon: DiscordIcon, label: 'Discord' },
+                  { href: CONTACT_CHANNELS.github, icon: Github, label: 'GitHub' },
+                  { href: CONTACT_CHANNELS.discord, icon: DiscordIcon, label: 'Discord' },
                 ].map((social) => (
                   <Link
                     key={social.label}
@@ -146,7 +172,7 @@ function FooterComponent() {
                   <motion.div
                     whileHover={{ scale: 1.05, x: 3 }}
                     whileTap={{ scale: 0.95 }}
-                    transition={ANIMATION_CONSTANTS.SPRING_DEFAULT}
+                    transition={springDefault}
                     className="inline-block"
                   >
                     <Link
@@ -192,7 +218,7 @@ function FooterComponent() {
                   <motion.div
                     whileHover={{ scale: 1.05, x: 3 }}
                     whileTap={{ scale: 0.95 }}
-                    transition={ANIMATION_CONSTANTS.SPRING_DEFAULT}
+                    transition={springDefault}
                     className="inline-block"
                   >
                     <Link
@@ -239,7 +265,7 @@ function FooterComponent() {
                   <motion.div
                     whileHover={{ scale: 1.05, x: 3 }}
                     whileTap={{ scale: 0.95 }}
-                    transition={ANIMATION_CONSTANTS.SPRING_DEFAULT}
+                    transition={springDefault}
                     className="inline-block"
                   >
                     <Link

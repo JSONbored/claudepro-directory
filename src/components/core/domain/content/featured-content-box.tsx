@@ -94,7 +94,7 @@ function AccordionBox(props: AccordionVariant) {
         {validItems.map((item, index) => (
           <Card
             key={`accordion-item-${index}-${item.title}`}
-            itemScope
+            itemScope={true}
             itemType="https://schema.org/Question"
             className="border border-border"
           >
@@ -125,7 +125,7 @@ function AccordionBox(props: AccordionVariant) {
             </button>
 
             {openItems.has(index) && (
-              <CardContent className="pt-0" itemScope itemType="https://schema.org/Answer">
+              <CardContent className="pt-0" itemScope={true} itemType="https://schema.org/Answer">
                 <div itemProp="text">{item.content}</div>
               </CardContent>
             )}
@@ -190,7 +190,7 @@ function InfoBoxComponent(props: InfoBoxVariant) {
 
   return (
     <div
-      itemScope
+      itemScope={true}
       itemType="https://schema.org/Note"
       className={cn('my-6 rounded-r-lg border-l-4 p-6', INFOBOX_COLORS[variantKey])}
     >

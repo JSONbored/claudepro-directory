@@ -19,7 +19,6 @@
  * @module components/layout/user-menu
  */
 
-import type { User } from '@supabase/supabase-js';
 import { motion } from 'motion/react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -35,9 +34,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/src/components/primitives/ui/dropdown-menu';
+import { getAnimationConfig } from '@/src/lib/actions/feature-flags.actions';
+import { useAuthenticatedUser } from '@/src/lib/auth/use-authenticated-user';
 import { Activity, BookOpen, LogOut, Settings, User as UserIcon } from '@/src/lib/icons';
-import { createClient } from '@/src/lib/supabase/client';
-import { ANIMATION_CONSTANTS, DIMENSIONS, UI_CLASSES } from '@/src/lib/ui-constants';
+import { logger } from '@/src/lib/logger';
+import { DIMENSIONS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { toasts } from '@/src/lib/utils/toast.utils';
 
 interface UserMenuProps {
@@ -45,42 +46,34 @@ interface UserMenuProps {
 }
 
 export function UserMenu({ className }: UserMenuProps) {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
   const [signingOut, setSigningOut] = useState(false);
+  const [springDefault, setSpringDefault] = useState({
+    type: 'spring' as const,
+    stiffness: 400,
+    damping: 17,
+  });
   const router = useRouter();
-  const supabase = createClient();
+  const { user, status, supabaseClient } = useAuthenticatedUser({
+    context: 'UserMenu',
+  });
+  const loading = status === 'loading';
+  const supabase = supabaseClient;
 
-  // Check auth state on mount
   useEffect(() => {
-    const getUser = async () => {
-      try {
-        const {
-          data: { user },
-        } = await supabase.auth.getUser();
-        setUser(user);
-      } catch {
-        // Fail silently - user menu will show sign in state
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    getUser().catch(() => {
-      // Error already handled in try-catch
-    });
-
-    // Listen for auth changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [supabase]);
+    getAnimationConfig({})
+      .then((result) => {
+        if (!result?.data) return;
+        const config = result.data;
+        setSpringDefault({
+          type: 'spring' as const,
+          stiffness: config['animation.spring.default.stiffness'],
+          damping: config['animation.spring.default.damping'],
+        });
+      })
+      .catch((error) => {
+        logger.error('UserMenu: failed to load animation config', error);
+      });
+  }, []);
 
   const handleSignOut = async () => {
     setSigningOut(true);
@@ -116,7 +109,7 @@ export function UserMenu({ className }: UserMenuProps) {
     return (
       <div className={className}>
         <Button
-          asChild
+          asChild={true}
           variant="ghost"
           size="sm"
           className="border-accent/20 bg-accent/10 font-medium text-accent text-xs hover:bg-accent hover:text-white"
@@ -145,11 +138,11 @@ export function UserMenu({ className }: UserMenuProps) {
   return (
     <div className={className}>
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
+        <DropdownMenuTrigger asChild={true}>
           <motion.div
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
-            transition={ANIMATION_CONSTANTS.SPRING_DEFAULT}
+            transition={springDefault}
           >
             <Button
               variant="ghost"
@@ -169,7 +162,7 @@ export function UserMenu({ className }: UserMenuProps) {
         <DropdownMenuContent
           className={`${DIMENSIONS.DROPDOWN_SM} sm:${DIMENSIONS.DROPDOWN_MD}`}
           align="end"
-          forceMount
+          forceMount={true}
         >
           {/* User Info */}
           <DropdownMenuLabel className="font-normal">
@@ -182,21 +175,21 @@ export function UserMenu({ className }: UserMenuProps) {
           <DropdownMenuSeparator />
 
           {/* Navigation Links */}
-          <DropdownMenuItem asChild>
+          <DropdownMenuItem asChild={true}>
             <Link href="/account/settings">
               <Settings className={UI_CLASSES.ICON_SM_LEADING} />
               <span>Settings</span>
             </Link>
           </DropdownMenuItem>
 
-          <DropdownMenuItem asChild>
+          <DropdownMenuItem asChild={true}>
             <Link href="/account/library">
               <BookOpen className={UI_CLASSES.ICON_SM_LEADING} />
               <span>Library</span>
             </Link>
           </DropdownMenuItem>
 
-          <DropdownMenuItem asChild>
+          <DropdownMenuItem asChild={true}>
             <Link href="/account/activity">
               <Activity className={UI_CLASSES.ICON_SM_LEADING} />
               <span>Activity</span>

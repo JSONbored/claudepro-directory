@@ -296,7 +296,7 @@ export function ExamplesArrayInput({
                       onChange={(e) => updateExample(index, 'title', e.target.value)}
                       placeholder="Basic Setup"
                       maxLength={100}
-                      required
+                      required={true}
                     />
                   </div>
 
@@ -336,7 +336,7 @@ export function ExamplesArrayInput({
                       placeholder="export default { ... }"
                       className={`${DIMENSIONS.INPUT_LG} font-mono text-sm`}
                       maxLength={10000}
-                      required
+                      required={true}
                     />
                     <p className={cn('text-xs', 'text-muted-foreground')}>
                       {example.code.length} / 10,000 characters

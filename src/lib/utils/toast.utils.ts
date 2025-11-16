@@ -1,118 +1,142 @@
 /**
- * Centralized toast message utilities for consistent UX
+ * Toast utilities with hardcoded defaults (client-safe)
+ * No server imports, synchronous calls for client components
+ *
+ * Note: Toast messages use hardcoded defaults for client-side performance.
+ * Server components can use toastConfigs from flags.ts if dynamic control is needed.
  */
 
 import { toast } from 'sonner';
-export const successToasts = {
-  // Profile & Auth
-  profileUpdated: () => toast.success('Profile updated successfully'),
-  signedOut: () => toast.success('Signed out successfully'),
+import type { ContentCategory } from '@/src/types/database-overrides';
 
-  // Content Management
+/**
+ * Hardcoded toast messages (client-safe defaults)
+ * These match the Statsig toastConfigs defaults in flags.ts
+ */
+const TOAST_MESSAGES = {
+  profile_updated: 'Profile updated successfully',
+  signed_out: 'Signed out successfully',
+  submission_created_title: 'Submission Created!',
+  submission_created_description: 'Your {contentType} has been submitted for review.',
+  template_applied_title: 'Template Applied!',
+  template_applied_description: 'Form has been pre-filled. Customize as needed.',
+  copied: 'Copied to clipboard!',
+  link_copied: 'Link copied to clipboard!',
+  code_copied: 'Code copied to clipboard!',
+  screenshot_copied: 'Screenshot copied & downloaded!',
+  bookmark_added: 'Bookmark added',
+  bookmark_removed: 'Bookmark removed',
+  changes_saved: 'Changes saved successfully',
+  save_failed: 'Failed to save. Please try again.',
+  required_fields: 'Please fill in all required fields',
+  auth_required: 'Please sign in to continue',
+  permission_denied: 'You do not have permission to perform this action',
+  submission_error_title: 'Submission Error',
+  submission_error_description: 'Failed to submit. Please try again.',
+  network_error: 'Network error. Please check your connection and try again.',
+  server_error: 'Server error. Please try again later.',
+  rate_limited: 'Too many requests. Please wait a moment and try again.',
+  screenshot_failed: 'Failed to generate screenshot',
+  profile_update_failed: 'Failed to update profile',
+  vote_update_failed: 'Failed to update vote',
+  coming_soon: 'Coming soon!',
+  redirecting: 'Redirecting...',
+  unsaved_changes: 'You have unsaved changes',
+  slow_connection: 'Slow connection detected. This may take longer than usual.',
+  saving: 'Saving...',
+  processing: 'Processing...',
+} as const;
+
+export const successToasts = {
+  profileUpdated: () => toast.success(TOAST_MESSAGES.profile_updated),
+  signedOut: () => toast.success(TOAST_MESSAGES.signed_out),
   itemCreated: (type: string) => toast.success(`${type} created successfully`),
   itemUpdated: (type: string) => toast.success(`${type} updated successfully`),
   itemDeleted: (type: string) => toast.success(`${type} deleted successfully`),
-
-  // Submissions
-  submissionCreated: (contentType: string) =>
-    toast.success('Submission Created!', {
-      description: `Your ${contentType} has been submitted for review.`,
+  submissionCreated: (contentType: ContentCategory) =>
+    toast.success(TOAST_MESSAGES.submission_created_title, {
+      description: TOAST_MESSAGES.submission_created_description.replace(
+        '{contentType}',
+        contentType
+      ),
     }),
   templateApplied: () =>
-    toast.success('Template Applied!', {
-      description: 'Form has been pre-filled. Customize as needed.',
+    toast.success(TOAST_MESSAGES.template_applied_title, {
+      description: TOAST_MESSAGES.template_applied_description,
     }),
-
-  // Clipboard
-  copied: (item?: string) => toast.success(`${item ? `${item} c` : 'C'}opied to clipboard!`),
-  linkCopied: () => toast.success('Link copied to clipboard!'),
-  codeCopied: () => toast.success('Code copied to clipboard!'),
-  screenshotCopied: () => toast.success('Screenshot copied & downloaded!'),
-
-  // Library & Bookmarks
+  copied: (item?: string) => {
+    const msg = TOAST_MESSAGES.copied;
+    return toast.success(item ? `${item} ${msg.toLowerCase()}` : msg);
+  },
+  linkCopied: () => toast.success(TOAST_MESSAGES.link_copied),
+  codeCopied: () => toast.success(TOAST_MESSAGES.code_copied),
+  screenshotCopied: () => toast.success(TOAST_MESSAGES.screenshot_copied),
   savedToLibrary: (count: number, total?: number) =>
     toast.success(
       total
         ? `Saved ${count} of ${total} items to your library`
         : `Saved ${count} ${count === 1 ? 'item' : 'items'} to your library`
     ),
-  bookmarkAdded: () => toast.success('Bookmark added'),
-  bookmarkRemoved: () => toast.success('Bookmark removed'),
-
-  // Generic
-  changesSaved: () => toast.success('Changes saved successfully'),
+  bookmarkAdded: () => toast.success(TOAST_MESSAGES.bookmark_added),
+  bookmarkRemoved: () => toast.success(TOAST_MESSAGES.bookmark_removed),
+  changesSaved: () => toast.success(TOAST_MESSAGES.changes_saved),
   actionCompleted: (action: string) => toast.success(`${action} completed successfully`),
 } as const;
 
 export const errorToasts = {
-  // Generic Failures
-  saveFailed: (customMessage?: string) =>
-    toast.error(customMessage || 'Failed to save. Please try again.'),
+  saveFailed: (customMessage?: string) => toast.error(customMessage || TOAST_MESSAGES.save_failed),
   loadFailed: (resource?: string) =>
     toast.error(resource ? `Failed to load ${resource}` : 'Failed to load data'),
   actionFailed: (action: string, customMessage?: string) =>
     toast.error(customMessage || `Failed to ${action}. Please try again.`),
-
-  // Validation
   validation: (message: string) => toast.error(message),
-  requiredFields: () => toast.error('Please fill in all required fields'),
+  requiredFields: () => toast.error(TOAST_MESSAGES.required_fields),
   invalidInput: (field?: string) =>
     toast.error(field ? `Invalid ${field}` : 'Please check your input and try again'),
-
-  // Auth
-  authRequired: () => toast.error('Please sign in to continue'),
+  authRequired: () => toast.error(TOAST_MESSAGES.auth_required),
   authFailed: (message?: string) => toast.error(message || 'Authentication failed'),
-  permissionDenied: () => toast.error('You do not have permission to perform this action'),
-
-  // Submissions & Forms
+  permissionDenied: () => toast.error(TOAST_MESSAGES.permission_denied),
   submissionFailed: (details?: string) =>
-    toast.error('Submission Error', {
-      description: details || 'Failed to submit. Please try again.',
+    toast.error(TOAST_MESSAGES.submission_error_title, {
+      description: details || TOAST_MESSAGES.submission_error_description,
     }),
-
-  // Network & Server
-  networkError: () => toast.error('Network error. Please check your connection and try again.'),
-  serverError: (message?: string) =>
-    toast.error(message || 'Server error. Please try again later.'),
-  rateLimited: () => toast.error('Too many requests. Please wait a moment and try again.'),
-
-  // Clipboard
+  networkError: () => toast.error(TOAST_MESSAGES.network_error),
+  serverError: (message?: string) => toast.error(message || TOAST_MESSAGES.server_error),
+  rateLimited: () => toast.error(TOAST_MESSAGES.rate_limited),
   copyFailed: (item?: string) => toast.error(`Failed to copy${item ? ` ${item}` : ''}`),
-  screenshotFailed: () => toast.error('Failed to generate screenshot'),
+  screenshotFailed: () => toast.error(TOAST_MESSAGES.screenshot_failed),
   shareFailed: () => toast.error('Failed to share'),
-
-  // Profile & User Actions
-  profileUpdateFailed: () => toast.error('Failed to update profile'),
+  profileUpdateFailed: () => toast.error(TOAST_MESSAGES.profile_update_failed),
   profileRefreshFailed: () => toast.error('Failed to refresh profile'),
-
-  // Reviews & Content
   reviewActionFailed: (action: string) => toast.error(`Failed to ${action} review`),
-  voteUpdateFailed: () => toast.error('Failed to update vote'),
-
-  // Generic with custom error handling
+  voteUpdateFailed: () => toast.error(TOAST_MESSAGES.vote_update_failed),
   fromError: (error: unknown, fallback = 'An error occurred') =>
     toast.error(error instanceof Error ? error.message : fallback),
 } as const;
 
 export const infoToasts = {
-  comingSoon: (feature?: string) =>
-    toast.info(feature ? `${feature} coming soon!` : 'Coming soon!'),
+  comingSoon: (feature?: string) => {
+    const msg = TOAST_MESSAGES.coming_soon;
+    return toast.info(feature ? `${feature} ${msg.toLowerCase()}` : msg);
+  },
   featureUnavailable: (reason?: string) =>
     toast.info(reason || 'This feature is currently unavailable'),
-  redirecting: (destination?: string) =>
-    toast.info(destination ? `Redirecting to ${destination}...` : 'Redirecting...'),
+  redirecting: (destination?: string) => {
+    const msg = TOAST_MESSAGES.redirecting;
+    return toast.info(destination ? `Redirecting to ${destination}...` : msg);
+  },
 } as const;
 
 export const warningToasts = {
-  unsavedChanges: () => toast.warning('You have unsaved changes'),
-  slowConnection: () => toast.warning('Slow connection detected. This may take longer than usual.'),
+  unsavedChanges: () => toast.warning(TOAST_MESSAGES.unsaved_changes),
+  slowConnection: () => toast.warning(TOAST_MESSAGES.slow_connection),
   limitReached: (limit: string) => toast.warning(`${limit} limit reached`),
 } as const;
 
 export const loadingToasts = {
-  saving: () => toast.loading('Saving...'),
+  saving: () => toast.loading(TOAST_MESSAGES.saving),
   loading: (action?: string) => toast.loading(action ? `${action}...` : 'Loading...'),
-  processing: () => toast.loading('Processing...'),
+  processing: () => toast.loading(TOAST_MESSAGES.processing),
 } as const;
 
 export const toasts = {
@@ -121,7 +145,6 @@ export const toasts = {
   info: infoToasts,
   warning: warningToasts,
   loading: loadingToasts,
-  // Direct access to sonner for advanced usage
   raw: toast,
 } as const;
 

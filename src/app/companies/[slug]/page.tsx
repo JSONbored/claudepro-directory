@@ -18,33 +18,16 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/ui/card';
-import { ROUTES } from '@/src/lib/constants';
+import { getCompanyProfile } from '@/src/lib/data/companies/public';
+import { ROUTES } from '@/src/lib/data/config/constants';
 import { Briefcase, Building, Calendar, Globe, TrendingUp, Users } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
-import type { Tables } from '@/src/types/database.types';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 
 interface CompanyPageProps {
   params: Promise<{ slug: string }>;
-}
-
-type CompanyRow = Tables<'companies'>;
-
-interface CompanyProfile {
-  company: CompanyRow;
-  active_jobs: Tables<'jobs'>[];
-  stats: {
-    total_jobs: number;
-    active_jobs: number;
-    featured_jobs: number;
-    remote_jobs: number;
-    avg_salary_min: number | null;
-    total_views: number;
-    total_clicks: number;
-    click_through_rate: number;
-    latest_job_posted_at: string | null;
-  };
 }
 
 export const revalidate = 1800; // 30min ISR (fallback if edge function cache misses)
@@ -59,26 +42,20 @@ export async function generateMetadata({ params }: CompanyPageProps): Promise<Me
 export default async function CompanyPage({ params }: CompanyPageProps) {
   const { slug } = await params;
 
-  // Call Supabase Edge Function (benefits from CDN cache)
-  const url = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/companies-handler?slug=${slug}`;
-
-  const res = await fetch(url, {
-    next: { revalidate: 1800 }, // Vercel ISR as fallback
-  });
-
-  if (!res.ok) {
-    if (res.status === 404) {
-      logger.warn('Company not found', { slug });
-      notFound();
-    }
-    logger.error('Failed to load company profile', new Error(`HTTP ${res.status}`), {
-      slug,
-      status: res.status,
-    });
-    throw new Error('Failed to load company profile');
+  let profile: Awaited<ReturnType<typeof getCompanyProfile>>;
+  try {
+    profile = await getCompanyProfile(slug);
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to load company profile');
+    logger.error('CompanyPage: getCompanyProfile threw', normalized, { slug });
+    throw normalized;
   }
 
-  const profile = (await res.json()) as CompanyProfile;
+  if (!profile?.company) {
+    logger.warn('CompanyPage: company not found', { slug });
+    notFound();
+  }
+
   const { company, active_jobs, stats } = profile;
 
   return (
@@ -97,7 +74,7 @@ export default async function CompanyPage({ params }: CompanyPageProps) {
                   width={96}
                   height={96}
                   className="h-24 w-24 rounded-lg border-4 border-background object-cover"
-                  priority
+                  priority={true}
                 />
               ) : (
                 <div className="flex h-24 w-24 items-center justify-center rounded-lg border-4 border-background bg-accent font-bold text-2xl">
@@ -207,36 +184,38 @@ export default async function CompanyPage({ params }: CompanyPageProps) {
                 <CardContent className="space-y-4">
                   <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
                     <span className={UI_CLASSES.TEXT_SM_MUTED}>Total Jobs Posted</span>
-                    <span className="font-semibold">{stats.total_jobs || 0}</span>
+                    <span className="font-semibold">{stats?.total_jobs || 0}</span>
                   </div>
 
                   <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
                     <span className={UI_CLASSES.TEXT_SM_MUTED}>Active Openings</span>
-                    <span className="font-semibold text-green-600">{stats.active_jobs || 0}</span>
+                    <span className="font-semibold text-green-600">{stats?.active_jobs || 0}</span>
                   </div>
 
-                  {stats.remote_jobs > 0 && (
+                  {stats?.remote_jobs && stats.remote_jobs > 0 && (
                     <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
                       <span className={UI_CLASSES.TEXT_SM_MUTED}>Remote Positions</span>
                       <span className="font-semibold">{stats.remote_jobs}</span>
                     </div>
                   )}
 
-                  {stats.avg_salary_min && (
+                  {stats?.avg_salary_min && (
                     <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
                       <span className={UI_CLASSES.TEXT_SM_MUTED}>Avg. Salary</span>
                       <span className="font-semibold">
-                        ${(stats.avg_salary_min / 1000).toFixed(0)}k+
+                        ${((stats.avg_salary_min ?? 0) / 1000).toFixed(0)}k+
                       </span>
                     </div>
                   )}
 
                   <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
                     <span className={UI_CLASSES.TEXT_SM_MUTED}>Total Views</span>
-                    <span className="font-semibold">{stats.total_views.toLocaleString()}</span>
+                    <span className="font-semibold">
+                      {(stats?.total_views ?? 0).toLocaleString()}
+                    </span>
                   </div>
 
-                  {stats.latest_job_posted_at && (
+                  {stats?.latest_job_posted_at && (
                     <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
                       <span className={UI_CLASSES.TEXT_SM_MUTED}>Latest Posting</span>
                       <span className="font-semibold text-sm">

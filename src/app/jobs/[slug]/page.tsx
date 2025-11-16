@@ -6,10 +6,11 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
+import { Pulse } from '@/src/components/core/infra/pulse';
 import { StructuredData } from '@/src/components/core/infra/structured-data';
 import { Button } from '@/src/components/primitives/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
-import { ROUTES } from '@/src/lib/constants';
+import { ROUTES } from '@/src/lib/data/config/constants';
 import { getJobBySlug } from '@/src/lib/data/jobs';
 import {
   ArrowLeft,
@@ -26,6 +27,8 @@ import type { PageProps } from '@/src/lib/schemas/app.schema';
 import { slugParamsSchema } from '@/src/lib/schemas/app.schema';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { ensureStringArray } from '@/src/lib/utils/data.utils';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 
 export async function generateMetadata({
   params,
@@ -33,25 +36,37 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const job = await getJobBySlug(slug);
+  let job: Awaited<ReturnType<typeof getJobBySlug>> | null = null;
+  try {
+    job = await getJobBySlug(slug);
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to load job for metadata');
+    logger.error('JobPage: getJobBySlug threw in generateMetadata', normalized, { slug });
+  }
 
   return generatePageMetadata('/jobs/:slug', {
     params: { slug },
-    item: job ? { ...job, tags: job.tags as string[] } : undefined,
+    item: job ? { ...job, tags: ensureStringArray(job.tags) } : undefined,
     slug,
   });
 }
 
 export async function generateStaticParams() {
   const { getJobs } = await import('@/src/lib/data/jobs');
-  const jobs = await getJobs();
+  try {
+    const jobs = await getJobs();
 
-  if (jobs.length === 0) {
-    logger.warn('No jobs available - returning placeholder param');
+    if (jobs.length === 0) {
+      logger.warn('generateStaticParams: no jobs available, returning placeholder', {});
+      return [{ slug: 'placeholder' }];
+    }
+
+    return jobs.map((job) => ({ slug: job.slug }));
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to load jobs for static params');
+    logger.error('JobPage: getJobs threw in generateStaticParams', normalized);
     return [{ slug: 'placeholder' }];
   }
-
-  return jobs.map((job) => ({ slug: job.slug }));
 }
 
 export default async function JobPage({ params }: PageProps) {
@@ -72,24 +87,33 @@ export default async function JobPage({ params }: PageProps) {
   }
 
   const { slug } = validationResult.data;
-  const job = await getJobBySlug(slug);
+  let job: Awaited<ReturnType<typeof getJobBySlug>> | null = null;
+  try {
+    job = await getJobBySlug(slug);
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to load job detail');
+    logger.error('JobPage: getJobBySlug threw', normalized, { slug });
+    throw normalized;
+  }
 
   if (!job) {
+    logger.warn('JobPage: job not found', { slug });
     notFound();
   }
 
-  const tags = job.tags as unknown as string[];
-  const requirements = job.requirements as unknown as string[];
-  const benefits = job.benefits as unknown as string[];
+  const tags = ensureStringArray(job.tags);
+  const requirements = ensureStringArray(job.requirements);
+  const benefits = ensureStringArray(job.benefits);
 
   return (
     <>
+      <Pulse variant="view" category="jobs" slug={slug} />
       <StructuredData route={`/jobs/${slug}`} />
 
       <div className={'min-h-screen bg-background'}>
         <div className={'border-border/50 border-b bg-card/30'}>
           <div className="container mx-auto px-4 py-8">
-            <Button variant="ghost" asChild className="mb-6">
+            <Button variant="ghost" asChild={true} className="mb-6">
               <Link href={ROUTES.JOBS}>
                 <ArrowLeft className={'mr-2 h-4 w-4'} />
                 Back to Jobs
@@ -195,14 +219,14 @@ export default async function JobPage({ params }: PageProps) {
                   <CardTitle>Apply for this position</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2">
-                  <Button className="w-full" asChild>
+                  <Button className="w-full" asChild={true}>
                     <a href={job.link} target="_blank" rel="noopener noreferrer">
                       <ExternalLink className={'mr-2 h-4 w-4'} />
                       Apply Now
                     </a>
                   </Button>
                   {job.contact_email && (
-                    <Button variant="outline" className="w-full" asChild>
+                    <Button variant="outline" className="w-full" asChild={true}>
                       <a href={`mailto:${job.contact_email}`}>
                         <Building2 className={'mr-2 h-4 w-4'} />
                         Contact Company

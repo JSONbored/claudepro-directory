@@ -40,7 +40,7 @@ const SelectTrigger = ({
     {...props}
   >
     {children}
-    <SelectPrimitive.Icon asChild>
+    <SelectPrimitive.Icon asChild={true}>
       <ChevronDown className={`${UI_CLASSES.ICON_SM} opacity-50`} aria-hidden="true" />
     </SelectPrimitive.Icon>
   </SelectPrimitive.Trigger>

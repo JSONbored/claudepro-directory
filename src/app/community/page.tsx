@@ -5,7 +5,7 @@ import { Button } from '@/src/components/primitives/ui/button';
 
 const NewsletterCTAVariant = dynamic(
   () =>
-    import('@/src/components/features/growth/newsletter').then((mod) => ({
+    import('@/src/components/features/growth/newsletter/newsletter-cta-variants').then((mod) => ({
       default: mod.NewsletterCTAVariant,
     })),
   {
@@ -14,8 +14,10 @@ const NewsletterCTAVariant = dynamic(
 );
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
-import { ROUTES, SOCIAL_LINKS } from '@/src/lib/constants';
+import { ROUTES } from '@/src/lib/data/config/constants';
+import { getContactChannels } from '@/src/lib/data/marketing/contact';
 import { Github, MessageCircle, MessageSquare, Twitter, Users } from '@/src/lib/icons';
+import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
@@ -28,6 +30,14 @@ export const metadata = generatePageMetadata('/community');
 export const revalidate = false;
 
 export default function CommunityPage() {
+  const channels = getContactChannels();
+  if (!channels.discord) {
+    logger.warn('CommunityPage: Discord channel is not configured');
+  }
+  if (!channels.twitter) {
+    logger.warn('CommunityPage: Twitter channel is not configured');
+  }
+
   return (
     <div className={'min-h-screen bg-background'}>
       {/* Hero Section */}
@@ -51,20 +61,20 @@ export default function CommunityPage() {
             </p>
 
             <div className={'flex flex-wrap justify-center gap-4'}>
-              <Button size="lg" asChild>
-                <a href={SOCIAL_LINKS.github} target="_blank" rel="noopener noreferrer">
+              <Button size="lg" asChild={true}>
+                <a href={channels.github} target="_blank" rel="noopener noreferrer">
                   <Github className={'mr-2 h-5 w-5'} />
                   GitHub
                 </a>
               </Button>
-              <Button size="lg" variant="outline" asChild>
-                <a href={SOCIAL_LINKS.discord} target="_blank" rel="noopener noreferrer">
+              <Button size="lg" variant="outline" asChild={true}>
+                <a href={channels.discord} target="_blank" rel="noopener noreferrer">
                   <MessageSquare className={'mr-2 h-5 w-5'} />
                   Discord
                 </a>
               </Button>
-              <Button size="lg" variant="outline" asChild>
-                <a href={SOCIAL_LINKS.twitter} target="_blank" rel="noopener noreferrer">
+              <Button size="lg" variant="outline" asChild={true}>
+                <a href={channels.twitter} target="_blank" rel="noopener noreferrer">
                   <Twitter className={'mr-2 h-5 w-5'} />X (Twitter)
                 </a>
               </Button>
@@ -147,7 +157,7 @@ export default function CommunityPage() {
                 </p>
               </div>
               <div className="pt-4">
-                <Button asChild>
+                <Button asChild={true}>
                   <Link href={ROUTES.SUBMIT}>Submit Your Configuration</Link>
                 </Button>
               </div>

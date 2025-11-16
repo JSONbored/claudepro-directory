@@ -10,15 +10,15 @@ import { useState } from 'react';
 import { Button } from '@/src/components/primitives/ui/button';
 import { LogOut } from '@/src/lib/icons';
 import { createClient } from '@/src/lib/supabase/client';
+import type { ButtonStyleProps } from '@/src/lib/types/component.types';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { toasts } from '@/src/lib/utils/toast.utils';
-import type { ButtonStyleProps } from '../shared/button-types';
 
 export type AuthSignOutButtonProps = ButtonStyleProps;
 
 export function AuthSignOutButton({
   size = 'sm',
-  buttonVariant = 'ghost',
+  variant = 'ghost',
   className,
   disabled = false,
 }: AuthSignOutButtonProps) {
@@ -46,7 +46,7 @@ export function AuthSignOutButton({
       onClick={handleSignOut}
       disabled={disabled || loading}
       size={size}
-      variant={buttonVariant}
+      variant={variant}
       className={className}
     >
       <LogOut className={UI_CLASSES.ICON_SM_LEADING} />

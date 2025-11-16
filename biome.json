@@ -63,6 +63,7 @@
       "suspicious": {
         "noExplicitAny": "error",
         "noImplicitAnyLet": "error",
+        "noEvolvingTypes": "error",
         "noArrayIndexKey": "warn",
         "noDoubleEquals": "error",
         "noDebugger": "error",
@@ -152,6 +153,9 @@
         "noUnreachableSuper": "error",
         "noUnsafeFinally": "error",
         "noUnsafeOptionalChaining": "error",
+        "noUnknownTypeSelector": {
+          "level": "off"
+        },
         "noUnusedImports": "error",
         "noUnusedLabels": "error",
         "noUnusedPrivateClassMembers": "error",
@@ -173,7 +177,7 @@
       },
       "style": {
         "noDefaultExport": "off",
-        "noImplicitBoolean": "off",
+        "noImplicitBoolean": "warn",
         "noInferrableTypes": "warn",
         "noNamespace": "off",
         "noNegationElse": "warn",
@@ -227,7 +231,7 @@
         "useImportType": "error",
         "useLiteralEnumMembers": "error",
         "useNamingConvention": "off",
-        "useNodeAssertStrict": "off",
+        "useNodeAssertStrict": "warn",
         "useNodejsImportProtocol": "off",
         "useNumberNamespace": "error",
         "useSelfClosingElements": "error",

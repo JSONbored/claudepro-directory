@@ -1,10 +1,11 @@
 import { Suspense } from 'react';
 import { AuthBrandPanel } from '@/src/components/core/auth/auth-brand-panel';
-import { AuthFormPanel } from '@/src/components/core/auth/auth-form-panel';
 import { SplitAuthLayout } from '@/src/components/core/auth/auth-layout';
 import { AuthMobileHeader } from '@/src/components/core/auth/auth-mobile-header';
-import { OAuthProviderButton } from '@/src/components/core/auth/oauth-provider-button';
+import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
+import { normalizeError } from '@/src/lib/utils/error.utils';
+import { LoginPanelClient } from './login-panel-client';
 
 export const metadata = generatePageMetadata('/login');
 
@@ -13,21 +14,22 @@ export default async function LoginPage({
 }: {
   searchParams: Promise<{ redirect?: string }>;
 }) {
-  const resolvedSearchParams = await searchParams;
-  const redirectTo = resolvedSearchParams.redirect;
+  let redirectTo: string | undefined;
+  try {
+    const resolvedSearchParams = await searchParams;
+    redirectTo = resolvedSearchParams.redirect;
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to resolve login search params');
+    logger.error('LoginPage: resolving searchParams failed', normalized);
+    redirectTo = undefined;
+  }
 
   return (
     <Suspense fallback={null}>
       <SplitAuthLayout
         brandPanel={<AuthBrandPanel />}
         mobileHeader={<AuthMobileHeader />}
-        authPanel={
-          <AuthFormPanel title="Sign in" description="Choose your preferred sign-in method">
-            <OAuthProviderButton provider="github" redirectTo={redirectTo} />
-            <OAuthProviderButton provider="google" redirectTo={redirectTo} />
-            <OAuthProviderButton provider="discord" redirectTo={redirectTo} />
-          </AuthFormPanel>
-        }
+        authPanel={<LoginPanelClient redirectTo={redirectTo} />}
       />
     </Suspense>
   );

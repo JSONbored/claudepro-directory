@@ -8,6 +8,9 @@ import { redirect } from 'next/navigation';
 import { AuthSignOutButton } from '@/src/components/core/buttons/auth/auth-signout-button';
 import { Button } from '@/src/components/primitives/ui/button';
 import { Card } from '@/src/components/primitives/ui/card';
+import { ensureUserRecord } from '@/src/lib/actions/user.actions';
+import { getAuthenticatedUser } from '@/src/lib/auth/get-authenticated-user';
+import { getUserSettings, getUserSponsorships } from '@/src/lib/data/account/user-data';
 import {
   Activity,
   Bookmark,
@@ -19,22 +22,19 @@ import {
   TrendingUp,
   User,
 } from '@/src/lib/icons';
+import { logger } from '@/src/lib/logger';
 import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
-import type { Database } from '@/src/types/database.types';
-
-type Tables<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]['Row'];
+import { normalizeError } from '@/src/lib/utils/error.utils';
 
 export default async function AccountLayout({ children }: { children: React.ReactNode }) {
+  const { user } = await getAuthenticatedUser({
+    requireUser: true,
+    context: 'AccountLayout',
+  });
+  if (!user) redirect('/login');
+
   const supabase = await createClient();
-
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser();
-
-  if (userError || !user) redirect('/login');
-
   const {
     data: { session },
   } = await supabase.auth.getSession();
@@ -46,41 +46,65 @@ export default async function AccountLayout({ children }: { children: React.Reac
     }
   }
 
-  let profile: Pick<Tables<'users'>, 'name' | 'slug' | 'image'> | null = null;
+  const userNameMetadata =
+    user.user_metadata?.full_name ?? user.user_metadata?.name ?? user.email ?? null;
+  const userImageMetadata = user.user_metadata?.avatar_url ?? user.user_metadata?.picture ?? null;
 
-  const { data: existingProfile } = await supabase
-    .from('users')
-    .select('name, slug, image')
-    .eq('id', user.id)
-    .maybeSingle();
-
-  if (existingProfile) {
-    profile = existingProfile;
-  } else {
-    const userInsert: Database['public']['Tables']['users']['Insert'] = {
-      id: user.id,
-      email: user.email ?? null,
-      name: user.user_metadata?.full_name ?? user.user_metadata?.name ?? null,
-      image: user.user_metadata?.avatar_url ?? user.user_metadata?.picture ?? null,
-    };
-
-    await supabase.from('users').upsert(userInsert);
-
-    const { data: newProfile } = await supabase
-      .from('users')
-      .select('name, slug, image')
-      .eq('id', user.id)
-      .single();
-    profile = newProfile;
+  let settings: Awaited<ReturnType<typeof getUserSettings>> = null;
+  let profile: NonNullable<Awaited<ReturnType<typeof getUserSettings>>>['user_data'] | null = null;
+  try {
+    settings = await getUserSettings(user.id);
+    if (settings) {
+      profile = settings.user_data ?? null;
+    } else {
+      logger.warn('AccountLayout: getUserSettings returned null', { userId: user.id });
+    }
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to load user settings in account layout');
+    logger.error('AccountLayout: getUserSettings threw', normalized, { userId: user.id });
   }
 
-  const { data: sponsorships } = await supabase
-    .from('sponsored_content')
-    .select('id')
-    .eq('user_id', user.id)
-    .limit(1);
+  if (!profile) {
+    try {
+      await ensureUserRecord({
+        id: user.id,
+        email: user.email ?? null,
+        name: userNameMetadata,
+        image: userImageMetadata,
+      });
+      settings = await getUserSettings(user.id);
+      if (settings) {
+        profile = settings.user_data ?? null;
+      } else {
+        logger.warn('AccountLayout: getUserSettings returned null after ensureUserRecord', {
+          userId: user.id,
+        });
+      }
+    } catch (error) {
+      const normalized = normalizeError(
+        error,
+        'Failed to ensure user record or reload settings in account layout'
+      );
+      logger.error('AccountLayout: ensureUserRecord or getUserSettings threw', normalized, {
+        userId: user.id,
+      });
+    }
+  }
 
-  const hasSponsorships = sponsorships && sponsorships.length > 0;
+  let sponsorships: Awaited<ReturnType<typeof getUserSponsorships>> = [];
+  try {
+    sponsorships = await getUserSponsorships(user.id);
+    if (!sponsorships) {
+      logger.warn('AccountLayout: getUserSponsorships returned null', { userId: user.id });
+      sponsorships = [];
+    }
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to load user sponsorships in account layout');
+    logger.error('AccountLayout: getUserSponsorships threw', normalized, { userId: user.id });
+    sponsorships = [];
+  }
+
+  const hasSponsorships = sponsorships.length > 0;
 
   const navigation = [
     { name: 'Dashboard', href: '/account', icon: Home },
@@ -126,7 +150,7 @@ export default async function AccountLayout({ children }: { children: React.Reac
                   width={48}
                   height={48}
                   className="h-12 w-12 rounded-full object-cover"
-                  priority
+                  priority={true}
                 />
               ) : (
                 <div className="flex h-12 w-12 items-center justify-center rounded-full bg-accent">
@@ -134,7 +158,7 @@ export default async function AccountLayout({ children }: { children: React.Reac
                 </div>
               )}
               <div>
-                <p className="font-medium">{profile?.name || user.email}</p>
+                <p className="font-medium">{profile?.name || userNameMetadata}</p>
                 <p className={UI_CLASSES.TEXT_XS_MUTED}>{user.email}</p>
               </div>
             </div>

@@ -41,13 +41,14 @@
 import { notFound } from 'next/navigation';
 import { ContentListServer } from '@/src/components/content/content-grid-list';
 import {
-  type CategoryId,
+  type ContentCategory,
   getCategoryConfig,
   isValidCategory,
-} from '@/src/lib/config/category-config';
-import { getContentByCategory } from '@/src/lib/content/supabase-content-loader';
+} from '@/src/lib/data/config/category';
+import { getContentByCategory } from '@/src/lib/data/content';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 
 export const revalidate = false;
 
@@ -73,7 +74,7 @@ export const revalidate = false;
  */
 export async function generateStaticParams() {
   try {
-    const { VALID_CATEGORIES } = await import('@/src/lib/config/category-config');
+    const { VALID_CATEGORIES } = await import('@/src/lib/data/config/category');
 
     return VALID_CATEGORIES.map((category) => ({
       category,
@@ -124,7 +125,15 @@ export async function generateMetadata({ params }: { params: Promise<{ category:
     });
   }
 
-  const categoryConfig = await getCategoryConfig(category as CategoryId);
+  let categoryConfig: Awaited<ReturnType<typeof getCategoryConfig>> | null = null;
+  try {
+    categoryConfig = await getCategoryConfig(category as ContentCategory);
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to load category config for metadata');
+    logger.error('CategoryPage: category config lookup failed in metadata', normalized, {
+      category,
+    });
+  }
 
   return generatePageMetadata('/:category', {
     params: { category },
@@ -162,27 +171,34 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
     notFound();
   }
 
-  const config = await getCategoryConfig(category as CategoryId);
+  let config: Awaited<ReturnType<typeof getCategoryConfig>> | null = null;
+  try {
+    config = await getCategoryConfig(category as ContentCategory);
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to load category config for page render');
+    logger.error('CategoryPage: getCategoryConfig threw', normalized, { category });
+  }
   if (!config) {
+    logger.error('CategoryPage: missing category config', new Error('Category config is null'), {
+      category,
+    });
     notFound();
   }
 
   // Load content for this category (enriched with analytics, sponsorship, etc.)
-  let items: Awaited<ReturnType<typeof getContentByCategory>>;
+  let items: Awaited<ReturnType<typeof getContentByCategory>> = [];
   try {
     items = await getContentByCategory(category);
   } catch (error) {
-    logger.error(
-      'getContentByCategory error in [category]',
-      error instanceof Error ? error : new Error(String(error)),
-      {
-        category,
-        phase: 'page-render',
-        route: '[category]/page.tsx',
-      }
-    );
-    // Return empty array on error (shows empty state instead of crashing)
-    items = [];
+    const normalized = normalizeError(error, 'Failed to load category list content');
+    logger.error('CategoryPage: getContentByCategory threw', normalized, {
+      category,
+      route: '[category]/page.tsx',
+    });
+    throw normalized;
+  }
+  if (!items || items.length === 0) {
+    logger.warn('CategoryPage: getContentByCategory returned no items', { category });
   }
 
   // Process badges (handle dynamic count badges)

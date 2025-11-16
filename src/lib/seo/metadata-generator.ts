@@ -3,10 +3,10 @@
  */
 
 import type { Metadata } from 'next';
-import { APP_CONFIG } from '@/src/lib/constants';
+import { APP_CONFIG } from '@/src/lib/data/config/constants';
+import { fetchMetadata, type SEOMetadata } from '@/src/lib/data/seo/client';
 import { logger } from '@/src/lib/logger';
 import { generateOGImageUrl, OG_IMAGE_DIMENSIONS } from '@/src/lib/og/url-generator';
-import { fetchMetadata, type SEOMetadata } from '@/src/lib/seo/client';
 
 interface MetadataContext {
   params?: Record<string, string | string[]>;
@@ -29,7 +29,7 @@ export async function generatePageMetadata(
     }
   }
 
-  // Fetch metadata from unified seo-api edge function
+  // Fetch metadata from unified data-api/seo endpoint
   const config: SEOMetadata = await fetchMetadata(resolvedRoute);
 
   const canonicalUrl = buildCanonicalUrl(resolvedRoute);
@@ -80,10 +80,14 @@ export async function generatePageMetadata(
     },
   };
 
-  logger.info(`✅ Metadata generated for ${resolvedRoute}`, {
-    titleLength: metadata.title ? String(metadata.title).length : 0,
-    descLength: metadata.description?.length || 0,
-  });
+  // Only log during development, not during production builds
+  // This prevents 400+ JSON log lines cluttering the build output
+  if (process.env.NODE_ENV === 'development') {
+    logger.info(`✅ Metadata generated for ${resolvedRoute}`, {
+      titleLength: metadata.title ? String(metadata.title).length : 0,
+      descLength: metadata.description?.length || 0,
+    });
+  }
 
   return metadata;
 }

@@ -7,21 +7,19 @@
 import { motion } from 'motion/react';
 import Link from 'next/link';
 import { Button } from '@/src/components/primitives/ui/button';
+import { useNotificationsContext } from '@/src/components/providers/notifications-provider';
+import { Bell, X } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import type { Tables } from '@/src/types/database.types';
 
-type Notification = Tables<'notifications'>;
-
-import { Bell, X } from '@/src/lib/icons';
-import { type NotificationStore, useNotificationStore } from '@/src/lib/stores/notification-store';
+type NotificationRecord = Tables<'notifications'>;
 
 interface NotificationItemProps {
-  notification: Notification;
+  notification: NotificationRecord;
 }
 
 export function NotificationItem({ notification }: NotificationItemProps) {
-  const dismiss = useNotificationStore((state: NotificationStore) => state.dismiss);
-  const closeSheet = useNotificationStore((state: NotificationStore) => state.closeSheet);
+  const { dismiss, closeSheet } = useNotificationsContext();
 
   const handleDismiss = () => {
     dismiss(notification.id);
@@ -72,7 +70,7 @@ export function NotificationItem({ notification }: NotificationItemProps) {
           {notification.action_label && (
             <div className="pt-2">
               {notification.action_href ? (
-                <Button asChild variant="outline" size="sm" onClick={handleActionClick}>
+                <Button asChild={true} variant="outline" size="sm" onClick={handleActionClick}>
                   <Link href={notification.action_href}>{notification.action_label}</Link>
                 </Button>
               ) : (

@@ -7,12 +7,17 @@
 
 import dynamic from 'next/dynamic';
 import { usePathname } from 'next/navigation';
-import { use } from 'react';
+import { useEffect } from 'react';
 import { AnnouncementBannerClient } from '@/src/components/core/layout/announcement-banner-client';
 import { Navigation } from '@/src/components/core/layout/navigation';
-import { newsletterExperiments } from '@/src/lib/flags';
+import { useConfetti } from '@/src/hooks/use-confetti';
+import { checkConfettiEnabled } from '@/src/lib/actions/feature-flags.actions';
+import { logger } from '@/src/lib/logger';
 import { DIMENSIONS } from '@/src/lib/ui-constants';
+import { logClientWarning, normalizeError } from '@/src/lib/utils/error.utils';
+import { toasts } from '@/src/lib/utils/toast.utils';
 import type { Tables } from '@/src/types/database.types';
+import type { GetGetNavigationMenuReturn } from '@/src/types/database-overrides';
 
 const Footer = dynamic(
   () => import('@/src/components/core/layout/footer').then((mod) => ({ default: mod.Footer })),
@@ -34,7 +39,7 @@ const NotificationSheet = dynamic(
 
 const NewsletterFooterBar = dynamic(
   () =>
-    import('@/src/components/features/growth/newsletter').then((mod) => ({
+    import('@/src/components/features/growth/newsletter/newsletter-footer-bar').then((mod) => ({
       default: mod.NewsletterFooterBar,
     })),
   {
@@ -52,21 +57,72 @@ const FloatingActionBar = dynamic(
   }
 );
 
+const NEWSLETTER_OPT_IN_COOKIE = 'newsletter_opt_in';
+const NEWSLETTER_OPT_IN_SEEN_FLAG = 'newsletter_opt_in_seen';
+
+const buildStorageErrorContext = (error: unknown) => ({
+  error: error instanceof Error ? error.message : String(error),
+});
+
+type WindowWithCookieStore = Window &
+  typeof globalThis & {
+    cookieStore?: {
+      delete?: (name: string) => Promise<void>;
+    };
+  };
+
+async function clearNewsletterOptInCookie() {
+  if (typeof window === 'undefined') return;
+
+  const cookieStoreApi = (window as WindowWithCookieStore).cookieStore;
+  if (cookieStoreApi?.delete) {
+    await cookieStoreApi.delete(NEWSLETTER_OPT_IN_COOKIE);
+    return;
+  }
+
+  const response = await fetch('/api/newsletter-opt-in/clear', {
+    method: 'POST',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(
+      `Failed to clear ${NEWSLETTER_OPT_IN_COOKIE} cookie: ${response.status} ${response.statusText}`
+    );
+  }
+}
+
 interface LayoutContentProps {
   children: React.ReactNode;
   announcement: Tables<'announcements'> | null;
+  navigationData: GetGetNavigationMenuReturn;
   useFloatingActionBar?: boolean;
+  fabFlags: {
+    showSubmit: boolean;
+    showSearch: boolean;
+    showScrollToTop: boolean;
+    showNotifications: boolean;
+  };
+  footerDelayVariant: '10s' | '30s' | '60s';
+  ctaVariant: 'aggressive' | 'social_proof' | 'value_focused';
 }
 
 export function LayoutContent({
   children,
   announcement,
+  navigationData,
   useFloatingActionBar = false,
+  fabFlags,
+  footerDelayVariant,
+  ctaVariant,
 }: LayoutContentProps) {
   const pathname = usePathname();
+  const { fireConfetti } = useConfetti();
 
-  // A/B test: Footer delay timing (10s vs 30s vs 60s)
-  const footerDelayVariant = use(newsletterExperiments.footerDelay());
+  // Convert variant to delay milliseconds
   const delayMs =
     footerDelayVariant === '10s' ? 10000 : footerDelayVariant === '60s' ? 60000 : 30000;
 
@@ -75,6 +131,66 @@ export function LayoutContent({
   const isAuthRoute = AUTH_ROUTE_PREFIXES.some((prefix) =>
     prefix.endsWith('/') ? pathname.startsWith(prefix) : pathname === prefix
   );
+
+  useEffect(() => {
+    if (isAuthRoute) return;
+
+    let hasSeenToast = false;
+    try {
+      hasSeenToast = sessionStorage.getItem(NEWSLETTER_OPT_IN_SEEN_FLAG) === 'true';
+    } catch (error) {
+      logger.warn(
+        'LayoutContent: unable to read newsletter toast flag from sessionStorage',
+        buildStorageErrorContext(error)
+      );
+    }
+
+    if (hasSeenToast) return;
+
+    const cookieMatch = document.cookie.match(/newsletter_opt_in=([^;]+)/);
+    if (!cookieMatch) return;
+
+    const value = cookieMatch[1];
+    if (value !== 'success') return;
+
+    try {
+      sessionStorage.setItem(NEWSLETTER_OPT_IN_SEEN_FLAG, 'true');
+    } catch (error) {
+      logger.warn(
+        'LayoutContent: unable to set newsletter toast flag',
+        buildStorageErrorContext(error)
+      );
+    }
+
+    toasts.raw.success("You're in!", {
+      description: "We'll send the next Claude drop on Monday.",
+    });
+
+    checkConfettiEnabled({})
+      .then((result) => {
+        if (result?.data) {
+          fireConfetti('subtle');
+        }
+        if (result?.serverError) {
+          logClientWarning('LayoutContent: confetti check failed', new Error(result.serverError));
+        }
+      })
+      .catch((error) => {
+        logClientWarning('LayoutContent: confetti check failed', error, {
+          component: 'LayoutContent',
+          pathname,
+        });
+      });
+
+    clearNewsletterOptInCookie().catch((error) => {
+      const normalized = normalizeError(error, 'Failed to clear newsletter opt-in cookie');
+      logger.error('LayoutContent: failed to clear newsletter opt-in cookie', normalized, {
+        component: 'LayoutContent',
+        pathname,
+        cookieName: NEWSLETTER_OPT_IN_COOKIE,
+      });
+    });
+  }, [fireConfetti, isAuthRoute, pathname]);
 
   // Auth routes: minimal wrapper with no height constraints for true fullscreen experience
   if (isAuthRoute) {
@@ -98,15 +214,15 @@ export function LayoutContent({
       </a>
       <div className={'flex min-h-screen flex-col bg-background'}>
         {announcement && <AnnouncementBannerClient announcement={announcement} />}
-        <Navigation hideCreateButton={useFloatingActionBar} />
+        <Navigation hideCreateButton={useFloatingActionBar} navigationData={navigationData} />
         <main id="main-content" className="flex-1">
           {children}
         </main>
         <Footer />
         {/* Feature flag: Floating Action Bar (can be toggled on/off via Statsig) */}
-        {useFloatingActionBar && <FloatingActionBar />}
+        {useFloatingActionBar && <FloatingActionBar fabFlags={fabFlags} />}
         <NotificationSheet />
-        <NewsletterFooterBar source="footer" showAfterDelay={delayMs} />
+        <NewsletterFooterBar source="footer" showAfterDelay={delayMs} ctaVariant={ctaVariant} />
       </div>
     </>
   );

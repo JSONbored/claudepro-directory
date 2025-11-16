@@ -1,9 +1,9 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
+import { SimpleCopyButton } from '@/src/components/core/buttons/shared/simple-copy-button';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { CollectionItemManager } from '@/src/components/core/domain/collection-items-editor';
-import { SimpleCopyButton } from '@/src/components/core/buttons/shared/simple-copy-button';
 import { Button } from '@/src/components/primitives/ui/button';
 import {
   Card,
@@ -12,12 +12,14 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/ui/card';
-import { APP_CONFIG, ROUTES } from '@/src/lib/constants';
-import { ArrowLeft, Edit, Share2 } from '@/src/lib/icons';
+import { getAuthenticatedUser } from '@/src/lib/auth/get-authenticated-user';
+import { getCollectionDetail } from '@/src/lib/data/account/user-data';
+import { APP_CONFIG, ROUTES } from '@/src/lib/data/config/constants';
+import { ArrowLeft, Edit } from '@/src/lib/icons';
+import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
-import type { Tables } from '@/src/types/database.types';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 
 interface CollectionPageProps {
   params: Promise<{ slug: string }>;
@@ -28,39 +30,36 @@ export async function generateMetadata({ params }: CollectionPageProps): Promise
   return generatePageMetadata('/account/library/:slug', { params: { slug } });
 }
 
-// Force dynamic rendering - requires authentication
-export const dynamic = 'force-dynamic';
-
 export default async function CollectionDetailPage({ params }: CollectionPageProps) {
   const { slug } = await params;
-  const supabase = await createClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { user } = await getAuthenticatedUser({ context: 'CollectionDetailPage' });
 
   if (!user) {
+    logger.warn('CollectionDetailPage: unauthenticated access attempt', { slug });
     redirect('/login');
   }
 
-  // Consolidated RPC: 3 queries → 1 (67% reduction)
-  const { data: collectionData } = await supabase.rpc('get_collection_detail_with_items', {
-    p_user_id: user.id,
-    p_slug: slug,
-  });
+  let collectionData: Awaited<ReturnType<typeof getCollectionDetail>> = null;
+  try {
+    collectionData = await getCollectionDetail(user.id, slug);
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to load collection detail for account view');
+    logger.error('CollectionDetailPage: getCollectionDetail threw', normalized, {
+      userId: user.id,
+      slug,
+    });
+    throw normalized;
+  }
 
   if (!collectionData) {
+    logger.warn('CollectionDetailPage: collection not found or inaccessible', {
+      slug,
+      userId: user.id,
+    });
     notFound();
   }
 
-  // Type assertion to database-generated Json type
-  type CollectionResponse = {
-    collection: Tables<'user_collections'>;
-    items: Array<Tables<'collection_items'>>;
-    bookmarks: Array<Tables<'bookmarks'>>;
-  };
-
-  const { collection, items, bookmarks } = collectionData as unknown as CollectionResponse;
+  const { collection, items, bookmarks } = collectionData;
 
   const shareUrl = collection.is_public
     ? `${APP_CONFIG.url}/u/${user.id}/collections/${collection.slug}`

@@ -12,7 +12,7 @@
  */
 
 import { motion } from 'motion/react';
-import { useId, useState, useTransition } from 'react';
+import { useEffect, useId, useState, useTransition } from 'react';
 import { z } from 'zod';
 import { Button } from '@/src/components/primitives/ui/button';
 import { Card, CardContent } from '@/src/components/primitives/ui/card';
@@ -20,26 +20,34 @@ import { Input } from '@/src/components/primitives/ui/input';
 import { Label } from '@/src/components/primitives/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/primitives/ui/tabs';
 import { Textarea } from '@/src/components/primitives/ui/textarea';
+import { submitContentForReview } from '@/src/lib/actions/content.actions';
+import { getAnimationConfig } from '@/src/lib/actions/feature-flags.actions';
+import { useAuthenticatedUser } from '@/src/lib/auth/use-authenticated-user';
+import { CheckCircle, Code, FileText, Github, Layers, Send, Sparkles } from '@/src/lib/icons';
+import { logger } from '@/src/lib/logger';
 import {
   SUBMISSION_CONTENT_TYPES,
   type SubmissionContentType,
   type SubmissionFormConfig,
   type SubmissionFormSection,
   type TextFieldDefinition,
-} from '@/src/lib/forms/types';
-import { CheckCircle, Code, FileText, Github, Layers, Send, Sparkles } from '@/src/lib/icons';
-import { logger } from '@/src/lib/logger';
-import { createClient } from '@/src/lib/supabase/client';
+} from '@/src/lib/types/component.types';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
 import { ParseStrategy, safeParse } from '@/src/lib/utils/data.utils';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
-import type { Database, Json } from '@/src/types/database.types';
+import type {
+  ContentCategory,
+  GetGetContentTemplatesReturn,
+  SubmissionStatus,
+  SubmissionType,
+} from '@/src/types/database-overrides';
 import { DuplicateWarning } from './duplicate-warning';
 import { ContentTypeFieldRenderer } from './dynamic-form-field';
 import { ExamplesArrayInput } from './examples-array-input';
 import { FormSectionCard } from './form-section-card';
-import { type Template, TemplateSelector } from './template-selector';
+import { TemplateSelector } from './template-selector';
 
 /**
  * Examples array schema (Zod)
@@ -47,7 +55,7 @@ import { type Template, TemplateSelector } from './template-selector';
  */
 const examplesArraySchema = z.array(z.string());
 
-const DEFAULT_CONTENT_TYPE: SubmissionContentType = 'agents';
+const DEFAULT_CONTENT_TYPE: SubmissionContentType = 'agents' as SubmissionType;
 
 const EMPTY_SECTION: SubmissionFormSection = {
   nameField: null,
@@ -78,6 +86,7 @@ const FORM_TYPE_LABELS: Record<SubmissionContentType, string> = {
 
 interface SubmitFormClientProps {
   formConfig: SubmissionFormConfig;
+  templates: GetGetContentTemplatesReturn;
 }
 
 /**
@@ -114,7 +123,7 @@ interface SubmitFormClientProps {
  * @see https://react.dev/reference/react-dom/components/input#controlling-an-input-with-a-state-variable
  * @see https://developer.mozilla.org/en-US/docs/Web/API/FormData
  */
-export function SubmitFormClient({ formConfig }: SubmitFormClientProps) {
+export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProps) {
   /**
    * Minimal React State (only what requires reactivity)
    */
@@ -134,9 +143,46 @@ export function SubmitFormClient({ formConfig }: SubmitFormClientProps) {
   /** Submission result for success message display */
   const [submissionResult, setSubmissionResult] = useState<{
     submission_id: string;
-    status: string;
+    status: SubmissionStatus;
     message: string;
   } | null>(null);
+
+  /** Animation configs */
+  const [springSmooth, setSpringSmooth] = useState({
+    type: 'spring' as const,
+    stiffness: 300,
+    damping: 25,
+  });
+  const [springBouncy, setSpringBouncy] = useState({
+    type: 'spring' as const,
+    stiffness: 500,
+    damping: 20,
+  });
+  const { user } = useAuthenticatedUser({
+    context: 'ContentSubmissionForm',
+    subscribe: false,
+  });
+
+  useEffect(() => {
+    getAnimationConfig({})
+      .then((result) => {
+        if (!result?.data) return;
+        const config = result.data;
+        setSpringSmooth({
+          type: 'spring' as const,
+          stiffness: config['animation.spring.smooth.stiffness'],
+          damping: config['animation.spring.smooth.damping'],
+        });
+        setSpringBouncy({
+          type: 'spring' as const,
+          stiffness: config['animation.spring.bouncy.stiffness'],
+          damping: config['animation.spring.bouncy.damping'],
+        });
+      })
+      .catch((error) => {
+        logger.error('SubmitFormClient: failed to load animation config', error);
+      });
+  }, []);
 
   /**
    * Single ID prefix for ALL form fields
@@ -146,7 +192,7 @@ export function SubmitFormClient({ formConfig }: SubmitFormClientProps) {
 
   // Handle template selection
   // Templates are type-safe discriminated unions for UI pre-fill convenience
-  const handleTemplateSelect = (template: Template) => {
+  const handleTemplateSelect = (template: GetGetContentTemplatesReturn[number]) => {
     // Pre-fill form with template data using name attributes
     // NOTE: Cannot use querySelector('#id') because useId() generates dynamic IDs like ':r0:'
     const form = document.querySelector('form') as HTMLFormElement;
@@ -158,7 +204,7 @@ export function SubmitFormClient({ formConfig }: SubmitFormClientProps) {
     if (nameInput) nameInput.value = template.name;
 
     const descInput = form.querySelector('[name="description"]') as HTMLTextAreaElement;
-    if (descInput) descInput.value = template.description;
+    if (descInput) descInput.value = template.description || '';
 
     const categoryInput = form.querySelector('[name="category"]') as HTMLInputElement;
     if (categoryInput && template.category) categoryInput.value = template.category;
@@ -222,8 +268,9 @@ export function SubmitFormClient({ formConfig }: SubmitFormClientProps) {
 
     if (template.type === 'command') {
       const cmdInput = form.querySelector('[name="commandContent"]') as HTMLTextAreaElement;
-      if (cmdInput && typeof template.commandContent === 'string')
+      if (cmdInput && typeof template.commandContent === 'string') {
         cmdInput.value = template.commandContent;
+      }
     }
 
     toasts.success.templateApplied();
@@ -234,13 +281,6 @@ export function SubmitFormClient({ formConfig }: SubmitFormClientProps) {
 
     startTransition(async () => {
       try {
-        const supabase = createClient();
-
-        // Check authentication
-        const {
-          data: { user },
-        } = await supabase.auth.getUser();
-
         if (!user) {
           toasts.error.submissionFailed('You must be signed in to submit content');
           return;
@@ -288,86 +328,70 @@ export function SubmitFormClient({ formConfig }: SubmitFormClientProps) {
           }
         }
 
-        // Direct RPC call - database validates everything
-        const rpcArgs: Database['public']['Functions']['submit_content_for_review']['Args'] = {
-          p_submission_type: contentType,
-          p_name: submissionData.name as string,
-          p_description: submissionData.description as string,
-          p_category: submissionData.category as string,
-          p_author: submissionData.author as string,
-          // Cast to Json - database validates structure via CHECK constraints
-          p_content_data: submissionData as Json,
-        };
+        // Server action call - database validates everything
+        const tags = submissionData.tags
+          ? (submissionData.tags as string)
+              .split(',')
+              .map((tag) => tag.trim())
+              .filter((tag) => tag.length > 0)
+          : undefined;
 
-        if (submissionData.author_profile_url) {
-          rpcArgs.p_author_profile_url = submissionData.author_profile_url as string;
-        }
-        if (submissionData.github_url) {
-          rpcArgs.p_github_url = submissionData.github_url as string;
-        }
-        if (submissionData.tags) {
-          rpcArgs.p_tags = (submissionData.tags as string)
-            .split(',')
-            .map((tag) => tag.trim())
-            .filter((tag) => tag.length > 0);
-        }
+        const result = await submitContentForReview({
+          submission_type: contentType,
+          name: submissionData.name as string,
+          description: submissionData.description as string,
+          category: submissionData.category as ContentCategory,
+          author: submissionData.author as string,
+          author_profile_url: submissionData.author_profile_url as string | undefined,
+          github_url: submissionData.github_url as string | undefined,
+          tags,
+          content_data: submissionData,
+        });
 
-        const { data, error } = await supabase.rpc('submit_content_for_review', rpcArgs);
-
-        if (error) {
-          logger.error('Submission RPC failed', new Error(error.message));
-          // Show generic error to user, full error is logged
+        if (result?.serverError || result?.validationErrors) {
+          logger.error(
+            'Submission server action failed',
+            new Error(result.serverError || 'Validation failed'),
+            {
+              component: 'SubmitFormClient',
+              contentType,
+              submissionType: contentType,
+              hasName: !!submissionData.name,
+              hasDescription: !!submissionData.description,
+              hasAuthor: !!submissionData.author,
+            }
+          );
           toasts.error.submissionFailed(
-            'Failed to submit content. Please try again or contact support.'
+            result.serverError || 'Failed to submit content. Please try again or contact support.'
           );
           return;
         }
 
-        if (!data) {
-          toasts.error.submissionFailed('No data returned from submission');
-          return;
-        }
-
-        // Validate response structure
-        if (
-          !data ||
-          typeof data !== 'object' ||
-          !('success' in data) ||
-          typeof data.success !== 'boolean'
-        ) {
-          logger.error('Invalid RPC response structure', new Error(JSON.stringify(data)));
-          toasts.error.submissionFailed('Received invalid response from server');
-          return;
-        }
-
-        const result = data as {
-          success: boolean;
-          submission_id?: string;
-          status?: string;
-          message?: string;
-        };
-
-        if (result.success) {
-          if (!(result.submission_id && result.status)) {
-            logger.warn('Success response missing expected fields', {
-              submission_id: result.submission_id || 'missing',
-              status: result.status || 'missing',
+        if (result?.data?.success) {
+          if (!result.data.submissionId) {
+            logger.warn('Success response missing submission ID', {
+              component: 'SubmitFormClient',
+              contentType,
             });
           }
+
           setSubmissionResult({
-            submission_id: result.submission_id || 'unknown',
-            status: result.status || 'pending',
-            message: result.message || 'Your submission has been received and is pending review!',
+            submission_id: result.data.submissionId || 'unknown',
+            status: 'pending',
+            message: 'Your submission has been received and is pending review!',
           });
 
           toasts.success.submissionCreated(contentType);
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }
       } catch (error) {
-        logger.error(
-          'Submission failed',
-          error instanceof Error ? error : new Error(String(error))
-        );
+        const normalized = normalizeError(error, 'Content submission failed');
+        logger.error('Submission failed', normalized, {
+          component: 'SubmitFormClient',
+          contentType,
+          hasName: !!name,
+          hasDescription: !!description,
+        });
         toasts.error.submissionFailed(error instanceof Error ? error.message : undefined);
       }
     });
@@ -394,7 +418,7 @@ export function SubmitFormClient({ formConfig }: SubmitFormClientProps) {
         <motion.div
           initial={{ opacity: 0, scale: 0.9, y: -20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
-          transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+          transition={springSmooth}
         >
           <Card className={'mb-6 border-green-500/20 bg-green-500/5'}>
             <CardContent className={'pt-6'}>
@@ -402,7 +426,7 @@ export function SubmitFormClient({ formConfig }: SubmitFormClientProps) {
                 <motion.div
                   initial={{ scale: 0, rotate: -180 }}
                   animate={{ scale: 1, rotate: 0 }}
-                  transition={{ type: 'spring', stiffness: 500, damping: 15, delay: 0.2 }}
+                  transition={{ ...springBouncy, delay: 0.2 }}
                 >
                   <CheckCircle
                     className={`h-6 w-6 text-green-500 ${UI_CLASSES.FLEX_SHRINK_0_MT_0_5}`}
@@ -470,7 +494,7 @@ export function SubmitFormClient({ formConfig }: SubmitFormClientProps) {
                     setContentType(e.target.value as SubmissionContentType);
                     setName(''); // Reset name when type changes
                   }}
-                  required
+                  required={true}
                   className={
                     'flex h-10 w-full rounded-md border border-input bg-background py-2 pr-3 pl-10 text-sm'
                   }
@@ -486,7 +510,7 @@ export function SubmitFormClient({ formConfig }: SubmitFormClientProps) {
 
             <div className={UI_CLASSES.SPACE_Y_2}>
               <Label>Quick Start</Label>
-              <TemplateSelector contentType={contentType} onSelect={handleTemplateSelect} />
+              <TemplateSelector templates={templates} onSelect={handleTemplateSelect} />
             </div>
           </div>
         </FormSectionCard>
@@ -525,7 +549,7 @@ export function SubmitFormClient({ formConfig }: SubmitFormClientProps) {
                     className="-translate-y-1/2 absolute top-1/2 right-3"
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
-                    transition={{ type: 'spring', stiffness: 500, damping: 15 }}
+                    transition={springBouncy}
                   >
                     <CheckCircle className={cn(UI_CLASSES.ICON_SM, UI_CLASSES.ICON_SUCCESS)} />
                   </motion.div>
@@ -556,7 +580,7 @@ export function SubmitFormClient({ formConfig }: SubmitFormClientProps) {
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                     placeholder="Describe what your configuration does and how to use it..."
-                    required
+                    required={true}
                     rows={6}
                     className="resize-y font-sans"
                   />

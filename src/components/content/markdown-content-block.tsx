@@ -107,7 +107,7 @@ function CaseStudyVariant(props: CaseStudyProps) {
   const { company, industry, challenge, solution, results, metrics, testimonial, logo } = props;
 
   return (
-    <Card itemScope itemType="https://schema.org/Article" className={'my-8 overflow-hidden'}>
+    <Card itemScope={true} itemType="https://schema.org/Article" className={'my-8 overflow-hidden'}>
       <CardHeader className="pb-4">
         <div className={'flex items-start justify-between'}>
           <div>
@@ -208,7 +208,7 @@ function FeatureGridVariant(props: FeatureGridProps) {
   }
 
   return (
-    <section itemScope itemType="https://schema.org/ItemList" className="my-8">
+    <section itemScope={true} itemType="https://schema.org/ItemList" className="my-8">
       <div className="mb-6">
         <h2 className={'mb-2 font-bold text-2xl'} itemProp="name">
           {title}
@@ -224,7 +224,7 @@ function FeatureGridVariant(props: FeatureGridProps) {
         {validFeatures.map((feature, index) => (
           <Card
             key={feature.title}
-            itemScope
+            itemScope={true}
             itemType="https://schema.org/ListItem"
             className={
               'group hover:-translate-y-1 relative h-full overflow-hidden border border-border/50 bg-gradient-to-br from-card/30 via-card/50 to-card/30 shadow-lg transition-all duration-300 hover:from-card/50 hover:via-card/70 hover:to-card/50 hover:shadow-xl'
@@ -285,7 +285,7 @@ function TLDRVariant(props: TLDRSummaryProps) {
 
   return (
     <Card
-      itemScope
+      itemScope={true}
       itemType="https://schema.org/Article"
       className="my-8 border-primary border-l-4 bg-primary/5"
     >
@@ -328,7 +328,7 @@ function ExpertQuoteVariant(props: ExpertQuoteProps) {
 
   return (
     <blockquote
-      itemScope
+      itemScope={true}
       itemType="https://schema.org/Quotation"
       className="my-8 rounded-r-lg border-primary border-l-4 bg-muted/30 p-6"
     >
@@ -342,7 +342,7 @@ function ExpertQuoteVariant(props: ExpertQuoteProps) {
             <AvatarFallback>{author.slice(0, 2).toUpperCase()}</AvatarFallback>
           </Avatar>
         )}
-        <div itemProp="author" itemScope itemType="https://schema.org/Person">
+        <div itemProp="author" itemScope={true} itemType="https://schema.org/Person">
           <cite className="not-italic">
             <span itemProp="name" className="font-semibold text-foreground">
               {author}
@@ -380,7 +380,7 @@ function QuickReferenceVariant(props: QuickReferenceProps) {
 
   return (
     <Card
-      itemScope
+      itemScope={true}
       itemType="https://schema.org/Table"
       className="my-8 border-accent border-l-4 bg-accent/5"
     >
@@ -396,7 +396,7 @@ function QuickReferenceVariant(props: QuickReferenceProps) {
           {validItems.map((item, index) => (
             <div
               key={`${item.label}-${index}`}
-              itemScope
+              itemScope={true}
               itemType="https://schema.org/PropertyValue"
               className={`${UI_CLASSES.FLEX_COL_GAP_2} rounded-lg border bg-card/50 p-3 sm:flex-row sm:items-start sm:gap-4`}
             >
@@ -435,7 +435,7 @@ function ContentTabsVariant(props: ContentTabsProps) {
   const firstValue = defaultValue || validItems[0]?.value || '';
 
   return (
-    <section itemScope itemType="https://schema.org/ItemList" className="my-8">
+    <section itemScope={true} itemType="https://schema.org/ItemList" className="my-8">
       {title && (
         <div className="mb-6">
           <h3 className={'mb-2 font-bold text-xl'} itemProp="name">
@@ -469,7 +469,7 @@ function ContentTabsVariant(props: ContentTabsProps) {
             key={item.value}
             value={item.value}
             className="mt-4"
-            itemScope
+            itemScope={true}
             itemType="https://schema.org/ListItem"
           >
             <div

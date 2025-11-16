@@ -6,6 +6,9 @@
  * Integrates with react-share for social platforms
  */
 
+import { logger } from '@/src/lib/logger';
+import { normalizeError } from '@/src/lib/utils/error.utils';
+
 export type SharePlatform = 'twitter' | 'linkedin' | 'reddit' | 'facebook' | 'copy_link' | 'native';
 
 export interface ShareOptions {
@@ -115,6 +118,12 @@ export async function shareNative(options: ShareOptions): Promise<boolean> {
       // User cancelled sharing
       return false;
     }
+    const normalized = normalizeError(error, 'navigator.share failed');
+    logger.warn('shareNative: navigator.share failed', {
+      platform: options.platform,
+      url: options.url,
+      error: normalized.message,
+    });
     // Fallback to copy link
     return await copyShareLink(options);
   }
@@ -132,7 +141,13 @@ export async function copyShareLink(options: ShareOptions): Promise<boolean> {
     const shareUrl = generateShareUrl(options);
     await navigator.clipboard.writeText(shareUrl);
     return true;
-  } catch {
+  } catch (error) {
+    const normalized = normalizeError(error, 'copyShareLink failed');
+    logger.warn('copyShareLink failed', {
+      platform: options.platform,
+      url: options.url,
+      error: normalized.message,
+    });
     return false;
   }
 }
@@ -152,6 +167,11 @@ export async function getShareCount(
 
 /**
  * Track share event (fire-and-forget)
+ *
+ * Note: This utility function is kept for backward compatibility.
+ * For new code, consider using usePulse() hook directly.
+ *
+ * @deprecated Consider using usePulse() hook in components instead
  */
 export async function trackShare(options: {
   platform: SharePlatform;
@@ -161,6 +181,7 @@ export async function trackShare(options: {
 }): Promise<void> {
   try {
     // Import trackInteraction dynamically to avoid circular deps
+    // This utility function can't use hooks, so we keep using trackInteraction directly
     const { trackInteraction } = await import('@/src/lib/edge/client');
 
     await trackInteraction({
@@ -172,7 +193,13 @@ export async function trackShare(options: {
         url: options.url,
       },
     });
-  } catch {
+  } catch (error) {
+    const normalized = normalizeError(error, 'trackShare failed');
+    logger.warn('trackShare failed', {
+      platform: options.platform,
+      url: options.url,
+      error: normalized.message,
+    });
     // Silent fail - don't block user action
   }
 }

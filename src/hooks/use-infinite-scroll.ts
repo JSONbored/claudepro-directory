@@ -1,16 +1,17 @@
 'use client';
 
 /**
- * useInfiniteScroll Hook - Database-First Configuration
+ * useInfiniteScroll Hook - Statsig Dynamic Config
  * Production-grade infinite scroll using Intersection Observer API
- * Loads default batch_size and threshold from app_settings
+ * Loads default batch_size and threshold from Statsig
  *
  * @module hooks/use-infinite-scroll
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { getAppSettings, getTimeoutConfig } from '@/src/lib/actions/feature-flags.actions';
 import { logger } from '@/src/lib/logger';
-import { createClient } from '@/src/lib/supabase/client';
+import { logClientWarning } from '@/src/lib/utils/error.utils';
 
 interface UseInfiniteScrollOptions {
   /** Total number of items available */
@@ -60,43 +61,37 @@ export function useInfiniteScroll({
   threshold,
   root = null,
 }: UseInfiniteScrollOptions): UseInfiniteScrollReturn {
-  // Hardcoded fallbacks (loaded from app_settings at mount)
-  const [dbDefaults, setDbDefaults] = useState({
+  // Hardcoded fallbacks (loaded from Statsig at mount)
+  const [configDefaults, setConfigDefaults] = useState({
     batchSize: 30,
     threshold: 0.1,
   });
 
-  // Load app_settings on mount (background, non-blocking)
+  // Load Statsig config on mount (background, non-blocking)
   useEffect(() => {
     const loadDefaults = async () => {
       try {
-        const supabase = createClient();
-        const { data } = await supabase.rpc('get_app_settings', {
-          p_category: 'hooks',
-        });
-
-        if (data) {
-          const settings = data as Record<string, { value: unknown }>;
-
-          setDbDefaults({
-            batchSize: (settings['hooks.infinite_scroll.batch_size']?.value as number) ?? 30,
-            threshold:
-              (settings['hooks.infinite_scroll.load_more_threshold']?.value as number) ?? 0.1,
+        const result = await getAppSettings({});
+        if (result?.data) {
+          const config = result.data;
+          setConfigDefaults({
+            batchSize: config['hooks.infinite_scroll.batch_size'],
+            threshold: config['hooks.infinite_scroll.threshold'],
           });
         }
-      } catch {
-        // Silent fail - uses hardcoded fallbacks
+      } catch (error) {
+        logClientWarning('useInfiniteScroll: failed to load defaults', error);
       }
     };
 
-    loadDefaults().catch(() => {
-      // Silent fail - uses hardcoded fallbacks
+    loadDefaults().catch((error) => {
+      logClientWarning('useInfiniteScroll: loadDefaults promise rejected', error);
     });
   }, []);
 
-  // Merge user options with database defaults (user options take precedence)
-  const finalBatchSize = batchSize ?? dbDefaults.batchSize;
-  const finalThreshold = threshold ?? dbDefaults.threshold;
+  // Merge user options with config defaults (user options take precedence)
+  const finalBatchSize = batchSize ?? configDefaults.batchSize;
+  const finalThreshold = threshold ?? configDefaults.threshold;
 
   // Validate threshold (shadcn-inspired production safety)
   const safeThreshold = useCallback(() => {
@@ -129,12 +124,22 @@ export function useInfiniteScroll({
 
     setIsLoading(true);
 
-    // Small delay for smooth UX and to batch rapid scroll events
-    setTimeout(() => {
-      setDisplayCount((prev) => Math.min(prev + finalBatchSize, totalItems));
-      setIsLoading(false);
-    }, 100);
-  }, [isLoading, hasMore, finalBatchSize, totalItems]);
+    getTimeoutConfig({})
+      .then((result) => {
+        const delay = result?.data?.['timeout.ui.transition_ms'] ?? 200;
+        setTimeout(() => {
+          setDisplayCount((prev) => Math.min(prev + finalBatchSize, totalItems));
+          setIsLoading(false);
+        }, delay);
+      })
+      .catch((error) => {
+        logClientWarning('useInfiniteScroll: failed to load transition timeout', error);
+        setTimeout(() => {
+          setDisplayCount((prev) => Math.min(prev + finalBatchSize, totalItems));
+          setIsLoading(false);
+        }, 200);
+      });
+  }, [finalBatchSize, hasMore, isLoading, totalItems]);
 
   /**
    * Callback ref for sentinel element

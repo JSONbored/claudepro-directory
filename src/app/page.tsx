@@ -1,7 +1,4 @@
-/**
- * Homepage - Database-First Configuration Directory
- * All content from Supabase with ISR caching, dynamic category loading from PostgreSQL.
- */
+/** Homepage consuming homepageConfigs for runtime-tunable categories */
 
 import dynamicImport from 'next/dynamic';
 import { Suspense } from 'react';
@@ -28,20 +25,22 @@ const NumberTicker = dynamicImport(
 
 const NewsletterCTAVariant = dynamicImport(
   () =>
-    import('@/src/components/features/growth/newsletter').then((mod) => mod.NewsletterCTAVariant),
+    import('@/src/components/features/growth/newsletter/newsletter-cta-variants').then((mod) => ({
+      default: mod.NewsletterCTAVariant,
+    })),
   {
     loading: () => <div className="h-32 animate-pulse rounded-lg bg-muted/20" />,
   }
 );
 
-import { getHomepageCategoryIds } from '@/src/lib/config/category-config';
+import { getHomepageFeaturedCategories } from '@/src/lib/data/config/category';
+import { getHomepageData } from '@/src/lib/data/content/homepage';
 import { logger } from '@/src/lib/logger';
-import { createAnonClient } from '@/src/lib/supabase/server-anon';
-import type { GetHomepageCompleteReturn } from '@/src/types/database-overrides';
+import type { GetGetHomepageCompleteReturn } from '@/src/types/database-overrides';
 
 export const metadata = generatePageMetadata('/');
 
-export const revalidate = false; // Static + on-demand ISR via content trigger
+export const revalidate = false;
 
 interface HomePageProps {
   searchParams: Promise<{
@@ -52,12 +51,12 @@ interface HomePageProps {
 async function HomeContentSection({
   homepageContentData,
   featuredJobs,
+  categoryIds,
 }: {
-  homepageContentData: GetHomepageCompleteReturn['content'];
-  featuredJobs: GetHomepageCompleteReturn['featured_jobs'];
+  homepageContentData: GetGetHomepageCompleteReturn['content'];
+  featuredJobs: GetGetHomepageCompleteReturn['featured_jobs'];
+  categoryIds: readonly string[];
 }) {
-  const categoryIds = getHomepageCategoryIds;
-
   try {
     return (
       <HomePageClient
@@ -72,13 +71,18 @@ async function HomeContentSection({
       'Homepage content section error',
       error instanceof Error ? error : new Error(String(error))
     );
-    const emptyData: GetHomepageCompleteReturn['content']['categoryData'] = {};
+    const emptyData: GetGetHomepageCompleteReturn['content']['categoryData'] =
+      {} as GetGetHomepageCompleteReturn['content']['categoryData'];
 
     return (
       <HomePageClient
         initialData={emptyData}
-        featuredByCategory={{}}
-        stats={Object.fromEntries(categoryIds.map((id: string) => [id, 0]))}
+        featuredByCategory={{} as GetGetHomepageCompleteReturn['content']['categoryData']}
+        stats={
+          Object.fromEntries(
+            categoryIds.map((id: string) => [id, { total: 0, featured: 0 }])
+          ) as GetGetHomepageCompleteReturn['content']['stats']
+        }
         featuredJobs={[]}
       />
     );
@@ -88,27 +92,15 @@ async function HomeContentSection({
 export default async function HomePage({ searchParams }: HomePageProps) {
   await searchParams;
 
-  // Consolidated homepage data: get_homepage_complete() returns everything (67% fewer DB calls)
-  const supabase = createAnonClient();
-  const { data: homepageData, error: homepageError } = await supabase.rpc('get_homepage_complete', {
-    p_category_ids: [...getHomepageCategoryIds],
-  });
-
-  if (homepageError) {
-    logger.error('Homepage RPC error', homepageError, {
-      rpcFunction: 'get_homepage_complete',
-      phase: 'homepage-render',
-    });
-  }
+  const categoryIds = await getHomepageFeaturedCategories();
 
   // Extract member_count and top_contributors from consolidated response
   // Type-safe RPC return using centralized type definition
-  const homepageResult = homepageData as GetHomepageCompleteReturn | null;
+  const homepageResult = await getHomepageData(categoryIds);
 
-  const memberCount = homepageError || !homepageResult ? 0 : homepageResult.member_count || 0;
-  const featuredJobs = homepageError || !homepageResult ? [] : homepageResult.featured_jobs || [];
-  const topContributors =
-    homepageError || !homepageResult ? [] : homepageResult.top_contributors || [];
+  const memberCount = homepageResult?.member_count ?? 0;
+  const featuredJobs = homepageResult?.featured_jobs ?? [];
+  const topContributors = homepageResult?.top_contributors ?? [];
 
   return (
     <div className={'min-h-screen bg-background'}>
@@ -144,29 +136,27 @@ export default async function HomePage({ searchParams }: HomePageProps) {
           <Suspense fallback={<HomePageLoading />}>
             <HomeContentSection
               homepageContentData={
-                homepageResult?.content || {
-                  categoryData: {},
-                  stats: {},
+                homepageResult?.content ??
+                ({
+                  categoryData: {} as GetGetHomepageCompleteReturn['content']['categoryData'],
+                  stats: {} as GetGetHomepageCompleteReturn['content']['stats'],
                   weekStart: '',
-                }
+                } as GetGetHomepageCompleteReturn['content'])
               }
               featuredJobs={featuredJobs}
+              categoryIds={categoryIds}
             />
           </Suspense>
         </div>
+
+        <LazySection>
+          <TopContributors contributors={topContributors} />
+        </LazySection>
+
+        <LazySection>
+          <NewsletterCTAVariant variant="hero" source="homepage" />
+        </LazySection>
       </div>
-
-      {Array.isArray(topContributors) && topContributors.length > 0 && (
-        <TopContributors contributors={topContributors as never[]} />
-      )}
-
-      <section className={'container mx-auto px-4 py-12'}>
-        <Suspense fallback={null}>
-          <LazySection variant="fade-in" delay={0.15}>
-            <NewsletterCTAVariant variant="hero" source="homepage" />
-          </LazySection>
-        </Suspense>
-      </section>
     </div>
   );
 }

@@ -8,17 +8,13 @@ import { useEffect, useState } from 'react';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { UnifiedCardGrid } from '@/src/components/core/domain/cards/card-grid';
 import { BaseCard } from '@/src/components/core/domain/cards/content-card-base';
-import type { CategoryId } from '@/src/lib/config/category-config';
-import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
+import type { ContentItem } from '@/src/lib/data/content';
+import { getRelatedContent } from '@/src/lib/data/content/related';
 import { Sparkles } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
-import { relatedContentService } from '@/src/lib/related-content/service';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { getContentItemUrl } from '@/src/lib/utils/content.utils';
-import type { Database } from '@/src/types/database.types';
-
-type RelatedContentRPCResult =
-  Database['public']['Functions']['get_related_content']['Returns'][number];
+import type { ContentCategory } from '@/src/types/database-overrides';
 
 type RelatedContentItem = ContentItem & {
   score?: number;
@@ -97,7 +93,7 @@ export function RelatedContentClient({
   useEffect(() => {
     const fetchRelatedContent = async () => {
       try {
-        const response = await relatedContentService.getRelatedContent({
+        const response = await getRelatedContent({
           currentPath: pathname,
           currentCategory: getCategoryFromPath(pathname),
           currentTags,
@@ -108,7 +104,7 @@ export function RelatedContentClient({
         });
 
         const convertedItems = response.items.map(
-          (item: RelatedContentRPCResult): Partial<RelatedContentItem> => ({
+          (item): Partial<RelatedContentItem> => ({
             category: item.category,
             slug: item.slug,
             title: item.title,
@@ -149,7 +145,7 @@ export function RelatedContentClient({
 
   return (
     <section
-      itemScope
+      itemScope={true}
       itemType="https://schema.org/ItemList"
       className="my-12"
       aria-label="Related content"
@@ -196,14 +192,14 @@ export function RelatedContentClient({
             <BaseCard
               key={`${relatedItem.category}-${relatedItem.slug}`}
               targetPath={getContentItemUrl({
-                category: relatedItem.category as CategoryId,
+                category: relatedItem.category as ContentCategory,
                 slug: relatedItem.slug,
               })}
               displayTitle={relatedItem.title ?? relatedItem.slug}
               description={relatedItem.description}
               tags={relatedItem.matchDetails?.matchedTags?.slice(0, 2) ?? []}
-              topAccent
-              compactMode
+              topAccent={true}
+              compactMode={true}
               ariaLabel={`Related: ${relatedItem.title}`}
               renderTopBadges={() => (
                 <div className="flex w-full items-center justify-between gap-2">

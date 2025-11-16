@@ -8,37 +8,85 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/ui/card';
-import { ROUTES } from '@/src/lib/constants';
+import { getAuthenticatedUser } from '@/src/lib/auth/get-authenticated-user';
+import { getUserSponsorships } from '@/src/lib/data/account/user-data';
+import { ROUTES } from '@/src/lib/data/config/constants';
 import { BarChart, Eye, MousePointer, TrendingUp } from '@/src/lib/icons';
+import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
-
-// Force dynamic rendering - requires authentication
-export const dynamic = 'force-dynamic';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 
 export const metadata = generatePageMetadata('/account/sponsorships');
 
 export default async function SponsorshipsPage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { user } = await getAuthenticatedUser({ context: 'SponsorshipsPage' });
 
-  if (!user) return null;
-
-  // Get user's sponsored content (they can only see their own campaigns)
-  const { data: sponsorships } = await supabase
-    .from('sponsored_content')
-    .select('*')
-    .eq('user_id', user.id)
-    .order('created_at', { ascending: false });
-
-  // If user has no sponsorships, don't show this page
-  // (Admin manually adds campaigns after payment, then user can access)
-  if (!sponsorships || sponsorships.length === 0) {
-    return null; // Or redirect to /partner page
+  if (!user) {
+    logger.warn('SponsorshipsPage: unauthenticated access attempt');
+    return (
+      <div className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-2xl">Sign in required</CardTitle>
+            <CardDescription>Please sign in to manage your sponsorship campaigns.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button asChild={true}>
+              <Link href={ROUTES.LOGIN}>Go to login</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
+
+  let sponsorships: Awaited<ReturnType<typeof getUserSponsorships>> | null = null;
+  let fetchError = false;
+  try {
+    sponsorships = await getUserSponsorships(user.id);
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to load user sponsorships');
+    logger.error('SponsorshipsPage: getUserSponsorships threw', normalized, { userId: user.id });
+    fetchError = true;
+  }
+
+  if (fetchError) {
+    return (
+      <div className="space-y-6">
+        <div className="text-destructive">Failed to load sponsorships. Please try again later.</div>
+      </div>
+    );
+  }
+
+  if (!sponsorships || sponsorships.length === 0) {
+    logger.info('SponsorshipsPage: user has no sponsorships', { userId: user.id });
+    return (
+      <div className="space-y-6">
+        <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
+          <div>
+            <h1 className="mb-2 font-bold text-3xl">Sponsorships</h1>
+            <p className="text-muted-foreground">No active campaigns yet</p>
+          </div>
+          <Button variant="outline" asChild={true}>
+            <Link href={ROUTES.PARTNER}>
+              <TrendingUp className="mr-2 h-4 w-4" />
+              Become a Sponsor
+            </Link>
+          </Button>
+        </div>
+        <Card>
+          <CardContent className="py-12 text-center text-muted-foreground">
+            You haven't launched any sponsorship campaigns yet.
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  const orderedSponsorships = [...sponsorships].sort(
+    (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+  );
 
   return (
     <div className="space-y-6">
@@ -50,7 +98,7 @@ export default async function SponsorshipsPage() {
             {sponsorships?.length === 1 ? 'campaign' : 'campaigns'}
           </p>
         </div>
-        <Button variant="outline" asChild>
+        <Button variant="outline" asChild={true}>
           <Link href={ROUTES.PARTNER}>
             <TrendingUp className="mr-2 h-4 w-4" />
             Become a Sponsor
@@ -59,7 +107,7 @@ export default async function SponsorshipsPage() {
       </div>
 
       <div className="grid gap-4">
-        {sponsorships.map((sponsorship) => {
+        {orderedSponsorships.map((sponsorship) => {
           const isActive =
             sponsorship.active &&
             new Date(sponsorship.start_date) <= new Date() &&
@@ -83,7 +131,7 @@ export default async function SponsorshipsPage() {
                       <UnifiedBadge
                         variant="sponsored"
                         tier={sponsorship.tier as 'featured' | 'promoted' | 'spotlight'}
-                        showIcon
+                        showIcon={true}
                       />
                       {isActive ? (
                         <UnifiedBadge variant="base" className={UI_CLASSES.STATUS_APPROVED}>
@@ -108,7 +156,7 @@ export default async function SponsorshipsPage() {
                       {new Date(sponsorship.end_date).toLocaleDateString()}
                     </CardDescription>
                   </div>
-                  <Button variant="outline" size="sm" asChild>
+                  <Button variant="outline" size="sm" asChild={true}>
                     <Link href={`/account/sponsorships/${sponsorship.id}/analytics`}>
                       <BarChart className="mr-1 h-3 w-3" />
                       Analytics

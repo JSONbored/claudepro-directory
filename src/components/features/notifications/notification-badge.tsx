@@ -15,8 +15,11 @@
 'use client';
 
 import { AnimatePresence, motion } from 'motion/react';
-import { type NotificationStore, useNotificationStore } from '@/src/lib/stores/notification-store';
-import { ANIMATION_CONSTANTS, POSITION_PATTERNS } from '@/src/lib/ui-constants';
+import { useEffect, useState } from 'react';
+import { useNotificationsContext } from '@/src/components/providers/notifications-provider';
+import { getAnimationConfig } from '@/src/lib/actions/feature-flags.actions';
+import { logger } from '@/src/lib/logger';
+import { POSITION_PATTERNS } from '@/src/lib/ui-constants';
 
 interface NotificationBadgeProps {
   /** Custom className for styling */
@@ -24,9 +27,30 @@ interface NotificationBadgeProps {
 }
 
 export function NotificationBadge({ className = '' }: NotificationBadgeProps) {
-  // ✅ Select stable state value (not function call)
-  const unreadCount = useNotificationStore((state: NotificationStore) => state.unreadCount);
+  const { unreadCount, flags } = useNotificationsContext();
+  const [springBouncy, setSpringBouncy] = useState({
+    type: 'spring' as const,
+    stiffness: 500,
+    damping: 20,
+  });
 
+  useEffect(() => {
+    getAnimationConfig({})
+      .then((result) => {
+        if (!result?.data) return;
+        const config = result.data;
+        setSpringBouncy({
+          type: 'spring' as const,
+          stiffness: config['animation.spring.bouncy.stiffness'],
+          damping: config['animation.spring.bouncy.damping'],
+        });
+      })
+      .catch((error) => {
+        logger.error('NotificationBadge: failed to load animation config', error);
+      });
+  }, []);
+
+  if (!flags.enableNotifications) return null;
   if (unreadCount === 0) return null;
 
   return (
@@ -36,7 +60,7 @@ export function NotificationBadge({ className = '' }: NotificationBadgeProps) {
         initial={{ scale: 0, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0, opacity: 0 }}
-        transition={ANIMATION_CONSTANTS.SPRING_BOUNCY}
+        transition={springBouncy}
         className={`${POSITION_PATTERNS.ABSOLUTE_TOP_BADGE} flex h-5 w-5 items-center justify-center rounded-full bg-destructive font-medium text-destructive-foreground text-xs shadow-md ${className}
         `}
         aria-live="polite"

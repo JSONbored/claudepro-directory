@@ -1,12 +1,13 @@
 'use client';
 
-import { useState } from 'react';
 import { Check, type LucideIcon } from 'lucide-react';
-import { Button } from '@/components/primitives/ui/button';
 import { motion } from 'motion/react';
-import { useButtonSuccess } from '@/hooks/use-button-success';
-import type { ButtonStyleProps } from './button-types';
-import { toasts } from '@/lib/toasts';
+import { useState } from 'react';
+import { Button } from '@/src/components/primitives/ui/button';
+import { useButtonSuccess } from '@/src/hooks/use-button-success';
+import type { ButtonStyleProps } from '@/src/lib/types/component.types';
+import { logClientWarning } from '@/src/lib/utils/error.utils';
+import { toasts } from '@/src/lib/utils/toast.utils';
 
 interface ContentActionButtonProps extends ButtonStyleProps {
   url: string;
@@ -48,6 +49,7 @@ export function ContentActionButton({
 
       if (trackAnalytics) await trackAnalytics();
     } catch (error) {
+      logClientWarning('ContentActionButton: action failed', error, { url, label });
       toasts.raw.error(error instanceof Error ? error.message : 'Action failed');
     } finally {
       setIsLoading(false);

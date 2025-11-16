@@ -19,6 +19,7 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { createClient } from '@supabase/supabase-js';
+import { logger } from '@/src/lib/logger';
 import { computeHash, hasHashChanged, setHash } from '../utils/build-cache.js';
 import { ensureEnvVars } from '../utils/env.js';
 
@@ -28,7 +29,9 @@ const LATEST_BACKUP_DIR = join(ROOT, 'backups/latest');
 
 const forceBackup = process.argv.includes('--force');
 
-console.log('🔒 Starting optimized incremental database backup...\n');
+logger.info('🔒 Starting optimized incremental database backup...\n', {
+  script: 'backup-database',
+});
 
 // ============================================================================
 // Load environment and create Supabase client
@@ -65,15 +68,19 @@ if (r2AccessKey && r2SecretKey && r2Endpoint && r2Bucket) {
       secretAccessKey: r2SecretKey,
     },
   });
-  console.log('   ✓ R2 upload enabled');
+  logger.info('   ✓ R2 upload enabled', { script: 'backup-database' });
 } else {
-  console.log('   ⚠️  R2 credentials not found - skipping offsite backup');
+  logger.warn('   ⚠️  R2 credentials not found - skipping offsite backup', {
+    script: 'backup-database',
+  });
 }
 
 // ============================================================================
 // OPTIMIZATION 1: Check database state hash BEFORE dumping (lightweight query)
 // ============================================================================
-console.log('🔍 Checking database state (lightweight metadata query)...');
+logger.info('🔍 Checking database state (lightweight metadata query)...', {
+  script: 'backup-database',
+});
 
 let currentHash: string;
 
@@ -92,14 +99,20 @@ if (supabaseUrl && supabaseKey) {
     // Create hash from fingerprint
     currentHash = computeHash(data);
 
-    console.log('   ✓ Using database fingerprint for change detection');
+    logger.info('   ✓ Using database fingerprint for change detection', {
+      script: 'backup-database',
+    });
   } catch (error) {
-    console.log('   ⚠️  Fingerprint RPC error:', error instanceof Error ? error.message : error);
-    console.log('   → Falling back to pg_dump hash');
+    logger.warn(`   ⚠️  Fingerprint RPC error: ${error instanceof Error ? error.message : error}`, {
+      script: 'backup-database',
+    });
+    logger.info('   → Falling back to pg_dump hash', { script: 'backup-database' });
     currentHash = ''; // Will trigger full dump below
   }
 } else {
-  console.log('   ⚠️  Supabase credentials not found, using pg_dump hash');
+  logger.warn('   ⚠️  Supabase credentials not found, using pg_dump hash', {
+    script: 'backup-database',
+  });
   currentHash = '';
 }
 
@@ -107,15 +120,18 @@ if (supabaseUrl && supabaseKey) {
 // Check if backup needed (compare hashes)
 // ============================================================================
 if (!forceBackup && currentHash && !hasHashChanged('backup-db', currentHash)) {
-  console.log('   ⊘ Database unchanged - backup not needed');
+  logger.info('   ⊘ Database unchanged - backup not needed', { script: 'backup-database' });
   if (existsSync(LATEST_BACKUP_DIR)) {
-    console.log(`   📁 Latest backup: ${LATEST_BACKUP_DIR}`);
+    logger.info(`   📁 Latest backup: ${LATEST_BACKUP_DIR}`, {
+      script: 'backup-database',
+      backupDir: LATEST_BACKUP_DIR,
+    });
   }
-  console.log('\n💡 Use --force to create backup anyway\n');
+  logger.info('\n💡 Use --force to create backup anyway\n', { script: 'backup-database' });
   process.exit(0);
 }
 
-console.log('   → Database changed - creating backup...');
+logger.info('   → Database changed - creating backup...', { script: 'backup-database' });
 
 // ============================================================================
 // OPTIMIZATION 2: Stream pg_dump directly to gzip (no intermediate buffer)
@@ -136,7 +152,7 @@ const findPgDump = (): string => {
 
   for (const path of versionedPaths) {
     if (existsSync(path)) {
-      console.log(`   ✓ Using ${path}`);
+      logger.info(`   ✓ Using ${path}`, { script: 'backup-database', pgDumpPath: path });
       return path;
     }
   }
@@ -144,7 +160,10 @@ const findPgDump = (): string => {
   // Fallback to PATH (may cause version mismatch warnings)
   try {
     const pathPgDump = execSync('which pg_dump', { encoding: 'utf-8' }).trim();
-    console.log(`   ⚠️  Using pg_dump from PATH: ${pathPgDump} (may not match server version)`);
+    logger.warn(`   ⚠️  Using pg_dump from PATH: ${pathPgDump} (may not match server version)`, {
+      script: 'backup-database',
+      pgDumpPath: pathPgDump,
+    });
     return pathPgDump;
   } catch {
     const genericPaths = [
@@ -154,7 +173,10 @@ const findPgDump = (): string => {
     ];
     for (const path of genericPaths) {
       if (existsSync(path)) {
-        console.log(`   ⚠️  Using ${path} (may not match server version)`);
+        logger.warn(`   ⚠️  Using ${path} (may not match server version)`, {
+          script: 'backup-database',
+          pgDumpPath: path,
+        });
         return path;
       }
     }
@@ -165,7 +187,7 @@ const findPgDump = (): string => {
 findPgDump(); // Verify pg_dump is installed
 const outputPath = join(BACKUP_DIR, 'full_backup.sql.gz');
 
-console.log('📦 Creating compressed backup (using Supabase CLI)...');
+logger.info('📦 Creating compressed backup (using Supabase CLI)...', { script: 'backup-database' });
 
 try {
   // Use Supabase CLI for full schema+data backup
@@ -182,17 +204,25 @@ try {
 
   // Check if there were any errors in stderr
   if (result && (result.includes('error') || result.includes('ERROR'))) {
-    console.error('   ⚠️  supabase db dump warnings:', result);
+    logger.warn('   ⚠️  supabase db dump warnings', { script: 'backup-database', warnings: result });
   }
 
-  console.log('   ✓ full_backup.sql.gz (compressed schema + data)');
+  logger.info('   ✓ full_backup.sql.gz (compressed schema + data)', { script: 'backup-database' });
 } catch (error) {
-  console.error('   ✗ Database dump failed:', error instanceof Error ? error.message : error);
+  logger.error(
+    '   ✗ Database dump failed',
+    error instanceof Error ? error : new Error(String(error)),
+    {
+      script: 'backup-database',
+    }
+  );
   const execError = error as ExecException & { stdout?: string };
   if (execError.stdout) {
-    console.error('   Output:', execError.stdout);
+    logger.error('   Output', undefined, { script: 'backup-database', stdout: execError.stdout });
   }
-  console.error('   💡 Make sure Supabase CLI is installed: npm install -g supabase');
+  logger.error('   💡 Make sure Supabase CLI is installed: npm install -g supabase', undefined, {
+    script: 'backup-database',
+  });
   process.exit(1);
 }
 
@@ -201,7 +231,7 @@ try {
 // ============================================================================
 const backupStartTime = Date.now();
 if (!currentHash) {
-  console.log('🔐 Computing backup hash...');
+  logger.info('🔐 Computing backup hash...', { script: 'backup-database' });
   const compressedContent = readFileSync(outputPath);
   currentHash = computeHash(compressedContent.toString('base64'));
 }
@@ -259,17 +289,24 @@ setHash('backup-db', currentHash, {
   files: [timestamp],
 });
 
-console.log('\n✅ Optimized backup created!');
-console.log(`📁 Location: ${BACKUP_DIR}`);
-console.log(`🔗 Symlink: backups/latest → ${timestamp}`);
-console.log(`💽 Size: ${sizeMB} MB (${compressionRatio}% compression)`);
-console.log(`🔐 Hash: ${currentHash.slice(0, 16)}...`);
+logger.info('\n✅ Optimized backup created!', { script: 'backup-database' });
+logger.info(`📁 Location: ${BACKUP_DIR}`, { script: 'backup-database', backupDir: BACKUP_DIR });
+logger.info(`🔗 Symlink: backups/latest → ${timestamp}`, { script: 'backup-database', timestamp });
+logger.info(`💽 Size: ${sizeMB} MB (${compressionRatio}% compression)`, {
+  script: 'backup-database',
+  sizeMB,
+  compressionRatio: `${compressionRatio}%`,
+});
+logger.info(`🔐 Hash: ${currentHash.slice(0, 16)}...`, {
+  script: 'backup-database',
+  hash: currentHash.slice(0, 16),
+});
 
 // ============================================================================
 // Upload to Cloudflare R2 (offsite backup)
 // ============================================================================
 if (r2Client && r2Bucket) {
-  console.log('\n📤 Uploading to Cloudflare R2...');
+  logger.info('\n📤 Uploading to Cloudflare R2...', { script: 'backup-database' });
 
   try {
     const fileStream = createReadStream(outputPath);
@@ -292,18 +329,31 @@ if (r2Client && r2Bucket) {
       })
     );
 
-    console.log(`   ✓ Uploaded to R2: ${r2Key}`);
-    console.log(`   🌍 Offsite backup secured (${sizeMB} MB)`);
+    logger.info(`   ✓ Uploaded to R2: ${r2Key}`, { script: 'backup-database', r2Key });
+    logger.info(`   🌍 Offsite backup secured (${sizeMB} MB)`, {
+      script: 'backup-database',
+      sizeMB,
+    });
   } catch (error) {
-    console.error('   ✗ R2 upload failed:', error instanceof Error ? error.message : error);
-    console.error('   ⚠️  Local backup preserved, but offsite backup failed');
+    logger.error(
+      '   ✗ R2 upload failed',
+      error instanceof Error ? error : new Error(String(error)),
+      {
+        script: 'backup-database',
+      }
+    );
+    logger.error('   ⚠️  Local backup preserved, but offsite backup failed', undefined, {
+      script: 'backup-database',
+    });
 
     // Report failure to BetterStack
     if (heartbeatUrl) {
       try {
         await fetch(`${heartbeatUrl}/fail`);
       } catch {
-        console.error('   ⚠️  Failed to report failure to BetterStack');
+        logger.error('   ⚠️  Failed to report failure to BetterStack', undefined, {
+          script: 'backup-database',
+        });
       }
     }
     process.exit(1);
@@ -314,22 +364,29 @@ if (r2Client && r2Bucket) {
 // BetterStack Heartbeat (success signal)
 // ============================================================================
 if (heartbeatUrl) {
-  console.log('\n💓 Sending heartbeat to BetterStack...');
+  logger.info('\n💓 Sending heartbeat to BetterStack...', { script: 'backup-database' });
   try {
     const response = await fetch(heartbeatUrl);
     if (response.ok) {
-      console.log('   ✓ Heartbeat sent successfully');
+      logger.info('   ✓ Heartbeat sent successfully', { script: 'backup-database' });
     } else {
-      console.error('   ⚠️  Heartbeat response:', response.status);
+      logger.warn(`   ⚠️  Heartbeat response: ${response.status}`, {
+        script: 'backup-database',
+        status: response.status,
+      });
     }
   } catch (error) {
-    console.error(
-      '   ⚠️  Failed to send heartbeat (non-critical):',
-      error instanceof Error ? error.message : error
+    logger.warn(
+      `   ⚠️  Failed to send heartbeat (non-critical): ${error instanceof Error ? error.message : error}`,
+      { script: 'backup-database' }
     );
   }
 } else {
-  console.log('\n💡 BetterStack heartbeat not configured (set BETTERSTACK_HEARTBEAT_DB_BACKUP)');
+  logger.info('\n💡 BetterStack heartbeat not configured (set BETTERSTACK_HEARTBEAT_DB_BACKUP)', {
+    script: 'backup-database',
+  });
 }
 
-console.log('\n💡 Next run will skip backup if database unchanged (fingerprint check)\n');
+logger.info('\n💡 Next run will skip backup if database unchanged (fingerprint check)\n', {
+  script: 'backup-database',
+});

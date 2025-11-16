@@ -3,11 +3,13 @@
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Button } from '@/src/components/primitives/ui/button';
-import type { NewsletterSource } from '@/src/hooks/use-newsletter';
-import { NEWSLETTER_CTA_CONFIG } from '@/src/lib/config/category-config';
+import { useLoggedAsync } from '@/src/hooks/use-logged-async';
+import { getAppSettings, getNewsletterConfig } from '@/src/lib/actions/feature-flags.actions';
+import { NEWSLETTER_CTA_CONFIG } from '@/src/lib/data/config/category';
 import { Mail, X } from '@/src/lib/icons';
-import { createClient } from '@/src/lib/supabase/client';
 import { DIMENSIONS, POSITION_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
+import { ensureNumber, ensureStringArray } from '@/src/lib/utils/data.utils';
+import type { NewsletterSource } from '@/src/types/database-overrides';
 import { NewsletterForm } from './newsletter-form';
 
 export interface NewsletterFooterBarProps {
@@ -15,62 +17,62 @@ export interface NewsletterFooterBarProps {
   dismissible?: boolean;
   showAfterDelay?: number;
   respectInlineCTA?: boolean;
+  ctaVariant?: 'aggressive' | 'social_proof' | 'value_focused';
 }
 
 export function NewsletterFooterBar({
   source,
   dismissible = true,
-  showAfterDelay = 3000,
+  showAfterDelay,
   respectInlineCTA = true,
+  ctaVariant = 'value_focused',
 }: NewsletterFooterBarProps) {
   const pathname = usePathname();
   const [isVisible, setIsVisible] = useState(false);
   const [isClient, setIsClient] = useState(false);
-  const [pagesWithInlineCTA, setPagesWithInlineCTA] = useState<string[]>([
-    '/',
-    '/trending',
-    '/guides',
-    '/changelog',
-    '/community',
-    '/companies',
-    '/jobs',
-    '/partner',
-    '/submit',
-    '/tools/config-recommender',
-    '/agents/',
-    '/mcp/',
-    '/rules/',
-    '/commands/',
-    '/hooks/',
-    '/statuslines/',
-    '/collections/',
-  ]);
+  const [pagesWithInlineCTA, setPagesWithInlineCTA] = useState<string[]>([]);
+  const [delayMs, setDelayMs] = useState(showAfterDelay ?? 30000);
+  const loadConfigs = useLoggedAsync({
+    scope: 'NewsletterFooterBar',
+    defaultMessage: 'Failed to load newsletter footer configs',
+    defaultLevel: 'warn',
+    defaultRethrow: false,
+  });
 
   useEffect(() => {
-    const loadExcludedPages = async () => {
-      try {
-        const supabase = createClient();
-        const { data } = await supabase.rpc('get_app_settings', {
-          p_category: 'newsletter',
-        });
+    loadConfigs(
+      async () => {
+        const [appConfigResult, newsletterConfigResult] = await Promise.all([
+          getAppSettings({}),
+          getNewsletterConfig({}),
+        ]);
 
-        if (data) {
-          const settings = data as Record<string, { value: unknown }>;
-          const excludedPages = settings['newsletter.excluded_pages']?.value;
-
-          if (Array.isArray(excludedPages) && excludedPages.length > 0) {
-            setPagesWithInlineCTA(excludedPages as string[]);
+        if (appConfigResult?.data) {
+          const appConfig = appConfigResult.data;
+          const excludedPages = ensureStringArray(appConfig['newsletter.excluded_pages']);
+          if (excludedPages.length > 0) {
+            setPagesWithInlineCTA(excludedPages);
           }
         }
-      } catch {
-        // Silent fail
-      }
-    };
 
-    loadExcludedPages().catch(() => {
-      // Intentionally ignore errors
-    });
-  }, []);
+        if (showAfterDelay === undefined && newsletterConfigResult?.data) {
+          const newsletterConfig = newsletterConfigResult.data;
+          const configDelay = ensureNumber(
+            newsletterConfig['newsletter.footer_bar.show_after_delay_ms'],
+            30000
+          );
+          setDelayMs(configDelay);
+        }
+      },
+      {
+        context: {
+          pathname,
+          respectInlineCTA,
+          dismissible,
+        },
+      }
+    );
+  }, [dismissible, loadConfigs, pathname, respectInlineCTA, showAfterDelay]);
 
   const hasInlineCTA =
     respectInlineCTA && pagesWithInlineCTA.some((page) => pathname?.startsWith(page));
@@ -83,7 +85,7 @@ export function NewsletterFooterBar({
     if (!isDismissed) {
       const timer = setTimeout(() => {
         setIsVisible(true);
-      }, showAfterDelay);
+      }, delayMs);
 
       return () => {
         clearTimeout(timer);
@@ -91,7 +93,7 @@ export function NewsletterFooterBar({
     }
 
     return undefined;
-  }, [showAfterDelay]);
+  }, [delayMs]);
 
   const handleDismiss = () => {
     setIsVisible(false);
@@ -119,9 +121,19 @@ export function NewsletterFooterBar({
             </div>
             <div>
               <p className="font-semibold text-base text-foreground">
-                {NEWSLETTER_CTA_CONFIG.headline}
+                {ctaVariant === 'aggressive'
+                  ? "⚡ Don't miss out!"
+                  : ctaVariant === 'social_proof'
+                    ? '✨ Join 12,000+ Claude builders'
+                    : NEWSLETTER_CTA_CONFIG.headline}
               </p>
-              <p className="text-muted-foreground text-sm">{NEWSLETTER_CTA_CONFIG.description}</p>
+              <p className="text-muted-foreground text-sm">
+                {ctaVariant === 'aggressive'
+                  ? 'Get weekly AI updates before everyone else'
+                  : ctaVariant === 'social_proof'
+                    ? 'The best Claude resources, curated weekly'
+                    : NEWSLETTER_CTA_CONFIG.description}
+              </p>
             </div>
           </div>
           <div className="flex flex-shrink-0 items-center gap-3">
@@ -149,7 +161,11 @@ export function NewsletterFooterBar({
                 aria-hidden="true"
               />
               <p className="font-medium text-foreground text-sm">
-                {NEWSLETTER_CTA_CONFIG.headline}
+                {ctaVariant === 'aggressive'
+                  ? "⚡ Don't miss out!"
+                  : ctaVariant === 'social_proof'
+                    ? '✨ Join 12k+ builders'
+                    : NEWSLETTER_CTA_CONFIG.headline}
               </p>
             </div>
             {dismissible && (

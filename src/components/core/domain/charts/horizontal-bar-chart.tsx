@@ -20,8 +20,6 @@
  * @module components/ui/horizontal-bar-chart
  */
 
-'use client';
-
 import type { ReactNode } from 'react';
 import { cn } from '@/src/lib/utils';
 
