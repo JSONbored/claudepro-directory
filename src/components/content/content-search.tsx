@@ -53,29 +53,18 @@ function ContentSearchClientComponent<T extends DisplayableContent>({
       }
 
       try {
-        const params = new URLSearchParams({
-          q: query.trim(),
-          limit: '100',
+        const { searchUnifiedClient } = await import('@/src/lib/edge/search-client');
+
+        const result = await searchUnifiedClient({
+          query: query.trim(),
+          entities: category ? [category as 'content'] : ['content'],
+          filters: {
+            limit: 100,
+            ...(category ? { categories: [category] } : {}),
+          },
         });
-        if (category) {
-          params.set('categories', category);
-        }
 
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/unified-search?${params.toString()}`,
-          {
-            headers: {
-              'Content-Type': 'application/json',
-            },
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error(`Search failed: ${response.statusText}`);
-        }
-
-        const data = await response.json();
-        setSearchResults(data.results as T[]);
+        setSearchResults(result.results as T[]);
       } catch (error) {
         logger.error('Content search failed', error as Error, { source: 'ContentSearchClient' });
         setSearchResults(items);
@@ -127,7 +116,13 @@ function ContentSearchClientComponent<T extends DisplayableContent>({
             ariaLabel="Search results"
             keyExtractor={(item) => item.slug}
             renderCard={(item) => (
-              <ConfigCard item={item} variant="default" showCategory={true} showActions={true} />
+              <ConfigCard
+                item={item}
+                variant="default"
+                showCategory={true}
+                showActions={true}
+                searchQuery={searchQuery}
+              />
             )}
           />
         </ErrorBoundary>

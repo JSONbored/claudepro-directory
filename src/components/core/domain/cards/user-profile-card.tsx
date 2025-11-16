@@ -19,8 +19,10 @@ import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge
 import { BaseCard } from '@/src/components/core/domain/cards/content-card-base';
 import { Avatar, AvatarFallback, AvatarImage } from '@/src/components/primitives/ui/avatar';
 import { Button } from '@/src/components/primitives/ui/button';
+import { usePulse } from '@/src/hooks/use-pulse';
 import { Award, ExternalLink, Users } from '@/src/lib/icons';
 import { BADGE_COLORS, UI_CLASSES } from '@/src/lib/ui-constants';
+import { logUnhandledPromise } from '@/src/lib/utils/error.utils';
 import type { Tables } from '@/src/types/database.types';
 
 /**
@@ -73,6 +75,7 @@ const getMemberBadge = (user: UserProfile) => {
 };
 
 function ProfileCardComponent({ user, variant = 'default', showActions = true }: ProfileCardProps) {
+  const pulse = usePulse();
   const memberBadge = getMemberBadge(user);
   const slug = user.slug || 'unknown';
   const username = `@${slug}`;
@@ -182,6 +185,22 @@ function ProfileCardComponent({ user, variant = 'default', showActions = true }:
               className={`${UI_CLASSES.ICON_BUTTON_SM} ${UI_CLASSES.BUTTON_GHOST_ICON}`}
               onClick={(e) => {
                 e.stopPropagation();
+                pulse
+                  .click({
+                    category: null,
+                    slug: null,
+                    metadata: {
+                      action: 'external_link',
+                      link_type: 'website',
+                      target_url: user.website as string,
+                      user_slug: slug,
+                    },
+                  })
+                  .catch((error) => {
+                    logUnhandledPromise('UserProfileCard: website link click pulse failed', error, {
+                      user_slug: slug,
+                    });
+                  });
                 window.open(user.website as string, '_blank');
               }}
               aria-label={`Visit ${displayName}'s website`}
@@ -198,6 +217,22 @@ function ProfileCardComponent({ user, variant = 'default', showActions = true }:
               className={`${UI_CLASSES.ICON_BUTTON_SM} ${UI_CLASSES.BUTTON_GHOST_ICON}`}
               onClick={(e) => {
                 e.stopPropagation();
+                pulse
+                  .click({
+                    category: null,
+                    slug: null,
+                    metadata: {
+                      action: 'external_link',
+                      link_type: 'social',
+                      target_url: user.social_x_link as string,
+                      user_slug: slug,
+                    },
+                  })
+                  .catch((error) => {
+                    logUnhandledPromise('UserProfileCard: social link click pulse failed', error, {
+                      user_slug: slug,
+                    });
+                  });
                 window.open(user.social_x_link as string, '_blank');
               }}
               aria-label={`Visit ${displayName} on X/Twitter`}

@@ -45,7 +45,7 @@ const NotificationToastHandler = dynamic(
 
 import { ErrorBoundary } from '@/src/components/core/infra/error-boundary';
 import { PostCopyEmailProvider } from '@/src/components/core/infra/providers/email-capture-modal-provider';
-import { PwaInstallTracker } from '@/src/components/core/infra/pwa-install-tracker';
+import { Pulse } from '@/src/components/core/infra/pulse';
 import { StructuredData } from '@/src/components/core/infra/structured-data';
 import { getActiveAnnouncement } from '@/src/components/core/layout/announcement-banner-server';
 import { LayoutContent } from '@/src/components/core/layout/root-layout-wrapper';
@@ -264,7 +264,8 @@ export default async function RootLayout({
         {/* Suspense boundary for analytics - streams after critical content */}
         <Suspense fallback={null}>{await UmamiScript()}</Suspense>
         {/* PWA Install Tracking - Tracks PWA installation events */}
-        <PwaInstallTracker />
+        <Pulse variant="pwa-install" />
+        <Pulse variant="pwa-launch" />
         {/* Service Worker Registration for PWA Support */}
         <script src="/scripts/service-worker-init.js" defer />
       </body>

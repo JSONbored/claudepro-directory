@@ -4,6 +4,8 @@
  */
 
 import { fetchCachedRpc } from '@/src/lib/data/helpers';
+import { logger } from '@/src/lib/logger';
+import { createClient } from '@/src/lib/supabase/server';
 import type { Tables } from '@/src/types/database-overrides';
 
 export type Job = Tables<'jobs'>;
@@ -118,7 +120,7 @@ export async function getFilteredJobs(
     p_offset: offset,
   };
 
-  return fetchCachedRpc<JobsFilterResult | null>(rpcParams, {
+  const result = await fetchCachedRpc<JobsFilterResult | null>(rpcParams, {
     rpcName: 'filter_jobs',
     tags: ['jobs', ...(category && category !== 'all' ? [`jobs-${category}`] : [])],
     ttlKey: 'cache.jobs.ttl_seconds',
@@ -142,4 +144,86 @@ export async function getFilteredJobs(
       offset,
     },
   });
+
+  // Track search analytics (fire and forget) - only if search query provided
+  if (searchQuery && result) {
+    trackJobsSearchAnalytics(
+      searchQuery,
+      {
+        ...(category ? { category } : {}),
+        ...(employment ? { employment } : {}),
+        ...(experience ? { experience } : {}),
+        ...(remote !== undefined ? { remote } : {}),
+      },
+      result.total_count
+    ).catch((error) => {
+      // Don't block on analytics - just log warning
+      logger.warn('Failed to track jobs search analytics', {
+        error: error instanceof Error ? error.message : String(error),
+        query: searchQuery.substring(0, 50),
+      });
+    });
+  }
+
+  return result;
+}
+
+/**
+ * Track jobs search analytics - Queue-Based
+ * Enqueues to user_interactions queue for batched processing (98% egress reduction)
+ * Fire and forget - non-blocking
+ */
+async function trackJobsSearchAnalytics(
+  query: string,
+  filters: {
+    category?: string;
+    employment?: string;
+    experience?: string;
+    remote?: boolean;
+  },
+  resultCount: number
+): Promise<void> {
+  if (!query.trim()) return;
+
+  try {
+    const supabase = await createClient();
+
+    // Get current user if authenticated
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    // Build filters object for analytics
+    const filtersJson = {
+      ...(filters.category && filters.category !== 'all' ? { category: filters.category } : {}),
+      ...(filters.employment && filters.employment !== 'any'
+        ? { employment: filters.employment }
+        : {}),
+      ...(filters.experience && filters.experience !== 'any'
+        ? { experience: filters.experience }
+        : {}),
+      ...(filters.remote !== undefined ? { remote: filters.remote } : {}),
+      entity: 'job', // Mark as job search
+    };
+
+    // Enqueue to queue instead of direct insert
+    const { enqueuePulseEvent } = await import('@/src/lib/utils/pulse');
+    await enqueuePulseEvent({
+      user_id: user?.id ?? null,
+      content_type: null,
+      content_slug: null,
+      interaction_type: 'search',
+      session_id: null,
+      metadata: {
+        query: query.trim(),
+        filters: Object.keys(filtersJson).length > 0 ? filtersJson : null,
+        result_count: resultCount,
+      },
+    });
+  } catch (error) {
+    // Silently fail - analytics should never block search
+    logger.warn('Jobs search analytics tracking error', {
+      error: error instanceof Error ? error.message : String(error),
+    });
+  }
 }

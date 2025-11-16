@@ -20,6 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/src/components/primitives/ui/select';
+import { usePulse } from '@/src/hooks/use-pulse';
 import { useUnifiedSearch } from '@/src/hooks/use-unified-search';
 import { getTimeoutConfig } from '@/src/lib/actions/feature-flags.actions';
 import { ChevronDown, ChevronUp, Filter, Search } from '@/src/lib/icons';
@@ -27,6 +28,7 @@ import type { FilterState, UnifiedSearchProps } from '@/src/lib/types/component.
 import { POSITION_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
 import { logClientWarning, logUnhandledPromise } from '@/src/lib/utils/error.utils';
+import type { ContentCategory } from '@/src/types/database-overrides';
 
 export type { FilterState };
 
@@ -46,6 +48,7 @@ function UnifiedSearchComponent({
   className,
   showFilters = true,
 }: UnifiedSearchProps & { showFilters?: boolean }) {
+  const pulse = usePulse();
   const [localSearchQuery, setLocalSearchQuery] = useState('');
   const [announcement, setAnnouncement] = useState('');
   const pathname = usePathname();
@@ -57,12 +60,34 @@ function UnifiedSearchComponent({
     handleFiltersChange,
     handleFilterChange,
     toggleTag,
-    clearFilters,
+    clearFilters: originalClearFilters,
     setIsFilterOpen,
   } = useUnifiedSearch({
     initialSort: initialFilters?.sort || 'trending',
     ...(onFiltersChange && { onFiltersChange }),
   });
+
+  // Wrap clearFilters to track filter clearing
+  const clearFilters = useCallback(() => {
+    originalClearFilters();
+
+    // Track filter clearing
+    const category = pathname?.split('/')[1] || 'global';
+    pulse
+      .filter({
+        category,
+        filters: {},
+        metadata: {
+          filterType: 'clear',
+          filterCount: 0,
+        },
+      })
+      .catch((error) => {
+        logUnhandledPromise('UnifiedSearchComponent: filter clear tracking failed', error, {
+          category,
+        });
+      });
+  }, [originalClearFilters, pathname, pulse]);
 
   const searchInputId = useId();
   const searchResultsId = useId();
@@ -102,18 +127,15 @@ function UnifiedSearchComponent({
       if (sanitized && sanitized.length > 0) {
         const category = pathname?.split('/')[1] || 'global';
 
-        import('@/src/lib/edge/client')
-          .then((module) =>
-            module.trackInteraction({
-              interaction_type: 'click',
-              content_type: category,
-              content_slug: `search:${sanitized}`,
-              metadata: {
-                resultsCount: resultCount,
-                filtersApplied: activeFilterCount > 0,
-              },
-            })
-          )
+        pulse
+          .click({
+            category: category as ContentCategory | null,
+            slug: `search:${sanitized}`,
+            metadata: {
+              resultsCount: resultCount,
+              filtersApplied: activeFilterCount > 0,
+            },
+          })
           .catch((error) => {
             logUnhandledPromise('UnifiedSearchComponent: search tracking failed', error, {
               query: sanitized,
@@ -126,7 +148,7 @@ function UnifiedSearchComponent({
     }, 500);
 
     return () => clearTimeout(analyticsTimer);
-  }, [localSearchQuery, resultCount, pathname, activeFilterCount]);
+  }, [localSearchQuery, resultCount, pathname, activeFilterCount, pulse]);
 
   useEffect(() => {
     if (!localSearchQuery) {
@@ -143,14 +165,59 @@ function UnifiedSearchComponent({
   const applyFilters = useCallback(() => {
     handleFiltersChange(filters);
     setIsFilterOpen(false);
-  }, [filters, handleFiltersChange, setIsFilterOpen]);
+
+    // Track filter application
+    if (activeFilterCount > 0) {
+      const category = pathname?.split('/')[1] || 'global';
+      pulse
+        .filter({
+          category,
+          filters: {
+            ...(filters.category && { category: filters.category }),
+            ...(filters.tags && filters.tags.length > 0 && { tags: filters.tags }),
+            ...(filters.author && { author: filters.author }),
+            ...(filters.sort && { sort: filters.sort }),
+            ...(filters.dateRange && { dateRange: filters.dateRange }),
+            ...(filters.popularity && { popularity: filters.popularity }),
+          },
+          metadata: {
+            filterCount: activeFilterCount,
+          },
+        })
+        .catch((error) => {
+          logUnhandledPromise('UnifiedSearchComponent: filter tracking failed', error, {
+            category,
+            filterCount: activeFilterCount,
+          });
+        });
+    }
+  }, [filters, handleFiltersChange, setIsFilterOpen, activeFilterCount, pathname, pulse]);
 
   const handleSortChange = useCallback(
     (value: FilterState['sort']) => {
       const newFilters = { ...filters, sort: value || 'trending' };
       handleFiltersChange(newFilters);
+
+      // Track sort filter change
+      const category = pathname?.split('/')[1] || 'global';
+      pulse
+        .filter({
+          category,
+          filters: {
+            sort: value || 'trending',
+          },
+          metadata: {
+            filterType: 'sort',
+          },
+        })
+        .catch((error) => {
+          logUnhandledPromise('UnifiedSearchComponent: sort filter tracking failed', error, {
+            category,
+            sort: value,
+          });
+        });
     },
-    [filters, handleFiltersChange]
+    [filters, handleFiltersChange, pathname, pulse]
   );
 
   return (

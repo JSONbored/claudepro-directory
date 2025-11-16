@@ -133,6 +133,7 @@ export type UnifiedBadgeProps =
       onClick?: () => void;
       onRemove?: () => void;
       className?: string;
+      children?: React.ReactNode; // Optional children for highlighted content
     }
   | {
       /** New indicator (animated dot with tooltip) */
@@ -360,7 +361,7 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
           )}
           onClick={handleClick}
         >
-          {props.tag}
+          {props.children || props.tag}
           {props.onRemove && (
             <button
               type="button"
@@ -388,7 +389,7 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
         )}
         onClick={handleClick}
       >
-        {props.tag}
+        {props.children || props.tag}
         {props.onRemove && (
           <button
             type="button"

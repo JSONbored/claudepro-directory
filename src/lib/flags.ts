@@ -214,7 +214,7 @@ export const APP_SETTINGS_DEFAULTS = {
     '/collections/',
   ] as const satisfies readonly string[],
   'hooks.infinite_scroll.batch_size': 30,
-  'queue.tracking.batch_size': 100, // User interactions queue batch size (hyper-optimized egress reduction)
+  'queue.pulse.batch_size': 100, // User interactions queue batch size (hyper-optimized egress reduction)
   'hooks.infinite_scroll.threshold': 0.1,
   'date.current_month': new Date().toISOString().slice(0, 7),
   'date.current_year': new Date().getFullYear(),

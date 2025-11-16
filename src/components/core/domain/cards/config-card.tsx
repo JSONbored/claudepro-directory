@@ -3,7 +3,7 @@
 /** ConfigCard consuming componentConfigs for runtime-tunable card behaviors */
 
 import { useRouter } from 'next/navigation';
-import { memo, useCallback, useEffect, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { BookmarkButton } from '@/src/components/core/buttons/interaction/bookmark-button';
 import { SimpleCopyButton } from '@/src/components/core/buttons/shared/simple-copy-button';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
@@ -12,10 +12,10 @@ import { BorderBeam } from '@/src/components/primitives/animation/border-beam';
 import { ReviewRatingCompact } from '@/src/components/primitives/feedback/review-rating-compact';
 import { Button } from '@/src/components/primitives/ui/button';
 import { useCopyToClipboard } from '@/src/hooks/use-copy-to-clipboard';
+import { usePulse } from '@/src/hooks/use-pulse';
 import { getComponentConfig } from '@/src/lib/actions/feature-flags.actions';
 import { addBookmark } from '@/src/lib/actions/user.actions';
 import { type CategoryId, isValidCategory } from '@/src/lib/data/config/category';
-import { trackInteraction } from '@/src/lib/edge/client';
 import { Award, ExternalLink, Eye, Github, Layers, Sparkles } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { SEMANTIC_COLORS } from '@/src/lib/semantic-colors';
@@ -25,7 +25,9 @@ import { getDisplayTitle } from '@/src/lib/utils';
 import { formatViewCount, getContentItemUrl } from '@/src/lib/utils/content.utils';
 import { ensureStringArray } from '@/src/lib/utils/data.utils';
 import { logClientWarning, logUnhandledPromise } from '@/src/lib/utils/error.utils';
+import { highlightSearchTerms } from '@/src/lib/utils/search-highlight';
 import { toasts } from '@/src/lib/utils/toast.utils';
+import type { ContentCategory } from '@/src/types/database-overrides';
 
 export const ConfigCard = memo(
   ({
@@ -36,8 +38,109 @@ export const ConfigCard = memo(
     enableSwipeGestures = true, // Enable mobile swipe gestures (copy/bookmark)
     useViewTransitions = true, // Enable smooth page morphing with View Transitions API (Baseline as of October 2025)
     showBorderBeam, // Auto-enable for featured items if not explicitly set
+    searchQuery, // Optional search query for highlighting
   }: ConfigCardProps) => {
     const displayTitle = getDisplayTitle(item);
+
+    // Memoize highlighted text for performance (only recompute when query/text changes)
+    const highlightedTitle = useMemo(
+      () => (searchQuery?.trim() ? highlightSearchTerms(displayTitle, searchQuery) : displayTitle),
+      [displayTitle, searchQuery]
+    );
+
+    const highlightedDescription = useMemo(
+      () =>
+        searchQuery?.trim() && item.description
+          ? highlightSearchTerms(item.description, searchQuery)
+          : item.description,
+      [item.description, searchQuery]
+    );
+
+    // Get tags from item (must be declared before use in useMemo)
+    const tags = ensureStringArray(
+      'tags' in item ? (item.tags as string[] | null | undefined) : []
+    );
+
+    // Highlight tags if search query matches
+    const highlightedTags = useMemo(() => {
+      if (!(searchQuery?.trim() && tags.length)) {
+        return [];
+      }
+      return tags.map((tag) => ({
+        original: tag,
+        highlighted: highlightSearchTerms(tag, searchQuery, {
+          wholeWordsOnly: false, // Allow partial matches in tags
+          enableAnimation: true,
+        }),
+      }));
+    }, [tags, searchQuery]);
+
+    // Highlight author if search query matches
+    const highlightedAuthor = useMemo(() => {
+      if (!(searchQuery?.trim() && 'author' in item && item.author)) {
+        return null;
+      }
+      return highlightSearchTerms(item.author, searchQuery, {
+        wholeWordsOnly: false, // Allow partial matches in author names
+        enableAnimation: true,
+      });
+    }, [item, searchQuery]);
+
+    // Initialize pulse hook (must be before useEffect that uses it)
+    const pulse = usePulse();
+
+    // Track highlight visibility for analytics (fire and forget)
+    const hasTrackedHighlight = useRef(false);
+    useEffect(() => {
+      if (searchQuery?.trim() && !hasTrackedHighlight.current) {
+        // Check if any highlighting occurred
+        const hasHighlights =
+          highlightedTitle !== displayTitle ||
+          (highlightedDescription !== item.description && item.description) ||
+          (highlightedTags.length > 0 &&
+            highlightedTags.some((t) => typeof t === 'object' && t.highlighted !== t.original)) ||
+          highlightedAuthor !== null;
+
+        if (hasHighlights) {
+          hasTrackedHighlight.current = true;
+          // Track highlight interaction (non-blocking)
+          pulse
+            .search({
+              category: item.category as ContentCategory,
+              slug: item.slug,
+              query: searchQuery.trim(),
+              metadata: {
+                has_title_highlight: highlightedTitle !== displayTitle,
+                has_description_highlight:
+                  highlightedDescription !== item.description && !!item.description,
+                has_tag_highlight:
+                  highlightedTags.length > 0 &&
+                  highlightedTags.some(
+                    (t) => typeof t === 'object' && t.highlighted !== t.original
+                  ),
+                has_author_highlight: highlightedAuthor !== null,
+              },
+            })
+            .catch((error) => {
+              logUnhandledPromise('ConfigCard: highlight analytics pulse failed', error, {
+                category: item.category,
+                slug: item.slug,
+              });
+            });
+        }
+      }
+    }, [
+      searchQuery,
+      highlightedTitle,
+      displayTitle,
+      highlightedDescription,
+      item.description,
+      highlightedTags,
+      highlightedAuthor,
+      item.category,
+      item.slug,
+      pulse,
+    ]);
     const targetPath = getContentItemUrl({
       category: item.category as CategoryId,
       slug: item.slug,
@@ -45,6 +148,32 @@ export const ConfigCard = memo(
         'subcategory' in item ? (item.subcategory as string | null | undefined) : undefined,
     });
     const router = useRouter();
+
+    // Extract position metadata (needed for click tracking)
+    const position: number | undefined =
+      'position' in item && typeof item.position === 'number' ? item.position : undefined;
+
+    // Track card clicks
+    const handleCardClickPulse = useCallback(() => {
+      pulse
+        .click({
+          category: item.category as ContentCategory,
+          slug: item.slug,
+          metadata: {
+            action: 'card_click',
+            source: 'card_grid',
+            ...(position !== undefined && { position }),
+            ...(searchQuery?.trim() && { search_query: searchQuery.trim() }),
+          },
+        })
+        .catch((error) => {
+          logUnhandledPromise('ConfigCard: card click pulse failed', error, {
+            category: item.category,
+            slug: item.slug,
+          });
+        });
+    }, [pulse, item.category, item.slug, position, searchQuery]);
+
     const { copy } = useCopyToClipboard({
       context: {
         component: 'ConfigCard',
@@ -84,19 +213,15 @@ export const ConfigCard = memo(
       await copy(url);
 
       // Track user interaction for analytics and personalization
-      trackInteraction({
-        interaction_type: 'copy',
-        content_type: item.category,
-        content_slug: item.slug,
-      }).catch((error) => {
-        logUnhandledPromise('ConfigCard: swipe copy tracking failed', error, {
+      pulse.copy({ category: item.category as ContentCategory, slug: item.slug }).catch((error) => {
+        logUnhandledPromise('ConfigCard: swipe copy pulse failed', error, {
           category: item.category,
           slug: item.slug,
         });
       });
 
       toasts.success.copied();
-    }, [targetPath, copy, item.category, item.slug]);
+    }, [targetPath, copy, item.category, item.slug, pulse]);
 
     const handleSwipeLeftBookmark = useCallback(async () => {
       // Type guard validation
@@ -119,6 +244,21 @@ export const ConfigCard = memo(
 
         if (result?.data?.success) {
           toasts.success.bookmarkAdded();
+
+          // Track bookmark addition
+          pulse
+            .bookmark({
+              category: validatedCategory,
+              slug: item.slug,
+              action: 'add',
+            })
+            .catch((error) => {
+              logClientWarning('ConfigCard: bookmark addition pulse failed', error, {
+                category: item.category,
+                slug: item.slug,
+              });
+            });
+
           router.refresh();
         }
       } catch (error) {
@@ -132,7 +272,7 @@ export const ConfigCard = memo(
           toasts.error.actionFailed('bookmark');
         }
       }
-    }, [item.category, item.slug, router]);
+    }, [item.category, item.slug, router, pulse]);
 
     // Extract sponsored metadata - ContentItem already includes these properties (when from enriched RPC)
     const isSponsored: boolean | undefined =
@@ -140,8 +280,6 @@ export const ConfigCard = memo(
     const sponsoredId: string | undefined =
       'sponsoredId' in item && typeof item.sponsoredId === 'string' ? item.sponsoredId : undefined;
     const sponsorTier = 'sponsorTier' in item ? item.sponsorTier : undefined;
-    const position: number | undefined =
-      'position' in item && typeof item.position === 'number' ? item.position : undefined;
     const viewCount = 'viewCount' in item ? item.viewCount : undefined;
 
     // copyCount is a runtime property added by analytics (not in schema)
@@ -169,7 +307,7 @@ export const ConfigCard = memo(
     const collectionType = 'collectionType' in item ? item.collectionType : undefined;
     const collectionDifficulty = 'difficulty' in item ? item.difficulty : undefined;
     const itemCount = 'itemCount' in item ? item.itemCount : undefined;
-    const tags = 'tags' in item ? ensureStringArray(item.tags) : [];
+    // Tags already declared above
 
     // Collection type label mapping (tree-shakeable)
     const COLLECTION_TYPE_LABELS = isCollection
@@ -196,14 +334,26 @@ export const ConfigCard = memo(
 
         <BaseCard
           targetPath={targetPath}
-          displayTitle={displayTitle}
-          description={item.description}
-          {...('author' in item && item.author ? { author: item.author } : {})}
+          displayTitle={highlightedTitle}
+          description={highlightedDescription}
+          {...('author' in item && item.author
+            ? {
+                author: highlightedAuthor || item.author,
+              }
+            : {})}
           {...('author_profile_url' in item && item.author_profile_url
             ? { authorProfileUrl: item.author_profile_url }
             : {})}
           {...('source' in item && item.source ? { source: item.source as string } : {})}
-          {...(tags.length ? { tags } : {})}
+          {...(tags.length
+            ? {
+                tags: highlightedTags.map((t) =>
+                  typeof t === 'string' ? t : (t.highlighted as string)
+                ),
+                highlightedTags: highlightedTags,
+                searchQuery,
+              }
+            : {})}
           variant={variant}
           showActions={showActions}
           ariaLabel={`${displayTitle} - ${item.category} by ${('author' in item && item.author) || 'Community'}`}
@@ -215,6 +365,7 @@ export const ConfigCard = memo(
           onSwipeLeft={handleSwipeLeftBookmark}
           useViewTransitions={useViewTransitions}
           viewTransitionSlug={item.slug}
+          onBeforeNavigate={handleCardClickPulse}
           renderTopBadges={() => {
             // Runtime type guard ensures category is valid CategoryId (excludes 'changelog' and 'jobs')
             // Type assertion is safe because isValidCategory() validates at runtime
@@ -350,6 +501,22 @@ export const ConfigCard = memo(
                   className={`${UI_CLASSES.ICON_BUTTON_SM} ${UI_CLASSES.BUTTON_GHOST_ICON}`}
                   onClick={(e) => {
                     e.stopPropagation();
+                    pulse
+                      .click({
+                        category: item.category as ContentCategory,
+                        slug: item.slug,
+                        metadata: {
+                          action: 'external_link',
+                          link_type: 'github',
+                          target_url: item.repository as string,
+                        },
+                      })
+                      .catch((error) => {
+                        logUnhandledPromise('ConfigCard: GitHub link click pulse failed', error, {
+                          category: item.category,
+                          slug: item.slug,
+                        });
+                      });
                     window.open(item.repository as string, '_blank');
                   }}
                   aria-label={`View ${displayTitle} repository on GitHub`}
@@ -365,6 +532,26 @@ export const ConfigCard = memo(
                   className={`${UI_CLASSES.ICON_BUTTON_SM} ${UI_CLASSES.BUTTON_GHOST_ICON}`}
                   onClick={(e) => {
                     e.stopPropagation();
+                    pulse
+                      .click({
+                        category: item.category as ContentCategory,
+                        slug: item.slug,
+                        metadata: {
+                          action: 'external_link',
+                          link_type: 'documentation',
+                          target_url: item.documentation_url as string,
+                        },
+                      })
+                      .catch((error) => {
+                        logUnhandledPromise(
+                          'ConfigCard: documentation link click pulse failed',
+                          error,
+                          {
+                            category: item.category,
+                            slug: item.slug,
+                          }
+                        );
+                      });
                     window.open(item.documentation_url as string, '_blank');
                   }}
                   aria-label={`View ${displayTitle} documentation`}
@@ -403,16 +590,14 @@ export const ConfigCard = memo(
                     iconClassName={UI_CLASSES.ICON_XS}
                     ariaLabel={`Copy link to ${displayTitle}`}
                     onCopySuccess={() => {
-                      trackInteraction({
-                        interaction_type: 'copy',
-                        content_type: item.category,
-                        content_slug: item.slug,
-                      }).catch((error) => {
-                        logUnhandledPromise('ConfigCard: copy button tracking failed', error, {
-                          category: item.category,
-                          slug: item.slug,
+                      pulse
+                        .copy({ category: item.category as ContentCategory, slug: item.slug })
+                        .catch((error) => {
+                          logUnhandledPromise('ConfigCard: copy button pulse failed', error, {
+                            category: item.category,
+                            slug: item.slug,
+                          });
                         });
-                      });
                     }}
                   />
                   {cardConfig.showCopyCount && copyCount !== undefined && copyCount > 0 && (

@@ -56,9 +56,7 @@ export type CompanySearchResult = {
   description: string | null;
 };
 
-const EDGE_SEARCH_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
-  ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/unified-search`
-  : null;
+// EDGE_SEARCH_URL removed - now using unified search helper
 
 export async function getCompanyProfile(slug: string): Promise<CompanyProfile | null> {
   return fetchCachedRpc<CompanyProfile | null>(
@@ -94,47 +92,14 @@ async function fetchCompanySearchResults(
   query: string,
   limit: number
 ): Promise<CompanySearchResult[]> {
-  if (!EDGE_SEARCH_URL) {
-    logger.warn('Company search: Supabase URL not configured', { query, limit });
-    return [];
-  }
-
   try {
-    const params = new URLSearchParams();
-    params.set('q', query);
-    params.set('entities', 'company');
-    params.set('limit', String(limit));
+    // Use unified search helper (server-side)
+    const { searchCompaniesUnified } = await import('@/src/lib/edge/search-client');
 
-    const response = await fetch(`${EDGE_SEARCH_URL}?${params.toString()}`, {
-      headers: { 'Content-Type': 'application/json' },
-      cache: 'no-store',
-    });
+    const results = await searchCompaniesUnified(query, limit);
 
-    if (!response.ok) {
-      const errorText = await response.text().catch(() => 'Unable to read response body');
-      const normalized = normalizeError(
-        new Error(errorText || response.statusText),
-        'Company search API failed'
-      );
-      logger.error('Company search fetch failed', normalized, {
-        status: response.status,
-        query,
-        limit,
-        responseBody: errorText.slice(0, 200), // First 200 chars for context
-      });
-      return [];
-    }
-
-    const data = (await response.json()) as {
-      results?: Array<{
-        id: string;
-        title: string;
-        slug: string | null;
-        description: string | null;
-      }>;
-    };
-
-    return (data.results ?? []).map((entity) => ({
+    // Transform unified search results to CompanySearchResult format
+    return results.map((entity) => ({
       id: entity.id,
       name: entity.title || entity.slug || '',
       slug: entity.slug,

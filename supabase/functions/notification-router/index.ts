@@ -2,8 +2,10 @@
  * Notification Router - Discord handlers, changelog sync, notification APIs, webhooks.
  */
 
+import { Resend } from 'npm:resend@4.0.0';
 import { revalidateChangelogPages } from '../_shared/changelog/service.ts';
 import { SITE_URL, supabaseServiceRole } from '../_shared/clients/supabase.ts';
+import { RESEND_ENV } from '../_shared/config/email-config.ts';
 import { edgeEnv } from '../_shared/config/env.ts';
 import {
   getCacheConfigNumber,
@@ -34,6 +36,7 @@ import {
   unauthorizedResponse,
   webhookCorsHeaders,
 } from '../_shared/utils/http.ts';
+import { updateContactEngagement } from '../_shared/utils/integrations/resend.ts';
 import { createRouter, type HttpMethod, type RouterContext } from '../_shared/utils/router.ts';
 import { ingestWebhookEvent, WebhookIngestError } from '../_shared/utils/webhook/ingest.ts';
 
@@ -112,11 +115,11 @@ const router = createRouter<NotificationRouterContext>({
       handler: () => handleChangelogReleaseQueue(),
     },
     {
-      name: 'tracking-queue-worker',
+      name: 'pulse-queue-worker',
       methods: ['POST', 'OPTIONS'],
       cors: notificationCorsHeaders,
-      match: (ctx) => ctx.pathname.startsWith('/tracking-queue-worker'),
-      handler: () => handleTrackingQueue(),
+      match: (ctx) => ctx.pathname.startsWith('/pulse-queue-worker'),
+      handler: () => handlePulseQueue(),
     },
   ],
   defaultRoute: {
@@ -638,15 +641,15 @@ async function handleChangelogReleaseQueue(): Promise<Response> {
 }
 
 /**
- * Tracking Queue Worker
+ * Pulse Queue Worker
  * Processes user_interactions queue in batches for hyper-optimized egress reduction
- * Batch size is configurable via Statsig dynamic config (queue.tracking.batch_size)
+ * Batch size is configurable via Statsig dynamic config (queue.pulse.batch_size)
  * Default: 100 events per batch
  */
-const TRACKING_QUEUE_NAME = 'user_interactions';
-const TRACKING_BATCH_SIZE_DEFAULT = 100; // Fallback if Statsig config unavailable
+const PULSE_QUEUE_NAME = 'user_interactions';
+const PULSE_BATCH_SIZE_DEFAULT = 100; // Fallback if Statsig config unavailable
 
-interface TrackingEvent {
+interface PulseEvent {
   user_id?: string | null;
   content_type: string | null;
   content_slug: string | null;
@@ -655,16 +658,124 @@ interface TrackingEvent {
   metadata?: unknown | null;
 }
 
-interface TrackingQueueMessage {
+interface PulseQueueMessage {
   msg_id: bigint;
   read_ct: number;
   vt: string;
   enqueued_at: string;
-  message: TrackingEvent;
+  message: PulseEvent;
 }
 
-async function processTrackingBatch(messages: TrackingQueueMessage[]): Promise<{
-  success: boolean;
+/**
+ * Process search events batch - inserts into search_queries table
+ */
+async function processSearchEventsBatch(messages: PulseQueueMessage[]): Promise<{
+  inserted: number;
+  failed: number;
+  errors: string[];
+}> {
+  const errors: string[] = [];
+  let inserted = 0;
+  let failed = 0;
+
+  try {
+    const searchQueries = messages.map((msg) => {
+      const event = msg.message;
+      const metadata = event.metadata as Record<string, unknown> | null;
+      return {
+        query: (metadata?.query as string) || '',
+        filters: metadata?.filters ?? null,
+        result_count: (metadata?.result_count as number) ?? 0,
+        user_id: event.user_id ?? null,
+        session_id: event.session_id ?? null,
+      };
+    });
+
+    // Batch insert into search_queries table
+    const { error } = await supabaseServiceRole.from('search_queries').insert(searchQueries);
+
+    if (error) {
+      throw error;
+    }
+
+    inserted = searchQueries.length;
+    return { inserted, failed, errors };
+  } catch (error) {
+    const errorMsg = error instanceof Error ? error.message : String(error);
+    errors.push(`Search events batch insert failed: ${errorMsg}`);
+    console.error('[notification-router] Search events batch insert error', {
+      error: errorMsg,
+      message_count: messages.length,
+    });
+    failed = messages.length;
+    return { inserted: 0, failed, errors };
+  }
+}
+
+/**
+ * Update Resend contact engagement for copy/view events
+ * Non-blocking, fire-and-forget - failures don't affect batch processing
+ */
+async function updateResendEngagement(messages: PulseQueueMessage[]): Promise<void> {
+  if (!RESEND_ENV.apiKey) {
+    return; // Resend not configured
+  }
+
+  const resend = new Resend(RESEND_ENV.apiKey);
+  const engagementEvents: Array<{ userId: string; activityType: 'copy_content' | 'visit_page' }> =
+    [];
+
+  // Filter for copy/view events with user_id
+  for (const msg of messages) {
+    const event = msg.message;
+    if (event.user_id && (event.interaction_type === 'copy' || event.interaction_type === 'view')) {
+      engagementEvents.push({
+        userId: event.user_id,
+        activityType: event.interaction_type === 'copy' ? 'copy_content' : 'visit_page',
+      });
+    }
+  }
+
+  if (engagementEvents.length === 0) {
+    return;
+  }
+
+  // Get unique user IDs
+  const userIds = [...new Set(engagementEvents.map((e) => e.userId))];
+
+  // Batch query newsletter subscriptions to get emails
+  const { data: subscriptions, error } = await supabaseServiceRole
+    .from('newsletter_subscriptions')
+    .select('email, user_id')
+    .in('user_id', userIds);
+
+  if (error || !subscriptions || subscriptions.length === 0) {
+    return; // No subscribers found or query failed
+  }
+
+  // Create email map
+  const emailMap = new Map<string, string>();
+  for (const sub of subscriptions) {
+    if (sub.user_id && sub.email) {
+      emailMap.set(sub.user_id, sub.email);
+    }
+  }
+
+  // Update engagement for each event (fire-and-forget)
+  for (const event of engagementEvents) {
+    const email = emailMap.get(event.userId);
+    if (email) {
+      updateContactEngagement(resend, email, event.activityType).catch(() => {
+        // Silent fail per event
+      });
+    }
+  }
+}
+
+/**
+ * Process user interactions batch - inserts into user_interactions table
+ */
+async function processUserInteractionsBatch(messages: PulseQueueMessage[]): Promise<{
   inserted: number;
   failed: number;
   errors: string[];
@@ -706,35 +817,187 @@ async function processTrackingBatch(messages: TrackingQueueMessage[]): Promise<{
       }
     }
 
-    return { success: inserted > 0, inserted, failed, errors };
+    // Update Resend contact engagement for copy/view events (non-blocking)
+    if (inserted > 0 && RESEND_ENV.apiKey) {
+      updateResendEngagement(messages).catch((error) => {
+        // Silent fail - Resend updates are best-effort, don't block batch processing
+        console.warn('[notification-router] Resend engagement update failed', {
+          error: error instanceof Error ? error.message : String(error),
+        });
+      });
+    }
+
+    return { inserted, failed, errors };
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : String(error);
     errors.push(`Batch insert failed: ${errorMsg}`);
-    console.error('[notification-router] Tracking batch insert error', {
+    console.error('[notification-router] Pulse batch insert error', {
       error: errorMsg,
       message_count: messages.length,
     });
-    return { success: false, inserted: 0, failed: messages.length, errors };
+    return { inserted: 0, failed: messages.length, errors };
   }
 }
 
-async function deleteTrackingMessages(msgIds: bigint[]): Promise<void> {
+/**
+ * Process sponsored events batch - inserts into sponsored_impressions and sponsored_clicks tables
+ */
+async function processSponsoredEventsBatch(messages: PulseQueueMessage[]): Promise<{
+  inserted: number;
+  failed: number;
+  errors: string[];
+}> {
+  const errors: string[] = [];
+  let inserted = 0;
+  let failed = 0;
+
+  try {
+    const impressions: Array<{
+      sponsored_id: string;
+      user_id: string | null;
+      page_url?: string;
+      position?: number;
+    }> = [];
+    const clicks: Array<{
+      sponsored_id: string;
+      user_id: string | null;
+      target_url: string;
+    }> = [];
+
+    for (const msg of messages) {
+      const event = msg.message;
+      const metadata = event.metadata as Record<string, unknown> | null;
+
+      if (metadata?.event_type === 'impression') {
+        impressions.push({
+          sponsored_id: event.content_slug ?? '',
+          user_id: event.user_id ?? null,
+          page_url: metadata.page_url as string | undefined,
+          position: metadata.position as number | undefined,
+        });
+      } else if (metadata?.event_type === 'click') {
+        clicks.push({
+          sponsored_id: event.content_slug ?? '',
+          user_id: event.user_id ?? null,
+          target_url: metadata.target_url as string,
+        });
+      }
+    }
+
+    // Batch insert impressions
+    if (impressions.length > 0) {
+      const { error: impressionsError } = await supabaseServiceRole
+        .from('sponsored_impressions')
+        .insert(impressions);
+
+      if (impressionsError) {
+        errors.push(`Sponsored impressions insert failed: ${impressionsError.message}`);
+        failed += impressions.length;
+      } else {
+        inserted += impressions.length;
+      }
+    }
+
+    // Batch insert clicks
+    if (clicks.length > 0) {
+      const { error: clicksError } = await supabaseServiceRole
+        .from('sponsored_clicks')
+        .insert(clicks);
+
+      if (clicksError) {
+        errors.push(`Sponsored clicks insert failed: ${clicksError.message}`);
+        failed += clicks.length;
+      } else {
+        inserted += clicks.length;
+      }
+    }
+
+    return { inserted, failed, errors };
+  } catch (error) {
+    const errorMsg = error instanceof Error ? error.message : String(error);
+    errors.push(`Sponsored events batch processing failed: ${errorMsg}`);
+    console.error('[notification-router] Sponsored events batch processing error', {
+      error: errorMsg,
+      message_count: messages.length,
+    });
+    return { inserted: 0, failed: messages.length, errors };
+  }
+}
+
+async function processPulseBatch(messages: PulseQueueMessage[]): Promise<{
+  success: boolean;
+  inserted: number;
+  failed: number;
+  errors: string[];
+}> {
+  // Separate events by type for routing to appropriate tables
+  const searchEvents: PulseQueueMessage[] = [];
+  const sponsoredEvents: PulseQueueMessage[] = [];
+  const otherEvents: PulseQueueMessage[] = [];
+
+  for (const msg of messages) {
+    if (msg.message.interaction_type === 'search') {
+      searchEvents.push(msg);
+    } else if (msg.message.content_type === 'sponsored') {
+      sponsoredEvents.push(msg);
+    } else {
+      otherEvents.push(msg);
+    }
+  }
+
+  const allErrors: string[] = [];
+  let totalInserted = 0;
+  let totalFailed = 0;
+
+  // Process search events separately (insert into search_queries)
+  if (searchEvents.length > 0) {
+    const searchResult = await processSearchEventsBatch(searchEvents);
+    totalInserted += searchResult.inserted;
+    totalFailed += searchResult.failed;
+    allErrors.push(...searchResult.errors);
+  }
+
+  // Process sponsored events separately (insert into sponsored_impressions/sponsored_clicks)
+  if (sponsoredEvents.length > 0) {
+    const sponsoredResult = await processSponsoredEventsBatch(sponsoredEvents);
+    totalInserted += sponsoredResult.inserted;
+    totalFailed += sponsoredResult.failed;
+    allErrors.push(...sponsoredResult.errors);
+  }
+
+  // Process other events (insert into user_interactions)
+  if (otherEvents.length > 0) {
+    const interactionsResult = await processUserInteractionsBatch(otherEvents);
+    totalInserted += interactionsResult.inserted;
+    totalFailed += interactionsResult.failed;
+    allErrors.push(...interactionsResult.errors);
+  }
+
+  return {
+    success: totalInserted > 0,
+    inserted: totalInserted,
+    failed: totalFailed,
+    errors: allErrors,
+  };
+}
+
+async function deletePulseMessages(msgIds: bigint[]): Promise<void> {
   // Delete all processed messages
   for (const msgId of msgIds) {
     try {
       const { error } = await supabaseServiceRole.schema('pgmq_public').rpc('delete', {
-        queue_name: TRACKING_QUEUE_NAME,
+        queue_name: PULSE_QUEUE_NAME,
         msg_id: msgId,
       });
 
       if (error) {
-        console.warn('[notification-router] Failed to delete tracking message', {
+        console.warn('[notification-router] Failed to delete pulse message', {
           msg_id: msgId.toString(),
           error: error.message,
         });
       }
     } catch (error) {
-      console.warn('[notification-router] Exception deleting tracking message', {
+      console.warn('[notification-router] Exception deleting pulse message', {
         msg_id: msgId.toString(),
         error: error instanceof Error ? error.message : String(error),
       });
@@ -742,17 +1005,17 @@ async function deleteTrackingMessages(msgIds: bigint[]): Promise<void> {
   }
 }
 
-async function handleTrackingQueue(): Promise<Response> {
+async function handlePulseQueue(): Promise<Response> {
   // Get batch size from Statsig dynamic config (with fallback)
-  const batchSize = getCacheConfigNumber('queue.tracking.batch_size', TRACKING_BATCH_SIZE_DEFAULT);
+  const batchSize = getCacheConfigNumber('queue.pulse.batch_size', PULSE_BATCH_SIZE_DEFAULT);
 
   // Validate batch size (safety limits)
   const safeBatchSize = Math.max(1, Math.min(batchSize, 500)); // Between 1 and 500
 
   const logContext = {
-    queue: TRACKING_QUEUE_NAME,
+    queue: PULSE_QUEUE_NAME,
     batch_size: safeBatchSize,
-    config_source: batchSize !== TRACKING_BATCH_SIZE_DEFAULT ? 'statsig' : 'default',
+    config_source: batchSize !== PULSE_BATCH_SIZE_DEFAULT ? 'statsig' : 'default',
   };
 
   try {
@@ -760,32 +1023,32 @@ async function handleTrackingQueue(): Promise<Response> {
     const { data: messages, error: readError } = await supabaseServiceRole
       .schema('pgmq_public')
       .rpc('read', {
-        queue_name: TRACKING_QUEUE_NAME,
+        queue_name: PULSE_QUEUE_NAME,
         sleep_seconds: 0,
         n: safeBatchSize,
       });
 
     if (readError) {
-      console.error('[notification-router] Tracking queue read error', {
+      console.error('[notification-router] Pulse queue read error', {
         ...logContext,
         error: readError.message,
       });
       return errorResponse(
-        new Error(`Failed to read tracking queue: ${readError.message}`),
-        'notification-router:tracking-queue-read'
+        new Error(`Failed to read pulse queue: ${readError.message}`),
+        'notification-router:pulse-queue-read'
       );
     }
 
     if (!messages || messages.length === 0) {
-      return successResponse({ message: 'No messages in tracking queue', processed: 0 }, 200);
+      return successResponse({ message: 'No messages in pulse queue', processed: 0 }, 200);
     }
 
-    console.log(`[notification-router] Processing ${messages.length} tracking events`, logContext);
+    console.log(`[notification-router] Processing ${messages.length} pulse events`, logContext);
 
-    const trackingMessages = messages as TrackingQueueMessage[];
+    const pulseMessages = messages as PulseQueueMessage[];
 
     // Process batch
-    const result = await processTrackingBatch(trackingMessages);
+    const result = await processPulseBatch(pulseMessages);
 
     if (result.success && result.inserted > 0) {
       // Delete successfully processed messages
@@ -793,18 +1056,18 @@ async function handleTrackingQueue(): Promise<Response> {
       // because the RPC handles partial failures internally and returns which ones succeeded
       // Failed ones within the batch are logged but the message is still consumed
       // If the entire batch fails, we don't delete (handled below)
-      const msgIds = trackingMessages.map((msg) => msg.msg_id);
-      await deleteTrackingMessages(msgIds);
+      const msgIds = pulseMessages.map((msg) => msg.msg_id);
+      await deletePulseMessages(msgIds);
     } else if (result.inserted === 0) {
       // All failed - don't delete, let them retry via queue visibility timeout
-      console.warn('[notification-router] All tracking events failed, will retry', {
+      console.warn('[notification-router] All pulse events failed, will retry', {
         ...logContext,
         failed: result.failed,
         errors: result.errors,
       });
     }
 
-    console.log('[notification-router] Tracking batch processed', {
+    console.log('[notification-router] Pulse batch processed', {
       ...logContext,
       processed: messages.length,
       inserted: result.inserted,
@@ -814,7 +1077,7 @@ async function handleTrackingQueue(): Promise<Response> {
 
     return successResponse(
       {
-        message: `Processed ${messages.length} tracking events`,
+        message: `Processed ${messages.length} pulse events`,
         processed: messages.length,
         inserted: result.inserted,
         failed: result.failed,
@@ -823,10 +1086,10 @@ async function handleTrackingQueue(): Promise<Response> {
       200
     );
   } catch (error) {
-    console.error('[notification-router] Fatal tracking queue processing error', {
+    console.error('[notification-router] Fatal pulse queue processing error', {
       ...logContext,
       error: error instanceof Error ? error.message : String(error),
     });
-    return errorResponse(error, 'notification-router:tracking-queue-fatal');
+    return errorResponse(error, 'notification-router:pulse-queue-fatal');
   }
 }

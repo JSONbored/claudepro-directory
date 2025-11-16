@@ -3,12 +3,15 @@ import Link from 'next/link';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { Button } from '@/src/components/primitives/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
+import { usePulse } from '@/src/hooks/use-pulse';
 import { Building, Clock, DollarSign, ExternalLink, MapPin, Star } from '@/src/lib/icons';
 import type { JobCardProps } from '@/src/lib/types/component.types';
 import { BADGE_COLORS, type JobType, UI_CLASSES } from '@/src/lib/ui-constants';
 import { ensureStringArray, formatRelativeDate } from '@/src/lib/utils/data.utils';
+import { logUnhandledPromise } from '@/src/lib/utils/error.utils';
 
 export function JobCard({ job }: JobCardProps) {
+  const pulse = usePulse();
   const isFeatured = job.tier === 'featured';
 
   return (
@@ -126,13 +129,51 @@ export function JobCard({ job }: JobCardProps) {
         </div>
 
         <div className={`flex ${UI_CLASSES.SPACE_DEFAULT}`}>
-          <Button asChild className="flex-1">
+          <Button
+            asChild
+            className="flex-1"
+            onClick={() => {
+              pulse
+                .click({
+                  category: 'jobs',
+                  slug: job.slug,
+                  metadata: {
+                    action: 'apply_now',
+                    target_url: job.link,
+                    external_link: true,
+                  },
+                })
+                .catch((error) => {
+                  logUnhandledPromise('JobCard: apply now click pulse failed', error, {
+                    slug: job.slug,
+                  });
+                });
+            }}
+          >
             <a href={job.link} target="_blank" rel="noopener noreferrer">
               Apply Now
               <ExternalLink className={`ml-2 ${UI_CLASSES.ICON_SM}`} />
             </a>
           </Button>
-          <Button variant="outline" asChild>
+          <Button
+            variant="outline"
+            asChild
+            onClick={() => {
+              pulse
+                .click({
+                  category: 'jobs',
+                  slug: job.slug,
+                  metadata: {
+                    action: 'view_details',
+                  },
+                })
+                .catch((error) => {
+                  logUnhandledPromise('JobCard: view details click pulse failed', error, {
+                    slug: job.slug,
+                  });
+                });
+            }}
+          >
             <Link href={`/jobs/${job.slug}`}>View Details</Link>
           </Button>
         </div>

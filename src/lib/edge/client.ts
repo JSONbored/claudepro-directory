@@ -9,6 +9,7 @@ import {
   type TrackInteractionParams,
   trackInteractionAction,
   trackNewsletterEventAction,
+  trackUsageAction,
 } from '@/src/lib/actions/pulse.actions';
 import { logger } from '@/src/lib/logger';
 import { createClient } from '@/src/lib/supabase/client';
@@ -223,5 +224,20 @@ export async function trackNewsletterEvent(
   const result = await trackNewsletterEventAction({ eventType, metadata });
   if (result?.serverError) {
     logger.warn('trackNewsletterEvent failed', { error: result.serverError, eventType });
+  }
+}
+
+/**
+ * Track content usage (copy, download) - Queue-Based
+ * Enqueues to user_interactions queue for batched processing
+ */
+export async function trackUsage(params: {
+  content_type: ContentCategory;
+  content_slug: string;
+  action_type: 'copy' | 'download_zip' | 'download_markdown' | 'llmstxt';
+}): Promise<void> {
+  const result = await trackUsageAction(params);
+  if (result?.serverError) {
+    logger.warn('trackUsage failed', { error: result.serverError });
   }
 }

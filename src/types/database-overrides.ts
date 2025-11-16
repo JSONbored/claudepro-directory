@@ -15,7 +15,15 @@ import type { Database as DatabaseGenerated, Json } from './database.types';
  */
 type DatabaseWithViewOverrides = {
   public: {
-    Tables: Omit<DatabaseGenerated['public']['Tables'], 'jobs'> & {
+    Tables: Omit<DatabaseGenerated['public']['Tables'], 'content' | 'jobs'> & {
+      content: {
+        Row: Omit<DatabaseGenerated['public']['Tables']['content']['Row'], 'category'> & {
+          category: DatabaseGenerated['public']['Enums']['content_category'];
+        };
+        Insert: DatabaseGenerated['public']['Tables']['content']['Insert'];
+        Update: DatabaseGenerated['public']['Tables']['content']['Update'];
+        Relationships: DatabaseGenerated['public']['Tables']['content']['Relationships'];
+      };
       jobs: {
         Row: Omit<
           DatabaseGenerated['public']['Tables']['jobs']['Row'],
@@ -542,7 +550,6 @@ export type GetContentDetailCompleteReturn = {
   content: Pick<
     Tables<'content'>,
     | 'id'
-    | 'category'
     | 'slug'
     | 'title'
     | 'display_title'
@@ -562,7 +569,9 @@ export type GetContentDetailCompleteReturn = {
     | 'popularity_score'
     | 'created_at'
     | 'updated_at'
-  >;
+  > & {
+    category: ContentCategory;
+  };
   analytics: {
     view_count: number;
     copy_count: number;

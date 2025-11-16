@@ -7,6 +7,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
+import { Pulse } from '@/src/components/core/infra/pulse';
 import { NavLink } from '@/src/components/core/navigation/navigation-link';
 import { Button } from '@/src/components/primitives/ui/button';
 import {
@@ -22,13 +23,12 @@ import {
   type CollectionDetailData,
   getPublicCollectionDetail,
 } from '@/src/lib/data/community/collections';
-import { trackInteraction } from '@/src/lib/edge/client';
 import { ArrowLeft, ExternalLink } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createAnonClient } from '@/src/lib/supabase/server-anon';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
-import { logUnhandledPromise, normalizeError } from '@/src/lib/utils/error.utils';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 import type { Tables } from '@/src/types/database.types';
 
 // Collection pages may have private content
@@ -97,17 +97,18 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
 
   const { user: profileUser, collection, items, isOwner } = collectionData;
 
-  // Track view (async, non-blocking)
-  trackInteraction({
-    interaction_type: 'view',
-    content_type: 'guides',
-    content_slug: `user-collection-${slug}-${collectionSlug}`,
-  }).catch((error) => {
-    logUnhandledPromise('PublicCollectionPage:view-tracking', error, { slug, collectionSlug });
-  });
-
   return (
     <div className={'min-h-screen bg-background'}>
+      {/* Track view - non-blocking */}
+      <Pulse
+        variant="view"
+        category="collections"
+        slug={collectionSlug}
+        metadata={{
+          user_slug: slug,
+          collection_slug: collectionSlug,
+        }}
+      />
       <div className={'container mx-auto px-4 py-12'}>
         <div className="space-y-6">
           {/* Navigation */}

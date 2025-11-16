@@ -31,13 +31,17 @@ import {
 import { ensureStringArray, getMetadata } from '@/src/lib/utils/data.utils';
 import { normalizeError } from '@/src/lib/utils/error.utils';
 import { getViewTransitionName } from '@/src/lib/utils/view-transitions.utils';
-import type { GetContentDetailCompleteReturn } from '@/src/types/database-overrides';
+import type { GetContentDetailCompleteReturn, Tables } from '@/src/types/database-overrides';
 import { DetailHeader } from './detail-header';
 import { DetailMetadata } from './detail-metadata';
 import { DetailSidebar } from './sidebar/navigation-sidebar';
 
+/**
+ * UnifiedDetailPage is only used for content detail pages, never for jobs.
+ * So we narrow the type to exclude Tables<'jobs'> to ensure proper type safety.
+ */
 export interface UnifiedDetailPageProps {
-  item: ContentItem | GetContentDetailCompleteReturn['content'];
+  item: Tables<'content'> | GetContentDetailCompleteReturn['content'];
   relatedItems?: ContentItem[] | GetContentDetailCompleteReturn['related'];
   viewCount?: number;
   copyCount?: number;
@@ -50,7 +54,7 @@ export interface UnifiedDetailPageProps {
 function logDetailProcessingWarning(
   section: string,
   error: unknown,
-  item: ContentItem | GetContentDetailCompleteReturn['content']
+  item: Tables<'content'> | GetContentDetailCompleteReturn['content']
 ): void {
   const normalized = normalizeError(error, `${section} processing failed`);
   logger.warn(`UnifiedDetailPage: ${section} processing failed`, {
@@ -64,7 +68,7 @@ function logDetailProcessingWarning(
  * Safely extracts configuration from item or metadata as a string
  */
 function getConfigurationAsString(
-  item: ContentItem | GetContentDetailCompleteReturn['content'],
+  item: Tables<'content'> | GetContentDetailCompleteReturn['content'],
   metadata: Record<string, unknown>
 ): string | null {
   // Check top-level item first
@@ -88,7 +92,7 @@ async function ViewCountMetadata({
   item,
   viewCountPromise,
 }: {
-  item: ContentItem | GetContentDetailCompleteReturn['content'];
+  item: Tables<'content'> | GetContentDetailCompleteReturn['content'];
   viewCountPromise: Promise<number>;
 }) {
   const viewCount = await viewCountPromise;
@@ -100,7 +104,7 @@ async function SidebarWithRelated({
   relatedItemsPromise,
   config,
 }: {
-  item: ContentItem | GetContentDetailCompleteReturn['content'];
+  item: Tables<'content'> | GetContentDetailCompleteReturn['content'];
   relatedItemsPromise: Promise<ContentItem[]>;
   config: {
     typeName: string;

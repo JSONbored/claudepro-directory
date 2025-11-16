@@ -31,6 +31,8 @@ export interface ConfigCardProps {
   enableSwipeGestures?: boolean;
   useViewTransitions?: boolean;
   showBorderBeam?: boolean;
+  /** Optional search query for highlighting search terms in title/description */
+  searchQuery?: string;
 }
 
 export type { HomePageClientProps, ContentItem };

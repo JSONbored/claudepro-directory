@@ -8,9 +8,9 @@ import { motion } from 'motion/react';
 import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { LinkedinShareButton, TwitterShareButton } from 'react-share';
+import { usePulse } from '@/src/hooks/use-pulse';
 import { getTimeoutConfig } from '@/src/lib/actions/feature-flags.actions';
 import { APP_CONFIG } from '@/src/lib/data/config/constants';
-import { trackInteraction } from '@/src/lib/edge/client';
 import { Camera, Check, ChevronDown, Copy, Linkedin, Share2, Twitter } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
@@ -26,9 +26,9 @@ import {
   generateShareText,
   generateShareUrl,
   type SharePlatform,
-  trackShare,
 } from '@/src/lib/utils/share.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
+import type { ContentCategory } from '@/src/types/database-overrides';
 
 export interface ProductionCodeBlockProps {
   /** Pre-rendered HTML from Sugar High (server-side) */
@@ -154,6 +154,7 @@ export function ProductionCodeBlock({
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [needsCollapse, setNeedsCollapse] = useState(false);
   const preRef = useRef<HTMLDivElement>(null);
+  const pulse = usePulse();
   const codeBlockRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
 
@@ -180,11 +181,7 @@ export function ProductionCodeBlock({
       await navigator.clipboard.writeText(code);
       toasts.success.codeCopied();
 
-      trackInteraction({
-        interaction_type: 'copy',
-        content_type: category,
-        content_slug: slug,
-      }).catch((error) => {
+      pulse.copy({ category: category as ContentCategory, slug }).catch((error) => {
         logUnhandledPromise('interactive-code-block:copy', error, { category, slug });
       });
     } catch (error) {
@@ -249,20 +246,21 @@ export function ProductionCodeBlock({
       // Also trigger download for user convenience
       downloadScreenshot(screenshot.dataUrl, screenshotFilename);
 
-      trackInteraction({
-        interaction_type: 'screenshot',
-        content_type: category,
-        content_slug: slug,
-        metadata: {
-          width: screenshot.width,
-          height: screenshot.height,
-        },
-      }).catch((error) => {
-        logUnhandledPromise('interactive-code-block:screenshot', error, {
-          category,
+      pulse
+        .screenshot({
+          category: category as ContentCategory,
           slug,
+          metadata: {
+            width: screenshot.width,
+            height: screenshot.height,
+          },
+        })
+        .catch((error) => {
+          logUnhandledPromise('interactive-code-block:screenshot', error, {
+            category,
+            slug,
+          });
         });
-      });
     } catch (error) {
       toasts.error.screenshotFailed();
       logger.error('Screenshot generation failed', error as Error);
@@ -294,7 +292,7 @@ export function ProductionCodeBlock({
         }
       }
 
-      trackShare({ platform, category, slug, url: currentUrl }).catch((error) => {
+      pulse.share({ platform, category, slug, url: currentUrl }).catch((error) => {
         logUnhandledPromise('interactive-code-block:share', error, {
           platform,
           category,

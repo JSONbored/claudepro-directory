@@ -4275,6 +4275,10 @@ export type Database = {
         }[]
       }
       refresh_mv_site_urls: { Args: never; Returns: undefined }
+      refresh_mv_unified_search_concurrently: {
+        Args: never
+        Returns: undefined
+      }
       refresh_profile_from_oauth: { Args: { user_id: string }; Returns: Json }
       refresh_unified_search_mv: { Args: never; Returns: undefined }
       refresh_user_stats: {
@@ -4569,15 +4573,6 @@ export type Database = {
       toggle_review_helpful: {
         Args: { p_helpful: boolean; p_review_id: string; p_user_id: string }
         Returns: Json
-      }
-      track_content_usage: {
-        Args: {
-          p_action_type: string
-          p_content_slug: string
-          p_content_type: string
-          p_user_id?: string
-        }
-        Returns: undefined
       }
       track_sponsored_event: {
         Args: { p_data: Json; p_event_type: string; p_user_id: string }

@@ -8,13 +8,14 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/primitives/ui/tabs';
-import { trackInteraction } from '@/src/lib/edge/client';
+import { usePulse } from '@/src/hooks/use-pulse';
 import type { TabbedDetailLayoutProps } from '@/src/lib/types/detail-tabs.types';
 import { cn } from '@/src/lib/utils';
 import { logUnhandledPromise } from '@/src/lib/utils/error.utils';
 import { TabSectionRenderer } from './tab-section-renderer';
 
 export function TabbedDetailLayout({ item, config, tabs, sectionData }: TabbedDetailLayoutProps) {
+  const pulse = usePulse();
   // Get initial tab from URL hash or default to first tab
   const getInitialTab = useCallback(() => {
     if (tabs.length === 0) return '';
@@ -54,22 +55,23 @@ export function TabbedDetailLayout({ item, config, tabs, sectionData }: TabbedDe
       }
 
       // Track tab switch
-      trackInteraction({
-        interaction_type: 'click',
-        content_type: item.category,
-        content_slug: item.slug,
-        metadata: {
-          tab_id: value,
-          tab_action: 'switch',
-        },
-      }).catch((error) => {
-        logUnhandledPromise('trackInteraction:tabbed-detail', error, {
-          tabId: value,
+      pulse
+        .click({
+          category: item.category,
           slug: item.slug,
+          metadata: {
+            tab_id: value,
+            tab_action: 'switch',
+          },
+        })
+        .catch((error) => {
+          logUnhandledPromise('trackInteraction:tabbed-detail', error, {
+            tabId: value,
+            slug: item.slug,
+          });
         });
-      });
     },
-    [item.category, item.slug]
+    [item.category, item.slug, pulse]
   );
 
   // Mobile swipe gesture navigation

@@ -7,11 +7,12 @@
 
 import { useEffect, useState } from 'react';
 import { Button } from '@/src/components/primitives/ui/button';
+import { usePulse } from '@/src/hooks/use-pulse';
 import { getSocialLinks } from '@/src/lib/data/marketing/contact';
 import { Github } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
-import { logClientWarning } from '@/src/lib/utils/error.utils';
+import { logClientWarning, logUnhandledPromise } from '@/src/lib/utils/error.utils';
 import type { ButtonStyleProps } from '../shared/button-types';
 
 export interface GitHubStarsButtonProps extends ButtonStyleProps {
@@ -27,6 +28,7 @@ export function GitHubStarsButton({
   className,
   disabled = false,
 }: GitHubStarsButtonProps) {
+  const pulse = usePulse();
   const [stars, setStars] = useState<number | null>(null);
 
   useEffect(() => {
@@ -59,6 +61,19 @@ export function GitHubStarsButton({
   }, [repoUrl]);
 
   const handleClick = () => {
+    pulse
+      .click({
+        category: null,
+        slug: null,
+        metadata: {
+          action: 'external_link',
+          link_type: 'github',
+          target_url: repoUrl,
+        },
+      })
+      .catch((error) => {
+        logUnhandledPromise('GitHubStarsButton: click pulse failed', error, { repoUrl });
+      });
     window.open(repoUrl, '_blank', 'noopener,noreferrer');
   };
 

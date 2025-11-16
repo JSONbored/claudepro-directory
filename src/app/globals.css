@@ -1039,6 +1039,53 @@
   }
 
   /* ========================================
+     SEARCH RESULT HIGHLIGHTING
+     ======================================== */
+
+  /* Base mark styling - semantic HTML5 element for search highlighting */
+  mark {
+    background-color: rgb(250 204 21 / 0.3); /* yellow-300 with 30% opacity */
+    color: inherit; /* Inherit text color for proper contrast */
+    padding: 0.125rem 0.25rem; /* Subtle padding */
+    border-radius: 0.25rem; /* Rounded corners */
+    font-weight: 500; /* Slightly bolder */
+    text-decoration: none; /* No underline */
+    box-decoration-break: clone; /* Ensure background wraps across lines */
+    -webkit-box-decoration-break: clone; /* Safari support */
+  }
+
+  /* Dark mode */
+  @media (prefers-color-scheme: dark) {
+    mark {
+      background-color: rgb(234 179 8 / 0.4); /* yellow-600 with 40% opacity */
+    }
+  }
+
+  /* High contrast mode support */
+  @media (prefers-contrast: high) {
+    mark {
+      background-color: rgb(250 204 21 / 0.5); /* More opaque for better visibility */
+      border: 1px solid rgb(234 179 8); /* Add border for clarity */
+    }
+  }
+
+  /* Reduced motion support */
+  @media (prefers-reduced-motion: reduce) {
+    mark {
+      transition: none; /* No transitions if user prefers reduced motion */
+    }
+  }
+
+  /* Print styles - remove highlighting for printing */
+  @media print {
+    mark {
+      background-color: transparent;
+      color: inherit;
+      font-weight: bold; /* Use bold instead of background for print */
+    }
+  }
+
+  /* ========================================
      PRODUCTION-GRADE CUSTOM SCROLLBARS
      ======================================== */
 

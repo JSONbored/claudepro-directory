@@ -25,7 +25,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { ReadProgress } from '@/src/components/content/read-progress';
-import { UnifiedTracker } from '@/src/components/core/infra/analytics-tracker';
+import { Pulse } from '@/src/components/core/infra/pulse';
 import { StructuredData } from '@/src/components/core/infra/structured-data';
 import { NavLink } from '@/src/components/core/navigation/navigation-link';
 import { ChangelogContent } from '@/src/components/features/changelog/changelog-content';
@@ -112,7 +112,7 @@ export default async function ChangelogEntryPage({
       <ReadProgress />
 
       {/* View Tracker - Track page views */}
-      <UnifiedTracker variant="view" category="changelog" slug={entry.slug} />
+      <Pulse variant="view" category="changelog" slug={entry.slug} />
 
       {/* Structured Data - Pre-generated schemas from database */}
       <StructuredData route={`/changelog/${entry.slug}`} />

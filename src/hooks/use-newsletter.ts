@@ -6,8 +6,8 @@
 'use client';
 
 import { useCallback, useEffect, useState, useTransition } from 'react';
+import { usePulse } from '@/src/hooks/use-pulse';
 import { getNewsletterConfig } from '@/src/lib/actions/feature-flags.actions';
-import { trackInteraction, trackNewsletterEvent } from '@/src/lib/edge/client';
 import { logger } from '@/src/lib/logger';
 import { logClientWarning } from '@/src/lib/utils/error.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
@@ -104,6 +104,7 @@ export function useNewsletter(options: UseNewsletterOptions): UseNewsletterRetur
   const [email, setEmail] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+  const pulse = usePulse();
 
   // Load retry config from Statsig on mount
   useEffect(() => {
@@ -176,10 +177,8 @@ export function useNewsletter(options: UseNewsletterOptions): UseNewsletterRetur
 
           // Track newsletter signup success
           Promise.all([
-            trackInteraction({
-              content_type: null,
-              content_slug: null,
-              interaction_type: 'newsletter_subscribe',
+            pulse.newsletter({
+              event: 'subscribe',
               metadata: {
                 source,
                 subscription_id: result.subscription_id,
@@ -187,9 +186,12 @@ export function useNewsletter(options: UseNewsletterOptions): UseNewsletterRetur
                 ...(metadata && metadata),
               },
             }),
-            trackNewsletterEvent('signup_success', {
-              source,
-              ...metadata,
+            pulse.newsletter({
+              event: 'signup_success',
+              metadata: {
+                source,
+                ...metadata,
+              },
             }),
           ]).catch((error) => {
             logClientWarning('useNewsletter: signup success tracking failed', error, {
@@ -215,13 +217,18 @@ export function useNewsletter(options: UseNewsletterOptions): UseNewsletterRetur
           onError?.(errorMessage);
 
           // Track newsletter signup error
-          trackNewsletterEvent('signup_error', {
-            source,
-            error: errorMessage,
-            ...metadata,
-          }).catch((error) => {
-            logClientWarning('useNewsletter: signup error tracking failed', error, { source });
-          });
+          pulse
+            .newsletter({
+              event: 'signup_error',
+              metadata: {
+                source,
+                error: errorMessage,
+                ...metadata,
+              },
+            })
+            .catch((error) => {
+              logClientWarning('useNewsletter: signup error tracking failed', error, { source });
+            });
 
           logger.error('Newsletter subscription failed', new Error(errorMessage), {
             component: 'useNewsletter',
@@ -246,13 +253,18 @@ export function useNewsletter(options: UseNewsletterOptions): UseNewsletterRetur
         onError?.(errorMessage);
 
         // Track newsletter signup error (exception)
-        trackNewsletterEvent('signup_error', {
-          source,
-          error: errorMessage,
-          ...metadata,
-        }).catch((error) => {
-          logClientWarning('useNewsletter: exception tracking failed', error, { source });
-        });
+        pulse
+          .newsletter({
+            event: 'signup_error',
+            metadata: {
+              source,
+              error: errorMessage,
+              ...metadata,
+            },
+          })
+          .catch((error) => {
+            logClientWarning('useNewsletter: exception tracking failed', error, { source });
+          });
 
         logger.error('Newsletter subscription error', err instanceof Error ? err : undefined, {
           component: 'useNewsletter',
@@ -272,6 +284,7 @@ export function useNewsletter(options: UseNewsletterOptions): UseNewsletterRetur
     reset,
     metadata,
     logContext,
+    pulse,
   ]);
 
   return {

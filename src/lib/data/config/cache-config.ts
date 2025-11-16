@@ -150,7 +150,7 @@ const BUILD_TIME_TTL_DEFAULTS: Record<CacheTtlKey, number> = {
   'cache.announcements.ttl_seconds': 1800,
   'cache.account.ttl_seconds': 300,
   'cache.newsletter_count_ttl_s': 300,
-  'cache.company_search.ttl_seconds': 300,
+  'cache.company_search.ttl_seconds': 1800, // Increased from 300s to 1800s (30min) - company data changes infrequently
   'cache.notifications.ttl_seconds': 300,
   'cache.contact.ttl_seconds': 3600,
 };

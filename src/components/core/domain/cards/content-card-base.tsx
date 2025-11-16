@@ -28,7 +28,7 @@ import type { ReactNode } from 'react';
 import { memo } from 'react';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { SwipeableCardWrapper } from '@/src/components/core/domain/cards/swipeable-card';
-import { SponsoredTracker } from '@/src/components/features/sponsored/sponsored-tracker';
+import { SponsoredPulse } from '@/src/components/features/sponsored/sponsored-pulse';
 import { HoverCard } from '@/src/components/primitives/animation/hover-card';
 import {
   Card,
@@ -57,18 +57,21 @@ export interface BaseCardProps {
 
   /**
    * Display title for the card
+   * Can be string or ReactNode (for search highlighting)
    */
-  displayTitle: string;
+  displayTitle: string | ReactNode;
 
   /**
    * Card description text (optional for some variants)
+   * Can be string or ReactNode (for search highlighting)
    */
-  description?: string;
+  description?: string | ReactNode;
 
   /**
    * Author name (optional for review/changelog variants)
+   * Can be string or ReactNode (for search highlighting)
    */
-  author?: string;
+  author?: string | ReactNode;
 
   /**
    * Author profile URL (GitHub, personal site, etc.)
@@ -85,6 +88,12 @@ export interface BaseCardProps {
    * Array of tags to display
    */
   tags?: string[];
+
+  /**
+   * Highlighted tags (for search highlighting)
+   * If provided, tags will be rendered with highlighting
+   */
+  highlightedTags?: Array<{ original: string; highlighted: ReactNode }>;
 
   /**
    * Maximum number of tags to show before "+N more"
@@ -252,6 +261,7 @@ export const BaseCard = memo(
     authorProfileUrl,
     source,
     tags,
+    highlightedTags,
     maxVisibleTags = 4,
     variant = 'default',
     showActions = true,
@@ -387,9 +397,24 @@ export const BaseCard = memo(
           {/* Tags */}
           {tags && tags.length > 0 && (
             <div className={UI_CLASSES.CARD_BADGE_CONTAINER}>
-              {visibleTags?.map((tag: string) => (
-                <UnifiedBadge key={tag} variant="tag" tag={tag} />
-              ))}
+              {visibleTags?.map((tag: string, index: number) => {
+                // Use highlighted tag if available, otherwise use original
+                const highlightedTag = highlightedTags?.[index];
+                const tagToRender = highlightedTag?.highlighted;
+                // UnifiedBadge tag variant renders props.tag, but we can override with children
+                // If we have highlighted content, render it as children
+                if (tagToRender && typeof tagToRender !== 'string') {
+                  // For highlighted tags, we need to render the ReactNode
+                  // UnifiedBadge will use children if provided, otherwise props.tag
+                  return (
+                    <UnifiedBadge key={tag} variant="tag" tag={tag}>
+                      {tagToRender}
+                    </UnifiedBadge>
+                  );
+                }
+                // No highlighting - use default rendering
+                return <UnifiedBadge key={tag} variant="tag" tag={tag} />;
+              })}
               {overflowCount > 0 && (
                 <UnifiedBadge
                   variant="base"
@@ -417,7 +442,7 @@ export const BaseCard = memo(
                       className="transition-colors hover:text-foreground hover:underline"
                       onClick={(e) => e.stopPropagation()}
                     >
-                      {author}
+                      {typeof author === 'string' ? author : author}
                     </a>
                   </span>
                 )}
@@ -465,13 +490,13 @@ export const BaseCard = memo(
     // Wrap in sponsored tracker if this is sponsored content
     if (isSponsored && sponsoredId && targetPath) {
       return (
-        <SponsoredTracker
+        <SponsoredPulse
           sponsoredId={sponsoredId}
           targetUrl={`${APP_CONFIG.url}${targetPath}`}
           position={position}
         >
           {cardContent}
-        </SponsoredTracker>
+        </SponsoredPulse>
       );
     }
 

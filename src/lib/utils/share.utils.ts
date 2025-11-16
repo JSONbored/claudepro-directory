@@ -167,6 +167,11 @@ export async function getShareCount(
 
 /**
  * Track share event (fire-and-forget)
+ *
+ * Note: This utility function is kept for backward compatibility.
+ * For new code, consider using usePulse() hook directly.
+ *
+ * @deprecated Consider using usePulse() hook in components instead
  */
 export async function trackShare(options: {
   platform: SharePlatform;
@@ -176,6 +181,7 @@ export async function trackShare(options: {
 }): Promise<void> {
   try {
     // Import trackInteraction dynamically to avoid circular deps
+    // This utility function can't use hooks, so we keep using trackInteraction directly
     const { trackInteraction } = await import('@/src/lib/edge/client');
 
     await trackInteraction({

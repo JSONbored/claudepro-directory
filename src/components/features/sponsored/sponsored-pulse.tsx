@@ -1,19 +1,24 @@
 'use client';
 
 /**
- * Sponsored Content Tracker - Secure Server-Side Tracking
+ * Sponsored Content Pulse - Secure Server-Side Tracking
  *
  * Tracks impressions (when visible) and clicks for sponsored content.
  * Uses server actions for secure RPC calls.
  *
  * Uses Intersection Observer for visibility detection.
+ *
+ * Note: This component requires a DOM wrapper for Intersection Observer,
+ * so it remains separate from the main Pulse component.
+ *
+ * @module components/features/sponsored/sponsored-pulse
  */
 
 import { useEffect, useRef } from 'react';
 import { trackSponsoredClick, trackSponsoredImpression } from '@/src/lib/actions/pulse.actions';
 import { logUnhandledPromise } from '@/src/lib/utils/error.utils';
 
-interface SponsoredTrackerProps {
+interface SponsoredPulseProps {
   /** UUID of the sponsored campaign */
   sponsoredId: string;
   /** Position in the feed (0-indexed) */
@@ -26,13 +31,13 @@ interface SponsoredTrackerProps {
   children: React.ReactNode;
 }
 
-export function SponsoredTracker({
+export function SponsoredPulse({
   sponsoredId,
   position,
   pageUrl,
   targetUrl,
   children,
-}: SponsoredTrackerProps) {
+}: SponsoredPulseProps) {
   const elementRef = useRef<HTMLDivElement>(null);
   const impressionTracked = useRef(false);
 
@@ -53,7 +58,7 @@ export function SponsoredTracker({
             pageUrl: pageUrl || (typeof window !== 'undefined' ? window.location.pathname : ''),
             position: position ?? 0,
           }).catch((error) => {
-            logUnhandledPromise('SponsoredTracker: impression failed', error, {
+            logUnhandledPromise('SponsoredPulse: impression failed', error, {
               sponsoredId,
               position: position ?? 0,
             });
@@ -84,7 +89,7 @@ export function SponsoredTracker({
         sponsoredId,
         targetUrl,
       }).catch((error) => {
-        logUnhandledPromise('SponsoredTracker: click failed', error, { sponsoredId });
+        logUnhandledPromise('SponsoredPulse: click failed', error, { sponsoredId });
       });
     };
 

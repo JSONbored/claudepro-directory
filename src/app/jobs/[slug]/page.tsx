@@ -6,6 +6,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
+import { Pulse } from '@/src/components/core/infra/pulse';
 import { StructuredData } from '@/src/components/core/infra/structured-data';
 import { Button } from '@/src/components/primitives/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
@@ -106,6 +107,7 @@ export default async function JobPage({ params }: PageProps) {
 
   return (
     <>
+      <Pulse variant="view" category="jobs" slug={slug} />
       <StructuredData route={`/jobs/${slug}`} />
 
       <div className={'min-h-screen bg-background'}>

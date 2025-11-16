@@ -7,7 +7,7 @@ import { notFound } from 'next/navigation';
 import { CollectionDetailView } from '@/src/components/content/detail-page/collection-view';
 import { UnifiedDetailPage } from '@/src/components/content/detail-page/content-detail-view';
 import { ReadProgress } from '@/src/components/content/read-progress';
-import { UnifiedTracker } from '@/src/components/core/infra/analytics-tracker';
+import { Pulse } from '@/src/components/core/infra/pulse';
 import { StructuredData } from '@/src/components/core/infra/structured-data';
 import { RecentlyViewedTracker } from '@/src/components/features/navigation/recently-viewed-tracker';
 import type { RecentlyViewedCategory } from '@/src/hooks/use-recently-viewed';
@@ -184,8 +184,8 @@ export default async function DetailPage({
       {/* Read Progress Bar - Shows reading progress at top of page */}
       <ReadProgress />
 
-      <UnifiedTracker variant="view" category={category} slug={slug} />
-      <UnifiedTracker variant="page-view" category={category} slug={slug} />
+      <Pulse variant="view" category={category} slug={slug} />
+      <Pulse variant="page-view" category={category} slug={slug} />
       <StructuredData route={`/${category}/${slug}`} />
 
       {/* Recently Viewed Tracking - gated by feature flag */}

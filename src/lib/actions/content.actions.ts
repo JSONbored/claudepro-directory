@@ -14,7 +14,6 @@ import type { CacheInvalidateKey } from '@/src/lib/data/config/cache-config';
 import { getPaginatedContent as getPaginatedContentData } from '@/src/lib/data/content/paginated';
 import { getReviewsWithStatsData } from '@/src/lib/data/content/reviews';
 import { logger } from '@/src/lib/logger';
-import { createClient } from '@/src/lib/supabase/server';
 import type { DisplayableContent } from '@/src/lib/types/component.types';
 import { logActionFailure } from '@/src/lib/utils/error.utils';
 import type { Database, Tables } from '@/src/types/database.types';
@@ -624,59 +623,6 @@ export const getReviewsWithStats = rateLimitedAction
 
 // DELETED: getReviews() - Use getReviewsWithStats() instead (optimized single RPC)
 // DELETED: getAggregateRating() - Use getReviewsWithStats() instead (optimized single RPC)
-
-// ============================================
-// USAGE TRACKING ACTIONS
-// ============================================
-
-/**
- * Track content usage (copy, download) - Database-First
- * Uses atomic track_content_usage() RPC (2 queries → 1, 50-100ms faster)
- */
-export const trackUsage = rateLimitedAction
-  .metadata({ actionName: 'trackUsage', category: 'content' })
-  .schema(
-    z.object({
-      content_type: z.enum([...CONTENT_CATEGORY_VALUES] as [ContentCategory, ...ContentCategory[]]),
-      content_slug: z.string(),
-      action_type: z.enum(['copy', 'download_zip', 'download_markdown', 'llmstxt']),
-    })
-  )
-  .action(async ({ parsedInput }) => {
-    const supabase = await createClient();
-    const { user } = await getAuthenticatedUserFromClient(supabase, {
-      context: 'trackUsage',
-    });
-
-    const interactionType = parsedInput.action_type === 'copy' ? 'copy' : 'download';
-
-    await runRpc(
-      'track_content_usage',
-      {
-        p_content_type: parsedInput.content_type,
-        p_content_slug: parsedInput.content_slug,
-        p_action_type: interactionType,
-        ...(user?.id && { p_user_id: user.id }),
-      },
-      {
-        action: 'content.trackUsage.rpc',
-        ...(user?.id ? { userId: user.id } : {}),
-        meta: {
-          content_type: parsedInput.content_type,
-          content_slug: parsedInput.content_slug,
-          action_type: parsedInput.action_type,
-        },
-      }
-    );
-
-    revalidatePath(`/${parsedInput.content_type}/${parsedInput.content_slug}`);
-
-    await invalidateContentCaches({
-      keys: ['cache.invalidate.usage_tracking'],
-    });
-
-    return { success: true };
-  });
 
 // ============================================
 // CONTENT FETCHING ACTIONS

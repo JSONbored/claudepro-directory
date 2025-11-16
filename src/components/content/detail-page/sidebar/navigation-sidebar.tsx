@@ -11,6 +11,7 @@ import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge
 import { JobsPromo } from '@/src/components/core/domain/jobs/jobs-banner';
 import { Button } from '@/src/components/primitives/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
+import { usePulse } from '@/src/hooks/use-pulse';
 import type { CategoryId } from '@/src/lib/data/config/category';
 import type { ContentItem } from '@/src/lib/data/content';
 import { getSocialLinks } from '@/src/lib/data/marketing/contact';
@@ -19,7 +20,11 @@ import { BADGE_COLORS, type CategoryType, UI_CLASSES } from '@/src/lib/ui-consta
 import { getDisplayTitle } from '@/src/lib/utils';
 import { getContentItemUrl } from '@/src/lib/utils/content.utils';
 import { ensureStringArray, getMetadata } from '@/src/lib/utils/data.utils';
-import type { GetContentDetailCompleteReturn } from '@/src/types/database-overrides';
+import { logUnhandledPromise } from '@/src/lib/utils/error.utils';
+import type {
+  ContentCategory,
+  GetContentDetailCompleteReturn,
+} from '@/src/types/database-overrides';
 
 /**
  * Props for DetailSidebar
@@ -61,6 +66,7 @@ export const DetailSidebar = memo(function DetailSidebar({
   customRenderer,
 }: DetailSidebarProps) {
   const router = useRouter();
+  const pulse = usePulse();
 
   // Use custom renderer if provided
   if (customRenderer) {
@@ -95,7 +101,33 @@ export const DetailSidebar = memo(function DetailSidebar({
           </CardHeader>
           <CardContent className="space-y-3">
             {showGitHubLink && githubUrl && (
-              <Button variant="outline" className="w-full justify-start" asChild>
+              <Button
+                variant="outline"
+                className="w-full justify-start"
+                onClick={() => {
+                  pulse
+                    .click({
+                      category: (item.category as ContentCategory) || null,
+                      slug: item.slug || null,
+                      metadata: {
+                        action: 'external_link',
+                        link_type: 'github',
+                        target_url: githubUrl,
+                      },
+                    })
+                    .catch((error) => {
+                      logUnhandledPromise(
+                        'NavigationSidebar: GitHub link click pulse failed',
+                        error,
+                        {
+                          category: item.category,
+                          slug: item.slug,
+                        }
+                      );
+                    });
+                }}
+                asChild
+              >
                 <a href={githubUrl} target="_blank" rel="noopener noreferrer">
                   <Github className={UI_CLASSES.ICON_SM_LEADING} />
                   View on GitHub
@@ -103,7 +135,33 @@ export const DetailSidebar = memo(function DetailSidebar({
               </Button>
             )}
             {hasDocumentationUrl && 'documentation_url' in item && item.documentation_url && (
-              <Button variant="outline" className="w-full justify-start" asChild>
+              <Button
+                variant="outline"
+                className="w-full justify-start"
+                onClick={() => {
+                  pulse
+                    .click({
+                      category: (item.category as ContentCategory) || null,
+                      slug: item.slug || null,
+                      metadata: {
+                        action: 'external_link',
+                        link_type: 'documentation',
+                        target_url: item.documentation_url as string,
+                      },
+                    })
+                    .catch((error) => {
+                      logUnhandledPromise(
+                        'NavigationSidebar: documentation link click pulse failed',
+                        error,
+                        {
+                          category: item.category,
+                          slug: item.slug,
+                        }
+                      );
+                    });
+                }}
+                asChild
+              >
                 <a href={item.documentation_url} target="_blank" rel="noopener noreferrer">
                   <ExternalLink className={UI_CLASSES.ICON_SM_LEADING} />
                   Documentation

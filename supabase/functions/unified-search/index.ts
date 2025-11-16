@@ -20,7 +20,7 @@
 
 import { supabaseAnon } from '../_shared/clients/supabase.ts';
 import type { Database } from '../_shared/database.types.ts';
-import { trackSearchQueryEdge } from '../_shared/utils/analytics/tracker.ts';
+import { enqueueSearchAnalytics } from '../_shared/utils/analytics/pulse.ts';
 import {
   badRequestResponse,
   errorResponse,
@@ -409,7 +409,8 @@ async function handleFacets(startTime: number): Promise<Response> {
 }
 
 /**
- * Track search analytics to search_queries table
+ * Track search analytics - Queue-Based
+ * Enqueues to user_interactions queue for batched processing (98% egress reduction)
  * Fire and forget - don't block response
  */
 async function trackSearchAnalytics(
@@ -426,10 +427,16 @@ async function trackSearchAnalytics(
 ): Promise<void> {
   if (!query) return;
 
-  await trackSearchQueryEdge({
+  // Enqueue to queue instead of direct insert
+  enqueueSearchAnalytics({
     query,
     filters: filters as Database['public']['Tables']['search_queries']['Insert']['filters'],
     resultCount,
     authorizationHeader,
+  }).catch((error) => {
+    console.warn('[unified-search] Failed to enqueue search analytics', {
+      error: error instanceof Error ? error.message : String(error),
+      query: query.substring(0, 50),
+    });
   });
 }

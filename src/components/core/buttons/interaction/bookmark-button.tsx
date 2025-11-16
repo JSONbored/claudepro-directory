@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
 import { Button } from '@/src/components/primitives/ui/button';
 import { useConfetti } from '@/src/hooks/use-confetti';
+import { usePulse } from '@/src/hooks/use-pulse';
 import { checkConfettiEnabled } from '@/src/lib/actions/feature-flags.actions';
 import { addBookmark, removeBookmark } from '@/src/lib/actions/user.actions';
 import { type CategoryId, isValidCategory } from '@/src/lib/data/config/category';
@@ -39,6 +40,7 @@ export function BookmarkButton({
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
   const { celebrateBookmark } = useConfetti();
+  const pulse = usePulse();
 
   const handleToggle = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -65,6 +67,20 @@ export function BookmarkButton({
           if (result?.data?.success) {
             setIsBookmarked(false);
             toasts.success.bookmarkRemoved();
+
+            // Track bookmark removal
+            pulse
+              .bookmark({
+                category: validatedCategory,
+                slug: contentSlug,
+                action: 'remove',
+              })
+              .catch((error) => {
+                logClientWarning('BookmarkButton: bookmark removal tracking failed', error, {
+                  contentType,
+                  contentSlug,
+                });
+              });
           }
         } else {
           const result = await addBookmark({
@@ -75,6 +91,20 @@ export function BookmarkButton({
           if (result?.data?.success) {
             setIsBookmarked(true);
             toasts.success.bookmarkAdded();
+
+            // Track bookmark addition
+            pulse
+              .bookmark({
+                category: validatedCategory,
+                slug: contentSlug,
+                action: 'add',
+              })
+              .catch((error) => {
+                logClientWarning('BookmarkButton: bookmark addition tracking failed', error, {
+                  contentType,
+                  contentSlug,
+                });
+              });
 
             // Confetti animation gated by feature flag
             const confettiResult = await checkConfettiEnabled({});
