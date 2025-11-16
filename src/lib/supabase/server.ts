@@ -20,9 +20,8 @@ export async function createClient() {
   // In development without env vars, return a mock client that won't crash
   if (!(supabaseUrl && supabaseAnonKey)) {
     if (process.env.NODE_ENV === 'development') {
-      // biome-ignore lint/suspicious/noConsole: Intentional development warning for missing Supabase credentials
-      console.warn(
-        '⚠️  Supabase env vars not found - using mock server client for development. Database features will not work.'
+      logger.warn(
+        'Supabase env vars not found - using mock server client for development. Database features will not work.'
       );
       // Return a mock client that matches the Supabase client interface
       // Chainable query builder that returns a Promise with chainable methods
@@ -128,6 +127,15 @@ export async function createClient() {
               cookieCount: cookiesToSet.length,
               errorMessage: error.message,
             });
+          } else {
+            logger.error(
+              'Failed to set auth cookies in Route Handler (non-Error exception)',
+              new Error(String(error)),
+              {
+                context: 'supabase_server_client',
+                cookieCount: cookiesToSet.length,
+              }
+            );
           }
         }
       },

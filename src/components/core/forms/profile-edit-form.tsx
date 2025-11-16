@@ -108,7 +108,7 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
         onChange={(e) => setValue('name', e.target.value, { shouldDirty: true })}
         placeholder="Your name"
         maxLength={100}
-        required
+        required={true}
         error={!!errors.name}
         {...(errors.name?.message && { errorMessage: errors.name.message })}
       />
@@ -120,7 +120,7 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
         onChange={(e) => setValue('bio', e.target.value, { shouldDirty: true })}
         placeholder="Tell us about yourself..."
         maxLength={500}
-        showCharCount
+        showCharCount={true}
         rows={4}
         error={!!errors.bio}
         {...(errors.bio?.message && { errorMessage: errors.bio.message })}
@@ -170,8 +170,8 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
         placeholder="Add an interest..."
         maxItems={10}
         maxLength={30}
-        noDuplicates
-        showCounter
+        noDuplicates={true}
+        showCounter={true}
         badgeStyle="secondary"
         description="Press Enter or click Add"
       />

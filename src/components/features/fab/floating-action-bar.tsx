@@ -5,8 +5,8 @@
 import { AnimatePresence, motion } from 'motion/react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { useNotificationsContext } from '@/src/components/providers/notifications-provider';
 import { logger } from '@/src/lib/logger';
-import { type NotificationStore, useNotificationStore } from '@/src/lib/stores/notification-store';
 import { createMainFABConfig, createSpeedDialActions } from './fab-config';
 import { SpeedDialItem } from './speed-dial-item';
 import { useScrollDirection } from './use-scroll-direction';
@@ -14,9 +14,16 @@ import { useScrollDirection } from './use-scroll-direction';
 interface FloatingActionBarProps {
   /** Scroll threshold to show/hide FAB (px) */
   threshold?: number;
+  /** Feature flags controlling which FAB actions to show */
+  fabFlags: {
+    showSubmit: boolean;
+    showSearch: boolean;
+    showScrollToTop: boolean;
+    showNotifications: boolean;
+  };
 }
 
-export function FloatingActionBar({ threshold = 100 }: FloatingActionBarProps) {
+export function FloatingActionBar({ threshold = 100, fabFlags }: FloatingActionBarProps) {
   const router = useRouter();
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -24,8 +31,7 @@ export function FloatingActionBar({ threshold = 100 }: FloatingActionBarProps) {
   const scrollState = useScrollDirection({ threshold });
 
   // Notification state
-  const unreadCount = useNotificationStore((state: NotificationStore) => state.unreadCount);
-  const openNotificationSheet = useNotificationStore((state: NotificationStore) => state.openSheet);
+  const { unreadCount, openSheet: openNotificationSheet, flags } = useNotificationsContext();
 
   // Main FAB config (Create button)
   const mainFAB = createMainFABConfig(() => {
@@ -55,6 +61,10 @@ export function FloatingActionBar({ threshold = 100 }: FloatingActionBarProps) {
       } catch (error) {
         logger.error('[FloatingActionBar] Error navigating to /submit', error as Error);
       }
+    },
+    {
+      ...fabFlags,
+      showNotifications: fabFlags.showNotifications && flags.enableFab,
     }
   );
 

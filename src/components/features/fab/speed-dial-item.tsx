@@ -18,7 +18,7 @@
 
 import { motion } from 'motion/react';
 import { logger } from '@/src/lib/logger';
-import type { SpeedDialAction } from './fab.types';
+import type { SpeedDialAction } from '@/src/lib/types/component.types';
 
 interface SpeedDialItemProps extends SpeedDialAction {
   /** Animation delay for stagger effect (seconds) */

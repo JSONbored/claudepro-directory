@@ -81,7 +81,7 @@ export function NavigationDesktop({ isActive, onCommandPaletteOpen }: Navigation
         if (link.children && link.children.length > 0) {
           return (
             <DropdownMenu key={link.label}>
-              <DropdownMenuTrigger asChild>
+              <DropdownMenuTrigger asChild={true}>
                 <button
                   type="button"
                   className={`group relative flex items-center px-2 py-1 font-medium ${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_NAV} ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT}`}
@@ -102,7 +102,7 @@ export function NavigationDesktop({ isActive, onCommandPaletteOpen }: Navigation
                   {link.children.map((child) => {
                     const ChildIcon = child.icon;
                     return (
-                      <DropdownMenuItem key={child.href} asChild>
+                      <DropdownMenuItem key={child.href} asChild={true}>
                         <Link
                           href={child.href}
                           prefetch={true}
@@ -160,7 +160,7 @@ export function NavigationDesktop({ isActive, onCommandPaletteOpen }: Navigation
       })}
 
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
+        <DropdownMenuTrigger asChild={true}>
           <button
             type="button"
             className={`group relative flex items-center px-2 py-1 font-medium ${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_NAV} ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT}`}
@@ -188,7 +188,7 @@ export function NavigationDesktop({ isActive, onCommandPaletteOpen }: Navigation
                   {group.links.map((link) => {
                     const IconComponent = link.icon;
                     return (
-                      <DropdownMenuItem key={link.href} asChild>
+                      <DropdownMenuItem key={link.href} asChild={true}>
                         <Link
                           href={link.href}
                           prefetch={true}

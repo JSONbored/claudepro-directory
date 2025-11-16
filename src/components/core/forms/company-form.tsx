@@ -1,12 +1,13 @@
 'use client';
 
 /**
- * Company Form Component - Calls companies-handler edge function with file upload
+ * Company Form Component - Uses server actions for CRUD operations
  */
 
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { useId, useState, useTransition } from 'react';
+import { useAction } from 'next-safe-action/hooks';
+import { useEffect, useId, useState, useTransition } from 'react';
 import { FormField } from '@/src/components/core/forms/form-field-wrapper';
 import { Button } from '@/src/components/primitives/ui/button';
 import {
@@ -17,24 +18,44 @@ import {
   CardTitle,
 } from '@/src/components/primitives/ui/card';
 import { SelectItem } from '@/src/components/primitives/ui/select';
-import { ROUTES } from '@/src/lib/constants';
+import {
+  createCompany,
+  updateCompany,
+  uploadCompanyLogoAction,
+} from '@/src/lib/actions/companies.actions';
+import { getFormConfig } from '@/src/lib/actions/feature-flags.actions';
+import { ROUTES } from '@/src/lib/data/config/constants';
 import { FileText, X } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
-import { createClient } from '@/src/lib/supabase/client';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { logClientWarning } from '@/src/lib/utils/error.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
 import type { Database } from '@/src/types/database.types';
 
-type CompanyInsert = Database['public']['Tables']['companies']['Insert'];
 type CompanyRow = Database['public']['Tables']['companies']['Row'];
+
+type AllowedImageMimeType = 'image/jpeg' | 'image/png' | 'image/webp';
 
 interface CompanyFormProps {
   initialData?: Partial<CompanyRow>;
   mode: 'create' | 'edit';
 }
 
-const MAX_FILE_SIZE = 200 * 1024; // 200KB
-const MAX_DIMENSION = 512;
+// Form validation (loaded from Statsig via server action)
+let MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+let MAX_DIMENSION = 2048; // 2048px
+
+async function fileToBase64(file: File) {
+  const buffer = await file.arrayBuffer();
+  let binary = '';
+  const bytes = new Uint8Array(buffer);
+  const chunkSize = 0x8000;
+  for (let i = 0; i < bytes.length; i += chunkSize) {
+    const chunk = bytes.subarray(i, i + chunkSize);
+    binary += String.fromCharCode(...chunk);
+  }
+  return btoa(binary);
+}
 
 export function CompanyForm({ initialData, mode }: CompanyFormProps) {
   const router = useRouter();
@@ -44,6 +65,22 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
   const [logoUrl, setLogoUrl] = useState<string | null>(initialData?.logo || null);
   const [logoPreview, setLogoPreview] = useState<string | null>(initialData?.logo || null);
   const [useCursorDate, setUseCursorDate] = useState<boolean>(!!initialData?.using_cursor_since);
+  const { executeAsync: uploadLogo } = useAction(uploadCompanyLogoAction);
+
+  // Load form validation config from Statsig on mount
+  useEffect(() => {
+    getFormConfig({})
+      .then((result) => {
+        if (!result?.data) return;
+        const config = result.data;
+        const maxMB = config['form.max_file_size_mb'];
+        MAX_FILE_SIZE = maxMB * 1024 * 1024;
+        MAX_DIMENSION = config['form.max_image_dimension_px'];
+      })
+      .catch((error) => {
+        logClientWarning('CompanyForm: failed to load form config', error);
+      });
+  }, []);
 
   const handleLogoUpload = async (file: File) => {
     // Client-side validation
@@ -109,48 +146,36 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
     setIsUploadingLogo(true);
 
     try {
-      const supabase = createClient();
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
+      const fileBase64 = await fileToBase64(file);
+      const result = await uploadLogo({
+        fileName: file.name,
+        mimeType: file.type as AllowedImageMimeType,
+        fileBase64,
+        companyId: initialData?.id,
+        oldLogoUrl: logoUrl ?? undefined,
+      });
 
-      if (!session) {
-        toasts.error.authRequired();
-        return;
+      if (result?.serverError) {
+        throw new Error(result.serverError);
       }
 
-      const uploadFormData = new FormData();
-      uploadFormData.append('file', file);
-      if (initialData?.id) {
-        uploadFormData.append('companyId', initialData.id);
-        if (logoUrl) {
-          uploadFormData.append('oldLogoUrl', logoUrl);
-        }
+      if (result?.validationErrors) {
+        throw new Error('Logo upload failed validation.');
       }
 
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/companies-handler`,
-        {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${session.access_token}`,
-            'X-Company-Action': 'upload-logo',
-          },
-          body: uploadFormData,
-        }
-      );
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Upload failed');
+      const uploaded = result?.data;
+      if (!uploaded?.publicUrl) {
+        throw new Error('Upload response was missing a public URL.');
       }
 
-      const result = await response.json();
-
-      setLogoUrl(result.publicUrl);
-      setLogoPreview(result.publicUrl);
+      setLogoUrl(uploaded.publicUrl);
+      setLogoPreview(uploaded.publicUrl);
       toasts.success.actionCompleted('Logo uploaded successfully!');
     } catch (error) {
+      logClientWarning('CompanyForm: logo upload failed', error, {
+        fileName: file.name,
+        companyId: initialData?.id,
+      });
       toasts.error.fromError(error, 'Failed to upload logo');
     } finally {
       setIsUploadingLogo(false);
@@ -162,7 +187,7 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
 
     const formData = new FormData(e.currentTarget);
 
-    const data: Partial<CompanyInsert> = {
+    const data = {
       name: formData.get('name') as string,
       website: (formData.get('website') as string) || null,
       logo: logoUrl, // Use uploaded logo URL from state
@@ -176,47 +201,40 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
 
     startTransition(async () => {
       try {
-        const supabase = createClient();
-        const {
-          data: { session },
-        } = await supabase.auth.getSession();
+        if (mode === 'create') {
+          // Create company via server action
+          const result = await createCompany(data);
 
-        if (!session) {
-          toasts.error.authRequired();
-          return;
-        }
+          if (result?.serverError || result?.validationErrors) {
+            throw new Error(result.serverError || 'Validation failed');
+          }
 
-        const action = mode === 'create' ? 'create' : 'update';
-        const payload = mode === 'edit' ? { ...data, id: initialData?.id } : data;
-
-        const url = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/companies-handler`;
-        const response = await fetch(url, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${session.access_token}`,
-            'X-Company-Action': action,
-          },
-          body: JSON.stringify(payload),
-        });
-
-        if (!response.ok) {
-          const error = await response.json();
-          throw new Error(error.error || 'Failed to save company');
-        }
-
-        const result = await response.json();
-
-        if (result.success || result.company) {
-          toasts.success.actionCompleted(
-            mode === 'create' ? 'Company created successfully!' : 'Company updated successfully!'
-          );
-          router.push(ROUTES.ACCOUNT_COMPANIES);
-          router.refresh();
+          toasts.success.actionCompleted('Company created successfully!');
         } else {
-          throw new Error('Unexpected response format');
+          // Update company via server action
+          if (!initialData?.id) {
+            throw new Error('Company ID is required for updates');
+          }
+
+          const result = await updateCompany({
+            id: initialData.id,
+            ...data,
+          });
+
+          if (result?.serverError || result?.validationErrors) {
+            throw new Error(result.serverError || 'Validation failed');
+          }
+
+          toasts.success.actionCompleted('Company updated successfully!');
         }
+
+        router.push(ROUTES.ACCOUNT_COMPANIES);
+        router.refresh();
       } catch (error) {
+        logClientWarning('CompanyForm: save failed', error, {
+          mode,
+          companyId: initialData?.id,
+        });
         toasts.error.fromError(error, 'Failed to save company');
       }
     });
@@ -235,7 +253,7 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
             label="Company Name"
             name="name"
             defaultValue={initialData?.name || ''}
-            required
+            required={true}
             placeholder="e.g., Acme Corporation"
           />
 
@@ -263,7 +281,7 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
                   <Image
                     src={logoPreview}
                     alt="Company logo preview"
-                    fill
+                    fill={true}
                     className="object-cover"
                   />
                 </div>

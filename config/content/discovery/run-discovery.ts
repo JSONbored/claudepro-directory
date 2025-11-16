@@ -4,6 +4,7 @@
  */
 
 import type { CategoryId } from '@/src/lib/config/category-types';
+import type { SubmissionType } from '@/src/types/database-overrides';
 
 /**
  * Discovery Metadata Type (matches database JSONB structure)
@@ -338,9 +339,9 @@ export function buildDatabasePayload(params: {
   authorProfileUrl?: string;
   githubUrl?: string;
   tags?: string[];
-  submissionType?: string; // Optional: defaults to category if not provided
+  submissionType?: SubmissionType; // Optional: defaults to category if not provided
 }): {
-  p_submission_type: string;
+  p_submission_type: SubmissionType;
   p_name: string;
   p_description: string;
   p_category: string;
@@ -353,7 +354,7 @@ export function buildDatabasePayload(params: {
   return {
     // Use explicit submission_type if provided, otherwise default to category
     // (for discovery submissions, category IS the submission type)
-    p_submission_type: params.submissionType || params.category,
+    p_submission_type: (params.submissionType || params.category) as SubmissionType,
     p_name: params.name,
     p_description: params.description,
     p_category: params.category,

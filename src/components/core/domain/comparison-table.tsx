@@ -1,5 +1,3 @@
-'use client';
-
 /**
  * ComparisonTable - Feature comparison table for products/services
  * Used in 16+ MDX files across the codebase

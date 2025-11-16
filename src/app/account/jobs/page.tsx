@@ -10,68 +10,84 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/ui/card';
-import { ROUTES } from '@/src/lib/constants';
+import { getAuthenticatedUser } from '@/src/lib/auth/get-authenticated-user';
+import { getUserDashboard } from '@/src/lib/data/account/user-data';
+import { ROUTES } from '@/src/lib/data/config/constants';
 import { BarChart, Briefcase, Edit, ExternalLink, Eye, Plus } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-import { createClient } from '@/src/lib/supabase/server';
-import { BADGE_COLORS, type JobStatusType, UI_CLASSES } from '@/src/lib/ui-constants';
+import { BADGE_COLORS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { formatRelativeDate } from '@/src/lib/utils/data.utils';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 import type { Tables } from '@/src/types/database.types';
-import type { GetUserDashboardReturn } from '@/src/types/database-overrides';
-
-// Force dynamic rendering - requires authentication
-export const dynamic = 'force-dynamic';
+import type { GetGetUserDashboardReturn, JobStatus } from '@/src/types/database-overrides';
 
 export const metadata = generatePageMetadata('/account/jobs');
 
 export default async function MyJobsPage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { user } = await getAuthenticatedUser({ context: 'MyJobsPage' });
 
-  let jobs: Array<Tables<'jobs'>> = [];
-  let hasError = false;
-
-  if (user) {
-    let data: unknown = null;
-    let error: unknown = null;
-
-    if (typeof supabase.rpc === 'function') {
-      ({ data, error } = await supabase.rpc('get_user_dashboard', { p_user_id: user.id }));
-    } else {
-      logger.warn(
-        'Supabase RPC unavailable (mock client fallback detected); skipping dashboard fetch.',
-        { context: 'MyJobsPage' }
-      );
-      // Mock client case - set empty jobs array to avoid misleading validation errors
-      jobs = [];
-    }
-
-    if (error) {
-      logger.error(
-        'Failed to fetch user dashboard',
-        error instanceof Error ? error : new Error(String(error))
-      );
-      hasError = true;
-    } else if (data !== null) {
-      // Type-safe RPC return using centralized type definition
-      const result = data as GetUserDashboardReturn;
-      jobs = result.jobs || [];
-    }
-  }
-
-  if (hasError) {
+  if (!user) {
+    logger.warn('MyJobsPage: unauthenticated access attempt detected');
     return (
       <div className="space-y-6">
-        <div className="text-destructive">Failed to load jobs. Please try again later.</div>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-2xl">Sign in required</CardTitle>
+            <CardDescription>Please sign in to manage your job listings.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button asChild={true}>
+              <Link href={ROUTES.LOGIN}>Go to login</Link>
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
-  const getStatusColor = (status: string) => {
-    return BADGE_COLORS.jobStatus[status as JobStatusType] || 'bg-muted';
+  let data: GetGetUserDashboardReturn | null = null;
+  let fetchError = false;
+  try {
+    data = await getUserDashboard(user.id);
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to load user dashboard for jobs');
+    logger.error('MyJobsPage: getUserDashboard threw', normalized, { userId: user.id });
+    fetchError = true;
+  }
+
+  if (!data) {
+    logger.warn('MyJobsPage: getUserDashboard returned no data', { userId: user.id });
+    fetchError = true;
+  }
+
+  if (fetchError) {
+    return (
+      <div className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-2xl">Job listings unavailable</CardTitle>
+            <CardDescription>
+              We couldn&apos;t load your job dashboard. Please refresh or try again later.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button asChild={true} variant="outline">
+              <Link href={ROUTES.ACCOUNT}>Back to dashboard</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  const jobs: Array<Tables<'jobs'>> = data?.jobs || [];
+  if (jobs.length === 0) {
+    logger.info('MyJobsPage: user has no job listings', { userId: user.id });
+  }
+
+  const getStatusColor = (status: JobStatus) => {
+    return BADGE_COLORS.jobStatus[status] || 'bg-muted';
   };
 
   const getPlanBadge = (plan: string) => {
@@ -99,7 +115,7 @@ export default async function MyJobsPage() {
             {jobs.length} {jobs.length === 1 ? 'listing' : 'listings'}
           </p>
         </div>
-        <Button asChild>
+        <Button asChild={true}>
           <Link href={ROUTES.ACCOUNT_JOBS_NEW}>
             <Plus className="mr-2 h-4 w-4" />
             Post a Job
@@ -115,7 +131,7 @@ export default async function MyJobsPage() {
             <p className={'mb-4 max-w-md text-center text-muted-foreground'}>
               Post your first job listing to reach talented developers in the Claude community
             </p>
-            <Button asChild>
+            <Button asChild={true}>
               <Link href={ROUTES.ACCOUNT_JOBS_NEW}>
                 <Plus className="mr-2 h-4 w-4" />
                 Post Your First Job
@@ -134,9 +150,11 @@ export default async function MyJobsPage() {
                       <UnifiedBadge
                         variant="base"
                         style="outline"
-                        className={getStatusColor(job.status ?? 'draft')}
+                        className={getStatusColor(
+                          (job.status ?? ('draft' as JobStatus)) as JobStatus
+                        )}
                       >
-                        {job.status ?? 'draft'}
+                        {job.status ?? ('draft' as JobStatus)}
                       </UnifiedBadge>
                       {getPlanBadge(job.plan ?? 'standard')}
                     </div>
@@ -159,14 +177,14 @@ export default async function MyJobsPage() {
                 </div>
 
                 <div className={UI_CLASSES.FLEX_GAP_2}>
-                  <Button variant="outline" size="sm" asChild>
+                  <Button variant="outline" size="sm" asChild={true}>
                     <Link href={`/account/jobs/${job.id}/edit`}>
                       <Edit className="mr-1 h-3 w-3" />
                       Edit
                     </Link>
                   </Button>
 
-                  <Button variant="outline" size="sm" asChild>
+                  <Button variant="outline" size="sm" asChild={true}>
                     <Link href={`/account/jobs/${job.id}/analytics`}>
                       <BarChart className="mr-1 h-3 w-3" />
                       Analytics
@@ -174,7 +192,7 @@ export default async function MyJobsPage() {
                   </Button>
 
                   {job.slug && (
-                    <Button variant="ghost" size="sm" asChild>
+                    <Button variant="ghost" size="sm" asChild={true}>
                       <Link href={`/jobs/${job.slug}`}>
                         <ExternalLink className="mr-1 h-3 w-3" />
                         View
@@ -182,8 +200,11 @@ export default async function MyJobsPage() {
                     </Button>
                   )}
 
-                  {job.status === 'active' && (
-                    <JobToggleButton jobId={job.id} currentStatus={job.status ?? 'paused'} />
+                  {job.status === ('active' as JobStatus) && (
+                    <JobToggleButton
+                      jobId={job.id}
+                      currentStatus={(job.status ?? ('draft' as JobStatus)) as JobStatus}
+                    />
                   )}
 
                   <JobDeleteButton jobId={job.id} />

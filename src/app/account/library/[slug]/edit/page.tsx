@@ -4,10 +4,12 @@ import { notFound, redirect } from 'next/navigation';
 import { CollectionForm } from '@/src/components/core/forms/collection-form';
 import { Button } from '@/src/components/primitives/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
+import { getAuthenticatedUser } from '@/src/lib/auth/get-authenticated-user';
+import { getCollectionDetail } from '@/src/lib/data/account/user-data';
 import { ArrowLeft } from '@/src/lib/icons';
+import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-import { createClient } from '@/src/lib/supabase/server';
-import type { Tables } from '@/src/types/database.types';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 
 interface EditCollectionPageProps {
   params: Promise<{ slug: string }>;
@@ -18,39 +20,36 @@ export async function generateMetadata({ params }: EditCollectionPageProps): Pro
   return generatePageMetadata('/account/library/:slug/edit', { params: { slug } });
 }
 
-// Force dynamic rendering - requires authentication
-export const dynamic = 'force-dynamic';
-
 export default async function EditCollectionPage({ params }: EditCollectionPageProps) {
   const { slug } = await params;
-  const supabase = await createClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { user } = await getAuthenticatedUser({ context: 'EditCollectionPage' });
 
   if (!user) {
+    logger.warn('EditCollectionPage: unauthenticated access attempt', { slug });
     redirect('/login');
   }
 
-  // Consolidated RPC: 2 queries → 1 (50% reduction)
-  const { data: collectionData } = await supabase.rpc('get_collection_detail_with_items', {
-    p_user_id: user.id,
-    p_slug: slug,
-  });
+  let collectionData: Awaited<ReturnType<typeof getCollectionDetail>> = null;
+  try {
+    collectionData = await getCollectionDetail(user.id, slug);
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to load collection detail for edit page');
+    logger.error('EditCollectionPage: getCollectionDetail threw', normalized, {
+      slug,
+      userId: user.id,
+    });
+    throw normalized;
+  }
 
   if (!collectionData) {
+    logger.warn('EditCollectionPage: collection not found or inaccessible', {
+      slug,
+      userId: user.id,
+    });
     notFound();
   }
 
-  // Type assertion to database-generated Json type
-  type CollectionResponse = {
-    collection: Tables<'user_collections'>;
-    items: Array<Tables<'collection_items'>>;
-    bookmarks: Array<Tables<'bookmarks'>>;
-  };
-
-  const { collection, bookmarks } = collectionData as unknown as CollectionResponse;
+  const { collection, bookmarks } = collectionData;
 
   return (
     <div className="space-y-6">

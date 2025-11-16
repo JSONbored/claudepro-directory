@@ -21,12 +21,17 @@
  */
 
 import { useRouter } from 'next/navigation';
-import { useCallback, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
+import { getTimeoutConfig } from '@/src/lib/actions/feature-flags.actions';
+import { logClientWarning } from '@/src/lib/utils/error.utils';
+
+// Prefetch delay (loaded from Statsig via server action)
+let DEFAULT_PREFETCH_DELAY = 100;
 
 export interface UsePrefetchOnHoverOptions {
   /**
    * Delay before prefetch (ms)
-   * @default 300 - Clear intent without wasting bandwidth
+   * @default 100 - Clear intent without wasting bandwidth (from Dynamic Config)
    */
   delay?: number;
 
@@ -85,10 +90,23 @@ export function usePrefetchOnHover(
   href: string,
   options: UsePrefetchOnHoverOptions = {}
 ): UsePrefetchOnHoverReturn {
-  const { delay = 300, disabled = false } = options;
+  const { delay = DEFAULT_PREFETCH_DELAY, disabled = false } = options;
   const router = useRouter();
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const prefetchedRef = useRef(false);
+
+  // Load prefetch delay from Statsig on mount
+  useEffect(() => {
+    getTimeoutConfig({})
+      .then((result) => {
+        if (result?.data) {
+          DEFAULT_PREFETCH_DELAY = result.data['timeout.ui.prefetch_delay_ms'];
+        }
+      })
+      .catch((error) => {
+        logClientWarning('usePrefetchOnHover: failed to load prefetch delay', error);
+      });
+  }, []);
 
   const handleMouseEnter = useCallback(() => {
     // Skip if disabled or already prefetched

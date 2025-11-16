@@ -791,12 +791,8 @@ export const POSITION_PATTERNS = {
  * </motion.div>
  * ```
  */
+/** Motion animation constants - easing and durations only (spring physics from animationConfigs) */
 export const ANIMATION_CONSTANTS = {
-  // ----- Spring Physics -----
-  SPRING_DEFAULT: { type: 'spring' as const, stiffness: 400, damping: 17 },
-  SPRING_BOUNCY: { type: 'spring' as const, stiffness: 500, damping: 20 },
-  SPRING_SMOOTH: { type: 'spring' as const, stiffness: 300, damping: 25 },
-
   // ----- Duration (for non-spring animations) -----
   DURATION_FAST: 0.15,
   DURATION_DEFAULT: 0.2,
@@ -959,6 +955,7 @@ export const BADGE_COLORS = {
     approved: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
     merged: 'bg-green-500/10 text-green-400 border-green-500/20',
     rejected: 'bg-red-500/10 text-red-400 border-red-500/20',
+    spam: 'bg-gray-500/10 text-gray-400 border-gray-500/20',
   },
 
   memberType: {
@@ -968,48 +965,19 @@ export const BADGE_COLORS = {
   },
 
   jobStatus: {
-    active: 'bg-green-500/10 text-green-400 border-green-500/20',
     draft: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20',
-    paused: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
+    pending_payment: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
+    pending_review: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+    active: 'bg-green-500/10 text-green-400 border-green-500/20',
     expired: 'bg-red-500/10 text-red-400 border-red-500/20',
+    rejected: 'bg-red-500/10 text-red-400 border-red-500/20',
+    deleted: 'bg-gray-500/10 text-gray-400 border-gray-500/20',
   },
 } as const;
 
 // ==========================================
-// SECTION 9: CARD BEHAVIORS & ICON MAPPING
+// SECTION 9: ICON MAPPING
 // ==========================================
-
-/**
- * CARD_BEHAVIORS - Card behavior configuration
- *
- * Defines different card interaction patterns (copy vs link actions).
- */
-export const CARD_BEHAVIORS = {
-  default: {
-    primaryAction: 'copy' as const,
-    showCopyButton: true,
-    showBookmark: true,
-    showViewCount: true,
-    showCopyCount: true,
-    showRating: false,
-  },
-  code: {
-    primaryAction: 'copy' as const,
-    showCopyButton: true,
-    showBookmark: true,
-    showViewCount: true,
-    showCopyCount: true,
-    showRating: false,
-  },
-  link: {
-    primaryAction: 'link' as const,
-    showCopyButton: false,
-    showBookmark: true,
-    showViewCount: true,
-    showCopyCount: false,
-    showRating: true,
-  },
-} as const;
 
 /**
  * ICON_NAME_MAP - Static icon name mapping
@@ -1049,15 +1017,14 @@ export type PositionPatternKey = keyof typeof POSITION_PATTERNS;
 export type BreakpointKey = keyof typeof BREAKPOINTS;
 export type ContainerBreakpointKey = keyof typeof CONTAINER_BREAKPOINTS;
 export type ViewportPresetKey = keyof typeof VIEWPORT_PRESETS;
-export type CardBehaviorKey = keyof typeof CARD_BEHAVIORS;
 export type JobType = keyof typeof BADGE_COLORS.jobType;
 export type DifficultyLevel = keyof typeof BADGE_COLORS.difficulty;
 export type CollectionType = keyof typeof BADGE_COLORS.collectionType;
-export type ChangelogCategory = keyof typeof BADGE_COLORS.changelogCategory;
+// Re-export from database-overrides.ts for type safety
+export type { ChangelogCategory } from '@/src/types/database-overrides';
 export type StatusType = keyof typeof BADGE_COLORS.status;
 export type CategoryType = keyof typeof BADGE_COLORS.category;
 export type SubmissionStatusType = keyof typeof BADGE_COLORS.submissionStatus;
-export type JobStatusType = keyof typeof BADGE_COLORS.jobStatus;
 
 // ==========================================
 // UTILITY FUNCTIONS

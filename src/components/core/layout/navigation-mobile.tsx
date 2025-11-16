@@ -4,8 +4,11 @@
  * Full-height menu with staggered animations
  */
 
+'use client';
+
 import { motion } from 'motion/react';
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { HeyClaudeLogo } from '@/src/components/core/layout/brand-logo';
 import { PrefetchLink } from '@/src/components/core/navigation/prefetch-link';
@@ -17,8 +20,10 @@ import {
   SheetTrigger,
 } from '@/src/components/primitives/ui/sheet';
 import { ACTION_LINKS, PRIMARY_NAVIGATION, SECONDARY_NAVIGATION } from '@/src/config/navigation';
-import { SOCIAL_LINKS } from '@/src/lib/constants';
+import { getAnimationConfig } from '@/src/lib/actions/feature-flags.actions';
+import { getContactChannels } from '@/src/lib/data/marketing/contact';
 import { DiscordIcon, Github, Menu } from '@/src/lib/icons';
+import { logger } from '@/src/lib/logger';
 import {
   ANIMATION_CONSTANTS,
   DIMENSIONS,
@@ -71,10 +76,34 @@ interface NavigationMobileProps {
   onOpenChange: (open: boolean) => void;
 }
 
+const CONTACT_CHANNELS = getContactChannels();
+
 export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationMobileProps) {
+  const [springDefault, setSpringDefault] = useState({
+    type: 'spring' as const,
+    stiffness: 400,
+    damping: 17,
+  });
+
+  useEffect(() => {
+    getAnimationConfig({})
+      .then((result) => {
+        if (!result?.data) return;
+        const config = result.data;
+        setSpringDefault({
+          type: 'spring' as const,
+          stiffness: config['animation.spring.default.stiffness'],
+          damping: config['animation.spring.default.damping'],
+        });
+      })
+      .catch((error) => {
+        logger.error('NavigationMobile: failed to load animation config', error);
+      });
+  }, []);
+
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
-      <SheetTrigger asChild>
+      <SheetTrigger asChild={true}>
         <Button variant="ghost" size="sm" className="md:hidden" aria-label="Open mobile menu">
           <Menu className={UI_CLASSES.ICON_LG} />
         </Button>
@@ -92,7 +121,7 @@ export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationM
             if (info.offset.y > 100) onOpenChange(false);
           }}
           whileDrag={{ scale: 1.2, backgroundColor: 'hsl(var(--accent))' }}
-          transition={ANIMATION_CONSTANTS.SPRING_DEFAULT}
+          transition={springDefault}
         />
 
         <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
@@ -210,22 +239,18 @@ export function NavigationMobile({ isActive, isOpen, onOpenChange }: NavigationM
               {[
                 {
                   icon: DiscordIcon,
-                  onClick: () => window.open('https://discord.gg/Ax3Py4YDrq', '_blank'),
+                  onClick: () => window.open(CONTACT_CHANNELS.discord, '_blank'),
                   label: 'Discord',
                   color: 'discord',
                 },
                 {
                   icon: Github,
-                  onClick: () => window.open(SOCIAL_LINKS.github, '_blank'),
+                  onClick: () => window.open(CONTACT_CHANNELS.github, '_blank'),
                   label: 'GitHub',
                   color: 'accent',
                 },
               ].map((item) => (
-                <motion.div
-                  key={item.label}
-                  whileTap={{ scale: 0.9 }}
-                  transition={ANIMATION_CONSTANTS.SPRING_DEFAULT}
-                >
+                <motion.div key={item.label} whileTap={{ scale: 0.9 }} transition={springDefault}>
                   <Button
                     variant="outline"
                     size="lg"

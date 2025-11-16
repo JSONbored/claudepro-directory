@@ -7,14 +7,35 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/ui/card';
-import { ROUTES } from '@/src/lib/constants';
+import { ROUTES } from '@/src/lib/data/config/constants';
 import { AlertCircle } from '@/src/lib/icons';
+import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 export const metadata = generatePageMetadata('/auth/auth-code-error');
 
-export default function AuthCodeError() {
+interface AuthCodeErrorSearchParams {
+  message?: string;
+  code?: string;
+  provider?: string;
+}
+
+export default function AuthCodeError({
+  searchParams,
+}: {
+  searchParams?: AuthCodeErrorSearchParams;
+}) {
+  if (searchParams) {
+    logger.error('AuthCodeErrorPage rendered', undefined, {
+      code: searchParams.code || 'unknown',
+      provider: searchParams.provider || 'unknown',
+      hasMessage: Boolean(searchParams.message),
+    });
+  } else {
+    logger.error('AuthCodeErrorPage rendered without search params');
+  }
+
   return (
     <Card className="w-full max-w-md">
       <CardHeader className="text-center">
@@ -31,10 +52,10 @@ export default function AuthCodeError() {
         </CardDescription>
       </CardHeader>
       <CardContent className={UI_CLASSES.FLEX_COL_GAP_2}>
-        <Button asChild>
+        <Button asChild={true}>
           <Link href={ROUTES.LOGIN}>Try Again</Link>
         </Button>
-        <Button variant="outline" asChild>
+        <Button variant="outline" asChild={true}>
           <Link href={ROUTES.HOME}>Return Home</Link>
         </Button>
       </CardContent>

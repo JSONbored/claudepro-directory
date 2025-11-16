@@ -5,7 +5,7 @@
  * Modal for sharing recommendation results
  */
 
-import { useState } from 'react';
+import { SimpleCopyButton } from '@/src/components/core/buttons/shared/simple-copy-button';
 import { Button } from '@/src/components/primitives/ui/button';
 import {
   Dialog,
@@ -15,10 +15,9 @@ import {
   DialogTitle,
 } from '@/src/components/primitives/ui/dialog';
 import { Input } from '@/src/components/primitives/ui/input';
-import { Check, Copy, Facebook, Linkedin, Mail, Share2, Twitter } from '@/src/lib/icons';
+import { Facebook, Linkedin, Mail, Share2, Twitter } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
-import { toasts } from '@/src/lib/utils/toast.utils';
 
 interface ShareResultsProps {
   shareUrl: string;
@@ -27,19 +26,6 @@ interface ShareResultsProps {
 }
 
 export function ShareResults({ shareUrl, resultCount, onClose }: ShareResultsProps) {
-  const [copied, setCopied] = useState(false);
-
-  const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(shareUrl);
-      setCopied(true);
-      toasts.success.linkCopied();
-      setTimeout(() => setCopied(false), 2000);
-    } catch (_error) {
-      toasts.error.copyFailed('link');
-    }
-  };
-
   const shareText = `I just found ${resultCount} perfect Claude configurations for my needs! 🚀`;
   const encodedShareText = encodeURIComponent(shareText);
   const encodedUrl = encodeURIComponent(shareUrl);
@@ -52,7 +38,7 @@ export function ShareResults({ shareUrl, resultCount, onClose }: ShareResultsPro
   };
 
   return (
-    <Dialog open onOpenChange={onClose}>
+    <Dialog open={true} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
@@ -68,29 +54,29 @@ export function ShareResults({ shareUrl, resultCount, onClose }: ShareResultsPro
           {/* Copy link */}
           <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
             <Input
-              readOnly
+              readOnly={true}
               value={shareUrl}
               className="flex-1"
               onClick={(e) => e.currentTarget.select()}
             />
-            <Button
-              type="button"
-              size="icon"
+            <SimpleCopyButton
+              content={shareUrl}
+              successMessage="Link copied to clipboard!"
+              errorMessage="Failed to copy link"
               variant="outline"
-              onClick={handleCopy}
+              size="icon"
               className="shrink-0"
-            >
-              {copied ? (
-                <Check className={`${UI_CLASSES.ICON_SM} text-green-600`} />
-              ) : (
-                <Copy className={UI_CLASSES.ICON_SM} />
-              )}
-            </Button>
+              iconClassName={UI_CLASSES.ICON_SM}
+              ariaLabel="Copy share link"
+              onCopySuccess={() => {
+                logger.info('Share link copied', { from: 'share-results-dialog' });
+              }}
+            />
           </div>
 
           {/* Social share buttons */}
           <div className="grid grid-cols-2 gap-3">
-            <Button variant="outline" size="sm" asChild className="gap-2">
+            <Button variant="outline" size="sm" asChild={true} className="gap-2">
               <a
                 href={shareLinks.twitter}
                 target="_blank"
@@ -104,7 +90,7 @@ export function ShareResults({ shareUrl, resultCount, onClose }: ShareResultsPro
               </a>
             </Button>
 
-            <Button variant="outline" size="sm" asChild className="gap-2">
+            <Button variant="outline" size="sm" asChild={true} className="gap-2">
               <a
                 href={shareLinks.linkedin}
                 target="_blank"
@@ -118,7 +104,7 @@ export function ShareResults({ shareUrl, resultCount, onClose }: ShareResultsPro
               </a>
             </Button>
 
-            <Button variant="outline" size="sm" asChild className="gap-2">
+            <Button variant="outline" size="sm" asChild={true} className="gap-2">
               <a
                 href={shareLinks.facebook}
                 target="_blank"
@@ -132,7 +118,7 @@ export function ShareResults({ shareUrl, resultCount, onClose }: ShareResultsPro
               </a>
             </Button>
 
-            <Button variant="outline" size="sm" asChild className="gap-2">
+            <Button variant="outline" size="sm" asChild={true} className="gap-2">
               <a
                 href={shareLinks.email}
                 onClick={() => {

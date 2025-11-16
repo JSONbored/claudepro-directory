@@ -1,33 +1,50 @@
 /**
- * Search Edge Function Client
- * Type-safe wrapper for unified-search edge function
+ * Unified Search Edge Client - Hyper-optimized, future-proof
+ * Wraps the /functions/v1/unified-search endpoint with full entity support
+ *
+ * Supports all entity types (content, company, job, user) with consistent
+ * caching, error handling, and analytics tracking.
  */
 
+import { getCacheTtl } from '@/src/lib/data/config/cache-config';
 import { logger } from '@/src/lib/logger';
-import { createClient } from '@/src/lib/supabase/client';
 import type { Database } from '@/src/types/database.types';
 
-const EDGE_BASE_URL = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1`;
+const EDGE_SEARCH_URL = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/unified-search`;
 
-// Type definitions matching edge function responses
-type SearchResult = Database['public']['Functions']['search_content_optimized']['Returns'][number];
+// Type definitions
+type ContentSearchResult =
+  Database['public']['Functions']['search_content_optimized']['Returns'][number];
+type UnifiedSearchResult = Database['public']['Functions']['search_unified']['Returns'][number];
 
-export interface SearchFilters {
+export type SearchEntity = 'content' | 'company' | 'job' | 'user';
+
+export interface UnifiedSearchFilters {
+  // Content filters
   categories?: string[];
   tags?: string[];
   authors?: string[];
   sort?: 'relevance' | 'popularity' | 'newest' | 'alphabetical';
+
+  // Pagination
   limit?: number;
   offset?: number;
 }
 
-export interface SearchResponse {
-  results: SearchResult[];
+export interface UnifiedSearchOptions {
+  query: string;
+  entities?: SearchEntity[];
+  filters?: UnifiedSearchFilters;
+}
+
+export interface UnifiedSearchResponse<T> {
+  results: T[];
   query: string;
   filters: {
     categories?: string[];
     tags?: string[];
     authors?: string[];
+    entities?: string[];
     sort?: string;
   };
   pagination: {
@@ -40,196 +57,223 @@ export interface SearchResponse {
     dbTime: number;
     totalTime: number;
   };
+  searchType: 'content' | 'unified';
 }
 
-export interface AutocompleteSuggestion {
-  text: string;
-  searchCount: number;
-  isPopular: boolean;
-}
+// Legacy types (backward compatibility)
+export type SearchFilters = {
+  sort?: 'relevance' | 'popularity' | 'newest' | 'alphabetical';
+  p_categories?: string[];
+  p_tags?: string[];
+  p_authors?: string[];
+  p_limit?: number;
+  p_offset?: number;
+};
 
-export interface AutocompleteResponse {
-  suggestions: AutocompleteSuggestion[];
-  query: string;
-}
-
-export interface SearchFacet {
-  category: string;
-  contentCount: number;
-  tags: string[];
-  authors: string[];
-}
-
-export interface FacetsResponse {
-  facets: SearchFacet[];
-}
+export type SearchResult = ContentSearchResult;
 
 /**
- * Search content via unified-search edge function
- * Includes edge caching (5min) and analytics tracking
- *
- * @param query - Search query string
- * @param filters - Optional filters (categories, tags, authors, sort, pagination)
- * @returns Search results with metadata
- *
- * @example
- * ```ts
- * const results = await searchContent('next.js', {
- *   categories: ['guides'],
- *   sort: 'relevance',
- *   limit: 20
- * });
- * ```
+ * Unified search - supports all entity types
+ * Hyper-optimized with edge caching and proper error handling
  */
-export async function searchContent(
-  query: string,
-  filters: SearchFilters = {}
-): Promise<SearchResponse> {
-  try {
-    // Build query params
-    const params = new URLSearchParams();
-    if (query) params.set('q', query);
-    if (filters.categories?.length) params.set('categories', filters.categories.join(','));
-    if (filters.tags?.length) params.set('tags', filters.tags.join(','));
-    if (filters.authors?.length) params.set('authors', filters.authors.join(','));
-    if (filters.sort) params.set('sort', filters.sort);
-    if (filters.limit) params.set('limit', filters.limit.toString());
-    if (filters.offset) params.set('offset', filters.offset.toString());
+export async function searchUnified<T = ContentSearchResult | UnifiedSearchResult>(
+  options: UnifiedSearchOptions
+): Promise<UnifiedSearchResponse<T>> {
+  const { query, entities, filters = {} } = options;
 
-    // Get auth token if available (for analytics tracking)
-    const supabase = createClient();
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
+  // Build URL params
+  const params = new URLSearchParams();
+  if (query.trim()) params.set('q', query.trim());
 
-    const response = await fetch(`${EDGE_BASE_URL}/unified-search?${params.toString()}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(session?.access_token && { Authorization: `Bearer ${session.access_token}` }),
-      },
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      logger.error('Search edge function error', errorText, {
-        query,
-        status: response.status,
-      });
-
-      try {
-        const error = JSON.parse(errorText);
-        throw new Error(error.message || 'Search failed');
-      } catch {
-        throw new Error(`Search failed: ${response.status}`);
-      }
-    }
-
-    return response.json();
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error : String(error);
-    logger.error('Search client error', errorMessage, { query });
-    throw error;
+  // Add entities if provided (triggers multi-entity search)
+  if (entities && entities.length > 0) {
+    params.set('entities', entities.join(','));
   }
+
+  // Add content filters (only used when no entities or entities includes 'content')
+  if (filters.categories?.length) {
+    params.set('categories', filters.categories.join(','));
+  }
+  if (filters.tags?.length) {
+    params.set('tags', filters.tags.join(','));
+  }
+  if (filters.authors?.length) {
+    params.set('authors', filters.authors.join(','));
+  }
+  if (filters.sort) {
+    params.set('sort', filters.sort);
+  }
+
+  // Pagination
+  params.set('limit', String(filters.limit ?? 50));
+  if (filters.offset) {
+    params.set('offset', String(filters.offset));
+  }
+
+  // Get cache TTL from Statsig (dynamic configuration)
+  const ttl = await getCacheTtl('cache.search.ttl_seconds');
+
+  // Build cache tags
+  const cacheTags = ['search', ...(entities || ['content']).map((e) => `search-${e}`)];
+
+  // Call edge function with proper caching
+  const response = await fetch(`${EDGE_SEARCH_URL}?${params.toString()}`, {
+    headers: { 'Content-Type': 'application/json' },
+    next: {
+      revalidate: ttl,
+      tags: cacheTags,
+    },
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    logger.error('Unified search failed', new Error(errorText), {
+      status: response.status,
+      url: EDGE_SEARCH_URL,
+      query: query || '',
+      entities: entities?.join(',') || '',
+      filters: JSON.stringify(filters),
+    });
+    throw new Error(`Unified search failed: ${response.statusText}`);
+  }
+
+  const data = (await response.json()) as UnifiedSearchResponse<T>;
+  return data;
 }
 
 /**
- * Get autocomplete suggestions via unified-search edge function
- * Returns smart suggestions from search history + content titles
- * Cached for 1 hour at edge
- *
- * @param query - Partial search query (min 2 characters)
- * @param limit - Max suggestions to return (default 10, max 20)
- * @returns Autocomplete suggestions with popularity indicators
- *
- * @example
- * ```ts
- * const suggestions = await getSearchAutocomplete('nex', 10);
- * // Returns: [{ text: 'next.js', searchCount: 42, isPopular: true }, ...]
- * ```
+ * Content-only search (backward compatibility)
+ * @deprecated Use searchUnified with entities: ['content'] instead
  */
-export async function getSearchAutocomplete(
+export async function searchContent(query: string, filters: SearchFilters = {}) {
+  // Build filters object without undefined values (for exactOptionalPropertyTypes)
+  const cleanFilters: UnifiedSearchFilters = {};
+  if (filters.p_categories) cleanFilters.categories = filters.p_categories;
+  if (filters.p_tags) cleanFilters.tags = filters.p_tags;
+  if (filters.p_authors) cleanFilters.authors = filters.p_authors;
+  if (filters.sort) cleanFilters.sort = filters.sort;
+  if (filters.p_limit !== undefined) cleanFilters.limit = filters.p_limit;
+  if (filters.p_offset !== undefined) cleanFilters.offset = filters.p_offset;
+
+  const result = await searchUnified<ContentSearchResult>({
+    query,
+    entities: ['content'],
+    filters: cleanFilters,
+  });
+
+  // Return just results for backward compatibility
+  return result.results;
+}
+
+/**
+ * Company search (new helper)
+ */
+export async function searchCompaniesUnified(
   query: string,
   limit = 10
-): Promise<AutocompleteResponse> {
-  try {
-    // Validate query length
-    if (query.length < 2) {
-      return { suggestions: [], query };
-    }
-
-    const params = new URLSearchParams();
-    params.set('q', query);
-    params.set('limit', Math.min(limit, 20).toString());
-
-    const response = await fetch(
-      `${EDGE_BASE_URL}/unified-search/autocomplete?${params.toString()}`,
-      {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }
-    );
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      logger.error('Autocomplete edge function error', errorText, {
-        query,
-        limit,
-        status: response.status,
-      });
-
-      // Graceful fallback: return empty suggestions
-      return { suggestions: [], query };
-    }
-
-    return response.json();
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error : String(error);
-    logger.error('Autocomplete client error', errorMessage, { query, limit });
-    // Graceful fallback: return empty suggestions
-    return { suggestions: [], query };
-  }
+): Promise<UnifiedSearchResult[]> {
+  const result = await searchUnified<UnifiedSearchResult>({
+    query,
+    entities: ['company'],
+    filters: { limit },
+  });
+  return result.results;
 }
 
 /**
- * Get available search facets (filters) via unified-search edge function
- * Returns categories with their available tags and authors
- * Cached for 1 hour at edge
- *
- * @returns Available search facets grouped by category
- *
- * @example
- * ```ts
- * const facets = await getSearchFacets();
- * // Returns: { facets: [{ category: 'guides', contentCount: 42, tags: [...], authors: [...] }] }
- * ```
+ * Job search (simple - no filters)
+ * For filtered jobs, use getFilteredJobs() which calls filter_jobs RPC
  */
-export async function getSearchFacets(): Promise<FacetsResponse> {
-  try {
-    const response = await fetch(`${EDGE_BASE_URL}/unified-search/facets`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+export async function searchJobsUnified(query: string, limit = 20): Promise<UnifiedSearchResult[]> {
+  const result = await searchUnified<UnifiedSearchResult>({
+    query,
+    entities: ['job'],
+    filters: { limit },
+  });
+  return result.results;
+}
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      logger.error('Facets edge function error', errorText, {
-        status: response.status,
-      });
+/**
+ * User search (new helper)
+ */
+export async function searchUsersUnified(
+  query: string,
+  limit = 20
+): Promise<UnifiedSearchResult[]> {
+  const result = await searchUnified<UnifiedSearchResult>({
+    query,
+    entities: ['user'],
+    filters: { limit },
+  });
+  return result.results;
+}
 
-      // Graceful fallback: return empty facets
-      return { facets: [] };
-    }
+/**
+ * Client-side unified search (for use in 'use client' components)
+ * Uses default TTL instead of dynamic Statsig config
+ */
+export async function searchUnifiedClient<T = ContentSearchResult | UnifiedSearchResult>(
+  options: UnifiedSearchOptions
+): Promise<UnifiedSearchResponse<T>> {
+  const { query, entities, filters = {} } = options;
 
-    return response.json();
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error : String(error);
-    logger.error('Facets client error', errorMessage);
-    // Graceful fallback: return empty facets
-    return { facets: [] };
+  // Build URL params
+  const params = new URLSearchParams();
+  if (query.trim()) params.set('q', query.trim());
+
+  // Add entities if provided
+  if (entities && entities.length > 0) {
+    params.set('entities', entities.join(','));
   }
+
+  // Add content filters
+  if (filters.categories?.length) {
+    params.set('categories', filters.categories.join(','));
+  }
+  if (filters.tags?.length) {
+    params.set('tags', filters.tags.join(','));
+  }
+  if (filters.authors?.length) {
+    params.set('authors', filters.authors.join(','));
+  }
+  if (filters.sort) {
+    params.set('sort', filters.sort);
+  }
+
+  // Pagination
+  params.set('limit', String(filters.limit ?? 50));
+  if (filters.offset) {
+    params.set('offset', String(filters.offset));
+  }
+
+  // Client-side: Use default TTL (3600s = 1 hour)
+  // Edge function has its own 5min cache, so this is fine
+  const DEFAULT_TTL = 3600;
+
+  // Build cache tags
+  const cacheTags = ['search', ...(entities || ['content']).map((e) => `search-${e}`)];
+
+  // Call edge function
+  const response = await fetch(`${EDGE_SEARCH_URL}?${params.toString()}`, {
+    headers: { 'Content-Type': 'application/json' },
+    next: {
+      revalidate: DEFAULT_TTL,
+      tags: cacheTags,
+    },
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    logger.error('Unified search failed (client)', new Error(errorText), {
+      status: response.status,
+      url: EDGE_SEARCH_URL,
+      query: query || '',
+      entities: entities?.join(',') || '',
+      filters: JSON.stringify(filters),
+    });
+    throw new Error(`Unified search failed: ${response.statusText}`);
+  }
+
+  const data = (await response.json()) as UnifiedSearchResponse<T>;
+  return data;
 }

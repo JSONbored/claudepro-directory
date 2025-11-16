@@ -1,7 +1,12 @@
 import { NavLink } from '@/src/components/core/navigation/navigation-link';
+import { ContactTerminal } from '@/src/components/features/contact/contact-terminal';
+import { ContactTerminalErrorBoundary } from '@/src/components/features/contact/contact-terminal-error-boundary';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
-import { APP_CONFIG, SOCIAL_LINKS } from '@/src/lib/constants';
+import { checkContactTerminalEnabled } from '@/src/lib/actions/feature-flags.actions';
+import { APP_CONFIG } from '@/src/lib/data/config/constants';
+import { getContactChannels } from '@/src/lib/data/marketing/contact';
 import { DiscordIcon, Github, Mail, MessageSquare } from '@/src/lib/icons';
+import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 
 export const metadata = generatePageMetadata('/contact');
@@ -12,110 +17,136 @@ export const metadata = generatePageMetadata('/contact');
  */
 export const revalidate = false;
 
-export default function ContactPage() {
+export default async function ContactPage() {
+  const channels = getContactChannels();
+  if (!channels.email) {
+    logger.warn('ContactPage: email channel is not configured');
+  }
+
+  // Check if terminal feature is enabled
+  const terminalResult = await checkContactTerminalEnabled({});
+  const terminalEnabled = terminalResult?.data ?? false;
+
   return (
-    <div className="container mx-auto max-w-4xl px-4 py-8 sm:py-12">
+    <div className="container mx-auto max-w-6xl px-4 py-8 sm:py-12">
       <div className="mb-8 text-center">
         <h1 className="mb-4 font-bold text-3xl sm:text-4xl">Contact Us</h1>
         <p className="text-lg text-muted-foreground">
-          We'd love to hear from you. Choose the best way to reach us below.
+          {terminalEnabled
+            ? 'Use our interactive terminal to get in touch, or choose an option below.'
+            : "We'd love to hear from you. Choose the best way to reach us below."}
         </p>
       </div>
 
-      <div className="mb-12 grid gap-6 md:grid-cols-2">
-        {/* GitHub Discussions */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Github className="h-5 w-5" />
-              GitHub Discussions
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="mb-4 text-muted-foreground">
-              Join the conversation, ask questions, and share ideas with the community.
-            </p>
-            <NavLink
-              href={`${SOCIAL_LINKS.github}/discussions`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2"
-            >
-              Visit Discussions →
-            </NavLink>
-          </CardContent>
-        </Card>
+      {/* Interactive Terminal (Feature Flagged) */}
+      {terminalEnabled && (
+        <div className="mb-12 flex justify-center">
+          <div className="w-full max-w-4xl">
+            <ContactTerminalErrorBoundary>
+              <ContactTerminal />
+            </ContactTerminalErrorBoundary>
+          </div>
+        </div>
+      )}
 
-        {/* Discord Community */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <DiscordIcon className="h-5 w-5" />
-              Discord Community
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="mb-4 text-muted-foreground">
-              Chat with other users, get help, and stay updated on the latest developments.
-            </p>
-            <NavLink
-              href={SOCIAL_LINKS.discord || '#'}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2"
-            >
-              Join Discord →
-            </NavLink>
-          </CardContent>
-        </Card>
+      {/* Traditional Contact Options */}
+      <div className={terminalEnabled ? 'mt-12' : ''}>
+        <h2 className="mb-6 text-center font-semibold text-2xl">
+          {terminalEnabled ? 'Or reach us directly:' : 'Get in Touch'}
+        </h2>
 
-        {/* GitHub Issues */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <MessageSquare className="h-5 w-5" />
-              Report an Issue
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="mb-4 text-muted-foreground">
-              Found a bug or have a feature request? Open an issue on GitHub.
-            </p>
-            <NavLink
-              href={`${SOCIAL_LINKS.github}/issues/new`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2"
-            >
-              Create Issue →
-            </NavLink>
-          </CardContent>
-        </Card>
+        <div className="grid gap-6 md:grid-cols-2">
+          {/* GitHub Discussions */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Github className="h-5 w-5" />
+                GitHub Discussions
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="mb-4 text-muted-foreground">
+                Join the conversation, ask questions, and share ideas with the community.
+              </p>
+              <NavLink
+                href={`${channels.github}/discussions`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2"
+              >
+                Visit Discussions →
+              </NavLink>
+            </CardContent>
+          </Card>
 
-        {/* Email */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Mail className="h-5 w-5" />
-              Email Support
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="mb-4 text-muted-foreground">
-              For private inquiries, partnerships, or other matters, reach us via email.
-            </p>
-            <NavLink
-              href={`mailto:${SOCIAL_LINKS.email}`}
-              className="inline-flex items-center gap-2"
-            >
-              {SOCIAL_LINKS.email} →
-            </NavLink>
-          </CardContent>
-        </Card>
+          {/* Discord Community */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <DiscordIcon className="h-5 w-5" />
+                Discord Community
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="mb-4 text-muted-foreground">
+                Chat with other users, get help, and stay updated on the latest developments.
+              </p>
+              <NavLink
+                href={channels.discord}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2"
+              >
+                Join Discord →
+              </NavLink>
+            </CardContent>
+          </Card>
+
+          {/* GitHub Issues */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <MessageSquare className="h-5 w-5" />
+                Report an Issue
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="mb-4 text-muted-foreground">
+                Found a bug or have a feature request? Open an issue on GitHub.
+              </p>
+              <NavLink
+                href={`${channels.github}/issues/new`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2"
+              >
+                Create Issue →
+              </NavLink>
+            </CardContent>
+          </Card>
+
+          {/* Email */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Mail className="h-5 w-5" />
+                Email Support
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="mb-4 text-muted-foreground">
+                For private inquiries, partnerships, or other matters, reach us via email.
+              </p>
+              <NavLink href={`mailto:${channels.email}`} className="inline-flex items-center gap-2">
+                {channels.email} →
+              </NavLink>
+            </CardContent>
+          </Card>
+        </div>
       </div>
 
       {/* Additional Information */}
-      <div className="prose prose-invert max-w-none">
+      <div className="prose prose-invert mx-auto mt-12 max-w-none">
         <h2 className="mb-4 font-semibold text-2xl">Frequently Asked Questions</h2>
         <p className="mb-4">
           Before reaching out, you might find answers in our{' '}

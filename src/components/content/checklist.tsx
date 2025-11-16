@@ -54,7 +54,7 @@ export function Checklist(props: ChecklistProps) {
   };
 
   return (
-    <Card itemScope itemType="https://schema.org/ItemList" className="my-8">
+    <Card itemScope={true} itemType="https://schema.org/ItemList" className="my-8">
       <CardHeader>
         <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
           <CardTitle className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
@@ -80,7 +80,7 @@ export function Checklist(props: ChecklistProps) {
           {validItems.map((item, index) => (
             <div
               key={`${item.task}-${index}`}
-              itemScope
+              itemScope={true}
               itemType="https://schema.org/ListItem"
               className={
                 'flex items-start gap-3 rounded-lg bg-muted/30 p-3 transition-colors hover:bg-muted/50'

@@ -1,4 +1,6 @@
+import Link from 'next/link';
 import { ActivityTimeline } from '@/src/components/features/user-activity/activity-timeline';
+import { Button } from '@/src/components/primitives/ui/button';
 import {
   Card,
   CardContent,
@@ -7,41 +9,95 @@ import {
   CardTitle,
 } from '@/src/components/primitives/ui/card';
 import { getActivitySummary, getActivityTimeline } from '@/src/lib/actions/user.actions';
+import { getAuthenticatedUser } from '@/src/lib/auth/get-authenticated-user';
+import { ROUTES } from '@/src/lib/data/config/constants';
 import { FileText, GitPullRequest, MessageSquare, ThumbsUp } from '@/src/lib/icons';
+import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
-
-// Force dynamic rendering - requires authentication
-export const dynamic = 'force-dynamic';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 
 export const metadata = generatePageMetadata('/account/activity');
 
 export default async function ActivityPage() {
+  const { user } = await getAuthenticatedUser({ context: 'ActivityPage' });
+
+  if (!user) {
+    logger.warn('ActivityPage: unauthenticated access attempt detected');
+    return (
+      <div className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-2xl">Sign in required</CardTitle>
+            <CardDescription>
+              Please sign in to view your contribution history and activity metrics.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button asChild={true}>
+              <Link href={ROUTES.LOGIN}>Go to login</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   // Fetch activity data - use Promise.allSettled for partial success handling
   const [summaryResult, timelineResult] = await Promise.allSettled([
     getActivitySummary(),
     getActivityTimeline({ limit: 50, offset: 0 }),
   ]);
 
-  const summary = summaryResult.status === 'fulfilled' ? summaryResult.value?.data : undefined;
-  const timeline = timelineResult.status === 'fulfilled' ? timelineResult.value?.data : undefined;
+  const summary = summaryResult.status === 'fulfilled' ? (summaryResult.value?.data ?? null) : null;
+  if (!summary) {
+    const reason =
+      summaryResult.status === 'rejected'
+        ? summaryResult.reason
+        : summaryResult.status === 'fulfilled'
+          ? (summaryResult.value?.serverError ?? new Error('Missing activity summary data'))
+          : new Error('Activity summary unavailable');
+    const normalized = normalizeError(reason, 'Failed to load activity summary');
+    logger.error('ActivityPage: getActivitySummary failed', normalized, { userId: user.id });
+  }
+
+  const timeline =
+    timelineResult.status === 'fulfilled' ? (timelineResult.value?.data ?? null) : null;
+  if (!timeline) {
+    const reason =
+      timelineResult.status === 'rejected'
+        ? timelineResult.reason
+        : timelineResult.status === 'fulfilled'
+          ? (timelineResult.value?.serverError ?? new Error('Missing activity timeline data'))
+          : new Error('Activity timeline unavailable');
+    const normalized = normalizeError(reason, 'Failed to load activity timeline');
+    logger.error('ActivityPage: getActivityTimeline failed', normalized, { userId: user.id });
+  }
 
   if (!(summary && timeline)) {
     return (
       <div className="space-y-6">
-        <div>
-          <h1 className="mb-2 font-bold text-3xl">Activity</h1>
-          <p className="text-muted-foreground">
-            {summaryResult.status === 'rejected' || timelineResult.status === 'rejected'
-              ? 'Failed to load activity data. Please try again later.'
-              : 'Sign in to view your contribution history'}
-          </p>
-        </div>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-2xl">Activity unavailable</CardTitle>
+            <CardDescription>
+              We couldn&apos;t load your activity summary. Please refresh or try again later.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button asChild={true}>
+              <Link href={ROUTES.ACCOUNT}>Back to dashboard</Link>
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
-  const { activities } = timeline;
+  const activities = timeline.activities || [];
+  if (activities.length === 0) {
+    logger.warn('ActivityPage: activity timeline returned no activities', { userId: user.id });
+  }
 
   return (
     <div className="space-y-6">

@@ -1,8 +1,8 @@
 'use client';
 
-import type { ReviewRatingInteractiveProps } from '@/src/components/core/domain/reviews/shared/review-types';
 import { Rating, RatingButton } from '@/src/components/primitives/feedback/rating';
 import { Star } from '@/src/lib/icons';
+import type { ReviewRatingInteractiveProps } from '@/src/lib/types/component.types';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 /**

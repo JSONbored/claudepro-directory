@@ -14,29 +14,56 @@
 
 import { motion } from 'motion/react';
 import { useRouter } from 'next/navigation';
-import { CopyLLMsButton } from '@/src/components/core/buttons/content/copy-llms-button';
-import { CopyMarkdownButton } from '@/src/components/core/buttons/content/copy-markdown-button';
-import { DownloadMarkdownButton } from '@/src/components/core/buttons/content/download-markdown-button';
+import { ContentActionButton } from '@/src/components/core/buttons/shared/content-action-button';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
+import { usePostCopyEmail } from '@/src/components/core/infra/providers/email-capture-modal-provider';
 import { Button } from '@/src/components/primitives/ui/button';
+import { useCopyToClipboard } from '@/src/hooks/use-copy-to-clipboard';
 import { useCopyWithEmailCapture } from '@/src/hooks/use-copy-with-email-capture';
-import type { CategoryId } from '@/src/lib/config/category-config';
-import type { ContentItem } from '@/src/lib/content/supabase-content-loader';
-import { trackInteraction } from '@/src/lib/edge/client';
-import { ArrowLeft, Check, Copy } from '@/src/lib/icons';
+import { usePulse } from '@/src/hooks/use-pulse';
+import type { ContentItem } from '@/src/lib/data/content';
+import { ArrowLeft, Check, Copy, Download, FileText, Sparkles } from '@/src/lib/icons';
 import { STATE_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
+import { logUnhandledPromise } from '@/src/lib/utils/error.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
-import type { CopyType } from '@/src/types/database-overrides';
+import type {
+  ContentCategory,
+  CopyType,
+  GetGetContentDetailCompleteReturn,
+} from '@/src/types/database-overrides';
 
 /**
  * Determine copy type based on content item structure
  */
-function determineCopyType(item: ContentItem): CopyType {
+function determineCopyType(
+  item: ContentItem | GetGetContentDetailCompleteReturn['content']
+): CopyType {
   // Check if item has content or configuration (indicates code/config copy)
   if ('content' in item && item.content) return 'code';
   if ('configuration' in item && item.configuration) return 'code';
   // Default to link for other types
   return 'link';
+}
+
+/**
+ * Safely extracts content or configuration from item as a string for copying
+ */
+function getContentForCopy(
+  item: ContentItem | GetGetContentDetailCompleteReturn['content']
+): string {
+  // Check for content first
+  if ('content' in item && typeof item.content === 'string') {
+    return item.content;
+  }
+
+  // Fall back to configuration
+  if ('configuration' in item) {
+    const cfg = item.configuration;
+    if (typeof cfg === 'string') return cfg;
+    if (cfg != null) return JSON.stringify(cfg, null, 2);
+  }
+
+  return '';
 }
 
 /**
@@ -48,9 +75,9 @@ export interface SerializableAction {
 }
 
 export interface DetailHeaderActionsProps {
-  item: ContentItem;
+  item: ContentItem | GetGetContentDetailCompleteReturn['content'];
   typeName: string;
-  category: CategoryId;
+  category: ContentCategory;
   hasContent: boolean;
   displayTitle: string;
   primaryAction: SerializableAction;
@@ -78,6 +105,9 @@ export function DetailHeaderActions({
 }: DetailHeaderActionsProps) {
   const router = useRouter();
   const referrer = typeof window !== 'undefined' ? window.location.pathname : undefined;
+  const { copy: copyToClipboard } = useCopyToClipboard();
+  const { showModal } = usePostCopyEmail();
+  const pulse = usePulse();
   const { copied, copy } = useCopyWithEmailCapture({
     emailContext: {
       copyType: determineCopyType(item),
@@ -108,23 +138,14 @@ export function DetailHeaderActions({
     }
 
     // Default copy logic
-    const contentToCopy =
-      ('content' in item ? (item as { content?: string }).content : '') ??
-      ('configuration' in item
-        ? typeof (item as unknown as { configuration?: unknown }).configuration === 'string'
-          ? (item as unknown as { configuration?: string }).configuration
-          : JSON.stringify((item as unknown as { configuration?: unknown }).configuration, null, 2)
-        : '') ??
-      '';
-
+    const contentToCopy = getContentForCopy(item);
     await copy(contentToCopy);
 
-    trackInteraction({
-      interaction_type: 'copy',
-      content_type: category,
-      content_slug: item.slug,
-    }).catch(() => {
-      // Intentional
+    pulse.copy({ category, slug: item.slug }).catch((error) => {
+      logUnhandledPromise('trackInteraction:copy-content', error, {
+        slug: item.slug,
+        category,
+      });
     });
   };
 
@@ -137,12 +158,11 @@ export function DetailHeaderActions({
         description: `Downloading ${item.title || item.slug} package...`,
       });
 
-      trackInteraction({
-        interaction_type: 'download',
-        content_type: category,
-        content_slug: item.slug,
-      }).catch(() => {
-        // Intentional
+      pulse.download({ category, slug: item.slug, action_type: 'download_zip' }).catch((error) => {
+        logUnhandledPromise('trackInteraction:download', error, {
+          slug: item.slug,
+          category,
+        });
       });
       return;
     }
@@ -220,29 +240,64 @@ export function DetailHeaderActions({
           )}
 
           {/* Copy for AI button */}
-          <CopyLLMsButton
-            llmsTxtUrl={`/${category}/${item.slug}/llms.txt`}
-            category={category}
-            slug={item.slug}
-            buttonVariant="outline"
+          <ContentActionButton
+            url={`/${category}/${item.slug}/llms.txt`}
+            action={async (content) => {
+              await copyToClipboard(content);
+            }}
+            label="Copy for AI"
+            successMessage="Copied llms.txt to clipboard!"
+            icon={Sparkles}
+            trackAnalytics={async () => {
+              await pulse.copy({ category, slug: item.slug, metadata: { action_type: 'llmstxt' } });
+            }}
+            variant="outline"
             size="default"
             className="min-w-0"
           />
 
           {/* Copy as Markdown button */}
-          <CopyMarkdownButton
-            category={category}
-            slug={item.slug}
-            buttonVariant="outline"
+          <ContentActionButton
+            url={`/${category}/${item.slug}.md?include_metadata=true&include_footer=false`}
+            action={async (content) => {
+              await copyToClipboard(content);
+              showModal({
+                copyType: 'markdown',
+                category,
+                slug: item.slug,
+                ...(referrer && { referrer }),
+              });
+            }}
+            label="Copy Markdown"
+            successMessage="Copied markdown to clipboard!"
+            icon={FileText}
+            trackAnalytics={async () => {
+              await pulse.copy({ category, slug: item.slug, metadata: { action_type: 'copy' } });
+            }}
+            variant="outline"
             size="default"
             className="min-w-0"
           />
 
           {/* Download Markdown button */}
-          <DownloadMarkdownButton
-            category={category}
-            slug={item.slug}
-            buttonVariant="outline"
+          <ContentActionButton
+            url={`/${category}/${item.slug}.md`}
+            action={async (content) => {
+              const blob = new Blob([content], { type: 'text/markdown' });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = `${item.slug}.md`;
+              a.click();
+              URL.revokeObjectURL(url);
+            }}
+            label="Download"
+            successMessage="Downloaded markdown file!"
+            icon={Download}
+            trackAnalytics={async () => {
+              await pulse.download({ category, slug: item.slug, action_type: 'download_markdown' });
+            }}
+            variant="outline"
             size="default"
             className="min-w-0"
           />

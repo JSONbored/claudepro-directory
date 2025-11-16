@@ -7,14 +7,16 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/ui/card';
+import { getAuthenticatedUser } from '@/src/lib/auth/get-authenticated-user';
+import {
+  getSponsorshipAnalytics,
+  type SponsorshipAnalytics,
+} from '@/src/lib/data/account/user-data';
 import { BarChart, Eye, MousePointer, TrendingUp } from '@/src/lib/icons';
+import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
-import type { Tables } from '@/src/types/database.types';
-
-// Force dynamic rendering - requires authentication
-export const dynamic = 'force-dynamic';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 
 export const metadata = generatePageMetadata('/account/sponsorships/:id/analytics');
 
@@ -24,40 +26,34 @@ interface AnalyticsPageProps {
 
 export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPageProps) {
   const { id } = await params;
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { user } = await getAuthenticatedUser({ context: 'SponsorshipAnalyticsPage' });
 
-  if (!user) return null;
+  if (!user) {
+    logger.warn('SponsorshipAnalyticsPage: unauthenticated access attempt', { sponsorshipId: id });
+    return null;
+  }
 
-  // Consolidated RPC: 3 queries + TypeScript loops → 1 (75% reduction)
-  const { data: analyticsData } = await supabase.rpc('get_sponsorship_analytics', {
-    p_user_id: user.id,
-    p_sponsorship_id: id,
-  });
+  let analyticsData: SponsorshipAnalytics | null = null;
+  try {
+    analyticsData = await getSponsorshipAnalytics(user.id, id);
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to load sponsorship analytics');
+    logger.error('SponsorshipAnalyticsPage: getSponsorshipAnalytics threw', normalized, {
+      sponsorshipId: id,
+      userId: user.id,
+    });
+    throw normalized;
+  }
 
   if (!analyticsData) {
+    logger.warn('SponsorshipAnalyticsPage: analytics not found or inaccessible', {
+      sponsorshipId: id,
+      userId: user.id,
+    });
     notFound();
   }
 
-  // Type assertion to database-generated Json type
-  type AnalyticsResponse = {
-    sponsorship: Tables<'sponsored_content'>;
-    daily_stats: Array<{
-      date: string;
-      impressions: number;
-      clicks: number;
-    }>;
-    computed_metrics: {
-      ctr: number;
-      days_active: number;
-      avg_impressions_per_day: number;
-    };
-  };
-
-  const { sponsorship, daily_stats, computed_metrics } =
-    analyticsData as unknown as AnalyticsResponse;
+  const { sponsorship, daily_stats, computed_metrics } = analyticsData;
 
   const impressionCount = sponsorship.impression_count ?? 0;
   const clickCount = sponsorship.click_count ?? 0;
@@ -83,7 +79,7 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
           <UnifiedBadge
             variant="sponsored"
             tier={sponsorship.tier as 'featured' | 'promoted' | 'spotlight'}
-            showIcon
+            showIcon={true}
           />
           <h1 className="font-bold text-3xl">Sponsorship Analytics</h1>
         </div>
@@ -198,7 +194,7 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
                 <UnifiedBadge
                   variant="sponsored"
                   tier={sponsorship.tier as 'featured' | 'promoted' | 'spotlight'}
-                  showIcon
+                  showIcon={true}
                 />
               </div>
             </div>

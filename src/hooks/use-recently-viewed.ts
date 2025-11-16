@@ -4,7 +4,9 @@
 
 import { useCallback, useEffect, useRef } from 'react';
 import { create } from 'zustand';
+import { getRecentlyViewedConfig, getTimeoutConfig } from '@/src/lib/actions/feature-flags.actions';
 import { logger } from '@/src/lib/logger';
+import { logClientWarning } from '@/src/lib/utils/error.utils';
 
 export type RecentlyViewedCategory =
   | 'agent'
@@ -35,11 +37,32 @@ interface RecentlyViewedState {
 }
 
 const STORAGE_KEY = 'heyclaude_recently_viewed';
-const MAX_ITEMS = 10;
-const TTL_DAYS = 30;
-const DEBOUNCE_MS = 300;
-const MAX_DESCRIPTION_LENGTH = 150;
-const MAX_TAGS = 3;
+
+// Configuration (loaded from Statsig via server actions)
+let MAX_ITEMS = 10;
+let TTL_DAYS = 30;
+let DEBOUNCE_MS = 300;
+let MAX_DESCRIPTION_LENGTH = 150;
+let MAX_TAGS = 5;
+
+// Load configs on module initialization
+Promise.all([getRecentlyViewedConfig({}), getTimeoutConfig({})])
+  .then(([recentlyViewedResult, timeoutResult]) => {
+    if (recentlyViewedResult?.data) {
+      const recentlyViewed = recentlyViewedResult.data;
+      MAX_ITEMS = recentlyViewed['recently_viewed.max_items'];
+      TTL_DAYS = recentlyViewed['recently_viewed.ttl_days'];
+      MAX_DESCRIPTION_LENGTH = recentlyViewed['recently_viewed.max_description_length'];
+      MAX_TAGS = recentlyViewed['recently_viewed.max_tags'];
+    }
+    if (timeoutResult?.data) {
+      const timeout = timeoutResult.data;
+      DEBOUNCE_MS = timeout['timeout.ui.form_debounce_ms'];
+    }
+  })
+  .catch((error) => {
+    logClientWarning('useRecentlyViewed: failed to load configs', error);
+  });
 const useRecentlyViewedStore = create<RecentlyViewedState>((set) => ({
   items: [],
   isLoaded: false,

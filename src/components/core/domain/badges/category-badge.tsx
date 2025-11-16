@@ -5,16 +5,20 @@
 import { cva } from 'class-variance-authority';
 import { motion } from 'motion/react';
 import type * as React from 'react';
+import { useEffect, useState } from 'react';
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from '@/src/components/primitives/ui/tooltip';
+import { getAnimationConfig } from '@/src/lib/actions/feature-flags.actions';
 import { Star, TrendingUp, Zap } from '@/src/lib/icons';
+import { logger } from '@/src/lib/logger';
 import { SEMANTIC_COLORS } from '@/src/lib/semantic-colors';
 import { ANIMATION_CONSTANTS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
+import type { ContentCategory } from '@/src/types/database-overrides';
 
 /**
  * Base badge variants (from original badge.tsx)
@@ -38,6 +42,8 @@ const baseBadgeVariants = cva(
   }
 );
 
+// Category badge styles - only for categories that have badge styles defined
+// Note: 'changelog' and 'jobs' are ContentCategory but don't have badge styles
 const categoryBadgeStyles = {
   rules: 'badge-category-rules',
   mcp: 'badge-category-mcp',
@@ -48,7 +54,7 @@ const categoryBadgeStyles = {
   collections: 'badge-category-collections',
   guides: 'badge-category-guides',
   skills: 'badge-category-skills',
-} as const;
+} as const satisfies Partial<Record<ContentCategory, string>>;
 
 const sourceBadgeStyles = {
   official: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
@@ -94,16 +100,7 @@ export type UnifiedBadgeProps =
   | {
       /** Category/content-type badge */
       variant: 'category';
-      category:
-        | 'rules'
-        | 'mcp'
-        | 'agents'
-        | 'commands'
-        | 'hooks'
-        | 'statuslines'
-        | 'collections'
-        | 'guides'
-        | 'skills';
+      category: ContentCategory;
       children: React.ReactNode;
       className?: string;
     }
@@ -136,6 +133,7 @@ export type UnifiedBadgeProps =
       onClick?: () => void;
       onRemove?: () => void;
       className?: string;
+      children?: React.ReactNode; // Optional children for highlighted content
     }
   | {
       /** New indicator (animated dot with tooltip) */
@@ -194,12 +192,18 @@ export type UnifiedBadgeProps =
  * BadgeWrapper - Wrap badges with hover animation
  * Extracted to module scope to avoid nested component definition
  */
-const BadgeWrapper = ({ children }: { children: React.ReactNode }) => (
+const BadgeWrapper = ({
+  children,
+  springDefault,
+}: {
+  children: React.ReactNode;
+  springDefault: { type: 'spring'; stiffness: number; damping: number };
+}) => (
   <motion.div
     className="inline-block"
     whileHover={{
       y: -2,
-      transition: ANIMATION_CONSTANTS.SPRING_DEFAULT,
+      transition: springDefault,
     }}
     whileTap={{ scale: 0.95 }}
   >
@@ -208,10 +212,31 @@ const BadgeWrapper = ({ children }: { children: React.ReactNode }) => (
 );
 
 export function UnifiedBadge(props: UnifiedBadgeProps) {
+  const [springDefault, setSpringDefault] = useState({
+    type: 'spring' as const,
+    stiffness: 400,
+    damping: 17,
+  });
+
+  useEffect(() => {
+    getAnimationConfig({})
+      .then((result) => {
+        if (!result?.data) return;
+        const config = result.data;
+        setSpringDefault({
+          type: 'spring' as const,
+          stiffness: config['animation.spring.default.stiffness'],
+          damping: config['animation.spring.default.damping'],
+        });
+      })
+      .catch((error) => {
+        logger.error('UnifiedBadge: failed to load animation config', error);
+      });
+  }, []);
   // Base badge variant
   if (props.variant === 'base') {
     return (
-      <BadgeWrapper>
+      <BadgeWrapper springDefault={springDefault}>
         <div
           className={cn(
             baseBadgeVariants({ variant: props.style }),
@@ -228,11 +253,12 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
   // Category badge variant
   if (props.variant === 'category') {
     return (
-      <BadgeWrapper>
+      <BadgeWrapper springDefault={springDefault}>
         <div
           className={cn(
             `border font-medium text-xs ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT} hover:shadow-md hover:shadow-primary/20`,
-            categoryBadgeStyles[props.category],
+            categoryBadgeStyles[props.category as keyof typeof categoryBadgeStyles] ??
+              'badge-category-rules',
             props.className
           )}
         >
@@ -245,7 +271,7 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
   // Source badge variant
   if (props.variant === 'source') {
     return (
-      <BadgeWrapper>
+      <BadgeWrapper springDefault={springDefault}>
         <div
           className={cn(
             `border font-medium text-xs ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT} hover:shadow-md hover:shadow-primary/20`,
@@ -262,7 +288,7 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
   // Status badge variant
   if (props.variant === 'status') {
     return (
-      <BadgeWrapper>
+      <BadgeWrapper springDefault={springDefault}>
         <div
           className={cn(
             `border font-medium text-xs ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT} hover:shadow-md hover:shadow-primary/20`,
@@ -335,7 +361,7 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
           )}
           onClick={handleClick}
         >
-          {props.tag}
+          {props.children || props.tag}
           {props.onRemove && (
             <button
               type="button"
@@ -363,7 +389,7 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
         )}
         onClick={handleClick}
       >
-        {props.tag}
+        {props.children || props.tag}
         {props.onRemove && (
           <button
             type="button"
@@ -390,7 +416,7 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
     return (
       <TooltipProvider delayDuration={delayDuration}>
         <Tooltip>
-          <TooltipTrigger asChild>
+          <TooltipTrigger asChild={true}>
             <output className={cn('relative flex h-2 w-2', props.className)} aria-label={label}>
               <span className="sr-only">{label}</span>
               <span

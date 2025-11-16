@@ -6,6 +6,7 @@
 import { parse as devalueParse } from 'devalue';
 import { z } from 'zod';
 import { logger } from '@/src/lib/logger';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 
 export enum ParseStrategy {
   DEVALUE = 'devalue',
@@ -23,6 +24,26 @@ const parseOptionsSchema = z.object({
 export type ParseOptions = z.infer<typeof parseOptionsSchema>;
 
 const MAX_SAFE_SIZE = 10_000_000;
+
+function isStringArray(value: unknown): value is string[] {
+  return Array.isArray(value) && value.every((item) => typeof item === 'string');
+}
+
+function isFiniteNumber(value: unknown): value is number {
+  return typeof value === 'number' && Number.isFinite(value);
+}
+
+export function ensureStringArray(value: unknown, fallback: readonly string[] = []): string[] {
+  return isStringArray(value) ? [...value] : [...fallback];
+}
+
+export function ensureString(value: unknown, fallback = ''): string {
+  return typeof value === 'string' && value.trim().length > 0 ? value : fallback;
+}
+
+export function ensureNumber(value: unknown, fallback = 0): number {
+  return isFiniteNumber(value) ? value : fallback;
+}
 
 function parseWithDevalue<T = unknown>(str: string): T {
   try {
@@ -216,7 +237,13 @@ export function formatDate(date: string | Date, style: DateFormatStyle = 'long')
       month: style === 'long' ? 'long' : 'short',
       day: 'numeric',
     });
-  } catch {
+  } catch (error) {
+    const normalized = normalizeError(error, 'formatDate failed');
+    logger.warn('formatDate failed', {
+      input: typeof date === 'string' ? date : date.toString(),
+      style,
+      error: normalized.message,
+    });
     return typeof date === 'string' ? date : date.toString();
   }
 }
@@ -268,11 +295,44 @@ export function formatRelativeDate(date: string | Date, options: RelativeDateOpt
       return `${diffMonths} ${diffMonths === 1 ? 'month' : 'months'} ago`;
     }
     return `${diffYears} ${diffYears === 1 ? 'year' : 'years'} ago`;
-  } catch {
+  } catch (error) {
+    const normalized = normalizeError(error, 'formatRelativeDate failed');
+    logger.warn('formatRelativeDate failed', {
+      input: typeof date === 'string' ? date : date.toString(),
+      style,
+      error: normalized.message,
+    });
     return typeof date === 'string' ? date : date.toString();
   }
 }
 
 export function formatDistanceToNow(date: Date): string {
   return formatRelativeDate(date, { style: 'detailed' });
+}
+
+/**
+ * Safely extracts metadata from a content item or collection
+ * Returns a normalized Record<string, unknown> with fallback to empty object
+ *
+ * @param item - Content item or collection that may contain a metadata field
+ * @returns Normalized metadata object, never null/undefined
+ *
+ * @example
+ * ```ts
+ * const metadata = getMetadata(item);
+ * const config = metadata.configuration;
+ * const tags = ensureStringArray(metadata.tags);
+ * ```
+ */
+export function getMetadata(
+  item: { metadata?: unknown } | Record<string, unknown>
+): Record<string, unknown> {
+  if ('metadata' in item && item.metadata) {
+    return typeof item.metadata === 'object' &&
+      item.metadata !== null &&
+      !Array.isArray(item.metadata)
+      ? (item.metadata as Record<string, unknown>)
+      : {};
+  }
+  return {};
 }

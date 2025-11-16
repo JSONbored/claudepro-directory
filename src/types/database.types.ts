@@ -100,10 +100,10 @@ export type Database = {
           created_at: string
           description: string
           enabled: boolean
-          environment: string
+          environment: Database["public"]["Enums"]["environment"] | null
           previous_value: Json | null
           setting_key: string
-          setting_type: string
+          setting_type: Database["public"]["Enums"]["setting_type"]
           setting_value: Json
           updated_at: string
           version: number
@@ -113,10 +113,10 @@ export type Database = {
           created_at?: string
           description: string
           enabled?: boolean
-          environment: string
+          environment?: Database["public"]["Enums"]["environment"] | null
           previous_value?: Json | null
           setting_key: string
-          setting_type: string
+          setting_type: Database["public"]["Enums"]["setting_type"]
           setting_value?: Json
           updated_at?: string
           version?: number
@@ -126,10 +126,10 @@ export type Database = {
           created_at?: string
           description?: string
           enabled?: boolean
-          environment?: string
+          environment?: Database["public"]["Enums"]["environment"] | null
           previous_value?: Json | null
           setting_key?: string
-          setting_type?: string
+          setting_type?: Database["public"]["Enums"]["setting_type"]
           setting_value?: Json
           updated_at?: string
           version?: number
@@ -266,116 +266,6 @@ export type Database = {
       }
       changelog: {
         Row: {
-          category: string
-          commit_count: number | null
-          contributors: string[] | null
-          created_at: string
-          date_added: string
-          date_published: string | null
-          date_updated: string | null
-          description: string
-          featured: boolean | null
-          git_commit_sha: string | null
-          git_hash: string | null
-          git_tag: string | null
-          id: string
-          sections: Json
-          slug: string
-          source: string | null
-          synced_at: string | null
-          tags: string[]
-          title: string
-          updated_at: string
-          version: string | null
-        }
-        Insert: {
-          category?: string
-          commit_count?: number | null
-          contributors?: string[] | null
-          created_at?: string
-          date_added: string
-          date_published?: string | null
-          date_updated?: string | null
-          description: string
-          featured?: boolean | null
-          git_commit_sha?: string | null
-          git_hash?: string | null
-          git_tag?: string | null
-          id?: string
-          sections: Json
-          slug: string
-          source?: string | null
-          synced_at?: string | null
-          tags: string[]
-          title: string
-          updated_at?: string
-          version?: string | null
-        }
-        Update: {
-          category?: string
-          commit_count?: number | null
-          contributors?: string[] | null
-          created_at?: string
-          date_added?: string
-          date_published?: string | null
-          date_updated?: string | null
-          description?: string
-          featured?: boolean | null
-          git_commit_sha?: string | null
-          git_hash?: string | null
-          git_tag?: string | null
-          id?: string
-          sections?: Json
-          slug?: string
-          source?: string | null
-          synced_at?: string | null
-          tags?: string[]
-          title?: string
-          updated_at?: string
-          version?: string | null
-        }
-        Relationships: []
-      }
-      changelog_changes: {
-        Row: {
-          category: string
-          change_text: string
-          changelog_entry_id: string
-          created_at: string | null
-          display_order: number
-          id: string
-          updated_at: string | null
-        }
-        Insert: {
-          category: string
-          change_text: string
-          changelog_entry_id: string
-          created_at?: string | null
-          display_order?: number
-          id?: string
-          updated_at?: string | null
-        }
-        Update: {
-          category?: string
-          change_text?: string
-          changelog_entry_id?: string
-          created_at?: string | null
-          display_order?: number
-          id?: string
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "changelog_changes_changelog_entry_id_fkey"
-            columns: ["changelog_entry_id"]
-            isOneToOne: false
-            referencedRelation: "changelog_entries"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      changelog_entries: {
-        Row: {
           canonical_url: string | null
           changes: Json
           commit_count: number | null
@@ -388,6 +278,7 @@ export type Database = {
           id: string
           json_ld: Json | null
           keywords: string[] | null
+          metadata: Json | null
           og_image: string | null
           og_type: string | null
           published: boolean
@@ -415,6 +306,7 @@ export type Database = {
           id?: string
           json_ld?: Json | null
           keywords?: string[] | null
+          metadata?: Json | null
           og_image?: string | null
           og_type?: string | null
           published?: boolean
@@ -442,6 +334,7 @@ export type Database = {
           id?: string
           json_ld?: Json | null
           keywords?: string[] | null
+          metadata?: Json | null
           og_image?: string | null
           og_type?: string | null
           published?: boolean
@@ -523,7 +416,6 @@ export type Database = {
           logo: string | null
           name: string
           owner_id: string | null
-          search_vector: unknown
           size: string | null
           slug: string
           updated_at: string
@@ -540,7 +432,6 @@ export type Database = {
           logo?: string | null
           name: string
           owner_id?: string | null
-          search_vector?: unknown
           size?: string | null
           slug: string
           updated_at?: string
@@ -557,7 +448,6 @@ export type Database = {
           logo?: string | null
           name?: string
           owner_id?: string | null
-          search_vector?: unknown
           size?: string | null
           slug?: string
           updated_at?: string
@@ -573,6 +463,117 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      contact_commands: {
+        Row: {
+          action_type: Database["public"]["Enums"]["contact_action_type"]
+          action_value: string | null
+          aliases: string[] | null
+          category: string
+          command_id: string
+          command_text: string
+          confetti_variant:
+            | Database["public"]["Enums"]["confetti_variant"]
+            | null
+          created_at: string | null
+          description: string | null
+          display_order: number
+          icon_name: string | null
+          id: string
+          is_active: boolean | null
+          metadata: Json | null
+          requires_auth: boolean | null
+          updated_at: string | null
+        }
+        Insert: {
+          action_type: Database["public"]["Enums"]["contact_action_type"]
+          action_value?: string | null
+          aliases?: string[] | null
+          category?: string
+          command_id: string
+          command_text: string
+          confetti_variant?:
+            | Database["public"]["Enums"]["confetti_variant"]
+            | null
+          created_at?: string | null
+          description?: string | null
+          display_order: number
+          icon_name?: string | null
+          id?: string
+          is_active?: boolean | null
+          metadata?: Json | null
+          requires_auth?: boolean | null
+          updated_at?: string | null
+        }
+        Update: {
+          action_type?: Database["public"]["Enums"]["contact_action_type"]
+          action_value?: string | null
+          aliases?: string[] | null
+          category?: string
+          command_id?: string
+          command_text?: string
+          confetti_variant?:
+            | Database["public"]["Enums"]["confetti_variant"]
+            | null
+          created_at?: string | null
+          description?: string | null
+          display_order?: number
+          icon_name?: string | null
+          id?: string
+          is_active?: boolean | null
+          metadata?: Json | null
+          requires_auth?: boolean | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      contact_submissions: {
+        Row: {
+          category: Database["public"]["Enums"]["contact_category"]
+          created_at: string | null
+          email: string
+          id: string
+          message: string
+          metadata: Json | null
+          name: string
+          responded_by: string | null
+          response_sent_at: string | null
+          session_id: string | null
+          status: Database["public"]["Enums"]["submission_status"]
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          category?: Database["public"]["Enums"]["contact_category"]
+          created_at?: string | null
+          email: string
+          id?: string
+          message: string
+          metadata?: Json | null
+          name: string
+          responded_by?: string | null
+          response_sent_at?: string | null
+          session_id?: string | null
+          status?: Database["public"]["Enums"]["submission_status"]
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["contact_category"]
+          created_at?: string | null
+          email?: string
+          id?: string
+          message?: string
+          metadata?: Json | null
+          name?: string
+          responded_by?: string | null
+          response_sent_at?: string | null
+          session_id?: string | null
+          status?: Database["public"]["Enums"]["submission_status"]
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
       }
       content: {
         Row: {
@@ -592,7 +593,6 @@ export type Database = {
           download_url: string | null
           examples: Json | null
           features: string[] | null
-          fts_vector: unknown
           git_hash: string | null
           has_breaking_changes: boolean | null
           has_prerequisites: boolean | null
@@ -635,7 +635,6 @@ export type Database = {
           download_url?: string | null
           examples?: Json | null
           features?: string[] | null
-          fts_vector?: unknown
           git_hash?: string | null
           has_breaking_changes?: boolean | null
           has_prerequisites?: boolean | null
@@ -678,7 +677,6 @@ export type Database = {
           download_url?: string | null
           examples?: Json | null
           features?: string[] | null
-          fts_vector?: unknown
           git_hash?: string | null
           has_breaking_changes?: boolean | null
           has_prerequisites?: boolean | null
@@ -1346,6 +1344,7 @@ export type Database = {
           contact_email: string | null
           created_at: string
           description: string
+          discord_message_id: string | null
           experience: string | null
           expires_at: string | null
           featured: boolean | null
@@ -1360,7 +1359,7 @@ export type Database = {
           payment_date: string | null
           payment_method: string | null
           payment_reference: string | null
-          payment_status: string
+          payment_status: Database["public"]["Enums"]["payment_status"] | null
           plan: string
           polar_customer_id: string | null
           polar_order_id: string | null
@@ -1369,7 +1368,6 @@ export type Database = {
           remote: boolean | null
           requirements: Json
           salary: string | null
-          search_vector: unknown
           slug: string
           status: Database["public"]["Enums"]["job_status"]
           tags: Json
@@ -1381,7 +1379,7 @@ export type Database = {
           updated_at: string
           user_id: string | null
           view_count: number | null
-          workplace: string | null
+          workplace: Database["public"]["Enums"]["workplace_type"] | null
         }
         Insert: {
           active?: boolean | null
@@ -1395,6 +1393,7 @@ export type Database = {
           contact_email?: string | null
           created_at?: string
           description: string
+          discord_message_id?: string | null
           experience?: string | null
           expires_at?: string | null
           featured?: boolean | null
@@ -1409,7 +1408,7 @@ export type Database = {
           payment_date?: string | null
           payment_method?: string | null
           payment_reference?: string | null
-          payment_status?: string
+          payment_status?: Database["public"]["Enums"]["payment_status"] | null
           plan?: string
           polar_customer_id?: string | null
           polar_order_id?: string | null
@@ -1418,7 +1417,6 @@ export type Database = {
           remote?: boolean | null
           requirements?: Json
           salary?: string | null
-          search_vector?: unknown
           slug?: string
           status?: Database["public"]["Enums"]["job_status"]
           tags?: Json
@@ -1430,7 +1428,7 @@ export type Database = {
           updated_at?: string
           user_id?: string | null
           view_count?: number | null
-          workplace?: string | null
+          workplace?: Database["public"]["Enums"]["workplace_type"] | null
         }
         Update: {
           active?: boolean | null
@@ -1444,6 +1442,7 @@ export type Database = {
           contact_email?: string | null
           created_at?: string
           description?: string
+          discord_message_id?: string | null
           experience?: string | null
           expires_at?: string | null
           featured?: boolean | null
@@ -1458,7 +1457,7 @@ export type Database = {
           payment_date?: string | null
           payment_method?: string | null
           payment_reference?: string | null
-          payment_status?: string
+          payment_status?: Database["public"]["Enums"]["payment_status"] | null
           plan?: string
           polar_customer_id?: string | null
           polar_order_id?: string | null
@@ -1467,7 +1466,6 @@ export type Database = {
           remote?: boolean | null
           requirements?: Json
           salary?: string | null
-          search_vector?: unknown
           slug?: string
           status?: Database["public"]["Enums"]["job_status"]
           tags?: Json
@@ -1479,7 +1477,7 @@ export type Database = {
           updated_at?: string
           user_id?: string | null
           view_count?: number | null
-          workplace?: string | null
+          workplace?: Database["public"]["Enums"]["workplace_type"] | null
         }
         Relationships: [
           {
@@ -2276,65 +2274,6 @@ export type Database = {
         }
         Relationships: []
       }
-      submissions: {
-        Row: {
-          branch_name: string | null
-          content_name: string
-          content_slug: string
-          content_type: string
-          created_at: string
-          id: string
-          merged_at: string | null
-          pr_number: number | null
-          pr_url: string | null
-          rejection_reason: string | null
-          status: string
-          submission_data: Json
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          branch_name?: string | null
-          content_name: string
-          content_slug: string
-          content_type: string
-          created_at?: string
-          id?: string
-          merged_at?: string | null
-          pr_number?: number | null
-          pr_url?: string | null
-          rejection_reason?: string | null
-          status?: string
-          submission_data: Json
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          branch_name?: string | null
-          content_name?: string
-          content_slug?: string
-          content_type?: string
-          created_at?: string
-          id?: string
-          merged_at?: string | null
-          pr_number?: number | null
-          pr_url?: string | null
-          rejection_reason?: string | null
-          status?: string
-          submission_data?: Json
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "submissions_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       subscriptions: {
         Row: {
           cancel_at_period_end: boolean | null
@@ -2404,7 +2343,7 @@ export type Database = {
           css_classes: string
           display_order: number
           label: string
-          tier: string
+          tier: Database["public"]["Enums"]["user_tier"] | null
           updated_at: string
         }
         Insert: {
@@ -2413,7 +2352,7 @@ export type Database = {
           css_classes: string
           display_order: number
           label: string
-          tier: string
+          tier?: Database["public"]["Enums"]["user_tier"] | null
           updated_at?: string
         }
         Update: {
@@ -2422,7 +2361,7 @@ export type Database = {
           css_classes?: string
           display_order?: number
           label?: string
-          tier?: string
+          tier?: Database["public"]["Enums"]["user_tier"] | null
           updated_at?: string
         }
         Relationships: []
@@ -2545,7 +2484,7 @@ export type Database = {
           content_type: string | null
           created_at: string
           id: string
-          interaction_type: string
+          interaction_type: Database["public"]["Enums"]["interaction_type"]
           metadata: Json | null
           session_id: string | null
           user_id: string | null
@@ -2555,7 +2494,7 @@ export type Database = {
           content_type?: string | null
           created_at?: string
           id?: string
-          interaction_type: string
+          interaction_type: Database["public"]["Enums"]["interaction_type"]
           metadata?: Json | null
           session_id?: string | null
           user_id?: string | null
@@ -2565,7 +2504,7 @@ export type Database = {
           content_type?: string | null
           created_at?: string
           id?: string
-          interaction_type?: string
+          interaction_type?: Database["public"]["Enums"]["interaction_type"]
           metadata?: Json | null
           session_id?: string | null
           user_id?: string | null
@@ -2725,12 +2664,11 @@ export type Database = {
           name: string | null
           profile_public: boolean | null
           public: boolean | null
-          search_vector: unknown
           slug: string | null
           social_x_link: string | null
           status: string | null
           submission_count: number
-          tier: string | null
+          tier: Database["public"]["Enums"]["user_tier"] | null
           updated_at: string
           website: string | null
           work: string | null
@@ -2752,12 +2690,11 @@ export type Database = {
           name?: string | null
           profile_public?: boolean | null
           public?: boolean | null
-          search_vector?: unknown
           slug?: string | null
           social_x_link?: string | null
           status?: string | null
           submission_count?: number
-          tier?: string | null
+          tier?: Database["public"]["Enums"]["user_tier"] | null
           updated_at?: string
           website?: string | null
           work?: string | null
@@ -2779,12 +2716,11 @@ export type Database = {
           name?: string | null
           profile_public?: boolean | null
           public?: boolean | null
-          search_vector?: unknown
           slug?: string | null
           social_x_link?: string | null
           status?: string | null
           submission_count?: number
-          tier?: string | null
+          tier?: Database["public"]["Enums"]["user_tier"] | null
           updated_at?: string
           website?: string | null
           work?: string | null
@@ -3012,6 +2948,22 @@ export type Database = {
         }
         Relationships: []
       }
+      mv_unified_search: {
+        Row: {
+          category: string | null
+          created_at: string | null
+          description: string | null
+          engagement_score: number | null
+          entity_type: string | null
+          id: string | null
+          search_vector: unknown
+          slug: string | null
+          tags: string[] | null
+          title: string | null
+          view_count: number | null
+        }
+        Relationships: []
+      }
       mv_weekly_new_content: {
         Row: {
           category: string | null
@@ -3052,6 +3004,10 @@ export type Database = {
         Args: { p_items: Json; p_user_id: string }
         Returns: Json
       }
+      batch_insert_user_interactions: {
+        Args: { p_interactions: Json[] }
+        Returns: Json
+      }
       build_aggregate_rating_schema: {
         Args: { p_content_slug: string; p_content_type: string }
         Returns: Json
@@ -3077,6 +3033,7 @@ export type Database = {
         Args: { p_category: string; p_slug: string }
         Returns: Json
       }
+      build_job_discord_embed: { Args: { p_job_id: string }; Returns: Json }
       build_job_posting_schema: { Args: { p_job_id: string }; Returns: Json }
       build_learning_resource_schema: {
         Args: { p_category: string; p_slug: string }
@@ -3104,6 +3061,10 @@ export type Database = {
         }
         Returns: number
       }
+      calculate_job_pricing: {
+        Args: { p_plan: string; p_tier: string }
+        Returns: number
+      }
       calculate_tag_similarity: {
         Args: { p_tags_a: string[]; p_tags_b: string[] }
         Returns: number
@@ -3119,6 +3080,23 @@ export type Database = {
           needs_vacuum: boolean
         }[]
       }
+      create_job_with_payment: {
+        Args: {
+          p_job_data: Json
+          p_plan: string
+          p_tier: string
+          p_user_id: string
+        }
+        Returns: Json
+      }
+      delete_company: {
+        Args: { p_company_id: string; p_user_id: string }
+        Returns: Json
+      }
+      delete_job: {
+        Args: { p_job_id: string; p_user_id: string }
+        Returns: Json
+      }
       diagnose_failing_section: {
         Args: { p_section_index: number; p_slug: string }
         Returns: string
@@ -3126,6 +3104,48 @@ export type Database = {
       enroll_in_email_sequence: {
         Args: { p_email: string }
         Returns: undefined
+      }
+      ensure_user_record: {
+        Args: {
+          p_email?: string
+          p_follow_email?: boolean
+          p_id: string
+          p_image?: string
+          p_name?: string
+          p_profile_public?: boolean
+        }
+        Returns: {
+          bio: string | null
+          bookmark_count: number
+          created_at: string
+          display_name: string | null
+          email: string | null
+          follow_email: boolean | null
+          follower_count: number
+          following_count: number
+          hero: string | null
+          id: string
+          image: string | null
+          interests: Json | null
+          json_ld: Json | null
+          name: string | null
+          profile_public: boolean | null
+          public: boolean | null
+          slug: string | null
+          social_x_link: string | null
+          status: string | null
+          submission_count: number
+          tier: Database["public"]["Enums"]["user_tier"] | null
+          updated_at: string
+          website: string | null
+          work: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "users"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       expire_jobs: {
         Args: never
@@ -3176,6 +3196,7 @@ export type Database = {
         Args: { p_slug: string; p_title: string }
         Returns: Json
       }
+      generate_company_slug: { Args: { p_name: string }; Returns: string }
       generate_content_atom_feed: {
         Args: { p_category?: string; p_limit?: number }
         Returns: string
@@ -3220,6 +3241,30 @@ export type Database = {
       }
       generate_tool_llms_txt: { Args: { p_tool_name: string }; Returns: string }
       get_account_dashboard: { Args: { p_user_id: string }; Returns: Json }
+      get_active_announcement: {
+        Args: { p_now?: string }
+        Returns: {
+          active: boolean
+          created_at: string
+          dismissible: boolean
+          end_date: string | null
+          href: string | null
+          icon: string | null
+          id: string
+          priority: Database["public"]["Enums"]["announcement_priority"]
+          start_date: string | null
+          tag: string | null
+          title: string
+          updated_at: string
+          variant: Database["public"]["Enums"]["announcement_variant"]
+        }
+        SetofOptions: {
+          from: "*"
+          to: "announcements"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       get_active_notifications: {
         Args: { p_dismissed_ids?: string[] }
         Returns: {
@@ -3270,37 +3315,17 @@ export type Database = {
         }[]
       }
       get_all_structured_data_configs: { Args: never; Returns: Json }
-      get_analytics_summary:
-        | {
-            Args: { p_category: string; p_slug: string }
-            Returns: {
-              bookmark_count: number | null
-              category: string | null
-              copy_count: number | null
-              last_interaction_at: string | null
-              last_viewed_at: string | null
-              slug: string | null
-              total_time_spent_seconds: number | null
-              view_count: number | null
-            }[]
-            SetofOptions: {
-              from: "*"
-              to: "mv_analytics_summary"
-              isOneToOne: false
-              isSetofReturn: true
-            }
-          }
-        | {
-            Args: { p_category?: string }
-            Returns: {
-              avg_popularity: number
-              category: string
-              total_bookmarks: number
-              total_copies: number
-              total_items: number
-              total_views: number
-            }[]
-          }
+      get_analytics_summary: {
+        Args: { p_category?: string }
+        Returns: {
+          avg_popularity: number
+          category: string
+          total_bookmarks: number
+          total_copies: number
+          total_items: number
+          total_views: number
+        }[]
+      }
       get_api_content_full: {
         Args: { p_base_url?: string; p_category: string; p_slug: string }
         Returns: string
@@ -3353,7 +3378,8 @@ export type Database = {
         Args: { p_category: string }
         Returns: string
       }
-      get_changelog_entries: {
+      get_changelog_detail: { Args: { p_slug: string }; Returns: Json }
+      get_changelog_overview: {
         Args: {
           p_category?: string
           p_featured_only?: boolean
@@ -3363,8 +3389,6 @@ export type Database = {
         }
         Returns: Json
       }
-      get_changelog_entry_by_slug: { Args: { p_slug: string }; Returns: Json }
-      get_changelog_metadata: { Args: never; Returns: Json }
       get_changelog_with_category_stats: {
         Args: { p_category?: string; p_limit?: number; p_offset?: number }
         Returns: Json
@@ -3381,39 +3405,30 @@ export type Database = {
         Args: { p_limit?: number; p_search_query?: string }
         Returns: Json
       }
-      get_company_job_stats: {
-        Args: { p_company_slug?: string }
+      get_companies_list: {
+        Args: { p_limit?: number; p_offset?: number }
+        Returns: Json
+      }
+      get_company_admin_profile: {
+        Args: { p_company_id: string }
         Returns: {
-          active_jobs: number | null
-          avg_salary_min: number | null
-          click_through_rate: number | null
-          company_id: string | null
-          company_name: string | null
-          company_slug: string | null
-          contract_jobs: number | null
-          featured_jobs: number | null
-          first_job_posted_at: string | null
-          full_time_jobs: number | null
-          internship_jobs: number | null
-          last_refreshed_at: string | null
-          latest_job_posted_at: string | null
-          part_time_jobs: number | null
-          remote_jobs: number | null
-          total_clicks: number | null
-          total_jobs: number | null
-          total_views: number | null
-          workplace_hybrid: number | null
-          workplace_onsite: number | null
-          workplace_remote: number | null
+          created_at: string
+          description: string
+          featured: boolean
+          id: string
+          industry: string
+          logo: string
+          name: string
+          owner_id: string
+          size: string
+          slug: string
+          updated_at: string
+          using_cursor_since: string
+          website: string
         }[]
-        SetofOptions: {
-          from: "*"
-          to: "company_job_stats"
-          isOneToOne: false
-          isSetofReturn: true
-        }
       }
       get_company_profile: { Args: { p_slug: string }; Returns: Json }
+      get_contact_commands: { Args: never; Returns: Json }
       get_content_detail_complete: {
         Args: { p_category: string; p_slug: string; p_user_id?: string }
         Returns: Json
@@ -3523,6 +3538,7 @@ export type Database = {
           contact_email: string | null
           created_at: string
           description: string
+          discord_message_id: string | null
           experience: string | null
           expires_at: string | null
           featured: boolean | null
@@ -3537,7 +3553,7 @@ export type Database = {
           payment_date: string | null
           payment_method: string | null
           payment_reference: string | null
-          payment_status: string
+          payment_status: Database["public"]["Enums"]["payment_status"] | null
           plan: string
           polar_customer_id: string | null
           polar_order_id: string | null
@@ -3546,7 +3562,6 @@ export type Database = {
           remote: boolean | null
           requirements: Json
           salary: string | null
-          search_vector: unknown
           slug: string
           status: Database["public"]["Enums"]["job_status"]
           tags: Json
@@ -3558,7 +3573,7 @@ export type Database = {
           updated_at: string
           user_id: string | null
           view_count: number | null
-          workplace: string | null
+          workplace: Database["public"]["Enums"]["workplace_type"] | null
         }[]
         SetofOptions: {
           from: "*"
@@ -3614,6 +3629,7 @@ export type Database = {
           contact_email: string | null
           created_at: string
           description: string
+          discord_message_id: string | null
           experience: string | null
           expires_at: string | null
           featured: boolean | null
@@ -3628,7 +3644,7 @@ export type Database = {
           payment_date: string | null
           payment_method: string | null
           payment_reference: string | null
-          payment_status: string
+          payment_status: Database["public"]["Enums"]["payment_status"] | null
           plan: string
           polar_customer_id: string | null
           polar_order_id: string | null
@@ -3637,7 +3653,6 @@ export type Database = {
           remote: boolean | null
           requirements: Json
           salary: string | null
-          search_vector: unknown
           slug: string
           status: Database["public"]["Enums"]["job_status"]
           tags: Json
@@ -3649,7 +3664,7 @@ export type Database = {
           updated_at: string
           user_id: string | null
           view_count: number | null
-          workplace: string | null
+          workplace: Database["public"]["Enums"]["workplace_type"] | null
         }[]
         SetofOptions: {
           from: "*"
@@ -3675,6 +3690,10 @@ export type Database = {
           title: string
           url: string
         }[]
+      }
+      get_or_create_company: {
+        Args: { p_company_name: string; p_user_id: string }
+        Returns: string
       }
       get_pending_resend_syncs: {
         Args: { p_limit?: number }
@@ -3708,6 +3727,57 @@ export type Database = {
         }[]
       }
       get_quiz_configuration: { Args: never; Returns: Json }
+      get_recent_content: {
+        Args: { p_category?: string; p_days?: number; p_limit?: number }
+        Returns: {
+          author: string
+          author_profile_url: string | null
+          avg_rating: number | null
+          bookmark_count: number
+          category: string
+          content: string | null
+          copy_count: number
+          created_at: string
+          date_added: string
+          description: string
+          difficulty_score: number | null
+          display_title: string | null
+          documentation_url: string | null
+          download_url: string | null
+          examples: Json | null
+          features: string[] | null
+          git_hash: string | null
+          has_breaking_changes: boolean | null
+          has_prerequisites: boolean | null
+          has_troubleshooting: boolean | null
+          id: string
+          json_ld: Json | null
+          metadata: Json
+          og_type: string | null
+          popularity_score: number | null
+          reading_time: number | null
+          review_count: number
+          robots_follow: boolean | null
+          robots_index: boolean | null
+          seo_title: string | null
+          slug: string
+          source: string | null
+          storage_url: string | null
+          synced_at: string | null
+          tags: string[]
+          title: string | null
+          twitter_card: string | null
+          updated_at: string
+          use_cases: string[] | null
+          view_count: number
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "content"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       get_recent_merged: { Args: { p_limit?: number }; Returns: Json }
       get_recommendations: {
         Args: {
@@ -3803,6 +3873,13 @@ export type Database = {
           priority: number
         }[]
       }
+      get_skill_storage_path: {
+        Args: { p_slug: string }
+        Returns: {
+          bucket: string
+          object_path: string
+        }[]
+      }
       get_sponsorship_analytics: {
         Args: { p_sponsorship_id: string; p_user_id: string }
         Returns: Json
@@ -3839,6 +3916,57 @@ export type Database = {
           tag_count: number
         }[]
       }
+      get_trending_content: {
+        Args: { p_category?: string; p_limit?: number }
+        Returns: {
+          author: string
+          author_profile_url: string | null
+          avg_rating: number | null
+          bookmark_count: number
+          category: string
+          content: string | null
+          copy_count: number
+          created_at: string
+          date_added: string
+          description: string
+          difficulty_score: number | null
+          display_title: string | null
+          documentation_url: string | null
+          download_url: string | null
+          examples: Json | null
+          features: string[] | null
+          git_hash: string | null
+          has_breaking_changes: boolean | null
+          has_prerequisites: boolean | null
+          has_troubleshooting: boolean | null
+          id: string
+          json_ld: Json | null
+          metadata: Json
+          og_type: string | null
+          popularity_score: number | null
+          reading_time: number | null
+          review_count: number
+          robots_follow: boolean | null
+          robots_index: boolean | null
+          seo_title: string | null
+          slug: string
+          source: string | null
+          storage_url: string | null
+          synced_at: string | null
+          tags: string[]
+          title: string | null
+          twitter_card: string | null
+          updated_at: string
+          use_cases: string[] | null
+          view_count: number
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "content"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       get_trending_metrics: {
         Args: { p_category?: string; p_limit?: number }
         Returns: {
@@ -3854,6 +3982,24 @@ export type Database = {
           trending_score: number
           views_7d: number
           views_prev_7d: number
+          views_total: number
+        }[]
+      }
+      get_trending_metrics_with_content: {
+        Args: { p_category?: string; p_limit?: number }
+        Returns: {
+          author: string
+          bookmarks_total: number
+          category: string
+          copies_total: number
+          description: string
+          engagement_score: number
+          freshness_score: number
+          slug: string
+          source: string
+          tags: string[]
+          title: string
+          trending_score: number
           views_total: number
         }[]
       }
@@ -3900,6 +4046,30 @@ export type Database = {
         Returns: Json
       }
       get_user_settings: { Args: { p_user_id: string }; Returns: Json }
+      get_user_sponsorships: {
+        Args: { p_user_id: string }
+        Returns: {
+          active: boolean | null
+          click_count: number | null
+          content_id: string
+          content_type: string
+          created_at: string
+          end_date: string
+          id: string
+          impression_count: number | null
+          impression_limit: number | null
+          start_date: string
+          tier: string
+          updated_at: string
+          user_id: string | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "sponsored_content"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       get_week_end: { Args: { week_start: string }; Returns: string }
       get_weekly_digest: { Args: { p_week_start?: string }; Returns: Json }
       get_weekly_new_content: {
@@ -3964,6 +4134,10 @@ export type Database = {
         Args: { p_event_data: Json; p_webhook_id: string }
         Returns: undefined
       }
+      immutable_array_to_string: {
+        Args: { arr: string[]; delimiter: string }
+        Returns: string
+      }
       import_redis_seed_data: {
         Args: { redis_data: Json }
         Returns: {
@@ -3981,6 +4155,19 @@ export type Database = {
           table_name: string
         }
         Returns: undefined
+      }
+      insert_contact_submission: {
+        Args: {
+          p_category: Database["public"]["Enums"]["contact_category"]
+          p_email: string
+          p_message: string
+          p_metadata?: Json
+          p_name: string
+        }
+        Returns: {
+          submission_id: string
+          success: boolean
+        }[]
       }
       invoke_edge_function: {
         Args: { action_header: string; function_name: string; payload?: Json }
@@ -4056,7 +4243,12 @@ export type Database = {
         }[]
       }
       refresh_mv_site_urls: { Args: never; Returns: undefined }
+      refresh_mv_unified_search_concurrently: {
+        Args: never
+        Returns: undefined
+      }
       refresh_profile_from_oauth: { Args: { user_id: string }; Returns: Json }
+      refresh_unified_search_mv: { Args: never; Returns: undefined }
       refresh_user_stats: {
         Args: never
         Returns: {
@@ -4133,7 +4325,6 @@ export type Database = {
           logo: string | null
           name: string
           owner_id: string | null
-          search_vector: unknown
           size: string | null
           slug: string
           updated_at: string
@@ -4195,6 +4386,7 @@ export type Database = {
           contact_email: string | null
           created_at: string
           description: string
+          discord_message_id: string | null
           experience: string | null
           expires_at: string | null
           featured: boolean | null
@@ -4209,7 +4401,7 @@ export type Database = {
           payment_date: string | null
           payment_method: string | null
           payment_reference: string | null
-          payment_status: string
+          payment_status: Database["public"]["Enums"]["payment_status"] | null
           plan: string
           polar_customer_id: string | null
           polar_order_id: string | null
@@ -4218,7 +4410,6 @@ export type Database = {
           remote: boolean | null
           requirements: Json
           salary: string | null
-          search_vector: unknown
           slug: string
           status: Database["public"]["Enums"]["job_status"]
           tags: Json
@@ -4230,7 +4421,7 @@ export type Database = {
           updated_at: string
           user_id: string | null
           view_count: number | null
-          workplace: string | null
+          workplace: Database["public"]["Enums"]["workplace_type"] | null
         }[]
         SetofOptions: {
           from: "*"
@@ -4238,6 +4429,26 @@ export type Database = {
           isOneToOne: false
           isSetofReturn: true
         }
+      }
+      search_unified: {
+        Args: {
+          p_entities?: string[]
+          p_limit?: number
+          p_offset?: number
+          p_query: string
+        }
+        Returns: {
+          category: string
+          created_at: string
+          description: string
+          engagement_score: number
+          entity_type: string
+          id: string
+          relevance_score: number
+          slug: string
+          tags: string[]
+          title: string
+        }[]
       }
       search_users: {
         Args: { result_limit?: number; search_query: string }
@@ -4258,12 +4469,11 @@ export type Database = {
           name: string | null
           profile_public: boolean | null
           public: boolean | null
-          search_vector: unknown
           slug: string | null
           social_x_link: string | null
           status: string | null
           submission_count: number
-          tier: string | null
+          tier: Database["public"]["Enums"]["user_tier"] | null
           updated_at: string
           website: string | null
           work: string | null
@@ -4285,7 +4495,7 @@ export type Database = {
           p_description: string
           p_github_url?: string
           p_name: string
-          p_submission_type: string
+          p_submission_type: Database["public"]["Enums"]["submission_type"]
           p_tags?: string[]
         }
         Returns: Json
@@ -4320,24 +4530,37 @@ export type Database = {
         }
         Returns: Json
       }
+      toggle_job_status: {
+        Args: {
+          p_job_id: string
+          p_new_status: Database["public"]["Enums"]["job_status"]
+          p_user_id: string
+        }
+        Returns: Json
+      }
       toggle_review_helpful: {
         Args: { p_helpful: boolean; p_review_id: string; p_user_id: string }
         Returns: Json
-      }
-      track_content_usage: {
-        Args: {
-          p_action_type: string
-          p_content_slug: string
-          p_content_type: string
-          p_user_id?: string
-        }
-        Returns: undefined
       }
       track_sponsored_event: {
         Args: { p_data: Json; p_event_type: string; p_user_id: string }
         Returns: Json
       }
+      track_user_interaction: {
+        Args: {
+          p_content_slug: string
+          p_content_type: string
+          p_interaction_type: string
+          p_metadata?: Json
+          p_session_id?: string
+        }
+        Returns: Json
+      }
       unlink_oauth_provider: { Args: { p_provider: string }; Returns: Json }
+      update_job: {
+        Args: { p_job_id: string; p_updates: Json; p_user_id: string }
+        Returns: Json
+      }
       update_user_profile: {
         Args: {
           p_bio?: string
@@ -4364,6 +4587,14 @@ export type Database = {
         | "Removed"
         | "Fixed"
         | "Security"
+      confetti_variant: "success" | "celebration" | "milestone" | "subtle"
+      contact_action_type:
+        | "internal"
+        | "external"
+        | "route"
+        | "sheet"
+        | "easter-egg"
+      contact_category: "bug" | "feature" | "partnership" | "general" | "other"
       content_category:
         | "agents"
         | "mcp"
@@ -4376,6 +4607,7 @@ export type Database = {
         | "guides"
         | "jobs"
         | "changelog"
+      environment: "development" | "preview" | "production"
       experience_level: "beginner" | "intermediate" | "advanced"
       field_scope: "common" | "type_specific" | "tags"
       field_type: "text" | "textarea" | "number" | "select"
@@ -4416,6 +4648,11 @@ export type Database = {
         | "screenshot"
         | "share"
         | "download"
+        | "pwa_installed"
+        | "pwa_launched"
+        | "newsletter_subscribe"
+        | "contact_interact"
+        | "contact_submit"
       job_status:
         | "draft"
         | "pending_payment"
@@ -4432,8 +4669,11 @@ export type Database = {
         | "inline"
         | "post_copy"
         | "resend_import"
+        | "oauth_signup"
       notification_priority: "high" | "medium" | "low"
       notification_type: "announcement" | "feedback"
+      payment_status: "unpaid" | "paid" | "refunded"
+      setting_type: "boolean" | "string" | "number" | "json"
       sort_direction: "asc" | "desc"
       sort_option:
         | "relevance"
@@ -4465,6 +4705,7 @@ export type Database = {
         | "general-development"
         | "testing-qa"
         | "security-audit"
+      user_tier: "free" | "pro" | "enterprise"
       webhook_direction: "inbound" | "outbound"
       webhook_source:
         | "resend"
@@ -4473,6 +4714,7 @@ export type Database = {
         | "supabase_db"
         | "custom"
         | "polar"
+      workplace_type: "Remote" | "On site" | "Hybrid"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -4610,6 +4852,15 @@ export const Constants = {
         "Fixed",
         "Security",
       ],
+      confetti_variant: ["success", "celebration", "milestone", "subtle"],
+      contact_action_type: [
+        "internal",
+        "external",
+        "route",
+        "sheet",
+        "easter-egg",
+      ],
+      contact_category: ["bug", "feature", "partnership", "general", "other"],
       content_category: [
         "agents",
         "mcp",
@@ -4623,6 +4874,7 @@ export const Constants = {
         "jobs",
         "changelog",
       ],
+      environment: ["development", "preview", "production"],
       experience_level: ["beginner", "intermediate", "advanced"],
       field_scope: ["common", "type_specific", "tags"],
       field_type: ["text", "textarea", "number", "select"],
@@ -4666,6 +4918,11 @@ export const Constants = {
         "screenshot",
         "share",
         "download",
+        "pwa_installed",
+        "pwa_launched",
+        "newsletter_subscribe",
+        "contact_interact",
+        "contact_submit",
       ],
       job_status: [
         "draft",
@@ -4684,9 +4941,12 @@ export const Constants = {
         "inline",
         "post_copy",
         "resend_import",
+        "oauth_signup",
       ],
       notification_priority: ["high", "medium", "low"],
       notification_type: ["announcement", "feedback"],
+      payment_status: ["unpaid", "paid", "refunded"],
+      setting_type: ["boolean", "string", "number", "json"],
       sort_direction: ["asc", "desc"],
       sort_option: [
         "relevance",
@@ -4721,6 +4981,7 @@ export const Constants = {
         "testing-qa",
         "security-audit",
       ],
+      user_tier: ["free", "pro", "enterprise"],
       webhook_direction: ["inbound", "outbound"],
       webhook_source: [
         "resend",
@@ -4730,6 +4991,7 @@ export const Constants = {
         "custom",
         "polar",
       ],
+      workplace_type: ["Remote", "On site", "Hybrid"],
     },
   },
 } as const

@@ -1,16 +1,19 @@
 /**
- * On-Demand ISR Revalidation - Database-First Architecture
- * Called by PostgreSQL trigger when content changes
+ * On-Demand ISR Revalidation - Realtime-Based Architecture
+ * Called by edge function via Supabase Realtime (logical replication)
  *
- * Payload format from PostgreSQL trigger:
+ * Flow: Database Trigger → Table Change → Realtime (postgres_changes) → Edge Function → This API Route
+ *
+ * Payload format from edge function:
  * {
  *   "secret": "REVALIDATE_SECRET",
  *   "category": "agents",
- *   "slug": "code-reviewer"
+ *   "slug": "code-reviewer",
+ *   "tags": ["content", "homepage", "trending"]
  * }
  */
 
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, revalidateTag } from 'next/cache';
 import { type NextRequest, NextResponse } from 'next/server';
 import { handleApiError } from '@/src/lib/error-handler';
 import { logger } from '@/src/lib/logger';
@@ -18,7 +21,7 @@ import { logger } from '@/src/lib/logger';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { secret, category, slug } = body;
+    const { secret, category, slug, tags } = body;
 
     // Verify secret from body (PostgreSQL trigger sends in payload)
     if (!secret || secret !== process.env.REVALIDATE_SECRET) {
@@ -29,47 +32,71 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Validate required fields
-    if (!category || typeof category !== 'string') {
+    const paths: string[] = [];
+    const invalidatedTags: string[] = [];
+
+    // Path revalidation (existing logic)
+    if (category && typeof category === 'string') {
+      // Always revalidate homepage (shows recent content)
+      paths.push('/');
+
+      // Revalidate category list page
+      paths.push(`/${category}`);
+
+      // Revalidate detail page if slug provided
+      if (slug && typeof slug === 'string') {
+        paths.push(`/${category}/${slug}`);
+      }
+
+      // Revalidate all paths
+      for (const path of paths) {
+        revalidatePath(path);
+      }
+    }
+
+    // Tag invalidation (new logic)
+    if (tags && Array.isArray(tags)) {
+      // Validate all tags are strings
+      const invalidTags = tags.filter((tag) => typeof tag !== 'string');
+      if (invalidTags.length > 0) {
+        return NextResponse.json(
+          { error: 'All tags must be strings', invalidTags },
+          { status: 400 }
+        );
+      }
+
+      // Invalidate each tag
+      for (const tag of tags) {
+        revalidateTag(tag, 'default');
+        invalidatedTags.push(tag);
+      }
+    }
+
+    // If neither category nor tags provided, return error
+    if (!category && (!tags || tags.length === 0)) {
       logger.warn('Revalidate webhook invalid payload', {
         hasCategory: !!category,
-        categoryType: typeof category,
+        hasTags: Array.isArray(tags),
         bodyKeys: Object.keys(body).join(', '),
       });
       return NextResponse.json(
-        { error: 'Missing or invalid category in webhook payload' },
+        { error: 'Missing category or tags in webhook payload' },
         { status: 400 }
       );
     }
 
-    // Determine paths to revalidate
-    const paths: string[] = [];
-
-    // Always revalidate homepage (shows recent content)
-    paths.push('/');
-
-    // Revalidate category list page
-    paths.push(`/${category}`);
-
-    // Revalidate detail page if slug provided
-    if (slug && typeof slug === 'string') {
-      paths.push(`/${category}/${slug}`);
-    }
-
-    // Revalidate all paths
-    for (const path of paths) {
-      revalidatePath(path);
-    }
-
-    logger.info('Revalidated paths successfully', {
-      category,
+    logger.info('Revalidated successfully', {
+      category: category || null,
       slug: slug || null,
       pathCount: paths.length,
+      tagCount: invalidatedTags.length,
+      ...(invalidatedTags.length > 0 && { tags: invalidatedTags.join(', ') }),
     });
 
     return NextResponse.json({
       revalidated: true,
-      paths,
+      ...(paths.length > 0 && { paths }),
+      ...(invalidatedTags.length > 0 && { tags: invalidatedTags }),
       timestamp: new Date().toISOString(),
     });
   } catch (error: unknown) {

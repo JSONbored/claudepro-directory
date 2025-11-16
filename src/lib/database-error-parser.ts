@@ -21,7 +21,7 @@ const CONSTRAINT_MESSAGES: Record<string, string> = {
   content_avg_rating_check: 'Rating must be between 0 and 5',
   content_download_url_check: 'Download URL must start with /downloads/ or https://',
   content_guide_subcategory_check:
-    'Guide subcategory must be one of: tutorials, comparisons, workflows, use-cases, troubleshooting',
+    'Guide subcategory must be one of: tutorials, comparisons, workflows, use-cases, troubleshooting', // Note: Values match GUIDE_SUBCATEGORY_VALUES in database-overrides.ts
 
   // Profiles
   profiles_display_name_check: 'Display name must be 1-100 characters',
@@ -33,9 +33,6 @@ const CONSTRAINT_MESSAGES: Record<string, string> = {
   profiles_total_bookmarks_check: 'Invalid bookmark count',
   profiles_total_submissions_check: 'Invalid submission count',
   profiles_total_views_check: 'Invalid view count',
-
-  // Users
-  users_tier_check: 'Invalid tier. Must be one of: free, pro, enterprise',
 
   // Collections
   user_collections_name_length: 'Collection name must be 2-100 characters',
@@ -85,7 +82,6 @@ const CONSTRAINT_MESSAGES: Record<string, string> = {
   posts_content_length: 'Content must be 5000 characters or less',
 
   // Jobs
-  jobs_payment_status_check: 'Invalid payment status',
   jobs_payment_method_check: 'Invalid payment method',
 };
 

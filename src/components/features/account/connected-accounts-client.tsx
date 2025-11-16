@@ -27,12 +27,9 @@ import {
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { errorToasts, successToasts } from '@/src/lib/utils/toast.utils';
 
-interface Identity {
-  provider: string;
-  email: string;
-  created_at: string;
-  last_sign_in_at: string;
-}
+import type { GetGetUserIdentitiesReturn } from '@/src/types/database-overrides';
+
+type Identity = GetGetUserIdentitiesReturn['identities'][number];
 
 interface ConnectedAccountsClientProps {
   identities: Identity[];
@@ -143,7 +140,9 @@ export function ConnectedAccountsClient({ identities }: ConnectedAccountsClientP
                   <div className="mt-1 text-muted-foreground text-sm">
                     <p>{identity.email}</p>
                     <p className="text-xs">
-                      Last sign-in: {new Date(identity.last_sign_in_at).toLocaleDateString()}
+                      {identity.last_sign_in_at
+                        ? `Last sign-in: ${new Date(identity.last_sign_in_at).toLocaleDateString()}`
+                        : 'Never signed in'}
                     </p>
                   </div>
                 )}

@@ -7,23 +7,28 @@
 
 import { useEffect, useState } from 'react';
 import { Button } from '@/src/components/primitives/ui/button';
-import { SOCIAL_LINKS } from '@/src/lib/constants';
+import { usePulse } from '@/src/hooks/use-pulse';
+import { getSocialLinks } from '@/src/lib/data/marketing/contact';
 import { Github } from '@/src/lib/icons';
+import type { ButtonStyleProps } from '@/src/lib/types/component.types';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
-import type { ButtonStyleProps } from '../shared/button-types';
+import { logClientWarning, logUnhandledPromise } from '@/src/lib/utils/error.utils';
 
 export interface GitHubStarsButtonProps extends ButtonStyleProps {
   repoUrl?: string;
 }
 
+const SOCIAL_LINK_SNAPSHOT = getSocialLinks();
+
 export function GitHubStarsButton({
-  repoUrl = SOCIAL_LINKS.github,
+  repoUrl = SOCIAL_LINK_SNAPSHOT.github,
   size = 'sm',
-  buttonVariant = 'ghost',
+  variant = 'ghost',
   className,
   disabled = false,
 }: GitHubStarsButtonProps) {
+  const pulse = usePulse();
   const [stars, setStars] = useState<number | null>(null);
 
   useEffect(() => {
@@ -49,16 +54,32 @@ export function GitHubStarsButton({
           data && typeof data.stargazers_count === 'number' ? data.stargazers_count : null;
         setStars(count);
       })
-      .catch(() => setStars(null));
+      .catch((error) => {
+        logClientWarning('GitHubStarsButton: failed to fetch star count', error, { apiUrl });
+        setStars(null);
+      });
   }, [repoUrl]);
 
   const handleClick = () => {
+    pulse
+      .click({
+        category: null,
+        slug: null,
+        metadata: {
+          action: 'external_link',
+          link_type: 'github',
+          target_url: repoUrl,
+        },
+      })
+      .catch((error) => {
+        logUnhandledPromise('GitHubStarsButton: click pulse failed', error, { repoUrl });
+      });
     window.open(repoUrl, '_blank', 'noopener,noreferrer');
   };
 
   return (
     <Button
-      variant={buttonVariant}
+      variant={variant}
       size={size}
       onClick={handleClick}
       disabled={disabled}
