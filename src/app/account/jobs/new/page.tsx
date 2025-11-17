@@ -44,8 +44,22 @@ export default function NewJobPage() {
     }
 
     if (result.data.success) {
-      // If requires payment and checkout URL exists, return for client redirect
-      if (result.data.requiresPayment && result.data.checkoutUrl) {
+      if (result.data.requiresPayment) {
+        if (!result.data.checkoutUrl) {
+          const error = new Error('Missing checkout URL for paid job creation');
+          logger.error('NewJobPage: missing checkout URL', error, {
+            title: data.title,
+            company: data.company,
+            jobId: result.data.jobId,
+            companyId: result.data.companyId,
+          });
+          return {
+            success: false,
+            message:
+              'Unable to start checkout right now. Please try again shortly or contact support.',
+          };
+        }
+
         return {
           success: true,
           requiresPayment: true,

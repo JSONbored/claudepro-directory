@@ -3,9 +3,6 @@ import { NextResponse } from 'next/server';
 import { isDevelopment } from '@/src/lib/env-client';
 import { logger } from '@/src/lib/logger';
 
-// Force Node.js runtime for middleware
-export const runtime = 'nodejs';
-
 function sanitizePathForLogging(path: string): string {
   return path
     .replace(/\/api\/[^/]*\/[a-f0-9-]{36}/g, '/api/*/[UUID]')
@@ -16,7 +13,7 @@ function sanitizePathForLogging(path: string): string {
 
 /** CVE-2025-29927 mitigation and security header middleware */
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const startTime = isDevelopment ? performance.now() : 0;
   const pathname = request.nextUrl.pathname;
 

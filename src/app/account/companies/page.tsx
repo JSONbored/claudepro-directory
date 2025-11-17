@@ -198,11 +198,13 @@ export default async function CompaniesPage() {
                           const parsed = new URL(company.logo);
                           // Only allow HTTPS
                           if (parsed.protocol !== 'https:') return null;
-                          // Allow Supabase storage or common CDN domains
-                          const isTrustedSource =
+                          // Allow Supabase storage (public bucket path) or common CDN domains
+                          const isSupabaseHost =
                             parsed.hostname.endsWith('.supabase.co') ||
-                            parsed.hostname.endsWith('.supabase.in') ||
-                            parsed.pathname.startsWith('/storage/v1/object/public/') ||
+                            parsed.hostname.endsWith('.supabase.in');
+                          const isTrustedSource =
+                            (isSupabaseHost &&
+                              parsed.pathname.startsWith('/storage/v1/object/public/')) ||
                             parsed.hostname.endsWith('.cloudinary.com') ||
                             parsed.hostname.endsWith('.amazonaws.com');
                           if (!isTrustedSource) return null;

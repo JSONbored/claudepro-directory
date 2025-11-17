@@ -154,6 +154,7 @@ export function ProductionCodeBlock({
   const [isScreenshotting, setIsScreenshotting] = useState(false);
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [needsCollapse, setNeedsCollapse] = useState(false);
+  const [clipboardResetDelay, setClipboardResetDelay] = useState(2000);
   const preRef = useRef<HTMLDivElement>(null);
   const pulse = usePulse();
   const codeBlockRef = useRef<HTMLDivElement>(null);
@@ -188,7 +189,19 @@ export function ProductionCodeBlock({
     setNeedsCollapse(lines > maxLines);
   }, [code, maxLines]);
 
-  const CLIPBOARD_RESET_DEFAULT_MS = 2000;
+  // Fetch timeout config once on mount
+  useEffect(() => {
+    getTimeoutConfig({})
+      .then((result) => {
+        if (result?.data) {
+          setClipboardResetDelay(result.data['timeout.ui.clipboard_reset_delay_ms']);
+        }
+      })
+      .catch((error) => {
+        logger.error('ProductionCodeBlock: failed to load timeout config', normalizeError(error));
+        // Keep default value (2000ms) on error
+      });
+  }, []);
 
   const handleCopy = async () => {
     setIsCopied(true);
@@ -210,17 +223,8 @@ export function ProductionCodeBlock({
       return;
     }
 
-    try {
-      const result = await getTimeoutConfig({});
-      if (result?.data) {
-        setTimeout(() => setIsCopied(false), result.data['timeout.ui.clipboard_reset_delay_ms']);
-      } else {
-        setTimeout(() => setIsCopied(false), CLIPBOARD_RESET_DEFAULT_MS);
-      }
-    } catch (error) {
-      logger.error('ProductionCodeBlock: failed to load timeout config', normalizeError(error));
-      setTimeout(() => setIsCopied(false), CLIPBOARD_RESET_DEFAULT_MS);
-    }
+    // Use cached clipboard reset delay (fetched on mount)
+    setTimeout(() => setIsCopied(false), clipboardResetDelay);
   };
 
   /**

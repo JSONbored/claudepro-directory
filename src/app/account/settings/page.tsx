@@ -89,20 +89,26 @@ export default async function SettingsPage() {
   // Initialize user if missing (consolidated - no more profiles table)
   if (!userData) {
     logger.warn('SettingsPage: user_data missing, invoking ensureUserRecord', { userId: user.id });
-    await ensureUserRecord({
-      id: user.id,
-      email: user.email ?? null,
-      name: user.user_metadata?.full_name ?? user.user_metadata?.name ?? null,
-      image: user.user_metadata?.avatar_url ?? user.user_metadata?.picture ?? null,
-    });
-    const refreshed = await getUserSettings(user.id);
-    if (refreshed) {
-      userData = refreshed.user_data;
-      profile = refreshed.profile;
-    } else {
-      logger.warn('SettingsPage: getUserSettings returned null after ensureUserRecord', {
-        userId: user.id,
+    try {
+      await ensureUserRecord({
+        id: user.id,
+        email: user.email ?? null,
+        name: user.user_metadata?.full_name ?? user.user_metadata?.name ?? null,
+        image: user.user_metadata?.avatar_url ?? user.user_metadata?.picture ?? null,
       });
+      const refreshed = await getUserSettings(user.id);
+      if (refreshed) {
+        userData = refreshed.user_data;
+        profile = refreshed.profile;
+      } else {
+        logger.warn('SettingsPage: getUserSettings returned null after ensureUserRecord', {
+          userId: user.id,
+        });
+      }
+    } catch (error) {
+      const normalized = normalizeError(error, 'Failed to initialize user record');
+      logger.error('SettingsPage: ensureUserRecord failed', normalized, { userId: user.id });
+      // Leave userData/profile undefined so page can render fallback UI
     }
   }
 
@@ -192,7 +198,6 @@ export default async function SettingsPage() {
                 width={64}
                 height={64}
                 className="h-16 w-16 rounded-full object-cover"
-                priority={true}
               />
               <div>
                 <p className="text-sm">

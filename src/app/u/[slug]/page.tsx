@@ -25,6 +25,7 @@ import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { sanitizeSlug } from '@/src/lib/utils/content.utils';
 import { normalizeError } from '@/src/lib/utils/error.utils';
 import type { GetGetUserProfileReturn } from '@/src/types/database-overrides';
+import { isContentCategory } from '@/src/types/database-overrides';
 
 /**
  * Validate slug is safe for use in URLs
@@ -36,33 +37,17 @@ function isValidSlug(slug: string): boolean {
 }
 
 /**
- * Validate content type is safe for URL construction
- */
-const ALLOWED_CONTENT_TYPES = [
-  'agents',
-  'mcp',
-  'rules',
-  'commands',
-  'hooks',
-  'statuslines',
-  'skills',
-  'collections',
-  'guides',
-  'jobs',
-] as const;
-
-function isValidContentType(type: string): boolean {
-  return ALLOWED_CONTENT_TYPES.includes(type as (typeof ALLOWED_CONTENT_TYPES)[number]);
-}
-
-/**
  * Get safe content URL from type and slug
  * Returns null if either is invalid
+ * Uses centralized CONTENT_CATEGORY_VALUES to ensure consistency
  */
 function getSafeContentUrl(type: string, slug: string): string | null {
-  if (!(isValidContentType(type) && isValidSlug(slug))) return null;
+  // Validate content type using centralized constant
+  if (!isContentCategory(type)) return null;
+  // Validate slug format
+  if (!isValidSlug(slug)) return null;
+  // sanitizeSlug preserves already-valid slugs, so no need to re-validate
   const sanitizedSlug = sanitizeSlug(slug);
-  if (!isValidSlug(sanitizedSlug)) return null;
   return `/${type}/${sanitizedSlug}`;
 }
 
@@ -71,10 +56,11 @@ function getSafeContentUrl(type: string, slug: string): string | null {
  * Returns null if either is invalid
  */
 function getSafeCollectionUrl(userSlug: string, collectionSlug: string): string | null {
+  // Validate both slugs
   if (!(isValidSlug(userSlug) && isValidSlug(collectionSlug))) return null;
+  // sanitizeSlug preserves already-valid slugs, so no need to re-validate
   const sanitizedUserSlug = sanitizeSlug(userSlug);
   const sanitizedCollectionSlug = sanitizeSlug(collectionSlug);
-  if (!(isValidSlug(sanitizedUserSlug) && isValidSlug(sanitizedCollectionSlug))) return null;
   return `/u/${sanitizedUserSlug}/collections/${sanitizedCollectionSlug}`;
 }
 
@@ -105,13 +91,10 @@ function sanitizeDisplayText(text: string | null | undefined, fallback: string):
     .split('')
     .filter((char) => {
       const code = char.charCodeAt(0);
-      // Filter out control characters (0x00-0x1F, 0x7F-0x9F) except newline/tab, and dangerous Unicode
-      return (
-        (code === 0x09 ||
-          code === 0x0a ||
-          (code < 0x20 || (code >= 0x7f && code <= 0x9f)) === false) &&
-        !dangerousChars.includes(code)
-      );
+      // Allow tab (0x09), newline (0x0a), and printable characters outside control ranges
+      const isControl = code < 0x20 || (code >= 0x7f && code <= 0x9f);
+      const isPrintable = code === 0x09 || code === 0x0a || !isControl;
+      return isPrintable && !dangerousChars.includes(code);
     })
     .join('');
   // Trim and limit length
@@ -137,6 +120,12 @@ export async function generateMetadata({ params }: UserProfilePageProps): Promis
 
 export default async function UserProfilePage({ params }: UserProfilePageProps) {
   const { slug } = await params;
+
+  // Validate route slug before hitting the data layer
+  if (!isValidSlug(slug)) {
+    logger.warn('UserProfilePage: invalid user slug', { slug });
+    notFound();
+  }
 
   const { user: currentUser } = await getAuthenticatedUser({
     requireUser: false,
@@ -192,9 +181,12 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
 
               <div className="mt-4">
                 <h1 className="font-bold text-3xl">{sanitizeDisplayText(profile.name, slug)}</h1>
-                {profile.bio && (
-                  <p className={'mt-2 max-w-2xl text-sm'}>{sanitizeDisplayText(profile.bio, '')}</p>
-                )}
+                {(() => {
+                  const sanitizedBio = profile.bio ? sanitizeDisplayText(profile.bio, '') : '';
+                  return sanitizedBio ? (
+                    <p className={'mt-2 max-w-2xl text-sm'}>{sanitizedBio}</p>
+                  ) : null;
+                })()}
 
                 <div className={'mt-3 flex items-center gap-4 text-sm'}>
                   <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>

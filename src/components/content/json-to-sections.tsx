@@ -94,7 +94,7 @@ function isValidInternalPath(path: string): boolean {
 
 /**
  * Validate and sanitize external URL for safe use in href
- * Only allows HTTPS/HTTP URLs, returns canonicalized URL or null if invalid
+ * Only allows HTTPS for external URLs, HTTP only for localhost/development
  */
 function getSafeExternalUrl(url: string): string | null {
   if (!url || typeof url !== 'string') return null;
@@ -102,7 +102,17 @@ function getSafeExternalUrl(url: string): string | null {
   try {
     const parsed = new URL(url.trim());
     // Only allow HTTPS protocol (or HTTP for localhost/development)
-    if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') return null;
+    const isLocalhost =
+      parsed.hostname === 'localhost' ||
+      parsed.hostname === '127.0.0.1' ||
+      parsed.hostname === '::1';
+    if (parsed.protocol === 'https:') {
+      // HTTPS always allowed
+    } else if (parsed.protocol === 'http:' && isLocalhost) {
+      // HTTP allowed only for local development
+    } else {
+      return null;
+    }
     // Reject dangerous components
     if (parsed.username || parsed.password) return null;
 

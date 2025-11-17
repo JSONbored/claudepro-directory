@@ -90,8 +90,8 @@
     "@supabase/supabase-js": "^2.81.1",
     "@tailwindcss/postcss": "^4.1.17",
     "@types/node": "^24.10.1",
-    "@types/react": "^19.2.5",
-    "@types/react-dom": "^19.2.3",
+    "@types/react": "19.2.5",
+    "@types/react-dom": "19.2.3",
     "@vercel/analytics": "^1.5.0",
     "@vercel/speed-insights": "^1.2.0",
     "canvas-confetti": "^1.9.4",
@@ -106,13 +106,13 @@
     "html2canvas-pro": "^1.5.13",
     "lucide-react": "^0.553.0",
     "motion": "^12.23.24",
-    "next": "16.0.2",
+    "next": "16.0.3",
     "next-safe-action": "^8.0.11",
     "next-themes": "^0.4.6",
     "pino": "^10.1.0",
     "pino-pretty": "^13.1.2",
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
     "react-error-boundary": "^6.0.0",
     "react-hook-form": "^7.66.0",
     "react-share": "^5.2.2",
@@ -127,7 +127,7 @@
   "devDependencies": {
     "@aws-sdk/client-s3": "^3.932.0",
     "@biomejs/biome": "2.3.5",
-    "@next/bundle-analyzer": "^16.0.3",
+    "@next/bundle-analyzer": "16.0.3",
     "@react-email/render": "^2.0.0",
     "@total-typescript/ts-reset": "^0.6.1",
     "@types/archiver": "^7.0.0",
@@ -150,7 +150,9 @@
       "tmp": "^0.2.3",
       "glob": ">=11.0.0",
       "rimraf": ">=6.0.0",
-      "inflight": ">=2.0.0"
+      "inflight": ">=2.0.0",
+      "@types/react": "19.2.5",
+      "@types/react-dom": "19.2.3"
     }
   }
 }

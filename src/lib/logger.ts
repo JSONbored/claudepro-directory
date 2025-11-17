@@ -28,19 +28,19 @@ type LogContext = Record<string, string | number | boolean>;
 
 /**
  * Sanitize log message to prevent log injection
- * Removes control characters and limits length
+ * Removes control characters including newlines, carriage returns, and tabs, and limits length
  */
 function sanitizeLogMessage(message: string): string {
   if (typeof message !== 'string') return String(message);
-  // Remove control characters (0x00-0x1F, 0x7F-0x9F) except newline/tab by filtering
+  // Remove newlines, carriage returns, and tabs to prevent log injection
+  // Then remove remaining control characters
   let sanitized = message
+    .replace(/[\r\n\t]/g, ' ') // Replace newlines, carriage returns, and tabs with spaces
     .split('')
     .filter((char) => {
       const code = char.charCodeAt(0);
-      // Keep newline (0x0A) and tab (0x09), remove other control characters
-      return (
-        code === 0x09 || code === 0x0a || (code < 0x20 || (code >= 0x7f && code <= 0x9f)) === false
-      );
+      // Remove all control characters (0x00-0x1F, 0x7F-0x9F)
+      return code >= 0x20 && (code < 0x7f || code > 0x9f);
     })
     .join('');
   // Limit length to prevent log flooding
@@ -68,17 +68,14 @@ function sanitizeLogContext(context?: LogContext): LogContext | undefined {
     if (!/^[a-zA-Z0-9_-]+$/.test(key)) continue;
 
     if (typeof value === 'string') {
-      // Sanitize string values: remove control characters, limit length
+      // Sanitize string values: remove control characters including newlines and tabs, limit length
       let sanitizedValue = value
+        .replace(/[\r\n\t]/g, ' ') // Replace newlines, carriage returns, and tabs with spaces
         .split('')
         .filter((char) => {
           const code = char.charCodeAt(0);
-          // Keep newline and tab, remove other control characters
-          return (
-            code === 0x09 ||
-            code === 0x0a ||
-            (code < 0x20 || (code >= 0x7f && code <= 0x9f)) === false
-          );
+          // Remove all control characters (0x00-0x1F, 0x7F-0x9F)
+          return code >= 0x20 && (code < 0x7f || code > 0x9f);
         })
         .join('');
       if (sanitizedValue.length > 500) {
@@ -136,7 +133,8 @@ class Logger {
       } else if (typeof error === 'string') {
         logData.err = sanitizeLogMessage(error);
       } else {
-        logData.err = error;
+        // For unknown error types, convert to string and sanitize to prevent log injection
+        logData.err = sanitizeLogMessage(String(error));
       }
     }
     pinoInstance.error(logData, sanitizedMessage);
