@@ -354,22 +354,98 @@ async function handleSearch(url: URL, startTime: number, req: Request): Promise<
     data = (unifiedData || []) as UnifiedSearchResult[];
     error = unifiedError;
   } else {
-    const rpcArgs = {
-      p_query: query || undefined,
-      p_categories: categories,
-      p_tags: tags,
-      p_authors: authors,
-      p_sort: sort,
-      p_limit: limit,
-      p_offset: offset,
-    } satisfies DatabaseGenerated['public']['Functions']['search_content_optimized']['Args'];
-    const { data: contentData, error: contentError } = await callRpc(
-      'search_content_optimized',
-      rpcArgs,
-      true
-    );
-    data = (contentData || []) as ContentSearchResult[];
-    error = contentError;
+    // Content search - use semantic search (full rollout) with keyword fallback
+
+    // Generate embedding for user query (if query provided)
+    let queryEmbedding: number[] | null = null;
+    if (query.trim()) {
+      try {
+        const model = new Supabase.ai.Session('gte-small');
+        queryEmbedding = (await model.run(query, {
+          mean_pool: true,
+          normalize: true,
+        })) as number[];
+      } catch (embeddingError) {
+        // Log but continue with keyword search fallback
+        console.warn('[unified-search] Embedding generation failed, using keyword search', {
+          ...logContext,
+          error: embeddingError instanceof Error ? embeddingError.message : String(embeddingError),
+        });
+      }
+    }
+
+    if (queryEmbedding && query.trim()) {
+      // SEMANTIC SEARCH (Primary Method - Full Rollout)
+      try {
+        const semanticArgs = {
+          query_embedding: JSON.stringify(queryEmbedding),
+          match_threshold: 0.7, // Configurable threshold
+          match_limit: limit,
+          p_categories: categories,
+          p_tags: tags,
+          p_authors: authors,
+          p_offset: offset,
+        } satisfies Database['public']['Functions']['query_content_embeddings']['Args'];
+
+        const { data: semanticData, error: semanticError } = await callRpc(
+          'query_content_embeddings',
+          semanticArgs,
+          true
+        );
+
+        if (!semanticError && semanticData && semanticData.length > 0) {
+          // query_content_embeddings now returns ContentSearchResult format directly
+          data = semanticData;
+          error = null;
+        } else {
+          // Fallback to keyword search if semantic search fails or returns no results
+          throw new Error('Semantic search returned no results');
+        }
+      } catch (semanticError) {
+        // FALLBACK: Keyword search (backward compatibility)
+        console.warn('[unified-search] Semantic search failed, falling back to keyword search', {
+          ...logContext,
+          error: semanticError instanceof Error ? semanticError.message : String(semanticError),
+        });
+
+        const rpcArgs = {
+          p_query: query || undefined,
+          p_categories: categories,
+          p_tags: tags,
+          p_authors: authors,
+          p_sort: sort,
+          p_limit: limit,
+          p_offset: offset,
+        } satisfies DatabaseGenerated['public']['Functions']['search_content_optimized']['Args'];
+
+        const { data: keywordData, error: keywordError } = await callRpc(
+          'search_content_optimized',
+          rpcArgs,
+          true
+        );
+        data = (keywordData || []) as ContentSearchResult[];
+        error = keywordError;
+      }
+    } else {
+      // NO QUERY: Use keyword search for filtering only (no semantic search without query)
+      const rpcArgs = {
+        p_query: undefined,
+        p_categories: categories,
+        p_tags: tags,
+        p_authors: authors,
+        p_sort: sort,
+        p_limit: limit,
+        p_offset: offset,
+      } satisfies DatabaseGenerated['public']['Functions']['search_content_optimized']['Args'];
+
+      const { data: keywordData, error: keywordError } = await callRpc(
+        'search_content_optimized',
+        rpcArgs,
+        true
+      );
+      data = (keywordData || []) as ContentSearchResult[];
+      error = keywordError;
+    }
   }
 
   const dbEndTime = performance.now();

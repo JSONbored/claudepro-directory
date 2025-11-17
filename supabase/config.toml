@@ -51,6 +51,9 @@ verify_jwt = false  # Uses Svix signature verification for auth hooks
 [functions.og-image]
 verify_jwt = false  # Public OG image generation endpoint (rate limited, cached)
 
+[functions.generate-embedding]
+verify_jwt = false  # Database webhook handler (uses service role key in headers)
+
 # =============================================================================
 # Authenticated Functions - Manual JWT Verification in Code
 # =============================================================================

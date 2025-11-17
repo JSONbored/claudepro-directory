@@ -21,33 +21,34 @@ import type { JobStatus } from '@/src/types/database-overrides';
 export const metadata = generatePageMetadata('/account/jobs/:id/analytics');
 
 interface JobAnalyticsPageProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 export default async function JobAnalyticsPage({ params }: JobAnalyticsPageProps) {
   const { user } = await getAuthenticatedUser({ context: 'JobAnalyticsPage' });
+  const { id } = await params;
 
   if (!user) {
     logger.warn('JobAnalyticsPage: unauthenticated access attempt', {
-      jobId: params.id,
+      jobId: id,
     });
     redirect('/login');
   }
 
   let job: Awaited<ReturnType<typeof getUserJobById>> | null = null;
   try {
-    job = await getUserJobById(user.id, params.id);
+    job = await getUserJobById(user.id, id);
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load job analytics detail');
     logger.error('JobAnalyticsPage: getUserJobById threw', normalized, {
-      jobId: params.id,
+      jobId: id,
       userId: user.id,
     });
     throw normalized;
   }
   if (!job) {
     logger.warn('JobAnalyticsPage: job not found or not owned by user', {
-      jobId: params.id,
+      jobId: id,
       userId: user.id,
     });
     notFound();

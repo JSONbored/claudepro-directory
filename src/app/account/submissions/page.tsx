@@ -24,23 +24,30 @@ import type {
 
 export const metadata = generatePageMetadata('/account/submissions');
 
-// Helper: ensure PR URL is a safe GitHub Pull Request link
+// Helper: strictly validate GitHub PR URLs to prevent XSS and redirect attacks
 function isSafePrUrl(url: string | null | undefined): boolean {
   if (!url || typeof url !== 'string') return false;
   try {
-    const parsed = new URL(url, 'https://dummy.local'); // Ensures URL constructor works even for relative URLs
-    // Only allow HTTPS GitHub PR links of the form https://github.com/{owner}/{repo}/pull/{number}
-    if (
-      parsed.protocol === 'https:' &&
-      parsed.hostname === 'github.com' &&
-      /^\/[^/]+\/[^/]+\/pull\/\d+/.test(parsed.pathname)
-    ) {
-      return true;
-    }
+    const parsed = new URL(url);
+    // Only allow HTTPS links to github.com, with /pull/ in path (no fragments, query params, etc)
+    if (parsed.protocol !== 'https:') return false;
+    if (parsed.hostname !== 'github.com') return false;
+    // Strict pattern: /owner/repo/pull/number (no trailing path, query, or fragment)
+    if (!/^\/[^/]+\/[^/]+\/pull\/\d+$/.test(parsed.pathname)) return false;
+    // Reject any query parameters or fragments
+    if (parsed.search || parsed.hash) return false;
+    return true;
   } catch {
-    // Invalid URL
+    return false;
   }
-  return false;
+}
+
+// Sanitizer returns the safe URL or fallback
+function sanitizePrUrl(url: string | null | undefined): string {
+  if (isSafePrUrl(url) && url) {
+    return url;
+  }
+  return '#';
 }
 
 // Allow-list of valid content types shown in URLs
@@ -57,9 +64,24 @@ const ALLOWED_TYPES = [
   'jobs',
 ] as const;
 
-// Conservative content slug validation function
-function isValidSlug(slug: string) {
+// Strict content slug validation - only alphanumeric, hyphens, underscores
+function isValidSlug(slug: string): boolean {
+  if (typeof slug !== 'string') return false;
+  // No path separators, no dots, no percent-encoding, no special chars
   return /^[a-z0-9-_]+$/.test(slug);
+}
+
+// Strict type validation - must be in allowlist
+function isSafeType(type: string): boolean {
+  return ALLOWED_TYPES.includes(type as (typeof ALLOWED_TYPES)[number]);
+}
+
+// Safe URL constructor - validates both type and slug before constructing
+function getSafeContentUrl(type: string, slug: string): string | null {
+  if (!(isSafeType(type) && isValidSlug(slug))) {
+    return null;
+  }
+  return `/${type}/${slug}`;
 }
 
 export default async function SubmissionsPage() {
@@ -243,7 +265,11 @@ export default async function SubmissionsPage() {
                   <div className={UI_CLASSES.FLEX_GAP_2}>
                     {isSafePrUrl(submission.pr_url) && submission.pr_url && (
                       <Button variant="outline" size="sm" asChild={true}>
-                        <a href={submission.pr_url} target="_blank" rel="noopener noreferrer">
+                        <a
+                          href={sanitizePrUrl(submission.pr_url)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
                           <GitPullRequest className="mr-1 h-3 w-3" />
                           View PR
                           <ExternalLink className="ml-1 h-3 w-3" />
@@ -251,16 +277,17 @@ export default async function SubmissionsPage() {
                       </Button>
                     )}
 
-                    {status === 'merged' &&
-                      ALLOWED_TYPES.includes(type as (typeof ALLOWED_TYPES)[number]) &&
-                      isValidSlug(submission.content_slug) && (
+                    {(() => {
+                      const safeUrl = getSafeContentUrl(type, submission.content_slug);
+                      return safeUrl && status === 'merged' ? (
                         <Button variant="outline" size="sm" asChild={true}>
-                          <Link href={`/${type}/${submission.content_slug}`}>
+                          <Link href={safeUrl}>
                             <ExternalLink className="mr-1 h-3 w-3" />
                             View Live
                           </Link>
                         </Button>
-                      )}
+                      ) : null;
+                    })()}
                   </div>
                 </CardContent>
               </Card>

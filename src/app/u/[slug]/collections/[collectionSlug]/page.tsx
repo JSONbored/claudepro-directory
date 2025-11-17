@@ -33,6 +33,37 @@ import type { Tables } from '@/src/types/database.types';
 // Collection pages may have private content
 export const dynamic = 'force-dynamic';
 
+// Whitelisted content types for outgoing links
+const ALLOWED_CONTENT_TYPES = [
+  'agents',
+  'mcp',
+  'rules',
+  'commands',
+  'hooks',
+  'statuslines',
+  'skills',
+  'collections',
+  'guides',
+  'jobs',
+] as const;
+
+function isValidContentType(type: string): boolean {
+  return ALLOWED_CONTENT_TYPES.includes(type as (typeof ALLOWED_CONTENT_TYPES)[number]);
+}
+
+// Slug must be alphanumeric/dash/underscore, no slashes, no protocol
+function isValidSlug(slug: string): boolean {
+  if (typeof slug !== 'string') return false;
+  return /^[a-zA-Z0-9-_]+$/.test(slug);
+}
+
+function getSafeContentLink(item: { content_type: string; content_slug: string }): string | null {
+  if (isValidContentType(item.content_type) && isValidSlug(item.content_slug)) {
+    return `/${item.content_type}/${item.content_slug}`;
+  }
+  return null;
+}
+
 interface PublicCollectionPageProps {
   params: Promise<{ slug: string; collectionSlug: string }>;
 }
@@ -178,20 +209,31 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
                               <CardDescription className="mt-2">{item.notes}</CardDescription>
                             )}
                           </div>
-                          <Link
-                            href={`/${item.content_type}/${item.content_slug}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}
-                            >
-                              <ExternalLink className="h-4 w-4" />
-                              View
-                            </Button>
-                          </Link>
+                          {(() => {
+                            const safeLink = getSafeContentLink(item);
+                            return safeLink ? (
+                              <Link href={safeLink} target="_blank" rel="noopener noreferrer">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}
+                                >
+                                  <ExternalLink className="h-4 w-4" />
+                                  View
+                                </Button>
+                              </Link>
+                            ) : (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}
+                                disabled={true}
+                              >
+                                <ExternalLink className="h-4 w-4" />
+                                View
+                              </Button>
+                            );
+                          })()}
                         </div>
                       </CardHeader>
                     </Card>

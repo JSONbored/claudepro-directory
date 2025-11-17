@@ -22,6 +22,12 @@ export default async function ContactPage() {
   if (!channels.email) {
     logger.warn('ContactPage: email channel is not configured');
   }
+  if (!channels.github) {
+    logger.warn('ContactPage: github channel is not configured');
+  }
+  if (!channels.discord) {
+    logger.warn('ContactPage: discord channel is not configured');
+  }
 
   // Check if terminal feature is enabled
   const terminalResult = await checkContactTerminalEnabled({});
@@ -57,70 +63,76 @@ export default async function ContactPage() {
 
         <div className="grid gap-6 md:grid-cols-2">
           {/* GitHub Discussions */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Github className="h-5 w-5" />
-                GitHub Discussions
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="mb-4 text-muted-foreground">
-                Join the conversation, ask questions, and share ideas with the community.
-              </p>
-              <NavLink
-                href={`${channels.github}/discussions`}
-                external={true}
-                className="inline-flex items-center gap-2"
-              >
-                Visit Discussions →
-              </NavLink>
-            </CardContent>
-          </Card>
+          {channels.github && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Github className="h-5 w-5" />
+                  GitHub Discussions
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="mb-4 text-muted-foreground">
+                  Join the conversation, ask questions, and share ideas with the community.
+                </p>
+                <NavLink
+                  href={`${channels.github}/discussions`}
+                  external={true}
+                  className="inline-flex items-center gap-2"
+                >
+                  Visit Discussions →
+                </NavLink>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Discord Community */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <DiscordIcon className="h-5 w-5" />
-                Discord Community
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="mb-4 text-muted-foreground">
-                Chat with other users, get help, and stay updated on the latest developments.
-              </p>
-              <NavLink
-                href={channels.discord}
-                external={true}
-                className="inline-flex items-center gap-2"
-              >
-                Join Discord →
-              </NavLink>
-            </CardContent>
-          </Card>
+          {channels.discord && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <DiscordIcon className="h-5 w-5" />
+                  Discord Community
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="mb-4 text-muted-foreground">
+                  Chat with other users, get help, and stay updated on the latest developments.
+                </p>
+                <NavLink
+                  href={channels.discord}
+                  external={true}
+                  className="inline-flex items-center gap-2"
+                >
+                  Join Discord →
+                </NavLink>
+              </CardContent>
+            </Card>
+          )}
 
           {/* GitHub Issues */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <MessageSquare className="h-5 w-5" />
-                Report an Issue
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="mb-4 text-muted-foreground">
-                Found a bug or have a feature request? Open an issue on GitHub.
-              </p>
-              <NavLink
-                href={`${channels.github}/issues/new`}
-                external={true}
-                className="inline-flex items-center gap-2"
-              >
-                Create Issue →
-              </NavLink>
-            </CardContent>
-          </Card>
+          {channels.github && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <MessageSquare className="h-5 w-5" />
+                  Report an Issue
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="mb-4 text-muted-foreground">
+                  Found a bug or have a feature request? Open an issue on GitHub.
+                </p>
+                <NavLink
+                  href={`${channels.github}/issues/new`}
+                  external={true}
+                  className="inline-flex items-center gap-2"
+                >
+                  Create Issue →
+                </NavLink>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Email */}
           {channels.email && (

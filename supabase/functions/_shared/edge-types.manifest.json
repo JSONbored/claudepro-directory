@@ -3,6 +3,7 @@
     "newsletter_subscriptions",
     "webhook_events",
     "content",
+    "content_embeddings",
     "content_submissions",
     "notifications",
     "changelog",
@@ -17,6 +18,7 @@
   "functions": [
     "search_content_optimized",
     "search_unified",
+    "query_content_embeddings",
     "get_search_suggestions_from_history",
     "get_search_facets",
     "get_weekly_digest",

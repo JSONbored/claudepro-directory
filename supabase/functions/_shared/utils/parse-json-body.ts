@@ -9,7 +9,7 @@ import { createUtilityContext, logError, logWarn } from './logging.ts';
 
 export interface ParseJsonBodyOptions {
   maxSize?: number;
-  cors?: typeof publicCorsHeaders;
+  cors?: Record<string, string>;
   required?: boolean;
 }
 

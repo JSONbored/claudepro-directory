@@ -704,6 +704,51 @@ export type Database = {
         }
         Relationships: []
       }
+      content_embeddings: {
+        Row: {
+          content_id: string
+          content_text: string
+          created_at: string
+          embedding: string
+          embedding_generated_at: string
+          id: number
+          updated_at: string
+        }
+        Insert: {
+          content_id: string
+          content_text: string
+          created_at?: string
+          embedding: string
+          embedding_generated_at?: string
+          id?: number
+          updated_at?: string
+        }
+        Update: {
+          content_id?: string
+          content_text?: string
+          created_at?: string
+          embedding?: string
+          embedding_generated_at?: string
+          id?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_embeddings_content_id_fkey"
+            columns: ["content_id"]
+            isOneToOne: true
+            referencedRelation: "content"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "content_embeddings_content_id_fkey"
+            columns: ["content_id"]
+            isOneToOne: true
+            referencedRelation: "mv_content_list_slim"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       content_generation_tracking: {
         Row: {
           category: string
@@ -4257,6 +4302,33 @@ export type Database = {
           category_name: string
           items_updated: number
           total_updated: number
+        }[]
+      }
+      query_content_embeddings: {
+        Args: {
+          match_limit?: number
+          match_threshold?: number
+          p_authors?: string[]
+          p_categories?: string[]
+          p_offset?: number
+          p_tags?: string[]
+          query_embedding: string
+        }
+        Returns: {
+          author: string
+          author_profile_url: string
+          bookmark_count: number
+          category: string
+          content_id: string
+          copy_count: number
+          created_at: string
+          description: string
+          similarity: number
+          slug: string
+          tags: string[]
+          title: string
+          updated_at: string
+          view_count: number
         }[]
       }
       refresh_mv_site_urls: { Args: never; Returns: undefined }

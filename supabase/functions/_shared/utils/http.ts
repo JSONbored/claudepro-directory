@@ -134,7 +134,7 @@ export function errorResponse(
 
 export function badRequestResponse(
   message: string,
-  cors = publicCorsHeaders,
+  cors: Record<string, string> = publicCorsHeaders,
   additionalHeaders?: Record<string, string>
 ): Response {
   return jsonResponse({ error: 'Bad Request', message }, 400, cors, additionalHeaders);

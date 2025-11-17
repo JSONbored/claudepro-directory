@@ -52,22 +52,43 @@ function isSafeRepositoryUrl(url: string): boolean {
 /**
  * Validate documentation URL is safe for opening
  * Only allows HTTPS URLs from trusted hosts.
+ * TODO: For robust security, consider loading trusted hostnames from server-side configuration or environment variables.
  */
 const TRUSTED_DOC_HOSTNAMES = [
   'docs.trusted.com', // Example trusted documentation domain
-  'developer.trusted.com', // Add more as needed
+  'developer.trusted.com', // Example additional trusted domain
+  // Wildcard domains (match any subdomain): add as '*.trusted.com'
   // Add additional trusted documentation domains below.
 ] as const;
 
-function isTrustedDocumentationUrl(url: string): boolean {
+function isTrustedDocHostname(hostname: string): boolean {
+  return TRUSTED_DOC_HOSTNAMES.some((trusted) => {
+    // Handle wildcard domains of form "*.trusted.com"
+    if (trusted.startsWith('*.')) {
+      const root = trusted.slice(2); // remove "*."
+      return hostname === root || hostname.endsWith(`.${root}`);
+    }
+    return hostname === trusted;
+  });
+}
+
+/**
+ * Validate and sanitize documentation URL
+ * Returns sanitized URL (with query/fragment removed) or null if invalid
+ */
+function isTrustedDocumentationUrl(url: string): string | null {
   try {
     const parsed = new URL(url);
-    return (
-      parsed.protocol === 'https:' &&
-      TRUSTED_DOC_HOSTNAMES.includes(parsed.hostname as (typeof TRUSTED_DOC_HOSTNAMES)[number])
-    );
+    // Require HTTPS and trusted hostname
+    if (parsed.protocol === 'https:' && isTrustedDocHostname(parsed.hostname)) {
+      // Remove query string and fragment for redirect
+      parsed.search = '';
+      parsed.hash = '';
+      return parsed.toString();
+    }
+    return null;
   } catch {
-    return false;
+    return null;
   }
 }
 
@@ -628,8 +649,9 @@ export const ConfigCard = memo(
                           }
                         );
                       });
-                    if (isTrustedDocumentationUrl(item.documentation_url as string)) {
-                      window.open(item.documentation_url as string, '_blank');
+                    const safeDocUrl = isTrustedDocumentationUrl(item.documentation_url as string);
+                    if (safeDocUrl) {
+                      window.open(safeDocUrl, '_blank');
                     } else {
                       logClientWarning('ConfigCard: Blocked untrusted documentation URL', {
                         url: item.documentation_url,

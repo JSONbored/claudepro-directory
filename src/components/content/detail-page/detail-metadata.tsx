@@ -7,7 +7,6 @@
  * Performance: Eliminated from client bundle, server-rendered for instant display
  */
 
-import he from 'he';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { getSocialLinks } from '@/src/lib/data/marketing/contact';
 import { Calendar, Copy, Eye, Tag, User } from '@/src/lib/icons';
@@ -91,7 +90,7 @@ export function DetailMetadata({ item, viewCount, copyCount }: DetailMetadataPro
                   'author_profile_url' in item &&
                   isSafeAuthorProfileUrl(item.author_profile_url) &&
                   item.author_profile_url
-                    ? he.encode(item.author_profile_url, { useNamedReferences: true })
+                    ? item.author_profile_url
                     : SOCIAL_LINK_SNAPSHOT.authorProfile
                 }
                 target="_blank"

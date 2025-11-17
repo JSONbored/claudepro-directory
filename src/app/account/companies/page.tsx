@@ -144,7 +144,7 @@ export default async function CompaniesPage() {
         </Card>
       ) : (
         <div className="grid gap-4">
-          {companies.map((company) => {
+          {companies.map((company, index) => {
             return (
               <Card key={company.id}>
                 <CardHeader>
@@ -157,7 +157,7 @@ export default async function CompaniesPage() {
                           width={64}
                           height={64}
                           className="h-16 w-16 rounded-lg border object-cover"
-                          priority={true}
+                          priority={index === 0}
                         />
                       ) : (
                         <div className="flex h-16 w-16 items-center justify-center rounded-lg border bg-accent">
@@ -176,30 +176,21 @@ export default async function CompaniesPage() {
                         <CardDescription className="mt-1">
                           {company.description || 'No description provided'}
                         </CardDescription>
-                        {company.website && isAllowedHttpUrl(company.website) ? (
-                          <a
-                            href={company.website}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className={`mt-2 inline-flex items-center gap-1 text-sm ${UI_CLASSES.LINK_ACCENT}`}
-                          >
-                            <ExternalLink className="h-3 w-3" />
-                            {String(company.website.replace(/^https?:\/\//, '')).replace(
-                              /[<>"'`]/g,
-                              ''
-                            )}
-                          </a>
-                        ) : company.website ? (
-                          <span
-                            className={`mt-2 inline-flex items-center gap-1 text-sm ${UI_CLASSES.LINK_ACCENT}`}
-                          >
-                            <ExternalLink className="h-3 w-3" />
-                            {String(company.website.replace(/^https?:\/\//, '')).replace(
-                              /[<>"'`]/g,
-                              ''
-                            )}
-                          </span>
-                        ) : null}
+                        {(() => {
+                          const website = company.website;
+                          if (!(website && isAllowedHttpUrl(website))) return null;
+                          return (
+                            <a
+                              href={website}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className={`mt-2 inline-flex items-center gap-1 text-sm ${UI_CLASSES.LINK_ACCENT}`}
+                            >
+                              <ExternalLink className="h-3 w-3" />
+                              {String(website.replace(/^https?:\/\//, '')).replace(/[<>"'`]/g, '')}
+                            </a>
+                          );
+                        })()}
                       </div>
                     </div>
                   </div>

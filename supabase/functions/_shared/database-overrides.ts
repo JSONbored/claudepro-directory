@@ -44,6 +44,40 @@ export type Database = DatabaseGenerated & {
         };
         Returns: GetFilterJobsReturn;
       };
+      query_content_embeddings: {
+        Args: {
+          query_embedding: string; // JSON stringified vector
+          match_threshold?: number;
+          match_limit?: number;
+          p_categories?: string[] | null;
+          p_tags?: string[] | null;
+          p_authors?: string[] | null;
+          p_offset?: number;
+        };
+        Returns: Array<{
+          _featured: Json;
+          author: string;
+          author_profile_url: string;
+          bookmark_count: number;
+          category: string;
+          combined_score: number;
+          copyCount: number;
+          created_at: string;
+          date_added: string;
+          description: string;
+          examples: Json;
+          features: Json;
+          id: string;
+          relevance_score: number;
+          slug: string;
+          source: string;
+          tags: string[];
+          title: string;
+          updated_at: string;
+          use_cases: Json;
+          viewCount: number;
+        }>;
+      };
     };
   };
 };
