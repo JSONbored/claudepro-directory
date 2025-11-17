@@ -55,8 +55,9 @@ function getSafeUserProfileUrl(slug: string | null | undefined): string | null {
  */
 function sanitizeDisplayName(name: string | null | undefined, fallback: string): string {
   if (!name || typeof name !== 'string') return fallback;
-  // Remove HTML tags and script content
-  let sanitized = name.replace(/<[^>]*>/g, '').replace(/<script[^>]*>.*?<\/script>/gi, '');
+  // Remove all < and > characters to fully prevent incomplete tag removal
+  // This is the safest approach for display names which should never contain HTML
+  let sanitized = name.replace(/<|>/g, '');
   // Remove control characters and dangerous Unicode by filtering character codes
   // Control characters: 0x00-0x1F, 0x7F-0x9F
   // Dangerous Unicode: RTL override marks, directional isolates

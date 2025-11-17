@@ -84,8 +84,9 @@ function getSafeCollectionUrl(userSlug: string, collectionSlug: string): string 
  */
 function sanitizeDisplayText(text: string | null | undefined, fallback: string): string {
   if (!text || typeof text !== 'string') return fallback;
-  // Remove HTML tags and script content
-  let sanitized = text.replace(/<[^>]*>/g, '').replace(/<script[^>]*>.*?<\/script>/gi, '');
+  // Remove all angle brackets to prevent HTML/script injection (safest for plain text display)
+  // This completely eliminates any possibility of HTML tag injection
+  let sanitized = text.replace(/[<>]/g, '');
   // Remove control characters and dangerous Unicode by filtering character codes
   const dangerousChars = [
     0x202e,

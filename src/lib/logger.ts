@@ -56,8 +56,17 @@ function sanitizeLogMessage(message: string): string {
  */
 function sanitizeLogContext(context?: LogContext): LogContext | undefined {
   if (!context) return context;
-  const sanitized: LogContext = {};
+  // Use Object.create(null) to create a plain object without prototype
+  // This prevents prototype pollution attacks since there's no __proto__ to pollute
+  const sanitized = Object.create(null) as LogContext;
   for (const [key, value] of Object.entries(context)) {
+    // Validate key to prevent prototype pollution: only allow safe property names
+    // Skip keys that could be used for attacks (e.g., __proto__, constructor)
+    // Also sanitize key to ensure it's a valid identifier
+    if (!key || typeof key !== 'string') continue;
+    // Only allow alphanumeric, underscore, and hyphen in keys (safe for logging)
+    if (!/^[a-zA-Z0-9_-]+$/.test(key)) continue;
+
     if (typeof value === 'string') {
       // Sanitize string values: remove control characters, limit length
       let sanitizedValue = value
