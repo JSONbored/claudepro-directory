@@ -52,9 +52,9 @@ export async function GET() {
       });
     }
 
-    const total = monthSubmissions?.length || 1;
+    const total = monthSubmissions?.length || 0;
     const approved = monthSubmissions?.filter((s) => s.status === 'merged').length || 0;
-    const successRate = Math.round((approved / total) * 100);
+    const successRate = total > 0 ? Math.round((approved / total) * 100) : null;
 
     // Get top contributors this week (unique authors with most submissions)
     const contributorCounts = new Map<string, number>();

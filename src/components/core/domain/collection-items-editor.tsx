@@ -28,9 +28,29 @@ import {
 import { isValidCategory } from '@/src/lib/data/config/category';
 import { ArrowDown, ArrowUp, ExternalLink, Plus, Trash } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { sanitizeSlug } from '@/src/lib/utils/content.utils';
 import { logClientWarning } from '@/src/lib/utils/error.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
 import type { Tables } from '@/src/types/database.types';
+
+/**
+ * Validate slug is safe for use in URLs
+ */
+function isValidSlug(slug: string): boolean {
+  if (typeof slug !== 'string' || slug.length === 0) return false;
+  return /^[a-zA-Z0-9-_]+$/.test(slug);
+}
+
+/**
+ * Get safe content URL from type and slug
+ * Returns null if either is invalid
+ */
+function getSafeContentUrl(type: string, slug: string): string | null {
+  if (!(isValidCategory(type) && isValidSlug(slug))) return null;
+  const sanitizedSlug = sanitizeSlug(slug);
+  if (!isValidSlug(sanitizedSlug)) return null;
+  return `/${type}/${sanitizedSlug}`;
+}
 
 type CollectionItem = Tables<'collection_items'>;
 type Bookmark = Tables<'bookmarks'>;
@@ -288,17 +308,21 @@ export function CollectionItemManager({
 
               {/* Actions */}
               <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className={`${UI_CLASSES.ICON_XL} p-0`}
-                  onClick={() =>
-                    window.open(`/${item.content_type}/${item.content_slug}`, '_blank')
-                  }
-                  aria-label="View item"
-                >
-                  <ExternalLink className={UI_CLASSES.ICON_SM} />
-                </Button>
+                {(() => {
+                  const safeContentUrl = getSafeContentUrl(item.content_type, item.content_slug);
+                  if (!safeContentUrl) return null;
+                  return (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className={`${UI_CLASSES.ICON_XL} p-0`}
+                      onClick={() => window.open(safeContentUrl, '_blank')}
+                      aria-label="View item"
+                    >
+                      <ExternalLink className={UI_CLASSES.ICON_SM} />
+                    </Button>
+                  );
+                })()}
                 <Button
                   variant="ghost"
                   size="sm"

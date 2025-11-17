@@ -74,7 +74,14 @@ export function useOnboardingToasts({
 
     const fetchNotifications = async () => {
       try {
-        const response = await fetch('/api/flux-station/active-notifications', {
+        const fluxStationUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+          ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/flux-station/active-notifications`
+          : null;
+        if (!fluxStationUrl) {
+          logger.warn('NEXT_PUBLIC_SUPABASE_URL not configured, skipping notification fetch');
+          return;
+        }
+        const response = await fetch(fluxStationUrl, {
           headers: {
             Authorization: `Bearer ${user.id}`,
           },
@@ -118,26 +125,16 @@ export function useOnboardingToasts({
       seenData[context] = true;
       localStorage.setItem(STORAGE_KEY, JSON.stringify(seenData));
 
-      // Dismiss notifications in database (async)
-      if (user) {
-        await fetch('/api/notifications/dismiss', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${user.id}`,
-          },
-          body: JSON.stringify({
-            userId: user.id,
-            context,
-          }),
-        });
-      }
+      // Dismiss notifications in database (async) via edge function
+      // Note: This is a no-op since we don't have notification IDs here
+      // The actual dismissal happens when users interact with notifications
+      // This hook just tracks localStorage state
 
       setHasSeenToasts(true);
     } catch {
       // Ignore errors when marking toasts as seen
     }
-  }, [context, user]);
+  }, [context]);
 
   // Create onboarding notifications via flux-station
   useEffect(() => {
@@ -147,26 +144,27 @@ export function useOnboardingToasts({
       const toastsToShow = customToasts || ONBOARDING_TOASTS;
 
       try {
-        // Create notifications in database via Supabase client
+        // Create notifications in database via edge function
+        const fluxStationUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+          ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/flux-station/notifications/create`
+          : null;
+        if (!fluxStationUrl) {
+          logger.warn('NEXT_PUBLIC_SUPABASE_URL not configured, skipping notification creation');
+          return;
+        }
         for (const toast of toastsToShow) {
-          await fetch('/api/notifications/create', {
+          await fetch(fluxStationUrl, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
               Authorization: `Bearer ${user.id}`,
             },
             body: JSON.stringify({
-              userId: user.id,
-              type: 'onboarding',
+              type: 'announcement', // Edge function expects 'announcement' or 'feedback'
               priority: 'low',
               title: toast.title,
               message: toast.message,
-              metadata: {
-                context,
-                toastId: toast.id,
-                delay: toast.delay,
-                duration: toast.duration,
-              },
+              // Note: metadata field is not supported by notifications table schema
             }),
           });
 

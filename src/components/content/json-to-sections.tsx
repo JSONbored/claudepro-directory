@@ -4,6 +4,7 @@
 
 'use client';
 
+import DOMPurify from 'dompurify';
 import { Checklist } from '@/src/components/content/checklist';
 import { ProductionCodeBlock } from '@/src/components/content/interactive-code-block';
 import { UnifiedContentBlock } from '@/src/components/content/markdown-content-block';
@@ -73,6 +74,53 @@ interface ResourceItem {
   description: string;
   type: string;
   external?: boolean;
+}
+
+/**
+ * Validate internal navigation path is safe
+ * Only allows relative paths starting with /, no protocol-relative URLs
+ */
+function isValidInternalPath(path: string): boolean {
+  if (typeof path !== 'string' || path.length === 0) return false;
+  // Must start with / for relative paths
+  if (!path.startsWith('/')) return false;
+  // Reject protocol-relative URLs (//example.com)
+  if (path.startsWith('//')) return false;
+  // Reject dangerous protocols
+  if (/^(javascript|data|vbscript|file):/i.test(path)) return false;
+  // Basic path validation - allow alphanumeric, slashes, hyphens, underscores, query params, hash
+  return /^\/[a-zA-Z0-9/?#\-_.~!*'();:@&=+$,%[\]]*$/.test(path);
+}
+
+/**
+ * Validate and sanitize external URL for safe use in href
+ * Only allows HTTPS/HTTP URLs, returns canonicalized URL or null if invalid
+ */
+function getSafeExternalUrl(url: string): string | null {
+  if (!url || typeof url !== 'string') return null;
+
+  try {
+    const parsed = new URL(url.trim());
+    // Only allow HTTPS protocol (or HTTP for localhost/development)
+    if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') return null;
+    // Reject dangerous components
+    if (parsed.username || parsed.password) return null;
+
+    // Sanitize: remove credentials
+    parsed.username = '';
+    parsed.password = '';
+    // Normalize hostname
+    parsed.hostname = parsed.hostname.replace(/\.$/, '').toLowerCase();
+    // Remove default ports
+    if (parsed.port === '80' || parsed.port === '443') {
+      parsed.port = '';
+    }
+
+    // Return canonicalized href
+    return parsed.href;
+  } catch {
+    return null;
+  }
 }
 
 type SectionBase = {
@@ -201,9 +249,73 @@ type Section =
   | ChecklistSection
   | RelatedContentSection;
 
+/**
+ * TrustedHTML - Safely renders HTML content with XSS protection
+ * Sanitizes HTML using DOMPurify before rendering
+ */
 function TrustedHTML({ html, className, id }: { html: string; className?: string; id?: string }) {
-  // biome-ignore lint/security/noDangerouslySetInnerHtml: Content is from owner-controlled JSON files, not user input
-  return <div id={id} className={className} dangerouslySetInnerHTML={{ __html: html }} />;
+  if (!html || typeof html !== 'string') {
+    return <div id={id} className={className} />;
+  }
+
+  // Sanitize HTML to prevent XSS
+  // Allow common markdown-generated HTML tags for content sections
+  const safeHtml = DOMPurify.sanitize(html, {
+    ALLOWED_TAGS: [
+      'p',
+      'br',
+      'strong',
+      'em',
+      'b',
+      'i',
+      'u',
+      'a',
+      'ul',
+      'ol',
+      'li',
+      'h1',
+      'h2',
+      'h3',
+      'h4',
+      'h5',
+      'h6',
+      'code',
+      'pre',
+      'blockquote',
+      'span',
+      'div',
+      'table',
+      'thead',
+      'tbody',
+      'tr',
+      'th',
+      'td',
+      'img',
+    ],
+    ALLOWED_ATTR: [
+      'href',
+      'title',
+      'target',
+      'rel',
+      'class',
+      'id',
+      'src',
+      'alt',
+      'width',
+      'height',
+    ],
+    ALLOWED_URI_REGEXP:
+      /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|sms|cid|xmpp|data):|[^a-z]|[a-z+.-]+(?:[^a-z+.\-:]|$))/i,
+  });
+
+  return (
+    <div
+      id={id}
+      className={className}
+      // biome-ignore lint/security/noDangerouslySetInnerHtml: HTML is sanitized with DOMPurify with strict allowlist
+      dangerouslySetInnerHTML={{ __html: safeHtml }}
+    />
+  );
 }
 
 function render_section(section: Section, index: number): React.ReactNode {
@@ -498,19 +610,39 @@ function render_section(section: Section, index: number): React.ReactNode {
           )}
           {section.resources && section.resources.length > 0 && (
             <div className="grid gap-4">
-              {section.resources.map((r: ResourceItem, idx: number) => (
-                <a
-                  key={`${r.url}-${idx}`}
-                  href={r.url}
-                  target={r.external ? '_blank' : undefined}
-                  rel={r.external ? 'noopener noreferrer' : undefined}
-                  className="rounded-lg border p-4 transition-colors hover:bg-muted/50"
-                >
-                  <h4 className="mb-1 font-semibold">{r.title}</h4>
-                  <p className="mb-2 text-muted-foreground text-sm">{r.description}</p>
-                  <span className="text-primary text-xs uppercase">{r.type}</span>
-                </a>
-              ))}
+              {section.resources.map((r: ResourceItem, idx: number) => {
+                // Validate and sanitize URL based on whether it's external or internal
+                const safeUrl = r.external
+                  ? getSafeExternalUrl(r.url)
+                  : isValidInternalPath(r.url)
+                    ? r.url
+                    : null;
+
+                // Don't render if URL is invalid or unsafe
+                if (!safeUrl) {
+                  return (
+                    <div key={`${r.url}-${idx}`} className="rounded-lg border p-4 opacity-50">
+                      <h4 className="mb-1 font-semibold">{r.title}</h4>
+                      <p className="mb-2 text-muted-foreground text-sm">{r.description}</p>
+                      <span className="text-primary text-xs uppercase">{r.type}</span>
+                    </div>
+                  );
+                }
+
+                return (
+                  <a
+                    key={`${r.url}-${idx}`}
+                    href={safeUrl}
+                    target={r.external ? '_blank' : undefined}
+                    rel={r.external ? 'noopener noreferrer' : undefined}
+                    className="rounded-lg border p-4 transition-colors hover:bg-muted/50"
+                  >
+                    <h4 className="mb-1 font-semibold">{r.title}</h4>
+                    <p className="mb-2 text-muted-foreground text-sm">{r.description}</p>
+                    <span className="text-primary text-xs uppercase">{r.type}</span>
+                  </a>
+                );
+              })}
             </div>
           )}
         </div>

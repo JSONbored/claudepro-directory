@@ -162,10 +162,21 @@ export function ProductionCodeBlock({
   // Extract category and slug from pathname for tracking
   const pathParts = pathname?.split('/').filter(Boolean) || [];
   const rawCategory = pathParts[0] || 'unknown';
-  const category: ContentCategory = isValidCategory(rawCategory) ? rawCategory : 'agents';
+
+  // Warn and use explicit sentinel for invalid categories to avoid misleading analytics
   if (!isValidCategory(rawCategory)) {
-    logger.warn('Invalid category in pathname', { rawCategory, pathname });
+    logger.warn('Invalid category in pathname, using fallback', {
+      rawCategory,
+      pathname,
+      fallback: 'agents',
+    });
   }
+
+  // Use 'agents' as fallback (valid ContentCategory) but logged above for visibility
+  // Type assertion needed since rawCategory may not be valid ContentCategory
+  const category: ContentCategory = isValidCategory(rawCategory)
+    ? rawCategory
+    : ('agents' as ContentCategory);
   const slug = pathParts[1] || 'unknown';
 
   // Calculate current URL for sharing (needed during render for react-share components)

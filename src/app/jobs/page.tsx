@@ -370,16 +370,9 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
                 </div>
 
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                  {jobs
-                    .map((job) => ({
-                      ...job,
-                      payment_status: job.payment_status ?? 'unpaid',
-                      status: job.status ?? 'draft',
-                      workplace: job.workplace ?? 'On site',
-                    }))
-                    .map((job) => (
-                      <JobCard key={job.slug} job={job} />
-                    ))}
+                  {jobs.map((job) => (
+                    <JobCard key={job.slug} job={job} />
+                  ))}
                 </div>
               </>
             )}

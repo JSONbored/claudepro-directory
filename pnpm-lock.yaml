@@ -125,9 +125,6 @@ importers:
       geist:
         specifier: ^1.5.1
         version: 1.5.1(next@16.0.2(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.0(react@19.2.0))(react@19.2.0))
-      he:
-        specifier: ^1.2.0
-        version: 1.2.0
       html2canvas-pro:
         specifier: ^1.5.13
         version: 1.5.13
@@ -225,6 +222,9 @@ importers:
       babel-plugin-react-compiler:
         specifier: ^1.0.0
         version: 1.0.0
+      he:
+        specifier: ^1.2.0
+        version: 1.2.0
       knip:
         specifier: ^5.69.1
         version: 5.69.1(@types/node@24.10.1)(typescript@5.9.3)
@@ -2352,8 +2352,8 @@ packages:
   css-line-break@2.1.0:
     resolution: {integrity: sha512-FHcKFCZcAha3LwfVBhCQbW2nCNbkZXn7KVUJcsT5/P8YmfsVja0FMPJr0B903j/E69HUphKiV9iQArX8SDYA4w==}
 
-  csstype@3.2.2:
-    resolution: {integrity: sha512-D80T+tiqkd/8B0xNlbstWDG4x6aqVfO52+OlSUNIdkTvmNw0uQpJLeos2J/2XvpyidAFuTPmpad+tUxLndwj6g==}
+  csstype@3.2.3:
+    resolution: {integrity: sha512-z1HGKcYy2xA8AGQfwrn0PAy+PB7X/GSj3UVJW9qKyn43xWa+gl5nXmU4qqLMRzWVLFC8KusUX8T/0kCiOYpAIQ==}
 
   dateformat@4.6.3:
     resolution: {integrity: sha512-2P0p0pFGzHS5EMnhdxQi7aJN+iMheud0UhG4dlE1DLAlvL8JHjJJTX/CSm4JXwV0Ka5nGk3zC5mcb5bUQUxxMA==}
@@ -5752,7 +5752,7 @@ snapshots:
 
   '@types/react@19.2.5':
     dependencies:
-      csstype: 3.2.2
+      csstype: 3.2.3
 
   '@types/readdir-glob@1.1.5':
     dependencies:
@@ -6084,7 +6084,7 @@ snapshots:
     dependencies:
       utrie: 1.0.2
 
-  csstype@3.2.2: {}
+  csstype@3.2.3: {}
 
   dateformat@4.6.3: {}
 

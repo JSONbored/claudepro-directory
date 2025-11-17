@@ -64,7 +64,7 @@ function formatTimeAgo(dateString: string): string {
 export const metadata: Promise<import('next').Metadata> = generatePageMetadata('/submit');
 
 /**
- * Static generation: Dashboard data fetched at build time
+ * Edge-cached data: Dashboard data fetched from edge-cached data layer
  */
 export const revalidate = false;
 

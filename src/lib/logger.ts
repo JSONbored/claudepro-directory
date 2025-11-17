@@ -26,18 +26,84 @@ const pinoInstance = isDevelopment
 
 type LogContext = Record<string, string | number | boolean>;
 
+/**
+ * Sanitize log message to prevent log injection
+ * Removes control characters and limits length
+ */
+function sanitizeLogMessage(message: string): string {
+  if (typeof message !== 'string') return String(message);
+  // Remove control characters (0x00-0x1F, 0x7F-0x9F) except newline/tab by filtering
+  let sanitized = message
+    .split('')
+    .filter((char) => {
+      const code = char.charCodeAt(0);
+      // Keep newline (0x0A) and tab (0x09), remove other control characters
+      return (
+        code === 0x09 || code === 0x0a || (code < 0x20 || (code >= 0x7f && code <= 0x9f)) === false
+      );
+    })
+    .join('');
+  // Limit length to prevent log flooding
+  if (sanitized.length > 1000) {
+    sanitized = `${sanitized.slice(0, 1000)}... [truncated]`;
+  }
+  return sanitized;
+}
+
+/**
+ * Sanitize log context values to prevent log injection
+ * Recursively sanitizes string values in context objects
+ */
+function sanitizeLogContext(context?: LogContext): LogContext | undefined {
+  if (!context) return context;
+  const sanitized: LogContext = {};
+  for (const [key, value] of Object.entries(context)) {
+    if (typeof value === 'string') {
+      // Sanitize string values: remove control characters, limit length
+      let sanitizedValue = value
+        .split('')
+        .filter((char) => {
+          const code = char.charCodeAt(0);
+          // Keep newline and tab, remove other control characters
+          return (
+            code === 0x09 ||
+            code === 0x0a ||
+            (code < 0x20 || (code >= 0x7f && code <= 0x9f)) === false
+          );
+        })
+        .join('');
+      if (sanitizedValue.length > 500) {
+        sanitizedValue = `${sanitizedValue.slice(0, 500)}... [truncated]`;
+      }
+      sanitized[key] = sanitizedValue;
+    } else {
+      sanitized[key] = value;
+    }
+  }
+  return sanitized;
+}
+
 // Wrapper to match existing API signature
 class Logger {
   debug(message: string, context?: LogContext, metadata?: LogContext): void {
-    pinoInstance.debug({ ...context, ...metadata }, message);
+    const sanitizedMessage = sanitizeLogMessage(message);
+    const sanitizedContext = sanitizeLogContext(context);
+    const sanitizedMetadata = sanitizeLogContext(metadata);
+    pinoInstance.debug({ ...sanitizedContext, ...sanitizedMetadata }, sanitizedMessage);
   }
 
   info(message: string, context?: LogContext, metadata?: LogContext): void {
-    pinoInstance.info({ ...context, ...metadata }, message);
+    const sanitizedMessage = sanitizeLogMessage(message);
+    const sanitizedContext = sanitizeLogContext(context);
+    const sanitizedMetadata = sanitizeLogContext(metadata);
+    pinoInstance.info({ ...sanitizedContext, ...sanitizedMetadata }, sanitizedMessage);
   }
 
   warn(message: string, context?: LogContext, metadata?: LogContext): void {
-    pinoInstance.warn({ ...context, ...metadata }, message);
+    const sanitizedMessage = sanitizeLogMessage(message);
+    const sanitizedContext = sanitizeLogContext(context);
+    const sanitizedMetadata = sanitizeLogContext(metadata);
+    pinoInstance.warn({ ...sanitizedContext, ...sanitizedMetadata }, sanitizedMessage);
   }
 
   error(
@@ -46,7 +112,25 @@ class Logger {
     context?: LogContext,
     metadata?: LogContext
   ): void {
-    pinoInstance.error({ err: error, ...context, ...metadata }, message);
+    const sanitizedMessage = sanitizeLogMessage(message);
+    const sanitizedContext = sanitizeLogContext(context);
+    const sanitizedMetadata = sanitizeLogContext(metadata);
+    const logData: Record<string, unknown> = { ...sanitizedContext, ...sanitizedMetadata };
+    if (error !== undefined) {
+      // For Error objects, extract message safely
+      if (error instanceof Error) {
+        logData.err = {
+          message: sanitizeLogMessage(error.message),
+          name: error.name,
+          stack: error.stack ? sanitizeLogMessage(error.stack) : undefined,
+        };
+      } else if (typeof error === 'string') {
+        logData.err = sanitizeLogMessage(error);
+      } else {
+        logData.err = error;
+      }
+    }
+    pinoInstance.error(logData, sanitizedMessage);
   }
 
   fatal(

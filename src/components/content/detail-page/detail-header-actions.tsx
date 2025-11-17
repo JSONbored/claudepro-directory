@@ -28,6 +28,48 @@ function sanitizePathSegment(segment: string): string {
   return segment;
 }
 
+/**
+ * Validate and sanitize Supabase storage URL for safe use in window.location.href
+ * Only allows HTTPS URLs from Supabase storage domains
+ * Returns canonicalized URL or null if invalid
+ */
+function getSafeStorageUrl(url: string | null | undefined): string | null {
+  if (!url || typeof url !== 'string') return null;
+
+  try {
+    const parsed = new URL(url.trim());
+    // Only allow HTTPS protocol
+    if (parsed.protocol !== 'https:') return null;
+
+    // Validate it's from Supabase storage
+    // Supabase storage URLs typically have pattern: https://<project>.supabase.co/storage/v1/object/public/<bucket>/<path>
+    const isSupabaseStorage =
+      parsed.hostname.endsWith('.supabase.co') ||
+      parsed.hostname.endsWith('.supabase.in') ||
+      parsed.pathname.startsWith('/storage/v1/object/public/');
+
+    if (!isSupabaseStorage) return null;
+
+    // Reject dangerous components
+    if (parsed.username || parsed.password) return null;
+
+    // Sanitize: remove credentials
+    parsed.username = '';
+    parsed.password = '';
+    // Normalize hostname
+    parsed.hostname = parsed.hostname.replace(/\.$/, '').toLowerCase();
+    // Remove default ports
+    if (parsed.port === '443') {
+      parsed.port = '';
+    }
+
+    // Return canonicalized href
+    return parsed.href;
+  } catch {
+    return null;
+  }
+}
+
 import { motion } from 'motion/react';
 import { useRouter } from 'next/navigation';
 import { ContentActionButton } from '@/src/components/core/buttons/shared/content-action-button';
@@ -169,7 +211,15 @@ export function DetailHeaderActions({
   const handleActionClick = (action: SerializableAction) => {
     // Handle download action - check for storage_url
     if (action.type === 'download' && 'storage_url' in item && item.storage_url) {
-      window.location.href = item.storage_url;
+      // Validate and sanitize storage URL before redirect
+      const safeStorageUrl = getSafeStorageUrl(item.storage_url as string);
+      if (!safeStorageUrl) {
+        toasts.raw.error('Invalid download URL', {
+          description: 'The download link is not available.',
+        });
+        return;
+      }
+      window.location.href = safeStorageUrl;
       toasts.raw.success('Download started!', {
         description: `Downloading ${item.title || item.slug} package...`,
       });

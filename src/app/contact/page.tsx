@@ -12,8 +12,8 @@ import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 export const metadata = generatePageMetadata('/contact');
 
 /**
- * ISR Configuration: Marketing pages update infrequently
- * revalidate: 86400 = Revalidate every 24 hours
+ * Static Generation: Marketing pages are fully static
+ * revalidate: false = Static generation at build time
  */
 export const revalidate = false;
 

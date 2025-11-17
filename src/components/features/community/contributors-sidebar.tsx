@@ -20,6 +20,74 @@ import type { UserProfile } from '@/src/components/core/domain/cards/user-profil
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
 import { Award, Medal, TrendingUp } from '@/src/lib/icons';
 import { POSITION_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
+import { sanitizeSlug } from '@/src/lib/utils/content.utils';
+
+/**
+ * Validate slug is safe for use in URLs
+ * Only allows alphanumeric characters, hyphens, and underscores
+ */
+function isValidSlug(slug: string): boolean {
+  if (typeof slug !== 'string' || slug.length === 0) return false;
+  // Strict pattern: only alphanumeric, hyphens, underscores
+  // No path separators, no dots, no special chars
+  return /^[a-zA-Z0-9-_]+$/.test(slug);
+}
+
+/**
+ * Get safe user profile URL from slug
+ * Returns null if slug is invalid or unsafe
+ */
+function getSafeUserProfileUrl(slug: string | null | undefined): string | null {
+  if (!slug || typeof slug !== 'string') return null;
+  // Validate slug format
+  if (!isValidSlug(slug)) return null;
+  // Sanitize to remove any potentially dangerous characters
+  const sanitized = sanitizeSlug(slug);
+  // Double-check after sanitization
+  if (!isValidSlug(sanitized) || sanitized.length === 0) return null;
+  return `/u/${sanitized}`;
+}
+
+/**
+ * Sanitize display name for safe use in text content and attributes
+ * Removes HTML tags, script content, and dangerous characters
+ * Limits length to prevent abuse
+ */
+function sanitizeDisplayName(name: string | null | undefined, fallback: string): string {
+  if (!name || typeof name !== 'string') return fallback;
+  // Remove HTML tags and script content
+  let sanitized = name.replace(/<[^>]*>/g, '').replace(/<script[^>]*>.*?<\/script>/gi, '');
+  // Remove control characters and dangerous Unicode by filtering character codes
+  // Control characters: 0x00-0x1F, 0x7F-0x9F
+  // Dangerous Unicode: RTL override marks, directional isolates
+  const dangerousChars = [
+    0x202e,
+    0x202d,
+    0x202c,
+    0x202b,
+    0x202a, // RTL override marks
+    0x200e,
+    0x200f, // Left-to-right/right-to-left marks
+    0x2066,
+    0x2067,
+    0x2068,
+    0x2069, // Directional isolates
+  ];
+  sanitized = sanitized
+    .split('')
+    .filter((char) => {
+      const code = char.charCodeAt(0);
+      // Filter out control characters (0x00-0x1F, 0x7F-0x9F) and dangerous Unicode
+      return (
+        (code < 0x20 || (code >= 0x7f && code <= 0x9f)) === false && !dangerousChars.includes(code)
+      );
+    })
+    .join('');
+  // Trim and limit length (prevent extremely long names)
+  sanitized = sanitized.trim().slice(0, 100);
+  // Return sanitized name or fallback if empty
+  return sanitized.length > 0 ? sanitized : fallback;
+}
 
 export interface ContributorsSidebarProps {
   topContributors: UserProfile[];
@@ -40,11 +108,15 @@ function ContributorsSidebarComponent({ topContributors, newMembers }: Contribut
         <CardContent className="space-y-3">
           {topContributors.slice(0, 5).map((contributor, index) => {
             const slug = contributor.slug || 'unknown';
-            const displayName = contributor.name || `@${slug}`;
+            const safeUrl = getSafeUserProfileUrl(slug);
+            // Don't render if slug is invalid or unsafe
+            if (!safeUrl) return null;
+            // Sanitize display name to prevent XSS
+            const displayName = sanitizeDisplayName(contributor.name, `@${slug}`);
             return (
               <Link
                 key={slug}
-                href={`/u/${slug}`}
+                href={safeUrl}
                 className="flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-muted/50"
               >
                 <div className="relative flex-shrink-0">
@@ -99,11 +171,15 @@ function ContributorsSidebarComponent({ topContributors, newMembers }: Contribut
           <CardContent className="space-y-3">
             {newMembers.slice(0, 5).map((member) => {
               const slug = member.slug || 'unknown';
-              const displayName = member.name || `@${slug}`;
+              const safeUrl = getSafeUserProfileUrl(slug);
+              // Don't render if slug is invalid or unsafe
+              if (!safeUrl) return null;
+              // Sanitize display name to prevent XSS
+              const displayName = sanitizeDisplayName(member.name, `@${slug}`);
               return (
                 <Link
                   key={slug}
-                  href={`/u/${slug}`}
+                  href={safeUrl}
                   className="flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-muted/50"
                 >
                   {member.image ? (

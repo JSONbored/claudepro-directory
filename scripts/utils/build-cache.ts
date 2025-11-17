@@ -239,45 +239,28 @@ export function getCacheStats(): {
  */
 export function printCache(): void {
   const cache = loadCache();
-  logger.info('\n📦 Build Cache Contents\n', { script: 'build-cache' });
-  logger.info(`Version: ${cache.version}`, { script: 'build-cache', version: cache.version });
-  logger.info(`Last Updated: ${cache.lastUpdated}\n`, {
-    script: 'build-cache',
-    lastUpdated: cache.lastUpdated,
-  });
+  console.log('\n📦 Build Cache Contents\n');
+  console.log(`Version: ${cache.version}`);
+  console.log(`Last Updated: ${cache.lastUpdated}\n`);
 
   if (Object.keys(cache.caches).length === 0) {
-    logger.info('   (empty)\n', { script: 'build-cache' });
+    console.log('   (empty)\n');
     return;
   }
 
   for (const [key, entry] of Object.entries(cache.caches)) {
-    logger.info(`🔑 ${key}`, { script: 'build-cache', cacheKey: key });
-    logger.info(`   Hash: ${entry.hash.slice(0, 16)}...`, {
-      script: 'build-cache',
-      hash: entry.hash.slice(0, 16),
-    });
-    logger.info(`   Time: ${new Date(entry.timestamp).toLocaleString()}`, {
-      script: 'build-cache',
-      timestamp: entry.timestamp,
-    });
+    console.log(`🔑 ${key}`);
+    console.log(`   Hash: ${entry.hash.slice(0, 16)}...`);
+    console.log(`   Time: ${new Date(entry.timestamp).toLocaleString()}`);
     if (entry.metadata?.reason) {
-      logger.info(`   Reason: ${entry.metadata.reason}`, {
-        script: 'build-cache',
-        reason: entry.metadata.reason,
-      });
+      console.log(`   Reason: ${entry.metadata.reason}`);
     }
     if (entry.metadata?.duration) {
-      logger.info(`   Duration: ${entry.metadata.duration}ms`, {
-        script: 'build-cache',
-        duration: entry.metadata.duration,
-      });
+      console.log(`   Duration: ${entry.metadata.duration}ms`);
     }
     if (entry.metadata?.files && entry.metadata.files.length > 0) {
-      logger.info(`   Files: ${entry.metadata.files.join(', ')}`, {
-        script: 'build-cache',
-        files: entry.metadata.files,
-      });
+      console.log(`   Files: ${entry.metadata.files.join(', ')}`);
     }
+    console.log('');
   }
 }

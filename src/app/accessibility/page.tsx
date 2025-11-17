@@ -7,8 +7,8 @@ import { getLastUpdatedDate } from '@/src/lib/utils/data.utils';
 export const metadata = generatePageMetadata('/accessibility');
 
 /**
- * ISR Configuration: Legal pages are static and never change
- * revalidate: false = Cache forever (no automatic revalidation)
+ * Static Generation: Legal pages are fully static and never change
+ * revalidate: false = Static generation at build time (no automatic revalidation)
  */
 export const revalidate = false;
 

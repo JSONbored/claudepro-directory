@@ -122,7 +122,7 @@ interface SocialProofBarProps {
   stats: {
     contributors?: { count: number; names: string[] };
     submissions?: number;
-    successRate?: number;
+    successRate?: number | null;
     totalUsers?: number;
   };
   className?: string;

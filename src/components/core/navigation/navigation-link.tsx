@@ -6,6 +6,57 @@ import Link from 'next/link';
 import type { ComponentProps, ReactNode } from 'react';
 import { ANIMATION_CONSTANTS, DIMENSIONS, POSITION_PATTERNS } from '@/src/lib/ui-constants';
 
+/**
+ * Validate internal navigation path is safe
+ * Only allows relative paths starting with /, no protocol-relative URLs
+ */
+function isValidInternalPath(path: string): boolean {
+  if (typeof path !== 'string' || path.length === 0) return false;
+  // Must start with / for relative paths
+  if (!path.startsWith('/')) return false;
+  // Reject protocol-relative URLs (//example.com)
+  if (path.startsWith('//')) return false;
+  // Reject dangerous protocols
+  if (/^(javascript|data|vbscript|file):/i.test(path)) return false;
+  // Basic path validation - allow alphanumeric, slashes, hyphens, underscores, query params, hash
+  // This is permissive but safe for Next.js routing
+  return /^\/[a-zA-Z0-9/?#\-_.~!*'();:@&=+$,%[\]]*$/.test(path);
+}
+
+/**
+ * Validate and sanitize external URL for safe use in href
+ * Only allows HTTPS URLs, returns canonicalized URL or null if invalid
+ */
+function getSafeExternalUrl(url: string): string | null {
+  if (!url || typeof url !== 'string') return null;
+
+  try {
+    const parsed = new URL(url.trim());
+    // Only allow HTTPS protocol (or HTTP for localhost/development)
+    if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') return null;
+    // Block localhost in production (optional, but safer)
+    // For now, allow it for development
+    // Reject dangerous components
+    if (parsed.username || parsed.password) return null;
+
+    // Sanitize: remove query strings and fragments for external links (optional)
+    // For navigation links, we might want to keep them, so we'll just sanitize credentials
+    parsed.username = '';
+    parsed.password = '';
+    // Normalize hostname
+    parsed.hostname = parsed.hostname.replace(/\.$/, '').toLowerCase();
+    // Remove default ports
+    if (parsed.port === '80' || parsed.port === '443') {
+      parsed.port = '';
+    }
+
+    // Return canonicalized href
+    return parsed.href;
+  } catch {
+    return null;
+  }
+}
+
 export interface NavLinkProps extends Omit<ComponentProps<typeof Link>, 'href' | 'children'> {
   /** Link destination */
   href: string;
@@ -53,9 +104,15 @@ export function NavLink({
   );
 
   if (external) {
+    // Validate and sanitize external URL
+    const safeUrl = getSafeExternalUrl(href);
+    if (!safeUrl) {
+      // Don't render unsafe external links
+      return <span className={`group ${className}`}>{content}</span>;
+    }
     return (
       <a
-        href={href}
+        href={safeUrl}
         className={`group ${className}`}
         target="_blank"
         rel="noopener noreferrer"
@@ -64,6 +121,12 @@ export function NavLink({
         {content}
       </a>
     );
+  }
+
+  // Validate internal path
+  if (!isValidInternalPath(href)) {
+    // Don't render unsafe internal links
+    return <span className={`group ${className}`}>{content}</span>;
   }
 
   return (

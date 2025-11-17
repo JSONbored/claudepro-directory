@@ -42,6 +42,47 @@ function isAllowedHttpUrl(url: string | null | undefined): boolean {
   }
 }
 
+/**
+ * Validate that URL belongs to a trusted public domain (TLD-based check)
+ * Only allows URLs with common, trusted top-level domains to prevent redirect attacks
+ * This provides an additional layer of security beyond protocol validation
+ */
+function isTrustedPublicDomain(url: string | null | undefined): boolean {
+  if (!url || typeof url !== 'string') return false;
+  let parsed: URL;
+  try {
+    parsed = new URL(url.trim());
+  } catch {
+    return false;
+  }
+  // List of allowed public TLDs for company websites
+  // These are common, trusted TLDs used by legitimate businesses
+  const allowedTlds = [
+    '.com',
+    '.org',
+    '.net',
+    '.io',
+    '.ai',
+    '.dev',
+    '.co',
+    '.xyz',
+    '.info',
+    '.edu',
+    '.gov',
+    '.us',
+    '.uk',
+    '.ca',
+    '.au',
+    '.de',
+    '.fr',
+    '.jp',
+    '.cn',
+  ];
+  const hostname = parsed.hostname.toLowerCase();
+  // Only allow hostnames ending with one of the trusted TLDs
+  return allowedTlds.some((tld) => hostname.endsWith(tld));
+}
+
 export const metadata = generatePageMetadata('/account/companies');
 
 export default async function CompaniesPage() {
@@ -150,16 +191,36 @@ export default async function CompaniesPage() {
                 <CardHeader>
                   <div className={UI_CLASSES.FLEX_ITEMS_START_JUSTIFY_BETWEEN}>
                     <div className="flex flex-1 items-start gap-4">
-                      {company.logo ? (
-                        <Image
-                          src={company.logo}
-                          alt={`${company.name} logo`}
-                          width={64}
-                          height={64}
-                          className="h-16 w-16 rounded-lg border object-cover"
-                          priority={index === 0}
-                        />
-                      ) : (
+                      {(() => {
+                        // Validate logo URL is safe (should be from Supabase storage or trusted domain)
+                        if (!company.logo) return null;
+                        try {
+                          const parsed = new URL(company.logo);
+                          // Only allow HTTPS
+                          if (parsed.protocol !== 'https:') return null;
+                          // Allow Supabase storage or common CDN domains
+                          const isTrustedSource =
+                            parsed.hostname.endsWith('.supabase.co') ||
+                            parsed.hostname.endsWith('.supabase.in') ||
+                            parsed.pathname.startsWith('/storage/v1/object/public/') ||
+                            parsed.hostname.endsWith('.cloudinary.com') ||
+                            parsed.hostname.endsWith('.amazonaws.com');
+                          if (!isTrustedSource) return null;
+                          return (
+                            <Image
+                              src={company.logo}
+                              alt={`${company.name} logo`}
+                              width={64}
+                              height={64}
+                              className="h-16 w-16 rounded-lg border object-cover"
+                              priority={index === 0}
+                            />
+                          );
+                        } catch {
+                          return null;
+                        }
+                      })()}
+                      {!company.logo && (
                         <div className="flex h-16 w-16 items-center justify-center rounded-lg border bg-accent">
                           <Building2 className="h-8 w-8 text-muted-foreground" />
                         </div>
@@ -178,16 +239,53 @@ export default async function CompaniesPage() {
                         </CardDescription>
                         {(() => {
                           const website = company.website;
-                          if (!(website && isAllowedHttpUrl(website))) return null;
+                          // Defense in depth: validate both protocol and trusted domain
+                          if (
+                            !(
+                              website &&
+                              isAllowedHttpUrl(website) &&
+                              isTrustedPublicDomain(website)
+                            )
+                          ) {
+                            return null;
+                          }
+                          // Canonicalize and sanitize URL to prevent XSS and redirect attacks
+                          // Parse URL to get normalized, canonicalized version for safe use in href
+                          let safeHref = '';
+                          let displayText = '';
+                          try {
+                            const parsed = new URL(website.trim());
+                            // Remove all potentially dangerous components
+                            parsed.username = '';
+                            parsed.password = '';
+                            parsed.search = '';
+                            parsed.hash = '';
+                            // Normalize hostname (remove trailing dots, lowercase)
+                            parsed.hostname = parsed.hostname.replace(/\.$/, '').toLowerCase();
+                            // Remove port if it's the default (80 for http, 443 for https)
+                            if (parsed.port === '80' || parsed.port === '443') {
+                              parsed.port = '';
+                            }
+                            // Use parsed.href for guaranteed normalized absolute URL
+                            // This is safer than toString() as it's guaranteed to be canonicalized
+                            safeHref = parsed.href;
+                            // Safe display text: hostname + pathname (no query/fragment)
+                            // Pathname is already URL-encoded by the URL constructor, so it's safe
+                            displayText =
+                              parsed.hostname + (parsed.pathname !== '/' ? parsed.pathname : '');
+                          } catch {
+                            // If parsing fails, don't render the link
+                            return null;
+                          }
                           return (
                             <a
-                              href={website}
+                              href={safeHref}
                               target="_blank"
                               rel="noopener noreferrer"
                               className={`mt-2 inline-flex items-center gap-1 text-sm ${UI_CLASSES.LINK_ACCENT}`}
                             >
                               <ExternalLink className="h-3 w-3" />
-                              {String(website.replace(/^https?:\/\//, '')).replace(/[<>"'`]/g, '')}
+                              {displayText}
                             </a>
                           );
                         })()}

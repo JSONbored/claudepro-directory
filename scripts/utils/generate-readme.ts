@@ -21,22 +21,43 @@ async function main() {
       throw new Error('Missing NEXT_PUBLIC_SUPABASE_URL environment variable');
     }
 
-    // NOTE: Verify endpoint is deployed and returns HTTP 200 before using in production
-    // Expected: /functions/v1/data-api/content/sitewide?format=readme
+    // Endpoint: /functions/v1/data-api/content/sitewide?format=readme
+    // Route: data-api edge function -> content route -> sitewide handler -> readme format
     // Should return: text/markdown content with HTTP 200
     const edgeFunctionUrl = `${supabaseUrl}/functions/v1/data-api/content/sitewide?format=readme`;
 
     logger.info('📝 Generating README.md from edge function...\n', { script: 'generate-readme' });
+    logger.info(`   Endpoint: ${edgeFunctionUrl}`, { script: 'generate-readme' });
 
     const response = await fetch(edgeFunctionUrl);
 
     if (!response.ok) {
-      throw new Error(`Edge function failed: ${response.status} ${response.statusText}`);
+      // Try to get error details from response body
+      let errorDetails = '';
+      try {
+        const errorBody = await response.text();
+        if (errorBody) {
+          try {
+            const parsed = JSON.parse(errorBody);
+            errorDetails = ` - ${JSON.stringify(parsed)}`;
+          } catch {
+            errorDetails = ` - ${errorBody.slice(0, 200)}`;
+          }
+        }
+      } catch {
+        // Ignore errors when reading error body
+      }
+
+      throw new Error(
+        `Edge function failed: ${response.status} ${response.statusText}${errorDetails}`
+      );
     }
 
     const contentType = response.headers.get('Content-Type');
     if (!contentType?.includes('text/markdown')) {
-      throw new Error(`Unexpected content type: ${contentType}`);
+      throw new Error(
+        `Unexpected content type: ${contentType}. Expected text/markdown. Response status: ${response.status}`
+      );
     }
 
     const readme = await response.text();

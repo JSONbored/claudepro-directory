@@ -279,6 +279,27 @@ export default function WizardSubmissionPage() {
     return () => clearTimeout(timeoutId);
   }, [formData, currentStep, draftManager, qualityScore]);
 
+  // Check if can proceed from current step
+  const canProceedFromStep = useCallback(
+    (step: number): boolean => {
+      switch (step) {
+        case 1:
+          return !!formData.submission_type;
+        case 2:
+          return formData.name.length >= 3 && formData.description.length >= 10;
+        case 3:
+          return true; // Type-specific fields are optional
+        case 4:
+          return true; // Examples are optional
+        case 5:
+          return false; // Last step
+        default:
+          return false;
+      }
+    },
+    [formData]
+  );
+
   // Define wizard steps
   const steps: WizardStep[] = useMemo(
     () => [
@@ -310,7 +331,7 @@ export default function WizardSubmissionPage() {
         description: 'Type-specific settings',
         isCompleted: currentStep > 3,
         isCurrent: currentStep === 3,
-        isAccessible: currentStep >= 2 && formData.name.length >= 3,
+        isAccessible: currentStep >= 2 && canProceedFromStep(2),
       },
       {
         id: 'examples',
@@ -320,7 +341,7 @@ export default function WizardSubmissionPage() {
         description: 'Add examples and tags',
         isCompleted: currentStep > 4,
         isCurrent: currentStep === 4,
-        isAccessible: currentStep >= 3 && formData.description.length >= 10,
+        isAccessible: currentStep >= 3 && canProceedFromStep(3),
       },
       {
         id: 'review',
@@ -330,31 +351,10 @@ export default function WizardSubmissionPage() {
         description: 'Review and submit',
         isCompleted: false,
         isCurrent: currentStep === 5,
-        isAccessible: currentStep >= 4,
+        isAccessible: currentStep >= 4 && canProceedFromStep(4),
       },
     ],
-    [currentStep, formData.name.length, formData.description.length]
-  );
-
-  // Check if can proceed from current step
-  const canProceedFromStep = useCallback(
-    (step: number): boolean => {
-      switch (step) {
-        case 1:
-          return !!formData.submission_type;
-        case 2:
-          return formData.name.length >= 3 && formData.description.length >= 10;
-        case 3:
-          return true; // Type-specific fields are optional
-        case 4:
-          return true; // Examples are optional
-        case 5:
-          return false; // Last step
-        default:
-          return false;
-      }
-    },
-    [formData]
+    [currentStep, canProceedFromStep]
   );
 
   // Handle next step
@@ -455,7 +455,16 @@ export default function WizardSubmissionPage() {
 
   // Update form data helper
   const updateFormData = useCallback((updates: Partial<FormData>) => {
-    setFormData((prev) => ({ ...prev, ...updates }));
+    setFormData((prev) => {
+      const next: FormData = { ...prev, ...updates };
+
+      // Keep category and submission_type in sync
+      if (updates.submission_type && updates.submission_type !== prev.submission_type) {
+        next.category = updates.submission_type as ContentCategory;
+      }
+
+      return next;
+    });
   }, []);
 
   // Render step content
@@ -852,13 +861,15 @@ function StepConfiguration({
                       min={0}
                       max={1}
                       step={0.1}
-                      value={(data.temperature as number) || 0.7}
-                      onChange={(e) =>
+                      value={(data.temperature as number | undefined) ?? 0.7}
+                      onChange={(e) => {
+                        const raw = e.target.value;
+                        const parsed = raw === '' ? undefined : Number.parseFloat(raw);
                         onChange({
                           ...data,
-                          temperature: Number.parseFloat(e.target.value),
-                        })
-                      }
+                          temperature: Number.isNaN(parsed as number) ? undefined : parsed,
+                        });
+                      }}
                     />
                   </AnimatedFormField>
 
@@ -873,13 +884,15 @@ function StepConfiguration({
                       min={100}
                       max={4096}
                       step={100}
-                      value={(data.maxTokens as number) || 2048}
-                      onChange={(e) =>
+                      value={(data.maxTokens as number | undefined) ?? 2048}
+                      onChange={(e) => {
+                        const raw = e.target.value;
+                        const parsed = raw === '' ? undefined : Number.parseInt(raw, 10);
                         onChange({
                           ...data,
-                          maxTokens: Number.parseInt(e.target.value, 10),
-                        })
-                      }
+                          maxTokens: Number.isNaN(parsed as number) ? undefined : parsed,
+                        });
+                      }}
                     />
                   </AnimatedFormField>
                 </div>

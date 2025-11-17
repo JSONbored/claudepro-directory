@@ -58,6 +58,14 @@ export default function NewJobPage() {
       redirect('/account/jobs');
     }
 
+    // Handle unexpected failure case
+    logger.error('NewJobPage: createJob returned success=false', new Error('Job creation failed'), {
+      title: data.title,
+      company: data.company,
+      jobId: result.data.jobId,
+      companyId: result.data.companyId,
+      requiresPayment: result.data.requiresPayment,
+    });
     return { success: false };
   };
 

@@ -55,12 +55,28 @@ export function prefersReducedMotion(): boolean {
 }
 
 /**
+ * Validate internal navigation path is safe
+ * Only allows relative paths starting with /, no protocol-relative URLs
+ */
+function isValidInternalPath(path: string): boolean {
+  if (typeof path !== 'string' || path.length === 0) return false;
+  // Must start with / for relative paths
+  if (!path.startsWith('/')) return false;
+  // Reject protocol-relative URLs (//example.com)
+  if (path.startsWith('//')) return false;
+  // Reject dangerous protocols
+  if (/^(javascript|data|vbscript|file):/i.test(path)) return false;
+  // Basic path validation - allow alphanumeric, slashes, hyphens, underscores, query params, hash
+  return /^\/[a-zA-Z0-9/?#\-_.~!*'();:@&=+$,%[\]]*$/.test(path);
+}
+
+/**
  * Navigate with view transition (client-side)
  *
  * Uses View Transitions API for smooth page morphing if supported.
  * Falls back to instant navigation if not supported or reduced motion preferred.
  *
- * @param url - Destination URL
+ * @param url - Destination URL (must be a valid internal path)
  * @param router - Next.js router instance (optional, will use window.location if not provided)
  *
  * @example
@@ -81,6 +97,12 @@ export function navigateWithTransition(
   url: string,
   router?: { push: (url: string) => void }
 ): void {
+  // Validate URL is a safe internal path
+  if (!isValidInternalPath(url)) {
+    // Silently skip invalid URLs to prevent XSS/redirect attacks
+    return;
+  }
+
   // Check if transitions are supported and user hasn't disabled animations
   const canTransition = supportsViewTransitions() && !prefersReducedMotion();
 

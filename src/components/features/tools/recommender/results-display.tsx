@@ -373,10 +373,16 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                   'guides',
                   'jobs',
                 ] as const;
+                // Validate slug pattern: alphanumeric start, then alphanumeric/hyphens/underscores, 3-32 chars
+                const slugPattern = /^[a-zA-Z0-9][a-zA-Z0-9-_]{2,32}$/;
                 if (
-                  !allowedCategories.includes(result.category as (typeof allowedCategories)[number])
+                  !allowedCategories.includes(
+                    result.category as (typeof allowedCategories)[number]
+                  ) ||
+                  typeof result.slug !== 'string' ||
+                  !slugPattern.test(result.slug)
                 ) {
-                  // Skip rendering for invalid categories
+                  // Skip rendering for invalid categories or invalid slugs
                   return null;
                 }
                 const targetPath = getContentItemUrl({

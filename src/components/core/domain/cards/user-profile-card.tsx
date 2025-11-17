@@ -26,6 +26,37 @@ import { logUnhandledPromise } from '@/src/lib/utils/error.utils';
 import type { Json, Tables } from '@/src/types/database.types';
 
 /**
+ * Validate and sanitize external URL for safe use in window.open
+ * Only allows HTTPS/HTTP URLs, returns canonicalized URL or null if invalid
+ */
+function getSafeExternalUrl(url: string | null | undefined): string | null {
+  if (!url || typeof url !== 'string') return null;
+
+  try {
+    const parsed = new URL(url.trim());
+    // Only allow HTTPS protocol (or HTTP for localhost/development)
+    if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') return null;
+    // Reject dangerous components
+    if (parsed.username || parsed.password) return null;
+
+    // Sanitize: remove credentials
+    parsed.username = '';
+    parsed.password = '';
+    // Normalize hostname
+    parsed.hostname = parsed.hostname.replace(/\.$/, '').toLowerCase();
+    // Remove default ports
+    if (parsed.port === '80' || parsed.port === '443') {
+      parsed.port = '';
+    }
+
+    // Return canonicalized href
+    return parsed.href;
+  } catch {
+    return null;
+  }
+}
+
+/**
  * User profile data with runtime-added stats from materialized views
  * Supports both full user records and simplified user objects from RPCs
  */
@@ -199,82 +230,110 @@ function ProfileCardComponent({ user, variant = 'default', showActions = true }:
       renderActions={() => (
         <>
           {/* Website link */}
-          {user.website && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className={`${UI_CLASSES.ICON_BUTTON_SM} ${UI_CLASSES.BUTTON_GHOST_ICON}`}
-              onClick={(e) => {
-                e.stopPropagation();
-                pulse
-                  .click({
-                    category: null,
-                    slug: null,
-                    metadata: {
-                      action: 'external_link',
-                      link_type: 'website',
-                      target_url: user.website as string,
-                      user_slug: slug,
-                    },
-                  })
-                  .catch((error) => {
-                    logUnhandledPromise('UserProfileCard: website link click pulse failed', error, {
-                      user_slug: slug,
-                    });
-                  });
-                window.open(user.website as string, '_blank');
-              }}
-              aria-label={`Visit ${displayName}'s website`}
-            >
-              <ExternalLink className={UI_CLASSES.ICON_XS} aria-hidden="true" />
-            </Button>
-          )}
+          {user.website &&
+            (() => {
+              const safeWebsiteUrl = getSafeExternalUrl(user.website);
+              if (!safeWebsiteUrl) return null;
+              return (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className={`${UI_CLASSES.ICON_BUTTON_SM} ${UI_CLASSES.BUTTON_GHOST_ICON}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    pulse
+                      .click({
+                        category: null,
+                        slug: null,
+                        metadata: {
+                          action: 'external_link',
+                          link_type: 'website',
+                          target_url: safeWebsiteUrl,
+                          user_slug: slug,
+                        },
+                      })
+                      .catch((error) => {
+                        logUnhandledPromise(
+                          'UserProfileCard: website link click pulse failed',
+                          error,
+                          {
+                            user_slug: slug,
+                          }
+                        );
+                      });
+                    window.open(safeWebsiteUrl, '_blank');
+                  }}
+                  aria-label={`Visit ${displayName}'s website`}
+                >
+                  <ExternalLink className={UI_CLASSES.ICON_XS} aria-hidden="true" />
+                </Button>
+              );
+            })()}
 
           {/* Twitter/X link */}
-          {user.social_x_link && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className={`${UI_CLASSES.ICON_BUTTON_SM} ${UI_CLASSES.BUTTON_GHOST_ICON}`}
-              onClick={(e) => {
-                e.stopPropagation();
-                pulse
-                  .click({
-                    category: null,
-                    slug: null,
-                    metadata: {
-                      action: 'external_link',
-                      link_type: 'social',
-                      target_url: user.social_x_link as string,
-                      user_slug: slug,
-                    },
-                  })
-                  .catch((error) => {
-                    logUnhandledPromise('UserProfileCard: social link click pulse failed', error, {
-                      user_slug: slug,
-                    });
-                  });
-                window.open(user.social_x_link as string, '_blank');
-              }}
-              aria-label={`Visit ${displayName} on X/Twitter`}
-            >
-              <ExternalLink className={UI_CLASSES.ICON_XS} aria-hidden="true" />
-            </Button>
-          )}
+          {user.social_x_link &&
+            (() => {
+              const safeSocialUrl = getSafeExternalUrl(user.social_x_link);
+              if (!safeSocialUrl) return null;
+              return (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className={`${UI_CLASSES.ICON_BUTTON_SM} ${UI_CLASSES.BUTTON_GHOST_ICON}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    pulse
+                      .click({
+                        category: null,
+                        slug: null,
+                        metadata: {
+                          action: 'external_link',
+                          link_type: 'social',
+                          target_url: safeSocialUrl,
+                          user_slug: slug,
+                        },
+                      })
+                      .catch((error) => {
+                        logUnhandledPromise(
+                          'UserProfileCard: social link click pulse failed',
+                          error,
+                          {
+                            user_slug: slug,
+                          }
+                        );
+                      });
+                    window.open(safeSocialUrl, '_blank');
+                  }}
+                  aria-label={`Visit ${displayName} on X/Twitter`}
+                >
+                  <ExternalLink className={UI_CLASSES.ICON_XS} aria-hidden="true" />
+                </Button>
+              );
+            })()}
 
           {/* View profile button */}
-          <Button
-            variant="ghost"
-            size="sm"
-            className={`${UI_CLASSES.BUTTON_ICON_TEXT_SM} ${UI_CLASSES.BUTTON_GHOST_ICON}`}
-            onClick={(e) => {
-              e.stopPropagation();
-              window.location.href = profileUrl;
-            }}
-            aria-label={`View ${displayName}'s profile`}
-          >
-            View
-          </Button>
+          {(() => {
+            // Validate profile URL is safe (should be /u/{slug})
+            const safeProfileUrl =
+              profileUrl.startsWith('/u/') && /^\/u\/[a-zA-Z0-9-_]+$/.test(profileUrl)
+                ? profileUrl
+                : null;
+            if (!safeProfileUrl) return null;
+            return (
+              <Button
+                variant="ghost"
+                size="sm"
+                className={`${UI_CLASSES.BUTTON_ICON_TEXT_SM} ${UI_CLASSES.BUTTON_GHOST_ICON}`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  window.location.href = safeProfileUrl;
+                }}
+                aria-label={`View ${displayName}'s profile`}
+              >
+                View
+              </Button>
+            );
+          })()}
         </>
       )}
       customMetadataText={null}

@@ -83,14 +83,19 @@ export default async function SponsorshipsPage() {
     (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
   );
 
+  // Compute active count once using consistent logic
+  const now = new Date();
+  const activeCount = orderedSponsorships.filter(
+    (s) => s.active && new Date(s.start_date) <= now && new Date(s.end_date) >= now
+  ).length;
+
   return (
     <div className="space-y-6">
       <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
         <div>
           <h1 className="mb-2 font-bold text-3xl">Sponsorships</h1>
           <p className="text-muted-foreground">
-            {sponsorships?.length || 0} active{' '}
-            {sponsorships?.length === 1 ? 'campaign' : 'campaigns'}
+            {activeCount} active {activeCount === 1 ? 'campaign' : 'campaigns'}
           </p>
         </div>
         <Button variant="outline" asChild={true}>
@@ -103,7 +108,6 @@ export default async function SponsorshipsPage() {
 
       <div className="grid gap-4">
         {orderedSponsorships.map((sponsorship) => {
-          const now = new Date();
           const isActive =
             sponsorship.active &&
             new Date(sponsorship.start_date) <= now &&

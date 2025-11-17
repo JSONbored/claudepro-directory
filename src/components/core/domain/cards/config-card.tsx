@@ -31,21 +31,33 @@ import type { ContentCategory } from '@/src/types/database-overrides';
 import { isExperienceLevel } from '@/src/types/database-overrides';
 
 /**
- * Validate repository URL is safe for opening
+ * Validate and sanitize repository URL
  * Only allows HTTPS URLs from trusted repository hosts (GitHub, GitLab)
+ * Returns sanitized URL (with query/fragment removed) or null if invalid
  */
-function isSafeRepositoryUrl(url: string): boolean {
+function getSafeRepositoryUrl(url: string | null | undefined): string | null {
+  if (!url || typeof url !== 'string') return null;
   try {
-    const u = new URL(url);
-    return (
-      u.protocol === 'https:' &&
-      (u.hostname === 'github.com' ||
-        u.hostname === 'www.github.com' ||
-        u.hostname === 'gitlab.com' ||
-        u.hostname === 'www.gitlab.com')
-    );
+    const parsed = new URL(url);
+    // Require HTTPS and trusted hostname
+    if (
+      parsed.protocol === 'https:' &&
+      (parsed.hostname === 'github.com' ||
+        parsed.hostname === 'www.github.com' ||
+        parsed.hostname === 'gitlab.com' ||
+        parsed.hostname === 'www.gitlab.com')
+    ) {
+      // Remove query string and fragment for redirect
+      parsed.search = '';
+      parsed.hash = '';
+      // Remove username/password if present
+      parsed.username = '';
+      parsed.password = '';
+      return parsed.toString();
+    }
+    return null;
   } catch {
-    return false;
+    return null;
   }
 }
 
@@ -605,8 +617,9 @@ export const ConfigCard = memo(
                           slug: item.slug,
                         });
                       });
-                    if (isSafeRepositoryUrl(item.repository as string)) {
-                      window.open(item.repository as string, '_blank');
+                    const safeRepoUrl = getSafeRepositoryUrl(item.repository as string);
+                    if (safeRepoUrl) {
+                      window.open(safeRepoUrl, '_blank');
                     } else {
                       logClientWarning('ConfigCard: Unsafe repository URL blocked', {
                         url: item.repository,

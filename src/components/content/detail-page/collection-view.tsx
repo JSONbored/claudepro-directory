@@ -104,10 +104,16 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
   );
 
   // Group items by category for organized display
+  // Validate category before using as property key to prevent property injection
   const itemsByCategory = validItems.reduce(
     (acc: Record<string, ItemWithData[]>, item: ItemWithData) => {
       if (!item) return acc;
       const category = item.category;
+      // Validate category is safe before using as property key
+      if (!isValidCategory(category)) {
+        logger.warn('CollectionView: Invalid category in item', { category, slug: item.slug });
+        return acc;
+      }
       if (!acc[category]) {
         acc[category] = [];
       }

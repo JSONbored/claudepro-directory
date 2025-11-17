@@ -24,30 +24,87 @@ import type {
 
 export const metadata = generatePageMetadata('/account/submissions');
 
-// Helper: strictly validate GitHub PR URLs to prevent XSS and redirect attacks
-function isSafePrUrl(url: string | null | undefined): boolean {
-  if (!url || typeof url !== 'string') return false;
+/**
+ * Extract and validate GitHub PR components from URL
+ * Returns validated owner, repo, and PR number, or null if invalid
+ * This allows us to reconstruct the URL from trusted components instead of using user input directly
+ */
+function extractPrComponents(
+  url: string | null | undefined
+): { owner: string; repo: string; prNumber: string } | null {
+  if (!url || typeof url !== 'string') return null;
+
+  // Disallow control characters, invisible chars, and dangerous unicode
+  const dangerousChars = [
+    0x202e,
+    0x202d,
+    0x202c,
+    0x202b,
+    0x202a, // RTL override marks
+    0x200e,
+    0x200f, // Left-to-right/right-to-left marks
+    0x2066,
+    0x2067,
+    0x2068,
+    0x2069, // Directional isolates
+  ];
+  for (let i = 0; i < url.length; i++) {
+    const code = url.charCodeAt(i);
+    if (
+      (code >= 0x00 && code <= 0x1f) ||
+      (code >= 0x7f && code <= 0x9f) ||
+      dangerousChars.includes(code)
+    ) {
+      return null;
+    }
+  }
+
   try {
     const parsed = new URL(url);
-    // Only allow HTTPS links to github.com, with /pull/ in path (no fragments, query params, etc)
-    if (parsed.protocol !== 'https:') return false;
-    if (parsed.hostname !== 'github.com') return false;
-    // Strict pattern: /owner/repo/pull/number (no trailing path, query, or fragment)
-    if (!/^\/[^/]+\/[^/]+\/pull\/\d+$/.test(parsed.pathname)) return false;
+    // Only allow HTTPS links to github.com
+    if (parsed.protocol.toLowerCase() !== 'https:') return null;
+    if (parsed.hostname.toLowerCase() !== 'github.com') return null;
     // Reject any query parameters or fragments
-    if (parsed.search || parsed.hash) return false;
-    return true;
+    if (parsed.search || parsed.hash) return null;
+    // Reject if username/password present
+    if (parsed.username || parsed.password) return null;
+    // Strict pattern: /owner/repo/pull/number
+    const pathMatch = parsed.pathname.match(/^\/([a-zA-Z0-9][\w-]*)\/([\w.-]+)\/pull\/(\d+)$/);
+    if (!pathMatch || pathMatch.length < 4) return null;
+
+    const owner = pathMatch[1];
+    const repo = pathMatch[2];
+    const prNumber = pathMatch[3];
+
+    // Type guard: ensure all components are defined
+    if (!(owner && repo && prNumber)) return null;
+
+    return { owner, repo, prNumber };
   } catch {
-    return false;
+    return null;
   }
 }
 
-// Sanitizer returns the safe URL or fallback
-function sanitizePrUrl(url: string | null | undefined): string {
-  if (isSafePrUrl(url) && url) {
-    return url;
+/**
+ * Construct a safe GitHub PR URL from validated components
+ * This ensures we're using only trusted, validated data instead of user-controlled URLs
+ * Uses URL constructor for canonicalization to prevent encoding-based attacks
+ */
+function buildSafePrUrl(owner: string, repo: string, prNumber: string): string {
+  // Additional validation on extracted components
+  if (!(/^[a-zA-Z0-9][\w-]*$/.test(owner) && /^[\w.-]+$/.test(repo) && /^\d+$/.test(prNumber))) {
+    return '#';
   }
-  return '#';
+  try {
+    // Use URL constructor to get canonicalized, normalized URL
+    // This prevents encoding-based attacks and ensures proper URL encoding
+    const url = new URL(`https://github.com/${owner}/${repo}/pull/${prNumber}`);
+    // Return the canonicalized href (guaranteed to be normalized and safe)
+    return url.href;
+  } catch {
+    // If URL construction fails, return fallback
+    return '#';
+  }
 }
 
 // Allow-list of valid content types shown in URLs
@@ -263,19 +320,33 @@ export default async function SubmissionsPage() {
                   )}
 
                   <div className={UI_CLASSES.FLEX_GAP_2}>
-                    {isSafePrUrl(submission.pr_url) && submission.pr_url && (
-                      <Button variant="outline" size="sm" asChild={true}>
-                        <a
-                          href={sanitizePrUrl(submission.pr_url)}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <GitPullRequest className="mr-1 h-3 w-3" />
-                          View PR
-                          <ExternalLink className="ml-1 h-3 w-3" />
-                        </a>
-                      </Button>
-                    )}
+                    {(() => {
+                      // Extract PR components from URL and reconstruct from trusted data
+                      // This prevents using user-controlled URL directly in href
+                      const prUrl = submission.pr_url;
+                      const components = prUrl ? extractPrComponents(prUrl) : null;
+
+                      // Prefer pr_number if available, otherwise use extracted PR number
+                      const prNumber = submission.pr_number || components?.prNumber;
+
+                      if (!(components && prNumber)) {
+                        return null;
+                      }
+
+                      // Reconstruct URL from validated components (not user input)
+                      const safePrUrl = buildSafePrUrl(components.owner, components.repo, prNumber);
+
+                      // Only render if we have a valid URL (not the fallback '#')
+                      return safePrUrl && safePrUrl !== '#' ? (
+                        <Button variant="outline" size="sm" asChild={true}>
+                          <a href={safePrUrl} target="_blank" rel="noopener noreferrer">
+                            <GitPullRequest className="mr-1 h-3 w-3" />
+                            View PR
+                            <ExternalLink className="ml-1 h-3 w-3" />
+                          </a>
+                        </Button>
+                      ) : null;
+                    })()}
 
                     {(() => {
                       const safeUrl = getSafeContentUrl(type, submission.content_slug);

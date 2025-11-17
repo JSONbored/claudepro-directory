@@ -6,19 +6,10 @@
  */
 
 import { type NextRequest, NextResponse } from 'next/server';
+import { VALID_CATEGORIES } from '@/src/lib/data/config/category';
 import { getContentTemplates } from '@/src/lib/data/content/templates';
 import { logger } from '@/src/lib/logger';
 import type { ContentCategory } from '@/src/types/database-overrides';
-
-const VALID_CATEGORIES: ContentCategory[] = [
-  'agents',
-  'mcp',
-  'rules',
-  'commands',
-  'hooks',
-  'statuslines',
-  'skills',
-];
 
 export async function GET(request: NextRequest) {
   try {

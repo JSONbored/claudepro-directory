@@ -30,14 +30,20 @@ type ContentRow = Database['public']['Tables']['content']['Row'];
 type GuideSection = ContentRow['metadata'];
 
 import { BADGE_COLORS, UI_CLASSES } from '@/src/lib/ui-constants';
+import { SanitizedHTML } from './sanitized-html';
 
 /**
- * TrustedHTML - Safe wrapper for owner-controlled HTML content
- * Same implementation as json-section-renderer.tsx
+ * TrustedHTML - Safe wrapper for HTML content with sanitization
+ * Uses SanitizedHTML client component for XSS protection
  */
 function TrustedHTML({ html, className, id }: { html: string; className?: string; id?: string }) {
-  // biome-ignore lint/security/noDangerouslySetInnerHtml: Content is from git commit messages, validated during build
-  return <div id={id} className={className} dangerouslySetInnerHTML={{ __html: html }} />;
+  return (
+    <SanitizedHTML
+      html={html}
+      {...(className !== undefined && { className })}
+      {...(id !== undefined && { id })}
+    />
+  );
 }
 
 /**

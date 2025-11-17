@@ -22,8 +22,101 @@ import { FolderOpen, Globe, Users } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { sanitizeSlug } from '@/src/lib/utils/content.utils';
 import { normalizeError } from '@/src/lib/utils/error.utils';
 import type { GetGetUserProfileReturn } from '@/src/types/database-overrides';
+
+/**
+ * Validate slug is safe for use in URLs
+ * Only allows alphanumeric characters, hyphens, and underscores
+ */
+function isValidSlug(slug: string): boolean {
+  if (typeof slug !== 'string' || slug.length === 0) return false;
+  return /^[a-zA-Z0-9-_]+$/.test(slug);
+}
+
+/**
+ * Validate content type is safe for URL construction
+ */
+const ALLOWED_CONTENT_TYPES = [
+  'agents',
+  'mcp',
+  'rules',
+  'commands',
+  'hooks',
+  'statuslines',
+  'skills',
+  'collections',
+  'guides',
+  'jobs',
+] as const;
+
+function isValidContentType(type: string): boolean {
+  return ALLOWED_CONTENT_TYPES.includes(type as (typeof ALLOWED_CONTENT_TYPES)[number]);
+}
+
+/**
+ * Get safe content URL from type and slug
+ * Returns null if either is invalid
+ */
+function getSafeContentUrl(type: string, slug: string): string | null {
+  if (!(isValidContentType(type) && isValidSlug(slug))) return null;
+  const sanitizedSlug = sanitizeSlug(slug);
+  if (!isValidSlug(sanitizedSlug)) return null;
+  return `/${type}/${sanitizedSlug}`;
+}
+
+/**
+ * Get safe collection URL from user slug and collection slug
+ * Returns null if either is invalid
+ */
+function getSafeCollectionUrl(userSlug: string, collectionSlug: string): string | null {
+  if (!(isValidSlug(userSlug) && isValidSlug(collectionSlug))) return null;
+  const sanitizedUserSlug = sanitizeSlug(userSlug);
+  const sanitizedCollectionSlug = sanitizeSlug(collectionSlug);
+  if (!(isValidSlug(sanitizedUserSlug) && isValidSlug(sanitizedCollectionSlug))) return null;
+  return `/u/${sanitizedUserSlug}/collections/${sanitizedCollectionSlug}`;
+}
+
+/**
+ * Sanitize display text for safe use in text content
+ * Removes HTML tags, script content, and dangerous characters
+ */
+function sanitizeDisplayText(text: string | null | undefined, fallback: string): string {
+  if (!text || typeof text !== 'string') return fallback;
+  // Remove HTML tags and script content
+  let sanitized = text.replace(/<[^>]*>/g, '').replace(/<script[^>]*>.*?<\/script>/gi, '');
+  // Remove control characters and dangerous Unicode by filtering character codes
+  const dangerousChars = [
+    0x202e,
+    0x202d,
+    0x202c,
+    0x202b,
+    0x202a, // RTL override marks
+    0x200e,
+    0x200f, // Left-to-right/right-to-left marks
+    0x2066,
+    0x2067,
+    0x2068,
+    0x2069, // Directional isolates
+  ];
+  sanitized = sanitized
+    .split('')
+    .filter((char) => {
+      const code = char.charCodeAt(0);
+      // Filter out control characters (0x00-0x1F, 0x7F-0x9F) except newline/tab, and dangerous Unicode
+      return (
+        (code === 0x09 ||
+          code === 0x0a ||
+          (code < 0x20 || (code >= 0x7f && code <= 0x9f)) === false) &&
+        !dangerousChars.includes(code)
+      );
+    })
+    .join('');
+  // Trim and limit length
+  sanitized = sanitized.trim().slice(0, 200);
+  return sanitized.length > 0 ? sanitized : fallback;
+}
 
 interface UserProfilePageProps {
   params: Promise<{ slug: string }>;
@@ -97,8 +190,10 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
               )}
 
               <div className="mt-4">
-                <h1 className="font-bold text-3xl">{profile.name || slug}</h1>
-                {profile.bio && <p className={'mt-2 max-w-2xl text-sm'}>{profile.bio}</p>}
+                <h1 className="font-bold text-3xl">{sanitizeDisplayText(profile.name, slug)}</h1>
+                {profile.bio && (
+                  <p className={'mt-2 max-w-2xl text-sm'}>{sanitizeDisplayText(profile.bio, '')}</p>
+                )}
 
                 <div className={'mt-3 flex items-center gap-4 text-sm'}>
                   <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
@@ -187,33 +282,37 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                 </Card>
               ) : (
                 <div className="grid gap-4 sm:grid-cols-2">
-                  {collections.map((collection) => (
-                    <Card key={collection.id} className={UI_CLASSES.CARD_INTERACTIVE}>
-                      <a href={`/u/${slug}/collections/${collection.slug}`}>
-                        <CardHeader>
-                          <CardTitle className="text-lg">{collection.name}</CardTitle>
-                          {collection.description && (
-                            <CardDescription className="line-clamp-2">
-                              {collection.description}
-                            </CardDescription>
-                          )}
-                        </CardHeader>
-                        <CardContent>
-                          <div
-                            className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} text-sm`}
-                          >
-                            <span className="text-muted-foreground">
-                              {collection.item_count}{' '}
-                              {collection.item_count === 1 ? 'item' : 'items'}
-                            </span>
-                            <span className="text-muted-foreground">
-                              {collection.view_count} views
-                            </span>
-                          </div>
-                        </CardContent>
-                      </a>
-                    </Card>
-                  ))}
+                  {collections.map((collection) => {
+                    const safeCollectionUrl = getSafeCollectionUrl(slug, collection.slug);
+                    if (!safeCollectionUrl) return null;
+                    return (
+                      <Card key={collection.id} className={UI_CLASSES.CARD_INTERACTIVE}>
+                        <a href={safeCollectionUrl}>
+                          <CardHeader>
+                            <CardTitle className="text-lg">{collection.name}</CardTitle>
+                            {collection.description && (
+                              <CardDescription className="line-clamp-2">
+                                {collection.description}
+                              </CardDescription>
+                            )}
+                          </CardHeader>
+                          <CardContent>
+                            <div
+                              className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} text-sm`}
+                            >
+                              <span className="text-muted-foreground">
+                                {collection.item_count}{' '}
+                                {collection.item_count === 1 ? 'item' : 'items'}
+                              </span>
+                              <span className="text-muted-foreground">
+                                {collection.view_count} views
+                              </span>
+                            </div>
+                          </CardContent>
+                        </a>
+                      </Card>
+                    );
+                  })}
                 </div>
               )}
             </div>
@@ -223,35 +322,41 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
               <div>
                 <h2 className="mb-4 font-bold text-2xl">Contributions</h2>
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                  {contributions.map((item) => (
-                    <Card key={item.id} className={UI_CLASSES.CARD_INTERACTIVE}>
-                      <a href={`/${item.content_type}/${item.slug}`}>
-                        <CardHeader>
-                          <div className={'mb-2 flex items-center justify-between'}>
-                            <UnifiedBadge variant="base" style="secondary" className="text-xs">
-                              {item.content_type}
-                            </UnifiedBadge>
-                            {item.featured && (
-                              <UnifiedBadge variant="base" style="default" className="text-xs">
-                                Featured
+                  {contributions.map((item) => {
+                    const safeContentUrl = getSafeContentUrl(item.content_type, item.slug);
+                    if (!safeContentUrl) return null;
+                    return (
+                      <Card key={item.id} className={UI_CLASSES.CARD_INTERACTIVE}>
+                        <a href={safeContentUrl}>
+                          <CardHeader>
+                            <div className={'mb-2 flex items-center justify-between'}>
+                              <UnifiedBadge variant="base" style="secondary" className="text-xs">
+                                {item.content_type}
                               </UnifiedBadge>
-                            )}
-                          </div>
-                          <CardTitle className="text-base">{item.name}</CardTitle>
-                          <CardDescription className="line-clamp-2 text-xs">
-                            {item.description}
-                          </CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                          <div className={'flex items-center gap-2 text-muted-foreground text-xs'}>
-                            <span>{item.view_count || 0} views</span>
-                            <span>•</span>
-                            <span>{item.download_count || 0} downloads</span>
-                          </div>
-                        </CardContent>
-                      </a>
-                    </Card>
-                  ))}
+                              {item.featured && (
+                                <UnifiedBadge variant="base" style="default" className="text-xs">
+                                  Featured
+                                </UnifiedBadge>
+                              )}
+                            </div>
+                            <CardTitle className="text-base">{item.name}</CardTitle>
+                            <CardDescription className="line-clamp-2 text-xs">
+                              {item.description}
+                            </CardDescription>
+                          </CardHeader>
+                          <CardContent>
+                            <div
+                              className={'flex items-center gap-2 text-muted-foreground text-xs'}
+                            >
+                              <span>{item.view_count || 0} views</span>
+                              <span>•</span>
+                              <span>{item.download_count || 0} downloads</span>
+                            </div>
+                          </CardContent>
+                        </a>
+                      </Card>
+                    );
+                  })}
                 </div>
               </div>
             )}

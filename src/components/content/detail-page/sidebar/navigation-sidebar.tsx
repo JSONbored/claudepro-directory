@@ -17,13 +17,100 @@ import { getSocialLinks } from '@/src/lib/data/marketing/contact';
 import { ExternalLink, Github, Thermometer } from '@/src/lib/icons';
 import { BADGE_COLORS, type CategoryType, UI_CLASSES } from '@/src/lib/ui-constants';
 import { getDisplayTitle } from '@/src/lib/utils';
-import { getContentItemUrl } from '@/src/lib/utils/content.utils';
+import { getContentItemUrl, sanitizeSlug } from '@/src/lib/utils/content.utils';
 import { ensureStringArray, getMetadata } from '@/src/lib/utils/data.utils';
 import { logUnhandledPromise } from '@/src/lib/utils/error.utils';
 import type {
+  ContentCategory,
   ContentItem,
   GetGetContentDetailCompleteReturn,
 } from '@/src/types/database-overrides';
+
+/**
+ * Validate slug is safe for use in URLs
+ */
+function isValidSlug(slug: string): boolean {
+  if (typeof slug !== 'string' || slug.length === 0) return false;
+  return /^[a-zA-Z0-9-_]+$/.test(slug);
+}
+
+/**
+ * Get safe content URL with validation
+ * Returns null if category or slug is invalid
+ */
+function getSafeContentItemUrl(category: string, slug: string): string | null {
+  if (!(isValidCategory(category) && isValidSlug(slug))) return null;
+  const sanitizedSlug = sanitizeSlug(slug);
+  if (!isValidSlug(sanitizedSlug)) return null;
+  return getContentItemUrl({ category: category as ContentCategory, slug: sanitizedSlug });
+}
+
+/**
+ * Validate and sanitize documentation URL for safe use in href attributes
+ * Only allows HTTPS URLs from trusted domains with common TLDs
+ * Returns canonicalized URL or null if invalid
+ */
+function getSafeDocumentationUrl(url: string | null | undefined): string | null {
+  if (!url || typeof url !== 'string') return null;
+
+  try {
+    const parsed = new URL(url.trim());
+    // Only allow HTTPS protocol
+    if (parsed.protocol.toLowerCase() !== 'https:') return null;
+
+    // Reject dangerous components
+    if (parsed.username || parsed.password) return null;
+
+    // List of trusted TLDs for documentation sites
+    // These are common TLDs used by legitimate documentation platforms
+    const trustedTlds = [
+      '.com',
+      '.org',
+      '.net',
+      '.io',
+      '.ai',
+      '.dev',
+      '.co',
+      '.xyz',
+      '.info',
+      '.edu',
+      '.gov',
+      '.us',
+      '.uk',
+      '.ca',
+      '.au',
+      '.de',
+      '.fr',
+      '.jp',
+      '.cn',
+      '.tech',
+      '.site',
+      '.online',
+    ];
+
+    const hostname = parsed.hostname.toLowerCase().replace(/\.$/, '');
+    // Only allow hostnames ending with one of the trusted TLDs
+    const hasTrustedTld = trustedTlds.some((tld) => hostname.endsWith(tld));
+    if (!hasTrustedTld) return null;
+
+    // Sanitize: remove query strings, fragments, and credentials
+    parsed.search = '';
+    parsed.hash = '';
+    parsed.username = '';
+    parsed.password = '';
+    // Normalize hostname
+    parsed.hostname = hostname;
+    // Remove default ports
+    if (parsed.port === '443') {
+      parsed.port = '';
+    }
+
+    // Return canonicalized href (guaranteed to be normalized and safe)
+    return parsed.href;
+  } catch {
+    return null;
+  }
+}
 
 /**
  * Props for DetailSidebar
@@ -133,40 +220,51 @@ export const DetailSidebar = memo(function DetailSidebar({
                 </a>
               </Button>
             )}
-            {hasDocumentationUrl && 'documentation_url' in item && item.documentation_url && (
-              <Button
-                variant="outline"
-                className="w-full justify-start"
-                onClick={() => {
-                  pulse
-                    .click({
-                      category: isValidCategory(item.category) ? item.category : null,
-                      slug: item.slug || null,
-                      metadata: {
-                        action: 'external_link',
-                        link_type: 'documentation',
-                        target_url: item.documentation_url as string,
-                      },
-                    })
-                    .catch((error) => {
-                      logUnhandledPromise(
-                        'NavigationSidebar: documentation link click pulse failed',
-                        error,
-                        {
-                          category: item.category,
-                          slug: item.slug,
-                        }
-                      );
-                    });
-                }}
-                asChild={true}
-              >
-                <a href={item.documentation_url} target="_blank" rel="noopener noreferrer">
-                  <ExternalLink className={UI_CLASSES.ICON_SM_LEADING} />
-                  Documentation
-                </a>
-              </Button>
-            )}
+            {hasDocumentationUrl &&
+              'documentation_url' in item &&
+              item.documentation_url &&
+              (() => {
+                // Validate and sanitize documentation URL before rendering
+                const safeDocUrl = getSafeDocumentationUrl(item.documentation_url as string);
+                if (!safeDocUrl) {
+                  // Don't render link if URL is invalid or unsafe
+                  return null;
+                }
+                return (
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start"
+                    onClick={() => {
+                      pulse
+                        .click({
+                          category: isValidCategory(item.category) ? item.category : null,
+                          slug: item.slug || null,
+                          metadata: {
+                            action: 'external_link',
+                            link_type: 'documentation',
+                            target_url: safeDocUrl,
+                          },
+                        })
+                        .catch((error) => {
+                          logUnhandledPromise(
+                            'NavigationSidebar: documentation link click pulse failed',
+                            error,
+                            {
+                              category: item.category,
+                              slug: item.slug,
+                            }
+                          );
+                        });
+                    }}
+                    asChild={true}
+                  >
+                    <a href={safeDocUrl} target="_blank" rel="noopener noreferrer">
+                      <ExternalLink className={UI_CLASSES.ICON_SM_LEADING} />
+                      Documentation
+                    </a>
+                  </Button>
+                );
+              })()}
           </CardContent>
         </Card>
       )}
@@ -288,13 +386,13 @@ export const DetailSidebar = memo(function DetailSidebar({
                 'slug' in relatedItem && typeof relatedItem.slug === 'string'
                   ? relatedItem.slug
                   : '';
+              // Validate and sanitize URL before using
+              const safeRelatedUrl = getSafeContentItemUrl(relatedCategory, relatedSlug);
+              if (!safeRelatedUrl) return null;
               return (
                 <Link
                   key={relatedSlug}
-                  href={getContentItemUrl({
-                    category: relatedCategory,
-                    slug: relatedSlug,
-                  })}
+                  href={safeRelatedUrl}
                   className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} block w-full cursor-pointer rounded-lg border border-border p-3 text-left transition-colors hover:bg-muted/50`}
                 >
                   <div className={'min-w-0 flex-1'}>

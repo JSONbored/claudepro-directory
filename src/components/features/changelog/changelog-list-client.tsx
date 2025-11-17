@@ -12,16 +12,41 @@ import { CategoryFilter } from '@/src/components/features/changelog/changelog-ca
 import { Tabs, TabsContent } from '@/src/components/primitives/ui/tabs';
 import {
   formatChangelogDateShort,
-  getChangelogPath,
   getNonEmptyCategories,
   getRelativeTime,
 } from '@/src/lib/changelog/utils';
 import { ArrowRight, Calendar } from '@/src/lib/icons';
 import { BADGE_COLORS, UI_CLASSES } from '@/src/lib/ui-constants';
+import { sanitizeSlug } from '@/src/lib/utils/content.utils';
 import type { Tables } from '@/src/types/database.types';
 import type { ChangelogCategory } from '@/src/types/database-overrides';
 
 type ChangelogEntry = Tables<'changelog'>;
+
+/**
+ * Validate changelog slug is safe for use in URLs
+ * Changelog slugs must be 3-100 lowercase characters (letters, numbers, hyphens only)
+ */
+function isValidChangelogSlug(slug: string): boolean {
+  if (typeof slug !== 'string' || slug.length < 3 || slug.length > 100) return false;
+  // Strict pattern: lowercase letters, numbers, hyphens only
+  return /^[a-z0-9-]+$/.test(slug);
+}
+
+/**
+ * Get safe changelog path from slug
+ * Returns null if slug is invalid or unsafe
+ */
+function getSafeChangelogPath(slug: string | null | undefined): string | null {
+  if (!slug || typeof slug !== 'string') return null;
+  // Validate slug format
+  if (!isValidChangelogSlug(slug)) return null;
+  // Sanitize to remove any potentially dangerous characters
+  const sanitized = sanitizeSlug(slug).toLowerCase();
+  // Double-check after sanitization
+  if (!isValidChangelogSlug(sanitized) || sanitized.length === 0) return null;
+  return `/changelog/${sanitized}`;
+}
 
 export interface ChangelogListClientProps {
   entries: ChangelogEntry[];
@@ -63,7 +88,10 @@ export function ChangelogListClient({ entries, categoryCounts }: ChangelogListCl
         ) : (
           <div className="grid grid-cols-1 gap-6">
             {filteredEntries.map((entry) => {
-              const targetPath = getChangelogPath(entry.slug);
+              // Validate and sanitize slug before using in URL
+              const targetPath = getSafeChangelogPath(entry.slug);
+              // Don't render if slug is invalid or unsafe
+              if (!targetPath) return null;
               const nonEmptyCategories = getNonEmptyCategories(entry.changes);
               const displayDate = getRelativeTime(entry.release_date);
 
