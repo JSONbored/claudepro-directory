@@ -12,18 +12,21 @@
  * Performance: Only the interactive buttons are client-side, rest is server-rendered
  */
 
+import { logger } from '@/src/lib/logger';
+
 /**
  * Sanitizes path segment to prevent SSRF/path traversal.
  * Allows a-z, A-Z, 0-9, dash, underscore, dot, NO slash or backslash.
- * Throws if invalid. Used to construct safe URLs.
+ * Returns null if invalid to allow graceful fallback instead of crashing.
+ * Used to construct safe URLs.
  */
-function sanitizePathSegment(segment: string): string {
+function sanitizePathSegment(segment: string): string | null {
   // Only allow a-z, A-Z, 0-9, dash, underscore, dot.
   // No slashes, no backslashes, no semicolon, no control chars.
-  // You may wish to restrict length (1-64).
+  // Length restricted to 1-64 characters.
   const SAFE_SEGMENT_REGEX = /^[a-zA-Z0-9._-]{1,64}$/;
   if (!SAFE_SEGMENT_REGEX.test(segment)) {
-    throw new Error(`Invalid path segment for SSRF-protected URL: ${segment}`);
+    return null;
   }
   return segment;
 }
@@ -105,31 +108,57 @@ function determineCopyType(
 
 /**
  * Safely extracts content or configuration from item as a string for copying
+ * Returns null if no usable content exists (prevents copying empty strings)
  */
 function getContentForCopy(
   item: ContentItem | GetGetContentDetailCompleteReturn['content']
-): string {
+): string | null {
   // Check for content first
-  if ('content' in item && typeof item.content === 'string') {
+  if ('content' in item && typeof item.content === 'string' && item.content.trim().length > 0) {
     return item.content;
   }
 
   // Fall back to configuration
   if ('configuration' in item) {
     const cfg = item.configuration;
-    if (typeof cfg === 'string') return cfg;
-    if (cfg != null) return JSON.stringify(cfg, null, 2);
+    if (typeof cfg === 'string' && cfg.trim().length > 0) return cfg;
+    if (cfg != null) {
+      const jsonStr = JSON.stringify(cfg, null, 2);
+      if (jsonStr.trim().length > 0) return jsonStr;
+    }
   }
 
-  return '';
+  return null;
 }
 
 /**
  * Serializable action data for client component
+ *
+ * Action types used in the codebase:
+ * - 'download': Downloads a file (handled specially in handleActionClick)
+ * - 'scroll': Scrolls to a section
+ * - 'github_link': Links to GitHub
+ * - 'notification': Shows a notification
+ * - 'copy_command': Copies a command
+ * - 'copy_script': Copies a script
+ * - 'deploy': Default fallback action
+ * - 'info': Generic info action
+ * - 'custom': Custom action type
  */
+export type SerializableActionType =
+  | 'download'
+  | 'scroll'
+  | 'github_link'
+  | 'notification'
+  | 'copy_command'
+  | 'copy_script'
+  | 'deploy'
+  | 'info'
+  | 'custom';
+
 export interface SerializableAction {
   label: string;
-  type: string; // 'deploy', 'copy', 'view', etc.
+  type: SerializableActionType;
 }
 
 export interface DetailHeaderActionsProps {
@@ -140,6 +169,20 @@ export interface DetailHeaderActionsProps {
   displayTitle: string;
   primaryAction: SerializableAction;
   secondaryActions?: SerializableAction[];
+  /**
+   * Optional custom copy handler.
+   *
+   * NOTE: If provided, this completely replaces the default copy behavior.
+   * The caller is responsible for:
+   * - Triggering Pulse copy analytics (if desired)
+   * - Showing the email capture modal (if desired)
+   * - Handling clipboard operations
+   * - Showing success/error toasts
+   *
+   * If you want to augment the default behavior rather than replace it,
+   * consider using the default implementation and handling additional logic
+   * in the component that uses DetailHeaderActions.
+   */
   onCopyContent?: (() => Promise<void>) | undefined;
 }
 
@@ -197,6 +240,15 @@ export function DetailHeaderActions({
 
     // Default copy logic
     const contentToCopy = getContentForCopy(item);
+
+    // Short-circuit if no content to copy
+    if (!contentToCopy) {
+      toasts.raw.error('Nothing to copy', {
+        description: 'No content is available to copy.',
+      });
+      return;
+    }
+
     await copy(contentToCopy);
 
     pulse.copy({ category, slug: item.slug }).catch((error) => {
@@ -306,67 +358,127 @@ export function DetailHeaderActions({
           )}
 
           {/* Copy for AI button */}
-          <ContentActionButton
-            url={`/${sanitizePathSegment(category)}/${sanitizePathSegment(item.slug)}/llms.txt`}
-            action={async (content) => {
-              await copyToClipboard(content);
-            }}
-            label="Copy for AI"
-            successMessage="Copied llms.txt to clipboard!"
-            icon={Sparkles}
-            trackAnalytics={async () => {
-              await pulse.copy({ category, slug: item.slug, metadata: { action_type: 'llmstxt' } });
-            }}
-            variant="outline"
-            size="default"
-            className="min-w-0"
-          />
-
-          {/* Copy as Markdown button */}
-          <ContentActionButton
-            url={`/${sanitizePathSegment(category)}/${sanitizePathSegment(item.slug)}.md?include_metadata=true&include_footer=false`}
-            action={async (content) => {
-              await copyToClipboard(content);
-              showModal({
-                copyType: 'markdown',
+          {(() => {
+            const safeCategory = sanitizePathSegment(category);
+            const safeSlug = sanitizePathSegment(item.slug);
+            if (!(safeCategory && safeSlug)) {
+              // Log warning but don't crash - gracefully skip this button
+              logger.warn('DetailHeaderActions: Invalid category or slug for AI copy button', {
                 category,
                 slug: item.slug,
-                ...(referrer && { referrer }),
               });
-            }}
-            label="Copy Markdown"
-            successMessage="Copied markdown to clipboard!"
-            icon={FileText}
-            trackAnalytics={async () => {
-              await pulse.copy({ category, slug: item.slug, metadata: { action_type: 'copy' } });
-            }}
-            variant="outline"
-            size="default"
-            className="min-w-0"
-          />
+              return null;
+            }
+            return (
+              <ContentActionButton
+                url={`/${safeCategory}/${safeSlug}/llms.txt`}
+                action={async (content) => {
+                  await copyToClipboard(content);
+                }}
+                label="Copy for AI"
+                successMessage="Copied llms.txt to clipboard!"
+                icon={Sparkles}
+                trackAnalytics={async () => {
+                  await pulse.copy({
+                    category,
+                    slug: item.slug,
+                    metadata: { action_type: 'llmstxt' },
+                  });
+                }}
+                variant="outline"
+                size="default"
+                className="min-w-0"
+              />
+            );
+          })()}
+
+          {/* Copy as Markdown button */}
+          {(() => {
+            const safeCategory = sanitizePathSegment(category);
+            const safeSlug = sanitizePathSegment(item.slug);
+            if (!(safeCategory && safeSlug)) {
+              // Log warning but don't crash - gracefully skip this button
+              logger.warn(
+                'DetailHeaderActions: Invalid category or slug for Markdown copy button',
+                {
+                  category,
+                  slug: item.slug,
+                }
+              );
+              return null;
+            }
+            return (
+              <ContentActionButton
+                url={`/${safeCategory}/${safeSlug}.md?include_metadata=true&include_footer=false`}
+                action={async (content) => {
+                  await copyToClipboard(content);
+                  showModal({
+                    copyType: 'markdown',
+                    category,
+                    slug: item.slug,
+                    ...(referrer && { referrer }),
+                  });
+                }}
+                label="Copy Markdown"
+                successMessage="Copied markdown to clipboard!"
+                icon={FileText}
+                trackAnalytics={async () => {
+                  await pulse.copy({
+                    category,
+                    slug: item.slug,
+                    metadata: { action_type: 'copy' },
+                  });
+                }}
+                variant="outline"
+                size="default"
+                className="min-w-0"
+              />
+            );
+          })()}
 
           {/* Download Markdown button */}
-          <ContentActionButton
-            url={`/${sanitizePathSegment(category)}/${sanitizePathSegment(item.slug)}.md`}
-            action={async (content) => {
-              const blob = new Blob([content], { type: 'text/markdown' });
-              const url = URL.createObjectURL(blob);
-              const a = document.createElement('a');
-              a.href = url;
-              a.download = `${item.slug}.md`;
-              a.click();
-              URL.revokeObjectURL(url);
-            }}
-            label="Download"
-            successMessage="Downloaded markdown file!"
-            icon={Download}
-            trackAnalytics={async () => {
-              await pulse.download({ category, slug: item.slug, action_type: 'download_markdown' });
-            }}
-            variant="outline"
-            size="default"
-            className="min-w-0"
-          />
+          {(() => {
+            const safeCategory = sanitizePathSegment(category);
+            const safeSlug = sanitizePathSegment(item.slug);
+            if (!(safeCategory && safeSlug)) {
+              // Log warning but don't crash - gracefully skip this button
+              logger.warn(
+                'DetailHeaderActions: Invalid category or slug for Markdown download button',
+                {
+                  category,
+                  slug: item.slug,
+                }
+              );
+              return null;
+            }
+            return (
+              <ContentActionButton
+                url={`/${safeCategory}/${safeSlug}.md`}
+                action={async (content) => {
+                  const blob = new Blob([content], { type: 'text/markdown' });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement('a');
+                  a.href = url;
+                  a.download = `${item.slug}.md`;
+                  a.click();
+                  URL.revokeObjectURL(url);
+                }}
+                label="Download"
+                successMessage="Downloaded markdown file!"
+                icon={Download}
+                trackAnalytics={async () => {
+                  await pulse.download({
+                    category,
+                    slug: item.slug,
+                    action_type: 'download_markdown',
+                  });
+                }}
+                variant="outline"
+                size="default"
+                className="min-w-0"
+              />
+            );
+          })()}
 
           {secondaryActions?.map((action) => (
             <Button

@@ -4,9 +4,9 @@ import { generateContentCacheKey } from '@/src/lib/data/helpers-utils';
 import type { DisplayableContent } from '@/src/lib/types/component.types';
 import type {
   ContentCategory,
+  GetGetPopularContentReturn,
   GetGetRecentContentReturn,
-  GetPopularContentReturn,
-  GetTrendingMetricsWithContentReturn,
+  GetGetTrendingMetricsWithContentReturn,
   HomepageContentItem,
 } from '@/src/types/database-overrides';
 
@@ -52,8 +52,11 @@ export async function getTrendingPageData(
 async function fetchTrendingMetrics(
   category: ContentCategory | null,
   limit: number
-): Promise<GetTrendingMetricsWithContentReturn> {
-  return fetchCachedRpc<'get_trending_metrics_with_content', GetTrendingMetricsWithContentReturn>(
+): Promise<GetGetTrendingMetricsWithContentReturn> {
+  return fetchCachedRpc<
+    'get_trending_metrics_with_content',
+    GetGetTrendingMetricsWithContentReturn
+  >(
     {
       ...(category ? { p_category: category } : {}),
       p_limit: limit,
@@ -72,9 +75,9 @@ async function fetchTrendingMetrics(
 async function fetchPopularContent(
   category: ContentCategory | null,
   limit: number
-): Promise<GetPopularContentReturn> {
+): Promise<GetGetPopularContentReturn> {
   // Note: fetchCachedRpc has a constraint issue where it expects description: string
-  // but GetPopularContentReturn has description: string | null. We bypass the constraint
+  // but GetGetPopularContentReturn has description: string | null. We bypass the constraint
   // by casting the function call result.
   const data = await fetchCachedRpc(
     {
@@ -100,7 +103,7 @@ async function fetchPopularContent(
       logMeta: { category: category ?? 'all', limit },
     }
   );
-  return data as GetPopularContentReturn;
+  return data as GetGetPopularContentReturn;
 }
 
 async function fetchRecentContent(
@@ -125,11 +128,11 @@ async function fetchRecentContent(
 }
 
 function mapTrendingMetrics(
-  rows: GetTrendingMetricsWithContentReturn,
+  rows: GetGetTrendingMetricsWithContentReturn,
   category: ContentCategory | null
 ): DisplayableContent[] {
   if (!rows || rows.length === 0) return [];
-  return rows.map((row: GetTrendingMetricsWithContentReturn[number], index: number) => {
+  return rows.map((row: GetGetTrendingMetricsWithContentReturn[number], index: number) => {
     const resolvedCategory = row.category ?? category ?? DEFAULT_CATEGORY;
     const validCategory = isValidCategory(resolvedCategory) ? resolvedCategory : DEFAULT_CATEGORY;
     return toHomepageContentItem({
@@ -149,10 +152,10 @@ function mapTrendingMetrics(
 }
 
 function mapPopularContent(
-  rows: GetPopularContentReturn,
+  rows: GetGetPopularContentReturn,
   category: ContentCategory | null
 ): DisplayableContent[] {
-  return rows.map((row: GetPopularContentReturn[number], index: number) => {
+  return rows.map((row: GetGetPopularContentReturn[number], index: number) => {
     const resolvedCategory = row.category ?? category ?? DEFAULT_CATEGORY;
     const validCategory = isValidCategory(resolvedCategory) ? resolvedCategory : DEFAULT_CATEGORY;
     return toHomepageContentItem({

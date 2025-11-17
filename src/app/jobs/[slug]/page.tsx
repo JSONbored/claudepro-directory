@@ -30,6 +30,86 @@ import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { ensureStringArray } from '@/src/lib/utils/data.utils';
 import { normalizeError } from '@/src/lib/utils/error.utils';
 
+/**
+ * Validate and sanitize external website URL for safe use in href attributes
+ * Only allows HTTPS URLs (or HTTP for localhost in development)
+ * Returns canonicalized URL or null if invalid
+ */
+function getSafeWebsiteUrl(url: string | null | undefined): string | null {
+  if (!url || typeof url !== 'string') return null;
+
+  try {
+    const parsed = new URL(url.trim());
+    // Only allow HTTPS protocol (or HTTP for localhost/development)
+    const isLocalhost =
+      parsed.hostname === 'localhost' ||
+      parsed.hostname === '127.0.0.1' ||
+      parsed.hostname === '::1';
+    if (parsed.protocol === 'https:') {
+      // HTTPS always allowed
+    } else if (parsed.protocol === 'http:' && isLocalhost) {
+      // HTTP allowed only for local development
+    } else {
+      return null;
+    }
+    // Reject dangerous components
+    if (parsed.username || parsed.password) return null;
+
+    // Sanitize: remove credentials
+    parsed.username = '';
+    parsed.password = '';
+    // Normalize hostname
+    parsed.hostname = parsed.hostname.replace(/\.$/, '').toLowerCase();
+    // Remove default ports
+    if (parsed.port === '80' || parsed.port === '443') {
+      parsed.port = '';
+    }
+
+    // Return canonicalized href (guaranteed to be normalized and safe)
+    return parsed.href;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Validate and sanitize email address for safe use in mailto links
+ * Returns safe mailto URL or null if email is invalid
+ */
+function getSafeMailtoUrl(email: string | null | undefined): string | null {
+  if (!email || typeof email !== 'string') return null;
+
+  // Trim and normalize
+  const trimmed = email.trim();
+  if (trimmed.length === 0) return null;
+
+  // Basic email format validation (RFC 5322 simplified)
+  // Prevents injection attacks while allowing valid emails
+  const emailRegex =
+    /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
+
+  // Validate format
+  if (!emailRegex.test(trimmed)) return null;
+
+  // Security checks: reject dangerous patterns
+  // Prevent null bytes
+  if (trimmed.includes('\0')) return null;
+  // Prevent path traversal attempts
+  if (trimmed.includes('..') || trimmed.includes('//')) return null;
+  // Prevent protocol injection (javascript:, data:, etc.)
+  if (/^(javascript|data|vbscript|file):/i.test(trimmed)) return null;
+
+  // Normalize to lowercase
+  const normalized = trimmed.toLowerCase();
+
+  // Limit length (RFC 5321: max 254 characters)
+  if (normalized.length > 254) return null;
+
+  // Encode email in mailto URL to prevent injection
+  // encodeURIComponent handles special characters safely
+  return `mailto:${encodeURIComponent(normalized)}`;
+}
+
 export async function generateMetadata({
   params,
 }: {
@@ -219,20 +299,35 @@ export default async function JobPage({ params }: PageProps) {
                   <CardTitle>Apply for this position</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2">
-                  <Button className="w-full" asChild={true}>
-                    <a href={job.link} target="_blank" rel="noopener noreferrer">
-                      <ExternalLink className={'mr-2 h-4 w-4'} />
-                      Apply Now
-                    </a>
-                  </Button>
-                  {job.contact_email && (
-                    <Button variant="outline" className="w-full" asChild={true}>
-                      <a href={`mailto:${job.contact_email}`}>
-                        <Building2 className={'mr-2 h-4 w-4'} />
-                        Contact Company
-                      </a>
-                    </Button>
-                  )}
+                  {(() => {
+                    const safeJobLink = getSafeWebsiteUrl(job.link);
+                    if (!safeJobLink) return null;
+                    // Explicit validation: getSafeWebsiteUrl guarantees the URL is safe
+                    // It validates protocol (HTTPS only, or HTTP for localhost), removes credentials,
+                    // normalizes hostname, and returns null for any invalid URLs
+                    // At this point, safeJobLink is validated and safe for use in external links
+                    const validatedUrl: string = safeJobLink;
+                    return (
+                      <Button className="w-full" asChild={true}>
+                        <a href={validatedUrl} target="_blank" rel="noopener noreferrer">
+                          <ExternalLink className={'mr-2 h-4 w-4'} />
+                          Apply Now
+                        </a>
+                      </Button>
+                    );
+                  })()}
+                  {(() => {
+                    const safeMailtoUrl = getSafeMailtoUrl(job.contact_email);
+                    if (!safeMailtoUrl) return null;
+                    return (
+                      <Button variant="outline" className="w-full" asChild={true}>
+                        <a href={safeMailtoUrl}>
+                          <Building2 className={'mr-2 h-4 w-4'} />
+                          Contact Company
+                        </a>
+                      </Button>
+                    );
+                  })()}
                 </CardContent>
               </Card>
 

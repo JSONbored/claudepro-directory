@@ -29,6 +29,48 @@ import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { normalizeError } from '@/src/lib/utils/error.utils';
 
+/**
+ * Validate and sanitize external website URL for safe use in href attributes
+ * Only allows HTTPS URLs (or HTTP for localhost in development)
+ * Returns canonicalized URL or null if invalid
+ */
+function getSafeWebsiteUrl(url: string | null | undefined): string | null {
+  if (!url || typeof url !== 'string') return null;
+
+  try {
+    const parsed = new URL(url.trim());
+    // Only allow HTTPS protocol (or HTTP for localhost/development)
+    const isLocalhost =
+      parsed.hostname === 'localhost' ||
+      parsed.hostname === '127.0.0.1' ||
+      parsed.hostname === '::1';
+    if (parsed.protocol === 'https:') {
+      // HTTPS always allowed
+    } else if (parsed.protocol === 'http:' && isLocalhost) {
+      // HTTP allowed only for local development
+    } else {
+      return null;
+    }
+    // Reject dangerous components
+    if (parsed.username || parsed.password) return null;
+
+    // Sanitize: remove credentials
+    parsed.username = '';
+    parsed.password = '';
+    // Normalize hostname
+    parsed.hostname = parsed.hostname.replace(/\.$/, '').toLowerCase();
+    // Remove default ports
+    if (parsed.port === '80' || parsed.port === '443') {
+      parsed.port = '';
+    }
+
+    // Return canonicalized href (guaranteed to be normalized and safe)
+    return parsed.href;
+  } catch {
+    return null;
+  }
+}
+
 export async function generateMetadata() {
   return await generatePageMetadata('/companies');
 }
@@ -189,13 +231,22 @@ export default async function CompaniesPage() {
                       </UnifiedBadge>
                     )}
 
-                    {company.website && (
-                      <Button variant="ghost" size="sm" asChild={true}>
-                        <a href={company.website} target="_blank" rel="noopener noreferrer">
-                          <ExternalLink className="h-3 w-3" />
-                        </a>
-                      </Button>
-                    )}
+                    {(() => {
+                      const safeWebsiteUrl = getSafeWebsiteUrl(company.website);
+                      if (!safeWebsiteUrl) return null;
+                      // Explicit validation: getSafeWebsiteUrl guarantees the URL is safe
+                      // It validates protocol (HTTPS only, or HTTP for localhost), removes credentials,
+                      // normalizes hostname, and returns null for any invalid URLs
+                      // At this point, safeWebsiteUrl is validated and safe for use in external links
+                      const validatedUrl: string = safeWebsiteUrl;
+                      return (
+                        <Button variant="ghost" size="sm" asChild={true}>
+                          <a href={validatedUrl} target="_blank" rel="noopener noreferrer">
+                            <ExternalLink className="h-3 w-3" />
+                          </a>
+                        </Button>
+                      );
+                    })()}
                   </div>
                 </CardContent>
               </Card>

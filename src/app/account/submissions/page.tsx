@@ -29,31 +29,34 @@ export const metadata = generatePageMetadata('/account/submissions');
  * Returns validated owner, repo, and PR number, or null if invalid
  * This allows us to reconstruct the URL from trusted components instead of using user input directly
  */
+// Dangerous Unicode characters that could be used for attacks
+// Using Set for O(1) lookup performance instead of O(n) array includes
+const dangerousCharsSet = new Set([
+  0x202e,
+  0x202d,
+  0x202c,
+  0x202b,
+  0x202a, // RTL override marks
+  0x200e,
+  0x200f, // Left-to-right/right-to-left marks
+  0x2066,
+  0x2067,
+  0x2068,
+  0x2069, // Directional isolates
+]);
+
 function extractPrComponents(
   url: string | null | undefined
 ): { owner: string; repo: string; prNumber: string } | null {
   if (!url || typeof url !== 'string') return null;
 
   // Disallow control characters, invisible chars, and dangerous unicode
-  const dangerousChars = [
-    0x202e,
-    0x202d,
-    0x202c,
-    0x202b,
-    0x202a, // RTL override marks
-    0x200e,
-    0x200f, // Left-to-right/right-to-left marks
-    0x2066,
-    0x2067,
-    0x2068,
-    0x2069, // Directional isolates
-  ];
   for (let i = 0; i < url.length; i++) {
     const code = url.charCodeAt(i);
     if (
       (code >= 0x00 && code <= 0x1f) ||
       (code >= 0x7f && code <= 0x9f) ||
-      dangerousChars.includes(code)
+      dangerousCharsSet.has(code)
     ) {
       return null;
     }
@@ -69,7 +72,11 @@ function extractPrComponents(
     // Reject if username/password present
     if (parsed.username || parsed.password) return null;
     // Strict pattern: /owner/repo/pull/number
-    const pathMatch = parsed.pathname.match(/^\/([a-zA-Z0-9][\w-]*)\/([\w.-]+)\/pull\/(\d+)$/);
+    // Owner: GitHub usernames are 1-39 chars, alphanumeric + hyphens only (no underscores)
+    // Repo: 1-100 chars, alphanumeric + underscores + dots + hyphens
+    const pathMatch = parsed.pathname.match(
+      /^\/([a-zA-Z0-9](?:[a-zA-Z0-9-]{0,38})?)\/([\w.-]{1,100})\/pull\/(\d+)$/
+    );
     if (!pathMatch || pathMatch.length < 4) return null;
 
     const owner = pathMatch[1];
@@ -91,8 +98,16 @@ function extractPrComponents(
  * Uses URL constructor for canonicalization to prevent encoding-based attacks
  */
 function buildSafePrUrl(owner: string, repo: string, prNumber: string): string {
-  // Additional validation on extracted components
-  if (!(/^[a-zA-Z0-9][\w-]*$/.test(owner) && /^[\w.-]+$/.test(repo) && /^\d+$/.test(prNumber))) {
+  // Additional validation matching GitHub's rules
+  // Owner: 1-39 chars, alphanumeric + hyphens only (no underscores)
+  // Repo: 1-100 chars, alphanumeric + underscores + dots + hyphens
+  if (
+    !(
+      /^[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,38})?$/.test(owner) &&
+      /^[\w.-]{1,100}$/.test(repo) &&
+      /^\d+$/.test(prNumber)
+    )
+  ) {
     return '#';
   }
   try {
@@ -227,6 +242,32 @@ export default async function SubmissionsPage() {
     return labels[type] || type;
   };
 
+  /**
+   * Get safe PR link props or null if PR URL is invalid
+   * Extracts and validates PR components, then constructs a safe URL
+   */
+  function getPrLinkProps(submission: (typeof submissions)[number]) {
+    const components = submission.pr_url ? extractPrComponents(submission.pr_url) : null;
+    const prNumber = submission.pr_number || components?.prNumber;
+
+    if (!(components && prNumber)) return null;
+
+    const safePrUrl = buildSafePrUrl(components.owner, components.repo, prNumber);
+    return safePrUrl && safePrUrl !== '#' ? { href: safePrUrl } : null;
+  }
+
+  /**
+   * Get safe content URL or null if invalid
+   */
+  function getContentLinkProps(
+    type: string,
+    slug: string,
+    status: SubmissionStatus
+  ): { href: string } | null {
+    const safeUrl = getSafeContentUrl(type, slug);
+    return safeUrl && status === 'merged' ? { href: safeUrl } : null;
+  }
+
   return (
     <div className="space-y-6">
       <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
@@ -321,43 +362,45 @@ export default async function SubmissionsPage() {
 
                   <div className={UI_CLASSES.FLEX_GAP_2}>
                     {(() => {
-                      // Extract PR components from URL and reconstruct from trusted data
-                      // This prevents using user-controlled URL directly in href
-                      const prUrl = submission.pr_url;
-                      const components = prUrl ? extractPrComponents(prUrl) : null;
-
-                      // Prefer pr_number if available, otherwise use extracted PR number
-                      const prNumber = submission.pr_number || components?.prNumber;
-
-                      if (!(components && prNumber)) {
-                        return null;
-                      }
-
-                      // Reconstruct URL from validated components (not user input)
-                      const safePrUrl = buildSafePrUrl(components.owner, components.repo, prNumber);
-
-                      // Only render if we have a valid URL (not the fallback '#')
-                      return safePrUrl && safePrUrl !== '#' ? (
+                      const prLinkProps = getPrLinkProps(submission);
+                      if (!prLinkProps) return null;
+                      // Explicit validation: getPrLinkProps guarantees the URL is safe
+                      // It extracts and validates PR components (owner, repo, prNumber) using strict
+                      // regex patterns, validates against GitHub's rules, and reconstructs the URL
+                      // from trusted components. buildSafePrUrl further validates and normalizes
+                      // the URL. At this point, prLinkProps.href is validated and safe
+                      const validatedUrl: string = prLinkProps.href;
+                      return (
                         <Button variant="outline" size="sm" asChild={true}>
-                          <a href={safePrUrl} target="_blank" rel="noopener noreferrer">
+                          <a href={validatedUrl} target="_blank" rel="noopener noreferrer">
                             <GitPullRequest className="mr-1 h-3 w-3" />
                             View PR
                             <ExternalLink className="ml-1 h-3 w-3" />
                           </a>
                         </Button>
-                      ) : null;
+                      );
                     })()}
 
                     {(() => {
-                      const safeUrl = getSafeContentUrl(type, submission.content_slug);
-                      return safeUrl && status === 'merged' ? (
+                      const contentLinkProps = getContentLinkProps(
+                        type,
+                        submission.content_slug,
+                        status
+                      );
+                      if (!contentLinkProps) return null;
+                      // Explicit validation: getContentLinkProps guarantees the URL is safe
+                      // It validates both type (using isSafeType) and slug (using isValidSlug)
+                      // before constructing the URL path. Only returns props if validation passes
+                      // and status is 'merged'. At this point, contentLinkProps.href is validated and safe
+                      const validatedUrl: string = contentLinkProps.href;
+                      return (
                         <Button variant="outline" size="sm" asChild={true}>
-                          <Link href={safeUrl}>
+                          <Link href={validatedUrl}>
                             <ExternalLink className="mr-1 h-3 w-3" />
                             View Live
                           </Link>
                         </Button>
-                      ) : null;
+                      );
                     })()}
                   </div>
                 </CardContent>

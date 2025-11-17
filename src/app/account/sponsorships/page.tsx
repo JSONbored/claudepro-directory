@@ -19,6 +19,23 @@ import { normalizeError } from '@/src/lib/utils/error.utils';
 
 export const metadata = generatePageMetadata('/account/sponsorships');
 
+/**
+ * Check if a sponsorship is currently active
+ * A sponsorship is active if:
+ * - The active flag is true (not null or false)
+ * - Current date is between start_date and end_date (inclusive)
+ */
+function isSponsorshipActive(
+  sponsorship: { active: boolean | null; start_date: string; end_date: string },
+  now: Date
+): boolean {
+  return (
+    sponsorship.active === true &&
+    new Date(sponsorship.start_date) <= now &&
+    new Date(sponsorship.end_date) >= now
+  );
+}
+
 export default async function SponsorshipsPage() {
   const { user } = await getAuthenticatedUser({ context: 'SponsorshipsPage' });
 
@@ -85,9 +102,7 @@ export default async function SponsorshipsPage() {
 
   // Compute active count once using consistent logic
   const now = new Date();
-  const activeCount = orderedSponsorships.filter(
-    (s) => s.active && new Date(s.start_date) <= now && new Date(s.end_date) >= now
-  ).length;
+  const activeCount = orderedSponsorships.filter((s) => isSponsorshipActive(s, now)).length;
 
   return (
     <div className="space-y-6">
@@ -108,10 +123,7 @@ export default async function SponsorshipsPage() {
 
       <div className="grid gap-4">
         {orderedSponsorships.map((sponsorship) => {
-          const isActive =
-            sponsorship.active &&
-            new Date(sponsorship.start_date) <= now &&
-            new Date(sponsorship.end_date) >= now;
+          const isActive = isSponsorshipActive(sponsorship, now);
 
           const impressionCount = sponsorship.impression_count ?? 0;
           const clickCount = sponsorship.click_count ?? 0;
@@ -206,12 +218,20 @@ export default async function SponsorshipsPage() {
 
                 {/* Progress bar if has limit */}
                 {sponsorship.impression_limit && (
-                  <div className="h-2 w-full rounded-full bg-muted">
+                  <div
+                    className="h-2 w-full rounded-full bg-muted"
+                    role="progressbar"
+                    aria-valuenow={impressionCount}
+                    aria-valuemin={0}
+                    aria-valuemax={sponsorship.impression_limit}
+                    aria-label={`Impressions: ${impressionCount} of ${sponsorship.impression_limit}`}
+                  >
                     <div
                       className="h-2 rounded-full bg-primary transition-all"
                       style={{
                         width: `${Math.min(100, (impressionCount / sponsorship.impression_limit) * 100)}%`,
                       }}
+                      aria-hidden="true"
                     />
                   </div>
                 )}

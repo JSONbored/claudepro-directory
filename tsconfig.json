@@ -18,7 +18,8 @@
     "config/build/../../src/**/*.tsx",
     "config/build/../../src/types/**/*.d.ts",
     "config/build/../../.next/types/**/*.ts",
-    ".next/types/**/*.ts"
+    ".next/types/**/*.ts",
+    "scripts/**/*.ts"
   ],
   "exclude": [
     "node_modules",

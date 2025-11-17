@@ -66,7 +66,7 @@ async function main() {
 
     logger.info('✅ README.md generated successfully!', { script: 'generate-readme' });
     logger.info(`   Bytes: ${readme.length}`, { script: 'generate-readme', bytes: readme.length });
-    logger.info('   Source: Supabase Edge Function (generate_readme_data RPC)', {
+    logger.info('   Source: Supabase Edge Function (data-api/content)', {
       script: 'generate-readme',
     });
   } catch (error) {

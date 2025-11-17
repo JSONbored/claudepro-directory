@@ -14,8 +14,8 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { z } from 'zod';
 import { logger } from '@/src/lib/logger';
-import { ALL_CATEGORY_IDS } from '../../src/lib/config/category-config.generated.js';
-import { SECURITY_CONFIG } from '../../src/lib/constants.js';
+import { ALL_CATEGORY_IDS } from '../../src/lib/data/config/category/category-config.generated';
+import { SECURITY_CONFIG } from '../../src/lib/data/config/constants';
 import { ParseStrategy, safeParse } from '../../src/lib/utils/data.utils.js';
 import { computeHash, hasHashChanged, setHash } from '../utils/build-cache.js';
 
@@ -53,18 +53,17 @@ async function generateServiceWorker() {
     logger.info(`📦 Found ${categoryIds.length} categories: ${categoryIds.join(', ')}`, {
       script: 'generate-service-worker',
       categoryCount: categoryIds.length,
-      categories: categoryIds,
     });
 
     // Generate content routes array
     // MODERNIZATION: All categories from registry, no special cases
-    const contentRoutes = categoryIds.map((id) => `"/${id}"`);
+    const contentRoutes = categoryIds.map((id: string) => `"/${id}"`);
 
     // Generate category pattern for detail pages
     const categoryPattern = categoryIds.join('|');
 
     // Generate allowed origins array from SECURITY_CONFIG
-    const allowedOrigins = SECURITY_CONFIG.allowedOrigins.map((origin) => `"${origin}"`);
+    const allowedOrigins = SECURITY_CONFIG.allowedOrigins.map((origin: string) => `"${origin}"`);
 
     // OPTIMIZATION: Hash inputs instead of output (faster - skips template rendering)
     const inputHash = computeHash({

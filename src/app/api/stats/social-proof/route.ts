@@ -69,7 +69,16 @@ export async function GET() {
     const topContributors = Array.from(contributorCounts.entries())
       .sort((a, b) => b[1] - a[1])
       .slice(0, 5)
-      .map(([name]) => name.split('@')[0]); // Extract username from email
+      .map(([name]) => {
+        // Defensively extract username: handle both email and non-email formats
+        const atIndex = name.indexOf('@');
+        if (atIndex !== -1) {
+          // Email format: extract username part before '@'
+          return name.substring(0, atIndex);
+        }
+        // Non-email format: return trimmed original name
+        return name.trim();
+      });
 
     // Get total content count as proxy for total users
     const { count: contentCount, error: contentError } = await supabase

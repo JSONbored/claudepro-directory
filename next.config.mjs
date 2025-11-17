@@ -71,6 +71,7 @@ const nextConfig = {
       '@content': './content',
       '@generated': './generated',
     },
+    resolveExtensions: ['.tsx', '.ts', '.jsx', '.js', '.mjs', '.json'],
   },
 
   outputFileTracingExcludes: {
@@ -155,6 +156,26 @@ const nextConfig = {
         })
       );
     }
+
+    // Ignore test files in node_modules (helps with Turbopack compatibility)
+    config.plugins.push(
+      new webpack.IgnorePlugin({
+        resourceRegExp: /\/test\//,
+        contextRegExp: /node_modules/,
+      })
+    );
+    config.plugins.push(
+      new webpack.IgnorePlugin({
+        resourceRegExp: /\.(test|spec)\.(js|ts|mjs|tsx|jsx)$/,
+        contextRegExp: /node_modules/,
+      })
+    );
+    config.plugins.push(
+      new webpack.IgnorePlugin({
+        resourceRegExp: /\.(md|txt|yml|yaml|zip)$/,
+        contextRegExp: /node_modules\/thread-stream/,
+      })
+    );
 
     if (!isServer) {
       config.resolve.fallback = {

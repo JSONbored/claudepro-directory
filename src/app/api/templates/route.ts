@@ -14,10 +14,10 @@ import type { ContentCategory } from '@/src/types/database-overrides';
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
-    const category = searchParams.get('category') as ContentCategory | null;
+    const category = searchParams.get('category');
 
     // Validate category
-    if (!(category && VALID_CATEGORIES.includes(category))) {
+    if (!(category && VALID_CATEGORIES.includes(category as ContentCategory))) {
       return NextResponse.json(
         {
           error: 'Invalid category',
@@ -27,15 +27,18 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    // Type narrowing: category is validated and guaranteed to be ContentCategory
+    const validCategory = category as ContentCategory;
+
     // Fetch templates from data layer
-    const templates = await getContentTemplates(category);
+    const templates = await getContentTemplates(validCategory);
 
     // Return success response
     return NextResponse.json(
       {
         success: true,
         templates,
-        category,
+        category: validCategory,
         count: templates.length,
       },
       {

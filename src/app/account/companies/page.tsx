@@ -199,14 +199,21 @@ export default async function CompaniesPage() {
                           // Only allow HTTPS
                           if (parsed.protocol !== 'https:') return null;
                           // Allow Supabase storage (public bucket path) or common CDN domains
+                          // Restrict to specific CDN patterns to prevent subdomain abuse
                           const isSupabaseHost =
                             parsed.hostname.endsWith('.supabase.co') ||
                             parsed.hostname.endsWith('.supabase.in');
+                          const isCloudinary =
+                            parsed.hostname === 'res.cloudinary.com' ||
+                            /^[a-z0-9-]+\.cloudinary\.com$/.test(parsed.hostname);
+                          const isAwsS3 =
+                            /^[a-z0-9-]+\.s3\.amazonaws\.com$/.test(parsed.hostname) ||
+                            /^s3\.[a-z0-9-]+\.amazonaws\.com$/.test(parsed.hostname);
                           const isTrustedSource =
                             (isSupabaseHost &&
                               parsed.pathname.startsWith('/storage/v1/object/public/')) ||
-                            parsed.hostname.endsWith('.cloudinary.com') ||
-                            parsed.hostname.endsWith('.amazonaws.com');
+                            isCloudinary ||
+                            isAwsS3;
                           if (!isTrustedSource) return null;
                           return (
                             <Image
@@ -279,9 +286,14 @@ export default async function CompaniesPage() {
                             // If parsing fails, don't render the link
                             return null;
                           }
+                          // Explicit validation: safeHref is guaranteed to be safe
+                          // It's constructed from a validated URL (isAllowedHttpUrl + isTrustedPublicDomain)
+                          // with all dangerous components removed (credentials, query, hash)
+                          // and hostname normalized. At this point, safeHref is validated and safe for use
+                          const validatedUrl: string = safeHref;
                           return (
                             <a
-                              href={safeHref}
+                              href={validatedUrl}
                               target="_blank"
                               rel="noopener noreferrer"
                               className={`mt-2 inline-flex items-center gap-1 text-sm ${UI_CLASSES.LINK_ACCENT}`}

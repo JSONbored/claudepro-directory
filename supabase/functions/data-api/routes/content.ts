@@ -49,6 +49,9 @@ export async function handleContentRoute(
     if (first === 'changelog') {
       return handleChangelogIndex(format);
     }
+    if (first === 'category-configs' || first === 'categories') {
+      return handleCategoryConfigs();
+    }
     if (first && CONTENT_CATEGORY_VALUES.includes(first as ContentCategory)) {
       return handleCategoryOnly(first, format);
     }
@@ -324,5 +327,33 @@ async function handleToolLlms(tool: string): Promise<Response> {
       ...CORS,
       ...buildCacheHeaders('content_export'),
     },
+  });
+}
+
+async function handleCategoryConfigs(): Promise<Response> {
+  const rpcArgs =
+    {} satisfies DatabaseGenerated['public']['Functions']['get_category_configs_with_features']['Args'];
+  const { data, error } = await callRpc('get_category_configs_with_features', rpcArgs, true);
+
+  if (error) {
+    return errorResponse(error, 'data-api:get_category_configs_with_features', CORS);
+  }
+
+  if (!data) {
+    return jsonResponse(
+      {
+        error: 'Not Found',
+        message: 'Category configs not available',
+      },
+      404,
+      CORS
+    );
+  }
+
+  return jsonResponse(data, 200, {
+    ...CORS,
+    ...buildSecurityHeaders(),
+    ...buildCacheHeaders('config'),
+    'X-Generated-By': 'supabase.rpc.get_category_configs_with_features',
   });
 }

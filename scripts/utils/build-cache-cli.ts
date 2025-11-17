@@ -73,11 +73,11 @@ function main() {
         });
         logger.info(`   Oldest: ${stats.oldestEntry || 'N/A'}`, {
           script: 'build-cache-cli',
-          oldestEntry: stats.oldestEntry,
+          oldestEntry: stats.oldestEntry || 'N/A',
         });
         logger.info(`   Newest: ${stats.newestEntry || 'N/A'}`, {
           script: 'build-cache-cli',
-          newestEntry: stats.newestEntry,
+          newestEntry: stats.newestEntry || 'N/A',
         });
         logger.info(`   Total Build Time Saved: ${(stats.totalDuration / 1000).toFixed(1)}s`, {
           script: 'build-cache-cli',

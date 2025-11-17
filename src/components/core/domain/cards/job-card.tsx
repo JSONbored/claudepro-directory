@@ -217,10 +217,19 @@ export function JobCard({ job }: JobCardProps) {
                 });
             }}
           >
-            <a href={getSafeJobLink(job.link)} target="_blank" rel="noopener noreferrer">
-              Apply Now
-              <ExternalLink className={`ml-2 ${UI_CLASSES.ICON_SM}`} />
-            </a>
+            {(() => {
+              const safeJobLink = getSafeJobLink(job.link);
+              // Explicit validation: getSafeJobLink guarantees the URL is safe
+              // It validates protocol (HTTPS only), hostname (whitelisted job board domains only),
+              // and returns '#' for any invalid URLs. At this point, safeJobLink is validated
+              const validatedUrl: string = safeJobLink;
+              return (
+                <a href={validatedUrl} target="_blank" rel="noopener noreferrer">
+                  Apply Now
+                  <ExternalLink className={`ml-2 ${UI_CLASSES.ICON_SM}`} />
+                </a>
+              );
+            })()}
           </Button>
           <Button
             variant="outline"

@@ -70,7 +70,7 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
 
   const itemsWithContent = await Promise.all(
     items.map(async (itemRef): Promise<ItemWithData | null> => {
-      const refData = itemRef as { category: string; slug: string; reason?: string };
+      const refData = itemRef;
 
       try {
         // Type guard validation
@@ -131,9 +131,12 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
 
   const prerequisites = ensureStringArray(metadata.prerequisites);
   const installationOrder = ensureStringArray(metadata.installation_order);
-  const compatibility = metadata.compatibility as
-    | { claudeDesktop?: boolean; claudeCode?: boolean }
-    | undefined;
+  const compatibility =
+    typeof metadata.compatibility === 'object' &&
+    metadata.compatibility !== null &&
+    !Array.isArray(metadata.compatibility)
+      ? (metadata.compatibility as { claudeDesktop?: boolean; claudeCode?: boolean })
+      : undefined;
 
   return (
     <>

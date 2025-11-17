@@ -4,9 +4,10 @@
  * Code block with syntax highlighting, screenshot, share, and copy functionality
  */
 
+import DOMPurify from 'dompurify';
 import { motion } from 'motion/react';
 import { usePathname } from 'next/navigation';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { LinkedinShareButton, TwitterShareButton } from 'react-share';
 import { usePulse } from '@/src/hooks/use-pulse';
 import { getTimeoutConfig } from '@/src/lib/actions/feature-flags.actions';
@@ -30,6 +31,28 @@ import {
 } from '@/src/lib/utils/share.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
 import type { ContentCategory } from '@/src/types/database-overrides';
+
+const CLIPBOARD_RESET_DEFAULT_MS = 2000;
+
+/**
+ * Sanitize Shiki-generated HTML for safe use in dangerouslySetInnerHTML
+ * Only allows tags and attributes that Shiki uses for syntax highlighting
+ * Prevents XSS while preserving syntax highlighting
+ */
+function sanitizeShikiHtml(html: string): string {
+  if (!html || typeof html !== 'string') return '';
+  // Sanitize with very restrictive allowlist for Shiki HTML
+  // Shiki typically uses: <pre>, <code>, <span> with class and style attributes
+  return DOMPurify.sanitize(html, {
+    ALLOWED_TAGS: ['pre', 'code', 'span', 'div'],
+    ALLOWED_ATTR: ['class', 'style'],
+    // Allow data-* attributes (Shiki may use data-* for metadata)
+    ALLOW_DATA_ATTR: true,
+    // Remove any dangerous protocols or scripts
+    FORBID_TAGS: ['script', 'iframe', 'object', 'embed', 'form', 'input', 'button'],
+    FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover', 'href', 'src'],
+  });
+}
 
 export interface ProductionCodeBlockProps {
   /** Pre-rendered HTML from Sugar High (server-side) */
@@ -154,30 +177,32 @@ export function ProductionCodeBlock({
   const [isScreenshotting, setIsScreenshotting] = useState(false);
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [needsCollapse, setNeedsCollapse] = useState(false);
-  const [clipboardResetDelay, setClipboardResetDelay] = useState(2000);
+  const [clipboardResetDelay, setClipboardResetDelay] = useState(CLIPBOARD_RESET_DEFAULT_MS);
   const preRef = useRef<HTMLDivElement>(null);
   const pulse = usePulse();
   const codeBlockRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
 
   // Extract category and slug from pathname for tracking
+  // Memoize category validation to avoid repeated checks on every render
+  const category: ContentCategory = useMemo(() => {
+    const pathParts = pathname?.split('/').filter(Boolean) || [];
+    const rawCategory = pathParts[0] || 'unknown';
+
+    // Warn and use explicit sentinel for invalid categories to avoid misleading analytics
+    if (!isValidCategory(rawCategory)) {
+      logger.warn('Invalid category in pathname, using fallback', {
+        rawCategory,
+        pathname,
+        fallback: 'agents',
+      });
+      return 'agents' as ContentCategory;
+    }
+
+    return rawCategory;
+  }, [pathname]);
+
   const pathParts = pathname?.split('/').filter(Boolean) || [];
-  const rawCategory = pathParts[0] || 'unknown';
-
-  // Warn and use explicit sentinel for invalid categories to avoid misleading analytics
-  if (!isValidCategory(rawCategory)) {
-    logger.warn('Invalid category in pathname, using fallback', {
-      rawCategory,
-      pathname,
-      fallback: 'agents',
-    });
-  }
-
-  // Use 'agents' as fallback (valid ContentCategory) but logged above for visibility
-  // Type assertion needed since rawCategory may not be valid ContentCategory
-  const category: ContentCategory = isValidCategory(rawCategory)
-    ? rawCategory
-    : ('agents' as ContentCategory);
   const slug = pathParts[1] || 'unknown';
 
   // Calculate current URL for sharing (needed during render for react-share components)
@@ -283,7 +308,10 @@ export function ProductionCodeBlock({
         });
     } catch (error) {
       toasts.error.screenshotFailed();
-      logger.error('Screenshot generation failed', error as Error);
+      logger.error('Screenshot generation failed', normalizeError(error), {
+        category,
+        slug,
+      });
     } finally {
       clearTimeout(failsafeTimeout);
       setIsScreenshotting(false);
@@ -323,7 +351,11 @@ export function ProductionCodeBlock({
       setIsShareOpen(false);
     } catch (error) {
       toasts.error.shareFailed();
-      logger.error('Share failed', error as Error);
+      logger.error('Share failed', normalizeError(error), {
+        category,
+        slug,
+        platform,
+      });
     }
   };
 
@@ -482,8 +514,8 @@ export function ProductionCodeBlock({
         <div
           ref={preRef}
           className={showLineNumbers ? 'code-with-line-numbers' : ''}
-          // biome-ignore lint/security/noDangerouslySetInnerHtml: Server-side Shiki generates trusted HTML
-          dangerouslySetInnerHTML={{ __html: html }}
+          // biome-ignore lint/security/noDangerouslySetInnerHtml: HTML is sanitized with DOMPurify with strict allowlist for Shiki
+          dangerouslySetInnerHTML={{ __html: sanitizeShikiHtml(html) }}
         />
       </div>
 

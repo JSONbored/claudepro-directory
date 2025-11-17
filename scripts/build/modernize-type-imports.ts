@@ -180,9 +180,11 @@ function main() {
   logger.info('   Run pnpm type-check to verify\n', { script: 'modernize-type-imports' });
 }
 
-main().catch((error) => {
+try {
+  main();
+} catch (error: unknown) {
   logger.error('❌ Error', error instanceof Error ? error : new Error(String(error)), {
     script: 'modernize-type-imports',
   });
   process.exit(1);
-});
+}

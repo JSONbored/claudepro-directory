@@ -8,7 +8,7 @@ import type {
   ContentItem,
   GetGetContentDetailCompleteReturn,
 } from '@/src/types/database-overrides';
-import { DetailHeaderActions } from './detail-header-actions';
+import { DetailHeaderActions, type SerializableAction } from './detail-header-actions';
 
 export interface DetailHeaderProps {
   displayTitle: string;
@@ -31,8 +31,14 @@ export function DetailHeader({ displayTitle, item, config, onCopyContent }: Deta
   );
 
   // Extract serializable action data - database stores { label, type } only
-  const primaryAction = config.primaryAction || { label: 'Deploy', type: 'deploy' };
-  const secondaryActions = config.secondaryActions;
+  // Cast to SerializableAction to ensure type safety
+  const primaryAction: SerializableAction = (config.primaryAction as SerializableAction) || {
+    label: 'Deploy',
+    type: 'deploy',
+  };
+  const secondaryActions: SerializableAction[] | undefined = config.secondaryActions as
+    | SerializableAction[]
+    | undefined;
 
   return (
     <div className={'border-border border-b bg-code/50 backdrop-blur-sm'}>

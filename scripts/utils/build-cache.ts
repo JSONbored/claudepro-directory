@@ -150,11 +150,14 @@ export function setHash(
       const cache = loadCache();
 
       // Update only this script's entry
-      cache.caches[scriptKey] = {
+      const entry: CacheEntry = {
         hash,
         timestamp: new Date().toISOString(),
-        metadata,
       };
+      if (metadata) {
+        entry.metadata = metadata;
+      }
+      cache.caches[scriptKey] = entry;
 
       saveCache(cache);
       return; // Success

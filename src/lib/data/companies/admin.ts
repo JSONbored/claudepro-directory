@@ -7,7 +7,7 @@ const COMPANY_DETAIL_TTL_KEY = 'cache.company_detail.ttl_seconds';
 
 export async function getCompanyAdminProfile(
   companyId: string
-): Promise<GetGetCompanyAdminProfileReturn | null> {
+): Promise<GetGetCompanyAdminProfileReturn[number] | null> {
   if (!companyId) {
     return null;
   }
@@ -15,7 +15,7 @@ export async function getCompanyAdminProfile(
   // RPC returns array, but we normalize to single object
   const data = await fetchCachedRpc<
     'get_company_admin_profile',
-    GetGetCompanyAdminProfileReturn[] | null
+    GetGetCompanyAdminProfileReturn | null
   >(
     { p_company_id: companyId },
     {
@@ -35,5 +35,5 @@ export async function getCompanyAdminProfile(
     return null;
   }
 
-  return normalized;
+  return normalized as GetGetCompanyAdminProfileReturn[number] | null;
 }

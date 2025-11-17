@@ -478,13 +478,7 @@ export default function WizardSubmissionPage() {
           />
         );
       case 2:
-        return (
-          <StepBasicInfo
-            data={formData}
-            onChange={updateFormData}
-            getHighlightClasses={getHighlightClasses}
-          />
-        );
+        return <StepBasicInfo data={formData} onChange={updateFormData} />;
       case 3:
         return (
           <StepConfiguration
@@ -595,7 +589,6 @@ function StepBasicInfo({
 }: {
   data: FormData;
   onChange: (updates: Partial<FormData>) => void;
-  getHighlightClasses?: (field: string) => string;
 }) {
   const [nameValidation, setNameValidation] = useState<ValidationState>('idle');
   const [descValidation, setDescValidation] = useState<ValidationState>('idle');
@@ -1117,8 +1110,8 @@ function StepExamplesTags({
               {data.examples.length > 0 ? (
                 <div className="space-y-2">
                   {data.examples.map((example, index) => {
-                    // Create stable key from example content and index
-                    const exampleKey = `example-${index}-${example.slice(0, 10)}`;
+                    // Use stable key based on index to preserve animations
+                    const exampleKey = `example-${index}`;
                     return (
                       <motion.div
                         key={exampleKey}

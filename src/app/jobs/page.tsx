@@ -37,6 +37,18 @@ const NewsletterCTAVariant = dynamic(
   }
 );
 
+/**
+ * Caching Strategy: Delegated to Data Layer
+ *
+ * revalidate = false means this page won't automatically revalidate via Next.js.
+ * Instead, job listing freshness is controlled by the cache configuration in the data layer.
+ *
+ * The getFilteredJobs() function uses fetchCachedRpc() with TTL-based caching.
+ * Cache duration is configured via cache.jobs.ttl_seconds in the data layer configuration.
+ *
+ * To adjust job listing cache duration, update the cache.jobs.ttl_seconds setting,
+ * not the Next.js revalidate value on this page.
+ */
 export const revalidate = false;
 
 export async function generateMetadata({ searchParams }: PagePropsWithSearchParams) {

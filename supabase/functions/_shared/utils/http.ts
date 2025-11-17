@@ -83,6 +83,57 @@ export function getAuthenticatedCorsHeaders(requestOrigin: string | null): Recor
 
 /* ----------------------------- JSON RESPONSES ----------------------------- */
 
+/**
+ * Sanitize response data to prevent stack trace exposure
+ * Removes Error objects, stack properties, and other sensitive internal information
+ */
+function sanitizeResponseData(data: unknown): unknown {
+  // Handle null/undefined
+  if (data === null || data === undefined) {
+    return data;
+  }
+
+  // Handle primitives (safe to return as-is)
+  if (typeof data !== 'object') {
+    return data;
+  }
+
+  // Handle Error instances - convert to safe message only
+  if (data instanceof Error) {
+    return { error: data.message || 'An error occurred' };
+  }
+
+  // Handle Date objects - convert to ISO string
+  if (data instanceof Date) {
+    return data.toISOString();
+  }
+
+  // Handle arrays - recursively sanitize each element
+  if (Array.isArray(data)) {
+    return data.map((item) => sanitizeResponseData(item));
+  }
+
+  // Handle plain objects - recursively sanitize and remove sensitive properties
+  const sanitized: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(data)) {
+    // Skip sensitive properties that could expose stack traces or internal details
+    if (
+      key === 'stack' ||
+      key === 'cause' ||
+      key === 'originalError' ||
+      key === 'internalError' ||
+      key.startsWith('_')
+    ) {
+      continue;
+    }
+
+    // Recursively sanitize nested values
+    sanitized[key] = sanitizeResponseData(value);
+  }
+
+  return sanitized;
+}
+
 export function jsonResponse(
   data: unknown,
   status: number,
@@ -90,8 +141,10 @@ export function jsonResponse(
   additionalHeaders?: Record<string, string>
 ): Response {
   const securityHeaders = buildSecurityHeaders();
+  // Sanitize data to prevent stack trace exposure
+  const sanitizedData = sanitizeResponseData(data);
 
-  return new Response(JSON.stringify(data), {
+  return new Response(JSON.stringify(sanitizedData), {
     status,
     headers: {
       'Content-Type': 'application/json; charset=utf-8',
@@ -187,6 +240,7 @@ const DEFAULT_CACHE_PRESETS = {
   search_autocomplete: { ttl: 3600, stale: 3600 }, // 1h / 1h
   search_facets: { ttl: 3600, stale: 3600 }, // 1h / 1h
   transform: { ttl: 60 * 60 * 24 * 365, stale: 60 * 60 * 24 * 365 }, // 1y / 1y (immutable)
+  config: { ttl: 60 * 60 * 24, stale: 60 * 60 * 48 }, // 1d / 2d (category configs)
 } as const;
 
 const CACHE_PRESET_CONFIG_MAP: Partial<Record<CachePresetKey, string>> = {
@@ -203,6 +257,7 @@ const CACHE_PRESET_CONFIG_MAP: Partial<Record<CachePresetKey, string>> = {
   search_autocomplete: 'cache.search_autocomplete.ttl_seconds',
   search_facets: 'cache.search_facets.ttl_seconds',
   transform: 'cache.transform.ttl_seconds',
+  config: 'cache.config.ttl_seconds',
 };
 
 export type CachePresetKey = keyof typeof DEFAULT_CACHE_PRESETS;

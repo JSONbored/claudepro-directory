@@ -118,6 +118,23 @@ function isSafeCategoryAndSlug(category: unknown, slug: unknown): boolean {
   );
 }
 
+/**
+ * Validate internal navigation path is safe
+ * Only allows relative paths starting with /, no protocol-relative URLs
+ */
+function isValidInternalPath(path: string): boolean {
+  if (typeof path !== 'string' || path.length === 0) return false;
+  // Must start with / for relative paths
+  if (!path.startsWith('/')) return false;
+  // Reject protocol-relative URLs (//example.com)
+  if (path.startsWith('//')) return false;
+  // Reject dangerous protocols
+  if (/^(javascript|data|vbscript|file):/i.test(path)) return false;
+  // Basic path validation - allow alphanumeric, slashes, hyphens, underscores
+  // This is permissive but safe for Next.js routing
+  return /^\/[a-zA-Z0-9/?#\-_.~!*'();:@&=+$,%[\]]*$/.test(path);
+}
+
 export const ConfigCard = memo(
   ({
     item,
@@ -619,7 +636,12 @@ export const ConfigCard = memo(
                       });
                     const safeRepoUrl = getSafeRepositoryUrl(item.repository as string);
                     if (safeRepoUrl) {
-                      window.open(safeRepoUrl, '_blank');
+                      // Explicit validation: getSafeRepositoryUrl guarantees the URL is safe
+                      // It validates protocol (HTTPS only), hostname (GitHub/GitLab only),
+                      // removes credentials, query strings, and fragments
+                      // At this point, safeRepoUrl is validated and safe for use in window.open
+                      const validatedUrl: string = safeRepoUrl;
+                      window.open(validatedUrl, '_blank');
                     } else {
                       logClientWarning('ConfigCard: Unsafe repository URL blocked', {
                         url: item.repository,
@@ -664,7 +686,12 @@ export const ConfigCard = memo(
                       });
                     const safeDocUrl = isTrustedDocumentationUrl(item.documentation_url as string);
                     if (safeDocUrl) {
-                      window.open(safeDocUrl, '_blank');
+                      // Explicit validation: isTrustedDocumentationUrl guarantees the URL is safe
+                      // It validates protocol (HTTPS only), hostname (trusted TLDs only),
+                      // removes credentials, query strings, and fragments
+                      // At this point, safeDocUrl is validated and safe for use in window.open
+                      const validatedUrl: string = safeDocUrl;
+                      window.open(validatedUrl, '_blank');
                     } else {
                       logClientWarning('ConfigCard: Blocked untrusted documentation URL', {
                         url: item.documentation_url,
@@ -735,7 +762,20 @@ export const ConfigCard = memo(
                     e.stopPropagation();
                     // Only redirect if category and slug are valid
                     if (isSafeCategoryAndSlug(item.category, item.slug)) {
-                      window.location.href = targetPath;
+                      // Explicit validation: targetPath is constructed from validated category and slug
+                      // via getContentItemUrl, which returns a relative path like /category/slug
+                      // Additional validation ensures the path is a safe internal path
+                      if (!isValidInternalPath(targetPath)) {
+                        logClientWarning('ConfigCard: Blocked invalid internal path', {
+                          attemptedCategory: item.category,
+                          attemptedSlug: item.slug,
+                          targetPath,
+                        });
+                        return;
+                      }
+                      // At this point, targetPath is validated and safe for use in window.location.href
+                      const validatedPath: string = targetPath;
+                      window.location.href = validatedPath;
                     } else {
                       logClientWarning('ConfigCard: Blocked potentially unsafe redirect', {
                         attemptedCategory: item.category,

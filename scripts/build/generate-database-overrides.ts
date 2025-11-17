@@ -69,7 +69,7 @@ interface RpcFunction {
 function extractEnums(content: string): EnumDefinition[] {
   const enums: EnumDefinition[] = [];
   const enumsMatch = content.match(/Enums:\s*\{([\s\S]*?)\n\s*\}\s*CompositeTypes:/);
-  if (!enumsMatch) {
+  if (!(enumsMatch && enumsMatch[1])) {
     throw new Error('Could not find Enums section in database.types.ts');
   }
 
@@ -81,7 +81,7 @@ function extractEnums(content: string): EnumDefinition[] {
     const trimmedLine = line.trim();
     const enumNameMatch = trimmedLine.match(/^(\w+):\s*(.*)$/);
 
-    if (enumNameMatch) {
+    if (enumNameMatch && enumNameMatch[1]) {
       if (currentEnum && currentEnum.values.length > 0) {
         enums.push({ name: currentEnum.name, values: currentEnum.values });
       }
@@ -89,25 +89,29 @@ function extractEnums(content: string): EnumDefinition[] {
       const name = enumNameMatch[1];
       const rest = enumNameMatch[2];
 
-      if (rest?.includes('"')) {
+      if (rest && typeof rest === 'string' && rest.includes('"')) {
         const valuePattern = /"([^"]+)"/g;
         const values: string[] = [];
         let valueMatch: RegExpExecArray | null = valuePattern.exec(rest);
         while (valueMatch !== null) {
-          values.push(valueMatch[1]);
+          const capturedValue = valueMatch[1];
+          if (capturedValue && typeof capturedValue === 'string') {
+            values.push(capturedValue);
+          }
           valueMatch = valuePattern.exec(rest);
         }
         if (values.length > 0) {
           enums.push({ name, values });
         }
         currentEnum = null;
-      } else {
+      } else if (name) {
         currentEnum = { name, values: [] };
       }
     } else if (currentEnum && trimmedLine.startsWith('|')) {
       const valueMatch = trimmedLine.match(/\|\s*"([^"]+)"/);
-      if (valueMatch) {
-        currentEnum.values.push(valueMatch[1]);
+      const capturedValue = valueMatch?.[1];
+      if (capturedValue) {
+        currentEnum.values.push(capturedValue);
       }
     } else if (trimmedLine && !trimmedLine.startsWith('|') && currentEnum) {
       if (currentEnum.values.length > 0) {
@@ -352,7 +356,7 @@ function parseCheckConstraint(
       /CHECK\s*\(\s*\(\s*(\w+)\s*=\s*ANY\s*\(\s*ARRAY\[([^\]]+)\]\s*\)\s*\)\s*\)/i
     );
   }
-  if (!match) return null;
+  if (!(match && match[1] && match[2])) return null;
 
   const columnName = match[1];
   const values = match[2]
@@ -599,106 +603,6 @@ function checkExistingRpcType(rpcName: string): boolean {
   }
 }
 
-/**
- * Check if an RPC has a manual definition in the skeletons file
- * (not just a TODO - an actual type definition)
- * @deprecated This function is currently unused but kept for potential future use
- */
-function _hasManualRpcDefinition(rpcName: string, skeletonsContent: string): boolean {
-  let prefix = 'Get';
-  let nameWithoutPrefix = rpcName;
-
-  if (rpcName.startsWith('add_')) {
-    prefix = 'Add';
-    nameWithoutPrefix = rpcName.slice(4);
-  } else if (rpcName.startsWith('create_')) {
-    prefix = 'Create';
-    nameWithoutPrefix = rpcName.slice(7);
-  } else if (rpcName.startsWith('remove_')) {
-    prefix = 'Remove';
-    nameWithoutPrefix = rpcName.slice(7);
-  } else if (rpcName.startsWith('delete_')) {
-    prefix = 'Delete';
-    nameWithoutPrefix = rpcName.slice(7);
-  } else if (rpcName.startsWith('update_')) {
-    prefix = 'Update';
-    nameWithoutPrefix = rpcName.slice(7);
-  } else if (rpcName.startsWith('toggle_')) {
-    prefix = 'Toggle';
-    nameWithoutPrefix = rpcName.slice(7);
-  } else if (rpcName.startsWith('approve_')) {
-    prefix = 'Approve';
-    nameWithoutPrefix = rpcName.slice(8);
-  } else if (rpcName.startsWith('reject_')) {
-    prefix = 'Reject';
-    nameWithoutPrefix = rpcName.slice(7);
-  } else if (rpcName.startsWith('batch_')) {
-    prefix = 'Batch';
-    nameWithoutPrefix = rpcName.slice(6);
-  } else if (rpcName.startsWith('track_')) {
-    prefix = 'Track';
-    nameWithoutPrefix = rpcName.slice(6);
-  } else if (rpcName.startsWith('manage_')) {
-    prefix = 'Manage';
-    nameWithoutPrefix = rpcName.slice(7);
-  } else if (rpcName.startsWith('generate_')) {
-    prefix = 'Generate';
-    nameWithoutPrefix = rpcName.slice(9);
-  } else if (rpcName.startsWith('build_')) {
-    prefix = 'Build';
-    nameWithoutPrefix = rpcName.slice(6);
-  } else if (rpcName.startsWith('subscribe_')) {
-    prefix = 'Subscribe';
-    nameWithoutPrefix = rpcName.slice(10);
-  } else if (rpcName.startsWith('unlink_')) {
-    prefix = 'Unlink';
-    nameWithoutPrefix = rpcName.slice(7);
-  } else if (rpcName.startsWith('refresh_')) {
-    prefix = 'Refresh';
-    nameWithoutPrefix = rpcName.slice(8);
-  } else if (rpcName.startsWith('reorder_')) {
-    prefix = 'Reorder';
-    nameWithoutPrefix = rpcName.slice(8);
-  }
-
-  const typeName = `${prefix}${nameWithoutPrefix
-    .split('_')
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-    .join('')}Return`;
-
-  // Validate typeName format to prevent ReDoS
-  if (!/^[A-Z][A-Za-z0-9_]*Return$/.test(typeName)) {
-    return false;
-  }
-
-  // Check if it's a real definition (not just TODO)
-  // Use simple substring/indexOf checks instead of complex regex
-  const exportTypeMarker = `export type ${typeName}`;
-  const exportIndex = skeletonsContent.indexOf(exportTypeMarker);
-  if (exportIndex === -1) {
-    return false;
-  }
-
-  // Check for balanced braces after the type name
-  const afterMarker = skeletonsContent.slice(exportIndex + exportTypeMarker.length);
-  let braceCount = 0;
-  let foundOpenBrace = false;
-  for (const char of afterMarker) {
-    if (char === '{') {
-      braceCount++;
-      foundOpenBrace = true;
-    } else if (char === '}') {
-      braceCount--;
-      if (foundOpenBrace && braceCount === 0) {
-        // Found a complete type definition
-        return !skeletonsContent.includes('// TODO: Replace with actual structure');
-      }
-    }
-  }
-
-  return false;
-}
-
 function generateRpcSkeleton(rpc: RpcFunction): string {
   let prefix = 'Get';
   let nameWithoutPrefix = rpc.name;
@@ -782,6 +686,7 @@ function extractManualSection(content: string): string {
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
+    if (!line) continue;
 
     // Start of manual section
     if (
@@ -797,12 +702,13 @@ function extractManualSection(content: string): string {
 
     // End of manual section: end of file or next major section
     if (inManualSection) {
+      const prevLine = i > 0 ? lines[i - 1] : undefined;
       if (
         line.includes(
           '// ============================================================================'
         ) &&
-        i > 0 &&
-        lines[i - 1].trim() === ''
+        prevLine &&
+        prevLine.trim() === ''
       ) {
         // Check if this is the end marker
         break;
@@ -888,10 +794,12 @@ function preserveManualRpcDefinitions(existingContent: string, rpcName: string):
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
+    if (!line) continue;
 
     // Find the start - look for /** comment block containing rpcName
     if (startIdx === -1) {
-      if (line.trim().startsWith('/**') && i + 1 < lines.length && lines[i + 1].includes(rpcName)) {
+      const nextLine = i + 1 < lines.length ? lines[i + 1] : undefined;
+      if (line.trim().startsWith('/**') && nextLine && nextLine.includes(rpcName)) {
         startIdx = i;
       }
     }
@@ -1175,16 +1083,22 @@ export type GetPopularContentReturn =
     let startIdx = -1;
     // Find where RPC types start (after imports)
     for (let i = 0; i < lines.length; i++) {
-      if (lines[i].includes('import type') && lines[i].includes('from')) {
+      const line = lines[i];
+      if (line && line.includes('import type') && line.includes('from')) {
         // Find the last import line
         let j = i;
-        while (
-          j < lines.length &&
-          (lines[j].includes('import type') ||
-            lines[j].trim() === '' ||
-            lines[j].trim().startsWith('//'))
-        ) {
-          j++;
+        while (j < lines.length) {
+          const currentLine = lines[j];
+          if (currentLine === undefined) break;
+          if (
+            currentLine.includes('import type') ||
+            currentLine.trim() === '' ||
+            currentLine.trim().startsWith('//')
+          ) {
+            j++;
+          } else {
+            break;
+          }
         }
         startIdx = j;
         break;
@@ -1192,7 +1106,7 @@ export type GetPopularContentReturn =
     }
 
     const rpcTypes =
-      startIdx > 0
+      startIdx > 0 && startIdx < lines.length
         ? lines.slice(startIdx).join('\n').trim()
         : rpcSkeletonsCode.split('\n').slice(25).join('\n').trim();
 

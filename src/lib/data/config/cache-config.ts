@@ -218,7 +218,7 @@ async function loadCacheConfig(): Promise<CacheConfig> {
   }
 }
 
-export function primeCacheConfig(promise: CacheConfigPromise): void {
+export async function primeCacheConfig(promise: CacheConfigPromise): Promise<void> {
   cacheConfigPromise = promise;
 }
 

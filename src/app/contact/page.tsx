@@ -8,12 +8,15 @@ import { getContactChannels } from '@/src/lib/data/marketing/contact';
 import { DiscordIcon, Github, Mail, MessageSquare } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 
 export const metadata = generatePageMetadata('/contact');
 
 /**
- * Static Generation: Marketing pages are fully static
- * revalidate: false = Static generation at build time
+ * Static Generation: This page is statically generated at build time
+ * revalidate: false = Static generation at build time (no revalidation)
+ * Note: Calls checkContactTerminalEnabled() at build time to determine terminal feature flag state.
+ * The page is static, but the terminal feature flag value is determined during build.
  */
 export const revalidate = false;
 
@@ -30,8 +33,14 @@ export default async function ContactPage() {
   }
 
   // Check if terminal feature is enabled
-  const terminalResult = await checkContactTerminalEnabled({});
-  const terminalEnabled = terminalResult?.data ?? false;
+  let terminalEnabled = false;
+  try {
+    const terminalResult = await checkContactTerminalEnabled({});
+    terminalEnabled = terminalResult?.data ?? false;
+  } catch (error) {
+    logger.error('ContactPage: failed to check terminal feature flag', normalizeError(error));
+    // Fallback to false if feature flag check fails
+  }
 
   return (
     <div className="container mx-auto max-w-6xl px-4 py-8 sm:py-12">
@@ -62,6 +71,11 @@ export default async function ContactPage() {
         </h2>
 
         <div className="grid gap-6 md:grid-cols-2">
+          {!(channels.github || channels.discord || channels.email) && (
+            <div className="col-span-2 py-8 text-center text-muted-foreground">
+              <p>Contact channels are currently being configured. Please check back soon.</p>
+            </div>
+          )}
           {/* GitHub Discussions */}
           {channels.github && (
             <Card>

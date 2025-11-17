@@ -4,7 +4,7 @@
  * Detects patterns like: as unknown as, as any, as never (except in specific contexts)
  */
 
-import { readdirSync, readFileSync, statSync } from 'fs';
+import { existsSync, readdirSync, readFileSync, statSync } from 'fs';
 import { join } from 'path';
 import { logger } from '@/src/lib/logger';
 
@@ -109,12 +109,15 @@ function scanDirectory(dir: string, findings: Finding[] = []): Finding[] {
         }
       } catch (statError) {
         // Skip individual entries that fail (e.g., ENOENT, permissions)
-        if (statError instanceof Error && statError.code !== 'ENOENT') {
-          logger.warn(`Error accessing ${fullPath}`, {
-            script: 'audit-unsafe-casts',
-            filePath: fullPath,
-            error: statError.message,
-          });
+        if (statError instanceof Error) {
+          const errorWithCode = statError as Error & { code?: string };
+          if (errorWithCode.code !== 'ENOENT') {
+            logger.warn(`Error accessing ${fullPath}`, {
+              script: 'audit-unsafe-casts',
+              filePath: fullPath,
+              error: statError.message,
+            });
+          }
         }
       }
     }
@@ -138,35 +141,47 @@ function main() {
   const findings: Finding[] = [];
 
   // Validate directory existence before scanning
-  try {
-    const srcStat = statSync(srcDir);
-    if (srcStat.isDirectory()) {
-      scanDirectory(srcDir, findings);
-    } else {
-      logger.warn(`src directory exists but is not a directory: ${srcDir}`, {
+  if (existsSync(srcDir)) {
+    try {
+      const srcStat = statSync(srcDir);
+      if (srcStat.isDirectory()) {
+        scanDirectory(srcDir, findings);
+      } else {
+        logger.warn(`src path exists but is not a directory: ${srcDir}`, {
+          script: 'audit-unsafe-casts',
+        });
+      }
+    } catch (error) {
+      logger.warn(`Error accessing src directory: ${srcDir}`, {
         script: 'audit-unsafe-casts',
+        error: error instanceof Error ? error.message : String(error),
       });
     }
-  } catch (error) {
-    logger.warn(`src directory not found or inaccessible: ${srcDir}`, {
+  } else {
+    logger.warn(`src directory not found: ${srcDir}`, {
       script: 'audit-unsafe-casts',
-      error: error instanceof Error ? error.message : String(error),
     });
   }
 
-  try {
-    const supabaseStat = statSync(supabaseDir);
-    if (supabaseStat.isDirectory()) {
-      scanDirectory(supabaseDir, findings);
-    } else {
-      logger.warn(`supabase directory exists but is not a directory: ${supabaseDir}`, {
+  if (existsSync(supabaseDir)) {
+    try {
+      const supabaseStat = statSync(supabaseDir);
+      if (supabaseStat.isDirectory()) {
+        scanDirectory(supabaseDir, findings);
+      } else {
+        logger.warn(`supabase path exists but is not a directory: ${supabaseDir}`, {
+          script: 'audit-unsafe-casts',
+        });
+      }
+    } catch (error) {
+      logger.warn(`Error accessing supabase directory: ${supabaseDir}`, {
         script: 'audit-unsafe-casts',
+        error: error instanceof Error ? error.message : String(error),
       });
     }
-  } catch (error) {
-    logger.warn(`supabase directory not found or inaccessible: ${supabaseDir}`, {
+  } else {
+    logger.warn(`supabase directory not found: ${supabaseDir}`, {
       script: 'audit-unsafe-casts',
-      error: error instanceof Error ? error.message : String(error),
     });
   }
 

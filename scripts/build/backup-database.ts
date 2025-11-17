@@ -267,8 +267,13 @@ writeFileSync(join(BACKUP_DIR, 'README.txt'), readme, 'utf-8');
 // ============================================================================
 // Summary
 // ============================================================================
-const sizeKB = execSync(`du -sk "${BACKUP_DIR}"`, { encoding: 'utf-8' }).split('\t')[0].trim();
-const sizeMB = (Number.parseInt(sizeKB, 10) / 1024).toFixed(2);
+const duOutput = execSync(`du -sk "${BACKUP_DIR}"`, { encoding: 'utf-8' });
+const sizeKB = duOutput.split('\t')[0];
+if (!sizeKB) {
+  throw new Error('Failed to get backup directory size');
+}
+const sizeKBTrimmed = sizeKB.trim();
+const sizeMB = (Number.parseInt(sizeKBTrimmed, 10) / 1024).toFixed(2);
 
 // Calculate compression ratio
 const uncompressedSize = execSync(`gunzip -l "${outputPath}" | tail -1 | awk '{print $2}'`, {

@@ -492,6 +492,8 @@ export function isValidEnum<T extends string>(
 
 export type DatabaseWithTableOverrides = {
   public: {
+    Enums: DatabaseGenerated['public']['Enums'];
+    Functions: DatabaseGenerated['public']['Functions'];
     Tables: Omit<
       DatabaseGenerated['public']['Tables'],
       | 'category_configs'
@@ -766,16 +768,13 @@ export type DatabaseWithTableOverrides = {
         Relationships: DatabaseGenerated['public']['Tables']['webhook_events']['Relationships'];
       };
     };
-    Functions: Omit<DatabaseGenerated['public']['Functions'], 'get_contact_commands'> & {
-      get_contact_commands: {
-        Args: Record<string, never>;
-        Returns: Json;
-      };
-    };
   };
 };
 
-// Re-export Database type for convenience (after DatabaseWithTableOverrides is defined)
+/**
+ * Database type with all table overrides applied
+ * This is the main Database type to use throughout the application
+ */
 export type Database = DatabaseWithTableOverrides;
 
 // ============================================================================
@@ -1450,11 +1449,6 @@ export type GetGetCollectionDetailWithItemsReturn = {
 };
 
 /**
- * CollectionDetailData - Alias for GetGetUserCollectionDetailReturn for convenience
- */
-export type CollectionDetailData = GetGetUserCollectionDetailReturn;
-
-/**
  * get_collection_items_grouped RPC return type
  */
 export type GetGetCollectionItemsGroupedReturn = {
@@ -1547,6 +1541,25 @@ export type GetGetCompaniesListReturn = {
 };
 
 /**
+ * get_company_admin_profile RPC return type
+ */
+export type GetGetCompanyAdminProfileReturn = Array<{
+  id: string;
+  slug: string;
+  name: string;
+  logo: string | null;
+  website: string | null;
+  description: string | null;
+  size: string | null;
+  industry: string | null;
+  using_cursor_since: string | null;
+  featured: boolean;
+  created_at: string;
+  updated_at: string;
+  owner_id: string;
+}>;
+
+/**
  * get_company_profile RPC return type
  */
 export type GetGetCompanyProfileReturn = {
@@ -1598,6 +1611,24 @@ export type GetGetCompanyProfileReturn = {
     click_through_rate: number | null;
     latest_job_posted_at: string | null;
   } | null;
+};
+
+/**
+ * get_contact_commands RPC return type
+ */
+export type GetGetContactCommandsReturn = {
+  commands: Array<{
+    id: string;
+    text: string;
+    iconName: string | null;
+    actionType: ContactActionType;
+    actionValue: string | null;
+    confettiVariant: ConfettiVariant | null;
+    requiresAuth: boolean;
+    aliases: string[];
+    category: string;
+    description: string | null;
+  }>;
 };
 
 /**
@@ -1670,6 +1701,81 @@ export type GetGetContentTemplatesReturn = Array<{
   tags: string | null;
   templateData: Json;
   [key: string]: unknown;
+}>;
+
+/**
+ * get_popular_content RPC return type
+ */
+export type GetGetPopularContentReturn = Array<{
+  author: string;
+  category: string;
+  copy_count: number;
+  description: string;
+  popularity_score: number;
+  slug: string;
+  tags: string[];
+  title: string;
+  view_count: number;
+}>;
+
+/**
+ * get_recent_content RPC return type
+ */
+export type GetGetRecentContentReturn = Array<{
+  author: string;
+  author_profile_url: string | null;
+  avg_rating: number | null;
+  bookmark_count: number;
+  category: string;
+  content: string | null;
+  copy_count: number;
+  created_at: string;
+  date_added: string;
+  description: string;
+  difficulty_score: number | null;
+  display_title: string | null;
+  documentation_url: string | null;
+  download_url: string | null;
+  examples: Json | null;
+  features: string[] | null;
+  git_hash: string | null;
+  has_breaking_changes: boolean | null;
+  has_prerequisites: boolean | null;
+  has_troubleshooting: boolean | null;
+  id: string;
+  json_ld: Json | null;
+  metadata: Json;
+  og_type: string | null;
+  popularity_score: number | null;
+  reading_time: number | null;
+  review_count: number;
+  robots_follow: boolean | null;
+  robots_index: boolean | null;
+  seo_title: string | null;
+  slug: string;
+  source: string | null;
+  tags: string[];
+  title: string;
+  view_count: number;
+}>;
+
+/**
+ * get_trending_metrics_with_content RPC return type
+ */
+export type GetGetTrendingMetricsWithContentReturn = Array<{
+  author: string;
+  bookmarks_total: number;
+  category: string;
+  copies_total: number;
+  description: string;
+  engagement_score: number;
+  freshness_score: number;
+  slug: string;
+  source: string;
+  tags: string[];
+  title: string;
+  trending_score: number;
+  views_total: number;
 }>;
 
 /**
@@ -1772,6 +1878,26 @@ export type GetGetFormFieldsGroupedReturn = Record<
     config: Json | null;
   }>
 >;
+
+/**
+ * get_form_fields_for_content_type RPC return type
+ */
+export type GetGetFormFieldsForContentTypeReturn = Array<{
+  field_name: string;
+  field_order: number;
+  field_properties: Json;
+  field_scope: FieldScope;
+  field_type: FieldType;
+  grid_column: GridColumn;
+  help_text: string;
+  icon: string;
+  icon_position: IconPosition;
+  id: string;
+  label: string;
+  placeholder: string;
+  required: boolean;
+  select_options: Json;
+}>;
 
 /**
  * get_generation_config RPC return type
@@ -2456,6 +2582,25 @@ export type GetGetUserRecentInteractionsReturn = Array<{
 }>;
 
 /**
+ * get_user_sponsorships RPC return type
+ */
+export type GetGetUserSponsorshipsReturn = Array<{
+  active: boolean | null;
+  click_count: number | null;
+  content_id: string;
+  content_type: string;
+  created_at: string;
+  end_date: string;
+  id: string;
+  impression_count: number | null;
+  impression_limit: number | null;
+  start_date: string;
+  tier: string;
+  updated_at: string;
+  user_id: string | null;
+}>;
+
+/**
  * get_user_settings RPC return type
  */
 export type GetGetUserSettingsReturn = {
@@ -2644,143 +2789,6 @@ export type UpdateJobReturn = {
  */
 export type UpdateUserProfileReturn = { success: boolean; error?: string };
 
-/**
- * get_company_admin_profile RPC return type
- */
-export type GetGetCompanyAdminProfileReturn = {
-  id: string;
-  slug: string;
-  name: string;
-  logo: string | null;
-  website: string | null;
-  description: string | null;
-  size: string | null;
-  industry: string | null;
-  using_cursor_since: string | null;
-  featured: boolean;
-  owner_id: string;
-  created_at: string;
-  updated_at: string;
-} | null;
-
-/**
- * get_contact_commands RPC return type
- */
-export type GetGetContactCommandsReturn = {
-  commands: Array<{
-    id: string;
-    text: string;
-    description: string | null;
-    category: string;
-    iconName: string | null;
-    actionType: ContactActionType;
-    actionValue: string | null;
-    confettiVariant: ConfettiVariant | null;
-    requiresAuth: boolean;
-    aliases: string[];
-  }>;
-};
-
-/**
- * get_recent_content RPC return type
- */
-export type GetGetRecentContentReturn = Array<{
-  author: string;
-  author_profile_url: string | null;
-  avg_rating: number | null;
-  bookmark_count: number;
-  category: ContentCategory;
-  content: string | null;
-  copy_count: number;
-  created_at: string;
-  date_added: string;
-  description: string;
-  difficulty_score: number | null;
-  display_title: string | null;
-  documentation_url: string | null;
-  download_url: string | null;
-  features: string[] | null;
-  id: string;
-  popularity_score: number | null;
-  review_count: number;
-  slug: string;
-  source: string | null;
-  tags: string[];
-  title: string | null;
-  use_cases: string[] | null;
-  view_count: number;
-}>;
-
-/**
- * get_popular_content RPC return type
- */
-export type GetPopularContentReturn = Array<{
-  author: string;
-  category: ContentCategory;
-  copy_count: number;
-  description: string;
-  popularity_score: number;
-  slug: string;
-  tags: string[];
-  title: string;
-  view_count: number;
-}>;
-
-/**
- * get_trending_metrics_with_content RPC return type
- */
-export type GetTrendingMetricsWithContentReturn = Array<{
-  author: string;
-  bookmarks_total: number;
-  category: ContentCategory;
-  copies_total: number;
-  description: string;
-  engagement_score: number;
-  freshness_score: number;
-  slug: string;
-  source: string;
-  tags: string[];
-  title: string;
-  trending_score: number;
-  views_total: number;
-}>;
-
-/**
- * get_user_sponsorships RPC return type
- */
-export type GetGetUserSponsorshipsReturn = Array<{
-  id: string;
-  user_id: string | null;
-  content_id: string;
-  content_type: ContentCategory;
-  active: boolean | null;
-  start_date: string;
-  end_date: string;
-  tier: string;
-  impression_count: number | null;
-  impression_limit: number | null;
-  click_count: number | null;
-  created_at: string;
-  updated_at: string;
-}>;
-
-/**
- * get_form_fields_for_content_type RPC return type
- */
-export type GetGetFormFieldsForContentTypeReturn = Array<{
-  id: string;
-  field_name: string;
-  label: string;
-  field_type: FieldType;
-  field_scope: FieldScope;
-  grid_column: GridColumn;
-  icon: string | null;
-  icon_position: IconPosition;
-  help_text: string | null;
-  field_order: number;
-  field_properties: Json;
-}>;
-
 // ============================================================================
 // MANUAL SECTION - EDITABLE
 // ============================================================================
@@ -2789,39 +2797,36 @@ export type GetGetFormFieldsForContentTypeReturn = Array<{
 // ============================================================================
 
 // ============================================================================
+// View overrides, function overrides, application types
+// This section is preserved by the generator.
+// ============================================================================
+// ============================================================================
 // Application Content Types (derived from RPC returns and database tables)
 // ============================================================================
-
 /**
  * Job Plan type - payment plan for job postings
  */
 export type JobPlan = 'one-time' | 'subscription';
-
 /**
  * Valid values for JobPlan
  */
 export const JOB_PLAN_VALUES = ['one-time', 'subscription'] as const satisfies readonly JobPlan[];
-
 /**
  * Job Tier type - visibility tier for job postings
  */
 export type JobTier = 'standard' | 'featured';
-
 /**
  * Valid values for JobTier
  */
 export const JOB_TIER_VALUES = ['standard', 'featured'] as const satisfies readonly JobTier[];
-
 /**
  * Copy Type - type of content being copied
  */
 export type CopyType = 'code' | 'link' | 'markdown';
-
 /**
  * Valid values for CopyType
  */
 export const COPY_TYPE_VALUES = ['code', 'link', 'markdown'] as const satisfies readonly CopyType[];
-
 /**
  * get_related_content RPC return type
  */
@@ -2838,19 +2843,16 @@ export type GetGetRelatedContentReturn = Array<{
   title: string;
   views: number;
 }>;
-
 /**
  * ContentItem - Base content item type derived from content table and RPC returns
  * Used throughout the application for displaying content items
  */
 export type ContentItem = Tables<'content'>;
-
 /**
  * EnrichedContentItem - Content item with additional analytics and metadata
  * From get_enriched_content_list RPC
  */
 export type EnrichedContentItem = GetGetEnrichedContentListReturn[number];
-
 /**
  * HomepageContentItem - Simplified content item for homepage display
  * From get_homepage_content_enriched RPC
@@ -2869,7 +2871,6 @@ export type HomepageContentItem = {
   copy_count: number;
   featured: boolean;
 };
-
 /**
  * JobCardJobType - Job type for job cards (subset of full job table)
  * Used when displaying jobs from RPC returns that don't include all fields
@@ -2897,12 +2898,10 @@ export type JobCardJobType = {
   click_count: number;
   link: string | null;
 };
-
 /**
  * ReviewItem - Review rating item from reviews table
  */
 export type ReviewItem = Tables<'review_ratings'>;
-
 /**
  * ReviewsAggregateRating - Aggregate rating data from get_reviews_with_stats RPC
  */
@@ -2918,34 +2917,35 @@ export type ReviewsAggregateRating = {
     '5': number;
   };
 };
-
 /**
  * SponsorshipAnalytics - Analytics data for sponsored content
  */
 export type SponsorshipAnalytics = GetGetSponsorshipAnalyticsReturn;
-
 /**
  * Helper function to check if value is a valid ExperienceLevel
  */
 export function isExperienceLevel(value: unknown): value is ExperienceLevel {
   return typeof value === 'string' && EXPERIENCE_LEVEL_VALUES.includes(value as ExperienceLevel);
 }
-
 /**
  * Helper function to check if value is a valid WorkplaceType
  */
 export function isWorkplaceType(value: unknown): value is WorkplaceType {
   return typeof value === 'string' && WORKPLACE_TYPE_VALUES.includes(value as WorkplaceType);
 }
-
 /**
  * ContentType - Alias for ContentCategory for backward compatibility
  */
 export type ContentType = ContentCategory;
-
 /**
  * Helper function to check if value is a valid ContentCategory
  */
 export function isContentCategory(value: unknown): value is ContentCategory {
   return typeof value === 'string' && CONTENT_CATEGORY_VALUES.includes(value as ContentCategory);
 }
+
+/**
+ * CollectionDetailData - Alias for GetGetUserCollectionDetailReturn
+ * Used for user collection detail pages
+ */
+export type CollectionDetailData = GetGetUserCollectionDetailReturn;

@@ -113,8 +113,8 @@ export default async function SettingsPage() {
   }
 
   if (!profile) {
-    // No error object available, only context - pass undefined for error parameter
-    logger.error('SettingsPage: profile missing from getUserSettings response', undefined, {
+    // No error object available, only context
+    logger.error('SettingsPage: profile missing from getUserSettings response', '', {
       userId: user.id,
     });
     return (

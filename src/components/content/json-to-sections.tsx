@@ -10,12 +10,15 @@ import { ProductionCodeBlock } from '@/src/components/content/interactive-code-b
 import { UnifiedContentBlock } from '@/src/components/content/markdown-content-block';
 import { ComparisonTable } from '@/src/components/core/domain/comparison-table';
 import { UnifiedContentBox } from '@/src/components/core/domain/content/featured-content-box';
+import { logger } from '@/src/lib/logger';
 import type { Database } from '@/src/types/database.types';
 
 type ContentRow = Database['public']['Tables']['content']['Row'];
 type GuideSections = ContentRow['metadata'];
 
 interface JSONSectionRendererProps {
+  // Note: The permissive type is kept for backward compatibility with legacy data formats.
+  // Runtime validation is performed in the component body to ensure type safety.
   sections: GuideSections | Section[] | Array<Record<string, unknown> & { html?: string }>;
 }
 
@@ -620,9 +623,16 @@ function render_section(section: Section, index: number): React.ReactNode {
           )}
           {section.resources && section.resources.length > 0 && (
             <div className="grid gap-4">
-              {section.resources.map((r: ResourceItem, idx: number) => {
+              {section.resources.map((r: ResourceItem) => {
+                // Defensive defaulting: infer external flag from URL pattern if not provided
+                // Prevents silent link disabling when external flag is undefined but URL is clearly external
+                const isExternal =
+                  r.external !== undefined
+                    ? r.external
+                    : r.url.trim().startsWith('http://') || r.url.trim().startsWith('https://');
+
                 // Validate and sanitize URL based on whether it's external or internal
-                const safeUrl = r.external
+                const safeUrl = isExternal
                   ? getSafeExternalUrl(r.url)
                   : isValidInternalPath(r.url)
                     ? r.url
@@ -630,21 +640,35 @@ function render_section(section: Section, index: number): React.ReactNode {
 
                 // Don't render if URL is invalid or unsafe
                 if (!safeUrl) {
+                  logger.warn('Invalid or unsafe URL detected in resource', {
+                    url: r.url,
+                    title: r.title,
+                  });
+                  // Use a stable key based on resource properties instead of array index
+                  const resourceKey = `invalid-resource-${r.title}-${r.url.slice(0, 50)}`;
                   return (
-                    <div key={`${r.url}-${idx}`} className="rounded-lg border p-4 opacity-50">
+                    <div
+                      key={resourceKey}
+                      className="rounded-lg border p-4 opacity-50"
+                      title="Invalid or unsafe URL - cannot display link"
+                    >
                       <h4 className="mb-1 font-semibold">{r.title}</h4>
                       <p className="mb-2 text-muted-foreground text-sm">{r.description}</p>
-                      <span className="text-primary text-xs uppercase">{r.type}</span>
+                      <span className="text-destructive text-xs uppercase">
+                        {r.type} • Invalid URL
+                      </span>
                     </div>
                   );
                 }
 
+                // Use a stable key based on resource properties instead of array index
+                const resourceKey = `resource-${r.title}-${r.url.slice(0, 50)}`;
                 return (
                   <a
-                    key={`${r.url}-${idx}`}
+                    key={resourceKey}
                     href={safeUrl}
-                    target={r.external ? '_blank' : undefined}
-                    rel={r.external ? 'noopener noreferrer' : undefined}
+                    target={isExternal ? '_blank' : undefined}
+                    rel={isExternal ? 'noopener noreferrer' : undefined}
                     className="rounded-lg border p-4 transition-colors hover:bg-muted/50"
                   >
                     <h4 className="mb-1 font-semibold">{r.title}</h4>

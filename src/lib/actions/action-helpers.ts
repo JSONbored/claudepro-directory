@@ -87,7 +87,9 @@ export async function runRpc<ResultType>(
   }
 }
 
-export function traceMeta<T extends Record<string, unknown>>(meta?: T): T & { traceId: string } {
+export async function traceMeta<T extends Record<string, unknown>>(
+  meta?: T
+): Promise<T & { traceId: string }> {
   const traceId = `trace_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
   return {
     traceId,

@@ -12,8 +12,6 @@
  * 6. Memory-efficient: Stream ZIPs directly to storage (no disk writes)
  */
 
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { createClient } from '@supabase/supabase-js';
 import archiver from 'archiver';
 import { logger } from '@/src/lib/logger';
@@ -22,23 +20,34 @@ import type { Database } from '@/src/types/database.types';
 import { computeHash, hasHashChanged, setHash } from '../utils/build-cache.js';
 import { ensureEnvVars } from '../utils/env.js';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const _ROOT = path.resolve(__dirname, '../..');
-
 type SkillRow = Database['public']['Tables']['content']['Row'] & { category: 'skills' };
 
 const CONCURRENCY = 5; // Parallel uploads
 const FIXED_DATE = new Date('2024-01-01T00:00:00.000Z'); // Deterministic ZIPs
 
-// Load environment (only pull if missing - saves 300-500ms on CI)
-await ensureEnvVars(['NEXT_PUBLIC_SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY']);
+// Load environment - only require SUPABASE_SERVICE_ROLE_KEY
+// NEXT_PUBLIC_SUPABASE_URL has a fallback, so we don't require it
+await ensureEnvVars(['SUPABASE_SERVICE_ROLE_KEY']);
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+// Use fallback Supabase URL if not set (matches next.config.mjs pattern)
+// This allows builds to work even if NEXT_PUBLIC_SUPABASE_URL isn't set in Vercel
+// but we still prefer the environment variable for flexibility
+const SUPABASE_URL =
+  process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://hgtjdifxfapoltfflowc.supabase.co';
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-if (!(SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY)) {
-  throw new Error('Missing required environment variables');
+if (!SUPABASE_SERVICE_ROLE_KEY) {
+  throw new Error('Missing required environment variable: SUPABASE_SERVICE_ROLE_KEY');
+}
+
+if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
+  logger.warn(
+    'NEXT_PUBLIC_SUPABASE_URL not set, using fallback URL. Set this in Vercel Project Settings for production builds.',
+    {
+      script: 'generate-skill-packages',
+      fallbackUrl: SUPABASE_URL,
+    }
+  );
 }
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
@@ -131,8 +140,16 @@ async function processBatch(
     if (result.status === 'fulfilled') {
       return result.value;
     }
+    const skill = skills[index];
+    if (!skill) {
+      return {
+        slug: 'unknown',
+        status: 'error' as const,
+        message: 'Skill not found at index',
+      };
+    }
     return {
-      slug: skills[index].skill.slug,
+      slug: skill.skill.slug,
       status: 'error' as const,
       message: result.reason instanceof Error ? result.reason.message : String(result.reason),
     };

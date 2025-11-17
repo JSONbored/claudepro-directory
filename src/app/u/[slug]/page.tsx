@@ -44,10 +44,10 @@ function isValidSlug(slug: string): boolean {
 function getSafeContentUrl(type: string, slug: string): string | null {
   // Validate content type using centralized constant
   if (!isContentCategory(type)) return null;
-  // Validate slug format
-  if (!isValidSlug(slug)) return null;
-  // sanitizeSlug preserves already-valid slugs, so no need to re-validate
+  // Sanitize slug first, then validate the sanitized result
+  // sanitizeSlug preserves already-valid slugs, so this catches any issues
   const sanitizedSlug = sanitizeSlug(slug);
+  if (!isValidSlug(sanitizedSlug)) return null;
   return `/${type}/${sanitizedSlug}`;
 }
 
@@ -56,11 +56,11 @@ function getSafeContentUrl(type: string, slug: string): string | null {
  * Returns null if either is invalid
  */
 function getSafeCollectionUrl(userSlug: string, collectionSlug: string): string | null {
-  // Validate both slugs
-  if (!(isValidSlug(userSlug) && isValidSlug(collectionSlug))) return null;
-  // sanitizeSlug preserves already-valid slugs, so no need to re-validate
+  // Sanitize slugs first, then validate the sanitized results
+  // sanitizeSlug preserves already-valid slugs, so this catches any issues
   const sanitizedUserSlug = sanitizeSlug(userSlug);
   const sanitizedCollectionSlug = sanitizeSlug(collectionSlug);
+  if (!(isValidSlug(sanitizedUserSlug) && isValidSlug(sanitizedCollectionSlug))) return null;
   return `/u/${sanitizedUserSlug}/collections/${sanitizedCollectionSlug}`;
 }
 
@@ -167,7 +167,7 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
               {profile.image ? (
                 <Image
                   src={profile.image}
-                  alt={`${profile.name || slug}'s profile picture`}
+                  alt={`${sanitizeDisplayText(profile.name, slug)}'s profile picture`}
                   width={96}
                   height={96}
                   className="h-24 w-24 rounded-full border-4 border-background object-cover"
@@ -277,10 +277,18 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                 <div className="grid gap-4 sm:grid-cols-2">
                   {collections.map((collection) => {
                     const safeCollectionUrl = getSafeCollectionUrl(slug, collection.slug);
-                    if (!safeCollectionUrl) return null;
+                    if (!safeCollectionUrl) {
+                      logger.warn('UserProfilePage: skipping collection with invalid slug', {
+                        collectionId: collection.id,
+                        collectionName: collection.name,
+                        collectionSlug: collection.slug,
+                        userSlug: slug,
+                      });
+                      return null;
+                    }
                     return (
                       <Card key={collection.id} className={UI_CLASSES.CARD_INTERACTIVE}>
-                        <a href={safeCollectionUrl}>
+                        <NavLink href={safeCollectionUrl}>
                           <CardHeader>
                             <CardTitle className="text-lg">{collection.name}</CardTitle>
                             {collection.description && (
@@ -302,7 +310,7 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                               </span>
                             </div>
                           </CardContent>
-                        </a>
+                        </NavLink>
                       </Card>
                     );
                   })}
@@ -317,10 +325,20 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                   {contributions.map((item) => {
                     const safeContentUrl = getSafeContentUrl(item.content_type, item.slug);
-                    if (!safeContentUrl) return null;
+                    if (!safeContentUrl) {
+                      logger.warn(
+                        'UserProfilePage: skipping contribution with invalid type or slug',
+                        {
+                          contentId: item.id,
+                          contentType: item.content_type,
+                          contentSlug: item.slug,
+                        }
+                      );
+                      return null;
+                    }
                     return (
                       <Card key={item.id} className={UI_CLASSES.CARD_INTERACTIVE}>
-                        <a href={safeContentUrl}>
+                        <NavLink href={safeContentUrl}>
                           <CardHeader>
                             <div className={'mb-2 flex items-center justify-between'}>
                               <UnifiedBadge variant="base" style="secondary" className="text-xs">
@@ -346,7 +364,7 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                               <span>{item.download_count || 0} downloads</span>
                             </div>
                           </CardContent>
-                        </a>
+                        </NavLink>
                       </Card>
                     );
                   })}

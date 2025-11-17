@@ -474,14 +474,16 @@ function main() {
     // Run operations in order, passing cached hash to avoid redundant queries
     if (runDump) {
       results.push(generateSchemaDump(isForce, cachedSchemaHashForRun));
-      if (!results[results.length - 1].success) {
+      const dumpResult = results[results.length - 1];
+      if (!(dumpResult && dumpResult.success)) {
         throw new Error('Schema dump failed - aborting');
       }
     }
 
     if (runTypes) {
       results.push(generateTypes(isForce, cachedSchemaHashForRun));
-      if (!results[results.length - 1].success) {
+      const typesResult = results[results.length - 1];
+      if (!(typesResult && typesResult.success)) {
         throw new Error('Type generation failed - aborting');
       }
     }
@@ -501,12 +503,15 @@ function main() {
       const status = result.skipped ? 'SKIPPED' : result.success ? 'SUCCESS' : 'FAILED';
       const duration = result.duration_ms > 0 ? `(${result.duration_ms}ms)` : '';
 
-      logger.info(`  ${icon} ${result.step}: ${status} ${duration}`, {
+      const logContext: Record<string, string | number | boolean> = {
         step: result.step,
         status,
         duration: result.duration_ms,
-        reason: result.reason,
-      });
+      };
+      if (result.reason) {
+        logContext.reason = result.reason;
+      }
+      logger.info(`  ${icon} ${result.step}: ${status} ${duration}`, logContext);
       if (result.reason) {
         logger.info(`     ${result.reason}`);
       }

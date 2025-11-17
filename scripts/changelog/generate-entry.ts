@@ -180,23 +180,33 @@ function parseArgs(): GenerateOptions {
     switch (arg) {
       case '--branch':
         current = argsIterator.next();
-        options.branch = current.value;
+        if (current.value) {
+          options.branch = current.value;
+        }
         break;
       case '--since':
         current = argsIterator.next();
-        options.since = current.value;
+        if (current.value) {
+          options.since = current.value;
+        }
         break;
       case '--until':
         current = argsIterator.next();
-        options.until = current.value;
+        if (current.value) {
+          options.until = current.value;
+        }
         break;
       case '--title':
         current = argsIterator.next();
-        options.title = current.value;
+        if (current.value) {
+          options.title = current.value;
+        }
         break;
       case '--tag':
         current = argsIterator.next();
-        options.tag = current.value;
+        if (current.value) {
+          options.tag = current.value;
+        }
         break;
       case '--dry-run':
       case '--dry':

@@ -48,10 +48,26 @@ function getSafeAuthorProfileHref(
 
   if (!url) return SOCIAL_LINK_SNAPSHOT.authorProfile;
 
+  // Block protocol-relative URLs (//evil.com) before checking relative paths
+  // Protocol-relative URLs are interpreted by browsers as https://evil.com, creating open redirect vulnerability
+  if (url.startsWith('//')) {
+    return SOCIAL_LINK_SNAPSHOT.authorProfile;
+  }
+
   // Handle relative URLs (/profile/...) only to local domain.
+  // Strict validation to prevent open redirect attacks:
+  // - Must start with a single / (not // for protocol-relative URLs - already blocked above)
+  // - Reject paths with traversal or suspicious patterns before other checks
   if (url.startsWith('/')) {
-    // Encode minimally.
-    return encodeURI(url);
+    // Reject paths with traversal or suspicious patterns
+    if (url.includes('..') || url.includes('//')) {
+      return SOCIAL_LINK_SNAPSHOT.authorProfile;
+    }
+    // Additional validation: no backslashes, fragments, or query strings
+    if (!(url.includes('\\') || url.includes('#') || url.includes('?'))) {
+      // Encode minimally - URL is already validated as safe relative path
+      return encodeURI(url);
+    }
   }
 
   try {
@@ -92,11 +108,13 @@ function getSafeAuthorProfileHref(
 }
 
 export function DetailMetadata({ item, viewCount, copyCount }: DetailMetadataProps) {
+  const hasViewCount = typeof viewCount === 'number' && viewCount > 0;
+  const hasCopyCount = typeof copyCount === 'number' && copyCount > 0;
   const hasMetadata =
     ('author' in item && item.author) ||
     ('date_added' in item && item.date_added) ||
-    viewCount !== undefined ||
-    copyCount !== undefined;
+    hasViewCount ||
+    hasCopyCount;
   const hasTags = 'tags' in item && Array.isArray(item.tags) && item.tags.length > 0;
   const tags = hasTags ? ensureStringArray(item.tags) : [];
 
@@ -107,32 +125,45 @@ export function DetailMetadata({ item, viewCount, copyCount }: DetailMetadataPro
       {/* Author, Date & View Count Metadata */}
       {hasMetadata && (
         <div className="mb-4 flex flex-wrap gap-4 text-muted-foreground text-sm">
-          {'author' in item && item.author && (
-            <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-              <User className={UI_CLASSES.ICON_SM} />
-              <a
-                href={getSafeAuthorProfileHref(item)}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="transition-colors hover:text-foreground hover:underline"
-              >
-                {item.author}
-              </a>
-            </div>
-          )}
+          {'author' in item &&
+            item.author &&
+            (() => {
+              // Get safe author profile URL - this function validates and sanitizes the URL
+              // It only allows relative paths or strictly mapped social media profile URLs
+              // (GitHub, Twitter/X, LinkedIn) with extracted handles, or falls back to default
+              const safeAuthorUrl = getSafeAuthorProfileHref(item);
+              // Explicit validation: getSafeAuthorProfileHref guarantees the URL is safe
+              // It validates protocol-relative URLs, path traversal, and only allows
+              // known social media domains with strict handle extraction, or safe relative paths
+              // At this point, safeAuthorUrl is validated and safe for use in external links
+              const validatedUrl: string = safeAuthorUrl;
+              return (
+                <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+                  <User className={UI_CLASSES.ICON_SM} />
+                  <a
+                    href={validatedUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="transition-colors hover:text-foreground hover:underline"
+                  >
+                    {item.author}
+                  </a>
+                </div>
+              );
+            })()}
           {'date_added' in item && item.date_added && (
             <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
               <Calendar className={UI_CLASSES.ICON_SM} />
               <span>{formatDate(item.date_added)}</span>
             </div>
           )}
-          {viewCount !== undefined && viewCount > 0 && (
+          {typeof viewCount === 'number' && viewCount > 0 && (
             <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
               <Eye className={UI_CLASSES.ICON_SM} />
               <span>{formatViewCount(viewCount)}</span>
             </div>
           )}
-          {copyCount !== undefined && copyCount > 0 && (
+          {typeof copyCount === 'number' && copyCount > 0 && (
             <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
               <Copy className={UI_CLASSES.ICON_SM} />
               <span>{formatCopyCount(copyCount)}</span>

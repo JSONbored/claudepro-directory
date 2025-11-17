@@ -13,7 +13,7 @@
         ".build-cache/cache.json"
       ],
       "cache": true,
-      "passThroughEnv": ["SUPABASE_SERVICE_ROLE_KEY"]
+      "passThroughEnv": ["SUPABASE_SERVICE_ROLE_KEY", "NEXT_PUBLIC_SUPABASE_URL"]
     },
     "build:skills:exec": {
       "outputs": [
@@ -29,7 +29,7 @@
       ],
       "cache": true,
       "persistent": true,
-      "passThroughEnv": ["SUPABASE_SERVICE_ROLE_KEY"]
+      "passThroughEnv": ["SUPABASE_SERVICE_ROLE_KEY", "NEXT_PUBLIC_SUPABASE_URL"]
     },
     "generate:service-worker:exec": {
       "dependsOn": ["generate:categories:exec"],
@@ -78,6 +78,8 @@
     "VERCEL_GIT_PULL_REQUEST_ID",
     "TURBO_REMOTE_CACHE_SIGNATURE_KEY",
     "CI",
-    "CONTINUOUS_INTEGRATION"
+    "CONTINUOUS_INTEGRATION",
+    "NEXT_PUBLIC_SUPABASE_URL",
+    "SUPABASE_SERVICE_ROLE_KEY"
   ]
 }
