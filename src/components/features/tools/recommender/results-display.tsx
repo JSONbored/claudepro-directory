@@ -360,6 +360,25 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                 isValidCategory(result.category)
               )
               .map((result) => {
+                // Only allow categories from the explicit allowlist
+                const allowedCategories = [
+                  'agents',
+                  'mcp',
+                  'rules',
+                  'commands',
+                  'hooks',
+                  'statuslines',
+                  'skills',
+                  'collections',
+                  'guides',
+                  'jobs',
+                ] as const;
+                if (
+                  !allowedCategories.includes(result.category as (typeof allowedCategories)[number])
+                ) {
+                  // Skip rendering for invalid categories
+                  return null;
+                }
                 const targetPath = getContentItemUrl({
                   category: result.category,
                   slug: sanitizeSlug(result.slug),

@@ -48,6 +48,9 @@ verify_jwt = false  # Unified notification and queue processing edge function (D
 [functions.email-handler]
 verify_jwt = false  # Uses Svix signature verification for auth hooks
 
+[functions.og-image]
+verify_jwt = false  # Public OG image generation endpoint (rate limited, cached)
+
 # =============================================================================
 # Authenticated Functions - Manual JWT Verification in Code
 # =============================================================================

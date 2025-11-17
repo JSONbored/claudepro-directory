@@ -21,26 +21,32 @@ export const OG_IMAGE_DIMENSIONS = {
 /**
  * Generate OpenGraph image URL for any page path
  *
- * Returns the static WebP image optimized for social media sharing.
- * All routes use the same professionally designed brand image.
+ * Returns the dynamic OG image from the edge function, which generates
+ * images based on route metadata (title, description, category, tags).
  *
- * @param path - The page path (ignored - all routes use same image)
- * @returns Full URL to the static OG image
+ * @param path - The page path (e.g., '/agents/code-reviewer' or '/')
+ * @returns Full URL to the dynamic OG image edge function
  *
  * @example
  * ```ts
  * // Homepage
  * generateOGImageUrl('/');
- * // => "https://claudepro.directory/og-images/og-image.webp"
+ * // => "https://[project].supabase.co/functions/v1/og-image?route=/"
  *
- * // Content page (same image)
+ * // Content page
  * generateOGImageUrl('/agents/code-reviewer');
- * // => "https://claudepro.directory/og-images/og-image.webp"
+ * // => "https://[project].supabase.co/functions/v1/og-image?route=/agents/code-reviewer"
  * ```
  */
-export function generateOGImageUrl(_path: string): string {
-  // Return static image URL - path parameter maintained for future dynamic generation
-  return `${APP_CONFIG.url}/og-images/og-image.webp`;
+export function generateOGImageUrl(path: string): string {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  if (!supabaseUrl) {
+    // Fallback to static image if Supabase URL is not available (e.g., during build)
+    return `${APP_CONFIG.url}/og-images/og-image.webp`;
+  }
+
+  const route = encodeURIComponent(path || '/');
+  return `${supabaseUrl}/functions/v1/og-image?route=${route}`;
 }
 
 /**
@@ -67,7 +73,7 @@ export function generateOGMetadata(path: string, alt: string) {
         width: OG_IMAGE_DIMENSIONS.width,
         height: OG_IMAGE_DIMENSIONS.height,
         alt,
-        type: 'image/webp',
+        type: 'image/png', // Edge function returns PNG, not WebP
       },
     ],
   };

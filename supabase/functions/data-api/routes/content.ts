@@ -15,6 +15,7 @@ import {
   methodNotAllowedResponse,
 } from '../../_shared/utils/http.ts';
 import type { BaseLogContext } from '../../_shared/utils/logging.ts';
+import { logInfo } from '../../_shared/utils/logging.ts';
 import { buildSecurityHeaders } from '../../_shared/utils/security-headers.ts';
 import { handlePaginatedContent } from './content-paginated.ts';
 import { handleRecordExport } from './content-record.ts';
@@ -129,11 +130,13 @@ async function handleSitewideReadme(logContext?: BaseLogContext): Promise<Respon
   const readmeData = data as GenerateReadmeDataReturn;
   const markdown = buildReadmeMarkdown(readmeData);
 
-  console.log('[data-api] Sitewide readme generated', {
-    ...(logContext || {}),
-    bytes: markdown.length,
-    categories: readmeData.categories.length,
-  });
+  if (logContext) {
+    logInfo('Sitewide readme generated', {
+      ...logContext,
+      bytes: markdown.length,
+      categories: readmeData.categories.length,
+    });
+  }
 
   return new Response(markdown, {
     status: 200,
@@ -168,10 +171,12 @@ async function handleSitewideLlmsTxt(logContext?: BaseLogContext): Promise<Respo
 
   const formatted = data.replace(/\\n/g, '\n');
 
-  console.log('[data-api] Sitewide llms generated', {
-    ...(logContext || {}),
-    bytes: formatted.length,
-  });
+  if (logContext) {
+    logInfo('Sitewide llms generated', {
+      ...logContext,
+      bytes: formatted.length,
+    });
+  }
 
   return new Response(formatted, {
     status: 200,

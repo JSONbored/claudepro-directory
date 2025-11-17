@@ -214,3 +214,41 @@ export function createTransformApiContext(
     ...(options?.method && { method: options.method }),
   };
 }
+
+/**
+ * Logging functions - use these instead of console.log/error/warn directly
+ * All logging should use logContext for consistent structured logging
+ */
+
+/**
+ * Log an info-level message
+ */
+export function logInfo(message: string, logContext: BaseLogContext): void {
+  console.log(`[${logContext.function}] ${message}`, {
+    ...logContext,
+  });
+}
+
+/**
+ * Log an error-level message
+ */
+export function logError(message: string, logContext: BaseLogContext, error?: unknown): void {
+  const errorData: Record<string, unknown> = {
+    ...logContext,
+  };
+
+  if (error) {
+    errorData.error = error instanceof Error ? error.message : String(error);
+  }
+
+  console.error(`[${logContext.function}] ${message}`, errorData);
+}
+
+/**
+ * Log a warning-level message
+ */
+export function logWarn(message: string, logContext: BaseLogContext): void {
+  console.warn(`[${logContext.function}] ${message}`, {
+    ...logContext,
+  });
+}

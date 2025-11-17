@@ -4,7 +4,7 @@
  */
 
 import { jsonResponse } from '../_shared/utils/http.ts';
-import { createTransformApiContext } from '../_shared/utils/logging.ts';
+import { createTransformApiContext, logError, logInfo } from '../_shared/utils/logging.ts';
 import { checkRateLimit, RATE_LIMIT_PRESETS } from '../_shared/utils/rate-limit.ts';
 import {
   applyRateLimitHeaders,
@@ -181,9 +181,9 @@ function respondWithAnalytics(
     }
 
     if (outcome === 'success') {
-      console.log('[transform-api] Route hit', { ...logContext, ...logData });
+      logInfo('Route hit', { ...logContext, ...logData });
     } else {
-      console.error('[transform-api] Route error', { ...logContext, ...logData });
+      logError('Route error', { ...logContext, ...logData }, error);
     }
   };
 

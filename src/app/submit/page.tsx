@@ -61,7 +61,7 @@ function formatTimeAgo(dateString: string): string {
   return `${Math.floor(seconds / 604800)}w ago`;
 }
 
-export const metadata = generatePageMetadata('/submit');
+export const metadata: Promise<import('next').Metadata> = generatePageMetadata('/submit');
 
 /**
  * Static generation: Dashboard data fetched at build time

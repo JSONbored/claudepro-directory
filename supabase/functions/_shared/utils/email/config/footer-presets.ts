@@ -1,4 +1,4 @@
-export type SubscriptionFooterPreset = 'newsletterWelcome' | 'weeklyDigest';
+export type SubscriptionFooterPreset = 'newsletterWelcome' | 'weeklyDigest' | 'signupOAuth';
 
 export type OnboardingFooterPreset = 'step2' | 'step3' | 'step4' | 'step5';
 
@@ -44,6 +44,14 @@ export function buildSubscriptionFooter(
         {
           type: 'text',
           text: "You're receiving this because you subscribed to weekly updates from ClaudePro Directory. You can unsubscribe anytime using the links at the bottom of this email.",
+        },
+      ];
+    case 'signupOAuth':
+      return [
+        baseLine,
+        {
+          type: 'text',
+          text: 'You can manage your account settings and email preferences anytime in your account dashboard.',
         },
       ];
   }

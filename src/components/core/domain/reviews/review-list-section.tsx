@@ -13,12 +13,16 @@ import {
   markReviewHelpful,
 } from '@/src/lib/actions/content.actions';
 import { Edit, Star, ThumbsUp, Trash } from '@/src/lib/icons';
-import type { ReviewItem, ReviewSectionProps } from '@/src/lib/types/component.types';
+import type { ReviewSectionProps } from '@/src/lib/types/component.types';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { formatDistanceToNow } from '@/src/lib/utils/data.utils';
 import { logClientWarning, logUnhandledPromise } from '@/src/lib/utils/error.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
-import type { ContentCategory, ReviewsAggregateRating } from '@/src/types/database-overrides';
+import type {
+  ContentCategory,
+  GetGetReviewsWithStatsReturn,
+  ReviewsAggregateRating,
+} from '@/src/types/database-overrides';
 import { ReviewRatingHistogram } from './review-rating-histogram';
 import { StarDisplay } from './shared/star-display';
 
@@ -32,7 +36,7 @@ export function ReviewListSection({
   currentUserId,
 }: Omit<ReviewSectionProps, 'variant'>) {
   const sortSelectId = useId(); // Generate unique ID for sort select
-  const [reviews, setReviews] = useState<ReviewItem[]>([]);
+  const [reviews, setReviews] = useState<NonNullable<GetGetReviewsWithStatsReturn>['reviews']>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [sortBy, setSortBy] = useState<'recent' | 'helpful' | 'rating_high' | 'rating_low'>(
     'recent'
@@ -60,7 +64,9 @@ export function ReviewListSection({
 
         if (result?.data) {
           const { reviews: nextReviews, hasMore, aggregateRating: agg } = result.data;
-          setReviews((prev) => (pageNum === 1 ? nextReviews : [...prev, ...nextReviews]));
+          setReviews((prev: NonNullable<GetGetReviewsWithStatsReturn>['reviews']) =>
+            pageNum === 1 ? nextReviews : [...prev, ...nextReviews]
+          );
           setHasMore(Boolean(hasMore));
 
           if (agg) {
@@ -125,7 +131,11 @@ export function ReviewListSection({
       const result = await deleteReview({ review_id: reviewId });
       if (result?.data?.success) {
         toasts.success.itemDeleted('Review');
-        setReviews((prev) => prev.filter((r) => r.id !== reviewId));
+        setReviews((prev: NonNullable<GetGetReviewsWithStatsReturn>['reviews']) =>
+          prev.filter(
+            (r: NonNullable<GetGetReviewsWithStatsReturn>['reviews'][number]) => r.id !== reviewId
+          )
+        );
         // Refresh stats after deletion
         loadReviewsWithStats(1, sortBy).catch((error) => {
           logUnhandledPromise('ReviewListSection refresh after delete', error, {
@@ -189,7 +199,7 @@ export function ReviewListSection({
         </Card>
       ) : (
         <div className="space-y-4">
-          {reviews.map((review) => (
+          {reviews.map((review: NonNullable<GetGetReviewsWithStatsReturn>['reviews'][number]) => (
             <ReviewCardItem
               key={review.id}
               review={review}
@@ -231,7 +241,7 @@ function ReviewCardItem({
   isEditing,
   onCancelEdit,
 }: {
-  review: ReviewItem;
+  review: NonNullable<GetGetReviewsWithStatsReturn>['reviews'][number];
   currentUserId?: string;
   contentType: ContentCategory;
   contentSlug: string;

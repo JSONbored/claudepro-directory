@@ -198,7 +198,7 @@ export async function getUserCompanies(userId: string): Promise<GetGetUserCompan
  * Get user sponsorships
  */
 export async function getUserSponsorships(userId: string): Promise<GetGetUserSponsorshipsReturn> {
-  const data = await fetchCachedRpc<'get_user_sponsorships', GetGetUserSponsorshipsReturn | null>(
+  const data = await fetchCachedRpc<'get_user_sponsorships', GetGetUserSponsorshipsReturn>(
     { p_user_id: userId },
     {
       rpcName: 'get_user_sponsorships',
@@ -206,11 +206,11 @@ export async function getUserSponsorships(userId: string): Promise<GetGetUserSpo
       ttlKey: ACCOUNT_TTL_KEY,
       keySuffix: `sponsorships-${userId}`,
       useAuthClient: true,
-      fallback: null,
+      fallback: [],
       logMeta: { userId },
     }
   );
-  return data ?? [];
+  return data;
 }
 
 /**

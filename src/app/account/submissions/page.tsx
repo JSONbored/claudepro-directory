@@ -24,6 +24,44 @@ import type {
 
 export const metadata = generatePageMetadata('/account/submissions');
 
+// Helper: ensure PR URL is a safe GitHub Pull Request link
+function isSafePrUrl(url: string | null | undefined): boolean {
+  if (!url || typeof url !== 'string') return false;
+  try {
+    const parsed = new URL(url, 'https://dummy.local'); // Ensures URL constructor works even for relative URLs
+    // Only allow HTTPS GitHub PR links of the form https://github.com/{owner}/{repo}/pull/{number}
+    if (
+      parsed.protocol === 'https:' &&
+      parsed.hostname === 'github.com' &&
+      /^\/[^/]+\/[^/]+\/pull\/\d+/.test(parsed.pathname)
+    ) {
+      return true;
+    }
+  } catch {
+    // Invalid URL
+  }
+  return false;
+}
+
+// Allow-list of valid content types shown in URLs
+const ALLOWED_TYPES = [
+  'agents',
+  'mcp',
+  'rules',
+  'commands',
+  'hooks',
+  'statuslines',
+  'skills',
+  'collections',
+  'guides',
+  'jobs',
+] as const;
+
+// Conservative content slug validation function
+function isValidSlug(slug: string) {
+  return /^[a-z0-9-_]+$/.test(slug);
+}
+
 export default async function SubmissionsPage() {
   const { user } = await getAuthenticatedUser({ context: 'SubmissionsPage' });
 
@@ -203,7 +241,7 @@ export default async function SubmissionsPage() {
                   )}
 
                   <div className={UI_CLASSES.FLEX_GAP_2}>
-                    {submission.pr_url && (
+                    {isSafePrUrl(submission.pr_url) && submission.pr_url && (
                       <Button variant="outline" size="sm" asChild={true}>
                         <a href={submission.pr_url} target="_blank" rel="noopener noreferrer">
                           <GitPullRequest className="mr-1 h-3 w-3" />
@@ -213,14 +251,16 @@ export default async function SubmissionsPage() {
                       </Button>
                     )}
 
-                    {status === 'merged' && (
-                      <Button variant="outline" size="sm" asChild={true}>
-                        <Link href={`/${type}/${submission.content_slug}`}>
-                          <ExternalLink className="mr-1 h-3 w-3" />
-                          View Live
-                        </Link>
-                      </Button>
-                    )}
+                    {status === 'merged' &&
+                      ALLOWED_TYPES.includes(type as (typeof ALLOWED_TYPES)[number]) &&
+                      isValidSlug(submission.content_slug) && (
+                        <Button variant="outline" size="sm" asChild={true}>
+                          <Link href={`/${type}/${submission.content_slug}`}>
+                            <ExternalLink className="mr-1 h-3 w-3" />
+                            View Live
+                          </Link>
+                        </Button>
+                      )}
                   </div>
                 </CardContent>
               </Card>

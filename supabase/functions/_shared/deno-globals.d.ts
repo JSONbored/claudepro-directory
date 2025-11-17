@@ -4,6 +4,5 @@
  */
 
 declare namespace Deno {
-  // Additional type augmentations can go here if needed
-  // Deno's built-in types are already available from lib.deno.d.ts
+  function serve(handler: (req: Request) => Response | Promise<Response>): void;
 }

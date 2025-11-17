@@ -56,6 +56,9 @@ export function ContentActionButton({
   const { isSuccess, triggerSuccess } = useButtonSuccess();
 
   const handleClick = async () => {
+    // Prevent race conditions
+    if (isLoading || isSuccess) return;
+
     if (!isSafeFetchUrl(url)) {
       logClientWarning('ContentActionButton: Unsafe URL blocked', { url, label });
       toasts.raw.error('Invalid or unsafe URL');
@@ -73,7 +76,18 @@ export function ContentActionButton({
       triggerSuccess();
       toasts.raw.success(successMessage);
 
-      if (trackAnalytics) await trackAnalytics();
+      // Wrap analytics in separate try/catch to avoid masking action success
+      if (trackAnalytics) {
+        try {
+          await trackAnalytics();
+        } catch (analyticsError) {
+          logClientWarning('ContentActionButton: analytics tracking failed', analyticsError, {
+            url,
+            label,
+          });
+          // Don't show error to user - action succeeded
+        }
+      }
     } catch (error) {
       logClientWarning('ContentActionButton: action failed', error, { url, label });
       toasts.raw.error(error instanceof Error ? error.message : 'Action failed');

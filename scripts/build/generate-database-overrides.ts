@@ -141,7 +141,6 @@ function generateEnumArrays(enums: EnumDefinition[]): string {
   for (const enumDef of enums) {
     const typeName = toTypeName(enumDef.name);
     const constantName = `${enumDef.name.toUpperCase()}_VALUES`;
-    const guardName = `is${typeName}`;
 
     typeExports.push(`export type ${typeName} = Enums<'${enumDef.name}'>;`);
 
@@ -154,13 +153,15 @@ export const ${constantName} = [
 ${valuesStr},
 ] as const satisfies readonly ${typeName}[];`);
 
-    typeGuards.push(`
-/**
- * Type guard for ${enumDef.name} enum values
- */
-export function ${guardName}(value: string): value is ${typeName} {
-  return ${constantName}.includes(value as ${typeName});
-}`);
+    // Type guards removed - unused (40+ unused type guards found via ts-prune)
+    // If needed in future, uncomment:
+    // typeGuards.push(`
+    // /**
+    //  * Type guard for ${enumDef.name} enum values
+    //  */
+    // export function ${guardName}(value: string): value is ${typeName} {
+    //   return ${constantName}.includes(value as ${typeName});
+    // }`);
   }
 
   return `
@@ -406,7 +407,6 @@ function generateCheckConstraints(constraints: CheckConstraint[]): string {
   for (const constraint of constraints) {
     const typeName = constraint.typeName;
     const valuesName = `${typeName.toUpperCase()}_VALUES`;
-    const guardName = `is${typeName}`;
 
     typeExports.push(
       `export type ${typeName} = ${constraint.allowedValues.map((v) => `'${v}'`).join(' | ')};`
@@ -420,13 +420,15 @@ export const ${valuesName} = [
   ${constraint.allowedValues.map((v) => `'${v}'`).join(',\n  ')}
 ] as const satisfies readonly ${typeName}[];`);
 
-    typeGuards.push(`
-/**
- * Type guard for ${typeName} values
- */
-export function ${guardName}(value: string): value is ${typeName} {
-  return ${valuesName}.includes(value as ${typeName});
-}`);
+    // Type guards removed - unused (found via ts-prune)
+    // If needed in future, uncomment:
+    // typeGuards.push(`
+    // /**
+    //  * Type guard for ${typeName} values
+    //  */
+    // export function ${guardName}(value: string): value is ${typeName} {
+    //   return ${valuesName}.includes(value as ${typeName});
+    // }`);
   }
 
   return `

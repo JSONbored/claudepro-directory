@@ -448,6 +448,104 @@ export const UI_CLASSES = {
   CARD_HOVER_LIFT: 'transition-all duration-300 hover:-translate-y-1 hover:shadow-xl',
   CARD_HOVER_BORDER: 'border-2 transition-all hover:border-primary/50 hover:shadow-lg',
   CARD_HOVER_BG: 'transition-colors hover:bg-accent/5',
+
+  // ==========================================
+  // SUBMISSION FORM PATTERNS (Coffee/Warm Theme)
+  // ==========================================
+
+  // ----- Form Sections -----
+  FORM_SECTION_COLLAPSED:
+    'rounded-xl border border-white/10 bg-[oklch(26%_0.006_60)] p-4 cursor-pointer hover:bg-[oklch(28%_0.008_60)] transition-all',
+  FORM_SECTION_EXPANDED:
+    'rounded-xl border border-[oklch(74%_0.2_35)]/20 bg-[oklch(28%_0.006_60)] p-6 shadow-[0_8px_32px_-4px_oklch(74%_0.2_35/0.15)]',
+  FORM_SECTION_ACTIVE:
+    'rounded-xl border border-[oklch(74%_0.2_35)]/30 bg-[oklch(30%_0.008_60)] p-6 shadow-[0_0_0_4px_oklch(74%_0.2_35/0.15)]',
+  FORM_SECTION_COMPLETE:
+    'rounded-xl border border-[oklch(72%_0.19_145)]/20 bg-[oklch(26%_0.006_60)] p-4 cursor-pointer hover:bg-[oklch(28%_0.008_60)] transition-all',
+
+  // ----- Form Fields -----
+  FORM_FIELD_BASE:
+    'w-full rounded-lg border border-white/10 bg-[oklch(26%_0.006_60)] px-4 py-3 text-[16px] text-[oklch(94%_0.005_60)] placeholder:text-[oklch(57%_0.012_60)] transition-all',
+  FORM_FIELD_FOCUS:
+    'focus:border-[oklch(74%_0.2_35)]/40 focus:ring-4 focus:ring-[oklch(74%_0.2_35)]/15 focus:bg-[oklch(28%_0.008_60)] outline-none',
+  FORM_FIELD_ERROR: 'border-[oklch(70%_0.195_25)]/40 ring-4 ring-[oklch(70%_0.195_25)]/15',
+  FORM_FIELD_SUCCESS: 'border-[oklch(72%_0.19_145)]/40 ring-4 ring-[oklch(72%_0.19_145)]/15',
+  FORM_FIELD_FILLED: 'bg-[oklch(24%_0.008_60)] border-[oklch(72%_0.19_145)]/20',
+  FORM_FIELD_DISABLED: 'bg-[oklch(24%_0.005_60)] cursor-not-allowed opacity-50',
+
+  // ----- Form Labels -----
+  FORM_LABEL: 'block text-sm font-medium text-[oklch(94%_0.005_60)] mb-2',
+  FORM_LABEL_REQUIRED: 'after:content-["*"] after:ml-0.5 after:text-[oklch(70%_0.195_25)]',
+  FORM_HELP_TEXT: 'mt-1.5 text-xs text-[oklch(72%_0.01_60)]',
+  FORM_ERROR_TEXT: 'mt-1.5 text-xs font-medium text-[oklch(70%_0.195_25)] flex items-center gap-1',
+  FORM_SUCCESS_TEXT:
+    'mt-1.5 text-xs font-medium text-[oklch(72%_0.19_145)] flex items-center gap-1',
+
+  // ----- Form Buttons -----
+  FORM_BUTTON_PRIMARY:
+    'rounded-lg bg-[oklch(74%_0.2_35)] px-6 py-3 text-sm font-semibold text-[#1A1A1D] hover:bg-[oklch(78%_0.19_35)] active:bg-[oklch(70%_0.21_35)] transition-colors shadow-lg shadow-[oklch(74%_0.2_35)]/20 disabled:opacity-50 disabled:cursor-not-allowed',
+  FORM_BUTTON_SECONDARY:
+    'rounded-lg border border-white/10 bg-[oklch(28%_0.006_60)] px-6 py-3 text-sm font-semibold text-[oklch(94%_0.005_60)] hover:bg-[oklch(30%_0.008_60)] hover:border-white/20 transition-all',
+  FORM_BUTTON_GHOST:
+    'rounded-lg px-4 py-2 text-sm font-medium text-[oklch(78%_0.008_60)] hover:bg-white/5 hover:text-[oklch(94%_0.005_60)] transition-all',
+
+  // ----- Progress Indicators -----
+  FORM_PROGRESS_BAR: 'h-1 rounded-full bg-white/5 overflow-hidden',
+  FORM_PROGRESS_FILL:
+    'h-full bg-gradient-to-r from-[oklch(74%_0.2_35)] to-[oklch(82%_0.17_37)] transition-all duration-500 ease-out',
+  FORM_PROGRESS_STEP_COMPLETE:
+    'flex h-8 w-8 items-center justify-center rounded-full bg-[oklch(72%_0.19_145)] text-[#1A1A1D] text-sm font-bold',
+  FORM_PROGRESS_STEP_ACTIVE:
+    'flex h-8 w-8 items-center justify-center rounded-full bg-[oklch(74%_0.2_35)] text-[#1A1A1D] text-sm font-bold shadow-lg shadow-[oklch(74%_0.2_35)]/30',
+  FORM_PROGRESS_STEP_PENDING:
+    'flex h-8 w-8 items-center justify-center rounded-full border-2 border-white/20 text-white/40 text-sm font-semibold',
+
+  // ----- Type Selection Cards -----
+  FORM_TYPE_CARD:
+    'group relative rounded-xl border border-white/10 bg-[oklch(26%_0.006_60)] p-6 cursor-pointer transition-all hover:border-white/20 hover:bg-[oklch(28%_0.008_60)] hover:shadow-md',
+  FORM_TYPE_CARD_SELECTED:
+    'relative rounded-xl border-2 border-[oklch(74%_0.2_35)] bg-[oklch(28%_0.008_60)] p-6 shadow-lg shadow-[oklch(74%_0.2_35)]/20',
+  FORM_TYPE_CARD_ICON: 'flex h-12 w-12 items-center justify-center rounded-lg bg-white/5 mb-3',
+
+  // ----- Stats Cards -----
+  FORM_STAT_CARD: 'rounded-lg bg-white/5 p-4 text-center',
+  FORM_STAT_NUMBER: 'text-3xl font-bold text-[oklch(74%_0.2_35)]',
+  FORM_STAT_LABEL: 'text-xs text-[oklch(72%_0.01_60)] mt-1',
+
+  // ----- Quality Meter (Gamification) -----
+  FORM_QUALITY_LOW: 'text-[oklch(70%_0.195_25)]',
+  FORM_QUALITY_MEDIUM: 'text-[oklch(75%_0.155_65)]',
+  FORM_QUALITY_HIGH: 'text-[oklch(72%_0.19_145)]',
+  FORM_QUALITY_PERFECT: 'text-[oklch(74%_0.2_35)]',
+
+  // ----- Tags/Chips -----
+  FORM_TAG:
+    'inline-flex items-center rounded-full bg-white/5 border border-white/10 px-3 py-1 text-xs font-medium text-[oklch(94%_0.005_60)] hover:bg-white/10 transition-colors',
+  FORM_TAG_REMOVABLE:
+    'inline-flex items-center gap-1.5 rounded-full bg-white/5 border border-white/10 px-3 py-1 text-xs font-medium text-[oklch(94%_0.005_60)] hover:bg-white/10 transition-colors group',
+  FORM_TAG_REMOVE_ICON:
+    'h-3 w-3 text-[oklch(72%_0.01_60)] hover:text-[oklch(70%_0.195_25)] cursor-pointer transition-colors',
+
+  // ----- Code Blocks (for examples) -----
+  FORM_CODE_BLOCK:
+    'rounded-lg bg-[oklch(12%_0.003_60)] border border-white/10 p-4 font-mono text-sm overflow-x-auto',
+  FORM_CODE_TOOLBAR: 'flex items-center justify-between mb-2 text-xs text-[oklch(72%_0.01_60)]',
+
+  // ----- Empty States -----
+  FORM_EMPTY_STATE:
+    'flex flex-col items-center justify-center p-8 text-center rounded-xl border border-dashed border-white/10 bg-white/2',
+  FORM_EMPTY_ICON: 'h-12 w-12 text-white/20 mb-3',
+  FORM_EMPTY_TEXT: 'text-sm text-[oklch(72%_0.01_60)]',
+
+  // ----- Social Proof Cards -----
+  FORM_SOCIAL_PROOF_CARD:
+    'rounded-lg border border-blue-500/20 bg-blue-500/5 p-4 flex items-start gap-3',
+  FORM_SOCIAL_PROOF_ICON: 'h-5 w-5 text-blue-400 flex-shrink-0 mt-0.5',
+
+  // ----- Dividers -----
+  FORM_DIVIDER: 'border-t border-white/5 my-6',
+  FORM_DIVIDER_WITH_TEXT:
+    'relative flex items-center justify-center my-6 before:content-[""] before:flex-1 before:border-t before:border-white/5 after:content-[""] after:flex-1 after:border-t after:border-white/5',
   CARD_HOVER_SCALE: 'transition-transform hover:scale-[1.02]',
 
   // ----- Group Hover Patterns -----
@@ -1023,7 +1121,10 @@ export type CollectionType = keyof typeof BADGE_COLORS.collectionType;
 
 // Re-export JobStatus from database-overrides.ts for type safety
 // Re-export from database-overrides.ts for type safety
-export type { ChangelogCategory, JobStatus } from '@/src/types/database-overrides';
+export type {
+  ChangelogCategory,
+  JobStatus,
+} from '@/src/types/database-overrides';
 export type StatusType = keyof typeof BADGE_COLORS.status;
 export type CategoryType = keyof typeof BADGE_COLORS.category;
 export type SubmissionStatusType = keyof typeof BADGE_COLORS.submissionStatus;

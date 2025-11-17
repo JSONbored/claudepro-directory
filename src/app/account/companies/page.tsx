@@ -28,11 +28,14 @@ import type { GetGetUserCompaniesReturn } from '@/src/types/database-overrides';
 /**
  * Validate company website URL is safe for use in href
  * Only allows absolute URLs with http:// or https:// protocol
+ * Strictly validates to prevent XSS and protocol-relative URLs
  */
 function isAllowedHttpUrl(url: string | null | undefined): boolean {
   if (!url || typeof url !== 'string') return false;
+  // Reject any leading whitespace or suspicious chars
+  if (!/^(https?:\/\/)/i.test(url.trim())) return false;
   try {
-    const parsed = new URL(url, 'http://dummy-base');
+    const parsed = new URL(url.trim());
     return parsed.protocol === 'http:' || parsed.protocol === 'https:';
   } catch {
     return false;
@@ -181,14 +184,20 @@ export default async function CompaniesPage() {
                             className={`mt-2 inline-flex items-center gap-1 text-sm ${UI_CLASSES.LINK_ACCENT}`}
                           >
                             <ExternalLink className="h-3 w-3" />
-                            {company.website.replace(/^https?:\/\//, '')}
+                            {String(company.website.replace(/^https?:\/\//, '')).replace(
+                              /[<>"'`]/g,
+                              ''
+                            )}
                           </a>
                         ) : company.website ? (
                           <span
                             className={`mt-2 inline-flex items-center gap-1 text-sm ${UI_CLASSES.LINK_ACCENT}`}
                           >
                             <ExternalLink className="h-3 w-3" />
-                            {company.website.replace(/^https?:\/\//, '')}
+                            {String(company.website.replace(/^https?:\/\//, '')).replace(
+                              /[<>"'`]/g,
+                              ''
+                            )}
                           </span>
                         ) : null}
                       </div>

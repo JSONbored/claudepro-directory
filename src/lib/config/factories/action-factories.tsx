@@ -218,7 +218,7 @@ export function createStorageDownloadAction(label: string, icon: ReactNode): Act
     label,
     icon,
     handler: (item: ContentItem) => {
-      if ('storage_url' in item && item.storage_url) {
+      if ('storage_url' in item && item.storage_url && typeof item.storage_url === 'string') {
         window.location.href = item.storage_url;
         toasts.raw.success('Download started!', {
           description: `Downloading ${item.title || item.slug} package...`,

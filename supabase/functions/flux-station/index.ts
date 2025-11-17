@@ -1,3 +1,5 @@
+/// <reference path="../_shared/deno-globals.d.ts" />
+
 /**
  * Flux Station - Unified notification and queue processing edge function
  * Handles all notification APIs, webhooks, and queue processing routes
@@ -67,6 +69,10 @@ import { errorResponse } from '../_shared/utils/http.ts';
 import { validatePathSegments, validateQueryString } from '../_shared/utils/input-validation.ts';
 import { checkRateLimit } from '../_shared/utils/rate-limit.ts';
 import { createRouter, type HttpMethod, type RouterContext } from '../_shared/utils/router.ts';
+// Static imports to ensure circuit-breaker and timeout utilities are included in the bundle
+// These are lazily imported in callRpc, but we need static imports for Supabase bundling
+import '../_shared/utils/circuit-breaker.ts';
+import '../_shared/utils/timeout.ts';
 import { handleChangelogNotify } from './routes/changelog/notify.ts';
 import { handleChangelogProcess } from './routes/changelog/process.ts';
 import { handleDiscordDirect } from './routes/discord/direct.ts';
@@ -135,7 +141,9 @@ const router = createRouter<FluxStationContext>({
     if (ctx.method === 'POST' || ctx.method === 'OPTIONS') {
       return handleExternalWebhook(ctx.request);
     }
-    return errorResponse(new Error(`Not Found: ${ctx.pathname}`), 'flux-station:not-found');
+    return Promise.resolve(
+      errorResponse(new Error(`Not Found: ${ctx.pathname}`), 'flux-station:not-found')
+    );
   },
   routes: [
     {
@@ -143,16 +151,18 @@ const router = createRouter<FluxStationContext>({
       methods: ['POST', 'OPTIONS'],
       match: (ctx) =>
         ctx.pathname === '/changelog-webhook' || ctx.pathname === '/changelog-webhook/',
-      handler: async (ctx) => {
+      handler: (ctx) => {
         // Rate limiting
         const rateLimit = checkRateLimit(ctx.request, QUEUE_WORKER_RATE_LIMIT);
         if (!rateLimit.allowed) {
-          return errorResponse(new Error('Rate limit exceeded'), 'flux-station:rate-limit', {
-            'Retry-After': String(rateLimit.retryAfter ?? 60),
-            'X-RateLimit-Limit': String(QUEUE_WORKER_RATE_LIMIT.maxRequests),
-            'X-RateLimit-Remaining': String(rateLimit.remaining),
-            'X-RateLimit-Reset': String(rateLimit.resetAt),
-          });
+          return Promise.resolve(
+            errorResponse(new Error('Rate limit exceeded'), 'flux-station:rate-limit', {
+              'Retry-After': String(rateLimit.retryAfter ?? 60),
+              'X-RateLimit-Limit': String(QUEUE_WORKER_RATE_LIMIT.maxRequests),
+              'X-RateLimit-Remaining': String(rateLimit.remaining),
+              'X-RateLimit-Reset': String(rateLimit.resetAt),
+            })
+          );
         }
         return handleChangelogSyncRequest(ctx.request);
       },
@@ -161,16 +171,18 @@ const router = createRouter<FluxStationContext>({
       name: 'pulse',
       methods: ['POST', 'OPTIONS'],
       match: (ctx) => ctx.pathname === '/pulse' || ctx.pathname === '/pulse/',
-      handler: async (ctx) => {
+      handler: (ctx) => {
         // Rate limiting
         const rateLimit = checkRateLimit(ctx.request, QUEUE_WORKER_RATE_LIMIT);
         if (!rateLimit.allowed) {
-          return errorResponse(new Error('Rate limit exceeded'), 'flux-station:rate-limit', {
-            'Retry-After': String(rateLimit.retryAfter ?? 60),
-            'X-RateLimit-Limit': String(QUEUE_WORKER_RATE_LIMIT.maxRequests),
-            'X-RateLimit-Remaining': String(rateLimit.remaining),
-            'X-RateLimit-Reset': String(rateLimit.resetAt),
-          });
+          return Promise.resolve(
+            errorResponse(new Error('Rate limit exceeded'), 'flux-station:rate-limit', {
+              'Retry-After': String(rateLimit.retryAfter ?? 60),
+              'X-RateLimit-Limit': String(QUEUE_WORKER_RATE_LIMIT.maxRequests),
+              'X-RateLimit-Remaining': String(rateLimit.remaining),
+              'X-RateLimit-Reset': String(rateLimit.resetAt),
+            })
+          );
         }
         return handlePulse(ctx.request);
       },
@@ -180,16 +192,18 @@ const router = createRouter<FluxStationContext>({
       methods: ['POST', 'OPTIONS'],
       match: (ctx) =>
         ctx.pathname === '/changelog/process' || ctx.pathname === '/changelog/process/',
-      handler: async (ctx) => {
+      handler: (ctx) => {
         // Rate limiting
         const rateLimit = checkRateLimit(ctx.request, QUEUE_WORKER_RATE_LIMIT);
         if (!rateLimit.allowed) {
-          return errorResponse(new Error('Rate limit exceeded'), 'flux-station:rate-limit', {
-            'Retry-After': String(rateLimit.retryAfter ?? 60),
-            'X-RateLimit-Limit': String(QUEUE_WORKER_RATE_LIMIT.maxRequests),
-            'X-RateLimit-Remaining': String(rateLimit.remaining),
-            'X-RateLimit-Reset': String(rateLimit.resetAt),
-          });
+          return Promise.resolve(
+            errorResponse(new Error('Rate limit exceeded'), 'flux-station:rate-limit', {
+              'Retry-After': String(rateLimit.retryAfter ?? 60),
+              'X-RateLimit-Limit': String(QUEUE_WORKER_RATE_LIMIT.maxRequests),
+              'X-RateLimit-Remaining': String(rateLimit.remaining),
+              'X-RateLimit-Reset': String(rateLimit.resetAt),
+            })
+          );
         }
         return handleChangelogProcess(ctx.request);
       },
@@ -198,16 +212,18 @@ const router = createRouter<FluxStationContext>({
       name: 'changelog-notify',
       methods: ['POST', 'OPTIONS'],
       match: (ctx) => ctx.pathname === '/changelog/notify' || ctx.pathname === '/changelog/notify/',
-      handler: async (ctx) => {
+      handler: (ctx) => {
         // Rate limiting
         const rateLimit = checkRateLimit(ctx.request, QUEUE_WORKER_RATE_LIMIT);
         if (!rateLimit.allowed) {
-          return errorResponse(new Error('Rate limit exceeded'), 'flux-station:rate-limit', {
-            'Retry-After': String(rateLimit.retryAfter ?? 60),
-            'X-RateLimit-Limit': String(QUEUE_WORKER_RATE_LIMIT.maxRequests),
-            'X-RateLimit-Remaining': String(rateLimit.remaining),
-            'X-RateLimit-Reset': String(rateLimit.resetAt),
-          });
+          return Promise.resolve(
+            errorResponse(new Error('Rate limit exceeded'), 'flux-station:rate-limit', {
+              'Retry-After': String(rateLimit.retryAfter ?? 60),
+              'X-RateLimit-Limit': String(QUEUE_WORKER_RATE_LIMIT.maxRequests),
+              'X-RateLimit-Remaining': String(rateLimit.remaining),
+              'X-RateLimit-Reset': String(rateLimit.resetAt),
+            })
+          );
         }
         return handleChangelogNotify(ctx.request);
       },
@@ -216,16 +232,18 @@ const router = createRouter<FluxStationContext>({
       name: 'discord-jobs',
       methods: ['POST', 'OPTIONS'],
       match: (ctx) => ctx.pathname === '/discord/jobs' || ctx.pathname === '/discord/jobs/',
-      handler: async (ctx) => {
+      handler: (ctx) => {
         // Rate limiting
         const rateLimit = checkRateLimit(ctx.request, QUEUE_WORKER_RATE_LIMIT);
         if (!rateLimit.allowed) {
-          return errorResponse(new Error('Rate limit exceeded'), 'flux-station:rate-limit', {
-            'Retry-After': String(rateLimit.retryAfter ?? 60),
-            'X-RateLimit-Limit': String(QUEUE_WORKER_RATE_LIMIT.maxRequests),
-            'X-RateLimit-Remaining': String(rateLimit.remaining),
-            'X-RateLimit-Reset': String(rateLimit.resetAt),
-          });
+          return Promise.resolve(
+            errorResponse(new Error('Rate limit exceeded'), 'flux-station:rate-limit', {
+              'Retry-After': String(rateLimit.retryAfter ?? 60),
+              'X-RateLimit-Limit': String(QUEUE_WORKER_RATE_LIMIT.maxRequests),
+              'X-RateLimit-Remaining': String(rateLimit.remaining),
+              'X-RateLimit-Reset': String(rateLimit.resetAt),
+            })
+          );
         }
         return handleDiscordJobs(ctx.request);
       },
@@ -235,16 +253,18 @@ const router = createRouter<FluxStationContext>({
       methods: ['POST', 'OPTIONS'],
       match: (ctx) =>
         ctx.pathname === '/discord/submissions' || ctx.pathname === '/discord/submissions/',
-      handler: async (ctx) => {
+      handler: (ctx) => {
         // Rate limiting
         const rateLimit = checkRateLimit(ctx.request, QUEUE_WORKER_RATE_LIMIT);
         if (!rateLimit.allowed) {
-          return errorResponse(new Error('Rate limit exceeded'), 'flux-station:rate-limit', {
-            'Retry-After': String(rateLimit.retryAfter ?? 60),
-            'X-RateLimit-Limit': String(QUEUE_WORKER_RATE_LIMIT.maxRequests),
-            'X-RateLimit-Remaining': String(rateLimit.remaining),
-            'X-RateLimit-Reset': String(rateLimit.resetAt),
-          });
+          return Promise.resolve(
+            errorResponse(new Error('Rate limit exceeded'), 'flux-station:rate-limit', {
+              'Retry-After': String(rateLimit.retryAfter ?? 60),
+              'X-RateLimit-Limit': String(QUEUE_WORKER_RATE_LIMIT.maxRequests),
+              'X-RateLimit-Remaining': String(rateLimit.remaining),
+              'X-RateLimit-Reset': String(rateLimit.resetAt),
+            })
+          );
         }
         return handleDiscordSubmissions(ctx.request);
       },
@@ -253,16 +273,18 @@ const router = createRouter<FluxStationContext>({
       name: 'revalidation',
       methods: ['POST', 'OPTIONS'],
       match: (ctx) => ctx.pathname === '/revalidation' || ctx.pathname === '/revalidation/',
-      handler: async (ctx) => {
+      handler: (ctx) => {
         // Rate limiting
         const rateLimit = checkRateLimit(ctx.request, QUEUE_WORKER_RATE_LIMIT);
         if (!rateLimit.allowed) {
-          return errorResponse(new Error('Rate limit exceeded'), 'flux-station:rate-limit', {
-            'Retry-After': String(rateLimit.retryAfter ?? 60),
-            'X-RateLimit-Limit': String(QUEUE_WORKER_RATE_LIMIT.maxRequests),
-            'X-RateLimit-Remaining': String(rateLimit.remaining),
-            'X-RateLimit-Reset': String(rateLimit.resetAt),
-          });
+          return Promise.resolve(
+            errorResponse(new Error('Rate limit exceeded'), 'flux-station:rate-limit', {
+              'Retry-After': String(rateLimit.retryAfter ?? 60),
+              'X-RateLimit-Limit': String(QUEUE_WORKER_RATE_LIMIT.maxRequests),
+              'X-RateLimit-Remaining': String(rateLimit.remaining),
+              'X-RateLimit-Reset': String(rateLimit.resetAt),
+            })
+          );
         }
         return handleRevalidation(ctx.request);
       },
@@ -271,16 +293,18 @@ const router = createRouter<FluxStationContext>({
       name: 'active-notifications',
       methods: ['GET', 'HEAD', 'OPTIONS'],
       match: (ctx) => ctx.pathname.startsWith('/active-notifications'),
-      handler: async (ctx) => {
+      handler: (ctx) => {
         // Rate limiting for user routes
         const rateLimit = checkRateLimit(ctx.request, USER_ROUTE_RATE_LIMIT);
         if (!rateLimit.allowed) {
-          return errorResponse(new Error('Rate limit exceeded'), 'flux-station:rate-limit', {
-            'Retry-After': String(rateLimit.retryAfter ?? 60),
-            'X-RateLimit-Limit': String(USER_ROUTE_RATE_LIMIT.maxRequests),
-            'X-RateLimit-Remaining': String(rateLimit.remaining),
-            'X-RateLimit-Reset': String(rateLimit.resetAt),
-          });
+          return Promise.resolve(
+            errorResponse(new Error('Rate limit exceeded'), 'flux-station:rate-limit', {
+              'Retry-After': String(rateLimit.retryAfter ?? 60),
+              'X-RateLimit-Limit': String(USER_ROUTE_RATE_LIMIT.maxRequests),
+              'X-RateLimit-Remaining': String(rateLimit.remaining),
+              'X-RateLimit-Reset': String(rateLimit.resetAt),
+            })
+          );
         }
         return handleActiveNotifications(ctx.request);
       },
@@ -289,16 +313,18 @@ const router = createRouter<FluxStationContext>({
       name: 'dismiss-notifications',
       methods: ['POST', 'OPTIONS'],
       match: (ctx) => ctx.pathname.startsWith('/dismiss'),
-      handler: async (ctx) => {
+      handler: (ctx) => {
         // Rate limiting for user routes
         const rateLimit = checkRateLimit(ctx.request, USER_ROUTE_RATE_LIMIT);
         if (!rateLimit.allowed) {
-          return errorResponse(new Error('Rate limit exceeded'), 'flux-station:rate-limit', {
-            'Retry-After': String(rateLimit.retryAfter ?? 60),
-            'X-RateLimit-Limit': String(USER_ROUTE_RATE_LIMIT.maxRequests),
-            'X-RateLimit-Remaining': String(rateLimit.remaining),
-            'X-RateLimit-Reset': String(rateLimit.resetAt),
-          });
+          return Promise.resolve(
+            errorResponse(new Error('Rate limit exceeded'), 'flux-station:rate-limit', {
+              'Retry-After': String(rateLimit.retryAfter ?? 60),
+              'X-RateLimit-Limit': String(USER_ROUTE_RATE_LIMIT.maxRequests),
+              'X-RateLimit-Remaining': String(rateLimit.remaining),
+              'X-RateLimit-Reset': String(rateLimit.resetAt),
+            })
+          );
         }
         return handleDismissNotifications(ctx.request);
       },
@@ -307,16 +333,18 @@ const router = createRouter<FluxStationContext>({
       name: 'create-notification',
       methods: ['POST', 'OPTIONS'],
       match: (ctx) => ctx.pathname.startsWith('/notifications/create'),
-      handler: async (ctx) => {
+      handler: (ctx) => {
         // Rate limiting for user routes
         const rateLimit = checkRateLimit(ctx.request, USER_ROUTE_RATE_LIMIT);
         if (!rateLimit.allowed) {
-          return errorResponse(new Error('Rate limit exceeded'), 'flux-station:rate-limit', {
-            'Retry-After': String(rateLimit.retryAfter ?? 60),
-            'X-RateLimit-Limit': String(USER_ROUTE_RATE_LIMIT.maxRequests),
-            'X-RateLimit-Remaining': String(rateLimit.remaining),
-            'X-RateLimit-Reset': String(rateLimit.resetAt),
-          });
+          return Promise.resolve(
+            errorResponse(new Error('Rate limit exceeded'), 'flux-station:rate-limit', {
+              'Retry-After': String(rateLimit.retryAfter ?? 60),
+              'X-RateLimit-Limit': String(USER_ROUTE_RATE_LIMIT.maxRequests),
+              'X-RateLimit-Remaining': String(rateLimit.remaining),
+              'X-RateLimit-Reset': String(rateLimit.resetAt),
+            })
+          );
         }
         return handleCreateNotification(ctx.request);
       },
@@ -328,16 +356,18 @@ const router = createRouter<FluxStationContext>({
         const notificationType = ctx.request.headers.get('X-Discord-Notification-Type');
         return Boolean(notificationType);
       },
-      handler: async (ctx) => {
+      handler: (ctx) => {
         // Rate limiting for direct Discord notifications
         const rateLimit = checkRateLimit(ctx.request, USER_ROUTE_RATE_LIMIT);
         if (!rateLimit.allowed) {
-          return errorResponse(new Error('Rate limit exceeded'), 'flux-station:rate-limit', {
-            'Retry-After': String(rateLimit.retryAfter ?? 60),
-            'X-RateLimit-Limit': String(USER_ROUTE_RATE_LIMIT.maxRequests),
-            'X-RateLimit-Remaining': String(rateLimit.remaining),
-            'X-RateLimit-Reset': String(rateLimit.resetAt),
-          });
+          return Promise.resolve(
+            errorResponse(new Error('Rate limit exceeded'), 'flux-station:rate-limit', {
+              'Retry-After': String(rateLimit.retryAfter ?? 60),
+              'X-RateLimit-Limit': String(USER_ROUTE_RATE_LIMIT.maxRequests),
+              'X-RateLimit-Remaining': String(rateLimit.remaining),
+              'X-RateLimit-Reset': String(rateLimit.resetAt),
+            })
+          );
         }
         return handleDiscordDirect(ctx.request);
       },
@@ -354,7 +384,7 @@ Deno.serve(async (req: Request) => {
       error instanceof Error &&
       (error.message.includes('too long') || error.message.includes('invalid'))
     ) {
-      return errorResponse(error, 'flux-station:validation-error');
+      return Promise.resolve(errorResponse(error, 'flux-station:validation-error'));
     }
     // Re-throw to let router handle it
     throw error;

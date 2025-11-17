@@ -5,6 +5,8 @@ import { Suspense } from 'react';
 import { LazySection } from '@/src/components/core/infra/scroll-animated-section';
 import { TopContributors } from '@/src/components/features/community/top-contributors';
 import { HomePageClient } from '@/src/components/features/home/home-sections';
+import { AnimatedGradientText } from '@/src/components/primitives/animation/gradient-text';
+import { ParticlesBackground } from '@/src/components/primitives/animation/particles-background';
 import { HomePageLoading } from '@/src/components/primitives/feedback/loading-factory';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 
@@ -111,10 +113,14 @@ export default async function HomePage({ searchParams }: HomePageProps) {
     <div className={'min-h-screen bg-background'}>
       <div className="relative overflow-hidden">
         <section className={'relative border-border/50 border-b'} aria-label="Homepage hero">
-          <div className={'container relative mx-auto px-4 py-10 sm:py-16 lg:py-24'}>
+          {/* Particles Background */}
+          <ParticlesBackground />
+
+          <div className={'container relative z-10 mx-auto px-4 py-10 sm:py-16 lg:py-24'}>
             <div className={'mx-auto max-w-4xl text-center'}>
-              <h1 className="mb-4 font-bold text-4xl text-foreground tracking-tight sm:mb-6 sm:text-5xl lg:text-7xl">
-                The home for Claude{' '}
+              <h1 className="mb-4 font-bold text-4xl tracking-tight sm:mb-6 sm:text-5xl lg:text-7xl">
+                <AnimatedGradientText className="mr-2">The Ultimate Directory</AnimatedGradientText>{' '}
+                for Claude{' '}
                 <RollingText
                   words={['enthusiasts', 'developers', 'power users', 'beginners', 'builders']}
                   duration={3000}

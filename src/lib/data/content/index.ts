@@ -10,12 +10,9 @@ import { fetchCachedRpc } from '@/src/lib/data/helpers';
 import { generateContentCacheKey, generateContentTags } from '@/src/lib/data/helpers-utils';
 import type {
   ContentCategory,
-  ContentType,
   GetGetEnrichedContentListReturn,
   Tables,
 } from '@/src/types/database-overrides';
-
-export type FullContentItem = ContentType;
 
 export interface ContentFilters {
   category?: ContentCategory | ContentCategory[];

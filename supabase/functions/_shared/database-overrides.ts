@@ -12,14 +12,40 @@ import type { Database as DatabaseGenerated, Json } from './database.types.ts';
 import type { ExtendedDatabase } from './database-extensions.types.ts';
 
 /**
+ * filter_jobs RPC return type
+ */
+export type GetFilterJobsReturn = {
+  jobs: Array<DatabaseGenerated['public']['Tables']['jobs']['Row']>;
+  total_count: number;
+} | null;
+
+/**
  * Database type with proper overrides for edge functions
  *
  * Uses intersection type to combine DatabaseGenerated with pgmq_public schema
  * This ensures Supabase's type system can properly infer RPC functions and table operations
  * while also supporting pgmq_public schema operations
+ *
+ * Also includes function overrides for better type safety
  */
 export type Database = DatabaseGenerated & {
   pgmq_public: ExtendedDatabase['pgmq_public'];
+  public: DatabaseGenerated['public'] & {
+    Functions: DatabaseGenerated['public']['Functions'] & {
+      filter_jobs: {
+        Args: {
+          p_query?: string | null;
+          p_category?: string | null;
+          p_employment_type?: string | null;
+          p_experience_level?: string | null;
+          p_remote_only?: boolean | null;
+          p_limit?: number | null;
+          p_offset?: number | null;
+        };
+        Returns: GetFilterJobsReturn;
+      };
+    };
+  };
 };
 
 /**
@@ -56,21 +82,23 @@ export type TablesUpdate<T extends keyof DatabaseGenerated['public']['Tables']> 
 
 /**
  * RPC function Args helper type
- * Uses DatabaseGenerated directly to ensure proper type inference
+ * Uses Database type to support overridden functions
  * @example
  * type BuildJobEmbedArgs = RpcArgs<'build_job_discord_embed'>
+ * type FilterJobsArgs = RpcArgs<'filter_jobs'>
  */
-export type RpcArgs<T extends keyof DatabaseGenerated['public']['Functions']> =
-  DatabaseGenerated['public']['Functions'][T]['Args'];
+export type RpcArgs<T extends keyof Database['public']['Functions']> =
+  Database['public']['Functions'][T]['Args'];
 
 /**
  * RPC function Returns helper type
- * Uses DatabaseGenerated directly to ensure proper type inference
+ * Uses Database type to support overridden functions
  * @example
  * type BuildJobEmbedReturn = RpcReturns<'build_job_discord_embed'>
+ * type FilterJobsReturn = RpcReturns<'filter_jobs'>
  */
-export type RpcReturns<T extends keyof DatabaseGenerated['public']['Functions']> =
-  DatabaseGenerated['public']['Functions'][T]['Returns'];
+export type RpcReturns<T extends keyof Database['public']['Functions']> =
+  Database['public']['Functions'][T]['Returns'];
 
 /**
  * Enum helper type
@@ -759,19 +787,20 @@ export async function upsertTable<T extends keyof DatabaseGenerated['public']['T
  * Type-safe RPC call helper function with timeout and circuit breaker
  * Properly types the RPC call to avoid 'undefined' inference
  */
-export async function callRpc<T extends keyof DatabaseGenerated['public']['Functions']>(
+export async function callRpc<T extends keyof Database['public']['Functions']>(
   functionName: T,
-  args: DatabaseGenerated['public']['Functions'][T]['Args'],
+  args: Database['public']['Functions'][T]['Args'],
   useAnon = false,
   options?: {
     timeoutMs?: number;
     useCircuitBreaker?: boolean;
   }
 ): Promise<{
-  data: DatabaseGenerated['public']['Functions'][T]['Returns'] | null;
+  data: Database['public']['Functions'][T]['Returns'] | null;
   error: unknown;
 }> {
   // Lazy import to avoid circular dependencies
+  // Files are now included via static type imports above
   const { withTimeout, TIMEOUT_PRESETS } = await import('./utils/timeout.ts');
   const { withCircuitBreaker, CIRCUIT_BREAKER_CONFIGS } = await import(
     './utils/circuit-breaker.ts'
@@ -783,16 +812,16 @@ export async function callRpc<T extends keyof DatabaseGenerated['public']['Funct
   const executeRpc = async () => {
     const client = useAnon ? supabaseAnon : supabaseServiceRole;
     // Use satisfies to validate args type, then use the client directly
-    const validatedArgs = args satisfies DatabaseGenerated['public']['Functions'][T]['Args'];
+    const validatedArgs = args satisfies Database['public']['Functions'][T]['Args'];
     // The Supabase client may infer 'undefined' but we validate the args type with satisfies
     // Type assertion needed due to Supabase client type inference limitation
     // Args are validated with satisfies, but client infers 'undefined' - this is a known Supabase limitation
     type RpcClient = {
-      rpc: <T extends keyof DatabaseGenerated['public']['Functions']>(
+      rpc: <T extends keyof Database['public']['Functions']>(
         name: T,
-        args: DatabaseGenerated['public']['Functions'][T]['Args']
+        args: Database['public']['Functions'][T]['Args']
       ) => Promise<{
-        data: DatabaseGenerated['public']['Functions'][T]['Returns'] | null;
+        data: Database['public']['Functions'][T]['Returns'] | null;
         error: unknown;
       }>;
     };

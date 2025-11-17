@@ -39,7 +39,7 @@ class CircuitBreaker {
   }
 
   async execute<T>(fn: () => Promise<T>): Promise<T> {
-    this.updateState();
+    await this.updateState();
 
     if (this.state.state === 'open') {
       throw new Error('Circuit breaker is open - service unavailable');
@@ -47,15 +47,15 @@ class CircuitBreaker {
 
     try {
       const result = await fn();
-      this.onSuccess();
+      await this.onSuccess();
       return result;
     } catch (error) {
-      this.onFailure();
+      await this.onFailure();
       throw error;
     }
   }
 
-  private updateState(): void {
+  private async updateState(): Promise<void> {
     const now = Date.now();
 
     if (this.state.state === 'open') {
@@ -63,34 +63,43 @@ class CircuitBreaker {
         // Transition to half-open
         this.state.state = 'half-open';
         this.state.halfOpenAttempts = 0;
-        console.log('[circuit-breaker] Circuit half-open (testing recovery)', {
+        // Lazy import to avoid circular dependencies
+        const { createUtilityContext, logInfo } = await import('./logging.ts');
+        const logContext = createUtilityContext('circuit-breaker', 'state-transition', {
           key: this.key,
           state: 'half-open',
           resetTimeoutMs: this.config.resetTimeoutMs,
         });
+        logInfo('Circuit half-open (testing recovery)', logContext);
       }
     }
   }
 
-  private onSuccess(): void {
+  private async onSuccess(): Promise<void> {
     if (this.state.state === 'half-open') {
       // Success in half-open state - close the circuit
       this.state.state = 'closed';
       this.state.failures = 0;
       this.state.halfOpenAttempts = 0;
-      console.log('[circuit-breaker] Circuit closed (recovery successful)', {
+      // Lazy import to avoid circular dependencies
+      const { createUtilityContext, logInfo } = await import('./logging.ts');
+      const logContext = createUtilityContext('circuit-breaker', 'state-transition', {
         key: this.key,
         state: 'closed',
       });
+      logInfo('Circuit closed (recovery successful)', logContext);
     } else {
       // Reset failure count on success
       this.state.failures = 0;
     }
   }
 
-  private onFailure(): void {
+  private async onFailure(): Promise<void> {
     this.state.failures++;
     this.state.lastFailureTime = Date.now();
+
+    // Lazy import to avoid circular dependencies
+    const { createUtilityContext, logWarn } = await import('./logging.ts');
 
     if (this.state.state === 'half-open') {
       this.state.halfOpenAttempts++;
@@ -98,26 +107,28 @@ class CircuitBreaker {
         // Too many failures in half-open - open again
         this.state.state = 'open';
         this.state.halfOpenAttempts = 0;
-        console.warn('[circuit-breaker] Circuit opened (half-open failures)', {
+        const logContext = createUtilityContext('circuit-breaker', 'state-transition', {
           key: this.key,
           state: 'open',
           halfOpenAttempts: this.state.halfOpenAttempts,
         });
+        logWarn('Circuit opened (half-open failures)', logContext);
       }
     } else if (this.state.failures >= this.config.failureThreshold) {
       // Too many failures - open the circuit
       this.state.state = 'open';
-      console.warn('[circuit-breaker] Circuit opened (threshold exceeded)', {
+      const logContext = createUtilityContext('circuit-breaker', 'state-transition', {
         key: this.key,
         state: 'open',
         failures: this.state.failures,
         threshold: this.config.failureThreshold,
       });
+      logWarn('Circuit opened (threshold exceeded)', logContext);
     }
   }
 
-  getState(): CircuitState {
-    this.updateState();
+  async getState(): Promise<CircuitState> {
+    await this.updateState();
     return this.state.state;
   }
 

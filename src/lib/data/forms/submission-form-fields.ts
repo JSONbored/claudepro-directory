@@ -95,7 +95,7 @@ function mapIconPosition(value: RpcRow['icon_position']): IconPosition | undefin
   return undefined;
 }
 
-function mapSelectOptions(selectOptions: RpcRow['select_options']) {
+function mapSelectOptions(selectOptions: unknown) {
   if (!(selectOptions && Array.isArray(selectOptions))) return [];
   return selectOptions
     .map((option) => {
@@ -110,12 +110,15 @@ function mapSelectOptions(selectOptions: RpcRow['select_options']) {
 
 function mapField(row: RpcRow): FieldDefinition | null {
   const props = parseProperties(row.field_properties);
+  const placeholder = props.placeholder as string | undefined;
+  const required = props.required as boolean | undefined;
+  const selectOptions = props.select_options as unknown;
   const base = {
     name: row.field_name,
     label: row.label,
-    placeholder: row.placeholder ?? undefined,
+    placeholder,
     helpText: row.help_text ?? undefined,
-    required: row.required ?? false,
+    required: required ?? false,
     gridColumn: mapGridColumn(row.grid_column),
     iconName: row.icon ?? undefined,
     iconPosition: mapIconPosition(row.icon_position),
@@ -156,7 +159,7 @@ function mapField(row: RpcRow): FieldDefinition | null {
       return {
         ...base,
         type: 'select',
-        options: mapSelectOptions(row.select_options),
+        options: mapSelectOptions(selectOptions),
         defaultValue: getStringProperty(props, ['defaultValue', 'default_value']),
       } as SelectFieldDefinition;
 

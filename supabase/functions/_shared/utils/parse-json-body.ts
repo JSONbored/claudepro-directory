@@ -3,10 +3,9 @@
  * Validates body size, parses JSON, and provides type-safe results
  */
 
-import { errorToString } from './error-handling.ts';
 import { badRequestResponse, publicCorsHeaders } from './http.ts';
 import { MAX_BODY_SIZE, validateBodySize } from './input-validation.ts';
-import { createUtilityContext } from './logging.ts';
+import { createUtilityContext, logError, logWarn } from './logging.ts';
 
 export interface ParseJsonBodyOptions {
   maxSize?: number;
@@ -45,11 +44,9 @@ export async function parseJsonBody<T = unknown>(
     const logContext = createUtilityContext('parse-json-body', 'body-size-validation-failed', {
       content_length: contentLength,
       max_size: maxSize,
-    });
-    console.warn('[parse-json-body] Request body size validation failed', {
-      ...logContext,
       error: bodySizeValidation.error,
     });
+    logWarn('Request body size validation failed', logContext);
     return {
       success: false,
       response: badRequestResponse(bodySizeValidation.error ?? 'Request body too large', cors),
@@ -62,10 +59,7 @@ export async function parseJsonBody<T = unknown>(
     bodyText = await req.text();
   } catch (error) {
     const logContext = createUtilityContext('parse-json-body', 'read-body-failed');
-    console.error('[parse-json-body] Failed to read request body', {
-      ...logContext,
-      error: errorToString(error),
-    });
+    logError('Failed to read request body', logContext, error);
     return {
       success: false,
       response: badRequestResponse('Failed to read request body', cors),
@@ -78,7 +72,7 @@ export async function parseJsonBody<T = unknown>(
       body_size: bodyText.length,
       max_size: maxSize,
     });
-    console.warn('[parse-json-body] Request body size exceeded after reading', logContext);
+    logWarn('Request body size exceeded after reading', logContext);
     return {
       success: false,
       response: badRequestResponse(`Request body too large (max ${maxSize} bytes)`, cors),
@@ -101,10 +95,7 @@ export async function parseJsonBody<T = unknown>(
     const logContext = createUtilityContext('parse-json-body', 'json-parse-failed', {
       body_preview: bodyText.slice(0, 100),
     });
-    console.error('[parse-json-body] JSON parse failed', {
-      ...logContext,
-      error: errorToString(error),
-    });
+    logError('JSON parse failed', logContext, error);
     return {
       success: false,
       response: badRequestResponse('Invalid JSON body', cors),

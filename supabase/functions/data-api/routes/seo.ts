@@ -14,6 +14,7 @@ import {
 import { sanitizeRoute } from '../../_shared/utils/input-validation.ts';
 import { serializeJsonLd } from '../../_shared/utils/jsonld.ts';
 import type { BaseLogContext } from '../../_shared/utils/logging.ts';
+import { logInfo, logWarn } from '../../_shared/utils/logging.ts';
 import { buildSecurityHeaders } from '../../_shared/utils/security-headers.ts';
 
 const CORS = getOnlyCorsHeaders;
@@ -74,11 +75,10 @@ export async function handleSeoRoute(
         ...typedData,
         schemas: serializedSchemas,
       };
-    } catch (error) {
-      console.warn('[data-api] JSON-LD serialization failed, using original schemas', {
-        ...(logContext || {}),
-        error: error instanceof Error ? error.message : String(error),
-      });
+    } catch {
+      if (logContext) {
+        logWarn('JSON-LD serialization failed, using original schemas', logContext);
+      }
       // Fallback: use original schemas (edge function will still escape in JSON.stringify)
       processedData = typedData;
     }
@@ -86,14 +86,16 @@ export async function handleSeoRoute(
 
   const responseBody = JSON.stringify(processedData);
 
-  console.log('[data-api] SEO generated', {
-    ...(logContext || {}),
-    route,
-    include,
-    bytes: responseBody.length,
-    schemasSerialized:
-      'schemas' in typedData && Array.isArray(typedData.schemas) && typedData.schemas.length > 0,
-  });
+  if (logContext) {
+    logInfo('SEO generated', {
+      ...logContext,
+      route,
+      include,
+      bytes: responseBody.length,
+      schemasSerialized:
+        'schemas' in typedData && Array.isArray(typedData.schemas) && typedData.schemas.length > 0,
+    });
+  }
 
   return new Response(responseBody, {
     status: 200,

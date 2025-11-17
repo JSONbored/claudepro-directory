@@ -9,18 +9,24 @@
  *     - entities: Comma-separated list (content,company,job,user) - triggers federated search
  *     - categories/tags/authors: Content-only filters
  *     - sort: Content-only sorting (relevance, popularity, newest, alphabetical)
+ *     - job_category/job_employment/job_experience/job_remote: Job filters (triggers filter_jobs RPC)
  *     - limit/offset: Pagination
  * - GET /unified-search/autocomplete - Smart autocomplete from search history + content titles
  * - GET /unified-search/facets - Available filters (categories, tags, authors)
  *
  * Search Routing:
+ * - With job filters (job_category, job_employment, job_experience, job_remote) → filter_jobs() RPC (with highlighting)
  * - With entities param → search_unified() RPC (federated multi-entity search)
  * - Without entities param → search_content_optimized() RPC (content-only with advanced filters)
  */
 
 import type { Database as DatabaseGenerated } from '../_shared/database.types.ts';
-import type { Database, RpcReturns } from '../_shared/database-overrides.ts';
+import type { Database, GetFilterJobsReturn, RpcReturns } from '../_shared/database-overrides.ts';
 import { callRpc } from '../_shared/database-overrides.ts';
+// Static imports to ensure circuit-breaker and timeout utilities are included in the bundle
+// These are lazily imported in callRpc, but we need static imports for Supabase bundling
+import '../_shared/utils/circuit-breaker.ts';
+import '../_shared/utils/timeout.ts';
 import { enqueueSearchAnalytics } from '../_shared/utils/analytics/pulse.ts';
 import {
   badRequestResponse,
@@ -66,6 +72,11 @@ interface SearchResponse {
     authors?: string[];
     sort?: string;
     entities?: string[];
+    // Job filters
+    job_category?: string;
+    job_employment?: string;
+    job_experience?: string;
+    job_remote?: boolean;
   };
   pagination: {
     total: number;
@@ -207,6 +218,13 @@ async function handleSearch(url: URL, startTime: number, req: Request): Promise<
   const entities = url.searchParams.get('entities')?.split(',').filter(Boolean);
   const sort = url.searchParams.get('sort') || 'relevance';
 
+  // Parse job filter parameters
+  const jobCategory = url.searchParams.get('job_category') || undefined;
+  const jobEmployment = url.searchParams.get('job_employment') || undefined;
+  const jobExperience = url.searchParams.get('job_experience') || undefined;
+  const jobRemote = url.searchParams.get('job_remote');
+  const isJobRemote = jobRemote === 'true' ? true : jobRemote === 'false' ? false : undefined;
+
   // Validate limit parameter
   const limitValidation = validateLimit(url.searchParams.get('limit'), 1, 100, 20);
   if (!limitValidation.valid || limitValidation.limit === undefined) {
@@ -224,14 +242,38 @@ async function handleSearch(url: URL, startTime: number, req: Request): Promise<
     return badRequestResponse('Invalid offset parameter', getWithAuthCorsHeaders);
   }
 
-  // Determine search type based on entities parameter
-  const searchType: 'content' | 'unified' = entities ? 'unified' : 'content';
+  // Detect if job filters are present (triggers filter_jobs RPC)
+  const hasJobFilters =
+    jobCategory !== undefined ||
+    jobEmployment !== undefined ||
+    jobExperience !== undefined ||
+    isJobRemote !== undefined;
+
+  // Determine search type based on entities parameter and job filters
+  // If job filters are present, use filter_jobs RPC (even if entities includes 'job')
+  const searchType: 'content' | 'unified' | 'jobs' = hasJobFilters
+    ? 'jobs'
+    : entities
+      ? 'unified'
+      : 'content';
 
   // Create logContext
   const logContext = createSearchContext({
     query,
     searchType,
-    filters: { categories, tags, authors, entities, sort },
+    filters: {
+      categories,
+      tags,
+      authors,
+      entities,
+      sort,
+      ...(hasJobFilters && {
+        job_category: jobCategory,
+        job_employment: jobEmployment,
+        job_experience: jobExperience,
+        job_remote: isJobRemote,
+      }),
+    },
   });
 
   // Validate entities if provided
@@ -255,11 +297,49 @@ async function handleSearch(url: URL, startTime: number, req: Request): Promise<
   }
 
   const dbStartTime = performance.now();
-  let data: ContentSearchResult[] | UnifiedSearchResult[];
+  let data:
+    | ContentSearchResult[]
+    | UnifiedSearchResult[]
+    | DatabaseGenerated['public']['Tables']['jobs']['Row'][];
+  let totalCount: number | undefined;
   let error: unknown;
 
   // Route to appropriate RPC based on search type
-  if (searchType === 'unified') {
+  if (searchType === 'jobs') {
+    // Job filters present → use filter_jobs RPC
+    const rpcArgs = {
+      ...(query ? { p_query: query } : {}),
+      ...(jobCategory && jobCategory !== 'all' ? { p_category: jobCategory } : {}),
+      ...(jobEmployment && jobEmployment !== 'any' ? { p_employment_type: jobEmployment } : {}),
+      ...(jobExperience && jobExperience !== 'any' ? { p_experience_level: jobExperience } : {}),
+      ...(isJobRemote !== undefined ? { p_remote_only: isJobRemote } : {}),
+      p_limit: limit,
+      p_offset: offset,
+    } satisfies Database['public']['Functions']['filter_jobs']['Args'];
+    const { data: filterJobsData, error: filterJobsError } = await callRpc(
+      'filter_jobs',
+      rpcArgs,
+      true
+    );
+
+    if (filterJobsError) {
+      error = filterJobsError;
+      data = [];
+    } else if (filterJobsData) {
+      // filter_jobs returns { jobs: [...], total_count: number }
+      const filterJobsResult = filterJobsData as GetFilterJobsReturn;
+      if (filterJobsResult) {
+        data = filterJobsResult.jobs || [];
+        totalCount = filterJobsResult.total_count;
+      } else {
+        data = [];
+        totalCount = 0;
+      }
+    } else {
+      data = [];
+      totalCount = 0;
+    }
+  } else if (searchType === 'unified') {
     const rpcArgs = {
       p_query: query,
       p_entities: entities || ['content', 'company', 'job', 'user'],
@@ -300,11 +380,13 @@ async function handleSearch(url: URL, startTime: number, req: Request): Promise<
       searchType,
       error: error instanceof Error ? error.message : String(error),
     });
-    return errorResponse(
-      error,
-      searchType === 'unified' ? 'search_unified' : 'search_content_optimized',
-      getWithAuthCorsHeaders
-    );
+    const rpcName =
+      searchType === 'jobs'
+        ? 'filter_jobs'
+        : searchType === 'unified'
+          ? 'search_unified'
+          : 'search_content_optimized';
+    return errorResponse(error, rpcName, getWithAuthCorsHeaders);
   }
 
   const results = data;
@@ -314,16 +396,21 @@ async function handleSearch(url: URL, startTime: number, req: Request): Promise<
     ? results.map((result) => {
         const highlighted: HighlightedSearchResult = { ...result };
 
+        // For jobs, result is a Tables<'jobs'> row with title/description fields
+        // For content/unified, result has title/description fields
+        const title = 'title' in result ? result.title : null;
+        const description = 'description' in result ? result.description : null;
+
         // Highlight title
-        if (result.title) {
-          highlighted.title_highlighted = highlightSearchTerms(result.title, query, {
+        if (title && typeof title === 'string') {
+          highlighted.title_highlighted = highlightSearchTerms(title, query, {
             wholeWordsOnly: true,
           });
         }
 
         // Highlight description
-        if (result.description) {
-          highlighted.description_highlighted = highlightSearchTerms(result.description, query, {
+        if (description && typeof description === 'string') {
+          highlighted.description_highlighted = highlightSearchTerms(description, query, {
             wholeWordsOnly: true,
           });
         }
@@ -335,11 +422,20 @@ async function handleSearch(url: URL, startTime: number, req: Request): Promise<
           });
         }
 
-        // Highlight tags
-        if (result.tags && Array.isArray(result.tags) && result.tags.length > 0) {
-          highlighted.tags_highlighted = highlightSearchTermsArray(result.tags, query, {
-            wholeWordsOnly: false, // Allow partial matches in tags
-          });
+        // Highlight tags (content search only - jobs don't have tags)
+        if ('tags' in result && result.tags) {
+          const tags = result.tags;
+          if (Array.isArray(tags) && tags.length > 0) {
+            // Type guard: ensure all tags are strings
+            const stringTags = tags.filter(
+              (tag): tag is string => typeof tag === 'string'
+            ) as string[];
+            if (stringTags.length > 0) {
+              highlighted.tags_highlighted = highlightSearchTermsArray(stringTags, query, {
+                wholeWordsOnly: false, // Allow partial matches in tags
+              });
+            }
+          }
         }
 
         return highlighted;
@@ -355,6 +451,13 @@ async function handleSearch(url: URL, startTime: number, req: Request): Promise<
       authors,
       sort,
       entities,
+      ...(hasJobFilters && {
+        job_category: jobCategory,
+        job_employment: jobEmployment,
+        job_experience: jobExperience,
+        job_remote: isJobRemote,
+        entity: 'job',
+      }),
     },
     results.length,
     req.headers.get('Authorization')
@@ -384,18 +487,25 @@ async function handleSearch(url: URL, startTime: number, req: Request): Promise<
       ...(authors && { authors }),
       ...(entities && { entities }),
       sort,
+      ...(hasJobFilters && {
+        job_category: jobCategory,
+        job_employment: jobEmployment,
+        job_experience: jobExperience,
+        job_remote: isJobRemote,
+      }),
     },
     pagination: {
-      total: results.length,
+      total: totalCount !== undefined ? totalCount : results.length,
       limit,
       offset,
-      hasMore: results.length === limit,
+      hasMore:
+        totalCount !== undefined ? offset + results.length < totalCount : results.length === limit,
     },
     performance: {
       dbTime: Math.round(dbEndTime - dbStartTime),
       totalTime: Math.round(totalTime),
     },
-    searchType,
+    searchType: searchType === 'jobs' ? 'unified' : searchType, // Keep response type compatible
   };
 
   return new Response(JSON.stringify(response), {

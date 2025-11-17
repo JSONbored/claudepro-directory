@@ -128,6 +128,7 @@ function mapTrendingMetrics(
   rows: GetTrendingMetricsWithContentReturn,
   category: ContentCategory | null
 ): DisplayableContent[] {
+  if (!rows || rows.length === 0) return [];
   return rows.map((row: GetTrendingMetricsWithContentReturn[number], index: number) => {
     const resolvedCategory = row.category ?? category ?? DEFAULT_CATEGORY;
     const validCategory = isValidCategory(resolvedCategory) ? resolvedCategory : DEFAULT_CATEGORY;
@@ -139,9 +140,9 @@ function mapTrendingMetrics(
       author: row.author,
       tags: row.tags,
       source: row.source ?? 'trending',
-      viewCount: row.views_total,
-      copyCount: row.copies_total,
-      featuredScore: row.trending_score ?? row.freshness_score ?? row.engagement_score,
+      viewCount: row.views_total ?? 0,
+      copyCount: row.copies_total ?? 0,
+      featuredScore: row.trending_score ?? row.engagement_score ?? row.freshness_score ?? 0,
       featuredRank: index + 1,
     });
   });

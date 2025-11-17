@@ -82,8 +82,11 @@ function loadCache(): BuildCache {
     }
 
     return cache;
-  } catch (_error) {
-    logger.warn('⚠️  Cache corrupted, resetting', { script: 'build-cache' });
+  } catch (error) {
+    logger.warn('⚠️  Cache corrupted, resetting', {
+      script: 'build-cache',
+      error: error instanceof Error ? error.message : String(error),
+    });
     return {
       version: CACHE_VERSION,
       lastUpdated: new Date().toISOString(),

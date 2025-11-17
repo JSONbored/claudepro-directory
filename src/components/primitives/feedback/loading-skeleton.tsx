@@ -90,7 +90,7 @@ function Skeleton({
       {/* Shimmer wave effect - only if not disabled */}
       {!noShimmer && (
         <motion.div
-          className={`${POSITION_PATTERNS.ABSOLUTE_INSET} bg-gradient-to-r from-transparent via-white/10 to-transparent`}
+          className={`${POSITION_PATTERNS.ABSOLUTE_INSET} bg-linear-to-r from-transparent via-white/10 to-transparent`}
           animate={{
             x: ['-100%', '100%'],
           }}

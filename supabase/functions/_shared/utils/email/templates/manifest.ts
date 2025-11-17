@@ -37,13 +37,14 @@ import {
   type OnboardingStayEngagedProps,
   renderOnboardingStayEngagedEmail,
 } from './onboarding-stay-engaged.tsx';
+import { renderSignupOAuthEmail, type SignupOAuthProps } from './signup-oauth.tsx';
 import { renderWeeklyDigestEmail, type WeeklyDigestProps } from './weekly-digest.tsx';
 
-const JOBS_FROM = 'Claude Pro Directory <jobs@mail.claudepro.directory>';
-const COMMUNITY_FROM = 'Claude Pro Directory <community@mail.claudepro.directory>';
-const HELLO_FROM = 'Claude Pro Directory <hello@mail.claudepro.directory>';
-const ONBOARDING_FROM = 'Claude Pro Directory <noreply@claudepro.directory>';
-const CONTACT_FROM = 'Claude Pro Directory <contact@mail.claudepro.directory>';
+export const JOBS_FROM = 'Claude Pro Directory <jobs@mail.claudepro.directory>';
+export const COMMUNITY_FROM = 'Claude Pro Directory <community@mail.claudepro.directory>';
+export const HELLO_FROM = 'Claude Pro Directory <hello@mail.claudepro.directory>';
+export const ONBOARDING_FROM = 'Claude Pro Directory <noreply@claudepro.directory>';
+export const CONTACT_FROM = 'Claude Pro Directory <contact@mail.claudepro.directory>';
 
 export type EmailTemplateSlug =
   | 'job-submitted'
@@ -55,6 +56,7 @@ export type EmailTemplateSlug =
   | 'job-posted'
   | 'collection-shared'
   | 'newsletter-welcome'
+  | 'signup-oauth'
   | 'onboarding-getting-started'
   | 'onboarding-power-tips'
   | 'onboarding-community'
@@ -261,6 +263,21 @@ export const EMAIL_TEMPLATE_MANIFEST: EmailTemplateDefinition<unknown>[] = [
     }),
     render: (props: unknown) => {
       return renderNewsletterWelcomeEmail(props as NewsletterWelcomeProps);
+    },
+  },
+  {
+    slug: 'signup-oauth',
+    displayName: 'OAuth Sign-Up',
+    description: 'Welcome email sent when a user signs up via OAuth (Google, GitHub, Discord).',
+    category: 'onboarding',
+    from: HELLO_FROM,
+    buildSubject: () => 'Welcome to Claude Pro Directory! 🎉',
+    buildSampleData: (): SignupOAuthProps => ({
+      email: 'user@example.com',
+      provider: 'google',
+    }),
+    render: (props: unknown) => {
+      return renderSignupOAuthEmail(props as SignupOAuthProps);
     },
   },
   {

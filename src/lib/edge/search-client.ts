@@ -26,6 +26,12 @@ export interface UnifiedSearchFilters {
   authors?: string[];
   sort?: 'relevance' | 'popularity' | 'newest' | 'alphabetical';
 
+  // Job filters
+  job_category?: string;
+  job_employment?: string;
+  job_experience?: string;
+  job_remote?: boolean;
+
   // Pagination
   limit?: number;
   offset?: number;
@@ -46,6 +52,11 @@ export interface UnifiedSearchResponse<T> {
     authors?: string[];
     entities?: string[];
     sort?: string;
+    // Job filters
+    job_category?: string;
+    job_employment?: string;
+    job_experience?: string;
+    job_remote?: boolean;
   };
   pagination: {
     total: number;
@@ -102,6 +113,20 @@ export async function searchUnified<T = ContentSearchResult | UnifiedSearchResul
   }
   if (filters.sort) {
     params.set('sort', filters.sort);
+  }
+
+  // Add job filters (triggers filter_jobs RPC in edge function)
+  if (filters.job_category) {
+    params.set('job_category', filters.job_category);
+  }
+  if (filters.job_employment) {
+    params.set('job_employment', filters.job_employment);
+  }
+  if (filters.job_experience) {
+    params.set('job_experience', filters.job_experience);
+  }
+  if (filters.job_remote !== undefined) {
+    params.set('job_remote', String(filters.job_remote));
   }
 
   // Pagination
@@ -238,6 +263,20 @@ export async function searchUnifiedClient<T = ContentSearchResult | UnifiedSearc
   }
   if (filters.sort) {
     params.set('sort', filters.sort);
+  }
+
+  // Add job filters (triggers filter_jobs RPC in edge function)
+  if (filters.job_category) {
+    params.set('job_category', filters.job_category);
+  }
+  if (filters.job_employment) {
+    params.set('job_employment', filters.job_employment);
+  }
+  if (filters.job_experience) {
+    params.set('job_experience', filters.job_experience);
+  }
+  if (filters.job_remote !== undefined) {
+    params.set('job_remote', String(filters.job_remote));
   }
 
   // Pagination

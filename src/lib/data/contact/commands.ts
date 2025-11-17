@@ -5,7 +5,7 @@ import type { GetGetContactCommandsReturn } from '@/src/types/database-overrides
 
 export async function fetchContactCommands(): Promise<GetGetContactCommandsReturn | null> {
   return fetchCachedRpc<'get_contact_commands', GetGetContactCommandsReturn | null>(
-    undefined as never,
+    {},
     {
       rpcName: 'get_contact_commands',
       tags: ['contact'],

@@ -7,6 +7,7 @@
  * Performance: Eliminated from client bundle, server-rendered for instant display
  */
 
+import he from 'he';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { getSocialLinks } from '@/src/lib/data/marketing/contact';
 import { Calendar, Copy, Eye, Tag, User } from '@/src/lib/icons';
@@ -34,8 +35,16 @@ const SOCIAL_LINK_SNAPSHOT = getSocialLinks();
 
 /**
  * Validate that author profile URL is safe for use in href
- * Only allows relative paths or absolute URLs with https:// protocol
+ * Only allows relative paths or absolute URLs with https:// protocol to allowlisted domains
  */
+const ALLOWED_AUTHOR_PROFILE_DOMAINS = [
+  'github.com',
+  'twitter.com',
+  'linkedin.com',
+  'x.com',
+  // Add your actual domain(s) here if needed
+] as const;
+
 function isSafeAuthorProfileUrl(url: string | undefined | null): boolean {
   if (!url || typeof url !== 'string') return false;
   try {
@@ -43,9 +52,16 @@ function isSafeAuthorProfileUrl(url: string | undefined | null): boolean {
     if (/^(javascript|data|vbscript):/i.test(url.trim())) return false;
     // Allow relative paths
     if (url.startsWith('/')) return true;
-    // Allow absolute HTTPS URLs
+    // Allow absolute HTTPS URLs ONLY to allowed domains
     const parsed = new URL(url);
-    return parsed.protocol === 'https:';
+    if (parsed.protocol !== 'https:') return false;
+    if (
+      !ALLOWED_AUTHOR_PROFILE_DOMAINS.includes(
+        parsed.hostname as (typeof ALLOWED_AUTHOR_PROFILE_DOMAINS)[number]
+      )
+    )
+      return false;
+    return true;
   } catch {
     return false;
   }
@@ -72,10 +88,11 @@ export function DetailMetadata({ item, viewCount, copyCount }: DetailMetadataPro
               <User className={UI_CLASSES.ICON_SM} />
               <a
                 href={
-                  ('author_profile_url' in item &&
-                    isSafeAuthorProfileUrl(item.author_profile_url) &&
-                    item.author_profile_url) ||
-                  SOCIAL_LINK_SNAPSHOT.authorProfile
+                  'author_profile_url' in item &&
+                  isSafeAuthorProfileUrl(item.author_profile_url) &&
+                  item.author_profile_url
+                    ? he.encode(item.author_profile_url, { useNamedReferences: true })
+                    : SOCIAL_LINK_SNAPSHOT.authorProfile
                 }
                 target="_blank"
                 rel="noopener noreferrer"

@@ -29,7 +29,12 @@ export const getNewsletterCountAction = rateLimitedAction
  */
 const subscribeViaOAuthSchema = z.object({
   email: z.string().email('Invalid email address'),
-  metadata: z.record(z.string(), z.unknown()).optional(),
+  metadata: z
+    .object({
+      referrer: z.string().url().optional(),
+      trigger_source: z.enum(['auth_callback']).optional(),
+    })
+    .optional(),
 });
 
 export const subscribeViaOAuthAction = rateLimitedAction

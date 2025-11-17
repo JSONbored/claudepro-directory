@@ -12,6 +12,7 @@ import {
 } from '../../_shared/utils/http.ts';
 import { fetchWithRetry } from '../../_shared/utils/integrations/http-client.ts';
 import type { BaseLogContext } from '../../_shared/utils/logging.ts';
+import { logError, logInfo } from '../../_shared/utils/logging.ts';
 import { buildSecurityHeaders } from '../../_shared/utils/security-headers.ts';
 import { TIMEOUT_PRESETS, withTimeout } from '../../_shared/utils/timeout.ts';
 
@@ -194,11 +195,13 @@ async function handleSitemapIndexNow(req: Request, logContext?: BaseLogContext):
       );
     }
 
-    console.log('[data-api] IndexNow submitted', {
-      ...(logContext || {}),
-      submitted: urlList.length,
-      status: finalResponse.status,
-    });
+    if (logContext) {
+      logInfo('IndexNow submitted', {
+        ...logContext,
+        submitted: urlList.length,
+        status: finalResponse.status,
+      });
+    }
 
     return jsonResponse(
       {
@@ -210,11 +213,16 @@ async function handleSitemapIndexNow(req: Request, logContext?: BaseLogContext):
     );
   } catch (error) {
     // Log error but return success to avoid blocking
-    console.error('[data-api] IndexNow submission failed', {
-      ...(logContext || {}),
-      error: error instanceof Error ? error.message : String(error),
-      submitted: urlList.length,
-    });
+    if (logContext) {
+      logError(
+        'IndexNow submission failed',
+        {
+          ...logContext,
+          submitted: urlList.length,
+        },
+        error
+      );
+    }
 
     // Return success even if IndexNow fails (non-blocking)
     return jsonResponse(

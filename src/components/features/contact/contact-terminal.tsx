@@ -54,6 +54,7 @@ import type {
   ConfettiVariant,
   ContactActionType,
   ContactCategory,
+  GetGetContactCommandsReturn,
 } from '@/src/types/database-overrides';
 
 type ContactCommand = {
@@ -115,8 +116,23 @@ export function ContactTerminal() {
     try {
       setIsLoading(true);
       const result = await getContactCommands({});
-      if (result?.data && Array.isArray(result.data.commands)) {
-        setCommands(result.data.commands as ContactCommand[]);
+      if (result?.data?.commands && Array.isArray(result.data.commands)) {
+        // Transform RPC return to ContactCommand format
+        const transformedCommands: ContactCommand[] = result.data.commands.map(
+          (cmd: GetGetContactCommandsReturn['commands'][number]) => ({
+            id: cmd.id,
+            text: cmd.text,
+            iconName: cmd.iconName ?? null,
+            actionType: cmd.actionType,
+            actionValue: cmd.actionValue,
+            confettiVariant: cmd.confettiVariant ?? null,
+            requiresAuth: cmd.requiresAuth,
+            aliases: cmd.aliases,
+            category: cmd.category,
+            description: cmd.description ?? null,
+          })
+        );
+        setCommands(transformedCommands);
         if (result.data.commands.length === 0) {
           setLoadError('No commands available');
           addOutput('error', 'No commands available');

@@ -163,6 +163,9 @@ export function ProductionCodeBlock({
   const pathParts = pathname?.split('/').filter(Boolean) || [];
   const rawCategory = pathParts[0] || 'unknown';
   const category: ContentCategory = isValidCategory(rawCategory) ? rawCategory : 'agents';
+  if (!isValidCategory(rawCategory)) {
+    logger.warn('Invalid category in pathname', { rawCategory, pathname });
+  }
   const slug = pathParts[1] || 'unknown';
 
   // Calculate current URL for sharing (needed during render for react-share components)

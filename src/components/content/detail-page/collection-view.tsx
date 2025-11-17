@@ -64,8 +64,9 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
   const categoryConfigs = await getCategoryConfigs();
 
   const metadata = getMetadata(collection);
-  const items =
-    (metadata.items as Array<{ category: string; slug: string; reason?: string }>) || [];
+  const items = Array.isArray(metadata.items)
+    ? (metadata.items as Array<{ category: string; slug: string; reason?: string }>)
+    : [];
 
   const itemsWithContent = await Promise.all(
     items.map(async (itemRef): Promise<ItemWithData | null> => {

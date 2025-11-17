@@ -4,10 +4,12 @@
  */
 
 import type { Resend } from 'npm:resend@4.0.0';
-
+import { RESEND_ENV } from '../../config/email-config.ts';
 import type { NewsletterSource } from '../../database-overrides.ts';
 
-import { createUtilityContext } from '../logging.ts';
+import type { BaseLogContext } from '../logging.ts';
+import { createUtilityContext, logError, logInfo, logWarn } from '../logging.ts';
+import { TIMEOUT_PRESETS, withTimeout } from '../timeout.ts';
 import { runWithRetry } from './http-client.ts';
 
 /**
@@ -223,10 +225,7 @@ export async function syncContactSegment(
     }
   } catch (error) {
     const logContext = createUtilityContext('resend', 'sync-contact-segment', { contactId });
-    console.error('[Resend] Segment sync failed', {
-      ...logContext,
-      error: error instanceof Error ? error.message : String(error),
-    });
+    logError('Segment sync failed', logContext, error);
   }
 }
 
@@ -309,7 +308,7 @@ export async function updateContactEngagement(
 
     if (!contact?.data) {
       const logContext = createUtilityContext('resend', 'update-contact-engagement', { email });
-      console.warn('[Resend] contact not found', logContext);
+      logWarn('contact not found', logContext);
       return;
     }
 
@@ -334,10 +333,7 @@ export async function updateContactEngagement(
     }
   } catch (error) {
     const logContext = createUtilityContext('resend', 'update-contact-engagement', { email });
-    console.error('[Resend] failed to update contact', {
-      ...logContext,
-      error: error instanceof Error ? error.message : String(error),
-    });
+    logError('failed to update contact', logContext, error);
   }
 }
 
@@ -361,4 +357,193 @@ async function listSegmentsWithRetry(resend: Resend, contactId: string): Promise
   return (
     (data as { data?: Array<{ id: string }> } | null)?.data?.map((segment) => segment.id) ?? []
   );
+}
+
+/**
+ * Send email via Resend with timeout and logging
+ * Centralized email sending utility for consistent error handling and logging
+ */
+export async function sendEmail(
+  resend: Resend,
+  options: {
+    to: string;
+    subject: string;
+    html: string;
+    from: string;
+    tags?: Array<{ name: string; value: string }>;
+    replyTo?: string;
+  },
+  logContext: BaseLogContext,
+  timeoutMessage = 'Resend email send timed out'
+): Promise<{ data: { id: string } | null; error: { message: string } | null }> {
+  const { data, error } = (await withTimeout(
+    resend.emails.send({
+      from: options.from,
+      to: options.to,
+      subject: options.subject,
+      html: options.html,
+      ...(options.tags && { tags: options.tags }),
+      ...(options.replyTo && { replyTo: options.replyTo }),
+    }),
+    TIMEOUT_PRESETS.external,
+    timeoutMessage
+  )) as { data: { id: string } | null; error: { message: string } | null };
+
+  if (error) {
+    logError('Email send failed', logContext, error);
+  }
+
+  return { data, error };
+}
+
+/**
+ * Sync contact to Resend: create contact, assign topics, assign segment
+ * Returns sync status and contact ID for database storage
+ */
+export async function syncContactToResend(
+  resend: Resend,
+  email: string,
+  contactProperties: Record<string, unknown>,
+  validatedSource: NewsletterSource | null,
+  copy_category: string | null | undefined,
+  logContext: BaseLogContext
+): Promise<{
+  resendContactId: string | null;
+  syncStatus: 'synced' | 'failed' | 'skipped';
+  syncError: string | null;
+  topicIds: string[];
+}> {
+  let resendContactId: string | null = null;
+  let syncStatus: 'synced' | 'failed' | 'skipped' = 'synced';
+  let syncError: string | null = null;
+  let topicIds: string[] = [];
+
+  try {
+    logInfo('Creating Resend contact', {
+      ...logContext,
+      contact_properties: contactProperties,
+    });
+
+    // Create contact with properties
+    type ResendContactsCreateApi = {
+      create: (args: {
+        audienceId: string;
+        email: string;
+        unsubscribed?: boolean;
+        properties?: Record<string, unknown>;
+      }) => Promise<{ data: { id: string } | null; error: { message?: string } | null }>;
+    };
+    const contactsApi = resend.contacts as unknown as ResendContactsCreateApi;
+    const { data: contact, error: resendError } = await withTimeout(
+      contactsApi.create({
+        audienceId: RESEND_ENV.audienceId,
+        email,
+        unsubscribed: false,
+        properties: contactProperties,
+      }),
+      TIMEOUT_PRESETS.external,
+      'Resend contact creation timed out'
+    );
+
+    if (resendError) {
+      if (
+        resendError.message?.includes('already exists') ||
+        resendError.message?.includes('duplicate')
+      ) {
+        logInfo('Email already in Resend, skipping contact creation', {
+          ...logContext,
+          sync_status: 'skipped',
+        });
+        syncStatus = 'skipped';
+        syncError = 'Email already in audience';
+      } else {
+        logError(
+          'Resend contact creation failed',
+          { ...logContext, sync_status: 'failed' },
+          resendError
+        );
+        syncStatus = 'failed';
+        syncError = resendError.message || 'Unknown Resend error';
+      }
+    } else if (contact?.id) {
+      resendContactId = contact.id;
+      logInfo('Contact created', { ...logContext, resend_contact_id: resendContactId });
+
+      // Assign topics based on signup context
+      try {
+        topicIds = inferInitialTopics(validatedSource, copy_category);
+        logInfo('Assigning topics', {
+          ...logContext,
+          topic_count: topicIds.length,
+          topic_ids: topicIds,
+        });
+
+        if (topicIds.length > 0) {
+          type ResendContactsTopicsApi = {
+            topics: {
+              update: (args: {
+                contactId: string;
+                topicIds: string[];
+              }) => Promise<{ data: unknown; error: { message?: string } | null }>;
+            };
+          };
+          const contactsWithTopics = resend.contacts as unknown as ResendContactsTopicsApi;
+          const { error: topicError } = await withTimeout(
+            contactsWithTopics.topics.update({
+              contactId: resendContactId,
+              topicIds,
+            }),
+            TIMEOUT_PRESETS.external,
+            'Resend topic assignment timed out'
+          );
+
+          if (topicError) {
+            logError('Failed to assign topics', logContext, topicError);
+          } else {
+            logInfo('Topics assigned successfully', logContext);
+          }
+        }
+      } catch (topicException) {
+        logError('Topic assignment exception', logContext, topicException);
+      }
+
+      // Assign to engagement segment
+      try {
+        const engagementScore = contactProperties.engagement_score as number;
+        await withTimeout(
+          syncContactSegment(resend, resendContactId, engagementScore),
+          TIMEOUT_PRESETS.external,
+          'Resend segment assignment timed out'
+        );
+        logInfo('Segment assigned successfully', logContext);
+      } catch (segmentException) {
+        logError('Segment assignment exception', logContext, segmentException);
+      }
+    }
+  } catch (resendException) {
+    logError('Unexpected Resend error', logContext, resendException);
+    syncStatus = 'failed';
+    syncError = resendException instanceof Error ? resendException.message : 'Unknown error';
+  }
+
+  return { resendContactId, syncStatus, syncError, topicIds };
+}
+
+/**
+ * Enroll email in onboarding sequence
+ * Helper function to avoid duplication
+ */
+export async function enrollInOnboardingSequence(
+  email: string,
+  logContext: BaseLogContext
+): Promise<void> {
+  try {
+    const { callRpc } = await import('../../database-overrides.ts');
+    const enrollArgs = {
+      p_email: email,
+    } satisfies Parameters<typeof callRpc<'enroll_in_email_sequence'>>[1];
+    await callRpc('enroll_in_email_sequence', enrollArgs);
+  } catch (sequenceError) {
+    logError('Sequence enrollment failed', logContext, sequenceError);
+  }
 }

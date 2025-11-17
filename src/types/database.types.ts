@@ -2343,7 +2343,7 @@ export type Database = {
           css_classes: string
           display_order: number
           label: string
-          tier: Database["public"]["Enums"]["user_tier"] | null
+          tier: Database["public"]["Enums"]["user_tier"]
           updated_at: string
         }
         Insert: {
@@ -2352,7 +2352,7 @@ export type Database = {
           css_classes: string
           display_order: number
           label: string
-          tier?: Database["public"]["Enums"]["user_tier"] | null
+          tier: Database["public"]["Enums"]["user_tier"]
           updated_at?: string
         }
         Update: {
@@ -2361,7 +2361,7 @@ export type Database = {
           css_classes?: string
           display_order?: number
           label?: string
-          tier?: Database["public"]["Enums"]["user_tier"] | null
+          tier?: Database["public"]["Enums"]["user_tier"]
           updated_at?: string
         }
         Relationships: []
@@ -2982,6 +2982,15 @@ export type Database = {
           merged_this_week: number | null
           pending: number | null
           total: number | null
+        }
+        Relationships: []
+      }
+      trending_searches: {
+        Row: {
+          last_searched: string | null
+          search_count: number | null
+          search_query: string | null
+          unique_users: number | null
         }
         Relationships: []
       }
@@ -4003,6 +4012,14 @@ export type Database = {
           views_total: number
         }[]
       }
+      get_trending_searches: {
+        Args: { limit_count?: number }
+        Returns: {
+          count: number
+          label: string
+          query: string
+        }[]
+      }
       get_user_activity_summary: { Args: { p_user_id: string }; Returns: Json }
       get_user_activity_timeline: {
         Args: {
@@ -4243,12 +4260,7 @@ export type Database = {
         }[]
       }
       refresh_mv_site_urls: { Args: never; Returns: undefined }
-      refresh_mv_unified_search_concurrently: {
-        Args: never
-        Returns: undefined
-      }
       refresh_profile_from_oauth: { Args: { user_id: string }; Returns: Json }
-      refresh_unified_search_mv: { Args: never; Returns: undefined }
       refresh_user_stats: {
         Args: never
         Returns: {
@@ -4430,6 +4442,7 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      search_mv: { Args: never; Returns: undefined }
       search_unified: {
         Args: {
           p_entities?: string[]
@@ -4653,6 +4666,12 @@ export type Database = {
         | "newsletter_subscribe"
         | "contact_interact"
         | "contact_submit"
+        | "form_started"
+        | "form_step_completed"
+        | "form_field_focused"
+        | "form_template_selected"
+        | "form_abandoned"
+        | "form_submitted"
       job_status:
         | "draft"
         | "pending_payment"
@@ -4923,6 +4942,12 @@ export const Constants = {
         "newsletter_subscribe",
         "contact_interact",
         "contact_submit",
+        "form_started",
+        "form_step_completed",
+        "form_field_focused",
+        "form_template_selected",
+        "form_abandoned",
+        "form_submitted",
       ],
       job_status: [
         "draft",

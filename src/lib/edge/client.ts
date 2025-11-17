@@ -88,7 +88,13 @@ export async function callEdgeFunction<T = unknown>(
 }
 
 export async function trackInteraction(params: TrackInteractionParams): Promise<void> {
-  const result = await trackInteractionAction(params);
+  const result = await trackInteractionAction({
+    interaction_type: params.interaction_type,
+    content_type: params.content_type ?? null,
+    content_slug: params.content_slug ?? null,
+    session_id: params.session_id ?? null,
+    metadata: params.metadata ?? null,
+  });
   if (result?.serverError) {
     logger.warn('trackInteraction failed', { error: result.serverError });
   }

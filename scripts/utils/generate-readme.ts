@@ -21,6 +21,9 @@ async function main() {
       throw new Error('Missing NEXT_PUBLIC_SUPABASE_URL environment variable');
     }
 
+    // NOTE: Verify endpoint is deployed and returns HTTP 200 before using in production
+    // Expected: /functions/v1/data-api/content/sitewide?format=readme
+    // Should return: text/markdown content with HTTP 200
     const edgeFunctionUrl = `${supabaseUrl}/functions/v1/data-api/content/sitewide?format=readme`;
 
     logger.info('📝 Generating README.md from edge function...\n', { script: 'generate-readme' });

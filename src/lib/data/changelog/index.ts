@@ -174,9 +174,33 @@ export async function getChangelog(): Promise<{
 }
 
 /**
+ * Transform changelog entry to ensure contributors and keywords are arrays (never null)
+ */
+function normalizeChangelogEntry(entry: Tables<'changelog'>): Omit<
+  Tables<'changelog'>,
+  'contributors' | 'keywords'
+> & {
+  contributors: string[];
+  keywords: string[];
+} {
+  return {
+    ...entry,
+    contributors: Array.isArray(entry.contributors) ? entry.contributors : [],
+    keywords: Array.isArray(entry.keywords) ? entry.keywords : [],
+  };
+}
+
+/**
  * Get all changelog entries (for static generation)
  */
-export async function getAllChangelogEntries(): Promise<Tables<'changelog'>[]> {
+export async function getAllChangelogEntries(): Promise<
+  Array<
+    Omit<Tables<'changelog'>, 'contributors' | 'keywords'> & {
+      contributors: string[];
+      keywords: string[];
+    }
+  >
+> {
   const limit = 10000;
   const overview = await getChangelogOverview({
     publishedOnly: false,
@@ -184,28 +208,40 @@ export async function getAllChangelogEntries(): Promise<Tables<'changelog'>[]> {
     offset: 0,
   });
 
-  return overview.entries;
+  return overview.entries.map(normalizeChangelogEntry);
 }
 
 /**
  * Get recent changelog entries
  */
-export async function getRecentChangelogEntries(limit = 5): Promise<Tables<'changelog'>[]> {
+export async function getRecentChangelogEntries(limit = 5): Promise<
+  Array<
+    Omit<Tables<'changelog'>, 'contributors' | 'keywords'> & {
+      contributors: string[];
+      keywords: string[];
+    }
+  >
+> {
   const overview = await getChangelogOverview({
     publishedOnly: true,
     limit,
     offset: 0,
   });
 
-  return overview.entries;
+  return overview.entries.map(normalizeChangelogEntry);
 }
 
 /**
  * Get changelog entries by category
  */
-export async function getChangelogEntriesByCategory(
-  category: ChangelogCategory
-): Promise<Tables<'changelog'>[]> {
+export async function getChangelogEntriesByCategory(category: ChangelogCategory): Promise<
+  Array<
+    Omit<Tables<'changelog'>, 'contributors' | 'keywords'> & {
+      contributors: string[];
+      keywords: string[];
+    }
+  >
+> {
   const limit = 1000;
   const overview = await getChangelogOverview({
     category,
@@ -214,13 +250,20 @@ export async function getChangelogEntriesByCategory(
     offset: 0,
   });
 
-  return overview.entries;
+  return overview.entries.map(normalizeChangelogEntry);
 }
 
 /**
  * Get featured changelog entries
  */
-export async function getFeaturedChangelogEntries(limit = 3): Promise<Tables<'changelog'>[]> {
+export async function getFeaturedChangelogEntries(limit = 3): Promise<
+  Array<
+    Omit<Tables<'changelog'>, 'contributors' | 'keywords'> & {
+      contributors: string[];
+      keywords: string[];
+    }
+  >
+> {
   const overview = await getChangelogOverview({
     publishedOnly: true,
     featuredOnly: true,
@@ -228,7 +271,7 @@ export async function getFeaturedChangelogEntries(limit = 3): Promise<Tables<'ch
     offset: 0,
   });
 
-  return overview.featured;
+  return overview.featured.map(normalizeChangelogEntry);
 }
 
 /**

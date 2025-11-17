@@ -147,8 +147,7 @@ async function revalidateUserSurfaces({
 
 async function cachedUserData<
   T extends keyof Database['public']['Functions'],
-  ResultType extends
-    Database['public']['Functions'][T]['Returns'] = Database['public']['Functions'][T]['Returns'],
+  ResultType = Database['public']['Functions'][T]['Returns'],
 >(
   rpcName: T,
   args: Database['public']['Functions'][T]['Args'],

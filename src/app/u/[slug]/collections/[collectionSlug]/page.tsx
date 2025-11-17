@@ -159,42 +159,44 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
               </Card>
             ) : (
               <div className="grid gap-4">
-                {items.map((item: CollectionDetailData['items'][number], index: number) => (
-                  <Card key={item.id}>
-                    <CardHeader>
-                      <div className="flex items-start gap-4">
-                        <div className="w-8 font-bold text-2xl text-muted-foreground/50">
-                          {index + 1}
-                        </div>
-                        <div className="flex-1">
-                          <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                            <UnifiedBadge variant="base" style="outline" className="capitalize">
-                              {item.content_type}
-                            </UnifiedBadge>
-                            <CardTitle className="text-lg">{item.content_slug}</CardTitle>
+                {items?.map(
+                  (item: NonNullable<CollectionDetailData>['items'][number], index: number) => (
+                    <Card key={item.id}>
+                      <CardHeader>
+                        <div className="flex items-start gap-4">
+                          <div className="w-8 font-bold text-2xl text-muted-foreground/50">
+                            {index + 1}
                           </div>
-                          {item.notes && (
-                            <CardDescription className="mt-2">{item.notes}</CardDescription>
-                          )}
-                        </div>
-                        <Link
-                          href={`/${item.content_type}/${item.content_slug}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}
+                          <div className="flex-1">
+                            <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+                              <UnifiedBadge variant="base" style="outline" className="capitalize">
+                                {item.content_type}
+                              </UnifiedBadge>
+                              <CardTitle className="text-lg">{item.content_slug}</CardTitle>
+                            </div>
+                            {item.notes && (
+                              <CardDescription className="mt-2">{item.notes}</CardDescription>
+                            )}
+                          </div>
+                          <Link
+                            href={`/${item.content_type}/${item.content_slug}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
                           >
-                            <ExternalLink className="h-4 w-4" />
-                            View
-                          </Button>
-                        </Link>
-                      </div>
-                    </CardHeader>
-                  </Card>
-                ))}
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}
+                            >
+                              <ExternalLink className="h-4 w-4" />
+                              View
+                            </Button>
+                          </Link>
+                        </div>
+                      </CardHeader>
+                    </Card>
+                  )
+                )}
               </div>
             )}
           </div>

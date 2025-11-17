@@ -12,6 +12,7 @@ import {
 } from '../../_shared/utils/http.ts';
 import { MAX_BODY_SIZE } from '../../_shared/utils/input-validation.ts';
 import type { BaseLogContext } from '../../_shared/utils/logging.ts';
+import { logError } from '../../_shared/utils/logging.ts';
 import { parseJsonBody } from '../../_shared/utils/parse-json-body.ts';
 import { buildSecurityHeaders } from '../../_shared/utils/security-headers.ts';
 
@@ -104,10 +105,7 @@ export async function handleContentHighlight(
       }
     );
   } catch (error) {
-    console.error('[transform-api] Request parsing failed', {
-      ...logContext,
-      error: error instanceof Error ? error.message : String(error),
-    });
+    logError('Request parsing failed', logContext, error);
     return badRequestResponse(
       'Invalid request body. Expected JSON with code, language, and showLineNumbers.',
       CORS

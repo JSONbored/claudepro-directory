@@ -14,7 +14,7 @@ import { Sparkles } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { getContentItemUrl } from '@/src/lib/utils/content.utils';
-import type { ContentItem } from '@/src/types/database-overrides';
+import type { ContentItem, GetGetRelatedContentReturn } from '@/src/types/database-overrides';
 
 type RelatedContentItem = ContentItem & {
   score?: number;
@@ -103,8 +103,8 @@ export function RelatedContentClient({
           limit,
         });
 
-        const convertedItems = response.items.map(
-          (item): Partial<RelatedContentItem> => ({
+        const convertedItems = (response.items || []).map(
+          (item: GetGetRelatedContentReturn[number]): Partial<RelatedContentItem> => ({
             category: item.category,
             slug: item.slug,
             title: item.title,

@@ -12,6 +12,22 @@
  * Performance: Only the interactive buttons are client-side, rest is server-rendered
  */
 
+/**
+ * Sanitizes path segment to prevent SSRF/path traversal.
+ * Allows a-z, A-Z, 0-9, dash, underscore, dot, NO slash or backslash.
+ * Throws if invalid. Used to construct safe URLs.
+ */
+function sanitizePathSegment(segment: string): string {
+  // Only allow a-z, A-Z, 0-9, dash, underscore, dot.
+  // No slashes, no backslashes, no semicolon, no control chars.
+  // You may wish to restrict length (1-64).
+  const SAFE_SEGMENT_REGEX = /^[a-zA-Z0-9._-]{1,64}$/;
+  if (!SAFE_SEGMENT_REGEX.test(segment)) {
+    throw new Error(`Invalid path segment for SSRF-protected URL: ${segment}`);
+  }
+  return segment;
+}
+
 import { motion } from 'motion/react';
 import { useRouter } from 'next/navigation';
 import { ContentActionButton } from '@/src/components/core/buttons/shared/content-action-button';
@@ -241,7 +257,7 @@ export function DetailHeaderActions({
 
           {/* Copy for AI button */}
           <ContentActionButton
-            url={`/${category}/${item.slug}/llms.txt`}
+            url={`/${sanitizePathSegment(category)}/${sanitizePathSegment(item.slug)}/llms.txt`}
             action={async (content) => {
               await copyToClipboard(content);
             }}
@@ -258,7 +274,7 @@ export function DetailHeaderActions({
 
           {/* Copy as Markdown button */}
           <ContentActionButton
-            url={`/${category}/${item.slug}.md?include_metadata=true&include_footer=false`}
+            url={`/${sanitizePathSegment(category)}/${sanitizePathSegment(item.slug)}.md?include_metadata=true&include_footer=false`}
             action={async (content) => {
               await copyToClipboard(content);
               showModal({
@@ -281,7 +297,7 @@ export function DetailHeaderActions({
 
           {/* Download Markdown button */}
           <ContentActionButton
-            url={`/${category}/${item.slug}.md`}
+            url={`/${sanitizePathSegment(category)}/${sanitizePathSegment(item.slug)}.md`}
             action={async (content) => {
               const blob = new Blob([content], { type: 'text/markdown' });
               const url = URL.createObjectURL(blob);

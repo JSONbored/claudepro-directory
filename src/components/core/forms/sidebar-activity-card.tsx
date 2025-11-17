@@ -81,11 +81,7 @@ export function SidebarActivityCard({ recentMerged, tips, typeLabels }: SidebarA
                     )}
                   >
                     <CheckCircle
-                      className={cn(
-                        'mt-0.5 flex-shrink-0',
-                        UI_CLASSES.ICON_SM,
-                        UI_CLASSES.ICON_SUCCESS
-                      )}
+                      className={cn('mt-0.5 shrink-0', UI_CLASSES.ICON_SM, UI_CLASSES.ICON_SUCCESS)}
                     />
                     <div className="min-w-0 flex-1">
                       <p className={cn('truncate font-medium', UI_CLASSES.TEXT_SM)}>

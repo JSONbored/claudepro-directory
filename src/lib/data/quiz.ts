@@ -5,7 +5,7 @@ import type { GetGetQuizConfigurationReturn } from '@/src/types/database-overrid
 
 export async function fetchQuizConfiguration(): Promise<GetGetQuizConfigurationReturn | null> {
   return fetchCachedRpc<'get_quiz_configuration', GetGetQuizConfigurationReturn | null>(
-    {},
+    undefined as never,
     {
       rpcName: 'get_quiz_configuration',
       tags: ['quiz'],

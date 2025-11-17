@@ -51,12 +51,21 @@ function isSafeRepositoryUrl(url: string): boolean {
 
 /**
  * Validate documentation URL is safe for opening
- * Only allows HTTPS URLs
+ * Only allows HTTPS URLs from trusted hosts.
  */
+const TRUSTED_DOC_HOSTNAMES = [
+  'docs.trusted.com', // Example trusted documentation domain
+  'developer.trusted.com', // Add more as needed
+  // Add additional trusted documentation domains below.
+] as const;
+
 function isTrustedDocumentationUrl(url: string): boolean {
   try {
     const parsed = new URL(url);
-    return parsed.protocol === 'https:';
+    return (
+      parsed.protocol === 'https:' &&
+      TRUSTED_DOC_HOSTNAMES.includes(parsed.hostname as (typeof TRUSTED_DOC_HOSTNAMES)[number])
+    );
   } catch {
     return false;
   }

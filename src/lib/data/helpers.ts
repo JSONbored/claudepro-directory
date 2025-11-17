@@ -52,8 +52,7 @@ interface CachedRpcOptions<Result> {
  */
 export async function fetchCachedRpc<
   T extends keyof Database['public']['Functions'],
-  Result extends
-    Database['public']['Functions'][T]['Returns'] = Database['public']['Functions'][T]['Returns'],
+  Result = Database['public']['Functions'][T]['Returns'],
 >(
   args: Database['public']['Functions'][T]['Args'],
   options: CachedRpcOptions<Result> & { rpcName: T }

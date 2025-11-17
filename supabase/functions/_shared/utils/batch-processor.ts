@@ -3,8 +3,7 @@
  * Handles errors, retries, and progress tracking
  */
 
-import { errorToString } from './error-handling.ts';
-import { createUtilityContext } from './logging.ts';
+import { createUtilityContext, logError, logInfo, logWarn } from './logging.ts';
 
 export interface BatchProcessOptions<T> {
   concurrency?: number;
@@ -42,7 +41,7 @@ export async function batchProcess<T, R>(
     retries,
   });
 
-  console.log('[batch-processor] Starting batch processing', logContext);
+  logInfo('Starting batch processing', logContext);
 
   const success: T[] = [];
   const failed: Array<{ item: T; error: unknown }> = [];
@@ -76,10 +75,7 @@ export async function batchProcess<T, R>(
           total_retries: retries,
           item_index: items.indexOf(item),
         });
-        console.warn('[batch-processor] Item processing failed, retrying', {
-          ...itemLogContext,
-          error: errorToString(error),
-        });
+        logWarn('Item processing failed, retrying', itemLogContext);
 
         // Wait before retry (exponential backoff)
         if (attempt <= retries) {
@@ -94,10 +90,7 @@ export async function batchProcess<T, R>(
       item_index: items.indexOf(item),
       total_retries: retries,
     });
-    console.error('[batch-processor] Item processing failed after all retries', {
-      ...itemLogContext,
-      error: errorToString(lastError),
-    });
+    logError('Item processing failed after all retries', itemLogContext, lastError);
     failed.push({ item, error: lastError });
     processed++;
     if (onProgress) {
@@ -123,7 +116,7 @@ export async function batchProcess<T, R>(
     failedCount: failed.length,
   };
 
-  console.log('[batch-processor] Batch processing completed', {
+  logInfo('Batch processing completed', {
     ...logContext,
     success_count: result.successCount,
     failed_count: result.failedCount,

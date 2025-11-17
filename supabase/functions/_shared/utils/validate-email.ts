@@ -3,7 +3,7 @@
  * Validates email format and normalizes for storage
  */
 
-import { createUtilityContext } from './logging.ts';
+import { createUtilityContext, logWarn } from './logging.ts';
 
 export interface ValidateEmailResult {
   valid: boolean;
@@ -77,7 +77,7 @@ export function validateEmail(
       email_length: trimmed.length,
       max_length: maxLength,
     });
-    console.warn('[validate-email] Email address too long', logContext);
+    logWarn('Email address too long', logContext);
     return {
       valid: false,
       error: `Email address too long (max ${maxLength} characters)`,
@@ -89,7 +89,7 @@ export function validateEmail(
     const logContext = createUtilityContext('validate-email', 'invalid-format', {
       email_preview: trimmed.slice(0, 50), // Log first 50 chars for debugging
     });
-    console.warn('[validate-email] Invalid email format', logContext);
+    logWarn('Invalid email format', logContext);
     return {
       valid: false,
       error: 'Invalid email address format',
@@ -105,7 +105,7 @@ export function validateEmail(
     const logContext = createUtilityContext('validate-email', 'security-check-failed', {
       check: 'null_bytes',
     });
-    console.warn('[validate-email] Security check failed: null bytes detected', logContext);
+    logWarn('Security check failed: null bytes detected', logContext);
     return {
       valid: false,
       error: 'Email address contains invalid characters',
@@ -117,7 +117,7 @@ export function validateEmail(
     const logContext = createUtilityContext('validate-email', 'security-check-failed', {
       check: 'path_traversal',
     });
-    console.warn('[validate-email] Security check failed: path traversal detected', logContext);
+    logWarn('Security check failed: path traversal detected', logContext);
     return {
       valid: false,
       error: 'Email address contains invalid characters',

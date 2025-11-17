@@ -47,7 +47,9 @@ export async function getRelatedContent(input: RelatedContentInput): Promise<Rel
   );
 
   // Filter out invalid items
-  const validItems = data.filter((item) => Boolean(item.title && item.slug && item.category));
+  const validItems = data.filter((item: GetGetRelatedContentReturn[number]) =>
+    Boolean(item.title && item.slug && item.category)
+  );
 
   return {
     items: validItems,

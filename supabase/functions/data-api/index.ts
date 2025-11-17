@@ -1,8 +1,12 @@
 import { getOnlyCorsHeaders, jsonResponse } from '../_shared/utils/http.ts';
 import { validatePathSegments, validateQueryString } from '../_shared/utils/input-validation.ts';
-import { createDataApiContext } from '../_shared/utils/logging.ts';
+import { createDataApiContext, logError, logInfo } from '../_shared/utils/logging.ts';
 import { checkRateLimit, RATE_LIMIT_PRESETS } from '../_shared/utils/rate-limit.ts';
 import { createRouter, type HttpMethod, type RouterContext } from '../_shared/utils/router.ts';
+// Static imports to ensure circuit-breaker and timeout utilities are included in the bundle
+// These are lazily imported in callRpc, but we need static imports for Supabase bundling
+import '../_shared/utils/circuit-breaker.ts';
+import '../_shared/utils/timeout.ts';
 import { handleCompanyRoute } from './routes/company.ts';
 import { handleContentRoute } from './routes/content.ts';
 import { handleFeedsRoute } from './routes/feeds.ts';
@@ -341,9 +345,9 @@ function respondWithAnalytics(
     }
 
     if (outcome === 'success') {
-      console.log('[data-api] Route hit', { ...logContext, ...logData });
+      logInfo('Route hit', { ...logContext, ...logData });
     } else {
-      console.error('[data-api] Route error', { ...logContext, ...logData });
+      logError('Route error', { ...logContext, ...logData }, error);
     }
   };
 
