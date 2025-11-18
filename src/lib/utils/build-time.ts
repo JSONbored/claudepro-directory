@@ -46,7 +46,7 @@ export function isBuildTime(): boolean {
   // CRITICAL: During static generation (prerendering), Next.js analyzes modules
   // and ANY require('flags/next') calls trigger Edge Config access
   // We MUST be EXTREMELY conservative and assume build-time unless we're 100% certain we're in runtime
-  
+
   // PRIMARY HEURISTIC: During static generation/prerendering, env vars are often missing
   // If env vars are missing, we're almost certainly in build context
   // CRITICAL: This check MUST happen before any flags/next imports to prevent Edge Config access
@@ -63,7 +63,7 @@ export function isBuildTime(): boolean {
   if (process.env.NEXT_RUNTIME === 'nodejs') {
     // If we don't have Vercel environment indicators, we're likely in a build context
     // Be EXTREMELY conservative: assume build-time unless we're definitely in Vercel production
-    if (!process.env.VERCEL && !process.env.VERCEL_ENV && !process.env.VERCEL_URL) {
+    if (!(process.env.VERCEL || process.env.VERCEL_ENV || process.env.VERCEL_URL)) {
       // We're likely in a local build context
       // CRITICAL: Return true to prevent ANY flags/next imports during static generation
       return true;
@@ -73,10 +73,10 @@ export function isBuildTime(): boolean {
   // FINAL CHECK: During static generation (prerendering), we're in Node.js runtime
   // but NOT in a request context. We MUST assume build-time unless we're 100% certain
   // we're in a Vercel production runtime request.
-  // 
+  //
   // CRITICAL: During local builds, VERCEL env vars are NEVER set, so we MUST return true
   // This prevents ANY flags/next imports during static generation
-  if (!process.env.VERCEL && !process.env.VERCEL_ENV && !process.env.VERCEL_URL) {
+  if (!(process.env.VERCEL || process.env.VERCEL_ENV || process.env.VERCEL_URL)) {
     // We're in a local build context - ALWAYS assume build-time
     // This is the most conservative approach and prevents Edge Config access
     return true;

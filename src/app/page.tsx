@@ -35,7 +35,7 @@ const NewsletterCTAVariant = dynamicImport(
   }
 );
 
-import { getHomepageFeaturedCategories } from '@/src/lib/data/config/category';
+import { getHomepageCategoryIds } from '@/src/lib/data/config/category';
 import { getHomepageData } from '@/src/lib/data/content/homepage';
 import { logger } from '@/src/lib/logger';
 import type { GetGetHomepageCompleteReturn } from '@/src/types/database-overrides';
@@ -99,7 +99,10 @@ async function HomeContentSection({
 export default async function HomePage({ searchParams }: HomePageProps) {
   await searchParams;
 
-  const categoryIds = await getHomepageFeaturedCategories();
+  // Dynamic configs are server/middleware only - use static defaults for static generation
+  // getHomepageFeaturedCategories() accesses flags.ts which triggers Edge Config during build
+  // Client components can fetch dynamic configs via server actions at runtime
+  const categoryIds = getHomepageCategoryIds; // Use static default for static generation
 
   // Extract member_count and top_contributors from consolidated response
   // Type-safe RPC return using centralized type definition

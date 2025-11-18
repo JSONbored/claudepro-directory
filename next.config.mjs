@@ -26,6 +26,9 @@ const nextConfig = {
   productionBrowserSourceMaps: false,
   reactCompiler: true,
   cacheComponents: false,
+  // CRITICAL: Exclude flags/next from static analysis during build
+  // flags/next uses Vercel Edge Config which triggers "Server Functions cannot be called" errors
+  serverExternalPackages: ['flags', '@flags-sdk/statsig'],
   cacheLife: {
     minutes: { stale: 300, revalidate: 60, expire: 3600 },
     quarter: { stale: 900, revalidate: 300, expire: 7200 },

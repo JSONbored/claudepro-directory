@@ -265,7 +265,7 @@ async function loadCacheConfig(): Promise<CacheConfig> {
   // CRITICAL: This check MUST happen BEFORE any dynamic import of flags.ts
   // Even dynamic imports are analyzed by Next.js during static generation
   // We check MULTIPLE times to be absolutely certain
-  // 
+  //
   // NOTE: isBuildTime() should return true during local builds (no VERCEL env vars)
   // If it doesn't, we have a problem with build-time detection
   const buildTimeCheck1 = isBuildTime();
@@ -305,7 +305,7 @@ async function loadCacheConfig(): Promise<CacheConfig> {
       // Even with isBuildTime() checks, Next.js analyzes the module during static generation
       // and sees require('flags/next') calls, which triggers Edge Config access
       // Solution: ALWAYS use defaults during build, never import flags.ts
-      // 
+      //
       // During runtime (not build-time), we would import flags.ts here, but since
       // isBuildTime() should return true during local builds, we should never reach this point
       // If we do reach this point, it means isBuildTime() is not working correctly,

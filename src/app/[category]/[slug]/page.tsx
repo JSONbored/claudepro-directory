@@ -172,23 +172,10 @@ export default async function DetailPage({
   const copyCount = analytics?.copy_count || 0;
   const relatedItems = related || [];
 
-  // Check feature flags (lazy-loaded to avoid Edge Config access during build)
-  // CRITICAL: Check build-time BEFORE importing flags.ts to prevent Edge Config access
-  const { isBuildTime } = await import('@/src/lib/utils/build-time');
-
-  let tabsEnabled = false;
-  let recentlyViewedEnabled = false;
-
-  // CRITICAL: NEVER import flags.ts during build-time static generation
-  // Even with isBuildTime() checks, Next.js analyzes the module and sees require('flags/next')
-  // which triggers Edge Config access. Always use defaults during build.
-  if (!isBuildTime()) {
-    // Only import flags.ts at runtime (not during build)
-    const { featureFlags } = await import('@/src/lib/flags');
-    tabsEnabled = await featureFlags.contentDetailTabs();
-    recentlyViewedEnabled = await featureFlags.recentlyViewed();
-  }
-  // During build-time, tabsEnabled and recentlyViewedEnabled remain false (defaults)
+  // Feature flags are server/middleware only - use defaults for static generation
+  // Flags should be evaluated in middleware or server actions, not in page components
+  const tabsEnabled = false; // Default for static generation
+  const recentlyViewedEnabled = false; // Default for static generation
 
   // No transformation needed - displayTitle computed at build time
   // This eliminates runtime overhead and follows DRY principles

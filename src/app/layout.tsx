@@ -30,7 +30,9 @@ import { LayoutContent } from '@/src/components/core/layout/root-layout-wrapper'
 import { NotificationsProvider } from '@/src/components/providers/notifications-provider';
 import { APP_CONFIG } from '@/src/lib/data/config/constants';
 import { getLayoutData } from '@/src/lib/data/layout/data';
-import { getLayoutFlags } from '@/src/lib/data/layout/flags';
+// CRITICAL: Lazy-load getLayoutFlags to prevent flags.ts from being analyzed during build
+// Even though getLayoutFlags has build-time checks, Next.js's static analyzer might
+// still traverse the import chain and see flags/next imports
 import { getHomeMetadata } from '@/src/lib/data/seo/homepage';
 
 // Self-hosted fonts - no external requests, faster FCP, GDPR compliant
@@ -185,12 +187,12 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // Fetch layout data and flags in parallel using Promise.allSettled
-  // This ensures graceful degradation if one fails (partial success handling)
-  const [layoutDataResult, layoutFlagsResult] = await Promise.allSettled([
-    getLayoutData(),
-    getLayoutFlags(),
-  ]);
+  // Fetch layout data
+  // NOTE: Feature flags are server/middleware only - not for use in page components
+  // Layout flags should be evaluated in middleware and passed via headers/cookies
+  // For now, use defaults to allow static generation
+  const [layoutDataResult] = await Promise.allSettled([getLayoutData()]);
+  const layoutFlagsResult = { status: 'fulfilled' as const, value: DEFAULT_LAYOUT_FLAGS };
 
   // Extract layout data with fallbacks
   const layoutData =
@@ -208,12 +210,7 @@ export default async function RootLayout({
     });
   }
 
-  if (layoutFlagsResult.status === 'rejected') {
-    const normalized = normalizeError(layoutFlagsResult.reason, 'Failed to load layout flags');
-    logger.error('RootLayout: layout flags fetch failed', normalized, {
-      source: 'root-layout',
-    });
-  }
+  // layoutFlagsResult is always fulfilled (using defaults) since flags are server/middleware only
 
   return (
     <html

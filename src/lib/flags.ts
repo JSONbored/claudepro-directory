@@ -1,295 +1,134 @@
-// CRITICAL: Lazy-load flags/next to prevent Edge Config access during module evaluation
-// flags/next uses Vercel Edge Config which triggers "Server Functions cannot be called" errors during build
-// During build-time, this module exports ONLY mock functions - no flags/next imports at all
-// CRITICAL: Don't import types from @flags-sdk/statsig as it might cause Next.js to analyze the package
-// Define StatsigUser type locally
-type StatsigUser = {
-  userID: string;
-  email?: string;
-  customIDs?: Record<string, string>;
-};
+/**
+ * Feature Flags & Dynamic Configs
+ *
+ * Following the official Vercel Flags SDK pattern:
+ * https://vercel.com/docs/flags/getting-started
+ *
+ * CRITICAL: This file is server-only to prevent flags/next from being
+ * analyzed during build. flags/next uses Vercel Edge Config which
+ * triggers "Server Functions cannot be called" errors during static generation.
+ *
+ * Note: We use 'server-only' (not 'use server') because this file exports
+ * regular functions, not server actions.
+ */
 
-// Define Identify type locally to avoid importing from 'flags' package
-// which might cause Next.js to analyze flags/next during build
-type Identify<T> = (context: {
-  headers?: { get: (name: string) => string | null };
-  cookies?: { getAll: () => Array<{ name: string; value: string }> };
-}) => Promise<T>;
+// This import will throw an error if this module is imported in client code
+import 'server-only';
 
-// CRITICAL: Check build-time at MODULE LEVEL to prevent ANY flags/next imports during build
-// If we're in build-time, we'll export mock functions that never touch flags/next
-// This check happens IMMEDIATELY when the module loads, before any other code executes
-// Use direct env check to avoid any function call that might trigger analysis
-const IS_BUILD_TIME =
-  typeof process !== 'undefined' &&
-  (process.env.NEXT_PHASE === 'phase-production-build' ||
-    (typeof process.argv !== 'undefined' &&
-      process.argv.some(
-        (arg) => arg.includes('next') && (arg.includes('build') || arg.includes('export'))
-      )) ||
-    !process.env.NEXT_PUBLIC_SUPABASE_URL ||
-    !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
-    (!process.env.VERCEL && !process.env.VERCEL_ENV && !process.env.VERCEL_URL));
-
-// CRITICAL: Runtime-only functions - only defined when NOT in build-time
-// This prevents Next.js from analyzing flags/next during build
-// During build-time, these are simple no-op functions
-// At runtime, they're replaced with real implementations via dynamic import
-// CRITICAL: Use Function constructor to build the import path dynamically
-// This prevents Next.js from statically analyzing the import path
-const getFlagsNext = IS_BUILD_TIME
-  ? (async () => null as { flag: unknown; dedupe: unknown } | null)
-  : (async () => {
-      // Runtime-only: Load the actual implementation
-      // Build the import path dynamically to prevent static analysis
-      const runtimePath = './flags' + '-runtime';
-      const importFn = new Function('specifier', 'return import(specifier)');
-      const runtimeModule = await importFn(runtimePath);
-      return runtimeModule.getFlagsNext();
-    }) as () => Promise<{ flag: unknown; dedupe: unknown } | null>;
-
-const getRuntimeDeps = IS_BUILD_TIME
-  ? (async () => null as any)
-  : (async () => {
-      // Runtime-only: Load the actual implementation
-      // Build the import path dynamically to prevent static analysis
-      const runtimePath = './flags' + '-runtime';
-      const importFn = new Function('specifier', 'return import(specifier)');
-      const runtimeModule = await importFn(runtimePath);
-      return runtimeModule.getRuntimeDeps();
-    }) as () => Promise<any>;
+import { type StatsigUser, statsigAdapter } from '@flags-sdk/statsig';
+import { createServerClient } from '@supabase/ssr';
+// Following official Vercel Flags SDK pattern - direct imports as shown in docs
+import { dedupe, flag } from 'flags/next';
+import { getAuthenticatedUserFromClient } from '@/src/lib/auth/get-authenticated-user';
+import { logger } from '@/src/lib/logger';
 
 /**
  * Identify function - provides user context for flag evaluation
  * Statsig uses this to do % rollouts, user targeting, etc.
  *
- * CRITICAL: During build-time, returns a simple mock function.
- * At runtime, lazy-loads the real implementation with flags/next
+ * Following official pattern: wrapped in dedupe for request-level deduplication
  */
-let _identifyFn: Identify<StatsigUser> | null = null;
+export const identify = dedupe(async ({ headers: _headers, cookies }): Promise<StatsigUser> => {
+  try {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-const getIdentifyBuildTime = async (): Promise<Identify<StatsigUser>> => {
-  if (!_identifyFn) {
-    _identifyFn = async () => ({ userID: 'anonymous' });
-  }
-  return _identifyFn!;
-};
-
-const getIdentifyRuntime = async (): Promise<Identify<StatsigUser>> => {
-  if (!_identifyFn) {
-    const flagsNext = await getFlagsNext();
-    const deps = await getRuntimeDeps();
-    if (!flagsNext || !deps) {
-      _identifyFn = async () => ({ userID: 'anonymous' });
-    } else {
-      const dedupe = (flagsNext as { dedupe: <T>(fn: T) => T }).dedupe;
-      const identifyImpl = dedupe(
-        (async ({ headers, cookies }) => {
-          try {
-            if (!(cookies && headers)) {
-              return { userID: 'anonymous' };
-            }
-
-            const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-            const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-            if (!(supabaseUrl && supabaseAnonKey)) {
-              return { userID: 'anonymous' };
-            }
-
-            const supabase = deps.createServerClient(
-              supabaseUrl,
-              supabaseAnonKey,
-              {
-                cookies: {
-                  getAll() {
-                    return cookies.getAll();
-                  },
-                  setAll() {
-                    // Flags SDK cookies are read-only
-                  },
-                },
-              }
-            );
-
-            const { user } = await deps.getAuthenticatedUserFromClient(supabase, {
-              context: 'feature_flags_identify',
-            });
-
-            const baseUser: StatsigUser = {
-              userID: user?.id || 'anonymous',
-            };
-
-            if (user?.email) {
-              baseUser.email = user.email;
-            }
-
-            if (user?.user_metadata?.slug) {
-              baseUser.customIDs = {
-                userSlug: user.user_metadata.slug as string,
-              };
-            }
-
-            return baseUser;
-          } catch (error) {
-            deps.logger.error(
-              'Failed to identify user for feature flags, falling back to anonymous',
-              error as Error,
-              {
-                context: 'feature_flags',
-                fallback: 'anonymous',
-              }
-            );
-            return { userID: 'anonymous' };
-          }
-        }) satisfies Identify<StatsigUser>
-      );
-      _identifyFn = identifyImpl;
+    if (!(supabaseUrl && supabaseAnonKey)) {
+      return { userID: 'anonymous' };
     }
+
+    const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
+      cookies: {
+        getAll() {
+          return cookies.getAll();
+        },
+        setAll() {
+          // Flags SDK cookies are read-only
+        },
+      },
+    });
+
+    const { user } = await getAuthenticatedUserFromClient(supabase, {
+      context: 'feature_flags_identify',
+    });
+
+    const baseUser: StatsigUser = {
+      userID: user?.id || 'anonymous',
+    };
+
+    if (user?.email) {
+      baseUser.email = user.email;
+    }
+
+    if (user?.user_metadata?.slug) {
+      baseUser.customIDs = {
+        userSlug: user.user_metadata.slug as string,
+      };
+    }
+
+    return baseUser;
+  } catch (error) {
+    logger.error(
+      'Failed to identify user for feature flags, falling back to anonymous',
+      error as Error,
+      {
+        context: 'feature_flags',
+        fallback: 'anonymous',
+      }
+    );
+    return { userID: 'anonymous' };
   }
-  return _identifyFn!;
-};
-
-const getIdentify = IS_BUILD_TIME ? getIdentifyBuildTime : getIdentifyRuntime;
-
-// Export identify as a function that lazy-loads
-export const identify = getIdentify;
+});
 
 /**
  * Factory function to create feature flags
- * During build-time, returns a mock function to prevent Edge Config access
- * 
- * CRITICAL: Split into two separate functions to prevent Next.js from analyzing
- * the runtime code path during build.
+ * Following the official pattern from Vercel docs
  */
-const createFeatureFlagBuildTime = (_key: string) => {
-  return async () => false as boolean;
+export const createFeatureFlag = (key: string) => {
+  return flag<boolean, StatsigUser>({
+    key,
+    adapter: statsigAdapter.featureGate((gate) => gate.value, {
+      exposureLogging: true,
+    }),
+    identify,
+    defaultValue: false,
+  });
 };
-
-const createFeatureFlagRuntime = (key: string) => {
-  // Lazy-load runtime implementation
-  return async () => {
-    const flagsNext = await getFlagsNext();
-    const deps = await getRuntimeDeps();
-    if (!flagsNext || !deps) {
-      return false;
-    }
-    const flag = (flagsNext as { flag: <T, U>(config: unknown) => () => Promise<T> }).flag;
-    const identifyFn = await getIdentify();
-    const flagFn = flag<boolean, StatsigUser>({
-      key,
-      adapter: deps.statsigAdapter.featureGate((gate: { value: boolean }) => gate.value, {
-        exposureLogging: true,
-      }),
-      identify: identifyFn,
-      defaultValue: false,
-    });
-    return flagFn();
-  };
-};
-
-export const createFeatureFlag = IS_BUILD_TIME
-  ? createFeatureFlagBuildTime
-  : createFeatureFlagRuntime;
 
 /**
  * Factory function to create experiments (A/B tests with variants)
- * During build-time, returns a mock function to prevent Edge Config access
- * 
- * CRITICAL: Split into two separate functions to prevent Next.js from analyzing
- * the runtime code path during build.
  */
-const createExperimentBuildTime = <T extends string>(_key: string, defaultValue: T) => {
-  return async () => defaultValue as T;
+export const createExperiment = <T extends string>(key: string, defaultValue: T) => {
+  return flag<T, StatsigUser>({
+    key,
+    adapter: statsigAdapter.experiment((exp) => exp.get('variant', defaultValue) as T, {
+      exposureLogging: true,
+    }),
+    identify,
+    defaultValue,
+  });
 };
-
-const createExperimentRuntime = <T extends string>(key: string, defaultValue: T) => {
-  // Lazy-load runtime implementation
-  return async () => {
-    const flagsNext = await getFlagsNext();
-    const deps = await getRuntimeDeps();
-    if (!flagsNext || !deps) {
-      return defaultValue;
-    }
-    const flag = (flagsNext as { flag: <T, U>(config: unknown) => () => Promise<T> }).flag;
-    const identifyFn = await getIdentify();
-    return flag<T, StatsigUser>({
-      key,
-      adapter: deps.statsigAdapter.experiment(
-        (exp: { get: (key: string, defaultValue: T) => T }) => exp.get('variant', defaultValue) as T,
-        {
-          exposureLogging: true,
-        }
-      ),
-      identify: identifyFn,
-      defaultValue,
-    })();
-  };
-};
-
-export const createExperiment = IS_BUILD_TIME
-  ? createExperimentBuildTime
-  : createExperimentRuntime;
 
 /**
  * Factory function to create dynamic config groups (runtime-tunable values)
- * Each config group returns a JSON object with multiple parameters
- * Use for values that need to change without code deploys
- * During build-time, returns a mock function to prevent Edge Config access
- * 
- * CRITICAL: Split into two separate functions to prevent Next.js from analyzing
- * the runtime code path during build. When IS_BUILD_TIME is true, only the
- * build-time function is defined, so Next.js never sees the flags/next reference.
  */
-const createDynamicConfigGroupBuildTime = <T extends Record<string, unknown>>(
-  _configName: string,
-  defaults: T
-): (() => Promise<T>) => {
-  return async () => defaults as T;
-};
-
-const createDynamicConfigGroupRuntime = <T extends Record<string, unknown>>(
+export const createDynamicConfigGroup = <T extends Record<string, unknown>>(
   configName: string,
   defaults: T
-): (() => Promise<T>) => {
-  // Lazy-load runtime implementation
-  return async () => {
-    const flagsNext = await getFlagsNext();
-    const deps = await getRuntimeDeps();
-    if (!flagsNext || !deps) {
-      return defaults;
-    }
-    const flag = (flagsNext as { flag: <T, U>(config: unknown) => () => Promise<T> }).flag;
-    const identifyFn = await getIdentify();
-    const flagFn = flag<T, StatsigUser>({
-      key: configName,
-      adapter: deps.statsigAdapter.dynamicConfig((config: { value: unknown }) => {
-        const statsigValues = (config.value as Record<string, unknown>) || {};
-        return { ...defaults, ...statsigValues } as T;
-      }),
-      identify: identifyFn,
-      defaultValue: defaults,
-    });
-    return flagFn();
-  };
+) => {
+  return flag<T, StatsigUser>({
+    key: configName,
+    adapter: statsigAdapter.dynamicConfig((config) => {
+      const statsigValues = (config.value as Record<string, unknown>) || {};
+      return { ...defaults, ...statsigValues } as T;
+    }),
+    identify,
+    defaultValue: defaults,
+  });
 };
 
-// CRITICAL: Conditionally define the function based on build-time
-// This ensures Next.js never sees the runtime code path during build
-const createDynamicConfigGroup = IS_BUILD_TIME
-  ? createDynamicConfigGroupBuildTime
-  : createDynamicConfigGroupRuntime;
-
 /**
- * All feature flags - centralized
- * Usage: const enabled = await featureFlags.testFlag();
- *
- * CRITICAL: Lazy-loaded to prevent flags/next from being evaluated during module load
- * This prevents "Server Functions cannot be called" errors during static generation
- */
-
-/**
- * Feature flags type - exported for TypeScript inference in dynamic imports
+ * Feature flags type - exported for TypeScript inference
  */
 export type FeatureFlags = {
   testFlag: () => Promise<boolean>;
@@ -367,17 +206,40 @@ export const featureFlags: FeatureFlags = new Proxy({} as FeatureFlags, {
 
 /**
  * Newsletter A/B Test Experiments
+ * CRITICAL: Lazy-initialized to prevent module-level execution during build
  */
-export const newsletterExperiments = {
-  // Footer delay timing test (10s vs 30s vs 60s)
-  footerDelay: createExperiment<'10s' | '30s' | '60s'>('newsletter_footer_delay', '30s'),
+let _newsletterExperiments: {
+  footerDelay: () => Promise<'10s' | '30s' | '60s'>;
+  ctaVariant: () => Promise<'aggressive' | 'social_proof' | 'value_focused'>;
+} | null = null;
 
-  // CTA copy variant test (aggressive vs social_proof vs value_focused)
-  ctaVariant: createExperiment<'aggressive' | 'social_proof' | 'value_focused'>(
-    'newsletter_cta_variant',
-    'value_focused'
-  ),
+const getNewsletterExperiments = () => {
+  if (!_newsletterExperiments) {
+    _newsletterExperiments = {
+      // Footer delay timing test (10s vs 30s vs 60s)
+      footerDelay: createExperiment<'10s' | '30s' | '60s'>('newsletter_footer_delay', '30s'),
+
+      // CTA copy variant test (aggressive vs social_proof vs value_focused)
+      ctaVariant: createExperiment<'aggressive' | 'social_proof' | 'value_focused'>(
+        'newsletter_cta_variant',
+        'value_focused'
+      ),
+    };
+  }
+  return _newsletterExperiments;
 };
+
+export const newsletterExperiments = new Proxy(
+  {} as {
+    footerDelay: () => Promise<'10s' | '30s' | '60s'>;
+    ctaVariant: () => Promise<'aggressive' | 'social_proof' | 'value_focused'>;
+  },
+  {
+    get(_target, prop) {
+      return getNewsletterExperiments()[prop as keyof typeof _newsletterExperiments];
+    },
+  }
+);
 
 /**
  * Dynamic Configs - Runtime-tunable values
@@ -417,7 +279,15 @@ export const APP_SETTINGS_DEFAULTS = {
   'date.current_date': new Date().toISOString().split('T')[0],
   'date.last_reviewed': new Date().toISOString().split('T')[0],
 } as const;
-export const appSettings = createDynamicConfigGroup('app_settings', APP_SETTINGS_DEFAULTS);
+
+// Lazy getter - only creates the config when first accessed
+let _appSettingsFn: (() => Promise<typeof APP_SETTINGS_DEFAULTS>) | null = null;
+export const appSettings = (): Promise<typeof APP_SETTINGS_DEFAULTS> => {
+  if (!_appSettingsFn) {
+    _appSettingsFn = createDynamicConfigGroup('app_settings', APP_SETTINGS_DEFAULTS);
+  }
+  return _appSettingsFn();
+};
 
 /**
  * Component Configs - Component-level UI behavior settings
@@ -435,23 +305,37 @@ export const COMPONENT_CONFIG_DEFAULTS = {
   'fab.show_scroll_to_top': true,
   'fab.show_notifications': true,
 } as const;
-export const componentConfigs = createDynamicConfigGroup(
-  'component_configs',
-  COMPONENT_CONFIG_DEFAULTS
-);
+
+// Lazy getter - only creates the config when first accessed
+let _componentConfigsFn: (() => Promise<typeof COMPONENT_CONFIG_DEFAULTS>) | null = null;
+export const componentConfigs = (): Promise<typeof COMPONENT_CONFIG_DEFAULTS> => {
+  if (!_componentConfigsFn) {
+    _componentConfigsFn = createDynamicConfigGroup('component_configs', COMPONENT_CONFIG_DEFAULTS);
+  }
+  return _componentConfigsFn();
+};
 
 /**
  * Email Configs - Subject lines and email copy
  * Enables A/B testing of email subjects without deploys
  * Usage: const config = await emailConfigs(); const subject = config['email.subject.welcome'];
  */
-export const emailConfigs = createDynamicConfigGroup('email_configs', {
+export const EMAIL_CONFIG_DEFAULTS = {
   'email.subject.welcome': 'Welcome to Claude Pro Directory! 🎉',
   'email.subject.magic_link': 'Your Magic Link - Claude Pro Directory',
   'email.subject.password_reset': 'Reset Your Password - Claude Pro Directory',
   'email.subject.job_posted': 'Your Job Listing is Live!',
   'email.subject.collection_shared': 'Someone shared a collection with you!',
-});
+} as const;
+
+// Lazy getter - only creates the config when first accessed
+let _emailConfigsFn: (() => Promise<typeof EMAIL_CONFIG_DEFAULTS>) | null = null;
+export const emailConfigs = (): Promise<typeof EMAIL_CONFIG_DEFAULTS> => {
+  if (!_emailConfigsFn) {
+    _emailConfigsFn = createDynamicConfigGroup('email_configs', EMAIL_CONFIG_DEFAULTS);
+  }
+  return _emailConfigsFn();
+};
 
 /**
  * Newsletter Configs - CTA copy and settings
@@ -488,10 +372,18 @@ export const NEWSLETTER_CONFIG_DEFAULTS = {
   'newsletter.show_footer_bar': true,
   'newsletter.show_scroll_trigger': true,
 } as const;
-export const newsletterConfigs = createDynamicConfigGroup(
-  'newsletter_configs',
-  NEWSLETTER_CONFIG_DEFAULTS
-);
+
+// Lazy getter - only creates the config when first accessed
+let _newsletterConfigsFn: (() => Promise<typeof NEWSLETTER_CONFIG_DEFAULTS>) | null = null;
+export const newsletterConfigs = (): Promise<typeof NEWSLETTER_CONFIG_DEFAULTS> => {
+  if (!_newsletterConfigsFn) {
+    _newsletterConfigsFn = createDynamicConfigGroup(
+      'newsletter_configs',
+      NEWSLETTER_CONFIG_DEFAULTS
+    );
+  }
+  return _newsletterConfigsFn();
+};
 
 /**
  * Pricing Configs - Partner page pricing display
@@ -508,7 +400,15 @@ export const PRICING_CONFIG_DEFAULTS = {
   'pricing.launch_discount_enabled': true,
   'pricing.launch_discount_end_date': '2025-12-31',
 } as const;
-export const pricingConfigs = createDynamicConfigGroup('pricing_configs', PRICING_CONFIG_DEFAULTS);
+
+// Lazy getter - only creates the config when first accessed
+let _pricingConfigsFn: (() => Promise<typeof PRICING_CONFIG_DEFAULTS>) | null = null;
+export const pricingConfigs = (): Promise<typeof PRICING_CONFIG_DEFAULTS> => {
+  if (!_pricingConfigsFn) {
+    _pricingConfigsFn = createDynamicConfigGroup('pricing_configs', PRICING_CONFIG_DEFAULTS);
+  }
+  return _pricingConfigsFn();
+};
 
 /**
  * Polling Configs - Polling intervals for real-time updates
@@ -525,7 +425,15 @@ export const POLLING_CONFIG_DEFAULTS = {
   'polling.analytics.stats_ms': 300000,
   'polling.newsletter_count_ms': 300000, // Phase 3
 } as const;
-export const pollingConfigs = createDynamicConfigGroup('polling_configs', POLLING_CONFIG_DEFAULTS);
+
+// Lazy getter - only creates the config when first accessed
+let _pollingConfigsFn: (() => Promise<typeof POLLING_CONFIG_DEFAULTS>) | null = null;
+export const pollingConfigs = (): Promise<typeof POLLING_CONFIG_DEFAULTS> => {
+  if (!_pollingConfigsFn) {
+    _pollingConfigsFn = createDynamicConfigGroup('polling_configs', POLLING_CONFIG_DEFAULTS);
+  }
+  return _pollingConfigsFn();
+};
 
 /**
  * Animation Configs - Animation durations and delays
@@ -563,10 +471,15 @@ export const ANIMATION_CONFIG_DEFAULTS = {
   'confetti.subtle.spread': 40,
   'confetti.subtle.ticks': 100,
 } as const;
-export const animationConfigs = createDynamicConfigGroup(
-  'animation_configs',
-  ANIMATION_CONFIG_DEFAULTS
-);
+
+// Lazy getter - only creates the config when first accessed
+let _animationConfigsFn: (() => Promise<typeof ANIMATION_CONFIG_DEFAULTS>) | null = null;
+export const animationConfigs = (): Promise<typeof ANIMATION_CONFIG_DEFAULTS> => {
+  if (!_animationConfigsFn) {
+    _animationConfigsFn = createDynamicConfigGroup('animation_configs', ANIMATION_CONFIG_DEFAULTS);
+  }
+  return _animationConfigsFn();
+};
 
 /** Timeout Configs - UI/API timeouts and retry logic */
 export const TIMEOUT_CONFIG_DEFAULTS = {
@@ -602,7 +515,15 @@ export const TIMEOUT_CONFIG_DEFAULTS = {
   'retry.database.transaction_retry_ms': 500,
   'retry.build.max_retries': 3,
 } as const;
-export const timeoutConfigs = createDynamicConfigGroup('timeout_configs', TIMEOUT_CONFIG_DEFAULTS);
+
+// Lazy getter - only creates the config when first accessed
+let _timeoutConfigsFn: (() => Promise<typeof TIMEOUT_CONFIG_DEFAULTS>) | null = null;
+export const timeoutConfigs = (): Promise<typeof TIMEOUT_CONFIG_DEFAULTS> => {
+  if (!_timeoutConfigsFn) {
+    _timeoutConfigsFn = createDynamicConfigGroup('timeout_configs', TIMEOUT_CONFIG_DEFAULTS);
+  }
+  return _timeoutConfigsFn();
+};
 
 /**
  * Toast Configs - Toast notification messages
@@ -642,7 +563,15 @@ export const TOAST_CONFIG_DEFAULTS = {
   'toast.saving': 'Saving...',
   'toast.processing': 'Processing...',
 } as const;
-export const toastConfigs = createDynamicConfigGroup('toast_configs', TOAST_CONFIG_DEFAULTS);
+
+// Lazy getter - only creates the config when first accessed
+let _toastConfigsFn: (() => Promise<typeof TOAST_CONFIG_DEFAULTS>) | null = null;
+export const toastConfigs = (): Promise<typeof TOAST_CONFIG_DEFAULTS> => {
+  if (!_toastConfigsFn) {
+    _toastConfigsFn = createDynamicConfigGroup('toast_configs', TOAST_CONFIG_DEFAULTS);
+  }
+  return _toastConfigsFn();
+};
 
 /**
  * Homepage Configs - Homepage layout and categories
@@ -673,10 +602,15 @@ export const HOMEPAGE_CONFIG_DEFAULTS = {
     'community',
   ] as const satisfies readonly string[],
 } as const;
-export const homepageConfigs = createDynamicConfigGroup(
-  'homepage_configs',
-  HOMEPAGE_CONFIG_DEFAULTS
-);
+
+// Lazy getter - only creates the config when first accessed
+let _homepageConfigsFn: (() => Promise<typeof HOMEPAGE_CONFIG_DEFAULTS>) | null = null;
+export const homepageConfigs = (): Promise<typeof HOMEPAGE_CONFIG_DEFAULTS> => {
+  if (!_homepageConfigsFn) {
+    _homepageConfigsFn = createDynamicConfigGroup('homepage_configs', HOMEPAGE_CONFIG_DEFAULTS);
+  }
+  return _homepageConfigsFn();
+};
 
 /**
  * Form Configs - Form validation and limits (Phase 3)
@@ -691,7 +625,15 @@ export const FORM_CONFIG_DEFAULTS = {
   'form.review_helpful_threshold': 3,
   'form.review_auto_approve_score': 0.8,
 } as const;
-export const formConfigs = createDynamicConfigGroup('form_configs', FORM_CONFIG_DEFAULTS);
+
+// Lazy getter - only creates the config when first accessed
+let _formConfigsFn: (() => Promise<typeof FORM_CONFIG_DEFAULTS>) | null = null;
+export const formConfigs = (): Promise<typeof FORM_CONFIG_DEFAULTS> => {
+  if (!_formConfigsFn) {
+    _formConfigsFn = createDynamicConfigGroup('form_configs', FORM_CONFIG_DEFAULTS);
+  }
+  return _formConfigsFn();
+};
 
 /**
  * Recently Viewed Configs - Recently viewed items settings (Phase 3)
@@ -704,17 +646,23 @@ export const RECENTLY_VIEWED_CONFIG_DEFAULTS = {
   'recently_viewed.max_description_length': 150,
   'recently_viewed.max_tags': 5,
 } as const;
-export const recentlyViewedConfigs = createDynamicConfigGroup(
-  'recently_viewed_configs',
-  RECENTLY_VIEWED_CONFIG_DEFAULTS
-);
+
+// Lazy getter - only creates the config when first accessed
+let _recentlyViewedConfigsFn: (() => Promise<typeof RECENTLY_VIEWED_CONFIG_DEFAULTS>) | null = null;
+export const recentlyViewedConfigs = (): Promise<typeof RECENTLY_VIEWED_CONFIG_DEFAULTS> => {
+  if (!_recentlyViewedConfigsFn) {
+    _recentlyViewedConfigsFn = createDynamicConfigGroup(
+      'recently_viewed_configs',
+      RECENTLY_VIEWED_CONFIG_DEFAULTS
+    );
+  }
+  return _recentlyViewedConfigsFn();
+};
 
 /**
  * Cache Configs - Cache TTL settings and invalidation rules
  * Controls cache durations and invalidation tags across the application
  * Usage: const config = await cacheConfigs(); const ttl = config['cache.homepage.ttl_seconds'];
- *
- * CRITICAL: Using lazy getter to prevent module-level evaluation during build
  */
 const _cacheConfigsDefaults = {
   // TTL Settings (in seconds) - Optimized for low-traffic sites
@@ -808,7 +756,6 @@ const _cacheConfigsDefaults = {
 } as const;
 
 // Lazy getter - only creates the config when first accessed
-// This prevents module-level evaluation that triggers Edge Config access during build
 let _cacheConfigsFn: (() => Promise<typeof _cacheConfigsDefaults>) | null = null;
 export const cacheConfigs = (): Promise<typeof _cacheConfigsDefaults> => {
   if (!_cacheConfigsFn) {

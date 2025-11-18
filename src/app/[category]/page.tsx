@@ -50,6 +50,9 @@ import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { normalizeError } from '@/src/lib/utils/error.utils';
 
+// Feature flags are server/middleware only - mark as dynamic to prevent static generation
+// This prevents flags.ts from being analyzed during build
+export const dynamic = 'force-dynamic';
 export const revalidate = false;
 
 /**

@@ -290,4 +290,34 @@ export const getComponentConfigValue = componentConfigAccessor.getValue;
 export const getHomepageConfig = homepageConfigAccessor.getSnapshot;
 export const getHomepageConfigValue = homepageConfigAccessor.getValue;
 
+const emailConfigAccessor = createTypedConfigAccessor({
+  getDefaults: async () => {
+    const flagsModule = await getFlagsModule();
+    return flagsModule.EMAIL_CONFIG_DEFAULTS;
+  },
+  getFetcher: (flagsModule) => () => flagsModule.emailConfigs() as Promise<ConfigRecord>,
+  actionName: 'featureFlags.emailConfig',
+});
+
+const toastConfigAccessor = createTypedConfigAccessor({
+  getDefaults: async () => {
+    const flagsModule = await getFlagsModule();
+    return flagsModule.TOAST_CONFIG_DEFAULTS;
+  },
+  getFetcher: (flagsModule) => () => flagsModule.toastConfigs() as Promise<ConfigRecord>,
+  actionName: 'featureFlags.toastConfig',
+});
+
+/**
+ * Get email configuration from Statsig
+ */
+export const getEmailConfig = emailConfigAccessor.getSnapshot;
+export const getEmailConfigValue = emailConfigAccessor.getValue;
+
+/**
+ * Get toast configuration from Statsig
+ */
+export const getToastConfig = toastConfigAccessor.getSnapshot;
+export const getToastConfigValue = toastConfigAccessor.getValue;
+
 // fetchWithLogging removed - safe-action middleware handles all error logging

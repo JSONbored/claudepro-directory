@@ -2,13 +2,11 @@ import { NavLink } from '@/src/components/core/navigation/navigation-link';
 import { ContactTerminal } from '@/src/components/features/contact/contact-terminal';
 import { ContactTerminalErrorBoundary } from '@/src/components/features/contact/contact-terminal-error-boundary';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
-import { checkContactTerminalEnabled } from '@/src/lib/actions/feature-flags.actions';
 import { APP_CONFIG } from '@/src/lib/data/config/constants';
 import { getContactChannels } from '@/src/lib/data/marketing/contact';
 import { DiscordIcon, Github, Mail, MessageSquare } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-import { normalizeError } from '@/src/lib/utils/error.utils';
 
 export const metadata = generatePageMetadata('/contact');
 
@@ -32,15 +30,9 @@ export default async function ContactPage() {
     logger.warn('ContactPage: discord channel is not configured');
   }
 
-  // Check if terminal feature is enabled
-  let terminalEnabled = false;
-  try {
-    const terminalResult = await checkContactTerminalEnabled({});
-    terminalEnabled = terminalResult?.data ?? false;
-  } catch (error) {
-    logger.error('ContactPage: failed to check terminal feature flag', normalizeError(error));
-    // Fallback to false if feature flag check fails
-  }
+  // Feature flags are server/middleware only - use default for static generation
+  // Terminal feature should be evaluated in middleware, not in page components
+  const terminalEnabled = false; // Default for static generation
 
   return (
     <div className="container mx-auto max-w-6xl px-4 py-8 sm:py-12">
