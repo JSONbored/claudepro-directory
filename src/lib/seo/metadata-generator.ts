@@ -4,7 +4,7 @@
 
 import type { Metadata } from 'next';
 import { APP_CONFIG } from '@/src/lib/data/config/constants';
-import { fetchMetadata, type SEOMetadata } from '@/src/lib/data/seo/client';
+import { getSEOMetadata } from '@/src/lib/data/seo/client';
 import { logger } from '@/src/lib/logger';
 import { generateOGImageUrl, OG_IMAGE_DIMENSIONS } from '@/src/lib/og/url-generator';
 
@@ -29,8 +29,47 @@ export async function generatePageMetadata(
     }
   }
 
-  // Fetch metadata from unified data-api/seo endpoint
-  const config: SEOMetadata = await fetchMetadata(resolvedRoute);
+  // Fetch metadata from RPC (data layer)
+  const seoData = await getSEOMetadata(resolvedRoute);
+
+  if (!seoData) {
+    // Fallback to default metadata if RPC returns null
+    const canonicalUrl = buildCanonicalUrl(resolvedRoute);
+    const ogImageUrl = generateOGImageUrl(resolvedRoute);
+    return {
+      title: APP_CONFIG.name,
+      description: APP_CONFIG.description,
+      metadataBase: new URL(APP_CONFIG.url),
+      alternates: { canonical: canonicalUrl },
+      openGraph: {
+        type: 'website',
+        title: APP_CONFIG.name,
+        description: APP_CONFIG.description,
+        url: canonicalUrl,
+        siteName: APP_CONFIG.name,
+        locale: 'en_US',
+        images: [
+          {
+            url: ogImageUrl,
+            width: OG_IMAGE_DIMENSIONS.width,
+            height: OG_IMAGE_DIMENSIONS.height,
+            alt: APP_CONFIG.name,
+          },
+        ],
+      },
+      twitter: {
+        card: 'summary',
+        title: APP_CONFIG.name,
+        description: APP_CONFIG.description,
+        images: [ogImageUrl],
+        creator: '@JSONbored',
+        site: '@JSONbored',
+      },
+    };
+  }
+
+  // Handle discriminated union: metadata-only case
+  const config = 'metadata' in seoData ? seoData.metadata : seoData;
 
   const canonicalUrl = buildCanonicalUrl(resolvedRoute);
   const ogImageUrl = generateOGImageUrl(resolvedRoute);
@@ -39,18 +78,12 @@ export async function generatePageMetadata(
     title: config.title,
     description: config.description,
     keywords: config.keywords,
-    authors: config.authors || undefined,
     robots: config.robots,
     alternates: {
       canonical: canonicalUrl,
-      ...(config.shouldAddLlmsTxt && {
-        types: {
-          'text/plain': `${new URL(canonicalUrl).pathname}/llms.txt`,
-        },
-      }),
     },
     openGraph: {
-      type: config.openGraphType,
+      type: config.openGraphType === 'profile' ? 'profile' : 'website',
       title: config.title,
       description: config.description,
       url: canonicalUrl,
@@ -64,14 +97,9 @@ export async function generatePageMetadata(
           alt: config.title,
         },
       ],
-      ...(config.openGraphType === 'article' && {
-        publishedTime: config.publishedTime || undefined,
-        modifiedTime: config.modifiedTime || undefined,
-        authors: config.authors?.map((a) => a.name),
-      }),
     },
     twitter: {
-      card: config.twitterCard as 'summary' | 'summary_large_image' | 'app' | 'player',
+      card: 'summary_large_image',
       title: config.title,
       description: config.description,
       images: [ogImageUrl],

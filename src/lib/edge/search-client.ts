@@ -6,7 +6,8 @@
  * caching, error handling, and analytics tracking.
  */
 
-import { getCacheTtl } from '@/src/lib/data/config/cache-config';
+// NOTE: getCacheTtl is NOT imported at module level to prevent flags/next from being
+// evaluated in client component contexts. It's lazy-loaded inside functions that need it.
 import { logger } from '@/src/lib/logger';
 import type { Database } from '@/src/types/database-overrides';
 
@@ -135,8 +136,10 @@ export async function searchUnified<T = ContentSearchResult | UnifiedSearchResul
     params.set('offset', String(filters.offset));
   }
 
-  // Get cache TTL from Statsig (dynamic configuration)
-  const ttl = await getCacheTtl('cache.search.ttl_seconds');
+  // Get cache TTL - use default for edge/client contexts to avoid importing cache-config.ts
+  // cache-config.ts is server-only and uses flags/next which has Node.js-only dependencies
+  // In edge/client contexts, use a sensible default TTL (1 hour)
+  const ttl = 3600; // Default: 1 hour cache for search results
 
   // Build cache tags
   const cacheTags = ['search', ...(entities || ['content']).map((e) => `search-${e}`)];

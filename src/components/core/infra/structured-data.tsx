@@ -1,45 +1,50 @@
 /**
- * Unified Structured Data - Renders pre-generated Schema.org JSON-LD from data-api/seo
- * Schemas are pre-serialized with XSS protection at the edge function
+ * Unified Structured Data - Renders Schema.org JSON-LD from generate_metadata_complete RPC
+ * Schemas are serialized with XSS protection client-side
  */
 
 import Script from 'next/script';
-import { fetchSchemas } from '@/src/lib/data/seo/client';
+import { getSEOMetadataWithSchemas } from '@/src/lib/data/seo/client';
+import { serializeJsonLd } from '@/src/lib/utils/jsonld';
 
 interface StructuredDataProps {
   route: string;
 }
 
 export async function StructuredData({ route }: StructuredDataProps) {
-  const schemas = await fetchSchemas(route);
+  const seoData = await getSEOMetadataWithSchemas(route);
 
-  if (!schemas || schemas.length === 0) {
+  // Handle discriminated union: check if schemas exist
+  if (!(seoData && 'schemas' in seoData && seoData.schemas) || seoData.schemas.length === 0) {
     return null;
   }
 
   return (
     <>
-      {schemas.map((schema) => {
-        // Edge function returns pre-serialized strings (XSS-protected)
-        // Extract @type for key (from serialized string) - use schema content hash for unique key
+      {seoData.schemas.map((schema, index) => {
+        // Serialize JSON-LD with XSS protection
+        const serialized = serializeJsonLd(schema);
+
+        // Extract @type for key
         let schemaType = 'schema';
-        let schemaId = schema.slice(0, 20); // Use first 20 chars as unique identifier
+        let schemaId = `schema-${index}`;
         try {
-          const parsed = JSON.parse(schema);
+          const parsed =
+            typeof schema === 'object' && schema !== null
+              ? schema
+              : JSON.parse(JSON.stringify(schema));
           schemaType = (parsed as { '@type'?: string })['@type'] || 'schema';
-          // Use @id or @type + hash of content for unique key
+          // Use @id or @type + index for unique key
           if ('@id' in parsed && typeof parsed['@id'] === 'string') {
             schemaId = parsed['@id'];
           } else {
-            // Create hash from schema content for uniqueness
-            schemaId = `${schemaType}-${schema.slice(0, 20).replace(/[^a-zA-Z0-9]/g, '')}`;
+            schemaId = `${schemaType}-${index}`;
           }
         } catch {
-          // Fallback if parsing fails - use content hash
-          schemaId = `schema-${schema.slice(0, 20).replace(/[^a-zA-Z0-9]/g, '')}`;
+          // Fallback if parsing fails
+          schemaId = `schema-${index}`;
         }
 
-        // Use schemaId (derived from content) as key instead of index
         const uniqueKey = `${schemaType}-${schemaId}`;
 
         return (
@@ -47,9 +52,9 @@ export async function StructuredData({ route }: StructuredDataProps) {
             key={uniqueKey}
             id={`structured-data-${uniqueKey}`}
             type="application/ld+json"
-            // biome-ignore lint/security/noDangerouslySetInnerHtml: JSON-LD structured data is pre-serialized with XSS protection at edge function
+            // biome-ignore lint/security/noDangerouslySetInnerHtml: JSON-LD structured data is serialized with XSS protection via serializeJsonLd
             dangerouslySetInnerHTML={{
-              __html: schema,
+              __html: serialized,
             }}
             strategy="afterInteractive"
           />

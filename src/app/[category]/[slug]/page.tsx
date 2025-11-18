@@ -19,7 +19,9 @@ import {
 } from '@/src/lib/data/config/category';
 import { getContentByCategory } from '@/src/lib/data/content';
 import { getContentDetailComplete } from '@/src/lib/data/content/detail';
-import { featureFlags } from '@/src/lib/flags';
+// NOTE: featureFlags is NOT imported at module level to avoid flags/next accessing
+// Vercel Edge Config during module initialization. It's lazy-loaded in the component
+// only when the page is actually rendered (runtime, not build-time).
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { ensureStringArray } from '@/src/lib/utils/data.utils';
@@ -170,9 +172,23 @@ export default async function DetailPage({
   const copyCount = analytics?.copy_count || 0;
   const relatedItems = related || [];
 
-  // Check feature flags
-  const tabsEnabled = await featureFlags.contentDetailTabs();
-  const recentlyViewedEnabled = await featureFlags.recentlyViewed();
+  // Check feature flags (lazy-loaded to avoid Edge Config access during build)
+  // CRITICAL: Check build-time BEFORE importing flags.ts to prevent Edge Config access
+  const { isBuildTime } = await import('@/src/lib/utils/build-time');
+
+  let tabsEnabled = false;
+  let recentlyViewedEnabled = false;
+
+  // CRITICAL: NEVER import flags.ts during build-time static generation
+  // Even with isBuildTime() checks, Next.js analyzes the module and sees require('flags/next')
+  // which triggers Edge Config access. Always use defaults during build.
+  if (!isBuildTime()) {
+    // Only import flags.ts at runtime (not during build)
+    const { featureFlags } = await import('@/src/lib/flags');
+    tabsEnabled = await featureFlags.contentDetailTabs();
+    recentlyViewedEnabled = await featureFlags.recentlyViewed();
+  }
+  // During build-time, tabsEnabled and recentlyViewedEnabled remain false (defaults)
 
   // No transformation needed - displayTitle computed at build time
   // This eliminates runtime overhead and follows DRY principles

@@ -1,4 +1,11 @@
-'use server';
+/**
+ * Cached RPC Helper Functions
+ *
+ * NOTE: This file does NOT have 'use server' because fetchCachedRpc is a helper function
+ * used in server components, not a server action called from client components.
+ * Removing 'use server' prevents Next.js from treating this as a server action module
+ * during static generation, which was causing "Server Functions cannot be called" errors.
+ */
 
 import type { CacheTtlKey } from '@/src/lib/data/config/cache-config';
 import { logger } from '@/src/lib/logger';

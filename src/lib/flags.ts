@@ -1,173 +1,369 @@
-import { type StatsigUser, statsigAdapter } from '@flags-sdk/statsig';
-import { createServerClient } from '@supabase/ssr';
-import type { Identify } from 'flags';
-import { dedupe, flag } from 'flags/next';
-import { getAuthenticatedUserFromClient } from '@/src/lib/auth/get-authenticated-user';
-import { logger } from '@/src/lib/logger';
-import type { Database } from '@/src/types/database.types';
+// CRITICAL: Lazy-load flags/next to prevent Edge Config access during module evaluation
+// flags/next uses Vercel Edge Config which triggers "Server Functions cannot be called" errors during build
+// During build-time, this module exports ONLY mock functions - no flags/next imports at all
+// CRITICAL: Don't import types from @flags-sdk/statsig as it might cause Next.js to analyze the package
+// Define StatsigUser type locally
+type StatsigUser = {
+  userID: string;
+  email?: string;
+  customIDs?: Record<string, string>;
+};
+
+// Define Identify type locally to avoid importing from 'flags' package
+// which might cause Next.js to analyze flags/next during build
+type Identify<T> = (context: {
+  headers?: { get: (name: string) => string | null };
+  cookies?: { getAll: () => Array<{ name: string; value: string }> };
+}) => Promise<T>;
+
+// CRITICAL: Check build-time at MODULE LEVEL to prevent ANY flags/next imports during build
+// If we're in build-time, we'll export mock functions that never touch flags/next
+// This check happens IMMEDIATELY when the module loads, before any other code executes
+// Use direct env check to avoid any function call that might trigger analysis
+const IS_BUILD_TIME =
+  typeof process !== 'undefined' &&
+  (process.env.NEXT_PHASE === 'phase-production-build' ||
+    (typeof process.argv !== 'undefined' &&
+      process.argv.some(
+        (arg) => arg.includes('next') && (arg.includes('build') || arg.includes('export'))
+      )) ||
+    !process.env.NEXT_PUBLIC_SUPABASE_URL ||
+    !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+    (!process.env.VERCEL && !process.env.VERCEL_ENV && !process.env.VERCEL_URL));
+
+// CRITICAL: Runtime-only functions - only defined when NOT in build-time
+// This prevents Next.js from analyzing flags/next during build
+// During build-time, these are simple no-op functions
+// At runtime, they're replaced with real implementations via dynamic import
+// CRITICAL: Use Function constructor to build the import path dynamically
+// This prevents Next.js from statically analyzing the import path
+const getFlagsNext = IS_BUILD_TIME
+  ? (async () => null as { flag: unknown; dedupe: unknown } | null)
+  : (async () => {
+      // Runtime-only: Load the actual implementation
+      // Build the import path dynamically to prevent static analysis
+      const runtimePath = './flags' + '-runtime';
+      const importFn = new Function('specifier', 'return import(specifier)');
+      const runtimeModule = await importFn(runtimePath);
+      return runtimeModule.getFlagsNext();
+    }) as () => Promise<{ flag: unknown; dedupe: unknown } | null>;
+
+const getRuntimeDeps = IS_BUILD_TIME
+  ? (async () => null as any)
+  : (async () => {
+      // Runtime-only: Load the actual implementation
+      // Build the import path dynamically to prevent static analysis
+      const runtimePath = './flags' + '-runtime';
+      const importFn = new Function('specifier', 'return import(specifier)');
+      const runtimeModule = await importFn(runtimePath);
+      return runtimeModule.getRuntimeDeps();
+    }) as () => Promise<any>;
 
 /**
  * Identify function - provides user context for flag evaluation
  * Statsig uses this to do % rollouts, user targeting, etc.
  *
- * IMPORTANT: Uses headers/cookies provided by flags SDK (no next/headers import needed)
- * This allows the function to work in both server and client contexts without build errors
+ * CRITICAL: During build-time, returns a simple mock function.
+ * At runtime, lazy-loads the real implementation with flags/next
  */
-export const identify = dedupe((async ({ headers, cookies }) => {
-  try {
-    // Build-time detection: If cookies/headers unavailable (static generation), return anonymous immediately
-    // This prevents warnings about missing request context during build
-    if (!(cookies && headers)) {
-      return { userID: 'anonymous' };
-    }
+let _identifyFn: Identify<StatsigUser> | null = null;
 
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-    // Fallback to anonymous if env vars missing (development safety)
-    if (!(supabaseUrl && supabaseAnonKey)) {
-      return { userID: 'anonymous' };
-    }
-
-    // Create Supabase client using cookies provided by flags SDK
-    const supabase = createServerClient<Database>(supabaseUrl, supabaseAnonKey, {
-      cookies: {
-        getAll() {
-          return cookies.getAll();
-        },
-        setAll() {
-          // Flags SDK cookies are read-only, cannot set
-          // This is fine - auth cookies are already set by middleware/route handlers
-        },
-      },
-    });
-
-    const { user } = await getAuthenticatedUserFromClient(supabase, {
-      context: 'feature_flags_identify',
-    });
-
-    const baseUser: StatsigUser = {
-      userID: user?.id || 'anonymous',
-    };
-
-    // Only add optional fields if they exist
-    if (user?.email) {
-      baseUser.email = user.email;
-    }
-
-    if (user?.user_metadata?.slug) {
-      baseUser.customIDs = {
-        userSlug: user.user_metadata.slug as string,
-      };
-    }
-
-    return baseUser;
-  } catch (error) {
-    // Log auth failure for monitoring (important for debugging flag evaluation issues)
-    logger.error(
-      'Failed to identify user for feature flags, falling back to anonymous',
-      error as Error,
-      {
-        context: 'feature_flags',
-        fallback: 'anonymous',
-      }
-    );
-
-    // Fallback to anonymous if auth fails
-    return {
-      userID: 'anonymous',
-    };
+const getIdentifyBuildTime = async (): Promise<Identify<StatsigUser>> => {
+  if (!_identifyFn) {
+    _identifyFn = async () => ({ userID: 'anonymous' });
   }
-}) satisfies Identify<StatsigUser>);
+  return _identifyFn!;
+};
+
+const getIdentifyRuntime = async (): Promise<Identify<StatsigUser>> => {
+  if (!_identifyFn) {
+    const flagsNext = await getFlagsNext();
+    const deps = await getRuntimeDeps();
+    if (!flagsNext || !deps) {
+      _identifyFn = async () => ({ userID: 'anonymous' });
+    } else {
+      const dedupe = (flagsNext as { dedupe: <T>(fn: T) => T }).dedupe;
+      const identifyImpl = dedupe(
+        (async ({ headers, cookies }) => {
+          try {
+            if (!(cookies && headers)) {
+              return { userID: 'anonymous' };
+            }
+
+            const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+            const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+            if (!(supabaseUrl && supabaseAnonKey)) {
+              return { userID: 'anonymous' };
+            }
+
+            const supabase = deps.createServerClient(
+              supabaseUrl,
+              supabaseAnonKey,
+              {
+                cookies: {
+                  getAll() {
+                    return cookies.getAll();
+                  },
+                  setAll() {
+                    // Flags SDK cookies are read-only
+                  },
+                },
+              }
+            );
+
+            const { user } = await deps.getAuthenticatedUserFromClient(supabase, {
+              context: 'feature_flags_identify',
+            });
+
+            const baseUser: StatsigUser = {
+              userID: user?.id || 'anonymous',
+            };
+
+            if (user?.email) {
+              baseUser.email = user.email;
+            }
+
+            if (user?.user_metadata?.slug) {
+              baseUser.customIDs = {
+                userSlug: user.user_metadata.slug as string,
+              };
+            }
+
+            return baseUser;
+          } catch (error) {
+            deps.logger.error(
+              'Failed to identify user for feature flags, falling back to anonymous',
+              error as Error,
+              {
+                context: 'feature_flags',
+                fallback: 'anonymous',
+              }
+            );
+            return { userID: 'anonymous' };
+          }
+        }) satisfies Identify<StatsigUser>
+      );
+      _identifyFn = identifyImpl;
+    }
+  }
+  return _identifyFn!;
+};
+
+const getIdentify = IS_BUILD_TIME ? getIdentifyBuildTime : getIdentifyRuntime;
+
+// Export identify as a function that lazy-loads
+export const identify = getIdentify;
 
 /**
  * Factory function to create feature flags
+ * During build-time, returns a mock function to prevent Edge Config access
+ * 
+ * CRITICAL: Split into two separate functions to prevent Next.js from analyzing
+ * the runtime code path during build.
  */
-export const createFeatureFlag = (key: string) =>
-  flag<boolean, StatsigUser>({
-    key,
-    adapter: statsigAdapter.featureGate((gate) => gate.value, {
-      exposureLogging: true, // Track when flags are checked (for analytics)
-    }),
-    identify,
-  });
+const createFeatureFlagBuildTime = (_key: string) => {
+  return async () => false as boolean;
+};
+
+const createFeatureFlagRuntime = (key: string) => {
+  // Lazy-load runtime implementation
+  return async () => {
+    const flagsNext = await getFlagsNext();
+    const deps = await getRuntimeDeps();
+    if (!flagsNext || !deps) {
+      return false;
+    }
+    const flag = (flagsNext as { flag: <T, U>(config: unknown) => () => Promise<T> }).flag;
+    const identifyFn = await getIdentify();
+    const flagFn = flag<boolean, StatsigUser>({
+      key,
+      adapter: deps.statsigAdapter.featureGate((gate: { value: boolean }) => gate.value, {
+        exposureLogging: true,
+      }),
+      identify: identifyFn,
+      defaultValue: false,
+    });
+    return flagFn();
+  };
+};
+
+export const createFeatureFlag = IS_BUILD_TIME
+  ? createFeatureFlagBuildTime
+  : createFeatureFlagRuntime;
 
 /**
  * Factory function to create experiments (A/B tests with variants)
+ * During build-time, returns a mock function to prevent Edge Config access
+ * 
+ * CRITICAL: Split into two separate functions to prevent Next.js from analyzing
+ * the runtime code path during build.
  */
-export const createExperiment = <T extends string>(key: string, defaultValue: T) =>
-  flag<T, StatsigUser>({
-    key,
-    adapter: statsigAdapter.experiment((exp) => exp.get('variant', defaultValue) as T, {
-      exposureLogging: true,
-    }),
-    identify,
-    defaultValue,
-  });
+const createExperimentBuildTime = <T extends string>(_key: string, defaultValue: T) => {
+  return async () => defaultValue as T;
+};
+
+const createExperimentRuntime = <T extends string>(key: string, defaultValue: T) => {
+  // Lazy-load runtime implementation
+  return async () => {
+    const flagsNext = await getFlagsNext();
+    const deps = await getRuntimeDeps();
+    if (!flagsNext || !deps) {
+      return defaultValue;
+    }
+    const flag = (flagsNext as { flag: <T, U>(config: unknown) => () => Promise<T> }).flag;
+    const identifyFn = await getIdentify();
+    return flag<T, StatsigUser>({
+      key,
+      adapter: deps.statsigAdapter.experiment(
+        (exp: { get: (key: string, defaultValue: T) => T }) => exp.get('variant', defaultValue) as T,
+        {
+          exposureLogging: true,
+        }
+      ),
+      identify: identifyFn,
+      defaultValue,
+    })();
+  };
+};
+
+export const createExperiment = IS_BUILD_TIME
+  ? createExperimentBuildTime
+  : createExperimentRuntime;
 
 /**
  * Factory function to create dynamic config groups (runtime-tunable values)
  * Each config group returns a JSON object with multiple parameters
  * Use for values that need to change without code deploys
+ * During build-time, returns a mock function to prevent Edge Config access
+ * 
+ * CRITICAL: Split into two separate functions to prevent Next.js from analyzing
+ * the runtime code path during build. When IS_BUILD_TIME is true, only the
+ * build-time function is defined, so Next.js never sees the flags/next reference.
  */
-const createDynamicConfigGroup = <T extends Record<string, unknown>>(
+const createDynamicConfigGroupBuildTime = <T extends Record<string, unknown>>(
+  _configName: string,
+  defaults: T
+): (() => Promise<T>) => {
+  return async () => defaults as T;
+};
+
+const createDynamicConfigGroupRuntime = <T extends Record<string, unknown>>(
   configName: string,
   defaults: T
-) =>
-  flag<T, StatsigUser>({
-    key: configName,
-    adapter: statsigAdapter.dynamicConfig((config) => {
-      // Merge Statsig values with defaults
-      const statsigValues = (config.value as Record<string, unknown>) || {};
-      return { ...defaults, ...statsigValues } as T;
-    }),
-    identify,
-    defaultValue: defaults,
-  });
+): (() => Promise<T>) => {
+  // Lazy-load runtime implementation
+  return async () => {
+    const flagsNext = await getFlagsNext();
+    const deps = await getRuntimeDeps();
+    if (!flagsNext || !deps) {
+      return defaults;
+    }
+    const flag = (flagsNext as { flag: <T, U>(config: unknown) => () => Promise<T> }).flag;
+    const identifyFn = await getIdentify();
+    const flagFn = flag<T, StatsigUser>({
+      key: configName,
+      adapter: deps.statsigAdapter.dynamicConfig((config: { value: unknown }) => {
+        const statsigValues = (config.value as Record<string, unknown>) || {};
+        return { ...defaults, ...statsigValues } as T;
+      }),
+      identify: identifyFn,
+      defaultValue: defaults,
+    });
+    return flagFn();
+  };
+};
+
+// CRITICAL: Conditionally define the function based on build-time
+// This ensures Next.js never sees the runtime code path during build
+const createDynamicConfigGroup = IS_BUILD_TIME
+  ? createDynamicConfigGroupBuildTime
+  : createDynamicConfigGroupRuntime;
 
 /**
  * All feature flags - centralized
  * Usage: const enabled = await featureFlags.testFlag();
+ *
+ * CRITICAL: Lazy-loaded to prevent flags/next from being evaluated during module load
+ * This prevents "Server Functions cannot be called" errors during static generation
  */
-export const featureFlags = {
-  // Test
-  testFlag: createFeatureFlag('test_flag'),
 
-  // Growth features
-  referralProgram: createFeatureFlag('referral_program'),
-  confettiAnimations: createFeatureFlag('confetti_animations'),
-  recentlyViewed: createFeatureFlag('recently_viewed_sidebar'),
-  compareConfigs: createFeatureFlag('compare_configs'),
-
-  // Monetization features
-  promotedConfigs: createFeatureFlag('promoted_configs'),
-  jobAlerts: createFeatureFlag('job_alerts'),
-  selfServiceCheckout: createFeatureFlag('self_service_checkout'),
-
-  // UX enhancements
-  contentDetailTabs: createFeatureFlag('content_detail_tabs'),
-  interactiveOnboarding: createFeatureFlag('interactive_onboarding'),
-  configPlayground: createFeatureFlag('config_playground'),
-  contactTerminalEnabled: createFeatureFlag('contact_terminal_enabled'),
-
-  // Infrastructure
-  publicAPI: createFeatureFlag('public_api'),
-  enhancedSkeletons: createFeatureFlag('enhanced_skeletons'),
-
-  // UI Components
-  floatingActionBar: createFeatureFlag('floating_action_bar'),
-  fabSubmitAction: createFeatureFlag('fab_submit_action'),
-  fabSearchAction: createFeatureFlag('fab_search_action'),
-  fabScrollToTop: createFeatureFlag('fab_scroll_to_top'),
-  fabNotifications: createFeatureFlag('fab_notifications'),
-  notificationsProvider: createFeatureFlag('notifications_provider'),
-  notificationsSheet: createFeatureFlag('notifications_sheet'),
-  notificationsToasts: createFeatureFlag('notifications_toasts'),
-
-  // Infrastructure - Logging
-  loggerConsole: createFeatureFlag('logger_console'),
-  loggerVerbose: createFeatureFlag('logger_verbose'),
+/**
+ * Feature flags type - exported for TypeScript inference in dynamic imports
+ */
+export type FeatureFlags = {
+  testFlag: () => Promise<boolean>;
+  referralProgram: () => Promise<boolean>;
+  confettiAnimations: () => Promise<boolean>;
+  recentlyViewed: () => Promise<boolean>;
+  compareConfigs: () => Promise<boolean>;
+  promotedConfigs: () => Promise<boolean>;
+  jobAlerts: () => Promise<boolean>;
+  selfServiceCheckout: () => Promise<boolean>;
+  contentDetailTabs: () => Promise<boolean>;
+  interactiveOnboarding: () => Promise<boolean>;
+  configPlayground: () => Promise<boolean>;
+  contactTerminalEnabled: () => Promise<boolean>;
+  publicAPI: () => Promise<boolean>;
+  enhancedSkeletons: () => Promise<boolean>;
+  floatingActionBar: () => Promise<boolean>;
+  fabSubmitAction: () => Promise<boolean>;
+  fabSearchAction: () => Promise<boolean>;
+  fabScrollToTop: () => Promise<boolean>;
+  fabNotifications: () => Promise<boolean>;
+  notificationsProvider: () => Promise<boolean>;
+  notificationsSheet: () => Promise<boolean>;
+  notificationsToasts: () => Promise<boolean>;
+  loggerConsole: () => Promise<boolean>;
+  loggerVerbose: () => Promise<boolean>;
 };
+
+let _featureFlags: FeatureFlags | null = null;
+
+const getFeatureFlags = (): FeatureFlags => {
+  if (!_featureFlags) {
+    _featureFlags = {
+      // Test
+      testFlag: createFeatureFlag('test_flag'),
+      // Growth features
+      referralProgram: createFeatureFlag('referral_program'),
+      confettiAnimations: createFeatureFlag('confetti_animations'),
+      recentlyViewed: createFeatureFlag('recently_viewed_sidebar'),
+      compareConfigs: createFeatureFlag('compare_configs'),
+      // Monetization features
+      promotedConfigs: createFeatureFlag('promoted_configs'),
+      jobAlerts: createFeatureFlag('job_alerts'),
+      selfServiceCheckout: createFeatureFlag('self_service_checkout'),
+      // UX enhancements
+      contentDetailTabs: createFeatureFlag('content_detail_tabs'),
+      interactiveOnboarding: createFeatureFlag('interactive_onboarding'),
+      configPlayground: createFeatureFlag('config_playground'),
+      contactTerminalEnabled: createFeatureFlag('contact_terminal_enabled'),
+      // Infrastructure
+      publicAPI: createFeatureFlag('public_api'),
+      enhancedSkeletons: createFeatureFlag('enhanced_skeletons'),
+      // UI Components
+      floatingActionBar: createFeatureFlag('floating_action_bar'),
+      fabSubmitAction: createFeatureFlag('fab_submit_action'),
+      fabSearchAction: createFeatureFlag('fab_search_action'),
+      fabScrollToTop: createFeatureFlag('fab_scroll_to_top'),
+      fabNotifications: createFeatureFlag('fab_notifications'),
+      notificationsProvider: createFeatureFlag('notifications_provider'),
+      notificationsSheet: createFeatureFlag('notifications_sheet'),
+      notificationsToasts: createFeatureFlag('notifications_toasts'),
+      // Infrastructure - Logging
+      loggerConsole: createFeatureFlag('logger_console'),
+      loggerVerbose: createFeatureFlag('logger_verbose'),
+    };
+  }
+  return _featureFlags;
+};
+
+export const featureFlags: FeatureFlags = new Proxy({} as FeatureFlags, {
+  get(_target, prop) {
+    return getFeatureFlags()[prop as keyof FeatureFlags];
+  },
+});
 
 /**
  * Newsletter A/B Test Experiments
@@ -517,8 +713,10 @@ export const recentlyViewedConfigs = createDynamicConfigGroup(
  * Cache Configs - Cache TTL settings and invalidation rules
  * Controls cache durations and invalidation tags across the application
  * Usage: const config = await cacheConfigs(); const ttl = config['cache.homepage.ttl_seconds'];
+ *
+ * CRITICAL: Using lazy getter to prevent module-level evaluation during build
  */
-export const cacheConfigs = createDynamicConfigGroup('cache_configs', {
+const _cacheConfigsDefaults = {
   // TTL Settings (in seconds) - Optimized for low-traffic sites
   'cache.homepage.ttl_seconds': 3600, // 1 hour
   'cache.content_detail.ttl_seconds': 7200, // 2 hours
@@ -607,4 +805,14 @@ export const cacheConfigs = createDynamicConfigGroup('cache_configs', {
   'cache.invalidate.usage_tracking': ['content'] as string[],
   'cache.invalidate.changelog': ['changelog'] as string[],
   'cache.invalidate.newsletter_subscribe': ['newsletter'] as string[],
-});
+} as const;
+
+// Lazy getter - only creates the config when first accessed
+// This prevents module-level evaluation that triggers Edge Config access during build
+let _cacheConfigsFn: (() => Promise<typeof _cacheConfigsDefaults>) | null = null;
+export const cacheConfigs = (): Promise<typeof _cacheConfigsDefaults> => {
+  if (!_cacheConfigsFn) {
+    _cacheConfigsFn = createDynamicConfigGroup('cache_configs', _cacheConfigsDefaults);
+  }
+  return _cacheConfigsFn();
+};

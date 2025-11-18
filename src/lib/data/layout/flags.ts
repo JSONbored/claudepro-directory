@@ -12,7 +12,9 @@
 'use server';
 
 import { cache } from 'react';
-import { featureFlags, newsletterExperiments } from '@/src/lib/flags';
+// NOTE: featureFlags and newsletterExperiments are NOT imported at module level to avoid flags/next
+// accessing Vercel Edge Config during module initialization. They're lazy-loaded in getLayoutFlags()
+// only when the function is actually called (runtime, not build-time).
 import { logger } from '@/src/lib/logger';
 import { normalizeError } from '@/src/lib/utils/error.utils';
 
@@ -69,8 +71,32 @@ const DEFAULT_FLAGS: LayoutFlags = {
  * Uses Promise.allSettled to handle partial failures gracefully
  * Wrapped in React cache() for request deduplication
  */
+import { isBuildTime } from '@/src/lib/utils/build-time';
+
 export const getLayoutFlags = cache(async (): Promise<LayoutFlags> => {
+  // CRITICAL: Check build-time BEFORE importing flags.ts
+  // flags/next uses Vercel Edge Config as a cache layer, and accessing Edge Config
+  // during build triggers "Server Functions cannot be called during initial render" errors
+
+  if (isBuildTime()) {
+    // During build, return defaults immediately to avoid importing flags.ts
+    // which would trigger Edge Config access
+    return DEFAULT_FLAGS;
+  }
+
+  // CRITICAL: NEVER import flags.ts during build-time static generation
+  // Even with isBuildTime() checks, Next.js analyzes the module and sees require('flags/next')
+  // which triggers Edge Config access. Always use defaults during build.
+  // Double-check build-time status before importing
+  if (isBuildTime()) {
+    return DEFAULT_FLAGS;
+  }
+
   try {
+    // Lazy-load featureFlags and newsletterExperiments to avoid flags/next accessing
+    // Vercel Edge Config during module initialization (which happens during build)
+    const { featureFlags, newsletterExperiments } = await import('@/src/lib/flags');
+
     // Fetch all flags in parallel using Promise.allSettled for graceful error handling
     const [
       floatingActionBarResult,

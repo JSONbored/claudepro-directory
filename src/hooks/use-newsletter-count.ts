@@ -21,41 +21,52 @@ export interface UseNewsletterCountReturn {
 const CACHE_KEY = 'newsletter_count';
 const CACHE_TIMESTAMP_KEY = 'newsletter_count_ts';
 
-// Default values (will be overridden by Dynamic Configs)
-let CACHE_TTL_MS = 300000; // 5 minutes (300 seconds)
-let POLL_INTERVAL_MS = 300000; // 5 minutes
-
-// Load config from Statsig on module initialization
-Promise.all([getCacheConfig({}), getPollingConfig({})])
-  .then(
-    ([cacheResult, pollingResult]: [
-      Awaited<ReturnType<typeof getCacheConfig>>,
-      Awaited<ReturnType<typeof getPollingConfig>>,
-    ]) => {
-      if (cacheResult?.data) {
-        const cache = cacheResult.data as Record<string, unknown>;
-        const cacheTtlSeconds = (cache['cache.newsletter_count_ttl_s'] as number) ?? 300;
-        CACHE_TTL_MS = cacheTtlSeconds * 1000;
-      }
-      if (pollingResult?.data) {
-        const polling = pollingResult.data as Record<string, unknown>;
-        POLL_INTERVAL_MS = (polling['polling.newsletter_count_ms'] as number) ?? 300000;
-      }
-    }
-  )
-  .catch((error) => {
-    logClientWarning('useNewsletterCount: failed to load cache/polling config', error);
-  });
+// Default values (will be overridden by Dynamic Configs from Statsig)
+const DEFAULT_CACHE_TTL_MS = 300000; // 5 minutes (300 seconds)
+const DEFAULT_POLL_INTERVAL_MS = 300000; // 5 minutes
 
 /**
  * Hook to fetch and poll newsletter subscriber count
- * Features: localStorage caching (1min TTL), visibility-based polling optimization
+ * Features: localStorage caching, visibility-based polling optimization
+ * Loads config from Statsig client-side (avoids build-time server calls)
  */
 export function useNewsletterCount(): UseNewsletterCountReturn {
   const [count, setCount] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const [cacheTtlMs, setCacheTtlMs] = useState(DEFAULT_CACHE_TTL_MS);
+  const [pollIntervalMs, setPollIntervalMs] = useState(DEFAULT_POLL_INTERVAL_MS);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const configLoadedRef = useRef(false);
+
+  // Load config from Statsig once when hook mounts (client-side only)
+  useEffect(() => {
+    if (configLoadedRef.current) return;
+    configLoadedRef.current = true;
+
+    Promise.all([getCacheConfig({}), getPollingConfig({})])
+      .then(
+        ([cacheResult, pollingResult]: [
+          Awaited<ReturnType<typeof getCacheConfig>>,
+          Awaited<ReturnType<typeof getPollingConfig>>,
+        ]) => {
+          if (cacheResult?.data) {
+            const cache = cacheResult.data as Record<string, unknown>;
+            const cacheTtlSeconds = (cache['cache.newsletter_count_ttl_s'] as number) ?? 300;
+            setCacheTtlMs(cacheTtlSeconds * 1000);
+          }
+          if (pollingResult?.data) {
+            const polling = pollingResult.data as Record<string, unknown>;
+            const pollInterval = (polling['polling.newsletter_count_ms'] as number) ?? 300000;
+            setPollIntervalMs(pollInterval);
+          }
+        }
+      )
+      .catch((error) => {
+        logClientWarning('useNewsletterCount: failed to load cache/polling config', error);
+        // Keep default values on error
+      });
+  }, []);
 
   useEffect(() => {
     const fetchCount = async () => {
@@ -65,7 +76,7 @@ export function useNewsletterCount(): UseNewsletterCountReturn {
         const cacheTs = localStorage.getItem(CACHE_TIMESTAMP_KEY);
         const cacheAge = Date.now() - (cacheTs ? Number.parseInt(cacheTs, 10) : 0);
 
-        if (cachedCount && cacheAge < CACHE_TTL_MS) {
+        if (cachedCount && cacheAge < cacheTtlMs) {
           setCount(Number.parseInt(cachedCount, 10));
           setIsLoading(false);
           return;
@@ -109,12 +120,12 @@ export function useNewsletterCount(): UseNewsletterCountReturn {
       logClientWarning('useNewsletterCount: initial fetch failed', err);
     });
 
-    // Start polling
+    // Start polling with current interval
     intervalRef.current = setInterval(() => {
       fetchCount().catch((err) => {
         logClientWarning('useNewsletterCount: polling fetch failed', err);
       });
-    }, POLL_INTERVAL_MS);
+    }, pollIntervalMs);
 
     // Visibility API: Pause polling when tab is hidden
     const handleVisibilityChange = () => {
@@ -133,7 +144,7 @@ export function useNewsletterCount(): UseNewsletterCountReturn {
             fetchCount().catch((err) => {
               logClientWarning('useNewsletterCount: polling fetch failed', err);
             });
-          }, POLL_INTERVAL_MS);
+          }, pollIntervalMs);
         }
       }
     };
@@ -144,7 +155,7 @@ export function useNewsletterCount(): UseNewsletterCountReturn {
       if (intervalRef.current) clearInterval(intervalRef.current);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, []);
+  }, [cacheTtlMs, pollIntervalMs]);
 
   return { count, isLoading, error };
 }

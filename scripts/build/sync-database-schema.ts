@@ -475,7 +475,7 @@ function main() {
     if (runDump) {
       results.push(generateSchemaDump(isForce, cachedSchemaHashForRun));
       const dumpResult = results[results.length - 1];
-      if (!(dumpResult && dumpResult.success)) {
+      if (!dumpResult?.success) {
         throw new Error('Schema dump failed - aborting');
       }
     }
@@ -483,7 +483,7 @@ function main() {
     if (runTypes) {
       results.push(generateTypes(isForce, cachedSchemaHashForRun));
       const typesResult = results[results.length - 1];
-      if (!(typesResult && typesResult.success)) {
+      if (!typesResult?.success) {
         throw new Error('Type generation failed - aborting');
       }
     }

@@ -39,7 +39,9 @@ export const getActiveNotificationsAction = authedAction
   .schema(getActiveNotificationsSchema)
   .action(async ({ parsedInput, ctx }): Promise<GetActiveNotificationsActionResult> => {
     const dismissedIds = parsedInput.dismissedIds ?? [];
-    const meta = await traceMeta<{ dismissedCount: number }>({ dismissedCount: dismissedIds.length });
+    const meta = await traceMeta<{ dismissedCount: number }>({
+      dismissedCount: dismissedIds.length,
+    });
 
     try {
       const notifications = await getActiveNotifications({

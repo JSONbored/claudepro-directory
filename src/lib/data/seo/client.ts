@@ -1,140 +1,85 @@
 /**
- * Unified SEO Client - Fetches metadata + schemas from data-api/seo
+ * SEO Data Layer - Database-First Architecture
+ * Uses generate_metadata_complete RPC with edge-layer caching
  */
 
-import { APP_CONFIG } from '@/src/lib/data/config/constants';
-import { logger } from '@/src/lib/logger';
-import { normalizeError } from '@/src/lib/utils/error.utils';
+'use server';
 
-const SEO_API_URL = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/data-api/seo`;
+import { fetchCachedRpc } from '@/src/lib/data/helpers';
+import type { GenerateMetadataCompleteReturn } from '@/src/types/database-overrides';
 
-export interface SEOMetadata {
-  title: string;
-  description: string;
-  keywords: string[];
-  openGraphType: 'website' | 'article';
-  twitterCard: string;
-  robots: { index: boolean; follow: boolean };
-  authors?: Array<{ name: string }> | null;
-  publishedTime?: string | null;
-  modifiedTime?: string | null;
-  shouldAddLlmsTxt: boolean;
-  isOverride: boolean;
+/**
+ * Detect if we're in build-time context or missing required environment variables
+ * During build, Supabase env vars may be unavailable, so RPC calls will fail
+ */
+function shouldSkipRpcCall(): boolean {
+  // Check if Supabase environment variables are available
+  const hasEnvVars =
+    process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  // During build-time static generation, env vars may not be available
+  // Return null to trigger fallback metadata in generatePageMetadata()
+  return !hasEnvVars;
 }
 
 /**
- * SEOSchema - Pre-serialized JSON-LD string from edge function (XSS-protected)
- * Edge function handles all serialization and XSS protection
+ * Get SEO metadata for a route
+ * Returns metadata-only response (discriminated union case 1)
+ * During build-time, returns null to trigger fallback metadata
  */
-export type SEOSchema = string;
-
-export interface SEOResponse {
-  metadata: SEOMetadata;
-  schemas?: SEOSchema[];
-}
-
-const DEFAULT_SEO_METADATA: SEOMetadata = {
-  title: APP_CONFIG.name,
-  description: APP_CONFIG.description,
-  keywords: [],
-  openGraphType: 'website',
-  twitterCard: 'summary',
-  robots: { index: true, follow: true },
-  authors: null,
-  publishedTime: null,
-  modifiedTime: null,
-  shouldAddLlmsTxt: false,
-  isOverride: false,
-};
-
-const DEFAULT_SEO_RESPONSE: SEOResponse = {
-  metadata: DEFAULT_SEO_METADATA,
-  schemas: [],
-};
-
-export async function fetchSEO(
-  route: string,
-  include: 'metadata' | 'metadata,schemas' = 'metadata'
-): Promise<SEOResponse> {
-  const url = `${SEO_API_URL}?route=${encodeURIComponent(route)}&include=${include}`;
-
-  try {
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
-      next: { revalidate: 86400 }, // 24hr Next.js cache
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text().catch(() => 'Unable to read response body');
-      const normalized = normalizeError(
-        new Error(`SEO API error: ${response.status} ${response.statusText}`),
-        'SEO API request failed'
-      );
-      logger.error('Failed to fetch SEO from edge function', normalized, {
-        route,
-        include,
-        status: response.status,
-        responseBody: errorText.slice(0, 200), // First 200 chars for context
-      });
-      return DEFAULT_SEO_RESPONSE;
-    }
-
-    const data = await response.json();
-
-    // Transform RPC response to client-side SEOResponse format
-    // RPC returns either: { title, description, ... } OR { metadata: {...}, schemas: [...] }
-    if ('metadata' in data && data.metadata) {
-      // Case: metadata+schemas response
-      return {
-        metadata: {
-          ...data.metadata,
-          // Add default values for fields not in RPC return
-          authors: null,
-          publishedTime: null,
-          modifiedTime: null,
-          shouldAddLlmsTxt: false,
-          isOverride: false,
-        } as SEOMetadata,
-        schemas: Array.isArray(data.schemas)
-          ? data.schemas.map((s: unknown) => (typeof s === 'string' ? s : JSON.stringify(s)))
-          : [],
-      };
-    }
-    if ('title' in data) {
-      // Case: metadata-only response (discriminated union case 1)
-      return {
-        metadata: {
-          ...data,
-          // Add default values for fields not in RPC return
-          authors: null,
-          publishedTime: null,
-          modifiedTime: null,
-          shouldAddLlmsTxt: false,
-          isOverride: false,
-        } as SEOMetadata,
-        schemas: [],
-      };
-    }
-
-    // Fallback to default if structure is unexpected
-    return DEFAULT_SEO_RESPONSE;
-  } catch (error) {
-    const normalized = normalizeError(error, 'Failed to fetch SEO from edge function');
-    logger.error('Failed to fetch SEO from edge function', normalized, {
-      route,
-      include,
-    });
-    return DEFAULT_SEO_RESPONSE;
+export async function getSEOMetadata(
+  route: string
+): Promise<GenerateMetadataCompleteReturn | null> {
+  // During build or if env vars missing, return null immediately
+  // This triggers fallback metadata in generatePageMetadata()
+  if (shouldSkipRpcCall()) {
+    return null;
   }
+
+  return fetchCachedRpc<'generate_metadata_complete', GenerateMetadataCompleteReturn | null>(
+    {
+      p_route: route,
+      p_include: 'metadata',
+    },
+    {
+      rpcName: 'generate_metadata_complete',
+      tags: ['seo', `seo-${route}`],
+      ttlKey: 'cache.seo.ttl_seconds',
+      keySuffix: `metadata-${route}`,
+      useAuthClient: false,
+      fallback: null,
+      logMeta: { route, include: 'metadata' },
+    }
+  );
 }
 
-export async function fetchMetadata(route: string): Promise<SEOMetadata> {
-  const { metadata } = await fetchSEO(route, 'metadata');
-  return metadata;
-}
+/**
+ * Get SEO metadata and JSON-LD schemas for a route
+ * Returns metadata+schemas response (discriminated union case 2)
+ * During build-time, returns null (no schemas during static generation)
+ */
+export async function getSEOMetadataWithSchemas(
+  route: string
+): Promise<GenerateMetadataCompleteReturn | null> {
+  // During build or if env vars missing, return null immediately
+  // Structured data will be empty during build (expected behavior)
+  if (shouldSkipRpcCall()) {
+    return null;
+  }
 
-export async function fetchSchemas(route: string): Promise<SEOSchema[]> {
-  const { schemas } = await fetchSEO(route, 'metadata,schemas');
-  return schemas || [];
+  return fetchCachedRpc<'generate_metadata_complete', GenerateMetadataCompleteReturn | null>(
+    {
+      p_route: route,
+      p_include: 'metadata,schemas',
+    },
+    {
+      rpcName: 'generate_metadata_complete',
+      tags: ['seo', `seo-${route}`, 'structured-data'],
+      ttlKey: 'cache.seo.ttl_seconds',
+      keySuffix: `metadata-schemas-${route}`,
+      useAuthClient: false,
+      fallback: null,
+      logMeta: { route, include: 'metadata,schemas' },
+    }
+  );
 }

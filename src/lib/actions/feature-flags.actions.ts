@@ -7,31 +7,22 @@
 
 import { z } from 'zod';
 import { rateLimitedAction } from '@/src/lib/actions/safe-action';
-import {
-  ANIMATION_CONFIG_DEFAULTS,
-  APP_SETTINGS_DEFAULTS,
-  animationConfigs,
-  appSettings,
-  COMPONENT_CONFIG_DEFAULTS,
-  cacheConfigs,
-  componentConfigs,
-  FORM_CONFIG_DEFAULTS,
-  featureFlags,
-  formConfigs,
-  HOMEPAGE_CONFIG_DEFAULTS,
-  homepageConfigs,
-  NEWSLETTER_CONFIG_DEFAULTS,
-  newsletterConfigs,
-  POLLING_CONFIG_DEFAULTS,
-  PRICING_CONFIG_DEFAULTS,
-  pollingConfigs,
-  pricingConfigs,
-  RECENTLY_VIEWED_CONFIG_DEFAULTS,
-  recentlyViewedConfigs,
-  TIMEOUT_CONFIG_DEFAULTS,
-  timeoutConfigs,
-} from '@/src/lib/flags';
-// Error handling now done by safe-action middleware
+import { isBuildTime } from '@/src/lib/utils/build-time';
+
+// CRITICAL: ALL imports from flags.ts are lazy-loaded to prevent Edge Config access during build.
+// When flags.ts is imported, it executes module-level code that creates configs using flag(),
+// which accesses Vercel Edge Config. This triggers "Server Functions cannot be called" errors.
+// Solution: Lazy-load everything from flags.ts only when actions are actually called (runtime).
+
+/**
+ * Lazy-load flags.ts only when needed (runtime, not build-time)
+ */
+async function getFlagsModule() {
+  if (isBuildTime()) {
+    throw new Error('Cannot load flags during build-time');
+  }
+  return await import('@/src/lib/flags');
+}
 
 /**
  * Check if confetti animations are enabled
@@ -41,6 +32,7 @@ export const checkConfettiEnabled = rateLimitedAction
   .metadata({ actionName: 'featureFlags.checkConfettiEnabled', category: 'analytics' })
   .action(async () => {
     try {
+      const { featureFlags } = await getFlagsModule();
       return await featureFlags.confettiAnimations();
     } catch {
       // Fallback to false on error (safe-action middleware handles logging)
@@ -57,6 +49,7 @@ export const checkContactTerminalEnabled = rateLimitedAction
   .metadata({ actionName: 'featureFlags.checkContactTerminalEnabled', category: 'analytics' })
   .action(async () => {
     try {
+      const { featureFlags } = await getFlagsModule();
       return await featureFlags.contactTerminalEnabled();
     } catch {
       // Fallback to false on error (safe-action middleware handles logging)
@@ -67,12 +60,14 @@ export const checkContactTerminalEnabled = rateLimitedAction
 type ConfigRecord = Record<string, unknown>;
 
 function createTypedConfigAccessor<const Schema extends ConfigRecord>({
-  fetcher,
-  defaults,
+  getDefaults,
+  getFetcher,
   actionName,
 }: {
-  fetcher: () => Promise<ConfigRecord>;
-  defaults: Schema;
+  getDefaults: () => Promise<Schema>;
+  getFetcher: (
+    flagsModule: Awaited<ReturnType<typeof getFlagsModule>>
+  ) => () => Promise<ConfigRecord>;
   actionName: string;
 }) {
   const getSnapshot = rateLimitedAction
@@ -80,10 +75,17 @@ function createTypedConfigAccessor<const Schema extends ConfigRecord>({
     .metadata({ actionName: `${actionName}.getSnapshot`, category: 'analytics' })
     .action(async () => {
       try {
+        const defaults = await getDefaults();
+        if (isBuildTime()) {
+          return defaults;
+        }
+        const flagsModule = await getFlagsModule();
+        const fetcher = getFetcher(flagsModule);
         const result = (await fetcher()) as Schema;
         return { ...defaults, ...result };
       } catch {
         // Fallback to defaults on error (safe-action middleware handles logging)
+        const defaults = await getDefaults();
         return defaults;
       }
     });
@@ -94,6 +96,7 @@ function createTypedConfigAccessor<const Schema extends ConfigRecord>({
     .action(async ({ parsedInput }) => {
       try {
         const snapshotResult = await getSnapshot({});
+        const defaults = await getDefaults();
         if (!snapshotResult?.data) {
           return defaults[parsedInput.key as keyof Schema] as Schema[keyof Schema];
         }
@@ -104,6 +107,7 @@ function createTypedConfigAccessor<const Schema extends ConfigRecord>({
         ) as Schema[keyof Schema];
       } catch {
         // Fallback to default value on error
+        const defaults = await getDefaults();
         return defaults[parsedInput.key as keyof Schema] as Schema[keyof Schema];
       }
     });
@@ -111,79 +115,98 @@ function createTypedConfigAccessor<const Schema extends ConfigRecord>({
   return { getSnapshot, getValue };
 }
 
-type NewsletterConfigSchema = typeof NEWSLETTER_CONFIG_DEFAULTS;
-type PricingConfigSchema = typeof PRICING_CONFIG_DEFAULTS;
-type AnimationConfigSchema = typeof ANIMATION_CONFIG_DEFAULTS;
-type TimeoutConfigSchema = typeof TIMEOUT_CONFIG_DEFAULTS;
-type FormConfigSchema = typeof FORM_CONFIG_DEFAULTS;
-type RecentlyViewedConfigSchema = typeof RECENTLY_VIEWED_CONFIG_DEFAULTS;
-type AppSettingsConfigSchema = typeof APP_SETTINGS_DEFAULTS;
-type CacheConfigSchema = Awaited<ReturnType<typeof cacheConfigs>>;
-type PollingConfigSchema = typeof POLLING_CONFIG_DEFAULTS;
-type ComponentConfigSchema = typeof COMPONENT_CONFIG_DEFAULTS;
-type HomepageConfigSchema = typeof HOMEPAGE_CONFIG_DEFAULTS;
-
 function emptyObject<T extends ConfigRecord>(): T {
   return {} as T;
 }
 
-const newsletterConfigAccessor = createTypedConfigAccessor<NewsletterConfigSchema>({
-  fetcher: () => newsletterConfigs() as Promise<ConfigRecord>,
-  defaults: NEWSLETTER_CONFIG_DEFAULTS,
+// Lazy-loaded config accessors - all defaults and fetchers are loaded from flags.ts at runtime
+const newsletterConfigAccessor = createTypedConfigAccessor({
+  getDefaults: async () => {
+    const flagsModule = await getFlagsModule();
+    return flagsModule.NEWSLETTER_CONFIG_DEFAULTS;
+  },
+  getFetcher: (flagsModule) => () => flagsModule.newsletterConfigs() as Promise<ConfigRecord>,
   actionName: 'featureFlags.newsletterConfig',
 });
 
-const pricingConfigAccessor = createTypedConfigAccessor<PricingConfigSchema>({
-  fetcher: () => pricingConfigs() as Promise<ConfigRecord>,
-  defaults: PRICING_CONFIG_DEFAULTS,
+const pricingConfigAccessor = createTypedConfigAccessor({
+  getDefaults: async () => {
+    const flagsModule = await getFlagsModule();
+    return flagsModule.PRICING_CONFIG_DEFAULTS;
+  },
+  getFetcher: (flagsModule) => () => flagsModule.pricingConfigs() as Promise<ConfigRecord>,
   actionName: 'featureFlags.pricingConfig',
 });
 
-const animationConfigAccessor = createTypedConfigAccessor<AnimationConfigSchema>({
-  fetcher: () => animationConfigs() as Promise<ConfigRecord>,
-  defaults: ANIMATION_CONFIG_DEFAULTS,
+const animationConfigAccessor = createTypedConfigAccessor({
+  getDefaults: async () => {
+    const flagsModule = await getFlagsModule();
+    return flagsModule.ANIMATION_CONFIG_DEFAULTS;
+  },
+  getFetcher: (flagsModule) => () => flagsModule.animationConfigs() as Promise<ConfigRecord>,
   actionName: 'featureFlags.animationConfig',
 });
 
-const timeoutConfigAccessor = createTypedConfigAccessor<TimeoutConfigSchema>({
-  fetcher: () => timeoutConfigs() as Promise<ConfigRecord>,
-  defaults: TIMEOUT_CONFIG_DEFAULTS,
+const timeoutConfigAccessor = createTypedConfigAccessor({
+  getDefaults: async () => {
+    const flagsModule = await getFlagsModule();
+    return flagsModule.TIMEOUT_CONFIG_DEFAULTS;
+  },
+  getFetcher: (flagsModule) => () => flagsModule.timeoutConfigs() as Promise<ConfigRecord>,
   actionName: 'featureFlags.timeoutConfig',
 });
 
-const formConfigAccessor = createTypedConfigAccessor<FormConfigSchema>({
-  fetcher: () => formConfigs() as Promise<ConfigRecord>,
-  defaults: FORM_CONFIG_DEFAULTS,
+const formConfigAccessor = createTypedConfigAccessor({
+  getDefaults: async () => {
+    const flagsModule = await getFlagsModule();
+    return flagsModule.FORM_CONFIG_DEFAULTS;
+  },
+  getFetcher: (flagsModule) => () => flagsModule.formConfigs() as Promise<ConfigRecord>,
   actionName: 'featureFlags.formConfig',
 });
 
-const recentlyViewedConfigAccessor = createTypedConfigAccessor<RecentlyViewedConfigSchema>({
-  fetcher: () => recentlyViewedConfigs() as Promise<ConfigRecord>,
-  defaults: RECENTLY_VIEWED_CONFIG_DEFAULTS,
+const recentlyViewedConfigAccessor = createTypedConfigAccessor({
+  getDefaults: async () => {
+    const flagsModule = await getFlagsModule();
+    return flagsModule.RECENTLY_VIEWED_CONFIG_DEFAULTS;
+  },
+  getFetcher: (flagsModule) => () => flagsModule.recentlyViewedConfigs() as Promise<ConfigRecord>,
   actionName: 'featureFlags.recentlyViewedConfig',
 });
 
-const appSettingsAccessor = createTypedConfigAccessor<AppSettingsConfigSchema>({
-  fetcher: () => appSettings() as Promise<ConfigRecord>,
-  defaults: APP_SETTINGS_DEFAULTS,
+const appSettingsAccessor = createTypedConfigAccessor({
+  getDefaults: async () => {
+    const flagsModule = await getFlagsModule();
+    return flagsModule.APP_SETTINGS_DEFAULTS;
+  },
+  getFetcher: (flagsModule) => () => flagsModule.appSettings() as Promise<ConfigRecord>,
   actionName: 'featureFlags.appSettings',
 });
 
-const pollingConfigAccessor = createTypedConfigAccessor<PollingConfigSchema>({
-  fetcher: () => pollingConfigs() as Promise<ConfigRecord>,
-  defaults: POLLING_CONFIG_DEFAULTS,
+const pollingConfigAccessor = createTypedConfigAccessor({
+  getDefaults: async () => {
+    const flagsModule = await getFlagsModule();
+    return flagsModule.POLLING_CONFIG_DEFAULTS;
+  },
+  getFetcher: (flagsModule) => () => flagsModule.pollingConfigs() as Promise<ConfigRecord>,
   actionName: 'featureFlags.pollingConfig',
 });
 
-const componentConfigAccessor = createTypedConfigAccessor<ComponentConfigSchema>({
-  fetcher: () => componentConfigs() as Promise<ConfigRecord>,
-  defaults: COMPONENT_CONFIG_DEFAULTS,
+const componentConfigAccessor = createTypedConfigAccessor({
+  getDefaults: async () => {
+    const flagsModule = await getFlagsModule();
+    return flagsModule.COMPONENT_CONFIG_DEFAULTS;
+  },
+  getFetcher: (flagsModule) => () => flagsModule.componentConfigs() as Promise<ConfigRecord>,
   actionName: 'featureFlags.componentConfig',
 });
 
-const homepageConfigAccessor = createTypedConfigAccessor<HomepageConfigSchema>({
-  fetcher: () => homepageConfigs() as Promise<ConfigRecord>,
-  defaults: HOMEPAGE_CONFIG_DEFAULTS,
+const homepageConfigAccessor = createTypedConfigAccessor({
+  getDefaults: async () => {
+    const flagsModule = await getFlagsModule();
+    return flagsModule.HOMEPAGE_CONFIG_DEFAULTS;
+  },
+  getFetcher: (flagsModule) => () => flagsModule.homepageConfigs() as Promise<ConfigRecord>,
   actionName: 'featureFlags.homepageConfig',
 });
 
@@ -231,16 +254,21 @@ export const getAppSettingValue = appSettingsAccessor.getValue;
 
 /**
  * Get cache configuration from Statsig
+ * Lazy-loads cacheConfigs to avoid Vercel Edge Config access during build
  */
 export const getCacheConfig = rateLimitedAction
   .schema(z.object({}))
   .metadata({ actionName: 'featureFlags.getCacheConfig', category: 'analytics' })
   .action(async () => {
     try {
+      if (isBuildTime()) {
+        return emptyObject();
+      }
+      const { cacheConfigs } = await getFlagsModule();
       return await cacheConfigs();
     } catch {
       // Fallback to empty object on error (safe-action middleware handles logging)
-      return emptyObject<CacheConfigSchema>();
+      return emptyObject();
     }
   });
 

@@ -69,7 +69,7 @@ interface RpcFunction {
 function extractEnums(content: string): EnumDefinition[] {
   const enums: EnumDefinition[] = [];
   const enumsMatch = content.match(/Enums:\s*\{([\s\S]*?)\n\s*\}\s*CompositeTypes:/);
-  if (!(enumsMatch && enumsMatch[1])) {
+  if (!enumsMatch?.[1]) {
     throw new Error('Could not find Enums section in database.types.ts');
   }
 
@@ -81,7 +81,7 @@ function extractEnums(content: string): EnumDefinition[] {
     const trimmedLine = line.trim();
     const enumNameMatch = trimmedLine.match(/^(\w+):\s*(.*)$/);
 
-    if (enumNameMatch && enumNameMatch[1]) {
+    if (enumNameMatch?.[1]) {
       if (currentEnum && currentEnum.values.length > 0) {
         enums.push({ name: currentEnum.name, values: currentEnum.values });
       }
@@ -356,7 +356,7 @@ function parseCheckConstraint(
       /CHECK\s*\(\s*\(\s*(\w+)\s*=\s*ANY\s*\(\s*ARRAY\[([^\]]+)\]\s*\)\s*\)\s*\)/i
     );
   }
-  if (!(match && match[1] && match[2])) return null;
+  if (!(match?.[1] && match[2])) return null;
 
   const columnName = match[1];
   const values = match[2]
@@ -1084,7 +1084,7 @@ export type GetPopularContentReturn =
     // Find where RPC types start (after imports)
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
-      if (line && line.includes('import type') && line.includes('from')) {
+      if (line?.includes('import type') && line.includes('from')) {
         // Find the last import line
         let j = i;
         while (j < lines.length) {

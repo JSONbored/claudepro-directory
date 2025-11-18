@@ -1,4 +1,6 @@
-import { featureFlags } from '@/src/lib/flags';
+// NOTE: featureFlags is NOT imported at module level to avoid flags/next accessing
+// Vercel Edge Config during module initialization. It's lazy-loaded in the component
+// only when the page is actually rendered (runtime, not build-time).
 import { logger } from '@/src/lib/logger';
 import { normalizeError } from '@/src/lib/utils/error.utils';
 
@@ -7,12 +9,20 @@ import { normalizeError } from '@/src/lib/utils/error.utils';
  * Visit /test-flags to verify Statsig integration
  */
 export default async function TestFlagsPage() {
+  // CRITICAL: Check build-time BEFORE importing flags.ts to prevent Edge Config access
+  const { isBuildTime } = await import('@/src/lib/utils/build-time');
+
   let testEnabled = false;
-  try {
-    testEnabled = await featureFlags.testFlag();
-  } catch (error) {
-    const normalized = normalizeError(error, 'Failed to evaluate test flag');
-    logger.error('TestFlagsPage: featureFlags.testFlag failed', normalized);
+
+  if (!isBuildTime()) {
+    // Only import flags.ts at runtime (not during build)
+    const { featureFlags } = await import('@/src/lib/flags');
+    try {
+      testEnabled = await featureFlags.testFlag();
+    } catch (error) {
+      const normalized = normalizeError(error, 'Failed to evaluate test flag');
+      logger.error('TestFlagsPage: featureFlags.testFlag failed', normalized);
+    }
   }
 
   return (

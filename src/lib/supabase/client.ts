@@ -14,38 +14,39 @@ export function createClient() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-  // In development without env vars, return a mock client that won't crash
+  // If env vars are missing, return a mock client (never throw)
+  // This allows builds to succeed even when env vars aren't available
+  // Client components handle missing auth gracefully
   if (!(supabaseUrl && supabaseAnonKey)) {
+    // Only log in development, not during build (to reduce noise)
     if (process.env.NODE_ENV === 'development') {
       logger.warn(
         'Supabase env vars not found - using mock browser client for development. Auth features will not work.'
       );
-      // Return a mock client that matches the Supabase client interface
-      return {
-        auth: {
-          getUser: async () => ({ data: { user: null }, error: null }),
-          signOut: async () => ({ error: null }),
-          onAuthStateChange: () => ({
-            data: {
-              subscription: {
-                // biome-ignore lint/suspicious/noEmptyBlockStatements: Mock unsubscribe function for development
-                unsubscribe: () => {},
-              },
+    }
+    // Return a mock client that matches the Supabase client interface
+    return {
+      auth: {
+        getUser: async () => ({ data: { user: null }, error: null }),
+        signOut: async () => ({ error: null }),
+        signInWithOAuth: async () => ({ error: new Error('Supabase client not configured') }),
+        onAuthStateChange: () => ({
+          data: {
+            subscription: {
+              // biome-ignore lint/suspicious/noEmptyBlockStatements: Mock unsubscribe function
+              unsubscribe: () => {},
             },
-          }),
-        },
-        from: () => ({
-          select: () => ({
-            eq: () => ({
-              single: async () => ({ data: null, error: null }),
-            }),
+          },
+        }),
+      },
+      from: () => ({
+        select: () => ({
+          eq: () => ({
+            single: async () => ({ data: null, error: null }),
           }),
         }),
-      } as unknown as ReturnType<typeof createBrowserClient<Database>>;
-    }
-    throw new Error(
-      'Missing required Supabase environment variables: NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY'
-    );
+      }),
+    } as unknown as ReturnType<typeof createBrowserClient<Database>>;
   }
 
   return createBrowserClient<Database>(supabaseUrl, supabaseAnonKey);

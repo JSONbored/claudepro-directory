@@ -1,7 +1,8 @@
 /** Category configuration loader - database-first architecture */
 
 import { cache } from 'react';
-import { getHomepageConfig } from '@/src/lib/actions/feature-flags.actions';
+// NOTE: getHomepageConfig is NOT imported at module level to avoid server action evaluation
+// during static generation. It's lazy-loaded inside functions that need it.
 import type { CategoryStatsConfig, UnifiedCategoryConfig } from '@/src/lib/types/component.types';
 import type { ContentCategory, ContentType } from '@/src/types/database-overrides';
 import { isContentCategory } from '@/src/types/database-overrides';
@@ -95,6 +96,12 @@ export const NEWSLETTER_CTA_CONFIG = {
 /** Get homepage featured categories from Statsig homepageConfigs */
 export async function getHomepageFeaturedCategories(): Promise<readonly ContentCategory[]> {
   try {
+    // CRITICAL: Lazy-load getHomepageConfig to prevent server action evaluation during build
+    const { isBuildTime } = await import('@/src/lib/utils/build-time');
+    if (isBuildTime()) {
+      return [];
+    }
+    const { getHomepageConfig } = await import('@/src/lib/actions/feature-flags.actions');
     const result = await getHomepageConfig({});
     if (!result?.data) {
       return [];
@@ -112,6 +119,12 @@ export async function getHomepageFeaturedCategories(): Promise<readonly ContentC
 /** Get homepage tab categories from Statsig homepageConfigs */
 export async function getHomepageTabCategories(): Promise<readonly string[]> {
   try {
+    // CRITICAL: Lazy-load getHomepageConfig to prevent server action evaluation during build
+    const { isBuildTime } = await import('@/src/lib/utils/build-time');
+    if (isBuildTime()) {
+      return [];
+    }
+    const { getHomepageConfig } = await import('@/src/lib/actions/feature-flags.actions');
     const result = await getHomepageConfig({});
     if (!result?.data) {
       return [];

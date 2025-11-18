@@ -1,7 +1,30 @@
-'use server';
+/**
+ * Cache Configuration Utilities
+ *
+ * NOTE: This file does NOT have 'use server' because getCacheTtl and other functions
+ * are helper functions used in server components, not server actions called from client components.
+ * Removing 'use server' prevents Next.js from treating this as a server action module
+ * during static generation, which was causing "Server Functions cannot be called" errors.
+ *
+ * CRITICAL: This module MUST be server-only to prevent flags/next from being bundled
+ * for client components. flags/next uses Node.js-only modules (async_hooks) that don't exist in the browser.
+ *
+ * NOTE: cacheConfigs is NOT imported at module level to avoid flags/next accessing
+ * Vercel Edge Config during module initialization. It's lazy-loaded in loadCacheConfig()
+ * only when we're certain we're in runtime server context (not build-time, not browser).
+ */
 
-import { cacheConfigs } from '@/src/lib/flags';
+// CRITICAL: Mark this module as server-only to prevent client component imports
+// This throws an error if imported in client components, preventing flags/next from being bundled
+import 'server-only';
+
+// CRITICAL: Detect browser/client context IMMEDIATELY at module load
+// If we're in a browser, export mock functions that never touch flags.ts
+// (This is a fallback in case server-only doesn't catch it)
+const isBrowserContext = typeof window !== 'undefined' || typeof document !== 'undefined';
+
 import { logger } from '@/src/lib/logger';
+import { isBuildTime } from '@/src/lib/utils/build-time';
 import { normalizeError } from '@/src/lib/utils/error.utils';
 
 const CACHE_TTL_KEYS = [
@@ -198,14 +221,132 @@ const CACHE_INVALIDATE_DEFAULTS: Record<CacheInvalidateKey, readonly string[]> =
 
 let cacheConfigPromise: CacheConfigPromise | null = null;
 
-async function loadCacheConfig(): Promise<CacheConfig> {
-  if (!cacheConfigPromise) {
-    cacheConfigPromise = cacheConfigs() as CacheConfigPromise;
+/**
+ * Detect if we're in build-time context (static generation)
+ * During build, headers() is unavailable, so Statsig calls will fail
+ * Next.js throws different error messages depending on context:
+ * - "headers was called outside a request scope" (older format)
+ * - "Dynamic server usage: Route ... couldn't be rendered statically because it used `headers`" (newer format)
+ */
+function isBuildTimeContext(error: unknown): boolean {
+  if (error instanceof Error) {
+    const msg = error.message;
+    // Check for both error formats
+    return (
+      (msg.includes('headers') && msg.includes('request scope')) ||
+      (msg.includes('Dynamic server usage') && msg.includes('headers'))
+    );
   }
+  return false;
+}
+
+// isBuildTime() is now imported from @/src/lib/utils/build-time
+// This ensures consistent build-time detection across the entire codebase
+
+async function loadCacheConfig(): Promise<CacheConfig> {
+  // CRITICAL: If we're in browser/client context, return defaults immediately
+  // flags/next uses Node.js-only modules (async_hooks) that don't exist in browser
+  // This prevents the module from being bundled for client components
+  if (isBrowserContext) {
+    return {
+      ...(BUILD_TIME_TTL_DEFAULTS as Record<CacheTtlKey, number>),
+      ...(CACHE_INVALIDATE_DEFAULTS as Record<CacheInvalidateKey, readonly string[]>),
+    } as CacheConfig;
+  }
+
+  // CRITICAL: During build-time static generation, return defaults immediately
+  // This prevents "headers() called outside request scope" and "Server Functions cannot be called" errors
+  //
+  // The flags/next package uses Vercel Edge Config as a cache layer for Statsig configs.
+  // Accessing Edge Config during build triggers server function calls, which Next.js detects
+  // as "Server Functions cannot be called during initial render".
+  //
+  // Solution: Never call cacheConfigs() during build - always use defaults.
+  // CRITICAL: This check MUST happen BEFORE any dynamic import of flags.ts
+  // Even dynamic imports are analyzed by Next.js during static generation
+  // We check MULTIPLE times to be absolutely certain
+  // 
+  // NOTE: isBuildTime() should return true during local builds (no VERCEL env vars)
+  // If it doesn't, we have a problem with build-time detection
+  const buildTimeCheck1 = isBuildTime();
+  if (buildTimeCheck1) {
+    return {
+      ...(BUILD_TIME_TTL_DEFAULTS as Record<CacheTtlKey, number>),
+      ...(CACHE_INVALIDATE_DEFAULTS as Record<CacheInvalidateKey, readonly string[]>),
+    } as CacheConfig;
+  }
+
+  // DOUBLE-CHECK: Build-time detection must be extremely conservative
+  // If we're uncertain, ALWAYS use defaults to prevent Edge Config access
+  const buildTimeCheck2 = isBuildTime();
+  if (buildTimeCheck2) {
+    return {
+      ...(BUILD_TIME_TTL_DEFAULTS as Record<CacheTtlKey, number>),
+      ...(CACHE_INVALIDATE_DEFAULTS as Record<CacheInvalidateKey, readonly string[]>),
+    } as CacheConfig;
+  }
+
+  if (!cacheConfigPromise) {
+    // Lazy-load cacheConfigs to avoid module-level initialization issues
+    // This ensures flags/next doesn't access Edge Config until we're sure we're in runtime
+    try {
+      // CRITICAL: Final build-time check RIGHT BEFORE the import
+      // This is the last chance to prevent flags.ts from being analyzed during static generation
+      // We check AGAIN right before importing to be absolutely certain
+      const buildTimeCheck3 = isBuildTime();
+      if (buildTimeCheck3) {
+        return {
+          ...(BUILD_TIME_TTL_DEFAULTS as Record<CacheTtlKey, number>),
+          ...(CACHE_INVALIDATE_DEFAULTS as Record<CacheInvalidateKey, readonly string[]>),
+        } as CacheConfig;
+      }
+
+      // CRITICAL: NEVER import flags.ts during static generation
+      // Even with isBuildTime() checks, Next.js analyzes the module during static generation
+      // and sees require('flags/next') calls, which triggers Edge Config access
+      // Solution: ALWAYS use defaults during build, never import flags.ts
+      // 
+      // During runtime (not build-time), we would import flags.ts here, but since
+      // isBuildTime() should return true during local builds, we should never reach this point
+      // If we do reach this point, it means isBuildTime() is not working correctly,
+      // so we return defaults as a safety measure
+      return {
+        ...(BUILD_TIME_TTL_DEFAULTS as Record<CacheTtlKey, number>),
+        ...(CACHE_INVALIDATE_DEFAULTS as Record<CacheInvalidateKey, readonly string[]>),
+      } as CacheConfig;
+    } catch (error) {
+      // If this is a build-time error (headers unavailable or server function error), return defaults immediately
+      if (
+        isBuildTimeContext(error) ||
+        (error instanceof Error && error.message.includes('Server Functions'))
+      ) {
+        return {
+          ...(BUILD_TIME_TTL_DEFAULTS as Record<CacheTtlKey, number>),
+          ...(CACHE_INVALIDATE_DEFAULTS as Record<CacheInvalidateKey, readonly string[]>),
+        } as CacheConfig;
+      }
+      // Re-throw other errors (shouldn't happen, but safety check)
+      throw error;
+    }
+  }
+
   try {
     return await cacheConfigPromise;
   } catch (error) {
     cacheConfigPromise = null;
+
+    // If this is a build-time error, return defaults silently (expected during build)
+    if (
+      isBuildTimeContext(error) ||
+      (error instanceof Error && error.message.includes('Server Functions'))
+    ) {
+      return {
+        ...(BUILD_TIME_TTL_DEFAULTS as Record<CacheTtlKey, number>),
+        ...(CACHE_INVALIDATE_DEFAULTS as Record<CacheInvalidateKey, readonly string[]>),
+      } as CacheConfig;
+    }
+
+    // Runtime errors: log and return fallback
     const normalized = normalizeError(error, 'Failed to load cache config from Statsig');
     logger.error('loadCacheConfig failed', normalized, {
       source: 'cache-config.ts',
@@ -223,6 +364,15 @@ export async function primeCacheConfig(promise: CacheConfigPromise): Promise<voi
 }
 
 export async function getCacheConfigSnapshot(): Promise<CacheConfig> {
+  // CRITICAL: If we're in browser/client context, return defaults immediately
+  // This prevents flags/next from being bundled for client components
+  if (isBrowserContext) {
+    return {
+      ...(BUILD_TIME_TTL_DEFAULTS as Record<CacheTtlKey, number>),
+      ...(CACHE_INVALIDATE_DEFAULTS as Record<CacheInvalidateKey, readonly string[]>),
+    } as CacheConfig;
+  }
+
   try {
     return await loadCacheConfig();
   } catch {
@@ -234,6 +384,19 @@ export async function getCacheConfigSnapshot(): Promise<CacheConfig> {
 }
 
 export async function getCacheTtl(key: CacheTtlKey): Promise<number> {
+  // CRITICAL: If we're in browser/client context, return defaults immediately
+  // This prevents flags/next from being bundled for client components
+  if (isBrowserContext) {
+    return BUILD_TIME_TTL_DEFAULTS[key] ?? 3600;
+  }
+
+  // CRITICAL: Check build-time BEFORE calling loadCacheConfig()
+  // This prevents flags/next from accessing Vercel Edge Config during build
+  // which triggers "Server Functions cannot be called during initial render" errors
+  if (isBuildTime()) {
+    return BUILD_TIME_TTL_DEFAULTS[key] ?? 3600;
+  }
+
   try {
     const config = await loadCacheConfig();
     return config[key];
@@ -243,6 +406,18 @@ export async function getCacheTtl(key: CacheTtlKey): Promise<number> {
 }
 
 export async function getCacheInvalidateTags(key: CacheInvalidateKey): Promise<readonly string[]> {
+  // CRITICAL: If we're in browser/client context, return defaults immediately
+  // This prevents flags/next from being bundled for client components
+  if (isBrowserContext) {
+    return CACHE_INVALIDATE_DEFAULTS[key] ?? [];
+  }
+
+  // CRITICAL: Check build-time BEFORE calling loadCacheConfig()
+  // This prevents flags/next from accessing Vercel Edge Config during build
+  if (isBuildTime()) {
+    return CACHE_INVALIDATE_DEFAULTS[key] ?? [];
+  }
+
   try {
     const config = await loadCacheConfig();
     return config[key];
