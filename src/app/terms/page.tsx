@@ -2,10 +2,9 @@ import type { Metadata } from 'next';
 import { NavLink } from '@/src/components/core/navigation/navigation-link';
 import { APP_CONFIG } from '@/src/lib/data/config/constants';
 import { getContactChannels } from '@/src/lib/data/marketing/contact';
-import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
-import { normalizeError } from '@/src/lib/utils/error.utils';
+import { getLastUpdatedDate } from '@/src/lib/utils/data.utils';
 
 export const metadata: Promise<Metadata> = generatePageMetadata('/terms');
 
@@ -14,20 +13,6 @@ export const metadata: Promise<Metadata> = generatePageMetadata('/terms');
  * revalidate: false = Static generation at build time (no automatic revalidation)
  */
 export const revalidate = false;
-
-function getLastUpdatedDate(): string {
-  try {
-    return new Date().toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-  } catch (error) {
-    const normalized = normalizeError(error, 'Failed to format terms last updated date');
-    logger.error('TermsPage: last updated date formatting failed', normalized);
-    return 'Unavailable';
-  }
-}
 
 export default function TermsPage() {
   const lastUpdated = getLastUpdatedDate();
@@ -172,8 +157,10 @@ export default function TermsPage() {
           <h2 className={`${UI_CLASSES.MARGIN_DEFAULT} font-semibold text-2xl`}>11. Contact Us</h2>
           <p className={UI_CLASSES.MARGIN_DEFAULT}>
             If you have questions about these Terms of Service, please{' '}
-            <NavLink href={`mailto:${channels.email}`}>{channels.email}</NavLink> or{' '}
-            <NavLink href="/contact">contact us</NavLink>.
+            <NavLink href={`mailto:${channels.email}`} external={true}>
+              {channels.email}
+            </NavLink>{' '}
+            or <NavLink href="/contact">contact us</NavLink>.
           </p>
         </section>
       </div>

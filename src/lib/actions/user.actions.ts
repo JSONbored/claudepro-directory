@@ -31,8 +31,8 @@ import { CONTENT_CATEGORY_VALUES, type ContentCategory } from '@/src/types/datab
 // Activity filter schema (query parameters - NOT stored data, validation is useful here)
 const activityFilterSchema = z.object({
   type: z.enum(['post', 'comment', 'vote', 'submission']).optional(),
-  limit: z.number().int().positive().max(100).default(50),
-  offset: z.number().int().nonnegative().default(0),
+  limit: z.number().int().min(1).max(100).default(50),
+  offset: z.number().int().min(0).default(0),
 });
 
 // Activity types (database validates structure via RPC function)
@@ -106,7 +106,7 @@ async function invalidateUserCaches({
   }
 
   if (tags.size) {
-    await revalidateCacheTags([...tags]);
+    revalidateCacheTags([...tags]);
   }
 
   if (userIds?.length) {
@@ -142,7 +142,7 @@ async function revalidateUserSurfaces({
     return;
   }
 
-  await Promise.allSettled([...paths].map((path) => revalidatePath(path)));
+  await Promise.allSettled([...paths].map((path) => Promise.resolve(revalidatePath(path))));
 }
 
 async function cachedUserData<
@@ -182,7 +182,7 @@ const bookmarkSchema = z.object({
 
 export const updateProfile = authedAction
   .metadata({ actionName: 'updateProfile', category: 'user' })
-  .schema(
+  .inputSchema(
     z.object({
       display_name: z.string().optional(),
       bio: z.string().optional(),
@@ -262,7 +262,7 @@ export async function refreshProfileFromOAuthServer(userId: string) {
 
 export const refreshProfileFromOAuth = authedAction
   .metadata({ actionName: 'refreshProfileFromOAuth', category: 'user' })
-  .schema(z.void())
+  .inputSchema(z.void())
   .action(async ({ ctx }) => {
     const result = await refreshProfileFromOAuthInternal(ctx.userId);
     return { success: true, message: 'Profile refreshed from OAuth provider', slug: result.slug };
@@ -273,7 +273,7 @@ export const addBookmark = authedAction
     actionName: 'addBookmark',
     category: 'user',
   })
-  .schema(bookmarkSchema)
+  .inputSchema(bookmarkSchema)
   .action(async ({ parsedInput, ctx }) => {
     const cacheConfigPromise = getCacheConfigSnapshot();
     const { content_type, content_slug, notes } = parsedInput;
@@ -309,7 +309,7 @@ export const removeBookmark = authedAction
     actionName: 'removeBookmark',
     category: 'user',
   })
-  .schema(bookmarkSchema.pick({ content_type: true, content_slug: true }))
+  .inputSchema(bookmarkSchema.pick({ content_type: true, content_slug: true }))
   .action(async ({ parsedInput, ctx }) => {
     const cacheConfigPromise = getCacheConfigSnapshot();
     const { content_type, content_slug } = parsedInput;
@@ -341,7 +341,7 @@ export const removeBookmark = authedAction
 
 export const isBookmarkedAction = authedAction
   .metadata({ actionName: 'isBookmarked', category: 'user' })
-  .schema(
+  .inputSchema(
     z.object({
       content_type: z.enum([...CONTENT_CATEGORY_VALUES] as [ContentCategory, ...ContentCategory[]]),
       content_slug: z
@@ -375,7 +375,7 @@ export const addBookmarkBatch = authedAction
     actionName: 'addBookmarkBatch',
     category: 'user',
   })
-  .schema(
+  .inputSchema(
     z.object({
       items: z
         .array(
@@ -432,7 +432,7 @@ export const toggleFollow = authedAction
     actionName: 'toggleFollow',
     category: 'user',
   })
-  .schema(followSchema)
+  .inputSchema(followSchema)
   .action(async ({ parsedInput: { action, user_id, slug }, ctx }) => {
     const cacheConfigPromise = getCacheConfigSnapshot();
     const result = await runRpc<{ success: boolean; action: string }>(
@@ -465,9 +465,15 @@ export const toggleFollow = authedAction
 
 export const isFollowingAction = authedAction
   .metadata({ actionName: 'isFollowing', category: 'user' })
-  .schema(
+  .inputSchema(
     z.object({
-      user_id: z.string().uuid(),
+      user_id: z.string().refine(
+        (val) => {
+          const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+          return uuidRegex.test(val);
+        },
+        { message: 'Invalid UUID format' }
+      ),
     })
   )
   .action(async ({ parsedInput, ctx }) => {
@@ -495,7 +501,7 @@ export const isFollowingAction = authedAction
  */
 export const getBookmarkStatusBatch = authedAction
   .metadata({ actionName: 'getBookmarkStatusBatch', category: 'user' })
-  .schema(
+  .inputSchema(
     z.object({
       items: z.array(
         z.object({
@@ -538,9 +544,17 @@ export const getBookmarkStatusBatch = authedAction
  */
 export const getFollowStatusBatch = authedAction
   .metadata({ actionName: 'getFollowStatusBatch', category: 'user' })
-  .schema(
+  .inputSchema(
     z.object({
-      user_ids: z.array(z.string().uuid()),
+      user_ids: z.array(
+        z.string().refine(
+          (val) => {
+            const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+            return uuidRegex.test(val);
+          },
+          { message: 'Invalid UUID format' }
+        )
+      ),
     })
   )
   .action(async ({ parsedInput, ctx }) => {
@@ -567,7 +581,7 @@ export const getFollowStatusBatch = authedAction
 
 export const getActivitySummary = authedAction
   .metadata({ actionName: 'getActivitySummary', category: 'user' })
-  .schema(z.void())
+  .inputSchema(z.void())
   .action(async ({ ctx }) => {
     const data = await cachedUserData<'get_user_activity_summary', GetGetUserActivitySummaryReturn>(
       'get_user_activity_summary',
@@ -595,7 +609,7 @@ export const getActivitySummary = authedAction
 
 export const getActivityTimeline = authedAction
   .metadata({ actionName: 'getActivityTimeline', category: 'user' })
-  .schema(activityFilterSchema)
+  .inputSchema(activityFilterSchema)
   .action(async ({ parsedInput: { type, limit = 20, offset = 0 }, ctx }) => {
     const data = await cachedUserData<
       'get_user_activity_timeline',
@@ -626,7 +640,7 @@ export const getActivityTimeline = authedAction
 
 export const getUserIdentities = authedAction
   .metadata({ actionName: 'getUserIdentities', category: 'user' })
-  .schema(z.void())
+  .inputSchema(z.void())
   .action(async ({ ctx }) => {
     const data = await cachedUserData<'get_user_identities', GetGetUserIdentitiesReturn>(
       'get_user_identities',
@@ -652,7 +666,7 @@ export const getUserIdentities = authedAction
  */
 export const unlinkOAuthProvider = authedAction
   .metadata({ actionName: 'unlinkOAuthProvider', category: 'user' })
-  .schema(
+  .inputSchema(
     z.object({
       provider: z.string().min(1, 'Provider name is required'),
     })

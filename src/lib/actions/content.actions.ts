@@ -24,6 +24,17 @@ import {
   type SubmissionType,
 } from '@/src/types/database-overrides';
 
+// URL validation helper
+const urlRefine = (val: string | null | undefined) => {
+  if (val === null || val === undefined || val === '') return true; // Allow null/empty for optional
+  try {
+    new URL(val);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
 // Manual Zod schemas (database validates, Zod just provides type safety)
 const collectionSchema = z.object({
   name: z.string().min(2).max(100),
@@ -112,7 +123,7 @@ async function invalidateContentCaches(options: {
  */
 export const createCollection = authedAction
   .metadata({ actionName: 'createCollection', category: 'user' })
-  .schema(collectionSchema)
+  .inputSchema(collectionSchema)
   .action(async ({ parsedInput, ctx }) => {
     try {
       type ManageCollectionResult = {
@@ -156,7 +167,7 @@ export const createCollection = authedAction
  */
 export const updateCollection = authedAction
   .metadata({ actionName: 'updateCollection', category: 'user' })
-  .schema(collectionSchema.extend({ id: z.string() }))
+  .inputSchema(collectionSchema.extend({ id: z.string() }))
   .action(async ({ parsedInput, ctx }) => {
     try {
       type ManageCollectionResult = {
@@ -201,7 +212,7 @@ export const updateCollection = authedAction
  */
 export const deleteCollection = authedAction
   .metadata({ actionName: 'deleteCollection', category: 'user' })
-  .schema(z.object({ id: z.string() }))
+  .inputSchema(z.object({ id: z.string() }))
   .action(async ({ parsedInput, ctx }) => {
     try {
       await runRpc(
@@ -240,7 +251,7 @@ export const deleteCollection = authedAction
  */
 export const addItemToCollection = authedAction
   .metadata({ actionName: 'addItemToCollection', category: 'user' })
-  .schema(collectionItemSchema)
+  .inputSchema(collectionItemSchema)
   .action(async ({ parsedInput, ctx }) => {
     try {
       type ManageCollectionItemResult = {
@@ -288,7 +299,7 @@ export const addItemToCollection = authedAction
  */
 export const removeItemFromCollection = authedAction
   .metadata({ actionName: 'removeItemFromCollection', category: 'user' })
-  .schema(z.object({ id: z.string(), collection_id: z.string() }))
+  .inputSchema(z.object({ id: z.string(), collection_id: z.string() }))
   .action(async ({ parsedInput, ctx }) => {
     try {
       await runRpc(
@@ -334,7 +345,7 @@ export const reorderCollectionItems = authedAction
     actionName: 'reorderCollectionItems',
     category: 'user',
   })
-  .schema(reorderItemsSchema)
+  .inputSchema(reorderItemsSchema)
   .action(async ({ parsedInput, ctx }) => {
     const { collection_id, items } = parsedInput;
     const { userId } = ctx;
@@ -393,7 +404,7 @@ export const reorderCollectionItems = authedAction
  */
 export const createReview = authedAction
   .metadata({ actionName: 'createReview', category: 'user' })
-  .schema(reviewSchema)
+  .inputSchema(reviewSchema)
   .action(async ({ parsedInput, ctx }) => {
     try {
       const result = await runRpc<{ success: boolean; review: Tables<'review_ratings'> }>(
@@ -446,7 +457,7 @@ export const createReview = authedAction
  */
 export const updateReview = authedAction
   .metadata({ actionName: 'updateReview', category: 'user' })
-  .schema(reviewUpdateSchema)
+  .inputSchema(reviewUpdateSchema)
   .action(async ({ parsedInput, ctx }) => {
     try {
       const result = await runRpc<{ success: boolean; review: Tables<'review_ratings'> }>(
@@ -495,7 +506,7 @@ export const updateReview = authedAction
  */
 export const deleteReview = authedAction
   .metadata({ actionName: 'deleteReview', category: 'user' })
-  .schema(reviewDeleteSchema)
+  .inputSchema(reviewDeleteSchema)
   .action(async ({ parsedInput, ctx }) => {
     try {
       const result = await runRpc<{
@@ -543,7 +554,7 @@ export const deleteReview = authedAction
 
 export const markReviewHelpful = authedAction
   .metadata({ actionName: 'markReviewHelpful', category: 'user' })
-  .schema(helpfulVoteSchema)
+  .inputSchema(helpfulVoteSchema)
   .action(async ({ parsedInput, ctx }) => {
     try {
       const result = await runRpc<{
@@ -592,7 +603,7 @@ export const getReviewsWithStats = optionalAuthAction
     actionName: 'getReviewsWithStats',
     category: 'content',
   })
-  .schema(getReviewsSchema)
+  .inputSchema(getReviewsSchema)
   .action(async ({ parsedInput, ctx }) => {
     const { content_type, content_slug, sort_by, limit, offset } = parsedInput;
 
@@ -633,7 +644,7 @@ const fetchPaginatedContentSchema = z.object({
  * Public action - no authentication required
  */
 export const fetchPaginatedContent = rateLimitedAction
-  .schema(fetchPaginatedContentSchema)
+  .inputSchema(fetchPaginatedContentSchema)
   .metadata({ actionName: 'content.fetchPaginatedContent', category: 'content' })
   .action(async ({ parsedInput }) => {
     try {
@@ -664,15 +675,15 @@ const submitContentSchema = z.object({
   description: z.string().min(10),
   category: z.enum([...CONTENT_CATEGORY_VALUES] as [ContentCategory, ...ContentCategory[]]),
   author: z.string().min(2),
-  author_profile_url: z.string().url().optional(),
-  github_url: z.string().url().optional(),
+  author_profile_url: z.string().refine(urlRefine, { message: 'Invalid URL format' }).optional(),
+  github_url: z.string().refine(urlRefine, { message: 'Invalid URL format' }).optional(),
   tags: z.array(z.string()).optional(),
   content_data: z.record(z.string(), z.unknown()), // Additional fields as JSONB
 });
 
 export const submitContentForReview = rateLimitedAction
   .metadata({ actionName: 'submitContentForReview', category: 'content' })
-  .schema(submitContentSchema)
+  .inputSchema(submitContentSchema)
   .action(async ({ parsedInput }) => {
     try {
       type SubmitContentResult = {

@@ -131,7 +131,12 @@ export function NotificationsProvider({
 
   useEffect(() => {
     if (!(isInitialized && flags.enableNotifications)) return;
-    refresh();
+    refresh().catch((error) => {
+      logger.error(
+        '[NotificationsProvider] Failed to refresh notifications on mount',
+        normalizeError(error)
+      );
+    });
   }, [flags.enableNotifications, isInitialized, refresh]);
 
   useEffect(() => {

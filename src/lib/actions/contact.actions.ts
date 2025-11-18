@@ -14,7 +14,7 @@ import { fetchContactCommands } from '@/src/lib/data/contact/commands';
  * Public action - no authentication required
  */
 export const getContactCommands = rateLimitedAction
-  .schema(z.object({}))
+  .inputSchema(z.object({}))
   .metadata({ actionName: 'contact.getContactCommands', category: 'content' })
   .action(async () => {
     try {

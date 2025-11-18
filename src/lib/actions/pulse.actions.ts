@@ -80,8 +80,19 @@ const trackInteractionSchema = z.object({
   content_type: z.string().nullable().optional(),
   content_slug: z.string().nullable().optional(),
   interaction_type: z.enum([...INTERACTION_TYPE_VALUES] as [InteractionType, ...InteractionType[]]),
-  session_id: z.string().uuid().optional().nullable(),
-  metadata: z.any().optional().nullable(), // Json type - database validates
+  session_id: z
+    .string()
+    .refine(
+      (val) => {
+        if (val === null || val === undefined || val === '') return true; // Allow null/empty for optional
+        const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+        return uuidRegex.test(val);
+      },
+      { message: 'Invalid UUID format' }
+    )
+    .optional()
+    .nullable(),
+  metadata: z.unknown().optional().nullable(), // Json type - database validates
 });
 
 const trackNewsletterEventSchema = z.object({
@@ -97,7 +108,7 @@ const trackTerminalCommandSchema = z.object({
   ]),
   success: z.boolean(),
   error_reason: z.string().optional(),
-  execution_time_ms: z.number().int().nonnegative().optional(),
+  execution_time_ms: z.number().int().min(0).optional(),
 });
 
 const trackTerminalFormSubmissionSchema = z.object({
@@ -109,12 +120,22 @@ const trackTerminalFormSubmissionSchema = z.object({
 const trackSponsoredImpressionSchema = z.object({
   sponsoredId: z.string(),
   pageUrl: z.string().optional(),
-  position: z.number().int().nonnegative().optional(),
+  position: z.number().int().min(0).optional(),
 });
 
 const trackSponsoredClickSchema = z.object({
   sponsoredId: z.string(),
-  targetUrl: z.string().url(),
+  targetUrl: z.string().refine(
+    (url) => {
+      try {
+        new URL(url);
+        return true;
+      } catch {
+        return false;
+      }
+    },
+    { message: 'Invalid URL format' }
+  ),
 });
 
 const trackUsageSchema = z.object({
@@ -126,7 +147,7 @@ const trackUsageSchema = z.object({
 const getSimilarConfigsSchema = z.object({
   content_type: z.enum([...CONTENT_CATEGORY_VALUES] as [ContentCategory, ...ContentCategory[]]),
   content_slug: z.string(),
-  limit: z.number().int().positive().max(50).optional(),
+  limit: z.number().int().min(1).max(50).optional(),
 });
 
 const generateConfigRecommendationsSchema = z.object({
@@ -155,8 +176,8 @@ const generateConfigRecommendationsSchema = z.object({
  * Fire-and-forget, non-blocking
  */
 export const trackInteractionAction = optionalAuthAction
+  .inputSchema(trackInteractionSchema)
   .metadata({ actionName: 'pulse.trackInteraction', category: 'analytics' })
-  .schema(trackInteractionSchema)
   .action(async ({ parsedInput, ctx }) => {
     const contentType = parsedInput.content_type ?? 'unknown';
     const contentSlug = parsedInput.content_slug ?? 'unknown';
@@ -169,7 +190,7 @@ export const trackInteractionAction = optionalAuthAction
       content_slug: contentSlug,
       interaction_type: parsedInput.interaction_type,
       session_id: parsedInput.session_id ?? null,
-      metadata: parsedInput.metadata ?? null,
+      metadata: parsedInput.metadata ? (parsedInput.metadata as Json) : null,
     });
   });
 
@@ -178,8 +199,8 @@ export const trackInteractionAction = optionalAuthAction
  * Enqueues to queue (hyper-optimized batching)
  */
 export const trackNewsletterEventAction = optionalAuthAction
+  .inputSchema(trackNewsletterEventSchema)
   .metadata({ actionName: 'pulse.trackNewsletterEvent', category: 'analytics' })
-  .schema(trackNewsletterEventSchema)
   .action(async ({ parsedInput, ctx }) => {
     const metadataPayload: Record<string, unknown> = {
       event_type: parsedInput.eventType,
@@ -205,8 +226,8 @@ export const trackNewsletterEventAction = optionalAuthAction
  * Enqueues to queue (hyper-optimized batching)
  */
 export const trackTerminalCommandAction = optionalAuthAction
+  .inputSchema(trackTerminalCommandSchema)
   .metadata({ actionName: 'pulse.trackTerminalCommand', category: 'analytics' })
-  .schema(trackTerminalCommandSchema)
   .action(async ({ parsedInput, ctx }) => {
     const userId = ctx.userId ?? null;
 
@@ -235,8 +256,8 @@ export const trackTerminalCommandAction = optionalAuthAction
  * Enqueues to queue (hyper-optimized batching)
  */
 export const trackTerminalFormSubmissionAction = optionalAuthAction
+  .inputSchema(trackTerminalFormSubmissionSchema)
   .metadata({ actionName: 'pulse.trackTerminalFormSubmission', category: 'analytics' })
-  .schema(trackTerminalFormSubmissionSchema)
   .action(async ({ parsedInput, ctx }) => {
     const userId = ctx.userId ?? null;
 
@@ -261,8 +282,8 @@ export const trackTerminalFormSubmissionAction = optionalAuthAction
  * Fire-and-forget, non-blocking
  */
 export const trackUsageAction = optionalAuthAction
+  .inputSchema(trackUsageSchema)
   .metadata({ actionName: 'pulse.trackUsage', category: 'analytics' })
-  .schema(trackUsageSchema)
   .action(async ({ parsedInput, ctx }) => {
     const userId = ctx.userId ?? null;
     const interactionType = parsedInput.action_type === 'copy' ? 'copy' : 'download';
@@ -294,8 +315,8 @@ export const trackUsageAction = optionalAuthAction
  * Fire-and-forget, non-blocking
  */
 export const trackSponsoredImpression = optionalAuthAction
+  .inputSchema(trackSponsoredImpressionSchema)
   .metadata({ actionName: 'pulse.trackSponsoredImpression', category: 'analytics' })
-  .schema(trackSponsoredImpressionSchema)
   .action(async ({ parsedInput, ctx }) => {
     const userId = ctx.userId ?? null;
 
@@ -324,8 +345,8 @@ export const trackSponsoredImpression = optionalAuthAction
  * Fire-and-forget, non-blocking
  */
 export const trackSponsoredClick = optionalAuthAction
+  .inputSchema(trackSponsoredClickSchema)
   .metadata({ actionName: 'pulse.trackSponsoredClick', category: 'analytics' })
-  .schema(trackSponsoredClickSchema)
   .action(async ({ parsedInput, ctx }) => {
     const userId = ctx.userId ?? null;
 
@@ -357,8 +378,8 @@ export const trackSponsoredClick = optionalAuthAction
  * Uses cached data layer (fetchCachedRpc via getSimilarContent)
  */
 export const getSimilarConfigsAction = rateLimitedAction
+  .inputSchema(getSimilarConfigsSchema)
   .metadata({ actionName: 'pulse.getSimilarConfigs', category: 'analytics' })
-  .schema(getSimilarConfigsSchema)
   .action(async ({ parsedInput }) => {
     try {
       return await getSimilarContent({
@@ -388,8 +409,8 @@ export const getSimilarConfigsAction = rateLimitedAction
  * Uses cached data layer (fetchCachedRpc via getConfigRecommendations)
  */
 export const generateConfigRecommendationsAction = rateLimitedAction
+  .inputSchema(generateConfigRecommendationsSchema)
   .metadata({ actionName: 'pulse.generateConfigRecommendations', category: 'analytics' })
-  .schema(generateConfigRecommendationsSchema)
   .action(async ({ parsedInput }) => {
     try {
       const data = await getConfigRecommendations({

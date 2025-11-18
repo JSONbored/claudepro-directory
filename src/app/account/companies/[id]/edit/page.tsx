@@ -3,10 +3,20 @@
  */
 
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { CompanyForm } from '@/src/components/core/forms/company-form';
+import { Button } from '@/src/components/primitives/ui/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/src/components/primitives/ui/card';
 import { getAuthenticatedUser } from '@/src/lib/auth/get-authenticated-user';
 import { getUserCompanyById } from '@/src/lib/data/account/user-data';
+import { ROUTES } from '@/src/lib/data/config/constants';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { normalizeError } from '@/src/lib/utils/error.utils';
@@ -27,6 +37,7 @@ export default async function EditCompanyPage({ params }: EditCompanyPageProps) 
   }
 
   let company: Awaited<ReturnType<typeof getUserCompanyById>> | null = null;
+  let hasError = false;
   try {
     company = await getUserCompanyById(user.id, id);
   } catch (error) {
@@ -35,7 +46,27 @@ export default async function EditCompanyPage({ params }: EditCompanyPageProps) 
       companyId: id,
       userId: user.id,
     });
-    throw normalized;
+    hasError = true;
+  }
+
+  if (hasError) {
+    return (
+      <div className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-2xl">Company unavailable</CardTitle>
+            <CardDescription>
+              We couldn&apos;t load this company. Please try again later.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button asChild={true} variant="outline">
+              <Link href={ROUTES.ACCOUNT_COMPANIES}>Back to companies</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   if (!company) {

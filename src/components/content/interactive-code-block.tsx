@@ -216,9 +216,11 @@ export function ProductionCodeBlock({
   useEffect(() => {
     getTimeoutConfig({})
       .then((result) => {
-        if (result?.data) {
-          setClipboardResetDelay(result.data['timeout.ui.clipboard_reset_delay_ms']);
+        const override = result?.data?.['timeout.ui.clipboard_reset_delay_ms'];
+        if (typeof override === 'number' && Number.isFinite(override) && override > 0) {
+          setClipboardResetDelay(override);
         }
+        // Otherwise keep the default value (2000ms)
       })
       .catch((error) => {
         logger.error('ProductionCodeBlock: failed to load timeout config', normalizeError(error));
@@ -247,7 +249,14 @@ export function ProductionCodeBlock({
     }
 
     // Use cached clipboard reset delay (fetched on mount)
-    setTimeout(() => setIsCopied(false), clipboardResetDelay);
+    // Validate delay is a valid positive number before using
+    const delay =
+      typeof clipboardResetDelay === 'number' &&
+      Number.isFinite(clipboardResetDelay) &&
+      clipboardResetDelay > 0
+        ? clipboardResetDelay
+        : CLIPBOARD_RESET_DEFAULT_MS;
+    setTimeout(() => setIsCopied(false), delay);
   };
 
   /**

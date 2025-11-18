@@ -21,11 +21,50 @@ import {
   type WorkplaceType,
 } from '@/src/types/database-overrides';
 
+// UUID validation helper
+const uuidRefine = (val: string | null | undefined) => {
+  if (val === null || val === undefined || val === '') return true; // Allow null/empty for optional
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  return uuidRegex.test(val);
+};
+
+// Email validation helper
+const emailRefine = (val: string | null | undefined) => {
+  if (val === null || val === undefined || val === '') return true; // Allow null/empty for optional
+  try {
+    const parts = val.split('@');
+    if (parts.length !== 2) return false;
+    const [local, domain] = parts;
+    if (!local) return false;
+    if (!domain) return false;
+    if (!domain.includes('.')) return false;
+    if (val.includes(' ')) return false;
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+// URL validation helper
+const urlRefine = (val: string | null | undefined) => {
+  if (val === null || val === undefined || val === '') return true; // Allow null/empty for optional
+  try {
+    new URL(val);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
 // Minimal Zod schemas (database CHECK constraints do real validation)
 const createJobSchema = z.object({
   title: z.string(),
   company: z.string(),
-  company_id: z.string().uuid().optional().nullable(),
+  company_id: z
+    .string()
+    .refine(uuidRefine, { message: 'Invalid UUID format' })
+    .optional()
+    .nullable(),
   description: z.string(),
   location: z.string().optional().nullable(),
   salary: z.string().optional().nullable(),
@@ -41,17 +80,29 @@ const createJobSchema = z.object({
   requirements: z.array(z.string()),
   benefits: z.array(z.string()),
   link: z.string(),
-  contact_email: z.string().email().optional().nullable(),
-  company_logo: z.string().url().optional().nullable(),
+  contact_email: z
+    .string()
+    .refine(emailRefine, { message: 'Invalid email address' })
+    .optional()
+    .nullable(),
+  company_logo: z
+    .string()
+    .refine(urlRefine, { message: 'Invalid URL format' })
+    .optional()
+    .nullable(),
   plan: z.enum(['one-time', 'subscription']),
   tier: z.enum(['standard', 'featured']),
 });
 
 const updateJobSchema = z.object({
-  job_id: z.string().uuid(),
+  job_id: z.string().refine(uuidRefine, { message: 'Invalid UUID format' }),
   title: z.string().optional(),
   company: z.string().optional(),
-  company_id: z.string().uuid().optional().nullable(),
+  company_id: z
+    .string()
+    .refine(uuidRefine, { message: 'Invalid UUID format' })
+    .optional()
+    .nullable(),
   description: z.string().optional(),
   location: z.string().optional().nullable(),
   salary: z.string().optional().nullable(),
@@ -64,8 +115,16 @@ const updateJobSchema = z.object({
   requirements: z.array(z.string()).optional(),
   benefits: z.array(z.string()).optional(),
   link: z.string().optional(),
-  contact_email: z.string().email().optional().nullable(),
-  company_logo: z.string().url().optional().nullable(),
+  contact_email: z
+    .string()
+    .refine(emailRefine, { message: 'Invalid email address' })
+    .optional()
+    .nullable(),
+  company_logo: z
+    .string()
+    .refine(urlRefine, { message: 'Invalid URL format' })
+    .optional()
+    .nullable(),
 });
 
 // Export inferred types for use in components and pages
@@ -73,11 +132,11 @@ export type CreateJobInput = z.infer<typeof createJobSchema>;
 export type UpdateJobInput = z.infer<typeof updateJobSchema>;
 
 const deleteJobSchema = z.object({
-  job_id: z.string().uuid(),
+  job_id: z.string().refine(uuidRefine, { message: 'Invalid UUID format' }),
 });
 
 const toggleJobStatusSchema = z.object({
-  job_id: z.string().uuid(),
+  job_id: z.string().refine(uuidRefine, { message: 'Invalid UUID format' }),
   new_status: z.enum([...JOB_STATUS_VALUES] as [JobStatus, ...JobStatus[]]),
 });
 
@@ -104,7 +163,7 @@ async function invalidateJobCaches(options: {
  */
 export const createJob = authedAction
   .metadata({ actionName: 'createJob', category: 'content' })
-  .schema(createJobSchema)
+  .inputSchema(createJobSchema)
   .action(async ({ parsedInput, ctx }) => {
     try {
       type CreateJobRpcResult = {
@@ -235,7 +294,7 @@ export const createJob = authedAction
  */
 export const updateJob = authedAction
   .metadata({ actionName: 'updateJob', category: 'content' })
-  .schema(updateJobSchema)
+  .inputSchema(updateJobSchema)
   .action(async ({ parsedInput, ctx }) => {
     try {
       const { job_id, ...updates } = parsedInput;
@@ -301,7 +360,7 @@ export const updateJob = authedAction
  */
 export const deleteJob = authedAction
   .metadata({ actionName: 'deleteJob', category: 'content' })
-  .schema(deleteJobSchema)
+  .inputSchema(deleteJobSchema)
   .action(async ({ parsedInput, ctx }) => {
     try {
       type DeleteJobRpcResult = {
@@ -358,7 +417,7 @@ export const deleteJob = authedAction
  */
 export const toggleJobStatus = authedAction
   .metadata({ actionName: 'toggleJobStatus', category: 'content' })
-  .schema(toggleJobStatusSchema)
+  .inputSchema(toggleJobStatusSchema)
   .action(async ({ parsedInput, ctx }) => {
     try {
       type ToggleJobStatusRpcResult = {

@@ -92,27 +92,11 @@ After running a full check via tasks or commands:
 3. **Run Full Check**: Use the tasks above or run `pnpm type-check` manually
 4. **Check Settings**: Ensure TypeScript and linting are enabled in Zed
 
-### Manual Commands
-
-```bash
-# Check all TypeScript errors
-pnpm type-check
-
-# Check all linting errors
-pnpm lint
-
-# Check edge function type errors
-pnpm type-check:edge
-
-# Check edge function lint errors
-pnpm lint:edge
-```
-
 ## Troubleshooting
 
 If the debugger doesn't work:
 1. Ensure Node.js is installed and in PATH
-2. Check that `tsx` is installed (`pnpm install -g tsx` or via package.json)
+2. Check that `tsx` is installed (`pnpm add -g tsx` for global installation or via package.json)
 3. Verify the debug adapter is working (check debug panel logs)
 
 If static analysis doesn't work:

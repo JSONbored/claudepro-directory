@@ -61,7 +61,7 @@ export async function invalidateByKeys({
   }
 
   if (tags.size) {
-    await revalidateCacheTags([...tags]);
+    revalidateCacheTags([...tags]);
   }
 }
 

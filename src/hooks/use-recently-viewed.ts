@@ -36,6 +36,14 @@ interface RecentlyViewedState {
   setLoaded: (loaded: boolean) => void;
 }
 
+export interface UseRecentlyViewedReturn {
+  recentlyViewed: RecentlyViewedItem[];
+  isLoaded: boolean;
+  addRecentlyViewed: (item: Omit<RecentlyViewedItem, 'viewedAt'>) => void;
+  removeItem: (category: RecentlyViewedCategory, slug: string) => void;
+  clearAll: () => void;
+}
+
 const STORAGE_KEY = 'heyclaude_recently_viewed';
 
 // Configuration (loaded from Statsig via server actions)
@@ -169,14 +177,14 @@ function saveToStorage(items: RecentlyViewedItem[]): void {
 /**
  * Recently Viewed Hook
  *
- * @returns {Object} Hook interface
- * @returns {RecentlyViewedItem[]} recentlyViewed - List of recently viewed items (max 10)
- * @returns {boolean} isLoaded - Whether data has been loaded from storage
- * @returns {Function} addRecentlyViewed - Add item to recently viewed
- * @returns {Function} removeItem - Remove specific item by slug
- * @returns {Function} clearAll - Clear all recently viewed items
+ * Returns an object with:
+ * - recentlyViewed: List of recently viewed items (max 10)
+ * - isLoaded: Whether data has been loaded from storage
+ * - addRecentlyViewed: Add item to recently viewed
+ * - removeItem: Remove specific item by slug
+ * - clearAll: Clear all recently viewed items
  */
-export function useRecentlyViewed() {
+export function useRecentlyViewed(): UseRecentlyViewedReturn {
   const { items, isLoaded, setItems, setLoaded } = useRecentlyViewedStore();
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 

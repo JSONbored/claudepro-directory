@@ -13,10 +13,26 @@ import { env } from '@/src/lib/schemas/env.schema';
 import { logActionFailure } from '@/src/lib/utils/error.utils';
 import { CONTACT_CATEGORY_VALUES, type ContactCategory } from '@/src/types/database-overrides';
 
+// Email validation helper
+const emailRefine = (val: string) => {
+  try {
+    const parts = val.split('@');
+    if (parts.length !== 2) return false;
+    const [local, domain] = parts;
+    if (!local) return false;
+    if (!domain) return false;
+    if (!domain.includes('.')) return false;
+    if (val.includes(' ')) return false;
+    return true;
+  } catch {
+    return false;
+  }
+};
+
 // Minimal Zod schema - database CHECK constraints do real validation
 const contactFormSchema = z.object({
   name: z.string().min(1).max(255),
-  email: z.string().email(),
+  email: z.string().refine(emailRefine, { message: 'Invalid email address' }),
   category: z.enum([...CONTACT_CATEGORY_VALUES] as [ContactCategory, ...ContactCategory[]]),
   message: z.string().min(10).max(5000),
   metadata: z.record(z.string(), z.unknown()).optional(),

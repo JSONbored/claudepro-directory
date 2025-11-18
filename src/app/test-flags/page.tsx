@@ -1,13 +1,24 @@
 // Feature flags are server/middleware only - this test page should use server actions
 
+import { checkTestFlag } from '@/src/lib/actions/feature-flags.actions';
+import { logger } from '@/src/lib/logger';
+import { normalizeError } from '@/src/lib/utils/error.utils';
+
 /**
  * Feature Flag Test Page
  * Visit /test-flags to verify Statsig integration
  */
 export default async function TestFlagsPage() {
-  // Feature flags are server/middleware only - this test page should use server actions
-  // For demonstration, we'll use a server action to check flags
-  const testEnabled = false; // Default - flags should be checked via server actions, not page components
+  // Feature flags are server/middleware only - check via server action
+  let testEnabled = false;
+  try {
+    const result = await checkTestFlag({});
+    testEnabled = result?.data ?? false;
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to check test flag');
+    logger.error('TestFlagsPage: checkTestFlag failed', normalized);
+    // Keep default false on error
+  }
 
   return (
     <div className="container mx-auto px-4 py-12">

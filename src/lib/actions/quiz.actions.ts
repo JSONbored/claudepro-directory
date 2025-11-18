@@ -15,7 +15,7 @@ import type { GetGetQuizConfigurationReturn } from '@/src/types/database-overrid
  * Public action - no authentication required
  */
 export const getQuizConfiguration = rateLimitedAction
-  .schema(z.object({}))
+  .inputSchema(z.object({}))
   .metadata({ actionName: 'quiz.getQuizConfiguration', category: 'content' })
   .action(async () => {
     try {

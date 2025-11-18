@@ -36,7 +36,7 @@ export const getActiveNotificationsAction = authedAction
     actionName: 'getActiveNotifications',
     category: 'user',
   })
-  .schema(getActiveNotificationsSchema)
+  .inputSchema(getActiveNotificationsSchema)
   .action(async ({ parsedInput, ctx }): Promise<GetActiveNotificationsActionResult> => {
     const dismissedIds = parsedInput.dismissedIds ?? [];
     const meta = await traceMeta<{ dismissedCount: number }>({
@@ -66,7 +66,7 @@ export const dismissNotificationsAction = authedAction
     actionName: 'dismissNotifications',
     category: 'user',
   })
-  .schema(dismissNotificationsSchema)
+  .inputSchema(dismissNotificationsSchema)
   .action(async ({ parsedInput, ctx }): Promise<DismissNotificationsActionResult> => {
     const uniqueIds = Array.from(
       new Set(parsedInput.notificationIds.map((id) => id.trim()).filter(Boolean))

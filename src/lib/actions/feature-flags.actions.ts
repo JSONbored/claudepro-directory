@@ -27,8 +27,8 @@ async function getFlagsModule() {
 /**
  * Check if confetti animations are enabled
  */
-export const checkConfettiEnabled = rateLimitedAction
-  .schema(z.object({}))
+const checkConfettiEnabledAction = rateLimitedAction
+  .inputSchema(z.object({}))
   .metadata({ actionName: 'featureFlags.checkConfettiEnabled', category: 'analytics' })
   .action(async () => {
     try {
@@ -40,12 +40,18 @@ export const checkConfettiEnabled = rateLimitedAction
     }
   });
 
+export async function checkConfettiEnabled(
+  input: Parameters<typeof checkConfettiEnabledAction>[0]
+): ReturnType<typeof checkConfettiEnabledAction> {
+  return checkConfettiEnabledAction(input);
+}
+
 /**
  * Check if contact terminal feature is enabled
  * Used for gradual rollout of interactive terminal on /contact page
  */
-export const checkContactTerminalEnabled = rateLimitedAction
-  .schema(z.object({}))
+const checkContactTerminalEnabledAction = rateLimitedAction
+  .inputSchema(z.object({}))
   .metadata({ actionName: 'featureFlags.checkContactTerminalEnabled', category: 'analytics' })
   .action(async () => {
     try {
@@ -56,6 +62,35 @@ export const checkContactTerminalEnabled = rateLimitedAction
       return false;
     }
   });
+
+export async function checkContactTerminalEnabled(
+  input: Parameters<typeof checkContactTerminalEnabledAction>[0]
+): ReturnType<typeof checkContactTerminalEnabledAction> {
+  return checkContactTerminalEnabledAction(input);
+}
+
+/**
+ * Check if test flag is enabled
+ * Used for testing Statsig integration on /test-flags page
+ */
+const checkTestFlagAction = rateLimitedAction
+  .inputSchema(z.object({}))
+  .metadata({ actionName: 'featureFlags.checkTestFlag', category: 'analytics' })
+  .action(async () => {
+    try {
+      const { featureFlags } = await getFlagsModule();
+      return await featureFlags.testFlag();
+    } catch {
+      // Fallback to false on error (safe-action middleware handles logging)
+      return false;
+    }
+  });
+
+export async function checkTestFlag(
+  input: Parameters<typeof checkTestFlagAction>[0]
+): ReturnType<typeof checkTestFlagAction> {
+  return checkTestFlagAction(input);
+}
 
 type ConfigRecord = Record<string, unknown>;
 
@@ -71,7 +106,7 @@ function createTypedConfigAccessor<const Schema extends ConfigRecord>({
   actionName: string;
 }) {
   const getSnapshot = rateLimitedAction
-    .schema(z.object({}))
+    .inputSchema(z.object({}))
     .metadata({ actionName: `${actionName}.getSnapshot`, category: 'analytics' })
     .action(async () => {
       try {
@@ -91,7 +126,7 @@ function createTypedConfigAccessor<const Schema extends ConfigRecord>({
     });
 
   const getValue = rateLimitedAction
-    .schema(z.object({ key: z.string() }))
+    .inputSchema(z.object({ key: z.string() }))
     .metadata({ actionName: `${actionName}.getValue`, category: 'analytics' })
     .action(async ({ parsedInput }) => {
       try {
@@ -213,51 +248,114 @@ const homepageConfigAccessor = createTypedConfigAccessor({
 /**
  * Get newsletter configuration from Statsig
  */
-export const getNewsletterConfig = newsletterConfigAccessor.getSnapshot;
-export const getNewsletterConfigValue = newsletterConfigAccessor.getValue;
+export async function getNewsletterConfig(
+  input: Parameters<typeof newsletterConfigAccessor.getSnapshot>[0]
+): ReturnType<typeof newsletterConfigAccessor.getSnapshot> {
+  return newsletterConfigAccessor.getSnapshot(input);
+}
+
+export async function getNewsletterConfigValue(
+  input: Parameters<typeof newsletterConfigAccessor.getValue>[0]
+): ReturnType<typeof newsletterConfigAccessor.getValue> {
+  return newsletterConfigAccessor.getValue(input);
+}
 
 /**
  * Get pricing configuration from Statsig
  */
-export const getPricingConfig = pricingConfigAccessor.getSnapshot;
-export const getPricingConfigValue = pricingConfigAccessor.getValue;
+export async function getPricingConfig(
+  input: Parameters<typeof pricingConfigAccessor.getSnapshot>[0]
+): ReturnType<typeof pricingConfigAccessor.getSnapshot> {
+  return pricingConfigAccessor.getSnapshot(input);
+}
+
+export async function getPricingConfigValue(
+  input: Parameters<typeof pricingConfigAccessor.getValue>[0]
+): ReturnType<typeof pricingConfigAccessor.getValue> {
+  return pricingConfigAccessor.getValue(input);
+}
 
 /**
  * Get animation configuration from Statsig
  */
-export const getAnimationConfig = animationConfigAccessor.getSnapshot;
-export const getAnimationConfigValue = animationConfigAccessor.getValue;
+export async function getAnimationConfig(
+  input: Parameters<typeof animationConfigAccessor.getSnapshot>[0]
+): ReturnType<typeof animationConfigAccessor.getSnapshot> {
+  return animationConfigAccessor.getSnapshot(input);
+}
+
+export async function getAnimationConfigValue(
+  input: Parameters<typeof animationConfigAccessor.getValue>[0]
+): ReturnType<typeof animationConfigAccessor.getValue> {
+  return animationConfigAccessor.getValue(input);
+}
 
 /**
  * Get timeout configuration from Statsig
  */
-export const getTimeoutConfig = timeoutConfigAccessor.getSnapshot;
-export const getTimeoutConfigValue = timeoutConfigAccessor.getValue;
+export async function getTimeoutConfig(
+  input: Parameters<typeof timeoutConfigAccessor.getSnapshot>[0]
+): ReturnType<typeof timeoutConfigAccessor.getSnapshot> {
+  return timeoutConfigAccessor.getSnapshot(input);
+}
+
+export async function getTimeoutConfigValue(
+  input: Parameters<typeof timeoutConfigAccessor.getValue>[0]
+): ReturnType<typeof timeoutConfigAccessor.getValue> {
+  return timeoutConfigAccessor.getValue(input);
+}
 
 /**
  * Get form validation configuration from Statsig
  */
-export const getFormConfig = formConfigAccessor.getSnapshot;
-export const getFormConfigValue = formConfigAccessor.getValue;
+export async function getFormConfig(
+  input: Parameters<typeof formConfigAccessor.getSnapshot>[0]
+): ReturnType<typeof formConfigAccessor.getSnapshot> {
+  return formConfigAccessor.getSnapshot(input);
+}
+
+export async function getFormConfigValue(
+  input: Parameters<typeof formConfigAccessor.getValue>[0]
+): ReturnType<typeof formConfigAccessor.getValue> {
+  return formConfigAccessor.getValue(input);
+}
 
 /**
  * Get recently viewed configuration from Statsig
  */
-export const getRecentlyViewedConfig = recentlyViewedConfigAccessor.getSnapshot;
-export const getRecentlyViewedConfigValue = recentlyViewedConfigAccessor.getValue;
+export async function getRecentlyViewedConfig(
+  input: Parameters<typeof recentlyViewedConfigAccessor.getSnapshot>[0]
+): ReturnType<typeof recentlyViewedConfigAccessor.getSnapshot> {
+  return recentlyViewedConfigAccessor.getSnapshot(input);
+}
+
+export async function getRecentlyViewedConfigValue(
+  input: Parameters<typeof recentlyViewedConfigAccessor.getValue>[0]
+): ReturnType<typeof recentlyViewedConfigAccessor.getValue> {
+  return recentlyViewedConfigAccessor.getValue(input);
+}
 
 /**
  * Get app settings configuration from Statsig
  */
-export const getAppSettings = appSettingsAccessor.getSnapshot;
-export const getAppSettingValue = appSettingsAccessor.getValue;
+export async function getAppSettings(
+  input: Parameters<typeof appSettingsAccessor.getSnapshot>[0]
+): ReturnType<typeof appSettingsAccessor.getSnapshot> {
+  return appSettingsAccessor.getSnapshot(input);
+}
+
+export async function getAppSettingValue(
+  input: Parameters<typeof appSettingsAccessor.getValue>[0]
+): ReturnType<typeof appSettingsAccessor.getValue> {
+  return appSettingsAccessor.getValue(input);
+}
 
 /**
  * Get cache configuration from Statsig
  * Lazy-loads cacheConfigs to avoid Vercel Edge Config access during build
  */
-export const getCacheConfig = rateLimitedAction
-  .schema(z.object({}))
+const getCacheConfigAction = rateLimitedAction
+  .inputSchema(z.object({}))
   .metadata({ actionName: 'featureFlags.getCacheConfig', category: 'analytics' })
   .action(async () => {
     try {
@@ -272,23 +370,56 @@ export const getCacheConfig = rateLimitedAction
     }
   });
 
+export async function getCacheConfig(
+  input: Parameters<typeof getCacheConfigAction>[0]
+): ReturnType<typeof getCacheConfigAction> {
+  return getCacheConfigAction(input);
+}
+
 /**
  * Get polling configuration from Statsig
  */
-export const getPollingConfig = pollingConfigAccessor.getSnapshot;
-export const getPollingConfigValue = pollingConfigAccessor.getValue;
+export async function getPollingConfig(
+  input: Parameters<typeof pollingConfigAccessor.getSnapshot>[0]
+): ReturnType<typeof pollingConfigAccessor.getSnapshot> {
+  return pollingConfigAccessor.getSnapshot(input);
+}
+
+export async function getPollingConfigValue(
+  input: Parameters<typeof pollingConfigAccessor.getValue>[0]
+): ReturnType<typeof pollingConfigAccessor.getValue> {
+  return pollingConfigAccessor.getValue(input);
+}
 
 /**
  * Get component configuration from Statsig
  */
-export const getComponentConfig = componentConfigAccessor.getSnapshot;
-export const getComponentConfigValue = componentConfigAccessor.getValue;
+export async function getComponentConfig(
+  input: Parameters<typeof componentConfigAccessor.getSnapshot>[0]
+): ReturnType<typeof componentConfigAccessor.getSnapshot> {
+  return componentConfigAccessor.getSnapshot(input);
+}
+
+export async function getComponentConfigValue(
+  input: Parameters<typeof componentConfigAccessor.getValue>[0]
+): ReturnType<typeof componentConfigAccessor.getValue> {
+  return componentConfigAccessor.getValue(input);
+}
 
 /**
  * Get homepage configuration from Statsig
  */
-export const getHomepageConfig = homepageConfigAccessor.getSnapshot;
-export const getHomepageConfigValue = homepageConfigAccessor.getValue;
+export async function getHomepageConfig(
+  input: Parameters<typeof homepageConfigAccessor.getSnapshot>[0]
+): ReturnType<typeof homepageConfigAccessor.getSnapshot> {
+  return homepageConfigAccessor.getSnapshot(input);
+}
+
+export async function getHomepageConfigValue(
+  input: Parameters<typeof homepageConfigAccessor.getValue>[0]
+): ReturnType<typeof homepageConfigAccessor.getValue> {
+  return homepageConfigAccessor.getValue(input);
+}
 
 const emailConfigAccessor = createTypedConfigAccessor({
   getDefaults: async () => {
@@ -311,13 +442,31 @@ const toastConfigAccessor = createTypedConfigAccessor({
 /**
  * Get email configuration from Statsig
  */
-export const getEmailConfig = emailConfigAccessor.getSnapshot;
-export const getEmailConfigValue = emailConfigAccessor.getValue;
+export async function getEmailConfig(
+  input: Parameters<typeof emailConfigAccessor.getSnapshot>[0]
+): ReturnType<typeof emailConfigAccessor.getSnapshot> {
+  return emailConfigAccessor.getSnapshot(input);
+}
+
+export async function getEmailConfigValue(
+  input: Parameters<typeof emailConfigAccessor.getValue>[0]
+): ReturnType<typeof emailConfigAccessor.getValue> {
+  return emailConfigAccessor.getValue(input);
+}
 
 /**
  * Get toast configuration from Statsig
  */
-export const getToastConfig = toastConfigAccessor.getSnapshot;
-export const getToastConfigValue = toastConfigAccessor.getValue;
+export async function getToastConfig(
+  input: Parameters<typeof toastConfigAccessor.getSnapshot>[0]
+): ReturnType<typeof toastConfigAccessor.getSnapshot> {
+  return toastConfigAccessor.getSnapshot(input);
+}
+
+export async function getToastConfigValue(
+  input: Parameters<typeof toastConfigAccessor.getValue>[0]
+): ReturnType<typeof toastConfigAccessor.getValue> {
+  return toastConfigAccessor.getValue(input);
+}
 
 // fetchWithLogging removed - safe-action middleware handles all error logging

@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
+import { Button } from '@/src/components/primitives/ui/button';
 import {
   Card,
   CardContent,
@@ -10,6 +12,7 @@ import {
 } from '@/src/components/primitives/ui/card';
 import { getAuthenticatedUser } from '@/src/lib/auth/get-authenticated-user';
 import { getSponsorshipAnalytics } from '@/src/lib/data/account/user-data';
+import { ROUTES } from '@/src/lib/data/config/constants';
 import { BarChart, Eye, MousePointer, TrendingUp } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
@@ -31,7 +34,21 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
 
   if (!user) {
     logger.warn('SponsorshipAnalyticsPage: unauthenticated access attempt', { sponsorshipId: id });
-    return null;
+    return (
+      <div className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-2xl">Sign in required</CardTitle>
+            <CardDescription>Please sign in to view sponsorship analytics.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button asChild={true}>
+              <Link href={ROUTES.LOGIN}>Go to sign in</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   let analyticsData: SponsorshipAnalytics | null = null;
@@ -56,6 +73,24 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
 
   const { sponsorship, daily_stats, computed_metrics } = analyticsData;
 
+  // Validate tier value to ensure type safety
+  const validTiers = ['featured', 'promoted', 'spotlight', 'sponsored'] as const;
+  type ValidTier = (typeof validTiers)[number];
+  const isValidTier = (tier: string): tier is ValidTier => {
+    return validTiers.includes(tier as ValidTier);
+  };
+
+  const safeTier: ValidTier = isValidTier(sponsorship.tier)
+    ? (sponsorship.tier as ValidTier)
+    : (() => {
+        logger.warn('SponsorshipAnalyticsPage: invalid tier value', {
+          tier: sponsorship.tier,
+          sponsorshipId: id,
+          userId: user.id,
+        });
+        return 'sponsored' as ValidTier; // Fallback to default tier
+      })();
+
   const impressionCount = sponsorship.impression_count ?? 0;
   const clickCount = sponsorship.click_count ?? 0;
   const ctr = computed_metrics.ctr.toFixed(2);
@@ -77,11 +112,7 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
       {/* Header */}
       <div>
         <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-          <UnifiedBadge
-            variant="sponsored"
-            tier={sponsorship.tier as 'featured' | 'promoted' | 'spotlight' | 'sponsored'}
-            showIcon={true}
-          />
+          <UnifiedBadge variant="sponsored" tier={safeTier} showIcon={true} />
           <h1 className="font-bold text-3xl">Sponsorship Analytics</h1>
         </div>
         <p className="text-muted-foreground">
@@ -192,11 +223,7 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
             <div>
               <p className={'font-medium text-sm'}>Tier</p>
               <div>
-                <UnifiedBadge
-                  variant="sponsored"
-                  tier={sponsorship.tier as 'featured' | 'promoted' | 'spotlight' | 'sponsored'}
-                  showIcon={true}
-                />
+                <UnifiedBadge variant="sponsored" tier={safeTier} showIcon={true} />
               </div>
             </div>
           </div>

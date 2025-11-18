@@ -48,12 +48,27 @@ export async function fetchWithRetry({
 
   for (let attempt = 0; attempt <= attempts; attempt++) {
     try {
-      const response = await fetch(url, {
+      const fetchOptions: {
+        method: string;
+        headers?: Record<string, string>;
+        body?:
+          | string
+          | Blob
+          | ArrayBufferView
+          | ArrayBuffer
+          | FormData
+          | URLSearchParams
+          | ReadableStream<Uint8Array>;
+      } = {
         method,
         headers,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        body: body ?? (undefined as any),
-      });
+      };
+      if (body !== null && body !== undefined) {
+        // Type assertion needed because body is unknown, but we validate it's a valid BodyInit type at runtime
+        fetchOptions.body = body as typeof fetchOptions.body;
+      }
+      // Type assertion to satisfy fetch's RequestInit type requirements
+      const response = await fetch(url, fetchOptions as Parameters<typeof fetch>[1]);
 
       if (response.ok) {
         return { response, retryCount: attempt };

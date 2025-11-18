@@ -18,7 +18,9 @@ import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { normalizeError } from '@/src/lib/utils/error.utils';
 
-export const metadata: Promise<Metadata> = generatePageMetadata('/account/sponsorships');
+export async function generateMetadata(): Promise<Metadata> {
+  return generatePageMetadata('/account/sponsorships');
+}
 
 /**
  * Check if a sponsorship is currently active
@@ -105,6 +107,13 @@ export default async function SponsorshipsPage() {
   const now = new Date();
   const activeCount = orderedSponsorships.filter((s) => isSponsorshipActive(s, now)).length;
 
+  // Validate tier value to ensure type safety
+  const validTiers = ['featured', 'promoted', 'spotlight', 'sponsored'] as const;
+  type ValidTier = (typeof validTiers)[number];
+  const isValidTier = (tier: string): tier is ValidTier => {
+    return validTiers.includes(tier as ValidTier);
+  };
+
   return (
     <div className="space-y-6">
       <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
@@ -130,10 +139,22 @@ export default async function SponsorshipsPage() {
           const clickCount = sponsorship.click_count ?? 0;
 
           const hasHitLimit =
-            sponsorship.impression_limit && impressionCount >= sponsorship.impression_limit;
+            sponsorship.impression_limit != null && impressionCount >= sponsorship.impression_limit;
 
           const ctr =
             impressionCount > 0 ? ((clickCount / impressionCount) * 100).toFixed(2) : '0.00';
+
+          // Validate tier for this sponsorship
+          const safeTier: ValidTier = isValidTier(sponsorship.tier)
+            ? (sponsorship.tier as ValidTier)
+            : (() => {
+                logger.warn('SponsorshipsPage: invalid tier value', {
+                  tier: sponsorship.tier,
+                  sponsorshipId: sponsorship.id,
+                  userId: user.id,
+                });
+                return 'sponsored' as ValidTier; // Fallback to default tier
+              })();
 
           return (
             <Card key={sponsorship.id}>
@@ -141,13 +162,7 @@ export default async function SponsorshipsPage() {
                 <div className={UI_CLASSES.FLEX_ITEMS_START_JUSTIFY_BETWEEN}>
                   <div className="flex-1">
                     <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                      <UnifiedBadge
-                        variant="sponsored"
-                        tier={
-                          sponsorship.tier as 'featured' | 'promoted' | 'spotlight' | 'sponsored'
-                        }
-                        showIcon={true}
-                      />
+                      <UnifiedBadge variant="sponsored" tier={safeTier} showIcon={true} />
                       {isActive ? (
                         <UnifiedBadge variant="base" className={UI_CLASSES.STATUS_APPROVED}>
                           Active

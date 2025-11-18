@@ -141,7 +141,10 @@ export function WizardLayout({
       // Cmd/Ctrl + S to save
       if ((e.metaKey || e.ctrlKey) && e.key === 's') {
         e.preventDefault();
-        handleSave();
+        handleSave().catch((error) => {
+          // Error handling is done inside handleSave, but we need to catch to prevent floating promise
+          logger.error('WizardLayout: handleSave failed in keyboard shortcut', error as Error);
+        });
       }
 
       // Escape to exit

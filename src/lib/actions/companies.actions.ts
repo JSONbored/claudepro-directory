@@ -24,15 +24,30 @@ import {
 import { createClient as createSupabaseAdminClient } from '@/src/lib/supabase/admin-client';
 import { logActionFailure } from '@/src/lib/utils/error.utils';
 
+// UUID validation helper
+const uuidRefine = (val: string | null | undefined) => {
+  if (val === null || val === undefined || val === '') return true; // Allow null/empty for optional
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  return uuidRegex.test(val);
+};
+
+// URL validation helper
+const urlRefine = (val: string | null | undefined) => {
+  if (val === null || val === undefined || val === '') return true; // Allow null/empty for optional
+  try {
+    const url = new URL(val);
+    // Check protocol is http or https
+    return url.protocol === 'http:' || url.protocol === 'https:';
+  } catch {
+    return false;
+  }
+};
+
 // Minimal Zod schemas - database CHECK constraints do real validation
 const companyDataSchema = z.object({
   name: z.string(),
-  logo: z.string().url().optional().nullable(),
-  website: z
-    .string()
-    .url({ protocol: /^https?$/ })
-    .optional()
-    .nullable(),
+  logo: z.string().refine(urlRefine, { message: 'Invalid URL format' }).optional().nullable(),
+  website: z.string().refine(urlRefine, { message: 'Invalid URL format' }).optional().nullable(),
   description: z.string().optional().nullable(),
   size: z.string().optional().nullable(),
   industry: z.string().optional().nullable(),
@@ -40,11 +55,11 @@ const companyDataSchema = z.object({
 });
 
 const updateCompanySchema = companyDataSchema.extend({
-  id: z.string().uuid(),
+  id: z.string().refine(uuidRefine, { message: 'Invalid UUID format' }),
 });
 
 const deleteCompanySchema = z.object({
-  company_id: z.string().uuid(),
+  company_id: z.string().refine(uuidRefine, { message: 'Invalid UUID format' }),
 });
 
 const companySearchSchema = z.object({
@@ -56,8 +71,8 @@ const uploadLogoSchema = z.object({
   fileName: z.string().min(1).max(256),
   mimeType: z.enum(IMAGE_CONFIG.ALLOWED_TYPES),
   fileBase64: z.string().min(1),
-  companyId: z.string().uuid().optional(),
-  oldLogoUrl: z.string().url().optional(),
+  companyId: z.string().refine(uuidRefine, { message: 'Invalid UUID format' }).optional(),
+  oldLogoUrl: z.string().refine(urlRefine, { message: 'Invalid URL format' }).optional(),
 });
 
 // Export inferred types
@@ -84,7 +99,7 @@ async function invalidateCompanyCaches(options: {
  */
 export const createCompany = authedAction
   .metadata({ actionName: 'createCompany', category: 'content' })
-  .schema(companyDataSchema)
+  .inputSchema(companyDataSchema)
   .action(async ({ parsedInput, ctx }) => {
     try {
       type ManageCompanyCreateResult = {
@@ -149,7 +164,7 @@ export const createCompany = authedAction
  */
 export const updateCompany = authedAction
   .metadata({ actionName: 'updateCompany', category: 'content' })
-  .schema(updateCompanySchema)
+  .inputSchema(updateCompanySchema)
   .action(async ({ parsedInput, ctx }) => {
     try {
       const { id, ...updates } = parsedInput;
@@ -216,7 +231,7 @@ export const updateCompany = authedAction
  */
 export const deleteCompany = authedAction
   .metadata({ actionName: 'deleteCompany', category: 'content' })
-  .schema(deleteCompanySchema)
+  .inputSchema(deleteCompanySchema)
   .action(async ({ parsedInput, ctx }) => {
     try {
       type DeleteCompanyResult = {
@@ -269,7 +284,7 @@ export const deleteCompany = authedAction
 
 export const searchCompaniesAction = authedAction
   .metadata({ actionName: 'searchCompanies', category: 'content' })
-  .schema(companySearchSchema)
+  .inputSchema(companySearchSchema)
   .action(async ({ parsedInput }) => {
     try {
       const limit = parsedInput.limit ?? 10;
@@ -290,7 +305,9 @@ export const searchCompaniesAction = authedAction
  * Public action - no authentication required
  */
 export const getCompanyByIdAction = rateLimitedAction
-  .schema(z.object({ companyId: z.string().uuid() }))
+  .inputSchema(
+    z.object({ companyId: z.string().refine(uuidRefine, { message: 'Invalid UUID format' }) })
+  )
   .metadata({ actionName: 'companies.getCompanyById', category: 'content' })
   .action(async ({ parsedInput }) => {
     try {
@@ -316,7 +333,7 @@ export const getCompanyByIdAction = rateLimitedAction
 
 export const uploadCompanyLogoAction = authedAction
   .metadata({ actionName: 'uploadCompanyLogo', category: 'content' })
-  .schema(uploadLogoSchema)
+  .inputSchema(uploadLogoSchema)
   .action(async ({ parsedInput, ctx }) => {
     const { companyId, oldLogoUrl, fileBase64, fileName, mimeType } = parsedInput;
 

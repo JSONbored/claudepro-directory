@@ -16,7 +16,7 @@ import { env } from '@/src/lib/schemas/env.schema';
  * Cached for 5 minutes (controlled by cache.newsletter_count_ttl_s)
  */
 export const getNewsletterCountAction = rateLimitedAction
-  .schema(z.object({}))
+  .inputSchema(z.object({}))
   .metadata({ actionName: 'newsletter.getCount', category: 'analytics' })
   .action(async () => {
     const count = await getNewsletterSubscriberCount();
@@ -28,17 +28,50 @@ export const getNewsletterCountAction = rateLimitedAction
  * Mirrors the client-side edge call but keeps secrets server-side
  */
 const subscribeViaOAuthSchema = z.object({
-  email: z.string().email('Invalid email address'),
+  email: z.string().refine(
+    (val) => {
+      try {
+        // Basic email validation using URL constructor (similar to URL validation)
+        // More robust than regex for edge cases
+        const parts = val.split('@');
+        if (parts.length !== 2) return false;
+        const [local, domain] = parts;
+        if (!local) return false;
+        if (!domain) return false;
+        // Check domain has at least one dot
+        if (!domain.includes('.')) return false;
+        // Check no spaces
+        if (val.includes(' ')) return false;
+        return true;
+      } catch {
+        return false;
+      }
+    },
+    { message: 'Invalid email address' }
+  ),
   metadata: z
     .object({
-      referrer: z.string().url().optional(),
+      referrer: z
+        .string()
+        .refine(
+          (url) => {
+            try {
+              new URL(url);
+              return true;
+            } catch {
+              return false;
+            }
+          },
+          { message: 'Invalid URL format' }
+        )
+        .optional(),
       trigger_source: z.enum(['auth_callback']).optional(),
     })
     .optional(),
 });
 
 export const subscribeViaOAuthAction = rateLimitedAction
-  .schema(subscribeViaOAuthSchema)
+  .inputSchema(subscribeViaOAuthSchema)
   .metadata({ actionName: 'newsletter.subscribeViaOAuth', category: 'form' })
   .action(async ({ parsedInput }) => {
     const supabaseUrl = env.NEXT_PUBLIC_SUPABASE_URL;

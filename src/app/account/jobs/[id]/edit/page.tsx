@@ -19,31 +19,32 @@ import type { JobCategory, JobPlan, JobTier, Tables } from '@/src/types/database
 export const metadata: Promise<Metadata> = generatePageMetadata('/account/jobs/:id/edit');
 
 interface EditJobPageProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 export default async function EditJobPage({ params }: EditJobPageProps) {
+  const { id } = await params;
   const { user } = await getAuthenticatedUser({ context: 'EditJobPage' });
 
   if (!user) {
-    logger.warn('EditJobPage: unauthenticated access attempt', { jobId: params.id });
+    logger.warn('EditJobPage: unauthenticated access attempt', { jobId: id });
     redirect('/login');
   }
 
   let job: Tables<'jobs'> | null = null;
   try {
-    job = await getUserJobById(user.id, params.id);
+    job = await getUserJobById(user.id, id);
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load user job for edit page');
     logger.error('EditJobPage: getUserJobById threw', normalized, {
-      jobId: params.id,
+      jobId: id,
       userId: user.id,
     });
     throw normalized;
   }
   if (!job) {
     logger.warn('EditJobPage: job not found or not owned by user', {
-      jobId: params.id,
+      jobId: id,
       userId: user.id,
     });
     notFound();
@@ -55,13 +56,13 @@ export default async function EditJobPage({ params }: EditJobPageProps) {
     let result: Awaited<ReturnType<typeof updateJob>>;
     try {
       result = await updateJob({
-        job_id: params.id,
+        job_id: id,
         ...data,
       });
     } catch (error) {
       const normalized = normalizeError(error, 'updateJob server action failed');
       logger.error('EditJobPage: updateJob threw', normalized, {
-        jobId: params.id,
+        jobId: id,
         userId: user.id,
       });
       throw normalized;
@@ -70,7 +71,7 @@ export default async function EditJobPage({ params }: EditJobPageProps) {
     if (result?.serverError) {
       const normalized = normalizeError(result.serverError, 'updateJob server error response');
       logger.error('EditJobPage: updateJob returned serverError', normalized, {
-        jobId: params.id,
+        jobId: id,
         userId: user.id,
       });
       throw normalized;
@@ -79,7 +80,7 @@ export default async function EditJobPage({ params }: EditJobPageProps) {
     if (!result?.data) {
       const error = new Error('updateJob returned no data');
       logger.error('EditJobPage: updateJob returned no data', error, {
-        jobId: params.id,
+        jobId: id,
         userId: user.id,
       });
       return { success: false };

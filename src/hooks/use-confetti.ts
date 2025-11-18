@@ -3,6 +3,7 @@
 import confetti from 'canvas-confetti';
 import { useCallback } from 'react';
 import { getAnimationConfig } from '@/src/lib/actions/feature-flags.actions';
+import { logger } from '@/src/lib/logger';
 import type { ConfettiVariant } from '@/src/types/database-overrides';
 
 /** Confetti animations - config values from Statsig animationConfigs */
@@ -60,16 +61,25 @@ export function useConfetti() {
 
   // Preset functions for common actions
   const celebrateBookmark = useCallback(() => {
-    fireConfetti('success');
+    fireConfetti('success').catch((error) => {
+      // Error handling is done inside fireConfetti, but we need to catch to prevent floating promise
+      logger.error('useConfetti: celebrateBookmark failed', error as Error);
+    });
   }, [fireConfetti]);
   const celebrateSubmission = useCallback(() => {
-    fireConfetti('celebration');
+    fireConfetti('celebration').catch((error) => {
+      logger.error('useConfetti: celebrateSubmission failed', error as Error);
+    });
   }, [fireConfetti]);
   const celebrateMilestone = useCallback(() => {
-    fireConfetti('milestone');
+    fireConfetti('milestone').catch((error) => {
+      logger.error('useConfetti: celebrateMilestone failed', error as Error);
+    });
   }, [fireConfetti]);
   const celebrateSignup = useCallback(() => {
-    fireConfetti('subtle');
+    fireConfetti('subtle').catch((error) => {
+      logger.error('useConfetti: celebrateSignup failed', error as Error);
+    });
   }, [fireConfetti]);
 
   return {
