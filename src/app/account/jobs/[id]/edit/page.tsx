@@ -3,6 +3,7 @@
  * Uses updateJob server action (calls update_job RPC)
  */
 
+import type { Metadata } from 'next';
 import { notFound, redirect } from 'next/navigation';
 import { JobForm } from '@/src/components/core/forms/job-form';
 import { type UpdateJobInput, updateJob } from '@/src/lib/actions/jobs.actions';
@@ -15,7 +16,7 @@ import { ensureStringArray } from '@/src/lib/utils/data.utils';
 import { normalizeError } from '@/src/lib/utils/error.utils';
 import type { JobCategory, JobPlan, JobTier, Tables } from '@/src/types/database-overrides';
 
-export const metadata = generatePageMetadata('/account/jobs/:id/edit');
+export const metadata: Promise<Metadata> = generatePageMetadata('/account/jobs/:id/edit');
 
 interface EditJobPageProps {
   params: { id: string };

@@ -163,8 +163,8 @@ async function processChangelogWebhook(message: ChangelogWebhookQueueMessage): P
               throw new Error(`GitHub API error (${response.status}): ${errorText}`);
             }
 
-            const data = await response.json();
-            return data.commits || [];
+            const data = (await response.json()) as { commits?: unknown[] };
+            return (data.commits || []) as GitHubCommit[];
           },
           CIRCUIT_BREAKER_CONFIGS.external
         ),

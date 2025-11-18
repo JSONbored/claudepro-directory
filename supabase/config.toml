@@ -57,6 +57,3 @@ verify_jwt = false  # Database webhook handler (uses service role key in headers
 # =============================================================================
 # Authenticated Functions - Manual JWT Verification in Code
 # =============================================================================
-
-[functions.analytics]
-verify_jwt = true  # Requires authenticated user for analytics tracking

@@ -8,6 +8,7 @@ import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import type React from 'react';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { JobCard } from '@/src/components/core/domain/cards/job-card';
 import { StructuredData } from '@/src/components/core/infra/structured-data';
@@ -24,7 +25,29 @@ import { Briefcase, Building, Calendar, Globe, TrendingUp, Users } from '@/src/l
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
-import { normalizeError } from '@/src/lib/utils/error.utils';
+
+/**
+ * Reusable component for rendering safe website links
+ * Returns null if URL is invalid, otherwise renders an external link
+ */
+function SafeWebsiteLink({
+  url,
+  children,
+  className,
+}: {
+  url: string | null | undefined;
+  children: React.ReactNode;
+  className?: string;
+}) {
+  const safeUrl = getSafeWebsiteUrl(url);
+  if (!safeUrl) return null;
+
+  return (
+    <a href={safeUrl} target="_blank" rel="noopener noreferrer" className={className}>
+      {children}
+    </a>
+  );
+}
 
 /**
  * Validate and sanitize external website URL for safe use in href attributes
@@ -51,9 +74,6 @@ function getSafeWebsiteUrl(url: string | null | undefined): string | null {
     // Reject dangerous components
     if (parsed.username || parsed.password) return null;
 
-    // Sanitize: remove credentials
-    parsed.username = '';
-    parsed.password = '';
     // Normalize hostname
     parsed.hostname = parsed.hostname.replace(/\.$/, '').toLowerCase();
     // Remove default ports
@@ -84,14 +104,7 @@ export async function generateMetadata({ params }: CompanyPageProps): Promise<Me
 export default async function CompanyPage({ params }: CompanyPageProps) {
   const { slug } = await params;
 
-  let profile: Awaited<ReturnType<typeof getCompanyProfile>>;
-  try {
-    profile = await getCompanyProfile(slug);
-  } catch (error) {
-    const normalized = normalizeError(error, 'Failed to load company profile');
-    logger.error('CompanyPage: getCompanyProfile threw', normalized, { slug });
-    throw normalized;
-  }
+  const profile = await getCompanyProfile(slug);
 
   if (!profile?.company) {
     logger.warn('CompanyPage: company not found', { slug });
@@ -139,26 +152,13 @@ export default async function CompanyPage({ params }: CompanyPageProps) {
                 )}
 
                 <div className={'mt-4 flex flex-wrap items-center gap-4 text-sm'}>
-                  {(() => {
-                    const safeWebsiteUrl = getSafeWebsiteUrl(company.website);
-                    if (!safeWebsiteUrl) return null;
-                    // Explicit validation: getSafeWebsiteUrl guarantees the URL is safe
-                    // It validates protocol (HTTPS only, or HTTP for localhost), removes credentials,
-                    // normalizes hostname, and returns null for any invalid URLs
-                    // At this point, safeWebsiteUrl is validated and safe for use in external links
-                    const validatedUrl: string = safeWebsiteUrl;
-                    return (
-                      <a
-                        href={validatedUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1} ${UI_CLASSES.LINK_ACCENT}`}
-                      >
-                        <Globe className="h-4 w-4" />
-                        Website
-                      </a>
-                    );
-                  })()}
+                  <SafeWebsiteLink
+                    url={company.website}
+                    className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1} ${UI_CLASSES.LINK_ACCENT}`}
+                  >
+                    <Globe className="h-4 w-4" />
+                    Website
+                  </SafeWebsiteLink>
 
                   {company.industry && (
                     <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
@@ -254,7 +254,7 @@ export default async function CompanyPage({ params }: CompanyPageProps) {
                     <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
                       <span className={UI_CLASSES.TEXT_SM_MUTED}>Avg. Salary</span>
                       <span className="font-semibold">
-                        ${((stats.avg_salary_min ?? 0) / 1000).toFixed(0)}k+
+                        ${(stats.avg_salary_min / 1000).toFixed(0)}k+
                       </span>
                     </div>
                   )}
@@ -292,25 +292,9 @@ export default async function CompanyPage({ params }: CompanyPageProps) {
                       ? 'Visit their website to learn more about the company and culture.'
                       : 'Check back regularly for new opportunities!'}
                   </p>
-                  {(() => {
-                    const safeWebsiteUrl = getSafeWebsiteUrl(company.website);
-                    if (!safeWebsiteUrl) return null;
-                    // Explicit validation: getSafeWebsiteUrl guarantees the URL is safe
-                    // It validates protocol (HTTPS only, or HTTP for localhost), removes credentials,
-                    // normalizes hostname, and returns null for any invalid URLs
-                    // At this point, safeWebsiteUrl is validated and safe for use in external links
-                    const validatedUrl: string = safeWebsiteUrl;
-                    return (
-                      <a
-                        href={validatedUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={UI_CLASSES.LINK_ACCENT}
-                      >
-                        Visit Website
-                      </a>
-                    );
-                  })()}
+                  <SafeWebsiteLink url={company.website} className={UI_CLASSES.LINK_ACCENT}>
+                    Visit Website
+                  </SafeWebsiteLink>
                 </CardContent>
               </Card>
             </aside>

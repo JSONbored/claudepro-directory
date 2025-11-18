@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import { NavLink } from '@/src/components/core/navigation/navigation-link';
 import { ContactTerminal } from '@/src/components/features/contact/contact-terminal';
 import { ContactTerminalErrorBoundary } from '@/src/components/features/contact/contact-terminal-error-boundary';
@@ -8,7 +9,7 @@ import { DiscordIcon, Github, Mail, MessageSquare } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 
-export const metadata = generatePageMetadata('/contact');
+export const metadata: Promise<Metadata> = generatePageMetadata('/contact');
 
 /**
  * Static Generation: This page is statically generated at build time

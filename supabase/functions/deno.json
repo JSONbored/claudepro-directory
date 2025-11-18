@@ -1,3 +1,21 @@
 {
-  "nodeModulesDir": "auto"
+  "nodeModulesDir": "auto",
+  "imports": {
+    "react": "npm:react@18.3.1"
+  },
+  "lint": {
+    "include": ["**/*.ts", "**/*.tsx"],
+    "exclude": ["node_modules/**", "deno.lock"],
+    "rules": {
+      "tags": ["recommended"],
+      "exclude": [
+        "no-var",
+        "no-explicit-any"
+      ]
+    }
+  },
+  "compilerOptions": {
+    "lib": ["deno.ns", "deno.unstable"],
+    "types": ["./_shared/deno-globals.d.ts", "./_shared/jsx-types.d.ts"]
+  }
 }

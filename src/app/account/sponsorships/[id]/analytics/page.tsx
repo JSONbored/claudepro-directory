@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import {
@@ -16,7 +17,9 @@ import { POSITION_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { normalizeError } from '@/src/lib/utils/error.utils';
 import type { SponsorshipAnalytics } from '@/src/types/database-overrides';
 
-export const metadata = generatePageMetadata('/account/sponsorships/:id/analytics');
+export const metadata: Promise<Metadata> = generatePageMetadata(
+  '/account/sponsorships/:id/analytics'
+);
 
 interface AnalyticsPageProps {
   params: Promise<{ id: string }>;
@@ -76,7 +79,7 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
         <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
           <UnifiedBadge
             variant="sponsored"
-            tier={sponsorship.tier as 'featured' | 'promoted' | 'spotlight'}
+            tier={sponsorship.tier as 'featured' | 'promoted' | 'spotlight' | 'sponsored'}
             showIcon={true}
           />
           <h1 className="font-bold text-3xl">Sponsorship Analytics</h1>
@@ -191,7 +194,7 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
               <div>
                 <UnifiedBadge
                   variant="sponsored"
-                  tier={sponsorship.tier as 'featured' | 'promoted' | 'spotlight'}
+                  tier={sponsorship.tier as 'featured' | 'promoted' | 'spotlight' | 'sponsored'}
                   showIcon={true}
                 />
               </div>

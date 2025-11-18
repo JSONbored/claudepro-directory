@@ -2,6 +2,7 @@
  * Job Analytics Page - Display view/click metrics for job postings.
  */
 
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
@@ -18,7 +19,7 @@ import { formatRelativeDate } from '@/src/lib/utils/data.utils';
 import { normalizeError } from '@/src/lib/utils/error.utils';
 import type { JobStatus } from '@/src/types/database-overrides';
 
-export const metadata = generatePageMetadata('/account/jobs/:id/analytics');
+export const metadata: Promise<Metadata> = generatePageMetadata('/account/jobs/:id/analytics');
 
 interface JobAnalyticsPageProps {
   params: Promise<{ id: string }>;

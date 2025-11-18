@@ -45,8 +45,7 @@ function isValidInternalPath(path: string): boolean {
   if (!path.startsWith('/')) return false;
   // Reject protocol-relative URLs (//example.com)
   if (path.startsWith('//')) return false;
-  // Reject dangerous protocols
-  if (/^(javascript|data|vbscript|file):/i.test(path)) return false;
+  // Note: Protocol check removed as unreachable (path already starts with /)
   // Basic path validation - allow alphanumeric, slashes, hyphens, underscores
   // This is permissive but safe for Next.js routing
   return /^\/[a-zA-Z0-9/?#\-_.~!*'();:@&=+$,%[\]]*$/.test(path);
@@ -59,7 +58,8 @@ function isValidInternalPath(path: string): boolean {
 function getSafeContentItemUrl(category: string, slug: string): string | null {
   if (!(isValidCategory(category) && isValidSlug(slug))) return null;
   const sanitizedSlug = sanitizeSlug(slug);
-  if (!isValidSlug(sanitizedSlug)) return null;
+  // sanitizeSlug only removes characters that isValidSlug already forbids,
+  // so if slug passed isValidSlug, sanitizedSlug will also pass
   // Construct the URL
   const url = getContentItemUrl({ category: category as ContentCategory, slug: sanitizedSlug });
   // Validate the final URL path to ensure it's safe
@@ -115,9 +115,7 @@ function getSafeDocumentationUrl(url: string | null | undefined): string | null 
     const hasTrustedTld = trustedTlds.some((tld) => hostname.endsWith(tld));
     if (!hasTrustedTld) return null;
 
-    // Sanitize: remove query strings, fragments, and credentials
-    parsed.search = '';
-    parsed.hash = '';
+    // Sanitize: strip credentials but keep query/fragment for navigation
     parsed.username = '';
     parsed.password = '';
     // Normalize hostname
@@ -249,6 +247,11 @@ export const DetailSidebar = memo(function DetailSidebar({
                 // Validate and sanitize documentation URL before rendering
                 const safeDocUrl = getSafeDocumentationUrl(item.documentation_url as string);
                 if (!safeDocUrl) {
+                  logger.warn('NavigationSidebar: Invalid documentation URL rejected', {
+                    category: item.category,
+                    slug: item.slug,
+                    url: item.documentation_url,
+                  });
                   // Don't render link if URL is invalid or unsafe
                   return null;
                 }
@@ -446,7 +449,7 @@ export const DetailSidebar = memo(function DetailSidebar({
                         : ''}
                     </p>
                   </div>
-                  <ExternalLink className="ml-2 h-4 w-4 flex-shrink-0 text-muted-foreground" />
+                  <ExternalLink className="ml-2 h-4 w-4 shrink-0 text-muted-foreground" />
                 </Link>
               );
             })}

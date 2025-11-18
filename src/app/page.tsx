@@ -35,12 +35,13 @@ const NewsletterCTAVariant = dynamicImport(
   }
 );
 
+import type { Metadata } from 'next';
 import { getHomepageCategoryIds } from '@/src/lib/data/config/category';
 import { getHomepageData } from '@/src/lib/data/content/homepage';
 import { logger } from '@/src/lib/logger';
 import type { GetGetHomepageCompleteReturn } from '@/src/types/database-overrides';
 
-export const metadata = generatePageMetadata('/');
+export const metadata: Promise<Metadata> = generatePageMetadata('/');
 
 /**
  * ISR Configuration: Homepage revalidates every 60 seconds

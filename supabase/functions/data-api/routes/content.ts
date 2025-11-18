@@ -4,6 +4,7 @@ import {
   CONTENT_CATEGORY_VALUES,
   type ContentCategory,
   callRpc,
+  type Database,
   type GenerateReadmeDataReturn,
 } from '../../_shared/database-overrides.ts';
 import {
@@ -332,7 +333,7 @@ async function handleToolLlms(tool: string): Promise<Response> {
 
 async function handleCategoryConfigs(): Promise<Response> {
   const rpcArgs =
-    {} satisfies DatabaseGenerated['public']['Functions']['get_category_configs_with_features']['Args'];
+    {} satisfies Database['public']['Functions']['get_category_configs_with_features']['Args'];
   const { data, error } = await callRpc('get_category_configs_with_features', rpcArgs, true);
 
   if (error) {

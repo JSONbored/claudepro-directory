@@ -3,6 +3,7 @@
  * Optimized: Uses get_content_detail_complete() RPC (2-3 calls → 1, 50-67% reduction)
  */
 
+import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { CollectionDetailView } from '@/src/components/content/detail-page/collection-view';
 import { UnifiedDetailPage } from '@/src/components/content/detail-page/content-detail-view';
@@ -77,7 +78,7 @@ export async function generateMetadata({
   params,
 }: {
   params: Promise<{ category: string; slug: string }>;
-}) {
+}): Promise<Metadata> {
   const { category, slug } = await params;
 
   // Validate category at compile time
@@ -202,12 +203,10 @@ export default async function DetailPage({
             slug
           }
           description={fullItem.description}
-          {...('tags' in fullItem
-            ? (() => {
-                const tags = ensureStringArray(fullItem.tags).slice(0, 3);
-                return tags.length ? { tags } : {};
-              })()
-            : {})}
+          {...(() => {
+            const itemTags = 'tags' in fullItem ? ensureStringArray(fullItem.tags).slice(0, 3) : [];
+            return itemTags.length ? { tags: itemTags } : {};
+          })()}
         />
       )}
 

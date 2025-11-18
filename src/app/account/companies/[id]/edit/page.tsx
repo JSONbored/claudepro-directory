@@ -2,6 +2,7 @@
  * Edit Company Page - Update existing company via edge function
  */
 
+import type { Metadata } from 'next';
 import { notFound, redirect } from 'next/navigation';
 import { CompanyForm } from '@/src/components/core/forms/company-form';
 import { getAuthenticatedUser } from '@/src/lib/auth/get-authenticated-user';
@@ -10,7 +11,7 @@ import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { normalizeError } from '@/src/lib/utils/error.utils';
 
-export const metadata = generatePageMetadata('/account/companies/:id/edit');
+export const metadata: Promise<Metadata> = generatePageMetadata('/account/companies/:id/edit');
 
 interface EditCompanyPageProps {
   params: Promise<{ id: string }>;

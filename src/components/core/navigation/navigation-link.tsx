@@ -32,8 +32,13 @@ function getSafeExternalUrl(url: string): string | null {
 
   try {
     const parsed = new URL(url.trim());
-    // Only allow HTTPS protocol (or HTTP for localhost/development)
-    if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') return null;
+    // Allow HTTPS, HTTP, and mailto protocols
+    if (
+      parsed.protocol !== 'https:' &&
+      parsed.protocol !== 'http:' &&
+      parsed.protocol !== 'mailto:'
+    )
+      return null;
     // Block localhost in production (optional, but safer)
     // For now, allow it for development
     // Reject dangerous components

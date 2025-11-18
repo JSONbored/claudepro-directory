@@ -180,33 +180,63 @@ function parseArgs(): GenerateOptions {
     switch (arg) {
       case '--branch':
         current = argsIterator.next();
-        if (current.value) {
-          options.branch = current.value;
+        if (current.done || !current.value) {
+          logger.error('Missing value for --branch', undefined, {
+            script: 'changelog-generate-entry',
+            option: '--branch',
+          });
+          showHelp();
+          process.exit(1);
         }
+        options.branch = current.value;
         break;
       case '--since':
         current = argsIterator.next();
-        if (current.value) {
-          options.since = current.value;
+        if (current.done || !current.value) {
+          logger.error('Missing value for --since', undefined, {
+            script: 'changelog-generate-entry',
+            option: '--since',
+          });
+          showHelp();
+          process.exit(1);
         }
+        options.since = current.value;
         break;
       case '--until':
         current = argsIterator.next();
-        if (current.value) {
-          options.until = current.value;
+        if (current.done || !current.value) {
+          logger.error('Missing value for --until', undefined, {
+            script: 'changelog-generate-entry',
+            option: '--until',
+          });
+          showHelp();
+          process.exit(1);
         }
+        options.until = current.value;
         break;
       case '--title':
         current = argsIterator.next();
-        if (current.value) {
-          options.title = current.value;
+        if (current.done || !current.value) {
+          logger.error('Missing value for --title', undefined, {
+            script: 'changelog-generate-entry',
+            option: '--title',
+          });
+          showHelp();
+          process.exit(1);
         }
+        options.title = current.value;
         break;
       case '--tag':
         current = argsIterator.next();
-        if (current.value) {
-          options.tag = current.value;
+        if (current.done || !current.value) {
+          logger.error('Missing value for --tag', undefined, {
+            script: 'changelog-generate-entry',
+            option: '--tag',
+          });
+          showHelp();
+          process.exit(1);
         }
+        options.tag = current.value;
         break;
       case '--dry-run':
       case '--dry':
@@ -236,7 +266,8 @@ function parseArgs(): GenerateOptions {
  * Show help message
  */
 function showHelp(): void {
-  logger.info(`
+  logger.info(
+    `
 Changelog Entry Generator
 
 Usage:
@@ -265,7 +296,9 @@ Examples:
   npm run changelog:generate -- --dry-run
 
 Documentation: https://git-cliff.org/docs/usage
-`);
+`,
+    { script: 'changelog-generate-entry' }
+  );
 }
 
 /**
@@ -311,9 +344,9 @@ async function main() {
 
     if (options.dryRun) {
       logger.info('🔍 Dry Run - Generated Entry:\n', { script: 'changelog-generate-entry' });
-      logger.info('─'.repeat(80));
-      logger.info(newEntry);
-      logger.info('─'.repeat(80));
+      logger.info('─'.repeat(80), { script: 'changelog-generate-entry' });
+      logger.info(newEntry, { script: 'changelog-generate-entry' });
+      logger.info('─'.repeat(80), { script: 'changelog-generate-entry' });
       logger.info('\n✅ Preview complete (no files modified)\n', {
         script: 'changelog-generate-entry',
       });

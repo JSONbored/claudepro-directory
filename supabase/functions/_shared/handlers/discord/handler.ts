@@ -370,7 +370,7 @@ async function handleJobNotification(req: Request): Promise<Response> {
     );
   }
 
-  const payload: DatabaseWebhookPayload<JobRow> = await req.json();
+  const payload = (await req.json()) as DatabaseWebhookPayload<JobRow>;
   const job = payload.record;
 
   if (job.is_placeholder) {
@@ -517,7 +517,7 @@ async function handleSubmissionNotification(req: Request): Promise<Response> {
     );
   }
 
-  const payload: DatabaseWebhookPayload<ContentSubmission> = await req.json();
+  const payload = (await req.json()) as DatabaseWebhookPayload<ContentSubmission>;
 
   if (!filterEventType(payload, ['INSERT'])) {
     return successResponse(
@@ -568,7 +568,7 @@ async function handleContentNotification(req: Request): Promise<Response> {
     );
   }
 
-  const payload: DatabaseWebhookPayload<ContentSubmission> = await req.json();
+  const payload = (await req.json()) as DatabaseWebhookPayload<ContentSubmission>;
 
   if (!didStatusChangeTo(payload, 'merged')) {
     return successResponse(
@@ -683,7 +683,7 @@ async function handleErrorNotification(req: Request): Promise<Response> {
     );
   }
 
-  const payload: DatabaseWebhookPayload<WebhookEventRecord> = await req.json();
+  const payload = (await req.json()) as DatabaseWebhookPayload<WebhookEventRecord>;
 
   if (!filterEventType(payload, ['INSERT', 'UPDATE'])) {
     return successResponse(
@@ -730,8 +730,9 @@ async function handleChangelogNotification(req: Request): Promise<Response> {
     );
   }
 
-  const payload: DatabaseWebhookPayload<Database['public']['Tables']['changelog']['Row']> =
-    await req.json();
+  const payload = (await req.json()) as DatabaseWebhookPayload<
+    Database['public']['Tables']['changelog']['Row']
+  >;
   const entry = payload.record;
 
   // Create logContext

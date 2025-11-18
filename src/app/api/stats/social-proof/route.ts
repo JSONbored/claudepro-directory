@@ -19,39 +19,71 @@ export async function GET() {
   try {
     const supabase = await createClient();
 
-    // Get submissions this week
+    // Calculate date ranges
     const weekAgo = new Date();
     weekAgo.setDate(weekAgo.getDate() - 7);
+    const monthAgo = new Date();
+    monthAgo.setDate(monthAgo.getDate() - 30);
 
-    const { data: recentSubmissions, error: submissionsError } = await supabase
-      .from('content_submissions')
-      .select('id, status, created_at, author')
-      .gte('created_at', weekAgo.toISOString())
-      .order('created_at', { ascending: false });
+    // Execute all queries in parallel
+    const [recentResult, monthResult, contentResult] = await Promise.allSettled([
+      supabase
+        .from('content_submissions')
+        .select('id, status, created_at, author')
+        .gte('created_at', weekAgo.toISOString())
+        .order('created_at', { ascending: false }),
+      supabase
+        .from('content_submissions')
+        .select('status')
+        .gte('created_at', monthAgo.toISOString()),
+      supabase.from('content').select('id', { count: 'exact', head: true }),
+    ]);
+
+    // Extract results and handle errors
+    const recentSubmissions = recentResult.status === 'fulfilled' ? recentResult.value.data : null;
+    const submissionsError =
+      recentResult.status === 'rejected'
+        ? recentResult.reason
+        : recentResult.status === 'fulfilled'
+          ? recentResult.value.error || null
+          : null;
 
     if (submissionsError) {
       logger.warn('Failed to fetch recent submissions', {
-        error: submissionsError.message,
+        error:
+          submissionsError instanceof Error ? submissionsError.message : String(submissionsError),
+      });
+    }
+
+    const monthSubmissions = monthResult.status === 'fulfilled' ? monthResult.value.data : null;
+    const monthError =
+      monthResult.status === 'rejected'
+        ? monthResult.reason
+        : monthResult.status === 'fulfilled'
+          ? monthResult.value.error || null
+          : null;
+
+    if (monthError) {
+      logger.warn('Failed to fetch month submissions', {
+        error: monthError instanceof Error ? monthError.message : String(monthError),
+      });
+    }
+
+    const contentCount = contentResult.status === 'fulfilled' ? contentResult.value.count : null;
+    const contentError =
+      contentResult.status === 'rejected'
+        ? contentResult.reason
+        : contentResult.status === 'fulfilled'
+          ? contentResult.value.error || null
+          : null;
+
+    if (contentError) {
+      logger.warn('Failed to fetch content count', {
+        error: contentError instanceof Error ? contentError.message : String(contentError),
       });
     }
 
     const submissionCount = recentSubmissions?.length || 0;
-
-    // Calculate success rate (approved / total in last 30 days)
-    const monthAgo = new Date();
-    monthAgo.setDate(monthAgo.getDate() - 30);
-
-    const { data: monthSubmissions, error: monthError } = await supabase
-      .from('content_submissions')
-      .select('status')
-      .gte('created_at', monthAgo.toISOString());
-
-    if (monthError) {
-      logger.warn('Failed to fetch month submissions', {
-        error: monthError.message,
-      });
-    }
-
     const total = monthSubmissions?.length || 0;
     const approved = monthSubmissions?.filter((s) => s.status === 'merged').length || 0;
     const successRate = total > 0 ? Math.round((approved / total) * 100) : null;
@@ -79,17 +111,6 @@ export async function GET() {
         // Non-email format: return trimmed original name
         return name.trim();
       });
-
-    // Get total content count as proxy for total users
-    const { count: contentCount, error: contentError } = await supabase
-      .from('content')
-      .select('id', { count: 'exact', head: true });
-
-    if (contentError) {
-      logger.warn('Failed to fetch content count', {
-        error: contentError.message,
-      });
-    }
 
     const totalUsers = contentCount || 1000; // Fallback to 1000
 
@@ -127,7 +148,12 @@ export async function GET() {
     return NextResponse.json(
       {
         error: 'Failed to fetch stats',
-        message: error instanceof Error ? error.message : 'Unknown error',
+        message:
+          process.env.NODE_ENV === 'development'
+            ? error instanceof Error
+              ? error.message
+              : 'Unknown error'
+            : 'An error occurred while fetching statistics',
       },
       { status: 500 }
     );

@@ -3,6 +3,7 @@
  * Uses getUserLibrary data function for fetching bookmarks and collections
  */
 
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { NavLink } from '@/src/components/core/navigation/navigation-link';
@@ -25,7 +26,7 @@ import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { normalizeError } from '@/src/lib/utils/error.utils';
 import type { GetGetUserLibraryReturn } from '@/src/types/database-overrides';
 
-export const metadata = generatePageMetadata('/account/library');
+export const metadata: Promise<Metadata> = generatePageMetadata('/account/library');
 
 export default async function LibraryPage() {
   const { user } = await getAuthenticatedUser({ context: 'LibraryPage' });

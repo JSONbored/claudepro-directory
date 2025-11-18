@@ -184,10 +184,11 @@ export function ProductionCodeBlock({
   const pathname = usePathname();
 
   // Extract category and slug from pathname for tracking
-  // Memoize category validation to avoid repeated checks on every render
-  const category: ContentCategory = useMemo(() => {
+  // Memoize to avoid repeated validation on every render
+  const { category, slug } = useMemo(() => {
     const pathParts = pathname?.split('/').filter(Boolean) || [];
     const rawCategory = pathParts[0] || 'unknown';
+    const slug = pathParts[1] || 'unknown';
 
     // Warn and use explicit sentinel for invalid categories to avoid misleading analytics
     if (!isValidCategory(rawCategory)) {
@@ -196,14 +197,11 @@ export function ProductionCodeBlock({
         pathname,
         fallback: 'agents',
       });
-      return 'agents' as ContentCategory;
+      return { category: 'agents' as ContentCategory, slug };
     }
 
-    return rawCategory;
+    return { category: rawCategory, slug };
   }, [pathname]);
-
-  const pathParts = pathname?.split('/').filter(Boolean) || [];
-  const slug = pathParts[1] || 'unknown';
 
   // Calculate current URL for sharing (needed during render for react-share components)
   const currentUrl = `${APP_CONFIG.url}${pathname || ''}`;
@@ -420,7 +418,7 @@ export function ProductionCodeBlock({
 
             {/* Language badge */}
             {language && language !== 'text' && (
-              <div className="rounded-full border border-accent/30 bg-gradient-to-r from-accent/15 to-accent/10 px-2.5 py-1 font-semibold text-2xs text-accent uppercase tracking-wider shadow-md backdrop-blur-md">
+              <div className="rounded-full border border-accent/30 bg-linear-to-r from-accent/15 to-accent/10 px-2.5 py-1 font-semibold text-2xs text-accent uppercase tracking-wider shadow-md backdrop-blur-md">
                 {language}
               </div>
             )}
@@ -493,7 +491,7 @@ export function ProductionCodeBlock({
 
             {/* Language badge */}
             {language && language !== 'text' && (
-              <div className="rounded-full border border-accent/30 bg-gradient-to-r from-accent/15 to-accent/10 px-2.5 py-1 font-semibold text-2xs text-accent uppercase tracking-wider shadow-md backdrop-blur-md">
+              <div className="rounded-full border border-accent/30 bg-linear-to-r from-accent/15 to-accent/10 px-2.5 py-1 font-semibold text-2xs text-accent uppercase tracking-wider shadow-md backdrop-blur-md">
                 {language}
               </div>
             )}

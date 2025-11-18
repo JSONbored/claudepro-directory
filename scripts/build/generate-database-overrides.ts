@@ -566,99 +566,96 @@ function getJsonbRpcFunctions(): RpcFunction[] {
   }));
 }
 
+/**
+ * Get RPC type name following the same logic as generateRpcSkeleton
+ * Extracts prefix and converts to PascalCase type name
+ */
+function getRpcTypeName(rpcName: string): string {
+  const { prefix, nameWithoutPrefix } = getRpcNameParts(rpcName);
+
+  const pascalName = nameWithoutPrefix
+    .split('_')
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join('');
+  return `${prefix}${pascalName}Return`;
+}
+
 function checkExistingRpcType(rpcName: string): boolean {
   try {
     const content = readFileSync(DATABASE_OVERRIDES_FILE, 'utf-8');
-    const pascalName = rpcName
-      .split('_')
-      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-      .join('');
-    const prefixes = [
-      'Get',
-      'Add',
-      'Remove',
-      'Update',
-      'Toggle',
-      'Approve',
-      'Reject',
-      'Batch',
-      'Track',
-      'Manage',
-      'Delete',
-      'Create',
-      'Generate',
-      'Build',
-      'Calculate',
-      'Subscribe',
-      'Unlink',
-      'Refresh',
-      'Reorder',
-    ];
-    return (
-      prefixes.some((prefix) => content.includes(`${prefix}${pascalName}Return`)) ||
-      content.includes(`'${rpcName}':`)
-    );
+    const typeName = getRpcTypeName(rpcName);
+    return content.includes(`export type ${typeName}`) || content.includes(`'${rpcName}':`);
   } catch {
     return false;
   }
 }
 
-function generateRpcSkeleton(rpc: RpcFunction): string {
+/**
+ * Extract RPC name parts (prefix and name without prefix)
+ * Shared utility used by generateRpcSkeleton, preserveManualRpcDefinitions, and getRpcTypeName
+ */
+function getRpcNameParts(rpcName: string): { prefix: string; nameWithoutPrefix: string } {
   let prefix = 'Get';
-  let nameWithoutPrefix = rpc.name;
+  let nameWithoutPrefix = rpcName;
 
-  if (rpc.name.startsWith('add_')) {
+  if (rpcName.startsWith('add_')) {
     prefix = 'Add';
-    nameWithoutPrefix = rpc.name.slice(4);
-  } else if (rpc.name.startsWith('create_')) {
+    nameWithoutPrefix = rpcName.slice(4);
+  } else if (rpcName.startsWith('create_')) {
     prefix = 'Create';
-    nameWithoutPrefix = rpc.name.slice(7);
-  } else if (rpc.name.startsWith('remove_')) {
+    nameWithoutPrefix = rpcName.slice(7);
+  } else if (rpcName.startsWith('remove_')) {
     prefix = 'Remove';
-    nameWithoutPrefix = rpc.name.slice(7);
-  } else if (rpc.name.startsWith('delete_')) {
+    nameWithoutPrefix = rpcName.slice(7);
+  } else if (rpcName.startsWith('delete_')) {
     prefix = 'Delete';
-    nameWithoutPrefix = rpc.name.slice(7);
-  } else if (rpc.name.startsWith('update_')) {
+    nameWithoutPrefix = rpcName.slice(7);
+  } else if (rpcName.startsWith('update_')) {
     prefix = 'Update';
-    nameWithoutPrefix = rpc.name.slice(7);
-  } else if (rpc.name.startsWith('toggle_')) {
+    nameWithoutPrefix = rpcName.slice(7);
+  } else if (rpcName.startsWith('toggle_')) {
     prefix = 'Toggle';
-    nameWithoutPrefix = rpc.name.slice(7);
-  } else if (rpc.name.startsWith('approve_')) {
+    nameWithoutPrefix = rpcName.slice(7);
+  } else if (rpcName.startsWith('approve_')) {
     prefix = 'Approve';
-    nameWithoutPrefix = rpc.name.slice(8);
-  } else if (rpc.name.startsWith('reject_')) {
+    nameWithoutPrefix = rpcName.slice(8);
+  } else if (rpcName.startsWith('reject_')) {
     prefix = 'Reject';
-    nameWithoutPrefix = rpc.name.slice(7);
-  } else if (rpc.name.startsWith('batch_')) {
+    nameWithoutPrefix = rpcName.slice(7);
+  } else if (rpcName.startsWith('batch_')) {
     prefix = 'Batch';
-    nameWithoutPrefix = rpc.name.slice(6);
-  } else if (rpc.name.startsWith('track_')) {
+    nameWithoutPrefix = rpcName.slice(6);
+  } else if (rpcName.startsWith('track_')) {
     prefix = 'Track';
-    nameWithoutPrefix = rpc.name.slice(6);
-  } else if (rpc.name.startsWith('manage_')) {
+    nameWithoutPrefix = rpcName.slice(6);
+  } else if (rpcName.startsWith('manage_')) {
     prefix = 'Manage';
-    nameWithoutPrefix = rpc.name.slice(7);
-  } else if (rpc.name.startsWith('generate_')) {
+    nameWithoutPrefix = rpcName.slice(7);
+  } else if (rpcName.startsWith('generate_')) {
     prefix = 'Generate';
-    nameWithoutPrefix = rpc.name.slice(9);
-  } else if (rpc.name.startsWith('build_')) {
+    nameWithoutPrefix = rpcName.slice(9);
+  } else if (rpcName.startsWith('build_')) {
     prefix = 'Build';
-    nameWithoutPrefix = rpc.name.slice(6);
-  } else if (rpc.name.startsWith('subscribe_')) {
+    nameWithoutPrefix = rpcName.slice(6);
+  } else if (rpcName.startsWith('subscribe_')) {
     prefix = 'Subscribe';
-    nameWithoutPrefix = rpc.name.slice(10);
-  } else if (rpc.name.startsWith('unlink_')) {
+    nameWithoutPrefix = rpcName.slice(10);
+  } else if (rpcName.startsWith('unlink_')) {
     prefix = 'Unlink';
-    nameWithoutPrefix = rpc.name.slice(7);
-  } else if (rpc.name.startsWith('refresh_')) {
+    nameWithoutPrefix = rpcName.slice(7);
+  } else if (rpcName.startsWith('refresh_')) {
     prefix = 'Refresh';
-    nameWithoutPrefix = rpc.name.slice(8);
-  } else if (rpc.name.startsWith('reorder_')) {
+    nameWithoutPrefix = rpcName.slice(8);
+  } else if (rpcName.startsWith('reorder_')) {
     prefix = 'Reorder';
-    nameWithoutPrefix = rpc.name.slice(8);
+    nameWithoutPrefix = rpcName.slice(8);
   }
+
+  return { prefix, nameWithoutPrefix };
+}
+
+function generateRpcSkeleton(rpc: RpcFunction): string {
+  const { prefix, nameWithoutPrefix } = getRpcNameParts(rpc.name);
 
   const pascalName = nameWithoutPrefix
     .split('_')
@@ -724,61 +721,7 @@ function extractManualSection(content: string): string {
  * Preserve manual RPC definitions from existing file
  */
 function preserveManualRpcDefinitions(existingContent: string, rpcName: string): string | null {
-  let prefix = 'Get';
-  let nameWithoutPrefix = rpcName;
-
-  if (rpcName.startsWith('add_')) {
-    prefix = 'Add';
-    nameWithoutPrefix = rpcName.slice(4);
-  } else if (rpcName.startsWith('create_')) {
-    prefix = 'Create';
-    nameWithoutPrefix = rpcName.slice(7);
-  } else if (rpcName.startsWith('remove_')) {
-    prefix = 'Remove';
-    nameWithoutPrefix = rpcName.slice(7);
-  } else if (rpcName.startsWith('delete_')) {
-    prefix = 'Delete';
-    nameWithoutPrefix = rpcName.slice(7);
-  } else if (rpcName.startsWith('update_')) {
-    prefix = 'Update';
-    nameWithoutPrefix = rpcName.slice(7);
-  } else if (rpcName.startsWith('toggle_')) {
-    prefix = 'Toggle';
-    nameWithoutPrefix = rpcName.slice(7);
-  } else if (rpcName.startsWith('approve_')) {
-    prefix = 'Approve';
-    nameWithoutPrefix = rpcName.slice(8);
-  } else if (rpcName.startsWith('reject_')) {
-    prefix = 'Reject';
-    nameWithoutPrefix = rpcName.slice(7);
-  } else if (rpcName.startsWith('batch_')) {
-    prefix = 'Batch';
-    nameWithoutPrefix = rpcName.slice(6);
-  } else if (rpcName.startsWith('track_')) {
-    prefix = 'Track';
-    nameWithoutPrefix = rpcName.slice(6);
-  } else if (rpcName.startsWith('manage_')) {
-    prefix = 'Manage';
-    nameWithoutPrefix = rpcName.slice(7);
-  } else if (rpcName.startsWith('generate_')) {
-    prefix = 'Generate';
-    nameWithoutPrefix = rpcName.slice(9);
-  } else if (rpcName.startsWith('build_')) {
-    prefix = 'Build';
-    nameWithoutPrefix = rpcName.slice(6);
-  } else if (rpcName.startsWith('subscribe_')) {
-    prefix = 'Subscribe';
-    nameWithoutPrefix = rpcName.slice(10);
-  } else if (rpcName.startsWith('unlink_')) {
-    prefix = 'Unlink';
-    nameWithoutPrefix = rpcName.slice(7);
-  } else if (rpcName.startsWith('refresh_')) {
-    prefix = 'Refresh';
-    nameWithoutPrefix = rpcName.slice(8);
-  } else if (rpcName.startsWith('reorder_')) {
-    prefix = 'Reorder';
-    nameWithoutPrefix = rpcName.slice(8);
-  }
+  const { prefix, nameWithoutPrefix } = getRpcNameParts(rpcName);
 
   const typeName = `${prefix}${nameWithoutPrefix
     .split('_')
@@ -941,7 +884,7 @@ function main() {
       const content = readFileSync(DATABASE_TYPES_FILE, 'utf-8');
       const enums = extractEnums(content);
       enumArraysCode = generateEnumArrays(enums);
-      logger.info(`   ✅ ${enums.length} enum types with arrays and type guards`, {
+      logger.info(`   ✅ ${enums.length} enum types with value arrays`, {
         script: 'generate-database-overrides',
         enumCount: enums.length,
       });

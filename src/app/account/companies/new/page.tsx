@@ -2,13 +2,14 @@
  * Create Company Page - Standalone company creation flow
  */
 
+import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { CompanyForm } from '@/src/components/core/forms/company-form';
 import { getAuthenticatedUser } from '@/src/lib/auth/get-authenticated-user';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 
-export const metadata = generatePageMetadata('/account/companies/new');
+export const metadata: Promise<Metadata> = generatePageMetadata('/account/companies/new');
 
 export default async function NewCompanyPage() {
   const { user } = await getAuthenticatedUser({ context: 'NewCompanyPage' });

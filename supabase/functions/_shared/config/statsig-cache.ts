@@ -51,7 +51,7 @@ async function fetchStatsigConfig(): Promise<void> {
     );
   }
 
-  const payload = await response.json();
+  const payload = (await response.json()) as { value?: unknown } | null;
   if (!payload || typeof payload.value !== 'object' || payload.value === null) {
     throw new Error('Statsig cache config response missing value');
   }

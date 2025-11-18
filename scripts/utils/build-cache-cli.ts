@@ -66,7 +66,7 @@ function main() {
       const stats = getCacheStats();
 
       if (stats.totalEntries > 0) {
-        logger.info('📊 Statistics:');
+        logger.info('📊 Statistics:', { script: 'build-cache-cli' });
         logger.info(`   Total Entries: ${stats.totalEntries}`, {
           script: 'build-cache-cli',
           totalEntries: stats.totalEntries,

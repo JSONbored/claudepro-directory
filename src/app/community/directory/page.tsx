@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import { Suspense } from 'react';
 import { ContributorsSidebar } from '@/src/components/features/community/contributors-sidebar';
 import { ProfileSearchClient } from '@/src/components/features/community/profile-search';
@@ -8,7 +9,7 @@ import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { normalizeError } from '@/src/lib/utils/error.utils';
 import type { GetGetCommunityDirectoryReturn } from '@/src/types/database-overrides';
 
-export const metadata = generatePageMetadata('/community/directory');
+export const metadata: Promise<Metadata> = generatePageMetadata('/community/directory');
 
 export const revalidate = false;
 

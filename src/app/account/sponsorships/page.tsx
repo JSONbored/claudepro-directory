@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { Button } from '@/src/components/primitives/ui/button';
@@ -17,7 +18,7 @@ import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { normalizeError } from '@/src/lib/utils/error.utils';
 
-export const metadata = generatePageMetadata('/account/sponsorships');
+export const metadata: Promise<Metadata> = generatePageMetadata('/account/sponsorships');
 
 /**
  * Check if a sponsorship is currently active
@@ -71,7 +72,7 @@ export default async function SponsorshipsPage() {
     );
   }
 
-  if (!sponsorships || sponsorships.length === 0) {
+  if (sponsorships.length === 0) {
     logger.info('SponsorshipsPage: user has no sponsorships', { userId: user.id });
     return (
       <div className="space-y-6">
@@ -142,7 +143,9 @@ export default async function SponsorshipsPage() {
                     <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
                       <UnifiedBadge
                         variant="sponsored"
-                        tier={sponsorship.tier as 'featured' | 'promoted' | 'spotlight'}
+                        tier={
+                          sponsorship.tier as 'featured' | 'promoted' | 'spotlight' | 'sponsored'
+                        }
                         showIcon={true}
                       />
                       {isActive ? (

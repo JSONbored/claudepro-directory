@@ -219,9 +219,11 @@ function generateSchemaDump(isForce: boolean, cachedHash?: string | null): StepR
   const spinner = ora();
 
   try {
-    logger.info(`\n${'='.repeat(80)}`);
-    logger.info('🗂️  STEP 1: Schema Dump (supabase/schema.sql)');
-    logger.info(`${'='.repeat(80)}\n`);
+    logger.info(`\n${'='.repeat(80)}`, { script: 'sync-database-schema' });
+    logger.info('🗂️  STEP 1: Schema Dump (supabase/schema.sql)', {
+      script: 'sync-database-schema',
+    });
+    logger.info(`${'='.repeat(80)}\n`, { script: 'sync-database-schema' });
 
     // Check if regeneration needed
     if (!isForce) {
@@ -305,9 +307,11 @@ function generateTypes(isForce: boolean, cachedHash?: string | null): StepResult
   const spinner = ora();
 
   try {
-    logger.info(`\n${'='.repeat(80)}`);
-    logger.info('📘 STEP 2: TypeScript Types (src/types/database.types.ts)');
-    logger.info(`${'='.repeat(80)}\n`);
+    logger.info(`\n${'='.repeat(80)}`, { script: 'sync-database-schema' });
+    logger.info('📘 STEP 2: TypeScript Types (src/types/database.types.ts)', {
+      script: 'sync-database-schema',
+    });
+    logger.info(`${'='.repeat(80)}\n`, { script: 'sync-database-schema' });
 
     // Check if regeneration needed
     if (!isForce) {
@@ -448,7 +452,9 @@ function main() {
 
     // Early exit optimization: Check if anything needs regeneration
     if (!isForce && runDump && runTypes) {
-      logger.info('🔍 Checking if database schema has changed...\n');
+      logger.info('🔍 Checking if database schema has changed...\n', {
+        script: 'sync-database-schema',
+      });
       cachedSchemaHashForRun = getSchemaHash();
 
       if (cachedSchemaHashForRun) {
@@ -494,9 +500,9 @@ function main() {
     const skippedSteps = results.filter((r) => r.skipped).length;
     const failedSteps = results.filter((r) => !r.success).length;
 
-    logger.info(`\n${'='.repeat(80)}`);
-    logger.info('📊 Sync Summary');
-    logger.info(`${'='.repeat(80)}\n`);
+    logger.info(`\n${'='.repeat(80)}`, { script: 'sync-database-schema' });
+    logger.info('📊 Sync Summary', { script: 'sync-database-schema' });
+    logger.info(`${'='.repeat(80)}\n`, { script: 'sync-database-schema' });
 
     for (const result of results) {
       const icon = result.success ? '✅' : '❌';
@@ -504,6 +510,7 @@ function main() {
       const duration = result.duration_ms > 0 ? `(${result.duration_ms}ms)` : '';
 
       const logContext: Record<string, string | number | boolean> = {
+        script: 'sync-database-schema',
         step: result.step,
         status,
         duration: result.duration_ms,

@@ -186,6 +186,7 @@
         "noParameterProperties": "off",
         "noRestrictedGlobals": "off",
         "noRestrictedImports": {
+          "level": "error",
           "options": {
             "patterns": [
               {

@@ -20,6 +20,53 @@ export type GetFilterJobsReturn = {
 } | null;
 
 /**
+ * get_category_configs_with_features RPC return type
+ */
+export type GetGetCategoryConfigsWithFeaturesReturn = Record<
+  ContentCategory,
+  {
+    category: ContentCategory;
+    title: string;
+    plural_title: string;
+    description: string | null;
+    icon_name: string | null;
+    color_scheme: string | null;
+    keywords: string[] | null;
+    meta_description: string | null;
+    search_placeholder: string | null;
+    empty_state_message: string | null;
+    url_slug: string;
+    content_loader: string | null;
+    config_format: string | null;
+    primary_action_type: string | null;
+    primary_action_label: string | null;
+    primary_action_config: Json | null;
+    validation_config: Json | null;
+    generation_config: Json | null;
+    schema_name: string | null;
+    api_schema: Json | null;
+    metadata_fields: string[];
+    badges: Json;
+    features: {
+      show_on_homepage: boolean;
+      display_config: Json | null;
+      generate_full_content: boolean;
+      build_enable_cache: boolean;
+      api_generate_static: boolean;
+      api_include_trending: boolean;
+      section_features: boolean;
+      section_installation: boolean;
+      section_use_cases: boolean;
+      section_configuration: boolean;
+      section_security: boolean;
+      section_troubleshooting: boolean;
+      section_examples: boolean;
+      metadata_show_github_link: boolean;
+    };
+  }
+>;
+
+/**
  * Database type with proper overrides for edge functions
  *
  * Uses intersection type to combine DatabaseGenerated with pgmq_public schema
@@ -77,6 +124,10 @@ export type Database = DatabaseGenerated & {
           use_cases: Json;
           viewCount: number;
         }>;
+      };
+      get_category_configs_with_features: {
+        Args: Record<string, never>; // No arguments
+        Returns: GetGetCategoryConfigsWithFeaturesReturn;
       };
     };
   };

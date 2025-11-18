@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import { NavLink } from '@/src/components/core/navigation/navigation-link';
 import { APP_CONFIG } from '@/src/lib/data/config/constants';
 import { getContactChannels } from '@/src/lib/data/marketing/contact';
@@ -6,7 +7,7 @@ import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { normalizeError } from '@/src/lib/utils/error.utils';
 
-export const metadata = generatePageMetadata('/terms');
+export const metadata: Promise<Metadata> = generatePageMetadata('/terms');
 
 /**
  * Static Generation: Legal pages are fully static and never change

@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ActivityTimeline } from '@/src/components/features/user-activity/activity-timeline';
 import { Button } from '@/src/components/primitives/ui/button';
@@ -17,7 +18,7 @@ import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { normalizeError } from '@/src/lib/utils/error.utils';
 
-export const metadata = generatePageMetadata('/account/activity');
+export const metadata: Promise<Metadata> = generatePageMetadata('/account/activity');
 
 export default async function ActivityPage() {
   const { user } = await getAuthenticatedUser({ context: 'ActivityPage' });

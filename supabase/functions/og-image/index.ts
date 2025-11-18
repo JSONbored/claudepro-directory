@@ -97,11 +97,17 @@ async function fetchMetadataFromRoute(
         throw new Error(`SEO API returned ${response.status}: ${errorText}`);
       }
 
-      const data = await response.json();
+      const data = (await response.json()) as
+        | { metadata?: { title?: string; description?: string; keywords?: string[] } }
+        | { title?: string; description?: string; keywords?: string[] };
 
       // Extract metadata from response
       // Response can be either { title, description, ... } or { metadata: { title, description, ... } }
-      const metadata = 'metadata' in data ? data.metadata : data;
+      const metadata = ('metadata' in data ? data.metadata : data) as {
+        title?: string;
+        description?: string;
+        keywords?: string[];
+      };
 
       if (!metadata?.title) {
         throw new Error('Metadata missing title');

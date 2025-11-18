@@ -130,6 +130,9 @@ async function generateCategoryConfig() {
     // Generate TypeScript file
     logger.info('📝 Generating TypeScript config file...');
 
+    // Centralized string escaping for generated TypeScript literals
+    const escapeString = (value: string) => JSON.stringify(value).slice(1, -1);
+
     const configEntries = Object.entries(rawConfigs)
       .map(([categoryId, dbConfig]) => {
         const features = dbConfig.features || {};
@@ -159,15 +162,15 @@ async function generateCategoryConfig() {
 
         return `  '${categoryId}': {
     id: '${categoryId}' as const,
-    title: '${dbConfig.title.replace(/'/g, "\\'")}',
-    pluralTitle: '${dbConfig.plural_title.replace(/'/g, "\\'")}',
-    description: '${dbConfig.description.replace(/'/g, "\\'")}',
+    title: '${escapeString(dbConfig.title)}',
+    pluralTitle: '${escapeString(dbConfig.plural_title)}',
+    description: '${escapeString(dbConfig.description)}',
     icon: ICON_MAP.${dbConfig.icon_name} || FileText,
     colorScheme: '${dbConfig.color_scheme}',
     showOnHomepage: ${features.show_on_homepage ?? true},
-    keywords: '${dbConfig.keywords.replace(/'/g, "\\'")}',
-    metaDescription: '${dbConfig.meta_description.replace(/'/g, "\\'")}',
-    typeName: '${dbConfig.title.replace(/'/g, "\\'")}',
+    keywords: '${escapeString(dbConfig.keywords)}',
+    metaDescription: '${escapeString(dbConfig.meta_description)}',
+    typeName: '${escapeString(dbConfig.title)}',
     generateFullContent: ${features.generate_full_content ?? true},
     metadataFields: ${JSON.stringify(dbConfig.metadata_fields)},
     buildConfig: {
@@ -181,9 +184,9 @@ async function generateCategoryConfig() {
       maxItemsPerResponse: ${apiSchema.apiConfig?.maxItemsPerResponse || 1000},
     },
     listPage: {
-      searchPlaceholder: '${dbConfig.search_placeholder.replace(/'/g, "\\'")}',
+      searchPlaceholder: '${escapeString(dbConfig.search_placeholder)}',
       badges: [${badges.join(', ')}],
-      ${dbConfig.empty_state_message ? `emptyStateMessage: '${dbConfig.empty_state_message.replace(/'/g, "\\'")}',` : ''}
+      ${dbConfig.empty_state_message ? `emptyStateMessage: '${escapeString(dbConfig.empty_state_message)}',` : ''}
     },
     detailPage: {
       displayConfig: ${features.display_config ?? true},
@@ -202,7 +205,7 @@ async function generateCategoryConfig() {
       showGitHubLink: ${features.metadata_show_github_link ?? true},
     },
     primaryAction: {
-      label: '${dbConfig.primary_action_label}',
+      label: '${escapeString(dbConfig.primary_action_label)}',
       type: '${dbConfig.primary_action_type}',
     },
     urlSlug: '${dbConfig.url_slug}',

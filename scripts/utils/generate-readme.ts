@@ -24,6 +24,10 @@ async function main() {
     // Endpoint: /functions/v1/data-api/content/sitewide?format=readme
     // Route: data-api edge function -> content route -> sitewide handler -> readme format
     // Should return: text/markdown content with HTTP 200
+    // NOTE: Before relying on this script in CI, verify that:
+    // - GET ${supabaseUrl}/functions/v1/data-api/content/sitewide?format=readme returns 200
+    // - Content-Type includes text/markdown
+    // - The body is the expected README markdown
     const edgeFunctionUrl = `${supabaseUrl}/functions/v1/data-api/content/sitewide?format=readme`;
 
     logger.info('📝 Generating README.md from edge function...\n', { script: 'generate-readme' });

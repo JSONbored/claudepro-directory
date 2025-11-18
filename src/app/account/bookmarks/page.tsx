@@ -1,8 +1,9 @@
+import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 
-export const metadata = generatePageMetadata('/account/bookmarks');
+export const metadata: Promise<Metadata> = generatePageMetadata('/account/bookmarks');
 
 /**
  * Redirect legacy /account/bookmarks to /account/library

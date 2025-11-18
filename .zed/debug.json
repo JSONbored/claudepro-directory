@@ -1,0 +1,80 @@
+[
+  {
+    "label": "Next.js: Debug Dev Server",
+    "adapter": "JavaScript",
+    "request": "launch",
+    "type": "node",
+    "runtimeExecutable": "node",
+    "runtimeArgs": ["--inspect", "node_modules/.bin/next", "dev", "--turbopack"],
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "env": {
+      "NODE_ENV": "development"
+    },
+    "console": "integratedTerminal",
+    "internalConsoleOptions": "neverOpen",
+    "skipFiles": ["<node_internals>/**", "**/node_modules/**"]
+  },
+  {
+    "label": "Next.js: Debug Production Server",
+    "adapter": "JavaScript",
+    "request": "launch",
+    "type": "node",
+    "runtimeExecutable": "node",
+    "runtimeArgs": ["--inspect", "node_modules/.bin/next", "start"],
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "env": {
+      "NODE_ENV": "production"
+    },
+    "console": "integratedTerminal",
+    "internalConsoleOptions": "neverOpen",
+    "skipFiles": ["<node_internals>/**", "**/node_modules/**"]
+  },
+  {
+    "label": "TypeScript: Debug Current File",
+    "adapter": "JavaScript",
+    "request": "launch",
+    "type": "node",
+    "runtimeExecutable": "tsx",
+    "runtimeArgs": ["--inspect", "$ZED_FILE"],
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "console": "integratedTerminal",
+    "internalConsoleOptions": "neverOpen",
+    "skipFiles": ["<node_internals>/**", "**/node_modules/**"]
+  },
+  {
+    "label": "Script: Generate Categories",
+    "adapter": "JavaScript",
+    "request": "launch",
+    "type": "node",
+    "runtimeExecutable": "tsx",
+    "runtimeArgs": ["--inspect", "scripts/build/generate-category-config.ts"],
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "console": "integratedTerminal",
+    "internalConsoleOptions": "neverOpen",
+    "skipFiles": ["<node_internals>/**", "**/node_modules/**"]
+  },
+  {
+    "label": "Script: Sync Database Schema",
+    "adapter": "JavaScript",
+    "request": "launch",
+    "type": "node",
+    "runtimeExecutable": "tsx",
+    "runtimeArgs": ["--inspect", "scripts/build/sync-database-schema.ts", "--skip-dump"],
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "console": "integratedTerminal",
+    "internalConsoleOptions": "neverOpen",
+    "skipFiles": ["<node_internals>/**", "**/node_modules/**"]
+  },
+  {
+    "label": "Script: Generate Database Overrides",
+    "adapter": "JavaScript",
+    "request": "launch",
+    "type": "node",
+    "runtimeExecutable": "tsx",
+    "runtimeArgs": ["--inspect", "scripts/build/generate-database-overrides.ts"],
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "console": "integratedTerminal",
+    "internalConsoleOptions": "neverOpen",
+    "skipFiles": ["<node_internals>/**", "**/node_modules/**"]
+  }
+]

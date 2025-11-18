@@ -4,7 +4,7 @@ export interface FetchWithRetryOptions {
   url: string;
   method?: string;
   headers?: Record<string, string>;
-  body?: BodyInit | null;
+  body?: unknown;
   retry?: {
     attempts?: number;
     baseDelayMs?: number;
@@ -51,7 +51,8 @@ export async function fetchWithRetry({
       const response = await fetch(url, {
         method,
         headers,
-        body,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        body: body ?? (undefined as any),
       });
 
       if (response.ok) {

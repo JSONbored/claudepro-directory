@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ConnectedAccountsClient } from '@/src/components/features/account/connected-accounts-client';
 import { Button } from '@/src/components/primitives/ui/button';
@@ -15,7 +16,7 @@ import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { normalizeError } from '@/src/lib/utils/error.utils';
 
-export async function generateMetadata() {
+export async function generateMetadata(): Promise<Metadata> {
   return await generatePageMetadata('/account/connected-accounts');
 }
 

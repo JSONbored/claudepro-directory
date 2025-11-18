@@ -71,20 +71,22 @@ const router = createRouter<TransformApiContext>({
       methods: ['GET', 'HEAD', 'OPTIONS'],
       cors: BASE_CORS,
       match: (ctx) => ctx.segments.length === 0,
-      handler: (ctx) => handleDirectoryIndex(ctx),
+      handler: (ctx) => Promise.resolve(handleDirectoryIndex(ctx)),
     },
     {
       name: 'content-highlight',
       methods: ['POST', 'OPTIONS'],
       cors: BASE_CORS,
       match: (ctx) => ctx.segments[0] === 'content' && ctx.segments[1] === 'highlight',
-      handler: async (ctx) => {
+      handler: function handleContentHighlightRoute(ctx: TransformApiContext): Promise<Response> {
         const rateLimit = checkRateLimit(ctx.request, RATE_LIMIT_PRESETS.transform);
         if (!rateLimit.allowed) {
-          return createRateLimitErrorResponse(rateLimit, {
-            preset: 'transform',
-            cors: BASE_CORS,
-          });
+          return Promise.resolve(
+            createRateLimitErrorResponse(rateLimit, {
+              preset: 'transform',
+              cors: BASE_CORS,
+            })
+          );
         }
         return respondWithAnalytics(ctx, 'content-highlight', async () => {
           const logContext = createTransformApiContext('content-highlight', {
@@ -102,13 +104,15 @@ const router = createRouter<TransformApiContext>({
       methods: ['POST', 'OPTIONS'],
       cors: BASE_CORS,
       match: (ctx) => ctx.segments[0] === 'content' && ctx.segments[1] === 'process',
-      handler: async (ctx) => {
+      handler: function handleContentProcessRoute(ctx: TransformApiContext): Promise<Response> {
         const rateLimit = checkRateLimit(ctx.request, RATE_LIMIT_PRESETS.transform);
         if (!rateLimit.allowed) {
-          return createRateLimitErrorResponse(rateLimit, {
-            preset: 'transform',
-            cors: BASE_CORS,
-          });
+          return Promise.resolve(
+            createRateLimitErrorResponse(rateLimit, {
+              preset: 'transform',
+              cors: BASE_CORS,
+            })
+          );
         }
         return respondWithAnalytics(ctx, 'content-process', async () => {
           const logContext = createTransformApiContext('content-process', {
@@ -126,7 +130,7 @@ const router = createRouter<TransformApiContext>({
 
 Deno.serve((request) => router(request));
 
-async function handleDirectoryIndex(ctx: TransformApiContext): Promise<Response> {
+function handleDirectoryIndex(ctx: TransformApiContext): Response {
   const response = jsonResponse(
     {
       ok: true,

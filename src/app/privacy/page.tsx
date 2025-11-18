@@ -1,9 +1,10 @@
+import type { Metadata } from 'next';
 import { NavLink } from '@/src/components/core/navigation/navigation-link';
 import { APP_CONFIG } from '@/src/lib/data/config/constants';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { getLastUpdatedDate } from '@/src/lib/utils/data.utils';
 
-export const metadata = generatePageMetadata('/privacy');
+export const metadata: Promise<Metadata> = generatePageMetadata('/privacy');
 
 /**
  * Static Generation: Legal pages are fully static and never change

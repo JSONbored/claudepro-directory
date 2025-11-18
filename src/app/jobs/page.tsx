@@ -3,6 +3,7 @@
  * Single RPC call to filter_jobs() - all filtering in PostgreSQL
  */
 
+import type { Metadata } from 'next';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
@@ -51,7 +52,9 @@ const NewsletterCTAVariant = dynamic(
  */
 export const revalidate = false;
 
-export async function generateMetadata({ searchParams }: PagePropsWithSearchParams) {
+export async function generateMetadata({
+  searchParams,
+}: PagePropsWithSearchParams): Promise<Metadata> {
   const rawParams = await searchParams;
   return generatePageMetadata('/jobs', {
     filters: {
@@ -69,7 +72,7 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
   const category = rawParams?.category as string | undefined;
   const employment = rawParams?.employment as string | undefined;
   const experience = rawParams?.experience as string | undefined;
-  const remote = rawParams?.remote === 'true';
+  const remote = rawParams?.remote === 'true' ? true : undefined;
   const page = Number(rawParams?.page) || 1;
   const limit = Math.min(Number(rawParams?.limit) || 20, 100);
   const offset = (page - 1) * limit;
@@ -78,7 +81,7 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
     searchQuery: searchQuery || 'none',
     category: category || 'all',
     employment: employment || 'any',
-    remote,
+    remote: Boolean(remote),
     page,
     limit,
   });
@@ -90,7 +93,7 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
       ...(category ? { category } : {}),
       ...(employment ? { employment } : {}),
       ...(experience ? { experience } : {}),
-      remote,
+      ...(remote !== undefined ? { remote } : {}),
       limit,
       offset,
     });
@@ -101,7 +104,7 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
       category: category || 'all',
       employment: employment || 'any',
       experience: experience || 'any',
-      remote,
+      remote: Boolean(remote),
       page,
       limit,
     });

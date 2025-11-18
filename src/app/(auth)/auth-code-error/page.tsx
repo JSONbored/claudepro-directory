@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Button } from '@/src/components/primitives/ui/button';
 import {
@@ -13,7 +14,7 @@ import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
-export const metadata = generatePageMetadata('/auth/auth-code-error');
+export const metadata: Promise<Metadata> = generatePageMetadata('/auth/auth-code-error');
 
 interface AuthCodeErrorSearchParams {
   message?: string;

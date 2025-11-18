@@ -17,6 +17,7 @@ import {
  * Settings Page - User profile and account management.
  */
 
+import type { Metadata } from 'next';
 import { ensureUserRecord } from '@/src/lib/actions/user.actions';
 import { getAuthenticatedUser } from '@/src/lib/auth/get-authenticated-user';
 import { getUserSettings } from '@/src/lib/data/account/user-data';
@@ -27,7 +28,7 @@ import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { normalizeError } from '@/src/lib/utils/error.utils';
 import type { GetGetUserSettingsReturn } from '@/src/types/database-overrides';
 
-export const metadata = generatePageMetadata('/account/settings');
+export const metadata: Promise<Metadata> = generatePageMetadata('/account/settings');
 
 export default async function SettingsPage() {
   const { user } = await getAuthenticatedUser({ context: 'SettingsPage' });
@@ -114,9 +115,13 @@ export default async function SettingsPage() {
 
   if (!profile) {
     // No error object available, only context
-    logger.error('SettingsPage: profile missing from getUserSettings response', '', {
-      userId: user.id,
-    });
+    logger.error(
+      'SettingsPage: profile missing from getUserSettings response',
+      new Error('Profile missing from response'),
+      {
+        userId: user.id,
+      }
+    );
     return (
       <div className="space-y-6">
         <h1 className="font-bold text-3xl">Settings</h1>

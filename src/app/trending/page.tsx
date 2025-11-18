@@ -3,6 +3,7 @@
  * Server component uses getTrendingPageData (cached RPC). Data API exposes the same payload for external consumers.
  */
 
+import type { Metadata } from 'next';
 import dynamic from 'next/dynamic';
 import { Suspense } from 'react';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
@@ -28,7 +29,7 @@ const NewsletterCTAVariant = dynamic(
 
 export const revalidate = false;
 
-export const metadata = generatePageMetadata('/trending');
+export const metadata: Promise<Metadata> = generatePageMetadata('/trending');
 
 export default async function TrendingPage({ searchParams }: PagePropsWithSearchParams) {
   const rawParams = await searchParams;

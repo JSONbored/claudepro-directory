@@ -50,6 +50,8 @@
     "start": "next start",
     "type-check": "tsc --noEmit",
     "type-check:edge": "cd supabase/functions && deno check '**/*.ts'",
+    "lint:edge": "cd supabase/functions && deno lint",
+    "lint:edge:fix": "cd supabase/functions && deno lint --fix",
     "type-check:unused": "ts-prune",
     "type-check:unused:filtered": "tsx scripts/lint/filter-unused-types.ts",
     "lint": "ultracite check && pnpm lint:auth-guards && pnpm lint:data-layer",

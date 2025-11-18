@@ -130,8 +130,8 @@ export async function fetchCommitsFromGitHub(
     throw new Error(`GitHub API error (${response.status}): ${errorText}`);
   }
 
-  const data = await response.json();
-  return data.commits || [];
+  const data = (await response.json()) as { commits?: unknown[] };
+  return (data.commits || []) as GitHubCommit[];
 }
 
 export function filterConventionalCommits(commits: GitHubCommit[]): GitHubCommit[] {

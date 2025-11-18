@@ -38,6 +38,7 @@
  * @see {@link file://../../lib/content-loaders.ts} - Content loading with caching
  */
 
+import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { ContentListServer } from '@/src/components/content/content-grid-list';
 import {
@@ -117,7 +118,11 @@ export async function generateStaticParams() {
  * //   twitter: { ... }
  * // }
  */
-export async function generateMetadata({ params }: { params: Promise<{ category: string }> }) {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ category: string }>;
+}): Promise<Metadata> {
   const { category } = await params;
 
   // Validate category and load config

@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { CollectionForm } from '@/src/components/core/forms/collection-form';
@@ -10,7 +11,7 @@ import { ArrowLeft } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 
-export const metadata = generatePageMetadata('/account/library/new');
+export const metadata: Promise<Metadata> = generatePageMetadata('/account/library/new');
 
 export default async function NewCollectionPage() {
   const { user } = await getAuthenticatedUser({ context: 'NewCollectionPage' });

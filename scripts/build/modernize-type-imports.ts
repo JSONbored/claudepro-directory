@@ -101,8 +101,9 @@ function modernizeFile(filePath: string): boolean {
       `(import\\s+(?:type\\s+)?\\{[^}]*\\b)${oldName}(\\b[^}]*\\}\\s+from\\s+['"]@/src/types/database-overrides['"])`,
       'g'
     );
-    if (importRegex.test(updated)) {
-      updated = updated.replace(importRegex, `$1${newName}$2`);
+    const afterImport = updated.replace(importRegex, `$1${newName}$2`);
+    if (afterImport !== updated) {
+      updated = afterImport;
       changed = true;
     }
 

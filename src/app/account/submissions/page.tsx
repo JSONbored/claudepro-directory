@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { Button } from '@/src/components/primitives/ui/button';
@@ -22,7 +23,7 @@ import type {
   SubmissionType,
 } from '@/src/types/database-overrides';
 
-export const metadata = generatePageMetadata('/account/submissions');
+export const metadata: Promise<Metadata> = generatePageMetadata('/account/submissions');
 
 /**
  * Extract and validate GitHub PR components from URL
@@ -44,6 +45,15 @@ const dangerousCharsSet = new Set([
   0x2068,
   0x2069, // Directional isolates
 ]);
+
+// Shared regex patterns for PR URL validation
+// Owner: GitHub usernames are 1-39 chars, alphanumeric + hyphens only (no underscores)
+const OWNER_REGEX = /^[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,38})?$/;
+// Repo: 1-100 chars, alphanumeric + underscores + dots + hyphens
+const REPO_REGEX = /^[\w.-]{1,100}$/;
+const PR_NUMBER_REGEX = /^\d+$/;
+// Full path pattern: /owner/repo/pull/number
+const PR_PATH_REGEX = /^\/([a-zA-Z0-9](?:[a-zA-Z0-9-]{0,38})?)\/([\w.-]{1,100})\/pull\/(\d+)$/;
 
 function extractPrComponents(
   url: string | null | undefined
@@ -72,11 +82,7 @@ function extractPrComponents(
     // Reject if username/password present
     if (parsed.username || parsed.password) return null;
     // Strict pattern: /owner/repo/pull/number
-    // Owner: GitHub usernames are 1-39 chars, alphanumeric + hyphens only (no underscores)
-    // Repo: 1-100 chars, alphanumeric + underscores + dots + hyphens
-    const pathMatch = parsed.pathname.match(
-      /^\/([a-zA-Z0-9](?:[a-zA-Z0-9-]{0,38})?)\/([\w.-]{1,100})\/pull\/(\d+)$/
-    );
+    const pathMatch = parsed.pathname.match(PR_PATH_REGEX);
     if (!pathMatch || pathMatch.length < 4) return null;
 
     const owner = pathMatch[1];
@@ -98,16 +104,8 @@ function extractPrComponents(
  * Uses URL constructor for canonicalization to prevent encoding-based attacks
  */
 function buildSafePrUrl(owner: string, repo: string, prNumber: string): string {
-  // Additional validation matching GitHub's rules
-  // Owner: 1-39 chars, alphanumeric + hyphens only (no underscores)
-  // Repo: 1-100 chars, alphanumeric + underscores + dots + hyphens
-  if (
-    !(
-      /^[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,38})?$/.test(owner) &&
-      /^[\w.-]{1,100}$/.test(repo) &&
-      /^\d+$/.test(prNumber)
-    )
-  ) {
+  // Additional validation matching GitHub's rules using shared regex patterns
+  if (!(OWNER_REGEX.test(owner) && REPO_REGEX.test(repo) && PR_NUMBER_REGEX.test(prNumber))) {
     return '#';
   }
   try {
@@ -144,12 +142,12 @@ function isValidSlug(slug: string): boolean {
 }
 
 // Strict type validation - must be in allowlist
-function isSafeType(type: string): boolean {
+function isSafeType(type: string): type is SubmissionType {
   return ALLOWED_TYPES.includes(type as (typeof ALLOWED_TYPES)[number]);
 }
 
 // Safe URL constructor - validates both type and slug before constructing
-function getSafeContentUrl(type: string, slug: string): string | null {
+function getSafeContentUrl(type: SubmissionType, slug: string): string | null {
   if (!(isSafeType(type) && isValidSlug(slug))) {
     return null;
   }
@@ -230,7 +228,7 @@ export default async function SubmissionsPage() {
   };
 
   const getTypeLabel = (type: SubmissionType) => {
-    const labels: Record<SubmissionType, string> = {
+    const labels: Partial<Record<SubmissionType, string>> = {
       agents: 'Claude Agent',
       mcp: 'MCP Server',
       rules: 'Claude Rule',
@@ -239,8 +237,48 @@ export default async function SubmissionsPage() {
       statuslines: 'Statusline',
       skills: 'Skill',
     };
-    return labels[type] || type;
+    return labels[type] ?? type;
   };
+
+  /**
+   * Format date consistently using en-US locale
+   */
+  function formatSubmissionDate(dateString: string): string {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
+  }
+
+  /**
+   * Render PR link button helper
+   */
+  function PrLinkButton({ href }: { href: string }) {
+    return (
+      <Button variant="outline" size="sm" asChild={true}>
+        <a href={href} target="_blank" rel="noopener noreferrer">
+          <GitPullRequest className="mr-1 h-3 w-3" />
+          View PR
+          <ExternalLink className="ml-1 h-3 w-3" />
+        </a>
+      </Button>
+    );
+  }
+
+  /**
+   * Render content link button helper
+   */
+  function ContentLinkButton({ href }: { href: string }) {
+    return (
+      <Button variant="outline" size="sm" asChild={true}>
+        <Link href={href}>
+          <ExternalLink className="mr-1 h-3 w-3" />
+          View Live
+        </Link>
+      </Button>
+    );
+  }
 
   /**
    * Get safe PR link props or null if PR URL is invalid
@@ -260,7 +298,7 @@ export default async function SubmissionsPage() {
    * Get safe content URL or null if invalid
    */
   function getContentLinkProps(
-    type: string,
+    type: SubmissionType,
     slug: string,
     status: SubmissionStatus
   ): { href: string } | null {
@@ -328,11 +366,11 @@ export default async function SubmissionsPage() {
 
                 <CardContent>
                   <div className={'mb-4 flex flex-wrap gap-4 text-muted-foreground text-sm'}>
-                    <div>Submitted {new Date(submission.created_at).toLocaleDateString()}</div>
+                    <div>Submitted {formatSubmissionDate(submission.created_at)}</div>
                     {submission.merged_at && (
                       <>
                         <span>•</span>
-                        <div>Merged {new Date(submission.merged_at).toLocaleDateString()}</div>
+                        <div>Merged {formatSubmissionDate(submission.merged_at)}</div>
                       </>
                     )}
                     {submission.pr_number && (
@@ -363,22 +401,7 @@ export default async function SubmissionsPage() {
                   <div className={UI_CLASSES.FLEX_GAP_2}>
                     {(() => {
                       const prLinkProps = getPrLinkProps(submission);
-                      if (!prLinkProps) return null;
-                      // Explicit validation: getPrLinkProps guarantees the URL is safe
-                      // It extracts and validates PR components (owner, repo, prNumber) using strict
-                      // regex patterns, validates against GitHub's rules, and reconstructs the URL
-                      // from trusted components. buildSafePrUrl further validates and normalizes
-                      // the URL. At this point, prLinkProps.href is validated and safe
-                      const validatedUrl: string = prLinkProps.href;
-                      return (
-                        <Button variant="outline" size="sm" asChild={true}>
-                          <a href={validatedUrl} target="_blank" rel="noopener noreferrer">
-                            <GitPullRequest className="mr-1 h-3 w-3" />
-                            View PR
-                            <ExternalLink className="ml-1 h-3 w-3" />
-                          </a>
-                        </Button>
-                      );
+                      return prLinkProps ? <PrLinkButton href={prLinkProps.href} /> : null;
                     })()}
 
                     {(() => {
@@ -387,20 +410,9 @@ export default async function SubmissionsPage() {
                         submission.content_slug,
                         status
                       );
-                      if (!contentLinkProps) return null;
-                      // Explicit validation: getContentLinkProps guarantees the URL is safe
-                      // It validates both type (using isSafeType) and slug (using isValidSlug)
-                      // before constructing the URL path. Only returns props if validation passes
-                      // and status is 'merged'. At this point, contentLinkProps.href is validated and safe
-                      const validatedUrl: string = contentLinkProps.href;
-                      return (
-                        <Button variant="outline" size="sm" asChild={true}>
-                          <Link href={validatedUrl}>
-                            <ExternalLink className="mr-1 h-3 w-3" />
-                            View Live
-                          </Link>
-                        </Button>
-                      );
+                      return contentLinkProps ? (
+                        <ContentLinkButton href={contentLinkProps.href} />
+                      ) : null;
                     })()}
                   </div>
                 </CardContent>

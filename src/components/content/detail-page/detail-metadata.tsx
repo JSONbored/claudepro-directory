@@ -72,7 +72,11 @@ function getSafeAuthorProfileHref(
 
   try {
     const parsed = new URL(url);
-    const hostname = parsed.hostname.replace(/\.$/, '').toLowerCase();
+    // Normalize hostname: remove trailing dots, lowercase, and strip www prefix
+    const hostname = parsed.hostname
+      .replace(/\.$/, '')
+      .replace(/^www\./, '')
+      .toLowerCase();
 
     // Strict mapping for allowed domains only - extract handle and reconstruct URL
     if (hostname === 'github.com') {
@@ -89,7 +93,7 @@ function getSafeAuthorProfileHref(
         handle = match[1];
         return `https://twitter.com/${encodeURIComponent(handle)}`;
       }
-    } else if (hostname === 'linkedin.com') {
+    } else if (hostname === 'linkedin.com' || hostname === 'www.linkedin.com') {
       // Extract from /in/username or /company/username
       const match = parsed.pathname.match(
         /^\/(in|company)\/([A-Za-z0-9]([A-Za-z0-9-._]*[A-Za-z0-9])?)$/

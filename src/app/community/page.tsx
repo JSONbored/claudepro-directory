@@ -13,6 +13,7 @@ const NewsletterCTAVariant = dynamic(
   }
 );
 
+import type { Metadata } from 'next';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
 import { ROUTES } from '@/src/lib/data/config/constants';
 import { getContactChannels } from '@/src/lib/data/marketing/contact';
@@ -21,7 +22,7 @@ import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
-export const metadata = generatePageMetadata('/community');
+export const metadata: Promise<Metadata> = generatePageMetadata('/community');
 
 /**
  * Static Generation: Marketing pages are fully static

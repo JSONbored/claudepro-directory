@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { JobForm } from '@/src/components/core/forms/job-form';
 import { type CreateJobInput, createJob } from '@/src/lib/actions/jobs.actions';
@@ -6,7 +7,7 @@ import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { normalizeError } from '@/src/lib/utils/error.utils';
 
-export const metadata = generatePageMetadata('/account/jobs/new');
+export const metadata: Promise<Metadata> = generatePageMetadata('/account/jobs/new');
 
 export default function NewJobPage() {
   const handleSubmit = async (data: CreateJobInput) => {

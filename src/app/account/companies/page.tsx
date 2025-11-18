@@ -3,6 +3,7 @@
  * Manages user's companies with CRUD operations via companies-handler
  */
 
+import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
@@ -83,7 +84,7 @@ function isTrustedPublicDomain(url: string | null | undefined): boolean {
   return allowedTlds.some((tld) => hostname.endsWith(tld));
 }
 
-export const metadata = generatePageMetadata('/account/companies');
+export const metadata: Promise<Metadata> = generatePageMetadata('/account/companies');
 
 export default async function CompaniesPage() {
   const { user } = await getAuthenticatedUser({ context: 'CompaniesPage' });

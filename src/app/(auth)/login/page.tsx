@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import { Suspense } from 'react';
 import { AuthBrandPanel } from '@/src/components/core/auth/auth-brand-panel';
 import { SplitAuthLayout } from '@/src/components/core/auth/auth-layout';
@@ -7,7 +8,7 @@ import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { normalizeError } from '@/src/lib/utils/error.utils';
 import { LoginPanelClient } from './login-panel-client';
 
-export const metadata = generatePageMetadata('/login');
+export const metadata: Promise<Metadata> = generatePageMetadata('/login');
 
 export default async function LoginPage({
   searchParams,

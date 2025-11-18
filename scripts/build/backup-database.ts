@@ -279,7 +279,7 @@ const sizeMB = (Number.parseInt(sizeKBTrimmed, 10) / 1024).toFixed(2);
 const uncompressedSize = execSync(`gunzip -l "${outputPath}" | tail -1 | awk '{print $2}'`, {
   encoding: 'utf-8',
 }).trim();
-const compressedSize = execSync(`stat -f%z "${outputPath}"`, { encoding: 'utf-8' }).trim();
+const compressedSize = String(statSync(outputPath).size);
 const compressionRatio = (
   (1 - Number.parseInt(compressedSize, 10) / Number.parseInt(uncompressedSize, 10)) *
   100

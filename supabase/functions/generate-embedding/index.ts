@@ -199,7 +199,7 @@ function respondWithAnalytics(handler: () => Promise<Response>): Promise<Respons
 /**
  * Main webhook handler
  */
-Deno.serve(async (req: Request): Promise<Response> => {
+Deno.serve((req: Request): Promise<Response> => {
   return respondWithAnalytics(async () => {
     const logContext = createUtilityContext('generate-embedding', 'webhook-handler');
     const startTime = performance.now();

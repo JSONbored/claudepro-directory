@@ -46,9 +46,9 @@ function getSafeStorageUrl(url: string | null | undefined): string | null {
 
     // Validate it's from Supabase storage
     // Supabase storage URLs typically have pattern: https://<project>.supabase.co/storage/v1/object/public/<bucket>/<path>
+    // Require BOTH valid Supabase hostname AND storage path
     const isSupabaseStorage =
-      parsed.hostname.endsWith('.supabase.co') ||
-      parsed.hostname.endsWith('.supabase.in') ||
+      (parsed.hostname.endsWith('.supabase.co') || parsed.hostname.endsWith('.supabase.in')) &&
       parsed.pathname.startsWith('/storage/v1/object/public/');
 
     if (!isSupabaseStorage) return null;

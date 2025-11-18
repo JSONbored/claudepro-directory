@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -71,7 +72,7 @@ function getSafeWebsiteUrl(url: string | null | undefined): string | null {
   }
 }
 
-export async function generateMetadata() {
+export async function generateMetadata(): Promise<Metadata> {
   return await generatePageMetadata('/companies');
 }
 

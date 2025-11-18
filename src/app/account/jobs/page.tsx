@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { JobDeleteButton } from '@/src/components/core/buttons/jobs/job-delete-button';
 import { JobToggleButton } from '@/src/components/core/buttons/jobs/job-toggle-button';
@@ -22,7 +23,7 @@ import { normalizeError } from '@/src/lib/utils/error.utils';
 import type { Tables } from '@/src/types/database.types';
 import type { GetGetUserDashboardReturn, JobStatus } from '@/src/types/database-overrides';
 
-export const metadata = generatePageMetadata('/account/jobs');
+export const metadata: Promise<Metadata> = generatePageMetadata('/account/jobs');
 
 export default async function MyJobsPage() {
   const { user } = await getAuthenticatedUser({ context: 'MyJobsPage' });
