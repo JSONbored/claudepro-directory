@@ -26,7 +26,7 @@ import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { normalizeError } from '@/src/lib/utils/error.utils';
-import type { GetGetUserSettingsReturn } from '@/src/types/database-overrides';
+import type { Database } from '@/src/types/database.types';
 
 export const metadata: Promise<Metadata> = generatePageMetadata('/account/settings');
 
@@ -52,7 +52,7 @@ export default async function SettingsPage() {
     );
   }
 
-  let settingsData: GetGetUserSettingsReturn | null = null;
+  let settingsData: Database['public']['Functions']['get_user_settings']['Returns'] | null = null;
   try {
     settingsData = await getUserSettings(user.id);
     if (!settingsData) {

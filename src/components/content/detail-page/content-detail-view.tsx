@@ -19,11 +19,8 @@ import { transformMcpConfigForDisplay } from '@/src/lib/utils/content.utils';
 import { ensureStringArray, getMetadata } from '@/src/lib/utils/data.utils';
 import { normalizeError } from '@/src/lib/utils/error.utils';
 import { getViewTransitionName } from '@/src/lib/utils/view-transitions.utils';
-import type {
-  ContentItem,
-  GetGetContentDetailCompleteReturn,
-  Tables,
-} from '@/src/types/database-overrides';
+import type { Database } from '@/src/types/database.types';
+import type { ContentItem, Tables } from '@/src/types/database-overrides';
 import { DetailHeader } from './detail-header';
 import { DetailMetadata } from './detail-metadata';
 import { DetailSidebar } from './sidebar/navigation-sidebar';
@@ -33,8 +30,13 @@ import { DetailSidebar } from './sidebar/navigation-sidebar';
  * So we narrow the type to exclude Tables<'jobs'> to ensure proper type safety.
  */
 export interface UnifiedDetailPageProps {
-  item: Tables<'content'> | GetGetContentDetailCompleteReturn['content'];
-  relatedItems?: ContentItem[] | GetGetContentDetailCompleteReturn['related'];
+  item:
+    | Tables<'content'>
+    | (Database['public']['Functions']['get_content_detail_complete']['Returns']['content'] &
+        Tables<'content'>);
+  relatedItems?:
+    | ContentItem[]
+    | Database['public']['Functions']['get_content_detail_complete']['Returns']['related'];
   viewCount?: number;
   copyCount?: number;
   relatedItemsPromise?: Promise<ContentItem[]>;
@@ -46,7 +48,10 @@ export interface UnifiedDetailPageProps {
 function logDetailProcessingWarning(
   section: string,
   error: unknown,
-  item: Tables<'content'> | GetGetContentDetailCompleteReturn['content']
+  item:
+    | Tables<'content'>
+    | (Database['public']['Functions']['get_content_detail_complete']['Returns']['content'] &
+        Tables<'content'>)
 ): void {
   const normalized = normalizeError(error, `${section} processing failed`);
   logger.warn(`UnifiedDetailPage: ${section} processing failed`, {
@@ -60,12 +65,18 @@ function logDetailProcessingWarning(
  * Safely extracts configuration from item or metadata as a string
  */
 function getConfigurationAsString(
-  item: Tables<'content'> | GetGetContentDetailCompleteReturn['content'],
+  item:
+    | Tables<'content'>
+    | (Database['public']['Functions']['get_content_detail_complete']['Returns']['content'] &
+        Tables<'content'>),
   metadata: Record<string, unknown>
 ): string | null {
+  // Cast item to Tables<'content'> for property access (content is Json type from RPC)
+  const contentItem = item as Tables<'content'>;
+
   // Check top-level item first
-  if ('configuration' in item) {
-    const cfg = item.configuration;
+  if ('configuration' in contentItem) {
+    const cfg = contentItem['configuration'];
     if (typeof cfg === 'string') return cfg;
     if (cfg != null) return JSON.stringify(cfg, null, 2);
   }
@@ -84,7 +95,10 @@ async function ViewCountMetadata({
   item,
   viewCountPromise,
 }: {
-  item: Tables<'content'> | GetGetContentDetailCompleteReturn['content'];
+  item:
+    | Tables<'content'>
+    | (Database['public']['Functions']['get_content_detail_complete']['Returns']['content'] &
+        Tables<'content'>);
   viewCountPromise: Promise<number>;
 }) {
   const viewCount = await viewCountPromise;
@@ -96,7 +110,10 @@ async function SidebarWithRelated({
   relatedItemsPromise,
   config,
 }: {
-  item: Tables<'content'> | GetGetContentDetailCompleteReturn['content'];
+  item:
+    | Tables<'content'>
+    | (Database['public']['Functions']['get_content_detail_complete']['Returns']['content'] &
+        Tables<'content'>);
   relatedItemsPromise: Promise<ContentItem[]>;
   config: {
     typeName: string;
@@ -128,35 +145,44 @@ export async function UnifiedDetailPage({
   const displayTitle = getDisplayTitle(item);
   const metadata = getMetadata(item);
 
+  // Cast item to Tables<'content'> for property access
+  const contentItem = item as Tables<'content'>;
+
   const installation = (() => {
-    const inst = ('installation' in item && item.installation) || metadata['installation'];
+    const inst =
+      ('installation' in contentItem && contentItem['installation']) || metadata['installation'];
     return inst && typeof inst === 'object' && !Array.isArray(inst)
       ? (inst as InstallationSteps)
       : undefined;
   })();
 
   const useCases = (() => {
-    const cases = ('use_cases' in item && item.use_cases) || metadata['use_cases'];
+    const cases = ('use_cases' in contentItem && contentItem['use_cases']) || metadata['use_cases'];
     return ensureStringArray(cases);
   })();
 
   const features = (() => {
-    const feats = ('features' in item && item.features) || metadata['features'];
+    const feats = ('features' in contentItem && contentItem['features']) || metadata['features'];
     return ensureStringArray(feats);
   })();
 
   const troubleshooting = (() => {
     const trouble =
-      ('troubleshooting' in item && item.troubleshooting) || metadata['troubleshooting'];
+      ('troubleshooting' in contentItem && contentItem['troubleshooting']) ||
+      metadata['troubleshooting'];
     return Array.isArray(trouble) && trouble.length > 0 ? trouble : [];
   })();
 
   const requirements = (() => {
-    const reqs = ('requirements' in item && item.requirements) || metadata['requirements'];
+    const reqs =
+      ('requirements' in contentItem && contentItem['requirements']) || metadata['requirements'];
     return ensureStringArray(reqs);
   })();
 
-  const securityItems = 'security' in item && item.security ? ensureStringArray(item.security) : [];
+  const securityItems =
+    'security' in contentItem && contentItem['security']
+      ? ensureStringArray(contentItem['security'])
+      : [];
 
   // Pre-process content highlighting
   const contentData = await (async () => {
@@ -214,7 +240,7 @@ export async function UnifiedDetailPage({
   const configData = await (async () => {
     // Check top-level first, then metadata
     const configuration =
-      ('configuration' in item && item.configuration) || metadata['configuration'];
+      ('configuration' in contentItem && contentItem['configuration']) || metadata['configuration'];
     if (!configuration) return null;
 
     const format = item.category === 'mcp' ? 'multi' : item.category === 'hooks' ? 'hook' : 'json';

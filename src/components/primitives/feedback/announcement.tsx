@@ -92,7 +92,7 @@ export function AnnouncementTag({ className, ...props }: AnnouncementTagProps) {
         'font-semibold text-[10px] uppercase tracking-wider',
         'rounded',
         'bg-accent text-accent-foreground',
-        'flex-shrink-0',
+        'shrink-0',
         className
       )}
       {...props}

@@ -126,7 +126,7 @@ export function TabbedDetailLayout({ item, config, tabs, sectionData }: TabbedDe
   return (
     <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
       {/* Sticky tab bar */}
-      <div className="-mx-4 sticky top-16 z-10 border-b bg-background/95 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="-mx-4 sticky top-16 z-10 border-b bg-background/95 px-4 backdrop-blur supports-backdrop-filter:bg-background/60">
         <div className="container mx-auto">
           <TabsList className="h-auto w-full justify-start rounded-none border-0 bg-transparent p-0">
             {tabs.map((tab) => {
@@ -143,7 +143,7 @@ export function TabbedDetailLayout({ item, config, tabs, sectionData }: TabbedDe
                     'hover:bg-muted/50',
                     // Mobile optimization
                     'text-sm md:text-base',
-                    'min-w-[80px] md:min-w-[100px]'
+                    'min-w-20 md:min-w-[100px]'
                   )}
                 >
                   {label}

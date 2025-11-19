@@ -52,21 +52,7 @@ import { POSITION_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { getContentItemUrl, sanitizeSlug } from '@/src/lib/utils/content.utils';
 import type { Database } from '@/src/types/database.types';
 
-type RecommendationResponse = {
-  results: Array<{
-    slug: string;
-    title: string;
-    description: string;
-    category: string;
-    tags?: string[] | null;
-    author?: string | null;
-    match_score?: number | null;
-    match_percentage?: number | null;
-    primary_reason?: string | null;
-    rank?: number | null;
-    reasons?: Array<{ type: string; message: string }> | null;
-  }>;
-  totalMatches: number;
+type RecommendationResponse = Database['public']['Functions']['get_recommendations']['Returns'] & {
   answers: {
     useCase: Database['public']['Enums']['use_case_type'];
     experienceLevel: Database['public']['Enums']['experience_level'];
@@ -77,13 +63,6 @@ type RecommendationResponse = {
   };
   id: string;
   generatedAt: string;
-  algorithm: string;
-  summary: {
-    topCategory?: string;
-    avgMatchScore?: number;
-    diversityScore?: number;
-    topTags?: string[];
-  };
 };
 
 import { toasts } from '@/src/lib/utils/toast.utils';
@@ -102,18 +81,22 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
   const [maxResults, setMaxResults] = useState(10);
   const [showRefinePanel, setShowRefinePanel] = useState(false);
 
-  const { results, summary, totalMatches, answers } = recommendations;
+  const { results, summary, total_matches, answers } = recommendations;
 
   const handleSaveAll = () => {
     startTransition(async () => {
       try {
-        const items = results
+        const items = (results ?? [])
           .filter(
             (
               result
             ): result is typeof result & {
               category: Database['public']['Enums']['content_category'];
-            } => isValidCategory(result.category)
+              slug: string;
+            } => {
+              if (!(result.category && result.slug)) return false;
+              return isValidCategory(result.category);
+            }
           )
           .map((result) => ({
             content_type: result.category,
@@ -144,12 +127,12 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
     });
   };
 
-  const filteredResults = results
+  const filteredResults = (results ?? [])
     .filter((r) => selectedCategory === 'all' || r.category === selectedCategory)
     .filter((r) => (r.match_score ?? 0) >= minScore)
     .slice(0, maxResults);
 
-  const categories = ['all', ...new Set(results.map((r) => r.category))];
+  const categories = ['all', ...new Set((results ?? []).map((r) => r.category).filter(Boolean))];
 
   return (
     <div className="space-y-8">
@@ -161,21 +144,21 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
 
         <p className="mx-auto max-w-2xl text-lg text-muted-foreground">
           Based on your preferences, we found{' '}
-          <strong>{totalMatches} matching configurations</strong>. Here are the top {results.length}{' '}
-          best fits for your needs.
+          <strong>{total_matches ?? 0} matching configurations</strong>. Here are the top{' '}
+          {results?.length ?? 0} best fits for your needs.
         </p>
 
         <div className={'flex-wrap items-center justify-center gap-3'}>
           <UnifiedBadge variant="base" style="secondary" className="text-sm">
             <TrendingUp className={UI_CLASSES.ICON_XS_LEADING} />
-            {(summary.avgMatchScore ?? 0).toFixed(0)}% Avg Match
+            {(summary?.avg_match_score ?? 0).toFixed(0)}% Avg Match
           </UnifiedBadge>
           <UnifiedBadge variant="base" style="secondary" className="text-sm">
             <BarChart className={UI_CLASSES.ICON_XS_LEADING} />
-            {(summary.diversityScore ?? 0).toFixed(0)}% Diversity
+            {(summary?.diversity_score ?? 0).toFixed(0)}% Diversity
           </UnifiedBadge>
           <UnifiedBadge variant="base" style="outline" className="text-sm">
-            Top Category: {summary.topCategory ?? 'General'}
+            Top Category: {summary?.top_category ?? 'General'}
           </UnifiedBadge>
         </div>
 
@@ -270,7 +253,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                 <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} text-sm`}>
                   <span className="text-muted-foreground">Showing results:</span>
                   <span className="font-medium">
-                    {filteredResults.length} of {results.length}
+                    {filteredResults.length} of {results?.length ?? 0}
                   </span>
                 </div>
               </div>
@@ -341,11 +324,11 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
           {categories.map((category) => {
             const count =
               category === 'all'
-                ? results.length
-                : results.filter((r) => r.category === category).length;
+                ? (results?.length ?? 0)
+                : (results ?? []).filter((r) => r.category === category).length;
             return (
-              <TabsTrigger key={category} value={category} className="capitalize">
-                {category === 'all' ? 'All Results' : category} ({count})
+              <TabsTrigger key={category ?? 'all'} value={category ?? 'all'} className="capitalize">
+                {category === 'all' ? 'All Results' : (category ?? 'all')} ({count})
               </TabsTrigger>
             );
           })}
@@ -359,7 +342,11 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                   result
                 ): result is typeof result & {
                   category: Database['public']['Enums']['content_category'];
-                } => isValidCategory(result.category)
+                  slug: string;
+                } => {
+                  if (!(result.category && result.slug)) return false;
+                  return isValidCategory(result.category);
+                }
               )
               .map((result) => {
                 // Only allow categories from the explicit allowlist
@@ -378,18 +365,18 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                 // Validate slug pattern: alphanumeric start, then alphanumeric/hyphens/underscores, 3-32 chars
                 const slugPattern = /^[a-zA-Z0-9][a-zA-Z0-9-_]{2,32}$/;
                 if (
-                  !allowedCategories.includes(
-                    result.category as (typeof allowedCategories)[number]
-                  ) ||
-                  typeof result.slug !== 'string' ||
-                  !slugPattern.test(result.slug)
+                  !(
+                    allowedCategories.includes(
+                      result.category as (typeof allowedCategories)[number]
+                    ) && slugPattern.test(result.slug)
+                  )
                 ) {
                   // Skip rendering for invalid categories or invalid slugs
                   return null;
                 }
                 const targetPath = getContentItemUrl({
                   category: result.category,
-                  slug: sanitizeSlug(result.slug),
+                  slug: sanitizeSlug(result.slug ?? ''),
                 });
                 const matchScore = typeof result.match_score === 'number' ? result.match_score : 0;
                 const rank = typeof result.rank === 'number' ? result.rank : null;
@@ -569,7 +556,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
       {showShareModal && (
         <ShareResults
           shareUrl={shareUrl}
-          resultCount={results.length}
+          resultCount={results?.length ?? 0}
           onClose={() => setShowShareModal(false)}
         />
       )}

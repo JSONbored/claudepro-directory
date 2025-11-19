@@ -7,7 +7,7 @@ import { getCommunityDirectory } from '@/src/lib/data/community/directory';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { normalizeError } from '@/src/lib/utils/error.utils';
-import type { GetGetCommunityDirectoryReturn } from '@/src/types/database-overrides';
+import type { Database } from '@/src/types/database.types';
 
 export const metadata: Promise<Metadata> = generatePageMetadata('/community/directory');
 
@@ -16,7 +16,8 @@ export const revalidate = false;
 const DEFAULT_DIRECTORY_LIMIT = 100;
 
 async function CommunityDirectoryContent({ searchQuery }: { searchQuery: string }) {
-  let directoryData: GetGetCommunityDirectoryReturn | null = null;
+  let directoryData: Database['public']['Functions']['get_community_directory']['Returns'] | null =
+    null;
   try {
     directoryData = await getCommunityDirectory({ searchQuery, limit: DEFAULT_DIRECTORY_LIMIT });
   } catch (error) {
@@ -34,14 +35,84 @@ async function CommunityDirectoryContent({ searchQuery }: { searchQuery: string 
   }
 
   const {
-    all_users: allUsers,
-    top_contributors: topContributors,
-    new_members: newMembers,
+    all_users: allUsersRaw,
+    top_contributors: topContributorsRaw,
+    new_members: newMembersRaw,
   } = directoryData ?? {
-    all_users: [],
-    top_contributors: [],
-    new_members: [],
+    all_users: null,
+    top_contributors: null,
+    new_members: null,
   };
+
+  // Filter out items with null required fields and ensure types match UserProfile
+  const allUsers = (allUsersRaw ?? [])
+    .filter(
+      (
+        u
+      ): u is typeof u & {
+        id: string;
+        slug: string;
+        name: string;
+        tier: NonNullable<typeof u.tier>;
+        created_at: string;
+      } => Boolean(u.id && u.slug && u.name && u.tier && u.created_at)
+    )
+    .map((u) => ({
+      id: u.id,
+      slug: u.slug,
+      name: u.name,
+      image: u.image,
+      bio: u.bio,
+      work: u.work,
+      tier: u.tier,
+      created_at: u.created_at,
+    }));
+
+  const topContributors = (topContributorsRaw ?? [])
+    .filter(
+      (
+        u
+      ): u is typeof u & {
+        id: string;
+        slug: string;
+        name: string;
+        tier: NonNullable<typeof u.tier>;
+        created_at: string;
+      } => Boolean(u.id && u.slug && u.name && u.tier && u.created_at)
+    )
+    .map((u) => ({
+      id: u.id,
+      slug: u.slug,
+      name: u.name,
+      image: u.image,
+      bio: u.bio,
+      work: u.work,
+      tier: u.tier,
+      created_at: u.created_at,
+    }));
+
+  const newMembers = (newMembersRaw ?? [])
+    .filter(
+      (
+        u
+      ): u is typeof u & {
+        id: string;
+        slug: string;
+        name: string;
+        tier: NonNullable<typeof u.tier>;
+        created_at: string;
+      } => Boolean(u.id && u.slug && u.name && u.tier && u.created_at)
+    )
+    .map((u) => ({
+      id: u.id,
+      slug: u.slug,
+      name: u.name,
+      image: u.image,
+      bio: u.bio,
+      work: u.work,
+      tier: u.tier,
+      created_at: u.created_at,
+    }));
 
   return (
     <div className="container mx-auto px-4 py-8">

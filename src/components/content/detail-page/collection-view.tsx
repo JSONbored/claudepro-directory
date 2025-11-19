@@ -33,13 +33,12 @@ import { logger } from '@/src/lib/logger';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { ensureStringArray, getMetadata } from '@/src/lib/utils/data.utils';
 import type { Database } from '@/src/types/database.types';
-import type { EnrichedContentItem } from '@/src/types/database-overrides';
 
 interface ItemWithData {
   category: string;
   slug: string;
   reason?: string;
-  data: EnrichedContentItem;
+  data: Database['public']['CompositeTypes']['enriched_content_item'];
 }
 
 /**
@@ -225,7 +224,7 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
                   <li key={slug} className={UI_CLASSES.FLEX_ITEMS_START_GAP_3}>
                     <span
                       className={
-                        'flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-primary/10 font-semibold text-primary text-sm'
+                        'flex h-6 w-6 shrink-0s-center justify-center rounded-full bg-primary/10 font-semibold text-primary text-sm'
                       }
                       aria-hidden="true"
                     >

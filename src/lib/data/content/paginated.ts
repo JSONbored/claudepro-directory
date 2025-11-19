@@ -2,7 +2,7 @@
 
 import { fetchCachedRpc } from '@/src/lib/data/helpers';
 import { generateContentCacheKey, generateContentTags } from '@/src/lib/data/helpers-utils';
-import type { GetGetContentPaginatedSlimReturn } from '@/src/types/database-overrides';
+import type { Database } from '@/src/types/database.types';
 
 interface PaginatedContentParams {
   category?: string | null;
@@ -14,8 +14,13 @@ export async function getPaginatedContent({
   category,
   limit,
   offset,
-}: PaginatedContentParams): Promise<GetGetContentPaginatedSlimReturn | null> {
-  return fetchCachedRpc<'get_content_paginated_slim', GetGetContentPaginatedSlimReturn | null>(
+}: PaginatedContentParams): Promise<
+  Database['public']['Functions']['get_content_paginated_slim']['Returns'] | null
+> {
+  return fetchCachedRpc<
+    'get_content_paginated_slim',
+    Database['public']['Functions']['get_content_paginated_slim']['Returns'] | null
+  >(
     {
       ...(category ? { p_category: category } : {}),
       p_limit: limit,

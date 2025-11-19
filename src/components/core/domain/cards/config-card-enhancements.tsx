@@ -51,9 +51,11 @@ export function EnhancedConfigCard({
   animateViewCount = true,
 }: EnhancedConfigCardProps) {
   const [isHovered, setIsHovered] = useState(false);
-  const [viewCount, setViewCount] = useState('viewCount' in item ? item.viewCount : 0);
+  const [viewCount, setViewCount] = useState(
+    'view_count' in item && typeof item.view_count === 'number' ? item.view_count : 0
+  );
   const [bookmarkCount, setBookmarkCount] = useState(
-    'bookmark_count' in item ? item.bookmark_count : 0
+    'bookmark_count' in item && typeof item.bookmark_count === 'number' ? item.bookmark_count : 0
   );
   const cardRef = useRef<HTMLDivElement>(null);
 
@@ -116,7 +118,12 @@ export function EnhancedConfigCard({
 
   // Animate view count on hover
   useEffect(() => {
-    if (animateViewCount && isHovered && 'viewCount' in item) {
+    if (
+      animateViewCount &&
+      isHovered &&
+      'view_count' in item &&
+      typeof item.view_count === 'number'
+    ) {
       setViewCount((prev: number) => prev + 1);
     }
   }, [isHovered, animateViewCount, item]);
@@ -238,13 +245,13 @@ export function EnhancedConfigCard({
 
             {/* Social Proof */}
             <div className="flex items-center gap-3 border-t pt-2 text-muted-foreground text-xs">
-              {viewCount > 0 && (
+              {viewCount !== null && viewCount > 0 && (
                 <span className="flex items-center gap-1">
                   <Eye className="h-3 w-3" />
                   {viewCount.toLocaleString()} views
                 </span>
               )}
-              {bookmarkCount > 0 && (
+              {bookmarkCount !== null && bookmarkCount > 0 && (
                 <span className="flex items-center gap-1">
                   <Bookmark className="h-3 w-3" />
                   {bookmarkCount.toLocaleString()} bookmarks

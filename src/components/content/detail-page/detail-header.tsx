@@ -4,15 +4,16 @@
 
 import { isValidCategory } from '@/src/lib/data/config/category';
 import type { UnifiedCategoryConfig } from '@/src/lib/types/component.types';
-import type {
-  ContentItem,
-  GetGetContentDetailCompleteReturn,
-} from '@/src/types/database-overrides';
+import type { Database } from '@/src/types/database.types';
+import type { ContentItem } from '@/src/types/database-overrides';
 import { DetailHeaderActions, type SerializableAction } from './detail-header-actions';
 
 export interface DetailHeaderProps {
   displayTitle: string;
-  item: ContentItem | GetGetContentDetailCompleteReturn['content'];
+  item:
+    | ContentItem
+    | (Database['public']['Functions']['get_content_detail_complete']['Returns']['content'] &
+        ContentItem);
   config: UnifiedCategoryConfig;
   onCopyContent?: (() => Promise<void>) | undefined;
 }

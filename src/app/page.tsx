@@ -39,7 +39,6 @@ import type { Metadata } from 'next';
 import { getHomepageCategoryIds } from '@/src/lib/data/config/category';
 import { getHomepageData } from '@/src/lib/data/content/homepage';
 import { logger } from '@/src/lib/logger';
-import type { GetGetHomepageCompleteReturn } from '@/src/types/database-overrides';
 
 export const metadata: Promise<Metadata> = generatePageMetadata('/');
 
@@ -61,8 +60,12 @@ async function HomeContentSection({
   featuredJobs,
   categoryIds,
 }: {
-  homepageContentData: GetGetHomepageCompleteReturn['content'];
-  featuredJobs: GetGetHomepageCompleteReturn['featured_jobs'];
+  homepageContentData: {
+    categoryData: Record<string, unknown[]>;
+    stats: Record<string, { total: number; featured: number }>;
+    weekStart: string;
+  };
+  featuredJobs: Array<unknown>;
   categoryIds: readonly string[];
 }) {
   try {
@@ -79,17 +82,16 @@ async function HomeContentSection({
       'Homepage content section error',
       error instanceof Error ? error : new Error(String(error))
     );
-    const emptyData: GetGetHomepageCompleteReturn['content']['categoryData'] =
-      {} as GetGetHomepageCompleteReturn['content']['categoryData'];
+    const emptyData: Record<string, unknown[]> = {};
 
     return (
       <HomePageClient
         initialData={emptyData}
-        featuredByCategory={{} as GetGetHomepageCompleteReturn['content']['categoryData']}
+        featuredByCategory={{}}
         stats={
           Object.fromEntries(
             categoryIds.map((id: string) => [id, { total: 0, featured: 0 }])
-          ) as GetGetHomepageCompleteReturn['content']['stats']
+          ) as Record<string, { total: number; featured: number }>
         }
         featuredJobs={[]}
       />
@@ -110,8 +112,23 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   const homepageResult = await getHomepageData(categoryIds);
 
   const memberCount = homepageResult?.member_count ?? 0;
-  const featuredJobs = homepageResult?.featured_jobs ?? [];
-  const topContributors = homepageResult?.top_contributors ?? [];
+  // Cast featured_jobs from Json to array (it's jsonb from get_featured_jobs RPC)
+  const featuredJobs = (homepageResult?.featured_jobs as Array<unknown> | null) ?? [];
+  // Map top_contributors to UserProfile format (add created_at and ensure non-null required fields)
+  const topContributors = (homepageResult?.top_contributors ?? [])
+    .filter((c): c is typeof c & { id: string; slug: string; name: string } =>
+      Boolean(c.id && c.slug && c.name)
+    ) // Filter out invalid entries
+    .map((contributor) => ({
+      id: contributor.id,
+      slug: contributor.slug,
+      name: contributor.name,
+      image: contributor.image,
+      bio: contributor.bio,
+      work: contributor.work,
+      tier: contributor.tier ?? ('free' as const),
+      created_at: new Date().toISOString(), // Default since not in RPC return
+    }));
 
   return (
     <div className={'min-h-screen bg-background'}>
@@ -151,12 +168,15 @@ export default async function HomePage({ searchParams }: HomePageProps) {
           <Suspense fallback={<HomePageLoading />}>
             <HomeContentSection
               homepageContentData={
-                homepageResult?.content ??
-                ({
-                  categoryData: {} as GetGetHomepageCompleteReturn['content']['categoryData'],
-                  stats: {} as GetGetHomepageCompleteReturn['content']['stats'],
+                (homepageResult?.content as {
+                  categoryData: Record<string, unknown[]>;
+                  stats: Record<string, { total: number; featured: number }>;
+                  weekStart: string;
+                } | null) ?? {
+                  categoryData: {},
+                  stats: {},
                   weekStart: '',
-                } as GetGetHomepageCompleteReturn['content'])
+                }
               }
               featuredJobs={featuredJobs}
               categoryIds={categoryIds}

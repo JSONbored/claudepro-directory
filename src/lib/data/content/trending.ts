@@ -3,12 +3,7 @@ import { fetchCachedRpc } from '@/src/lib/data/helpers';
 import { generateContentCacheKey } from '@/src/lib/data/helpers-utils';
 import type { DisplayableContent } from '@/src/lib/types/component.types';
 import type { Database } from '@/src/types/database.types';
-import type {
-  GetGetPopularContentReturn,
-  GetGetRecentContentReturn,
-  GetGetTrendingMetricsWithContentReturn,
-  HomepageContentItem,
-} from '@/src/types/database-overrides';
+import type { HomepageContentItem } from '@/src/types/database-overrides';
 
 interface TrendingPageParams {
   category?: Database['public']['Enums']['content_category'] | null;
@@ -52,10 +47,10 @@ export async function getTrendingPageData(
 async function fetchTrendingMetrics(
   category: Database['public']['Enums']['content_category'] | null,
   limit: number
-): Promise<GetGetTrendingMetricsWithContentReturn> {
+): Promise<Database['public']['Functions']['get_trending_metrics_with_content']['Returns']> {
   return fetchCachedRpc<
     'get_trending_metrics_with_content',
-    GetGetTrendingMetricsWithContentReturn
+    Database['public']['Functions']['get_trending_metrics_with_content']['Returns']
   >(
     {
       ...(category ? { p_category: category } : {}),
@@ -75,42 +70,34 @@ async function fetchTrendingMetrics(
 async function fetchPopularContent(
   category: Database['public']['Enums']['content_category'] | null,
   limit: number
-): Promise<GetGetPopularContentReturn> {
-  // Note: fetchCachedRpc has a constraint issue where it expects description: string
-  // but GetGetPopularContentReturn has description: string | null. We bypass the constraint
-  // by casting the function call result.
-  const data = await fetchCachedRpc(
+): Promise<Database['public']['Functions']['get_popular_content']['Returns']> {
+  return fetchCachedRpc<
+    'get_popular_content',
+    Database['public']['Functions']['get_popular_content']['Returns']
+  >(
     {
       ...(category ? { p_category: category } : {}),
       p_limit: limit,
     },
     {
-      rpcName: 'get_popular_content' as const,
+      rpcName: 'get_popular_content',
       tags: ['trending', 'trending-popular'],
       ttlKey: TTL_CONFIG_KEY,
       keySuffix: `popular-${generateContentCacheKey(category, null, limit)}`,
-      fallback: [] as unknown as {
-        author: string;
-        category: string;
-        copy_count: number;
-        description: string;
-        popularity_score: number;
-        slug: string;
-        tags: string[];
-        title: string;
-        view_count: number;
-      }[],
+      fallback: [],
       logMeta: { category: category ?? 'all', limit },
     }
   );
-  return data as GetGetPopularContentReturn;
 }
 
 async function fetchRecentContent(
   category: Database['public']['Enums']['content_category'] | null,
   limit: number
-): Promise<GetGetRecentContentReturn> {
-  return fetchCachedRpc<'get_recent_content', GetGetRecentContentReturn>(
+): Promise<Database['public']['Functions']['get_recent_content']['Returns']> {
+  return fetchCachedRpc<
+    'get_recent_content',
+    Database['public']['Functions']['get_recent_content']['Returns']
+  >(
     {
       ...(category ? { p_category: category } : {}),
       p_limit: limit,
@@ -128,12 +115,16 @@ async function fetchRecentContent(
 }
 
 function mapTrendingMetrics(
-  rows: GetGetTrendingMetricsWithContentReturn,
+  rows: Database['public']['Functions']['get_trending_metrics_with_content']['Returns'],
   category: Database['public']['Enums']['content_category'] | null
 ): DisplayableContent[] {
   if (!rows || rows.length === 0) return [];
-  return rows.map((row: GetGetTrendingMetricsWithContentReturn[number], index: number) => {
-    const resolvedCategory = row.category ?? category ?? DEFAULT_CATEGORY;
+  return rows.map((row, index: number) => {
+    // category is string from view, validate it's a valid ENUM value
+    const resolvedCategory =
+      (row.category as Database['public']['Enums']['content_category']) ??
+      category ??
+      DEFAULT_CATEGORY;
     const validCategory = isValidCategory(resolvedCategory) ? resolvedCategory : DEFAULT_CATEGORY;
     return toHomepageContentItem({
       slug: row.slug,
@@ -152,11 +143,15 @@ function mapTrendingMetrics(
 }
 
 function mapPopularContent(
-  rows: GetGetPopularContentReturn,
+  rows: Database['public']['Functions']['get_popular_content']['Returns'],
   category: Database['public']['Enums']['content_category'] | null
 ): DisplayableContent[] {
-  return rows.map((row: GetGetPopularContentReturn[number], index: number) => {
-    const resolvedCategory = row.category ?? category ?? DEFAULT_CATEGORY;
+  return rows.map((row, index: number) => {
+    // category is string from view, validate it's a valid ENUM value
+    const resolvedCategory =
+      (row.category as Database['public']['Enums']['content_category']) ??
+      category ??
+      DEFAULT_CATEGORY;
     const validCategory = isValidCategory(resolvedCategory) ? resolvedCategory : DEFAULT_CATEGORY;
     return toHomepageContentItem({
       slug: row.slug,
@@ -174,11 +169,15 @@ function mapPopularContent(
 }
 
 function mapRecentContent(
-  rows: GetGetRecentContentReturn,
+  rows: Database['public']['Functions']['get_recent_content']['Returns'],
   category: Database['public']['Enums']['content_category'] | null
 ): DisplayableContent[] {
-  return rows.map((row: GetGetRecentContentReturn[number], index: number) => {
-    const resolvedCategory = row.category ?? category ?? DEFAULT_CATEGORY;
+  return rows.map((row, index: number) => {
+    // category is string from table, validate it's a valid ENUM value
+    const resolvedCategory =
+      (row.category as Database['public']['Enums']['content_category']) ??
+      category ??
+      DEFAULT_CATEGORY;
     const validCategory = isValidCategory(resolvedCategory) ? resolvedCategory : DEFAULT_CATEGORY;
     return toHomepageContentItem({
       slug: row.slug,

@@ -24,7 +24,7 @@ import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { formatRelativeDate } from '@/src/lib/utils/data.utils';
 import { normalizeError } from '@/src/lib/utils/error.utils';
-import type { GetGetUserCompaniesReturn } from '@/src/types/database-overrides';
+import type { Database } from '@/src/types/database.types';
 
 /**
  * Validate company website URL is safe for use in href
@@ -108,7 +108,7 @@ export default async function CompaniesPage() {
     );
   }
 
-  let companies: GetGetUserCompaniesReturn['companies'] = [];
+  let companies: Database['public']['Functions']['get_user_companies']['Returns']['companies'] = [];
   let hasError = false;
 
   // User-scoped edge-cached RPC via centralized data layer
@@ -186,167 +186,181 @@ export default async function CompaniesPage() {
         </Card>
       ) : (
         <div className="grid gap-4">
-          {companies.map((company, index) => {
-            return (
-              <Card key={company.id}>
-                <CardHeader>
-                  <div className={UI_CLASSES.FLEX_ITEMS_START_JUSTIFY_BETWEEN}>
-                    <div className="flex flex-1 items-start gap-4">
-                      {(() => {
-                        // Validate logo URL is safe (should be from Supabase storage or trusted domain)
-                        if (!company.logo) return null;
-                        try {
-                          const parsed = new URL(company.logo);
-                          // Only allow HTTPS
-                          if (parsed.protocol !== 'https:') return null;
-                          // Allow Supabase storage (public bucket path) or common CDN domains
-                          // Restrict to specific CDN patterns to prevent subdomain abuse
-                          const isSupabaseHost =
-                            parsed.hostname.endsWith('.supabase.co') ||
-                            parsed.hostname.endsWith('.supabase.in');
-                          const isCloudinary =
-                            parsed.hostname === 'res.cloudinary.com' ||
-                            /^[a-z0-9-]+\.cloudinary\.com$/.test(parsed.hostname);
-                          const isAwsS3 =
-                            /^[a-z0-9-]+\.s3\.amazonaws\.com$/.test(parsed.hostname) ||
-                            /^s3\.[a-z0-9-]+\.amazonaws\.com$/.test(parsed.hostname);
-                          const isTrustedSource =
-                            (isSupabaseHost &&
-                              parsed.pathname.startsWith('/storage/v1/object/public/')) ||
-                            isCloudinary ||
-                            isAwsS3;
-                          if (!isTrustedSource) return null;
-                          return (
-                            <Image
-                              src={company.logo}
-                              alt={`${company.name} logo`}
-                              width={64}
-                              height={64}
-                              className="h-16 w-16 rounded-lg border object-cover"
-                              priority={index === 0}
-                            />
-                          );
-                        } catch {
-                          return null;
-                        }
-                      })()}
-                      {!company.logo && (
-                        <div className="flex h-16 w-16 items-center justify-center rounded-lg border bg-accent">
-                          <Building2 className="h-8 w-8 text-muted-foreground" />
+          {companies
+            ?.filter(
+              (
+                company
+              ): company is NonNullable<typeof company> & {
+                id: string;
+                name: string;
+                slug: string;
+              } =>
+                company !== null &&
+                company.id !== null &&
+                company.name !== null &&
+                company.slug !== null
+            )
+            .map((company, index) => {
+              return (
+                <Card key={company.id}>
+                  <CardHeader>
+                    <div className={UI_CLASSES.FLEX_ITEMS_START_JUSTIFY_BETWEEN}>
+                      <div className="flex flex-1 items-start gap-4">
+                        {(() => {
+                          // Validate logo URL is safe (should be from Supabase storage or trusted domain)
+                          if (!company.logo) return null;
+                          try {
+                            const parsed = new URL(company.logo);
+                            // Only allow HTTPS
+                            if (parsed.protocol !== 'https:') return null;
+                            // Allow Supabase storage (public bucket path) or common CDN domains
+                            // Restrict to specific CDN patterns to prevent subdomain abuse
+                            const isSupabaseHost =
+                              parsed.hostname.endsWith('.supabase.co') ||
+                              parsed.hostname.endsWith('.supabase.in');
+                            const isCloudinary =
+                              parsed.hostname === 'res.cloudinary.com' ||
+                              /^[a-z0-9-]+\.cloudinary\.com$/.test(parsed.hostname);
+                            const isAwsS3 =
+                              /^[a-z0-9-]+\.s3\.amazonaws\.com$/.test(parsed.hostname) ||
+                              /^s3\.[a-z0-9-]+\.amazonaws\.com$/.test(parsed.hostname);
+                            const isTrustedSource =
+                              (isSupabaseHost &&
+                                parsed.pathname.startsWith('/storage/v1/object/public/')) ||
+                              isCloudinary ||
+                              isAwsS3;
+                            if (!isTrustedSource) return null;
+                            return (
+                              <Image
+                                src={company.logo}
+                                alt={`${company.name} logo`}
+                                width={64}
+                                height={64}
+                                className="h-16 w-16 rounded-lg border object-cover"
+                                priority={index === 0}
+                              />
+                            );
+                          } catch {
+                            return null;
+                          }
+                        })()}
+                        {!company.logo && (
+                          <div className="flex h-16 w-16 items-center justify-center rounded-lg border bg-accent">
+                            <Building2 className="h-8 w-8 text-muted-foreground" />
+                          </div>
+                        )}
+                        <div className="flex-1">
+                          <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+                            <CardTitle>{company.name}</CardTitle>
+                            {company.featured && (
+                              <UnifiedBadge variant="base" style="default">
+                                Featured
+                              </UnifiedBadge>
+                            )}
+                          </div>
+                          <CardDescription className="mt-1">
+                            {company.description || 'No description provided'}
+                          </CardDescription>
+                          {(() => {
+                            const website = company.website;
+                            // Defense in depth: validate both protocol and trusted domain
+                            if (
+                              !(
+                                website &&
+                                isAllowedHttpUrl(website) &&
+                                isTrustedPublicDomain(website)
+                              )
+                            ) {
+                              return null;
+                            }
+                            // Canonicalize and sanitize URL to prevent XSS and redirect attacks
+                            // Parse URL to get normalized, canonicalized version for safe use in href
+                            let safeHref = '';
+                            let displayText = '';
+                            try {
+                              const parsed = new URL(website.trim());
+                              // Remove all potentially dangerous components
+                              parsed.username = '';
+                              parsed.password = '';
+                              parsed.search = '';
+                              parsed.hash = '';
+                              // Normalize hostname (remove trailing dots, lowercase)
+                              parsed.hostname = parsed.hostname.replace(/\.$/, '').toLowerCase();
+                              // Remove port if it's the default (80 for http, 443 for https)
+                              if (parsed.port === '80' || parsed.port === '443') {
+                                parsed.port = '';
+                              }
+                              // Use parsed.href for guaranteed normalized absolute URL
+                              // This is safer than toString() as it's guaranteed to be canonicalized
+                              safeHref = parsed.href;
+                              // Safe display text: hostname + pathname (no query/fragment)
+                              // Pathname is already URL-encoded by the URL constructor, so it's safe
+                              displayText =
+                                parsed.hostname + (parsed.pathname !== '/' ? parsed.pathname : '');
+                            } catch {
+                              // If parsing fails, don't render the link
+                              return null;
+                            }
+                            // Explicit validation: safeHref is guaranteed to be safe
+                            // It's constructed from a validated URL (isAllowedHttpUrl + isTrustedPublicDomain)
+                            // with all dangerous components removed (credentials, query, hash)
+                            // and hostname normalized. At this point, safeHref is validated and safe for use
+                            const validatedUrl: string = safeHref;
+                            return (
+                              <a
+                                href={validatedUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className={`mt-2 inline-flex items-center gap-1 text-sm ${UI_CLASSES.LINK_ACCENT}`}
+                              >
+                                <ExternalLink className="h-3 w-3" />
+                                {displayText}
+                              </a>
+                            );
+                          })()}
+                        </div>
+                      </div>
+                    </div>
+                  </CardHeader>
+
+                  <CardContent>
+                    <div className={'mb-4 flex flex-wrap gap-4 text-muted-foreground text-sm'}>
+                      <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
+                        <Briefcase className="h-4 w-4" />
+                        {company.stats?.active_jobs || 0} active job
+                        {(company.stats?.active_jobs || 0) !== 1 ? 's' : ''}
+                      </div>
+                      <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
+                        <Eye className="h-4 w-4" />
+                        {(company.stats?.total_views || 0).toLocaleString()} views
+                      </div>
+                      {company.stats?.latest_job_posted_at && (
+                        <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
+                          <Calendar className="h-4 w-4" />
+                          Last job posted {formatRelativeDate(company.stats.latest_job_posted_at)}
                         </div>
                       )}
-                      <div className="flex-1">
-                        <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                          <CardTitle>{company.name}</CardTitle>
-                          {company.featured && (
-                            <UnifiedBadge variant="base" style="default">
-                              Featured
-                            </UnifiedBadge>
-                          )}
-                        </div>
-                        <CardDescription className="mt-1">
-                          {company.description || 'No description provided'}
-                        </CardDescription>
-                        {(() => {
-                          const website = company.website;
-                          // Defense in depth: validate both protocol and trusted domain
-                          if (
-                            !(
-                              website &&
-                              isAllowedHttpUrl(website) &&
-                              isTrustedPublicDomain(website)
-                            )
-                          ) {
-                            return null;
-                          }
-                          // Canonicalize and sanitize URL to prevent XSS and redirect attacks
-                          // Parse URL to get normalized, canonicalized version for safe use in href
-                          let safeHref = '';
-                          let displayText = '';
-                          try {
-                            const parsed = new URL(website.trim());
-                            // Remove all potentially dangerous components
-                            parsed.username = '';
-                            parsed.password = '';
-                            parsed.search = '';
-                            parsed.hash = '';
-                            // Normalize hostname (remove trailing dots, lowercase)
-                            parsed.hostname = parsed.hostname.replace(/\.$/, '').toLowerCase();
-                            // Remove port if it's the default (80 for http, 443 for https)
-                            if (parsed.port === '80' || parsed.port === '443') {
-                              parsed.port = '';
-                            }
-                            // Use parsed.href for guaranteed normalized absolute URL
-                            // This is safer than toString() as it's guaranteed to be canonicalized
-                            safeHref = parsed.href;
-                            // Safe display text: hostname + pathname (no query/fragment)
-                            // Pathname is already URL-encoded by the URL constructor, so it's safe
-                            displayText =
-                              parsed.hostname + (parsed.pathname !== '/' ? parsed.pathname : '');
-                          } catch {
-                            // If parsing fails, don't render the link
-                            return null;
-                          }
-                          // Explicit validation: safeHref is guaranteed to be safe
-                          // It's constructed from a validated URL (isAllowedHttpUrl + isTrustedPublicDomain)
-                          // with all dangerous components removed (credentials, query, hash)
-                          // and hostname normalized. At this point, safeHref is validated and safe for use
-                          const validatedUrl: string = safeHref;
-                          return (
-                            <a
-                              href={validatedUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className={`mt-2 inline-flex items-center gap-1 text-sm ${UI_CLASSES.LINK_ACCENT}`}
-                            >
-                              <ExternalLink className="h-3 w-3" />
-                              {displayText}
-                            </a>
-                          );
-                        })()}
-                      </div>
                     </div>
-                  </div>
-                </CardHeader>
 
-                <CardContent>
-                  <div className={'mb-4 flex flex-wrap gap-4 text-muted-foreground text-sm'}>
-                    <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
-                      <Briefcase className="h-4 w-4" />
-                      {company.stats?.active_jobs || 0} active job
-                      {(company.stats?.active_jobs || 0) !== 1 ? 's' : ''}
+                    <div className={UI_CLASSES.FLEX_GAP_2}>
+                      <Button variant="outline" size="sm" asChild={true}>
+                        <Link href={`${ROUTES.ACCOUNT_COMPANIES}/${company.id}/edit`}>
+                          <Edit className="mr-1 h-3 w-3" />
+                          Edit
+                        </Link>
+                      </Button>
+
+                      <Button variant="ghost" size="sm" asChild={true}>
+                        <Link href={`/companies/${company.slug ?? ''}`}>
+                          <ExternalLink className="mr-1 h-3 w-3" />
+                          View Profile
+                        </Link>
+                      </Button>
                     </div>
-                    <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
-                      <Eye className="h-4 w-4" />
-                      {(company.stats?.total_views || 0).toLocaleString()} views
-                    </div>
-                    {company.stats?.latest_job_posted_at && (
-                      <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
-                        <Calendar className="h-4 w-4" />
-                        Last job posted {formatRelativeDate(company.stats.latest_job_posted_at)}
-                      </div>
-                    )}
-                  </div>
-
-                  <div className={UI_CLASSES.FLEX_GAP_2}>
-                    <Button variant="outline" size="sm" asChild={true}>
-                      <Link href={`${ROUTES.ACCOUNT_COMPANIES}/${company.id}/edit`}>
-                        <Edit className="mr-1 h-3 w-3" />
-                        Edit
-                      </Link>
-                    </Button>
-
-                    <Button variant="ghost" size="sm" asChild={true}>
-                      <Link href={`/companies/${company.slug}`}>
-                        <ExternalLink className="mr-1 h-3 w-3" />
-                        View Profile
-                      </Link>
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
+                  </CardContent>
+                </Card>
+              );
+            })}
         </div>
       )}
     </div>

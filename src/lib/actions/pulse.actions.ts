@@ -22,10 +22,7 @@ import { logger } from '@/src/lib/logger';
 import { normalizeError } from '@/src/lib/utils/error.utils';
 import { enqueuePulseEventServer } from '@/src/lib/utils/pulse';
 import type { Database, Json } from '@/src/types/database.types';
-import type {
-  Database as DatabaseOverrides,
-  GetGetRecommendationsReturn,
-} from '@/src/types/database-overrides';
+import type { Database as DatabaseOverrides } from '@/src/types/database-overrides';
 import {
   CONTACT_ACTION_TYPE_VALUES,
   EXPERIENCE_LEVEL_VALUES,
@@ -66,8 +63,12 @@ export type TrackInteractionParams = Omit<
   'id' | 'created_at' | 'user_id'
 >;
 
-type RecommendationItem = NonNullable<GetGetRecommendationsReturn>['results'][number];
-type RecommendationsPayload = NonNullable<GetGetRecommendationsReturn>;
+type RecommendationItem = NonNullable<
+  NonNullable<Database['public']['Functions']['get_recommendations']['Returns']>['results']
+>[number];
+type RecommendationsPayload = NonNullable<
+  Database['public']['Functions']['get_recommendations']['Returns']
+>;
 
 export interface ConfigRecommendationsResponse {
   success: boolean;
@@ -462,14 +463,16 @@ export const generateConfigRecommendationsAction = rateLimitedAction
       });
 
       const responseId = `rec_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
-      const fallback: NonNullable<GetGetRecommendationsReturn> = {
+      const fallback: NonNullable<
+        Database['public']['Functions']['get_recommendations']['Returns']
+      > = {
         results: [],
-        totalMatches: 0,
+        total_matches: 0,
         algorithm: 'unknown',
         summary: {
-          topCategory: null,
-          avgMatchScore: 0,
-          diversityScore: 0,
+          top_category: null,
+          avg_match_score: 0,
+          diversity_score: 0,
         },
       };
 
@@ -478,7 +481,7 @@ export const generateConfigRecommendationsAction = rateLimitedAction
       // Wrap transformation in try-catch
       let normalizedResults: RecommendationItem[];
       try {
-        normalizedResults = source.results.map((item) => {
+        normalizedResults = (source.results ?? []).map((item) => {
           const tags: string[] = Array.isArray(item.tags) ? item.tags : [];
           const reasons = Array.isArray(item.reasons)
             ? (item.reasons as Array<{ type: string; message: string }>)
@@ -508,9 +511,13 @@ export const generateConfigRecommendationsAction = rateLimitedAction
 
       const payload: RecommendationsPayload = {
         results: normalizedResults,
-        totalMatches: source.totalMatches,
-        algorithm: source.algorithm,
-        summary: source.summary,
+        total_matches: source.total_matches ?? 0,
+        algorithm: source.algorithm ?? 'unknown',
+        summary: source.summary ?? {
+          top_category: null,
+          avg_match_score: 0,
+          diversity_score: 0,
+        },
       };
 
       return {

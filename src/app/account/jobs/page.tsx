@@ -21,8 +21,7 @@ import type { JobStatus } from '@/src/lib/ui-constants';
 import { BADGE_COLORS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { formatRelativeDate } from '@/src/lib/utils/data.utils';
 import { normalizeError } from '@/src/lib/utils/error.utils';
-import type { Tables } from '@/src/types/database.types';
-import type { GetGetUserDashboardReturn } from '@/src/types/database-overrides';
+import type { Database, Tables } from '@/src/types/database.types';
 
 export const metadata: Promise<Metadata> = generatePageMetadata('/account/jobs');
 
@@ -48,7 +47,7 @@ export default async function MyJobsPage() {
     );
   }
 
-  let data: GetGetUserDashboardReturn | null = null;
+  let data: Database['public']['Functions']['get_user_dashboard']['Returns'] | null = null;
   let fetchError = false;
   try {
     data = await getUserDashboard(user.id);
@@ -83,7 +82,7 @@ export default async function MyJobsPage() {
     );
   }
 
-  const jobs: Array<Tables<'jobs'>> = data?.jobs || [];
+  const jobs: Array<Tables<'jobs'>> = (data?.jobs as Array<Tables<'jobs'>> | undefined) || [];
   if (jobs.length === 0) {
     logger.info('MyJobsPage: user has no job listings', { userId: user.id });
   }

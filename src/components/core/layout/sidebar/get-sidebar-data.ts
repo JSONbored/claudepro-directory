@@ -27,23 +27,37 @@ interface SidebarData {
 export async function getSidebarData(limit = 5): Promise<SidebarData> {
   try {
     const data = await getTrendingPageData({ category: 'guides', limit });
-    const trending = (data.trending || []).slice(0, limit).map((item) => ({
-      title: item.title ?? item.slug,
-      slug: `/${item.category ?? 'guides'}/${item.slug}`,
-      views: `${Number((item as { viewCount?: number }).viewCount ?? 0).toLocaleString()} views`,
-    }));
+    const trending = (data.trending || [])
+      .slice(0, limit)
+      .filter((item) => item.slug && item.title) // Filter out items with null slug or title
+      .map((item) => ({
+        title: item.title ?? item.slug ?? '',
+        slug: `/${item.category ?? 'guides'}/${item.slug ?? ''}`,
+        views: `${Number((item as { view_count?: number }).view_count ?? 0).toLocaleString()} views`,
+      }));
 
-    const recent = (data.recent || []).slice(0, limit).map((item) => ({
-      title: item.title ?? item.slug,
-      slug: `/${item.category ?? 'guides'}/${item.slug}`,
-      date: item.created_at
-        ? new Date(item.created_at).toLocaleDateString('en-US', {
-            month: 'short',
-            day: 'numeric',
-            year: 'numeric',
-          })
-        : '',
-    }));
+    const recent = (data.recent || [])
+      .slice(0, limit)
+      .filter((item) => item.slug && item.title) // Filter out items with null slug or title
+      .map((item) => {
+        // Handle both created_at (from content table) and date_added (from related_content_item composite type)
+        // Use type assertion to access the date field safely
+        const dateField =
+          (item as { created_at?: string; date_added?: string }).created_at ??
+          (item as { created_at?: string; date_added?: string }).date_added ??
+          null;
+        return {
+          title: item.title ?? item.slug ?? '',
+          slug: `/${item.category ?? 'guides'}/${item.slug ?? ''}`,
+          date: dateField
+            ? new Date(dateField).toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric',
+              })
+            : '',
+        };
+      });
 
     return { trending, recent };
   } catch (error) {

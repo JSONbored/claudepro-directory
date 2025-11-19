@@ -207,11 +207,56 @@ export const ConfigCard = memo(
       return item.author;
     }, [item]);
 
-    // Initialize pulse hook (must be before useEffect that uses it)
+    // Initialize all hooks at the top level (before any conditional returns)
     const pulse = usePulse();
+    const router = useRouter();
+    const { copy } = useCopyToClipboard({
+      context: {
+        component: 'ConfigCard',
+        action: 'swipe_copy',
+      },
+    });
+    const [cardConfig, setCardConfig] = useState({
+      showCopyButton: true,
+      showBookmark: true,
+      showViewCount: true,
+      showCopyCount: true,
+      showRating: false,
+    });
 
     // Track highlight visibility for analytics (fire and forget)
     const hasTrackedHighlight = useRef(false);
+
+    // Extract position metadata (needed for click tracking)
+    const position: number | undefined =
+      'position' in item && typeof item.position === 'number' ? item.position : undefined;
+
+    // Track card clicks
+    const handleCardClickPulse = useCallback(() => {
+      if (!item.slug) return;
+      const category = isValidCategory(item.category ?? 'agents')
+        ? (item.category ?? 'agents')
+        : 'agents';
+      pulse
+        .click({
+          category: category as Database['public']['Enums']['content_category'],
+          slug: item.slug,
+          metadata: {
+            action: 'card_click',
+            source: 'card_grid',
+            ...(position !== undefined && { position }),
+            ...(searchQuery?.trim() && { search_query: searchQuery.trim() }),
+          },
+        })
+        .catch((error) => {
+          logUnhandledPromise('ConfigCard: card click pulse failed', error, {
+            category: (item.category ??
+              'agents') as Database['public']['Enums']['content_category'],
+            slug: item.slug ?? '',
+          });
+        });
+    }, [pulse, item.category, item.slug, position, searchQuery]);
+
     useEffect(() => {
       if (searchQuery?.trim() && !hasTrackedHighlight.current) {
         // Check if any highlighting occurred (edge function provides pre-highlighted fields)
@@ -221,13 +266,15 @@ export const ConfigCard = memo(
           ('tags_highlighted' in item && item.tags_highlighted) ||
           ('author_highlighted' in item && item.author_highlighted);
 
-        if (hasHighlights) {
+        if (hasHighlights && item.slug) {
           hasTrackedHighlight.current = true;
           // Track highlight interaction (non-blocking)
-          const category = isValidCategory(item.category) ? item.category : 'agents';
+          const category = isValidCategory(item.category ?? 'agents')
+            ? (item.category ?? 'agents')
+            : 'agents';
           pulse
             .search({
-              category,
+              category: category as Database['public']['Enums']['content_category'],
               slug: item.slug,
               query: searchQuery.trim(),
               metadata: {
@@ -245,62 +292,25 @@ export const ConfigCard = memo(
             })
             .catch((error) => {
               logUnhandledPromise('ConfigCard: highlight analytics pulse failed', error, {
-                category,
-                slug: item.slug,
+                category: category as Database['public']['Enums']['content_category'],
+                slug: item.slug ?? '',
               });
             });
         }
       }
     }, [searchQuery, item, pulse]);
-    const category = isValidCategory(item.category) ? item.category : 'agents';
-    const targetPath = getContentItemUrl({
-      category,
-      slug: item.slug,
-      subcategory:
-        'subcategory' in item ? (item.subcategory as string | null | undefined) : undefined,
-    });
-    const router = useRouter();
 
-    // Extract position metadata (needed for click tracking)
-    const position: number | undefined =
-      'position' in item && typeof item.position === 'number' ? item.position : undefined;
-
-    // Track card clicks
-    const handleCardClickPulse = useCallback(() => {
-      const category = isValidCategory(item.category) ? item.category : 'agents';
-      pulse
-        .click({
-          category,
+    // Compute targetPath early (before hooks that use it)
+    const targetPath = item.slug
+      ? getContentItemUrl({
+          category: (isValidCategory(item.category ?? 'agents')
+            ? (item.category ?? 'agents')
+            : 'agents') as Database['public']['Enums']['content_category'],
           slug: item.slug,
-          metadata: {
-            action: 'card_click',
-            source: 'card_grid',
-            ...(position !== undefined && { position }),
-            ...(searchQuery?.trim() && { search_query: searchQuery.trim() }),
-          },
+          subcategory:
+            'subcategory' in item ? (item.subcategory as string | null | undefined) : undefined,
         })
-        .catch((error) => {
-          logUnhandledPromise('ConfigCard: card click pulse failed', error, {
-            category: item.category,
-            slug: item.slug,
-          });
-        });
-    }, [pulse, item.category, item.slug, position, searchQuery]);
-
-    const { copy } = useCopyToClipboard({
-      context: {
-        component: 'ConfigCard',
-        action: 'swipe_copy',
-      },
-    });
-
-    const [cardConfig, setCardConfig] = useState({
-      showCopyButton: true,
-      showBookmark: true,
-      showViewCount: true,
-      showCopyCount: true,
-      showRating: false,
-    });
+      : '';
 
     useEffect(() => {
       getComponentConfig({})
@@ -322,33 +332,43 @@ export const ConfigCard = memo(
 
     // Swipe gesture handlers for mobile quick actions
     const handleSwipeRightCopy = useCallback(async () => {
+      if (!(item.slug && targetPath)) return;
       const url = `${typeof window !== 'undefined' ? window.location.origin : ''}${targetPath}`;
       await copy(url);
 
       // Track user interaction for analytics and personalization
-      const category = isValidCategory(item.category) ? item.category : 'agents';
-      pulse.copy({ category, slug: item.slug }).catch((error) => {
-        logUnhandledPromise('ConfigCard: swipe copy pulse failed', error, {
-          category,
+      const category = isValidCategory(item.category ?? 'agents')
+        ? (item.category ?? 'agents')
+        : 'agents';
+      pulse
+        .copy({
+          category: category as Database['public']['Enums']['content_category'],
           slug: item.slug,
+        })
+        .catch((error) => {
+          logUnhandledPromise('ConfigCard: swipe copy pulse failed', error, {
+            category: category as Database['public']['Enums']['content_category'],
+            slug: item.slug ?? undefined,
+          });
         });
-      });
 
       toasts.success.copied();
     }, [targetPath, copy, item, pulse]);
 
     const handleSwipeLeftBookmark = useCallback(async () => {
+      if (!item.slug) return;
       // Type guard validation
-      if (!isValidCategory(item.category)) {
+      const categoryValue = item.category ?? 'agents';
+      if (!isValidCategory(categoryValue)) {
         logger.error('Invalid content type for bookmark', new Error('Invalid content type'), {
-          contentType: item.category,
+          contentType: categoryValue,
           contentSlug: item.slug,
         });
-        toasts.error.fromError(new Error(`Invalid content type: ${item.category}`));
+        toasts.error.fromError(new Error(`Invalid content type: ${categoryValue}`));
         return;
       }
 
-      const validatedCategory = item.category;
+      const validatedCategory = categoryValue as Database['public']['Enums']['content_category'];
 
       try {
         const result = await addBookmark({
@@ -368,8 +388,8 @@ export const ConfigCard = memo(
             })
             .catch((error) => {
               logClientWarning('ConfigCard: bookmark addition pulse failed', error, {
-                category: item.category,
-                slug: item.slug,
+                category: validatedCategory,
+                slug: item.slug ?? undefined,
               });
             });
 
@@ -388,19 +408,31 @@ export const ConfigCard = memo(
       }
     }, [item.category, item.slug, router, pulse]);
 
-    // Extract sponsored metadata - ContentItem already includes these properties (when from enriched RPC)
+    // Extract sponsored metadata - use snake_case directly from database types
     const isSponsored: boolean | undefined =
-      'isSponsored' in item && typeof item.isSponsored === 'boolean' ? item.isSponsored : undefined;
+      'is_sponsored' in item && typeof item.is_sponsored === 'boolean'
+        ? item.is_sponsored
+        : undefined;
     const sponsoredId: string | undefined =
-      'sponsoredId' in item && typeof item.sponsoredId === 'string' ? item.sponsoredId : undefined;
-    const sponsorTier = 'sponsorTier' in item ? item.sponsorTier : undefined;
-    const viewCount = 'viewCount' in item ? item.viewCount : undefined;
+      'sponsored_content_id' in item && typeof item.sponsored_content_id === 'string'
+        ? item.sponsored_content_id
+        : undefined;
+    const sponsorTier =
+      'sponsorship_tier' in item && typeof item.sponsorship_tier === 'string'
+        ? item.sponsorship_tier
+        : undefined;
+    const viewCount =
+      'view_count' in item && typeof item.view_count === 'number' ? item.view_count : undefined;
 
-    // copyCount is a runtime property added by analytics (not in schema)
-    const copyCount = (item as { copyCount?: number }).copyCount;
+    // copyCount is a runtime property added by analytics (not in schema) - use snake_case
+    const copyCount =
+      'copy_count' in item && typeof item.copy_count === 'number' ? item.copy_count : undefined;
 
-    // bookmarkCount is a runtime property added by analytics (not in schema)
-    const bookmarkCount = (item as { bookmarkCount?: number }).bookmarkCount;
+    // bookmarkCount is a runtime property added by analytics (not in schema) - use snake_case
+    const bookmarkCount =
+      'bookmark_count' in item && typeof item.bookmark_count === 'number'
+        ? item.bookmark_count
+        : undefined;
 
     // Extract featured metadata (weekly algorithm selection)
     // Note: _featured is a computed property added by trending algorithm, not in schema
@@ -467,7 +499,7 @@ export const ConfigCard = memo(
             : {})}
           variant={variant}
           showActions={showActions}
-          ariaLabel={`${displayTitle} - ${item.category} by ${('author' in item && item.author) || 'Community'}`}
+          ariaLabel={`${displayTitle} - ${item.category ?? 'content'} by ${('author' in item && item.author) || 'Community'}`}
           {...(isSponsored !== undefined ? { isSponsored } : {})}
           {...(sponsoredId !== undefined ? { sponsoredId } : {})}
           {...(position !== undefined ? { position } : {})}
@@ -475,16 +507,16 @@ export const ConfigCard = memo(
           onSwipeRight={handleSwipeRightCopy}
           onSwipeLeft={handleSwipeLeftBookmark}
           useViewTransitions={useViewTransitions}
-          viewTransitionSlug={item.slug}
+          {...(item.slug ? { viewTransitionSlug: item.slug } : {})}
           onBeforeNavigate={handleCardClickPulse}
           renderTopBadges={() => {
             // Runtime type guard ensures category is valid ContentCategory (excludes 'changelog' and 'jobs')
             // Type assertion is safe because isValidCategory() validates at runtime
-            const rawCategory = item.category;
+            const rawCategory = item.category ?? 'agents';
             const category: Database['public']['Enums']['content_category'] = isValidCategory(
               rawCategory
             )
-              ? rawCategory
+              ? (rawCategory as Database['public']['Enums']['content_category'])
               : 'agents';
             return (
               <>
@@ -622,10 +654,13 @@ export const ConfigCard = memo(
                   className={`${UI_CLASSES.ICON_BUTTON_SM} ${UI_CLASSES.BUTTON_GHOST_ICON}`}
                   onClick={(e) => {
                     e.stopPropagation();
-                    const category = isValidCategory(item.category) ? item.category : 'agents';
+                    if (!item.slug) return;
+                    const category = isValidCategory(item.category ?? 'agents')
+                      ? (item.category ?? 'agents')
+                      : 'agents';
                     pulse
                       .click({
-                        category,
+                        category: category as Database['public']['Enums']['content_category'],
                         slug: item.slug,
                         metadata: {
                           action: 'external_link',
@@ -635,8 +670,8 @@ export const ConfigCard = memo(
                       })
                       .catch((error) => {
                         logUnhandledPromise('ConfigCard: GitHub link click pulse failed', error, {
-                          category,
-                          slug: item.slug,
+                          category: category as Database['public']['Enums']['content_category'],
+                          slug: item.slug ?? undefined,
                         });
                       });
                     const safeRepoUrl = getSafeRepositoryUrl(item.repository as string);
@@ -668,10 +703,13 @@ export const ConfigCard = memo(
                   className={`${UI_CLASSES.ICON_BUTTON_SM} ${UI_CLASSES.BUTTON_GHOST_ICON}`}
                   onClick={(e) => {
                     e.stopPropagation();
-                    const category = isValidCategory(item.category) ? item.category : 'agents';
+                    if (!item.slug) return;
+                    const category = isValidCategory(item.category ?? 'agents')
+                      ? (item.category ?? 'agents')
+                      : 'agents';
                     pulse
                       .click({
-                        category,
+                        category: category as Database['public']['Enums']['content_category'],
                         slug: item.slug,
                         metadata: {
                           action: 'external_link',
@@ -685,7 +723,7 @@ export const ConfigCard = memo(
                           error,
                           {
                             category,
-                            slug: item.slug,
+                            slug: item.slug ?? undefined,
                           }
                         );
                       });
@@ -715,10 +753,16 @@ export const ConfigCard = memo(
               {/* Bookmark button with count overlay */}
               {cardConfig.showBookmark && (
                 <div className="relative">
-                  <BookmarkButton
-                    contentType={isValidCategory(item.category) ? item.category : 'agents'}
-                    contentSlug={item.slug}
-                  />
+                  {item.slug && (
+                    <BookmarkButton
+                      contentType={
+                        isValidCategory(item.category ?? 'agents')
+                          ? (item.category as Database['public']['Enums']['content_category'])
+                          : 'agents'
+                      }
+                      contentSlug={item.slug}
+                    />
+                  )}
                   {bookmarkCount !== undefined && bookmarkCount > 0 && (
                     <UnifiedBadge
                       variant="notification-count"
@@ -742,13 +786,18 @@ export const ConfigCard = memo(
                     iconClassName={UI_CLASSES.ICON_XS}
                     ariaLabel={`Copy link to ${displayTitle}`}
                     onCopySuccess={() => {
-                      const category = isValidCategory(item.category) ? item.category : 'agents';
-                      pulse.copy({ category, slug: item.slug }).catch((error) => {
-                        logUnhandledPromise('ConfigCard: copy button pulse failed', error, {
-                          category,
-                          slug: item.slug,
+                      const category: Database['public']['Enums']['content_category'] =
+                        isValidCategory(item.category ?? 'agents')
+                          ? (item.category as Database['public']['Enums']['content_category'])
+                          : 'agents';
+                      if (item.slug) {
+                        pulse.copy({ category, slug: item.slug }).catch((error) => {
+                          logUnhandledPromise('ConfigCard: copy button pulse failed', error, {
+                            category,
+                            slug: item.slug ?? undefined,
+                          });
                         });
-                      });
+                      }
                     }}
                   />
                   {cardConfig.showCopyCount && copyCount !== undefined && copyCount > 0 && (

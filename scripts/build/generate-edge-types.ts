@@ -20,6 +20,7 @@ interface Manifest {
   tables?: string[];
   functions?: string[];
   enums?: string[];
+  compositeTypes?: string[];
 }
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url));
@@ -36,6 +37,30 @@ const functionsStart = source.indexOf('    Functions: {', tablesStart);
 const enumsStart = source.indexOf('    Enums: {', functionsStart);
 const compositeTypesIndex = source.indexOf('    CompositeTypes:', enumsStart);
 const enumsEnd = compositeTypesIndex === -1 ? source.length : compositeTypesIndex;
+
+// Find the end of CompositeTypes section (look for the closing brace of the public namespace)
+let compositeTypesEnd = source.length;
+if (compositeTypesIndex !== -1) {
+  // Find the closing brace of the CompositeTypes object
+  const compositeTypesBraceStart = source.indexOf('{', compositeTypesIndex);
+  if (compositeTypesBraceStart !== -1) {
+    let depth = 0;
+    let index = compositeTypesBraceStart;
+    while (index < source.length) {
+      const char = source[index];
+      if (char === '{') {
+        depth++;
+      } else if (char === '}') {
+        depth--;
+        if (depth === 0) {
+          compositeTypesEnd = index + 1;
+          break;
+        }
+      }
+      index++;
+    }
+  }
+}
 
 if (tablesStart === -1 || functionsStart === -1 || enumsStart === -1) {
   throw new Error('Failed to locate Tables/Functions/Enums sections in database.types.ts');
@@ -111,11 +136,54 @@ function extractEnumBlock(name: string): string {
   return lines.join('\n').trimEnd();
 }
 
+function extractCompositeTypeBlock(name: string): string {
+  if (compositeTypesIndex === -1) {
+    throw new Error('CompositeTypes section not found in source');
+  }
+  const marker = `      ${name}:`;
+  const startIndex = source.indexOf(marker, compositeTypesIndex);
+  if (startIndex === -1 || startIndex > compositeTypesEnd) {
+    throw new Error(`Unable to find composite type "${name}"`);
+  }
+
+  // Find the opening brace
+  const braceStart = source.indexOf('{', startIndex);
+  if (braceStart === -1) {
+    throw new Error(`Malformed composite type block for "${name}"`);
+  }
+
+  // Find the matching closing brace
+  let depth = 0;
+  let index = braceStart;
+  while (index < compositeTypesEnd) {
+    const char = source[index];
+    if (char === '{') {
+      depth++;
+    } else if (char === '}') {
+      depth--;
+      if (depth === 0) {
+        index++;
+        break;
+      }
+    }
+    index++;
+  }
+
+  if (depth !== 0) {
+    throw new Error(`Unbalanced braces while parsing composite type "${name}"`);
+  }
+
+  // Include the closing brace
+  return source.slice(startIndex, index).trimEnd();
+}
+
 const tablesOutput =
   manifest.tables?.map((table) => extractStructuredBlock(table, tablesStart, functionsStart)) ?? [];
 const functionsOutput =
   manifest.functions?.map((fn) => extractStructuredBlock(fn, functionsStart, enumsStart)) ?? [];
 const enumsOutput = manifest.enums?.map((enumeration) => extractEnumBlock(enumeration)) ?? [];
+const compositeTypesOutput =
+  manifest.compositeTypes?.map((type) => extractCompositeTypeBlock(type)) ?? [];
 
 const header = `/**
  * AUTO-GENERATED FILE.
@@ -156,6 +224,9 @@ const outputLines = [
   '    Enums: {',
   formatSection(enumsOutput),
   '    };',
+  ...(compositeTypesOutput.length > 0
+    ? ['    CompositeTypes: {', formatSection(compositeTypesOutput), '    };']
+    : []),
   '  };',
   '}',
 ];

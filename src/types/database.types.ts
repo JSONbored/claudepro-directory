@@ -3263,7 +3263,16 @@ export type Database = {
         Returns: string
       }
       generate_tool_llms_txt: { Args: { p_tool_name: string }; Returns: string }
-      get_account_dashboard: { Args: { p_user_id: string }; Returns: Json }
+      get_account_dashboard: {
+        Args: { p_user_id: string }
+        Returns: Database["public"]["CompositeTypes"]["account_dashboard_result"]
+        SetofOptions: {
+          from: "*"
+          to: "account_dashboard_result"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       get_active_announcement: {
         Args: { p_now?: string }
         Returns: {
@@ -3392,7 +3401,16 @@ export type Database = {
         }[]
       }
       get_category_config: { Args: { p_category?: string }; Returns: Json }
-      get_category_configs_with_features: { Args: never; Returns: Json }
+      get_category_configs_with_features: {
+        Args: never
+        Returns: Database["public"]["CompositeTypes"]["category_config_with_features"][]
+        SetofOptions: {
+          from: "*"
+          to: "category_config_with_features"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       get_category_description: {
         Args: { p_category: string }
         Returns: string
@@ -3401,7 +3419,16 @@ export type Database = {
         Args: { p_category: string }
         Returns: string
       }
-      get_changelog_detail: { Args: { p_slug: string }; Returns: Json }
+      get_changelog_detail: {
+        Args: { p_slug: string }
+        Returns: Database["public"]["CompositeTypes"]["changelog_detail_result"]
+        SetofOptions: {
+          from: "*"
+          to: "changelog_detail_result"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       get_changelog_overview: {
         Args: {
           p_category?: string
@@ -3410,7 +3437,13 @@ export type Database = {
           p_offset?: number
           p_published_only?: boolean
         }
-        Returns: Json
+        Returns: Database["public"]["CompositeTypes"]["changelog_overview_result"]
+        SetofOptions: {
+          from: "*"
+          to: "changelog_overview_result"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       get_changelog_with_category_stats: {
         Args: { p_category?: string; p_limit?: number; p_offset?: number }
@@ -3418,19 +3451,43 @@ export type Database = {
       }
       get_collection_detail_with_items: {
         Args: { p_slug: string; p_user_id: string }
-        Returns: Json
+        Returns: Database["public"]["CompositeTypes"]["collection_detail_with_items_result"]
+        SetofOptions: {
+          from: "*"
+          to: "collection_detail_with_items_result"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       get_collection_items_grouped: {
         Args: { p_collection_slug: string }
-        Returns: Json
+        Returns: Database["public"]["CompositeTypes"]["collection_items_grouped_result"]
+        SetofOptions: {
+          from: "*"
+          to: "collection_items_grouped_result"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       get_community_directory: {
         Args: { p_limit?: number; p_search_query?: string }
-        Returns: Json
+        Returns: Database["public"]["CompositeTypes"]["community_directory_result"]
+        SetofOptions: {
+          from: "*"
+          to: "community_directory_result"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       get_companies_list: {
         Args: { p_limit?: number; p_offset?: number }
-        Returns: Json
+        Returns: Database["public"]["CompositeTypes"]["company_list_result"]
+        SetofOptions: {
+          from: "*"
+          to: "company_list_result"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       get_company_admin_profile: {
         Args: { p_company_id: string }
@@ -3450,11 +3507,31 @@ export type Database = {
           website: string
         }[]
       }
-      get_company_profile: { Args: { p_slug: string }; Returns: Json }
-      get_contact_commands: { Args: never; Returns: Json }
+      get_company_profile: {
+        Args: { p_slug: string }
+        Returns: Database["public"]["CompositeTypes"]["company_profile_result"]
+        SetofOptions: {
+          from: "*"
+          to: "company_profile_result"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      get_contact_commands: {
+        Args: never
+        Returns: {
+          commands: Database["public"]["CompositeTypes"]["contact_command_result"][]
+        }[]
+      }
       get_content_detail_complete: {
         Args: { p_category: string; p_slug: string; p_user_id?: string }
-        Returns: Json
+        Returns: Database["public"]["CompositeTypes"]["content_detail_complete_result"]
+        SetofOptions: {
+          from: "*"
+          to: "content_detail_complete_result"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       get_content_paginated: {
         Args: {
@@ -3467,7 +3544,13 @@ export type Database = {
           p_search?: string
           p_tags?: string[]
         }
-        Returns: Json
+        Returns: Database["public"]["CompositeTypes"]["content_paginated_result"]
+        SetofOptions: {
+          from: "*"
+          to: "content_paginated_result"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       get_content_paginated_slim: {
         Args: {
@@ -3477,7 +3560,13 @@ export type Database = {
           p_order_by?: string
           p_order_direction?: string
         }
-        Returns: Json
+        Returns: Database["public"]["CompositeTypes"]["content_paginated_slim_result"]
+        SetofOptions: {
+          from: "*"
+          to: "content_paginated_slim_result"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       get_content_templates: { Args: { p_category: string }; Returns: Json }
       get_content_with_analytics:
@@ -3545,7 +3634,13 @@ export type Database = {
           p_offset?: number
           p_slugs?: string[]
         }
-        Returns: Json
+        Returns: Database["public"]["CompositeTypes"]["enriched_content_item"][]
+        SetofOptions: {
+          from: "*"
+          to: "enriched_content_item"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
       get_featured_jobs: {
         Args: never
@@ -3631,13 +3726,28 @@ export type Database = {
       get_generation_config: { Args: { p_category?: string }; Returns: Json }
       get_homepage_complete: {
         Args: { p_category_ids?: string[] }
-        Returns: Json
+        Returns: Database["public"]["CompositeTypes"]["homepage_complete_result"]
+        SetofOptions: {
+          from: "*"
+          to: "homepage_complete_result"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       get_homepage_content_enriched: {
         Args: { p_category_ids: string[]; p_week_start?: string }
         Returns: Json
       }
-      get_job_detail: { Args: { p_slug: string }; Returns: Json }
+      get_job_detail: {
+        Args: { p_slug: string }
+        Returns: Database["public"]["CompositeTypes"]["job_detail_result"]
+        SetofOptions: {
+          from: "*"
+          to: "job_detail_result"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       get_jobs_by_category: {
         Args: { p_category: string }
         Returns: {
@@ -3697,7 +3807,16 @@ export type Database = {
         }
       }
       get_jobs_count: { Args: never; Returns: number }
-      get_jobs_list: { Args: never; Returns: Json }
+      get_jobs_list: {
+        Args: never
+        Returns: Database["public"]["CompositeTypes"]["jobs_list_item"][]
+        SetofOptions: {
+          from: "*"
+          to: "jobs_list_item"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       get_mcpb_storage_path: {
         Args: { p_slug: string }
         Returns: {
@@ -3707,9 +3826,24 @@ export type Database = {
       }
       get_my_submissions: {
         Args: { p_limit?: number; p_offset?: number }
-        Returns: Json
+        Returns: Database["public"]["CompositeTypes"]["my_submissions_item"][]
+        SetofOptions: {
+          from: "*"
+          to: "my_submissions_item"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
-      get_navigation_menu: { Args: never; Returns: Json }
+      get_navigation_menu: {
+        Args: never
+        Returns: Database["public"]["CompositeTypes"]["navigation_menu_result"]
+        SetofOptions: {
+          from: "*"
+          to: "navigation_menu_result"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       get_new_content_for_week: {
         Args: { p_limit?: number; p_week_start: string }
         Returns: {
@@ -3739,7 +3873,13 @@ export type Database = {
       }
       get_pending_submissions: {
         Args: { p_filter_type?: string; p_limit?: number; p_offset?: number }
-        Returns: Json
+        Returns: Database["public"]["CompositeTypes"]["pending_submissions_item"][]
+        SetofOptions: {
+          from: "*"
+          to: "pending_submissions_item"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
       get_performance_baseline: { Args: never; Returns: Json }
       get_popular_content: {
@@ -3821,7 +3961,13 @@ export type Database = {
           p_tool_preferences: string[]
           p_use_case: string
         }
-        Returns: Json
+        Returns: Database["public"]["CompositeTypes"]["recommendation_result"]
+        SetofOptions: {
+          from: "*"
+          to: "recommendation_result"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       get_related_content: {
         Args: {
@@ -3831,19 +3977,13 @@ export type Database = {
           p_slug: string
           p_tags?: string[]
         }
-        Returns: {
-          author: string
-          category: string
-          date_added: string
-          description: string
-          match_type: string
-          matched_tags: string[]
-          score: number
-          slug: string
-          tags: string[]
-          title: string
-          views: number
-        }[]
+        Returns: Database["public"]["CompositeTypes"]["related_content_item"][]
+        SetofOptions: {
+          from: "*"
+          to: "related_content_item"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
       get_reviews_with_stats: {
         Args: {
@@ -3854,7 +3994,13 @@ export type Database = {
           p_sort_by?: string
           p_user_id?: string
         }
-        Returns: Json
+        Returns: Database["public"]["CompositeTypes"]["review_with_stats_result"]
+        SetofOptions: {
+          from: "*"
+          to: "review_with_stats_result"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       get_search_count: {
         Args: {
@@ -3895,7 +4041,13 @@ export type Database = {
           p_content_type: string
           p_limit?: number
         }
-        Returns: Json
+        Returns: Database["public"]["CompositeTypes"]["similar_content_result"]
+        SetofOptions: {
+          from: "*"
+          to: "similar_content_result"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       get_site_urls: {
         Args: never
@@ -3923,7 +4075,13 @@ export type Database = {
       }
       get_submission_dashboard: {
         Args: { p_contributors_limit?: number; p_recent_limit?: number }
-        Returns: Json
+        Returns: Database["public"]["CompositeTypes"]["submission_dashboard_result"]
+        SetofOptions: {
+          from: "*"
+          to: "submission_dashboard_result"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       get_submission_stats: { Args: never; Returns: Json }
       get_submission_stats_summary: {
@@ -4047,7 +4205,16 @@ export type Database = {
           query: string
         }[]
       }
-      get_user_activity_summary: { Args: { p_user_id: string }; Returns: Json }
+      get_user_activity_summary: {
+        Args: { p_user_id: string }
+        Returns: Database["public"]["CompositeTypes"]["user_activity_summary"]
+        SetofOptions: {
+          from: "*"
+          to: "user_activity_summary"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       get_user_activity_timeline: {
         Args: {
           p_limit?: number
@@ -4055,11 +4222,13 @@ export type Database = {
           p_type?: string
           p_user_id: string
         }
-        Returns: Json
-      }
-      get_user_affinities: {
-        Args: { p_limit?: number; p_min_score?: number; p_user_id: string }
-        Returns: Json
+        Returns: Database["public"]["CompositeTypes"]["user_activity_timeline_result"]
+        SetofOptions: {
+          from: "*"
+          to: "user_activity_timeline_result"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       get_user_collection_detail: {
         Args: {
@@ -4067,29 +4236,84 @@ export type Database = {
           p_user_slug: string
           p_viewer_id?: string
         }
-        Returns: Json
+        Returns: Database["public"]["CompositeTypes"]["user_collection_detail_result"]
+        SetofOptions: {
+          from: "*"
+          to: "user_collection_detail_result"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
-      get_user_companies: { Args: { p_user_id: string }; Returns: Json }
-      get_user_dashboard: { Args: { p_user_id: string }; Returns: Json }
-      get_user_favorite_categories: {
-        Args: { p_limit?: number; p_user_id: string }
-        Returns: string[]
+      get_user_companies: {
+        Args: { p_user_id: string }
+        Returns: Database["public"]["CompositeTypes"]["user_companies_result"]
+        SetofOptions: {
+          from: "*"
+          to: "user_companies_result"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
-      get_user_identities: { Args: { p_user_id: string }; Returns: Json }
+      get_user_dashboard: {
+        Args: { p_user_id: string }
+        Returns: Database["public"]["CompositeTypes"]["user_dashboard_result"]
+        SetofOptions: {
+          from: "*"
+          to: "user_dashboard_result"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      get_user_identities: {
+        Args: { p_user_id: string }
+        Returns: Database["public"]["CompositeTypes"]["user_identities_result"]
+        SetofOptions: {
+          from: "*"
+          to: "user_identities_result"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       get_user_interaction_summary: {
         Args: { p_user_id: string }
-        Returns: Json
+        Returns: Database["public"]["CompositeTypes"]["user_interaction_summary"]
+        SetofOptions: {
+          from: "*"
+          to: "user_interaction_summary"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
-      get_user_library: { Args: { p_user_id: string }; Returns: Json }
+      get_user_library: {
+        Args: { p_user_id: string }
+        Returns: Database["public"]["CompositeTypes"]["user_library_result"]
+        SetofOptions: {
+          from: "*"
+          to: "user_library_result"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       get_user_profile: {
         Args: { p_user_slug: string; p_viewer_id?: string }
-        Returns: Json
+        Returns: Database["public"]["CompositeTypes"]["user_profile_result"]
+        SetofOptions: {
+          from: "*"
+          to: "user_profile_result"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
-      get_user_recent_interactions: {
-        Args: { p_limit?: number; p_user_id: string }
-        Returns: Json
+      get_user_settings: {
+        Args: { p_user_id: string }
+        Returns: Database["public"]["CompositeTypes"]["user_settings_result"]
+        SetofOptions: {
+          from: "*"
+          to: "user_settings_result"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
-      get_user_settings: { Args: { p_user_id: string }; Returns: Json }
       get_user_sponsorships: {
         Args: { p_user_id: string }
         Returns: {
@@ -4826,7 +5050,952 @@ export type Database = {
       workplace_type: "Remote" | "On site" | "Hybrid"
     }
     CompositeTypes: {
-      [_ in never]: never
+      account_dashboard_profile: {
+        name: string | null
+        tier: Database["public"]["Enums"]["user_tier"] | null
+        created_at: string | null
+      }
+      account_dashboard_result: {
+        bookmark_count: number | null
+        profile:
+          | Database["public"]["CompositeTypes"]["account_dashboard_profile"]
+          | null
+      }
+      category_config_features: {
+        show_on_homepage: boolean | null
+        display_config: boolean | null
+        generate_full_content: boolean | null
+        build_enable_cache: boolean | null
+        api_generate_static: boolean | null
+        api_include_trending: boolean | null
+        section_features: boolean | null
+        section_installation: boolean | null
+        section_use_cases: boolean | null
+        section_configuration: boolean | null
+        section_security: boolean | null
+        section_troubleshooting: boolean | null
+        section_examples: boolean | null
+        metadata_show_github_link: boolean | null
+      }
+      category_config_with_features: {
+        category: Database["public"]["Enums"]["content_category"] | null
+        title: string | null
+        plural_title: string | null
+        description: string | null
+        icon_name: string | null
+        color_scheme: string | null
+        keywords: string | null
+        meta_description: string | null
+        search_placeholder: string | null
+        empty_state_message: string | null
+        url_slug: string | null
+        content_loader: string | null
+        config_format: string | null
+        primary_action_type: string | null
+        primary_action_label: string | null
+        primary_action_config: Json | null
+        validation_config: Json | null
+        generation_config: Json | null
+        schema_name: string | null
+        api_schema: Json | null
+        metadata_fields: string[] | null
+        badges: Json | null
+        features:
+          | Database["public"]["CompositeTypes"]["category_config_features"]
+          | null
+      }
+      changelog_detail_entry: {
+        id: string | null
+        slug: string | null
+        title: string | null
+        tldr: string | null
+        description: string | null
+        content: string | null
+        raw_content: string | null
+        release_date: string | null
+        date: string | null
+        featured: boolean | null
+        published: boolean | null
+        keywords: string[] | null
+        metadata: Json | null
+        changes: Json | null
+        created_at: string | null
+        updated_at: string | null
+        categories: Json | null
+      }
+      changelog_detail_result: {
+        entry:
+          | Database["public"]["CompositeTypes"]["changelog_detail_entry"]
+          | null
+      }
+      changelog_metadata: {
+        total_entries: number | null
+        date_range:
+          | Database["public"]["CompositeTypes"]["changelog_metadata_date_range"]
+          | null
+        category_counts: Json | null
+      }
+      changelog_metadata_date_range: {
+        earliest: string | null
+        latest: string | null
+      }
+      changelog_overview_entry: {
+        id: string | null
+        slug: string | null
+        title: string | null
+        tldr: string | null
+        description: string | null
+        content: string | null
+        raw_content: string | null
+        release_date: string | null
+        date: string | null
+        featured: boolean | null
+        published: boolean | null
+        keywords: string[] | null
+        metadata: Json | null
+        changes: Json | null
+        created_at: string | null
+        updated_at: string | null
+      }
+      changelog_overview_result: {
+        entries:
+          | Database["public"]["CompositeTypes"]["changelog_overview_entry"][]
+          | null
+        metadata:
+          | Database["public"]["CompositeTypes"]["changelog_metadata"]
+          | null
+        featured:
+          | Database["public"]["CompositeTypes"]["changelog_overview_entry"][]
+          | null
+        pagination:
+          | Database["public"]["CompositeTypes"]["changelog_pagination"]
+          | null
+      }
+      changelog_pagination: {
+        total: number | null
+        limit: number | null
+        offset: number | null
+        has_more: boolean | null
+      }
+      collection_detail_with_items_result: {
+        collection:
+          | Database["public"]["Tables"]["user_collections"]["Row"]
+          | null
+        items: Database["public"]["Tables"]["collection_items"]["Row"][] | null
+        bookmarks: Database["public"]["Tables"]["bookmarks"]["Row"][] | null
+      }
+      collection_items_grouped_item: {
+        id: string | null
+        slug: string | null
+        title: string | null
+        description: string | null
+        category: Database["public"]["Enums"]["content_category"] | null
+        metadata: Json | null
+        tags: string[] | null
+        author: string | null
+        date_added: string | null
+        view_count: number | null
+        copy_count: number | null
+        bookmark_count: number | null
+        review_count: number | null
+        avg_rating: number | null
+        popularity_score: number | null
+      }
+      collection_items_grouped_result: {
+        success: boolean | null
+        error: string | null
+        grouped_items: Json | null
+        total_items: number | null
+      }
+      community_directory_result: {
+        all_users:
+          | Database["public"]["CompositeTypes"]["community_directory_user"][]
+          | null
+        top_contributors:
+          | Database["public"]["CompositeTypes"]["community_directory_user"][]
+          | null
+        new_members:
+          | Database["public"]["CompositeTypes"]["community_directory_user"][]
+          | null
+      }
+      community_directory_user: {
+        id: string | null
+        slug: string | null
+        name: string | null
+        image: string | null
+        bio: string | null
+        work: string | null
+        tier: Database["public"]["Enums"]["user_tier"] | null
+        created_at: string | null
+      }
+      company_job_stats_item: {
+        active_jobs: number | null
+        total_jobs: number | null
+        remote_jobs: number | null
+        total_views: number | null
+        total_clicks: number | null
+        latest_job_posted_at: string | null
+      }
+      company_list_item: {
+        id: string | null
+        slug: string | null
+        name: string | null
+        logo: string | null
+        website: string | null
+        description: string | null
+        size: string | null
+        industry: string | null
+        featured: boolean | null
+        created_at: string | null
+        stats:
+          | Database["public"]["CompositeTypes"]["company_job_stats_item"]
+          | null
+      }
+      company_list_result: {
+        companies:
+          | Database["public"]["CompositeTypes"]["company_list_item"][]
+          | null
+        total: number | null
+      }
+      company_profile_job_item: {
+        id: string | null
+        slug: string | null
+        title: string | null
+        company: string | null
+        company_logo: string | null
+        location: string | null
+        description: string | null
+        salary: string | null
+        remote: boolean | null
+        type: Database["public"]["Enums"]["job_type"] | null
+        workplace: Database["public"]["Enums"]["workplace_type"] | null
+        experience: Database["public"]["Enums"]["experience_level"] | null
+        category: Database["public"]["Enums"]["job_category"] | null
+        tags: string[] | null
+        plan: Database["public"]["Enums"]["job_plan"] | null
+        tier: Database["public"]["Enums"]["job_tier"] | null
+        posted_at: string | null
+        expires_at: string | null
+        view_count: number | null
+        click_count: number | null
+        link: string | null
+      }
+      company_profile_result: {
+        company: Database["public"]["Tables"]["companies"]["Row"] | null
+        active_jobs:
+          | Database["public"]["CompositeTypes"]["company_profile_job_item"][]
+          | null
+        stats:
+          | Database["public"]["CompositeTypes"]["company_profile_stats"]
+          | null
+      }
+      company_profile_stats: {
+        total_jobs: number | null
+        active_jobs: number | null
+        featured_jobs: number | null
+        remote_jobs: number | null
+        avg_salary_min: number | null
+        total_views: number | null
+        total_clicks: number | null
+        click_through_rate: number | null
+        latest_job_posted_at: string | null
+      }
+      contact_command_result: {
+        id: string | null
+        text: string | null
+        description: string | null
+        category: string | null
+        icon_name: string | null
+        action_type: Database["public"]["Enums"]["contact_action_type"] | null
+        action_value: string | null
+        confetti_variant: Database["public"]["Enums"]["confetti_variant"] | null
+        requires_auth: boolean | null
+        aliases: string[] | null
+      }
+      content_detail_analytics: {
+        view_count: number | null
+        copy_count: number | null
+        bookmark_count: number | null
+        is_bookmarked: boolean | null
+      }
+      content_detail_collection_item: {
+        id: string | null
+        collection_id: string | null
+        content_type: string | null
+        content_slug: string | null
+        order: number | null
+        added_at: string | null
+        title: string | null
+        description: string | null
+        author: string | null
+      }
+      content_detail_complete_result: {
+        content: Json | null
+        analytics:
+          | Database["public"]["CompositeTypes"]["content_detail_analytics"]
+          | null
+        related:
+          | Database["public"]["CompositeTypes"]["content_detail_related_item"][]
+          | null
+        collection_items:
+          | Database["public"]["CompositeTypes"]["content_detail_collection_item"][]
+          | null
+      }
+      content_detail_related_item: {
+        category: string | null
+        slug: string | null
+        title: string | null
+        description: string | null
+        author: string | null
+        date_added: string | null
+        tags: string[] | null
+        score: number | null
+        match_type: string | null
+        views: number | null
+        matched_tags: string[] | null
+      }
+      content_paginated_filters: {
+        category: string | null
+        author: string | null
+        tags: string[] | null
+        search: string | null
+        order_by: string | null
+        order_direction: string | null
+      }
+      content_paginated_item: {
+        id: string | null
+        slug: string | null
+        title: string | null
+        display_title: string | null
+        seo_title: string | null
+        description: string | null
+        author: string | null
+        author_profile_url: string | null
+        category: string | null
+        tags: string[] | null
+        source_table: string | null
+        created_at: string | null
+        updated_at: string | null
+        date_added: string | null
+        features: string[] | null
+        use_cases: string[] | null
+        source: string | null
+        documentation_url: string | null
+        view_count: number | null
+        copy_count: number | null
+        bookmark_count: number | null
+        popularity_score: number | null
+        trending_score: number | null
+        sponsored_content_id: string | null
+        sponsorship_tier: string | null
+        is_sponsored: boolean | null
+      }
+      content_paginated_pagination: {
+        total_count: number | null
+        limit: number | null
+        offset: number | null
+        has_more: boolean | null
+        current_page: number | null
+        total_pages: number | null
+      }
+      content_paginated_result: {
+        items:
+          | Database["public"]["CompositeTypes"]["content_paginated_item"][]
+          | null
+        pagination:
+          | Database["public"]["CompositeTypes"]["content_paginated_pagination"]
+          | null
+        filters_applied:
+          | Database["public"]["CompositeTypes"]["content_paginated_filters"]
+          | null
+      }
+      content_paginated_slim_item: {
+        id: string | null
+        slug: string | null
+        title: string | null
+        display_title: string | null
+        description: string | null
+        author: string | null
+        author_profile_url: string | null
+        category: string | null
+        tags: string[] | null
+        source: string | null
+        source_table: string | null
+        created_at: string | null
+        updated_at: string | null
+        date_added: string | null
+        view_count: number | null
+        copy_count: number | null
+        bookmark_count: number | null
+        popularity_score: number | null
+        trending_score: number | null
+        sponsored_content_id: string | null
+        sponsorship_tier: string | null
+        is_sponsored: boolean | null
+      }
+      content_paginated_slim_result: {
+        items:
+          | Database["public"]["CompositeTypes"]["content_paginated_slim_item"][]
+          | null
+        pagination:
+          | Database["public"]["CompositeTypes"]["content_paginated_pagination"]
+          | null
+      }
+      enriched_content_item: {
+        id: string | null
+        slug: string | null
+        title: string | null
+        display_title: string | null
+        seo_title: string | null
+        description: string | null
+        author: string | null
+        author_profile_url: string | null
+        category: string | null
+        tags: string[] | null
+        source_table: string | null
+        created_at: string | null
+        updated_at: string | null
+        date_added: string | null
+        features: string[] | null
+        use_cases: string[] | null
+        source: string | null
+        documentation_url: string | null
+        metadata: Json | null
+        view_count: number | null
+        copy_count: number | null
+        bookmark_count: number | null
+        popularity_score: number | null
+        trending_score: number | null
+        sponsored_content_id: string | null
+        sponsorship_tier: string | null
+        is_sponsored: boolean | null
+      }
+      homepage_complete_result: {
+        content: Json | null
+        member_count: number | null
+        jobs_count: number | null
+        featured_jobs: Json | null
+        top_contributors:
+          | Database["public"]["CompositeTypes"]["homepage_top_contributor"][]
+          | null
+      }
+      homepage_top_contributor: {
+        id: string | null
+        slug: string | null
+        name: string | null
+        image: string | null
+        bio: string | null
+        work: string | null
+        tier: Database["public"]["Enums"]["user_tier"] | null
+      }
+      job_detail_result: {
+        id: string | null
+        slug: string | null
+        title: string | null
+        company: string | null
+        description: string | null
+        location: string | null
+        remote: boolean | null
+        salary: string | null
+        type: Database["public"]["Enums"]["job_type"] | null
+        category: Database["public"]["Enums"]["job_category"] | null
+        tags: string[] | null
+        requirements: string[] | null
+        benefits: string[] | null
+        link: string | null
+        contact_email: string | null
+        posted_at: string | null
+        expires_at: string | null
+        active: boolean | null
+        status: Database["public"]["Enums"]["job_status"] | null
+        plan: Database["public"]["Enums"]["job_plan"] | null
+        tier: Database["public"]["Enums"]["job_tier"] | null
+        order: number | null
+        created_at: string | null
+        updated_at: string | null
+      }
+      jobs_list_item: {
+        id: string | null
+        slug: string | null
+        title: string | null
+        company: string | null
+        description: string | null
+        location: string | null
+        remote: boolean | null
+        salary: string | null
+        type: Database["public"]["Enums"]["job_type"] | null
+        category: Database["public"]["Enums"]["job_category"] | null
+        tags: string[] | null
+        requirements: string[] | null
+        benefits: string[] | null
+        link: string | null
+        contact_email: string | null
+        posted_at: string | null
+        expires_at: string | null
+        active: boolean | null
+        status: Database["public"]["Enums"]["job_status"] | null
+        plan: Database["public"]["Enums"]["job_plan"] | null
+        tier: Database["public"]["Enums"]["job_tier"] | null
+        order: number | null
+        created_at: string | null
+        updated_at: string | null
+      }
+      my_submissions_item: {
+        id: string | null
+        submission_type: Database["public"]["Enums"]["submission_type"] | null
+        status: Database["public"]["Enums"]["submission_status"] | null
+        name: string | null
+        description: string | null
+        category: Database["public"]["Enums"]["content_category"] | null
+        moderator_notes: string | null
+        created_at: string | null
+        moderated_at: string | null
+      }
+      navigation_menu_item: {
+        path: string | null
+        title: string | null
+        description: string | null
+        icon_name: string | null
+        group: string | null
+      }
+      navigation_menu_result: {
+        primary:
+          | Database["public"]["CompositeTypes"]["navigation_menu_item"][]
+          | null
+        secondary:
+          | Database["public"]["CompositeTypes"]["navigation_menu_item"][]
+          | null
+        actions:
+          | Database["public"]["CompositeTypes"]["navigation_menu_item"][]
+          | null
+      }
+      pending_submissions_item: {
+        id: string | null
+        submission_type: Database["public"]["Enums"]["submission_type"] | null
+        status: Database["public"]["Enums"]["submission_status"] | null
+        name: string | null
+        description: string | null
+        category: Database["public"]["Enums"]["content_category"] | null
+        author: string | null
+        author_profile_url: string | null
+        github_url: string | null
+        tags: string[] | null
+        content_data: Json | null
+        submitter_id: string | null
+        submitter_email: string | null
+        spam_score: number | null
+        created_at: string | null
+      }
+      recommendation_item: {
+        slug: string | null
+        title: string | null
+        description: string | null
+        category: Database["public"]["Enums"]["content_category"] | null
+        tags: string[] | null
+        author: string | null
+        match_score: number | null
+        match_percentage: number | null
+        primary_reason: string | null
+        rank: number | null
+        reasons:
+          | Database["public"]["CompositeTypes"]["recommendation_reason"][]
+          | null
+      }
+      recommendation_reason: {
+        type: string | null
+        message: string | null
+      }
+      recommendation_result: {
+        results:
+          | Database["public"]["CompositeTypes"]["recommendation_item"][]
+          | null
+        total_matches: number | null
+        algorithm: string | null
+        summary:
+          | Database["public"]["CompositeTypes"]["recommendation_summary"]
+          | null
+      }
+      recommendation_summary: {
+        top_category: string | null
+        avg_match_score: number | null
+        diversity_score: number | null
+      }
+      related_content_item: {
+        category: Database["public"]["Enums"]["content_category"] | null
+        slug: string | null
+        title: string | null
+        description: string | null
+        author: string | null
+        date_added: string | null
+        tags: string[] | null
+        score: number | null
+        match_type: string | null
+        views: number | null
+        matched_tags: string[] | null
+      }
+      review_aggregate_rating: {
+        success: boolean | null
+        average: number | null
+        count: number | null
+        distribution:
+          | Database["public"]["CompositeTypes"]["review_rating_distribution"]
+          | null
+      }
+      review_rating_distribution: {
+        rating_1: number | null
+        rating_2: number | null
+        rating_3: number | null
+        rating_4: number | null
+        rating_5: number | null
+      }
+      review_with_stats_item: {
+        id: string | null
+        rating: number | null
+        review_text: string | null
+        helpful_count: number | null
+        created_at: string | null
+        updated_at: string | null
+        user:
+          | Database["public"]["CompositeTypes"]["review_with_stats_user"]
+          | null
+        is_helpful: boolean | null
+      }
+      review_with_stats_result: {
+        reviews:
+          | Database["public"]["CompositeTypes"]["review_with_stats_item"][]
+          | null
+        has_more: boolean | null
+        total_count: number | null
+        aggregate_rating:
+          | Database["public"]["CompositeTypes"]["review_aggregate_rating"]
+          | null
+      }
+      review_with_stats_user: {
+        id: string | null
+        slug: string | null
+        name: string | null
+        image: string | null
+        tier: Database["public"]["Enums"]["user_tier"] | null
+      }
+      similar_content_item: {
+        slug: string | null
+        title: string | null
+        description: string | null
+        category: Database["public"]["Enums"]["content_category"] | null
+        score: number | null
+        tags: string[] | null
+        similarity_factors: Json | null
+        calculated_at: string | null
+      }
+      similar_content_result: {
+        similar_items:
+          | Database["public"]["CompositeTypes"]["similar_content_item"][]
+          | null
+        source_item:
+          | Database["public"]["CompositeTypes"]["similar_content_source_item"]
+          | null
+        algorithm_version: string | null
+      }
+      similar_content_source_item: {
+        slug: string | null
+        category: Database["public"]["Enums"]["content_category"] | null
+      }
+      submission_dashboard_contributor_item: {
+        rank: number | null
+        name: string | null
+        slug: string | null
+        merged_count: number | null
+      }
+      submission_dashboard_recent_item: {
+        id: string | null
+        content_name: string | null
+        content_type: Database["public"]["Enums"]["submission_type"] | null
+        merged_at: string | null
+        user:
+          | Database["public"]["CompositeTypes"]["submission_dashboard_recent_user"]
+          | null
+      }
+      submission_dashboard_recent_user: {
+        name: string | null
+        slug: string | null
+      }
+      submission_dashboard_result: {
+        stats:
+          | Database["public"]["CompositeTypes"]["submission_dashboard_stats"]
+          | null
+        recent:
+          | Database["public"]["CompositeTypes"]["submission_dashboard_recent_item"][]
+          | null
+        contributors:
+          | Database["public"]["CompositeTypes"]["submission_dashboard_contributor_item"][]
+          | null
+      }
+      submission_dashboard_stats: {
+        total: number | null
+        pending: number | null
+        merged_this_week: number | null
+      }
+      user_activity_summary: {
+        total_posts: number | null
+        total_comments: number | null
+        total_votes: number | null
+        total_submissions: number | null
+        merged_submissions: number | null
+        total_activity: number | null
+      }
+      user_activity_timeline_item: {
+        id: string | null
+        type: string | null
+        title: string | null
+        body: string | null
+        vote_type: string | null
+        content_type: string | null
+        content_slug: string | null
+        post_id: string | null
+        parent_id: string | null
+        submission_url: string | null
+        description: string | null
+        status: string | null
+        user_id: string | null
+        created_at: string | null
+        updated_at: string | null
+      }
+      user_activity_timeline_result: {
+        activities:
+          | Database["public"]["CompositeTypes"]["user_activity_timeline_item"][]
+          | null
+        has_more: boolean | null
+        total: number | null
+      }
+      user_collection_detail_collection: {
+        id: string | null
+        user_id: string | null
+        slug: string | null
+        name: string | null
+        description: string | null
+        is_public: boolean | null
+        item_count: number | null
+        view_count: number | null
+        created_at: string | null
+        updated_at: string | null
+      }
+      user_collection_detail_item: {
+        id: string | null
+        collection_id: string | null
+        content_type: Database["public"]["Enums"]["content_category"] | null
+        content_slug: string | null
+        notes: string | null
+        order: number | null
+        added_at: string | null
+      }
+      user_collection_detail_result: {
+        user:
+          | Database["public"]["CompositeTypes"]["user_collection_detail_user"]
+          | null
+        collection:
+          | Database["public"]["CompositeTypes"]["user_collection_detail_collection"]
+          | null
+        items:
+          | Database["public"]["CompositeTypes"]["user_collection_detail_item"][]
+          | null
+        is_owner: boolean | null
+      }
+      user_collection_detail_user: {
+        id: string | null
+        slug: string | null
+        name: string | null
+        image: string | null
+        tier: Database["public"]["Enums"]["user_tier"] | null
+      }
+      user_companies_company: {
+        id: string | null
+        slug: string | null
+        name: string | null
+        logo: string | null
+        website: string | null
+        description: string | null
+        size: string | null
+        industry: string | null
+        using_cursor_since: string | null
+        featured: boolean | null
+        created_at: string | null
+        updated_at: string | null
+        stats:
+          | Database["public"]["CompositeTypes"]["user_companies_stats"]
+          | null
+      }
+      user_companies_result: {
+        companies:
+          | Database["public"]["CompositeTypes"]["user_companies_company"][]
+          | null
+      }
+      user_companies_stats: {
+        total_jobs: number | null
+        active_jobs: number | null
+        total_views: number | null
+        total_clicks: number | null
+        latest_job_posted_at: string | null
+      }
+      user_dashboard_result: {
+        submissions:
+          | Database["public"]["CompositeTypes"]["user_dashboard_submission"][]
+          | null
+        companies: Json | null
+        jobs: Json | null
+      }
+      user_dashboard_submission: {
+        id: string | null
+        user_id: string | null
+        content_type: string | null
+        content_slug: string | null
+        content_name: string | null
+        pr_number: string | null
+        pr_url: string | null
+        branch_name: string | null
+        status: string | null
+        submission_data: Json | null
+        rejection_reason: string | null
+        created_at: string | null
+        updated_at: string | null
+        merged_at: string | null
+      }
+      user_identities_identity: {
+        provider: string | null
+        email: string | null
+        created_at: string | null
+        last_sign_in_at: string | null
+      }
+      user_identities_result: {
+        identities:
+          | Database["public"]["CompositeTypes"]["user_identities_identity"][]
+          | null
+      }
+      user_interaction_summary: {
+        total_interactions: number | null
+        views: number | null
+        copies: number | null
+        bookmarks: number | null
+        unique_content_items: number | null
+      }
+      user_library_bookmark: {
+        id: string | null
+        user_id: string | null
+        content_type: string | null
+        content_slug: string | null
+        notes: string | null
+        created_at: string | null
+        updated_at: string | null
+      }
+      user_library_collection: {
+        id: string | null
+        user_id: string | null
+        slug: string | null
+        name: string | null
+        description: string | null
+        is_public: boolean | null
+        item_count: number | null
+        view_count: number | null
+        created_at: string | null
+        updated_at: string | null
+      }
+      user_library_result: {
+        bookmarks:
+          | Database["public"]["CompositeTypes"]["user_library_bookmark"][]
+          | null
+        collections:
+          | Database["public"]["CompositeTypes"]["user_library_collection"][]
+          | null
+        stats: Database["public"]["CompositeTypes"]["user_library_stats"] | null
+      }
+      user_library_stats: {
+        bookmark_count: number | null
+        collection_count: number | null
+        total_collection_items: number | null
+        total_collection_views: number | null
+      }
+      user_profile_collection: {
+        id: string | null
+        slug: string | null
+        name: string | null
+        description: string | null
+        is_public: boolean | null
+        item_count: number | null
+        view_count: number | null
+        created_at: string | null
+      }
+      user_profile_company: {
+        name: string | null
+        logo: string | null
+      }
+      user_profile_contribution: {
+        id: string | null
+        content_type: Database["public"]["Enums"]["content_category"] | null
+        slug: string | null
+        name: string | null
+        description: string | null
+        featured: boolean | null
+        view_count: number | null
+        download_count: number | null
+        created_at: string | null
+      }
+      user_profile_profile: {
+        id: string | null
+        slug: string | null
+        name: string | null
+        image: string | null
+        bio: string | null
+        website: string | null
+        tier: Database["public"]["Enums"]["user_tier"] | null
+        created_at: string | null
+        company:
+          | Database["public"]["CompositeTypes"]["user_profile_company"]
+          | null
+      }
+      user_profile_result: {
+        profile:
+          | Database["public"]["CompositeTypes"]["user_profile_profile"]
+          | null
+        stats: Database["public"]["CompositeTypes"]["user_profile_stats"] | null
+        collections:
+          | Database["public"]["CompositeTypes"]["user_profile_collection"][]
+          | null
+        contributions:
+          | Database["public"]["CompositeTypes"]["user_profile_contribution"][]
+          | null
+        is_following: boolean | null
+        is_owner: boolean | null
+      }
+      user_profile_stats: {
+        follower_count: number | null
+        following_count: number | null
+        collections_count: number | null
+        contributions_count: number | null
+      }
+      user_settings_profile: {
+        display_name: string | null
+        bio: string | null
+        work: string | null
+        website: string | null
+        social_x_link: string | null
+        interests: string[] | null
+        profile_public: boolean | null
+        follow_email: boolean | null
+        created_at: string | null
+      }
+      user_settings_result: {
+        profile:
+          | Database["public"]["CompositeTypes"]["user_settings_profile"]
+          | null
+        user_data:
+          | Database["public"]["CompositeTypes"]["user_settings_user_data"]
+          | null
+      }
+      user_settings_user_data: {
+        slug: string | null
+        name: string | null
+        image: string | null
+        tier: Database["public"]["Enums"]["user_tier"] | null
+      }
     }
   }
 }

@@ -87,21 +87,23 @@ import { STATE_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { logUnhandledPromise } from '@/src/lib/utils/error.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
 import type { Database } from '@/src/types/database.types';
-import type {
-  ContentItem,
-  CopyType,
-  GetGetContentDetailCompleteReturn,
-} from '@/src/types/database-overrides';
+import type { ContentItem, CopyType } from '@/src/types/database-overrides';
 
 /**
  * Determine copy type based on content item structure
  */
 function determineCopyType(
-  item: ContentItem | GetGetContentDetailCompleteReturn['content']
+  item:
+    | ContentItem
+    | (Database['public']['Functions']['get_content_detail_complete']['Returns']['content'] &
+        ContentItem)
 ): CopyType {
+  // Handle Json type - cast to ContentItem for property access
+  const contentItem = item as ContentItem;
+
   // Check if item has content or configuration (indicates code/config copy)
-  if ('content' in item && item.content) return 'code';
-  if ('configuration' in item && item.configuration) return 'code';
+  if ('content' in contentItem && contentItem.content) return 'code';
+  if ('configuration' in contentItem && contentItem.configuration) return 'code';
   // Default to link for other types
   return 'link';
 }
@@ -111,16 +113,26 @@ function determineCopyType(
  * Returns null if no usable content exists (prevents copying empty strings)
  */
 function getContentForCopy(
-  item: ContentItem | GetGetContentDetailCompleteReturn['content']
+  item:
+    | ContentItem
+    | (Database['public']['Functions']['get_content_detail_complete']['Returns']['content'] &
+        ContentItem)
 ): string | null {
+  // Handle Json type - cast to ContentItem for property access
+  const contentItem = item as ContentItem;
+
   // Check for content first
-  if ('content' in item && typeof item.content === 'string' && item.content.trim().length > 0) {
-    return item.content;
+  if (
+    'content' in contentItem &&
+    typeof contentItem.content === 'string' &&
+    contentItem.content.trim().length > 0
+  ) {
+    return contentItem.content;
   }
 
   // Fall back to configuration
-  if ('configuration' in item) {
-    const cfg = item.configuration;
+  if ('configuration' in contentItem) {
+    const cfg = contentItem.configuration;
     if (typeof cfg === 'string' && cfg.trim().length > 0) return cfg;
     if (cfg != null) {
       const jsonStr = JSON.stringify(cfg, null, 2);
@@ -162,7 +174,9 @@ export interface SerializableAction {
 }
 
 export interface DetailHeaderActionsProps {
-  item: ContentItem | GetGetContentDetailCompleteReturn['content'];
+  item:
+    | ContentItem
+    | Database['public']['Functions']['get_content_detail_complete']['Returns']['content'];
   typeName: string;
   category: Database['public']['Enums']['content_category'];
   hasContent: boolean;
@@ -208,12 +222,15 @@ export function DetailHeaderActions({
   const referrer = typeof window !== 'undefined' ? window.location.pathname : undefined;
   const { copy: copyToClipboard } = useCopyToClipboard();
   const { showModal } = usePostCopyEmail();
+  // Cast item to ContentItem for property access (content is Json type)
+  const contentItem = item as ContentItem;
+
   const pulse = usePulse();
   const { copied, copy } = useCopyWithEmailCapture({
     emailContext: {
-      copyType: determineCopyType(item),
+      copyType: determineCopyType(contentItem),
       category,
-      slug: item.slug,
+      slug: contentItem.slug,
       ...(referrer && { referrer }),
     },
     onSuccess: () => {
@@ -239,7 +256,7 @@ export function DetailHeaderActions({
     }
 
     // Default copy logic
-    const contentToCopy = getContentForCopy(item);
+    const contentToCopy = getContentForCopy(contentItem);
 
     // Short-circuit if no content to copy
     if (!contentToCopy) {
@@ -251,9 +268,9 @@ export function DetailHeaderActions({
 
     await copy(contentToCopy);
 
-    pulse.copy({ category, slug: item.slug }).catch((error) => {
+    pulse.copy({ category, slug: contentItem.slug }).catch((error) => {
       logUnhandledPromise('trackInteraction:copy-content', error, {
-        slug: item.slug,
+        slug: contentItem.slug,
         category,
       });
     });
@@ -262,15 +279,15 @@ export function DetailHeaderActions({
   // Check if download is available for this item
   const hasMcpbDownload =
     category === 'mcp' &&
-    'mcpb_storage_url' in item &&
-    item.mcpb_storage_url &&
-    typeof item.mcpb_storage_url === 'string';
+    'mcpb_storage_url' in contentItem &&
+    contentItem.mcpb_storage_url &&
+    typeof contentItem.mcpb_storage_url === 'string';
 
   const hasStorageDownload =
     category === 'skills' &&
-    'storage_url' in item &&
-    item.storage_url &&
-    typeof item.storage_url === 'string';
+    'storage_url' in contentItem &&
+    contentItem.storage_url &&
+    typeof contentItem.storage_url === 'string';
 
   const hasDownloadAvailable = hasMcpbDownload || hasStorageDownload;
 
@@ -280,7 +297,7 @@ export function DetailHeaderActions({
     if (action.type === 'download') {
       // For MCP content, use edge function proxy for .mcpb files (ensures Cloudflare caching)
       if (hasMcpbDownload) {
-        const safeSlug = sanitizePathSegment(item.slug);
+        const safeSlug = sanitizePathSegment(contentItem.slug);
         if (!safeSlug) {
           toasts.raw.error('Invalid content slug', {
             description: 'The download link is not available.',
@@ -300,14 +317,14 @@ export function DetailHeaderActions({
         const downloadUrl = `${supabaseUrl}/functions/v1/data-api/content/mcp/${safeSlug}?format=storage`;
         window.location.href = downloadUrl;
         toasts.raw.success('Download started!', {
-          description: `Downloading ${item.title || item.slug} package...`,
+          description: `Downloading ${contentItem.title || contentItem.slug} package...`,
         });
 
         pulse
-          .download({ category, slug: item.slug, action_type: 'download_mcpb' })
+          .download({ category, slug: contentItem.slug, action_type: 'download_mcpb' })
           .catch((error) => {
             logUnhandledPromise('trackInteraction:download_mcpb', error, {
-              slug: item.slug,
+              slug: contentItem.slug,
               category,
             });
           });
@@ -317,7 +334,7 @@ export function DetailHeaderActions({
       // For Skills content, use direct storage URL
       if (hasStorageDownload) {
         // Validate and sanitize storage URL before redirect
-        const safeStorageUrl = getSafeStorageUrl(item.storage_url as string);
+        const safeStorageUrl = getSafeStorageUrl(contentItem.storage_url as string);
         if (!safeStorageUrl) {
           toasts.raw.error('Invalid download URL', {
             description: 'The download link is not available.',
@@ -326,14 +343,14 @@ export function DetailHeaderActions({
         }
         window.location.href = safeStorageUrl;
         toasts.raw.success('Download started!', {
-          description: `Downloading ${item.title || item.slug} package...`,
+          description: `Downloading ${contentItem.title || contentItem.slug} package...`,
         });
 
         pulse
-          .download({ category, slug: item.slug, action_type: 'download_zip' })
+          .download({ category, slug: contentItem.slug, action_type: 'download_zip' })
           .catch((error) => {
             logUnhandledPromise('trackInteraction:download', error, {
-              slug: item.slug,
+              slug: contentItem.slug,
               category,
             });
           });
@@ -385,9 +402,9 @@ export function DetailHeaderActions({
 
           <h1 className={`mb-4 ${UI_CLASSES.HEADING_H1}`}>{displayTitle}</h1>
 
-          {item.description && (
+          {contentItem.description && (
             <p className={`mb-6 ${UI_CLASSES.TEXT_BODY_LG} text-muted-foreground`}>
-              {item.description}
+              {contentItem.description}
             </p>
           )}
         </div>
@@ -406,7 +423,7 @@ export function DetailHeaderActions({
             <Button
               onClick={() => {
                 if (hasMcpbDownload) {
-                  const safeSlug = sanitizePathSegment(item.slug);
+                  const safeSlug = sanitizePathSegment(contentItem.slug);
                   if (!safeSlug) {
                     toasts.raw.error('Invalid content slug', {
                       description: 'The download link is not available.',
@@ -425,19 +442,19 @@ export function DetailHeaderActions({
                   const downloadUrl = `${supabaseUrl}/functions/v1/data-api/content/mcp/${safeSlug}?format=storage`;
                   window.location.href = downloadUrl;
                   toasts.raw.success('Download started!', {
-                    description: `Downloading ${item.title || item.slug} package...`,
+                    description: `Downloading ${contentItem.title || contentItem.slug} package...`,
                   });
 
                   pulse
-                    .download({ category, slug: item.slug, action_type: 'download_mcpb' })
+                    .download({ category, slug: contentItem.slug, action_type: 'download_mcpb' })
                     .catch((error) => {
                       logUnhandledPromise('trackInteraction:download_mcpb', error, {
-                        slug: item.slug,
+                        slug: contentItem.slug,
                         category,
                       });
                     });
                 } else if (hasStorageDownload) {
-                  const safeStorageUrl = getSafeStorageUrl(item.storage_url as string);
+                  const safeStorageUrl = getSafeStorageUrl(contentItem.storage_url as string);
                   if (!safeStorageUrl) {
                     toasts.raw.error('Invalid download URL', {
                       description: 'The download link is not available.',
@@ -446,14 +463,14 @@ export function DetailHeaderActions({
                   }
                   window.location.href = safeStorageUrl;
                   toasts.raw.success('Download started!', {
-                    description: `Downloading ${item.title || item.slug} package...`,
+                    description: `Downloading ${contentItem.title || contentItem.slug} package...`,
                   });
 
                   pulse
-                    .download({ category, slug: item.slug, action_type: 'download_zip' })
+                    .download({ category, slug: contentItem.slug, action_type: 'download_zip' })
                     .catch((error) => {
                       logUnhandledPromise('trackInteraction:download', error, {
-                        slug: item.slug,
+                        slug: contentItem.slug,
                         category,
                       });
                     });
@@ -490,12 +507,12 @@ export function DetailHeaderActions({
           {/* Copy for AI button */}
           {(() => {
             const safeCategory = sanitizePathSegment(category);
-            const safeSlug = sanitizePathSegment(item.slug);
+            const safeSlug = sanitizePathSegment(contentItem.slug);
             if (!(safeCategory && safeSlug)) {
               // Log warning but don't crash - gracefully skip this button
               logger.warn('DetailHeaderActions: Invalid category or slug for AI copy button', {
                 category,
-                slug: item.slug,
+                slug: contentItem.slug,
               });
               return null;
             }
@@ -511,7 +528,7 @@ export function DetailHeaderActions({
                 trackAnalytics={async () => {
                   await pulse.copy({
                     category,
-                    slug: item.slug,
+                    slug: contentItem.slug,
                     metadata: { action_type: 'llmstxt' },
                   });
                 }}
@@ -525,14 +542,14 @@ export function DetailHeaderActions({
           {/* Copy as Markdown button */}
           {(() => {
             const safeCategory = sanitizePathSegment(category);
-            const safeSlug = sanitizePathSegment(item.slug);
+            const safeSlug = sanitizePathSegment(contentItem.slug);
             if (!(safeCategory && safeSlug)) {
               // Log warning but don't crash - gracefully skip this button
               logger.warn(
                 'DetailHeaderActions: Invalid category or slug for Markdown copy button',
                 {
                   category,
-                  slug: item.slug,
+                  slug: contentItem.slug,
                 }
               );
               return null;
@@ -545,7 +562,7 @@ export function DetailHeaderActions({
                   showModal({
                     copyType: 'markdown',
                     category,
-                    slug: item.slug,
+                    slug: contentItem.slug,
                     ...(referrer && { referrer }),
                   });
                 }}
@@ -555,7 +572,7 @@ export function DetailHeaderActions({
                 trackAnalytics={async () => {
                   await pulse.copy({
                     category,
-                    slug: item.slug,
+                    slug: contentItem.slug,
                     metadata: { action_type: 'copy' },
                   });
                 }}
@@ -569,14 +586,14 @@ export function DetailHeaderActions({
           {/* Download Markdown button */}
           {(() => {
             const safeCategory = sanitizePathSegment(category);
-            const safeSlug = sanitizePathSegment(item.slug);
+            const safeSlug = sanitizePathSegment(contentItem.slug);
             if (!(safeCategory && safeSlug)) {
               // Log warning but don't crash - gracefully skip this button
               logger.warn(
                 'DetailHeaderActions: Invalid category or slug for Markdown download button',
                 {
                   category,
-                  slug: item.slug,
+                  slug: contentItem.slug,
                 }
               );
               return null;
@@ -589,7 +606,7 @@ export function DetailHeaderActions({
                   const url = URL.createObjectURL(blob);
                   const a = document.createElement('a');
                   a.href = url;
-                  a.download = `${item.slug}.md`;
+                  a.download = `${contentItem.slug}.md`;
                   a.click();
                   URL.revokeObjectURL(url);
                 }}
@@ -599,7 +616,7 @@ export function DetailHeaderActions({
                 trackAnalytics={async () => {
                   await pulse.download({
                     category,
-                    slug: item.slug,
+                    slug: contentItem.slug,
                     action_type: 'download_markdown',
                   });
                 }}

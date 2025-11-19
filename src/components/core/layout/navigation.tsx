@@ -29,13 +29,13 @@ import {
   RESPONSIVE_PATTERNS,
   UI_CLASSES,
 } from '@/src/lib/ui-constants';
-import type { GetGetNavigationMenuReturn } from '@/src/types/database-overrides';
+import type { Database } from '@/src/types/database.types';
 
 interface NavigationProps {
   /** Hide Create button when FloatingActionBar is enabled */
   hideCreateButton?: boolean;
   /** Navigation data from server (required) */
-  navigationData: GetGetNavigationMenuReturn;
+  navigationData: Database['public']['Functions']['get_navigation_menu']['Returns'];
 }
 
 const NavigationComponent = ({ hideCreateButton = false, navigationData }: NavigationProps) => {

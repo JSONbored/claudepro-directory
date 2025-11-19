@@ -61,6 +61,14 @@ export default async function CollectionDetailPage({ params }: CollectionPagePro
 
   const { collection, items, bookmarks } = collectionData;
 
+  if (!collection) {
+    logger.warn('CollectionDetailPage: collection is null in response', {
+      slug,
+      userId: user.id,
+    });
+    notFound();
+  }
+
   const shareUrl = collection.is_public
     ? `${APP_CONFIG.url}/u/${user.id}/collections/${collection.slug}`
     : null;

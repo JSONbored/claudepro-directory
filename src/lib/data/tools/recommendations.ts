@@ -2,7 +2,6 @@
 
 import { fetchCachedRpc } from '@/src/lib/data/helpers';
 import type { Database } from '@/src/types/database.types';
-import type { GetGetRecommendationsReturn } from '@/src/types/database-overrides';
 
 export interface RecommendationInput {
   useCase: Database['public']['Enums']['use_case_type'];
@@ -16,7 +15,7 @@ export interface RecommendationInput {
 
 export async function getConfigRecommendations(
   input: RecommendationInput
-): Promise<GetGetRecommendationsReturn | null> {
+): Promise<Database['public']['Functions']['get_recommendations']['Returns'] | null> {
   const {
     useCase,
     experienceLevel,
@@ -27,7 +26,10 @@ export async function getConfigRecommendations(
     viewerId,
   } = input;
 
-  return fetchCachedRpc<'get_recommendations', GetGetRecommendationsReturn | null>(
+  return fetchCachedRpc<
+    'get_recommendations',
+    Database['public']['Functions']['get_recommendations']['Returns'] | null
+  >(
     {
       p_use_case: useCase,
       p_experience_level: experienceLevel,

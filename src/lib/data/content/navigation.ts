@@ -4,23 +4,28 @@
  */
 
 import { fetchCachedRpc } from '@/src/lib/data/helpers';
-import type { GetGetNavigationMenuReturn } from '@/src/types/database-overrides';
+import type { Database } from '@/src/types/database.types';
 
 /**
  * Get navigation menu data via edge-cached RPC
  * Used by command palette and navigation components
  */
-export async function getNavigationMenu(): Promise<GetGetNavigationMenuReturn> {
-  return fetchCachedRpc<'get_navigation_menu', GetGetNavigationMenuReturn>(undefined as never, {
+export async function getNavigationMenu(): Promise<
+  Database['public']['Functions']['get_navigation_menu']['Returns']
+> {
+  return fetchCachedRpc<
+    'get_navigation_menu',
+    Database['public']['Functions']['get_navigation_menu']['Returns']
+  >(undefined as never, {
     rpcName: 'get_navigation_menu',
     tags: ['navigation', 'ui'],
     ttlKey: 'cache.navigation.ttl_seconds',
     keySuffix: 'menu',
     useAuthClient: false,
     fallback: {
-      primary: [],
-      secondary: [],
-      actions: [],
+      primary: null,
+      secondary: null,
+      actions: null,
     },
     logMeta: { namespace: 'navigation' },
   });

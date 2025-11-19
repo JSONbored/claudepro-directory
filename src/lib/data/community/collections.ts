@@ -3,12 +3,11 @@
 import { fetchCachedRpc } from '@/src/lib/data/helpers';
 import { logger } from '@/src/lib/logger';
 import { normalizeError } from '@/src/lib/utils/error.utils';
-import type {
-  CollectionDetailData,
-  GetGetUserCollectionDetailReturn,
-} from '@/src/types/database-overrides';
+import type { Database } from '@/src/types/database.types';
 
-export type { CollectionDetailData };
+// Alias for convenience (using generated type)
+export type CollectionDetailData =
+  Database['public']['Functions']['get_user_collection_detail']['Returns'];
 
 export async function getPublicCollectionDetail(input: {
   userSlug: string;
@@ -20,7 +19,7 @@ export async function getPublicCollectionDetail(input: {
   try {
     const data = await fetchCachedRpc<
       'get_user_collection_detail',
-      GetGetUserCollectionDetailReturn
+      Database['public']['Functions']['get_user_collection_detail']['Returns'] | null
     >(
       {
         p_user_slug: userSlug,

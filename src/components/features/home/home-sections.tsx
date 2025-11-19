@@ -31,7 +31,7 @@ import type {
 } from '@/src/lib/types/component.types';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { logClientWarning, logUnhandledPromise } from '@/src/lib/utils/error.utils';
-import type { Database } from '@/src/types/database.types';
+import type { Database, Tables } from '@/src/types/database.types';
 import type { ContentItem } from '@/src/types/database-overrides';
 
 /**
@@ -206,7 +206,12 @@ function HomePageClientComponent({
     for (const category of featuredCategories) {
       const categoryData = initialData[category as keyof typeof initialData];
       if (categoryData && Array.isArray(categoryData)) {
-        maps[category] = new Set(categoryData.map((item: DisplayableContent) => item.slug));
+        // Cast to DisplayableContent[] since we know the structure from RPC
+        maps[category] = new Set(
+          (categoryData as DisplayableContent[])
+            .map((item) => item.slug)
+            .filter((slug): slug is string => slug !== null && slug !== undefined)
+        );
       }
     }
 
@@ -298,7 +303,7 @@ function HomePageClientComponent({
                           transition={springDefault}
                         >
                           <Icon
-                            className={`${UI_CLASSES.ICON_SM} flex-shrink-0 text-accent`}
+                            className={`${UI_CLASSES.ICON_SM} shrink-0-accent`}
                             aria-hidden="true"
                           />
                           <span className="font-medium text-sm">
@@ -388,9 +393,11 @@ function HomePageClientComponent({
         {/* Featured Content Sections - Render immediately (above the fold) */}
         {!isSearching && (
           <LazyFeaturedSections
-            categories={featuredByCategory || initialData}
+            categories={
+              (featuredByCategory || initialData) as Record<string, readonly DisplayableContent[]>
+            }
             categoryConfigs={categoryConfigs}
-            featuredJobs={featuredJobs}
+            featuredJobs={featuredJobs as ReadonlyArray<Tables<'jobs'>>}
             featuredCategories={featuredCategories}
           />
         )}

@@ -114,7 +114,7 @@ function ContentSearchClientComponent<T extends DisplayableContent>({
             batchSize={30}
             emptyMessage={`No ${title.toLowerCase()} found`}
             ariaLabel="Search results"
-            keyExtractor={(item) => item.slug}
+            keyExtractor={(item) => item.slug ?? ''}
             renderCard={(item) => (
               <ConfigCard
                 item={item}

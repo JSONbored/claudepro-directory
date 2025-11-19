@@ -12,7 +12,19 @@ import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { normalizeError } from '@/src/lib/utils/error.utils';
 import type { Database } from '@/src/types/database.types';
-import type { GetGetRecommendationsReturn } from '@/src/types/database-overrides';
+
+type RecommendationResponse = Database['public']['Functions']['get_recommendations']['Returns'] & {
+  answers: {
+    useCase: Database['public']['Enums']['use_case_type'];
+    experienceLevel: Database['public']['Enums']['experience_level'];
+    toolPreferences: string[];
+    integrations?: Database['public']['Enums']['integration_type'][];
+    focusAreas?: Database['public']['Enums']['focus_area_type'][];
+    teamSize?: string;
+  };
+  id: string;
+  generatedAt: string;
+};
 
 // Type matching QuizAnswers from quiz-form.tsx
 type DecodedQuizAnswers = {
@@ -38,45 +50,13 @@ function decodeQuizAnswers(encoded: string): DecodedQuizAnswers {
   }
 }
 
-function isRecommendationReason(value: unknown): value is { type: string; message: string } {
-  if (typeof value !== 'object' || value === null) {
-    return false;
-  }
-
-  const record = value as Record<string, unknown>;
-  return typeof record['type'] === 'string' && typeof record['message'] === 'string';
-}
-
-function normalizeRecommendationResults(results: GetGetRecommendationsReturn['results']) {
-  return results.map((item) => {
-    const tags =
-      Array.isArray(item.tags) && item.tags.length > 0
-        ? item.tags.filter((tag): tag is string => typeof tag === 'string')
-        : undefined;
-
-    const reasons =
-      Array.isArray(item.reasons) && item.reasons.length > 0
-        ? item.reasons
-            .map((reason) => (isRecommendationReason(reason) ? reason : null))
-            .filter((reason): reason is { type: string; message: string } => Boolean(reason))
-        : undefined;
-
-    return {
-      slug: item.slug,
-      title: item.title,
-      description: item.description ?? '',
-      category: item.category,
-      ...(tags ? { tags } : {}),
-      ...(item.author ? { author: item.author } : {}),
-      ...(typeof item.match_score === 'number' ? { match_score: item.match_score } : {}),
-      ...(typeof item.match_percentage === 'number'
-        ? { match_percentage: item.match_percentage }
-        : {}),
-      ...(item.primary_reason ? { primary_reason: item.primary_reason } : {}),
-      ...(typeof item.rank === 'number' ? { rank: item.rank } : {}),
-      ...(reasons?.length ? { reasons } : {}),
-    };
-  });
+function normalizeRecommendationResults(
+  results: Database['public']['Functions']['get_recommendations']['Returns']['results']
+): Database['public']['CompositeTypes']['recommendation_item'][] {
+  if (!results) return [];
+  return results.filter((item): item is NonNullable<typeof item> =>
+    Boolean(item?.slug && item?.title && item?.category)
+  );
 }
 
 interface PageProps {
@@ -141,17 +121,12 @@ export default async function ResultsPage({ params, searchParams }: PageProps) {
     notFound();
   }
 
-  const recommendations = {
+  const recommendations: RecommendationResponse = {
     ...enrichedResult,
     results: normalizeRecommendationResults(enrichedResult.results),
     answers,
     id: resolvedParams.id,
     generatedAt: new Date().toISOString(),
-    summary: {
-      topCategory: enrichedResult.summary.topCategory ?? '',
-      avgMatchScore: enrichedResult.summary.avgMatchScore,
-      diversityScore: enrichedResult.summary.diversityScore,
-    },
   };
 
   const shareUrl = `${APP_CONFIG.url}/tools/config-recommender/results/${resolvedParams.id}?answers=${resolvedSearchParams.answers}`;
@@ -160,7 +135,7 @@ export default async function ResultsPage({ params, searchParams }: PageProps) {
     resultId: resolvedParams.id,
     useCase: answers.useCase,
     experienceLevel: answers.experienceLevel,
-    resultCount: recommendations.results.length,
+    resultCount: recommendations.results?.length ?? 0,
   });
 
   return (

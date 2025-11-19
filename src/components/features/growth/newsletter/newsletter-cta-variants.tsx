@@ -204,7 +204,7 @@ export function NewsletterCTAVariant(props: NewsletterCTAVariantProps) {
         )}
       >
         <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3} min-w-0 flex-1`}>
-          <Mail className={`${UI_CLASSES.ICON_MD} flex-shrink-0 text-primary`} aria-hidden="true" />
+          <Mail className={`${UI_CLASSES.ICON_MD} shrink-0 text-primary`} aria-hidden="true" />
           <div className="min-w-0 flex-1">
             <p className="truncate font-medium text-sm">{finalHeadline}</p>
             <p className="truncate text-muted-foreground text-xs">{finalDescription}</p>

@@ -7,12 +7,8 @@ import { fetchCachedRpc } from '@/src/lib/data/helpers';
 import { searchUnified } from '@/src/lib/edge/search-client';
 import { logger } from '@/src/lib/logger';
 import { normalizeError } from '@/src/lib/utils/error.utils';
-import type {
-  GetFilterJobsReturn,
-  GetGetJobDetailReturn,
-  GetGetJobsListReturn,
-  Tables,
-} from '@/src/types/database-overrides';
+import type { Database } from '@/src/types/database.types';
+import type { GetFilterJobsReturn, Tables } from '@/src/types/database-overrides';
 
 export interface JobsFilterOptions {
   searchQuery?: string;
@@ -31,15 +27,18 @@ export type JobsFilterResult = GetFilterJobsReturn;
  * Get all active jobs via edge-cached RPC
  */
 export async function getJobs(): Promise<Tables<'jobs'>[]> {
-  const data = await fetchCachedRpc<'get_jobs_list', GetGetJobsListReturn>(undefined as never, {
+  const data = await fetchCachedRpc<
+    'get_jobs_list',
+    Database['public']['Functions']['get_jobs_list']['Returns']
+  >(undefined as never, {
     rpcName: 'get_jobs_list',
     tags: ['jobs'],
     ttlKey: 'cache.jobs.ttl_seconds',
     keySuffix: 'all',
     fallback: [],
   });
-  // Map GetGetJobsListReturn to Tables<'jobs'>
-  // GetGetJobsListReturn is a simplified structure, so we need to map it
+  // Map composite type to Tables<'jobs'>
+  // The composite type is a simplified structure, so we need to map it
   return data.map((item) => ({
     ...item,
     // Add missing fields with defaults
@@ -60,7 +59,10 @@ export async function getJobs(): Promise<Tables<'jobs'>[]> {
  * Get a job by slug via edge-cached RPC
  */
 export async function getJobBySlug(slug: string): Promise<Tables<'jobs'> | undefined> {
-  const data = await fetchCachedRpc<'get_job_detail', GetGetJobDetailReturn>(
+  const data = await fetchCachedRpc<
+    'get_job_detail',
+    Database['public']['Functions']['get_job_detail']['Returns'] | null
+  >(
     { p_slug: slug },
     {
       rpcName: 'get_job_detail',
@@ -74,7 +76,8 @@ export async function getJobBySlug(slug: string): Promise<Tables<'jobs'> | undef
 
   if (!data) return undefined;
 
-  // Map GetGetJobDetailReturn to Tables<'jobs'>
+  // Map job_detail_result composite type to Tables<'jobs'>
+  // The composite type includes all fields from the RPC, but Tables<'jobs'> has additional fields
   return {
     ...data,
     // Add missing fields with defaults

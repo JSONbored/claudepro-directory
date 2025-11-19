@@ -66,7 +66,7 @@ export function NewsletterForm({ source, className }: NewsletterFormProps) {
             />
             <div
               className={cn(
-                'absolute bottom-0 left-0 h-0.5 bg-gradient-to-r from-accent to-primary transition-all duration-300 ease-out',
+                'absolute bottom-0 left-0 h-0.5 bg-linear-to-r from-accent to-primary transition-all duration-300 ease-out',
                 isFocused && !error ? 'w-full opacity-100' : 'w-0 opacity-0'
               )}
             />
@@ -76,8 +76,8 @@ export function NewsletterForm({ source, className }: NewsletterFormProps) {
             disabled={isSubmitting || !email.trim()}
             size="lg"
             className={cn(
-              `${DIMENSIONS.BUTTON_LG} flex-shrink-0 whitespace-nowrap px-8`,
-              'bg-gradient-to-r from-accent via-accent to-primary font-semibold text-accent-foreground',
+              `${DIMENSIONS.BUTTON_LG} shrink-0 whitespace-nowrap px-8`,
+              'bg-linear-to-rrom-accent via-accent to-primary font-semibold text-accent-foreground',
               'shadow-md transition-all duration-200 ease-out',
               'hover:scale-[1.02] hover:from-accent/90 hover:via-accent/90 hover:to-primary/90 hover:shadow-lg',
               'active:scale-[0.98]',

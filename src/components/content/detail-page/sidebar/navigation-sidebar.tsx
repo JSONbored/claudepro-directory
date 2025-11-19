@@ -22,10 +22,7 @@ import { getContentItemUrl, sanitizeSlug } from '@/src/lib/utils/content.utils';
 import { ensureStringArray, getMetadata } from '@/src/lib/utils/data.utils';
 import { logUnhandledPromise } from '@/src/lib/utils/error.utils';
 import type { Database } from '@/src/types/database.types';
-import type {
-  ContentItem,
-  GetGetContentDetailCompleteReturn,
-} from '@/src/types/database-overrides';
+import type { ContentItem } from '@/src/types/database-overrides';
 
 /**
  * Validate slug is safe for use in URLs
@@ -139,8 +136,12 @@ function getSafeDocumentationUrl(url: string | null | undefined): string | null 
  * Props for DetailSidebar
  */
 export interface DetailSidebarProps {
-  item: ContentItem | GetGetContentDetailCompleteReturn['content'];
-  relatedItems: ContentItem[] | GetGetContentDetailCompleteReturn['related'];
+  item:
+    | ContentItem
+    | Database['public']['Functions']['get_content_detail_complete']['Returns']['content'];
+  relatedItems:
+    | ContentItem[]
+    | Database['public']['Functions']['get_content_detail_complete']['Returns']['related'];
   config: {
     typeName: string;
     metadata?:
@@ -153,8 +154,12 @@ export interface DetailSidebarProps {
   };
   customRenderer?:
     | ((
-        item: ContentItem | GetGetContentDetailCompleteReturn['content'],
-        relatedItems: ContentItem[] | GetGetContentDetailCompleteReturn['related'],
+        item:
+          | ContentItem
+          | Database['public']['Functions']['get_content_detail_complete']['Returns']['content'],
+        relatedItems:
+          | ContentItem[]
+          | Database['public']['Functions']['get_content_detail_complete']['Returns']['related'],
         router: ReturnType<typeof useRouter>
       ) => React.ReactNode)
     | undefined;
@@ -177,6 +182,9 @@ export const DetailSidebar = memo(function DetailSidebar({
   const router = useRouter();
   const pulse = usePulse();
 
+  // Cast item to ContentItem for property access (content is Json type from RPC)
+  const contentItem = item as ContentItem;
+
   // Use custom renderer if provided
   if (customRenderer) {
     return <div className="space-y-6">{customRenderer(item, relatedItems, router)}</div>;
@@ -184,14 +192,14 @@ export const DetailSidebar = memo(function DetailSidebar({
 
   // Default sidebar using SidebarCard with inline configuration
   const githubUrl = config.metadata?.githubPathPrefix
-    ? `${SOCIAL_LINK_SNAPSHOT.github}/blob/main/${config.metadata.githubPathPrefix}/${item.slug}.json`
-    : item.category
-      ? `${SOCIAL_LINK_SNAPSHOT.github}/blob/main/content/${item.category}/${item.slug}.json`
+    ? `${SOCIAL_LINK_SNAPSHOT.github}/blob/main/${config.metadata.githubPathPrefix}/${contentItem.slug}.json`
+    : contentItem.category
+      ? `${SOCIAL_LINK_SNAPSHOT.github}/blob/main/content/${contentItem.category}/${contentItem.slug}.json`
       : null;
 
   const showGitHubLink = config.metadata?.showGitHubLink ?? true;
-  const hasDocumentationUrl = 'documentation_url' in item && item.documentation_url;
-  const metadata = getMetadata(item);
+  const hasDocumentationUrl = 'documentation_url' in contentItem && contentItem.documentation_url;
+  const metadata = getMetadata(contentItem);
   const hasConfiguration =
     metadata['configuration'] && typeof metadata['configuration'] === 'object';
   const packageName = metadata['package'] as string | undefined;
@@ -199,7 +207,7 @@ export const DetailSidebar = memo(function DetailSidebar({
   const hasAuth = 'requiresAuth' in metadata;
   const hasPermissions = 'permissions' in metadata;
   const permissions = hasPermissions ? ensureStringArray(metadata['permissions']) : [];
-  const hasSource = 'source' in item && item.source;
+  const hasSource = 'source' in contentItem && contentItem.source;
 
   return (
     <div className="space-y-6">
@@ -217,8 +225,8 @@ export const DetailSidebar = memo(function DetailSidebar({
                 onClick={() => {
                   pulse
                     .click({
-                      category: isValidCategory(item.category) ? item.category : null,
-                      slug: item.slug || null,
+                      category: isValidCategory(contentItem.category) ? contentItem.category : null,
+                      slug: contentItem.slug || null,
                       metadata: {
                         action: 'external_link',
                         link_type: 'github',
@@ -230,8 +238,8 @@ export const DetailSidebar = memo(function DetailSidebar({
                         'NavigationSidebar: GitHub link click pulse failed',
                         error,
                         {
-                          category: item.category,
-                          slug: item.slug,
+                          category: contentItem.category,
+                          slug: contentItem.slug,
                         }
                       );
                     });
@@ -245,16 +253,16 @@ export const DetailSidebar = memo(function DetailSidebar({
               </Button>
             )}
             {hasDocumentationUrl &&
-              'documentation_url' in item &&
-              item.documentation_url &&
+              'documentation_url' in contentItem &&
+              contentItem.documentation_url &&
               (() => {
                 // Validate and sanitize documentation URL before rendering
-                const safeDocUrl = getSafeDocumentationUrl(item.documentation_url as string);
+                const safeDocUrl = getSafeDocumentationUrl(contentItem.documentation_url as string);
                 if (!safeDocUrl) {
                   logger.warn('NavigationSidebar: Invalid documentation URL rejected', {
-                    category: item.category,
-                    slug: item.slug,
-                    url: item.documentation_url,
+                    category: contentItem.category,
+                    slug: contentItem.slug,
+                    url: contentItem.documentation_url,
                   });
                   // Don't render link if URL is invalid or unsafe
                   return null;
@@ -266,8 +274,10 @@ export const DetailSidebar = memo(function DetailSidebar({
                     onClick={() => {
                       pulse
                         .click({
-                          category: isValidCategory(item.category) ? item.category : null,
-                          slug: item.slug || null,
+                          category: isValidCategory(contentItem.category)
+                            ? contentItem.category
+                            : null,
+                          slug: contentItem.slug || null,
                           metadata: {
                             action: 'external_link',
                             link_type: 'documentation',
@@ -279,8 +289,8 @@ export const DetailSidebar = memo(function DetailSidebar({
                             'NavigationSidebar: documentation link click pulse failed',
                             error,
                             {
-                              category: item.category,
-                              slug: item.slug,
+                              category: contentItem.category,
+                              slug: contentItem.slug,
                             }
                           );
                         });
@@ -305,20 +315,20 @@ export const DetailSidebar = memo(function DetailSidebar({
             <CardTitle>{`${config.typeName} Details`}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {item.category && (
+            {contentItem.category && (
               <div>
                 <h4 className={'mb-1 font-medium'}>Category</h4>
                 <UnifiedBadge
                   variant="base"
                   style="default"
                   className={`font-medium text-xs ${
-                    BADGE_COLORS.category[item.category as CategoryType] ||
+                    BADGE_COLORS.category[contentItem.category as CategoryType] ||
                     BADGE_COLORS.category.default
                   }`}
                 >
-                  {item.category === 'mcp'
+                  {contentItem.category === 'mcp'
                     ? 'MCP Server'
-                    : item.category.charAt(0).toUpperCase() + item.category.slice(1)}
+                    : contentItem.category.charAt(0).toUpperCase() + contentItem.category.slice(1)}
                 </UnifiedBadge>
               </div>
             )}
@@ -385,11 +395,11 @@ export const DetailSidebar = memo(function DetailSidebar({
               </div>
             )}
 
-            {hasSource && 'source' in item && item.source && (
+            {hasSource && 'source' in contentItem && contentItem.source && (
               <div>
                 <h4 className={'mb-1 font-medium'}>Source</h4>
                 <UnifiedBadge variant="base" style="outline">
-                  {item.source}
+                  {contentItem.source}
                 </UnifiedBadge>
               </div>
             )}
@@ -398,7 +408,7 @@ export const DetailSidebar = memo(function DetailSidebar({
       )}
 
       {/* Related Items Card */}
-      {relatedItems.length > 0 && (
+      {relatedItems && Array.isArray(relatedItems) && relatedItems.length > 0 && (
         <Card>
           <CardHeader>
             <CardTitle>{`Related ${config.typeName}s`}</CardTitle>

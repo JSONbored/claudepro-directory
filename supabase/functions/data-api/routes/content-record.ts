@@ -1,10 +1,6 @@
 import { SITE_URL } from '../../_shared/clients/supabase.ts';
 import type { Database as DatabaseGenerated } from '../../_shared/database.types.ts';
-import {
-  callRpc,
-  type Database,
-  type GenerateMarkdownExportReturn,
-} from '../../_shared/database-overrides.ts';
+import { callRpc, type Database } from '../../_shared/database-overrides.ts';
 import {
   badRequestResponse,
   buildCacheHeaders,
@@ -94,12 +90,21 @@ async function handleMarkdownFormat(category: string, slug: string, url: URL): P
     return badRequestResponse('Markdown generation failed: RPC returned null', CORS_MARKDOWN);
   }
 
-  // Type assertion to our return type (callRpc returns Json, we know the structure)
-  const result = data as GenerateMarkdownExportReturn;
+  // Use generated type from database.types.ts (returns Json)
+  // Type assertion to the known structure (discriminated union)
+  type MarkdownExportResult =
+    | { success: true; markdown: string; filename: string; length: number; content_id: string }
+    | { success: false; error: string };
+  const result = data as MarkdownExportResult | null;
 
-  // Use type narrowing with discriminated union
+  if (!result || typeof result !== 'object' || !('success' in result)) {
+    return badRequestResponse('Markdown generation failed: invalid response', CORS_MARKDOWN);
+  }
+
   if (!result.success) {
-    return badRequestResponse(result.error, CORS_MARKDOWN);
+    // TypeScript narrows to failure case
+    const errorResult = result as { success: false; error: string };
+    return badRequestResponse(errorResult.error, CORS_MARKDOWN);
   }
 
   // TypeScript narrows to success case - all fields are properly typed

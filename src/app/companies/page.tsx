@@ -202,24 +202,24 @@ export default async function CompaniesPage() {
                   )}
 
                   {/* Job Statistics from RPC/data layer (getCompanyProfile RPC) */}
-                  {company.stats && company.stats.active_jobs > 0 && (
+                  {company.stats && (company.stats.active_jobs ?? 0) > 0 && (
                     <div className={'mb-4 flex flex-wrap gap-2'}>
                       <UnifiedBadge variant="base" style="secondary" className="text-xs">
                         <Briefcase className="mr-1 h-3 w-3" />
-                        {company.stats.active_jobs} Active{' '}
-                        {company.stats.active_jobs === 1 ? 'Job' : 'Jobs'}
+                        {company.stats.active_jobs ?? 0} Active{' '}
+                        {(company.stats.active_jobs ?? 0) === 1 ? 'Job' : 'Jobs'}
                       </UnifiedBadge>
 
-                      {company.stats.total_views > 0 && (
+                      {(company.stats.total_views ?? 0) > 0 && (
                         <UnifiedBadge variant="base" style="outline" className="text-xs">
                           <TrendingUp className="mr-1 h-3 w-3" />
-                          {company.stats.total_views.toLocaleString()} views
+                          {(company.stats.total_views ?? 0).toLocaleString()} views
                         </UnifiedBadge>
                       )}
 
-                      {company.stats.remote_jobs > 0 && (
+                      {(company.stats.remote_jobs ?? 0) > 0 && (
                         <UnifiedBadge variant="base" style="outline" className="text-xs">
-                          {company.stats.remote_jobs} Remote
+                          {company.stats.remote_jobs ?? 0} Remote
                         </UnifiedBadge>
                       )}
                     </div>

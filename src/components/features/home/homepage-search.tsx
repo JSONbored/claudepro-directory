@@ -51,7 +51,7 @@ const SearchSectionComponent: FC<SearchSectionProps> = ({
           batchSize={30}
           emptyMessage="No results found"
           ariaLabel="Search results"
-          keyExtractor={(item) => item.slug}
+          keyExtractor={(item) => item.slug ?? ''}
           renderCard={(item) => (
             <ConfigCard
               item={item}

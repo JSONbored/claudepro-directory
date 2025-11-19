@@ -5,7 +5,7 @@
 
 import { fetchCachedRpc } from '@/src/lib/data/helpers';
 import { generateContentCacheKey, generateContentTags } from '@/src/lib/data/helpers-utils';
-import type { GetGetRelatedContentReturn } from '@/src/types/database-overrides';
+import type { Database } from '@/src/types/database.types';
 
 export interface RelatedContentInput {
   currentPath: string;
@@ -18,7 +18,7 @@ export interface RelatedContentInput {
 }
 
 export interface RelatedContentResult {
-  items: GetGetRelatedContentReturn; // Return RPC result directly with scoring fields
+  items: Database['public']['Functions']['get_related_content']['Returns'];
 }
 
 /**
@@ -27,7 +27,10 @@ export interface RelatedContentResult {
 export async function getRelatedContent(input: RelatedContentInput): Promise<RelatedContentResult> {
   const currentSlug = input.currentPath.split('/').pop() || '';
 
-  const data = await fetchCachedRpc<'get_related_content', GetGetRelatedContentReturn>(
+  const data = await fetchCachedRpc<
+    'get_related_content',
+    Database['public']['Functions']['get_related_content']['Returns']
+  >(
     {
       p_category: input.currentCategory,
       p_slug: currentSlug,
@@ -46,10 +49,8 @@ export async function getRelatedContent(input: RelatedContentInput): Promise<Rel
     }
   );
 
-  // Filter out invalid items
-  const validItems = data.filter((item: GetGetRelatedContentReturn[number]) =>
-    Boolean(item.title && item.slug && item.category)
-  );
+  // Filter out invalid items (handle nullable fields from composite type)
+  const validItems = data.filter((item) => Boolean(item.title && item.slug && item.category));
 
   return {
     items: validItems,

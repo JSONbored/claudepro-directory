@@ -14,10 +14,10 @@ import { Sparkles } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { getContentItemUrl } from '@/src/lib/utils/content.utils';
-import type { ContentItem, GetGetRelatedContentReturn } from '@/src/types/database-overrides';
+import type { Database } from '@/src/types/database.types';
 
-type RelatedContentItem = ContentItem & {
-  score?: number;
+// Use the generated composite type directly
+type RelatedContentItemWithUI = Database['public']['CompositeTypes']['related_content_item'] & {
   matchType?: string;
   matchDetails?: {
     matchedTags: string[];
@@ -85,7 +85,7 @@ export function RelatedContentClient({
   title = 'Related Content',
   showTitle = true,
 }: SmartRelatedContentProps) {
-  const [items, setItems] = useState<RelatedContentItem[]>([]);
+  const [items, setItems] = useState<RelatedContentItemWithUI[]>([]);
   const [loading, setLoading] = useState(true);
   const pathname: string =
     providedPathname ?? (typeof window !== 'undefined' ? window.location.pathname : '/');
@@ -103,23 +103,31 @@ export function RelatedContentClient({
           limit,
         });
 
-        const convertedItems = (response.items || []).map(
-          (item: GetGetRelatedContentReturn[number]): Partial<RelatedContentItem> => ({
-            category: item.category,
-            slug: item.slug,
-            title: item.title,
-            description: item.description,
-            author: item.author,
-            date_added: item.date_added,
-            tags: item.tags,
-            score: item.score,
-            matchType: item.match_type,
-            matchDetails: {
-              matchedTags: item.matched_tags || [],
+        const convertedItems: RelatedContentItemWithUI[] = (response.items || [])
+          .filter((item) => Boolean(item.category && item.slug && item.title))
+          .map((item): RelatedContentItemWithUI => {
+            const result: RelatedContentItemWithUI = {
+              category: item.category,
+              slug: item.slug,
+              title: item.title,
+              description: item.description,
+              author: item.author,
+              date_added: item.date_added,
+              tags: item.tags,
+              score: item.score,
+              match_type: item.match_type,
+              views: item.views,
+              matched_tags: item.matched_tags,
+            };
+            if (item.match_type !== null && item.match_type !== undefined) {
+              result.matchType = item.match_type;
+            }
+            result.matchDetails = {
+              matchedTags: item.matched_tags ?? [],
               matchedKeywords: [],
-            },
-          })
-        ) as RelatedContentItem[];
+            };
+            return result;
+          });
 
         setItems(convertedItems);
       } catch (error) {
@@ -151,10 +159,10 @@ export function RelatedContentClient({
       aria-label="Related content"
     >
       {showTitle && (
-        <div className="mb-8 rounded-xl border border-primary/20 bg-gradient-to-r from-primary/5 to-primary/10 p-4 sm:p-6">
+        <div className="mb-8 rounded-xl border border-primary/20 bg-linear-to-r from-primary/5 to-primary/10 p-4 sm:p-6">
           <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
             <div className="flex items-center gap-3 sm:gap-4">
-              <div className="flex-shrink-0 rounded-lg bg-primary/10 p-2">
+              <div className="shrink-0 rounded-lg bg-primary/10 p-2">
                 <Sparkles className={`${UI_CLASSES.ICON_MD} text-primary sm:h-6 sm:w-6`} />
               </div>
               <div className="min-w-0">
@@ -169,7 +177,7 @@ export function RelatedContentClient({
             <UnifiedBadge
               variant="base"
               style="secondary"
-              className="flex-shrink-0 border-primary/30 bg-primary/10 px-2 py-1 font-medium text-primary text-xs sm:px-3 sm:text-sm"
+              className="shrink-0imary/30 bg-primary/10 px-2 py-1 font-medium text-primary text-xs sm:px-3 sm:text-sm"
             >
               AI Powered
             </UnifiedBadge>
@@ -178,25 +186,27 @@ export function RelatedContentClient({
       )}
 
       <UnifiedCardGrid
-        items={items as readonly ContentItem[]}
+        items={items}
         variant="tight"
         loading={loading}
         emptyMessage="No related content available"
         loadingMessage="Finding related content..."
         renderCard={(item) => {
-          const relatedItem = item as RelatedContentItem;
+          const relatedItem = item as RelatedContentItemWithUI;
           const matchBadge = getMatchTypeBadge(relatedItem.matchType ?? 'unknown');
-          const categoryBadge = getCategoryBadgeClass(relatedItem.category);
+          const categoryBadge = getCategoryBadgeClass(relatedItem.category ?? 'unknown');
 
           return (
             <BaseCard
               key={`${relatedItem.category}-${relatedItem.slug}`}
               targetPath={getContentItemUrl({
-                category: isValidCategory(relatedItem.category) ? relatedItem.category : 'agents',
-                slug: relatedItem.slug,
+                category: isValidCategory(relatedItem.category ?? 'agents')
+                  ? (relatedItem.category ?? 'agents')
+                  : 'agents',
+                slug: relatedItem.slug ?? '',
               })}
-              displayTitle={relatedItem.title ?? relatedItem.slug}
-              description={relatedItem.description}
+              displayTitle={relatedItem.title ?? relatedItem.slug ?? ''}
+              description={relatedItem.description ?? undefined}
               tags={relatedItem.matchDetails?.matchedTags?.slice(0, 2) ?? []}
               topAccent={true}
               compactMode={true}
@@ -204,17 +214,17 @@ export function RelatedContentClient({
               renderTopBadges={() => (
                 <div className="flex w-full items-center justify-between gap-2">
                   <UnifiedBadge
-                    className={`${categoryBadge} flex-shrink-0 border px-2 py-1 font-medium text-xs sm:px-3 sm:text-sm`}
+                    className={`${categoryBadge} shrink-0 border px-2 py-1 font-medium text-xs sm:px-3 sm:text-sm`}
                     variant="base"
                     style="secondary"
                   >
-                    {relatedItem.category}
+                    {relatedItem.category ?? 'unknown'}
                   </UnifiedBadge>
                   <div title={matchBadge.label === 'Keyword' ? 'Keyword Match' : matchBadge.label}>
                     <UnifiedBadge
                       variant="base"
                       style={matchBadge.variant}
-                      className="flex-shrink-0 border px-1.5 py-1 font-medium text-2xs sm:px-2 sm:text-xs"
+                      className="shrink-0 border px-1.5 py-1 font-medium text-2xs sm:px-2 sm:text-xs"
                     >
                       {matchBadge.label}
                     </UnifiedBadge>

@@ -53,7 +53,8 @@
 		"get_recent_content",
 		"get_company_profile",
 		"get_content_paginated_slim",
-		"get_api_health"
+		"get_api_health",
+		"get_category_configs_with_features"
 	],
 	"enums": [
 		"newsletter_source",
@@ -84,6 +85,20 @@
 		"focus_area_type",
 		"announcement_priority",
 		"announcement_variant",
-		"confetti_variant"
+		"confetti_variant",
+		"job_category",
+		"job_plan",
+		"job_tier",
+		"job_type"
+	],
+	"compositeTypes": [
+		"company_profile_result",
+		"company_profile_job_item",
+		"company_profile_stats",
+		"category_config_with_features",
+		"category_config_features",
+		"content_paginated_slim_result",
+		"content_paginated_slim_item",
+		"content_paginated_pagination"
 	]
 }

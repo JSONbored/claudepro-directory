@@ -678,7 +678,12 @@ export const fetchPaginatedContent = rateLimitedAction
         offset: parsedInput.offset,
       });
 
-      return (data?.items ?? []) as DisplayableContent[];
+      // get_content_paginated_slim returns content_paginated_slim_result composite type
+      if (!data?.items) {
+        return [];
+      }
+      // Return items directly - they are already properly typed as content_paginated_slim_item[]
+      return data.items as DisplayableContent[];
     } catch {
       // Fallback to empty array on error (safe-action middleware handles logging)
       return [];

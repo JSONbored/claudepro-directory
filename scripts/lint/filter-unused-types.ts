@@ -25,7 +25,7 @@ const INCLUDE_PATTERNS = [
   // Unused RPC return types
   /GetGet.*Return$/,
   // Unused type aliases
-  /(ContentItem|FullContentItem|EnrichedContentItem)$/,
+  /(ContentItem|FullContentItem)$/,
   // Unused type values
   /_VALUES$/,
 ];
@@ -66,9 +66,7 @@ function filterUnusedTypes() {
     // Group by category
     const typeGuards = filtered.filter((l) => /is[A-Z]\w+$/.test(l));
     const rpcReturns = filtered.filter((l) => /GetGet.*Return$/.test(l));
-    const typeAliases = filtered.filter((l) =>
-      /(ContentItem|FullContentItem|EnrichedContentItem)$/.test(l)
-    );
+    const typeAliases = filtered.filter((l) => /(ContentItem|FullContentItem)$/.test(l));
     const typeValues = filtered.filter((l) => /_VALUES$/.test(l));
 
     console.log('📊 Summary:');

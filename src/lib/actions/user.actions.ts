@@ -20,11 +20,6 @@ import {
 import { fetchCachedRpc } from '@/src/lib/data/helpers';
 import { revalidateCacheTags } from '@/src/lib/supabase/cache-helpers';
 import type { Database, Tables } from '@/src/types/database.types';
-import type {
-  GetGetUserActivitySummaryReturn,
-  GetGetUserActivityTimelineReturn,
-  GetGetUserIdentitiesReturn,
-} from '@/src/types/database-overrides';
 
 const CONTENT_CATEGORY_VALUES = [
   'agents',
@@ -41,45 +36,20 @@ const CONTENT_CATEGORY_VALUES = [
 ] as const satisfies readonly Database['public']['Enums']['content_category'][];
 
 // Activity filter schema (query parameters - NOT stored data, validation is useful here)
+// Note: Only 'submission' type is supported (posts/comments/votes features not implemented)
 const activityFilterSchema = z.object({
-  type: z.enum(['post', 'comment', 'vote', 'submission']).optional(),
+  type: z.enum(['submission']).optional(),
   limit: z.number().int().min(1).max(100).default(50),
   offset: z.number().int().min(0).default(0),
 });
 
 // Activity types (database validates structure via RPC function)
-type BaseActivity = {
+// Note: Only submissions exist - posts/comments/votes tables don't exist
+type SubmissionActivity = {
   id: string;
-  type: 'post' | 'comment' | 'vote' | 'submission';
+  type: 'submission';
   created_at: string;
   user_id: string;
-};
-
-type PostActivity = BaseActivity & {
-  type: 'post';
-  title: string;
-  body: string;
-  content_type: string;
-  content_slug: string;
-  updated_at: string;
-};
-
-type CommentActivity = BaseActivity & {
-  type: 'comment';
-  body: string;
-  post_id: string;
-  parent_id: string | null;
-  updated_at: string;
-};
-
-type VoteActivity = BaseActivity & {
-  type: 'vote';
-  vote_type: 'upvote' | 'downvote';
-  post_id: string;
-};
-
-type SubmissionActivity = BaseActivity & {
-  type: 'submission';
   title: string;
   description: string | null;
   content_type: string;
@@ -88,7 +58,7 @@ type SubmissionActivity = BaseActivity & {
   updated_at: string;
 };
 
-export type Activity = PostActivity | CommentActivity | VoteActivity | SubmissionActivity;
+export type Activity = SubmissionActivity;
 
 type UserSurface = 'account' | 'library' | 'settings';
 
@@ -601,7 +571,10 @@ export const getActivitySummary = authedAction
   .metadata({ actionName: 'getActivitySummary', category: 'user' })
   .inputSchema(z.void())
   .action(async ({ ctx }) => {
-    const data = await cachedUserData<'get_user_activity_summary', GetGetUserActivitySummaryReturn>(
+    const data = await cachedUserData<
+      'get_user_activity_summary',
+      Database['public']['Functions']['get_user_activity_summary']['Returns']
+    >(
       'get_user_activity_summary',
       {
         p_user_id: ctx.userId,
@@ -631,7 +604,7 @@ export const getActivityTimeline = authedAction
   .action(async ({ parsedInput: { type, limit = 20, offset = 0 }, ctx }) => {
     const data = await cachedUserData<
       'get_user_activity_timeline',
-      GetGetUserActivityTimelineReturn
+      Database['public']['Functions']['get_user_activity_timeline']['Returns']
     >(
       'get_user_activity_timeline',
       {
@@ -648,7 +621,7 @@ export const getActivityTimeline = authedAction
       },
       {
         activities: [],
-        hasMore: false,
+        has_more: false,
         total: 0,
       }
     );
@@ -660,7 +633,10 @@ export const getUserIdentities = authedAction
   .metadata({ actionName: 'getUserIdentities', category: 'user' })
   .inputSchema(z.void())
   .action(async ({ ctx }) => {
-    const data = await cachedUserData<'get_user_identities', GetGetUserIdentitiesReturn>(
+    const data = await cachedUserData<
+      'get_user_identities',
+      Database['public']['Functions']['get_user_identities']['Returns']
+    >(
       'get_user_identities',
       {
         p_user_id: ctx.userId,

@@ -20,7 +20,6 @@ import type {
 } from '@/src/lib/types/component.types';
 import { SUBMISSION_CONTENT_TYPES } from '@/src/lib/types/component.types';
 import type { Database } from '@/src/types/database.types';
-import type { GetGetFormFieldsForContentTypeReturn } from '@/src/types/database-overrides';
 
 const FIELD_SCOPE_VALUES = [
   'common',
@@ -47,8 +46,8 @@ const ICON_POSITION_VALUES = [
   'right',
 ] as const satisfies readonly Database['public']['Enums']['icon_position'][];
 
-type RpcRow = GetGetFormFieldsForContentTypeReturn[number];
-type RpcRows = GetGetFormFieldsForContentTypeReturn;
+type RpcRow =
+  Database['public']['Functions']['get_form_fields_for_content_type']['Returns'][number];
 
 type FieldProperties = Record<string, unknown>;
 
@@ -200,7 +199,10 @@ function emptySection(): SubmissionFormSection {
 async function fetchFieldsForContentType(
   contentType: SubmissionContentType
 ): Promise<SubmissionFormSection> {
-  const data = await fetchCachedRpc<'get_form_fields_for_content_type', RpcRows | null>(
+  const data = await fetchCachedRpc<
+    'get_form_fields_for_content_type',
+    Database['public']['Functions']['get_form_fields_for_content_type']['Returns'] | null
+  >(
     { p_content_type: contentType },
     {
       rpcName: 'get_form_fields_for_content_type',

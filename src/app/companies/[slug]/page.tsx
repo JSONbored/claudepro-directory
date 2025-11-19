@@ -218,9 +218,65 @@ export default async function CompanyPage({ params }: CompanyPageProps) {
                 </Card>
               ) : (
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                  {active_jobs.map((job) => (
-                    <JobCard key={job.id} job={job} />
-                  ))}
+                  {(active_jobs ?? [])
+                    .filter(
+                      (
+                        job
+                      ): job is typeof job & {
+                        id: string;
+                        slug: string;
+                        title: string;
+                        company: string;
+                        workplace: NonNullable<typeof job.workplace>;
+                        experience: NonNullable<typeof job.experience>;
+                        plan: NonNullable<typeof job.plan>;
+                        posted_at: string;
+                        expires_at: string;
+                        view_count: number;
+                        click_count: number;
+                      } =>
+                        Boolean(
+                          job.id &&
+                            job.slug &&
+                            job.title &&
+                            job.company &&
+                            job.workplace &&
+                            job.experience &&
+                            job.plan &&
+                            job.posted_at &&
+                            job.expires_at &&
+                            job.view_count != null &&
+                            job.click_count != null
+                        )
+                    )
+                    .map((job) => (
+                      <JobCard
+                        key={job.id}
+                        job={{
+                          id: job.id,
+                          slug: job.slug,
+                          title: job.title,
+                          company: job.company,
+                          company_logo: job.company_logo,
+                          location: job.location,
+                          description: job.description,
+                          salary: job.salary,
+                          remote: job.remote ?? false,
+                          type: job.type,
+                          workplace: job.workplace,
+                          experience: job.experience,
+                          category: job.category,
+                          tags: job.tags ?? [],
+                          plan: job.plan,
+                          tier: job.tier,
+                          posted_at: job.posted_at,
+                          expires_at: job.expires_at,
+                          view_count: job.view_count,
+                          click_count: job.click_count,
+                          link: job.link,
+                        }}
+                      />
+                    ))}
                 </div>
               )}
             </div>
@@ -243,10 +299,10 @@ export default async function CompanyPage({ params }: CompanyPageProps) {
                     <span className="font-semibold text-green-600">{stats?.active_jobs ?? 0}</span>
                   </div>
 
-                  {stats?.remote_jobs && stats.remote_jobs > 0 && (
+                  {stats && (stats.remote_jobs ?? 0) > 0 && (
                     <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
                       <span className={UI_CLASSES.TEXT_SM_MUTED}>Remote Positions</span>
-                      <span className="font-semibold">{stats.remote_jobs}</span>
+                      <span className="font-semibold">{stats.remote_jobs ?? 0}</span>
                     </div>
                   )}
 
@@ -254,7 +310,10 @@ export default async function CompanyPage({ params }: CompanyPageProps) {
                     <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
                       <span className={UI_CLASSES.TEXT_SM_MUTED}>Avg. Salary</span>
                       <span className="font-semibold">
-                        ${(stats.avg_salary_min / 1000).toFixed(0)}k+
+                        $
+                        {stats.avg_salary_min
+                          ? `${(stats.avg_salary_min / 1000).toFixed(0)}k+`
+                          : 'N/A'}
                       </span>
                     </div>
                   )}
@@ -270,11 +329,12 @@ export default async function CompanyPage({ params }: CompanyPageProps) {
                     <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
                       <span className={UI_CLASSES.TEXT_SM_MUTED}>Latest Posting</span>
                       <span className="font-semibold text-sm">
-                        {new Date(stats.latest_job_posted_at).toLocaleDateString('en-US', {
-                          month: 'short',
-                          day: 'numeric',
-                          year: 'numeric',
-                        })}
+                        {stats.latest_job_posted_at &&
+                          new Date(stats.latest_job_posted_at).toLocaleDateString('en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                            year: 'numeric',
+                          })}
                       </span>
                     </div>
                   )}

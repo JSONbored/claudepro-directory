@@ -3,7 +3,6 @@
 import { fetchCachedRpc } from '@/src/lib/data/helpers';
 import { generateContentCacheKey } from '@/src/lib/data/helpers-utils';
 import type { Database } from '@/src/types/database.types';
-import type { GetGetReviewsWithStatsReturn } from '@/src/types/database-overrides';
 
 interface ReviewsWithStatsParams {
   contentType: Database['public']['Enums']['content_category'];
@@ -16,10 +15,13 @@ interface ReviewsWithStatsParams {
 
 export async function getReviewsWithStatsData(
   params: ReviewsWithStatsParams
-): Promise<GetGetReviewsWithStatsReturn | null> {
+): Promise<Database['public']['Functions']['get_reviews_with_stats']['Returns'] | null> {
   const { contentType, contentSlug, sortBy, limit, offset, userId } = params;
 
-  return fetchCachedRpc<'get_reviews_with_stats', GetGetReviewsWithStatsReturn | null>(
+  return fetchCachedRpc<
+    'get_reviews_with_stats',
+    Database['public']['Functions']['get_reviews_with_stats']['Returns'] | null
+  >(
     {
       p_content_type: contentType,
       p_content_slug: contentSlug,

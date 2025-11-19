@@ -34,6 +34,7 @@ import { getLayoutData } from '@/src/lib/data/layout/data';
 // Even though getLayoutFlags has build-time checks, Next.js's static analyzer might
 // still traverse the import chain and see flags/next imports
 import { getHomeMetadata } from '@/src/lib/data/seo/homepage';
+import type { Database } from '@/src/types/database.types';
 
 // Self-hosted fonts - no external requests, faster FCP, GDPR compliant
 const inter = localFont({
@@ -133,35 +134,13 @@ export async function generateMetadata(): Promise<Metadata> {
 
 const DEFAULT_LAYOUT_DATA: {
   announcement: null;
-  navigationData: {
-    primary: Array<{
-      path: string;
-      title: string;
-      description: string | null;
-      iconName: string | null;
-      group: 'primary';
-    }>;
-    secondary: Array<{
-      path: string;
-      title: string;
-      description: string | null;
-      iconName: string | null;
-      group: 'secondary';
-    }>;
-    actions: Array<{
-      path: string;
-      title: string;
-      description: string | null;
-      iconName: string | null;
-      group: 'actions';
-    }>;
-  };
+  navigationData: Database['public']['Functions']['get_navigation_menu']['Returns'];
 } = {
   announcement: null,
   navigationData: {
-    primary: [],
-    secondary: [],
-    actions: [],
+    primary: null,
+    secondary: null,
+    actions: null,
   },
 };
 

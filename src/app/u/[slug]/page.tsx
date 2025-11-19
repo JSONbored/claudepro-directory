@@ -25,7 +25,6 @@ import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { sanitizeSlug } from '@/src/lib/utils/content.utils';
 import { normalizeError } from '@/src/lib/utils/error.utils';
 import type { Database } from '@/src/types/database.types';
-import type { GetGetUserProfileReturn } from '@/src/types/database-overrides';
 
 const CONTENT_CATEGORY_VALUES = [
   'agents',
@@ -155,7 +154,7 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
     context: 'UserProfilePage',
   });
 
-  let profileData: GetGetUserProfileReturn | null = null;
+  let profileData: Database['public']['Functions']['get_user_profile']['Returns'] | null = null;
   try {
     profileData = await getPublicUserProfile({
       slug,
@@ -176,9 +175,9 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
   }
 
   // Type-safe RPC return using centralized type definition
-  const { profile, stats, collections, contributions, isFollowing } = profileData;
+  const { profile, stats, collections, contributions, is_following } = profileData;
 
-  const { followerCount, followingCount } = stats;
+  const { follower_count, following_count } = stats ?? {};
 
   return (
     <div className={'min-h-screen bg-background'}>
@@ -187,10 +186,10 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
         <div className={'container mx-auto px-4'}>
           <div className="flex items-start justify-between pt-12">
             <div className="flex items-start gap-4">
-              {profile.image ? (
+              {profile?.image ? (
                 <Image
                   src={profile.image}
-                  alt={`${sanitizeDisplayText(profile.name, slug)}'s profile picture`}
+                  alt={`${sanitizeDisplayText(profile?.name ?? slug, slug)}'s profile picture`}
                   width={96}
                   height={96}
                   className="h-24 w-24 rounded-full border-4 border-background object-cover"
@@ -198,14 +197,16 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                 />
               ) : (
                 <div className="flex h-24 w-24 items-center justify-center rounded-full border-4 border-background bg-accent font-bold text-2xl">
-                  {(profile.name || slug).charAt(0).toUpperCase()}
+                  {(profile?.name ?? slug).charAt(0).toUpperCase()}
                 </div>
               )}
 
               <div className="mt-4">
-                <h1 className="font-bold text-3xl">{sanitizeDisplayText(profile.name, slug)}</h1>
+                <h1 className="font-bold text-3xl">
+                  {sanitizeDisplayText(profile?.name ?? slug, slug)}
+                </h1>
                 {(() => {
-                  const sanitizedBio = profile.bio ? sanitizeDisplayText(profile.bio, '') : '';
+                  const sanitizedBio = profile?.bio ? sanitizeDisplayText(profile.bio, '') : '';
                   return sanitizedBio ? (
                     <p className={'mt-2 max-w-2xl text-sm'}>{sanitizedBio}</p>
                   ) : null;
@@ -214,12 +215,12 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                 <div className={'mt-3 flex items-center gap-4 text-sm'}>
                   <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
                     <Users className="h-4 w-4" />
-                    {followerCount || 0} followers
+                    {follower_count ?? 0} followers
                   </div>
                   <span>•</span>
-                  <div>{followingCount || 0} following</div>
+                  <div>{following_count ?? 0} following</div>
 
-                  {profile.website && (
+                  {profile?.website && (
                     <>
                       <span>•</span>
                       <NavLink
@@ -236,11 +237,11 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
               </div>
             </div>
 
-            {currentUser && currentUser.id !== profile.id && profile.slug && (
+            {currentUser && currentUser.id !== profile?.id && profile?.id && profile?.slug && (
               <FollowButton
                 userId={profile.id}
                 userSlug={profile.slug}
-                initialIsFollowing={isFollowing}
+                initialIsFollowing={is_following ?? false}
               />
             )}
           </div>
@@ -261,22 +262,24 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                 <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
                   <span className={UI_CLASSES.TEXT_SM_MUTED}>Contributions</span>
                   <UnifiedBadge variant="base" style="secondary">
-                    {contributions?.length || 0}
+                    {contributions?.length ?? 0}
                   </UnifiedBadge>
                 </div>
                 <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
                   <span className={UI_CLASSES.TEXT_SM_MUTED}>Collections</span>
                   <UnifiedBadge variant="base" style="secondary">
-                    {collections?.length || 0}
+                    {collections?.length ?? 0}
                   </UnifiedBadge>
                 </div>
                 <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
                   <span className={UI_CLASSES.TEXT_SM_MUTED}>Member since</span>
                   <span className="text-sm">
-                    {new Date(profile.created_at).toLocaleDateString('en-US', {
-                      month: 'short',
-                      year: 'numeric',
-                    })}
+                    {profile?.created_at
+                      ? new Date(profile.created_at).toLocaleDateString('en-US', {
+                          month: 'short',
+                          year: 'numeric',
+                        })
+                      : 'N/A'}
                   </span>
                 </div>
               </CardContent>
@@ -289,7 +292,7 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
             <div>
               <h2 className="mb-4 font-bold text-2xl">Public Collections</h2>
 
-              {!collections || collections.length === 0 ? (
+              {!collections || (collections.length ?? 0) === 0 ? (
                 <Card>
                   <CardContent className={'flex flex-col items-center py-12'}>
                     <FolderOpen className="mb-4 h-12 w-12 text-muted-foreground" />
@@ -298,99 +301,129 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                 </Card>
               ) : (
                 <div className="grid gap-4 sm:grid-cols-2">
-                  {collections.map((collection) => {
-                    const safeCollectionUrl = getSafeCollectionUrl(slug, collection.slug);
-                    if (!safeCollectionUrl) {
-                      logger.warn('UserProfilePage: skipping collection with invalid slug', {
-                        collectionId: collection.id,
-                        collectionName: collection.name,
-                        collectionSlug: collection.slug,
-                        userSlug: slug,
-                      });
-                      return null;
-                    }
-                    return (
-                      <Card key={collection.id} className={UI_CLASSES.CARD_INTERACTIVE}>
-                        <NavLink href={safeCollectionUrl}>
-                          <CardHeader>
-                            <CardTitle className="text-lg">{collection.name}</CardTitle>
-                            {collection.description && (
-                              <CardDescription className="line-clamp-2">
-                                {collection.description}
-                              </CardDescription>
-                            )}
-                          </CardHeader>
-                          <CardContent>
-                            <div
-                              className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} text-sm`}
-                            >
-                              <span className="text-muted-foreground">
-                                {collection.item_count}{' '}
-                                {collection.item_count === 1 ? 'item' : 'items'}
-                              </span>
-                              <span className="text-muted-foreground">
-                                {collection.view_count} views
-                              </span>
-                            </div>
-                          </CardContent>
-                        </NavLink>
-                      </Card>
-                    );
-                  })}
+                  {collections
+                    ?.filter(
+                      (
+                        collection
+                      ): collection is NonNullable<typeof collection> & {
+                        id: string;
+                        slug: string;
+                        name: string | null;
+                      } =>
+                        collection !== null &&
+                        collection.id !== null &&
+                        collection.slug !== null &&
+                        collection.name !== null
+                    )
+                    .map((collection) => {
+                      const safeCollectionUrl = getSafeCollectionUrl(slug, collection.slug);
+                      if (!safeCollectionUrl) {
+                        logger.warn('UserProfilePage: skipping collection with invalid slug', {
+                          collectionId: collection.id,
+                          collectionName: collection.name ?? 'Unknown',
+                          collectionSlug: collection.slug ?? 'Unknown',
+                          userSlug: slug,
+                        });
+                        return null;
+                      }
+                      return (
+                        <Card key={collection.id} className={UI_CLASSES.CARD_INTERACTIVE}>
+                          <NavLink href={safeCollectionUrl}>
+                            <CardHeader>
+                              <CardTitle className="text-lg">{collection.name}</CardTitle>
+                              {collection.description && (
+                                <CardDescription className="line-clamp-2">
+                                  {collection.description}
+                                </CardDescription>
+                              )}
+                            </CardHeader>
+                            <CardContent>
+                              <div
+                                className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} text-sm`}
+                              >
+                                <span className="text-muted-foreground">
+                                  {collection.item_count ?? 0}{' '}
+                                  {(collection.item_count ?? 0) === 1 ? 'item' : 'items'}
+                                </span>
+                                <span className="text-muted-foreground">
+                                  {collection.view_count ?? 0} views
+                                </span>
+                              </div>
+                            </CardContent>
+                          </NavLink>
+                        </Card>
+                      );
+                    })}
                 </div>
               )}
             </div>
 
             {/* Content Contributions */}
-            {contributions && contributions.length > 0 && (
+            {contributions && (contributions.length ?? 0) > 0 && (
               <div>
                 <h2 className="mb-4 font-bold text-2xl">Contributions</h2>
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                  {contributions.map((item) => {
-                    const safeContentUrl = getSafeContentUrl(item.content_type, item.slug);
-                    if (!safeContentUrl) {
-                      logger.warn(
-                        'UserProfilePage: skipping contribution with invalid type or slug',
-                        {
-                          contentId: item.id,
-                          contentType: item.content_type,
-                          contentSlug: item.slug,
-                        }
-                      );
-                      return null;
-                    }
-                    return (
-                      <Card key={item.id} className={UI_CLASSES.CARD_INTERACTIVE}>
-                        <NavLink href={safeContentUrl}>
-                          <CardHeader>
-                            <div className={'mb-2 flex items-center justify-between'}>
-                              <UnifiedBadge variant="base" style="secondary" className="text-xs">
-                                {item.content_type}
-                              </UnifiedBadge>
-                              {item.featured && (
-                                <UnifiedBadge variant="base" style="default" className="text-xs">
-                                  Featured
+                  {contributions
+                    ?.filter(
+                      (
+                        item
+                      ): item is NonNullable<typeof item> & {
+                        id: string;
+                        content_type: Database['public']['Enums']['content_category'];
+                        slug: string;
+                        name: string | null;
+                      } =>
+                        item !== null &&
+                        item.id !== null &&
+                        item.content_type !== null &&
+                        item.slug !== null &&
+                        item.name !== null
+                    )
+                    .map((item) => {
+                      const safeContentUrl = getSafeContentUrl(item.content_type, item.slug);
+                      if (!safeContentUrl) {
+                        logger.warn(
+                          'UserProfilePage: skipping contribution with invalid type or slug',
+                          {
+                            contentId: item.id,
+                            contentType: item.content_type,
+                            contentSlug: item.slug,
+                          }
+                        );
+                        return null;
+                      }
+                      return (
+                        <Card key={item.id} className={UI_CLASSES.CARD_INTERACTIVE}>
+                          <NavLink href={safeContentUrl}>
+                            <CardHeader>
+                              <div className={'mb-2 flex items-center justify-between'}>
+                                <UnifiedBadge variant="base" style="secondary" className="text-xs">
+                                  {item.content_type}
                                 </UnifiedBadge>
-                              )}
-                            </div>
-                            <CardTitle className="text-base">{item.name}</CardTitle>
-                            <CardDescription className="line-clamp-2 text-xs">
-                              {item.description}
-                            </CardDescription>
-                          </CardHeader>
-                          <CardContent>
-                            <div
-                              className={'flex items-center gap-2 text-muted-foreground text-xs'}
-                            >
-                              <span>{item.view_count || 0} views</span>
-                              <span>•</span>
-                              <span>{item.download_count || 0} downloads</span>
-                            </div>
-                          </CardContent>
-                        </NavLink>
-                      </Card>
-                    );
-                  })}
+                                {item.featured && (
+                                  <UnifiedBadge variant="base" style="default" className="text-xs">
+                                    Featured
+                                  </UnifiedBadge>
+                                )}
+                              </div>
+                              <CardTitle className="text-base">{item.name}</CardTitle>
+                              <CardDescription className="line-clamp-2 text-xs">
+                                {item.description}
+                              </CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                              <div
+                                className={'flex items-center gap-2 text-muted-foreground text-xs'}
+                              >
+                                <span>{item.view_count ?? 0} views</span>
+                                <span>•</span>
+                                <span>{item.download_count ?? 0} downloads</span>
+                              </div>
+                            </CardContent>
+                          </NavLink>
+                        </Card>
+                      );
+                    })}
                 </div>
               </div>
             )}

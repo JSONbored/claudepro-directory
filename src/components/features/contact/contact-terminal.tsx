@@ -51,18 +51,18 @@ import { logger } from '@/src/lib/logger';
 import { cn } from '@/src/lib/utils';
 import { logUnhandledPromise, normalizeError } from '@/src/lib/utils/error.utils';
 import type { Database } from '@/src/types/database.types';
-import type { GetGetContactCommandsReturn } from '@/src/types/database-overrides';
 
+// Internal type with non-nullable fields (after transformation)
 type ContactCommand = {
   id: string;
   text: string;
   description: string | null;
   category: string;
-  iconName: string | null;
-  actionType: Database['public']['Enums']['contact_action_type'];
-  actionValue: string | null;
-  confettiVariant: Database['public']['Enums']['confetti_variant'] | null;
-  requiresAuth: boolean;
+  icon_name: string | null;
+  action_type: Database['public']['Enums']['contact_action_type'];
+  action_value: string | null;
+  confetti_variant: Database['public']['Enums']['confetti_variant'] | null;
+  requires_auth: boolean;
   aliases: string[];
 };
 
@@ -113,21 +113,20 @@ export function ContactTerminal() {
       setIsLoading(true);
       const result = await getContactCommands({});
       if (result?.data?.commands && Array.isArray(result.data.commands)) {
-        // Transform RPC return to ContactCommand format
-        const transformedCommands: ContactCommand[] = result.data.commands.map(
-          (cmd: GetGetContactCommandsReturn['commands'][number]) => ({
-            id: cmd.id,
-            text: cmd.text,
-            iconName: cmd.iconName ?? null,
-            actionType: cmd.actionType,
-            actionValue: cmd.actionValue,
-            confettiVariant: cmd.confettiVariant ?? null,
-            requiresAuth: cmd.requiresAuth,
-            aliases: cmd.aliases,
-            category: cmd.category,
-            description: cmd.description ?? null,
-          })
-        );
+        // RPC returns commands with snake_case fields - use directly
+        const transformedCommands: ContactCommand[] = result.data.commands.map((cmd) => ({
+          id: cmd.id ?? '',
+          text: cmd.text ?? '',
+          description: cmd.description,
+          category: cmd.category ?? '',
+          icon_name: cmd.icon_name,
+          action_type:
+            cmd.action_type ?? ('internal' as Database['public']['Enums']['contact_action_type']),
+          action_value: cmd.action_value,
+          confetti_variant: cmd.confetti_variant,
+          requires_auth: cmd.requires_auth ?? false,
+          aliases: cmd.aliases ?? [],
+        }));
         setCommands(transformedCommands);
         if (result.data.commands.length === 0) {
           setLoadError('No commands available');
@@ -211,56 +210,56 @@ export function ContactTerminal() {
       }
 
       // Handle different action types
-      switch (command.actionType) {
+      switch (command.action_type) {
         case 'internal':
           handleInternalCommand(command);
           break;
 
         case 'external':
-          if (command.actionValue) {
-            addOutput('success', `Opening: ${command.actionValue}`, <Check className="h-3 w-3" />);
-            window.open(command.actionValue, '_blank', 'noopener,noreferrer');
+          if (command.action_value) {
+            addOutput('success', `Opening: ${command.action_value}`, <Check className="h-3 w-3" />);
+            window.open(command.action_value, '_blank', 'noopener,noreferrer');
           }
           break;
 
         case 'route':
-          if (command.actionValue) {
+          if (command.action_value) {
             addOutput(
               'success',
-              `Navigating to ${command.actionValue}...`,
+              `Navigating to ${command.action_value}...`,
               <Check className="h-3 w-3" />
             );
-            router.push(command.actionValue);
+            router.push(command.action_value);
           }
           break;
 
         case 'sheet':
-          if (command.actionValue) {
+          if (command.action_value) {
             setSelectedCategory(
-              command.actionValue as Database['public']['Enums']['contact_category']
+              command.action_value as Database['public']['Enums']['contact_category']
             );
             setIsSheetOpen(true);
             addOutput(
               'success',
-              `Opening ${command.actionValue} contact form...`,
+              `Opening ${command.action_value} contact form...`,
               <Check className="h-3 w-3" />
             );
           }
           break;
 
         case 'easter-egg':
-          addOutput('success', command.actionValue || '🎉 You found an easter egg!');
+          addOutput('success', command.action_value || '🎉 You found an easter egg!');
           break;
       }
 
       // Fire confetti
-      if (command.confettiVariant) {
-        fireConfetti(command.confettiVariant);
+      if (command.confetti_variant) {
+        fireConfetti(command.confetti_variant);
       }
 
       trackTerminalCommandAction({
-        command_id: command.id,
-        action_type: command.actionType,
+        command_id: command.id ?? '',
+        action_type: command.action_type ?? 'internal',
         success: true,
         execution_time_ms: Date.now() - startTime,
       }).catch(() => {
@@ -272,10 +271,12 @@ export function ContactTerminal() {
         'An error occurred while executing the command.',
         <X className="h-3 w-3" />
       );
-      logger.error('Terminal command execution failed', error as Error, { commandId: command.id });
+      logger.error('Terminal command execution failed', error as Error, {
+        commandId: command.id ?? 'unknown',
+      });
       trackTerminalCommandAction({
-        command_id: command.id,
-        action_type: command.actionType,
+        command_id: command.id ?? '',
+        action_type: command.action_type ?? 'internal',
         success: false,
         error_reason: error instanceof Error ? error.message : 'unknown_error',
         execution_time_ms: Date.now() - startTime,
@@ -290,7 +291,10 @@ export function ContactTerminal() {
       case 'help':
         addOutput('output', '📋 Available commands:');
         for (const cmd of commands) {
-          addOutput('output', `  ${cmd.text.padEnd(20)} - ${cmd.description || 'No description'}`);
+          addOutput(
+            'output',
+            `  ${cmd.text?.padEnd(20) ?? ''} - ${cmd.description || 'No description'}`
+          );
         }
         break;
 
@@ -300,8 +304,8 @@ export function ContactTerminal() {
         break;
 
       default:
-        if (command.actionValue) {
-          addOutput('output', command.actionValue);
+        if (command.action_value) {
+          addOutput('output', command.action_value);
         }
     }
   };

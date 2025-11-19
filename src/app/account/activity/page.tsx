@@ -12,7 +12,7 @@ import {
 import { getActivitySummary, getActivityTimeline } from '@/src/lib/actions/user.actions';
 import { getAuthenticatedUser } from '@/src/lib/auth/get-authenticated-user';
 import { ROUTES } from '@/src/lib/data/config/constants';
-import { FileText, GitPullRequest, MessageSquare, ThumbsUp } from '@/src/lib/icons';
+import { GitPullRequest } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
@@ -103,43 +103,7 @@ export default async function ActivityPage() {
       </div>
 
       {/* Stats Overview */}
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm">Posts</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-              <FileText className={`${UI_CLASSES.ICON_MD} ${UI_CLASSES.ICON_INFO}`} />
-              <span className="font-bold text-2xl">{summary.total_posts}</span>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm">Comments</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-              <MessageSquare className={`${UI_CLASSES.ICON_MD} ${UI_CLASSES.ICON_SUCCESS}`} />
-              <span className="font-bold text-2xl">{summary.total_comments}</span>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm">Votes</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-              <ThumbsUp className={`${UI_CLASSES.ICON_MD} ${UI_CLASSES.ICON_WARNING}`} />
-              <span className="font-bold text-2xl">{summary.total_votes}</span>
-            </div>
-          </CardContent>
-        </Card>
-
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-sm">Submissions</CardTitle>

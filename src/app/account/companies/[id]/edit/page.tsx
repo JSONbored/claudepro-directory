@@ -20,7 +20,7 @@ import { ROUTES } from '@/src/lib/data/config/constants';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { normalizeError } from '@/src/lib/utils/error.utils';
-import type { Tables } from '@/src/types/database.types';
+import type { Database } from '@/src/types/database.types';
 
 export const metadata: Promise<Metadata> = generatePageMetadata('/account/companies/:id/edit');
 
@@ -37,7 +37,7 @@ export default async function EditCompanyPage({ params }: EditCompanyPageProps) 
     redirect('/login');
   }
 
-  let company: Tables<'companies'> | null = null;
+  let company: Database['public']['CompositeTypes']['user_companies_company'] | null = null;
   let hasError = false;
   try {
     company = await getUserCompanyById(user.id, id);

@@ -21,10 +21,7 @@ const TYPE_MAPPINGS: Record<string, string> = {
   GetUserDashboardReturn: 'GetGetUserDashboardReturn',
   GetUserProfileReturn: 'GetGetUserProfileReturn',
   GetHomepageCompleteReturn: 'GetGetHomepageCompleteReturn',
-  GetChangelogOverviewReturn: 'GetGetChangelogOverviewReturn',
-  GetChangelogDetailReturn: 'GetGetChangelogDetailReturn',
   GetContentDetailCompleteReturn: 'GetGetContentDetailCompleteReturn',
-  GetEnrichedContentListReturn: 'GetGetEnrichedContentListReturn',
   GetJobsListReturn: 'GetGetJobsListReturn',
   GetCollectionDetailWithItemsReturn: 'GetGetCollectionDetailWithItemsReturn',
   GetReviewsWithStatsReturn: 'GetGetReviewsWithStatsReturn',
@@ -49,7 +46,6 @@ const TYPE_MAPPINGS: Record<string, string> = {
   GetSimilarContentReturn: 'GetGetSimilarContentReturn',
   // Batch 6: Config types
   GetCategoryConfigReturn: 'GetGetCategoryConfigReturn',
-  GetCategoryConfigsWithFeaturesReturn: 'GetGetCategoryConfigsWithFeaturesReturn',
   GetFormFieldConfigReturn: 'GetGetFormFieldConfigReturn',
   GetFormFieldsGroupedReturn: 'GetGetFormFieldsGroupedReturn',
   GetGenerationConfigReturn: 'GetGetGenerationConfigReturn',

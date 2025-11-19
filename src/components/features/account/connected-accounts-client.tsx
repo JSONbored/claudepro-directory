@@ -27,9 +27,11 @@ import {
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { errorToasts, successToasts } from '@/src/lib/utils/toast.utils';
 
-import type { GetGetUserIdentitiesReturn } from '@/src/types/database-overrides';
+import type { Database } from '@/src/types/database.types';
 
-type Identity = GetGetUserIdentitiesReturn['identities'][number];
+type Identity = NonNullable<
+  Database['public']['Functions']['get_user_identities']['Returns']['identities']
+>[number];
 
 interface ConnectedAccountsClientProps {
   identities: Identity[];
@@ -69,7 +71,13 @@ export function ConnectedAccountsClient({ identities }: ConnectedAccountsClientP
   const [unlinkDialogOpen, setUnlinkDialogOpen] = useState(false);
   const [providerToUnlink, setProviderToUnlink] = useState<string | null>(null);
 
-  const connectedProviders = new Set(identities.map((i) => i.provider));
+  const connectedProviders = new Set(
+    identities
+      .filter(
+        (i): i is NonNullable<typeof i> & { provider: string } => i !== null && i.provider !== null
+      )
+      .map((i) => i.provider)
+  );
   const availableProviders = Object.entries(PROVIDER_CONFIG);
 
   const handleLinkProvider = (provider: string) => {
@@ -113,7 +121,10 @@ export function ConnectedAccountsClient({ identities }: ConnectedAccountsClientP
   return (
     <div className="space-y-4">
       {availableProviders.map(([provider, config]) => {
-        const identity = identities.find((i) => i.provider === provider);
+        const identity = identities.find(
+          (i): i is NonNullable<typeof i> & { provider: string } =>
+            i !== null && i.provider === provider
+        );
         const isConnected = connectedProviders.has(provider);
         const IconComponent = config.icon;
 
@@ -138,7 +149,7 @@ export function ConnectedAccountsClient({ identities }: ConnectedAccountsClientP
                 </div>
                 {identity && (
                   <div className="mt-1 text-muted-foreground text-sm">
-                    <p>{identity.email}</p>
+                    <p>{identity.email ?? 'No email'}</p>
                     <p className="text-xs">
                       {identity.last_sign_in_at
                         ? `Last sign-in: ${new Date(identity.last_sign_in_at).toLocaleDateString()}`

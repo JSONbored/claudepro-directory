@@ -122,12 +122,38 @@ export default async function SubmitPage() {
     });
   }
 
-  const stats = dashboardData?.stats || { total: 0, pending: 0, merged_this_week: 0 };
-  const recentMerged = (dashboardData?.recent || []).map((submission) => ({
-    ...submission,
-    content_type: submission.content_type,
-    merged_at_formatted: formatTimeAgo(submission.merged_at),
-  }));
+  const stats = {
+    total: dashboardData?.stats?.total ?? 0,
+    pending: dashboardData?.stats?.pending ?? 0,
+    merged_this_week: dashboardData?.stats?.merged_this_week ?? 0,
+  };
+  const recentMerged = (dashboardData?.recent || [])
+    .filter(
+      (
+        submission
+      ): submission is NonNullable<typeof submission> & {
+        id: string;
+        content_name: string;
+        content_type: NonNullable<typeof submission.content_type>;
+        merged_at: string;
+      } =>
+        submission !== null &&
+        submission.id !== null &&
+        submission.content_name !== null &&
+        submission.content_type !== null &&
+        submission.merged_at !== null
+    )
+    .map((submission) => ({
+      id: submission.id,
+      content_name: submission.content_name,
+      content_type: submission.content_type as Database['public']['Enums']['content_category'],
+      merged_at: submission.merged_at,
+      merged_at_formatted: formatTimeAgo(submission.merged_at),
+      user:
+        submission.user?.name && submission.user?.slug
+          ? { name: submission.user.name, slug: submission.user.slug }
+          : null,
+    }));
 
   return (
     <div className="container mx-auto max-w-7xl px-4 py-8 sm:py-12">

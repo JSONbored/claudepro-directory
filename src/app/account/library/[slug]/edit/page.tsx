@@ -51,6 +51,14 @@ export default async function EditCollectionPage({ params }: EditCollectionPageP
 
   const { collection, bookmarks } = collectionData;
 
+  if (!collection) {
+    logger.warn('EditCollectionPage: collection is null in response', {
+      slug,
+      userId: user.id,
+    });
+    notFound();
+  }
+
   return (
     <div className="space-y-6">
       <div>
@@ -70,7 +78,7 @@ export default async function EditCollectionPage({ params }: EditCollectionPageP
         </CardHeader>
         <CardContent>
           <CollectionForm
-            bookmarks={(bookmarks || []).map((b) => ({ ...b, notes: b.notes ?? '' }))}
+            bookmarks={(bookmarks ?? []).map((b) => ({ ...b, notes: b.notes ?? '' }))}
             mode="edit"
             collection={{ ...collection, description: collection.description ?? '' }}
           />

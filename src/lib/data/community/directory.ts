@@ -4,12 +4,12 @@ import { fetchCachedRpc } from '@/src/lib/data/helpers';
 import { searchUsersUnified } from '@/src/lib/edge/search-client';
 import { logger } from '@/src/lib/logger';
 import { normalizeError } from '@/src/lib/utils/error.utils';
-import type { GetGetCommunityDirectoryReturn } from '@/src/types/database-overrides';
+import type { Database } from '@/src/types/database.types';
 
 export async function getCommunityDirectory(options: {
   searchQuery?: string;
   limit?: number;
-}): Promise<GetGetCommunityDirectoryReturn | null> {
+}): Promise<Database['public']['Functions']['get_community_directory']['Returns'] | null> {
   const { searchQuery, limit = 100 } = options;
 
   // Hybrid approach:
@@ -23,18 +23,22 @@ export async function getCommunityDirectory(options: {
       // Transform unified-search results to directory format
       // Note: unified-search returns basic fields, we need to fetch full user data
       // For now, we'll use the basic fields and let the UI handle it
-      const allUsers: GetGetCommunityDirectoryReturn['all_users'] = unifiedResults
-        .filter((result): result is typeof result & { slug: string } => result.slug != null) // Filter out null slugs
-        .map((result) => ({
-          id: result.id,
-          slug: result.slug,
-          name: result.title || result.slug || '',
-          image: null, // unified-search doesn't return image
-          bio: result.description || null,
-          work: null, // unified-search doesn't return work
-          tier: 'free' as const, // unified-search doesn't return tier, default to free
-          created_at: result.created_at,
-        }));
+      const allUsers: Database['public']['CompositeTypes']['community_directory_user'][] =
+        unifiedResults
+          .filter(
+            (result): result is typeof result & { slug: string; created_at: string } =>
+              result.slug != null && result.created_at != null
+          ) // Filter out null slugs and created_at
+          .map((result) => ({
+            id: result.id,
+            slug: result.slug,
+            name: result.title || result.slug || '',
+            image: null, // unified-search doesn't return image
+            bio: result.description || null,
+            work: null, // unified-search doesn't return work
+            tier: 'free' as const, // unified-search doesn't return tier, default to free
+            created_at: result.created_at,
+          }));
 
       // Pulse search events (fire and forget)
       const { pulseUserSearch } = await import('@/src/lib/utils/pulse');
@@ -60,7 +64,10 @@ export async function getCommunityDirectory(options: {
   }
 
   // No search query or unified-search failed → use optimized RPC for directory listing
-  return fetchCachedRpc<'get_community_directory', GetGetCommunityDirectoryReturn | null>(
+  return fetchCachedRpc<
+    'get_community_directory',
+    Database['public']['Functions']['get_community_directory']['Returns'] | null
+  >(
     {
       p_limit: limit,
     },

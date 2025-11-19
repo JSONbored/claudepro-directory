@@ -24,7 +24,7 @@ import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { normalizeError } from '@/src/lib/utils/error.utils';
-import type { GetGetUserLibraryReturn } from '@/src/types/database-overrides';
+import type { Database } from '@/src/types/database.types';
 
 export const metadata: Promise<Metadata> = generatePageMetadata('/account/library');
 
@@ -50,7 +50,7 @@ export default async function LibraryPage() {
     );
   }
 
-  let data: GetGetUserLibraryReturn | null = null;
+  let data: Database['public']['Functions']['get_user_library']['Returns'] | null = null;
   try {
     data = await getUserLibrary(user.id);
     if (!data) {
@@ -84,12 +84,14 @@ export default async function LibraryPage() {
   const bookmarks = data.bookmarks ?? [];
   const collections = data.collections ?? [];
   const stats = data.stats ?? {
-    bookmarkCount: bookmarks.length,
-    collectionCount: collections.length,
-    totalCollectionItems: 0,
-    totalCollectionViews: 0,
+    bookmark_count: bookmarks.length,
+    collection_count: collections.length,
+    total_collection_items: 0,
+    total_collection_views: 0,
   };
-  const { bookmarkCount, collectionCount } = stats;
+  // Map snake_case to camelCase for compatibility
+  const bookmarkCount = stats.bookmark_count ?? 0;
+  const collectionCount = stats.collection_count ?? 0;
   if (!(bookmarks.length || collections.length)) {
     logger.info('LibraryPage: library returned no bookmarks or collections', { userId: user.id });
   }
@@ -165,7 +167,10 @@ export default async function LibraryPage() {
                   </CardHeader>
                   <CardContent>
                     <p className={'text-muted-foreground text-xs'}>
-                      Saved {new Date(bookmark.created_at).toLocaleDateString()}
+                      Saved{' '}
+                      {bookmark.created_at
+                        ? new Date(bookmark.created_at).toLocaleDateString()
+                        : 'Unknown date'}
                     </p>
                   </CardContent>
                 </Card>

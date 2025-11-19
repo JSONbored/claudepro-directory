@@ -13,7 +13,7 @@ import {
 } from '@/src/lib/actions/pulse.actions';
 import { logger } from '@/src/lib/logger';
 import { createClient } from '@/src/lib/supabase/client';
-import type { Database, Json } from '@/src/types/database.types';
+import type { Database } from '@/src/types/database.types';
 
 // All ENUM types accessed directly via Database['public']['Enums']['enum_name']
 
@@ -115,38 +115,13 @@ export async function getSimilarConfigs(params: {
     ...data,
     similar_items: (data.similar_items || []).map((item) => ({
       ...item,
-      url: `${SITE_URL}/${item.category}/${item.slug}`,
+      url: `${SITE_URL}/${item.category ?? 'agents'}/${item.slug ?? ''}`,
     })),
   };
 }
 
 // Config recommendations response (analytics Edge function wrapper)
-interface RecommendationsSummary {
-  topCategory?: string | null;
-  avgMatchScore?: number | null;
-  diversityScore?: number | null;
-}
-
-interface RecommendationItem {
-  slug: string;
-  title: string;
-  description: string;
-  category: string;
-  tags?: string[] | null;
-  author?: string | null;
-  match_score?: number | null;
-  match_percentage?: number | null;
-  primary_reason?: string | null;
-  rank?: number | null;
-  reasons?: Json;
-}
-
-interface RecommendationsPayload {
-  results: RecommendationItem[];
-  totalMatches: number;
-  algorithm: string;
-  summary: RecommendationsSummary | null;
-}
+type RecommendationsPayload = Database['public']['Functions']['get_recommendations']['Returns'];
 
 export interface ConfigRecommendationsResponse {
   success: boolean;
@@ -157,8 +132,8 @@ export interface ConfigRecommendationsResponse {
       useCase: Database['public']['Enums']['use_case_type'];
       experienceLevel: Database['public']['Enums']['experience_level'];
       toolPreferences: string[];
-      integrations: Database['public']['Enums']['integration_type'][];
-      focusAreas: Database['public']['Enums']['focus_area_type'][];
+      integrations?: Database['public']['Enums']['integration_type'][];
+      focusAreas?: Database['public']['Enums']['focus_area_type'][];
     };
   };
 }
@@ -179,9 +154,13 @@ export async function generateConfigRecommendations(answers: {
       success: false,
       recommendations: {
         results: [],
-        totalMatches: 0,
+        total_matches: 0,
         algorithm: 'unknown',
-        summary: {},
+        summary: {
+          top_category: null,
+          avg_match_score: 0,
+          diversity_score: 0,
+        },
         answers: {
           useCase: answers.useCase,
           experienceLevel: answers.experienceLevel,
@@ -195,16 +174,21 @@ export async function generateConfigRecommendations(answers: {
     };
   }
 
+  // Use the generated type directly from the action's return
+  const recommendations: RecommendationsPayload = {
+    results: payload.recommendations.results ?? null,
+    total_matches: (payload.recommendations as RecommendationsPayload).total_matches ?? 0,
+    algorithm: payload.recommendations.algorithm ?? 'unknown',
+    summary: (payload.recommendations as RecommendationsPayload).summary ?? null,
+  };
+
   return {
     success: payload.success,
     recommendations: {
-      ...payload.recommendations,
-      results:
-        payload.recommendations.results?.map((item) => ({
-          ...item,
-          description: item.description ?? '',
-          url: `${SITE_URL}/${item.category}/${item.slug}`,
-        })) ?? [],
+      ...recommendations,
+      id: payload.recommendations.id,
+      generatedAt: payload.recommendations.generatedAt,
+      answers: payload.recommendations.answers,
     },
   };
 }

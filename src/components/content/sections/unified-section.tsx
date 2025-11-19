@@ -87,7 +87,7 @@ function List({ items, color }: { items: string[]; color: string }) {
     <ul className="space-y-2">
       {items.map((item) => (
         <li key={item.slice(0, 50)} className={UI_CLASSES.FLEX_ITEMS_START_GAP_3}>
-          <div className={cn('mt-2 h-1.5 w-1.5 flex-shrink-0 rounded-full', color)} />
+          <div className={cn('mt-2 h-1.5 w-1.5 shrink-0 rounded-full', color)} />
           <span className="text-sm leading-relaxed">{item}</span>
         </li>
       ))}
@@ -108,13 +108,13 @@ function EnhancedList({ items, color }: { items: EnhancedListItem[]; color: stri
       {items.map((item, index) =>
         typeof item === 'string' ? (
           <li key={getEnhancedListKey(item, index)} className={UI_CLASSES.FLEX_ITEMS_START_GAP_3}>
-            <div className={cn('mt-2 h-1.5 w-1.5 flex-shrink-0 rounded-full', color)} />
+            <div className={cn('mt-2 h-1.5 w-1.5 shrink-0 rounded-full', color)} />
             <span className="text-sm leading-relaxed">{item}</span>
           </li>
         ) : (
           <li key={getEnhancedListKey(item, index)} className="space-y-2">
             <div className={UI_CLASSES.FLEX_ITEMS_START_GAP_3}>
-              <div className={cn('mt-2 h-1.5 w-1.5 flex-shrink-0 rounded-full', color)} />
+              <div className={cn('mt-2 h-1.5 w-1.5 shrink-0 rounded-full', color)} />
               <div className="space-y-1">
                 <p className="font-medium text-foreground text-sm">{item.issue}</p>
                 <p className="text-muted-foreground text-sm leading-relaxed">{item.solution}</p>
@@ -163,7 +163,7 @@ function Platform({
             </div>
           ) : (
             <div key={getStepKey(step, index)} className="flex items-start gap-3">
-              <div className="mt-2 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-primary" />
+              <div className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
               <span className="text-sm leading-relaxed">{step.text}</span>
             </div>
           )

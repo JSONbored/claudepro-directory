@@ -87,7 +87,7 @@ export async function generateMetadata({ params }: PublicCollectionPageProps): P
 
   return generatePageMetadata('/u/:slug/collections/:collectionSlug', {
     params: { slug, collectionSlug },
-    item: collectionData?.collection as Tables<'user_collections'> | undefined,
+    item: (collectionData?.collection ?? null) as Tables<'user_collections'> | undefined,
     slug,
     collectionSlug,
   });
@@ -125,7 +125,7 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
     notFound();
   }
 
-  const { user: profileUser, collection, items, isOwner } = collectionData;
+  const { user: profileUser, collection, items, is_owner } = collectionData;
 
   return (
     <div className={'min-h-screen bg-background'}>
@@ -145,7 +145,7 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
           <Link href={`/u/${slug}`}>
             <Button variant="ghost" className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
               <ArrowLeft className="h-4 w-4" />
-              Back to {profileUser.name || slug}'s Profile
+              Back to {profileUser?.name ?? slug}'s Profile
             </Button>
           </Link>
 
@@ -153,13 +153,13 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
           <div>
             <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} mb-2`}>
               <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                <h1 className="font-bold text-3xl">{collection.name}</h1>
+                <h1 className="font-bold text-3xl">{collection?.name ?? 'Untitled Collection'}</h1>
                 <UnifiedBadge variant="base" style="outline">
                   Public
                 </UnifiedBadge>
               </div>
-              {isOwner && (
-                <Link href={`/account/library/${collection.slug}`}>
+              {is_owner && (
+                <Link href={`/account/library/${collection?.slug}`}>
                   <Button variant="outline" size="sm">
                     Manage Collection
                   </Button>
@@ -167,14 +167,14 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
               )}
             </div>
 
-            {collection.description && (
+            {collection?.description && (
               <p className={'max-w-3xl text-muted-foreground'}>{collection.description}</p>
             )}
 
             <div className={'mt-2 text-muted-foreground text-sm'}>
-              Created by <NavLink href={`/u/${slug}`}>{profileUser.name || slug}</NavLink> •{' '}
-              {collection.item_count} {collection.item_count === 1 ? 'item' : 'items'} •{' '}
-              {collection.view_count} views
+              Created by <NavLink href={`/u/${slug}`}>{profileUser?.name ?? slug}</NavLink> •{' '}
+              {collection?.item_count ?? 0} {(collection?.item_count ?? 0) === 1 ? 'item' : 'items'}{' '}
+              • {collection?.view_count ?? 0} views
             </div>
           </div>
 
@@ -182,7 +182,7 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
           <div>
             <h2 className="mb-4 font-semibold text-xl">Items in this Collection</h2>
 
-            {!items || items.length === 0 ? (
+            {!items || (items.length ?? 0) === 0 ? (
               <Card>
                 <CardContent className={'flex flex-col items-center py-12'}>
                   <p className="text-muted-foreground">This collection is empty</p>
@@ -190,8 +190,21 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
               </Card>
             ) : (
               <div className="grid gap-4">
-                {items?.map(
-                  (item: NonNullable<CollectionDetailData>['items'][number], index: number) => (
+                {items
+                  ?.filter(
+                    (
+                      item
+                    ): item is NonNullable<typeof item> & {
+                      id: string;
+                      content_type: string;
+                      content_slug: string;
+                    } =>
+                      item !== null &&
+                      item.id !== null &&
+                      item.content_type !== null &&
+                      item.content_slug !== null
+                  )
+                  .map((item, index) => (
                     <Card key={item.id}>
                       <CardHeader>
                         <div className="flex items-start gap-4">
@@ -210,7 +223,10 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
                             )}
                           </div>
                           {(() => {
-                            const safeLink = getSafeContentLink(item);
+                            const safeLink = getSafeContentLink({
+                              content_type: item.content_type,
+                              content_slug: item.content_slug,
+                            });
                             return safeLink ? (
                               <Link href={safeLink} target="_blank" rel="noopener noreferrer">
                                 <Button
@@ -237,8 +253,7 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
                         </div>
                       </CardHeader>
                     </Card>
-                  )
-                )}
+                  ))}
               </div>
             )}
           </div>
@@ -251,7 +266,7 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
                 <CardTitle className="font-medium text-sm">Total Items</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="font-bold text-2xl">{collection.item_count}</div>
+                <div className="font-bold text-2xl">{collection?.item_count ?? 0}</div>
               </CardContent>
             </Card>
             <Card>
@@ -259,7 +274,7 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
                 <CardTitle className="font-medium text-sm">Views</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="font-bold text-2xl">{collection.view_count}</div>
+                <div className="font-bold text-2xl">{collection?.view_count ?? 0}</div>
               </CardContent>
             </Card>
             <Card>
@@ -268,11 +283,13 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
               </CardHeader>
               <CardContent>
                 <div className="font-medium text-base">
-                  {new Date(collection.created_at).toLocaleDateString('en-US', {
-                    month: 'long',
-                    day: 'numeric',
-                    year: 'numeric',
-                  })}
+                  {collection?.created_at
+                    ? new Date(collection.created_at).toLocaleDateString('en-US', {
+                        month: 'long',
+                        day: 'numeric',
+                        year: 'numeric',
+                      })
+                    : 'N/A'}
                 </div>
               </CardContent>
             </Card>

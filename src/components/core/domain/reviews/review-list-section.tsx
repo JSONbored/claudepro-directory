@@ -19,10 +19,6 @@ import { formatDistanceToNow } from '@/src/lib/utils/data.utils';
 import { logClientWarning, logUnhandledPromise } from '@/src/lib/utils/error.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
 import type { Database } from '@/src/types/database.types';
-import type {
-  GetGetReviewsWithStatsReturn,
-  ReviewsAggregateRating,
-} from '@/src/types/database-overrides';
 
 import { ReviewRatingHistogram } from './review-rating-histogram';
 import { StarDisplay } from './shared/star-display';
@@ -37,14 +33,18 @@ export function ReviewListSection({
   currentUserId,
 }: Omit<ReviewSectionProps, 'variant'>) {
   const sortSelectId = useId(); // Generate unique ID for sort select
-  const [reviews, setReviews] = useState<NonNullable<GetGetReviewsWithStatsReturn>['reviews']>([]);
+  const [reviews, setReviews] = useState<
+    NonNullable<Database['public']['Functions']['get_reviews_with_stats']['Returns']>['reviews']
+  >([]);
   const [isLoading, setIsLoading] = useState(true);
   const [sortBy, setSortBy] = useState<'recent' | 'helpful' | 'rating_high' | 'rating_low'>(
     'recent'
   );
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
-  const [aggregateRating, setAggregateRating] = useState<ReviewsAggregateRating | null>(null);
+  const [aggregateRating, setAggregateRating] = useState<
+    Database['public']['CompositeTypes']['review_aggregate_rating'] | null
+  >(null);
   const [editingReviewId, setEditingReviewId] = useState<string | null>(null);
   const router = useRouter();
 
@@ -64,11 +64,11 @@ export function ReviewListSection({
         });
 
         if (result?.data) {
-          const { reviews: nextReviews, hasMore, aggregateRating: agg } = result.data;
-          setReviews((prev: NonNullable<GetGetReviewsWithStatsReturn>['reviews']) =>
-            pageNum === 1 ? nextReviews : [...prev, ...nextReviews]
+          const { reviews: nextReviews, has_more, aggregate_rating: agg } = result.data;
+          setReviews((prev) =>
+            pageNum === 1 ? (nextReviews ?? []) : [...(prev ?? []), ...(nextReviews ?? [])]
           );
-          setHasMore(Boolean(hasMore));
+          setHasMore(Boolean(has_more));
 
           if (agg) {
             setAggregateRating(agg);
@@ -132,11 +132,7 @@ export function ReviewListSection({
       const result = await deleteReview({ review_id: reviewId });
       if (result?.data?.success) {
         toasts.success.itemDeleted('Review');
-        setReviews((prev: NonNullable<GetGetReviewsWithStatsReturn>['reviews']) =>
-          prev.filter(
-            (r: NonNullable<GetGetReviewsWithStatsReturn>['reviews'][number]) => r.id !== reviewId
-          )
-        );
+        setReviews((prev) => (prev ?? []).filter((r) => r.id !== reviewId));
         // Refresh stats after deletion
         loadReviewsWithStats(1, sortBy).catch((error) => {
           logUnhandledPromise('ReviewListSection refresh after delete', error, {
@@ -159,17 +155,23 @@ export function ReviewListSection({
   return (
     <div className="space-y-6">
       {/* Aggregate Rating + Histogram */}
-      {aggregateRating && aggregateRating.count > 0 && (
+      {aggregateRating?.count && aggregateRating.count > 0 && aggregateRating.distribution && (
         <ReviewRatingHistogram
-          distribution={aggregateRating.distribution}
+          distribution={{
+            '1': aggregateRating.distribution.rating_1 ?? 0,
+            '2': aggregateRating.distribution.rating_2 ?? 0,
+            '3': aggregateRating.distribution.rating_3 ?? 0,
+            '4': aggregateRating.distribution.rating_4 ?? 0,
+            '5': aggregateRating.distribution.rating_5 ?? 0,
+          }}
           totalReviews={aggregateRating.count}
-          averageRating={aggregateRating.average}
+          averageRating={aggregateRating.average ?? 0}
         />
       )}
 
       {/* Sort Controls */}
       <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}`}>
-        <h3 className="font-semibold text-lg">Reviews ({aggregateRating?.count || 0})</h3>
+        <h3 className="font-semibold text-lg">Reviews ({aggregateRating?.count ?? 0})</h3>
         <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
           <Label htmlFor={sortSelectId} className="text-muted-foreground text-sm">
             Sort by:
@@ -193,22 +195,22 @@ export function ReviewListSection({
         <div className="py-8 text-center">
           <p className="text-muted-foreground">Loading reviews...</p>
         </div>
-      ) : reviews.length === 0 ? (
+      ) : (reviews ?? []).length === 0 ? (
         <Card className="bg-muted/50 p-8 text-center">
           <Star className="mx-auto mb-3 h-12 w-12 text-muted-foreground/30" aria-hidden="true" />
           <p className="text-muted-foreground">No reviews yet. Be the first to review!</p>
         </Card>
       ) : (
         <div className="space-y-4">
-          {reviews.map((review: NonNullable<GetGetReviewsWithStatsReturn>['reviews'][number]) => (
+          {(reviews ?? []).map((review) => (
             <ReviewCardItem
-              key={review.id}
+              key={review.id ?? ''}
               review={review}
               {...(currentUserId && { currentUserId })}
               contentType={contentType}
               contentSlug={contentSlug}
-              onEdit={() => setEditingReviewId(review.id)}
-              onDelete={() => handleDelete(review.id)}
+              onEdit={() => setEditingReviewId(review.id ?? null)}
+              onDelete={() => handleDelete(review.id ?? '')}
               {...(editingReviewId === review.id && { isEditing: true })}
               onCancelEdit={() => setEditingReviewId(null)}
             />
@@ -242,7 +244,7 @@ function ReviewCardItem({
   isEditing,
   onCancelEdit,
 }: {
-  review: NonNullable<GetGetReviewsWithStatsReturn>['reviews'][number];
+  review: Database['public']['CompositeTypes']['review_with_stats_item'];
   currentUserId?: string;
   contentType: Database['public']['Enums']['content_category'];
   contentSlug: string;
@@ -252,8 +254,10 @@ function ReviewCardItem({
   onCancelEdit?: () => void;
 }) {
   const [showFullText, setShowFullText] = useState(false);
+  if (!(review.user && review.id && review.rating)) return null;
+
   const isOwnReview = currentUserId === review.user.id;
-  const reviewText = review.review_text || '';
+  const reviewText = review.review_text ?? '';
   const needsTruncation = reviewText.length > 200;
   const displayText =
     needsTruncation && !showFullText ? `${reviewText.slice(0, 200)}...` : reviewText;
@@ -277,24 +281,28 @@ function ReviewCardItem({
 
   return (
     <BaseCard
-      displayTitle={review.user.name || 'Anonymous'}
+      displayTitle={review.user.name ?? 'Anonymous'}
       description=""
       author=""
       variant="review"
       showActions={false}
       disableNavigation={true}
-      ariaLabel={`Review by ${review.user.name || 'Anonymous'}`}
+      ariaLabel={`Review by ${review.user.name ?? 'Anonymous'}`}
       renderContent={() => (
         <div className="space-y-3">
           {/* Rating + Date */}
           <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}`}>
             <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
-              <StarDisplay rating={review.rating} size="sm" />
-              <span className="ml-1 text-muted-foreground text-xs">{review.rating.toFixed(1)}</span>
+              <StarDisplay rating={review.rating ?? 0} size="sm" />
+              <span className="ml-1 text-muted-foreground text-xs">
+                {(review.rating ?? 0).toFixed(1)}
+              </span>
             </div>
-            <time className="text-muted-foreground text-xs" dateTime={review.created_at}>
-              {formatDistanceToNow(new Date(review.created_at))} ago
-            </time>
+            {review.created_at && (
+              <time className="text-muted-foreground text-xs" dateTime={review.created_at}>
+                {formatDistanceToNow(new Date(review.created_at))} ago
+              </time>
+            )}
           </div>
 
           {/* Review Text */}
@@ -323,11 +331,11 @@ function ReviewCardItem({
                 onClick={async (e) => {
                   e.stopPropagation();
                   try {
-                    await markReviewHelpful({ review_id: review.id, helpful: true });
+                    await markReviewHelpful({ review_id: review.id ?? '', helpful: true });
                     toasts.success.actionCompleted('mark as helpful');
                   } catch (error) {
                     logClientWarning('ReviewListSection: markReviewHelpful failed', error, {
-                      reviewId: review.id,
+                      reviewId: review.id ?? '',
                     });
                     toasts.error.reviewActionFailed('vote');
                   }
@@ -335,7 +343,7 @@ function ReviewCardItem({
                 className={UI_CLASSES.BUTTON_GHOST_ICON}
               >
                 <ThumbsUp className="mr-1 h-3.5 w-3.5" aria-hidden="true" />
-                Helpful ({review.helpful_count})
+                Helpful ({review.helpful_count ?? 0})
               </Button>
             )}
 

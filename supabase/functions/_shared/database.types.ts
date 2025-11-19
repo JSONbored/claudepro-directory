@@ -194,6 +194,9 @@ export interface Database {
           has_troubleshooting: boolean | null;
           id: string;
           json_ld: Json | null;
+          mcpb_build_hash: string | null;
+          mcpb_last_built_at: string | null;
+          mcpb_storage_url: string | null;
           metadata: Json;
           og_type: string | null;
           popularity_score: number | null;
@@ -236,6 +239,9 @@ export interface Database {
           has_troubleshooting?: boolean | null;
           id?: string;
           json_ld?: Json | null;
+          mcpb_build_hash?: string | null;
+          mcpb_last_built_at?: string | null;
+          mcpb_storage_url?: string | null;
           metadata?: Json;
           og_type?: string | null;
           popularity_score?: number | null;
@@ -278,6 +284,9 @@ export interface Database {
           has_troubleshooting?: boolean | null;
           id?: string;
           json_ld?: Json | null;
+          mcpb_build_hash?: string | null;
+          mcpb_last_built_at?: string | null;
+          mcpb_storage_url?: string | null;
           metadata?: Json;
           og_type?: string | null;
           popularity_score?: number | null;
@@ -643,7 +652,7 @@ export interface Database {
           payment_method?: string | null;
           payment_reference?: string | null;
           payment_status?: Database['public']['Enums']['payment_status'] | null;
-          plan?: string;
+          plan?: Database['public']['Enums']['job_plan'];
           polar_customer_id?: string | null;
           polar_order_id?: string | null;
           polar_subscription_id?: string | null;
@@ -692,7 +701,7 @@ export interface Database {
           payment_method?: string | null;
           payment_reference?: string | null;
           payment_status?: Database['public']['Enums']['payment_status'] | null;
-          plan?: string;
+          plan?: Database['public']['Enums']['job_plan'];
           polar_customer_id?: string | null;
           polar_order_id?: string | null;
           polar_subscription_id?: string | null;
@@ -720,13 +729,6 @@ export interface Database {
             isOneToOne: false;
             referencedRelation: 'companies';
             referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'jobs_company_id_fkey';
-            columns: ['company_id'];
-            isOneToOne: false;
-            referencedRelation: 'company_job_stats';
-            referencedColumns: ['company_id'];
           },
           {
             foreignKeyName: 'jobs_user_id_fkey';
@@ -1171,10 +1173,7 @@ export interface Database {
         Returns: string;
       };
 
-      generate_tool_llms_txt: {
-        Args: { p_tool_name: string };
-        Returns: string;
-      };
+      generate_tool_llms_txt: { Args: { p_tool_name: string }; Returns: string };
 
       get_active_notifications: {
         Args: { p_dismissed_ids?: string[] };
@@ -1254,6 +1253,14 @@ export interface Database {
         }[];
       };
 
+      get_mcpb_storage_path: {
+        Args: { p_slug: string };
+        Returns: {
+          bucket: string;
+          object_path: string;
+        }[];
+      };
+
       get_trending_metrics_with_content: {
         Args: { p_category?: string; p_limit?: number };
         Returns: {
@@ -1313,6 +1320,9 @@ export interface Database {
           has_troubleshooting: boolean | null;
           id: string;
           json_ld: Json | null;
+          mcpb_build_hash: string | null;
+          mcpb_last_built_at: string | null;
+          mcpb_storage_url: string | null;
           metadata: Json;
           og_type: string | null;
           popularity_score: number | null;
@@ -1340,7 +1350,16 @@ export interface Database {
         };
       };
 
-      get_company_profile: { Args: { p_slug: string }; Returns: Json };
+      get_company_profile: {
+        Args: { p_slug: string };
+        Returns: Database['public']['CompositeTypes']['company_profile_result'];
+        SetofOptions: {
+          from: '*';
+          to: 'company_profile_result';
+          isOneToOne: true;
+          isSetofReturn: false;
+        };
+      };
 
       get_content_paginated_slim: {
         Args: {
@@ -1350,10 +1369,27 @@ export interface Database {
           p_order_by?: string;
           p_order_direction?: string;
         };
-        Returns: Json;
+        Returns: Database['public']['CompositeTypes']['content_paginated_slim_result'];
+        SetofOptions: {
+          from: '*';
+          to: 'content_paginated_slim_result';
+          isOneToOne: true;
+          isSetofReturn: false;
+        };
       };
 
       get_api_health: { Args: never; Returns: Json };
+
+      get_category_configs_with_features: {
+        Args: never;
+        Returns: Database['public']['CompositeTypes']['category_config_with_features'][];
+        SetofOptions: {
+          from: '*';
+          to: 'category_config_with_features';
+          isOneToOne: false;
+          isSetofReturn: true;
+        };
+      };
     };
     Enums: {
       newsletter_source:
@@ -1382,27 +1418,6 @@ export interface Database {
         | 'expired'
         | 'rejected'
         | 'deleted';
-
-      job_category:
-        | 'engineering'
-        | 'design'
-        | 'product'
-        | 'marketing'
-        | 'sales'
-        | 'support'
-        | 'research'
-        | 'data'
-        | 'operations'
-        | 'leadership'
-        | 'consulting'
-        | 'education'
-        | 'other';
-
-      job_plan: 'one-time' | 'subscription';
-
-      job_tier: 'standard' | 'featured';
-
-      job_type: 'full-time' | 'part-time' | 'contract' | 'freelance' | 'internship';
 
       webhook_direction: 'inbound' | 'outbound';
 
@@ -1495,6 +1510,152 @@ export interface Database {
       announcement_variant: 'default' | 'outline' | 'secondary' | 'destructive';
 
       confetti_variant: 'success' | 'celebration' | 'milestone' | 'subtle';
+
+      job_category:
+        | 'engineering'
+        | 'design'
+        | 'product'
+        | 'marketing'
+        | 'sales'
+        | 'support'
+        | 'research'
+        | 'data'
+        | 'operations'
+        | 'leadership'
+        | 'consulting'
+        | 'education'
+        | 'other';
+
+      job_plan: 'one-time' | 'subscription';
+
+      job_tier: 'standard' | 'featured';
+
+      job_type: 'full-time' | 'part-time' | 'contract' | 'freelance' | 'internship';
+    };
+    CompositeTypes: {
+      company_profile_result: {
+        company: Database['public']['Tables']['companies']['Row'] | null;
+        active_jobs: Database['public']['CompositeTypes']['company_profile_job_item'][] | null;
+        stats: Database['public']['CompositeTypes']['company_profile_stats'] | null;
+      };
+
+      company_profile_job_item: {
+        id: string | null;
+        slug: string | null;
+        title: string | null;
+        company: string | null;
+        company_logo: string | null;
+        location: string | null;
+        description: string | null;
+        salary: string | null;
+        remote: boolean | null;
+        type: Database['public']['Enums']['job_type'] | null;
+        workplace: Database['public']['Enums']['workplace_type'] | null;
+        experience: Database['public']['Enums']['experience_level'] | null;
+        category: Database['public']['Enums']['job_category'] | null;
+        tags: string[] | null;
+        plan: Database['public']['Enums']['job_plan'] | null;
+        tier: Database['public']['Enums']['job_tier'] | null;
+        posted_at: string | null;
+        expires_at: string | null;
+        view_count: number | null;
+        click_count: number | null;
+        link: string | null;
+      };
+
+      company_profile_stats: {
+        total_jobs: number | null;
+        active_jobs: number | null;
+        featured_jobs: number | null;
+        remote_jobs: number | null;
+        avg_salary_min: number | null;
+        total_views: number | null;
+        total_clicks: number | null;
+        click_through_rate: number | null;
+        latest_job_posted_at: string | null;
+      };
+
+      category_config_with_features: {
+        category: Database['public']['Enums']['content_category'] | null;
+        title: string | null;
+        plural_title: string | null;
+        description: string | null;
+        icon_name: string | null;
+        color_scheme: string | null;
+        keywords: string | null;
+        meta_description: string | null;
+        search_placeholder: string | null;
+        empty_state_message: string | null;
+        url_slug: string | null;
+        content_loader: string | null;
+        config_format: string | null;
+        primary_action_type: string | null;
+        primary_action_label: string | null;
+        primary_action_config: Json | null;
+        validation_config: Json | null;
+        generation_config: Json | null;
+        schema_name: string | null;
+        api_schema: Json | null;
+        metadata_fields: string[] | null;
+        badges: Json | null;
+        features: Database['public']['CompositeTypes']['category_config_features'] | null;
+      };
+
+      category_config_features: {
+        show_on_homepage: boolean | null;
+        display_config: boolean | null;
+        generate_full_content: boolean | null;
+        build_enable_cache: boolean | null;
+        api_generate_static: boolean | null;
+        api_include_trending: boolean | null;
+        section_features: boolean | null;
+        section_installation: boolean | null;
+        section_use_cases: boolean | null;
+        section_configuration: boolean | null;
+        section_security: boolean | null;
+        section_troubleshooting: boolean | null;
+        section_examples: boolean | null;
+        metadata_show_github_link: boolean | null;
+      };
+
+      content_paginated_slim_result: {
+        items: Database['public']['CompositeTypes']['content_paginated_slim_item'][] | null;
+        pagination: Database['public']['CompositeTypes']['content_paginated_pagination'] | null;
+      };
+
+      content_paginated_slim_item: {
+        id: string | null;
+        slug: string | null;
+        title: string | null;
+        display_title: string | null;
+        description: string | null;
+        author: string | null;
+        author_profile_url: string | null;
+        category: string | null;
+        tags: string[] | null;
+        source: string | null;
+        source_table: string | null;
+        created_at: string | null;
+        updated_at: string | null;
+        date_added: string | null;
+        view_count: number | null;
+        copy_count: number | null;
+        bookmark_count: number | null;
+        popularity_score: number | null;
+        trending_score: number | null;
+        sponsored_content_id: string | null;
+        sponsorship_tier: string | null;
+        is_sponsored: boolean | null;
+      };
+
+      content_paginated_pagination: {
+        total_count: number | null;
+        limit: number | null;
+        offset: number | null;
+        has_more: boolean | null;
+        current_page: number | null;
+        total_pages: number | null;
+      };
     };
   };
 }

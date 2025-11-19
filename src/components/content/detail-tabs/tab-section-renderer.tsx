@@ -9,17 +9,18 @@ import { ReviewListSection } from '@/src/components/core/domain/reviews/review-l
 import { isValidCategory } from '@/src/lib/data/config/category';
 import type { ProcessedSectionData, SectionId } from '@/src/lib/types/component.types';
 import { ensureStringArray } from '@/src/lib/utils/data.utils';
-import type {
-  ContentItem,
-  GetGetContentDetailCompleteReturn,
-} from '@/src/types/database-overrides';
+import type { Database } from '@/src/types/database.types';
+import type { ContentItem } from '@/src/types/database-overrides';
 
 // Dynamic import for unified section component (code splitting)
 const UnifiedSection = dynamic(() => import('@/src/components/content/sections/unified-section'));
 
 export interface TabSectionRendererProps {
   sectionId: SectionId;
-  item: ContentItem | GetGetContentDetailCompleteReturn['content'];
+  item:
+    | ContentItem
+    | (Database['public']['Functions']['get_content_detail_complete']['Returns']['content'] &
+        ContentItem);
   sectionData: ProcessedSectionData;
   config: {
     typeName: string;
@@ -146,8 +147,10 @@ export function TabSectionRenderer({
       );
 
     case 'security': {
-      if (!(config.sections.security && 'security' in item)) return null;
-      const securityItems = ensureStringArray(item.security);
+      // Cast item to ContentItem for property access (content is Json type from RPC)
+      const contentItem = item as ContentItem;
+      if (!(config.sections.security && 'security' in contentItem)) return null;
+      const securityItems = ensureStringArray(contentItem['security']);
       if (securityItems.length === 0) return null;
       return (
         <UnifiedSection

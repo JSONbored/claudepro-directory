@@ -32,12 +32,13 @@ import { logClientWarning } from '@/src/lib/utils/error.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
 import type { Database } from '@/src/types/database.types';
 
-type CompanyRow = Database['public']['Tables']['companies']['Row'];
+// Use the generated composite type from the RPC return
+type CompanyCompositeType = Database['public']['CompositeTypes']['user_companies_company'];
 
 type AllowedImageMimeType = 'image/jpeg' | 'image/png' | 'image/webp';
 
 interface CompanyFormProps {
-  initialData?: Partial<CompanyRow>;
+  initialData?: Partial<CompanyCompositeType>;
   mode: 'create' | 'edit';
 }
 
@@ -151,7 +152,7 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
         fileName: file.name,
         mimeType: file.type as AllowedImageMimeType,
         fileBase64,
-        companyId: initialData?.id,
+        companyId: initialData?.id ?? undefined,
         oldLogoUrl: logoUrl ?? undefined,
       });
 
@@ -174,7 +175,7 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
     } catch (error) {
       logClientWarning('CompanyForm: logo upload failed', error, {
         fileName: file.name,
-        companyId: initialData?.id,
+        companyId: initialData?.id ?? undefined,
       });
       toasts.error.fromError(error, 'Failed to upload logo');
     } finally {
@@ -212,12 +213,13 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
           toasts.success.actionCompleted('Company created successfully!');
         } else {
           // Update company via server action
-          if (!initialData?.id) {
+          const companyId = initialData?.id;
+          if (!companyId) {
             throw new Error('Company ID is required for updates');
           }
 
           const result = await updateCompany({
-            id: initialData.id,
+            id: companyId,
             ...data,
           });
 
@@ -233,7 +235,7 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
       } catch (error) {
         logClientWarning('CompanyForm: save failed', error, {
           mode,
-          companyId: initialData?.id,
+          companyId: initialData?.id ?? undefined,
         });
         toasts.error.fromError(error, 'Failed to save company');
       }

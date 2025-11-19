@@ -26,7 +26,7 @@ import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { ensureStringArray } from '@/src/lib/utils/data.utils';
 import { normalizeError } from '@/src/lib/utils/error.utils';
-import type { Database } from '@/src/types/database.types';
+import type { Database, Tables } from '@/src/types/database.types';
 
 export const revalidate = false; // Static generation - zero database egress during serving
 
@@ -39,10 +39,12 @@ export async function generateStaticParams() {
         const items = await getContentByCategory(category);
 
         for (const item of items) {
-          allParams.push({
-            category,
-            slug: item.slug,
-          });
+          if (item.slug) {
+            allParams.push({
+              category,
+              slug: item.slug,
+            });
+          }
         }
       } catch (error) {
         logger.error(
@@ -154,8 +156,10 @@ export default async function DetailPage({
     notFound();
   }
 
-  // detailData is already typed as GetGetContentDetailCompleteReturn | null
-  const { content: fullItem, analytics, related } = detailData;
+  // detailData.content is Json | null, but we know it's a content table row
+  // Cast it to Tables<'content'> for type safety
+  const fullItem = detailData.content as Tables<'content'> | null;
+  const { analytics, related } = detailData;
 
   // Null safety: If content doesn't exist in database, return 404
   if (!fullItem) {

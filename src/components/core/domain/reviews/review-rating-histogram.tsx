@@ -19,8 +19,19 @@ export function ReviewRatingHistogram({
   averageRating,
 }: Omit<ReviewHistogramProps, 'variant'>) {
   // Calculate chart data (no memoization needed - server components render once)
+  // Map from generated type structure (rating_1, rating_2, etc.) to star counts
   const chartData = [5, 4, 3, 2, 1].map((stars) => {
-    const count = distribution[String(stars)] || 0;
+    const count = distribution
+      ? stars === 5
+        ? (distribution['rating_5'] ?? 0)
+        : stars === 4
+          ? (distribution['rating_4'] ?? 0)
+          : stars === 3
+            ? (distribution['rating_3'] ?? 0)
+            : stars === 2
+              ? (distribution['rating_2'] ?? 0)
+              : (distribution['rating_1'] ?? 0)
+      : 0;
     const percentage = totalReviews > 0 ? (count / totalReviews) * 100 : 0;
 
     return {

@@ -380,9 +380,12 @@ async function handleToolLlms(tool: string): Promise<Response> {
 }
 
 async function handleCategoryConfigs(): Promise<Response> {
-  const rpcArgs =
-    {} satisfies Database['public']['Functions']['get_category_configs_with_features']['Args'];
-  const { data, error } = await callRpc('get_category_configs_with_features', rpcArgs, true);
+  // get_category_configs_with_features has Args: never (no arguments)
+  const { data, error } = await callRpc(
+    'get_category_configs_with_features',
+    {} as DatabaseGenerated['public']['Functions']['get_category_configs_with_features']['Args'],
+    true
+  );
 
   if (error) {
     return errorResponse(error, 'data-api:get_category_configs_with_features', CORS);

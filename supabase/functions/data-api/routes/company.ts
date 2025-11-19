@@ -1,5 +1,5 @@
 import type { Database as DatabaseGenerated } from '../../_shared/database.types.ts';
-import { callRpc, type GetCompanyProfileReturn } from '../../_shared/database-overrides.ts';
+import { callRpc } from '../../_shared/database-overrides.ts';
 import {
   badRequestResponse,
   buildCacheHeaders,
@@ -39,7 +39,8 @@ export async function handleCompanyRoute(
     return errorResponse(error, 'data-api:get_company_profile', CORS);
   }
 
-  const profile = profileRaw as GetCompanyProfileReturn;
+  const profile =
+    profileRaw as DatabaseGenerated['public']['Functions']['get_company_profile']['Returns'];
 
   if (!profile) {
     return jsonResponse({ error: 'Company not found' }, 404, CORS);

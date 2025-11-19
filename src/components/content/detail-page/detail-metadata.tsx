@@ -13,13 +13,14 @@ import { Calendar, Copy, Eye, Tag, User } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { formatCopyCount, formatViewCount } from '@/src/lib/utils/content.utils';
 import { ensureStringArray, formatDate } from '@/src/lib/utils/data.utils';
-import type {
-  ContentItem,
-  GetGetContentDetailCompleteReturn,
-} from '@/src/types/database-overrides';
+import type { Database } from '@/src/types/database.types';
+import type { ContentItem } from '@/src/types/database-overrides';
 
 export interface DetailMetadataProps {
-  item: ContentItem | GetGetContentDetailCompleteReturn['content'];
+  item:
+    | ContentItem
+    | (Database['public']['Functions']['get_content_detail_complete']['Returns']['content'] &
+        ContentItem);
   viewCount?: number | undefined;
   copyCount?: number | undefined;
 }
@@ -36,14 +37,19 @@ const SOCIAL_LINK_SNAPSHOT = getSocialLinks();
 // Only allows strictly mapped profile URLs for allowed domains or fallback to default.
 // Never uses arbitrary user-supplied URLs to prevent client-side URL redirect attacks.
 function getSafeAuthorProfileHref(
-  item: ContentItem | GetGetContentDetailCompleteReturn['content']
+  item:
+    | ContentItem
+    | (Database['public']['Functions']['get_content_detail_complete']['Returns']['content'] &
+        ContentItem)
 ): string {
+  // Cast item to ContentItem for property access (content is Json type from RPC)
+  const contentItem = item as ContentItem;
   // Only allow strictly mapped profile URLs for allowed domains or fallback to default.
   // Never use arbitrary user-supplied URLs.
   let handle: string | undefined;
   const url: string | undefined =
-    'author_profile_url' in item && typeof item.author_profile_url === 'string'
-      ? item.author_profile_url.trim()
+    'author_profile_url' in contentItem && typeof contentItem.author_profile_url === 'string'
+      ? contentItem.author_profile_url.trim()
       : undefined;
 
   if (!url) return SOCIAL_LINK_SNAPSHOT.authorProfile;

@@ -18,7 +18,6 @@ import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { BADGE_COLORS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { normalizeError } from '@/src/lib/utils/error.utils';
 import type { Database } from '@/src/types/database.types';
-import type { GetGetUserDashboardReturn } from '@/src/types/database-overrides';
 
 export const metadata: Promise<Metadata> = generatePageMetadata('/account/submissions');
 
@@ -176,12 +175,14 @@ export default async function SubmissionsPage() {
     );
   }
 
-  let submissions: GetGetUserDashboardReturn['submissions'] = [];
+  let submissions: NonNullable<
+    Database['public']['Functions']['get_user_dashboard']['Returns']['submissions']
+  > = [];
   let hasError = false;
   try {
     const data = await getUserDashboard(user.id);
-    if (data) {
-      submissions = data.submissions ?? [];
+    if (data?.submissions) {
+      submissions = data.submissions;
     } else {
       logger.error('SubmissionsPage: getUserDashboard returned null', undefined, {
         userId: user.id,
@@ -285,7 +286,7 @@ export default async function SubmissionsPage() {
    * Extracts and validates PR components, then constructs a safe URL
    */
   function getPrLinkProps(submission: (typeof submissions)[number]) {
-    const components = submission.pr_url ? extractPrComponents(submission.pr_url) : null;
+    const components = submission.pr_url ? extractPrComponents(submission.pr_url ?? '') : null;
     const prNumber = submission.pr_number || components?.prNumber;
 
     if (!(components && prNumber)) return null;
@@ -343,10 +344,12 @@ export default async function SubmissionsPage() {
       ) : (
         <div className="grid gap-4">
           {submissions.map((submission) => {
-            const status = submission.status;
-            const type = submission.content_type;
+            const status = (submission.status ??
+              'pending') as Database['public']['Enums']['submission_status'];
+            const type = (submission.content_type ??
+              'commands') as Database['public']['Enums']['submission_type'];
             return (
-              <Card key={submission.id}>
+              <Card key={submission.id ?? `submission-${Math.random()}`}>
                 <CardHeader>
                   <div className={UI_CLASSES.FLEX_ITEMS_START_JUSTIFY_BETWEEN}>
                     <div className="flex-1">
@@ -356,9 +359,11 @@ export default async function SubmissionsPage() {
                           {getTypeLabel(type)}
                         </UnifiedBadge>
                       </div>
-                      <CardTitle className="mt-2">{submission.content_name}</CardTitle>
+                      <CardTitle className="mt-2">
+                        {submission.content_name ?? 'Untitled'}
+                      </CardTitle>
                       <CardDescription className="mt-1">
-                        Slug: <code className="text-xs">{submission.content_slug}</code>
+                        Slug: <code className="text-xs">{submission.content_slug ?? 'N/A'}</code>
                       </CardDescription>
                     </div>
                   </div>
@@ -366,7 +371,10 @@ export default async function SubmissionsPage() {
 
                 <CardContent>
                   <div className={'mb-4 flex flex-wrap gap-4 text-muted-foreground text-sm'}>
-                    <div>Submitted {formatSubmissionDate(submission.created_at)}</div>
+                    <div>
+                      Submitted{' '}
+                      {formatSubmissionDate(submission.created_at ?? new Date().toISOString())}
+                    </div>
                     {submission.merged_at && (
                       <>
                         <span>•</span>
@@ -407,7 +415,7 @@ export default async function SubmissionsPage() {
                     {(() => {
                       const contentLinkProps = getContentLinkProps(
                         type,
-                        submission.content_slug,
+                        submission.content_slug ?? '',
                         status
                       );
                       return contentLinkProps ? (

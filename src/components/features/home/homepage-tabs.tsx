@@ -123,7 +123,7 @@ const TabsSectionComponent: FC<TabsSectionProps> = ({
               batchSize={30}
               emptyMessage={`No ${categoryName} found. Try adjusting your filters.`}
               ariaLabel={`${categoryName} results`}
-              keyExtractor={(item) => item.slug}
+              keyExtractor={(item) => item.slug ?? ''}
               renderCard={(item) => (
                 <ConfigCard item={item} variant="default" showCategory={true} showActions={true} />
               )}

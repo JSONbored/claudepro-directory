@@ -93,7 +93,8 @@ export default async function ConnectedAccountsPage() {
     );
   }
 
-  const identities = result.data.identities || [];
+  const identities =
+    result.data?.identities?.filter((i): i is NonNullable<typeof i> => i !== null) ?? [];
   if (identities.length === 0) {
     logger.info('ConnectedAccountsPage: no OAuth identities found', { userId: user.id });
   }

@@ -180,7 +180,7 @@ export function NewsletterModal({
               type="submit"
               disabled={isSubmitting || !email.trim()}
               className={cn(
-                'flex-1 bg-gradient-to-r from-accent to-primary hover:from-accent/90 hover:to-primary/90',
+                'flex-1 bg-linear-to-r from-accent to-primary hover:from-accent/90 hover:to-primary/90',
                 isSubmitting && 'opacity-50'
               )}
             >

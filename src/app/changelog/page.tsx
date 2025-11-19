@@ -44,6 +44,7 @@ import { ArrowLeft } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import type { Tables } from '@/src/types/database-overrides';
 
 /**
  * Generate metadata for changelog list page
@@ -94,17 +95,19 @@ export default async function ChangelogPage() {
       offset: 0,
     });
 
-    const entries = overview.entries;
+    const entries = overview.entries ?? [];
 
     // Get category counts from metadata (database-calculated, not client-side)
+    // Cast category_counts from Json to Record<string, number>
+    const categoryCountsJson = overview.metadata?.category_counts as Record<string, number> | null;
     const categoryCounts: Record<string, number> = {
-      All: overview.metadata.totalEntries,
-      Added: overview.metadata.categoryCounts['Added'] ?? 0,
-      Changed: overview.metadata.categoryCounts['Changed'] ?? 0,
-      Fixed: overview.metadata.categoryCounts['Fixed'] ?? 0,
-      Removed: overview.metadata.categoryCounts['Removed'] ?? 0,
-      Deprecated: overview.metadata.categoryCounts['Deprecated'] ?? 0,
-      Security: overview.metadata.categoryCounts['Security'] ?? 0,
+      All: overview.metadata?.total_entries ?? 0,
+      Added: categoryCountsJson?.['Added'] ?? 0,
+      Changed: categoryCountsJson?.['Changed'] ?? 0,
+      Fixed: categoryCountsJson?.['Fixed'] ?? 0,
+      Removed: categoryCountsJson?.['Removed'] ?? 0,
+      Deprecated: categoryCountsJson?.['Deprecated'] ?? 0,
+      Security: categoryCountsJson?.['Security'] ?? 0,
     };
 
     return (
@@ -136,7 +139,7 @@ export default async function ChangelogPage() {
                 <span className="font-semibold text-foreground">{entries.length}</span> total
                 updates
               </div>
-              {entries.length > 0 && entries[0] && (
+              {entries.length > 0 && entries[0] && entries[0].release_date && (
                 <div>
                   Latest:{' '}
                   <time dateTime={entries[0].release_date} className="font-medium text-foreground">
@@ -152,7 +155,29 @@ export default async function ChangelogPage() {
           </div>
 
           {/* Client-side filtered list */}
-          <ChangelogListClient entries={entries} categoryCounts={categoryCounts} />
+          <ChangelogListClient
+            entries={
+              entries.map((entry) => ({
+                ...entry,
+                canonical_url: null,
+                commit_count: null,
+                contributors: null,
+                git_commit_sha: null,
+                json_ld: null,
+                og_image: null,
+                og_type: null,
+                robots_follow: null,
+                robots_index: null,
+                source: null,
+                twitter_card: null,
+                content: entry.content ?? '',
+                changes: entry.changes ?? {},
+                created_at: entry.created_at ?? '',
+                updated_at: entry.updated_at ?? '',
+              })) as Tables<'changelog'>[]
+            }
+            categoryCounts={categoryCounts}
+          />
         </div>
 
         {/* Email CTA - Footer section (matching homepage pattern) */}

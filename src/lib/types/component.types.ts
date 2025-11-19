@@ -20,9 +20,6 @@ import type { LucideIcon, LucideIcon as LucideIconType } from '@/src/lib/icons';
 import type { Database } from '@/src/types/database.types';
 import type {
   ContentItem,
-  EnrichedContentItem,
-  GetGetContentDetailCompleteReturn,
-  GetGetHomepageCompleteReturn,
   HomepageContentItem,
   JobCardJobType,
   Tables,
@@ -35,7 +32,8 @@ import type {
 export type DisplayableContent =
   | ContentItem
   | SearchResult
-  | EnrichedContentItem
+  | Database['public']['CompositeTypes']['enriched_content_item']
+  | Database['public']['CompositeTypes']['related_content_item']
   | HomepageContentItem;
 
 export interface ConfigCardProps {
@@ -61,13 +59,13 @@ export interface ConfigCardProps {
  */
 export interface HomePageClientProps {
   /** Initial server-side data for client hydration (from get_homepage_complete RPC) */
-  initialData: GetGetHomepageCompleteReturn['content']['categoryData'];
+  initialData: Record<string, unknown[]>;
   /** Weekly featured content grouped by category */
-  featuredByCategory?: GetGetHomepageCompleteReturn['content']['categoryData'];
+  featuredByCategory?: Record<string, unknown[]>;
   /** Content category statistics */
-  stats?: GetGetHomepageCompleteReturn['content']['stats'];
+  stats?: Record<string, { total: number; featured: number }>;
   /** Featured jobs from database (includes placeholders if no real jobs) */
-  featuredJobs?: GetGetHomepageCompleteReturn['featured_jobs'];
+  featuredJobs?: Array<unknown>;
 }
 
 export interface ContentListWithLoadMoreProps {
@@ -133,7 +131,9 @@ export interface TrendingContentProps {
   period?: Database['public']['Enums']['trending_period'];
 }
 
-export type ContentListServerProps<T extends DisplayableContent = EnrichedContentItem> = {
+export type ContentListServerProps<
+  T extends DisplayableContent = Database['public']['CompositeTypes']['enriched_content_item'],
+> = {
   title: string;
   description: string;
   icon: string;
@@ -780,11 +780,16 @@ export interface ProcessedSectionData {
  * So we narrow the type to exclude Tables<'jobs'> to ensure proper type safety.
  */
 export interface TabbedDetailLayoutProps {
-  item: Tables<'content'> | GetGetContentDetailCompleteReturn['content'];
+  item:
+    | Tables<'content'>
+    | (Database['public']['Functions']['get_content_detail_complete']['Returns']['content'] &
+        Tables<'content'>);
   config: UnifiedCategoryConfig<Database['public']['Enums']['content_category']>;
   tabs: ReadonlyArray<TabConfig>;
   sectionData: ProcessedSectionData;
-  relatedItems?: ContentItem[] | GetGetContentDetailCompleteReturn['related'];
+  relatedItems?:
+    | ContentItem[]
+    | Database['public']['Functions']['get_content_detail_complete']['Returns']['related'];
 }
 
 // ============================================================================
@@ -889,7 +894,10 @@ export type InstallProps = BaseProps & {
     } | null;
     requirements?: string[];
   };
-  item: ContentItem | GetGetContentDetailCompleteReturn['content'];
+  item:
+    | ContentItem
+    | (Database['public']['Functions']['get_content_detail_complete']['Returns']['content'] &
+        ContentItem);
 };
 
 export type UnifiedSectionProps =

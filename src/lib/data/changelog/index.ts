@@ -4,11 +4,7 @@ import { z } from 'zod';
 import { fetchCachedRpc } from '@/src/lib/data/helpers';
 import { logger } from '@/src/lib/logger';
 import type { Database } from '@/src/types/database.types';
-import type {
-  GetGetChangelogDetailReturn,
-  GetGetChangelogOverviewReturn,
-  Tables,
-} from '@/src/types/database-overrides';
+import type { Tables } from '@/src/types/database-overrides';
 
 // Zod schema for changelog entry changes structure (JSONB validation)
 const changeItemSchema = z.object({
@@ -44,20 +40,23 @@ const CHANGELOG_TAG = 'changelog';
 const CHANGELOG_TTL_KEY = 'cache.changelog.ttl_seconds';
 const CHANGELOG_DETAIL_TTL_KEY = 'cache.changelog_detail.ttl_seconds';
 
-function createEmptyOverview(limit: number, offset = 0): GetGetChangelogOverviewReturn {
+function createEmptyOverview(
+  limit: number,
+  offset = 0
+): Database['public']['Functions']['get_changelog_overview']['Returns'] {
   return {
     entries: [],
     metadata: {
-      totalEntries: 0,
-      dateRange: { earliest: '', latest: '' },
-      categoryCounts: {},
+      total_entries: 0,
+      date_range: { earliest: '', latest: '' },
+      category_counts: {},
     },
     featured: [],
     pagination: {
       total: 0,
       limit,
       offset,
-      hasMore: false,
+      has_more: false,
     },
   };
 }
@@ -74,10 +73,13 @@ export async function getChangelogOverview(
     limit?: number;
     offset?: number;
   } = {}
-): Promise<GetGetChangelogOverviewReturn> {
+): Promise<Database['public']['Functions']['get_changelog_overview']['Returns']> {
   const { category, publishedOnly = true, featuredOnly = false, limit = 50, offset = 0 } = options;
 
-  return fetchCachedRpc<'get_changelog_overview', GetGetChangelogOverviewReturn>(
+  return fetchCachedRpc<
+    'get_changelog_overview',
+    Database['public']['Functions']['get_changelog_overview']['Returns']
+  >(
     {
       ...(category ? { p_category: category } : {}),
       p_published_only: publishedOnly,
@@ -109,7 +111,10 @@ export async function getChangelogOverview(
  * Optimized single RPC call that replaces get_changelog_entry_by_slug
  */
 export async function getChangelogEntryBySlug(slug: string): Promise<Tables<'changelog'> | null> {
-  const result = await fetchCachedRpc<'get_changelog_detail', GetGetChangelogDetailReturn>(
+  const result = await fetchCachedRpc<
+    'get_changelog_detail',
+    Database['public']['Functions']['get_changelog_detail']['Returns']
+  >(
     { p_slug: slug },
     {
       rpcName: 'get_changelog_detail',
@@ -124,8 +129,24 @@ export async function getChangelogEntryBySlug(slug: string): Promise<Tables<'cha
   if (!result.entry) return null;
 
   // Map RPC return to full Tables<'changelog'> structure
+  // Cast categories from Json to Record<string, string[]>
+  const entry = result.entry;
   return {
-    ...result.entry,
+    id: entry.id ?? '',
+    slug: entry.slug ?? '',
+    title: entry.title ?? '',
+    tldr: entry.tldr,
+    description: entry.description,
+    content: entry.content ?? '',
+    raw_content: entry.raw_content ?? '',
+    release_date: entry.release_date ?? '',
+    featured: entry.featured ?? false,
+    published: entry.published ?? false,
+    keywords: entry.keywords,
+    metadata: entry.metadata,
+    changes: entry.changes ?? {},
+    created_at: entry.created_at ?? '',
+    updated_at: entry.updated_at ?? '',
     canonical_url: null,
     commit_count: null,
     contributors: null,
@@ -137,9 +158,7 @@ export async function getChangelogEntryBySlug(slug: string): Promise<Tables<'cha
     robots_index: null,
     source: null,
     twitter_card: null,
-    content: result.entry.content ?? '',
-    changes: result.entry.changes,
-  } as unknown as Tables<'changelog'>;
+  } as Tables<'changelog'>;
 }
 
 /**
@@ -147,7 +166,7 @@ export async function getChangelogEntryBySlug(slug: string): Promise<Tables<'cha
  * Get paginated changelog entries (backward compatibility)
  */
 export async function getChangelog(): Promise<{
-  entries: GetGetChangelogOverviewReturn['entries'];
+  entries: Database['public']['Functions']['get_changelog_overview']['Returns']['entries'];
   total: number;
   limit: number;
   offset: number;
@@ -162,28 +181,48 @@ export async function getChangelog(): Promise<{
 
   // Convert to old format for backward compatibility
   return {
-    entries: overview.entries,
-    total: overview.pagination.total,
-    limit: overview.pagination.limit,
-    offset: overview.pagination.offset,
-    hasMore: overview.pagination.hasMore,
+    entries: overview.entries ?? [],
+    total: overview.pagination?.total ?? 0,
+    limit: overview.pagination?.limit ?? 0,
+    offset: overview.pagination?.offset ?? 0,
+    hasMore: overview.pagination?.has_more ?? false,
   };
 }
 
 /**
  * Transform changelog entry to ensure contributors and keywords are arrays (never null)
+ * Accepts both full Tables<'changelog'> and changelog_overview_entry (subset)
  */
-function normalizeChangelogEntry(entry: Tables<'changelog'>): Omit<
-  Tables<'changelog'>,
-  'contributors' | 'keywords'
-> & {
+function normalizeChangelogEntry(
+  entry: Tables<'changelog'> | Database['public']['CompositeTypes']['changelog_overview_entry']
+): Omit<Tables<'changelog'>, 'contributors' | 'keywords'> & {
   contributors: string[];
   keywords: string[];
 } {
-  return {
+  // Map changelog_overview_entry to full Tables<'changelog'> structure
+  const fullEntry: Tables<'changelog'> = {
     ...entry,
-    contributors: Array.isArray(entry.contributors) ? entry.contributors : [],
-    keywords: Array.isArray(entry.keywords) ? entry.keywords : [],
+    canonical_url: null,
+    commit_count: null,
+    contributors: null,
+    git_commit_sha: null,
+    json_ld: null,
+    og_image: null,
+    og_type: null,
+    robots_follow: null,
+    robots_index: null,
+    source: null,
+    twitter_card: null,
+    content: entry.content ?? '',
+    changes: entry.changes ?? {},
+    created_at: entry.created_at ?? '',
+    updated_at: entry.updated_at ?? '',
+  } as Tables<'changelog'>;
+
+  return {
+    ...fullEntry,
+    contributors: Array.isArray(fullEntry.contributors) ? fullEntry.contributors : [],
+    keywords: Array.isArray(fullEntry.keywords) ? fullEntry.keywords : [],
   };
 }
 
@@ -205,7 +244,7 @@ export async function getAllChangelogEntries(): Promise<
     offset: 0,
   });
 
-  return overview.entries.map(normalizeChangelogEntry);
+  return (overview.entries ?? []).map(normalizeChangelogEntry);
 }
 
 /**
@@ -225,7 +264,7 @@ export async function getRecentChangelogEntries(limit = 5): Promise<
     offset: 0,
   });
 
-  return overview.entries.map(normalizeChangelogEntry);
+  return (overview.entries ?? []).map(normalizeChangelogEntry);
 }
 
 /**
@@ -249,7 +288,7 @@ export async function getChangelogEntriesByCategory(
     offset: 0,
   });
 
-  return overview.entries.map(normalizeChangelogEntry);
+  return (overview.entries ?? []).map(normalizeChangelogEntry);
 }
 
 /**
@@ -270,7 +309,7 @@ export async function getFeaturedChangelogEntries(limit = 3): Promise<
     offset: 0,
   });
 
-  return overview.featured.map(normalizeChangelogEntry);
+  return (overview.featured ?? []).map(normalizeChangelogEntry);
 }
 
 /**
@@ -279,5 +318,21 @@ export async function getFeaturedChangelogEntries(limit = 3): Promise<
  */
 export async function getChangelogMetadata() {
   const overview = await getChangelogOverview({ limit: 1, offset: 0 });
-  return overview.metadata;
+  // Map to old format for backward compatibility
+  const metadata = overview.metadata;
+  if (!metadata) {
+    return {
+      totalEntries: 0,
+      dateRange: { earliest: '', latest: '' },
+      categoryCounts: {},
+    };
+  }
+  return {
+    totalEntries: metadata.total_entries ?? 0,
+    dateRange: {
+      earliest: metadata.date_range?.earliest ?? '',
+      latest: metadata.date_range?.latest ?? '',
+    },
+    categoryCounts: (metadata.category_counts as Record<string, number>) ?? {},
+  };
 }
