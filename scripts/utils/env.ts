@@ -36,15 +36,15 @@ export async function ensureEnvVars(
   // Detect Vercel builds: VERCEL=1 or VERCEL_ENV is set
   // Detect GitHub Actions: GITHUB_ACTIONS=true or CI=true
   const isCI =
-    process.env.CI === 'true' ||
-    process.env.GITHUB_ACTIONS === 'true' ||
-    process.env.VERCEL === '1' ||
-    Boolean(process.env.VERCEL_ENV);
+    process.env['CI'] === 'true' ||
+    process.env['GITHUB_ACTIONS'] === 'true' ||
+    process.env['VERCEL'] === '1' ||
+    Boolean(process.env['VERCEL_ENV']);
 
   if (isCI) {
-    const environment = process.env.VERCEL
+    const environment = process.env['VERCEL']
       ? 'vercel'
-      : process.env.GITHUB_ACTIONS
+      : process.env['GITHUB_ACTIONS']
         ? 'github'
         : 'ci';
     logger.warn(`⚠️  Missing environment variables in CI/Build: ${missingVars.join(', ')}`, {
@@ -53,7 +53,7 @@ export async function ensureEnvVars(
       environment,
     });
 
-    if (process.env.VERCEL) {
+    if (process.env['VERCEL']) {
       logger.warn(
         'For Vercel deployments, ensure these variables are set in your Vercel project settings:',
         { script: 'env' }
@@ -70,7 +70,7 @@ export async function ensureEnvVars(
 
     throw new Error(
       `Missing required environment variables in CI/Build: ${missingVars.join(', ')}\n` +
-        (process.env.VERCEL
+        (process.env['VERCEL']
           ? 'Set these in Vercel Project Settings → Environment Variables for all environments (Production, Preview, Development).'
           : 'Set these in your CI environment or deployment platform.')
     );

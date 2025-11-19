@@ -3,7 +3,7 @@ import type * as React from 'react';
 import { baseBadgeVariants } from '@/src/components/core/domain/badges/category-badge';
 import { ANIMATION_CONSTANTS } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
-import type { AnnouncementVariant } from '@/src/types/database-overrides';
+import type { Database } from '@/src/types/database.types';
 
 /**
  * Announcement Component System
@@ -37,7 +37,7 @@ export interface AnnouncementProps extends React.OutputHTMLAttributes<HTMLOutput
    * Badge variant for styling
    * @default "outline"
    */
-  variant?: AnnouncementVariant;
+  variant?: Database['public']['Enums']['announcement_variant'];
 
   /**
    * Enable themed styling with additional visual effects

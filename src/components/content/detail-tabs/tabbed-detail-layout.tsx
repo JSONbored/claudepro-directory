@@ -12,7 +12,8 @@ import { usePulse } from '@/src/hooks/use-pulse';
 import type { TabbedDetailLayoutProps } from '@/src/lib/types/component.types';
 import { cn } from '@/src/lib/utils';
 import { logUnhandledPromise } from '@/src/lib/utils/error.utils';
-import type { ContentCategory } from '@/src/types/database-overrides';
+import type { Database } from '@/src/types/database.types';
+
 import { TabSectionRenderer } from './tab-section-renderer';
 
 export function TabbedDetailLayout({ item, config, tabs, sectionData }: TabbedDetailLayoutProps) {
@@ -58,7 +59,7 @@ export function TabbedDetailLayout({ item, config, tabs, sectionData }: TabbedDe
       // Track tab switch
       pulse
         .click({
-          category: item.category as ContentCategory,
+          category: item.category as Database['public']['Enums']['content_category'],
           slug: item.slug,
           metadata: {
             tab_id: value,

@@ -84,7 +84,7 @@ async function processChangelogWebhook(message: ChangelogWebhookQueueMessage): P
     // 2. Parse VercelWebhookPayload from webhook.data
     let payload: VercelWebhookPayload;
     try {
-      payload = webhookEvent.data as unknown as VercelWebhookPayload;
+      payload = webhookEvent['data'] as unknown as VercelWebhookPayload;
     } catch (parseError) {
       const errorMsg = parseError instanceof Error ? parseError.message : String(parseError);
       errors.push(`Payload parse: ${errorMsg}`);
@@ -155,7 +155,7 @@ async function processChangelogWebhook(message: ChangelogWebhookQueueMessage): P
                 retryOn: [500, 502, 503, 504],
                 noRetryOn: [400, 401, 403, 404],
               },
-              logContext,
+              ...(logContext !== undefined ? { logContext } : {}),
             });
 
             if (!response.ok) {
@@ -205,7 +205,11 @@ async function processChangelogWebhook(message: ChangelogWebhookQueueMessage): P
     const title = inferTitle(conventionalCommits);
     const tldr = generateTldr(conventionalCommits);
     const changes = transformSectionsToChanges(sections);
-    const releaseDate = new Date().toISOString().split('T')[0];
+    const dateStr = new Date().toISOString().split('T')[0];
+    if (!dateStr) {
+      throw new Error('Failed to format release date');
+    }
+    const releaseDate = dateStr;
     const slug = `${releaseDate}-${payload.payload.deployment.id.slice(-6)}`;
     const branch = payload.payload.deployment.meta?.branch || 'main';
     const deploymentUrl = payload.payload.deployment.url;
@@ -227,26 +231,25 @@ async function processChangelogWebhook(message: ChangelogWebhookQueueMessage): P
     const changelogEntry: ChangelogInsert = {
       title,
       slug,
-      tldr,
+      tldr: tldr ?? null,
       description: tldr || title,
       content: markdownContent,
       raw_content: markdownContent,
-      changes,
+      changes: changes ?? null,
       release_date: releaseDate,
       published: true,
       featured: false,
       source: 'automation',
-      metadata,
-      keywords,
+      metadata: metadata ?? null,
+      keywords: keywords ?? null,
       commit_count: conventionalCommits.length,
-      contributors,
-      git_commit_sha: headCommit,
+      contributors: contributors ?? null,
+      git_commit_sha: headCommit ?? null,
       canonical_url: `${SITE_URL}/changelog/${slug}`,
-    };
+    } satisfies ChangelogInsert;
 
     // 9. Insert changelog entry
-    const insertData =
-      changelogEntry satisfies DatabaseGenerated['public']['Tables']['changelog']['Insert'];
+    const insertData: DatabaseGenerated['public']['Tables']['changelog']['Insert'] = changelogEntry;
     const result = insertTable('changelog', insertData);
     const { data: changelogData, error: insertError } = await result
       .select('*')
@@ -270,7 +273,7 @@ async function processChangelogWebhook(message: ChangelogWebhookQueueMessage): P
       tldr,
       sections,
       commits: conventionalCommits,
-      releaseDate: changelogData.release_date ?? new Date().toISOString(),
+      releaseDate: changelogData.release_date || new Date().toISOString(),
       metadata,
     };
 

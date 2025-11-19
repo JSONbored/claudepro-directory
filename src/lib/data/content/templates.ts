@@ -4,10 +4,11 @@
  */
 
 import { fetchCachedRpc } from '@/src/lib/data/helpers';
-import type { ContentCategory, GetGetContentTemplatesReturn } from '@/src/types/database-overrides';
+import type { Database } from '@/src/types/database.types';
+import type { GetGetContentTemplatesReturn } from '@/src/types/database-overrides';
 
 export async function getContentTemplates(
-  category: ContentCategory
+  category: Database['public']['Enums']['content_category']
 ): Promise<GetGetContentTemplatesReturn> {
   return fetchCachedRpc<'get_content_templates', GetGetContentTemplatesReturn>(
     { p_category: category },

@@ -21,36 +21,48 @@ import { getConfigRecommendations } from '@/src/lib/data/tools/recommendations';
 import { logger } from '@/src/lib/logger';
 import { normalizeError } from '@/src/lib/utils/error.utils';
 import { enqueuePulseEventServer } from '@/src/lib/utils/pulse';
-import type { Json } from '@/src/types/database.types';
+import type { Database, Json } from '@/src/types/database.types';
 import type {
-  ContactCategory,
-  Database,
-  ExperienceLevel,
-  FocusAreaType,
+  Database as DatabaseOverrides,
   GetGetRecommendationsReturn,
-  InteractionType,
 } from '@/src/types/database-overrides';
 import {
   CONTACT_ACTION_TYPE_VALUES,
-  CONTACT_CATEGORY_VALUES,
-  CONTENT_CATEGORY_VALUES,
-  type ContactActionType,
-  type ContentCategory,
   EXPERIENCE_LEVEL_VALUES,
   FOCUS_AREA_TYPE_VALUES,
   INTEGRATION_TYPE_VALUES,
   INTERACTION_TYPE_VALUES,
-  type IntegrationType,
   USE_CASE_TYPE_VALUES,
-  type UseCaseType,
 } from '@/src/types/database-overrides';
+
+const CONTACT_CATEGORY_VALUES = [
+  'bug',
+  'feature',
+  'partnership',
+  'general',
+  'other',
+] as const satisfies readonly Database['public']['Enums']['contact_category'][];
+
+const CONTENT_CATEGORY_VALUES = [
+  'agents',
+  'mcp',
+  'rules',
+  'commands',
+  'hooks',
+  'statuslines',
+  'skills',
+  'collections',
+  'guides',
+  'jobs',
+  'changelog',
+] as const satisfies readonly Database['public']['Enums']['content_category'][];
 
 // ============================================
 // TYPES
 // ============================================
 
 export type TrackInteractionParams = Omit<
-  Database['public']['Tables']['user_interactions']['Insert'],
+  DatabaseOverrides['public']['Tables']['user_interactions']['Insert'],
   'id' | 'created_at' | 'user_id'
 >;
 
@@ -63,11 +75,11 @@ export interface ConfigRecommendationsResponse {
     id: string;
     generatedAt: string;
     answers: {
-      useCase: UseCaseType;
-      experienceLevel: ExperienceLevel;
+      useCase: Database['public']['Enums']['use_case_type'];
+      experienceLevel: Database['public']['Enums']['experience_level'];
       toolPreferences: string[];
-      integrations: IntegrationType[];
-      focusAreas: FocusAreaType[];
+      integrations: Database['public']['Enums']['integration_type'][];
+      focusAreas: Database['public']['Enums']['focus_area_type'][];
     };
   };
 }
@@ -79,7 +91,10 @@ export interface ConfigRecommendationsResponse {
 const trackInteractionSchema = z.object({
   content_type: z.string().nullable().optional(),
   content_slug: z.string().nullable().optional(),
-  interaction_type: z.enum([...INTERACTION_TYPE_VALUES] as [InteractionType, ...InteractionType[]]),
+  interaction_type: z.enum([...INTERACTION_TYPE_VALUES] as [
+    Database['public']['Enums']['interaction_type'],
+    ...Database['public']['Enums']['interaction_type'][],
+  ]),
   session_id: z
     .string()
     .refine(
@@ -103,8 +118,8 @@ const trackNewsletterEventSchema = z.object({
 const trackTerminalCommandSchema = z.object({
   command_id: z.string(),
   action_type: z.enum([...CONTACT_ACTION_TYPE_VALUES] as [
-    ContactActionType,
-    ...ContactActionType[],
+    Database['public']['Enums']['contact_action_type'],
+    ...Database['public']['Enums']['contact_action_type'][],
   ]),
   success: z.boolean(),
   error_reason: z.string().optional(),
@@ -112,7 +127,10 @@ const trackTerminalCommandSchema = z.object({
 });
 
 const trackTerminalFormSubmissionSchema = z.object({
-  category: z.enum([...CONTACT_CATEGORY_VALUES] as [ContactCategory, ...ContactCategory[]]),
+  category: z.enum([...CONTACT_CATEGORY_VALUES] as [
+    Database['public']['Enums']['contact_category'],
+    ...Database['public']['Enums']['contact_category'][],
+  ]),
   success: z.boolean(),
   error: z.string().optional(),
 });
@@ -139,26 +157,48 @@ const trackSponsoredClickSchema = z.object({
 });
 
 const trackUsageSchema = z.object({
-  content_type: z.enum([...CONTENT_CATEGORY_VALUES] as [ContentCategory, ...ContentCategory[]]),
+  content_type: z.enum([...CONTENT_CATEGORY_VALUES] as [
+    Database['public']['Enums']['content_category'],
+    ...Database['public']['Enums']['content_category'][],
+  ]),
   content_slug: z.string(),
-  action_type: z.enum(['copy', 'download_zip', 'download_markdown', 'llmstxt']),
+  action_type: z.enum(['copy', 'download_zip', 'download_markdown', 'llmstxt', 'download_mcpb']),
 });
 
 const getSimilarConfigsSchema = z.object({
-  content_type: z.enum([...CONTENT_CATEGORY_VALUES] as [ContentCategory, ...ContentCategory[]]),
+  content_type: z.enum([...CONTENT_CATEGORY_VALUES] as [
+    Database['public']['Enums']['content_category'],
+    ...Database['public']['Enums']['content_category'][],
+  ]),
   content_slug: z.string(),
   limit: z.number().int().min(1).max(50).optional(),
 });
 
 const generateConfigRecommendationsSchema = z.object({
-  useCase: z.enum([...USE_CASE_TYPE_VALUES] as [UseCaseType, ...UseCaseType[]]),
-  experienceLevel: z.enum([...EXPERIENCE_LEVEL_VALUES] as [ExperienceLevel, ...ExperienceLevel[]]),
+  useCase: z.enum([...USE_CASE_TYPE_VALUES] as [
+    Database['public']['Enums']['use_case_type'],
+    ...Database['public']['Enums']['use_case_type'][],
+  ]),
+  experienceLevel: z.enum([...EXPERIENCE_LEVEL_VALUES] as [
+    Database['public']['Enums']['experience_level'],
+    ...Database['public']['Enums']['experience_level'][],
+  ]),
   toolPreferences: z.array(z.string()),
   integrations: z
-    .array(z.enum([...INTEGRATION_TYPE_VALUES] as [IntegrationType, ...IntegrationType[]]))
+    .array(
+      z.enum([...INTEGRATION_TYPE_VALUES] as [
+        Database['public']['Enums']['integration_type'],
+        ...Database['public']['Enums']['integration_type'][],
+      ])
+    )
     .optional(),
   focusAreas: z
-    .array(z.enum([...FOCUS_AREA_TYPE_VALUES] as [FocusAreaType, ...FocusAreaType[]]))
+    .array(
+      z.enum([...FOCUS_AREA_TYPE_VALUES] as [
+        Database['public']['Enums']['focus_area_type'],
+        ...Database['public']['Enums']['focus_area_type'][],
+      ])
+    )
     .optional(),
 });
 
@@ -395,8 +435,8 @@ export const getSimilarConfigsAction = rateLimitedAction
         contentType: parsedInput.content_type,
         contentSlug: parsedInput.content_slug,
       };
-      if (parsedInput.limit !== undefined) {
-        logContext.limit = parsedInput.limit;
+      if (parsedInput['limit'] !== undefined) {
+        logContext['limit'] = parsedInput['limit'];
       }
       logger.error('getSimilarConfigsAction: getSimilarContent threw', normalized, logContext);
       return null;

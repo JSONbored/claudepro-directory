@@ -21,8 +21,8 @@ import { getDisplayTitle } from '@/src/lib/utils';
 import { getContentItemUrl, sanitizeSlug } from '@/src/lib/utils/content.utils';
 import { ensureStringArray, getMetadata } from '@/src/lib/utils/data.utils';
 import { logUnhandledPromise } from '@/src/lib/utils/error.utils';
+import type { Database } from '@/src/types/database.types';
 import type {
-  ContentCategory,
   ContentItem,
   GetGetContentDetailCompleteReturn,
 } from '@/src/types/database-overrides';
@@ -61,7 +61,10 @@ function getSafeContentItemUrl(category: string, slug: string): string | null {
   // sanitizeSlug only removes characters that isValidSlug already forbids,
   // so if slug passed isValidSlug, sanitizedSlug will also pass
   // Construct the URL
-  const url = getContentItemUrl({ category: category as ContentCategory, slug: sanitizedSlug });
+  const url = getContentItemUrl({
+    category: category as Database['public']['Enums']['content_category'],
+    slug: sanitizedSlug,
+  });
   // Validate the final URL path to ensure it's safe
   if (!isValidInternalPath(url)) return null;
   return url;
@@ -189,12 +192,13 @@ export const DetailSidebar = memo(function DetailSidebar({
   const showGitHubLink = config.metadata?.showGitHubLink ?? true;
   const hasDocumentationUrl = 'documentation_url' in item && item.documentation_url;
   const metadata = getMetadata(item);
-  const hasConfiguration = metadata.configuration && typeof metadata.configuration === 'object';
-  const packageName = metadata.package as string | undefined;
+  const hasConfiguration =
+    metadata['configuration'] && typeof metadata['configuration'] === 'object';
+  const packageName = metadata['package'] as string | undefined;
   const hasPackage = !!packageName;
   const hasAuth = 'requiresAuth' in metadata;
   const hasPermissions = 'permissions' in metadata;
-  const permissions = hasPermissions ? ensureStringArray(metadata.permissions) : [];
+  const permissions = hasPermissions ? ensureStringArray(metadata['permissions']) : [];
   const hasSource = 'source' in item && item.source;
 
   return (
@@ -322,12 +326,12 @@ export const DetailSidebar = memo(function DetailSidebar({
             {(() => {
               if (
                 !hasConfiguration ||
-                typeof metadata.configuration !== 'object' ||
-                metadata.configuration === null
+                typeof metadata['configuration'] !== 'object' ||
+                metadata['configuration'] === null
               ) {
                 return null;
               }
-              const config = metadata.configuration as { temperature?: number };
+              const config = metadata['configuration'] as { temperature?: number };
               if (typeof config.temperature !== 'number') {
                 return null;
               }
@@ -363,7 +367,7 @@ export const DetailSidebar = memo(function DetailSidebar({
               <div>
                 <h4 className={'mb-1 font-medium'}>Authentication</h4>
                 <p className={UI_CLASSES.TEXT_SM_MUTED}>
-                  {(metadata.requiresAuth as boolean) ? 'Required' : 'Not required'}
+                  {(metadata['requiresAuth'] as boolean) ? 'Required' : 'Not required'}
                 </p>
               </div>
             )}

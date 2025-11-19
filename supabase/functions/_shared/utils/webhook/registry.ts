@@ -4,8 +4,10 @@ import { webhookCorsHeaders } from '../http.ts';
 import { verifyVercelSignature } from '../integrations/vercel.ts';
 import { verifySvixSignature } from './crypto.ts';
 
-type WebhookSource = Database['public']['Enums']['webhook_source'];
-export type WebhookProviderName = Extract<WebhookSource, 'resend' | 'vercel' | 'polar'>;
+export type WebhookProviderName = Extract<
+  Database['public']['Enums']['webhook_source'],
+  'resend' | 'vercel' | 'polar'
+>;
 
 interface WebhookVerifierInput {
   rawBody: string;
@@ -114,8 +116,8 @@ const PROVIDERS: WebhookProviderConfig[] = [
       });
     },
     extractMetadata: (payload: Record<string, unknown>, headers: Headers) => ({
-      type: (payload.type as string | undefined) ?? null,
-      createdAt: (payload.created_at as string | undefined) ?? null,
+      type: (payload['type'] as string | undefined) ?? null,
+      createdAt: (payload['created_at'] as string | undefined) ?? null,
       idempotencyKey: headers.get('svix-id'),
     }),
   },
@@ -134,13 +136,13 @@ const PROVIDERS: WebhookProviderConfig[] = [
       return verifyVercelSignature(rawBody, signature, secret);
     },
     extractMetadata: (payload: Record<string, unknown>, headers: Headers) => {
-      const createdAt = payload.createdAt
-        ? new Date(Number(payload.createdAt)).toISOString()
+      const createdAt = payload['createdAt']
+        ? new Date(Number(payload['createdAt'])).toISOString()
         : new Date().toISOString();
       const idempotencyKey =
-        (payload.id as string | undefined) ?? headers.get('x-vercel-id') ?? null;
+        (payload['id'] as string | undefined) ?? headers.get('x-vercel-id') ?? null;
       return {
-        type: (payload.type as string | undefined) ?? null,
+        type: (payload['type'] as string | undefined) ?? null,
         createdAt,
         idempotencyKey,
       };
@@ -168,8 +170,8 @@ const PROVIDERS: WebhookProviderConfig[] = [
       });
     },
     extractMetadata: (payload: Record<string, unknown>, headers: Headers) => ({
-      type: (payload.type as string | undefined) ?? null,
-      createdAt: (payload.timestamp as string | undefined) ?? null,
+      type: (payload['type'] as string | undefined) ?? null,
+      createdAt: (payload['timestamp'] as string | undefined) ?? null,
       idempotencyKey: headers.get('webhook-id'),
     }),
   },

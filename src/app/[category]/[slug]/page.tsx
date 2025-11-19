@@ -13,7 +13,6 @@ import { StructuredData } from '@/src/components/core/infra/structured-data';
 import { RecentlyViewedTracker } from '@/src/components/features/navigation/recently-viewed-tracker';
 import type { RecentlyViewedCategory } from '@/src/hooks/use-recently-viewed';
 import {
-  type ContentCategory,
   getCategoryConfig,
   isValidCategory,
   VALID_CATEGORIES,
@@ -90,7 +89,7 @@ export async function generateMetadata({
 
   let config: Awaited<ReturnType<typeof getCategoryConfig>> | null = null;
   try {
-    config = await getCategoryConfig(category as ContentCategory);
+    config = await getCategoryConfig(category as Database['public']['Enums']['content_category']);
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load category config for metadata');
     logger.error('DetailPage: category config lookup failed', normalized, {
@@ -122,7 +121,7 @@ export default async function DetailPage({
 
   let config: Awaited<ReturnType<typeof getCategoryConfig>> | null = null;
   try {
-    config = await getCategoryConfig(category as ContentCategory);
+    config = await getCategoryConfig(category as Database['public']['Enums']['content_category']);
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load category config');
     logger.error('DetailPage: category config lookup threw', normalized, {

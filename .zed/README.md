@@ -33,8 +33,9 @@ Your project uses:
 
 ### Viewing Issues
 
-1. **Problems Panel**: View → Problems (or `Cmd+Shift+M` on macOS)
+1. **Problems Panel**: View → Problems (or `Cmd+Shift+M` on macOS, `Ctrl+Shift+M` on Windows/Linux)
    - **Note**: By default, TypeScript only checks open files. See "Full Workspace Analysis" below.
+   - **Keyboard Shortcuts**: See [Zed keybindings documentation](https://zed.dev/docs/keybindings) for platform-specific shortcuts
 
 2. **Hover Diagnostics**: Hover over code to see type information and errors
 3. **Inline Errors**: Red squiggles show TypeScript errors directly in the editor
@@ -52,7 +53,7 @@ This is **normal behavior** - it's a performance optimization. The language serv
 
 #### Option 1: Use Zed Tasks (Recommended - Easiest)
 
-1. Press `Cmd+Shift+P` (or `Ctrl+Shift+P`) to open Command Palette
+1. Press `Cmd+Shift+P` (macOS) or `Ctrl+Shift+P` (Windows/Linux) to open Command Palette
 2. Type "Tasks: Run Task" and select it
 3. Choose one of these tasks:
    - **"Type Check: Full Workspace"** - Checks all TypeScript files

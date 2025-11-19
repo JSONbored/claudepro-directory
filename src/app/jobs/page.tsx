@@ -58,8 +58,8 @@ export async function generateMetadata({
   const rawParams = await searchParams;
   return generatePageMetadata('/jobs', {
     filters: {
-      category: rawParams?.category as string | undefined,
-      remote: rawParams?.remote === 'true',
+      category: rawParams?.['category'] as string | undefined,
+      remote: rawParams?.['remote'] === 'true',
     },
   });
 }
@@ -68,13 +68,15 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
   const rawParams = await searchParams;
 
   const searchQuery =
-    (rawParams?.q as string) || (rawParams?.query as string) || (rawParams?.search as string);
-  const category = rawParams?.category as string | undefined;
-  const employment = rawParams?.employment as string | undefined;
-  const experience = rawParams?.experience as string | undefined;
-  const remote = rawParams?.remote === 'true' ? true : undefined;
-  const page = Number(rawParams?.page) || 1;
-  const limit = Math.min(Number(rawParams?.limit) || 20, 100);
+    (rawParams?.['q'] as string) ||
+    (rawParams?.['query'] as string) ||
+    (rawParams?.['search'] as string);
+  const category = rawParams?.['category'] as string | undefined;
+  const employment = rawParams?.['employment'] as string | undefined;
+  const experience = rawParams?.['experience'] as string | undefined;
+  const remote = rawParams?.['remote'] === 'true' ? true : undefined;
+  const page = Number(rawParams?.['page']) || 1;
+  const limit = Math.min(Number(rawParams?.['limit']) || 20, 100);
   const offset = (page - 1) * limit;
 
   logger.info('Jobs page accessed', {

@@ -8,14 +8,13 @@ import { cache } from 'react';
 import { getCacheTtl } from '@/src/lib/data/config/cache-config';
 import { fetchCachedRpc } from '@/src/lib/data/helpers';
 import { generateContentCacheKey, generateContentTags } from '@/src/lib/data/helpers-utils';
-import type {
-  ContentCategory,
-  GetGetEnrichedContentListReturn,
-  Tables,
-} from '@/src/types/database-overrides';
+import type { Database } from '@/src/types/database.types';
+import type { GetGetEnrichedContentListReturn, Tables } from '@/src/types/database-overrides';
 
 export interface ContentFilters {
-  category?: ContentCategory | ContentCategory[];
+  category?:
+    | Database['public']['Enums']['content_category']
+    | Database['public']['Enums']['content_category'][];
   tags?: string[];
   author?: string | string[];
   sourceTable?: string | string[];
@@ -26,7 +25,7 @@ export interface ContentFilters {
 }
 
 export async function getContentByCategory(
-  category: ContentCategory
+  category: Database['public']['Enums']['content_category']
 ): Promise<GetGetEnrichedContentListReturn> {
   return fetchCachedRpc<'get_enriched_content_list', GetGetEnrichedContentListReturn>(
     {
@@ -47,7 +46,7 @@ export async function getContentByCategory(
 
 export const getContentBySlug = cache(
   async (
-    category: ContentCategory,
+    category: Database['public']['Enums']['content_category'],
     slug: string
   ): Promise<GetGetEnrichedContentListReturn[number] | null> => {
     const ttl = await getCacheTtl('cache.content_detail.ttl_seconds');
@@ -87,7 +86,7 @@ export const getContentBySlug = cache(
 // This function is currently unused - consider removing or implementing with existing RPC
 export const getFullContentBySlug = cache(
   async (
-    category: ContentCategory,
+    category: Database['public']['Enums']['content_category'],
     slug: string
   ): Promise<GetGetEnrichedContentListReturn[number] | null> => {
     // Fallback to getContentBySlug for now
@@ -126,45 +125,49 @@ export const getAllContent = cache(
 
 // TODO: RPC 'get_content_count' does not exist - derive count from paginated result
 // Consider creating a dedicated count RPC for better performance
-export const getContentCount = cache(async (category?: ContentCategory): Promise<number> => {
-  // Use get_content_paginated with limit=1 to get total (if RPC returns pagination metadata)
-  // For now, return a placeholder - this needs a proper count RPC
-  const data = await fetchCachedRpc<'get_content_paginated', GetGetEnrichedContentListReturn>(
-    {
-      ...(category ? { p_category: category } : {}),
-      p_limit: 1,
-      p_offset: 0,
-    },
-    {
-      rpcName: 'get_content_paginated',
-      tags: generateContentTags(category),
-      ttlKey: 'cache.content_list.ttl_seconds',
-      keySuffix: generateContentCacheKey(category),
-      fallback: [],
-      logMeta: { category: category ?? 'all' },
-    }
-  );
-  // TODO: This is incorrect - we need the actual count, not array length
-  // The RPC doesn't return total count metadata, so this is a temporary workaround
-  return data.length;
-});
+export const getContentCount = cache(
+  async (category?: Database['public']['Enums']['content_category']): Promise<number> => {
+    // Use get_content_paginated with limit=1 to get total (if RPC returns pagination metadata)
+    // For now, return a placeholder - this needs a proper count RPC
+    const data = await fetchCachedRpc<'get_content_paginated', GetGetEnrichedContentListReturn>(
+      {
+        ...(category ? { p_category: category } : {}),
+        p_limit: 1,
+        p_offset: 0,
+      },
+      {
+        rpcName: 'get_content_paginated',
+        tags: generateContentTags(category),
+        ttlKey: 'cache.content_list.ttl_seconds',
+        keySuffix: generateContentCacheKey(category),
+        fallback: [],
+        logMeta: { category: category ?? 'all' },
+      }
+    );
+    // TODO: This is incorrect - we need the actual count, not array length
+    // The RPC doesn't return total count metadata, so this is a temporary workaround
+    return data.length;
+  }
+);
 
-export const getTrendingContent = cache(async (category?: ContentCategory, limit = 20) => {
-  return fetchCachedRpc<'get_trending_content', Tables<'content'>[]>(
-    {
-      ...(category ? { p_category: category } : {}),
-      p_limit: limit,
-    },
-    {
-      rpcName: 'get_trending_content',
-      tags: ['trending', ...(category ? [`trending-${category}`] : ['trending-all'])],
-      ttlKey: 'cache.content_list.ttl_seconds',
-      keySuffix: generateContentCacheKey(category, null, limit),
-      fallback: [],
-      logMeta: { category: category ?? 'all', limit },
-    }
-  );
-});
+export const getTrendingContent = cache(
+  async (category?: Database['public']['Enums']['content_category'], limit = 20) => {
+    return fetchCachedRpc<'get_trending_content', Tables<'content'>[]>(
+      {
+        ...(category ? { p_category: category } : {}),
+        p_limit: limit,
+      },
+      {
+        rpcName: 'get_trending_content',
+        tags: ['trending', ...(category ? [`trending-${category}`] : ['trending-all'])],
+        ttlKey: 'cache.content_list.ttl_seconds',
+        keySuffix: generateContentCacheKey(category, null, limit),
+        fallback: [],
+        logMeta: { category: category ?? 'all', limit },
+      }
+    );
+  }
+);
 
 export const getFilteredContent = cache(
   async (filters: ContentFilters): Promise<GetGetEnrichedContentListReturn> => {

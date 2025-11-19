@@ -24,8 +24,31 @@ import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { sanitizeSlug } from '@/src/lib/utils/content.utils';
 import { normalizeError } from '@/src/lib/utils/error.utils';
+import type { Database } from '@/src/types/database.types';
 import type { GetGetUserProfileReturn } from '@/src/types/database-overrides';
-import { isContentCategory } from '@/src/types/database-overrides';
+
+const CONTENT_CATEGORY_VALUES = [
+  'agents',
+  'mcp',
+  'rules',
+  'commands',
+  'hooks',
+  'statuslines',
+  'skills',
+  'collections',
+  'guides',
+  'jobs',
+  'changelog',
+] as const satisfies readonly Database['public']['Enums']['content_category'][];
+
+function isContentCategory(
+  value: unknown
+): value is Database['public']['Enums']['content_category'] {
+  return (
+    typeof value === 'string' &&
+    CONTENT_CATEGORY_VALUES.includes(value as Database['public']['Enums']['content_category'])
+  );
+}
 
 /**
  * Validate slug is safe for use in URLs

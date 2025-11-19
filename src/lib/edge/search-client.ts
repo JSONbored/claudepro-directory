@@ -11,7 +11,7 @@
 import { logger } from '@/src/lib/logger';
 import type { Database } from '@/src/types/database-overrides';
 
-const EDGE_SEARCH_URL = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/unified-search`;
+const EDGE_SEARCH_URL = `${process.env['NEXT_PUBLIC_SUPABASE_URL']}/functions/v1/unified-search`;
 
 // Type definitions
 type ContentSearchResult =

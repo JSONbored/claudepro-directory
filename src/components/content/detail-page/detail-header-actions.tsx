@@ -86,8 +86,8 @@ import { ArrowLeft, Check, Copy, Download, FileText, Sparkles } from '@/src/lib/
 import { STATE_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { logUnhandledPromise } from '@/src/lib/utils/error.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
+import type { Database } from '@/src/types/database.types';
 import type {
-  ContentCategory,
   ContentItem,
   CopyType,
   GetGetContentDetailCompleteReturn,
@@ -164,7 +164,7 @@ export interface SerializableAction {
 export interface DetailHeaderActionsProps {
   item: ContentItem | GetGetContentDetailCompleteReturn['content'];
   typeName: string;
-  category: ContentCategory;
+  category: Database['public']['Enums']['content_category'];
   hasContent: boolean;
   displayTitle: string;
   primaryAction: SerializableAction;
@@ -259,28 +259,90 @@ export function DetailHeaderActions({
     });
   };
 
+  // Check if download is available for this item
+  const hasMcpbDownload =
+    category === 'mcp' &&
+    'mcpb_storage_url' in item &&
+    item.mcpb_storage_url &&
+    typeof item.mcpb_storage_url === 'string';
+
+  const hasStorageDownload =
+    category === 'skills' &&
+    'storage_url' in item &&
+    item.storage_url &&
+    typeof item.storage_url === 'string';
+
+  const hasDownloadAvailable = hasMcpbDownload || hasStorageDownload;
+
   // Handle action clicks based on type
   const handleActionClick = (action: SerializableAction) => {
-    // Handle download action - check for storage_url
-    if (action.type === 'download' && 'storage_url' in item && item.storage_url) {
-      // Validate and sanitize storage URL before redirect
-      const safeStorageUrl = getSafeStorageUrl(item.storage_url as string);
-      if (!safeStorageUrl) {
-        toasts.raw.error('Invalid download URL', {
-          description: 'The download link is not available.',
+    // Handle download action
+    if (action.type === 'download') {
+      // For MCP content, use edge function proxy for .mcpb files (ensures Cloudflare caching)
+      if (hasMcpbDownload) {
+        const safeSlug = sanitizePathSegment(item.slug);
+        if (!safeSlug) {
+          toasts.raw.error('Invalid content slug', {
+            description: 'The download link is not available.',
+          });
+          return;
+        }
+
+        const supabaseUrl = process.env['NEXT_PUBLIC_SUPABASE_URL'];
+        if (!supabaseUrl) {
+          toasts.raw.error('Configuration error', {
+            description: 'Unable to generate download link.',
+          });
+          return;
+        }
+
+        // Use edge function proxy for cached egress (critical for cost optimization)
+        const downloadUrl = `${supabaseUrl}/functions/v1/data-api/content/mcp/${safeSlug}?format=storage`;
+        window.location.href = downloadUrl;
+        toasts.raw.success('Download started!', {
+          description: `Downloading ${item.title || item.slug} package...`,
         });
+
+        pulse
+          .download({ category, slug: item.slug, action_type: 'download_mcpb' })
+          .catch((error) => {
+            logUnhandledPromise('trackInteraction:download_mcpb', error, {
+              slug: item.slug,
+              category,
+            });
+          });
         return;
       }
-      window.location.href = safeStorageUrl;
-      toasts.raw.success('Download started!', {
-        description: `Downloading ${item.title || item.slug} package...`,
-      });
 
-      pulse.download({ category, slug: item.slug, action_type: 'download_zip' }).catch((error) => {
-        logUnhandledPromise('trackInteraction:download', error, {
-          slug: item.slug,
-          category,
+      // For Skills content, use direct storage URL
+      if (hasStorageDownload) {
+        // Validate and sanitize storage URL before redirect
+        const safeStorageUrl = getSafeStorageUrl(item.storage_url as string);
+        if (!safeStorageUrl) {
+          toasts.raw.error('Invalid download URL', {
+            description: 'The download link is not available.',
+          });
+          return;
+        }
+        window.location.href = safeStorageUrl;
+        toasts.raw.success('Download started!', {
+          description: `Downloading ${item.title || item.slug} package...`,
         });
+
+        pulse
+          .download({ category, slug: item.slug, action_type: 'download_zip' })
+          .catch((error) => {
+            logUnhandledPromise('trackInteraction:download', error, {
+              slug: item.slug,
+              category,
+            });
+          });
+        return;
+      }
+
+      // Download action clicked but no download available
+      toasts.raw.error('Download unavailable', {
+        description: 'This package is not yet available for download.',
       });
       return;
     }
@@ -332,9 +394,77 @@ export function DetailHeaderActions({
 
         {/* Action buttons */}
         <div className={UI_CLASSES.FLEX_COL_SM_ROW_GAP_3}>
-          <Button onClick={() => handleActionClick(primaryAction)} className="min-w-0">
-            {primaryAction.label}
-          </Button>
+          {/* Primary action button - only show if not a download action, or if download is available */}
+          {(!(primaryAction.type === 'download') || hasDownloadAvailable) && (
+            <Button onClick={() => handleActionClick(primaryAction)} className="min-w-0">
+              {primaryAction.label}
+            </Button>
+          )}
+
+          {/* Conditional download button - show when download is available but primaryAction is not download */}
+          {hasDownloadAvailable && primaryAction.type !== 'download' && (
+            <Button
+              onClick={() => {
+                if (hasMcpbDownload) {
+                  const safeSlug = sanitizePathSegment(item.slug);
+                  if (!safeSlug) {
+                    toasts.raw.error('Invalid content slug', {
+                      description: 'The download link is not available.',
+                    });
+                    return;
+                  }
+
+                  const supabaseUrl = process.env['NEXT_PUBLIC_SUPABASE_URL'];
+                  if (!supabaseUrl) {
+                    toasts.raw.error('Configuration error', {
+                      description: 'Unable to generate download link.',
+                    });
+                    return;
+                  }
+
+                  const downloadUrl = `${supabaseUrl}/functions/v1/data-api/content/mcp/${safeSlug}?format=storage`;
+                  window.location.href = downloadUrl;
+                  toasts.raw.success('Download started!', {
+                    description: `Downloading ${item.title || item.slug} package...`,
+                  });
+
+                  pulse
+                    .download({ category, slug: item.slug, action_type: 'download_mcpb' })
+                    .catch((error) => {
+                      logUnhandledPromise('trackInteraction:download_mcpb', error, {
+                        slug: item.slug,
+                        category,
+                      });
+                    });
+                } else if (hasStorageDownload) {
+                  const safeStorageUrl = getSafeStorageUrl(item.storage_url as string);
+                  if (!safeStorageUrl) {
+                    toasts.raw.error('Invalid download URL', {
+                      description: 'The download link is not available.',
+                    });
+                    return;
+                  }
+                  window.location.href = safeStorageUrl;
+                  toasts.raw.success('Download started!', {
+                    description: `Downloading ${item.title || item.slug} package...`,
+                  });
+
+                  pulse
+                    .download({ category, slug: item.slug, action_type: 'download_zip' })
+                    .catch((error) => {
+                      logUnhandledPromise('trackInteraction:download', error, {
+                        slug: item.slug,
+                        category,
+                      });
+                    });
+                }
+              }}
+              className="min-w-0"
+            >
+              <Download className={UI_CLASSES.ICON_SM_LEADING} />
+              {category === 'mcp' ? 'Download .mcpb' : 'Download'}
+            </Button>
+          )}
 
           {hasContent && (
             <motion.div

@@ -99,12 +99,12 @@ export default async function ChangelogPage() {
     // Get category counts from metadata (database-calculated, not client-side)
     const categoryCounts: Record<string, number> = {
       All: overview.metadata.totalEntries,
-      Added: overview.metadata.categoryCounts.Added ?? 0,
-      Changed: overview.metadata.categoryCounts.Changed ?? 0,
-      Fixed: overview.metadata.categoryCounts.Fixed ?? 0,
-      Removed: overview.metadata.categoryCounts.Removed ?? 0,
-      Deprecated: overview.metadata.categoryCounts.Deprecated ?? 0,
-      Security: overview.metadata.categoryCounts.Security ?? 0,
+      Added: overview.metadata.categoryCounts['Added'] ?? 0,
+      Changed: overview.metadata.categoryCounts['Changed'] ?? 0,
+      Fixed: overview.metadata.categoryCounts['Fixed'] ?? 0,
+      Removed: overview.metadata.categoryCounts['Removed'] ?? 0,
+      Deprecated: overview.metadata.categoryCounts['Deprecated'] ?? 0,
+      Security: overview.metadata.categoryCounts['Security'] ?? 0,
     };
 
     return (

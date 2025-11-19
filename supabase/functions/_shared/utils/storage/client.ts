@@ -74,6 +74,10 @@ export function buildStorageObjectPath(options: BuildStorageObjectPathOptions = 
     sanitize = DEFAULT_SANITIZE,
   } = options;
 
+  if (!extension) {
+    throw new Error('extension is required for buildStorageObjectPath');
+  }
+
   const segments: string[] = [];
 
   if (prefix) {
@@ -158,7 +162,7 @@ export async function createSignedStorageUrl(
     const { data, error } = await getStorageServiceClient()
       .storage.from(bucket)
       .createSignedUrl(path, expiresIn, {
-        download: options?.downloadFileName,
+        ...(options?.downloadFileName !== undefined ? { download: options.downloadFileName } : {}),
       });
 
     if (error) {

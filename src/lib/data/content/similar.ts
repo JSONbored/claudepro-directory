@@ -2,10 +2,11 @@
 
 import { fetchCachedRpc } from '@/src/lib/data/helpers';
 import { generateContentCacheKey } from '@/src/lib/data/helpers-utils';
-import type { ContentCategory, GetGetSimilarContentReturn } from '@/src/types/database-overrides';
+import type { Database } from '@/src/types/database.types';
+import type { GetGetSimilarContentReturn } from '@/src/types/database-overrides';
 
 export async function getSimilarContent(input: {
-  contentType: ContentCategory;
+  contentType: Database['public']['Enums']['content_category'];
   contentSlug: string;
   limit?: number;
 }): Promise<GetGetSimilarContentReturn | null> {

@@ -23,7 +23,11 @@ export function getPreviousWeekStart(): string {
   const lastMonday = new Date(now);
   lastMonday.setDate(now.getDate() - dayOfWeek - 6);
   lastMonday.setHours(0, 0, 0, 0);
-  return lastMonday.toISOString().split('T')[0];
+  const dateStr = lastMonday.toISOString().split('T')[0];
+  if (!dateStr) {
+    throw new Error('Failed to format date string');
+  }
+  return dateStr;
 }
 
 /**
@@ -60,7 +64,10 @@ export async function checkDigestRateLimit(): Promise<{
           column: string,
           value: string
         ) => {
-          single: () => Promise<{ data: AppSettingsRow | null; error: unknown }>;
+          single: () => Promise<{
+            data: AppSettingsRow | null;
+            error: unknown;
+          }>;
         };
       };
     }
@@ -116,7 +123,7 @@ export async function sendBatchDigest(
     const batch = subscribers.slice(i, i + batchSize);
 
     try {
-      const result = await withTimeout(
+      const result = (await withTimeout(
         resend.batch.send(
           batch.map((email) => ({
             from: HELLO_FROM,
@@ -128,9 +135,9 @@ export async function sendBatchDigest(
         ),
         TIMEOUT_PRESETS.external * 2, // Longer timeout for batch operations
         'Resend batch digest send timed out'
-      );
+      )) as { error?: unknown; data?: unknown } | unknown;
 
-      if (result.error) {
+      if (result && typeof result === 'object' && 'error' in result && result.error) {
         failed += batch.length;
       } else {
         success += batch.length;

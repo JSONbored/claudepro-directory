@@ -1,3 +1,5 @@
+/// <reference path="../_shared/deno-globals.d.ts" />
+
 /**
  * Transform API - Unified edge function for data transformations
  * Handles syntax highlighting, content processing, and other expensive operations
@@ -153,7 +155,10 @@ function handleDirectoryIndex(ctx: TransformApiContext): Response {
   );
 
   if (ctx.originalMethod === 'HEAD') {
-    return new Response(null, { status: response.status, headers: response.headers });
+    return new Response(null, {
+      status: response.status,
+      headers: response.headers,
+    });
   }
 
   return response;
@@ -181,7 +186,7 @@ function respondWithAnalytics(
     };
 
     if (error) {
-      logData.error = error instanceof Error ? error.message : String(error);
+      logData['error'] = error instanceof Error ? error.message : String(error);
     }
 
     if (outcome === 'success') {

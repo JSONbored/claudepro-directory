@@ -13,17 +13,12 @@ import {
 } from '@/src/lib/actions/pulse.actions';
 import { logger } from '@/src/lib/logger';
 import { createClient } from '@/src/lib/supabase/client';
-import type { Json } from '@/src/types/database.types';
-import type {
-  ContentCategory,
-  ExperienceLevel,
-  FocusAreaType,
-  IntegrationType,
-  UseCaseType,
-} from '@/src/types/database-overrides';
+import type { Database, Json } from '@/src/types/database.types';
 
-const EDGE_BASE_URL = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1`;
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://claudepro.directory';
+// All ENUM types accessed directly via Database['public']['Enums']['enum_name']
+
+const EDGE_BASE_URL = `${process.env['NEXT_PUBLIC_SUPABASE_URL']}/functions/v1`;
+const SITE_URL = process.env['NEXT_PUBLIC_SITE_URL'] ?? 'https://claudepro.directory';
 
 interface EdgeCallOptions {
   method?: 'GET' | 'POST';
@@ -48,7 +43,7 @@ export async function callEdgeFunction<T = unknown>(
 
   // Use session token if available, otherwise anon key (if auth not required)
   const token =
-    session?.access_token || (requireAuth ? null : process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+    session?.access_token || (requireAuth ? null : process.env['NEXT_PUBLIC_SUPABASE_ANON_KEY']);
 
   if (!token && requireAuth) {
     logger.error(
@@ -101,7 +96,7 @@ export async function trackInteraction(params: TrackInteractionParams): Promise<
 }
 
 export async function getSimilarConfigs(params: {
-  content_type: ContentCategory;
+  content_type: Database['public']['Enums']['content_category'];
   content_slug: string;
   limit?: number;
 }) {
@@ -159,21 +154,21 @@ export interface ConfigRecommendationsResponse {
     id: string;
     generatedAt: string;
     answers: {
-      useCase: UseCaseType;
-      experienceLevel: ExperienceLevel;
+      useCase: Database['public']['Enums']['use_case_type'];
+      experienceLevel: Database['public']['Enums']['experience_level'];
       toolPreferences: string[];
-      integrations: IntegrationType[];
-      focusAreas: FocusAreaType[];
+      integrations: Database['public']['Enums']['integration_type'][];
+      focusAreas: Database['public']['Enums']['focus_area_type'][];
     };
   };
 }
 
 export async function generateConfigRecommendations(answers: {
-  useCase: UseCaseType;
-  experienceLevel: ExperienceLevel;
+  useCase: Database['public']['Enums']['use_case_type'];
+  experienceLevel: Database['public']['Enums']['experience_level'];
   toolPreferences: string[];
-  integrations?: IntegrationType[];
-  focusAreas?: FocusAreaType[];
+  integrations?: Database['public']['Enums']['integration_type'][];
+  focusAreas?: Database['public']['Enums']['focus_area_type'][];
 }): Promise<ConfigRecommendationsResponse> {
   const result = await generateConfigRecommendationsAction(answers);
   const payload = result?.data;
@@ -245,9 +240,9 @@ export async function trackNewsletterEvent(
  * Enqueues to pulse queue for batched processing
  */
 export async function trackUsage(params: {
-  content_type: ContentCategory;
+  content_type: Database['public']['Enums']['content_category'];
   content_slug: string;
-  action_type: 'copy' | 'download_zip' | 'download_markdown' | 'llmstxt';
+  action_type: 'copy' | 'download_zip' | 'download_markdown' | 'llmstxt' | 'download_mcpb';
 }): Promise<void> {
   const result = await trackUsageAction(params);
   if (result?.serverError) {

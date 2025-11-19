@@ -74,8 +74,8 @@ export function useOnboardingToasts({
 
     const fetchNotifications = async () => {
       try {
-        const fluxStationUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-          ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/flux-station/active-notifications`
+        const fluxStationUrl = process.env['NEXT_PUBLIC_SUPABASE_URL']
+          ? `${process.env['NEXT_PUBLIC_SUPABASE_URL']}/functions/v1/flux-station/active-notifications`
           : null;
         if (!fluxStationUrl) {
           logger.warn('NEXT_PUBLIC_SUPABASE_URL not configured, skipping notification fetch');
@@ -145,8 +145,8 @@ export function useOnboardingToasts({
 
       try {
         // Create notifications in database via edge function
-        const fluxStationUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-          ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/flux-station/notifications/create`
+        const fluxStationUrl = process.env['NEXT_PUBLIC_SUPABASE_URL']
+          ? `${process.env['NEXT_PUBLIC_SUPABASE_URL']}/functions/v1/flux-station/notifications/create`
           : null;
         if (!fluxStationUrl) {
           logger.warn('NEXT_PUBLIC_SUPABASE_URL not configured, skipping notification creation');

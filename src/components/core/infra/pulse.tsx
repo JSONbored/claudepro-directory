@@ -26,20 +26,19 @@ import { getPollingConfig } from '@/src/lib/actions/feature-flags.actions';
 import { trackInteraction } from '@/src/lib/edge/client';
 import { logger } from '@/src/lib/logger';
 import { logClientWarning, logUnhandledPromise, normalizeError } from '@/src/lib/utils/error.utils';
-import type { Json } from '@/src/types/database.types';
-import type { ContentCategory } from '@/src/types/database-overrides';
+import type { Database, Json } from '@/src/types/database.types';
 
 export type PulseProps =
   | {
       variant: 'view';
-      category: ContentCategory;
+      category: Database['public']['Enums']['content_category'];
       slug: string;
       delay?: number;
       metadata?: Record<string, unknown>;
     }
   | {
       variant: 'page-view';
-      category: ContentCategory;
+      category: Database['public']['Enums']['content_category'];
       slug: string;
       sourcePage?: string;
       delay?: number;

@@ -5,8 +5,8 @@ import pino from 'pino';
 const isDevelopment = process.env.NODE_ENV === 'development';
 
 // Config via env vars (set from Statsig logger_console/logger_verbose flags)
-const loggerConsoleEnabled = process.env.NEXT_PUBLIC_LOGGER_CONSOLE === 'true';
-const loggerVerbose = process.env.NEXT_PUBLIC_LOGGER_VERBOSE === 'true';
+const loggerConsoleEnabled = process.env['NEXT_PUBLIC_LOGGER_CONSOLE'] === 'true';
+const loggerVerbose = process.env['NEXT_PUBLIC_LOGGER_VERBOSE'] === 'true';
 
 // Configure pino with minimal setup
 // In development, use basic console output to avoid thread-stream issues with Turbopack
@@ -125,16 +125,16 @@ class Logger {
     if (error !== undefined) {
       // For Error objects, extract message safely
       if (error instanceof Error) {
-        logData.err = {
+        logData['err'] = {
           message: sanitizeLogMessage(error.message),
           name: error.name,
           stack: error.stack ? sanitizeLogMessage(error.stack) : undefined,
         };
       } else if (typeof error === 'string') {
-        logData.err = sanitizeLogMessage(error);
+        logData['err'] = sanitizeLogMessage(error);
       } else {
         // For unknown error types, convert to string and sanitize to prevent log injection
-        logData.err = sanitizeLogMessage(String(error));
+        logData['err'] = sanitizeLogMessage(String(error));
       }
     }
     pinoInstance.error(logData, sanitizedMessage);

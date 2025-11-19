@@ -170,41 +170,41 @@ function mapTypeSpecificFields(
   switch (contentType) {
     case 'agents':
       // Agent-specific fields
-      if (templateData.system_prompt) {
-        typeSpecific.systemPrompt = templateData.system_prompt;
+      if (templateData['system_prompt']) {
+        typeSpecific['systemPrompt'] = templateData['system_prompt'];
       }
-      if (templateData.temperature !== undefined) {
-        typeSpecific.temperature = templateData.temperature;
+      if (templateData['temperature'] !== undefined) {
+        typeSpecific['temperature'] = templateData['temperature'];
       }
-      if (templateData.max_tokens !== undefined) {
-        typeSpecific.maxTokens = templateData.max_tokens;
+      if (templateData['max_tokens'] !== undefined) {
+        typeSpecific['maxTokens'] = templateData['max_tokens'];
       }
       break;
 
     case 'mcp':
       // MCP-specific fields
-      if (templateData.npm_package) {
-        typeSpecific.npmPackage = templateData.npm_package;
+      if (templateData['npm_package']) {
+        typeSpecific['npmPackage'] = templateData['npm_package'];
       }
-      if (templateData.install_command) {
-        typeSpecific.installCommand = templateData.install_command;
+      if (templateData['install_command']) {
+        typeSpecific['installCommand'] = templateData['install_command'];
       }
-      if (templateData.tools_description) {
-        typeSpecific.toolsDescription = templateData.tools_description;
+      if (templateData['tools_description']) {
+        typeSpecific['toolsDescription'] = templateData['tools_description'];
       }
       break;
 
     case 'rules':
       // Rules-specific fields
-      if (templateData.rules_content) {
-        typeSpecific.rulesContent = templateData.rules_content;
+      if (templateData['rules_content']) {
+        typeSpecific['rulesContent'] = templateData['rules_content'];
       }
       break;
 
     case 'commands':
       // Commands-specific fields
-      if (templateData.command_content) {
-        typeSpecific.commandContent = templateData.command_content;
+      if (templateData['command_content']) {
+        typeSpecific['commandContent'] = templateData['command_content'];
       }
       break;
 

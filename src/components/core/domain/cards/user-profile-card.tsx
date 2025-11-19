@@ -23,7 +23,7 @@ import { usePulse } from '@/src/hooks/use-pulse';
 import { Award, ExternalLink, Users } from '@/src/lib/icons';
 import { BADGE_COLORS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { logUnhandledPromise } from '@/src/lib/utils/error.utils';
-import type { Json, Tables } from '@/src/types/database.types';
+import type { Tables } from '@/src/types/database.types';
 
 /**
  * Validate and sanitize external URL for safe use in window.open
@@ -183,21 +183,16 @@ function ProfileCardComponent({ user, variant = 'default', showActions = true }:
           </UnifiedBadge>
 
           {/* Top interests (max 2) */}
-          {user.interests &&
-            Array.isArray(user.interests) &&
-            (user.interests as Json[])
-              .slice(0, 2)
-              .filter((interest): interest is string => typeof interest === 'string')
-              .map((interest) => (
-                <UnifiedBadge
-                  key={interest}
-                  variant="base"
-                  style="secondary"
-                  className={`${UI_CLASSES.TEXT_BADGE} border-primary/20 text-primary`}
-                >
-                  {interest}
-                </UnifiedBadge>
-              ))}
+          {user.interests?.slice(0, 2).map((interest) => (
+            <UnifiedBadge
+              key={interest}
+              variant="base"
+              style="secondary"
+              className={`${UI_CLASSES.TEXT_BADGE} border-primary/20 text-primary`}
+            >
+              {interest}
+            </UnifiedBadge>
+          ))}
         </div>
       )}
       renderMetadataBadges={() => (

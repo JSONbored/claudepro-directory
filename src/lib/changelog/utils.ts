@@ -3,7 +3,7 @@
  */
 
 import { APP_CONFIG } from '@/src/lib/data/config/constants';
-import type { ChangelogCategory } from '@/src/types/database-overrides';
+import type { Database } from '@/src/types/database.types';
 
 export function formatChangelogDate(isoDate: string): string {
   try {
@@ -73,24 +73,26 @@ export function getChangelogPath(slug: string): string {
   return `/changelog/${slug}`;
 }
 
-export function getNonEmptyCategories(categories: unknown): ChangelogCategory[] {
-  const nonEmpty: ChangelogCategory[] = [];
+export function getNonEmptyCategories(
+  categories: unknown
+): Database['public']['Enums']['changelog_category'][] {
+  const nonEmpty: Database['public']['Enums']['changelog_category'][] = [];
 
   const cats = categories as Record<string, unknown>;
   if (!cats) return nonEmpty;
 
-  if (Array.isArray(cats.Added) && cats.Added.length > 0)
-    nonEmpty.push('Added' as ChangelogCategory);
-  if (Array.isArray(cats.Changed) && cats.Changed.length > 0)
-    nonEmpty.push('Changed' as ChangelogCategory);
-  if (Array.isArray(cats.Deprecated) && cats.Deprecated.length > 0)
-    nonEmpty.push('Deprecated' as ChangelogCategory);
-  if (Array.isArray(cats.Removed) && cats.Removed.length > 0)
-    nonEmpty.push('Removed' as ChangelogCategory);
-  if (Array.isArray(cats.Fixed) && cats.Fixed.length > 0)
-    nonEmpty.push('Fixed' as ChangelogCategory);
-  if (Array.isArray(cats.Security) && cats.Security.length > 0)
-    nonEmpty.push('Security' as ChangelogCategory);
+  if (Array.isArray(cats['Added']) && cats['Added'].length > 0)
+    nonEmpty.push('Added' as Database['public']['Enums']['changelog_category']);
+  if (Array.isArray(cats['Changed']) && cats['Changed'].length > 0)
+    nonEmpty.push('Changed' as Database['public']['Enums']['changelog_category']);
+  if (Array.isArray(cats['Deprecated']) && cats['Deprecated'].length > 0)
+    nonEmpty.push('Deprecated' as Database['public']['Enums']['changelog_category']);
+  if (Array.isArray(cats['Removed']) && cats['Removed'].length > 0)
+    nonEmpty.push('Removed' as Database['public']['Enums']['changelog_category']);
+  if (Array.isArray(cats['Fixed']) && cats['Fixed'].length > 0)
+    nonEmpty.push('Fixed' as Database['public']['Enums']['changelog_category']);
+  if (Array.isArray(cats['Security']) && cats['Security'].length > 0)
+    nonEmpty.push('Security' as Database['public']['Enums']['changelog_category']);
 
   return nonEmpty;
 }

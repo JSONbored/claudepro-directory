@@ -34,7 +34,7 @@ export function highlightCode(
 
     if (showLineNumbers && hasMultipleLines) {
       const numberedLines = lines
-        .map((line, index) => {
+        .map((line: string, index: number) => {
           const lineNum = index + 1;
           return `<span class="sh__line" data-line="${lineNum}">${line || ' '}</span>`;
         })

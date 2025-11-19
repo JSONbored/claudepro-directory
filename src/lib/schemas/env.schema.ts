@@ -251,10 +251,10 @@ function validateEnv(): Env {
   // Production validation - server-side only for security
   const isServer = typeof window === 'undefined';
   const isBuildPhase =
-    process.env.NEXT_PHASE === 'phase-production-build' ||
-    process.env.NEXT_PHASE === 'phase-production-server';
+    process.env['NEXT_PHASE'] === 'phase-production-build' ||
+    process.env['NEXT_PHASE'] === 'phase-production-server';
   const isProductionRuntime =
-    process.env.NODE_ENV === 'production' || process.env.VERCEL_ENV === 'production';
+    process.env['NODE_ENV'] === 'production' || process.env['VERCEL_ENV'] === 'production';
 
   if (isServer && !isBuildPhase && isProductionRuntime) {
     const missingRequiredEnvs = productionRequiredEnvs.filter((envVar) => !process.env[envVar]);
@@ -271,22 +271,22 @@ function validateEnv(): Env {
     const securityValidations = [
       {
         name: 'RATE_LIMIT_SECRET',
-        value: process.env.RATE_LIMIT_SECRET,
+        value: process.env['RATE_LIMIT_SECRET'],
         minLength: 32,
       },
       {
         name: 'CACHE_WARM_AUTH_TOKEN',
-        value: process.env.CACHE_WARM_AUTH_TOKEN,
+        value: process.env['CACHE_WARM_AUTH_TOKEN'],
         minLength: 32,
       },
       {
         name: 'VIEW_COUNT_SALT',
-        value: process.env.VIEW_COUNT_SALT,
+        value: process.env['VIEW_COUNT_SALT'],
         minLength: 16,
       },
       {
         name: 'WEBHOOK_SECRET',
-        value: process.env.WEBHOOK_SECRET,
+        value: process.env['WEBHOOK_SECRET'],
         minLength: 32,
       },
     ];

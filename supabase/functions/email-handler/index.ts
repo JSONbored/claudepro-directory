@@ -1,3 +1,5 @@
+/// <reference path="../_shared/deno-globals.d.ts" />
+
 /**
  * Consolidated Email Handler - Routes all email operations via action parameter
  */
@@ -6,18 +8,13 @@ import { Resend } from 'npm:resend@4.0.0';
 import { supabaseServiceRole } from '../_shared/clients/supabase.ts';
 import { AUTH_HOOK_ENV, RESEND_ENV, validateEnvironment } from '../_shared/config/email-config.ts';
 import { edgeEnv } from '../_shared/config/env.ts';
-import type { Database as DatabaseGenerated } from '../_shared/database.types.ts';
-import type { Database, NewsletterSource } from '../_shared/database-overrides.ts';
+import type { Database, Database as DatabaseGenerated } from '../_shared/database.types.ts';
 import {
-  type ContactCategory,
   callRpc,
-  ENVIRONMENT_VALUES,
   type GetDueSequenceEmailsReturn,
   type GetWeeklyDigestReturn,
   insertTable,
-  isContactCategory,
   isNewsletterSource,
-  SETTING_TYPE_VALUES,
   upsertTable,
 } from '../_shared/database-overrides.ts';
 // Static imports to ensure circuit-breaker and timeout utilities are included in the bundle
@@ -93,8 +90,8 @@ function respondWithEmailAnalytics(
 ): Promise<Response> {
   const startedAt = performance.now();
   const logContext = createEmailHandlerContext(action, {
-    email: options?.email,
-    subscriptionId: options?.subscriptionId,
+    ...(options?.email !== undefined ? { email: options.email } : {}),
+    ...(options?.subscriptionId !== undefined ? { subscriptionId: options.subscriptionId } : {}),
   });
 
   const logEvent = (status: number, outcome: 'success' | 'error', error?: unknown) => {
@@ -106,7 +103,7 @@ function respondWithEmailAnalytics(
     };
 
     if (error) {
-      logData.error = error instanceof Error ? error.message : String(error);
+      logData['error'] = error instanceof Error ? error.message : String(error);
     }
 
     if (outcome === 'success') {
@@ -190,10 +187,22 @@ const router = createRouter<EmailHandlerContext>({
   },
   routes: [
     ...createEmailRoutes([
-      { action: 'subscribe', handler: handleSubscribe, requiresRateLimit: true },
+      {
+        action: 'subscribe',
+        handler: handleSubscribe,
+        requiresRateLimit: true,
+      },
       { action: 'welcome', handler: handleWelcome, requiresRateLimit: true },
-      { action: 'transactional', handler: handleTransactional, requiresRateLimit: true },
-      { action: 'contact-submission', handler: handleContactSubmission, requiresRateLimit: true },
+      {
+        action: 'transactional',
+        handler: handleTransactional,
+        requiresRateLimit: true,
+      },
+      {
+        action: 'contact-submission',
+        handler: handleContactSubmission,
+        requiresRateLimit: true,
+      },
     ]),
     {
       name: 'digest',
@@ -298,16 +307,16 @@ async function handleSubscribe(req: Request): Promise<Response> {
 
   try {
     // Step 1: Add to Resend audience with properties and topics
-    const validatedSource: NewsletterSource | null =
+    const validatedSource: Database['public']['Enums']['newsletter_source'] | null =
       source && typeof source === 'string' && isNewsletterSource(source)
-        ? (source as NewsletterSource)
+        ? (source as Database['public']['Enums']['newsletter_source'])
         : null;
 
     const contactProperties = buildContactProperties({
       source: validatedSource,
-      copyType: copy_type,
-      copyCategory: copy_category,
-      referrer,
+      ...(copy_type !== undefined ? { copyType: copy_type } : {}),
+      ...(copy_category !== undefined ? { copyCategory: copy_category } : {}),
+      ...(referrer !== undefined ? { referrer } : {}),
     });
 
     const { resendContactId, syncStatus, syncError, topicIds } = await syncContactToResend(
@@ -321,7 +330,8 @@ async function handleSubscribe(req: Request): Promise<Response> {
 
     // Step 2: Insert into database (rate limiting handled by BEFORE INSERT trigger)
     // Use validated source (defaults to 'footer' if not provided or invalid)
-    const finalSource: NewsletterSource = validatedSource ?? ('footer' as NewsletterSource);
+    const finalSource: Database['public']['Enums']['newsletter_source'] =
+      validatedSource ?? ('footer' as Database['public']['Enums']['newsletter_source']);
 
     const insertData: DatabaseGenerated['public']['Tables']['newsletter_subscriptions']['Insert'] =
       {
@@ -336,9 +346,9 @@ async function handleSubscribe(req: Request): Promise<Response> {
         sync_error: syncError,
         last_sync_at: new Date().toISOString(),
         // Store engagement data in database
-        engagement_score: contactProperties.engagement_score as number,
-        primary_interest: contactProperties.primary_interest as string,
-        total_copies: contactProperties.total_copies as number,
+        engagement_score: contactProperties['engagement_score'] as number,
+        primary_interest: contactProperties['primary_interest'] as string,
+        total_copies: contactProperties['total_copies'] as number,
         last_active_at: new Date().toISOString(),
         resend_topics: topicIds,
       };
@@ -370,7 +380,9 @@ async function handleSubscribe(req: Request): Promise<Response> {
     });
 
     // Step 3: Send welcome email and enroll in sequence
-    const html = await renderEmailTemplate(NewsletterWelcome, { email: normalizedEmail });
+    const html = await renderEmailTemplate(NewsletterWelcome, {
+      email: normalizedEmail,
+    });
     const { data: emailData, error: emailError } = await sendEmail(
       resend,
       {
@@ -431,7 +443,10 @@ async function handleWelcome(req: Request): Promise<Response> {
 
   // Newsletter subscription trigger
   if (triggerSource === 'newsletter_subscription') {
-    const parseResult = await parseJsonBody<{ email: string; subscription_id: string }>(req, {
+    const parseResult = await parseJsonBody<{
+      email: string;
+      subscription_id: string;
+    }>(req, {
       maxSize: MAX_BODY_SIZE.default,
       cors: publicCorsHeaders,
     });
@@ -444,8 +459,8 @@ async function handleWelcome(req: Request): Promise<Response> {
     const { email, subscription_id } = payload;
 
     const logContext = createEmailHandlerContext('welcome', {
-      email: typeof email === 'string' ? email : undefined,
-      subscriptionId: typeof subscription_id === 'string' ? subscription_id : undefined,
+      ...(typeof email === 'string' ? { email } : {}),
+      ...(typeof subscription_id === 'string' ? { subscriptionId: subscription_id } : {}),
     });
 
     const html = await renderEmailTemplate(NewsletterWelcome, { email });
@@ -556,7 +571,7 @@ async function handleTransactional(req: Request): Promise<Response> {
   const { type, email, data: emailData } = payload;
 
   const logContext = createEmailHandlerContext('transactional', {
-    email: typeof email === 'string' ? email : undefined,
+    ...(typeof email === 'string' ? { email } : {}),
   });
 
   if (!(type && email)) {
@@ -664,8 +679,8 @@ async function handleDigest(): Promise<Response> {
   const upsertData = {
     setting_key: 'last_digest_email_timestamp',
     setting_value: currentTimestamp,
-    setting_type: SETTING_TYPE_VALUES[1], // 'string'
-    environment: ENVIRONMENT_VALUES[2], // 'production'
+    setting_type: 'string' as DatabaseGenerated['public']['Enums']['setting_type'],
+    environment: 'production' as DatabaseGenerated['public']['Enums']['environment'],
     enabled: true,
     description: 'Timestamp of last successful weekly digest email send (used for rate limiting)',
     category: 'email',
@@ -897,7 +912,7 @@ async function handleContactSubmission(req: Request): Promise<Response> {
   const { submissionId, name, email, category, message } = payload;
 
   const logContext = createEmailHandlerContext('contact-submission', {
-    email: typeof email === 'string' ? email : undefined,
+    ...(typeof email === 'string' ? { email } : {}),
   });
 
   if (!(submissionId && name && email && category && message)) {
@@ -907,13 +922,23 @@ async function handleContactSubmission(req: Request): Promise<Response> {
   }
 
   // Validate category is a valid contact_category enum value
-  if (typeof category !== 'string' || !isContactCategory(category)) {
+  const validCategories: DatabaseGenerated['public']['Enums']['contact_category'][] = [
+    'bug',
+    'feature',
+    'partnership',
+    'general',
+    'other',
+  ];
+  if (
+    typeof category !== 'string' ||
+    !validCategories.includes(category as DatabaseGenerated['public']['Enums']['contact_category'])
+  ) {
     return badRequestResponse(
       'Invalid category value. Must be one of: bug, feature, partnership, general, other'
     );
   }
 
-  const validatedCategory: ContactCategory = category as ContactCategory;
+  const validatedCategory = category as DatabaseGenerated['public']['Enums']['contact_category'];
 
   try {
     // Send admin notification email

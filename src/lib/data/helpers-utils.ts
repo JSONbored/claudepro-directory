@@ -3,14 +3,14 @@
  * Shared utilities for common patterns across data layer helpers
  */
 
-import type { ContentCategory } from '@/src/types/database-overrides';
+import type { Database } from '@/src/types/database.types';
 
 /**
  * Generate content cache tags with category and optional slug
  * Common pattern: ['content', `content-${category}`, `content-${category}-${slug}`]
  */
 export function generateContentTags(
-  category?: ContentCategory | string | null,
+  category?: Database['public']['Enums']['content_category'] | string | null,
   slug?: string | null,
   additionalTags: string[] = []
 ): string[] {
@@ -36,7 +36,7 @@ export function generateContentTags(
  * - `${category ?? 'all'}-${limit}-${offset}` for pagination
  */
 export function generateContentCacheKey(
-  category?: ContentCategory | string | null,
+  category?: Database['public']['Enums']['content_category'] | string | null,
   slug?: string | null,
   limit?: number | null,
   offset?: number | null,

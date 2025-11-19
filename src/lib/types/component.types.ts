@@ -17,21 +17,15 @@
 import type { ReactNode } from 'react';
 import type { SearchResult } from '@/src/lib/edge/search-client';
 import type { LucideIcon, LucideIcon as LucideIconType } from '@/src/lib/icons';
+import type { Database } from '@/src/types/database.types';
 import type {
-  ContentCategory,
   ContentItem,
   EnrichedContentItem,
-  FormFieldType,
-  FormGridColumn,
-  FormIconPosition,
   GetGetContentDetailCompleteReturn,
   GetGetHomepageCompleteReturn,
   HomepageContentItem,
   JobCardJobType,
-  SortOption,
-  SubmissionType,
   Tables,
-  TrendingPeriod,
 } from '@/src/types/database-overrides';
 
 // ============================================================================
@@ -110,8 +104,8 @@ export interface JobCardProps {
 }
 
 export interface FilterState {
-  sort?: SortOption;
-  category?: ContentCategory;
+  sort?: Database['public']['Enums']['sort_option'];
+  category?: Database['public']['Enums']['content_category'];
   author?: string;
   dateRange?: string;
   popularity?: [number, number];
@@ -134,9 +128,9 @@ export interface TrendingContentProps {
   trending?: DisplayableContent[];
   popular?: DisplayableContent[];
   recent?: DisplayableContent[];
-  category?: ContentCategory;
+  category?: Database['public']['Enums']['content_category'];
   limit?: number;
-  period?: TrendingPeriod;
+  period?: Database['public']['Enums']['trending_period'];
 }
 
 export type ContentListServerProps<T extends DisplayableContent = EnrichedContentItem> = {
@@ -147,14 +141,14 @@ export type ContentListServerProps<T extends DisplayableContent = EnrichedConten
   type: string;
   searchPlaceholder?: string;
   badges?: Array<{ icon?: string; text: string }>;
-  category?: ContentCategory;
+  category?: Database['public']['Enums']['content_category'];
   featured?: boolean;
   gridCols?: string;
 };
 
 export type RelatedConfigsProps<T extends ContentItem = ContentItem> = {
   items: T[];
-  category?: ContentCategory;
+  category?: Database['public']['Enums']['content_category'];
 };
 
 export type FloatingSearchSidebarProps = {
@@ -170,30 +164,30 @@ export type ContentSearchClientProps<T extends DisplayableContent = DisplayableC
   title: string;
   icon: string;
   type?: string;
-  category?: string;
+  category?: Database['public']['Enums']['content_category'];
 };
 
 export type ContentSidebarProps<T extends ContentItem = ContentItem> = {
   content: T[];
-  category?: ContentCategory;
+  category?: Database['public']['Enums']['content_category'];
 };
 
 export type SortDropdownProps = {
-  value?: SortOption;
-  onChange?: (value: SortOption) => void;
+  value?: Database['public']['Enums']['sort_option'];
+  onChange?: (value: Database['public']['Enums']['sort_option']) => void;
 };
 
 export interface SearchOptions {
   query?: string;
-  category?: ContentCategory;
-  sort?: SortOption;
+  category?: Database['public']['Enums']['content_category'];
+  sort?: Database['public']['Enums']['sort_option'];
   limit?: number;
   offset?: number;
 }
 
 export interface UseSearchProps {
   initialQuery?: string;
-  initialCategory?: ContentCategory;
+  initialCategory?: Database['public']['Enums']['content_category'];
   debounceMs?: number;
 }
 
@@ -208,7 +202,7 @@ export type { ReviewItem } from '@/src/types/database-overrides';
  */
 export interface ReviewFormProps {
   variant: 'form';
-  contentType: ContentCategory;
+  contentType: Database['public']['Enums']['content_category'];
   contentSlug: string;
   existingReview?: {
     id: string;
@@ -224,7 +218,7 @@ export interface ReviewFormProps {
  */
 export interface ReviewSectionProps {
   variant: 'section';
-  contentType: ContentCategory;
+  contentType: Database['public']['Enums']['content_category'];
   contentSlug: string;
   currentUserId?: string | undefined;
 }
@@ -336,6 +330,9 @@ export interface InstallationSteps {
   sdk?: {
     steps?: string[];
   };
+  mcpb?: {
+    steps?: string[];
+  };
   requirements?: string[];
 }
 
@@ -348,9 +345,11 @@ export interface ActionButtonConfig {
   handler: (item: ContentItem) => void | Promise<void>;
 }
 
-export type FieldType = FormFieldType;
-export type GridColumn = FormGridColumn;
-export type IconPosition = FormIconPosition;
+// Local type definitions for form field types
+
+export type FieldType = Database['public']['Enums']['form_field_type'];
+export type GridColumn = Database['public']['Enums']['form_grid_column'];
+export type IconPosition = Database['public']['Enums']['form_icon_position'];
 
 export interface SelectOption {
   value: string;
@@ -412,13 +411,13 @@ export interface FormFieldConfig {
  * Submission content type - extracted from database enum
  * Use this type for type-safe submission content categories
  */
-export type SubmissionContentType = SubmissionType;
+export type SubmissionContentType = Database['public']['Enums']['submission_type'];
 
 /**
  * Submission content types array (for runtime use, e.g., form dropdowns)
  * TypeScript will validate that all values match the database enum
  */
-export const SUBMISSION_CONTENT_TYPES: readonly SubmissionType[] = [
+export const SUBMISSION_CONTENT_TYPES: readonly Database['public']['Enums']['submission_type'][] = [
   'agents',
   'mcp',
   'rules',
@@ -533,7 +532,7 @@ export interface UnifiedCategoryConfig<TId extends string = string> {
 }
 
 export interface CategoryStatsConfig {
-  categoryId: ContentCategory;
+  categoryId: Database['public']['Enums']['content_category'];
   icon: LucideIconType;
   displayText: string;
   delay: number;
@@ -743,6 +742,11 @@ export interface ProcessedSectionData {
             { type: 'command'; html: string; code: string } | { type: 'text'; text: string }
           >;
         } | null;
+        mcpb?: {
+          steps: Array<
+            { type: 'command'; html: string; code: string } | { type: 'text'; text: string }
+          >;
+        } | null;
         requirements?: string[];
       }
     | null
@@ -777,7 +781,7 @@ export interface ProcessedSectionData {
  */
 export interface TabbedDetailLayoutProps {
   item: Tables<'content'> | GetGetContentDetailCompleteReturn['content'];
-  config: UnifiedCategoryConfig<ContentCategory>;
+  config: UnifiedCategoryConfig<Database['public']['Enums']['content_category']>;
   tabs: ReadonlyArray<TabConfig>;
   sectionData: ProcessedSectionData;
   relatedItems?: ContentItem[] | GetGetContentDetailCompleteReturn['related'];
@@ -794,7 +798,7 @@ export type ListProps = BaseProps & {
   title: string;
   description: string;
   items: string[];
-  category?: ContentCategory;
+  category?: Database['public']['Enums']['content_category'];
   icon?: LucideIcon;
   dotColor?: string;
 };
@@ -874,6 +878,11 @@ export type InstallProps = BaseProps & {
       configPath?: Record<string, string>;
     } | null;
     sdk?: {
+      steps: Array<
+        { type: 'command'; html: string; code: string } | { type: 'text'; text: string }
+      >;
+    } | null;
+    mcpb?: {
       steps: Array<
         { type: 'command'; html: string; code: string } | { type: 'text'; text: string }
       >;

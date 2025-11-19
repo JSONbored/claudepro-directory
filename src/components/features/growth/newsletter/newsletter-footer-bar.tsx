@@ -10,11 +10,12 @@ import { Mail, X } from '@/src/lib/icons';
 import { DIMENSIONS, POSITION_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { ensureNumber, ensureStringArray } from '@/src/lib/utils/data.utils';
 import { logUnhandledPromise } from '@/src/lib/utils/error.utils';
-import type { NewsletterSource } from '@/src/types/database-overrides';
+import type { Database } from '@/src/types/database.types';
+
 import { NewsletterForm } from './newsletter-form';
 
 export interface NewsletterFooterBarProps {
-  source: NewsletterSource;
+  source: Database['public']['Enums']['newsletter_source'];
   dismissible?: boolean;
   showAfterDelay?: number;
   respectInlineCTA?: boolean;

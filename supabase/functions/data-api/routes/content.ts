@@ -1,12 +1,27 @@
 import { buildReadmeMarkdown } from '../../_shared/changelog/readme-builder.ts';
 import type { Database as DatabaseGenerated } from '../../_shared/database.types.ts';
 import {
-  CONTENT_CATEGORY_VALUES,
-  type ContentCategory,
   callRpc,
   type Database,
   type GenerateReadmeDataReturn,
 } from '../../_shared/database-overrides.ts';
+
+type ContentCategory = DatabaseGenerated['public']['Enums']['content_category'];
+
+const CONTENT_CATEGORY_VALUES = [
+  'agents',
+  'mcp',
+  'rules',
+  'commands',
+  'hooks',
+  'statuslines',
+  'skills',
+  'collections',
+  'guides',
+  'jobs',
+  'changelog',
+] as const satisfies readonly ContentCategory[];
+
 import {
   badRequestResponse,
   buildCacheHeaders,
@@ -27,10 +42,36 @@ export async function handleContentRoute(
   segments: string[],
   url: URL,
   method: string,
+  _request: Request,
   logContext?: BaseLogContext
 ): Promise<Response> {
-  if (method !== 'GET') {
-    return methodNotAllowedResponse('GET', CORS);
+  // Handle POST requests for content generation operations
+  if (method === 'POST') {
+    const action = url.searchParams.get('action')?.toLowerCase();
+
+    // Handle .mcpb generation check: POST /content/mcp/[slug]?action=generate
+    // Note: Currently just checks if package exists (read operation), no auth needed
+    // When actual generation is implemented, this will become a write operation
+    if (action === 'generate' && segments.length === 2) {
+      const [category, slug] = segments;
+      if (category === 'mcp' && slug !== undefined) {
+        return handleMcpbGeneration(slug, _request, logContext);
+      }
+      return badRequestResponse(
+        `Generation not supported for category '${category}'. Supported: mcp`,
+        CORS
+      );
+    }
+
+    return badRequestResponse(
+      'Invalid POST request. Supported: POST /content/mcp/[slug]?action=generate',
+      CORS
+    );
+  }
+
+  // Handle GET requests (existing functionality)
+  if (method !== 'GET' && method !== 'HEAD') {
+    return methodNotAllowedResponse('GET, HEAD, POST', CORS);
   }
 
   const format = (url.searchParams.get('format') || 'json').toLowerCase();
@@ -60,13 +101,17 @@ export async function handleContentRoute(
 
   if (segments.length === 2) {
     const [first, second] = segments;
-    if (first === 'changelog') {
+    if (first === 'changelog' && second !== undefined) {
       return handleChangelogEntry(second, format);
     }
-    if (first === 'tools') {
+    if (first === 'tools' && second !== undefined) {
       return handleToolLlmsTxt(second, format);
     }
-    if (first && CONTENT_CATEGORY_VALUES.includes(first as ContentCategory)) {
+    if (
+      first &&
+      CONTENT_CATEGORY_VALUES.includes(first as ContentCategory) &&
+      second !== undefined
+    ) {
       return handleRecordExport(first, second, url);
     }
     return badRequestResponse(
@@ -167,7 +212,10 @@ async function handleSitewideLlmsTxt(logContext?: BaseLogContext): Promise<Respo
 
   if (!data || typeof data !== 'string') {
     return jsonResponse(
-      { error: 'Sitewide LLMs export failed', message: 'RPC returned null or invalid' },
+      {
+        error: 'Sitewide LLMs export failed',
+        message: 'RPC returned null or invalid',
+      },
       500,
       CORS
     );
@@ -357,4 +405,126 @@ async function handleCategoryConfigs(): Promise<Response> {
     ...buildCacheHeaders('config'),
     'X-Generated-By': 'supabase.rpc.get_category_configs_with_features',
   });
+}
+
+/**
+ * Handle on-demand .mcpb package generation for MCP servers
+ * Route: POST /content/mcp/[slug]?action=generate
+ *
+ * Purpose: Check if .mcpb package exists and return URL (read operation)
+ * Future: Will trigger actual package generation when implemented (write operation)
+ *
+ * Note: Currently this is a read-only operation (checking if package exists),
+ * similar to the download endpoint. No authentication required until actual
+ * generation is implemented (which would be a write/processing operation).
+ *
+ * Flow:
+ * 1. Validate slug parameter
+ * 2. Fetch MCP server from database
+ * 3. Check if .mcpb already exists (mcpb_storage_url)
+ * 4. If exists, return existing URL
+ * 5. If not, return 501 (Not Implemented) - full generation requires Deno-compatible refactoring
+ */
+async function handleMcpbGeneration(
+  slug: string,
+  _request: Request,
+  logContext?: BaseLogContext
+): Promise<Response> {
+  // Validate slug format (prevent path traversal)
+  const sanitizedSlug = slug.trim();
+  if (!/^[a-z0-9-]+$/.test(sanitizedSlug)) {
+    return badRequestResponse(
+      'Invalid slug format. Only lowercase letters, numbers, and hyphens allowed.',
+      CORS
+    );
+  }
+
+  if (logContext) {
+    logInfo('Fetching MCP server for generation', {
+      ...logContext,
+      slug: sanitizedSlug,
+    });
+  }
+
+  // Fetch MCP server using existing RPC (reuse existing pattern)
+  const rpcArgs = {
+    p_category: 'mcp' as const,
+    p_slug: sanitizedSlug,
+    p_base_url: Deno.env.get('SITE_URL') || '',
+  } satisfies DatabaseGenerated['public']['Functions']['get_api_content_full']['Args'];
+
+  const { data, error } = await callRpc('get_api_content_full', rpcArgs, true);
+
+  if (error) {
+    return errorResponse(error, 'data-api:get_api_content_full', CORS);
+  }
+
+  if (!data) {
+    return jsonResponse(
+      {
+        error: 'Not Found',
+        message: `MCP server with slug '${sanitizedSlug}' not found`,
+      },
+      404,
+      CORS
+    );
+  }
+
+  // Parse JSON string returned by RPC (same pattern as other handlers)
+  const contentData = typeof data === 'string' ? JSON.parse(data) : data;
+  const mcpServer = contentData as Database['public']['Tables']['content']['Row'];
+
+  // Check if .mcpb already exists
+  // Note: mcpb_storage_url field exists in database but may not be in generated types yet
+  const mcpbStorageUrl = (mcpServer as Record<string, unknown>)['mcpb_storage_url'];
+  if (mcpbStorageUrl && typeof mcpbStorageUrl === 'string') {
+    if (logContext) {
+      logInfo('MCPB package already exists', {
+        ...logContext,
+        slug: sanitizedSlug,
+        storage_url: mcpbStorageUrl,
+      });
+    }
+
+    return jsonResponse(
+      {
+        success: true,
+        slug: sanitizedSlug,
+        mcpb_storage_url: mcpbStorageUrl,
+        already_exists: true,
+        message: 'MCPB package already exists. Use the existing URL.',
+      },
+      200,
+      {
+        ...CORS,
+        ...buildSecurityHeaders(),
+        'X-Generated-By': 'supabase.rpc.get_api_content_full',
+      }
+    );
+  }
+
+  // .mcpb doesn't exist - return 501 (Not Implemented)
+  // Full on-demand generation requires Deno-compatible refactoring of generation logic
+  if (logContext) {
+    logInfo('MCPB package does not exist - generation not yet implemented', {
+      ...logContext,
+      slug: sanitizedSlug,
+    });
+  }
+
+  return jsonResponse(
+    {
+      error: 'Not Implemented',
+      message:
+        'On-demand generation is not yet implemented. Please run `pnpm build:mcpb` to generate packages.',
+      slug: sanitizedSlug,
+      instructions: 'Run the build script: pnpm build:mcpb',
+    },
+    501,
+    {
+      ...CORS,
+      ...buildSecurityHeaders(),
+      'X-Generated-By': 'data-api:handleMcpbGeneration',
+    }
+  );
 }

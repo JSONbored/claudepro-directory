@@ -23,9 +23,9 @@ export type GetFilterJobsReturn = {
  * get_category_configs_with_features RPC return type
  */
 export type GetGetCategoryConfigsWithFeaturesReturn = Record<
-  ContentCategory,
+  DatabaseGenerated['public']['Enums']['content_category'],
   {
-    category: ContentCategory;
+    category: DatabaseGenerated['public']['Enums']['content_category'];
     title: string;
     plural_title: string;
     description: string | null;
@@ -78,6 +78,17 @@ export type GetGetCategoryConfigsWithFeaturesReturn = Record<
 export type Database = DatabaseGenerated & {
   pgmq_public: ExtendedDatabase['pgmq_public'];
   public: DatabaseGenerated['public'] & {
+    Enums: DatabaseGenerated['public']['Enums'];
+    Tables: DatabaseGenerated['public']['Tables'] & {
+      content: DatabaseGenerated['public']['Tables']['content'] & {
+        Update: DatabaseGenerated['public']['Tables']['content']['Update'] & {
+          // MCP package generation fields
+          mcpb_storage_url?: string | null;
+          mcpb_build_hash?: string | null;
+          mcpb_last_built_at?: string | null;
+        };
+      };
+    };
     Functions: DatabaseGenerated['public']['Functions'] & {
       filter_jobs: {
         Args: {
@@ -129,6 +140,13 @@ export type Database = DatabaseGenerated & {
         Args: Record<string, never>; // No arguments
         Returns: GetGetCategoryConfigsWithFeaturesReturn;
       };
+      get_mcpb_storage_path: {
+        Args: { p_slug: string };
+        Returns: {
+          bucket: string;
+          object_path: string;
+        }[];
+      };
     };
   };
 };
@@ -158,12 +176,13 @@ export type TablesInsert<T extends keyof DatabaseGenerated['public']['Tables']> 
 
 /**
  * Table update helper type
- * Uses DatabaseGenerated directly to ensure proper type inference
+ * Uses Database type to include extended fields (e.g., mcpb_storage_url, etc.)
  * @example
  * type JobUpdate = TablesUpdate<'jobs'>
+ * type ContentUpdate = TablesUpdate<'content'> // Includes mcpb_storage_url, mcpb_build_hash, mcpb_last_built_at
  */
-export type TablesUpdate<T extends keyof DatabaseGenerated['public']['Tables']> =
-  DatabaseGenerated['public']['Tables'][T]['Update'];
+export type TablesUpdate<T extends keyof Database['public']['Tables']> =
+  Database['public']['Tables'][T]['Update'];
 
 /**
  * RPC function Args helper type
@@ -193,10 +212,9 @@ export type RpcReturns<T extends keyof Database['public']['Functions']> =
 export type Enums<T extends keyof Database['public']['Enums']> = Database['public']['Enums'][T];
 
 /**
- * Common enum type aliases (for convenience)
- * Extracted from database enums for easier usage in edge functions
+ * All ENUM types should be accessed directly via Database['public']['Enums']['enum_name']
+ * No convenience aliases - use exact naming for consistency
  */
-export type WebhookDirection = Enums<'webhook_direction'>;
 
 /**
  * Valid values for webhook_direction enum
@@ -205,35 +223,20 @@ export type WebhookDirection = Enums<'webhook_direction'>;
 export const WEBHOOK_DIRECTION_VALUES = [
   'inbound',
   'outbound',
-] as const satisfies readonly WebhookDirection[];
+] as const satisfies readonly DatabaseGenerated['public']['Enums']['webhook_direction'][];
 
 /**
  * Type guard for webhook_direction enum values
  */
-export function isWebhookDirection(value: string): value is WebhookDirection {
-  return WEBHOOK_DIRECTION_VALUES.includes(value as WebhookDirection);
+export function isWebhookDirection(
+  value: string
+): value is DatabaseGenerated['public']['Enums']['webhook_direction'] {
+  return WEBHOOK_DIRECTION_VALUES.includes(
+    value as DatabaseGenerated['public']['Enums']['webhook_direction']
+  );
 }
 
-export type SettingType = Enums<'setting_type'>;
-
-/**
- * Setting type values array for runtime use (validation, etc.)
- */
-export const SETTING_TYPE_VALUES = [
-  'boolean',
-  'string',
-  'number',
-  'json',
-] as const satisfies readonly SettingType[];
-
-/**
- * Type guard for setting_type enum values
- */
-export function isSettingType(value: string): value is SettingType {
-  return SETTING_TYPE_VALUES.includes(value as SettingType);
-}
-
-export type WorkplaceType = Enums<'workplace_type'>;
+// WorkplaceType removed - use Database['public']['Enums']['workplace_type'] directly
 
 /**
  * Workplace type values array for runtime use (validation, etc.)
@@ -242,50 +245,20 @@ export const WORKPLACE_TYPE_VALUES = [
   'Remote',
   'On site',
   'Hybrid',
-] as const satisfies readonly WorkplaceType[];
+] as const satisfies readonly DatabaseGenerated['public']['Enums']['workplace_type'][];
 
 /**
  * Type guard for workplace_type enum values
  */
-export function isWorkplaceType(value: string): value is WorkplaceType {
-  return WORKPLACE_TYPE_VALUES.includes(value as WorkplaceType);
+export function isWorkplaceType(
+  value: string
+): value is DatabaseGenerated['public']['Enums']['workplace_type'] {
+  return WORKPLACE_TYPE_VALUES.includes(
+    value as DatabaseGenerated['public']['Enums']['workplace_type']
+  );
 }
 
-export type ContentCategory = Enums<'content_category'>;
-
-/**
- * Content category values array for runtime use (validation, etc.)
- * Must match database enum: content_category
- * Database values: agents, mcp, rules, commands, hooks, statuslines, skills, collections, guides, jobs, changelog
- */
-export const CONTENT_CATEGORY_VALUES = [
-  'agents',
-  'mcp',
-  'rules',
-  'commands',
-  'hooks',
-  'statuslines',
-  'skills',
-  'collections',
-  'guides',
-  'jobs',
-  'changelog',
-] as const satisfies readonly ContentCategory[];
-
-/**
- * Type guard for content_category enum values
- */
-export function isContentCategory(value: string): value is ContentCategory {
-  return CONTENT_CATEGORY_VALUES.includes(value as ContentCategory);
-}
-
-/**
- * Alias for CONTENT_CATEGORY_VALUES (backward compatibility)
- * @deprecated Use CONTENT_CATEGORY_VALUES instead
- */
-export const VALID_CONTENT_CATEGORIES = CONTENT_CATEGORY_VALUES;
-
-export type JobStatus = Enums<'job_status'>;
+// JobStatus removed - use Database['public']['Enums']['job_status'] directly
 
 /**
  * Job status values array for runtime use (validation, etc.)
@@ -300,16 +273,18 @@ export const JOB_STATUS_VALUES = [
   'expired',
   'rejected',
   'deleted',
-] as const satisfies readonly JobStatus[];
+] as const satisfies readonly DatabaseGenerated['public']['Enums']['job_status'][];
 
 /**
  * Type guard for job_status enum values
  */
-export function isJobStatus(value: string): value is JobStatus {
-  return JOB_STATUS_VALUES.includes(value as JobStatus);
+export function isJobStatus(
+  value: string
+): value is DatabaseGenerated['public']['Enums']['job_status'] {
+  return JOB_STATUS_VALUES.includes(value as DatabaseGenerated['public']['Enums']['job_status']);
 }
 
-export type SortOption = Enums<'sort_option'>;
+// SortOption removed - use Database['public']['Enums']['sort_option'] directly
 
 /**
  * Sort option values array for runtime use (validation, etc.)
@@ -325,32 +300,41 @@ export const SORT_OPTION_VALUES = [
   'created',
   'views',
   'trending',
-] as const satisfies readonly SortOption[];
+] as const satisfies readonly DatabaseGenerated['public']['Enums']['sort_option'][];
 
 /**
  * Type guard for sort_option enum values
  */
-export function isSortOption(value: string): value is SortOption {
-  return SORT_OPTION_VALUES.includes(value as SortOption);
+export function isSortOption(
+  value: string
+): value is DatabaseGenerated['public']['Enums']['sort_option'] {
+  return SORT_OPTION_VALUES.includes(value as DatabaseGenerated['public']['Enums']['sort_option']);
 }
 
-export type SortDirection = Enums<'sort_direction'>;
+// SortDirection removed - use Database['public']['Enums']['sort_direction'] directly
 
 /**
  * Sort direction values array for runtime use (validation, etc.)
  * Must match database enum: sort_direction
  * Database values: asc, desc
  */
-export const SORT_DIRECTION_VALUES = ['asc', 'desc'] as const satisfies readonly SortDirection[];
+export const SORT_DIRECTION_VALUES = [
+  'asc',
+  'desc',
+] as const satisfies readonly DatabaseGenerated['public']['Enums']['sort_direction'][];
 
 /**
  * Type guard for sort_direction enum values
  */
-export function isSortDirection(value: string): value is SortDirection {
-  return SORT_DIRECTION_VALUES.includes(value as SortDirection);
+export function isSortDirection(
+  value: string
+): value is DatabaseGenerated['public']['Enums']['sort_direction'] {
+  return SORT_DIRECTION_VALUES.includes(
+    value as DatabaseGenerated['public']['Enums']['sort_direction']
+  );
 }
 
-export type SubmissionType = Enums<'submission_type'>;
+// SubmissionType removed - use Database['public']['Enums']['submission_type'] directly
 
 /**
  * Submission type values array for runtime use (validation, etc.)
@@ -365,38 +349,20 @@ export const SUBMISSION_TYPE_VALUES = [
   'hooks',
   'statuslines',
   'skills',
-] as const satisfies readonly SubmissionType[];
+] as const satisfies readonly DatabaseGenerated['public']['Enums']['submission_type'][];
 
 /**
  * Type guard for submission_type enum values
  */
-export function isSubmissionType(value: string): value is SubmissionType {
-  return SUBMISSION_TYPE_VALUES.includes(value as SubmissionType);
+export function isSubmissionType(
+  value: string
+): value is DatabaseGenerated['public']['Enums']['submission_type'] {
+  return SUBMISSION_TYPE_VALUES.includes(
+    value as DatabaseGenerated['public']['Enums']['submission_type']
+  );
 }
 
-export type SubmissionStatus = Enums<'submission_status'>;
-
-/**
- * Submission status values array for runtime use (validation, etc.)
- * Must match database enum: submission_status
- * Database values: pending, approved, rejected, spam, merged
- */
-export const SUBMISSION_STATUS_VALUES = [
-  'pending',
-  'approved',
-  'rejected',
-  'spam',
-  'merged',
-] as const satisfies readonly SubmissionStatus[];
-
-/**
- * Type guard for submission_status enum values
- */
-export function isSubmissionStatus(value: string): value is SubmissionStatus {
-  return SUBMISSION_STATUS_VALUES.includes(value as SubmissionStatus);
-}
-
-export type NewsletterSource = Enums<'newsletter_source'>;
+// NewsletterSource removed - use Database['public']['Enums']['newsletter_source'] directly
 
 /**
  * Newsletter source values array for runtime use (validation, etc.)
@@ -412,38 +378,20 @@ export const NEWSLETTER_SOURCE_VALUES = [
   'post_copy',
   'resend_import',
   'oauth_signup',
-] as const satisfies readonly NewsletterSource[];
+] as const satisfies readonly DatabaseGenerated['public']['Enums']['newsletter_source'][];
 
 /**
  * Type guard for newsletter_source enum values
  */
-export function isNewsletterSource(value: string): value is NewsletterSource {
-  return NEWSLETTER_SOURCE_VALUES.includes(value as NewsletterSource);
+export function isNewsletterSource(
+  value: string
+): value is DatabaseGenerated['public']['Enums']['newsletter_source'] {
+  return NEWSLETTER_SOURCE_VALUES.includes(
+    value as DatabaseGenerated['public']['Enums']['newsletter_source']
+  );
 }
 
-export type ContactCategory = Enums<'contact_category'>;
-
-/**
- * Contact category values array for runtime use (validation, etc.)
- * Must match database enum: contact_category
- * Database values: bug, feature, partnership, general, other
- */
-export const CONTACT_CATEGORY_VALUES = [
-  'bug',
-  'feature',
-  'partnership',
-  'general',
-  'other',
-] as const satisfies readonly ContactCategory[];
-
-/**
- * Type guard for contact_category enum values
- */
-export function isContactCategory(value: string): value is ContactCategory {
-  return CONTACT_CATEGORY_VALUES.includes(value as ContactCategory);
-}
-
-export type ContactActionType = Enums<'contact_action_type'>;
+// ContactActionType removed - use Database['public']['Enums']['contact_action_type'] directly
 
 /**
  * Valid values for contact_action_type enum
@@ -455,16 +403,20 @@ export const CONTACT_ACTION_TYPE_VALUES = [
   'route',
   'sheet',
   'easter-egg',
-] as const satisfies readonly ContactActionType[];
+] as const satisfies readonly DatabaseGenerated['public']['Enums']['contact_action_type'][];
 
 /**
  * Type guard for contact_action_type enum values
  */
-export function isContactActionType(value: string): value is ContactActionType {
-  return CONTACT_ACTION_TYPE_VALUES.includes(value as ContactActionType);
+export function isContactActionType(
+  value: string
+): value is DatabaseGenerated['public']['Enums']['contact_action_type'] {
+  return CONTACT_ACTION_TYPE_VALUES.includes(
+    value as DatabaseGenerated['public']['Enums']['contact_action_type']
+  );
 }
 
-export type TrendingMetric = Enums<'trending_metric'>;
+// TrendingMetric removed - use Database['public']['Enums']['trending_metric'] directly
 
 /**
  * Valid values for trending_metric enum
@@ -476,16 +428,20 @@ export const TRENDING_METRIC_VALUES = [
   'shares',
   'downloads',
   'all',
-] as const satisfies readonly TrendingMetric[];
+] as const satisfies readonly DatabaseGenerated['public']['Enums']['trending_metric'][];
 
 /**
  * Type guard for trending_metric enum values
  */
-export function isTrendingMetric(value: string): value is TrendingMetric {
-  return TRENDING_METRIC_VALUES.includes(value as TrendingMetric);
+export function isTrendingMetric(
+  value: string
+): value is DatabaseGenerated['public']['Enums']['trending_metric'] {
+  return TRENDING_METRIC_VALUES.includes(
+    value as DatabaseGenerated['public']['Enums']['trending_metric']
+  );
 }
 
-export type TrendingPeriod = Enums<'trending_period'>;
+// TrendingPeriod removed - use Database['public']['Enums']['trending_period'] directly
 
 /**
  * Valid values for trending_period enum
@@ -497,16 +453,20 @@ export const TRENDING_PERIOD_VALUES = [
   'month',
   'year',
   'all',
-] as const satisfies readonly TrendingPeriod[];
+] as const satisfies readonly DatabaseGenerated['public']['Enums']['trending_period'][];
 
 /**
  * Type guard for trending_period enum values
  */
-export function isTrendingPeriod(value: string): value is TrendingPeriod {
-  return TRENDING_PERIOD_VALUES.includes(value as TrendingPeriod);
+export function isTrendingPeriod(
+  value: string
+): value is DatabaseGenerated['public']['Enums']['trending_period'] {
+  return TRENDING_PERIOD_VALUES.includes(
+    value as DatabaseGenerated['public']['Enums']['trending_period']
+  );
 }
 
-export type UseCaseType = Enums<'use_case_type'>;
+// UseCaseType removed - use Database['public']['Enums']['use_case_type'] directly
 
 /**
  * Valid values for use_case_type enum
@@ -522,16 +482,20 @@ export const USE_CASE_TYPE_VALUES = [
   'general-development',
   'testing-qa',
   'security-audit',
-] as const satisfies readonly UseCaseType[];
+] as const satisfies readonly DatabaseGenerated['public']['Enums']['use_case_type'][];
 
 /**
  * Type guard for use_case_type enum values
  */
-export function isUseCaseType(value: string): value is UseCaseType {
-  return USE_CASE_TYPE_VALUES.includes(value as UseCaseType);
+export function isUseCaseType(
+  value: string
+): value is DatabaseGenerated['public']['Enums']['use_case_type'] {
+  return USE_CASE_TYPE_VALUES.includes(
+    value as DatabaseGenerated['public']['Enums']['use_case_type']
+  );
 }
 
-export type ChangelogCategory = Enums<'changelog_category'>;
+// ChangelogCategory removed - use Database['public']['Enums']['changelog_category'] directly
 
 /**
  * Valid values for changelog_category enum
@@ -544,16 +508,20 @@ export const CHANGELOG_CATEGORY_VALUES = [
   'Removed',
   'Fixed',
   'Security',
-] as const satisfies readonly ChangelogCategory[];
+] as const satisfies readonly DatabaseGenerated['public']['Enums']['changelog_category'][];
 
 /**
  * Type guard for changelog_category enum values
  */
-export function isChangelogCategory(value: string): value is ChangelogCategory {
-  return CHANGELOG_CATEGORY_VALUES.includes(value as ChangelogCategory);
+export function isChangelogCategory(
+  value: string
+): value is DatabaseGenerated['public']['Enums']['changelog_category'] {
+  return CHANGELOG_CATEGORY_VALUES.includes(
+    value as DatabaseGenerated['public']['Enums']['changelog_category']
+  );
 }
 
-export type ExperienceLevel = Enums<'experience_level'>;
+// ExperienceLevel removed - use Database['public']['Enums']['experience_level'] directly
 
 /**
  * Valid values for experience_level enum
@@ -563,16 +531,20 @@ export const EXPERIENCE_LEVEL_VALUES = [
   'beginner',
   'intermediate',
   'advanced',
-] as const satisfies readonly ExperienceLevel[];
+] as const satisfies readonly DatabaseGenerated['public']['Enums']['experience_level'][];
 
 /**
  * Type guard for experience_level enum values
  */
-export function isExperienceLevel(value: string): value is ExperienceLevel {
-  return EXPERIENCE_LEVEL_VALUES.includes(value as ExperienceLevel);
+export function isExperienceLevel(
+  value: string
+): value is DatabaseGenerated['public']['Enums']['experience_level'] {
+  return EXPERIENCE_LEVEL_VALUES.includes(
+    value as DatabaseGenerated['public']['Enums']['experience_level']
+  );
 }
 
-export type FocusAreaType = Enums<'focus_area_type'>;
+// FocusAreaType removed - use Database['public']['Enums']['focus_area_type'] directly
 
 /**
  * Valid values for focus_area_type enum
@@ -585,55 +557,20 @@ export const FOCUS_AREA_TYPE_VALUES = [
   'testing',
   'code-quality',
   'automation',
-] as const satisfies readonly FocusAreaType[];
+] as const satisfies readonly DatabaseGenerated['public']['Enums']['focus_area_type'][];
 
 /**
  * Type guard for focus_area_type enum values
  */
-export function isFocusAreaType(value: string): value is FocusAreaType {
-  return FOCUS_AREA_TYPE_VALUES.includes(value as FocusAreaType);
+export function isFocusAreaType(
+  value: string
+): value is DatabaseGenerated['public']['Enums']['focus_area_type'] {
+  return FOCUS_AREA_TYPE_VALUES.includes(
+    value as DatabaseGenerated['public']['Enums']['focus_area_type']
+  );
 }
 
-export type AnnouncementPriority = Enums<'announcement_priority'>;
-
-/**
- * Valid values for announcement_priority enum
- * Source: Database enum definition
- */
-export const ANNOUNCEMENT_PRIORITY_VALUES = [
-  'high',
-  'medium',
-  'low',
-] as const satisfies readonly AnnouncementPriority[];
-
-/**
- * Type guard for announcement_priority enum values
- */
-export function isAnnouncementPriority(value: string): value is AnnouncementPriority {
-  return ANNOUNCEMENT_PRIORITY_VALUES.includes(value as AnnouncementPriority);
-}
-
-export type AnnouncementVariant = Enums<'announcement_variant'>;
-
-/**
- * Valid values for announcement_variant enum
- * Source: Database enum definition
- */
-export const ANNOUNCEMENT_VARIANT_VALUES = [
-  'default',
-  'outline',
-  'secondary',
-  'destructive',
-] as const satisfies readonly AnnouncementVariant[];
-
-/**
- * Type guard for announcement_variant enum values
- */
-export function isAnnouncementVariant(value: string): value is AnnouncementVariant {
-  return ANNOUNCEMENT_VARIANT_VALUES.includes(value as AnnouncementVariant);
-}
-
-export type ConfettiVariant = Enums<'confetti_variant'>;
+// ConfettiVariant removed - use Database['public']['Enums']['confetti_variant'] directly
 
 /**
  * Valid values for confetti_variant enum
@@ -644,16 +581,20 @@ export const CONFETTI_VARIANT_VALUES = [
   'celebration',
   'milestone',
   'subtle',
-] as const satisfies readonly ConfettiVariant[];
+] as const satisfies readonly DatabaseGenerated['public']['Enums']['confetti_variant'][];
 
 /**
  * Type guard for confetti_variant enum values
  */
-export function isConfettiVariant(value: string): value is ConfettiVariant {
-  return CONFETTI_VARIANT_VALUES.includes(value as ConfettiVariant);
+export function isConfettiVariant(
+  value: string
+): value is DatabaseGenerated['public']['Enums']['confetti_variant'] {
+  return CONFETTI_VARIANT_VALUES.includes(
+    value as DatabaseGenerated['public']['Enums']['confetti_variant']
+  );
 }
 
-export type NotificationPriority = Enums<'notification_priority'>;
+// NotificationPriority removed - use Database['public']['Enums']['notification_priority'] directly
 
 /**
  * Valid values for notification_priority enum
@@ -663,16 +604,20 @@ export const NOTIFICATION_PRIORITY_VALUES = [
   'high',
   'medium',
   'low',
-] as const satisfies readonly NotificationPriority[];
+] as const satisfies readonly DatabaseGenerated['public']['Enums']['notification_priority'][];
 
 /**
  * Type guard for notification_priority enum values
  */
-export function isNotificationPriority(value: string): value is NotificationPriority {
-  return NOTIFICATION_PRIORITY_VALUES.includes(value as NotificationPriority);
+export function isNotificationPriority(
+  value: string
+): value is DatabaseGenerated['public']['Enums']['notification_priority'] {
+  return NOTIFICATION_PRIORITY_VALUES.includes(
+    value as DatabaseGenerated['public']['Enums']['notification_priority']
+  );
 }
 
-export type NotificationType = Enums<'notification_type'>;
+// NotificationType removed - use Database['public']['Enums']['notification_type'] directly
 
 /**
  * Valid values for notification_type enum
@@ -681,16 +626,20 @@ export type NotificationType = Enums<'notification_type'>;
 export const NOTIFICATION_TYPE_VALUES = [
   'announcement',
   'feedback',
-] as const satisfies readonly NotificationType[];
+] as const satisfies readonly DatabaseGenerated['public']['Enums']['notification_type'][];
 
 /**
  * Type guard for notification_type enum values
  */
-export function isNotificationType(value: string): value is NotificationType {
-  return NOTIFICATION_TYPE_VALUES.includes(value as NotificationType);
+export function isNotificationType(
+  value: string
+): value is DatabaseGenerated['public']['Enums']['notification_type'] {
+  return NOTIFICATION_TYPE_VALUES.includes(
+    value as DatabaseGenerated['public']['Enums']['notification_type']
+  );
 }
 
-export type GuideSubcategory = Enums<'guide_subcategory'>;
+// GuideSubcategory removed - use Database['public']['Enums']['guide_subcategory'] directly
 
 /**
  * Valid values for guide_subcategory enum
@@ -702,16 +651,20 @@ export const GUIDE_SUBCATEGORY_VALUES = [
   'workflows',
   'use-cases',
   'troubleshooting',
-] as const satisfies readonly GuideSubcategory[];
+] as const satisfies readonly DatabaseGenerated['public']['Enums']['guide_subcategory'][];
 
 /**
  * Type guard for guide_subcategory enum values
  */
-export function isGuideSubcategory(value: string): value is GuideSubcategory {
-  return GUIDE_SUBCATEGORY_VALUES.includes(value as GuideSubcategory);
+export function isGuideSubcategory(
+  value: string
+): value is DatabaseGenerated['public']['Enums']['guide_subcategory'] {
+  return GUIDE_SUBCATEGORY_VALUES.includes(
+    value as DatabaseGenerated['public']['Enums']['guide_subcategory']
+  );
 }
 
-export type IntegrationType = Enums<'integration_type'>;
+// IntegrationType removed - use Database['public']['Enums']['integration_type'] directly
 
 /**
  * Valid values for integration_type enum
@@ -725,16 +678,20 @@ export const INTEGRATION_TYPE_VALUES = [
   'cloud-azure',
   'communication',
   'none',
-] as const satisfies readonly IntegrationType[];
+] as const satisfies readonly DatabaseGenerated['public']['Enums']['integration_type'][];
 
 /**
  * Type guard for integration_type enum values
  */
-export function isIntegrationType(value: string): value is IntegrationType {
-  return INTEGRATION_TYPE_VALUES.includes(value as IntegrationType);
+export function isIntegrationType(
+  value: string
+): value is DatabaseGenerated['public']['Enums']['integration_type'] {
+  return INTEGRATION_TYPE_VALUES.includes(
+    value as DatabaseGenerated['public']['Enums']['integration_type']
+  );
 }
 
-export type UserTier = Enums<'user_tier'>;
+// UserTier removed - use Database['public']['Enums']['user_tier'] directly
 
 /**
  * User tier values array for runtime use (validation, etc.)
@@ -743,16 +700,18 @@ export const USER_TIER_VALUES = [
   'free',
   'pro',
   'enterprise',
-] as const satisfies readonly UserTier[];
+] as const satisfies readonly DatabaseGenerated['public']['Enums']['user_tier'][];
 
 /**
  * Type guard for user_tier enum values
  */
-export function isUserTier(value: string): value is UserTier {
-  return USER_TIER_VALUES.includes(value as UserTier);
+export function isUserTier(
+  value: string
+): value is DatabaseGenerated['public']['Enums']['user_tier'] {
+  return USER_TIER_VALUES.includes(value as DatabaseGenerated['public']['Enums']['user_tier']);
 }
 
-export type PaymentStatus = Enums<'payment_status'>;
+// PaymentStatus removed - use Database['public']['Enums']['payment_status'] directly
 
 /**
  * Payment status values array for runtime use (validation, etc.)
@@ -761,31 +720,17 @@ export const PAYMENT_STATUS_VALUES = [
   'unpaid',
   'paid',
   'refunded',
-] as const satisfies readonly PaymentStatus[];
+] as const satisfies readonly DatabaseGenerated['public']['Enums']['payment_status'][];
 
 /**
  * Type guard for payment_status enum values
  */
-export function isPaymentStatus(value: string): value is PaymentStatus {
-  return PAYMENT_STATUS_VALUES.includes(value as PaymentStatus);
-}
-
-export type Environment = Enums<'environment'>;
-
-/**
- * Environment values array for runtime use (validation, etc.)
- */
-export const ENVIRONMENT_VALUES = [
-  'development',
-  'preview',
-  'production',
-] as const satisfies readonly Environment[];
-
-/**
- * Type guard for environment enum values
- */
-export function isEnvironment(value: string): value is Environment {
-  return ENVIRONMENT_VALUES.includes(value as Environment);
+export function isPaymentStatus(
+  value: string
+): value is DatabaseGenerated['public']['Enums']['payment_status'] {
+  return PAYMENT_STATUS_VALUES.includes(
+    value as DatabaseGenerated['public']['Enums']['payment_status']
+  );
 }
 
 /**
@@ -820,19 +765,20 @@ export function insertTable<T extends keyof DatabaseGenerated['public']['Tables'
 /**
  * Type-safe table update helper function
  * Properly types the update operation to avoid 'never' inference
+ * Uses Database type to include extended fields (e.g., mcpb_storage_url, etc.)
  */
-export async function updateTable<T extends keyof DatabaseGenerated['public']['Tables']>(
+export async function updateTable<T extends keyof Database['public']['Tables']>(
   table: T,
-  data: DatabaseGenerated['public']['Tables'][T]['Update'],
+  data: Database['public']['Tables'][T]['Update'],
   id: string
 ): Promise<{ error: unknown }> {
   // Use satisfies to validate data type, then use the client directly
-  const validatedData = data satisfies DatabaseGenerated['public']['Tables'][T]['Update'];
+  const validatedData = data satisfies Database['public']['Tables'][T]['Update'];
   // The Supabase client may infer 'never' but we validate the data type with satisfies
   // Type assertion needed due to Supabase client type inference limitation
   // Data is validated with satisfies, but client infers 'never' - this is a known Supabase limitation
   type UpdateBuilder = {
-    update: (values: DatabaseGenerated['public']['Tables'][T]['Update']) => {
+    update: (values: Database['public']['Tables'][T]['Update']) => {
       eq: (column: string, value: string) => Promise<{ error: unknown }>;
     };
   };
@@ -1226,13 +1172,13 @@ export type GetAppSettingsReturn = Record<
     /** The actual setting value (can be any JSON-serializable value) */
     value: Json;
     /** The type of the setting value */
-    type: SettingType;
+    type: DatabaseGenerated['public']['Enums']['setting_type'];
     /** Human-readable description of the setting */
     description: string | null;
     /** Category grouping for the setting */
     category: string | null;
     /** Environment where this setting applies (null = all environments) */
-    environment: Environment | null;
+    environment: DatabaseGenerated['public']['Enums']['environment'] | null;
     /** Whether this setting is currently enabled (always true in return) */
     enabled: boolean;
     /** Version number for the setting */

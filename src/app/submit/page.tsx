@@ -29,7 +29,7 @@ import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
 import { normalizeError } from '@/src/lib/utils/error.utils';
-import type { ContentCategory } from '@/src/types/database-overrides';
+import type { Database } from '@/src/types/database.types';
 
 const SUBMISSION_TIPS = [
   'Be specific in your descriptions - help users understand what your config does',
@@ -39,7 +39,7 @@ const SUBMISSION_TIPS = [
   'Tag appropriately - tags help users discover your work',
 ];
 
-const TYPE_LABELS: Partial<Record<ContentCategory, string>> = {
+const TYPE_LABELS: Partial<Record<Database['public']['Enums']['content_category'], string>> = {
   agents: 'Agent',
   mcp: 'MCP',
   rules: 'Rule',

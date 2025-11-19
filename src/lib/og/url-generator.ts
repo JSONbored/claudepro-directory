@@ -39,7 +39,7 @@ export const OG_IMAGE_DIMENSIONS = {
  * ```
  */
 export function generateOGImageUrl(path: string): string {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseUrl = process.env['NEXT_PUBLIC_SUPABASE_URL'];
   if (!supabaseUrl) {
     // Fallback to static image if Supabase URL is not available (e.g., during build)
     return `${APP_CONFIG.url}/og-images/og-image.webp`;

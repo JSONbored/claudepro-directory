@@ -25,13 +25,11 @@ export async function handlePaginatedContent(url: URL): Promise<Response> {
 
   const category = categoryParam === 'all' ? undefined : categoryParam;
 
-  const rpcArgs = {
-    p_category: category,
+  const rpcArgs: DatabaseGenerated['public']['Functions']['get_content_paginated_slim']['Args'] = {
+    ...(category !== undefined ? { p_category: category } : {}),
     p_limit: limitParam,
     p_offset: offsetParam,
-    p_order_by: undefined,
-    p_order_direction: undefined,
-  } satisfies DatabaseGenerated['public']['Functions']['get_content_paginated_slim']['Args'];
+  };
   const { data, error } = await callRpc('get_content_paginated_slim', rpcArgs, true);
 
   if (error) {
@@ -43,8 +41,8 @@ export async function handlePaginatedContent(url: URL): Promise<Response> {
     DatabaseGenerated['public']['Functions']['get_content_paginated_slim']['Returns'];
   const result = data as PaginatedResult;
   const items =
-    result && typeof result === 'object' && 'items' in result && Array.isArray(result.items)
-      ? result.items
+    result && typeof result === 'object' && 'items' in result && Array.isArray(result['items'])
+      ? result['items']
       : [];
 
   return new Response(JSON.stringify(items), {

@@ -108,6 +108,7 @@ export function ContentListServer<T extends DisplayableContent>({
   type,
   searchPlaceholder = `Search ${title.toLowerCase()}...`,
   badges = [],
+  category,
 }: ContentListServerProps<T>) {
   return (
     <div className={'min-h-screen bg-background'}>
@@ -129,7 +130,7 @@ export function ContentListServer<T extends DisplayableContent>({
           <ContentSearchClient
             items={items}
             type={type}
-            category={type}
+            {...(category && { category })}
             searchPlaceholder={searchPlaceholder}
             title={title}
             icon={icon}

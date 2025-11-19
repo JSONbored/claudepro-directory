@@ -63,9 +63,9 @@ async function processSearchEventsBatch(messages: PulseQueueMessage[]): Promise<
       const userId = event.user_id && isValidUUID(event.user_id) ? event.user_id : null;
       const sessionId = event.session_id && isValidUUID(event.session_id) ? event.session_id : null;
       return {
-        query: (metadata?.query as string) || '',
-        filters: metadata?.filters ?? null,
-        result_count: (metadata?.result_count as number) ?? 0,
+        query: (metadata?.['query'] as string) || '',
+        filters: metadata?.['filters'] ?? null,
+        result_count: (metadata?.['result_count'] as number) ?? 0,
         user_id: userId,
         session_id: sessionId,
       };
@@ -117,8 +117,10 @@ async function updateResendEngagement(messages: PulseQueueMessage[]): Promise<vo
   }
 
   const resend = new Resend(RESEND_ENV.apiKey);
-  const engagementEvents: Array<{ userId: string; activityType: 'copy_content' | 'visit_page' }> =
-    [];
+  const engagementEvents: Array<{
+    userId: string;
+    activityType: 'copy_content' | 'visit_page';
+  }> = [];
 
   // Filter for copy/view events with user_id
   for (const msg of messages) {
@@ -268,18 +270,22 @@ async function processSponsoredEventsBatch(messages: PulseQueueMessage[]): Promi
       const event = msg.message;
       const metadata = event.metadata as Record<string, unknown> | null;
 
-      if (metadata?.event_type === 'impression') {
+      if (metadata?.['event_type'] === 'impression') {
         impressions.push({
           sponsored_id: event.content_slug ?? '',
           user_id: event.user_id ?? null,
-          page_url: metadata.page_url as string | undefined,
-          position: metadata.position as number | undefined,
+          ...(metadata?.['page_url'] !== undefined
+            ? { page_url: metadata['page_url'] as string }
+            : {}),
+          ...(metadata?.['position'] !== undefined
+            ? { position: metadata['position'] as number }
+            : {}),
         });
-      } else if (metadata?.event_type === 'click') {
+      } else if (metadata?.['event_type'] === 'click') {
         clicks.push({
           sponsored_id: event.content_slug ?? '',
           user_id: event.user_id ?? null,
-          target_url: metadata.target_url as string,
+          target_url: metadata['target_url'] as string,
         });
       }
     }

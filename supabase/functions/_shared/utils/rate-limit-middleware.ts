@@ -46,7 +46,9 @@ export function createRateLimitErrorResponse(
     'X-RateLimit-Limit': String(config.maxRequests),
     'X-RateLimit-Remaining': String(rateLimit.remaining),
     'X-RateLimit-Reset': new Date(rateLimit.resetAt).toISOString(),
-    ...(rateLimit.retryAfter && { 'Retry-After': String(rateLimit.retryAfter) }),
+    ...(rateLimit.retryAfter && {
+      'Retry-After': String(rateLimit.retryAfter),
+    }),
   };
 
   if (errorResponseType === 'badRequest') {

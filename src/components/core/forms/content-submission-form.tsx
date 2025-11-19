@@ -37,11 +37,9 @@ import { cn } from '@/src/lib/utils';
 import { ParseStrategy, safeParse } from '@/src/lib/utils/data.utils';
 import { normalizeError } from '@/src/lib/utils/error.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
-import type {
-  ContentCategory,
-  GetGetContentTemplatesReturn,
-  SubmissionStatus,
-} from '@/src/types/database-overrides';
+import type { Database } from '@/src/types/database.types';
+import type { GetGetContentTemplatesReturn } from '@/src/types/database-overrides';
+
 import { DuplicateWarning } from './duplicate-warning';
 import { ContentTypeFieldRenderer } from './dynamic-form-field';
 import { ExamplesArrayInput } from './examples-array-input';
@@ -142,7 +140,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
   /** Submission result for success message display */
   const [submissionResult, setSubmissionResult] = useState<{
     submission_id: string;
-    status: SubmissionStatus;
+    status: Database['public']['Enums']['submission_status'];
     message: string;
   } | null>(null);
 
@@ -198,77 +196,78 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
     if (!form) return;
 
     // Set common fields (present in all templates)
-    setName(template.name);
+    setName(template['name']);
     const nameInput = form.querySelector('[name="name"]') as HTMLInputElement;
-    if (nameInput) nameInput.value = template.name;
+    if (nameInput) nameInput.value = template['name'];
 
     const descInput = form.querySelector('[name="description"]') as HTMLTextAreaElement;
-    if (descInput) descInput.value = template.description || '';
+    if (descInput) descInput.value = template['description'] || '';
 
     const categoryInput = form.querySelector('[name="category"]') as HTMLInputElement;
-    if (categoryInput && template.category) categoryInput.value = template.category;
+    if (categoryInput && template['category']) categoryInput.value = template['category'];
 
     const tagsInput = form.querySelector('[name="tags"]') as HTMLInputElement;
-    if (tagsInput && template.tags) tagsInput.value = template.tags;
+    if (tagsInput && template['tags']) tagsInput.value = template['tags'];
 
     if (template.type === 'agent') {
       const promptInput = form.querySelector('[name="systemPrompt"]') as HTMLTextAreaElement;
-      if (promptInput && typeof template.systemPrompt === 'string')
-        promptInput.value = template.systemPrompt;
+      if (promptInput && typeof template['systemPrompt'] === 'string')
+        promptInput.value = template['systemPrompt'];
 
       const tempInput = form.querySelector('[name="temperature"]') as HTMLInputElement;
-      if (tempInput && typeof template.temperature === 'number')
-        tempInput.value = template.temperature.toString();
+      if (tempInput && typeof template['temperature'] === 'number')
+        tempInput.value = template['temperature'].toString();
 
       const tokensInput = form.querySelector('[name="maxTokens"]') as HTMLInputElement;
-      if (tokensInput && typeof template.maxTokens === 'number')
-        tokensInput.value = template.maxTokens.toString();
+      if (tokensInput && typeof template['maxTokens'] === 'number')
+        tokensInput.value = template['maxTokens'].toString();
     }
 
     if (template.type === 'rules') {
       const rulesInput = form.querySelector('[name="rulesContent"]') as HTMLTextAreaElement;
-      if (rulesInput && typeof template.rulesContent === 'string')
-        rulesInput.value = template.rulesContent;
+      if (rulesInput && typeof template['rulesContent'] === 'string')
+        rulesInput.value = template['rulesContent'];
 
       const tempInput = form.querySelector('[name="temperature"]') as HTMLInputElement;
-      if (tempInput && typeof template.temperature === 'number')
-        tempInput.value = template.temperature.toString();
+      if (tempInput && typeof template['temperature'] === 'number')
+        tempInput.value = template['temperature'].toString();
 
       const tokensInput = form.querySelector('[name="maxTokens"]') as HTMLInputElement;
-      if (tokensInput && typeof template.maxTokens === 'number')
-        tokensInput.value = template.maxTokens.toString();
+      if (tokensInput && typeof template['maxTokens'] === 'number')
+        tokensInput.value = template['maxTokens'].toString();
     }
 
     if (template.type === 'mcp') {
       const npmInput = form.querySelector('[name="npmPackage"]') as HTMLInputElement;
-      if (npmInput && typeof template.npmPackage === 'string') npmInput.value = template.npmPackage;
+      if (npmInput && typeof template['npmPackage'] === 'string')
+        npmInput.value = template['npmPackage'];
 
       const typeInput = form.querySelector('[name="serverType"]') as HTMLSelectElement;
-      if (typeInput && typeof template.serverType === 'string')
-        typeInput.value = template.serverType;
+      if (typeInput && typeof template['serverType'] === 'string')
+        typeInput.value = template['serverType'];
 
       const installInput = form.querySelector('[name="installCommand"]') as HTMLInputElement;
-      if (installInput && typeof template.installCommand === 'string')
-        installInput.value = template.installCommand;
+      if (installInput && typeof template['installCommand'] === 'string')
+        installInput.value = template['installCommand'];
 
       const configInput = form.querySelector('[name="configCommand"]') as HTMLInputElement;
-      if (configInput && typeof template.configCommand === 'string')
-        configInput.value = template.configCommand;
+      if (configInput && typeof template['configCommand'] === 'string')
+        configInput.value = template['configCommand'];
 
       const toolsInput = form.querySelector('[name="toolsDescription"]') as HTMLTextAreaElement;
-      if (toolsInput && typeof template.toolsDescription === 'string')
-        toolsInput.value = template.toolsDescription;
+      if (toolsInput && typeof template['toolsDescription'] === 'string')
+        toolsInput.value = template['toolsDescription'];
 
-      if (template.envVars && typeof template.envVars === 'string') {
+      if (template['envVars'] && typeof template['envVars'] === 'string') {
         const envInput = form.querySelector('[name="envVars"]') as HTMLTextAreaElement;
-        if (envInput) envInput.value = template.envVars;
+        if (envInput) envInput.value = template['envVars'];
       }
     }
 
     if (template.type === 'command') {
       const cmdInput = form.querySelector('[name="commandContent"]') as HTMLTextAreaElement;
-      if (cmdInput && typeof template.commandContent === 'string') {
-        cmdInput.value = template.commandContent;
+      if (cmdInput && typeof template['commandContent'] === 'string') {
+        cmdInput.value = template['commandContent'];
       }
     }
 
@@ -301,7 +300,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
             const examplesJson = value as string;
             if (examplesJson && examplesJson !== '[]') {
               try {
-                submissionData.examples = safeParse(examplesJson, examplesArraySchema, {
+                submissionData['examples'] = safeParse(examplesJson, examplesArraySchema, {
                   strategy: ParseStrategy.VALIDATED_JSON,
                 });
               } catch (error) {
@@ -309,7 +308,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
                   error: error instanceof Error ? error.message : String(error),
                 });
                 toasts.raw.warning('Examples field could not be parsed and will be omitted');
-                submissionData.examples = undefined;
+                submissionData['examples'] = undefined;
               }
             }
             continue;
@@ -328,8 +327,8 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
         }
 
         // Server action call - database validates everything
-        const tags = submissionData.tags
-          ? (submissionData.tags as string)
+        const tags = submissionData['tags']
+          ? (submissionData['tags'] as string)
               .split(',')
               .map((tag) => tag.trim())
               .filter((tag) => tag.length > 0)
@@ -337,12 +336,12 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
 
         const result = await submitContentForReview({
           submission_type: contentType,
-          name: submissionData.name as string,
-          description: submissionData.description as string,
-          category: submissionData.category as ContentCategory,
-          author: submissionData.author as string,
-          author_profile_url: submissionData.author_profile_url as string | undefined,
-          github_url: submissionData.github_url as string | undefined,
+          name: submissionData['name'] as string,
+          description: submissionData['description'] as string,
+          category: submissionData['category'] as Database['public']['Enums']['content_category'],
+          author: submissionData['author'] as string,
+          author_profile_url: submissionData['author_profile_url'] as string | undefined,
+          github_url: submissionData['github_url'] as string | undefined,
           tags,
           content_data: submissionData,
         });
@@ -355,9 +354,9 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
               component: 'SubmitFormClient',
               contentType,
               submissionType: contentType,
-              hasName: !!submissionData.name,
-              hasDescription: !!submissionData.description,
-              hasAuthor: !!submissionData.author,
+              hasName: !!submissionData['name'],
+              hasDescription: !!submissionData['description'],
+              hasAuthor: !!submissionData['author'],
             }
           );
           toasts.error.submissionFailed(

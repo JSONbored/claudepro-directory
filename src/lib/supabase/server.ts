@@ -14,12 +14,12 @@ import type { Database } from '@/src/types/database.types';
 export async function createClient() {
   const cookieStore = await cookies();
 
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const supabaseUrl = process.env['NEXT_PUBLIC_SUPABASE_URL'];
+  const supabaseAnonKey = process.env['NEXT_PUBLIC_SUPABASE_ANON_KEY'];
 
   // In development without env vars, return a mock client that won't crash
   if (!(supabaseUrl && supabaseAnonKey)) {
-    if (process.env.NODE_ENV === 'development') {
+    if (process.env['NODE_ENV'] === 'development') {
       logger.warn(
         'Supabase env vars not found - using mock server client for development. Database features will not work.'
       );

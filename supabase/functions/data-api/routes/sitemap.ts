@@ -119,7 +119,10 @@ async function handleSitemapIndexNow(req: Request, logContext?: BaseLogContext):
 
   if (!INDEXNOW_TRIGGER_KEY) {
     return jsonResponse(
-      { error: 'Service unavailable', message: 'IndexNow trigger key not configured' },
+      {
+        error: 'Service unavailable',
+        message: 'IndexNow trigger key not configured',
+      },
       503,
       CORS
     );
@@ -131,7 +134,10 @@ async function handleSitemapIndexNow(req: Request, logContext?: BaseLogContext):
 
   if (!INDEXNOW_API_KEY) {
     return jsonResponse(
-      { error: 'Service unavailable', message: 'IndexNow API key not configured' },
+      {
+        error: 'Service unavailable',
+        message: 'IndexNow API key not configured',
+      },
       503,
       CORS
     );
@@ -172,7 +178,7 @@ async function handleSitemapIndexNow(req: Request, logContext?: BaseLogContext):
         retryOn: [500, 502, 503, 504],
         noRetryOn: [400, 401, 403, 404],
       },
-      logContext,
+      ...(logContext !== undefined ? { logContext } : {}),
     });
 
     // Use timeout to prevent hanging

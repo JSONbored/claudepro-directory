@@ -18,7 +18,6 @@ import {
 } from '@/src/components/primitives/feedback/loading-skeleton';
 import { getAnimationConfig } from '@/src/lib/actions/feature-flags.actions';
 import {
-  type ContentCategory,
   getCategoryConfigs,
   getCategoryStatsConfig,
   getHomepageFeaturedCategories,
@@ -32,6 +31,7 @@ import type {
 } from '@/src/lib/types/component.types';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { logClientWarning, logUnhandledPromise } from '@/src/lib/utils/error.utils';
+import type { Database } from '@/src/types/database.types';
 import type { ContentItem } from '@/src/types/database-overrides';
 
 /**
@@ -65,7 +65,9 @@ function HomePageClientComponent({
   const [isSearching, setIsSearching] = useState(false);
   const [filters, setFilters] = useState({});
   const [currentSearchQuery, setCurrentSearchQuery] = useState('');
-  const [featuredCategories, setFeaturedCategories] = useState<readonly ContentCategory[]>([]);
+  const [featuredCategories, setFeaturedCategories] = useState<
+    readonly Database['public']['Enums']['content_category'][]
+  >([]);
   const [springDefault, setSpringDefault] = useState({
     type: 'spring' as const,
     stiffness: 400,

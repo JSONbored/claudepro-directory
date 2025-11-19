@@ -37,6 +37,17 @@ export function getNumberEnv(name: string, fallback?: number): number | undefine
   return Number.isFinite(parsed) ? parsed : fallback;
 }
 
+/**
+ * Helper to conditionally include a property only if value is defined
+ * This ensures exactOptionalPropertyTypes compatibility
+ */
+function optionalProp<T>(
+  key: string,
+  value: T | undefined
+): Record<string, T> | Record<string, never> {
+  return value !== undefined ? { [key]: value } : {};
+}
+
 export interface EdgeEnv {
   nodeEnv: string;
   site: {
@@ -120,7 +131,7 @@ export const edgeEnv: EdgeEnv = {
   },
   statsig: {
     apiUrl: getEnvOrDefault('STATSIG_CACHE_ENDPOINT', 'https://api.statsig.com/v1/get_config'),
-    serverSecret: getOptionalEnv('STATSIG_SERVER_SECRET'),
+    ...optionalProp('serverSecret', getOptionalEnv('STATSIG_SERVER_SECRET')),
     configName: getEnvOrDefault('STATSIG_CACHE_CONFIG_NAME', 'cache_configs'),
     refreshIntervalMs: getNumberEnv('STATSIG_CACHE_REFRESH_MS', 5 * 60 * 1000) ?? 5 * 60 * 1000,
   },
@@ -128,48 +139,54 @@ export const edgeEnv: EdgeEnv = {
     countTtlSeconds: getNumberEnv('NEWSLETTER_COUNT_TTL_S', 300) ?? 300,
   },
   betterstack: {
-    weeklyTasks: getOptionalEnv('BETTERSTACK_HEARTBEAT_WEEKLY_TASKS'),
-    emailSequences: getOptionalEnv('BETTERSTACK_HEARTBEAT_EMAIL_SEQUENCES'),
+    ...optionalProp('weeklyTasks', getOptionalEnv('BETTERSTACK_HEARTBEAT_WEEKLY_TASKS')),
+    ...optionalProp('emailSequences', getOptionalEnv('BETTERSTACK_HEARTBEAT_EMAIL_SEQUENCES')),
   },
   resend: {
-    apiKey: getOptionalEnv('RESEND_API_KEY'),
-    audienceId: getOptionalEnv('RESEND_AUDIENCE_ID'),
-    webhookSecret: getOptionalEnv('RESEND_WEBHOOK_SECRET'),
+    ...optionalProp('apiKey', getOptionalEnv('RESEND_API_KEY')),
+    ...optionalProp('audienceId', getOptionalEnv('RESEND_AUDIENCE_ID')),
+    ...optionalProp('webhookSecret', getOptionalEnv('RESEND_WEBHOOK_SECRET')),
   },
   sendEmailHook: {
-    secret: getOptionalEnv('SEND_EMAIL_HOOK_SECRET'),
+    ...optionalProp('secret', getOptionalEnv('SEND_EMAIL_HOOK_SECRET')),
   },
   github: {
-    token: getOptionalEnv('GITHUB_TOKEN'),
-    repoOwner: getOptionalEnv('GITHUB_REPO_OWNER'),
-    repoName: getOptionalEnv('GITHUB_REPO_NAME'),
+    ...optionalProp('token', getOptionalEnv('GITHUB_TOKEN')),
+    ...optionalProp('repoOwner', getOptionalEnv('GITHUB_REPO_OWNER')),
+    ...optionalProp('repoName', getOptionalEnv('GITHUB_REPO_NAME')),
   },
   revalidate: {
-    secret: getOptionalEnv('REVALIDATE_SECRET'),
+    ...optionalProp('secret', getOptionalEnv('REVALIDATE_SECRET')),
   },
   vercel: {
-    webhookSecret: getOptionalEnv('VERCEL_WEBHOOK_SECRET'),
+    ...optionalProp('webhookSecret', getOptionalEnv('VERCEL_WEBHOOK_SECRET')),
   },
   discord: {
-    defaultWebhook: getOptionalEnv('DISCORD_WEBHOOK_URL'),
-    jobs: getOptionalEnv('DISCORD_WEBHOOK_JOBS'),
-    announcements: getOptionalEnv('DISCORD_ANNOUNCEMENTS_WEBHOOK_URL'),
-    errors: getOptionalEnv('DISCORD_EDGE_FUNCTION_ERRORS_WEBHOOK'),
-    changelog: getOptionalEnv('DISCORD_CHANGELOG_WEBHOOK_URL'),
+    ...optionalProp('defaultWebhook', getOptionalEnv('DISCORD_WEBHOOK_URL')),
+    ...optionalProp('jobs', getOptionalEnv('DISCORD_WEBHOOK_JOBS')),
+    ...optionalProp('announcements', getOptionalEnv('DISCORD_ANNOUNCEMENTS_WEBHOOK_URL')),
+    ...optionalProp('errors', getOptionalEnv('DISCORD_EDGE_FUNCTION_ERRORS_WEBHOOK')),
+    ...optionalProp('changelog', getOptionalEnv('DISCORD_CHANGELOG_WEBHOOK_URL')),
   },
   polar: {
-    accessToken: getOptionalEnv('POLAR_ACCESS_TOKEN'),
+    ...optionalProp('accessToken', getOptionalEnv('POLAR_ACCESS_TOKEN')),
     environment: getEnvOrDefault('POLAR_ENVIRONMENT', 'production'),
-    webhookSecret: getOptionalEnv('POLAR_WEBHOOK_SECRET'),
+    ...optionalProp('webhookSecret', getOptionalEnv('POLAR_WEBHOOK_SECRET')),
     productPrices: {
-      oneTimeStandard: getOptionalEnv('POLAR_PRODUCT_PRICE_ONETIME_STANDARD'),
-      oneTimeFeatured: getOptionalEnv('POLAR_PRODUCT_PRICE_ONETIME_FEATURED'),
-      subscriptionStandard: getOptionalEnv('POLAR_PRODUCT_PRICE_SUBSCRIPTION_STANDARD'),
-      subscriptionFeatured: getOptionalEnv('POLAR_PRODUCT_PRICE_SUBSCRIPTION_FEATURED'),
+      ...optionalProp('oneTimeStandard', getOptionalEnv('POLAR_PRODUCT_PRICE_ONETIME_STANDARD')),
+      ...optionalProp('oneTimeFeatured', getOptionalEnv('POLAR_PRODUCT_PRICE_ONETIME_FEATURED')),
+      ...optionalProp(
+        'subscriptionStandard',
+        getOptionalEnv('POLAR_PRODUCT_PRICE_SUBSCRIPTION_STANDARD')
+      ),
+      ...optionalProp(
+        'subscriptionFeatured',
+        getOptionalEnv('POLAR_PRODUCT_PRICE_SUBSCRIPTION_FEATURED')
+      ),
     },
   },
   indexNow: {
-    apiKey: getOptionalEnv('INDEXNOW_API_KEY'),
-    triggerKey: getOptionalEnv('INDEXNOW_TRIGGER_KEY'),
+    ...optionalProp('apiKey', getOptionalEnv('INDEXNOW_API_KEY')),
+    ...optionalProp('triggerKey', getOptionalEnv('INDEXNOW_TRIGGER_KEY')),
   },
 };

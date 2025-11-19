@@ -188,7 +188,7 @@ async function uploadTemplates() {
             subject,
             html,
             from: definition.from,
-            replyTo: definition.replyTo,
+            ...(definition.replyTo !== undefined ? { replyTo: definition.replyTo } : {}),
             variables: DEFAULT_TEMPLATE_VARIABLES,
           });
           return (await result) as { error: unknown; data: unknown };
@@ -206,7 +206,7 @@ async function uploadTemplates() {
             subject,
             html,
             from: definition.from,
-            replyTo: definition.replyTo,
+            ...(definition.replyTo !== undefined ? { replyTo: definition.replyTo } : {}),
             variables: DEFAULT_TEMPLATE_VARIABLES,
           });
           // Resend's ChainableTemplateResult needs to be awaited or converted

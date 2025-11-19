@@ -19,9 +19,9 @@
 
 import type { Database as DatabaseGenerated, Json } from './database.types';
 
-// Helper types
-type Enums<T extends keyof DatabaseGenerated['public']['Enums']> =
-  DatabaseGenerated['public']['Enums'][T];
+// Helper types (kept for backward compatibility but not used - all ENUMs accessed directly)
+// type Enums<T extends keyof DatabaseGenerated['public']['Enums']> =
+//   DatabaseGenerated['public']['Enums'][T];
 
 export type Tables<T extends keyof DatabaseGenerated['public']['Tables']> =
   DatabaseGenerated['public']['Tables'][T]['Row'];
@@ -34,43 +34,8 @@ export type Tables<T extends keyof DatabaseGenerated['public']['Tables']> =
 // Enum Arrays
 // ============================================================================
 
-export type AnnouncementPriority = Enums<'announcement_priority'>;
-export type AnnouncementVariant = Enums<'announcement_variant'>;
-export type ChangelogCategory = Enums<'changelog_category'>;
-export type ConfettiVariant = Enums<'confetti_variant'>;
-export type ContactActionType = Enums<'contact_action_type'>;
-export type ContactCategory = Enums<'contact_category'>;
-export type ContentCategory = Enums<'content_category'>;
-export type Environment = Enums<'environment'>;
-export type ExperienceLevel = Enums<'experience_level'>;
-export type FieldScope = Enums<'field_scope'>;
-export type FieldType = Enums<'field_type'>;
-export type FocusAreaType = Enums<'focus_area_type'>;
-export type FormFieldType = Enums<'form_field_type'>;
-export type FormGridColumn = Enums<'form_grid_column'>;
-export type FormIconPosition = Enums<'form_icon_position'>;
-export type GridColumn = Enums<'grid_column'>;
-export type GuideSubcategory = Enums<'guide_subcategory'>;
-export type IconPosition = Enums<'icon_position'>;
-export type IntegrationType = Enums<'integration_type'>;
-export type InteractionType = Enums<'interaction_type'>;
-export type JobStatus = Enums<'job_status'>;
-export type NewsletterSource = Enums<'newsletter_source'>;
-export type NotificationPriority = Enums<'notification_priority'>;
-export type NotificationType = Enums<'notification_type'>;
-export type PaymentStatus = Enums<'payment_status'>;
-export type SettingType = Enums<'setting_type'>;
-export type SortDirection = Enums<'sort_direction'>;
-export type SortOption = Enums<'sort_option'>;
-export type SubmissionStatus = Enums<'submission_status'>;
-export type SubmissionType = Enums<'submission_type'>;
-export type TrendingMetric = Enums<'trending_metric'>;
-export type TrendingPeriod = Enums<'trending_period'>;
-export type UseCaseType = Enums<'use_case_type'>;
-export type UserTier = Enums<'user_tier'>;
-export type WebhookDirection = Enums<'webhook_direction'>;
-export type WebhookSource = Enums<'webhook_source'>;
-export type WorkplaceType = Enums<'workplace_type'>;
+// All ENUM types should be accessed directly via Database['public']['Enums']['enum_name']
+// No convenience aliases - use exact naming for consistency
 
 /**
  * Valid values for announcement_priority enum
@@ -79,17 +44,7 @@ export const ANNOUNCEMENT_PRIORITY_VALUES = [
   'high',
   'medium',
   'low',
-] as const satisfies readonly AnnouncementPriority[];
-
-/**
- * Valid values for announcement_variant enum
- */
-export const ANNOUNCEMENT_VARIANT_VALUES = [
-  'default',
-  'outline',
-  'secondary',
-  'destructive',
-] as const satisfies readonly AnnouncementVariant[];
+] as const satisfies readonly DatabaseGenerated['public']['Enums']['announcement_priority'][];
 
 /**
  * Valid values for changelog_category enum
@@ -101,7 +56,7 @@ export const CHANGELOG_CATEGORY_VALUES = [
   'Removed',
   'Fixed',
   'Security',
-] as const satisfies readonly ChangelogCategory[];
+] as const satisfies readonly DatabaseGenerated['public']['Enums']['changelog_category'][];
 
 /**
  * Valid values for confetti_variant enum
@@ -111,7 +66,7 @@ export const CONFETTI_VARIANT_VALUES = [
   'celebration',
   'milestone',
   'subtle',
-] as const satisfies readonly ConfettiVariant[];
+] as const satisfies readonly DatabaseGenerated['public']['Enums']['confetti_variant'][];
 
 /**
  * Valid values for contact_action_type enum
@@ -122,44 +77,7 @@ export const CONTACT_ACTION_TYPE_VALUES = [
   'route',
   'sheet',
   'easter-egg',
-] as const satisfies readonly ContactActionType[];
-
-/**
- * Valid values for contact_category enum
- */
-export const CONTACT_CATEGORY_VALUES = [
-  'bug',
-  'feature',
-  'partnership',
-  'general',
-  'other',
-] as const satisfies readonly ContactCategory[];
-
-/**
- * Valid values for content_category enum
- */
-export const CONTENT_CATEGORY_VALUES = [
-  'agents',
-  'mcp',
-  'rules',
-  'commands',
-  'hooks',
-  'statuslines',
-  'skills',
-  'collections',
-  'guides',
-  'jobs',
-  'changelog',
-] as const satisfies readonly ContentCategory[];
-
-/**
- * Valid values for environment enum
- */
-export const ENVIRONMENT_VALUES = [
-  'development',
-  'preview',
-  'production',
-] as const satisfies readonly Environment[];
+] as const satisfies readonly DatabaseGenerated['public']['Enums']['contact_action_type'][];
 
 /**
  * Valid values for experience_level enum
@@ -168,26 +86,7 @@ export const EXPERIENCE_LEVEL_VALUES = [
   'beginner',
   'intermediate',
   'advanced',
-] as const satisfies readonly ExperienceLevel[];
-
-/**
- * Valid values for field_scope enum
- */
-export const FIELD_SCOPE_VALUES = [
-  'common',
-  'type_specific',
-  'tags',
-] as const satisfies readonly FieldScope[];
-
-/**
- * Valid values for field_type enum
- */
-export const FIELD_TYPE_VALUES = [
-  'text',
-  'textarea',
-  'number',
-  'select',
-] as const satisfies readonly FieldType[];
+] as const satisfies readonly DatabaseGenerated['public']['Enums']['experience_level'][];
 
 /**
  * Valid values for focus_area_type enum
@@ -199,45 +98,7 @@ export const FOCUS_AREA_TYPE_VALUES = [
   'testing',
   'code-quality',
   'automation',
-] as const satisfies readonly FocusAreaType[];
-
-/**
- * Valid values for form_field_type enum
- */
-export const FORM_FIELD_TYPE_VALUES = [
-  'text',
-  'textarea',
-  'number',
-  'select',
-] as const satisfies readonly FormFieldType[];
-
-/**
- * Valid values for form_grid_column enum
- */
-export const FORM_GRID_COLUMN_VALUES = [
-  'full',
-  'half',
-  'third',
-  'two-thirds',
-] as const satisfies readonly FormGridColumn[];
-
-/**
- * Valid values for form_icon_position enum
- */
-export const FORM_ICON_POSITION_VALUES = [
-  'left',
-  'right',
-] as const satisfies readonly FormIconPosition[];
-
-/**
- * Valid values for grid_column enum
- */
-export const GRID_COLUMN_VALUES = [
-  'full',
-  'half',
-  'third',
-  'two-thirds',
-] as const satisfies readonly GridColumn[];
+] as const satisfies readonly DatabaseGenerated['public']['Enums']['focus_area_type'][];
 
 /**
  * Valid values for guide_subcategory enum
@@ -248,12 +109,7 @@ export const GUIDE_SUBCATEGORY_VALUES = [
   'workflows',
   'use-cases',
   'troubleshooting',
-] as const satisfies readonly GuideSubcategory[];
-
-/**
- * Valid values for icon_position enum
- */
-export const ICON_POSITION_VALUES = ['left', 'right'] as const satisfies readonly IconPosition[];
+] as const satisfies readonly DatabaseGenerated['public']['Enums']['guide_subcategory'][];
 
 /**
  * Valid values for integration_type enum
@@ -266,7 +122,7 @@ export const INTEGRATION_TYPE_VALUES = [
   'cloud-azure',
   'communication',
   'none',
-] as const satisfies readonly IntegrationType[];
+] as const satisfies readonly DatabaseGenerated['public']['Enums']['integration_type'][];
 
 /**
  * Valid values for interaction_type enum
@@ -293,20 +149,7 @@ export const INTERACTION_TYPE_VALUES = [
   'form_template_selected',
   'form_abandoned',
   'form_submitted',
-] as const satisfies readonly InteractionType[];
-
-/**
- * Valid values for job_status enum
- */
-export const JOB_STATUS_VALUES = [
-  'draft',
-  'pending_payment',
-  'pending_review',
-  'active',
-  'expired',
-  'rejected',
-  'deleted',
-] as const satisfies readonly JobStatus[];
+] as const satisfies readonly DatabaseGenerated['public']['Enums']['interaction_type'][];
 
 /**
  * Valid values for newsletter_source enum
@@ -320,16 +163,7 @@ export const NEWSLETTER_SOURCE_VALUES = [
   'post_copy',
   'resend_import',
   'oauth_signup',
-] as const satisfies readonly NewsletterSource[];
-
-/**
- * Valid values for notification_priority enum
- */
-export const NOTIFICATION_PRIORITY_VALUES = [
-  'high',
-  'medium',
-  'low',
-] as const satisfies readonly NotificationPriority[];
+] as const satisfies readonly DatabaseGenerated['public']['Enums']['newsletter_source'][];
 
 /**
  * Valid values for notification_type enum
@@ -337,31 +171,15 @@ export const NOTIFICATION_PRIORITY_VALUES = [
 export const NOTIFICATION_TYPE_VALUES = [
   'announcement',
   'feedback',
-] as const satisfies readonly NotificationType[];
-
-/**
- * Valid values for payment_status enum
- */
-export const PAYMENT_STATUS_VALUES = [
-  'unpaid',
-  'paid',
-  'refunded',
-] as const satisfies readonly PaymentStatus[];
-
-/**
- * Valid values for setting_type enum
- */
-export const SETTING_TYPE_VALUES = [
-  'boolean',
-  'string',
-  'number',
-  'json',
-] as const satisfies readonly SettingType[];
+] as const satisfies readonly DatabaseGenerated['public']['Enums']['notification_type'][];
 
 /**
  * Valid values for sort_direction enum
  */
-export const SORT_DIRECTION_VALUES = ['asc', 'desc'] as const satisfies readonly SortDirection[];
+export const SORT_DIRECTION_VALUES = [
+  'asc',
+  'desc',
+] as const satisfies readonly DatabaseGenerated['public']['Enums']['sort_direction'][];
 
 /**
  * Valid values for sort_option enum
@@ -375,18 +193,7 @@ export const SORT_OPTION_VALUES = [
   'created',
   'views',
   'trending',
-] as const satisfies readonly SortOption[];
-
-/**
- * Valid values for submission_status enum
- */
-export const SUBMISSION_STATUS_VALUES = [
-  'pending',
-  'approved',
-  'rejected',
-  'spam',
-  'merged',
-] as const satisfies readonly SubmissionStatus[];
+] as const satisfies readonly DatabaseGenerated['public']['Enums']['sort_option'][];
 
 /**
  * Valid values for submission_type enum
@@ -399,7 +206,7 @@ export const SUBMISSION_TYPE_VALUES = [
   'hooks',
   'statuslines',
   'skills',
-] as const satisfies readonly SubmissionType[];
+] as const satisfies readonly DatabaseGenerated['public']['Enums']['submission_type'][];
 
 /**
  * Valid values for trending_metric enum
@@ -410,7 +217,7 @@ export const TRENDING_METRIC_VALUES = [
   'shares',
   'downloads',
   'all',
-] as const satisfies readonly TrendingMetric[];
+] as const satisfies readonly DatabaseGenerated['public']['Enums']['trending_metric'][];
 
 /**
  * Valid values for trending_period enum
@@ -421,7 +228,7 @@ export const TRENDING_PERIOD_VALUES = [
   'month',
   'year',
   'all',
-] as const satisfies readonly TrendingPeriod[];
+] as const satisfies readonly DatabaseGenerated['public']['Enums']['trending_period'][];
 
 /**
  * Valid values for use_case_type enum
@@ -436,7 +243,7 @@ export const USE_CASE_TYPE_VALUES = [
   'general-development',
   'testing-qa',
   'security-audit',
-] as const satisfies readonly UseCaseType[];
+] as const satisfies readonly DatabaseGenerated['public']['Enums']['use_case_type'][];
 
 /**
  * Valid values for user_tier enum
@@ -445,7 +252,7 @@ export const USER_TIER_VALUES = [
   'free',
   'pro',
   'enterprise',
-] as const satisfies readonly UserTier[];
+] as const satisfies readonly DatabaseGenerated['public']['Enums']['user_tier'][];
 
 /**
  * Valid values for webhook_direction enum
@@ -453,7 +260,7 @@ export const USER_TIER_VALUES = [
 export const WEBHOOK_DIRECTION_VALUES = [
   'inbound',
   'outbound',
-] as const satisfies readonly WebhookDirection[];
+] as const satisfies readonly DatabaseGenerated['public']['Enums']['webhook_direction'][];
 
 /**
  * Valid values for webhook_source enum
@@ -465,16 +272,7 @@ export const WEBHOOK_SOURCE_VALUES = [
   'supabase_db',
   'custom',
   'polar',
-] as const satisfies readonly WebhookSource[];
-
-/**
- * Valid values for workplace_type enum
- */
-export const WORKPLACE_TYPE_VALUES = [
-  'Remote',
-  'On site',
-  'Hybrid',
-] as const satisfies readonly WorkplaceType[];
+] as const satisfies readonly DatabaseGenerated['public']['Enums']['webhook_source'][];
 
 /**
  * Generic enum validation helper
@@ -492,8 +290,6 @@ export function isValidEnum<T extends string>(
 
 export type DatabaseWithTableOverrides = {
   public: {
-    Enums: DatabaseGenerated['public']['Enums'];
-    Functions: DatabaseGenerated['public']['Functions'];
     Tables: Omit<
       DatabaseGenerated['public']['Tables'],
       | 'category_configs'
@@ -506,7 +302,6 @@ export type DatabaseWithTableOverrides = {
       | 'newsletter_subscriptions'
       | 'structured_data_config'
       | 'announcements'
-      | 'app_settings'
       | 'contact_submissions'
       | 'content_templates'
       | 'form_field_configs'
@@ -516,7 +311,6 @@ export type DatabaseWithTableOverrides = {
       | 'tier_display_config'
       | 'user_interactions'
       | 'users'
-      | 'webhook_events'
     > & {
       category_configs: {
         Row: Omit<
@@ -631,173 +425,59 @@ export type DatabaseWithTableOverrides = {
         Update: DatabaseGenerated['public']['Tables']['structured_data_config']['Update'];
         Relationships: DatabaseGenerated['public']['Tables']['structured_data_config']['Relationships'];
       };
-      announcements: {
-        Row: Omit<
-          DatabaseGenerated['public']['Tables']['announcements']['Row'],
-          'priority' | 'variant'
-        > & {
-          priority: DatabaseGenerated['public']['Enums']['announcement_priority'];
-          variant: DatabaseGenerated['public']['Enums']['announcement_variant'];
-        };
-        Insert: DatabaseGenerated['public']['Tables']['announcements']['Insert'];
-        Update: DatabaseGenerated['public']['Tables']['announcements']['Update'];
-        Relationships: DatabaseGenerated['public']['Tables']['announcements']['Relationships'];
-      };
-      app_settings: {
-        Row: Omit<
-          DatabaseGenerated['public']['Tables']['app_settings']['Row'],
-          'environment' | 'setting_type'
-        > & {
-          environment: DatabaseGenerated['public']['Enums']['environment'];
-          setting_type: DatabaseGenerated['public']['Enums']['setting_type'];
-        };
-        Insert: DatabaseGenerated['public']['Tables']['app_settings']['Insert'];
-        Update: DatabaseGenerated['public']['Tables']['app_settings']['Update'];
-        Relationships: DatabaseGenerated['public']['Tables']['app_settings']['Relationships'];
-      };
-      contact_submissions: {
-        Row: Omit<
-          DatabaseGenerated['public']['Tables']['contact_submissions']['Row'],
-          'category' | 'status'
-        > & {
-          category: DatabaseGenerated['public']['Enums']['contact_category'];
-          status: DatabaseGenerated['public']['Enums']['submission_status'];
-        };
-        Insert: DatabaseGenerated['public']['Tables']['contact_submissions']['Insert'];
-        Update: DatabaseGenerated['public']['Tables']['contact_submissions']['Update'];
-        Relationships: DatabaseGenerated['public']['Tables']['contact_submissions']['Relationships'];
-      };
-      content_templates: {
-        Row: Omit<DatabaseGenerated['public']['Tables']['content_templates']['Row'], 'category'> & {
-          category: DatabaseGenerated['public']['Enums']['content_category'];
-        };
-        Insert: DatabaseGenerated['public']['Tables']['content_templates']['Insert'];
-        Update: DatabaseGenerated['public']['Tables']['content_templates']['Update'];
-        Relationships: DatabaseGenerated['public']['Tables']['content_templates']['Relationships'];
-      };
-      form_field_configs: {
-        Row: Omit<
-          DatabaseGenerated['public']['Tables']['form_field_configs']['Row'],
-          'field_type' | 'grid_column' | 'icon_position'
-        > & {
-          field_type: DatabaseGenerated['public']['Enums']['form_field_type'];
-          grid_column: DatabaseGenerated['public']['Enums']['form_grid_column'];
-          icon_position: DatabaseGenerated['public']['Enums']['form_icon_position'];
-        };
-        Insert: DatabaseGenerated['public']['Tables']['form_field_configs']['Insert'];
-        Update: DatabaseGenerated['public']['Tables']['form_field_configs']['Update'];
-        Relationships: DatabaseGenerated['public']['Tables']['form_field_configs']['Relationships'];
-      };
-      form_field_definitions: {
-        Row: Omit<
-          DatabaseGenerated['public']['Tables']['form_field_definitions']['Row'],
-          'content_type' | 'field_scope' | 'field_type' | 'grid_column' | 'icon_position'
-        > & {
-          content_type: DatabaseGenerated['public']['Enums']['content_category'];
-          field_scope: DatabaseGenerated['public']['Enums']['field_scope'];
-          field_type: DatabaseGenerated['public']['Enums']['field_type'];
-          grid_column: DatabaseGenerated['public']['Enums']['grid_column'];
-          icon_position: DatabaseGenerated['public']['Enums']['icon_position'];
-        };
-        Insert: DatabaseGenerated['public']['Tables']['form_field_definitions']['Insert'];
-        Update: DatabaseGenerated['public']['Tables']['form_field_definitions']['Update'];
-        Relationships: DatabaseGenerated['public']['Tables']['form_field_definitions']['Relationships'];
-      };
       jobs: {
-        Row: Omit<
-          DatabaseGenerated['public']['Tables']['jobs']['Row'],
-          'payment_status' | 'status' | 'workplace'
-        > & {
-          payment_status: DatabaseGenerated['public']['Enums']['payment_status'];
-          status: DatabaseGenerated['public']['Enums']['job_status'];
-          workplace: DatabaseGenerated['public']['Enums']['workplace_type'];
-        };
+        Row: DatabaseGenerated['public']['Tables']['jobs']['Row'];
         Insert: DatabaseGenerated['public']['Tables']['jobs']['Insert'];
         Update: DatabaseGenerated['public']['Tables']['jobs']['Update'];
         Relationships: DatabaseGenerated['public']['Tables']['jobs']['Relationships'];
       };
       notifications: {
-        Row: Omit<
-          DatabaseGenerated['public']['Tables']['notifications']['Row'],
-          'priority' | 'type'
-        > & {
-          priority: DatabaseGenerated['public']['Enums']['notification_priority'];
-          type: DatabaseGenerated['public']['Enums']['notification_type'];
-        };
+        Row: DatabaseGenerated['public']['Tables']['notifications']['Row'];
         Insert: DatabaseGenerated['public']['Tables']['notifications']['Insert'];
         Update: DatabaseGenerated['public']['Tables']['notifications']['Update'];
         Relationships: DatabaseGenerated['public']['Tables']['notifications']['Relationships'];
       };
       tier_display_config: {
-        Row: Omit<DatabaseGenerated['public']['Tables']['tier_display_config']['Row'], 'tier'> & {
-          tier: DatabaseGenerated['public']['Enums']['user_tier'];
-        };
+        Row: DatabaseGenerated['public']['Tables']['tier_display_config']['Row'];
         Insert: DatabaseGenerated['public']['Tables']['tier_display_config']['Insert'];
         Update: DatabaseGenerated['public']['Tables']['tier_display_config']['Update'];
         Relationships: DatabaseGenerated['public']['Tables']['tier_display_config']['Relationships'];
       };
       user_interactions: {
-        Row: Omit<
-          DatabaseGenerated['public']['Tables']['user_interactions']['Row'],
-          'interaction_type'
-        > & {
-          interaction_type: DatabaseGenerated['public']['Enums']['interaction_type'];
-        };
+        Row: DatabaseGenerated['public']['Tables']['user_interactions']['Row'];
         Insert: DatabaseGenerated['public']['Tables']['user_interactions']['Insert'];
         Update: DatabaseGenerated['public']['Tables']['user_interactions']['Update'];
         Relationships: DatabaseGenerated['public']['Tables']['user_interactions']['Relationships'];
       };
       users: {
-        Row: Omit<DatabaseGenerated['public']['Tables']['users']['Row'], 'tier'> & {
-          tier: DatabaseGenerated['public']['Enums']['user_tier'];
-        };
+        Row: DatabaseGenerated['public']['Tables']['users']['Row'];
         Insert: DatabaseGenerated['public']['Tables']['users']['Insert'];
         Update: DatabaseGenerated['public']['Tables']['users']['Update'];
         Relationships: DatabaseGenerated['public']['Tables']['users']['Relationships'];
-      };
-      webhook_events: {
-        Row: Omit<
-          DatabaseGenerated['public']['Tables']['webhook_events']['Row'],
-          'direction' | 'source'
-        > & {
-          direction: DatabaseGenerated['public']['Enums']['webhook_direction'];
-          source: DatabaseGenerated['public']['Enums']['webhook_source'];
-        };
-        Insert: DatabaseGenerated['public']['Tables']['webhook_events']['Insert'];
-        Update: DatabaseGenerated['public']['Tables']['webhook_events']['Update'];
-        Relationships: DatabaseGenerated['public']['Tables']['webhook_events']['Relationships'];
       };
     };
   };
 };
 
 /**
- * Database type with all table overrides applied
- * This is the main Database type to use throughout the application
+ * Database type with all overrides applied
+ * This is the main Database type that should be used throughout the application
  */
-export type Database = DatabaseWithTableOverrides;
+export type Database = DatabaseWithTableOverrides & {
+  public: DatabaseWithTableOverrides['public'] & {
+    Functions: DatabaseGenerated['public']['Functions'];
+    Enums: DatabaseGenerated['public']['Enums'];
+  };
+};
 
 // ============================================================================
-// CHECK Constraints
+// CHECK Constraints (DEPRECATED - Use Database['public']['Enums'] directly)
 // ============================================================================
-
-export type JobCategory =
-  | 'engineering'
-  | 'design'
-  | 'product'
-  | 'marketing'
-  | 'sales'
-  | 'support'
-  | 'research'
-  | 'data'
-  | 'operations'
-  | 'leadership'
-  | 'consulting'
-  | 'education'
-  | 'other';
+// These are kept for backward compatibility but should be replaced with
+// direct imports from database.types.ts: Database['public']['Enums']['job_category']
 
 /**
- * Valid values for jobs.category CHECK constraint
+ * Valid values for job_category enum
  */
 export const JOBCATEGORY_VALUES = [
   'engineering',
@@ -813,7 +493,7 @@ export const JOBCATEGORY_VALUES = [
   'consulting',
   'education',
   'other',
-] as const satisfies readonly JobCategory[];
+] as const satisfies readonly DatabaseGenerated['public']['Enums']['job_category'][];
 
 // ============================================================================
 // RPC Return Types
@@ -829,7 +509,7 @@ export type AddBookmarkReturn = {
   bookmark: {
     id: string;
     user_id: string;
-    content_type: ContentCategory;
+    content_type: DatabaseGenerated['public']['Enums']['content_category'];
     content_slug: string;
     notes: string | null;
     created_at: string;
@@ -845,7 +525,7 @@ export type ApproveSubmissionReturn = {
   submission_id: string;
   content_id: string;
   slug: string;
-  category: ContentCategory;
+  category: DatabaseGenerated['public']['Enums']['content_category'];
   message: string;
 };
 
@@ -1075,8 +755,8 @@ export type CreateJobWithPaymentReturn = {
   company_id: string;
   payment_amount: number;
   requires_payment: boolean;
-  tier: JobTier;
-  plan: JobPlan;
+  tier: DatabaseGenerated['public']['Enums']['job_tier'];
+  plan: DatabaseGenerated['public']['Enums']['job_plan'];
 };
 
 /**
@@ -1187,7 +867,7 @@ export type GenerateMetadataCompleteReturn =
  */
 export type GenerateReadmeDataReturn = {
   categories: Array<{
-    category: string;
+    category: DatabaseGenerated['public']['Enums']['content_category'];
     title: string;
     description: string;
     icon_name: string;
@@ -1209,7 +889,7 @@ export type GetGetAccountDashboardReturn = {
   bookmark_count: number;
   profile: {
     name: string | null;
-    tier: UserTier | null;
+    tier: DatabaseGenerated['public']['Enums']['user_tier'] | null;
     created_at: string;
   };
 };
@@ -1218,7 +898,7 @@ export type GetGetAccountDashboardReturn = {
  * get_all_structured_data_configs RPC return type
  */
 export type GetGetAllStructuredDataConfigsReturn = Record<
-  ContentCategory,
+  DatabaseGenerated['public']['Enums']['content_category'],
   {
     schemaTypes: {
       application: boolean;
@@ -1260,7 +940,7 @@ export type GetGetAppSettingsReturn = Json; // TODO: Replace with actual structu
  */
 export type GetGetCategoryConfigReturn =
   | {
-      category: ContentCategory;
+      category: DatabaseGenerated['public']['Enums']['content_category'];
       title: string;
       pluralTitle: string;
       description: string | null;
@@ -1286,7 +966,7 @@ export type GetGetCategoryConfigReturn =
   | Record<
       string,
       {
-        category: ContentCategory;
+        category: DatabaseGenerated['public']['Enums']['content_category'];
         title: string;
         pluralTitle: string;
         description: string | null;
@@ -1315,9 +995,9 @@ export type GetGetCategoryConfigReturn =
  * get_category_configs_with_features RPC return type
  */
 export type GetGetCategoryConfigsWithFeaturesReturn = Record<
-  ContentCategory,
+  DatabaseGenerated['public']['Enums']['content_category'],
   {
-    category: ContentCategory;
+    category: DatabaseGenerated['public']['Enums']['content_category'];
     title: string;
     plural_title: string;
     description: string | null;
@@ -1455,13 +1135,13 @@ export type GetGetCollectionItemsGroupedReturn = {
   success: boolean;
   error?: string;
   grouped_items: Record<
-    ContentCategory,
+    DatabaseGenerated['public']['Enums']['content_category'],
     Array<{
       id: string;
       slug: string;
       title: string;
       description: string | null;
-      category: ContentCategory;
+      category: DatabaseGenerated['public']['Enums']['content_category'];
       metadata: Json | null;
       tags: string[];
       author: string;
@@ -1488,7 +1168,7 @@ export type GetGetCommunityDirectoryReturn = {
     image: string | null;
     bio: string | null;
     work: string | null;
-    tier: UserTier;
+    tier: DatabaseGenerated['public']['Enums']['user_tier'];
     created_at: string;
   }>;
   top_contributors: Array<{
@@ -1498,7 +1178,7 @@ export type GetGetCommunityDirectoryReturn = {
     image: string | null;
     bio: string | null;
     work: string | null;
-    tier: UserTier;
+    tier: DatabaseGenerated['public']['Enums']['user_tier'];
     created_at: string;
   }>;
   new_members: Array<{
@@ -1508,7 +1188,7 @@ export type GetGetCommunityDirectoryReturn = {
     image: string | null;
     bio: string | null;
     work: string | null;
-    tier: UserTier;
+    tier: DatabaseGenerated['public']['Enums']['user_tier'];
     created_at: string;
   }>;
 };
@@ -1547,16 +1227,16 @@ export type GetGetCompanyAdminProfileReturn = Array<{
   id: string;
   slug: string;
   name: string;
-  logo: string | null;
-  website: string | null;
-  description: string | null;
-  size: string | null;
-  industry: string | null;
-  using_cursor_since: string | null;
+  logo: string;
+  website: string;
+  description: string;
+  size: string;
+  industry: string;
   featured: boolean;
+  owner_id: string;
+  using_cursor_since: string;
   created_at: string;
   updated_at: string;
-  owner_id: string;
 }>;
 
 /**
@@ -1587,13 +1267,13 @@ export type GetGetCompanyProfileReturn = {
     description: string | null;
     salary: string | null;
     remote: boolean;
-    type: string | null;
-    workplace: WorkplaceType;
-    experience: ExperienceLevel;
-    category: JobCategory | null;
+    type: DatabaseGenerated['public']['Enums']['job_type'] | null;
+    workplace: DatabaseGenerated['public']['Enums']['workplace_type'];
+    experience: DatabaseGenerated['public']['Enums']['experience_level'];
+    category: DatabaseGenerated['public']['Enums']['job_category'] | null;
     tags: string[];
-    plan: JobPlan;
-    tier: JobTier | null;
+    plan: DatabaseGenerated['public']['Enums']['job_plan'];
+    tier: DatabaseGenerated['public']['Enums']['job_tier'] | null;
     posted_at: string;
     expires_at: string;
     view_count: number;
@@ -1620,14 +1300,14 @@ export type GetGetContactCommandsReturn = {
   commands: Array<{
     id: string;
     text: string;
+    description: string | null;
+    category: DatabaseGenerated['public']['Enums']['contact_category'];
     iconName: string | null;
-    actionType: ContactActionType;
+    actionType: DatabaseGenerated['public']['Enums']['contact_action_type'];
     actionValue: string | null;
-    confettiVariant: ConfettiVariant | null;
+    confettiVariant: DatabaseGenerated['public']['Enums']['confetti_variant'] | null;
     requiresAuth: boolean;
     aliases: string[];
-    category: string;
-    description: string | null;
   }>;
 };
 
@@ -1643,7 +1323,7 @@ export type GetGetContentDetailCompleteReturn = {
     is_bookmarked: boolean;
   };
   related: Array<{
-    category: ContentCategory;
+    category: DatabaseGenerated['public']['Enums']['content_category'];
     slug: string;
     title: string;
     description: string;
@@ -1658,7 +1338,7 @@ export type GetGetContentDetailCompleteReturn = {
   collection_items: Array<{
     id: string;
     collection_id: string;
-    content_type: ContentCategory;
+    content_type: DatabaseGenerated['public']['Enums']['content_category'];
     content_slug: string;
     order: number;
     added_at: string;
@@ -1697,85 +1377,10 @@ export type GetGetContentTemplatesReturn = Array<{
   type: string;
   name: string;
   description: string | null;
-  category: string | null;
+  category: DatabaseGenerated['public']['Enums']['content_category'] | null;
   tags: string | null;
   templateData: Json;
   [key: string]: unknown;
-}>;
-
-/**
- * get_popular_content RPC return type
- */
-export type GetGetPopularContentReturn = Array<{
-  author: string;
-  category: string;
-  copy_count: number;
-  description: string;
-  popularity_score: number;
-  slug: string;
-  tags: string[];
-  title: string;
-  view_count: number;
-}>;
-
-/**
- * get_recent_content RPC return type
- */
-export type GetGetRecentContentReturn = Array<{
-  author: string;
-  author_profile_url: string | null;
-  avg_rating: number | null;
-  bookmark_count: number;
-  category: string;
-  content: string | null;
-  copy_count: number;
-  created_at: string;
-  date_added: string;
-  description: string;
-  difficulty_score: number | null;
-  display_title: string | null;
-  documentation_url: string | null;
-  download_url: string | null;
-  examples: Json | null;
-  features: string[] | null;
-  git_hash: string | null;
-  has_breaking_changes: boolean | null;
-  has_prerequisites: boolean | null;
-  has_troubleshooting: boolean | null;
-  id: string;
-  json_ld: Json | null;
-  metadata: Json;
-  og_type: string | null;
-  popularity_score: number | null;
-  reading_time: number | null;
-  review_count: number;
-  robots_follow: boolean | null;
-  robots_index: boolean | null;
-  seo_title: string | null;
-  slug: string;
-  source: string | null;
-  tags: string[];
-  title: string;
-  view_count: number;
-}>;
-
-/**
- * get_trending_metrics_with_content RPC return type
- */
-export type GetGetTrendingMetricsWithContentReturn = Array<{
-  author: string;
-  bookmarks_total: number;
-  category: string;
-  copies_total: number;
-  description: string;
-  engagement_score: number;
-  freshness_score: number;
-  slug: string;
-  source: string;
-  tags: string[];
-  title: string;
-  trending_score: number;
-  views_total: number;
 }>;
 
 /**
@@ -1816,9 +1421,9 @@ export type GetGetEnrichedContentListReturn = Array<{
   description: string;
   author: string;
   author_profile_url: string | null;
-  category: ContentCategory;
+  category: DatabaseGenerated['public']['Enums']['content_category'];
   tags: string[];
-  source_table: ContentCategory;
+  source_table: DatabaseGenerated['public']['Enums']['content_category'];
   created_at: string;
   updated_at: string;
   date_added: string;
@@ -1860,6 +1465,26 @@ export type GetGetFormFieldConfigReturn = {
 } | null;
 
 /**
+ * get_form_fields_for_content_type RPC return type
+ */
+export type GetGetFormFieldsForContentTypeReturn = Array<{
+  id: string;
+  field_name: string;
+  label: string;
+  field_type: DatabaseGenerated['public']['Enums']['field_type'];
+  field_scope: DatabaseGenerated['public']['Enums']['field_scope'];
+  required: boolean;
+  placeholder: string;
+  help_text: string;
+  field_order: number;
+  grid_column: DatabaseGenerated['public']['Enums']['grid_column'];
+  icon: string;
+  icon_position: DatabaseGenerated['public']['Enums']['icon_position'];
+  field_properties: Json;
+  select_options: Json;
+}>;
+
+/**
  * get_form_fields_grouped RPC return type
  */
 export type GetGetFormFieldsGroupedReturn = Record<
@@ -1880,36 +1505,16 @@ export type GetGetFormFieldsGroupedReturn = Record<
 >;
 
 /**
- * get_form_fields_for_content_type RPC return type
- */
-export type GetGetFormFieldsForContentTypeReturn = Array<{
-  field_name: string;
-  field_order: number;
-  field_properties: Json;
-  field_scope: FieldScope;
-  field_type: FieldType;
-  grid_column: GridColumn;
-  help_text: string;
-  icon: string;
-  icon_position: IconPosition;
-  id: string;
-  label: string;
-  placeholder: string;
-  required: boolean;
-  select_options: Json;
-}>;
-
-/**
  * get_generation_config RPC return type
  */
 export type GetGetGenerationConfigReturn =
   | {
-      category: ContentCategory;
+      category: DatabaseGenerated['public']['Enums']['content_category'];
       validationConfig: Json | null;
       generationConfig: Json | null;
     }
   | Record<
-      ContentCategory,
+      DatabaseGenerated['public']['Enums']['content_category'],
       {
         validationConfig: Json | null;
         generationConfig: Json | null;
@@ -1931,7 +1536,7 @@ export type GetGetHomepageCompleteReturn = {
     image: string | null;
     bio: string | null;
     work: string | null;
-    tier: UserTier;
+    tier: DatabaseGenerated['public']['Enums']['user_tier'];
     created_at: string; // Added to match UserProfile requirement
   }>;
 };
@@ -1957,8 +1562,8 @@ export type GetGetJobDetailReturn = {
   location: string | null;
   remote: boolean;
   salary: string | null;
-  type: string | null;
-  category: JobCategory | null;
+  type: DatabaseGenerated['public']['Enums']['job_type'] | null;
+  category: DatabaseGenerated['public']['Enums']['job_category'] | null;
   tags: string[];
   requirements: string[] | null;
   benefits: string[] | null;
@@ -1967,9 +1572,9 @@ export type GetGetJobDetailReturn = {
   posted_at: string;
   expires_at: string;
   active: boolean;
-  status: JobStatus;
-  plan: JobPlan;
-  tier: JobTier;
+  status: DatabaseGenerated['public']['Enums']['job_status'];
+  plan: DatabaseGenerated['public']['Enums']['job_plan'];
+  tier: DatabaseGenerated['public']['Enums']['job_tier'];
   order: number;
   created_at: string;
   updated_at: string;
@@ -1987,8 +1592,8 @@ export type GetGetJobsListReturn = Array<{
   location: string | null;
   remote: boolean;
   salary: string | null;
-  type: string | null;
-  category: JobCategory | null;
+  type: DatabaseGenerated['public']['Enums']['job_type'] | null;
+  category: DatabaseGenerated['public']['Enums']['job_category'] | null;
   tags: string[];
   requirements: string[] | null;
   benefits: string[] | null;
@@ -1997,9 +1602,9 @@ export type GetGetJobsListReturn = Array<{
   posted_at: string;
   expires_at: string;
   active: boolean;
-  status: JobStatus;
-  plan: JobPlan;
-  tier: JobTier;
+  status: DatabaseGenerated['public']['Enums']['job_status'];
+  plan: DatabaseGenerated['public']['Enums']['job_plan'];
+  tier: DatabaseGenerated['public']['Enums']['job_tier'];
   order: number;
   created_at: string;
   updated_at: string;
@@ -2010,11 +1615,11 @@ export type GetGetJobsListReturn = Array<{
  */
 export type GetGetMySubmissionsReturn = Array<{
   id: string;
-  submission_type: SubmissionType;
-  status: SubmissionStatus;
+  submission_type: DatabaseGenerated['public']['Enums']['submission_type'];
+  status: DatabaseGenerated['public']['Enums']['submission_status'];
   name: string;
   description: string | null;
-  category: ContentCategory;
+  category: DatabaseGenerated['public']['Enums']['content_category'];
   moderator_notes: string | null;
   created_at: string;
   moderated_at: string | null;
@@ -2052,11 +1657,11 @@ export type GetGetNavigationMenuReturn = {
  */
 export type GetGetPendingSubmissionsReturn = Array<{
   id: string;
-  submission_type: SubmissionType;
-  status: SubmissionStatus;
+  submission_type: DatabaseGenerated['public']['Enums']['submission_type'];
+  status: DatabaseGenerated['public']['Enums']['submission_status'];
   name: string;
   description: string | null;
-  category: ContentCategory;
+  category: DatabaseGenerated['public']['Enums']['content_category'];
   author: string | null;
   author_profile_url: string | null;
   github_url: string | null;
@@ -2066,6 +1671,70 @@ export type GetGetPendingSubmissionsReturn = Array<{
   submitter_email: string | null;
   spam_score: number | null;
   created_at: string;
+}>;
+
+/**
+ * get_popular_content RPC return type
+ */
+export type GetGetPopularContentReturn = Array<{
+  author: string;
+  category: DatabaseGenerated['public']['Enums']['content_category'];
+  copy_count: number;
+  description: string;
+  popularity_score: number;
+  slug: string;
+  tags: string[];
+  title: string;
+  view_count: number;
+}>;
+
+/**
+ * get_recent_content RPC return type
+ */
+export type GetGetRecentContentReturn = Array<{
+  id: string;
+  slug: string;
+  title: string | null;
+  display_title: string | null;
+  seo_title: string | null;
+  description: string;
+  author: string;
+  author_profile_url: string | null;
+  category: DatabaseGenerated['public']['Enums']['content_category'];
+  tags: string[];
+  content: string | null;
+  source: string | null;
+  created_at: string;
+  updated_at: string;
+  date_added: string;
+  features: string[] | null;
+  use_cases: string[] | null;
+  documentation_url: string | null;
+  download_url: string | null;
+  storage_url: string | null;
+  git_hash: string | null;
+  mcpb_build_hash: string | null;
+  mcpb_last_built_at: string | null;
+  mcpb_storage_url: string | null;
+  synced_at: string | null;
+  examples: Json | null;
+  json_ld: Json | null;
+  metadata: Json;
+  og_type: string | null;
+  twitter_card: string | null;
+  robots_index: boolean | null;
+  robots_follow: boolean | null;
+  reading_time: number | null;
+  difficulty_score: number | null;
+  popularity_score: number | null;
+  has_prerequisites: boolean | null;
+  has_troubleshooting: boolean | null;
+  has_breaking_changes: boolean | null;
+  view_count: number;
+  copy_count: number;
+  bookmark_count: number;
+  review_count: number;
+  avg_rating: number | null;
 }>;
 
 /**
@@ -2147,7 +1816,7 @@ export type GetGetQuizConfigurationReturn = Array<{
 export type GetGetRecentMergedReturn = Array<{
   id: string;
   content_name: string;
-  content_type: ContentCategory;
+  content_type: DatabaseGenerated['public']['Enums']['content_category'];
   merged_at: string;
   merged_at_formatted?: string;
   user: {
@@ -2164,7 +1833,7 @@ export type GetGetRecommendationsReturn = {
     slug: string;
     title: string;
     description: string | null;
-    category: ContentCategory;
+    category: DatabaseGenerated['public']['Enums']['content_category'];
     tags: string[];
     author: string;
     match_score: number;
@@ -2201,7 +1870,7 @@ export type GetGetReviewsWithStatsReturn = {
       slug: string;
       name: string;
       image: string | null;
-      tier: UserTier;
+      tier: DatabaseGenerated['public']['Enums']['user_tier'];
     };
     is_helpful: boolean;
   }>;
@@ -2229,7 +1898,7 @@ export type GetGetSimilarContentReturn = {
     slug: string;
     title: string;
     description: string;
-    category: ContentCategory;
+    category: DatabaseGenerated['public']['Enums']['content_category'];
     score: number;
     tags: string[];
     similarity_factors: Json;
@@ -2237,10 +1906,48 @@ export type GetGetSimilarContentReturn = {
   }>;
   source_item: {
     slug: string;
-    category: ContentCategory;
+    category: DatabaseGenerated['public']['Enums']['content_category'];
   };
   algorithm_version: string;
 } | null;
+
+/**
+ * get_trending_metrics_with_content RPC return type
+ */
+export type GetGetTrendingMetricsWithContentReturn = Array<{
+  author: string;
+  category: DatabaseGenerated['public']['Enums']['content_category'];
+  slug: string;
+  title: string;
+  description: string;
+  tags: string[];
+  source: string;
+  views_total: number;
+  copies_total: number;
+  bookmarks_total: number;
+  trending_score: number;
+  engagement_score: number;
+  freshness_score: number;
+}>;
+
+/**
+ * get_user_sponsorships RPC return type
+ */
+export type GetGetUserSponsorshipsReturn = Array<{
+  id: string;
+  user_id: string | null;
+  content_id: string;
+  content_type: string;
+  tier: string;
+  active: boolean | null;
+  start_date: string;
+  end_date: string;
+  impression_count: number | null;
+  impression_limit: number | null;
+  click_count: number | null;
+  created_at: string;
+  updated_at: string;
+}>;
 
 /**
  * get_sponsorship_analytics RPC return type
@@ -2263,7 +1970,7 @@ export type GetGetSponsorshipAnalyticsReturn = {
  * get_structured_data_config RPC return type
  */
 export type GetGetStructuredDataConfigReturn = {
-  category: ContentCategory;
+  category: DatabaseGenerated['public']['Enums']['content_category'];
   schemaTypes: {
     application: boolean;
     sourceCode: boolean;
@@ -2298,7 +2005,7 @@ export type GetGetSubmissionDashboardReturn = {
   recent: Array<{
     id: string;
     content_name: string;
-    content_type: SubmissionType;
+    content_type: DatabaseGenerated['public']['Enums']['submission_type'];
     merged_at: string;
     user: {
       name: string;
@@ -2387,7 +2094,7 @@ export type GetGetUserCollectionDetailReturn = {
     slug: string;
     name: string;
     image: string | null;
-    tier: UserTier;
+    tier: DatabaseGenerated['public']['Enums']['user_tier'];
   };
   collection: {
     id: string;
@@ -2404,7 +2111,7 @@ export type GetGetUserCollectionDetailReturn = {
   items: Array<{
     id: string;
     collection_id: string;
-    content_type: ContentCategory;
+    content_type: DatabaseGenerated['public']['Enums']['content_category'];
     content_slug: string;
     notes: string | null;
     order: number;
@@ -2447,13 +2154,13 @@ export type GetGetUserDashboardReturn = {
   submissions: Array<{
     id: string;
     user_id: string;
-    content_type: SubmissionType;
+    content_type: DatabaseGenerated['public']['Enums']['submission_type'];
     content_slug: string;
     content_name: string;
     pr_number: string | null;
     pr_url: string | null;
     branch_name: string | null;
-    status: SubmissionStatus;
+    status: DatabaseGenerated['public']['Enums']['submission_status'];
     submission_data: Json;
     rejection_reason: string | null;
     created_at: string;
@@ -2494,7 +2201,7 @@ export type GetGetUserLibraryReturn = {
   bookmarks: Array<{
     id: string;
     user_id: string;
-    content_type: ContentCategory;
+    content_type: DatabaseGenerated['public']['Enums']['content_category'];
     content_slug: string;
     notes: string | null;
     created_at: string;
@@ -2531,7 +2238,7 @@ export type GetGetUserProfileReturn = {
     image: string | null;
     bio: string | null;
     website: string | null;
-    tier: UserTier;
+    tier: DatabaseGenerated['public']['Enums']['user_tier'];
     created_at: string;
     company: {
       name: string;
@@ -2556,7 +2263,7 @@ export type GetGetUserProfileReturn = {
   }>;
   contributions: Array<{
     id: string;
-    content_type: ContentCategory;
+    content_type: DatabaseGenerated['public']['Enums']['content_category'];
     slug: string;
     name: string;
     description: string | null;
@@ -2575,29 +2282,10 @@ export type GetGetUserProfileReturn = {
 export type GetGetUserRecentInteractionsReturn = Array<{
   content_type: string;
   content_slug: string;
-  interaction_type: InteractionType;
+  interaction_type: DatabaseGenerated['public']['Enums']['interaction_type'];
   session_id: string | null;
   metadata: Json;
   created_at: string;
-}>;
-
-/**
- * get_user_sponsorships RPC return type
- */
-export type GetGetUserSponsorshipsReturn = Array<{
-  active: boolean | null;
-  click_count: number | null;
-  content_id: string;
-  content_type: string;
-  created_at: string;
-  end_date: string;
-  id: string;
-  impression_count: number | null;
-  impression_limit: number | null;
-  start_date: string;
-  tier: string;
-  updated_at: string;
-  user_id: string | null;
 }>;
 
 /**
@@ -2619,7 +2307,7 @@ export type GetGetUserSettingsReturn = {
     slug: string;
     name: string;
     image: string | null;
-    tier: UserTier;
+    tier: DatabaseGenerated['public']['Enums']['user_tier'];
   };
 };
 
@@ -2670,7 +2358,7 @@ export type RefreshProfileFromOauthReturn = { success: boolean; updated: boolean
 export type RejectSubmissionReturn = {
   success: boolean;
   submission_id: string;
-  status: SubmissionStatus;
+  status: DatabaseGenerated['public']['Enums']['submission_status'];
 };
 
 /**
@@ -2729,8 +2417,8 @@ export type ToggleFollowReturn = { success: boolean; is_following: boolean; erro
 export type ToggleJobStatusReturn = {
   success: boolean;
   job_id: string;
-  old_status: JobStatus;
-  new_status: JobStatus;
+  old_status: DatabaseGenerated['public']['Enums']['job_status'];
+  new_status: DatabaseGenerated['public']['Enums']['job_status'];
   message: string;
 };
 
@@ -2741,7 +2429,7 @@ export type ToggleJobStatusReturn = {
 export type ToggleReviewHelpfulReturn = {
   success: boolean;
   helpful: boolean;
-  content_type: ContentCategory;
+  content_type: DatabaseGenerated['public']['Enums']['content_category'];
   content_slug: string;
 };
 
@@ -2803,22 +2491,39 @@ export type UpdateUserProfileReturn = { success: boolean; error?: string };
 // ============================================================================
 // Application Content Types (derived from RPC returns and database tables)
 // ============================================================================
+
+// ============================================================================
+// MANUAL SECTION - EDITABLE
+// ============================================================================
+// View overrides, function overrides, application types
+// This section is preserved by the generator.
+// ============================================================================
+
+// ============================================================================
+// View overrides, function overrides, application types
+// This section is preserved by the generator.
+// ============================================================================
+// ============================================================================
+// View overrides, function overrides, application types
+// This section is preserved by the generator.
+// ============================================================================
+// ============================================================================
+// Application Content Types (derived from RPC returns and database tables)
+// ============================================================================
 /**
- * Job Plan type - payment plan for job postings
+ * Valid values for job_plan enum
  */
-export type JobPlan = 'one-time' | 'subscription';
+export const JOB_PLAN_VALUES = [
+  'one-time',
+  'subscription',
+] as const satisfies readonly DatabaseGenerated['public']['Enums']['job_plan'][];
 /**
- * Valid values for JobPlan
+ * Valid values for job_tier enum
  */
-export const JOB_PLAN_VALUES = ['one-time', 'subscription'] as const satisfies readonly JobPlan[];
-/**
- * Job Tier type - visibility tier for job postings
- */
-export type JobTier = 'standard' | 'featured';
-/**
- * Valid values for JobTier
- */
-export const JOB_TIER_VALUES = ['standard', 'featured'] as const satisfies readonly JobTier[];
+export const JOB_TIER_VALUES = [
+  'standard',
+  'featured',
+] as const satisfies readonly DatabaseGenerated['public']['Enums']['job_tier'][];
 /**
  * Copy Type - type of content being copied
  */
@@ -2832,7 +2537,7 @@ export const COPY_TYPE_VALUES = ['code', 'link', 'markdown'] as const satisfies 
  */
 export type GetGetRelatedContentReturn = Array<{
   author: string;
-  category: ContentCategory;
+  category: DatabaseGenerated['public']['Enums']['content_category'];
   date_added: string;
   description: string;
   match_type: string;
@@ -2866,7 +2571,7 @@ export type HomepageContentItem = {
   source: string;
   created_at: string;
   date_added: string;
-  category: ContentCategory;
+  category: DatabaseGenerated['public']['Enums']['content_category'];
   view_count: number;
   copy_count: number;
   featured: boolean;
@@ -2885,13 +2590,13 @@ export type JobCardJobType = {
   description: string | null;
   salary: string | null;
   remote: boolean;
-  type: string | null;
-  workplace: WorkplaceType;
-  experience: ExperienceLevel;
-  category: JobCategory | null;
+  type: DatabaseGenerated['public']['Enums']['job_type'] | null;
+  workplace: DatabaseGenerated['public']['Enums']['workplace_type'];
+  experience: DatabaseGenerated['public']['Enums']['experience_level'];
+  category: DatabaseGenerated['public']['Enums']['job_category'] | null;
   tags: string[];
-  plan: JobPlan;
-  tier: JobTier | null;
+  plan: DatabaseGenerated['public']['Enums']['job_plan'];
+  tier: DatabaseGenerated['public']['Enums']['job_tier'] | null;
   posted_at: string;
   expires_at: string;
   view_count: number;
@@ -2922,28 +2627,18 @@ export type ReviewsAggregateRating = {
  */
 export type SponsorshipAnalytics = GetGetSponsorshipAnalyticsReturn;
 /**
- * Helper function to check if value is a valid ExperienceLevel
+ * Helper function to check if value is a valid experience_level enum
  */
-export function isExperienceLevel(value: unknown): value is ExperienceLevel {
-  return typeof value === 'string' && EXPERIENCE_LEVEL_VALUES.includes(value as ExperienceLevel);
+export function isExperienceLevel(
+  value: unknown
+): value is DatabaseGenerated['public']['Enums']['experience_level'] {
+  return (
+    typeof value === 'string' &&
+    EXPERIENCE_LEVEL_VALUES.includes(
+      value as DatabaseGenerated['public']['Enums']['experience_level']
+    )
+  );
 }
-/**
- * Helper function to check if value is a valid WorkplaceType
- */
-export function isWorkplaceType(value: unknown): value is WorkplaceType {
-  return typeof value === 'string' && WORKPLACE_TYPE_VALUES.includes(value as WorkplaceType);
-}
-/**
- * ContentType - Alias for ContentCategory for backward compatibility
- */
-export type ContentType = ContentCategory;
-/**
- * Helper function to check if value is a valid ContentCategory
- */
-export function isContentCategory(value: unknown): value is ContentCategory {
-  return typeof value === 'string' && CONTENT_CATEGORY_VALUES.includes(value as ContentCategory);
-}
-
 /**
  * CollectionDetailData - Alias for GetGetUserCollectionDetailReturn
  * Used for user collection detail pages

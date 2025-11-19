@@ -33,14 +33,14 @@ await ensureEnvVars(['SUPABASE_SERVICE_ROLE_KEY']);
 // This allows builds to work even if NEXT_PUBLIC_SUPABASE_URL isn't set in Vercel
 // but we still prefer the environment variable for flexibility
 const SUPABASE_URL =
-  process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://hgtjdifxfapoltfflowc.supabase.co';
-const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  process.env['NEXT_PUBLIC_SUPABASE_URL'] || 'https://hgtjdifxfapoltfflowc.supabase.co';
+const SUPABASE_SERVICE_ROLE_KEY = process.env['SUPABASE_SERVICE_ROLE_KEY'];
 
 if (!SUPABASE_SERVICE_ROLE_KEY) {
   throw new Error('Missing required environment variable: SUPABASE_SERVICE_ROLE_KEY');
 }
 
-if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
+if (!process.env['NEXT_PUBLIC_SUPABASE_URL']) {
   logger.warn(
     'NEXT_PUBLIC_SUPABASE_URL not set, using fallback URL. Set this in Vercel Project Settings for production builds.',
     {

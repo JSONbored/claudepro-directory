@@ -69,14 +69,14 @@ async function generateCategoryConfig() {
     // This allows builds to work even if NEXT_PUBLIC_SUPABASE_URL isn't set in Vercel
     // but we still prefer the environment variable for flexibility
     const SUPABASE_URL =
-      process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://hgtjdifxfapoltfflowc.supabase.co';
-    const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+      process.env['NEXT_PUBLIC_SUPABASE_URL'] || 'https://hgtjdifxfapoltfflowc.supabase.co';
+    const SUPABASE_SERVICE_ROLE_KEY = process.env['SUPABASE_SERVICE_ROLE_KEY'];
 
     if (!SUPABASE_SERVICE_ROLE_KEY) {
       throw new Error('Missing required environment variable: SUPABASE_SERVICE_ROLE_KEY');
     }
 
-    if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
+    if (!process.env['NEXT_PUBLIC_SUPABASE_URL']) {
       logger.warn(
         'NEXT_PUBLIC_SUPABASE_URL not set, using fallback URL. Set this in Vercel Project Settings for production builds.',
         {
@@ -167,20 +167,20 @@ async function generateCategoryConfig() {
     description: '${escapeString(dbConfig.description)}',
     icon: ICON_MAP.${dbConfig.icon_name} || FileText,
     colorScheme: '${dbConfig.color_scheme}',
-    showOnHomepage: ${features.show_on_homepage ?? true},
+    showOnHomepage: ${features['show_on_homepage'] ?? true},
     keywords: '${escapeString(dbConfig.keywords)}',
     metaDescription: '${escapeString(dbConfig.meta_description)}',
     typeName: '${escapeString(dbConfig.title)}',
-    generateFullContent: ${features.generate_full_content ?? true},
+    generateFullContent: ${features['generate_full_content'] ?? true},
     metadataFields: ${JSON.stringify(dbConfig.metadata_fields)},
     buildConfig: {
       batchSize: ${generationConfig.buildConfig?.batchSize || 10},
-      enableCache: ${features.build_enable_cache ?? true},
+      enableCache: ${features['build_enable_cache'] ?? true},
       cacheTTL: ${generationConfig.buildConfig?.cacheTTL || 300000},
     },
     apiConfig: {
-      generateStaticAPI: ${features.api_generate_static ?? true},
-      includeTrending: ${features.api_include_trending ?? true},
+      generateStaticAPI: ${features['api_generate_static'] ?? true},
+      includeTrending: ${features['api_include_trending'] ?? true},
       maxItemsPerResponse: ${apiSchema.apiConfig?.maxItemsPerResponse || 1000},
     },
     listPage: {
@@ -189,20 +189,20 @@ async function generateCategoryConfig() {
       ${dbConfig.empty_state_message ? `emptyStateMessage: '${escapeString(dbConfig.empty_state_message)}',` : ''}
     },
     detailPage: {
-      displayConfig: ${features.display_config ?? true},
+      displayConfig: ${features['display_config'] ?? true},
       configFormat: '${dbConfig.config_format || 'json'}' as 'json' | 'multi' | 'hook',
     },
     sections: {
-      features: ${features.section_features ?? false},
-      installation: ${features.section_installation ?? false},
-      use_cases: ${features.section_use_cases ?? false},
-      configuration: ${features.section_configuration ?? false},
-      security: ${features.section_security ?? false},
-      troubleshooting: ${features.section_troubleshooting ?? false},
-      examples: ${features.section_examples ?? false},
+      features: ${features['section_features'] ?? false},
+      installation: ${features['section_installation'] ?? false},
+      use_cases: ${features['section_use_cases'] ?? false},
+      configuration: ${features['section_configuration'] ?? false},
+      security: ${features['section_security'] ?? false},
+      troubleshooting: ${features['section_troubleshooting'] ?? false},
+      examples: ${features['section_examples'] ?? false},
     },
     metadata: {
-      showGitHubLink: ${features.metadata_show_github_link ?? true},
+      showGitHubLink: ${features['metadata_show_github_link'] ?? true},
     },
     primaryAction: {
       label: '${escapeString(dbConfig.primary_action_label)}',
@@ -269,7 +269,7 @@ export const ALL_CATEGORY_IDS = ${JSON.stringify(categoryIds)} as const;
 export const HOMEPAGE_CATEGORY_IDS = ${JSON.stringify(
       categoryIds.filter((id) => {
         const config = rawConfigs[id];
-        return config && (config.features?.show_on_homepage ?? true);
+        return config && (config.features?.['show_on_homepage'] ?? true);
       })
     )} as const;
 

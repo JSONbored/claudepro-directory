@@ -71,8 +71,8 @@ function getConfigurationAsString(
   }
 
   // Fall back to metadata
-  if (metadata.configuration) {
-    const cfg = metadata.configuration;
+  if (metadata['configuration']) {
+    const cfg = metadata['configuration'];
     if (typeof cfg === 'string') return cfg;
     if (typeof cfg === 'object') return JSON.stringify(cfg, null, 2);
   }
@@ -129,29 +129,30 @@ export async function UnifiedDetailPage({
   const metadata = getMetadata(item);
 
   const installation = (() => {
-    const inst = ('installation' in item && item.installation) || metadata.installation;
+    const inst = ('installation' in item && item.installation) || metadata['installation'];
     return inst && typeof inst === 'object' && !Array.isArray(inst)
       ? (inst as InstallationSteps)
       : undefined;
   })();
 
   const useCases = (() => {
-    const cases = ('use_cases' in item && item.use_cases) || metadata.use_cases;
+    const cases = ('use_cases' in item && item.use_cases) || metadata['use_cases'];
     return ensureStringArray(cases);
   })();
 
   const features = (() => {
-    const feats = ('features' in item && item.features) || metadata.features;
+    const feats = ('features' in item && item.features) || metadata['features'];
     return ensureStringArray(feats);
   })();
 
   const troubleshooting = (() => {
-    const trouble = ('troubleshooting' in item && item.troubleshooting) || metadata.troubleshooting;
+    const trouble =
+      ('troubleshooting' in item && item.troubleshooting) || metadata['troubleshooting'];
     return Array.isArray(trouble) && trouble.length > 0 ? trouble : [];
   })();
 
   const requirements = (() => {
-    const reqs = ('requirements' in item && item.requirements) || metadata.requirements;
+    const reqs = ('requirements' in item && item.requirements) || metadata['requirements'];
     return ensureStringArray(reqs);
   })();
 
@@ -212,7 +213,8 @@ export async function UnifiedDetailPage({
   // Pre-process configuration highlighting (ConfigurationSection data)
   const configData = await (async () => {
     // Check top-level first, then metadata
-    const configuration = ('configuration' in item && item.configuration) || metadata.configuration;
+    const configuration =
+      ('configuration' in item && item.configuration) || metadata['configuration'];
     if (!configuration) return null;
 
     const format = item.category === 'mcp' ? 'multi' : item.category === 'hooks' ? 'hook' : 'json';
@@ -442,7 +444,15 @@ export async function UnifiedDetailPage({
     };
 
     try {
-      const [claudeCodeSteps, claudeDesktopSteps, sdkSteps] = await Promise.all([
+      // Auto-generate .mcpb installation steps if mcpb_storage_url exists (even if not in metadata)
+      const hasMcpbPackage =
+        'mcpb_storage_url' in item &&
+        item.mcpb_storage_url &&
+        typeof item.mcpb_storage_url === 'string';
+      const mcpbStepsFromMetadata = installation.mcpb?.steps || [];
+      const shouldAutoGenerateMcpbSteps = hasMcpbPackage && mcpbStepsFromMetadata.length === 0;
+
+      const [claudeCodeSteps, claudeDesktopSteps, sdkSteps, mcpbSteps] = await Promise.all([
         installation.claudeCode?.steps
           ? Promise.all(
               installation.claudeCode.steps.map(async (step) => {
@@ -476,6 +486,29 @@ export async function UnifiedDetailPage({
               })
             )
           : Promise.resolve(null),
+        // Process .mcpb steps from metadata OR auto-generate if package exists
+        mcpbStepsFromMetadata.length > 0
+          ? Promise.all(
+              mcpbStepsFromMetadata.map(async (step) => {
+                if (isCommandStep(step)) {
+                  const html = await highlightCodeEdge(step, { language: 'bash' });
+                  return { type: 'command' as const, html, code: step };
+                }
+                return { type: 'text' as const, text: step };
+              })
+            )
+          : shouldAutoGenerateMcpbSteps
+            ? Promise.resolve([
+                {
+                  type: 'text' as const,
+                  text: 'Download the .mcpb package using the button above, then double-click the file to install in Claude Desktop.',
+                },
+                {
+                  type: 'text' as const,
+                  text: 'After installation, restart Claude Desktop to activate the MCP server.',
+                },
+              ])
+            : Promise.resolve(null),
       ]);
 
       return {
@@ -499,6 +532,7 @@ export async function UnifiedDetailPage({
             }
           : null,
         sdk: sdkSteps ? { steps: sdkSteps } : null,
+        mcpb: mcpbSteps ? { steps: mcpbSteps } : null,
         ...(installation.requirements && { requirements: installation.requirements }),
       };
     } catch (error) {
@@ -514,9 +548,9 @@ export async function UnifiedDetailPage({
     if (item.category !== 'guides') return null;
 
     const itemMetadata = getMetadata(item);
-    if (!(itemMetadata?.sections && Array.isArray(itemMetadata.sections))) return null;
+    if (!(itemMetadata?.['sections'] && Array.isArray(itemMetadata['sections']))) return null;
 
-    const sections = itemMetadata.sections as Array<{
+    const sections = itemMetadata['sections'] as Array<{
       type: string;
       code?: string;
       language?: string;

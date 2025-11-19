@@ -1,13 +1,13 @@
 import type { NotificationRecord } from '@/src/lib/data/notifications';
 import { logger } from '@/src/lib/logger';
-import type { NotificationPriority, NotificationType } from '@/src/types/database-overrides';
+import type { Database } from '@/src/types/database.types';
 
 export interface NotificationCreateInput {
   id?: string;
   title: string;
   message: string;
-  type: NotificationType;
-  priority?: NotificationPriority;
+  type: Database['public']['Enums']['notification_type'];
+  priority?: Database['public']['Enums']['notification_priority'];
   action_label?: string | null;
   action_href?: string | null;
   action_onclick?: string | null;
@@ -32,8 +32,8 @@ export async function dismissNotifications({
   }
 
   const fluxStationUrl =
-    process.env.NEXT_PUBLIC_FLUX_STATION_URL ||
-    `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/flux-station`;
+    process.env['NEXT_PUBLIC_FLUX_STATION_URL'] ||
+    `${process.env['NEXT_PUBLIC_SUPABASE_URL']}/functions/v1/flux-station`;
 
   try {
     // Use auth token passed from action (no client creation needed)
@@ -67,8 +67,8 @@ export async function createNotification(
   authToken?: string
 ): Promise<NotificationRecord> {
   const fluxStationUrl =
-    process.env.NEXT_PUBLIC_FLUX_STATION_URL ||
-    `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/flux-station`;
+    process.env['NEXT_PUBLIC_FLUX_STATION_URL'] ||
+    `${process.env['NEXT_PUBLIC_SUPABASE_URL']}/functions/v1/flux-station`;
 
   try {
     // Use optional auth token if provided (notifications are global, auth is optional)

@@ -31,7 +31,7 @@ export class ContactTerminalErrorBoundary extends Component<Props, State> {
     return { hasError: true, error };
   }
 
-  componentDidCatch(error: Error, errorInfo: { componentStack?: string }) {
+  override componentDidCatch(error: Error, errorInfo: { componentStack?: string }) {
     const normalized = normalizeError(error, 'Contact terminal error boundary triggered');
     logger.error('ContactTerminal error boundary caught error', normalized, {
       componentStack: errorInfo.componentStack || 'unknown',
@@ -42,7 +42,7 @@ export class ContactTerminalErrorBoundary extends Component<Props, State> {
     });
   }
 
-  render() {
+  override render() {
     if (this.state.hasError) {
       return (
         <Terminal className="relative flex min-h-[500px] flex-col">

@@ -1,10 +1,8 @@
 import { supabaseServiceRole } from '../../clients/supabase.ts';
-import type { Database as DatabaseGenerated } from '../../database.types.ts';
+import type { Database as DatabaseGenerated, Json } from '../../database.types.ts';
 import type { Database } from '../../database-overrides.ts';
 import { WEBHOOK_DIRECTION_VALUES } from '../../database-overrides.ts';
 import { resolveWebhookRequest, type WebhookRegistryError } from './registry.ts';
-
-type WebhookSource = Database['public']['Enums']['webhook_source'];
 
 export class WebhookIngestError extends Error {
   constructor(
@@ -17,7 +15,7 @@ export class WebhookIngestError extends Error {
 }
 
 export interface WebhookIngestResult {
-  source: WebhookSource;
+  source: Database['public']['Enums']['webhook_source'];
   duplicate: boolean;
   cors: Record<string, string>;
 }
@@ -39,15 +37,15 @@ export async function ingestWebhookEvent(
     cors,
   } = resolution;
 
-  const insertData = {
+  const insertData: DatabaseGenerated['public']['Tables']['webhook_events']['Insert'] = {
     source: provider,
     direction: WEBHOOK_DIRECTION_VALUES[0], // 'inbound'
     type,
-    data: payload as DatabaseGenerated['public']['Tables']['webhook_events']['Insert']['data'],
+    data: payload as Json,
     created_at: createdAt || new Date().toISOString(),
-    svix_id: idempotencyKey,
+    svix_id: idempotencyKey ?? null,
     processed: false,
-  } satisfies DatabaseGenerated['public']['Tables']['webhook_events']['Insert'];
+  };
   // Use direct insert for immediate error feedback (we don't need returned data)
   // Type assertion needed due to Supabase client type inference limitation
   const { error } = await (

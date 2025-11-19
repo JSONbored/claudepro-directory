@@ -27,7 +27,8 @@ import { formatViewCount, getContentItemUrl } from '@/src/lib/utils/content.util
 import { ensureStringArray } from '@/src/lib/utils/data.utils';
 import { logClientWarning, logUnhandledPromise } from '@/src/lib/utils/error.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
-import type { ContentCategory } from '@/src/types/database-overrides';
+import type { Database } from '@/src/types/database.types';
+
 import { isExperienceLevel } from '@/src/types/database-overrides';
 
 /**
@@ -480,7 +481,11 @@ export const ConfigCard = memo(
             // Runtime type guard ensures category is valid ContentCategory (excludes 'changelog' and 'jobs')
             // Type assertion is safe because isValidCategory() validates at runtime
             const rawCategory = item.category;
-            const category: ContentCategory = isValidCategory(rawCategory) ? rawCategory : 'agents';
+            const category: Database['public']['Enums']['content_category'] = isValidCategory(
+              rawCategory
+            )
+              ? rawCategory
+              : 'agents';
             return (
               <>
                 {showCategory && (

@@ -15,7 +15,8 @@ import { Mail } from '@/src/lib/icons';
 import { DIMENSIONS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
 import { logUnhandledPromise } from '@/src/lib/utils/error.utils';
-import type { NewsletterSource } from '@/src/types/database-overrides';
+import type { Database } from '@/src/types/database.types';
+
 import { NewsletterForm } from './newsletter-form';
 import {
   formatSubscriberCount,
@@ -25,7 +26,7 @@ import {
 } from './newsletter-utils';
 
 export interface NewsletterCTABaseProps {
-  source: NewsletterSource;
+  source: Database['public']['Enums']['newsletter_source'];
   className?: string;
   category?: string;
   headline?: string;
@@ -117,7 +118,7 @@ export function NewsletterCTAVariant(props: NewsletterCTAVariantProps) {
     return (
       <div
         className={cn(
-          'w-full bg-gradient-to-br from-card/80 via-card/60 to-card/40',
+          'w-full bg-linear-to-br from-card/80 via-card/60 to-card/40',
           'backdrop-blur-sm',
           'rounded-2xl border border-border/30',
           'shadow-black/5 shadow-lg',
@@ -167,7 +168,7 @@ export function NewsletterCTAVariant(props: NewsletterCTAVariantProps) {
     return (
       <Card
         className={cn(
-          'border-primary/20 bg-gradient-to-br from-primary/5 via-accent/5 to-background/95',
+          'border-primary/20 bg-linear-to-br from-primary/5 via-accent/5 to-background/95',
           'shadow-lg backdrop-blur-sm',
           className
         )}
@@ -221,7 +222,7 @@ export function NewsletterCTAVariant(props: NewsletterCTAVariantProps) {
     return (
       <Card
         className={cn(
-          'flex h-full flex-col border-primary/20 bg-gradient-to-br from-primary/5 via-accent/5 to-background/95',
+          'flex h-full flex-col border-primary/20 bg-linear-to-br from-primary/5 via-accent/5 to-background/95',
           'shadow-lg backdrop-blur-sm',
           className
         )}

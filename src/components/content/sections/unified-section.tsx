@@ -28,9 +28,9 @@ import {
 import type { UnifiedSectionProps } from '@/src/lib/types/component.types';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
-import type { ContentCategory } from '@/src/types/database-overrides';
+import type { Database } from '@/src/types/database.types';
 
-const ICONS: Record<ContentCategory, LucideIcon> = {
+const ICONS: Record<Database['public']['Enums']['content_category'], LucideIcon> = {
   agents: Sparkles,
   mcp: Package,
   commands: Terminal,
@@ -55,7 +55,7 @@ function Wrapper({
   title: string;
   description?: string;
   icon?: LucideIcon;
-  category?: ContentCategory;
+  category?: Database['public']['Enums']['content_category'];
   className?: string;
   children: React.ReactNode;
 }) {
@@ -389,6 +389,7 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
               />
             )}
             {d.sdk && <Platform name="SDK Setup" steps={d.sdk.steps} />}
+            {d.mcpb && <Platform name="One-Click Install (.mcpb)" steps={d.mcpb.steps} />}
             {d.requirements && d.requirements.length > 0 && (
               <div>
                 <h4 className="mb-2 font-medium">Requirements</h4>

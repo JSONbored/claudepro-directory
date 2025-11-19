@@ -27,7 +27,7 @@ export function isBuildTime(): boolean {
   }
 
   // Next.js sets NEXT_PHASE during build - this is the most reliable indicator
-  if (process.env.NEXT_PHASE === 'phase-production-build') {
+  if (process.env['NEXT_PHASE'] === 'phase-production-build') {
     return true;
   }
 
@@ -51,7 +51,7 @@ export function isBuildTime(): boolean {
   // If env vars are missing, we're almost certainly in build context
   // CRITICAL: This check MUST happen before any flags/next imports to prevent Edge Config access
   const hasSupabaseEnv =
-    process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    process.env['NEXT_PUBLIC_SUPABASE_URL'] && process.env['NEXT_PUBLIC_SUPABASE_ANON_KEY'];
 
   if (!hasSupabaseEnv) {
     return true; // Conservative: assume build-time if env vars missing
@@ -60,10 +60,10 @@ export function isBuildTime(): boolean {
   // CRITICAL: During static generation, we're in Node.js runtime but NOT in a request context
   // If we're in Node.js runtime but NOT in Vercel production, we're likely building
   // During local builds, VERCEL env vars are not set
-  if (process.env.NEXT_RUNTIME === 'nodejs') {
+  if (process.env['NEXT_RUNTIME'] === 'nodejs') {
     // If we don't have Vercel environment indicators, we're likely in a build context
     // Be EXTREMELY conservative: assume build-time unless we're definitely in Vercel production
-    if (!(process.env.VERCEL || process.env.VERCEL_ENV || process.env.VERCEL_URL)) {
+    if (!(process.env['VERCEL'] || process.env['VERCEL_ENV'] || process.env['VERCEL_URL'])) {
       // We're likely in a local build context
       // CRITICAL: Return true to prevent ANY flags/next imports during static generation
       return true;
@@ -76,7 +76,7 @@ export function isBuildTime(): boolean {
   //
   // CRITICAL: During local builds, VERCEL env vars are NEVER set, so we MUST return true
   // This prevents ANY flags/next imports during static generation
-  if (!(process.env.VERCEL || process.env.VERCEL_ENV || process.env.VERCEL_URL)) {
+  if (!(process.env['VERCEL'] || process.env['VERCEL_ENV'] || process.env['VERCEL_URL'])) {
     // We're in a local build context - ALWAYS assume build-time
     // This is the most conservative approach and prevents Edge Config access
     return true;

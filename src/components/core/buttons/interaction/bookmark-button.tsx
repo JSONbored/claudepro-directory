@@ -17,10 +17,10 @@ import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
 import { logClientWarning } from '@/src/lib/utils/error.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
-import type { ContentCategory } from '@/src/types/database-overrides';
+import type { Database } from '@/src/types/database.types';
 
 export interface BookmarkButtonProps extends ButtonStyleProps {
-  contentType: ContentCategory;
+  contentType: Database['public']['Enums']['content_category'];
   contentSlug: string;
   initialBookmarked?: boolean;
   showLabel?: boolean;
@@ -54,7 +54,7 @@ export function BookmarkButton({
       return;
     }
 
-    const validatedCategory = contentType as ContentCategory;
+    const validatedCategory = contentType as Database['public']['Enums']['content_category'];
 
     startTransition(async () => {
       try {

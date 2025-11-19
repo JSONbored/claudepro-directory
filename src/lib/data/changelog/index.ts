@@ -3,8 +3,8 @@
 import { z } from 'zod';
 import { fetchCachedRpc } from '@/src/lib/data/helpers';
 import { logger } from '@/src/lib/logger';
+import type { Database } from '@/src/types/database.types';
 import type {
-  ChangelogCategory,
   GetGetChangelogDetailReturn,
   GetGetChangelogOverviewReturn,
   Tables,
@@ -26,9 +26,6 @@ const changesSchema = z.object({
 
 // Validated changes type (for runtime use after parsing)
 export type ChangelogChanges = z.infer<typeof changesSchema>;
-
-// Re-export from database-overrides.ts for convenience
-export type { ChangelogCategory } from '@/src/types/database-overrides';
 
 // Helper to safely parse changes JSONB field
 export function parseChangelogChanges(changes: unknown): ChangelogChanges {
@@ -71,7 +68,7 @@ function createEmptyOverview(limit: number, offset = 0): GetGetChangelogOverview
  */
 export async function getChangelogOverview(
   options: {
-    category?: ChangelogCategory;
+    category?: Database['public']['Enums']['changelog_category'];
     publishedOnly?: boolean;
     featuredOnly?: boolean;
     limit?: number;
@@ -234,7 +231,9 @@ export async function getRecentChangelogEntries(limit = 5): Promise<
 /**
  * Get changelog entries by category
  */
-export async function getChangelogEntriesByCategory(category: ChangelogCategory): Promise<
+export async function getChangelogEntriesByCategory(
+  category: Database['public']['Enums']['changelog_category']
+): Promise<
   Array<
     Omit<Tables<'changelog'>, 'contributors' | 'keywords'> & {
       contributors: string[];

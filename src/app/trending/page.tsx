@@ -33,8 +33,8 @@ export const metadata: Promise<Metadata> = generatePageMetadata('/trending');
 
 export default async function TrendingPage({ searchParams }: PagePropsWithSearchParams) {
   const rawParams = await searchParams;
-  const categoryParam = rawParams?.category as string | undefined;
-  const limit = Math.min(Number(rawParams?.limit) || 12, 100);
+  const categoryParam = rawParams?.['category'] as string | undefined;
+  const limit = Math.min(Number(rawParams?.['limit']) || 12, 100);
   const normalizedCategory = categoryParam && isValidCategory(categoryParam) ? categoryParam : null;
 
   if (categoryParam && !normalizedCategory) {

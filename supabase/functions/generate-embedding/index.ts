@@ -1,11 +1,26 @@
+/// <reference path="../_shared/deno-globals.d.ts" />
+
 /**
  * Generate Embedding Edge Function
- * Database webhook handler for generating content embeddings
  *
- * Triggered by: Database webhook on content table INSERT/UPDATE
- * Purpose: Generate vector embeddings for semantic search
+ * Handles two modes:
+ * 1. Queue Worker: POST /process - Processes embedding_generation queue (automatic)
+ * 2. Direct Webhook: POST / - Direct embedding generation (manual/legacy)
  *
- * Flow:
+ * Automatic generation (queue-based):
+ * - Database triggers enqueue jobs to 'embedding_generation' queue
+ * - Queue worker processes batches: POST /process
+ *
+ * Manual generation (direct webhook):
+ * - Legacy webhook endpoint for backward compatibility
+ * - Direct embedding generation without queue
+ *
+ * Flow (queue worker):
+ * 1. Read batch from embedding_generation queue
+ * 2. For each message: Fetch content → Build text → Generate → Store
+ * 3. Delete message on success, leave in queue for retry on failure
+ *
+ * Flow (direct webhook):
  * 1. Receive webhook payload (content row)
  * 2. Extract text fields (title, description, tags, author)
  * 3. Concatenate into searchable text
@@ -14,6 +29,7 @@
  * 6. Return success (webhook expects 200 response)
  */
 
+import { supabaseServiceRole } from '../_shared/clients/supabase.ts';
 import type { Database as DatabaseGenerated } from '../_shared/database.types.ts';
 import { upsertTable } from '../_shared/database-overrides.ts';
 import { CIRCUIT_BREAKER_CONFIGS, withCircuitBreaker } from '../_shared/utils/circuit-breaker.ts';
@@ -21,6 +37,7 @@ import { CIRCUIT_BREAKER_CONFIGS, withCircuitBreaker } from '../_shared/utils/ci
 // These are lazily imported in callRpc, but we need static imports for Supabase bundling
 import '../_shared/utils/circuit-breaker.ts';
 import '../_shared/utils/timeout.ts';
+import { errorToString } from '../_shared/utils/error-handling.ts';
 import {
   badRequestResponse,
   errorResponse,
@@ -29,6 +46,7 @@ import {
 } from '../_shared/utils/http.ts';
 import { createUtilityContext, logError, logInfo, withDuration } from '../_shared/utils/logging.ts';
 import { parseJsonBody } from '../_shared/utils/parse-json-body.ts';
+import { pgmqDelete, pgmqRead } from '../_shared/utils/pgmq-client.ts';
 import { buildSecurityHeaders } from '../_shared/utils/security-headers.ts';
 import { TIMEOUT_PRESETS, withTimeout } from '../_shared/utils/timeout.ts';
 
@@ -196,10 +214,191 @@ function respondWithAnalytics(handler: () => Promise<Response>): Promise<Respons
     });
 }
 
+const EMBEDDING_GENERATION_QUEUE = 'embedding_generation';
+const QUEUE_BATCH_SIZE = 10; // Moderate batch size for AI operations
+
+interface EmbeddingGenerationQueueMessage {
+  msg_id: bigint;
+  read_ct: number;
+  vt: string;
+  enqueued_at: string;
+  message: {
+    content_id: string;
+    type: 'INSERT' | 'UPDATE';
+    created_at: string;
+  };
+}
+
 /**
- * Main webhook handler
+ * Process a single embedding generation job (from queue)
+ */
+async function processEmbeddingGeneration(
+  message: EmbeddingGenerationQueueMessage
+): Promise<{ success: boolean; errors: string[] }> {
+  const errors: string[] = [];
+  const { content_id } = message.message;
+
+  try {
+    // Fetch content from database
+    const { data: content, error: fetchError } = await supabaseServiceRole
+      .from('content')
+      .select('*')
+      .eq('id', content_id)
+      .single();
+
+    if (fetchError || !content) {
+      errors.push(`Failed to fetch content: ${fetchError?.message || 'Content not found'}`);
+      return { success: false, errors };
+    }
+
+    // Type assertion: content is guaranteed to be non-null after the check above
+    // Import ContentRow type for explicit typing
+    type ContentRow = DatabaseGenerated['public']['Tables']['content']['Row'];
+    const contentRow = content as ContentRow;
+
+    // Build searchable text
+    // Create compatible record object for buildSearchableText function
+    const searchableText = buildSearchableText({
+      id: contentRow.id,
+      title: contentRow.title,
+      description: contentRow.description,
+      content: contentRow.content,
+      tags: contentRow.tags,
+      author: contentRow.author,
+      category: contentRow.category,
+    });
+
+    if (!searchableText || searchableText.trim().length === 0) {
+      // Skip empty content (not an error, just nothing to embed)
+      console.log('[generate-embedding] Skipping embedding generation: empty searchable text', {
+        content_id,
+      });
+      return { success: true, errors: [] }; // Mark as success (skipped)
+    }
+
+    // Generate embedding (with circuit breaker + timeout)
+    const embedding = await generateEmbedding(searchableText);
+
+    // Store embedding (with circuit breaker + timeout)
+    await storeEmbedding(content_id, searchableText, embedding);
+
+    console.log('[generate-embedding] Embedding generated and stored', {
+      content_id,
+      embedding_dim: embedding.length,
+    });
+
+    return { success: true, errors: [] };
+  } catch (error) {
+    const errorMsg = errorToString(error);
+    errors.push(`Embedding generation failed: ${errorMsg}`);
+    console.error('[generate-embedding] Embedding generation error', {
+      content_id,
+      error: errorMsg,
+    });
+    return { success: false, errors };
+  }
+}
+
+/**
+ * Queue worker handler
+ * POST /process - Processes embedding_generation queue
+ */
+async function handleEmbeddingGenerationQueue(_req: Request): Promise<Response> {
+  try {
+    // Read messages with timeout protection
+    const messages = await withTimeout(
+      pgmqRead(EMBEDDING_GENERATION_QUEUE, {
+        sleep_seconds: 0,
+        n: QUEUE_BATCH_SIZE,
+      }),
+      TIMEOUT_PRESETS.rpc,
+      'Embedding generation queue read timed out'
+    );
+
+    if (!messages || messages.length === 0) {
+      return successResponse({ message: 'No messages in queue', processed: 0 }, 200);
+    }
+
+    console.log(`[generate-embedding] Processing ${messages.length} embedding generation jobs`);
+
+    const results: Array<{
+      msg_id: string;
+      status: 'success' | 'skipped' | 'failed';
+      errors: string[];
+      will_retry?: boolean;
+    }> = [];
+
+    for (const msg of messages) {
+      const message: EmbeddingGenerationQueueMessage = {
+        msg_id: msg.msg_id,
+        read_ct: msg.read_ct,
+        vt: msg.vt,
+        enqueued_at: msg.enqueued_at,
+        message: msg.message as EmbeddingGenerationQueueMessage['message'],
+      };
+
+      try {
+        const result = await processEmbeddingGeneration(message);
+
+        if (result.success) {
+          await pgmqDelete(EMBEDDING_GENERATION_QUEUE, message.msg_id);
+          results.push({
+            msg_id: message.msg_id.toString(),
+            status: 'success',
+            errors: result.errors,
+          });
+        } else {
+          // Leave in queue for retry (pgmq visibility timeout will retry)
+          results.push({
+            msg_id: message.msg_id.toString(),
+            status: 'failed',
+            errors: result.errors,
+            will_retry: true,
+          });
+        }
+      } catch (error) {
+        const errorMsg = errorToString(error);
+        console.error('[generate-embedding] Unexpected error processing embedding generation', {
+          msg_id: message.msg_id.toString(),
+          error: errorMsg,
+        });
+        results.push({
+          msg_id: message.msg_id.toString(),
+          status: 'failed',
+          errors: [errorMsg],
+          will_retry: true,
+        });
+      }
+    }
+
+    return successResponse(
+      {
+        message: `Processed ${messages.length} messages`,
+        processed: messages.length,
+        results,
+      },
+      200
+    );
+  } catch (error) {
+    console.error('[generate-embedding] Fatal embedding generation queue error', {
+      error: errorToString(error),
+    });
+    return errorResponse(error, 'generate-embedding:queue-fatal');
+  }
+}
+
+/**
+ * Main handler - routes to queue worker or direct webhook
  */
 Deno.serve((req: Request): Promise<Response> => {
+  const url = new URL(req.url);
+
+  // Route to queue worker if path is /process
+  if (url.pathname === '/process' || url.pathname === '/process/') {
+    return handleEmbeddingGenerationQueue(req);
+  }
+
+  // Otherwise, handle as direct webhook (legacy)
   return respondWithAnalytics(async () => {
     const logContext = createUtilityContext('generate-embedding', 'webhook-handler');
     const startTime = performance.now();

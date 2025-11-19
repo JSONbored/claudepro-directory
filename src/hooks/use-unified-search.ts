@@ -19,7 +19,7 @@
 import { useCallback, useState } from 'react';
 import { useLocalStorage } from '@/src/hooks/use-local-storage';
 import type { FilterState } from '@/src/lib/types/component.types';
-import type { SortOption } from '@/src/types/database-overrides';
+import type { Database } from '@/src/types/database.types';
 
 export interface UseUnifiedSearchOptions {
   initialSort?: FilterState['sort'];
@@ -46,7 +46,7 @@ export interface UseUnifiedSearchReturn {
 }
 
 export function useUnifiedSearch({
-  initialSort = 'trending' as SortOption,
+  initialSort = 'trending' as Database['public']['Enums']['sort_option'],
   onSearchChange,
   onFiltersChange,
 }: UseUnifiedSearchOptions = {}): UseUnifiedSearchReturn {
@@ -54,13 +54,14 @@ export function useUnifiedSearch({
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   // Persist sort preference in localStorage
-  const { value: savedSort, setValue: setSavedSort } = useLocalStorage<SortOption>(
-    'user-pref-sort',
-    {
-      defaultValue: (initialSort as SortOption) || ('trending' as SortOption),
-      syncAcrossTabs: true,
-    }
-  );
+  const { value: savedSort, setValue: setSavedSort } = useLocalStorage<
+    Database['public']['Enums']['sort_option']
+  >('user-pref-sort', {
+    defaultValue:
+      (initialSort as Database['public']['Enums']['sort_option']) ||
+      ('trending' as Database['public']['Enums']['sort_option']),
+    syncAcrossTabs: true,
+  });
 
   const [filters, setFilters] = useState<FilterState>(() => ({
     sort: savedSort || initialSort,
@@ -106,7 +107,7 @@ export function useUnifiedSearch({
       setFilters(newFilters);
       // Persist sort preference
       if (key === 'sort' && value) {
-        setSavedSort(value as SortOption);
+        setSavedSort(value as Database['public']['Enums']['sort_option']);
       }
       onFiltersChange?.(newFilters);
     },
@@ -135,7 +136,7 @@ export function useUnifiedSearch({
   // Clear all filters (keep sort)
   const clearFilters = useCallback(() => {
     const clearedFilters: FilterState = {
-      sort: filters.sort || ('trending' as SortOption),
+      sort: filters.sort || ('trending' as Database['public']['Enums']['sort_option']),
     };
     setFilters(clearedFilters);
     onFiltersChange?.(clearedFilters);

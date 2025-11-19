@@ -368,24 +368,6 @@ function generateTypes(isForce: boolean, cachedHash?: string | null): StepResult
 
     spinner.succeed(`Type generation complete (${duration}ms)`);
 
-    // Auto-generate all database overrides after type generation
-    spinner.start('Generating database overrides...');
-    try {
-      execSync('pnpm generate:db-overrides', {
-        encoding: 'utf-8',
-        stdio: 'pipe',
-        cwd: ROOT,
-      });
-      spinner.succeed('Database overrides generated');
-    } catch (error) {
-      spinner.warn('Database override generation failed (non-critical)');
-      logger.warn(`   ${error instanceof Error ? error.message : String(error)}`, {
-        script: 'sync-database-schema',
-        step: 'Database Overrides',
-      });
-      // Don't fail the whole process - override generation is optional
-    }
-
     return {
       step: 'TypeScript Types',
       success: true,
@@ -515,12 +497,12 @@ function main() {
         status,
         duration: result.duration_ms,
       };
-      if (result.reason) {
-        logContext.reason = result.reason;
+      if (result['reason']) {
+        logContext['reason'] = result['reason'];
       }
       logger.info(`  ${icon} ${result.step}: ${status} ${duration}`, logContext);
-      if (result.reason) {
-        logger.info(`     ${result.reason}`);
+      if (result['reason']) {
+        logger.info(`     ${result['reason']}`);
       }
     }
 

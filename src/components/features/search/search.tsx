@@ -28,7 +28,7 @@ import type { FilterState, UnifiedSearchProps } from '@/src/lib/types/component.
 import { POSITION_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
 import { logClientWarning, logUnhandledPromise } from '@/src/lib/utils/error.utils';
-import type { ContentCategory, SortOption } from '@/src/types/database-overrides';
+import type { Database } from '@/src/types/database.types';
 
 export type { FilterState };
 
@@ -129,7 +129,7 @@ function UnifiedSearchComponent({
 
         pulse
           .click({
-            category: category as ContentCategory | null,
+            category: category as Database['public']['Enums']['content_category'] | null,
             slug: `search:${sanitized}`,
             metadata: {
               resultsCount: resultCount,
@@ -195,7 +195,10 @@ function UnifiedSearchComponent({
 
   const handleSortChange = useCallback(
     (value: FilterState['sort']) => {
-      const newFilters = { ...filters, sort: value || ('trending' as SortOption) };
+      const newFilters = {
+        ...filters,
+        sort: value || ('trending' as Database['public']['Enums']['sort_option']),
+      };
       handleFiltersChange(newFilters);
 
       // Track sort filter change
@@ -204,7 +207,7 @@ function UnifiedSearchComponent({
         .filter({
           category,
           filters: {
-            sort: value || ('trending' as SortOption),
+            sort: value || ('trending' as Database['public']['Enums']['sort_option']),
           },
           metadata: {
             filterType: 'sort',

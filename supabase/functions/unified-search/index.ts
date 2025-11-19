@@ -1,3 +1,5 @@
+/// <reference path="../_shared/deno-globals.d.ts" />
+
 /**
  * Unified Search Edge Function
  * Consolidates all client-side search functionality with caching and analytics
@@ -70,7 +72,7 @@ interface SearchResponse {
     categories?: string[];
     tags?: string[];
     authors?: string[];
-    sort?: string;
+    sort: string;
     entities?: string[];
     // Job filters
     job_category?: string;
@@ -381,9 +383,9 @@ async function handleSearch(url: URL, startTime: number, req: Request): Promise<
           query_embedding: JSON.stringify(queryEmbedding),
           match_threshold: 0.7, // Configurable threshold
           match_limit: limit,
-          p_categories: categories,
-          p_tags: tags,
-          p_authors: authors,
+          ...(categories !== undefined ? { p_categories: categories } : {}),
+          ...(tags !== undefined ? { p_tags: tags } : {}),
+          ...(authors !== undefined ? { p_authors: authors } : {}),
           p_offset: offset,
         } satisfies Database['public']['Functions']['query_content_embeddings']['Args'];
 
@@ -409,10 +411,10 @@ async function handleSearch(url: URL, startTime: number, req: Request): Promise<
         });
 
         const rpcArgs = {
-          p_query: query || undefined,
-          p_categories: categories,
-          p_tags: tags,
-          p_authors: authors,
+          ...(query !== undefined ? { p_query: query } : {}),
+          ...(categories !== undefined ? { p_categories: categories } : {}),
+          ...(tags !== undefined ? { p_tags: tags } : {}),
+          ...(authors !== undefined ? { p_authors: authors } : {}),
           p_sort: sort,
           p_limit: limit,
           p_offset: offset,
@@ -429,10 +431,9 @@ async function handleSearch(url: URL, startTime: number, req: Request): Promise<
     } else {
       // NO QUERY: Use keyword search for filtering only (no semantic search without query)
       const rpcArgs = {
-        p_query: undefined,
-        p_categories: categories,
-        p_tags: tags,
-        p_authors: authors,
+        ...(categories !== undefined ? { p_categories: categories } : {}),
+        ...(tags !== undefined ? { p_tags: tags } : {}),
+        ...(authors !== undefined ? { p_authors: authors } : {}),
         p_sort: sort,
         p_limit: limit,
         p_offset: offset,
@@ -498,7 +499,7 @@ async function handleSearch(url: URL, startTime: number, req: Request): Promise<
           });
         }
 
-        // Highlight tags (content search only - jobs don't have tags)
+        // Highlight tags (content search only - jobs have tags but they're not highlighted in search results)
         if ('tags' in result && result.tags) {
           const tags = result.tags;
           if (Array.isArray(tags) && tags.length > 0) {
@@ -522,18 +523,16 @@ async function handleSearch(url: URL, startTime: number, req: Request): Promise<
   trackSearchAnalytics(
     query,
     {
-      categories,
-      tags,
-      authors,
       sort,
-      entities,
-      ...(hasJobFilters && {
-        job_category: jobCategory,
-        job_employment: jobEmployment,
-        job_experience: jobExperience,
-        job_remote: isJobRemote,
-        entity: 'job',
-      }),
+      ...(categories !== undefined ? { categories } : {}),
+      ...(tags !== undefined ? { tags } : {}),
+      ...(authors !== undefined ? { authors } : {}),
+      ...(entities !== undefined ? { entities } : {}),
+      ...(jobCategory !== undefined ? { job_category: jobCategory } : {}),
+      ...(jobEmployment !== undefined ? { job_employment: jobEmployment } : {}),
+      ...(jobExperience !== undefined ? { job_experience: jobExperience } : {}),
+      ...(isJobRemote !== undefined ? { job_remote: isJobRemote } : {}),
+      ...(hasJobFilters ? { entity: 'job' } : {}),
     },
     results.length,
     req.headers.get('Authorization')
@@ -558,17 +557,15 @@ async function handleSearch(url: URL, startTime: number, req: Request): Promise<
     results: highlightedResults,
     query,
     filters: {
-      ...(categories && { categories }),
-      ...(tags && { tags }),
-      ...(authors && { authors }),
-      ...(entities && { entities }),
       sort,
-      ...(hasJobFilters && {
-        job_category: jobCategory,
-        job_employment: jobEmployment,
-        job_experience: jobExperience,
-        job_remote: isJobRemote,
-      }),
+      ...(categories !== undefined ? { categories } : {}),
+      ...(tags !== undefined ? { tags } : {}),
+      ...(authors !== undefined ? { authors } : {}),
+      ...(entities !== undefined ? { entities } : {}),
+      ...(jobCategory !== undefined ? { job_category: jobCategory } : {}),
+      ...(jobEmployment !== undefined ? { job_employment: jobEmployment } : {}),
+      ...(jobExperience !== undefined ? { job_experience: jobExperience } : {}),
+      ...(isJobRemote !== undefined ? { job_remote: isJobRemote } : {}),
     },
     pagination: {
       total: totalCount !== undefined ? totalCount : results.length,
@@ -743,8 +740,13 @@ async function trackSearchAnalytics(
     categories?: string[];
     tags?: string[];
     authors?: string[];
-    sort?: string;
+    sort: string;
     entities?: string[];
+    job_category?: string;
+    job_employment?: string;
+    job_experience?: string;
+    job_remote?: boolean;
+    entity?: string;
   },
   resultCount: number,
   authorizationHeader: string | null

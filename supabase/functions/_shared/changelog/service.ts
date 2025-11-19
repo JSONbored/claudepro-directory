@@ -94,7 +94,7 @@ export function buildChangelogMetadata(params: BuildChangelogMetadataParams): Js
   };
 
   if (structuredSections.length > 0) {
-    metadata.sections = structuredSections;
+    metadata['sections'] = structuredSections;
   }
 
   return metadata;
@@ -138,6 +138,7 @@ export function filterConventionalCommits(commits: GitHubCommit[]): GitHubCommit
   const conventionalCommitRegex = /^(feat|fix|refactor|perf|style|revert)(\(.+\))?: .+/;
   return commits.filter((commit) => {
     const firstLine = commit.commit.message.split('\n')[0];
+    if (!firstLine) return false;
     return conventionalCommitRegex.test(firstLine);
   });
 }
@@ -151,24 +152,27 @@ export function groupCommitsByType(commits: GitHubCommit[]): ChangelogSection[] 
 
   for (const commit of commits) {
     const firstLine = commit.commit.message.split('\n')[0];
+    if (!firstLine) continue;
+
     const typeMatch = firstLine.match(/^(\w+)(\(.+\))?: (.+)/);
 
     if (!typeMatch) continue;
 
     const [, type, , message] = typeMatch;
+    if (!message) continue;
 
     if (type === 'feat') {
-      sections.Added.push(message);
+      sections['Added']?.push(message);
     } else if (type === 'fix' || type === 'revert') {
-      sections.Fixed.push(message);
+      sections['Fixed']?.push(message);
     } else {
-      sections.Changed.push(message);
+      sections['Changed']?.push(message);
     }
   }
 
   return Object.entries(sections)
-    .filter(([, items]) => items.length > 0)
-    .map(([title, items]) => ({ title, items }));
+    .filter(([, items]) => items && items.length > 0)
+    .map(([title, items]) => ({ title, items: items ?? [] }));
 }
 
 export function transformSectionsToChanges(sections: ChangelogSection[]): Json {
@@ -182,8 +186,9 @@ export function transformSectionsToChanges(sections: ChangelogSection[]): Json {
   };
 
   for (const section of sections) {
-    if (changes[section.title] !== undefined) {
-      changes[section.title] = section.items;
+    const changeKey = section.title;
+    if (changes[changeKey] !== undefined) {
+      changes[changeKey] = section.items;
     }
   }
 
@@ -207,11 +212,17 @@ export function generateMarkdownContent(sections: ChangelogSection[]): string {
 export function inferTitle(commits: GitHubCommit[]): string {
   if (commits.length === 0) return 'General Updates';
 
-  const firstCommit = commits[0].commit.message.split('\n')[0];
-  const titleMatch = firstCommit.match(/^(feat|fix|refactor|perf|style|revert)(\(.+\))?: (.+)/);
+  const firstCommit = commits[0];
+  if (!firstCommit) return 'General Updates';
+
+  const firstLine = firstCommit.commit.message.split('\n')[0];
+  if (!firstLine) return 'General Updates';
+
+  const titleMatch = firstLine.match(/^(feat|fix|refactor|perf|style|revert)(\(.+\))?: (.+)/);
 
   if (titleMatch) {
-    const [, , , message] = titleMatch;
+    const message = titleMatch[3];
+    if (!message) return 'General Updates';
     return message.charAt(0).toUpperCase() + message.slice(1);
   }
 
@@ -223,7 +234,7 @@ export function generateTldr(commits: GitHubCommit[]): string {
   if (!firstCommit) return 'General improvements and fixes.';
 
   const match = firstCommit.match(/:(.*)/);
-  return match ? match[1].trim() : firstCommit;
+  return match?.[1] ? match[1].trim() : firstCommit;
 }
 
 export function formatCommitRange(base: string, head: string): string {

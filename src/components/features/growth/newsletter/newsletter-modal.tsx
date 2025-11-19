@@ -17,10 +17,11 @@ import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
 import { logUnhandledPromise } from '@/src/lib/utils/error.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
-import type { CopyType, NewsletterSource } from '@/src/types/database-overrides';
+import type { Database } from '@/src/types/database.types';
+import type { CopyType } from '@/src/types/database-overrides';
 
 export interface NewsletterModalProps {
-  source: NewsletterSource;
+  source: Database['public']['Enums']['newsletter_source'];
   category?: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;

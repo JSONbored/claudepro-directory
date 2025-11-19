@@ -19,14 +19,26 @@ import {
 } from '@/src/lib/data/config/cache-config';
 import { fetchCachedRpc } from '@/src/lib/data/helpers';
 import { revalidateCacheTags } from '@/src/lib/supabase/cache-helpers';
-import type { Enums, Tables } from '@/src/types/database.types';
+import type { Database, Tables } from '@/src/types/database.types';
 import type {
-  Database,
   GetGetUserActivitySummaryReturn,
   GetGetUserActivityTimelineReturn,
   GetGetUserIdentitiesReturn,
 } from '@/src/types/database-overrides';
-import { CONTENT_CATEGORY_VALUES, type ContentCategory } from '@/src/types/database-overrides';
+
+const CONTENT_CATEGORY_VALUES = [
+  'agents',
+  'mcp',
+  'rules',
+  'commands',
+  'hooks',
+  'statuslines',
+  'skills',
+  'collections',
+  'guides',
+  'jobs',
+  'changelog',
+] as const satisfies readonly Database['public']['Enums']['content_category'][];
 
 // Activity filter schema (query parameters - NOT stored data, validation is useful here)
 const activityFilterSchema = z.object({
@@ -72,7 +84,7 @@ type SubmissionActivity = BaseActivity & {
   description: string | null;
   content_type: string;
   submission_url: string | null;
-  status: Enums<'submission_status'>;
+  status: Database['public']['Enums']['submission_status'];
   updated_at: string;
 };
 
@@ -172,7 +184,10 @@ async function cachedUserData<
 
 // Manual Zod schemas (database validates, Zod just provides type safety)
 const bookmarkSchema = z.object({
-  content_type: z.enum([...CONTENT_CATEGORY_VALUES] as [ContentCategory, ...ContentCategory[]]),
+  content_type: z.enum([...CONTENT_CATEGORY_VALUES] as [
+    Database['public']['Enums']['content_category'],
+    ...Database['public']['Enums']['content_category'][],
+  ]),
   content_slug: z
     .string()
     .max(200)
@@ -343,7 +358,10 @@ export const isBookmarkedAction = authedAction
   .metadata({ actionName: 'isBookmarked', category: 'user' })
   .inputSchema(
     z.object({
-      content_type: z.enum([...CONTENT_CATEGORY_VALUES] as [ContentCategory, ...ContentCategory[]]),
+      content_type: z.enum([...CONTENT_CATEGORY_VALUES] as [
+        Database['public']['Enums']['content_category'],
+        ...Database['public']['Enums']['content_category'][],
+      ]),
       content_slug: z
         .string()
         .max(200)
@@ -381,8 +399,8 @@ export const addBookmarkBatch = authedAction
         .array(
           z.object({
             content_type: z.enum([...CONTENT_CATEGORY_VALUES] as [
-              ContentCategory,
-              ...ContentCategory[],
+              Database['public']['Enums']['content_category'],
+              ...Database['public']['Enums']['content_category'][],
             ]),
             content_slug: z.string().min(1),
           })
@@ -506,8 +524,8 @@ export const getBookmarkStatusBatch = authedAction
       items: z.array(
         z.object({
           content_type: z.enum([...CONTENT_CATEGORY_VALUES] as [
-            ContentCategory,
-            ...ContentCategory[],
+            Database['public']['Enums']['content_category'],
+            ...Database['public']['Enums']['content_category'][],
           ]),
           content_slug: z.string(),
         })

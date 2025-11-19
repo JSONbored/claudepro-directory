@@ -1014,6 +1014,7 @@ export const BADGE_COLORS = {
     'part-time': 'bg-blue-500/10 text-blue-400 border-blue-500/20',
     contract: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
     freelance: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
+    internship: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20',
     remote: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
   },
 
@@ -1119,12 +1120,12 @@ export type JobType = keyof typeof BADGE_COLORS.jobType;
 export type DifficultyLevel = keyof typeof BADGE_COLORS.difficulty;
 export type CollectionType = keyof typeof BADGE_COLORS.collectionType;
 
-// Re-export JobStatus from database-overrides.ts for type safety
-// Re-export from database-overrides.ts for type safety
-export type {
-  ChangelogCategory,
-  JobStatus,
-} from '@/src/types/database-overrides';
+// Re-export changelog_category enum directly from database.types.ts
+export type ChangelogCategory = Database['public']['Enums']['changelog_category'];
+
+// Re-export JobStatus directly from database.types.ts
+import type { Database } from '@/src/types/database.types';
+export type JobStatus = Database['public']['Enums']['job_status'];
 export type StatusType = keyof typeof BADGE_COLORS.status;
 export type CategoryType = keyof typeof BADGE_COLORS.category;
 export type SubmissionStatusType = keyof typeof BADGE_COLORS.submissionStatus;

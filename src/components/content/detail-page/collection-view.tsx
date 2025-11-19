@@ -64,8 +64,8 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
   const categoryConfigs = await getCategoryConfigs();
 
   const metadata = getMetadata(collection);
-  const items = Array.isArray(metadata.items)
-    ? (metadata.items as Array<{ category: string; slug: string; reason?: string }>)
+  const items = Array.isArray(metadata['items'])
+    ? (metadata['items'] as Array<{ category: string; slug: string; reason?: string }>)
     : [];
 
   const itemsWithContent = await Promise.all(
@@ -129,13 +129,13 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
     categories: Object.keys(itemsByCategory).length,
   });
 
-  const prerequisites = ensureStringArray(metadata.prerequisites);
-  const installationOrder = ensureStringArray(metadata.installation_order);
+  const prerequisites = ensureStringArray(metadata['prerequisites']);
+  const installationOrder = ensureStringArray(metadata['installation_order']);
   const compatibility =
-    typeof metadata.compatibility === 'object' &&
-    metadata.compatibility !== null &&
-    !Array.isArray(metadata.compatibility)
-      ? (metadata.compatibility as { claudeDesktop?: boolean; claudeCode?: boolean })
+    typeof metadata['compatibility'] === 'object' &&
+    metadata['compatibility'] !== null &&
+    !Array.isArray(metadata['compatibility'])
+      ? (metadata['compatibility'] as { claudeDesktop?: boolean; claudeCode?: boolean })
       : undefined;
 
   return (

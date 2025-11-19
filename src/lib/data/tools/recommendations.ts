@@ -1,20 +1,15 @@
 'use server';
 
 import { fetchCachedRpc } from '@/src/lib/data/helpers';
-import type {
-  ExperienceLevel,
-  FocusAreaType,
-  GetGetRecommendationsReturn,
-  IntegrationType,
-  UseCaseType,
-} from '@/src/types/database-overrides';
+import type { Database } from '@/src/types/database.types';
+import type { GetGetRecommendationsReturn } from '@/src/types/database-overrides';
 
 export interface RecommendationInput {
-  useCase: UseCaseType;
-  experienceLevel: ExperienceLevel;
+  useCase: Database['public']['Enums']['use_case_type'];
+  experienceLevel: Database['public']['Enums']['experience_level'];
   toolPreferences: string[];
-  integrations?: IntegrationType[];
-  focusAreas?: FocusAreaType[];
+  integrations?: Database['public']['Enums']['integration_type'][];
+  focusAreas?: Database['public']['Enums']['focus_area_type'][];
   limit?: number;
   viewerId?: string;
 }

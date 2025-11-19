@@ -5,7 +5,7 @@
 
 import { z } from 'zod';
 import { fetchCachedRpc } from '@/src/lib/data/helpers';
-import type { Tables } from '@/src/types/database.types';
+import type { Database, Tables } from '@/src/types/database.types';
 import type {
   GetGetAccountDashboardReturn,
   GetGetCollectionDetailWithItemsReturn,
@@ -15,7 +15,6 @@ import type {
   GetGetUserLibraryReturn,
   GetGetUserSettingsReturn,
   GetGetUserSponsorshipsReturn,
-  UserTier,
 } from '@/src/types/database-overrides';
 import { USER_TIER_VALUES } from '@/src/types/database-overrides';
 
@@ -26,7 +25,10 @@ const accountDashboardSchema = z.object({
   profile: z.object({
     name: z.string().nullable().catch(null),
     tier: z
-      .enum([...USER_TIER_VALUES] as [UserTier, ...UserTier[]])
+      .enum([...USER_TIER_VALUES] as [
+        Database['public']['Enums']['user_tier'],
+        ...Database['public']['Enums']['user_tier'][],
+      ])
       .nullable()
       .catch(null),
     created_at: z.string(),

@@ -27,7 +27,6 @@ import type { PageProps } from '@/src/lib/schemas/app.schema';
 import { slugParamsSchema } from '@/src/lib/schemas/app.schema';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
-import { ensureStringArray } from '@/src/lib/utils/data.utils';
 import { normalizeError } from '@/src/lib/utils/error.utils';
 
 /**
@@ -126,7 +125,7 @@ export async function generateMetadata({
 
   return generatePageMetadata('/jobs/:slug', {
     params: { slug },
-    item: job ? { ...job, tags: ensureStringArray(job.tags) } : undefined,
+    item: job ? { ...job, tags: job.tags || [] } : undefined,
     slug,
   });
 }
@@ -161,7 +160,7 @@ export default async function JobPage({ params }: PageProps) {
     logger.error(
       'Invalid slug parameter for job page',
       new Error(validationResult.error.issues[0]?.message || 'Invalid slug'),
-      { slug: String(rawParams.slug), errorCount: validationResult.error.issues.length }
+      { slug: String(rawParams['slug']), errorCount: validationResult.error.issues.length }
     );
     notFound();
   }
@@ -181,9 +180,9 @@ export default async function JobPage({ params }: PageProps) {
     notFound();
   }
 
-  const tags = ensureStringArray(job.tags);
-  const requirements = ensureStringArray(job.requirements);
-  const benefits = ensureStringArray(job.benefits);
+  const tags = job.tags || [];
+  const requirements = job.requirements || [];
+  const benefits = job.benefits || [];
 
   return (
     <>

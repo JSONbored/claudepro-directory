@@ -18,8 +18,7 @@ import {
 import { ArrowRight, Calendar } from '@/src/lib/icons';
 import { BADGE_COLORS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { sanitizeSlug } from '@/src/lib/utils/content.utils';
-import type { Tables } from '@/src/types/database.types';
-import type { ChangelogCategory } from '@/src/types/database-overrides';
+import type { Database, Tables } from '@/src/types/database.types';
 
 type ChangelogEntry = Tables<'changelog'>;
 
@@ -74,7 +73,9 @@ export interface ChangelogListClientProps {
   categoryCounts: Record<string, number>;
 }
 export function ChangelogListClient({ entries, categoryCounts }: ChangelogListClientProps) {
-  const [activeCategory, setActiveCategory] = useState<'All' | ChangelogCategory>('All');
+  const [activeCategory, setActiveCategory] = useState<
+    'All' | Database['public']['Enums']['changelog_category']
+  >('All');
 
   // Filter entries based on active category
   const filteredEntries =
@@ -90,7 +91,9 @@ export function ChangelogListClient({ entries, categoryCounts }: ChangelogListCl
   return (
     <Tabs
       value={activeCategory}
-      onValueChange={(value) => setActiveCategory(value as 'All' | ChangelogCategory)}
+      onValueChange={(value) =>
+        setActiveCategory(value as 'All' | Database['public']['Enums']['changelog_category'])
+      }
       className="space-y-6"
     >
       <CategoryFilter

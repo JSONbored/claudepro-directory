@@ -1,11 +1,34 @@
 /** Category configuration loader - database-first architecture */
 
 import { cache } from 'react';
+import type { CategoryStatsConfig, UnifiedCategoryConfig } from '@/src/lib/types/component.types';
 // NOTE: getHomepageConfig is NOT imported at module level to avoid server action evaluation
 // during static generation. It's lazy-loaded inside functions that need it.
-import type { CategoryStatsConfig, UnifiedCategoryConfig } from '@/src/lib/types/component.types';
-import type { ContentCategory, ContentType } from '@/src/types/database-overrides';
-import { isContentCategory } from '@/src/types/database-overrides';
+import type { Database } from '@/src/types/database.types';
+
+const CONTENT_CATEGORY_VALUES = [
+  'agents',
+  'mcp',
+  'rules',
+  'commands',
+  'hooks',
+  'statuslines',
+  'skills',
+  'collections',
+  'guides',
+  'jobs',
+  'changelog',
+] as const satisfies readonly Database['public']['Enums']['content_category'][];
+
+function isContentCategory(
+  value: unknown
+): value is Database['public']['Enums']['content_category'] {
+  return (
+    typeof value === 'string' &&
+    CONTENT_CATEGORY_VALUES.includes(value as Database['public']['Enums']['content_category'])
+  );
+}
+
 import {
   ALL_CATEGORY_IDS,
   CACHEABLE_CATEGORY_IDS,
@@ -19,13 +42,15 @@ import { getTabConfigForCategory } from './default-tab-configs';
  * Cached with React cache() for request-level deduplication
  */
 export const getCategoryConfigs = cache(
-  (): Record<ContentCategory, UnifiedCategoryConfig<ContentCategory>> => {
+  (): Record<
+    Database['public']['Enums']['content_category'],
+    UnifiedCategoryConfig<Database['public']['Enums']['content_category']>
+  > => {
     return CATEGORY_CONFIGS;
   }
 );
 
-export type { CategoryStatsConfig, ContentType, UnifiedCategoryConfig };
-export type { ContentCategory };
+export type { CategoryStatsConfig, UnifiedCategoryConfig };
 export type UnifiedCategoryConfigValue = UnifiedCategoryConfig;
 
 // Re-export from generated file (single source of truth)
@@ -37,7 +62,9 @@ export const VALID_CATEGORIES = ALL_CATEGORY_IDS;
  * Merges default tab configurations with generated configs
  */
 export const getCategoryConfig = cache(
-  (slug: ContentCategory): UnifiedCategoryConfig<ContentCategory> | null => {
+  (
+    slug: Database['public']['Enums']['content_category']
+  ): UnifiedCategoryConfig<Database['public']['Enums']['content_category']> | null => {
     const baseConfig = CATEGORY_CONFIGS[slug];
     if (!baseConfig) return null;
 
@@ -58,7 +85,9 @@ export const getCategoryConfig = cache(
  * Check if category ID is valid (static)
  * Uses isContentCategory from database-overrides.ts as single source of truth
  */
-export function isValidCategory(category: string): category is ContentCategory {
+export function isValidCategory(
+  category: string
+): category is Database['public']['Enums']['content_category'] {
   return isContentCategory(category);
 }
 
@@ -73,9 +102,10 @@ export { CACHEABLE_CATEGORY_IDS as getCacheableCategoryIds };
  */
 export const getCategoryStatsConfig = cache((): readonly CategoryStatsConfig[] => {
   return Object.keys(CATEGORY_CONFIGS).map((id, index) => ({
-    categoryId: id as ContentCategory,
-    icon: CATEGORY_CONFIGS[id as ContentCategory].icon,
-    displayText: CATEGORY_CONFIGS[id as ContentCategory].pluralTitle,
+    categoryId: id as Database['public']['Enums']['content_category'],
+    icon: CATEGORY_CONFIGS[id as Database['public']['Enums']['content_category']].icon,
+    displayText:
+      CATEGORY_CONFIGS[id as Database['public']['Enums']['content_category']].pluralTitle,
     delay: index * 100,
   }));
 });
@@ -94,7 +124,9 @@ export const NEWSLETTER_CTA_CONFIG = {
 } as const;
 
 /** Get homepage featured categories from Statsig homepageConfigs */
-export async function getHomepageFeaturedCategories(): Promise<readonly ContentCategory[]> {
+export async function getHomepageFeaturedCategories(): Promise<
+  readonly Database['public']['Enums']['content_category'][]
+> {
   try {
     // CRITICAL: Lazy-load getHomepageConfig to prevent server action evaluation during build
     const { isBuildTime } = await import('@/src/lib/utils/build-time');
@@ -108,7 +140,8 @@ export async function getHomepageFeaturedCategories(): Promise<readonly ContentC
     }
     const config = result.data;
     const categories = config['homepage.featured_categories'].filter(
-      (slug: string): slug is ContentCategory => isValidCategory(slug)
+      (slug: string): slug is Database['public']['Enums']['content_category'] =>
+        isValidCategory(slug)
     );
     return categories;
   } catch {

@@ -50,13 +50,7 @@ import {
 } from '@/src/lib/icons';
 import { POSITION_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { getContentItemUrl, sanitizeSlug } from '@/src/lib/utils/content.utils';
-import type {
-  ContentCategory,
-  ExperienceLevel,
-  FocusAreaType,
-  IntegrationType,
-  UseCaseType,
-} from '@/src/types/database-overrides';
+import type { Database } from '@/src/types/database.types';
 
 type RecommendationResponse = {
   results: Array<{
@@ -74,11 +68,11 @@ type RecommendationResponse = {
   }>;
   totalMatches: number;
   answers: {
-    useCase: UseCaseType;
-    experienceLevel: ExperienceLevel;
+    useCase: Database['public']['Enums']['use_case_type'];
+    experienceLevel: Database['public']['Enums']['experience_level'];
     toolPreferences: string[];
-    integrations?: IntegrationType[];
-    focusAreas?: FocusAreaType[];
+    integrations?: Database['public']['Enums']['integration_type'][];
+    focusAreas?: Database['public']['Enums']['focus_area_type'][];
     teamSize?: string;
   };
   id: string;
@@ -114,8 +108,12 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
     startTransition(async () => {
       try {
         const items = results
-          .filter((result): result is typeof result & { category: ContentCategory } =>
-            isValidCategory(result.category)
+          .filter(
+            (
+              result
+            ): result is typeof result & {
+              category: Database['public']['Enums']['content_category'];
+            } => isValidCategory(result.category)
           )
           .map((result) => ({
             content_type: result.category,
@@ -356,8 +354,12 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
         <TabsContent value={selectedCategory} className="mt-6">
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {filteredResults
-              .filter((result): result is typeof result & { category: ContentCategory } =>
-                isValidCategory(result.category)
+              .filter(
+                (
+                  result
+                ): result is typeof result & {
+                  category: Database['public']['Enums']['content_category'];
+                } => isValidCategory(result.category)
               )
               .map((result) => {
                 // Only allow categories from the explicit allowlist
@@ -457,7 +459,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                     </div>
 
                     <div
-                      className={`${POSITION_PATTERNS.ABSOLUTE_INSET} bg-gradient-to-br ${getMatchGradient(matchScore)} pointer-events-none opacity-50`}
+                      className={`${POSITION_PATTERNS.ABSOLUTE_INSET} bg-linear-to-br ${getMatchGradient(matchScore)} pointer-events-none opacity-50`}
                     />
 
                     <Link href={targetPath}>

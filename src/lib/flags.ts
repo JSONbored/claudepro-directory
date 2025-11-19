@@ -30,8 +30,8 @@ import { logger } from '@/src/lib/logger';
  */
 export const identify = dedupe(async ({ headers: _headers, cookies }): Promise<StatsigUser> => {
   try {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    const supabaseUrl = process.env['NEXT_PUBLIC_SUPABASE_URL'];
+    const supabaseAnonKey = process.env['NEXT_PUBLIC_SUPABASE_ANON_KEY'];
 
     if (!(supabaseUrl && supabaseAnonKey)) {
       return { userID: 'anonymous' };
@@ -60,9 +60,9 @@ export const identify = dedupe(async ({ headers: _headers, cookies }): Promise<S
       baseUser.email = user.email;
     }
 
-    if (user?.user_metadata?.slug) {
+    if (user?.user_metadata?.['slug']) {
       baseUser.customIDs = {
-        userSlug: user.user_metadata.slug as string,
+        userSlug: user.user_metadata['slug'] as string,
       };
     }
 

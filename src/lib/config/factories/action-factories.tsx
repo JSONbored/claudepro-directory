@@ -161,6 +161,7 @@ export function createNotificationAction(
  *
  * Triggers browser download of a file using window.location.href.
  * Used for downloadable assets like skill ZIP packages.
+ * Shows appropriate toast notifications for success/failure.
  *
  * @param label - Button label text (e.g., "Download Skill")
  * @param icon - React icon component to display
@@ -189,6 +190,13 @@ export function createDownloadAction(
       if ('slug' in item && item.slug) {
         const downloadPath = pathTemplate.replace('{slug}', item.slug);
         window.location.href = downloadPath;
+        toasts.raw.success('Download started!', {
+          description: `Downloading ${item.title || item.slug}...`,
+        });
+      } else {
+        toasts.raw.error('Download unavailable', {
+          description: 'Unable to generate download link.',
+        });
       }
     },
   };
@@ -226,6 +234,63 @@ export function createStorageDownloadAction(label: string, icon: ReactNode): Act
       } else {
         toasts.raw.error('Download unavailable', {
           description: 'This skill package is not yet available for download.',
+        });
+      }
+    },
+  };
+}
+
+/**
+ * Create a .mcpb download action handler for MCP servers
+ *
+ * Downloads .mcpb files via edge function proxy (ensures Cloudflare caching for cost optimization).
+ * Uses mcpb_storage_url field and constructs edge function proxy URL.
+ * Shows appropriate toast notifications for success/failure.
+ *
+ * @param label - Button label text (e.g., "Download .mcpb")
+ * @param icon - React icon component to display
+ * @returns ActionButtonConfig with .mcpb download handler
+ *
+ * @example
+ * ```tsx
+ * // mcp category - download .mcpb via edge function proxy
+ * primaryAction: createMcpbDownloadAction(
+ *   'Download .mcpb',
+ *   <Download className={`h-4 w-4 mr-2`} />
+ * )
+ * ```
+ */
+export function createMcpbDownloadAction(label: string, icon: ReactNode): ActionButtonConfig {
+  return {
+    label,
+    icon,
+    handler: (item: ContentItem) => {
+      // Check for mcpb_storage_url (required for .mcpb downloads)
+      if (
+        'mcpb_storage_url' in item &&
+        item.mcpb_storage_url &&
+        typeof item.mcpb_storage_url === 'string' &&
+        'slug' in item &&
+        item.slug
+      ) {
+        // Use edge function proxy for Cloudflare caching (critical for cost optimization)
+        const supabaseUrl = process.env['NEXT_PUBLIC_SUPABASE_URL'];
+        if (!supabaseUrl) {
+          toasts.raw.error('Configuration error', {
+            description: 'Unable to generate download link.',
+          });
+          return;
+        }
+
+        // Construct edge function proxy URL (ensures cached egress)
+        const proxyUrl = `${supabaseUrl}/functions/v1/data-api/content/mcp/${item.slug}?format=storage`;
+        window.location.href = proxyUrl;
+        toasts.raw.success('Download started!', {
+          description: `Downloading ${item.title || item.slug}.mcpb...`,
+        });
+      } else {
+        toasts.raw.error('Download unavailable', {
+          description: 'This .mcpb package is not yet available for download.',
         });
       }
     },
@@ -334,6 +399,13 @@ export const commonActions = {
    */
   applySkill: () =>
     createStorageDownloadAction('Download Skill', <Download className={'mr-2 h-4 w-4'} />),
+
+  /**
+   * Download .mcpb package (for mcp category)
+   * Downloads one-click installer .mcpb package via edge function proxy (ensures Cloudflare caching)
+   */
+  downloadMcpb: () =>
+    createMcpbDownloadAction('Download .mcpb', <Download className={'mr-2 h-4 w-4'} />),
 
   /**
    * View hooks on GitHub action (for hooks category)

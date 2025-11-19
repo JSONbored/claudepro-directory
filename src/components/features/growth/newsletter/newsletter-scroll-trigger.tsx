@@ -11,11 +11,12 @@ import { useLoggedAsync } from '@/src/hooks/use-logged-async';
 import { getNewsletterConfigValue } from '@/src/lib/actions/feature-flags.actions';
 import { ensureNumber } from '@/src/lib/utils/data.utils';
 import { logUnhandledPromise } from '@/src/lib/utils/error.utils';
-import type { NewsletterSource } from '@/src/types/database-overrides';
+import type { Database } from '@/src/types/database.types';
+
 import { NewsletterCTAVariant } from './newsletter-cta-variants';
 
 export interface NewsletterScrollTriggerProps {
-  source: NewsletterSource;
+  source: Database['public']['Enums']['newsletter_source'];
   category?: string;
   /**
    * Scroll threshold (0-1) to trigger CTA

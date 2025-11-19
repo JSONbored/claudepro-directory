@@ -2,10 +2,11 @@
 
 import { fetchCachedRpc } from '@/src/lib/data/helpers';
 import { generateContentCacheKey } from '@/src/lib/data/helpers-utils';
-import type { ContentCategory, GetGetReviewsWithStatsReturn } from '@/src/types/database-overrides';
+import type { Database } from '@/src/types/database.types';
+import type { GetGetReviewsWithStatsReturn } from '@/src/types/database-overrides';
 
 interface ReviewsWithStatsParams {
-  contentType: ContentCategory;
+  contentType: Database['public']['Enums']['content_category'];
   contentSlug: string;
   sortBy?: string;
   limit?: number;

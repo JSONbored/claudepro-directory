@@ -11,4 +11,4 @@ export const isDevelopment = process.env.NODE_ENV === 'development';
 export const isProduction = process.env.NODE_ENV === 'production';
 
 // These are build-time constants, safe for client
-export const isVercel = process.env.VERCEL === '1';
+export const isVercel = process.env['VERCEL'] === '1';

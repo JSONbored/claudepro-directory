@@ -246,6 +246,7 @@ function parseArgs(): GenerateOptions {
       case '-h':
         showHelp();
         process.exit(0);
+        // @ts-expect-error - break is unreachable but required by Biome's noFallthroughSwitchClause rule
         break;
       default:
         logger.error(`Unknown option: ${arg}\n`, undefined, {

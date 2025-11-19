@@ -54,12 +54,22 @@ export async function processSequenceEmail(
     email: item.email,
   });
 
+  const subject = STEP_SUBJECTS[step];
+  if (!subject) {
+    logError(
+      'Unknown sequence step subject',
+      logContext,
+      new Error(`No subject for step: ${step}`)
+    );
+    throw new Error(`No subject for step: ${step}`);
+  }
+
   const result = await sendEmail(
     resend,
     {
       from: ONBOARDING_FROM,
       to: email,
-      subject: STEP_SUBJECTS[step],
+      subject,
       html,
       tags: [
         { name: 'template', value: 'onboarding_sequence' },

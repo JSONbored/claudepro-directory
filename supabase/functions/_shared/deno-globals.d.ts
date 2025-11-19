@@ -1,8 +1,13 @@
 /**
  * Deno global type declarations
- * Using namespace augmentation to avoid conflicts with Deno's built-in types
+ * Using interface augmentation to extend Deno's built-in types without conflicts
  */
 
+/// <reference lib="deno.ns" />
+/// <reference lib="dom" />
+
+// Deno namespace is provided by deno.ns lib reference above
+// This declaration ensures Deno.serve is properly typed
 declare namespace Deno {
   function serve(handler: (req: Request) => Response | Promise<Response>): void;
 }
@@ -28,50 +33,4 @@ declare global {
       };
     };
   };
-
-  // Console API (available in Deno runtime)
-  // eslint-disable-next-line no-var
-  var console: {
-    log(...args: unknown[]): void;
-    error(...args: unknown[]): void;
-    warn(...args: unknown[]): void;
-    info(...args: unknown[]): void;
-    debug(...args: unknown[]): void;
-  };
-
-  // Web Crypto API (available in Deno runtime)
-  // eslint-disable-next-line no-var
-  var crypto: {
-    randomUUID(): string;
-    subtle: {
-      importKey(
-        format: string,
-        keyData: BufferSource,
-        algorithm: { name: string; hash?: string },
-        extractable: boolean,
-        keyUsages: string[]
-      ): Promise<unknown>;
-      sign(algorithm: string, key: unknown, data: BufferSource): Promise<ArrayBuffer>;
-    };
-  };
-
-  // Timer APIs (available in Deno runtime)
-  function setTimeout(
-    callback: (...args: unknown[]) => void,
-    delay?: number,
-    ...args: unknown[]
-  ): number;
-  function clearTimeout(id: number): void;
-  function setInterval(
-    callback: (...args: unknown[]) => void,
-    delay?: number,
-    ...args: unknown[]
-  ): number;
-  function clearInterval(id: number): void;
-
-  // BufferSource type (Web API standard)
-  type BufferSource = ArrayBufferView | ArrayBuffer;
-
-  // Web API types (available in Deno runtime)
-  type HeadersInit = Headers | Record<string, string> | [string, string][];
 }

@@ -18,7 +18,7 @@ import { logger } from '@/src/lib/logger';
 import { SEMANTIC_COLORS } from '@/src/lib/semantic-colors';
 import { ANIMATION_CONSTANTS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
-import type { ContentCategory } from '@/src/types/database-overrides';
+import type { Database } from '@/src/types/database.types';
 
 /**
  * Base badge variants (from original badge.tsx)
@@ -54,7 +54,7 @@ const categoryBadgeStyles = {
   collections: 'badge-category-collections',
   guides: 'badge-category-guides',
   skills: 'badge-category-skills',
-} as const satisfies Partial<Record<ContentCategory, string>>;
+} as const satisfies Partial<Record<Database['public']['Enums']['content_category'], string>>;
 
 const sourceBadgeStyles = {
   official: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
@@ -100,7 +100,7 @@ export type UnifiedBadgeProps =
   | {
       /** Category/content-type badge */
       variant: 'category';
-      category: ContentCategory;
+      category: Database['public']['Enums']['content_category'];
       children: React.ReactNode;
       className?: string;
     }

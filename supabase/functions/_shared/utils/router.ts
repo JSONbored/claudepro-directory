@@ -71,7 +71,10 @@ export function createRouter<C extends RouterContext>(options: RouterOptions<C>)
     const finalResponse = applyCors(response, route.cors ?? options.defaultCors);
 
     if (isHead) {
-      return new Response(null, { status: finalResponse.status, headers: finalResponse.headers });
+      return new Response(null, {
+        status: finalResponse.status,
+        headers: finalResponse.headers,
+      });
     }
 
     return finalResponse;

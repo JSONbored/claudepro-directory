@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
     const { secret, category, slug, tags } = body;
 
     // Verify secret from body (PostgreSQL trigger sends in payload)
-    if (!secret || secret !== process.env.REVALIDATE_SECRET) {
+    if (!secret || secret !== process.env['REVALIDATE_SECRET']) {
       logger.warn('Revalidate webhook unauthorized', {
         hasSecret: !!secret,
         ip: request.headers.get('x-forwarded-for') || 'unknown',

@@ -9,7 +9,7 @@ import { usePulse } from '@/src/hooks/use-pulse';
 import { Building, Clock, DollarSign, ExternalLink, MapPin, Star } from '@/src/lib/icons';
 import type { JobCardProps } from '@/src/lib/types/component.types';
 import { BADGE_COLORS, type JobType, UI_CLASSES } from '@/src/lib/ui-constants';
-import { ensureStringArray, formatRelativeDate } from '@/src/lib/utils/data.utils';
+import { formatRelativeDate } from '@/src/lib/utils/data.utils';
 import { logUnhandledPromise } from '@/src/lib/utils/error.utils';
 
 /**
@@ -175,18 +175,16 @@ export function JobCard({ job }: JobCardProps) {
 
         <div className={UI_CLASSES.MARGIN_DEFAULT}>
           <div className={UI_CLASSES.FLEX_WRAP_GAP_2}>
-            {ensureStringArray(job.tags)
-              .slice(0, 4)
-              .map((tag: string) => (
-                <UnifiedBadge
-                  key={tag}
-                  variant="base"
-                  style="outline"
-                  className={UI_CLASSES.TEXT_BADGE}
-                >
-                  {tag}
-                </UnifiedBadge>
-              ))}
+            {(job.tags || []).slice(0, 4).map((tag: string) => (
+              <UnifiedBadge
+                key={tag}
+                variant="base"
+                style="outline"
+                className={UI_CLASSES.TEXT_BADGE}
+              >
+                {tag}
+              </UnifiedBadge>
+            ))}
             {Array.isArray(job.tags) && job.tags.length > 4 && (
               <UnifiedBadge variant="base" style="outline" className={UI_CLASSES.TEXT_BADGE}>
                 +{job.tags.length - 4} more

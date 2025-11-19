@@ -39,7 +39,7 @@ export function generateMarkdownBody(skill: SkillRow): string {
 
   if (skill.content) sections.push(skill.content);
 
-  const dependencies = metadata.dependencies as string[] | null;
+  const dependencies = metadata['dependencies'] as string[] | null;
   const prerequisites = generatePrerequisitesSection(dependencies);
   if (prerequisites) sections.push(prerequisites);
 
@@ -52,7 +52,7 @@ export function generateMarkdownBody(skill: SkillRow): string {
   const examples = generateExamplesSection(skill.examples as SkillExample[] | null);
   if (examples) sections.push(examples);
 
-  const troubleshooting = metadata.troubleshooting as TroubleshootingItem[] | null;
+  const troubleshooting = metadata['troubleshooting'] as TroubleshootingItem[] | null;
   const troubleshootingSection = generateTroubleshootingSection(troubleshooting);
   if (troubleshootingSection) sections.push(troubleshootingSection);
 

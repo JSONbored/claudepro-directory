@@ -1,77 +1,101 @@
-import React from 'npm:react@18.3.1';
-import { Button, Section, Text } from 'npm:@react-email/components@0.0.22';
-import { buildEmailCtaUrl } from '../cta.ts';
-import type { EmailUTMParams } from '../utm-templates.ts';
-import {
-  ctaSection,
-  ctaTitleStyle,
-  paragraphStyle,
-  primaryButtonStyle,
-  secondaryButtonStyle,
-} from '../common-styles.ts';
-import { getCtaPreset, type EmailCtaPresetId, type EmailCtaPreset } from '../config/cta-presets.ts';
+// React import required for Deno JSX (even though jsx: "react-jsx" doesn't require it for TypeScript)
+import React from "npm:react@18.3.1";
 
-type ButtonVariant = 'primary' | 'secondary';
+// Mark React as used for TypeScript (required for Deno JSX runtime)
+void React;
+
+import { Button, Section, Text } from "npm:@react-email/components@0.0.22";
+import {
+	ctaSection,
+	ctaTitleStyle,
+	paragraphStyle,
+	primaryButtonStyle,
+	secondaryButtonStyle,
+} from "../common-styles.ts";
+import {
+	type EmailCtaPreset,
+	type EmailCtaPresetId,
+	getCtaPreset,
+} from "../config/cta-presets.ts";
+import { buildEmailCtaUrl } from "../cta.ts";
+import type { EmailUTMParams } from "../utm-templates.ts";
+
+type ButtonVariant = "primary" | "secondary";
 
 export interface EmailCtaButtonProps {
-  utm: EmailUTMParams;
-  preset: EmailCtaPresetId;
-  variant?: ButtonVariant;
-  overrides?: Partial<EmailCtaPreset>;
+	utm: EmailUTMParams;
+	preset: EmailCtaPresetId;
+	variant?: ButtonVariant;
+	overrides?: Partial<EmailCtaPreset>;
 }
 
-export function EmailCtaButton({ utm, preset, variant = 'primary', overrides }: EmailCtaButtonProps) {
-  const presetConfig = { ...getCtaPreset(preset), ...(overrides ?? {}) };
-  const href = buildEmailCtaUrl(
-    presetConfig.href,
-    utm,
-    presetConfig.contentKey ? { content: presetConfig.contentKey } : undefined
-  );
+export function EmailCtaButton({
+	utm,
+	preset,
+	variant = "primary",
+	overrides,
+}: EmailCtaButtonProps) {
+	const presetConfig = { ...getCtaPreset(preset), ...(overrides ?? {}) };
+	const href = buildEmailCtaUrl(
+		presetConfig.href,
+		utm,
+		presetConfig.contentKey ? { content: presetConfig.contentKey } : undefined,
+	);
 
-  const style = variant === 'secondary' ? secondaryButtonStyle : primaryButtonStyle;
+	const style =
+		variant === "secondary" ? secondaryButtonStyle : primaryButtonStyle;
 
-  return (
-    <Button href={href} style={style}>
-      {presetConfig.label}
-    </Button>
-  );
+	return (
+		<Button href={href} style={style}>
+			{presetConfig.label}
+		</Button>
+	);
 }
 
 export interface EmailCtaSectionButtonConfig
-  extends Omit<EmailCtaButtonProps, 'utm' | 'overrides'> {
-  overrides?: Partial<EmailCtaPreset>;
-  // Note: 'key' is a special React prop and should NOT be included in this interface
-  // It's handled separately in the map function
+	extends Omit<EmailCtaButtonProps, "utm" | "overrides"> {
+	overrides?: Partial<EmailCtaPreset>;
+	// Note: 'key' is a special React prop and should NOT be included in this interface
+	// It's handled separately in the map function
 }
 
 export interface EmailCtaSectionProps {
-  utm: EmailUTMParams;
-  title?: string;
-  description?: string;
-  buttons: EmailCtaSectionButtonConfig[];
+	utm: EmailUTMParams;
+	title?: string;
+	description?: string;
+	buttons: EmailCtaSectionButtonConfig[];
 }
 
-export function EmailCtaSection({ utm, title, description, buttons }: EmailCtaSectionProps) {
-  if (buttons.length === 0) return null;
+export function EmailCtaSection({
+	utm,
+	title,
+	description,
+	buttons,
+}: EmailCtaSectionProps) {
+	if (buttons.length === 0) return null;
 
-  return (
-    <Section style={ctaSection}>
-      {title ? <Text style={ctaTitleStyle}>{title}</Text> : null}
-      {description ? <Text style={paragraphStyle}>{description}</Text> : null}
-      {buttons.map((button, index) => {
-        // Generate React key from button props (key is a special React prop, not part of component props)
-        const reactKey = `${button.preset}-${button.variant ?? 'primary'}-${index}`;
-        // React's key prop is special and handled separately - TypeScript may complain but this is correct
-        return (
-          <EmailCtaButton
-            {...({ key: reactKey } as { key: string })}
-            utm={utm}
-            preset={button.preset}
-            variant={button.variant}
-            overrides={button.overrides}
-          />
-        );
-      })}
-    </Section>
-  );
+	return (
+		<Section style={ctaSection}>
+			{title ? <Text style={ctaTitleStyle}>{title}</Text> : null}
+			{description ? <Text style={paragraphStyle}>{description}</Text> : null}
+			{buttons.map((button, index) => {
+				// Generate React key from button props (key is a special React prop, not part of component props)
+				const reactKey = `${button.preset}-${button.variant ?? "primary"}-${index}`;
+				// React's key prop is special and handled separately - TypeScript may complain but this is correct
+				return (
+					<EmailCtaButton
+						{...({ key: reactKey } as { key: string })}
+						utm={utm}
+						preset={button.preset}
+						{...(button.variant !== undefined
+							? { variant: button.variant }
+							: {})}
+						{...(button.overrides !== undefined
+							? { overrides: button.overrides }
+							: {})}
+					/>
+				);
+			})}
+		</Section>
+	);
 }

@@ -1,5 +1,4 @@
-import type { Database as DatabaseGenerated } from '../../database.types.ts';
-import type { Database } from '../../database-overrides.ts';
+import type { Database as DatabaseGenerated, Json } from '../../database.types.ts';
 import { insertTable, updateTable, WEBHOOK_DIRECTION_VALUES } from '../../database-overrides.ts';
 import type { BaseLogContext } from '../logging.ts';
 import { createUtilityContext } from '../logging.ts';
@@ -30,15 +29,15 @@ export async function logOutboundWebhookEvent(
   data: unknown,
   relatedId?: string
 ): Promise<string | null> {
-  const insertData = {
+  const insertData: DatabaseGenerated['public']['Tables']['webhook_events']['Insert'] = {
     source: 'discord',
     direction: WEBHOOK_DIRECTION_VALUES[1], // 'outbound'
     type,
-    data: data as Database['public']['Tables']['webhook_events']['Insert']['data'],
+    data: data as Json,
     created_at: new Date().toISOString(),
     processed: false,
-    related_id: relatedId || null,
-  } satisfies DatabaseGenerated['public']['Tables']['webhook_events']['Insert'];
+    related_id: relatedId ?? null,
+  };
   const result = insertTable('webhook_events', insertData);
   const { data: logData, error: logError } = await result.select('id').single<{ id: string }>();
 
@@ -63,15 +62,14 @@ export async function updateWebhookEventStatus(
   retryCount?: number
 ): Promise<void> {
   // success parameter determines if webhook was successful (used for logging/analytics)
-  const updateData = {
+  const updateData: DatabaseGenerated['public']['Tables']['webhook_events']['Update'] = {
     processed: true,
     processed_at: new Date().toISOString(),
     http_status_code: httpStatus ?? null,
     error: success ? null : (error ?? 'Unknown error'),
-    response_payload:
-      responsePayload as DatabaseGenerated['public']['Tables']['webhook_events']['Update']['response_payload'],
+    response_payload: responsePayload ? (responsePayload as Json) : null,
     retry_count: retryCount ?? null,
-  } satisfies DatabaseGenerated['public']['Tables']['webhook_events']['Update'];
+  };
   await updateTable('webhook_events', updateData, webhookEventId);
 }
 
@@ -87,15 +85,15 @@ export async function sendDiscordWebhook(
   const logPayload = metadata ?? payload;
   const eventType = logType ?? webhookType;
 
-  const insertData2 = {
+  const insertData2: DatabaseGenerated['public']['Tables']['webhook_events']['Insert'] = {
     source: 'discord',
     direction: WEBHOOK_DIRECTION_VALUES[1], // 'outbound'
     type: eventType,
-    data: logPayload as Database['public']['Tables']['webhook_events']['Insert']['data'],
+    data: logPayload as Json,
     created_at: new Date().toISOString(),
     processed: false,
-    related_id: relatedId || null,
-  } satisfies DatabaseGenerated['public']['Tables']['webhook_events']['Insert'];
+    related_id: relatedId ?? null,
+  };
   const result2 = insertTable('webhook_events', insertData2);
   const { data: logData, error: logError } = await result2.select('id').single<{ id: string }>();
 
@@ -113,13 +111,14 @@ export async function sendDiscordWebhook(
 
       if (response.ok) {
         if (webhookEventId) {
-          const successUpdateData = {
-            processed: true,
-            processed_at: new Date().toISOString(),
-            http_status_code: response.status,
-            response_payload: { success: true },
-            retry_count: attempt,
-          } satisfies DatabaseGenerated['public']['Tables']['webhook_events']['Update'];
+          const successUpdateData: DatabaseGenerated['public']['Tables']['webhook_events']['Update'] =
+            {
+              processed: true,
+              processed_at: new Date().toISOString(),
+              http_status_code: response.status,
+              response_payload: { success: true } as Json,
+              retry_count: attempt,
+            };
           await updateTable('webhook_events', successUpdateData, webhookEventId);
         }
 
@@ -164,12 +163,12 @@ export async function sendDiscordWebhook(
   }
 
   if (webhookEventId) {
-    const errorUpdateData = {
+    const errorUpdateData: DatabaseGenerated['public']['Tables']['webhook_events']['Update'] = {
       processed: true,
       processed_at: new Date().toISOString(),
       error: lastError?.message || 'Max retries exceeded',
       retry_count: MAX_RETRIES,
-    } satisfies DatabaseGenerated['public']['Tables']['webhook_events']['Update'];
+    };
     await updateTable('webhook_events', errorUpdateData, webhookEventId);
   }
 
@@ -225,8 +224,8 @@ export async function createDiscordMessageWithLogging(
   }
 
   const messageId =
-    (parsedResponse?.id as string | undefined) ??
-    (parsedResponse?.message_id as string | undefined);
+    (parsedResponse?.['id'] as string | undefined) ??
+    (parsedResponse?.['message_id'] as string | undefined);
 
   if (!messageId) {
     console.warn('[discord-client] Discord response missing message ID', {
@@ -248,7 +247,7 @@ export async function createDiscordMessageWithLogging(
     status: response.status,
     messageId: messageId ?? '',
     retryCount: 0,
-    rawResponse: parsedResponse,
+    ...(parsedResponse !== undefined ? { rawResponse: parsedResponse } : {}),
   };
 }
 
@@ -266,7 +265,10 @@ export async function updateDiscordMessage(
   const logData: Record<string, unknown> = metadata
     ? { ...metadata, discord_message_id: messageId }
     : payload && typeof payload === 'object' && !Array.isArray(payload)
-      ? { ...(payload as Record<string, unknown>), discord_message_id: messageId }
+      ? {
+          ...(payload as Record<string, unknown>),
+          discord_message_id: messageId,
+        }
       : { discord_message_id: messageId };
 
   const webhookEventId = await logOutboundWebhookEvent(`${webhookType}_update`, logData, relatedId);

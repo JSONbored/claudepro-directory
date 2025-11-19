@@ -12,9 +12,9 @@ const HERO_DEFAULTS = {
   monthlyPageViews: 16000,
 };
 
-const VERCEL_ANALYTICS_TOKEN = process.env.VERCEL_WEB_ANALYTICS_TOKEN;
+const VERCEL_ANALYTICS_TOKEN = process.env['VERCEL_WEB_ANALYTICS_TOKEN'];
 const VERCEL_PROJECT_ID =
-  process.env.VERCEL_PROJECT_ID ?? process.env.NEXT_PUBLIC_VERCEL_PROJECT_ID;
+  process.env['VERCEL_PROJECT_ID'] ?? process.env['NEXT_PUBLIC_VERCEL_PROJECT_ID'];
 
 type VisitorStats = {
   monthlyVisitors: number;

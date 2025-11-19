@@ -31,11 +31,12 @@ import {
   Zap,
 } from '@/src/lib/icons';
 import { cn } from '@/src/lib/utils';
-import type { ContentCategory, GetGetContentTemplatesReturn } from '@/src/types/database-overrides';
+import type { Database } from '@/src/types/database.types';
+import type { GetGetContentTemplatesReturn } from '@/src/types/database-overrides';
 
 interface TemplateGalleryProps {
   templates: GetGetContentTemplatesReturn;
-  contentType: ContentCategory | null;
+  contentType: Database['public']['Enums']['content_category'] | null;
   onApplyTemplate: (template: GetGetContentTemplatesReturn[0]) => void;
   className?: string;
 }
@@ -193,13 +194,14 @@ function TemplateCard({ template, index, onApply }: TemplateCardProps) {
         typeof templateData === 'object' && templateData !== null && !Array.isArray(templateData)
           ? (templateData as Record<string, unknown>)
           : {};
-      const usageCount = typeof data.usage_count === 'number' ? data.usage_count : 0;
+      const usageCount = typeof data['usage_count'] === 'number' ? data['usage_count'] : 0;
       return {
         usageCount,
-        trending: typeof data.trending === 'boolean' ? data.trending : undefined,
-        featured: typeof data.featured === 'boolean' ? data.featured : undefined,
-        successRate: typeof data.success_rate === 'number' ? data.success_rate : undefined,
-        averageRating: typeof data.average_rating === 'number' ? data.average_rating : undefined,
+        trending: typeof data['trending'] === 'boolean' ? data['trending'] : undefined,
+        featured: typeof data['featured'] === 'boolean' ? data['featured'] : undefined,
+        successRate: typeof data['success_rate'] === 'number' ? data['success_rate'] : undefined,
+        averageRating:
+          typeof data['average_rating'] === 'number' ? data['average_rating'] : undefined,
         isPopular: usageCount > 100,
       };
     } catch {
@@ -382,7 +384,7 @@ function TemplateCard({ template, index, onApply }: TemplateCardProps) {
  */
 interface TemplateQuickSelectProps {
   templates: GetGetContentTemplatesReturn;
-  contentType: ContentCategory | null;
+  contentType: Database['public']['Enums']['content_category'] | null;
   onApplyTemplate: (template: GetGetContentTemplatesReturn[0]) => void;
   maxVisible?: number;
   className?: string;

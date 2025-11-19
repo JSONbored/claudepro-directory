@@ -50,12 +50,8 @@ import { Check, X } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { cn } from '@/src/lib/utils';
 import { logUnhandledPromise, normalizeError } from '@/src/lib/utils/error.utils';
-import type {
-  ConfettiVariant,
-  ContactActionType,
-  ContactCategory,
-  GetGetContactCommandsReturn,
-} from '@/src/types/database-overrides';
+import type { Database } from '@/src/types/database.types';
+import type { GetGetContactCommandsReturn } from '@/src/types/database-overrides';
 
 type ContactCommand = {
   id: string;
@@ -63,9 +59,9 @@ type ContactCommand = {
   description: string | null;
   category: string;
   iconName: string | null;
-  actionType: ContactActionType;
+  actionType: Database['public']['Enums']['contact_action_type'];
   actionValue: string | null;
-  confettiVariant: ConfettiVariant | null;
+  confettiVariant: Database['public']['Enums']['confetti_variant'] | null;
   requiresAuth: boolean;
   aliases: string[];
 };
@@ -88,9 +84,9 @@ export function ContactTerminal() {
   const [output, setOutput] = useState<OutputLine[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<ContactCategory>(
-    'general' as ContactCategory
-  );
+  const [selectedCategory, setSelectedCategory] = useState<
+    Database['public']['Enums']['contact_category']
+  >('general' as Database['public']['Enums']['contact_category']);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const outputEndRef = useRef<HTMLDivElement>(null);
@@ -198,7 +194,7 @@ export function ContactTerminal() {
       addOutput('output', 'Type for suggestions or try: help, report-bug, request-feature');
       trackTerminalCommandAction({
         command_id: 'unknown',
-        action_type: 'internal' as ContactActionType, // Default fallback for unknown commands
+        action_type: 'internal' as Database['public']['Enums']['contact_action_type'], // Default fallback for unknown commands
         success: false,
         error_reason: 'command_not_found',
         execution_time_ms: Date.now() - startTime,
@@ -240,7 +236,9 @@ export function ContactTerminal() {
 
         case 'sheet':
           if (command.actionValue) {
-            setSelectedCategory(command.actionValue as ContactCategory);
+            setSelectedCategory(
+              command.actionValue as Database['public']['Enums']['contact_category']
+            );
             setIsSheetOpen(true);
             addOutput(
               'success',

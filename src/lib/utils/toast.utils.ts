@@ -7,7 +7,7 @@
  */
 
 import { toast } from 'sonner';
-import type { ContentCategory } from '@/src/types/database-overrides';
+import type { Database } from '@/src/types/database.types';
 
 /**
  * Hardcoded toast messages (client-safe defaults)
@@ -53,7 +53,7 @@ export const successToasts = {
   itemCreated: (type: string) => toast.success(`${type} created successfully`),
   itemUpdated: (type: string) => toast.success(`${type} updated successfully`),
   itemDeleted: (type: string) => toast.success(`${type} deleted successfully`),
-  submissionCreated: (contentType: ContentCategory) =>
+  submissionCreated: (contentType: Database['public']['Enums']['content_category']) =>
     toast.success(TOAST_MESSAGES.submission_created_title, {
       description: TOAST_MESSAGES.submission_created_description.replace(
         '{contentType}',

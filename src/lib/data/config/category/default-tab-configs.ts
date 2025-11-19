@@ -4,7 +4,7 @@
  */
 
 import type { TabConfig } from '@/src/lib/types/component.types';
-import type { ContentCategory } from '@/src/types/database-overrides';
+import type { Database } from '@/src/types/database.types';
 
 /**
  * Standard tabs for technical content (agents, mcp, hooks, statuslines, skills)
@@ -129,7 +129,7 @@ const COLLECTION_TABS: ReadonlyArray<TabConfig> = [
  * Category to tab layout mapping
  */
 export const DEFAULT_TAB_CONFIGS: Readonly<
-  Record<ContentCategory, ReadonlyArray<TabConfig> | null>
+  Record<Database['public']['Enums']['content_category'], ReadonlyArray<TabConfig> | null>
 > = {
   // Standard technical content
   agents: STANDARD_TABS,
@@ -155,7 +155,7 @@ export const DEFAULT_TAB_CONFIGS: Readonly<
  * Get tab configuration for a category
  */
 export function getTabConfigForCategory(
-  categoryId: ContentCategory
+  categoryId: Database['public']['Enums']['content_category']
 ): ReadonlyArray<TabConfig> | null {
   return DEFAULT_TAB_CONFIGS[categoryId] ?? null;
 }
@@ -163,6 +163,8 @@ export function getTabConfigForCategory(
 /**
  * Check if category supports tabs
  */
-export function categorySupportsTabbing(categoryId: ContentCategory): boolean {
+export function categorySupportsTabbing(
+  categoryId: Database['public']['Enums']['content_category']
+): boolean {
   return DEFAULT_TAB_CONFIGS[categoryId] !== null;
 }

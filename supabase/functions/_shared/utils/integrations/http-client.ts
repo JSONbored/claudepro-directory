@@ -61,11 +61,18 @@ export async function fetchWithRetry({
           | ReadableStream<Uint8Array>;
       } = {
         method,
-        headers,
+        ...(headers !== undefined ? { headers } : {}),
       };
       if (body !== null && body !== undefined) {
         // Type assertion needed because body is unknown, but we validate it's a valid BodyInit type at runtime
-        fetchOptions.body = body as typeof fetchOptions.body;
+        fetchOptions.body = body as
+          | string
+          | Blob
+          | ArrayBufferView
+          | ArrayBuffer
+          | FormData
+          | URLSearchParams
+          | ReadableStream<Uint8Array>;
       }
       // Type assertion to satisfy fetch's RequestInit type requirements
       const response = await fetch(url, fetchOptions as Parameters<typeof fetch>[1]);

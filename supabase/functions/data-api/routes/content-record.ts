@@ -1,6 +1,10 @@
 import { SITE_URL } from '../../_shared/clients/supabase.ts';
 import type { Database as DatabaseGenerated } from '../../_shared/database.types.ts';
-import { callRpc, type GenerateMarkdownExportReturn } from '../../_shared/database-overrides.ts';
+import {
+  callRpc,
+  type Database,
+  type GenerateMarkdownExportReturn,
+} from '../../_shared/database-overrides.ts';
 import {
   badRequestResponse,
   buildCacheHeaders,
@@ -144,36 +148,71 @@ async function handleItemLlmsTxt(category: string, slug: string): Promise<Respon
 }
 
 async function handleStorageFormat(category: string, slug: string): Promise<Response> {
-  if (category !== 'skills') {
-    return badRequestResponse(`Storage format not supported for category '${category}'`, CORS_JSON);
+  // Support both 'skills' and 'mcp' categories for storage format
+  if (category === 'skills') {
+    const rpcArgs = {
+      p_slug: slug,
+    } satisfies DatabaseGenerated['public']['Functions']['get_skill_storage_path']['Args'];
+    const { data, error } = await callRpc('get_skill_storage_path', rpcArgs, true);
+
+    if (error) {
+      return errorResponse(error, 'data-api:get_skill_storage_path', CORS_JSON);
+    }
+
+    type StoragePathResult =
+      DatabaseGenerated['public']['Functions']['get_skill_storage_path']['Returns'];
+    const result = data as StoragePathResult;
+    const location = Array.isArray(result) ? result[0] : result;
+    if (
+      !location ||
+      typeof location !== 'object' ||
+      !('bucket' in location) ||
+      !('object_path' in location)
+    ) {
+      return badRequestResponse('Storage file not found', CORS_JSON);
+    }
+    const typedLocation = location as { bucket: string; object_path: string };
+
+    return proxyStorageFile({
+      bucket: typedLocation.bucket,
+      path: typedLocation.object_path,
+      cacheControl: 'public, max-age=31536000, immutable',
+    });
   }
 
-  const rpcArgs = {
-    p_slug: slug,
-  } satisfies DatabaseGenerated['public']['Functions']['get_skill_storage_path']['Args'];
-  const { data, error } = await callRpc('get_skill_storage_path', rpcArgs, true);
+  if (category === 'mcp') {
+    // get_mcpb_storage_path RPC function (properly typed in database-overrides.ts)
+    const rpcArgs = {
+      p_slug: slug,
+    };
+    const { data, error } = await callRpc('get_mcpb_storage_path', rpcArgs, true);
 
-  if (error) {
-    return errorResponse(error, 'data-api:get_skill_storage_path', CORS_JSON);
+    if (error) {
+      return errorResponse(error, 'data-api:get_mcpb_storage_path', CORS_JSON);
+    }
+
+    type StoragePathResult = Database['public']['Functions']['get_mcpb_storage_path']['Returns'];
+    const result = data as StoragePathResult;
+    const location = Array.isArray(result) ? result[0] : result;
+    if (
+      !location ||
+      typeof location !== 'object' ||
+      !('bucket' in location) ||
+      !('object_path' in location)
+    ) {
+      return badRequestResponse('MCPB package not found', CORS_JSON);
+    }
+    const typedLocation = location as { bucket: string; object_path: string };
+
+    return proxyStorageFile({
+      bucket: typedLocation.bucket,
+      path: typedLocation.object_path,
+      cacheControl: 'public, max-age=31536000, immutable',
+    });
   }
 
-  type StoragePathResult =
-    DatabaseGenerated['public']['Functions']['get_skill_storage_path']['Returns'];
-  const result = data as StoragePathResult;
-  const location = Array.isArray(result) ? result[0] : result;
-  if (
-    !location ||
-    typeof location !== 'object' ||
-    !('bucket' in location) ||
-    !('object_path' in location)
-  ) {
-    return badRequestResponse('Storage file not found', CORS_JSON);
-  }
-  const typedLocation = location as { bucket: string; object_path: string };
-
-  return proxyStorageFile({
-    bucket: typedLocation.bucket,
-    path: typedLocation.object_path,
-    cacheControl: 'public, max-age=31536000, immutable',
-  });
+  return badRequestResponse(
+    `Storage format not supported for category '${category}'. Supported categories: skills, mcp`,
+    CORS_JSON
+  );
 }

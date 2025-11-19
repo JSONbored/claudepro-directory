@@ -5,7 +5,7 @@
 
 import type { Resend } from 'npm:resend@4.0.0';
 import { RESEND_ENV } from '../../config/email-config.ts';
-import type { NewsletterSource } from '../../database-overrides.ts';
+import type { Database } from '../../database.types.ts';
 
 import type { BaseLogContext } from '../logging.ts';
 import { createUtilityContext, logError, logInfo, logWarn } from '../logging.ts';
@@ -32,7 +32,7 @@ export const RESEND_TOPIC_IDS = {
  * Auto-assigns relevant topics to maximize engagement
  */
 export function inferInitialTopics(
-  _source: NewsletterSource | null,
+  _source: Database['public']['Enums']['newsletter_source'] | null,
   copyCategory?: string | null
 ): string[] {
   const topics: string[] = [];
@@ -74,7 +74,7 @@ export function inferInitialTopics(
  * Higher score for more intentional signups
  */
 export function calculateInitialEngagementScore(
-  source: NewsletterSource | null,
+  source: Database['public']['Enums']['newsletter_source'] | null,
   copyType?: string | null
 ): number {
   let score = 50; // Neutral baseline
@@ -125,13 +125,13 @@ export function calculateInitialEngagementScore(
  * Maps our database fields to Resend custom properties
  */
 export function buildContactProperties(params: {
-  source: NewsletterSource | null;
+  source: Database['public']['Enums']['newsletter_source'] | null;
   copyType?: string | null;
   copyCategory?: string | null;
   referrer?: string | null;
 }): Record<string, string | number> {
   const { source, copyType, copyCategory, referrer } = params;
-  // Convert NewsletterSource | null to string | null for database compatibility
+  // Convert newsletter_source enum | null to string | null for database compatibility
   const sourceValue: string | null = source ?? null;
 
   return {
@@ -224,7 +224,9 @@ export async function syncContactSegment(
       );
     }
   } catch (error) {
-    const logContext = createUtilityContext('resend', 'sync-contact-segment', { contactId });
+    const logContext = createUtilityContext('resend', 'sync-contact-segment', {
+      contactId,
+    });
     logError('Segment sync failed', logContext, error);
   }
 }
@@ -306,14 +308,14 @@ export async function updateContactEngagement(
     const contactsApi = resend.contacts as unknown as ResendContactsApi;
     const { data: contact } = await runWithRetry(() => contactsApi.get({ email }), SEGMENT_RETRY);
 
-    if (!contact?.data) {
+    if (!contact?.['data']) {
       const logContext = createUtilityContext('resend', 'update-contact-engagement', { email });
       logWarn('contact not found', logContext);
       return;
     }
 
-    const contactData = contact.data as ResendContact;
-    const currentScore = (contactData.properties?.engagement_score as number) || 50;
+    const contactData = contact['data'] as ResendContact;
+    const currentScore = (contactData.properties?.['engagement_score'] as number) || 50;
     const newScore = calculateEngagementChange(currentScore, activityType);
 
     await runWithRetry(
@@ -343,9 +345,10 @@ async function listSegmentsWithRetry(resend: Resend, contactId: string): Promise
       (
         resend.contacts as unknown as {
           segments: {
-            list: (args: {
-              id: string;
-            }) => Promise<{ data: { data?: Array<{ id: string }> } | null; error: unknown }>;
+            list: (args: { id: string }) => Promise<{
+              data: { data?: Array<{ id: string }> } | null;
+              error: unknown;
+            }>;
           };
         }
       ).segments.list({
@@ -404,7 +407,7 @@ export async function syncContactToResend(
   resend: Resend,
   email: string,
   contactProperties: Record<string, unknown>,
-  validatedSource: NewsletterSource | null,
+  validatedSource: Database['public']['Enums']['newsletter_source'] | null,
   copy_category: string | null | undefined,
   logContext: BaseLogContext
 ): Promise<{
@@ -431,7 +434,10 @@ export async function syncContactToResend(
         email: string;
         unsubscribed?: boolean;
         properties?: Record<string, unknown>;
-      }) => Promise<{ data: { id: string } | null; error: { message?: string } | null }>;
+      }) => Promise<{
+        data: { id: string } | null;
+        error: { message?: string } | null;
+      }>;
     };
     const contactsApi = resend.contacts as unknown as ResendContactsCreateApi;
     const { data: contact, error: resendError } = await withTimeout(
@@ -467,7 +473,10 @@ export async function syncContactToResend(
       }
     } else if (contact?.id) {
       resendContactId = contact.id;
-      logInfo('Contact created', { ...logContext, resend_contact_id: resendContactId });
+      logInfo('Contact created', {
+        ...logContext,
+        resend_contact_id: resendContactId,
+      });
 
       // Assign topics based on signup context
       try {
@@ -481,10 +490,10 @@ export async function syncContactToResend(
         if (topicIds.length > 0) {
           type ResendContactsTopicsApi = {
             topics: {
-              update: (args: {
-                contactId: string;
-                topicIds: string[];
-              }) => Promise<{ data: unknown; error: { message?: string } | null }>;
+              update: (args: { contactId: string; topicIds: string[] }) => Promise<{
+                data: unknown;
+                error: { message?: string } | null;
+              }>;
             };
           };
           const contactsWithTopics = resend.contacts as unknown as ResendContactsTopicsApi;
@@ -509,7 +518,7 @@ export async function syncContactToResend(
 
       // Assign to engagement segment
       try {
-        const engagementScore = contactProperties.engagement_score as number;
+        const engagementScore = contactProperties['engagement_score'] as number;
         await withTimeout(
           syncContactSegment(resend, resendContactId, engagementScore),
           TIMEOUT_PRESETS.external,

@@ -84,7 +84,7 @@ export async function handleCreateNotification(req: Request): Promise<Response> 
       source: 'main-app',
     });
     const logContext = createNotificationRouterContext('create-notification', {
-      userId: authResult?.user.id,
+      ...(authResult?.user.id !== undefined ? { userId: authResult.user.id } : {}),
       source: 'main-app',
     });
 

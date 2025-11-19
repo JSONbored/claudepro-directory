@@ -9,7 +9,7 @@ import { type NextRequest, NextResponse } from 'next/server';
 import { VALID_CATEGORIES } from '@/src/lib/data/config/category';
 import { getContentTemplates } from '@/src/lib/data/content/templates';
 import { logger } from '@/src/lib/logger';
-import type { ContentCategory } from '@/src/types/database-overrides';
+import type { Database } from '@/src/types/database.types';
 
 export async function GET(request: NextRequest) {
   try {
@@ -17,7 +17,12 @@ export async function GET(request: NextRequest) {
     const category = searchParams.get('category');
 
     // Validate category
-    if (!(category && VALID_CATEGORIES.includes(category as ContentCategory))) {
+    if (
+      !(
+        category &&
+        VALID_CATEGORIES.includes(category as Database['public']['Enums']['content_category'])
+      )
+    ) {
       return NextResponse.json(
         {
           error: 'Invalid category',
@@ -27,8 +32,8 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Type narrowing: category is validated and guaranteed to be ContentCategory
-    const validCategory = category as ContentCategory;
+    // Type narrowing: category is validated and guaranteed to be content_category
+    const validCategory = category as Database['public']['Enums']['content_category'];
 
     // Fetch templates from data layer
     const templates = await getContentTemplates(validCategory);

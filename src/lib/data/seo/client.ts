@@ -15,7 +15,7 @@ import type { GenerateMetadataCompleteReturn } from '@/src/types/database-overri
 function shouldSkipRpcCall(): boolean {
   // Check if Supabase environment variables are available
   const hasEnvVars =
-    process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    process.env['NEXT_PUBLIC_SUPABASE_URL'] && process.env['NEXT_PUBLIC_SUPABASE_ANON_KEY'];
 
   // During build-time static generation, env vars may not be available
   // Return null to trigger fallback metadata in generatePageMetadata()

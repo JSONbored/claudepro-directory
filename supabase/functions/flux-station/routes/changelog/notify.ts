@@ -217,7 +217,9 @@ async function processChangelogRelease(message: QueueMessage): Promise<{
 
   // 4. Revalidate Next.js pages (non-critical)
   try {
-    await revalidateChangelogPages(changelogEntry.slug, { invalidateTags: true });
+    await revalidateChangelogPages(changelogEntry.slug, {
+      invalidateTags: true,
+    });
     revalidationSuccess = true;
     console.log('[flux-station] Pages revalidated', {
       ...logContext,
@@ -305,7 +307,9 @@ export async function handleChangelogNotify(_req: Request): Promise<Response> {
     const readError = messages === null ? new Error('Failed to read queue messages') : null;
 
     if (readError) {
-      console.error('[flux-station] Queue read error', { error: readError.message });
+      console.error('[flux-station] Queue read error', {
+        error: readError.message,
+      });
       return errorResponse(
         new Error(`Failed to read queue: ${readError.message}`),
         'flux-station:changelog-notify-read'

@@ -191,8 +191,8 @@ export const DATE_CONFIG = {
  */
 export const ANALYTICS_CONFIG = {
   umami: {
-    websiteId: process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID,
-    scriptSrc: process.env.NEXT_PUBLIC_UMAMI_SCRIPT_SRC,
+    websiteId: process.env['NEXT_PUBLIC_UMAMI_WEBSITE_ID'],
+    scriptSrc: process.env['NEXT_PUBLIC_UMAMI_SCRIPT_SRC'],
   },
 } as const;
 

@@ -7,10 +7,10 @@ import { getTimeoutConfig } from '@/src/lib/actions/feature-flags.actions';
 import { AlertTriangle } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { logClientWarning } from '@/src/lib/utils/error.utils';
-import type { ContentCategory } from '@/src/types/database-overrides';
+import type { Database } from '@/src/types/database.types';
 
 interface DuplicateWarningProps {
-  contentType: ContentCategory;
+  contentType: Database['public']['Enums']['content_category'];
   name: string;
 }
 

@@ -1,3 +1,5 @@
+/// <reference path="../_shared/deno-globals.d.ts" />
+
 import { getOnlyCorsHeaders, jsonResponse } from '../_shared/utils/http.ts';
 import { validatePathSegments, validateQueryString } from '../_shared/utils/input-validation.ts';
 import { createDataApiContext, logError, logInfo } from '../_shared/utils/logging.ts';
@@ -9,6 +11,8 @@ import '../_shared/utils/circuit-breaker.ts';
 import '../_shared/utils/timeout.ts';
 import { handleCompanyRoute } from './routes/company.ts';
 import { handleContentRoute } from './routes/content.ts';
+import { handleGeneratePackage } from './routes/content-generate/index.ts';
+import { handlePackageGenerationQueue } from './routes/content-generate/queue-worker.ts';
 import { handleFeedsRoute } from './routes/feeds.ts';
 import { handleSeoRoute } from './routes/seo.ts';
 import { handleSitemapRoute } from './routes/sitemap.ts';
@@ -88,14 +92,52 @@ const router = createRouter<DataApiContext>({
       handler: (ctx) => respondWithAnalytics(ctx, 'root', () => handleDirectoryIndex(ctx)),
     },
     {
-      name: 'content',
-      methods: ['GET', 'HEAD', 'OPTIONS'],
+      name: 'content-generate',
+      methods: ['POST', 'OPTIONS'],
       cors: BASE_CORS,
-      match: (ctx) => ctx.segments[0] === 'content',
+      match: (ctx) => ctx.segments[0] === 'content' && ctx.segments[1] === 'generate-package',
       handler: (ctx) =>
-        respondWithAnalytics(ctx, 'content', async () => {
-          // Rate limiting for content endpoints
-          const rateLimit = checkRateLimit(ctx.request, RATE_LIMIT_PRESETS.public);
+        respondWithAnalytics(ctx, 'content-generate', async () => {
+          // Check if this is the queue worker route
+          if (ctx.segments[2] === 'process') {
+            // Queue worker route: POST /content/generate-package/process
+            // Rate limiting: Moderate preset for queue workers
+            const rateLimit = checkRateLimit(ctx.request, RATE_LIMIT_PRESETS.heavy);
+            if (!rateLimit.allowed) {
+              return jsonResponse(
+                {
+                  error: 'Too Many Requests',
+                  message: 'Rate limit exceeded',
+                  retryAfter: rateLimit.retryAfter,
+                },
+                429,
+                BASE_CORS,
+                {
+                  'Retry-After': String(rateLimit.retryAfter ?? 60),
+                  'X-RateLimit-Limit': String(RATE_LIMIT_PRESETS.heavy.maxRequests),
+                  'X-RateLimit-Remaining': String(rateLimit.remaining),
+                  'X-RateLimit-Reset': String(rateLimit.resetAt),
+                }
+              );
+            }
+
+            const response = await handlePackageGenerationQueue(ctx.request);
+
+            // Add rate limit headers
+            const headers = new Headers(response.headers);
+            headers.set('X-RateLimit-Limit', String(RATE_LIMIT_PRESETS.heavy.maxRequests));
+            headers.set('X-RateLimit-Remaining', String(rateLimit.remaining));
+            headers.set('X-RateLimit-Reset', String(rateLimit.resetAt));
+
+            return new Response(response.body, {
+              status: response.status,
+              headers,
+            });
+          }
+
+          // Manual generation route: POST /content/generate-package
+          // Rate limiting: Heavy preset for package generation (expensive operation)
+          const rateLimit = checkRateLimit(ctx.request, RATE_LIMIT_PRESETS.heavy);
           if (!rateLimit.allowed) {
             return jsonResponse(
               {
@@ -107,7 +149,57 @@ const router = createRouter<DataApiContext>({
               BASE_CORS,
               {
                 'Retry-After': String(rateLimit.retryAfter ?? 60),
-                'X-RateLimit-Limit': String(RATE_LIMIT_PRESETS.public.maxRequests),
+                'X-RateLimit-Limit': String(RATE_LIMIT_PRESETS.heavy.maxRequests),
+                'X-RateLimit-Remaining': String(rateLimit.remaining),
+                'X-RateLimit-Reset': String(rateLimit.resetAt),
+              }
+            );
+          }
+
+          const logContext = createDataApiContext('content-generate', {
+            path: ctx.pathname,
+            method: ctx.method,
+            resource: 'generate-package',
+          });
+
+          const response = await handleGeneratePackage(ctx.request, logContext);
+
+          // Add rate limit headers
+          const headers = new Headers(response.headers);
+          headers.set('X-RateLimit-Limit', String(RATE_LIMIT_PRESETS.heavy.maxRequests));
+          headers.set('X-RateLimit-Remaining', String(rateLimit.remaining));
+          headers.set('X-RateLimit-Reset', String(rateLimit.resetAt));
+
+          return new Response(response.body, {
+            status: response.status,
+            headers,
+          });
+        }),
+    },
+    {
+      name: 'content',
+      methods: ['GET', 'HEAD', 'POST', 'OPTIONS'],
+      cors: BASE_CORS,
+      match: (ctx) => ctx.segments[0] === 'content',
+      handler: (ctx) =>
+        respondWithAnalytics(ctx, 'content', async () => {
+          // Rate limiting for content endpoints
+          // Use heavier preset for POST requests (generation operations)
+          const preset =
+            ctx.method === 'POST' ? RATE_LIMIT_PRESETS.heavy : RATE_LIMIT_PRESETS.public;
+          const rateLimit = checkRateLimit(ctx.request, preset);
+          if (!rateLimit.allowed) {
+            return jsonResponse(
+              {
+                error: 'Too Many Requests',
+                message: 'Rate limit exceeded',
+                retryAfter: rateLimit.retryAfter,
+              },
+              429,
+              BASE_CORS,
+              {
+                'Retry-After': String(rateLimit.retryAfter ?? 60),
+                'X-RateLimit-Limit': String(preset.maxRequests),
                 'X-RateLimit-Remaining': String(rateLimit.remaining),
                 'X-RateLimit-Reset': String(rateLimit.resetAt),
               }
@@ -117,19 +209,22 @@ const router = createRouter<DataApiContext>({
           const logContext = createDataApiContext('content', {
             path: ctx.pathname,
             method: ctx.method,
-            resource: ctx.segments.length > 1 ? ctx.segments[1] : undefined,
+            ...(ctx.segments.length > 1 && ctx.segments[1] !== undefined
+              ? { resource: ctx.segments[1] }
+              : {}),
           });
 
           const response = await handleContentRoute(
             ctx.segments.slice(1),
             ctx.url,
             ctx.method,
+            ctx.request,
             logContext
           );
 
           // Add rate limit headers
           const headers = new Headers(response.headers);
-          headers.set('X-RateLimit-Limit', String(RATE_LIMIT_PRESETS.public.maxRequests));
+          headers.set('X-RateLimit-Limit', String(preset.maxRequests));
           headers.set('X-RateLimit-Remaining', String(rateLimit.remaining));
           headers.set('X-RateLimit-Reset', String(rateLimit.resetAt));
 
@@ -285,19 +380,45 @@ async function handleDirectoryIndex(ctx: DataApiContext): Promise<Response> {
     {
       ok: true,
       resources: [
-        { path: 'content/sitewide', description: 'Sitewide README + LLM exports' },
-        { path: 'content/paginated', description: 'Paginated content listings' },
+        {
+          path: 'content/sitewide',
+          description: 'Sitewide README + LLM exports',
+        },
+        {
+          path: 'content/paginated',
+          description: 'Paginated content listings',
+        },
         { path: 'content/changelog', description: 'Changelog index + entries' },
         {
           path: 'content/:category/:slug',
           description: 'Content exports (JSON/Markdown/LLMs/storage)',
         },
+        {
+          path: 'content/generate-package',
+          description:
+            'Generate package for content (Skills ZIP, MCP .mcpb, etc.) - Internal only (POST)',
+          method: 'POST',
+        },
+        {
+          path: 'content/mcp/:slug?action=generate',
+          description: 'Check if .mcpb package exists for MCP server (POST)',
+          method: 'POST',
+        },
         { path: 'company', description: 'Public company profile' },
         { path: 'seo', description: 'Metadata + schema JSON for any route' },
-        { path: 'feeds', description: 'RSS/Atom feeds for content & changelog' },
-        { path: 'sitemap', description: 'Sitemap XML/JSON + IndexNow submitter' },
+        {
+          path: 'feeds',
+          description: 'RSS/Atom feeds for content & changelog',
+        },
+        {
+          path: 'sitemap',
+          description: 'Sitemap XML/JSON + IndexNow submitter',
+        },
         { path: 'status', description: 'API health check' },
-        { path: 'trending', description: 'Trending/popular/recent content data' },
+        {
+          path: 'trending',
+          description: 'Trending/popular/recent content data',
+        },
       ],
     },
     200,
@@ -305,7 +426,10 @@ async function handleDirectoryIndex(ctx: DataApiContext): Promise<Response> {
   );
 
   if (ctx.originalMethod === 'HEAD') {
-    return new Response(null, { status: response.status, headers: response.headers });
+    return new Response(null, {
+      status: response.status,
+      headers: response.headers,
+    });
   }
 
   return response;
@@ -320,7 +444,9 @@ function respondWithAnalytics(
   const logContext = createDataApiContext(routeName, {
     path: ctx.pathname,
     method: ctx.method,
-    resource: ctx.segments.length > 1 ? ctx.segments[1] : undefined,
+    ...(ctx.segments.length > 1 && ctx.segments[1] !== undefined
+      ? { resource: ctx.segments[1] }
+      : {}),
   });
 
   const logEvent = (status: number, outcome: 'success' | 'error', error?: unknown) => {
@@ -335,13 +461,13 @@ function respondWithAnalytics(
 
     const query = ctx.searchParams.toString();
     if (query) {
-      logData.query = query;
+      logData['query'] = query;
     }
     if (ctx.segments.length > 1) {
-      logData.resource = ctx.segments[1];
+      logData['resource'] = ctx.segments[1];
     }
     if (error) {
-      logData.error = error instanceof Error ? error.message : String(error);
+      logData['error'] = error instanceof Error ? error.message : String(error);
     }
 
     if (outcome === 'success') {

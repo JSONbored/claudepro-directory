@@ -46,7 +46,10 @@ function cleanupOldEntries(): void {
       );
       const toRemove = Math.floor(entries.length * 0.1);
       for (let i = 0; i < toRemove; i++) {
-        requestCounts.delete(entries[i][0]);
+        const entry = entries[i];
+        if (entry) {
+          requestCounts.delete(entry[0]);
+        }
       }
     }
     lastCleanup = now;
@@ -74,7 +77,10 @@ function getIdentifier(request: Request, customIdentifier?: string): string {
   // Try to get IP from various headers (Vercel, Cloudflare, etc.)
   const forwardedFor = request.headers.get('x-forwarded-for');
   if (forwardedFor) {
-    return forwardedFor.split(',')[0].trim();
+    const firstIp = forwardedFor.split(',')[0];
+    if (firstIp) {
+      return firstIp.trim();
+    }
   }
 
   const realIp = request.headers.get('x-real-ip');

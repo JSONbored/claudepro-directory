@@ -43,19 +43,19 @@ await ensureEnvVars([
 ]);
 
 // Properly handle environment variables with type safety
-const dbUrl = process.env.POSTGRES_URL_NON_POOLING;
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const dbUrl = process.env['POSTGRES_URL_NON_POOLING'];
+const supabaseUrl = process.env['NEXT_PUBLIC_SUPABASE_URL'];
+const supabaseKey = process.env['SUPABASE_SERVICE_ROLE_KEY'];
 
 if (!(dbUrl && supabaseUrl && supabaseKey)) {
   throw new Error('Required environment variables are missing after ensureEnvVars');
 }
 
-const r2AccessKey = process.env.R2_ACCESS_KEY_ID;
-const r2SecretKey = process.env.R2_SECRET_ACCESS_KEY;
-const r2Endpoint = process.env.R2_ENDPOINT;
-const r2Bucket = process.env.R2_BUCKET_NAME;
-const heartbeatUrl = process.env.BETTERSTACK_HEARTBEAT_DB_BACKUP;
+const r2AccessKey = process.env['R2_ACCESS_KEY_ID'];
+const r2SecretKey = process.env['R2_SECRET_ACCESS_KEY'];
+const r2Endpoint = process.env['R2_ENDPOINT'];
+const r2Bucket = process.env['R2_BUCKET_NAME'];
+const heartbeatUrl = process.env['BETTERSTACK_HEARTBEAT_DB_BACKUP'];
 
 // Initialize R2 client if credentials available
 let r2Client: S3Client | null = null;

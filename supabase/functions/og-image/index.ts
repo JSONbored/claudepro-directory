@@ -1,3 +1,5 @@
+/// <reference path="../_shared/deno-globals.d.ts" />
+
 /**
  * OG Image Generator Edge Function
  * Generates dynamic Open Graph images for any route using metadata from data-api/seo
@@ -98,7 +100,13 @@ async function fetchMetadataFromRoute(
       }
 
       const data = (await response.json()) as
-        | { metadata?: { title?: string; description?: string; keywords?: string[] } }
+        | {
+            metadata?: {
+              title?: string;
+              description?: string;
+              keywords?: string[];
+            };
+          }
         | { title?: string; description?: string; keywords?: string[] };
 
       // Extract metadata from response
@@ -160,7 +168,11 @@ async function fetchMetadataFromRoute(
             typeof contentData === 'object' &&
             'title' in contentData
           ) {
-            const content = contentData as { title: string; description?: string; tags?: string[] };
+            const content = contentData as {
+              title: string;
+              description?: string;
+              tags?: string[];
+            };
             logInfo('Direct database fallback succeeded', {
               ...logContext,
               source: 'database-rpc',
@@ -209,7 +221,7 @@ function extractTypeFromRoute(route: string): string {
     return 'website';
   }
   const match = route.match(/^\/([^/]+)/);
-  return match ? match[1] : 'agents';
+  return match?.[1] ?? 'agents';
 }
 
 /**
@@ -278,7 +290,14 @@ function generateOGImage(params: OGImageParams): Response {
       },
       React.createElement(
         'div',
-        { style: { display: 'flex', flexDirection: 'column', gap: '24px', width: '100%' } },
+        {
+          style: {
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '24px',
+            width: '100%',
+          },
+        },
         // Category badge - pill style (not rounded rectangle)
         React.createElement(
           'div',
@@ -336,7 +355,14 @@ function generateOGImage(params: OGImageParams): Response {
         tags.length > 0 &&
           React.createElement(
             'div',
-            { style: { display: 'flex', flexWrap: 'wrap', gap: '10px', marginTop: '8px' } },
+            {
+              style: {
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: '10px',
+                marginTop: '8px',
+              },
+            },
             ...tags.slice(0, 5).map((tag) =>
               React.createElement(
                 'div',
@@ -525,10 +551,10 @@ function respondWithAnalytics(
 
     const query = ctx.url.searchParams.toString();
     if (query) {
-      logData.query = query;
+      logData['query'] = query;
     }
     if (error) {
-      logData.error = error instanceof Error ? error.message : String(error);
+      logData['error'] = error instanceof Error ? error.message : String(error);
     }
 
     if (outcome === 'success') {

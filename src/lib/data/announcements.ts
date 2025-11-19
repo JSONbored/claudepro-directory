@@ -1,7 +1,7 @@
 'use server';
 
 import { fetchCachedRpc } from '@/src/lib/data/helpers';
-import type { Tables } from '@/src/types/database-overrides';
+import type { Tables } from '@/src/types/database.types';
 
 export async function getActiveAnnouncement(): Promise<Tables<'announcements'> | null> {
   return fetchCachedRpc<'get_active_announcement', Tables<'announcements'> | null>(

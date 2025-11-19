@@ -11,9 +11,9 @@ import { getNewsletterConfig } from '@/src/lib/actions/feature-flags.actions';
 import { logger } from '@/src/lib/logger';
 import { logClientWarning } from '@/src/lib/utils/error.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
-import type { NewsletterSource } from '@/src/types/database-overrides';
+import type { Database } from '@/src/types/database.types';
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const SUPABASE_URL = process.env['NEXT_PUBLIC_SUPABASE_URL'];
 
 // Retry configuration (loaded from Statsig via server action)
 let MAX_RETRIES = 3;
@@ -61,7 +61,7 @@ async function fetchWithRetry(
 }
 
 export interface UseNewsletterOptions {
-  source: NewsletterSource;
+  source: Database['public']['Enums']['newsletter_source'];
   onSuccess?: () => void;
   onError?: (error: string) => void;
   successMessage?: string;

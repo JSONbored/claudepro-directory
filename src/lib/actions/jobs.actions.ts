@@ -12,14 +12,54 @@ import { authedAction } from '@/src/lib/actions/safe-action';
 import type { CacheInvalidateKey } from '@/src/lib/data/config/cache-config';
 import { logger } from '@/src/lib/logger';
 import { logActionFailure } from '@/src/lib/utils/error.utils';
-import {
-  JOBCATEGORY_VALUES as JOB_CATEGORY_VALUES,
-  JOB_STATUS_VALUES,
-  type JobCategory,
-  type JobStatus,
-  WORKPLACE_TYPE_VALUES,
-  type WorkplaceType,
-} from '@/src/types/database-overrides';
+import type { Database } from '@/src/types/database.types';
+
+// Create const arrays for Zod enum validation
+const JOB_STATUS_VALUES = [
+  'draft',
+  'pending_payment',
+  'pending_review',
+  'active',
+  'expired',
+  'rejected',
+  'deleted',
+] as const satisfies readonly Database['public']['Enums']['job_status'][];
+
+const WORKPLACE_TYPE_VALUES = [
+  'Remote',
+  'On site',
+  'Hybrid',
+] as const satisfies readonly Database['public']['Enums']['workplace_type'][];
+
+const EXPERIENCE_LEVEL_VALUES = [
+  'beginner',
+  'intermediate',
+  'advanced',
+] as const satisfies readonly Database['public']['Enums']['experience_level'][];
+
+const JOB_CATEGORY_VALUES = [
+  'engineering',
+  'design',
+  'product',
+  'marketing',
+  'sales',
+  'support',
+  'research',
+  'data',
+  'operations',
+  'leadership',
+  'consulting',
+  'education',
+  'other',
+] as const satisfies readonly Database['public']['Enums']['job_category'][];
+
+const JOB_TYPE_VALUES = [
+  'full-time',
+  'part-time',
+  'contract',
+  'freelance',
+  'internship',
+] as const satisfies readonly Database['public']['Enums']['job_type'][];
 
 // UUID validation helper
 const uuidRefine = (val: string | null | undefined) => {
@@ -69,13 +109,28 @@ const createJobSchema = z.object({
   location: z.string().optional().nullable(),
   salary: z.string().optional().nullable(),
   remote: z.boolean().optional(),
-  type: z.string(),
+  type: z.enum([...JOB_TYPE_VALUES] as [
+    Database['public']['Enums']['job_type'],
+    ...Database['public']['Enums']['job_type'][],
+  ]),
   workplace: z
-    .enum([...WORKPLACE_TYPE_VALUES] as [WorkplaceType, ...WorkplaceType[]])
+    .enum([...WORKPLACE_TYPE_VALUES] as [
+      Database['public']['Enums']['workplace_type'],
+      ...Database['public']['Enums']['workplace_type'][],
+    ])
     .optional()
     .nullable(),
-  experience: z.string().optional().nullable(),
-  category: z.enum([...JOB_CATEGORY_VALUES] as [JobCategory, ...JobCategory[]]),
+  experience: z
+    .enum([...EXPERIENCE_LEVEL_VALUES] as [
+      Database['public']['Enums']['experience_level'],
+      ...Database['public']['Enums']['experience_level'][],
+    ])
+    .optional()
+    .nullable(),
+  category: z.enum([...JOB_CATEGORY_VALUES] as [
+    Database['public']['Enums']['job_category'],
+    ...Database['public']['Enums']['job_category'][],
+  ]),
   tags: z.array(z.string()),
   requirements: z.array(z.string()),
   benefits: z.array(z.string()),
@@ -107,10 +162,26 @@ const updateJobSchema = z.object({
   location: z.string().optional().nullable(),
   salary: z.string().optional().nullable(),
   remote: z.boolean().optional(),
-  type: z.string().optional(),
+  type: z
+    .enum([...JOB_TYPE_VALUES] as [
+      Database['public']['Enums']['job_type'],
+      ...Database['public']['Enums']['job_type'][],
+    ])
+    .optional(),
   workplace: z.string().optional().nullable(),
-  experience: z.string().optional().nullable(),
-  category: z.enum([...JOB_CATEGORY_VALUES] as [JobCategory, ...JobCategory[]]).optional(),
+  experience: z
+    .enum([...EXPERIENCE_LEVEL_VALUES] as [
+      Database['public']['Enums']['experience_level'],
+      ...Database['public']['Enums']['experience_level'][],
+    ])
+    .optional()
+    .nullable(),
+  category: z
+    .enum([...JOB_CATEGORY_VALUES] as [
+      Database['public']['Enums']['job_category'],
+      ...Database['public']['Enums']['job_category'][],
+    ])
+    .optional(),
   tags: z.array(z.string()).optional(),
   requirements: z.array(z.string()).optional(),
   benefits: z.array(z.string()).optional(),
@@ -137,7 +208,10 @@ const deleteJobSchema = z.object({
 
 const toggleJobStatusSchema = z.object({
   job_id: z.string().refine(uuidRefine, { message: 'Invalid UUID format' }),
-  new_status: z.enum([...JOB_STATUS_VALUES] as [JobStatus, ...JobStatus[]]),
+  new_status: z.enum([...JOB_STATUS_VALUES] as [
+    Database['public']['Enums']['job_status'],
+    ...Database['public']['Enums']['job_status'][],
+  ]),
 });
 
 async function invalidateJobCaches(options: {
@@ -220,7 +294,7 @@ export const createJob = authedAction
               jobId: result.job_id,
               userId: ctx.userId,
               customerEmail: ctx.userEmail || '',
-              successUrl: `${process.env.NEXT_PUBLIC_BASE_URL}/account/jobs?payment=success&job_id=${result.job_id}`,
+              successUrl: `${process.env['NEXT_PUBLIC_BASE_URL']}/account/jobs?payment=success&job_id=${result.job_id}`,
             });
 
             if ('error' in checkoutResult) {
@@ -422,8 +496,8 @@ export const toggleJobStatus = authedAction
     try {
       type ToggleJobStatusRpcResult = {
         success: boolean;
-        old_status: JobStatus;
-        new_status: JobStatus;
+        old_status: Database['public']['Enums']['job_status'];
+        new_status: Database['public']['Enums']['job_status'];
       };
 
       const result = await runRpc<ToggleJobStatusRpcResult>(

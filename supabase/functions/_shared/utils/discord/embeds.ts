@@ -70,7 +70,7 @@ export function buildContentEmbed(content: ContentRow) {
     date_added,
   } = content;
 
-  const color = CATEGORY_COLORS[category] || CATEGORY_COLORS.agents;
+  const color = CATEGORY_COLORS[category] || CATEGORY_COLORS['agents'];
   const contentUrl = `${SITE_URL}/${category}/${slug}`;
   const contentTitle = display_title || title;
   const authorField = author_profile_url ? `[${author}](${author_profile_url})` : author;
@@ -84,7 +84,7 @@ export function buildContentEmbed(content: ContentRow) {
     description.length > 200 ? `${description.slice(0, 200)}...` : description;
 
   return {
-    title: `${CATEGORY_EMOJIS[category] || '📄'} ${contentTitle}`,
+    title: `${CATEGORY_EMOJIS[category] ?? '📄'} ${contentTitle}`,
     description: truncatedDescription,
     color,
     url: contentUrl,
@@ -131,7 +131,7 @@ export function buildSubmissionEmbed(submission: SubmissionRow) {
     author_profile_url && author ? `[${author}](${author_profile_url})` : safeAuthor;
   const safeCreatedAt = created_at ? new Date(created_at).toISOString() : new Date().toISOString();
 
-  const color = CATEGORY_COLORS[safeCategory] || CATEGORY_COLORS.agents;
+  const color = CATEGORY_COLORS[safeCategory] || CATEGORY_COLORS['agents'];
   const dashboardUrl = `https://supabase.com/dashboard/project/${SUPABASE_PROJECT_ID}/editor/${encodeURIComponent(
     'content_submissions'
   )}?filter=id%3Aeq%3A${safeId}`;
@@ -143,7 +143,11 @@ export function buildSubmissionEmbed(submission: SubmissionRow) {
   ];
 
   if (github_url) {
-    fields.push({ name: '🔗 GitHub', value: `[View Repository](${github_url})`, inline: false });
+    fields.push({
+      name: '🔗 GitHub',
+      value: `[View Repository](${github_url})`,
+      inline: false,
+    });
   }
 
   if (tags && Array.isArray(tags) && tags.length > 0) {
@@ -155,7 +159,11 @@ export function buildSubmissionEmbed(submission: SubmissionRow) {
   }
 
   if (submitter_email) {
-    fields.push({ name: '📧 Submitted by', value: submitter_email, inline: false });
+    fields.push({
+      name: '📧 Submitted by',
+      value: submitter_email,
+      inline: false,
+    });
   }
 
   fields.push({
@@ -215,9 +223,12 @@ export function buildChangelogEmbed(params: {
     ),
   ];
 
-  const addedCount = sections.find((s) => s.title === 'Added')?.items.length || 0;
-  const changedCount = sections.find((s) => s.title === 'Changed')?.items.length || 0;
-  const fixedCount = sections.find((s) => s.title === 'Fixed')?.items.length || 0;
+  const addedSection = sections.find((s) => s.title === 'Added');
+  const changedSection = sections.find((s) => s.title === 'Changed');
+  const fixedSection = sections.find((s) => s.title === 'Fixed');
+  const addedCount = addedSection?.['items']?.length || 0;
+  const changedCount = changedSection?.['items']?.length || 0;
+  const fixedCount = fixedSection?.['items']?.length || 0;
 
   const highlights: string[] = [];
   if (addedCount > 0)
@@ -282,16 +293,17 @@ function addSectionField(
   fieldLabel: string
 ) {
   const section = sections.find((s) => s.title === sectionTitle);
-  if (!section || section.items.length === 0) return;
+  if (!section?.['items'] || section['items'].length === 0) return;
 
-  const items = section.items.slice(0, 5);
+  const items = section['items'].slice(0, 5);
   const value = items
     .map((item) => `• ${item.slice(0, 80)}${item.length > 80 ? '...' : ''}`)
     .join('\n');
 
   fields.push({
     name: fieldLabel,
-    value: value + (section.items.length > 5 ? `\n*...and ${section.items.length - 5} more*` : ''),
+    value:
+      value + (section['items'].length > 5 ? `\n*...and ${section['items'].length - 5} more*` : ''),
     inline: false,
   });
 }

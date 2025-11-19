@@ -18,11 +18,12 @@ import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { formatDistanceToNow } from '@/src/lib/utils/data.utils';
 import { logClientWarning, logUnhandledPromise } from '@/src/lib/utils/error.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
+import type { Database } from '@/src/types/database.types';
 import type {
-  ContentCategory,
   GetGetReviewsWithStatsReturn,
   ReviewsAggregateRating,
 } from '@/src/types/database-overrides';
+
 import { ReviewRatingHistogram } from './review-rating-histogram';
 import { StarDisplay } from './shared/star-display';
 
@@ -243,7 +244,7 @@ function ReviewCardItem({
 }: {
   review: NonNullable<GetGetReviewsWithStatsReturn>['reviews'][number];
   currentUserId?: string;
-  contentType: ContentCategory;
+  contentType: Database['public']['Enums']['content_category'];
   contentSlug: string;
   onEdit?: () => void;
   onDelete?: () => void;

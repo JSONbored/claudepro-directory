@@ -13,13 +13,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primi
 import { Separator } from '@/src/components/primitives/ui/separator';
 import { getQuizConfiguration } from '@/src/lib/actions/quiz.actions';
 import { generateConfigRecommendations } from '@/src/lib/edge/client';
-import type {
-  ExperienceLevel,
-  FocusAreaType,
-  GetGetQuizConfigurationReturn,
-  IntegrationType,
-  UseCaseType,
-} from '@/src/types/database-overrides';
+import type { Database } from '@/src/types/database.types';
+import type { GetGetQuizConfigurationReturn } from '@/src/types/database-overrides';
 import {
   EXPERIENCE_LEVEL_VALUES,
   FOCUS_AREA_TYPE_VALUES,
@@ -73,14 +68,30 @@ import { QuizProgress } from './quiz-progress';
 
 // Manual Zod schema (database validates via RPC function)
 const quizAnswersSchema = z.object({
-  useCase: z.enum([...USE_CASE_TYPE_VALUES] as [UseCaseType, ...UseCaseType[]]),
-  experienceLevel: z.enum([...EXPERIENCE_LEVEL_VALUES] as [ExperienceLevel, ...ExperienceLevel[]]),
+  useCase: z.enum([...USE_CASE_TYPE_VALUES] as [
+    Database['public']['Enums']['use_case_type'],
+    ...Database['public']['Enums']['use_case_type'][],
+  ]),
+  experienceLevel: z.enum([...EXPERIENCE_LEVEL_VALUES] as [
+    Database['public']['Enums']['experience_level'],
+    ...Database['public']['Enums']['experience_level'][],
+  ]),
   toolPreferences: z.array(z.string()).min(1).max(5),
   p_integrations: z
-    .array(z.enum([...INTEGRATION_TYPE_VALUES] as [IntegrationType, ...IntegrationType[]]))
+    .array(
+      z.enum([...INTEGRATION_TYPE_VALUES] as [
+        Database['public']['Enums']['integration_type'],
+        ...Database['public']['Enums']['integration_type'][],
+      ])
+    )
     .optional(),
   p_focus_areas: z
-    .array(z.enum([...FOCUS_AREA_TYPE_VALUES] as [FocusAreaType, ...FocusAreaType[]]))
+    .array(
+      z.enum([...FOCUS_AREA_TYPE_VALUES] as [
+        Database['public']['Enums']['focus_area_type'],
+        ...Database['public']['Enums']['focus_area_type'][],
+      ])
+    )
     .optional(),
   teamSize: z.string().optional(),
   timestamp: z.string().datetime().optional(),

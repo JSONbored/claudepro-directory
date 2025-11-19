@@ -30,7 +30,7 @@ import {
   type SharePlatform,
 } from '@/src/lib/utils/share.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
-import type { ContentCategory } from '@/src/types/database-overrides';
+import type { Database } from '@/src/types/database.types';
 
 const CLIPBOARD_RESET_DEFAULT_MS = 2000;
 
@@ -197,7 +197,7 @@ export function ProductionCodeBlock({
         pathname,
         fallback: 'agents',
       });
-      return { category: 'agents' as ContentCategory, slug };
+      return { category: 'agents' as Database['public']['Enums']['content_category'], slug };
     }
 
     return { category: rawCategory, slug };

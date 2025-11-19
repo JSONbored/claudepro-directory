@@ -10,8 +10,6 @@ import {
 import { logger } from '@/src/lib/logger';
 import type {
   FieldDefinition,
-  GridColumn,
-  IconPosition,
   NumberFieldDefinition,
   SelectFieldDefinition,
   SubmissionContentType,
@@ -21,21 +19,38 @@ import type {
   TextFieldDefinition,
 } from '@/src/lib/types/component.types';
 import { SUBMISSION_CONTENT_TYPES } from '@/src/lib/types/component.types';
+import type { Database } from '@/src/types/database.types';
 import type { GetGetFormFieldsForContentTypeReturn } from '@/src/types/database-overrides';
-import {
-  FIELD_SCOPE_VALUES,
-  FIELD_TYPE_VALUES,
-  type FieldScope,
-  type FieldType,
-} from '@/src/types/database-overrides';
+
+const FIELD_SCOPE_VALUES = [
+  'common',
+  'type_specific',
+  'tags',
+] as const satisfies readonly Database['public']['Enums']['field_scope'][];
+
+const FIELD_TYPE_VALUES = [
+  'text',
+  'textarea',
+  'number',
+  'select',
+] as const satisfies readonly Database['public']['Enums']['field_type'][];
+
+const GRID_COLUMN_VALUES = [
+  'full',
+  'half',
+  'third',
+  'two-thirds',
+] as const satisfies readonly Database['public']['Enums']['grid_column'][];
+
+const ICON_POSITION_VALUES = [
+  'left',
+  'right',
+] as const satisfies readonly Database['public']['Enums']['icon_position'][];
 
 type RpcRow = GetGetFormFieldsForContentTypeReturn[number];
 type RpcRows = GetGetFormFieldsForContentTypeReturn;
 
 type FieldProperties = Record<string, unknown>;
-
-const ICON_POSITION_VALUES: readonly IconPosition[] = ['left', 'right'] as const;
-const GRID_COLUMN_VALUES: readonly GridColumn[] = ['full', 'half', 'third', 'two-thirds'] as const;
 
 function parseProperties(properties: RpcRow['field_properties']): FieldProperties {
   if (!properties || typeof properties !== 'object' || Array.isArray(properties)) {
@@ -81,16 +96,21 @@ function getBooleanProperty(props: FieldProperties, keys: string[]): boolean | u
   return undefined;
 }
 
-function mapGridColumn(value: RpcRow['grid_column']): GridColumn {
-  if (value && GRID_COLUMN_VALUES.includes(value as GridColumn)) {
-    return value as GridColumn;
+function mapGridColumn(value: RpcRow['grid_column']): Database['public']['Enums']['grid_column'] {
+  if (value && GRID_COLUMN_VALUES.includes(value as Database['public']['Enums']['grid_column'])) {
+    return value as Database['public']['Enums']['grid_column'];
   }
   return 'full';
 }
 
-function mapIconPosition(value: RpcRow['icon_position']): IconPosition | undefined {
-  if (value && ICON_POSITION_VALUES.includes(value as IconPosition)) {
-    return value as IconPosition;
+function mapIconPosition(
+  value: RpcRow['icon_position']
+): Database['public']['Enums']['icon_position'] | undefined {
+  if (
+    value &&
+    ICON_POSITION_VALUES.includes(value as Database['public']['Enums']['icon_position'])
+  ) {
+    return value as Database['public']['Enums']['icon_position'];
   }
   return undefined;
 }
@@ -110,9 +130,9 @@ function mapSelectOptions(selectOptions: unknown) {
 
 function mapField(row: RpcRow): FieldDefinition | null {
   const props = parseProperties(row.field_properties);
-  const placeholder = props.placeholder as string | undefined;
-  const required = props.required as boolean | undefined;
-  const selectOptions = props.select_options as unknown;
+  const placeholder = props['placeholder'] as string | undefined;
+  const required = props['required'] as boolean | undefined;
+  const selectOptions = props['select_options'] as unknown;
   const base = {
     name: row.field_name,
     label: row.label,
@@ -124,7 +144,7 @@ function mapField(row: RpcRow): FieldDefinition | null {
     iconPosition: mapIconPosition(row.icon_position),
   };
 
-  switch (row.field_type as FieldType) {
+  switch (row.field_type as Database['public']['Enums']['field_type']) {
     case FIELD_TYPE_VALUES[0]: // 'text'
       return {
         ...base,
@@ -216,7 +236,7 @@ async function fetchFieldsForContentType(
       continue;
     }
 
-    switch (row.field_scope as FieldScope) {
+    switch (row.field_scope as Database['public']['Enums']['field_scope']) {
       case FIELD_SCOPE_VALUES[0]: // 'common'
         section.common.push(field);
         break;

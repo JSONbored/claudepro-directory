@@ -30,6 +30,7 @@
     "build:analyze": "TURBOPACK_STATS=1 next build --turbopack",
     "build:skills": "turbo run build:skills:exec",
     "build:skills:exec": "tsx scripts/build/generate-skill-packages.ts",
+    "build:mcpb": "tsx scripts/build/generate-mcpb-packages.ts",
     "generate:categories": "turbo run generate:categories:exec",
     "generate:categories:exec": "tsx scripts/build/generate-category-config.ts",
     "generate:service-worker": "turbo run generate:service-worker:exec",
@@ -38,7 +39,6 @@
     "sync:db": "tsx scripts/build/sync-database-schema.ts --skip-dump",
     "sync:db:full": "tsx scripts/build/sync-database-schema.ts",
     "sync:db:types": "tsx scripts/build/sync-database-schema.ts --only-types",
-    "generate:db-overrides": "tsx scripts/build/generate-database-overrides.ts",
     "edge:types": "tsx scripts/build/generate-edge-types.ts",
     "backup:db": "tsx scripts/build/backup-database.ts",
     "cache:info": "tsx scripts/utils/build-cache-cli.ts info",
@@ -49,7 +49,7 @@
     "indexnow:submit": "tsx scripts/utilities/submit-indexnow.ts",
     "start": "next start",
     "type-check": "tsc --noEmit",
-    "type-check:edge": "cd supabase/functions && deno check '**/*.ts'",
+    "type-check:edge": "cd supabase/functions && deno check --config deno.json '**/*.ts' '**/*.tsx'",
     "lint:edge": "cd supabase/functions && deno lint",
     "lint:edge:fix": "cd supabase/functions && deno lint --fix",
     "type-check:unused": "ts-prune",
@@ -129,6 +129,7 @@
     "zustand": "^5.0.8"
   },
   "devDependencies": {
+    "@anthropic-ai/mcpb": "^2.0.1",
     "@aws-sdk/client-s3": "^3.933.0",
     "@biomejs/biome": "2.3.5",
     "@next/bundle-analyzer": "16.0.3",

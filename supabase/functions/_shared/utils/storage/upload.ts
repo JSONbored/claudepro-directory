@@ -83,18 +83,35 @@ export async function uploadObject({
   client = getStorageServiceClient(),
   validationPolicy,
 }: UploadObjectOptions): Promise<StorageUploadResult> {
+  const mimeExtension = mimeType.split('/')[1];
+  if (!mimeExtension) {
+    throw new Error(`Invalid MIME type: ${mimeType}`);
+  }
   const targetPath =
     objectPath ??
     buildStorageObjectPath({
-      extension: mimeType.split('/')[1],
-      ...pathOptions,
+      extension: mimeExtension,
+      ...(pathOptions
+        ? {
+            ...(pathOptions.prefix !== undefined ? { prefix: pathOptions.prefix } : {}),
+            ...(pathOptions.userId !== undefined ? { userId: pathOptions.userId } : {}),
+            ...(pathOptions.fileName !== undefined ? { fileName: pathOptions.fileName } : {}),
+            ...(pathOptions.includeTimestamp !== undefined
+              ? { includeTimestamp: pathOptions.includeTimestamp }
+              : {}),
+            ...(pathOptions.sanitize !== undefined ? { sanitize: pathOptions.sanitize } : {}),
+          }
+        : {}),
     });
 
   try {
     if (validationPolicy) {
       const validation = validateBufferAgainstPolicy(buffer, mimeType, validationPolicy);
       if (!validation.valid) {
-        return { success: false, error: validation.error };
+        return {
+          success: false,
+          error: validation['error'] ?? 'Validation failed',
+        };
       }
     }
 
@@ -105,7 +122,10 @@ export async function uploadObject({
     });
 
     if (error) {
-      const logContext = createUtilityContext('storage-upload', 'upload', { bucket, targetPath });
+      const logContext = createUtilityContext('storage-upload', 'upload', {
+        bucket,
+        targetPath,
+      });
       console.error('[Storage] Upload failed', {
         ...logContext,
         error: error.message,
@@ -121,7 +141,10 @@ export async function uploadObject({
       publicUrl,
     };
   } catch (error) {
-    const logContext = createUtilityContext('storage-upload', 'upload', { bucket, targetPath });
+    const logContext = createUtilityContext('storage-upload', 'upload', {
+      bucket,
+      targetPath,
+    });
     console.error('[Storage] Upload error', {
       ...logContext,
       error: error instanceof Error ? error.message : 'Unknown storage upload error',
@@ -150,7 +173,7 @@ export async function uploadImage(
     pathOptions: {
       prefix: userId,
       fileName: fileName ?? 'upload',
-      extension: mimeType.split('/')[1],
+      extension: mimeType.split('/')[1] ?? 'bin',
     },
   });
 }

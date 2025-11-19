@@ -1,12 +1,39 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
-  "extends": "./config/build/tsconfig.json",
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
       "@/*": ["./*"],
       "@/src/*": ["./src/*"]
     },
+    "target": "ES2022",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "strictBindCallApply": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "exactOptionalPropertyTypes": true,
+    "noUncheckedIndexedAccess": true,
+    "noFallthroughCasesInSwitch": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noImplicitOverride": true,
+    "allowUnusedLabels": false,
+    "allowUnreachableCode": false,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "verbatimModuleSyntax": true,
+    "jsx": "preserve",
+    "incremental": true,
+    "tsBuildInfoFile": ".next/cache/.tsbuildinfo",
     "plugins": [
       {
         "name": "next"
@@ -14,10 +41,9 @@
     ]
   },
   "include": [
-    "config/build/../../src/**/*.ts",
-    "config/build/../../src/**/*.tsx",
-    "config/build/../../src/types/**/*.d.ts",
-    "config/build/../../.next/types/**/*.ts",
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "src/types/**/*.d.ts",
     ".next/types/**/*.ts",
     "scripts/**/*.ts"
   ],

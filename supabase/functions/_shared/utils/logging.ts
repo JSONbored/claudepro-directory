@@ -59,8 +59,8 @@ export function createSearchContext(options?: {
     action: options?.searchType ?? 'search',
     request_id: crypto.randomUUID(),
     started_at: new Date().toISOString(),
-    ...(options?.query && { query: options.query }),
-    ...(options?.filters && { filters: options.filters }),
+    ...(options?.query !== undefined ? { query: options.query } : {}),
+    ...(options?.filters !== undefined ? { filters: options.filters } : {}),
   };
 }
 
@@ -238,7 +238,7 @@ export function logError(message: string, logContext: BaseLogContext, error?: un
   };
 
   if (error) {
-    errorData.error = error instanceof Error ? error.message : String(error);
+    errorData['error'] = error instanceof Error ? error.message : String(error);
   }
 
   console.error(`[${logContext.function}] ${message}`, errorData);

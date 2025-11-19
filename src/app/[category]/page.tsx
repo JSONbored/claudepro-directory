@@ -41,15 +41,12 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { ContentListServer } from '@/src/components/content/content-grid-list';
-import {
-  type ContentCategory,
-  getCategoryConfig,
-  isValidCategory,
-} from '@/src/lib/data/config/category';
+import { getCategoryConfig, isValidCategory } from '@/src/lib/data/config/category';
 import { getContentByCategory } from '@/src/lib/data/content';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { normalizeError } from '@/src/lib/utils/error.utils';
+import type { Database } from '@/src/types/database.types';
 
 // Feature flags are server/middleware only - mark as dynamic to prevent static generation
 // This prevents flags.ts from being analyzed during build
@@ -135,7 +132,9 @@ export async function generateMetadata({
 
   let categoryConfig: Awaited<ReturnType<typeof getCategoryConfig>> | null = null;
   try {
-    categoryConfig = await getCategoryConfig(category as ContentCategory);
+    categoryConfig = await getCategoryConfig(
+      category as Database['public']['Enums']['content_category']
+    );
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load category config for metadata');
     logger.error('CategoryPage: category config lookup failed in metadata', normalized, {
@@ -181,7 +180,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
 
   let config: Awaited<ReturnType<typeof getCategoryConfig>> | null = null;
   try {
-    config = await getCategoryConfig(category as ContentCategory);
+    config = await getCategoryConfig(category as Database['public']['Enums']['content_category']);
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load category config for page render');
     logger.error('CategoryPage: getCategoryConfig threw', normalized, { category });

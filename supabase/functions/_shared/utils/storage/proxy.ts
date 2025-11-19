@@ -49,7 +49,10 @@ export async function proxyStorageFile(options: StorageProxyOptions): Promise<Re
     const detectedContentType = contentType ?? detectContentType(path);
     const resolvedFileName = fileName ?? path.split('/').pop() ?? 'download';
 
-    const logContext = createUtilityContext('storage-proxy', 'download', { bucket, path });
+    const logContext = createUtilityContext('storage-proxy', 'download', {
+      bucket,
+      path,
+    });
     console.log('[Storage] Proxy download', {
       ...logContext,
       size: data.size,
@@ -70,7 +73,10 @@ export async function proxyStorageFile(options: StorageProxyOptions): Promise<Re
       }),
     });
   } catch (error) {
-    const logContext = createUtilityContext('storage-proxy', 'download', { bucket, path });
+    const logContext = createUtilityContext('storage-proxy', 'download', {
+      bucket,
+      path,
+    });
     console.error('[Storage] Proxy error', {
       ...logContext,
       error: error instanceof Error ? error.message : String(error),

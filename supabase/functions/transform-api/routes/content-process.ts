@@ -419,10 +419,12 @@ export async function handleContentProcess(
       const generatedFilename = generateFilename({
         item: validItem,
         language: detectedLanguage,
-        format,
-        section,
+        ...(format !== undefined ? { format } : {}),
+        ...(section !== undefined ? { section } : {}),
       });
-      const highlightedHtml = highlightCode(codeString, detectedLanguage, { showLineNumbers });
+      const highlightedHtml = highlightCode(codeString, detectedLanguage, {
+        showLineNumbers,
+      });
 
       result = {
         html: highlightedHtml,
@@ -446,8 +448,8 @@ export async function handleContentProcess(
         generatedFilename = generateFilename({
           item: validItem,
           language: language || 'json',
-          format,
-          section,
+          ...(format !== undefined ? { format } : {}),
+          ...(section !== undefined ? { section } : {}),
         });
       }
 
@@ -462,7 +464,9 @@ export async function handleContentProcess(
 
       // Highlight only (for backward compatibility)
       const highlightLanguage = language || 'javascript';
-      const highlightedHtml = highlightCode(codeString, highlightLanguage, { showLineNumbers });
+      const highlightedHtml = highlightCode(codeString, highlightLanguage, {
+        showLineNumbers,
+      });
 
       result = {
         html: highlightedHtml,

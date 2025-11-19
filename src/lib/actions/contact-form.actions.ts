@@ -11,7 +11,15 @@ import { invalidateByKeys, runRpc } from '@/src/lib/actions/action-helpers';
 import { logger } from '@/src/lib/logger';
 import { env } from '@/src/lib/schemas/env.schema';
 import { logActionFailure } from '@/src/lib/utils/error.utils';
-import { CONTACT_CATEGORY_VALUES, type ContactCategory } from '@/src/types/database-overrides';
+import type { Database } from '@/src/types/database.types';
+
+const CONTACT_CATEGORY_VALUES = [
+  'bug',
+  'feature',
+  'partnership',
+  'general',
+  'other',
+] as const satisfies readonly Database['public']['Enums']['contact_category'][];
 
 // Email validation helper
 const emailRefine = (val: string) => {
@@ -33,7 +41,10 @@ const emailRefine = (val: string) => {
 const contactFormSchema = z.object({
   name: z.string().min(1).max(255),
   email: z.string().refine(emailRefine, { message: 'Invalid email address' }),
-  category: z.enum([...CONTACT_CATEGORY_VALUES] as [ContactCategory, ...ContactCategory[]]),
+  category: z.enum([...CONTACT_CATEGORY_VALUES] as [
+    Database['public']['Enums']['contact_category'],
+    ...Database['public']['Enums']['contact_category'][],
+  ]),
   message: z.string().min(10).max(5000),
   metadata: z.record(z.string(), z.unknown()).optional(),
 });

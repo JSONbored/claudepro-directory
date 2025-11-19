@@ -1,7 +1,7 @@
-import { randomUUID } from 'node:crypto';
 import { supabaseServiceRole } from '../clients/supabase.ts';
-import type { Database as DatabaseGenerated } from '../database.types.ts';
-import type { NotificationPriority, NotificationType, Tables } from '../database-overrides.ts';
+import type { Database, Database as DatabaseGenerated } from '../database.types.ts';
+import type { Tables } from '../database-overrides.ts';
+
 import {
   callRpc,
   insertTable,
@@ -20,8 +20,8 @@ export interface NotificationInsertPayload {
   id?: string;
   title: string;
   message: string;
-  priority?: NotificationPriority;
-  type?: NotificationType;
+  priority?: Database['public']['Enums']['notification_priority'];
+  type?: Database['public']['Enums']['notification_type'];
   action_label?: string | null;
   action_href?: string | null;
   action_onclick?: string | null;
@@ -104,7 +104,7 @@ export async function insertNotification(
 
   // Invalidate cache after successful insert
   await invalidateCacheByKey('cache.invalidate.notifications', ['notifications'], {
-    logContext,
+    ...(logContext !== undefined ? { logContext } : {}),
   }).catch((cacheError) => {
     console.warn('[notifications] Cache invalidation failed', {
       ...(logContext || {}),
@@ -155,7 +155,7 @@ export async function dismissNotificationsForUser(
 
   // Invalidate cache after successful dismiss
   await invalidateCacheByKey('cache.invalidate.notifications', ['notifications'], {
-    logContext,
+    ...(logContext !== undefined ? { logContext } : {}),
   }).catch((cacheError) => {
     console.warn('[notifications] Cache invalidation failed', {
       ...(logContext || {}),
@@ -172,7 +172,7 @@ export async function dismissNotificationsForUser(
 
 export function createNotificationTrace(fields?: Record<string, unknown>) {
   return {
-    traceId: randomUUID(),
+    traceId: crypto.randomUUID(),
     ...(fields ?? {}),
   };
 }

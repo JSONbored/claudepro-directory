@@ -1,9 +1,22 @@
 import type { Database as DatabaseGenerated } from '../../_shared/database.types.ts';
-import {
-  CONTENT_CATEGORY_VALUES,
-  type ContentCategory,
-  callRpc,
-} from '../../_shared/database-overrides.ts';
+import { callRpc } from '../../_shared/database-overrides.ts';
+
+type ContentCategory = DatabaseGenerated['public']['Enums']['content_category'];
+
+const CONTENT_CATEGORY_VALUES = [
+  'agents',
+  'mcp',
+  'rules',
+  'commands',
+  'hooks',
+  'statuslines',
+  'skills',
+  'collections',
+  'guides',
+  'jobs',
+  'changelog',
+] as const satisfies readonly ContentCategory[];
+
 import {
   badRequestResponse,
   buildCacheHeaders,
@@ -175,10 +188,11 @@ function clampLimit(rawLimit: number): number {
 }
 
 async function fetchTrendingMetrics(category: string | null, limit: number) {
-  const rpcArgs = {
-    p_category: category ?? undefined,
-    p_limit: limit,
-  } satisfies DatabaseGenerated['public']['Functions']['get_trending_metrics_with_content']['Args'];
+  const rpcArgs: DatabaseGenerated['public']['Functions']['get_trending_metrics_with_content']['Args'] =
+    {
+      ...(category !== null && category !== undefined ? { p_category: category } : {}),
+      p_limit: limit,
+    };
   const { data, error } = await callRpc('get_trending_metrics_with_content', rpcArgs, true);
 
   if (error) {
@@ -189,10 +203,10 @@ async function fetchTrendingMetrics(category: string | null, limit: number) {
 }
 
 async function fetchPopularContent(category: string | null, limit: number) {
-  const rpcArgs = {
-    p_category: category ?? undefined,
+  const rpcArgs: DatabaseGenerated['public']['Functions']['get_popular_content']['Args'] = {
+    ...(category !== null && category !== undefined ? { p_category: category } : {}),
     p_limit: limit,
-  } satisfies DatabaseGenerated['public']['Functions']['get_popular_content']['Args'];
+  };
   const { data, error } = await callRpc('get_popular_content', rpcArgs, true);
 
   if (error) {
@@ -203,11 +217,11 @@ async function fetchPopularContent(category: string | null, limit: number) {
 }
 
 async function fetchRecentContent(category: string | null, limit: number) {
-  const rpcArgs = {
-    p_category: category ?? undefined,
+  const rpcArgs: DatabaseGenerated['public']['Functions']['get_recent_content']['Args'] = {
+    ...(category !== null && category !== undefined ? { p_category: category } : {}),
     p_limit: limit,
     p_days: 30,
-  } satisfies DatabaseGenerated['public']['Functions']['get_recent_content']['Args'];
+  };
   const { data, error } = await callRpc('get_recent_content', rpcArgs, true);
 
   if (error) {
@@ -230,8 +244,8 @@ function mapTrendingRows(rows: TrendingMetricsRow[], fallbackCategory: string | 
     copyCount: row.copies_total ?? undefined,
     bookmarkCount: row.bookmarks_total ?? undefined,
     popularity: row.trending_score ?? undefined,
-    engagementScore: row.engagement_score ?? undefined,
-    freshnessScore: row.freshness_score ?? undefined,
+    engagementScore: row['engagement_score'] ?? undefined,
+    freshnessScore: row['freshness_score'] ?? undefined,
   }));
 }
 

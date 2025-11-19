@@ -61,7 +61,7 @@ export default async function SponsorshipsPage() {
     );
   }
 
-  let sponsorships: Awaited<ReturnType<typeof getUserSponsorships>> | null = null;
+  let sponsorships: Awaited<ReturnType<typeof getUserSponsorships>>;
   try {
     sponsorships = await getUserSponsorships(user.id);
   } catch (error) {
@@ -145,16 +145,17 @@ export default async function SponsorshipsPage() {
             impressionCount > 0 ? ((clickCount / impressionCount) * 100).toFixed(2) : '0.00';
 
           // Validate tier for this sponsorship
-          const safeTier: ValidTier = isValidTier(sponsorship.tier)
-            ? (sponsorship.tier as ValidTier)
-            : (() => {
-                logger.warn('SponsorshipsPage: invalid tier value', {
-                  tier: sponsorship.tier,
-                  sponsorshipId: sponsorship.id,
-                  userId: user.id,
-                });
-                return 'sponsored' as ValidTier; // Fallback to default tier
-              })();
+          let safeTier: ValidTier;
+          if (isValidTier(sponsorship.tier)) {
+            safeTier = sponsorship.tier as ValidTier;
+          } else {
+            logger.warn('SponsorshipsPage: invalid tier value', {
+              tier: sponsorship.tier,
+              sponsorshipId: sponsorship.id,
+              userId: user.id,
+            });
+            safeTier = 'sponsored' as ValidTier;
+          }
 
           return (
             <Card key={sponsorship.id}>

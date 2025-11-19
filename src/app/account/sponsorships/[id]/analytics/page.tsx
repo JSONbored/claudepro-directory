@@ -132,7 +132,7 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
               <span className="font-bold text-3xl">{impressionCount.toLocaleString()}</span>
             </div>
             {sponsorship.impression_limit && (
-              <p className={'mt-2 text-muted-foreground text-xs'}>
+              <p className="mt-2 text-muted-foreground text-xs">
                 of {sponsorship.impression_limit.toLocaleString()} limit
               </p>
             )}
@@ -148,7 +148,7 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
               <MousePointer className="h-5 w-5 text-primary" />
               <span className="font-bold text-3xl">{clickCount.toLocaleString()}</span>
             </div>
-            <p className={'mt-2 text-muted-foreground text-xs'}>User engagements</p>
+            <p className="mt-2 text-muted-foreground text-xs">User engagements</p>
           </CardContent>
         </Card>
 
@@ -161,7 +161,7 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
               <BarChart className="h-5 w-5 text-primary" />
               <span className="font-bold text-3xl">{ctr}%</span>
             </div>
-            <p className={'mt-2 text-muted-foreground text-xs'}>Clicks / Impressions</p>
+            <p className="mt-2 text-muted-foreground text-xs">Clicks / Impressions</p>
           </CardContent>
         </Card>
 
@@ -174,7 +174,7 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
               <TrendingUp className="h-5 w-5 text-primary" />
               <span className="font-bold text-3xl">{avgImpressionsPerDay}</span>
             </div>
-            <p className={'mt-2 text-muted-foreground text-xs'}>Over {daysActive} days</p>
+            <p className="mt-2 text-muted-foreground text-xs">Over {daysActive} days</p>
           </CardContent>
         </Card>
       </div>
@@ -188,31 +188,31 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
         <CardContent className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <p className={'font-medium text-sm'}>Content Type</p>
+              <p className="font-medium text-sm">Content Type</p>
               <p className="text-muted-foreground">{sponsorship.content_type}</p>
             </div>
 
             <div>
-              <p className={'font-medium text-sm'}>Content ID</p>
-              <p className={'font-mono text-muted-foreground text-xs'}>{sponsorship.content_id}</p>
+              <p className="font-medium text-sm">Content ID</p>
+              <p className="font-mono text-muted-foreground text-xs">{sponsorship.content_id}</p>
             </div>
 
             <div>
-              <p className={'font-medium text-sm'}>Start Date</p>
+              <p className="font-medium text-sm">Start Date</p>
               <p className="text-muted-foreground">
                 {new Date(sponsorship.start_date).toLocaleDateString()}
               </p>
             </div>
 
             <div>
-              <p className={'font-medium text-sm'}>End Date</p>
+              <p className="font-medium text-sm">End Date</p>
               <p className="text-muted-foreground">
                 {new Date(sponsorship.end_date).toLocaleDateString()}
               </p>
             </div>
 
             <div>
-              <p className={'font-medium text-sm'}>Status</p>
+              <p className="font-medium text-sm">Status</p>
               <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
                 <UnifiedBadge variant="base" style={sponsorship.active ? 'default' : 'outline'}>
                   {sponsorship.active ? 'Active' : 'Inactive'}
@@ -221,7 +221,7 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
             </div>
 
             <div>
-              <p className={'font-medium text-sm'}>Tier</p>
+              <p className="font-medium text-sm">Tier</p>
               <div>
                 <UnifiedBadge variant="sponsored" tier={safeTier} showIcon={true} />
               </div>
@@ -291,7 +291,7 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
           <CardDescription>Improve your campaign performance</CardDescription>
         </CardHeader>
         <CardContent>
-          <ul className={'space-y-2 text-sm'}>
+          <ul className="space-y-2 text-sm">
             <li>• CTR above 2% is excellent for sponsored content</li>
             <li>• Featured tier gets 3x more impressions than promoted</li>
             <li>• Premium tier includes newsletter promotion for extra reach</li>

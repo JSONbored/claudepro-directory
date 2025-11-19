@@ -17,11 +17,8 @@ import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { BADGE_COLORS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { normalizeError } from '@/src/lib/utils/error.utils';
-import type {
-  GetGetUserDashboardReturn,
-  SubmissionStatus,
-  SubmissionType,
-} from '@/src/types/database-overrides';
+import type { Database } from '@/src/types/database.types';
+import type { GetGetUserDashboardReturn } from '@/src/types/database-overrides';
 
 export const metadata: Promise<Metadata> = generatePageMetadata('/account/submissions');
 
@@ -142,12 +139,15 @@ function isValidSlug(slug: string): boolean {
 }
 
 // Strict type validation - must be in allowlist
-function isSafeType(type: string): type is SubmissionType {
+function isSafeType(type: string): type is Database['public']['Enums']['submission_type'] {
   return ALLOWED_TYPES.includes(type as (typeof ALLOWED_TYPES)[number]);
 }
 
 // Safe URL constructor - validates both type and slug before constructing
-function getSafeContentUrl(type: SubmissionType, slug: string): string | null {
+function getSafeContentUrl(
+  type: Database['public']['Enums']['submission_type'],
+  slug: string
+): string | null {
   if (!(isSafeType(type) && isValidSlug(slug))) {
     return null;
   }
@@ -203,7 +203,7 @@ export default async function SubmissionsPage() {
   }
 
   const SUBMISSION_STATUS_VARIANTS: Record<
-    SubmissionStatus,
+    Database['public']['Enums']['submission_status'],
     { icon: typeof Clock; label: string }
   > = {
     pending: { icon: Clock, label: 'Pending Review' },
@@ -213,7 +213,7 @@ export default async function SubmissionsPage() {
     spam: { icon: XCircle, label: 'Spam' },
   };
 
-  const getStatusBadge = (status: SubmissionStatus) => {
+  const getStatusBadge = (status: Database['public']['Enums']['submission_status']) => {
     const variant = SUBMISSION_STATUS_VARIANTS[status] || SUBMISSION_STATUS_VARIANTS.pending;
     const Icon = variant.icon;
     const colorClass =
@@ -227,8 +227,8 @@ export default async function SubmissionsPage() {
     );
   };
 
-  const getTypeLabel = (type: SubmissionType) => {
-    const labels: Partial<Record<SubmissionType, string>> = {
+  const getTypeLabel = (type: Database['public']['Enums']['submission_type']) => {
+    const labels: Partial<Record<Database['public']['Enums']['submission_type'], string>> = {
       agents: 'Claude Agent',
       mcp: 'MCP Server',
       rules: 'Claude Rule',
@@ -298,9 +298,9 @@ export default async function SubmissionsPage() {
    * Get safe content URL or null if invalid
    */
   function getContentLinkProps(
-    type: SubmissionType,
+    type: Database['public']['Enums']['submission_type'],
     slug: string,
-    status: SubmissionStatus
+    status: Database['public']['Enums']['submission_status']
   ): { href: string } | null {
     const safeUrl = getSafeContentUrl(type, slug);
     return safeUrl && status === 'merged' ? { href: safeUrl } : null;

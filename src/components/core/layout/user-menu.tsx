@@ -125,8 +125,9 @@ export function UserMenu({ className }: UserMenuProps) {
 
   // Signed in state - show user avatar and dropdown
   const userMetadata = user.user_metadata;
-  const displayName = userMetadata?.name || userMetadata?.full_name || user.email?.split('@')[0];
-  const avatarUrl = userMetadata?.avatar_url || userMetadata?.picture;
+  const displayName =
+    userMetadata?.['name'] || userMetadata?.['full_name'] || user.email?.split('@')[0];
+  const avatarUrl = userMetadata?.['avatar_url'] || userMetadata?.['picture'];
   const initials =
     displayName
       ?.split(' ')

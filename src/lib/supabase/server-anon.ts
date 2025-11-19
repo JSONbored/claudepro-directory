@@ -19,8 +19,8 @@ import { logger } from '@/src/lib/logger';
 import type { Database } from '@/src/types/database.types';
 
 export function createAnonClient() {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const supabaseUrl = process.env['NEXT_PUBLIC_SUPABASE_URL'];
+  const supabaseAnonKey = process.env['NEXT_PUBLIC_SUPABASE_ANON_KEY'];
 
   // If env vars are missing, return a mock client (never throw)
   // This allows builds to succeed even when env vars aren't available

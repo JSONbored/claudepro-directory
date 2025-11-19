@@ -51,7 +51,9 @@ export async function handleJobNotificationDirect(
   const job = payload.record;
 
   if (job.is_placeholder) {
-    console.log('[discord-handler] Skipping placeholder job', { jobId: job.id });
+    console.log('[discord-handler] Skipping placeholder job', {
+      jobId: job.id,
+    });
     return;
   }
 
@@ -243,9 +245,9 @@ export async function handleContentNotificationDirect(
     .single<Database['public']['Tables']['content']['Row']>();
 
   const logContext = createDiscordHandlerContext('content-notification', {
-    contentId: content?.id,
-    category: content?.category,
-    slug: content?.slug,
+    ...(content?.id !== undefined ? { contentId: content.id } : {}),
+    ...(content?.category !== undefined ? { category: content.category } : {}),
+    ...(content?.slug !== undefined ? { slug: content.slug } : {}),
   });
 
   if (contentError || !content) {
@@ -266,7 +268,10 @@ export async function handleContentNotificationDirect(
   const embed = buildContentEmbed(content);
   await sendDiscordWebhook(
     webhookUrl,
-    { content: '🎉 **New Content Added to Claude Pro Directory!**', embeds: [embed] },
+    {
+      content: '🎉 **New Content Added to Claude Pro Directory!**',
+      embeds: [embed],
+    },
     'content_announcement',
     {
       relatedId: content.id,
@@ -313,7 +318,11 @@ export async function handleContentNotificationDirect(
   await invalidateCacheByKey(
     'cache.invalidate.content_create',
     ['content', 'homepage', 'trending'],
-    { category: content.category, slug: content.slug, logContext: updatedContext }
+    {
+      ...(content.category !== undefined ? { category: content.category } : {}),
+      ...(content.slug !== undefined ? { slug: content.slug } : {}),
+      logContext: updatedContext,
+    }
   ).catch((error) => {
     console.warn('[discord-handler] Cache invalidation failed', {
       ...updatedContext,
@@ -589,9 +598,9 @@ async function handleContentNotification(req: Request): Promise<Response> {
 
   // Create logContext after fetching content
   const logContext = createDiscordHandlerContext('content-notification', {
-    contentId: content?.id,
-    category: content?.category,
-    slug: content?.slug,
+    ...(content?.id !== undefined ? { contentId: content.id } : {}),
+    ...(content?.category !== undefined ? { category: content.category } : {}),
+    ...(content?.slug !== undefined ? { slug: content.slug } : {}),
   });
 
   if (contentError || !content) {
@@ -613,7 +622,10 @@ async function handleContentNotification(req: Request): Promise<Response> {
   const embed = buildContentEmbed(content);
   await sendDiscordWebhook(
     webhookUrl,
-    { content: '🎉 **New Content Added to Claude Pro Directory!**', embeds: [embed] },
+    {
+      content: '🎉 **New Content Added to Claude Pro Directory!**',
+      embeds: [embed],
+    },
     'content_announcement',
     {
       relatedId: content.id,
@@ -659,7 +671,11 @@ async function handleContentNotification(req: Request): Promise<Response> {
   await invalidateCacheByKey(
     'cache.invalidate.content_create',
     ['content', 'homepage', 'trending'],
-    { category: content.category, slug: content.slug, logContext: updatedContext }
+    {
+      ...(content.category !== undefined ? { category: content.category } : {}),
+      ...(content.slug !== undefined ? { slug: content.slug } : {}),
+      logContext: updatedContext,
+    }
   ).catch((error) => {
     console.warn('[discord-handler] Cache invalidation failed', {
       ...updatedContext,

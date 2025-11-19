@@ -2,8 +2,8 @@ import { isValidCategory } from '@/src/lib/data/config/category';
 import { fetchCachedRpc } from '@/src/lib/data/helpers';
 import { generateContentCacheKey } from '@/src/lib/data/helpers-utils';
 import type { DisplayableContent } from '@/src/lib/types/component.types';
+import type { Database } from '@/src/types/database.types';
 import type {
-  ContentCategory,
   GetGetPopularContentReturn,
   GetGetRecentContentReturn,
   GetGetTrendingMetricsWithContentReturn,
@@ -11,7 +11,7 @@ import type {
 } from '@/src/types/database-overrides';
 
 interface TrendingPageParams {
-  category?: ContentCategory | null;
+  category?: Database['public']['Enums']['content_category'] | null;
   limit?: number;
 }
 
@@ -23,7 +23,7 @@ interface TrendingPageDataResult {
 }
 
 const TTL_CONFIG_KEY = 'cache.content_list.ttl_seconds';
-const DEFAULT_CATEGORY: ContentCategory = 'agents';
+const DEFAULT_CATEGORY: Database['public']['Enums']['content_category'] = 'agents';
 
 export async function getTrendingPageData(
   params: TrendingPageParams = {}
@@ -50,7 +50,7 @@ export async function getTrendingPageData(
 }
 
 async function fetchTrendingMetrics(
-  category: ContentCategory | null,
+  category: Database['public']['Enums']['content_category'] | null,
   limit: number
 ): Promise<GetGetTrendingMetricsWithContentReturn> {
   return fetchCachedRpc<
@@ -73,7 +73,7 @@ async function fetchTrendingMetrics(
 }
 
 async function fetchPopularContent(
-  category: ContentCategory | null,
+  category: Database['public']['Enums']['content_category'] | null,
   limit: number
 ): Promise<GetGetPopularContentReturn> {
   // Note: fetchCachedRpc has a constraint issue where it expects description: string
@@ -107,7 +107,7 @@ async function fetchPopularContent(
 }
 
 async function fetchRecentContent(
-  category: ContentCategory | null,
+  category: Database['public']['Enums']['content_category'] | null,
   limit: number
 ): Promise<GetGetRecentContentReturn> {
   return fetchCachedRpc<'get_recent_content', GetGetRecentContentReturn>(
@@ -129,7 +129,7 @@ async function fetchRecentContent(
 
 function mapTrendingMetrics(
   rows: GetGetTrendingMetricsWithContentReturn,
-  category: ContentCategory | null
+  category: Database['public']['Enums']['content_category'] | null
 ): DisplayableContent[] {
   if (!rows || rows.length === 0) return [];
   return rows.map((row: GetGetTrendingMetricsWithContentReturn[number], index: number) => {
@@ -153,7 +153,7 @@ function mapTrendingMetrics(
 
 function mapPopularContent(
   rows: GetGetPopularContentReturn,
-  category: ContentCategory | null
+  category: Database['public']['Enums']['content_category'] | null
 ): DisplayableContent[] {
   return rows.map((row: GetGetPopularContentReturn[number], index: number) => {
     const resolvedCategory = row.category ?? category ?? DEFAULT_CATEGORY;
@@ -175,7 +175,7 @@ function mapPopularContent(
 
 function mapRecentContent(
   rows: GetGetRecentContentReturn,
-  category: ContentCategory | null
+  category: Database['public']['Enums']['content_category'] | null
 ): DisplayableContent[] {
   return rows.map((row: GetGetRecentContentReturn[number], index: number) => {
     const resolvedCategory = row.category ?? category ?? DEFAULT_CATEGORY;
@@ -196,7 +196,7 @@ function mapRecentContent(
 
 function toHomepageContentItem(input: {
   slug: string;
-  category: ContentCategory;
+  category: Database['public']['Enums']['content_category'];
   title?: string | null;
   description?: string | null;
   author?: string | null;

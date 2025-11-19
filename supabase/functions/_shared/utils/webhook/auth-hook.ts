@@ -53,7 +53,13 @@ export async function verifyAuthHookWebhook(
     );
   }
 
-  const headers = Object.fromEntries(req.headers);
+  // Convert Headers to plain object for webhook verification
+  // Headers is iterable, but TypeScript needs explicit iteration
+  const headers: Record<string, string> = {};
+  // Use for...of directly on Headers (it's iterable in the Web API)
+  for (const [key, value] of req.headers as unknown as Iterable<[string, string]>) {
+    headers[key] = value;
+  }
   const wh = new Webhook(hookSecret);
 
   try {

@@ -1,9 +1,22 @@
 import type { Database as DatabaseGenerated } from '../../_shared/database.types.ts';
-import {
-  CONTENT_CATEGORY_VALUES,
-  type ContentCategory,
-  callRpc,
-} from '../../_shared/database-overrides.ts';
+import { callRpc } from '../../_shared/database-overrides.ts';
+
+type ContentCategory = DatabaseGenerated['public']['Enums']['content_category'];
+
+const CONTENT_CATEGORY_VALUES = [
+  'agents',
+  'mcp',
+  'rules',
+  'commands',
+  'hooks',
+  'statuslines',
+  'skills',
+  'collections',
+  'guides',
+  'jobs',
+  'changelog',
+] as const satisfies readonly ContentCategory[];
+
 import {
   badRequestResponse,
   buildCacheHeaders,
@@ -114,10 +127,11 @@ async function generateFeedPayload(
   }
 
   if (type === 'rss') {
-    const rpcArgs3 = {
-      p_category: category ?? undefined,
-      p_limit: 50,
-    } satisfies DatabaseGenerated['public']['Functions']['generate_content_rss_feed']['Args'];
+    const rpcArgs3: DatabaseGenerated['public']['Functions']['generate_content_rss_feed']['Args'] =
+      {
+        ...(category !== null && category !== undefined ? { p_category: category } : {}),
+        p_limit: 50,
+      };
     const { data, error } = await callRpc('generate_content_rss_feed', rpcArgs3, true);
     if (error || !data) {
       throw error ?? new Error('generate_content_rss_feed returned null');
@@ -129,10 +143,10 @@ async function generateFeedPayload(
     };
   }
 
-  const rpcArgs4 = {
-    p_category: category ?? undefined,
+  const rpcArgs4: DatabaseGenerated['public']['Functions']['generate_content_atom_feed']['Args'] = {
+    ...(category !== null && category !== undefined ? { p_category: category } : {}),
     p_limit: 50,
-  } satisfies DatabaseGenerated['public']['Functions']['generate_content_atom_feed']['Args'];
+  };
   const { data, error } = await callRpc('generate_content_atom_feed', rpcArgs4, true);
   if (error || !data) {
     throw error ?? new Error('generate_content_atom_feed returned null');

@@ -64,9 +64,9 @@ export async function handleRevalidation(_req: Request): Promise<Response> {
         }
 
         const record = payload.record;
-        const category = record.category as string | null;
-        const slug = record.slug as string | null;
-        const tags = record.tags as string[] | null;
+        const category = record['category'] as string | null;
+        const slug = record['slug'] as string | null;
+        const tags = record['tags'] as string[] | null;
 
         // Build tags to invalidate
         const tagsToInvalidate = ['content', 'homepage', 'trending'];
@@ -78,14 +78,14 @@ export async function handleRevalidation(_req: Request): Promise<Response> {
         // Wrap with timeout and retry for reliability
         const logContext = createUtilityContext('flux-station', 'content-revalidation', {
           operation: payload.type,
-          contentId: record.id as string | null,
+          contentId: record['id'] as string | null,
         });
         await withTimeout(
           runWithRetry(
             () =>
               invalidateCacheTags(tagsToInvalidate, {
-                category: category || undefined,
-                slug: slug || undefined,
+                ...(category !== null && category !== undefined ? { category } : {}),
+                ...(slug !== null && slug !== undefined ? { slug } : {}),
                 logContext,
               }),
             {

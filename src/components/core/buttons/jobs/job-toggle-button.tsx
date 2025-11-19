@@ -11,10 +11,10 @@ import { Button } from '@/src/components/primitives/ui/button';
 import { toggleJobStatus } from '@/src/lib/actions/jobs.actions';
 import { Pause, Play } from '@/src/lib/icons';
 import type { ButtonStyleProps } from '@/src/lib/types/component.types';
+import type { JobStatus } from '@/src/lib/ui-constants';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { logClientWarning } from '@/src/lib/utils/error.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
-import type { JobStatus } from '@/src/types/database-overrides';
 
 export interface JobToggleButtonProps extends ButtonStyleProps {
   jobId: string;

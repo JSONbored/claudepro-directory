@@ -47,8 +47,9 @@ export default async function AccountLayout({ children }: { children: React.Reac
   }
 
   const userNameMetadata =
-    user.user_metadata?.full_name ?? user.user_metadata?.name ?? user.email ?? null;
-  const userImageMetadata = user.user_metadata?.avatar_url ?? user.user_metadata?.picture ?? null;
+    user.user_metadata?.['full_name'] ?? user.user_metadata?.['name'] ?? user.email ?? null;
+  const userImageMetadata =
+    user.user_metadata?.['avatar_url'] ?? user.user_metadata?.['picture'] ?? null;
 
   let settings: Awaited<ReturnType<typeof getUserSettings>> = null;
   let profile: NonNullable<Awaited<ReturnType<typeof getUserSettings>>>['user_data'] | null = null;

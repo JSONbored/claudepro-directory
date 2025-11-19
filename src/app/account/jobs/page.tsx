@@ -17,11 +17,12 @@ import { ROUTES } from '@/src/lib/data/config/constants';
 import { BarChart, Briefcase, Edit, ExternalLink, Eye, Plus } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
+import type { JobStatus } from '@/src/lib/ui-constants';
 import { BADGE_COLORS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { formatRelativeDate } from '@/src/lib/utils/data.utils';
 import { normalizeError } from '@/src/lib/utils/error.utils';
 import type { Tables } from '@/src/types/database.types';
-import type { GetGetUserDashboardReturn, JobStatus } from '@/src/types/database-overrides';
+import type { GetGetUserDashboardReturn } from '@/src/types/database-overrides';
 
 export const metadata: Promise<Metadata> = generatePageMetadata('/account/jobs');
 

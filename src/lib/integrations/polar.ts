@@ -38,8 +38,8 @@ interface PolarCheckoutResponse {
 export async function createPolarCheckout(
   params: CreateCheckoutParams
 ): Promise<{ url: string; sessionId: string } | { error: string }> {
-  const polarAccessToken = process.env.POLAR_ACCESS_TOKEN;
-  const polarEnvironment = process.env.POLAR_ENVIRONMENT || 'production';
+  const polarAccessToken = process.env['POLAR_ACCESS_TOKEN'];
+  const polarEnvironment = process.env['POLAR_ENVIRONMENT'] || 'production';
 
   if (!polarAccessToken) {
     logger.error('Polar: POLAR_ACCESS_TOKEN not configured');
@@ -110,11 +110,11 @@ export async function createPolarCheckout(
 export function getPolarProductPriceId(plan: string, tier: string): string | null {
   const productPriceIds = {
     // One-time payments
-    'one-time_standard': process.env.POLAR_PRODUCT_PRICE_ONETIME_STANDARD,
-    'one-time_featured': process.env.POLAR_PRODUCT_PRICE_ONETIME_FEATURED,
+    'one-time_standard': process.env['POLAR_PRODUCT_PRICE_ONETIME_STANDARD'],
+    'one-time_featured': process.env['POLAR_PRODUCT_PRICE_ONETIME_FEATURED'],
     // Subscription payments
-    subscription_standard: process.env.POLAR_PRODUCT_PRICE_SUBSCRIPTION_STANDARD,
-    subscription_featured: process.env.POLAR_PRODUCT_PRICE_SUBSCRIPTION_FEATURED,
+    subscription_standard: process.env['POLAR_PRODUCT_PRICE_SUBSCRIPTION_STANDARD'],
+    subscription_featured: process.env['POLAR_PRODUCT_PRICE_SUBSCRIPTION_FEATURED'],
   };
 
   const key = `${plan}_${tier}` as keyof typeof productPriceIds;

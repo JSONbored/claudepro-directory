@@ -16,12 +16,24 @@ import { logger } from '@/src/lib/logger';
 import type { DisplayableContent } from '@/src/lib/types/component.types';
 import { logActionFailure } from '@/src/lib/utils/error.utils';
 import type { Database, Tables } from '@/src/types/database.types';
+
+const CONTENT_CATEGORY_VALUES = [
+  'agents',
+  'mcp',
+  'rules',
+  'commands',
+  'hooks',
+  'statuslines',
+  'skills',
+  'collections',
+  'guides',
+  'jobs',
+  'changelog',
+] as const satisfies readonly Database['public']['Enums']['content_category'][];
+
 import {
-  CONTENT_CATEGORY_VALUES,
-  type ContentCategory,
   type ReorderCollectionItemsReturn,
   SUBMISSION_TYPE_VALUES,
-  type SubmissionType,
 } from '@/src/types/database-overrides';
 
 // URL validation helper
@@ -49,7 +61,10 @@ const collectionSchema = z.object({
 
 const collectionItemSchema = z.object({
   collection_id: z.string(),
-  content_type: z.enum([...CONTENT_CATEGORY_VALUES] as [ContentCategory, ...ContentCategory[]]),
+  content_type: z.enum([...CONTENT_CATEGORY_VALUES] as [
+    Database['public']['Enums']['content_category'],
+    ...Database['public']['Enums']['content_category'][],
+  ]),
   content_slug: z
     .string()
     .max(200)
@@ -59,7 +74,10 @@ const collectionItemSchema = z.object({
 });
 
 const reviewSchema = z.object({
-  content_type: z.enum([...CONTENT_CATEGORY_VALUES] as [ContentCategory, ...ContentCategory[]]),
+  content_type: z.enum([...CONTENT_CATEGORY_VALUES] as [
+    Database['public']['Enums']['content_category'],
+    ...Database['public']['Enums']['content_category'][],
+  ]),
   content_slug: z
     .string()
     .max(200)
@@ -69,7 +87,10 @@ const reviewSchema = z.object({
 });
 
 const getReviewsSchema = z.object({
-  content_type: z.enum([...CONTENT_CATEGORY_VALUES] as [ContentCategory, ...ContentCategory[]]),
+  content_type: z.enum([...CONTENT_CATEGORY_VALUES] as [
+    Database['public']['Enums']['content_category'],
+    ...Database['public']['Enums']['content_category'][],
+  ]),
   content_slug: z
     .string()
     .max(200)
@@ -634,7 +655,10 @@ const fetchPaginatedContentSchema = z.object({
   offset: z.number().int().min(0).default(0),
   limit: z.number().int().min(1).max(100).default(30),
   category: z
-    .enum([...CONTENT_CATEGORY_VALUES] as [ContentCategory, ...ContentCategory[]])
+    .enum([...CONTENT_CATEGORY_VALUES] as [
+      Database['public']['Enums']['content_category'],
+      ...Database['public']['Enums']['content_category'][],
+    ])
     .nullable()
     .default(null),
 });
@@ -670,10 +694,16 @@ export const fetchPaginatedContent = rateLimitedAction
  * Calls submit_content_for_review RPC with validation
  */
 const submitContentSchema = z.object({
-  submission_type: z.enum([...SUBMISSION_TYPE_VALUES] as [SubmissionType, ...SubmissionType[]]),
+  submission_type: z.enum([...SUBMISSION_TYPE_VALUES] as [
+    Database['public']['Enums']['submission_type'],
+    ...Database['public']['Enums']['submission_type'][],
+  ]),
   name: z.string().min(2),
   description: z.string().min(10),
-  category: z.enum([...CONTENT_CATEGORY_VALUES] as [ContentCategory, ...ContentCategory[]]),
+  category: z.enum([...CONTENT_CATEGORY_VALUES] as [
+    Database['public']['Enums']['content_category'],
+    ...Database['public']['Enums']['content_category'][],
+  ]),
   author: z.string().min(2),
   author_profile_url: z.string().refine(urlRefine, { message: 'Invalid URL format' }).optional(),
   github_url: z.string().refine(urlRefine, { message: 'Invalid URL format' }).optional(),

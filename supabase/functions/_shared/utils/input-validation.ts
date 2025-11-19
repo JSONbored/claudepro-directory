@@ -10,7 +10,10 @@ const MAX_ROUTE_LENGTH = 2048;
 /**
  * Validate and sanitize query string
  */
-export function validateQueryString(url: URL): { valid: boolean; error?: string } {
+export function validateQueryString(url: URL): {
+  valid: boolean;
+  error?: string;
+} {
   const queryString = url.search;
   if (queryString.length > MAX_QUERY_STRING_LENGTH) {
     return {
@@ -33,7 +36,10 @@ export function validateQueryString(url: URL): { valid: boolean; error?: string 
 /**
  * Validate and sanitize path segments
  */
-export function validatePathSegments(segments: string[]): { valid: boolean; error?: string } {
+export function validatePathSegments(segments: string[]): {
+  valid: boolean;
+  error?: string;
+} {
   for (const segment of segments) {
     if (segment.length > MAX_PATH_SEGMENT_LENGTH) {
       return {

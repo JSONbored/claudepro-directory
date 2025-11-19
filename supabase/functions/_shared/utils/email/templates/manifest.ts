@@ -287,7 +287,9 @@ export const EMAIL_TEMPLATE_MANIFEST: EmailTemplateDefinition<unknown>[] = [
     category: 'onboarding',
     from: ONBOARDING_FROM,
     buildSubject: () => 'Getting Started with Claude Pro Directory',
-    buildSampleData: (): OnboardingGettingStartedProps => ({ email: 'founder@example.com' }),
+    buildSampleData: (): OnboardingGettingStartedProps => ({
+      email: 'founder@example.com',
+    }),
     render: (props: unknown) =>
       renderOnboardingGettingStartedEmail(props as OnboardingGettingStartedProps),
   },
@@ -298,7 +300,9 @@ export const EMAIL_TEMPLATE_MANIFEST: EmailTemplateDefinition<unknown>[] = [
     category: 'onboarding',
     from: ONBOARDING_FROM,
     buildSubject: () => 'Power User Tips for Claude',
-    buildSampleData: (): OnboardingPowerTipsProps => ({ email: 'founder@example.com' }),
+    buildSampleData: (): OnboardingPowerTipsProps => ({
+      email: 'founder@example.com',
+    }),
     render: (props: unknown) => {
       return renderOnboardingPowerTipsEmail(props as OnboardingPowerTipsProps);
     },
@@ -310,7 +314,9 @@ export const EMAIL_TEMPLATE_MANIFEST: EmailTemplateDefinition<unknown>[] = [
     category: 'onboarding',
     from: ONBOARDING_FROM,
     buildSubject: () => 'Join the Claude Pro Community',
-    buildSampleData: (): OnboardingCommunityProps => ({ email: 'founder@example.com' }),
+    buildSampleData: (): OnboardingCommunityProps => ({
+      email: 'founder@example.com',
+    }),
     render: (props: unknown) => {
       return renderOnboardingCommunityEmail(props as OnboardingCommunityProps);
     },
@@ -322,7 +328,9 @@ export const EMAIL_TEMPLATE_MANIFEST: EmailTemplateDefinition<unknown>[] = [
     category: 'onboarding',
     from: ONBOARDING_FROM,
     buildSubject: () => 'Stay Engaged with ClaudePro',
-    buildSampleData: (): OnboardingStayEngagedProps => ({ email: 'founder@example.com' }),
+    buildSampleData: (): OnboardingStayEngagedProps => ({
+      email: 'founder@example.com',
+    }),
     render: (props: unknown) =>
       renderOnboardingStayEngagedEmail(props as OnboardingStayEngagedProps),
   },
@@ -390,7 +398,7 @@ export const EMAIL_TEMPLATE_MANIFEST: EmailTemplateDefinition<unknown>[] = [
     description: 'Notifies admins of new contact form submissions via terminal.',
     category: 'contact',
     from: CONTACT_FROM,
-    replyTo: undefined,
+    // replyTo is optional, so we don't include it when undefined
     buildSubject: (props: unknown) => {
       const typedProps = props as ContactSubmissionAdminProps;
       return `New Contact: ${typedProps.category} - ${typedProps.name}`;

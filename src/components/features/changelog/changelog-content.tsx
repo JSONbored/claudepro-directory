@@ -23,7 +23,6 @@ import { JSONSectionRenderer } from '@/src/components/content/json-to-sections';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { parseChangelogChanges } from '@/src/lib/data/changelog';
 import type { Database, Tables } from '@/src/types/database.types';
-import type { ChangelogCategory } from '@/src/types/database-overrides';
 
 type ChangelogEntry = Tables<'changelog'>;
 type ContentRow = Database['public']['Tables']['content']['Row'];
@@ -75,19 +74,19 @@ export const ChangelogContent = memo(({ entry, sections }: ChangelogContentProps
       : undefined);
 
   // Get non-empty categories for badge display
-  const nonEmptyCategories: ChangelogCategory[] = [];
+  const nonEmptyCategories: Database['public']['Enums']['changelog_category'][] = [];
   if (changes.Added && changes.Added.length > 0)
-    nonEmptyCategories.push('Added' as ChangelogCategory);
+    nonEmptyCategories.push('Added' as Database['public']['Enums']['changelog_category']);
   if (changes.Changed && changes.Changed.length > 0)
-    nonEmptyCategories.push('Changed' as ChangelogCategory);
+    nonEmptyCategories.push('Changed' as Database['public']['Enums']['changelog_category']);
   if (changes.Deprecated && changes.Deprecated.length > 0)
-    nonEmptyCategories.push('Deprecated' as ChangelogCategory);
+    nonEmptyCategories.push('Deprecated' as Database['public']['Enums']['changelog_category']);
   if (changes.Removed && changes.Removed.length > 0)
-    nonEmptyCategories.push('Removed' as ChangelogCategory);
+    nonEmptyCategories.push('Removed' as Database['public']['Enums']['changelog_category']);
   if (changes.Fixed && changes.Fixed.length > 0)
-    nonEmptyCategories.push('Fixed' as ChangelogCategory);
+    nonEmptyCategories.push('Fixed' as Database['public']['Enums']['changelog_category']);
   if (changes.Security && changes.Security.length > 0)
-    nonEmptyCategories.push('Security' as ChangelogCategory);
+    nonEmptyCategories.push('Security' as Database['public']['Enums']['changelog_category']);
 
   return (
     <article className={'max-w-none space-y-6'}>

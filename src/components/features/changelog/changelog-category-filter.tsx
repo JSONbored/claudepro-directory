@@ -7,12 +7,13 @@
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { TabsList, TabsTrigger } from '@/src/components/primitives/ui/tabs';
 import { DIMENSIONS } from '@/src/lib/ui-constants';
-import type { ChangelogCategory } from '@/src/types/database-overrides';
+import type { Database } from '@/src/types/database.types';
+
 import { CHANGELOG_CATEGORY_VALUES } from '@/src/types/database-overrides';
 
 export interface CategoryFilterProps {
-  activeCategory: 'All' | ChangelogCategory;
-  onCategoryChange: (category: 'All' | ChangelogCategory) => void;
+  activeCategory: 'All' | Database['public']['Enums']['changelog_category'];
+  onCategoryChange: (category: 'All' | Database['public']['Enums']['changelog_category']) => void;
   categoryCounts: Record<string, number>;
 }
 

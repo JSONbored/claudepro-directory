@@ -12,11 +12,12 @@ import { getUserJobById } from '@/src/lib/data/account/user-data';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
-import { ensureStringArray } from '@/src/lib/utils/data.utils';
 import { normalizeError } from '@/src/lib/utils/error.utils';
-import type { JobCategory, JobPlan, JobTier, Tables } from '@/src/types/database-overrides';
+import type { Database, Tables } from '@/src/types/database.types';
 
-export const metadata: Promise<Metadata> = generatePageMetadata('/account/jobs/:id/edit');
+export async function generateMetadata(): Promise<Metadata> {
+  return generatePageMetadata('/account/jobs/:id/edit');
+}
 
 interface EditJobPageProps {
   params: Promise<{ id: string }>;
@@ -108,18 +109,18 @@ export default async function EditJobPage({ params }: EditJobPageProps) {
           description: job.description,
           salary: job.salary,
           remote: job.remote ?? undefined,
-          type: job.type,
+          ...(job.type && { type: job.type as Database['public']['Enums']['job_type'] }),
           workplace: job.workplace,
           experience: job.experience,
-          category: (job.category as JobCategory) ?? undefined,
-          tags: ensureStringArray(job.tags),
-          requirements: ensureStringArray(job.requirements),
-          benefits: ensureStringArray(job.benefits),
+          ...(job.category && {
+            category: job.category as Database['public']['Enums']['job_category'],
+          }),
+          tags: job.tags || [],
+          requirements: job.requirements || [],
+          benefits: job.benefits || [],
           link: job.link,
           contact_email: job.contact_email,
           company_logo: job.company_logo,
-          plan: job.plan as JobPlan,
-          tier: job.tier as JobTier,
         }}
         onSubmit={handleSubmit}
         submitLabel="Update Job Listing"

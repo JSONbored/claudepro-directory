@@ -31,14 +31,13 @@ import {
   trackUsage,
 } from '@/src/lib/edge/client';
 import type { SharePlatform } from '@/src/lib/utils/share.utils';
-import type { Json } from '@/src/types/database.types';
-import type { ContentCategory } from '@/src/types/database-overrides';
+import type { Database, Json } from '@/src/types/database.types';
 
 /**
  * Parameters for copy tracking
  */
 export interface PulseCopyParams {
-  category: ContentCategory;
+  category: Database['public']['Enums']['content_category'];
   slug: string;
   metadata?: Record<string, unknown> | null;
 }
@@ -47,7 +46,7 @@ export interface PulseCopyParams {
  * Parameters for click tracking
  */
 export interface PulseClickParams {
-  category: ContentCategory | null;
+  category: Database['public']['Enums']['content_category'] | null;
   slug: string | null;
   metadata?: Record<string, unknown> | null;
 }
@@ -66,7 +65,7 @@ export interface PulseShareParams {
  * Parameters for screenshot tracking
  */
 export interface PulseScreenshotParams {
-  category: ContentCategory;
+  category: Database['public']['Enums']['content_category'];
   slug: string;
   metadata?: Record<string, unknown> | null;
 }
@@ -75,16 +74,16 @@ export interface PulseScreenshotParams {
  * Parameters for download tracking
  */
 export interface PulseDownloadParams {
-  category: ContentCategory;
+  category: Database['public']['Enums']['content_category'];
   slug: string;
-  action_type?: 'download_zip' | 'download_markdown' | 'llmstxt';
+  action_type?: 'download_zip' | 'download_markdown' | 'llmstxt' | 'download_mcpb';
 }
 
 /**
  * Parameters for bookmark tracking
  */
 export interface PulseBookmarkParams {
-  category: ContentCategory;
+  category: Database['public']['Enums']['content_category'];
   slug: string;
   action: 'add' | 'remove';
 }
@@ -102,7 +101,7 @@ export interface PulseFilterParams {
  * Parameters for search tracking
  */
 export interface PulseSearchParams {
-  category: ContentCategory;
+  category: Database['public']['Enums']['content_category'];
   slug: string;
   query: string;
   metadata?: Record<string, unknown> | null;
@@ -120,7 +119,7 @@ export interface PulseNewsletterParams {
  * Parameters for view tracking
  */
 export interface PulseViewParams {
-  category: ContentCategory;
+  category: Database['public']['Enums']['content_category'];
   slug: string;
   metadata?: Record<string, unknown> | null;
 }
@@ -254,14 +253,15 @@ export function usePulse(): UsePulseReturn {
 
       /**
        * Track download action
-       * Maps to trackUsage() for download_zip/download_markdown/llmstxt
+       * Maps to trackUsage() for download_zip/download_markdown/llmstxt/download_mcpb
        * or trackInteraction() for generic download
        */
       download: async ({ category, slug, action_type = 'download_zip' }) => {
         if (
           action_type === 'download_zip' ||
           action_type === 'download_markdown' ||
-          action_type === 'llmstxt'
+          action_type === 'llmstxt' ||
+          action_type === 'download_mcpb'
         ) {
           await trackUsage({
             content_type: category,

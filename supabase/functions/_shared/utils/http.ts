@@ -69,9 +69,13 @@ export function getAuthenticatedCorsHeaders(requestOrigin: string | null): Recor
     ...(edgeEnv.nodeEnv === 'development' ? ['http://localhost:3000'] : []),
   ];
 
+  const firstOrigin = allowedOrigins[0];
+  if (!firstOrigin) {
+    throw new Error('No allowed origins configured');
+  }
   const origin = allowedOrigins.includes(requestOrigin || '')
-    ? requestOrigin || allowedOrigins[0]
-    : allowedOrigins[0];
+    ? requestOrigin || firstOrigin
+    : firstOrigin;
 
   return {
     'Access-Control-Allow-Origin': origin,
@@ -164,7 +168,9 @@ export function errorResponse(
   context: string,
   cors: Record<string, string> = publicCorsHeaders
 ): Response {
-  const logContext = createUtilityContext('http-utils', 'error-response', { context });
+  const logContext = createUtilityContext('http-utils', 'error-response', {
+    context,
+  });
   const errorMsg = errorToString(error);
   console.error(`${context} failed`, {
     ...logContext,

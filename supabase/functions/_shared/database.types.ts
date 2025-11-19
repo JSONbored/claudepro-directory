@@ -569,8 +569,8 @@ export interface Database {
         Row: {
           active: boolean | null;
           admin_notes: string | null;
-          benefits: Json;
-          category: string;
+          benefits: string[];
+          category: Database['public']['Enums']['job_category'];
           click_count: number | null;
           company: string;
           company_id: string | null;
@@ -579,7 +579,7 @@ export interface Database {
           created_at: string;
           description: string;
           discord_message_id: string | null;
-          experience: string | null;
+          experience: Database['public']['Enums']['experience_level'] | null;
           expires_at: string | null;
           featured: boolean | null;
           id: string;
@@ -594,22 +594,22 @@ export interface Database {
           payment_method: string | null;
           payment_reference: string | null;
           payment_status: Database['public']['Enums']['payment_status'] | null;
-          plan: string;
+          plan: Database['public']['Enums']['job_plan'];
           polar_customer_id: string | null;
           polar_order_id: string | null;
           polar_subscription_id: string | null;
           posted_at: string | null;
           remote: boolean | null;
-          requirements: Json;
+          requirements: string[];
           salary: string | null;
           slug: string;
           status: Database['public']['Enums']['job_status'];
-          tags: Json;
-          tier: string;
+          tags: string[];
+          tier: Database['public']['Enums']['job_tier'];
           tier_price: number | null;
           tier_upgraded_at: string | null;
           title: string;
-          type: string;
+          type: Database['public']['Enums']['job_type'];
           updated_at: string;
           user_id: string | null;
           view_count: number | null;
@@ -618,8 +618,8 @@ export interface Database {
         Insert: {
           active?: boolean | null;
           admin_notes?: string | null;
-          benefits?: Json;
-          category: string;
+          benefits?: string[];
+          category: Database['public']['Enums']['job_category'];
           click_count?: number | null;
           company: string;
           company_id?: string | null;
@@ -628,7 +628,7 @@ export interface Database {
           created_at?: string;
           description: string;
           discord_message_id?: string | null;
-          experience?: string | null;
+          experience?: Database['public']['Enums']['experience_level'] | null;
           expires_at?: string | null;
           featured?: boolean | null;
           id?: string;
@@ -649,16 +649,16 @@ export interface Database {
           polar_subscription_id?: string | null;
           posted_at?: string | null;
           remote?: boolean | null;
-          requirements?: Json;
+          requirements?: string[];
           salary?: string | null;
           slug?: string;
           status?: Database['public']['Enums']['job_status'];
-          tags?: Json;
-          tier?: string;
+          tags?: string[];
+          tier?: Database['public']['Enums']['job_tier'];
           tier_price?: number | null;
           tier_upgraded_at?: string | null;
           title: string;
-          type: string;
+          type: Database['public']['Enums']['job_type'];
           updated_at?: string;
           user_id?: string | null;
           view_count?: number | null;
@@ -667,8 +667,8 @@ export interface Database {
         Update: {
           active?: boolean | null;
           admin_notes?: string | null;
-          benefits?: Json;
-          category?: string;
+          benefits?: string[];
+          category?: Database['public']['Enums']['job_category'];
           click_count?: number | null;
           company?: string;
           company_id?: string | null;
@@ -677,7 +677,7 @@ export interface Database {
           created_at?: string;
           description?: string;
           discord_message_id?: string | null;
-          experience?: string | null;
+          experience?: Database['public']['Enums']['experience_level'] | null;
           expires_at?: string | null;
           featured?: boolean | null;
           id?: string;
@@ -698,16 +698,16 @@ export interface Database {
           polar_subscription_id?: string | null;
           posted_at?: string | null;
           remote?: boolean | null;
-          requirements?: Json;
+          requirements?: string[];
           salary?: string | null;
           slug?: string;
           status?: Database['public']['Enums']['job_status'];
-          tags?: Json;
-          tier?: string;
+          tags?: string[];
+          tier?: Database['public']['Enums']['job_tier'];
           tier_price?: number | null;
           tier_upgraded_at?: string | null;
           title?: string;
-          type?: string;
+          type?: Database['public']['Enums']['job_type'];
           updated_at?: string;
           user_id?: string | null;
           view_count?: number | null;
@@ -1171,7 +1171,10 @@ export interface Database {
         Returns: string;
       };
 
-      generate_tool_llms_txt: { Args: { p_tool_name: string }; Returns: string };
+      generate_tool_llms_txt: {
+        Args: { p_tool_name: string };
+        Returns: string;
+      };
 
       get_active_notifications: {
         Args: { p_dismissed_ids?: string[] };
@@ -1379,6 +1382,27 @@ export interface Database {
         | 'expired'
         | 'rejected'
         | 'deleted';
+
+      job_category:
+        | 'engineering'
+        | 'design'
+        | 'product'
+        | 'marketing'
+        | 'sales'
+        | 'support'
+        | 'research'
+        | 'data'
+        | 'operations'
+        | 'leadership'
+        | 'consulting'
+        | 'education'
+        | 'other';
+
+      job_plan: 'one-time' | 'subscription';
+
+      job_tier: 'standard' | 'featured';
+
+      job_type: 'full-time' | 'part-time' | 'contract' | 'freelance' | 'internship';
 
       webhook_direction: 'inbound' | 'outbound';
 

@@ -58,7 +58,8 @@ import { Code, FileText, Plus, Sparkles, Tag, X } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import type { SubmissionContentType } from '@/src/lib/types/component.types';
 import { toasts } from '@/src/lib/utils/toast.utils';
-import type { ContentCategory, GetGetContentTemplatesReturn } from '@/src/types/database-overrides';
+import type { Database } from '@/src/types/database.types';
+import type { GetGetContentTemplatesReturn } from '@/src/types/database-overrides';
 
 interface FormData {
   submission_type: SubmissionContentType;
@@ -70,7 +71,7 @@ interface FormData {
   type_specific: Record<string, unknown>;
   tags: string[];
   examples: string[];
-  category: ContentCategory;
+  category: Database['public']['Enums']['content_category'];
 }
 
 const DEFAULT_FORM_DATA: FormData = {
@@ -126,7 +127,7 @@ export default function WizardSubmissionPage() {
         const merged: FormData = {
           ...prev,
           ...updates,
-          category: prev.submission_type as ContentCategory, // Always ensure category matches submission_type
+          category: prev.submission_type as Database['public']['Enums']['content_category'], // Always ensure category matches submission_type
         };
         return merged;
       });
@@ -460,7 +461,7 @@ export default function WizardSubmissionPage() {
 
       // Keep category and submission_type in sync
       if (updates.submission_type && updates.submission_type !== prev.submission_type) {
-        next.category = updates.submission_type as ContentCategory;
+        next.category = updates.submission_type as Database['public']['Enums']['content_category'];
       }
 
       return next;
@@ -801,7 +802,7 @@ function StepConfiguration({
         >
           <TemplateQuickSelect
             templates={templates}
-            contentType={submissionType as ContentCategory}
+            contentType={submissionType as Database['public']['Enums']['content_category']}
             onApplyTemplate={onApplyTemplate}
             maxVisible={3}
           />
@@ -828,12 +829,12 @@ function StepConfiguration({
                   required={true}
                   helpText="The main prompt that defines the agent's behavior"
                   showCharCount={true}
-                  currentLength={((data.systemPrompt as string) || '').length}
+                  currentLength={((data['systemPrompt'] as string) || '').length}
                   maxLength={2000}
                 >
                   <Textarea
                     id="wizard-system-prompt"
-                    value={(data.systemPrompt as string) || ''}
+                    value={(data['systemPrompt'] as string) || ''}
                     onChange={(e) => onChange({ ...data, systemPrompt: e.target.value })}
                     placeholder="You are an expert in..."
                     rows={8}
@@ -854,7 +855,7 @@ function StepConfiguration({
                       min={0}
                       max={1}
                       step={0.1}
-                      value={(data.temperature as number | undefined) ?? 0.7}
+                      value={(data['temperature'] as number | undefined) ?? 0.7}
                       onChange={(e) => {
                         const raw = e.target.value;
                         const parsed = raw === '' ? undefined : Number.parseFloat(raw);
@@ -877,7 +878,7 @@ function StepConfiguration({
                       min={100}
                       max={4096}
                       step={100}
-                      value={(data.maxTokens as number | undefined) ?? 2048}
+                      value={(data['maxTokens'] as number | undefined) ?? 2048}
                       onChange={(e) => {
                         const raw = e.target.value;
                         const parsed = raw === '' ? undefined : Number.parseInt(raw, 10);
@@ -902,7 +903,7 @@ function StepConfiguration({
                 >
                   <Input
                     id="wizard-npm-package"
-                    value={(data.npmPackage as string) || ''}
+                    value={(data['npmPackage'] as string) || ''}
                     onChange={(e) => onChange({ ...data, npmPackage: e.target.value })}
                     placeholder="@modelcontextprotocol/server-..."
                   />
@@ -915,7 +916,7 @@ function StepConfiguration({
                 >
                   <Input
                     id="wizard-install-command"
-                    value={(data.installCommand as string) || ''}
+                    value={(data['installCommand'] as string) || ''}
                     onChange={(e) => onChange({ ...data, installCommand: e.target.value })}
                     placeholder="npm install -g @modelcontextprotocol/..."
                   />
@@ -928,7 +929,7 @@ function StepConfiguration({
                 >
                   <Textarea
                     id="wizard-tools-description"
-                    value={(data.toolsDescription as string) || ''}
+                    value={(data['toolsDescription'] as string) || ''}
                     onChange={(e) =>
                       onChange({
                         ...data,
@@ -949,12 +950,12 @@ function StepConfiguration({
                 required={true}
                 helpText="The expertise rules or guidelines"
                 showCharCount={true}
-                currentLength={((data.rulesContent as string) || '').length}
+                currentLength={((data['rulesContent'] as string) || '').length}
                 maxLength={3000}
               >
                 <Textarea
                   id="wizard-rules-content"
-                  value={(data.rulesContent as string) || ''}
+                  value={(data['rulesContent'] as string) || ''}
                   onChange={(e) => onChange({ ...data, rulesContent: e.target.value })}
                   placeholder="When working with TypeScript..."
                   rows={10}
@@ -970,12 +971,12 @@ function StepConfiguration({
                 required={true}
                 helpText="The shell command or script"
                 showCharCount={true}
-                currentLength={((data.commandContent as string) || '').length}
+                currentLength={((data['commandContent'] as string) || '').length}
                 maxLength={1000}
               >
                 <Textarea
                   id="wizard-command-content"
-                  value={(data.commandContent as string) || ''}
+                  value={(data['commandContent'] as string) || ''}
                   onChange={(e) => onChange({ ...data, commandContent: e.target.value })}
                   placeholder="#!/bin/bash..."
                   rows={6}

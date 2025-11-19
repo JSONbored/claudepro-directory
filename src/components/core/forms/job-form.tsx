@@ -30,18 +30,44 @@ import type { CreateJobInput } from '@/src/lib/actions/jobs.actions';
 import { ROUTES } from '@/src/lib/data/config/constants';
 import { Star } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
-import { ensureStringArray } from '@/src/lib/utils/data.utils';
 import { logClientWarning } from '@/src/lib/utils/error.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
-import {
-  isWorkplaceType,
-  JOB_PLAN_VALUES,
-  type JobCategory,
-  type JobPlan,
-  type JobTier,
-  WORKPLACE_TYPE_VALUES,
-  type WorkplaceType,
-} from '@/src/types/database-overrides';
+import type { Database } from '@/src/types/database.types';
+import { JOB_PLAN_VALUES } from '@/src/types/database-overrides';
+
+const WORKPLACE_TYPE_VALUES = [
+  'Remote',
+  'On site',
+  'Hybrid',
+] as const satisfies readonly Database['public']['Enums']['workplace_type'][];
+
+const EXPERIENCE_LEVEL_VALUES = [
+  'beginner',
+  'intermediate',
+  'advanced',
+] as const satisfies readonly Database['public']['Enums']['experience_level'][];
+
+/**
+ * Helper function to check if value is a valid WorkplaceType
+ */
+function isWorkplaceType(value: unknown): value is Database['public']['Enums']['workplace_type'] {
+  return (
+    typeof value === 'string' &&
+    WORKPLACE_TYPE_VALUES.includes(value as Database['public']['Enums']['workplace_type'])
+  );
+}
+
+/**
+ * Helper function to check if value is a valid ExperienceLevel
+ */
+function isExperienceLevel(
+  value: unknown
+): value is Database['public']['Enums']['experience_level'] {
+  return (
+    typeof value === 'string' &&
+    EXPERIENCE_LEVEL_VALUES.includes(value as Database['public']['Enums']['experience_level'])
+  );
+}
 
 interface JobFormProps {
   initialData?: Partial<CreateJobInput>;
@@ -57,11 +83,9 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
   const [companyId, setCompanyId] = useState<string | null>(initialData?.company_id || null);
   const [companyName, setCompanyName] = useState<string>(initialData?.company || '');
   const [isFeatured, setIsFeatured] = useState<boolean>(initialData?.tier === 'featured');
-  const [tags, setTags] = useState<string[]>(ensureStringArray(initialData?.tags));
-  const [requirements, setRequirements] = useState<string[]>(
-    ensureStringArray(initialData?.requirements)
-  );
-  const [benefits, setBenefits] = useState<string[]>(ensureStringArray(initialData?.benefits));
+  const [tags, setTags] = useState<string[]>(initialData?.tags || []);
+  const [requirements, setRequirements] = useState<string[]>(initialData?.requirements || []);
+  const [benefits, setBenefits] = useState<string[]>(initialData?.benefits || []);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -71,16 +95,20 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
     const location = formData.get('location') as string;
     const salary = formData.get('salary') as string;
     const workplaceRaw = formData.get('workplace') as string;
-    const experience = formData.get('experience') as string;
+    const experienceRaw = formData.get('experience') as string;
     const contactEmail = formData.get('contact_email') as string;
     const companyLogo = formData.get('company_logo') as string;
 
     // Validate workplace type
-    const workplace: WorkplaceType | null | undefined = workplaceRaw
+    const workplace: Database['public']['Enums']['workplace_type'] | null | undefined = workplaceRaw
       ? isWorkplaceType(workplaceRaw)
         ? workplaceRaw
         : null
       : null;
+
+    // Validate experience level
+    const experience: Database['public']['Enums']['experience_level'] | null | undefined =
+      experienceRaw ? (isExperienceLevel(experienceRaw) ? experienceRaw : null) : null;
 
     const jobData: CreateJobInput = {
       title: formData.get('title') as string,
@@ -90,22 +118,25 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
       description: formData.get('description') as string,
       ...(salary && { salary }),
       remote: formData.get('remote') === 'on',
-      type: formData.get('type') as string,
+      type: formData.get('type') as Database['public']['Enums']['job_type'],
       ...(workplace && { workplace }),
       ...(experience && { experience }),
-      category: formData.get('category') as JobCategory,
+      category: formData.get('category') as Database['public']['Enums']['job_category'],
       tags,
       requirements,
       benefits,
       link: formData.get('link') as string,
       plan: (() => {
         const planRaw = formData.get('plan');
-        if (typeof planRaw === 'string' && JOB_PLAN_VALUES.includes(planRaw as JobPlan)) {
-          return planRaw as JobPlan;
+        if (
+          typeof planRaw === 'string' &&
+          JOB_PLAN_VALUES.includes(planRaw as Database['public']['Enums']['job_plan'])
+        ) {
+          return planRaw as Database['public']['Enums']['job_plan'];
         }
         throw new Error('Invalid job plan');
       })(),
-      tier: (isFeatured ? 'featured' : 'standard') as JobTier,
+      tier: (isFeatured ? 'featured' : 'standard') as Database['public']['Enums']['job_tier'],
       ...(contactEmail && { contact_email: contactEmail }),
       ...(companyLogo && { company_logo: companyLogo }),
     };
@@ -178,8 +209,10 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
               label="Workplace"
               name="workplace"
               defaultValue={
-                (initialData?.workplace as WorkplaceType | undefined) ||
-                (WORKPLACE_TYPE_VALUES[0] as WorkplaceType)
+                (initialData?.workplace as
+                  | Database['public']['Enums']['workplace_type']
+                  | undefined) ||
+                (WORKPLACE_TYPE_VALUES[0] as Database['public']['Enums']['workplace_type'])
               }
               required={true}
             >
@@ -204,14 +237,19 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
               variant="select"
               label="Experience Level"
               name="experience"
-              defaultValue={initialData?.experience || ''}
+              defaultValue={
+                (initialData?.experience as
+                  | Database['public']['Enums']['experience_level']
+                  | undefined) ||
+                (EXPERIENCE_LEVEL_VALUES[0] as Database['public']['Enums']['experience_level'])
+              }
               placeholder="Select level"
             >
-              <SelectItem value="Entry">Entry Level</SelectItem>
-              <SelectItem value="Mid">Mid Level</SelectItem>
-              <SelectItem value="Senior">Senior</SelectItem>
-              <SelectItem value="Lead">Lead</SelectItem>
-              <SelectItem value="Executive">Executive</SelectItem>
+              {EXPERIENCE_LEVEL_VALUES.map((value) => (
+                <SelectItem key={value} value={value}>
+                  {value.charAt(0).toUpperCase() + value.slice(1)}
+                </SelectItem>
+              ))}
             </FormField>
           </div>
 

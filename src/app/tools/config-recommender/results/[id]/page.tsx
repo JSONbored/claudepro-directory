@@ -11,21 +11,16 @@ import { getConfigRecommendations } from '@/src/lib/data/tools/recommendations';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { normalizeError } from '@/src/lib/utils/error.utils';
-import type {
-  ExperienceLevel,
-  FocusAreaType,
-  GetGetRecommendationsReturn,
-  IntegrationType,
-  UseCaseType,
-} from '@/src/types/database-overrides';
+import type { Database } from '@/src/types/database.types';
+import type { GetGetRecommendationsReturn } from '@/src/types/database-overrides';
 
 // Type matching QuizAnswers from quiz-form.tsx
 type DecodedQuizAnswers = {
-  useCase: UseCaseType;
-  experienceLevel: ExperienceLevel;
+  useCase: Database['public']['Enums']['use_case_type'];
+  experienceLevel: Database['public']['Enums']['experience_level'];
   toolPreferences: string[];
-  p_integrations?: IntegrationType[];
-  p_focus_areas?: FocusAreaType[];
+  p_integrations?: Database['public']['Enums']['integration_type'][];
+  p_focus_areas?: Database['public']['Enums']['focus_area_type'][];
   teamSize?: string;
   timestamp?: string;
 };
@@ -49,7 +44,7 @@ function isRecommendationReason(value: unknown): value is { type: string; messag
   }
 
   const record = value as Record<string, unknown>;
-  return typeof record.type === 'string' && typeof record.message === 'string';
+  return typeof record['type'] === 'string' && typeof record['message'] === 'string';
 }
 
 function normalizeRecommendationResults(results: GetGetRecommendationsReturn['results']) {

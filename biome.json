@@ -9,21 +9,19 @@
       "scripts/utils/**/*.js",
       "content/**/*",
       "config/**/*",
-      "supabase/functions/**/*.ts"
-    ],
-    "experimentalScannerIgnores": [
-      ".next/**/*",
-      "out/**/*",
-      "dist/**/*",
-      "generated/**/*",
-      "src/generated/**/*",
-      "src/lib/schemas/generated/**/*",
-      "src/lib/schemas/generated/db-schemas.d.ts",
-      "src/types/database.types.ts",
-      "scripts/build/templates/**/*",
-      "scripts/build/templates/service-worker.template.js",
-      "node_modules/**/*",
-      "playwright-report/**/*"
+      "supabase/functions/**/*.ts",
+      "!!**/.next/**/*",
+      "!!**/out/**/*",
+      "!!**/dist/**/*",
+      "!!**/generated/**/*",
+      "!!**/src/generated/**/*",
+      "!!**/src/lib/schemas/generated/**/*",
+      "!!**/src/lib/schemas/generated/db-schemas.d.ts",
+      "!!**/src/types/database.types.ts",
+      "!!**/scripts/build/templates/**/*",
+      "!!**/scripts/build/templates/service-worker.template.js",
+      "!!**/node_modules/**/*",
+      "!!**/playwright-report/**/*"
     ],
     "ignoreUnknown": false
   },
@@ -125,7 +123,7 @@
         "noVoid": "error",
         "useArrowFunction": "warn",
         "useFlatMap": "error",
-        "useLiteralKeys": "error",
+        "useLiteralKeys": "off",
         "useOptionalChain": "error",
         "useRegexLiterals": "error",
         "useSimpleNumberKeys": "error",
@@ -279,9 +277,7 @@
         "noFloatingPromises": "error",
         "noMisusedPromises": "error",
         "noUnresolvedImports": "off",
-        "noDuplicateDependencies": "error",
         "noImportCycles": "error",
-        "noReactForwardRef": "warn",
         "useSortedClasses": "warn"
       }
     }
@@ -421,6 +417,26 @@
           },
           "correctness": {
             "noUndeclaredVariables": "off"
+          },
+          "complexity": {
+            "useOptionalChain": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": ["supabase/functions/deno-imports.d.ts"],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noExplicitAny": "off",
+            "noRedeclare": "off"
+          },
+          "performance": {
+            "noReExportAll": "off"
+          },
+          "complexity": {
+            "noBannedTypes": "off"
           }
         }
       }
