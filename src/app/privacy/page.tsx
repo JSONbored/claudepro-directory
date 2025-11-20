@@ -4,7 +4,9 @@ import { APP_CONFIG } from '@/src/lib/data/config/constants';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { getLastUpdatedDate } from '@/src/lib/utils/data.utils';
 
-export const metadata: Promise<Metadata> = generatePageMetadata('/privacy');
+export async function generateMetadata(): Promise<Metadata> {
+  return generatePageMetadata('/privacy');
+}
 
 /**
  * Static Generation: Legal pages are fully static and never change

@@ -20,6 +20,7 @@ import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { normalizeError } from '@/src/lib/utils/error.utils';
+import { hashUserId } from '@/src/lib/utils/privacy.utils';
 
 interface CollectionPageProps {
   params: Promise<{ slug: string }>;
@@ -39,6 +40,9 @@ export default async function CollectionDetailPage({ params }: CollectionPagePro
     redirect('/login');
   }
 
+  // Hash user ID for privacy-compliant logging (GDPR/CCPA)
+  const userIdHash = hashUserId(user.id);
+
   let collectionData: Awaited<ReturnType<typeof getCollectionDetail>> = null;
   let hasError = false;
   try {
@@ -46,7 +50,7 @@ export default async function CollectionDetailPage({ params }: CollectionPagePro
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load collection detail for account view');
     logger.error('CollectionDetailPage: getCollectionDetail threw', normalized, {
-      userId: user.id,
+      userIdHash,
       slug,
     });
     hasError = true;
@@ -75,7 +79,7 @@ export default async function CollectionDetailPage({ params }: CollectionPagePro
   if (!collectionData) {
     logger.warn('CollectionDetailPage: collection not found or inaccessible', {
       slug,
-      userId: user.id,
+      userIdHash,
     });
     notFound();
   }
@@ -85,7 +89,7 @@ export default async function CollectionDetailPage({ params }: CollectionPagePro
   if (!collection) {
     logger.warn('CollectionDetailPage: collection is null in response', {
       slug,
-      userId: user.id,
+      userIdHash,
     });
     notFound();
   }

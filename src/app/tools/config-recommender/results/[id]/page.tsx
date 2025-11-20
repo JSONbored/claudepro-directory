@@ -14,14 +14,7 @@ import { normalizeError } from '@/src/lib/utils/error.utils';
 import type { Database } from '@/src/types/database.types';
 
 type RecommendationResponse = Database['public']['Functions']['get_recommendations']['Returns'] & {
-  answers: {
-    useCase: Database['public']['Enums']['use_case_type'];
-    experienceLevel: Database['public']['Enums']['experience_level'];
-    toolPreferences: string[];
-    integrations?: Database['public']['Enums']['integration_type'][];
-    focusAreas?: Database['public']['Enums']['focus_area_type'][];
-    teamSize?: string;
-  };
+  answers: DecodedQuizAnswers;
   id: string;
   generatedAt: string;
 };

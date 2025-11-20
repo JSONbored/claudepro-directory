@@ -5,14 +5,14 @@
  */
 
 import { logger } from '@/src/lib/logger';
-import type { Json } from '@/src/types/database.types';
+import type { Database, Json } from '@/src/types/database.types';
 
 const PULSE_QUEUE_NAME = 'pulse';
 
 async function enqueueToPulseQueue(
   event: {
     user_id?: string | null;
-    content_type: string | null;
+    content_type: Database['public']['Enums']['content_category'] | null;
     content_slug: string | null;
     interaction_type: string;
     session_id?: string | null;
@@ -78,7 +78,7 @@ async function enqueueToPulseQueue(
 
 export async function enqueuePulseEventServer(event: {
   user_id?: string | null;
-  content_type: string | null;
+  content_type: Database['public']['Enums']['content_category'] | null;
   content_slug: string | null;
   interaction_type: string;
   session_id?: string | null;

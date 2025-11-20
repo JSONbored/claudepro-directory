@@ -29,11 +29,19 @@ const NewsletterCTAVariant = dynamic(
 
 export const revalidate = false;
 
-export const metadata: Promise<Metadata> = generatePageMetadata('/trending');
+export async function generateMetadata(): Promise<Metadata> {
+  return generatePageMetadata('/trending');
+}
 
 export default async function TrendingPage({ searchParams }: PagePropsWithSearchParams) {
   const rawParams = await searchParams;
-  const categoryParam = rawParams?.['category'] as string | undefined;
+  const categoryParam = (() => {
+    const category = rawParams?.['category'];
+    if (Array.isArray(category)) {
+      return category.length > 0 ? category[0] : undefined;
+    }
+    return category as string | undefined;
+  })();
   const limit = Math.min(Number(rawParams?.['limit']) || 12, 100);
   const normalizedCategory = categoryParam && isValidCategory(categoryParam) ? categoryParam : null;
 

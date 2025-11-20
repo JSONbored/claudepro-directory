@@ -9,7 +9,9 @@ import { DiscordIcon, Github, Mail, MessageSquare } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 
-export const metadata: Promise<Metadata> = generatePageMetadata('/contact');
+export async function generateMetadata(): Promise<Metadata> {
+  return generatePageMetadata('/contact');
+}
 
 /**
  * Static Generation: This page is statically generated at build time

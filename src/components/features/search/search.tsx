@@ -30,6 +30,37 @@ import { cn } from '@/src/lib/utils';
 import { logClientWarning, logUnhandledPromise } from '@/src/lib/utils/error.utils';
 import type { Database } from '@/src/types/database.types';
 
+const CONTENT_CATEGORY_VALUES = [
+  'agents',
+  'mcp',
+  'rules',
+  'commands',
+  'hooks',
+  'statuslines',
+  'skills',
+  'collections',
+  'guides',
+  'jobs',
+  'changelog',
+] as const satisfies readonly Database['public']['Enums']['content_category'][];
+
+function isValidContentCategory(
+  value: string | null | undefined
+): value is Database['public']['Enums']['content_category'] {
+  return (
+    typeof value === 'string' &&
+    CONTENT_CATEGORY_VALUES.includes(value as Database['public']['Enums']['content_category'])
+  );
+}
+
+function getCategoryFromPathname(
+  pathname: string | null | undefined
+): Database['public']['Enums']['content_category'] | null {
+  if (!pathname) return null;
+  const category = pathname.split('/')[1];
+  return isValidContentCategory(category) ? category : null;
+}
+
 export type { FilterState };
 
 const SearchErrorFallback = () => (
@@ -72,7 +103,7 @@ function UnifiedSearchComponent({
     originalClearFilters();
 
     // Track filter clearing
-    const category = pathname?.split('/')[1] || 'global';
+    const category = getCategoryFromPathname(pathname);
     pulse
       .filter({
         category,
@@ -84,7 +115,7 @@ function UnifiedSearchComponent({
       })
       .catch((error) => {
         logUnhandledPromise('UnifiedSearchComponent: filter clear tracking failed', error, {
-          category,
+          category: category ?? 'null',
         });
       });
   }, [originalClearFilters, pathname, pulse]);
@@ -125,11 +156,11 @@ function UnifiedSearchComponent({
     const analyticsTimer = setTimeout(() => {
       const sanitized = localSearchQuery.trim().slice(0, 100);
       if (sanitized && sanitized.length > 0) {
-        const category = pathname?.split('/')[1] || 'global';
+        const category = getCategoryFromPathname(pathname);
 
         pulse
           .click({
-            category: category as Database['public']['Enums']['content_category'] | null,
+            category,
             slug: `search:${sanitized}`,
             metadata: {
               resultsCount: resultCount,
@@ -139,7 +170,7 @@ function UnifiedSearchComponent({
           .catch((error) => {
             logUnhandledPromise('UnifiedSearchComponent: search tracking failed', error, {
               query: sanitized,
-              category,
+              category: category ?? 'null',
               resultCount,
               activeFilterCount,
             });
@@ -168,7 +199,7 @@ function UnifiedSearchComponent({
 
     // Track filter application
     if (activeFilterCount > 0) {
-      const category = pathname?.split('/')[1] || 'global';
+      const category = getCategoryFromPathname(pathname);
       pulse
         .filter({
           category,
@@ -186,7 +217,7 @@ function UnifiedSearchComponent({
         })
         .catch((error) => {
           logUnhandledPromise('UnifiedSearchComponent: filter tracking failed', error, {
-            category,
+            category: category ?? 'null',
             filterCount: activeFilterCount,
           });
         });
@@ -202,7 +233,7 @@ function UnifiedSearchComponent({
       handleFiltersChange(newFilters);
 
       // Track sort filter change
-      const category = pathname?.split('/')[1] || 'global';
+      const category = getCategoryFromPathname(pathname);
       pulse
         .filter({
           category,
@@ -215,7 +246,7 @@ function UnifiedSearchComponent({
         })
         .catch((error) => {
           logUnhandledPromise('UnifiedSearchComponent: sort filter tracking failed', error, {
-            category,
+            category: category ?? 'null',
             sort: value,
           });
         });

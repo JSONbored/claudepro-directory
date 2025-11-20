@@ -5,7 +5,9 @@ import { getContactChannels } from '@/src/lib/data/marketing/contact';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { getLastUpdatedDate } from '@/src/lib/utils/data.utils';
 
-export const metadata: Promise<Metadata> = generatePageMetadata('/accessibility');
+export async function generateMetadata(): Promise<Metadata> {
+  return generatePageMetadata('/accessibility');
+}
 
 /**
  * Static Generation: Legal pages are fully static and never change

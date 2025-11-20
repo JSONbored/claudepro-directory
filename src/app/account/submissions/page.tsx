@@ -19,7 +19,9 @@ import { BADGE_COLORS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { normalizeError } from '@/src/lib/utils/error.utils';
 import type { Database } from '@/src/types/database.types';
 
-export const metadata: Promise<Metadata> = generatePageMetadata('/account/submissions');
+export async function generateMetadata(): Promise<Metadata> {
+  return generatePageMetadata('/account/submissions');
+}
 
 /**
  * Extract and validate GitHub PR components from URL
@@ -286,7 +288,7 @@ export default async function SubmissionsPage() {
    * Extracts and validates PR components, then constructs a safe URL
    */
   function getPrLinkProps(submission: (typeof submissions)[number]) {
-    const components = submission.pr_url ? extractPrComponents(submission.pr_url ?? '') : null;
+    const components = submission.pr_url ? extractPrComponents(submission.pr_url) : null;
     const prNumber = submission.pr_number || components?.prNumber;
 
     if (!(components && prNumber)) return null;

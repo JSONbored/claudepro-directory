@@ -23,7 +23,9 @@ import { formatRelativeDate } from '@/src/lib/utils/data.utils';
 import { normalizeError } from '@/src/lib/utils/error.utils';
 import type { Database, Tables } from '@/src/types/database.types';
 
-export const metadata: Promise<Metadata> = generatePageMetadata('/account/jobs');
+export async function generateMetadata(): Promise<Metadata> {
+  return generatePageMetadata('/account/jobs');
+}
 
 export default async function MyJobsPage() {
   const { user } = await getAuthenticatedUser({ context: 'MyJobsPage' });

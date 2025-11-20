@@ -246,8 +246,10 @@ export async function handleContentNotificationDirect(
 
   const logContext = createDiscordHandlerContext('content-notification', {
     ...(content?.id !== undefined ? { contentId: content.id } : {}),
-    ...(content?.category !== undefined ? { category: content.category } : {}),
-    ...(content?.slug !== undefined ? { slug: content.slug } : {}),
+    ...(content?.category !== null && content?.category !== undefined
+      ? { category: content.category }
+      : {}),
+    ...(content?.slug !== null && content?.slug !== undefined ? { slug: content.slug } : {}),
   });
 
   if (contentError || !content) {
@@ -599,8 +601,10 @@ async function handleContentNotification(req: Request): Promise<Response> {
   // Create logContext after fetching content
   const logContext = createDiscordHandlerContext('content-notification', {
     ...(content?.id !== undefined ? { contentId: content.id } : {}),
-    ...(content?.category !== undefined ? { category: content.category } : {}),
-    ...(content?.slug !== undefined ? { slug: content.slug } : {}),
+    ...(content?.category !== null && content?.category !== undefined
+      ? { category: content.category }
+      : {}),
+    ...(content?.slug !== null && content?.slug !== undefined ? { slug: content.slug } : {}),
   });
 
   if (contentError || !content) {

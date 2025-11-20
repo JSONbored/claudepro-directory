@@ -253,7 +253,7 @@ export interface HighlightCodeResponse {
 }
 
 export interface ProcessContentItem {
-  category: string;
+  category: Database['public']['Enums']['content_category'] | null;
   slug?: string | null;
   name?: string | null;
   hook_type?: string | null;

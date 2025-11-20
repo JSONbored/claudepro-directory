@@ -147,7 +147,11 @@ export const ConfigCard = memo(
     showBorderBeam, // Auto-enable for featured items if not explicitly set
     searchQuery, // Optional search query for highlighting
   }: ConfigCardProps) => {
-    const displayTitle = getDisplayTitle(item);
+    const displayTitle = getDisplayTitle({
+      title: 'title' in item ? (typeof item.title === 'string' ? item.title : null) : null,
+      slug: 'slug' in item ? (typeof item.slug === 'string' ? item.slug : null) : null,
+      category: 'category' in item && isValidCategory(item.category) ? item.category : null,
+    });
 
     // Use pre-highlighted HTML from edge function (unified-search)
     // All highlighting is now done server-side at the edge

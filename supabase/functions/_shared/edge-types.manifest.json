@@ -102,7 +102,15 @@
 		"job_tier",
 		"job_type",
 		"interaction_type",
-		"sponsorship_tier"
+		"sponsorship_tier",
+		"config_format",
+		"primary_action_type",
+		"generation_source",
+		"email_blocklist_reason",
+		"payment_method",
+		"copy_type",
+		"newsletter_sync_status",
+		"route_group"
 	],
 	"compositeTypes": [
 		"company_profile_result",

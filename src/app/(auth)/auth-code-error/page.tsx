@@ -14,7 +14,9 @@ import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
-export const metadata: Promise<Metadata> = generatePageMetadata('/auth/auth-code-error');
+export async function generateMetadata(): Promise<Metadata> {
+  return generatePageMetadata('/auth/auth-code-error');
+}
 
 interface AuthCodeErrorSearchParams {
   message?: string;

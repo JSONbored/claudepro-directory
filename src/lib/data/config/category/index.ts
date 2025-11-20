@@ -86,9 +86,14 @@ export const getCategoryConfig = cache(
  * Uses isContentCategory from database-overrides.ts as single source of truth
  */
 export function isValidCategory(
-  category: string
+  category: string | Database['public']['Enums']['content_category'] | null | undefined
 ): category is Database['public']['Enums']['content_category'] {
-  return isContentCategory(category);
+  return (
+    category !== null &&
+    category !== undefined &&
+    typeof category === 'string' &&
+    isContentCategory(category)
+  );
 }
 
 // Direct exports (already immutable from generated file)

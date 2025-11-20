@@ -28,7 +28,9 @@ import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { normalizeError } from '@/src/lib/utils/error.utils';
 import type { Database } from '@/src/types/database.types';
 
-export const metadata: Promise<Metadata> = generatePageMetadata('/account/settings');
+export async function generateMetadata(): Promise<Metadata> {
+  return generatePageMetadata('/account/settings');
+}
 
 export default async function SettingsPage() {
   const { user } = await getAuthenticatedUser({ context: 'SettingsPage' });

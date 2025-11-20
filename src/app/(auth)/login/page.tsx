@@ -8,7 +8,9 @@ import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { normalizeError } from '@/src/lib/utils/error.utils';
 import { LoginPanelClient } from './login-panel-client';
 
-export const metadata: Promise<Metadata> = generatePageMetadata('/login');
+export async function generateMetadata(): Promise<Metadata> {
+  return generatePageMetadata('/login');
+}
 
 export default async function LoginPage({
   searchParams,

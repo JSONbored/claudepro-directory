@@ -52,15 +52,19 @@ import { POSITION_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { getContentItemUrl, sanitizeSlug } from '@/src/lib/utils/content.utils';
 import type { Database } from '@/src/types/database.types';
 
+// Type matching DecodedQuizAnswers from results page
+type DecodedQuizAnswers = {
+  useCase: Database['public']['Enums']['use_case_type'];
+  experienceLevel: Database['public']['Enums']['experience_level'];
+  toolPreferences: string[];
+  p_integrations?: Database['public']['Enums']['integration_type'][];
+  p_focus_areas?: Database['public']['Enums']['focus_area_type'][];
+  teamSize?: string;
+  timestamp?: string;
+};
+
 type RecommendationResponse = Database['public']['Functions']['get_recommendations']['Returns'] & {
-  answers: {
-    useCase: Database['public']['Enums']['use_case_type'];
-    experienceLevel: Database['public']['Enums']['experience_level'];
-    toolPreferences: string[];
-    integrations?: Database['public']['Enums']['integration_type'][];
-    focusAreas?: Database['public']['Enums']['focus_area_type'][];
-    teamSize?: string;
-  };
+  answers: DecodedQuizAnswers;
   id: string;
   generatedAt: string;
 };
@@ -287,23 +291,23 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                 {Array.isArray(answers.toolPreferences) ? answers.toolPreferences.join(', ') : ''}
               </p>
             </div>
-            {answers.integrations &&
-              Array.isArray(answers.integrations) &&
-              answers.integrations.length > 0 && (
+            {answers.p_integrations &&
+              Array.isArray(answers.p_integrations) &&
+              answers.p_integrations.length > 0 && (
                 <div>
                   <span className="font-medium text-sm">Integrations</span>
                   <p className="mt-1 text-muted-foreground text-sm">
-                    {answers.integrations.join(', ')}
+                    {answers.p_integrations.join(', ')}
                   </p>
                 </div>
               )}
-            {answers.focusAreas &&
-              Array.isArray(answers.focusAreas) &&
-              answers.focusAreas.length > 0 && (
+            {answers.p_focus_areas &&
+              Array.isArray(answers.p_focus_areas) &&
+              answers.p_focus_areas.length > 0 && (
                 <div>
                   <span className="font-medium text-sm">Focus Areas</span>
                   <p className="mt-1 text-muted-foreground text-sm">
-                    {answers.focusAreas.join(', ')}
+                    {answers.p_focus_areas.join(', ')}
                   </p>
                 </div>
               )}

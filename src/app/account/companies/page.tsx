@@ -84,7 +84,9 @@ function isTrustedPublicDomain(url: string | null | undefined): boolean {
   return allowedTlds.some((tld) => hostname.endsWith(tld));
 }
 
-export const metadata: Promise<Metadata> = generatePageMetadata('/account/companies');
+export async function generateMetadata(): Promise<Metadata> {
+  return generatePageMetadata('/account/companies');
+}
 
 export default async function CompaniesPage() {
   const { user } = await getAuthenticatedUser({ context: 'CompaniesPage' });

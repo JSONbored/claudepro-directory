@@ -57,7 +57,7 @@ function ContentSearchClientComponent<T extends DisplayableContent>({
 
         const result = await searchUnifiedClient({
           query: query.trim(),
-          entities: category ? [category as 'content'] : ['content'],
+          entities: ['content'],
           filters: {
             limit: 100,
             ...(category ? { categories: [category] } : {}),

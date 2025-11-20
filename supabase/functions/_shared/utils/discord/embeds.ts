@@ -70,8 +70,10 @@ export function buildContentEmbed(content: ContentRow) {
     date_added,
   } = content;
 
-  const color = CATEGORY_COLORS[category] || CATEGORY_COLORS['agents'];
-  const contentUrl = `${SITE_URL}/${category}/${slug}`;
+  const validCategory = category ?? 'agents';
+  const validSlug = slug ?? '';
+  const color = CATEGORY_COLORS[validCategory] || CATEGORY_COLORS['agents'];
+  const contentUrl = `${SITE_URL}/${validCategory}/${validSlug}`;
   const contentTitle = display_title || title;
   const authorField = author_profile_url ? `[${author}](${author_profile_url})` : author;
   const tagsField = tags && tags.length > 0 ? tags.map((tag) => `#${tag}`).join(' ') : 'None';
@@ -84,12 +86,12 @@ export function buildContentEmbed(content: ContentRow) {
     description.length > 200 ? `${description.slice(0, 200)}...` : description;
 
   return {
-    title: `${CATEGORY_EMOJIS[category] ?? '📄'} ${contentTitle}`,
+    title: `${CATEGORY_EMOJIS[validCategory] ?? '📄'} ${contentTitle}`,
     description: truncatedDescription,
     color,
     url: contentUrl,
     fields: [
-      { name: '✨ Type', value: `\`${category}\``, inline: true },
+      { name: '✨ Type', value: `\`${validCategory}\``, inline: true },
       { name: '👤 Author', value: authorField, inline: true },
       { name: '🏷️ Tags', value: tagsField, inline: false },
       {

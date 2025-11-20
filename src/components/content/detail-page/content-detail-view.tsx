@@ -55,7 +55,7 @@ function logDetailProcessingWarning(
 ): void {
   const normalized = normalizeError(error, `${section} processing failed`);
   logger.warn(`UnifiedDetailPage: ${section} processing failed`, {
-    category: item.category,
+    category: item.category ?? 'null',
     slug: item.slug ?? 'unknown',
     error: normalized.message,
   });
@@ -94,15 +94,17 @@ function getConfigurationAsString(
 async function ViewCountMetadata({
   item,
   viewCountPromise,
+  copyCount,
 }: {
   item:
     | Tables<'content'>
     | (Database['public']['Functions']['get_content_detail_complete']['Returns']['content'] &
         Tables<'content'>);
   viewCountPromise: Promise<number>;
+  copyCount?: number;
 }) {
   const viewCount = await viewCountPromise;
-  return <DetailMetadata item={item} viewCount={viewCount} />;
+  return <DetailMetadata item={item} viewCount={viewCount} copyCount={copyCount} />;
 }
 
 async function SidebarWithRelated({
@@ -140,7 +142,9 @@ export async function UnifiedDetailPage({
   collectionSections,
   tabsEnabled = false,
 }: UnifiedDetailPageProps) {
-  const category = isValidCategory(item.category) ? item.category : 'agents';
+  const category: Database['public']['Enums']['content_category'] = isValidCategory(item.category)
+    ? item.category
+    : 'agents';
   const config = await getCategoryConfig(category);
   const displayTitle = getDisplayTitle(item);
   const metadata = getMetadata(item);
@@ -668,7 +672,11 @@ export async function UnifiedDetailPage({
           <Suspense
             fallback={<DetailMetadata item={item} viewCount={undefined} copyCount={undefined} />}
           >
-            <ViewCountMetadata item={item} viewCountPromise={viewCountPromise} />
+            <ViewCountMetadata
+              item={item}
+              viewCountPromise={viewCountPromise}
+              {...(copyCount !== undefined ? { copyCount } : {})}
+            />
           </Suspense>
         ) : (
           <DetailMetadata item={item} viewCount={viewCount} copyCount={copyCount} />
@@ -683,7 +691,11 @@ export async function UnifiedDetailPage({
         />
 
         <div className="container mx-auto px-4 pb-8">
-          <NewsletterCTAVariant source="content_page" variant="inline" category={item.category} />
+          <NewsletterCTAVariant
+            source="content_page"
+            variant="inline"
+            {...(item.category ? { category: item.category } : {})}
+          />
         </div>
       </div>
     );
@@ -699,7 +711,11 @@ export async function UnifiedDetailPage({
         <Suspense
           fallback={<DetailMetadata item={item} viewCount={undefined} copyCount={undefined} />}
         >
-          <ViewCountMetadata item={item} viewCountPromise={viewCountPromise} />
+          <ViewCountMetadata
+            item={item}
+            viewCountPromise={viewCountPromise}
+            {...(copyCount !== undefined ? { copyCount } : {})}
+          />
         </Suspense>
       ) : (
         <DetailMetadata item={item} viewCount={viewCount} copyCount={copyCount} />
@@ -829,14 +845,18 @@ export async function UnifiedDetailPage({
             )}
 
             {/* Reviews & Ratings Section */}
-            {isValidCategory(item.category) && (
+            {isValidCategory(item.category) && item.category && item.slug && (
               <div className="mt-12 border-t pt-12">
                 <ReviewListSection contentType={item.category} contentSlug={item.slug} />
               </div>
             )}
 
             {/* Email CTA - Inline variant */}
-            <NewsletterCTAVariant source="content_page" variant="inline" category={item.category} />
+            <NewsletterCTAVariant
+              source="content_page"
+              variant="inline"
+              {...(item.category ? { category: item.category } : {})}
+            />
           </div>
 
           {/* Sidebars - Related content + Recently Viewed */}

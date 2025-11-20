@@ -48,10 +48,8 @@ import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { normalizeError } from '@/src/lib/utils/error.utils';
 import type { Database } from '@/src/types/database.types';
 
-// Feature flags are server/middleware only - mark as dynamic to prevent static generation
-// This prevents flags.ts from being analyzed during build
-export const dynamic = 'force-dynamic';
-export const revalidate = false;
+// ISR: Revalidate every 4 hours (14400s) to pick up new content without requiring a full rebuild
+export const revalidate = 14400;
 
 /**
  * Generate static params for all valid categories

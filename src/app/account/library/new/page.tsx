@@ -11,7 +11,9 @@ import { ArrowLeft } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 
-export const metadata: Promise<Metadata> = generatePageMetadata('/account/library/new');
+export async function generateMetadata(): Promise<Metadata> {
+  return generatePageMetadata('/account/library/new');
+}
 
 export default async function NewCollectionPage() {
   const { user } = await getAuthenticatedUser({ context: 'NewCollectionPage' });

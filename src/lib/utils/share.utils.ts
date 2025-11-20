@@ -8,6 +8,7 @@
 
 import { logger } from '@/src/lib/logger';
 import { normalizeError } from '@/src/lib/utils/error.utils';
+import type { Database } from '@/src/types/database.types';
 
 export type SharePlatform = 'twitter' | 'linkedin' | 'reddit' | 'facebook' | 'copy_link' | 'native';
 
@@ -175,8 +176,8 @@ export async function getShareCount(
  */
 export async function trackShare(options: {
   platform: SharePlatform;
-  category?: string;
-  slug?: string;
+  category?: Database['public']['Enums']['content_category'] | null;
+  slug?: string | null;
   url: string;
 }): Promise<void> {
   try {
@@ -186,8 +187,8 @@ export async function trackShare(options: {
 
     await trackInteraction({
       interaction_type: 'share',
-      content_type: options.category || 'unknown',
-      content_slug: options.slug || 'unknown',
+      content_type: options.category ?? null,
+      content_slug: options.slug ?? null,
       metadata: {
         platform: options.platform,
         url: options.url,

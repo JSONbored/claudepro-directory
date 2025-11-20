@@ -9,7 +9,9 @@ import { getAuthenticatedUser } from '@/src/lib/auth/get-authenticated-user';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 
-export const metadata: Promise<Metadata> = generatePageMetadata('/account/companies/new');
+export async function generateMetadata(): Promise<Metadata> {
+  return generatePageMetadata('/account/companies/new');
+}
 
 export default async function NewCompanyPage() {
   const { user } = await getAuthenticatedUser({ context: 'NewCompanyPage' });

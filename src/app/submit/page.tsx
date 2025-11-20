@@ -61,11 +61,23 @@ function formatTimeAgo(dateString: string): string {
   return `${Math.floor(seconds / 604800)}w ago`;
 }
 
+// Map submission_type to content_category (submission_type is a subset of content_category)
+function mapSubmissionTypeToContentCategory(
+  submissionType: Database['public']['Enums']['submission_type'] | null
+): Database['public']['Enums']['content_category'] {
+  // submission_type values are valid content_category values
+  // Default to 'agents' if null (should not happen due to type guard, but TypeScript needs this)
+  if (submissionType === null) {
+    return 'agents';
+  }
+  return submissionType as Database['public']['Enums']['content_category'];
+}
+
 // Type guard for recent merged submissions
 function isValidRecentSubmission(submission: unknown): submission is {
   id: string;
   content_name: string;
-  content_type: Database['public']['Enums']['content_category'];
+  content_type: Database['public']['Enums']['submission_type'];
   merged_at: string;
   user?: { name: string; slug: string } | null;
 } {
@@ -85,7 +97,9 @@ function isValidRecentSubmission(submission: unknown): submission is {
 
 import type { Metadata } from 'next';
 
-export const metadata: Promise<Metadata> = generatePageMetadata('/submit');
+export async function generateMetadata(): Promise<Metadata> {
+  return generatePageMetadata('/submit');
+}
 
 /**
  * Edge-cached data: Dashboard data fetched from edge-cached data layer
@@ -103,7 +117,7 @@ export default async function SubmitPage() {
       recentCount: 5,
       statsCount: 5,
     });
-    throw normalized;
+    // Continue with null dashboardData - page will render with fallback empty data
   }
 
   if (!dashboardData) {
@@ -127,21 +141,37 @@ export default async function SubmitPage() {
     throw new Error('Submission form configuration is unavailable');
   }
 
-  let templates: Awaited<ReturnType<typeof getContentTemplates>>;
+  // Fetch templates for all supported submission types
+  const supportedCategories: Database['public']['Enums']['content_category'][] = [
+    'agents',
+    'mcp',
+    'rules',
+    'commands',
+    'hooks',
+    'statuslines',
+    'skills',
+  ];
+  let templates: Awaited<ReturnType<typeof getContentTemplates>> = [];
   try {
-    templates = await getContentTemplates('agents');
+    const templatePromises = supportedCategories.map((category) =>
+      getContentTemplates(category).catch((error) => {
+        const normalized = normalizeError(error, `Failed to load templates for ${category}`);
+        logger.error('SubmitPage: getContentTemplates failed for category', normalized, {
+          category,
+        });
+        return []; // Return empty array on error for this category
+      })
+    );
+    const templateResults = await Promise.all(templatePromises);
+    templates = templateResults.flat();
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load submission templates');
-    logger.error('SubmitPage: getContentTemplates failed', normalized, {
-      category: 'agents',
-    });
-    throw normalized;
+    logger.error('SubmitPage: getContentTemplates failed', normalized);
+    // Continue with empty templates array - page will render without templates
   }
 
   if (templates.length === 0) {
-    logger.warn('SubmitPage: no templates returned from getContentTemplates', {
-      category: 'agents',
-    });
+    logger.warn('SubmitPage: no templates returned from getContentTemplates');
   }
 
   const stats = {
@@ -163,7 +193,7 @@ export default async function SubmitPage() {
     .map((submission) => ({
       id: submission.id,
       content_name: submission.content_name,
-      content_type: submission.content_type as Database['public']['Enums']['content_category'],
+      content_type: mapSubmissionTypeToContentCategory(submission.content_type),
       merged_at: submission.merged_at,
       merged_at_formatted: formatTimeAgo(submission.merged_at),
       user:
@@ -219,11 +249,14 @@ export default async function SubmitPage() {
           <SidebarActivityCard
             recentMerged={recentMerged}
             tips={SUBMISSION_TIPS}
-            typeLabels={
-              TYPE_LABELS as Partial<
-                Record<Database['public']['Enums']['content_category'], string>
-              >
-            }
+            typeLabels={Object.fromEntries(
+              Object.entries(TYPE_LABELS).map(([key, value]) => [
+                mapSubmissionTypeToContentCategory(
+                  key as Database['public']['Enums']['submission_type']
+                ),
+                value,
+              ])
+            )}
           />
         </aside>
       </div>

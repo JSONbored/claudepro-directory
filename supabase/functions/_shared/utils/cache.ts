@@ -6,14 +6,18 @@
 
 import { edgeEnv } from '../config/env.ts';
 import { getCacheConfigStringArray } from '../config/statsig-cache.ts';
+import type { Database } from '../database.types.ts';
 
 const REVALIDATE_SECRET = edgeEnv.revalidate.secret;
 const SITE_URL = edgeEnv.site.siteUrl;
 
 export interface InvalidateCacheOptions {
-  category?: string;
-  slug?: string;
+  category?: Database['public']['Enums']['content_category'] | null | undefined;
+  slug?: string | null | undefined;
   logContext?: Record<string, unknown>;
+  contentId?: string | null | undefined;
+  jobId?: string | null | undefined;
+  changelogId?: string | null | undefined;
 }
 
 export interface InvalidateCacheResult {
@@ -47,8 +51,10 @@ export async function invalidateCacheTags(
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         secret: REVALIDATE_SECRET,
-        ...(options?.category && { category: options.category }),
-        ...(options?.slug && { slug: options.slug }),
+        ...(options?.category !== null && options?.category !== undefined
+          ? { category: options.category }
+          : {}),
+        ...(options?.slug !== null && options?.slug !== undefined ? { slug: options.slug } : {}),
         tags,
       }),
     });

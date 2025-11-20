@@ -258,6 +258,7 @@ async function processEmbeddingGeneration(
 
     // Build searchable text
     // Create compatible record object for buildSearchableText function
+    const validCategory = contentRow.category ?? 'agents';
     const searchableText = buildSearchableText({
       id: contentRow.id,
       title: contentRow.title,
@@ -265,7 +266,7 @@ async function processEmbeddingGeneration(
       content: contentRow.content,
       tags: contentRow.tags,
       author: contentRow.author,
-      category: contentRow.category,
+      category: validCategory,
     });
 
     if (!searchableText || searchableText.trim().length === 0) {

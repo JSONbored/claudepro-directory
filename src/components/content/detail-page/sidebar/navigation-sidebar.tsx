@@ -238,8 +238,8 @@ export const DetailSidebar = memo(function DetailSidebar({
                         'NavigationSidebar: GitHub link click pulse failed',
                         error,
                         {
-                          category: contentItem.category,
-                          slug: contentItem.slug,
+                          category: contentItem.category ?? 'null',
+                          slug: contentItem.slug ?? 'null',
                         }
                       );
                     });
@@ -257,12 +257,12 @@ export const DetailSidebar = memo(function DetailSidebar({
               contentItem.documentation_url &&
               (() => {
                 // Validate and sanitize documentation URL before rendering
-                const safeDocUrl = getSafeDocumentationUrl(contentItem.documentation_url as string);
+                const safeDocUrl = getSafeDocumentationUrl(contentItem.documentation_url);
                 if (!safeDocUrl) {
                   logger.warn('NavigationSidebar: Invalid documentation URL rejected', {
-                    category: contentItem.category,
-                    slug: contentItem.slug,
-                    url: contentItem.documentation_url,
+                    category: contentItem.category ?? 'null',
+                    slug: contentItem.slug ?? 'null',
+                    url: contentItem.documentation_url ?? 'null',
                   });
                   // Don't render link if URL is invalid or unsafe
                   return null;
@@ -289,8 +289,8 @@ export const DetailSidebar = memo(function DetailSidebar({
                             'NavigationSidebar: documentation link click pulse failed',
                             error,
                             {
-                              category: contentItem.category,
-                              slug: contentItem.slug,
+                              category: contentItem.category ?? 'null',
+                              slug: contentItem.slug ?? 'null',
                             }
                           );
                         });
@@ -431,7 +431,14 @@ export const DetailSidebar = memo(function DetailSidebar({
                 logger.warn('NavigationSidebar: Invalid related item URL rejected', {
                   category: relatedCategory,
                   slug: relatedSlug,
-                  relatedItemTitle: getDisplayTitle(relatedItem),
+                  relatedItemTitle: getDisplayTitle({
+                    title:
+                      'title' in relatedItem && typeof relatedItem.title === 'string'
+                        ? relatedItem.title
+                        : null,
+                    slug: relatedSlug,
+                    category: relatedCategory,
+                  }),
                 });
                 return null;
               }
@@ -456,7 +463,16 @@ export const DetailSidebar = memo(function DetailSidebar({
                   className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} block w-full cursor-pointer rounded-lg border border-border p-3 text-left transition-colors hover:bg-muted/50`}
                 >
                   <div className={'min-w-0 flex-1'}>
-                    <h4 className="truncate font-medium text-sm">{getDisplayTitle(relatedItem)}</h4>
+                    <h4 className="truncate font-medium text-sm">
+                      {getDisplayTitle({
+                        title:
+                          'title' in relatedItem && typeof relatedItem.title === 'string'
+                            ? relatedItem.title
+                            : null,
+                        slug: relatedSlug,
+                        category: relatedCategory,
+                      })}
+                    </h4>
                     <p className="truncate text-muted-foreground text-xs">
                       {'description' in relatedItem && typeof relatedItem.description === 'string'
                         ? relatedItem.description

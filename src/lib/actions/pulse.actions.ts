@@ -90,7 +90,13 @@ export interface ConfigRecommendationsResponse {
 // ============================================
 
 const trackInteractionSchema = z.object({
-  content_type: z.string().nullable().optional(),
+  content_type: z
+    .enum([...CONTENT_CATEGORY_VALUES] as [
+      Database['public']['Enums']['content_category'],
+      ...Database['public']['Enums']['content_category'][],
+    ])
+    .nullable()
+    .optional(),
   content_slug: z.string().nullable().optional(),
   interaction_type: z.enum([...INTERACTION_TYPE_VALUES] as [
     Database['public']['Enums']['interaction_type'],
@@ -220,8 +226,8 @@ export const trackInteractionAction = optionalAuthAction
   .inputSchema(trackInteractionSchema)
   .metadata({ actionName: 'pulse.trackInteraction', category: 'analytics' })
   .action(async ({ parsedInput, ctx }) => {
-    const contentType = parsedInput.content_type ?? 'unknown';
-    const contentSlug = parsedInput.content_slug ?? 'unknown';
+    const contentType = parsedInput.content_type ?? null;
+    const contentSlug = parsedInput.content_slug ?? null;
     const userId = ctx.userId ?? null;
 
     // Enqueue to queue (fast, non-blocking)
@@ -253,7 +259,7 @@ export const trackNewsletterEventAction = optionalAuthAction
     // Enqueue to queue (fast, non-blocking)
     await enqueuePulseEventServer({
       user_id: userId,
-      content_type: 'newsletter',
+      content_type: null, // Newsletter is not a content category
       content_slug: 'newsletter_cta',
       interaction_type: 'click',
       session_id: null,
@@ -275,7 +281,7 @@ export const trackTerminalCommandAction = optionalAuthAction
     // Enqueue to queue (fast, non-blocking)
     await enqueuePulseEventServer({
       user_id: userId,
-      content_type: 'terminal',
+      content_type: null, // Terminal is not a content category
       content_slug: 'contact-terminal',
       interaction_type: 'contact_interact',
       session_id: null,
@@ -305,7 +311,7 @@ export const trackTerminalFormSubmissionAction = optionalAuthAction
     // Enqueue to queue (fast, non-blocking)
     await enqueuePulseEventServer({
       user_id: userId,
-      content_type: 'terminal',
+      content_type: null, // Terminal is not a content category
       content_slug: 'contact-form',
       interaction_type: 'contact_submit',
       session_id: null,
@@ -354,6 +360,9 @@ export const trackUsageAction = optionalAuthAction
  * Track sponsored content impression - Queue-Based
  * Enqueues to pulse queue → Worker processes in batches (hyper-optimized)
  * Fire-and-forget, non-blocking
+ *
+ * Note: Uses actual content_category from sponsored_content table instead of 'sponsored' marker
+ * since content_type is now an ENUM and cannot accept arbitrary strings.
  */
 export const trackSponsoredImpression = optionalAuthAction
   .inputSchema(trackSponsoredImpressionSchema)
@@ -361,11 +370,37 @@ export const trackSponsoredImpression = optionalAuthAction
   .action(async ({ parsedInput, ctx }) => {
     const userId = ctx.userId ?? null;
 
+    // Fetch actual content_type from sponsored_content table
+    // Since content_type is now an ENUM, we must use the actual content category
+    const { createClient } = await import('@/src/lib/supabase/server');
+    const supabase = await createClient();
+
+    const { data: sponsoredContent, error } = await supabase
+      .from('sponsored_content')
+      .select('content_type')
+      .eq('id', parsedInput.sponsoredId)
+      .single();
+
+    if (error || !sponsoredContent) {
+      logger.warn('Failed to fetch sponsored content for tracking', {
+        sponsored_id: parsedInput.sponsoredId,
+        error: error?.message ?? 'Not found',
+      });
+      // If sponsored content doesn't exist, we can't track it
+      // This is acceptable since we don't have sponsored content yet
+      return;
+    }
+
+    // Use content_type directly from sponsored_content (database will validate ENUM)
+    // Type assertion to ENUM since sponsored_content.content_type should be content_category
+    const contentType =
+      sponsoredContent.content_type as Database['public']['Enums']['content_category'];
+
     // Enqueue to queue instead of direct RPC
     // This provides 98% egress reduction via batched processing
     await enqueuePulseEventServer({
       user_id: userId,
-      content_type: 'sponsored',
+      content_type: contentType, // Use actual content category from sponsored_content
       content_slug: parsedInput.sponsoredId,
       interaction_type: 'sponsored_impression',
       metadata: {
@@ -384,6 +419,9 @@ export const trackSponsoredImpression = optionalAuthAction
  * Track sponsored content click - Queue-Based
  * Enqueues to pulse queue → Worker processes in batches (hyper-optimized)
  * Fire-and-forget, non-blocking
+ *
+ * Note: Uses actual content_category from sponsored_content table instead of 'sponsored' marker
+ * since content_type is now an ENUM and cannot accept arbitrary strings.
  */
 export const trackSponsoredClick = optionalAuthAction
   .inputSchema(trackSponsoredClickSchema)
@@ -391,11 +429,37 @@ export const trackSponsoredClick = optionalAuthAction
   .action(async ({ parsedInput, ctx }) => {
     const userId = ctx.userId ?? null;
 
+    // Fetch actual content_type from sponsored_content table
+    // Since content_type is now an ENUM, we must use the actual content category
+    const { createClient } = await import('@/src/lib/supabase/server');
+    const supabase = await createClient();
+
+    const { data: sponsoredContent, error } = await supabase
+      .from('sponsored_content')
+      .select('content_type')
+      .eq('id', parsedInput.sponsoredId)
+      .single();
+
+    if (error || !sponsoredContent) {
+      logger.warn('Failed to fetch sponsored content for tracking', {
+        sponsored_id: parsedInput.sponsoredId,
+        error: error?.message ?? 'Not found',
+      });
+      // If sponsored content doesn't exist, we can't track it
+      // This is acceptable since we don't have sponsored content yet
+      return;
+    }
+
+    // Use content_type directly from sponsored_content (database will validate ENUM)
+    // Type assertion to ENUM since sponsored_content.content_type should be content_category
+    const contentType =
+      sponsoredContent.content_type as Database['public']['Enums']['content_category'];
+
     // Enqueue to queue instead of direct RPC
     // This provides 98% egress reduction via batched processing
     await enqueuePulseEventServer({
       user_id: userId,
-      content_type: 'sponsored',
+      content_type: contentType, // Use actual content category from sponsored_content
       content_slug: parsedInput.sponsoredId,
       interaction_type: 'sponsored_click',
       metadata: {

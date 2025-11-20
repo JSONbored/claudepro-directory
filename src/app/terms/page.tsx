@@ -6,7 +6,9 @@ import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { getLastUpdatedDate } from '@/src/lib/utils/data.utils';
 
-export const metadata: Promise<Metadata> = generatePageMetadata('/terms');
+export async function generateMetadata(): Promise<Metadata> {
+  return generatePageMetadata('/terms');
+}
 
 /**
  * Static Generation: Legal pages are fully static and never change

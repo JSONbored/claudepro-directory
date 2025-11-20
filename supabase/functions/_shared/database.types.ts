@@ -176,7 +176,7 @@ export interface Database {
           author_profile_url: string | null;
           avg_rating: number | null;
           bookmark_count: number;
-          category: Database['public']['Enums']['content_category'];
+          category: Database['public']['Enums']['content_category'] | null;
           content: string | null;
           copy_count: number;
           created_at: string;
@@ -221,7 +221,7 @@ export interface Database {
           author_profile_url?: string | null;
           avg_rating?: number | null;
           bookmark_count?: number;
-          category: Database['public']['Enums']['content_category'];
+          category?: Database['public']['Enums']['content_category'] | null;
           content?: string | null;
           copy_count?: number;
           created_at?: string;
@@ -266,7 +266,7 @@ export interface Database {
           author_profile_url?: string | null;
           avg_rating?: number | null;
           bookmark_count?: number;
-          category?: Database['public']['Enums']['content_category'];
+          category?: Database['public']['Enums']['content_category'] | null;
           content?: string | null;
           copy_count?: number;
           created_at?: string;
@@ -770,7 +770,7 @@ export interface Database {
       user_interactions: {
         Row: {
           content_slug: string | null;
-          content_type: string | null;
+          content_type: Database['public']['Enums']['content_category'] | null;
           created_at: string;
           id: string;
           interaction_type: Database['public']['Enums']['interaction_type'];
@@ -780,7 +780,7 @@ export interface Database {
         };
         Insert: {
           content_slug?: string | null;
-          content_type?: string | null;
+          content_type?: Database['public']['Enums']['content_category'] | null;
           created_at?: string;
           id?: string;
           interaction_type: Database['public']['Enums']['interaction_type'];
@@ -790,7 +790,7 @@ export interface Database {
         };
         Update: {
           content_slug?: string | null;
-          content_type?: string | null;
+          content_type?: Database['public']['Enums']['content_category'] | null;
           created_at?: string;
           id?: string;
           interaction_type?: Database['public']['Enums']['interaction_type'];
@@ -1401,7 +1401,7 @@ export interface Database {
           author_profile_url: string | null;
           avg_rating: number | null;
           bookmark_count: number;
-          category: Database['public']['Enums']['content_category'];
+          category: Database['public']['Enums']['content_category'] | null;
           content: string | null;
           copy_count: number;
           created_at: string;
@@ -1623,26 +1623,6 @@ export interface Database {
 
       payment_status: 'unpaid' | 'paid' | 'refunded';
 
-      payment_method: 'polar' | 'mercury_invoice' | 'manual';
-
-      copy_type: 'llmstxt' | 'markdown' | 'code' | 'link';
-
-      newsletter_sync_status: 'pending' | 'synced' | 'failed' | 'skipped';
-
-      config_format: 'json' | 'multi' | 'hook';
-
-      primary_action_type:
-        | 'notification'
-        | 'copy_command'
-        | 'copy_script'
-        | 'scroll'
-        | 'download'
-        | 'github_link';
-
-      generation_source: 'ai' | 'manual' | 'import' | 'migration';
-
-      email_blocklist_reason: 'spam_complaint' | 'hard_bounce' | 'repeated_soft_bounce' | 'manual';
-
       environment: 'development' | 'preview' | 'production';
 
       content_category:
@@ -1770,6 +1750,28 @@ export interface Database {
         | 'sponsored_click';
 
       sponsorship_tier: 'featured' | 'promoted' | 'spotlight' | 'sponsored';
+
+      config_format: 'json' | 'multi' | 'hook';
+
+      primary_action_type:
+        | 'notification'
+        | 'copy_command'
+        | 'copy_script'
+        | 'scroll'
+        | 'download'
+        | 'github_link';
+
+      generation_source: 'ai' | 'manual' | 'import' | 'migration';
+
+      email_blocklist_reason: 'spam_complaint' | 'hard_bounce' | 'repeated_soft_bounce' | 'manual';
+
+      payment_method: 'polar' | 'mercury_invoice' | 'manual';
+
+      copy_type: 'llmstxt' | 'markdown' | 'code' | 'link';
+
+      newsletter_sync_status: 'pending' | 'synced' | 'failed' | 'skipped';
+
+      route_group: 'primary' | 'secondary' | 'actions';
     };
     CompositeTypes: {
       company_profile_result: {
@@ -1815,7 +1817,6 @@ export interface Database {
       };
 
       category_config_with_features: {
-        category: Database['public']['Enums']['content_category'] | null;
         title: string | null;
         plural_title: string | null;
         description: string | null;
@@ -1960,7 +1961,6 @@ export interface Database {
       };
 
       structured_data_config_result: {
-        category: Database['public']['Enums']['content_category'] | null;
         schema_types: Database['public']['CompositeTypes']['structured_data_schema_types'] | null;
         category_display_name: string | null;
         application_sub_category: string | null;
@@ -1998,7 +1998,7 @@ export interface Database {
       };
 
       weekly_digest_new_content: {
-        category: Database['public']['Enums']['content_category'] | null;
+        category: string | null;
         slug: string | null;
         title: string | null;
         description: string | null;
@@ -2007,7 +2007,7 @@ export interface Database {
       };
 
       weekly_digest_trending_content: {
-        category: Database['public']['Enums']['content_category'] | null;
+        category: string | null;
         slug: string | null;
         title: string | null;
         description: string | null;

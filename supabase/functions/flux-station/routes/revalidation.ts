@@ -4,6 +4,7 @@
  */
 
 import { edgeEnv } from '../../_shared/config/env.ts';
+import type { Database } from '../../_shared/database.types.ts';
 import { invalidateCacheTags } from '../../_shared/utils/cache.ts';
 import { errorToString } from '../../_shared/utils/error-handling.ts';
 import { errorResponse, successResponse } from '../../_shared/utils/http.ts';
@@ -64,7 +65,11 @@ export async function handleRevalidation(_req: Request): Promise<Response> {
         }
 
         const record = payload.record;
-        const category = record['category'] as string | null;
+        const categoryRaw = record['category'] as string | null;
+        const category =
+          categoryRaw !== null && categoryRaw !== undefined
+            ? (categoryRaw as Database['public']['Enums']['content_category'])
+            : null;
         const slug = record['slug'] as string | null;
         const tags = record['tags'] as string[] | null;
 

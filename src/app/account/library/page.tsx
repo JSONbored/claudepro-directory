@@ -27,7 +27,9 @@ import { normalizeError } from '@/src/lib/utils/error.utils';
 import { hashUserId } from '@/src/lib/utils/privacy.utils';
 import type { Database } from '@/src/types/database.types';
 
-export const metadata: Promise<Metadata> = generatePageMetadata('/account/library');
+export async function generateMetadata(): Promise<Metadata> {
+  return generatePageMetadata('/account/library');
+}
 
 export default async function LibraryPage() {
   const { user } = await getAuthenticatedUser({ context: 'LibraryPage' });

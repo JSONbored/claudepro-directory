@@ -7,7 +7,9 @@ import { ErrorBoundary } from '@/src/components/core/infra/error-boundary';
 import { ConsultingClient } from '@/src/components/features/consulting/consulting-page-content';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 
-export const metadata: Promise<Metadata> = generatePageMetadata('/consulting');
+export async function generateMetadata(): Promise<Metadata> {
+  return generatePageMetadata('/consulting');
+}
 
 /**
  * Static generation - marketing page that doesn't change

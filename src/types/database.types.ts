@@ -581,7 +581,7 @@ export type Database = {
           author_profile_url: string | null
           avg_rating: number | null
           bookmark_count: number
-          category: Database["public"]["Enums"]["content_category"]
+          category: Database["public"]["Enums"]["content_category"] | null
           content: string | null
           copy_count: number
           created_at: string
@@ -626,7 +626,7 @@ export type Database = {
           author_profile_url?: string | null
           avg_rating?: number | null
           bookmark_count?: number
-          category: Database["public"]["Enums"]["content_category"]
+          category?: Database["public"]["Enums"]["content_category"] | null
           content?: string | null
           copy_count?: number
           created_at?: string
@@ -671,7 +671,7 @@ export type Database = {
           author_profile_url?: string | null
           avg_rating?: number | null
           bookmark_count?: number
-          category?: Database["public"]["Enums"]["content_category"]
+          category?: Database["public"]["Enums"]["content_category"] | null
           content?: string | null
           copy_count?: number
           created_at?: string
@@ -803,9 +803,9 @@ export type Database = {
         Row: {
           calculated_at: string
           content_a_slug: string
-          content_a_type: string
+          content_a_type: Database["public"]["Enums"]["content_category"] | null
           content_b_slug: string
-          content_b_type: string
+          content_b_type: Database["public"]["Enums"]["content_category"] | null
           id: string
           similarity_factors: Json | null
           similarity_score: number
@@ -813,9 +813,13 @@ export type Database = {
         Insert: {
           calculated_at?: string
           content_a_slug: string
-          content_a_type: string
+          content_a_type?:
+            | Database["public"]["Enums"]["content_category"]
+            | null
           content_b_slug: string
-          content_b_type: string
+          content_b_type?:
+            | Database["public"]["Enums"]["content_category"]
+            | null
           id?: string
           similarity_factors?: Json | null
           similarity_score: number
@@ -823,9 +827,13 @@ export type Database = {
         Update: {
           calculated_at?: string
           content_a_slug?: string
-          content_a_type?: string
+          content_a_type?:
+            | Database["public"]["Enums"]["content_category"]
+            | null
           content_b_slug?: string
-          content_b_type?: string
+          content_b_type?:
+            | Database["public"]["Enums"]["content_category"]
+            | null
           id?: string
           similarity_factors?: Json | null
           similarity_score?: number
@@ -1809,7 +1817,7 @@ export type Database = {
       review_ratings: {
         Row: {
           content_slug: string
-          content_type: string
+          content_type: Database["public"]["Enums"]["content_category"]
           created_at: string
           helpful_count: number
           id: string
@@ -1820,7 +1828,7 @@ export type Database = {
         }
         Insert: {
           content_slug: string
-          content_type: string
+          content_type: Database["public"]["Enums"]["content_category"]
           created_at?: string
           helpful_count?: number
           id?: string
@@ -1831,7 +1839,7 @@ export type Database = {
         }
         Update: {
           content_slug?: string
-          content_type?: string
+          content_type?: Database["public"]["Enums"]["content_category"]
           created_at?: string
           helpful_count?: number
           id?: string
@@ -1943,7 +1951,7 @@ export type Database = {
         Row: {
           created_at: string
           description: string
-          group_name: string
+          group_name: Database["public"]["Enums"]["route_group"]
           icon_name: string
           id: string
           is_active: boolean
@@ -1962,7 +1970,7 @@ export type Database = {
         Insert: {
           created_at?: string
           description: string
-          group_name: string
+          group_name: Database["public"]["Enums"]["route_group"]
           icon_name: string
           id?: string
           is_active?: boolean
@@ -1981,7 +1989,7 @@ export type Database = {
         Update: {
           created_at?: string
           description?: string
-          group_name?: string
+          group_name?: Database["public"]["Enums"]["route_group"]
           icon_name?: string
           id?: string
           is_active?: boolean
@@ -2287,7 +2295,7 @@ export type Database = {
       user_interactions: {
         Row: {
           content_slug: string | null
-          content_type: string | null
+          content_type: Database["public"]["Enums"]["content_category"] | null
           created_at: string
           id: string
           interaction_type: Database["public"]["Enums"]["interaction_type"]
@@ -2297,7 +2305,7 @@ export type Database = {
         }
         Insert: {
           content_slug?: string | null
-          content_type?: string | null
+          content_type?: Database["public"]["Enums"]["content_category"] | null
           created_at?: string
           id?: string
           interaction_type: Database["public"]["Enums"]["interaction_type"]
@@ -2307,7 +2315,7 @@ export type Database = {
         }
         Update: {
           content_slug?: string | null
-          content_type?: string | null
+          content_type?: Database["public"]["Enums"]["content_category"] | null
           created_at?: string
           id?: string
           interaction_type?: Database["public"]["Enums"]["interaction_type"]
@@ -2588,7 +2596,7 @@ export type Database = {
       mv_analytics_summary: {
         Row: {
           bookmark_count: number | null
-          category: string | null
+          category: Database["public"]["Enums"]["content_category"] | null
           copy_count: number | null
           last_interaction_at: string | null
           last_viewed_at: string | null
@@ -3587,7 +3595,7 @@ export type Database = {
           author_profile_url: string | null
           avg_rating: number | null
           bookmark_count: number
-          category: Database["public"]["Enums"]["content_category"]
+          category: Database["public"]["Enums"]["content_category"] | null
           content: string | null
           copy_count: number
           created_at: string
@@ -3797,7 +3805,7 @@ export type Database = {
           author_profile_url: string | null
           avg_rating: number | null
           bookmark_count: number
-          category: Database["public"]["Enums"]["content_category"]
+          category: Database["public"]["Enums"]["content_category"] | null
           content: string | null
           copy_count: number
           created_at: string
@@ -4524,16 +4532,27 @@ export type Database = {
         Args: { p_helpful: boolean; p_review_id: string; p_user_id: string }
         Returns: Json
       }
-      track_user_interaction: {
-        Args: {
-          p_content_slug: string
-          p_content_type: string
-          p_interaction_type: string
-          p_metadata?: Json
-          p_session_id?: string
-        }
-        Returns: Json
-      }
+      track_user_interaction:
+        | {
+            Args: {
+              p_content_slug: string
+              p_content_type: Database["public"]["Enums"]["content_category"]
+              p_interaction_type: string
+              p_metadata?: Json
+              p_session_id?: string
+            }
+            Returns: Json
+          }
+        | {
+            Args: {
+              p_content_slug: string
+              p_content_type: string
+              p_interaction_type: string
+              p_metadata?: Json
+              p_session_id?: string
+            }
+            Returns: Json
+          }
       unlink_oauth_provider: { Args: { p_provider: string }; Returns: Json }
       update_job: {
         Args: { p_job_id: string; p_updates: Json; p_user_id: string }
@@ -4586,6 +4605,7 @@ export type Database = {
         | "guides"
         | "jobs"
         | "changelog"
+      content_category_test: "agents" | "mcp"
       copy_type: "llmstxt" | "markdown" | "code" | "link"
       email_blocklist_reason:
         | "spam_complaint"
@@ -4698,6 +4718,7 @@ export type Database = {
         | "scroll"
         | "download"
         | "github_link"
+      route_group: "primary" | "secondary" | "actions"
       setting_type: "boolean" | "string" | "number" | "json"
       sort_direction: "asc" | "desc"
       sort_option:
@@ -4803,7 +4824,6 @@ export type Database = {
         metadata_show_github_link: boolean | null
       }
       category_config_with_features: {
-        category: Database["public"]["Enums"]["content_category"] | null
         title: string | null
         plural_title: string | null
         description: string | null
@@ -4952,7 +4972,6 @@ export type Database = {
         slug: string | null
         title: string | null
         description: string | null
-        category: Database["public"]["Enums"]["content_category"] | null
         metadata: Json | null
         tags: string[] | null
         author: string | null
@@ -5287,7 +5306,6 @@ export type Database = {
           | null
       }
       generation_config_item: {
-        category: Database["public"]["Enums"]["content_category"] | null
         validation_config: Json | null
         generation_config: Json | null
       }
@@ -5367,7 +5385,6 @@ export type Database = {
         status: Database["public"]["Enums"]["submission_status"] | null
         name: string | null
         description: string | null
-        category: Database["public"]["Enums"]["content_category"] | null
         moderator_notes: string | null
         created_at: string | null
         moderated_at: string | null
@@ -5396,7 +5413,6 @@ export type Database = {
         status: Database["public"]["Enums"]["submission_status"] | null
         name: string | null
         description: string | null
-        category: Database["public"]["Enums"]["content_category"] | null
         author: string | null
         author_profile_url: string | null
         github_url: string | null
@@ -5528,9 +5544,6 @@ export type Database = {
         similar_items:
           | Database["public"]["CompositeTypes"]["similar_content_item"][]
           | null
-        source_item:
-          | Database["public"]["CompositeTypes"]["similar_content_source_item"]
-          | null
         algorithm_version: string | null
       }
       similar_content_source_item: {
@@ -5559,7 +5572,6 @@ export type Database = {
           | null
       }
       structured_data_config_result: {
-        category: Database["public"]["Enums"]["content_category"] | null
         schema_types:
           | Database["public"]["CompositeTypes"]["structured_data_schema_types"]
           | null
@@ -5668,7 +5680,7 @@ export type Database = {
       user_collection_detail_item: {
         id: string | null
         collection_id: string | null
-        content_type: Database["public"]["Enums"]["content_category"] | null
+        content_type: string | null
         content_slug: string | null
         notes: string | null
         order: number | null
@@ -5815,7 +5827,7 @@ export type Database = {
       }
       user_profile_contribution: {
         id: string | null
-        content_type: Database["public"]["Enums"]["content_category"] | null
+        content_type: string | null
         slug: string | null
         name: string | null
         description: string | null
@@ -5883,7 +5895,7 @@ export type Database = {
         tier: Database["public"]["Enums"]["user_tier"] | null
       }
       weekly_digest_new_content: {
-        category: Database["public"]["Enums"]["content_category"] | null
+        category: string | null
         slug: string | null
         title: string | null
         description: string | null
@@ -5902,7 +5914,7 @@ export type Database = {
           | null
       }
       weekly_digest_trending_content: {
-        category: Database["public"]["Enums"]["content_category"] | null
+        category: string | null
         slug: string | null
         title: string | null
         description: string | null
@@ -6066,6 +6078,7 @@ export const Constants = {
         "jobs",
         "changelog",
       ],
+      content_category_test: ["agents", "mcp"],
       copy_type: ["llmstxt", "markdown", "code", "link"],
       email_blocklist_reason: [
         "spam_complaint",
@@ -6188,6 +6201,7 @@ export const Constants = {
         "download",
         "github_link",
       ],
+      route_group: ["primary", "secondary", "actions"],
       setting_type: ["boolean", "string", "number", "json"],
       sort_direction: ["asc", "desc"],
       sort_option: [

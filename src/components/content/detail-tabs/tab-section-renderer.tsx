@@ -63,44 +63,50 @@ export function TabSectionRenderer({
       // Description is handled in header/metadata, not as a separate section
       return null;
 
-    case 'features':
+    case 'features': {
       if (!config.sections.features || features.length === 0) return null;
+      const validCategory = isValidCategory(item.category) ? item.category : 'agents';
       return (
         <UnifiedSection
           variant="list"
           title="Features"
           description="Key capabilities and functionality"
           items={features}
-          category={isValidCategory(item.category) ? item.category : 'agents'}
+          category={validCategory}
           dotColor="bg-primary"
         />
       );
+    }
 
-    case 'requirements':
+    case 'requirements': {
       if (requirements.length === 0) return null;
+      const validCategory = isValidCategory(item.category) ? item.category : 'agents';
       return (
         <UnifiedSection
           variant="list"
           title="Requirements"
           description="Prerequisites and dependencies"
           items={requirements}
-          category={isValidCategory(item.category) ? item.category : 'agents'}
+          category={validCategory}
           dotColor="bg-orange-500"
         />
       );
+    }
 
-    case 'use_cases':
+    case 'use_cases': {
       if (!config.sections.use_cases || useCases.length === 0) return null;
+      const validCategory = isValidCategory(item.category) ? item.category : 'agents';
       return (
         <UnifiedSection
           variant="list"
           title="Use Cases"
           description="Common scenarios and applications"
           items={useCases}
-          category={isValidCategory(item.category) ? item.category : 'agents'}
+          category={validCategory}
           dotColor="bg-accent"
         />
       );
+    }
 
     case 'installation':
       if (!(config.sections.installation && installationData)) return null;
@@ -152,27 +158,29 @@ export function TabSectionRenderer({
       if (!(config.sections.security && 'security' in contentItem)) return null;
       const securityItems = ensureStringArray(contentItem['security']);
       if (securityItems.length === 0) return null;
+      const validCategory = isValidCategory(item.category) ? item.category : 'agents';
       return (
         <UnifiedSection
           variant="list"
           title="Security Best Practices"
           description="Important security considerations"
           items={securityItems}
-          category={isValidCategory(item.category) ? item.category : 'agents'}
+          category={validCategory}
           dotColor="bg-orange-500"
         />
       );
     }
 
-    case 'reviews':
+    case 'reviews': {
+      const validCategory = isValidCategory(item.category) ? item.category : 'agents';
+      const validSlug = item.slug ?? '';
+      if (!validSlug) return null;
       return (
         <div className="border-t pt-8">
-          <ReviewListSection
-            contentType={isValidCategory(item.category) ? item.category : 'agents'}
-            contentSlug={item.slug}
-          />
+          <ReviewListSection contentType={validCategory} contentSlug={validSlug} />
         </div>
       );
+    }
 
     case 'related':
       // Related items handled in sidebar

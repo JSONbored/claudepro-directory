@@ -1,7 +1,10 @@
+import type { Metadata } from 'next';
 import { NotFoundEmpty } from '@/src/components/primitives/feedback/empty-state';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 
-export const metadata = generatePageMetadata('/404');
+export async function generateMetadata(): Promise<Metadata> {
+  return generatePageMetadata('/404');
+}
 
 export default function NotFound() {
   return (

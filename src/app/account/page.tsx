@@ -19,7 +19,9 @@ import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { normalizeError } from '@/src/lib/utils/error.utils';
 
-export const metadata: Promise<Metadata> = generatePageMetadata('/account');
+export async function generateMetadata(): Promise<Metadata> {
+  return generatePageMetadata('/account');
+}
 
 export default async function AccountDashboard() {
   const { user } = await getAuthenticatedUser({ context: 'AccountDashboard' });

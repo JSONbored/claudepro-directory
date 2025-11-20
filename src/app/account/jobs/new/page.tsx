@@ -7,7 +7,9 @@ import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { normalizeError } from '@/src/lib/utils/error.utils';
 
-export const metadata: Promise<Metadata> = generatePageMetadata('/account/jobs/new');
+export async function generateMetadata(): Promise<Metadata> {
+  return generatePageMetadata('/account/jobs/new');
+}
 
 export default function NewJobPage() {
   const handleSubmit = async (data: CreateJobInput) => {

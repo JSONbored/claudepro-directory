@@ -22,7 +22,9 @@ import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
-export const metadata: Promise<Metadata> = generatePageMetadata('/community');
+export async function generateMetadata(): Promise<Metadata> {
+  return generatePageMetadata('/community');
+}
 
 /**
  * Static Generation: Marketing pages are fully static

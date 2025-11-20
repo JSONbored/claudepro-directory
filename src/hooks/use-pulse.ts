@@ -56,8 +56,8 @@ export interface PulseClickParams {
  */
 export interface PulseShareParams {
   platform: SharePlatform;
-  category?: string;
-  slug?: string;
+  category?: Database['public']['Enums']['content_category'] | null;
+  slug?: string | null;
   url: string;
 }
 
@@ -92,7 +92,7 @@ export interface PulseBookmarkParams {
  * Parameters for filter tracking
  */
 export interface PulseFilterParams {
-  category: string;
+  category: Database['public']['Enums']['content_category'] | null;
   filters: Record<string, unknown>;
   metadata?: Record<string, unknown> | null;
 }
@@ -230,8 +230,8 @@ export function usePulse(): UsePulseReturn {
       share: async ({ platform, category, slug, url }) => {
         await trackInteraction({
           interaction_type: 'share',
-          content_type: category || 'unknown',
-          content_slug: slug || 'unknown',
+          content_type: category ?? null,
+          content_slug: slug ?? null,
           metadata: {
             platform,
             url,

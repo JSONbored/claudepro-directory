@@ -28,7 +28,6 @@ import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { normalizeError } from '@/src/lib/utils/error.utils';
-import type { Tables } from '@/src/types/database.types';
 
 // Collection pages may have private content
 export const dynamic = 'force-dynamic';
@@ -72,9 +71,8 @@ interface PublicCollectionPageProps {
 export async function generateMetadata({ params }: PublicCollectionPageProps): Promise<Metadata> {
   const { slug, collectionSlug } = await params;
 
-  let collectionData: CollectionDetailData | null = null;
   try {
-    collectionData = await getPublicCollectionDetail({
+    await getPublicCollectionDetail({
       userSlug: slug,
       collectionSlug,
     });
@@ -88,7 +86,6 @@ export async function generateMetadata({ params }: PublicCollectionPageProps): P
 
   return generatePageMetadata('/u/:slug/collections/:collectionSlug', {
     params: { slug, collectionSlug },
-    item: (collectionData?.collection ?? null) as Tables<'user_collections'> | undefined,
     slug,
     collectionSlug,
   });
@@ -229,7 +226,7 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
                               content_slug: item.content_slug,
                             });
                             return safeLink ? (
-                              <Link href={safeLink} target="_blank" rel="noopener noreferrer">
+                              <Link href={safeLink}>
                                 <Button
                                   variant="ghost"
                                   size="sm"
