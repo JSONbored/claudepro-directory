@@ -13,11 +13,22 @@ import {
 } from '@/src/components/primitives/ui/dropdown-menu';
 import { ChevronDown, FileText } from '@/src/lib/icons';
 import { DIMENSIONS, UI_CLASSES } from '@/src/lib/ui-constants';
-import type { GetGetContentTemplatesReturn } from '@/src/types/database-overrides';
+import type { Database } from '@/src/types/database.types';
+
+// Use generated type directly from database.types.ts
+type ContentTemplatesResult = Database['public']['Functions']['get_content_templates']['Returns'];
+type ContentTemplateItem = NonNullable<NonNullable<ContentTemplatesResult['templates']>[number]>;
+
+// Type representing the merged structure (matches what getContentTemplates returns)
+type MergedTemplateItem = ContentTemplateItem & {
+  templateData: ContentTemplateItem['template_data'];
+} & (ContentTemplateItem['template_data'] extends Record<string, unknown>
+    ? ContentTemplateItem['template_data']
+    : Record<string, unknown>);
 
 interface TemplateSelectorProps {
-  templates: GetGetContentTemplatesReturn;
-  onSelect: (template: GetGetContentTemplatesReturn[number]) => void;
+  templates: MergedTemplateItem[];
+  onSelect: (template: MergedTemplateItem) => void;
 }
 
 export function TemplateSelector({ templates, onSelect }: TemplateSelectorProps) {

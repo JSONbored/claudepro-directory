@@ -56,8 +56,7 @@ export const getContentBySlug = cache(
 
     return unstable_cache(
       async () => {
-        // Note: get_enriched_content RPC still returns jsonb - will be migrated separately
-        // For now, use get_enriched_content_list with slug filter
+        // Use get_enriched_content_list with slug filter (get_enriched_content was removed as unused)
         const data = await fetchCachedRpc<
           'get_enriched_content_list',
           Database['public']['Functions']['get_enriched_content_list']['Returns']
@@ -90,7 +89,7 @@ export const getContentBySlug = cache(
 );
 
 // TODO: RPC 'get_full_content_by_slug' does not exist in database
-// Use get_content_detail_complete or get_enriched_content instead
+// Use get_content_detail_complete or get_enriched_content_list instead
 // This function is currently unused - consider removing or implementing with existing RPC
 export const getFullContentBySlug = cache(
   async (

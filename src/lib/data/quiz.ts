@@ -1,11 +1,14 @@
 'use server';
 
 import { fetchCachedRpc } from '@/src/lib/data/helpers';
-import type { GetGetQuizConfigurationReturn } from '@/src/types/database-overrides';
+import type { Database } from '@/src/types/database.types';
 
-export async function fetchQuizConfiguration(): Promise<GetGetQuizConfigurationReturn | null> {
-  return fetchCachedRpc<'get_quiz_configuration', GetGetQuizConfigurationReturn | null>(
-    undefined as never,
+// Use generated type directly from database.types.ts
+type QuizConfigurationResult = Database['public']['Functions']['get_quiz_configuration']['Returns'];
+
+export async function fetchQuizConfiguration(): Promise<QuizConfigurationResult | null> {
+  return fetchCachedRpc<'get_quiz_configuration', QuizConfigurationResult | null>(
+    {} as Database['public']['Functions']['get_quiz_configuration']['Args'],
     {
       rpcName: 'get_quiz_configuration',
       tags: ['quiz'],

@@ -7,7 +7,18 @@
 
 import { useCallback } from 'react';
 import type { SubmissionContentType } from '@/src/lib/types/component.types';
-import type { GetGetContentTemplatesReturn } from '@/src/types/database-overrides';
+import type { Database } from '@/src/types/database.types';
+
+// Use generated type directly from database.types.ts
+type ContentTemplatesResult = Database['public']['Functions']['get_content_templates']['Returns'];
+type ContentTemplateItem = NonNullable<NonNullable<ContentTemplatesResult['templates']>[number]>;
+
+// Type representing the merged structure (matches what getContentTemplates returns)
+type MergedTemplateItem = ContentTemplateItem & {
+  templateData: ContentTemplateItem['template_data'];
+} & (ContentTemplateItem['template_data'] extends Record<string, unknown>
+    ? ContentTemplateItem['template_data']
+    : Record<string, unknown>);
 
 interface FormData {
   submission_type: SubmissionContentType;
@@ -62,7 +73,7 @@ export function useTemplateApplication({
    * Apply a template to the current form
    */
   const applyTemplate = useCallback(
-    (template: GetGetContentTemplatesReturn[0]) => {
+    (template: MergedTemplateItem) => {
       try {
         // Parse template data
         const templateData = parseTemplateData(template.templateData);
@@ -226,7 +237,7 @@ function mapTypeSpecificFields(
 /**
  * Extract preview text from template for display
  */
-export function getTemplatePreview(template: GetGetContentTemplatesReturn[0]): string {
+export function getTemplatePreview(template: MergedTemplateItem): string {
   try {
     const data = parseTemplateData(template.templateData);
 

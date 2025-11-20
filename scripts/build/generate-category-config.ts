@@ -4,7 +4,7 @@
  * Category Config Generator - Edge Function Build Script
  * Queries data-api edge function at build time and generates static TypeScript config.
  *
- * CRITICAL: This eliminates runtime database queries from category-config.ts
+ * CRITICAL: This generates static configs at build time (no runtime database queries)
  * Performance: 100% faster (0ms vs unstable_cache overhead)
  *
  * Usage:

@@ -8,7 +8,10 @@
 import { z } from 'zod';
 import { rateLimitedAction } from '@/src/lib/actions/safe-action';
 import { fetchQuizConfiguration } from '@/src/lib/data/quiz';
-import type { GetGetQuizConfigurationReturn } from '@/src/types/database-overrides';
+import type { Database } from '@/src/types/database.types';
+
+// Use generated type directly from database.types.ts
+type QuizConfigurationResult = Database['public']['Functions']['get_quiz_configuration']['Returns'];
 
 /**
  * Get quiz configuration
@@ -21,9 +24,9 @@ export const getQuizConfiguration = rateLimitedAction
     try {
       const data = await fetchQuizConfiguration();
       // Return empty array if data is null (graceful fallback)
-      return (data ?? []) as GetGetQuizConfigurationReturn;
+      return (data ?? []) as QuizConfigurationResult;
     } catch {
       // Fallback to empty array on error (safe-action middleware handles logging)
-      return [] as GetGetQuizConfigurationReturn;
+      return [] as QuizConfigurationResult;
     }
   });

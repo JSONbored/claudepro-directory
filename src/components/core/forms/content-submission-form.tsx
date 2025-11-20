@@ -38,7 +38,17 @@ import { ParseStrategy, safeParse } from '@/src/lib/utils/data.utils';
 import { normalizeError } from '@/src/lib/utils/error.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
 import type { Database } from '@/src/types/database.types';
-import type { GetGetContentTemplatesReturn } from '@/src/types/database-overrides';
+
+// Use generated type directly from database.types.ts
+type ContentTemplatesResult = Database['public']['Functions']['get_content_templates']['Returns'];
+type ContentTemplateItem = NonNullable<NonNullable<ContentTemplatesResult['templates']>[number]>;
+
+// Type representing the merged structure (matches what getContentTemplates returns)
+type MergedTemplateItem = ContentTemplateItem & {
+  templateData: ContentTemplateItem['template_data'];
+} & (ContentTemplateItem['template_data'] extends Record<string, unknown>
+    ? ContentTemplateItem['template_data']
+    : Record<string, unknown>);
 
 import { DuplicateWarning } from './duplicate-warning';
 import { ContentTypeFieldRenderer } from './dynamic-form-field';
@@ -83,7 +93,7 @@ const FORM_TYPE_LABELS: Record<SubmissionContentType, string> = {
 
 interface SubmitFormClientProps {
   formConfig: SubmissionFormConfig;
-  templates: GetGetContentTemplatesReturn;
+  templates: MergedTemplateItem[];
 }
 
 /**
@@ -189,16 +199,17 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
 
   // Handle template selection
   // Templates are type-safe discriminated unions for UI pre-fill convenience
-  const handleTemplateSelect = (template: GetGetContentTemplatesReturn[number]) => {
+  const handleTemplateSelect = (template: MergedTemplateItem) => {
     // Pre-fill form with template data using name attributes
     // NOTE: Cannot use querySelector('#id') because useId() generates dynamic IDs like ':r0:'
     const form = document.querySelector('form') as HTMLFormElement;
     if (!form) return;
 
     // Set common fields (present in all templates)
-    setName(template['name']);
+    const templateName = template['name'] ?? '';
+    setName(templateName);
     const nameInput = form.querySelector('[name="name"]') as HTMLInputElement;
-    if (nameInput) nameInput.value = template['name'];
+    if (nameInput) nameInput.value = templateName;
 
     const descInput = form.querySelector('[name="description"]') as HTMLTextAreaElement;
     if (descInput) descInput.value = template['description'] || '';
@@ -207,12 +218,12 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
     if (categoryInput && template['category']) categoryInput.value = template['category'];
 
     const tagsInput = form.querySelector('[name="tags"]') as HTMLInputElement;
-    if (tagsInput && template['tags']) tagsInput.value = template['tags'];
+    if (tagsInput && template['tags']) tagsInput.value = template['tags'] ?? '';
 
     if (template.type === 'agent') {
       const promptInput = form.querySelector('[name="systemPrompt"]') as HTMLTextAreaElement;
       if (promptInput && typeof template['systemPrompt'] === 'string')
-        promptInput.value = template['systemPrompt'];
+        promptInput.value = template['systemPrompt'] ?? '';
 
       const tempInput = form.querySelector('[name="temperature"]') as HTMLInputElement;
       if (tempInput && typeof template['temperature'] === 'number')
@@ -317,12 +328,45 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
           submissionData[key] = value || undefined;
         }
 
-        // Validate required fields before casting
-        const requiredFields = ['name', 'description', 'category', 'author'] as const;
-        for (const field of requiredFields) {
-          if (!submissionData[field] || typeof submissionData[field] !== 'string') {
-            toasts.error.submissionFailed(`Missing or invalid required field: ${field}`);
+        // Collect all required fields dynamically from form config
+        const activeSection = getSection(contentType);
+        const allFields = [
+          ...(activeSection.nameField ? [activeSection.nameField] : []),
+          ...activeSection.common,
+          ...activeSection.typeSpecific,
+          ...activeSection.tags,
+        ];
+        const requiredFieldNames = new Set(
+          allFields.filter((field) => field.required).map((field) => field.name)
+        );
+
+        // Validate all required fields (including dynamic ones from config)
+        for (const fieldName of requiredFieldNames) {
+          const value = submissionData[fieldName];
+          if (value === undefined || value === null || value === '') {
+            const field = allFields.find((f) => f.name === fieldName);
+            const fieldLabel = field?.label || fieldName;
+            toasts.error.submissionFailed(`Missing required field: ${fieldLabel}`);
             return;
+          }
+        }
+
+        // Extract specific fields for RPC parameters
+        const extractedFields = [
+          'name',
+          'description',
+          'category',
+          'author',
+          'author_profile_url',
+          'github_url',
+          'tags',
+        ] as const;
+
+        // Filter out extracted fields from content_data to avoid duplicates
+        const contentData: Record<string, unknown> = {};
+        for (const [key, value] of Object.entries(submissionData)) {
+          if (!extractedFields.includes(key as (typeof extractedFields)[number])) {
+            contentData[key] = value;
           }
         }
 
@@ -343,7 +387,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
           author_profile_url: submissionData['author_profile_url'] as string | undefined,
           github_url: submissionData['github_url'] as string | undefined,
           tags,
-          content_data: submissionData,
+          content_data: contentData,
         });
 
         if (result?.serverError || result?.validationErrors) {

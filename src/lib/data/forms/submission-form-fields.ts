@@ -12,6 +12,7 @@ import type {
   FieldDefinition,
   NumberFieldDefinition,
   SelectFieldDefinition,
+  SelectOption,
   SubmissionContentType,
   SubmissionFormConfig,
   SubmissionFormSection,
@@ -21,166 +22,79 @@ import type {
 import { SUBMISSION_CONTENT_TYPES } from '@/src/lib/types/component.types';
 import type { Database } from '@/src/types/database.types';
 
-const FIELD_SCOPE_VALUES = [
-  'common',
-  'type_specific',
-  'tags',
-] as const satisfies readonly Database['public']['Enums']['field_scope'][];
+type FormFieldConfigItem = Database['public']['CompositeTypes']['form_field_config_item'];
 
-const FIELD_TYPE_VALUES = [
-  'text',
-  'textarea',
-  'number',
-  'select',
-] as const satisfies readonly Database['public']['Enums']['field_type'][];
-
-const GRID_COLUMN_VALUES = [
-  'full',
-  'half',
-  'third',
-  'two-thirds',
-] as const satisfies readonly Database['public']['Enums']['grid_column'][];
-
-const ICON_POSITION_VALUES = [
-  'left',
-  'right',
-] as const satisfies readonly Database['public']['Enums']['icon_position'][];
-
-type RpcRow =
-  Database['public']['Functions']['get_form_fields_for_content_type']['Returns'][number];
-
-type FieldProperties = Record<string, unknown>;
-
-function parseProperties(properties: RpcRow['field_properties']): FieldProperties {
-  if (!properties || typeof properties !== 'object' || Array.isArray(properties)) {
-    return {};
+function mapField(item: FormFieldConfigItem): FieldDefinition | null {
+  if (!(item.name && item.label && item.type)) {
+    return null;
   }
 
-  return properties as FieldProperties;
-}
-
-function getStringProperty(props: FieldProperties, keys: string[]): string | undefined {
-  for (const key of keys) {
-    const value = props[key];
-    if (value === undefined || value === null) continue;
-    if (typeof value === 'string') return value;
-    if (typeof value === 'number' || typeof value === 'boolean') return String(value);
-  }
-  return undefined;
-}
-
-function getNumberProperty(props: FieldProperties, keys: string[]): number | undefined {
-  for (const key of keys) {
-    const value = props[key];
-    if (value === undefined || value === null) continue;
-    if (typeof value === 'number' && Number.isFinite(value)) return value;
-    if (typeof value === 'string') {
-      const parsed = Number(value);
-      if (!Number.isNaN(parsed)) return parsed;
-    }
-  }
-  return undefined;
-}
-
-function getBooleanProperty(props: FieldProperties, keys: string[]): boolean | undefined {
-  for (const key of keys) {
-    const value = props[key];
-    if (value === undefined || value === null) continue;
-    if (typeof value === 'boolean') return value;
-    if (typeof value === 'string') {
-      if (value.toLowerCase() === 'true') return true;
-      if (value.toLowerCase() === 'false') return false;
-    }
-  }
-  return undefined;
-}
-
-function mapGridColumn(value: RpcRow['grid_column']): Database['public']['Enums']['grid_column'] {
-  if (value && GRID_COLUMN_VALUES.includes(value as Database['public']['Enums']['grid_column'])) {
-    return value as Database['public']['Enums']['grid_column'];
-  }
-  return 'full';
-}
-
-function mapIconPosition(
-  value: RpcRow['icon_position']
-): Database['public']['Enums']['icon_position'] | undefined {
-  if (
-    value &&
-    ICON_POSITION_VALUES.includes(value as Database['public']['Enums']['icon_position'])
-  ) {
-    return value as Database['public']['Enums']['icon_position'];
-  }
-  return undefined;
-}
-
-function mapSelectOptions(selectOptions: unknown) {
-  if (!(selectOptions && Array.isArray(selectOptions))) return [];
-  return selectOptions
-    .map((option) => {
-      if (!option || typeof option !== 'object') return null;
-      const value = 'value' in option ? option.value : undefined;
-      const label = 'label' in option ? option.label : undefined;
-      if (typeof value !== 'string' || typeof label !== 'string') return null;
-      return { value, label };
-    })
-    .filter((option): option is { value: string; label: string } => option !== null);
-}
-
-function mapField(row: RpcRow): FieldDefinition | null {
-  const props = parseProperties(row.field_properties);
-  const placeholder = props['placeholder'] as string | undefined;
-  const required = props['required'] as boolean | undefined;
-  const selectOptions = props['select_options'] as unknown;
   const base = {
-    name: row.field_name,
-    label: row.label,
-    placeholder,
-    helpText: row.help_text ?? undefined,
-    required: required ?? false,
-    gridColumn: mapGridColumn(row.grid_column),
-    iconName: row.icon ?? undefined,
-    iconPosition: mapIconPosition(row.icon_position),
+    name: item.name,
+    label: item.label,
+    placeholder: item.placeholder ?? undefined,
+    helpText: item.help_text ?? undefined,
+    required: item.required ?? false,
+    gridColumn: item.grid_column ?? 'full',
+    iconName: item.icon_name ?? undefined,
+    iconPosition: item.icon_position ?? undefined,
   };
 
-  switch (row.field_type as Database['public']['Enums']['field_type']) {
-    case FIELD_TYPE_VALUES[0]: // 'text'
+  const fieldType = item.type;
+
+  switch (fieldType) {
+    case 'text':
       return {
         ...base,
-        type: 'text',
-        defaultValue: getStringProperty(props, ['defaultValue', 'default_value']),
+        type: 'text' as const,
+        defaultValue: item.default_value ?? undefined,
       } as TextFieldDefinition;
 
-    case FIELD_TYPE_VALUES[1]: // 'textarea'
+    case 'textarea':
       return {
         ...base,
-        type: 'textarea',
-        rows: getNumberProperty(props, ['rows']),
-        monospace: getBooleanProperty(props, ['monospace']) ?? false,
-        defaultValue: getStringProperty(props, ['defaultValue', 'default_value']),
+        type: 'textarea' as const,
+        rows: item.rows ?? undefined,
+        monospace: item.monospace ?? false,
+        defaultValue: item.default_value ?? undefined,
       } as TextareaFieldDefinition;
 
-    case FIELD_TYPE_VALUES[2]: {
-      // 'number'
-      const defaultValue = getNumberProperty(props, ['defaultValue', 'default_value']);
-      const fallbackString = getStringProperty(props, ['defaultValue', 'default_value']);
+    case 'number':
       return {
         ...base,
-        type: 'number',
-        min: getNumberProperty(props, ['min']),
-        max: getNumberProperty(props, ['max']),
-        step: getNumberProperty(props, ['step']),
-        defaultValue: defaultValue ?? fallbackString,
+        type: 'number' as const,
+        min: item.min_value ?? undefined,
+        max: item.max_value ?? undefined,
+        step: item.step_value ?? undefined,
+        defaultValue: item.default_value ?? undefined,
       } as NumberFieldDefinition;
-    }
 
-    case FIELD_TYPE_VALUES[3]: // 'select'
+    case 'select': {
+      const options: SelectOption[] = [];
+      if (item.select_options && Array.isArray(item.select_options)) {
+        for (const opt of item.select_options) {
+          if (
+            opt !== null &&
+            typeof opt === 'object' &&
+            !Array.isArray(opt) &&
+            'value' in opt &&
+            'label' in opt
+          ) {
+            const value = opt['value'];
+            const label = opt['label'];
+            if (typeof value === 'string' && typeof label === 'string') {
+              options.push({ value, label });
+            }
+          }
+        }
+      }
       return {
         ...base,
-        type: 'select',
-        options: mapSelectOptions(selectOptions),
-        defaultValue: getStringProperty(props, ['defaultValue', 'default_value']),
+        type: 'select' as const,
+        options,
+        defaultValue: item.default_value ?? undefined,
       } as SelectFieldDefinition;
+    }
 
     default:
       return null;
@@ -199,13 +113,13 @@ function emptySection(): SubmissionFormSection {
 async function fetchFieldsForContentType(
   contentType: SubmissionContentType
 ): Promise<SubmissionFormSection> {
-  const data = await fetchCachedRpc<
-    'get_form_fields_for_content_type',
-    Database['public']['Functions']['get_form_fields_for_content_type']['Returns'] | null
+  const result = await fetchCachedRpc<
+    'get_form_field_config',
+    Database['public']['Functions']['get_form_field_config']['Returns'] | null
   >(
-    { p_content_type: contentType },
+    { p_form_type: contentType },
     {
-      rpcName: 'get_form_fields_for_content_type',
+      rpcName: 'get_form_field_config',
       tags: ['templates', `submission-${contentType}`],
       ttlKey: 'cache.templates.ttl_seconds',
       keySuffix: contentType,
@@ -214,38 +128,33 @@ async function fetchFieldsForContentType(
     }
   );
 
-  if (!data) {
-    logger.error('Failed to load form fields', new Error('RPC returned null'), {
+  if (!result?.fields) {
+    logger.error('Failed to load form fields', new Error('RPC returned null or no fields'), {
       contentType,
       source: 'SubmissionFormConfig',
     });
     return emptySection();
   }
 
-  const rows = data;
   const section = emptySection();
 
-  for (const row of rows) {
-    const field = mapField(row);
+  for (const item of result.fields) {
+    const field = mapField(item);
     if (!field) continue;
 
-    if (
-      row.field_scope === FIELD_SCOPE_VALUES[0] &&
-      field.name === 'name' &&
-      field.type === FIELD_TYPE_VALUES[0]
-    ) {
+    if (item.field_group === 'common' && field.name === 'name' && field.type === 'text') {
       section.nameField = field;
       continue;
     }
 
-    switch (row.field_scope as Database['public']['Enums']['field_scope']) {
-      case FIELD_SCOPE_VALUES[0]: // 'common'
+    switch (item.field_group) {
+      case 'common':
         section.common.push(field);
         break;
-      case FIELD_SCOPE_VALUES[1]: // 'type_specific'
+      case 'type_specific':
         section.typeSpecific.push(field);
         break;
-      case FIELD_SCOPE_VALUES[2]: // 'tags'
+      case 'tags':
         section.tags.push(field);
         break;
       default:

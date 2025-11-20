@@ -11,7 +11,6 @@ import { edgeEnv } from '../_shared/config/env.ts';
 import type { Database, Database as DatabaseGenerated } from '../_shared/database.types.ts';
 import {
   callRpc,
-  type GetDueSequenceEmailsReturn,
   type GetWeeklyDigestReturn,
   insertTable,
   isNewsletterSource,
@@ -724,7 +723,9 @@ async function handleSequence(): Promise<Response> {
     return successResponse({ sent: 0, failed: 0 });
   }
 
-  const dueEmails = data as GetDueSequenceEmailsReturn;
+  // Use generated type directly from database.types.ts
+  const dueEmails =
+    data as DatabaseGenerated['public']['Functions']['get_due_sequence_emails']['Returns'];
 
   logInfo('Processing sequence emails', {
     ...logContext,

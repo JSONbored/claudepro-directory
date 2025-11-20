@@ -14,13 +14,15 @@ import { Separator } from '@/src/components/primitives/ui/separator';
 import { getQuizConfiguration } from '@/src/lib/actions/quiz.actions';
 import { generateConfigRecommendations } from '@/src/lib/edge/client';
 import type { Database } from '@/src/types/database.types';
-import type { GetGetQuizConfigurationReturn } from '@/src/types/database-overrides';
 import {
   EXPERIENCE_LEVEL_VALUES,
   FOCUS_AREA_TYPE_VALUES,
   INTEGRATION_TYPE_VALUES,
   USE_CASE_TYPE_VALUES,
 } from '@/src/types/database-overrides';
+
+// Use generated type directly from database.types.ts
+type QuizConfigurationResult = Database['public']['Functions']['get_quiz_configuration']['Returns'];
 
 type QuizQuestion = {
   id: string;
@@ -36,24 +38,22 @@ type QuizQuestion = {
   }>;
 };
 
-function mapQuizConfigToQuestions(
-  config: GetGetQuizConfigurationReturn | null
-): QuizQuestion[] | null {
+function mapQuizConfigToQuestions(config: QuizConfigurationResult | null): QuizQuestion[] | null {
   if (!(config && Array.isArray(config)) || config.length === 0) {
     return null;
   }
 
   return config.map((q) => ({
-    id: q.id,
-    question: q.question,
+    id: q.id ?? '',
+    question: q.question ?? '',
     description: q.description,
-    required: q.required,
-    displayOrder: q.displayOrder,
-    options: q.options.map((opt) => ({
-      value: opt.value,
-      label: opt.label,
+    required: q.required ?? false,
+    displayOrder: q.display_order ?? 0,
+    options: (q.options ?? []).map((opt) => ({
+      value: opt.value ?? '',
+      label: opt.label ?? '',
       description: opt.description,
-      iconName: opt.iconName,
+      iconName: opt.icon_name,
     })),
   }));
 }

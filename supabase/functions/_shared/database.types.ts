@@ -1114,7 +1114,16 @@ export interface Database {
 
       get_weekly_digest: { Args: { p_week_start?: string }; Returns: Json };
 
-      get_due_sequence_emails: { Args: never; Returns: Json };
+      get_due_sequence_emails: {
+        Args: never;
+        Returns: Database['public']['CompositeTypes']['due_sequence_email_item'][];
+        SetofOptions: {
+          from: '*';
+          to: 'due_sequence_email_item';
+          isOneToOne: false;
+          isSetofReturn: true;
+        };
+      };
 
       build_job_discord_embed: { Args: { p_job_id: string }; Returns: Json };
 
@@ -1378,7 +1387,16 @@ export interface Database {
         };
       };
 
-      get_api_health: { Args: never; Returns: Json };
+      get_api_health: {
+        Args: never;
+        Returns: Database['public']['CompositeTypes']['api_health_result'];
+        SetofOptions: {
+          from: '*';
+          to: 'api_health_result';
+          isOneToOne: true;
+          isSetofReturn: false;
+        };
+      };
 
       get_category_configs_with_features: {
         Args: never;
@@ -1655,6 +1673,47 @@ export interface Database {
         has_more: boolean | null;
         current_page: number | null;
         total_pages: number | null;
+      };
+
+      api_health_result: {
+        status: string | null;
+        timestamp: string | null;
+        api_version: string | null;
+        checks: Database['public']['CompositeTypes']['api_health_checks'] | null;
+      };
+
+      api_health_checks: {
+        database: Database['public']['CompositeTypes']['api_health_database_check'] | null;
+        content_table:
+          | Database['public']['CompositeTypes']['api_health_content_table_check']
+          | null;
+        category_configs:
+          | Database['public']['CompositeTypes']['api_health_category_configs_check']
+          | null;
+      };
+
+      api_health_database_check: {
+        status: string | null;
+        latency: number | null;
+        error: string | null;
+      };
+
+      api_health_content_table_check: {
+        status: string | null;
+        count: number | null;
+        error: string | null;
+      };
+
+      api_health_category_configs_check: {
+        status: string | null;
+        count: number | null;
+        error: string | null;
+      };
+
+      due_sequence_email_item: {
+        id: string | null;
+        email: string | null;
+        step: number | null;
       };
     };
   };

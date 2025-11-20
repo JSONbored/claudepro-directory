@@ -1246,145 +1246,6 @@ export type Database = {
         }
         Relationships: []
       }
-      form_field_definitions: {
-        Row: {
-          active: boolean | null
-          content_type: Database["public"]["Enums"]["content_category"] | null
-          created_at: string
-          created_by: string | null
-          field_name: string
-          field_order: number
-          field_properties: Json | null
-          field_scope: Database["public"]["Enums"]["field_scope"]
-          field_type: Database["public"]["Enums"]["field_type"]
-          grid_column: Database["public"]["Enums"]["grid_column"] | null
-          help_text: string | null
-          icon: string | null
-          icon_position: Database["public"]["Enums"]["icon_position"] | null
-          id: string
-          label: string
-          placeholder: string | null
-          required: boolean | null
-          updated_at: string
-        }
-        Insert: {
-          active?: boolean | null
-          content_type?: Database["public"]["Enums"]["content_category"] | null
-          created_at?: string
-          created_by?: string | null
-          field_name: string
-          field_order: number
-          field_properties?: Json | null
-          field_scope?: Database["public"]["Enums"]["field_scope"]
-          field_type: Database["public"]["Enums"]["field_type"]
-          grid_column?: Database["public"]["Enums"]["grid_column"] | null
-          help_text?: string | null
-          icon?: string | null
-          icon_position?: Database["public"]["Enums"]["icon_position"] | null
-          id?: string
-          label: string
-          placeholder?: string | null
-          required?: boolean | null
-          updated_at?: string
-        }
-        Update: {
-          active?: boolean | null
-          content_type?: Database["public"]["Enums"]["content_category"] | null
-          created_at?: string
-          created_by?: string | null
-          field_name?: string
-          field_order?: number
-          field_properties?: Json | null
-          field_scope?: Database["public"]["Enums"]["field_scope"]
-          field_type?: Database["public"]["Enums"]["field_type"]
-          grid_column?: Database["public"]["Enums"]["grid_column"] | null
-          help_text?: string | null
-          icon?: string | null
-          icon_position?: Database["public"]["Enums"]["icon_position"] | null
-          id?: string
-          label?: string
-          placeholder?: string | null
-          required?: boolean | null
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      form_field_versions: {
-        Row: {
-          change_summary: string | null
-          changed_at: string
-          changed_by: string | null
-          field_data: Json
-          field_id: string
-          id: string
-          version_number: number
-        }
-        Insert: {
-          change_summary?: string | null
-          changed_at?: string
-          changed_by?: string | null
-          field_data: Json
-          field_id: string
-          id?: string
-          version_number: number
-        }
-        Update: {
-          change_summary?: string | null
-          changed_at?: string
-          changed_by?: string | null
-          field_data?: Json
-          field_id?: string
-          id?: string
-          version_number?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "form_field_versions_field_id_fkey"
-            columns: ["field_id"]
-            isOneToOne: false
-            referencedRelation: "form_field_definitions"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      form_select_options: {
-        Row: {
-          active: boolean | null
-          created_at: string
-          field_id: string
-          id: string
-          option_label: string
-          option_order: number
-          option_value: string
-        }
-        Insert: {
-          active?: boolean | null
-          created_at?: string
-          field_id: string
-          id?: string
-          option_label: string
-          option_order: number
-          option_value: string
-        }
-        Update: {
-          active?: boolean | null
-          created_at?: string
-          field_id?: string
-          id?: string
-          option_label?: string
-          option_order?: number
-          option_value?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "form_select_options_field_id_fkey"
-            columns: ["field_id"]
-            isOneToOne: false
-            referencedRelation: "form_field_definitions"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       jobs: {
         Row: {
           active: boolean | null
@@ -3346,7 +3207,6 @@ export type Database = {
           category: string
         }[]
       }
-      get_all_structured_data_configs: { Args: never; Returns: Json }
       get_analytics_summary: {
         Args: { p_category?: string }
         Returns: {
@@ -3362,10 +3222,15 @@ export type Database = {
         Args: { p_base_url?: string; p_category: string; p_slug: string }
         Returns: string
       }
-      get_api_health: { Args: never; Returns: Json }
-      get_app_settings: {
-        Args: { p_category?: string; p_environment?: string }
-        Returns: Json
+      get_api_health: {
+        Args: never
+        Returns: Database["public"]["CompositeTypes"]["api_health_result"]
+        SetofOptions: {
+          from: "*"
+          to: "api_health_result"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       get_bookmark_counts_by_category: {
         Args: { category_filter: string }
@@ -3400,7 +3265,6 @@ export type Database = {
           votes_received: number
         }[]
       }
-      get_category_config: { Args: { p_category?: string }; Returns: Json }
       get_category_configs_with_features: {
         Args: never
         Returns: Database["public"]["CompositeTypes"]["category_config_with_features"][]
@@ -3447,7 +3311,13 @@ export type Database = {
       }
       get_changelog_with_category_stats: {
         Args: { p_category?: string; p_limit?: number; p_offset?: number }
-        Returns: Json
+        Returns: Database["public"]["CompositeTypes"]["changelog_with_category_stats_result"]
+        SetofOptions: {
+          from: "*"
+          to: "changelog_with_category_stats_result"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       get_collection_detail_with_items: {
         Args: { p_slug: string; p_user_id: string }
@@ -3568,7 +3438,16 @@ export type Database = {
           isSetofReturn: false
         }
       }
-      get_content_templates: { Args: { p_category: string }; Returns: Json }
+      get_content_templates: {
+        Args: { p_category: string }
+        Returns: Database["public"]["CompositeTypes"]["content_templates_result"]
+        SetofOptions: {
+          from: "*"
+          to: "content_templates_result"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       get_content_with_analytics:
         | {
             Args: { p_category?: string; p_limit?: number }
@@ -3597,9 +3476,27 @@ export type Database = {
             }[]
           }
       get_current_week_start: { Args: never; Returns: string }
-      get_database_fingerprint: { Args: never; Returns: Json }
+      get_database_fingerprint: {
+        Args: never
+        Returns: Database["public"]["CompositeTypes"]["database_fingerprint_item"][]
+        SetofOptions: {
+          from: "*"
+          to: "database_fingerprint_item"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       get_days_ago: { Args: { input_date: string }; Returns: number }
-      get_due_sequence_emails: { Args: never; Returns: Json }
+      get_due_sequence_emails: {
+        Args: never
+        Returns: Database["public"]["CompositeTypes"]["due_sequence_email_item"][]
+        SetofOptions: {
+          from: "*"
+          to: "due_sequence_email_item"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       get_dynamic_featured_content: {
         Args: { p_category: string; p_limit?: number }
         Returns: {
@@ -3616,16 +3513,6 @@ export type Database = {
           total_views: number
           trending_score: number
         }[]
-      }
-      get_enriched_content: {
-        Args: {
-          p_category?: string
-          p_limit?: number
-          p_offset?: number
-          p_slug?: string
-          p_slugs?: string[]
-        }
-        Returns: Json
       }
       get_enriched_content_list: {
         Args: {
@@ -3700,30 +3587,26 @@ export type Database = {
           isSetofReturn: true
         }
       }
-      get_form_field_config: { Args: { p_form_type: string }; Returns: Json }
-      get_form_fields_for_content_type: {
-        Args: {
-          p_content_type: Database["public"]["Enums"]["content_category"]
+      get_form_field_config: {
+        Args: { p_form_type: string }
+        Returns: Database["public"]["CompositeTypes"]["form_field_config_result"]
+        SetofOptions: {
+          from: "*"
+          to: "form_field_config_result"
+          isOneToOne: true
+          isSetofReturn: false
         }
-        Returns: {
-          field_name: string
-          field_order: number
-          field_properties: Json
-          field_scope: Database["public"]["Enums"]["field_scope"]
-          field_type: Database["public"]["Enums"]["field_type"]
-          grid_column: Database["public"]["Enums"]["grid_column"]
-          help_text: string
-          icon: string
-          icon_position: Database["public"]["Enums"]["icon_position"]
-          id: string
-          label: string
-          placeholder: string
-          required: boolean
-          select_options: Json
-        }[]
       }
-      get_form_fields_grouped: { Args: { p_form_type: string }; Returns: Json }
-      get_generation_config: { Args: { p_category?: string }; Returns: Json }
+      get_generation_config: {
+        Args: { p_category?: string }
+        Returns: Database["public"]["CompositeTypes"]["generation_config_item"][]
+        SetofOptions: {
+          from: "*"
+          to: "generation_config_item"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       get_homepage_complete: {
         Args: { p_category_ids?: string[] }
         Returns: Database["public"]["CompositeTypes"]["homepage_complete_result"]
@@ -3896,7 +3779,16 @@ export type Database = {
           view_count: number
         }[]
       }
-      get_quiz_configuration: { Args: never; Returns: Json }
+      get_quiz_configuration: {
+        Args: never
+        Returns: Database["public"]["CompositeTypes"]["quiz_configuration_question"][]
+        SetofOptions: {
+          from: "*"
+          to: "quiz_configuration_question"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       get_recent_content: {
         Args: { p_category?: string; p_days?: number; p_limit?: number }
         Returns: {
@@ -4083,7 +3975,6 @@ export type Database = {
           isSetofReturn: false
         }
       }
-      get_submission_stats: { Args: never; Returns: Json }
       get_submission_stats_summary: {
         Args: never
         Returns: {
@@ -5061,6 +4952,38 @@ export type Database = {
           | Database["public"]["CompositeTypes"]["account_dashboard_profile"]
           | null
       }
+      api_health_category_configs_check: {
+        status: string | null
+        count: number | null
+        error: string | null
+      }
+      api_health_checks: {
+        database:
+          | Database["public"]["CompositeTypes"]["api_health_database_check"]
+          | null
+        content_table:
+          | Database["public"]["CompositeTypes"]["api_health_content_table_check"]
+          | null
+        category_configs:
+          | Database["public"]["CompositeTypes"]["api_health_category_configs_check"]
+          | null
+      }
+      api_health_content_table_check: {
+        status: string | null
+        count: number | null
+        error: string | null
+      }
+      api_health_database_check: {
+        status: string | null
+        latency: number | null
+        error: string | null
+      }
+      api_health_result: {
+        status: string | null
+        timestamp: string | null
+        api_version: string | null
+        checks: Database["public"]["CompositeTypes"]["api_health_checks"] | null
+      }
       category_config_features: {
         show_on_homepage: boolean | null
         display_config: boolean | null
@@ -5103,6 +5026,15 @@ export type Database = {
         features:
           | Database["public"]["CompositeTypes"]["category_config_features"]
           | null
+      }
+      changelog_category_counts: {
+        all_count: number | null
+        added_count: number | null
+        changed_count: number | null
+        fixed_count: number | null
+        removed_count: number | null
+        deprecated_count: number | null
+        security_count: number | null
       }
       changelog_detail_entry: {
         id: string | null
@@ -5176,6 +5108,33 @@ export type Database = {
         limit: number | null
         offset: number | null
         has_more: boolean | null
+      }
+      changelog_with_category_stats_entry: {
+        id: string | null
+        slug: string | null
+        title: string | null
+        description: string | null
+        tldr: string | null
+        content: string | null
+        raw_content: string | null
+        changes: Json | null
+        metadata: Json | null
+        release_date: string | null
+        featured: boolean | null
+        published: boolean | null
+        keywords: string[] | null
+        created_at: string | null
+        updated_at: string | null
+      }
+      changelog_with_category_stats_result: {
+        entries:
+          | Database["public"]["CompositeTypes"]["changelog_with_category_stats_entry"][]
+          | null
+        category_counts:
+          | Database["public"]["CompositeTypes"]["changelog_category_counts"]
+          | null
+        total: number | null
+        filtered_count: number | null
       }
       collection_detail_with_items_result: {
         collection:
@@ -5441,6 +5400,33 @@ export type Database = {
           | Database["public"]["CompositeTypes"]["content_paginated_pagination"]
           | null
       }
+      content_templates_item: {
+        id: string | null
+        type: string | null
+        name: string | null
+        description: string | null
+        category: string | null
+        tags: string | null
+        template_data: Json | null
+      }
+      content_templates_result: {
+        templates:
+          | Database["public"]["CompositeTypes"]["content_templates_item"][]
+          | null
+      }
+      database_fingerprint_item: {
+        table_name: string | null
+        rows: number | null
+        inserts: number | null
+        updates: number | null
+        deletes: number | null
+        last_vacuum: string | null
+      }
+      due_sequence_email_item: {
+        id: string | null
+        email: string | null
+        step: number | null
+      }
       enriched_content_item: {
         id: string | null
         slug: string | null
@@ -5469,6 +5455,37 @@ export type Database = {
         sponsored_content_id: string | null
         sponsorship_tier: string | null
         is_sponsored: boolean | null
+      }
+      form_field_config_item: {
+        name: string | null
+        label: string | null
+        type: Database["public"]["Enums"]["form_field_type"] | null
+        required: boolean | null
+        placeholder: string | null
+        help_text: string | null
+        default_value: string | null
+        grid_column: Database["public"]["Enums"]["form_grid_column"] | null
+        icon_name: string | null
+        icon_position: Database["public"]["Enums"]["form_icon_position"] | null
+        rows: number | null
+        monospace: boolean | null
+        min_value: number | null
+        max_value: number | null
+        step_value: number | null
+        select_options: Json | null
+        field_group: string | null
+        display_order: number | null
+      }
+      form_field_config_result: {
+        form_type: string | null
+        fields:
+          | Database["public"]["CompositeTypes"]["form_field_config_item"][]
+          | null
+      }
+      generation_config_item: {
+        category: Database["public"]["Enums"]["content_category"] | null
+        validation_config: Json | null
+        generation_config: Json | null
       }
       homepage_complete_result: {
         content: Json | null
@@ -5585,6 +5602,22 @@ export type Database = {
         submitter_email: string | null
         spam_score: number | null
         created_at: string | null
+      }
+      quiz_configuration_option: {
+        value: string | null
+        label: string | null
+        description: string | null
+        icon_name: string | null
+      }
+      quiz_configuration_question: {
+        id: string | null
+        question: string | null
+        description: string | null
+        required: boolean | null
+        display_order: number | null
+        options:
+          | Database["public"]["CompositeTypes"]["quiz_configuration_option"][]
+          | null
       }
       recommendation_item: {
         slug: string | null

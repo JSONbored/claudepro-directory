@@ -99,6 +99,12 @@
 		"category_config_features",
 		"content_paginated_slim_result",
 		"content_paginated_slim_item",
-		"content_paginated_pagination"
+		"content_paginated_pagination",
+		"api_health_result",
+		"api_health_checks",
+		"api_health_database_check",
+		"api_health_content_table_check",
+		"api_health_category_configs_check",
+		"due_sequence_email_item"
 	]
 }

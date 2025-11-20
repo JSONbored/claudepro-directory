@@ -20,6 +20,7 @@ import { fileURLToPath } from 'node:url';
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { createClient } from '@supabase/supabase-js';
 import { logger } from '@/src/lib/logger';
+import type { Database } from '@/src/types/database.types';
 import { computeHash, hasHashChanged, setHash } from '../utils/build-cache.js';
 import { ensureEnvVars } from '../utils/env.js';
 
@@ -96,8 +97,14 @@ if (supabaseUrl && supabaseKey) {
 
     if (error) throw error;
 
-    // Create hash from fingerprint
-    currentHash = computeHash(data);
+    // MODERNIZED: Uses array directly, no Record transformation
+    // computeHash accepts objects (arrays serialize to JSON)
+    type DatabaseFingerprintItem =
+      Database['public']['CompositeTypes']['database_fingerprint_item'];
+    const fingerprint = (data as DatabaseFingerprintItem[] | null) ?? [];
+
+    // Create hash from fingerprint array
+    currentHash = computeHash(fingerprint);
 
     logger.info('   ✓ Using database fingerprint for change detection', {
       script: 'backup-database',

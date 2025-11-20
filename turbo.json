@@ -36,7 +36,6 @@
       "outputs": ["public/service-worker.js"],
       "inputs": [
         "scripts/build/generate-service-worker.ts",
-        "src/lib/config/category-config.ts",
         "src/lib/config/category-config.generated.ts",
         "src/lib/constants/security.ts",
         "package.json",

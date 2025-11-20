@@ -6,7 +6,6 @@
 import type { FC } from 'npm:react@18.3.1';
 import type { Resend } from 'npm:resend@4.0.0';
 import type { Database as DatabaseGenerated } from '../../database.types.ts';
-import type { GetDueSequenceEmailsReturn } from '../../database-overrides.ts';
 import { callRpc } from '../../database-overrides.ts';
 import { sendEmail } from '../../utils/integrations/resend.ts';
 import type { BaseLogContext } from '../logging.ts';
@@ -37,10 +36,17 @@ export const STEP_TEMPLATES: Record<number, FC<{ email: string }>> = {
  */
 export async function processSequenceEmail(
   resend: Resend,
-  item: GetDueSequenceEmailsReturn[number],
+  item: DatabaseGenerated['public']['CompositeTypes']['due_sequence_email_item'],
   logContext: BaseLogContext
 ): Promise<void> {
-  const { id, email, step } = item;
+  // Note: PostgreSQL composite types don't support NOT NULL constraints,
+  // but the RPC selects from table columns that ARE NOT NULL, so these values
+  // are guaranteed to be non-null at runtime. Type assertion is safe here.
+  const { id, email, step } = item as {
+    id: string;
+    email: string;
+    step: number;
+  };
 
   const Template = STEP_TEMPLATES[step];
   if (!Template) {
@@ -51,7 +57,7 @@ export async function processSequenceEmail(
   const html = await renderEmailTemplate(Template, { email });
 
   const itemLogContext = createEmailHandlerContext('sequence', {
-    email: item.email,
+    email, // Use destructured email (non-null after type assertion)
   });
 
   const subject = STEP_SUBJECTS[step];

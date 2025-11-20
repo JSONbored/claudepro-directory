@@ -32,16 +32,26 @@ import {
 } from '@/src/lib/icons';
 import { cn } from '@/src/lib/utils';
 import type { Database } from '@/src/types/database.types';
-import type { GetGetContentTemplatesReturn } from '@/src/types/database-overrides';
+
+// Use generated type directly from database.types.ts
+type ContentTemplatesResult = Database['public']['Functions']['get_content_templates']['Returns'];
+type ContentTemplateItem = NonNullable<NonNullable<ContentTemplatesResult['templates']>[number]>;
+
+// Type representing the merged structure (matches what getContentTemplates returns)
+type MergedTemplateItem = ContentTemplateItem & {
+  templateData: ContentTemplateItem['template_data'];
+} & (ContentTemplateItem['template_data'] extends Record<string, unknown>
+    ? ContentTemplateItem['template_data']
+    : Record<string, unknown>);
 
 interface TemplateGalleryProps {
-  templates: GetGetContentTemplatesReturn;
+  templates: MergedTemplateItem[];
   contentType: Database['public']['Enums']['content_category'] | null;
-  onApplyTemplate: (template: GetGetContentTemplatesReturn[0]) => void;
+  onApplyTemplate: (template: MergedTemplateItem) => void;
   className?: string;
 }
 
-type TemplateWithStats = GetGetContentTemplatesReturn[0] & {
+type TemplateWithStats = MergedTemplateItem & {
   usageCount?: number;
   trending?: boolean;
   featured?: boolean;
@@ -383,9 +393,9 @@ function TemplateCard({ template, index, onApply }: TemplateCardProps) {
  * Compact Template Selector (for inline use in wizard steps)
  */
 interface TemplateQuickSelectProps {
-  templates: GetGetContentTemplatesReturn;
+  templates: MergedTemplateItem[];
   contentType: Database['public']['Enums']['content_category'] | null;
-  onApplyTemplate: (template: GetGetContentTemplatesReturn[0]) => void;
+  onApplyTemplate: (template: MergedTemplateItem) => void;
   maxVisible?: number;
   className?: string;
 }

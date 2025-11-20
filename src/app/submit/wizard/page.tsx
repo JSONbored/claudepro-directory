@@ -59,7 +59,17 @@ import { logger } from '@/src/lib/logger';
 import type { SubmissionContentType } from '@/src/lib/types/component.types';
 import { toasts } from '@/src/lib/utils/toast.utils';
 import type { Database } from '@/src/types/database.types';
-import type { GetGetContentTemplatesReturn } from '@/src/types/database-overrides';
+
+// Use generated type directly from database.types.ts
+type ContentTemplatesResult = Database['public']['Functions']['get_content_templates']['Returns'];
+type ContentTemplateItem = NonNullable<NonNullable<ContentTemplatesResult['templates']>[number]>;
+
+// Type representing the merged structure (matches what getContentTemplates returns)
+type MergedTemplateItem = ContentTemplateItem & {
+  templateData: ContentTemplateItem['template_data'];
+} & (ContentTemplateItem['template_data'] extends Record<string, unknown>
+    ? ContentTemplateItem['template_data']
+    : Record<string, unknown>);
 
 interface FormData {
   submission_type: SubmissionContentType;
@@ -102,7 +112,7 @@ export default function WizardSubmissionPage() {
   const [formData, setFormData] = useState<FormData>(DEFAULT_FORM_DATA);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showCelebration, setShowCelebration] = useState(false);
-  const [templates, setTemplates] = useState<GetGetContentTemplatesReturn>([]);
+  const [templates, setTemplates] = useState<MergedTemplateItem[]>([]);
   const [templatesLoading, setTemplatesLoading] = useState(false);
   const [socialProofStats, setSocialProofStats] = useState<{
     contributors?: { count: number; names: string[] };
@@ -752,9 +762,9 @@ function StepConfiguration({
   submissionType: SubmissionContentType;
   data: Record<string, unknown>;
   onChange: (data: Record<string, unknown>) => void;
-  templates?: GetGetContentTemplatesReturn;
+  templates?: MergedTemplateItem[];
   templatesLoading?: boolean;
-  onApplyTemplate?: (template: GetGetContentTemplatesReturn[0]) => void;
+  onApplyTemplate?: (template: MergedTemplateItem) => void;
   getHighlightClasses?: (field: string) => string;
 }) {
   const hasTemplates = templates && templates.length > 0;

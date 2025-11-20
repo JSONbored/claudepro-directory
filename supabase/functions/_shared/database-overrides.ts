@@ -914,24 +914,6 @@ export type GetWeeklyDigestReturn = {
 };
 
 /**
- * get_due_sequence_emails RPC return type
- * Returns array of due email sequence items that need to be processed.
- *
- * Used for onboarding email sequence automation - fetches emails that are due
- * to receive their next sequence step.
- *
- * @see {@link https://claudepro.directory} Email sequence automation
- */
-export type GetDueSequenceEmailsReturn = Array<{
-  /** UUID of the email sequence schedule record */
-  id: string;
-  /** Email address of the recipient */
-  email: string;
-  /** Step number in the sequence (2-5 for onboarding sequence) */
-  step: number;
-}>;
-
-/**
  * get_company_profile RPC return type
  * Returns company profile with active jobs and statistics
  *
@@ -1057,46 +1039,6 @@ export type GenerateMetadataCompleteReturn =
     };
 
 /**
- * get_api_health RPC return type
- * Returns API health status with database connectivity and table checks
- *
- * Structure:
- * - status: Overall health status (healthy/degraded/unhealthy)
- * - timestamp: ISO timestamp of health check
- * - apiVersion: API version string (currently '1.0.0')
- * - checks: Individual health check results for database, content table, and category configs
- *
- * Status determination:
- * - healthy: All checks pass
- * - degraded: Some checks fail (contentTable or categoryConfigs)
- * - unhealthy: Database connectivity fails
- *
- * Note: Function always returns a result (never NULL)
- */
-export type GetApiHealthReturn = {
-  status: 'healthy' | 'degraded' | 'unhealthy';
-  timestamp: string;
-  apiVersion: string;
-  checks: {
-    database: {
-      status: 'ok' | 'error';
-      latency: number;
-      error?: string;
-    };
-    contentTable: {
-      status: 'ok' | 'error';
-      count: number;
-      error?: string;
-    };
-    categoryConfigs: {
-      status: 'ok' | 'error';
-      count: number;
-      error?: string;
-    };
-  };
-};
-
-/**
  * generate_markdown_export RPC return type
  * Returns markdown export for a content item with optional metadata and footer
  *
@@ -1152,36 +1094,3 @@ export type GenerateReadmeDataReturn = {
   totalCount: number;
   categoryBreakdown: Record<string, number>;
 };
-
-/**
- * get_app_settings RPC return type
- * Returns a key-value map of app settings with metadata.
- *
- * Keys are setting_key values, values contain setting metadata including
- * the actual setting value, type, description, category, environment, etc.
- *
- * Note: This RPC is not currently used by the application codebase.
- * The application uses Statsig Dynamic Configs instead. This type definition
- * is provided for completeness and potential future use.
- *
- * @see {@link https://claudepro.directory} App settings configuration
- */
-export type GetAppSettingsReturn = Record<
-  string,
-  {
-    /** The actual setting value (can be any JSON-serializable value) */
-    value: Json;
-    /** The type of the setting value */
-    type: DatabaseGenerated['public']['Enums']['setting_type'];
-    /** Human-readable description of the setting */
-    description: string | null;
-    /** Category grouping for the setting */
-    category: string | null;
-    /** Environment where this setting applies (null = all environments) */
-    environment: DatabaseGenerated['public']['Enums']['environment'] | null;
-    /** Whether this setting is currently enabled (always true in return) */
-    enabled: boolean;
-    /** Version number for the setting */
-    version: number;
-  }
->;

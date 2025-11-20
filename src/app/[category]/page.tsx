@@ -34,7 +34,7 @@
  *
  * @see {@link https://nextjs.org/docs/app/building-your-application/routing/dynamic-routes}
  * @see {@link file://./[slug]/page.tsx} - Detail page counterpart
- * @see {@link file://../../lib/config/category-config.ts} - Category configuration
+ * @see {@link file://../../lib/data/config/category/index.ts} - Category configuration
  * @see {@link file://../../lib/content-loaders.ts} - Content loading with caching
  */
 

@@ -34,9 +34,9 @@ interface CachedRpcOptions<Result> {
  * @example
  * // Result type inferred from RPC return type (recommended)
  * const data = await fetchCachedRpc(
- *   { p_content_type: 'agents' },
+ *   { p_form_type: 'agents' },
  *   {
- *     rpcName: 'get_form_fields_for_content_type',
+ *     rpcName: 'get_form_field_config',
  *     tags: ['templates'],
  *     ttlKey: 'cache.templates.ttl_seconds',
  *     keySuffix: 'agents',

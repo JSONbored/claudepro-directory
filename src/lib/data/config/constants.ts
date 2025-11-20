@@ -83,12 +83,12 @@ export const CLAUDE_CONFIG = claudeConfigSchema.parse({
 
 /**
  * Content Categories - Database-First
- * Use category_configs table as single source of truth (category-config.ts)
+ * Use category_configs table as single source of truth (via generated configs)
  */
 
 // CONSOLIDATION: Export unified main content categories for splitting logic
 // **ARCHITECTURAL FIX**: Import from category-config where needed to avoid circular dependency
-// MAIN_CONTENT_CATEGORIES moved to category-config.ts as VALID_CATEGORIES
+// MAIN_CONTENT_CATEGORIES moved to generated category configs as VALID_CATEGORIES
 
 // **ARCHITECTURAL FIX**: Removed unused SEO_CATEGORIES (guide subcategories, not top-level categories)
 
