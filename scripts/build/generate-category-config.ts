@@ -15,6 +15,7 @@ import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { logger } from '@/src/lib/logger';
+import type { Database } from '@/src/types/database.types';
 import { computeHash, hasHashChanged, setHash } from '../utils/build-cache.js';
 import { ensureEnvVars } from '../utils/env.js';
 
@@ -27,6 +28,10 @@ interface BadgeConfig {
   icon?: string;
   hasDynamicCount?: boolean;
 }
+
+// Use generated types directly from database.types.ts
+type ConfigFormatEnum = Database['public']['Enums']['config_format'];
+type PrimaryActionTypeEnum = Database['public']['Enums']['primary_action_type'];
 
 interface DatabaseConfigWithFeatures {
   category: string;
@@ -41,8 +46,9 @@ interface DatabaseConfigWithFeatures {
   empty_state_message: string | null;
   url_slug: string;
   content_loader: string;
-  config_format: string | null;
-  primary_action_type: string;
+  // Use generated ENUM types directly (values come as strings from JSON but are typed as ENUM)
+  config_format: ConfigFormatEnum | null;
+  primary_action_type: PrimaryActionTypeEnum;
   primary_action_label: string;
   primary_action_config: unknown;
   validation_config: unknown;
@@ -130,11 +136,17 @@ async function generateCategoryConfig() {
     // Generate TypeScript file
     logger.info('📝 Generating TypeScript config file...');
 
-    // Centralized string escaping for generated TypeScript literals
-    const escapeString = (value: string) => JSON.stringify(value).slice(1, -1);
+    // All strings now use JSON.stringify directly (no escapeString needed)
+    // JSON.stringify properly escapes all special characters including apostrophes
 
     const configEntries = Object.entries(rawConfigs)
-      .map(([categoryId, dbConfig]) => {
+      .map(([, dbConfig]) => {
+        // Use the category ENUM value as the key, not the numeric ID
+        const categoryKey = dbConfig.category;
+        if (!categoryKey) {
+          throw new Error('Category config missing category ENUM value');
+        }
+
         const features = dbConfig.features || {};
         const generationConfig = (dbConfig.generation_config || {}) as {
           buildConfig?: { batchSize?: number; cacheTTL?: number };
@@ -151,26 +163,26 @@ async function generateCategoryConfig() {
               if (hasDynamic && badge.text) {
                 const template = badge.text.replace(/`/g, '\\`').replace(/\$/g, '\\$');
                 return badge.icon
-                  ? `{ icon: '${badge.icon}', text: (count: number) => \`${template}\`.replace('{count}', String(count)) }`
+                  ? `{ icon: ${JSON.stringify(badge.icon)}, text: (count: number) => \`${template}\`.replace('{count}', String(count)) }`
                   : `{ text: (count: number) => \`${template}\`.replace('{count}', String(count)) }`;
               }
               return badge.icon
-                ? `{ icon: '${badge.icon}', text: '${badge.text || ''}' }`
-                : `{ text: '${badge.text || ''}' }`;
+                ? `{ icon: ${JSON.stringify(badge.icon)}, text: ${JSON.stringify(badge.text || '')} }`
+                : `{ text: ${JSON.stringify(badge.text || '')} }`;
             })
           : [];
 
-        return `  '${categoryId}': {
-    id: '${categoryId}' as const,
-    title: '${escapeString(dbConfig.title)}',
-    pluralTitle: '${escapeString(dbConfig.plural_title)}',
-    description: '${escapeString(dbConfig.description)}',
-    icon: ICON_MAP.${dbConfig.icon_name} || FileText,
-    colorScheme: '${dbConfig.color_scheme}',
+        return `  ${JSON.stringify(categoryKey)}: {
+    id: ${JSON.stringify(categoryKey)} as const,
+    title: ${JSON.stringify(dbConfig.title)},
+    pluralTitle: ${JSON.stringify(dbConfig.plural_title)},
+    description: ${JSON.stringify(dbConfig.description)},
+    icon: ICON_MAP['${dbConfig.icon_name}'] || FileText,
+    colorScheme: ${JSON.stringify(dbConfig.color_scheme)},
     showOnHomepage: ${features['show_on_homepage'] ?? true},
-    keywords: '${escapeString(dbConfig.keywords)}',
-    metaDescription: '${escapeString(dbConfig.meta_description)}',
-    typeName: '${escapeString(dbConfig.title)}',
+    keywords: ${JSON.stringify(dbConfig.keywords)},
+    metaDescription: ${JSON.stringify(dbConfig.meta_description)},
+    typeName: ${JSON.stringify(dbConfig.title)},
     generateFullContent: ${features['generate_full_content'] ?? true},
     metadataFields: ${JSON.stringify(dbConfig.metadata_fields)},
     buildConfig: {
@@ -184,13 +196,13 @@ async function generateCategoryConfig() {
       maxItemsPerResponse: ${apiSchema.apiConfig?.maxItemsPerResponse || 1000},
     },
     listPage: {
-      searchPlaceholder: '${escapeString(dbConfig.search_placeholder)}',
+      searchPlaceholder: ${JSON.stringify(dbConfig.search_placeholder)},
       badges: [${badges.join(', ')}],
-      ${dbConfig.empty_state_message ? `emptyStateMessage: '${escapeString(dbConfig.empty_state_message)}',` : ''}
+      ${dbConfig.empty_state_message ? `emptyStateMessage: ${JSON.stringify(dbConfig.empty_state_message)},` : ''}
     },
     detailPage: {
       displayConfig: ${features['display_config'] ?? true},
-      configFormat: '${dbConfig.config_format || 'json'}' as 'json' | 'multi' | 'hook',
+      configFormat: ${JSON.stringify(dbConfig.config_format || 'json')},
     },
     sections: {
       features: ${features['section_features'] ?? false},
@@ -205,11 +217,11 @@ async function generateCategoryConfig() {
       showGitHubLink: ${features['metadata_show_github_link'] ?? true},
     },
     primaryAction: {
-      label: '${escapeString(dbConfig.primary_action_label)}',
-      type: '${dbConfig.primary_action_type}',
+      label: ${JSON.stringify(dbConfig.primary_action_label)},
+      type: ${JSON.stringify(dbConfig.primary_action_type)},
     },
-    urlSlug: '${dbConfig.url_slug}',
-    contentLoader: '${dbConfig.content_loader}',
+    urlSlug: ${JSON.stringify(dbConfig.url_slug)},
+    contentLoader: ${JSON.stringify(dbConfig.content_loader)},
   }`;
       })
       .join(',\n');
@@ -235,8 +247,10 @@ import {
   Terminal,
   Webhook,
 } from '@/src/lib/icons';
+import type { Database } from '@/src/types/database.types';
 import type { UnifiedCategoryConfig } from '@/src/lib/types/component.types';
-import type { ContentCategory } from '@/src/types/database-overrides';
+
+type ContentCategory = Database['public']['Enums']['content_category'];
 
 const ICON_MAP: Record<string, LucideIcon> = {
   Sparkles,

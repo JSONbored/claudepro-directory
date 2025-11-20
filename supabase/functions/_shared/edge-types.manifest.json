@@ -9,11 +9,12 @@
 		"changelog",
 		"jobs",
 		"search_queries",
-		"sponsored_impressions",
-		"sponsored_clicks",
+		"user_interactions",
 		"app_settings",
 		"notification_dismissals",
-		"companies"
+		"companies",
+		"sponsored_content",
+		"structured_data_config"
 	],
 	"functions": [
 		"search_content_optimized",
@@ -54,7 +55,17 @@
 		"get_company_profile",
 		"get_content_paginated_slim",
 		"get_api_health",
-		"get_category_configs_with_features"
+		"get_category_configs_with_features",
+		"get_structured_data_config",
+		"get_pgmq_queue_metrics",
+		"build_complete_content_schemas",
+		"build_software_application_schema",
+		"build_breadcrumb_json_ld",
+		"build_source_code_schema",
+		"build_how_to_schema",
+		"build_faq_schema",
+		"build_learning_resource_schema",
+		"build_item_list_schema"
 	],
 	"enums": [
 		"newsletter_source",
@@ -89,7 +100,9 @@
 		"job_category",
 		"job_plan",
 		"job_tier",
-		"job_type"
+		"job_type",
+		"interaction_type",
+		"sponsorship_tier"
 	],
 	"compositeTypes": [
 		"company_profile_result",
@@ -105,6 +118,14 @@
 		"api_health_database_check",
 		"api_health_content_table_check",
 		"api_health_category_configs_check",
-		"due_sequence_email_item"
+		"due_sequence_email_item",
+		"sponsorship_analytics_result",
+		"sponsorship_analytics_daily_stat",
+		"sponsorship_analytics_computed_metrics",
+		"structured_data_config_result",
+		"structured_data_schema_types",
+		"weekly_digest_result",
+		"weekly_digest_new_content",
+		"weekly_digest_trending_content"
 	]
 }

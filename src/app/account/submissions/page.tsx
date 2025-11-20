@@ -343,13 +343,19 @@ export default async function SubmissionsPage() {
         </Card>
       ) : (
         <div className="grid gap-4">
-          {submissions.map((submission) => {
+          {submissions.map((submission, index) => {
             const status = (submission.status ??
               'pending') as Database['public']['Enums']['submission_status'];
             const type = (submission.content_type ??
               'commands') as Database['public']['Enums']['submission_type'];
+            const prLinkProps = getPrLinkProps(submission);
+            const contentLinkProps = getContentLinkProps(
+              type,
+              submission.content_slug ?? '',
+              status
+            );
             return (
-              <Card key={submission.id ?? `submission-${Math.random()}`}>
+              <Card key={submission.id ?? `submission-${index}`}>
                 <CardHeader>
                   <div className={UI_CLASSES.FLEX_ITEMS_START_JUSTIFY_BETWEEN}>
                     <div className="flex-1">
@@ -407,21 +413,8 @@ export default async function SubmissionsPage() {
                   )}
 
                   <div className={UI_CLASSES.FLEX_GAP_2}>
-                    {(() => {
-                      const prLinkProps = getPrLinkProps(submission);
-                      return prLinkProps ? <PrLinkButton href={prLinkProps.href} /> : null;
-                    })()}
-
-                    {(() => {
-                      const contentLinkProps = getContentLinkProps(
-                        type,
-                        submission.content_slug ?? '',
-                        status
-                      );
-                      return contentLinkProps ? (
-                        <ContentLinkButton href={contentLinkProps.href} />
-                      ) : null;
-                    })()}
+                    {prLinkProps && <PrLinkButton href={prLinkProps.href} />}
+                    {contentLinkProps && <ContentLinkButton href={contentLinkProps.href} />}
                   </div>
                 </CardContent>
               </Card>

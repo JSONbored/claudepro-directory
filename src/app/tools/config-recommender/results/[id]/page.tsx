@@ -40,7 +40,30 @@ type DecodedQuizAnswers = {
 function decodeQuizAnswers(encoded: string): DecodedQuizAnswers {
   try {
     const json = Buffer.from(encoded, 'base64url').toString('utf-8');
-    return JSON.parse(json) as DecodedQuizAnswers;
+    const parsed = JSON.parse(json);
+
+    // Validate required fields
+    if (!parsed.useCase || typeof parsed.useCase !== 'string') {
+      throw new Error('Missing or invalid useCase field in quiz answers');
+    }
+    if (!parsed.experienceLevel || typeof parsed.experienceLevel !== 'string') {
+      throw new Error('Missing or invalid experienceLevel field in quiz answers');
+    }
+    if (!Array.isArray(parsed.toolPreferences)) {
+      throw new Error(
+        'Missing or invalid toolPreferences field in quiz answers (must be an array)'
+      );
+    }
+
+    // Validate optional array fields if present
+    if (parsed.p_integrations !== undefined && !Array.isArray(parsed.p_integrations)) {
+      throw new Error('Invalid p_integrations field in quiz answers (must be an array if present)');
+    }
+    if (parsed.p_focus_areas !== undefined && !Array.isArray(parsed.p_focus_areas)) {
+      throw new Error('Invalid p_focus_areas field in quiz answers (must be an array if present)');
+    }
+
+    return parsed as DecodedQuizAnswers;
   } catch (error) {
     const normalized = normalizeError(error, 'Invalid quiz answers encoding');
     logger.error('ConfigRecommenderResults: decodeQuizAnswers failed', normalized, {
@@ -54,9 +77,18 @@ function normalizeRecommendationResults(
   results: Database['public']['Functions']['get_recommendations']['Returns']['results']
 ): Database['public']['CompositeTypes']['recommendation_item'][] {
   if (!results) return [];
-  return results.filter((item): item is NonNullable<typeof item> =>
+  const normalized = results.filter((item): item is NonNullable<typeof item> =>
     Boolean(item?.slug && item?.title && item?.category)
   );
+
+  if (normalized.length < results.length) {
+    logger.warn('ConfigRecommenderResults: filtered incomplete recommendation items', {
+      originalCount: results.length,
+      filteredCount: normalized.length,
+    });
+  }
+
+  return normalized;
 }
 
 interface PageProps {

@@ -39,7 +39,7 @@ const SUBMISSION_TIPS = [
   'Tag appropriately - tags help users discover your work',
 ];
 
-const TYPE_LABELS: Partial<Record<Database['public']['Enums']['content_category'], string>> = {
+const TYPE_LABELS: Record<Database['public']['Enums']['submission_type'], string> = {
   agents: 'Agent',
   mcp: 'MCP',
   rules: 'Rule',
@@ -59,6 +59,28 @@ function formatTimeAgo(dateString: string): string {
   if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
   if (seconds < 604800) return `${Math.floor(seconds / 86400)}d ago`;
   return `${Math.floor(seconds / 604800)}w ago`;
+}
+
+// Type guard for recent merged submissions
+function isValidRecentSubmission(submission: unknown): submission is {
+  id: string;
+  content_name: string;
+  content_type: Database['public']['Enums']['content_category'];
+  merged_at: string;
+  user?: { name: string; slug: string } | null;
+} {
+  return (
+    submission !== null &&
+    typeof submission === 'object' &&
+    'id' in submission &&
+    submission.id !== null &&
+    'content_name' in submission &&
+    submission.content_name !== null &&
+    'content_type' in submission &&
+    submission.content_type !== null &&
+    'merged_at' in submission &&
+    submission.merged_at !== null
+  );
 }
 
 import type { Metadata } from 'next';
@@ -105,7 +127,7 @@ export default async function SubmitPage() {
     throw new Error('Submission form configuration is unavailable');
   }
 
-  let templates: Awaited<ReturnType<typeof getContentTemplates>> | null = null;
+  let templates: Awaited<ReturnType<typeof getContentTemplates>>;
   try {
     templates = await getContentTemplates('agents');
   } catch (error) {
@@ -116,7 +138,7 @@ export default async function SubmitPage() {
     throw normalized;
   }
 
-  if (!templates || templates.length === 0) {
+  if (templates.length === 0) {
     logger.warn('SubmitPage: no templates returned from getContentTemplates', {
       category: 'agents',
     });
@@ -128,20 +150,15 @@ export default async function SubmitPage() {
     merged_this_week: dashboardData?.stats?.merged_this_week ?? 0,
   };
   const recentMerged = (dashboardData?.recent || [])
+    .filter(isValidRecentSubmission)
     .filter(
       (
         submission
-      ): submission is NonNullable<typeof submission> & {
+      ): submission is typeof submission & {
         id: string;
         content_name: string;
-        content_type: NonNullable<typeof submission.content_type>;
         merged_at: string;
-      } =>
-        submission !== null &&
-        submission.id !== null &&
-        submission.content_name !== null &&
-        submission.content_type !== null &&
-        submission.merged_at !== null
+      } => submission.merged_at != null && submission.id != null && submission.content_name != null
     )
     .map((submission) => ({
       id: submission.id,
@@ -202,7 +219,11 @@ export default async function SubmitPage() {
           <SidebarActivityCard
             recentMerged={recentMerged}
             tips={SUBMISSION_TIPS}
-            typeLabels={TYPE_LABELS}
+            typeLabels={
+              TYPE_LABELS as Partial<
+                Record<Database['public']['Enums']['content_category'], string>
+              >
+            }
           />
         </aside>
       </div>

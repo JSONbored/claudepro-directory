@@ -24,32 +24,34 @@ import { buildSubscriptionFooter } from "../config/footer-presets.ts";
 import { buildEmailCtaUrl } from "../cta.ts";
 import { EMAIL_UTM_TEMPLATES } from "../utm-templates.ts";
 
+// Use generated types directly from database.types.ts - snake_case matches database
 export interface DigestContentItem {
 	title: string;
 	description: string;
 	category: string;
 	slug: string;
 	url: string;
+	date_added?: string; // For new content
 }
 
 export interface DigestTrendingItem extends DigestContentItem {
-	viewCount: number;
+	view_count: number;
 }
 
 export interface WeeklyDigestProps {
 	email: string;
-	weekOf: string;
-	newContent: DigestContentItem[];
-	trendingContent: DigestTrendingItem[];
-	personalizedContent?: DigestContentItem[];
+	week_of: string; // snake_case to match database
+	new_content: DigestContentItem[]; // snake_case to match database
+	trending_content: DigestTrendingItem[]; // snake_case to match database
+	personalized_content?: DigestContentItem[]; // snake_case for consistency
 }
 
 export function WeeklyDigest({
 	email,
-	weekOf,
-	newContent,
-	trendingContent,
-	personalizedContent,
+	week_of,
+	new_content,
+	trending_content,
+	personalized_content,
 }: WeeklyDigestProps) {
 	const utm = EMAIL_UTM_TEMPLATES.WEEKLY_DIGEST;
 
@@ -66,14 +68,14 @@ export function WeeklyDigest({
 			},
 		}));
 
-	const personalizedCards = personalizedContent
-		? mapContentCards(personalizedContent, "Recommendation")
+	const personalizedCards = personalized_content
+		? mapContentCards(personalized_content, "Recommendation")
 		: [];
-	const newContentCards = mapContentCards(newContent, "Content");
-	const trendingCards = trendingContent.map((item) => ({
+	const newContentCards = mapContentCards(new_content, "Content");
+	const trendingCards = trending_content.map((item) => ({
 		title: item.title,
 		description: item.description,
-		meta: `${item.category.toUpperCase()} • ${formatViewCount(item.viewCount)} views`,
+		meta: `${item.category.toUpperCase()} • ${formatViewCount(item.view_count)} views`,
 		cta: {
 			label: `View ${item.category}`,
 			href: buildEmailCtaUrl(item.url, utm, {
@@ -83,8 +85,8 @@ export function WeeklyDigest({
 	}));
 
 	return (
-		<BaseLayout preview={`This Week in Claude - ${weekOf}`} utm={utm}>
-			<HeroBlock title="This Week in Claude 🚀" subtitle={weekOf}>
+		<BaseLayout preview={`This Week in Claude - ${week_of}`} utm={utm}>
+			<HeroBlock title="This Week in Claude 🚀" subtitle={week_of}>
 				<Text style={paragraphStyle}>
 					Your weekly roundup of the best Claude tools, configurations, and
 					resources from the community.

@@ -136,8 +136,10 @@ export default async function ChangelogPage() {
             {/* Stats */}
             <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_6} text-muted-foreground text-sm`}>
               <div>
-                <span className="font-semibold text-foreground">{entries.length}</span> total
-                updates
+                <span className="font-semibold text-foreground">
+                  {overview.metadata?.total_entries ?? entries.length}
+                </span>{' '}
+                total updates
               </div>
               {entries.length > 0 && entries[0] && entries[0].release_date && (
                 <div>

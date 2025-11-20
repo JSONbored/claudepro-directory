@@ -223,9 +223,7 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
                 return (
                   <li key={slug} className={UI_CLASSES.FLEX_ITEMS_START_GAP_3}>
                     <span
-                      className={
-                        'flex h-6 w-6 shrink-0s-center justify-center rounded-full bg-primary/10 font-semibold text-primary text-sm'
-                      }
+                      className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 font-semibold text-primary text-sm"
                       aria-hidden="true"
                     >
                       {index + 1}

@@ -417,9 +417,11 @@ export const ConfigCard = memo(
       'sponsored_content_id' in item && typeof item.sponsored_content_id === 'string'
         ? item.sponsored_content_id
         : undefined;
-    const sponsorTier =
-      'sponsorship_tier' in item && typeof item.sponsorship_tier === 'string'
-        ? item.sponsorship_tier
+    const sponsorTier: Database['public']['Enums']['sponsorship_tier'] | null | undefined =
+      'sponsorship_tier' in item &&
+      item.sponsorship_tier !== null &&
+      item.sponsorship_tier !== undefined
+        ? (item.sponsorship_tier as Database['public']['Enums']['sponsorship_tier']) // Cast to ENUM type
         : undefined;
     const viewCount =
       'view_count' in item && typeof item.view_count === 'number' ? item.view_count : undefined;
@@ -608,11 +610,7 @@ export const ConfigCard = memo(
                   </UnifiedBadge>
                 )}
                 {isSponsored && sponsorTier && (
-                  <UnifiedBadge
-                    variant="sponsored"
-                    tier={sponsorTier as 'featured' | 'promoted' | 'spotlight'}
-                    showIcon={true}
-                  />
+                  <UnifiedBadge variant="sponsored" tier={sponsorTier} showIcon={true} />
                 )}
 
                 {/* New indicator - 0-7 days old content (server-computed) */}

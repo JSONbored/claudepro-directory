@@ -367,7 +367,7 @@ export const trackSponsoredImpression = optionalAuthAction
       user_id: userId,
       content_type: 'sponsored',
       content_slug: parsedInput.sponsoredId,
-      interaction_type: 'view', // Use 'view' for impressions (or add 'sponsored_impression' to enum if needed)
+      interaction_type: 'sponsored_impression',
       metadata: {
         event_type: 'impression',
         sponsored_id: parsedInput.sponsoredId,
@@ -397,7 +397,7 @@ export const trackSponsoredClick = optionalAuthAction
       user_id: userId,
       content_type: 'sponsored',
       content_slug: parsedInput.sponsoredId,
-      interaction_type: 'click',
+      interaction_type: 'sponsored_click',
       metadata: {
         event_type: 'click',
         sponsored_id: parsedInput.sponsoredId,

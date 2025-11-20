@@ -291,69 +291,81 @@ export function DetailHeaderActions({
 
   const hasDownloadAvailable = hasMcpbDownload || hasStorageDownload;
 
+  /**
+   * Handle download for MCPB or Storage content
+   */
+  const handleDownload = (
+    downloadType: 'mcpb' | 'zip',
+    contentItem: ContentItem,
+    category: Database['public']['Enums']['content_category'],
+    pulse: ReturnType<typeof usePulse>
+  ) => {
+    if (downloadType === 'mcpb') {
+      const safeSlug = sanitizePathSegment(contentItem.slug);
+      if (!safeSlug) {
+        toasts.raw.error('Invalid content slug', {
+          description: 'The download link is not available.',
+        });
+        return;
+      }
+
+      const supabaseUrl = process.env['NEXT_PUBLIC_SUPABASE_URL'];
+      if (!supabaseUrl) {
+        toasts.raw.error('Configuration error', {
+          description: 'Unable to generate download link.',
+        });
+        return;
+      }
+
+      // Use edge function proxy for cached egress (critical for cost optimization)
+      const downloadUrl = `${supabaseUrl}/functions/v1/data-api/content/mcp/${safeSlug}?format=storage`;
+      window.location.href = downloadUrl;
+      pulse
+        .download({ category, slug: contentItem.slug, action_type: 'download_mcpb' })
+        .catch((error) => {
+          logUnhandledPromise('trackInteraction:download_mcpb', error, {
+            slug: contentItem.slug,
+            category,
+          });
+        });
+    } else {
+      // For Skills content, use direct storage URL
+      const safeStorageUrl = getSafeStorageUrl(contentItem.storage_url as string);
+      if (!safeStorageUrl) {
+        toasts.raw.error('Invalid download URL', {
+          description: 'The download link is not available.',
+        });
+        return;
+      }
+      window.location.href = safeStorageUrl;
+      pulse
+        .download({ category, slug: contentItem.slug, action_type: 'download_zip' })
+        .catch((error) => {
+          logUnhandledPromise('trackInteraction:download', error, {
+            slug: contentItem.slug,
+            category,
+          });
+        });
+    }
+
+    toasts.raw.success('Download started!', {
+      description: `Downloading ${contentItem.title || contentItem.slug} package...`,
+    });
+  };
+
   // Handle action clicks based on type
   const handleActionClick = (action: SerializableAction) => {
     // Handle download action
     if (action.type === 'download') {
       // For MCP content, use edge function proxy for .mcpb files (ensures Cloudflare caching)
       if (hasMcpbDownload) {
-        const safeSlug = sanitizePathSegment(contentItem.slug);
-        if (!safeSlug) {
-          toasts.raw.error('Invalid content slug', {
-            description: 'The download link is not available.',
-          });
-          return;
-        }
-
-        const supabaseUrl = process.env['NEXT_PUBLIC_SUPABASE_URL'];
-        if (!supabaseUrl) {
-          toasts.raw.error('Configuration error', {
-            description: 'Unable to generate download link.',
-          });
-          return;
-        }
-
-        // Use edge function proxy for cached egress (critical for cost optimization)
-        const downloadUrl = `${supabaseUrl}/functions/v1/data-api/content/mcp/${safeSlug}?format=storage`;
-        window.location.href = downloadUrl;
-        toasts.raw.success('Download started!', {
-          description: `Downloading ${contentItem.title || contentItem.slug} package...`,
-        });
-
-        pulse
-          .download({ category, slug: contentItem.slug, action_type: 'download_mcpb' })
-          .catch((error) => {
-            logUnhandledPromise('trackInteraction:download_mcpb', error, {
-              slug: contentItem.slug,
-              category,
-            });
-          });
+        handleDownload('mcpb', contentItem, category, pulse);
         return;
       }
 
       // For Skills content, use direct storage URL
       if (hasStorageDownload) {
-        // Validate and sanitize storage URL before redirect
-        const safeStorageUrl = getSafeStorageUrl(contentItem.storage_url as string);
-        if (!safeStorageUrl) {
-          toasts.raw.error('Invalid download URL', {
-            description: 'The download link is not available.',
-          });
-          return;
-        }
-        window.location.href = safeStorageUrl;
-        toasts.raw.success('Download started!', {
-          description: `Downloading ${contentItem.title || contentItem.slug} package...`,
-        });
-
-        pulse
-          .download({ category, slug: contentItem.slug, action_type: 'download_zip' })
-          .catch((error) => {
-            logUnhandledPromise('trackInteraction:download', error, {
-              slug: contentItem.slug,
-              category,
-            });
-          });
+        handleDownload('zip', contentItem, category, pulse);
         return;
       }
 
@@ -423,57 +435,9 @@ export function DetailHeaderActions({
             <Button
               onClick={() => {
                 if (hasMcpbDownload) {
-                  const safeSlug = sanitizePathSegment(contentItem.slug);
-                  if (!safeSlug) {
-                    toasts.raw.error('Invalid content slug', {
-                      description: 'The download link is not available.',
-                    });
-                    return;
-                  }
-
-                  const supabaseUrl = process.env['NEXT_PUBLIC_SUPABASE_URL'];
-                  if (!supabaseUrl) {
-                    toasts.raw.error('Configuration error', {
-                      description: 'Unable to generate download link.',
-                    });
-                    return;
-                  }
-
-                  const downloadUrl = `${supabaseUrl}/functions/v1/data-api/content/mcp/${safeSlug}?format=storage`;
-                  window.location.href = downloadUrl;
-                  toasts.raw.success('Download started!', {
-                    description: `Downloading ${contentItem.title || contentItem.slug} package...`,
-                  });
-
-                  pulse
-                    .download({ category, slug: contentItem.slug, action_type: 'download_mcpb' })
-                    .catch((error) => {
-                      logUnhandledPromise('trackInteraction:download_mcpb', error, {
-                        slug: contentItem.slug,
-                        category,
-                      });
-                    });
+                  handleDownload('mcpb', contentItem, category, pulse);
                 } else if (hasStorageDownload) {
-                  const safeStorageUrl = getSafeStorageUrl(contentItem.storage_url as string);
-                  if (!safeStorageUrl) {
-                    toasts.raw.error('Invalid download URL', {
-                      description: 'The download link is not available.',
-                    });
-                    return;
-                  }
-                  window.location.href = safeStorageUrl;
-                  toasts.raw.success('Download started!', {
-                    description: `Downloading ${contentItem.title || contentItem.slug} package...`,
-                  });
-
-                  pulse
-                    .download({ category, slug: contentItem.slug, action_type: 'download_zip' })
-                    .catch((error) => {
-                      logUnhandledPromise('trackInteraction:download', error, {
-                        slug: contentItem.slug,
-                        category,
-                      });
-                    });
+                  handleDownload('zip', contentItem, category, pulse);
                 }
               }}
               className="min-w-0"

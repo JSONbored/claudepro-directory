@@ -22,6 +22,8 @@ import {
 import type { UnifiedCategoryConfig } from '@/src/lib/types/component.types';
 import type { Database } from '@/src/types/database.types';
 
+type ContentCategory = Database['public']['Enums']['content_category'];
+
 const ICON_MAP: Record<string, LucideIcon> = {
   Sparkles,
   Terminal,
@@ -38,10 +40,7 @@ const ICON_MAP: Record<string, LucideIcon> = {
  * Static category configurations (generated at build time)
  * ZERO runtime database queries - 100% faster than unstable_cache
  */
-export const CATEGORY_CONFIGS: Record<
-  Database['public']['Enums']['content_category'],
-  UnifiedCategoryConfig<Database['public']['Enums']['content_category']>
-> = {
+export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<ContentCategory>> = {
   mcp: {
     id: 'mcp' as const,
     title: 'MCP Server',
@@ -74,7 +73,7 @@ export const CATEGORY_CONFIGS: Record<
     },
     detailPage: {
       displayConfig: true,
-      configFormat: 'json' as 'json' | 'multi' | 'hook',
+      configFormat: 'json',
     },
     sections: {
       features: true,
@@ -89,269 +88,11 @@ export const CATEGORY_CONFIGS: Record<
       showGitHubLink: true,
     },
     primaryAction: {
-      label: 'View Configuration',
-      type: 'scroll',
+      label: 'Download .mcpb',
+      type: 'download',
     },
     urlSlug: 'mcp',
     contentLoader: 'mcp',
-  },
-  jobs: {
-    id: 'jobs' as const,
-    title: 'Job',
-    pluralTitle: 'Jobs',
-    description:
-      'Job listings for Claude-related positions, AI engineering roles, and opportunities to work with AI technology.',
-    icon: ICON_MAP['Briefcase'] || FileText,
-    colorScheme: 'emerald-500',
-    showOnHomepage: false,
-    keywords: 'Claude jobs, AI jobs, engineering jobs, remote AI positions',
-    metaDescription:
-      'Job opportunities in Claude and AI. Find roles working with Claude, AI engineering positions, remote opportunities, and cutting-edge AI careers worldwide.',
-    typeName: 'Job',
-    generateFullContent: true,
-    metadataFields: ['title', 'description', 'category', 'slug', 'created_at', 'updated_at'],
-    buildConfig: {
-      batchSize: 10,
-      enableCache: true,
-      cacheTTL: 300000,
-    },
-    apiConfig: {
-      generateStaticAPI: true,
-      includeTrending: true,
-      maxItemsPerResponse: 1000,
-    },
-    listPage: {
-      searchPlaceholder: 'Search jobs...',
-      badges: [{ text: (count: number) => '{count} items'.replace('{count}', String(count)) }],
-    },
-    detailPage: {
-      displayConfig: false,
-      configFormat: 'json' as 'json' | 'multi' | 'hook',
-    },
-    sections: {
-      features: false,
-      installation: false,
-      use_cases: false,
-      configuration: false,
-      security: false,
-      troubleshooting: false,
-      examples: false,
-    },
-    metadata: {
-      showGitHubLink: true,
-    },
-    primaryAction: {
-      label: 'View Job',
-      type: 'scroll',
-    },
-    urlSlug: 'jobs',
-    contentLoader: 'jobs',
-  },
-  hooks: {
-    id: 'hooks' as const,
-    title: 'Hook',
-    pluralTitle: 'Hooks',
-    description: 'Event-driven automation hooks that trigger during Claude Code operations.',
-    icon: ICON_MAP['Webhook'] || FileText,
-    colorScheme: 'green-500',
-    showOnHomepage: true,
-    keywords: 'Claude hooks, event hooks, automation, Claude Code hooks, git hooks',
-    metaDescription:
-      'Event-driven hooks for Claude Code. Automate workflows with pre-commit, post-merge, and custom event triggers to enhance development workflow and quality.',
-    typeName: 'Hook',
-    generateFullContent: true,
-    metadataFields: ['title', 'description', 'category', 'slug', 'created_at', 'updated_at'],
-    buildConfig: {
-      batchSize: 10,
-      enableCache: true,
-      cacheTTL: 300000,
-    },
-    apiConfig: {
-      generateStaticAPI: true,
-      includeTrending: true,
-      maxItemsPerResponse: 1000,
-    },
-    listPage: {
-      searchPlaceholder: 'Search hooks...',
-      badges: [{ text: (count: number) => '{count} items'.replace('{count}', String(count)) }],
-    },
-    detailPage: {
-      displayConfig: true,
-      configFormat: 'hook' as 'json' | 'multi' | 'hook',
-    },
-    sections: {
-      features: true,
-      installation: true,
-      use_cases: true,
-      configuration: true,
-      security: false,
-      troubleshooting: true,
-      examples: false,
-    },
-    metadata: {
-      showGitHubLink: true,
-    },
-    primaryAction: {
-      label: 'View on GitHub',
-      type: 'github_link',
-    },
-    urlSlug: 'hooks',
-    contentLoader: 'hooks',
-  },
-  rules: {
-    id: 'rules' as const,
-    title: 'Rule',
-    pluralTitle: 'Rules',
-    description: "Custom rules to guide Claude's behavior and responses in your projects.",
-    icon: ICON_MAP['BookOpen'] || FileText,
-    colorScheme: 'red-500',
-    showOnHomepage: true,
-    keywords: 'Claude rules, custom rules, behavior rules, project rules, .cursorrules',
-    metaDescription:
-      'Custom rules for Claude in October 2025. Define coding standards, architectural guidelines, and project-specific behavior for consistent AI assistance.',
-    typeName: 'Rule',
-    generateFullContent: true,
-    metadataFields: ['title', 'description', 'category', 'slug', 'created_at', 'updated_at'],
-    buildConfig: {
-      batchSize: 10,
-      enableCache: true,
-      cacheTTL: 300000,
-    },
-    apiConfig: {
-      generateStaticAPI: true,
-      includeTrending: true,
-      maxItemsPerResponse: 1000,
-    },
-    listPage: {
-      searchPlaceholder: 'Search rules...',
-      badges: [{ text: (count: number) => '{count} items'.replace('{count}', String(count)) }],
-    },
-    detailPage: {
-      displayConfig: true,
-      configFormat: 'json' as 'json' | 'multi' | 'hook',
-    },
-    sections: {
-      features: true,
-      installation: false,
-      use_cases: true,
-      configuration: true,
-      security: false,
-      troubleshooting: true,
-      examples: true,
-    },
-    metadata: {
-      showGitHubLink: true,
-    },
-    primaryAction: {
-      label: 'Use Rule',
-      type: 'notification',
-    },
-    urlSlug: 'rules',
-    contentLoader: 'rules',
-  },
-  agents: {
-    id: 'agents' as const,
-    title: 'AI Agent',
-    pluralTitle: 'AI Agents',
-    description:
-      "Browse specialized AI agents designed for specific tasks and workflows using Claude's capabilities.",
-    icon: ICON_MAP['Sparkles'] || FileText,
-    colorScheme: 'purple-500',
-    showOnHomepage: true,
-    keywords: 'Claude agents, AI agents, specialized assistants, workflow automation, Claude AI',
-    metaDescription:
-      'Specialized Claude AI agents for October 2025. Community-contributed coding, writing, research, and automation configurations ready for Claude Desktop and Code.',
-    typeName: 'AI Agent',
-    generateFullContent: true,
-    metadataFields: ['title', 'description', 'category', 'slug', 'created_at', 'updated_at'],
-    buildConfig: {
-      batchSize: 10,
-      enableCache: true,
-      cacheTTL: 300000,
-    },
-    apiConfig: {
-      generateStaticAPI: true,
-      includeTrending: true,
-      maxItemsPerResponse: 1000,
-    },
-    listPage: {
-      searchPlaceholder: 'Search AI agents...',
-      badges: [{ text: (count: number) => '{count} items'.replace('{count}', String(count)) }],
-    },
-    detailPage: {
-      displayConfig: true,
-      configFormat: 'json' as 'json' | 'multi' | 'hook',
-    },
-    sections: {
-      features: true,
-      installation: true,
-      use_cases: true,
-      configuration: true,
-      security: false,
-      troubleshooting: true,
-      examples: false,
-    },
-    metadata: {
-      showGitHubLink: true,
-    },
-    primaryAction: {
-      label: 'Deploy Agent',
-      type: 'notification',
-    },
-    urlSlug: 'agents',
-    contentLoader: 'agents',
-  },
-  guides: {
-    id: 'guides' as const,
-    title: 'Guide',
-    pluralTitle: 'Guides',
-    description:
-      'Comprehensive guides, tutorials, comparisons, and workflows for Claude. SEO-optimized content covering best practices, use cases, and troubleshooting.',
-    icon: ICON_MAP['FileText'] || FileText,
-    colorScheme: 'yellow-500',
-    showOnHomepage: false,
-    keywords: 'Claude guides, tutorials, how-to guides, best practices, workflows',
-    metaDescription:
-      'Comprehensive guides for Claude. Tutorials, comparisons, workflows, and troubleshooting for Claude Desktop and Code. Learn best practices and techniques.',
-    typeName: 'Guide',
-    generateFullContent: true,
-    metadataFields: ['title', 'description', 'category', 'slug', 'created_at', 'updated_at'],
-    buildConfig: {
-      batchSize: 10,
-      enableCache: true,
-      cacheTTL: 300000,
-    },
-    apiConfig: {
-      generateStaticAPI: true,
-      includeTrending: true,
-      maxItemsPerResponse: 1000,
-    },
-    listPage: {
-      searchPlaceholder: 'Search guides...',
-      badges: [{ text: (count: number) => '{count} items'.replace('{count}', String(count)) }],
-    },
-    detailPage: {
-      displayConfig: false,
-      configFormat: 'json' as 'json' | 'multi' | 'hook',
-    },
-    sections: {
-      features: false,
-      installation: false,
-      use_cases: true,
-      configuration: false,
-      security: false,
-      troubleshooting: false,
-      examples: true,
-    },
-    metadata: {
-      showGitHubLink: true,
-    },
-    primaryAction: {
-      label: 'Read Guide',
-      type: 'scroll',
-    },
-    urlSlug: 'guides',
-    contentLoader: 'guides',
   },
   skills: {
     id: 'skills' as const,
@@ -384,7 +125,7 @@ export const CATEGORY_CONFIGS: Record<
     },
     detailPage: {
       displayConfig: false,
-      configFormat: 'json' as 'json' | 'multi' | 'hook',
+      configFormat: 'json',
     },
     sections: {
       features: true,
@@ -436,7 +177,7 @@ export const CATEGORY_CONFIGS: Record<
     },
     detailPage: {
       displayConfig: false,
-      configFormat: 'json' as 'json' | 'multi' | 'hook',
+      configFormat: 'json',
     },
     sections: {
       features: true,
@@ -488,7 +229,7 @@ export const CATEGORY_CONFIGS: Record<
     },
     detailPage: {
       displayConfig: false,
-      configFormat: 'json' as 'json' | 'multi' | 'hook',
+      configFormat: 'json',
     },
     sections: {
       features: false,
@@ -508,6 +249,58 @@ export const CATEGORY_CONFIGS: Record<
     },
     urlSlug: 'changelog',
     contentLoader: 'changelog',
+  },
+  jobs: {
+    id: 'jobs' as const,
+    title: 'Job',
+    pluralTitle: 'Jobs',
+    description:
+      'Job listings for Claude-related positions, AI engineering roles, and opportunities to work with AI technology.',
+    icon: ICON_MAP['Briefcase'] || FileText,
+    colorScheme: 'emerald-500',
+    showOnHomepage: false,
+    keywords: 'Claude jobs, AI jobs, engineering jobs, remote AI positions',
+    metaDescription:
+      'Job opportunities in Claude and AI. Find roles working with Claude, AI engineering positions, remote opportunities, and cutting-edge AI careers worldwide.',
+    typeName: 'Job',
+    generateFullContent: true,
+    metadataFields: ['title', 'description', 'category', 'slug', 'created_at', 'updated_at'],
+    buildConfig: {
+      batchSize: 10,
+      enableCache: true,
+      cacheTTL: 300000,
+    },
+    apiConfig: {
+      generateStaticAPI: true,
+      includeTrending: true,
+      maxItemsPerResponse: 1000,
+    },
+    listPage: {
+      searchPlaceholder: 'Search jobs...',
+      badges: [{ text: (count: number) => '{count} items'.replace('{count}', String(count)) }],
+    },
+    detailPage: {
+      displayConfig: false,
+      configFormat: 'json',
+    },
+    sections: {
+      features: false,
+      installation: false,
+      use_cases: false,
+      configuration: false,
+      security: false,
+      troubleshooting: false,
+      examples: false,
+    },
+    metadata: {
+      showGitHubLink: true,
+    },
+    primaryAction: {
+      label: 'View Job',
+      type: 'scroll',
+    },
+    urlSlug: 'jobs',
+    contentLoader: 'jobs',
   },
   collections: {
     id: 'collections' as const,
@@ -540,7 +333,7 @@ export const CATEGORY_CONFIGS: Record<
     },
     detailPage: {
       displayConfig: false,
-      configFormat: 'json' as 'json' | 'multi' | 'hook',
+      configFormat: 'json',
     },
     sections: {
       features: false,
@@ -560,6 +353,109 @@ export const CATEGORY_CONFIGS: Record<
     },
     urlSlug: 'collections',
     contentLoader: 'collections',
+  },
+  rules: {
+    id: 'rules' as const,
+    title: 'Rule',
+    pluralTitle: 'Rules',
+    description: "Custom rules to guide Claude's behavior and responses in your projects.",
+    icon: ICON_MAP['BookOpen'] || FileText,
+    colorScheme: 'red-500',
+    showOnHomepage: true,
+    keywords: 'Claude rules, custom rules, behavior rules, project rules, .cursorrules',
+    metaDescription:
+      'Custom rules for Claude in October 2025. Define coding standards, architectural guidelines, and project-specific behavior for consistent AI assistance.',
+    typeName: 'Rule',
+    generateFullContent: true,
+    metadataFields: ['title', 'description', 'category', 'slug', 'created_at', 'updated_at'],
+    buildConfig: {
+      batchSize: 10,
+      enableCache: true,
+      cacheTTL: 300000,
+    },
+    apiConfig: {
+      generateStaticAPI: true,
+      includeTrending: true,
+      maxItemsPerResponse: 1000,
+    },
+    listPage: {
+      searchPlaceholder: 'Search rules...',
+      badges: [{ text: (count: number) => '{count} items'.replace('{count}', String(count)) }],
+    },
+    detailPage: {
+      displayConfig: true,
+      configFormat: 'json',
+    },
+    sections: {
+      features: true,
+      installation: false,
+      use_cases: true,
+      configuration: true,
+      security: false,
+      troubleshooting: true,
+      examples: true,
+    },
+    metadata: {
+      showGitHubLink: true,
+    },
+    primaryAction: {
+      label: 'Use Rule',
+      type: 'notification',
+    },
+    urlSlug: 'rules',
+    contentLoader: 'rules',
+  },
+  agents: {
+    id: 'agents' as const,
+    title: 'AI Agent',
+    pluralTitle: 'AI Agents',
+    description:
+      "Browse specialized AI agents designed for specific tasks and workflows using Claude's capabilities.",
+    icon: ICON_MAP['Sparkles'] || FileText,
+    colorScheme: 'purple-500',
+    showOnHomepage: true,
+    keywords: 'Claude agents, AI agents, specialized assistants, workflow automation, Claude AI',
+    metaDescription:
+      'Specialized Claude AI agents for October 2025. Community-contributed coding, writing, research, and automation configurations ready for Claude Desktop and Code.',
+    typeName: 'AI Agent',
+    generateFullContent: true,
+    metadataFields: ['title', 'description', 'category', 'slug', 'created_at', 'updated_at'],
+    buildConfig: {
+      batchSize: 10,
+      enableCache: true,
+      cacheTTL: 300000,
+    },
+    apiConfig: {
+      generateStaticAPI: true,
+      includeTrending: true,
+      maxItemsPerResponse: 1000,
+    },
+    listPage: {
+      searchPlaceholder: 'Search AI agents...',
+      badges: [{ text: (count: number) => '{count} items'.replace('{count}', String(count)) }],
+    },
+    detailPage: {
+      displayConfig: true,
+      configFormat: 'json',
+    },
+    sections: {
+      features: true,
+      installation: true,
+      use_cases: true,
+      configuration: true,
+      security: false,
+      troubleshooting: true,
+      examples: false,
+    },
+    metadata: {
+      showGitHubLink: true,
+    },
+    primaryAction: {
+      label: 'Deploy Agent',
+      type: 'notification',
+    },
+    urlSlug: 'agents',
+    contentLoader: 'agents',
   },
   statuslines: {
     id: 'statuslines' as const,
@@ -592,7 +488,7 @@ export const CATEGORY_CONFIGS: Record<
     },
     detailPage: {
       displayConfig: true,
-      configFormat: 'json' as 'json' | 'multi' | 'hook',
+      configFormat: 'json',
     },
     sections: {
       features: true,
@@ -613,50 +509,134 @@ export const CATEGORY_CONFIGS: Record<
     urlSlug: 'statuslines',
     contentLoader: 'statuslines',
   },
+  guides: {
+    id: 'guides' as const,
+    title: 'Guide',
+    pluralTitle: 'Guides',
+    description:
+      'Comprehensive guides, tutorials, comparisons, and workflows for Claude. SEO-optimized content covering best practices, use cases, and troubleshooting.',
+    icon: ICON_MAP['FileText'] || FileText,
+    colorScheme: 'yellow-500',
+    showOnHomepage: false,
+    keywords: 'Claude guides, tutorials, how-to guides, best practices, workflows',
+    metaDescription:
+      'Comprehensive guides for Claude. Tutorials, comparisons, workflows, and troubleshooting for Claude Desktop and Code. Learn best practices and techniques.',
+    typeName: 'Guide',
+    generateFullContent: true,
+    metadataFields: ['title', 'description', 'category', 'slug', 'created_at', 'updated_at'],
+    buildConfig: {
+      batchSize: 10,
+      enableCache: true,
+      cacheTTL: 300000,
+    },
+    apiConfig: {
+      generateStaticAPI: true,
+      includeTrending: true,
+      maxItemsPerResponse: 1000,
+    },
+    listPage: {
+      searchPlaceholder: 'Search guides...',
+      badges: [{ text: (count: number) => '{count} items'.replace('{count}', String(count)) }],
+    },
+    detailPage: {
+      displayConfig: false,
+      configFormat: 'json',
+    },
+    sections: {
+      features: false,
+      installation: false,
+      use_cases: true,
+      configuration: false,
+      security: false,
+      troubleshooting: false,
+      examples: true,
+    },
+    metadata: {
+      showGitHubLink: true,
+    },
+    primaryAction: {
+      label: 'Read Guide',
+      type: 'scroll',
+    },
+    urlSlug: 'guides',
+    contentLoader: 'guides',
+  },
+  hooks: {
+    id: 'hooks' as const,
+    title: 'Hook',
+    pluralTitle: 'Hooks',
+    description: 'Event-driven automation hooks that trigger during Claude Code operations.',
+    icon: ICON_MAP['Webhook'] || FileText,
+    colorScheme: 'green-500',
+    showOnHomepage: true,
+    keywords: 'Claude hooks, event hooks, automation, Claude Code hooks, git hooks',
+    metaDescription:
+      'Event-driven hooks for Claude Code. Automate workflows with pre-commit, post-merge, and custom event triggers to enhance development workflow and quality.',
+    typeName: 'Hook',
+    generateFullContent: true,
+    metadataFields: ['title', 'description', 'category', 'slug', 'created_at', 'updated_at'],
+    buildConfig: {
+      batchSize: 10,
+      enableCache: true,
+      cacheTTL: 300000,
+    },
+    apiConfig: {
+      generateStaticAPI: true,
+      includeTrending: true,
+      maxItemsPerResponse: 1000,
+    },
+    listPage: {
+      searchPlaceholder: 'Search hooks...',
+      badges: [{ text: (count: number) => '{count} items'.replace('{count}', String(count)) }],
+    },
+    detailPage: {
+      displayConfig: true,
+      configFormat: 'hook',
+    },
+    sections: {
+      features: true,
+      installation: true,
+      use_cases: true,
+      configuration: true,
+      security: false,
+      troubleshooting: true,
+      examples: false,
+    },
+    metadata: {
+      showGitHubLink: true,
+    },
+    primaryAction: {
+      label: 'View on GitHub',
+      type: 'github_link',
+    },
+    urlSlug: 'hooks',
+    contentLoader: 'hooks',
+  },
 };
 
 /**
  * All category IDs (static array)
  */
-export const ALL_CATEGORY_IDS = [
-  'mcp',
-  'jobs',
-  'hooks',
-  'rules',
-  'agents',
-  'guides',
-  'skills',
-  'commands',
-  'changelog',
-  'collections',
-  'statuslines',
-] as const;
+export const ALL_CATEGORY_IDS = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10'] as const;
 
 /**
  * Homepage category IDs (filtered at build time)
  */
-export const HOMEPAGE_CATEGORY_IDS = [
-  'mcp',
-  'hooks',
-  'rules',
-  'agents',
-  'skills',
-  'commands',
-  'collections',
-  'statuslines',
-] as const;
+export const HOMEPAGE_CATEGORY_IDS = ['0', '1', '2', '5', '6', '7', '8', '10'] as const;
 
 /**
  * Cacheable category IDs (excludes jobs and changelog)
  */
 export const CACHEABLE_CATEGORY_IDS = [
-  'mcp',
-  'hooks',
-  'rules',
-  'agents',
-  'guides',
-  'skills',
-  'commands',
-  'collections',
-  'statuslines',
+  '0',
+  '1',
+  '2',
+  '3',
+  '4',
+  '5',
+  '6',
+  '7',
+  '8',
+  '9',
+  '10',
 ] as const;

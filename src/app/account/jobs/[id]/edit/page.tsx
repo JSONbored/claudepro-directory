@@ -15,8 +15,13 @@ import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { normalizeError } from '@/src/lib/utils/error.utils';
 import type { Database, Tables } from '@/src/types/database.types';
 
-export async function generateMetadata(): Promise<Metadata> {
-  return generatePageMetadata('/account/jobs/:id/edit');
+interface EditJobPageMetadataProps {
+  params: Promise<{ id: string }>;
+}
+
+export async function generateMetadata({ params }: EditJobPageMetadataProps): Promise<Metadata> {
+  const { id } = await params;
+  return generatePageMetadata('/account/jobs/:id/edit', { params: { id } });
 }
 
 interface EditJobPageProps {

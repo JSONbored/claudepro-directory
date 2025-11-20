@@ -130,17 +130,29 @@ export default function WizardSubmissionPage() {
     [formData.submission_type]
   );
 
+  // Update form data helper - centralizes category/submission_type sync
+  const updateFormData = useCallback((updates: Partial<FormData>) => {
+    setFormData((prev) => {
+      const next: FormData = { ...prev, ...updates };
+
+      // Keep category and submission_type in sync
+      if (updates.submission_type && updates.submission_type !== prev.submission_type) {
+        next.category = updates.submission_type as Database['public']['Enums']['content_category'];
+      }
+
+      return next;
+    });
+  }, []);
+
   // Template application hook
   const { applyTemplate } = useTemplateApplication({
     onFormUpdate: (updates) => {
-      setFormData((prev) => {
-        const merged: FormData = {
-          ...prev,
-          ...updates,
-          category: prev.submission_type as Database['public']['Enums']['content_category'], // Always ensure category matches submission_type
-        };
-        return merged;
-      });
+      // Use updateFormData to ensure category/submission_type sync is centralized
+      // Filter out undefined values to satisfy exactOptionalPropertyTypes
+      const cleanUpdates = Object.fromEntries(
+        Object.entries(updates).filter(([_, value]) => value !== undefined)
+      ) as Partial<FormData>;
+      updateFormData(cleanUpdates);
 
       // Highlight fields that were updated
       const updatedFields = Object.keys(updates).filter(
@@ -216,11 +228,50 @@ export default function WizardSubmissionPage() {
     });
   }, []);
 
+  // Check if can proceed from current step (defined early for draft resume validation)
+  const canProceedFromStep = useCallback((step: number, data: FormData): boolean => {
+    switch (step) {
+      case 1:
+        return !!data.submission_type;
+      case 2:
+        return data.name.length >= 3 && data.description.length >= 10;
+      case 3:
+        return true; // Type-specific fields are optional
+      case 4:
+        return true; // Examples are optional
+      case 5:
+        return false; // Last step
+      default:
+        return false;
+    }
+  }, []);
+
+  // Build draft payload helper - centralizes draft save logic
+  const buildDraftPayload = useCallback(
+    (step: number, score: number): Partial<DraftFormData> => ({
+      submission_type: formData.submission_type,
+      name: formData.name,
+      description: formData.description,
+      type_specific: formData.type_specific,
+      // Convert string[] examples to structured format for DraftFormData
+      examples: formData.examples.map((ex, i) => ({
+        id: `ex-${i}`,
+        title: ex,
+        code: '',
+        language: 'typescript',
+      })),
+      tags: formData.tags,
+      last_step: step,
+      quality_score: score,
+    }),
+    [formData]
+  );
+
   // Load draft on mount
   useEffect(() => {
     const draft = draftManager.load();
     if (draft) {
-      setFormData({
+      const loadedFormData: FormData = {
         submission_type: draft.submission_type || 'agents',
         name: draft.name || '',
         description: draft.description || '',
@@ -229,15 +280,29 @@ export default function WizardSubmissionPage() {
         github_url: '',
         type_specific: draft.type_specific || {},
         tags: draft.tags || [],
-        examples: draft.examples?.map((ex) => ex.title) || [],
+        // Convert structured examples to string[] (extract title only for UI)
+        examples:
+          draft.examples?.map((ex) => ex.title).filter((title): title is string => !!title) || [],
         category: draft.submission_type, // Use submission_type as category
-      });
+      };
+
+      setFormData(loadedFormData);
+
+      // Resume wizard at the last step the user was on (clamped to valid range)
+      if (draft.last_step && draft.last_step >= 1 && draft.last_step <= 5) {
+        // Validate that we can proceed to this step using loaded form data
+        const targetStep = draft.last_step;
+        if (targetStep === 1 || canProceedFromStep(targetStep - 1, loadedFormData)) {
+          setCurrentStep(targetStep);
+        }
+      }
+
       formTracking.trackDraftLoaded({
         submission_type: draft.submission_type,
         quality_score: draft.quality_score,
       });
     }
-  }, [draftManager, user, formTracking]);
+  }, [draftManager, user, formTracking, canProceedFromStep]);
 
   // Calculate quality score
   const qualityScore = useMemo(() => {
@@ -268,47 +333,19 @@ export default function WizardSubmissionPage() {
   }, [formData]);
 
   // Auto-save draft on form data change (debounced)
+  // buildDraftPayload already depends on formData, so we don't need formData in the dependency array
   useEffect(() => {
     const timeoutId = setTimeout(() => {
-      draftManager.save({
-        submission_type: formData.submission_type,
-        name: formData.name,
-        description: formData.description,
-        type_specific: formData.type_specific,
-        examples: formData.examples.map((ex, i) => ({
-          id: `ex-${i}`,
-          title: ex,
-          code: '',
-          language: 'typescript',
-        })),
-        tags: formData.tags,
-        last_step: currentStep,
-        quality_score: qualityScore,
-      } as Partial<DraftFormData>);
+      draftManager.save(buildDraftPayload(currentStep, qualityScore));
     }, 2000);
 
     return () => clearTimeout(timeoutId);
-  }, [formData, currentStep, draftManager, qualityScore]);
+  }, [currentStep, draftManager, qualityScore, buildDraftPayload]);
 
-  // Check if can proceed from current step
-  const canProceedFromStep = useCallback(
-    (step: number): boolean => {
-      switch (step) {
-        case 1:
-          return !!formData.submission_type;
-        case 2:
-          return formData.name.length >= 3 && formData.description.length >= 10;
-        case 3:
-          return true; // Type-specific fields are optional
-        case 4:
-          return true; // Examples are optional
-        case 5:
-          return false; // Last step
-        default:
-          return false;
-      }
-    },
-    [formData]
+  // Check if can proceed from current step (wrapper using current formData)
+  const canProceedFromCurrentStep = useCallback(
+    (step: number): boolean => canProceedFromStep(step, formData),
+    [canProceedFromStep, formData]
   );
 
   // Define wizard steps
@@ -342,7 +379,7 @@ export default function WizardSubmissionPage() {
         description: 'Type-specific settings',
         isCompleted: currentStep > 3,
         isCurrent: currentStep === 3,
-        isAccessible: currentStep >= 2 && canProceedFromStep(2),
+        isAccessible: currentStep >= 2 && canProceedFromCurrentStep(2),
       },
       {
         id: 'examples',
@@ -352,7 +389,7 @@ export default function WizardSubmissionPage() {
         description: 'Add examples and tags',
         isCompleted: currentStep > 4,
         isCurrent: currentStep === 4,
-        isAccessible: currentStep >= 3 && canProceedFromStep(3),
+        isAccessible: currentStep >= 3 && canProceedFromCurrentStep(3),
       },
       {
         id: 'review',
@@ -362,18 +399,18 @@ export default function WizardSubmissionPage() {
         description: 'Review and submit',
         isCompleted: false,
         isCurrent: currentStep === 5,
-        isAccessible: currentStep >= 4 && canProceedFromStep(4),
+        isAccessible: currentStep >= 4 && canProceedFromCurrentStep(4),
       },
     ],
-    [currentStep, canProceedFromStep]
+    [currentStep, canProceedFromCurrentStep]
   );
 
   // Handle next step
   const handleNext = useCallback(async () => {
-    if (canProceedFromStep(currentStep)) {
+    if (canProceedFromCurrentStep(currentStep)) {
       setCurrentStep((prev) => Math.min(prev + 1, 5));
     }
-  }, [currentStep, canProceedFromStep]);
+  }, [currentStep, canProceedFromCurrentStep]);
 
   // Handle previous step
   const handlePrevious = useCallback(() => {
@@ -393,24 +430,9 @@ export default function WizardSubmissionPage() {
 
   // Handle save draft
   const handleSave = useCallback(async () => {
-    draftManager.save({
-      submission_type: formData.submission_type,
-      name: formData.name,
-      description: formData.description,
-      type_specific: formData.type_specific,
-      examples: formData.examples.map((ex, i) => ({
-        id: `ex-${i}`,
-        title: ex,
-        code: '',
-        language: 'typescript',
-      })),
-      tags: formData.tags,
-      last_step: currentStep,
-      quality_score: qualityScore,
-    } as Partial<DraftFormData>);
-
+    draftManager.save(buildDraftPayload(currentStep, qualityScore));
     toasts.success.changesSaved();
-  }, [draftManager, formData, currentStep, qualityScore]);
+  }, [draftManager, buildDraftPayload, currentStep, qualityScore]);
 
   // Handle final submit
   const handleSubmit = useCallback(async () => {
@@ -463,20 +485,6 @@ export default function WizardSubmissionPage() {
       setIsSubmitting(false);
     }
   }, [user, formData, formTracking, qualityScore, draftManager, router]);
-
-  // Update form data helper
-  const updateFormData = useCallback((updates: Partial<FormData>) => {
-    setFormData((prev) => {
-      const next: FormData = { ...prev, ...updates };
-
-      // Keep category and submission_type in sync
-      if (updates.submission_type && updates.submission_type !== prev.submission_type) {
-        next.category = updates.submission_type as Database['public']['Enums']['content_category'];
-      }
-
-      return next;
-    });
-  }, []);
 
   // Render step content
   const renderStepContent = () => {
@@ -532,7 +540,7 @@ export default function WizardSubmissionPage() {
         onNext={handleNext}
         onPrevious={handlePrevious}
         onSave={handleSave}
-        canGoNext={canProceedFromStep(currentStep)}
+        canGoNext={canProceedFromCurrentStep(currentStep)}
         canGoPrevious={currentStep > 1}
         isLastStep={currentStep === 5}
         qualityScore={qualityScore}
@@ -1121,8 +1129,8 @@ function StepExamplesTags({
               {data.examples.length > 0 ? (
                 <div className="space-y-2">
                   {data.examples.map((example, index) => {
-                    // Use stable key based on index to preserve animations
-                    const exampleKey = `example-${index}`;
+                    // Use example content as stable key (examples should be unique)
+                    const exampleKey = `example-${example}`;
                     return (
                       <motion.div
                         key={exampleKey}

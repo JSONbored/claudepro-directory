@@ -5,7 +5,7 @@
 
 import type { Resend } from 'npm:resend@4.0.0';
 import { RESEND_ENV } from '../../config/email-config.ts';
-import type { Database } from '../../database.types.ts';
+import type { Database, Database as DatabaseGenerated } from '../../database.types.ts';
 
 import type { BaseLogContext } from '../logging.ts';
 import { createUtilityContext, logError, logInfo, logWarn } from '../logging.ts';
@@ -412,12 +412,12 @@ export async function syncContactToResend(
   logContext: BaseLogContext
 ): Promise<{
   resendContactId: string | null;
-  syncStatus: 'synced' | 'failed' | 'skipped';
+  syncStatus: DatabaseGenerated['public']['Enums']['newsletter_sync_status'];
   syncError: string | null;
   topicIds: string[];
 }> {
   let resendContactId: string | null = null;
-  let syncStatus: 'synced' | 'failed' | 'skipped' = 'synced';
+  let syncStatus: DatabaseGenerated['public']['Enums']['newsletter_sync_status'] = 'synced';
   let syncError: string | null = null;
   let topicIds: string[] = [];
 

@@ -123,6 +123,7 @@ export default async function TrendingPage({ searchParams }: PagePropsWithSearch
             <NewsletterCTAVariant
               source="content_page"
               variant="hero"
+              {...(normalizedCategory ? { category: normalizedCategory } : {})}
               headline="Never Miss Trending Tools"
               description="Get weekly updates on what's hot in the Claude community. No spam, unsubscribe anytime."
             />

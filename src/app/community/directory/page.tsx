@@ -9,7 +9,9 @@ import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { normalizeError } from '@/src/lib/utils/error.utils';
 import type { Database } from '@/src/types/database.types';
 
-export const metadata: Promise<Metadata> = generatePageMetadata('/community/directory');
+export async function generateMetadata(): Promise<Metadata> {
+  return generatePageMetadata('/community/directory');
+}
 
 export const revalidate = false;
 

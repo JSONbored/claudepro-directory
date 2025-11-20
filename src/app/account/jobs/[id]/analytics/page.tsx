@@ -4,10 +4,16 @@
 
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { notFound, redirect } from 'next/navigation';
+import { redirect } from 'next/navigation';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { Button } from '@/src/components/primitives/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/src/components/primitives/ui/card';
 import { getAuthenticatedUser } from '@/src/lib/auth/get-authenticated-user';
 import { getUserJobById } from '@/src/lib/data/account/user-data';
 import { ROUTES } from '@/src/lib/data/config/constants';
@@ -19,10 +25,13 @@ import { BADGE_COLORS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { formatRelativeDate } from '@/src/lib/utils/data.utils';
 import { normalizeError } from '@/src/lib/utils/error.utils';
 
-export const metadata: Promise<Metadata> = generatePageMetadata('/account/jobs/:id/analytics');
-
 interface JobAnalyticsPageProps {
   params: Promise<{ id: string }>;
+}
+
+export async function generateMetadata({ params }: JobAnalyticsPageProps): Promise<Metadata> {
+  const { id } = await params;
+  return generatePageMetadata('/account/jobs/:id/analytics', { params: { id } });
 }
 
 export default async function JobAnalyticsPage({ params }: JobAnalyticsPageProps) {
@@ -33,10 +42,11 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPageProps
     logger.warn('JobAnalyticsPage: unauthenticated access attempt', {
       jobId: id,
     });
-    redirect('/login');
+    redirect(ROUTES.LOGIN);
   }
 
   let job: Awaited<ReturnType<typeof getUserJobById>> | null = null;
+  let fetchError = false;
   try {
     job = await getUserJobById(user.id, id);
   } catch (error) {
@@ -45,14 +55,31 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPageProps
       jobId: id,
       userId: user.id,
     });
-    throw normalized;
+    fetchError = true;
   }
-  if (!job) {
+  if (!job || fetchError) {
     logger.warn('JobAnalyticsPage: job not found or not owned by user', {
       jobId: id,
       userId: user.id,
     });
-    notFound();
+    return (
+      <div className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-2xl">Job analytics unavailable</CardTitle>
+            <CardDescription>
+              We couldn&apos;t load analytics for this job. It may not exist or you may not have
+              access.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button asChild={true} variant="outline">
+              <Link href={ROUTES.ACCOUNT_JOBS}>Back to job listings</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   const viewCount = job.view_count ?? 0;

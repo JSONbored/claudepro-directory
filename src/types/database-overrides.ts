@@ -414,13 +414,7 @@ export type DatabaseWithTableOverrides = {
         Relationships: DatabaseGenerated['public']['Tables']['newsletter_subscriptions']['Relationships'];
       };
       structured_data_config: {
-        Row: Omit<
-          DatabaseGenerated['public']['Tables']['structured_data_config']['Row'],
-          'default_keywords' | 'default_requirements'
-        > & {
-          default_keywords: string[];
-          default_requirements: string[];
-        };
+        Row: DatabaseGenerated['public']['Tables']['structured_data_config']['Row'];
         Insert: DatabaseGenerated['public']['Tables']['structured_data_config']['Insert'];
         Update: DatabaseGenerated['public']['Tables']['structured_data_config']['Update'];
         Relationships: DatabaseGenerated['public']['Tables']['structured_data_config']['Relationships'];
@@ -954,79 +948,28 @@ export type GetGetPerformanceBaselineReturn = {
 };
 
 /**
- * get_recent_merged RPC return type
- */
-export type GetGetRecentMergedReturn = Array<{
-  id: string;
-  content_name: string;
-  content_type: DatabaseGenerated['public']['Enums']['content_category'];
-  merged_at: string;
-  merged_at_formatted?: string;
-  user: {
-    name: string;
-    slug: string;
-  } | null;
-}>;
-
-/**
  * get_sponsorship_analytics RPC return type
+ * REMOVED: Now using generated type from database.types.ts
+ * Use: Database['public']['Functions']['get_sponsorship_analytics']['Returns']
  */
-export type GetGetSponsorshipAnalyticsReturn = {
-  sponsorship: Tables<'sponsored_content'>;
-  daily_stats: Array<{
-    date: string;
-    impressions: number;
-    clicks: number;
-  }>;
-  computed_metrics: {
-    ctr: number;
-    days_active: number;
-    avg_impressions_per_day: number;
-  };
-} | null;
 
 /**
  * get_structured_data_config RPC return type
+ * REMOVED: Now using generated type from database.types.ts
+ * Use: Database['public']['Functions']['get_structured_data_config']['Returns']
  */
-export type GetGetStructuredDataConfigReturn = {
-  category: DatabaseGenerated['public']['Enums']['content_category'];
-  schemaTypes: {
-    application: boolean;
-    sourceCode: boolean;
-    howTo: boolean;
-    creativeWork: boolean;
-    faq: boolean;
-    breadcrumb: boolean;
-    speakable: boolean;
-    review: boolean;
-    aggregateRating: boolean;
-    videoObject: boolean;
-    course: boolean;
-    jobPosting: boolean;
-    collectionPage: boolean;
-  };
-  categoryDisplayName: string | null;
-  applicationSubCategory: string | null;
-  defaultKeywords: string[] | null;
-  defaultRequirements: string[] | null;
-  creativeWorkDescription: string | null;
-} | null;
 
 /**
  * get_top_contributors RPC return type
+ * REMOVED: Function was unused and has been dropped from database
+ * get_homepage_complete and get_submission_dashboard provide similar functionality
  */
-export type GetGetTopContributorsReturn = Array<{
-  rank: number;
-  name: string;
-  slug: string;
-  mergedCount: number;
-}>;
 
 /**
  * get_weekly_digest RPC return type
- * TODO: Define the actual return structure
+ * REMOVED: Now using generated type from database.types.ts
+ * Use: Database['public']['Functions']['get_weekly_digest']['Returns']
  */
-export type GetGetWeeklyDigestReturn = Json; // TODO: Replace with actual structure
 
 /**
  * manage_collection RPC return type
@@ -1146,13 +1089,8 @@ export type ToggleReviewHelpfulReturn = {
 
 /**
  * track_sponsored_event RPC return type
- * Returns sponsored event tracking result
+ * REMOVED: RPC is unused - sponsored events now go through user_interactions
  */
-export type TrackSponsoredEventReturn = {
-  success: boolean;
-  event_id?: string;
-  error?: string;
-};
 
 /**
  * track_user_interaction RPC return type
@@ -1298,9 +1236,11 @@ export type JobCardJobType = {
  */
 export type ReviewItem = Tables<'review_ratings'>;
 /**
- * SponsorshipAnalytics - Analytics data for sponsored content
+ * SponsorshipAnalytics - Convenience alias for generated type
+ * Points to generated type from database.types.ts
  */
-export type SponsorshipAnalytics = GetGetSponsorshipAnalyticsReturn;
+export type SponsorshipAnalytics =
+  DatabaseGenerated['public']['Functions']['get_sponsorship_analytics']['Returns'];
 /**
  * Helper function to check if value is a valid experience_level enum
  */

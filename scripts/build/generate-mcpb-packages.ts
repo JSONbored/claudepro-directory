@@ -3,10 +3,19 @@
 /**
  * Generate .mcpb Packages for MCP Servers (Database-First, Optimized)
  *
+ * ⚠️ DEPRECATED: This script is primarily for one-time migration/backfill purposes.
+ * Automatic package generation is now handled via database triggers → edge functions.
+ * New MCP content automatically generates packages when inserted/updated.
+ *
+ * Use cases for this script:
+ * - One-time backfill of existing MCP content
+ * - Batch regeneration during development/testing
+ * - CLI validation during package development
+ *
  * OPTIMIZATIONS:
  * 1. Uses official @anthropic-ai/mcpb CLI tool for validation and packaging
  * 2. Content hashing: Only rebuild if MCP server content/metadata actually changed
- * 3. Parallel processing: 5 concurrent uploads to Supabase Storage
+ * 3. Parallel processing: 5 concurrent uploads via edge function
  * 4. Deterministic bundles: Same content = same .mcpb file
  * 5. Memory-efficient: Temporary directories cleaned up after processing
  *
@@ -15,10 +24,10 @@
  * - Generates manifest.json (v0.2 spec) with user_config for API keys
  * - Generates minimal Node.js MCP server wrapper (for HTTP-based servers)
  * - Uses `mcpb pack` CLI tool to create validated .mcpb file
- * - Uploads to Supabase Storage and updates database
+ * - Uploads via edge function endpoint (centralized storage/DB logic)
  */
 
-import { execSync } from 'node:child_process';
+import { spawnSync } from 'node:child_process';
 import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -196,7 +205,8 @@ function generateManifest(mcp: McpRow): string {
       claude_desktop: '>=1.0.0',
       platforms: ['darwin', 'win32', 'linux'],
       runtimes: {
-        node: '>=16.0.0',
+        // Uses global `fetch`, which is reliably available in Node >=18
+        node: '>=18.0.0',
       },
     },
   };
@@ -484,18 +494,22 @@ async function createTempBundleDirectory(mcp: McpRow): Promise<string> {
 
 /**
  * Pack .mcpb bundle using official CLI tool
+ * Uses spawnSync to avoid command injection risks from tempDir/outputPath
  */
 async function packMcpbBundle(tempDir: string, outputPath: string): Promise<void> {
-  const command = `npx mcpb pack "${tempDir}" "${outputPath}"`;
+  const result = spawnSync('npx', ['mcpb', 'pack', tempDir, outputPath], {
+    cwd: tempDir,
+    encoding: 'utf-8',
+    stdio: ['pipe', 'pipe', 'inherit'],
+  });
 
-  try {
-    execSync(command, {
-      cwd: tempDir,
-      encoding: 'utf-8',
-      stdio: ['pipe', 'pipe', 'inherit'],
-    });
-  } catch (error) {
-    throw new Error(`mcpb pack failed: ${error instanceof Error ? error.message : String(error)}`);
+  if (result.error) {
+    throw new Error(`mcpb pack failed: ${result.error.message}`);
+  }
+
+  if (result.status !== 0) {
+    const errorOutput = result.stderr?.toString() || result.stdout?.toString() || 'Unknown error';
+    throw new Error(`mcpb pack failed with exit code ${result.status}: ${errorOutput}`);
   }
 }
 
@@ -508,7 +522,8 @@ function needsRebuild(mcp: McpRow, packageContent: string): boolean {
 }
 
 /**
- * Upload .mcpb file to Supabase Storage and update database
+ * Upload .mcpb file via edge function upload endpoint
+ * Uses edge function to centralize storage/DB logic (matches automatic generation flow)
  * @param mcp - MCP server row from database
  * @param mcpbFilePath - Path to generated .mcpb file
  * @param contentHash - Content hash (computed from packageContent) for rebuild detection
@@ -520,42 +535,53 @@ async function uploadToStorage(
 ): Promise<string> {
   const { readFile } = await import('node:fs/promises');
   const mcpbBuffer = await readFile(mcpbFilePath);
-  const fileName = `packages/${mcp.slug}.mcpb`;
 
-  // Upload to Supabase Storage
-  const { error: uploadError } = await supabase.storage
-    .from('mcpb-packages')
-    .upload(fileName, mcpbBuffer, {
-      contentType: 'application/zip',
-      cacheControl: '3600',
-      upsert: true,
-    });
+  // Convert buffer to base64 for edge function upload endpoint
+  const base64File = mcpbBuffer.toString('base64');
 
-  if (uploadError) {
-    throw new Error(`Storage upload failed: ${uploadError.message}`);
+  // Call edge function upload endpoint
+  const edgeFunctionUrl = `${SUPABASE_URL}/functions/v1/data-api/content/generate-package/upload`;
+
+  const response = await fetch(edgeFunctionUrl, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      content_id: mcp.id,
+      category: 'mcp',
+      mcpb_file: base64File,
+      content_hash: contentHash,
+    }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text().catch(() => 'Unknown error');
+    let errorMessage: string;
+    try {
+      const errorJson = JSON.parse(errorText);
+      errorMessage = errorJson.message || errorJson.error || `HTTP ${response.status}`;
+    } catch {
+      errorMessage = `HTTP ${response.status}: ${errorText}`;
+    }
+    throw new Error(`Edge function upload failed: ${errorMessage}`);
   }
 
-  // Get public URL
-  const {
-    data: { publicUrl },
-  } = supabase.storage.from('mcpb-packages').getPublicUrl(fileName);
+  const result = (await response.json()) as {
+    success: boolean;
+    storage_url: string;
+    message?: string;
+    error?: string;
+  };
 
-  // Update database with storage URL and build metadata
-  // Use the content hash (not binary file hash) for consistent rebuild detection
-  const { error: updateError } = await supabase
-    .from('content')
-    .update({
-      mcpb_storage_url: publicUrl,
-      mcpb_build_hash: contentHash,
-      mcpb_last_built_at: new Date().toISOString(),
-    })
-    .eq('id', mcp.id);
-
-  if (updateError) {
-    throw new Error(`Database update failed: ${updateError.message}`);
+  if (!(result.success && result.storage_url)) {
+    throw new Error(
+      result.error || result.message || 'Edge function upload returned unsuccessful response'
+    );
   }
 
-  return publicUrl;
+  return result.storage_url;
 }
 
 /**

@@ -28,8 +28,8 @@ import type {
 import { ICON_NAME_MAP } from '@/src/lib/ui-constants';
 
 /**
- * Content Search Client - Server Actions Integration
- * Uses cached server actions for optimized search
+ * Content Search Client - Edge Function Integration
+ * Uses edge-cached search client for optimized search
  */
 function ContentSearchClientComponent<T extends DisplayableContent>({
   items,
@@ -114,7 +114,7 @@ function ContentSearchClientComponent<T extends DisplayableContent>({
             batchSize={30}
             emptyMessage={`No ${title.toLowerCase()} found`}
             ariaLabel="Search results"
-            keyExtractor={(item) => item.slug ?? ''}
+            keyExtractor={(item, index) => item.slug ?? `fallback-${index}`}
             renderCard={(item) => (
               <ConfigCard
                 item={item}

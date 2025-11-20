@@ -31,6 +31,7 @@
     "build:skills": "turbo run build:skills:exec",
     "build:skills:exec": "tsx scripts/build/generate-skill-packages.ts",
     "build:mcpb": "tsx scripts/build/generate-mcpb-packages.ts",
+    "verify:mcpb": "tsx scripts/utils/verify-mcpb-packages.ts",
     "generate:categories": "turbo run generate:categories:exec",
     "generate:categories:exec": "tsx scripts/build/generate-category-config.ts",
     "generate:service-worker": "turbo run generate:service-worker:exec",

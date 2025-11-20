@@ -17,7 +17,7 @@
 
 import { useCallback } from 'react';
 import { usePostCopyEmail } from '@/src/components/core/infra/providers/email-capture-modal-provider';
-import type { CopyType } from '@/src/types/database-overrides';
+import type { Database } from '@/src/types/database.types';
 import { type UseCopyToClipboardOptions, useCopyToClipboard } from './use-copy-to-clipboard';
 
 /**
@@ -27,7 +27,7 @@ export interface EmailCaptureContext {
   /**
    * Type of content being copied
    */
-  copyType: CopyType;
+  copyType: Database['public']['Enums']['copy_type'];
 
   /**
    * Content category (agents, mcp, etc.)

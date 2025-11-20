@@ -7,6 +7,7 @@
 
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 import { edgeEnv } from '../config/env.ts';
+import type { Database as DatabaseGenerated } from '../database.types.ts';
 import type { ExtendedDatabase } from '../database-extensions.types.ts';
 
 const {
@@ -18,6 +19,12 @@ const {
  * Created separately to maintain proper typing for extension schemas
  */
 const pgmqSupabaseClient = createClient<ExtendedDatabase>(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+
+/**
+ * Typed Supabase client for public schema RPC operations
+ * Uses generated Database type from database.types.ts (ONLY generated types)
+ */
+const publicSchemaClient = createClient<DatabaseGenerated>(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
 /**
  * Type-safe wrapper for pgmq_public.send RPC
@@ -69,4 +76,68 @@ export async function pgmqDelete(queueName: string, msgId: bigint): Promise<bool
 
   if (error) throw error;
   return data;
+}
+
+/**
+ * Type-safe wrapper for pgmq.metrics RPC
+ * Returns queue metrics including queue_length for smart polling
+ * Uses public.get_pgmq_queue_metrics wrapper function (calls pgmq.metrics internally)
+ * This wrapper is needed because PostgREST doesn't expose pgmq schema directly
+ *
+ * Uses generated types from database.types.ts via Database type
+ */
+export async function pgmqMetrics(queueName: string): Promise<{
+  queue_length: number;
+  newest_msg_age_sec: number | null;
+  oldest_msg_age_sec: number | null;
+} | null> {
+  try {
+    // Use wrapper function in public schema (get_pgmq_queue_metrics)
+    // This function calls pgmq.metrics internally and is exposed via PostgREST
+    // Uses ONLY generated types from database.types.ts
+    type Args = DatabaseGenerated['public']['Functions']['get_pgmq_queue_metrics']['Args'];
+    type Returns = DatabaseGenerated['public']['Functions']['get_pgmq_queue_metrics']['Returns'];
+
+    const args: Args = { p_queue_name: queueName };
+
+    // Type assertion needed because Supabase client doesn't infer function names dynamically
+    // The rpc method returns a PostgrestFilterBuilder, we need to await it
+    const rpcCall = publicSchemaClient.rpc(
+      'get_pgmq_queue_metrics' as keyof DatabaseGenerated['public']['Functions'],
+      args as never
+    );
+    const { data, error } = await (rpcCall as unknown as Promise<{
+      data: Returns | null;
+      error: unknown;
+    }>);
+
+    if (error) throw error;
+
+    // Function returns array with single row: { queue_length, newest_msg_age_sec, oldest_msg_age_sec }[]
+    const results = data as Returns;
+
+    if (!(results && Array.isArray(results)) || results.length === 0) {
+      return null;
+    }
+
+    const metrics = results[0];
+    if (!metrics || typeof metrics !== 'object') {
+      return null;
+    }
+
+    // Convert numeric types (may be bigint from database) to number
+    return {
+      queue_length: Number(metrics.queue_length ?? 0),
+      newest_msg_age_sec:
+        metrics.newest_msg_age_sec !== null ? Number(metrics.newest_msg_age_sec) : null,
+      oldest_msg_age_sec:
+        metrics.oldest_msg_age_sec !== null ? Number(metrics.oldest_msg_age_sec) : null,
+    };
+  } catch (error) {
+    // If metrics check fails, return null (safe fallback - queue will be treated as empty)
+    console.warn(`[pgmq-client] Failed to get metrics for queue '${queueName}'`, {
+      error: error instanceof Error ? error.message : String(error),
+    });
+    return null;
+  }
 }

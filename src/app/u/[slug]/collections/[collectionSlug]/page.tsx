@@ -45,6 +45,7 @@ const ALLOWED_CONTENT_TYPES = [
   'collections',
   'guides',
   'jobs',
+  'changelog',
 ] as const;
 
 function isValidContentType(type: string): boolean {

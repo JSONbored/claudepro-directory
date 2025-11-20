@@ -21,7 +21,7 @@ export interface Database {
           consent_given: boolean | null;
           copy_category: string | null;
           copy_slug: string | null;
-          copy_type: string | null;
+          copy_type: Database['public']['Enums']['copy_type'] | null;
           created_at: string | null;
           email: string;
           engagement_score: number | null;
@@ -39,7 +39,7 @@ export interface Database {
           status: string;
           subscribed_at: string | null;
           sync_error: string | null;
-          sync_status: string | null;
+          sync_status: Database['public']['Enums']['newsletter_sync_status'];
           total_copies: number | null;
           unsubscribed_at: string | null;
           updated_at: string | null;
@@ -53,7 +53,7 @@ export interface Database {
           consent_given?: boolean | null;
           copy_category?: string | null;
           copy_slug?: string | null;
-          copy_type?: string | null;
+          copy_type?: Database['public']['Enums']['copy_type'] | null;
           created_at?: string | null;
           email: string;
           engagement_score?: number | null;
@@ -71,7 +71,7 @@ export interface Database {
           status?: string;
           subscribed_at?: string | null;
           sync_error?: string | null;
-          sync_status?: string | null;
+          sync_status?: Database['public']['Enums']['newsletter_sync_status'];
           total_copies?: number | null;
           unsubscribed_at?: string | null;
           updated_at?: string | null;
@@ -85,7 +85,7 @@ export interface Database {
           consent_given?: boolean | null;
           copy_category?: string | null;
           copy_slug?: string | null;
-          copy_type?: string | null;
+          copy_type?: Database['public']['Enums']['copy_type'] | null;
           created_at?: string | null;
           email?: string;
           engagement_score?: number | null;
@@ -103,7 +103,7 @@ export interface Database {
           status?: string;
           subscribed_at?: string | null;
           sync_error?: string | null;
-          sync_status?: string | null;
+          sync_status?: Database['public']['Enums']['newsletter_sync_status'];
           total_copies?: number | null;
           unsubscribed_at?: string | null;
           updated_at?: string | null;
@@ -176,7 +176,7 @@ export interface Database {
           author_profile_url: string | null;
           avg_rating: number | null;
           bookmark_count: number;
-          category: string;
+          category: Database['public']['Enums']['content_category'];
           content: string | null;
           copy_count: number;
           created_at: string;
@@ -221,7 +221,7 @@ export interface Database {
           author_profile_url?: string | null;
           avg_rating?: number | null;
           bookmark_count?: number;
-          category: string;
+          category: Database['public']['Enums']['content_category'];
           content?: string | null;
           copy_count?: number;
           created_at?: string;
@@ -266,7 +266,7 @@ export interface Database {
           author_profile_url?: string | null;
           avg_rating?: number | null;
           bookmark_count?: number;
-          category?: string;
+          category?: Database['public']['Enums']['content_category'];
           content?: string | null;
           copy_count?: number;
           created_at?: string;
@@ -343,13 +343,6 @@ export interface Database {
             columns: ['content_id'];
             isOneToOne: true;
             referencedRelation: 'content';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'content_embeddings_content_id_fkey';
-            columns: ['content_id'];
-            isOneToOne: true;
-            referencedRelation: 'mv_content_list_slim';
             referencedColumns: ['id'];
           },
         ];
@@ -600,7 +593,7 @@ export interface Database {
           order: number | null;
           payment_amount: number | null;
           payment_date: string | null;
-          payment_method: string | null;
+          payment_method: Database['public']['Enums']['payment_method'] | null;
           payment_reference: string | null;
           payment_status: Database['public']['Enums']['payment_status'] | null;
           plan: Database['public']['Enums']['job_plan'];
@@ -649,7 +642,7 @@ export interface Database {
           order?: number | null;
           payment_amount?: number | null;
           payment_date?: string | null;
-          payment_method?: string | null;
+          payment_method?: Database['public']['Enums']['payment_method'] | null;
           payment_reference?: string | null;
           payment_status?: Database['public']['Enums']['payment_status'] | null;
           plan?: Database['public']['Enums']['job_plan'];
@@ -698,7 +691,7 @@ export interface Database {
           order?: number | null;
           payment_amount?: number | null;
           payment_date?: string | null;
-          payment_method?: string | null;
+          payment_method?: Database['public']['Enums']['payment_method'] | null;
           payment_reference?: string | null;
           payment_status?: Database['public']['Enums']['payment_status'] | null;
           plan?: Database['public']['Enums']['job_plan'];
@@ -774,95 +767,40 @@ export interface Database {
         Relationships: [];
       };
 
-      sponsored_impressions: {
+      user_interactions: {
         Row: {
+          content_slug: string | null;
+          content_type: string | null;
           created_at: string;
           id: string;
-          page_url: string | null;
-          position: number | null;
-          sponsored_id: string;
+          interaction_type: Database['public']['Enums']['interaction_type'];
+          metadata: Json | null;
+          session_id: string | null;
           user_id: string | null;
         };
         Insert: {
+          content_slug?: string | null;
+          content_type?: string | null;
           created_at?: string;
           id?: string;
-          page_url?: string | null;
-          position?: number | null;
-          sponsored_id: string;
+          interaction_type: Database['public']['Enums']['interaction_type'];
+          metadata?: Json | null;
+          session_id?: string | null;
           user_id?: string | null;
         };
         Update: {
+          content_slug?: string | null;
+          content_type?: string | null;
           created_at?: string;
           id?: string;
-          page_url?: string | null;
-          position?: number | null;
-          sponsored_id?: string;
+          interaction_type?: Database['public']['Enums']['interaction_type'];
+          metadata?: Json | null;
+          session_id?: string | null;
           user_id?: string | null;
         };
         Relationships: [
           {
-            foreignKeyName: 'sponsored_impressions_sponsored_id_fkey';
-            columns: ['sponsored_id'];
-            isOneToOne: false;
-            referencedRelation: 'mv_content_list_slim';
-            referencedColumns: ['sponsored_content_id'];
-          },
-          {
-            foreignKeyName: 'sponsored_impressions_sponsored_id_fkey';
-            columns: ['sponsored_id'];
-            isOneToOne: false;
-            referencedRelation: 'sponsored_content';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'sponsored_impressions_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'users';
-            referencedColumns: ['id'];
-          },
-        ];
-      };
-
-      sponsored_clicks: {
-        Row: {
-          created_at: string;
-          id: string;
-          sponsored_id: string;
-          target_url: string | null;
-          user_id: string | null;
-        };
-        Insert: {
-          created_at?: string;
-          id?: string;
-          sponsored_id: string;
-          target_url?: string | null;
-          user_id?: string | null;
-        };
-        Update: {
-          created_at?: string;
-          id?: string;
-          sponsored_id?: string;
-          target_url?: string | null;
-          user_id?: string | null;
-        };
-        Relationships: [
-          {
-            foreignKeyName: 'sponsored_clicks_sponsored_id_fkey';
-            columns: ['sponsored_id'];
-            isOneToOne: false;
-            referencedRelation: 'mv_content_list_slim';
-            referencedColumns: ['sponsored_content_id'];
-          },
-          {
-            foreignKeyName: 'sponsored_clicks_sponsored_id_fkey';
-            columns: ['sponsored_id'];
-            isOneToOne: false;
-            referencedRelation: 'sponsored_content';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'sponsored_clicks_user_id_fkey';
+            foreignKeyName: 'user_interactions_user_id_fkey';
             columns: ['user_id'];
             isOneToOne: false;
             referencedRelation: 'users';
@@ -1006,6 +944,145 @@ export interface Database {
           },
         ];
       };
+
+      sponsored_content: {
+        Row: {
+          active: boolean | null;
+          click_count: number | null;
+          content_id: string;
+          content_type: string;
+          created_at: string;
+          end_date: string;
+          id: string;
+          impression_count: number | null;
+          impression_limit: number | null;
+          start_date: string;
+          tier: Database['public']['Enums']['sponsorship_tier'];
+          updated_at: string;
+          user_id: string | null;
+        };
+        Insert: {
+          active?: boolean | null;
+          click_count?: number | null;
+          content_id: string;
+          content_type: string;
+          created_at?: string;
+          end_date: string;
+          id?: string;
+          impression_count?: number | null;
+          impression_limit?: number | null;
+          start_date: string;
+          tier: Database['public']['Enums']['sponsorship_tier'];
+          updated_at?: string;
+          user_id?: string | null;
+        };
+        Update: {
+          active?: boolean | null;
+          click_count?: number | null;
+          content_id?: string;
+          content_type?: string;
+          created_at?: string;
+          end_date?: string;
+          id?: string;
+          impression_count?: number | null;
+          impression_limit?: number | null;
+          start_date?: string;
+          tier?: Database['public']['Enums']['sponsorship_tier'];
+          updated_at?: string;
+          user_id?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'sponsored_content_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+
+      structured_data_config: {
+        Row: {
+          active: boolean | null;
+          application_sub_category: string | null;
+          category: Database['public']['Enums']['content_category'];
+          category_display_name: string;
+          created_at: string;
+          creative_work_description: string | null;
+          default_keywords: string[] | null;
+          default_requirements: string[] | null;
+          generate_aggregate_rating: boolean | null;
+          generate_application: boolean | null;
+          generate_breadcrumb: boolean | null;
+          generate_collection_page: boolean | null;
+          generate_course: boolean | null;
+          generate_creative_work: boolean | null;
+          generate_faq: boolean | null;
+          generate_how_to: boolean | null;
+          generate_item_list: boolean | null;
+          generate_job_posting: boolean | null;
+          generate_learning_resource: boolean | null;
+          generate_review: boolean | null;
+          generate_source_code: boolean | null;
+          generate_speakable: boolean | null;
+          generate_video_object: boolean | null;
+          updated_at: string;
+        };
+        Insert: {
+          active?: boolean | null;
+          application_sub_category?: string | null;
+          category: Database['public']['Enums']['content_category'];
+          category_display_name: string;
+          created_at?: string;
+          creative_work_description?: string | null;
+          default_keywords?: string[] | null;
+          default_requirements?: string[] | null;
+          generate_aggregate_rating?: boolean | null;
+          generate_application?: boolean | null;
+          generate_breadcrumb?: boolean | null;
+          generate_collection_page?: boolean | null;
+          generate_course?: boolean | null;
+          generate_creative_work?: boolean | null;
+          generate_faq?: boolean | null;
+          generate_how_to?: boolean | null;
+          generate_item_list?: boolean | null;
+          generate_job_posting?: boolean | null;
+          generate_learning_resource?: boolean | null;
+          generate_review?: boolean | null;
+          generate_source_code?: boolean | null;
+          generate_speakable?: boolean | null;
+          generate_video_object?: boolean | null;
+          updated_at?: string;
+        };
+        Update: {
+          active?: boolean | null;
+          application_sub_category?: string | null;
+          category?: Database['public']['Enums']['content_category'];
+          category_display_name?: string;
+          created_at?: string;
+          creative_work_description?: string | null;
+          default_keywords?: string[] | null;
+          default_requirements?: string[] | null;
+          generate_aggregate_rating?: boolean | null;
+          generate_application?: boolean | null;
+          generate_breadcrumb?: boolean | null;
+          generate_collection_page?: boolean | null;
+          generate_course?: boolean | null;
+          generate_creative_work?: boolean | null;
+          generate_faq?: boolean | null;
+          generate_how_to?: boolean | null;
+          generate_item_list?: boolean | null;
+          generate_job_posting?: boolean | null;
+          generate_learning_resource?: boolean | null;
+          generate_review?: boolean | null;
+          generate_source_code?: boolean | null;
+          generate_speakable?: boolean | null;
+          generate_video_object?: boolean | null;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
     };
     Functions: {
       search_content_optimized: {
@@ -1112,7 +1189,16 @@ export interface Database {
         }[];
       };
 
-      get_weekly_digest: { Args: { p_week_start?: string }; Returns: Json };
+      get_weekly_digest: {
+        Args: { p_week_start?: string };
+        Returns: Database['public']['CompositeTypes']['weekly_digest_result'];
+        SetofOptions: {
+          from: '*';
+          to: 'weekly_digest_result';
+          isOneToOne: true;
+          isSetofReturn: false;
+        };
+      };
 
       get_due_sequence_emails: {
         Args: never;
@@ -1235,7 +1321,11 @@ export interface Database {
       };
 
       get_api_content_full: {
-        Args: { p_base_url?: string; p_category: string; p_slug: string };
+        Args: {
+          p_base_url?: string;
+          p_category: Database['public']['Enums']['content_category'];
+          p_slug: string;
+        };
         Returns: string;
       };
 
@@ -1311,7 +1401,7 @@ export interface Database {
           author_profile_url: string | null;
           avg_rating: number | null;
           bookmark_count: number;
-          category: string;
+          category: Database['public']['Enums']['content_category'];
           content: string | null;
           copy_count: number;
           created_at: string;
@@ -1408,6 +1498,90 @@ export interface Database {
           isSetofReturn: true;
         };
       };
+
+      get_structured_data_config: {
+        Args: { p_category: Database['public']['Enums']['content_category'] };
+        Returns: Database['public']['CompositeTypes']['structured_data_config_result'];
+        SetofOptions: {
+          from: '*';
+          to: 'structured_data_config_result';
+          isOneToOne: true;
+          isSetofReturn: false;
+        };
+      };
+
+      get_pgmq_queue_metrics: {
+        Args: { p_queue_name: string };
+        Returns: {
+          newest_msg_age_sec: number;
+          oldest_msg_age_sec: number;
+          queue_length: number;
+        }[];
+      };
+
+      build_complete_content_schemas:
+        | {
+            Args: {
+              p_category: Database['public']['Enums']['content_category'];
+              p_slug: string;
+            };
+            Returns: Json;
+          }
+        | {
+            Args: {
+              p_category: Database['public']['Enums']['content_category'];
+              p_slug: string;
+            };
+            Returns: Json;
+          };
+
+      build_breadcrumb_json_ld: {
+        Args: {
+          p_category: Database['public']['Enums']['content_category'];
+          p_slug: string;
+        };
+        Returns: Json;
+      };
+
+      build_source_code_schema: {
+        Args: {
+          p_category: Database['public']['Enums']['content_category'];
+          p_slug: string;
+        };
+        Returns: Json;
+      };
+
+      build_how_to_schema: {
+        Args: {
+          p_category: Database['public']['Enums']['content_category'];
+          p_slug: string;
+        };
+        Returns: Json;
+      };
+
+      build_faq_schema: {
+        Args: {
+          p_category: Database['public']['Enums']['content_category'];
+          p_slug: string;
+        };
+        Returns: Json;
+      };
+
+      build_learning_resource_schema: {
+        Args: {
+          p_category: Database['public']['Enums']['content_category'];
+          p_slug: string;
+        };
+        Returns: Json;
+      };
+
+      build_item_list_schema: {
+        Args: {
+          p_category: Database['public']['Enums']['content_category'];
+          p_slug: string;
+        };
+        Returns: Json;
+      };
     };
     Enums: {
       newsletter_source:
@@ -1448,6 +1622,26 @@ export interface Database {
       user_tier: 'free' | 'pro' | 'enterprise';
 
       payment_status: 'unpaid' | 'paid' | 'refunded';
+
+      payment_method: 'polar' | 'mercury_invoice' | 'manual';
+
+      copy_type: 'llmstxt' | 'markdown' | 'code' | 'link';
+
+      newsletter_sync_status: 'pending' | 'synced' | 'failed' | 'skipped';
+
+      config_format: 'json' | 'multi' | 'hook';
+
+      primary_action_type:
+        | 'notification'
+        | 'copy_command'
+        | 'copy_script'
+        | 'scroll'
+        | 'download'
+        | 'github_link';
+
+      generation_source: 'ai' | 'manual' | 'import' | 'migration';
+
+      email_blocklist_reason: 'spam_complaint' | 'hard_bounce' | 'repeated_soft_bounce' | 'manual';
 
       environment: 'development' | 'preview' | 'production';
 
@@ -1549,6 +1743,33 @@ export interface Database {
       job_tier: 'standard' | 'featured';
 
       job_type: 'full-time' | 'part-time' | 'contract' | 'freelance' | 'internship';
+
+      interaction_type:
+        | 'view'
+        | 'copy'
+        | 'bookmark'
+        | 'click'
+        | 'time_spent'
+        | 'search'
+        | 'filter'
+        | 'screenshot'
+        | 'share'
+        | 'download'
+        | 'pwa_installed'
+        | 'pwa_launched'
+        | 'newsletter_subscribe'
+        | 'contact_interact'
+        | 'contact_submit'
+        | 'form_started'
+        | 'form_step_completed'
+        | 'form_field_focused'
+        | 'form_template_selected'
+        | 'form_abandoned'
+        | 'form_submitted'
+        | 'sponsored_impression'
+        | 'sponsored_click';
+
+      sponsorship_tier: 'featured' | 'promoted' | 'spotlight' | 'sponsored';
     };
     CompositeTypes: {
       company_profile_result: {
@@ -1606,8 +1827,8 @@ export interface Database {
         empty_state_message: string | null;
         url_slug: string | null;
         content_loader: string | null;
-        config_format: string | null;
-        primary_action_type: string | null;
+        config_format: Database['public']['Enums']['config_format'] | null;
+        primary_action_type: Database['public']['Enums']['primary_action_type'] | null;
         primary_action_label: string | null;
         primary_action_config: Json | null;
         validation_config: Json | null;
@@ -1714,6 +1935,84 @@ export interface Database {
         id: string | null;
         email: string | null;
         step: number | null;
+      };
+
+      sponsorship_analytics_result: {
+        sponsorship: Database['public']['Tables']['sponsored_content']['Row'] | null;
+        daily_stats:
+          | Database['public']['CompositeTypes']['sponsorship_analytics_daily_stat'][]
+          | null;
+        computed_metrics:
+          | Database['public']['CompositeTypes']['sponsorship_analytics_computed_metrics']
+          | null;
+      };
+
+      sponsorship_analytics_daily_stat: {
+        date: string | null;
+        impressions: number | null;
+        clicks: number | null;
+      };
+
+      sponsorship_analytics_computed_metrics: {
+        ctr: number | null;
+        days_active: number | null;
+        avg_impressions_per_day: number | null;
+      };
+
+      structured_data_config_result: {
+        category: Database['public']['Enums']['content_category'] | null;
+        schema_types: Database['public']['CompositeTypes']['structured_data_schema_types'] | null;
+        category_display_name: string | null;
+        application_sub_category: string | null;
+        default_keywords: string[] | null;
+        default_requirements: string[] | null;
+        creative_work_description: string | null;
+      };
+
+      structured_data_schema_types: {
+        application: boolean | null;
+        source_code: boolean | null;
+        how_to: boolean | null;
+        creative_work: boolean | null;
+        faq: boolean | null;
+        breadcrumb: boolean | null;
+        speakable: boolean | null;
+        review: boolean | null;
+        aggregate_rating: boolean | null;
+        video_object: boolean | null;
+        course: boolean | null;
+        job_posting: boolean | null;
+        collection_page: boolean | null;
+        learning_resource: boolean | null;
+        item_list: boolean | null;
+      };
+
+      weekly_digest_result: {
+        week_of: string | null;
+        week_start: string | null;
+        week_end: string | null;
+        new_content: Database['public']['CompositeTypes']['weekly_digest_new_content'][] | null;
+        trending_content:
+          | Database['public']['CompositeTypes']['weekly_digest_trending_content'][]
+          | null;
+      };
+
+      weekly_digest_new_content: {
+        category: Database['public']['Enums']['content_category'] | null;
+        slug: string | null;
+        title: string | null;
+        description: string | null;
+        date_added: string | null;
+        url: string | null;
+      };
+
+      weekly_digest_trending_content: {
+        category: Database['public']['Enums']['content_category'] | null;
+        slug: string | null;
+        title: string | null;
+        description: string | null;
+        url: string | null;
+        view_count: number | null;
       };
     };
   };

@@ -40,7 +40,9 @@ import { getHomepageCategoryIds } from '@/src/lib/data/config/category';
 import { getHomepageData } from '@/src/lib/data/content/homepage';
 import { logger } from '@/src/lib/logger';
 
-export const metadata: Promise<Metadata> = generatePageMetadata('/');
+export async function generateMetadata(): Promise<Metadata> {
+  return generatePageMetadata('/');
+}
 
 /**
  * ISR Configuration: Homepage revalidates every 60 seconds

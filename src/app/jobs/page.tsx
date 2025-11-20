@@ -75,7 +75,7 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
   const employment = rawParams?.['employment'] as string | undefined;
   const experience = rawParams?.['experience'] as string | undefined;
   const remote = rawParams?.['remote'] === 'true' ? true : undefined;
-  const page = Number(rawParams?.['page']) || 1;
+  const page = Math.max(1, Math.min(Number(rawParams?.['page']) || 1, 10000));
   const limit = Math.min(Number(rawParams?.['limit']) || 20, 100);
   const offset = (page - 1) * limit;
 

@@ -107,13 +107,6 @@ export default async function SponsorshipsPage() {
   const now = new Date();
   const activeCount = orderedSponsorships.filter((s) => isSponsorshipActive(s, now)).length;
 
-  // Validate tier value to ensure type safety
-  const validTiers = ['featured', 'promoted', 'spotlight', 'sponsored'] as const;
-  type ValidTier = (typeof validTiers)[number];
-  const isValidTier = (tier: string): tier is ValidTier => {
-    return validTiers.includes(tier as ValidTier);
-  };
-
   return (
     <div className="space-y-6">
       <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
@@ -144,18 +137,8 @@ export default async function SponsorshipsPage() {
           const ctr =
             impressionCount > 0 ? ((clickCount / impressionCount) * 100).toFixed(2) : '0.00';
 
-          // Validate tier for this sponsorship
-          let safeTier: ValidTier;
-          if (isValidTier(sponsorship.tier)) {
-            safeTier = sponsorship.tier as ValidTier;
-          } else {
-            logger.warn('SponsorshipsPage: invalid tier value', {
-              tier: sponsorship.tier,
-              sponsorshipId: sponsorship.id,
-              userId: user.id,
-            });
-            safeTier = 'sponsored' as ValidTier;
-          }
+          // Use generated ENUM type directly - no validation needed
+          const safeTier = sponsorship.tier;
 
           return (
             <Card key={sponsorship.id}>

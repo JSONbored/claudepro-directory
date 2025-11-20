@@ -40,6 +40,7 @@ export default async function CollectionDetailPage({ params }: CollectionPagePro
   }
 
   let collectionData: Awaited<ReturnType<typeof getCollectionDetail>> = null;
+  let hasError = false;
   try {
     collectionData = await getCollectionDetail(user.id, slug);
   } catch (error) {
@@ -48,7 +49,27 @@ export default async function CollectionDetailPage({ params }: CollectionPagePro
       userId: user.id,
       slug,
     });
-    throw normalized;
+    hasError = true;
+  }
+
+  if (hasError) {
+    return (
+      <div className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-2xl">Collection unavailable</CardTitle>
+            <CardDescription>
+              We couldn&apos;t load this collection. Please try again later.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button asChild={true} variant="outline">
+              <Link href={ROUTES.ACCOUNT_LIBRARY}>Back to library</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   if (!collectionData) {

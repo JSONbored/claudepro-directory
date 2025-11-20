@@ -65,7 +65,7 @@
  */
 
 import { handleChangelogSyncRequest } from '../_shared/handlers/changelog/handler.ts';
-import { errorResponse } from '../_shared/utils/http.ts';
+import { errorResponse, publicCorsHeaders } from '../_shared/utils/http.ts';
 import { validatePathSegments, validateQueryString } from '../_shared/utils/input-validation.ts';
 import { checkRateLimit } from '../_shared/utils/rate-limit.ts';
 import { createRouter, type HttpMethod, type RouterContext } from '../_shared/utils/router.ts';
@@ -82,6 +82,7 @@ import { handleActiveNotifications } from './routes/notifications/active.ts';
 import { handleCreateNotification } from './routes/notifications/create.ts';
 import { handleDismissNotifications } from './routes/notifications/dismiss.ts';
 import { handlePulse } from './routes/pulse.ts';
+import { processAllQueues } from './routes/queue-processor.ts';
 import { handleRevalidation } from './routes/revalidation.ts';
 import { handleExternalWebhook } from './routes/webhook/external.ts';
 
@@ -370,6 +371,36 @@ const router = createRouter<FluxStationContext>({
           );
         }
         return handleDiscordDirect(ctx.request);
+      },
+    },
+    {
+      name: 'process-queues',
+      methods: ['POST', 'OPTIONS'],
+      match: (ctx) => ctx.pathname === '/process-queues' || ctx.pathname === '/process-queues/',
+      handler: async () => {
+        const summary = await processAllQueues();
+        return new Response(
+          JSON.stringify({
+            success: true,
+            summary: {
+              totalQueues: summary.totalQueues,
+              queuesWithMessages: summary.queuesWithMessages,
+              queuesProcessed: summary.queuesProcessed,
+              totalMessagesProcessed: summary.results.reduce(
+                (sum, r) => sum + (r.processed ?? 0),
+                0
+              ),
+              results: summary.results,
+            },
+          }),
+          {
+            status: 200,
+            headers: {
+              'Content-Type': 'application/json',
+              ...publicCorsHeaders,
+            },
+          }
+        );
       },
     },
   ],

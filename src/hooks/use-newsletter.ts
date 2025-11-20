@@ -69,7 +69,7 @@ export interface UseNewsletterOptions {
   showToasts?: boolean;
   /** Optional metadata for contextual tracking (copy actions, campaigns, etc.) */
   metadata?: {
-    copy_type?: string;
+    copy_type?: Database['public']['Enums']['copy_type'];
     copy_category?: string;
     copy_slug?: string;
     [key: string]: unknown;

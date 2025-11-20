@@ -6,19 +6,54 @@ import { logger } from '@/src/lib/logger';
 import { normalizeError } from '@/src/lib/utils/error.utils';
 import type { Database } from '@/src/types/database.types';
 
+// Content category validation using generated ENUM
+const CONTENT_CATEGORY_VALUES = [
+  'agents',
+  'mcp',
+  'rules',
+  'commands',
+  'hooks',
+  'statuslines',
+  'skills',
+  'collections',
+  'guides',
+  'jobs',
+  'changelog',
+] as const satisfies readonly Database['public']['Enums']['content_category'][];
+
+function isValidContentCategory(
+  value: string
+): value is Database['public']['Enums']['content_category'] {
+  return (
+    typeof value === 'string' &&
+    CONTENT_CATEGORY_VALUES.includes(value as Database['public']['Enums']['content_category'])
+  );
+}
+
 export async function getContentDetailComplete(input: {
   category: string;
   slug: string;
 }): Promise<Database['public']['Functions']['get_content_detail_complete']['Returns'] | null> {
   const { category, slug } = input;
 
+  // Validate category is valid ENUM value
+  // Database will also validate, but we check early for better error messages
+  if (!isValidContentCategory(category)) {
+    logger.error('Invalid category in getContentDetailComplete', new Error('Invalid category'), {
+      category,
+      slug,
+    });
+    return null;
+  }
+
+  // Type guard has narrowed category to ENUM - database will validate
   try {
     return fetchCachedRpc<
       'get_content_detail_complete',
       Database['public']['Functions']['get_content_detail_complete']['Returns'] | null
     >(
       {
-        p_category: category,
+        p_category: category, // Type guard has narrowed this to ENUM
         p_slug: slug,
       },
       {

@@ -6,7 +6,6 @@
 import { z } from 'zod';
 import { fetchCachedRpc } from '@/src/lib/data/helpers';
 import type { Database, Tables } from '@/src/types/database.types';
-import type { GetGetSponsorshipAnalyticsReturn } from '@/src/types/database-overrides';
 import { USER_TIER_VALUES } from '@/src/types/database-overrides';
 
 const ACCOUNT_TTL_KEY = 'cache.account.ttl_seconds';
@@ -203,8 +202,11 @@ export async function getUserSettings(
 export async function getSponsorshipAnalytics(
   userId: string,
   sponsorshipId: string
-): Promise<GetGetSponsorshipAnalyticsReturn | null> {
-  return fetchCachedRpc<'get_sponsorship_analytics', GetGetSponsorshipAnalyticsReturn | null>(
+): Promise<Database['public']['Functions']['get_sponsorship_analytics']['Returns'] | null> {
+  return fetchCachedRpc<
+    'get_sponsorship_analytics',
+    Database['public']['Functions']['get_sponsorship_analytics']['Returns'] | null
+  >(
     { p_user_id: userId, p_sponsorship_id: sponsorshipId },
     {
       rpcName: 'get_sponsorship_analytics',

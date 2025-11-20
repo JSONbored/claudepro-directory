@@ -6,7 +6,7 @@
 import type { Resend } from 'npm:resend@4.0.0';
 import { supabaseServiceRole } from '../../clients/supabase.ts';
 import type { Database as DatabaseGenerated } from '../../database.types.ts';
-import type { GetWeeklyDigestReturn, Tables } from '../../database-overrides.ts';
+import type { Tables } from '../../database-overrides.ts';
 import { callRpc } from '../../database-overrides.ts';
 import { createEmailHandlerContext, logError } from '../logging.ts';
 import { TIMEOUT_PRESETS, withTimeout } from '../timeout.ts';
@@ -99,7 +99,7 @@ export async function checkDigestRateLimit(): Promise<{
 export async function sendBatchDigest(
   resend: Resend,
   subscribers: string[],
-  digestData: GetWeeklyDigestReturn,
+  digestData: DatabaseGenerated['public']['Functions']['get_weekly_digest']['Returns'],
   logContext: ReturnType<typeof createEmailHandlerContext>
 ): Promise<{
   success: number;
@@ -110,11 +110,26 @@ export async function sendBatchDigest(
   let failed = 0;
 
   // Render once for all subscribers (same content)
+  // Use generated types directly - pass snake_case fields as-is
   const html = await renderEmailTemplate(WeeklyDigest, {
     email: subscribers[0] || '', // First email for template (not used in rendering)
-    weekOf: digestData.weekOf,
-    newContent: digestData.newContent,
-    trendingContent: digestData.trendingContent,
+    week_of: digestData.week_of || '',
+    new_content: (digestData.new_content || []).map((item) => ({
+      category: item.category || '',
+      slug: item.slug || '',
+      title: item.title || '',
+      description: item.description || '',
+      date_added: item.date_added || '',
+      url: item.url || '',
+    })),
+    trending_content: (digestData.trending_content || []).map((item) => ({
+      category: item.category || '',
+      slug: item.slug || '',
+      title: item.title || '',
+      description: item.description || '',
+      url: item.url || '',
+      view_count: item.view_count || 0,
+    })),
   });
 
   // Use Resend batch API (up to 100 recipients) instead of sequential sending
@@ -128,7 +143,7 @@ export async function sendBatchDigest(
           batch.map((email) => ({
             from: HELLO_FROM,
             to: email,
-            subject: `This Week in Claude: ${digestData.weekOf}`,
+            subject: `This Week in Claude: ${digestData.week_of}`,
             html,
             tags: [{ name: 'type', value: 'weekly_digest' }],
           }))

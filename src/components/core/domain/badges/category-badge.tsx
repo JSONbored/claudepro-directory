@@ -121,7 +121,7 @@ export type UnifiedBadgeProps =
   | {
       /** Sponsored/promoted content badge */
       variant: 'sponsored';
-      tier: 'featured' | 'promoted' | 'spotlight' | 'sponsored';
+      tier: Database['public']['Enums']['sponsorship_tier'];
       showIcon?: boolean;
       className?: string;
     }

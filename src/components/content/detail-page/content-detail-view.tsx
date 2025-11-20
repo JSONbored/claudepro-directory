@@ -643,8 +643,8 @@ export async function UnifiedDetailPage({
   }
 
   // Check if we should use tabbed layout
-  const configuredTabs = config.detailPage.tabs;
-  const shouldUseTabs = tabsEnabled && configuredTabs && configuredTabs.length > 0;
+  const configuredTabs = config.detailPage?.tabs;
+  const shouldUseTabs = tabsEnabled && Array.isArray(configuredTabs) && configuredTabs.length > 0;
 
   // If tabs are enabled and configured, use tabbed layout
   if (shouldUseTabs && configuredTabs) {

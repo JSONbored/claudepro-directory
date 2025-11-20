@@ -241,111 +241,6 @@ async function processUserInteractionsBatch(messages: PulseQueueMessage[]): Prom
   }
 }
 
-/**
- * Process sponsored events batch - inserts into sponsored_impressions and sponsored_clicks tables
- */
-async function processSponsoredEventsBatch(messages: PulseQueueMessage[]): Promise<{
-  inserted: number;
-  failed: number;
-  errors: string[];
-}> {
-  const errors: string[] = [];
-  let inserted = 0;
-  let failed = 0;
-
-  try {
-    const impressions: Array<{
-      sponsored_id: string;
-      user_id: string | null;
-      page_url?: string;
-      position?: number;
-    }> = [];
-    const clicks: Array<{
-      sponsored_id: string;
-      user_id: string | null;
-      target_url: string;
-    }> = [];
-
-    for (const msg of messages) {
-      const event = msg.message;
-      const metadata = event.metadata as Record<string, unknown> | null;
-
-      if (metadata?.['event_type'] === 'impression') {
-        impressions.push({
-          sponsored_id: event.content_slug ?? '',
-          user_id: event.user_id ?? null,
-          ...(metadata?.['page_url'] !== undefined
-            ? { page_url: metadata['page_url'] as string }
-            : {}),
-          ...(metadata?.['position'] !== undefined
-            ? { position: metadata['position'] as number }
-            : {}),
-        });
-      } else if (metadata?.['event_type'] === 'click') {
-        clicks.push({
-          sponsored_id: event.content_slug ?? '',
-          user_id: event.user_id ?? null,
-          target_url: metadata['target_url'] as string,
-        });
-      }
-    }
-
-    // Batch insert impressions
-    if (impressions.length > 0) {
-      const insertData: DatabaseGenerated['public']['Tables']['sponsored_impressions']['Insert'][] =
-        impressions;
-      const { error: impressionsError } = await (
-        supabaseServiceRole.from('sponsored_impressions') as unknown as {
-          insert: (
-            values: DatabaseGenerated['public']['Tables']['sponsored_impressions']['Insert'][]
-          ) => Promise<{ error: unknown }>;
-        }
-      ).insert(insertData);
-
-      if (impressionsError) {
-        const errorMessage =
-          impressionsError instanceof Error ? impressionsError.message : String(impressionsError);
-        errors.push(`Sponsored impressions insert failed: ${errorMessage}`);
-        failed += impressions.length;
-      } else {
-        inserted += impressions.length;
-      }
-    }
-
-    // Batch insert clicks
-    if (clicks.length > 0) {
-      const insertData: DatabaseGenerated['public']['Tables']['sponsored_clicks']['Insert'][] =
-        clicks;
-      const { error: clicksError } = await (
-        supabaseServiceRole.from('sponsored_clicks') as unknown as {
-          insert: (
-            values: DatabaseGenerated['public']['Tables']['sponsored_clicks']['Insert'][]
-          ) => Promise<{ error: unknown }>;
-        }
-      ).insert(insertData);
-
-      if (clicksError) {
-        const errorMessage =
-          clicksError instanceof Error ? clicksError.message : String(clicksError);
-        errors.push(`Sponsored clicks insert failed: ${errorMessage}`);
-        failed += clicks.length;
-      } else {
-        inserted += clicks.length;
-      }
-    }
-
-    return { inserted, failed, errors };
-  } catch (error) {
-    const errorMsg = errorToString(error);
-    errors.push(`Sponsored events batch processing failed: ${errorMsg}`);
-    console.error('[flux-station] Sponsored events batch processing error', {
-      error: errorMsg,
-      message_count: messages.length,
-    });
-    return { inserted: 0, failed: messages.length, errors };
-  }
-}
-
 async function processPulseBatch(messages: PulseQueueMessage[]): Promise<{
   success: boolean;
   inserted: number;
@@ -354,15 +249,13 @@ async function processPulseBatch(messages: PulseQueueMessage[]): Promise<{
 }> {
   // Separate events by type for routing to appropriate tables
   const searchEvents: PulseQueueMessage[] = [];
-  const sponsoredEvents: PulseQueueMessage[] = [];
-  const otherEvents: PulseQueueMessage[] = [];
+  const otherEvents: PulseQueueMessage[] = []; // All other events (including sponsored) go to user_interactions
 
   for (const msg of messages) {
     if (msg.message.interaction_type === 'search') {
       searchEvents.push(msg);
-    } else if (msg.message.content_type === 'sponsored') {
-      sponsoredEvents.push(msg);
     } else {
+      // All other events (including sponsored) go to user_interactions
       otherEvents.push(msg);
     }
   }
@@ -379,15 +272,7 @@ async function processPulseBatch(messages: PulseQueueMessage[]): Promise<{
     allErrors.push(...searchResult.errors);
   }
 
-  // Process sponsored events separately (insert into sponsored_impressions/sponsored_clicks)
-  if (sponsoredEvents.length > 0) {
-    const sponsoredResult = await processSponsoredEventsBatch(sponsoredEvents);
-    totalInserted += sponsoredResult.inserted;
-    totalFailed += sponsoredResult.failed;
-    allErrors.push(...sponsoredResult.errors);
-  }
-
-  // Process other events (insert into user_interactions table - table name unchanged, queue is now 'pulse')
+  // Process all other events (including sponsored) into user_interactions
   if (otherEvents.length > 0) {
     const interactionsResult = await processUserInteractionsBatch(otherEvents);
     totalInserted += interactionsResult.inserted;

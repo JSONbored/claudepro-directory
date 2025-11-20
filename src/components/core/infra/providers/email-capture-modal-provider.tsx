@@ -17,13 +17,13 @@
 
 import { createContext, type ReactNode, useCallback, useContext, useEffect, useState } from 'react';
 import { NewsletterModal } from '@/src/components/features/growth/newsletter/newsletter-modal';
-import type { CopyType } from '@/src/types/database-overrides';
+import type { Database } from '@/src/types/database.types';
 
 /**
  * Modal context data structure
  */
 interface ModalContext {
-  copyType: CopyType;
+  copyType: Database['public']['Enums']['copy_type'];
   category?: string;
   slug?: string;
   referrer?: string;

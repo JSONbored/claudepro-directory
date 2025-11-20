@@ -340,11 +340,12 @@ export const EMAIL_TEMPLATE_MANIFEST: EmailTemplateDefinition<unknown>[] = [
     description: 'Weekly roundup of new, trending, and personalized content.',
     category: 'newsletter',
     from: HELLO_FROM,
-    buildSubject: (props: unknown) => `This Week in Claude: ${(props as WeeklyDigestProps).weekOf}`,
+    buildSubject: (props: unknown) =>
+      `This Week in Claude: ${(props as WeeklyDigestProps).week_of}`,
     buildSampleData: (): WeeklyDigestProps => ({
       email: 'subscriber@example.com',
-      weekOf: 'January 13, 2025',
-      newContent: [
+      week_of: 'January 13, 2025',
+      new_content: [
         {
           title: 'Claude Content Strategist',
           description: 'Plan editorial calendars with live data pulls.',
@@ -360,14 +361,14 @@ export const EMAIL_TEMPLATE_MANIFEST: EmailTemplateDefinition<unknown>[] = [
           url: 'https://claudepro.directory/workflows/legal-research-copilot',
         },
       ],
-      trendingContent: [
+      trending_content: [
         {
           title: 'MCP Notion Sync',
           description: 'Bi-directional Notion sync with Claude.',
           category: 'mcp',
           slug: 'mcp-notion-sync',
           url: 'https://claudepro.directory/mcp/mcp-notion-sync',
-          viewCount: 18250,
+          view_count: 18250,
         },
         {
           title: 'Growth Analyst Agent',
@@ -375,10 +376,10 @@ export const EMAIL_TEMPLATE_MANIFEST: EmailTemplateDefinition<unknown>[] = [
           category: 'agents',
           slug: 'growth-analyst-agent',
           url: 'https://claudepro.directory/agents/growth-analyst-agent',
-          viewCount: 13420,
+          view_count: 13420,
         },
       ],
-      personalizedContent: [
+      personalized_content: [
         {
           title: 'Config Projections Toolkit',
           description: 'Forecasts costs for large deployments.',

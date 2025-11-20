@@ -64,13 +64,9 @@ function getSafeWebsiteUrl(url: string | null | undefined): string | null {
       parsed.hostname === 'localhost' ||
       parsed.hostname === '127.0.0.1' ||
       parsed.hostname === '::1';
-    if (parsed.protocol === 'https:') {
-      // HTTPS always allowed
-    } else if (parsed.protocol === 'http:' && isLocalhost) {
-      // HTTP allowed only for local development
-    } else {
-      return null;
-    }
+    const isValidProtocol =
+      parsed.protocol === 'https:' || (parsed.protocol === 'http:' && isLocalhost);
+    if (!isValidProtocol) return null;
     // Reject dangerous components
     if (parsed.username || parsed.password) return null;
 
@@ -219,64 +215,71 @@ export default async function CompanyPage({ params }: CompanyPageProps) {
               ) : (
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                   {(active_jobs ?? [])
-                    .filter(
-                      (
-                        job
-                      ): job is typeof job & {
-                        id: string;
-                        slug: string;
-                        title: string;
-                        company: string;
-                        workplace: NonNullable<typeof job.workplace>;
-                        experience: NonNullable<typeof job.experience>;
-                        plan: NonNullable<typeof job.plan>;
-                        posted_at: string;
-                        expires_at: string;
-                        view_count: number;
-                        click_count: number;
-                      } =>
-                        Boolean(
+                    .filter((job) => {
+                      // Filter out jobs missing required fields
+                      return Boolean(
+                        job?.id &&
+                          job?.slug &&
+                          job?.title &&
+                          job?.company &&
+                          job?.workplace &&
+                          job?.experience &&
+                          job?.plan &&
+                          job?.posted_at &&
+                          job?.expires_at &&
+                          job?.view_count != null &&
+                          job?.click_count != null
+                      );
+                    })
+                    .map((job) => {
+                      // Type narrowing: at this point we know all required fields exist
+                      if (
+                        !(
                           job.id &&
-                            job.slug &&
-                            job.title &&
-                            job.company &&
-                            job.workplace &&
-                            job.experience &&
-                            job.plan &&
-                            job.posted_at &&
-                            job.expires_at &&
-                            job.view_count != null &&
-                            job.click_count != null
-                        )
-                    )
-                    .map((job) => (
-                      <JobCard
-                        key={job.id}
-                        job={{
-                          id: job.id,
-                          slug: job.slug,
-                          title: job.title,
-                          company: job.company,
-                          company_logo: job.company_logo,
-                          location: job.location,
-                          description: job.description,
-                          salary: job.salary,
-                          remote: job.remote ?? false,
-                          type: job.type,
-                          workplace: job.workplace,
-                          experience: job.experience,
-                          category: job.category,
-                          tags: job.tags ?? [],
-                          plan: job.plan,
-                          tier: job.tier,
-                          posted_at: job.posted_at,
-                          expires_at: job.expires_at,
-                          view_count: job.view_count,
-                          click_count: job.click_count,
-                          link: job.link,
-                        }}
-                      />
-                    ))}
+                          job.slug &&
+                          job.title &&
+                          job.company &&
+                          job.workplace &&
+                          job.experience &&
+                          job.plan &&
+                          job.posted_at &&
+                          job.expires_at
+                        ) ||
+                        job.view_count == null ||
+                        job.click_count == null
+                      ) {
+                        return null;
+                      }
+                      return (
+                        <JobCard
+                          key={job.id}
+                          job={{
+                            id: job.id,
+                            slug: job.slug,
+                            title: job.title,
+                            company: job.company,
+                            company_logo: job.company_logo,
+                            location: job.location,
+                            description: job.description,
+                            salary: job.salary,
+                            remote: job.remote ?? false,
+                            type: job.type,
+                            workplace: job.workplace,
+                            experience: job.experience,
+                            category: job.category,
+                            tags: job.tags ?? [],
+                            plan: job.plan,
+                            tier: job.tier,
+                            posted_at: job.posted_at,
+                            expires_at: job.expires_at,
+                            view_count: job.view_count,
+                            click_count: job.click_count,
+                            link: job.link,
+                          }}
+                        />
+                      );
+                    })
+                    .filter((card): card is React.ReactElement => card !== null)}
                 </div>
               )}
             </div>
@@ -310,10 +313,7 @@ export default async function CompanyPage({ params }: CompanyPageProps) {
                     <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
                       <span className={UI_CLASSES.TEXT_SM_MUTED}>Avg. Salary</span>
                       <span className="font-semibold">
-                        $
-                        {stats.avg_salary_min
-                          ? `${(stats.avg_salary_min / 1000).toFixed(0)}k+`
-                          : 'N/A'}
+                        ${(stats.avg_salary_min / 1000).toFixed(0)}k+
                       </span>
                     </div>
                   )}
@@ -329,12 +329,11 @@ export default async function CompanyPage({ params }: CompanyPageProps) {
                     <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
                       <span className={UI_CLASSES.TEXT_SM_MUTED}>Latest Posting</span>
                       <span className="font-semibold text-sm">
-                        {stats.latest_job_posted_at &&
-                          new Date(stats.latest_job_posted_at).toLocaleDateString('en-US', {
-                            month: 'short',
-                            day: 'numeric',
-                            year: 'numeric',
-                          })}
+                        {new Date(stats.latest_job_posted_at).toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric',
+                        })}
                       </span>
                     </div>
                   )}

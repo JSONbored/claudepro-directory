@@ -18,7 +18,9 @@ import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { normalizeError } from '@/src/lib/utils/error.utils';
 
-export const metadata: Promise<Metadata> = generatePageMetadata('/account/activity');
+export async function generateMetadata(): Promise<Metadata> {
+  return generatePageMetadata('/account/activity');
+}
 
 export default async function ActivityPage() {
   const { user } = await getAuthenticatedUser({ context: 'ActivityPage' });

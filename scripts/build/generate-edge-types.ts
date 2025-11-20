@@ -67,8 +67,30 @@ if (tablesStart === -1 || functionsStart === -1 || enumsStart === -1) {
 }
 
 function extractStructuredBlock(name: string, sectionStart: number, sectionEnd: number): string {
-  const marker = `      ${name}: {`;
-  const startIndex = source.indexOf(marker, sectionStart);
+  // Try simple format first: `name: {`
+  let marker = `      ${name}: {`;
+  let startIndex = source.indexOf(marker, sectionStart);
+
+  // If not found, try union type format: `name:\n        | {`
+  if (startIndex === -1 || startIndex > sectionEnd) {
+    marker = `      ${name}:`;
+    startIndex = source.indexOf(marker, sectionStart);
+    if (startIndex !== -1 && startIndex < sectionEnd) {
+      // Find the first `| {` or `{` after the name
+      const afterName = startIndex + marker.length;
+      const unionStart = source.indexOf('| {', afterName);
+      const simpleStart = source.indexOf('{', afterName);
+      const actualStart =
+        unionStart !== -1 && (simpleStart === -1 || unionStart < simpleStart)
+          ? unionStart + 2 // Skip `| ` to get to `{`
+          : simpleStart;
+
+      if (actualStart !== -1) {
+        startIndex = actualStart - 2; // Go back to include `| ` if it exists
+      }
+    }
+  }
+
   if (startIndex === -1 || startIndex > sectionEnd) {
     throw new Error(`Unable to find definition for "${name}"`);
   }

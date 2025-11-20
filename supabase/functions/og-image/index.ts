@@ -21,6 +21,30 @@ import { SITE_URL } from '../_shared/clients/supabase.ts';
 import { edgeEnv } from '../_shared/config/env.ts';
 import type { Database as DatabaseGenerated } from '../_shared/database.types.ts';
 import { callRpc } from '../_shared/database-overrides.ts';
+
+// Content category validation
+const CONTENT_CATEGORY_VALUES = [
+  'agents',
+  'mcp',
+  'rules',
+  'commands',
+  'hooks',
+  'statuslines',
+  'skills',
+  'collections',
+  'guides',
+  'jobs',
+  'changelog',
+] as const satisfies readonly DatabaseGenerated['public']['Enums']['content_category'][];
+
+function isValidContentCategory(
+  value: string
+): value is DatabaseGenerated['public']['Enums']['content_category'] {
+  return CONTENT_CATEGORY_VALUES.includes(
+    value as DatabaseGenerated['public']['Enums']['content_category']
+  );
+}
+
 import { CIRCUIT_BREAKER_CONFIGS, withCircuitBreaker } from '../_shared/utils/circuit-breaker.ts';
 import {
   badRequestResponse,
@@ -146,13 +170,15 @@ async function fetchMetadataFromRoute(
 
     // Fallback 1: Try direct database query for content routes
     const type = extractTypeFromRoute(route);
-    if (type && type !== 'website' && route.includes('/')) {
+    if (type && type !== 'website' && route.includes('/') && isValidContentCategory(type)) {
+      // Type guard narrows type to ENUM - database will validate
       const slug = route.split('/').pop() || '';
       if (slug) {
         try {
           // Try to get content directly from database
+          // Database validates ENUM - no type assertion needed after type guard
           const rpcArgs = {
-            p_category: type,
+            p_category: type, // Type guard has narrowed this to ENUM
             p_slug: slug,
             p_base_url: SITE_URL,
           } satisfies DatabaseGenerated['public']['Functions']['get_api_content_full']['Args'];

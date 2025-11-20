@@ -13,6 +13,7 @@ import { handleCompanyRoute } from './routes/company.ts';
 import { handleContentRoute } from './routes/content.ts';
 import { handleGeneratePackage } from './routes/content-generate/index.ts';
 import { handlePackageGenerationQueue } from './routes/content-generate/queue-worker.ts';
+import { handleUploadPackage } from './routes/content-generate/upload.ts';
 import { handleFeedsRoute } from './routes/feeds.ts';
 import { handleSeoRoute } from './routes/seo.ts';
 import { handleSitemapRoute } from './routes/sitemap.ts';
@@ -98,7 +99,46 @@ const router = createRouter<DataApiContext>({
       match: (ctx) => ctx.segments[0] === 'content' && ctx.segments[1] === 'generate-package',
       handler: (ctx) =>
         respondWithAnalytics(ctx, 'content-generate', async () => {
-          // Check if this is the queue worker route
+          // Check for sub-routes
+          if (ctx.segments[2] === 'upload') {
+            // Upload route: POST /content/generate-package/upload
+            // Rate limiting: Heavy preset for package uploads (expensive operation)
+            const rateLimit = checkRateLimit(ctx.request, RATE_LIMIT_PRESETS.heavy);
+            if (!rateLimit.allowed) {
+              return jsonResponse(
+                {
+                  error: 'Too Many Requests',
+                  message: 'Rate limit exceeded',
+                  retryAfter: rateLimit.retryAfter,
+                },
+                429,
+                BASE_CORS,
+                {
+                  'Retry-After': String(rateLimit.retryAfter ?? 60),
+                  'X-RateLimit-Limit': String(RATE_LIMIT_PRESETS.heavy.maxRequests),
+                  'X-RateLimit-Remaining': String(rateLimit.remaining),
+                  'X-RateLimit-Reset': String(rateLimit.resetAt),
+                }
+              );
+            }
+
+            const logContext = createDataApiContext('content-generate-upload', {
+              path: ctx.pathname,
+            });
+            const response = await handleUploadPackage(ctx.request, logContext);
+
+            // Add rate limit headers
+            const headers = new Headers(response.headers);
+            headers.set('X-RateLimit-Limit', String(RATE_LIMIT_PRESETS.heavy.maxRequests));
+            headers.set('X-RateLimit-Remaining', String(rateLimit.remaining));
+            headers.set('X-RateLimit-Reset', String(rateLimit.resetAt));
+
+            return new Response(response.body, {
+              status: response.status,
+              headers,
+            });
+          }
+
           if (ctx.segments[2] === 'process') {
             // Queue worker route: POST /content/generate-package/process
             // Rate limiting: Moderate preset for queue workers

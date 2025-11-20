@@ -18,14 +18,17 @@ import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { POSITION_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { normalizeError } from '@/src/lib/utils/error.utils';
-import type { SponsorshipAnalytics } from '@/src/types/database-overrides';
+import type { Database } from '@/src/types/database.types';
 
-export const metadata: Promise<Metadata> = generatePageMetadata(
-  '/account/sponsorships/:id/analytics'
-);
+type SponsorshipAnalytics = Database['public']['Functions']['get_sponsorship_analytics']['Returns'];
 
 interface AnalyticsPageProps {
   params: Promise<{ id: string }>;
+}
+
+export async function generateMetadata({ params }: AnalyticsPageProps): Promise<Metadata> {
+  const { id } = await params;
+  return generatePageMetadata('/account/sponsorships/:id/analytics', { params: { id } });
 }
 
 export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPageProps) {
@@ -71,40 +74,46 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
     notFound();
   }
 
-  const { sponsorship, daily_stats, computed_metrics } = analyticsData;
+  // analyticsData is guaranteed to be non-null here (checked above)
+  // Use generated types directly - handle nullability as defined in database.types.ts
+  const sponsorship = analyticsData.sponsorship;
+  const daily_stats = analyticsData.daily_stats;
+  const computed_metrics = analyticsData.computed_metrics;
 
-  // Validate tier value to ensure type safety
-  const validTiers = ['featured', 'promoted', 'spotlight', 'sponsored'] as const;
-  type ValidTier = (typeof validTiers)[number];
-  const isValidTier = (tier: string): tier is ValidTier => {
-    return validTiers.includes(tier as ValidTier);
-  };
+  // Handle nullability per generated types (composite types are nullable in generated types)
+  if (!(sponsorship && daily_stats && computed_metrics)) {
+    logger.error(
+      'SponsorshipAnalyticsPage: unexpected null fields in analytics data',
+      new Error('Null fields in analytics data'),
+      {
+        sponsorshipId: id,
+        userId: user.id,
+      }
+    );
+    notFound();
+  }
 
-  const safeTier: ValidTier = isValidTier(sponsorship.tier)
-    ? (sponsorship.tier as ValidTier)
-    : (() => {
-        logger.warn('SponsorshipAnalyticsPage: invalid tier value', {
-          tier: sponsorship.tier,
-          sponsorshipId: id,
-          userId: user.id,
-        });
-        return 'sponsored' as ValidTier; // Fallback to default tier
-      })();
+  // After null check, TypeScript narrows types - use generated types directly
+  // Use generated ENUM type directly - no validation needed
+  const safeTier = sponsorship.tier;
 
   const impressionCount = sponsorship.impression_count ?? 0;
   const clickCount = sponsorship.click_count ?? 0;
-  const ctr = computed_metrics.ctr.toFixed(2);
-  const daysActive = computed_metrics.days_active;
-  const avgImpressionsPerDay = computed_metrics.avg_impressions_per_day.toFixed(0);
+  const ctr = (computed_metrics.ctr ?? 0).toFixed(2);
+  const daysActive = computed_metrics.days_active ?? 0;
+  const avgImpressionsPerDay = (computed_metrics.avg_impressions_per_day ?? 0).toFixed(0);
 
   // Convert daily_stats array to Maps for chart rendering
+  // Handle nullability per generated types
   const impressionsMap = new Map<string, number>();
   const clicksMap = new Map<string, number>();
 
   for (const stat of daily_stats) {
-    const day = stat.date.substring(0, 10);
-    impressionsMap.set(day, stat.impressions);
-    clicksMap.set(day, stat.clicks);
+    if (stat.date && stat.impressions != null && stat.clicks != null) {
+      const day = stat.date.substring(0, 10);
+      impressionsMap.set(day, stat.impressions);
+      clicksMap.set(day, stat.clicks);
+    }
   }
 
   return (

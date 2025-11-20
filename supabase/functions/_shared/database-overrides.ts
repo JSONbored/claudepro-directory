@@ -882,36 +882,9 @@ export async function callRpc<T extends keyof Database['public']['Functions']>(
 
 /**
  * get_weekly_digest RPC return type
- * Returns weekly digest data including new content and trending items for email campaigns.
- *
- * @see {@link https://claudepro.directory} Weekly digest emails sent every Monday
+ * REMOVED: Now using generated type from database.types.ts
+ * Use: DatabaseGenerated['public']['Functions']['get_weekly_digest']['Returns']
  */
-export type GetWeeklyDigestReturn = {
-  /** Formatted week range string (e.g., "December 2-8, 2025") */
-  weekOf: string;
-  /** ISO date string for week start (YYYY-MM-DD) */
-  weekStart: string;
-  /** ISO date string for week end (YYYY-MM-DD) */
-  weekEnd: string;
-  /** Array of new content items added during the week (top 5) */
-  newContent: Array<{
-    category: string;
-    slug: string;
-    title: string;
-    description: string;
-    date_added: string; // ISO timestamp
-    url: string; // Full URL: https://claudepro.directory/{category}/{slug}
-  }>;
-  /** Array of trending content items (top 3) */
-  trendingContent: Array<{
-    category: string;
-    slug: string;
-    title: string;
-    description: string;
-    url: string; // Full URL: https://claudepro.directory/{category}/{slug}
-    viewCount: number; // Total views from get_trending_metrics
-  }>;
-};
 
 /**
  * get_company_profile RPC return type

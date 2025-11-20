@@ -9,7 +9,6 @@ import { getCacheTtl } from '@/src/lib/data/config/cache-config';
 import { fetchCachedRpc } from '@/src/lib/data/helpers';
 import { generateContentCacheKey, generateContentTags } from '@/src/lib/data/helpers-utils';
 import type { Database } from '@/src/types/database.types';
-import type { Tables } from '@/src/types/database-overrides';
 
 export interface ContentFilters {
   category?:
@@ -170,7 +169,10 @@ export const getContentCount = cache(
 
 export const getTrendingContent = cache(
   async (category?: Database['public']['Enums']['content_category'], limit = 20) => {
-    return fetchCachedRpc<'get_trending_content', Tables<'content'>[]>(
+    return fetchCachedRpc<
+      'get_trending_content',
+      Database['public']['Functions']['get_trending_content']['Returns']
+    >(
       {
         ...(category ? { p_category: category } : {}),
         p_limit: limit,

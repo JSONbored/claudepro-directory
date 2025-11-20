@@ -1,6 +1,30 @@
 import { SITE_URL } from '../../_shared/clients/supabase.ts';
 import type { Database as DatabaseGenerated } from '../../_shared/database.types.ts';
-import { callRpc, type Database } from '../../_shared/database-overrides.ts';
+import { callRpc } from '../../_shared/database-overrides.ts';
+
+// Content category validation
+const CONTENT_CATEGORY_VALUES = [
+  'agents',
+  'mcp',
+  'rules',
+  'commands',
+  'hooks',
+  'statuslines',
+  'skills',
+  'collections',
+  'guides',
+  'jobs',
+  'changelog',
+] as const satisfies readonly DatabaseGenerated['public']['Enums']['content_category'][];
+
+function isValidContentCategory(
+  value: string
+): value is DatabaseGenerated['public']['Enums']['content_category'] {
+  return CONTENT_CATEGORY_VALUES.includes(
+    value as DatabaseGenerated['public']['Enums']['content_category']
+  );
+}
+
 import {
   badRequestResponse,
   buildCacheHeaders,
@@ -19,6 +43,16 @@ export async function handleRecordExport(
   slug: string,
   url: URL
 ): Promise<Response> {
+  // Validate category is valid ENUM value (for all formats)
+  // Database will also validate, but we check early for better error messages
+  if (!isValidContentCategory(category)) {
+    return badRequestResponse(
+      `Invalid category '${category}'. Valid categories: ${CONTENT_CATEGORY_VALUES.join(', ')}`,
+      CORS_JSON
+    );
+  }
+
+  // Type guard has narrowed category to ENUM - database will validate
   const format = (url.searchParams.get('format') || 'json').toLowerCase();
 
   switch (format) {
@@ -40,7 +74,11 @@ export async function handleRecordExport(
   }
 }
 
-async function handleJsonFormat(category: string, slug: string): Promise<Response> {
+async function handleJsonFormat(
+  category: DatabaseGenerated['public']['Enums']['content_category'],
+  slug: string
+): Promise<Response> {
+  // Category is already validated ENUM - database will validate
   const rpcArgs = {
     p_category: category,
     p_slug: slug,
@@ -70,7 +108,11 @@ async function handleJsonFormat(category: string, slug: string): Promise<Respons
   });
 }
 
-async function handleMarkdownFormat(category: string, slug: string, url: URL): Promise<Response> {
+async function handleMarkdownFormat(
+  category: DatabaseGenerated['public']['Enums']['content_category'],
+  slug: string,
+  url: URL
+): Promise<Response> {
   const includeMetadata = url.searchParams.get('includeMetadata') !== 'false';
   const includeFooter = url.searchParams.get('includeFooter') === 'true';
 
@@ -122,7 +164,10 @@ async function handleMarkdownFormat(category: string, slug: string, url: URL): P
   });
 }
 
-async function handleItemLlmsTxt(category: string, slug: string): Promise<Response> {
+async function handleItemLlmsTxt(
+  category: DatabaseGenerated['public']['Enums']['content_category'],
+  slug: string
+): Promise<Response> {
   const rpcArgs = {
     p_category: category,
     p_slug: slug,
@@ -152,7 +197,10 @@ async function handleItemLlmsTxt(category: string, slug: string): Promise<Respon
   });
 }
 
-async function handleStorageFormat(category: string, slug: string): Promise<Response> {
+async function handleStorageFormat(
+  category: DatabaseGenerated['public']['Enums']['content_category'],
+  slug: string
+): Promise<Response> {
   // Support both 'skills' and 'mcp' categories for storage format
   if (category === 'skills') {
     const rpcArgs = {
@@ -196,7 +244,8 @@ async function handleStorageFormat(category: string, slug: string): Promise<Resp
       return errorResponse(error, 'data-api:get_mcpb_storage_path', CORS_JSON);
     }
 
-    type StoragePathResult = Database['public']['Functions']['get_mcpb_storage_path']['Returns'];
+    type StoragePathResult =
+      DatabaseGenerated['public']['Functions']['get_mcpb_storage_path']['Returns'];
     const result = data as StoragePathResult;
     const location = Array.isArray(result) ? result[0] : result;
     if (

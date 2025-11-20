@@ -10,18 +10,18 @@
       "content/**/*",
       "config/**/*",
       "supabase/functions/**/*.ts",
-      "!!**/.next/**/*",
-      "!!**/out/**/*",
-      "!!**/dist/**/*",
-      "!!**/generated/**/*",
-      "!!**/src/generated/**/*",
-      "!!**/src/lib/schemas/generated/**/*",
-      "!!**/src/lib/schemas/generated/db-schemas.d.ts",
-      "!!**/src/types/database.types.ts",
-      "!!**/scripts/build/templates/**/*",
-      "!!**/scripts/build/templates/service-worker.template.js",
-      "!!**/node_modules/**/*",
-      "!!**/playwright-report/**/*"
+      "!**/.next",
+      "!**/out",
+      "!**/dist",
+      "!**/generated",
+      "!**/src/generated",
+      "!**/src/lib/schemas/generated",
+      "!**/src/lib/schemas/generated/db-schemas.d.ts",
+      "!**/src/types/database.types.ts",
+      "!**/scripts/build/templates",
+      "!**/scripts/build/templates/service-worker.template.js",
+      "!**/node_modules",
+      "!**/playwright-report"
     ],
     "ignoreUnknown": false
   },
@@ -377,10 +377,7 @@
       }
     },
     {
-      "includes": [
-        "src/lib/schemas/factories/client-input-schema.factory.ts",
-        "src/lib/security/html-sanitizer.ts"
-      ],
+      "includes": ["src/lib/schemas/factories/client-input-schema.factory.ts"],
       "linter": {
         "rules": {
           "suspicious": {

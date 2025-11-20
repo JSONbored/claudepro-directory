@@ -22,7 +22,9 @@ import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { normalizeError } from '@/src/lib/utils/error.utils';
 import type { Database } from '@/src/types/database.types';
 
-export const metadata: Promise<Metadata> = generatePageMetadata('/account/companies/:id/edit');
+export async function generateMetadata(): Promise<Metadata> {
+  return generatePageMetadata('/account/companies/:id/edit');
+}
 
 interface EditCompanyPageProps {
   params: Promise<{ id: string }>;

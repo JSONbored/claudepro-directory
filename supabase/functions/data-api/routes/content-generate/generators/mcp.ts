@@ -54,6 +54,15 @@ function createTemplateVar(variable: string): string {
 }
 
 /**
+ * Escape a string for safe inclusion in a JS template literal (for generated code).
+ * Escapes backslashes first, then $ and ` to prevent injection issues.
+ */
+function escapeForTemplateLiteral(s: string): string {
+  // Must escape backslash first, then the rest
+  return s.replace(/\\/g, '\\\\').replace(/\$/g, '\\$').replace(/`/g, '\\`');
+}
+
+/**
  * Extract user_config from MCP metadata
  */
 function extractUserConfig(mcp: McpRow): Record<string, UserConfigEntry> {
@@ -133,7 +142,8 @@ function generateManifest(mcp: McpRow): string {
       claude_desktop: '>=1.0.0',
       platforms: ['darwin', 'win32', 'linux'],
       runtimes: {
-        node: '>=16.0.0',
+        // Uses global `fetch`, which is reliably available in Node >=18
+        node: '>=18.0.0',
       },
     },
   };
@@ -157,13 +167,13 @@ function generateServerIndex(mcp: McpRow): string {
   const serverConfig = config?.[serverName];
   const httpUrl = serverConfig?.url as string | undefined;
 
-  const title = (mcp.title || mcp.slug).replace(/\$/g, '\\$').replace(/`/g, '\\`');
-  const description = (mcp.description || '').replace(/\$/g, '\\$').replace(/`/g, '\\`');
-  const slug = mcp.slug.replace(/\$/g, '\\$').replace(/`/g, '\\`');
+  const title = escapeForTemplateLiteral(mcp.title || mcp.slug);
+  const description = escapeForTemplateLiteral(mcp.description || '');
+  const slug = escapeForTemplateLiteral(mcp.slug);
 
   // For HTTP-based servers, create a proxy bridge
   if (httpUrl && typeof httpUrl === 'string') {
-    const safeHttpUrl = httpUrl.replace(/\$/g, '\\$').replace(/`/g, '\\`');
+    const safeHttpUrl = escapeForTemplateLiteral(httpUrl);
     return `#!/usr/bin/env node
 /**
  * MCP Server Proxy: ${title}
@@ -586,26 +596,48 @@ export class McpGenerator implements PackageGenerator {
 
     const mcp = content as McpRow;
 
-    // 1. Generate package files
-    const manifest = generateManifest(mcp);
-    const serverIndex = generateServerIndex(mcp);
-    const packageJson = generatePackageJson(mcp);
-    const readme = generateReadme(mcp);
-
-    // 2. Create .mcpb package (ZIP file)
-    const mcpbBuffer = await createMcpbPackage(manifest, serverIndex, packageJson, readme);
-    const fileSizeKB = (mcpbBuffer.length / 1024).toFixed(2);
-
-    // 3. Compute content hash for build tracking
+    // 1. Compute content hash FIRST to check if regeneration is needed
+    // Generate manifest temporarily to compute hash (matches build script logic)
+    const manifestForHash = generateManifest(mcp);
     const packageContent = JSON.stringify({
-      manifest,
+      manifest: manifestForHash,
       metadata: mcp.metadata,
       description: mcp.description,
       title: mcp.title,
     });
     const contentHash = await computeContentHash(packageContent);
 
-    // 4. Upload to Supabase Storage using shared utility
+    // 2. Check if package already exists and content hasn't changed
+    // Skip generation if hash matches and storage URL exists (optimization)
+    if (
+      mcp.mcpb_build_hash === contentHash &&
+      mcp.mcpb_storage_url &&
+      mcp.mcpb_storage_url.trim().length > 0
+    ) {
+      // Package is up to date, return existing storage URL
+      return {
+        storageUrl: mcp.mcpb_storage_url,
+        metadata: {
+          file_size_kb: '0', // Unknown, but package exists
+          package_type: 'mcpb',
+          build_hash: contentHash,
+          skipped: true,
+          reason: 'content_unchanged',
+        },
+      };
+    }
+
+    // 3. Generate package files (content changed or package missing)
+    const manifest = generateManifest(mcp);
+    const serverIndex = generateServerIndex(mcp);
+    const packageJson = generatePackageJson(mcp);
+    const readme = generateReadme(mcp);
+
+    // 4. Create .mcpb package (ZIP file)
+    const mcpbBuffer = await createMcpbPackage(manifest, serverIndex, packageJson, readme);
+    const fileSizeKB = (mcpbBuffer.length / 1024).toFixed(2);
+
+    // 5. Upload to Supabase Storage using shared utility
     const fileName = `packages/${mcp.slug}.mcpb`;
     const uploadResult = await uploadObject({
       bucket: this.getBucketName(),
@@ -621,7 +653,7 @@ export class McpGenerator implements PackageGenerator {
       throw new Error(uploadResult['error'] || 'Failed to upload .mcpb package to storage');
     }
 
-    // 5. Update database with storage URL and build metadata
+    // 6. Update database with storage URL and build metadata
     // Use updateTable helper to properly handle extended Database type
     const updateData = {
       mcpb_storage_url: uploadResult.publicUrl,

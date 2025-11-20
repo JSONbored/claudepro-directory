@@ -180,7 +180,7 @@ export type Database = {
           badges: Json | null
           category: Database["public"]["Enums"]["content_category"]
           color_scheme: string
-          config_format: string | null
+          config_format: Database["public"]["Enums"]["config_format"] | null
           content_loader: string
           created_at: string
           description: string
@@ -194,7 +194,7 @@ export type Database = {
           plural_title: string
           primary_action_config: Json | null
           primary_action_label: string
-          primary_action_type: string
+          primary_action_type: Database["public"]["Enums"]["primary_action_type"]
           schema_name: string | null
           search_placeholder: string
           sections: Json
@@ -209,7 +209,7 @@ export type Database = {
           badges?: Json | null
           category: Database["public"]["Enums"]["content_category"]
           color_scheme: string
-          config_format?: string | null
+          config_format?: Database["public"]["Enums"]["config_format"] | null
           content_loader: string
           created_at?: string
           description: string
@@ -223,7 +223,7 @@ export type Database = {
           plural_title: string
           primary_action_config?: Json | null
           primary_action_label: string
-          primary_action_type: string
+          primary_action_type: Database["public"]["Enums"]["primary_action_type"]
           schema_name?: string | null
           search_placeholder: string
           sections?: Json
@@ -238,7 +238,7 @@ export type Database = {
           badges?: Json | null
           category?: Database["public"]["Enums"]["content_category"]
           color_scheme?: string
-          config_format?: string | null
+          config_format?: Database["public"]["Enums"]["config_format"] | null
           content_loader?: string
           created_at?: string
           description?: string
@@ -252,7 +252,7 @@ export type Database = {
           plural_title?: string
           primary_action_config?: Json | null
           primary_action_label?: string
-          primary_action_type?: string
+          primary_action_type?: Database["public"]["Enums"]["primary_action_type"]
           schema_name?: string | null
           search_placeholder?: string
           sections?: Json
@@ -581,7 +581,7 @@ export type Database = {
           author_profile_url: string | null
           avg_rating: number | null
           bookmark_count: number
-          category: string
+          category: Database["public"]["Enums"]["content_category"]
           content: string | null
           copy_count: number
           created_at: string
@@ -626,7 +626,7 @@ export type Database = {
           author_profile_url?: string | null
           avg_rating?: number | null
           bookmark_count?: number
-          category: string
+          category: Database["public"]["Enums"]["content_category"]
           content?: string | null
           copy_count?: number
           created_at?: string
@@ -671,7 +671,7 @@ export type Database = {
           author_profile_url?: string | null
           avg_rating?: number | null
           bookmark_count?: number
-          category?: string
+          category?: Database["public"]["Enums"]["content_category"]
           content?: string | null
           copy_count?: number
           created_at?: string
@@ -749,13 +749,6 @@ export type Database = {
             referencedRelation: "content"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "content_embeddings_content_id_fkey"
-            columns: ["content_id"]
-            isOneToOne: true
-            referencedRelation: "mv_content_list_slim"
-            referencedColumns: ["id"]
-          },
         ]
       }
       content_generation_tracking: {
@@ -763,7 +756,7 @@ export type Database = {
           category: string
           discovery_metadata: Json | null
           generated_at: string
-          generated_by: string
+          generated_by: Database["public"]["Enums"]["generation_source"]
           generation_model: string | null
           generation_trigger: string | null
           github_pr_url: string | null
@@ -778,7 +771,7 @@ export type Database = {
           category: string
           discovery_metadata?: Json | null
           generated_at?: string
-          generated_by: string
+          generated_by: Database["public"]["Enums"]["generation_source"]
           generation_model?: string | null
           generation_trigger?: string | null
           github_pr_url?: string | null
@@ -793,7 +786,7 @@ export type Database = {
           category?: string
           discovery_metadata?: Json | null
           generated_at?: string
-          generated_by?: string
+          generated_by?: Database["public"]["Enums"]["generation_source"]
           generation_model?: string | null
           generation_trigger?: string | null
           github_pr_url?: string | null
@@ -967,19 +960,19 @@ export type Database = {
           created_at: string
           email: string
           notes: string | null
-          reason: string
+          reason: Database["public"]["Enums"]["email_blocklist_reason"]
         }
         Insert: {
           created_at?: string
           email: string
           notes?: string | null
-          reason: string
+          reason: Database["public"]["Enums"]["email_blocklist_reason"]
         }
         Update: {
           created_at?: string
           email?: string
           notes?: string | null
-          reason?: string
+          reason?: Database["public"]["Enums"]["email_blocklist_reason"]
         }
         Relationships: []
       }
@@ -1272,7 +1265,7 @@ export type Database = {
           order: number | null
           payment_amount: number | null
           payment_date: string | null
-          payment_method: string | null
+          payment_method: Database["public"]["Enums"]["payment_method"] | null
           payment_reference: string | null
           payment_status: Database["public"]["Enums"]["payment_status"] | null
           plan: Database["public"]["Enums"]["job_plan"]
@@ -1321,7 +1314,7 @@ export type Database = {
           order?: number | null
           payment_amount?: number | null
           payment_date?: string | null
-          payment_method?: string | null
+          payment_method?: Database["public"]["Enums"]["payment_method"] | null
           payment_reference?: string | null
           payment_status?: Database["public"]["Enums"]["payment_status"] | null
           plan?: Database["public"]["Enums"]["job_plan"]
@@ -1370,7 +1363,7 @@ export type Database = {
           order?: number | null
           payment_amount?: number | null
           payment_date?: string | null
-          payment_method?: string | null
+          payment_method?: Database["public"]["Enums"]["payment_method"] | null
           payment_reference?: string | null
           payment_status?: Database["public"]["Enums"]["payment_status"] | null
           plan?: Database["public"]["Enums"]["job_plan"]
@@ -1456,7 +1449,7 @@ export type Database = {
           consent_given: boolean | null
           copy_category: string | null
           copy_slug: string | null
-          copy_type: string | null
+          copy_type: Database["public"]["Enums"]["copy_type"] | null
           created_at: string | null
           email: string
           engagement_score: number | null
@@ -1474,7 +1467,7 @@ export type Database = {
           status: string
           subscribed_at: string | null
           sync_error: string | null
-          sync_status: string | null
+          sync_status: Database["public"]["Enums"]["newsletter_sync_status"]
           total_copies: number | null
           unsubscribed_at: string | null
           updated_at: string | null
@@ -1488,7 +1481,7 @@ export type Database = {
           consent_given?: boolean | null
           copy_category?: string | null
           copy_slug?: string | null
-          copy_type?: string | null
+          copy_type?: Database["public"]["Enums"]["copy_type"] | null
           created_at?: string | null
           email: string
           engagement_score?: number | null
@@ -1506,7 +1499,7 @@ export type Database = {
           status?: string
           subscribed_at?: string | null
           sync_error?: string | null
-          sync_status?: string | null
+          sync_status?: Database["public"]["Enums"]["newsletter_sync_status"]
           total_copies?: number | null
           unsubscribed_at?: string | null
           updated_at?: string | null
@@ -1520,7 +1513,7 @@ export type Database = {
           consent_given?: boolean | null
           copy_category?: string | null
           copy_slug?: string | null
-          copy_type?: string | null
+          copy_type?: Database["public"]["Enums"]["copy_type"] | null
           created_at?: string | null
           email?: string
           engagement_score?: number | null
@@ -1538,7 +1531,7 @@ export type Database = {
           status?: string
           subscribed_at?: string | null
           sync_error?: string | null
-          sync_status?: string | null
+          sync_status?: Database["public"]["Enums"]["newsletter_sync_status"]
           total_copies?: number | null
           unsubscribed_at?: string | null
           updated_at?: string | null
@@ -1890,52 +1883,6 @@ export type Database = {
         }
         Relationships: []
       }
-      sponsored_clicks: {
-        Row: {
-          created_at: string
-          id: string
-          sponsored_id: string
-          target_url: string | null
-          user_id: string | null
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          sponsored_id: string
-          target_url?: string | null
-          user_id?: string | null
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          sponsored_id?: string
-          target_url?: string | null
-          user_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "sponsored_clicks_sponsored_id_fkey"
-            columns: ["sponsored_id"]
-            isOneToOne: false
-            referencedRelation: "mv_content_list_slim"
-            referencedColumns: ["sponsored_content_id"]
-          },
-          {
-            foreignKeyName: "sponsored_clicks_sponsored_id_fkey"
-            columns: ["sponsored_id"]
-            isOneToOne: false
-            referencedRelation: "sponsored_content"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "sponsored_clicks_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       sponsored_content: {
         Row: {
           active: boolean | null
@@ -1948,7 +1895,7 @@ export type Database = {
           impression_count: number | null
           impression_limit: number | null
           start_date: string
-          tier: string
+          tier: Database["public"]["Enums"]["sponsorship_tier"]
           updated_at: string
           user_id: string | null
         }
@@ -1963,7 +1910,7 @@ export type Database = {
           impression_count?: number | null
           impression_limit?: number | null
           start_date: string
-          tier: string
+          tier: Database["public"]["Enums"]["sponsorship_tier"]
           updated_at?: string
           user_id?: string | null
         }
@@ -1978,62 +1925,13 @@ export type Database = {
           impression_count?: number | null
           impression_limit?: number | null
           start_date?: string
-          tier?: string
+          tier?: Database["public"]["Enums"]["sponsorship_tier"]
           updated_at?: string
           user_id?: string | null
         }
         Relationships: [
           {
             foreignKeyName: "sponsored_content_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      sponsored_impressions: {
-        Row: {
-          created_at: string
-          id: string
-          page_url: string | null
-          position: number | null
-          sponsored_id: string
-          user_id: string | null
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          page_url?: string | null
-          position?: number | null
-          sponsored_id: string
-          user_id?: string | null
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          page_url?: string | null
-          position?: number | null
-          sponsored_id?: string
-          user_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "sponsored_impressions_sponsored_id_fkey"
-            columns: ["sponsored_id"]
-            isOneToOne: false
-            referencedRelation: "mv_content_list_slim"
-            referencedColumns: ["sponsored_content_id"]
-          },
-          {
-            foreignKeyName: "sponsored_impressions_sponsored_id_fkey"
-            columns: ["sponsored_id"]
-            isOneToOne: false
-            referencedRelation: "sponsored_content"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "sponsored_impressions_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "users"
@@ -2105,7 +2003,7 @@ export type Database = {
         Row: {
           active: boolean | null
           application_sub_category: string | null
-          category: string
+          category: Database["public"]["Enums"]["content_category"]
           category_display_name: string
           created_at: string
           creative_work_description: string | null
@@ -2131,7 +2029,7 @@ export type Database = {
         Insert: {
           active?: boolean | null
           application_sub_category?: string | null
-          category: string
+          category: Database["public"]["Enums"]["content_category"]
           category_display_name: string
           created_at?: string
           creative_work_description?: string | null
@@ -2157,7 +2055,7 @@ export type Database = {
         Update: {
           active?: boolean | null
           application_sub_category?: string | null
-          category?: string
+          category?: Database["public"]["Enums"]["content_category"]
           category_display_name?: string
           created_at?: string
           creative_work_description?: string | null
@@ -2700,163 +2598,9 @@ export type Database = {
         }
         Relationships: []
       }
-      mv_content_list_slim: {
-        Row: {
-          author: string | null
-          author_profile_url: string | null
-          bookmark_count: number | null
-          category: string | null
-          copy_count: number | null
-          created_at: string | null
-          date_added: string | null
-          description: string | null
-          display_title: string | null
-          id: string | null
-          is_sponsored: boolean | null
-          popularity_score: number | null
-          slug: string | null
-          source: string | null
-          sponsored_content_id: string | null
-          sponsorship_tier: string | null
-          tags: string[] | null
-          title: string | null
-          updated_at: string | null
-          view_count: number | null
-        }
-        Relationships: []
-      }
-      mv_content_stats: {
-        Row: {
-          author: string | null
-          bookmark_count: number | null
-          category: string | null
-          copy_count: number | null
-          created_at: string | null
-          description: string | null
-          difficulty_score: number | null
-          display_title: string | null
-          last_interaction_at: string | null
-          last_viewed_at: string | null
-          popularity_score: number | null
-          reading_time: number | null
-          slug: string | null
-          tags: string[] | null
-          title: string | null
-          total_time_spent_seconds: number | null
-          updated_at: string | null
-          view_count: number | null
-        }
-        Relationships: []
-      }
-      mv_content_tag_index: {
-        Row: {
-          category: string | null
-          featured: boolean | null
-          priority: number | null
-          slug: string | null
-          tags: string[] | null
-          title: string | null
-        }
-        Relationships: []
-      }
-      mv_content_trending_metrics: {
-        Row: {
-          bookmarks_total: number | null
-          category: string | null
-          copies_total: number | null
-          created_at: string | null
-          days_old: number | null
-          engagement_score: number | null
-          freshness_score: number | null
-          last_refreshed: string | null
-          slug: string | null
-          trending_score: number | null
-          views_7d: number | null
-          views_prev_7d: number | null
-          views_total: number | null
-        }
-        Relationships: []
-      }
-      mv_featured_content_rankings: {
-        Row: {
-          bookmarks_total: number | null
-          category: string | null
-          copies_total: number | null
-          days_old: number | null
-          engagement_score: number | null
-          final_score: number | null
-          freshness_score: number | null
-          growth_rate_pct: number | null
-          last_refreshed: string | null
-          rank: number | null
-          slug: string | null
-          trending_score: number | null
-          views_7d: number | null
-          views_prev_7d: number | null
-          views_total: number | null
-        }
-        Relationships: []
-      }
-      mv_search_facets: {
-        Row: {
-          all_tags: string[] | null
-          author_count: number | null
-          authors: string[] | null
-          category: string | null
-          content_count: number | null
-          tag_count: number | null
-        }
-        Relationships: []
-      }
-      mv_site_urls: {
-        Row: {
-          changefreq: string | null
-          lastmod: string | null
-          path: string | null
-          priority: number | null
-        }
-        Relationships: []
-      }
       mv_timezone_names: {
         Row: {
           name: string | null
-        }
-        Relationships: []
-      }
-      mv_unified_search: {
-        Row: {
-          category: string | null
-          created_at: string | null
-          description: string | null
-          engagement_score: number | null
-          entity_type: string | null
-          id: string | null
-          search_vector: unknown
-          slug: string | null
-          tags: string[] | null
-          title: string | null
-          view_count: number | null
-        }
-        Relationships: []
-      }
-      mv_weekly_new_content: {
-        Row: {
-          category: string | null
-          date_added: string | null
-          description: string | null
-          slug: string | null
-          title: string | null
-          week_rank: number | null
-          week_start: string | null
-        }
-        Relationships: []
-      }
-      submission_stats_summary: {
-        Row: {
-          last_refreshed_at: string | null
-          merged_this_week: number | null
-          pending: number | null
-          total: number | null
         }
         Relationships: []
       }
@@ -2897,30 +2641,48 @@ export type Database = {
         Returns: Json
       }
       build_breadcrumb_json_ld: {
-        Args: { p_category: string; p_slug: string }
+        Args: {
+          p_category: Database["public"]["Enums"]["content_category"]
+          p_slug: string
+        }
         Returns: Json
       }
       build_changelog_json_ld: { Args: { p_slug: string }; Returns: Json }
       build_complete_content_schemas: {
-        Args: { p_category: string; p_slug: string }
+        Args: {
+          p_category: Database["public"]["Enums"]["content_category"]
+          p_slug: string
+        }
         Returns: Json
       }
       build_faq_schema: {
-        Args: { p_category: string; p_slug: string }
+        Args: {
+          p_category: Database["public"]["Enums"]["content_category"]
+          p_slug: string
+        }
         Returns: Json
       }
       build_how_to_schema: {
-        Args: { p_category: string; p_slug: string }
+        Args: {
+          p_category: Database["public"]["Enums"]["content_category"]
+          p_slug: string
+        }
         Returns: Json
       }
       build_item_list_schema: {
-        Args: { p_category: string; p_slug: string }
+        Args: {
+          p_category: Database["public"]["Enums"]["content_category"]
+          p_slug: string
+        }
         Returns: Json
       }
       build_job_discord_embed: { Args: { p_job_id: string }; Returns: Json }
       build_job_posting_schema: { Args: { p_job_id: string }; Returns: Json }
       build_learning_resource_schema: {
-        Args: { p_category: string; p_slug: string }
+        Args: {
+          p_category: Database["public"]["Enums"]["content_category"]
+          p_slug: string
+        }
         Returns: Json
       }
       build_organization_schema: {
@@ -2929,10 +2691,19 @@ export type Database = {
       }
       build_person_schema: { Args: { p_slug: string }; Returns: Json }
       build_software_application_schema:
-        | { Args: { p_category: string; p_slug: string }; Returns: Json }
+        | {
+            Args: {
+              p_category: Database["public"]["Enums"]["content_category"]
+              p_slug: string
+            }
+            Returns: Json
+          }
         | { Args: { p_config: Json; p_content_row: Json }; Returns: Json }
       build_source_code_schema: {
-        Args: { p_category: string; p_slug: string }
+        Args: {
+          p_category: Database["public"]["Enums"]["content_category"]
+          p_slug: string
+        }
         Returns: Json
       }
       build_static_route_json_ld: { Args: { p_path: string }; Returns: Json }
@@ -3219,7 +2990,11 @@ export type Database = {
         }[]
       }
       get_api_content_full: {
-        Args: { p_base_url?: string; p_category: string; p_slug: string }
+        Args: {
+          p_base_url?: string
+          p_category: Database["public"]["Enums"]["content_category"]
+          p_slug: string
+        }
         Returns: string
       }
       get_api_health: {
@@ -3394,7 +3169,11 @@ export type Database = {
         }[]
       }
       get_content_detail_complete: {
-        Args: { p_category: string; p_slug: string; p_user_id?: string }
+        Args: {
+          p_category: Database["public"]["Enums"]["content_category"]
+          p_slug: string
+          p_user_id?: string
+        }
         Returns: Database["public"]["CompositeTypes"]["content_detail_complete_result"]
         SetofOptions: {
           from: "*"
@@ -3406,7 +3185,7 @@ export type Database = {
       get_content_paginated: {
         Args: {
           p_author?: string
-          p_category?: string
+          p_category?: Database["public"]["Enums"]["content_category"]
           p_limit?: number
           p_offset?: number
           p_order_by?: string
@@ -3439,7 +3218,7 @@ export type Database = {
         }
       }
       get_content_templates: {
-        Args: { p_category: string }
+        Args: { p_category: Database["public"]["Enums"]["content_category"] }
         Returns: Database["public"]["CompositeTypes"]["content_templates_result"]
         SetofOptions: {
           from: "*"
@@ -3450,7 +3229,10 @@ export type Database = {
       }
       get_content_with_analytics:
         | {
-            Args: { p_category?: string; p_limit?: number }
+            Args: {
+              p_category?: Database["public"]["Enums"]["content_category"]
+              p_limit?: number
+            }
             Returns: {
               bookmark_count: number
               category: string
@@ -3463,7 +3245,10 @@ export type Database = {
             }[]
           }
         | {
-            Args: { p_category: string; p_slug: string }
+            Args: {
+              p_category: Database["public"]["Enums"]["content_category"]
+              p_slug: string
+            }
             Returns: {
               bookmark_count: number
               category: string
@@ -3498,7 +3283,10 @@ export type Database = {
         }
       }
       get_dynamic_featured_content: {
-        Args: { p_category: string; p_limit?: number }
+        Args: {
+          p_category: Database["public"]["Enums"]["content_category"]
+          p_limit?: number
+        }
         Returns: {
           bookmark_count: number
           content_slug: string
@@ -3516,7 +3304,7 @@ export type Database = {
       }
       get_enriched_content_list: {
         Args: {
-          p_category?: string
+          p_category?: Database["public"]["Enums"]["content_category"]
           p_limit?: number
           p_offset?: number
           p_slugs?: string[]
@@ -3556,7 +3344,7 @@ export type Database = {
           order: number | null
           payment_amount: number | null
           payment_date: string | null
-          payment_method: string | null
+          payment_method: Database["public"]["Enums"]["payment_method"] | null
           payment_reference: string | null
           payment_status: Database["public"]["Enums"]["payment_status"] | null
           plan: Database["public"]["Enums"]["job_plan"]
@@ -3617,10 +3405,6 @@ export type Database = {
           isSetofReturn: false
         }
       }
-      get_homepage_content_enriched: {
-        Args: { p_category_ids: string[]; p_week_start?: string }
-        Returns: Json
-      }
       get_job_detail: {
         Args: { p_slug: string }
         Returns: Database["public"]["CompositeTypes"]["job_detail_result"]
@@ -3658,7 +3442,7 @@ export type Database = {
           order: number | null
           payment_amount: number | null
           payment_date: string | null
-          payment_method: string | null
+          payment_method: Database["public"]["Enums"]["payment_method"] | null
           payment_reference: string | null
           payment_status: Database["public"]["Enums"]["payment_status"] | null
           plan: Database["public"]["Enums"]["job_plan"]
@@ -3730,7 +3514,7 @@ export type Database = {
       get_new_content_for_week: {
         Args: { p_limit?: number; p_week_start: string }
         Returns: {
-          category: string
+          category: Database["public"]["Enums"]["content_category"]
           date_added: string
           description: string
           slug: string
@@ -3764,7 +3548,14 @@ export type Database = {
           isSetofReturn: true
         }
       }
-      get_performance_baseline: { Args: never; Returns: Json }
+      get_pgmq_queue_metrics: {
+        Args: { p_queue_name: string }
+        Returns: {
+          newest_msg_age_sec: number
+          oldest_msg_age_sec: number
+          queue_length: number
+        }[]
+      }
       get_popular_content: {
         Args: { p_category?: string; p_limit?: number }
         Returns: {
@@ -3796,7 +3587,7 @@ export type Database = {
           author_profile_url: string | null
           avg_rating: number | null
           bookmark_count: number
-          category: string
+          category: Database["public"]["Enums"]["content_category"]
           content: string | null
           copy_count: number
           created_at: string
@@ -3843,7 +3634,6 @@ export type Database = {
           isSetofReturn: true
         }
       }
-      get_recent_merged: { Args: { p_limit?: number }; Returns: Json }
       get_recommendations: {
         Args: {
           p_experience_level: string
@@ -3863,7 +3653,7 @@ export type Database = {
       }
       get_related_content: {
         Args: {
-          p_category: string
+          p_category: Database["public"]["Enums"]["content_category"]
           p_exclude_slugs?: string[]
           p_limit?: number
           p_slug: string
@@ -3959,11 +3749,23 @@ export type Database = {
       }
       get_sponsorship_analytics: {
         Args: { p_sponsorship_id: string; p_user_id: string }
-        Returns: Json
+        Returns: Database["public"]["CompositeTypes"]["sponsorship_analytics_result"]
+        SetofOptions: {
+          from: "*"
+          to: "sponsorship_analytics_result"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       get_structured_data_config: {
-        Args: { p_category: string }
-        Returns: Json
+        Args: { p_category: Database["public"]["Enums"]["content_category"] }
+        Returns: Database["public"]["CompositeTypes"]["structured_data_config_result"]
+        SetofOptions: {
+          from: "*"
+          to: "structured_data_config_result"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       get_submission_dashboard: {
         Args: { p_contributors_limit?: number; p_recent_limit?: number }
@@ -3975,37 +3777,27 @@ export type Database = {
           isSetofReturn: false
         }
       }
-      get_submission_stats_summary: {
-        Args: never
-        Returns: {
-          last_refreshed_at: string | null
-          merged_this_week: number | null
-          pending: number | null
-          total: number | null
-        }[]
-        SetofOptions: {
-          from: "*"
-          to: "submission_stats_summary"
-          isOneToOne: false
-          isSetofReturn: true
-        }
-      }
-      get_top_contributors: { Args: { p_limit?: number }; Returns: Json }
       get_top_tags_for_category: {
-        Args: { p_category: string; p_limit?: number }
+        Args: {
+          p_category: Database["public"]["Enums"]["content_category"]
+          p_limit?: number
+        }
         Returns: {
           tag: string
           tag_count: number
         }[]
       }
       get_trending_content: {
-        Args: { p_category?: string; p_limit?: number }
+        Args: {
+          p_category?: Database["public"]["Enums"]["content_category"]
+          p_limit?: number
+        }
         Returns: {
           author: string
           author_profile_url: string | null
           avg_rating: number | null
           bookmark_count: number
-          category: string
+          category: Database["public"]["Enums"]["content_category"]
           content: string | null
           copy_count: number
           created_at: string
@@ -4053,10 +3845,13 @@ export type Database = {
         }
       }
       get_trending_metrics: {
-        Args: { p_category?: string; p_limit?: number }
+        Args: {
+          p_category?: Database["public"]["Enums"]["content_category"]
+          p_limit?: number
+        }
         Returns: {
           bookmarks_total: number
-          category: string
+          category: Database["public"]["Enums"]["content_category"]
           copies_total: number
           created_at: string
           days_old: number
@@ -4218,7 +4013,7 @@ export type Database = {
           impression_count: number | null
           impression_limit: number | null
           start_date: string
-          tier: string
+          tier: Database["public"]["Enums"]["sponsorship_tier"]
           updated_at: string
           user_id: string | null
         }[]
@@ -4230,23 +4025,14 @@ export type Database = {
         }
       }
       get_week_end: { Args: { week_start: string }; Returns: string }
-      get_weekly_digest: { Args: { p_week_start?: string }; Returns: Json }
-      get_weekly_new_content: {
-        Args: { p_category?: string }
-        Returns: {
-          category: string | null
-          date_added: string | null
-          description: string | null
-          slug: string | null
-          title: string | null
-          week_rank: number | null
-          week_start: string | null
-        }[]
+      get_weekly_digest: {
+        Args: { p_week_start?: string }
+        Returns: Database["public"]["CompositeTypes"]["weekly_digest_result"]
         SetofOptions: {
           from: "*"
-          to: "mv_weekly_new_content"
-          isOneToOne: false
-          isSetofReturn: true
+          to: "weekly_digest_result"
+          isOneToOne: true
+          isSetofReturn: false
         }
       }
       handle_polar_order_paid: {
@@ -4581,7 +4367,7 @@ export type Database = {
           order: number | null
           payment_amount: number | null
           payment_date: string | null
-          payment_method: string | null
+          payment_method: Database["public"]["Enums"]["payment_method"] | null
           payment_reference: string | null
           payment_status: Database["public"]["Enums"]["payment_status"] | null
           plan: Database["public"]["Enums"]["job_plan"]
@@ -4738,10 +4524,6 @@ export type Database = {
         Args: { p_helpful: boolean; p_review_id: string; p_user_id: string }
         Returns: Json
       }
-      track_sponsored_event: {
-        Args: { p_data: Json; p_event_type: string; p_user_id: string }
-        Returns: Json
-      }
       track_user_interaction: {
         Args: {
           p_content_slug: string
@@ -4784,6 +4566,7 @@ export type Database = {
         | "Fixed"
         | "Security"
       confetti_variant: "success" | "celebration" | "milestone" | "subtle"
+      config_format: "json" | "multi" | "hook"
       contact_action_type:
         | "internal"
         | "external"
@@ -4803,6 +4586,12 @@ export type Database = {
         | "guides"
         | "jobs"
         | "changelog"
+      copy_type: "llmstxt" | "markdown" | "code" | "link"
+      email_blocklist_reason:
+        | "spam_complaint"
+        | "hard_bounce"
+        | "repeated_soft_bounce"
+        | "manual"
       environment: "development" | "preview" | "production"
       experience_level: "beginner" | "intermediate" | "advanced"
       field_scope: "common" | "type_specific" | "tags"
@@ -4817,6 +4606,7 @@ export type Database = {
       form_field_type: "text" | "textarea" | "number" | "select"
       form_grid_column: "full" | "half" | "third" | "two-thirds"
       form_icon_position: "left" | "right"
+      generation_source: "ai" | "manual" | "import" | "migration"
       grid_column: "full" | "half" | "third" | "two-thirds"
       guide_subcategory:
         | "tutorials"
@@ -4855,6 +4645,8 @@ export type Database = {
         | "form_template_selected"
         | "form_abandoned"
         | "form_submitted"
+        | "sponsored_impression"
+        | "sponsored_click"
       job_category:
         | "engineering"
         | "design"
@@ -4894,9 +4686,18 @@ export type Database = {
         | "post_copy"
         | "resend_import"
         | "oauth_signup"
+      newsletter_sync_status: "pending" | "synced" | "failed" | "skipped"
       notification_priority: "high" | "medium" | "low"
       notification_type: "announcement" | "feedback"
+      payment_method: "polar" | "mercury_invoice" | "manual"
       payment_status: "unpaid" | "paid" | "refunded"
+      primary_action_type:
+        | "notification"
+        | "copy_command"
+        | "copy_script"
+        | "scroll"
+        | "download"
+        | "github_link"
       setting_type: "boolean" | "string" | "number" | "json"
       sort_direction: "asc" | "desc"
       sort_option:
@@ -4908,6 +4709,7 @@ export type Database = {
         | "created"
         | "views"
         | "trending"
+      sponsorship_tier: "featured" | "promoted" | "spotlight" | "sponsored"
       submission_status: "pending" | "approved" | "rejected" | "spam" | "merged"
       submission_type:
         | "agents"
@@ -5013,8 +4815,10 @@ export type Database = {
         empty_state_message: string | null
         url_slug: string | null
         content_loader: string | null
-        config_format: string | null
-        primary_action_type: string | null
+        config_format: Database["public"]["Enums"]["config_format"] | null
+        primary_action_type:
+          | Database["public"]["Enums"]["primary_action_type"]
+          | null
         primary_action_label: string | null
         primary_action_config: Json | null
         validation_config: Json | null
@@ -5733,6 +5537,55 @@ export type Database = {
         slug: string | null
         category: Database["public"]["Enums"]["content_category"] | null
       }
+      sponsorship_analytics_computed_metrics: {
+        ctr: number | null
+        days_active: number | null
+        avg_impressions_per_day: number | null
+      }
+      sponsorship_analytics_daily_stat: {
+        date: string | null
+        impressions: number | null
+        clicks: number | null
+      }
+      sponsorship_analytics_result: {
+        sponsorship:
+          | Database["public"]["Tables"]["sponsored_content"]["Row"]
+          | null
+        daily_stats:
+          | Database["public"]["CompositeTypes"]["sponsorship_analytics_daily_stat"][]
+          | null
+        computed_metrics:
+          | Database["public"]["CompositeTypes"]["sponsorship_analytics_computed_metrics"]
+          | null
+      }
+      structured_data_config_result: {
+        category: Database["public"]["Enums"]["content_category"] | null
+        schema_types:
+          | Database["public"]["CompositeTypes"]["structured_data_schema_types"]
+          | null
+        category_display_name: string | null
+        application_sub_category: string | null
+        default_keywords: string[] | null
+        default_requirements: string[] | null
+        creative_work_description: string | null
+      }
+      structured_data_schema_types: {
+        application: boolean | null
+        source_code: boolean | null
+        how_to: boolean | null
+        creative_work: boolean | null
+        faq: boolean | null
+        breadcrumb: boolean | null
+        speakable: boolean | null
+        review: boolean | null
+        aggregate_rating: boolean | null
+        video_object: boolean | null
+        course: boolean | null
+        job_posting: boolean | null
+        collection_page: boolean | null
+        learning_resource: boolean | null
+        item_list: boolean | null
+      }
       submission_dashboard_contributor_item: {
         rank: number | null
         name: string | null
@@ -6029,6 +5882,33 @@ export type Database = {
         image: string | null
         tier: Database["public"]["Enums"]["user_tier"] | null
       }
+      weekly_digest_new_content: {
+        category: Database["public"]["Enums"]["content_category"] | null
+        slug: string | null
+        title: string | null
+        description: string | null
+        date_added: string | null
+        url: string | null
+      }
+      weekly_digest_result: {
+        week_of: string | null
+        week_start: string | null
+        week_end: string | null
+        new_content:
+          | Database["public"]["CompositeTypes"]["weekly_digest_new_content"][]
+          | null
+        trending_content:
+          | Database["public"]["CompositeTypes"]["weekly_digest_trending_content"][]
+          | null
+      }
+      weekly_digest_trending_content: {
+        category: Database["public"]["Enums"]["content_category"] | null
+        slug: string | null
+        title: string | null
+        description: string | null
+        url: string | null
+        view_count: number | null
+      }
     }
   }
 }
@@ -6164,6 +6044,7 @@ export const Constants = {
         "Security",
       ],
       confetti_variant: ["success", "celebration", "milestone", "subtle"],
+      config_format: ["json", "multi", "hook"],
       contact_action_type: [
         "internal",
         "external",
@@ -6185,6 +6066,13 @@ export const Constants = {
         "jobs",
         "changelog",
       ],
+      copy_type: ["llmstxt", "markdown", "code", "link"],
+      email_blocklist_reason: [
+        "spam_complaint",
+        "hard_bounce",
+        "repeated_soft_bounce",
+        "manual",
+      ],
       environment: ["development", "preview", "production"],
       experience_level: ["beginner", "intermediate", "advanced"],
       field_scope: ["common", "type_specific", "tags"],
@@ -6200,6 +6088,7 @@ export const Constants = {
       form_field_type: ["text", "textarea", "number", "select"],
       form_grid_column: ["full", "half", "third", "two-thirds"],
       form_icon_position: ["left", "right"],
+      generation_source: ["ai", "manual", "import", "migration"],
       grid_column: ["full", "half", "third", "two-thirds"],
       guide_subcategory: [
         "tutorials",
@@ -6240,6 +6129,8 @@ export const Constants = {
         "form_template_selected",
         "form_abandoned",
         "form_submitted",
+        "sponsored_impression",
+        "sponsored_click",
       ],
       job_category: [
         "engineering",
@@ -6284,9 +6175,19 @@ export const Constants = {
         "resend_import",
         "oauth_signup",
       ],
+      newsletter_sync_status: ["pending", "synced", "failed", "skipped"],
       notification_priority: ["high", "medium", "low"],
       notification_type: ["announcement", "feedback"],
+      payment_method: ["polar", "mercury_invoice", "manual"],
       payment_status: ["unpaid", "paid", "refunded"],
+      primary_action_type: [
+        "notification",
+        "copy_command",
+        "copy_script",
+        "scroll",
+        "download",
+        "github_link",
+      ],
       setting_type: ["boolean", "string", "number", "json"],
       sort_direction: ["asc", "desc"],
       sort_option: [
@@ -6299,6 +6200,7 @@ export const Constants = {
         "views",
         "trending",
       ],
+      sponsorship_tier: ["featured", "promoted", "spotlight", "sponsored"],
       submission_status: ["pending", "approved", "rejected", "spam", "merged"],
       submission_type: [
         "agents",

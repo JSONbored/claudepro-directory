@@ -7,6 +7,30 @@ import { fetchCachedRpc } from '@/src/lib/data/helpers';
 import { generateContentCacheKey, generateContentTags } from '@/src/lib/data/helpers-utils';
 import type { Database } from '@/src/types/database.types';
 
+// Content category validation using generated ENUM
+const CONTENT_CATEGORY_VALUES = [
+  'agents',
+  'mcp',
+  'rules',
+  'commands',
+  'hooks',
+  'statuslines',
+  'skills',
+  'collections',
+  'guides',
+  'jobs',
+  'changelog',
+] as const satisfies readonly Database['public']['Enums']['content_category'][];
+
+function isValidContentCategory(
+  value: string
+): value is Database['public']['Enums']['content_category'] {
+  return (
+    typeof value === 'string' &&
+    CONTENT_CATEGORY_VALUES.includes(value as Database['public']['Enums']['content_category'])
+  );
+}
+
 export interface RelatedContentInput {
   currentPath: string;
   currentCategory: string;
@@ -27,12 +51,21 @@ export interface RelatedContentResult {
 export async function getRelatedContent(input: RelatedContentInput): Promise<RelatedContentResult> {
   const currentSlug = input.currentPath.split('/').pop() || '';
 
+  // Validate category is valid ENUM value
+  // Database will also validate, but we check early for better error messages
+  if (!isValidContentCategory(input.currentCategory)) {
+    return {
+      items: [],
+    };
+  }
+
+  // Type guard has narrowed category to ENUM - database will validate
   const data = await fetchCachedRpc<
     'get_related_content',
     Database['public']['Functions']['get_related_content']['Returns']
   >(
     {
-      p_category: input.currentCategory,
+      p_category: input.currentCategory, // Type guard has narrowed this to ENUM
       p_slug: currentSlug,
       p_tags: input.currentTags || [],
       p_limit: input.limit || 3,

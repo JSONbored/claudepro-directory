@@ -11,7 +11,6 @@ import { edgeEnv } from '../_shared/config/env.ts';
 import type { Database, Database as DatabaseGenerated } from '../_shared/database.types.ts';
 import {
   callRpc,
-  type GetWeeklyDigestReturn,
   insertTable,
   isNewsletterSource,
   upsertTable,
@@ -652,14 +651,16 @@ async function handleDigest(): Promise<Response> {
     return errorResponse(digestError, 'handleDigest');
   }
 
-  if (!digest || typeof digest !== 'object') {
+  if (!digest) {
     return successResponse({ skipped: true, reason: 'invalid_data' });
   }
-  const digestData = digest as GetWeeklyDigestReturn;
+  // Use generated type directly from database.types.ts
+  const digestData =
+    digest as DatabaseGenerated['public']['Functions']['get_weekly_digest']['Returns'];
 
-  const hasNewContent = Array.isArray(digestData.newContent) && digestData.newContent.length > 0;
+  const hasNewContent = Array.isArray(digestData.new_content) && digestData.new_content.length > 0;
   const hasTrendingContent =
-    Array.isArray(digestData.trendingContent) && digestData.trendingContent.length > 0;
+    Array.isArray(digestData.trending_content) && digestData.trending_content.length > 0;
 
   if (!(hasNewContent || hasTrendingContent)) {
     return successResponse({ skipped: true, reason: 'no_content' });

@@ -24,6 +24,7 @@ import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { normalizeError } from '@/src/lib/utils/error.utils';
+import { hashUserId } from '@/src/lib/utils/privacy.utils';
 import type { Database } from '@/src/types/database.types';
 
 export const metadata: Promise<Metadata> = generatePageMetadata('/account/library');
@@ -51,14 +52,16 @@ export default async function LibraryPage() {
   }
 
   let data: Database['public']['Functions']['get_user_library']['Returns'] | null = null;
+  // Hash user ID for privacy-compliant logging (GDPR/CCPA)
+  const userIdHash = hashUserId(user.id);
   try {
     data = await getUserLibrary(user.id);
     if (!data) {
-      logger.warn('LibraryPage: getUserLibrary returned null', { userId: user.id });
+      logger.warn('LibraryPage: getUserLibrary returned null', { userIdHash });
     }
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load user library');
-    logger.error('LibraryPage: getUserLibrary threw', normalized, { userId: user.id });
+    logger.error('LibraryPage: getUserLibrary threw', normalized, { userIdHash });
   }
 
   if (!data) {
@@ -93,7 +96,8 @@ export default async function LibraryPage() {
   const bookmarkCount = stats.bookmark_count ?? 0;
   const collectionCount = stats.collection_count ?? 0;
   if (!(bookmarks.length || collections.length)) {
-    logger.info('LibraryPage: library returned no bookmarks or collections', { userId: user.id });
+    // Hash user ID for privacy-compliant logging (GDPR/CCPA)
+    logger.info('LibraryPage: library returned no bookmarks or collections', { userIdHash });
   }
 
   return (
