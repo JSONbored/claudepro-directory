@@ -181,7 +181,7 @@ export const updateProfile = authedAction
   )
   .action(async ({ parsedInput, ctx }) => {
     const cacheConfigPromise = getCacheConfigSnapshot();
-    const result = await runRpc<{ success: boolean; profile: { slug: string } }>(
+    const result = await runRpc<Database['public']['Functions']['update_user_profile']['Returns']>(
       'update_user_profile',
       {
         p_user_id: ctx.userId,
@@ -205,8 +205,14 @@ export const updateProfile = authedAction
       }
     );
 
+    // Extract profile with null check
+    const profile = result.profile;
+    if (profile == null) {
+      throw new Error('update_user_profile returned null profile');
+    }
+
     await revalidateUserSurfaces({
-      slug: result.profile.slug ?? null,
+      slug: profile.slug ?? null,
       accountSections: ['account', 'settings'],
     });
 
@@ -221,14 +227,19 @@ export const updateProfile = authedAction
 
 async function refreshProfileFromOAuthInternal(userId: string) {
   const cacheConfigPromise = getCacheConfigSnapshot();
-  const profile = await runRpc<{ slug: string } | null>(
+  const result = await runRpc<
+    Database['public']['Functions']['refresh_profile_from_oauth']['Returns']
+  >(
     'refresh_profile_from_oauth',
     { user_id: userId },
     { action: 'user.refreshProfileFromOAuth', userId }
   );
 
+  const profile = result.user_profile;
+  const slug = profile?.slug ?? null;
+
   await revalidateUserSurfaces({
-    slug: profile?.slug ?? null,
+    slug,
     accountSections: ['account', 'settings'],
   });
 
@@ -238,7 +249,7 @@ async function refreshProfileFromOAuthInternal(userId: string) {
     userIds: [userId],
   });
 
-  return { success: true, slug: profile?.slug ?? null };
+  return { success: true, slug };
 }
 
 export async function refreshProfileFromOAuthServer(userId: string) {
@@ -263,7 +274,7 @@ export const addBookmark = authedAction
     const cacheConfigPromise = getCacheConfigSnapshot();
     const { content_type, content_slug, notes } = parsedInput;
 
-    const data = await runRpc<{ success: boolean; bookmark: unknown }>(
+    const data = await runRpc<Database['public']['Functions']['add_bookmark']['Returns']>(
       'add_bookmark',
       {
         p_user_id: ctx.userId,
@@ -299,7 +310,7 @@ export const removeBookmark = authedAction
     const cacheConfigPromise = getCacheConfigSnapshot();
     const { content_type, content_slug } = parsedInput;
 
-    const data = await runRpc<{ success: boolean }>(
+    const data = await runRpc<Database['public']['Functions']['remove_bookmark']['Returns']>(
       'remove_bookmark',
       {
         p_user_id: ctx.userId,
@@ -381,15 +392,19 @@ export const addBookmarkBatch = authedAction
   )
   .action(async ({ parsedInput, ctx }) => {
     const cacheConfigPromise = getCacheConfigSnapshot();
-    const result = await runRpc<{
-      success: boolean;
-      saved_count: number;
-      total_requested: number;
-    }>(
+
+    // Construct composite type array from parsed input
+    const items: Database['public']['CompositeTypes']['bookmark_item_input'][] =
+      parsedInput.items.map((item) => ({
+        content_type: item.content_type,
+        content_slug: item.content_slug,
+      }));
+
+    const result = await runRpc<Database['public']['Functions']['batch_add_bookmarks']['Returns']>(
       'batch_add_bookmarks',
       {
         p_user_id: ctx.userId,
-        p_items: JSON.stringify(parsedInput.items),
+        p_items: items,
       },
       {
         action: 'user.addBookmarkBatch',
@@ -410,7 +425,9 @@ export const addBookmarkBatch = authedAction
   });
 
 const followSchema = z.object({
-  action: z.enum(['follow', 'unfollow']),
+  action: z.enum(['follow', 'unfollow']) satisfies z.ZodType<
+    Database['public']['Enums']['follow_action']
+  >,
   user_id: z.string(), // Database validates UUID format
   slug: z.string(),
 });
@@ -423,12 +440,12 @@ export const toggleFollow = authedAction
   .inputSchema(followSchema)
   .action(async ({ parsedInput: { action, user_id, slug }, ctx }) => {
     const cacheConfigPromise = getCacheConfigSnapshot();
-    const result = await runRpc<{ success: boolean; action: string }>(
+    const result = await runRpc<Database['public']['Functions']['toggle_follow']['Returns']>(
       'toggle_follow',
       {
         p_follower_id: ctx.userId,
         p_following_id: user_id,
-        p_action: action,
+        p_action: action satisfies Database['public']['Enums']['follow_action'],
       },
       {
         action: 'user.toggleFollow',
@@ -505,7 +522,7 @@ export const getBookmarkStatusBatch = authedAction
   .action(async ({ parsedInput, ctx }) => {
     const data = await cachedUserData<
       'is_bookmarked_batch',
-      { content_type: string; content_slug: string; is_bookmarked: boolean }[]
+      Database['public']['Functions']['is_bookmarked_batch']['Returns']
     >(
       'is_bookmarked_batch',
       {
@@ -662,20 +679,18 @@ export const unlinkOAuthProvider = authedAction
   .metadata({ actionName: 'unlinkOAuthProvider', category: 'user' })
   .inputSchema(
     z.object({
-      provider: z.string().min(1, 'Provider name is required'),
+      provider: z.enum(['discord', 'github', 'google']) satisfies z.ZodType<
+        Database['public']['Enums']['oauth_provider']
+      >,
     })
   )
   .action(async ({ parsedInput: { provider }, ctx }) => {
     const cacheConfigPromise = getCacheConfigSnapshot();
-    const result = await runRpc<{
-      success: boolean;
-      error?: string;
-      message?: string;
-      provider?: string;
-      remaining_providers?: number;
-    }>(
+    const result = await runRpc<
+      Database['public']['Functions']['unlink_oauth_provider']['Returns']
+    >(
       'unlink_oauth_provider',
-      { p_provider: provider },
+      { p_provider: provider satisfies Database['public']['Enums']['oauth_provider'] },
       {
         action: 'user.unlinkOAuthProvider',
         userId: ctx.userId,
@@ -686,7 +701,7 @@ export const unlinkOAuthProvider = authedAction
     if (!result.success) {
       return {
         success: false,
-        error: result.error || 'Failed to unlink provider',
+        error: result.error ?? 'Failed to unlink provider',
       };
     }
 
@@ -699,8 +714,8 @@ export const unlinkOAuthProvider = authedAction
 
     return {
       success: true,
-      message: result.message || `Successfully unlinked ${provider}`,
-      remainingProviders: result.remaining_providers,
+      message: result.message ?? `Successfully unlinked ${provider}`,
+      remainingProviders: result.remaining_providers ?? undefined,
     };
   });
 

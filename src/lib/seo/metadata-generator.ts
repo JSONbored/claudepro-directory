@@ -69,7 +69,71 @@ export async function generatePageMetadata(
   }
 
   // Handle discriminated union: metadata-only case
-  const config = 'metadata' in seoData ? seoData.metadata : seoData;
+  // Runtime validation ensures structure matches expected type
+  const hasMetadata =
+    seoData &&
+    typeof seoData === 'object' &&
+    'metadata' in seoData &&
+    seoData['metadata'] &&
+    typeof seoData['metadata'] === 'object';
+
+  const config = hasMetadata
+    ? (seoData['metadata'] as {
+        title: string;
+        description: string;
+        keywords: string[];
+        openGraphType: 'profile' | 'website';
+        robots: {
+          index: boolean;
+          follow: boolean;
+        };
+      })
+    : (seoData as {
+        title: string;
+        description: string;
+        keywords: string[];
+        openGraphType: 'profile' | 'website';
+        robots: {
+          index: boolean;
+          follow: boolean;
+        };
+      });
+
+  if (!config || typeof config !== 'object') {
+    // Fallback if structure is invalid
+    const canonicalUrl = buildCanonicalUrl(resolvedRoute);
+    const ogImageUrl = generateOGImageUrl(resolvedRoute);
+    return {
+      title: APP_CONFIG.name,
+      description: APP_CONFIG.description,
+      metadataBase: new URL(APP_CONFIG.url),
+      alternates: { canonical: canonicalUrl },
+      openGraph: {
+        type: 'website',
+        title: APP_CONFIG.name,
+        description: APP_CONFIG.description,
+        url: canonicalUrl,
+        siteName: APP_CONFIG.name,
+        locale: 'en_US',
+        images: [
+          {
+            url: ogImageUrl,
+            width: OG_IMAGE_DIMENSIONS.width,
+            height: OG_IMAGE_DIMENSIONS.height,
+            alt: APP_CONFIG.name,
+          },
+        ],
+      },
+      twitter: {
+        card: 'summary',
+        title: APP_CONFIG.name,
+        description: APP_CONFIG.description,
+        images: [ogImageUrl],
+        creator: '@JSONbored',
+        site: '@JSONbored',
+      },
+    };
+  }
 
   const canonicalUrl = buildCanonicalUrl(resolvedRoute);
   const ogImageUrl = generateOGImageUrl(resolvedRoute);

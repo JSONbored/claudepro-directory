@@ -1,9 +1,5 @@
-import type { Database as DatabaseGenerated } from '../../_shared/database.types.ts';
-import {
-  callRpc,
-  type GenerateMetadataCompleteReturn,
-  type Json,
-} from '../../_shared/database-overrides.ts';
+import type { Database as DatabaseGenerated, Json } from '../../_shared/database.types.ts';
+import { callRpc } from '../../_shared/database-overrides.ts';
 import {
   badRequestResponse,
   buildCacheHeaders,
@@ -60,21 +56,64 @@ export async function handleSeoRoute(
     return badRequestResponse('SEO generation failed: RPC returned null', CORS);
   }
 
-  // Type assertion to our return type (callRpc returns Json, we know the structure)
-  const typedData = data as GenerateMetadataCompleteReturn;
+  // Use Json type from generated types (runtime validation ensures structure)
+  // Function returns union type based on p_include parameter
+  const typedData = data as Json &
+    (
+      | {
+          title: string;
+          description: string;
+          keywords: string[];
+          openGraphType: 'profile' | 'website';
+          twitterCard: 'summary_large_image';
+          robots: {
+            index: boolean;
+            follow: boolean;
+          };
+          _debug?: {
+            pattern: string;
+            route: string;
+            category?: string;
+            slug?: string;
+            error?: string;
+          };
+        }
+      | {
+          metadata: {
+            title: string;
+            description: string;
+            keywords: string[];
+            openGraphType: 'profile' | 'website';
+            twitterCard: 'summary_large_image';
+            robots: {
+              index: boolean;
+              follow: boolean;
+            };
+            _debug?: {
+              pattern: string;
+              route: string;
+              category?: string;
+              slug?: string;
+              error?: string;
+            };
+          };
+          schemas: Json[];
+        }
+    );
 
   // Serialize JSON-LD schemas with XSS protection if schemas are included
   // Use type narrowing with discriminated union
-  let processedData: GenerateMetadataCompleteReturn = typedData;
-  if ('schemas' in typedData && typedData.schemas) {
+  let processedData: typeof typedData = typedData;
+  if ('schemas' in typedData && typedData.schemas && Array.isArray(typedData.schemas)) {
     // TypeScript narrows to metadata+schemas case
     try {
       // Serialize each schema with XSS protection
-      const serializedSchemas = typedData.schemas.map((schema: Json) => serializeJsonLd(schema));
+      const schemasArray = typedData.schemas as Json[];
+      const serializedSchemas = schemasArray.map((schema: Json) => serializeJsonLd(schema));
       processedData = {
-        ...typedData,
+        ...(typedData as Record<string, unknown>),
         schemas: serializedSchemas,
-      };
+      } as typeof typedData;
     } catch {
       if (logContext) {
         logWarn('JSON-LD serialization failed, using original schemas', logContext);

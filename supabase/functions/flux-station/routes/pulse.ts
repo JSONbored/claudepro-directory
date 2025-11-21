@@ -140,24 +140,40 @@ async function updateResendEngagement(messages: PulseQueueMessage[]): Promise<vo
   // Get unique user IDs
   const userIds = [...new Set(engagementEvents.map((e) => e.userId))];
 
-  // Batch query newsletter subscriptions to get emails
-  const { data: subscriptions, error } = await supabaseServiceRole
-    .from('newsletter_subscriptions')
-    .select('email, user_id')
-    .in('user_id', userIds);
+  // Query users table to get emails from user_ids
+  const { data: users, error: usersError } = await supabaseServiceRole
+    .from('users')
+    .select('id, email')
+    .in('id', userIds);
 
-  if (error || !subscriptions || subscriptions.length === 0) {
-    return; // No subscribers found or query failed
+  if (usersError || !users || users.length === 0) {
+    return; // No users found or query failed
   }
 
-  // Create email map
+  // Get emails from users
+  const emails = users.map((u) => u.email).filter((email): email is string => Boolean(email));
+
+  if (emails.length === 0) {
+    return; // No valid emails found
+  }
+
+  // Query newsletter subscriptions to find which emails are subscribed
+  const { data: subscriptions, error: subscriptionsError } = await supabaseServiceRole
+    .from('newsletter_subscriptions')
+    .select('email')
+    .in('email', emails)
+    .eq('status', 'active');
+
+  if (subscriptionsError || !subscriptions || subscriptions.length === 0) {
+    return; // No active subscribers found
+  }
+
+  // Create email map: user_id -> email (only for users who are subscribed)
   const emailMap = new Map<string, string>();
-  for (const sub of subscriptions as Array<{
-    user_id: string | null;
-    email: string;
-  }>) {
-    if (sub.user_id && sub.email) {
-      emailMap.set(sub.user_id, sub.email);
+  const subscribedEmails = new Set(subscriptions.map((s) => s.email));
+  for (const user of users) {
+    if (user.email && subscribedEmails.has(user.email)) {
+      emailMap.set(user.id, user.email);
     }
   }
 
@@ -185,13 +201,28 @@ async function processUserInteractionsBatch(messages: PulseQueueMessage[]): Prom
   let failed = 0;
 
   try {
-    // Extract events from messages and convert to JSONB array format
-    // Convert PulseEvent to Json-compatible format for RPC
-    const events = messages.map((msg) => msg.message as unknown as Json);
+    // Construct composite type array from messages
+    // Convert PulseEvent to user_interaction_input composite type
+    const interactions: DatabaseGenerated['public']['CompositeTypes']['user_interaction_input'][] =
+      messages.map((msg) => {
+        const event = msg.message;
+        return {
+          user_id: event.user_id ?? null,
+          content_type:
+            (event.content_type as
+              | DatabaseGenerated['public']['Enums']['content_category']
+              | null) ?? null,
+          content_slug: event.content_slug ?? null,
+          interaction_type:
+            event.interaction_type as DatabaseGenerated['public']['Enums']['interaction_type'],
+          session_id: event.session_id ?? null,
+          metadata: (event.metadata as Json | null) ?? null,
+        };
+      });
 
     // Batch insert all events in single transaction
     const rpcArgs = {
-      p_interactions: events,
+      p_interactions: interactions,
     } satisfies DatabaseGenerated['public']['Functions']['batch_insert_user_interactions']['Args'];
     const { data: result, error: batchError } = await callRpc(
       'batch_insert_user_interactions',
@@ -202,20 +233,29 @@ async function processUserInteractionsBatch(messages: PulseQueueMessage[]): Prom
       throw batchError;
     }
 
-    // Parse result from RPC (returns jsonb with inserted, failed, total, errors)
-    const batchResult = result as {
-      inserted?: number;
-      failed?: number;
-      total?: number;
-      errors?: Array<{ interaction: unknown; error: string }>;
-    };
+    if (!result) {
+      throw new Error('batch_insert_user_interactions returned null');
+    }
+
+    // Use generated type from database.types.ts - no manual parsing, use types directly
+    const batchResult: DatabaseGenerated['public']['Functions']['batch_insert_user_interactions']['Returns'] =
+      result;
 
     inserted = batchResult.inserted ?? 0;
     failed = batchResult.failed ?? 0;
 
+    // errors is Json | null - Json can be an array, so check and iterate directly
     if (batchResult.errors && Array.isArray(batchResult.errors)) {
       for (const err of batchResult.errors) {
-        errors.push(`Interaction failed: ${err.error}`);
+        if (
+          err &&
+          typeof err === 'object' &&
+          !Array.isArray(err) &&
+          'error' in err &&
+          typeof err['error'] === 'string'
+        ) {
+          errors.push(`Interaction failed: ${err['error']}`);
+        }
       }
     }
 

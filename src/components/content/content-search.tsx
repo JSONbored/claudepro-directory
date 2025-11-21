@@ -18,6 +18,7 @@ const UnifiedSearch = dynamic(
   }
 );
 
+import { searchUnifiedClient } from '@/src/lib/edge/search-client';
 import { HelpCircle } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import type {
@@ -53,8 +54,6 @@ function ContentSearchClientComponent<T extends DisplayableContent>({
       }
 
       try {
-        const { searchUnifiedClient } = await import('@/src/lib/edge/search-client');
-
         const result = await searchUnifiedClient({
           query: query.trim(),
           entities: ['content'],

@@ -26,7 +26,6 @@ import {
 } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { errorToasts, successToasts } from '@/src/lib/utils/toast.utils';
-
 import type { Database } from '@/src/types/database.types';
 
 type Identity = NonNullable<
@@ -38,7 +37,7 @@ interface ConnectedAccountsClientProps {
 }
 
 const PROVIDER_CONFIG: Record<
-  string,
+  Database['public']['Enums']['oauth_provider'],
   {
     label: string;
     icon: ComponentType<{ className?: string }>;
@@ -69,7 +68,9 @@ const PROVIDER_CONFIG: Record<
 export function ConnectedAccountsClient({ identities }: ConnectedAccountsClientProps) {
   const [isPending, startTransition] = useTransition();
   const [unlinkDialogOpen, setUnlinkDialogOpen] = useState(false);
-  const [providerToUnlink, setProviderToUnlink] = useState<string | null>(null);
+  const [providerToUnlink, setProviderToUnlink] = useState<
+    Database['public']['Enums']['oauth_provider'] | null
+  >(null);
 
   const connectedProviders = new Set(
     identities
@@ -78,15 +79,18 @@ export function ConnectedAccountsClient({ identities }: ConnectedAccountsClientP
       )
       .map((i) => i.provider)
   );
-  const availableProviders = Object.entries(PROVIDER_CONFIG);
+  const availableProviders = Object.entries(PROVIDER_CONFIG) as [
+    Database['public']['Enums']['oauth_provider'],
+    (typeof PROVIDER_CONFIG)[Database['public']['Enums']['oauth_provider']],
+  ][];
 
-  const handleLinkProvider = (provider: string) => {
+  const handleLinkProvider = (provider: Database['public']['Enums']['oauth_provider']) => {
     const config = PROVIDER_CONFIG[provider];
     if (!config) return;
     window.location.href = config.linkUrl;
   };
 
-  const openUnlinkDialog = (provider: string) => {
+  const openUnlinkDialog = (provider: Database['public']['Enums']['oauth_provider']) => {
     if (connectedProviders.size <= 1) {
       errorToasts.actionFailed(
         'unlink provider',

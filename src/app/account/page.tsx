@@ -18,6 +18,7 @@ import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { normalizeError } from '@/src/lib/utils/error.utils';
+import { hashUserId } from '@/src/lib/utils/privacy.utils';
 
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/account');
@@ -45,18 +46,21 @@ export default async function AccountDashboard() {
     );
   }
 
+  // Hash user ID for privacy-compliant logging (GDPR/CCPA)
+  const userIdHash = hashUserId(user.id);
+
   let dashboardData: Awaited<ReturnType<typeof getAccountDashboard>> = null;
   try {
     dashboardData = await getAccountDashboard(user.id);
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load account dashboard data');
     logger.error('AccountDashboard: getAccountDashboard threw', normalized, {
-      userId: user.id,
+      userIdHash,
     });
   }
 
   if (!dashboardData) {
-    logger.error('AccountDashboard: dashboard data is null', undefined, { userId: user.id });
+    logger.error('AccountDashboard: dashboard data is null', undefined, { userIdHash });
     return (
       <div className="space-y-6">
         <Card>

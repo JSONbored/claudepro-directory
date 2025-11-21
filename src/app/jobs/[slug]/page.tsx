@@ -234,7 +234,7 @@ export default async function JobPage({ params }: PageProps) {
               </div>
 
               <div className={UI_CLASSES.FLEX_WRAP_GAP_2}>
-                {tags.map((skill) => (
+                {tags.map((skill: string) => (
                   <UnifiedBadge key={skill} variant="base" style="secondary">
                     {skill}
                   </UnifiedBadge>
@@ -262,7 +262,7 @@ export default async function JobPage({ params }: PageProps) {
                 </CardHeader>
                 <CardContent>
                   <ul className="space-y-2">
-                    {requirements.map((req) => (
+                    {requirements.map((req: string) => (
                       <li key={req} className={UI_CLASSES.FLEX_ITEMS_START_GAP_3}>
                         <span className="mt-1 text-accent">•</span>
                         <span>{req}</span>
@@ -279,7 +279,7 @@ export default async function JobPage({ params }: PageProps) {
                   </CardHeader>
                   <CardContent>
                     <ul className="space-y-2">
-                      {benefits.map((benefit) => (
+                      {benefits.map((benefit: string) => (
                         <li key={benefit} className={UI_CLASSES.FLEX_ITEMS_START_GAP_3}>
                           <span className="mt-1 text-green-500">✓</span>
                           <span>{benefit}</span>

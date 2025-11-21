@@ -1,5 +1,5 @@
 import { SITE_URL } from '../clients/supabase.ts';
-import type { GenerateReadmeDataReturn } from '../database-overrides.ts';
+import type { Json } from '../database.types.ts';
 
 const ICON_EMOJI_MAP: Record<string, string> = {
   Sparkles: '🤖',
@@ -13,7 +13,24 @@ const ICON_EMOJI_MAP: Record<string, string> = {
   Code: '💻',
 };
 
-export function buildReadmeMarkdown(data: GenerateReadmeDataReturn): string {
+export function buildReadmeMarkdown(
+  data: Json & {
+    categories: Array<{
+      category: string;
+      title: string;
+      description: string;
+      icon_name: string;
+      url_slug: string;
+      items: Array<{
+        slug: string;
+        title: string;
+        description: string;
+      }>;
+    }>;
+    totalCount: number;
+    categoryBreakdown: Record<string, number>;
+  }
+): string {
   const { categories, totalCount } = data;
 
   const categorySections = categories

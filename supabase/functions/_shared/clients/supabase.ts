@@ -1,6 +1,6 @@
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 import { edgeEnv } from '../config/env.ts';
-import type { Database } from '../database-overrides.ts';
+import type { Database } from '../database.types.ts';
 
 const {
   supabase: {
@@ -11,8 +11,8 @@ const {
   site: { siteUrl: SITE_URL_VALUE },
 } = edgeEnv;
 
-// Use Database type from database-overrides.ts to include all type extensions
-// This ensures proper type inference for RPC functions, table operations, and extended fields
+// Use Database type from database.types.ts (generated types only)
+// This ensures proper type inference for RPC functions and table operations
 export const supabaseAnon = createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY);
 export const supabaseServiceRole = createClient<Database>(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 

@@ -1,10 +1,6 @@
 import { buildReadmeMarkdown } from '../../_shared/changelog/readme-builder.ts';
-import type { Database as DatabaseGenerated } from '../../_shared/database.types.ts';
-import {
-  callRpc,
-  type Database,
-  type GenerateReadmeDataReturn,
-} from '../../_shared/database-overrides.ts';
+import type { Database as DatabaseGenerated, Json } from '../../_shared/database.types.ts';
+import { callRpc } from '../../_shared/database-overrides.ts';
 
 type ContentCategory = DatabaseGenerated['public']['Enums']['content_category'];
 
@@ -176,14 +172,30 @@ async function handleSitewideReadme(logContext?: BaseLogContext): Promise<Respon
     );
   }
 
-  const readmeData = data as GenerateReadmeDataReturn;
+  // Use Json type from generated types (runtime validation ensures structure)
+  const readmeData = data as Json & {
+    categories: Array<{
+      category: string;
+      title: string;
+      description: string;
+      icon_name: string;
+      url_slug: string;
+      items: Array<{
+        slug: string;
+        title: string;
+        description: string;
+      }>;
+    }>;
+    totalCount: number;
+    categoryBreakdown: Record<string, number>;
+  };
   const markdown = buildReadmeMarkdown(readmeData);
 
   if (logContext) {
     logInfo('Sitewide readme generated', {
       ...logContext,
       bytes: markdown.length,
-      categories: readmeData.categories.length,
+      categories: Array.isArray(readmeData.categories) ? readmeData.categories.length : 0,
     });
   }
 
@@ -475,11 +487,11 @@ async function handleMcpbGeneration(
 
   // Parse JSON string returned by RPC (same pattern as other handlers)
   const contentData = typeof data === 'string' ? JSON.parse(data) : data;
-  const mcpServer = contentData as Database['public']['Tables']['content']['Row'];
+  const mcpServer = contentData as DatabaseGenerated['public']['Tables']['content']['Row'];
 
   // Check if .mcpb already exists
-  // Note: mcpb_storage_url field exists in database but may not be in generated types yet
-  const mcpbStorageUrl = (mcpServer as Record<string, unknown>)['mcpb_storage_url'];
+  // mcpb_storage_url field exists in generated types (database.types.ts)
+  const mcpbStorageUrl = mcpServer.mcpb_storage_url;
   if (mcpbStorageUrl && typeof mcpbStorageUrl === 'string') {
     if (logContext) {
       logInfo('MCPB package already exists', {

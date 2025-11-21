@@ -72,6 +72,8 @@ export async function generateMetadata({ params }: PublicCollectionPageProps): P
   const { slug, collectionSlug } = await params;
 
   try {
+    // Warm cache for subsequent page render - this fetch in generateMetadata
+    // ensures the data is cached when the page component fetches the same data
     await getPublicCollectionDetail({
       userSlug: slug,
       collectionSlug,

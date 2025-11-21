@@ -134,6 +134,7 @@ async function handleMarkdownFormat(
 
   // Use generated type from database.types.ts (returns Json)
   // Type assertion to the known structure (discriminated union)
+  // Structure: { success: true, markdown: string, filename: string, length: number, content_id: string } | { success: false, error: string }
   type MarkdownExportResult =
     | { success: true; markdown: string; filename: string; length: number; content_id: string }
     | { success: false; error: string };
@@ -234,10 +235,10 @@ async function handleStorageFormat(
   }
 
   if (category === 'mcp') {
-    // get_mcpb_storage_path RPC function (properly typed in database-overrides.ts)
+    // get_mcpb_storage_path RPC function (uses generated types from database.types.ts)
     const rpcArgs = {
       p_slug: slug,
-    };
+    } satisfies DatabaseGenerated['public']['Functions']['get_mcpb_storage_path']['Args'];
     const { data, error } = await callRpc('get_mcpb_storage_path', rpcArgs, true);
 
     if (error) {

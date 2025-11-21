@@ -8,15 +8,8 @@ import { Resend } from 'npm:resend@4.0.0';
 import { supabaseServiceRole } from '../_shared/clients/supabase.ts';
 import { AUTH_HOOK_ENV, RESEND_ENV, validateEnvironment } from '../_shared/config/email-config.ts';
 import { edgeEnv } from '../_shared/config/env.ts';
-import type { Database, Database as DatabaseGenerated } from '../_shared/database.types.ts';
-import {
-  callRpc,
-  insertTable,
-  isNewsletterSource,
-  upsertTable,
-} from '../_shared/database-overrides.ts';
+import type { Database as DatabaseGenerated } from '../_shared/database.types.ts';
 // Static imports to ensure circuit-breaker and timeout utilities are included in the bundle
-// These are lazily imported in callRpc, but we need static imports for Supabase bundling
 import '../_shared/utils/circuit-breaker.ts';
 import '../_shared/utils/timeout.ts';
 import { batchProcess } from '../_shared/utils/batch-processor.ts';
@@ -260,16 +253,18 @@ Deno.serve((request) => router(request));
  * Handle Newsletter Subscription
  * Full flow: Validate → Resend audience → Database → Welcome email → Sequence
  */
-type SubscribePayload = Pick<
-  Database['public']['Tables']['newsletter_subscriptions']['Insert'],
-  'email' | 'source' | 'referrer' | 'copy_type' | 'copy_category' | 'copy_slug'
->;
-
 async function handleSubscribe(req: Request): Promise<Response> {
   const startTime = Date.now();
 
   // Parse and validate JSON body with size validation
-  const parseResult = await parseJsonBody<SubscribePayload>(req, {
+  const parseResult = await parseJsonBody<{
+    email: string;
+    source?: string | null;
+    referrer?: string | null;
+    copy_type?: string | null;
+    copy_category?: string | null;
+    copy_slug?: string | null;
+  }>(req, {
     maxSize: MAX_BODY_SIZE.default,
     cors: publicCorsHeaders,
   });
@@ -286,14 +281,11 @@ async function handleSubscribe(req: Request): Promise<Response> {
     return badRequestResponse(emailValidation.error ?? 'Valid email address is required');
   }
 
-  // Validate source is a valid newsletter_source enum value (if provided)
-  if (source !== null && source !== undefined) {
-    if (typeof source !== 'string' || !isNewsletterSource(source)) {
-      return badRequestResponse(
-        'Invalid source value. Must be one of: footer, homepage, modal, content_page, inline, post_copy, resend_import, oauth_signup'
-      );
-    }
-  }
+  // Use values - RPC accepts union type (ENUMs or strings), database enforces constraints
+  const validatedSource = source && typeof source === 'string' ? source : null;
+  const validatedCopyType = copy_type && typeof copy_type === 'string' ? copy_type : null;
+  const validatedCopyCategory =
+    copy_category && typeof copy_category === 'string' ? copy_category : null;
 
   // Use normalized email from validation
   const normalizedEmail = emailValidation.normalized;
@@ -305,10 +297,6 @@ async function handleSubscribe(req: Request): Promise<Response> {
 
   try {
     // Step 1: Add to Resend audience with properties and topics
-    const validatedSource: Database['public']['Enums']['newsletter_source'] | null =
-      source && typeof source === 'string' && isNewsletterSource(source)
-        ? (source as Database['public']['Enums']['newsletter_source'])
-        : null;
 
     const contactProperties = buildContactProperties({
       source: validatedSource,
@@ -326,45 +314,88 @@ async function handleSubscribe(req: Request): Promise<Response> {
       logContext
     );
 
-    // Step 2: Insert into database (rate limiting handled by BEFORE INSERT trigger)
-    // Use validated source (defaults to 'footer' if not provided or invalid)
-    const finalSource: Database['public']['Enums']['newsletter_source'] =
-      validatedSource ?? ('footer' as Database['public']['Enums']['newsletter_source']);
+    // Step 2: Call RPC to handle subscription/resubscription logic
+    // Use validated source (defaults to 'footer' if not provided)
+    const finalSource: DatabaseGenerated['public']['Enums']['newsletter_source'] =
+      (validatedSource ?? 'footer') as DatabaseGenerated['public']['Enums']['newsletter_source'];
 
-    const insertData: DatabaseGenerated['public']['Tables']['newsletter_subscriptions']['Insert'] =
-      {
-        email: normalizedEmail,
-        source: finalSource,
-        referrer: referrer || null,
-        copy_type: copy_type || null,
-        copy_category: copy_category || null,
-        copy_slug: copy_slug || null,
-        resend_contact_id: resendContactId,
-        sync_status: syncStatus,
-        sync_error: syncError,
-        last_sync_at: new Date().toISOString(),
-        // Store engagement data in database
-        engagement_score: contactProperties['engagement_score'] as number,
-        primary_interest: contactProperties['primary_interest'] as string,
-        total_copies: contactProperties['total_copies'] as number,
-        last_active_at: new Date().toISOString(),
-        resend_topics: topicIds,
-      };
-    // Use type-safe helper to ensure proper type inference
-    const validatedInsertData =
-      insertData satisfies DatabaseGenerated['public']['Tables']['newsletter_subscriptions']['Insert'];
-    const result = insertTable('newsletter_subscriptions', validatedInsertData);
-    const { data: subscription, error: dbError } = await result
-      .select('*')
-      .single<DatabaseGenerated['public']['Tables']['newsletter_subscriptions']['Row']>();
+    // Prepare RPC arguments - use exact type from database.types.ts
+    const rpcArgs: DatabaseGenerated['public']['Functions']['subscribe_newsletter']['Args'] = {
+      p_email: normalizedEmail,
+      p_source: finalSource,
+      ...(referrer ? { p_referrer: referrer } : {}),
+      ...(validatedCopyType
+        ? { p_copy_type: validatedCopyType as DatabaseGenerated['public']['Enums']['copy_type'] }
+        : {}),
+      ...(validatedCopyCategory
+        ? {
+            p_copy_category:
+              validatedCopyCategory as DatabaseGenerated['public']['Enums']['content_category'],
+          }
+        : {}),
+      ...(copy_slug ? { p_copy_slug: copy_slug } : {}),
+      ...(resendContactId ? { p_resend_contact_id: resendContactId } : {}),
+      p_sync_status: syncStatus,
+      ...(syncError ? { p_sync_error: syncError } : {}),
+      p_engagement_score: contactProperties['engagement_score'] as number,
+      ...(contactProperties['primary_interest']
+        ? { p_primary_interest: contactProperties['primary_interest'] as string }
+        : {}),
+      p_total_copies: contactProperties['total_copies'] as number,
+      p_last_active_at: new Date().toISOString(),
+      ...(topicIds ? { p_resend_topics: topicIds } : {}),
+    };
 
-    if (dbError) {
-      const errorResponse = handleDatabaseError(dbError, logContext, 'handleSubscribe');
+    const { data: rpcResult, error: rpcError } = await supabaseServiceRole.rpc(
+      'subscribe_newsletter',
+      rpcArgs
+    );
+
+    if (rpcError) {
+      const errorResponse = handleDatabaseError(rpcError, logContext, 'handleSubscribe');
       if (errorResponse) {
         return errorResponse;
       }
       // If handleDatabaseError returns null, re-throw
-      throw dbError;
+      throw rpcError;
+    }
+
+    if (!(rpcResult && rpcResult.success)) {
+      const errorMessage = rpcResult?.error ?? 'Subscription failed';
+      logError('RPC subscription failed', logContext, new Error(errorMessage));
+      return errorResponse(new Error(errorMessage), 'handleSubscribe');
+    }
+
+    // Get the full subscription record for response
+    const subscriptionId = rpcResult.subscription_id;
+    if (!subscriptionId) {
+      logError('RPC returned success but no subscription_id', logContext);
+      return errorResponse(
+        new Error('Subscription succeeded but no subscription ID returned'),
+        'handleSubscribe'
+      );
+    }
+
+    const { data: subscription, error: fetchError } = await supabaseServiceRole
+      .from('newsletter_subscriptions')
+      .select('*')
+      .eq('id', subscriptionId)
+      .single<DatabaseGenerated['public']['Tables']['newsletter_subscriptions']['Row']>();
+
+    if (fetchError || !subscription) {
+      logError('Failed to fetch subscription after RPC call', logContext, fetchError);
+      return errorResponse(
+        new Error('Subscription succeeded but failed to fetch subscription data'),
+        'handleSubscribe'
+      );
+    }
+
+    // Log resubscription if applicable
+    if (rpcResult.was_resubscribed) {
+      logInfo('User resubscribed', {
+        ...logContext,
+        subscription_id: rpcResult.subscription_id,
+      });
     }
 
     // Step 2.5: Invalidate cache after successful subscription insert
@@ -641,10 +672,13 @@ async function handleDigest(): Promise<Response> {
 
   const previousWeekStart = getPreviousWeekStart();
 
-  const digestArgs = {
+  const digestArgs: DatabaseGenerated['public']['Functions']['get_weekly_digest']['Args'] = {
     p_week_start: previousWeekStart,
-  } satisfies DatabaseGenerated['public']['Functions']['get_weekly_digest']['Args'];
-  const { data: digest, error: digestError } = await callRpc('get_weekly_digest', digestArgs);
+  };
+  const { data: digest, error: digestError } = await supabaseServiceRole.rpc(
+    'get_weekly_digest',
+    digestArgs
+  );
 
   if (digestError) {
     logError('Failed to fetch weekly digest', logContext, digestError);
@@ -655,8 +689,8 @@ async function handleDigest(): Promise<Response> {
     return successResponse({ skipped: true, reason: 'invalid_data' });
   }
   // Use generated type directly from database.types.ts
-  const digestData =
-    digest as DatabaseGenerated['public']['Functions']['get_weekly_digest']['Returns'];
+  const digestData: DatabaseGenerated['public']['Functions']['get_weekly_digest']['Returns'] =
+    digest;
 
   const hasNewContent = Array.isArray(digestData.new_content) && digestData.new_content.length > 0;
   const hasTrendingContent =
@@ -676,17 +710,17 @@ async function handleDigest(): Promise<Response> {
 
   // OPTION 1: Update last successful run timestamp after sending
   const currentTimestamp = new Date().toISOString();
-  const upsertData = {
+  const upsertData: DatabaseGenerated['public']['Tables']['app_settings']['Insert'] = {
     setting_key: 'last_digest_email_timestamp',
     setting_value: currentTimestamp,
-    setting_type: 'string' as DatabaseGenerated['public']['Enums']['setting_type'],
-    environment: 'production' as DatabaseGenerated['public']['Enums']['environment'],
+    setting_type: 'string',
+    environment: 'production',
     enabled: true,
     description: 'Timestamp of last successful weekly digest email send (used for rate limiting)',
     category: 'email',
     version: 1,
-  } satisfies DatabaseGenerated['public']['Tables']['app_settings']['Insert'];
-  await upsertTable('app_settings', upsertData);
+  };
+  await supabaseServiceRole.from('app_settings').upsert(upsertData);
 
   logInfo('Digest completed', {
     ...withDuration(logContext, startTime),
@@ -709,10 +743,7 @@ async function handleSequence(): Promise<Response> {
   const startTime = Date.now();
   const logContext = createEmailHandlerContext('sequence');
 
-  const { data, error } = await callRpc(
-    'get_due_sequence_emails',
-    {} as DatabaseGenerated['public']['Functions']['get_due_sequence_emails']['Args']
-  );
+  const { data, error } = await supabaseServiceRole.rpc('get_due_sequence_emails', undefined);
 
   if (error) {
     logError('Failed to fetch due sequence emails', logContext, error);
@@ -725,8 +756,8 @@ async function handleSequence(): Promise<Response> {
   }
 
   // Use generated type directly from database.types.ts
-  const dueEmails =
-    data as DatabaseGenerated['public']['Functions']['get_due_sequence_emails']['Returns'];
+  const dueEmails: DatabaseGenerated['public']['Functions']['get_due_sequence_emails']['Returns'] =
+    data;
 
   logInfo('Processing sequence emails', {
     ...logContext,
@@ -923,24 +954,8 @@ async function handleContactSubmission(req: Request): Promise<Response> {
     );
   }
 
-  // Validate category is a valid contact_category enum value
-  const validCategories: DatabaseGenerated['public']['Enums']['contact_category'][] = [
-    'bug',
-    'feature',
-    'partnership',
-    'general',
-    'other',
-  ];
-  if (
-    typeof category !== 'string' ||
-    !validCategories.includes(category as DatabaseGenerated['public']['Enums']['contact_category'])
-  ) {
-    return badRequestResponse(
-      'Invalid category value. Must be one of: bug, feature, partnership, general, other'
-    );
-  }
-
-  const validatedCategory = category as DatabaseGenerated['public']['Enums']['contact_category'];
+  // Use category value - database will enforce enum constraints
+  const validatedCategory = category;
 
   try {
     // Send admin notification email

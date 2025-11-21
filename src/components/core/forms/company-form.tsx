@@ -188,12 +188,15 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
 
     const formData = new FormData(e.currentTarget);
 
+    // Type the form data to match Zod schema expectations
+    // Zod will validate the size field to ensure it's a valid company_size ENUM value
+    const sizeValue = (formData.get('size') as string) || null;
     const data = {
       name: formData.get('name') as string,
       website: (formData.get('website') as string) || null,
       logo: logoUrl, // Use uploaded logo URL from state
       description: (formData.get('description') as string) || null,
-      size: (formData.get('size') as string) || null,
+      size: sizeValue as Database['public']['Enums']['company_size'] | null,
       industry: (formData.get('industry') as string) || null,
       using_cursor_since: useCursorDate
         ? (formData.get('using_cursor_since') as string) || null
@@ -376,7 +379,8 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
             defaultValue={initialData?.size || ''}
             placeholder="Select size"
           >
-            <SelectItem value="1-10">1-10 employees</SelectItem>
+            <SelectItem value="just_me">Just Me</SelectItem>
+            <SelectItem value="2-10">2-10 employees</SelectItem>
             <SelectItem value="11-50">11-50 employees</SelectItem>
             <SelectItem value="51-200">51-200 employees</SelectItem>
             <SelectItem value="201-500">201-500 employees</SelectItem>

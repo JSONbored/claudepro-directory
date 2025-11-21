@@ -68,10 +68,22 @@ function decodeQuizAnswers(encoded: string): DecodedQuizAnswers {
 
 function normalizeRecommendationResults(
   results: Database['public']['Functions']['get_recommendations']['Returns']['results']
-): Database['public']['CompositeTypes']['recommendation_item'][] {
+): Array<
+  Database['public']['CompositeTypes']['recommendation_item'] & {
+    slug: string;
+    title: string;
+    category: Database['public']['Enums']['content_category'];
+  }
+> {
   if (!results) return [];
-  const normalized = results.filter((item): item is NonNullable<typeof item> =>
-    Boolean(item?.slug && item?.title && item?.category)
+  const normalized = results.filter(
+    (
+      item
+    ): item is typeof item & {
+      slug: string;
+      title: string;
+      category: Database['public']['Enums']['content_category'];
+    } => Boolean(item?.slug && item?.title && item?.category)
   );
 
   if (normalized.length < results.length) {

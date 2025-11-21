@@ -6,7 +6,7 @@
 'use server';
 
 import { fetchCachedRpc } from '@/src/lib/data/helpers';
-import type { GenerateMetadataCompleteReturn } from '@/src/types/database-overrides';
+import type { Json } from '@/src/types/database.types';
 
 /**
  * Detect if we're in build-time context or missing required environment variables
@@ -27,16 +27,53 @@ function shouldSkipRpcCall(): boolean {
  * Returns metadata-only response (discriminated union case 1)
  * During build-time, returns null to trigger fallback metadata
  */
-export async function getSEOMetadata(
-  route: string
-): Promise<GenerateMetadataCompleteReturn | null> {
+export async function getSEOMetadata(route: string): Promise<
+  | (Json & {
+      title: string;
+      description: string;
+      keywords: string[];
+      openGraphType: 'profile' | 'website';
+      twitterCard: 'summary_large_image';
+      robots: {
+        index: boolean;
+        follow: boolean;
+      };
+      _debug?: {
+        pattern: string;
+        route: string;
+        category?: string;
+        slug?: string;
+        error?: string;
+      };
+    })
+  | null
+> {
   // During build or if env vars missing, return null immediately
   // This triggers fallback metadata in generatePageMetadata()
   if (shouldSkipRpcCall()) {
     return null;
   }
 
-  return fetchCachedRpc<'generate_metadata_complete', GenerateMetadataCompleteReturn | null>(
+  type SEOMetadataReturn = Json & {
+    title: string;
+    description: string;
+    keywords: string[];
+    openGraphType: 'profile' | 'website';
+    twitterCard: 'summary_large_image';
+    robots: {
+      index: boolean;
+      follow: boolean;
+    };
+    _debug?: {
+      pattern: string;
+      route: string;
+      category?: string;
+      slug?: string;
+      error?: string;
+    };
+  };
+
+  return fetchCachedRpc<'generate_metadata_complete', SEOMetadataReturn | null>(
     {
       p_route: route,
       p_include: 'metadata',
@@ -58,16 +95,59 @@ export async function getSEOMetadata(
  * Returns metadata+schemas response (discriminated union case 2)
  * During build-time, returns null (no schemas during static generation)
  */
-export async function getSEOMetadataWithSchemas(
-  route: string
-): Promise<GenerateMetadataCompleteReturn | null> {
+export async function getSEOMetadataWithSchemas(route: string): Promise<
+  | (Json & {
+      metadata: {
+        title: string;
+        description: string;
+        keywords: string[];
+        openGraphType: 'profile' | 'website';
+        twitterCard: 'summary_large_image';
+        robots: {
+          index: boolean;
+          follow: boolean;
+        };
+        _debug?: {
+          pattern: string;
+          route: string;
+          category?: string;
+          slug?: string;
+          error?: string;
+        };
+      };
+      schemas: Json[];
+    })
+  | null
+> {
   // During build or if env vars missing, return null immediately
   // Structured data will be empty during build (expected behavior)
   if (shouldSkipRpcCall()) {
     return null;
   }
 
-  return fetchCachedRpc<'generate_metadata_complete', GenerateMetadataCompleteReturn | null>(
+  type SEOMetadataWithSchemasReturn = Json & {
+    metadata: {
+      title: string;
+      description: string;
+      keywords: string[];
+      openGraphType: 'profile' | 'website';
+      twitterCard: 'summary_large_image';
+      robots: {
+        index: boolean;
+        follow: boolean;
+      };
+      _debug?: {
+        pattern: string;
+        route: string;
+        category?: string;
+        slug?: string;
+        error?: string;
+      };
+    };
+    schemas: Json[];
+  };
+
+  return fetchCachedRpc<'generate_metadata_complete', SEOMetadataWithSchemasReturn | null>(
     {
       p_route: route,
       p_include: 'metadata,schemas',

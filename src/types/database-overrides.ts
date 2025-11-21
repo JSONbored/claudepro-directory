@@ -492,98 +492,64 @@ export const JOBCATEGORY_VALUES = [
 // ============================================================================
 // RPC Return Types
 // ============================================================================
-// IMPORTANT: You can manually edit TODO sections in RPC return types.
+// IMPORTANT: Manual documentation sections in RPC return types are preserved.
 // The generator will preserve your manual edits when regenerating.
+//
+// Note: Schema builder functions (build_*_schema, generate_*) intentionally
+// return jsonb for dynamic JSON-LD structures. These are documented below.
 
 /**
  * add_bookmark RPC return type
+ * REMOVED: Now using generated type from database.types.ts
+ * Use: Database['public']['Functions']['add_bookmark']['Returns']
  */
-export type AddBookmarkReturn = {
-  success: boolean;
-  bookmark: {
-    id: string;
-    user_id: string;
-    content_type: DatabaseGenerated['public']['Enums']['content_category'];
-    content_slug: string;
-    notes: string | null;
-    created_at: string;
-  };
-};
 
 /**
  * approve_submission RPC return type
- * Returns submission approval result with content details
+ * REMOVED: Now using generated type from database.types.ts
+ * Use: Database['public']['Functions']['approve_submission']['Returns']
  */
-export type ApproveSubmissionReturn = {
-  success: boolean;
-  submission_id: string;
-  content_id: string;
-  slug: string;
-  category: DatabaseGenerated['public']['Enums']['content_category'];
-  message: string;
-};
 
 /**
  * batch_add_bookmarks RPC return type
- * Returns batch bookmark addition result
+ * REMOVED: Now using generated type from database.types.ts
+ * Use: Database['public']['Functions']['batch_add_bookmarks']['Returns']
  */
-export type BatchAddBookmarksReturn = {
-  success: boolean;
-  added_count?: number;
-  errors?: Array<{ item: unknown; error: string }>;
-  error?: string;
-};
 
 /**
  * batch_insert_user_interactions RPC return type
- * Returns batch user interaction insertion result
+ * REMOVED: Now using generated type from database.types.ts
+ * Use: Database['public']['Functions']['batch_insert_user_interactions']['Returns']
  */
-export type BatchInsertUserInteractionsReturn = {
-  success: boolean;
-  inserted_count?: number;
-  error?: string;
-};
 
 /**
  * build_aggregate_rating_schema RPC return type
+ * REMOVED: Now using generated type from database.types.ts
+ * Use: Database['public']['Functions']['build_aggregate_rating_schema']['Returns']
  */
-export type BuildAggregateRatingSchemaReturn = {
-  '@context': 'https://schema.org';
-  '@type': 'AggregateRating';
-  ratingValue: number;
-  ratingCount: number;
-  reviewCount: number;
-  bestRating: 5;
-  worstRating: 1;
-} | null;
 
 /**
  * build_breadcrumb_json_ld RPC return type
+ * REMOVED: Now using generated type from database.types.ts
+ * Use: Database['public']['Functions']['build_breadcrumb_json_ld']['Returns']
  */
-export type BuildBreadcrumbJsonLdReturn = {
-  '@context': 'https://schema.org';
-  '@type': 'BreadcrumbList';
-  itemListElement: Array<{
-    '@type': 'ListItem';
-    position: number;
-    item: {
-      '@id': string;
-      name: string;
-    };
-  }>;
-};
 
 /**
  * build_changelog_json_ld RPC return type
- * TODO: Define the actual return structure
+ * REMOVED: Now using generated type from database.types.ts
+ * Use: Database['public']['Functions']['build_changelog_json_ld']['Returns']
  */
-export type BuildChangelogJsonLdReturn = Json; // TODO: Replace with actual structure
 
 /**
  * build_complete_content_schemas RPC return type
- * TODO: Define the actual return structure
+ * REMOVED: Now using generated type from database.types.ts
+ * Use: Database['public']['Functions']['build_complete_content_schemas']['Returns']
+ *
+ * Note: The return type is intentionally `jsonb` (array of heterogeneous JSON-LD schemas).
+ * This function aggregates multiple schema types (breadcrumb, application, FAQ, etc.) into
+ * a single dynamic array based on category configuration. The jsonb type is appropriate
+ * for this use case as it handles heterogeneous schema objects and variable-length arrays.
  */
-export type BuildCompleteContentSchemasReturn = Json; // TODO: Replace with actual structure
 
 /**
  * build_faq_schema RPC return type
@@ -646,15 +612,25 @@ export type BuildItemListSchemaReturn = {
 
 /**
  * build_job_discord_embed RPC return type
- * TODO: Define the actual return structure
+ * REMOVED: Now using generated type from database.types.ts
+ * Use: Database['public']['Functions']['build_job_discord_embed']['Returns']
+ *
+ * Note: The return type is intentionally `jsonb` (Discord embed structure).
+ * This function builds a Discord embed JSON object for job postings to be sent
+ * via Discord webhooks. The jsonb type is appropriate for this use case as it
+ * matches Discord's API format and allows direct integration with external services.
  */
-export type BuildJobDiscordEmbedReturn = Json; // TODO: Replace with actual structure
 
 /**
  * build_job_posting_schema RPC return type
- * TODO: Define the actual return structure
+ * REMOVED: Now using generated type from database.types.ts
+ * Use: Database['public']['Functions']['build_job_posting_schema']['Returns']
+ *
+ * Note: The return type is intentionally `jsonb` (schema.org JobPosting JSON-LD structure).
+ * This function builds a schema.org JobPosting structured data object for SEO and search
+ * engine optimization. The jsonb type is appropriate for this use case as it matches
+ * the schema.org specification format and allows direct storage in the jobs.json_ld column.
  */
-export type BuildJobPostingSchemaReturn = Json; // TODO: Replace with actual structure
 
 /**
  * build_learning_resource_schema RPC return type
@@ -681,15 +657,25 @@ export type BuildLearningResourceSchemaReturn = {
 
 /**
  * build_organization_schema RPC return type
- * TODO: Define the actual return structure
+ * REMOVED: Now using generated type from database.types.ts
+ * Use: Database['public']['Functions']['build_organization_schema']['Returns']
+ *
+ * Note: The return type is intentionally `jsonb` (schema.org Organization JSON-LD structure).
+ * This function builds a schema.org Organization structured data object for SEO and search
+ * engine optimization. The jsonb type is appropriate for this use case as it matches
+ * the schema.org specification format and allows direct storage in the companies.json_ld column.
  */
-export type BuildOrganizationSchemaReturn = Json; // TODO: Replace with actual structure
 
 /**
  * build_person_schema RPC return type
- * TODO: Define the actual return structure
+ * REMOVED: Now using generated type from database.types.ts
+ * Use: Database['public']['Functions']['build_person_schema']['Returns']
+ *
+ * Note: The return type is intentionally `jsonb` (schema.org Person JSON-LD structure).
+ * This function builds a schema.org Person structured data object for SEO and search
+ * engine optimization. The jsonb type is appropriate for this use case as it matches
+ * the schema.org specification format and allows direct storage in the users.json_ld column.
  */
-export type BuildPersonSchemaReturn = Json; // TODO: Replace with actual structure
 
 /**
  * build_software_application_schema RPC return type
@@ -735,80 +721,51 @@ export type BuildSourceCodeSchemaReturn = Array<{
 
 /**
  * build_static_route_json_ld RPC return type
- * TODO: Define the actual return structure
+ * REMOVED: Now using generated type from database.types.ts
+ * Use: Database['public']['Functions']['build_static_route_json_ld']['Returns']
+ *
+ * Note: The return type is intentionally `jsonb` (array of schema.org JSON-LD structures).
+ * This function builds an array containing CollectionPage and WebPage schema.org structured
+ * data objects for SEO and search engine optimization. The jsonb type is appropriate for
+ * this use case as it matches the schema.org specification format and allows direct storage
+ * in the static_routes.json_ld column.
  */
-export type BuildStaticRouteJsonLdReturn = Json; // TODO: Replace with actual structure
 
 /**
  * create_job_with_payment RPC return type
- * Returns job creation with payment result
+ * REMOVED: Now using generated type from database.types.ts
+ * Use: Database['public']['Functions']['create_job_with_payment']['Returns']
  */
-export type CreateJobWithPaymentReturn = {
-  success: boolean;
-  job_id: string;
-  company_id: string;
-  payment_amount: number;
-  requires_payment: boolean;
-  tier: DatabaseGenerated['public']['Enums']['job_tier'];
-  plan: DatabaseGenerated['public']['Enums']['job_plan'];
-};
 
 /**
  * delete_company RPC return type
- * Returns company deletion result
+ * REMOVED: Now using generated type from database.types.ts
+ * Use: Database['public']['Functions']['delete_company']['Returns']
  */
-export type DeleteCompanyReturn = {
-  success: boolean;
-  company_id: string;
-};
 
 /**
  * delete_job RPC return type
- * Returns job deletion result
+ * REMOVED: Now using generated type from database.types.ts
+ * Use: Database['public']['Functions']['delete_job']['Returns']
  */
-export type DeleteJobReturn = {
-  success: boolean;
-  job_id: string;
-  message: string;
-};
 
 /**
  * filter_jobs RPC return type
+ * REMOVED: Now using generated type from database.types.ts
+ * Use: Database['public']['Functions']['filter_jobs']['Returns']
  */
-export type GetFilterJobsReturn = {
-  jobs: Array<Tables<'jobs'>>;
-  total_count: number;
-} | null;
 
 /**
  * generate_command_installation RPC return type
- * TODO: Define the actual return structure
+ * REMOVED: Now using generated type from database.types.ts
+ * Use: Database['public']['Functions']['generate_command_installation']['Returns']
+ *
+ * Note: The return type is intentionally `jsonb` (installation steps structure).
+ * This function generates installation instructions for Claude Code commands, returning
+ * a structured object with steps, config paths, and requirements. The jsonb type is
+ * appropriate for this use case as it provides flexibility for the installation data
+ * structure and matches the InstallationSteps type used in the frontend.
  */
-export type GenerateCommandInstallationReturn = Json; // TODO: Replace with actual structure
-
-/**
- * generate_content_field RPC return type
- * TODO: Define the actual return structure
- */
-export type GenerateContentFieldReturn = Json; // TODO: Replace with actual structure
-
-/**
- * generate_hook_installation RPC return type
- * TODO: Define the actual return structure
- */
-export type GenerateHookInstallationReturn = Json; // TODO: Replace with actual structure
-
-/**
- * generate_llms_txt_content RPC return type
- * TODO: Define the actual return structure
- */
-export type GenerateLlmsTxtContentReturn = Json; // TODO: Replace with actual structure
-
-/**
- * generate_markdown_export RPC return type
- * TODO: Define the actual return structure
- */
-export type GenerateMarkdownExportReturn = Json; // TODO: Replace with actual structure
 
 /**
  * generate_metadata_complete RPC return type
@@ -878,74 +835,20 @@ export type GenerateReadmeDataReturn = {
 
 /**
  * get_api_health RPC return type
- * TODO: Define the actual return structure
+ * REMOVED: Now using generated type from database.types.ts
+ * Use: Database['public']['Functions']['get_api_health']['Returns']
  */
-export type GetGetApiHealthReturn = Json; // TODO: Replace with actual structure
 
 /**
  * get_homepage_content_enriched RPC return type
+ * REMOVED: Function does not exist (replaced by get_homepage_complete)
+ * Use: Database['public']['Functions']['get_homepage_complete']['Returns']
  */
-export type GetGetHomepageContentEnrichedReturn = {
-  categoryData: Record<string, HomepageContentItem[]>;
-  stats: Record<string, { total: number; featured: number }>;
-  weekStart: string;
-};
 
 /**
  * get_performance_baseline RPC return type
+ * REMOVED: Function does not exist in database
  */
-export type GetGetPerformanceBaselineReturn = {
-  snapshot_time: string;
-  database: {
-    size_mb: number;
-    active_connections: number;
-    total_connections: number;
-    max_connections: number;
-    connection_usage_pct: number;
-  };
-  cache: {
-    hit_ratio_pct: number;
-    blocks_read: number;
-    blocks_hit: number;
-    status: 'EXCELLENT' | 'GOOD' | 'FAIR' | 'POOR';
-  };
-  indexes: {
-    total: number;
-    unused: number;
-    total_scans: number;
-    total_size_mb: number;
-  };
-  tables: {
-    total: number;
-    live_tuples: number;
-    dead_tuples: number;
-    avg_bloat_pct: number;
-    total_size_mb: number;
-    largest: Array<{
-      table: string;
-      size_mb: number;
-      live_tuples: number;
-      dead_tuples: number;
-    }>;
-  };
-  queries: {
-    total_tracked: number;
-    total_calls: number;
-    avg_time_ms: number;
-    max_time_ms: number;
-    total_time_ms: number;
-    slowest: Array<{
-      query: string;
-      calls: number;
-      mean_time_ms: number;
-      total_time_ms: number;
-    }>;
-  };
-  health: {
-    status: string;
-    recommendations: Array<string | null>;
-  };
-};
 
 /**
  * get_sponsorship_analytics RPC return type
@@ -973,119 +876,75 @@ export type GetGetPerformanceBaselineReturn = {
 
 /**
  * manage_collection RPC return type
- * Returns collection management result
+ * REMOVED: Now using generated type from database.types.ts
+ * Use: Database['public']['Functions']['manage_collection']['Returns']
  */
-export type ManageCollectionReturn = {
-  success: boolean;
-  collection_id?: string;
-  action?: string;
-  error?: string;
-};
 
 /**
  * manage_company RPC return type
- * TODO: Define the actual return structure
+ * REMOVED: Now using generated type from database.types.ts
+ * Use: Database['public']['Functions']['manage_company']['Returns']
  */
-export type ManageCompanyReturn = Json; // TODO: Replace with actual structure
 
 /**
  * manage_review RPC return type
- * Returns review management result
+ * REMOVED: Now using generated type from database.types.ts
+ * Use: Database['public']['Functions']['manage_review']['Returns']
  */
-export type ManageReviewReturn = {
-  success: boolean;
-  review?: Tables<'review_ratings'>;
-  review_id?: string;
-  error?: string;
-};
 
 /**
  * refresh_profile_from_oauth RPC return type
- * Returns profile refresh result
+ * REMOVED: Now using generated type from database.types.ts
+ * Use: Database['public']['Functions']['refresh_profile_from_oauth']['Returns']
  */
-export type RefreshProfileFromOauthReturn = { success: boolean; updated: boolean; error?: string };
 
 /**
  * reject_submission RPC return type
- * Returns submission rejection result
+ * REMOVED: Now using generated type from database.types.ts
+ * Use: Database['public']['Functions']['reject_submission']['Returns']
  */
-export type RejectSubmissionReturn = {
-  success: boolean;
-  submission_id: string;
-  status: DatabaseGenerated['public']['Enums']['submission_status'];
-};
 
 /**
  * remove_bookmark RPC return type
- * Returns bookmark removal result
+ * REMOVED: Now using generated type from database.types.ts
+ * Use: Database['public']['Functions']['remove_bookmark']['Returns']
  */
-export type RemoveBookmarkReturn = { success: boolean; error?: string };
 
 /**
  * reorder_collection_items RPC return type
- * Returns collection item reordering result with success/error details
+ * REMOVED: Now using generated type from database.types.ts
+ * Use: Database['public']['Functions']['reorder_collection_items']['Returns']
  */
-export type ReorderCollectionItemsReturn =
-  | {
-      success: true;
-      updated: number;
-      errors: Array<{
-        itemId: string;
-        error: string;
-      }>;
-    }
-  | {
-      success: false;
-      error: string;
-      updated: 0;
-    };
 
 /**
  * submit_content_for_review RPC return type
- * TODO: Define the actual return structure
+ * REMOVED: Now using generated type from database.types.ts
+ * Use: Database['public']['Functions']['submit_content_for_review']['Returns']
  */
-export type GetSubmitContentForReviewReturn = Json; // TODO: Replace with actual structure
 
 /**
  * subscribe_newsletter RPC return type
- * Returns newsletter subscription result
+ * REMOVED: Now using generated type from database.types.ts
+ * Use: Database['public']['Functions']['subscribe_newsletter']['Returns']
  */
-export type SubscribeNewsletterReturn = {
-  success: boolean;
-  subscription_id?: string;
-  was_resubscribed?: boolean;
-  email: string;
-  error?: string;
-};
 
 /**
  * toggle_follow RPC return type
- * Returns follow toggle result
+ * REMOVED: Now using generated type from database.types.ts
+ * Use: Database['public']['Functions']['toggle_follow']['Returns']
  */
-export type ToggleFollowReturn = { success: boolean; is_following: boolean; error?: string };
 
 /**
  * toggle_job_status RPC return type
- * Returns job status toggle result
+ * REMOVED: Now using generated type from database.types.ts
+ * Use: Database['public']['Functions']['toggle_job_status']['Returns']
  */
-export type ToggleJobStatusReturn = {
-  success: boolean;
-  job_id: string;
-  old_status: DatabaseGenerated['public']['Enums']['job_status'];
-  new_status: DatabaseGenerated['public']['Enums']['job_status'];
-  message: string;
-};
 
 /**
  * toggle_review_helpful RPC return type
- * Returns review helpfulness toggle result
+ * REMOVED: Now using generated type from database.types.ts
+ * Use: Database['public']['Functions']['toggle_review_helpful']['Returns']
  */
-export type ToggleReviewHelpfulReturn = {
-  success: boolean;
-  helpful: boolean;
-  content_type: DatabaseGenerated['public']['Enums']['content_category'];
-  content_slug: string;
-};
 
 /**
  * track_sponsored_event RPC return type
@@ -1094,37 +953,27 @@ export type ToggleReviewHelpfulReturn = {
 
 /**
  * track_user_interaction RPC return type
- * TODO: Define the actual return structure
+ * REMOVED: Now using generated type from database.types.ts
+ * Use: Database['public']['Functions']['track_user_interaction']['Returns']
  */
-export type TrackUserInteractionReturn = Json; // TODO: Replace with actual structure
 
 /**
  * unlink_oauth_provider RPC return type
- * Returns OAuth provider unlinking result
+ * REMOVED: Now using generated type from database.types.ts
+ * Use: Database['public']['Functions']['unlink_oauth_provider']['Returns']
  */
-export type UnlinkOauthProviderReturn = {
-  success: boolean;
-  message?: string;
-  provider: string;
-  remaining_providers?: number;
-  error?: string;
-};
 
 /**
  * update_job RPC return type
- * Returns job update result
+ * REMOVED: Now using generated type from database.types.ts
+ * Use: Database['public']['Functions']['update_job']['Returns']
  */
-export type UpdateJobReturn = {
-  success: boolean;
-  job_id: string;
-  message: string;
-};
 
 /**
  * update_user_profile RPC return type
- * Returns user profile update result
+ * REMOVED: Now using generated type from database.types.ts
+ * Use: Database['public']['Functions']['update_user_profile']['Returns']
  */
-export type UpdateUserProfileReturn = { success: boolean; error?: string };
 
 // ============================================================================
 // MANUAL SECTION - EDITABLE
@@ -1188,7 +1037,7 @@ export const COPY_TYPE_VALUES = ['code', 'link', 'markdown'] as const satisfies 
 export type ContentItem = Tables<'content'>;
 /**
  * HomepageContentItem - Simplified content item for homepage display
- * From get_homepage_content_enriched RPC
+ * Component/application type used for UI rendering (not a database type)
  */
 export type HomepageContentItem = {
   slug: string;

@@ -84,7 +84,43 @@ export default async function MyJobsPage() {
     );
   }
 
-  const jobs: Array<Tables<'jobs'>> = (data?.jobs as Array<Tables<'jobs'>> | undefined) || [];
+  // Validate and convert jobs from Json to Tables<'jobs'>[]
+  // The RPC returns jobs as Json | null, so we need runtime validation
+  const jobs: Array<Tables<'jobs'>> = (() => {
+    const jobsData = data?.jobs;
+    if (!(jobsData && Array.isArray(jobsData))) {
+      return [];
+    }
+
+    return jobsData
+      .filter((item): item is Tables<'jobs'> => {
+        // Validate required fields for Tables<'jobs'>
+        // Use bracket notation for index signature properties
+        return (
+          item !== null &&
+          typeof item === 'object' &&
+          'id' in item &&
+          typeof item['id'] === 'string' &&
+          'company' in item &&
+          typeof item['company'] === 'string' &&
+          'description' in item &&
+          typeof item['description'] === 'string' &&
+          'link' in item &&
+          typeof item['link'] === 'string' &&
+          'title' in item &&
+          typeof item['title'] === 'string' &&
+          'created_at' in item &&
+          typeof item['created_at'] === 'string' &&
+          'is_placeholder' in item &&
+          typeof item['is_placeholder'] === 'boolean' &&
+          'category' in item &&
+          'plan' in item &&
+          'type' in item
+        );
+      })
+      .map((item) => item as Tables<'jobs'>);
+  })();
+
   if (jobs.length === 0) {
     logger.info('MyJobsPage: user has no job listings', { userId: user.id });
   }
@@ -201,9 +237,12 @@ export default async function MyJobsPage() {
                     </Button>
                   )}
 
-                  {(job.status === 'active' || job.status === 'draft') && (
-                    <JobToggleButton jobId={job.id} currentStatus={job.status ?? 'draft'} />
-                  )}
+                  {(() => {
+                    const status = job.status ?? 'draft';
+                    return status === 'active' || status === 'draft' ? (
+                      <JobToggleButton jobId={job.id} currentStatus={status} />
+                    ) : null;
+                  })()}
 
                   <JobDeleteButton jobId={job.id} />
                 </div>

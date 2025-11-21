@@ -29,7 +29,7 @@ import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
 import { normalizeError } from '@/src/lib/utils/error.utils';
-import type { Database } from '@/src/types/database.types';
+import { Constants, type Database } from '@/src/types/database.types';
 
 const SUBMISSION_TIPS = [
   'Be specific in your descriptions - help users understand what your config does',
@@ -61,16 +61,41 @@ function formatTimeAgo(dateString: string): string {
   return `${Math.floor(seconds / 604800)}w ago`;
 }
 
-// Map submission_type to content_category (submission_type is a subset of content_category)
+/**
+ * Type guard: Check if a value is a valid content_category
+ * Uses only generated types from database.types.ts
+ */
+function isValidContentCategory(
+  value: string
+): value is Database['public']['Enums']['content_category'] {
+  return Constants.public.Enums.content_category.includes(
+    value as Database['public']['Enums']['content_category']
+  );
+}
+
+/**
+ * Map submission_type to content_category with runtime validation
+ * Uses only generated types from database.types.ts
+ * Validates that the submission_type value is a valid content_category at runtime
+ */
 function mapSubmissionTypeToContentCategory(
   submissionType: Database['public']['Enums']['submission_type'] | null
 ): Database['public']['Enums']['content_category'] {
-  // submission_type values are valid content_category values
-  // Default to 'agents' if null (should not happen due to type guard, but TypeScript needs this)
   if (submissionType === null) {
-    return 'agents';
+    return 'agents'; // Safe default
   }
-  return submissionType as Database['public']['Enums']['content_category'];
+
+  // Runtime validation: submission_type values are a subset of content_category
+  // Use type guard to ensure type safety without assertions
+  if (isValidContentCategory(submissionType)) {
+    return submissionType; // TypeScript now knows this is content_category
+  }
+
+  // Fallback if somehow an invalid value gets through (should never happen)
+  logger.warn('mapSubmissionTypeToContentCategory: invalid submission_type', {
+    submissionType,
+  });
+  return 'agents';
 }
 
 // Type guard for recent merged submissions

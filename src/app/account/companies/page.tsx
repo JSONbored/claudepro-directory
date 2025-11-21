@@ -43,47 +43,6 @@ function isAllowedHttpUrl(url: string | null | undefined): boolean {
   }
 }
 
-/**
- * Validate that URL belongs to a trusted public domain (TLD-based check)
- * Only allows URLs with common, trusted top-level domains to prevent redirect attacks
- * This provides an additional layer of security beyond protocol validation
- */
-function isTrustedPublicDomain(url: string | null | undefined): boolean {
-  if (!url || typeof url !== 'string') return false;
-  let parsed: URL;
-  try {
-    parsed = new URL(url.trim());
-  } catch {
-    return false;
-  }
-  // List of allowed public TLDs for company websites
-  // These are common, trusted TLDs used by legitimate businesses
-  const allowedTlds = [
-    '.com',
-    '.org',
-    '.net',
-    '.io',
-    '.ai',
-    '.dev',
-    '.co',
-    '.xyz',
-    '.info',
-    '.edu',
-    '.gov',
-    '.us',
-    '.uk',
-    '.ca',
-    '.au',
-    '.de',
-    '.fr',
-    '.jp',
-    '.cn',
-  ];
-  const hostname = parsed.hostname.toLowerCase();
-  // Only allow hostnames ending with one of the trusted TLDs
-  return allowedTlds.some((tld) => hostname.endsWith(tld));
-}
-
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/account/companies');
 }
@@ -265,17 +224,11 @@ export default async function CompaniesPage() {
                           </CardDescription>
                           {(() => {
                             const website = company.website;
-                            // Defense in depth: validate both protocol and trusted domain
-                            if (
-                              !(
-                                website &&
-                                isAllowedHttpUrl(website) &&
-                                isTrustedPublicDomain(website)
-                              )
-                            ) {
+                            // Validate protocol (http/https) and sanitize URL to prevent XSS and redirect attacks
+                            if (!(website && isAllowedHttpUrl(website))) {
                               return null;
                             }
-                            // Canonicalize and sanitize URL to prevent XSS and redirect attacks
+                            // Canonicalize and sanitize URL
                             // Parse URL to get normalized, canonicalized version for safe use in href
                             let safeHref = '';
                             let displayText = '';
@@ -304,7 +257,7 @@ export default async function CompaniesPage() {
                               return null;
                             }
                             // Explicit validation: safeHref is guaranteed to be safe
-                            // It's constructed from a validated URL (isAllowedHttpUrl + isTrustedPublicDomain)
+                            // It's constructed from a validated URL (isAllowedHttpUrl)
                             // with all dangerous components removed (credentials, query, hash)
                             // and hostname normalized. At this point, safeHref is validated and safe for use
                             const validatedUrl: string = safeHref;

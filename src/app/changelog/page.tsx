@@ -95,8 +95,30 @@ export default async function ChangelogPage() {
       offset: 0,
     });
 
-    // Filter to ensure only published entries are included
-    const entries = (overview.entries ?? []).filter((entry) => entry.published === true);
+    // Normalize entries: null heavy fields and default required fields
+    // publishedOnly: true ensures only published entries, so no additional filter needed
+    const normalizeChangelogEntry = (entry: NonNullable<typeof overview.entries>[number]) => ({
+      ...entry,
+      canonical_url: null,
+      commit_count: null,
+      contributors: null,
+      git_commit_sha: null,
+      json_ld: null,
+      og_image: null,
+      og_type: null,
+      robots_follow: null,
+      robots_index: null,
+      source: null,
+      twitter_card: null,
+      content: entry.content ?? '',
+      changes: entry.changes ?? {},
+      created_at: entry.created_at ?? '',
+      updated_at: entry.updated_at ?? '',
+    });
+
+    const publishedEntries = (overview.entries ?? []).map(
+      normalizeChangelogEntry
+    ) as Tables<'changelog'>[];
 
     // Get category counts from metadata (database-calculated, not client-side)
     // Cast category_counts from Json to Record<string, number>
@@ -138,51 +160,32 @@ export default async function ChangelogPage() {
             <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_6} text-muted-foreground text-sm`}>
               <div>
                 <span className="font-semibold text-foreground">
-                  {overview.metadata?.total_entries ?? entries.length}
+                  {overview.metadata?.total_entries ?? publishedEntries.length}
                 </span>{' '}
                 total updates
               </div>
-              {entries.length > 0 && entries[0] && entries[0].release_date && (
-                <div>
-                  Latest:{' '}
-                  <time dateTime={entries[0].release_date} className="font-medium text-foreground">
-                    {new Date(entries[0].release_date).toLocaleDateString('en-US', {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric',
-                    })}
-                  </time>
-                </div>
-              )}
+              {publishedEntries.length > 0 &&
+                publishedEntries[0] &&
+                publishedEntries[0].release_date && (
+                  <div>
+                    Latest:{' '}
+                    <time
+                      dateTime={publishedEntries[0].release_date}
+                      className="font-medium text-foreground"
+                    >
+                      {new Date(publishedEntries[0].release_date).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                      })}
+                    </time>
+                  </div>
+                )}
             </div>
           </div>
 
           {/* Client-side filtered list */}
-          <ChangelogListClient
-            entries={
-              entries
-                .filter((entry) => entry.published === true)
-                .map((entry) => ({
-                  ...entry,
-                  canonical_url: null,
-                  commit_count: null,
-                  contributors: null,
-                  git_commit_sha: null,
-                  json_ld: null,
-                  og_image: null,
-                  og_type: null,
-                  robots_follow: null,
-                  robots_index: null,
-                  source: null,
-                  twitter_card: null,
-                  content: entry.content ?? '',
-                  changes: entry.changes ?? {},
-                  created_at: entry.created_at ?? '',
-                  updated_at: entry.updated_at ?? '',
-                })) as Tables<'changelog'>[]
-            }
-            categoryCounts={categoryCounts}
-          />
+          <ChangelogListClient entries={publishedEntries} categoryCounts={categoryCounts} />
         </div>
 
         {/* Email CTA - Footer section (matching homepage pattern) */}

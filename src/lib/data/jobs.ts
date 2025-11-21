@@ -7,8 +7,7 @@ import { fetchCachedRpc } from '@/src/lib/data/helpers';
 import { searchUnified } from '@/src/lib/edge/search-client';
 import { logger } from '@/src/lib/logger';
 import { normalizeError } from '@/src/lib/utils/error.utils';
-import type { Database } from '@/src/types/database.types';
-import type { GetFilterJobsReturn, Tables } from '@/src/types/database-overrides';
+import type { Database, Tables } from '@/src/types/database.types';
 
 export interface JobsFilterOptions {
   searchQuery?: string;
@@ -20,13 +19,13 @@ export interface JobsFilterOptions {
   offset: number;
 }
 
-// JobsFilterResult matches GetFilterJobsReturn from database-overrides.ts
-export type JobsFilterResult = GetFilterJobsReturn;
+// JobsFilterResult uses generated type from database.types.ts
+export type JobsFilterResult = Database['public']['Functions']['filter_jobs']['Returns'] | null;
 
 /**
  * Get all active jobs via edge-cached RPC
  */
-export async function getJobs(): Promise<Tables<'jobs'>[]> {
+export async function getJobs(): Promise<Database['public']['Tables']['jobs']['Row'][]> {
   const data = await fetchCachedRpc<
     'get_jobs_list',
     Database['public']['Functions']['get_jobs_list']['Returns']
@@ -136,7 +135,7 @@ export async function getJobsCount(): Promise<number> {
 /** Filter jobs via unified-search edge function (with highlighting and analytics) */
 export async function getFilteredJobs(
   options: JobsFilterOptions
-): Promise<GetFilterJobsReturn | null> {
+): Promise<Database['public']['Functions']['filter_jobs']['Returns'] | null> {
   const { searchQuery, category, employment, experience, remote, limit, offset } = options;
 
   try {
@@ -150,7 +149,10 @@ export async function getFilteredJobs(
 
     // If no filters and no query, use direct RPC (faster for simple listing)
     if (!hasFilters) {
-      const result = await fetchCachedRpc<'filter_jobs', GetFilterJobsReturn | null>(
+      const result = await fetchCachedRpc<
+        'filter_jobs',
+        Database['public']['Functions']['filter_jobs']['Returns'] | null
+      >(
         {
           p_limit: limit,
           p_offset: offset,
@@ -172,7 +174,7 @@ export async function getFilteredJobs(
     }
 
     // Use edge function for filtered searches (provides highlighting, analytics, caching)
-    const response = await searchUnified<Tables<'jobs'>>({
+    const response = await searchUnified<Database['public']['Tables']['jobs']['Row']>({
       query: searchQuery || '',
       filters: {
         ...(category && category !== 'all' ? { job_category: category } : {}),
@@ -184,13 +186,13 @@ export async function getFilteredJobs(
       },
     });
 
-    // Transform edge function response to GetFilterJobsReturn format
+    // Transform edge function response to filter_jobs_result format
     // Edge function returns results with highlighting, we need to extract jobs array
-    const jobs = (response.results as Tables<'jobs'>[]) || [];
+    const jobs = (response.results as Database['public']['Tables']['jobs']['Row'][]) || [];
 
     return {
       jobs,
-      total_count: response.pagination.total,
+      total_count: response.pagination.total ?? 0,
     };
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to filter jobs via edge function');
@@ -205,17 +207,33 @@ export async function getFilteredJobs(
     });
 
     // Fallback to direct RPC if edge function fails
-    const rpcParams = {
+    // Convert string values to ENUMs or NULL (NULL means 'all'/'any')
+    const rpcParams: Database['public']['Functions']['filter_jobs']['Args'] = {
       ...(searchQuery ? { p_search_query: searchQuery } : {}),
-      ...(category && category !== 'all' ? { p_category: category } : {}),
-      ...(employment && employment !== 'any' ? { p_employment_type: employment } : {}),
-      ...(remote ? { p_remote_only: remote } : {}),
-      ...(experience && experience !== 'any' ? { p_experience_level: experience } : {}),
+      ...(category && category !== 'all'
+        ? {
+            p_category: category as Database['public']['Enums']['job_category'],
+          }
+        : {}),
+      ...(employment && employment !== 'any'
+        ? {
+            p_employment_type: employment as Database['public']['Enums']['job_type'],
+          }
+        : {}),
+      ...(remote !== undefined ? { p_remote_only: remote } : {}),
+      ...(experience && experience !== 'any'
+        ? {
+            p_experience_level: experience as Database['public']['Enums']['experience_level'],
+          }
+        : {}),
       p_limit: limit,
       p_offset: offset,
     };
 
-    const result = await fetchCachedRpc<'filter_jobs', GetFilterJobsReturn | null>(rpcParams, {
+    const result = await fetchCachedRpc<
+      'filter_jobs',
+      Database['public']['Functions']['filter_jobs']['Returns'] | null
+    >(rpcParams, {
       rpcName: 'filter_jobs',
       tags: ['jobs', ...(category && category !== 'all' ? [`jobs-${category}`] : [])],
       ttlKey: 'cache.jobs.ttl_seconds',
@@ -252,7 +270,7 @@ export async function getFilteredJobs(
           ...(experience ? { experience } : {}),
           ...(remote !== undefined ? { remote } : {}),
         },
-        result.total_count
+        result.total_count ?? 0
       ).catch((error) => {
         // Don't block - just log warning
         logger.warn('Failed to pulse jobs search', {

@@ -83,7 +83,10 @@ export default function NewJobPage() {
       companyId: result.data.companyId,
       requiresPayment: result.data.requiresPayment,
     });
-    return { success: false };
+    return {
+      success: false,
+      message: 'Job creation failed. Please try again or contact support.',
+    };
   };
 
   return (

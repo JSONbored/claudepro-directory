@@ -26,10 +26,12 @@
 		"get_due_sequence_emails",
 		"build_job_discord_embed",
 		"batch_insert_user_interactions",
+		"filter_jobs",
 		"enroll_in_email_sequence",
 		"mark_sequence_email_processed",
 		"schedule_next_sequence_step",
 		"get_active_subscribers",
+		"subscribe_newsletter",
 		"get_site_urls",
 		"generate_sitemap_xml",
 		"generate_readme_data",
@@ -110,7 +112,9 @@
 		"payment_method",
 		"copy_type",
 		"newsletter_sync_status",
-		"route_group"
+		"route_group",
+		"company_size",
+		"content_field_type"
 	],
 	"compositeTypes": [
 		"company_profile_result",
@@ -134,6 +138,11 @@
 		"structured_data_schema_types",
 		"weekly_digest_result",
 		"weekly_digest_new_content",
-		"weekly_digest_trending_content"
+		"weekly_digest_trending_content",
+		"batch_insert_user_interactions_result",
+		"filter_jobs_result",
+		"build_breadcrumb_json_ld_result",
+		"subscribe_newsletter_result",
+		"user_interaction_input"
 	]
 }

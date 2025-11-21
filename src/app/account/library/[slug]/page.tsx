@@ -23,16 +23,16 @@ import { normalizeError } from '@/src/lib/utils/error.utils';
 import { hashUserId } from '@/src/lib/utils/privacy.utils';
 
 interface CollectionPageProps {
-  params: Promise<{ slug: string }>;
+  params: { slug: string };
 }
 
 export async function generateMetadata({ params }: CollectionPageProps): Promise<Metadata> {
-  const { slug } = await params;
+  const { slug } = params;
   return generatePageMetadata('/account/library/:slug', { params: { slug } });
 }
 
 export default async function CollectionDetailPage({ params }: CollectionPageProps) {
-  const { slug } = await params;
+  const { slug } = params;
   const { user } = await getAuthenticatedUser({ context: 'CollectionDetailPage' });
 
   if (!user) {

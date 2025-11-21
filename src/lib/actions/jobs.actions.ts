@@ -61,6 +61,16 @@ const JOB_TYPE_VALUES = [
   'internship',
 ] as const satisfies readonly Database['public']['Enums']['job_type'][];
 
+const JOB_PLAN_VALUES = [
+  'one-time',
+  'subscription',
+] as const satisfies readonly Database['public']['Enums']['job_plan'][];
+
+const JOB_TIER_VALUES = [
+  'standard',
+  'featured',
+] as const satisfies readonly Database['public']['Enums']['job_tier'][];
+
 // UUID validation helper
 const uuidRefine = (val: string | null | undefined) => {
   if (val === null || val === undefined || val === '') return true; // Allow null/empty for optional
@@ -145,8 +155,14 @@ const createJobSchema = z.object({
     .refine(urlRefine, { message: 'Invalid URL format' })
     .optional()
     .nullable(),
-  plan: z.enum(['one-time', 'subscription']),
-  tier: z.enum(['standard', 'featured']),
+  plan: z.enum([...JOB_PLAN_VALUES] as [
+    Database['public']['Enums']['job_plan'],
+    ...Database['public']['Enums']['job_plan'][],
+  ]),
+  tier: z.enum([...JOB_TIER_VALUES] as [
+    Database['public']['Enums']['job_tier'],
+    ...Database['public']['Enums']['job_tier'][],
+  ]),
 });
 
 const updateJobSchema = z.object({
@@ -240,19 +256,34 @@ export const createJob = authedAction
   .inputSchema(createJobSchema)
   .action(async ({ parsedInput, ctx }) => {
     try {
-      type CreateJobRpcResult = {
-        success: boolean;
-        job_id: string;
-        company_id: string;
-        payment_amount: number;
-        requires_payment: boolean;
+      // Construct composite type from parsed input
+      const jobData: Database['public']['CompositeTypes']['job_create_input'] = {
+        company: parsedInput.company,
+        company_id: parsedInput.company_id ?? null,
+        title: parsedInput.title,
+        description: parsedInput.description,
+        type: parsedInput.type,
+        category: parsedInput.category,
+        link: parsedInput.link,
+        location: parsedInput.location ?? null,
+        salary: parsedInput.salary ?? null,
+        remote: parsedInput.remote ?? null,
+        workplace: parsedInput.workplace ?? null,
+        experience: parsedInput.experience ?? null,
+        tags: parsedInput.tags,
+        requirements: parsedInput.requirements,
+        benefits: parsedInput.benefits,
+        contact_email: parsedInput.contact_email ?? null,
+        company_logo: parsedInput.company_logo ?? null,
       };
 
-      const result = await runRpc<CreateJobRpcResult>(
+      const result = await runRpc<
+        Database['public']['Functions']['create_job_with_payment']['Returns']
+      >(
         'create_job_with_payment',
         {
           p_user_id: ctx.userId,
-          p_job_data: parsedInput,
+          p_job_data: jobData,
           p_tier: parsedInput.tier,
           p_plan: parsedInput.plan,
         },
@@ -267,17 +298,27 @@ export const createJob = authedAction
         throw new Error('Job creation failed');
       }
 
+      // Use generated types directly - handle nullability
+      const jobId = result.job_id ?? '';
+      const companyId = result.company_id ?? '';
+      const paymentAmount = result.payment_amount ?? 0;
+      const requiresPayment = result.requires_payment ?? false;
+
+      if (!jobId) {
+        throw new Error('Job creation failed: missing job_id');
+      }
+
       logger.info('Job created successfully', {
         userId: ctx.userId,
-        jobId: result.job_id,
-        companyId: result.company_id,
-        paymentAmount: result.payment_amount,
+        jobId,
+        companyId,
+        paymentAmount,
       });
 
       // Polar.sh checkout integration (READY - pending account approval)
       let checkoutUrl: string | null = null;
 
-      if (result.requires_payment) {
+      if (requiresPayment) {
         // Dynamic import to avoid issues if Polar utils aren't configured yet
         try {
           const { createPolarCheckout, getPolarProductPriceId } = await import(
@@ -291,15 +332,15 @@ export const createJob = authedAction
             // Create Polar checkout session (redirects to Polar-hosted page)
             const checkoutResult = await createPolarCheckout({
               productPriceId,
-              jobId: result.job_id,
+              jobId,
               userId: ctx.userId,
               customerEmail: ctx.userEmail || '',
-              successUrl: `${process.env['NEXT_PUBLIC_BASE_URL']}/account/jobs?payment=success&job_id=${result.job_id}`,
+              successUrl: `${process.env['NEXT_PUBLIC_BASE_URL']}/account/jobs?payment=success&job_id=${jobId}`,
             });
 
             if ('error' in checkoutResult) {
               logger.error('Failed to create Polar checkout', new Error(checkoutResult.error), {
-                jobId: result.job_id,
+                jobId,
                 userId: ctx.userId,
               });
               // Job created but checkout failed
@@ -307,7 +348,7 @@ export const createJob = authedAction
             } else {
               checkoutUrl = checkoutResult.url;
               logger.info('Polar checkout session created', {
-                jobId: result.job_id,
+                jobId,
                 sessionId: checkoutResult.sessionId,
                 checkoutUrl: checkoutResult.url,
               });
@@ -325,7 +366,7 @@ export const createJob = authedAction
             'Polar integration error',
             error instanceof Error ? error : new Error(String(error)),
             {
-              jobId: result.job_id,
+              jobId,
               userId: ctx.userId,
             }
           );
@@ -340,18 +381,18 @@ export const createJob = authedAction
       await invalidateJobCaches({
         keys: ['cache.invalidate.job_create'],
       });
-      if (result.company_id) {
-        revalidateTag(`company-${result.company_id}`, 'default');
-        revalidateTag(`company-id-${result.company_id}`, 'default');
+      if (companyId) {
+        revalidateTag(`company-${companyId}`, 'default');
+        revalidateTag(`company-id-${companyId}`, 'default');
       }
-      revalidateTag(`job-${result.job_id}`, 'default');
+      revalidateTag(`job-${jobId}`, 'default');
 
       return {
         success: true,
-        jobId: result.job_id,
-        companyId: result.company_id,
-        paymentAmount: result.payment_amount,
-        requiresPayment: result.requires_payment,
+        jobId,
+        companyId,
+        paymentAmount,
+        requiresPayment,
         checkoutUrl, // Polar-hosted checkout page URL (or null if not configured yet)
       };
     } catch (error) {
@@ -373,12 +414,7 @@ export const updateJob = authedAction
     try {
       const { job_id, ...updates } = parsedInput;
 
-      type UpdateJobRpcResult = {
-        success: boolean;
-        job_id: string;
-      };
-
-      const result = await runRpc<UpdateJobRpcResult>(
+      const result = await runRpc<Database['public']['Functions']['update_job']['Returns']>(
         'update_job',
         {
           p_job_id: job_id,
@@ -396,9 +432,15 @@ export const updateJob = authedAction
         throw new Error('Job update failed');
       }
 
+      // Extract job_id with null check
+      const updatedJobId = result.job_id;
+      if (updatedJobId == null) {
+        throw new Error('Job update returned null job_id');
+      }
+
       logger.info('Job updated successfully', {
         userId: ctx.userId,
-        jobId: result.job_id,
+        jobId: updatedJobId,
       });
 
       revalidatePath('/account/jobs');
@@ -418,7 +460,7 @@ export const updateJob = authedAction
 
       return {
         success: true,
-        jobId: result.job_id,
+        jobId: updatedJobId,
       };
     } catch (error) {
       throw logActionFailure('jobs.updateJob', error, {
@@ -437,12 +479,7 @@ export const deleteJob = authedAction
   .inputSchema(deleteJobSchema)
   .action(async ({ parsedInput, ctx }) => {
     try {
-      type DeleteJobRpcResult = {
-        success: boolean;
-        job_id: string;
-      };
-
-      const result = await runRpc<DeleteJobRpcResult>(
+      const result = await runRpc<Database['public']['Functions']['delete_job']['Returns']>(
         'delete_job',
         {
           p_job_id: parsedInput.job_id,
@@ -459,9 +496,16 @@ export const deleteJob = authedAction
         throw new Error('Job deletion failed');
       }
 
+      // Use generated types directly - handle nullability
+      const jobId = result.job_id ?? '';
+
+      if (!jobId) {
+        throw new Error('Job deletion failed: missing job_id');
+      }
+
       logger.info('Job deleted successfully', {
         userId: ctx.userId,
-        jobId: result.job_id,
+        jobId,
       });
 
       revalidatePath('/account/jobs');
@@ -471,11 +515,11 @@ export const deleteJob = authedAction
       await invalidateJobCaches({
         keys: ['cache.invalidate.job_delete'],
       });
-      revalidateTag(`job-${result.job_id}`, 'default');
+      revalidateTag(`job-${jobId}`, 'default');
 
       return {
         success: true,
-        jobId: result.job_id,
+        jobId,
       };
     } catch (error) {
       throw logActionFailure('jobs.deleteJob', error, {
@@ -494,13 +538,7 @@ export const toggleJobStatus = authedAction
   .inputSchema(toggleJobStatusSchema)
   .action(async ({ parsedInput, ctx }) => {
     try {
-      type ToggleJobStatusRpcResult = {
-        success: boolean;
-        old_status: Database['public']['Enums']['job_status'];
-        new_status: Database['public']['Enums']['job_status'];
-      };
-
-      const result = await runRpc<ToggleJobStatusRpcResult>(
+      const result = await runRpc<Database['public']['Functions']['toggle_job_status']['Returns']>(
         'toggle_job_status',
         {
           p_job_id: parsedInput.job_id,
@@ -521,11 +559,18 @@ export const toggleJobStatus = authedAction
         throw new Error('Job status toggle failed');
       }
 
+      const oldStatus = result.old_status;
+      const newStatus = result.new_status;
+
+      if (oldStatus == null || newStatus == null) {
+        throw new Error('Job status toggle returned null status values');
+      }
+
       logger.info('Job status toggled successfully', {
         userId: ctx.userId,
         jobId: parsedInput.job_id,
-        oldStatus: result.old_status,
-        newStatus: result.new_status,
+        oldStatus,
+        newStatus,
       });
 
       revalidatePath('/account/jobs');
@@ -539,8 +584,8 @@ export const toggleJobStatus = authedAction
 
       return {
         success: true,
-        oldStatus: result.old_status,
-        newStatus: result.new_status,
+        oldStatus,
+        newStatus,
       };
     } catch (error) {
       throw logActionFailure('jobs.toggleJobStatus', error, {

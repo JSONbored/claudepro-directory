@@ -13,58 +13,15 @@ import type { ExtendedDatabase } from './database-extensions.types.ts';
 
 /**
  * filter_jobs RPC return type
+ * REMOVED: Now using generated type from database.types.ts
+ * Use: DatabaseGenerated['public']['Functions']['filter_jobs']['Returns']
  */
-export type GetFilterJobsReturn = {
-  jobs: Array<DatabaseGenerated['public']['Tables']['jobs']['Row']>;
-  total_count: number;
-} | null;
 
 /**
  * get_category_configs_with_features RPC return type
+ * REMOVED: Now using generated type from database.types.ts
+ * Use: DatabaseGenerated['public']['CompositeTypes']['category_config_with_features'][]
  */
-export type GetGetCategoryConfigsWithFeaturesReturn = Record<
-  DatabaseGenerated['public']['Enums']['content_category'],
-  {
-    category: DatabaseGenerated['public']['Enums']['content_category'];
-    title: string;
-    plural_title: string;
-    description: string | null;
-    icon_name: string | null;
-    color_scheme: string | null;
-    keywords: string[] | null;
-    meta_description: string | null;
-    search_placeholder: string | null;
-    empty_state_message: string | null;
-    url_slug: string;
-    content_loader: string | null;
-    config_format: string | null;
-    primary_action_type: string | null;
-    primary_action_label: string | null;
-    primary_action_config: Json | null;
-    validation_config: Json | null;
-    generation_config: Json | null;
-    schema_name: string | null;
-    api_schema: Json | null;
-    metadata_fields: string[];
-    badges: Json;
-    features: {
-      show_on_homepage: boolean;
-      display_config: Json | null;
-      generate_full_content: boolean;
-      build_enable_cache: boolean;
-      api_generate_static: boolean;
-      api_include_trending: boolean;
-      section_features: boolean;
-      section_installation: boolean;
-      section_use_cases: boolean;
-      section_configuration: boolean;
-      section_security: boolean;
-      section_troubleshooting: boolean;
-      section_examples: boolean;
-      metadata_show_github_link: boolean;
-    };
-  }
->;
 
 /**
  * Database type with proper overrides for edge functions
@@ -79,75 +36,8 @@ export type Database = DatabaseGenerated & {
   pgmq_public: ExtendedDatabase['pgmq_public'];
   public: DatabaseGenerated['public'] & {
     Enums: DatabaseGenerated['public']['Enums'];
-    Tables: DatabaseGenerated['public']['Tables'] & {
-      content: DatabaseGenerated['public']['Tables']['content'] & {
-        Update: DatabaseGenerated['public']['Tables']['content']['Update'] & {
-          // MCP package generation fields
-          mcpb_storage_url?: string | null;
-          mcpb_build_hash?: string | null;
-          mcpb_last_built_at?: string | null;
-        };
-      };
-    };
-    Functions: DatabaseGenerated['public']['Functions'] & {
-      filter_jobs: {
-        Args: {
-          p_query?: string | null;
-          p_category?: string | null;
-          p_employment_type?: string | null;
-          p_experience_level?: string | null;
-          p_remote_only?: boolean | null;
-          p_limit?: number | null;
-          p_offset?: number | null;
-        };
-        Returns: GetFilterJobsReturn;
-      };
-      query_content_embeddings: {
-        Args: {
-          query_embedding: string; // JSON stringified vector
-          match_threshold?: number;
-          match_limit?: number;
-          p_categories?: string[] | null;
-          p_tags?: string[] | null;
-          p_authors?: string[] | null;
-          p_offset?: number;
-        };
-        Returns: Array<{
-          _featured: Json;
-          author: string;
-          author_profile_url: string;
-          bookmark_count: number;
-          category: string;
-          combined_score: number;
-          copyCount: number;
-          created_at: string;
-          date_added: string;
-          description: string;
-          examples: Json;
-          features: Json;
-          id: string;
-          relevance_score: number;
-          slug: string;
-          source: string;
-          tags: string[];
-          title: string;
-          updated_at: string;
-          use_cases: Json;
-          viewCount: number;
-        }>;
-      };
-      get_category_configs_with_features: {
-        Args: Record<string, never>; // No arguments
-        Returns: GetGetCategoryConfigsWithFeaturesReturn;
-      };
-      get_mcpb_storage_path: {
-        Args: { p_slug: string };
-        Returns: {
-          bucket: string;
-          object_path: string;
-        }[];
-      };
-    };
+    Tables: DatabaseGenerated['public']['Tables'];
+    Functions: DatabaseGenerated['public']['Functions'];
   };
 };
 
@@ -888,182 +778,24 @@ export async function callRpc<T extends keyof Database['public']['Functions']>(
 
 /**
  * get_company_profile RPC return type
- * Returns company profile with active jobs and statistics
- *
- * Structure:
- * - company: Full company row from companies table
- * - active_jobs: Array of active job listings (subset of job fields)
- * - stats: Company job statistics from company_job_stats view
- *
- * Returns NULL if company not found (slug doesn't exist or owner_id IS NULL)
+ * REMOVED: Now using generated type from database.types.ts
+ * Use: DatabaseGenerated['public']['CompositeTypes']['company_profile_result']
  */
-export type GetCompanyProfileReturn = {
-  company: Tables<'companies'>;
-  active_jobs: Array<{
-    id: string;
-    slug: string;
-    title: string;
-    company: string;
-    company_logo: string | null;
-    location: string | null;
-    description: string | null;
-    salary: string | null;
-    remote: boolean;
-    type: string | null;
-    workplace: string | null;
-    experience: string | null;
-    category: string | null;
-    tags: string[];
-    tier: string | null;
-    posted_at: string;
-    expires_at: string | null;
-    view_count: number;
-    click_count: number;
-    link: string;
-  }>;
-  stats: {
-    total_jobs: number | null;
-    active_jobs: number | null;
-    featured_jobs: number | null;
-    remote_jobs: number | null;
-    avg_salary_min: number | null;
-    total_views: number | null;
-    total_clicks: number | null;
-    click_through_rate: number | null;
-    latest_job_posted_at: string | null;
-  };
-} | null;
 
 /**
  * reorder_collection_items RPC return type
- * Returns result of reordering collection items with batch update status
- *
- * Structure:
- * - Success case: { success: true, updated: number, errors: Array<{ itemId, error }> }
- * - Failure case: { success: false, error: string, updated: 0 }
- *
- * The errors array contains items that failed during batch update.
- * Empty array [] if all items updated successfully.
+ * REMOVED: Now using generated type from database.types.ts
+ * Use: DatabaseGenerated['public']['Functions']['reorder_collection_items']['Returns']
  */
-export type ReorderCollectionItemsReturn =
-  | {
-      success: true;
-      updated: number;
-      errors: Array<{
-        itemId: string;
-        error: string;
-      }>;
-    }
-  | {
-      success: false;
-      error: string;
-      updated: 0;
-    };
 
 /**
  * generate_metadata_complete RPC return type
- * Returns SEO metadata and optional JSON-LD schemas based on route pattern
- *
- * Structure:
- * - When p_include = 'metadata': Returns metadata object only
- * - When p_include includes 'schemas': Returns { metadata: {...}, schemas: [...] }
- *
- * Function never returns NULL (always returns a JSONB object)
+ * REMOVED: Now using generated type from database.types.ts
+ * Use: DatabaseGenerated['public']['Functions']['generate_metadata_complete']['Returns'] (Json)
  */
-export type GenerateMetadataCompleteReturn =
-  | {
-      title: string;
-      description: string;
-      keywords: string[];
-      openGraphType: 'profile' | 'website';
-      twitterCard: 'summary_large_image';
-      robots: {
-        index: boolean;
-        follow: boolean;
-      };
-      _debug?: {
-        pattern: string;
-        route: string;
-        category?: string;
-        slug?: string;
-        error?: string;
-      };
-    }
-  | {
-      metadata: {
-        title: string;
-        description: string;
-        keywords: string[];
-        openGraphType: 'profile' | 'website';
-        twitterCard: 'summary_large_image';
-        robots: {
-          index: boolean;
-          follow: boolean;
-        };
-        _debug?: {
-          pattern: string;
-          route: string;
-          category?: string;
-          slug?: string;
-          error?: string;
-        };
-      };
-      schemas: Json[];
-    };
-
-/**
- * generate_markdown_export RPC return type
- * Returns markdown export for a content item with optional metadata and footer
- *
- * Structure:
- * - Success case: { success: true, markdown: string, filename: string, length: number, content_id: string }
- * - Failure case: { success: false, error: string }
- *
- * Function always returns a result (never NULL)
- * Markdown field is always a string (text type in PostgreSQL)
- * Filename format: "{slug}.md"
- * Length is the character count of the generated markdown
- */
-export type GenerateMarkdownExportReturn =
-  | {
-      success: true;
-      markdown: string;
-      filename: string;
-      length: number;
-      content_id: string;
-    }
-  | {
-      success: false;
-      error: string;
-    };
 
 /**
  * generate_readme_data RPC return type
- * Returns structured data for README.md generation
- *
- * Structure:
- * - categories: Array of category configurations with items
- * - totalCount: Total number of content items across all categories
- * - categoryBreakdown: Record mapping category names to item counts
- *
- * Categories filtered to: agents, mcp, hooks, commands, rules, skills, statuslines, collections
- * Items are sorted by title within each category.
- *
- * Note: Function always returns a result (never NULL)
+ * REMOVED: Now using generated type from database.types.ts
+ * Use: DatabaseGenerated['public']['Functions']['generate_readme_data']['Returns'] (Json)
  */
-export type GenerateReadmeDataReturn = {
-  categories: Array<{
-    category: string;
-    title: string;
-    description: string;
-    icon_name: string;
-    url_slug: string;
-    items: Array<{
-      slug: string;
-      title: string;
-      description: string;
-    }>;
-  }>;
-  totalCount: number;
-  categoryBreakdown: Record<string, number>;
-};

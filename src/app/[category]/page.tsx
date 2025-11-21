@@ -116,9 +116,9 @@ export async function generateStaticParams() {
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ category: string }>;
+  params: { category: string };
 }): Promise<Metadata> {
-  const { category } = await params;
+  const { category } = params;
 
   // Validate category and load config
   if (!isValidCategory(category)) {

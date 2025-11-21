@@ -4,7 +4,8 @@ import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 
 export async function generateMetadata(): Promise<Metadata> {
-  return generatePageMetadata('/account/bookmarks');
+  // Use /account/library metadata since this redirects there
+  return generatePageMetadata('/account/library');
 }
 
 /**

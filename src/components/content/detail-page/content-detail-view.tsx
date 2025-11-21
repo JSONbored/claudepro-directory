@@ -188,8 +188,9 @@ export async function UnifiedDetailPage({
       ? ensureStringArray(contentItem['security'])
       : [];
 
-  // Pre-process content highlighting
-  const contentData = await (async () => {
+  // Parallelize independent preprocessing blocks to reduce TTFB
+  // Start all promises first, then await them together
+  const contentDataPromise = (async () => {
     // GUIDES: Skip content processing - structured sections rendered separately
     if (item.category === 'guides') {
       return null;
@@ -241,7 +242,7 @@ export async function UnifiedDetailPage({
   })();
 
   // Pre-process configuration highlighting (ConfigurationSection data)
-  const configData = await (async () => {
+  const configDataPromise = (async () => {
     // Check top-level first, then metadata
     const configuration =
       ('configuration' in contentItem && contentItem['configuration']) || metadata['configuration'];
@@ -406,7 +407,7 @@ export async function UnifiedDetailPage({
   })();
 
   // Pre-process usage examples highlighting (UsageExamplesSection data)
-  const examplesData = await (async () => {
+  const examplesDataPromise = (async () => {
     if (
       !('examples' in item && item.examples && Array.isArray(item.examples)) ||
       item.examples.length === 0 ||
@@ -423,36 +424,63 @@ export async function UnifiedDetailPage({
         description?: string;
       }>;
 
-      const highlightedExamples = await Promise.all(
+      const highlightedExamplesResults = await Promise.all(
         examples.map(async (example) => {
-          const html = await highlightCodeEdge(example.code, { language: example.language });
-          // Generate filename from title
-          const filename = `${example.title
-            .toLowerCase()
-            .replace(/[^a-z0-9]+/g, '-')
-            .replace(/^-+|-+$/g, '')}.${
-            {
-              typescript: 'ts',
-              javascript: 'js',
-              json: 'json',
-              bash: 'sh',
-              shell: 'sh',
-              python: 'py',
-              yaml: 'yml',
-              markdown: 'md',
-              plaintext: 'txt',
-            }[example.language] || 'txt'
-          }`;
+          // Validate required fields before processing
+          if (
+            typeof example.code !== 'string' ||
+            typeof example.language !== 'string' ||
+            typeof example.title !== 'string' ||
+            example.title.trim().length === 0
+          ) {
+            logDetailProcessingWarning(
+              'examplesData',
+              new Error(
+                `Invalid example entry: code=${typeof example.code}, language=${typeof example.language}, title=${typeof example.title}`
+              ),
+              item
+            );
+            return null;
+          }
 
-          return {
-            title: example.title,
-            ...(example.description && { description: example.description }),
-            html,
-            code: example.code,
-            language: example.language,
-            filename,
-          };
+          try {
+            const html = await highlightCodeEdge(example.code, { language: example.language });
+            // Generate filename from title
+            const filename = `${example.title
+              .toLowerCase()
+              .replace(/[^a-z0-9]+/g, '-')
+              .replace(/^-+|-+$/g, '')}.${
+              {
+                typescript: 'ts',
+                javascript: 'js',
+                json: 'json',
+                bash: 'sh',
+                shell: 'sh',
+                python: 'py',
+                yaml: 'yml',
+                markdown: 'md',
+                plaintext: 'txt',
+              }[example.language] || 'txt'
+            }`;
+
+            return {
+              title: example.title,
+              ...(example.description && { description: example.description }),
+              html,
+              code: example.code,
+              language: example.language,
+              filename,
+            };
+          } catch (error) {
+            logDetailProcessingWarning('examplesData', error, item);
+            return null;
+          }
         })
+      );
+
+      // Filter out null results after Promise.all resolves
+      const highlightedExamples = highlightedExamplesResults.filter(
+        (r): r is NonNullable<typeof r> => r !== null
       );
 
       return highlightedExamples;
@@ -463,7 +491,7 @@ export async function UnifiedDetailPage({
   })();
 
   // Pre-process installation steps highlighting (InstallationSection data)
-  const installationData = await (async () => {
+  const installationDataPromise = (async () => {
     if (!installation) return null;
 
     // Helper to detect if a step is a command (should be highlighted)
@@ -572,7 +600,7 @@ export async function UnifiedDetailPage({
   })();
 
   // GUIDES: Pre-process sections with server-side syntax highlighting
-  const guideSections = await (async (): Promise<Array<
+  const guideSectionsPromise = (async (): Promise<Array<
     Record<string, unknown> & { html?: string }
   > | null> => {
     if (item.category !== 'guides') return null;
@@ -592,19 +620,45 @@ export async function UnifiedDetailPage({
     return await Promise.all(
       sections.map(async (section) => {
         if (section.type === 'code' && section.code) {
-          const html = await highlightCodeEdge(section.code, {
-            language: section.language || 'text',
-          });
-          return { ...section, html };
+          if (typeof section.code !== 'string') {
+            logDetailProcessingWarning(
+              'guideSections',
+              new Error(`Invalid code section: code is ${typeof section.code}`),
+              item
+            );
+            return section;
+          }
+          try {
+            const html = await highlightCodeEdge(section.code, {
+              language: typeof section.language === 'string' ? section.language : 'text',
+            });
+            return { ...section, html };
+          } catch (error) {
+            logDetailProcessingWarning('guideSections', error, item);
+            return section;
+          }
         }
 
         if (section.type === 'code_group' && section.tabs) {
           const tabs = await Promise.all(
             section.tabs.map(async (tab) => {
-              const html = await highlightCodeEdge(tab.code, {
-                language: tab.language || 'text',
-              });
-              return { ...tab, html };
+              if (typeof tab.code !== 'string') {
+                logDetailProcessingWarning(
+                  'guideSections',
+                  new Error(`Invalid code_group tab: code is ${typeof tab.code}`),
+                  item
+                );
+                return tab;
+              }
+              try {
+                const html = await highlightCodeEdge(tab.code, {
+                  language: typeof tab.language === 'string' ? tab.language : 'text',
+                });
+                return { ...tab, html };
+              } catch (error) {
+                logDetailProcessingWarning('guideSections', error, item);
+                return tab;
+              }
             })
           );
           return { ...section, tabs };
@@ -614,10 +668,23 @@ export async function UnifiedDetailPage({
           const steps = await Promise.all(
             section.steps.map(async (step) => {
               if (step.code) {
-                const html = await highlightCodeEdge(step.code, {
-                  language: step.language || 'bash',
-                });
-                return { ...step, html };
+                if (typeof step.code !== 'string') {
+                  logDetailProcessingWarning(
+                    'guideSections',
+                    new Error(`Invalid steps step: code is ${typeof step.code}`),
+                    item
+                  );
+                  return step;
+                }
+                try {
+                  const html = await highlightCodeEdge(step.code, {
+                    language: typeof step.language === 'string' ? step.language : 'bash',
+                  });
+                  return { ...step, html };
+                } catch (error) {
+                  logDetailProcessingWarning('guideSections', error, item);
+                  return step;
+                }
               }
               return step;
             })
@@ -629,6 +696,16 @@ export async function UnifiedDetailPage({
       })
     );
   })();
+
+  // Await all independent preprocessing operations in parallel
+  const [contentData, configData, examplesData, installationData, guideSections] =
+    await Promise.all([
+      contentDataPromise,
+      configDataPromise,
+      examplesDataPromise,
+      installationDataPromise,
+      guideSectionsPromise,
+    ]);
 
   // Handle case where config is not found - AFTER ALL HOOKS
   if (!config) {
@@ -675,7 +752,7 @@ export async function UnifiedDetailPage({
             <ViewCountMetadata
               item={item}
               viewCountPromise={viewCountPromise}
-              {...(copyCount !== undefined ? { copyCount } : {})}
+              {...(copyCount !== undefined && { copyCount })}
             />
           </Suspense>
         ) : (
@@ -714,7 +791,7 @@ export async function UnifiedDetailPage({
           <ViewCountMetadata
             item={item}
             viewCountPromise={viewCountPromise}
-            {...(copyCount !== undefined ? { copyCount } : {})}
+            {...(copyCount !== undefined && { copyCount })}
           />
         </Suspense>
       ) : (

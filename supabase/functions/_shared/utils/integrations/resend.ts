@@ -32,7 +32,7 @@ export const RESEND_TOPIC_IDS = {
  * Auto-assigns relevant topics to maximize engagement
  */
 export function inferInitialTopics(
-  _source: Database['public']['Enums']['newsletter_source'] | null,
+  _source: Database['public']['Enums']['newsletter_source'] | string | null,
   copyCategory?: string | null
 ): string[] {
   const topics: string[] = [];
@@ -74,7 +74,7 @@ export function inferInitialTopics(
  * Higher score for more intentional signups
  */
 export function calculateInitialEngagementScore(
-  source: Database['public']['Enums']['newsletter_source'] | null,
+  source: Database['public']['Enums']['newsletter_source'] | string | null,
   copyType?: string | null
 ): number {
   let score = 50; // Neutral baseline
@@ -125,13 +125,13 @@ export function calculateInitialEngagementScore(
  * Maps our database fields to Resend custom properties
  */
 export function buildContactProperties(params: {
-  source: Database['public']['Enums']['newsletter_source'] | null;
+  source: Database['public']['Enums']['newsletter_source'] | string | null;
   copyType?: string | null;
   copyCategory?: string | null;
   referrer?: string | null;
 }): Record<string, string | number> {
   const { source, copyType, copyCategory, referrer } = params;
-  // Convert newsletter_source enum | null to string | null for database compatibility
+  // Convert newsletter_source to string | null for database compatibility
   const sourceValue: string | null = source ?? null;
 
   return {
@@ -407,8 +407,8 @@ export async function syncContactToResend(
   resend: Resend,
   email: string,
   contactProperties: Record<string, unknown>,
-  validatedSource: Database['public']['Enums']['newsletter_source'] | null,
-  copy_category: string | null | undefined,
+  validatedSource: Database['public']['Enums']['newsletter_source'] | string | null,
+  copy_category: Database['public']['Enums']['content_category'] | string | null | undefined,
   logContext: BaseLogContext
 ): Promise<{
   resendContactId: string | null;

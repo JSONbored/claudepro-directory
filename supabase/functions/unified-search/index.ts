@@ -22,8 +22,7 @@
  * - Without entities param → search_content_optimized() RPC (content-only with advanced filters)
  */
 
-import type { Database as DatabaseGenerated } from '../_shared/database.types.ts';
-import type { Database, GetFilterJobsReturn, RpcReturns } from '../_shared/database-overrides.ts';
+import type { Database as DatabaseGenerated, Json } from '../_shared/database.types.ts';
 import { callRpc } from '../_shared/database-overrides.ts';
 // Static imports to ensure circuit-breaker and timeout utilities are included in the bundle
 // These are lazily imported in callRpc, but we need static imports for Supabase bundling
@@ -50,10 +49,13 @@ import {
 } from '../_shared/utils/search-highlight.ts';
 import { buildSecurityHeaders } from '../_shared/utils/security-headers.ts';
 
-type ContentSearchResult = RpcReturns<'search_content_optimized'>[number];
-type UnifiedSearchResult = RpcReturns<'search_unified'>[number];
-type AutocompleteResult = RpcReturns<'get_search_suggestions_from_history'>[number];
-type FacetResult = RpcReturns<'get_search_facets'>[number];
+type ContentSearchResult =
+  DatabaseGenerated['public']['Functions']['search_content_optimized']['Returns'][number];
+type UnifiedSearchResult =
+  DatabaseGenerated['public']['Functions']['search_unified']['Returns'][number];
+type AutocompleteResult =
+  DatabaseGenerated['public']['Functions']['get_search_suggestions_from_history']['Returns'][number];
+type FacetResult = DatabaseGenerated['public']['Functions']['get_search_facets']['Returns'][number];
 
 interface HighlightedSearchResult {
   // Original fields
@@ -309,15 +311,29 @@ async function handleSearch(url: URL, startTime: number, req: Request): Promise<
   // Route to appropriate RPC based on search type
   if (searchType === 'jobs') {
     // Job filters present → use filter_jobs RPC
+    // Convert string values to ENUMs (NULL means 'all'/'any')
     const rpcArgs = {
-      ...(query ? { p_query: query } : {}),
-      ...(jobCategory && jobCategory !== 'all' ? { p_category: jobCategory } : {}),
-      ...(jobEmployment && jobEmployment !== 'any' ? { p_employment_type: jobEmployment } : {}),
-      ...(jobExperience && jobExperience !== 'any' ? { p_experience_level: jobExperience } : {}),
+      ...(query ? { p_search_query: query } : {}),
+      ...(jobCategory && jobCategory !== 'all'
+        ? {
+            p_category: jobCategory as DatabaseGenerated['public']['Enums']['job_category'],
+          }
+        : {}),
+      ...(jobEmployment && jobEmployment !== 'any'
+        ? {
+            p_employment_type: jobEmployment as DatabaseGenerated['public']['Enums']['job_type'],
+          }
+        : {}),
+      ...(jobExperience && jobExperience !== 'any'
+        ? {
+            p_experience_level:
+              jobExperience as DatabaseGenerated['public']['Enums']['experience_level'],
+          }
+        : {}),
       ...(isJobRemote !== undefined ? { p_remote_only: isJobRemote } : {}),
       p_limit: limit,
       p_offset: offset,
-    } satisfies Database['public']['Functions']['filter_jobs']['Args'];
+    } satisfies DatabaseGenerated['public']['Functions']['filter_jobs']['Args'];
     const { data: filterJobsData, error: filterJobsError } = await callRpc(
       'filter_jobs',
       rpcArgs,
@@ -328,15 +344,11 @@ async function handleSearch(url: URL, startTime: number, req: Request): Promise<
       error = filterJobsError;
       data = [];
     } else if (filterJobsData) {
-      // filter_jobs returns { jobs: [...], total_count: number }
-      const filterJobsResult = filterJobsData as GetFilterJobsReturn;
-      if (filterJobsResult) {
-        data = filterJobsResult.jobs || [];
-        totalCount = filterJobsResult.total_count;
-      } else {
-        data = [];
-        totalCount = 0;
-      }
+      // Use generated type from database.types.ts - no manual parsing, use types directly
+      const filterJobsResult: DatabaseGenerated['public']['Functions']['filter_jobs']['Returns'] =
+        filterJobsData;
+      data = filterJobsResult.jobs ?? [];
+      totalCount = filterJobsResult.total_count ?? 0;
     } else {
       data = [];
       totalCount = 0;
@@ -387,7 +399,7 @@ async function handleSearch(url: URL, startTime: number, req: Request): Promise<
           ...(tags !== undefined ? { p_tags: tags } : {}),
           ...(authors !== undefined ? { p_authors: authors } : {}),
           p_offset: offset,
-        } satisfies Database['public']['Functions']['query_content_embeddings']['Args'];
+        } satisfies DatabaseGenerated['public']['Functions']['query_content_embeddings']['Args'];
 
         const { data: semanticData, error: semanticError } = await callRpc(
           'query_content_embeddings',
@@ -396,8 +408,37 @@ async function handleSearch(url: URL, startTime: number, req: Request): Promise<
         );
 
         if (!semanticError && semanticData && semanticData.length > 0) {
-          // query_content_embeddings now returns ContentSearchResult format directly
-          data = semanticData;
+          // query_content_embeddings returns different structure than ContentSearchResult
+          // Transform to match ContentSearchResult format for consistency
+          type QueryEmbeddingsResult =
+            DatabaseGenerated['public']['Functions']['query_content_embeddings']['Returns'][number];
+          const transformedData = semanticData.map((item: QueryEmbeddingsResult) => ({
+            id: item.content_id,
+            title: item.title,
+            description: item.description,
+            category: item.category,
+            slug: item.slug,
+            author: item.author,
+            author_profile_url: item.author_profile_url,
+            tags: item.tags,
+            view_count: item.view_count,
+            bookmark_count: item.bookmark_count,
+            copy_count: item.copy_count,
+            created_at: item.created_at,
+            updated_at: item.updated_at,
+            relevance_score: item.similarity,
+            // Required fields for ContentSearchResult (provide defaults for missing fields)
+            _featured: null as Json,
+            combined_score: item.similarity,
+            copyCount: item.copy_count,
+            date_added: item.created_at,
+            examples: null as Json,
+            features: null as Json,
+            source: 'semantic_search',
+            use_cases: null as Json,
+            viewCount: item.view_count,
+          })) as ContentSearchResult[];
+          data = transformedData;
           error = null;
         } else {
           // Fallback to keyword search if semantic search fails or returns no results
@@ -756,7 +797,8 @@ async function trackSearchAnalytics(
   // Enqueue to queue instead of direct insert
   enqueueSearchAnalytics({
     query,
-    filters: filters as Database['public']['Tables']['search_queries']['Insert']['filters'],
+    filters:
+      filters as DatabaseGenerated['public']['Tables']['search_queries']['Insert']['filters'],
     resultCount,
     authorizationHeader,
   }).catch((error) => {

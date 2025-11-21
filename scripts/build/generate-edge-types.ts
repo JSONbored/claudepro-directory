@@ -75,42 +75,59 @@ function extractStructuredBlock(name: string, sectionStart: number, sectionEnd: 
   if (startIndex === -1 || startIndex > sectionEnd) {
     marker = `      ${name}:`;
     startIndex = source.indexOf(marker, sectionStart);
-    if (startIndex !== -1 && startIndex < sectionEnd) {
-      // Find the first `| {` or `{` after the name
-      const afterName = startIndex + marker.length;
-      const unionStart = source.indexOf('| {', afterName);
-      const simpleStart = source.indexOf('{', afterName);
-      const actualStart =
-        unionStart !== -1 && (simpleStart === -1 || unionStart < simpleStart)
-          ? unionStart + 2 // Skip `| ` to get to `{`
-          : simpleStart;
+    if (startIndex === -1 || startIndex > sectionEnd) {
+      throw new Error(`Unable to find definition for "${name}"`);
+    }
+    // For union types, start from the function name itself
+    // Find where the union ends by looking for the next function definition
+  }
 
-      if (actualStart !== -1) {
-        startIndex = actualStart - 2; // Go back to include `| ` if it exists
-      }
+  // Find the end of this block by looking for the next function or end of section
+  // For union types, we need to find all union members
+  let endIndex = sectionEnd;
+
+  // Look for the next function definition after this one
+  const nextFunctionPattern = /\n {6}[a-z_]+:\s*(?:\{|\|)/;
+  const afterStart = source.slice(startIndex + 1);
+  const nextMatch = afterStart.match(nextFunctionPattern);
+  if (nextMatch && nextMatch.index !== undefined) {
+    endIndex = Math.min(endIndex, startIndex + 1 + nextMatch.index);
+  }
+
+  // For union types, find the end of the union (when we hit the next function or closing brace)
+  // Count braces to find the end of the union type
+  let braceStart = source.indexOf('{', startIndex);
+  if (braceStart === -1) {
+    // For union types starting with `|`, find the first `| {`
+    const unionStart = source.indexOf('| {', startIndex);
+    if (unionStart !== -1) {
+      braceStart = unionStart + 2; // Point to the `{` after `| `
+    } else {
+      throw new Error(`Malformed block for "${name}"`);
     }
   }
 
-  if (startIndex === -1 || startIndex > sectionEnd) {
-    throw new Error(`Unable to find definition for "${name}"`);
-  }
-
-  const braceStart = source.indexOf('{', startIndex);
-  if (braceStart === -1) {
-    throw new Error(`Malformed block for "${name}"`);
-  }
-
+  // Find the end by counting braces, but stop at the next function definition
   let depth = 0;
   let index = braceStart;
-  while (index < sectionEnd) {
+  let foundFirstBrace = false;
+
+  while (index < endIndex) {
     const char = source[index];
     if (char === '{') {
       depth++;
+      foundFirstBrace = true;
     } else if (char === '}') {
       depth--;
-      if (depth === 0) {
-        index++;
-        break;
+      // For union types, we're done when we've closed all braces AND we're past the union
+      // Check if we've hit the next function definition
+      if (depth === 0 && foundFirstBrace) {
+        // Check if there's another union member (`| {`) or if we're done
+        const remaining = source.slice(index + 1, endIndex).trimStart();
+        if (!remaining.startsWith('|')) {
+          index++;
+          break;
+        }
       }
     }
     index++;

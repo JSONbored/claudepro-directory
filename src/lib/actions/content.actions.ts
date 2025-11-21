@@ -15,7 +15,7 @@ import { getReviewsWithStatsData } from '@/src/lib/data/content/reviews';
 import { logger } from '@/src/lib/logger';
 import type { DisplayableContent } from '@/src/lib/types/component.types';
 import { logActionFailure } from '@/src/lib/utils/error.utils';
-import type { Database, Tables } from '@/src/types/database.types';
+import type { Database } from '@/src/types/database.types';
 
 const CONTENT_CATEGORY_VALUES = [
   'agents',
@@ -31,10 +31,7 @@ const CONTENT_CATEGORY_VALUES = [
   'changelog',
 ] as const satisfies readonly Database['public']['Enums']['content_category'][];
 
-import {
-  type ReorderCollectionItemsReturn,
-  SUBMISSION_TYPE_VALUES,
-} from '@/src/types/database-overrides';
+import { SUBMISSION_TYPE_VALUES } from '@/src/types/database-overrides';
 
 // URL validation helper
 const urlRefine = (val: string | null | undefined) => {
@@ -147,17 +144,20 @@ export const createCollection = authedAction
   .inputSchema(collectionSchema)
   .action(async ({ parsedInput, ctx }) => {
     try {
-      type ManageCollectionResult = {
-        success: boolean;
-        collection: Tables<'user_collections'>;
+      // Construct composite type from parsed input
+      const createData: Database['public']['CompositeTypes']['collection_create_input'] = {
+        name: parsedInput.name,
+        slug: parsedInput.slug,
+        description: parsedInput.description ?? null,
+        is_public: parsedInput.is_public ?? false,
       };
 
-      const result = await runRpc<ManageCollectionResult>(
+      const result = await runRpc<Database['public']['Functions']['manage_collection']['Returns']>(
         'manage_collection',
         {
-          p_action: 'create',
+          p_action: 'create' as const,
           p_user_id: ctx.userId,
-          p_data: parsedInput,
+          p_create_data: createData,
         },
         {
           action: 'content.createCollection.rpc',
@@ -166,15 +166,20 @@ export const createCollection = authedAction
         }
       );
 
+      const collection = result.collection;
+      if (!collection) {
+        throw new Error('Collection creation failed: missing collection');
+      }
+
       revalidatePath('/account');
       revalidatePath('/account/library');
-      if (result.collection?.is_public) revalidatePath('/u/[slug]', 'page');
+      if (collection.is_public) revalidatePath('/u/[slug]', 'page');
 
       await invalidateContentCaches({
         keys: ['cache.invalidate.collection_create'],
       });
 
-      return result;
+      return { success: result.success ?? false, collection };
     } catch (error) {
       throw logActionFailure('content.createCollection', error, {
         userId: ctx.userId,
@@ -191,17 +196,21 @@ export const updateCollection = authedAction
   .inputSchema(collectionSchema.extend({ id: z.string() }))
   .action(async ({ parsedInput, ctx }) => {
     try {
-      type ManageCollectionResult = {
-        success: boolean;
-        collection: Tables<'user_collections'>;
+      // Construct composite type from parsed input
+      const updateData: Database['public']['CompositeTypes']['collection_update_input'] = {
+        id: parsedInput.id,
+        name: parsedInput.name,
+        slug: parsedInput.slug,
+        description: parsedInput.description ?? null,
+        is_public: parsedInput.is_public ?? false,
       };
 
-      const result = await runRpc<ManageCollectionResult>(
+      const result = await runRpc<Database['public']['Functions']['manage_collection']['Returns']>(
         'manage_collection',
         {
-          p_action: 'update',
+          p_action: 'update' as const,
           p_user_id: ctx.userId,
-          p_data: parsedInput,
+          p_update_data: updateData,
         },
         {
           action: 'content.updateCollection.rpc',
@@ -210,16 +219,21 @@ export const updateCollection = authedAction
         }
       );
 
+      const collection = result.collection;
+      if (!collection) {
+        throw new Error('Collection update failed: missing collection');
+      }
+
       revalidatePath('/account');
       revalidatePath('/account/library');
-      revalidatePath(`/account/library/${result.collection.slug}`);
-      if (result.collection.is_public) revalidatePath('/u/[slug]', 'page');
+      revalidatePath(`/account/library/${collection.slug}`);
+      if (collection.is_public) revalidatePath('/u/[slug]', 'page');
 
       await invalidateContentCaches({
         keys: ['cache.invalidate.collection_update'],
       });
 
-      return result;
+      return { success: result.success ?? false, collection };
     } catch (error) {
       throw logActionFailure('content.updateCollection', error, {
         userId: ctx.userId,
@@ -239,9 +253,9 @@ export const deleteCollection = authedAction
       await runRpc(
         'manage_collection',
         {
-          p_action: 'delete',
+          p_action: 'delete' as const,
           p_user_id: ctx.userId,
-          p_data: parsedInput,
+          p_delete_id: parsedInput.id,
         },
         {
           action: 'content.deleteCollection.rpc',
@@ -275,17 +289,21 @@ export const addItemToCollection = authedAction
   .inputSchema(collectionItemSchema)
   .action(async ({ parsedInput, ctx }) => {
     try {
-      type ManageCollectionItemResult = {
-        success: boolean;
-        item: Tables<'collection_items'>;
+      // Construct composite type from parsed input
+      const addItemData: Database['public']['CompositeTypes']['collection_item_input'] = {
+        collection_id: parsedInput.collection_id,
+        content_type: parsedInput.content_type,
+        content_slug: parsedInput.content_slug,
+        notes: parsedInput.notes ?? null,
+        order: parsedInput.order ?? null,
       };
 
-      const result = await runRpc<ManageCollectionItemResult>(
+      const result = await runRpc<Database['public']['Functions']['manage_collection']['Returns']>(
         'manage_collection',
         {
-          p_action: 'add_item',
+          p_action: 'add_item' as const,
           p_user_id: ctx.userId,
-          p_data: parsedInput,
+          p_add_item_data: addItemData,
         },
         {
           action: 'content.addItemToCollection.rpc',
@@ -297,6 +315,11 @@ export const addItemToCollection = authedAction
         }
       );
 
+      const item = result.item;
+      if (!item) {
+        throw new Error('Failed to add item to collection: missing item');
+      }
+
       revalidatePath('/account/library');
       revalidatePath('/account/library/[slug]', 'page');
       revalidatePath('/u/[slug]', 'page');
@@ -305,7 +328,7 @@ export const addItemToCollection = authedAction
         keys: ['cache.invalidate.collection_items'],
       });
 
-      return result;
+      return { success: result.success ?? false, item };
     } catch (error) {
       throw logActionFailure('content.addItemToCollection', error, {
         userId: ctx.userId,
@@ -326,9 +349,9 @@ export const removeItemFromCollection = authedAction
       await runRpc(
         'manage_collection',
         {
-          p_action: 'remove_item',
+          p_action: 'remove_item' as const,
           p_user_id: ctx.userId,
-          p_data: parsedInput,
+          p_remove_item_id: parsedInput.id,
         },
         {
           action: 'content.removeItemFromCollection.rpc',
@@ -372,12 +395,21 @@ export const reorderCollectionItems = authedAction
     const { userId } = ctx;
 
     try {
-      const result = await runRpc<ReorderCollectionItemsReturn>(
+      // Construct composite type array from parsed input
+      const orderItems: Database['public']['CompositeTypes']['collection_item_order_input'][] =
+        items.map((item) => ({
+          id: item.id,
+          order: item.order,
+        }));
+
+      const result = await runRpc<
+        Database['public']['Functions']['reorder_collection_items']['Returns']
+      >(
         'reorder_collection_items',
         {
           p_collection_id: collection_id,
           p_user_id: userId,
-          p_items: items,
+          p_items: orderItems,
         },
         {
           action: 'content.reorderCollectionItems.rpc',
@@ -387,12 +419,13 @@ export const reorderCollectionItems = authedAction
       );
 
       if (!result.success) {
-        throw new Error(result.error || 'Failed to reorder collection items');
+        throw new Error(result.error ?? 'Failed to reorder collection items');
       }
 
-      if (result.errors.length > 0) {
+      const errors = result.errors;
+      if (errors && Array.isArray(errors) && errors.length > 0) {
         logger.warn('Some items failed to reorder', undefined, {
-          errorCount: result.errors.length,
+          errorCount: errors.length,
         });
       }
 
@@ -428,12 +461,20 @@ export const createReview = authedAction
   .inputSchema(reviewSchema)
   .action(async ({ parsedInput, ctx }) => {
     try {
-      const result = await runRpc<{ success: boolean; review: Tables<'review_ratings'> }>(
+      // Construct composite type from parsed input
+      const createData: Database['public']['CompositeTypes']['review_create_input'] = {
+        content_type: parsedInput.content_type,
+        content_slug: parsedInput.content_slug,
+        rating: parsedInput.rating,
+        review_text: parsedInput.review_text ?? null,
+      };
+
+      const result = await runRpc<Database['public']['Functions']['manage_review']['Returns']>(
         'manage_review',
         {
-          p_action: 'create',
+          p_action: 'create' as const,
           p_user_id: ctx.userId,
-          p_data: parsedInput,
+          p_create_data: createData,
         },
         {
           action: 'content.createReview.rpc',
@@ -444,7 +485,11 @@ export const createReview = authedAction
           },
         }
       );
-      const { content_type, content_slug } = result.review;
+      const review = result.review;
+      if (!review) {
+        throw new Error('Review creation failed: missing review');
+      }
+      const { content_type, content_slug } = review;
 
       revalidatePath(`/${content_type}/${content_slug}`);
       revalidatePath(`/${content_type}`);
@@ -457,13 +502,13 @@ export const createReview = authedAction
 
       logger.info('Review created', {
         userId: ctx.userId,
-        reviewId: result.review.id,
+        reviewId: review.id,
         content_type,
         content_slug,
-        rating: result.review.rating,
+        rating: review.rating,
       });
 
-      return result;
+      return { success: result.success ?? false, review };
     } catch (error) {
       throw logActionFailure('content.createReview', error, {
         userId: ctx.userId,
@@ -481,12 +526,19 @@ export const updateReview = authedAction
   .inputSchema(reviewUpdateSchema)
   .action(async ({ parsedInput, ctx }) => {
     try {
-      const result = await runRpc<{ success: boolean; review: Tables<'review_ratings'> }>(
+      // Construct composite type from parsed input
+      const updateData: Database['public']['CompositeTypes']['review_update_input'] = {
+        review_id: parsedInput.review_id,
+        rating: parsedInput.rating ?? null,
+        review_text: parsedInput.review_text ?? null,
+      };
+
+      const result = await runRpc<Database['public']['Functions']['manage_review']['Returns']>(
         'manage_review',
         {
-          p_action: 'update',
+          p_action: 'update' as const,
           p_user_id: ctx.userId,
-          p_data: parsedInput,
+          p_update_data: updateData,
         },
         {
           action: 'content.updateReview.rpc',
@@ -495,7 +547,11 @@ export const updateReview = authedAction
         }
       );
 
-      const { content_type, content_slug } = result.review;
+      const review = result.review;
+      if (!review) {
+        throw new Error('Review update failed: missing review');
+      }
+      const { content_type, content_slug } = review;
 
       revalidatePath(`/${content_type}/${content_slug}`);
       revalidatePath(`/${content_type}`);
@@ -513,7 +569,7 @@ export const updateReview = authedAction
         content_slug,
       });
 
-      return result;
+      return { success: result.success ?? false, review };
     } catch (error) {
       throw logActionFailure('content.updateReview', error, {
         userId: ctx.userId,
@@ -530,16 +586,12 @@ export const deleteReview = authedAction
   .inputSchema(reviewDeleteSchema)
   .action(async ({ parsedInput, ctx }) => {
     try {
-      const result = await runRpc<{
-        success: boolean;
-        content_type: string;
-        content_slug: string;
-      }>(
+      const result = await runRpc<Database['public']['Functions']['manage_review']['Returns']>(
         'manage_review',
         {
-          p_action: 'delete',
+          p_action: 'delete' as const,
           p_user_id: ctx.userId,
-          p_data: parsedInput,
+          p_delete_id: parsedInput.review_id,
         },
         {
           action: 'content.deleteReview.rpc',
@@ -548,20 +600,26 @@ export const deleteReview = authedAction
         }
       );
 
-      revalidatePath(`/${result.content_type}/${result.content_slug}`);
-      revalidatePath(`/${result.content_type}`);
+      const content_type = result.content_type;
+      const content_slug = result.content_slug;
+      if (content_type == null || content_slug == null) {
+        throw new Error('Review deletion failed: missing content_type or content_slug');
+      }
+
+      revalidatePath(`/${content_type}/${content_slug}`);
+      revalidatePath(`/${content_type}`);
 
       await invalidateContentCaches({
         keys: ['cache.invalidate.review_delete'],
-        extraTags: [`reviews:${result.content_type}:${result.content_slug}`],
+        extraTags: [`reviews:${content_type}:${content_slug}`],
       });
-      revalidateTag(`reviews:${result.content_type}:${result.content_slug}`, 'default');
+      revalidateTag(`reviews:${content_type}:${content_slug}`, 'default');
 
       logger.info('Review deleted', {
         userId: ctx.userId,
         reviewId: parsedInput.review_id,
-        content_type: result.content_type,
-        content_slug: result.content_slug,
+        content_type,
+        content_slug,
       });
 
       return { success: true };
@@ -578,12 +636,9 @@ export const markReviewHelpful = authedAction
   .inputSchema(helpfulVoteSchema)
   .action(async ({ parsedInput, ctx }) => {
     try {
-      const result = await runRpc<{
-        success: boolean;
-        helpful: boolean;
-        content_type: string;
-        content_slug: string;
-      }>(
+      const result = await runRpc<
+        Database['public']['Functions']['toggle_review_helpful']['Returns']
+      >(
         'toggle_review_helpful',
         {
           p_review_id: parsedInput.review_id,
@@ -597,13 +652,21 @@ export const markReviewHelpful = authedAction
         }
       );
 
-      revalidatePath(`/${result.content_type}/${result.content_slug}`);
+      // Extract values with null checks
+      const contentType = result.content_type;
+      const contentSlug = result.content_slug;
+
+      if (contentType == null || contentSlug == null) {
+        throw new Error('toggle_review_helpful returned null content_type or content_slug');
+      }
+
+      revalidatePath(`/${contentType}/${contentSlug}`);
 
       await invalidateContentCaches({
         keys: ['cache.invalidate.review_helpful'],
-        extraTags: [`reviews:${result.content_type}:${result.content_slug}`],
+        extraTags: [`reviews:${contentType}:${contentSlug}`],
       });
-      revalidateTag(`reviews:${result.content_type}:${result.content_slug}`, 'default');
+      revalidateTag(`reviews:${contentType}:${contentSlug}`, 'default');
 
       return { success: result.success, helpful: result.helpful };
     } catch (error) {
@@ -721,12 +784,9 @@ export const submitContentForReview = rateLimitedAction
   .inputSchema(submitContentSchema)
   .action(async ({ parsedInput }) => {
     try {
-      type SubmitContentResult = {
-        success: boolean;
-        submission_id: string;
-      };
-
-      const result = await runRpc<SubmitContentResult>(
+      const result = await runRpc<
+        Database['public']['Functions']['submit_content_for_review']['Returns']
+      >(
         'submit_content_for_review',
         {
           p_submission_type: parsedInput.submission_type,
@@ -755,8 +815,13 @@ export const submitContentForReview = rateLimitedAction
         throw new Error('Content submission failed');
       }
 
+      const submissionId = result.submission_id;
+      if (!submissionId) {
+        throw new Error('Content submission failed: missing submission_id');
+      }
+
       logger.info('Content submitted successfully', {
-        submission_id: result.submission_id,
+        submission_id: submissionId,
         submission_type: parsedInput.submission_type,
       });
 
@@ -768,7 +833,7 @@ export const submitContentForReview = rateLimitedAction
 
       return {
         success: true,
-        submissionId: result.submission_id,
+        submissionId: submissionId,
       };
     } catch (error) {
       logger.error(

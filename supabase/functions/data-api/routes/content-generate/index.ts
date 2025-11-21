@@ -234,8 +234,7 @@ export async function handleGeneratePackage(
         'X-Processing-Mode': 'async',
       });
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-
+      // Log error details server-side (not exposed to users)
       if (logContext) {
         logError('Failed to enqueue package generation', logContext, error);
       }
@@ -248,7 +247,7 @@ export async function handleGeneratePackage(
           slug: contentRow.slug || '',
           storage_url: '', // Empty for error cases
           error: 'Enqueue Failed',
-          message: errorMessage,
+          message: 'Internal Server Error', // Never expose details to users
         } satisfies GeneratePackageResponse,
         500,
         {
@@ -299,8 +298,7 @@ export async function handleGeneratePackage(
       'X-Processing-Mode': 'sync',
     });
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : String(error);
-
+    // Log error details server-side (not exposed to users)
     if (logContext) {
       logError('Package generation failed', logContext, error);
     }
@@ -313,7 +311,7 @@ export async function handleGeneratePackage(
         slug: contentRow.slug || '',
         storage_url: '', // Empty for error cases
         error: 'Generation Failed',
-        message: errorMessage,
+        message: 'Internal Server Error', // Never expose details to users
       } satisfies GeneratePackageResponse,
       500,
       {

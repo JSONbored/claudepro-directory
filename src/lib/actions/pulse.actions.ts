@@ -22,7 +22,6 @@ import { logger } from '@/src/lib/logger';
 import { normalizeError } from '@/src/lib/utils/error.utils';
 import { enqueuePulseEventServer } from '@/src/lib/utils/pulse';
 import type { Database, Json } from '@/src/types/database.types';
-import type { Database as DatabaseOverrides } from '@/src/types/database-overrides';
 import {
   CONTACT_ACTION_TYPE_VALUES,
   EXPERIENCE_LEVEL_VALUES,
@@ -58,8 +57,9 @@ const CONTENT_CATEGORY_VALUES = [
 // TYPES
 // ============================================
 
+// Use generated types directly from database.types.ts
 export type TrackInteractionParams = Omit<
-  DatabaseOverrides['public']['Tables']['user_interactions']['Insert'],
+  Database['public']['Tables']['user_interactions']['Insert'],
   'id' | 'created_at' | 'user_id'
 >;
 
@@ -391,10 +391,8 @@ export const trackSponsoredImpression = optionalAuthAction
       return;
     }
 
-    // Use content_type directly from sponsored_content (database will validate ENUM)
-    // Type assertion to ENUM since sponsored_content.content_type should be content_category
-    const contentType =
-      sponsoredContent.content_type as Database['public']['Enums']['content_category'];
+    // Use content_type directly from sponsored_content (now correctly typed as ENUM)
+    const contentType = sponsoredContent.content_type;
 
     // Enqueue to queue instead of direct RPC
     // This provides 98% egress reduction via batched processing
@@ -450,10 +448,8 @@ export const trackSponsoredClick = optionalAuthAction
       return;
     }
 
-    // Use content_type directly from sponsored_content (database will validate ENUM)
-    // Type assertion to ENUM since sponsored_content.content_type should be content_category
-    const contentType =
-      sponsoredContent.content_type as Database['public']['Enums']['content_category'];
+    // Use content_type directly from sponsored_content (now correctly typed as ENUM)
+    const contentType = sponsoredContent.content_type;
 
     // Enqueue to queue instead of direct RPC
     // This provides 98% egress reduction via batched processing
