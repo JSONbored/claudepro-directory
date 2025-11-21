@@ -19,6 +19,7 @@ import { SEMANTIC_COLORS } from '@/src/lib/semantic-colors';
 import { ANIMATION_CONSTANTS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
 import type { Database } from '@/src/types/database.types';
+import { Constants } from '@/src/types/database.types';
 
 /**
  * Base badge variants (from original badge.tsx)
@@ -512,6 +513,7 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
 
 /**
  * Type guard helper: Check if a string is a valid category
+ * Uses Constants.public.Enums.content_category to ensure all categories are included
  */
 export function isValidCategory(
   value: string
@@ -520,17 +522,10 @@ export function isValidCategory(
     ? C
     : never
   : never {
-  return [
-    'rules',
-    'mcp',
-    'agents',
-    'commands',
-    'hooks',
-    'statuslines',
-    'collections',
-    'guides',
-    'skills',
-  ].includes(value);
+  // Use enum values directly from database.types.ts Constants
+  return Constants.public.Enums.content_category.includes(
+    value as Database['public']['Enums']['content_category']
+  );
 }
 
 /**

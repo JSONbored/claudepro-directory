@@ -7,6 +7,7 @@
  */
 
 import type { Database as DatabaseGenerated } from '../../../_shared/database.types.ts';
+import { Constants } from '../../../_shared/database.types.ts';
 import {
   createNotificationTrace,
   insertNotification,
@@ -74,9 +75,12 @@ export async function handleCreateNotification(req: Request): Promise<Response> 
   type NotificationType = DatabaseGenerated['public']['Enums']['notification_type'];
   type NotificationPriority = DatabaseGenerated['public']['Enums']['notification_priority'];
 
+  // Use enum values directly from database.types.ts Constants
+  const notificationTypeValues = Constants.public.Enums.notification_type;
+  const notificationPriorityValues = Constants.public.Enums.notification_priority;
+
   function isValidNotificationType(value: string): value is NotificationType {
-    const validTypes: NotificationType[] = ['announcement', 'feedback'];
-    for (const validType of validTypes) {
+    for (const validType of notificationTypeValues) {
       if (value === validType) {
         return true;
       }
@@ -85,8 +89,7 @@ export async function handleCreateNotification(req: Request): Promise<Response> 
   }
 
   function isValidNotificationPriority(value: string): value is NotificationPriority {
-    const validPriorities: NotificationPriority[] = ['high', 'medium', 'low'];
-    for (const validPriority of validPriorities) {
+    for (const validPriority of notificationPriorityValues) {
       if (value === validPriority) {
         return true;
       }
