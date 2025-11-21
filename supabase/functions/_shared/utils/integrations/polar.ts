@@ -88,9 +88,10 @@ export async function createPolarCheckout(
       sessionId: session.id,
     };
   } catch (error) {
+    const { errorToString } = await import('../error-handling.ts');
     console.error('Polar checkout creation error', {
       ...logContext,
-      error: error instanceof Error ? error.message : String(error),
+      error: errorToString(error),
     });
     return { error: 'Failed to create checkout session' };
   }

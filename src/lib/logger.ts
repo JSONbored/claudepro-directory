@@ -24,7 +24,48 @@ const pinoInstance = isDevelopment
       },
     });
 
-type LogContext = Record<string, string | number | boolean>;
+/**
+ * Log context value type - supports primitives, arrays, and nested objects
+ * Recursive type allows nested structures while maintaining type safety
+ */
+export type LogContextValue =
+  | string
+  | number
+  | boolean
+  | null
+  | readonly string[]
+  | readonly number[]
+  | readonly boolean[]
+  | ReadonlyArray<LogContextValue>
+  | { readonly [key: string]: LogContextValue };
+
+type LogContext = Record<string, LogContextValue>;
+
+/**
+ * Convert a value to LogContextValue safely
+ * Handles Json types from database and plain objects
+ * This function ensures type safety when converting complex types to LogContextValue
+ */
+export function toLogContextValue(value: unknown): LogContextValue {
+  if (value === null || value === undefined) {
+    return null;
+  }
+  if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+    return value;
+  }
+  if (Array.isArray(value)) {
+    return value.map(toLogContextValue) as ReadonlyArray<LogContextValue>;
+  }
+  if (typeof value === 'object') {
+    const result: Record<string, LogContextValue> = {};
+    for (const [key, val] of Object.entries(value)) {
+      result[key] = toLogContextValue(val);
+    }
+    return result as { readonly [key: string]: LogContextValue };
+  }
+  // Fallback: convert to string for unknown types
+  return String(value);
+}
 
 /**
  * Sanitize log message to prevent log injection
@@ -51,14 +92,49 @@ function sanitizeLogMessage(message: string): string {
 }
 
 /**
- * Sanitize log context values to prevent log injection
- * Recursively sanitizes string values in context objects
+ * Sanitize a single string value to prevent log injection
  */
-function sanitizeLogContext(context?: LogContext): LogContext | undefined {
+function sanitizeStringValue(value: string, maxLength = 500): string {
+  let sanitized = value
+    .replace(/[\r\n\t]/g, ' ') // Replace newlines, carriage returns, and tabs with spaces
+    .split('')
+    .filter((char) => {
+      const code = char.charCodeAt(0);
+      // Remove all control characters (0x00-0x1F, 0x7F-0x9F)
+      return code >= 0x20 && (code < 0x7f || code > 0x9f);
+    })
+    .join('');
+  if (sanitized.length > maxLength) {
+    sanitized = `${sanitized.slice(0, maxLength)}... [truncated]`;
+  }
+  return sanitized;
+}
+
+/**
+ * Sanitize log context values to prevent log injection
+ * Recursively sanitizes string values in context objects, arrays, and nested structures
+ * @param context - The context object to sanitize
+ * @param depth - Current recursion depth (default: 0, max: 5)
+ * @param sizeLimit - Maximum size in bytes for the entire context (default: 10KB)
+ * @returns Sanitized context object
+ */
+function sanitizeLogContext(
+  context?: LogContext,
+  depth = 0,
+  sizeLimit = 10 * 1024
+): LogContext | undefined {
   if (!context) return context;
+
+  // Prevent deep nesting attacks (max depth: 5)
+  if (depth > 5) {
+    return { '[error]': 'Context too deeply nested' } as LogContext;
+  }
+
   // Use Object.create(null) to create a plain object without prototype
   // This prevents prototype pollution attacks since there's no __proto__ to pollute
   const sanitized = Object.create(null) as LogContext;
+  let currentSize = 0;
+
   for (const [key, value] of Object.entries(context)) {
     // Validate key to prevent prototype pollution: only allow safe property names
     // Skip keys that could be used for attacks (e.g., __proto__, constructor)
@@ -67,25 +143,63 @@ function sanitizeLogContext(context?: LogContext): LogContext | undefined {
     // Only allow alphanumeric, underscore, and hyphen in keys (safe for logging)
     if (!/^[a-zA-Z0-9_-]+$/.test(key)) continue;
 
-    if (typeof value === 'string') {
-      // Sanitize string values: remove control characters including newlines and tabs, limit length
-      let sanitizedValue = value
-        .replace(/[\r\n\t]/g, ' ') // Replace newlines, carriage returns, and tabs with spaces
-        .split('')
-        .filter((char) => {
-          const code = char.charCodeAt(0);
-          // Remove all control characters (0x00-0x1F, 0x7F-0x9F)
-          return code >= 0x20 && (code < 0x7f || code > 0x9f);
-        })
-        .join('');
-      if (sanitizedValue.length > 500) {
-        sanitizedValue = `${sanitizedValue.slice(0, 500)}... [truncated]`;
-      }
-      sanitized[key] = sanitizedValue;
-    } else {
+    // Estimate size (rough approximation)
+    const keySize = key.length;
+    if (currentSize + keySize > sizeLimit) {
+      sanitized['[truncated]'] = 'Context size limit exceeded';
+      break;
+    }
+    currentSize += keySize;
+
+    // Handle different value types
+    if (value === null) {
+      sanitized[key] = null;
+    } else if (typeof value === 'string') {
+      sanitized[key] = sanitizeStringValue(value);
+      currentSize += sanitized[key].length;
+    } else if (typeof value === 'number' || typeof value === 'boolean') {
       sanitized[key] = value;
+      currentSize += 8; // Rough estimate for number/boolean
+    } else if (Array.isArray(value)) {
+      // Recursively sanitize array elements
+      const sanitizedArray: LogContextValue[] = [];
+      for (const item of value) {
+        if (currentSize > sizeLimit) {
+          sanitizedArray.push('[truncated]');
+          break;
+        }
+        if (typeof item === 'string') {
+          const sanitizedItem = sanitizeStringValue(item);
+          sanitizedArray.push(sanitizedItem);
+          currentSize += sanitizedItem.length;
+        } else if (typeof item === 'number' || typeof item === 'boolean') {
+          sanitizedArray.push(item);
+          currentSize += 8;
+        } else if (item === null) {
+          sanitizedArray.push(null);
+        } else if (typeof item === 'object' && !Array.isArray(item)) {
+          // Recursively sanitize nested objects in arrays
+          const nested = sanitizeLogContext(item as LogContext, depth + 1, sizeLimit - currentSize);
+          if (nested) {
+            sanitizedArray.push(nested);
+            currentSize += JSON.stringify(nested).length;
+          }
+        } else if (Array.isArray(item)) {
+          // Handle nested arrays (flatten or truncate)
+          sanitizedArray.push('[nested array truncated]');
+        }
+      }
+      sanitized[key] = sanitizedArray;
+    } else if (typeof value === 'object' && !Array.isArray(value)) {
+      // Recursively sanitize nested objects
+      const nested = sanitizeLogContext(value as LogContext, depth + 1, sizeLimit - currentSize);
+      if (nested) {
+        sanitized[key] = nested;
+        currentSize += JSON.stringify(nested).length;
+      }
     }
   }
+
   return sanitized;
 }
 
@@ -146,7 +260,26 @@ class Logger {
     context?: LogContext,
     metadata?: LogContext
   ): void {
-    pinoInstance.fatal({ err: error, ...context, ...metadata }, message);
+    const sanitizedMessage = sanitizeLogMessage(message);
+    const sanitizedContext = sanitizeLogContext(context);
+    const sanitizedMetadata = sanitizeLogContext(metadata);
+    const logData: Record<string, unknown> = { ...sanitizedContext, ...sanitizedMetadata };
+    if (error !== undefined) {
+      // For Error objects, extract message safely
+      if (error instanceof Error) {
+        logData['err'] = {
+          message: sanitizeLogMessage(error.message),
+          name: error.name,
+          stack: error.stack ? sanitizeLogMessage(error.stack) : undefined,
+        };
+      } else if (typeof error === 'string') {
+        logData['err'] = sanitizeLogMessage(error);
+      } else {
+        // For unknown error types, convert to string and sanitize to prevent log injection
+        logData['err'] = sanitizeLogMessage(String(error));
+      }
+    }
+    pinoInstance.fatal(logData, sanitizedMessage);
   }
 
   // Special method used once - just pass through

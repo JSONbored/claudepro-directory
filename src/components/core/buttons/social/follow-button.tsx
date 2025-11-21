@@ -17,6 +17,7 @@ import { toast } from 'sonner';
 import { Button } from '@/src/components/primitives/ui/button';
 import { toggleFollow } from '@/src/lib/actions/user.actions';
 import { logger } from '@/src/lib/logger';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 
 export interface FollowButtonProps {
   userId: string;
@@ -61,7 +62,8 @@ export function FollowButton({
           // Rollback on server error
           setOptimisticIsFollowing(!newState);
           toast.error(result.serverError);
-          logger.error('Follow action failed', new Error(result.serverError), {
+          const normalized = normalizeError(result.serverError, 'Follow action failed');
+          logger.error('Follow action failed', normalized, {
             userId,
             action: newState ? 'follow' : 'unfollow',
           });
@@ -74,11 +76,8 @@ export function FollowButton({
         // Rollback on exception
         setOptimisticIsFollowing(!newState);
         toast.error('An unexpected error occurred');
-        logger.error(
-          'Follow action exception',
-          error instanceof Error ? error : new Error(String(error)),
-          { userId }
-        );
+        const normalized = normalizeError(error, 'Follow action exception');
+        logger.error('Follow action exception', normalized, { userId });
       }
     });
   };

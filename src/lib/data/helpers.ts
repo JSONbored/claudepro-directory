@@ -13,7 +13,17 @@ import { cachedRPCWithDedupe } from '@/src/lib/supabase/cached-rpc';
 import { normalizeError } from '@/src/lib/utils/error.utils';
 import type { Database } from '@/src/types/database.types';
 
-type LoggerValue = string | number | boolean;
+// Match LogContextValue from logger.ts to support arrays and objects
+type LoggerValue =
+  | string
+  | number
+  | boolean
+  | null
+  | readonly string[]
+  | readonly number[]
+  | readonly boolean[]
+  | ReadonlyArray<LoggerValue>
+  | { readonly [key: string]: LoggerValue };
 
 interface CachedRpcOptions<Result> {
   tags: string[];

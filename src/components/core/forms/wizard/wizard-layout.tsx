@@ -25,6 +25,7 @@ import { ArrowLeft, ArrowRight, Save, X } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import type { SubmissionContentType } from '@/src/lib/types/component.types';
 import { cn } from '@/src/lib/utils';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 import { ProgressIndicator, type WizardStep } from './progress-indicator';
 
 interface WizardLayoutProps {
@@ -101,9 +102,8 @@ export function WizardLayout({
         ...(qualityScore !== undefined ? { quality_score: qualityScore } : {}),
       });
     } catch (error) {
-      logger.warn('Failed to save draft', {
-        error: error instanceof Error ? error.message : String(error),
-      });
+      const normalized = normalizeError(error, 'Failed to save draft');
+      logger.warn('Failed to save draft', { error: normalized.message });
     } finally {
       setIsSaving(false);
     }
@@ -121,9 +121,8 @@ export function WizardLayout({
         ...(qualityScore !== undefined ? { quality_score: qualityScore } : {}),
       });
     } catch (error) {
-      logger.warn('Failed to navigate to next step', {
-        error: error instanceof Error ? error.message : String(error),
-      });
+      const normalized = normalizeError(error, 'Failed to navigate to next step');
+      logger.warn('Failed to navigate to next step', { error: normalized.message });
     } finally {
       setIsNavigating(false);
     }
@@ -143,7 +142,11 @@ export function WizardLayout({
         e.preventDefault();
         handleSave().catch((error) => {
           // Error handling is done inside handleSave, but we need to catch to prevent floating promise
-          logger.error('WizardLayout: handleSave failed in keyboard shortcut', error as Error);
+          const normalized = normalizeError(
+            error,
+            'WizardLayout: handleSave failed in keyboard shortcut'
+          );
+          logger.error('WizardLayout: handleSave failed in keyboard shortcut', normalized);
         });
       }
 

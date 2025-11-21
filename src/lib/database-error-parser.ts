@@ -4,6 +4,7 @@
  */
 
 import type { PostgrestError } from '@supabase/supabase-js';
+import { Constants } from '@/src/types/database.types';
 
 /**
  * Constraint name → user-friendly error message mapping
@@ -16,12 +17,10 @@ const CONSTRAINT_MESSAGES: Record<string, string> = {
 
   // Content
   content_slug_pattern: 'Slug must be 3-100 lowercase characters (letters, numbers, hyphens only)',
-  content_category_check:
-    'Invalid category. Must be one of: agents, mcp, commands, rules, hooks, statuslines, skills, collections, guides',
+  content_category_check: `Invalid category. Must be one of: ${Constants.public.Enums.content_category.join(', ')}`,
   content_avg_rating_check: 'Rating must be between 0 and 5',
   content_download_url_check: 'Download URL must start with /downloads/ or https://',
-  content_guide_subcategory_check:
-    'Guide subcategory must be one of: tutorials, comparisons, workflows, use-cases, troubleshooting', // Note: Values match guide_subcategory enum in database.types.ts
+  content_guide_subcategory_check: `Guide subcategory must be one of: ${Constants.public.Enums.guide_subcategory.join(', ')}`,
 
   // Profiles
   profiles_display_name_check: 'Display name must be 1-100 characters',

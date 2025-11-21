@@ -11,65 +11,18 @@ import { invalidateByKeys, runRpc } from '@/src/lib/actions/action-helpers';
 import { authedAction } from '@/src/lib/actions/safe-action';
 import type { CacheInvalidateKey } from '@/src/lib/data/config/cache-config';
 import { logger } from '@/src/lib/logger';
-import { logActionFailure } from '@/src/lib/utils/error.utils';
+import { logActionFailure, normalizeError } from '@/src/lib/utils/error.utils';
 import type { Database } from '@/src/types/database.types';
+import { Constants } from '@/src/types/database.types';
 
-// Create const arrays for Zod enum validation
-const JOB_STATUS_VALUES = [
-  'draft',
-  'pending_payment',
-  'pending_review',
-  'active',
-  'expired',
-  'rejected',
-  'deleted',
-] as const satisfies readonly Database['public']['Enums']['job_status'][];
-
-const WORKPLACE_TYPE_VALUES = [
-  'Remote',
-  'On site',
-  'Hybrid',
-] as const satisfies readonly Database['public']['Enums']['workplace_type'][];
-
-const EXPERIENCE_LEVEL_VALUES = [
-  'beginner',
-  'intermediate',
-  'advanced',
-] as const satisfies readonly Database['public']['Enums']['experience_level'][];
-
-const JOB_CATEGORY_VALUES = [
-  'engineering',
-  'design',
-  'product',
-  'marketing',
-  'sales',
-  'support',
-  'research',
-  'data',
-  'operations',
-  'leadership',
-  'consulting',
-  'education',
-  'other',
-] as const satisfies readonly Database['public']['Enums']['job_category'][];
-
-const JOB_TYPE_VALUES = [
-  'full-time',
-  'part-time',
-  'contract',
-  'freelance',
-  'internship',
-] as const satisfies readonly Database['public']['Enums']['job_type'][];
-
-const JOB_PLAN_VALUES = [
-  'one-time',
-  'subscription',
-] as const satisfies readonly Database['public']['Enums']['job_plan'][];
-
-const JOB_TIER_VALUES = [
-  'standard',
-  'featured',
-] as const satisfies readonly Database['public']['Enums']['job_tier'][];
+// Use enum values directly from database.types.ts Constants
+const JOB_STATUS_VALUES = Constants.public.Enums.job_status;
+const WORKPLACE_TYPE_VALUES = Constants.public.Enums.workplace_type;
+const EXPERIENCE_LEVEL_VALUES = Constants.public.Enums.experience_level;
+const JOB_CATEGORY_VALUES = Constants.public.Enums.job_category;
+const JOB_TYPE_VALUES = Constants.public.Enums.job_type;
+const JOB_PLAN_VALUES = Constants.public.Enums.job_plan;
+const JOB_TIER_VALUES = Constants.public.Enums.job_tier;
 
 // UUID validation helper
 const uuidRefine = (val: string | null | undefined) => {
@@ -339,7 +292,11 @@ export const createJob = authedAction
             });
 
             if ('error' in checkoutResult) {
-              logger.error('Failed to create Polar checkout', new Error(checkoutResult.error), {
+              const normalized = normalizeError(
+                checkoutResult.error,
+                'Failed to create Polar checkout'
+              );
+              logger.error('Failed to create Polar checkout', normalized, {
                 jobId,
                 userId: ctx.userId,
               });
@@ -362,14 +319,11 @@ export const createJob = authedAction
             // Return without checkout URL - user will need to contact support
           }
         } catch (error) {
-          logger.error(
-            'Polar integration error',
-            error instanceof Error ? error : new Error(String(error)),
-            {
-              jobId,
-              userId: ctx.userId,
-            }
-          );
+          const normalized = normalizeError(error, 'Polar integration error');
+          logger.error('Polar integration error', normalized, {
+            jobId,
+            userId: ctx.userId,
+          });
           // Graceful degradation - job created but payment cannot be processed
         }
       }

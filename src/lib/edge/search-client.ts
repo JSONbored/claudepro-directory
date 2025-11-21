@@ -8,7 +8,8 @@
 
 // NOTE: getCacheTtl is NOT imported at module level to prevent flags/next from being
 // evaluated in client component contexts. It's lazy-loaded inside functions that need it.
-import { logger } from '@/src/lib/logger';
+import { logger, toLogContextValue } from '@/src/lib/logger';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 import type { Database } from '@/src/types/database.types';
 
 const EDGE_SEARCH_URL = `${process.env['NEXT_PUBLIC_SUPABASE_URL']}/functions/v1/unified-search`;
@@ -155,12 +156,13 @@ export async function searchUnified<T = ContentSearchResult | UnifiedSearchResul
 
   if (!response.ok) {
     const errorText = await response.text();
-    logger.error('Unified search failed', new Error(errorText), {
+    const normalized = normalizeError(errorText, 'Unified search failed');
+    logger.error('Unified search failed', normalized, {
       status: response.status,
       url: EDGE_SEARCH_URL,
       query: query || '',
-      entities: entities?.join(',') || '',
-      filters: JSON.stringify(filters),
+      entities: entities || [], // Array support enables better log querying
+      filters: toLogContextValue(filters),
     });
     throw new Error(`Unified search failed: ${response.statusText}`);
   }
@@ -306,12 +308,13 @@ export async function searchUnifiedClient<T = ContentSearchResult | UnifiedSearc
 
   if (!response.ok) {
     const errorText = await response.text();
-    logger.error('Unified search failed (client)', new Error(errorText), {
+    const normalized = normalizeError(errorText, 'Unified search failed (client)');
+    logger.error('Unified search failed (client)', normalized, {
       status: response.status,
       url: EDGE_SEARCH_URL,
       query: query || '',
-      entities: entities?.join(',') || '',
-      filters: JSON.stringify(filters),
+      entities: entities || [], // Array support enables better log querying
+      filters: toLogContextValue(filters),
     });
     throw new Error(`Unified search failed: ${response.statusText}`);
   }

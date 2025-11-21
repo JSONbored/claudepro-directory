@@ -20,20 +20,10 @@ import {
 import { fetchCachedRpc } from '@/src/lib/data/helpers';
 import { revalidateCacheTags } from '@/src/lib/supabase/cache-helpers';
 import type { Database } from '@/src/types/database.types';
+import { Constants } from '@/src/types/database.types';
 
-const CONTENT_CATEGORY_VALUES = [
-  'agents',
-  'mcp',
-  'rules',
-  'commands',
-  'hooks',
-  'statuslines',
-  'skills',
-  'collections',
-  'guides',
-  'jobs',
-  'changelog',
-] as const satisfies readonly Database['public']['Enums']['content_category'][];
+// Use enum values directly from database.types.ts Constants
+const CONTENT_CATEGORY_VALUES = Constants.public.Enums.content_category;
 
 // UUID validation regex pattern (RFC 4122 compliant)
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;

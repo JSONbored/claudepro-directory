@@ -7,6 +7,7 @@
 
 import { useCallback } from 'react';
 import type { SubmissionContentType } from '@/src/lib/types/component.types';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 import type { Database } from '@/src/types/database.types';
 
 // Use generated type directly from database.types.ts
@@ -131,9 +132,10 @@ export function useTemplateApplication({
         return true;
       } catch (error) {
         if (onTrackEvent) {
+          const normalized = normalizeError(error, 'Template application failed');
           onTrackEvent('template_apply_error', {
             template_id: template.id,
-            error: error instanceof Error ? error.message : 'Unknown error',
+            error: normalized.message,
           });
         }
 

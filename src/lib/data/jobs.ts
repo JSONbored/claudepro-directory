@@ -171,9 +171,12 @@ export async function getFilteredJobs(
           keySuffix: `all-${limit}-${offset}`,
           fallback: null,
           logMeta: {
-            hasSearch: false,
-            limit,
-            offset,
+            filters: {
+              // Grouped filter values - better for structured logging
+              hasSearch: false,
+              limit,
+              offset,
+            },
           },
         }
       );
@@ -204,13 +207,16 @@ export async function getFilteredJobs(
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to filter jobs via edge function');
     logger.error('getFilteredJobs: edge function call failed', normalized, {
-      hasSearch: Boolean(searchQuery),
-      category: category || 'all',
-      employment: employment || 'any',
-      experience: experience || 'any',
-      remote: Boolean(remote),
-      limit,
-      offset,
+      filters: {
+        // Grouped filter values - better for structured logging
+        hasSearch: Boolean(searchQuery),
+        category: category || 'all',
+        employment: employment || 'any',
+        experience: experience || 'any',
+        remote: Boolean(remote),
+        limit,
+        offset,
+      },
     });
 
     // Fallback to direct RPC if edge function fails
@@ -255,13 +261,16 @@ export async function getFilteredJobs(
       ].join('|'),
       fallback: null,
       logMeta: {
-        hasSearch: Boolean(searchQuery),
-        category: category || 'all',
-        employment: employment || 'any',
-        experience: experience || 'any',
-        remote: Boolean(remote),
-        limit,
-        offset,
+        filters: {
+          // Grouped filter values - better for structured logging
+          hasSearch: Boolean(searchQuery),
+          category: category || 'all',
+          employment: employment || 'any',
+          experience: experience || 'any',
+          remote: Boolean(remote),
+          limit,
+          offset,
+        },
       },
     });
 
@@ -280,8 +289,9 @@ export async function getFilteredJobs(
         result.total_count ?? 0
       ).catch((error) => {
         // Don't block - just log warning
+        const normalized = normalizeError(error, 'Failed to pulse jobs search');
         logger.warn('Failed to pulse jobs search', {
-          error: error instanceof Error ? error.message : String(error),
+          error: normalized.message,
           query: searchQuery.substring(0, 50),
         });
       });

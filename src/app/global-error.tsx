@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { logger } from '@/src/lib/logger';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 
 export default function GlobalError({
   error,
@@ -13,7 +14,8 @@ export default function GlobalError({
 }) {
   useEffect(() => {
     // Log critical global errors with digest for Vercel observability
-    logger.fatal('Global error boundary triggered', error, {
+    const normalized = normalizeError(error, 'Global error boundary triggered');
+    logger.fatal('Global error boundary triggered', normalized, {
       errorDigest: error.digest || 'no-digest',
       digestAvailable: Boolean(error.digest),
       userAgent: typeof window !== 'undefined' ? window.navigator?.userAgent || '' : '',

@@ -1,5 +1,6 @@
 import { supabaseAnon } from '../../_shared/clients/supabase.ts';
 import type { Database as DatabaseGenerated } from '../../_shared/database.types.ts';
+import { Constants } from '../../_shared/database.types.ts';
 
 import {
   badRequestResponse,
@@ -135,19 +136,8 @@ function isValidContentCategory(
   if (typeof value !== 'string') {
     return false;
   }
-  const validValues: DatabaseGenerated['public']['Enums']['content_category'][] = [
-    'agents',
-    'mcp',
-    'rules',
-    'commands',
-    'hooks',
-    'statuslines',
-    'skills',
-    'collections',
-    'guides',
-    'jobs',
-    'changelog',
-  ];
+  // Use enum values directly from database.types.ts Constants
+  const validValues = Constants.public.Enums.content_category;
   for (const validValue of validValues) {
     if (value === validValue) {
       return true;

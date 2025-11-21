@@ -5,6 +5,7 @@
 import { ArrowUp, Bell, FileText, Plus, Search } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import type { MainFABConfig, SpeedDialAction } from '@/src/lib/types/component.types';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 
 export const handleScrollToTop = (): void => {
   try {
@@ -13,7 +14,8 @@ export const handleScrollToTop = (): void => {
       behavior: 'smooth',
     });
   } catch (error) {
-    logger.error('[FAB] Error scrolling to top', error as Error);
+    const normalized = normalizeError(error, '[FAB] Error scrolling to top');
+    logger.error('[FAB] Error scrolling to top', normalized);
   }
 };
 
@@ -31,7 +33,8 @@ export const handleSearchClick = (): void => {
       });
     }
   } catch (error) {
-    logger.error('[FAB] Error focusing search', error as Error);
+    const normalized = normalizeError(error, '[FAB] Error focusing search');
+    logger.error('[FAB] Error focusing search', normalized);
   }
 };
 

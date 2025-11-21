@@ -15,7 +15,7 @@ import { logger } from '@/src/lib/logger';
 import type { ButtonStyleProps } from '@/src/lib/types/component.types';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
-import { logClientWarning } from '@/src/lib/utils/error.utils';
+import { logClientWarning, normalizeError } from '@/src/lib/utils/error.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
 import type { Database } from '@/src/types/database.types';
 
@@ -46,7 +46,8 @@ export function BookmarkButton({
     e.stopPropagation();
 
     if (!isValidCategory(contentType)) {
-      logger.error('Invalid content type', new Error('Invalid content type'), {
+      const normalized = normalizeError('Invalid content type', 'Invalid content type');
+      logger.error('Invalid content type', normalized, {
         contentType,
         contentSlug,
       });
@@ -131,9 +132,12 @@ export function BookmarkButton({
             },
           });
         } else {
-          toasts.error.fromError(
-            error instanceof Error ? error : new Error('Failed to update bookmark')
-          );
+          const normalized = normalizeError(error, 'Failed to update bookmark');
+          logger.error('BookmarkButton: Failed to update bookmark', normalized, {
+            contentType,
+            contentSlug,
+          });
+          toasts.error.fromError(normalized);
         }
       }
     });

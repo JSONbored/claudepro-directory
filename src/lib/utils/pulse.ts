@@ -5,6 +5,7 @@
  */
 
 import { logger } from '@/src/lib/logger';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 import type { Database, Json } from '@/src/types/database.types';
 
 const PULSE_QUEUE_NAME = 'pulse';
@@ -67,8 +68,9 @@ async function enqueueToPulseQueue(
       });
     }
   } catch (error) {
+    const normalized = normalizeError(error, 'Pulse event enqueue exception');
     logger.warn('Pulse event enqueue exception', {
-      error: error instanceof Error ? error.message : String(error),
+      error: normalized.message,
       interaction_type: event.interaction_type,
       content_type: event.content_type ?? 'unknown',
       ...(event.user_id && { user_id: event.user_id }),
@@ -142,9 +144,8 @@ export async function pulseJobSearch(
       },
     });
   } catch (error) {
-    logger.warn('Job search pulsing error', {
-      error: error instanceof Error ? error.message : String(error),
-    });
+    const normalized = normalizeError(error, 'Job search pulsing error');
+    logger.warn('Job search pulsing error', { error: normalized.message });
   }
 }
 
@@ -168,8 +169,7 @@ export async function pulseUserSearch(query: string, resultCount: number): Promi
       },
     });
   } catch (error) {
-    logger.warn('User search pulsing error', {
-      error: error instanceof Error ? error.message : String(error),
-    });
+    const normalized = normalizeError(error, 'User search pulsing error');
+    logger.warn('User search pulsing error', { error: normalized.message });
   }
 }

@@ -43,9 +43,8 @@ export async function getCommunityDirectory(options: {
       // Pulse search events (fire and forget)
       const { pulseUserSearch } = await import('@/src/lib/utils/pulse');
       pulseUserSearch(searchQuery.trim(), allUsers.length).catch((error) => {
-        logger.warn('Failed to pulse user search', {
-          error: error instanceof Error ? error.message : String(error),
-        });
+        const normalized = normalizeError(error, 'Failed to pulse user search');
+        logger.warn('Failed to pulse user search', { error: normalized.message });
       });
 
       // For search results, return only all_users (top_contributors/new_members not relevant)

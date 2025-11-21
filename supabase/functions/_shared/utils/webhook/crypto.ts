@@ -48,10 +48,11 @@ export async function verifySvixSignature({
 
     return signatures.some((sig) => sig === expectedSignature);
   } catch (error) {
+    const { errorToString } = await import('../error-handling.ts');
     const logContext = createUtilityContext('webhook-crypto', 'verify-svix-signature');
     console.error('Svix signature verification error', {
       ...logContext,
-      error: error instanceof Error ? error.message : String(error),
+      error: errorToString(error),
     });
     return false;
   }

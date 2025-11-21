@@ -8,7 +8,7 @@ import { Resend } from 'npm:resend@4.0.0';
 import { supabaseServiceRole } from '../_shared/clients/supabase.ts';
 import { AUTH_HOOK_ENV, RESEND_ENV, validateEnvironment } from '../_shared/config/email-config.ts';
 import { edgeEnv } from '../_shared/config/env.ts';
-import type { Database as DatabaseGenerated } from '../_shared/database.types.ts';
+import { Constants, type Database as DatabaseGenerated } from '../_shared/database.types.ts';
 // Static imports to ensure circuit-breaker and timeout utilities are included in the bundle
 import '../_shared/utils/circuit-breaker.ts';
 import '../_shared/utils/timeout.ts';
@@ -30,6 +30,7 @@ import { ContactSubmissionUser } from '../_shared/utils/email/templates/contact-
 import { CONTACT_FROM, HELLO_FROM, JOBS_FROM } from '../_shared/utils/email/templates/manifest.ts';
 import { NewsletterWelcome } from '../_shared/utils/email/templates/newsletter-welcome.tsx';
 import { renderSignupOAuthEmail } from '../_shared/utils/email/templates/signup-oauth.tsx';
+import { errorToString } from '../_shared/utils/error-handling.ts';
 import {
   badRequestResponse,
   errorResponse,
@@ -94,7 +95,7 @@ function respondWithEmailAnalytics(
     };
 
     if (error) {
-      logData['error'] = error instanceof Error ? error.message : String(error);
+      logData['error'] = errorToString(error);
     }
 
     if (outcome === 'success') {
@@ -371,13 +372,8 @@ async function handleSubscribe(req: Request): Promise<Response> {
     const finalSource: DatabaseGenerated['public']['Enums']['newsletter_source'] =
       isValidNewsletterSource(validatedSource) ? validatedSource : 'footer';
 
-    // Validate copy_type enum without type assertion
-    const copyTypeValues: readonly DatabaseGenerated['public']['Enums']['copy_type'][] = [
-      'llmstxt',
-      'markdown',
-      'code',
-      'link',
-    ] as const satisfies readonly DatabaseGenerated['public']['Enums']['copy_type'][];
+    // Use enum values directly from database.types.ts Constants
+    const copyTypeValues = Constants.public.Enums.copy_type;
 
     const isValidCopyType = (
       value: string | null | undefined
@@ -391,21 +387,8 @@ async function handleSubscribe(req: Request): Promise<Response> {
       return false;
     };
 
-    // Validate content_category enum without type assertion
-    const contentCategoryValues: readonly DatabaseGenerated['public']['Enums']['content_category'][] =
-      [
-        'agents',
-        'mcp',
-        'rules',
-        'commands',
-        'hooks',
-        'statuslines',
-        'skills',
-        'collections',
-        'guides',
-        'jobs',
-        'changelog',
-      ] as const satisfies readonly DatabaseGenerated['public']['Enums']['content_category'][];
+    // Use enum values directly from database.types.ts Constants
+    const contentCategoryValues = Constants.public.Enums.content_category;
 
     const isValidContentCategory = (
       value: string | null | undefined
@@ -526,7 +509,7 @@ async function handleSubscribe(req: Request): Promise<Response> {
     }).catch((error) => {
       logWarn('Cache invalidation failed', {
         ...logContext,
-        error: error instanceof Error ? error.message : String(error),
+        error: errorToString(error),
       });
     });
 
@@ -1015,9 +998,8 @@ async function getCachedNewsletterCount(): Promise<number> {
     .select('*', { count: 'exact', head: true });
 
   if (error) {
-    const errorMessage = error instanceof Error ? error.message : String(error);
     // This is called from handleGetNewsletterCount which has try-catch
-    throw new Error(`Failed to get newsletter count: ${errorMessage}`);
+    throw new Error(`Failed to get newsletter count: ${errorToString(error)}`);
   }
 
   const subscriberCount = count ?? 0;
@@ -1087,8 +1069,28 @@ async function handleContactSubmission(req: Request): Promise<Response> {
     );
   }
 
-  // Use category value - database will enforce enum constraints
-  const validatedCategory = category;
+  // Validate contact_category enum using Constants from database.types.ts
+  const contactCategoryValues = Constants.public.Enums.contact_category;
+
+  const isValidContactCategory = (
+    value: string | null | undefined
+  ): value is DatabaseGenerated['public']['Enums']['contact_category'] => {
+    if (!value) return false;
+    for (const validValue of contactCategoryValues) {
+      if (value === validValue) {
+        return true;
+      }
+    }
+    return false;
+  };
+
+  if (!isValidContactCategory(category)) {
+    return badRequestResponse(
+      `Invalid category. Must be one of: ${contactCategoryValues.join(', ')}`
+    );
+  }
+
+  const validatedCategory: DatabaseGenerated['public']['Enums']['contact_category'] = category;
 
   try {
     // Send admin notification email

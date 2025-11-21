@@ -23,8 +23,13 @@
  */
 
 import { supabaseAnon } from '../_shared/clients/supabase.ts';
-import type { Database as DatabaseGenerated, Json } from '../_shared/database.types.ts';
+import {
+  Constants,
+  type Database as DatabaseGenerated,
+  type Json,
+} from '../_shared/database.types.ts';
 import { enqueueSearchAnalytics } from '../_shared/utils/analytics/pulse.ts';
+import { errorToString } from '../_shared/utils/error-handling.ts';
 import {
   badRequestResponse,
   buildCacheHeaders,
@@ -191,7 +196,7 @@ Deno.serve(async (request) => {
     const logContext = createSearchContext();
     console.error('[unified-search] Unified search error', {
       ...logContext,
-      error: error instanceof Error ? error.message : String(error),
+      error: errorToString(error),
     });
     return errorResponse(error, 'unified-search', getWithAuthCorsHeaders);
   }
@@ -227,10 +232,6 @@ async function handleSearch(url: URL, startTime: number, req: Request): Promise<
 
   // Validate enum values - only include if they match generated enum types
   // TypeScript will validate at compile time that these values match the enum
-  type JobCategory = DatabaseGenerated['public']['Enums']['job_category'];
-  type JobType = DatabaseGenerated['public']['Enums']['job_type'];
-  type ExperienceLevel = DatabaseGenerated['public']['Enums']['experience_level'];
-
   // Helper to check if value is valid enum - uses satisfies to ensure type safety
   // No type assertions - uses type narrowing with explicit check
   const isValidEnum = <T extends string>(
@@ -247,36 +248,10 @@ async function handleSearch(url: URL, startTime: number, req: Request): Promise<
     return false;
   };
 
-  // Define valid enum values using satisfies to ensure they match generated types
-  const jobCategoryValues = [
-    'engineering',
-    'design',
-    'product',
-    'marketing',
-    'sales',
-    'support',
-    'research',
-    'data',
-    'operations',
-    'leadership',
-    'consulting',
-    'education',
-    'other',
-  ] as const satisfies readonly JobCategory[];
-
-  const jobTypeValues = [
-    'full-time',
-    'part-time',
-    'contract',
-    'freelance',
-    'internship',
-  ] as const satisfies readonly JobType[];
-
-  const experienceLevelValues = [
-    'beginner',
-    'intermediate',
-    'advanced',
-  ] as const satisfies readonly ExperienceLevel[];
+  // Use enum values directly from database.types.ts Constants
+  const jobCategoryValues = Constants.public.Enums.job_category;
+  const jobTypeValues = Constants.public.Enums.job_type;
+  const experienceLevelValues = Constants.public.Enums.experience_level;
 
   // Validate and narrow types using type guards
   const jobCategory = isValidEnum(jobCategoryParam, jobCategoryValues)
@@ -551,7 +526,7 @@ async function handleSearch(url: URL, startTime: number, req: Request): Promise<
     console.error('[unified-search] Search RPC error', {
       ...logContext,
       searchType,
-      error: error instanceof Error ? error.message : String(error),
+      error: errorToString(error),
     });
     const rpcName =
       searchType === 'jobs'
@@ -635,7 +610,7 @@ async function handleSearch(url: URL, startTime: number, req: Request): Promise<
   ).catch((error) => {
     console.warn('[unified-search] Analytics tracking failed', {
       ...logContext,
-      error: error instanceof Error ? error.message : String(error),
+      error: errorToString(error),
     });
   });
 
@@ -734,7 +709,7 @@ async function handleAutocomplete(url: URL, startTime: number): Promise<Response
   if (error) {
     console.error('[unified-search] Autocomplete RPC error', {
       ...logContext,
-      error: error instanceof Error ? error.message : String(error),
+      error: errorToString(error),
     });
     return errorResponse(error, 'get_search_suggestions_from_history', getWithAuthCorsHeaders);
   }
@@ -785,7 +760,7 @@ async function handleFacets(startTime: number): Promise<Response> {
   if (error) {
     console.error('[unified-search] Facets RPC error', {
       ...logContext,
-      error: error instanceof Error ? error.message : String(error),
+      error: errorToString(error),
     });
     return errorResponse(error, 'get_search_facets', getWithAuthCorsHeaders);
   }
@@ -855,7 +830,7 @@ async function trackSearchAnalytics(
     authorizationHeader,
   }).catch((error) => {
     console.warn('[unified-search] Failed to enqueue search analytics', {
-      error: error instanceof Error ? error.message : String(error),
+      error: errorToString(error),
       query: query.substring(0, 50),
     });
   });

@@ -1,22 +1,12 @@
 import { buildReadmeMarkdown } from '../../_shared/changelog/readme-builder.ts';
 import { supabaseAnon } from '../../_shared/clients/supabase.ts';
 import type { Database as DatabaseGenerated } from '../../_shared/database.types.ts';
+import { Constants } from '../../_shared/database.types.ts';
 
 type ContentCategory = DatabaseGenerated['public']['Enums']['content_category'];
 
-const CONTENT_CATEGORY_VALUES = [
-  'agents',
-  'mcp',
-  'rules',
-  'commands',
-  'hooks',
-  'statuslines',
-  'skills',
-  'collections',
-  'guides',
-  'jobs',
-  'changelog',
-] as const satisfies readonly ContentCategory[];
+// Use enum values directly from database.types.ts Constants
+const CONTENT_CATEGORY_VALUES = Constants.public.Enums.content_category;
 
 import {
   badRequestResponse,

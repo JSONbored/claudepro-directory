@@ -12,35 +12,15 @@ import { authedAction, optionalAuthAction, rateLimitedAction } from '@/src/lib/a
 import type { CacheInvalidateKey } from '@/src/lib/data/config/cache-config';
 import { getPaginatedContent as getPaginatedContentData } from '@/src/lib/data/content/paginated';
 import { getReviewsWithStatsData } from '@/src/lib/data/content/reviews';
-import { logger } from '@/src/lib/logger';
+import { logger, toLogContextValue } from '@/src/lib/logger';
 import type { DisplayableContent } from '@/src/lib/types/component.types';
 import { logActionFailure } from '@/src/lib/utils/error.utils';
 import type { Database } from '@/src/types/database.types';
+import { Constants } from '@/src/types/database.types';
 
-const CONTENT_CATEGORY_VALUES = [
-  'agents',
-  'mcp',
-  'rules',
-  'commands',
-  'hooks',
-  'statuslines',
-  'skills',
-  'collections',
-  'guides',
-  'jobs',
-  'changelog',
-] as const satisfies readonly Database['public']['Enums']['content_category'][];
-
-// Submission type enum values for validation
-const SUBMISSION_TYPE_VALUES: readonly Database['public']['Enums']['submission_type'][] = [
-  'agents',
-  'mcp',
-  'rules',
-  'commands',
-  'hooks',
-  'statuslines',
-  'skills',
-] as const;
+// Use enum values directly from database.types.ts Constants
+const CONTENT_CATEGORY_VALUES = Constants.public.Enums.content_category;
+const SUBMISSION_TYPE_VALUES = Constants.public.Enums.submission_type;
 
 // URL validation helper
 const urlRefine = (val: string | null | undefined) => {
@@ -435,6 +415,7 @@ export const reorderCollectionItems = authedAction
       if (errors && Array.isArray(errors) && errors.length > 0) {
         logger.warn('Some items failed to reorder', undefined, {
           errorCount: errors.length,
+          failedItems: toLogContextValue(errors),
         });
       }
 

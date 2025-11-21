@@ -33,24 +33,12 @@ import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { logClientWarning } from '@/src/lib/utils/error.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
 import type { Database } from '@/src/types/database.types';
+import { Constants } from '@/src/types/database.types';
 
-// Job plan enum values for validation
-const JOB_PLAN_VALUES: readonly Database['public']['Enums']['job_plan'][] = [
-  'one-time',
-  'subscription',
-] as const;
-
-const WORKPLACE_TYPE_VALUES = [
-  'Remote',
-  'On site',
-  'Hybrid',
-] as const satisfies readonly Database['public']['Enums']['workplace_type'][];
-
-const EXPERIENCE_LEVEL_VALUES = [
-  'beginner',
-  'intermediate',
-  'advanced',
-] as const satisfies readonly Database['public']['Enums']['experience_level'][];
+// Use enum values directly from database.types.ts Constants
+const JOB_PLAN_VALUES = Constants.public.Enums.job_plan;
+const WORKPLACE_TYPE_VALUES = Constants.public.Enums.workplace_type;
+const EXPERIENCE_LEVEL_VALUES = Constants.public.Enums.experience_level;
 
 /**
  * Helper function to check if value is a valid WorkplaceType

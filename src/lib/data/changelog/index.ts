@@ -3,21 +3,37 @@
 import { z } from 'zod';
 import { fetchCachedRpc } from '@/src/lib/data/helpers';
 import { logger } from '@/src/lib/logger';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 import type { Database } from '@/src/types/database.types';
+import { Constants } from '@/src/types/database.types';
 
 // Zod schema for changelog entry changes structure (JSONB validation)
 const changeItemSchema = z.object({
   content: z.string(),
 });
 
-const changesSchema = z.object({
-  Added: z.array(changeItemSchema).optional(),
-  Changed: z.array(changeItemSchema).optional(),
-  Fixed: z.array(changeItemSchema).optional(),
-  Removed: z.array(changeItemSchema).optional(),
-  Deprecated: z.array(changeItemSchema).optional(),
-  Security: z.array(changeItemSchema).optional(),
-});
+// Build schema dynamically from database enum to ensure consistency
+// Use explicit keys to preserve literal types for TypeScript inference
+const changesSchema = z
+  .object({
+    Added: z.array(changeItemSchema).optional(),
+    Changed: z.array(changeItemSchema).optional(),
+    Fixed: z.array(changeItemSchema).optional(),
+    Removed: z.array(changeItemSchema).optional(),
+    Deprecated: z.array(changeItemSchema).optional(),
+    Security: z.array(changeItemSchema).optional(),
+  })
+  .refine(
+    (data) => {
+      // Validate that all keys are valid changelog category enum values
+      const validCategories = Constants.public.Enums.changelog_category;
+      const dataKeys = Object.keys(data);
+      return dataKeys.every((key) =>
+        validCategories.includes(key as Database['public']['Enums']['changelog_category'])
+      );
+    },
+    { message: 'Invalid changelog category in changes object' }
+  );
 
 // Validated changes type (for runtime use after parsing)
 export type ChangelogChanges = z.infer<typeof changesSchema>;
@@ -27,10 +43,8 @@ export function parseChangelogChanges(changes: unknown): ChangelogChanges {
   try {
     return changesSchema.parse(changes);
   } catch (error) {
-    logger.error(
-      'Failed to parse changelog changes',
-      error instanceof Error ? error : new Error(String(error))
-    );
+    const normalized = normalizeError(error, 'Failed to parse changelog changes');
+    logger.error('Failed to parse changelog changes', normalized);
     return {}; // Return empty object if parsing fails
   }
 }

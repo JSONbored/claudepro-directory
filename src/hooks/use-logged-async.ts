@@ -94,7 +94,7 @@ export function useLoggedAsync({
         const severity = level ?? defaultLevel;
 
         if (severity === 'warn') {
-          logger.warn(logLabel, { ...(sanitizedContext ?? {}), error: normalized.message });
+          logger.warn(logLabel, sanitizedContext, { error: normalized.message });
         } else {
           logger.error(logLabel, normalized, sanitizedContext);
         }

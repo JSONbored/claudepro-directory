@@ -25,19 +25,17 @@ import { BADGE_COLORS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { getDisplayTitle } from '@/src/lib/utils';
 import { formatViewCount, getContentItemUrl } from '@/src/lib/utils/content.utils';
 import { ensureStringArray } from '@/src/lib/utils/data.utils';
-import { logClientWarning, logUnhandledPromise } from '@/src/lib/utils/error.utils';
+import { logClientWarning, logUnhandledPromise, normalizeError } from '@/src/lib/utils/error.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
 import type { Database } from '@/src/types/database.types';
+import { Constants } from '@/src/types/database.types';
 
 // Experience level validation helper
 function isExperienceLevel(
   value: unknown
 ): value is Database['public']['Enums']['experience_level'] {
-  const EXPERIENCE_LEVEL_VALUES: readonly Database['public']['Enums']['experience_level'][] = [
-    'beginner',
-    'intermediate',
-    'advanced',
-  ] as const;
+  // Use enum values directly from database.types.ts Constants
+  const EXPERIENCE_LEVEL_VALUES = Constants.public.Enums.experience_level;
   return (
     typeof value === 'string' &&
     EXPERIENCE_LEVEL_VALUES.includes(value as Database['public']['Enums']['experience_level'])
@@ -377,7 +375,11 @@ export const ConfigCard = memo(
       // Type guard validation
       const categoryValue = item.category ?? 'agents';
       if (!isValidCategory(categoryValue)) {
-        logger.error('Invalid content type for bookmark', new Error('Invalid content type'), {
+        const normalized = normalizeError(
+          'Invalid content type',
+          'Invalid content type for bookmark'
+        );
+        logger.error('Invalid content type for bookmark', normalized, {
           contentType: categoryValue,
           contentSlug: item.slug,
         });
@@ -413,7 +415,8 @@ export const ConfigCard = memo(
           router.refresh();
         }
       } catch (error) {
-        logger.error('ConfigCard: Failed to add bookmark via swipe', error as Error, {
+        const normalized = normalizeError(error, 'ConfigCard: Failed to add bookmark via swipe');
+        logger.error('ConfigCard: Failed to add bookmark via swipe', normalized, {
           contentType: validatedCategory,
           contentSlug: item.slug,
         });

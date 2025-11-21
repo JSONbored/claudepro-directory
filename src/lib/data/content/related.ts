@@ -6,21 +6,10 @@
 import { fetchCachedRpc } from '@/src/lib/data/helpers';
 import { generateContentCacheKey, generateContentTags } from '@/src/lib/data/helpers-utils';
 import type { Database } from '@/src/types/database.types';
+import { Constants } from '@/src/types/database.types';
 
-// Content category validation using generated ENUM
-const CONTENT_CATEGORY_VALUES = [
-  'agents',
-  'mcp',
-  'rules',
-  'commands',
-  'hooks',
-  'statuslines',
-  'skills',
-  'collections',
-  'guides',
-  'jobs',
-  'changelog',
-] as const satisfies readonly Database['public']['Enums']['content_category'][];
+// Use enum values directly from database.types.ts Constants
+const CONTENT_CATEGORY_VALUES = Constants.public.Enums.content_category;
 
 function isValidContentCategory(
   value: string

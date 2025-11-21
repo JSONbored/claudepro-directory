@@ -48,29 +48,26 @@ export async function generateStaticParams() {
           }
         }
       } catch (error) {
-        logger.error(
-          'getContentByCategory error in generateStaticParams',
-          error instanceof Error ? error : new Error(String(error)),
-          {
-            category,
-            phase: 'build-time',
-            route: '[category]/[slug]/page.tsx',
-          }
+        const normalized = normalizeError(
+          error,
+          'getContentByCategory error in generateStaticParams'
         );
+        logger.error('getContentByCategory error in generateStaticParams', normalized, {
+          category,
+          phase: 'build-time',
+          route: '[category]/[slug]/page.tsx',
+        });
         // Continue with next category (partial build better than full failure)
       }
     }
 
     return allParams;
   } catch (error) {
-    logger.error(
-      'generateStaticParams error in [category]/[slug]',
-      error instanceof Error ? error : new Error(String(error)),
-      {
-        phase: 'build-time',
-        route: '[category]/[slug]/page.tsx',
-      }
-    );
+    const normalized = normalizeError(error, 'generateStaticParams error in [category]/[slug]');
+    logger.error('generateStaticParams error in [category]/[slug]', normalized, {
+      phase: 'build-time',
+      route: '[category]/[slug]/page.tsx',
+    });
     // Return empty array (prevents build failure, skips detail pages)
     return [];
   }
@@ -133,7 +130,11 @@ export default async function DetailPage({
     });
   }
   if (!config) {
-    logger.error('DetailPage: missing category config', new Error('Category config is null'), {
+    const normalized = normalizeError(
+      'Category config is null',
+      'DetailPage: missing category config'
+    );
+    logger.error('DetailPage: missing category config', normalized, {
       category,
       slug,
     });
@@ -146,14 +147,14 @@ export default async function DetailPage({
   const detailData = await getContentDetailComplete({ category, slug });
 
   if (!detailData) {
-    logger.error(
-      'DetailPage: get_content_detail_complete returned null',
-      new Error('Content detail data is null'),
-      {
-        category,
-        slug,
-      }
+    const normalized = normalizeError(
+      'Content detail data is null',
+      'DetailPage: get_content_detail_complete returned null'
     );
+    logger.error('DetailPage: get_content_detail_complete returned null', normalized, {
+      category,
+      slug,
+    });
     notFound();
   }
 

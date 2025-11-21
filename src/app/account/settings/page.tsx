@@ -36,7 +36,10 @@ export default async function SettingsPage() {
   const { user } = await getAuthenticatedUser({ context: 'SettingsPage' });
 
   if (!user) {
-    logger.warn('SettingsPage: unauthenticated access attempt');
+    logger.warn('SettingsPage: unauthenticated access attempt', undefined, {
+      route: '/account/settings',
+      timestamp: new Date().toISOString(),
+    });
     return (
       <div className="space-y-6">
         <Card>

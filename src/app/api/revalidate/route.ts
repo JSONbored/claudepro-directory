@@ -77,7 +77,7 @@ export async function POST(request: NextRequest) {
       logger.warn('Revalidate webhook invalid payload', {
         hasCategory: !!category,
         hasTags: Array.isArray(tags),
-        bodyKeys: Object.keys(body).join(', '),
+        bodyKeys: Object.keys(body), // Array support enables better log querying
       });
       return NextResponse.json(
         { error: 'Missing category or tags in webhook payload' },
@@ -88,9 +88,10 @@ export async function POST(request: NextRequest) {
     logger.info('Revalidated successfully', {
       category: category || null,
       slug: slug || null,
+      paths, // Array of revalidated paths - better for querying
       pathCount: paths.length,
+      tags: invalidatedTags, // Array support enables better log querying
       tagCount: invalidatedTags.length,
-      ...(invalidatedTags.length > 0 && { tags: invalidatedTags.join(', ') }),
     });
 
     return NextResponse.json({

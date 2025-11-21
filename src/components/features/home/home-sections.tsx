@@ -31,7 +31,7 @@ import type {
   HomePageClientProps,
 } from '@/src/lib/types/component.types';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
-import { logClientWarning, logUnhandledPromise } from '@/src/lib/utils/error.utils';
+import { logClientWarning, logUnhandledPromise, normalizeError } from '@/src/lib/utils/error.utils';
 import type { Database } from '@/src/types/database.types';
 
 /**
@@ -120,7 +120,8 @@ function HomePageClientComponent({
 
         if (result?.serverError) {
           // Error already logged by safe-action middleware
-          logger.error('Failed to load content', new Error(result.serverError), {
+          const normalized = normalizeError(result.serverError, 'Failed to load content');
+          logger.error('Failed to load content', normalized, {
             source: 'fetchAllConfigs',
           });
         }
@@ -133,7 +134,8 @@ function HomePageClientComponent({
 
         setAllConfigs((prev) => [...prev, ...newItems]);
       } catch (error) {
-        logger.error('Failed to load content', error as Error, { source: 'fetchAllConfigs' });
+        const normalized = normalizeError(error, 'Failed to load content');
+        logger.error('Failed to load content', normalized, { source: 'fetchAllConfigs' });
       } finally {
         setIsLoadingAllConfigs(false);
       }
@@ -183,7 +185,8 @@ function HomePageClientComponent({
 
         setSearchResults(result.results as DisplayableContent[]);
       } catch (error) {
-        logger.error('Search failed', error as Error, { source: 'HomePageSearch' });
+        const normalized = normalizeError(error, 'Search failed');
+        logger.error('Search failed', normalized, { source: 'HomePageSearch' });
         setSearchResults(allConfigs);
       } finally {
         setIsSearching(false);

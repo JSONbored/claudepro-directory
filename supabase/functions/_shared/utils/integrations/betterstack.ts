@@ -28,10 +28,11 @@ export async function sendBetterStackHeartbeat(
     fetch(heartbeatUrl, { method: 'GET' }),
     TIMEOUT_PRESETS.external,
     'BetterStack heartbeat timed out'
-  ).catch((error) => {
+  ).catch(async (error) => {
+    const { errorToString } = await import('../error-handling.ts');
     logWarn('BetterStack heartbeat failed', {
       ...logContext,
-      error: error instanceof Error ? error.message : String(error),
+      error: errorToString(error),
     });
   });
 }

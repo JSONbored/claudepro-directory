@@ -13,6 +13,7 @@ import {
 } from '@/src/lib/actions/pulse.actions';
 import { logger } from '@/src/lib/logger';
 import { createClient } from '@/src/lib/supabase/client';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 import type { Database } from '@/src/types/database.types';
 
 // All ENUM types accessed directly via Database['public']['Enums']['enum_name']
@@ -91,7 +92,7 @@ export async function trackInteraction(params: TrackInteractionParams): Promise<
     metadata: params.metadata ?? null,
   });
   if (result?.serverError) {
-    logger.warn('trackInteraction failed', { error: result.serverError });
+    logger.warn('trackInteraction failed', undefined, { error: result.serverError });
   }
 }
 
@@ -215,7 +216,7 @@ export async function trackNewsletterEvent(
 ) {
   const result = await trackNewsletterEventAction({ eventType, metadata });
   if (result?.serverError) {
-    logger.warn('trackNewsletterEvent failed', { error: result.serverError, eventType });
+    logger.warn('trackNewsletterEvent failed', undefined, { error: result.serverError, eventType });
   }
 }
 
@@ -230,7 +231,7 @@ export async function trackUsage(params: {
 }): Promise<void> {
   const result = await trackUsageAction(params);
   if (result?.serverError) {
-    logger.warn('trackUsage failed', { error: result.serverError });
+    logger.warn('trackUsage failed', undefined, { error: result.serverError });
   }
 }
 
@@ -327,7 +328,7 @@ export async function highlightCodeEdge(
 
     // If edge function returned an error but still provided HTML (fallback), log it
     if (data.error) {
-      logger.warn('Edge highlighting used fallback', {
+      logger.warn('Edge highlighting used fallback', undefined, {
         error: data.error,
         language,
         codePreview: code.slice(0, 80),
@@ -338,7 +339,7 @@ export async function highlightCodeEdge(
   } catch (error) {
     // Fallback: escape code (same as current implementation)
     const normalized = error instanceof Error ? error : new Error(String(error));
-    logger.warn('Edge highlighting failed, using fallback', {
+    logger.warn('Edge highlighting failed, using fallback', undefined, {
       error: normalized.message,
       language,
       codePreview: code.slice(0, 80),
@@ -450,8 +451,9 @@ export async function processContentEdge(
 
     // If edge function returned an error, log it
     if (data.error) {
-      logger.warn('Edge content processing returned error', {
-        error: data.error,
+      const normalized = normalizeError(data.error, 'Edge content processing returned error');
+      logger.warn('Edge content processing returned error', undefined, {
+        error: normalized.message,
         operation,
         ...(language && { language }),
         ...(code && { codePreview: code.slice(0, 80) }),
@@ -461,8 +463,8 @@ export async function processContentEdge(
     return data;
   } catch (error) {
     // Fallback handling based on operation
-    const normalized = error instanceof Error ? error : new Error(String(error));
-    logger.warn('Edge content processing failed', {
+    const normalized = normalizeError(error, 'Edge content processing failed');
+    logger.warn('Edge content processing failed', undefined, {
       error: normalized.message,
       operation,
       ...(language && { language }),

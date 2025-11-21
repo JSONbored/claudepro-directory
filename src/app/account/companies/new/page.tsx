@@ -17,7 +17,10 @@ export default async function NewCompanyPage() {
   const { user } = await getAuthenticatedUser({ context: 'NewCompanyPage' });
 
   if (!user) {
-    logger.warn('NewCompanyPage: unauthenticated access attempt');
+    logger.warn('NewCompanyPage: unauthenticated access attempt', undefined, {
+      route: '/account/companies/new',
+      timestamp: new Date().toISOString(),
+    });
     redirect('/login');
   }
 

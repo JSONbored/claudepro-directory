@@ -4,6 +4,7 @@
 
 import { randomUUID } from 'node:crypto';
 import { logger } from '@/src/lib/logger';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 
 const isDevelopment = process.env.NODE_ENV === 'development';
 
@@ -70,9 +71,13 @@ export function createErrorBoundaryFallback(
       processingTime: `${(performance.now() - startTime).toFixed(2)}ms`,
     });
 
+    const normalized = normalizeError(
+      error,
+      `Error Boundary: ${error.name || 'Unknown'}: ${error.message}`
+    );
     logger.error(
       `Error Boundary: ${error.name || 'Unknown'}: ${error.message}`,
-      error,
+      normalized,
       fullContext
     );
 
@@ -88,8 +93,8 @@ export function createErrorBoundaryFallback(
 
     return errorResponse;
   } catch (handlerError) {
-    const fallbackError = handlerError instanceof Error ? handlerError : new Error('Unknown error');
-    logger.error('Error boundary fallback failed', fallbackError, {
+    const normalized = normalizeError(handlerError, 'Error boundary fallback failed');
+    logger.error('Error boundary fallback failed', normalized, {
       originalError: error.message,
     });
 

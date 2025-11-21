@@ -9,6 +9,7 @@ import { createClient } from 'jsr:@supabase/supabase-js@2';
 import { edgeEnv } from '../config/env.ts';
 import type { Database as DatabaseGenerated } from '../database.types.ts';
 import type { ExtendedDatabase } from '../database-extensions.types.ts';
+import { errorToString } from './error-handling.ts';
 
 const {
   supabase: { url: SUPABASE_URL, serviceRoleKey: SUPABASE_SERVICE_ROLE_KEY },
@@ -148,7 +149,7 @@ export async function pgmqMetrics(queueName: string): Promise<{
   } catch (error) {
     // If metrics check fails, return null (safe fallback - queue will be treated as empty)
     console.warn(`[pgmq-client] Failed to get metrics for queue '${queueName}'`, {
-      error: error instanceof Error ? error.message : String(error),
+      error: errorToString(error),
     });
     return null;
   }

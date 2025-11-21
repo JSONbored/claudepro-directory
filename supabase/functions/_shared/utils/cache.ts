@@ -82,7 +82,8 @@ export async function invalidateCacheTags(
 
     return { success: true, tags };
   } catch (error) {
-    const errorMsg = error instanceof Error ? error.message : String(error);
+    const { errorToString } = await import('./error-handling.ts');
+    const errorMsg = errorToString(error);
     if (options?.logContext) {
       console.warn('[cache] Invalidation error', {
         ...options.logContext,

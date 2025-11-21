@@ -43,7 +43,10 @@ export default async function SponsorshipsPage() {
   const { user } = await getAuthenticatedUser({ context: 'SponsorshipsPage' });
 
   if (!user) {
-    logger.warn('SponsorshipsPage: unauthenticated access attempt');
+    logger.warn('SponsorshipsPage: unauthenticated access attempt', undefined, {
+      route: '/account/sponsorships',
+      timestamp: new Date().toISOString(),
+    });
     return (
       <div className="space-y-6">
         <Card>

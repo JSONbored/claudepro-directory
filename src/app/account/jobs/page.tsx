@@ -31,7 +31,10 @@ export default async function MyJobsPage() {
   const { user } = await getAuthenticatedUser({ context: 'MyJobsPage' });
 
   if (!user) {
-    logger.warn('MyJobsPage: unauthenticated access attempt detected');
+    logger.warn('MyJobsPage: unauthenticated access attempt detected', undefined, {
+      route: '/account/jobs',
+      timestamp: new Date().toISOString(),
+    });
     return (
       <div className="space-y-6">
         <Card>

@@ -174,7 +174,7 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPageProps
           {
             label: 'Clicks',
             value: clickCount.toLocaleString(),
-            change: 'Applications started',
+            change: 'Users clicked to view',
             trend: clickCount > 0 ? 'up' : 'unchanged',
           },
           {
@@ -182,7 +182,13 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPageProps
             value: `${ctr}%`,
             change: 'Of viewers clicked apply',
             trend:
-              Number.parseFloat(ctr) > 5 ? 'up' : Number.parseFloat(ctr) > 0 ? 'unchanged' : 'down',
+              viewCount === 0
+                ? 'unchanged'
+                : Number.parseFloat(ctr) > 5
+                  ? 'up'
+                  : Number.parseFloat(ctr) > 0
+                    ? 'unchanged'
+                    : 'down',
           },
         ]}
       />

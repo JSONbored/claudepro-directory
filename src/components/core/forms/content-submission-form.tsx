@@ -315,8 +315,9 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
                   strategy: ParseStrategy.VALIDATED_JSON,
                 });
               } catch (error) {
+                const normalized = normalizeError(error, 'Failed to parse examples JSON');
                 logger.warn('Failed to parse examples JSON, field will be omitted', {
-                  error: error instanceof Error ? error.message : String(error),
+                  error: normalized.message,
                 });
                 toasts.raw.warning('Examples field could not be parsed and will be omitted');
                 submissionData['examples'] = undefined;
@@ -434,7 +435,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
           hasName: !!name,
           hasDescription: !!description,
         });
-        toasts.error.submissionFailed(error instanceof Error ? error.message : undefined);
+        toasts.error.submissionFailed(normalized.message);
       }
     });
   };

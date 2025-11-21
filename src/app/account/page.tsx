@@ -28,7 +28,10 @@ export default async function AccountDashboard() {
   const { user } = await getAuthenticatedUser({ context: 'AccountDashboard' });
 
   if (!user) {
-    logger.warn('AccountDashboard: unauthenticated access attempt detected');
+    logger.warn('AccountDashboard: unauthenticated access attempt detected', undefined, {
+      route: '/account',
+      timestamp: new Date().toISOString(),
+    });
     return (
       <div className="space-y-6">
         <Card>
@@ -60,7 +63,13 @@ export default async function AccountDashboard() {
   }
 
   if (!dashboardData) {
-    logger.error('AccountDashboard: dashboard data is null', undefined, { userIdHash });
+    const normalized = normalizeError(
+      'Dashboard data is null',
+      'AccountDashboard: dashboard data is null'
+    );
+    logger.error('AccountDashboard: dashboard data is null', normalized, {
+      userIdHash,
+    });
     return (
       <div className="space-y-6">
         <Card>

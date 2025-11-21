@@ -11,6 +11,7 @@
 import { NextResponse } from 'next/server';
 import { logger } from '@/src/lib/logger';
 import { createClient } from '@/src/lib/supabase/server';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -49,9 +50,9 @@ export async function GET() {
           : null;
 
     if (submissionsError) {
-      logger.warn('Failed to fetch recent submissions', {
-        error:
-          submissionsError instanceof Error ? submissionsError.message : String(submissionsError),
+      const normalized = normalizeError(submissionsError, 'Failed to fetch recent submissions');
+      logger.warn('Failed to fetch recent submissions', undefined, {
+        error: normalized.message,
       });
     }
 
@@ -64,8 +65,9 @@ export async function GET() {
           : null;
 
     if (monthError) {
-      logger.warn('Failed to fetch month submissions', {
-        error: monthError instanceof Error ? monthError.message : String(monthError),
+      const normalized = normalizeError(monthError, 'Failed to fetch month submissions');
+      logger.warn('Failed to fetch month submissions', undefined, {
+        error: normalized.message,
       });
     }
 
@@ -78,8 +80,9 @@ export async function GET() {
           : null;
 
     if (contentError) {
-      logger.warn('Failed to fetch content count', {
-        error: contentError instanceof Error ? contentError.message : String(contentError),
+      const normalized = normalizeError(contentError, 'Failed to fetch content count');
+      logger.warn('Failed to fetch content count', undefined, {
+        error: normalized.message,
       });
     }
 
@@ -137,13 +140,10 @@ export async function GET() {
       }
     );
   } catch (error) {
-    logger.error(
-      'Social proof stats API error',
-      error instanceof Error ? error : new Error(String(error)),
-      {
-        endpoint: '/api/stats/social-proof',
-      }
-    );
+    const normalized = normalizeError(error, 'Social proof stats API error');
+    logger.error('Social proof stats API error', normalized, {
+      endpoint: '/api/stats/social-proof',
+    });
 
     return NextResponse.json(
       {

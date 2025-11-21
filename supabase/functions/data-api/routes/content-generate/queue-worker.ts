@@ -12,6 +12,7 @@
 
 import { supabaseServiceRole } from '../../../_shared/clients/supabase.ts';
 import type { Database as DatabaseGenerated } from '../../../_shared/database.types.ts';
+import { Constants } from '../../../_shared/database.types.ts';
 
 import { errorToString } from '../../../_shared/utils/error-handling.ts';
 import { errorResponse, successResponse } from '../../../_shared/utils/http.ts';
@@ -159,20 +160,8 @@ export async function handlePackageGenerationQueue(_req: Request): Promise<Respo
         return false;
       }
 
-      // Validate category enum
-      const validCategories: DatabaseGenerated['public']['Enums']['content_category'][] = [
-        'agents',
-        'mcp',
-        'rules',
-        'commands',
-        'hooks',
-        'statuslines',
-        'skills',
-        'collections',
-        'guides',
-        'jobs',
-        'changelog',
-      ];
+      // Validate category enum - use enum values directly from database.types.ts Constants
+      const validCategories = Constants.public.Enums.content_category;
       for (const validCategory of validCategories) {
         if (category === validCategory) {
           return true;

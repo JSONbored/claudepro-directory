@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useNotificationsContext } from '@/src/components/providers/notifications-provider';
 import { logger } from '@/src/lib/logger';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 import { createMainFABConfig, createSpeedDialActions } from './fab-config';
 import { SpeedDialItem } from './speed-dial-item';
 import { useScrollDirection } from './use-scroll-direction';
@@ -39,7 +40,8 @@ export function FloatingActionBar({ threshold = 100, fabFlags }: FloatingActionB
       setIsExpanded(false); // Close speed dial on navigate
       router.push('/submit');
     } catch (error) {
-      logger.error('[FloatingActionBar] Error navigating to /submit', error as Error);
+      const normalized = normalizeError(error, '[FloatingActionBar] Error navigating to /submit');
+      logger.error('[FloatingActionBar] Error navigating to /submit', normalized);
     }
   });
 
@@ -51,7 +53,11 @@ export function FloatingActionBar({ threshold = 100, fabFlags }: FloatingActionB
         setIsExpanded(false); // Close speed dial when opening notifications
         openNotificationSheet();
       } catch (error) {
-        logger.error('[FloatingActionBar] Error opening notification sheet', error as Error);
+        const normalized = normalizeError(
+          error,
+          '[FloatingActionBar] Error opening notification sheet'
+        );
+        logger.error('[FloatingActionBar] Error opening notification sheet', normalized);
       }
     },
     () => {
@@ -59,7 +65,8 @@ export function FloatingActionBar({ threshold = 100, fabFlags }: FloatingActionB
         setIsExpanded(false); // Close speed dial on navigate
         router.push('/submit');
       } catch (error) {
-        logger.error('[FloatingActionBar] Error navigating to /submit', error as Error);
+        const normalized = normalizeError(error, '[FloatingActionBar] Error navigating to /submit');
+        logger.error('[FloatingActionBar] Error navigating to /submit', normalized);
       }
     },
     {
@@ -76,7 +83,8 @@ export function FloatingActionBar({ threshold = 100, fabFlags }: FloatingActionB
     try {
       setIsExpanded((prev) => !prev);
     } catch (error) {
-      logger.error('[FloatingActionBar] Error toggling expansion', error as Error);
+      const normalized = normalizeError(error, '[FloatingActionBar] Error toggling expansion');
+      logger.error('[FloatingActionBar] Error toggling expansion', normalized);
     }
   };
 

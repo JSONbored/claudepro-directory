@@ -33,7 +33,7 @@
 
 import { useCallback, useMemo } from 'react';
 import { logger } from '@/src/lib/logger';
-import { logClientWarning } from '@/src/lib/utils/error.utils';
+import { logClientWarning, normalizeError } from '@/src/lib/utils/error.utils';
 
 interface UseViewTransitionReturn {
   /**
@@ -85,8 +85,9 @@ export function useViewTransition(): UseViewTransitionReturn {
         return document.startViewTransition(updateCallback);
       } catch (error) {
         if (process.env.NODE_ENV === 'development') {
+          const normalized = normalizeError(error, 'View Transition failed');
           logger.warn('View Transition failed, falling back to instant update', {
-            error: error instanceof Error ? error.message : String(error),
+            error: normalized.message,
           });
         }
         Promise.resolve(updateCallback()).catch((fallbackError) => {

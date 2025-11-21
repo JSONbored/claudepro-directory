@@ -24,6 +24,7 @@ import {
 import { createClient as createSupabaseAdminClient } from '@/src/lib/supabase/admin-client';
 import { logActionFailure } from '@/src/lib/utils/error.utils';
 import type { Database } from '@/src/types/database.types';
+import { Constants } from '@/src/types/database.types';
 
 // UUID validation helper
 const uuidRefine = (val: string | null | undefined) => {
@@ -45,15 +46,8 @@ const urlRefine = (val: string | null | undefined) => {
 };
 
 // Minimal Zod schemas - database CHECK constraints do real validation
-// Use company_size ENUM values directly from database.types.ts
-const COMPANY_SIZE_VALUES = [
-  'just_me',
-  '2-10',
-  '11-50',
-  '51-200',
-  '201-500',
-  '500+',
-] as const satisfies readonly Database['public']['Enums']['company_size'][];
+// Use company_size ENUM values directly from database.types.ts Constants
+const COMPANY_SIZE_VALUES = Constants.public.Enums.company_size;
 
 const companyDataSchema = z.object({
   name: z.string(),

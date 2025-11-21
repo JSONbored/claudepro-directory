@@ -22,98 +22,17 @@ import { logger } from '@/src/lib/logger';
 import { normalizeError } from '@/src/lib/utils/error.utils';
 import { enqueuePulseEventServer } from '@/src/lib/utils/pulse';
 import type { Database, Json } from '@/src/types/database.types';
+import { Constants } from '@/src/types/database.types';
 
-// Enum values for validation - using direct enum access from database.types.ts
-const EXPERIENCE_LEVEL_VALUES: readonly Database['public']['Enums']['experience_level'][] = [
-  'beginner',
-  'intermediate',
-  'advanced',
-] as const;
-
-const FOCUS_AREA_TYPE_VALUES: readonly Database['public']['Enums']['focus_area_type'][] = [
-  'security',
-  'performance',
-  'documentation',
-  'testing',
-  'code-quality',
-  'automation',
-] as const;
-
-const INTEGRATION_TYPE_VALUES: readonly Database['public']['Enums']['integration_type'][] = [
-  'github',
-  'database',
-  'cloud-aws',
-  'cloud-gcp',
-  'cloud-azure',
-  'communication',
-  'none',
-] as const;
-
-const INTERACTION_TYPE_VALUES: readonly Database['public']['Enums']['interaction_type'][] = [
-  'view',
-  'copy',
-  'bookmark',
-  'click',
-  'time_spent',
-  'search',
-  'filter',
-  'screenshot',
-  'share',
-  'download',
-  'pwa_installed',
-  'pwa_launched',
-  'newsletter_subscribe',
-  'contact_interact',
-  'contact_submit',
-  'form_started',
-  'form_step_completed',
-  'form_field_focused',
-  'form_template_selected',
-  'form_abandoned',
-  'form_submitted',
-] as const;
-
-const USE_CASE_TYPE_VALUES: readonly Database['public']['Enums']['use_case_type'][] = [
-  'code-review',
-  'api-development',
-  'frontend-development',
-  'data-science',
-  'content-creation',
-  'devops-infrastructure',
-  'general-development',
-  'testing-qa',
-  'security-audit',
-] as const;
-
-const CONTACT_ACTION_TYPE_VALUES: readonly Database['public']['Enums']['contact_action_type'][] = [
-  'internal',
-  'external',
-  'route',
-  'sheet',
-  'easter-egg',
-] as const;
-
-const CONTACT_CATEGORY_VALUES = [
-  'bug',
-  'feature',
-  'partnership',
-  'general',
-  'other',
-] as const satisfies readonly Database['public']['Enums']['contact_category'][];
-
-const CONTENT_CATEGORY_VALUES = [
-  'agents',
-  'mcp',
-  'rules',
-  'commands',
-  'hooks',
-  'statuslines',
-  'skills',
-  'collections',
-  'guides',
-  'jobs',
-  'changelog',
-] as const satisfies readonly Database['public']['Enums']['content_category'][];
+// Use enum values directly from database.types.ts Constants
+const EXPERIENCE_LEVEL_VALUES = Constants.public.Enums.experience_level;
+const FOCUS_AREA_TYPE_VALUES = Constants.public.Enums.focus_area_type;
+const INTEGRATION_TYPE_VALUES = Constants.public.Enums.integration_type;
+const INTERACTION_TYPE_VALUES = Constants.public.Enums.interaction_type;
+const USE_CASE_TYPE_VALUES = Constants.public.Enums.use_case_type;
+const CONTACT_ACTION_TYPE_VALUES = Constants.public.Enums.contact_action_type;
+const CONTACT_CATEGORY_VALUES = Constants.public.Enums.contact_category;
+const CONTENT_CATEGORY_VALUES = Constants.public.Enums.content_category;
 
 // ============================================
 // TYPES
@@ -625,8 +544,11 @@ export const generateConfigRecommendationsAction = rateLimitedAction
       } catch (transformError) {
         const normalized = normalizeError(transformError, 'Failed to transform recommendations');
         logger.error('generateConfigRecommendationsAction: transformation failed', normalized, {
-          useCase: parsedInput.useCase,
-          experienceLevel: parsedInput.experienceLevel,
+          quizInput: {
+            // Grouped quiz input values - better for structured logging
+            useCase: parsedInput.useCase,
+            experienceLevel: parsedInput.experienceLevel,
+          },
         });
         normalizedResults = [];
       }

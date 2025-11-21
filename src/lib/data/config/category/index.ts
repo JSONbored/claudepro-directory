@@ -2,23 +2,13 @@
 
 import { cache } from 'react';
 import type { CategoryStatsConfig, UnifiedCategoryConfig } from '@/src/lib/types/component.types';
+import type { Database } from '@/src/types/database.types';
 // NOTE: getHomepageConfig is NOT imported at module level to avoid server action evaluation
 // during static generation. It's lazy-loaded inside functions that need it.
-import type { Database } from '@/src/types/database.types';
+import { Constants } from '@/src/types/database.types';
 
-const CONTENT_CATEGORY_VALUES = [
-  'agents',
-  'mcp',
-  'rules',
-  'commands',
-  'hooks',
-  'statuslines',
-  'skills',
-  'collections',
-  'guides',
-  'jobs',
-  'changelog',
-] as const satisfies readonly Database['public']['Enums']['content_category'][];
+// Use enum values directly from database.types.ts Constants
+const CONTENT_CATEGORY_VALUES = Constants.public.Enums.content_category;
 
 function isContentCategory(
   value: unknown

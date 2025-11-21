@@ -4,6 +4,7 @@
  */
 
 import { highlightCode } from '../../_shared/utils/code-highlight.ts';
+import { errorToString } from '../../_shared/utils/error-handling.ts';
 import {
   badRequestResponse,
   buildCacheHeaders,
@@ -509,7 +510,7 @@ export async function handleContentProcess(
     // Return error response
     return jsonResponse(
       {
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: errorToString(error),
       } satisfies ProcessResponse,
       500,
       CORS

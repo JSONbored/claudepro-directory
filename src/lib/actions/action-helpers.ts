@@ -12,7 +12,7 @@ import {
 } from '@/src/lib/data/config/cache-config';
 import { revalidateCacheTags } from '@/src/lib/supabase/cache-helpers';
 import { createClient } from '@/src/lib/supabase/server';
-import { logActionFailure } from '@/src/lib/utils/error.utils';
+import { logActionFailure, normalizeError } from '@/src/lib/utils/error.utils';
 import type { Database } from '@/src/types/database.types';
 
 type PublicRpc = keyof Database['public']['Functions'] | 'ensure_user_record';
@@ -75,7 +75,7 @@ export async function runRpc<ResultType>(
   try {
     const { data, error } = await supabase.rpc(rpcName, args);
     if (error) {
-      throw new Error(error.message);
+      throw normalizeError(error, `RPC ${String(rpcName)} failed`);
     }
     return data as ResultType;
   } catch (error) {

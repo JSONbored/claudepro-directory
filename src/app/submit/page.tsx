@@ -162,7 +162,14 @@ export default async function SubmitPage() {
   }
 
   if (!formConfig) {
-    logger.error('SubmitPage: submission form config is undefined');
+    logger.error(
+      'SubmitPage: submission form config is undefined',
+      new Error('Submission form config is undefined'),
+      {
+        route: '/submit',
+        phase: 'page-render',
+      }
+    );
     throw new Error('Submission form configuration is unavailable');
   }
 
@@ -203,7 +210,11 @@ export default async function SubmitPage() {
   }
 
   if (templates.length === 0) {
-    logger.warn('SubmitPage: no templates returned from getContentTemplates');
+    logger.warn('SubmitPage: no templates returned from getContentTemplates', undefined, {
+      route: '/submit',
+      supportedCategoriesCount: supportedCategories.length,
+      categories: supportedCategories,
+    });
   }
 
   const stats = {

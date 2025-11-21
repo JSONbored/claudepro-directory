@@ -79,14 +79,11 @@ export async function generateStaticParams() {
       category,
     }));
   } catch (error) {
-    logger.error(
-      'generateStaticParams error in [category]',
-      error instanceof Error ? error : new Error(String(error)),
-      {
-        phase: 'build-time',
-        route: '[category]/page.tsx',
-      }
-    );
+    const normalized = normalizeError(error, 'generateStaticParams error in [category]');
+    logger.error('generateStaticParams error in [category]', normalized, {
+      phase: 'build-time',
+      route: '[category]/page.tsx',
+    });
     // Return empty array (prevents build failure, skips category pages)
     return [];
   }
@@ -184,7 +181,11 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
     logger.error('CategoryPage: getCategoryConfig threw', normalized, { category });
   }
   if (!config) {
-    logger.error('CategoryPage: missing category config', new Error('Category config is null'), {
+    const normalized = normalizeError(
+      'Category config is null',
+      'CategoryPage: missing category config'
+    );
+    logger.error('CategoryPage: missing category config', normalized, {
       category,
     });
     notFound();

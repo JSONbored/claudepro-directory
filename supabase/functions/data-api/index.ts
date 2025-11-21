@@ -1,5 +1,6 @@
 /// <reference path="../_shared/deno-globals.d.ts" />
 
+import { errorToString } from '../_shared/utils/error-handling.ts';
 import { getOnlyCorsHeaders, jsonResponse } from '../_shared/utils/http.ts';
 import { validatePathSegments, validateQueryString } from '../_shared/utils/input-validation.ts';
 import { createDataApiContext, logError, logInfo } from '../_shared/utils/logging.ts';
@@ -527,7 +528,7 @@ function respondWithAnalytics(
       logData['resource'] = ctx.segments[1];
     }
     if (error) {
-      logData['error'] = error instanceof Error ? error.message : String(error);
+      logData['error'] = errorToString(error);
     }
 
     if (outcome === 'success') {

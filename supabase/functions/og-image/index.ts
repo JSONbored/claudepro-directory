@@ -20,21 +20,10 @@ import React from 'https://esm.sh/react@18.2.0';
 import { SITE_URL, supabaseAnon } from '../_shared/clients/supabase.ts';
 import { edgeEnv } from '../_shared/config/env.ts';
 import type { Database as DatabaseGenerated } from '../_shared/database.types.ts';
+import { Constants } from '../_shared/database.types.ts';
 
-// Content category validation
-const CONTENT_CATEGORY_VALUES = [
-  'agents',
-  'mcp',
-  'rules',
-  'commands',
-  'hooks',
-  'statuslines',
-  'skills',
-  'collections',
-  'guides',
-  'jobs',
-  'changelog',
-] as const satisfies readonly DatabaseGenerated['public']['Enums']['content_category'][];
+// Use enum values directly from database.types.ts Constants
+const CONTENT_CATEGORY_VALUES = Constants.public.Enums.content_category;
 
 function isValidContentCategory(
   value: string
@@ -49,6 +38,7 @@ function isValidContentCategory(
 }
 
 import { CIRCUIT_BREAKER_CONFIGS, withCircuitBreaker } from '../_shared/utils/circuit-breaker.ts';
+import { errorToString } from '../_shared/utils/error-handling.ts';
 import {
   badRequestResponse,
   buildCacheHeaders,
@@ -205,7 +195,7 @@ async function fetchMetadataFromRoute(
   } catch (error) {
     logWarn('SEO API fetch failed, attempting direct database fallback', {
       ...logContext,
-      error: error instanceof Error ? error.message : String(error),
+      error: errorToString(error),
       seoUrl,
     });
 
@@ -639,7 +629,7 @@ function respondWithAnalytics(
       logData['query'] = query;
     }
     if (error) {
-      logData['error'] = error instanceof Error ? error.message : String(error);
+      logData['error'] = errorToString(error);
     }
 
     if (outcome === 'success') {

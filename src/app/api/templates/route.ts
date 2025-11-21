@@ -9,6 +9,7 @@ import { type NextRequest, NextResponse } from 'next/server';
 import { VALID_CATEGORIES } from '@/src/lib/data/config/category';
 import { getContentTemplates } from '@/src/lib/data/content/templates';
 import { logger } from '@/src/lib/logger';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 import type { Database } from '@/src/types/database.types';
 
 export async function GET(request: NextRequest) {
@@ -54,14 +55,15 @@ export async function GET(request: NextRequest) {
       }
     );
   } catch (error) {
-    logger.error('Templates API error', error instanceof Error ? error : new Error(String(error)), {
+    const normalized = normalizeError(error, 'Templates API error');
+    logger.error('Templates API error', normalized, {
       endpoint: '/api/templates',
     });
 
     return NextResponse.json(
       {
         error: 'Failed to fetch templates',
-        message: error instanceof Error ? error.message : 'Unknown error',
+        message: normalized.message,
       },
       { status: 500 }
     );

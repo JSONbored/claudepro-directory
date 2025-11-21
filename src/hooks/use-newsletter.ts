@@ -9,7 +9,7 @@ import { useCallback, useEffect, useState, useTransition } from 'react';
 import { usePulse } from '@/src/hooks/use-pulse';
 import { getNewsletterConfig } from '@/src/lib/actions/feature-flags.actions';
 import { logger } from '@/src/lib/logger';
-import { logClientWarning } from '@/src/lib/utils/error.utils';
+import { logClientWarning, normalizeError } from '@/src/lib/utils/error.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
 import type { Database } from '@/src/types/database.types';
 
@@ -52,7 +52,8 @@ async function fetchWithRetry(
       await new Promise((resolve) => setTimeout(resolve, delay));
       return fetchWithRetry(url, options, retries - 1);
     }
-    logger.error('fetchWithRetry: request failed', error as Error, {
+    const normalized = normalizeError(error, 'fetchWithRetry: request failed');
+    logger.error('fetchWithRetry: request failed', normalized, {
       url,
       attempt: MAX_RETRIES - retries + 1,
     });
@@ -228,7 +229,8 @@ export function useNewsletter(options: UseNewsletterOptions): UseNewsletterRetur
               logClientWarning('useNewsletter: signup error tracking failed', error, { source });
             });
 
-          logger.error('Newsletter subscription failed', new Error(errorMessage), {
+          const normalized = normalizeError(errorMessage, 'Newsletter subscription failed');
+          logger.error('Newsletter subscription failed', normalized, {
             component: 'useNewsletter',
             source,
             email: `${email.substring(0, 3)}***`,

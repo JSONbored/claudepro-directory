@@ -757,8 +757,15 @@ async function main() {
   });
 
   if (failCount > 0) {
-    logger.error('\n❌ FAILED BUILDS:\n', undefined, { failCount });
     const failedResults = allResults.filter((r) => r.status === 'error');
+    logger.error('\n❌ FAILED BUILDS:\n', undefined, {
+      failCount,
+      failedBuilds: failedResults.map((r) => ({
+        slug: r.slug,
+        message: r.message,
+      })), // Array support enables better log querying and analysis
+    });
+    // Also log individual failures for console readability
     for (const r of failedResults) {
       logger.error(`   ${r.slug}: ${r.message}`, undefined, { slug: r.slug, message: r.message });
     }

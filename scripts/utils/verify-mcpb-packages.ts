@@ -157,10 +157,15 @@ async function verifyMcpbPackages(): Promise<VerificationResult> {
     logger.warn('⚠️  Missing packages:', {
       script: 'verify-mcpb-packages',
       missing_count: result.missing_packages,
+      missingPackages: result.missing_packages_list.map((mcp) => ({
+        slug: mcp.slug,
+        title: mcp.title || 'No title',
+      })), // Array support enables better log querying and analysis
     });
     logger.info('\nMissing packages list:', {
       script: 'verify-mcpb-packages',
     });
+    // Also log individual items for console readability
     for (const mcp of result.missing_packages_list) {
       logger.info(`  - ${mcp.slug} (${mcp.title || 'No title'})`, {
         script: 'verify-mcpb-packages',
@@ -173,10 +178,14 @@ async function verifyMcpbPackages(): Promise<VerificationResult> {
     logger.warn('⚠️  Storage mismatches:', {
       script: 'verify-mcpb-packages',
       mismatches_count: result.storage_mismatches,
+      storageMismatches: result.storage_mismatches_list.map((mcp) => ({
+        slug: mcp.slug,
+      })), // Array support enables better log querying and analysis
     });
     logger.info('\nStorage mismatch list:', {
       script: 'verify-mcpb-packages',
     });
+    // Also log individual items for console readability
     for (const mcp of result.storage_mismatches_list) {
       logger.info(`  - ${mcp.slug}: DB has URL but storage file missing`, {
         script: 'verify-mcpb-packages',

@@ -19,7 +19,10 @@ export default async function NewCollectionPage() {
   const { user } = await getAuthenticatedUser({ context: 'NewCollectionPage' });
 
   if (!user) {
-    logger.warn('NewCollectionPage: unauthenticated access attempt');
+    logger.warn('NewCollectionPage: unauthenticated access attempt', undefined, {
+      route: '/account/library/new',
+      timestamp: new Date().toISOString(),
+    });
     redirect('/login');
   }
 

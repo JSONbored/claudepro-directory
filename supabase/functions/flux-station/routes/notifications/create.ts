@@ -49,8 +49,11 @@ export async function handleCreateNotification(req: Request): Promise<Response> 
     }
     payload = JSON.parse(bodyText);
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : String(error);
-    return badRequestResponse(`Invalid JSON payload: ${errorMessage}`, notificationCorsHeaders);
+    const { errorToString } = await import('../../../_shared/utils/error-handling.ts');
+    return badRequestResponse(
+      `Invalid JSON payload: ${errorToString(error)}`,
+      notificationCorsHeaders
+    );
   }
 
   // Validate payload structure

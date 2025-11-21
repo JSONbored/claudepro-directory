@@ -16,7 +16,9 @@ if (process.env.ANALYZE === 'true') {
 }
 
 /**
- * Next.js 16.0.0 configuration with Turbopack, React Compiler, and optimized caching
+ * Next.js 16.0.2 configuration with Turbopack, React Compiler, and optimized caching
+ *
+ * Middleware migration: Completed - using proxy.ts (Next.js 16 convention)
  * @type {import('next').NextConfig}
  */
 const nextConfig = {

@@ -24,13 +24,25 @@ export const revalidate = false;
 export default async function ContactPage() {
   const channels = getContactChannels();
   if (!channels.email) {
-    logger.warn('ContactPage: email channel is not configured');
+    logger.warn('ContactPage: email channel is not configured', undefined, {
+      route: '/contact',
+      channel: 'email',
+      configKey: 'CONTACT_EMAIL',
+    });
   }
   if (!channels.github) {
-    logger.warn('ContactPage: github channel is not configured');
+    logger.warn('ContactPage: github channel is not configured', undefined, {
+      route: '/contact',
+      channel: 'github',
+      configKey: 'GITHUB_URL',
+    });
   }
   if (!channels.discord) {
-    logger.warn('ContactPage: discord channel is not configured');
+    logger.warn('ContactPage: discord channel is not configured', undefined, {
+      route: '/contact',
+      channel: 'discord',
+      configKey: 'DISCORD_INVITE_URL',
+    });
   }
 
   // Feature flags are server/middleware only - use default for static generation

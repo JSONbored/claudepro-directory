@@ -159,7 +159,10 @@ export default async function SubmissionsPage() {
   const { user } = await getAuthenticatedUser({ context: 'SubmissionsPage' });
 
   if (!user) {
-    logger.warn('SubmissionsPage: unauthenticated access attempt');
+    logger.warn('SubmissionsPage: unauthenticated access attempt', undefined, {
+      route: '/account/submissions',
+      timestamp: new Date().toISOString(),
+    });
     return (
       <div className="space-y-6">
         <Card>
@@ -186,9 +189,13 @@ export default async function SubmissionsPage() {
     if (data?.submissions) {
       submissions = data.submissions;
     } else {
-      logger.error('SubmissionsPage: getUserDashboard returned null', undefined, {
-        userId: user.id,
-      });
+      logger.error(
+        'SubmissionsPage: getUserDashboard returned null',
+        new Error('getUserDashboard returned null'),
+        {
+          userId: user.id,
+        }
+      );
       hasError = true;
     }
   } catch (error) {

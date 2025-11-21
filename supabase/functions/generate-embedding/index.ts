@@ -149,9 +149,7 @@ async function storeEmbedding(
     const { error } = await supabaseServiceRole.from('content_embeddings').upsert(insertData);
 
     if (error) {
-      throw new Error(
-        `Failed to store embedding: ${error instanceof Error ? error.message : String(error)}`
-      );
+      throw new Error(`Failed to store embedding: ${errorToString(error)}`);
     }
   };
 
@@ -176,9 +174,7 @@ function respondWithAnalytics(handler: () => Promise<Response>): Promise<Respons
 
   const logEvent = (status: number, outcome: 'success' | 'error', error?: unknown) => {
     const duration = Math.round(performance.now() - startedAt);
-    const errorData = error
-      ? { error: error instanceof Error ? error.message : String(error) }
-      : {};
+    const errorData = error ? { error: errorToString(error) } : {};
     const logData = {
       ...withDuration(logContext, startedAt),
       status,

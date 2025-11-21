@@ -12,14 +12,10 @@ import { logger } from '@/src/lib/logger';
 import { env } from '@/src/lib/schemas/env.schema';
 import { logActionFailure } from '@/src/lib/utils/error.utils';
 import type { Database } from '@/src/types/database.types';
+import { Constants } from '@/src/types/database.types';
 
-const CONTACT_CATEGORY_VALUES = [
-  'bug',
-  'feature',
-  'partnership',
-  'general',
-  'other',
-] as const satisfies readonly Database['public']['Enums']['contact_category'][];
+// Use enum values directly from database.types.ts Constants
+const CONTACT_CATEGORY_VALUES = Constants.public.Enums.contact_category;
 
 // Email validation helper
 const emailRefine = (val: string) => {
@@ -68,7 +64,15 @@ export async function submitContactForm(
   const supabaseUrl = env.NEXT_PUBLIC_SUPABASE_URL;
 
   if (!supabaseUrl) {
-    logger.error('submitContactForm missing NEXT_PUBLIC_SUPABASE_URL env', undefined);
+    logger.error(
+      'submitContactForm missing NEXT_PUBLIC_SUPABASE_URL env',
+      new Error('Missing NEXT_PUBLIC_SUPABASE_URL'),
+      {
+        action: 'submitContactForm',
+        envVar: 'NEXT_PUBLIC_SUPABASE_URL',
+        phase: 'validation',
+      }
+    );
     return { success: false, error: 'Configuration error' };
   }
 

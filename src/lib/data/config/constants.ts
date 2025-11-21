@@ -292,7 +292,7 @@ export const ACRONYMS = [
 /**
  * External Services & CDN URLs
  * Centralized external service URLs for CSP, middleware, and integrations
- * Used in middleware.ts CSP headers, OAuth configs, and API integrations
+ * Used in proxy.ts CSP headers, OAuth configs, and API integrations
  */
 const externalServicesSchema = z.object({
   // Analytics & Monitoring

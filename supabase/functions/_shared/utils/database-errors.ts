@@ -3,6 +3,7 @@
  * Provides consistent error handling for database operations
  */
 
+import { errorToString } from './error-handling.ts';
 import { badRequestResponse, errorResponse, jsonResponse, publicCorsHeaders } from './http.ts';
 import type { BaseLogContext } from './logging.ts';
 import { logError } from './logging.ts';
@@ -41,6 +42,8 @@ export function handleDatabaseError(
     );
   }
 
-  logError('Database operation failed', logContext, new Error(errorMessage));
-  return errorResponse(new Error(`Database operation failed: ${errorMessage}`), context);
+  // Use errorToString for consistent error message extraction
+  const normalizedError = error instanceof Error ? error : new Error(errorToString(error));
+  logError('Database operation failed', logContext, normalizedError);
+  return errorResponse(normalizedError, context);
 }

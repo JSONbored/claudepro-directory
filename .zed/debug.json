@@ -22,7 +22,7 @@
     "runtimeExecutable": "sh",
     "runtimeArgs": [
       "-c",
-      "pnpm turbo run generate:categories:exec generate:service-worker:exec --concurrency=2 && exec node --inspect node_modules/.bin/next dev --turbopack"
+      "pnpm dev:generators && exec node --inspect node_modules/.bin/next dev --turbopack"
     ],
     "cwd": "$ZED_WORKTREE_ROOT",
     "env": {

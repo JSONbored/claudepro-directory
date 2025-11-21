@@ -26,6 +26,8 @@
   },
   "scripts": {
     "dev": "turbo run generate:categories:exec generate:service-worker:exec --concurrency=2 && next dev --turbopack",
+    "dev:generators": "turbo run generate:categories:exec generate:service-worker:exec --concurrency=2",
+    "dev:with-generators": "pnpm dev:generators && next dev --turbopack",
     "build": "turbo run generate:categories:exec generate:service-worker:exec --concurrency=2 && next build --turbopack",
     "build:analyze": "TURBOPACK_STATS=1 next build --turbopack",
     "build:skills": "turbo run build:skills:exec",

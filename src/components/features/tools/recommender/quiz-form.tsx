@@ -13,45 +13,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primi
 import { Separator } from '@/src/components/primitives/ui/separator';
 import { getQuizConfiguration } from '@/src/lib/actions/quiz.actions';
 import { generateConfigRecommendations } from '@/src/lib/edge/client';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 import type { Database } from '@/src/types/database.types';
+import { Constants } from '@/src/types/database.types';
 
-// Enum values for validation - using direct enum access from database.types.ts
-const EXPERIENCE_LEVEL_VALUES: readonly Database['public']['Enums']['experience_level'][] = [
-  'beginner',
-  'intermediate',
-  'advanced',
-] as const;
-
-const FOCUS_AREA_TYPE_VALUES: readonly Database['public']['Enums']['focus_area_type'][] = [
-  'security',
-  'performance',
-  'documentation',
-  'testing',
-  'code-quality',
-  'automation',
-] as const;
-
-const INTEGRATION_TYPE_VALUES: readonly Database['public']['Enums']['integration_type'][] = [
-  'github',
-  'database',
-  'cloud-aws',
-  'cloud-gcp',
-  'cloud-azure',
-  'communication',
-  'none',
-] as const;
-
-const USE_CASE_TYPE_VALUES: readonly Database['public']['Enums']['use_case_type'][] = [
-  'code-review',
-  'api-development',
-  'frontend-development',
-  'data-science',
-  'content-creation',
-  'devops-infrastructure',
-  'general-development',
-  'testing-qa',
-  'security-audit',
-] as const;
+// Use enum values directly from database.types.ts Constants
+const EXPERIENCE_LEVEL_VALUES = Constants.public.Enums.experience_level;
+const FOCUS_AREA_TYPE_VALUES = Constants.public.Enums.focus_area_type;
+const INTEGRATION_TYPE_VALUES = Constants.public.Enums.integration_type;
+const USE_CASE_TYPE_VALUES = Constants.public.Enums.use_case_type;
 
 // Use generated type directly from database.types.ts
 type QuizConfigurationResult = Database['public']['Functions']['get_quiz_configuration']['Returns'];
@@ -156,12 +126,17 @@ export function QuizForm() {
         }
         if (result?.serverError) {
           // Error already logged by safe-action middleware
-          logger.error('Failed to load quiz configuration', new Error(result.serverError));
+          const normalized = normalizeError(
+            result.serverError,
+            'Failed to load quiz configuration'
+          );
+          logger.error('Failed to load quiz configuration', normalized);
           toasts.error.actionFailed('load quiz');
         }
       })
       .catch((err) => {
-        logger.error('Failed to load quiz configuration', err);
+        const normalized = normalizeError(err, 'Failed to load quiz configuration');
+        logger.error('Failed to load quiz configuration', normalized);
         toasts.error.actionFailed('load quiz');
       });
   }, []);
@@ -261,18 +236,14 @@ export function QuizForm() {
           }
         } catch (error) {
           toasts.error.actionFailed('generate recommendations');
-          logger.error(
-            'Quiz submission failed',
-            error instanceof Error ? error : new Error(String(error))
-          );
+          const normalized = normalizeError(error, 'Quiz submission failed');
+          logger.error('Quiz submission failed', normalized);
         }
       });
     } catch (error) {
       toasts.error.invalidInput();
-      logger.error(
-        'Quiz validation failed',
-        error instanceof Error ? error : new Error(String(error))
-      );
+      const normalized = normalizeError(error, 'Quiz validation failed');
+      logger.error('Quiz validation failed', normalized);
     }
   };
 

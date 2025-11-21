@@ -18,7 +18,9 @@ const VercelPulse = dynamic(
       .then((mod) => mod.Analytics)
       .catch((error) => {
         const normalized = normalizeError(error, 'Failed to load Vercel pulse');
-        logger.warn('PulseCannon: Vercel pulse import failed', { error: normalized.message });
+        logger.warn('PulseCannon: Vercel pulse import failed', undefined, {
+          error: normalized.message,
+        });
         return () => null;
       }),
   {
@@ -32,7 +34,9 @@ const SpeedInsights = dynamic(
       .then((mod) => mod.SpeedInsights)
       .catch((error) => {
         const normalized = normalizeError(error, 'Failed to load Speed Insights');
-        logger.warn('PulseCannon: Speed Insights import failed', { error: normalized.message });
+        logger.warn('PulseCannon: Speed Insights import failed', undefined, {
+          error: normalized.message,
+        });
         return () => null;
       }),
   {
@@ -58,7 +62,9 @@ function loadUmamiPulse(): void {
     document.head.appendChild(script);
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to inject Umami pulse script');
-    logger.warn('PulseCannon: Umami pulse injection failed', { error: normalized.message });
+    logger.warn('PulseCannon: Umami pulse injection failed', undefined, {
+      error: normalized.message,
+    });
   }
 }
 
@@ -80,7 +86,7 @@ export function PulseCannon() {
         setShouldLoadPulse(true);
       } catch (error) {
         const normalized = normalizeError(error, 'Failed to load pulse services');
-        logger.warn('PulseCannon: Pulse loading failed', { error: normalized.message });
+        logger.warn('PulseCannon: Pulse loading failed', undefined, { error: normalized.message });
       }
     };
 

@@ -20,6 +20,7 @@ import { motion } from 'motion/react';
 import { NotificationBadge } from '@/src/components/features/notifications/notification-badge';
 import { logger } from '@/src/lib/logger';
 import type { SpeedDialAction } from '@/src/lib/types/component.types';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 
 interface SpeedDialItemProps extends SpeedDialAction {
   /** Animation delay for stagger effect (seconds) */
@@ -45,7 +46,8 @@ export function SpeedDialItem({
     try {
       onClick();
     } catch (error) {
-      logger.error('[SpeedDialItem] Error in onClick handler', error as Error);
+      const normalized = normalizeError(error, '[SpeedDialItem] Error in onClick handler');
+      logger.error('[SpeedDialItem] Error in onClick handler', normalized);
     }
   };
 

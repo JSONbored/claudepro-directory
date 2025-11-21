@@ -12,6 +12,7 @@
  */
 
 import { logger } from '@/src/lib/logger';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 
 interface CreateCheckoutParams {
   productPriceId: string;
@@ -71,7 +72,8 @@ export async function createPolarCheckout(
 
     if (!response.ok) {
       const errorText = await response.text();
-      logger.error('Polar checkout creation failed', new Error(response.statusText), {
+      const normalized = normalizeError(response.statusText, 'Polar checkout creation failed');
+      logger.error('Polar checkout creation failed', normalized, {
         status: response.status,
         error: errorText,
       });
@@ -91,7 +93,8 @@ export async function createPolarCheckout(
       sessionId: session.id,
     };
   } catch (error) {
-    logger.error('Polar checkout creation error', error as Error);
+    const normalized = normalizeError(error, 'Polar checkout creation error');
+    logger.error('Polar checkout creation error', normalized);
     return { error: 'Failed to create checkout session. Please try again.' };
   }
 }

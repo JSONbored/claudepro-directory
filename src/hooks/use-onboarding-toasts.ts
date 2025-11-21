@@ -13,6 +13,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useAuthenticatedUser } from '@/src/lib/auth/use-authenticated-user';
 import { logger } from '@/src/lib/logger';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 
 interface OnboardingToast {
   id: string;
@@ -110,9 +111,8 @@ export function useOnboardingToasts({
     };
 
     fetchNotifications().catch((error) => {
-      logger.warn('Failed to fetch notifications', {
-        error: error instanceof Error ? error.message : String(error),
-      });
+      const normalized = normalizeError(error, 'Failed to fetch notifications');
+      logger.warn('Failed to fetch notifications', { error: normalized.message });
     });
   }, [enabled, context, user]);
 
@@ -187,9 +187,8 @@ export function useOnboardingToasts({
     };
 
     createNotifications().catch((error) => {
-      logger.warn('Failed to create onboarding notifications', {
-        error: error instanceof Error ? error.message : String(error),
-      });
+      const normalized = normalizeError(error, 'Failed to create onboarding notifications');
+      logger.warn('Failed to create onboarding notifications', { error: normalized.message });
     });
   }, [enabled, hasSeenToasts, customToasts, user, context, markToastsAsSeen]);
 

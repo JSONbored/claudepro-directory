@@ -13,6 +13,7 @@ import { AlertCircle } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/auth/auth-code-error');
@@ -29,7 +30,11 @@ export default function AuthCodeError({
 }: {
   searchParams?: AuthCodeErrorSearchParams;
 }) {
-  logger.error('AuthCodeErrorPage rendered', undefined, {
+  const normalized = normalizeError(
+    'Authentication code error page accessed',
+    'AuthCodeErrorPage rendered'
+  );
+  logger.error('AuthCodeErrorPage rendered', normalized, {
     code: searchParams?.code || 'unknown',
     provider: searchParams?.provider || 'unknown',
     hasMessage: Boolean(searchParams?.message),

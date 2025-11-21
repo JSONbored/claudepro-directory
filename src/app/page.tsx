@@ -9,6 +9,7 @@ import { AnimatedGradientText } from '@/src/components/primitives/animation/grad
 import { ParticlesBackground } from '@/src/components/primitives/animation/particles-background';
 import { HomePageLoading } from '@/src/components/primitives/feedback/loading-factory';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
+import type { Database } from '@/src/types/database.types';
 
 const RollingText = dynamicImport(
   () => import('@/src/components/primitives/animation/rolling-text').then((mod) => mod.RollingText),
@@ -128,7 +129,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
       image: contributor.image,
       bio: contributor.bio,
       work: contributor.work,
-      tier: contributor.tier ?? ('free' as const),
+      tier: (contributor.tier ?? 'free') as Database['public']['Enums']['user_tier'],
       created_at: new Date().toISOString(), // Default since not in RPC return
     }));
 

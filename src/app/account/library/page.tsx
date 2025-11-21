@@ -35,7 +35,10 @@ export default async function LibraryPage() {
   const { user } = await getAuthenticatedUser({ context: 'LibraryPage' });
 
   if (!user) {
-    logger.warn('LibraryPage: unauthenticated access attempt detected');
+    logger.warn('LibraryPage: unauthenticated access attempt detected', undefined, {
+      route: '/account/library',
+      timestamp: new Date().toISOString(),
+    });
     return (
       <div className="space-y-6">
         <Card>

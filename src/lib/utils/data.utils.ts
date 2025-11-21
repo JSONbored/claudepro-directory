@@ -49,9 +49,8 @@ function parseWithDevalue<T = unknown>(str: string): T {
   try {
     return devalueParse(str) as T;
   } catch (error) {
-    throw new Error(
-      `Devalue parse failed: ${error instanceof Error ? error.message : 'Unknown error'}`
-    );
+    const normalized = normalizeError(error, 'Devalue parse failed');
+    throw normalized;
   }
 }
 
@@ -65,9 +64,8 @@ function parseWithValidation<T>(str: string, schema: z.ZodType<T>): T {
     const parsed = JSON.parse(str);
     return schema.parse(parsed);
   } catch (error) {
-    throw new Error(
-      `Validated JSON parse failed: ${error instanceof Error ? error.message : 'Unknown error'}`
-    );
+    const normalized = normalizeError(error, 'Validated JSON parse failed');
+    throw normalized;
   }
 }
 
@@ -80,9 +78,8 @@ function parseWithUnsafeJSON<T = unknown>(str: string): T {
   try {
     return JSON.parse(str) as T;
   } catch (error) {
-    throw new Error(
-      `JSON parse failed: ${error instanceof Error ? error.message : 'Unknown error'}`
-    );
+    const normalized = normalizeError(error, 'JSON parse failed');
+    throw normalized;
   }
 }
 
@@ -140,10 +137,11 @@ export function safeParse<T = unknown>(
 
     return result;
   } catch (error) {
-    lastError = error instanceof Error ? error : new Error(String(error));
+    const normalized = normalizeError(error, 'Primary parse strategy failed');
+    lastError = normalized;
 
     if (opts.enableLogging) {
-      logger.error('Primary parse strategy failed', lastError, {
+      logger.error('Primary parse strategy failed', normalized, {
         strategy: String(opts.strategy),
         size: `${str.length} bytes`,
         preview: str.slice(0, 100),

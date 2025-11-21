@@ -59,9 +59,12 @@ const FloatingActionBar = dynamic(
 const NEWSLETTER_OPT_IN_COOKIE = 'newsletter_opt_in';
 const NEWSLETTER_OPT_IN_SEEN_FLAG = 'newsletter_opt_in_seen';
 
-const buildStorageErrorContext = (error: unknown) => ({
-  error: error instanceof Error ? error.message : String(error),
-});
+const buildStorageErrorContext = (error: unknown) => {
+  const normalized = normalizeError(error, 'Storage operation failed');
+  return {
+    error: normalized.message,
+  };
+};
 
 type WindowWithCookieStore = Window &
   typeof globalThis & {

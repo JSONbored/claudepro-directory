@@ -7,6 +7,7 @@
  */
 
 import { toast } from 'sonner';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 import type { Database } from '@/src/types/database.types';
 
 /**
@@ -110,8 +111,10 @@ export const errorToasts = {
   profileRefreshFailed: () => toast.error('Failed to refresh profile'),
   reviewActionFailed: (action: string) => toast.error(`Failed to ${action} review`),
   voteUpdateFailed: () => toast.error(TOAST_MESSAGES.vote_update_failed),
-  fromError: (error: unknown, fallback = 'An error occurred') =>
-    toast.error(error instanceof Error ? error.message : fallback),
+  fromError: (error: unknown, fallback = 'An error occurred') => {
+    const normalized = normalizeError(error, fallback);
+    return toast.error(normalized.message);
+  },
 } as const;
 
 export const infoToasts = {

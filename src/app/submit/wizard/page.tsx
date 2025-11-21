@@ -57,6 +57,7 @@ import { type DraftFormData, DraftManager } from '@/src/lib/drafts/draft-manager
 import { Code, FileText, Plus, Sparkles, Tag, X } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import type { SubmissionContentType } from '@/src/lib/types/component.types';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
 import type { Database } from '@/src/types/database.types';
 
@@ -189,9 +190,8 @@ export default function WizardSubmissionPage() {
           setTemplates(data.templates || []);
         }
       } catch (error) {
-        logger.warn('Failed to load templates', {
-          error: error instanceof Error ? error.message : String(error),
-        });
+        const normalized = normalizeError(error, 'Failed to load templates');
+        logger.warn('Failed to load templates', { error: normalized.message });
         setTemplates([]);
       } finally {
         setTemplatesLoading(false);
@@ -199,9 +199,8 @@ export default function WizardSubmissionPage() {
     };
 
     loadTemplates().catch((error) => {
-      logger.warn('Failed to load templates in useEffect', {
-        error: error instanceof Error ? error.message : String(error),
-      });
+      const normalized = normalizeError(error, 'Failed to load templates in useEffect');
+      logger.warn('Failed to load templates in useEffect', { error: normalized.message });
     });
   }, [formData.submission_type]);
 
@@ -215,16 +214,14 @@ export default function WizardSubmissionPage() {
           setSocialProofStats(data.stats || {});
         }
       } catch (error) {
-        logger.warn('Failed to load social proof stats', {
-          error: error instanceof Error ? error.message : String(error),
-        });
+        const normalized = normalizeError(error, 'Failed to load social proof stats');
+        logger.warn('Failed to load social proof stats', { error: normalized.message });
       }
     };
 
     loadSocialProofStats().catch((error) => {
-      logger.warn('Failed to load social proof stats in useEffect', {
-        error: error instanceof Error ? error.message : String(error),
-      });
+      const normalized = normalizeError(error, 'Failed to load social proof stats in useEffect');
+      logger.warn('Failed to load social proof stats in useEffect', { error: normalized.message });
     });
   }, []);
 
@@ -477,7 +474,8 @@ export default function WizardSubmissionPage() {
         toasts.error.submissionFailed(result?.serverError);
       }
     } catch (error) {
-      logger.error('Submission failed', error instanceof Error ? error : new Error(String(error)), {
+      const normalized = normalizeError(error, 'Submission failed');
+      logger.error('Submission failed', normalized, {
         submissionType: formData.submission_type,
       });
       toasts.error.submissionFailed();

@@ -21,6 +21,7 @@
 
 import { logger } from '@/src/lib/logger';
 import type { SubmissionContentType } from '@/src/lib/types/component.types';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 
 /**
  * Form data structure for drafts
@@ -117,8 +118,9 @@ export class DraftManager {
       localStorage.setItem(this.key, JSON.stringify(draft));
       return true;
     } catch (error) {
+      const normalized = normalizeError(error, 'DraftManager: Failed to save draft');
       logger.warn('DraftManager: Failed to save draft', {
-        error: error instanceof Error ? error.message : String(error),
+        error: normalized.message,
         key: this.key,
       });
       return false;
@@ -165,8 +167,9 @@ export class DraftManager {
 
       return draft;
     } catch (error) {
+      const normalized = normalizeError(error, 'DraftManager: Failed to load draft');
       logger.warn('DraftManager: Failed to load draft', {
-        error: error instanceof Error ? error.message : String(error),
+        error: normalized.message,
         key: this.key,
       });
       return null;
@@ -181,8 +184,9 @@ export class DraftManager {
       localStorage.removeItem(this.key);
       return true;
     } catch (error) {
+      const normalized = normalizeError(error, 'DraftManager: Failed to clear draft');
       logger.warn('DraftManager: Failed to clear draft', {
-        error: error instanceof Error ? error.message : String(error),
+        error: normalized.message,
         key: this.key,
       });
       return false;
@@ -315,9 +319,8 @@ export class DraftManager {
         });
       }
     } catch (error) {
-      logger.warn('DraftManager: Failed to list drafts', {
-        error: error instanceof Error ? error.message : String(error),
-      });
+      const normalized = normalizeError(error, 'DraftManager: Failed to list drafts');
+      logger.warn('DraftManager: Failed to list drafts', { error: normalized.message });
     }
 
     // Sort by updated_at (most recent first)
@@ -364,9 +367,8 @@ export class DraftManager {
         }
       }
     } catch (error) {
-      logger.warn('DraftManager: Failed to clear expired drafts', {
-        error: error instanceof Error ? error.message : String(error),
-      });
+      const normalized = normalizeError(error, 'DraftManager: Failed to clear expired drafts');
+      logger.warn('DraftManager: Failed to clear expired drafts', { error: normalized.message });
     }
 
     return cleared;
@@ -395,9 +397,8 @@ export class DraftManager {
         cleared++;
       }
     } catch (error) {
-      logger.warn('DraftManager: Failed to clear all drafts', {
-        error: error instanceof Error ? error.message : String(error),
-      });
+      const normalized = normalizeError(error, 'DraftManager: Failed to clear all drafts');
+      logger.warn('DraftManager: Failed to clear all drafts', { error: normalized.message });
     }
 
     return cleared;
@@ -421,9 +422,8 @@ export class DraftManager {
         }
       }
     } catch (error) {
-      logger.warn('DraftManager: Failed to calculate storage size', {
-        error: error instanceof Error ? error.message : String(error),
-      });
+      const normalized = normalizeError(error, 'DraftManager: Failed to calculate storage size');
+      logger.warn('DraftManager: Failed to calculate storage size', { error: normalized.message });
     }
 
     return size;

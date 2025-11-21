@@ -1,6 +1,7 @@
 import type { SupabaseClient } from 'jsr:@supabase/supabase-js@2';
 import { supabaseAnon, supabaseServiceRole } from '../../clients/supabase.ts';
 import type { Database as DatabaseGenerated } from '../../database.types.ts';
+import { errorToString } from '../error-handling.ts';
 import { createUtilityContext } from '../logging.ts';
 
 export type StorageServiceClient = SupabaseClient<DatabaseGenerated>;
@@ -142,11 +143,11 @@ export async function deleteStorageObjects(
     });
     console.error('[Storage] Delete error', {
       ...logContext,
-      error: error instanceof Error ? error.message : 'Unknown storage delete error',
+      error: errorToString(error),
     });
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Unknown storage delete error',
+      error: errorToString(error),
     };
   }
 }
@@ -185,11 +186,11 @@ export async function createSignedStorageUrl(
     });
     console.error('[Storage] Signed URL exception', {
       ...logContext,
-      error: error instanceof Error ? error.message : 'Unknown signed URL error',
+      error: errorToString(error),
     });
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Unknown signed URL error',
+      error: errorToString(error),
     };
   }
 }

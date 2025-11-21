@@ -3,6 +3,7 @@
 import { z } from 'zod';
 import { logger } from '@/src/lib/logger';
 import { nonEmptyString, urlString } from '@/src/lib/schemas/primitives';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 
 /**
  * Server-side environment variables schema
@@ -231,8 +232,14 @@ function validateEnv(): Env {
 
   if (!parsed.success) {
     const errorDetails = JSON.stringify(parsed.error.flatten().fieldErrors, null, 2);
-
-    logger.error(`Invalid environment variables detected: ${errorDetails}`);
+    const normalized = normalizeError(
+      new Error(`Invalid environment variables: ${errorDetails}`),
+      'Invalid environment variables detected'
+    );
+    logger.error('Invalid environment variables detected', normalized, {
+      errorDetails,
+      phase: 'validation',
+    });
 
     // In production, we should fail fast on invalid env vars
     if (process.env.NODE_ENV === 'production') {

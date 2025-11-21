@@ -20,6 +20,7 @@ import type {
   TextFieldDefinition,
 } from '@/src/lib/types/component.types';
 import { SUBMISSION_CONTENT_TYPES } from '@/src/lib/types/component.types';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 import type { Database } from '@/src/types/database.types';
 
 type FormFieldConfigItem = Database['public']['CompositeTypes']['form_field_config_item'];
@@ -129,7 +130,11 @@ async function fetchFieldsForContentType(
   );
 
   if (!result?.fields) {
-    logger.error('Failed to load form fields', new Error('RPC returned null or no fields'), {
+    const normalized = normalizeError(
+      'RPC returned null or no fields',
+      'Failed to load form fields'
+    );
+    logger.error('Failed to load form fields', normalized, {
       contentType,
       source: 'SubmissionFormConfig',
     });

@@ -77,14 +77,15 @@ export async function proxyStorageFile(options: StorageProxyOptions): Promise<Re
       bucket,
       path,
     });
+    const { errorToString } = await import('../error-handling.ts');
     console.error('[Storage] Proxy error', {
       ...logContext,
-      error: error instanceof Error ? error.message : String(error),
+      error: errorToString(error),
     });
     return buildErrorResponse(
       {
         error: 'proxy_failed',
-        message: error instanceof Error ? error.message : 'Unknown proxy error',
+        message: errorToString(error),
         bucket,
         path,
       },

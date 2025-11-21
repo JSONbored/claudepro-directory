@@ -53,8 +53,9 @@ export async function enqueueSearchAnalytics({
       },
     });
   } catch (error) {
+    const { errorToString } = await import('./error-handling.ts');
     console.warn('[analytics] Failed to enqueue search analytics', {
-      error: error instanceof Error ? error.message : String(error),
+      error: errorToString(error),
       query: query.substring(0, 50),
     });
   }

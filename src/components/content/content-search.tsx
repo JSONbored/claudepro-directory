@@ -27,6 +27,7 @@ import type {
   FilterState,
 } from '@/src/lib/types/component.types';
 import { ICON_NAME_MAP } from '@/src/lib/ui-constants';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 
 /**
  * Content Search Client - Edge Function Integration
@@ -100,7 +101,8 @@ function ContentSearchClientComponent<T extends DisplayableContent>({
 
         setSearchResults(result.results as T[]);
       } catch (error) {
-        logger.error('Content search failed', error as Error, { source: 'ContentSearchClient' });
+        const normalized = normalizeError(error, 'Content search failed');
+        logger.error('Content search failed', normalized, { source: 'ContentSearchClient' });
         setSearchResults(items);
       }
     },
@@ -127,7 +129,8 @@ function ContentSearchClientComponent<T extends DisplayableContent>({
       // Fire-and-forget: handleSearch has its own error handling
       handleSearch(searchQuery).catch((error) => {
         // Error is already logged in handleSearch, but we catch to prevent unhandled promise rejection
-        logger.error('Content search effect failed', error as Error, {
+        const normalized = normalizeError(error, 'Content search effect failed');
+        logger.error('Content search effect failed', normalized, {
           source: 'ContentSearchClient',
         });
       });

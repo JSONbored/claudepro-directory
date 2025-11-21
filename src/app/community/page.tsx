@@ -35,10 +35,18 @@ export const revalidate = false;
 export default function CommunityPage() {
   const channels = getContactChannels();
   if (!channels.discord) {
-    logger.warn('CommunityPage: Discord channel is not configured');
+    logger.warn('CommunityPage: Discord channel is not configured', undefined, {
+      route: '/community',
+      channel: 'discord',
+      configKey: 'DISCORD_INVITE_URL',
+    });
   }
   if (!channels.twitter) {
-    logger.warn('CommunityPage: Twitter channel is not configured');
+    logger.warn('CommunityPage: Twitter channel is not configured', undefined, {
+      route: '/community',
+      channel: 'twitter',
+      configKey: 'TWITTER_URL',
+    });
   }
 
   return (

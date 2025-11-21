@@ -6,13 +6,14 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { logger } from './logger';
+import { normalizeError } from './utils/error.utils';
 
 /**
  * Sanitize error messages - strip file paths and sensitive info
  */
 export function sanitizeError(error: unknown): string {
-  const message = error instanceof Error ? error.message : String(error);
-  return message
+  const normalized = normalizeError(error, 'Error occurred');
+  return normalized.message
     .replace(/\/Users\/[^/\s]+/g, '[USER]')
     .replace(/\/var\/[^/\s]+/g, '[PATH]')
     .replace(/\/home\/[^/\s]+/g, '[PATH]')
@@ -45,7 +46,8 @@ export function createErrorResponse(
   } = {}
 ): NextResponse {
   // Log error with full context - BetterStack captures everything
-  logger.error('API error occurred', error instanceof Error ? error : new Error(String(error)), {
+  const normalized = normalizeError(error, 'API error occurred');
+  logger.error('API error occurred', normalized, {
     route: context.route || 'unknown',
     operation: context.operation || 'unknown',
     method: context.method || 'unknown',
@@ -68,14 +70,14 @@ export function createErrorResponse(
 
   // Handle generic errors
   const isDev = process.env.NODE_ENV === 'development';
-  const errorMessage = error instanceof Error ? error.message : 'An error occurred';
+  const errorMessage = normalized.message;
 
   return NextResponse.json(
     {
       success: false,
       error: isDev ? sanitizeError(error) : 'Internal server error',
       message: isDev ? errorMessage : 'An unexpected error occurred',
-      ...(isDev && error instanceof Error && error.stack && { stack: error.stack }),
+      ...(isDev && normalized.stack && { stack: normalized.stack }),
     },
     {
       status: 500,

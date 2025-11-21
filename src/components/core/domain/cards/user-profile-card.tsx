@@ -69,7 +69,7 @@ export type UserProfile = (
       image: string | null;
       bio: string | null;
       work: string | null;
-      tier: 'free' | 'pro' | 'enterprise';
+      tier: Database['public']['Enums']['user_tier'];
       created_at: string;
       interests?: string[] | null;
       website?: string | null;

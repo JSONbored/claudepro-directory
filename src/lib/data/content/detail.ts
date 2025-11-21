@@ -5,21 +5,10 @@ import { generateContentCacheKey, generateContentTags } from '@/src/lib/data/hel
 import { logger } from '@/src/lib/logger';
 import { normalizeError } from '@/src/lib/utils/error.utils';
 import type { Database } from '@/src/types/database.types';
+import { Constants } from '@/src/types/database.types';
 
-// Content category validation using generated ENUM
-const CONTENT_CATEGORY_VALUES = [
-  'agents',
-  'mcp',
-  'rules',
-  'commands',
-  'hooks',
-  'statuslines',
-  'skills',
-  'collections',
-  'guides',
-  'jobs',
-  'changelog',
-] as const satisfies readonly Database['public']['Enums']['content_category'][];
+// Use enum values directly from database.types.ts Constants
+const CONTENT_CATEGORY_VALUES = Constants.public.Enums.content_category;
 
 function isValidContentCategory(
   value: string
@@ -39,7 +28,11 @@ export async function getContentDetailComplete(input: {
   // Validate category is valid ENUM value
   // Database will also validate, but we check early for better error messages
   if (!isValidContentCategory(category)) {
-    logger.error('Invalid category in getContentDetailComplete', new Error('Invalid category'), {
+    const normalized = normalizeError(
+      'Invalid category',
+      'Invalid category in getContentDetailComplete'
+    );
+    logger.error('Invalid category in getContentDetailComplete', normalized, {
       category,
       slug,
     });

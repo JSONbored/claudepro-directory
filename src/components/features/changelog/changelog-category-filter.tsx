@@ -8,16 +8,10 @@ import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge
 import { TabsList, TabsTrigger } from '@/src/components/primitives/ui/tabs';
 import { DIMENSIONS } from '@/src/lib/ui-constants';
 import type { Database } from '@/src/types/database.types';
+import { Constants } from '@/src/types/database.types';
 
-// Changelog category enum values for validation
-const CHANGELOG_CATEGORY_VALUES: readonly Database['public']['Enums']['changelog_category'][] = [
-  'Added',
-  'Changed',
-  'Deprecated',
-  'Removed',
-  'Fixed',
-  'Security',
-] as const;
+// Use enum values directly from database.types.ts Constants
+const CHANGELOG_CATEGORY_VALUES = Constants.public.Enums.changelog_category;
 
 export interface CategoryFilterProps {
   activeCategory: 'All' | Database['public']['Enums']['changelog_category'];

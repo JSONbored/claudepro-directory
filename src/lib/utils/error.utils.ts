@@ -1,12 +1,24 @@
 import { logger } from '@/src/lib/logger';
 
-type LoggerContext = Record<string, string | number | boolean>;
-type ContextInput = Record<string, string | number | boolean | undefined> | undefined;
+// Match LogContext type from logger.ts to support arrays and objects
+type LogContextValue =
+  | string
+  | number
+  | boolean
+  | null
+  | readonly string[]
+  | readonly number[]
+  | readonly boolean[]
+  | ReadonlyArray<LogContextValue>
+  | { readonly [key: string]: LogContextValue };
+
+type LoggerContext = Record<string, LogContextValue>;
+type ContextInput = Record<string, LogContextValue | undefined> | undefined;
 
 function sanitizeContext(context: ContextInput): LoggerContext | undefined {
   if (!context) return undefined;
   const entries = Object.entries(context).filter(
-    (entry): entry is [string, string | number | boolean] => entry[1] !== undefined
+    (entry): entry is [string, LogContextValue] => entry[1] !== undefined
   );
   if (entries.length === 0) {
     return undefined;

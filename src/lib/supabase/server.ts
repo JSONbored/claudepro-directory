@@ -9,6 +9,7 @@
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { logger } from '@/src/lib/logger';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 import type { Database } from '@/src/types/database.types';
 
 export async function createClient() {
@@ -91,7 +92,7 @@ export async function createClient() {
         const cookies = cookieStore.getAll();
         logger.info('Supabase getting cookies', {
           count: cookies.length,
-          names: cookies.map((c) => c.name).join(', '),
+          names: cookies.map((c) => c.name), // Array support enables better log querying
         });
         return cookies;
       },
@@ -122,15 +123,20 @@ export async function createClient() {
             }
 
             // Route Handler error: actual cookie-setting failure - log it
-            logger.error('Failed to set auth cookies in Route Handler', error, {
+            const normalized = normalizeError(error, 'Failed to set auth cookies in Route Handler');
+            logger.error('Failed to set auth cookies in Route Handler', normalized, {
               context: 'supabase_server_client',
               cookieCount: cookiesToSet.length,
-              errorMessage: error.message,
+              errorMessage: normalized.message,
             });
           } else {
+            const normalized = normalizeError(
+              error,
+              'Failed to set auth cookies in Route Handler (non-Error exception)'
+            );
             logger.error(
               'Failed to set auth cookies in Route Handler (non-Error exception)',
-              new Error(String(error)),
+              normalized,
               {
                 context: 'supabase_server_client',
                 cookieCount: cookiesToSet.length,

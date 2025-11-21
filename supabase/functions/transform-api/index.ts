@@ -5,6 +5,7 @@
  * Handles syntax highlighting, content processing, and other expensive operations
  */
 
+import { errorToString } from '../_shared/utils/error-handling.ts';
 import { jsonResponse } from '../_shared/utils/http.ts';
 import { createTransformApiContext, logError, logInfo } from '../_shared/utils/logging.ts';
 import { checkRateLimit, RATE_LIMIT_PRESETS } from '../_shared/utils/rate-limit.ts';
@@ -198,7 +199,7 @@ function respondWithAnalytics(
     };
 
     if (error) {
-      logData['error'] = error instanceof Error ? error.message : String(error);
+      logData['error'] = errorToString(error);
     }
 
     if (outcome === 'success') {

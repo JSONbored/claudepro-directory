@@ -18,7 +18,7 @@ import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { POSITION_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { normalizeError } from '@/src/lib/utils/error.utils';
-import type { Database } from '@/src/types/database.types';
+import { Constants, type Database } from '@/src/types/database.types';
 
 type SponsorshipAnalytics = Database['public']['Functions']['get_sponsorship_analytics']['Returns'];
 
@@ -94,8 +94,32 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
   }
 
   // After null check, TypeScript narrows types - use generated types directly
-  // Use generated ENUM type directly - no validation needed
-  const safeTier = sponsorship.tier;
+  // Validate tier value at runtime using database enum constants
+  const rawTier = sponsorship.tier;
+  const validTiers = Constants.public.Enums.sponsorship_tier;
+
+  // Type guard to check if tier is a valid enum value
+  // Uses database enum constants directly - leverages readonly array includes
+  function isValidTier(
+    tier: Database['public']['Enums']['sponsorship_tier']
+  ): tier is Database['public']['Enums']['sponsorship_tier'] {
+    // TypeScript knows validTiers contains all enum values, so this is type-safe
+    return validTiers.some((validTier) => validTier === tier);
+  }
+
+  const safeTier: Database['public']['Enums']['sponsorship_tier'] = isValidTier(rawTier)
+    ? rawTier
+    : 'sponsored'; // Safe default for invalid values
+
+  if (!isValidTier(rawTier)) {
+    logger.warn('SponsorshipAnalyticsPage: invalid tier value, using safe default', {
+      sponsorshipId: id,
+      userId: user.id,
+      invalidTier: rawTier,
+      expectedTiers: validTiers, // Now supports arrays directly - better for log querying
+      fallbackTier: 'sponsored',
+    });
+  }
 
   const impressionCount = sponsorship.impression_count ?? 0;
   const clickCount = sponsorship.click_count ?? 0;

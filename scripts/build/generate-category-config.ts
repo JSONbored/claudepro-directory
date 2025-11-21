@@ -95,11 +95,32 @@ async function generateCategoryConfig() {
   logger.info('📥 Fetching category configs from data-api edge function...');
   const edgeFunctionUrl = `${SUPABASE_URL}/functions/v1/data-api/content/category-configs`;
 
-  const response = await fetch(edgeFunctionUrl, {
-    headers: {
-      Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
-    },
-  });
+  // Add timeout to prevent hanging requests
+  const abortController = new AbortController();
+  const timeoutId = setTimeout(() => {
+    abortController.abort();
+  }, 10_000); // 10 second timeout
+
+  let response: Response;
+  try {
+    response = await fetch(edgeFunctionUrl, {
+      headers: {
+        Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+      },
+      signal: abortController.signal,
+    });
+    // Clear timeout after fetch completes
+    clearTimeout(timeoutId);
+  } catch (err) {
+    // Clear timeout on error
+    clearTimeout(timeoutId);
+    // Handle AbortError (timeout) - can be Error or DOMException depending on environment
+    if (err && typeof err === 'object' && 'name' in err && err.name === 'AbortError') {
+      throw new Error('Edge function request timed out after 10 seconds');
+    }
+    // Re-throw other errors as-is
+    throw err;
+  }
 
   if (!response.ok) {
     const errorText = await response.text().catch(() => 'Unknown error');

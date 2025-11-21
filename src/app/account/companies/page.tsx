@@ -52,7 +52,10 @@ export default async function CompaniesPage() {
   const { user } = await getAuthenticatedUser({ context: 'CompaniesPage' });
 
   if (!user) {
-    logger.warn('CompaniesPage: unauthenticated access attempt detected');
+    logger.warn('CompaniesPage: unauthenticated access attempt detected', undefined, {
+      route: '/account/companies',
+      timestamp: new Date().toISOString(),
+    });
     return (
       <div className="space-y-6">
         <Card>

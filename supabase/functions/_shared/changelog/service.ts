@@ -257,12 +257,13 @@ export async function revalidateChangelogPages(
         action: 'revalidate',
         slug,
       },
-    }).catch((error) => {
+    }).catch(async (error) => {
+      const { errorToString } = await import('../utils/error-handling.ts');
       console.warn('[changelog-service] Cache tag invalidation failed', {
         function: 'changelog-service',
         action: 'revalidate',
         slug,
-        error: error instanceof Error ? error.message : String(error),
+        error: errorToString(error),
       });
     });
   }
@@ -295,12 +296,13 @@ export async function revalidateChangelogPages(
           });
         }
       } catch (error) {
+        const { errorToString } = await import('../utils/error-handling.ts');
         console.error('[changelog-service] Revalidate error', {
           function: 'changelog-service',
           action: 'revalidate',
           slug,
           path,
-          error: error instanceof Error ? error.message : String(error),
+          error: errorToString(error),
         });
       }
     })

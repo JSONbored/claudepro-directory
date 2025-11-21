@@ -18,6 +18,7 @@ import type { ReactNode } from 'react';
 import type { SearchResult } from '@/src/lib/edge/search-client';
 import type { LucideIcon, LucideIcon as LucideIconType } from '@/src/lib/icons';
 import type { Database } from '@/src/types/database.types';
+import { Constants } from '@/src/types/database.types';
 
 /**
  * ContentItem - Base content item type derived from content table
@@ -31,8 +32,9 @@ export type ContentItem = Database['public']['Tables']['content']['Row'];
 
 /**
  * Copy Type - type of content being copied
+ * Uses generated enum directly from database.types.ts
  */
-export type CopyType = 'code' | 'link' | 'markdown';
+export type CopyType = Database['public']['Enums']['copy_type'];
 
 /**
  * HomepageContentItem - Simplified content item for homepage display
@@ -457,17 +459,9 @@ export type SubmissionContentType = Database['public']['Enums']['submission_type
 
 /**
  * Submission content types array (for runtime use, e.g., form dropdowns)
- * TypeScript will validate that all values match the database enum
+ * Uses enum values directly from database.types.ts Constants
  */
-export const SUBMISSION_CONTENT_TYPES: readonly Database['public']['Enums']['submission_type'][] = [
-  'agents',
-  'mcp',
-  'rules',
-  'commands',
-  'hooks',
-  'statuslines',
-  'skills',
-] as const;
+export const SUBMISSION_CONTENT_TYPES = Constants.public.Enums.submission_type;
 
 export interface SubmissionFormSection {
   nameField: TextFieldDefinition | null;
@@ -543,7 +537,7 @@ export interface UnifiedCategoryConfig<TId extends string = string> {
   };
   detailPage: {
     displayConfig: boolean;
-    configFormat: 'json' | 'multi' | 'hook';
+    configFormat: Database['public']['Enums']['config_format'];
     tabs?: ReadonlyArray<TabConfig>;
   };
   sections: {

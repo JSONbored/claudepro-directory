@@ -139,7 +139,8 @@ export function ContactTerminal() {
       }
       if (result?.serverError) {
         // Error already logged by safe-action middleware
-        logger.error('Failed to load terminal commands', new Error(result.serverError), {
+        const normalized = normalizeError(result.serverError, 'Failed to load terminal commands');
+        logger.error('Failed to load terminal commands', normalized, {
           component: 'ContactTerminal',
           action: 'loadCommands',
         });
@@ -147,7 +148,8 @@ export function ContactTerminal() {
         addOutput('error', 'Failed to load commands. Please refresh the page.');
       }
     } catch (error) {
-      logger.error('Failed to load terminal commands', error as Error, {
+      const normalized = normalizeError(error, 'Failed to load terminal commands');
+      logger.error('Failed to load terminal commands', normalized, {
         component: 'ContactTerminal',
         action: 'loadCommands',
       });
@@ -271,14 +273,15 @@ export function ContactTerminal() {
         'An error occurred while executing the command.',
         <X className="h-3 w-3" />
       );
-      logger.error('Terminal command execution failed', error as Error, {
+      const normalized = normalizeError(error, 'Terminal command execution failed');
+      logger.error('Terminal command execution failed', normalized, {
         commandId: command.id ?? 'unknown',
       });
       trackTerminalCommandAction({
         command_id: command.id ?? '',
         action_type: command.action_type ?? 'internal',
         success: false,
-        error_reason: error instanceof Error ? error.message : 'unknown_error',
+        error_reason: normalized.message,
         execution_time_ms: Date.now() - startTime,
       }).catch(() => {
         // Fire-and-forget tracking

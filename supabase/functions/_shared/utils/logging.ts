@@ -3,6 +3,8 @@
  * Ensures consistent log structure across all functions
  */
 
+import { errorToString } from './error-handling.ts';
+
 export interface BaseLogContext {
   function: string;
   action?: string;
@@ -238,7 +240,7 @@ export function logError(message: string, logContext: BaseLogContext, error?: un
   };
 
   if (error) {
-    errorData['error'] = error instanceof Error ? error.message : String(error);
+    errorData['error'] = errorToString(error);
   }
 
   console.error(`[${logContext.function}] ${message}`, errorData);

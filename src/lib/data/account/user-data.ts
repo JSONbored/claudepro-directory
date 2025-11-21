@@ -6,15 +6,12 @@
 import { z } from 'zod';
 import { fetchCachedRpc } from '@/src/lib/data/helpers';
 import type { Database } from '@/src/types/database.types';
+import { Constants } from '@/src/types/database.types';
 
 const ACCOUNT_TTL_KEY = 'cache.account.ttl_seconds';
 
-// User tier enum values for validation
-const USER_TIER_VALUES: readonly Database['public']['Enums']['user_tier'][] = [
-  'free',
-  'pro',
-  'enterprise',
-] as const;
+// Use enum values directly from database.types.ts Constants
+const USER_TIER_VALUES = Constants.public.Enums.user_tier;
 
 const accountDashboardSchema = z.object({
   bookmark_count: z.number().catch(0),

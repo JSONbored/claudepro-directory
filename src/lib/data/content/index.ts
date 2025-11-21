@@ -8,6 +8,7 @@ import { cache } from 'react';
 import { getCacheTtl } from '@/src/lib/data/config/cache-config';
 import { fetchCachedRpc } from '@/src/lib/data/helpers';
 import { generateContentCacheKey, generateContentTags } from '@/src/lib/data/helpers-utils';
+import { toLogContextValue } from '@/src/lib/logger';
 import type { Database } from '@/src/types/database.types';
 
 export interface ContentFilters {
@@ -105,7 +106,6 @@ export const getAllContent = cache(
   async (
     filters?: ContentFilters
   ): Promise<Database['public']['CompositeTypes']['enriched_content_item'][]> => {
-    const filterMeta = filters ? { filterKeys: Object.keys(filters).length } : undefined;
     const category = Array.isArray(filters?.category) ? filters.category[0] : filters?.category;
     const author = Array.isArray(filters?.author) ? filters.author[0] : filters?.author;
     const result = await fetchCachedRpc<
@@ -128,7 +128,7 @@ export const getAllContent = cache(
         ttlKey: 'cache.content_list.ttl_seconds',
         keySuffix: JSON.stringify(filters ?? {}),
         fallback: { items: [], pagination: null, filters_applied: null },
-        ...(filterMeta ? { logMeta: filterMeta } : {}),
+        ...(filters ? { logMeta: { filters: toLogContextValue(filters) } } : {}),
       }
     );
 

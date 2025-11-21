@@ -1,5 +1,6 @@
 import type { NotificationRecord } from '@/src/lib/data/notifications';
 import { logger } from '@/src/lib/logger';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 import type { Database } from '@/src/types/database.types';
 
 export interface NotificationCreateInput {
@@ -54,7 +55,8 @@ export async function dismissNotifications({
     const result = (await response.json()) as { dismissed: number; traceId?: string };
     return result.dismissed;
   } catch (error) {
-    logger.error('Failed to dismiss notifications via flux-station', error as Error, {
+    const normalized = normalizeError(error, 'Failed to dismiss notifications via flux-station');
+    logger.error('Failed to dismiss notifications via flux-station', normalized, {
       userId,
       notificationIdsCount: notificationIds.length,
     });
@@ -92,7 +94,8 @@ export async function createNotification(
     };
     return result.notification;
   } catch (error) {
-    logger.error('Failed to create notification via flux-station', error as Error, {
+    const normalized = normalizeError(error, 'Failed to create notification via flux-station');
+    logger.error('Failed to create notification via flux-station', normalized, {
       ...(input.id && { notificationId: input.id }),
       title: input.title,
     });

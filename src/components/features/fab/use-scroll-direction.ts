@@ -19,7 +19,7 @@ import { useEffect, useState } from 'react';
 import { getTimeoutConfig } from '@/src/lib/actions/feature-flags.actions';
 import { logger } from '@/src/lib/logger';
 import type { ScrollState } from '@/src/lib/types/component.types';
-import { logClientWarning } from '@/src/lib/utils/error.utils';
+import { logClientWarning, normalizeError } from '@/src/lib/utils/error.utils';
 
 // Default values (will be overridden by Dynamic Config)
 let DEFAULT_SCROLL_THRESHOLD = 100;
@@ -111,11 +111,13 @@ export function useScrollDirection({
 
             prevScrollY = currentScrollY;
           } catch (error) {
-            logger.error('[useScrollDirection] Error in rAF callback', error as Error);
+            const normalized = normalizeError(error, '[useScrollDirection] Error in rAF callback');
+            logger.error('[useScrollDirection] Error in rAF callback', normalized);
           }
         });
       } catch (error) {
-        logger.error('[useScrollDirection] Error in scroll handler', error as Error);
+        const normalized = normalizeError(error, '[useScrollDirection] Error in scroll handler');
+        logger.error('[useScrollDirection] Error in scroll handler', normalized);
       }
     };
 
@@ -123,7 +125,11 @@ export function useScrollDirection({
     try {
       handleScroll();
     } catch (error) {
-      logger.error('[useScrollDirection] Error in initial scroll check', error as Error);
+      const normalized = normalizeError(
+        error,
+        '[useScrollDirection] Error in initial scroll check'
+      );
+      logger.error('[useScrollDirection] Error in initial scroll check', normalized);
     }
 
     // Passive listener for better scroll performance

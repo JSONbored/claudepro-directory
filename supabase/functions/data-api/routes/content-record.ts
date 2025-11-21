@@ -1,20 +1,9 @@
 import { SITE_URL, supabaseAnon } from '../../_shared/clients/supabase.ts';
 import type { Database as DatabaseGenerated } from '../../_shared/database.types.ts';
+import { Constants } from '../../_shared/database.types.ts';
 
-// Content category validation
-const CONTENT_CATEGORY_VALUES = [
-  'agents',
-  'mcp',
-  'rules',
-  'commands',
-  'hooks',
-  'statuslines',
-  'skills',
-  'collections',
-  'guides',
-  'jobs',
-  'changelog',
-] as const satisfies readonly DatabaseGenerated['public']['Enums']['content_category'][];
+// Use enum values directly from database.types.ts Constants
+const CONTENT_CATEGORY_VALUES = Constants.public.Enums.content_category;
 
 function isValidContentCategory(
   value: string

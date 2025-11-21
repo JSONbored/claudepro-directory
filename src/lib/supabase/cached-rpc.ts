@@ -6,9 +6,10 @@
 import { unstable_cache } from 'next/cache';
 import { cache } from 'react';
 import { type CacheTtlKey, getCacheTtl } from '@/src/lib/data/config/cache-config';
-import { logger } from '@/src/lib/logger';
+import { logger, toLogContextValue } from '@/src/lib/logger';
 import { createClient } from '@/src/lib/supabase/server';
 import { createAnonClient } from '@/src/lib/supabase/server-anon';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 import type { Database } from '@/src/types/database.types';
 
 export interface CachedRPCOptions {
@@ -80,24 +81,20 @@ export async function cachedRPC<T extends keyof Database['public']['Functions']>
         );
 
         if (error) {
-          logger.error(
-            `RPC call failed: ${String(functionName)}`,
-            error instanceof Error ? error : new Error(String(error)),
-            {
-              functionName: String(functionName),
-              params: JSON.stringify(params),
-            }
-          );
+          const normalized = normalizeError(error, `RPC call failed: ${String(functionName)}`);
+          logger.error(`RPC call failed: ${String(functionName)}`, normalized, {
+            functionName: String(functionName),
+            params: toLogContextValue(params),
+          });
           return null;
         }
 
         return data;
       } catch (error) {
-        logger.error(
-          `Cached RPC error: ${String(functionName)}`,
-          error instanceof Error ? error : new Error(String(error)),
-          { functionName: String(functionName) }
-        );
+        const normalized = normalizeError(error, `Cached RPC error: ${String(functionName)}`);
+        logger.error(`Cached RPC error: ${String(functionName)}`, normalized, {
+          functionName: String(functionName),
+        });
         return null;
       }
     },

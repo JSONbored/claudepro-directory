@@ -72,6 +72,7 @@ export function NotificationsProvider({
     } catch (error) {
       const err = normalizeError(error);
       logger.error('[NotificationsProvider] Failed to persist dismissed IDs', err, {
+        dismissedIds: dismissedIdsRef.current, // Array support enables better log querying
         count: dismissedIdsRef.current.length,
       });
     }
@@ -107,7 +108,8 @@ export function NotificationsProvider({
         '[NotificationsProvider] Failed to refresh notifications',
         normalizeError(error),
         {
-          dismissedIds: dismissedIdsRef.current.length,
+          dismissedIds: dismissedIdsRef.current, // Array support enables better log querying
+          count: dismissedIdsRef.current.length,
         }
       );
     }
@@ -161,7 +163,11 @@ export function NotificationsProvider({
       performDismiss({ notificationIds: [id] })
         .then(() => refresh())
         .catch((error) => {
-          logger.error('[NotificationsProvider] Failed to persist dismissal', error as Error, {
+          const normalized = normalizeError(
+            error,
+            '[NotificationsProvider] Failed to persist dismissal'
+          );
+          logger.error('[NotificationsProvider] Failed to persist dismissal', normalized, {
             id,
           });
         });
@@ -177,7 +183,12 @@ export function NotificationsProvider({
     performDismiss({ notificationIds: ids })
       .then(() => refresh())
       .catch((error) => {
-        logger.error('[NotificationsProvider] Failed to persist dismiss-all', error as Error, {
+        const normalized = normalizeError(
+          error,
+          '[NotificationsProvider] Failed to persist dismiss-all'
+        );
+        logger.error('[NotificationsProvider] Failed to persist dismiss-all', normalized, {
+          dismissedIds: ids, // Array support enables better log querying
           count: ids.length,
         });
       });

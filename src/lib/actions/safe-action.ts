@@ -6,7 +6,7 @@ import { headers } from 'next/headers';
 import { createSafeActionClient, DEFAULT_SERVER_ERROR_MESSAGE } from 'next-safe-action';
 import { z } from 'zod';
 import { getAuthenticatedUserFromClient } from '@/src/lib/auth/get-authenticated-user';
-import { logger } from '@/src/lib/logger';
+import { logger, toLogContextValue } from '@/src/lib/logger';
 import { logActionFailure, normalizeError } from '@/src/lib/utils/error.utils';
 
 const actionMetadataSchema = z.object({
@@ -58,8 +58,9 @@ const loggedAction = actionClient.use(async ({ next, metadata }) => {
 export const rateLimitedAction = loggedAction.use(async ({ next, metadata }) => {
   const parsedMetadata = actionMetadataSchema.safeParse(metadata);
   if (!parsedMetadata.success) {
-    logger.error('Invalid action metadata', new Error(parsedMetadata.error.message), {
-      metadataProvided: JSON.stringify(metadata),
+    const normalized = normalizeError(parsedMetadata.error, 'Invalid action metadata');
+    logger.error('Invalid action metadata', normalized, {
+      metadataProvided: toLogContextValue(metadata),
     });
     throw new Error('Invalid action configuration');
   }

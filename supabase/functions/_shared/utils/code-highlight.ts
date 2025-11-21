@@ -4,6 +4,7 @@
  */
 
 import { highlight } from 'npm:sugar-high@0.9.5';
+import { errorToString } from './error-handling.ts';
 import { createUtilityContext } from './logging.ts';
 
 export interface HighlightCodeOptions {
@@ -50,7 +51,7 @@ export function highlightCode(
     });
     console.warn('[code-highlight] Highlighting failed, using fallback', {
       ...logContext,
-      error: error instanceof Error ? error.message : String(error),
+      error: errorToString(error),
     });
 
     // Fallback: escape code

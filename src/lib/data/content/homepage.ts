@@ -22,12 +22,13 @@ export async function getHomepageData(
         ttlKey: 'cache.homepage.ttl_seconds',
         keySuffix: categoryIds.join('-') || 'all',
         fallback: null,
-        logMeta: { categoryCount: categoryIds.length },
+        logMeta: { categoryIds, categoryCount: categoryIds.length },
       }
     );
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load homepage data');
     logger.error('getHomepageData failed', normalized, {
+      categoryIds, // Array support enables better log querying
       categoryCount: categoryIds.length,
     });
     throw normalized;

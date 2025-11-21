@@ -32,6 +32,7 @@ import { AlertTriangle, CheckCircle } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { ensureStringArray, getMetadata } from '@/src/lib/utils/data.utils';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 import type { Database } from '@/src/types/database.types';
 
 interface ItemWithData {
@@ -88,7 +89,8 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
         const item = await getContentBySlug(refData.category, refData.slug);
         return item ? { ...refData, data: item } : null;
       } catch (error) {
-        logger.error('Failed to load collection item', error as Error, {
+        const normalized = normalizeError(error, 'Failed to load collection item');
+        logger.error('Failed to load collection item', normalized, {
           category: refData.category,
           slug: refData.slug,
         });
@@ -125,7 +127,8 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
   logger.info('Collection detail view rendered', {
     slug: collection.slug,
     itemCount: validItems.length,
-    categories: Object.keys(itemsByCategory).length,
+    categories: Object.keys(itemsByCategory), // Array of category names - better for querying
+    categoryCount: Object.keys(itemsByCategory).length,
   });
 
   const prerequisites = ensureStringArray(metadata['prerequisites']);

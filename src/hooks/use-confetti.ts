@@ -4,6 +4,7 @@ import confetti from 'canvas-confetti';
 import { useCallback } from 'react';
 import { getAnimationConfig } from '@/src/lib/actions/feature-flags.actions';
 import { logger } from '@/src/lib/logger';
+import { normalizeError } from '@/src/lib/utils/error.utils';
 import type { Database } from '@/src/types/database.types';
 
 /** Confetti animations - config values from Statsig animationConfigs */
@@ -66,22 +67,26 @@ export function useConfetti() {
   const celebrateBookmark = useCallback(() => {
     fireConfetti('success').catch((error) => {
       // Error handling is done inside fireConfetti, but we need to catch to prevent floating promise
-      logger.error('useConfetti: celebrateBookmark failed', error as Error);
+      const normalized = normalizeError(error, 'useConfetti: celebrateBookmark failed');
+      logger.error('useConfetti: celebrateBookmark failed', normalized);
     });
   }, [fireConfetti]);
   const celebrateSubmission = useCallback(() => {
     fireConfetti('celebration').catch((error) => {
-      logger.error('useConfetti: celebrateSubmission failed', error as Error);
+      const normalized = normalizeError(error, 'useConfetti: celebrateSubmission failed');
+      logger.error('useConfetti: celebrateSubmission failed', normalized);
     });
   }, [fireConfetti]);
   const celebrateMilestone = useCallback(() => {
     fireConfetti('milestone').catch((error) => {
-      logger.error('useConfetti: celebrateMilestone failed', error as Error);
+      const normalized = normalizeError(error, 'useConfetti: celebrateMilestone failed');
+      logger.error('useConfetti: celebrateMilestone failed', normalized);
     });
   }, [fireConfetti]);
   const celebrateSignup = useCallback(() => {
     fireConfetti('subtle').catch((error) => {
-      logger.error('useConfetti: celebrateSignup failed', error as Error);
+      const normalized = normalizeError(error, 'useConfetti: celebrateSignup failed');
+      logger.error('useConfetti: celebrateSignup failed', normalized);
     });
   }, [fireConfetti]);
 

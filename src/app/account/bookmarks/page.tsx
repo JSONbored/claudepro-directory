@@ -13,6 +13,14 @@ export async function generateMetadata(): Promise<Metadata> {
  * Keeping this for backward compatibility
  */
 export default function BookmarksPage() {
-  logger.info('BookmarksPage: redirecting legacy /account/bookmarks to /account/library');
+  logger.info(
+    'BookmarksPage: redirecting legacy /account/bookmarks to /account/library',
+    undefined,
+    {
+      sourceRoute: '/account/bookmarks',
+      targetRoute: '/account/library',
+      redirectReason: 'legacy-route-compatibility',
+    }
+  );
   redirect('/account/library');
 }

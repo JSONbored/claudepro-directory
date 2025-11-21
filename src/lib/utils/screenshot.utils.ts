@@ -223,14 +223,13 @@ export async function generateCodeScreenshot(
       height: img.height,
     };
   } catch (error) {
-    logger.error('generateCodeScreenshot failed', normalizeError(error), {
+    const normalized = normalizeError(error, 'Screenshot generation failed');
+    logger.error('generateCodeScreenshot failed', normalized, {
       hasElement: Boolean(element),
       category: category ?? 'unknown',
       title: title ?? 'untitled',
     });
-    throw new Error(
-      `Screenshot generation failed: ${error instanceof Error ? error.message : 'Unknown error'}`
-    );
+    throw normalized;
   }
 }
 
@@ -247,10 +246,9 @@ export async function copyScreenshotToClipboard(blob: Blob): Promise<void> {
     const clipboardItem = new ClipboardItem({ 'image/png': blob });
     await navigator.clipboard.write([clipboardItem]);
   } catch (error) {
-    logger.error('copyScreenshotToClipboard failed', normalizeError(error));
-    throw new Error(
-      `Failed to copy to clipboard: ${error instanceof Error ? error.message : 'Unknown error'}`
-    );
+    const normalized = normalizeError(error, 'Failed to copy to clipboard');
+    logger.error('copyScreenshotToClipboard failed', normalized);
+    throw normalized;
   }
 }
 

@@ -29,7 +29,7 @@ export default function NewJobPage() {
     }
 
     if (result?.serverError) {
-      const error = new Error(result.serverError);
+      const error = normalizeError(result.serverError, 'NewJobPage: createJob failed');
       logger.error('NewJobPage: createJob failed', error, {
         title: data.title,
         company: data.company,
@@ -38,7 +38,10 @@ export default function NewJobPage() {
     }
 
     if (!result?.data) {
-      const error = new Error('createJob returned no data');
+      const error = normalizeError(
+        'createJob returned no data',
+        'NewJobPage: createJob returned no data'
+      );
       logger.error('NewJobPage: createJob returned no data', error, {
         title: data.title,
         company: data.company,
@@ -49,7 +52,10 @@ export default function NewJobPage() {
     if (result.data.success) {
       if (result.data.requiresPayment) {
         if (!result.data.checkoutUrl) {
-          const error = new Error('Missing checkout URL for paid job creation');
+          const error = normalizeError(
+            'Missing checkout URL for paid job creation',
+            'NewJobPage: missing checkout URL'
+          );
           logger.error('NewJobPage: missing checkout URL', error, {
             title: data.title,
             company: data.company,
@@ -76,7 +82,11 @@ export default function NewJobPage() {
     }
 
     // Handle unexpected failure case
-    logger.error('NewJobPage: createJob returned success=false', new Error('Job creation failed'), {
+    const error = normalizeError(
+      'Job creation failed',
+      'NewJobPage: createJob returned success=false'
+    );
+    logger.error('NewJobPage: createJob returned success=false', error, {
       title: data.title,
       company: data.company,
       jobId: result.data.jobId,
