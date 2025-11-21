@@ -1,11 +1,11 @@
 import { getOptionalEnv } from '../../config/env.ts';
-import type { Database } from '../../database-overrides.ts';
+import type { Database as DatabaseGenerated } from '../../database.types.ts';
 import { webhookCorsHeaders } from '../http.ts';
 import { verifyVercelSignature } from '../integrations/vercel.ts';
 import { verifySvixSignature } from './crypto.ts';
 
 export type WebhookProviderName = Extract<
-  Database['public']['Enums']['webhook_source'],
+  DatabaseGenerated['public']['Enums']['webhook_source'],
   'resend' | 'vercel' | 'polar'
 >;
 
@@ -93,6 +93,16 @@ export type WebhookResolutionResult<Payload = Record<string, unknown>> =
   | ({ kind: 'success' } & WebhookContext<Payload>)
   | WebhookRegistryError;
 
+// Helper to safely extract string properties from unknown objects
+function getStringProperty(obj: unknown, key: string): string | undefined {
+  if (typeof obj !== 'object' || obj === null) {
+    return undefined;
+  }
+  const desc = Object.getOwnPropertyDescriptor(obj, key);
+  const value = desc?.value;
+  return typeof value === 'string' ? value : undefined;
+}
+
 const PROVIDERS: WebhookProviderConfig[] = [
   {
     name: 'resend',
@@ -116,8 +126,8 @@ const PROVIDERS: WebhookProviderConfig[] = [
       });
     },
     extractMetadata: (payload: Record<string, unknown>, headers: Headers) => ({
-      type: (payload['type'] as string | undefined) ?? null,
-      createdAt: (payload['created_at'] as string | undefined) ?? null,
+      type: getStringProperty(payload, 'type') ?? null,
+      createdAt: getStringProperty(payload, 'created_at') ?? null,
       idempotencyKey: headers.get('svix-id'),
     }),
   },
@@ -136,13 +146,18 @@ const PROVIDERS: WebhookProviderConfig[] = [
       return verifyVercelSignature(rawBody, signature, secret);
     },
     extractMetadata: (payload: Record<string, unknown>, headers: Headers) => {
-      const createdAt = payload['createdAt']
-        ? new Date(Number(payload['createdAt'])).toISOString()
+      // Extract createdAt - can be number (timestamp) or string
+      const createdAtValue = payload['createdAt'];
+      const createdAt = createdAtValue
+        ? typeof createdAtValue === 'number'
+          ? new Date(createdAtValue).toISOString()
+          : typeof createdAtValue === 'string'
+            ? new Date(Number(createdAtValue)).toISOString()
+            : new Date().toISOString()
         : new Date().toISOString();
-      const idempotencyKey =
-        (payload['id'] as string | undefined) ?? headers.get('x-vercel-id') ?? null;
+      const idempotencyKey = getStringProperty(payload, 'id') ?? headers.get('x-vercel-id') ?? null;
       return {
-        type: (payload['type'] as string | undefined) ?? null,
+        type: getStringProperty(payload, 'type') ?? null,
         createdAt,
         idempotencyKey,
       };
@@ -170,8 +185,8 @@ const PROVIDERS: WebhookProviderConfig[] = [
       });
     },
     extractMetadata: (payload: Record<string, unknown>, headers: Headers) => ({
-      type: (payload['type'] as string | undefined) ?? null,
-      createdAt: (payload['timestamp'] as string | undefined) ?? null,
+      type: getStringProperty(payload, 'type') ?? null,
+      createdAt: getStringProperty(payload, 'timestamp') ?? null,
       idempotencyKey: headers.get('webhook-id'),
     }),
   },

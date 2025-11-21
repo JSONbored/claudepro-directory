@@ -100,21 +100,33 @@ export async function pgmqMetrics(queueName: string): Promise<{
 
     const args: Args = { p_queue_name: queueName };
 
-    // Type assertion needed because Supabase client doesn't infer function names dynamically
-    // The rpc method returns a PostgrestFilterBuilder, we need to await it
-    const rpcCall = publicSchemaClient.rpc(
-      'get_pgmq_queue_metrics' as keyof DatabaseGenerated['public']['Functions'],
-      args as never
-    );
-    const { data, error } = await (rpcCall as unknown as Promise<{
-      data: Returns | null;
-      error: unknown;
-    }>);
+    // Call RPC - use satisfies to ensure args match generated type
+    const rpcResult = await publicSchemaClient.rpc('get_pgmq_queue_metrics', args);
 
-    if (error) throw error;
+    if (rpcResult.error) throw rpcResult.error;
 
     // Function returns array with single row: { queue_length, newest_msg_age_sec, oldest_msg_age_sec }[]
-    const results = data as Returns;
+    // Validate data structure matches Returns type
+    const data = rpcResult.data;
+    if (!(data && Array.isArray(data))) {
+      return null;
+    }
+
+    // Validate each result has the expected structure
+    const results = data.filter((item): item is Returns[number] => {
+      if (typeof item !== 'object' || item === null) {
+        return false;
+      }
+      const getProperty = (obj: unknown, key: string): unknown => {
+        if (typeof obj !== 'object' || obj === null) {
+          return undefined;
+        }
+        const desc = Object.getOwnPropertyDescriptor(obj, key);
+        return desc?.value;
+      };
+      const queueLength = getProperty(item, 'queue_length');
+      return typeof queueLength === 'number';
+    });
 
     if (!(results && Array.isArray(results)) || results.length === 0) {
       return null;

@@ -6,6 +6,7 @@
  * If auth token is provided, it's used for logging context only.
  */
 
+import type { Database as DatabaseGenerated } from '../../../_shared/database.types.ts';
 import {
   createNotificationTrace,
   insertNotification,
@@ -48,35 +49,86 @@ export async function handleCreateNotification(req: Request): Promise<Response> 
     }
     payload = JSON.parse(bodyText);
   } catch (error) {
-    return badRequestResponse(
-      `Invalid JSON payload: ${(error as Error).message}`,
-      notificationCorsHeaders
-    );
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    return badRequestResponse(`Invalid JSON payload: ${errorMessage}`, notificationCorsHeaders);
   }
 
   // Validate payload structure
-  if (
-    !payload ||
-    typeof payload !== 'object' ||
-    !('title' in payload) ||
-    !('message' in payload) ||
-    typeof (payload as { title: unknown }).title !== 'string' ||
-    typeof (payload as { message: unknown }).message !== 'string'
-  ) {
+  const getProperty = (obj: unknown, key: string): unknown => {
+    if (typeof obj !== 'object' || obj === null) {
+      return undefined;
+    }
+    const desc = Object.getOwnPropertyDescriptor(obj, key);
+    return desc?.value;
+  };
+
+  const getStringProperty = (obj: unknown, key: string): string | undefined => {
+    const value = getProperty(obj, key);
+    return typeof value === 'string' ? value : undefined;
+  };
+
+  // Type guards for enum validation
+  type NotificationType = DatabaseGenerated['public']['Enums']['notification_type'];
+  type NotificationPriority = DatabaseGenerated['public']['Enums']['notification_priority'];
+
+  function isValidNotificationType(value: string): value is NotificationType {
+    const validTypes: NotificationType[] = ['announcement', 'feedback'];
+    for (const validType of validTypes) {
+      if (value === validType) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  function isValidNotificationPriority(value: string): value is NotificationPriority {
+    const validPriorities: NotificationPriority[] = ['high', 'medium', 'low'];
+    for (const validPriority of validPriorities) {
+      if (value === validPriority) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  const title = getStringProperty(payload, 'title');
+  const message = getStringProperty(payload, 'message');
+
+  if (!(title && message)) {
     return badRequestResponse(
       'Invalid payload: title and message are required strings',
       notificationCorsHeaders
     );
   }
 
-  // Sanitize and validate payload
-  const sanitizedPayload = payload as NotificationInsertPayload;
-  if (!(sanitizedPayload.title.trim() && sanitizedPayload.message.trim())) {
+  // Build sanitized payload
+  const sanitizedTitle = title.trim();
+  const sanitizedMessage = message.trim();
+
+  if (!(sanitizedTitle && sanitizedMessage)) {
     return badRequestResponse(
       'Invalid payload: title and message cannot be empty',
       notificationCorsHeaders
     );
   }
+
+  // Validate and extract optional enum fields
+  const typeValue = getStringProperty(payload, 'type');
+  const priorityValue = getStringProperty(payload, 'priority');
+  const actionLabel = getStringProperty(payload, 'action_label');
+  const actionHref = getStringProperty(payload, 'action_href');
+
+  const sanitizedPayload: NotificationInsertPayload = {
+    title: sanitizedTitle,
+    message: sanitizedMessage,
+    // Optional fields with proper enum validation
+    ...(typeValue && isValidNotificationType(typeValue) ? { type: typeValue } : {}),
+    ...(priorityValue && isValidNotificationPriority(priorityValue)
+      ? { priority: priorityValue }
+      : {}),
+    ...(actionLabel ? { action_label: actionLabel } : {}),
+    ...(actionHref ? { action_href: actionHref } : {}),
+  };
 
   try {
     const trace = createNotificationTrace({

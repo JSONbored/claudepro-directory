@@ -110,12 +110,19 @@ function respondWithEmailAnalytics(
       return response;
     })
     .catch((error) => {
-      const status =
-        error instanceof Response
-          ? error.status
-          : typeof error === 'object' && error !== null && 'status' in error
-            ? Number((error as { status?: number }).status) || 500
-            : 500;
+      // Determine status without type assertions
+      let status = 500;
+      if (error instanceof Response) {
+        status = error.status;
+      } else if (typeof error === 'object' && error !== null && 'status' in error) {
+        const statusDesc = Object.getOwnPropertyDescriptor(error, 'status');
+        if (statusDesc && typeof statusDesc.value === 'number') {
+          status = statusDesc.value;
+        } else if (statusDesc && typeof statusDesc.value === 'string') {
+          const parsed = Number(statusDesc.value);
+          status = Number.isNaN(parsed) ? 500 : parsed;
+        }
+      }
       logEvent(status, 'error', error);
       throw error;
     });
@@ -158,8 +165,28 @@ function createEmailRoutes(
 
 const router = createRouter<EmailHandlerContext>({
   buildContext: (request) => {
-    const originalMethod = request.method.toUpperCase() as HttpMethod;
-    const normalizedMethod = (originalMethod === 'HEAD' ? 'GET' : originalMethod) as HttpMethod;
+    // Validate HTTP method without type assertion
+    const methodUpper = request.method.toUpperCase();
+    const validMethods: readonly HttpMethod[] = [
+      'GET',
+      'POST',
+      'PUT',
+      'PATCH',
+      'DELETE',
+      'OPTIONS',
+      'HEAD',
+    ] as const;
+    const isValidMethod = (m: string): m is HttpMethod => {
+      // Check each valid method explicitly to avoid type assertion
+      for (const validMethod of validMethods) {
+        if (m === validMethod) {
+          return true;
+        }
+      }
+      return false;
+    };
+    const originalMethod: HttpMethod = isValidMethod(methodUpper) ? methodUpper : 'GET';
+    const normalizedMethod: HttpMethod = originalMethod === 'HEAD' ? 'GET' : originalMethod;
 
     return {
       request,
@@ -316,32 +343,127 @@ async function handleSubscribe(req: Request): Promise<Response> {
 
     // Step 2: Call RPC to handle subscription/resubscription logic
     // Use validated source (defaults to 'footer' if not provided)
+    // Validate newsletter_source enum without type assertion
+    const newsletterSourceValues: readonly DatabaseGenerated['public']['Enums']['newsletter_source'][] =
+      [
+        'footer',
+        'homepage',
+        'modal',
+        'content_page',
+        'inline',
+        'post_copy',
+        'resend_import',
+        'oauth_signup',
+      ] as const satisfies readonly DatabaseGenerated['public']['Enums']['newsletter_source'][];
+
+    const isValidNewsletterSource = (
+      value: string | null | undefined
+    ): value is DatabaseGenerated['public']['Enums']['newsletter_source'] => {
+      if (!value) return false;
+      for (const validValue of newsletterSourceValues) {
+        if (value === validValue) {
+          return true;
+        }
+      }
+      return false;
+    };
+
     const finalSource: DatabaseGenerated['public']['Enums']['newsletter_source'] =
-      (validatedSource ?? 'footer') as DatabaseGenerated['public']['Enums']['newsletter_source'];
+      isValidNewsletterSource(validatedSource) ? validatedSource : 'footer';
+
+    // Validate copy_type enum without type assertion
+    const copyTypeValues: readonly DatabaseGenerated['public']['Enums']['copy_type'][] = [
+      'llmstxt',
+      'markdown',
+      'code',
+      'link',
+    ] as const satisfies readonly DatabaseGenerated['public']['Enums']['copy_type'][];
+
+    const isValidCopyType = (
+      value: string | null | undefined
+    ): value is DatabaseGenerated['public']['Enums']['copy_type'] => {
+      if (!value) return false;
+      for (const validValue of copyTypeValues) {
+        if (value === validValue) {
+          return true;
+        }
+      }
+      return false;
+    };
+
+    // Validate content_category enum without type assertion
+    const contentCategoryValues: readonly DatabaseGenerated['public']['Enums']['content_category'][] =
+      [
+        'agents',
+        'mcp',
+        'rules',
+        'commands',
+        'hooks',
+        'statuslines',
+        'skills',
+        'collections',
+        'guides',
+        'jobs',
+        'changelog',
+      ] as const satisfies readonly DatabaseGenerated['public']['Enums']['content_category'][];
+
+    const isValidContentCategory = (
+      value: string | null | undefined
+    ): value is DatabaseGenerated['public']['Enums']['content_category'] => {
+      if (!value) return false;
+      for (const validValue of contentCategoryValues) {
+        if (value === validValue) {
+          return true;
+        }
+      }
+      return false;
+    };
+
+    // Safely extract properties from contactProperties without type assertions
+    const getNumberProperty = (obj: Record<string, string | number>, key: string): number => {
+      const value = obj[key];
+      if (typeof value === 'number') {
+        return value;
+      }
+      if (typeof value === 'string') {
+        const parsed = Number(value);
+        return Number.isNaN(parsed) ? 0 : parsed;
+      }
+      return 0;
+    };
+
+    const getStringProperty = (
+      obj: Record<string, string | number>,
+      key: string
+    ): string | undefined => {
+      const value = obj[key];
+      if (typeof value === 'string') {
+        return value;
+      }
+      return undefined;
+    };
 
     // Prepare RPC arguments - use exact type from database.types.ts
     const rpcArgs: DatabaseGenerated['public']['Functions']['subscribe_newsletter']['Args'] = {
       p_email: normalizedEmail,
       p_source: finalSource,
       ...(referrer ? { p_referrer: referrer } : {}),
-      ...(validatedCopyType
-        ? { p_copy_type: validatedCopyType as DatabaseGenerated['public']['Enums']['copy_type'] }
+      ...(validatedCopyType && isValidCopyType(validatedCopyType)
+        ? { p_copy_type: validatedCopyType }
         : {}),
-      ...(validatedCopyCategory
-        ? {
-            p_copy_category:
-              validatedCopyCategory as DatabaseGenerated['public']['Enums']['content_category'],
-          }
+      ...(validatedCopyCategory && isValidContentCategory(validatedCopyCategory)
+        ? { p_copy_category: validatedCopyCategory }
         : {}),
       ...(copy_slug ? { p_copy_slug: copy_slug } : {}),
       ...(resendContactId ? { p_resend_contact_id: resendContactId } : {}),
       p_sync_status: syncStatus,
       ...(syncError ? { p_sync_error: syncError } : {}),
-      p_engagement_score: contactProperties['engagement_score'] as number,
-      ...(contactProperties['primary_interest']
-        ? { p_primary_interest: contactProperties['primary_interest'] as string }
-        : {}),
-      p_total_copies: contactProperties['total_copies'] as number,
+      p_engagement_score: getNumberProperty(contactProperties, 'engagement_score'),
+      ...(() => {
+        const primaryInterest = getStringProperty(contactProperties, 'primary_interest');
+        return primaryInterest !== undefined ? { p_primary_interest: primaryInterest } : {};
+      })(),
+      p_total_copies: getNumberProperty(contactProperties, 'total_copies'),
       p_last_active_at: new Date().toISOString(),
       ...(topicIds ? { p_resend_topics: topicIds } : {}),
     };
@@ -818,7 +940,18 @@ async function handleJobLifecycleEmail(req: Request, action: string): Promise<Re
   }
 
   const payload = parseResult.data;
-  const { userEmail, jobId } = payload as { userEmail: string; jobId: string };
+  // Validate payload structure without type assertion
+  if (
+    typeof payload !== 'object' ||
+    payload === null ||
+    !('userEmail' in payload) ||
+    !('jobId' in payload) ||
+    typeof payload.userEmail !== 'string' ||
+    typeof payload.jobId !== 'string'
+  ) {
+    return badRequestResponse('Missing required fields: userEmail, jobId');
+  }
+  const { userEmail, jobId } = payload;
 
   const config = JOB_EMAIL_CONFIGS[action];
   if (!config) {

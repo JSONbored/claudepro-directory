@@ -5,34 +5,15 @@
  * Uses shared storage and database utilities from data-api.
  */
 
-import type { Database, Json } from '../../../../_shared/database-overrides.ts';
-import { updateTable } from '../../../../_shared/database-overrides.ts';
+import { supabaseServiceRole } from '../../../../_shared/clients/supabase.ts';
+import type { Database as DatabaseGenerated } from '../../../../_shared/database.types.ts';
 import { getStorageServiceClient } from '../../../../_shared/utils/storage/client.ts';
 import { uploadObject } from '../../../../_shared/utils/storage/upload.ts';
 import type { ContentRow, GenerateResult, PackageGenerator } from '../types.ts';
 
 type McpRow = ContentRow & { category: 'mcp' };
 
-/**
- * Type for MCP metadata structure
- */
-type McpMetadata = {
-  requires_auth?: boolean;
-  configuration?: {
-    claudeDesktop?: {
-      mcp?: Record<
-        string,
-        {
-          url?: string;
-          [key: string]: Json | undefined;
-        }
-      >;
-      [key: string]: Json | undefined;
-    };
-    [key: string]: Json | undefined;
-  };
-  [key: string]: Json | undefined;
-};
+// MCP metadata is stored as Json type in database, validated at runtime
 
 /**
  * Type for user config entry in manifest
@@ -67,14 +48,15 @@ function escapeForTemplateLiteral(s: string): string {
  */
 function extractUserConfig(mcp: McpRow): Record<string, UserConfigEntry> {
   const userConfig: Record<string, UserConfigEntry> = {};
-  const metadata = mcp.metadata as McpMetadata | null;
 
-  if (!metadata) {
+  const metadata = mcp.metadata;
+  if (!metadata || typeof metadata !== 'object') {
     return userConfig;
   }
 
   // Check if requires_auth is true
-  const requiresAuth = metadata.requires_auth === true;
+  const requiresAuthDesc = Object.getOwnPropertyDescriptor(metadata, 'requires_auth');
+  const requiresAuth = requiresAuthDesc && requiresAuthDesc.value === true;
 
   if (requiresAuth) {
     // Extract common API key patterns from metadata
@@ -97,11 +79,39 @@ function extractUserConfig(mcp: McpRow): Record<string, UserConfigEntry> {
  * Generate manifest.json for .mcpb package (v0.2 spec)
  */
 function generateManifest(mcp: McpRow): string {
-  const metadata = mcp.metadata as McpMetadata | null;
-  const config = metadata?.configuration?.claudeDesktop?.mcp;
-  const serverName = Object.keys(config || {})[0] || mcp.slug;
-  const serverConfig = config?.[serverName];
-  const httpUrl = serverConfig?.url as string | undefined;
+  // Safely extract properties from metadata
+  const getProperty = (obj: unknown, key: string): unknown => {
+    if (typeof obj !== 'object' || obj === null) {
+      return undefined;
+    }
+    const desc = Object.getOwnPropertyDescriptor(obj, key);
+    return desc ? desc.value : undefined;
+  };
+
+  const getStringProperty = (obj: unknown, key: string): string | undefined => {
+    const value = getProperty(obj, key);
+    return typeof value === 'string' ? value : undefined;
+  };
+
+  const metadata = mcp.metadata;
+  const config =
+    metadata && typeof metadata === 'object' ? getProperty(metadata, 'configuration') : undefined;
+  const claudeDesktop =
+    config && typeof config === 'object' ? getProperty(config, 'claudeDesktop') : undefined;
+  const mcpConfig =
+    claudeDesktop && typeof claudeDesktop === 'object'
+      ? getProperty(claudeDesktop, 'mcp')
+      : undefined;
+
+  const configObj =
+    mcpConfig && typeof mcpConfig === 'object' && !Array.isArray(mcpConfig) ? mcpConfig : undefined;
+  const serverName = configObj ? Object.keys(configObj)[0] || mcp.slug : mcp.slug;
+  const serverConfig =
+    configObj && typeof configObj === 'object' ? getProperty(configObj, serverName) : undefined;
+  const httpUrl =
+    serverConfig && typeof serverConfig === 'object'
+      ? getStringProperty(serverConfig, 'url')
+      : undefined;
 
   const userConfig = extractUserConfig(mcp);
 
@@ -123,13 +133,10 @@ function generateManifest(mcp: McpRow): string {
         ? {
             command: 'node',
             args: [`${createTemplateVar('__dirname')}/server/index.js`],
-            env: Object.keys(userConfig).reduce(
-              (acc, key) => {
-                acc[key.toUpperCase()] = createTemplateVar(`user_config.${key}`);
-                return acc;
-              },
-              {} as Record<string, string>
-            ),
+            env: Object.keys(userConfig).reduce<Record<string, string>>((acc, key) => {
+              acc[key.toUpperCase()] = createTemplateVar(`user_config.${key}`);
+              return acc;
+            }, {}),
           }
         : {
             command: 'node',
@@ -161,11 +168,39 @@ function generateManifest(mcp: McpRow): string {
  * with tools/resources from metadata if available.
  */
 function generateServerIndex(mcp: McpRow): string {
-  const metadata = mcp.metadata as McpMetadata | null;
-  const config = metadata?.configuration?.claudeDesktop?.mcp;
-  const serverName = Object.keys(config || {})[0] || mcp.slug;
-  const serverConfig = config?.[serverName];
-  const httpUrl = serverConfig?.url as string | undefined;
+  // Safely extract properties from metadata (same logic as generateManifest)
+  const getProperty = (obj: unknown, key: string): unknown => {
+    if (typeof obj !== 'object' || obj === null) {
+      return undefined;
+    }
+    const desc = Object.getOwnPropertyDescriptor(obj, key);
+    return desc ? desc.value : undefined;
+  };
+
+  const getStringProperty = (obj: unknown, key: string): string | undefined => {
+    const value = getProperty(obj, key);
+    return typeof value === 'string' ? value : undefined;
+  };
+
+  const metadata = mcp.metadata;
+  const config =
+    metadata && typeof metadata === 'object' ? getProperty(metadata, 'configuration') : undefined;
+  const claudeDesktop =
+    config && typeof config === 'object' ? getProperty(config, 'claudeDesktop') : undefined;
+  const mcpConfig =
+    claudeDesktop && typeof claudeDesktop === 'object'
+      ? getProperty(claudeDesktop, 'mcp')
+      : undefined;
+
+  const configObj =
+    mcpConfig && typeof mcpConfig === 'object' && !Array.isArray(mcpConfig) ? mcpConfig : undefined;
+  const serverName = configObj ? Object.keys(configObj)[0] || mcp.slug : mcp.slug;
+  const serverConfig =
+    configObj && typeof configObj === 'object' ? getProperty(configObj, serverName) : undefined;
+  const httpUrl =
+    serverConfig && typeof serverConfig === 'object'
+      ? getStringProperty(serverConfig, 'url')
+      : undefined;
 
   const title = escapeForTemplateLiteral(mcp.title || mcp.slug);
   const description = escapeForTemplateLiteral(mcp.description || '');
@@ -594,7 +629,15 @@ export class McpGenerator implements PackageGenerator {
       throw new Error('MCP server slug is required');
     }
 
-    const mcp = content as McpRow;
+    // Validate content is MCP category
+    if (content.category !== 'mcp') {
+      throw new Error('Content must be MCP category');
+    }
+    // After validation, content.category is narrowed to 'mcp', so we can use it as McpRow
+    const mcp: McpRow = {
+      ...content,
+      category: 'mcp',
+    };
 
     // 1. Compute content hash FIRST to check if regeneration is needed
     // Generate manifest temporarily to compute hash (matches build script logic)
@@ -639,9 +682,12 @@ export class McpGenerator implements PackageGenerator {
 
     // 5. Upload to Supabase Storage using shared utility
     const fileName = `packages/${mcp.slug}.mcpb`;
+    // Convert Uint8Array to ArrayBuffer for upload
+    // Create a new ArrayBuffer by copying the Uint8Array data
+    const arrayBuffer = new Uint8Array(mcpbBuffer).buffer;
     const uploadResult = await uploadObject({
       bucket: this.getBucketName(),
-      buffer: mcpbBuffer.buffer as ArrayBuffer, // Uint8Array.buffer is ArrayBufferLike, cast to ArrayBuffer
+      buffer: arrayBuffer,
       mimeType: 'application/zip',
       objectPath: fileName,
       cacheControl: '3600',
@@ -659,8 +705,11 @@ export class McpGenerator implements PackageGenerator {
       mcpb_storage_url: uploadResult.publicUrl,
       mcpb_build_hash: contentHash,
       mcpb_last_built_at: new Date().toISOString(),
-    } satisfies Database['public']['Tables']['content']['Update'];
-    const { error: updateError } = await updateTable('content', updateData, mcp.id);
+    } satisfies DatabaseGenerated['public']['Tables']['content']['Update'];
+    const { error: updateError } = await supabaseServiceRole
+      .from('content')
+      .update(updateData)
+      .eq('id', mcp.id);
 
     if (updateError) {
       throw new Error(

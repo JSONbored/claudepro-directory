@@ -547,11 +547,11 @@ export async function enrollInOnboardingSequence(
   logContext: BaseLogContext
 ): Promise<void> {
   try {
-    const { callRpc } = await import('../../database-overrides.ts');
+    const { supabaseServiceRole: supabaseClient } = await import('../../clients/supabase.ts');
     const enrollArgs = {
       p_email: email,
-    } satisfies Parameters<typeof callRpc<'enroll_in_email_sequence'>>[1];
-    await callRpc('enroll_in_email_sequence', enrollArgs);
+    } satisfies DatabaseGenerated['public']['Functions']['enroll_in_email_sequence']['Args'];
+    await supabaseClient.rpc('enroll_in_email_sequence', enrollArgs);
   } catch (sequenceError) {
     logError('Sequence enrollment failed', logContext, sequenceError);
   }

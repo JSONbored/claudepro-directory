@@ -3,14 +3,11 @@
  */
 
 import type { Database as DatabaseGenerated } from '../../../_shared/database.types.ts';
-import type { Database } from '../../../_shared/database-overrides.ts';
-
-type ContentCategory = DatabaseGenerated['public']['Enums']['content_category'];
 
 /**
  * Content row type (from database)
  */
-export type ContentRow = Database['public']['Tables']['content']['Row'];
+export type ContentRow = DatabaseGenerated['public']['Tables']['content']['Row'];
 
 /**
  * Result of package generation
@@ -57,7 +54,7 @@ export interface PackageGenerator {
  */
 export interface GeneratePackageRequest {
   content_id: string;
-  category: ContentCategory;
+  category: DatabaseGenerated['public']['Enums']['content_category'];
 }
 
 /**
@@ -66,7 +63,7 @@ export interface GeneratePackageRequest {
 export interface GeneratePackageResponse {
   success: boolean;
   content_id: string;
-  category: ContentCategory;
+  category: DatabaseGenerated['public']['Enums']['content_category'];
   slug: string;
   storage_url: string; // Required for success, empty string for async/error cases
   metadata?: Record<string, unknown>;

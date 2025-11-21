@@ -6,8 +6,6 @@
 import type { Resend } from 'npm:resend@4.0.0';
 import { supabaseServiceRole } from '../../clients/supabase.ts';
 import type { Database as DatabaseGenerated } from '../../database.types.ts';
-import type { Tables } from '../../database-overrides.ts';
-import { callRpc } from '../../database-overrides.ts';
 import { createEmailHandlerContext, logError } from '../logging.ts';
 import { TIMEOUT_PRESETS, withTimeout } from '../timeout.ts';
 import { renderEmailTemplate } from './base-template.tsx';
@@ -34,7 +32,7 @@ export function getPreviousWeekStart(): string {
  * Get all active newsletter subscribers
  */
 export async function getAllSubscribers(): Promise<string[]> {
-  const { data, error } = await callRpc(
+  const { data, error } = await supabaseServiceRole.rpc(
     'get_active_subscribers',
     {} as DatabaseGenerated['public']['Functions']['get_active_subscribers']['Args']
   );
@@ -56,7 +54,10 @@ export async function checkDigestRateLimit(): Promise<{
   hoursSinceLastRun?: number;
   nextAllowedAt?: string;
 }> {
-  type AppSettingsRow = Pick<Tables<'app_settings'>, 'setting_value' | 'updated_at'>;
+  type AppSettingsRow = Pick<
+    DatabaseGenerated['public']['Tables']['app_settings']['Row'],
+    'setting_value' | 'updated_at'
+  >;
   const { data: lastRunData } = await (
     supabaseServiceRole.from('app_settings') as unknown as {
       select: (columns: string) => {

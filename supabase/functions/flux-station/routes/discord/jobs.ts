@@ -3,7 +3,7 @@
  * Processes discord_jobs queue: Send Discord notifications for job changes
  */
 
-import type { Database } from '../../../_shared/database-overrides.ts';
+import type { Database as DatabaseGenerated } from '../../../_shared/database.types.ts';
 import { handleJobNotificationDirect } from '../../../_shared/handlers/discord/handler.ts';
 import { errorToString } from '../../../_shared/utils/error-handling.ts';
 import { errorResponse, successResponse } from '../../../_shared/utils/http.ts';
@@ -11,10 +11,57 @@ import { pgmqDelete, pgmqRead } from '../../../_shared/utils/pgmq-client.ts';
 import { TIMEOUT_PRESETS, withTimeout } from '../../../_shared/utils/timeout.ts';
 import type { DatabaseWebhookPayload } from '../../../_shared/utils/webhook/database-events.ts';
 
-type JobRow = Database['public']['Tables']['jobs']['Row'];
+type JobRow = DatabaseGenerated['public']['Tables']['jobs']['Row'];
 
 const JOB_DISCORD_QUEUE = 'discord_jobs';
 const QUEUE_BATCH_SIZE = 10;
+
+// Type guard to validate database webhook payload structure
+function isValidJobWebhookPayload(value: unknown): value is DatabaseWebhookPayload<JobRow> {
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
+
+  const getProperty = (obj: unknown, key: string): unknown => {
+    if (typeof obj !== 'object' || obj === null) {
+      return undefined;
+    }
+    const desc = Object.getOwnPropertyDescriptor(obj, key);
+    return desc?.value;
+  };
+
+  const getStringProperty = (obj: unknown, key: string): string | undefined => {
+    const value = getProperty(obj, key);
+    return typeof value === 'string' ? value : undefined;
+  };
+
+  const type = getStringProperty(value, 'type');
+  const table = getStringProperty(value, 'table');
+  const schema = getStringProperty(value, 'schema');
+  const record = getProperty(value, 'record');
+  const oldRecord = getProperty(value, 'old_record');
+
+  // Validate type is one of the allowed values
+  if (type !== 'INSERT' && type !== 'UPDATE' && type !== 'DELETE') {
+    return false;
+  }
+
+  if (!(table && schema) || typeof record !== 'object' || record === null) {
+    return false;
+  }
+
+  // old_record is optional, but if present must be object or null
+  if (oldRecord !== undefined && oldRecord !== null && typeof oldRecord !== 'object') {
+    return false;
+  }
+
+  return true;
+}
+
+// Type guard to validate webhook type enum
+function isValidWebhookType(value: string): value is 'INSERT' | 'UPDATE' | 'DELETE' {
+  return value === 'INSERT' || value === 'UPDATE' || value === 'DELETE';
+}
 
 export async function handleDiscordJobs(_req: Request): Promise<Response> {
   try {
@@ -41,20 +88,43 @@ export async function handleDiscordJobs(_req: Request): Promise<Response> {
     }> = [];
     for (const msg of messages) {
       try {
-        const payload = msg.message as {
-          type: string;
-          table: string;
-          schema: string;
-          record: JobRow;
-          old_record?: JobRow | null;
-        };
+        // Validate queue message structure
+        if (!isValidJobWebhookPayload(msg.message)) {
+          console.error('[flux-station] Invalid job webhook payload structure', {
+            msg_id: msg.msg_id.toString(),
+          });
+          results.push({
+            msg_id: msg.msg_id.toString(),
+            status: 'failed',
+            errors: ['Invalid message structure'],
+            will_retry: false, // Don't retry invalid messages
+          });
+          continue;
+        }
+
+        const payload = msg.message;
+
+        // Validate webhook type
+        if (!isValidWebhookType(payload.type)) {
+          console.error('[flux-station] Invalid webhook type', {
+            msg_id: msg.msg_id.toString(),
+            type: payload.type,
+          });
+          results.push({
+            msg_id: msg.msg_id.toString(),
+            status: 'failed',
+            errors: [`Invalid webhook type: ${payload.type}`],
+            will_retry: false,
+          });
+          continue;
+        }
 
         // Transform payload to DatabaseWebhookPayload format
         const webhookPayload: DatabaseWebhookPayload<JobRow> = {
-          type: payload.type as 'INSERT' | 'UPDATE' | 'DELETE',
+          type: payload.type,
           table: payload.table,
           record: payload.record,
-          old_record: payload.old_record || null,
+          old_record: payload.old_record ?? null,
           schema: payload.schema,
         };
 

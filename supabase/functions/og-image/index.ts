@@ -17,10 +17,9 @@
 
 import { ImageResponse } from 'https://deno.land/x/og_edge@0.0.4/mod.ts';
 import React from 'https://esm.sh/react@18.2.0';
-import { SITE_URL } from '../_shared/clients/supabase.ts';
+import { SITE_URL, supabaseAnon } from '../_shared/clients/supabase.ts';
 import { edgeEnv } from '../_shared/config/env.ts';
 import type { Database as DatabaseGenerated } from '../_shared/database.types.ts';
-import { callRpc } from '../_shared/database-overrides.ts';
 
 // Content category validation
 const CONTENT_CATEGORY_VALUES = [
@@ -40,9 +39,13 @@ const CONTENT_CATEGORY_VALUES = [
 function isValidContentCategory(
   value: string
 ): value is DatabaseGenerated['public']['Enums']['content_category'] {
-  return CONTENT_CATEGORY_VALUES.includes(
-    value as DatabaseGenerated['public']['Enums']['content_category']
-  );
+  // Check each valid value explicitly to avoid type assertion
+  for (const validValue of CONTENT_CATEGORY_VALUES) {
+    if (value === validValue) {
+      return true;
+    }
+  }
+  return false;
 }
 
 import { CIRCUIT_BREAKER_CONFIGS, withCircuitBreaker } from '../_shared/utils/circuit-breaker.ts';
@@ -123,23 +126,61 @@ async function fetchMetadataFromRoute(
         throw new Error(`SEO API returned ${response.status}: ${errorText}`);
       }
 
-      const data = (await response.json()) as
-        | {
-            metadata?: {
-              title?: string;
-              description?: string;
-              keywords?: string[];
-            };
-          }
-        | { title?: string; description?: string; keywords?: string[] };
+      const data = await response.json();
 
       // Extract metadata from response
       // Response can be either { title, description, ... } or { metadata: { title, description, ... } }
-      const metadata = ('metadata' in data ? data.metadata : data) as {
-        title?: string;
-        description?: string;
-        keywords?: string[];
-      };
+      // Validate structure without type assertions - use Object.getOwnPropertyDescriptor
+      let metadata: { title?: string; description?: string; keywords?: string[] } = {};
+      if (typeof data === 'object' && data !== null) {
+        // Helper to safely extract property from object without type assertion
+        const getStringProperty = (obj: object, key: string): string | undefined => {
+          const desc = Object.getOwnPropertyDescriptor(obj, key);
+          if (desc && typeof desc.value === 'string') {
+            return desc.value;
+          }
+          return undefined;
+        };
+
+        const getArrayProperty = (obj: object, key: string): unknown[] | undefined => {
+          const desc = Object.getOwnPropertyDescriptor(obj, key);
+          if (desc && Array.isArray(desc.value)) {
+            return desc.value;
+          }
+          return undefined;
+        };
+
+        if ('metadata' in data && typeof data.metadata === 'object' && data.metadata !== null) {
+          // Extract from nested metadata object
+          const metadataObj = data.metadata;
+          const title = getStringProperty(metadataObj, 'title');
+          const description = getStringProperty(metadataObj, 'description');
+          const keywordsArray = getArrayProperty(metadataObj, 'keywords');
+          const keywords = keywordsArray
+            ? keywordsArray.filter((k: unknown): k is string => typeof k === 'string')
+            : undefined;
+
+          // Build metadata object conditionally to satisfy exactOptionalPropertyTypes
+          metadata = {};
+          if (title !== undefined) metadata.title = title;
+          if (description !== undefined) metadata.description = description;
+          if (keywords !== undefined) metadata.keywords = keywords;
+        } else if ('title' in data || 'description' in data || 'keywords' in data) {
+          // Extract from top-level object
+          const title = getStringProperty(data, 'title');
+          const description = getStringProperty(data, 'description');
+          const keywordsArray = getArrayProperty(data, 'keywords');
+          const keywords = keywordsArray
+            ? keywordsArray.filter((k: unknown): k is string => typeof k === 'string')
+            : undefined;
+
+          // Build metadata object conditionally to satisfy exactOptionalPropertyTypes
+          metadata = {};
+          if (title !== undefined) metadata.title = title;
+          if (description !== undefined) metadata.description = description;
+          if (keywords !== undefined) metadata.keywords = keywords;
+        }
+      }
 
       if (!metadata?.title) {
         throw new Error('Metadata missing title');
@@ -182,33 +223,51 @@ async function fetchMetadataFromRoute(
             p_slug: slug,
             p_base_url: SITE_URL,
           } satisfies DatabaseGenerated['public']['Functions']['get_api_content_full']['Args'];
-          const { data: contentData, error: dbError } = await callRpc(
+          const { data: contentData, error: dbError } = await supabaseAnon.rpc(
             'get_api_content_full',
-            rpcArgs,
-            true
+            rpcArgs
           );
 
-          if (
-            !dbError &&
-            contentData &&
-            typeof contentData === 'object' &&
-            'title' in contentData
-          ) {
-            const content = contentData as {
-              title: string;
-              description?: string;
-              tags?: string[];
-            };
-            logInfo('Direct database fallback succeeded', {
-              ...logContext,
-              source: 'database-rpc',
-            });
-            return {
-              title: content.title || 'Claude Pro Directory',
-              description: content.description || 'Community-curated agents, MCPs, and rules',
-              type: type || 'agents',
-              tags: Array.isArray(content.tags) ? content.tags : [],
-            };
+          // get_api_content_full returns a JSON string, not an object
+          if (!dbError && contentData && typeof contentData === 'string') {
+            try {
+              const parsedContent = JSON.parse(contentData);
+              // Validate structure without type assertions
+              if (
+                typeof parsedContent === 'object' &&
+                parsedContent !== null &&
+                'title' in parsedContent &&
+                typeof parsedContent.title === 'string'
+              ) {
+                const title = parsedContent.title;
+                const description =
+                  'description' in parsedContent && typeof parsedContent.description === 'string'
+                    ? parsedContent.description
+                    : undefined;
+                const tags =
+                  'tags' in parsedContent && Array.isArray(parsedContent.tags)
+                    ? parsedContent.tags.filter(
+                        (tag: unknown): tag is string => typeof tag === 'string'
+                      )
+                    : [];
+
+                logInfo('Direct database fallback succeeded', {
+                  ...logContext,
+                  source: 'database-rpc',
+                });
+                return {
+                  title: title || 'Claude Pro Directory',
+                  description: description || 'Community-curated agents, MCPs, and rules',
+                  type: type || 'agents',
+                  tags,
+                };
+              }
+            } catch (parseError) {
+              logWarn('Failed to parse content JSON from database', {
+                ...logContext,
+                parseError: parseError instanceof Error ? parseError.message : String(parseError),
+              });
+            }
           }
         } catch (dbError) {
           logWarn('Direct database fallback also failed, using route-based extraction', {
@@ -596,12 +655,19 @@ function respondWithAnalytics(
       return response;
     })
     .catch((error) => {
-      const status =
-        error instanceof Response
-          ? error.status
-          : typeof error === 'object' && error !== null && 'status' in error
-            ? Number((error as { status?: number }).status) || 500
-            : 500;
+      // Determine status without type assertions
+      let status = 500;
+      if (error instanceof Response) {
+        status = error.status;
+      } else if (typeof error === 'object' && error !== null && 'status' in error) {
+        const statusDesc = Object.getOwnPropertyDescriptor(error, 'status');
+        if (statusDesc && typeof statusDesc.value === 'number') {
+          status = statusDesc.value;
+        } else if (statusDesc && typeof statusDesc.value === 'string') {
+          const parsed = Number(statusDesc.value);
+          status = Number.isNaN(parsed) ? 500 : parsed;
+        }
+      }
       logEvent(status, 'error', error);
       throw error;
     });
@@ -610,8 +676,28 @@ function respondWithAnalytics(
 const router = createRouter<OGImageContext>({
   buildContext: (request) => {
     const url = new URL(request.url);
-    const originalMethod = request.method.toUpperCase() as HttpMethod;
-    const normalizedMethod = (originalMethod === 'HEAD' ? 'GET' : originalMethod) as HttpMethod;
+    // Validate HTTP method without type assertion
+    const methodUpper = request.method.toUpperCase();
+    const validMethods: readonly HttpMethod[] = [
+      'GET',
+      'POST',
+      'PUT',
+      'PATCH',
+      'DELETE',
+      'OPTIONS',
+      'HEAD',
+    ] as const;
+    const isValidMethod = (m: string): m is HttpMethod => {
+      // Check each valid method explicitly to avoid type assertion
+      for (const validMethod of validMethods) {
+        if (m === validMethod) {
+          return true;
+        }
+      }
+      return false;
+    };
+    const originalMethod: HttpMethod = isValidMethod(methodUpper) ? methodUpper : 'GET';
+    const normalizedMethod: HttpMethod = originalMethod === 'HEAD' ? 'GET' : originalMethod;
 
     // Input validation
     const queryValidation = validateQueryString(url);

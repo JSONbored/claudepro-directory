@@ -1,10 +1,11 @@
+import { supabaseAnon } from '../../_shared/clients/supabase.ts';
 import type { Database as DatabaseGenerated } from '../../_shared/database.types.ts';
-import { callRpc } from '../../_shared/database-overrides.ts';
 import {
   badRequestResponse,
   buildCacheHeaders,
   errorResponse,
   getOnlyCorsHeaders,
+  jsonResponse,
 } from '../../_shared/utils/http.ts';
 import { buildSecurityHeaders } from '../../_shared/utils/security-headers.ts';
 
@@ -30,29 +31,38 @@ export async function handlePaginatedContent(url: URL): Promise<Response> {
     p_limit: limitParam,
     p_offset: offsetParam,
   };
-  const { data, error } = await callRpc('get_content_paginated_slim', rpcArgs, true);
+  const { data, error } = await supabaseAnon.rpc('get_content_paginated_slim', rpcArgs);
 
   if (error) {
     return errorResponse(error, 'data-api:get_content_paginated_slim', CORS);
   }
 
-  // Type-safe access to RPC return value - ensure items array is properly typed
-  type PaginatedResult =
-    DatabaseGenerated['public']['Functions']['get_content_paginated_slim']['Returns'];
-  const result = data as PaginatedResult;
-  const items =
-    result && typeof result === 'object' && 'items' in result && Array.isArray(result['items'])
-      ? result['items']
-      : [];
-
-  return new Response(JSON.stringify(items), {
-    status: 200,
-    headers: {
-      'Content-Type': 'application/json; charset=utf-8',
-      'X-Generated-By': 'supabase.rpc.get_content_paginated_slim',
+  // Validate RPC return value without type assertion
+  if (!data || typeof data !== 'object' || !('items' in data)) {
+    return jsonResponse([], 200, {
       ...buildSecurityHeaders(),
       ...CORS,
       ...buildCacheHeaders('content_paginated'),
-    },
+      'X-Generated-By': 'supabase.rpc.get_content_paginated_slim',
+    });
+  }
+
+  // Safely extract items array
+  const getProperty = (obj: unknown, key: string): unknown => {
+    if (typeof obj !== 'object' || obj === null) {
+      return undefined;
+    }
+    const desc = Object.getOwnPropertyDescriptor(obj, key);
+    return desc?.value;
+  };
+
+  const itemsValue = getProperty(data, 'items');
+  const items = Array.isArray(itemsValue) ? itemsValue : [];
+
+  return jsonResponse(items, 200, {
+    ...buildSecurityHeaders(),
+    ...CORS,
+    ...buildCacheHeaders('content_paginated'),
+    'X-Generated-By': 'supabase.rpc.get_content_paginated_slim',
   });
 }

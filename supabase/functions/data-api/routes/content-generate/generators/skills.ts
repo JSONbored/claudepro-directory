@@ -5,8 +5,8 @@
  * Uses shared storage and database utilities from data-api.
  */
 
-import type { Database } from '../../../../_shared/database-overrides.ts';
-import { updateTable } from '../../../../_shared/database-overrides.ts';
+import { supabaseServiceRole } from '../../../../_shared/clients/supabase.ts';
+import type { Database as DatabaseGenerated } from '../../../../_shared/database.types.ts';
 import { getStorageServiceClient } from '../../../../_shared/utils/storage/client.ts';
 import { uploadObject } from '../../../../_shared/utils/storage/upload.ts';
 import type { ContentRow, GenerateResult, PackageGenerator } from '../types.ts';
@@ -30,35 +30,97 @@ description: ${escapeYamlString(skill.description || '')}
     sections.push(skill.content);
   }
 
-  const metadata = (skill.metadata as Record<string, unknown>) || {};
+  // Safely extract properties from metadata
+  const getProperty = (obj: unknown, key: string): unknown => {
+    if (typeof obj !== 'object' || obj === null) {
+      return undefined;
+    }
+    const desc = Object.getOwnPropertyDescriptor(obj, key);
+    return desc ? desc.value : undefined;
+  };
+
+  const getStringArray = (value: unknown): string[] | null => {
+    if (!Array.isArray(value)) {
+      return null;
+    }
+    const result: string[] = [];
+    for (const item of value) {
+      if (typeof item === 'string') {
+        result.push(item);
+      }
+    }
+    return result.length > 0 ? result : null;
+  };
+
+  const metadata = skill.metadata;
+  const metadataObj =
+    metadata && typeof metadata === 'object' && !Array.isArray(metadata) ? metadata : undefined;
 
   // Prerequisites
-  const dependencies = metadata['dependencies'] as string[] | null;
+  const dependencies = metadataObj
+    ? getStringArray(getProperty(metadataObj, 'dependencies'))
+    : null;
   if (dependencies && dependencies.length > 0) {
     sections.push(`## Prerequisites\n\n${dependencies.map((d) => `- ${d}`).join('\n')}`);
   }
 
   // Features
-  if (skill.features && Array.isArray(skill.features) && skill.features.length > 0) {
-    sections.push(
-      `## Key Features\n\n${(skill.features as string[]).map((f) => `- ${f}`).join('\n')}`
-    );
+  const features = getStringArray(skill.features);
+  if (features && features.length > 0) {
+    sections.push(`## Key Features\n\n${features.map((f) => `- ${f}`).join('\n')}`);
   }
 
   // Use Cases
-  if (skill.use_cases && Array.isArray(skill.use_cases) && skill.use_cases.length > 0) {
-    sections.push(
-      `## Use Cases\n\n${(skill.use_cases as string[]).map((uc) => `- ${uc}`).join('\n')}`
-    );
+  const useCases = getStringArray(skill.use_cases);
+  if (useCases && useCases.length > 0) {
+    sections.push(`## Use Cases\n\n${useCases.map((uc) => `- ${uc}`).join('\n')}`);
   }
 
   // Examples
-  const examples = skill.examples as Array<{
-    title: string;
-    code: string;
-    language: string;
-    description?: string;
-  }> | null;
+  const examplesRaw = skill.examples;
+  const examples = Array.isArray(examplesRaw)
+    ? examplesRaw
+        .map((ex) => {
+          if (typeof ex !== 'object' || ex === null) {
+            return null;
+          }
+          const titleDesc = Object.getOwnPropertyDescriptor(ex, 'title');
+          const codeDesc = Object.getOwnPropertyDescriptor(ex, 'code');
+          const languageDesc = Object.getOwnPropertyDescriptor(ex, 'language');
+          const descriptionDesc = Object.getOwnPropertyDescriptor(ex, 'description');
+
+          if (
+            !titleDesc ||
+            typeof titleDesc.value !== 'string' ||
+            !codeDesc ||
+            typeof codeDesc.value !== 'string' ||
+            !languageDesc ||
+            typeof languageDesc.value !== 'string'
+          ) {
+            return null;
+          }
+
+          const example: {
+            title: string;
+            code: string;
+            language: string;
+            description?: string;
+          } = {
+            title: titleDesc.value,
+            code: codeDesc.value,
+            language: languageDesc.value,
+          };
+          if (descriptionDesc && typeof descriptionDesc.value === 'string') {
+            example.description = descriptionDesc.value;
+          }
+          return example;
+        })
+        .filter(
+          (ex): ex is { title: string; code: string; language: string; description?: string } =>
+            ex !== null
+        )
+    : null;
+
   if (examples && examples.length > 0) {
     const exampleBlocks = examples
       .map((ex, idx) => {
@@ -72,10 +134,33 @@ description: ${escapeYamlString(skill.description || '')}
   }
 
   // Troubleshooting
-  const troubleshooting = metadata['troubleshooting'] as Array<{
-    issue: string;
-    solution: string;
-  }> | null;
+  const troubleshootingRaw = metadataObj ? getProperty(metadataObj, 'troubleshooting') : undefined;
+  const troubleshooting = Array.isArray(troubleshootingRaw)
+    ? troubleshootingRaw
+        .map((item) => {
+          if (typeof item !== 'object' || item === null) {
+            return null;
+          }
+          const issueDesc = Object.getOwnPropertyDescriptor(item, 'issue');
+          const solutionDesc = Object.getOwnPropertyDescriptor(item, 'solution');
+
+          if (
+            !issueDesc ||
+            typeof issueDesc.value !== 'string' ||
+            !solutionDesc ||
+            typeof solutionDesc.value !== 'string'
+          ) {
+            return null;
+          }
+
+          return {
+            issue: issueDesc.value,
+            solution: solutionDesc.value,
+          };
+        })
+        .filter((item): item is { issue: string; solution: string } => item !== null)
+    : null;
+
   if (troubleshooting && troubleshooting.length > 0) {
     const items = troubleshooting
       .map((item) => `### ${item.issue}\n\n${item.solution}`)
@@ -290,9 +375,12 @@ export class SkillsGenerator implements PackageGenerator {
 
     // 3. Upload to Supabase Storage using shared utility
     const fileName = `packages/${content.slug}.zip`;
+    // Convert Uint8Array to ArrayBuffer for upload
+    // Create a new ArrayBuffer by copying the Uint8Array data
+    const arrayBuffer = new Uint8Array(zipBuffer).buffer;
     const uploadResult = await uploadObject({
       bucket: this.getBucketName(),
-      buffer: zipBuffer.buffer as ArrayBuffer, // Uint8Array.buffer is ArrayBufferLike, cast to ArrayBuffer
+      buffer: arrayBuffer,
       mimeType: 'application/zip',
       objectPath: fileName,
       cacheControl: '3600',
@@ -308,8 +396,11 @@ export class SkillsGenerator implements PackageGenerator {
     // Use updateTable helper to properly handle Database type
     const updateData = {
       storage_url: uploadResult.publicUrl,
-    } satisfies Database['public']['Tables']['content']['Update'];
-    const { error: updateError } = await updateTable('content', updateData, content.id);
+    } satisfies DatabaseGenerated['public']['Tables']['content']['Update'];
+    const { error: updateError } = await supabaseServiceRole
+      .from('content')
+      .update(updateData)
+      .eq('id', content.id);
 
     if (updateError) {
       throw new Error(

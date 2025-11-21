@@ -22,12 +22,8 @@
  * - Without entities param → search_content_optimized() RPC (content-only with advanced filters)
  */
 
+import { supabaseAnon } from '../_shared/clients/supabase.ts';
 import type { Database as DatabaseGenerated, Json } from '../_shared/database.types.ts';
-import { callRpc } from '../_shared/database-overrides.ts';
-// Static imports to ensure circuit-breaker and timeout utilities are included in the bundle
-// These are lazily imported in callRpc, but we need static imports for Supabase bundling
-import '../_shared/utils/circuit-breaker.ts';
-import '../_shared/utils/timeout.ts';
 import { enqueueSearchAnalytics } from '../_shared/utils/analytics/pulse.ts';
 import {
   badRequestResponse,
@@ -223,11 +219,75 @@ async function handleSearch(url: URL, startTime: number, req: Request): Promise<
   const sort = url.searchParams.get('sort') || 'relevance';
 
   // Parse job filter parameters
-  const jobCategory = url.searchParams.get('job_category') || undefined;
-  const jobEmployment = url.searchParams.get('job_employment') || undefined;
-  const jobExperience = url.searchParams.get('job_experience') || undefined;
+  const jobCategoryParam = url.searchParams.get('job_category') || undefined;
+  const jobEmploymentParam = url.searchParams.get('job_employment') || undefined;
+  const jobExperienceParam = url.searchParams.get('job_experience') || undefined;
   const jobRemote = url.searchParams.get('job_remote');
   const isJobRemote = jobRemote === 'true' ? true : jobRemote === 'false' ? false : undefined;
+
+  // Validate enum values - only include if they match generated enum types
+  // TypeScript will validate at compile time that these values match the enum
+  type JobCategory = DatabaseGenerated['public']['Enums']['job_category'];
+  type JobType = DatabaseGenerated['public']['Enums']['job_type'];
+  type ExperienceLevel = DatabaseGenerated['public']['Enums']['experience_level'];
+
+  // Helper to check if value is valid enum - uses satisfies to ensure type safety
+  // No type assertions - uses type narrowing with explicit check
+  const isValidEnum = <T extends string>(
+    value: string | undefined,
+    validValues: readonly T[]
+  ): value is T => {
+    if (!value) return false;
+    // Check each value explicitly to avoid type assertion
+    for (const validValue of validValues) {
+      if (value === validValue) {
+        return true;
+      }
+    }
+    return false;
+  };
+
+  // Define valid enum values using satisfies to ensure they match generated types
+  const jobCategoryValues = [
+    'engineering',
+    'design',
+    'product',
+    'marketing',
+    'sales',
+    'support',
+    'research',
+    'data',
+    'operations',
+    'leadership',
+    'consulting',
+    'education',
+    'other',
+  ] as const satisfies readonly JobCategory[];
+
+  const jobTypeValues = [
+    'full-time',
+    'part-time',
+    'contract',
+    'freelance',
+    'internship',
+  ] as const satisfies readonly JobType[];
+
+  const experienceLevelValues = [
+    'beginner',
+    'intermediate',
+    'advanced',
+  ] as const satisfies readonly ExperienceLevel[];
+
+  // Validate and narrow types using type guards
+  const jobCategory = isValidEnum(jobCategoryParam, jobCategoryValues)
+    ? jobCategoryParam
+    : undefined;
+  const jobEmployment = isValidEnum(jobEmploymentParam, jobTypeValues)
+    ? jobEmploymentParam
+    : undefined;
+  const jobExperience = isValidEnum(jobExperienceParam, experienceLevelValues)
+    ? jobExperienceParam
+    : undefined;
 
   // Validate limit parameter
   const limitValidation = validateLimit(url.searchParams.get('limit'), 1, 100, 20);
@@ -314,30 +374,28 @@ async function handleSearch(url: URL, startTime: number, req: Request): Promise<
     // Convert string values to ENUMs (NULL means 'all'/'any')
     const rpcArgs = {
       ...(query ? { p_search_query: query } : {}),
-      ...(jobCategory && jobCategory !== 'all'
+      ...(jobCategory
         ? {
-            p_category: jobCategory as DatabaseGenerated['public']['Enums']['job_category'],
+            p_category: jobCategory,
           }
         : {}),
-      ...(jobEmployment && jobEmployment !== 'any'
+      ...(jobEmployment
         ? {
-            p_employment_type: jobEmployment as DatabaseGenerated['public']['Enums']['job_type'],
+            p_employment_type: jobEmployment,
           }
         : {}),
-      ...(jobExperience && jobExperience !== 'any'
+      ...(jobExperience
         ? {
-            p_experience_level:
-              jobExperience as DatabaseGenerated['public']['Enums']['experience_level'],
+            p_experience_level: jobExperience,
           }
         : {}),
       ...(isJobRemote !== undefined ? { p_remote_only: isJobRemote } : {}),
       p_limit: limit,
       p_offset: offset,
     } satisfies DatabaseGenerated['public']['Functions']['filter_jobs']['Args'];
-    const { data: filterJobsData, error: filterJobsError } = await callRpc(
+    const { data: filterJobsData, error: filterJobsError } = await supabaseAnon.rpc(
       'filter_jobs',
-      rpcArgs,
-      true
+      rpcArgs
     );
 
     if (filterJobsError) {
@@ -360,12 +418,11 @@ async function handleSearch(url: URL, startTime: number, req: Request): Promise<
       p_limit: limit,
       p_offset: offset,
     } satisfies DatabaseGenerated['public']['Functions']['search_unified']['Args'];
-    const { data: unifiedData, error: unifiedError } = await callRpc(
+    const { data: unifiedData, error: unifiedError } = await supabaseAnon.rpc(
       'search_unified',
-      rpcArgs,
-      true
+      rpcArgs
     );
-    data = (unifiedData || []) as UnifiedSearchResult[];
+    data = unifiedData ?? [];
     error = unifiedError;
   } else {
     // Content search - use semantic search (full rollout) with keyword fallback
@@ -375,10 +432,11 @@ async function handleSearch(url: URL, startTime: number, req: Request): Promise<
     if (query.trim()) {
       try {
         const model = new Supabase.ai.Session('gte-small');
-        queryEmbedding = (await model.run(query, {
+        const embeddingResult = await model.run(query, {
           mean_pool: true,
           normalize: true,
-        })) as number[];
+        });
+        queryEmbedding = Array.isArray(embeddingResult) ? embeddingResult : null;
       } catch (embeddingError) {
         // Log but continue with keyword search fallback
         console.warn('[unified-search] Embedding generation failed, using keyword search', {
@@ -401,10 +459,9 @@ async function handleSearch(url: URL, startTime: number, req: Request): Promise<
           p_offset: offset,
         } satisfies DatabaseGenerated['public']['Functions']['query_content_embeddings']['Args'];
 
-        const { data: semanticData, error: semanticError } = await callRpc(
+        const { data: semanticData, error: semanticError } = await supabaseAnon.rpc(
           'query_content_embeddings',
-          semanticArgs,
-          true
+          semanticArgs
         );
 
         if (!semanticError && semanticData && semanticData.length > 0) {
@@ -412,32 +469,32 @@ async function handleSearch(url: URL, startTime: number, req: Request): Promise<
           // Transform to match ContentSearchResult format for consistency
           type QueryEmbeddingsResult =
             DatabaseGenerated['public']['Functions']['query_content_embeddings']['Returns'][number];
-          const transformedData = semanticData.map((item: QueryEmbeddingsResult) => ({
-            id: item.content_id,
-            title: item.title,
-            description: item.description,
-            category: item.category,
-            slug: item.slug,
-            author: item.author,
-            author_profile_url: item.author_profile_url,
-            tags: item.tags,
-            view_count: item.view_count,
-            bookmark_count: item.bookmark_count,
-            copy_count: item.copy_count,
-            created_at: item.created_at,
-            updated_at: item.updated_at,
-            relevance_score: item.similarity,
-            // Required fields for ContentSearchResult (provide defaults for missing fields)
-            _featured: null as Json,
-            combined_score: item.similarity,
-            copyCount: item.copy_count,
-            date_added: item.created_at,
-            examples: null as Json,
-            features: null as Json,
-            source: 'semantic_search',
-            use_cases: null as Json,
-            viewCount: item.view_count,
-          })) as ContentSearchResult[];
+          const transformedData: ContentSearchResult[] = semanticData.map(
+            (item: QueryEmbeddingsResult): ContentSearchResult => ({
+              id: item.content_id,
+              title: item.title,
+              description: item.description,
+              category: item.category,
+              slug: item.slug,
+              author: item.author,
+              author_profile_url: item.author_profile_url,
+              tags: item.tags,
+              bookmark_count: item.bookmark_count,
+              created_at: item.created_at,
+              updated_at: item.updated_at,
+              relevance_score: item.similarity,
+              // Required fields for ContentSearchResult (provide defaults for missing fields)
+              _featured: null satisfies Json,
+              combined_score: item.similarity,
+              copyCount: item.copy_count,
+              date_added: item.created_at,
+              examples: null satisfies Json,
+              features: null satisfies Json,
+              source: 'semantic_search',
+              use_cases: null satisfies Json,
+              viewCount: item.view_count,
+            })
+          );
           data = transformedData;
           error = null;
         } else {
@@ -461,12 +518,11 @@ async function handleSearch(url: URL, startTime: number, req: Request): Promise<
           p_offset: offset,
         } satisfies DatabaseGenerated['public']['Functions']['search_content_optimized']['Args'];
 
-        const { data: keywordData, error: keywordError } = await callRpc(
+        const { data: keywordData, error: keywordError } = await supabaseAnon.rpc(
           'search_content_optimized',
-          rpcArgs,
-          true
+          rpcArgs
         );
-        data = (keywordData || []) as ContentSearchResult[];
+        data = keywordData ?? [];
         error = keywordError;
       }
     } else {
@@ -480,12 +536,11 @@ async function handleSearch(url: URL, startTime: number, req: Request): Promise<
         p_offset: offset,
       } satisfies DatabaseGenerated['public']['Functions']['search_content_optimized']['Args'];
 
-      const { data: keywordData, error: keywordError } = await callRpc(
+      const { data: keywordData, error: keywordError } = await supabaseAnon.rpc(
         'search_content_optimized',
-        rpcArgs,
-        true
+        rpcArgs
       );
-      data = (keywordData || []) as ContentSearchResult[];
+      data = keywordData ?? [];
       error = keywordError;
     }
   }
@@ -514,7 +569,7 @@ async function handleSearch(url: URL, startTime: number, req: Request): Promise<
     ? results.map((result) => {
         const highlighted: HighlightedSearchResult = { ...result };
 
-        // For jobs, result is a Tables<'jobs'> row with title/description fields
+        // For jobs, result is a DatabaseGenerated['public']['Tables']['jobs']['Row'] with title/description fields
         // For content/unified, result has title/description fields
         const title = 'title' in result ? result.title : null;
         const description = 'description' in result ? result.description : null;
@@ -545,9 +600,9 @@ async function handleSearch(url: URL, startTime: number, req: Request): Promise<
           const tags = result.tags;
           if (Array.isArray(tags) && tags.length > 0) {
             // Type guard: ensure all tags are strings
-            const stringTags = tags.filter(
+            const stringTags: string[] = tags.filter(
               (tag): tag is string => typeof tag === 'string'
-            ) as string[];
+            );
             if (stringTags.length > 0) {
               highlighted.tags_highlighted = highlightSearchTermsArray(stringTags, query, {
                 wholeWordsOnly: false, // Allow partial matches in tags
@@ -674,7 +729,7 @@ async function handleAutocomplete(url: URL, startTime: number): Promise<Response
     p_query: query,
     p_limit: limit,
   } satisfies DatabaseGenerated['public']['Functions']['get_search_suggestions_from_history']['Args'];
-  const { data, error } = await callRpc('get_search_suggestions_from_history', rpcArgs, true);
+  const { data, error } = await supabaseAnon.rpc('get_search_suggestions_from_history', rpcArgs);
 
   if (error) {
     console.error('[unified-search] Autocomplete RPC error', {
@@ -684,7 +739,7 @@ async function handleAutocomplete(url: URL, startTime: number): Promise<Response
     return errorResponse(error, 'get_search_suggestions_from_history', getWithAuthCorsHeaders);
   }
 
-  const suggestions = ((data || []) as AutocompleteResult[]).map((item) => ({
+  const suggestions = (data ?? []).map((item: AutocompleteResult) => ({
     text: item.suggestion,
     searchCount: Number(item.search_count),
     isPopular: Number(item.search_count) >= 2, // 2+ searches = popular
@@ -724,12 +779,8 @@ async function handleFacets(startTime: number): Promise<Response> {
     searchType: 'facets',
   });
 
-  // Call facets RPC
-  const { data, error } = await callRpc(
-    'get_search_facets',
-    {} as DatabaseGenerated['public']['Functions']['get_search_facets']['Args'],
-    true
-  );
+  // Call facets RPC (no args required - Args is 'never')
+  const { data, error } = await supabaseAnon.rpc('get_search_facets', undefined);
 
   if (error) {
     console.error('[unified-search] Facets RPC error', {
@@ -739,7 +790,7 @@ async function handleFacets(startTime: number): Promise<Response> {
     return errorResponse(error, 'get_search_facets', getWithAuthCorsHeaders);
   }
 
-  const facets = ((data || []) as FacetResult[]).map((item) => ({
+  const facets = (data ?? []).map((item: FacetResult) => ({
     category: item.category,
     contentCount: item.content_count,
     tags: item.all_tags || [],
@@ -795,10 +846,11 @@ async function trackSearchAnalytics(
   if (!query) return;
 
   // Enqueue to queue instead of direct insert
+  const analyticsFilters =
+    filters satisfies DatabaseGenerated['public']['Tables']['search_queries']['Insert']['filters'];
   enqueueSearchAnalytics({
     query,
-    filters:
-      filters as DatabaseGenerated['public']['Tables']['search_queries']['Insert']['filters'],
+    filters: analyticsFilters,
     resultCount,
     authorizationHeader,
   }).catch((error) => {

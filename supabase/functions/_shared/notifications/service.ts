@@ -1,27 +1,19 @@
 import { supabaseServiceRole } from '../clients/supabase.ts';
-import type { Database, Database as DatabaseGenerated } from '../database.types.ts';
-import type { Tables } from '../database-overrides.ts';
-
-import {
-  callRpc,
-  insertTable,
-  NOTIFICATION_TYPE_VALUES,
-  upsertTable,
-} from '../database-overrides.ts';
+import type { Database as DatabaseGenerated } from '../database.types.ts';
 import { invalidateCacheByKey } from '../utils/cache.ts';
 import { errorToString } from '../utils/error-handling.ts';
 import type { BaseLogContext } from '../utils/logging.ts';
 
 const MAX_NOTIFICATION_IDS = 50;
 
-type NotificationRecord = Tables<'notifications'>;
+type NotificationRecord = DatabaseGenerated['public']['Tables']['notifications']['Row'];
 
 export interface NotificationInsertPayload {
   id?: string;
   title: string;
   message: string;
-  priority?: Database['public']['Enums']['notification_priority'];
-  type?: Database['public']['Enums']['notification_type'];
+  priority?: DatabaseGenerated['public']['Enums']['notification_priority'];
+  type?: DatabaseGenerated['public']['Enums']['notification_type'];
   action_label?: string | null;
   action_href?: string | null;
   action_onclick?: string | null;
@@ -43,7 +35,7 @@ export async function getActiveNotificationsForUser(
   const rpcArgs = {
     p_dismissed_ids: sanitizedDismissedIds,
   } satisfies DatabaseGenerated['public']['Functions']['get_active_notifications']['Args'];
-  const { data, error } = await callRpc('get_active_notifications', rpcArgs);
+  const { data, error } = await supabaseServiceRole.rpc('get_active_notifications', rpcArgs);
 
   if (error) {
     console.error('[notifications] get_active_notifications failed', {
@@ -67,7 +59,9 @@ export async function insertNotification(
     title: payload.title,
     message: payload.message,
     priority: payload.priority ?? 'medium',
-    type: payload.type ?? NOTIFICATION_TYPE_VALUES[0], // Default to 'announcement'
+    type:
+      payload.type ??
+      ('announcement' satisfies DatabaseGenerated['public']['Enums']['notification_type']),
     action_label: payload.action_label ?? null,
     action_href: payload.action_href ?? null,
     action_onclick: payload.action_onclick ?? null,
@@ -78,11 +72,13 @@ export async function insertNotification(
     // Keeping metadata in interface for backward compatibility but not inserting it
   };
 
-  // Use type-safe helper to ensure proper type inference
   const insertData =
     record satisfies DatabaseGenerated['public']['Tables']['notifications']['Insert'];
-  const result = insertTable('notifications', insertData);
-  const { data, error } = await result.select('*').single<NotificationRecord>();
+  const { data, error } = await supabaseServiceRole
+    .from('notifications')
+    .insert(insertData)
+    .select('*')
+    .single<NotificationRecord>();
 
   if (error || !data) {
     if (isConflictError(error) && record.id) {
@@ -137,12 +133,11 @@ export async function dismissNotificationsForUser(
     return;
   }
 
-  // Use type-safe helper to ensure proper type inference
   const upsertData = sanitizedIds.map((notificationId) => ({
     notification_id: notificationId,
     user_id: userId,
   })) satisfies DatabaseGenerated['public']['Tables']['notification_dismissals']['Insert'][];
-  const { error } = await upsertTable('notification_dismissals', upsertData);
+  const { error } = await supabaseServiceRole.from('notification_dismissals').upsert(upsertData);
 
   if (error) {
     console.error('[notifications] Failed to dismiss notifications', {

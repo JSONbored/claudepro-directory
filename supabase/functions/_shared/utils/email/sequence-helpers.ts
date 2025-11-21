@@ -5,8 +5,8 @@
 
 import type { FC } from 'npm:react@18.3.1';
 import type { Resend } from 'npm:resend@4.0.0';
+import { supabaseServiceRole } from '../../clients/supabase.ts';
 import type { Database as DatabaseGenerated } from '../../database.types.ts';
-import { callRpc } from '../../database-overrides.ts';
 import { sendEmail } from '../../utils/integrations/resend.ts';
 import type { BaseLogContext } from '../logging.ts';
 import { createEmailHandlerContext, logError, logInfo } from '../logging.ts';
@@ -97,13 +97,13 @@ export async function processSequenceEmail(
     p_step: step,
     p_success: true,
   } satisfies DatabaseGenerated['public']['Functions']['mark_sequence_email_processed']['Args'];
-  await callRpc('mark_sequence_email_processed', markProcessedArgs);
+  await supabaseServiceRole.rpc('mark_sequence_email_processed', markProcessedArgs);
 
   const scheduleNextArgs = {
     p_email: email,
     p_current_step: step,
   } satisfies DatabaseGenerated['public']['Functions']['schedule_next_sequence_step']['Args'];
-  await callRpc('schedule_next_sequence_step', scheduleNextArgs);
+  await supabaseServiceRole.rpc('schedule_next_sequence_step', scheduleNextArgs);
 
   logInfo('Sequence email processed', {
     ...logContext,

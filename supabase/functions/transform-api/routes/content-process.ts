@@ -361,9 +361,24 @@ export async function handleContentProcess(
 
     // Type guard: code is guaranteed to be string for 'full' and 'highlight' operations
     const codeString: string | undefined =
-      operation === 'full' || operation === 'highlight' ? (code as string) : undefined;
+      (operation === 'full' || operation === 'highlight') && typeof code === 'string'
+        ? code
+        : undefined;
 
     // Type guard: item is guaranteed to be valid object with category for 'full' and 'filename' operations
+    const getProperty = (obj: unknown, key: string): unknown => {
+      if (typeof obj !== 'object' || obj === null) {
+        return undefined;
+      }
+      const desc = Object.getOwnPropertyDescriptor(obj, key);
+      return desc?.value;
+    };
+
+    const getStringProperty = (obj: unknown, key: string): string | undefined => {
+      const value = getProperty(obj, key);
+      return typeof value === 'string' ? value : undefined;
+    };
+
     const validItem:
       | {
           category: string;
@@ -373,12 +388,21 @@ export async function handleContentProcess(
         }
       | undefined =
       operation === 'full' || operation === 'filename'
-        ? (item as {
-            category: string;
-            slug?: string | null;
-            name?: string | null;
-            hook_type?: string | null;
-          })
+        ? (() => {
+            if (typeof item !== 'object' || item === null) {
+              return undefined;
+            }
+            const category = getStringProperty(item, 'category');
+            if (!category) {
+              return undefined;
+            }
+            return {
+              category,
+              slug: getStringProperty(item, 'slug') ?? null,
+              name: getStringProperty(item, 'name') ?? null,
+              hook_type: getStringProperty(item, 'hook_type') ?? null,
+            };
+          })()
         : undefined;
 
     // Handle empty code for highlight operations

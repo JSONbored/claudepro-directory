@@ -56,17 +56,34 @@ export async function handleExternalWebhook(req: Request): Promise<Response> {
       });
     }
 
-    // CORS headers are Record<string, string> but successResponse expects specific type
-    // Use type assertion to satisfy type checker - runtime behavior is correct
-    type CorsHeadersType = {
-      'Access-Control-Allow-Origin': string;
-      'Access-Control-Allow-Methods': string;
-      'Access-Control-Allow-Headers': string;
+    // cors is Record<string, string> from ingestWebhookEvent
+    // successResponse expects specific CORS headers structure
+    // Validate and construct proper CORS headers object
+    const getProperty = (obj: unknown, key: string): unknown => {
+      if (typeof obj !== 'object' || obj === null) {
+        return undefined;
+      }
+      const desc = Object.getOwnPropertyDescriptor(obj, key);
+      return desc?.value;
     };
+
+    const getStringProperty = (obj: unknown, key: string): string | undefined => {
+      const value = getProperty(obj, key);
+      return typeof value === 'string' ? value : undefined;
+    };
+
+    const corsHeaders = {
+      'Access-Control-Allow-Origin': getStringProperty(cors, 'Access-Control-Allow-Origin') ?? '*',
+      'Access-Control-Allow-Methods':
+        getStringProperty(cors, 'Access-Control-Allow-Methods') ?? 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Headers':
+        getStringProperty(cors, 'Access-Control-Allow-Headers') ?? 'Content-Type',
+    };
+
     return successResponse(
       { message: 'OK', source: result.source, duplicate: result.duplicate },
       200,
-      cors as CorsHeadersType
+      corsHeaders
     );
   } catch (error) {
     const logContext = createNotificationRouterContext('external-webhook', {

@@ -7,11 +7,11 @@
 
 import type { Database as DatabaseGenerated } from '../../../_shared/database.types.ts';
 
-type ContentCategory = DatabaseGenerated['public']['Enums']['content_category'];
-
 import { McpGenerator } from './generators/mcp.ts';
 import { SkillsGenerator } from './generators/skills.ts';
 import type { PackageGenerator } from './types.ts';
+
+type ContentCategory = DatabaseGenerated['public']['Enums']['content_category'];
 
 /**
  * Registry of category generators
@@ -42,7 +42,8 @@ export function getGenerator(category: ContentCategory): PackageGenerator | null
  * @returns Array of categories that support package generation
  */
 export function getSupportedCategories(): ContentCategory[] {
-  return Array.from(GENERATORS.keys()) as ContentCategory[];
+  // Array.from returns the correct type, no assertion needed
+  return Array.from(GENERATORS.keys());
 }
 
 /**

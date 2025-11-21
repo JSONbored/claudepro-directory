@@ -10,7 +10,7 @@ import {
   getCacheConfigNumber,
   getCacheConfigStringArray,
 } from '../../../_shared/config/statsig-cache.ts';
-import { NOTIFICATION_TYPE_VALUES } from '../../../_shared/database-overrides.ts';
+import type { Database as DatabaseGenerated } from '../../../_shared/database.types.ts';
 import { insertNotification } from '../../../_shared/notifications/service.ts';
 import { sendDiscordWebhook } from '../../../_shared/utils/discord/client.ts';
 import {
@@ -47,6 +47,57 @@ interface QueueMessage {
   vt: string;
   enqueued_at: string;
   message: ChangelogReleaseJob;
+}
+
+// Type guard to validate queue message structure
+function isValidChangelogReleaseJob(value: unknown): value is ChangelogReleaseJob {
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
+
+  // Helper to safely get property
+  const getProperty = (obj: unknown, key: string): unknown => {
+    if (typeof obj !== 'object' || obj === null) {
+      return undefined;
+    }
+    const desc = Object.getOwnPropertyDescriptor(obj, key);
+    return desc?.value;
+  };
+
+  const getStringProperty = (obj: unknown, key: string): string | undefined => {
+    const value = getProperty(obj, key);
+    return typeof value === 'string' ? value : undefined;
+  };
+
+  const entryId = getStringProperty(value, 'entryId');
+  const slug = getStringProperty(value, 'slug');
+  const title = getStringProperty(value, 'title');
+  const tldr = getStringProperty(value, 'tldr');
+  const releaseDate = getStringProperty(value, 'releaseDate');
+
+  if (!(entryId && slug && title && tldr && releaseDate)) {
+    return false;
+  }
+
+  // Validate sections array
+  const sectionsValue = getProperty(value, 'sections');
+  if (!Array.isArray(sectionsValue)) {
+    return false;
+  }
+
+  // Validate commits array
+  const commitsValue = getProperty(value, 'commits');
+  if (!Array.isArray(commitsValue)) {
+    return false;
+  }
+
+  // metadata can be any value (unknown), so we just check it exists
+  // No need to store it, just verify the property exists
+  if (!('metadata' in value)) {
+    return false;
+  }
+
+  return true;
 }
 
 async function processChangelogRelease(message: QueueMessage): Promise<{
@@ -123,7 +174,7 @@ async function processChangelogRelease(message: QueueMessage): Promise<{
         id: changelogEntry.entryId,
         title: changelogEntry.title,
         message: changelogEntry.tldr || 'We just shipped a fresh Claude Pro Directory release.',
-        type: NOTIFICATION_TYPE_VALUES[0], // 'announcement'
+        type: 'announcement' satisfies DatabaseGenerated['public']['Enums']['notification_type'],
         priority: 'high',
         action_label: 'Read release notes',
         // Database constraint requires action_href to start with '/' (relative path) or be NULL
@@ -331,12 +382,26 @@ export async function handleChangelogNotify(_req: Request): Promise<Response> {
 
     // Process each message
     for (const msg of messages || []) {
+      // Validate queue message structure
+      if (!isValidChangelogReleaseJob(msg.message)) {
+        console.error('[flux-station] Invalid changelog release job structure', {
+          msg_id: msg.msg_id.toString(),
+        });
+        results.push({
+          msg_id: msg.msg_id.toString(),
+          status: 'failed',
+          errors: ['Invalid message structure'],
+          will_retry: false, // Don't retry invalid messages
+        });
+        continue;
+      }
+
       const message: QueueMessage = {
         msg_id: msg.msg_id,
         read_ct: msg.read_ct,
         vt: msg.vt,
         enqueued_at: msg.enqueued_at,
-        message: msg.message as unknown as ChangelogReleaseJob,
+        message: msg.message,
       };
       try {
         const result = await processChangelogRelease(message);

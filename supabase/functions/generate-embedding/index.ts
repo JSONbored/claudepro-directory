@@ -31,10 +31,7 @@
 
 import { supabaseServiceRole } from '../_shared/clients/supabase.ts';
 import type { Database as DatabaseGenerated } from '../_shared/database.types.ts';
-import { upsertTable } from '../_shared/database-overrides.ts';
 import { CIRCUIT_BREAKER_CONFIGS, withCircuitBreaker } from '../_shared/utils/circuit-breaker.ts';
-// Static imports to ensure circuit-breaker and timeout utilities are included in the bundle
-// These are lazily imported in callRpc, but we need static imports for Supabase bundling
 import '../_shared/utils/circuit-breaker.ts';
 import '../_shared/utils/timeout.ts';
 import { errorToString } from '../_shared/utils/error-handling.ts';
@@ -51,31 +48,22 @@ import { buildSecurityHeaders } from '../_shared/utils/security-headers.ts';
 import { TIMEOUT_PRESETS, withTimeout } from '../_shared/utils/timeout.ts';
 
 // Webhook payload structure from Supabase database webhooks
-interface ContentWebhookPayload {
+// Use generated type for the record (content table row)
+type ContentRow = DatabaseGenerated['public']['Tables']['content']['Row'];
+type ContentWebhookPayload = {
   type: 'INSERT' | 'UPDATE' | 'DELETE';
   table: string;
-  record: {
-    id: string;
-    title: string | null;
-    description: string;
-    content: string | null;
-    tags: string[];
-    author: string;
-    category: string;
-    // ... other fields
-  };
-  old_record?: {
-    id: string;
-    // ... other fields
-  } | null;
+  record: ContentRow;
+  old_record?: ContentRow | null;
   schema: string;
-}
+};
 
 /**
  * Build searchable text from content fields
  * Combines title, description, tags, and author for embedding generation
+ * Uses generated ContentRow type directly
  */
-function buildSearchableText(record: ContentWebhookPayload['record']): string {
+function buildSearchableText(record: ContentRow): string {
   const parts: string[] = [];
 
   if (record.title) {
@@ -116,12 +104,16 @@ async function generateEmbedding(text: string): Promise<number[]> {
     const model = new Supabase.ai.Session('gte-small');
 
     // Generate embedding with normalization
-    const embedding = await model.run(text, {
+    const embeddingResult = await model.run(text, {
       mean_pool: true, // Use mean pooling for better quality
       normalize: true, // Normalize for inner product similarity
     });
 
-    return embedding as number[];
+    // Validate embedding is an array of numbers
+    if (!Array.isArray(embeddingResult)) {
+      throw new Error('Embedding generation returned non-array result');
+    }
+    return embeddingResult;
   };
 
   // Wrap with circuit breaker and timeout
@@ -154,8 +146,7 @@ async function storeEmbedding(
       embedding: JSON.stringify(embedding), // pgvector expects JSON string
       embedding_generated_at: new Date().toISOString(),
     };
-    const result = upsertTable('content_embeddings', insertData);
-    const { error } = await result;
+    const { error } = await supabaseServiceRole.from('content_embeddings').upsert(insertData);
 
     if (error) {
       throw new Error(
@@ -251,23 +242,14 @@ async function processEmbeddingGeneration(
       return { success: false, errors };
     }
 
-    // Type assertion: content is guaranteed to be non-null after the check above
-    // Import ContentRow type for explicit typing
+    // Content is guaranteed to be non-null after the check above
+    // Type is already correctly inferred from the Supabase query
     type ContentRow = DatabaseGenerated['public']['Tables']['content']['Row'];
-    const contentRow = content as ContentRow;
+    // No type assertion needed - Supabase query already returns correct type
+    const contentRow = content satisfies ContentRow;
 
-    // Build searchable text
-    // Create compatible record object for buildSearchableText function
-    const validCategory = contentRow.category ?? 'agents';
-    const searchableText = buildSearchableText({
-      id: contentRow.id,
-      title: contentRow.title,
-      description: contentRow.description,
-      content: contentRow.content,
-      tags: contentRow.tags,
-      author: contentRow.author,
-      category: validCategory,
-    });
+    // Build searchable text - use contentRow directly (already typed as ContentRow)
+    const searchableText = buildSearchableText(contentRow);
 
     if (!searchableText || searchableText.trim().length === 0) {
       // Skip empty content (not an error, just nothing to embed)
@@ -330,12 +312,50 @@ async function handleEmbeddingGenerationQueue(_req: Request): Promise<Response> 
     }> = [];
 
     for (const msg of messages) {
+      // Validate message structure matches expected format
+      const queueMessage = msg.message;
+
+      // Type guard to validate message structure
+      // Validates that message has required fields - uses satisfies pattern for type safety
+      function isValidQueueMessage(
+        msg: unknown
+      ): msg is { content_id: string; type?: string; created_at?: string } {
+        if (typeof msg !== 'object' || msg === null) {
+          return false;
+        }
+        // Check for required content_id field
+        // Use Object.getOwnPropertyDescriptor to avoid type assertions
+        const contentIdDesc = Object.getOwnPropertyDescriptor(msg, 'content_id');
+        if (!contentIdDesc || typeof contentIdDesc.value !== 'string') {
+          return false;
+        }
+        return true;
+      }
+
+      if (!isValidQueueMessage(queueMessage)) {
+        console.error('[generate-embedding] Invalid queue message format', {
+          msg_id: msg.msg_id.toString(),
+          message: queueMessage,
+        });
+        results.push({
+          msg_id: msg.msg_id.toString(),
+          status: 'failed',
+          errors: ['Invalid queue message format'],
+          will_retry: false, // Don't retry malformed messages
+        });
+        continue;
+      }
+
       const message: EmbeddingGenerationQueueMessage = {
         msg_id: msg.msg_id,
         read_ct: msg.read_ct,
         vt: msg.vt,
         enqueued_at: msg.enqueued_at,
-        message: msg.message as EmbeddingGenerationQueueMessage['message'],
+        message: {
+          content_id: queueMessage.content_id,
+          type: queueMessage.type === 'UPDATE' ? 'UPDATE' : 'INSERT',
+          created_at: queueMessage.created_at ?? new Date().toISOString(),
+        },
       };
 
       try {

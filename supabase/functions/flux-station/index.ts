@@ -103,11 +103,23 @@ const USER_ROUTE_RATE_LIMIT = {
   windowMs: 60 * 1000, // 100 requests per minute
 } as const;
 
+// Validate HTTP method without type assertion
+function isValidHttpMethod(value: string): value is HttpMethod {
+  const validMethods: HttpMethod[] = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'];
+  for (const validMethod of validMethods) {
+    if (value === validMethod) {
+      return true;
+    }
+  }
+  return false;
+}
+
 const router = createRouter<FluxStationContext>({
   buildContext: (request) => {
     const url = new URL(request.url);
-    const originalMethod = request.method.toUpperCase() as HttpMethod;
-    const normalizedMethod = (originalMethod === 'HEAD' ? 'GET' : originalMethod) as HttpMethod;
+    const methodUpper = request.method.toUpperCase();
+    const originalMethod = isValidHttpMethod(methodUpper) ? methodUpper : 'GET';
+    const normalizedMethod = originalMethod === 'HEAD' ? 'GET' : originalMethod;
     const pathname = url.pathname.replace(/^\/flux-station/, '') || '/';
     const segments =
       pathname === '/' ? [] : pathname.replace(/^\/+/, '').split('/').filter(Boolean);

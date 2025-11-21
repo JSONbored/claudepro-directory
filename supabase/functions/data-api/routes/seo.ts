@@ -1,5 +1,5 @@
+import { supabaseAnon } from '../../_shared/clients/supabase.ts';
 import type { Database as DatabaseGenerated, Json } from '../../_shared/database.types.ts';
-import { callRpc } from '../../_shared/database-overrides.ts';
 import {
   badRequestResponse,
   buildCacheHeaders,
@@ -46,7 +46,7 @@ export async function handleSeoRoute(
     p_route: route,
     p_include: include,
   } satisfies DatabaseGenerated['public']['Functions']['generate_metadata_complete']['Args'];
-  const { data, error } = await callRpc('generate_metadata_complete', rpcArgs, true);
+  const { data, error } = await supabaseAnon.rpc('generate_metadata_complete', rpcArgs);
 
   if (error) {
     return errorResponse(error, 'data-api:generate_metadata_complete', CORS);
@@ -56,70 +56,83 @@ export async function handleSeoRoute(
     return badRequestResponse('SEO generation failed: RPC returned null', CORS);
   }
 
-  // Use Json type from generated types (runtime validation ensures structure)
-  // Function returns union type based on p_include parameter
-  const typedData = data as Json &
-    (
-      | {
-          title: string;
-          description: string;
-          keywords: string[];
-          openGraphType: 'profile' | 'website';
-          twitterCard: 'summary_large_image';
-          robots: {
-            index: boolean;
-            follow: boolean;
-          };
-          _debug?: {
-            pattern: string;
-            route: string;
-            category?: string;
-            slug?: string;
-            error?: string;
-          };
-        }
-      | {
-          metadata: {
-            title: string;
-            description: string;
-            keywords: string[];
-            openGraphType: 'profile' | 'website';
-            twitterCard: 'summary_large_image';
-            robots: {
-              index: boolean;
-              follow: boolean;
-            };
-            _debug?: {
-              pattern: string;
-              route: string;
-              category?: string;
-              slug?: string;
-              error?: string;
-            };
-          };
-          schemas: Json[];
-        }
-    );
+  // Validate data structure without type assertion
+  if (typeof data !== 'object' || data === null) {
+    return badRequestResponse('SEO generation failed: invalid response', CORS);
+  }
+
+  // Safely extract properties
+  const getProperty = (obj: unknown, key: string): unknown => {
+    if (typeof obj !== 'object' || obj === null) {
+      return undefined;
+    }
+    const desc = Object.getOwnPropertyDescriptor(obj, key);
+    return desc?.value;
+  };
+
+  // Use validated data - TypeScript will infer types from runtime checks
+  const typedData = data satisfies Json;
 
   // Serialize JSON-LD schemas with XSS protection if schemas are included
-  // Use type narrowing with discriminated union
-  let processedData: typeof typedData = typedData;
-  if ('schemas' in typedData && typedData.schemas && Array.isArray(typedData.schemas)) {
-    // TypeScript narrows to metadata+schemas case
-    try {
-      // Serialize each schema with XSS protection
-      const schemasArray = typedData.schemas as Json[];
-      const serializedSchemas = schemasArray.map((schema: Json) => serializeJsonLd(schema));
-      processedData = {
-        ...(typedData as Record<string, unknown>),
-        schemas: serializedSchemas,
-      } as typeof typedData;
-    } catch {
-      if (logContext) {
-        logWarn('JSON-LD serialization failed, using original schemas', logContext);
+  // processedData will be Json type (either original or modified with serialized schemas)
+  let processedData: Json = typedData;
+  const schemasValue = getProperty(typedData, 'schemas');
+  if (schemasValue && Array.isArray(schemasValue)) {
+    // Validate each schema item is valid Json
+    const isValidJsonArray = (arr: unknown): arr is Json[] => {
+      if (!Array.isArray(arr)) return false;
+      // Each item should be valid Json (string, number, boolean, null, object, or array)
+      for (const item of arr) {
+        const itemType = typeof item;
+        if (
+          itemType !== 'string' &&
+          itemType !== 'number' &&
+          itemType !== 'boolean' &&
+          item !== null &&
+          !(itemType === 'object' && item !== null) &&
+          !Array.isArray(item)
+        ) {
+          return false;
+        }
       }
-      // Fallback: use original schemas (edge function will still escape in JSON.stringify)
-      processedData = typedData;
+      return true;
+    };
+
+    if (isValidJsonArray(schemasValue)) {
+      try {
+        // Serialize each schema with XSS protection
+        const serializedSchemas = schemasValue.map((schema: Json) => serializeJsonLd(schema));
+        // Build new object without type assertion - preserve all existing properties
+        // Since typedData is Json (object), we can safely copy properties
+        // All values from typedData are already Json, and serializedSchemas is Json[]
+        if (typeof typedData === 'object' && typedData !== null && !Array.isArray(typedData)) {
+          // Create a new object with all properties from typedData, replacing schemas
+          // We'll use JSON.parse/stringify to create a clean copy, then replace schemas
+          // This ensures all values remain Json-compatible
+          const jsonString = JSON.stringify(typedData);
+          const parsed = JSON.parse(jsonString);
+          // Validate parsed result is an object
+          if (typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed)) {
+            // Override schemas with serialized version (Json[])
+            // Use bracket notation for index signature access
+            parsed['schemas'] = serializedSchemas;
+            // parsed is now { [key: string]: Json | undefined } which is the object part of Json
+            processedData = parsed satisfies Json;
+          } else {
+            // Fallback if parsing failed
+            processedData = typedData;
+          }
+        } else {
+          // Fallback if typedData is not an object
+          processedData = typedData;
+        }
+      } catch {
+        if (logContext) {
+          logWarn('JSON-LD serialization failed, using original schemas', logContext);
+        }
+        // Fallback: use original schemas (edge function will still escape in JSON.stringify)
+        processedData = typedData;
+      }
     }
   }
 
@@ -131,8 +144,7 @@ export async function handleSeoRoute(
       route,
       include,
       bytes: responseBody.length,
-      schemasSerialized:
-        'schemas' in typedData && Array.isArray(typedData.schemas) && typedData.schemas.length > 0,
+      schemasSerialized: schemasValue && Array.isArray(schemasValue) && schemasValue.length > 0,
     });
   }
 

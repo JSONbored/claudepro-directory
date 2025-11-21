@@ -1,6 +1,6 @@
 import type { SupabaseClient } from 'jsr:@supabase/supabase-js@2';
 
-import type { Database } from '../../database-overrides.ts';
+import type { Database as DatabaseGenerated } from '../../database.types.ts';
 import { createUtilityContext } from '../logging.ts';
 import {
   type BuildStorageObjectPathOptions,
@@ -34,7 +34,7 @@ export interface UploadObjectOptions {
   pathOptions?: BuildStorageObjectPathOptions;
   cacheControl?: string;
   upsert?: boolean;
-  client?: SupabaseClient<Database>;
+  client?: SupabaseClient<DatabaseGenerated>;
   validationPolicy?: FileValidationPolicy;
 }
 

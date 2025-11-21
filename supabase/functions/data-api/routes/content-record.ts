@@ -1,6 +1,5 @@
-import { SITE_URL } from '../../_shared/clients/supabase.ts';
+import { SITE_URL, supabaseAnon } from '../../_shared/clients/supabase.ts';
 import type { Database as DatabaseGenerated } from '../../_shared/database.types.ts';
-import { callRpc } from '../../_shared/database-overrides.ts';
 
 // Content category validation
 const CONTENT_CATEGORY_VALUES = [
@@ -20,9 +19,13 @@ const CONTENT_CATEGORY_VALUES = [
 function isValidContentCategory(
   value: string
 ): value is DatabaseGenerated['public']['Enums']['content_category'] {
-  return CONTENT_CATEGORY_VALUES.includes(
-    value as DatabaseGenerated['public']['Enums']['content_category']
-  );
+  // Validate without type assertion
+  for (const validValue of CONTENT_CATEGORY_VALUES) {
+    if (value === validValue) {
+      return true;
+    }
+  }
+  return false;
 }
 
 import {
@@ -84,7 +87,7 @@ async function handleJsonFormat(
     p_slug: slug,
     p_base_url: SITE_URL,
   } satisfies DatabaseGenerated['public']['Functions']['get_api_content_full']['Args'];
-  const { data, error } = await callRpc('get_api_content_full', rpcArgs, true);
+  const { data, error } = await supabaseAnon.rpc('get_api_content_full', rpcArgs);
 
   if (error) {
     return errorResponse(error, 'data-api:get_api_content_full', CORS_JSON);
@@ -122,7 +125,7 @@ async function handleMarkdownFormat(
     p_include_metadata: includeMetadata,
     p_include_footer: includeFooter,
   } satisfies DatabaseGenerated['public']['Functions']['generate_markdown_export']['Args'];
-  const { data, error } = await callRpc('generate_markdown_export', rpcArgs, true);
+  const { data, error } = await supabaseAnon.rpc('generate_markdown_export', rpcArgs);
 
   if (error) {
     return errorResponse(error, 'data-api:generate_markdown_export', CORS_MARKDOWN);
@@ -132,23 +135,53 @@ async function handleMarkdownFormat(
     return badRequestResponse('Markdown generation failed: RPC returned null', CORS_MARKDOWN);
   }
 
-  // Use generated type from database.types.ts (returns Json)
-  // Type assertion to the known structure (discriminated union)
-  // Structure: { success: true, markdown: string, filename: string, length: number, content_id: string } | { success: false, error: string }
-  type MarkdownExportResult =
-    | { success: true; markdown: string; filename: string; length: number; content_id: string }
-    | { success: false; error: string };
-  const result = data as MarkdownExportResult | null;
-
-  if (!result || typeof result !== 'object' || !('success' in result)) {
+  // Validate data structure without type assertion
+  if (typeof data !== 'object' || data === null || !('success' in data)) {
     return badRequestResponse('Markdown generation failed: invalid response', CORS_MARKDOWN);
   }
 
-  if (!result.success) {
-    // TypeScript narrows to failure case
-    const errorResult = result as { success: false; error: string };
-    return badRequestResponse(errorResult.error, CORS_MARKDOWN);
+  // Safely extract properties
+  const getProperty = (obj: unknown, key: string): unknown => {
+    if (typeof obj !== 'object' || obj === null) {
+      return undefined;
+    }
+    const desc = Object.getOwnPropertyDescriptor(obj, key);
+    return desc?.value;
+  };
+
+  const success = getProperty(data, 'success');
+  if (typeof success !== 'boolean') {
+    return badRequestResponse('Markdown generation failed: invalid response', CORS_MARKDOWN);
   }
+
+  if (!success) {
+    // Failure case
+    const error = getProperty(data, 'error');
+    if (typeof error !== 'string') {
+      return badRequestResponse('Markdown generation failed: invalid error', CORS_MARKDOWN);
+    }
+    return badRequestResponse(error, CORS_MARKDOWN);
+  }
+
+  // Success case - validate required fields
+  const markdown = getProperty(data, 'markdown');
+  const filename = getProperty(data, 'filename');
+  const contentId = getProperty(data, 'content_id');
+
+  if (
+    typeof markdown !== 'string' ||
+    typeof filename !== 'string' ||
+    typeof contentId !== 'string'
+  ) {
+    return badRequestResponse('Markdown generation failed: invalid response', CORS_MARKDOWN);
+  }
+
+  const result = {
+    success: true,
+    markdown,
+    filename,
+    content_id: contentId,
+  };
 
   // TypeScript narrows to success case - all fields are properly typed
   return new Response(result.markdown, {
@@ -173,7 +206,7 @@ async function handleItemLlmsTxt(
     p_category: category,
     p_slug: slug,
   } satisfies DatabaseGenerated['public']['Functions']['generate_item_llms_txt']['Args'];
-  const { data, error } = await callRpc('generate_item_llms_txt', rpcArgs, true);
+  const { data, error } = await supabaseAnon.rpc('generate_item_llms_txt', rpcArgs);
 
   if (error) {
     return errorResponse(error, 'data-api:generate_item_llms_txt', CORS_JSON);
@@ -207,25 +240,36 @@ async function handleStorageFormat(
     const rpcArgs = {
       p_slug: slug,
     } satisfies DatabaseGenerated['public']['Functions']['get_skill_storage_path']['Args'];
-    const { data, error } = await callRpc('get_skill_storage_path', rpcArgs, true);
+    const { data, error } = await supabaseAnon.rpc('get_skill_storage_path', rpcArgs);
 
     if (error) {
       return errorResponse(error, 'data-api:get_skill_storage_path', CORS_JSON);
     }
 
-    type StoragePathResult =
-      DatabaseGenerated['public']['Functions']['get_skill_storage_path']['Returns'];
-    const result = data as StoragePathResult;
+    // Validate data structure without type assertion
+    const result = data;
     const location = Array.isArray(result) ? result[0] : result;
-    if (
-      !location ||
-      typeof location !== 'object' ||
-      !('bucket' in location) ||
-      !('object_path' in location)
-    ) {
+
+    // Safely extract properties
+    const getStringProperty = (obj: unknown, key: string): string | undefined => {
+      if (typeof obj !== 'object' || obj === null) {
+        return undefined;
+      }
+      const desc = Object.getOwnPropertyDescriptor(obj, key);
+      if (desc && typeof desc.value === 'string') {
+        return desc.value;
+      }
+      return undefined;
+    };
+
+    const bucket = getStringProperty(location, 'bucket');
+    const objectPath = getStringProperty(location, 'object_path');
+
+    if (!(bucket && objectPath)) {
       return badRequestResponse('Storage file not found', CORS_JSON);
     }
-    const typedLocation = location as { bucket: string; object_path: string };
+
+    const typedLocation = { bucket, object_path: objectPath };
 
     return proxyStorageFile({
       bucket: typedLocation.bucket,
@@ -239,25 +283,36 @@ async function handleStorageFormat(
     const rpcArgs = {
       p_slug: slug,
     } satisfies DatabaseGenerated['public']['Functions']['get_mcpb_storage_path']['Args'];
-    const { data, error } = await callRpc('get_mcpb_storage_path', rpcArgs, true);
+    const { data, error } = await supabaseAnon.rpc('get_mcpb_storage_path', rpcArgs);
 
     if (error) {
       return errorResponse(error, 'data-api:get_mcpb_storage_path', CORS_JSON);
     }
 
-    type StoragePathResult =
-      DatabaseGenerated['public']['Functions']['get_mcpb_storage_path']['Returns'];
-    const result = data as StoragePathResult;
+    // Validate data structure without type assertion
+    const result = data;
     const location = Array.isArray(result) ? result[0] : result;
-    if (
-      !location ||
-      typeof location !== 'object' ||
-      !('bucket' in location) ||
-      !('object_path' in location)
-    ) {
+
+    // Safely extract properties
+    const getStringProperty = (obj: unknown, key: string): string | undefined => {
+      if (typeof obj !== 'object' || obj === null) {
+        return undefined;
+      }
+      const desc = Object.getOwnPropertyDescriptor(obj, key);
+      if (desc && typeof desc.value === 'string') {
+        return desc.value;
+      }
+      return undefined;
+    };
+
+    const bucket = getStringProperty(location, 'bucket');
+    const objectPath = getStringProperty(location, 'object_path');
+
+    if (!(bucket && objectPath)) {
       return badRequestResponse('MCPB package not found', CORS_JSON);
     }
-    const typedLocation = location as { bucket: string; object_path: string };
+
+    const typedLocation = { bucket, object_path: objectPath };
 
     return proxyStorageFile({
       bucket: typedLocation.bucket,

@@ -13,8 +13,6 @@
 import { supabaseServiceRole } from '../../../_shared/clients/supabase.ts';
 import type { Database as DatabaseGenerated } from '../../../_shared/database.types.ts';
 
-type ContentCategory = DatabaseGenerated['public']['Enums']['content_category'];
-
 import { errorToString } from '../../../_shared/utils/error-handling.ts';
 import { errorResponse, successResponse } from '../../../_shared/utils/http.ts';
 import { pgmqDelete, pgmqRead } from '../../../_shared/utils/pgmq-client.ts';
@@ -32,7 +30,7 @@ interface PackageGenerationQueueMessage {
   enqueued_at: string;
   message: {
     content_id: string;
-    category: ContentCategory;
+    category: DatabaseGenerated['public']['Enums']['content_category'];
     slug: string;
     created_at: string;
   };
@@ -60,9 +58,9 @@ async function processPackageGeneration(
       return { success: false, errors };
     }
 
-    // Type assertion: content is guaranteed to be non-null after the check above
-    // Use explicit ContentRow type to avoid type narrowing issues
-    const contentRow = content as ContentRow;
+    // Content is guaranteed to be non-null after the check above
+    // Use satisfies to ensure type correctness without assertion
+    const contentRow = content satisfies ContentRow;
 
     // Get generator for category
     const generator = getGenerator(category);
@@ -72,7 +70,7 @@ async function processPackageGeneration(
     }
 
     // Validate content can be generated
-    if (!generator.canGenerate(contentRow as ContentRow)) {
+    if (!generator.canGenerate(contentRow)) {
       errors.push(
         `Content '${content_id}' cannot be generated. Missing required fields or invalid category.`
       );
@@ -80,7 +78,7 @@ async function processPackageGeneration(
     }
 
     // Generate package (this does: generate → upload → update DB)
-    await generator.generate(contentRow as ContentRow);
+    await generator.generate(contentRow);
 
     console.log('[data-api] Package generated successfully', {
       content_id,
@@ -131,13 +129,79 @@ export async function handlePackageGenerationQueue(_req: Request): Promise<Respo
       will_retry?: boolean;
     }> = [];
 
+    // Safely extract properties from queue message
+    const getStringProperty = (obj: unknown, key: string): string | undefined => {
+      if (typeof obj !== 'object' || obj === null) {
+        return undefined;
+      }
+      const desc = Object.getOwnPropertyDescriptor(obj, key);
+      if (desc && typeof desc.value === 'string') {
+        return desc.value;
+      }
+      return undefined;
+    };
+
+    function isValidQueueMessage(msg: unknown): msg is {
+      content_id: string;
+      category: DatabaseGenerated['public']['Enums']['content_category'];
+      slug: string;
+      created_at: string;
+    } {
+      if (typeof msg !== 'object' || msg === null) {
+        return false;
+      }
+      const contentId = getStringProperty(msg, 'content_id');
+      const slug = getStringProperty(msg, 'slug');
+      const createdAt = getStringProperty(msg, 'created_at');
+      const category = getStringProperty(msg, 'category');
+
+      if (!(contentId && slug && createdAt && category)) {
+        return false;
+      }
+
+      // Validate category enum
+      const validCategories: DatabaseGenerated['public']['Enums']['content_category'][] = [
+        'agents',
+        'mcp',
+        'rules',
+        'commands',
+        'hooks',
+        'statuslines',
+        'skills',
+        'collections',
+        'guides',
+        'jobs',
+        'changelog',
+      ];
+      for (const validCategory of validCategories) {
+        if (category === validCategory) {
+          return true;
+        }
+      }
+      return false;
+    }
+
     for (const msg of messages) {
+      // Validate message structure
+      if (!isValidQueueMessage(msg.message)) {
+        console.error('[data-api] Invalid queue message structure', {
+          msg_id: msg.msg_id.toString(),
+        });
+        results.push({
+          msg_id: msg.msg_id.toString(),
+          status: 'failed',
+          errors: ['Invalid message structure'],
+          will_retry: false, // Don't retry invalid messages
+        });
+        continue;
+      }
+
       const message: PackageGenerationQueueMessage = {
         msg_id: msg.msg_id,
         read_ct: msg.read_ct,
         vt: msg.vt,
         enqueued_at: msg.enqueued_at,
-        message: msg.message as PackageGenerationQueueMessage['message'],
+        message: msg.message,
       };
 
       try {

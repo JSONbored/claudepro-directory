@@ -16,8 +16,6 @@
 
 import { supabaseServiceRole } from '../../../_shared/clients/supabase.ts';
 import type { Database as DatabaseGenerated } from '../../../_shared/database.types.ts';
-import type { Database } from '../../../_shared/database-overrides.ts';
-import { updateTable } from '../../../_shared/database-overrides.ts';
 import {
   badRequestResponse,
   getOnlyCorsHeaders,
@@ -31,13 +29,11 @@ import { buildSecurityHeaders } from '../../../_shared/utils/security-headers.ts
 import { getStorageServiceClient } from '../../../_shared/utils/storage/client.ts';
 import { uploadObject } from '../../../_shared/utils/storage/upload.ts';
 
-type ContentCategory = DatabaseGenerated['public']['Enums']['content_category'];
-
 const CORS = getOnlyCorsHeaders;
 
 interface UploadPackageRequest {
   content_id: string;
-  category: ContentCategory;
+  category: DatabaseGenerated['public']['Enums']['content_category'];
   mcpb_file: string; // base64 encoded
   content_hash: string;
 }
@@ -45,7 +41,7 @@ interface UploadPackageRequest {
 interface UploadPackageResponse {
   success: boolean;
   content_id: string;
-  category: ContentCategory;
+  category: DatabaseGenerated['public']['Enums']['content_category'];
   slug: string;
   storage_url: string;
   message?: string;
@@ -140,6 +136,38 @@ export async function handleUploadPackage(
     return badRequestResponse('Missing or invalid content_id', CORS);
   }
 
+  // Validate category enum type
+  function isValidContentCategory(
+    value: unknown
+  ): value is DatabaseGenerated['public']['Enums']['content_category'] {
+    if (typeof value !== 'string') {
+      return false;
+    }
+    const validValues: DatabaseGenerated['public']['Enums']['content_category'][] = [
+      'agents',
+      'mcp',
+      'rules',
+      'commands',
+      'hooks',
+      'statuslines',
+      'skills',
+      'collections',
+      'guides',
+      'jobs',
+      'changelog',
+    ];
+    for (const validValue of validValues) {
+      if (value === validValue) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  if (!isValidContentCategory(category)) {
+    return badRequestResponse(`Category '${category}' is not a valid content category`, CORS);
+  }
+
   if (category !== 'mcp') {
     return badRequestResponse(
       `Invalid category '${category}'. Only 'mcp' category is supported for package uploads.`,
@@ -171,7 +199,7 @@ export async function handleUploadPackage(
         {
           success: false,
           content_id,
-          category: category as ContentCategory,
+          category,
           slug: '',
           storage_url: '',
           error: 'Not Found',
@@ -185,9 +213,9 @@ export async function handleUploadPackage(
       );
     }
 
-    // Type assertion: content is guaranteed to be non-null after the check above
+    // Content is guaranteed to be non-null after the check above
     type ContentRow = DatabaseGenerated['public']['Tables']['content']['Row'];
-    const content = contentData as Pick<ContentRow, 'id' | 'slug' | 'category'>;
+    const content = contentData satisfies Pick<ContentRow, 'id' | 'slug' | 'category'>;
 
     // Validate category matches
     if (content.category !== 'mcp') {
@@ -242,7 +270,7 @@ export async function handleUploadPackage(
         {
           success: false,
           content_id,
-          category: category as ContentCategory,
+          category,
           slug: content.slug,
           storage_url: '',
           error: 'Upload Failed',
@@ -261,9 +289,12 @@ export async function handleUploadPackage(
       mcpb_storage_url: uploadResult.publicUrl,
       mcpb_build_hash: content_hash,
       mcpb_last_built_at: new Date().toISOString(),
-    } satisfies Database['public']['Tables']['content']['Update'];
+    } satisfies DatabaseGenerated['public']['Tables']['content']['Update'];
 
-    const { error: updateError } = await updateTable('content', updateData, content_id);
+    const { error: updateError } = await supabaseServiceRole
+      .from('content')
+      .update(updateData)
+      .eq('id', content_id);
 
     if (updateError) {
       if (logContext) {
@@ -273,7 +304,7 @@ export async function handleUploadPackage(
         {
           success: false,
           content_id,
-          category: category as ContentCategory,
+          category,
           slug: content.slug,
           storage_url: '',
           error: 'Database Update Failed',
@@ -300,7 +331,7 @@ export async function handleUploadPackage(
     const response: UploadPackageResponse = {
       success: true,
       content_id,
-      category: category as ContentCategory,
+      category,
       slug: content.slug,
       storage_url: uploadResult.publicUrl,
       message: 'Package uploaded and database updated successfully',
@@ -322,7 +353,7 @@ export async function handleUploadPackage(
       {
         success: false,
         content_id,
-        category: category as ContentCategory,
+        category,
         slug: '',
         storage_url: '',
         error: 'Upload Failed',

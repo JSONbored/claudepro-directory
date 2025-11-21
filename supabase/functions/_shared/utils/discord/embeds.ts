@@ -1,6 +1,6 @@
 import { SITE_URL } from '../../clients/supabase.ts';
 import { edgeEnv } from '../../config/env.ts';
-import type { Database } from '../../database-overrides.ts';
+import type { Database as DatabaseGenerated } from '../../database.types.ts';
 
 const CATEGORY_COLORS: Record<string, number> = {
   agents: 0x5865f2,
@@ -26,8 +26,8 @@ const CATEGORY_EMOJIS: Record<string, string> = {
   guides: '📖',
 };
 
-type ContentRow = Database['public']['Tables']['content']['Row'];
-type SubmissionRow = Database['public']['Tables']['content_submissions']['Row'];
+type ContentRow = DatabaseGenerated['public']['Tables']['content']['Row'];
+type SubmissionRow = DatabaseGenerated['public']['Tables']['content_submissions']['Row'];
 
 interface WebhookEventRecord {
   id: string;

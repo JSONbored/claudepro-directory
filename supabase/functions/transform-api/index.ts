@@ -29,11 +29,23 @@ interface TransformApiContext extends RouterContext {
   searchParams: URLSearchParams;
 }
 
+// Type guard to validate HTTP method
+function isValidHttpMethod(value: string): value is HttpMethod {
+  const validMethods: HttpMethod[] = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'];
+  for (const validMethod of validMethods) {
+    if (value === validMethod) {
+      return true;
+    }
+  }
+  return false;
+}
+
 const router = createRouter<TransformApiContext>({
   buildContext: (request) => {
     const url = new URL(request.url);
-    const originalMethod = request.method.toUpperCase() as HttpMethod;
-    const normalizedMethod = (originalMethod === 'HEAD' ? 'GET' : originalMethod) as HttpMethod;
+    const methodUpper = request.method.toUpperCase();
+    const originalMethod = isValidHttpMethod(methodUpper) ? methodUpper : 'GET';
+    const normalizedMethod = originalMethod === 'HEAD' ? 'GET' : originalMethod;
 
     // Strict pathname normalization (prevent path traversal)
     let pathname = url.pathname;
@@ -202,12 +214,23 @@ function respondWithAnalytics(
       return response;
     })
     .catch((error) => {
-      const status =
-        error instanceof Response
-          ? error.status
-          : typeof error === 'object' && error !== null && 'status' in error
-            ? Number((error as { status?: number }).status) || 500
-            : 500;
+      let status = 500;
+      if (error instanceof Response) {
+        status = error.status;
+      } else if (typeof error === 'object' && error !== null) {
+        const getProperty = (obj: unknown, key: string): unknown => {
+          if (typeof obj !== 'object' || obj === null) {
+            return undefined;
+          }
+          const desc = Object.getOwnPropertyDescriptor(obj, key);
+          return desc?.value;
+        };
+
+        const statusValue = getProperty(error, 'status');
+        if (typeof statusValue === 'number') {
+          status = statusValue;
+        }
+      }
       logEvent(status, 'error', error);
       throw error;
     });

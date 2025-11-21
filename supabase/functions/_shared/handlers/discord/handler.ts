@@ -1,8 +1,6 @@
 import { supabaseServiceRole } from '../../clients/supabase.ts';
 import { edgeEnv } from '../../config/env.ts';
 import type { Database as DatabaseGenerated } from '../../database.types.ts';
-import type { Database } from '../../database-overrides.ts';
-import { callRpc, NOTIFICATION_TYPE_VALUES, updateTable } from '../../database-overrides.ts';
 import { insertNotification } from '../../notifications/service.ts';
 import { invalidateCacheByKey } from '../../utils/cache.ts';
 import {
@@ -15,7 +13,6 @@ import {
   buildContentEmbed,
   buildErrorEmbed,
   buildSubmissionEmbed,
-  type GitHubCommit,
 } from '../../utils/discord/embeds.ts';
 import { errorToString } from '../../utils/error-handling.ts';
 import {
@@ -32,8 +29,122 @@ import {
   validateWebhookUrl,
 } from '../../utils/webhook/database-events.ts';
 
-type JobRow = Database['public']['Tables']['jobs']['Row'];
-type ContentSubmission = Database['public']['Tables']['content_submissions']['Row'];
+type JobRow = DatabaseGenerated['public']['Tables']['jobs']['Row'];
+type ContentSubmission = DatabaseGenerated['public']['Tables']['content_submissions']['Row'];
+type WebhookEventRecord = DatabaseGenerated['public']['Tables']['webhook_events']['Row'];
+type ChangelogRow = DatabaseGenerated['public']['Tables']['changelog']['Row'];
+
+// Type guard to validate database webhook payload structure
+function isValidDatabaseWebhookPayload<T>(
+  value: unknown,
+  validateRecord: (record: unknown) => record is T
+): value is DatabaseWebhookPayload<T> {
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
+
+  const getProperty = (obj: unknown, key: string): unknown => {
+    if (typeof obj !== 'object' || obj === null) {
+      return undefined;
+    }
+    const desc = Object.getOwnPropertyDescriptor(obj, key);
+    return desc?.value;
+  };
+
+  const getStringProperty = (obj: unknown, key: string): string | undefined => {
+    const value = getProperty(obj, key);
+    return typeof value === 'string' ? value : undefined;
+  };
+
+  const type = getStringProperty(value, 'type');
+  const table = getStringProperty(value, 'table');
+  const schema = getStringProperty(value, 'schema');
+  const record = getProperty(value, 'record');
+  const oldRecord = getProperty(value, 'old_record');
+
+  // Validate type is one of the allowed values
+  if (type !== 'INSERT' && type !== 'UPDATE' && type !== 'DELETE') {
+    return false;
+  }
+
+  if (!(table && schema && validateRecord(record))) {
+    return false;
+  }
+
+  // old_record is optional, but if present must be T or null
+  if (oldRecord !== undefined && oldRecord !== null) {
+    if (!validateRecord(oldRecord)) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+// Type guard to validate JobRow
+function isValidJobRow(value: unknown): value is JobRow {
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
+  // Basic validation - check for required fields
+  const getProperty = (obj: unknown, key: string): unknown => {
+    if (typeof obj !== 'object' || obj === null) {
+      return undefined;
+    }
+    const desc = Object.getOwnPropertyDescriptor(obj, key);
+    return desc?.value;
+  };
+  const id = getProperty(value, 'id');
+  return typeof id === 'string';
+}
+
+// Type guard to validate ContentSubmission
+function isValidContentSubmission(value: unknown): value is ContentSubmission {
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
+  const getProperty = (obj: unknown, key: string): unknown => {
+    if (typeof obj !== 'object' || obj === null) {
+      return undefined;
+    }
+    const desc = Object.getOwnPropertyDescriptor(obj, key);
+    return desc?.value;
+  };
+  const id = getProperty(value, 'id');
+  return typeof id === 'string';
+}
+
+// Type guard to validate WebhookEventRecord
+function isValidWebhookEventRecord(value: unknown): value is WebhookEventRecord {
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
+  const getProperty = (obj: unknown, key: string): unknown => {
+    if (typeof obj !== 'object' || obj === null) {
+      return undefined;
+    }
+    const desc = Object.getOwnPropertyDescriptor(obj, key);
+    return desc?.value;
+  };
+  const id = getProperty(value, 'id');
+  return typeof id === 'string';
+}
+
+// Type guard to validate ChangelogRow
+function isValidChangelogRow(value: unknown): value is ChangelogRow {
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
+  const getProperty = (obj: unknown, key: string): unknown => {
+    if (typeof obj !== 'object' || obj === null) {
+      return undefined;
+    }
+    const desc = Object.getOwnPropertyDescriptor(obj, key);
+    return desc?.value;
+  };
+  const id = getProperty(value, 'id');
+  return typeof id === 'string';
+}
 
 /**
  * Direct handler for job notifications (called from Realtime subscriptions)
@@ -65,7 +176,10 @@ export async function handleJobNotificationDirect(
   const rpcArgs = {
     p_job_id: job.id,
   } satisfies DatabaseGenerated['public']['Functions']['build_job_discord_embed']['Args'];
-  const { data: embedData, error: embedError } = await callRpc('build_job_discord_embed', rpcArgs);
+  const { data: embedData, error: embedError } = await supabaseServiceRole.rpc(
+    'build_job_discord_embed',
+    rpcArgs
+  );
 
   if (embedError || !embedData) {
     const logContext = createDiscordHandlerContext('job-notification', {
@@ -119,7 +233,10 @@ async function createJobDiscordMessageDirect(
   const updateData = {
     discord_message_id: messageId,
   } satisfies DatabaseGenerated['public']['Tables']['jobs']['Update'];
-  const { error: updateError } = await updateTable('jobs', updateData, job.id);
+  const { error: updateError } = await supabaseServiceRole
+    .from('jobs')
+    .update(updateData)
+    .eq('id', job.id);
 
   if (updateError) {
     console.error('[discord-handler] Failed to store discord_message_id', {
@@ -157,7 +274,7 @@ async function updateJobDiscordMessageDirect(
     const nullUpdateData = {
       discord_message_id: null,
     } satisfies DatabaseGenerated['public']['Tables']['jobs']['Update'];
-    await updateTable('jobs', nullUpdateData, job.id);
+    await supabaseServiceRole.from('jobs').update(nullUpdateData).eq('id', job.id);
     await createJobDiscordMessageDirect(job, embedData, webhookUrl);
   }
 }
@@ -242,7 +359,7 @@ export async function handleContentNotificationDirect(
     )
     .eq('category', payload.record.category)
     .eq('slug', payload.record.approved_slug ?? '')
-    .single<Database['public']['Tables']['content']['Row']>();
+    .single<DatabaseGenerated['public']['Tables']['content']['Row']>();
 
   const logContext = createDiscordHandlerContext('content-notification', {
     ...(content?.id !== undefined ? { contentId: content.id } : {}),
@@ -292,7 +409,7 @@ export async function handleContentNotificationDirect(
       id: content.id,
       title: content.display_title ?? content.title ?? 'New content',
       message: content.description ?? payload.record.description ?? 'New content just dropped.',
-      type: NOTIFICATION_TYPE_VALUES[0], // 'announcement'
+      type: 'announcement' satisfies DatabaseGenerated['public']['Enums']['notification_type'],
       priority: 'medium',
       action_label: 'View content',
       // Database constraint requires action_href to start with '/' (relative path) or be NULL
@@ -331,13 +448,6 @@ export async function handleContentNotificationDirect(
       error: errorToString(error),
     });
   });
-}
-
-interface WebhookEventRecord {
-  id: string;
-  type: string;
-  created_at: string;
-  error: string | null;
 }
 
 export async function handleDiscordNotification(
@@ -381,7 +491,11 @@ async function handleJobNotification(req: Request): Promise<Response> {
     );
   }
 
-  const payload = (await req.json()) as DatabaseWebhookPayload<JobRow>;
+  const body = await req.json();
+  if (!isValidDatabaseWebhookPayload(body, isValidJobRow)) {
+    return badRequestResponse('Invalid webhook payload structure', discordCorsHeaders);
+  }
+  const payload = body;
   const job = payload.record;
 
   if (job.is_placeholder) {
@@ -399,7 +513,10 @@ async function handleJobNotification(req: Request): Promise<Response> {
   const rpcArgs = {
     p_job_id: job.id,
   } satisfies DatabaseGenerated['public']['Functions']['build_job_discord_embed']['Args'];
-  const { data: embedData, error: embedError } = await callRpc('build_job_discord_embed', rpcArgs);
+  const { data: embedData, error: embedError } = await supabaseServiceRole.rpc(
+    'build_job_discord_embed',
+    rpcArgs
+  );
 
   if (embedError || !embedData) {
     const logContext = createDiscordHandlerContext('job-notification', {
@@ -448,11 +565,13 @@ async function createJobDiscordMessage(
     throw new Error('Discord response missing message ID');
   }
 
-  // Use type-safe helper to ensure proper type inference
   const updateData = {
     discord_message_id: messageId,
   } satisfies DatabaseGenerated['public']['Tables']['jobs']['Update'];
-  const { error: updateError } = await updateTable('jobs', updateData, job.id);
+  const { error: updateError } = await supabaseServiceRole
+    .from('jobs')
+    .update(updateData)
+    .eq('id', job.id);
 
   if (updateError) {
     const logContext = createDiscordHandlerContext('job-notification', {
@@ -499,11 +618,10 @@ async function updateJobDiscordMessage(
   );
 
   if (result.deleted) {
-    // Use type-safe helper to ensure proper type inference
     const nullUpdateData = {
       discord_message_id: null,
     } satisfies DatabaseGenerated['public']['Tables']['jobs']['Update'];
-    await updateTable('jobs', nullUpdateData, job.id);
+    await supabaseServiceRole.from('jobs').update(nullUpdateData).eq('id', job.id);
     return await createJobDiscordMessage(job, embedData, webhookUrl);
   }
 
@@ -528,7 +646,11 @@ async function handleSubmissionNotification(req: Request): Promise<Response> {
     );
   }
 
-  const payload = (await req.json()) as DatabaseWebhookPayload<ContentSubmission>;
+  const body = await req.json();
+  if (!isValidDatabaseWebhookPayload(body, isValidContentSubmission)) {
+    return badRequestResponse('Invalid webhook payload structure', discordCorsHeaders);
+  }
+  const payload = body;
 
   if (!filterEventType(payload, ['INSERT'])) {
     return successResponse(
@@ -579,7 +701,11 @@ async function handleContentNotification(req: Request): Promise<Response> {
     );
   }
 
-  const payload = (await req.json()) as DatabaseWebhookPayload<ContentSubmission>;
+  const body = await req.json();
+  if (!isValidDatabaseWebhookPayload(body, isValidContentSubmission)) {
+    return badRequestResponse('Invalid webhook payload structure', discordCorsHeaders);
+  }
+  const payload = body;
 
   if (!didStatusChangeTo(payload, 'merged')) {
     return successResponse(
@@ -596,7 +722,7 @@ async function handleContentNotification(req: Request): Promise<Response> {
     )
     .eq('category', payload.record.category)
     .eq('slug', payload.record.approved_slug ?? '')
-    .single<Database['public']['Tables']['content']['Row']>();
+    .single<DatabaseGenerated['public']['Tables']['content']['Row']>();
 
   // Create logContext after fetching content
   const logContext = createDiscordHandlerContext('content-notification', {
@@ -647,7 +773,7 @@ async function handleContentNotification(req: Request): Promise<Response> {
       id: content.id,
       title: content.display_title ?? content.title ?? 'New content',
       message: content.description ?? payload.record.description ?? 'New content just dropped.',
-      type: NOTIFICATION_TYPE_VALUES[0], // 'announcement'
+      type: 'announcement' satisfies DatabaseGenerated['public']['Enums']['notification_type'],
       priority: 'medium',
       action_label: 'View content',
       // Database constraint requires action_href to start with '/' (relative path) or be NULL
@@ -703,7 +829,11 @@ async function handleErrorNotification(req: Request): Promise<Response> {
     );
   }
 
-  const payload = (await req.json()) as DatabaseWebhookPayload<WebhookEventRecord>;
+  const body = await req.json();
+  if (!isValidDatabaseWebhookPayload(body, isValidWebhookEventRecord)) {
+    return badRequestResponse('Invalid webhook payload structure', discordCorsHeaders);
+  }
+  const payload = body;
 
   if (!filterEventType(payload, ['INSERT', 'UPDATE'])) {
     return successResponse(
@@ -750,9 +880,11 @@ async function handleChangelogNotification(req: Request): Promise<Response> {
     );
   }
 
-  const payload = (await req.json()) as DatabaseWebhookPayload<
-    Database['public']['Tables']['changelog']['Row']
-  >;
+  const body = await req.json();
+  if (!isValidDatabaseWebhookPayload(body, isValidChangelogRow)) {
+    return badRequestResponse('Invalid webhook payload structure', discordCorsHeaders);
+  }
+  const payload = body;
   const entry = payload.record;
 
   // Create logContext
@@ -765,17 +897,48 @@ async function handleChangelogNotification(req: Request): Promise<Response> {
     return badRequestResponse('Missing changelog record', discordCorsHeaders);
   }
 
-  const sections = (entry.changes || []) as Array<{
+  // Validate and extract sections from changes (Json type)
+  const changesValue = entry.changes;
+  const sections: Array<{
     title: string;
     items: string[];
-  }>;
+  }> = [];
+
+  if (Array.isArray(changesValue)) {
+    for (const section of changesValue) {
+      if (typeof section === 'object' && section !== null) {
+        const getProperty = (obj: unknown, key: string): unknown => {
+          if (typeof obj !== 'object' || obj === null) {
+            return undefined;
+          }
+          const desc = Object.getOwnPropertyDescriptor(obj, key);
+          return desc?.value;
+        };
+
+        const getStringProperty = (obj: unknown, key: string): string | undefined => {
+          const value = getProperty(obj, key);
+          return typeof value === 'string' ? value : undefined;
+        };
+
+        const title = getStringProperty(section, 'title');
+        const itemsValue = getProperty(section, 'items');
+
+        if (title && Array.isArray(itemsValue)) {
+          const items = itemsValue.filter((item): item is string => typeof item === 'string');
+          if (items.length > 0) {
+            sections.push({ title, items });
+          }
+        }
+      }
+    }
+  }
 
   const embed = buildChangelogEmbed({
     slug: entry.slug,
     title: entry.title,
     tldr: entry.tldr ?? '',
     sections,
-    commits: [] as GitHubCommit[],
+    commits: [], // Empty commits array for changelog notifications
     date: entry.release_date ?? entry.created_at ?? new Date().toISOString(),
   });
 
@@ -798,7 +961,7 @@ async function handleChangelogNotification(req: Request): Promise<Response> {
       id: entry.id,
       title: entry.title,
       message: entry.tldr ?? entry.description ?? 'We just published new release notes.',
-      type: NOTIFICATION_TYPE_VALUES[0], // 'announcement'
+      type: 'announcement' satisfies DatabaseGenerated['public']['Enums']['notification_type'],
       priority: 'medium',
       action_label: 'View changelog',
       // Database constraint requires action_href to start with '/' (relative path) or be NULL

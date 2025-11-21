@@ -1,5 +1,5 @@
+import { supabaseServiceRole } from '../../clients/supabase.ts';
 import type { Database as DatabaseGenerated, Json } from '../../database.types.ts';
-import { insertTable, updateTable, WEBHOOK_DIRECTION_VALUES } from '../../database-overrides.ts';
 import type { BaseLogContext } from '../logging.ts';
 import { createUtilityContext } from '../logging.ts';
 
@@ -31,15 +31,18 @@ export async function logOutboundWebhookEvent(
 ): Promise<string | null> {
   const insertData: DatabaseGenerated['public']['Tables']['webhook_events']['Insert'] = {
     source: 'discord',
-    direction: WEBHOOK_DIRECTION_VALUES[1], // 'outbound'
+    direction: 'outbound' satisfies DatabaseGenerated['public']['Enums']['webhook_direction'],
     type,
     data: data as Json,
     created_at: new Date().toISOString(),
     processed: false,
     related_id: relatedId ?? null,
   };
-  const result = insertTable('webhook_events', insertData);
-  const { data: logData, error: logError } = await result.select('id').single<{ id: string }>();
+  const { data: logData, error: logError } = await supabaseServiceRole
+    .from('webhook_events')
+    .insert(insertData)
+    .select('id')
+    .single<{ id: string }>();
 
   if (logError) {
     const context = createUtilityContext('discord-client', 'log-outbound-webhook-event', { type });
@@ -70,7 +73,7 @@ export async function updateWebhookEventStatus(
     response_payload: responsePayload ? (responsePayload as Json) : null,
     retry_count: retryCount ?? null,
   };
-  await updateTable('webhook_events', updateData, webhookEventId);
+  await supabaseServiceRole.from('webhook_events').update(updateData).eq('id', webhookEventId);
 }
 
 export async function sendDiscordWebhook(
@@ -87,15 +90,18 @@ export async function sendDiscordWebhook(
 
   const insertData2: DatabaseGenerated['public']['Tables']['webhook_events']['Insert'] = {
     source: 'discord',
-    direction: WEBHOOK_DIRECTION_VALUES[1], // 'outbound'
+    direction: 'outbound' satisfies DatabaseGenerated['public']['Enums']['webhook_direction'],
     type: eventType,
     data: logPayload as Json,
     created_at: new Date().toISOString(),
     processed: false,
     related_id: relatedId ?? null,
   };
-  const result2 = insertTable('webhook_events', insertData2);
-  const { data: logData, error: logError } = await result2.select('id').single<{ id: string }>();
+  const { data: logData, error: logError } = await supabaseServiceRole
+    .from('webhook_events')
+    .insert(insertData2)
+    .select('id')
+    .single<{ id: string }>();
 
   if (!logError && logData) {
     webhookEventId = logData.id;
@@ -119,7 +125,10 @@ export async function sendDiscordWebhook(
               response_payload: { success: true } as Json,
               retry_count: attempt,
             };
-          await updateTable('webhook_events', successUpdateData, webhookEventId);
+          await supabaseServiceRole
+            .from('webhook_events')
+            .update(successUpdateData)
+            .eq('id', webhookEventId);
         }
 
         console.log('[discord-client] Webhook sent successfully', {
@@ -169,7 +178,10 @@ export async function sendDiscordWebhook(
       error: lastError?.message || 'Max retries exceeded',
       retry_count: MAX_RETRIES,
     };
-    await updateTable('webhook_events', errorUpdateData, webhookEventId);
+    await supabaseServiceRole
+      .from('webhook_events')
+      .update(errorUpdateData)
+      .eq('id', webhookEventId);
   }
 
   throw lastError || new Error('Max retries exceeded');

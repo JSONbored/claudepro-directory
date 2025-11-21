@@ -15,8 +15,6 @@
 import { supabaseServiceRole } from '../../../_shared/clients/supabase.ts';
 import type { Database as DatabaseGenerated } from '../../../_shared/database.types.ts';
 
-type ContentCategory = DatabaseGenerated['public']['Enums']['content_category'];
-
 import {
   badRequestResponse,
   errorResponse,
@@ -30,7 +28,10 @@ import { parseJsonBody } from '../../../_shared/utils/parse-json-body.ts';
 import { pgmqSend } from '../../../_shared/utils/pgmq-client.ts';
 import { buildSecurityHeaders } from '../../../_shared/utils/security-headers.ts';
 import { getGenerator, getSupportedCategories, isCategorySupported } from './registry.ts';
-import type { ContentRow, GeneratePackageRequest, GeneratePackageResponse } from './types.ts';
+import type { GeneratePackageRequest, GeneratePackageResponse } from './types.ts';
+
+// Use generated type directly from database
+type ContentRow = DatabaseGenerated['public']['Tables']['content']['Row'];
 
 const CORS = getOnlyCorsHeaders;
 
@@ -128,8 +129,40 @@ export async function handleGeneratePackage(
     return badRequestResponse('category is required and must be a string', CORS);
   }
 
+  // Validate category enum type
+  function isValidContentCategory(
+    value: unknown
+  ): value is DatabaseGenerated['public']['Enums']['content_category'] {
+    if (typeof value !== 'string') {
+      return false;
+    }
+    const validValues: DatabaseGenerated['public']['Enums']['content_category'][] = [
+      'agents',
+      'mcp',
+      'rules',
+      'commands',
+      'hooks',
+      'statuslines',
+      'skills',
+      'collections',
+      'guides',
+      'jobs',
+      'changelog',
+    ];
+    for (const validValue of validValues) {
+      if (value === validValue) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  if (!isValidContentCategory(category)) {
+    return badRequestResponse(`Category '${category}' is not a valid content category`, CORS);
+  }
+
   // Check if category is supported
-  if (!isCategorySupported(category as ContentCategory)) {
+  if (!isCategorySupported(category)) {
     return badRequestResponse(
       `Category '${category}' does not support package generation. Supported categories: ${getSupportedCategories().join(', ')}`,
       CORS
@@ -137,7 +170,7 @@ export async function handleGeneratePackage(
   }
 
   // Get generator for category
-  const generator = getGenerator(category as ContentCategory);
+  const generator = getGenerator(category);
   if (!generator) {
     return errorResponse(
       new Error(`Generator not found for category '${category}'`),
@@ -171,10 +204,9 @@ export async function handleGeneratePackage(
     );
   }
 
-  // Type assertion: content is guaranteed to be non-null after the check above
-  // This ensures TypeScript understands the type correctly
-  // Use explicit ContentRow type to avoid type narrowing issues
-  const contentRow = content as ContentRow;
+  // Content is guaranteed to be non-null after the check above
+  // Use satisfies to ensure type correctness without assertion
+  const contentRow = content satisfies ContentRow;
 
   // Validate content can be generated
   if (!generator.canGenerate(contentRow)) {
@@ -211,7 +243,7 @@ export async function handleGeneratePackage(
       const response: GeneratePackageResponse = {
         success: true,
         content_id,
-        category: category as ContentCategory,
+        category,
         slug: contentRow.slug || '',
         storage_url: '', // Will be set when generation completes
         message: 'Package generation queued successfully',
@@ -243,7 +275,7 @@ export async function handleGeneratePackage(
         {
           success: false,
           content_id,
-          category: category as ContentCategory,
+          category,
           slug: contentRow.slug || '',
           storage_url: '', // Empty for error cases
           error: 'Enqueue Failed',
@@ -274,7 +306,7 @@ export async function handleGeneratePackage(
     const response: GeneratePackageResponse = {
       success: true,
       content_id,
-      category: category as ContentCategory,
+      category,
       slug: contentRow.slug || '',
       storage_url: result.storageUrl,
       ...(result.metadata !== undefined ? { metadata: result.metadata } : {}),
@@ -307,7 +339,7 @@ export async function handleGeneratePackage(
       {
         success: false,
         content_id,
-        category: category as ContentCategory,
+        category,
         slug: contentRow.slug || '',
         storage_url: '', // Empty for error cases
         error: 'Generation Failed',

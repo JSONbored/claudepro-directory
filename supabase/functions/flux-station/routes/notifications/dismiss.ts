@@ -49,24 +49,29 @@ export async function handleDismissNotifications(req: Request): Promise<Response
     }
     payload = JSON.parse(bodyText);
   } catch (error) {
-    return badRequestResponse(
-      `Invalid JSON payload: ${(error as Error).message}`,
-      notificationCorsHeaders
-    );
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    return badRequestResponse(`Invalid JSON payload: ${errorMessage}`, notificationCorsHeaders);
   }
 
-  const sanitizedIds =
-    typeof payload === 'object' &&
-    payload !== null &&
-    Array.isArray((payload as { notificationIds?: unknown[] }).notificationIds)
-      ? Array.from(
-          new Set(
-            (payload as { notificationIds: unknown[] }).notificationIds
-              .map((id) => (typeof id === 'string' ? id.trim() : ''))
-              .filter(Boolean)
-          )
-        ).slice(0, 50)
-      : [];
+  // Validate payload structure
+  const getProperty = (obj: unknown, key: string): unknown => {
+    if (typeof obj !== 'object' || obj === null) {
+      return undefined;
+    }
+    const desc = Object.getOwnPropertyDescriptor(obj, key);
+    return desc?.value;
+  };
+
+  const notificationIdsValue = getProperty(payload, 'notificationIds');
+  const sanitizedIds = Array.isArray(notificationIdsValue)
+    ? Array.from(
+        new Set(
+          notificationIdsValue
+            .map((id) => (typeof id === 'string' ? id.trim() : ''))
+            .filter(Boolean)
+        )
+      ).slice(0, 50)
+    : [];
 
   if (sanitizedIds.length === 0) {
     return badRequestResponse('notificationIds array is required', notificationCorsHeaders);

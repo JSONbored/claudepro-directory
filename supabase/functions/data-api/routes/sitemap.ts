@@ -1,7 +1,6 @@
-import { SITE_URL } from '../../_shared/clients/supabase.ts';
+import { SITE_URL, supabaseAnon } from '../../_shared/clients/supabase.ts';
 import { edgeEnv } from '../../_shared/config/env.ts';
 import type { Database as DatabaseGenerated } from '../../_shared/database.types.ts';
-import { callRpc } from '../../_shared/database-overrides.ts';
 import {
   badRequestResponse,
   buildCacheHeaders,
@@ -47,33 +46,82 @@ async function handleSitemapGet(url: URL, _logContext?: BaseLogContext): Promise
   const format = (url.searchParams.get('format') || 'xml').toLowerCase();
 
   if (format === 'json') {
-    const { data: urls, error } = await callRpc(
-      'get_site_urls',
-      {} as DatabaseGenerated['public']['Functions']['get_site_urls']['Args'],
-      true
-    );
+    const { data: urls, error } = await supabaseAnon.rpc('get_site_urls', undefined);
     if (error) {
       return errorResponse(error, 'data-api:get_site_urls', CORS);
     }
-    type SiteUrlsResult = DatabaseGenerated['public']['Functions']['get_site_urls']['Returns'];
-    const typedUrls = (urls as SiteUrlsResult) || [];
-    if (!(typedUrls && Array.isArray(typedUrls)) || typedUrls.length === 0) {
+    // Validate data structure without type assertion
+    if (!(urls && Array.isArray(urls)) || urls.length === 0) {
       return jsonResponse({ error: 'No URLs returned from database' }, 500, CORS);
+    }
+
+    // Safely extract properties from URL objects
+    const getStringProperty = (obj: unknown, key: string): string | undefined => {
+      if (typeof obj !== 'object' || obj === null) {
+        return undefined;
+      }
+      const desc = Object.getOwnPropertyDescriptor(obj, key);
+      if (desc && typeof desc.value === 'string') {
+        return desc.value;
+      }
+      return undefined;
+    };
+
+    const getNumberProperty = (obj: unknown, key: string): number | undefined => {
+      if (typeof obj !== 'object' || obj === null) {
+        return undefined;
+      }
+      const desc = Object.getOwnPropertyDescriptor(obj, key);
+      if (desc && typeof desc.value === 'number') {
+        return desc.value;
+      }
+      return undefined;
+    };
+
+    // Map URLs to response format, filtering out invalid entries
+    const mappedUrls: Array<{
+      path: string;
+      loc: string;
+      lastmod?: string;
+      changefreq?: string;
+      priority?: number;
+    }> = [];
+
+    for (const u of urls) {
+      const path = getStringProperty(u, 'path');
+      if (path) {
+        const lastmod = getStringProperty(u, 'lastmod');
+        const changefreq = getStringProperty(u, 'changefreq');
+        const priority = getNumberProperty(u, 'priority');
+        // Build object conditionally to satisfy exactOptionalPropertyTypes
+        const urlItem: {
+          path: string;
+          loc: string;
+          lastmod?: string;
+          changefreq?: string;
+          priority?: number;
+        } = {
+          path,
+          loc: `${SITE_URL}${path}`,
+        };
+        if (lastmod !== undefined) {
+          urlItem.lastmod = lastmod;
+        }
+        if (changefreq !== undefined) {
+          urlItem.changefreq = changefreq;
+        }
+        if (priority !== undefined) {
+          urlItem.priority = priority;
+        }
+        mappedUrls.push(urlItem);
+      }
     }
 
     return jsonResponse(
       {
-        urls: typedUrls.map(
-          (u: { path: string; lastmod?: string; changefreq?: string; priority?: number }) => ({
-            path: u.path,
-            loc: `${SITE_URL}${u.path}`,
-            lastmod: u.lastmod,
-            changefreq: u.changefreq,
-            priority: u.priority,
-          })
-        ),
+        urls: mappedUrls,
         meta: {
-          total: typedUrls.length,
+          total: mappedUrls.length,
           generated: new Date().toISOString(),
         },
       },
@@ -90,7 +138,7 @@ async function handleSitemapGet(url: URL, _logContext?: BaseLogContext): Promise
   const rpcArgs = {
     p_base_url: SITE_URL,
   } satisfies DatabaseGenerated['public']['Functions']['generate_sitemap_xml']['Args'];
-  const { data, error } = await callRpc('generate_sitemap_xml', rpcArgs, true);
+  const { data, error } = await supabaseAnon.rpc('generate_sitemap_xml', rpcArgs);
 
   if (error) {
     return errorResponse(error, 'data-api:generate_sitemap_xml', CORS);
@@ -143,21 +191,34 @@ async function handleSitemapIndexNow(req: Request, logContext?: BaseLogContext):
     );
   }
 
-  const { data: urls, error } = await callRpc(
-    'get_site_urls',
-    {} as DatabaseGenerated['public']['Functions']['get_site_urls']['Args'],
-    true
-  );
+  const { data: urls, error } = await supabaseAnon.rpc('get_site_urls', undefined);
   if (error) {
     return errorResponse(error, 'data-api:get_site_urls', CORS);
   }
-  type SiteUrlsResult = DatabaseGenerated['public']['Functions']['get_site_urls']['Returns'];
-  const typedUrls = (urls as SiteUrlsResult) || [];
-  if (!(typedUrls && Array.isArray(typedUrls)) || typedUrls.length === 0) {
+  // Validate data structure without type assertion
+  if (!(urls && Array.isArray(urls)) || urls.length === 0) {
     return jsonResponse({ error: 'No URLs to submit to IndexNow' }, 500, CORS);
   }
 
-  const urlList = typedUrls.map((u: { path: string }) => `${SITE_URL}${u.path}`).slice(0, 10000);
+  // Safely extract path property from URL objects
+  const getStringProperty = (obj: unknown, key: string): string | undefined => {
+    if (typeof obj !== 'object' || obj === null) {
+      return undefined;
+    }
+    const desc = Object.getOwnPropertyDescriptor(obj, key);
+    if (desc && typeof desc.value === 'string') {
+      return desc.value;
+    }
+    return undefined;
+  };
+
+  const urlList = urls
+    .map((u: unknown) => {
+      const path = getStringProperty(u, 'path');
+      return path ? `${SITE_URL}${path}` : null;
+    })
+    .filter((url): url is string => url !== null)
+    .slice(0, 10000);
   const payload = {
     host: new URL(SITE_URL).host,
     key: INDEXNOW_API_KEY,

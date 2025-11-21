@@ -130,8 +130,22 @@ async function processInternalQueue(
     // Try to extract processed count from response body
     let processed: number | undefined;
     try {
-      const body = (await response.json()) as { processed?: number; message?: string };
-      processed = body.processed;
+      const body = await response.json();
+      // Validate response structure
+      if (typeof body === 'object' && body !== null) {
+        const getProperty = (obj: unknown, key: string): unknown => {
+          if (typeof obj !== 'object' || obj === null) {
+            return undefined;
+          }
+          const desc = Object.getOwnPropertyDescriptor(obj, key);
+          return desc?.value;
+        };
+
+        const processedValue = getProperty(body, 'processed');
+        if (typeof processedValue === 'number') {
+          processed = processedValue;
+        }
+      }
     } catch {
       // Response might not be JSON, that's okay
     }
@@ -176,8 +190,22 @@ async function processExternalQueue(
     // Try to extract processed count from response body
     let processed: number | undefined;
     try {
-      const body = (await response.json()) as { processed?: number; message?: string };
-      processed = body.processed;
+      const body = await response.json();
+      // Validate response structure
+      if (typeof body === 'object' && body !== null) {
+        const getProperty = (obj: unknown, key: string): unknown => {
+          if (typeof obj !== 'object' || obj === null) {
+            return undefined;
+          }
+          const desc = Object.getOwnPropertyDescriptor(obj, key);
+          return desc?.value;
+        };
+
+        const processedValue = getProperty(body, 'processed');
+        if (typeof processedValue === 'number') {
+          processed = processedValue;
+        }
+      }
     } catch {
       // Response might not be JSON, that's okay
     }

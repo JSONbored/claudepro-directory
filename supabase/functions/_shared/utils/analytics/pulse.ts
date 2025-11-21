@@ -1,8 +1,8 @@
-import type { TablesInsert } from '../../database-overrides.ts';
+import type { Database as DatabaseGenerated } from '../../database.types.ts';
 import { getAuthUserFromHeader } from '../auth.ts';
 import { pgmqSend } from '../pgmq-client.ts';
 
-type SearchQueryInsert = TablesInsert<'search_queries'>;
+type SearchQueryInsert = DatabaseGenerated['public']['Tables']['search_queries']['Insert'];
 
 export interface TrackSearchQueryEdgeParams {
   query: string;

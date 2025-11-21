@@ -1,6 +1,6 @@
 import { buildReadmeMarkdown } from '../../_shared/changelog/readme-builder.ts';
-import type { Database as DatabaseGenerated, Json } from '../../_shared/database.types.ts';
-import { callRpc } from '../../_shared/database-overrides.ts';
+import { supabaseAnon } from '../../_shared/clients/supabase.ts';
+import type { Database as DatabaseGenerated } from '../../_shared/database.types.ts';
 
 type ContentCategory = DatabaseGenerated['public']['Enums']['content_category'];
 
@@ -90,7 +90,16 @@ export async function handleContentRoute(
     if (first === 'category-configs' || first === 'categories') {
       return handleCategoryConfigs();
     }
-    if (first && CONTENT_CATEGORY_VALUES.includes(first as ContentCategory)) {
+    // Validate content category without type assertion
+    const isValidContentCategory = (value: string): value is ContentCategory => {
+      for (const validValue of CONTENT_CATEGORY_VALUES) {
+        if (value === validValue) {
+          return true;
+        }
+      }
+      return false;
+    };
+    if (first && isValidContentCategory(first)) {
       return handleCategoryOnly(first, format);
     }
   }
@@ -103,11 +112,16 @@ export async function handleContentRoute(
     if (first === 'tools' && second !== undefined) {
       return handleToolLlmsTxt(second, format);
     }
-    if (
-      first &&
-      CONTENT_CATEGORY_VALUES.includes(first as ContentCategory) &&
-      second !== undefined
-    ) {
+    // Validate content category without type assertion
+    const isValidContentCategory = (value: string): value is ContentCategory => {
+      for (const validValue of CONTENT_CATEGORY_VALUES) {
+        if (value === validValue) {
+          return true;
+        }
+      }
+      return false;
+    };
+    if (first && isValidContentCategory(first) && second !== undefined) {
       return handleRecordExport(first, second, url);
     }
     return badRequestResponse(
@@ -145,11 +159,7 @@ async function handleSitewideContent(url: URL, logContext?: BaseLogContext): Pro
 }
 
 async function handleSitewideReadme(logContext?: BaseLogContext): Promise<Response> {
-  const { data, error } = await callRpc(
-    'generate_readme_data',
-    {} as DatabaseGenerated['public']['Functions']['generate_readme_data']['Args'],
-    true
-  );
+  const { data, error } = await supabaseAnon.rpc('generate_readme_data', undefined);
 
   if (error) {
     return errorResponse(error, 'data-api:generate_readme_data', CORS);
@@ -172,22 +182,106 @@ async function handleSitewideReadme(logContext?: BaseLogContext): Promise<Respon
     );
   }
 
-  // Use Json type from generated types (runtime validation ensures structure)
-  const readmeData = data as Json & {
-    categories: Array<{
-      category: string;
+  // Validate data structure without type assertion
+  if (
+    typeof data !== 'object' ||
+    data === null ||
+    !('categories' in data) ||
+    !('totalCount' in data) ||
+    !('categoryBreakdown' in data)
+  ) {
+    return jsonResponse(
+      { error: 'README generation failed', message: 'Invalid data structure' },
+      500,
+      CORS
+    );
+  }
+
+  // Safely extract properties using Object.getOwnPropertyDescriptor
+  const getProperty = (obj: unknown, key: string): unknown => {
+    if (typeof obj !== 'object' || obj === null) {
+      return undefined;
+    }
+    const desc = Object.getOwnPropertyDescriptor(obj, key);
+    return desc?.value;
+  };
+
+  const categories = getProperty(data, 'categories');
+  const totalCount = getProperty(data, 'totalCount');
+  const categoryBreakdown = getProperty(data, 'categoryBreakdown');
+
+  // Validate categoryBreakdown structure
+  const isValidRecord = (obj: unknown): obj is Record<string, number> => {
+    if (typeof obj !== 'object' || obj === null) return false;
+    for (const key in obj) {
+      if (typeof key !== 'string') return false;
+      const desc = Object.getOwnPropertyDescriptor(obj, key);
+      if (!desc || typeof desc.value !== 'number') return false;
+    }
+    return true;
+  };
+
+  if (
+    !Array.isArray(categories) ||
+    typeof totalCount !== 'number' ||
+    !isValidRecord(categoryBreakdown)
+  ) {
+    return jsonResponse(
+      { error: 'README generation failed', message: 'Invalid data structure' },
+      500,
+      CORS
+    );
+  }
+
+  // Validate categories array structure
+  const isValidCategoryArray = (
+    arr: unknown
+  ): arr is Array<{
+    category: string;
+    title: string;
+    description: string;
+    icon_name: string;
+    url_slug: string;
+    items: Array<{
+      slug: string;
       title: string;
       description: string;
-      icon_name: string;
-      url_slug: string;
-      items: Array<{
-        slug: string;
-        title: string;
-        description: string;
-      }>;
     }>;
-    totalCount: number;
-    categoryBreakdown: Record<string, number>;
+  }> => {
+    if (!Array.isArray(arr)) return false;
+    for (const item of arr) {
+      if (
+        typeof item !== 'object' ||
+        item === null ||
+        !('category' in item) ||
+        !('title' in item) ||
+        !('description' in item) ||
+        !('icon_name' in item) ||
+        !('url_slug' in item) ||
+        !('items' in item) ||
+        !Array.isArray(item.items)
+      ) {
+        return false;
+      }
+    }
+    return true;
+  };
+
+  if (!isValidCategoryArray(categories)) {
+    return jsonResponse(
+      { error: 'README generation failed', message: 'Invalid categories structure' },
+      500,
+      CORS
+    );
+  }
+
+  // Use validated data - TypeScript will infer types from runtime checks
+  // The data has been validated above, so we can safely use it
+  // buildReadmeMarkdown expects a specific shape, which we've validated
+  const readmeData: Parameters<typeof buildReadmeMarkdown>[0] = {
+    categories,
+    totalCount,
+    categoryBreakdown,
   };
   const markdown = buildReadmeMarkdown(readmeData);
 
@@ -212,11 +306,7 @@ async function handleSitewideReadme(logContext?: BaseLogContext): Promise<Respon
 }
 
 async function handleSitewideLlmsTxt(logContext?: BaseLogContext): Promise<Response> {
-  const { data, error } = await callRpc(
-    'generate_sitewide_llms_txt',
-    {} as DatabaseGenerated['public']['Functions']['generate_sitewide_llms_txt']['Args'],
-    true
-  );
+  const { data, error } = await supabaseAnon.rpc('generate_sitewide_llms_txt', undefined);
 
   if (error) {
     return errorResponse(error, 'data-api:generate_sitewide_llms_txt', CORS);
@@ -286,7 +376,7 @@ async function handleCategoryLlmsTxt(category: string): Promise<Response> {
   const rpcArgs = {
     p_category: category,
   } satisfies DatabaseGenerated['public']['Functions']['generate_category_llms_txt']['Args'];
-  const { data, error } = await callRpc('generate_category_llms_txt', rpcArgs, true);
+  const { data, error } = await supabaseAnon.rpc('generate_category_llms_txt', rpcArgs);
 
   if (error) {
     return errorResponse(error, 'data-api:generate_category_llms_txt', CORS);
@@ -310,11 +400,7 @@ async function handleCategoryLlmsTxt(category: string): Promise<Response> {
 }
 
 async function handleChangelogLlmsTxt(): Promise<Response> {
-  const { data, error } = await callRpc(
-    'generate_changelog_llms_txt',
-    {} as DatabaseGenerated['public']['Functions']['generate_changelog_llms_txt']['Args'],
-    true
-  );
+  const { data, error } = await supabaseAnon.rpc('generate_changelog_llms_txt', undefined);
 
   if (error) {
     return errorResponse(error, 'data-api:generate_changelog_llms_txt', CORS);
@@ -341,7 +427,7 @@ async function handleChangelogEntryLlmsTxt(slug: string): Promise<Response> {
   const rpcArgs = {
     p_slug: slug,
   } satisfies DatabaseGenerated['public']['Functions']['generate_changelog_entry_llms_txt']['Args'];
-  const { data, error } = await callRpc('generate_changelog_entry_llms_txt', rpcArgs, true);
+  const { data, error } = await supabaseAnon.rpc('generate_changelog_entry_llms_txt', rpcArgs);
 
   if (error) {
     return errorResponse(error, 'data-api:generate_changelog_entry_llms_txt', CORS);
@@ -368,7 +454,7 @@ async function handleToolLlms(tool: string): Promise<Response> {
   const rpcArgs = {
     p_tool_name: tool,
   } satisfies DatabaseGenerated['public']['Functions']['generate_tool_llms_txt']['Args'];
-  const { data, error } = await callRpc('generate_tool_llms_txt', rpcArgs, true);
+  const { data, error } = await supabaseAnon.rpc('generate_tool_llms_txt', rpcArgs);
 
   if (error) {
     return errorResponse(error, 'data-api:generate_tool_llms_txt', CORS);
@@ -393,11 +479,7 @@ async function handleToolLlms(tool: string): Promise<Response> {
 
 async function handleCategoryConfigs(): Promise<Response> {
   // get_category_configs_with_features has Args: never (no arguments)
-  const { data, error } = await callRpc(
-    'get_category_configs_with_features',
-    {} as DatabaseGenerated['public']['Functions']['get_category_configs_with_features']['Args'],
-    true
-  );
+  const { data, error } = await supabaseAnon.rpc('get_category_configs_with_features', undefined);
 
   if (error) {
     return errorResponse(error, 'data-api:get_category_configs_with_features', CORS);
@@ -468,7 +550,7 @@ async function handleMcpbGeneration(
     p_base_url: Deno.env.get('SITE_URL') || '',
   } satisfies DatabaseGenerated['public']['Functions']['get_api_content_full']['Args'];
 
-  const { data, error } = await callRpc('get_api_content_full', rpcArgs, true);
+  const { data, error } = await supabaseAnon.rpc('get_api_content_full', rpcArgs);
 
   if (error) {
     return errorResponse(error, 'data-api:get_api_content_full', CORS);
@@ -487,7 +569,49 @@ async function handleMcpbGeneration(
 
   // Parse JSON string returned by RPC (same pattern as other handlers)
   const contentData = typeof data === 'string' ? JSON.parse(data) : data;
-  const mcpServer = contentData as DatabaseGenerated['public']['Tables']['content']['Row'];
+
+  // Validate content data structure without type assertion
+  if (typeof contentData !== 'object' || contentData === null) {
+    return jsonResponse(
+      {
+        error: 'Invalid Response',
+        message: 'RPC returned invalid data structure',
+      },
+      500,
+      CORS
+    );
+  }
+
+  // Safely check for required properties
+  const getStringProperty = (obj: unknown, key: string): string | undefined => {
+    if (typeof obj !== 'object' || obj === null) {
+      return undefined;
+    }
+    const desc = Object.getOwnPropertyDescriptor(obj, key);
+    if (desc && typeof desc.value === 'string') {
+      return desc.value;
+    }
+    return undefined;
+  };
+
+  // Validate that this looks like a content row by checking for required fields
+  const contentSlug = getStringProperty(contentData, 'slug');
+  const contentCategory = getStringProperty(contentData, 'category');
+
+  if (!(contentSlug && contentCategory)) {
+    return jsonResponse(
+      {
+        error: 'Invalid Response',
+        message: 'RPC returned incomplete data',
+      },
+      500,
+      CORS
+    );
+  }
+
+  // TypeScript will infer the type from our validation
+  // We can safely access mcpb_storage_url as it's part of the generated type
+  const mcpServer = contentData satisfies DatabaseGenerated['public']['Tables']['content']['Row'];
 
   // Check if .mcpb already exists
   // mcpb_storage_url field exists in generated types (database.types.ts)

@@ -1,21 +1,5 @@
+import { supabaseAnon } from '../../_shared/clients/supabase.ts';
 import type { Database as DatabaseGenerated } from '../../_shared/database.types.ts';
-import { callRpc } from '../../_shared/database-overrides.ts';
-
-type ContentCategory = DatabaseGenerated['public']['Enums']['content_category'];
-
-const CONTENT_CATEGORY_VALUES = [
-  'agents',
-  'mcp',
-  'rules',
-  'commands',
-  'hooks',
-  'statuslines',
-  'skills',
-  'collections',
-  'guides',
-  'jobs',
-  'changelog',
-] as const satisfies readonly ContentCategory[];
 
 import {
   badRequestResponse,
@@ -29,43 +13,15 @@ import {
 const CORS = getOnlyCorsHeaders;
 const DEFAULT_CATEGORY = 'agents';
 
-type TrendingMetricsRow = {
-  category: string | null;
-  slug: string;
-  title: string | null;
-  description: string | null;
-  author: string | null;
-  tags: string[] | null;
-  source: string | null;
-  views_total: number | null;
-  copies_total: number | null;
-  bookmarks_total: number | null;
-  trending_score: number | null;
-  engagement_score: number | null;
-  freshness_score: number | null;
-};
+// Use generated types directly from RPC return types
+type TrendingMetricsRow =
+  DatabaseGenerated['public']['Functions']['get_trending_metrics_with_content']['Returns'][number];
 
-type PopularContentRow = {
-  category: string | null;
-  slug: string;
-  title: string | null;
-  description: string | null;
-  author: string | null;
-  tags: string[] | null;
-  view_count: number | null;
-  copy_count: number | null;
-  popularity_score: number | null;
-};
+type PopularContentRow =
+  DatabaseGenerated['public']['Functions']['get_popular_content']['Returns'][number];
 
-type RecentContentRow = {
-  category: string | null;
-  slug: string;
-  title: string | null;
-  description: string | null;
-  author: string | null;
-  tags: string[] | null;
-  created_at: string | null;
-};
+type RecentContentRow =
+  DatabaseGenerated['public']['Functions']['get_recent_content']['Returns'][number];
 
 export async function handleTrendingRoute(
   segments: string[],
@@ -173,11 +129,38 @@ async function handleSidebar(url: URL): Promise<Response> {
   }
 }
 
+function isValidContentCategory(
+  value: unknown
+): value is DatabaseGenerated['public']['Enums']['content_category'] {
+  if (typeof value !== 'string') {
+    return false;
+  }
+  const validValues: DatabaseGenerated['public']['Enums']['content_category'][] = [
+    'agents',
+    'mcp',
+    'rules',
+    'commands',
+    'hooks',
+    'statuslines',
+    'skills',
+    'collections',
+    'guides',
+    'jobs',
+    'changelog',
+  ];
+  for (const validValue of validValues) {
+    if (value === validValue) {
+      return true;
+    }
+  }
+  return false;
+}
+
 function parseCategory(value: string | null): string | null {
   if (!value || value === 'all') {
     return null;
   }
-  return CONTENT_CATEGORY_VALUES.includes(value as ContentCategory) ? value : null;
+  return isValidContentCategory(value) ? value : null;
 }
 
 function clampLimit(rawLimit: number): number {
@@ -187,48 +170,69 @@ function clampLimit(rawLimit: number): number {
   return Math.min(Math.max(rawLimit, 1), 100);
 }
 
-async function fetchTrendingMetrics(category: string | null, limit: number) {
+async function fetchTrendingMetrics(
+  category: string | null,
+  limit: number
+): Promise<TrendingMetricsRow[]> {
   const rpcArgs: DatabaseGenerated['public']['Functions']['get_trending_metrics_with_content']['Args'] =
     {
       ...(category !== null && category !== undefined ? { p_category: category } : {}),
       p_limit: limit,
     };
-  const { data, error } = await callRpc('get_trending_metrics_with_content', rpcArgs, true);
+  const { data, error } = await supabaseAnon.rpc('get_trending_metrics_with_content', rpcArgs);
 
   if (error) {
     throw error;
   }
 
-  return (data || []) as TrendingMetricsRow[];
+  // Validate data structure without type assertion
+  if (!(data && Array.isArray(data))) {
+    return [];
+  }
+  return data;
 }
 
-async function fetchPopularContent(category: string | null, limit: number) {
+async function fetchPopularContent(
+  category: string | null,
+  limit: number
+): Promise<PopularContentRow[]> {
   const rpcArgs: DatabaseGenerated['public']['Functions']['get_popular_content']['Args'] = {
     ...(category !== null && category !== undefined ? { p_category: category } : {}),
     p_limit: limit,
   };
-  const { data, error } = await callRpc('get_popular_content', rpcArgs, true);
+  const { data, error } = await supabaseAnon.rpc('get_popular_content', rpcArgs);
 
   if (error) {
     throw error;
   }
 
-  return (data || []) as PopularContentRow[];
+  // Validate data structure without type assertion
+  if (!(data && Array.isArray(data))) {
+    return [];
+  }
+  return data;
 }
 
-async function fetchRecentContent(category: string | null, limit: number) {
+async function fetchRecentContent(
+  category: string | null,
+  limit: number
+): Promise<RecentContentRow[]> {
   const rpcArgs: DatabaseGenerated['public']['Functions']['get_recent_content']['Args'] = {
     ...(category !== null && category !== undefined ? { p_category: category } : {}),
     p_limit: limit,
     p_days: 30,
   };
-  const { data, error } = await callRpc('get_recent_content', rpcArgs, true);
+  const { data, error } = await supabaseAnon.rpc('get_recent_content', rpcArgs);
 
   if (error) {
     throw error;
   }
 
-  return (data || []) as RecentContentRow[];
+  // Validate data structure without type assertion
+  if (!(data && Array.isArray(data))) {
+    return [];
+  }
+  return data;
 }
 
 function mapTrendingRows(rows: TrendingMetricsRow[], fallbackCategory: string | null) {
@@ -244,8 +248,8 @@ function mapTrendingRows(rows: TrendingMetricsRow[], fallbackCategory: string | 
     copyCount: row.copies_total ?? undefined,
     bookmarkCount: row.bookmarks_total ?? undefined,
     popularity: row.trending_score ?? undefined,
-    engagementScore: row['engagement_score'] ?? undefined,
-    freshnessScore: row['freshness_score'] ?? undefined,
+    engagementScore: row.engagement_score ?? undefined,
+    freshnessScore: row.freshness_score ?? undefined,
   }));
 }
 

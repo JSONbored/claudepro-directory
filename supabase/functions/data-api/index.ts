@@ -31,8 +31,28 @@ interface DataApiContext extends RouterContext {
 const router = createRouter<DataApiContext>({
   buildContext: (request) => {
     const url = new URL(request.url);
-    const originalMethod = request.method.toUpperCase() as HttpMethod;
-    const normalizedMethod = (originalMethod === 'HEAD' ? 'GET' : originalMethod) as HttpMethod;
+    // Validate HTTP method without type assertion
+    const methodUpper = request.method.toUpperCase();
+    const validMethods: readonly HttpMethod[] = [
+      'GET',
+      'POST',
+      'PUT',
+      'PATCH',
+      'DELETE',
+      'OPTIONS',
+      'HEAD',
+    ] as const;
+    const isValidMethod = (m: string): m is HttpMethod => {
+      // Check each valid method explicitly to avoid type assertion
+      for (const validMethod of validMethods) {
+        if (m === validMethod) {
+          return true;
+        }
+      }
+      return false;
+    };
+    const originalMethod: HttpMethod = isValidMethod(methodUpper) ? methodUpper : 'GET';
+    const normalizedMethod: HttpMethod = originalMethod === 'HEAD' ? 'GET' : originalMethod;
 
     // Normalize pathname: remove /functions/v1/data-api or /data-api prefix
     // SECURITY: Use strict prefix matching to prevent path traversal
@@ -523,12 +543,19 @@ function respondWithAnalytics(
       return response;
     })
     .catch((error) => {
-      const status =
-        error instanceof Response
-          ? error.status
-          : typeof error === 'object' && error !== null && 'status' in error
-            ? Number((error as { status?: number }).status) || 500
-            : 500;
+      // Determine status without type assertions
+      let status = 500;
+      if (error instanceof Response) {
+        status = error.status;
+      } else if (typeof error === 'object' && error !== null && 'status' in error) {
+        const statusDesc = Object.getOwnPropertyDescriptor(error, 'status');
+        if (statusDesc && typeof statusDesc.value === 'number') {
+          status = statusDesc.value;
+        } else if (statusDesc && typeof statusDesc.value === 'string') {
+          const parsed = Number(statusDesc.value);
+          status = Number.isNaN(parsed) ? 500 : parsed;
+        }
+      }
       logEvent(status, 'error', error);
       throw error;
     });

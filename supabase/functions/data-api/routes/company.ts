@@ -1,5 +1,5 @@
+import { supabaseAnon } from '../../_shared/clients/supabase.ts';
 import type { Database as DatabaseGenerated } from '../../_shared/database.types.ts';
-import { callRpc } from '../../_shared/database-overrides.ts';
 import {
   badRequestResponse,
   buildCacheHeaders,
@@ -33,27 +33,20 @@ export async function handleCompanyRoute(
   const rpcArgs = {
     p_slug: slug,
   } satisfies DatabaseGenerated['public']['Functions']['get_company_profile']['Args'];
-  const { data: profileRaw, error } = await callRpc('get_company_profile', rpcArgs, true);
+  const { data: profile, error } = await supabaseAnon.rpc('get_company_profile', rpcArgs);
 
   if (error) {
     return errorResponse(error, 'data-api:get_company_profile', CORS);
   }
 
-  const profile =
-    profileRaw as DatabaseGenerated['public']['Functions']['get_company_profile']['Returns'];
-
   if (!profile) {
     return jsonResponse({ error: 'Company not found' }, 404, CORS);
   }
 
-  return new Response(JSON.stringify(profile), {
-    status: 200,
-    headers: {
-      'Content-Type': 'application/json; charset=utf-8',
-      'X-Generated-By': 'supabase.rpc.get_company_profile',
-      ...buildSecurityHeaders(),
-      ...CORS,
-      ...buildCacheHeaders('company_profile'),
-    },
+  return jsonResponse(profile, 200, {
+    ...buildSecurityHeaders(),
+    ...CORS,
+    ...buildCacheHeaders('company_profile'),
+    'X-Generated-By': 'supabase.rpc.get_company_profile',
   });
 }

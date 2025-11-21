@@ -19,7 +19,6 @@ import {
 import { SITE_URL, supabaseServiceRole } from '../../../_shared/clients/supabase.ts';
 import { getCacheConfigNumber } from '../../../_shared/config/statsig-cache.ts';
 import type { Database as DatabaseGenerated } from '../../../_shared/database.types.ts';
-import { insertTable } from '../../../_shared/database-overrides.ts';
 import {
   CIRCUIT_BREAKER_CONFIGS,
   withCircuitBreaker,
@@ -46,6 +45,144 @@ interface ChangelogWebhookQueueMessage {
   vt: string;
   enqueued_at: string;
   message: ChangelogWebhookProcessingJob;
+}
+
+// Type guard to validate VercelWebhookPayload structure
+function isValidVercelWebhookPayload(value: unknown): value is VercelWebhookPayload {
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
+
+  const getProperty = (obj: unknown, key: string): unknown => {
+    if (typeof obj !== 'object' || obj === null) {
+      return undefined;
+    }
+    const desc = Object.getOwnPropertyDescriptor(obj, key);
+    return desc?.value;
+  };
+
+  const getStringProperty = (obj: unknown, key: string): string | undefined => {
+    const value = getProperty(obj, key);
+    return typeof value === 'string' ? value : undefined;
+  };
+
+  const type = getStringProperty(value, 'type');
+  const id = getStringProperty(value, 'id');
+  const createdAt = getProperty(value, 'createdAt');
+  const payload = getProperty(value, 'payload');
+
+  if (
+    !(type && id) ||
+    typeof createdAt !== 'number' ||
+    typeof payload !== 'object' ||
+    payload === null
+  ) {
+    return false;
+  }
+
+  // Validate payload.deployment structure
+  const deployment = getProperty(payload, 'deployment');
+  if (typeof deployment !== 'object' || deployment === null) {
+    return false;
+  }
+
+  const deploymentId = getStringProperty(deployment, 'id');
+  const deploymentUrl = getStringProperty(deployment, 'url');
+  const meta = getProperty(deployment, 'meta');
+
+  if (!(deploymentId && deploymentUrl) || typeof meta !== 'object' || meta === null) {
+    return false;
+  }
+
+  const commitId = getStringProperty(meta, 'commitId');
+  if (!commitId) {
+    return false;
+  }
+
+  return true;
+}
+
+// Type guard to validate ChangelogWebhookProcessingJob structure
+function isValidChangelogWebhookProcessingJob(
+  value: unknown
+): value is ChangelogWebhookProcessingJob {
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
+
+  const getProperty = (obj: unknown, key: string): unknown => {
+    if (typeof obj !== 'object' || obj === null) {
+      return undefined;
+    }
+    const desc = Object.getOwnPropertyDescriptor(obj, key);
+    return desc?.value;
+  };
+
+  const getStringProperty = (obj: unknown, key: string): string | undefined => {
+    const value = getProperty(obj, key);
+    return typeof value === 'string' ? value : undefined;
+  };
+
+  const webhookEventId = getStringProperty(value, 'webhook_event_id');
+  if (!webhookEventId) {
+    return false;
+  }
+
+  // deployment_id is optional, so we just check if it exists and is a string if present
+  const deploymentId = getProperty(value, 'deployment_id');
+  if (deploymentId !== undefined && typeof deploymentId !== 'string') {
+    return false;
+  }
+
+  return true;
+}
+
+// Type guard to validate GitHubCommit array
+function isValidGitHubCommitArray(value: unknown): value is GitHubCommit[] {
+  if (!Array.isArray(value)) {
+    return false;
+  }
+
+  for (const item of value) {
+    if (typeof item !== 'object' || item === null) {
+      return false;
+    }
+
+    const getProperty = (obj: unknown, key: string): unknown => {
+      if (typeof obj !== 'object' || obj === null) {
+        return undefined;
+      }
+      const desc = Object.getOwnPropertyDescriptor(obj, key);
+      return desc?.value;
+    };
+
+    const getStringProperty = (obj: unknown, key: string): string | undefined => {
+      const value = getProperty(obj, key);
+      return typeof value === 'string' ? value : undefined;
+    };
+
+    const sha = getStringProperty(item, 'sha');
+    const commit = getProperty(item, 'commit');
+    const htmlUrl = getStringProperty(item, 'html_url');
+
+    if (!(sha && htmlUrl) || typeof commit !== 'object' || commit === null) {
+      return false;
+    }
+
+    const author = getProperty(commit, 'author');
+    const message = getStringProperty(commit, 'message');
+
+    if (!message || typeof author !== 'object' || author === null) {
+      return false;
+    }
+
+    const authorName = getStringProperty(author, 'name');
+    if (!authorName) {
+      return false;
+    }
+  }
+
+  return true;
 }
 
 async function processChangelogWebhook(message: ChangelogWebhookQueueMessage): Promise<{
@@ -82,18 +219,16 @@ async function processChangelogWebhook(message: ChangelogWebhookQueueMessage): P
     }
 
     // 2. Parse VercelWebhookPayload from webhook.data
-    let payload: VercelWebhookPayload;
-    try {
-      payload = webhookEvent['data'] as unknown as VercelWebhookPayload;
-    } catch (parseError) {
-      const errorMsg = parseError instanceof Error ? parseError.message : String(parseError);
-      errors.push(`Payload parse: ${errorMsg}`);
-      console.error('[flux-station] Failed to parse webhook payload', {
+    // webhookEvent.data is Json type, which could be any JSON-serializable value
+    const webhookData = webhookEvent.data;
+    if (!isValidVercelWebhookPayload(webhookData)) {
+      errors.push('Invalid webhook payload structure');
+      console.error('[flux-station] Invalid webhook payload structure', {
         ...logContext,
-        error: errorMsg,
       });
       return { success: false, errors };
     }
+    const payload = webhookData;
 
     // 3. Validate webhook type
     if (payload.type !== 'deployment.succeeded') {
@@ -102,13 +237,8 @@ async function processChangelogWebhook(message: ChangelogWebhookQueueMessage): P
         type: payload.type,
       });
       // Mark as processed and skip
-      await (
-        supabaseServiceRole.from('webhook_events') as unknown as {
-          update: (data: { processed: boolean; processed_at: string }) => {
-            eq: (column: string, value: string) => Promise<{ error: unknown }>;
-          };
-        }
-      )
+      await supabaseServiceRole
+        .from('webhook_events')
         .update({ processed: true, processed_at: new Date().toISOString() })
         .eq('id', job.webhook_event_id);
       return { success: true, errors: [] };
@@ -163,8 +293,30 @@ async function processChangelogWebhook(message: ChangelogWebhookQueueMessage): P
               throw new Error(`GitHub API error (${response.status}): ${errorText}`);
             }
 
-            const data = (await response.json()) as { commits?: unknown[] };
-            return (data.commits || []) as GitHubCommit[];
+            const data = await response.json();
+            // Validate response structure
+            if (typeof data !== 'object' || data === null) {
+              throw new Error('Invalid GitHub API response: expected object');
+            }
+
+            const getProperty = (obj: unknown, key: string): unknown => {
+              if (typeof obj !== 'object' || obj === null) {
+                return undefined;
+              }
+              const desc = Object.getOwnPropertyDescriptor(obj, key);
+              return desc?.value;
+            };
+
+            const commitsValue = getProperty(data, 'commits');
+            if (!commitsValue) {
+              return [];
+            }
+
+            if (!isValidGitHubCommitArray(commitsValue)) {
+              throw new Error('Invalid GitHub commits structure in API response');
+            }
+
+            return commitsValue;
           },
           CIRCUIT_BREAKER_CONFIGS.external
         ),
@@ -187,13 +339,8 @@ async function processChangelogWebhook(message: ChangelogWebhookQueueMessage): P
     if (conventionalCommits.length === 0) {
       console.log('[flux-station] No conventional commits found', logContext);
       // Mark as processed and skip
-      await (
-        supabaseServiceRole.from('webhook_events') as unknown as {
-          update: (data: { processed: boolean; processed_at: string }) => {
-            eq: (column: string, value: string) => Promise<{ error: unknown }>;
-          };
-        }
-      )
+      await supabaseServiceRole
+        .from('webhook_events')
         .update({ processed: true, processed_at: new Date().toISOString() })
         .eq('id', job.webhook_event_id);
       return { success: true, errors: [] };
@@ -250,8 +397,9 @@ async function processChangelogWebhook(message: ChangelogWebhookQueueMessage): P
 
     // 9. Insert changelog entry
     const insertData: DatabaseGenerated['public']['Tables']['changelog']['Insert'] = changelogEntry;
-    const result = insertTable('changelog', insertData);
-    const { data: changelogData, error: insertError } = await result
+    const { data: changelogData, error: insertError } = await supabaseServiceRole
+      .from('changelog')
+      .insert(insertData)
       .select('*')
       .single<ChangelogRow>();
 
@@ -295,13 +443,8 @@ async function processChangelogWebhook(message: ChangelogWebhookQueueMessage): P
     }
 
     // 11. Mark webhook as processed
-    await (
-      supabaseServiceRole.from('webhook_events') as unknown as {
-        update: (data: { processed: boolean; processed_at: string; related_id: string }) => {
-          eq: (column: string, value: string) => Promise<{ error: unknown }>;
-        };
-      }
-    )
+    await supabaseServiceRole
+      .from('webhook_events')
       .update({
         processed: true,
         processed_at: new Date().toISOString(),
@@ -359,12 +502,26 @@ export async function handleChangelogProcess(_req: Request): Promise<Response> {
     }> = [];
 
     for (const msg of messages) {
+      // Validate queue message structure
+      if (!isValidChangelogWebhookProcessingJob(msg.message)) {
+        console.error('[flux-station] Invalid changelog webhook processing job structure', {
+          msg_id: msg.msg_id.toString(),
+        });
+        results.push({
+          msg_id: msg.msg_id.toString(),
+          status: 'failed',
+          errors: ['Invalid message structure'],
+          will_retry: false, // Don't retry invalid messages
+        });
+        continue;
+      }
+
       const message: ChangelogWebhookQueueMessage = {
         msg_id: msg.msg_id,
         read_ct: msg.read_ct,
         vt: msg.vt,
         enqueued_at: msg.enqueued_at,
-        message: msg.message as unknown as ChangelogWebhookProcessingJob,
+        message: msg.message,
       };
 
       try {
