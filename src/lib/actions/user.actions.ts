@@ -35,6 +35,9 @@ const CONTENT_CATEGORY_VALUES = [
   'changelog',
 ] as const satisfies readonly Database['public']['Enums']['content_category'][];
 
+// UUID validation regex pattern (RFC 4122 compliant)
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 // Activity filter schema (query parameters - NOT stored data, validation is useful here)
 // Note: Only 'submission' type is supported (posts/comments/votes features not implemented)
 const activityFilterSchema = z.object({
@@ -472,13 +475,7 @@ export const isFollowingAction = authedAction
   .metadata({ actionName: 'isFollowing', category: 'user' })
   .inputSchema(
     z.object({
-      user_id: z.string().refine(
-        (val) => {
-          const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-          return uuidRegex.test(val);
-        },
-        { message: 'Invalid UUID format' }
-      ),
+      user_id: z.string().regex(UUID_REGEX, { message: 'Invalid UUID format' }),
     })
   )
   .action(async ({ parsedInput, ctx }) => {
@@ -551,15 +548,7 @@ export const getFollowStatusBatch = authedAction
   .metadata({ actionName: 'getFollowStatusBatch', category: 'user' })
   .inputSchema(
     z.object({
-      user_ids: z.array(
-        z.string().refine(
-          (val) => {
-            const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-            return uuidRegex.test(val);
-          },
-          { message: 'Invalid UUID format' }
-        )
-      ),
+      user_ids: z.array(z.string().regex(UUID_REGEX, { message: 'Invalid UUID format' })),
     })
   )
   .action(async ({ parsedInput, ctx }) => {

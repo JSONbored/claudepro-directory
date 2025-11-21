@@ -6,6 +6,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
+import { MetricsDisplay } from '@/src/components/features/analytics/metrics-display';
 import { Button } from '@/src/components/primitives/ui/button';
 import {
   Card,
@@ -17,7 +18,7 @@ import {
 import { getAuthenticatedUser } from '@/src/lib/auth/get-authenticated-user';
 import { getUserJobById } from '@/src/lib/data/account/user-data';
 import { ROUTES } from '@/src/lib/data/config/constants';
-import { ArrowLeft, BarChart, ExternalLink, Eye } from '@/src/lib/icons';
+import { ArrowLeft, ExternalLink } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import type { JobStatus } from '@/src/lib/ui-constants';
@@ -160,42 +161,31 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPageProps
         </CardContent>
       </Card>
 
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="font-medium text-sm">Total Views</CardTitle>
-            <Eye className={`${UI_CLASSES.ICON_SM} ${UI_CLASSES.ICON_NEUTRAL}`} />
-          </CardHeader>
-          <CardContent>
-            <div className="font-bold text-2xl">{viewCount.toLocaleString()}</div>
-            <p className={'text-muted-foreground text-xs'}>
-              Since {job.posted_at ? formatRelativeDate(job.posted_at) : 'creation'}
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="font-medium text-sm">Clicks</CardTitle>
-            <ExternalLink className={`${UI_CLASSES.ICON_SM} ${UI_CLASSES.ICON_NEUTRAL}`} />
-          </CardHeader>
-          <CardContent>
-            <div className="font-bold text-2xl">{clickCount.toLocaleString()}</div>
-            <p className={'text-muted-foreground text-xs'}>Applications started</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="font-medium text-sm">Click-Through Rate</CardTitle>
-            <BarChart className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="font-bold text-2xl">{ctr}%</div>
-            <p className={'text-muted-foreground text-xs'}>Of viewers clicked apply</p>
-          </CardContent>
-        </Card>
-      </div>
+      <MetricsDisplay
+        title="Performance Metrics"
+        description="Key metrics for your job listing"
+        metrics={[
+          {
+            label: 'Total Views',
+            value: viewCount.toLocaleString(),
+            change: `Since ${job.posted_at ? formatRelativeDate(job.posted_at) : 'creation'}`,
+            trend: viewCount > 0 ? 'up' : 'unchanged',
+          },
+          {
+            label: 'Clicks',
+            value: clickCount.toLocaleString(),
+            change: 'Applications started',
+            trend: clickCount > 0 ? 'up' : 'unchanged',
+          },
+          {
+            label: 'Click-Through Rate',
+            value: `${ctr}%`,
+            change: 'Of viewers clicked apply',
+            trend:
+              Number.parseFloat(ctr) > 5 ? 'up' : Number.parseFloat(ctr) > 0 ? 'unchanged' : 'down',
+          },
+        ]}
+      />
 
       <Card>
         <CardHeader>

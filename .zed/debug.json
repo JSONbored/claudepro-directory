@@ -1,11 +1,29 @@
 [
   {
-    "label": "Next.js: Debug Dev Server",
+    "label": "Next.js: Debug Dev Server (no generators)",
     "adapter": "JavaScript",
     "request": "launch",
     "type": "node",
     "runtimeExecutable": "node",
     "runtimeArgs": ["--inspect", "node_modules/.bin/next", "dev", "--turbopack"],
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "env": {
+      "NODE_ENV": "development"
+    },
+    "console": "integratedTerminal",
+    "internalConsoleOptions": "neverOpen",
+    "skipFiles": ["<node_internals>/**", "**/node_modules/**"]
+  },
+  {
+    "label": "Next.js: Debug Dev Server (with generators)",
+    "adapter": "JavaScript",
+    "request": "launch",
+    "type": "node",
+    "runtimeExecutable": "sh",
+    "runtimeArgs": [
+      "-c",
+      "pnpm turbo run generate:categories:exec generate:service-worker:exec --concurrency=2 && exec node --inspect node_modules/.bin/next dev --turbopack"
+    ],
     "cwd": "$ZED_WORKTREE_ROOT",
     "env": {
       "NODE_ENV": "development"

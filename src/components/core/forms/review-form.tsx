@@ -2,12 +2,11 @@
 
 import { useRouter } from 'next/navigation';
 import { useId, useState, useTransition } from 'react';
-import { Rating, RatingButton } from '@/src/components/primitives/feedback/rating';
+import { ReviewRatingInteractive } from '@/src/components/core/domain/reviews/review-rating-interactive';
 import { Button } from '@/src/components/primitives/ui/button';
 import { Label } from '@/src/components/primitives/ui/label';
 import { Textarea } from '@/src/components/primitives/ui/textarea';
 import { createReview, updateReview } from '@/src/lib/actions/content.actions';
-import { Star } from '@/src/lib/icons';
 import { MAX_REVIEW_LENGTH, type ReviewFormProps } from '@/src/lib/types/component.types';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { logClientWarning } from '@/src/lib/utils/error.utils';
@@ -108,24 +107,15 @@ export function ReviewForm({
         <Label htmlFor="rating" className="mb-2 block">
           Your Rating <span className="text-destructive">*</span>
         </Label>
-        <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1} mt-2`}>
-          <Rating
+        <div className="mt-2">
+          <ReviewRatingInteractive
             value={rating}
-            onValueChange={setRating}
-            readOnly={false}
-            className="gap-1"
-            aria-describedby={showRatingError ? ratingErrorId : undefined}
-            aria-invalid={showRatingError ? 'true' : undefined}
-          >
-            {Array.from({ length: 5 }, (_, i) => (
-              <RatingButton key={`star-${i + 1}`} size={20} icon={<Star />} />
-            ))}
-          </Rating>
-          {rating > 0 && (
-            <span className="ml-1 font-medium text-muted-foreground text-sm">
-              {rating.toFixed(1)}
-            </span>
-          )}
+            onChange={setRating}
+            size="md"
+            showValue={true}
+            {...(showRatingError ? { 'aria-describedby': ratingErrorId } : {})}
+            {...(showRatingError ? { 'aria-invalid': 'true' as const } : {})}
+          />
         </div>
         {rating === 0 && !showRatingError && (
           <p className="mt-1 text-muted-foreground text-xs">Click a star to rate</p>

@@ -83,12 +83,12 @@ export default async function CompaniesPage() {
     if (data) {
       companies = data.companies ?? [];
     } else {
-      logger.warn('CompaniesPage: getUserCompanies returned null', { userId: hashedUserId });
+      logger.warn('CompaniesPage: getUserCompanies returned null', { hashedUserId });
       hasError = true;
     }
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to fetch user companies');
-    logger.error('CompaniesPage: getUserCompanies threw', normalized, { userId: hashedUserId });
+    logger.error('CompaniesPage: getUserCompanies threw', normalized, { hashedUserId });
     hasError = true;
   }
 
@@ -113,7 +113,7 @@ export default async function CompaniesPage() {
   }
 
   if (companies.length === 0) {
-    logger.info('CompaniesPage: user has no companies', { userId: hashedUserId });
+    logger.info('CompaniesPage: user has no companies', { hashedUserId });
   }
 
   return (

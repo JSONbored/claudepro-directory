@@ -66,113 +66,122 @@ async function generateCategoryConfig() {
     script: 'generate-category-config',
   });
 
-  try {
-    // Load environment - only require SUPABASE_SERVICE_ROLE_KEY
-    // NEXT_PUBLIC_SUPABASE_URL has a fallback, so we don't require it
-    await ensureEnvVars(['SUPABASE_SERVICE_ROLE_KEY']);
+  // Load environment - only require SUPABASE_SERVICE_ROLE_KEY
+  // NEXT_PUBLIC_SUPABASE_URL has a fallback, so we don't require it
+  await ensureEnvVars(['SUPABASE_SERVICE_ROLE_KEY']);
 
-    // Use fallback Supabase URL if not set (matches next.config.mjs pattern)
-    // This allows builds to work even if NEXT_PUBLIC_SUPABASE_URL isn't set in Vercel
-    // but we still prefer the environment variable for flexibility
-    const SUPABASE_URL =
-      process.env['NEXT_PUBLIC_SUPABASE_URL'] || 'https://hgtjdifxfapoltfflowc.supabase.co';
-    const SUPABASE_SERVICE_ROLE_KEY = process.env['SUPABASE_SERVICE_ROLE_KEY'];
+  // Use fallback Supabase URL if not set (matches next.config.mjs pattern)
+  // This allows builds to work even if NEXT_PUBLIC_SUPABASE_URL isn't set in Vercel
+  // but we still prefer the environment variable for flexibility
+  const SUPABASE_URL =
+    process.env['NEXT_PUBLIC_SUPABASE_URL'] || 'https://hgtjdifxfapoltfflowc.supabase.co';
+  const SUPABASE_SERVICE_ROLE_KEY = process.env['SUPABASE_SERVICE_ROLE_KEY'];
 
-    if (!SUPABASE_SERVICE_ROLE_KEY) {
-      throw new Error('Missing required environment variable: SUPABASE_SERVICE_ROLE_KEY');
-    }
+  if (!SUPABASE_SERVICE_ROLE_KEY) {
+    throw new Error('Missing required environment variable: SUPABASE_SERVICE_ROLE_KEY');
+  }
 
-    if (!process.env['NEXT_PUBLIC_SUPABASE_URL']) {
-      logger.warn(
-        'NEXT_PUBLIC_SUPABASE_URL not set, using fallback URL. Set this in Vercel Project Settings for production builds.',
-        {
-          script: 'generate-category-config',
-          fallbackUrl: SUPABASE_URL,
-        }
-      );
-    }
+  if (!process.env['NEXT_PUBLIC_SUPABASE_URL']) {
+    logger.warn(
+      'NEXT_PUBLIC_SUPABASE_URL not set, using fallback URL. Set this in Vercel Project Settings for production builds.',
+      {
+        script: 'generate-category-config',
+        fallbackUrl: SUPABASE_URL,
+      }
+    );
+  }
 
-    // Fetch category configs from data-api edge function
-    logger.info('📥 Fetching category configs from data-api edge function...');
-    const edgeFunctionUrl = `${SUPABASE_URL}/functions/v1/data-api/content/category-configs`;
+  // Fetch category configs from data-api edge function
+  logger.info('📥 Fetching category configs from data-api edge function...');
+  const edgeFunctionUrl = `${SUPABASE_URL}/functions/v1/data-api/content/category-configs`;
 
-    const response = await fetch(edgeFunctionUrl, {
-      headers: {
-        Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
-      },
+  const response = await fetch(edgeFunctionUrl, {
+    headers: {
+      Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+    },
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text().catch(() => 'Unknown error');
+    throw new Error(
+      `Edge function request failed: ${response.status} ${response.statusText} - ${errorText}`
+    );
+  }
+
+  const data = await response.json();
+
+  if (!data || typeof data !== 'object') {
+    throw new Error('No category configs found in response');
+  }
+
+  const rawConfigs = data as unknown as Record<string, DatabaseConfigWithFeatures>;
+
+  // Derive category IDs from enum values in config objects (not JSON keys)
+  // This ensures we use the database enum values, not the raw JSON key naming
+  const categoryIds = Object.values(rawConfigs)
+    .map((dbConfig) => {
+      if (!dbConfig.category) {
+        throw new Error('Category config missing category ENUM value');
+      }
+      return dbConfig.category;
+    })
+    .sort(); // Sort for deterministic output
+
+  logger.info(`✅ Found ${categoryIds.length} categories: ${categoryIds.join(', ')}\n`, {
+    categoryCount: categoryIds.length,
+  });
+
+  // Generate content hash for change detection
+  const contentHash = computeHash(data);
+
+  if (!hasHashChanged('category-config', contentHash)) {
+    logger.info('✓ Category config unchanged (database data identical), skipping generation');
+    logger.info(`✅ Category config up-to-date (${Date.now() - startTime}ms)\n`, {
+      duration: `${Date.now() - startTime}ms`,
     });
+    return true;
+  }
 
-    if (!response.ok) {
-      const errorText = await response.text().catch(() => 'Unknown error');
-      throw new Error(
-        `Edge function request failed: ${response.status} ${response.statusText} - ${errorText}`
-      );
-    }
+  // Generate TypeScript file
+  logger.info('📝 Generating TypeScript config file...');
 
-    const data = await response.json();
+  // All strings now use JSON.stringify directly (no escapeString needed)
+  // JSON.stringify properly escapes all special characters including apostrophes
 
-    if (!data || typeof data !== 'object') {
-      throw new Error('No category configs found in response');
-    }
+  const configEntries = Object.entries(rawConfigs)
+    .map(([, dbConfig]) => {
+      // Use the category ENUM value as the key, not the numeric ID
+      const categoryKey = dbConfig.category;
+      if (!categoryKey) {
+        throw new Error('Category config missing category ENUM value');
+      }
 
-    const rawConfigs = data as unknown as Record<string, DatabaseConfigWithFeatures>;
-    const categoryIds = Object.keys(rawConfigs);
+      const features = dbConfig.features || {};
+      const generationConfig = (dbConfig.generation_config || {}) as {
+        buildConfig?: { batchSize?: number; cacheTTL?: number };
+      };
+      const apiSchema = (dbConfig.api_schema || {}) as {
+        apiConfig?: { maxItemsPerResponse?: number };
+      };
 
-    logger.info(`✅ Found ${categoryIds.length} categories: ${categoryIds.join(', ')}\n`, {
-      categoryCount: categoryIds.length,
-    });
-
-    // Generate content hash for change detection
-    const contentHash = computeHash(data);
-
-    if (!hasHashChanged('category-config', contentHash)) {
-      logger.info('✓ Category config unchanged (database data identical), skipping generation');
-      logger.info(`✅ Category config up-to-date (${Date.now() - startTime}ms)\n`, {
-        duration: `${Date.now() - startTime}ms`,
-      });
-      return true;
-    }
-
-    // Generate TypeScript file
-    logger.info('📝 Generating TypeScript config file...');
-
-    // All strings now use JSON.stringify directly (no escapeString needed)
-    // JSON.stringify properly escapes all special characters including apostrophes
-
-    const configEntries = Object.entries(rawConfigs)
-      .map(([, dbConfig]) => {
-        // Use the category ENUM value as the key, not the numeric ID
-        const categoryKey = dbConfig.category;
-        if (!categoryKey) {
-          throw new Error('Category config missing category ENUM value');
-        }
-
-        const features = dbConfig.features || {};
-        const generationConfig = (dbConfig.generation_config || {}) as {
-          buildConfig?: { batchSize?: number; cacheTTL?: number };
-        };
-        const apiSchema = (dbConfig.api_schema || {}) as {
-          apiConfig?: { maxItemsPerResponse?: number };
-        };
-
-        // Transform badges
-        const badges = Array.isArray(dbConfig.badges)
-          ? dbConfig.badges.map((badge: BadgeConfig) => {
-              if (typeof badge !== 'object' || !badge) return '{ text: "" }';
-              const hasDynamic = badge.hasDynamicCount && badge.text;
-              if (hasDynamic && badge.text) {
-                const template = badge.text.replace(/`/g, '\\`').replace(/\$/g, '\\$');
-                return badge.icon
-                  ? `{ icon: ${JSON.stringify(badge.icon)}, text: (count: number) => \`${template}\`.replace('{count}', String(count)) }`
-                  : `{ text: (count: number) => \`${template}\`.replace('{count}', String(count)) }`;
-              }
+      // Transform badges
+      const badges = Array.isArray(dbConfig.badges)
+        ? dbConfig.badges.map((badge: BadgeConfig) => {
+            if (typeof badge !== 'object' || !badge) return '{ text: "" }';
+            const hasDynamic = badge.hasDynamicCount && badge.text;
+            if (hasDynamic && badge.text) {
+              const template = badge.text.replace(/`/g, '\\`').replace(/\$/g, '\\$');
               return badge.icon
-                ? `{ icon: ${JSON.stringify(badge.icon)}, text: ${JSON.stringify(badge.text || '')} }`
-                : `{ text: ${JSON.stringify(badge.text || '')} }`;
-            })
-          : [];
+                ? `{ icon: ${JSON.stringify(badge.icon)}, text: (count: number) => \`${template}\`.replace('{count}', String(count)) }`
+                : `{ text: (count: number) => \`${template}\`.replace('{count}', String(count)) }`;
+            }
+            return badge.icon
+              ? `{ icon: ${JSON.stringify(badge.icon)}, text: ${JSON.stringify(badge.text || '')} }`
+              : `{ text: ${JSON.stringify(badge.text || '')} }`;
+          })
+        : [];
 
-        return `  ${JSON.stringify(categoryKey)}: {
+      return `  ${JSON.stringify(categoryKey)}: {
     id: ${JSON.stringify(categoryKey)} as const,
     title: ${JSON.stringify(dbConfig.title)},
     pluralTitle: ${JSON.stringify(dbConfig.plural_title)},
@@ -224,10 +233,10 @@ async function generateCategoryConfig() {
     urlSlug: ${JSON.stringify(dbConfig.url_slug)},
     contentLoader: ${JSON.stringify(dbConfig.content_loader)},
   }`;
-      })
-      .join(',\n');
+    })
+    .join(',\n');
 
-    const output = `/**
+  const output = `/**
  * AUTO-GENERATED FILE - DO NOT EDIT
  * Generated by scripts/build/generate-category-config.ts
  * Source: data-api edge function (/content/category-configs) via get_category_configs_with_features RPC
@@ -282,52 +291,48 @@ export const ALL_CATEGORY_IDS = ${JSON.stringify(categoryIds)} as const;
  * Homepage category IDs (filtered at build time)
  */
 export const HOMEPAGE_CATEGORY_IDS = ${JSON.stringify(
-      categoryIds.filter((id) => {
-        const config = rawConfigs[id];
-        return config && (config.features?.['show_on_homepage'] ?? true);
-      })
-    )} as const;
+    Object.values(rawConfigs)
+      .filter((dbConfig) => dbConfig.features?.['show_on_homepage'] ?? true)
+      .map((dbConfig) => dbConfig.category)
+      .sort()
+  )} as const;
 
 /**
  * Cacheable category IDs (excludes jobs and changelog)
  */
 export const CACHEABLE_CATEGORY_IDS = ${JSON.stringify(
-      categoryIds.filter((id) => id !== 'jobs' && id !== 'changelog')
-    )} as const;
+    Object.values(rawConfigs)
+      .filter((dbConfig) => {
+        const category = dbConfig.category;
+        return category && category !== 'jobs' && category !== 'changelog';
+      })
+      .map((dbConfig) => dbConfig.category)
+      .sort()
+  )} as const;
 `;
 
-    // Write output file
-    const outputDir = join(OUTPUT_FILE, '..');
-    if (!existsSync(outputDir)) {
-      mkdirSync(outputDir, { recursive: true });
-    }
-    writeFileSync(OUTPUT_FILE, output, 'utf-8');
-
-    const duration = Date.now() - startTime;
-
-    // Save hash for next build with metadata
-    setHash('category-config', contentHash, {
-      reason: 'Category config regenerated from database',
-      duration,
-      files: [OUTPUT_FILE],
-    });
-    logger.info(`✅ Category config generated in ${duration}ms`, { duration: `${duration}ms` });
-    logger.info(`📝 Output: ${OUTPUT_FILE}`, { outputFile: OUTPUT_FILE });
-    logger.info(`🎯 Categories: ${categoryIds.length} configs cached\n`, {
-      categoryCount: categoryIds.length,
-    });
-
-    return true;
-  } catch (err) {
-    logger.error(
-      '❌ Category config generation failed',
-      err instanceof Error ? err : new Error(String(err)),
-      {
-        script: 'generate-category-config',
-      }
-    );
-    throw err;
+  // Write output file
+  const outputDir = join(OUTPUT_FILE, '..');
+  if (!existsSync(outputDir)) {
+    mkdirSync(outputDir, { recursive: true });
   }
+  writeFileSync(OUTPUT_FILE, output, 'utf-8');
+
+  const duration = Date.now() - startTime;
+
+  // Save hash for next build with metadata
+  setHash('category-config', contentHash, {
+    reason: 'Category config regenerated from database',
+    duration,
+    files: [OUTPUT_FILE],
+  });
+  logger.info(`✅ Category config generated in ${duration}ms`, { duration: `${duration}ms` });
+  logger.info(`📝 Output: ${OUTPUT_FILE}`, { outputFile: OUTPUT_FILE });
+  logger.info(`🎯 Categories: ${categoryIds.length} configs cached\n`, {
+    categoryCount: categoryIds.length,
+  });
+
+  return true;
 }
 
 // Auto-run when executed directly

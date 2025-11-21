@@ -352,14 +352,6 @@ export interface ButtonStyleProps {
   disabled?: boolean;
 }
 
-export interface AsyncActionHelpers {
-  setLoading: (loading: boolean) => void;
-  setSuccess: (success: boolean) => void;
-  showError: (message: string, description?: string) => void;
-  showSuccess: (message: string, description?: string) => void;
-  logError: (message: string, error: Error, context?: Record<string, unknown>) => void;
-}
-
 // ============================================================================
 // Form Component Types
 // ============================================================================

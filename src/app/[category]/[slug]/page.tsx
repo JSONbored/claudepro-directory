@@ -24,6 +24,7 @@ import { getContentDetailComplete } from '@/src/lib/data/content/detail';
 // only when the page is actually rendered (runtime, not build-time).
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
+import { isBuildTime } from '@/src/lib/utils/build-time';
 import { ensureStringArray } from '@/src/lib/utils/data.utils';
 import { normalizeError } from '@/src/lib/utils/error.utils';
 import type { Database } from '@/src/types/database.types';
@@ -176,10 +177,27 @@ export default async function DetailPage({
   const copyCount = analytics?.copy_count || 0;
   const relatedItems = related || [];
 
-  // Feature flags are server/middleware only - use defaults for static generation
-  // Flags should be evaluated in middleware or server actions, not in page components
-  const tabsEnabled = false; // Default for static generation
-  const recentlyViewedEnabled = false; // Default for static generation
+  // Lazy-load feature flags at render-time (runtime, not build-time)
+  // Use defaults during static generation to avoid Edge Config access
+  let tabsEnabled = false;
+  let recentlyViewedEnabled = false;
+
+  if (!isBuildTime()) {
+    try {
+      // Lazy-load featureFlags only at runtime (not during build)
+      const { featureFlags } = await import('@/src/lib/flags');
+      tabsEnabled = await featureFlags.contentDetailTabs();
+      recentlyViewedEnabled = await featureFlags.recentlyViewed();
+    } catch (error) {
+      // Fallback to defaults on error (prevents page failure)
+      const normalized = normalizeError(error, 'Failed to load feature flags');
+      logger.warn('DetailPage: feature flags load failed, using defaults', {
+        category,
+        slug,
+        error: normalized.message,
+      });
+    }
+  }
 
   // No transformation needed - displayTitle computed at build time
   // This eliminates runtime overhead and follows DRY principles

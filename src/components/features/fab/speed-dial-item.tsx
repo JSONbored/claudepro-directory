@@ -17,6 +17,7 @@
 'use client';
 
 import { motion } from 'motion/react';
+import { NotificationBadge } from '@/src/components/features/notifications/notification-badge';
 import { logger } from '@/src/lib/logger';
 import type { SpeedDialAction } from '@/src/lib/types/component.types';
 
@@ -68,20 +69,9 @@ export function SpeedDialItem({
     >
       <Icon className="h-5 w-5" aria-hidden="true" />
 
-      {/* Badge indicator (notification count) */}
-      {badge !== undefined && badge > 0 && (
-        <motion.span
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{
-            type: 'spring',
-            stiffness: 500,
-            damping: 20,
-          }}
-          className="-right-1 -top-1 absolute flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-red-500 px-1 font-bold text-[10px] text-white shadow-md"
-        >
-          {badge > 99 ? '99+' : badge}
-        </motion.span>
+      {/* Badge indicator (notification count) - only show for notifications action */}
+      {badge !== undefined && badge > 0 && label === 'Notifications' && (
+        <NotificationBadge className="-right-1 -top-1 absolute" />
       )}
     </motion.button>
   );

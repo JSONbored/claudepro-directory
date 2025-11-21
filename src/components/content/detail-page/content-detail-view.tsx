@@ -8,7 +8,7 @@ import { TabbedDetailLayout } from '@/src/components/content/detail-tabs/tabbed-
 import { JSONSectionRenderer } from '@/src/components/content/json-to-sections';
 import UnifiedSection from '@/src/components/content/sections/unified-section';
 import { ReviewListSection } from '@/src/components/core/domain/reviews/review-list-section';
-import { NewsletterCTAVariant } from '@/src/components/features/growth/newsletter/newsletter-cta-variants';
+import { NewsletterScrollTrigger } from '@/src/components/features/growth/newsletter/newsletter-scroll-trigger';
 import { RecentlyViewedSidebar } from '@/src/components/features/navigation/recently-viewed-sidebar';
 import { getCategoryConfig, isValidCategory } from '@/src/lib/data/config/category';
 import { highlightCodeEdge, processContentEdge } from '@/src/lib/edge/client';
@@ -750,7 +750,7 @@ export async function UnifiedDetailPage({
         <DetailHeader displayTitle={displayTitle} item={item} config={config} />
         {viewCountPromise ? (
           <Suspense
-            fallback={<DetailMetadata item={item} viewCount={undefined} copyCount={undefined} />}
+            fallback={<DetailMetadata item={item} viewCount={undefined} copyCount={copyCount} />}
           >
             <ViewCountMetadata
               item={item}
@@ -771,9 +771,8 @@ export async function UnifiedDetailPage({
         />
 
         <div className="container mx-auto px-4 pb-8">
-          <NewsletterCTAVariant
+          <NewsletterScrollTrigger
             source="content_page"
-            variant="inline"
             {...(item.category ? { category: item.category } : {})}
           />
         </div>
@@ -789,7 +788,7 @@ export async function UnifiedDetailPage({
       {/* Metadata - Stream view count if promise provided */}
       {viewCountPromise ? (
         <Suspense
-          fallback={<DetailMetadata item={item} viewCount={undefined} copyCount={undefined} />}
+          fallback={<DetailMetadata item={item} viewCount={undefined} copyCount={copyCount} />}
         >
           <ViewCountMetadata
             item={item}
@@ -931,10 +930,9 @@ export async function UnifiedDetailPage({
               </div>
             )}
 
-            {/* Email CTA - Inline variant */}
-            <NewsletterCTAVariant
+            {/* Email CTA - Scroll-triggered variant for better engagement */}
+            <NewsletterScrollTrigger
               source="content_page"
-              variant="inline"
               {...(item.category ? { category: item.category } : {})}
             />
           </div>

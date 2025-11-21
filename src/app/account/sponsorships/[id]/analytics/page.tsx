@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
+import { MetricsDisplay } from '@/src/components/features/analytics/metrics-display';
 import { Button } from '@/src/components/primitives/ui/button';
 import {
   Card,
@@ -13,7 +14,6 @@ import {
 import { getAuthenticatedUser } from '@/src/lib/auth/get-authenticated-user';
 import { getSponsorshipAnalytics } from '@/src/lib/data/account/user-data';
 import { ROUTES } from '@/src/lib/data/config/constants';
-import { BarChart, Eye, MousePointer, TrendingUp } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { POSITION_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
@@ -130,63 +130,39 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
       </div>
 
       {/* Overview Stats */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm">Total Impressions</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-              <Eye className="h-5 w-5 text-primary" />
-              <span className="font-bold text-3xl">{impressionCount.toLocaleString()}</span>
-            </div>
-            {sponsorship.impression_limit && (
-              <p className="mt-2 text-muted-foreground text-xs">
-                of {sponsorship.impression_limit.toLocaleString()} limit
-              </p>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm">Total Clicks</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-              <MousePointer className="h-5 w-5 text-primary" />
-              <span className="font-bold text-3xl">{clickCount.toLocaleString()}</span>
-            </div>
-            <p className="mt-2 text-muted-foreground text-xs">User engagements</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm">Click-Through Rate</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-              <BarChart className="h-5 w-5 text-primary" />
-              <span className="font-bold text-3xl">{ctr}%</span>
-            </div>
-            <p className="mt-2 text-muted-foreground text-xs">Clicks / Impressions</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm">Avg. Daily Views</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-              <TrendingUp className="h-5 w-5 text-primary" />
-              <span className="font-bold text-3xl">{avgImpressionsPerDay}</span>
-            </div>
-            <p className="mt-2 text-muted-foreground text-xs">Over {daysActive} days</p>
-          </CardContent>
-        </Card>
-      </div>
+      <MetricsDisplay
+        title="Campaign Performance"
+        description="Key metrics for your sponsored content"
+        metrics={[
+          {
+            label: 'Total Impressions',
+            value: impressionCount.toLocaleString(),
+            ...(sponsorship.impression_limit
+              ? { change: `of ${sponsorship.impression_limit.toLocaleString()} limit` }
+              : {}),
+            trend: impressionCount > 0 ? 'up' : 'unchanged',
+          },
+          {
+            label: 'Total Clicks',
+            value: clickCount.toLocaleString(),
+            change: 'User engagements',
+            trend: clickCount > 0 ? 'up' : 'unchanged',
+          },
+          {
+            label: 'Click-Through Rate',
+            value: `${ctr}%`,
+            change: 'Clicks / Impressions',
+            trend:
+              Number.parseFloat(ctr) > 2 ? 'up' : Number.parseFloat(ctr) > 0 ? 'unchanged' : 'down',
+          },
+          {
+            label: 'Avg. Daily Views',
+            value: avgImpressionsPerDay,
+            change: `Over ${daysActive} days`,
+            trend: Number.parseFloat(avgImpressionsPerDay) > 0 ? 'up' : 'unchanged',
+          },
+        ]}
+      />
 
       {/* Campaign Details */}
       <Card>
