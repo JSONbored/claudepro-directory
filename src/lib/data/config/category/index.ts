@@ -83,7 +83,7 @@ export const getCategoryConfig = cache(
 
 /**
  * Check if category ID is valid (static)
- * Uses isContentCategory from database-overrides.ts as single source of truth
+ * Uses generated types directly from database.types.ts
  */
 export function isValidCategory(
   category: string | Database['public']['Enums']['content_category'] | null | undefined

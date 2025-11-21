@@ -9,7 +9,7 @@
 // NOTE: getCacheTtl is NOT imported at module level to prevent flags/next from being
 // evaluated in client component contexts. It's lazy-loaded inside functions that need it.
 import { logger } from '@/src/lib/logger';
-import type { Database } from '@/src/types/database-overrides';
+import type { Database } from '@/src/types/database.types';
 
 const EDGE_SEARCH_URL = `${process.env['NEXT_PUBLIC_SUPABASE_URL']}/functions/v1/unified-search`;
 

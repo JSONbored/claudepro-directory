@@ -83,6 +83,7 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
       security: true,
       troubleshooting: true,
       examples: true,
+      requirements: false,
     },
     metadata: {
       showGitHubLink: true,
@@ -93,6 +94,58 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
     },
     urlSlug: 'mcp',
     contentLoader: 'mcp',
+  },
+  hooks: {
+    id: 'hooks' as const,
+    title: 'Hook',
+    pluralTitle: 'Hooks',
+    description: 'Event-driven automation hooks that trigger during Claude Code operations.',
+    icon: ICON_MAP['Webhook'] || FileText,
+    colorScheme: 'green-500',
+    showOnHomepage: true,
+    keywords: 'Claude hooks, event hooks, automation, Claude Code hooks, git hooks',
+    metaDescription:
+      'Event-driven hooks for Claude Code. Automate workflows with pre-commit, post-merge, and custom event triggers to enhance development workflow and quality.',
+    typeName: 'Hook',
+    generateFullContent: true,
+    metadataFields: ['title', 'description', 'category', 'slug', 'created_at', 'updated_at'],
+    buildConfig: {
+      batchSize: 10,
+      enableCache: true,
+      cacheTTL: 300000,
+    },
+    apiConfig: {
+      generateStaticAPI: true,
+      includeTrending: true,
+      maxItemsPerResponse: 1000,
+    },
+    listPage: {
+      searchPlaceholder: 'Search hooks...',
+      badges: [{ text: (count: number) => '{count} items'.replace('{count}', String(count)) }],
+    },
+    detailPage: {
+      displayConfig: true,
+      configFormat: 'hook',
+    },
+    sections: {
+      features: true,
+      installation: true,
+      use_cases: true,
+      configuration: true,
+      security: false,
+      troubleshooting: true,
+      examples: false,
+      requirements: false,
+    },
+    metadata: {
+      showGitHubLink: true,
+    },
+    primaryAction: {
+      label: 'View on GitHub',
+      type: 'github_link',
+    },
+    urlSlug: 'hooks',
+    contentLoader: 'hooks',
   },
   skills: {
     id: 'skills' as const,
@@ -135,6 +188,7 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
       security: false,
       troubleshooting: true,
       examples: true,
+      requirements: false,
     },
     metadata: {
       showGitHubLink: true,
@@ -187,6 +241,7 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
       security: false,
       troubleshooting: true,
       examples: false,
+      requirements: false,
     },
     metadata: {
       showGitHubLink: true,
@@ -239,6 +294,7 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
       security: false,
       troubleshooting: false,
       examples: false,
+      requirements: false,
     },
     metadata: {
       showGitHubLink: true,
@@ -291,6 +347,7 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
       security: false,
       troubleshooting: false,
       examples: false,
+      requirements: false,
     },
     metadata: {
       showGitHubLink: true,
@@ -343,6 +400,7 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
       security: false,
       troubleshooting: false,
       examples: false,
+      requirements: false,
     },
     metadata: {
       showGitHubLink: true,
@@ -394,6 +452,7 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
       security: false,
       troubleshooting: true,
       examples: true,
+      requirements: false,
     },
     metadata: {
       showGitHubLink: true,
@@ -446,6 +505,7 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
       security: false,
       troubleshooting: true,
       examples: false,
+      requirements: false,
     },
     metadata: {
       showGitHubLink: true,
@@ -498,6 +558,7 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
       security: false,
       troubleshooting: true,
       examples: false,
+      requirements: false,
     },
     metadata: {
       showGitHubLink: true,
@@ -550,6 +611,7 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
       security: false,
       troubleshooting: false,
       examples: true,
+      requirements: false,
     },
     metadata: {
       showGitHubLink: true,
@@ -561,57 +623,6 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
     urlSlug: 'guides',
     contentLoader: 'guides',
   },
-  hooks: {
-    id: 'hooks' as const,
-    title: 'Hook',
-    pluralTitle: 'Hooks',
-    description: 'Event-driven automation hooks that trigger during Claude Code operations.',
-    icon: ICON_MAP['Webhook'] || FileText,
-    colorScheme: 'green-500',
-    showOnHomepage: true,
-    keywords: 'Claude hooks, event hooks, automation, Claude Code hooks, git hooks',
-    metaDescription:
-      'Event-driven hooks for Claude Code. Automate workflows with pre-commit, post-merge, and custom event triggers to enhance development workflow and quality.',
-    typeName: 'Hook',
-    generateFullContent: true,
-    metadataFields: ['title', 'description', 'category', 'slug', 'created_at', 'updated_at'],
-    buildConfig: {
-      batchSize: 10,
-      enableCache: true,
-      cacheTTL: 300000,
-    },
-    apiConfig: {
-      generateStaticAPI: true,
-      includeTrending: true,
-      maxItemsPerResponse: 1000,
-    },
-    listPage: {
-      searchPlaceholder: 'Search hooks...',
-      badges: [{ text: (count: number) => '{count} items'.replace('{count}', String(count)) }],
-    },
-    detailPage: {
-      displayConfig: true,
-      configFormat: 'hook',
-    },
-    sections: {
-      features: true,
-      installation: true,
-      use_cases: true,
-      configuration: true,
-      security: false,
-      troubleshooting: true,
-      examples: false,
-    },
-    metadata: {
-      showGitHubLink: true,
-    },
-    primaryAction: {
-      label: 'View on GitHub',
-      type: 'github_link',
-    },
-    urlSlug: 'hooks',
-    contentLoader: 'hooks',
-  },
 };
 
 /**
@@ -622,7 +633,7 @@ export const ALL_CATEGORY_IDS = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9
 /**
  * Homepage category IDs (filtered at build time)
  */
-export const HOMEPAGE_CATEGORY_IDS = ['0', '1', '2', '5', '6', '7', '8', '10'] as const;
+export const HOMEPAGE_CATEGORY_IDS = ['0', '1', '2', '3', '6', '7', '8', '9'] as const;
 
 /**
  * Cacheable category IDs (excludes jobs and changelog)

@@ -23,7 +23,7 @@ import { usePulse } from '@/src/hooks/use-pulse';
 import { Award, ExternalLink, Users } from '@/src/lib/icons';
 import { BADGE_COLORS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { logUnhandledPromise } from '@/src/lib/utils/error.utils';
-import type { Tables } from '@/src/types/database.types';
+import type { Database } from '@/src/types/database.types';
 
 /**
  * Validate and sanitize external URL for safe use in window.open
@@ -61,7 +61,7 @@ function getSafeExternalUrl(url: string | null | undefined): string | null {
  * Supports both full user records and simplified user objects from RPCs
  */
 export type UserProfile = (
-  | Tables<'users'>
+  | Database['public']['Tables']['users']['Row']
   | {
       id: string;
       slug: string;

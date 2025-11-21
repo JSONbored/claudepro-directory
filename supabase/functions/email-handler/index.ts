@@ -839,7 +839,7 @@ async function handleDigest(): Promise<Response> {
     environment: 'production',
     enabled: true,
     description: 'Timestamp of last successful weekly digest email send (used for rate limiting)',
-    category: 'email',
+    category: 'config',
     version: 1,
   };
   await supabaseServiceRole.from('app_settings').upsert(upsertData);

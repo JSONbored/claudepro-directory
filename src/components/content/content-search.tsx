@@ -18,7 +18,7 @@ const UnifiedSearch = dynamic(
   }
 );
 
-import { searchUnifiedClient } from '@/src/lib/edge/search-client';
+import { searchUnifiedClient, type UnifiedSearchFilters } from '@/src/lib/edge/search-client';
 import { HelpCircle } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import type {
@@ -54,13 +54,48 @@ function ContentSearchClientComponent<T extends DisplayableContent>({
       }
 
       try {
+        // Build filters object: merge filters state with category prop
+        // Use UnifiedSearchFilters type for proper type safety
+        const searchFilters: UnifiedSearchFilters = {
+          limit: 100,
+        };
+
+        // Categories: prefer filters.category, fallback to category prop
+        if (filters.category) {
+          searchFilters.categories = [filters.category];
+        } else if (category) {
+          searchFilters.categories = [category];
+        }
+
+        // Tags from filters state
+        if (filters.tags && filters.tags.length > 0) {
+          searchFilters.tags = filters.tags;
+        }
+
+        // Authors from filters state (convert singular to array)
+        if (filters.author) {
+          searchFilters.authors = [filters.author];
+        }
+
+        // Sort from filters state - convert ENUM to string union type
+        if (filters.sort) {
+          // Map sort_option ENUM to UnifiedSearchFilters sort type
+          const sortMap: Record<string, 'relevance' | 'popularity' | 'newest' | 'alphabetical'> = {
+            relevance: 'relevance',
+            popularity: 'popularity',
+            newest: 'newest',
+            alphabetical: 'alphabetical',
+          };
+          const mappedSort = sortMap[filters.sort];
+          if (mappedSort) {
+            searchFilters.sort = mappedSort;
+          }
+        }
+
         const result = await searchUnifiedClient({
           query: query.trim(),
           entities: ['content'],
-          filters: {
-            limit: 100,
-            ...(category ? { categories: [category] } : {}),
-          },
+          filters: searchFilters,
         });
 
         setSearchResults(result.results as T[]);
@@ -69,7 +104,7 @@ function ContentSearchClientComponent<T extends DisplayableContent>({
         setSearchResults(items);
       }
     },
-    [items, category]
+    [items, category, filters]
   );
 
   const handleFiltersChange = useCallback((newFilters: FilterState) => {
@@ -82,6 +117,22 @@ function ContentSearchClientComponent<T extends DisplayableContent>({
       setSearchResults(items);
     }
   }, [items, searchQuery]);
+
+  // Re-run search when filters change (if there's an active search query)
+  // Note: searchQuery changes are handled by the direct onSearch callback,
+  // but we need to include handleSearch and searchQuery in deps for exhaustive-deps compliance
+  // handleSearch already depends on filters, so when filters change, handleSearch is recreated
+  useEffect(() => {
+    if (searchQuery.trim()) {
+      // Fire-and-forget: handleSearch has its own error handling
+      handleSearch(searchQuery).catch((error) => {
+        // Error is already logged in handleSearch, but we catch to prevent unhandled promise rejection
+        logger.error('Content search effect failed', error as Error, {
+          source: 'ContentSearchClient',
+        });
+      });
+    }
+  }, [handleSearch, searchQuery]);
 
   const filteredItems = searchResults;
 

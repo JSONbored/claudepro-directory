@@ -10,11 +10,11 @@
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { getSocialLinks } from '@/src/lib/data/marketing/contact';
 import { Calendar, Copy, Eye, Tag, User } from '@/src/lib/icons';
+import type { ContentItem } from '@/src/lib/types/component.types';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { formatCopyCount, formatViewCount } from '@/src/lib/utils/content.utils';
 import { ensureStringArray, formatDate } from '@/src/lib/utils/data.utils';
 import type { Database } from '@/src/types/database.types';
-import type { ContentItem } from '@/src/types/database-overrides';
 
 export interface DetailMetadataProps {
   item:

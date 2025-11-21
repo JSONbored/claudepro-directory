@@ -3,9 +3,8 @@
  */
 
 import { isValidCategory } from '@/src/lib/data/config/category';
-import type { UnifiedCategoryConfig } from '@/src/lib/types/component.types';
+import type { ContentItem, UnifiedCategoryConfig } from '@/src/lib/types/component.types';
 import type { Database } from '@/src/types/database.types';
-import type { ContentItem } from '@/src/types/database-overrides';
 import { DetailHeaderActions, type SerializableAction } from './detail-header-actions';
 
 export interface DetailHeaderProps {

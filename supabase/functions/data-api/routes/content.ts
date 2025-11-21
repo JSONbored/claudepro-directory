@@ -173,123 +173,17 @@ async function handleSitewideReadme(logContext?: BaseLogContext): Promise<Respon
     );
   }
 
-  // Validate data structure before using
-  if (!data || typeof data !== 'object' || !('categories' in data)) {
-    return jsonResponse(
-      { error: 'README generation failed', message: 'Invalid data structure' },
-      500,
-      CORS
-    );
-  }
-
-  // Validate data structure without type assertion
-  if (
-    typeof data !== 'object' ||
-    data === null ||
-    !('categories' in data) ||
-    !('totalCount' in data) ||
-    !('categoryBreakdown' in data)
-  ) {
-    return jsonResponse(
-      { error: 'README generation failed', message: 'Invalid data structure' },
-      500,
-      CORS
-    );
-  }
-
-  // Safely extract properties using Object.getOwnPropertyDescriptor
-  const getProperty = (obj: unknown, key: string): unknown => {
-    if (typeof obj !== 'object' || obj === null) {
-      return undefined;
-    }
-    const desc = Object.getOwnPropertyDescriptor(obj, key);
-    return desc?.value;
-  };
-
-  const categories = getProperty(data, 'categories');
-  const totalCount = getProperty(data, 'totalCount');
-  const categoryBreakdown = getProperty(data, 'categoryBreakdown');
-
-  // Validate categoryBreakdown structure
-  const isValidRecord = (obj: unknown): obj is Record<string, number> => {
-    if (typeof obj !== 'object' || obj === null) return false;
-    for (const key in obj) {
-      if (typeof key !== 'string') return false;
-      const desc = Object.getOwnPropertyDescriptor(obj, key);
-      if (!desc || typeof desc.value !== 'number') return false;
-    }
-    return true;
-  };
-
-  if (
-    !Array.isArray(categories) ||
-    typeof totalCount !== 'number' ||
-    !isValidRecord(categoryBreakdown)
-  ) {
-    return jsonResponse(
-      { error: 'README generation failed', message: 'Invalid data structure' },
-      500,
-      CORS
-    );
-  }
-
-  // Validate categories array structure
-  const isValidCategoryArray = (
-    arr: unknown
-  ): arr is Array<{
-    category: string;
-    title: string;
-    description: string;
-    icon_name: string;
-    url_slug: string;
-    items: Array<{
-      slug: string;
-      title: string;
-      description: string;
-    }>;
-  }> => {
-    if (!Array.isArray(arr)) return false;
-    for (const item of arr) {
-      if (
-        typeof item !== 'object' ||
-        item === null ||
-        !('category' in item) ||
-        !('title' in item) ||
-        !('description' in item) ||
-        !('icon_name' in item) ||
-        !('url_slug' in item) ||
-        !('items' in item) ||
-        !Array.isArray(item.items)
-      ) {
-        return false;
-      }
-    }
-    return true;
-  };
-
-  if (!isValidCategoryArray(categories)) {
-    return jsonResponse(
-      { error: 'README generation failed', message: 'Invalid categories structure' },
-      500,
-      CORS
-    );
-  }
-
-  // Use validated data - TypeScript will infer types from runtime checks
-  // The data has been validated above, so we can safely use it
-  // buildReadmeMarkdown expects a specific shape, which we've validated
-  const readmeData: Parameters<typeof buildReadmeMarkdown>[0] = {
-    categories,
-    totalCount,
-    categoryBreakdown,
-  };
+  // Use generated composite type directly - Supabase RPC automatically converts composite types to JSON
+  // Field names are snake_case as defined in the composite type
+  const readmeData =
+    data as DatabaseGenerated['public']['Functions']['generate_readme_data']['Returns'];
   const markdown = buildReadmeMarkdown(readmeData);
 
   if (logContext) {
     logInfo('Sitewide readme generated', {
       ...logContext,
       bytes: markdown.length,
-      categories: Array.isArray(readmeData.categories) ? readmeData.categories.length : 0,
+      categories: readmeData.categories?.length ?? 0,
     });
   }
 

@@ -14,12 +14,44 @@ import { Separator } from '@/src/components/primitives/ui/separator';
 import { getQuizConfiguration } from '@/src/lib/actions/quiz.actions';
 import { generateConfigRecommendations } from '@/src/lib/edge/client';
 import type { Database } from '@/src/types/database.types';
-import {
-  EXPERIENCE_LEVEL_VALUES,
-  FOCUS_AREA_TYPE_VALUES,
-  INTEGRATION_TYPE_VALUES,
-  USE_CASE_TYPE_VALUES,
-} from '@/src/types/database-overrides';
+
+// Enum values for validation - using direct enum access from database.types.ts
+const EXPERIENCE_LEVEL_VALUES: readonly Database['public']['Enums']['experience_level'][] = [
+  'beginner',
+  'intermediate',
+  'advanced',
+] as const;
+
+const FOCUS_AREA_TYPE_VALUES: readonly Database['public']['Enums']['focus_area_type'][] = [
+  'security',
+  'performance',
+  'documentation',
+  'testing',
+  'code-quality',
+  'automation',
+] as const;
+
+const INTEGRATION_TYPE_VALUES: readonly Database['public']['Enums']['integration_type'][] = [
+  'github',
+  'database',
+  'cloud-aws',
+  'cloud-gcp',
+  'cloud-azure',
+  'communication',
+  'none',
+] as const;
+
+const USE_CASE_TYPE_VALUES: readonly Database['public']['Enums']['use_case_type'][] = [
+  'code-review',
+  'api-development',
+  'frontend-development',
+  'data-science',
+  'content-creation',
+  'devops-infrastructure',
+  'general-development',
+  'testing-qa',
+  'security-audit',
+] as const;
 
 // Use generated type directly from database.types.ts
 type QuizConfigurationResult = Database['public']['Functions']['get_quiz_configuration']['Returns'];

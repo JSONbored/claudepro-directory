@@ -14,8 +14,9 @@ interface StructuredDataProps {
 export async function StructuredData({ route }: StructuredDataProps) {
   const seoData = await getSEOMetadataWithSchemas(route);
 
-  // Handle discriminated union: check if schemas exist
-  if (!(seoData && 'schemas' in seoData && seoData.schemas) || seoData.schemas.length === 0) {
+  // getSEOMetadataWithSchemas() now always returns unified structure with schemas array
+  // Check if schemas array has any items
+  if (!seoData?.schemas || seoData.schemas.length === 0) {
     return null;
   }
 

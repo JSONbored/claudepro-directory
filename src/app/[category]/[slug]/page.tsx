@@ -26,7 +26,7 @@ import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { ensureStringArray } from '@/src/lib/utils/data.utils';
 import { normalizeError } from '@/src/lib/utils/error.utils';
-import type { Database, Tables } from '@/src/types/database.types';
+import type { Database } from '@/src/types/database.types';
 
 export const revalidate = false; // Static generation - zero database egress during serving
 
@@ -157,8 +157,8 @@ export default async function DetailPage({
   }
 
   // detailData.content is Json | null, but we know it's a content table row
-  // Cast it to Tables<'content'> for type safety
-  const fullItem = detailData.content as Tables<'content'> | null;
+  // Use generated type directly (tags/features/use_cases are already text[] in database)
+  const fullItem = detailData.content as Database['public']['Tables']['content']['Row'] | null;
   const { analytics, related } = detailData;
 
   // Null safety: If content doesn't exist in database, return 404

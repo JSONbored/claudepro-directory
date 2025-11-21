@@ -21,7 +21,7 @@ import type { JobStatus } from '@/src/lib/ui-constants';
 import { BADGE_COLORS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { formatRelativeDate } from '@/src/lib/utils/data.utils';
 import { normalizeError } from '@/src/lib/utils/error.utils';
-import type { Database, Tables } from '@/src/types/database.types';
+import type { Database } from '@/src/types/database.types';
 
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/account/jobs');
@@ -84,17 +84,17 @@ export default async function MyJobsPage() {
     );
   }
 
-  // Validate and convert jobs from Json to Tables<'jobs'>[]
+  // Validate and convert jobs from Json to jobs table rows
   // The RPC returns jobs as Json | null, so we need runtime validation
-  const jobs: Array<Tables<'jobs'>> = (() => {
+  const jobs: Array<Database['public']['Tables']['jobs']['Row']> = (() => {
     const jobsData = data?.jobs;
     if (!(jobsData && Array.isArray(jobsData))) {
       return [];
     }
 
     return jobsData
-      .filter((item): item is Tables<'jobs'> => {
-        // Validate required fields for Tables<'jobs'>
+      .filter((item): item is Database['public']['Tables']['jobs']['Row'] => {
+        // Validate required fields for jobs table row
         // Use bracket notation for index signature properties
         return (
           item !== null &&
@@ -118,7 +118,7 @@ export default async function MyJobsPage() {
           'type' in item
         );
       })
-      .map((item) => item as Tables<'jobs'>);
+      .map((item) => item as Database['public']['Tables']['jobs']['Row']);
   })();
 
   if (jobs.length === 0) {

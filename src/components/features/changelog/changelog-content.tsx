@@ -22,9 +22,9 @@ import { memo } from 'react';
 import { JSONSectionRenderer } from '@/src/components/content/json-to-sections';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { parseChangelogChanges } from '@/src/lib/data/changelog';
-import type { Database, Tables } from '@/src/types/database.types';
+import type { Database } from '@/src/types/database.types';
 
-type ChangelogEntry = Tables<'changelog'>;
+type ChangelogEntry = Database['public']['Tables']['changelog']['Row'];
 type ContentRow = Database['public']['Tables']['content']['Row'];
 type GuideSection = ContentRow['metadata'];
 

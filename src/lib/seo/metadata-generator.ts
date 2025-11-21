@@ -68,36 +68,9 @@ export async function generatePageMetadata(
     };
   }
 
-  // Handle discriminated union: metadata-only case
-  // Runtime validation ensures structure matches expected type
-  const hasMetadata =
-    seoData &&
-    typeof seoData === 'object' &&
-    'metadata' in seoData &&
-    seoData['metadata'] &&
-    typeof seoData['metadata'] === 'object';
-
-  const config = hasMetadata
-    ? (seoData['metadata'] as {
-        title: string;
-        description: string;
-        keywords: string[];
-        openGraphType: 'profile' | 'website';
-        robots: {
-          index: boolean;
-          follow: boolean;
-        };
-      })
-    : (seoData as {
-        title: string;
-        description: string;
-        keywords: string[];
-        openGraphType: 'profile' | 'website';
-        robots: {
-          index: boolean;
-          follow: boolean;
-        };
-      });
+  // getSEOMetadata() now always returns the unwrapped metadata object (no discriminated union)
+  // The function handles the unified structure internally
+  const config = seoData;
 
   if (!config || typeof config !== 'object') {
     // Fallback if structure is invalid

@@ -84,6 +84,7 @@ export const CATEGORY_CONFIGS: Record<
       security: true,
       troubleshooting: true,
       examples: true,
+      requirements: false,
     },
     metadata: {
       showGitHubLink: true,
@@ -136,6 +137,7 @@ export const CATEGORY_CONFIGS: Record<
       security: false,
       troubleshooting: false,
       examples: false,
+      requirements: false,
     },
     metadata: {
       showGitHubLink: true,
@@ -187,6 +189,7 @@ export const CATEGORY_CONFIGS: Record<
       security: false,
       troubleshooting: true,
       examples: false,
+      requirements: false,
     },
     metadata: {
       showGitHubLink: true,
@@ -238,6 +241,7 @@ export const CATEGORY_CONFIGS: Record<
       security: false,
       troubleshooting: true,
       examples: true,
+      requirements: false,
     },
     metadata: {
       showGitHubLink: true,
@@ -290,6 +294,7 @@ export const CATEGORY_CONFIGS: Record<
       security: false,
       troubleshooting: true,
       examples: false,
+      requirements: false,
     },
     metadata: {
       showGitHubLink: true,
@@ -342,6 +347,7 @@ export const CATEGORY_CONFIGS: Record<
       security: false,
       troubleshooting: false,
       examples: true,
+      requirements: false,
     },
     metadata: {
       showGitHubLink: true,
@@ -394,6 +400,7 @@ export const CATEGORY_CONFIGS: Record<
       security: false,
       troubleshooting: true,
       examples: true,
+      requirements: false,
     },
     metadata: {
       showGitHubLink: true,
@@ -446,6 +453,7 @@ export const CATEGORY_CONFIGS: Record<
       security: false,
       troubleshooting: true,
       examples: false,
+      requirements: false,
     },
     metadata: {
       showGitHubLink: true,
@@ -498,6 +506,7 @@ export const CATEGORY_CONFIGS: Record<
       security: false,
       troubleshooting: false,
       examples: false,
+      requirements: false,
     },
     metadata: {
       showGitHubLink: true,
@@ -550,6 +559,7 @@ export const CATEGORY_CONFIGS: Record<
       security: false,
       troubleshooting: false,
       examples: false,
+      requirements: false,
     },
     metadata: {
       showGitHubLink: true,
@@ -602,6 +612,7 @@ export const CATEGORY_CONFIGS: Record<
       security: false,
       troubleshooting: true,
       examples: false,
+      requirements: false,
     },
     metadata: {
       showGitHubLink: true,

@@ -83,11 +83,11 @@ import { useCopyToClipboard } from '@/src/hooks/use-copy-to-clipboard';
 import { useCopyWithEmailCapture } from '@/src/hooks/use-copy-with-email-capture';
 import { usePulse } from '@/src/hooks/use-pulse';
 import { ArrowLeft, Check, Copy, Download, FileText, Sparkles } from '@/src/lib/icons';
+import type { ContentItem, CopyType } from '@/src/lib/types/component.types';
 import { STATE_PATTERNS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { logUnhandledPromise } from '@/src/lib/utils/error.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
 import type { Database } from '@/src/types/database.types';
-import type { ContentItem, CopyType } from '@/src/types/database-overrides';
 
 /**
  * Determine copy type based on content item structure

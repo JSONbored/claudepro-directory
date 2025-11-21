@@ -1,10 +1,15 @@
 'use server';
 
 import { fetchCachedRpc } from '@/src/lib/data/helpers';
-import type { Tables } from '@/src/types/database.types';
+import type { Database } from '@/src/types/database.types';
 
-export async function getActiveAnnouncement(): Promise<Tables<'announcements'> | null> {
-  return fetchCachedRpc<'get_active_announcement', Tables<'announcements'> | null>(
+export async function getActiveAnnouncement(): Promise<
+  Database['public']['Tables']['announcements']['Row'] | null
+> {
+  return fetchCachedRpc<
+    'get_active_announcement',
+    Database['public']['Tables']['announcements']['Row'] | null
+  >(
     {},
     {
       rpcName: 'get_active_announcement',

@@ -46,11 +46,6 @@ function filterUnusedTypes() {
         return true;
       }
 
-      // Include if it's a type definition in database-overrides.ts
-      if (line.includes('database-overrides.ts') && !line.includes('(used in module)')) {
-        return true;
-      }
-
       return false;
     });
 

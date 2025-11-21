@@ -20,9 +20,9 @@ import {
 } from '@/src/lib/actions/notifications.actions';
 import { logger } from '@/src/lib/logger';
 import { normalizeError } from '@/src/lib/utils/error.utils';
-import type { Tables } from '@/src/types/database.types';
+import type { Database } from '@/src/types/database.types';
 
-type NotificationRecord = Tables<'notifications'>;
+type NotificationRecord = Database['public']['Tables']['notifications']['Row'];
 
 interface NotificationFeatureFlags {
   enableNotifications: boolean;

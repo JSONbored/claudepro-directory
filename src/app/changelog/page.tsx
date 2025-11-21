@@ -44,7 +44,7 @@ import { ArrowLeft } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
-import type { Tables } from '@/src/types/database-overrides';
+import type { Database } from '@/src/types/database.types';
 
 /**
  * Generate metadata for changelog list page
@@ -95,30 +95,34 @@ export default async function ChangelogPage() {
       offset: 0,
     });
 
-    // Normalize entries: null heavy fields and default required fields
-    // publishedOnly: true ensures only published entries, so no additional filter needed
-    const normalizeChangelogEntry = (entry: NonNullable<typeof overview.entries>[number]) => ({
-      ...entry,
-      canonical_url: null,
-      commit_count: null,
-      contributors: null,
-      git_commit_sha: null,
-      json_ld: null,
-      og_image: null,
-      og_type: null,
-      robots_follow: null,
-      robots_index: null,
-      source: null,
-      twitter_card: null,
-      content: entry.content ?? '',
-      changes: entry.changes ?? {},
-      created_at: entry.created_at ?? '',
-      updated_at: entry.updated_at ?? '',
-    });
+    // Normalize entries: ensure contributors and keywords are arrays (never null)
+    // changelog_overview_entry has keywords but not contributors, so we default contributors to []
+    const publishedEntries = (overview.entries ?? []).map((entry) => {
+      // keywords is already text[] in database (may be null in overview)
+      // contributors is not in changelog_overview_entry, so default to []
+      const keywords = Array.isArray(entry.keywords) ? entry.keywords : [];
+      const contributors: string[] = [];
 
-    const publishedEntries = (overview.entries ?? []).map(
-      normalizeChangelogEntry
-    ) as Tables<'changelog'>[];
+      return {
+        ...entry,
+        canonical_url: null,
+        commit_count: null,
+        contributors,
+        git_commit_sha: null,
+        json_ld: null,
+        keywords,
+        og_image: null,
+        og_type: null,
+        robots_follow: null,
+        robots_index: null,
+        source: null,
+        twitter_card: null,
+        content: entry.content ?? '',
+        changes: entry.changes ?? {},
+        created_at: entry.created_at ?? '',
+        updated_at: entry.updated_at ?? '',
+      } as Database['public']['Tables']['changelog']['Row'];
+    });
 
     // Get category counts from metadata (database-calculated, not client-side)
     // Cast category_counts from Json to Record<string, number>

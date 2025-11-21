@@ -16,7 +16,7 @@ import { logger } from '@/src/lib/logger';
 import { DIMENSIONS } from '@/src/lib/ui-constants';
 import { logClientWarning, normalizeError } from '@/src/lib/utils/error.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
-import type { Database, Tables } from '@/src/types/database.types';
+import type { Database } from '@/src/types/database.types';
 
 const Footer = dynamic(
   () => import('@/src/components/core/layout/footer').then((mod) => ({ default: mod.Footer })),
@@ -96,7 +96,7 @@ async function clearNewsletterOptInCookie() {
 
 interface LayoutContentProps {
   children: React.ReactNode;
-  announcement: Tables<'announcements'> | null;
+  announcement: Database['public']['Tables']['announcements']['Row'] | null;
   navigationData: Database['public']['Functions']['get_navigation_menu']['Returns'];
   useFloatingActionBar?: boolean;
   fabFlags: {

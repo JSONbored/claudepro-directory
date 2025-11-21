@@ -22,14 +22,76 @@ import { logger } from '@/src/lib/logger';
 import { normalizeError } from '@/src/lib/utils/error.utils';
 import { enqueuePulseEventServer } from '@/src/lib/utils/pulse';
 import type { Database, Json } from '@/src/types/database.types';
-import {
-  CONTACT_ACTION_TYPE_VALUES,
-  EXPERIENCE_LEVEL_VALUES,
-  FOCUS_AREA_TYPE_VALUES,
-  INTEGRATION_TYPE_VALUES,
-  INTERACTION_TYPE_VALUES,
-  USE_CASE_TYPE_VALUES,
-} from '@/src/types/database-overrides';
+
+// Enum values for validation - using direct enum access from database.types.ts
+const EXPERIENCE_LEVEL_VALUES: readonly Database['public']['Enums']['experience_level'][] = [
+  'beginner',
+  'intermediate',
+  'advanced',
+] as const;
+
+const FOCUS_AREA_TYPE_VALUES: readonly Database['public']['Enums']['focus_area_type'][] = [
+  'security',
+  'performance',
+  'documentation',
+  'testing',
+  'code-quality',
+  'automation',
+] as const;
+
+const INTEGRATION_TYPE_VALUES: readonly Database['public']['Enums']['integration_type'][] = [
+  'github',
+  'database',
+  'cloud-aws',
+  'cloud-gcp',
+  'cloud-azure',
+  'communication',
+  'none',
+] as const;
+
+const INTERACTION_TYPE_VALUES: readonly Database['public']['Enums']['interaction_type'][] = [
+  'view',
+  'copy',
+  'bookmark',
+  'click',
+  'time_spent',
+  'search',
+  'filter',
+  'screenshot',
+  'share',
+  'download',
+  'pwa_installed',
+  'pwa_launched',
+  'newsletter_subscribe',
+  'contact_interact',
+  'contact_submit',
+  'form_started',
+  'form_step_completed',
+  'form_field_focused',
+  'form_template_selected',
+  'form_abandoned',
+  'form_submitted',
+] as const;
+
+const USE_CASE_TYPE_VALUES: readonly Database['public']['Enums']['use_case_type'][] = [
+  'code-review',
+  'api-development',
+  'frontend-development',
+  'data-science',
+  'content-creation',
+  'devops-infrastructure',
+  'general-development',
+  'testing-qa',
+  'security-audit',
+] as const;
+
+const CONTACT_ACTION_TYPE_VALUES: readonly Database['public']['Enums']['contact_action_type'][] = [
+  'internal',
+  'external',
+  'route',
+  'sheet',
+  'easter-egg',
+] as const;
 
 const CONTACT_CATEGORY_VALUES = [
   'bug',

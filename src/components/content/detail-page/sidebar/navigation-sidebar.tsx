@@ -16,13 +16,13 @@ import { isValidCategory } from '@/src/lib/data/config/category';
 import { getSocialLinks } from '@/src/lib/data/marketing/contact';
 import { ExternalLink, Github, Thermometer } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
+import type { ContentItem } from '@/src/lib/types/component.types';
 import { BADGE_COLORS, type CategoryType, UI_CLASSES } from '@/src/lib/ui-constants';
 import { getDisplayTitle } from '@/src/lib/utils';
 import { getContentItemUrl, sanitizeSlug } from '@/src/lib/utils/content.utils';
 import { ensureStringArray, getMetadata } from '@/src/lib/utils/data.utils';
 import { logUnhandledPromise } from '@/src/lib/utils/error.utils';
 import type { Database } from '@/src/types/database.types';
-import type { ContentItem } from '@/src/types/database-overrides';
 
 /**
  * Validate slug is safe for use in URLs

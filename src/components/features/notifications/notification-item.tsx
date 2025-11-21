@@ -10,9 +10,9 @@ import { Button } from '@/src/components/primitives/ui/button';
 import { useNotificationsContext } from '@/src/components/providers/notifications-provider';
 import { Bell, X } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
-import type { Tables } from '@/src/types/database.types';
+import type { Database } from '@/src/types/database.types';
 
-type NotificationRecord = Tables<'notifications'>;
+type NotificationRecord = Database['public']['Tables']['notifications']['Row'];
 
 interface NotificationItemProps {
   notification: NotificationRecord;

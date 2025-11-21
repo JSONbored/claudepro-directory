@@ -18,7 +18,7 @@ import {
   X,
 } from '@/src/lib/icons';
 import { ANIMATION_CONSTANTS, DIMENSIONS, UI_CLASSES } from '@/src/lib/ui-constants';
-import type { Tables } from '@/src/types/database.types';
+import type { Database } from '@/src/types/database.types';
 
 /**
  * Icon mapping for announcements
@@ -36,7 +36,7 @@ const ICON_MAP = {
 type IconName = keyof typeof ICON_MAP;
 
 interface AnnouncementBannerClientProps {
-  announcement: Tables<'announcements'>;
+  announcement: Database['public']['Tables']['announcements']['Row'];
 }
 
 /**
@@ -111,7 +111,7 @@ export function AnnouncementBannerClient({ announcement }: AnnouncementBannerCli
       aria-label="Site announcement"
       aria-live="polite"
       aria-atomic="true"
-      className="relative z-[60] hidden w-full px-3 pt-2 pb-2 md:block"
+      className="relative z-60 hidden w-full px-3 pt-2 pb-2 md:block"
     >
       {/* Rounded pill container */}
       <div className="container mx-auto">
@@ -126,7 +126,7 @@ export function AnnouncementBannerClient({ announcement }: AnnouncementBannerCli
                 className={'flex-1 border-none bg-transparent shadow-none'}
               >
                 {announcement.tag && (
-                  <AnnouncementTag className={'flex-shrink-0 font-bold text-[9px] sm:text-xs'}>
+                  <AnnouncementTag className={'shrink-0 font-bold text-[9px] sm:text-xs'}>
                     {announcement.tag}
                   </AnnouncementTag>
                 )}
@@ -140,7 +140,7 @@ export function AnnouncementBannerClient({ announcement }: AnnouncementBannerCli
                       <span className="line-clamp-2 sm:line-clamp-1">{announcement.title}</span>
                       {IconComponent && (
                         <IconComponent
-                          className={'h-3 w-3 flex-shrink-0 sm:h-4 sm:w-4'}
+                          className={'h-3 w-3 shrink-0 sm:h-4 sm:w-4'}
                           aria-hidden="true"
                         />
                       )}
@@ -150,7 +150,7 @@ export function AnnouncementBannerClient({ announcement }: AnnouncementBannerCli
                       <span className="line-clamp-2 sm:line-clamp-1">{announcement.title}</span>
                       {IconComponent && (
                         <IconComponent
-                          className={'h-3 w-3 flex-shrink-0 sm:h-4 sm:w-4'}
+                          className={'h-3 w-3 shrink-0 sm:h-4 sm:w-4'}
                           aria-hidden="true"
                         />
                       )}
@@ -165,7 +165,7 @@ export function AnnouncementBannerClient({ announcement }: AnnouncementBannerCli
                   type="button"
                   onClick={dismiss}
                   aria-label="Dismiss announcement"
-                  className={`flex ${DIMENSIONS.MIN_H_ICON_BUTTON_SM} ${DIMENSIONS.MIN_W_ICON_BUTTON_SM} flex-shrink-0 items-center justify-center rounded-full ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT} hover:bg-accent/20 focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 sm:${DIMENSIONS.MIN_H_ICON_BUTTON_MD} sm:${DIMENSIONS.MIN_W_ICON_BUTTON_MD}`}
+                  className={`flex ${DIMENSIONS.MIN_H_ICON_BUTTON_SM} ${DIMENSIONS.MIN_W_ICON_BUTTON_SM} shrink-0 items-center justify-center rounded-full ${ANIMATION_CONSTANTS.CSS_TRANSITION_DEFAULT} hover:bg-accent/20 focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 sm:${DIMENSIONS.MIN_H_ICON_BUTTON_MD} sm:${DIMENSIONS.MIN_W_ICON_BUTTON_MD}`}
                 >
                   <X
                     className={`${UI_CLASSES.ICON_XS} text-foreground sm:h-4 sm:w-4`}

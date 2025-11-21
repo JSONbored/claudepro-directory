@@ -19,10 +19,10 @@ import { createCollection, updateCollection } from '@/src/lib/actions/content.ac
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { logClientWarning } from '@/src/lib/utils/error.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
-import type { Tables } from '@/src/types/database.types';
+import type { Database } from '@/src/types/database.types';
 
-type Bookmark = Tables<'bookmarks'>;
-type CollectionData = Tables<'user_collections'>;
+type Bookmark = Database['public']['Tables']['bookmarks']['Row'];
+type CollectionData = Database['public']['Tables']['user_collections']['Row'];
 
 interface CollectionFormProps {
   bookmarks: Bookmark[];

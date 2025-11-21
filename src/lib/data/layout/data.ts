@@ -15,13 +15,13 @@ import { getActiveAnnouncement as fetchActiveAnnouncement } from '@/src/componen
 import { getNavigationMenu } from '@/src/lib/data/content/navigation';
 import { logger } from '@/src/lib/logger';
 import { normalizeError } from '@/src/lib/utils/error.utils';
-import type { Database, Tables } from '@/src/types/database.types';
+import type { Database } from '@/src/types/database.types';
 
 /**
  * Layout data result type
  */
 export interface LayoutData {
-  announcement: Tables<'announcements'> | null;
+  announcement: Database['public']['Tables']['announcements']['Row'] | null;
   navigationData: Database['public']['Functions']['get_navigation_menu']['Returns'];
 }
 

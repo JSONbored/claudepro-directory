@@ -33,7 +33,12 @@ import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { logClientWarning } from '@/src/lib/utils/error.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
 import type { Database } from '@/src/types/database.types';
-import { JOB_PLAN_VALUES } from '@/src/types/database-overrides';
+
+// Job plan enum values for validation
+const JOB_PLAN_VALUES: readonly Database['public']['Enums']['job_plan'][] = [
+  'one-time',
+  'subscription',
+] as const;
 
 const WORKPLACE_TYPE_VALUES = [
   'Remote',

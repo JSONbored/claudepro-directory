@@ -343,12 +343,12 @@ export async function handleUploadPackage(
       'X-Uploaded-By': 'data-api:content-generate:upload',
     });
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : String(error);
-
+    // Log the real error server-side for debugging
     if (logContext) {
       logError('Package upload failed', logContext, error);
     }
 
+    // Return generic error message to client - never expose internal error details
     return jsonResponse(
       {
         success: false,
@@ -357,7 +357,7 @@ export async function handleUploadPackage(
         slug: '',
         storage_url: '',
         error: 'Upload Failed',
-        message: errorMessage,
+        message: 'An unexpected error occurred while uploading the package.',
       } satisfies UploadPackageResponse,
       500,
       {

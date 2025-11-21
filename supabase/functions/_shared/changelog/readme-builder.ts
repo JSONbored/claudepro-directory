@@ -1,5 +1,5 @@
 import { SITE_URL } from '../clients/supabase.ts';
-import type { Json } from '../database.types.ts';
+import type { Database as DatabaseGenerated } from '../database.types.ts';
 
 const ICON_EMOJI_MAP: Record<string, string> = {
   Sparkles: '🤖',
@@ -14,40 +14,32 @@ const ICON_EMOJI_MAP: Record<string, string> = {
 };
 
 export function buildReadmeMarkdown(
-  data: Json & {
-    categories: Array<{
-      category: string;
-      title: string;
-      description: string;
-      icon_name: string;
-      url_slug: string;
-      items: Array<{
-        slug: string;
-        title: string;
-        description: string;
-      }>;
-    }>;
-    totalCount: number;
-    categoryBreakdown: Record<string, number>;
-  }
+  data: DatabaseGenerated['public']['Functions']['generate_readme_data']['Returns']
 ): string {
-  const { categories, totalCount } = data;
+  // Composite type fields are snake_case as defined in the database
+  // Supabase RPC returns them as snake_case in JSON
+  const categories = data.categories ?? [];
+  const totalCount = data.total_count ?? 0;
 
   const categorySections = categories
     .map((cat) => {
       if (!cat.items || cat.items.length === 0) return '';
 
-      const emoji = ICON_EMOJI_MAP[cat.icon_name] || '📄';
+      // Handle nullable fields from composite type
+      if (!cat.title) return '';
+
+      const emoji = ICON_EMOJI_MAP[cat.icon_name ?? ''] || '📄';
       const categoryName = cat.title.endsWith('y')
         ? `${cat.title.slice(0, -1)}ies`
         : `${cat.title}s`;
 
       let section = `## ${emoji} ${categoryName} (${cat.items.length})\n\n`;
-      section += `${cat.description}\n\n`;
+      section += `${cat.description ?? ''}\n\n`;
 
       for (const item of cat.items) {
-        const url = `${SITE_URL}/${cat.url_slug}/${item.slug}`;
-        const description = item.description || 'No description available';
+        if (!(item.slug && item.title)) continue;
+        const url = `${SITE_URL}/${cat.url_slug ?? ''}/${item.slug}`;
+        const description = item.description ?? 'No description available';
         section += `- **[${item.title}](${url})** - ${description}\n`;
       }
 

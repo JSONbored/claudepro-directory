@@ -13,7 +13,7 @@ import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { normalizeError } from '@/src/lib/utils/error.utils';
-import type { Database, Tables } from '@/src/types/database.types';
+import type { Database } from '@/src/types/database.types';
 
 interface EditJobPageMetadataProps {
   params: Promise<{ id: string }>;
@@ -37,7 +37,7 @@ export default async function EditJobPage({ params }: EditJobPageProps) {
     redirect('/login');
   }
 
-  let job: Tables<'jobs'> | null = null;
+  let job: Database['public']['Tables']['jobs']['Row'] | null = null;
   try {
     job = await getUserJobById(user.id, id);
   } catch (error) {

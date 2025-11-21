@@ -7,10 +7,9 @@ import dynamic from 'next/dynamic';
 import { JSONSectionRenderer } from '@/src/components/content/json-to-sections';
 import { ReviewListSection } from '@/src/components/core/domain/reviews/review-list-section';
 import { isValidCategory } from '@/src/lib/data/config/category';
-import type { ProcessedSectionData, SectionId } from '@/src/lib/types/component.types';
+import type { ContentItem, ProcessedSectionData, SectionId } from '@/src/lib/types/component.types';
 import { ensureStringArray } from '@/src/lib/utils/data.utils';
 import type { Database } from '@/src/types/database.types';
-import type { ContentItem } from '@/src/types/database-overrides';
 
 // Dynamic import for unified section component (code splitting)
 const UnifiedSection = dynamic(() => import('@/src/components/content/sections/unified-section'));
@@ -32,6 +31,7 @@ export interface TabSectionRendererProps {
       security: boolean;
       troubleshooting: boolean;
       examples: boolean;
+      requirements: boolean;
     };
   };
 }
@@ -79,7 +79,7 @@ export function TabSectionRenderer({
     }
 
     case 'requirements': {
-      if (requirements.length === 0) return null;
+      if (!config.sections.requirements || requirements.length === 0) return null;
       const validCategory = isValidCategory(item.category) ? item.category : 'agents';
       return (
         <UnifiedSection

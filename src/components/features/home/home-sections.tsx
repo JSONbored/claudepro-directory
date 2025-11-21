@@ -25,14 +25,14 @@ import {
 import { ROUTES } from '@/src/lib/data/config/constants';
 import { logger } from '@/src/lib/logger';
 import type {
+  ContentItem,
   DisplayableContent,
   FilterState,
   HomePageClientProps,
 } from '@/src/lib/types/component.types';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { logClientWarning, logUnhandledPromise } from '@/src/lib/utils/error.utils';
-import type { Database, Tables } from '@/src/types/database.types';
-import type { ContentItem } from '@/src/types/database-overrides';
+import type { Database } from '@/src/types/database.types';
 
 /**
  * OPTIMIZATION (2025-10-22): Enabled SSR for UnifiedSearch
@@ -397,7 +397,9 @@ function HomePageClientComponent({
               (featuredByCategory || initialData) as Record<string, readonly DisplayableContent[]>
             }
             categoryConfigs={categoryConfigs}
-            featuredJobs={featuredJobs as ReadonlyArray<Tables<'jobs'>>}
+            featuredJobs={
+              featuredJobs as ReadonlyArray<Database['public']['Tables']['jobs']['Row']>
+            }
             featuredCategories={featuredCategories}
           />
         )}

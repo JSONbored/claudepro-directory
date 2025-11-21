@@ -11,7 +11,7 @@ import type { CacheTtlKey } from '@/src/lib/data/config/cache-config';
 import { logger } from '@/src/lib/logger';
 import { cachedRPCWithDedupe } from '@/src/lib/supabase/cached-rpc';
 import { normalizeError } from '@/src/lib/utils/error.utils';
-import type { Database } from '@/src/types/database-overrides';
+import type { Database } from '@/src/types/database.types';
 
 type LoggerValue = string | number | boolean;
 

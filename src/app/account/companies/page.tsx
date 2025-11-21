@@ -24,6 +24,7 @@ import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { formatRelativeDate } from '@/src/lib/utils/data.utils';
 import { normalizeError } from '@/src/lib/utils/error.utils';
+import { hashUserId } from '@/src/lib/utils/privacy.utils';
 import type { Database } from '@/src/types/database.types';
 
 /**
@@ -69,6 +70,9 @@ export default async function CompaniesPage() {
     );
   }
 
+  // Hash user ID for privacy-compliant logging (GDPR/CCPA)
+  const hashedUserId = hashUserId(user.id);
+
   let companies: Database['public']['Functions']['get_user_companies']['Returns']['companies'] = [];
   let hasError = false;
 
@@ -79,12 +83,12 @@ export default async function CompaniesPage() {
     if (data) {
       companies = data.companies ?? [];
     } else {
-      logger.warn('CompaniesPage: getUserCompanies returned null', { userId: user.id });
+      logger.warn('CompaniesPage: getUserCompanies returned null', { userId: hashedUserId });
       hasError = true;
     }
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to fetch user companies');
-    logger.error('CompaniesPage: getUserCompanies threw', normalized, { userId: user.id });
+    logger.error('CompaniesPage: getUserCompanies threw', normalized, { userId: hashedUserId });
     hasError = true;
   }
 
@@ -109,7 +113,7 @@ export default async function CompaniesPage() {
   }
 
   if (companies.length === 0) {
-    logger.info('CompaniesPage: user has no companies', { userId: user.id });
+    logger.info('CompaniesPage: user has no companies', { userId: hashedUserId });
   }
 
   return (

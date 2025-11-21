@@ -21,7 +21,7 @@ const CONSTRAINT_MESSAGES: Record<string, string> = {
   content_avg_rating_check: 'Rating must be between 0 and 5',
   content_download_url_check: 'Download URL must start with /downloads/ or https://',
   content_guide_subcategory_check:
-    'Guide subcategory must be one of: tutorials, comparisons, workflows, use-cases, troubleshooting', // Note: Values match GUIDE_SUBCATEGORY_VALUES in database-overrides.ts
+    'Guide subcategory must be one of: tutorials, comparisons, workflows, use-cases, troubleshooting', // Note: Values match guide_subcategory enum in database.types.ts
 
   // Profiles
   profiles_display_name_check: 'Display name must be 1-100 characters',
@@ -45,7 +45,7 @@ const CONSTRAINT_MESSAGES: Record<string, string> = {
   // Newsletter
   newsletter_subscriptions_email_check: 'Invalid email format',
   newsletter_subscriptions_status_check:
-    'Invalid status. Must be one of: active, unsubscribed, bounced, complained',
+    'Invalid status. Must be one of: active, unsubscribed, bounced, complained (newsletter_subscription_status ENUM)',
 
   // Review Ratings
   review_ratings_rating_range: 'Rating must be between 1 and 5',

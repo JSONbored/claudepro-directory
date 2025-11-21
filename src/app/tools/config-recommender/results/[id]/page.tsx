@@ -11,7 +11,7 @@ import { getConfigRecommendations } from '@/src/lib/data/tools/recommendations';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { normalizeError } from '@/src/lib/utils/error.utils';
-import type { Database } from '@/src/types/database.types';
+import { Constants, type Database } from '@/src/types/database.types';
 
 type RecommendationResponse = Database['public']['Functions']['get_recommendations']['Returns'] & {
   answers: DecodedQuizAnswers;
@@ -48,12 +48,54 @@ function decodeQuizAnswers(encoded: string): DecodedQuizAnswers {
       );
     }
 
+    // Validate enum values
+    if (
+      !Constants.public.Enums.use_case_type.includes(
+        parsed.useCase as Database['public']['Enums']['use_case_type']
+      )
+    ) {
+      throw new Error(`Invalid useCase value: ${parsed.useCase}`);
+    }
+    if (
+      !Constants.public.Enums.experience_level.includes(
+        parsed.experienceLevel as Database['public']['Enums']['experience_level']
+      )
+    ) {
+      throw new Error(`Invalid experienceLevel value: ${parsed.experienceLevel}`);
+    }
+
     // Validate optional array fields if present
     if (parsed.p_integrations !== undefined && !Array.isArray(parsed.p_integrations)) {
       throw new Error('Invalid p_integrations field in quiz answers (must be an array if present)');
     }
     if (parsed.p_focus_areas !== undefined && !Array.isArray(parsed.p_focus_areas)) {
       throw new Error('Invalid p_focus_areas field in quiz answers (must be an array if present)');
+    }
+
+    // Validate optional array elements against enum values
+    if (parsed.p_integrations !== undefined) {
+      for (const integration of parsed.p_integrations) {
+        if (
+          typeof integration !== 'string' ||
+          !Constants.public.Enums.integration_type.includes(
+            integration as Database['public']['Enums']['integration_type']
+          )
+        ) {
+          throw new Error(`Invalid p_integrations value: ${integration}`);
+        }
+      }
+    }
+    if (parsed.p_focus_areas !== undefined) {
+      for (const focusArea of parsed.p_focus_areas) {
+        if (
+          typeof focusArea !== 'string' ||
+          !Constants.public.Enums.focus_area_type.includes(
+            focusArea as Database['public']['Enums']['focus_area_type']
+          )
+        ) {
+          throw new Error(`Invalid p_focus_areas value: ${focusArea}`);
+        }
+      }
     }
 
     return parsed as DecodedQuizAnswers;

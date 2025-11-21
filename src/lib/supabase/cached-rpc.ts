@@ -9,7 +9,7 @@ import { type CacheTtlKey, getCacheTtl } from '@/src/lib/data/config/cache-confi
 import { logger } from '@/src/lib/logger';
 import { createClient } from '@/src/lib/supabase/server';
 import { createAnonClient } from '@/src/lib/supabase/server-anon';
-import type { Database } from '@/src/types/database-overrides';
+import type { Database } from '@/src/types/database.types';
 
 export interface CachedRPCOptions {
   /** Cache key suffix (will be prepended with function name) */

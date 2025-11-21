@@ -16,11 +16,11 @@ import { Button } from '@/src/components/primitives/ui/button';
 import { refreshProfileFromOAuth, updateProfile } from '@/src/lib/actions/user.actions';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { toasts } from '@/src/lib/utils/toast.utils';
-import type { Tables } from '@/src/types/database.types';
+import type { Database } from '@/src/types/database.types';
 
 // Profile data consolidated into users table - use generated types
 type ProfileData = Pick<
-  Tables<'users'>,
+  Database['public']['Tables']['users']['Row'],
   | 'display_name'
   | 'bio'
   | 'work'

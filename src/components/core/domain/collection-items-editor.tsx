@@ -31,7 +31,7 @@ import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { sanitizeSlug } from '@/src/lib/utils/content.utils';
 import { logClientWarning } from '@/src/lib/utils/error.utils';
 import { toasts } from '@/src/lib/utils/toast.utils';
-import type { Tables } from '@/src/types/database.types';
+import type { Database } from '@/src/types/database.types';
 
 /**
  * Validate slug is safe for use in URLs
@@ -52,8 +52,8 @@ function getSafeContentUrl(type: string, slug: string): string | null {
   return `/${type}/${sanitizedSlug}`;
 }
 
-type CollectionItem = Tables<'collection_items'>;
-type Bookmark = Tables<'bookmarks'>;
+type CollectionItem = Database['public']['Tables']['collection_items']['Row'];
+type Bookmark = Database['public']['Tables']['bookmarks']['Row'];
 
 interface CollectionItemManagerProps {
   collectionId: string;

@@ -56,87 +56,93 @@ export async function handleSeoRoute(
     return badRequestResponse('SEO generation failed: RPC returned null', CORS);
   }
 
-  // Validate data structure without type assertion
-  if (typeof data !== 'object' || data === null) {
-    return badRequestResponse('SEO generation failed: invalid response', CORS);
+  // Use generated composite type directly - Supabase RPC automatically converts composite types to JSON
+  // Field names are snake_case as defined in the composite type
+  // Validate data structure matches expected composite type
+  if (typeof data !== 'object' || data === null || Array.isArray(data)) {
+    return badRequestResponse('SEO generation failed: invalid response structure', CORS);
   }
 
-  // Safely extract properties
-  const getProperty = (obj: unknown, key: string): unknown => {
-    if (typeof obj !== 'object' || obj === null) {
-      return undefined;
-    }
-    const desc = Object.getOwnPropertyDescriptor(obj, key);
-    return desc?.value;
-  };
+  // Type guard: validate the structure matches our composite type
+  const dataObj = data as Record<string, unknown>;
+  // Use bracket notation for Record<string, unknown> to satisfy TypeScript index signature requirements
+  const hasMetadata =
+    'metadata' in dataObj &&
+    typeof dataObj['metadata'] === 'object' &&
+    dataObj['metadata'] !== null;
+  const hasSchemas = 'schemas' in dataObj;
 
-  // Use validated data - TypeScript will infer types from runtime checks
-  const typedData = data satisfies Json;
+  if (!hasMetadata) {
+    return badRequestResponse('SEO generation failed: missing metadata field', CORS);
+  }
+
+  // Access properties safely - TypeScript will infer types from structure
+  const metadataObj = dataObj['metadata'] as Record<string, unknown>;
+  const schemasArray = (
+    hasSchemas && Array.isArray(dataObj['schemas']) ? dataObj['schemas'] : []
+  ) as Json[];
 
   // Serialize JSON-LD schemas with XSS protection if schemas are included
-  // processedData will be Json type (either original or modified with serialized schemas)
-  let processedData: Json = typedData;
-  const schemasValue = getProperty(typedData, 'schemas');
-  if (schemasValue && Array.isArray(schemasValue)) {
-    // Validate each schema item is valid Json
-    const isValidJsonArray = (arr: unknown): arr is Json[] => {
-      if (!Array.isArray(arr)) return false;
-      // Each item should be valid Json (string, number, boolean, null, object, or array)
-      for (const item of arr) {
-        const itemType = typeof item;
-        if (
-          itemType !== 'string' &&
-          itemType !== 'number' &&
-          itemType !== 'boolean' &&
-          item !== null &&
-          !(itemType === 'object' && item !== null) &&
-          !Array.isArray(item)
-        ) {
-          return false;
-        }
+  let processedSchemas: Json[] = [];
+  if (schemasArray.length > 0) {
+    try {
+      // Serialize each schema with XSS protection
+      processedSchemas = schemasArray.map((schema: Json) => serializeJsonLd(schema));
+    } catch {
+      if (logContext) {
+        logWarn('JSON-LD serialization failed, using original schemas', logContext);
       }
-      return true;
-    };
-
-    if (isValidJsonArray(schemasValue)) {
-      try {
-        // Serialize each schema with XSS protection
-        const serializedSchemas = schemasValue.map((schema: Json) => serializeJsonLd(schema));
-        // Build new object without type assertion - preserve all existing properties
-        // Since typedData is Json (object), we can safely copy properties
-        // All values from typedData are already Json, and serializedSchemas is Json[]
-        if (typeof typedData === 'object' && typedData !== null && !Array.isArray(typedData)) {
-          // Create a new object with all properties from typedData, replacing schemas
-          // We'll use JSON.parse/stringify to create a clean copy, then replace schemas
-          // This ensures all values remain Json-compatible
-          const jsonString = JSON.stringify(typedData);
-          const parsed = JSON.parse(jsonString);
-          // Validate parsed result is an object
-          if (typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed)) {
-            // Override schemas with serialized version (Json[])
-            // Use bracket notation for index signature access
-            parsed['schemas'] = serializedSchemas;
-            // parsed is now { [key: string]: Json | undefined } which is the object part of Json
-            processedData = parsed satisfies Json;
-          } else {
-            // Fallback if parsing failed
-            processedData = typedData;
-          }
-        } else {
-          // Fallback if typedData is not an object
-          processedData = typedData;
-        }
-      } catch {
-        if (logContext) {
-          logWarn('JSON-LD serialization failed, using original schemas', logContext);
-        }
-        // Fallback: use original schemas (edge function will still escape in JSON.stringify)
-        processedData = typedData;
-      }
+      // Fallback: use original schemas (edge function will still escape in JSON.stringify)
+      processedSchemas = schemasArray;
     }
   }
 
-  const responseBody = JSON.stringify(processedData);
+  // Extract metadata fields safely
+  // Use bracket notation for Record<string, unknown> to satisfy TypeScript index signature requirements
+  const title = typeof metadataObj['title'] === 'string' ? metadataObj['title'] : '';
+  const description =
+    typeof metadataObj['description'] === 'string' ? metadataObj['description'] : '';
+  const keywords = Array.isArray(metadataObj['keywords'])
+    ? (metadataObj['keywords'] as string[])
+    : [];
+  const openGraphType = metadataObj['open_graph_type'] === 'profile' ? 'profile' : 'website';
+  const twitterCard =
+    typeof metadataObj['twitter_card'] === 'string'
+      ? metadataObj['twitter_card']
+      : 'summary_large_image';
+
+  const robotsObj = metadataObj['robots'] as Record<string, unknown> | undefined;
+  const robots = {
+    index: typeof robotsObj?.['index'] === 'boolean' ? robotsObj['index'] : true,
+    follow: typeof robotsObj?.['follow'] === 'boolean' ? robotsObj['follow'] : true,
+  };
+
+  const debugObj = metadataObj['debug'] as Record<string, unknown> | undefined;
+  const debug = debugObj
+    ? {
+        pattern: typeof debugObj['pattern'] === 'string' ? debugObj['pattern'] : '',
+        route: typeof debugObj['route'] === 'string' ? debugObj['route'] : '',
+        ...(typeof debugObj['category'] === 'string' ? { category: debugObj['category'] } : {}),
+        ...(typeof debugObj['slug'] === 'string' ? { slug: debugObj['slug'] } : {}),
+        ...(typeof debugObj['error'] === 'string' ? { error: debugObj['error'] } : {}),
+      }
+    : undefined;
+
+  // Build response with serialized schemas
+  const responseData: Json = {
+    metadata: {
+      title,
+      description,
+      keywords,
+      openGraphType,
+      twitterCard,
+      robots,
+      ...(debug ? { _debug: debug } : {}),
+    },
+    schemas: processedSchemas,
+  };
+
+  const responseBody = JSON.stringify(responseData);
 
   if (logContext) {
     logInfo('SEO generated', {
@@ -144,7 +150,7 @@ export async function handleSeoRoute(
       route,
       include,
       bytes: responseBody.length,
-      schemasSerialized: schemasValue && Array.isArray(schemasValue) && schemasValue.length > 0,
+      schemasSerialized: processedSchemas.length > 0,
     });
   }
 

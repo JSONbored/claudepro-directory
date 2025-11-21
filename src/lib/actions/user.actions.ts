@@ -19,7 +19,7 @@ import {
 } from '@/src/lib/data/config/cache-config';
 import { fetchCachedRpc } from '@/src/lib/data/helpers';
 import { revalidateCacheTags } from '@/src/lib/supabase/cache-helpers';
-import type { Database, Tables } from '@/src/types/database.types';
+import type { Database } from '@/src/types/database.types';
 
 const CONTENT_CATEGORY_VALUES = [
   'agents',
@@ -728,7 +728,7 @@ export async function ensureUserRecord(params: {
   'use server';
 
   const cacheConfigPromise = getCacheConfigSnapshot();
-  await runRpc<Tables<'users'>>(
+  await runRpc<Database['public']['Tables']['users']['Row']>(
     'ensure_user_record',
     {
       p_id: params.id,

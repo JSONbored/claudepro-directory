@@ -40,7 +40,6 @@
     "sync:db": "tsx scripts/build/sync-database-schema.ts --skip-dump",
     "sync:db:full": "tsx scripts/build/sync-database-schema.ts",
     "sync:db:types": "tsx scripts/build/sync-database-schema.ts --only-types",
-    "edge:types": "tsx scripts/build/generate-edge-types.ts",
     "backup:db": "tsx scripts/build/backup-database.ts",
     "cache:info": "tsx scripts/utils/build-cache-cli.ts info",
     "cache:clear": "tsx scripts/utils/build-cache-cli.ts clear",

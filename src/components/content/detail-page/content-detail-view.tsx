@@ -13,27 +13,30 @@ import { RecentlyViewedSidebar } from '@/src/components/features/navigation/rece
 import { getCategoryConfig, isValidCategory } from '@/src/lib/data/config/category';
 import { highlightCodeEdge, processContentEdge } from '@/src/lib/edge/client';
 import { logger } from '@/src/lib/logger';
-import type { InstallationSteps, ProcessedSectionData } from '@/src/lib/types/component.types';
+import type {
+  ContentItem,
+  InstallationSteps,
+  ProcessedSectionData,
+} from '@/src/lib/types/component.types';
 import { getDisplayTitle } from '@/src/lib/utils';
 import { transformMcpConfigForDisplay } from '@/src/lib/utils/content.utils';
 import { ensureStringArray, getMetadata } from '@/src/lib/utils/data.utils';
 import { normalizeError } from '@/src/lib/utils/error.utils';
 import { getViewTransitionName } from '@/src/lib/utils/view-transitions.utils';
 import type { Database } from '@/src/types/database.types';
-import type { ContentItem, Tables } from '@/src/types/database-overrides';
 import { DetailHeader } from './detail-header';
 import { DetailMetadata } from './detail-metadata';
 import { DetailSidebar } from './sidebar/navigation-sidebar';
 
 /**
  * UnifiedDetailPage is only used for content detail pages, never for jobs.
- * So we narrow the type to exclude Tables<'jobs'> to ensure proper type safety.
+ * So we narrow the type to exclude jobs to ensure proper type safety.
  */
 export interface UnifiedDetailPageProps {
   item:
-    | Tables<'content'>
+    | Database['public']['Tables']['content']['Row']
     | (Database['public']['Functions']['get_content_detail_complete']['Returns']['content'] &
-        Tables<'content'>);
+        Database['public']['Tables']['content']['Row']);
   relatedItems?:
     | ContentItem[]
     | Database['public']['Functions']['get_content_detail_complete']['Returns']['related'];
@@ -49,9 +52,9 @@ function logDetailProcessingWarning(
   section: string,
   error: unknown,
   item:
-    | Tables<'content'>
+    | Database['public']['Tables']['content']['Row']
     | (Database['public']['Functions']['get_content_detail_complete']['Returns']['content'] &
-        Tables<'content'>)
+        Database['public']['Tables']['content']['Row'])
 ): void {
   const normalized = normalizeError(error, `${section} processing failed`);
   logger.warn(`UnifiedDetailPage: ${section} processing failed`, {
@@ -66,13 +69,13 @@ function logDetailProcessingWarning(
  */
 function getConfigurationAsString(
   item:
-    | Tables<'content'>
+    | Database['public']['Tables']['content']['Row']
     | (Database['public']['Functions']['get_content_detail_complete']['Returns']['content'] &
-        Tables<'content'>),
+        Database['public']['Tables']['content']['Row']),
   metadata: Record<string, unknown>
 ): string | null {
-  // Cast item to Tables<'content'> for property access (content is Json type from RPC)
-  const contentItem = item as Tables<'content'>;
+  // Use generated type directly (tags/features/use_cases are already text[] in database)
+  const contentItem = item as Database['public']['Tables']['content']['Row'];
 
   // Check top-level item first
   if ('configuration' in contentItem) {
@@ -97,9 +100,9 @@ async function ViewCountMetadata({
   copyCount,
 }: {
   item:
-    | Tables<'content'>
+    | Database['public']['Tables']['content']['Row']
     | (Database['public']['Functions']['get_content_detail_complete']['Returns']['content'] &
-        Tables<'content'>);
+        Database['public']['Tables']['content']['Row']);
   viewCountPromise: Promise<number>;
   copyCount?: number;
 }) {
@@ -113,9 +116,9 @@ async function SidebarWithRelated({
   config,
 }: {
   item:
-    | Tables<'content'>
+    | Database['public']['Tables']['content']['Row']
     | (Database['public']['Functions']['get_content_detail_complete']['Returns']['content'] &
-        Tables<'content'>);
+        Database['public']['Tables']['content']['Row']);
   relatedItemsPromise: Promise<ContentItem[]>;
   config: {
     typeName: string;
@@ -149,8 +152,8 @@ export async function UnifiedDetailPage({
   const displayTitle = getDisplayTitle(item);
   const metadata = getMetadata(item);
 
-  // Cast item to Tables<'content'> for property access
-  const contentItem = item as Tables<'content'>;
+  // Use generated type directly (tags/features/use_cases are already text[] in database)
+  const contentItem = item as Database['public']['Tables']['content']['Row'];
 
   const installation = (() => {
     const inst =
@@ -840,7 +843,7 @@ export async function UnifiedDetailPage({
             )}
 
             {/* Requirements Section */}
-            {requirements.length > 0 && (
+            {config?.sections.requirements && requirements.length > 0 && (
               <UnifiedSection
                 variant="list"
                 title="Requirements"

@@ -31,7 +31,16 @@ const CONTENT_CATEGORY_VALUES = [
   'changelog',
 ] as const satisfies readonly Database['public']['Enums']['content_category'][];
 
-import { SUBMISSION_TYPE_VALUES } from '@/src/types/database-overrides';
+// Submission type enum values for validation
+const SUBMISSION_TYPE_VALUES: readonly Database['public']['Enums']['submission_type'][] = [
+  'agents',
+  'mcp',
+  'rules',
+  'commands',
+  'hooks',
+  'statuslines',
+  'skills',
+] as const;
 
 // URL validation helper
 const urlRefine = (val: string | null | undefined) => {

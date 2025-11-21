@@ -23,9 +23,8 @@
 import type { ReactNode } from 'react';
 import { getSocialLinks } from '@/src/lib/data/marketing/contact';
 import { Download, Layers, Server, Terminal, Webhook } from '@/src/lib/icons';
-import type { ActionButtonConfig } from '@/src/lib/types/component.types';
+import type { ActionButtonConfig, ContentItem } from '@/src/lib/types/component.types';
 import { toasts } from '@/src/lib/utils/toast.utils';
-import type { ContentItem } from '@/src/types/database-overrides';
 
 const SOCIAL_LINK_SNAPSHOT = getSocialLinks();
 

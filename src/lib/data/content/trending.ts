@@ -1,9 +1,8 @@
 import { isValidCategory } from '@/src/lib/data/config/category';
 import { fetchCachedRpc } from '@/src/lib/data/helpers';
 import { generateContentCacheKey } from '@/src/lib/data/helpers-utils';
-import type { DisplayableContent } from '@/src/lib/types/component.types';
+import type { DisplayableContent, HomepageContentItem } from '@/src/lib/types/component.types';
 import type { Database } from '@/src/types/database.types';
-import type { HomepageContentItem } from '@/src/types/database-overrides';
 
 interface TrendingPageParams {
   category?: Database['public']['Enums']['content_category'] | null;

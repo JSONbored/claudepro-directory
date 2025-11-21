@@ -4,7 +4,6 @@ import { z } from 'zod';
 import { fetchCachedRpc } from '@/src/lib/data/helpers';
 import { logger } from '@/src/lib/logger';
 import type { Database } from '@/src/types/database.types';
-import type { Tables } from '@/src/types/database-overrides';
 
 // Zod schema for changelog entry changes structure (JSONB validation)
 const changeItemSchema = z.object({
@@ -110,7 +109,9 @@ export async function getChangelogOverview(
  * Get changelog entry by slug with categories built from JSONB
  * Optimized single RPC call that replaces get_changelog_entry_by_slug
  */
-export async function getChangelogEntryBySlug(slug: string): Promise<Tables<'changelog'> | null> {
+export async function getChangelogEntryBySlug(
+  slug: string
+): Promise<Database['public']['Tables']['changelog']['Row'] | null> {
   const result = await fetchCachedRpc<
     'get_changelog_detail',
     Database['public']['Functions']['get_changelog_detail']['Returns']
@@ -128,8 +129,8 @@ export async function getChangelogEntryBySlug(slug: string): Promise<Tables<'cha
 
   if (!result.entry) return null;
 
-  // Map RPC return to full Tables<'changelog'> structure
-  // Cast categories from Json to Record<string, string[]>
+  // Map RPC return to full changelog row structure
+  // contributors and keywords are already text[] in database (may be null)
   const entry = result.entry;
   return {
     id: entry.id ?? '',
@@ -158,7 +159,7 @@ export async function getChangelogEntryBySlug(slug: string): Promise<Tables<'cha
     robots_index: null,
     source: null,
     twitter_card: null,
-  } as Tables<'changelog'>;
+  } as Database['public']['Tables']['changelog']['Row'];
 }
 
 /**
@@ -191,16 +192,19 @@ export async function getChangelog(): Promise<{
 
 /**
  * Transform changelog entry to ensure contributors and keywords are arrays (never null)
- * Accepts both full Tables<'changelog'> and changelog_overview_entry (subset)
+ * Accepts both full changelog row and changelog_overview_entry (subset)
+ * Note: contributors and keywords are already text[] in database, but may be null
  */
 function normalizeChangelogEntry(
-  entry: Tables<'changelog'> | Database['public']['CompositeTypes']['changelog_overview_entry']
-): Omit<Tables<'changelog'>, 'contributors' | 'keywords'> & {
+  entry:
+    | Database['public']['Tables']['changelog']['Row']
+    | Database['public']['CompositeTypes']['changelog_overview_entry']
+): Omit<Database['public']['Tables']['changelog']['Row'], 'contributors' | 'keywords'> & {
   contributors: string[];
   keywords: string[];
 } {
-  // Map changelog_overview_entry to full Tables<'changelog'> structure
-  const fullEntry: Tables<'changelog'> = {
+  // Map changelog_overview_entry to full changelog row structure
+  const fullEntry: Database['public']['Tables']['changelog']['Row'] = {
     ...entry,
     canonical_url: null,
     commit_count: null,
@@ -217,7 +221,7 @@ function normalizeChangelogEntry(
     changes: entry.changes ?? {},
     created_at: entry.created_at ?? '',
     updated_at: entry.updated_at ?? '',
-  } as Tables<'changelog'>;
+  } as Database['public']['Tables']['changelog']['Row'];
 
   return {
     ...fullEntry,
@@ -231,7 +235,7 @@ function normalizeChangelogEntry(
  */
 export async function getAllChangelogEntries(): Promise<
   Array<
-    Omit<Tables<'changelog'>, 'contributors' | 'keywords'> & {
+    Omit<Database['public']['Tables']['changelog']['Row'], 'contributors' | 'keywords'> & {
       contributors: string[];
       keywords: string[];
     }
@@ -252,7 +256,7 @@ export async function getAllChangelogEntries(): Promise<
  */
 export async function getRecentChangelogEntries(limit = 5): Promise<
   Array<
-    Omit<Tables<'changelog'>, 'contributors' | 'keywords'> & {
+    Omit<Database['public']['Tables']['changelog']['Row'], 'contributors' | 'keywords'> & {
       contributors: string[];
       keywords: string[];
     }
@@ -274,7 +278,7 @@ export async function getChangelogEntriesByCategory(
   category: Database['public']['Enums']['changelog_category']
 ): Promise<
   Array<
-    Omit<Tables<'changelog'>, 'contributors' | 'keywords'> & {
+    Omit<Database['public']['Tables']['changelog']['Row'], 'contributors' | 'keywords'> & {
       contributors: string[];
       keywords: string[];
     }
@@ -296,7 +300,7 @@ export async function getChangelogEntriesByCategory(
  */
 export async function getFeaturedChangelogEntries(limit = 3): Promise<
   Array<
-    Omit<Tables<'changelog'>, 'contributors' | 'keywords'> & {
+    Omit<Database['public']['Tables']['changelog']['Row'], 'contributors' | 'keywords'> & {
       contributors: string[];
       keywords: string[];
     }

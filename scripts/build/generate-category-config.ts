@@ -212,6 +212,7 @@ async function generateCategoryConfig() {
       security: ${features['section_security'] ?? false},
       troubleshooting: ${features['section_troubleshooting'] ?? false},
       examples: ${features['section_examples'] ?? false},
+      requirements: ${features['section_requirements'] ?? false},
     },
     metadata: {
       showGitHubLink: ${features['metadata_show_github_link'] ?? true},

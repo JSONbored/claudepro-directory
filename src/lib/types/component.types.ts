@@ -2,7 +2,7 @@
  * Component Types - Consolidated Component Props and Types
  *
  * This file contains ALL component types, props, and related TypeScript definitions.
- * Database types are in database.types.ts (generated) and database-overrides.ts (manual).
+ * Database types are in database.types.ts (generated).
  *
  * Structure:
  * - Core Content Types
@@ -18,16 +18,40 @@ import type { ReactNode } from 'react';
 import type { SearchResult } from '@/src/lib/edge/search-client';
 import type { LucideIcon, LucideIcon as LucideIconType } from '@/src/lib/icons';
 import type { Database } from '@/src/types/database.types';
-import type {
-  ContentItem,
-  HomepageContentItem,
-  JobCardJobType,
-  Tables,
-} from '@/src/types/database-overrides';
+
+/**
+ * ContentItem - Base content item type derived from content table
+ * Uses generated types directly from database.types.ts
+ */
+export type ContentItem = Database['public']['Tables']['content']['Row'];
 
 // ============================================================================
 // Core Content Types
 // ============================================================================
+
+/**
+ * Copy Type - type of content being copied
+ */
+export type CopyType = 'code' | 'link' | 'markdown';
+
+/**
+ * HomepageContentItem - Simplified content item for homepage display
+ * Component/application type used for UI rendering (not a database type)
+ */
+export type HomepageContentItem = {
+  slug: string;
+  title: string;
+  description: string;
+  author: string;
+  tags: string[];
+  source: string;
+  created_at: string;
+  date_added: string;
+  category: Database['public']['Enums']['content_category'];
+  view_count: number;
+  copy_count: number;
+  featured: boolean;
+};
 
 export type DisplayableContent =
   | ContentItem
@@ -97,8 +121,36 @@ export interface ErrorFallbackProps {
  * The RPC get_company_profile returns a subset of job fields, so we need
  * to support both the full type and the subset type.
  */
+/**
+ * JobCardJobType - Job type for job cards (subset of full job table)
+ * Used when displaying jobs from RPC returns that don't include all fields
+ */
+export type JobCardJobType = {
+  id: string;
+  slug: string;
+  title: string;
+  company: string;
+  company_logo: string | null;
+  location: string | null;
+  description: string | null;
+  salary: string | null;
+  remote: boolean;
+  type: Database['public']['Enums']['job_type'] | null;
+  workplace: Database['public']['Enums']['workplace_type'];
+  experience: Database['public']['Enums']['experience_level'];
+  category: Database['public']['Enums']['job_category'] | null;
+  tags: string[];
+  plan: Database['public']['Enums']['job_plan'];
+  tier: Database['public']['Enums']['job_tier'] | null;
+  posted_at: string;
+  expires_at: string;
+  view_count: number;
+  click_count: number;
+  link: string | null;
+};
+
 export interface JobCardProps {
-  job: Tables<'jobs'> | JobCardJobType;
+  job: Database['public']['Tables']['jobs']['Row'] | JobCardJobType;
 }
 
 export interface FilterState {
@@ -194,8 +246,6 @@ export interface UseSearchProps {
 // ============================================================================
 // Review Component Types
 // ============================================================================
-
-export type { ReviewItem } from '@/src/types/database-overrides';
 
 /**
  * Props for review form variant
@@ -512,6 +562,7 @@ export interface UnifiedCategoryConfig<TId extends string = string> {
     security: boolean;
     troubleshooting: boolean;
     examples: boolean;
+    requirements: boolean;
   };
   metadata?: {
     categoryLabel?: string;
@@ -777,13 +828,13 @@ export interface ProcessedSectionData {
  * Props for TabbedDetailLayout component
  *
  * Note: TabbedDetailLayout is only used for content detail pages, never for jobs.
- * So we narrow the type to exclude Tables<'jobs'> to ensure proper type safety.
+ * So we narrow the type to exclude jobs to ensure proper type safety.
  */
 export interface TabbedDetailLayoutProps {
   item:
-    | Tables<'content'>
+    | Database['public']['Tables']['content']['Row']
     | (Database['public']['Functions']['get_content_detail_complete']['Returns']['content'] &
-        Tables<'content'>);
+        Database['public']['Tables']['content']['Row']);
   config: UnifiedCategoryConfig<Database['public']['Enums']['content_category']>;
   tabs: ReadonlyArray<TabConfig>;
   sectionData: ProcessedSectionData;

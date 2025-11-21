@@ -167,15 +167,22 @@ export default async function SubmitPage() {
   }
 
   // Fetch templates for all supported submission types
-  const supportedCategories: Database['public']['Enums']['content_category'][] = [
-    'agents',
-    'mcp',
-    'rules',
-    'commands',
-    'hooks',
-    'statuslines',
-    'skills',
-  ];
+  // submission_type enum values are a subset of content_category enum values
+  // Map each element and validate using type guard to ensure type safety
+  const supportedCategories: Database['public']['Enums']['content_category'][] =
+    Constants.public.Enums.submission_type
+      .map((type) => {
+        // Runtime validation: all submission_type values are valid content_category values
+        if (isValidContentCategory(type)) {
+          return type;
+        }
+        // This should never happen, but TypeScript requires handling the case
+        logger.warn('SubmitPage: invalid submission_type found', { type });
+        return 'agents' as Database['public']['Enums']['content_category'];
+      })
+      .filter((category): category is Database['public']['Enums']['content_category'] =>
+        isValidContentCategory(category)
+      );
   let templates: Awaited<ReturnType<typeof getContentTemplates>> = [];
   try {
     const templatePromises = supportedCategories.map((category) =>

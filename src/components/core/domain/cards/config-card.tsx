@@ -29,7 +29,20 @@ import { logClientWarning, logUnhandledPromise } from '@/src/lib/utils/error.uti
 import { toasts } from '@/src/lib/utils/toast.utils';
 import type { Database } from '@/src/types/database.types';
 
-import { isExperienceLevel } from '@/src/types/database-overrides';
+// Experience level validation helper
+function isExperienceLevel(
+  value: unknown
+): value is Database['public']['Enums']['experience_level'] {
+  const EXPERIENCE_LEVEL_VALUES: readonly Database['public']['Enums']['experience_level'][] = [
+    'beginner',
+    'intermediate',
+    'advanced',
+  ] as const;
+  return (
+    typeof value === 'string' &&
+    EXPERIENCE_LEVEL_VALUES.includes(value as Database['public']['Enums']['experience_level'])
+  );
+}
 
 /**
  * Validate and sanitize repository URL

@@ -7,7 +7,7 @@ import { fetchCachedRpc } from '@/src/lib/data/helpers';
 import { searchUnified } from '@/src/lib/edge/search-client';
 import { logger } from '@/src/lib/logger';
 import { normalizeError } from '@/src/lib/utils/error.utils';
-import type { Database, Tables } from '@/src/types/database.types';
+import type { Database } from '@/src/types/database.types';
 
 export interface JobsFilterOptions {
   searchQuery?: string;
@@ -36,7 +36,7 @@ export async function getJobs(): Promise<Database['public']['Tables']['jobs']['R
     keySuffix: 'all',
     fallback: [],
   });
-  // Map composite type to Tables<'jobs'>
+  // Map composite type to jobs table row
   // The composite type is a simplified structure, so we need to map it
   return data.map((item) => ({
     ...item,
@@ -51,13 +51,15 @@ export async function getJobs(): Promise<Database['public']['Tables']['jobs']['R
     expires_at: item.expires_at ?? new Date().toISOString(),
     is_placeholder: false,
     workplace: item.remote ? 'Remote' : 'On-site',
-  })) as Tables<'jobs'>[];
+  })) as Database['public']['Tables']['jobs']['Row'][];
 }
 
 /**
  * Get a job by slug via edge-cached RPC
  */
-export async function getJobBySlug(slug: string): Promise<Tables<'jobs'> | undefined> {
+export async function getJobBySlug(
+  slug: string
+): Promise<Database['public']['Tables']['jobs']['Row'] | undefined> {
   const data = await fetchCachedRpc<
     'get_job_detail',
     Database['public']['Functions']['get_job_detail']['Returns'] | null
@@ -75,8 +77,8 @@ export async function getJobBySlug(slug: string): Promise<Tables<'jobs'> | undef
 
   if (!data) return undefined;
 
-  // Map job_detail_result composite type to Tables<'jobs'>
-  // The composite type includes all fields from the RPC, but Tables<'jobs'> has additional fields
+  // Map job_detail_result composite type to jobs table row
+  // The composite type includes all fields from the RPC, but the jobs table row has additional fields
   return {
     ...data,
     // Add missing fields with defaults
@@ -89,23 +91,28 @@ export async function getJobBySlug(slug: string): Promise<Tables<'jobs'> | undef
     expires_at: data.expires_at ?? new Date().toISOString(),
     is_placeholder: false,
     workplace: data.remote ? 'Remote' : 'On-site',
-  } as Tables<'jobs'>;
+  } as Database['public']['Tables']['jobs']['Row'];
 }
 
 /** Get featured jobs via edge-cached RPC */
-export async function getFeaturedJobs(): Promise<Tables<'jobs'>[]> {
-  return fetchCachedRpc<'get_featured_jobs', Tables<'jobs'>[]>(undefined as never, {
-    rpcName: 'get_featured_jobs',
-    tags: ['jobs'],
-    ttlKey: 'cache.jobs.ttl_seconds',
-    keySuffix: 'featured',
-    fallback: [],
-  });
+export async function getFeaturedJobs(): Promise<Database['public']['Tables']['jobs']['Row'][]> {
+  return fetchCachedRpc<'get_featured_jobs', Database['public']['Tables']['jobs']['Row'][]>(
+    undefined as never,
+    {
+      rpcName: 'get_featured_jobs',
+      tags: ['jobs'],
+      ttlKey: 'cache.jobs.ttl_seconds',
+      keySuffix: 'featured',
+      fallback: [],
+    }
+  );
 }
 
 /** Get jobs by category via edge-cached RPC */
-export async function getJobsByCategory(category: string): Promise<Tables<'jobs'>[]> {
-  return fetchCachedRpc<'get_jobs_by_category', Tables<'jobs'>[]>(
+export async function getJobsByCategory(
+  category: string
+): Promise<Database['public']['Tables']['jobs']['Row'][]> {
+  return fetchCachedRpc<'get_jobs_by_category', Database['public']['Tables']['jobs']['Row'][]>(
     { p_category: category },
     {
       rpcName: 'get_jobs_by_category',

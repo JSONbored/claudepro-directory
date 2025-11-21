@@ -12,7 +12,6 @@ import { ExternalLink } from '@/src/lib/icons';
 import type { DisplayableContent, UnifiedCategoryConfig } from '@/src/lib/types/component.types';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import type { Database } from '@/src/types/database.types';
-import type { Tables } from '@/src/types/database-overrides';
 
 interface FeaturedSectionProps {
   title: string;
@@ -61,7 +60,7 @@ FeaturedSection.displayName = 'FeaturedSection';
 interface FeaturedSectionsProps {
   categories: Record<string, readonly DisplayableContent[]>;
   categoryConfigs: Record<string, UnifiedCategoryConfig>;
-  featuredJobs?: ReadonlyArray<Tables<'jobs'>>;
+  featuredJobs?: ReadonlyArray<Database['public']['Tables']['jobs']['Row']>;
   featuredCategories: readonly Database['public']['Enums']['content_category'][];
 }
 

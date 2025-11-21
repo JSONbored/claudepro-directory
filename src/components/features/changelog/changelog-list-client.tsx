@@ -18,9 +18,9 @@ import {
 import { ArrowRight, Calendar } from '@/src/lib/icons';
 import { BADGE_COLORS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { sanitizeSlug } from '@/src/lib/utils/content.utils';
-import type { Database, Tables } from '@/src/types/database.types';
+import type { Database } from '@/src/types/database.types';
 
-type ChangelogEntry = Tables<'changelog'>;
+type ChangelogEntry = Database['public']['Tables']['changelog']['Row'];
 
 /**
  * Validate changelog slug is safe for use in URLs

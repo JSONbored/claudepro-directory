@@ -5,10 +5,16 @@
 
 import { z } from 'zod';
 import { fetchCachedRpc } from '@/src/lib/data/helpers';
-import type { Database, Tables } from '@/src/types/database.types';
-import { USER_TIER_VALUES } from '@/src/types/database-overrides';
+import type { Database } from '@/src/types/database.types';
 
 const ACCOUNT_TTL_KEY = 'cache.account.ttl_seconds';
+
+// User tier enum values for validation
+const USER_TIER_VALUES: readonly Database['public']['Enums']['user_tier'][] = [
+  'free',
+  'pro',
+  'enterprise',
+] as const;
 
 const accountDashboardSchema = z.object({
   bookmark_count: z.number().catch(0),
@@ -80,7 +86,7 @@ export async function getUserLibrary(
  */
 export async function getUserBookmarksForCollections(
   userId: string
-): Promise<Tables<'bookmarks'>[]> {
+): Promise<Database['public']['Tables']['bookmarks']['Row'][]> {
   const data = await getUserLibrary(userId);
   // Map from composite type to table type, filtering out nulls
   const bookmarks = data?.bookmarks ?? [];
@@ -111,7 +117,7 @@ export async function getUserBookmarksForCollections(
       notes: b.notes,
       created_at: b.created_at,
       updated_at: b.updated_at,
-    })) as Tables<'bookmarks'>[];
+    })) as Database['public']['Tables']['bookmarks']['Row'][];
 }
 
 /**
@@ -143,9 +149,9 @@ export async function getUserDashboard(
 export async function getUserJobById(
   userId: string,
   jobId: string
-): Promise<Tables<'jobs'> | null> {
+): Promise<Database['public']['Tables']['jobs']['Row'] | null> {
   const data = await getUserDashboard(userId);
-  const jobs = (data?.jobs as Array<Tables<'jobs'>> | undefined) || [];
+  const jobs = (data?.jobs as Array<Database['public']['Tables']['jobs']['Row']> | undefined) || [];
   return jobs.find((job) => job.id === jobId) ?? null;
 }
 
