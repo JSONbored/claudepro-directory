@@ -19,8 +19,9 @@
  * @module components/layout/user-menu
  */
 
-import { DIMENSIONS, getAnimationConfig, logger, UI_CLASSES } from '@heyclaude/web-runtime';
-import { toasts } from '@heyclaude/web-runtime/client';
+import { logger } from '@heyclaude/web-runtime/core';
+import { getAnimationConfig } from '@heyclaude/web-runtime/data';
+import { useAuthenticatedUser } from '@heyclaude/web-runtime/hooks/use-authenticated-user';
 import {
   Activity,
   BookOpen,
@@ -28,6 +29,7 @@ import {
   Settings,
   User as UserIcon,
 } from '@heyclaude/web-runtime/icons';
+import { DIMENSIONS, toasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { motion } from 'motion/react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -43,7 +45,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/src/components/primitives/ui/dropdown-menu';
-import { useAuthenticatedUser } from '@/src/lib/auth/use-authenticated-user';
 
 interface UserMenuProps {
   className?: string;

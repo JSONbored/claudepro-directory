@@ -29,13 +29,13 @@ export async function getConfigRecommendations(
 
   return fetchCached(
     (client) => new QuizService(client).getRecommendations({
-        useCase,
-        experienceLevel,
-        toolPreferences,
-        integrations,
-        focusAreas,
-        limit,
-        ...(viewerId ? { viewerId } : {})
+        p_use_case: useCase,
+        p_experience_level: experienceLevel,
+        p_tool_preferences: toolPreferences,
+        p_integrations: integrations,
+        p_focus_areas: focusAreas,
+        p_limit: limit,
+        ...(viewerId ? { p_viewer_id: viewerId } : {})
     }),
     {
       key: [

@@ -21,7 +21,7 @@
  * ```
  */
 
-import { cn } from '@heyclaude/web-runtime';
+import { cn } from '@heyclaude/web-runtime/ui';
 import { motion } from 'motion/react';
 import type { ReactNode } from 'react';
 

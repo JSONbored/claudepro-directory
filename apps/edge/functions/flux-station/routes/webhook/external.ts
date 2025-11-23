@@ -6,16 +6,14 @@
 import {
   badRequestResponse,
   errorResponse,
+  ingestWebhookEvent,
+  processPolarWebhook,
+  processResendWebhook,
   successResponse,
   unauthorizedResponse,
-  webhookCorsHeaders,
-} from '@heyclaude/edge-runtime/utils/http.ts';
-import {
-  ingestWebhookEvent,
   WebhookIngestError,
-} from '@heyclaude/edge-runtime/utils/webhook/ingest.ts';
-import { processPolarWebhook } from '@heyclaude/edge-runtime/utils/webhook/polar.ts';
-import { processResendWebhook } from '@heyclaude/edge-runtime/utils/webhook/resend.ts';
+  webhookCorsHeaders,
+} from '@heyclaude/edge-runtime';
 import {
   createNotificationRouterContext,
   errorToString,

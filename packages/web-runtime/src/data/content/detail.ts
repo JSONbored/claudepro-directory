@@ -19,6 +19,8 @@ function isValidContentCategory(
   );
 }
 
+export type ContentDetailData = Database['public']['Functions']['get_content_detail_complete']['Returns'];
+
 export async function getContentDetailComplete(input: {
   category: string;
   slug: string;
@@ -36,7 +38,7 @@ export async function getContentDetailComplete(input: {
 
   try {
     return await fetchCached(
-      (client) => new ContentService(client).getContentDetailComplete(category, slug),
+      (client) => new ContentService(client).getContentDetailComplete({ p_category: category, p_slug: slug }),
       {
         key: generateContentCacheKey(category, slug),
         tags: generateContentTags(category, slug),

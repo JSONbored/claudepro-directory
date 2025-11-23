@@ -13,10 +13,10 @@
  * }
  */
 
-import { logger } from '@heyclaude/web-runtime';
+import { logger } from '@heyclaude/web-runtime/core';
+import { handleApiError } from '@heyclaude/web-runtime/utils/error-handler';
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { type NextRequest, NextResponse } from 'next/server';
-import { handleApiError } from '@/src/lib/error-handler';
 
 export async function POST(request: NextRequest) {
   try {

@@ -1,10 +1,9 @@
+import { hashUserId, logger, normalizeError } from '@heyclaude/web-runtime/core';
 import {
   generatePageMetadata,
   getAuthenticatedUser,
   getCollectionDetail,
-  logger,
-  normalizeError,
-} from '@heyclaude/web-runtime';
+} from '@heyclaude/web-runtime/data';
 import { ArrowLeft } from '@heyclaude/web-runtime/icons';
 import type { Metadata } from 'next';
 import Link from 'next/link';
@@ -31,6 +30,8 @@ export default async function EditCollectionPage({ params }: EditCollectionPageP
     redirect('/login');
   }
 
+  const userIdHash = hashUserId(user.id);
+
   let collectionData: Awaited<ReturnType<typeof getCollectionDetail>> = null;
   try {
     collectionData = await getCollectionDetail(user.id, slug);
@@ -38,7 +39,7 @@ export default async function EditCollectionPage({ params }: EditCollectionPageP
     const normalized = normalizeError(error, 'Failed to load collection detail for edit page');
     logger.error('EditCollectionPage: getCollectionDetail threw', normalized, {
       slug,
-      userId: user.id,
+      userIdHash,
     });
     throw normalized;
   }
@@ -46,7 +47,7 @@ export default async function EditCollectionPage({ params }: EditCollectionPageP
   if (!collectionData) {
     logger.warn('EditCollectionPage: collection not found or inaccessible', {
       slug,
-      userId: user.id,
+      userIdHash,
     });
     notFound();
   }
@@ -56,7 +57,7 @@ export default async function EditCollectionPage({ params }: EditCollectionPageP
   if (!collection) {
     logger.warn('EditCollectionPage: collection is null in response', {
       slug,
-      userId: user.id,
+      userIdHash,
     });
     notFound();
   }

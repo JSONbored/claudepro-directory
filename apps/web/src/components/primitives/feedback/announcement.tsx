@@ -1,5 +1,5 @@
 import type { Database } from '@heyclaude/database-types';
-import { ANIMATION_CONSTANTS, cn } from '@heyclaude/web-runtime';
+import { ANIMATION_CONSTANTS, cn } from '@heyclaude/web-runtime/ui';
 import type * as React from 'react';
 import { baseBadgeVariants } from '@/src/components/core/domain/badges/category-badge';
 

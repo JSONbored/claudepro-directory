@@ -1,6 +1,5 @@
 'use client';
 
-import { cn, INFOBOX_COLORS, INFOBOX_ICON_COLORS, UI_CLASSES } from '@heyclaude/web-runtime';
 import {
   AlertTriangle,
   CheckCircle,
@@ -9,15 +8,16 @@ import {
   Info,
   Zap,
 } from '@heyclaude/web-runtime/icons';
-import { useCallback, useState } from 'react';
-import { Alert, AlertDescription, AlertTitle } from '@/src/components/primitives/ui/alert';
-import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
 import type {
   AccordionProps,
   CalloutProps,
   FAQProps,
   InfoBoxProps,
-} from '@/src/lib/types/component.types';
+} from '@heyclaude/web-runtime/types/component.types';
+import { cn, INFOBOX_COLORS, INFOBOX_ICON_COLORS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { useCallback, useState } from 'react';
+import { Alert, AlertDescription, AlertTitle } from '@/src/components/primitives/ui/alert';
+import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
 
 export type AccordionVariant = AccordionProps & {
   contentType: 'accordion';

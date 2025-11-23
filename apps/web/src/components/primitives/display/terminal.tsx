@@ -1,6 +1,6 @@
 'use client';
 
-import { cn } from '@heyclaude/web-runtime';
+import { cn } from '@heyclaude/web-runtime/ui';
 import { type MotionProps, motion } from 'motion/react';
 import { useEffect, useRef, useState } from 'react';
 

@@ -34,3 +34,4 @@ export * from './config/services.ts';
 export * from './config/time.ts';
 export * from './schemas/primitives.ts';
 export * from './schemas/env.ts';
+export * from './schemas/database.generated.ts';

@@ -20,7 +20,7 @@
  * @module components/ui/horizontal-bar-chart
  */
 
-import { cn } from '@heyclaude/web-runtime';
+import { cn } from '@heyclaude/web-runtime/ui';
 import type { ReactNode } from 'react';
 
 export interface HorizontalBarChartDataPoint {

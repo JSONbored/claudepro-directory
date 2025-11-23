@@ -1,7 +1,8 @@
-import { generatePageMetadata, getLastUpdatedDate } from '@heyclaude/web-runtime';
+import { getLastUpdatedDate } from '@heyclaude/web-runtime/core';
+import { generatePageMetadata } from '@heyclaude/web-runtime/data';
+import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
 import type { Metadata } from 'next';
 import { NavLink } from '@/src/components/core/navigation/navigation-link';
-import { APP_CONFIG } from '@/src/lib/data/config/constants';
 
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/privacy');

@@ -11,7 +11,7 @@ export async function getHomepageData(
 ): Promise<Database['public']['Functions']['get_homepage_complete']['Returns'] | null> {
   try {
     return await fetchCached(
-      (client) => new ContentService(client).getHomepageComplete([...categoryIds]),
+      (client) => new ContentService(client).getHomepageComplete({ p_category_ids: [...categoryIds] }),
       {
         key: categoryIds.join('-') || 'all',
         tags: ['homepage', 'content', 'trending'],

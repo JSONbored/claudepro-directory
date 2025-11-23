@@ -3,24 +3,22 @@
 /** Bookmark button - adds/removes content from user bookmarks with optional confetti */
 
 import type { Database } from '@heyclaude/database-types';
+import { addBookmark, removeBookmark } from '@heyclaude/web-runtime';
 import {
-  checkConfettiEnabled,
-  cn,
   isValidCategory,
   logClientWarning,
   logger,
   normalizeError,
-  UI_CLASSES,
-  usePulse,
-} from '@heyclaude/web-runtime';
-import { toasts } from '@heyclaude/web-runtime/client';
+} from '@heyclaude/web-runtime/core';
+import { checkConfettiEnabled } from '@heyclaude/web-runtime/data';
+import { usePulse } from '@heyclaude/web-runtime/hooks';
 import { Bookmark, BookmarkCheck } from '@heyclaude/web-runtime/icons';
+import type { ButtonStyleProps } from '@heyclaude/web-runtime/types/component.types';
+import { cn, toasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
 import { Button } from '@/src/components/primitives/ui/button';
 import { useConfetti } from '@/src/hooks/use-confetti';
-import { addBookmark, removeBookmark } from '@/src/lib/actions/user.actions';
-import type { ButtonStyleProps } from '@/src/lib/types/component.types';
 
 export interface BookmarkButtonProps extends ButtonStyleProps {
   contentType: Database['public']['Enums']['content_category'];
@@ -90,6 +88,7 @@ export function BookmarkButton({
           const result = await addBookmark({
             content_type: validatedCategory,
             content_slug: contentSlug,
+            notes: '',
           });
 
           if (result?.data?.success) {

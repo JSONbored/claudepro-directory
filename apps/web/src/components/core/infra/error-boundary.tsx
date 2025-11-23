@@ -1,8 +1,11 @@
 'use client';
 
-import { UI_CLASSES } from '@heyclaude/web-runtime';
-import { createErrorBoundaryFallback } from '@heyclaude/web-runtime/client';
 import { AlertTriangle, Home, RefreshCw } from '@heyclaude/web-runtime/icons';
+import type {
+  ErrorBoundaryProps,
+  ErrorFallbackProps,
+} from '@heyclaude/web-runtime/types/component.types';
+import { createErrorBoundaryFallback, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { useCallback } from 'react';
 import { ErrorBoundary as ReactErrorBoundary } from 'react-error-boundary';
 import { Button } from '@/src/components/primitives/ui/button';
@@ -13,7 +16,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/ui/card';
-import type { ErrorBoundaryProps, ErrorFallbackProps } from '@/src/lib/types/component.types';
 
 // Client-safe environment check - doesn't trigger server env validation
 const isDevelopment = process.env.NODE_ENV === 'development';

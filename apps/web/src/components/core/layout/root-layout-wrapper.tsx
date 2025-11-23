@@ -6,14 +6,9 @@
 'use client';
 
 import type { Database } from '@heyclaude/database-types';
-import {
-  checkConfettiEnabled,
-  DIMENSIONS,
-  logClientWarning,
-  logger,
-  normalizeError,
-} from '@heyclaude/web-runtime';
-import { toasts } from '@heyclaude/web-runtime/client';
+import { logClientWarning, logger, normalizeError } from '@heyclaude/web-runtime/core';
+import { checkConfettiEnabled } from '@heyclaude/web-runtime/data';
+import { DIMENSIONS, toasts } from '@heyclaude/web-runtime/ui';
 import dynamic from 'next/dynamic';
 import { usePathname } from 'next/navigation';
 import { useEffect } from 'react';

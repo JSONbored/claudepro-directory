@@ -5,18 +5,15 @@
  */
 
 import type { Database } from '@heyclaude/database-types';
-import { logger, normalizeError, UI_CLASSES } from '@heyclaude/web-runtime';
+import { createCompany, getCompanyByIdAction, searchCompaniesAction } from '@heyclaude/web-runtime';
+import { logger, normalizeError } from '@heyclaude/web-runtime/core';
+import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { Building2, Plus, Search } from 'lucide-react';
 import { useCallback, useEffect, useId, useState, useTransition } from 'react';
 import { Button } from '@/src/components/primitives/ui/button';
 import { Input } from '@/src/components/primitives/ui/input';
 import { Label } from '@/src/components/primitives/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/src/components/primitives/ui/popover';
-import {
-  createCompany,
-  getCompanyByIdAction,
-  searchCompaniesAction,
-} from '@/src/lib/actions/companies.actions';
 
 type Company = Pick<
   Database['public']['Tables']['companies']['Row'],

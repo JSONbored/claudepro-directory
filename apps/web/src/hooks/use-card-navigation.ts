@@ -20,7 +20,7 @@
  * ```
  */
 
-import { navigateWithTransition } from '@heyclaude/web-runtime/client';
+import { navigateWithTransition } from '@heyclaude/web-runtime/ui';
 import { useRouter } from 'next/navigation';
 import { useCallback } from 'react';
 

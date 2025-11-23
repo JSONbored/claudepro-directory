@@ -3,13 +3,13 @@
  */
 
 import type { Database } from '@heyclaude/database-types';
+import { logger, normalizeError } from '@heyclaude/web-runtime/core';
 import {
   generatePageMetadata,
   getAuthenticatedUser,
   getUserCompanyById,
-  logger,
-  normalizeError,
-} from '@heyclaude/web-runtime';
+} from '@heyclaude/web-runtime/data';
+import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
@@ -22,7 +22,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/ui/card';
-import { ROUTES } from '@/src/lib/data/config/constants';
 
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/account/companies/:id/edit');

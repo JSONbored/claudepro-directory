@@ -28,6 +28,9 @@ on:
   schedule:
     - cron: '0 3 * * 1'  # Weekly security scan on Mondays at 3am UTC
 
+env:
+  PNPM_VERSION: 10.23.0
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
@@ -161,7 +164,7 @@ jobs:
     - name: Setup pnpm
       uses: pnpm/action-setup@v4
       with:
-        version: 10.22.0
+        version: ${{ env.PNPM_VERSION }}
 
     - name: Setup Node.js
       uses: actions/setup-node@v6
@@ -208,7 +211,7 @@ jobs:
     - name: Setup pnpm
       uses: pnpm/action-setup@v4
       with:
-        version: 10.22.0
+        version: ${{ env.PNPM_VERSION }}
 
     - name: Setup Node.js
       uses: actions/setup-node@v6
@@ -266,7 +269,7 @@ jobs:
     - name: Setup pnpm
       uses: pnpm/action-setup@v4
       with:
-        version: 10.22.0
+        version: ${{ env.PNPM_VERSION }}
 
     - name: Setup Node.js
       uses: actions/setup-node@v6
@@ -297,10 +300,13 @@ jobs:
     - name: Notify Vercel
       if: github.event_name == 'push'
       uses: vercel/repository-dispatch/actions/status@v1
+      env:
+        LINT_WEB_OUTCOME: ${{ steps.lint_web.outcome }}
+        LINT_EDGE_OUTCOME: ${{ steps.lint_edge.outcome }}
       with:
         name: 'Vercel - heyclaude: lint-${{ matrix.target }}'
-        status: ${{ steps[matrix.stepId].outcome == 'success' && 'success' || 'failure' }}
-        description: ${{ steps[matrix.stepId].outcome == 'success' && format('{0} lint passed', matrix.label) || format('{0} lint failed', matrix.label) }}
+        status: ${{ (matrix.target == 'web' && env.LINT_WEB_OUTCOME == 'success') || (matrix.target == 'edge' && env.LINT_EDGE_OUTCOME == 'success') ? 'success' : 'failure' }}
+        description: ${{ ((matrix.target == 'web' && env.LINT_WEB_OUTCOME == 'success') || (matrix.target == 'edge' && env.LINT_EDGE_OUTCOME == 'success')) ? format('{0} lint passed', matrix.label) : format('{0} lint failed', matrix.label) }}
 
   build:
     name: Build
@@ -317,7 +323,7 @@ jobs:
     - name: Setup pnpm
       uses: pnpm/action-setup@v4
       with:
-        version: 10.22.0
+        version: ${{ env.PNPM_VERSION }}
 
     - name: Setup Node.js
       uses: actions/setup-node@v6

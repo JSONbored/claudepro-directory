@@ -1,9 +1,7 @@
-import {
-  generatePageMetadata,
-  getAuthenticatedUser,
-  logger,
-  normalizeError,
-} from '@heyclaude/web-runtime';
+import { getUserIdentities } from '@heyclaude/web-runtime';
+import { logger, normalizeError } from '@heyclaude/web-runtime/core';
+import { generatePageMetadata, getAuthenticatedUser } from '@heyclaude/web-runtime/data';
+import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ConnectedAccountsClient } from '@/src/components/features/account/connected-accounts-client';
@@ -15,8 +13,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/ui/card';
-import { getUserIdentities } from '@/src/lib/actions/user.actions';
-import { ROUTES } from '@/src/lib/data/config/constants';
 
 export async function generateMetadata(): Promise<Metadata> {
   return await generatePageMetadata('/account/connected-accounts');

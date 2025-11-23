@@ -2,13 +2,9 @@
  * Job Detail Page - Database-first job listing display
  */
 
-import {
-  generatePageMetadata,
-  getJobBySlug,
-  logger,
-  normalizeError,
-  UI_CLASSES,
-} from '@heyclaude/web-runtime';
+import { logger, normalizeError } from '@heyclaude/web-runtime/core';
+import { generatePageMetadata, getJobBySlug } from '@heyclaude/web-runtime/data';
+import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import {
   ArrowLeft,
   Building2,
@@ -19,6 +15,9 @@ import {
   MapPin,
   Users,
 } from '@heyclaude/web-runtime/icons';
+import type { PageProps } from '@heyclaude/web-runtime/types/app.schema';
+import { slugParamsSchema } from '@heyclaude/web-runtime/types/app.schema';
+import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -27,9 +26,6 @@ import { Pulse } from '@/src/components/core/infra/pulse';
 import { StructuredData } from '@/src/components/core/infra/structured-data';
 import { Button } from '@/src/components/primitives/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
-import { ROUTES } from '@/src/lib/data/config/constants';
-import type { PageProps } from '@/src/lib/schemas/app.schema';
-import { slugParamsSchema } from '@/src/lib/schemas/app.schema';
 
 /**
  * Validate and sanitize external website URL for safe use in href attributes

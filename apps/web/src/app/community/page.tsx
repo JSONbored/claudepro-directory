@@ -13,16 +13,13 @@ const NewsletterCTAVariant = dynamic(
   }
 );
 
-import {
-  generatePageMetadata,
-  getContactChannels,
-  logger,
-  UI_CLASSES,
-} from '@heyclaude/web-runtime';
+import { getContactChannels, logger } from '@heyclaude/web-runtime/core';
+import { generatePageMetadata } from '@heyclaude/web-runtime/data';
+import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { Github, MessageCircle, MessageSquare, Twitter, Users } from '@heyclaude/web-runtime/icons';
+import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import type { Metadata } from 'next';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
-import { ROUTES } from '@/src/lib/data/config/constants';
 
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/community');

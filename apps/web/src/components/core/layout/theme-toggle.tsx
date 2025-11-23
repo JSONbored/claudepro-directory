@@ -1,13 +1,10 @@
 'use client';
 
-import {
-  getTimeoutConfig,
-  logClientWarning,
-  logger,
-  UI_CLASSES,
-  useViewTransition,
-} from '@heyclaude/web-runtime';
+import { logClientWarning, logger } from '@heyclaude/web-runtime/core';
+import { getTimeoutConfig } from '@heyclaude/web-runtime/data';
+import { useViewTransition } from '@heyclaude/web-runtime/hooks';
 import { Moon, Sun } from '@heyclaude/web-runtime/icons';
+import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { useEffect, useRef, useState } from 'react';
 import { Switch } from '@/src/components/primitives/ui/switch';
 

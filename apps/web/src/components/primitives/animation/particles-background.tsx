@@ -22,8 +22,8 @@
  * ```
  */
 
+import { SUBMISSION_FORM_TOKENS as TOKENS } from '@heyclaude/web-runtime/ui/design-tokens/submission-form';
 import { useEffect, useRef } from 'react';
-import { SUBMISSION_FORM_TOKENS as TOKENS } from '@/src/lib/design-tokens/submission-form';
 
 interface Particle {
   x: number;

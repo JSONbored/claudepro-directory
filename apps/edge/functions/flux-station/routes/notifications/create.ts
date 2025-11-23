@@ -9,17 +9,15 @@
 import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
 import {
+  badRequestResponse,
   createNotificationTrace,
+  errorResponse,
+  getAuthUserFromHeader,
   insertNotification,
   type NotificationInsertPayload,
-} from '@heyclaude/edge-runtime/notifications/service.ts';
-import { getAuthUserFromHeader } from '@heyclaude/edge-runtime/utils/auth.ts';
-import {
-  badRequestResponse,
-  errorResponse,
   notificationCorsHeaders,
   successResponse,
-} from '@heyclaude/edge-runtime/utils/http.ts';
+} from '@heyclaude/edge-runtime';
 import {
   createNotificationRouterContext,
   MAX_BODY_SIZE,

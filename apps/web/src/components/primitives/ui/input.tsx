@@ -1,6 +1,6 @@
 'use client';
 
-import { ANIMATION_CONSTANTS, cn, STATE_PATTERNS } from '@heyclaude/web-runtime';
+import { ANIMATION_CONSTANTS, cn, STATE_PATTERNS } from '@heyclaude/web-runtime/ui';
 import { motion } from 'motion/react';
 import type * as React from 'react';
 import { useState } from 'react';

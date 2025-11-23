@@ -5,8 +5,8 @@
  * Displays progress bar and question counter for quiz
  */
 
-import { POSITION_PATTERNS, UI_CLASSES } from '@heyclaude/web-runtime';
 import { CheckCircle } from '@heyclaude/web-runtime/icons';
+import { POSITION_PATTERNS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 
 interface QuizProgressProps {

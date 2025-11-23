@@ -5,7 +5,7 @@
 'use client';
 
 import type { Database } from '@heyclaude/database-types';
-import { logger } from '@heyclaude/web-runtime';
+import { logger } from '@heyclaude/web-runtime/core';
 import DOMPurify from 'dompurify';
 import { Checklist } from '@/src/components/content/checklist';
 import { ProductionCodeBlock } from '@/src/components/content/interactive-code-block';

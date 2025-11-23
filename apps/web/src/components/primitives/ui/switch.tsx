@@ -1,6 +1,6 @@
 'use client';
 
-import { cn, STATE_PATTERNS } from '@heyclaude/web-runtime';
+import { cn, STATE_PATTERNS } from '@heyclaude/web-runtime/ui';
 import * as SwitchPrimitives from '@radix-ui/react-switch';
 import type * as React from 'react';
 

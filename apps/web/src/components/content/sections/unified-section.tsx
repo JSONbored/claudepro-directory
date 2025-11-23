@@ -1,7 +1,6 @@
 'use client';
 
 import type { Database } from '@heyclaude/database-types';
-import { cn, UI_CLASSES } from '@heyclaude/web-runtime';
 import {
   Bookmark,
   BookOpen,
@@ -17,6 +16,8 @@ import {
   Terminal,
   Zap,
 } from '@heyclaude/web-runtime/icons';
+import type { UnifiedSectionProps } from '@heyclaude/web-runtime/types/component.types';
+import { cn, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { motion } from 'motion/react';
 import { ProductionCodeBlock } from '@/src/components/content/interactive-code-block';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
@@ -27,7 +28,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/ui/card';
-import type { UnifiedSectionProps } from '@/src/lib/types/component.types';
 
 const ICONS: Record<Database['public']['Enums']['content_category'], LucideIcon> = {
   agents: Sparkles,

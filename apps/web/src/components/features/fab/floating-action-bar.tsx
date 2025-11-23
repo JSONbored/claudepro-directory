@@ -2,7 +2,7 @@
 
 /** Unified floating action bar with scroll-aware speed dial menu */
 
-import { logger, normalizeError } from '@heyclaude/web-runtime';
+import { logger, normalizeError } from '@heyclaude/web-runtime/core';
 import { AnimatePresence, motion } from 'motion/react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';

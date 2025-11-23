@@ -5,14 +5,12 @@
 
 import {
   createNotificationTrace,
-  getActiveNotificationsForUser,
-} from '@heyclaude/edge-runtime/notifications/service.ts';
-import { requireAuthUser } from '@heyclaude/edge-runtime/utils/auth.ts';
-import {
   errorResponse,
+  getActiveNotificationsForUser,
   notificationCorsHeaders,
+  requireAuthUser,
   successResponse,
-} from '@heyclaude/edge-runtime/utils/http.ts';
+} from '@heyclaude/edge-runtime';
 import { createNotificationRouterContext } from '@heyclaude/shared-runtime';
 
 export async function handleActiveNotifications(req: Request): Promise<Response> {

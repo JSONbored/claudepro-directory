@@ -1,6 +1,6 @@
 'use client';
 
-import { logger, normalizeError } from '@heyclaude/web-runtime';
+import { logger, normalizeError } from '@heyclaude/web-runtime/core';
 import { useCallback } from 'react';
 
 type ContextValue = string | number | boolean;

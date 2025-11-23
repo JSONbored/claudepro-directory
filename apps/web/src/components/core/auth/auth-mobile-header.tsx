@@ -4,7 +4,7 @@
 
 'use client';
 
-import { UI_CLASSES } from '@heyclaude/web-runtime';
+import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { motion } from 'motion/react';
 import { HeyClaudeLogo } from '@/src/components/core/layout/brand-logo';
 

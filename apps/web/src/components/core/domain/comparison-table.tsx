@@ -3,8 +3,9 @@
  * Used in 16+ MDX files across the codebase
  */
 
-import { UI_CLASSES } from '@heyclaude/web-runtime';
 import { CheckCircle } from '@heyclaude/web-runtime/icons';
+import type { ComparisonTableProps } from '@heyclaude/web-runtime/types/component.types';
+import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import {
   Card,
   CardContent,
@@ -12,7 +13,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/ui/card';
-import type { ComparisonTableProps } from '@/src/lib/types/component.types';
 
 export function ComparisonTable(props: ComparisonTableProps) {
   // Database CHECK constraint validates structure - no runtime validation needed

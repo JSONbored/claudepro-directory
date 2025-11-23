@@ -4,19 +4,18 @@
  */
 
 import type { Database } from '@heyclaude/database-types';
+import { type CreateJobInput, updateJob } from '@heyclaude/web-runtime';
+import { logger, normalizeError } from '@heyclaude/web-runtime/core';
 import {
   generatePageMetadata,
   getAuthenticatedUser,
   getPaymentPlanCatalog,
   getUserJobById,
-  logger,
-  normalizeError,
-  UI_CLASSES,
-} from '@heyclaude/web-runtime';
+} from '@heyclaude/web-runtime/data';
+import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import type { Metadata } from 'next';
 import { notFound, redirect } from 'next/navigation';
 import { JobForm } from '@/src/components/core/forms/job-form';
-import { type UpdateJobInput, updateJob } from '@/src/lib/actions/jobs.actions';
 
 interface EditJobPageMetadataProps {
   params: Promise<{ id: string }>;
@@ -60,14 +59,14 @@ export default async function EditJobPage({ params }: EditJobPageProps) {
   }
   const planCatalog = await getPaymentPlanCatalog();
 
-  const handleSubmit = async (data: Omit<UpdateJobInput, 'job_id'>) => {
+  const handleSubmit = async (data: CreateJobInput) => {
     'use server';
 
     let result: Awaited<ReturnType<typeof updateJob>>;
     try {
       result = await updateJob({
         job_id: id,
-        ...data,
+        updates: data,
       });
     } catch (error) {
       const normalized = normalizeError(error, 'updateJob server action failed');

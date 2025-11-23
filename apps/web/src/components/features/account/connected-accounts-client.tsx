@@ -6,8 +6,7 @@
  */
 
 import type { Database } from '@heyclaude/database-types';
-import { UI_CLASSES } from '@heyclaude/web-runtime';
-import { errorToasts, successToasts } from '@heyclaude/web-runtime/client';
+import { unlinkOAuthProvider } from '@heyclaude/web-runtime';
 import {
   AlertTriangle,
   CheckCircle,
@@ -15,6 +14,7 @@ import {
   GithubBrandIcon,
   GoogleBrandIcon,
 } from '@heyclaude/web-runtime/icons';
+import { errorToasts, successToasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { type ComponentType, useState, useTransition } from 'react';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { Button } from '@/src/components/primitives/ui/button';
@@ -26,7 +26,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/src/components/primitives/ui/dialog';
-import { unlinkOAuthProvider } from '@/src/lib/actions/user.actions';
 
 type Identity = NonNullable<
   Database['public']['Functions']['get_user_identities']['Returns']['identities']

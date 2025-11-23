@@ -1,8 +1,8 @@
 import { readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { SECURITY_CONFIG } from '@heyclaude/web-runtime/config/security';
-import { ParseStrategy, safeParse } from '@heyclaude/web-runtime/data';
-import { VALID_CATEGORIES } from '@heyclaude/web-runtime/data/config/category';
+import { SECURITY_CONFIG } from '@heyclaude/shared-runtime';
+import { ParseStrategy, safeParse } from '@heyclaude/web-runtime/core';
+import { VALID_CATEGORIES } from '@heyclaude/web-runtime/data/config/category/index.js';
 import { z } from 'zod';
 import { computeHash, hasHashChanged, setHash } from '../toolkit/cache.js';
 import { logger } from '../toolkit/logger.js';

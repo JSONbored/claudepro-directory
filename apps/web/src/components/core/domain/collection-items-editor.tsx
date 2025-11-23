@@ -10,13 +10,13 @@
 
 import type { Database } from '@heyclaude/database-types';
 import {
-  isValidCategory,
-  logClientWarning,
-  sanitizeSlug,
-  UI_CLASSES,
+  addItemToCollection,
+  removeItemFromCollection,
+  reorderCollectionItems,
 } from '@heyclaude/web-runtime';
-import { toasts } from '@heyclaude/web-runtime/client';
+import { isValidCategory, logClientWarning, sanitizeSlug } from '@heyclaude/web-runtime/core';
 import { ArrowDown, ArrowUp, ExternalLink, Plus, Trash } from '@heyclaude/web-runtime/icons';
+import { toasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
@@ -29,11 +29,6 @@ import {
   SelectValue,
 } from '@/src/components/primitives/ui/select';
 import { Separator } from '@/src/components/primitives/ui/separator';
-import {
-  addItemToCollection,
-  removeItemFromCollection,
-  reorderCollectionItems,
-} from '@/src/lib/actions/content.actions';
 
 /**
  * Validate slug is safe for use in URLs
@@ -120,8 +115,7 @@ export function CollectionItemManager({
     startTransition(async () => {
       try {
         const result = await removeItemFromCollection({
-          id: itemId,
-          collection_id: collectionId,
+          remove_item_id: itemId,
         });
 
         if (result?.data?.success) {

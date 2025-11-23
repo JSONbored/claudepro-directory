@@ -8,71 +8,21 @@ import { logger } from '../../logger.ts';
 import { normalizeError } from '../../errors.ts';
 import { fetchCached } from '../../cache/fetch-cached.ts';
 import { MiscService } from '@heyclaude/data-layer';
+import type {
+  SubmissionContentType,
+  SubmissionFormConfig,
+  SubmissionFormSection,
+  FieldDefinition,
+  TextFieldDefinition,
+  TextareaFieldDefinition,
+  NumberFieldDefinition,
+  SelectFieldDefinition,
+  SelectOption
+} from '../../types/component.types.ts';
 
-type SubmissionContentType = Database['public']['Enums']['submission_type'];
-type GridColumn = Database['public']['Enums']['form_grid_column'];
-type IconPosition = Database['public']['Enums']['form_icon_position'];
 const SUBMISSION_CONTENT_TYPES = Constants.public.Enums.submission_type as readonly SubmissionContentType[];
 const FORM_FIELDS_CACHE_TAG = 'submission-form-fields';
 const FORM_FIELDS_CACHE_SECONDS = 60 * 60 * 6;
-
-export interface SubmissionFormSection {
-  nameField: TextFieldDefinition | null;
-  common: FieldDefinition[];
-  typeSpecific: FieldDefinition[];
-  tags: FieldDefinition[];
-}
-
-export type SubmissionFormConfig = Record<SubmissionContentType, SubmissionFormSection>;
-
-type FieldDefinition =
-  | TextFieldDefinition
-  | TextareaFieldDefinition
-  | NumberFieldDefinition
-  | SelectFieldDefinition;
-
-interface BaseFieldDefinition {
-  type: 'text' | 'textarea' | 'number' | 'select';
-  name: string;
-  label: string;
-  placeholder?: string;
-  helpText?: string;
-  required?: boolean;
-  gridColumn?: GridColumn;
-  iconName?: string;
-  iconPosition?: IconPosition;
-}
-
-interface TextFieldDefinition extends BaseFieldDefinition {
-  type: 'text';
-  defaultValue?: string;
-}
-
-interface TextareaFieldDefinition extends BaseFieldDefinition {
-  type: 'textarea';
-  rows?: number;
-  monospace: boolean;
-  defaultValue?: string;
-}
-
-interface NumberFieldDefinition extends BaseFieldDefinition {
-  type: 'number';
-  min?: number;
-  max?: number;
-  step?: number;
-  defaultValue?: number;
-}
-
-interface SelectOption {
-  value: string;
-  label: string;
-}
-
-interface SelectFieldDefinition extends BaseFieldDefinition {
-  type: 'select';
-  options: SelectOption[];
-  defaultValue?: string;
-}
 
 type FormFieldConfigItem = Database['public']['CompositeTypes']['form_field_config_item'];
 
@@ -169,7 +119,7 @@ async function fetchFieldsForContentType(
   contentType: SubmissionContentType
 ): Promise<SubmissionFormSection> {
   const result = await fetchCached(
-    (client) => new MiscService(client).getFormFieldConfig(contentType),
+    (client) => new MiscService(client).getFormFieldConfig({ p_form_type: contentType }),
     {
       key: contentType,
       tags: ['templates', `submission-${contentType}`],

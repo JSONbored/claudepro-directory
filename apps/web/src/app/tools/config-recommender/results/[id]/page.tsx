@@ -4,16 +4,12 @@
  */
 
 import { Constants, type Database } from '@heyclaude/database-types';
-import {
-  generatePageMetadata,
-  getConfigRecommendations,
-  logger,
-  normalizeError,
-} from '@heyclaude/web-runtime';
+import { logger, normalizeError } from '@heyclaude/web-runtime/core';
+import { generatePageMetadata, getConfigRecommendations } from '@heyclaude/web-runtime/data';
+import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { ResultsDisplay } from '@/src/components/features/tools/recommender/results-display';
-import { APP_CONFIG } from '@/src/lib/data/config/constants';
 
 type RecommendationResponse = Database['public']['Functions']['get_recommendations']['Returns'] & {
   answers: DecodedQuizAnswers;

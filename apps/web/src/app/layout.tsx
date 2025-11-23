@@ -6,7 +6,8 @@ import './globals.css';
 import './view-transitions.css';
 import './micro-interactions.css';
 import './sugar-high.css';
-import { getLayoutData, logger, normalizeError } from '@heyclaude/web-runtime';
+import { logger, normalizeError } from '@heyclaude/web-runtime/core';
+import { getLayoutData } from '@heyclaude/web-runtime/data';
 import { unstable_cache } from 'next/cache';
 import dynamic from 'next/dynamic';
 import { Toaster } from 'sonner';
@@ -22,7 +23,8 @@ const NotificationToastHandler = dynamic(
 );
 
 import type { Database } from '@heyclaude/database-types';
-import { generatePageMetadata } from '@heyclaude/web-runtime';
+import { generatePageMetadata } from '@heyclaude/web-runtime/data';
+import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
 import { ErrorBoundary } from '@/src/components/core/infra/error-boundary';
 import { PostCopyEmailProvider } from '@/src/components/core/infra/providers/email-capture-modal-provider';
 import { Pulse } from '@/src/components/core/infra/pulse';
@@ -30,7 +32,6 @@ import { PulseCannon } from '@/src/components/core/infra/pulse-cannon';
 import { StructuredData } from '@/src/components/core/infra/structured-data';
 import { LayoutContent } from '@/src/components/core/layout/root-layout-wrapper';
 import { NotificationsProvider } from '@/src/components/providers/notifications-provider';
-import { APP_CONFIG } from '@/src/lib/data/config/constants';
 
 // CRITICAL: Lazy-load getLayoutFlags to prevent flags.ts from being analyzed during build
 // Even though getLayoutFlags has build-time checks, Next.js's static analyzer might

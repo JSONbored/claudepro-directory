@@ -1,14 +1,10 @@
-import {
-  generatePageMetadata,
-  getPaymentPlanCatalog,
-  logger,
-  normalizeError,
-  UI_CLASSES,
-} from '@heyclaude/web-runtime';
+import { type CreateJobInput, createJob } from '@heyclaude/web-runtime';
+import { logger, normalizeError } from '@heyclaude/web-runtime/core';
+import { generatePageMetadata, getPaymentPlanCatalog } from '@heyclaude/web-runtime/data';
+import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { JobForm } from '@/src/components/core/forms/job-form';
-import { type CreateJobInput, createJob } from '@/src/lib/actions/jobs.actions';
 
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/account/jobs/new');

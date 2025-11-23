@@ -1,7 +1,7 @@
 'use client';
 
-import { cn } from '@heyclaude/web-runtime';
 import { Star as StarIcon } from '@heyclaude/web-runtime/icons';
+import { cn } from '@heyclaude/web-runtime/ui';
 import { useControllableState } from '@radix-ui/react-use-controllable-state';
 import type { KeyboardEvent, MouseEvent, ReactElement, ReactNode } from 'react';
 import {

@@ -12,8 +12,9 @@
  * @module components/features/community/contributors-sidebar
  */
 
-import { POSITION_PATTERNS, sanitizeSlug, UI_CLASSES } from '@heyclaude/web-runtime';
+import { sanitizeSlug } from '@heyclaude/web-runtime/core';
 import { Award, Medal, TrendingUp } from '@heyclaude/web-runtime/icons';
+import { POSITION_PATTERNS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import Image from 'next/image';
 import Link from 'next/link';
 import { memo } from 'react';

@@ -23,7 +23,7 @@ export async function getCompanyAdminProfile(
   }
 
   const data = await fetchCached(
-    (client) => new CompaniesService(client).getCompanyAdminProfile(companyId),
+    (client) => new CompaniesService(client).getCompanyAdminProfile({ p_company_id: companyId }),
     {
       key: companyId,
       tags: ['companies', `company-id-${companyId}`],
@@ -47,7 +47,7 @@ export async function getCompanyProfile(
   slug: string
 ): Promise<Database['public']['Functions']['get_company_profile']['Returns'] | null> {
   return fetchCached(
-    (client) => new CompaniesService(client).getCompanyProfile(slug),
+    (client) => new CompaniesService(client).getCompanyProfile({ p_slug: slug }),
     {
       key: slug,
       tags: ['companies', 'jobs', `company-${slug}`],
@@ -63,7 +63,7 @@ export async function getCompaniesList(
   offset = 0
 ): Promise<Database['public']['Functions']['get_companies_list']['Returns']> {
   return fetchCached(
-    (client) => new CompaniesService(client).getCompaniesList(limit, offset),
+    (client) => new CompaniesService(client).getCompaniesList({ p_limit: limit, p_offset: offset }),
     {
       key: `list-${limit}-${offset}`,
       tags: ['companies', 'jobs'],

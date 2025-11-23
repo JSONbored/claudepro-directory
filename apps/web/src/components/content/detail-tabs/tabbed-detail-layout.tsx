@@ -7,10 +7,12 @@
  */
 
 import type { Database } from '@heyclaude/database-types';
-import { cn, logUnhandledPromise, usePulse } from '@heyclaude/web-runtime';
+import { logUnhandledPromise } from '@heyclaude/web-runtime/core';
+import { usePulse } from '@heyclaude/web-runtime/hooks';
+import type { TabbedDetailLayoutProps } from '@heyclaude/web-runtime/types/component.types';
+import { cn } from '@heyclaude/web-runtime/ui';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/primitives/ui/tabs';
-import type { TabbedDetailLayoutProps } from '@/src/lib/types/component.types';
 
 import { TabSectionRenderer } from './tab-section-renderer';
 

@@ -2,7 +2,8 @@
  * Search Page - Database-First RPC via search_content_optimized()
  */
 
-import { type SearchFilters, searchContent } from '@heyclaude/web-runtime';
+import type { SearchFilters } from '@heyclaude/web-runtime/core';
+import { searchContent } from '@heyclaude/web-runtime/data';
 import type { Metadata } from 'next';
 import { ContentSearchClient } from '@/src/components/content/content-search';
 
@@ -17,7 +18,8 @@ function isValidSort(value: string | undefined): value is SearchFilters['sort'] 
   return VALID_SORT_OPTIONS.some((option) => option === value);
 }
 
-import { generatePageMetadata, logger, normalizeError } from '@heyclaude/web-runtime';
+import { logger, normalizeError } from '@heyclaude/web-runtime/core';
+import { generatePageMetadata } from '@heyclaude/web-runtime/data';
 
 export const revalidate = false;
 

@@ -14,7 +14,9 @@
  * - Works with all variants (default, destructive, outline, secondary, ghost, link)
  */
 
-import { cn, getAnimationConfig, logger, STATE_PATTERNS, UI_CLASSES } from '@heyclaude/web-runtime';
+import { logger } from '@heyclaude/web-runtime/core';
+import { getAnimationConfig } from '@heyclaude/web-runtime/data';
+import { cn, STATE_PATTERNS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { Slot } from '@radix-ui/react-slot';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { AnimatePresence, motion } from 'motion/react';

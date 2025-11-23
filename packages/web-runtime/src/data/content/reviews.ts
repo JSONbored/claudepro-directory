@@ -21,12 +21,12 @@ export async function getReviewsWithStatsData(
 
   return fetchCached(
     (client) => new ContentService(client).getReviewsWithStats({
-        contentType,
-        contentSlug,
-        ...(sortBy ? { sortBy } : {}),
-        ...(limit ? { limit } : {}),
-        ...(offset ? { offset } : {}),
-        ...(userId ? { userId } : {})
+        p_content_type: contentType,
+        p_content_slug: contentSlug,
+        ...(sortBy ? { p_sort_by: sortBy } : {}),
+        ...(limit ? { p_limit: limit } : {}),
+        ...(offset ? { p_offset: offset } : {}),
+        ...(userId ? { p_user_id: userId } : {})
     }),
     {
       key: `${generateContentCacheKey(contentType, contentSlug, limit, offset)}-${sortBy ?? 'default'}-${userId ?? 'anon'}`,

@@ -14,10 +14,10 @@
  * - Quality score integration
  */
 
-import { cn } from '@heyclaude/web-runtime';
 import { CheckCircle } from '@heyclaude/web-runtime/icons';
+import { cn } from '@heyclaude/web-runtime/ui';
+import { SUBMISSION_FORM_TOKENS as TOKENS } from '@heyclaude/web-runtime/ui/design-tokens/submission-form';
 import { motion } from 'motion/react';
-import { SUBMISSION_FORM_TOKENS as TOKENS } from '@/src/lib/design-tokens/submission-form';
 
 export interface WizardStep {
   id: string;

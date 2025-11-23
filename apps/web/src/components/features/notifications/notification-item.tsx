@@ -5,8 +5,8 @@
 'use client';
 
 import type { Database } from '@heyclaude/database-types';
-import { UI_CLASSES } from '@heyclaude/web-runtime';
 import { Bell, X } from '@heyclaude/web-runtime/icons';
+import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { motion } from 'motion/react';
 import Link from 'next/link';
 import { Button } from '@/src/components/primitives/ui/button';

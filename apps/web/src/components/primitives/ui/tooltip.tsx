@@ -1,6 +1,6 @@
 'use client';
 
-import { cn } from '@heyclaude/web-runtime';
+import { cn } from '@heyclaude/web-runtime/ui';
 import * as TooltipPrimitive from '@radix-ui/react-tooltip';
 import type * as React from 'react';
 

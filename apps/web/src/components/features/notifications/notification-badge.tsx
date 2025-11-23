@@ -14,7 +14,9 @@
 
 'use client';
 
-import { getAnimationConfig, logger, POSITION_PATTERNS } from '@heyclaude/web-runtime';
+import { logger } from '@heyclaude/web-runtime/core';
+import { getAnimationConfig } from '@heyclaude/web-runtime/data';
+import { POSITION_PATTERNS } from '@heyclaude/web-runtime/ui';
 import { AnimatePresence, motion } from 'motion/react';
 import { useEffect, useState } from 'react';
 import { useNotificationsContext } from '@/src/components/providers/notifications-provider';

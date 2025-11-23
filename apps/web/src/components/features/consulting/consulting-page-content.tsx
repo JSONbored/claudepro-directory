@@ -5,7 +5,7 @@
  */
 
 import Cal, { getCalApi } from '@calcom/embed-react';
-import { logger } from '@heyclaude/web-runtime';
+import { logger } from '@heyclaude/web-runtime/core';
 import { motion } from 'motion/react';
 import Link from 'next/link';
 import { useEffect } from 'react';

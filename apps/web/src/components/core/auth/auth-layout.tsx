@@ -4,7 +4,7 @@
 
 'use client';
 
-import { DIMENSIONS } from '@heyclaude/web-runtime';
+import { DIMENSIONS } from '@heyclaude/web-runtime/ui';
 import { motion } from 'motion/react';
 import type { ReactNode } from 'react';
 

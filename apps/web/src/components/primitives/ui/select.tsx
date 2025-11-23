@@ -1,13 +1,13 @@
 'use client';
 
+import { Check, ChevronDown, ChevronUp } from '@heyclaude/web-runtime/icons';
 import {
   cn,
   DIMENSIONS,
   POSITION_PATTERNS,
   STATE_PATTERNS,
   UI_CLASSES,
-} from '@heyclaude/web-runtime';
-import { Check, ChevronDown, ChevronUp } from '@heyclaude/web-runtime/icons';
+} from '@heyclaude/web-runtime/ui';
 import * as SelectPrimitive from '@radix-ui/react-select';
 import type * as React from 'react';
 

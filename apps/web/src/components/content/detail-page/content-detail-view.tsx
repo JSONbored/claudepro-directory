@@ -6,17 +6,23 @@
 import type { Database } from '@heyclaude/database-types';
 import {
   ensureStringArray,
-  getCategoryConfig,
-  getDisplayTitle,
   getMetadata,
-  highlightCodeEdge,
   isValidCategory,
   logger,
   normalizeError,
-  processContentEdge,
   transformMcpConfigForDisplay,
-} from '@heyclaude/web-runtime';
-import { getViewTransitionName } from '@heyclaude/web-runtime/client';
+} from '@heyclaude/web-runtime/core';
+import {
+  getCategoryConfig,
+  highlightCodeEdge,
+  processContentEdge,
+} from '@heyclaude/web-runtime/data';
+import type {
+  ContentItem,
+  InstallationSteps,
+  ProcessedSectionData,
+} from '@heyclaude/web-runtime/types/component.types';
+import { getDisplayTitle, getViewTransitionName } from '@heyclaude/web-runtime/ui';
 import { Suspense } from 'react';
 import { TabbedDetailLayout } from '@/src/components/content/detail-tabs/tabbed-detail-layout';
 import { JSONSectionRenderer } from '@/src/components/content/json-to-sections';
@@ -24,11 +30,6 @@ import UnifiedSection from '@/src/components/content/sections/unified-section';
 import { ReviewListSection } from '@/src/components/core/domain/reviews/review-list-section';
 import { NewsletterScrollTrigger } from '@/src/components/features/growth/newsletter/newsletter-scroll-trigger';
 import { RecentlyViewedSidebar } from '@/src/components/features/navigation/recently-viewed-sidebar';
-import type {
-  ContentItem,
-  InstallationSteps,
-  ProcessedSectionData,
-} from '@/src/lib/types/component.types';
 import { DetailHeader } from './detail-header';
 import { DetailMetadata } from './detail-metadata';
 import { DetailSidebar } from './sidebar/navigation-sidebar';

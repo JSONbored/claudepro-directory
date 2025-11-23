@@ -14,15 +14,14 @@
 'use client';
 
 import type { Database } from '@heyclaude/database-types';
+import { getContactCommands, submitContactForm } from '@heyclaude/web-runtime';
+import { logger, logUnhandledPromise, normalizeError } from '@heyclaude/web-runtime/core';
 import {
-  cn,
-  logger,
-  logUnhandledPromise,
-  normalizeError,
   trackTerminalCommandAction,
   trackTerminalFormSubmissionAction,
-} from '@heyclaude/web-runtime';
+} from '@heyclaude/web-runtime/data';
 import { Check, X } from '@heyclaude/web-runtime/icons';
+import { cn } from '@heyclaude/web-runtime/ui';
 import { AnimatePresence, motion } from 'motion/react';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -50,8 +49,6 @@ import {
 } from '@/src/components/primitives/ui/sheet';
 import { Textarea } from '@/src/components/primitives/ui/textarea';
 import { useConfetti } from '@/src/hooks/use-confetti';
-import { getContactCommands } from '@/src/lib/actions/contact.actions';
-import { submitContactForm } from '@/src/lib/actions/contact-form.actions';
 
 // Internal type with non-nullable fields (after transformation)
 type ContactCommand = {
@@ -359,7 +356,7 @@ export function ContactTerminal() {
         metadata: { source: 'terminal' } as Record<string, unknown>,
       });
 
-      if (result.success) {
+      if (result?.data?.success) {
         addOutput(
           'success',
           "✓ Message sent successfully! We'll get back to you soon.",
@@ -375,11 +372,12 @@ export function ContactTerminal() {
         });
         (e.target as HTMLFormElement).reset();
       } else {
-        addOutput('error', result.error || 'Failed to send message.', <X className="h-3 w-3" />);
+        const error = result?.serverError || 'Failed to send message.';
+        addOutput('error', error, <X className="h-3 w-3" />);
         trackTerminalFormSubmissionAction({
           category: selectedCategory,
           success: false,
-          ...(result.error && { error: result.error }),
+          ...(error && { error }),
         }).catch(() => {
           // Fire-and-forget tracking
         });

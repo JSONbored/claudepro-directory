@@ -42,7 +42,7 @@ export async function getActiveNotifications({
   dismissedIds = [],
 }: NotificationFetchParams): Promise<ActiveNotificationRecord[]> {
   return fetchCached(
-    (client) => new MiscService(client).getActiveNotifications(dismissedIds),
+    (client) => new MiscService(client).getActiveNotifications({ p_dismissed_ids: dismissedIds }),
     {
       key: `${userId}-${dismissedIds.join('|') || 'none'}`,
       tags: [DEFAULT_NOTIFICATION_TAG, `user-${userId}`],

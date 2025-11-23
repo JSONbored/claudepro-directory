@@ -2,9 +2,17 @@ import type { Middleware } from './types.ts';
 import type { StandardContext } from '../utils/context.ts';
 import { createDataApiContext, logInfo, logError, errorToString } from '@heyclaude/shared-runtime';
 
-export function analytics(routeName: string): Middleware<StandardContext> {
+interface AnalyticsOptions {
+  app?: string;
+}
+
+export function analytics(
+  routeName: string,
+  options?: AnalyticsOptions
+): Middleware<StandardContext> {
   return async (ctx, next) => {
     const startedAt = performance.now();
+    const appLabel = options?.app ?? 'data-api';
     
     // Extract resource from path if available (convention: /route/:resource)
     // This logic mimics existing respondWithAnalytics but is more generic
@@ -14,6 +22,7 @@ export function analytics(routeName: string): Middleware<StandardContext> {
       path: ctx.pathname,
       method: ctx.method,
       ...(resource ? { resource } : {}),
+      app: appLabel,
     });
 
     const logEvent = (status: number, outcome: 'success' | 'error', error?: unknown) => {

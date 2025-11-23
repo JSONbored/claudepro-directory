@@ -1,13 +1,11 @@
 import type { Database } from '@heyclaude/database-types';
+import { logger, normalizeError } from '@heyclaude/web-runtime/core';
 import {
-  BADGE_COLORS,
   generatePageMetadata,
   getAuthenticatedUser,
   getUserDashboard,
-  logger,
-  normalizeError,
-  UI_CLASSES,
-} from '@heyclaude/web-runtime';
+} from '@heyclaude/web-runtime/data';
+import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import {
   CheckCircle,
   Clock,
@@ -16,6 +14,7 @@ import {
   Send,
   XCircle,
 } from '@heyclaude/web-runtime/icons';
+import { BADGE_COLORS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
@@ -27,7 +26,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/ui/card';
-import { ROUTES } from '@/src/lib/data/config/constants';
 
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/account/submissions');

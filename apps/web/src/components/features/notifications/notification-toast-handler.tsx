@@ -4,8 +4,8 @@
 
 'use client';
 
-import { UI_CLASSES } from '@heyclaude/web-runtime';
 import { Bell } from '@heyclaude/web-runtime/icons';
+import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import { useNotificationsContext } from '@/src/components/providers/notifications-provider';

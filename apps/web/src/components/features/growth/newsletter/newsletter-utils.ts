@@ -1,4 +1,5 @@
-import { ensureString, getNewsletterConfig, NEWSLETTER_CTA_CONFIG } from '@heyclaude/web-runtime';
+import { ensureString, NEWSLETTER_CTA_CONFIG } from '@heyclaude/web-runtime/core';
+import { getNewsletterConfig } from '@heyclaude/web-runtime/data';
 
 /**
  * Newsletter config type from Statsig

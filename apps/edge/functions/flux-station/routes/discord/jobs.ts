@@ -4,10 +4,14 @@
  */
 
 import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
-import { handleJobNotificationDirect } from '@heyclaude/edge-runtime/handlers/discord/handler.ts';
-import { errorResponse, successResponse } from '@heyclaude/edge-runtime/utils/http.ts';
-import { pgmqDelete, pgmqRead } from '@heyclaude/edge-runtime/utils/pgmq-client.ts';
-import type { DatabaseWebhookPayload } from '@heyclaude/edge-runtime/utils/webhook/database-events.ts';
+import type { DatabaseWebhookPayload } from '@heyclaude/edge-runtime';
+import {
+  errorResponse,
+  handleJobNotificationDirect,
+  pgmqDelete,
+  pgmqRead,
+  successResponse,
+} from '@heyclaude/edge-runtime';
 import { errorToString, TIMEOUT_PRESETS, withTimeout } from '@heyclaude/shared-runtime';
 
 type JobRow = DatabaseGenerated['public']['Tables']['jobs']['Row'];
@@ -92,6 +96,17 @@ export async function handleDiscordJobs(_req: Request): Promise<Response> {
           console.error('[flux-station] Invalid job webhook payload structure', {
             msg_id: msg.msg_id.toString(),
           });
+
+          // Delete invalid message to prevent infinite retries
+          try {
+            await pgmqDelete(JOB_DISCORD_QUEUE, msg.msg_id);
+          } catch (error) {
+            console.error('[flux-station] Failed to delete invalid message', {
+              msg_id: msg.msg_id.toString(),
+              error: errorToString(error),
+            });
+          }
+
           results.push({
             msg_id: msg.msg_id.toString(),
             status: 'failed',
@@ -109,6 +124,17 @@ export async function handleDiscordJobs(_req: Request): Promise<Response> {
             msg_id: msg.msg_id.toString(),
             type: payload.type,
           });
+
+          // Delete invalid message to prevent infinite retries
+          try {
+            await pgmqDelete(JOB_DISCORD_QUEUE, msg.msg_id);
+          } catch (error) {
+            console.error('[flux-station] Failed to delete invalid message', {
+              msg_id: msg.msg_id.toString(),
+              error: errorToString(error),
+            });
+          }
+
           results.push({
             msg_id: msg.msg_id.toString(),
             status: 'failed',

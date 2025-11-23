@@ -269,7 +269,9 @@ function generateServerIndex(mcp: McpRow): string {
   const slug = mcp.slug.replace(/\$/g, '\\$').replace(/`/g, '\\`');
 
   if (httpUrl && typeof httpUrl === 'string') {
-    const safeHttpUrl = httpUrl.replace(/\$/g, '\\$').replace(/`/g, '\\`');
+    // Use JSON.stringify to safely embed the URL, including proper escaping for backslashes/quotes
+    const escapedHttpUrl = JSON.stringify(httpUrl);
+
     return `#!/usr/bin/env node
 /**
  * MCP Server Proxy: ${title}
@@ -296,7 +298,7 @@ const server = new Server(
   }
 );
 
-const HTTP_ENDPOINT = '${safeHttpUrl}';
+const HTTP_ENDPOINT = ${escapedHttpUrl};
 
 server.setRequestHandler('tools/list', async () => {
   try {
@@ -376,7 +378,7 @@ server.setRequestHandler('prompts/list', async () => {
 async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  console.error('${slug} MCP server proxy running on stdio -> ${safeHttpUrl}');
+  console.error('${slug} MCP server proxy running on stdio -> ' + ${escapedHttpUrl});
 }
 
 main().catch((error) => {
@@ -511,31 +513,45 @@ async function uploadToStorage(
   const mcpbBuffer = await readFile(mcpbFilePath);
   const base64File = mcpbBuffer.toString('base64');
 
-  const result = await callEdgeFunction<{
-    success: boolean;
-    storage_url: string;
-    message?: string;
-    error?: string;
-  }>('/data-api/content/generate-package/upload', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      content_id: mcp.id,
-      category: 'mcp',
-      mcpb_file: base64File,
-      content_hash: contentHash,
-    }),
-  });
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 10_000);
 
-  if (!(result.success && result.storage_url)) {
-    throw new Error(
-      result.error || result.message || 'Edge function upload returned unsuccessful response'
-    );
+  try {
+    const result = await callEdgeFunction<{
+      success: boolean;
+      storage_url: string;
+      message?: string;
+      error?: string;
+    }>('/data-api/content/generate-package/upload', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        content_id: mcp.id,
+        category: 'mcp',
+        mcpb_file: base64File,
+        content_hash: contentHash,
+      }),
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeoutId);
+
+    if (!(result.success && result.storage_url)) {
+      throw new Error(
+        result.error || result.message || 'Edge function upload returned unsuccessful response'
+      );
+    }
+
+    return result.storage_url;
+  } catch (error) {
+    clearTimeout(timeoutId);
+    if (error instanceof Error && error.name === 'AbortError') {
+      throw new Error('Upload timed out after 10s');
+    }
+    throw error;
   }
-
-  return result.storage_url;
 }
 
 async function processBatch(

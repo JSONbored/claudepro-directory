@@ -10,10 +10,10 @@
  * - "Join X users" messaging
  */
 
-import { cn } from '@heyclaude/web-runtime';
 import { Award, CheckCircle, Sparkles, TrendingUp, Users } from '@heyclaude/web-runtime/icons';
+import { cn } from '@heyclaude/web-runtime/ui';
+import { SUBMISSION_FORM_TOKENS as TOKENS } from '@heyclaude/web-runtime/ui/design-tokens/submission-form';
 import { motion } from 'motion/react';
-import { SUBMISSION_FORM_TOKENS as TOKENS } from '@/src/lib/design-tokens/submission-form';
 
 interface SocialProofBadgeProps {
   variant: 'contributors' | 'submissions' | 'success' | 'join';

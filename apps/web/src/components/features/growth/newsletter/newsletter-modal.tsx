@@ -1,14 +1,9 @@
 'use client';
 
 import type { Database } from '@heyclaude/database-types';
-import {
-  cn,
-  logUnhandledPromise,
-  NEWSLETTER_CTA_CONFIG,
-  UI_CLASSES,
-  usePulse,
-} from '@heyclaude/web-runtime';
-import { toasts } from '@heyclaude/web-runtime/client';
+import { logUnhandledPromise, NEWSLETTER_CTA_CONFIG } from '@heyclaude/web-runtime/core';
+import { usePulse } from '@heyclaude/web-runtime/hooks';
+import { cn, toasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { useEffect, useState } from 'react';
 import { Button } from '@/src/components/primitives/ui/button';
 import { Input } from '@/src/components/primitives/ui/input';

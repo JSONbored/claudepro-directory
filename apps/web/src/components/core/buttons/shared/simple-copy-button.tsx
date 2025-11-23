@@ -1,11 +1,12 @@
 'use client';
 
-import { getTimeoutConfig, logClientWarning, logger } from '@heyclaude/web-runtime';
-import { toasts } from '@heyclaude/web-runtime/client';
+import { logClientWarning, logger } from '@heyclaude/web-runtime/core';
+import { getTimeoutConfig } from '@heyclaude/web-runtime/data';
+import type { ButtonStyleProps } from '@heyclaude/web-runtime/types/component.types';
+import { toasts } from '@heyclaude/web-runtime/ui';
 import { Check, Copy } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/src/components/primitives/ui/button';
-import type { ButtonStyleProps } from '@/src/lib/types/component.types';
 
 interface SimpleCopyButtonProps extends ButtonStyleProps {
   content: string;

@@ -12,14 +12,10 @@
  * - Respects prefers-reduced-motion
  */
 
-import {
-  cn,
-  getAnimationConfig,
-  logger,
-  POSITION_PATTERNS,
-  UI_CLASSES,
-} from '@heyclaude/web-runtime';
+import { logger } from '@heyclaude/web-runtime/core';
+import { getAnimationConfig } from '@heyclaude/web-runtime/data';
 import { X } from '@heyclaude/web-runtime/icons';
+import { cn, POSITION_PATTERNS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import * as SheetPrimitive from '@radix-ui/react-dialog';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { motion, useDragControls } from 'motion/react';

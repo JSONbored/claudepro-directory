@@ -6,8 +6,8 @@
  */
 
 import type { Database } from '@heyclaude/database-types';
-import { UI_CLASSES } from '@heyclaude/web-runtime';
-import { toasts } from '@heyclaude/web-runtime/client';
+import { refreshProfileFromOAuth, updateProfile } from '@heyclaude/web-runtime';
+import { toasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useTransition } from 'react';
 import { useForm } from 'react-hook-form';
@@ -16,7 +16,6 @@ import { FormField } from '@/src/components/core/forms/form-field-wrapper';
 import { ListItemManager } from '@/src/components/core/forms/list-items-editor';
 import { ToggleField } from '@/src/components/core/forms/toggle-field';
 import { Button } from '@/src/components/primitives/ui/button';
-import { refreshProfileFromOAuth, updateProfile } from '@/src/lib/actions/user.actions';
 
 // Profile data consolidated into users table - use generated types
 type ProfileData = Pick<

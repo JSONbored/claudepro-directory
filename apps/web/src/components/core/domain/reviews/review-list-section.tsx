@@ -1,14 +1,15 @@
 'use client';
 
 import type { Database } from '@heyclaude/database-types';
+import { deleteReview, getReviewsWithStats, markReviewHelpful } from '@heyclaude/web-runtime';
 import {
   formatDistanceToNow,
   logClientWarning,
   logUnhandledPromise,
-  UI_CLASSES,
-} from '@heyclaude/web-runtime';
-import { toasts } from '@heyclaude/web-runtime/client';
+} from '@heyclaude/web-runtime/core';
 import { Edit, Star, ThumbsUp, Trash } from '@heyclaude/web-runtime/icons';
+import type { ReviewSectionProps } from '@heyclaude/web-runtime/types/component.types';
+import { toasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useId, useState } from 'react';
 import { BaseCard } from '@/src/components/core/domain/cards/content-card-base';
@@ -16,12 +17,6 @@ import { ReviewForm } from '@/src/components/core/forms/review-form';
 import { Button } from '@/src/components/primitives/ui/button';
 import { Card } from '@/src/components/primitives/ui/card';
 import { Label } from '@/src/components/primitives/ui/label';
-import {
-  deleteReview,
-  getReviewsWithStats,
-  markReviewHelpful,
-} from '@/src/lib/actions/content.actions';
-import type { ReviewSectionProps } from '@/src/lib/types/component.types';
 
 import { ReviewRatingHistogram } from './review-rating-histogram';
 import { StarDisplay } from './shared/star-display';
@@ -132,7 +127,7 @@ export function ReviewListSection({
   // Handle delete
   const handleDelete = async (reviewId: string) => {
     try {
-      const result = await deleteReview({ review_id: reviewId });
+      const result = await deleteReview({ delete_id: reviewId });
       if (result?.data?.success) {
         toasts.success.itemDeleted('Review');
         setReviews((prev) => (prev ?? []).filter((r) => r.id !== reviewId));

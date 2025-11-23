@@ -9,13 +9,14 @@
  */
 
 import type { Database } from '@heyclaude/database-types';
+import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
+import { DiscordIcon } from '@heyclaude/web-runtime/icons';
 import {
   ANIMATION_CONSTANTS,
   POSITION_PATTERNS,
   RESPONSIVE_PATTERNS,
   UI_CLASSES,
-} from '@heyclaude/web-runtime';
-import { DiscordIcon } from '@heyclaude/web-runtime/icons';
+} from '@heyclaude/web-runtime/ui';
 import { motion, useScroll, useTransform } from 'motion/react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -29,7 +30,6 @@ import { NavigationTablet } from '@/src/components/core/layout/navigation-tablet
 import { UserMenu } from '@/src/components/core/layout/user-menu';
 import { Button } from '@/src/components/primitives/ui/button';
 import { ACTION_LINKS } from '@/src/config/navigation';
-import { ROUTES } from '@/src/lib/data/config/constants';
 
 interface NavigationProps {
   /** Hide Create button when FloatingActionBar is enabled */

@@ -4,7 +4,7 @@
  */
 
 import type { FC } from 'npm:react@18.3.1';
-import type { Resend } from 'npm:resend@4.0.0';
+import type { Resend } from 'npm:resend@6.5.2';
 import { supabaseServiceRole } from '../../clients/supabase.ts';
 import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
 import { sendEmail } from '../../utils/integrations/resend.ts';

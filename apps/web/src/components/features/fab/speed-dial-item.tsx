@@ -16,10 +16,10 @@
 
 'use client';
 
-import { logger, normalizeError } from '@heyclaude/web-runtime';
+import { logger, normalizeError } from '@heyclaude/web-runtime/core';
+import type { SpeedDialAction } from '@heyclaude/web-runtime/types/component.types';
 import { motion } from 'motion/react';
 import { NotificationBadge } from '@/src/components/features/notifications/notification-badge';
-import type { SpeedDialAction } from '@/src/lib/types/component.types';
 
 interface SpeedDialItemProps extends SpeedDialAction {
   /** Animation delay for stagger effect (seconds) */

@@ -1,7 +1,7 @@
-import { logger } from '../logger';
-import { normalizeError } from '../errors';
-import { pulseJobSearch } from '../pulse';
-import { fetchCached } from '../cache/fetch-cached';
+import { logger } from '../logger.ts';
+import { normalizeError } from '../errors.ts';
+import { pulseJobSearch } from '../pulse.ts';
+import { fetchCached } from '../cache/fetch-cached.ts';
 import { JobsService, SearchService } from '@heyclaude/data-layer';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '@heyclaude/database-types';
@@ -41,8 +41,8 @@ export async function getFilteredJobs(
   if (!hasFilters) {
     return fetchCached(
       (client: SupabaseClient<Database>) => new SearchService(client).filterJobs({
-        ...(limit !== undefined ? { limit } : {}),
-        ...(offset !== undefined ? { offset } : {})
+        ...(limit !== undefined ? { p_limit: limit } : {}),
+        ...(offset !== undefined ? { p_offset: offset } : {})
       }),
       {
         key: `jobs-all-${limit}-${offset}`,
@@ -65,13 +65,13 @@ export async function getFilteredJobs(
 
     return fetchCached(
       (client: SupabaseClient<Database>) => new SearchService(client).filterJobs({
-        ...(searchQuery ? { query: searchQuery } : {}),
-        ...(category && category !== 'all' ? { categories: [category as any] } : {}),
-        ...(employment && employment !== 'any' ? { employmentTypes: [employment as any] } : {}),
-        ...(experience && experience !== 'any' ? { experienceLevels: [experience as any] } : {}),
-        ...(remote !== undefined ? { remoteOnly: remote } : {}),
-        ...(limit !== undefined ? { limit } : {}),
-        ...(offset !== undefined ? { offset } : {})
+        ...(searchQuery ? { p_search_query: searchQuery } : {}),
+        ...(category && category !== 'all' ? { p_category: category as any } : {}),
+        ...(employment && employment !== 'any' ? { p_employment_type: employment as any } : {}),
+        ...(experience && experience !== 'any' ? { p_experience_level: experience as any } : {}),
+        ...(remote !== undefined ? { p_remote_only: remote } : {}),
+        ...(limit !== undefined ? { p_limit: limit } : {}),
+        ...(offset !== undefined ? { p_offset: offset } : {})
       }),
       {
         key: `jobs-filtered-${JSON.stringify(filtersLog)}`,
@@ -93,7 +93,7 @@ export async function getFilteredJobs(
  */
 export async function getJobBySlug(slug: string) {
   return fetchCached(
-    (client: SupabaseClient<Database>) => new JobsService(client).getJobBySlug(slug),
+    (client: SupabaseClient<Database>) => new JobsService(client).getJobBySlug({ p_slug: slug }),
     {
       key: `job-${slug}`,
       tags: [`job-${slug}`],

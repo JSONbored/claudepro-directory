@@ -43,11 +43,11 @@ export async function getRelatedContent(input: RelatedContentInput): Promise<Rel
 
   const data = await fetchCached(
     (client) => new ContentService(client).getRelatedContent({
-        category: category,
-        slug: currentSlug,
-        tags: input.currentTags || [],
-        limit: input.limit || 3,
-        excludeSlugs: input.exclude || []
+        p_category: category,
+        p_slug: currentSlug,
+        p_tags: input.currentTags || [],
+        p_limit: input.limit || 3,
+        p_exclude_slugs: input.exclude || []
     }),
     {
       key: generateContentCacheKey(category, currentSlug, input.limit || 3),

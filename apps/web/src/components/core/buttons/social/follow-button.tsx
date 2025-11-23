@@ -12,11 +12,11 @@
  * @module components/features/social/follow-button
  */
 
-import { logger, normalizeError } from '@heyclaude/web-runtime';
+import { toggleFollow } from '@heyclaude/web-runtime';
+import { logger, normalizeError } from '@heyclaude/web-runtime/core';
 import { useOptimistic, useTransition } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/src/components/primitives/ui/button';
-import { toggleFollow } from '@/src/lib/actions/user.actions';
 
 export interface FollowButtonProps {
   userId: string;

@@ -1,5 +1,10 @@
-import { ICON_NAME_MAP, UI_CLASSES } from '@heyclaude/web-runtime';
+import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { ExternalLink, HelpCircle } from '@heyclaude/web-runtime/icons';
+import type {
+  ContentListServerProps,
+  DisplayableContent,
+} from '@heyclaude/web-runtime/types/component.types';
+import { ICON_NAME_MAP, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import Link from 'next/link';
 import { Suspense, useId } from 'react';
 import { ContentSearchClient } from '@/src/components/content/content-search';
@@ -8,8 +13,6 @@ import { LazySection } from '@/src/components/core/infra/scroll-animated-section
 import { NewsletterCTAVariant } from '@/src/components/features/growth/newsletter/newsletter-cta-variants';
 import { Skeleton } from '@/src/components/primitives/feedback/loading-skeleton';
 import { Button } from '@/src/components/primitives/ui/button';
-import { ROUTES } from '@/src/lib/data/config/constants';
-import type { ContentListServerProps, DisplayableContent } from '@/src/lib/types/component.types';
 
 function ContentHeroSection<T extends DisplayableContent>({
   title,

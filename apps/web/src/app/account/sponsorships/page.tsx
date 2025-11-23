@@ -1,12 +1,12 @@
+import { hashUserId, logger, normalizeError } from '@heyclaude/web-runtime/core';
 import {
   generatePageMetadata,
   getAuthenticatedUser,
   getUserSponsorships,
-  logger,
-  normalizeError,
-  UI_CLASSES,
-} from '@heyclaude/web-runtime';
+} from '@heyclaude/web-runtime/data';
+import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { BarChart, Eye, MousePointer, TrendingUp } from '@heyclaude/web-runtime/icons';
+import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
@@ -18,7 +18,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/ui/card';
-import { ROUTES } from '@/src/lib/data/config/constants';
 
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/account/sponsorships');
@@ -66,12 +65,16 @@ export default async function SponsorshipsPage() {
     );
   }
 
+  const hashedUserId = hashUserId(user.id);
+
   let sponsorships: Awaited<ReturnType<typeof getUserSponsorships>>;
   try {
     sponsorships = await getUserSponsorships(user.id);
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load user sponsorships');
-    logger.error('SponsorshipsPage: getUserSponsorships threw', normalized, { userId: user.id });
+    logger.error('SponsorshipsPage: getUserSponsorships threw', normalized, {
+      userIdHash: hashedUserId,
+    });
     return (
       <div className="space-y-6">
         <div className="text-destructive">Failed to load sponsorships. Please try again later.</div>
@@ -80,7 +83,7 @@ export default async function SponsorshipsPage() {
   }
 
   if (sponsorships.length === 0) {
-    logger.info('SponsorshipsPage: user has no sponsorships', { userId: user.id });
+    logger.info('SponsorshipsPage: user has no sponsorships', { userIdHash: hashedUserId });
     return (
       <div className="space-y-6">
         <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>

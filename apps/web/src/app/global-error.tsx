@@ -1,6 +1,7 @@
 'use client';
 
-import { logger, normalizeError, UI_CLASSES } from '@heyclaude/web-runtime';
+import { logger, normalizeError } from '@heyclaude/web-runtime/core';
+import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { useEffect } from 'react';
 
 export default function GlobalError({

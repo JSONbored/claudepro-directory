@@ -1,5 +1,4 @@
 import type { Database } from '@heyclaude/database-types';
-import { Constants } from '@heyclaude/database-types';
 import { cache } from 'react';
 import type {
   CategoryStatsConfig,
@@ -12,17 +11,7 @@ import {
   HOMEPAGE_CATEGORY_IDS,
 } from './category-config.generated.ts';
 import { getTabConfigForCategory } from './default-tab-configs.ts';
-
-export const CONTENT_CATEGORY_VALUES = Constants.public.Enums.content_category;
-
-function isContentCategory(
-  value: unknown
-): value is Database['public']['Enums']['content_category'] {
-  return (
-    typeof value === 'string' &&
-    CONTENT_CATEGORY_VALUES.includes(value as Database['public']['Enums']['content_category'])
-  );
-}
+import { isValidCategory } from '../../../utils/category-validation.ts';
 
 export type UnifiedCategoryConfigValue = UnifiedCategoryConfig;
 
@@ -57,22 +46,12 @@ export const getCategoryConfig = cache(
   }
 );
 
-export function isValidCategory(
-  category: string | Database['public']['Enums']['content_category'] | null | undefined
-): category is Database['public']['Enums']['content_category'] {
-  return (
-    category !== null &&
-    category !== undefined &&
-    typeof category === 'string' &&
-    isContentCategory(category)
-  );
-}
-
 export { ALL_CATEGORY_IDS as getAllCategoryIds };
 export { HOMEPAGE_CATEGORY_IDS as getHomepageCategoryIds };
 export { CACHEABLE_CATEGORY_IDS as getCacheableCategoryIds };
+export { isValidCategory };
 
-export const VALID_CATEGORIES = ALL_CATEGORY_IDS;
+export { VALID_CATEGORIES } from '../../../utils/category-validation.ts';
 
 export const getCategoryStatsConfig = cache(
   (): readonly CategoryStatsConfig[] => {

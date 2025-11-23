@@ -6,8 +6,8 @@
 
 'use client';
 
-import { cn, UI_CLASSES } from '@heyclaude/web-runtime';
 import type { LucideIcon } from '@heyclaude/web-runtime/icons';
+import { cn, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { motion } from 'motion/react';
 import type { ReactNode } from 'react';
 import { BorderBeam } from '@/src/components/primitives/animation/border-beam';

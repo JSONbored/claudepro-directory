@@ -1,6 +1,7 @@
 'use client';
 
-import { logger, ParseStrategy, safeParse, useLocalStorage } from '@heyclaude/web-runtime';
+import { logger, ParseStrategy, safeParse } from '@heyclaude/web-runtime/core';
+import { useLocalStorage } from '@heyclaude/web-runtime/hooks';
 import { z } from 'zod';
 
 /**

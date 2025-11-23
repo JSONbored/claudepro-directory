@@ -1,7 +1,8 @@
 'use client';
 
 import type { Database } from '@heyclaude/database-types';
-import { getAnimationConfig, logger, normalizeError } from '@heyclaude/web-runtime';
+import { logger, normalizeError } from '@heyclaude/web-runtime/core';
+import { getAnimationConfig } from '@heyclaude/web-runtime/data';
 import confetti from 'canvas-confetti';
 import { useCallback } from 'react';
 

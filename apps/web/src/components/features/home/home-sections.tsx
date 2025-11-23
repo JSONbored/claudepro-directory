@@ -4,16 +4,25 @@
 
 import type { Database } from '@heyclaude/database-types';
 import {
-  getAnimationConfig,
-  getCategoryConfigs,
-  getCategoryStatsConfig,
-  getHomepageFeaturedCategories,
   logClientWarning,
   logger,
   logUnhandledPromise,
   normalizeError,
-  UI_CLASSES,
-} from '@heyclaude/web-runtime';
+} from '@heyclaude/web-runtime/core';
+import {
+  getAnimationConfig,
+  getCategoryConfigs,
+  getCategoryStatsConfig,
+  getHomepageFeaturedCategories,
+} from '@heyclaude/web-runtime/data';
+import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
+import type {
+  ContentItem,
+  DisplayableContent,
+  FilterState,
+  HomePageClientProps,
+} from '@heyclaude/web-runtime/types/component.types';
+import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { motion } from 'motion/react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
@@ -28,13 +37,6 @@ import {
   HomepageStatsSkeleton,
   Skeleton,
 } from '@/src/components/primitives/feedback/loading-skeleton';
-import { ROUTES } from '@/src/lib/data/config/constants';
-import type {
-  ContentItem,
-  DisplayableContent,
-  FilterState,
-  HomePageClientProps,
-} from '@/src/lib/types/component.types';
 
 /**
  * OPTIMIZATION (2025-10-22): Enabled SSR for UnifiedSearch
@@ -112,7 +114,7 @@ function HomePageClientComponent({
       setIsLoadingAllConfigs(true);
 
       try {
-        const { fetchPaginatedContent } = await import('@/src/lib/actions/content.actions');
+        const { fetchPaginatedContent } = await import('@heyclaude/web-runtime');
 
         const result = await fetchPaginatedContent({
           offset,
@@ -170,7 +172,7 @@ function HomePageClientComponent({
       setIsSearching(true);
 
       try {
-        const { searchUnifiedClient } = await import('@heyclaude/web-runtime');
+        const { searchUnifiedClient } = await import('@heyclaude/web-runtime/edge/search-client');
 
         const effectiveTab = categoryOverride ?? activeTab;
         const categories =

@@ -5,14 +5,10 @@
  */
 
 import type { Database } from '@heyclaude/database-types';
-import {
-  getContentItemUrl,
-  getRelatedContent,
-  isValidCategory,
-  logger,
-  UI_CLASSES,
-} from '@heyclaude/web-runtime';
+import { getContentItemUrl, isValidCategory, logger } from '@heyclaude/web-runtime/core';
+import { getRelatedContent } from '@heyclaude/web-runtime/data';
 import { Sparkles } from '@heyclaude/web-runtime/icons';
+import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { useEffect, useState } from 'react';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { UnifiedCardGrid } from '@/src/components/core/domain/cards/card-grid';

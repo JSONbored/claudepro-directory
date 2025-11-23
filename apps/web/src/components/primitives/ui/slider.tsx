@@ -1,6 +1,6 @@
 'use client';
 
-import { cn } from '@heyclaude/web-runtime';
+import { cn } from '@heyclaude/web-runtime/ui';
 import * as SliderPrimitive from '@radix-ui/react-slider';
 import type * as React from 'react';
 

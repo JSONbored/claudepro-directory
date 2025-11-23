@@ -5,7 +5,7 @@
  * Shows placeholder content matching the layout of the detail page.
  */
 
-import { UI_CLASSES } from '@heyclaude/web-runtime';
+import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { Skeleton } from '@/src/components/primitives/feedback/loading-skeleton';
 import { Separator } from '@/src/components/primitives/ui/separator';
 

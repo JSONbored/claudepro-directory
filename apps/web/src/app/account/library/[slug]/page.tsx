@@ -1,13 +1,12 @@
+import { hashUserId, logger, normalizeError } from '@heyclaude/web-runtime/core';
 import {
   generatePageMetadata,
   getAuthenticatedUser,
   getCollectionDetail,
-  hashUserId,
-  logger,
-  normalizeError,
-  UI_CLASSES,
-} from '@heyclaude/web-runtime';
+} from '@heyclaude/web-runtime/data';
+import { APP_CONFIG, ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { ArrowLeft, Edit } from '@heyclaude/web-runtime/icons';
+import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
@@ -22,7 +21,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/ui/card';
-import { APP_CONFIG, ROUTES } from '@/src/lib/data/config/constants';
 
 interface CollectionPageProps {
   params: { slug: string };

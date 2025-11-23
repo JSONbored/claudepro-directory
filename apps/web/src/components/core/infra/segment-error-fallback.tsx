@@ -1,6 +1,6 @@
 'use client';
 
-import { UI_CLASSES } from '@heyclaude/web-runtime';
+import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import Link from 'next/link';
 import { Button } from '@/src/components/primitives/ui/button';
 import {

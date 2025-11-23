@@ -38,8 +38,10 @@ const NewsletterCTAVariant = dynamic(
   }
 );
 
-import { generatePageMetadata, logger, normalizeError, UI_CLASSES } from '@heyclaude/web-runtime';
+import { logger, normalizeError } from '@heyclaude/web-runtime/core';
+import { generatePageMetadata } from '@heyclaude/web-runtime/data';
 import { BarChart, Clock, Sparkles, Target, Zap } from '@heyclaude/web-runtime/icons';
+import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { QuizForm } from '@/src/components/features/tools/recommender/quiz-form';
 
 // Generate metadata from centralized registry

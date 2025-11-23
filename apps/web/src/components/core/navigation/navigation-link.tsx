@@ -2,7 +2,7 @@
  * Navigation link with orange underline animation pattern
  */
 
-import { ANIMATION_CONSTANTS, DIMENSIONS, POSITION_PATTERNS } from '@heyclaude/web-runtime';
+import { ANIMATION_CONSTANTS, DIMENSIONS, POSITION_PATTERNS } from '@heyclaude/web-runtime/ui';
 import Link from 'next/link';
 import type { ComponentProps, ReactNode } from 'react';
 

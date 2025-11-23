@@ -2,9 +2,9 @@
 
 /** FAB configuration for main button and speed dial actions */
 
-import { logger, normalizeError } from '@heyclaude/web-runtime';
+import { logger, normalizeError } from '@heyclaude/web-runtime/core';
 import { ArrowUp, Bell, FileText, Plus, Search } from '@heyclaude/web-runtime/icons';
-import type { MainFABConfig, SpeedDialAction } from '@/src/lib/types/component.types';
+import type { MainFABConfig, SpeedDialAction } from '@heyclaude/web-runtime/types/component.types';
 
 export const handleScrollToTop = (): void => {
   try {

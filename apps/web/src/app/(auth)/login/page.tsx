@@ -1,4 +1,5 @@
-import { generatePageMetadata, logger, normalizeError } from '@heyclaude/web-runtime';
+import { logger, normalizeError } from '@heyclaude/web-runtime/core';
+import { generatePageMetadata } from '@heyclaude/web-runtime/data';
 import type { Metadata } from 'next';
 import { Suspense } from 'react';
 import { AuthBrandPanel } from '@/src/components/core/auth/auth-brand-panel';

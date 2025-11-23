@@ -5,7 +5,7 @@
 
 'use client';
 
-import { logger, normalizeError } from '@heyclaude/web-runtime';
+import { logger, normalizeError } from '@heyclaude/web-runtime/core';
 import { AlertTriangle } from '@heyclaude/web-runtime/icons';
 import { Component, type ReactNode } from 'react';
 import { Terminal } from '@/src/components/primitives/display/terminal';

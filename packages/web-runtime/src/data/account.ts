@@ -29,7 +29,7 @@ export async function getAccountDashboard(
   userId: string
 ): Promise<Database['public']['Functions']['get_account_dashboard']['Returns'] | null> {
   const result = await fetchCached(
-    (client) => new AccountService(client).getAccountDashboard(userId),
+    (client) => new AccountService(client).getAccountDashboard({ p_user_id: userId }),
     {
       key: `dashboard-${userId}`,
       tags: ['users', `user-${userId}`],
@@ -48,7 +48,7 @@ export async function getUserLibrary(
   userId: string
 ): Promise<Database['public']['Functions']['get_user_library']['Returns'] | null> {
   return fetchCached(
-    (client) => new AccountService(client).getUserLibrary(userId),
+    (client) => new AccountService(client).getUserLibrary({ p_user_id: userId }),
     {
       key: `library-${userId}`,
       tags: ['users', `user-${userId}`, 'user-bookmarks'],
@@ -99,7 +99,7 @@ export async function getUserDashboard(
   userId: string
 ): Promise<Database['public']['Functions']['get_user_dashboard']['Returns'] | null> {
   return fetchCached(
-    (client) => new AccountService(client).getUserDashboard(userId),
+    (client) => new AccountService(client).getUserDashboard({ p_user_id: userId }),
     {
       key: `jobs-${userId}`,
       tags: ['users', `user-${userId}`, 'jobs'],
@@ -125,7 +125,7 @@ export async function getCollectionDetail(
   slug: string
 ): Promise<Database['public']['Functions']['get_collection_detail_with_items']['Returns'] | null> {
   return fetchCached(
-    (client) => new AccountService(client).getCollectionDetailWithItems(userId, slug),
+    (client) => new AccountService(client).getCollectionDetailWithItems({ p_user_id: userId, p_slug: slug }),
     {
       key: `collection-${userId}-${slug}`,
       tags: ['users', `user-${userId}`, 'collections', `collection-${slug}`],
@@ -141,7 +141,7 @@ export async function getUserSettings(
   userId: string
 ): Promise<Database['public']['Functions']['get_user_settings']['Returns'] | null> {
   return fetchCached(
-    (client) => new AccountService(client).getUserSettings(userId),
+    (client) => new AccountService(client).getUserSettings({ p_user_id: userId }),
     {
       key: `settings-${userId}`,
       tags: ['users', `user-${userId}`, 'settings'],
@@ -158,7 +158,7 @@ export async function getSponsorshipAnalytics(
   sponsorshipId: string
 ): Promise<Database['public']['Functions']['get_sponsorship_analytics']['Returns'] | null> {
   return fetchCached(
-    (client) => new AccountService(client).getSponsorshipAnalytics(userId, sponsorshipId),
+    (client) => new AccountService(client).getSponsorshipAnalytics({ p_user_id: userId, p_sponsorship_id: sponsorshipId }),
     {
       key: `sponsorship-${userId}-${sponsorshipId}`,
       tags: ['users', `user-${userId}`, 'sponsorships', `sponsorship-${sponsorshipId}`],
@@ -174,7 +174,7 @@ export async function getUserCompanies(
   userId: string
 ): Promise<Database['public']['Functions']['get_user_companies']['Returns'] | null> {
   return fetchCached(
-    (client) => new AccountService(client).getUserCompanies(userId),
+    (client) => new AccountService(client).getUserCompanies({ p_user_id: userId }),
     {
       key: `companies-${userId}`,
       tags: ['users', `user-${userId}`, 'companies'],
@@ -190,7 +190,7 @@ export async function getUserSponsorships(
   userId: string
 ): Promise<Database['public']['Functions']['get_user_sponsorships']['Returns']> {
   return fetchCached(
-    (client) => new AccountService(client).getUserSponsorships(userId),
+    (client) => new AccountService(client).getUserSponsorships({ p_user_id: userId }),
     {
       key: `sponsorships-${userId}`,
       tags: ['users', `user-${userId}`, 'sponsorships'],
@@ -218,7 +218,10 @@ export async function getSubmissionDashboard(
   contributorsLimit = 5
 ): Promise<Database['public']['Functions']['get_submission_dashboard']['Returns'] | null> {
   return fetchCached(
-    (client) => new AccountService(client).getSubmissionDashboard(recentLimit, contributorsLimit),
+    (client) => new AccountService(client).getSubmissionDashboard({
+      p_recent_limit: recentLimit,
+      p_contributors_limit: contributorsLimit,
+    }),
     {
       key: `${recentLimit}-${contributorsLimit}`,
       tags: ['submissions', 'dashboard', 'content'],

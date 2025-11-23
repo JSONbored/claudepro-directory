@@ -65,7 +65,7 @@ export async function getCommunityDirectory(options: {
   }
 
   return fetchCached(
-    (client) => new CommunityService(client).getCommunityDirectory(limit),
+    (client) => new CommunityService(client).getCommunityDirectory({ p_limit: limit }),
     {
       key: `all-${limit}`,
       tags: ['community', 'users'],
@@ -88,7 +88,10 @@ export async function getPublicUserProfile(input: {
 
   try {
     return await fetchCached(
-      (client) => new CommunityService(client).getUserProfile(slug, viewerId),
+      (client) => new CommunityService(client).getUserProfile({
+        p_user_slug: slug,
+        ...(viewerId ? { p_viewer_id: viewerId } : {})
+      }),
       {
         key: viewerId ? `${slug}-viewer-${viewerId}` : slug,
         tags: ['users', `user-${slug}`],
@@ -117,7 +120,11 @@ export async function getPublicCollectionDetail(input: {
 
   try {
     const data = await fetchCached(
-      (client) => new CommunityService(client).getUserCollectionDetail(userSlug, collectionSlug, viewerId),
+      (client) => new CommunityService(client).getUserCollectionDetail({
+        p_user_slug: userSlug,
+        p_collection_slug: collectionSlug,
+        ...(viewerId ? { p_viewer_id: viewerId } : {})
+      }),
       {
         key: viewerId
           ? `${userSlug}-${collectionSlug}-viewer-${viewerId}`

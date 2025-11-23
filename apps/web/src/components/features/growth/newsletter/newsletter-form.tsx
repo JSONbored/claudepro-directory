@@ -1,14 +1,10 @@
 'use client';
 
 import type { Database } from '@heyclaude/database-types';
-import {
-  checkConfettiEnabled,
-  cn,
-  DIMENSIONS,
-  NEWSLETTER_CTA_CONFIG,
-  UI_CLASSES,
-} from '@heyclaude/web-runtime';
+import { NEWSLETTER_CTA_CONFIG } from '@heyclaude/web-runtime/core';
+import { checkConfettiEnabled } from '@heyclaude/web-runtime/data';
 import { Mail } from '@heyclaude/web-runtime/icons';
+import { cn, DIMENSIONS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { useId, useState } from 'react';
 import { InlineSpinner } from '@/src/components/primitives/feedback/loading-factory';
 import { Button } from '@/src/components/primitives/ui/button';

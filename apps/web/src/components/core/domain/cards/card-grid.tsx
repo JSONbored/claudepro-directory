@@ -4,7 +4,10 @@
  * Consolidated grid layout with infinite scroll and staggered animations
  */
 
-import { logUnhandledPromise, UI_CLASSES, useInfiniteScroll } from '@heyclaude/web-runtime';
+import { logUnhandledPromise } from '@heyclaude/web-runtime/core';
+import { useInfiniteScroll } from '@heyclaude/web-runtime/hooks';
+import type { DisplayableContent } from '@heyclaude/web-runtime/types/component.types';
+import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { motion } from 'motion/react';
 import { useRouter } from 'next/navigation';
 import type { ReactNode } from 'react';
@@ -12,7 +15,6 @@ import { memo, useEffect } from 'react';
 import { ConfigCard } from '@/src/components/core/domain/cards/config-card';
 import { ErrorBoundary } from '@/src/components/core/infra/error-boundary';
 import { InlineSpinner } from '@/src/components/primitives/feedback/loading-factory';
-import type { DisplayableContent } from '@/src/lib/types/component.types';
 
 export type GridVariant = 'normal' | 'tight' | 'wide' | 'list';
 

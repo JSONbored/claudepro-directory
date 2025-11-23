@@ -6,9 +6,9 @@
  */
 
 import type { Database } from '@heyclaude/database-types';
-import { normalizeError } from '@heyclaude/web-runtime';
+import { normalizeError } from '@heyclaude/web-runtime/core';
+import type { SubmissionContentType } from '@heyclaude/web-runtime/types/component.types';
 import { useCallback } from 'react';
-import type { SubmissionContentType } from '@/src/lib/types/component.types';
 
 // Use generated type directly from @heyclaude/database-types
 type ContentTemplatesResult = Database['public']['Functions']['get_content_templates']['Returns'];

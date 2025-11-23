@@ -16,7 +16,8 @@
 'use client';
 
 import type { Database } from '@heyclaude/database-types';
-import { type UseCopyToClipboardOptions, useCopyToClipboard } from '@heyclaude/web-runtime';
+import type { UseCopyToClipboardOptions } from '@heyclaude/web-runtime/core';
+import { useCopyToClipboard } from '@heyclaude/web-runtime/hooks';
 import { useCallback } from 'react';
 import { usePostCopyEmail } from '@/src/components/core/infra/providers/email-capture-modal-provider';
 

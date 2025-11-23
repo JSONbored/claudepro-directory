@@ -1,7 +1,7 @@
 'use client';
 
-import { cn, DIMENSIONS } from '@heyclaude/web-runtime';
 import { Search } from '@heyclaude/web-runtime/icons';
+import { cn, DIMENSIONS } from '@heyclaude/web-runtime/ui';
 import type { DialogProps } from '@radix-ui/react-dialog';
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 import { Command as CommandPrimitive } from 'cmdk';

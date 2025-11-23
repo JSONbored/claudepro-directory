@@ -5,14 +5,14 @@
  * Uses deleteJob server action (calls delete_job RPC)
  */
 
-import { cn, logClientWarning, UI_CLASSES } from '@heyclaude/web-runtime';
-import { toasts } from '@heyclaude/web-runtime/client';
+import { deleteJob } from '@heyclaude/web-runtime';
+import { logClientWarning } from '@heyclaude/web-runtime/core';
 import { Trash } from '@heyclaude/web-runtime/icons';
+import type { ButtonStyleProps } from '@heyclaude/web-runtime/types/component.types';
+import { cn, toasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
 import { Button } from '@/src/components/primitives/ui/button';
-import { deleteJob } from '@/src/lib/actions/jobs.actions';
-import type { ButtonStyleProps } from '@/src/lib/types/component.types';
 
 export interface JobDeleteButtonProps extends ButtonStyleProps {
   jobId: string;

@@ -19,7 +19,7 @@
  */
 
 import type { Database } from '@heyclaude/database-types';
-import { parseChangelogChanges } from '@heyclaude/web-runtime';
+import { parseChangelogChanges } from '@heyclaude/web-runtime/data';
 import { memo } from 'react';
 import { JSONSectionRenderer } from '@/src/components/content/json-to-sections';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
@@ -28,7 +28,7 @@ type ChangelogEntry = Database['public']['Tables']['changelog']['Row'];
 type ContentRow = Database['public']['Tables']['content']['Row'];
 type GuideSection = ContentRow['metadata'];
 
-import { BADGE_COLORS, UI_CLASSES } from '@heyclaude/web-runtime';
+import { BADGE_COLORS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { SanitizedHTML } from './sanitized-html';
 
 /**

@@ -25,8 +25,8 @@
  * ```
  */
 
-import { ANIMATION_CONSTANTS, cn, UI_CLASSES } from '@heyclaude/web-runtime';
 import { ChevronDown, ChevronUp, Clock, Trash, X } from '@heyclaude/web-runtime/icons';
+import { ANIMATION_CONSTANTS, cn, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { AnimatePresence, motion } from 'motion/react';
 import Link from 'next/link';
 import { memo, useState } from 'react';

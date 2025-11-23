@@ -39,14 +39,11 @@ const NewsletterCTAVariant = dynamic(
 );
 
 import type { Database } from '@heyclaude/database-types';
-import {
-  generatePageMetadata,
-  getChangelogOverview,
-  logger,
-  UI_CLASSES,
-} from '@heyclaude/web-runtime';
+import { logger } from '@heyclaude/web-runtime/core';
+import { generatePageMetadata, getChangelogOverview } from '@heyclaude/web-runtime/data';
+import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
 import { ArrowLeft } from '@heyclaude/web-runtime/icons';
-import { APP_CONFIG } from '@/src/lib/data/config/constants';
+import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 
 /**
  * Generate metadata for changelog list page

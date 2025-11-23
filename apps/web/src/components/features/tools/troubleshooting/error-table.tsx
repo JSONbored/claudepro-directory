@@ -5,8 +5,9 @@
  * Used in 1 MDX file across the codebase - Specialized for troubleshooting documentation
  */
 
-import { UI_CLASSES } from '@heyclaude/web-runtime';
 import { AlertTriangle, Info } from '@heyclaude/web-runtime/icons';
+import type { ErrorTableProps } from '@heyclaude/web-runtime/types/component.types';
+import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import {
   Card,
@@ -15,7 +16,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/ui/card';
-import type { ErrorTableProps } from '@/src/lib/types/component.types';
 
 export function ErrorTable(props: ErrorTableProps) {
   // Database CHECK constraint validates structure - no runtime validation needed

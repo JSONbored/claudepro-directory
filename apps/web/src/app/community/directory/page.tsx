@@ -1,10 +1,6 @@
 import type { Database } from '@heyclaude/database-types';
-import {
-  generatePageMetadata,
-  getCommunityDirectory,
-  logger,
-  normalizeError,
-} from '@heyclaude/web-runtime';
+import { logger, normalizeError } from '@heyclaude/web-runtime/core';
+import { generatePageMetadata, getCommunityDirectory } from '@heyclaude/web-runtime/data';
 import type { Metadata } from 'next';
 import { Suspense } from 'react';
 import { ContributorsSidebar } from '@/src/components/features/community/contributors-sidebar';

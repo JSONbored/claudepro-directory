@@ -5,8 +5,9 @@
  * Modal for sharing recommendation results
  */
 
-import { logger, UI_CLASSES } from '@heyclaude/web-runtime';
+import { logger } from '@heyclaude/web-runtime/core';
 import { Facebook, Linkedin, Mail, Share2, Twitter } from '@heyclaude/web-runtime/icons';
+import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { SimpleCopyButton } from '@/src/components/core/buttons/shared/simple-copy-button';
 import { Button } from '@/src/components/primitives/ui/button';
 import {

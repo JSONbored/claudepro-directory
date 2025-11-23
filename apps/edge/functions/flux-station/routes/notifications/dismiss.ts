@@ -4,16 +4,14 @@
  */
 
 import {
+  badRequestResponse,
   createNotificationTrace,
   dismissNotificationsForUser,
-} from '@heyclaude/edge-runtime/notifications/service.ts';
-import { requireAuthUser } from '@heyclaude/edge-runtime/utils/auth.ts';
-import {
-  badRequestResponse,
   errorResponse,
   notificationCorsHeaders,
+  requireAuthUser,
   successResponse,
-} from '@heyclaude/edge-runtime/utils/http.ts';
+} from '@heyclaude/edge-runtime';
 import {
   createNotificationRouterContext,
   MAX_BODY_SIZE,

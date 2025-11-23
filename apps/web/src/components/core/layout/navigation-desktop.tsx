@@ -4,13 +4,13 @@
  * Handles full dropdown menus with descriptions
  */
 
+import { Briefcase, ChevronDown, Handshake, Users } from '@heyclaude/web-runtime/icons';
 import {
   ANIMATION_CONSTANTS,
   DIMENSIONS,
   POSITION_PATTERNS,
   UI_CLASSES,
-} from '@heyclaude/web-runtime';
-import { Briefcase, ChevronDown, Handshake, Users } from '@heyclaude/web-runtime/icons';
+} from '@heyclaude/web-runtime/ui';
 import Link from 'next/link';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { PrefetchLink } from '@/src/components/core/navigation/prefetch-link';

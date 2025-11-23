@@ -1,8 +1,8 @@
 'use client';
 
-import { UI_CLASSES } from '@heyclaude/web-runtime';
 import { Star } from '@heyclaude/web-runtime/icons';
-import type { ReviewRatingCompactProps } from '@/src/lib/types/component.types';
+import type { ReviewRatingCompactProps } from '@heyclaude/web-runtime/types/component.types';
+import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 
 /**
  * Compact rating display showing average and count

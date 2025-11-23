@@ -18,17 +18,16 @@ import {
  */
 
 import type { Database } from '@heyclaude/database-types';
+import { ensureUserRecord } from '@heyclaude/web-runtime';
+import { hashUserId, logger, normalizeError } from '@heyclaude/web-runtime/core';
 import {
   generatePageMetadata,
   getAuthenticatedUser,
   getUserSettings,
-  logger,
-  normalizeError,
-  UI_CLASSES,
-} from '@heyclaude/web-runtime';
+} from '@heyclaude/web-runtime/data';
+import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
+import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import type { Metadata } from 'next';
-import { ensureUserRecord } from '@/src/lib/actions/user.actions';
-import { ROUTES } from '@/src/lib/data/config/constants';
 
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/account/settings');
@@ -59,15 +58,17 @@ export default async function SettingsPage() {
     );
   }
 
+  const hashedUserId = hashUserId(user.id);
+
   let settingsData: Database['public']['Functions']['get_user_settings']['Returns'] | null = null;
   try {
     settingsData = await getUserSettings(user.id);
     if (!settingsData) {
-      logger.warn('SettingsPage: getUserSettings returned null', { userId: user.id });
+      logger.warn('SettingsPage: getUserSettings returned null', { userIdHash: hashedUserId });
     }
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load user settings');
-    logger.error('SettingsPage: getUserSettings threw', normalized, { userId: user.id });
+    logger.error('SettingsPage: getUserSettings threw', normalized, { userIdHash: hashedUserId });
   }
 
   if (!settingsData) {
@@ -96,7 +97,9 @@ export default async function SettingsPage() {
 
   // Initialize user if missing (consolidated - no more profiles table)
   if (!userData) {
-    logger.warn('SettingsPage: user_data missing, invoking ensureUserRecord', { userId: user.id });
+    logger.warn('SettingsPage: user_data missing, invoking ensureUserRecord', {
+      userIdHash: hashedUserId,
+    });
     try {
       await ensureUserRecord({
         id: user.id,
@@ -110,12 +113,14 @@ export default async function SettingsPage() {
         profile = refreshed.profile;
       } else {
         logger.warn('SettingsPage: getUserSettings returned null after ensureUserRecord', {
-          userId: user.id,
+          userIdHash: hashedUserId,
         });
       }
     } catch (error) {
       const normalized = normalizeError(error, 'Failed to initialize user record');
-      logger.error('SettingsPage: ensureUserRecord failed', normalized, { userId: user.id });
+      logger.error('SettingsPage: ensureUserRecord failed', normalized, {
+        userIdHash: hashedUserId,
+      });
       // Leave userData/profile undefined so page can render fallback UI
     }
   }
@@ -126,7 +131,7 @@ export default async function SettingsPage() {
       'SettingsPage: profile missing from getUserSettings response',
       new Error('Profile missing from response'),
       {
-        userId: user.id,
+        userIdHash: hashedUserId,
       }
     );
     return (

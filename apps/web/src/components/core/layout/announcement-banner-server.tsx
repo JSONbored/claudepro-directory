@@ -6,11 +6,11 @@
  */
 
 import type { Database } from '@heyclaude/database-types';
+import { logger } from '@heyclaude/web-runtime/core';
 import {
   getActiveAnnouncement as fetchActiveAnnouncement,
   getCacheTtl,
-  logger,
-} from '@heyclaude/web-runtime';
+} from '@heyclaude/web-runtime/data';
 import { unstable_cache } from 'next/cache';
 import { cache } from 'react';
 

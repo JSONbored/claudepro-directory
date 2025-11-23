@@ -11,13 +11,9 @@
  * - Production-optimized: Radix handles state, Motion handles visuals
  */
 
-import {
-  cn,
-  getAnimationConfig,
-  logger,
-  POSITION_PATTERNS,
-  STATE_PATTERNS,
-} from '@heyclaude/web-runtime';
+import { logger } from '@heyclaude/web-runtime/core';
+import { getAnimationConfig } from '@heyclaude/web-runtime/data';
+import { cn, POSITION_PATTERNS, STATE_PATTERNS } from '@heyclaude/web-runtime/ui';
 import * as TabsPrimitive from '@radix-ui/react-tabs';
 import { motion } from 'motion/react';
 import type * as React from 'react';

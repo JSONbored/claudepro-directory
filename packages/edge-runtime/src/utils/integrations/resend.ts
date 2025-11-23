@@ -3,14 +3,140 @@
  * Topic assignment, property mapping, contact management, and segments.
  */
 
-import type { Resend } from 'npm:resend@4.0.0';
+import type { Resend } from 'npm:resend@6.5.2';
 import { RESEND_ENV } from '../../config/email-config.ts';
-import type { Database, Database as DatabaseGenerated } from '@heyclaude/database-types';
+import { Constants, type Database, type Database as DatabaseGenerated } from '@heyclaude/database-types';
 
 import type { BaseLogContext } from '@heyclaude/shared-runtime';
 import { createUtilityContext, logError, logInfo, logWarn } from '@heyclaude/shared-runtime';
 import { TIMEOUT_PRESETS, withTimeout } from '@heyclaude/shared-runtime';
 import { runWithRetry } from './http-client.ts';
+
+const RESEND_API_BASE_URL = 'https://api.resend.com';
+
+export class ResendApiError extends Error {
+  constructor(
+    message: string,
+    public readonly status: number | null,
+    public readonly rawBody?: string,
+    public readonly body?: unknown
+  ) {
+    super(message);
+    this.name = 'ResendApiError';
+  }
+}
+
+type ResendSdkError = {
+  message: string;
+  statusCode: number | null;
+  name: string;
+};
+
+type ResendSdkResponse<T> = {
+  data: T | null;
+  error: ResendSdkError | null;
+  headers?: Record<string, string> | null;
+};
+
+function assertResendSuccess<T>(response: ResendSdkResponse<T>, descriptor: string): T {
+  if (response.error || response.data === null) {
+    throw new ResendApiError(
+      `${descriptor} failed: ${response.error?.message ?? 'Unknown Resend error'}`,
+      response.error?.statusCode ?? null
+    );
+  }
+  return response.data;
+}
+
+type ResendApiRequestOptions = {
+  path: string;
+  method?: string;
+  payload?: unknown;
+  apiKey?: string;
+  fetchImpl?: typeof fetch;
+};
+
+type ResendApiResponse<T> = {
+  data: T;
+  status: number;
+  rawBody: string;
+};
+
+export async function callResendApi<T>({
+  path,
+  method = 'GET',
+  payload,
+  apiKey,
+  fetchImpl = fetch,
+}: ResendApiRequestOptions): Promise<ResendApiResponse<T>> {
+  const resolvedApiKey = apiKey ?? RESEND_ENV.apiKey;
+  if (!resolvedApiKey) {
+    throw new ResendApiError('Missing Resend API key', null);
+  }
+
+  const normalizedPath = normalizeResendPath(path);
+  const init: RequestInit = {
+    method,
+    headers: {
+      Authorization: `Bearer ${resolvedApiKey}`,
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    },
+  };
+
+  if (payload !== undefined) {
+    init.body = JSON.stringify(payload);
+  }
+
+  try {
+    const response = await withTimeout(
+      fetchImpl(`${RESEND_API_BASE_URL}${normalizedPath}`, init),
+      TIMEOUT_PRESETS.external,
+      `Resend ${method.toUpperCase()} ${normalizedPath} timed out`
+    );
+
+    const rawBody = await response.text();
+    let parsedBody: unknown = rawBody;
+    try {
+      parsedBody = rawBody ? JSON.parse(rawBody) : null;
+    } catch {
+      // Ignore JSON parse errors; keep raw text
+    }
+
+    if (!response.ok) {
+      throw new ResendApiError(
+        `Resend ${method.toUpperCase()} ${normalizedPath} failed with ${response.status}`,
+        response.status,
+        rawBody,
+        parsedBody
+      );
+    }
+
+    return {
+      data: parsedBody as T,
+      status: response.status,
+      rawBody,
+    };
+  } catch (error) {
+    if (error instanceof ResendApiError) {
+      throw error;
+    }
+    throw new ResendApiError(
+      error instanceof Error ? error.message : 'Unknown Resend request error',
+      null
+    );
+  }
+}
+
+function normalizeResendPath(path: string): string {
+  if (!path.startsWith('/')) {
+    path = `/${path}`;
+  }
+  if (!path.startsWith('/v')) {
+    return `/v1${path}`;
+  }
+  return path;
+}
 
 /**
  * Resend Topic IDs (static configuration)
@@ -26,6 +152,22 @@ export const RESEND_TOPIC_IDS = {
   job_board: '900424b3-7ccf-4bac-b244-31af6cac5b72',
   platform_updates: 'f84d94d8-76aa-4abf-8ff6-3dfd916b56e6',
 } as const;
+
+const NEWSLETTER_INTEREST_VALUES = Constants.public.Enums.newsletter_interest;
+const NEWSLETTER_INTEREST_SET = new Set(NEWSLETTER_INTEREST_VALUES);
+
+export function resolveNewsletterInterest(
+  copyCategory?: DatabaseGenerated['public']['Enums']['content_category'] | string | null,
+  fallback: DatabaseGenerated['public']['Enums']['newsletter_interest'] = 'general'
+): DatabaseGenerated['public']['Enums']['newsletter_interest'] {
+  if (copyCategory) {
+    const normalized = copyCategory.toString().toLowerCase() as DatabaseGenerated['public']['Enums']['newsletter_interest'];
+    if (NEWSLETTER_INTEREST_SET.has(normalized)) {
+      return normalized;
+    }
+  }
+  return fallback;
+}
 
 /**
  * Infer initial topics based on signup context
@@ -68,6 +210,63 @@ export function inferInitialTopics(
 
   // Deduplicate
   return [...new Set(topics)];
+}
+
+async function assignTopicsToContact(
+  resend: Resend,
+  contactId: string,
+  topicIds: string[],
+  logContext: BaseLogContext
+): Promise<void> {
+  if (topicIds.length === 0) {
+    return;
+  }
+
+  try {
+    await runWithRetry(
+      async () => {
+        const updateResponse = await resend.contacts.topics.update({
+          id: contactId,
+          topics: topicIds.map((id) => ({
+            id,
+            subscription: 'opt_in',
+          })),
+        });
+        assertResendSuccess(updateResponse, 'contacts.topics.update');
+      },
+      {
+        attempts: 3,
+        baseDelayMs: 500,
+        onRetry(attempt, error, delay) {
+          logWarn('[resend] topic assignment throttled', {
+            ...logContext,
+            attempt,
+            delay,
+            error: error.message,
+          });
+        },
+      }
+    );
+
+    logInfo('Topics assigned successfully', {
+      ...logContext,
+      topic_count: topicIds.length,
+    });
+  } catch (error) {
+    if (error instanceof ResendApiError) {
+      logError(
+        'Failed to assign topics',
+        {
+          ...logContext,
+          status: error.status,
+          response_body: error.rawBody ?? null,
+        },
+        error
+      );
+    } else {
+      logError('Failed to assign topics', logContext, error);
+    }
+  }
 }
 
 /**
@@ -122,23 +321,23 @@ export function calculateInitialEngagementScore(
 }
 
 /**
- * Build contact properties object for Resend
- * Maps our database fields to Resend custom properties
+ * Build contact properties object for Resend.
+ * `primaryInterest` must be derived via {@link resolveNewsletterInterest} to ensure enum safety.
  */
 export function buildContactProperties(params: {
   source: Database['public']['Enums']['newsletter_source'] | string | null;
   copyType?: string | null;
-  copyCategory?: Database['public']['Enums']['content_category'] | string | null;
   referrer?: string | null;
+  primaryInterest: DatabaseGenerated['public']['Enums']['newsletter_interest'];
 }): Record<string, string | number> {
-  const { source, copyType, copyCategory, referrer } = params;
+  const { source, copyType, referrer, primaryInterest } = params;
   // Convert newsletter_source to string | null for database compatibility
   const sourceValue: string | null = source ?? null;
 
   return {
     signup_source: sourceValue || 'unknown',
     copy_type: copyType || 'none',
-    primary_interest: copyCategory || 'general',
+    primary_interest: primaryInterest,
     signup_page: referrer || '/',
     engagement_score: calculateInitialEngagementScore(source, copyType),
     total_copies: copyType && copyType !== 'none' ? 1 : 0,
@@ -161,6 +360,38 @@ const SEGMENT_RETRY = {
   baseDelayMs: 750,
 };
 
+const SEGMENT_MIN_INTERVAL_MS = 1200;
+const SEGMENT_JITTER_MS = 300;
+let segmentLimiterTail: Promise<void> = Promise.resolve();
+let lastSegmentCallAt = 0;
+
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function scheduleSegmentApiCall<T>(operation: () => Promise<T>): Promise<T> {
+  const run = async () => {
+    const now = Date.now();
+    const elapsed = now - lastSegmentCallAt;
+    const wait = Math.max(0, SEGMENT_MIN_INTERVAL_MS - elapsed);
+    if (wait > 0) {
+      await delay(wait + Math.random() * SEGMENT_JITTER_MS);
+    }
+    const result = await operation();
+    lastSegmentCallAt = Date.now();
+    return result;
+  };
+
+  const task = segmentLimiterTail.then(run);
+  segmentLimiterTail = task.then(
+    () => undefined,
+    () => undefined
+  );
+  return task;
+}
+
+const RESEND_SEGMENTS_SUPPORTED = true;
+
 export function determineSegmentByEngagement(
   engagementScore: number
 ): (typeof RESEND_SEGMENT_IDS)[keyof typeof RESEND_SEGMENT_IDS] | null {
@@ -170,65 +401,121 @@ export function determineSegmentByEngagement(
   return null;
 }
 
+type SegmentSyncOptions = {
+  mode?: 'initial' | 'update';
+};
+
 export async function syncContactSegment(
   resend: Resend,
   contactId: string,
-  engagementScore: number
+  engagementScore: number,
+  options?: SegmentSyncOptions
 ): Promise<void> {
+  if (!RESEND_SEGMENTS_SUPPORTED) {
+    return;
+  }
+
+  const logContext = createUtilityContext('resend', 'sync-contact-segment', {
+    contactId,
+  });
+  const mode = options?.mode ?? 'update';
   const targetSegment = determineSegmentByEngagement(engagementScore);
   const managedSegmentIds = new Set(Object.values(RESEND_SEGMENT_IDS));
 
   try {
-    const currentSegmentIds = await listSegmentsWithRetry(resend, contactId);
+    let currentSegmentIds: string[] = [];
 
-    for (const segmentId of currentSegmentIds) {
-      const typedSegmentId =
-        segmentId as (typeof RESEND_SEGMENT_IDS)[keyof typeof RESEND_SEGMENT_IDS];
-      if (typedSegmentId !== targetSegment && managedSegmentIds.has(typedSegmentId)) {
-        await runWithRetry(
-          () =>
-            (
-              resend.contacts as unknown as {
-                segments: {
-                  remove: (args: {
-                    id: string;
-                    segmentId: string;
-                  }) => Promise<{ data: unknown; error: unknown }>;
-                };
-              }
-            ).segments.remove({
-              id: contactId,
-              segmentId: typedSegmentId,
-            }),
-          SEGMENT_RETRY
-        );
+    if (mode === 'update') {
+      currentSegmentIds = await runWithRetry(
+        () => listSegmentsWithRetry(resend, contactId),
+        {
+          attempts: 3,
+          baseDelayMs: 500,
+          onRetry(attempt, error, delay) {
+            logWarn('[resend] segment list throttled', {
+              ...logContext,
+              attempt,
+              delay,
+              error: error.message,
+            });
+          },
+        }
+      );
+
+      for (const segmentId of currentSegmentIds) {
+        const typedSegmentId =
+          segmentId as (typeof RESEND_SEGMENT_IDS)[keyof typeof RESEND_SEGMENT_IDS];
+        if (typedSegmentId !== targetSegment && managedSegmentIds.has(typedSegmentId)) {
+          await runWithRetry(
+            async () => {
+              const removeResponse = await scheduleSegmentApiCall(() =>
+                resend.contacts.segments.remove({
+                  contactId,
+                  segmentId: typedSegmentId,
+                })
+              );
+              assertResendSuccess(removeResponse, 'contacts.segments.remove');
+            },
+            {
+              attempts: 3,
+              baseDelayMs: 500,
+              onRetry(attempt, error, delay) {
+                logWarn('[resend] segment removal throttled', {
+                  ...logContext,
+                  attempt,
+                  delay,
+                  error: error.message,
+                });
+              },
+            }
+          );
+        }
       }
     }
 
-    if (targetSegment && !currentSegmentIds.includes(targetSegment)) {
+    const shouldAddSegment =
+      targetSegment &&
+      (mode === 'initial' || (mode === 'update' && !currentSegmentIds.includes(targetSegment)));
+
+    if (shouldAddSegment && targetSegment) {
       await runWithRetry(
-        () =>
-          (
-            resend.contacts as unknown as {
-              segments: {
-                add: (args: {
-                  id: string;
-                  segmentId: string;
-                }) => Promise<{ data: unknown; error: unknown }>;
-              };
-            }
-          ).segments.add({
-            id: contactId,
-            segmentId: targetSegment,
-          }),
-        SEGMENT_RETRY
+        async () => {
+          const addResponse = await scheduleSegmentApiCall(() =>
+            resend.contacts.segments.add({
+              contactId,
+              segmentId: targetSegment,
+            })
+          );
+          assertResendSuccess(addResponse, 'contacts.segments.add');
+        },
+        {
+          attempts: 3,
+          baseDelayMs: 500,
+          onRetry(attempt, error, delay) {
+            logWarn('[resend] segment add throttled', {
+              ...logContext,
+              attempt,
+              delay,
+              error: error.message,
+            });
+          },
+        }
       );
     }
   } catch (error) {
-    const logContext = createUtilityContext('resend', 'sync-contact-segment', {
-      contactId,
-    });
-    logError('Segment sync failed', logContext, error);
+    if (error instanceof ResendApiError) {
+      logError(
+        'Segment sync failed',
+        {
+          ...logContext,
+          status: error.status,
+          response_body: error.rawBody ?? null,
+        },
+        error
+      );
+    } else {
+      logError('Segment sync failed', logContext, error);
+    }
   }
 }
 
@@ -280,6 +567,7 @@ export async function updateContactEngagement(
     | 'visit_page'
 ): Promise<void> {
   try {
+    const logContext = createUtilityContext('resend', 'update-contact-engagement', { email });
     // Resend API requires audienceId for contacts.get
     // Type assertion needed because Resend types may not include all fields
     type ResendContact = {
@@ -310,7 +598,6 @@ export async function updateContactEngagement(
     const { data: contact } = await runWithRetry(() => contactsApi.get({ email }), SEGMENT_RETRY);
 
     if (!contact?.['data']) {
-      const logContext = createUtilityContext('resend', 'update-contact-engagement', { email });
       logWarn('contact not found', logContext);
       return;
     }
@@ -341,26 +628,19 @@ export async function updateContactEngagement(
 }
 
 async function listSegmentsWithRetry(resend: Resend, contactId: string): Promise<string[]> {
-  const { data } = await runWithRetry(
+  const response = await runWithRetry(
     () =>
-      (
-        resend.contacts as unknown as {
-          segments: {
-            list: (args: { id: string }) => Promise<{
-              data: { data?: Array<{ id: string }> } | null;
-              error: unknown;
-            }>;
-          };
-        }
-      ).segments.list({
-        id: contactId,
-      }),
+      scheduleSegmentApiCall(() =>
+        resend.contacts.segments.list({
+          contactId,
+          limit: 100,
+        })
+      ),
     SEGMENT_RETRY
   );
 
-  return (
-    (data as { data?: Array<{ id: string }> } | null)?.data?.map((segment) => segment.id) ?? []
-  );
+  const segments = assertResendSuccess(response, 'contacts.segments.list');
+  return segments.data.map((segment) => segment.id);
 }
 
 /**
@@ -484,48 +764,20 @@ export async function syncContactToResend(
       });
 
       // Assign topics based on signup context
-      try {
-        topicIds = inferInitialTopics(validatedSource, copy_category);
-        logInfo('Assigning topics', {
-          ...logContext,
-          topic_count: topicIds.length,
-          topic_ids: topicIds,
-        });
+      topicIds = inferInitialTopics(validatedSource, copy_category);
+      logInfo('Assigning topics', {
+        ...logContext,
+        topic_count: topicIds.length,
+        topic_ids: topicIds,
+      });
 
-        if (topicIds.length > 0) {
-          type ResendContactsTopicsApi = {
-            topics: {
-              update: (args: { contactId: string; topicIds: string[] }) => Promise<{
-                data: unknown;
-                error: { message?: string } | null;
-              }>;
-            };
-          };
-          const contactsWithTopics = resend.contacts as unknown as ResendContactsTopicsApi;
-          const { error: topicError } = await withTimeout(
-            contactsWithTopics.topics.update({
-              contactId: resendContactId,
-              topicIds,
-            }),
-            TIMEOUT_PRESETS.external,
-            'Resend topic assignment timed out'
-          );
-
-          if (topicError) {
-            logError('Failed to assign topics', logContext, topicError);
-          } else {
-            logInfo('Topics assigned successfully', logContext);
-          }
-        }
-      } catch (topicException) {
-        logError('Topic assignment exception', logContext, topicException);
-      }
+      await assignTopicsToContact(resend, resendContactId, topicIds, logContext);
 
       // Assign to engagement segment
+      const engagementScore = contactProperties['engagement_score'] as number;
       try {
-        const engagementScore = contactProperties['engagement_score'] as number;
         await withTimeout(
-          syncContactSegment(resend, resendContactId, engagementScore),
+          syncContactSegment(resend, resendContactId, engagementScore, { mode: 'initial' }),
           TIMEOUT_PRESETS.external,
           'Resend segment assignment timed out'
         );

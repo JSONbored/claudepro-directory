@@ -12,8 +12,8 @@
  * @module components/features/community/top-contributors
  */
 
-import { UI_CLASSES } from '@heyclaude/web-runtime';
 import { Users } from '@heyclaude/web-runtime/icons';
+import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { memo } from 'react';
 import {
   ProfileCard,

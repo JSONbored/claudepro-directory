@@ -4,8 +4,8 @@
   "rsc": true,
   "tsx": true,
   "tailwind": {
-      "config": "tailwind.config.ts",
-      "css": "apps/web/src/app/globals.css",
+    "config": null,
+    "css": "apps/web/src/app/globals.css",
     "baseColor": "slate",
     "cssVariables": true,
     "prefix": ""

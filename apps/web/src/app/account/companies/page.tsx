@@ -6,14 +6,16 @@
 import type { Database } from '@heyclaude/database-types';
 import {
   formatRelativeDate,
-  generatePageMetadata,
-  getAuthenticatedUser,
-  getUserCompanies,
   hashUserId,
   logger,
   normalizeError,
-  UI_CLASSES,
-} from '@heyclaude/web-runtime';
+} from '@heyclaude/web-runtime/core';
+import {
+  generatePageMetadata,
+  getAuthenticatedUser,
+  getUserCompanies,
+} from '@heyclaude/web-runtime/data';
+import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import {
   Briefcase,
   Building2,
@@ -23,6 +25,7 @@ import {
   Eye,
   Plus,
 } from '@heyclaude/web-runtime/icons';
+import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -35,7 +38,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/ui/card';
-import { ROUTES } from '@/src/lib/data/config/constants';
 
 /**
  * Validate company website URL is safe for use in href

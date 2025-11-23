@@ -10,9 +10,9 @@
  * - Context-aware messaging
  */
 
-import { logger, normalizeError } from '@heyclaude/web-runtime';
+import { logger, normalizeError } from '@heyclaude/web-runtime/core';
+import { useAuthenticatedUser } from '@heyclaude/web-runtime/hooks/use-authenticated-user';
 import { useCallback, useEffect, useState } from 'react';
-import { useAuthenticatedUser } from '@/src/lib/auth/use-authenticated-user';
 
 interface OnboardingToast {
   id: string;

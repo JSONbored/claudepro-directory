@@ -2,7 +2,7 @@
  * Consulting Page - Database-First Architecture Specialist
  */
 
-import { generatePageMetadata } from '@heyclaude/web-runtime';
+import { generatePageMetadata } from '@heyclaude/web-runtime/data';
 import type { Metadata } from 'next';
 import { ErrorBoundary } from '@/src/components/core/infra/error-boundary';
 import { ConsultingClient } from '@/src/components/features/consulting/consulting-page-content';

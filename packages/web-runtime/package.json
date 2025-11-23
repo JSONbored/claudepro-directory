@@ -8,21 +8,33 @@
       "types": "./src/index.ts",
       "default": "./src/index.ts"
     },
-    "./client": {
-      "types": "./src/client.ts",
-      "default": "./src/client.ts"
+    "./ui": {
+      "types": "./src/entries/ui.ts",
+      "default": "./src/entries/ui.ts"
     },
-    "./errors": {
-      "types": "./src/errors.ts",
-      "default": "./src/errors.ts"
+    "./hooks": {
+      "types": "./src/entries/hooks.ts",
+      "default": "./src/entries/hooks.ts"
+    },
+    "./client": {
+      "types": "./src/entries/client.ts",
+      "default": "./src/entries/client.ts"
+    },
+    "./core": {
+      "types": "./src/entries/core.ts",
+      "default": "./src/entries/core.ts"
     },
     "./data": {
-      "types": "./src/data.ts",
-      "default": "./src/data.ts"
+      "types": "./src/entries/data.ts",
+      "default": "./src/entries/data.ts"
     },
     "./config/security": {
       "types": "./src/config/security.ts",
       "default": "./src/config/security.ts"
+    },
+    "./config/actions": {
+      "types": "./src/config/actions.config.ts",
+      "default": "./src/config/actions.config.ts"
     },
     "./data/config/category": {
       "types": "./src/data/config/category/index.ts",

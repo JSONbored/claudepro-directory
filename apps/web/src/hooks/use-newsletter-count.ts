@@ -6,13 +6,12 @@
  * Uses secure server action for data fetching
  */
 
+import { logClientWarning, logger } from '@heyclaude/web-runtime/core';
 import {
   getCacheConfig,
   getNewsletterCountAction,
   getPollingConfig,
-  logClientWarning,
-  logger,
-} from '@heyclaude/web-runtime';
+} from '@heyclaude/web-runtime/data';
 import { useEffect, useRef, useState } from 'react';
 
 export interface UseNewsletterCountReturn {

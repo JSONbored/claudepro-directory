@@ -14,7 +14,7 @@
  * @module components/ui/magic/rolling-text
  */
 
-import { cn } from '@heyclaude/web-runtime';
+import { cn } from '@heyclaude/web-runtime/ui';
 import { motion, type Transition, useInView } from 'motion/react';
 import * as React from 'react';
 

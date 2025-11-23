@@ -25,15 +25,14 @@
 import type { Database } from '@heyclaude/database-types';
 import {
   ensureStringArray,
-  getCategoryConfigs,
-  getContentBySlug,
   getMetadata,
   isValidCategory,
   logger,
   normalizeError,
-  UI_CLASSES,
-} from '@heyclaude/web-runtime';
+} from '@heyclaude/web-runtime/core';
+import { getCategoryConfigs, getContentBySlug } from '@heyclaude/web-runtime/data';
 import { AlertTriangle, CheckCircle } from '@heyclaude/web-runtime/icons';
+import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { Suspense } from 'react';
 import { ConfigCard } from '@/src/components/core/domain/cards/config-card';
 import { Skeleton } from '@/src/components/primitives/feedback/loading-skeleton';

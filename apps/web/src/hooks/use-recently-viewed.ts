@@ -2,12 +2,8 @@
 
 /** Recently viewed content tracking with localStorage persistence and LRU eviction */
 
-import {
-  getRecentlyViewedConfig,
-  getTimeoutConfig,
-  logClientWarning,
-  logger,
-} from '@heyclaude/web-runtime';
+import { logClientWarning, logger } from '@heyclaude/web-runtime/core';
+import { getRecentlyViewedConfig, getTimeoutConfig } from '@heyclaude/web-runtime/data';
 import { useCallback, useEffect, useRef } from 'react';
 import { create } from 'zustand';
 

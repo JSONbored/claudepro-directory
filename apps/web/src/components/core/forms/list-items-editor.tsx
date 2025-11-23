@@ -19,9 +19,8 @@
  * @module components/forms/utilities/list-item-manager
  */
 
-import { cn, UI_CLASSES } from '@heyclaude/web-runtime';
-import { toasts } from '@heyclaude/web-runtime/client';
 import { X } from '@heyclaude/web-runtime/icons';
+import { cn, toasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { useState } from 'react';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { Button } from '@/src/components/primitives/ui/button';

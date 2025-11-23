@@ -7,10 +7,11 @@
 
 import type { Database } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
-import type { PaymentPlanCatalogEntry } from '@heyclaude/web-runtime';
-import { logClientWarning, UI_CLASSES } from '@heyclaude/web-runtime';
-import { toasts } from '@heyclaude/web-runtime/client';
+import type { CreateJobInput, PaymentPlanCatalogEntry } from '@heyclaude/web-runtime';
+import { logClientWarning } from '@heyclaude/web-runtime/core';
+import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { Star } from '@heyclaude/web-runtime/icons';
+import { toasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { useEffect, useId, useMemo, useState, useTransition } from 'react';
 import { CompanySelector } from '@/src/components/core/forms/company-selector';
 import { FormField } from '@/src/components/core/forms/form-field-wrapper';
@@ -32,8 +33,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/src/components/primitives/ui/select';
-import type { CreateJobInput } from '@/src/lib/actions/jobs.actions';
-import { ROUTES } from '@/src/lib/data/config/constants';
 
 // Use enum values directly from @heyclaude/database-types Constants
 const JOB_PLAN_VALUES = Constants.public.Enums.job_plan;
@@ -255,15 +254,15 @@ export function JobForm({
 
     const jobData: CreateJobInput = {
       title: formData.get('title') as string,
-      company: companyName, // Use state (supports legacy text field)
-      company_id: companyId, // FK to companies table
-      ...(location && { location }),
+      company: companyName,
+      company_id: companyId || undefined,
+      location: location || undefined,
       description: formData.get('description') as string,
-      ...(salary && { salary }),
+      salary: salary || undefined,
       remote: formData.get('remote') === 'on',
       type: formData.get('type') as Database['public']['Enums']['job_type'],
-      ...(workplace && { workplace }),
-      ...(experience && { experience }),
+      workplace: workplace || undefined,
+      experience: experience || undefined,
       category: formData.get('category') as Database['public']['Enums']['job_category'],
       tags,
       requirements,
@@ -280,9 +279,9 @@ export function JobForm({
         throw new Error('Invalid job plan');
       })(),
       tier: (isFeatured ? 'featured' : 'standard') as Database['public']['Enums']['job_tier'],
-      ...(contactEmail && { contact_email: contactEmail }),
-      ...(companyLogo && { company_logo: companyLogo }),
-    };
+      contact_email: contactEmail || undefined,
+      company_logo: companyLogo || undefined,
+    } as unknown as CreateJobInput;
 
     startTransition(async () => {
       try {
@@ -318,7 +317,7 @@ export function JobForm({
             variant="input"
             label="Job Title"
             name="title"
-            {...(initialData?.title && { defaultValue: initialData.title })}
+            defaultValue={initialData?.title || ''}
             required={true}
             placeholder="e.g., Senior AI Engineer"
           />
@@ -329,7 +328,7 @@ export function JobForm({
               setCompanyId(id);
               setCompanyName(name);
             }}
-            defaultCompanyName={initialData?.company}
+            defaultCompanyName={initialData?.company || undefined}
           />
 
           <div className="grid grid-cols-2 gap-4">
@@ -432,7 +431,7 @@ export function JobForm({
             variant="textarea"
             label="Job Description"
             name="description"
-            {...(initialData?.description && { defaultValue: initialData.description })}
+            defaultValue={initialData?.description || ''}
             required={true}
             rows={6}
             placeholder="Describe the role, responsibilities, and what makes this opportunity great..."
@@ -508,7 +507,7 @@ export function JobForm({
             label="Application URL"
             name="link"
             type="url"
-            {...(initialData?.link && { defaultValue: initialData.link })}
+            defaultValue={initialData?.link || ''}
             required={true}
             placeholder="https://company.com/careers/apply"
           />

@@ -4,9 +4,9 @@
 
 'use client';
 
-import { ANIMATION_CONSTANTS, cn, createSupabaseBrowserClient } from '@heyclaude/web-runtime';
-import { toasts } from '@heyclaude/web-runtime/client';
+import { createSupabaseBrowserClient } from '@heyclaude/web-runtime/client';
 import { DiscordBrandIcon, GithubBrandIcon, GoogleBrandIcon } from '@heyclaude/web-runtime/icons';
+import { ANIMATION_CONSTANTS, cn, toasts } from '@heyclaude/web-runtime/ui';
 import { motion } from 'motion/react';
 import { useState } from 'react';
 

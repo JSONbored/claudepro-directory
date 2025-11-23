@@ -6,14 +6,14 @@
  */
 
 import type { JobStatus } from '@heyclaude/web-runtime';
-import { logClientWarning, UI_CLASSES } from '@heyclaude/web-runtime';
-import { toasts } from '@heyclaude/web-runtime/client';
+import { toggleJobStatus } from '@heyclaude/web-runtime';
+import { logClientWarning } from '@heyclaude/web-runtime/core';
 import { Pause, Play } from '@heyclaude/web-runtime/icons';
+import type { ButtonStyleProps } from '@heyclaude/web-runtime/types/component.types';
+import { toasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { useRouter } from 'next/navigation';
 import { useTransition } from 'react';
 import { Button } from '@/src/components/primitives/ui/button';
-import { toggleJobStatus } from '@/src/lib/actions/jobs.actions';
-import type { ButtonStyleProps } from '@/src/lib/types/component.types';
 
 export interface JobToggleButtonProps extends ButtonStyleProps {
   jobId: string;

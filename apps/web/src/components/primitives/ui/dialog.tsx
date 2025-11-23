@@ -13,15 +13,10 @@
  * - Automatic prefers-reduced-motion support
  */
 
-import {
-  cn,
-  getAnimationConfig,
-  logger,
-  POSITION_PATTERNS,
-  STATE_PATTERNS,
-  UI_CLASSES,
-} from '@heyclaude/web-runtime';
+import { logger } from '@heyclaude/web-runtime/core';
+import { getAnimationConfig } from '@heyclaude/web-runtime/data';
 import { X } from '@heyclaude/web-runtime/icons';
+import { cn, POSITION_PATTERNS, STATE_PATTERNS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { motion } from 'motion/react';
 import type * as React from 'react';

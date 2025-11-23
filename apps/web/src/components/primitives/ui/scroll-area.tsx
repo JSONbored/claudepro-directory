@@ -1,6 +1,6 @@
 'use client';
 
-import { cn } from '@heyclaude/web-runtime';
+import { cn } from '@heyclaude/web-runtime/ui';
 import * as ScrollAreaPrimitive from '@radix-ui/react-scroll-area';
 import type * as React from 'react';
 

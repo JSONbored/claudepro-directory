@@ -1,9 +1,10 @@
+import { hashUserId, logger } from '@heyclaude/web-runtime/core';
 import {
   generatePageMetadata,
   getAuthenticatedUser,
   getUserBookmarksForCollections,
-  logger,
-} from '@heyclaude/web-runtime';
+} from '@heyclaude/web-runtime/data';
+import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { ArrowLeft } from '@heyclaude/web-runtime/icons';
 import type { Metadata } from 'next';
 import Link from 'next/link';
@@ -11,7 +12,6 @@ import { redirect } from 'next/navigation';
 import { CollectionForm } from '@/src/components/core/forms/collection-form';
 import { Button } from '@/src/components/primitives/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
-import { ROUTES } from '@/src/lib/data/config/constants';
 
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/account/library/new');
@@ -30,8 +30,9 @@ export default async function NewCollectionPage() {
 
   const bookmarks = await getUserBookmarksForCollections(user.id);
   if (!bookmarks) {
+    const hashedUserId = hashUserId(user.id);
     logger.warn('NewCollectionPage: getUserBookmarksForCollections returned null', {
-      userId: user.id,
+      userIdHash: hashedUserId,
     });
   }
 

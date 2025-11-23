@@ -6,16 +6,15 @@
 
 'use client';
 
+import { getContactChannels, logger } from '@heyclaude/web-runtime/core';
+import { getAnimationConfig } from '@heyclaude/web-runtime/data';
+import { DiscordIcon, Github, Menu } from '@heyclaude/web-runtime/icons';
 import {
   ANIMATION_CONSTANTS,
   DIMENSIONS,
-  getAnimationConfig,
-  getContactChannels,
-  logger,
   POSITION_PATTERNS,
   UI_CLASSES,
-} from '@heyclaude/web-runtime';
-import { DiscordIcon, Github, Menu } from '@heyclaude/web-runtime/icons';
+} from '@heyclaude/web-runtime/ui';
 import { motion } from 'motion/react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';

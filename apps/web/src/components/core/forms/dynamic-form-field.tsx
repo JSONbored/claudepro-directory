@@ -19,12 +19,16 @@
  * - Maintainability: Hard → Easy
  */
 
-import { getResponsiveGridClass, POSITION_PATTERNS, UI_CLASSES } from '@heyclaude/web-runtime';
 import { resolveFormIcon } from '@heyclaude/web-runtime/icons';
+import type {
+  FieldDefinition,
+  FormFieldConfig,
+  GridColumn,
+} from '@heyclaude/web-runtime/types/component.types';
+import { getResponsiveGridClass, POSITION_PATTERNS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { Input } from '@/src/components/primitives/ui/input';
 import { Label } from '@/src/components/primitives/ui/label';
 import { Textarea } from '@/src/components/primitives/ui/textarea';
-import type { FieldDefinition, FormFieldConfig, GridColumn } from '@/src/lib/types/component.types';
 
 // ============================================================================
 // GRID LAYOUT SYSTEM

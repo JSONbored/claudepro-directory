@@ -1,5 +1,9 @@
-import { generatePageMetadata, logger, normalizeError, UI_CLASSES } from '@heyclaude/web-runtime';
+import type { PagePropsWithSearchParams } from '@heyclaude/web-runtime/core';
+import { logger, normalizeError } from '@heyclaude/web-runtime/core';
+import { generatePageMetadata } from '@heyclaude/web-runtime/data';
+import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { AlertCircle } from '@heyclaude/web-runtime/icons';
+import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Button } from '@/src/components/primitives/ui/button';
@@ -10,31 +14,33 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/ui/card';
-import { ROUTES } from '@/src/lib/data/config/constants';
 
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/auth/auth-code-error');
 }
 
-interface AuthCodeErrorSearchParams {
-  message?: string;
-  code?: string;
-  provider?: string;
-}
+export default async function AuthCodeError(props: PagePropsWithSearchParams) {
+  const searchParams = await props.searchParams;
 
-export default function AuthCodeError({
-  searchParams,
-}: {
-  searchParams?: AuthCodeErrorSearchParams;
-}) {
+  const rawCode = searchParams?.['code'];
+  const rawProvider = searchParams?.['provider'];
+  const rawMessage = searchParams?.['message'];
+
+  // Handle array or string, and ensure we get a string or default
+  const code = (Array.isArray(rawCode) ? rawCode[0] : rawCode) || 'unknown';
+  const provider = (Array.isArray(rawProvider) ? rawProvider[0] : rawProvider) || 'unknown';
+  const message = Array.isArray(rawMessage) ? rawMessage[0] : rawMessage;
+
   const normalized = normalizeError(
     'Authentication code error page accessed',
     'AuthCodeErrorPage rendered'
   );
+
   logger.error('AuthCodeErrorPage rendered', normalized, {
-    code: searchParams?.code || 'unknown',
-    provider: searchParams?.provider || 'unknown',
-    hasMessage: Boolean(searchParams?.message),
+    // Redact sensitive code/provider values
+    hasCode: Boolean(code && code !== 'unknown'),
+    provider: provider === 'unknown' ? 'unknown' : 'redacted',
+    hasMessage: Boolean(message),
     hasSearchParams: Boolean(searchParams),
   });
 

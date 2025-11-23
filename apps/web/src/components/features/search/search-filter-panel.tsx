@@ -13,7 +13,8 @@
  * - Apply/Clear actions
  */
 
-import { UI_CLASSES } from '@heyclaude/web-runtime';
+import type { FilterState } from '@heyclaude/web-runtime/types/component.types';
+import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { memo, useId } from 'react';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { Button } from '@/src/components/primitives/ui/button';
@@ -27,7 +28,6 @@ import {
   SelectValue,
 } from '@/src/components/primitives/ui/select';
 import { Slider } from '@/src/components/primitives/ui/slider';
-import type { FilterState } from '@/src/lib/types/component.types';
 
 export interface SearchFilterPanelProps {
   filters: FilterState;

@@ -1,6 +1,6 @@
 'use client';
 
-import { ensureString, logClientWarning } from '@heyclaude/web-runtime';
+import { ensureString, logClientWarning } from '@heyclaude/web-runtime/core';
 import { useEffect, useMemo, useState } from 'react';
 import { AuthFormPanel } from '@/src/components/core/auth/auth-form-panel';
 import { NewsletterOptInTile } from '@/src/components/core/auth/newsletter-opt-in-tile';
@@ -22,11 +22,21 @@ export function LoginPanelClient({ redirectTo }: LoginPanelClientProps) {
   const subscriberCountLabel = useMemo(() => formatSubscriberCount(count), [count]);
 
   useEffect(() => {
+    let cancelled = false;
     loadNewsletterConfig()
-      .then((config) => setNewsletterConfig(config))
+      .then((config) => {
+        if (!cancelled) {
+          setNewsletterConfig(config);
+        }
+      })
       .catch((error) => {
-        logClientWarning('LoginPanelClient: failed to load newsletter config', error);
+        if (!cancelled) {
+          logClientWarning('LoginPanelClient: failed to load newsletter config', error);
+        }
       });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const tileHeadline = ensureString(

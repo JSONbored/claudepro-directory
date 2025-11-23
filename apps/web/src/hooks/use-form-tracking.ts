@@ -12,9 +12,9 @@
  * ```
  */
 
-import { usePulse } from '@heyclaude/web-runtime';
+import { usePulse } from '@heyclaude/web-runtime/hooks';
+import type { SubmissionContentType } from '@heyclaude/web-runtime/types/component.types';
 import { useCallback, useMemo } from 'react';
-import type { SubmissionContentType } from '@/src/lib/types/component.types';
 
 /**
  * Form tracking event metadata

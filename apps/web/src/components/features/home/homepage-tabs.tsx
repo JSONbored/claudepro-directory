@@ -2,12 +2,10 @@
 
 /** Homepage tabs consuming homepageConfigs for runtime-tunable tab categories */
 
-import {
-  getAnimationConfig,
-  getHomepageTabCategories,
-  logger,
-  type UnifiedCategoryConfig,
-} from '@heyclaude/web-runtime';
+import { logger, type UnifiedCategoryConfig } from '@heyclaude/web-runtime/core';
+import { getAnimationConfig, getHomepageTabCategories } from '@heyclaude/web-runtime/data';
+import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
+import type { DisplayableContent } from '@heyclaude/web-runtime/types/component.types';
 import { motion } from 'motion/react';
 import Link from 'next/link';
 import { type FC, memo, useEffect, useMemo, useState } from 'react';
@@ -15,8 +13,6 @@ import { UnifiedCardGrid } from '@/src/components/core/domain/cards/card-grid';
 import { ConfigCard } from '@/src/components/core/domain/cards/config-card';
 import { Button } from '@/src/components/primitives/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/primitives/ui/tabs';
-import { ROUTES } from '@/src/lib/data/config/constants';
-import type { DisplayableContent } from '@/src/lib/types/component.types';
 
 export interface TabsSectionProps {
   activeTab: string;

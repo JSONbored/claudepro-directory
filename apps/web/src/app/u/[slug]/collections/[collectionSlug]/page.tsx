@@ -3,16 +3,14 @@
  * Single RPC call to get_user_collection_detail() replaces 3 separate queries
  */
 
+import { type CollectionDetailData, logger, normalizeError } from '@heyclaude/web-runtime/core';
 import {
-  type CollectionDetailData,
   generatePageMetadata,
   getAuthenticatedUser,
   getPublicCollectionDetail,
-  logger,
-  normalizeError,
-  UI_CLASSES,
-} from '@heyclaude/web-runtime';
+} from '@heyclaude/web-runtime/data';
 import { ArrowLeft, ExternalLink } from '@heyclaude/web-runtime/icons';
+import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';

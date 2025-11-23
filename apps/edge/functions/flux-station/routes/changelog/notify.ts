@@ -4,23 +4,23 @@
  */
 
 import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
-import { revalidateChangelogPages } from '@heyclaude/edge-runtime/changelog/service.ts';
-import { SITE_URL } from '@heyclaude/edge-runtime/clients/supabase.ts';
-import { edgeEnv } from '@heyclaude/edge-runtime/config/env.ts';
-import {
-  getCacheConfigNumber,
-  getCacheConfigStringArray,
-} from '@heyclaude/edge-runtime/config/statsig-cache.ts';
-import { insertNotification } from '@heyclaude/edge-runtime/notifications/service.ts';
-import { sendDiscordWebhook } from '@heyclaude/edge-runtime/utils/discord/client.ts';
 import {
   buildChangelogEmbed,
   type ChangelogSection,
+  edgeEnv,
+  errorResponse,
+  fetchWithRetry,
   type GitHubCommit,
-} from '@heyclaude/edge-runtime/utils/discord/embeds.ts';
-import { errorResponse, successResponse } from '@heyclaude/edge-runtime/utils/http.ts';
-import { fetchWithRetry } from '@heyclaude/edge-runtime/utils/integrations/http-client.ts';
-import { pgmqDelete, pgmqRead } from '@heyclaude/edge-runtime/utils/pgmq-client.ts';
+  getCacheConfigNumber,
+  getCacheConfigStringArray,
+  insertNotification,
+  pgmqDelete,
+  pgmqRead,
+  revalidateChangelogPages,
+  SITE_URL,
+  sendDiscordWebhook,
+  successResponse,
+} from '@heyclaude/edge-runtime';
 import {
   createNotificationRouterContext,
   errorToString,
@@ -390,6 +390,17 @@ export async function handleChangelogNotify(_req: Request): Promise<Response> {
         console.error('[flux-station] Invalid changelog release job structure', {
           msg_id: msg.msg_id.toString(),
         });
+
+        // Delete invalid message to prevent infinite retries
+        try {
+          await pgmqDelete(CHANGELOG_NOTIFICATIONS_QUEUE, msg.msg_id);
+        } catch (error) {
+          console.error('[flux-station] Failed to delete invalid message', {
+            msg_id: msg.msg_id.toString(),
+            error: errorToString(error),
+          });
+        }
+
         results.push({
           msg_id: msg.msg_id.toString(),
           status: 'failed',

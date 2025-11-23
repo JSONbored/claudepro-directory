@@ -18,14 +18,14 @@ import {
   Tag,
   X,
 } from '@heyclaude/web-runtime/icons';
+import type { SubmissionContentType } from '@heyclaude/web-runtime/types/component.types';
+import { SUBMISSION_FORM_TOKENS as TOKENS } from '@heyclaude/web-runtime/ui/design-tokens/submission-form';
 import { AnimatePresence, motion } from 'motion/react';
 import { useCallback, useState } from 'react';
 import { Badge } from '@/src/components/primitives/ui/badge';
 import { Button } from '@/src/components/primitives/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
 import { Input } from '@/src/components/primitives/ui/input';
-import { SUBMISSION_FORM_TOKENS as TOKENS } from '@/src/lib/design-tokens/submission-form';
-import type { SubmissionContentType } from '@/src/lib/types/component.types';
 
 interface FormData {
   submission_type: SubmissionContentType;

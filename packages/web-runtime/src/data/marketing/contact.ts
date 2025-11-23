@@ -1,4 +1,3 @@
-'use server';
 
 import { logger } from '../../logger.ts';
 import { SOCIAL_LINKS, SOCIAL_LINK_KEYS, type SocialLinkKey } from '../../config/social-links.ts';

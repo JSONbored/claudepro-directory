@@ -32,11 +32,13 @@ const publicSchemaClient = createClient<DatabaseGenerated>(SUPABASE_URL, SUPABAS
  */
 export async function pgmqSend(
   queueName: string,
-  msg: Record<string, unknown>
+  msg: Record<string, unknown>,
+  options?: { sleepSeconds?: number }
 ): Promise<{ msg_id: bigint } | null> {
   const { data, error } = await pgmqSupabaseClient.schema('pgmq_public').rpc('send', {
     queue_name: queueName,
-    msg,
+    message: msg,
+    sleep_seconds: options?.sleepSeconds ?? 0,
   });
 
   if (error) throw error;

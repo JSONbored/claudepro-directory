@@ -7,7 +7,7 @@ import { QuizService } from '@heyclaude/data-layer';
 export type QuizConfigurationResult =
   Database['public']['Functions']['get_quiz_configuration']['Returns'];
 
-export async function fetchQuizConfiguration(): Promise<QuizConfigurationResult | null> {
+export async function getQuizConfiguration(): Promise<QuizConfigurationResult | null> {
   return fetchCached(
     (client) => new QuizService(client).getQuizConfiguration(),
     {

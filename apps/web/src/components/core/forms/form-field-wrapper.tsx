@@ -22,7 +22,7 @@
  * @module components/forms/utilities/form-field
  */
 
-import { cn } from '@heyclaude/web-runtime';
+import { cn } from '@heyclaude/web-runtime/ui';
 import { useId, useState } from 'react';
 import { Input } from '@/src/components/primitives/ui/input';
 import { Label } from '@/src/components/primitives/ui/label';

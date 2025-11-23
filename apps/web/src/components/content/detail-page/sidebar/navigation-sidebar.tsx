@@ -6,21 +6,20 @@
 
 import type { Database } from '@heyclaude/database-types';
 import {
-  BADGE_COLORS,
   type CategoryType,
   ensureStringArray,
   getContentItemUrl,
-  getDisplayTitle,
   getMetadata,
   getSocialLinks,
   isValidCategory,
   logger,
   logUnhandledPromise,
   sanitizeSlug,
-  UI_CLASSES,
-  usePulse,
-} from '@heyclaude/web-runtime';
+} from '@heyclaude/web-runtime/core';
+import { usePulse } from '@heyclaude/web-runtime/hooks';
 import { ExternalLink, Github, Thermometer } from '@heyclaude/web-runtime/icons';
+import type { ContentItem } from '@heyclaude/web-runtime/types/component.types';
+import { BADGE_COLORS, getDisplayTitle, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { memo } from 'react';
@@ -28,7 +27,6 @@ import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge
 import { JobsPromo } from '@/src/components/core/domain/jobs/jobs-banner';
 import { Button } from '@/src/components/primitives/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
-import type { ContentItem } from '@/src/lib/types/component.types';
 
 /**
  * Validate slug is safe for use in URLs

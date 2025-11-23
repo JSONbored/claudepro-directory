@@ -3,9 +3,9 @@
  * Replaces Tremor with custom components for better performance
  */
 
-import { cn, UI_CLASSES } from '@heyclaude/web-runtime';
 import { ArrowDownIcon, ArrowUpIcon, MinusIcon } from '@heyclaude/web-runtime/icons';
-import type { MetricsDisplayProps } from '@/src/lib/types/component.types';
+import type { MetricsDisplayProps } from '@heyclaude/web-runtime/types/component.types';
+import { cn, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 
 // Lightweight Badge component for delta display
 function BadgeDelta({

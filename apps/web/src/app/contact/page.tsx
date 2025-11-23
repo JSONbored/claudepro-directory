@@ -1,11 +1,12 @@
-import { generatePageMetadata, getContactChannels, logger } from '@heyclaude/web-runtime';
+import { getContactChannels, logger } from '@heyclaude/web-runtime/core';
+import { generatePageMetadata } from '@heyclaude/web-runtime/data';
+import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
 import { DiscordIcon, Github, Mail, MessageSquare } from '@heyclaude/web-runtime/icons';
 import type { Metadata } from 'next';
 import { NavLink } from '@/src/components/core/navigation/navigation-link';
 import { ContactTerminal } from '@/src/components/features/contact/contact-terminal';
 import { ContactTerminalErrorBoundary } from '@/src/components/features/contact/contact-terminal-error-boundary';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
-import { APP_CONFIG } from '@/src/lib/data/config/constants';
 
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/contact');
@@ -14,8 +15,6 @@ export async function generateMetadata(): Promise<Metadata> {
 /**
  * Static Generation: This page is statically generated at build time
  * revalidate: false = Static generation at build time (no revalidation)
- * Note: Calls checkContactTerminalEnabled() at build time to determine terminal feature flag state.
- * The page is static, but the terminal feature flag value is determined during build.
  */
 export const revalidate = false;
 

@@ -35,12 +35,12 @@ export function createEmailHandlerContext(
  */
 export function createDataApiContext(
   route: string,
-  options?: { path?: string; method?: string; resource?: string }
+  options?: { path?: string; method?: string; resource?: string; app?: string; requestId?: string }
 ): BaseLogContext {
   return {
-    function: 'data-api',
+    function: options?.app ?? 'data-api',
     action: route,
-    request_id: crypto.randomUUID(),
+    request_id: options?.requestId ?? crypto.randomUUID(),
     started_at: new Date().toISOString(),
     ...(options?.path && { path: options.path }),
     ...(options?.method && { method: options.method }),
@@ -225,8 +225,12 @@ export function createTransformApiContext(
 /**
  * Log an info-level message
  */
+function formatLabel(context: BaseLogContext): string {
+  return context.action ? `${context.function}:${context.action}` : context.function;
+}
+
 export function logInfo(message: string, logContext: BaseLogContext): void {
-  console.log(`[${logContext.function}] ${message}`, {
+  console.log(`[${formatLabel(logContext)}] ${message}`, {
     ...logContext,
   });
 }
@@ -243,14 +247,14 @@ export function logError(message: string, logContext: BaseLogContext, error?: un
     errorData['error'] = errorToString(error);
   }
 
-  console.error(`[${logContext.function}] ${message}`, errorData);
+  console.error(`[${formatLabel(logContext)}] ${message}`, errorData);
 }
 
 /**
  * Log a warning-level message
  */
 export function logWarn(message: string, logContext: BaseLogContext): void {
-  console.warn(`[${logContext.function}] ${message}`, {
+  console.warn(`[${formatLabel(logContext)}] ${message}`, {
     ...logContext,
   });
 }

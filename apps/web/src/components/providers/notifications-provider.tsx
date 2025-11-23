@@ -5,7 +5,8 @@
 'use client';
 
 import type { Database } from '@heyclaude/database-types';
-import { logger, normalizeError } from '@heyclaude/web-runtime';
+import { dismissNotificationsAction, getActiveNotificationsAction } from '@heyclaude/web-runtime';
+import { logger, normalizeError } from '@heyclaude/web-runtime/core';
 import { useAction } from 'next-safe-action/hooks';
 import {
   createContext,
@@ -16,10 +17,6 @@ import {
   useRef,
   useState,
 } from 'react';
-import {
-  dismissNotificationsAction,
-  getActiveNotificationsAction,
-} from '@/src/lib/actions/notifications.actions';
 
 type NotificationRecord = Database['public']['Tables']['notifications']['Row'];
 

@@ -14,7 +14,11 @@ export async function getContentByCategory(
   category: Database['public']['Enums']['content_category']
 ): Promise<Database['public']['Functions']['get_enriched_content_list']['Returns']> {
   return fetchCached(
-    (client) => new ContentService(client).getEnrichedContentList(category, 1000, 0),
+    (client) => new ContentService(client).getEnrichedContentList({
+      p_category: category,
+      p_limit: 1000,
+      p_offset: 0
+    }),
     {
       key: generateContentCacheKey(category),
       tags: generateContentTags(category),
@@ -32,7 +36,14 @@ export const getContentBySlug = cache(
   ): Promise<Database['public']['CompositeTypes']['enriched_content_item'] | null> => {
     return fetchCached(
        async (client) => {
-         return new ContentService(client).getEnrichedContentBySlug(category, slug);
+         // Manual service had getEnrichedContentBySlug which called get_enriched_content_list with p_slugs
+         const data = await new ContentService(client).getEnrichedContentList({
+           p_category: category,
+           p_slugs: [slug],
+           p_limit: 1,
+           p_offset: 0
+         });
+         return data?.[0] ?? null;
        },
        {
           key: generateContentCacheKey(category, slug),
@@ -63,14 +74,14 @@ export const getAllContent = cache(
     return fetchCached(
       async (client) => {
          const result = await new ContentService(client).getContentPaginated({
-            ...(category ? { categories: [category] } : {}),
-            ...(filters?.tags ? { tags: filters.tags } : {}),
-            ...(filters?.search ? { search: filters.search } : {}),
-            ...(filters?.author ? { author: filters.author } : {}),
-            ...(filters?.orderBy ? { orderBy: filters.orderBy } : {}),
-            ...(filters?.orderDirection ? { orderDirection: filters.orderDirection } : {}),
-            limit: filters?.limit ?? 1000,
-            offset: 0
+            ...(category ? { p_category: category } : {}),
+            ...(filters?.tags ? { p_tags: filters.tags } : {}),
+            ...(filters?.search ? { p_search: filters.search } : {}),
+            ...(filters?.author ? { p_author: filters.author } : {}),
+            p_order_by: filters?.orderBy ?? 'created_at',
+            p_order_direction: filters?.orderDirection ?? 'desc',
+            p_limit: filters?.limit ?? 1000,
+            p_offset: 0
          });
          return (result.items ?? []) as Database['public']['CompositeTypes']['enriched_content_item'][];
       },
@@ -90,9 +101,11 @@ export const getContentCount = cache(
     return fetchCached(
       async (client) => {
         const result = await new ContentService(client).getContentPaginated({
-          ...(category ? { categories: [category] } : {}),
-          limit: 1,
-          offset: 0
+          ...(category ? { p_category: category } : {}),
+          p_limit: 1,
+          p_offset: 0,
+          p_order_by: 'created_at',
+          p_order_direction: 'desc'
         });
         return result.pagination?.total_count ?? 0;
       },
@@ -110,7 +123,10 @@ export const getContentCount = cache(
 export const getTrendingContent = cache(
   async (category?: Database['public']['Enums']['content_category'], limit = 20) => {
     return fetchCached(
-      (client) => new TrendingService(client).getTrendingContent(category ?? null, limit),
+      (client) => new TrendingService(client).getTrendingContent({
+        ...(category ? { p_category: category } : {}),
+        p_limit: limit
+      }),
       {
         key: generateContentCacheKey(category, null, limit),
         tags: ['trending', ...(category ? [`trending-${category}`] : ['trending-all'])],
@@ -157,7 +173,10 @@ export async function getTrendingPageData(
 
   const [trending, popular, recent] = await Promise.all([
     fetchCached(
-      (client) => new TrendingService(client).getTrendingMetrics(category, safeLimit),
+      (client) => new TrendingService(client).getTrendingMetrics({
+        ...(category ? { p_category: category } : {}),
+        p_limit: safeLimit
+      }),
       {
         key: `metrics-${generateContentCacheKey(category, null, safeLimit)}`,
         tags: ['trending', 'trending-page'],
@@ -167,7 +186,10 @@ export async function getTrendingPageData(
       }
     ),
     fetchCached(
-      (client) => new TrendingService(client).getPopularContent(category, safeLimit),
+      (client) => new TrendingService(client).getPopularContent({
+        ...(category ? { p_category: category } : {}),
+        p_limit: safeLimit
+      }),
       {
         key: `popular-${generateContentCacheKey(category, null, safeLimit)}`,
         tags: ['trending', 'trending-popular'],
@@ -177,7 +199,11 @@ export async function getTrendingPageData(
       }
     ),
     fetchCached(
-      (client) => new TrendingService(client).getRecentContent(category, safeLimit),
+      (client) => new TrendingService(client).getRecentContent({
+        ...(category ? { p_category: category } : {}),
+        p_limit: safeLimit,
+        p_days: 30
+      }),
       {
         key: `recent-${generateContentCacheKey(category, null, safeLimit)}`,
         tags: ['trending', 'trending-recent'],

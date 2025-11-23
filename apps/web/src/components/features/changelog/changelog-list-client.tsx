@@ -5,19 +5,20 @@
 'use client';
 
 import type { Database } from '@heyclaude/database-types';
-import { BADGE_COLORS, sanitizeSlug, UI_CLASSES } from '@heyclaude/web-runtime';
+import { sanitizeSlug } from '@heyclaude/web-runtime/core';
 import { ArrowRight, Calendar } from '@heyclaude/web-runtime/icons';
+import { BADGE_COLORS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import {
+  formatChangelogDateShort,
+  getNonEmptyCategories,
+  getRelativeTime,
+} from '@heyclaude/web-runtime/utils/changelog';
 import Link from 'next/link';
 import { useState } from 'react';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { BaseCard } from '@/src/components/core/domain/cards/content-card-base';
 import { CategoryFilter } from '@/src/components/features/changelog/changelog-category-filter';
 import { Tabs, TabsContent } from '@/src/components/primitives/ui/tabs';
-import {
-  formatChangelogDateShort,
-  getNonEmptyCategories,
-  getRelativeTime,
-} from '@/src/lib/changelog/utils';
 
 type ChangelogEntry = Database['public']['Tables']['changelog']['Row'];
 

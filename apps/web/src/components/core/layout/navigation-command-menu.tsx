@@ -1,8 +1,8 @@
 'use client';
 
 import type { Database } from '@heyclaude/database-types';
-import { UI_CLASSES } from '@heyclaude/web-runtime';
 import * as Icons from '@heyclaude/web-runtime/icons';
+import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { useRouter } from 'next/navigation';
 import { useEffect, useId, useState } from 'react';
 import {

@@ -50,7 +50,7 @@
  * @module components/forms/utilities/toggle-field
  */
 
-import { cn } from '@heyclaude/web-runtime';
+import { cn } from '@heyclaude/web-runtime/ui';
 import { useId } from 'react';
 import { Label } from '@/src/components/primitives/ui/label';
 import { Switch } from '@/src/components/primitives/ui/switch';

@@ -1,21 +1,18 @@
-import {
-  generatePageMetadata,
-  getContactChannels,
-  getLastUpdatedDate,
-} from '@heyclaude/web-runtime';
+import { getContactChannels, getLastUpdatedDate } from '@heyclaude/web-runtime/core';
+import { generatePageMetadata } from '@heyclaude/web-runtime/data';
+import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
 import type { Metadata } from 'next';
 import { NavLink } from '@/src/components/core/navigation/navigation-link';
-import { APP_CONFIG } from '@/src/lib/data/config/constants';
 
 export async function generateMetadata(): Promise<Metadata> {
-  return generatePageMetadata('/accessibility');
+  return await generatePageMetadata('/accessibility');
 }
 
 /**
- * Static Generation: Legal pages are fully static and never change
- * revalidate: false = Static generation at build time (no automatic revalidation)
+ * Accessibility statement should reflect the latest compliance status.
+ * revalidate: 3600 = Revalidate every hour
  */
-export const revalidate = false;
+export const revalidate = 3600;
 
 export default function AccessibilityPage() {
   const lastUpdated = getLastUpdatedDate();

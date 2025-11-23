@@ -3,15 +3,18 @@
 /** Featured sections consuming homepageConfigs for runtime-tunable categories */
 
 import type { Database } from '@heyclaude/database-types';
-import { UI_CLASSES } from '@heyclaude/web-runtime';
+import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { ExternalLink } from '@heyclaude/web-runtime/icons';
+import type {
+  DisplayableContent,
+  UnifiedCategoryConfig,
+} from '@heyclaude/web-runtime/types/component.types';
+import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import Link from 'next/link';
 import { type FC, memo, useMemo } from 'react';
 import { UnifiedCardGrid } from '@/src/components/core/domain/cards/card-grid';
 import { ConfigCard } from '@/src/components/core/domain/cards/config-card';
 import { JobCard } from '@/src/components/core/domain/cards/job-card';
-import { ROUTES } from '@/src/lib/data/config/constants';
-import type { DisplayableContent, UnifiedCategoryConfig } from '@/src/lib/types/component.types';
 
 interface FeaturedSectionProps {
   title: string;

@@ -12,16 +12,10 @@
  */
 
 import type { Database } from '@heyclaude/database-types';
-import {
-  cn,
-  getAnimationConfig,
-  logger,
-  normalizeError,
-  ParseStrategy,
-  safeParse,
-  UI_CLASSES,
-} from '@heyclaude/web-runtime';
-import { toasts } from '@heyclaude/web-runtime/client';
+import { submitContentForReview } from '@heyclaude/web-runtime';
+import { logger, normalizeError, ParseStrategy, safeParse } from '@heyclaude/web-runtime/core';
+import { getAnimationConfig } from '@heyclaude/web-runtime/data';
+import { useAuthenticatedUser } from '@heyclaude/web-runtime/hooks/use-authenticated-user';
 import {
   CheckCircle,
   Code,
@@ -31,6 +25,14 @@ import {
   Send,
   Sparkles,
 } from '@heyclaude/web-runtime/icons';
+import {
+  SUBMISSION_CONTENT_TYPES,
+  type SubmissionContentType,
+  type SubmissionFormConfig,
+  type SubmissionFormSection,
+  type TextFieldDefinition,
+} from '@heyclaude/web-runtime/types/component.types';
+import { cn, toasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { motion } from 'motion/react';
 import { useEffect, useId, useState, useTransition } from 'react';
 import { z } from 'zod';
@@ -40,15 +42,6 @@ import { Input } from '@/src/components/primitives/ui/input';
 import { Label } from '@/src/components/primitives/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/primitives/ui/tabs';
 import { Textarea } from '@/src/components/primitives/ui/textarea';
-import { submitContentForReview } from '@/src/lib/actions/content.actions';
-import { useAuthenticatedUser } from '@/src/lib/auth/use-authenticated-user';
-import {
-  SUBMISSION_CONTENT_TYPES,
-  type SubmissionContentType,
-  type SubmissionFormConfig,
-  type SubmissionFormSection,
-  type TextFieldDefinition,
-} from '@/src/lib/types/component.types';
 
 // Use generated type directly from @heyclaude/database-types
 type ContentTemplatesResult = Database['public']['Functions']['get_content_templates']['Returns'];
@@ -396,9 +389,9 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
           description: submissionData['description'] as string,
           category: submissionData['category'] as Database['public']['Enums']['content_category'],
           author: submissionData['author'] as string,
-          author_profile_url: submissionData['author_profile_url'] as string | undefined,
-          github_url: submissionData['github_url'] as string | undefined,
-          tags,
+          author_profile_url: (submissionData['author_profile_url'] as string) || '',
+          github_url: (submissionData['github_url'] as string) || '',
+          tags: tags || [],
           content_data: contentData,
         });
 
@@ -422,7 +415,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
         }
 
         if (result?.data?.success) {
-          if (!result.data.submissionId) {
+          if (!result.data.submission_id) {
             logger.warn('Success response missing submission ID', {
               component: 'SubmitFormClient',
               contentType,
@@ -430,7 +423,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
           }
 
           setSubmissionResult({
-            submission_id: result.data.submissionId || 'unknown',
+            submission_id: (result.data.submission_id as string) || 'unknown',
             status: 'pending',
             message: 'Your submission has been received and is pending review!',
           });

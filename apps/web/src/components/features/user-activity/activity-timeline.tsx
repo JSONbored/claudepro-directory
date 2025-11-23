@@ -8,7 +8,7 @@ import { Card, CardContent } from '@/src/components/primitives/ui/card';
 
 type Activity = Database['public']['CompositeTypes']['user_activity_timeline_item'];
 
-import { logger } from '@heyclaude/web-runtime';
+import { logger } from '@heyclaude/web-runtime/core';
 import { GitPullRequest } from '@heyclaude/web-runtime/icons';
 
 interface ActivityTimelineProps {

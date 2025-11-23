@@ -27,6 +27,11 @@ interface PackageBuildConfig {
 
 const PACKAGE_BUILDS: readonly PackageBuildConfig[] = [
   {
+    name: '@heyclaude/data-layer',
+    tsconfigPath: 'packages/data-layer/tsconfig.json',
+    description: 'Emit data-layer declarations consumed by web-runtime + server actions',
+  },
+  {
     name: '@heyclaude/shared-runtime',
     tsconfigPath: 'packages/shared-runtime/tsconfig.json',
     description: 'Emit shared runtime declarations consumed across apps/web + scripts',

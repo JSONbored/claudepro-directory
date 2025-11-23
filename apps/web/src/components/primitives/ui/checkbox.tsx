@@ -1,7 +1,7 @@
 'use client';
 
-import { cn, STATE_PATTERNS, UI_CLASSES } from '@heyclaude/web-runtime';
 import { Check } from '@heyclaude/web-runtime/icons';
+import { cn, STATE_PATTERNS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import * as CheckboxPrimitive from '@radix-ui/react-checkbox';
 import type * as React from 'react';
 

@@ -1,6 +1,5 @@
-'use server';
-
 import { z } from 'zod';
+import { GENERATED_CONFIG } from './generated-config.ts';
 
 const socialLinksSchema = z.object({
   github: z.string().url(),
@@ -14,7 +13,8 @@ const socialLinksSchema = z.object({
   securityEmail: z.string().email(),
 });
 
-export const SOCIAL_LINKS = socialLinksSchema.parse({
+// Fallback for build time if generation hasn't run or failed silently
+const FALLBACK_SOCIAL_LINKS = {
   github: 'https://github.com/JSONbored/claudepro-directory',
   authorProfile: 'https://github.com/JSONbored',
   discord: 'https://discord.gg/Ax3Py4YDrq',
@@ -24,7 +24,11 @@ export const SOCIAL_LINKS = socialLinksSchema.parse({
   partnerEmail: 'partner@claudepro.directory',
   supportEmail: 'support@claudepro.directory',
   securityEmail: 'security@claudepro.directory',
-});
+};
+
+export const SOCIAL_LINKS = socialLinksSchema.parse(
+  GENERATED_CONFIG.social_links || FALLBACK_SOCIAL_LINKS
+);
 
 export const SOCIAL_LINK_KEYS = [
   'github',

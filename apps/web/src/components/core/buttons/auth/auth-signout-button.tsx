@@ -5,13 +5,13 @@
  * Signs user out and redirects to homepage
  */
 
-import { createSupabaseBrowserClient, UI_CLASSES } from '@heyclaude/web-runtime';
-import { toasts } from '@heyclaude/web-runtime/client';
+import { createSupabaseBrowserClient } from '@heyclaude/web-runtime/client';
 import { LogOut } from '@heyclaude/web-runtime/icons';
+import type { ButtonStyleProps } from '@heyclaude/web-runtime/types/component.types';
+import { toasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { Button } from '@/src/components/primitives/ui/button';
-import type { ButtonStyleProps } from '@/src/lib/types/component.types';
 
 export type AuthSignOutButtonProps = ButtonStyleProps;
 

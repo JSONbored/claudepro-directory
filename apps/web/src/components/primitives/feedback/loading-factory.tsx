@@ -9,7 +9,7 @@
  * @module lib/components/loading-factory
  */
 
-import { getSkeletonKeys, UI_CLASSES } from '@heyclaude/web-runtime';
+import { getSkeletonKeys, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import {
   ConfigCardSkeleton,
   ContentListSkeleton,

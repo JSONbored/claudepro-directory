@@ -13,15 +13,17 @@
     "allowImportingTsExtensions": false,
     "baseUrl": ".",
     "paths": {
-      "@heyclaude/database-types": ["../database-types/src/index.ts"],
-      "@heyclaude/web-runtime": ["../web-runtime/src/index.ts"],
-      "@heyclaude/web-runtime/*": ["../web-runtime/src/*"]
+      "@heyclaude/database-types": ["../database-types/dist/index"],
+      "@heyclaude/web-runtime": ["../web-runtime/dist/index"],
+      "@heyclaude/web-runtime/*": ["../web-runtime/dist/*"],
+      "@heyclaude/shared-runtime": ["../shared-runtime/src/index.ts"]
     }
   },
   "include": ["src/**/*"],
   "exclude": ["dist", "node_modules"],
   "references": [
     { "path": "../database-types/tsconfig.json" },
-    { "path": "../web-runtime/tsconfig.json" }
+    { "path": "../web-runtime/tsconfig.json" },
+    { "path": "../shared-runtime/tsconfig.json" }
   ]
 }

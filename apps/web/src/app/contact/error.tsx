@@ -1,6 +1,6 @@
 'use client';
 
-import { logger, normalizeError } from '@heyclaude/web-runtime';
+import { logger, normalizeError } from '@heyclaude/web-runtime/core';
 import { useEffect } from 'react';
 import { SegmentErrorFallback } from '@/src/components/core/infra/segment-error-fallback';
 

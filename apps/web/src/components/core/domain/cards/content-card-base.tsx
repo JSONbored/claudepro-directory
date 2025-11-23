@@ -24,8 +24,9 @@
  * @module components/shared/base-card
  */
 
-import { getSocialLinks, POSITION_PATTERNS, UI_CLASSES } from '@heyclaude/web-runtime';
-import { getViewTransitionName } from '@heyclaude/web-runtime/client';
+import { getSocialLinks } from '@heyclaude/web-runtime/core';
+import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
+import { getViewTransitionName, POSITION_PATTERNS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import type { ReactNode } from 'react';
 import { memo } from 'react';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
@@ -40,7 +41,6 @@ import {
   CardTitle,
 } from '@/src/components/primitives/ui/card';
 import { type UseCardNavigationOptions, useCardNavigation } from '@/src/hooks/use-card-navigation';
-import { APP_CONFIG } from '@/src/lib/data/config/constants';
 
 /**
  * Props for BaseCard component

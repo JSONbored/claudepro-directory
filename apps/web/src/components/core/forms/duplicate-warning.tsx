@@ -1,8 +1,10 @@
 'use client';
 
 import type { Database } from '@heyclaude/database-types';
-import { getTimeoutConfig, logClientWarning, UI_CLASSES } from '@heyclaude/web-runtime';
+import { logClientWarning } from '@heyclaude/web-runtime/core';
+import { getTimeoutConfig } from '@heyclaude/web-runtime/data';
 import { AlertTriangle } from '@heyclaude/web-runtime/icons';
+import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { motion } from 'motion/react';
 import { useEffect, useState } from 'react';
 import { Alert, AlertDescription, AlertTitle } from '@/src/components/primitives/ui/alert';

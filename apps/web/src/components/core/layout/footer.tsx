@@ -8,14 +8,15 @@
 
 'use client';
 
+import { getContactChannels, logger } from '@heyclaude/web-runtime/core';
+import { getAnimationConfig } from '@heyclaude/web-runtime/data';
 import {
-  getAnimationConfig,
-  getContactChannels,
-  logger,
-  RESPONSIVE_PATTERNS,
-  UI_CLASSES,
-} from '@heyclaude/web-runtime';
+  APP_CONFIG,
+  EXTERNAL_SERVICES,
+  ROUTES,
+} from '@heyclaude/web-runtime/data/config/constants';
 import { DiscordIcon, ExternalLink, Github, Rss, Sparkles } from '@heyclaude/web-runtime/icons';
+import { RESPONSIVE_PATTERNS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { motion } from 'motion/react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -24,7 +25,6 @@ import { memo, useEffect, useMemo, useState } from 'react';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { HeyClaudeLogo } from '@/src/components/core/layout/brand-logo';
 import { ThemeToggle } from '@/src/components/core/layout/theme-toggle';
-import { APP_CONFIG, EXTERNAL_SERVICES, ROUTES } from '@/src/lib/data/config/constants';
 
 /**
  * Footer Component

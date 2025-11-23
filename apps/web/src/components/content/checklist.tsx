@@ -5,8 +5,9 @@
  * Used in 7+ MDX files across the codebase
  */
 
-import { UI_CLASSES } from '@heyclaude/web-runtime';
 import { AlertTriangle, BookOpen, CheckCircle } from '@heyclaude/web-runtime/icons';
+import type { ChecklistProps } from '@heyclaude/web-runtime/types/component.types';
+import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import React from 'react';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import {
@@ -16,7 +17,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/ui/card';
-import type { ChecklistProps } from '@/src/lib/types/component.types';
 
 export function Checklist(props: ChecklistProps) {
   // Database CHECK constraint validates structure - no runtime validation needed

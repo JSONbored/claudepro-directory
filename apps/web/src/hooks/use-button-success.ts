@@ -2,7 +2,8 @@
  * Shared button success state management with auto-reset
  */
 
-import { getTimeoutConfig, logClientWarning } from '@heyclaude/web-runtime';
+import { logClientWarning } from '@heyclaude/web-runtime/core';
+import { getTimeoutConfig } from '@heyclaude/web-runtime/data';
 import { useCallback, useState } from 'react';
 
 // Default value (will be overridden by Dynamic Config)

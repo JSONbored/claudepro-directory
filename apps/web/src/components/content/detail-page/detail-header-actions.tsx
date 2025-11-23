@@ -12,7 +12,7 @@
  * Performance: Only the interactive buttons are client-side, rest is server-rendered
  */
 
-import { logger } from '@heyclaude/web-runtime';
+import { logger } from '@heyclaude/web-runtime/core';
 
 /**
  * Sanitizes path segment to prevent SSRF/path traversal.
@@ -74,15 +74,11 @@ function getSafeStorageUrl(url: string | null | undefined): string | null {
 }
 
 import type { Database } from '@heyclaude/database-types';
-import {
-  logUnhandledPromise,
-  STATE_PATTERNS,
-  UI_CLASSES,
-  useCopyToClipboard,
-  usePulse,
-} from '@heyclaude/web-runtime';
-import { toasts } from '@heyclaude/web-runtime/client';
+import { logUnhandledPromise } from '@heyclaude/web-runtime/core';
+import { useCopyToClipboard, usePulse } from '@heyclaude/web-runtime/hooks';
 import { ArrowLeft, Check, Copy, Download, FileText, Sparkles } from '@heyclaude/web-runtime/icons';
+import type { ContentItem, CopyType } from '@heyclaude/web-runtime/types/component.types';
+import { STATE_PATTERNS, toasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { motion } from 'motion/react';
 import { useRouter } from 'next/navigation';
 import { ContentActionButton } from '@/src/components/core/buttons/shared/content-action-button';
@@ -90,7 +86,6 @@ import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge
 import { usePostCopyEmail } from '@/src/components/core/infra/providers/email-capture-modal-provider';
 import { Button } from '@/src/components/primitives/ui/button';
 import { useCopyWithEmailCapture } from '@/src/hooks/use-copy-with-email-capture';
-import type { ContentItem, CopyType } from '@/src/lib/types/component.types';
 
 /**
  * Determine copy type based on content item structure

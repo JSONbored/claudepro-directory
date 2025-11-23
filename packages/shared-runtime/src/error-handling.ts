@@ -31,12 +31,8 @@ export function errorToString(error: unknown): string {
       return `${String((error as any).code)}: ${String((error as any).message)}`;
     }
 
-    // Fallback: stringify the object with all properties
-    try {
-      return JSON.stringify(error, Object.getOwnPropertyNames(error));
-    } catch {
-      return String(error);
-    }
+    // Fallback: never return stack trace or all properties
+    return 'An unexpected error occurred';
   }
 
   return String(error);

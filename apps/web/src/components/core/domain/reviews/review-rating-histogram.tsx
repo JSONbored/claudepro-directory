@@ -3,15 +3,15 @@
  * Shows average rating and distribution across 1-5 stars
  */
 
-import { UI_CLASSES } from '@heyclaude/web-runtime';
 import { Star } from '@heyclaude/web-runtime/icons';
+import type { ReviewHistogramProps } from '@heyclaude/web-runtime/types/component.types';
+import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import {
   ChartContainer,
   HorizontalBarChart,
 } from '@/src/components/core/domain/charts/horizontal-bar-chart';
 import { StarDisplay } from '@/src/components/core/domain/reviews/shared/star-display';
 import { Card } from '@/src/components/primitives/ui/card';
-import type { ReviewHistogramProps } from '@/src/lib/types/component.types';
 
 export function ReviewRatingHistogram({
   distribution,

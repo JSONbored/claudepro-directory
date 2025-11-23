@@ -40,8 +40,8 @@
  * ```
  */
 
-import { cn, DIMENSIONS, UI_CLASSES } from '@heyclaude/web-runtime';
 import { ChevronDown, ChevronUp, Code, Plus, Trash } from '@heyclaude/web-runtime/icons';
+import { cn, DIMENSIONS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { useId, useState } from 'react';
 import { Button } from '@/src/components/primitives/ui/button';
 import {

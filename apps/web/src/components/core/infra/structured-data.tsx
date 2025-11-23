@@ -4,7 +4,7 @@
  */
 
 import { serializeJsonLd } from '@heyclaude/shared-runtime';
-import { getSEOMetadataWithSchemas } from '@heyclaude/web-runtime';
+import { getSEOMetadataWithSchemas } from '@heyclaude/web-runtime/data';
 import Script from 'next/script';
 
 interface StructuredDataProps {

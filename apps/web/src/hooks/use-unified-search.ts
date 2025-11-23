@@ -17,9 +17,9 @@
  */
 
 import type { Database } from '@heyclaude/database-types';
-import { useLocalStorage } from '@heyclaude/web-runtime';
+import { useLocalStorage } from '@heyclaude/web-runtime/hooks';
+import type { FilterState } from '@heyclaude/web-runtime/types/component.types';
 import { useCallback, useState } from 'react';
-import type { FilterState } from '@/src/lib/types/component.types';
 
 export interface UseUnifiedSearchOptions {
   initialSort?: FilterState['sort'];

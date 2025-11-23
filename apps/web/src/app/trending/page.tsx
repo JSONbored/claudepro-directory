@@ -4,22 +4,21 @@
  */
 
 import type { Database } from '@heyclaude/database-types';
-import {
-  generatePageMetadata,
-  getTrendingPageData,
-  isValidCategory,
-  logger,
-  UI_CLASSES,
-} from '@heyclaude/web-runtime';
+import { isValidCategory, logger } from '@heyclaude/web-runtime/core';
+import { generatePageMetadata, getTrendingPageData } from '@heyclaude/web-runtime/data';
 import { Clock, Star, TrendingUp, Users } from '@heyclaude/web-runtime/icons';
+import type { PagePropsWithSearchParams } from '@heyclaude/web-runtime/types/app.schema';
+import type {
+  DisplayableContent,
+  HomepageContentItem,
+} from '@heyclaude/web-runtime/types/component.types';
+import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import type { Metadata } from 'next';
 import dynamic from 'next/dynamic';
 import { Suspense } from 'react';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { LazySection } from '@/src/components/core/infra/scroll-animated-section';
 import { TrendingContent } from '@/src/components/core/shared/trending-content';
-import type { PagePropsWithSearchParams } from '@/src/lib/schemas/app.schema';
-import type { DisplayableContent, HomepageContentItem } from '@/src/lib/types/component.types';
 
 const NewsletterCTAVariant = dynamic(
   () =>

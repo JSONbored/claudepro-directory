@@ -20,9 +20,9 @@ pre-commit:
   follow: true
   commands:
     # 1. Type checking (Next.js/Node code)
-      type-check:
-        glob: "**/*.{ts,tsx}"
-        exclude: "apps/edge/functions/**"
+    type-check:
+      glob: "**/*.{ts,tsx}"
+      exclude: "apps/edge/functions/**"
       run: |
         echo "🔍 Type checking Next.js code..."
         pnpm type-check

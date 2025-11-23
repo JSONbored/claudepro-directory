@@ -15,8 +15,10 @@
  */
 
 import type { Database } from '@heyclaude/database-types';
-import { BADGE_COLORS, logUnhandledPromise, UI_CLASSES, usePulse } from '@heyclaude/web-runtime';
+import { logUnhandledPromise } from '@heyclaude/web-runtime/core';
+import { usePulse } from '@heyclaude/web-runtime/hooks';
 import { Award, ExternalLink, Users } from '@heyclaude/web-runtime/icons';
+import { BADGE_COLORS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { memo } from 'react';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { BaseCard } from '@/src/components/core/domain/cards/content-card-base';

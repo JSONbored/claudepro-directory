@@ -22,9 +22,14 @@
  */
 
 import type { Database } from '@heyclaude/database-types';
-import { logger, normalizeError } from '@heyclaude/web-runtime';
-import { toasts } from '@heyclaude/web-runtime/client';
+import { submitContentForReview } from '@heyclaude/web-runtime';
+import { logger, normalizeError } from '@heyclaude/web-runtime/core';
+import { type DraftFormData, DraftManager } from '@heyclaude/web-runtime/data/drafts/draft-manager';
+import { useAuthenticatedUser } from '@heyclaude/web-runtime/hooks/use-authenticated-user';
 import { Code, FileText, Plus, Sparkles, Tag, X } from '@heyclaude/web-runtime/icons';
+import type { SubmissionContentType } from '@heyclaude/web-runtime/types/component.types';
+import { toasts } from '@heyclaude/web-runtime/ui';
+import { SUBMISSION_FORM_TOKENS as TOKENS } from '@heyclaude/web-runtime/ui/design-tokens/submission-form';
 import { AnimatePresence, motion } from 'motion/react';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -54,11 +59,6 @@ import { useFieldHighlight } from '@/src/hooks/use-field-highlight';
 import { useFormTracking } from '@/src/hooks/use-form-tracking';
 import { useOnboardingToasts } from '@/src/hooks/use-onboarding-toasts';
 import { useTemplateApplication } from '@/src/hooks/use-template-application';
-import { submitContentForReview } from '@/src/lib/actions/content.actions';
-import { useAuthenticatedUser } from '@/src/lib/auth/use-authenticated-user';
-import { SUBMISSION_FORM_TOKENS as TOKENS } from '@/src/lib/design-tokens/submission-form';
-import { type DraftFormData, DraftManager } from '@/src/lib/drafts/draft-manager';
-import type { SubmissionContentType } from '@/src/lib/types/component.types';
 
 // Use generated type directly from @heyclaude/database-types
 type ContentTemplatesResult = Database['public']['Functions']['get_content_templates']['Returns'];
@@ -446,9 +446,9 @@ export default function WizardSubmissionPage() {
         description: formData.description,
         category: formData.category,
         author: formData.author || user.email || 'Anonymous',
-        author_profile_url: formData.author_profile_url,
-        github_url: formData.github_url,
-        tags: formData.tags.length > 0 ? formData.tags : undefined,
+        author_profile_url: formData.author_profile_url || '',
+        github_url: formData.github_url || '',
+        tags: formData.tags,
         content_data: {
           ...formData.type_specific,
           examples: formData.examples,
@@ -457,7 +457,7 @@ export default function WizardSubmissionPage() {
 
       await formTracking.trackSubmitted(formData.submission_type, {
         quality_score: qualityScore,
-        submission_id: result?.data?.submissionId,
+        submission_id: result?.data?.submission_id,
       });
 
       if (result?.data?.success) {

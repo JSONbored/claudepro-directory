@@ -143,3 +143,13 @@ export function validateBodySize(
 
   return { valid: true };
 }
+
+export function validateSlug(slug: string): { valid: boolean; error?: string } {
+  if (!/^[a-z0-9-]+$/.test(slug)) {
+    return {
+      valid: false,
+      error: 'Invalid slug format. Only lowercase letters, numbers, and hyphens allowed.',
+    };
+  }
+  return { valid: true };
+}

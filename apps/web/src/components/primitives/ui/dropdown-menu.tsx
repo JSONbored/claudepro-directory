@@ -11,8 +11,8 @@
  * - Respects prefers-reduced-motion
  */
 
-import { cn, DIMENSIONS, POSITION_PATTERNS, UI_CLASSES } from '@heyclaude/web-runtime';
 import { Check, ChevronRight, Circle } from '@heyclaude/web-runtime/icons';
+import { cn, DIMENSIONS, POSITION_PATTERNS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu';
 import { motion } from 'motion/react';
 import type * as React from 'react';

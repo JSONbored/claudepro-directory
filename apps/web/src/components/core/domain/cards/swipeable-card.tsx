@@ -26,14 +26,10 @@
  * @module components/domain/swipeable-card-wrapper
  */
 
-import {
-  getAnimationConfig,
-  logger,
-  POSITION_PATTERNS,
-  SEMANTIC_COLORS,
-  UI_CLASSES,
-} from '@heyclaude/web-runtime';
+import { logger } from '@heyclaude/web-runtime/core';
+import { getAnimationConfig } from '@heyclaude/web-runtime/data';
 import { Bookmark, Copy as CopyIcon } from '@heyclaude/web-runtime/icons';
+import { POSITION_PATTERNS, SEMANTIC_COLORS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { motion, useMotionValue, useTransform } from 'motion/react';
 import type { ReactNode } from 'react';
 import { useEffect, useState } from 'react';

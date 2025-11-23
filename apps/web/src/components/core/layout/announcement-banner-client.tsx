@@ -1,7 +1,6 @@
 'use client';
 
 import type { Database } from '@heyclaude/database-types';
-import { ANIMATION_CONSTANTS, DIMENSIONS, UI_CLASSES } from '@heyclaude/web-runtime';
 import {
   AlertTriangle,
   ArrowRight,
@@ -11,6 +10,7 @@ import {
   Sparkles,
   X,
 } from '@heyclaude/web-runtime/icons';
+import { ANIMATION_CONSTANTS, DIMENSIONS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import Link from 'next/link';
 import { type ComponentType, useEffect, useState } from 'react';
 import {

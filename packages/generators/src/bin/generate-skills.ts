@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { runGenerateSkillPackages } from '../commands/generate-skills.js';
+import { runGenerateSkillPackages } from '../commands/generate-skill-packages.js';
 import { logger } from '../toolkit/logger.js';
 
 runGenerateSkillPackages()
@@ -10,7 +10,7 @@ runGenerateSkillPackages()
     });
     process.exit(0);
   })
-  .catch((error) => {
+  .catch((error: unknown) => {
     logger.error(
       '💥 Skills generation failed',
       error instanceof Error ? error : new Error(String(error)),

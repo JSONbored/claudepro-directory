@@ -1,4 +1,5 @@
-import { generatePageMetadata, getLastUpdatedDate } from '@heyclaude/web-runtime';
+import { getLastUpdatedDate } from '@heyclaude/web-runtime/core';
+import { generatePageMetadata } from '@heyclaude/web-runtime/data';
 import type { Metadata } from 'next';
 import { NavLink } from '@/src/components/core/navigation/navigation-link';
 

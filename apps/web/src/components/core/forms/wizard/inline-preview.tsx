@@ -7,15 +7,15 @@
  * Shows on desktop (sidebar) and mobile (modal).
  */
 
-import { cn } from '@heyclaude/web-runtime';
 import { Eye, Sparkles, X } from '@heyclaude/web-runtime/icons';
+import type { SubmissionContentType } from '@heyclaude/web-runtime/types/component.types';
+import { cn } from '@heyclaude/web-runtime/ui';
+import { SUBMISSION_FORM_TOKENS as TOKENS } from '@heyclaude/web-runtime/ui/design-tokens/submission-form';
 import { AnimatePresence, motion } from 'motion/react';
 import { useState } from 'react';
 import { Badge } from '@/src/components/primitives/ui/badge';
 import { Button } from '@/src/components/primitives/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
-import { SUBMISSION_FORM_TOKENS as TOKENS } from '@/src/lib/design-tokens/submission-form';
-import type { SubmissionContentType } from '@/src/lib/types/component.types';
 
 interface InlinePreviewProps {
   formData: {

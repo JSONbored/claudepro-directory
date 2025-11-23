@@ -2,6 +2,8 @@ import type { CacheConfigPromise, CacheInvalidateKey } from './cache-config.ts';
 import { getCacheConfigSnapshot } from './cache-config.ts';
 import { revalidateTag } from 'next/cache';
 
+export type { CacheInvalidateKey };
+
 export async function resolveInvalidateTags(
   keys: CacheInvalidateKey[] = [],
   cacheConfigPromise?: CacheConfigPromise

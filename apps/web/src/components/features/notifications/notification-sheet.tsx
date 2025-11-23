@@ -15,7 +15,7 @@
 
 'use client';
 
-import { DIMENSIONS } from '@heyclaude/web-runtime';
+import { DIMENSIONS } from '@heyclaude/web-runtime/ui';
 import {
   Sheet,
   SheetContent,

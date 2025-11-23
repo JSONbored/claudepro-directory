@@ -8,13 +8,13 @@
  * Uses infinite scroll for optimal performance with large result sets
  */
 
-import { UI_CLASSES } from '@heyclaude/web-runtime';
 import { Search } from '@heyclaude/web-runtime/icons';
+import type { DisplayableContent } from '@heyclaude/web-runtime/types/component.types';
+import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { type FC, memo } from 'react';
 import { UnifiedCardGrid } from '@/src/components/core/domain/cards/card-grid';
 import { ConfigCard } from '@/src/components/core/domain/cards/config-card';
 import { Button } from '@/src/components/primitives/ui/button';
-import type { DisplayableContent } from '@/src/lib/types/component.types';
 
 export interface SearchSectionProps {
   isSearching: boolean;

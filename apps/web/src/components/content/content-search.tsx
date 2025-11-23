@@ -19,13 +19,15 @@ const UnifiedSearch = dynamic(
 );
 
 import type { UnifiedSearchFilters } from '@heyclaude/web-runtime';
-import { ICON_NAME_MAP, logger, normalizeError, searchUnifiedClient } from '@heyclaude/web-runtime';
+import { logger, normalizeError } from '@heyclaude/web-runtime/core';
+import { searchUnifiedClient } from '@heyclaude/web-runtime/data';
 import { HelpCircle } from '@heyclaude/web-runtime/icons';
 import type {
   ContentSearchClientProps,
   DisplayableContent,
   FilterState,
-} from '@/src/lib/types/component.types';
+} from '@heyclaude/web-runtime/types/component.types';
+import { ICON_NAME_MAP } from '@heyclaude/web-runtime/ui';
 
 /**
  * Content Search Client - Edge Function Integration

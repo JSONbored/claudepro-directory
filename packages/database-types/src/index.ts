@@ -749,6 +749,13 @@ export type Database = {
             referencedRelation: "content"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "content_embeddings_content_id_fkey"
+            columns: ["content_id"]
+            isOneToOne: true
+            referencedRelation: "mv_content_list_slim"
+            referencedColumns: ["id"]
+          },
         ]
       }
       content_generation_tracking: {
@@ -3144,9 +3151,71 @@ export type Database = {
         }
         Relationships: []
       }
+      mv_content_list_slim: {
+        Row: {
+          author: string | null
+          author_profile_url: string | null
+          bookmark_count: number | null
+          category: string | null
+          copy_count: number | null
+          created_at: string | null
+          date_added: string | null
+          description: string | null
+          display_title: string | null
+          id: string | null
+          is_sponsored: boolean | null
+          popularity_score: number | null
+          slug: string | null
+          source: string | null
+          source_table: string | null
+          sponsored_content_id: string | null
+          sponsorship_tier: string | null
+          tags: string[] | null
+          title: string | null
+          trending_score: number | null
+          updated_at: string | null
+          view_count: number | null
+        }
+        Relationships: []
+      }
+      mv_search_facets: {
+        Row: {
+          all_tags: string[] | null
+          author_count: number | null
+          authors: string[] | null
+          category: string | null
+          content_count: number | null
+          tag_count: number | null
+        }
+        Relationships: []
+      }
+      mv_site_urls: {
+        Row: {
+          changefreq: string | null
+          lastmod: string | null
+          path: string | null
+          priority: number | null
+        }
+        Relationships: []
+      }
       mv_timezone_names: {
         Row: {
           name: string | null
+        }
+        Relationships: []
+      }
+      mv_unified_search: {
+        Row: {
+          category: string | null
+          created_at: string | null
+          description: string | null
+          engagement_score: number | null
+          entity_type: string | null
+          id: string | null
+          search_vector: unknown
+          slug: string | null
+          tags: string[] | null
+          title: string | null
         }
         Relationships: []
       }
@@ -3551,7 +3620,7 @@ export type Database = {
       }
       format_week_range: { Args: { week_start: string }; Returns: string }
       generate_category_llms_txt: {
-        Args: { p_category: string }
+        Args: { p_category: Database["public"]["Enums"]["content_category"] }
         Returns: string
       }
       generate_changelog_atom_feed: {
@@ -3579,7 +3648,10 @@ export type Database = {
       }
       generate_company_slug: { Args: { p_name: string }; Returns: string }
       generate_content_atom_feed: {
-        Args: { p_category?: string; p_limit?: number }
+        Args: {
+          p_category?: Database["public"]["Enums"]["content_category"]
+          p_limit?: number
+        }
         Returns: string
       }
       generate_content_field: {
@@ -3591,11 +3663,17 @@ export type Database = {
         Returns: Json
       }
       generate_content_rss_feed: {
-        Args: { p_category?: string; p_limit?: number }
+        Args: {
+          p_category?: Database["public"]["Enums"]["content_category"]
+          p_limit?: number
+        }
         Returns: string
       }
       generate_item_llms_txt: {
-        Args: { p_category: string; p_slug: string }
+        Args: {
+          p_category: Database["public"]["Enums"]["content_category"]
+          p_slug: string
+        }
         Returns: string
       }
       generate_markdown_export: {
@@ -3721,6 +3799,7 @@ export type Database = {
         }[]
       }
       get_active_subscribers: { Args: never; Returns: string[] }
+      get_all_app_settings: { Args: never; Returns: Json }
       get_all_content_categories: {
         Args: never
         Returns: {
@@ -3952,7 +4031,7 @@ export type Database = {
       }
       get_content_paginated_slim: {
         Args: {
-          p_category?: string
+          p_category?: Database["public"]["Enums"]["content_category"]
           p_limit?: number
           p_offset?: number
           p_order_by?: string
@@ -5334,7 +5413,7 @@ export type Database = {
           p_engagement_score?: number
           p_ip_address?: unknown
           p_last_active_at?: string
-          p_primary_interest?: string
+          p_primary_interest?: Database["public"]["Enums"]["newsletter_interest"]
           p_referrer?: string
           p_resend_contact_id?: string
           p_resend_topics?: string[]

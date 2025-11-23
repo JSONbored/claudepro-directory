@@ -1,14 +1,9 @@
 'use client';
 
 import type { Database } from '@heyclaude/database-types';
-import {
-  cn,
-  DIMENSIONS,
-  logUnhandledPromise,
-  NEWSLETTER_CTA_CONFIG,
-  UI_CLASSES,
-} from '@heyclaude/web-runtime';
+import { logUnhandledPromise, NEWSLETTER_CTA_CONFIG } from '@heyclaude/web-runtime/core';
 import { Mail } from '@heyclaude/web-runtime/icons';
+import { cn, DIMENSIONS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { useEffect, useState } from 'react';
 import {
   Card,

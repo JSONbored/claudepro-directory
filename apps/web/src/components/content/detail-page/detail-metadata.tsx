@@ -14,11 +14,11 @@ import {
   formatDate,
   formatViewCount,
   getSocialLinks,
-  UI_CLASSES,
-} from '@heyclaude/web-runtime';
+} from '@heyclaude/web-runtime/core';
 import { Calendar, Copy, Eye, Tag, User } from '@heyclaude/web-runtime/icons';
+import type { ContentItem } from '@heyclaude/web-runtime/types/component.types';
+import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
-import type { ContentItem } from '@/src/lib/types/component.types';
 
 export interface DetailMetadataProps {
   item:

@@ -1,4 +1,4 @@
-import { UI_CLASSES } from '@heyclaude/web-runtime';
+import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
 import {
   BookOpen,
   Code,
@@ -7,11 +7,11 @@ import {
   MessageSquare,
   Search,
 } from '@heyclaude/web-runtime/icons';
+import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import Link from 'next/link';
 import { NavLink } from '@/src/components/core/navigation/navigation-link';
 import { HoverCard } from '@/src/components/primitives/animation/hover-card';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
-import { APP_CONFIG } from '@/src/lib/data/config/constants';
 
 const helpTopics = [
   {

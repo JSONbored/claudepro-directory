@@ -1,6 +1,7 @@
 import { env, isDevelopment } from '@heyclaude/shared-runtime';
 import { sanitizePathForLogging } from '@heyclaude/shared-runtime/proxy/guards';
-import { applyNextProxyGuards, logger } from '@heyclaude/web-runtime';
+import { logger } from '@heyclaude/web-runtime/core';
+import { applyNextProxyGuards } from '@heyclaude/web-runtime/data';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 

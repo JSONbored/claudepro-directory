@@ -1,4 +1,5 @@
-import { generatePageMetadata, logger } from '@heyclaude/web-runtime';
+import { logger } from '@heyclaude/web-runtime/core';
+import { generatePageMetadata } from '@heyclaude/web-runtime/data';
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 

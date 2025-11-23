@@ -3,8 +3,11 @@
  * POST /discord - Handle direct Discord notifications (not queue-based)
  */
 
-import { handleDiscordNotification } from '@heyclaude/edge-runtime/handlers/discord/handler.ts';
-import { badRequestResponse, discordCorsHeaders } from '@heyclaude/edge-runtime/utils/http.ts';
+import {
+  badRequestResponse,
+  discordCorsHeaders,
+  handleDiscordNotification,
+} from '@heyclaude/edge-runtime';
 import { MAX_BODY_SIZE, validateBodySize } from '@heyclaude/shared-runtime';
 
 export async function handleDiscordDirect(req: Request): Promise<Response> {

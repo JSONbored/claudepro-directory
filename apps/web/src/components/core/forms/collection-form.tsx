@@ -9,8 +9,9 @@
  */
 
 import type { Database } from '@heyclaude/database-types';
-import { logClientWarning, UI_CLASSES } from '@heyclaude/web-runtime';
-import { toasts } from '@heyclaude/web-runtime/client';
+import { createCollection, updateCollection } from '@heyclaude/web-runtime';
+import { logClientWarning } from '@heyclaude/web-runtime/core';
+import { toasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { useRouter } from 'next/navigation';
 import { useId, useState, useTransition } from 'react';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
@@ -18,7 +19,6 @@ import { FormField } from '@/src/components/core/forms/form-field-wrapper';
 import { Button } from '@/src/components/primitives/ui/button';
 import { Checkbox } from '@/src/components/primitives/ui/checkbox';
 import { Label } from '@/src/components/primitives/ui/label';
-import { createCollection, updateCollection } from '@/src/lib/actions/content.actions';
 
 type Bookmark = Database['public']['Tables']['bookmarks']['Row'];
 type CollectionData = Database['public']['Tables']['user_collections']['Row'];

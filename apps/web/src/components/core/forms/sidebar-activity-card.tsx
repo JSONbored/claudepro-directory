@@ -7,8 +7,8 @@
 'use client';
 
 import type { Database } from '@heyclaude/database-types';
-import { cn, UI_CLASSES } from '@heyclaude/web-runtime';
 import { CheckCircle, Clock, Lightbulb } from '@heyclaude/web-runtime/icons';
+import { cn, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { motion } from 'motion/react';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { NavLink } from '@/src/components/core/navigation/navigation-link';

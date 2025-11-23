@@ -82,11 +82,11 @@ export async function getChangelogOverview(
 
   return fetchCached(
     (client) => new ChangelogService(client).getChangelogOverview({
-        ...(category ? { category } : {}),
-        publishedOnly,
-        featuredOnly,
-        limit,
-        offset
+        ...(category ? { p_category: category } : {}),
+        p_published_only: publishedOnly,
+        p_featured_only: featuredOnly,
+        p_limit: limit,
+        p_offset: offset
     }),
     {
       key: category ? `category-${category}-${limit}-${offset}` : `overview-${limit}-${offset}`,
@@ -108,7 +108,7 @@ export async function getChangelogEntryBySlug(
   slug: string
 ): Promise<Database['public']['Tables']['changelog']['Row'] | null> {
   const result = await fetchCached(
-    (client) => new ChangelogService(client).getChangelogDetail(slug),
+    (client) => new ChangelogService(client).getChangelogDetail({ p_slug: slug }),
     {
       key: slug,
       tags: [CHANGELOG_TAG, `changelog-${slug}`],

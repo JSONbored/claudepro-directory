@@ -1,11 +1,5 @@
-import {
-  BADGE_COLORS,
-  formatRelativeDate,
-  type JobType,
-  logUnhandledPromise,
-  UI_CLASSES,
-  usePulse,
-} from '@heyclaude/web-runtime';
+import { formatRelativeDate, type JobType, logUnhandledPromise } from '@heyclaude/web-runtime/core';
+import { usePulse } from '@heyclaude/web-runtime/hooks';
 import {
   Building,
   Clock,
@@ -14,6 +8,8 @@ import {
   MapPin,
   Star,
 } from '@heyclaude/web-runtime/icons';
+import type { JobCardProps } from '@heyclaude/web-runtime/types/component.types';
+import { BADGE_COLORS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useMemo } from 'react';
@@ -21,7 +17,6 @@ import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge
 import { HighlightedText } from '@/src/components/core/shared/highlighted-text';
 import { Button } from '@/src/components/primitives/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
-import type { JobCardProps } from '@/src/lib/types/component.types';
 
 /**
  * Validate job link is safe for use in href

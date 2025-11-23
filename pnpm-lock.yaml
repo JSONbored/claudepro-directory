@@ -31,6 +31,9 @@ importers:
       '@react-email/render':
         specifier: ^2.0.0
         version: 2.0.0(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
+      '@supabase/supabase-js':
+        specifier: ^2.84.0
+        version: 2.84.0
       '@total-typescript/ts-reset':
         specifier: ^0.6.1
         version: 0.6.1
@@ -312,6 +315,9 @@ importers:
       '@heyclaude/database-types':
         specifier: workspace:*
         version: link:../database-types
+      '@heyclaude/shared-runtime':
+        specifier: workspace:*
+        version: link:../shared-runtime
       '@heyclaude/web-runtime':
         specifier: workspace:*
         version: link:../web-runtime
@@ -321,6 +327,9 @@ importers:
       archiver:
         specifier: ^7.0.1
         version: 7.0.1
+      jiti:
+        specifier: ^2.6.1
+        version: 2.6.1
       ora:
         specifier: ^9.0.0
         version: 9.0.0

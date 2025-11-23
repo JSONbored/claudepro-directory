@@ -1,7 +1,7 @@
 'use client';
 
-import { UI_CLASSES } from '@heyclaude/web-runtime';
 import { Search } from '@heyclaude/web-runtime/icons';
+import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { Button } from '@/src/components/primitives/ui/button';
 
 interface SearchTriggerProps {

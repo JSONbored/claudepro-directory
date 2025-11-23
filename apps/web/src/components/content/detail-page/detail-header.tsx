@@ -3,8 +3,11 @@
  */
 
 import type { Database } from '@heyclaude/database-types';
-import { isValidCategory } from '@heyclaude/web-runtime';
-import type { ContentItem, UnifiedCategoryConfig } from '@/src/lib/types/component.types';
+import { isValidCategory } from '@heyclaude/web-runtime/core';
+import type {
+  ContentItem,
+  UnifiedCategoryConfig,
+} from '@heyclaude/web-runtime/types/component.types';
 import { DetailHeaderActions, type SerializableAction } from './detail-header-actions';
 
 export interface DetailHeaderProps {

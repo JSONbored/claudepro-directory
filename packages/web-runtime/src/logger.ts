@@ -23,6 +23,7 @@ export type LogContextValue =
   | number
   | boolean
   | null
+  | undefined
   | readonly string[]
   | readonly number[]
   | readonly boolean[]

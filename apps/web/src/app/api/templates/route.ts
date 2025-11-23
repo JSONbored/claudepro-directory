@@ -6,12 +6,8 @@
  */
 
 import type { Database } from '@heyclaude/database-types';
-import {
-  getContentTemplates,
-  logger,
-  normalizeError,
-  VALID_CATEGORIES,
-} from '@heyclaude/web-runtime';
+import { logger, normalizeError, VALID_CATEGORIES } from '@heyclaude/web-runtime/core';
+import { getContentTemplates } from '@heyclaude/web-runtime/data';
 import { type NextRequest, NextResponse } from 'next/server';
 
 export async function GET(request: NextRequest) {

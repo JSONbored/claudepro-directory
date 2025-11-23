@@ -11,7 +11,7 @@
  * - Respects prefers-reduced-motion (falls back to pulse)
  */
 
-import { cn, POSITION_PATTERNS, UI_CLASSES } from '@heyclaude/web-runtime';
+import { cn, POSITION_PATTERNS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { motion } from 'motion/react';
 import type * as React from 'react';

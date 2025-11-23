@@ -14,9 +14,9 @@ export async function getSimilarContent(input: {
 
   return fetchCached(
     (client) => new ContentService(client).getSimilarContent({
-        contentType,
-        contentSlug,
-        limit
+        p_content_type: contentType,
+        p_content_slug: contentSlug,
+        p_limit: limit
     }),
     {
       key: generateContentCacheKey(contentType, contentSlug, limit),

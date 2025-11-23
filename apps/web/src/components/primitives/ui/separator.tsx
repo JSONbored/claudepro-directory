@@ -1,6 +1,6 @@
 'use client';
 
-import { cn, DIMENSIONS } from '@heyclaude/web-runtime';
+import { cn, DIMENSIONS } from '@heyclaude/web-runtime/ui';
 import * as SeparatorPrimitive from '@radix-ui/react-separator';
 import type * as React from 'react';
 

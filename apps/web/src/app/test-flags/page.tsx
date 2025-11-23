@@ -1,6 +1,7 @@
 // Feature flags are server/middleware only - this test page should use server actions
 
-import { checkTestFlag, logger, normalizeError } from '@heyclaude/web-runtime';
+import { logger, normalizeError } from '@heyclaude/web-runtime/core';
+import { checkTestFlag } from '@heyclaude/web-runtime/data';
 
 /**
  * Feature Flag Test Page

@@ -15,13 +15,9 @@ const NewsletterCTAVariant = dynamic(
   }
 );
 
-import {
-  generatePageMetadata,
-  getCompaniesList,
-  logger,
-  normalizeError,
-  UI_CLASSES,
-} from '@heyclaude/web-runtime';
+import { logger, normalizeError } from '@heyclaude/web-runtime/core';
+import { generatePageMetadata, getCompaniesList } from '@heyclaude/web-runtime/data';
+import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import {
   Briefcase,
   Building,
@@ -30,6 +26,7 @@ import {
   Star,
   TrendingUp,
 } from '@heyclaude/web-runtime/icons';
+import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import {
   Card,
   CardContent,
@@ -37,7 +34,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/ui/card';
-import { ROUTES } from '@/src/lib/data/config/constants';
 
 /**
  * Validate and sanitize external website URL for safe use in href attributes

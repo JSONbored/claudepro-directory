@@ -4,21 +4,23 @@
  */
 
 import type { Database } from '@heyclaude/database-types';
-// NOTE: featureFlags is NOT imported at module level to avoid flags/next accessing
-// Vercel Edge Config during module initialization. It's lazy-loaded in the component
-// only when the page is actually rendered (runtime, not build-time).
 import {
   ensureStringArray,
-  generatePageMetadata,
-  getCategoryConfig,
-  getContentByCategory,
-  getContentDetailComplete,
   isBuildTime,
   isValidCategory,
   logger,
   normalizeError,
   VALID_CATEGORIES,
-} from '@heyclaude/web-runtime';
+} from '@heyclaude/web-runtime/core';
+// NOTE: featureFlags is NOT imported at module level to avoid flags/next accessing
+// Vercel Edge Config during module initialization. It's lazy-loaded in the component
+// only when the page is actually rendered (runtime, not build-time).
+import {
+  generatePageMetadata,
+  getCategoryConfig,
+  getContentByCategory,
+  getContentDetailComplete,
+} from '@heyclaude/web-runtime/data';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { CollectionDetailView } from '@/src/components/content/detail-page/collection-view';

@@ -5,7 +5,7 @@
  * Zero initial bundle impact - all services lazy-loaded
  */
 
-import { logger, normalizeError } from '@heyclaude/web-runtime';
+import { logger, normalizeError } from '@heyclaude/web-runtime/core';
 import dynamic from 'next/dynamic';
 import { useEffect, useState } from 'react';
 

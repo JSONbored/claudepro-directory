@@ -8,11 +8,11 @@
  * - Total user count
  */
 
-import { createSupabaseServerClient, logger, normalizeError } from '@heyclaude/web-runtime';
+import { logger, normalizeError } from '@heyclaude/web-runtime/core';
+import { createSupabaseServerClient } from '@heyclaude/web-runtime/data';
 import { NextResponse } from 'next/server';
 
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
+export const revalidate = 300;
 
 export async function GET() {
   try {
@@ -113,7 +113,7 @@ export async function GET() {
         return name.trim();
       });
 
-    const totalUsers = contentCount || 1000; // Fallback to 1000
+    const totalUsers = contentCount || null;
 
     // Return stats
     return NextResponse.json(

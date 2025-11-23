@@ -6,13 +6,9 @@
  */
 
 import type { Database } from '@heyclaude/database-types';
-import {
-  getContentItemUrl,
-  isValidCategory,
-  POSITION_PATTERNS,
-  sanitizeSlug,
-  UI_CLASSES,
-} from '@heyclaude/web-runtime';
+import { addBookmarkBatch } from '@heyclaude/web-runtime';
+import { getContentItemUrl, isValidCategory, sanitizeSlug } from '@heyclaude/web-runtime/core';
+import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import {
   ArrowRight,
   Award,
@@ -26,6 +22,7 @@ import {
   Sparkles,
   TrendingUp,
 } from '@heyclaude/web-runtime/icons';
+import { POSITION_PATTERNS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import Link from 'next/link';
 import { useState, useTransition } from 'react';
 import { BookmarkButton } from '@/src/components/core/buttons/interaction/bookmark-button';
@@ -53,8 +50,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/src/components/primitives/ui/tooltip';
-import { addBookmarkBatch } from '@/src/lib/actions/user.actions';
-import { ROUTES } from '@/src/lib/data/config/constants';
 
 // Type matching DecodedQuizAnswers from results page
 type DecodedQuizAnswers = {
@@ -73,7 +68,7 @@ type RecommendationResponse = Database['public']['Functions']['get_recommendatio
   generatedAt: string;
 };
 
-import { toasts } from '@heyclaude/web-runtime/client';
+import { toasts } from '@heyclaude/web-runtime/ui';
 import { ShareResults } from './share-results';
 
 interface ResultsDisplayProps {

@@ -95,7 +95,12 @@ export async function proxyStorageFile(options: StorageProxyOptions): Promise<Re
 }
 
 function buildErrorResponse(body: StorageProxyErrorBody, status: number): Response {
-  return new Response(JSON.stringify(body), {
+  // Ensure error message does not include stack trace or internal properties
+  const safeBody = {
+    ...body,
+    message: typeof body.message === 'string' ? body.message : 'An unexpected error occurred',
+  };
+  return new Response(JSON.stringify(safeBody), {
     status,
     headers: {
       'Content-Type': 'application/json',

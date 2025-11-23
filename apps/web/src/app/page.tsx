@@ -1,7 +1,7 @@
 /** Homepage consuming homepageConfigs for runtime-tunable categories */
 
 import type { Database } from '@heyclaude/database-types';
-import { generatePageMetadata } from '@heyclaude/web-runtime';
+import { generatePageMetadata } from '@heyclaude/web-runtime/data';
 import dynamicImport from 'next/dynamic';
 import { Suspense } from 'react';
 import { LazySection } from '@/src/components/core/infra/scroll-animated-section';
@@ -36,7 +36,8 @@ const NewsletterCTAVariant = dynamicImport(
   }
 );
 
-import { getHomepageCategoryIds, getHomepageData, logger } from '@heyclaude/web-runtime';
+import { logger } from '@heyclaude/web-runtime/core';
+import { getHomepageCategoryIds, getHomepageData } from '@heyclaude/web-runtime/data';
 import type { Metadata } from 'next';
 
 export async function generateMetadata(): Promise<Metadata> {

@@ -4,29 +4,31 @@
  */
 
 import type { Database as DatabaseGenerated, Json } from '@heyclaude/database-types';
+import type { GitHubCommit } from '@heyclaude/edge-runtime';
 import {
   buildChangelogMetadata,
   type ChangelogInsert,
   type ChangelogRow,
   deriveChangelogKeywords,
+  errorResponse,
+  fetchWithRetry,
   filterConventionalCommits,
+  finishWebhookEventRun,
   generateMarkdownContent,
   generateTldr,
+  getCacheConfigNumber,
   groupCommitsByType,
   inferTitle,
+  pgmqDelete,
+  pgmqRead,
+  pgmqSend,
+  SITE_URL,
+  startWebhookEventRun,
+  successResponse,
+  supabaseServiceRole,
   transformSectionsToChanges,
   type VercelWebhookPayload,
-} from '@heyclaude/edge-runtime/changelog/service.ts';
-import { SITE_URL, supabaseServiceRole } from '@heyclaude/edge-runtime/clients/supabase.ts';
-import { getCacheConfigNumber } from '@heyclaude/edge-runtime/config/statsig-cache.ts';
-import type { GitHubCommit } from '@heyclaude/edge-runtime/utils/discord/embeds.ts';
-import { errorResponse, successResponse } from '@heyclaude/edge-runtime/utils/http.ts';
-import { fetchWithRetry } from '@heyclaude/edge-runtime/utils/integrations/http-client.ts';
-import { pgmqDelete, pgmqRead, pgmqSend } from '@heyclaude/edge-runtime/utils/pgmq-client.ts';
-import {
-  finishWebhookEventRun,
-  startWebhookEventRun,
-} from '@heyclaude/edge-runtime/utils/webhook/run-logger.ts';
+} from '@heyclaude/edge-runtime';
 import {
   CIRCUIT_BREAKER_CONFIGS,
   createNotificationRouterContext,
@@ -254,8 +256,29 @@ async function processChangelogWebhook(message: ChangelogWebhookQueueMessage): P
       errors.push(validationError);
       console.error('[flux-station] Invalid webhook payload structure', {
         ...logContext,
+        data_preview: JSON.stringify(webhookData).slice(0, 200),
       });
-      return exitWithResult({ success: false, errors }, { errorMessage: validationError });
+
+      // Mark as processed (failed) to remove from queue and prevent infinite loop
+      try {
+        await supabaseServiceRole
+          .from('webhook_events')
+          .update({
+            processed: true,
+            processed_at: new Date().toISOString(),
+          })
+          .eq('id', job.webhook_event_id);
+      } catch (updateError) {
+        console.error('[flux-station] Failed to mark invalid webhook as processed', {
+          ...logContext,
+          error: errorToString(updateError),
+        });
+      }
+
+      return exitWithResult(
+        { success: true, errors }, // Return success to ack message from queue
+        { errorMessage: validationError, metadata: { invalid_payload: true } }
+      );
     }
     const payload = webhookData;
 
@@ -281,9 +304,10 @@ async function processChangelogWebhook(message: ChangelogWebhookQueueMessage): P
     const headCommit = payload.payload?.deployment?.meta?.commitId;
 
     if (!(baseCommit && headCommit)) {
-      errors.push('Missing commit metadata in deployment payload');
+      const errorMsg = 'Missing commit metadata in deployment payload';
+      errors.push(errorMsg);
       console.error('[flux-station] Missing commit metadata', logContext);
-      return { success: false, errors };
+      return exitWithResult({ success: false, errors }, { errorMessage: errorMsg });
     }
 
     // 5. Fetch commits from GitHub (with timeout, retry, and circuit breaker)
@@ -295,7 +319,7 @@ async function processChangelogWebhook(message: ChangelogWebhookQueueMessage): P
           'github-api',
           async () => {
             // Use fetchWithRetry for the actual GitHub API call
-            const { edgeEnv } = await import('@heyclaude/edge-runtime/config/env.ts');
+            const { edgeEnv } = await import('@heyclaude/edge-runtime');
             const repoOwner = edgeEnv.github.repoOwner;
             const repoName = edgeEnv.github.repoName;
             if (!(repoOwner && repoName)) {
@@ -550,6 +574,17 @@ export async function handleChangelogProcess(_req: Request): Promise<Response> {
         console.error('[flux-station] Invalid changelog webhook processing job structure', {
           msg_id: msg.msg_id.toString(),
         });
+
+        // Delete invalid message to prevent infinite retries
+        try {
+          await pgmqDelete(CHANGELOG_PROCESSING_QUEUE, msg.msg_id);
+        } catch (error) {
+          console.error('[flux-station] Failed to delete invalid message', {
+            msg_id: msg.msg_id.toString(),
+            error: errorToString(error),
+          });
+        }
+
         results.push({
           msg_id: msg.msg_id.toString(),
           status: 'failed',

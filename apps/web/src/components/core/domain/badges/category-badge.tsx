@@ -4,15 +4,10 @@
 
 import type { Database } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
-import {
-  ANIMATION_CONSTANTS,
-  cn,
-  getAnimationConfig,
-  logger,
-  SEMANTIC_COLORS,
-  UI_CLASSES,
-} from '@heyclaude/web-runtime';
+import { logger } from '@heyclaude/web-runtime/core';
+import { getAnimationConfig } from '@heyclaude/web-runtime/data';
 import { Star, TrendingUp, Zap } from '@heyclaude/web-runtime/icons';
+import { ANIMATION_CONSTANTS, cn, SEMANTIC_COLORS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { cva } from 'class-variance-authority';
 import { motion } from 'motion/react';
 import type * as React from 'react';

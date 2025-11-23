@@ -15,15 +15,16 @@
  * - Animated step transitions
  */
 
-import { cn, logger, normalizeError } from '@heyclaude/web-runtime';
+import { logger, normalizeError } from '@heyclaude/web-runtime/core';
 import { ArrowLeft, ArrowRight, Save, X } from '@heyclaude/web-runtime/icons';
+import type { SubmissionContentType } from '@heyclaude/web-runtime/types/component.types';
+import { cn } from '@heyclaude/web-runtime/ui';
+import { SUBMISSION_FORM_TOKENS as TOKENS } from '@heyclaude/web-runtime/ui/design-tokens/submission-form';
 import { AnimatePresence, motion } from 'motion/react';
 import { useRouter } from 'next/navigation';
 import { type ReactNode, useCallback, useEffect, useState } from 'react';
 import { Button } from '@/src/components/primitives/ui/button';
 import { useFormTracking } from '@/src/hooks/use-form-tracking';
-import { SUBMISSION_FORM_TOKENS as TOKENS } from '@/src/lib/design-tokens/submission-form';
-import type { SubmissionContentType } from '@/src/lib/types/component.types';
 import { ProgressIndicator, type WizardStep } from './progress-indicator';
 
 interface WizardLayoutProps {

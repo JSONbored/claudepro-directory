@@ -5,8 +5,8 @@
  */
 
 import type { Database } from '@heyclaude/database-types';
-import { DIMENSIONS, UI_CLASSES } from '@heyclaude/web-runtime';
 import { ChevronDown, FileText } from '@heyclaude/web-runtime/icons';
+import { DIMENSIONS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { Button } from '@/src/components/primitives/ui/button';
 import {
   DropdownMenu,

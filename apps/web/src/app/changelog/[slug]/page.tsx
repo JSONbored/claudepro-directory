@@ -22,15 +22,16 @@
  * - Responsive design
  */
 
+import { logger, normalizeError } from '@heyclaude/web-runtime/core';
 import {
   generatePageMetadata,
   getAllChangelogEntries,
   getChangelogEntryBySlug,
-  logger,
-  normalizeError,
-  UI_CLASSES,
-} from '@heyclaude/web-runtime';
+} from '@heyclaude/web-runtime/data';
+import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { ArrowLeft, Calendar } from '@heyclaude/web-runtime/icons';
+import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { formatChangelogDate, getChangelogUrl } from '@heyclaude/web-runtime/utils/changelog';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { ReadProgress } from '@/src/components/content/read-progress';
@@ -39,8 +40,6 @@ import { StructuredData } from '@/src/components/core/infra/structured-data';
 import { NavLink } from '@/src/components/core/navigation/navigation-link';
 import { ChangelogContent } from '@/src/components/features/changelog/changelog-content';
 import { Separator } from '@/src/components/primitives/ui/separator';
-import { formatChangelogDate, getChangelogUrl } from '@/src/lib/changelog/utils';
-import { ROUTES } from '@/src/lib/data/config/constants';
 
 /**
  * Generate static params for all changelog entries
@@ -55,7 +54,8 @@ export async function generateStaticParams() {
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to generate changelog static params');
     logger.error('ChangelogEntryPage: generateStaticParams threw', normalized);
-    return [];
+    // Re-throw so callers/CI see a hard failure rather than masking it
+    throw normalized;
   }
 }
 

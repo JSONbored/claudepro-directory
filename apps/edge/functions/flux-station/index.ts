@@ -8,17 +8,32 @@
 import {
   buildStandardContext,
   chain,
+  errorResponse,
+  handleChangelogSyncRequest,
+  publicCorsHeaders,
   rateLimit,
   type StandardContext,
   serveEdgeApp,
 } from '@heyclaude/edge-runtime';
-import { handleChangelogSyncRequest } from '@heyclaude/edge-runtime/handlers/changelog/handler.ts';
-import { errorResponse, publicCorsHeaders } from '@heyclaude/edge-runtime/utils/http.ts';
 import { handleChangelogNotify } from './routes/changelog/notify.ts';
 import { handleChangelogProcess } from './routes/changelog/process.ts';
 import { handleDiscordDirect } from './routes/discord/direct.ts';
 import { handleDiscordJobs } from './routes/discord/jobs.ts';
 import { handleDiscordSubmissions } from './routes/discord/submissions.ts';
+import {
+  handleContactSubmission,
+  handleDigest,
+  handleGetNewsletterCount,
+  handleJobLifecycleEmail,
+  handleSequence,
+  handleSubscribe,
+  handleTransactional,
+  handleWelcome,
+} from './routes/email/index.ts';
+import {
+  handleEmbeddingGenerationQueue,
+  handleEmbeddingWebhook,
+} from './routes/embedding/index.ts';
 import { handleActiveNotifications } from './routes/notifications/active.ts';
 import { handleCreateNotification } from './routes/notifications/create.ts';
 import { handleDismissNotifications } from './routes/notifications/dismiss.ts';
@@ -46,6 +61,80 @@ serveEdgeApp<FluxStationContext>({
     );
   },
   routes: [
+    // Email Routes (Sub-router handling handled within handlers via X-Email-Action check or direct route)
+    // Mapping specific paths for cleanliness, though handlers use X-Email-Action mostly
+    // Let's route /email/* to specific handlers or action-based dispatcher
+    {
+      name: 'email-subscribe',
+      methods: ['POST', 'OPTIONS'],
+      match: (ctx) => ctx.pathname === '/email/subscribe',
+      handler: chain(rateLimit('email'))((ctx) => handleSubscribe(ctx.request)),
+    },
+    {
+      name: 'email-welcome',
+      methods: ['POST', 'OPTIONS'],
+      match: (ctx) => ctx.pathname === '/email/welcome',
+      handler: chain(rateLimit('email'))((ctx) => handleWelcome(ctx.request)),
+    },
+    {
+      name: 'email-transactional',
+      methods: ['POST', 'OPTIONS'],
+      match: (ctx) => ctx.pathname === '/email/transactional',
+      handler: chain(rateLimit('email'))((ctx) => handleTransactional(ctx.request)),
+    },
+    {
+      name: 'email-digest',
+      methods: ['POST', 'OPTIONS'],
+      match: (ctx) => ctx.pathname === '/email/digest',
+      handler: chain(rateLimit('email'))(() => handleDigest()),
+    },
+    {
+      name: 'email-sequence',
+      methods: ['POST', 'OPTIONS'],
+      match: (ctx) => ctx.pathname === '/email/sequence',
+      handler: chain(rateLimit('email'))(() => handleSequence()),
+    },
+    {
+      name: 'email-count',
+      methods: ['POST', 'OPTIONS'],
+      match: (ctx) => ctx.pathname === '/email/count',
+      handler: chain(rateLimit('public'))(() => handleGetNewsletterCount()),
+    },
+    {
+      name: 'email-contact',
+      methods: ['POST', 'OPTIONS'],
+      match: (ctx) => ctx.pathname === '/email/contact',
+      handler: chain(rateLimit('email'))((ctx) => handleContactSubmission(ctx.request)),
+    },
+    {
+      name: 'email-job-lifecycle',
+      methods: ['POST', 'OPTIONS'],
+      match: (ctx) => ctx.pathname === '/email/job-lifecycle',
+      handler: chain(rateLimit('email'))(async (ctx) => {
+        // Extract action from header or body if needed, but handleJobLifecycleEmail expects action param
+        // The original router passed 'action' from header. Let's fallback to header.
+        const action = ctx.request.headers.get('X-Email-Action') || 'unknown';
+        return handleJobLifecycleEmail(ctx.request, action);
+      }),
+    },
+
+    // Embedding Routes
+    {
+      name: 'embedding-process',
+      methods: ['POST', 'OPTIONS'],
+      match: (ctx) => ctx.pathname === '/embedding/process',
+      handler: chain(rateLimit('queueWorker'))((ctx) =>
+        handleEmbeddingGenerationQueue(ctx.request)
+      ),
+    },
+    {
+      name: 'embedding-webhook',
+      methods: ['POST', 'OPTIONS'],
+      match: (ctx) => ctx.pathname === '/embedding/webhook',
+      handler: chain(rateLimit('public'))((ctx) => handleEmbeddingWebhook(ctx.request)),
+    },
+
+    // Existing Routes
     {
       name: 'changelog-webhook',
       methods: ['POST', 'OPTIONS'],

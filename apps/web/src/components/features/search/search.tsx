@@ -7,16 +7,12 @@
 
 import type { Database } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
-import {
-  cn,
-  getTimeoutConfig,
-  logClientWarning,
-  logUnhandledPromise,
-  POSITION_PATTERNS,
-  UI_CLASSES,
-  usePulse,
-} from '@heyclaude/web-runtime';
+import { logClientWarning, logUnhandledPromise } from '@heyclaude/web-runtime/core';
+import { getTimeoutConfig } from '@heyclaude/web-runtime/data';
+import { usePulse } from '@heyclaude/web-runtime/hooks';
 import { ChevronDown, ChevronUp, Filter, Search } from '@heyclaude/web-runtime/icons';
+import type { FilterState, UnifiedSearchProps } from '@heyclaude/web-runtime/types/component.types';
+import { cn, POSITION_PATTERNS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { usePathname } from 'next/navigation';
 import { memo, useCallback, useEffect, useId, useState } from 'react';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
@@ -33,7 +29,6 @@ import {
   SelectValue,
 } from '@/src/components/primitives/ui/select';
 import { useUnifiedSearch } from '@/src/hooks/use-unified-search';
-import type { FilterState, UnifiedSearchProps } from '@/src/lib/types/component.types';
 
 // Use enum values directly from @heyclaude/database-types Constants
 const CONTENT_CATEGORY_VALUES = Constants.public.Enums.content_category;

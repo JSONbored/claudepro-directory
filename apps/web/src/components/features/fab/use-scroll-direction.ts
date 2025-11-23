@@ -15,9 +15,10 @@
 
 'use client';
 
-import { getTimeoutConfig, logClientWarning, logger, normalizeError } from '@heyclaude/web-runtime';
+import { logClientWarning, logger, normalizeError } from '@heyclaude/web-runtime/core';
+import { getTimeoutConfig } from '@heyclaude/web-runtime/data';
+import type { ScrollState } from '@heyclaude/web-runtime/types/component.types';
 import { useEffect, useState } from 'react';
-import type { ScrollState } from '@/src/lib/types/component.types';
 
 // Default values (will be overridden by Dynamic Config)
 let DEFAULT_SCROLL_THRESHOLD = 100;

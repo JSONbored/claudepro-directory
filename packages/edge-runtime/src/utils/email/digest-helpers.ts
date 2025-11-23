@@ -3,7 +3,7 @@
  * Extracted from email-handler for better organization
  */
 
-import type { Resend } from 'npm:resend@4.0.0';
+import type { Resend } from 'npm:resend@6.5.2';
 import { supabaseServiceRole } from '../../clients/supabase.ts';
 import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
 import { createEmailHandlerContext, logError } from '@heyclaude/shared-runtime';

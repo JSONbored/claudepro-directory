@@ -5,7 +5,7 @@
  * Shows placeholder cards matching the layout of ChangelogCard components.
  */
 
-import { UI_CLASSES } from '@heyclaude/web-runtime';
+import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import {
   PageHeaderSkeleton,
   Skeleton,

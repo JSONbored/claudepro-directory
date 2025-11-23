@@ -5,14 +5,18 @@
  * Default: 100 events per batch
  */
 
-import { Resend } from 'npm:resend@4.0.0';
+import { Resend } from 'npm:resend@6.5.2';
 import type { Database as DatabaseGenerated, Json } from '@heyclaude/database-types';
-import { supabaseServiceRole } from '@heyclaude/edge-runtime/clients/supabase.ts';
-import { RESEND_ENV } from '@heyclaude/edge-runtime/config/email-config.ts';
-import { getCacheConfigNumber } from '@heyclaude/edge-runtime/config/statsig-cache.ts';
-import { errorResponse, successResponse } from '@heyclaude/edge-runtime/utils/http.ts';
-import { updateContactEngagement } from '@heyclaude/edge-runtime/utils/integrations/resend.ts';
-import { pgmqDelete, pgmqRead } from '@heyclaude/edge-runtime/utils/pgmq-client.ts';
+import {
+  errorResponse,
+  getCacheConfigNumber,
+  pgmqDelete,
+  pgmqRead,
+  RESEND_ENV,
+  successResponse,
+  supabaseServiceRole,
+  updateContactEngagement,
+} from '@heyclaude/edge-runtime';
 import { errorToString, TIMEOUT_PRESETS, withTimeout } from '@heyclaude/shared-runtime';
 
 const PULSE_QUEUE_NAME = 'pulse';
@@ -496,25 +500,27 @@ export async function handlePulse(_req: Request): Promise<Response> {
 
   try {
     // Read messages from queue (with timeout protection)
-    const messages = await withTimeout(
-      pgmqRead(PULSE_QUEUE_NAME, {
-        sleep_seconds: 0,
-        n: safeBatchSize,
-      }),
-      TIMEOUT_PRESETS.rpc,
-      'Pulse queue read timed out'
-    );
-    const readError = messages === null ? new Error('Failed to read pulse queue messages') : null;
-
-    if (readError) {
-      console.error('[flux-station] Pulse queue read error', {
-        ...logContext,
-        error: readError.message,
-      });
-      return errorResponse(
-        new Error(`Failed to read pulse queue: ${readError.message}`),
-        'flux-station:pulse-read'
+    let messages: PulseQueueMessage[] | null = null;
+    try {
+      const rawMessages = await withTimeout(
+        pgmqRead(PULSE_QUEUE_NAME, {
+          sleep_seconds: 0,
+          n: safeBatchSize,
+        }),
+        TIMEOUT_PRESETS.rpc,
+        'Pulse queue read timed out'
       );
+
+      // Cast raw messages to PulseQueueMessage array
+      // The pgmqRead returns messages with 'message' as Record<string, unknown>
+      // We validate the structure later with isValidPulseEvent
+      messages = rawMessages as unknown as PulseQueueMessage[];
+    } catch (error) {
+      if (error instanceof Error && error.name === 'TimeoutError') {
+        console.error('[flux-station] Pulse queue read timeout', logContext);
+        return errorResponse(error, 'flux-station:pulse-timeout');
+      }
+      throw error;
     }
 
     if (!messages || messages.length === 0) {

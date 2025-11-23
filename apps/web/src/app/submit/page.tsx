@@ -7,7 +7,7 @@ import {
   getContentTemplates,
   getSubmissionDashboard,
   getSubmissionFormFields,
-} from '@heyclaude/web-runtime';
+} from '@heyclaude/web-runtime/data';
 import dynamic from 'next/dynamic';
 import { JobsPromo } from '@/src/components/core/domain/jobs/jobs-banner';
 import { SubmitFormClient } from '@/src/components/core/forms/content-submission-form';
@@ -25,14 +25,10 @@ const NewsletterCTAVariant = dynamic(
 );
 
 import { Constants, type Database } from '@heyclaude/database-types';
-import {
-  cn,
-  generatePageMetadata,
-  logger,
-  normalizeError,
-  UI_CLASSES,
-} from '@heyclaude/web-runtime';
+import { logger, normalizeError } from '@heyclaude/web-runtime/core';
+import { generatePageMetadata } from '@heyclaude/web-runtime/data';
 import { TrendingUp } from '@heyclaude/web-runtime/icons';
+import { cn, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
 
 const SUBMISSION_TIPS = [

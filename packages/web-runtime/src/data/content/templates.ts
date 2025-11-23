@@ -17,7 +17,7 @@ export async function getContentTemplates(
   category: Database['public']['Enums']['content_category']
 ): Promise<MergedTemplateItem[]> {
   const result = await fetchCached(
-    (client) => new ContentService(client).getContentTemplates(category),
+    (client) => new ContentService(client).getContentTemplates({ p_category: category }),
     {
       key: category,
       tags: ['templates', `templates-${category}`],

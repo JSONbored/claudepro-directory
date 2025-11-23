@@ -1,30 +1,80 @@
 # Web Runtime
 
-Node/Next-specific helpers built atop shared-runtime.
+The **Web Runtime** (`@heyclaude/web-runtime`) is the standard library for the Next.js application. It contains all business logic, data access, UI components, and utility functions.
 
-## Exports
-- `logger`, `toLogContextValue` — hardened Pino logger with LogContext sanitization.
-- `normalizeError`, `logActionFailure`, `logClientWarning`, `logUnhandledPromise` — error helpers that capture consistent telemetry.
-- `isBuildTime` — conservative build-time detector to guard server-only imports during Next static generation.
-- `safeParse`, `formatDate`, `formatRelativeDate`, `ensureStringArray`, `getSkeletonKeys`, `formatViewCount`, etc. — data/content utilities for consistent parsing/formatting.
-- `hashUserId` — privacy helper for PII-safe logging.
-- `enqueuePulseEvent`, `enqueuePulseEventServer`, `pulseJobSearch`, `pulseUserSearch` — shared Pulse queue helpers for capturing interactions with consistent logging and Supabase wiring.
-- `sanitizeError`, `formatZodError` — shared sanitization helpers for API/edge/client error handling.
-- `createNotification`, `dismissNotifications` — Flux Station notification helpers reusable across web + edge.
-- `getCacheTtl`, `getCacheInvalidateTags`, `primeCacheConfig`, `resolveInvalidateTags`, `createInvalidateByKeys`, `revalidateCacheTags`, `nextInvalidateByKeys` — cache tooling with shared defaults and tag resolution (including a Next.js-ready helper).
-- `createCachedRpcExecutor`, `createCachedRpcWithDedupe`, `createFetchCachedRpc`, `createRunRpc`, plus preconfigured `cachedRPC`, `cachedRPCWithDedupe`, `fetchCachedRpc` helpers — factories for composing typed Supabase RPC helpers with shared caching, logging, and fallback behavior.
-- `generateContentTags`, `generateContentCacheKey`, `normalizeRpcResult` — deterministic helpers for cache tagging, key generation, and RPC result normalization used by every content/data loader.
-- `SOCIAL_LINKS`, `SOCIAL_LINK_KEYS` — validated marketing/social link configuration shared across runtimes.
-- `icons` — centralized Lucide icon barrel (including branded/custom SVGs) consumed by both the app and generated config files.
-- `applyNextProxyGuards` — Next.js proxy middleware guard (shared suspicious-header detection + rate limiting + logging) built atop shared-runtime primitives.
-- `getSimilarContent`, `getConfigRecommendations`, `fetchQuizConfiguration`, `getCompanyAdminProfile`, `getCompanyProfile`, `getCompaniesList`, `searchCompanies`, `getJobs`, `getJobBySlug`, `getFeaturedJobs`, `getJobsByCategory`, `getJobsCount`, `getFilteredJobs`, `getCommunityDirectory`, `getPublicUserProfile`, `getPublicCollectionDetail`, `getContentByCategory`, `getContentBySlug`, `getFullContentBySlug`, `getAllContent`, `getContentCount`, `getTrendingContent`, `getFilteredContent`, `getConfigurationCount`, `getTrendingPageData`, `getContentDetailComplete`, `getContentTemplates`, `getRelatedContent`, `getPaginatedContent`, `getReviewsWithStatsData`, `getHomepageData`, `getChangelogOverview`, `getChangelogEntryBySlug`, `getChangelog`, `getAllChangelogEntries`, `getRecentChangelogEntries`, `getChangelogEntriesByCategory`, `getFeaturedChangelogEntries`, `getChangelogMetadata`, `parseChangelogChanges`, `getSubmissionFormFields`, `getLayoutData`, `getNavigationMenu`, `getAccountDashboard`, `getUserLibrary`, `getUserBookmarksForCollections`, `getUserDashboard`, `getUserJobById`, `getCollectionDetail`, `getUserSettings`, `getSponsorshipAnalytics`, `getUserCompanies`, `getUserSponsorships`, `getUserCompanyById`, `getSubmissionDashboard`, `getActiveNotifications`, `getNotificationCacheTags`, `revalidateNotificationCache`, `getActiveAnnouncement`, `fetchContactCommands`, `getPartnerPricing`, `getSocialLinks`, `getContactChannels`, `getPartnerContactChannels`, `getPartnerCtas`, `getContentDescriptionCopy`, `getPartnerHeroStats`, `getSEOMetadata`, `getSEOMetadataWithSchemas` — server-safe data / marketing accessors for the personalized recommendation, quiz, company, jobs, community, content, changelog, submission forms, layout, account, notifications, contact, and marketing stacks with shared caching/fallback behavior.
-- `getNewsletterSubscriberCount` — shared data accessor for newsletter analytics that reuses the cached RPC executor.
-- `traceMeta`, `generateTraceId` — lightweight tracing helpers for server actions and RPC calls.
-- `createSupabaseServerClient`, `createSupabaseAnonClient`, `createSupabaseBrowserClient`, `createSupabaseAdminClient`, `getAuthenticatedUser`, `getAuthenticatedUserFromClient` — Supabase clients/auth helpers with consistent logging and safe fallbacks.
-- `actionClient`, `rateLimitedAction`, `authedAction`, `optionalAuthAction`, `runRpc` — preconfigured `next-safe-action` wrappers and RPC executor wired to the Supabase server client for consistent logging + auth.
-- `trackInteractionAction`, `trackNewsletterEventAction`, `trackTerminalCommandAction`, `trackTerminalFormSubmissionAction`, `trackUsageAction`, `trackSponsoredImpression`, `trackSponsoredClick`, `getSimilarConfigsAction`, `generateConfigRecommendationsAction`, plus supporting types — Pulse analytics server actions centralized for every runtime.
-- `getNewsletterCountAction`, `subscribeViaOAuthAction`, `getQuizConfiguration` — shared server actions for newsletter analytics/opt-ins and quiz configuration delivery.
-- `trackInteraction`, `trackNewsletterEvent`, `trackUsage`, `getSimilarConfigs`, `generateConfigRecommendations`, and `NewsletterEventType` — client-safe wrappers that call the shared Pulse server actions with consistent logging and fallbacks.
-- `featureFlags`, `newsletterExperiments`, `appSettings`, `componentConfigs`, and typed server actions in `actions/feature-flags` — centralized Statsig flag/dynamic config accessors with build-time guards.
-- `client` entry (`@heyclaude/web-runtime/client`) exports share helpers, screenshot generation, toast wrappers, view-transition utilities, and client-side error boundary helpers; edge helpers include `callEdgeFunction`, `highlightCodeEdge`, `processContentEdge`, and the unified search client for authenticated Supabase Edge requests.
-- `uploadImageToStorage`, `deleteImageFromStorage`, `validateImageBuffer`, `extractPathFromUrl` — shared Supabase Storage helpers for user-uploaded images.
+## Architecture
+
+This package acts as the "SDK" for `apps/web`. It encapsulates:
+-   **Server Actions**: Type-safe mutations using `next-safe-action`.
+-   **Data Access**: Functions to fetch data from Supabase, handling caching and validation.
+-   **UI System**: Reusable components, hooks, and design tokens.
+-   **Integrations**: wrappers for Logging, Analytics, and Feature Flags.
+
+## Exports by Category
+
+### ⚡ Actions (`@heyclaude/web-runtime/actions`)
+Server Actions for mutations and side effects.
+-   `actionClient`: Base client for defining safe actions.
+-   `authedAction`: Client for authenticated actions.
+-   `trackInteractionAction`, `trackUsageAction`: Analytics tracking.
+-   `subscribeViaOAuthAction`: Newsletter subscriptions.
+-   **Modules**: `user`, `company`, `jobs`, `content`, `feedback`.
+
+### 🎣 Hooks (`@heyclaude/web-runtime/hooks`)
+React hooks for client-side logic.
+-   `useToast`: Toast notifications.
+-   `useUser`: Client-side user session.
+-   `useSupabase`: Access the Supabase client.
+-   `useOptimistic`: Optimistic UI updates.
+-   `useLocalStorage`: Persist state.
+
+### 🎨 UI (`@heyclaude/web-runtime/ui`)
+UI components and design assets.
+-   `icons`: Centralized Lucide icon exports.
+-   `Button`, `Input`, `Dialog`: Core UI components (if moved here).
+-   `cn`: Class name merger utility.
+-   **Design Tokens**: Colors, spacing, typography constants.
+
+### 💾 Data (`@heyclaude/web-runtime/data`)
+Data fetching and Supabase interactions.
+-   **Supabase Clients**: `createSupabaseServerClient`, `createSupabaseBrowserClient`.
+-   **Content**: `getContentBySlug`, `getFeaturedJobs`, `getChangelog`.
+-   **User**: `getAuthenticatedUser`, `getUserProfile`.
+-   **RPC**: `cachedRPC`, `fetchCachedRpc` (Cached Remote Procedure Calls).
+
+### 🛠 Core & Utils
+Essential utilities and configuration.
+-   **Logging**: `logger` (Pino wrapper), `logActionFailure`.
+-   **Errors**: `normalizeError`, `sanitizeError`.
+-   **Config**: `SOCIAL_LINKS`, `featureFlags`.
+-   **Utils**: `formatDate`, `safeParse`, `hashUserId`.
+
+### 🚀 Edge (`@heyclaude/web-runtime/edge`)
+Utilities for Edge Runtimes (Middleware / Edge Functions).
+-   `callEdgeFunction`: Invoke Supabase Edge Functions.
+-   `processContentEdge`: Content processing helpers.
+
+### 📦 Cache (`@heyclaude/web-runtime/cache`)
+Caching strategies and tag management.
+-   `getCacheTtl`: Standardized TTLs.
+-   `revalidateCacheTags`: Tag invalidation.
+-   `generateContentCacheKey`: Consistent key generation.
+
+## Usage
+
+```typescript
+import { logger } from '@heyclaude/web-runtime';
+import { getFeaturedJobs } from '@heyclaude/web-runtime/data';
+import { useToast } from '@heyclaude/web-runtime/hooks';
+
+// Example: Fetch data with logging
+export async function loadPage() {
+  try {
+    const jobs = await getFeaturedJobs();
+    return jobs;
+  } catch (error) {
+    logger.error({ error }, 'Failed to load jobs');
+    return [];
+  }
+}
+```

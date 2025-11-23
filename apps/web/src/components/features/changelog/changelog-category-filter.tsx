@@ -6,7 +6,7 @@
 
 import type { Database } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
-import { DIMENSIONS } from '@heyclaude/web-runtime';
+import { DIMENSIONS } from '@heyclaude/web-runtime/ui';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { TabsList, TabsTrigger } from '@/src/components/primitives/ui/tabs';
 

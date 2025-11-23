@@ -79,7 +79,15 @@ async function executeSearch<T>(
         const service = new SearchService(client);
         
         const entities = options.entities?.map(e => e as string) ?? ['content'];
-        const results = await service.searchUnified(options.query, entities, options.filters);
+        const results = await service.searchUnified({
+          p_query: options.query,
+          p_entities: entities,
+          ...(options.filters?.categories ? { p_categories: options.filters.categories } : {}),
+          ...(options.filters?.tags ? { p_tags: options.filters.tags } : {}),
+          ...(options.filters?.authors ? { p_authors: options.filters.authors } : {}),
+          p_limit: options.filters?.limit ?? 20,
+          p_offset: options.filters?.offset ?? 0
+        });
         
         const end = performance.now();
         const totalTime = end - start;

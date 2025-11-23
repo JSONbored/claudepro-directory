@@ -1,11 +1,9 @@
-import {
-  generatePageMetadata,
-  getAuthenticatedUser,
-  logger,
-  normalizeError,
-  UI_CLASSES,
-} from '@heyclaude/web-runtime';
+import { getActivitySummary, getActivityTimeline } from '@heyclaude/web-runtime';
+import { logger, normalizeError } from '@heyclaude/web-runtime/core';
+import { generatePageMetadata, getAuthenticatedUser } from '@heyclaude/web-runtime/data';
+import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { GitPullRequest } from '@heyclaude/web-runtime/icons';
+import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ActivityTimeline } from '@/src/components/features/user-activity/activity-timeline';
@@ -17,8 +15,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/ui/card';
-import { getActivitySummary, getActivityTimeline } from '@/src/lib/actions/user.actions';
-import { ROUTES } from '@/src/lib/data/config/constants';
 
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/account/activity');

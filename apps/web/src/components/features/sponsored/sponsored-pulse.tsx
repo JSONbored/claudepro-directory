@@ -14,11 +14,8 @@
  * @module components/features/sponsored/sponsored-pulse
  */
 
-import {
-  logUnhandledPromise,
-  trackSponsoredClick,
-  trackSponsoredImpression,
-} from '@heyclaude/web-runtime';
+import { logUnhandledPromise } from '@heyclaude/web-runtime/core';
+import { trackSponsoredClick, trackSponsoredImpression } from '@heyclaude/web-runtime/data';
 import { useEffect, useRef } from 'react';
 
 interface SponsoredPulseProps {

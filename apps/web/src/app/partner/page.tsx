@@ -1,13 +1,10 @@
 import {
   getPartnerContactChannels,
   getPartnerCtas,
-  getPartnerHeroStats,
-  getPartnerPricing,
   logger,
   normalizeError,
-  RESPONSIVE_PATTERNS,
-  UI_CLASSES,
-} from '@heyclaude/web-runtime';
+} from '@heyclaude/web-runtime/core';
+import { getPartnerHeroStats, getPartnerPricing } from '@heyclaude/web-runtime/data';
 import {
   BarChart,
   Briefcase,
@@ -19,6 +16,7 @@ import {
   MousePointer,
   Sparkles,
 } from '@heyclaude/web-runtime/icons';
+import { RESPONSIVE_PATTERNS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { HoverCard } from '@/src/components/primitives/animation/hover-card';
 import { Button } from '@/src/components/primitives/ui/button';

@@ -13,9 +13,14 @@
       "@heyclaude/edge-runtime": ["./packages/edge-runtime/src/index.ts"],
       "@heyclaude/edge-runtime/*": ["./packages/edge-runtime/src/*"],
       "@heyclaude/web-runtime": ["./packages/web-runtime/src/index.ts"],
+      "@heyclaude/web-runtime/ui": ["./packages/web-runtime/src/entries/ui.ts"],
+      "@heyclaude/web-runtime/hooks": ["./packages/web-runtime/src/entries/hooks.ts"],
+      "@heyclaude/web-runtime/client": ["./packages/web-runtime/src/entries/client.ts"],
+      "@heyclaude/web-runtime/core": ["./packages/web-runtime/src/entries/core.ts"],
+      "@heyclaude/web-runtime/data": ["./packages/web-runtime/src/entries/data.ts"],
       "@heyclaude/web-runtime/*": ["./packages/web-runtime/src/*"],
-      "@heyclaude/data-layer": ["./packages/data-layer/src/index.ts"],
-      "@heyclaude/data-layer/*": ["./packages/data-layer/src/*"],
+      "@heyclaude/data-layer": ["./packages/data-layer/dist/index"],
+      "@heyclaude/data-layer/*": ["./packages/data-layer/dist/*"],
       "@heyclaude/generators": ["./packages/generators/src/index.ts"],
       "@heyclaude/generators/*": ["./packages/generators/src/*"]
     },
@@ -36,7 +41,7 @@
     "scripts/**/*.ts",
     "packages/web-runtime/src/**/*.ts",
     "packages/shared-runtime/src/**/*.ts",
-    "packages/data-layer/src/**/*.ts",
+    "packages/data-layer/dist/**/*.ts",
     "packages/database-types/**/*.ts"
   ],
   "exclude": [

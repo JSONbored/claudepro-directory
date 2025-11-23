@@ -1,4 +1,4 @@
-import { cn, DIMENSIONS, STATE_PATTERNS } from '@heyclaude/web-runtime';
+import { cn, DIMENSIONS, STATE_PATTERNS } from '@heyclaude/web-runtime/ui';
 import type * as React from 'react';
 
 export interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {

@@ -18,7 +18,7 @@
  * @module components/ui/magic/number-ticker
  */
 
-import { cn } from '@heyclaude/web-runtime';
+import { cn } from '@heyclaude/web-runtime/ui';
 import { useSpring } from 'motion/react';
 import { memo, useEffect, useRef, useState } from 'react';
 

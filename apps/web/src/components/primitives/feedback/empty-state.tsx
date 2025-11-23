@@ -25,12 +25,21 @@
  * ```
  */
 
-import { cn, UI_CLASSES } from '@heyclaude/web-runtime';
+import {
+  AlertCircle,
+  AlertTriangle,
+  Bookmark,
+  FileText,
+  Layers,
+  Search,
+  Sparkles,
+} from '@heyclaude/web-runtime/icons';
+import { cn, UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { SUBMISSION_FORM_TOKENS as TOKENS } from '@heyclaude/web-runtime/ui/design-tokens/submission-form';
 import type { LucideIcon } from 'lucide-react';
 import { motion } from 'motion/react';
 import Link from 'next/link';
 import { Button } from '@/src/components/primitives/ui/button';
-import { SUBMISSION_FORM_TOKENS as TOKENS } from '@/src/lib/design-tokens/submission-form';
 
 export interface EmptyStateProps {
   /** Icon component to display */
@@ -172,8 +181,6 @@ export function EmptySearchResults({
   category?: string;
   className?: string;
 }) {
-  const { Search } = require('@heyclaude/web-runtime/icons');
-
   return (
     <EmptyState
       icon={Search}
@@ -194,8 +201,6 @@ export function EmptySearchResults({
 }
 
 export function EmptyBookmarks({ className }: { className?: string }) {
-  const { Bookmark } = require('@heyclaude/web-runtime/icons');
-
   return (
     <EmptyState
       icon={Bookmark}
@@ -210,8 +215,6 @@ export function EmptyBookmarks({ className }: { className?: string }) {
 }
 
 export function EmptySubmissions({ className }: { className?: string }) {
-  const { FileText } = require('@heyclaude/web-runtime/icons');
-
   return (
     <EmptyState
       icon={FileText}
@@ -226,8 +229,6 @@ export function EmptySubmissions({ className }: { className?: string }) {
 }
 
 export function EmptyCollections({ className }: { className?: string }) {
-  const { Layers } = require('@heyclaude/web-runtime/icons');
-
   return (
     <EmptyState
       icon={Layers}
@@ -242,8 +243,6 @@ export function EmptyCollections({ className }: { className?: string }) {
 }
 
 export function EmptyCategory({ category, className }: { category: string; className?: string }) {
-  const { Sparkles } = require('@heyclaude/web-runtime/icons');
-
   return (
     <EmptyState
       icon={Sparkles}
@@ -258,8 +257,6 @@ export function EmptyCategory({ category, className }: { category: string; class
 }
 
 export function NotFoundEmpty({ className }: { className?: string }) {
-  const { AlertCircle } = require('@heyclaude/web-runtime/icons');
-
   return (
     <EmptyState
       icon={AlertCircle}
@@ -284,8 +281,6 @@ export function ErrorEmpty({
   description?: string;
   className?: string;
 }) {
-  const { AlertTriangle } = require('@heyclaude/web-runtime/icons');
-
   return (
     <EmptyState
       icon={AlertTriangle}

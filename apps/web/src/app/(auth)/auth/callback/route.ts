@@ -2,15 +2,11 @@
  * Auth Callback Route - OAuth redirect handler via Supabase Auth.
  */
 
-import {
-  createSupabaseServerClient,
-  logger,
-  normalizeError,
-  subscribeViaOAuthAction,
-} from '@heyclaude/web-runtime';
+import { refreshProfileFromOAuthServer } from '@heyclaude/web-runtime';
+import { logger, normalizeError } from '@heyclaude/web-runtime/core';
+import { createSupabaseServerClient, subscribeViaOAuthAction } from '@heyclaude/web-runtime/data';
+import { SECURITY_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
 import { type NextRequest, NextResponse } from 'next/server';
-import { refreshProfileFromOAuthServer } from '@/src/lib/actions/user.actions';
-import { SECURITY_CONFIG } from '@/src/lib/data/config/constants';
 
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);

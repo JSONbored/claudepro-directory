@@ -7,11 +7,8 @@
 
 import type { Database } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
-import {
-  generateConfigRecommendations,
-  getQuizConfiguration,
-  normalizeError,
-} from '@heyclaude/web-runtime';
+import { generateConfigRecommendations, normalizeError } from '@heyclaude/web-runtime/core';
+import { getQuizConfigurationAction } from '@heyclaude/web-runtime/data';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, useTransition } from 'react';
 import { z } from 'zod';
@@ -62,9 +59,9 @@ function mapQuizConfigToQuestions(config: QuizConfigurationResult | null): QuizQ
   }));
 }
 
-import { DIMENSIONS, logger, UI_CLASSES } from '@heyclaude/web-runtime';
-import { toasts } from '@heyclaude/web-runtime/client';
+import { logger } from '@heyclaude/web-runtime/core';
 import { ArrowLeft, ArrowRight, Sparkles } from '@heyclaude/web-runtime/icons';
+import { DIMENSIONS, toasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { InlineSpinner } from '@/src/components/primitives/feedback/loading-factory';
 import { QuestionCard } from './question-card';
 import { QuizProgress } from './quiz-progress';
@@ -119,7 +116,7 @@ export function QuizForm() {
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
-    getQuizConfiguration({})
+    getQuizConfigurationAction({})
       .then((result) => {
         if (result?.data) {
           const mapped = mapQuizConfigToQuestions(result.data);

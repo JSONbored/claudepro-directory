@@ -1,6 +1,6 @@
 'use client';
 
-import { cn } from '@heyclaude/web-runtime';
+import { cn } from '@heyclaude/web-runtime/ui';
 import * as PopoverPrimitive from '@radix-ui/react-popover';
 import type * as React from 'react';
 

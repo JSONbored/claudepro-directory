@@ -4,11 +4,15 @@
  */
 
 import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
-import { edgeEnv } from '@heyclaude/edge-runtime/config/env.ts';
-import { invalidateCacheTags } from '@heyclaude/edge-runtime/utils/cache.ts';
-import { errorResponse, successResponse } from '@heyclaude/edge-runtime/utils/http.ts';
-import { runWithRetry } from '@heyclaude/edge-runtime/utils/integrations/http-client.ts';
-import { pgmqDelete, pgmqRead } from '@heyclaude/edge-runtime/utils/pgmq-client.ts';
+import {
+  edgeEnv,
+  errorResponse,
+  invalidateCacheTags,
+  pgmqDelete,
+  pgmqRead,
+  runWithRetry,
+  successResponse,
+} from '@heyclaude/edge-runtime';
 import {
   createUtilityContext,
   errorToString,
@@ -112,6 +116,17 @@ export async function handleRevalidation(_req: Request): Promise<Response> {
           console.error('[flux-station] Invalid revalidation payload structure', {
             msg_id: msg.msg_id.toString(),
           });
+
+          // Delete invalid message to prevent infinite retries
+          try {
+            await pgmqDelete(CONTENT_REVALIDATION_QUEUE, msg.msg_id);
+          } catch (error) {
+            console.error('[flux-station] Failed to delete invalid message', {
+              msg_id: msg.msg_id.toString(),
+              error: errorToString(error),
+            });
+          }
+
           results.push({
             msg_id: msg.msg_id.toString(),
             status: 'failed',

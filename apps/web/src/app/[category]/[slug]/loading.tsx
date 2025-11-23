@@ -1,4 +1,4 @@
-import { getSkeletonKeys } from '@heyclaude/web-runtime';
+import { getSkeletonKeys } from '@heyclaude/web-runtime/ui';
 import { Skeleton } from '@/src/components/primitives/feedback/loading-skeleton';
 
 const CODE_LINE_KEYS = getSkeletonKeys(8);

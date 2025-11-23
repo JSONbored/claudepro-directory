@@ -1,13 +1,12 @@
 import { Constants, type Database } from '@heyclaude/database-types';
+import { logger, normalizeError } from '@heyclaude/web-runtime/core';
 import {
   generatePageMetadata,
   getAuthenticatedUser,
   getSponsorshipAnalytics,
-  logger,
-  normalizeError,
-  POSITION_PATTERNS,
-  UI_CLASSES,
-} from '@heyclaude/web-runtime';
+} from '@heyclaude/web-runtime/data';
+import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
+import { POSITION_PATTERNS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -21,7 +20,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/ui/card';
-import { ROUTES } from '@/src/lib/data/config/constants';
 
 type SponsorshipAnalytics = Database['public']['Functions']['get_sponsorship_analytics']['Returns'];
 
@@ -98,23 +96,23 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
 
   // After null check, TypeScript narrows types - use generated types directly
   // Validate tier value at runtime using database enum constants
-  const rawTier = sponsorship.tier;
+  const rawTier = sponsorship.tier as string; // Widen to string for validation
   const validTiers = Constants.public.Enums.sponsorship_tier;
 
   // Type guard to check if tier is a valid enum value
   // Uses database enum constants directly - leverages readonly array includes
-  function isValidTier(
-    tier: Database['public']['Enums']['sponsorship_tier']
-  ): tier is Database['public']['Enums']['sponsorship_tier'] {
+  function isValidTier(tier: string): tier is Database['public']['Enums']['sponsorship_tier'] {
     // TypeScript knows validTiers contains all enum values, so this is type-safe
-    return validTiers.some((validTier) => validTier === tier);
+    return (validTiers as readonly string[]).includes(tier);
   }
 
-  const safeTier: Database['public']['Enums']['sponsorship_tier'] = isValidTier(rawTier)
+  const isTierValid = isValidTier(rawTier);
+
+  const safeTier: Database['public']['Enums']['sponsorship_tier'] = isTierValid
     ? rawTier
     : 'sponsored'; // Safe default for invalid values
 
-  if (!isValidTier(rawTier)) {
+  if (!isTierValid) {
     logger.warn('SponsorshipAnalyticsPage: invalid tier value, using safe default', {
       sponsorshipId: id,
       userId: user.id,

@@ -5,12 +5,12 @@
  */
 
 import { Clock, Star, TrendingUp } from '@heyclaude/web-runtime/icons';
+import type { TrendingContentProps } from '@heyclaude/web-runtime/types/component.types';
 import { useId } from 'react';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { UnifiedCardGrid } from '@/src/components/core/domain/cards/card-grid';
 import { ConfigCard } from '@/src/components/core/domain/cards/config-card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/primitives/ui/tabs';
-import type { TrendingContentProps } from '@/src/lib/types/component.types';
 
 interface TabConfig {
   value: string;

@@ -58,8 +58,8 @@
  */
 
 import { nonEmptyString } from '@heyclaude/shared-runtime';
-import { DIMENSIONS, UI_CLASSES } from '@heyclaude/web-runtime';
 import type { LucideIcon } from '@heyclaude/web-runtime/icons';
+import { DIMENSIONS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import Link from 'next/link';
 import { z } from 'zod';
 import {

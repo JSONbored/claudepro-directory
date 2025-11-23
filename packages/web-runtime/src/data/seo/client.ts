@@ -33,7 +33,7 @@ export async function getSEOMetadata(route: string): Promise<{
   }
 
   const result = await fetchCached(
-    (client) => new SeoService(client).generateMetadata(route, 'metadata'),
+    (client) => new SeoService(client).generateMetadata({ p_route: route, p_include: 'metadata' }),
     {
       key: `metadata-${route}`,
       tags: ['seo', `seo-${route}`],
@@ -113,7 +113,7 @@ export async function getSEOMetadataWithSchemas(route: string): Promise<{
   }
 
   const result = await fetchCached(
-    (client) => new SeoService(client).generateMetadata(route, 'metadata,schemas'),
+    (client) => new SeoService(client).generateMetadata({ p_route: route, p_include: 'metadata,schemas' }),
     {
       key: `metadata-schemas-${route}`,
       tags: ['seo', `seo-${route}`, 'structured-data'],

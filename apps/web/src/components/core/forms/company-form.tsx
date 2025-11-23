@@ -5,9 +5,12 @@
  */
 
 import type { Database } from '@heyclaude/database-types';
-import { getFormConfig, logClientWarning, logger, UI_CLASSES } from '@heyclaude/web-runtime';
-import { toasts } from '@heyclaude/web-runtime/client';
+import { createCompany, updateCompany, uploadCompanyLogoAction } from '@heyclaude/web-runtime';
+import { logClientWarning, logger } from '@heyclaude/web-runtime/core';
+import { getFormConfig } from '@heyclaude/web-runtime/data';
+import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { FileText, X } from '@heyclaude/web-runtime/icons';
+import { toasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useAction } from 'next-safe-action/hooks';
@@ -22,12 +25,6 @@ import {
   CardTitle,
 } from '@/src/components/primitives/ui/card';
 import { SelectItem } from '@/src/components/primitives/ui/select';
-import {
-  createCompany,
-  updateCompany,
-  uploadCompanyLogoAction,
-} from '@/src/lib/actions/companies.actions';
-import { ROUTES } from '@/src/lib/data/config/constants';
 
 // Use the generated composite type from the RPC return
 type CompanyCompositeType = Database['public']['CompositeTypes']['user_companies_company'];

@@ -11,13 +11,13 @@
  * Called by pg_cron job every 2 minutes to process all queues automatically.
  */
 
-import { edgeEnv } from '@heyclaude/edge-runtime/config/env.ts';
-import { pgmqMetrics } from '@heyclaude/edge-runtime/utils/pgmq-client.ts';
+import { edgeEnv, pgmqMetrics } from '@heyclaude/edge-runtime';
 import { errorToString } from '@heyclaude/shared-runtime';
 import { handleChangelogNotify } from './changelog/notify.ts';
 import { handleChangelogProcess } from './changelog/process.ts';
 import { handleDiscordJobs } from './discord/jobs.ts';
 import { handleDiscordSubmissions } from './discord/submissions.ts';
+import { handleEmbeddingGenerationQueue } from './embedding/index.ts';
 import { handlePulse } from './pulse.ts';
 import { handleRevalidation } from './revalidation.ts';
 
@@ -55,14 +55,14 @@ const QUEUE_REGISTRY: QueueConfig[] = [
     priority: 5,
   },
   { name: 'revalidation', handler: 'internal', handlerFn: handleRevalidation, priority: 6 },
-
-  // External queues (other edge functions)
   {
     name: 'embedding_generation',
-    handler: 'external',
-    endpoint: '/functions/v1/generate-embedding/process',
+    handler: 'internal',
+    handlerFn: handleEmbeddingGenerationQueue,
     priority: 7,
   },
+
+  // External queues (other edge functions)
   {
     name: 'package_generation',
     handler: 'external',
@@ -187,8 +187,9 @@ async function processExternalQueue(
       },
     });
 
-    // Try to extract processed count from response body
+    // Try to extract processed count and error from response body
     let processed: number | undefined;
+    let errorMessage: string | undefined;
     try {
       const body = await response.json();
       // Validate response structure
@@ -205,14 +206,30 @@ async function processExternalQueue(
         if (typeof processedValue === 'number') {
           processed = processedValue;
         }
+
+        const errorValue = getProperty(body, 'error');
+        if (typeof errorValue === 'string') {
+          errorMessage = errorValue;
+        } else if (errorValue && typeof errorValue === 'object') {
+          errorMessage = JSON.stringify(errorValue);
+        }
       }
     } catch {
       // Response might not be JSON, that's okay
     }
 
+    if (!response.ok) {
+      return {
+        queue: config.name,
+        success: false,
+        queueLength,
+        error: errorMessage || `HTTP ${response.status} ${response.statusText}`,
+      };
+    }
+
     return {
       queue: config.name,
-      success: response.ok,
+      success: true,
       queueLength,
       ...(processed !== undefined && { processed }),
     };

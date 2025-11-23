@@ -3,17 +3,15 @@
  */
 
 import type { JobStatus } from '@heyclaude/web-runtime';
+import { formatRelativeDate, logger, normalizeError } from '@heyclaude/web-runtime/core';
 import {
-  BADGE_COLORS,
-  formatRelativeDate,
   generatePageMetadata,
   getAuthenticatedUser,
   getUserJobById,
-  logger,
-  normalizeError,
-  UI_CLASSES,
-} from '@heyclaude/web-runtime';
+} from '@heyclaude/web-runtime/data';
+import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { ArrowLeft, ExternalLink } from '@heyclaude/web-runtime/icons';
+import { BADGE_COLORS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
@@ -27,7 +25,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/ui/card';
-import { ROUTES } from '@/src/lib/data/config/constants';
 
 interface JobAnalyticsPageProps {
   params: Promise<{ id: string }>;
@@ -96,6 +93,13 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPageProps
 
   const status: JobStatus = job.status ?? 'draft';
 
+  const formatStatus = (rawStatus: string) => {
+    return rawStatus
+      .split('_')
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -126,7 +130,7 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPageProps
           <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
             <CardTitle>Listing Details</CardTitle>
             <UnifiedBadge variant="base" style="outline" className={getStatusColor(status)}>
-              {status}
+              {formatStatus(status)}
             </UnifiedBadge>
           </div>
         </CardHeader>
@@ -183,7 +187,7 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPageProps
           {
             label: 'Click-Through Rate',
             value: `${ctr}%`,
-            change: 'Of viewers clicked apply',
+            change: 'Of viewers who clicked Apply',
             trend:
               viewCount === 0
                 ? 'unchanged'

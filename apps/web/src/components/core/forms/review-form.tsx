@@ -1,15 +1,18 @@
 'use client';
 
-import { logClientWarning, UI_CLASSES } from '@heyclaude/web-runtime';
-import { toasts } from '@heyclaude/web-runtime/client';
+import { createReview, updateReview } from '@heyclaude/web-runtime';
+import { logClientWarning } from '@heyclaude/web-runtime/core';
+import {
+  MAX_REVIEW_LENGTH,
+  type ReviewFormProps,
+} from '@heyclaude/web-runtime/types/component.types';
+import { toasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { useRouter } from 'next/navigation';
 import { useId, useState, useTransition } from 'react';
 import { ReviewRatingInteractive } from '@/src/components/core/domain/reviews/review-rating-interactive';
 import { Button } from '@/src/components/primitives/ui/button';
 import { Label } from '@/src/components/primitives/ui/label';
 import { Textarea } from '@/src/components/primitives/ui/textarea';
-import { createReview, updateReview } from '@/src/lib/actions/content.actions';
-import { MAX_REVIEW_LENGTH, type ReviewFormProps } from '@/src/lib/types/component.types';
 
 /**
  * Form for creating and editing reviews

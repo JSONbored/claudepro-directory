@@ -39,14 +39,12 @@
  */
 
 import type { Database } from '@heyclaude/database-types';
+import { isValidCategory, logger, normalizeError } from '@heyclaude/web-runtime/core';
 import {
   generatePageMetadata,
   getCategoryConfig,
   getContentByCategory,
-  isValidCategory,
-  logger,
-  normalizeError,
-} from '@heyclaude/web-runtime';
+} from '@heyclaude/web-runtime/data';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { ContentListServer } from '@/src/components/content/content-grid-list';

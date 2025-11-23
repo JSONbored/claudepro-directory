@@ -4,25 +4,28 @@
 
 import type { Database } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
+import { addBookmark } from '@heyclaude/web-runtime';
 import {
-  BADGE_COLORS,
   ensureStringArray,
   formatViewCount,
-  getComponentConfig,
   getContentItemUrl,
-  getDisplayTitle,
   isValidCategory,
   logClientWarning,
   logger,
   logUnhandledPromise,
   normalizeError,
-  SEMANTIC_COLORS,
-  UI_CLASSES,
-  useCopyToClipboard,
-  usePulse,
-} from '@heyclaude/web-runtime';
-import { toasts } from '@heyclaude/web-runtime/client';
+} from '@heyclaude/web-runtime/core';
+import { getComponentConfig } from '@heyclaude/web-runtime/data';
+import { useCopyToClipboard, usePulse } from '@heyclaude/web-runtime/hooks';
 import { Award, ExternalLink, Eye, Github, Layers, Sparkles } from '@heyclaude/web-runtime/icons';
+import type { ConfigCardProps } from '@heyclaude/web-runtime/types/component.types';
+import {
+  BADGE_COLORS,
+  getDisplayTitle,
+  SEMANTIC_COLORS,
+  toasts,
+  UI_CLASSES,
+} from '@heyclaude/web-runtime/ui';
 import { useRouter } from 'next/navigation';
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { BookmarkButton } from '@/src/components/core/buttons/interaction/bookmark-button';
@@ -33,8 +36,6 @@ import { HighlightedText } from '@/src/components/core/shared/highlighted-text';
 import { BorderBeam } from '@/src/components/primitives/animation/border-beam';
 import { ReviewRatingCompact } from '@/src/components/primitives/feedback/review-rating-compact';
 import { Button } from '@/src/components/primitives/ui/button';
-import { addBookmark } from '@/src/lib/actions/user.actions';
-import type { ConfigCardProps } from '@/src/lib/types/component.types';
 
 // Experience level validation helper
 function isExperienceLevel(
@@ -399,6 +400,7 @@ export const ConfigCard = memo(
         const result = await addBookmark({
           content_type: validatedCategory,
           content_slug: item.slug,
+          notes: '',
         });
 
         if (result?.data?.success) {

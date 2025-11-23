@@ -40,8 +40,16 @@
  * ```
  */
 
-import { UI_CLASSES } from '@heyclaude/web-runtime';
 import { BookOpen, CheckCircle, Zap } from '@heyclaude/web-runtime/icons';
+import type {
+  CaseStudyProps,
+  ContentTabsProps,
+  ExpertQuoteProps,
+  FeatureGridProps,
+  QuickReferenceProps,
+  TLDRSummaryProps,
+} from '@heyclaude/web-runtime/types/component.types';
+import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/src/components/primitives/ui/avatar';
 import {
@@ -52,14 +60,6 @@ import {
   CardTitle,
 } from '@/src/components/primitives/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/primitives/ui/tabs';
-import type {
-  CaseStudyProps,
-  ContentTabsProps,
-  ExpertQuoteProps,
-  FeatureGridProps,
-  QuickReferenceProps,
-  TLDRSummaryProps,
-} from '@/src/lib/types/component.types';
 
 // ============================================================================
 // TYPE DEFINITIONS - Discriminated Union

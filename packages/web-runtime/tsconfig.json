@@ -5,13 +5,13 @@
     "declaration": true,
     "declarationMap": true,
     "emitDeclarationOnly": true,
-    "rootDir": "src",
     "outDir": "dist",
     "baseUrl": ".",
+    "types": ["next/types/global"],
     "paths": {
-      "@heyclaude/database-types": ["../database-types/src/index.ts"],
+      "@heyclaude/database-types": ["../database-types/dist/index"],
       "@heyclaude/shared-runtime": ["../shared-runtime/src/index.ts"],
-      "@heyclaude/data-layer": ["../data-layer/src/index.ts"]
+      "@heyclaude/data-layer": ["../data-layer/dist/index"]
     }
   },
   "include": ["src/**/*"],

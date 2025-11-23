@@ -2,15 +2,14 @@
  * Account Layout - Protected dashboard layout with sidebar navigation.
  */
 
+import { ensureUserRecord } from '@heyclaude/web-runtime';
+import { logger, normalizeError } from '@heyclaude/web-runtime/core';
 import {
   createSupabaseServerClient,
   getAuthenticatedUser,
   getUserSettings,
   getUserSponsorships,
-  logger,
-  normalizeError,
-  UI_CLASSES,
-} from '@heyclaude/web-runtime';
+} from '@heyclaude/web-runtime/data';
 import {
   Activity,
   Bookmark,
@@ -22,13 +21,13 @@ import {
   TrendingUp,
   User,
 } from '@heyclaude/web-runtime/icons';
+import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import Image from 'next/image';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { AuthSignOutButton } from '@/src/components/core/buttons/auth/auth-signout-button';
 import { Button } from '@/src/components/primitives/ui/button';
 import { Card } from '@/src/components/primitives/ui/card';
-import { ensureUserRecord } from '@/src/lib/actions/user.actions';
 
 export default async function AccountLayout({ children }: { children: React.ReactNode }) {
   const { user } = await getAuthenticatedUser({

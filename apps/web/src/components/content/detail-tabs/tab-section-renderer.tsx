@@ -4,11 +4,15 @@
  */
 
 import type { Database } from '@heyclaude/database-types';
-import { ensureStringArray, isValidCategory } from '@heyclaude/web-runtime';
+import { ensureStringArray, isValidCategory } from '@heyclaude/web-runtime/core';
+import type {
+  ContentItem,
+  ProcessedSectionData,
+  SectionId,
+} from '@heyclaude/web-runtime/types/component.types';
 import dynamic from 'next/dynamic';
 import { JSONSectionRenderer } from '@/src/components/content/json-to-sections';
 import { ReviewListSection } from '@/src/components/core/domain/reviews/review-list-section';
-import type { ContentItem, ProcessedSectionData, SectionId } from '@/src/lib/types/component.types';
 
 // Dynamic import for unified section component (code splitting)
 const UnifiedSection = dynamic(() => import('@/src/components/content/sections/unified-section'));

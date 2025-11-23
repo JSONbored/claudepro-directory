@@ -5,13 +5,13 @@
 
 'use client';
 
-import { cn, UI_CLASSES } from '@heyclaude/web-runtime';
+import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { Check, TrendingUp } from '@heyclaude/web-runtime/icons';
+import { cn, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { motion } from 'motion/react';
 import Link from 'next/link';
 import { Button } from '@/src/components/primitives/ui/button';
 import { Card, CardContent } from '@/src/components/primitives/ui/card';
-import { ROUTES } from '@/src/lib/data/config/constants';
 
 export function JobsPromo() {
   return (

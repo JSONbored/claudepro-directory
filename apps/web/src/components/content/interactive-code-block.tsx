@@ -6,25 +6,15 @@
 
 import type { Database } from '@heyclaude/database-types';
 import {
-  getTimeoutConfig,
   isValidCategory,
   logger,
   logUnhandledPromise,
   normalizeError,
-  UI_CLASSES,
-  usePulse,
-} from '@heyclaude/web-runtime';
-import {
-  copyScreenshotToClipboard,
-  copyShareLink,
-  downloadScreenshot,
-  generateCodeScreenshot,
-  generateScreenshotFilename,
-  generateShareText,
-  generateShareUrl,
   type SharePlatform,
-  toasts,
-} from '@heyclaude/web-runtime/client';
+} from '@heyclaude/web-runtime/core';
+import { getTimeoutConfig } from '@heyclaude/web-runtime/data';
+import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
+import { usePulse } from '@heyclaude/web-runtime/hooks';
 import {
   Camera,
   Check,
@@ -34,12 +24,22 @@ import {
   Share2,
   Twitter,
 } from '@heyclaude/web-runtime/icons';
+import {
+  copyScreenshotToClipboard,
+  copyShareLink,
+  downloadScreenshot,
+  generateCodeScreenshot,
+  generateScreenshotFilename,
+  generateShareText,
+  generateShareUrl,
+  toasts,
+  UI_CLASSES,
+} from '@heyclaude/web-runtime/ui';
 import DOMPurify from 'dompurify';
 import { motion } from 'motion/react';
 import { usePathname } from 'next/navigation';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { LinkedinShareButton, TwitterShareButton } from 'react-share';
-import { APP_CONFIG } from '@/src/lib/data/config/constants';
 
 const CLIPBOARD_RESET_DEFAULT_MS = 2000;
 

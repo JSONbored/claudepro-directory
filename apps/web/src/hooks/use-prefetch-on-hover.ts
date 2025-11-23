@@ -20,7 +20,8 @@
  * @module hooks/use-prefetch-on-hover
  */
 
-import { getTimeoutConfig, logClientWarning } from '@heyclaude/web-runtime';
+import { logClientWarning } from '@heyclaude/web-runtime/core';
+import { getTimeoutConfig } from '@heyclaude/web-runtime/data';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef } from 'react';
 

@@ -1,4 +1,4 @@
-import { cn, UI_CLASSES } from '@heyclaude/web-runtime';
+import { cn, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import type * as React from 'react';
 import { memo } from 'react';
 

@@ -1,6 +1,7 @@
 'use server';
 
 import type { Database } from '@heyclaude/database-types';
+import { Constants } from '@heyclaude/database-types';
 import { fetchCached } from '../../cache/fetch-cached.ts';
 import { ContentService } from '@heyclaude/data-layer';
 import { generateContentCacheKey, generateContentTags } from '../content-helpers.ts';
@@ -11,6 +12,18 @@ interface PaginatedContentParams {
   offset: number;
 }
 
+const CONTENT_CATEGORY_VALUES = Constants.public.Enums.content_category;
+
+function toContentCategory(
+  value: string | null | undefined
+): Database['public']['Enums']['content_category'] | undefined {
+  if (!value) return undefined;
+  const lowered = value.trim().toLowerCase();
+  return CONTENT_CATEGORY_VALUES.includes(lowered as Database['public']['Enums']['content_category'])
+    ? (lowered as Database['public']['Enums']['content_category'])
+    : undefined;
+}
+
 export async function getPaginatedContent({
   category,
   limit,
@@ -18,14 +31,20 @@ export async function getPaginatedContent({
 }: PaginatedContentParams): Promise<
   Database['public']['Functions']['get_content_paginated_slim']['Returns'] | null
 > {
+  const normalizedCategory = category ? toContentCategory(category) : undefined;
+
   return fetchCached(
-    (client) => new ContentService(client).getContentPaginatedSlim(category ?? null, limit, offset),
+    (client) => new ContentService(client).getContentPaginatedSlim({
+      ...(normalizedCategory ? { p_category: normalizedCategory } : {}),
+      p_limit: limit,
+      p_offset: offset
+    }),
     {
-      key: generateContentCacheKey(category, null, limit, offset),
-      tags: generateContentTags(category, null, ['content-paginated']),
+      key: generateContentCacheKey(normalizedCategory ?? category, null, limit, offset),
+      tags: generateContentTags(normalizedCategory ?? category, null, ['content-paginated']),
       ttlKey: 'cache.content_paginated.ttl_seconds',
       fallback: null,
-      logMeta: { category: category ?? 'all', limit, offset },
+      logMeta: { category: normalizedCategory ?? category ?? 'all', limit, offset },
     }
   );
 }

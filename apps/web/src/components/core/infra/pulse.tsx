@@ -22,14 +22,14 @@
  */
 
 import type { Database } from '@heyclaude/database-types';
+import { trackInteraction } from '@heyclaude/web-runtime/client';
 import {
-  getPollingConfig,
   logClientWarning,
   logger,
   logUnhandledPromise,
   normalizeError,
-  trackInteraction,
-} from '@heyclaude/web-runtime';
+} from '@heyclaude/web-runtime/core';
+import { getPollingConfig } from '@heyclaude/web-runtime/data';
 import { useEffect, useState } from 'react';
 
 export type PulseProps =

@@ -1,13 +1,13 @@
 'use client';
 
-import { logClientWarning, normalizeError } from '@heyclaude/web-runtime';
-import { toasts } from '@heyclaude/web-runtime/client';
+import { logClientWarning, normalizeError } from '@heyclaude/web-runtime/core';
+import type { ButtonStyleProps } from '@heyclaude/web-runtime/types/component.types';
+import { toasts } from '@heyclaude/web-runtime/ui';
 import { Check, type LucideIcon } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useState } from 'react';
 import { Button } from '@/src/components/primitives/ui/button';
 import { useButtonSuccess } from '@/src/hooks/use-button-success';
-import type { ButtonStyleProps } from '@/src/lib/types/component.types';
 
 interface ContentActionButtonProps extends ButtonStyleProps {
   url: string;

@@ -6,14 +6,10 @@
 'use client';
 
 import type { Database } from '@heyclaude/database-types';
-import {
-  getNewsletterConfig,
-  logClientWarning,
-  logger,
-  normalizeError,
-  usePulse,
-} from '@heyclaude/web-runtime';
-import { toasts } from '@heyclaude/web-runtime/client';
+import { logClientWarning, logger, normalizeError } from '@heyclaude/web-runtime/core';
+import { getNewsletterConfig } from '@heyclaude/web-runtime/data';
+import { usePulse } from '@heyclaude/web-runtime/hooks';
+import { toasts } from '@heyclaude/web-runtime/ui';
 import { useCallback, useEffect, useState, useTransition } from 'react';
 
 const SUPABASE_URL = process.env['NEXT_PUBLIC_SUPABASE_URL'];

@@ -1,8 +1,8 @@
 import { writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { normalizeError } from '@heyclaude/web-runtime/errors';
 import { callEdgeFunction } from '../toolkit/edge.js';
 import { ensureEnvVars } from '../toolkit/env.js';
+import { normalizeError } from '../toolkit/errors.js';
 import { logger } from '../toolkit/logger.js';
 import { DEFAULT_SUPABASE_URL } from '../toolkit/supabase.js';
 import { resolveRepoPath } from '../utils/paths.js';

@@ -5,18 +5,13 @@
  * Displays and links to GitHub repository with star count
  */
 
-import {
-  cn,
-  getSocialLinks,
-  logClientWarning,
-  logUnhandledPromise,
-  UI_CLASSES,
-  usePulse,
-} from '@heyclaude/web-runtime';
+import { getSocialLinks, logClientWarning, logUnhandledPromise } from '@heyclaude/web-runtime/core';
+import { usePulse } from '@heyclaude/web-runtime/hooks';
 import { Github } from '@heyclaude/web-runtime/icons';
+import type { ButtonStyleProps } from '@heyclaude/web-runtime/types/component.types';
+import { cn, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { useEffect, useState } from 'react';
 import { Button } from '@/src/components/primitives/ui/button';
-import type { ButtonStyleProps } from '@/src/lib/types/component.types';
 
 export interface GitHubStarsButtonProps extends ButtonStyleProps {
   repoUrl?: string;

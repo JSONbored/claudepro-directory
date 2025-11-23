@@ -1,6 +1,6 @@
 'use client';
 
-import { cn } from '@heyclaude/web-runtime';
+import { cn } from '@heyclaude/web-runtime/ui';
 import * as AvatarPrimitive from '@radix-ui/react-avatar';
 import type * as React from 'react';
 

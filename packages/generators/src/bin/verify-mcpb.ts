@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 
-import { runVerifyMcpbPackages } from '../commands/verify-mcpb.js';
+import { runVerifyMcpbPackages } from '../commands/verify-mcpb-packages.js';
 import { logger } from '../toolkit/logger.js';
 
 runVerifyMcpbPackages()
-  .then((result) => {
+  .then((result: unknown) => {
     if (result) {
       logger.info('✅ MCPB verification passed', {
         script: 'verify-mcpb',
@@ -17,7 +17,7 @@ runVerifyMcpbPackages()
       process.exit(1);
     }
   })
-  .catch((error) => {
+  .catch((error: unknown) => {
     logger.error(
       '💥 MCPB verification failed',
       error instanceof Error ? error : new Error(String(error)),

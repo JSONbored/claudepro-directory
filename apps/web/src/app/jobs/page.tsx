@@ -3,16 +3,12 @@
  * Single RPC call to filter_jobs() - all filtering in PostgreSQL
  */
 
-import {
-  generatePageMetadata,
-  getFilteredJobs,
-  type JobsFilterResult,
-  logger,
-  normalizeError,
-  POSITION_PATTERNS,
-  UI_CLASSES,
-} from '@heyclaude/web-runtime';
+import { type JobsFilterResult, logger, normalizeError } from '@heyclaude/web-runtime/core';
+import { generatePageMetadata, getFilteredJobs } from '@heyclaude/web-runtime/data';
+import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { Briefcase, Clock, Filter, MapPin, Plus, Search } from '@heyclaude/web-runtime/icons';
+import type { PagePropsWithSearchParams } from '@heyclaude/web-runtime/types/app.schema';
+import { POSITION_PATTERNS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import type { Metadata } from 'next';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
@@ -29,8 +25,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/src/components/primitives/ui/select';
-import { ROUTES } from '@/src/lib/data/config/constants';
-import type { PagePropsWithSearchParams } from '@/src/lib/schemas/app.schema';
 
 const NewsletterCTAVariant = dynamic(
   () =>

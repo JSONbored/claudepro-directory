@@ -6,7 +6,7 @@
 
 'use client';
 
-import { cn } from '@heyclaude/web-runtime';
+import { cn } from '@heyclaude/web-runtime/ui';
 import { motion } from 'motion/react';
 
 interface BorderBeamProps {
