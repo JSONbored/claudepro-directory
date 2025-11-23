@@ -1,0 +1,57 @@
+{
+  "name": "@heyclaude/web-runtime",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./client": {
+      "types": "./src/client.ts",
+      "default": "./src/client.ts"
+    },
+    "./errors": {
+      "types": "./src/errors.ts",
+      "default": "./src/errors.ts"
+    },
+    "./data": {
+      "types": "./src/data.ts",
+      "default": "./src/data.ts"
+    },
+    "./config/security": {
+      "types": "./src/config/security.ts",
+      "default": "./src/config/security.ts"
+    },
+    "./data/config/category": {
+      "types": "./src/data/config/category/index.ts",
+      "default": "./src/data/config/category/index.ts"
+    },
+    "./transformers/skill-to-md": {
+      "types": "./src/transformers/skill-to-md.ts",
+      "default": "./src/transformers/skill-to-md.ts"
+    }
+  },
+  "dependencies": {
+    "@flags-sdk/statsig": "^0.2.5",
+    "@heyclaude/data-layer": "workspace:*",
+    "@supabase/ssr": "^0.7.0",
+    "@supabase/supabase-js": "^2.84.0",
+    "clsx": "^2.1.1",
+    "devalue": "^5.5.0",
+    "flags": "^4.0.2",
+    "html2canvas-pro": "^1.5.13",
+    "lucide-react": "^0.460.0",
+    "next-safe-action": "^8.0.11",
+    "pino": "^10.1.0",
+    "sonner": "^2.0.7",
+    "tailwind-merge": "^3.4.0",
+    "zod": "^4.1.12"
+  },
+  "devDependencies": {
+    "@types/react": "19.2.5",
+    "next": "16.0.2",
+    "react": "19.2.0"
+  }
+}

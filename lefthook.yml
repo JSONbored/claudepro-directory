@@ -20,9 +20,9 @@ pre-commit:
   follow: true
   commands:
     # 1. Type checking (Next.js/Node code)
-    type-check:
-      glob: "**/*.{ts,tsx}"
-      exclude: "supabase/functions/**"
+      type-check:
+        glob: "**/*.{ts,tsx}"
+        exclude: "apps/edge/functions/**"
       run: |
         echo "🔍 Type checking Next.js code..."
         pnpm type-check
@@ -30,7 +30,7 @@ pre-commit:
 
     # 2. Type checking (Edge functions - Deno)
     type-check-edge:
-      glob: "supabase/functions/**/*.ts"
+      glob: "apps/edge/functions/**/*.ts"
       run: |
         echo "🦕 Type checking edge functions..."
         if command -v deno &> /dev/null; then
@@ -105,7 +105,7 @@ pre-push:
 
         # Check for circular dependencies
         echo "🔄 Checking for circular dependencies..."
-        CIRCULAR=$(npx madge --circular --extensions ts,tsx src/ 2>/dev/null || true)
+          CIRCULAR=$(npx madge --circular --extensions ts,tsx apps/web/src/ 2>/dev/null || true)
         if [ -n "$CIRCULAR" ]; then
           echo "$CIRCULAR" | head -10
           echo "   ... (run 'pnpm analyze:circular' for full report)"
@@ -117,7 +117,7 @@ pre-push:
 
         # Check for large files (>500 lines)
         echo "📏 Checking for large files (>500 LOC)..."
-        LARGE_FILES=$(find src supabase/functions -name '*.ts' -o -name '*.tsx' 2>/dev/null | while read file; do
+          LARGE_FILES=$(find apps/web/src apps/edge/functions -name '*.ts' -o -name '*.tsx' 2>/dev/null | while read file; do
           if [ -f "$file" ]; then
             lines=$(wc -l < "$file" 2>/dev/null || echo 0)
             if [ "$lines" -gt 500 ]; then

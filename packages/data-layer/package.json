@@ -1,0 +1,21 @@
+{
+  "name": "@heyclaude/data-layer",
+  "version": "0.0.0",
+  "private": true,
+  "exports": {
+    ".": "./src/index.ts",
+    "./services/trending": "./src/services/trending.ts"
+  },
+  "scripts": {
+    "lint": "biome check .",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@heyclaude/database-types": "workspace:*",
+    "@supabase/supabase-js": "^2.84.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.3.5",
+    "typescript": "5.9.3"
+  }
+}

@@ -10,22 +10,25 @@
   ],
   "ignoreExportsUsedInFile": true,
   "ignore": [
-    "src/components/ui/**",
-    "src/lib/analytics/**",
-    "src/lib/structured-data/**",
-    "src/lib/constants.ts",
-    "src/lib/icons.tsx",
-    "src/lib/ui-constants.ts",
-    "src/lib/data/jobs.ts",
-    "src/components/ui/sonner.tsx",
-    "public/scripts/offline.js",
-    "public/scripts/service-worker-init.js",
-    "public/service-worker.js",
-    "config/tools/progress-reporter.ts",
-    "config/tools/playwright.config.ts",
-    "next-env.d.ts"
+    "apps/web/src/components/ui/**",
+    "apps/web/src/lib/analytics/**",
+    "apps/web/src/lib/structured-data/**",
+    "apps/web/src/lib/constants.ts",
+    "apps/web/src/lib/icons.tsx",
+    "apps/web/src/lib/ui-constants.ts",
+    "apps/web/src/lib/data/jobs.ts",
+    "apps/web/src/components/ui/sonner.tsx",
+    "apps/web/public/scripts/offline.js",
+    "apps/web/public/scripts/service-worker-init.js",
+    "apps/web/public/service-worker.js",
+    "config/tools/disable-server-only.cjs",
+    "apps/web/next-env.d.ts"
   ],
   "ignoreBinaries": ["skott", "madge"],
-  "entry": ["src/app/**/*.{ts,tsx}", "src/middleware.ts", "scripts/**/*.ts"],
-  "project": ["**/*.{ts,tsx}", "!config/tools/playwright.config.ts"]
+  "entry": [
+    "apps/web/src/app/**/*.{ts,tsx}",
+    "apps/web/src/proxy.ts",
+    "packages/generators/src/**/*.ts"
+  ],
+  "project": ["**/*.{ts,tsx}", "!config/tools/disable-server-only.cjs"]
 }

@@ -1,0 +1,11 @@
+{
+  "name": "edge",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "lint": "cd functions && deno lint",
+    "lint:fix": "cd functions && deno lint --fix",
+    "type-check": "cd functions && deno check --config deno.json '**/*.ts' '**/*.tsx'",
+    "deploy": "pnpm exec heyclaude-deploy-edge"
+  }
+}

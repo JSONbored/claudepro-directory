@@ -6,10 +6,10 @@
   "tasks": {
     "generate:categories:exec": {
       "outputs": [
-        "src/lib/config/category-config.generated.ts"
+        "packages/web-runtime/src/data/config/category/category-config.generated.ts"
       ],
       "inputs": [
-        "scripts/build/generate-category-config.ts",
+        "packages/generators/src/**/*",
         ".build-cache/cache.json"
       ],
       "cache": true,
@@ -18,13 +18,13 @@
     "build:skills:exec": {
       "outputs": [
         "content/skills/*.zip",
-        "public/downloads/skills/*.zip"
+        "apps/web/public/downloads/skills/*.zip"
       ],
       "inputs": [
         "content/skills/*.json",
         "content/skills/*.zip",
-        "scripts/build/generate-skill-packages.ts",
-        "src/lib/transformers/skill-to-md.ts",
+        "packages/generators/src/**/*",
+        "packages/web-runtime/src/transformers/skill-to-md.ts",
         ".build-cache/cache.json"
       ],
       "cache": true,
@@ -33,11 +33,12 @@
     },
     "generate:service-worker:exec": {
       "dependsOn": ["generate:categories:exec"],
-      "outputs": ["public/service-worker.js"],
+      "outputs": ["apps/web/public/service-worker.js"],
       "inputs": [
-        "scripts/build/generate-service-worker.ts",
-        "src/lib/config/category-config.generated.ts",
-        "src/lib/constants/security.ts",
+        "packages/generators/src/**/*",
+        "packages/web-runtime/src/data/config/category/category-config.generated.ts",
+        "apps/web/src/lib/data/config/constants.ts",
+        "apps/web/src/lib/data/config/constants.server.ts",
         "package.json",
         ".build-cache/cache.json"
       ],
@@ -47,10 +48,44 @@
       "outputs": ["**/*.tsbuildinfo"],
       "cache": true
     },
+      "type-check:web": {
+        "outputs": [],
+        "inputs": [
+          "apps/web/**/*",
+          "packages/**/src/**/*",
+          "tsconfig.json"
+        ],
+        "cache": true,
+        "dependsOn": ["^generate:categories:exec"]
+      },
+      "type-check:packages": {
+        "outputs": [],
+        "inputs": [
+          "packages/**/src/**/*",
+          "packages/**/tsconfig.json"
+        ],
+        "cache": true
+      },
+      "type-check:edge": {
+        "outputs": [],
+        "inputs": [
+          "apps/edge/functions/**/*",
+          "apps/edge/functions/tsconfig.json",
+          "apps/edge/functions/deno.json"
+        ],
+        "cache": true
+      },
     "lint": {
       "outputs": [],
       "cache": true
     },
+      "lint:edge": {
+        "outputs": [],
+        "inputs": [
+          "apps/edge/functions/**/*"
+        ],
+        "cache": true
+      },
     "test:unit": {
       "outputs": ["coverage/**"],
       "cache": true

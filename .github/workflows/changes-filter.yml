@@ -26,15 +26,17 @@ jobs:
         id: filter
         uses: dorny/paths-filter@v3
         with:
-          filters: |
-            code:
-              - 'src/**/*.{ts,tsx,js,jsx}'
-              - 'scripts/**'
-              - 'config/**'
-              - 'supabase/functions/**/*.ts'
-              - 'supabase/**/*.sql'
-              - 'next.config.mjs'
-              - 'tailwind.config.ts'
-            deps:
-              - 'package.json'
-              - 'pnpm-lock.yaml'
+            filters: |
+                code:
+                  - 'apps/web/src/**/*.{ts,tsx,js,jsx}'
+                  - 'apps/web/next.config.mjs'
+                  - 'apps/web/postcss.config.js'
+                  - 'packages/**'
+                  - 'config/**'
+                  - 'apps/edge/functions/**/*.ts'
+                  - 'apps/edge/functions/**/*.tsx'
+                  - 'apps/edge/**/*.sql'
+                  - 'tailwind.config.ts'
+                deps:
+                  - 'package.json'
+                  - 'pnpm-lock.yaml'

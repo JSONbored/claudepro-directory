@@ -1,0 +1,118 @@
+'use server';
+
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
+import {
+  checkRateLimit,
+  type RateLimitConfig,
+  type RateLimitResult,
+  detectSuspiciousHeaders,
+  getClientInfo,
+  sanitizePathForLogging,
+  DEFAULT_SUSPICIOUS_HEADERS,
+} from '@heyclaude/shared-runtime';
+import { logger } from '../logger.ts';
+import { normalizeError } from '../errors.ts';
+
+export interface NextProxyRateLimitOptions {
+  config: RateLimitConfig;
+  shouldApply?: (pathname: string) => boolean;
+}
+
+export interface NextProxyGuardOptions {
+  rateLimit?: NextProxyRateLimitOptions;
+  suspiciousHeaders?: readonly string[];
+  sanitizePath?: (path: string) => string;
+}
+
+export interface NextProxyGuardResult {
+  blockedResponse?: NextResponse;
+  rateLimitResult?: RateLimitResult | null;
+}
+
+export function applyNextProxyGuards(
+  request: NextRequest,
+  options: NextProxyGuardOptions = {}
+): NextProxyGuardResult {
+  const pathname = request.nextUrl.pathname;
+  const sanitizePath = options.sanitizePath ?? sanitizePathForLogging;
+  const suspiciousHeaders = detectSuspiciousHeaders(
+    request,
+    options.suspiciousHeaders ?? DEFAULT_SUSPICIOUS_HEADERS
+  );
+
+  if (suspiciousHeaders.length > 0) {
+    const normalized = normalizeError(new Error('Suspicious header detected'));
+    const clientInfo = getClientInfo(request);
+    const sanitizedPath = sanitizePath(pathname);
+
+    for (const { header, value } of suspiciousHeaders) {
+      logger.error(
+        'CVE-2025-29927: Middleware bypass attempt detected',
+        normalized,
+        {
+          header,
+          value: value.substring(0, 100),
+          ip: clientInfo.ip,
+          userAgent: clientInfo.userAgent,
+          path: sanitizedPath,
+          type: 'security_bypass_attempt',
+          severity: 'critical',
+          cve: 'CVE-2025-29927',
+        }
+      );
+    }
+
+    const response = new NextResponse('Forbidden: Suspicious header detected', {
+      status: 403,
+      headers: {
+        'X-Security-Event': 'CVE-2025-29927-BLOCKED',
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Content-Type': 'text/plain',
+      },
+    });
+
+    return { blockedResponse: response };
+  }
+
+  let rateLimitResult: RateLimitResult | null = null;
+  const rateLimitOptions = options.rateLimit;
+
+  if (rateLimitOptions) {
+    const shouldApply =
+      !rateLimitOptions.shouldApply || rateLimitOptions.shouldApply(pathname);
+
+    if (shouldApply) {
+      rateLimitResult = checkRateLimit(request, rateLimitOptions.config);
+
+      if (!rateLimitResult.allowed) {
+        const sanitizedPath = sanitizePath(pathname);
+        const clientInfo = getClientInfo(request);
+        logger.warn('Proxy rate limit exceeded', {
+          path: sanitizedPath,
+          ip: clientInfo.ip,
+          limit: rateLimitOptions.config.maxRequests,
+          windowMs: rateLimitOptions.config.windowMs,
+        });
+
+        const retryAfter =
+          rateLimitResult.retryAfter ??
+          Math.ceil(rateLimitOptions.config.windowMs / 1000);
+
+        const response = new NextResponse('Too Many Requests', {
+          status: 429,
+          headers: {
+            'Retry-After': `${retryAfter}`,
+            'RateLimit-Limit': `${rateLimitOptions.config.maxRequests}`,
+            'RateLimit-Remaining': '0',
+            'RateLimit-Reset': `${Math.ceil(rateLimitResult.resetAt / 1000)}`,
+          },
+        });
+
+        return { blockedResponse: response };
+      }
+    }
+  }
+
+  return { rateLimitResult };
+}

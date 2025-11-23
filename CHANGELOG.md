@@ -570,7 +570,7 @@ Refactored the entire homepage and content loading architecture from hardcoded c
 
 ### Added
 
-- **Category Stats Configuration** (`src/lib/config/category-config.ts`)
+- **Category Stats Configuration** (`src/lib/data/config/category/index.ts`)
   - New `CategoryStatsConfig` interface for homepage stats display
   - `getCategoryStatsConfig()` function dynamically generates stats config from registry
   - Auto-derives icons, display text, and animation delays from `UNIFIED_CATEGORY_REGISTRY`
@@ -607,7 +607,7 @@ const results = await batchFetch(loaders);
 3. `src/components/shared/lazy-content-loaders.tsx` - Dynamic loader generation
 4. `src/lib/utils/content.utils.ts` - Generic transformation
 5. `src/lib/schemas/components/page-props.schema.ts` - Dynamic type schemas
-6. `src/lib/config/category-config.ts` - Stats config helper function
+6. `src/lib/data/config/category/index.ts` - Stats config helper function
 7. `CHANGELOG.md` - This entry
 
 **Key Architectural Benefits:**

@@ -1,15 +1,16 @@
 # Dependencies
 node_modules
-supabase/functions/node_modules
+apps/edge/functions/node_modules
 
 # Build outputs
 dist
 dist-ssr
 .next
+apps/web/.next
 out
 
 # Next.js TypeScript (auto-generated)
-next-env.d.ts
+apps/web/next-env.d.ts
 
 # Logs
 logs
@@ -41,13 +42,13 @@ lerna-debug.log*
 .cursor/
 
 # Source ZIPs in content/skills/ are git-tracked for GitHub discoverability
-public/downloads/skills/*.zip
+apps/web/public/downloads/skills/*.zip
 
 # Exception: Allow skill ZIPs in content/skills/ (overrides global ~/.gitignore_global *.zip rule)
 !content/skills/*.zip
 
 # Dynamic sitemap served by Supabase edge function (do not commit local copies)
-public/sitemap.xml
+apps/web/public/sitemap.xml
 
 # Cache files
 .eslintcache
@@ -73,12 +74,13 @@ stats.html
 Thumbs.db
 
 tsconfig.tsbuildinfo
+apps/web/.tsbuildinfo
 .env*.local
 
 manifest.json
 
 # Supabase schema dump (contains secrets in trigger definitions)
-supabase/schema.sql
+apps/edge/schema.sql
 
 .launchd/com.claudepro.backup.plist
 
@@ -91,8 +93,8 @@ supabase/schema.sql
 # Turborepo
 .turbo
 
-supabase/functions/deno.lock
+apps/edge/functions/deno.lock
 
-supabase/functions/_shared/utils/email/templates/template-map.json
+packages/edge-runtime/src/utils/email/templates/template-map.json
 
-src/lib/data/README.md
+apps/web/src/lib/data/README.md

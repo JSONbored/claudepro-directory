@@ -1,0 +1,27 @@
+{
+  "extends": "../../config/tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "rootDir": "src",
+    "outDir": "dist",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "types": ["node"],
+    "allowImportingTsExtensions": false,
+    "baseUrl": ".",
+    "paths": {
+      "@heyclaude/database-types": ["../database-types/src/index.ts"],
+      "@heyclaude/web-runtime": ["../web-runtime/src/index.ts"],
+      "@heyclaude/web-runtime/*": ["../web-runtime/src/*"]
+    }
+  },
+  "include": ["src/**/*"],
+  "exclude": ["dist", "node_modules"],
+  "references": [
+    { "path": "../database-types/tsconfig.json" },
+    { "path": "../web-runtime/tsconfig.json" }
+  ]
+}

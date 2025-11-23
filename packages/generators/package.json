@@ -1,0 +1,47 @@
+{
+  "name": "@heyclaude/generators",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "heyclaude-generate-categories": "./dist/bin/generate-categories.js",
+    "heyclaude-generate-service-worker": "./dist/bin/generate-service-worker.js",
+    "heyclaude-generate-skills": "./dist/bin/generate-skills.js",
+    "heyclaude-generate-mcpb": "./dist/bin/generate-mcpb.js",
+    "heyclaude-backup-db": "./dist/bin/backup-database.js",
+    "heyclaude-generate-readme": "./dist/bin/generate-readme.js",
+    "heyclaude-verify-mcpb": "./dist/bin/verify-mcpb.js",
+    "heyclaude-cache": "./dist/bin/cache.js",
+    "heyclaude-lint-auth-guards": "./dist/bin/lint-auth-guards.js",
+    "heyclaude-lint-data-layer": "./dist/bin/lint-data-layer.js",
+    "heyclaude-sync-db": "./dist/bin/sync-db.js",
+    "heyclaude-lint-unused": "./dist/bin/lint-unused.js",
+    "heyclaude-webhooks-list": "./dist/bin/list-backlog.js",
+    "heyclaude-webhooks-replay": "./dist/bin/replay-webhook.js",
+    "heyclaude-changelog": "./dist/bin/changelog.js",
+    "heyclaude-deploy-edge": "./dist/bin/deploy-functions.js",
+    "heyclaude-sync-email": "./dist/bin/sync-email-templates.js"
+  },
+  "exports": {
+    "./toolkit/logger": "./src/toolkit/logger.ts",
+    "./toolkit/env": "./src/toolkit/env.ts",
+    "./toolkit/cache": "./src/toolkit/cache.ts",
+    "./toolkit/supabase": "./src/toolkit/supabase.ts",
+    "./toolkit/edge": "./src/toolkit/edge.ts",
+    "./commands/*": "./src/commands/*.ts"
+  },
+  "scripts": {
+    "build": "tsc -b",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.937.0",
+    "@heyclaude/database-types": "workspace:*",
+    "@heyclaude/web-runtime": "workspace:*",
+    "@supabase/supabase-js": "^2.84.0",
+    "archiver": "^7.0.1",
+    "ora": "^9.0.0",
+    "resend": "^4.0.1",
+    "zod": "^4.1.12"
+  }
+}

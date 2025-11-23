@@ -1,0 +1,37 @@
+/**
+ * Create Company Page - Standalone company creation flow
+ */
+
+import { generatePageMetadata, getAuthenticatedUser, logger } from '@heyclaude/web-runtime';
+import type { Metadata } from 'next';
+import { redirect } from 'next/navigation';
+import { CompanyForm } from '@/src/components/core/forms/company-form';
+
+export async function generateMetadata(): Promise<Metadata> {
+  return generatePageMetadata('/account/companies/new');
+}
+
+export default async function NewCompanyPage() {
+  const { user } = await getAuthenticatedUser({ context: 'NewCompanyPage' });
+
+  if (!user) {
+    logger.warn('NewCompanyPage: unauthenticated access attempt', undefined, {
+      route: '/account/companies/new',
+      timestamp: new Date().toISOString(),
+    });
+    redirect('/login');
+  }
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h1 className="mb-2 font-bold text-3xl">Create Company</h1>
+        <p className="text-muted-foreground">
+          Add a new company profile to post jobs and showcase your organization
+        </p>
+      </div>
+
+      <CompanyForm mode="create" />
+    </div>
+  );
+}

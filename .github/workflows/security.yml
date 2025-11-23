@@ -4,18 +4,24 @@ on:
   push:
     branches: [ main ]
     paths:
-      - 'src/**/*.{ts,tsx,js,jsx}'
-      - 'supabase/functions/**/*.ts'
-      - 'supabase/**/*.sql'
+      - 'apps/web/src/**/*.{ts,tsx,js,jsx}'
+      - 'apps/web/next.config.mjs'
+      - 'apps/web/postcss.config.js'
+      - 'apps/edge/functions/**/*.ts'
+      - 'apps/edge/functions/**/*.tsx'
+      - 'apps/edge/**/*.sql'
       - 'package.json'
       - 'pnpm-lock.yaml'
       - '.github/workflows/security.yml'
   pull_request:
     branches: [ main ]
     paths:
-      - 'src/**/*.{ts,tsx,js,jsx}'
-      - 'supabase/functions/**/*.ts'
-      - 'supabase/**/*.sql'
+      - 'apps/web/src/**/*.{ts,tsx,js,jsx}'
+      - 'apps/web/next.config.mjs'
+      - 'apps/web/postcss.config.js'
+      - 'apps/edge/functions/**/*.ts'
+      - 'apps/edge/functions/**/*.tsx'
+      - 'apps/edge/**/*.sql'
       - 'package.json'
       - 'pnpm-lock.yaml'
       - '.github/workflows/security.yml'
@@ -132,7 +138,63 @@ jobs:
         warn-only: true
 
   type-check:
-    name: Type Check
+    name: Type Check (${{ matrix.label }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: [changes]
+    if: github.event_name == 'push' && (needs.changes.outputs.code == 'true' || needs.changes.outputs.deps == 'true')
+    strategy:
+      matrix:
+        include:
+          - target: web
+            label: Web
+            turboTask: type-check:web
+          - target: packages
+            label: Packages
+            turboTask: type-check:packages
+
+    steps:
+    - uses: actions/checkout@v5
+      with:
+        ref: ${{ github.event.client_payload.deployment.gitSource.ref || github.ref }}
+
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v4
+      with:
+        version: 10.22.0
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v6
+      with:
+        node-version: '22'
+        cache: 'pnpm'
+
+    - name: Install dependencies
+      run: pnpm install --frozen-lockfile
+
+    - name: Restore turbo cache
+      uses: actions/cache@v4
+      with:
+        path: .turbo
+        key: ${{ runner.os }}-turbo-${{ matrix.target }}-${{ hashFiles('pnpm-lock.yaml') }}
+        restore-keys: |
+          ${{ runner.os }}-turbo-${{ matrix.target }}-
+
+    - name: Type check (${{ matrix.label }})
+      id: type-check
+      run: pnpm turbo run ${{ matrix.turboTask }} --cache-dir=.turbo
+      continue-on-error: true
+
+    - name: Notify Vercel
+      if: github.event_name == 'push'
+      uses: vercel/repository-dispatch/actions/status@v1
+      with:
+        name: 'Vercel - heyclaude: type-check-${{ matrix.target }}'
+        status: ${{ steps.type-check.outcome == 'success' && 'success' || 'failure' }}
+        description: ${{ steps.type-check.outcome == 'success' && format('{0} type check passed', matrix.label) || format('{0} type check failed', matrix.label) }}
+
+  type-check-edge:
+    name: Type Check (Edge Functions)
     runs-on: ubuntu-latest
     timeout-minutes: 10
     needs: [changes]
@@ -157,25 +219,44 @@ jobs:
     - name: Install dependencies
       run: pnpm install --frozen-lockfile
 
-    - name: Type check
-      id: type-check
-      run: pnpm type-check
+    - name: Restore turbo cache
+      uses: actions/cache@v4
+      with:
+        path: .turbo
+        key: ${{ runner.os }}-turbo-edge-${{ hashFiles('pnpm-lock.yaml') }}
+        restore-keys: |
+          ${{ runner.os }}-turbo-edge-
+
+    - name: Type check edge functions
+      id: type-check-edge
+      run: pnpm turbo run type-check:edge --cache-dir=.turbo
       continue-on-error: true
 
     - name: Notify Vercel
       if: github.event_name == 'push'
       uses: vercel/repository-dispatch/actions/status@v1
       with:
-        name: 'Vercel - heyclaude: type-check'
-        status: ${{ steps.type-check.outcome == 'success' && 'success' || 'failure' }}
-        description: ${{ steps.type-check.outcome == 'success' && 'Type check passed' || 'Type check failed' }}
+        name: 'Vercel - heyclaude: type-check-edge'
+        status: ${{ steps.type-check-edge.outcome == 'success' && 'success' || 'failure' }}
+        description: ${{ steps.type-check-edge.outcome == 'success' && 'Edge type check passed' || 'Edge type check failed' }}
 
   lint:
-    name: Lint
+    name: Lint (${{ matrix.label }})
     runs-on: ubuntu-latest
     timeout-minutes: 10
     needs: [changes]
     if: github.event_name == 'push' && (needs.changes.outputs.code == 'true' || needs.changes.outputs.deps == 'true')
+    strategy:
+      matrix:
+        include:
+          - target: web
+            label: Web
+            turboTask: lint
+            stepId: lint_web
+          - target: edge
+            label: Edge
+            turboTask: lint:edge
+            stepId: lint_edge
 
     steps:
     - uses: actions/checkout@v5
@@ -196,18 +277,30 @@ jobs:
     - name: Install dependencies
       run: pnpm install --frozen-lockfile
 
-    - name: Lint
-      id: lint
-      run: pnpm lint
+    - name: Restore turbo cache
+      uses: actions/cache@v4
+      with:
+        path: .turbo
+        key: ${{ runner.os }}-turbo-lint-${{ matrix.target }}-${{ hashFiles('pnpm-lock.yaml') }}
+        restore-keys: |
+          ${{ runner.os }}-turbo-lint-${{ matrix.target }}-
+
+    - name: Lint (${{ matrix.label }})
+      id: ${{ matrix.stepId }}
+      env:
+        NEXT_PUBLIC_SUPABASE_URL: https://hgtjdifxfapoltfflowc.supabase.co
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: stub-anon-key
+        NODE_OPTIONS: --require ./config/tools/disable-server-only.cjs
+      run: pnpm turbo run ${{ matrix.turboTask }} --cache-dir=.turbo
       continue-on-error: true
 
     - name: Notify Vercel
       if: github.event_name == 'push'
       uses: vercel/repository-dispatch/actions/status@v1
       with:
-        name: 'Vercel - heyclaude: lint'
-        status: ${{ steps.lint.outcome == 'success' && 'success' || 'failure' }}
-        description: ${{ steps.lint.outcome == 'success' && 'Lint passed' || 'Lint failed' }}
+        name: 'Vercel - heyclaude: lint-${{ matrix.target }}'
+        status: ${{ steps[matrix.stepId].outcome == 'success' && 'success' || 'failure' }}
+        description: ${{ steps[matrix.stepId].outcome == 'success' && format('{0} lint passed', matrix.label) || format('{0} lint failed', matrix.label) }}
 
   build:
     name: Build

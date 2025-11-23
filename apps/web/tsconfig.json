@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "../../config/tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "tsBuildInfoFile": "./.tsbuildinfo",
+    "noEmit": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./*"],
+      "@/src/*": ["./src/*"],
+      "@heyclaude/database-types": ["../../packages/database-types/src/index.ts"],
+      "@heyclaude/shared-runtime": ["../../packages/shared-runtime/src/index.ts"],
+      "@heyclaude/shared-runtime/*": ["../../packages/shared-runtime/src/*"],
+      "@heyclaude/web-runtime": ["../../packages/web-runtime/src/index.ts"],
+      "@heyclaude/web-runtime/*": ["../../packages/web-runtime/src/*"]
+    }
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
+  "exclude": ["node_modules"],
+  "references": [
+    { "path": "../../packages/database-types/tsconfig.json" },
+    { "path": "../../packages/shared-runtime/tsconfig.json" },
+    { "path": "../../packages/web-runtime/tsconfig.json" }
+  ]
+}

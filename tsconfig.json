@@ -1,39 +1,27 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "./config/tsconfig.base.json",
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./*"],
-      "@/src/*": ["./src/*"]
+      "@/*": ["./apps/web/*"],
+      "@/src/*": ["./apps/web/src/*"],
+      "@heyclaude/database-types": ["./packages/database-types/dist/index"],
+      "@heyclaude/database-types/*": ["./packages/database-types/dist/*"],
+      "@heyclaude/shared-runtime": ["./packages/shared-runtime/src/index.ts"],
+      "@heyclaude/shared-runtime/*": ["./packages/shared-runtime/src/*"],
+      "@heyclaude/edge-runtime": ["./packages/edge-runtime/src/index.ts"],
+      "@heyclaude/edge-runtime/*": ["./packages/edge-runtime/src/*"],
+      "@heyclaude/web-runtime": ["./packages/web-runtime/src/index.ts"],
+      "@heyclaude/web-runtime/*": ["./packages/web-runtime/src/*"],
+      "@heyclaude/data-layer": ["./packages/data-layer/src/index.ts"],
+      "@heyclaude/data-layer/*": ["./packages/data-layer/src/*"],
+      "@heyclaude/generators": ["./packages/generators/src/index.ts"],
+      "@heyclaude/generators/*": ["./packages/generators/src/*"]
     },
-    "target": "ES2022",
-    "lib": ["dom", "dom.iterable", "esnext"],
-    "allowJs": true,
-    "skipLibCheck": true,
-    "strict": true,
-    "strictBindCallApply": true,
     "noEmit": true,
-    "esModuleInterop": true,
-    "noImplicitAny": true,
-    "noImplicitReturns": true,
-    "noImplicitThis": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "exactOptionalPropertyTypes": true,
-    "noUncheckedIndexedAccess": true,
-    "noFallthroughCasesInSwitch": true,
-    "noPropertyAccessFromIndexSignature": true,
-    "noImplicitOverride": true,
-    "allowUnusedLabels": false,
-    "allowUnreachableCode": false,
-    "module": "esnext",
-    "moduleResolution": "bundler",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "verbatimModuleSyntax": true,
-    "jsx": "preserve",
     "incremental": true,
-    "tsBuildInfoFile": ".next/cache/.tsbuildinfo",
+    "tsBuildInfoFile": "apps/web/.next/cache/.tsbuildinfo",
     "plugins": [
       {
         "name": "next"
@@ -41,11 +29,15 @@
     ]
   },
   "include": [
-    "src/**/*.ts",
-    "src/**/*.tsx",
-    "src/types/**/*.d.ts",
-    ".next/types/**/*.ts",
-    "scripts/**/*.ts"
+    "apps/web/src/**/*.ts",
+    "apps/web/src/**/*.tsx",
+    "apps/web/src/types/**/*.d.ts",
+    "apps/web/.next/types/**/*.ts",
+    "scripts/**/*.ts",
+    "packages/web-runtime/src/**/*.ts",
+    "packages/shared-runtime/src/**/*.ts",
+    "packages/data-layer/src/**/*.ts",
+    "packages/database-types/**/*.ts"
   ],
   "exclude": [
     "node_modules",
@@ -55,6 +47,7 @@
     "**/*.test.tsx",
     "**/*.spec.ts",
     "**/*.spec.tsx",
-    "supabase/functions"
+    "apps/edge/functions",
+    "packages/edge-runtime"
   ]
 }

@@ -3,23 +3,22 @@
   "files": {
     "includes": [
       "*.{ts,tsx,js,jsx,mjs,cjs}",
-      "src/**/*",
-      "scripts/**/*.ts",
-      "scripts/**/*.mjs",
-      "scripts/utils/**/*.js",
+      "apps/web/src/**/*",
+      "packages/generators/src/**/*.ts",
+      "packages/generators/src/**/*.mjs",
       "content/**/*",
       "config/**/*",
-      "supabase/functions/**/*.ts",
+      "apps/edge/functions/**/*.ts",
       "!**/.next",
       "!**/out",
       "!**/dist",
       "!**/generated",
-      "!**/src/generated",
-      "!**/src/lib/schemas/generated",
-      "!**/src/lib/schemas/generated/db-schemas.d.ts",
-      "!**/src/types/database.types.ts",
-      "!**/scripts/build/templates",
-      "!**/scripts/build/templates/service-worker.template.js",
+      "!**/apps/web/src/generated",
+      "!**/apps/web/src/lib/schemas/generated",
+      "!**/apps/web/src/lib/schemas/generated/db-schemas.d.ts",
+      "!**/packages/database-types/src/index.ts",
+      "!**/packages/generators/src/templates",
+      "!**/packages/generators/src/templates/service-worker.template.js",
       "!**/node_modules",
       "!**/playwright-report"
     ],
@@ -320,7 +319,7 @@
       }
     },
     {
-      "includes": ["scripts/**/*.ts", "scripts/**/*.js"],
+      "includes": ["packages/generators/src/**/*.ts", "packages/generators/src/**/*.js"],
       "linter": {
         "rules": {
           "suspicious": {
@@ -359,7 +358,6 @@
     {
       "includes": [
         "src/lib/content/supabase-content-loader.ts",
-        "scripts/sync/sync-content-supabase-client.ts",
         "src/lib/config/category-types.ts"
       ],
       "linter": {
@@ -387,7 +385,7 @@
       }
     },
     {
-      "includes": ["src/lib/supabase/validators.ts"],
+      "includes": ["apps/web/src/lib/supabase/validators.ts"],
       "linter": {
         "rules": {
           "suspicious": {
@@ -397,7 +395,7 @@
       }
     },
     {
-      "includes": ["scripts/build/templates/**/*.js"],
+      "includes": ["packages/generators/src/templates/**/*.js"],
       "linter": {
         "enabled": false
       },
@@ -406,7 +404,7 @@
       }
     },
     {
-      "includes": ["supabase/functions/**/*.ts", "supabase/functions/**/*.tsx"],
+      "includes": ["apps/edge/functions/**/*.ts", "apps/edge/functions/**/*.tsx"],
       "linter": {
         "rules": {
           "suspicious": {
@@ -422,7 +420,7 @@
       }
     },
     {
-      "includes": ["supabase/functions/deno-imports.d.ts"],
+      "includes": ["apps/edge/functions/deno-imports.d.ts"],
       "linter": {
         "rules": {
           "suspicious": {

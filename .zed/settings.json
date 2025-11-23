@@ -1,0 +1,8 @@
+{
+  "typescript": {
+    "tsconfig": "tsconfig.json"
+  },
+  "deno": {
+    "config": "apps/edge/functions/deno.json"
+  }
+}
