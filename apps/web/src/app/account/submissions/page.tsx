@@ -134,6 +134,9 @@ const ALLOWED_TYPES = [
   'skills',
 ] as const;
 
+// Typed copy of ALLOWED_TYPES for use as submission_type array
+const ALLOWED_TYPES_ARRAY: Database['public']['Enums']['submission_type'][] = [...ALLOWED_TYPES];
+
 // Strict content slug validation - only alphanumeric, hyphens, underscores
 function isValidSlug(slug: string): boolean {
   if (typeof slug !== 'string') return false;
@@ -285,9 +288,17 @@ export default async function SubmissionsPage() {
 
   /**
    * Format date consistently using en-US locale
+   * Returns safe fallback for invalid or missing dates
    */
   function formatSubmissionDate(dateString: string): string {
-    return new Date(dateString).toLocaleDateString('en-US', {
+    if (!dateString || typeof dateString !== 'string') {
+      return '-';
+    }
+    const date = new Date(dateString);
+    if (Number.isNaN(date.getTime())) {
+      return '-';
+    }
+    return date.toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
@@ -323,6 +334,16 @@ export default async function SubmissionsPage() {
     const safeUrl = getSafeContentUrl(type, slug);
     return safeUrl && status === 'merged' ? { href: safeUrl } : null;
   }
+
+  // Log any submissions with missing IDs for data integrity monitoring
+  submissions.forEach((sub, idx) => {
+    if (!sub.id) {
+      logger.warn('SubmissionsPage: submission missing ID', undefined, {
+        index: idx,
+        userId: user.id,
+      });
+    }
+  });
 
   return (
     <div className="space-y-6">
@@ -373,9 +394,7 @@ export default async function SubmissionsPage() {
               isValidSubmissionStatus={isValidSubmissionStatus}
               isValidSubmissionType={isValidSubmissionType}
               VALID_SUBMISSION_STATUSES={VALID_SUBMISSION_STATUSES}
-              VALID_SUBMISSION_TYPES={
-                [...ALLOWED_TYPES] as Database['public']['Enums']['submission_type'][]
-              }
+              VALID_SUBMISSION_TYPES={ALLOWED_TYPES_ARRAY}
             />
           ))}
         </div>

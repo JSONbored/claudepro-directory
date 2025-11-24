@@ -222,12 +222,22 @@ async function processEmbeddingGeneration(
   const { content_id } = message.message;
 
   try {
-    // Fetch content from database
-    const { data: content, error: fetchError } = await supabaseServiceRole
-      .from('content')
-      .select('*')
-      .eq('id', content_id)
-      .single();
+    // Fetch content from database (with circuit breaker + timeout)
+    type ContentRow = DatabaseGenerated['public']['Tables']['content']['Row'];
+    const fetchResult = await withTimeout(
+      withCircuitBreaker(
+        'generate-embedding:fetch-content',
+        async () =>
+          await supabaseServiceRole.from('content').select('*').eq('id', content_id).single(),
+        CIRCUIT_BREAKER_CONFIGS.rpc
+      ),
+      TIMEOUT_PRESETS.rpc,
+      'Content fetch timed out'
+    );
+    const { data: content, error: fetchError } = fetchResult as {
+      data: ContentRow | null;
+      error: { message?: string } | null;
+    };
 
     if (fetchError || !content) {
       errors.push(`Failed to fetch content: ${fetchError?.message || 'Content not found'}`);
@@ -236,9 +246,7 @@ async function processEmbeddingGeneration(
 
     // Content is guaranteed to be non-null after the check above
     // Type is already correctly inferred from the Supabase query
-    type ContentRow = DatabaseGenerated['public']['Tables']['content']['Row'];
-    // No type assertion needed - Supabase query already returns correct type
-    const contentRow = content satisfies ContentRow;
+    const contentRow = content;
 
     // Build searchable text - use contentRow directly (already typed as ContentRow)
     const searchableText = buildSearchableText(contentRow);
@@ -588,6 +596,20 @@ export async function handleEmbeddingWebhook(req: Request): Promise<Response> {
     }
 
     const payload = parseResult.data;
+
+    // Validate webhook source (defense-in-depth: ensure webhook is from expected table)
+    if (payload.schema !== 'public' || payload.table !== 'content') {
+      logWarn('Unexpected webhook source', {
+        ...logContext,
+        schema: payload.schema,
+        table: payload.table,
+      });
+      return badRequestResponse(
+        'Unexpected webhook source',
+        webhookCorsHeaders,
+        buildSecurityHeaders()
+      );
+    }
 
     // Validate payload structure
     if (!payload.record?.id) {

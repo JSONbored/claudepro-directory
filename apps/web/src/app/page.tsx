@@ -6,6 +6,7 @@ import { Suspense } from 'react';
 import { LazySection } from '@/src/components/core/infra/scroll-animated-section';
 import { TopContributors } from '@/src/components/features/community/top-contributors';
 import { HomePageClient } from '@/src/components/features/home/home-sections';
+import { RecentlyViewedRail } from '@/src/components/features/home/recently-viewed-rail';
 import { AnimatedGradientText } from '@/src/components/primitives/animation/gradient-text';
 import { ParticlesBackground } from '@/src/components/primitives/animation/particles-background';
 import { HomePageLoading } from '@/src/components/primitives/feedback/loading-factory';
@@ -32,17 +33,6 @@ const NewsletterCTAVariant = dynamicImport(
     })),
   {
     loading: () => <div className="h-32 animate-pulse rounded-lg bg-muted/20" />,
-  }
-);
-
-const RecentlyViewedRail = dynamicImport(
-  () =>
-    import('@/src/components/features/home/recently-viewed-rail').then((mod) => ({
-      default: mod.RecentlyViewedRail,
-    })),
-  {
-    ssr: false,
-    loading: () => null,
   }
 );
 

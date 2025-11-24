@@ -198,7 +198,8 @@ async function fetchMetadataFromRoute(
       isValidContentCategory(routeType)
     ) {
       // Type guard narrows type to ENUM - database will validate
-      const slug = route.split('/').pop() || '';
+      // Use filter(Boolean) to handle trailing slashes (e.g., /agents/foo/ -> 'foo')
+      const slug = route.split('/').filter(Boolean).pop() || '';
       if (slug) {
         try {
           // Try to get content directly from database
@@ -208,9 +209,14 @@ async function fetchMetadataFromRoute(
             p_slug: slug,
             p_base_url: SITE_URL,
           } satisfies DatabaseGenerated['public']['Functions']['get_api_content_full']['Args'];
-          const { data: contentData, error: dbError } = await supabaseAnon.rpc(
-            'get_api_content_full',
-            rpcArgs
+          const { data: contentData, error: dbError } = await withTimeout(
+            withCircuitBreaker(
+              'og-image:fetch-content',
+              async () => await supabaseAnon.rpc('get_api_content_full', rpcArgs),
+              CIRCUIT_BREAKER_CONFIGS.rpc
+            ),
+            TIMEOUT_PRESETS.rpc,
+            'Database RPC timed out'
           );
 
           // get_api_content_full returns a JSON string, not an object
@@ -286,7 +292,9 @@ function extractTypeFromRoute(route: string): string {
     return 'website';
   }
   const match = route.match(/^\/([^/]+)/);
-  return match?.[1] ?? 'agents';
+  const extractedType = match?.[1] ?? 'website';
+  // Validate against known content categories, default to 'website' if invalid
+  return isValidContentCategory(extractedType) ? extractedType : 'website';
 }
 
 /**
@@ -517,6 +525,11 @@ export async function handleOGImageRequest(req: Request, startTime: number): Pro
   }
   // Direct params (fallback)
   else if (titleParam || descriptionParam || typeParam || tagsParam) {
+    // Validate query string for consistency with route-based branch
+    const queryValidation = validateQueryString(url);
+    if (!queryValidation.valid) {
+      return badRequestResponse(queryValidation.error || 'Invalid query string', CORS);
+    }
     params = {
       title: titleParam || OG_DEFAULTS.title,
       description: descriptionParam || OG_DEFAULTS.description,
@@ -574,7 +587,7 @@ export async function handleOGImageRequest(req: Request, startTime: number): Pro
       headers,
     });
   } catch (error) {
-    logError('Failed to generate OG image', logContext, error);
+    logError('Failed to generate OG image', withDuration(logContext, startTime), error);
     return errorResponse(error, 'og-image:generate', CORS);
   }
 }

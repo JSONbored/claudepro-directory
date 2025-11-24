@@ -14,10 +14,11 @@ import { Bookmark, Calendar } from '@heyclaude/web-runtime/icons';
 import type { HomepageContentItem } from '@heyclaude/web-runtime/types/component.types';
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import type { Metadata } from 'next';
-import dynamicImport from 'next/dynamic';
 import Link from 'next/link';
+import { Suspense } from 'react';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { NavLink } from '@/src/components/core/navigation/navigation-link';
+import { RecentlySavedGrid } from '@/src/components/features/account/recently-saved-grid';
 import { Button } from '@/src/components/primitives/ui/button';
 import {
   Card,
@@ -26,17 +27,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/ui/card';
-
-const RecentlySavedGrid = dynamicImport(
-  () =>
-    import('@/src/components/features/account/recently-saved-grid').then(
-      (mod) => mod.RecentlySavedGrid
-    ),
-  {
-    ssr: false,
-    loading: () => <RecentlySavedSkeleton />,
-  }
-);
 
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/account');
@@ -311,7 +301,9 @@ export default async function AccountDashboard() {
           </CardHeader>
           <CardContent>
             {recentlySavedContent.length > 0 ? (
-              <RecentlySavedGrid items={recentlySavedContent} />
+              <Suspense fallback={<RecentlySavedSkeleton />}>
+                <RecentlySavedGrid items={recentlySavedContent} />
+              </Suspense>
             ) : (
               <EmptyRecentlySavedState />
             )}
