@@ -10,25 +10,47 @@
   ],
   "ignoreExportsUsedInFile": true,
   "ignore": [
-    "apps/web/src/components/ui/**",
-    "apps/web/src/lib/analytics/**",
-    "apps/web/src/lib/structured-data/**",
-    "apps/web/src/lib/constants.ts",
-    "apps/web/src/lib/icons.tsx",
-    "apps/web/src/lib/ui-constants.ts",
-    "apps/web/src/lib/data/jobs.ts",
-    "apps/web/src/components/ui/sonner.tsx",
+    "apps/web/next-env.d.ts",
     "apps/web/public/scripts/offline.js",
     "apps/web/public/scripts/service-worker-init.js",
     "apps/web/public/service-worker.js",
+    "apps/web/src/components/ui/**",
+    "apps/web/src/components/ui/sonner.tsx",
+    "apps/web/src/lib/analytics/**",
+    "apps/web/src/lib/constants.ts",
+    "apps/web/src/lib/data/jobs.ts",
+    "apps/web/src/lib/icons.tsx",
+    "apps/web/src/lib/structured-data/**",
+    "apps/web/src/lib/ui-constants.ts",
     "config/tools/disable-server-only.cjs",
-    "apps/web/next-env.d.ts"
+    "content/skills/**/*.zip",
+    "reports/knip/**/*.json",
+    "**/.next/**",
+    "**/build/**",
+    "**/dist/**",
+    "**/node_modules/**",
+    "**/*.generated.ts",
+    "**/*.generated.tsx"
   ],
+  "ignoreNotes": {
+    "content/skills/**/*.zip": "Binary skill archives managed outside the codebase; Knip cannot analyze compressed assets.",
+    "reports/knip/**/*.json": "Machine-generated Knip outputs stored for auditing and should not influence unused-code detection.",
+    "**/.next/**": "Next.js build artifacts that re-export compiled output and routinely confuse unused-file scans.",
+    "**/build/**": "Generic build folders emitted by tooling packages; contents are derived from /src and safe to skip.",
+    "**/dist/**": "Package distribution directories compiled from source—scanning them duplicates findings and adds noise.",
+    "**/node_modules/**": "External dependencies vendored locally for certain workspaces; excluding prevents redundant scanning.",
+    "**/*.generated.ts": "Codegen outputs (db/services/types) may not have direct imports but are intentionally retained.",
+    "**/*.generated.tsx": "Same as above for React-facing codegen artifacts."
+  },
   "ignoreBinaries": ["skott", "madge"],
   "entry": [
-    "apps/web/src/app/**/*.{ts,tsx}",
+    "apps/edge/functions/**/*.{ts,tsx}",
+    "apps/*/src/**/*.{ts,tsx}",
+    "apps/web/src/**/*.{ts,tsx}",
     "apps/web/src/proxy.ts",
-    "packages/generators/src/**/*.ts"
+    "config/**/*.ts",
+    "packages/*/scripts/**/*.{ts,tsx}",
+    "packages/*/src/**/*.{ts,tsx}"
   ],
-  "project": ["**/*.{ts,tsx}", "!config/tools/disable-server-only.cjs"]
+  "project": ["**/*.{ts,tsx,cts,mts,js,jsx,cjs,mjs}", "!config/tools/disable-server-only.cjs"]
 }

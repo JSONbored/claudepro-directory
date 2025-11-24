@@ -112,7 +112,8 @@
   "pnpm": {
     "overrides": {
       "tmp": "^0.2.3",
-      "glob": ">=11.0.0",
+      "glob": ">=11.1.0",
+      "js-yaml": ">=4.1.1",
       "rimraf": ">=6.0.0",
       "inflight": ">=2.0.0",
       "@types/react": "19.2.5",
