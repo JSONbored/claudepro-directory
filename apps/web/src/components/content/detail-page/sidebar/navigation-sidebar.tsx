@@ -16,10 +16,10 @@ import {
   logUnhandledPromise,
   sanitizeSlug,
 } from '@heyclaude/web-runtime/core';
-import { useCopyToClipboard, usePulse } from '@heyclaude/web-runtime/hooks';
+import { usePulse } from '@heyclaude/web-runtime/hooks';
 import { Copy, ExternalLink, Github, Thermometer } from '@heyclaude/web-runtime/icons';
 import type { ContentItem } from '@heyclaude/web-runtime/types/component.types';
-import { BADGE_COLORS, getDisplayTitle, toasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { BADGE_COLORS, getDisplayTitle, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { memo } from 'react';
@@ -27,6 +27,7 @@ import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge
 import { JobsPromo } from '@/src/components/core/domain/jobs/jobs-banner';
 import { Button } from '@/src/components/primitives/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
+import { useDetailQuickActions } from '../use-detail-quick-actions';
 
 /**
  * Validate slug is safe for use in URLs
@@ -142,20 +143,9 @@ export const DetailSidebar = memo(function DetailSidebar({
 }: DetailSidebarProps) {
   const router = useRouter();
   const pulse = usePulse();
-  const { copy: copyToClipboard } = useCopyToClipboard({
-    context: {
-      component: 'detail-sidebar',
-      action: 'quick_action',
-    },
-  });
 
   // Cast item to ContentItem for property access (content is Json type from RPC)
   const contentItem = item as ContentItem;
-
-  // Use custom renderer if provided
-  if (customRenderer) {
-    return <div className="space-y-6">{customRenderer(item, relatedItems, router)}</div>;
-  }
 
   // Default sidebar using SidebarCard with inline configuration
   const githubUrl = config.metadata?.githubPathPrefix
@@ -183,101 +173,16 @@ export const DetailSidebar = memo(function DetailSidebar({
     metadata['configuration'] && typeof metadata['configuration'] === 'object'
       ? metadata['configuration']
       : null;
-  const pulseCategory = isValidCategory(contentItem.category)
-    ? (contentItem.category as Database['public']['Enums']['content_category'])
-    : null;
-  const contentSlug = typeof contentItem.slug === 'string' ? contentItem.slug : null;
+  const quickActions = useDetailQuickActions({
+    item: contentItem,
+    metadata,
+    packageName: packageName ?? null,
+    configurationObject: configurationObject as Record<string, unknown> | null,
+    mcpServers: mcpServers as Record<string, unknown> | null,
+  });
 
-  type QuickAction = {
-    key: string;
-    label: string;
-    description?: string;
-    onClick: () => void | Promise<void>;
-  };
-
-  const trackCopyPulse = (metadata?: Record<string, unknown>) => {
-    if (!(pulseCategory && contentSlug)) return;
-    pulse
-      .copy({
-        category: pulseCategory,
-        slug: contentSlug,
-        ...(metadata ? { metadata } : {}),
-      })
-      .catch((error) => {
-        logUnhandledPromise('NavigationSidebar: quick action pulse failed', error, {
-          category: contentItem.category ?? 'null',
-          slug: contentSlug ?? 'null',
-        });
-      });
-  };
-
-  const quickActions: QuickAction[] = [];
-
-  if (hasPackage && packageName) {
-    const pnpmCommand = `pnpm add ${packageName}`;
-    quickActions.push({
-      key: 'pnpm-install',
-      label: `Copy “${pnpmCommand}”`,
-      description: 'Paste into your terminal to install this package',
-      onClick: async () => {
-        try {
-          await copyToClipboard(pnpmCommand);
-          toasts.raw.success('Install command copied', {
-            description: pnpmCommand,
-          });
-          trackCopyPulse({ action: 'copy_install', manager: 'pnpm' });
-        } catch (error) {
-          logger.error('NavigationSidebar: failed to copy pnpm command', error as Error);
-          toasts.raw.error('Copy failed', {
-            description: 'Unable to copy pnpm command.',
-          });
-        }
-      },
-    });
-  }
-
-  if (mcpServers) {
-    quickActions.push({
-      key: 'copy-mcp-config',
-      label: 'Copy Claude Desktop config',
-      description: 'Adds this MCP server to Claude Desktop settings',
-      onClick: async () => {
-        try {
-          await copyToClipboard(JSON.stringify({ mcpServers }, null, 2));
-          toasts.raw.success('Claude config copied', {
-            description: 'Paste into Claude Desktop → Settings → MCP Servers.',
-          });
-          trackCopyPulse({ action: 'copy_mcp_config' });
-        } catch (error) {
-          logger.error('NavigationSidebar: failed to copy MCP config', error as Error);
-          toasts.raw.error('Copy failed', {
-            description: 'Unable to copy Claude Desktop configuration.',
-          });
-        }
-      },
-    });
-  }
-
-  if (configurationObject && !mcpServers) {
-    quickActions.push({
-      key: 'copy-config-json',
-      label: 'Copy configuration JSON',
-      description: 'Use this configuration in your own project',
-      onClick: async () => {
-        try {
-          await copyToClipboard(JSON.stringify(configurationObject, null, 2));
-          toasts.raw.success('Configuration copied', {
-            description: 'JSON configuration saved to your clipboard.',
-          });
-          trackCopyPulse({ action: 'copy_configuration' });
-        } catch (error) {
-          logger.error('NavigationSidebar: failed to copy configuration JSON', error as Error);
-          toasts.raw.error('Copy failed', {
-            description: 'Unable to copy configuration JSON.',
-          });
-        }
-      },
-    });
+  if (customRenderer) {
+    return <div className="space-y-6">{customRenderer(item, relatedItems, router)}</div>;
   }
 
   return (

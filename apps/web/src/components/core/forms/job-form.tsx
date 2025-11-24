@@ -294,6 +294,14 @@ export function JobForm({
               ? 'Job created! Contact us for payment.'
               : 'Job posted successfully!'
           );
+        } else {
+          // Handle case when server action returns { success: false }
+          logClientWarning('JobForm: submit returned success: false', undefined, {
+            title: jobData.title,
+            company: jobData.company,
+            plan: jobData.plan,
+          });
+          toasts.raw.error('Failed to save job');
         }
       } catch (error) {
         logClientWarning('JobForm: submit failed', error, {

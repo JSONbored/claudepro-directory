@@ -32,6 +32,8 @@ import { NewsletterScrollTrigger } from '@/src/components/features/growth/newsle
 import { RecentlyViewedSidebar } from '@/src/components/features/navigation/recently-viewed-sidebar';
 import { DetailHeader } from './detail-header';
 import { DetailMetadata } from './detail-metadata';
+import { DetailQuickActionsBar } from './detail-quick-actions-bar';
+import { DetailToc } from './detail-toc';
 import { DetailSidebar } from './sidebar/navigation-sidebar';
 
 /**
@@ -210,6 +212,21 @@ export async function UnifiedDetailPage({
       ? ensureStringArray(contentItem['security'])
       : [];
 
+  const quickActionsPackageName =
+    typeof metadata['package'] === 'string' ? (metadata['package'] as string) : null;
+  const quickActionsMcpServers =
+    metadata['mcpServers'] && typeof metadata['mcpServers'] === 'object'
+      ? (metadata['mcpServers'] as Record<string, unknown>)
+      : null;
+  const quickActionsConfiguration =
+    metadata['configuration'] && typeof metadata['configuration'] === 'object'
+      ? (metadata['configuration'] as Record<string, unknown>)
+      : null;
+  const shouldRenderQuickActionsBar =
+    Boolean(quickActionsPackageName) ||
+    Boolean(quickActionsMcpServers) ||
+    Boolean(quickActionsConfiguration);
+
   // Parallelize independent preprocessing blocks to reduce TTFB
   // Start all promises first, then await them together
   const contentDataPromise = (async () => {
@@ -256,6 +273,9 @@ export async function UnifiedDetailPage({
         code: content,
         language: result.language,
         filename: result.filename,
+        ...(Array.isArray(result.headings) && result.headings.length > 0
+          ? { headings: result.headings }
+          : {}),
       };
     } catch (error) {
       logDetailProcessingWarning('contentData', error, item);
@@ -729,6 +749,9 @@ export async function UnifiedDetailPage({
       guideSectionsPromise,
     ]);
 
+  const headingMetadata = contentData?.headings ?? null;
+  const shouldRenderDetailToc = Array.isArray(headingMetadata) && headingMetadata.length >= 3;
+
   // Handle case where config is not found - AFTER ALL HOOKS
   if (!config) {
     return (
@@ -821,14 +844,27 @@ export async function UnifiedDetailPage({
         <DetailMetadata item={item} viewCount={viewCount} copyCount={copyCount} />
       )}
 
+      {shouldRenderQuickActionsBar && (
+        <div className="container mx-auto px-4 pt-4">
+          <DetailQuickActionsBar
+            item={contentItem}
+            metadata={metadata}
+            packageName={quickActionsPackageName}
+            configurationObject={quickActionsConfiguration}
+            mcpServers={quickActionsMcpServers}
+          />
+        </div>
+      )}
+
       {/* Main content */}
       <div
         className="container mx-auto px-4 py-8"
         style={{ viewTransitionName: getViewTransitionName('card', item.slug) }}
       >
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+        <div id="detail-main-content" className="grid grid-cols-1 gap-8 lg:grid-cols-3">
           {/* Primary content */}
           <div className="space-y-8 lg:col-span-2">
+            {shouldRenderDetailToc && <DetailToc headings={headingMetadata} />}
             {/* COLLECTIONS: Render collection-specific sections */}
             {collectionSections}
 

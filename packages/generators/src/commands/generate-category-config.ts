@@ -128,7 +128,12 @@ export async function runGenerateCategoryConfig(): Promise<boolean> {
             if (typeof badge !== 'object' || !badge) return '{ text: "" }';
             const hasDynamic = badge.hasDynamicCount && badge.text;
             if (hasDynamic && badge.text) {
-              const template = badge.text.replace(/`/g, '\\`').replace(/\$/g, '\\$');
+              // Escape backslashes first, then backticks and dollar signs for template literal safety
+              // Order matters: backslashes must be escaped first to prevent double-escaping
+              const template = badge.text
+                .replace(/\\/g, '\\\\')
+                .replace(/`/g, '\\`')
+                .replace(/\$/g, '\\$');
               return badge.icon
                 ? `{ icon: ${JSON.stringify(badge.icon)}, text: (count: number) => \`${template}\`.replace('{count}', String(count)) }`
                 : `{ text: (count: number) => \`${template}\`.replace('{count}', String(count)) }`;

@@ -1,10 +1,11 @@
-import { type ExecException, execSync } from 'node:child_process';
+import { type ExecException, execFileSync, execSync } from 'node:child_process';
 import {
   createReadStream,
   existsSync,
   mkdirSync,
   readFileSync,
   statSync,
+  unlinkSync,
   writeFileSync,
 } from 'node:fs';
 import { join } from 'node:path';
@@ -163,27 +164,49 @@ export async function runBackupDatabase(options: BackupDatabaseOptions = {}): Pr
 
   findPgDump();
   const outputPath = join(BACKUP_DIR, 'full_backup.sql.gz');
+  // Use a temp file for the raw SQL dump before compression
+  const rawDumpPath = join(BACKUP_DIR, 'raw_backup.sql');
 
   logger.info('📦 Creating compressed backup (using Supabase CLI)...', {
     script: 'backup-database',
   });
 
   try {
-    const result = execSync(
-      `npx supabase db dump --db-url "${dbUrl}" 2>&1 | gzip -9 > "${outputPath}"`,
-      {
-        cwd: ROOT,
-        stdio: 'pipe',
-        maxBuffer: 200 * 1024 * 1024,
-        encoding: 'utf-8',
-      }
-    );
+    // Step 1: Run supabase db dump and capture output (no shell interpolation)
+    const dumpOutput = execFileSync('npx', ['supabase', 'db', 'dump', '--db-url', dbUrl], {
+      cwd: ROOT,
+      stdio: ['ignore', 'pipe', 'pipe'],
+      maxBuffer: 200 * 1024 * 1024,
+      encoding: 'utf-8',
+    });
 
-    if (result && (result.includes('error') || result.includes('ERROR'))) {
+    // Check for warnings/errors in output
+    if (dumpOutput && (dumpOutput.includes('error') || dumpOutput.includes('ERROR'))) {
       logger.warn('   ⚠️  supabase db dump warnings', {
         script: 'backup-database',
-        warnings: result,
+        warnings: dumpOutput.substring(0, 500), // Limit warning log size
       });
+    }
+
+    // Write raw dump to temp file
+    writeFileSync(rawDumpPath, dumpOutput, 'utf-8');
+
+    // Step 2: Compress with gzip (no shell interpolation)
+    const compressedDump = execFileSync('gzip', ['-9', '-c', rawDumpPath], {
+      cwd: ROOT,
+      stdio: ['ignore', 'pipe', 'pipe'],
+      maxBuffer: 200 * 1024 * 1024,
+      encoding: 'buffer',
+    });
+
+    // Write compressed output to final path
+    writeFileSync(outputPath, compressedDump);
+
+    // Clean up temp file
+    try {
+      unlinkSync(rawDumpPath);
+    } catch {
+      // Ignore cleanup errors
     }
 
     logger.info('   ✓ full_backup.sql.gz (compressed schema + data)', {
@@ -194,7 +217,9 @@ export async function runBackupDatabase(options: BackupDatabaseOptions = {}): Pr
     if (execError?.stdout) {
       logger.error('   Output', undefined, { script: 'backup-database', stdout: execError.stdout });
     }
-    throw new Error('Database dump failed. Ensure Supabase CLI is installed.');
+    throw new Error(
+      'Database dump failed. Ensure Supabase CLI is installed and gzip is available.'
+    );
   }
 
   const backupStartTime = Date.now();

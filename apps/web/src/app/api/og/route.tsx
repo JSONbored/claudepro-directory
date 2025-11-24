@@ -88,21 +88,26 @@ export async function GET(request: NextRequest) {
       >
         {tags.length > 0 && (
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
-            {tags.slice(0, 5).map((tag) => (
-              <div
-                key={typeof tag === 'string' ? tag : JSON.stringify(tag)}
-                style={{
-                  backgroundColor: '#2a2010',
-                  color: '#f97316',
-                  padding: '6px 16px',
-                  borderRadius: '6px',
-                  fontSize: '20px',
-                  border: '1px solid #3a3020',
-                }}
-              >
-                {tag}
-              </div>
-            ))}
+            {tags.slice(0, 5).map((tag) => {
+              // Use tag value as key since tags are static and won't reorder
+              // For duplicate tags, React will handle them correctly
+              const key = `tag-${tag}`;
+              return (
+                <div
+                  key={key}
+                  style={{
+                    backgroundColor: '#2a2010',
+                    color: '#f97316',
+                    padding: '6px 16px',
+                    borderRadius: '6px',
+                    fontSize: '20px',
+                    border: '1px solid #3a3020',
+                  }}
+                >
+                  {tag}
+                </div>
+              );
+            })}
           </div>
         )}
 

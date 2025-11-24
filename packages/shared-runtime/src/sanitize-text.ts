@@ -40,7 +40,10 @@ export function sanitizeText(text: unknown, options: SanitizeTextOptions = {}): 
     });
   }
 
+  // Remove dangerous URL schemes that can execute code
   sanitized = sanitized.replace(/javascript:/gi, '');
+  sanitized = sanitized.replace(/data:/gi, '');
+  sanitized = sanitized.replace(/vbscript:/gi, '');
   sanitized = sanitized.replace(/\r\n/g, '\n');
   sanitized = sanitized.replace(/\r/g, '\n');
 

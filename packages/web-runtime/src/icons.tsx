@@ -66,6 +66,7 @@ import {
   Layers,
   Lightbulb,
   Linkedin,
+  ListTree,
   Loader2,
   LogOut,
   type LucideIcon,
@@ -99,6 +100,7 @@ import {
   Settings,
   Share2,
   Shield,
+  SlidersHorizontal,
   Sparkles,
   Star,
   Sun,
@@ -227,6 +229,7 @@ export {
   Settings,
   Share2,
   Shield,
+  SlidersHorizontal,
   Sparkles,
   Sun,
   Tag,
@@ -242,6 +245,7 @@ export {
   XCircle,
   ThumbsUp,
   Activity,
+  ListTree,
 };
 
 export type { LucideIcon };

@@ -6,7 +6,15 @@
 import { type JobsFilterResult, logger, normalizeError } from '@heyclaude/web-runtime/core';
 import { generatePageMetadata, getFilteredJobs } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { Briefcase, Clock, Filter, MapPin, Plus, Search } from '@heyclaude/web-runtime/icons';
+import {
+  Briefcase,
+  Clock,
+  Filter,
+  MapPin,
+  Plus,
+  Search,
+  SlidersHorizontal,
+} from '@heyclaude/web-runtime/icons';
 import type { PagePropsWithSearchParams } from '@heyclaude/web-runtime/types/app.schema';
 import { POSITION_PATTERNS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import type { Metadata } from 'next';
@@ -14,6 +22,7 @@ import dynamicImport from 'next/dynamic';
 import Link from 'next/link';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { JobCard } from '@/src/components/core/domain/cards/job-card';
+import { JobAlertsCard } from '@/src/components/core/domain/jobs/job-alerts-card';
 import { JobsPromo } from '@/src/components/core/domain/jobs/jobs-banner';
 import { Button } from '@/src/components/primitives/ui/button';
 import { Card, CardContent } from '@/src/components/primitives/ui/card';
@@ -85,6 +94,10 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
   const employment = rawParams?.['employment'] as string | undefined;
   const experience = rawParams?.['experience'] as string | undefined;
   const remote = rawParams?.['remote'] === 'true' ? true : undefined;
+  const sortParam = (rawParams?.['sort'] as string | undefined)?.toLowerCase();
+  const sort: SortOption = SORT_VALUES.has(sortParam as SortOption)
+    ? (sortParam as SortOption)
+    : 'newest';
   const page = Math.max(1, Math.min(Number(rawParams?.['page']) || 1, 10000));
   const limit = Math.min(Number(rawParams?.['limit']) || 20, 100);
   const offset = (page - 1) * limit;
@@ -94,6 +107,8 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
     category: category || 'all',
     employment: employment || 'any',
     remote: Boolean(remote),
+    experience: experience || 'any',
+    sort,
     page,
     limit,
   });
@@ -106,6 +121,7 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
       ...(employment ? { employment } : {}),
       ...(experience ? { experience } : {}),
       ...(remote !== undefined ? { remote } : {}),
+      sort,
       limit,
       offset,
     });
@@ -117,12 +133,13 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
       employment: employment || 'any',
       experience: experience || 'any',
       remote: Boolean(remote),
+      sort,
       page,
       limit,
     });
   }
 
-  const jobs = jobsResponse?.jobs ?? [];
+  const jobs = applyJobSorting(jobsResponse?.jobs ?? [], sort);
   const total_count = jobsResponse?.total_count ?? 0;
 
   const totalJobs = total_count;
@@ -131,6 +148,8 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
   const searchInputId = `${baseId}-search`;
   const categoryFilterId = `${baseId}-category`;
   const employmentFilterId = `${baseId}-employment`;
+  const experienceFilterId = `${baseId}-experience`;
+  const sortFilterId = `${baseId}-sort`;
 
   const buildFilterUrl = (newParams: Record<string, string | boolean | undefined>) => {
     const urlParams = new URLSearchParams();
@@ -141,6 +160,7 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
       employment: employment !== 'any' ? employment : undefined,
       experience: experience !== 'any' ? experience : undefined,
       remote: remote ? 'true' : undefined,
+      sort: sort !== 'newest' ? sort : undefined,
     };
 
     const merged = { ...currentParams, ...newParams };
@@ -199,7 +219,7 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
         <section className={'px-4 pb-8'}>
           <div className={'container mx-auto'}>
             <Card className="card-gradient glow-effect">
-              <CardContent className="p-6">
+              <CardContent className="space-y-4 p-6">
                 <form method="GET" action="/jobs" className={UI_CLASSES.GRID_RESPONSIVE_4}>
                   <div className="relative">
                     <Search
@@ -274,11 +294,42 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
                       Filter
                     </Button>
                   </div>
+
+                  <Select name="experience" defaultValue={experience || 'any'}>
+                    <SelectTrigger
+                      id={experienceFilterId}
+                      aria-label="Filter jobs by experience level"
+                    >
+                      <SlidersHorizontal className="mr-2 h-4 w-4" />
+                      <SelectValue placeholder="Experience Level" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="any">All Levels</SelectItem>
+                      <SelectItem value="beginner">Entry level</SelectItem>
+                      <SelectItem value="intermediate">Mid level</SelectItem>
+                      <SelectItem value="advanced">Senior level</SelectItem>
+                    </SelectContent>
+                  </Select>
+
+                  <Select name="sort" defaultValue={sort}>
+                    <SelectTrigger id={sortFilterId} aria-label="Sort jobs">
+                      <SelectValue placeholder="Sort" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="newest">Newest first</SelectItem>
+                      <SelectItem value="oldest">Oldest first</SelectItem>
+                      <SelectItem value="salary">Highest salary</SelectItem>
+                    </SelectContent>
+                  </Select>
+
+                  <input type="hidden" name="page" value="1" />
                 </form>
 
                 {(searchQuery ||
                   (category && category !== 'all') ||
                   (employment && employment !== 'any') ||
+                  (experience && experience !== 'any') ||
+                  sort !== 'newest' ||
                   remote) && (
                   <div className={`${UI_CLASSES.FLEX_WRAP_GAP_2} mt-4 border-border border-t pt-4`}>
                     <span className={UI_CLASSES.TEXT_SM_MUTED}>Active filters:</span>
@@ -319,6 +370,22 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
                         </Link>
                       </UnifiedBadge>
                     )}
+                    {experience && experience !== 'any' && (
+                      <UnifiedBadge variant="base" style="secondary">
+                        {experience === 'beginner'
+                          ? 'Entry level'
+                          : experience === 'intermediate'
+                            ? 'Mid level'
+                            : 'Senior level'}
+                        <Link
+                          href={buildFilterUrl({ experience: undefined })}
+                          className="ml-1 hover:text-destructive"
+                          aria-label="Remove experience filter"
+                        >
+                          ×
+                        </Link>
+                      </UnifiedBadge>
+                    )}
                     {remote && (
                       <UnifiedBadge variant="base" style="secondary">
                         Remote
@@ -326,6 +393,18 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
                           href={buildFilterUrl({ remote: undefined })}
                           className="ml-1 hover:text-destructive"
                           aria-label="Remove remote filter"
+                        >
+                          ×
+                        </Link>
+                      </UnifiedBadge>
+                    )}
+                    {sort !== 'newest' && (
+                      <UnifiedBadge variant="base" style="secondary">
+                        Sort: {sort === 'oldest' ? 'Oldest' : 'Highest Salary'}
+                        <Link
+                          href={buildFilterUrl({ sort: undefined })}
+                          className="ml-1 hover:text-destructive"
+                          aria-label="Reset sort"
                         >
                           ×
                         </Link>
@@ -407,6 +486,11 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
 
           <aside className="w-full space-y-6 lg:sticky lg:top-24 lg:h-fit">
             <JobsPromo />
+            <JobAlertsCard
+              defaultCategory={category || 'all'}
+              defaultExperience={experience || 'any'}
+              defaultRemote={remote ? 'remote' : 'any'}
+            />
           </aside>
         </div>
       </section>
@@ -416,4 +500,43 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
       </section>
     </div>
   );
+}
+
+type SortOption = 'newest' | 'oldest' | 'salary';
+const SORT_VALUES = new Set<SortOption>(['newest', 'oldest', 'salary']);
+
+function applyJobSorting(jobs: JobsFilterResult['jobs'], sort: SortOption) {
+  if (!(jobs && Array.isArray(jobs))) return [];
+  const clone = [...jobs];
+  if (sort === 'oldest') {
+    return clone.sort((a, b) => {
+      const aDate = a.posted_at ? new Date(a.posted_at).getTime() : 0;
+      const bDate = b.posted_at ? new Date(b.posted_at).getTime() : 0;
+      return aDate - bDate;
+    });
+  }
+
+  if (sort === 'salary') {
+    return clone.sort((a, b) => {
+      const aMax = extractSalaryValue(a.salary);
+      const bMax = extractSalaryValue(b.salary);
+      return bMax - aMax;
+    });
+  }
+
+  // newest default
+  return clone.sort((a, b) => {
+    const aDate = a.posted_at ? new Date(a.posted_at).getTime() : 0;
+    const bDate = b.posted_at ? new Date(b.posted_at).getTime() : 0;
+    return bDate - aDate;
+  });
+}
+
+function extractSalaryValue(raw: string | null | undefined) {
+  if (!raw) return 0;
+  const match = raw.replace(/,/g, '').match(/(\d{2,6})(?:\s?-\s?(\d{2,6}))?/);
+  if (!match) return 0;
+  const first = Number(match[1]) || 0;
+  const second = match[2] ? Number(match[2]) : first;
+  return Math.max(first, second);
 }

@@ -30,7 +30,7 @@ export type LogContextValue =
   | ReadonlyArray<LogContextValue>
   | { readonly [key: string]: LogContextValue };
 
-type LogContext = Record<string, LogContextValue>;
+export type LogContext = Record<string, LogContextValue>;
 
 export function toLogContextValue(value: unknown): LogContextValue {
   if (value === null || value === undefined) {
@@ -52,7 +52,7 @@ export function toLogContextValue(value: unknown): LogContextValue {
   return String(value);
 }
 
-function sanitizeLogMessage(message: string): string {
+export function sanitizeLogMessage(message: string): string {
   if (typeof message !== 'string') return String(message);
   let sanitized = message
     .replace(/[\r\n\t]/g, ' ')
@@ -83,7 +83,7 @@ function sanitizeStringValue(value: string, maxLength = 500): string {
   return sanitized;
 }
 
-function sanitizeLogContext(
+export function sanitizeLogContext(
   context?: LogContext,
   depth = 0,
   sizeLimit = 10 * 1024

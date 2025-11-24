@@ -4,7 +4,7 @@ import type { Database } from '@heyclaude/database-types';
 import { createSupabaseServerClient } from '../supabase/server.ts';
 import { createSupabaseAnonClient } from '../supabase/server-anon.ts';
 import { getCacheTtl, type CacheTtlKey } from '../cache-config.ts';
-import { logger } from '../logger.ts';
+import { logger, sanitizeLogMessage, sanitizeLogContext, toLogContextValue, type LogContext } from '../logger.ts';
 import { normalizeError } from '../errors.ts';
 
 export interface FetchCachedOptions<TResult> {
@@ -34,10 +34,19 @@ export async function fetchCached<TResult>(
         // Cast to typed client
         return await serviceCall(client as unknown as SupabaseClient<Database>);
       } catch (error) {
-        const normalized = normalizeError(error, `Service call failed: ${key}`);
-        logger.error(`Service call failed: ${key}`, normalized, {
-           key,
-           ...logMeta
+        // Sanitize user-provided data to prevent log injection
+        const sanitizedKey = sanitizeLogMessage(key);
+        // Convert logMeta to LogContext format before sanitization
+        const logContext: LogContext | undefined = logMeta
+          ? Object.fromEntries(
+              Object.entries(logMeta).map(([k, v]) => [k, toLogContextValue(v)])
+            )
+          : undefined;
+        const sanitizedLogMeta = sanitizeLogContext(logContext);
+        const normalized = normalizeError(error, `Service call failed: ${sanitizedKey}`);
+        logger.error(`Service call failed: ${sanitizedKey}`, normalized, {
+          key: sanitizedKey,
+          ...sanitizedLogMeta,
         });
         return fallback;
       }

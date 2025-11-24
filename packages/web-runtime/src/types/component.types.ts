@@ -65,6 +65,13 @@ export type DisplayableContent =
   | Database['public']['CompositeTypes']['related_content_item']
   | HomepageContentItem;
 
+export interface ContentHeadingMetadata {
+  id: string;
+  anchor: string;
+  title: string;
+  level: number;
+}
+
 export interface ConfigCardProps {
   item: DisplayableContent;
   variant?: 'default' | 'detailed';
@@ -680,6 +687,7 @@ export interface ProcessedSectionData {
     code: string;
     language: string;
     filename: string;
+    headings?: ContentHeadingMetadata[];
   } | null;
 
   // Configuration section data

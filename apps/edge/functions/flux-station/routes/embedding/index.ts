@@ -454,75 +454,84 @@ export async function handleEmbeddingWebhook(req: Request): Promise<Response> {
     // Read raw body for signature verification (before parsing)
     const rawBody = await req.text();
 
-    // Verify webhook signature if secret is configured
+    // Verify webhook signature - INTERNAL_API_SECRET is required for security
     const webhookSecret = Deno.env.get('INTERNAL_API_SECRET');
-    if (webhookSecret) {
-      // Check for common signature header names
-      const signature =
-        req.headers.get('x-supabase-signature') ||
-        req.headers.get('x-webhook-signature') ||
-        req.headers.get('x-signature');
-      const timestamp = req.headers.get('x-webhook-timestamp') || req.headers.get('x-timestamp');
+    if (!webhookSecret) {
+      logError(
+        'INTERNAL_API_SECRET environment variable is not configured - rejecting request for security',
+        logContext,
+        new Error('Missing INTERNAL_API_SECRET')
+      );
+      return errorResponse(
+        new Error('Server configuration error: INTERNAL_API_SECRET is not set'),
+        'embedding-webhook:config_error',
+        webhookCorsHeaders
+      );
+    }
 
-      if (!signature) {
-        const headerNames: string[] = [];
-        req.headers.forEach((_, key) => {
-          headerNames.push(key);
-        });
-        logWarn('Missing webhook signature header', {
-          ...logContext,
-          headers: headerNames,
-        });
-        return unauthorizedResponse('Missing webhook signature', webhookCorsHeaders);
-      }
+    // Check for common signature header names
+    const signature =
+      req.headers.get('x-supabase-signature') ||
+      req.headers.get('x-webhook-signature') ||
+      req.headers.get('x-signature');
+    const timestamp = req.headers.get('x-webhook-timestamp') || req.headers.get('x-timestamp');
 
-      // Validate timestamp if provided (prevent replay attacks)
-      if (timestamp) {
-        const timestampMs = Number.parseInt(timestamp, 10);
-        if (Number.isNaN(timestampMs)) {
-          return badRequestResponse('Invalid timestamp format', webhookCorsHeaders);
-        }
-
-        const now = Date.now();
-        const timestampAge = now - timestampMs;
-        const maxAge = 5 * 60 * 1000; // 5 minutes
-
-        if (timestampAge > maxAge || timestampAge < -maxAge) {
-          logWarn('Webhook timestamp too old or too far in future', {
-            ...logContext,
-            timestamp: timestampMs,
-            now,
-            age_ms: timestampAge,
-          });
-          return unauthorizedResponse(
-            'Webhook timestamp out of acceptable range',
-            webhookCorsHeaders
-          );
-        }
-      }
-
-      const isValid = await verifySupabaseDatabaseWebhook({
-        rawBody,
-        signature,
-        timestamp: timestamp || null,
-        secret: webhookSecret,
+    if (!signature) {
+      const headerNames: string[] = [];
+      req.headers.forEach((_, key) => {
+        headerNames.push(key);
       });
+      logWarn('Missing webhook signature header', {
+        ...logContext,
+        headers: headerNames,
+      });
+      return unauthorizedResponse('Missing webhook signature', webhookCorsHeaders);
+    }
 
-      if (!isValid) {
-        logWarn('Webhook signature verification failed', {
-          ...logContext,
-          has_timestamp: !!timestamp,
-        });
-        return unauthorizedResponse('Invalid webhook signature', webhookCorsHeaders);
+    // Validate timestamp if provided (prevent replay attacks)
+    if (timestamp) {
+      const timestampMs = Number.parseInt(timestamp, 10);
+      if (Number.isNaN(timestampMs)) {
+        return badRequestResponse('Invalid timestamp format', webhookCorsHeaders);
       }
 
-      logInfo('Webhook signature verified', {
+      const now = Date.now();
+      const timestampAge = now - timestampMs;
+      const maxAge = 5 * 60 * 1000; // 5 minutes
+
+      if (timestampAge > maxAge || timestampAge < -maxAge) {
+        logWarn('Webhook timestamp too old or too far in future', {
+          ...logContext,
+          timestamp: timestampMs,
+          now,
+          age_ms: timestampAge,
+        });
+        return unauthorizedResponse(
+          'Webhook timestamp out of acceptable range',
+          webhookCorsHeaders
+        );
+      }
+    }
+
+    const isValid = await verifySupabaseDatabaseWebhook({
+      rawBody,
+      signature,
+      timestamp: timestamp || null,
+      secret: webhookSecret,
+    });
+
+    if (!isValid) {
+      logWarn('Webhook signature verification failed', {
         ...logContext,
         has_timestamp: !!timestamp,
       });
-    } else {
-      logWarn('Webhook secret not configured - skipping signature verification', logContext);
+      return unauthorizedResponse('Invalid webhook signature', webhookCorsHeaders);
     }
+
+    logInfo('Webhook signature verified', {
+      ...logContext,
+      has_timestamp: !!timestamp,
+    });
 
     // Parse webhook payload (create new request from raw body since we already read it)
     const parseResult = await parseJsonBody<ContentWebhookPayload>(

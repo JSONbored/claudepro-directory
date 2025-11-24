@@ -227,13 +227,13 @@ const nextConfig = {
       },
       {
         source:
-          '/guides/:subcategory(comparisons|troubleshooting|tutorials|use-cases|workflows)/:slug',
+          '/guides/:subcategory(comparisons|troubleshooting|tutorials|use-cases)/:slug',
         destination: '/guides/:slug',
         permanent: true,
       },
       {
         source:
-          '/guides/:subcategory(comparisons|troubleshooting|tutorials|use-cases|workflows)/:slug/llms.txt',
+          '/guides/:subcategory(comparisons|troubleshooting|tutorials|use-cases)/:slug/llms.txt',
         destination: '/guides/:slug/llms.txt',
         permanent: true,
       },

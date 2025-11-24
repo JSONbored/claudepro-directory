@@ -219,6 +219,46 @@ export default async function SubmissionsPage() {
     );
   }
 
+  // Valid enum values for validation
+  const VALID_SUBMISSION_STATUSES: Database['public']['Enums']['submission_status'][] = [
+    'pending',
+    'approved',
+    'rejected',
+    'spam',
+    'merged',
+  ];
+  const VALID_SUBMISSION_TYPES: Database['public']['Enums']['submission_type'][] = [
+    'agents',
+    'mcp',
+    'rules',
+    'commands',
+    'hooks',
+    'statuslines',
+    'skills',
+  ];
+
+  /**
+   * Validate submission status against enum values
+   */
+  function isValidSubmissionStatus(
+    status: unknown
+  ): status is Database['public']['Enums']['submission_status'] {
+    if (typeof status !== 'string') return false;
+    return VALID_SUBMISSION_STATUSES.includes(
+      status as Database['public']['Enums']['submission_status']
+    );
+  }
+
+  /**
+   * Validate submission type against enum values
+   */
+  function isValidSubmissionType(
+    type: unknown
+  ): type is Database['public']['Enums']['submission_type'] {
+    if (typeof type !== 'string') return false;
+    return VALID_SUBMISSION_TYPES.includes(type as Database['public']['Enums']['submission_type']);
+  }
+
   const SUBMISSION_STATUS_VARIANTS: Record<
     Database['public']['Enums']['submission_status'],
     { icon: typeof Clock; label: string }
@@ -360,26 +400,88 @@ export default async function SubmissionsPage() {
       ) : (
         <div className="grid gap-4">
           {submissions.map((submission, index) => {
-            const status = (submission.status ??
-              'pending') as Database['public']['Enums']['submission_status'];
-            const type = (submission.content_type ??
-              'commands') as Database['public']['Enums']['submission_type'];
+            const submissionId = submission.id ?? `submission-${index}`;
+
+            // Validate status - log warning if missing or invalid
+            let status: Database['public']['Enums']['submission_status'] | null = null;
+            if (submission.status) {
+              if (isValidSubmissionStatus(submission.status)) {
+                status = submission.status;
+              } else {
+                logger.warn('SubmissionsPage: Invalid submission status', {
+                  submissionId,
+                  invalidStatus: submission.status,
+                  validStatuses: VALID_SUBMISSION_STATUSES,
+                  error: `Invalid status: ${submission.status}`,
+                });
+              }
+            } else {
+              logger.warn('SubmissionsPage: Missing submission status', undefined, {
+                submissionId,
+              });
+            }
+
+            // Validate content_type - log warning if missing or invalid
+            let type: Database['public']['Enums']['submission_type'] | null = null;
+            if (submission.content_type) {
+              if (isValidSubmissionType(submission.content_type)) {
+                type = submission.content_type;
+              } else {
+                logger.warn('SubmissionsPage: Invalid submission content_type', {
+                  submissionId,
+                  invalidContentType: submission.content_type,
+                  validContentTypes: VALID_SUBMISSION_TYPES,
+                  error: `Invalid content_type: ${submission.content_type}`,
+                });
+              }
+            } else {
+              logger.warn('SubmissionsPage: Missing submission content_type', undefined, {
+                submissionId,
+              });
+            }
+
+            // Validate content_slug - log warning if missing
+            const contentSlug = submission.content_slug;
+            if (!contentSlug) {
+              logger.warn('SubmissionsPage: Missing submission content_slug', undefined, {
+                submissionId,
+              });
+            }
+
             const prLinkProps = getPrLinkProps(submission);
-            const contentLinkProps = getContentLinkProps(
-              type,
-              submission.content_slug ?? '',
-              status
-            );
+            // Only call getContentLinkProps if type, slug, and status are all valid
+            const contentLinkProps =
+              type && contentSlug && status ? getContentLinkProps(type, contentSlug, status) : null;
             return (
               <Card key={submission.id ?? `submission-${index}`}>
                 <CardHeader>
                   <div className={UI_CLASSES.FLEX_ITEMS_START_JUSTIFY_BETWEEN}>
                     <div className="flex-1">
                       <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                        {getStatusBadge(status)}
-                        <UnifiedBadge variant="base" style="outline" className="text-xs">
-                          {getTypeLabel(type)}
-                        </UnifiedBadge>
+                        {status ? (
+                          getStatusBadge(status)
+                        ) : (
+                          <UnifiedBadge
+                            variant="base"
+                            style="outline"
+                            className="text-muted-foreground text-xs"
+                          >
+                            Status: Unknown
+                          </UnifiedBadge>
+                        )}
+                        {type ? (
+                          <UnifiedBadge variant="base" style="outline" className="text-xs">
+                            {getTypeLabel(type)}
+                          </UnifiedBadge>
+                        ) : (
+                          <UnifiedBadge
+                            variant="base"
+                            style="outline"
+                            className="text-muted-foreground text-xs"
+                          >
+                            Type: Unknown
+                          </UnifiedBadge>
+                        )}
                       </div>
                       <CardTitle className="mt-2">
                         {submission.content_name ?? 'Untitled'}
@@ -395,7 +497,7 @@ export default async function SubmissionsPage() {
                   <div className={'mb-4 flex flex-wrap gap-4 text-muted-foreground text-sm'}>
                     <div>
                       Submitted{' '}
-                      {formatSubmissionDate(submission.created_at ?? new Date().toISOString())}
+                      {submission.created_at ? formatSubmissionDate(submission.created_at) : 'N/A'}
                     </div>
                     {submission.merged_at && (
                       <>

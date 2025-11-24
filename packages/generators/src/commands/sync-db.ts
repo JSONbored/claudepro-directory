@@ -1,4 +1,4 @@
-import { execSync } from 'node:child_process';
+import { execFileSync, execSync } from 'node:child_process';
 import { writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -165,7 +165,7 @@ function getOptionValue(args: string[], flag: string): string | null {
 function calculateSchemaHash(dbUrl: string, schema: string): string | null {
   try {
     const query = buildSchemaQuery(schema).replace(/\n/g, ' ');
-    const result = execSync(`psql "${dbUrl}" -c "${query}" -t -A`, {
+    const result = execFileSync('psql', ['-d', dbUrl, '-c', query, '-t', '-A'], {
       encoding: 'utf-8',
       stdio: 'pipe',
     });
@@ -241,12 +241,13 @@ function generateSchemaDump(params: {
 
     spinner.start('Dumping database schema...');
 
-    const dumpCommand = `npx supabase db dump --db-url "${dbUrl}" --schema ${schema}`;
+    const dumpArgs = ['supabase', 'db', 'dump', '--db-url', dbUrl, '--schema', schema];
+    const dumpCommandStr = `npx ${dumpArgs.map((arg) => (/\s/.test(arg) ? `"${arg}"` : arg)).join(' ')}`;
     if (dryRun) {
       spinner.info('[dry-run] Skipping schema dump execution');
-      logger.info(`Would run: ${dumpCommand}`);
+      logger.info(`Would run: ${dumpCommandStr}`);
     } else {
-      const output = execSync(dumpCommand, {
+      const output = execFileSync('npx', dumpArgs, {
         cwd: ROOT,
         encoding: 'utf-8',
         stdio: 'pipe',
@@ -347,13 +348,23 @@ function generateTypes(params: {
     spinner.start('Generating TypeScript types from Supabase...');
 
     // Use --project-id instead of --db-url (handles SSL automatically via Supabase API)
-    const typeCommand = `npx supabase gen types typescript --project-id "${projectId}" --schema ${schema}`;
+    const typeCommandArgs = [
+      'supabase',
+      'gen',
+      'types',
+      'typescript',
+      '--project-id',
+      projectId,
+      '--schema',
+      schema,
+    ];
+    const typeCommandStr = `npx ${typeCommandArgs.map((arg) => (/\s/.test(arg) ? `"${arg}"` : arg)).join(' ')}`;
     let output = '';
     if (dryRun) {
       spinner.info('[dry-run] Skipping type generation execution');
-      logger.info(`Would run: ${typeCommand}`);
+      logger.info(`Would run: ${typeCommandStr}`);
     } else {
-      output = execSync(typeCommand, {
+      output = execFileSync('npx', typeCommandArgs, {
         encoding: 'utf-8',
         stdio: 'pipe',
       });

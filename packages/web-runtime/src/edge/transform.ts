@@ -4,6 +4,7 @@ import type { Database } from '@heyclaude/database-types';
 import { logger } from '../logger.ts';
 import { normalizeError } from '../errors.ts';
 import { getEnvVar } from '@heyclaude/shared-runtime';
+import type { ContentHeadingMetadata } from '../types/component.types.ts';
 
 const EDGE_TRANSFORM_URL = `${getEnvVar('NEXT_PUBLIC_SUPABASE_URL')}/functions/v1/transform-api`;
 
@@ -44,6 +45,7 @@ export interface ProcessContentResponse {
   language?: string;
   filename?: string;
   error?: string;
+  headings?: ContentHeadingMetadata[];
 }
 
 export async function highlightCodeEdge(

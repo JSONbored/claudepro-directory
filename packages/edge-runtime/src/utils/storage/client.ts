@@ -82,7 +82,18 @@ export function buildStorageObjectPath(options: BuildStorageObjectPathOptions = 
   const segments: string[] = [];
 
   if (prefix) {
-    segments.push(prefix.replace(/^\/+|\/+$/g, ''));
+    // Remove leading and trailing slashes safely without ReDoS vulnerability
+    // Use simple string iteration to avoid regex backtracking issues
+    let start = 0;
+    let end = prefix.length;
+    while (start < end && prefix[start] === '/') {
+      start++;
+    }
+    while (end > start && prefix[end - 1] === '/') {
+      end--;
+    }
+    const trimmed = prefix.slice(start, end);
+    segments.push(trimmed);
   }
 
   if (userId) {

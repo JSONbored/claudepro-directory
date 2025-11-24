@@ -430,11 +430,11 @@ function generateOGImage(params: OGImageParams): Response {
                 marginTop: '8px',
               },
             },
-            ...tags.slice(0, 5).map((tag) =>
+            ...tags.slice(0, 5).map((tag, index) =>
               React.createElement(
                 'div',
                 {
-                  key: tag,
+                  key: `${tag}-${index}`,
                   style: {
                     backgroundColor: '#2a2010',
                     color: '#FF6F4A',

@@ -257,6 +257,17 @@ function generateManifest(mcp: McpRow): string {
   return JSON.stringify(manifest, null, 2);
 }
 
+/**
+ * Escapes backslash, dollar sign, and backtick for safe embedding in JavaScript template literals.
+ * Order matters: backslashes must be escaped first to prevent double-escaping.
+ */
+function escapeForTemplateLiteral(input: string): string {
+  return input
+    .replace(/\\/g, '\\\\') // Escape backslash first
+    .replace(/\$/g, '\\$') // Escape dollar sign
+    .replace(/`/g, '\\`'); // Escape backtick
+}
+
 function generateServerIndex(mcp: McpRow): string {
   const metadata = mcp.metadata as McpMetadata | null;
   const config = metadata?.configuration?.claudeDesktop?.mcp;
@@ -264,9 +275,9 @@ function generateServerIndex(mcp: McpRow): string {
   const serverConfig = config?.[serverName];
   const httpUrl = serverConfig?.url as string | undefined;
 
-  const title = (mcp.title || mcp.slug).replace(/\$/g, '\\$').replace(/`/g, '\\`');
-  const description = (mcp.description || '').replace(/\$/g, '\\$').replace(/`/g, '\\`');
-  const slug = mcp.slug.replace(/\$/g, '\\$').replace(/`/g, '\\`');
+  const title = escapeForTemplateLiteral(mcp.title || mcp.slug);
+  const description = escapeForTemplateLiteral(mcp.description || '');
+  const slug = escapeForTemplateLiteral(mcp.slug);
 
   if (httpUrl && typeof httpUrl === 'string') {
     // Use JSON.stringify to safely embed the URL, including proper escaping for backslashes/quotes

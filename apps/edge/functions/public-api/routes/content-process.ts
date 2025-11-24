@@ -13,7 +13,6 @@ import {
 import type { BaseLogContext } from '@heyclaude/shared-runtime';
 import {
   buildSecurityHeaders,
-  errorToString,
   highlightCode,
   logError,
   MAX_BODY_SIZE,
@@ -262,6 +261,43 @@ function generateHookFilename(
   return `${identifier}-${suffix}.${ext}`;
 }
 
+function extractMarkdownHeadings(source: string): HeadingMetadata[] {
+  if (!(source && /^(#{2,6})\s+.+/m.test(source))) {
+    return [];
+  }
+
+  const headings: HeadingMetadata[] = [];
+  const counts = new Map<string, number>();
+  const lines = source.split(/\r?\n/);
+
+  for (const line of lines) {
+    const match = line.match(/^(#{2,6})\s+(.+?)\s*$/);
+    if (!(match && match[1] && match[2])) continue;
+
+    const level = Math.min(match[1].length, 6);
+    const title = match[2].trim();
+    if (!title) continue;
+
+    const baseId = normalizeSlug(title) || `section-${level}-${headings.length + 1}`;
+    const priorCount = counts.get(baseId) ?? 0;
+    counts.set(baseId, priorCount + 1);
+    const uniqueId = priorCount === 0 ? baseId : `${baseId}-${priorCount + 1}`;
+
+    headings.push({
+      id: uniqueId,
+      anchor: `#${uniqueId}`,
+      title,
+      level,
+    });
+
+    if (headings.length >= 50) {
+      break;
+    }
+  }
+
+  return headings;
+}
+
 // Request/Response interfaces
 interface ProcessRequest {
   operation: 'full' | 'filename' | 'highlight';
@@ -281,11 +317,19 @@ interface ProcessRequest {
   contentType?: 'hookConfig' | 'scriptContent';
 }
 
+interface HeadingMetadata {
+  id: string;
+  anchor: string;
+  title: string;
+  level: number;
+}
+
 interface ProcessResponse {
   html?: string;
   language?: string;
   filename?: string;
   error?: string;
+  headings?: HeadingMetadata[];
 }
 
 /**
@@ -356,7 +400,8 @@ export async function handleContentHighlight(
     });
   } catch (error) {
     logError('Content highlight failed', logContext, error);
-    return jsonResponse({ error: errorToString(error) }, 500, {
+    // DO NOT expose internal error details to user - use generic message
+    return jsonResponse({ error: 'Internal Server Error' }, 500, {
       ...buildSecurityHeaders(),
       ...CORS,
     });
@@ -519,10 +564,13 @@ export async function handleContentProcess(
         showLineNumbers,
       });
 
+      const headings = extractMarkdownHeadings(codeString);
+
       result = {
         html: highlightedHtml,
         language: detectedLanguage,
         filename: generatedFilename,
+        ...(headings.length > 0 ? { headings } : {}),
       };
     } else if (operation === 'filename') {
       // TypeScript guard: validItem is guaranteed to be valid here
@@ -568,10 +616,11 @@ export async function handleContentProcess(
   } catch (error) {
     logError('Content processing failed', logContext, error);
 
+    // DO NOT expose internal error details to user - use generic message
     // Return error response
     return jsonResponse(
       {
-        error: errorToString(error),
+        error: 'Internal Server Error',
       } satisfies ProcessResponse,
       500,
       {

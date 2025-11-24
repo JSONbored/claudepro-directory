@@ -16,6 +16,7 @@ export interface JobsFilterOptions {
   remote?: boolean;
   limit?: number;
   offset?: number;
+  sort?: 'newest' | 'oldest' | 'salary';
 }
 
 /**
@@ -24,7 +25,7 @@ export interface JobsFilterOptions {
 export async function getFilteredJobs(
   options: JobsFilterOptions
 ): Promise<JobsFilterResult | null> {
-  const { searchQuery, category, employment, experience, remote, limit, offset } = options;
+  const { searchQuery, category, employment, experience, remote, limit, offset, sort } = options;
   const hasFilters = Boolean(searchQuery || (category && category !== 'all') || (employment && employment !== 'any') || (experience && experience !== 'any') || (remote !== undefined));
 
   const filtersLog: Record<string, string | number | boolean | null> = {
@@ -34,7 +35,8 @@ export async function getFilteredJobs(
     experience: experience ?? null,
     remote: remote ?? null,
     limit: limit ?? null,
-    offset: offset ?? null
+    offset: offset ?? null,
+    sort: sort ?? null
   };
 
   // If no filters, use standard list (cached)

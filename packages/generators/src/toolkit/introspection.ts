@@ -1,4 +1,4 @@
-import { execSync } from 'node:child_process';
+import { execFileSync } from 'node:child_process';
 
 export interface ColumnMeta {
   name: string;
@@ -125,10 +125,14 @@ SELECT
 `;
 
   try {
-    const result = execSync(`psql "${dbUrl}" -t -A -c "${query.replace(/\n/g, ' ')}"`, {
-      encoding: 'utf-8',
-      stdio: 'pipe',
-    });
+    const result = execFileSync(
+      'psql',
+      ['-d', dbUrl, '-t', '-A', '-c', query.replace(/\n/g, ' ')],
+      {
+        encoding: 'utf-8',
+        stdio: 'pipe',
+      }
+    );
     return JSON.parse(result.trim());
   } catch (error) {
     throw new Error(`Failed to query database: ${(error as Error).message}`);

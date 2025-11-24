@@ -37,6 +37,9 @@ export default async function AccountLayout({ children }: { children: React.Reac
     data: { session },
   } = await supabase.auth.getSession();
 
+  // Compute userIdHash once for reuse in all log contexts
+  const userIdHash = hashUserId(user.id);
+
   if (session?.expires_at) {
     const expiresIn = session.expires_at - Math.floor(Date.now() / 1000);
     if (expiresIn < 3600) {
@@ -45,12 +48,12 @@ export default async function AccountLayout({ children }: { children: React.Reac
         const normalized = normalizeError(refreshError, 'Session refresh failed');
         logger.warn('AccountLayout: session refresh failed', {
           error: normalized.message,
-          userIdHash: hashUserId(user.id),
+          userIdHash,
         });
         // Continue with existing session - user may need to re-authenticate on next request
       } else if (refreshData.session) {
         logger.debug('AccountLayout: session refreshed successfully', {
-          userIdHash: hashUserId(user.id),
+          userIdHash,
         });
       }
     }
@@ -60,8 +63,6 @@ export default async function AccountLayout({ children }: { children: React.Reac
     user.user_metadata?.['full_name'] ?? user.user_metadata?.['name'] ?? user.email ?? null;
   const userImageMetadata =
     user.user_metadata?.['avatar_url'] ?? user.user_metadata?.['picture'] ?? null;
-
-  const userIdHash = hashUserId(user.id);
 
   // Fetch sponsorships in parallel with settings (they don't depend on each other)
   const sponsorshipsPromise = getUserSponsorships(user.id);

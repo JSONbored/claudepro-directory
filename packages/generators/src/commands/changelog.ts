@@ -1,5 +1,13 @@
 import { execSync } from 'node:child_process';
-import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import {
+  closeSync,
+  constants,
+  existsSync,
+  ftruncateSync,
+  openSync,
+  readFileSync,
+  writeFileSync,
+} from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { logger } from '../toolkit/logger.js';
@@ -105,28 +113,53 @@ function generateChangelog(options: GenerateOptions): string {
 
 /**
  * Prepend new entry to CHANGELOG.md
+ * Uses file descriptors to avoid race conditions between read and write operations
  */
 function prependToChangelog(newEntry: string): void {
-  // Read existing CHANGELOG.md
-  const existingContent = existsSync(CHANGELOG_PATH)
-    ? readFileSync(CHANGELOG_PATH, 'utf-8')
-    : '# Changelog\n';
-
   // Remove header from git-cliff output (we already have one)
   const entryWithoutHeader = newEntry.replace(/^#\s+Changelog\s*\n/, '');
 
-  // Find where to insert (after the main header)
-  const lines = existingContent.split('\n');
-  const headerIndex = lines.findIndex((line) => line.startsWith('# Changelog'));
+  // Open file with file descriptor to avoid race conditions
+  // Use O_CREAT | O_RDWR to atomically create if it doesn't exist, or open for read-write
+  // This eliminates the race condition from existsSync check
+  const fd = openSync(CHANGELOG_PATH, constants.O_CREAT | constants.O_RDWR, 0o644);
 
-  if (headerIndex === -1) {
-    // No header found, prepend everything
-    const newContent = `# Changelog\n${entryWithoutHeader}\n${existingContent}`;
-    writeFileSync(CHANGELOG_PATH, newContent, 'utf-8');
-  } else {
-    // Insert after header
-    lines.splice(headerIndex + 1, 0, entryWithoutHeader);
-    writeFileSync(CHANGELOG_PATH, lines.join('\n'), 'utf-8');
+  try {
+    // Read existing content using file descriptor
+    // readFileSync with fd reads from position 0 (beginning of file)
+    const content = readFileSync(fd, 'utf-8');
+    const existingContent = content.length > 0 ? content : '# Changelog\n';
+
+    // Find where to insert (after the main header)
+    const lines = existingContent.split('\n');
+    const headerIndex = lines.findIndex((line) => line.startsWith('# Changelog'));
+
+    let newContent: string;
+    if (headerIndex === -1) {
+      // No header found, prepend everything
+      newContent = `# Changelog\n${entryWithoutHeader}\n${existingContent}`;
+    } else {
+      // Insert after header
+      lines.splice(headerIndex + 1, 0, entryWithoutHeader);
+      newContent = lines.join('\n');
+    }
+
+    // Truncate file to 0 before writing to ensure clean overwrite
+    ftruncateSync(fd, 0);
+    // Write using file descriptor
+    writeFileSync(fd, newContent, 'utf-8');
+  } catch (error) {
+    logger.error(
+      'Error writing to CHANGELOG.md',
+      error instanceof Error ? error : new Error(String(error)),
+      {
+        script: 'changelog-generate-entry',
+      }
+    );
+    throw error;
+  } finally {
+    // Always close file descriptor
+    closeSync(fd);
   }
 
   logger.info('✅ Updated CHANGELOG.md\n', { script: 'changelog-generate-entry' });
