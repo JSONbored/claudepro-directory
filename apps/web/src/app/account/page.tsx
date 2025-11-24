@@ -283,7 +283,7 @@ export default async function AccountDashboard() {
           {resumeBookmarkHref && (
             <QuickActionRow
               title="Resume latest bookmark"
-              description={`Jump back into ${latestBookmark?.content_slug}`}
+              description="Continue where you left off"
               href={resumeBookmarkHref}
             />
           )}
@@ -325,9 +325,10 @@ export default async function AccountDashboard() {
               <ul className="space-y-3">
                 {recommendations.map((item) => {
                   const firstTag = ensureStringArray(item.tags)[0];
-                  const href = firstTag
+                  const itemHref = `/${item.category}/${item.slug}`;
+                  const similarHref = firstTag
                     ? `/search?tags=${encodeURIComponent(firstTag)}`
-                    : `/${item.category}/${item.slug}`;
+                    : null;
                   return (
                     <li
                       key={`${item.category}-${item.slug}`}
@@ -342,9 +343,19 @@ export default async function AccountDashboard() {
                             </p>
                           )}
                         </div>
-                        <NavLink href={href} className="font-medium text-sm">
-                          Explore →
-                        </NavLink>
+                        <div className="flex flex-col items-end gap-2">
+                          <NavLink href={itemHref} className="font-medium text-sm">
+                            Explore →
+                          </NavLink>
+                          {similarHref && (
+                            <NavLink
+                              href={similarHref}
+                              className="text-muted-foreground text-xs hover:text-foreground"
+                            >
+                              Explore similar →
+                            </NavLink>
+                          )}
+                        </div>
                       </div>
                     </li>
                   );

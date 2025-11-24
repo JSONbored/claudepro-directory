@@ -40,6 +40,7 @@ lerna-debug.log*
 # Project specific
 .claude/
 .cursor/
+docs/
 
 # Source ZIPs in content/skills/ are git-tracked for GitHub discoverability
 apps/web/public/downloads/skills/*.zip

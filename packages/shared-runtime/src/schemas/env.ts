@@ -176,6 +176,9 @@ const clientEnvSchema = z
     NEXT_PUBLIC_SUPABASE_ANON_KEY: nonEmptyString
       .optional()
       .describe('Supabase anonymous/public key (safe for client-side, RLS enforced)'),
+    NEXT_PUBLIC_STATSIG_CLIENT_KEY: nonEmptyString
+      .optional()
+      .describe('Statsig client SDK key used for client-side flag hydration'),
   })
   .describe(
     'Client-side environment variables exposed to the browser (must not contain sensitive data)'

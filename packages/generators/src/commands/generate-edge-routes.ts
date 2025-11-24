@@ -127,7 +127,7 @@ async function generateRouterFile(routes: RouteConfig[]) {
       // This is "cheating" the generator but necessary for 1:1 migration without refactoring the sub-handlers
       handlerLogic = `async (ctx) => {
         // Check for sub-routes
-        if (ctx.segments[2] === 'upload') {
+        if (ctx.segments[1] === 'upload') {
           const rateLimit = checkRateLimit(ctx.request, RATE_LIMIT_PRESETS.heavy);
           if (!rateLimit.allowed) {
             return jsonResponse({ error: 'Too Many Requests', message: 'Rate limit exceeded', retryAfter: rateLimit.retryAfter }, 429, BASE_CORS, { 'Retry-After': String(rateLimit.retryAfter ?? 60), 'X-RateLimit-Limit': String(RATE_LIMIT_PRESETS.heavy.maxRequests), 'X-RateLimit-Remaining': String(rateLimit.remaining), 'X-RateLimit-Reset': String(rateLimit.resetAt) });
@@ -140,7 +140,7 @@ async function generateRouterFile(routes: RouteConfig[]) {
           headers.set('X-RateLimit-Reset', String(rateLimit.resetAt));
           return new Response(response.body, { status: response.status, headers });
         }
-        if (ctx.segments[2] === 'process') {
+        if (ctx.segments[1] === 'process') {
           const rateLimit = checkRateLimit(ctx.request, RATE_LIMIT_PRESETS.heavy);
           if (!rateLimit.allowed) {
             return jsonResponse({ error: 'Too Many Requests', message: 'Rate limit exceeded', retryAfter: rateLimit.retryAfter }, 429, BASE_CORS, { 'Retry-After': String(rateLimit.retryAfter ?? 60), 'X-RateLimit-Limit': String(RATE_LIMIT_PRESETS.heavy.maxRequests), 'X-RateLimit-Remaining': String(rateLimit.remaining), 'X-RateLimit-Reset': String(rateLimit.resetAt) });

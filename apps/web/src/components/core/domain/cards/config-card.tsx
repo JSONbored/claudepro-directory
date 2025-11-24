@@ -4,7 +4,7 @@
 
 import type { Database } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
-import { addBookmark, getComponentConfig } from '@heyclaude/web-runtime/actions';
+import { addBookmark } from '@heyclaude/web-runtime/actions';
 import {
   ensureStringArray,
   formatViewCount,
@@ -36,7 +36,7 @@ import {
   UI_CLASSES,
 } from '@heyclaude/web-runtime/ui';
 import { useRouter } from 'next/navigation';
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef } from 'react';
 import { BookmarkButton } from '@/src/components/core/buttons/interaction/bookmark-button';
 import { SimpleCopyButton } from '@/src/components/core/buttons/shared/simple-copy-button';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
@@ -45,6 +45,7 @@ import { HighlightedText } from '@/src/components/core/shared/highlighted-text';
 import { BorderBeam } from '@/src/components/primitives/animation/border-beam';
 import { ReviewRatingCompact } from '@/src/components/primitives/feedback/review-rating-compact';
 import { Button } from '@/src/components/primitives/ui/button';
+import { useComponentCardConfig } from '@/src/components/providers/component-config-context';
 import { usePinboard } from '@/src/hooks/use-pinboard';
 
 // Experience level validation helper
@@ -251,13 +252,7 @@ export const ConfigCard = memo(
         action: 'swipe_copy',
       },
     });
-    const [cardConfig, setCardConfig] = useState({
-      showCopyButton: true,
-      showBookmark: true,
-      showViewCount: true,
-      showCopyCount: true,
-      showRating: false,
-    });
+    const cardConfig = useComponentCardConfig();
 
     // Track highlight visibility for analytics (fire and forget)
     const hasTrackedHighlight = useRef(false);
@@ -346,24 +341,6 @@ export const ConfigCard = memo(
             'subcategory' in item ? (item.subcategory as string | null | undefined) : undefined,
         })
       : '';
-
-    useEffect(() => {
-      getComponentConfig({})
-        .then((result) => {
-          if (!result?.data) return;
-          const config = result.data;
-          setCardConfig({
-            showCopyButton: config['cards.show_copy_button'],
-            showBookmark: config['cards.show_bookmark'],
-            showViewCount: config['cards.show_view_count'],
-            showCopyCount: config['cards.show_copy_count'],
-            showRating: config['cards.show_rating'],
-          });
-        })
-        .catch((error) => {
-          logClientWarning('ConfigCard: failed to load component config', error);
-        });
-    }, []);
 
     // Swipe gesture handlers for mobile quick actions
     const handleSwipeRightCopy = useCallback(async () => {

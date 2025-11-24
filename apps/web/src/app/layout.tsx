@@ -31,6 +31,7 @@ import { Pulse } from '@/src/components/core/infra/pulse';
 import { PulseCannon } from '@/src/components/core/infra/pulse-cannon';
 import { StructuredData } from '@/src/components/core/infra/structured-data';
 import { LayoutContent } from '@/src/components/core/layout/root-layout-wrapper';
+import { ComponentConfigProvider } from '@/src/components/providers/component-config-provider';
 import { NotificationsProvider } from '@/src/components/providers/notifications-provider';
 
 // CRITICAL: Lazy-load getLayoutFlags to prevent flags.ts from being analyzed during build
@@ -229,21 +230,23 @@ export default async function RootLayout({
           enableColorScheme={false}
         >
           <FeatureFlagsProvider initialFlags={null}>
-            <PostCopyEmailProvider>
-              <NotificationsProvider>
-                <ErrorBoundary>
-                  <LayoutContent
-                    announcement={layoutData.announcement}
-                    navigationData={layoutData.navigationData}
-                  >
-                    {children}
-                  </LayoutContent>
-                </ErrorBoundary>
-                <Toaster />
-                <NotificationToastHandler />
-                {/* Newsletter capture is conditionally rendered in LayoutContent for non-auth pages */}
-              </NotificationsProvider>
-            </PostCopyEmailProvider>
+            <ComponentConfigProvider>
+              <PostCopyEmailProvider>
+                <NotificationsProvider>
+                  <ErrorBoundary>
+                    <LayoutContent
+                      announcement={layoutData.announcement}
+                      navigationData={layoutData.navigationData}
+                    >
+                      {children}
+                    </LayoutContent>
+                  </ErrorBoundary>
+                  <Toaster />
+                  <NotificationToastHandler />
+                  {/* Newsletter capture is conditionally rendered in LayoutContent for non-auth pages */}
+                </NotificationsProvider>
+              </PostCopyEmailProvider>
+            </ComponentConfigProvider>
           </FeatureFlagsProvider>
         </ThemeProvider>
         {/* Pulse Cannon - Unified pulse loading system (loads after page idle) */}

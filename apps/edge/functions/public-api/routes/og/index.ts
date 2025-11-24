@@ -604,6 +604,8 @@ export async function handleOGImageRequest(req: Request, startTime: number): Pro
     }
     // Long-term caching: OG images rarely change (30 days TTL, 90 days stale-while-revalidate)
     // Content pages rarely update, so we can cache aggressively
+    // Note: Using 'seo' cache preset key with custom overrides (default 'seo' is 1d/2d, we use 30d/90d)
+    // The preset key is used for observability; actual TTL values come from overrides
     const cacheTtl = 60 * 60 * 24 * 30; // 30 days
     const cacheStale = 60 * 60 * 24 * 90; // 90 days
     for (const [key, value] of Object.entries(

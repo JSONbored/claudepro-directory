@@ -68,7 +68,9 @@ export async function getSeoMetadata(
     const description =
       typeof metadataObj['description'] === 'string' ? metadataObj['description'] : '';
     const keywords = Array.isArray(metadataObj['keywords'])
-      ? (metadataObj['keywords'] as string[])
+      ? (metadataObj['keywords'] as unknown[]).filter(
+          (item): item is string => typeof item === 'string'
+        )
       : [];
 
     if (!title) {
@@ -80,8 +82,10 @@ export async function getSeoMetadata(
       description,
       keywords,
     };
-  } catch {
+  } catch (error) {
     // Return null on error - caller should handle fallback
+    // Log error for debugging while maintaining API contract
+    console.error('Failed to generate SEO metadata:', error);
     return null;
   }
 }

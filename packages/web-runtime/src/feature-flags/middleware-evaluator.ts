@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr';
 import type { NextRequest } from 'next/server';
+import { getEnvVar } from '@heyclaude/shared-runtime';
 import { logger } from '../logger.ts';
 
 // We use direct fetch to avoid heavy SDKs in middleware
@@ -7,13 +8,23 @@ import { logger } from '../logger.ts';
 const STATSIG_API_URL = 'https://api.statsig.com/v1/get_client_initialize_response';
 const TIMEOUT_MS = 500; // Aggressive timeout for middleware
 
+let missingEnvWarningEmitted = false;
+
 export async function evaluateFlags(request: NextRequest) {
-  const supabaseUrl = process.env['NEXT_PUBLIC_SUPABASE_URL'];
-  const supabaseAnonKey = process.env['NEXT_PUBLIC_SUPABASE_ANON_KEY'];
-  const statsigClientKey = process.env['NEXT_PUBLIC_STATSIG_CLIENT_KEY'];
+  const supabaseUrl = getEnvVar('NEXT_PUBLIC_SUPABASE_URL');
+  const supabaseAnonKey = getEnvVar('NEXT_PUBLIC_SUPABASE_ANON_KEY');
+  const statsigClientKey = getEnvVar('NEXT_PUBLIC_STATSIG_CLIENT_KEY');
 
   if (!supabaseUrl || !supabaseAnonKey || !statsigClientKey) {
-    logger.warn('Missing env vars for flag evaluation');
+    if (!missingEnvWarningEmitted) {
+      const missing = [
+        !supabaseUrl ? 'NEXT_PUBLIC_SUPABASE_URL' : null,
+        !supabaseAnonKey ? 'NEXT_PUBLIC_SUPABASE_ANON_KEY' : null,
+        !statsigClientKey ? 'NEXT_PUBLIC_STATSIG_CLIENT_KEY' : null,
+      ].filter(Boolean);
+      logger.warn('Missing env vars for flag evaluation', { missing });
+      missingEnvWarningEmitted = true;
+    }
     return null;
   }
 
