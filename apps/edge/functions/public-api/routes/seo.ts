@@ -23,6 +23,7 @@ export async function handleSeoRoute(
   segments: string[],
   url: URL,
   method: string,
+  request?: Request,
   logContext?: BaseLogContext
 ): Promise<Response> {
   if (method !== 'GET') {
@@ -31,6 +32,14 @@ export async function handleSeoRoute(
 
   if (segments.length > 0) {
     return badRequestResponse('SEO path does not accept nested segments', CORS);
+  }
+
+  // Loopback detection: if X-Internal-Loopback header is present, this is an internal call
+  // In this case, we should use the direct function call instead of making another HTTP request
+  // This prevents circular calls when OG route falls back to HTTP
+  const isLoopback = request?.headers.get('X-Internal-Loopback') === 'true';
+  if (isLoopback && logContext) {
+    logWarn('Loopback call detected, consider using direct function call instead', logContext);
   }
 
   const routeParam = url.searchParams.get('route');

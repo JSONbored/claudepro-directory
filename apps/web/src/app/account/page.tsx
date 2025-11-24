@@ -15,7 +15,6 @@ import type { HomepageContentItem } from '@heyclaude/web-runtime/types/component
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { Suspense } from 'react';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { NavLink } from '@/src/components/core/navigation/navigation-link';
 import { RecentlySavedGrid } from '@/src/components/features/account/recently-saved-grid';
@@ -182,9 +181,20 @@ export default async function AccountDashboard() {
     }
   }
 
-  const homepageCategoryData =
-    ((homepageData?.content as { categoryData?: Record<string, HomepageContentItem[]> }) ?? null)
-      ?.categoryData ?? {};
+  // Helper to safely extract categoryData
+  function extractHomepageCategoryData(
+    homepageData: Awaited<ReturnType<typeof getHomepageData>> | null
+  ): Record<string, HomepageContentItem[]> {
+    if (!homepageData?.content || typeof homepageData.content !== 'object') {
+      return {};
+    }
+    const content = homepageData.content as {
+      categoryData?: Record<string, HomepageContentItem[]>;
+    };
+    return content.categoryData ?? {};
+  }
+
+  const homepageCategoryData = extractHomepageCategoryData(homepageData);
 
   const homepageItems = Object.values(homepageCategoryData).flatMap((bucket) =>
     Array.isArray(bucket) ? (bucket as HomepageContentItem[]) : []
@@ -236,18 +246,15 @@ export default async function AccountDashboard() {
             <CardTitle className="text-sm">Tier</CardTitle>
           </CardHeader>
           <CardContent>
-            {(() => {
-              const tier = profile?.tier;
-              return (
-                <UnifiedBadge
-                  variant="base"
-                  style={tier === 'pro' ? 'default' : 'secondary'}
-                  className="mt-2"
-                >
-                  {tier ? tier.charAt(0).toUpperCase() + tier.slice(1) : 'Free'}
-                </UnifiedBadge>
-              );
-            })()}
+            <UnifiedBadge
+              variant="base"
+              style={profile?.tier === 'pro' ? 'default' : 'secondary'}
+              className="mt-2"
+            >
+              {profile?.tier
+                ? profile.tier.charAt(0).toUpperCase() + profile.tier.slice(1)
+                : 'Free'}
+            </UnifiedBadge>
             <p className={'mt-2 text-muted-foreground text-xs'}>Membership level</p>
           </CardContent>
         </Card>
@@ -301,9 +308,7 @@ export default async function AccountDashboard() {
           </CardHeader>
           <CardContent>
             {recentlySavedContent.length > 0 ? (
-              <Suspense fallback={<RecentlySavedSkeleton />}>
-                <RecentlySavedGrid items={recentlySavedContent} />
-              </Suspense>
+              <RecentlySavedGrid items={recentlySavedContent} />
             ) : (
               <EmptyRecentlySavedState />
             )}
@@ -375,20 +380,6 @@ function QuickActionRow({
       <NavLink href={href} className="font-semibold text-sm">
         Open →
       </NavLink>
-    </div>
-  );
-}
-
-function RecentlySavedSkeleton() {
-  const skeletonPlaceholders = ['first', 'second', 'third'];
-  return (
-    <div className="grid gap-4 sm:grid-cols-2">
-      {skeletonPlaceholders.map((token) => (
-        <div
-          key={`recently-saved-skeleton-${token}`}
-          className="h-32 animate-pulse rounded-2xl border border-border/50 bg-muted/20"
-        />
-      ))}
     </div>
   );
 }

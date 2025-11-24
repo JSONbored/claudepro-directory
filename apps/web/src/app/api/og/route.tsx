@@ -11,10 +11,14 @@ export async function GET(request: NextRequest) {
   const type = searchParams.get('type') || OG_DEFAULTS.type;
   const rawTags = searchParams.get('tags');
   const tags = rawTags
-    ? rawTags
-        .split(',')
-        .map((tag) => tag.trim())
-        .filter((tag) => tag.length > 0)
+    ? Array.from(
+        new Set(
+          rawTags
+            .split(',')
+            .map((tag) => tag.trim())
+            .filter((tag) => tag.length > 0)
+        )
+      )
     : [];
 
   return new ImageResponse(
@@ -88,9 +92,9 @@ export async function GET(request: NextRequest) {
       >
         {tags.length > 0 && (
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
-            {tags.slice(0, 5).map((tag, index) => (
+            {tags.slice(0, 5).map((tag) => (
               <div
-                key={`${tag}-${index}`}
+                key={tag}
                 style={{
                   backgroundColor: '#2a2010',
                   color: '#f97316',

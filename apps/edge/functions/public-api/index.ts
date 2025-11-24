@@ -134,7 +134,7 @@ const ROUTE_HANDLERS: Record<string, (ctx: PublicApiContext) => Promise<Response
       path: ctx.pathname,
       method: ctx.method,
     });
-    return handleSeoRoute(ctx.segments.slice(1), ctx.url, ctx.method, logContext);
+    return handleSeoRoute(ctx.segments.slice(1), ctx.url, ctx.method, ctx.request, logContext);
   },
   sitemap: (ctx) => {
     const logContext = createPublicApiContext('sitemap', {

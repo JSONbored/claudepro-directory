@@ -6,7 +6,7 @@
  */
 
 import { ImageResponse } from 'https://deno.land/x/og_edge@0.0.4/mod.ts';
-import React from 'https://esm.sh/react@18.2.0';
+import React from 'npm:react@18.3.1';
 import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
 import {
@@ -35,6 +35,7 @@ import {
   withDuration,
   withTimeout,
 } from '@heyclaude/shared-runtime';
+import { getSeoMetadata } from '../../lib/seo.ts';
 
 const CORS = getOnlyCorsHeaders;
 const OG_WIDTH = 1200;
@@ -76,8 +77,50 @@ function createOGImageContext(action: string, options?: Record<string, unknown>)
 }
 
 /**
- * Fetch metadata from data-api/seo endpoint with circuit breaker and timeout
- * Falls back to route-based title extraction if SEO API fails
+ * Extract metadata from HTTP response data
+ * Handles both { metadata: {...} } and {...} response shapes
+ */
+function extractMetadataFromResponse(data: unknown): {
+  title?: string;
+  description?: string;
+  keywords?: string[];
+} {
+  if (typeof data !== 'object' || data === null) {
+    return {};
+  }
+
+  const getStringProperty = (obj: object, key: string): string | undefined => {
+    const desc = Object.getOwnPropertyDescriptor(obj, key);
+    return desc && typeof desc.value === 'string' ? desc.value : undefined;
+  };
+
+  const getArrayProperty = (obj: object, key: string): unknown[] | undefined => {
+    const desc = Object.getOwnPropertyDescriptor(obj, key);
+    return desc && Array.isArray(desc.value) ? desc.value : undefined;
+  };
+
+  // Handle both { metadata: {...} } and {...} shapes
+  const source =
+    'metadata' in data && typeof data.metadata === 'object' && data.metadata !== null
+      ? data.metadata
+      : data;
+
+  const metadata: { title?: string; description?: string; keywords?: string[] } = {};
+  const title = getStringProperty(source, 'title');
+  const description = getStringProperty(source, 'description');
+  const keywordsArray = getArrayProperty(source, 'keywords');
+  const keywords = keywordsArray?.filter((k): k is string => typeof k === 'string');
+
+  if (title !== undefined) metadata.title = title;
+  if (description !== undefined) metadata.description = description;
+  if (keywords !== undefined) metadata.keywords = keywords;
+
+  return metadata;
+}
+
+/**
+ * Fetch metadata from SEO service with direct function call (no HTTP loopback)
+ * Falls back to HTTP call if direct call fails, then to route-based title extraction
  * Always returns OGImageParams (never null)
  */
 async function fetchMetadataFromRoute(
@@ -88,196 +131,186 @@ async function fetchMetadataFromRoute(
   // Compute route type upfront to reuse across all return paths
   const routeType = extractTypeFromRoute(route);
 
-  // Note: We're calling the same monolith here (public-api) via HTTP.
-  // In a perfect world we'd call the handler directly, but SEO logic is complex and bound to HTTP context.
-  // For now, loopback call is acceptable (and cached).
-  const seoUrl = `${supabaseUrl}/functions/v1/public-api/seo?route=${encodeURIComponent(route)}&include=metadata`;
-
+  // Try direct function call first (avoids HTTP loopback and reduces latency)
   try {
-    const fetchMetadata = async () => {
-      const response = await fetch(seoUrl, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text().catch(() => 'Unknown error');
-        throw new Error(`SEO API returned ${response.status}: ${errorText}`);
+    const fetchMetadataDirect = async () => {
+      const result = await getSeoMetadata(route, supabaseAnon, 'metadata');
+      if (!result) {
+        throw new Error('SEO metadata generation returned null');
       }
-
-      const data = await response.json();
-
-      // Extract metadata from response
-      // Response can be either { title, description, ... } or { metadata: { title, description, ... } }
-      // Validate structure without type assertions - use Object.getOwnPropertyDescriptor
-      let metadata: { title?: string; description?: string; keywords?: string[] } = {};
-      if (typeof data === 'object' && data !== null) {
-        // Helper to safely extract property from object without type assertion
-        const getStringProperty = (obj: object, key: string): string | undefined => {
-          const desc = Object.getOwnPropertyDescriptor(obj, key);
-          if (desc && typeof desc.value === 'string') {
-            return desc.value;
-          }
-          return undefined;
-        };
-
-        const getArrayProperty = (obj: object, key: string): unknown[] | undefined => {
-          const desc = Object.getOwnPropertyDescriptor(obj, key);
-          if (desc && Array.isArray(desc.value)) {
-            return desc.value;
-          }
-          return undefined;
-        };
-
-        if ('metadata' in data && typeof data.metadata === 'object' && data.metadata !== null) {
-          // Extract from nested metadata object
-          const metadataObj = data.metadata;
-          const title = getStringProperty(metadataObj, 'title');
-          const description = getStringProperty(metadataObj, 'description');
-          const keywordsArray = getArrayProperty(metadataObj, 'keywords');
-          const keywords = keywordsArray
-            ? keywordsArray.filter((k: unknown): k is string => typeof k === 'string')
-            : undefined;
-
-          // Build metadata object conditionally to satisfy exactOptionalPropertyTypes
-          metadata = {};
-          if (title !== undefined) metadata.title = title;
-          if (description !== undefined) metadata.description = description;
-          if (keywords !== undefined) metadata.keywords = keywords;
-        } else if ('title' in data || 'description' in data || 'keywords' in data) {
-          // Extract from top-level object
-          const title = getStringProperty(data, 'title');
-          const description = getStringProperty(data, 'description');
-          const keywordsArray = getArrayProperty(data, 'keywords');
-          const keywords = keywordsArray
-            ? keywordsArray.filter((k: unknown): k is string => typeof k === 'string')
-            : undefined;
-
-          // Build metadata object conditionally to satisfy exactOptionalPropertyTypes
-          metadata = {};
-          if (title !== undefined) metadata.title = title;
-          if (description !== undefined) metadata.description = description;
-          if (keywords !== undefined) metadata.keywords = keywords;
-        }
-      }
-
-      if (!metadata?.title) {
-        throw new Error('Metadata missing title');
-      }
-
       return {
-        title: metadata.title || OG_DEFAULTS.title,
-        description: metadata.description || OG_DEFAULTS.description,
+        title: result.title || OG_DEFAULTS.title,
+        description: result.description || OG_DEFAULTS.description,
         type: routeType || OG_DEFAULTS.type,
-        tags: Array.isArray(metadata.keywords) ? metadata.keywords : [],
+        tags: Array.isArray(result.keywords) ? result.keywords : [],
       };
     };
 
     // Wrap with circuit breaker and timeout
     const metadata = await withTimeout(
-      withCircuitBreaker('og-image:seo-api', fetchMetadata, CIRCUIT_BREAKER_CONFIGS.external),
-      TIMEOUT_PRESETS.external,
-      'SEO API call timed out'
+      withCircuitBreaker('og-image:seo-direct', fetchMetadataDirect, CIRCUIT_BREAKER_CONFIGS.rpc),
+      TIMEOUT_PRESETS.rpc,
+      'SEO direct call timed out'
     );
+
+    logInfo('SEO metadata fetched via direct call', {
+      ...logContext,
+      source: 'direct-function',
+    });
 
     return metadata;
   } catch (error) {
-    logWarn('SEO API fetch failed, attempting direct database fallback', {
+    logWarn('Direct SEO metadata call failed, attempting HTTP fallback', {
       ...logContext,
       error: errorToString(error),
-      seoUrl,
     });
 
-    // Fallback 1: Try direct database query for content routes
-    if (
-      routeType &&
-      routeType !== 'website' &&
-      route.includes('/') &&
-      isValidContentCategory(routeType)
-    ) {
-      // Type guard narrows type to ENUM - database will validate
-      // Use filter(Boolean) to handle trailing slashes (e.g., /agents/foo/ -> 'foo')
-      const slug = route.split('/').filter(Boolean).pop() || '';
-      if (slug) {
-        try {
-          // Try to get content directly from database
-          // Database validates ENUM - no type assertion needed after type guard
-          const rpcArgs = {
-            p_category: routeType, // Type guard has narrowed this to ENUM
-            p_slug: slug,
-            p_base_url: SITE_URL,
-          } satisfies DatabaseGenerated['public']['Functions']['get_api_content_full']['Args'];
-          const { data: contentData, error: dbError } = await withTimeout(
-            withCircuitBreaker(
-              'og-image:fetch-content',
-              async () => await supabaseAnon.rpc('get_api_content_full', rpcArgs),
-              CIRCUIT_BREAKER_CONFIGS.rpc
-            ),
-            TIMEOUT_PRESETS.rpc,
-            'Database RPC timed out'
-          );
+    // Fallback to HTTP call (with loopback detection guard)
+    const seoUrl = `${supabaseUrl}/functions/v1/public-api/seo?route=${encodeURIComponent(route)}&include=metadata`;
 
-          // get_api_content_full returns a JSON string, not an object
-          if (!dbError && contentData && typeof contentData === 'string') {
-            try {
-              const parsedContent = JSON.parse(contentData);
-              // Validate structure without type assertions
-              if (
-                typeof parsedContent === 'object' &&
-                parsedContent !== null &&
-                'title' in parsedContent &&
-                typeof parsedContent.title === 'string'
-              ) {
-                const title = parsedContent.title;
-                const description =
-                  'description' in parsedContent && typeof parsedContent.description === 'string'
-                    ? parsedContent.description
-                    : undefined;
-                const tags =
-                  'tags' in parsedContent && Array.isArray(parsedContent.tags)
-                    ? parsedContent.tags.filter(
-                        (tag: unknown): tag is string => typeof tag === 'string'
-                      )
-                    : [];
+    try {
+      const fetchMetadataHttp = async () => {
+        // Loopback detection: X-Internal-Loopback header is set to prevent circular calls
+        // The SEO route handler will detect this header and log a warning
+        const response = await fetch(seoUrl, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Internal-Loopback': 'true', // Mark as internal call to prevent circular calls
+          },
+        });
 
-                logInfo('Direct database fallback succeeded', {
+        if (!response.ok) {
+          const errorText = await response.text().catch(() => 'Unknown error');
+          throw new Error(`SEO API returned ${response.status}: ${errorText}`);
+        }
+
+        const data = await response.json();
+
+        // Extract metadata from response
+        const metadata = extractMetadataFromResponse(data);
+
+        if (!metadata.title) {
+          throw new Error('Metadata missing title');
+        }
+
+        return {
+          title: metadata.title,
+          description: metadata.description || OG_DEFAULTS.description,
+          type: routeType || OG_DEFAULTS.type,
+          tags: Array.isArray(metadata.keywords) ? metadata.keywords : [],
+        };
+      };
+
+      // Wrap with circuit breaker and timeout
+      const metadata = await withTimeout(
+        withCircuitBreaker('og-image:seo-api', fetchMetadataHttp, CIRCUIT_BREAKER_CONFIGS.external),
+        TIMEOUT_PRESETS.external,
+        'SEO API call timed out'
+      );
+
+      logInfo('SEO metadata fetched via HTTP fallback', {
+        ...logContext,
+        source: 'http-fallback',
+      });
+
+      return metadata;
+    } catch (httpError) {
+      logWarn('HTTP fallback also failed, attempting direct database fallback', {
+        ...logContext,
+        error: errorToString(httpError),
+        seoUrl,
+      });
+
+      // Fallback 1: Try direct database query for content routes
+      if (
+        routeType &&
+        routeType !== 'website' &&
+        route.includes('/') &&
+        isValidContentCategory(routeType)
+      ) {
+        // Type guard narrows type to ENUM - database will validate
+        // Use filter(Boolean) to handle trailing slashes (e.g., /agents/foo/ -> 'foo')
+        const slug = route.split('/').filter(Boolean).pop() || '';
+        if (slug) {
+          try {
+            // Try to get content directly from database
+            // Database validates ENUM - no type assertion needed after type guard
+            const rpcArgs = {
+              p_category: routeType, // Type guard has narrowed this to ENUM
+              p_slug: slug,
+              p_base_url: SITE_URL,
+            } satisfies DatabaseGenerated['public']['Functions']['get_api_content_full']['Args'];
+            const { data: contentData, error: dbError } = await withTimeout(
+              withCircuitBreaker(
+                'og-image:fetch-content',
+                async () => await supabaseAnon.rpc('get_api_content_full', rpcArgs),
+                CIRCUIT_BREAKER_CONFIGS.rpc
+              ),
+              TIMEOUT_PRESETS.rpc,
+              'Database RPC timed out'
+            );
+
+            // get_api_content_full returns a JSON string, not an object
+            if (!dbError && contentData && typeof contentData === 'string') {
+              try {
+                const parsedContent = JSON.parse(contentData);
+                // Validate structure without type assertions
+                if (
+                  typeof parsedContent === 'object' &&
+                  parsedContent !== null &&
+                  'title' in parsedContent &&
+                  typeof parsedContent.title === 'string'
+                ) {
+                  const title = parsedContent.title;
+                  const description =
+                    'description' in parsedContent && typeof parsedContent.description === 'string'
+                      ? parsedContent.description
+                      : undefined;
+                  const tags =
+                    'tags' in parsedContent && Array.isArray(parsedContent.tags)
+                      ? parsedContent.tags.filter(
+                          (tag: unknown): tag is string => typeof tag === 'string'
+                        )
+                      : [];
+
+                  logInfo('Direct database fallback succeeded', {
+                    ...logContext,
+                    source: 'database-rpc',
+                  });
+                  return {
+                    title: title || OG_DEFAULTS.title,
+                    description: description || OG_DEFAULTS.description,
+                    type: routeType || OG_DEFAULTS.type,
+                    tags,
+                  };
+                }
+              } catch (parseError) {
+                logWarn('Failed to parse content JSON from database', {
                   ...logContext,
-                  source: 'database-rpc',
+                  parseError: parseError instanceof Error ? parseError.message : String(parseError),
                 });
-                return {
-                  title: title || OG_DEFAULTS.title,
-                  description: description || OG_DEFAULTS.description,
-                  type: routeType || OG_DEFAULTS.type,
-                  tags,
-                };
               }
-            } catch (parseError) {
-              logWarn('Failed to parse content JSON from database', {
-                ...logContext,
-                parseError: parseError instanceof Error ? parseError.message : String(parseError),
-              });
             }
+          } catch (dbError) {
+            logWarn('Direct database fallback also failed, using route-based extraction', {
+              ...logContext,
+              dbError: dbError instanceof Error ? dbError.message : String(dbError),
+            });
           }
-        } catch (dbError) {
-          logWarn('Direct database fallback also failed, using route-based extraction', {
-            ...logContext,
-            dbError: dbError instanceof Error ? dbError.message : String(dbError),
-          });
         }
       }
+
+      // Fallback 2: Extract basic info from route (last resort)
+      const title = deriveTitleFromRoute(route);
+
+      return {
+        title,
+        description: OG_DEFAULTS.description,
+        type: routeType || OG_DEFAULTS.type,
+        tags: [],
+      };
     }
-
-    // Fallback 2: Extract basic info from route (last resort)
-    const title = deriveTitleFromRoute(route);
-
-    return {
-      title,
-      description: OG_DEFAULTS.description,
-      type: routeType || OG_DEFAULTS.type,
-      tags: [],
-    };
   }
 }
 
