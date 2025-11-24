@@ -84,7 +84,7 @@
     "@supabase/ssr": "^0.7.0",
     "@supabase/supabase-js": "^2.81.1",
     "@tailwindcss/postcss": "^4.1.17",
-    "@types/node": "^24.10.0",
+    "@types/node": "^24.10.1",
     "@types/react": "^19.2.3",
     "@types/react-dom": "^19.2.2",
     "@vercel/analytics": "^1.5.0",
