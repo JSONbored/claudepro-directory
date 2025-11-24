@@ -94,10 +94,7 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPageProps
   const status: JobStatus = job.status ?? 'draft';
 
   const formatStatus = (rawStatus: string) => {
-    return rawStatus
-      .split('_')
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ');
+    return rawStatus.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
   };
 
   return (

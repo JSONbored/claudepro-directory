@@ -35,6 +35,17 @@ const NewsletterCTAVariant = dynamicImport(
   }
 );
 
+const RecentlyViewedRail = dynamicImport(
+  () =>
+    import('@/src/components/features/home/recently-viewed-rail').then((mod) => ({
+      default: mod.RecentlyViewedRail,
+    })),
+  {
+    ssr: false,
+    loading: () => null,
+  }
+);
+
 import { logger, normalizeError } from '@heyclaude/web-runtime/core';
 import type { SearchFacetAggregate } from '@heyclaude/web-runtime/server';
 import {
@@ -206,6 +217,10 @@ export default async function HomePage({ searchParams }: HomePageProps) {
             </div>
           </div>
         </section>
+
+        <LazySection>
+          <RecentlyViewedRail />
+        </LazySection>
 
         <div className={'relative'}>
           <Suspense fallback={<HomePageLoading />}>

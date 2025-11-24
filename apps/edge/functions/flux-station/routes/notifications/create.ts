@@ -2,8 +2,8 @@
  * Create Notification Route
  * POST /notifications/create - Create a new notification
  *
- * Notifications are global (visible to all users), so auth is optional.
- * If auth token is provided, it's used for logging context only.
+ * Notifications are global (visible to all users).
+ * Auth is required to create a notification.
  */
 
 import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
@@ -28,6 +28,14 @@ export async function handleCreateNotification(req: Request): Promise<Response> 
   // Optional auth - use for logging context if provided
   const authHeader = req.headers.get('Authorization');
   const authResult = authHeader ? await getAuthUserFromHeader(authHeader) : null;
+
+  // Require a valid authenticated caller for creating global notifications
+  if (!authResult) {
+    return badRequestResponse(
+      'Unauthorized: missing or invalid Authorization header',
+      notificationCorsHeaders
+    );
+  }
 
   // Validate body size before reading
   const contentLength = req.headers.get('content-length');

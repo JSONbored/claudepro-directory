@@ -82,6 +82,9 @@ async function fetchMetadataFromRoute(
   logContext: BaseLogContext
 ): Promise<OGImageParams | null> {
   const supabaseUrl = edgeEnv.supabase.url;
+  // Compute route type upfront to reuse across all return paths
+  const routeType = extractTypeFromRoute(route);
+
   // Note: We're calling the same monolith here (public-api) via HTTP.
   // In a perfect world we'd call the handler directly, but SEO logic is complex and bound to HTTP context.
   // For now, loopback call is acceptable (and cached).
@@ -164,7 +167,7 @@ async function fetchMetadataFromRoute(
       return {
         title: metadata.title || 'Claude Pro Directory',
         description: metadata.description || 'Community-curated agents, MCPs, and rules',
-        type: extractTypeFromRoute(route) || 'agents',
+        type: routeType || 'agents',
         tags: Array.isArray(metadata.keywords) ? metadata.keywords : [],
       };
     };
@@ -185,8 +188,12 @@ async function fetchMetadataFromRoute(
     });
 
     // Fallback 1: Try direct database query for content routes
-    const type = extractTypeFromRoute(route);
-    if (type && type !== 'website' && route.includes('/') && isValidContentCategory(type)) {
+    if (
+      routeType &&
+      routeType !== 'website' &&
+      route.includes('/') &&
+      isValidContentCategory(routeType)
+    ) {
       // Type guard narrows type to ENUM - database will validate
       const slug = route.split('/').pop() || '';
       if (slug) {
@@ -194,7 +201,7 @@ async function fetchMetadataFromRoute(
           // Try to get content directly from database
           // Database validates ENUM - no type assertion needed after type guard
           const rpcArgs = {
-            p_category: type, // Type guard has narrowed this to ENUM
+            p_category: routeType, // Type guard has narrowed this to ENUM
             p_slug: slug,
             p_base_url: SITE_URL,
           } satisfies DatabaseGenerated['public']['Functions']['get_api_content_full']['Args'];
@@ -233,7 +240,7 @@ async function fetchMetadataFromRoute(
                 return {
                   title: title || 'Claude Pro Directory',
                   description: description || 'Community-curated agents, MCPs, and rules',
-                  type: type || 'agents',
+                  type: routeType || 'agents',
                   tags,
                 };
               }
@@ -264,7 +271,7 @@ async function fetchMetadataFromRoute(
     return {
       title,
       description: 'Community-curated agents, MCPs, and rules',
-      type: type || 'agents',
+      type: routeType || 'agents',
       tags: [],
     };
   }
@@ -507,6 +514,8 @@ export async function handleOGImageRequest(req: Request, startTime: number): Pro
     }
 
     const sanitizedRoute = sanitizeRoute(routeParam);
+    // Compute route type upfront
+    const routeType = extractTypeFromRoute(sanitizedRoute);
     const metadata = await fetchMetadataFromRoute(sanitizedRoute, logContext);
 
     if (metadata) {
@@ -514,7 +523,6 @@ export async function handleOGImageRequest(req: Request, startTime: number): Pro
     } else {
       logError('Failed to fetch metadata for route, using minimal fallback', logContext);
       // Minimal fallback - at least show something
-      const type = extractTypeFromRoute(sanitizedRoute);
       const slug = sanitizedRoute.split('/').pop() || '';
       const fallbackTitle =
         slug
@@ -525,7 +533,7 @@ export async function handleOGImageRequest(req: Request, startTime: number): Pro
       params = {
         title: fallbackTitle,
         description: 'Community-curated agents, MCPs, and rules',
-        type: type || 'agents',
+        type: routeType || 'agents',
         tags: [],
       };
     }

@@ -2,6 +2,7 @@
  * Search Page - Database-First RPC via search_content_optimized()
  */
 
+import type { Database } from '@heyclaude/database-types';
 import type { SearchFilters } from '@heyclaude/web-runtime/core';
 import {
   generatePageMetadata,
@@ -20,6 +21,15 @@ const VALID_SORT_OPTIONS: SearchFilters['sort'][] = [
   'newest',
   'alphabetical',
 ];
+
+const QUICK_TAG_LIMIT = 8;
+const QUICK_AUTHOR_LIMIT = 6;
+const QUICK_CATEGORY_LIMIT = 6;
+const FALLBACK_SUGGESTION_LIMIT = 18;
+
+type SearchFacetAggregate = Awaited<ReturnType<typeof getSearchFacets>>;
+type SearchFacetSummary = SearchFacetAggregate['facets'][number];
+type ContentCategory = Database['public']['Enums']['content_category'];
 
 function isValidSort(value: string | undefined): value is SearchFilters['sort'] {
   return VALID_SORT_OPTIONS.some((option) => option === value);
@@ -100,13 +110,18 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
     throw normalized;
   }
 
-  let facetOptions = { tags: [] as string[], authors: [] as string[], categories: [] as string[] };
+  let facetAggregate: SearchFacetAggregate | null = null;
+  let facetOptions = {
+    tags: [] as string[],
+    authors: [] as string[],
+    categories: [] as ContentCategory[],
+  };
   try {
-    const facetData = await getSearchFacets();
+    facetAggregate = await getSearchFacets();
     facetOptions = {
-      tags: facetData.tags,
-      authors: facetData.authors,
-      categories: facetData.categories,
+      tags: facetAggregate.tags,
+      authors: facetAggregate.authors,
+      categories: facetAggregate.categories,
     };
   } catch (error) {
     const normalized = normalizeError(error, 'Search facets fetch failed');
@@ -126,6 +141,28 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
     logger.error('SearchPage: suggestions fetch failed', normalized);
   }
 
+  const fallbackSuggestions = dedupeSuggestions(zeroStateSuggestions, FALLBACK_SUGGESTION_LIMIT);
+
+  const quickTags = rankFacetValues(
+    facetAggregate?.facets,
+    (facet) => facet.tags,
+    QUICK_TAG_LIMIT,
+    facetOptions.tags
+  );
+
+  const quickAuthors = rankFacetValues(
+    facetAggregate?.facets,
+    (facet) => facet.authors,
+    QUICK_AUTHOR_LIMIT,
+    facetOptions.authors
+  );
+
+  const quickCategories = deriveQuickCategories(
+    facetAggregate?.facets,
+    QUICK_CATEGORY_LIMIT,
+    facetOptions.categories
+  );
+
   return (
     <main className="container mx-auto px-4 py-8">
       <h1 className="mb-8 font-bold text-4xl">
@@ -141,7 +178,11 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
           availableTags={facetOptions.tags}
           availableAuthors={facetOptions.authors}
           availableCategories={facetOptions.categories}
-          zeroStateSuggestions={zeroStateSuggestions.slice(0, 6)}
+          zeroStateSuggestions={fallbackSuggestions}
+          fallbackSuggestions={fallbackSuggestions}
+          quickTags={quickTags}
+          quickAuthors={quickAuthors}
+          quickCategories={quickCategories}
         />
         <Suspense fallback={null}>
           <RecentlyViewedSidebar />
@@ -149,4 +190,78 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
       </div>
     </main>
   );
+}
+
+function rankFacetValues(
+  facets: SearchFacetSummary[] | undefined,
+  selector: (facet: SearchFacetSummary) => string[],
+  limit: number,
+  fallback: string[]
+): string[] {
+  if (!facets || facets.length === 0) {
+    return fallback.slice(0, limit);
+  }
+
+  const counts = new Map<string, number>();
+  for (const facet of facets) {
+    const weight = Math.max(1, facet.contentCount);
+    for (const rawValue of selector(facet)) {
+      if (!rawValue) continue;
+      const normalized = rawValue.trim();
+      if (!normalized) continue;
+      counts.set(normalized, (counts.get(normalized) ?? 0) + weight);
+    }
+  }
+
+  if (counts.size === 0) {
+    return fallback.slice(0, limit);
+  }
+
+  return Array.from(counts.entries())
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+    .slice(0, limit)
+    .map(([value]) => value);
+}
+
+function deriveQuickCategories(
+  facets: SearchFacetSummary[] | undefined,
+  limit: number,
+  fallback: ContentCategory[]
+): ContentCategory[] {
+  if (!facets || facets.length === 0) {
+    return fallback.slice(0, limit);
+  }
+
+  return facets
+    .slice()
+    .sort(
+      (a, b) => b.contentCount - a.contentCount || a.category.localeCompare(b.category) // alphabetical tiebreaker
+    )
+    .map((facet) => facet.category as ContentCategory)
+    .slice(0, limit);
+}
+
+function dedupeSuggestions<T extends { slug?: string | null }>(items: T[], limit: number): T[] {
+  if (!Array.isArray(items) || items.length === 0) {
+    return [];
+  }
+
+  const seen = new Set<string>();
+  const result: T[] = [];
+
+  for (const item of items) {
+    const slug = (item as { slug?: string | null }).slug;
+    if (typeof slug === 'string' && slug.length > 0) {
+      if (seen.has(slug)) {
+        continue;
+      }
+      seen.add(slug);
+    }
+    result.push(item);
+    if (result.length >= limit) {
+      break;
+    }
+  }
+
+  return result;
 }

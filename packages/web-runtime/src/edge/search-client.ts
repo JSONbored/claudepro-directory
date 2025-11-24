@@ -54,7 +54,7 @@ export interface UnifiedSearchResponse<T> {
     dbTime: number;
     totalTime: number;
   };
-  searchType: 'content' | 'unified';
+  searchType: 'content' | 'unified' | 'jobs';
 }
 
 export type SearchFilters = {
@@ -79,7 +79,7 @@ async function executeSearch<T>(
         const service = new SearchService(client);
         
         const entities = options.entities?.map(e => e as string) ?? ['content'];
-        const results = await service.searchUnified({
+        const serviceResponse = await service.searchUnified({
           p_query: options.query,
           p_entities: entities,
           ...(options.filters?.categories ? { p_categories: options.filters.categories } : {}),
@@ -89,37 +89,51 @@ async function executeSearch<T>(
           p_offset: options.filters?.offset ?? 0
         });
         
+        // SearchService.searchUnified returns { data: UnifiedSearchResult[] | null, total_count: number }
+        // Type assertion needed because TypeScript may not infer the return type correctly
+        const searchResponse = serviceResponse as unknown as { data: UnifiedSearchResult[] | null; total_count: number } | null;
+        const results = (searchResponse?.data ?? []) as UnifiedSearchResult[];
+        const totalCount = searchResponse?.total_count ?? results.length;
+
         const end = performance.now();
         const totalTime = end - start;
         
         // Explicitly construct response object without undefined properties where possible
-        const response: UnifiedSearchResponse<T> = {
-           results: results as unknown as T[],
-           query: options.query,
-           filters: {
-              ...(options.filters?.categories ? { categories: options.filters.categories } : {}),
-              ...(options.filters?.tags ? { tags: options.filters.tags } : {}),
-              ...(options.filters?.authors ? { authors: options.filters.authors } : {}),
-              ...(options.entities ? { entities: options.entities.map(e => e as string) } : {}),
-              ...(options.filters?.sort ? { sort: options.filters.sort } : {}),
-              ...(options.filters?.job_category ? { job_category: options.filters.job_category } : {}),
-              ...(options.filters?.job_employment ? { job_employment: options.filters.job_employment } : {}),
-              ...(options.filters?.job_experience ? { job_experience: options.filters.job_experience } : {}),
-              ...(options.filters?.job_remote !== undefined ? { job_remote: options.filters.job_remote } : {})
-           },
-           pagination: {
-              total: results.length, 
-              limit: options.filters?.limit ?? 20,
-              offset: options.filters?.offset ?? 0,
-              hasMore: results.length >= (options.filters?.limit ?? 20)
-           },
-           performance: {
-              dbTime: totalTime,
-              totalTime: totalTime
-           },
-           searchType: entities.length === 1 && entities[0] === 'content' ? 'content' : 'unified'
-        };
-        return response;
+    const response: UnifiedSearchResponse<T> = {
+      results: results as unknown as T[],
+      query: options.query,
+      filters: {
+        ...(options.filters?.categories ? { categories: options.filters.categories } : {}),
+        ...(options.filters?.tags ? { tags: options.filters.tags } : {}),
+        ...(options.filters?.authors ? { authors: options.filters.authors } : {}),
+        ...(options.entities ? { entities: options.entities.map(e => e as string) } : {}),
+        ...(options.filters?.sort ? { sort: options.filters.sort } : {}),
+        ...(options.filters?.job_category ? { job_category: options.filters.job_category } : {}),
+        ...(options.filters?.job_employment ? { job_employment: options.filters.job_employment } : {}),
+        ...(options.filters?.job_experience ? { job_experience: options.filters.job_experience } : {}),
+        ...(options.filters?.job_remote !== undefined ? { job_remote: options.filters.job_remote } : {})
+      },
+      pagination: {
+        total: totalCount, 
+        limit: options.filters?.limit ?? 20,
+        offset: options.filters?.offset ?? 0,
+        hasMore: totalCount > ((options.filters?.offset ?? 0) + results.length)
+      },
+      performance: {
+        dbTime: totalTime,
+        totalTime: totalTime
+      },
+      searchType:
+        options.filters?.job_category ||
+        options.filters?.job_employment ||
+        options.filters?.job_experience ||
+        options.filters?.job_remote !== undefined
+          ? 'jobs'
+          : entities.length === 1 && entities[0] === 'content'
+            ? 'content'
+            : 'unified',
+    };
+    return response;
     },
     {
        key: `unified-search-${JSON.stringify(options)}`,
@@ -131,7 +145,7 @@ async function executeSearch<T>(
            filters: {},
            pagination: { total: 0, limit: 0, offset: 0, hasMore: false },
            performance: { dbTime: 0, totalTime: 0 },
-           searchType: 'unified'
+           searchType: 'unified' as const
        }
     }
   );

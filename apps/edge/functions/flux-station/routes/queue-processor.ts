@@ -66,7 +66,7 @@ const QUEUE_REGISTRY: QueueConfig[] = [
   {
     name: 'package_generation',
     handler: 'external',
-    endpoint: '/functions/v1/data-api/content/generate-package/process',
+    endpoint: '/functions/v1/public-api/content/generate-package/process',
     priority: 8,
   },
 ];

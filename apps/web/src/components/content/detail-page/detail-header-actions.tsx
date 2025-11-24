@@ -404,7 +404,7 @@ export function DetailHeaderActions({
       }
 
       // Use edge function proxy for cached egress (critical for cost optimization)
-      const downloadUrl = `${supabaseUrl}/functions/v1/data-api/content/mcp/${safeSlug}?format=storage`;
+      const downloadUrl = `${supabaseUrl}/functions/v1/public-api/content/mcp/${safeSlug}?format=storage`;
       window.location.href = downloadUrl;
       pulse
         .download({ category, slug: contentItem.slug, action_type: 'download_mcpb' })

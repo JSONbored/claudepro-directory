@@ -100,12 +100,12 @@ export default async function EditJobPage({ params }: EditJobPageProps) {
     }
 
     if (!result?.data) {
-      const error = new Error('updateJob returned no data');
-      logger.error('EditJobPage: updateJob returned no data', error, {
+      const normalized = normalizeError('updateJob returned no data', 'updateJob returned no data');
+      logger.error('EditJobPage: updateJob returned no data', normalized, {
         jobId: id,
         userId: user.id,
       });
-      return { success: false };
+      throw normalized;
     }
 
     if (result.data.success) {
@@ -149,12 +149,22 @@ export default async function EditJobPage({ params }: EditJobPageProps) {
     });
   }
 
+  const hasInvalidData =
+    (job.type && !isValidJobType(job.type)) || (job.category && !isValidJobCategory(job.category));
+
   return (
     <div className="space-y-6">
       <div>
         <h1 className={`mb-2 ${UI_CLASSES.HEADING_H2}`}>Edit Job Listing</h1>
         <p className="text-muted-foreground">Update your job posting details</p>
       </div>
+      {hasInvalidData && (
+        <div className="rounded-md bg-yellow-50 p-4 dark:bg-yellow-900/20">
+          <p className="text-sm text-yellow-800 dark:text-yellow-200">
+            Some fields contain invalid data and couldn't be loaded. Please review and update.
+          </p>
+        </div>
+      )}
       <JobForm
         initialData={{
           title: job.title,

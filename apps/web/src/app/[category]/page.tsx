@@ -45,6 +45,18 @@ import { notFound } from 'next/navigation';
 import { ContentListServer } from '@/src/components/content/content-grid-list';
 
 /**
+ * Dynamic Rendering Required
+ *
+ * This page must use dynamic rendering because it imports from @heyclaude/web-runtime
+ * which transitively imports feature-flags/flags.ts. The Vercel Flags SDK's flags/next
+ * module contains module-level code that calls server functions, which cannot be
+ * executed during static site generation.
+ *
+ * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic
+ */
+export const dynamic = 'force-dynamic';
+
+/**
  * Generate metadata for category list pages
  *
  * @description
@@ -80,11 +92,12 @@ export async function generateMetadata({
     });
   }
 
+  // Type narrowing: after isValidCategory check, we know category is a valid enum value
+  const typedCategory = category as Database['public']['Enums']['content_category'];
+
   let categoryConfig: Awaited<ReturnType<typeof getCategoryConfig>> | null = null;
   try {
-    categoryConfig = await getCategoryConfig(
-      category as Database['public']['Enums']['content_category']
-    );
+    categoryConfig = await getCategoryConfig(typedCategory);
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load category config for metadata');
     logger.error('CategoryPage: category config lookup failed in metadata', normalized, {
@@ -108,7 +121,7 @@ export async function generateMetadata({
  * Returns 404 if category is invalid.
  *
  * @param {Object} props - Component props
- * @param {Promise<{category: string}>} props.params - Route parameters with category slug
+ * @param {{ category: string }} props.params - Route parameters containing category slug
  *
  * @returns {Promise<JSX.Element>} Rendered category list page
  *
@@ -128,9 +141,12 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
     notFound();
   }
 
+  // Type narrowing: after isValidCategory check, we know category is a valid enum value
+  const typedCategory = category as Database['public']['Enums']['content_category'];
+
   let config: Awaited<ReturnType<typeof getCategoryConfig>> | null = null;
   try {
-    config = await getCategoryConfig(category as Database['public']['Enums']['content_category']);
+    config = await getCategoryConfig(typedCategory);
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load category config for page render');
     logger.error('CategoryPage: getCategoryConfig threw', normalized, { category });
@@ -149,7 +165,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
   // Load content for this category (enriched with analytics, sponsorship, etc.)
   let items: Awaited<ReturnType<typeof getContentByCategory>> = [];
   try {
-    items = await getContentByCategory(category);
+    items = await getContentByCategory(typedCategory);
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load category list content');
     logger.error('CategoryPage: getContentByCategory threw', normalized, {

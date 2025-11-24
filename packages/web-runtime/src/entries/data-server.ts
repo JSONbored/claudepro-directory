@@ -34,6 +34,7 @@ export * from '../data/marketing/site.ts';
 export * from '../seo/generator.ts';
 export * from '../data/seo/client.ts';
 export * from '../data/content/index.ts';
+export * from '../data/content/detail.ts';
 export * from '../data/content/templates.ts';
 export * from '../data/content/related.ts';
 export * from '../data/content/paginated.ts';

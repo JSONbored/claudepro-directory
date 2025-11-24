@@ -102,3 +102,73 @@ export async function verifySvixSignature({
     return false;
   }
 }
+
+export interface SupabaseDatabaseWebhookVerificationInput {
+  rawBody: string;
+  signature: string | null;
+  timestamp?: string | null;
+  secret: string;
+}
+
+/**
+ * Verify Supabase database webhook signature using HMAC-SHA256
+ * Supports both simple payload signing and timestamp-based signing for replay attack prevention
+ * 
+ * @param input - Verification parameters
+ * @returns true if signature is valid, false otherwise
+ */
+export async function verifySupabaseDatabaseWebhook({
+  rawBody,
+  signature,
+  timestamp,
+  secret,
+}: SupabaseDatabaseWebhookVerificationInput): Promise<boolean> {
+  if (!signature) {
+    return false;
+  }
+
+  try {
+    // Prepare secret bytes
+    const encoder = new TextEncoder();
+    const secretBytes = encoder.encode(secret);
+
+    // Create HMAC key
+    const key = await crypto.subtle.importKey(
+      'raw' as const,
+      secretBytes as BufferSource,
+      { name: 'HMAC', hash: 'SHA-256' },
+      false,
+      ['sign']
+    );
+
+    // Build signed content - include timestamp if provided for replay attack prevention
+    const signedContent = timestamp ? `${timestamp}.${rawBody}` : rawBody;
+
+    // Compute expected signature
+    const signatureBuffer = await crypto.subtle.sign(
+      'HMAC',
+      key,
+      encoder.encode(signedContent)
+    );
+    const expectedSignature = encodeBase64(new Uint8Array(signatureBuffer));
+
+    // Constant-time comparison to prevent timing attacks
+    if (signature.length !== expectedSignature.length) {
+      return false;
+    }
+
+    let result = 0;
+    for (let i = 0; i < signature.length; i++) {
+      result |= signature.charCodeAt(i) ^ expectedSignature.charCodeAt(i);
+    }
+
+    return result === 0;
+  } catch (error) {
+    const logContext = createUtilityContext('webhook-crypto', 'verify-supabase-database-webhook');
+    console.error('Supabase database webhook verification error', {
+      ...logContext,
+      error: errorToString(error),
+    });
+    return false;
+  }
+}

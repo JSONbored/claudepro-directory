@@ -255,11 +255,9 @@ jobs:
           - target: web
             label: Web
             turboTask: lint
-            stepId: lint_web
           - target: edge
             label: Edge
             turboTask: lint:edge
-            stepId: lint_edge
 
     steps:
     - uses: actions/checkout@v5
@@ -289,7 +287,7 @@ jobs:
           ${{ runner.os }}-turbo-lint-${{ matrix.target }}-
 
     - name: Lint (${{ matrix.label }})
-      id: ${{ matrix.stepId }}
+      id: lint
       env:
         NEXT_PUBLIC_SUPABASE_URL: https://hgtjdifxfapoltfflowc.supabase.co
         NEXT_PUBLIC_SUPABASE_ANON_KEY: stub-anon-key
@@ -302,16 +300,16 @@ jobs:
       uses: vercel/repository-dispatch/actions/status@v1
       with:
         name: 'Vercel - heyclaude: lint-web'
-        status: ${{ steps.lint_web.outcome == 'success' && 'success' || 'failure' }}
-        description: ${{ steps.lint_web.outcome == 'success' && 'Web lint passed' || 'Web lint failed' }}
+        status: ${{ steps.lint.outcome == 'success' && 'success' || 'failure' }}
+        description: ${{ steps.lint.outcome == 'success' && 'Web lint passed' || 'Web lint failed' }}
 
     - name: Notify Vercel (Edge)
       if: github.event_name == 'push' && matrix.target == 'edge'
       uses: vercel/repository-dispatch/actions/status@v1
       with:
         name: 'Vercel - heyclaude: lint-edge'
-        status: ${{ steps.lint_edge.outcome == 'success' && 'success' || 'failure' }}
-        description: ${{ steps.lint_edge.outcome == 'success' && 'Edge lint passed' || 'Edge lint failed' }}
+        status: ${{ steps.lint.outcome == 'success' && 'success' || 'failure' }}
+        description: ${{ steps.lint.outcome == 'success' && 'Edge lint passed' || 'Edge lint failed' }}
 
   build:
     name: Build

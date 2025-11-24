@@ -9,7 +9,13 @@ export async function GET(request: NextRequest) {
   const description =
     searchParams.get('description') || 'Community-curated agents, MCPs, and rules';
   const type = searchParams.get('type') || 'agents';
-  const tags = searchParams.get('tags')?.split(',') || [];
+  const rawTags = searchParams.get('tags');
+  const tags = rawTags
+    ? rawTags
+        .split(',')
+        .map((tag) => tag.trim())
+        .filter((tag) => tag.length > 0)
+    : [];
 
   return new ImageResponse(
     <div
@@ -84,7 +90,7 @@ export async function GET(request: NextRequest) {
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
             {tags.slice(0, 5).map((tag) => (
               <div
-                key={tag}
+                key={typeof tag === 'string' ? tag : JSON.stringify(tag)}
                 style={{
                   backgroundColor: '#2a2010',
                   color: '#f97316',

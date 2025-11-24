@@ -127,6 +127,8 @@ function buildSafePrUrl(owner: string, repo: string, prNumber: string): string {
 }
 
 // Allow-list of valid content types shown in URLs
+// NOTE: This array must be kept in sync with Database['public']['Enums']['submission_type']
+// If the enum changes, update this array accordingly to maintain type safety
 const ALLOWED_TYPES = [
   'agents',
   'mcp',

@@ -76,6 +76,7 @@ export default async function NewJobPage() {
           });
           return {
             success: false,
+            requiresPayment: true,
             message:
               'Unable to start checkout right now. Please try again shortly or contact support.',
           };

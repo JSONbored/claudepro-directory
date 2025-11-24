@@ -28,12 +28,12 @@ export async function runGenerateReadme(options: GenerateReadmeOptions = {}): Pr
     }
 
     logger.info('📝 Generating README.md from edge function...\n', { script: 'generate-readme' });
-    logger.info('   Endpoint: /functions/v1/data-api/content/sitewide?format=readme', {
+    logger.info('   Endpoint: /functions/v1/public-api/content/sitewide?format=readme', {
       script: 'generate-readme',
     });
 
     const readme = await callEdgeFunction<string>(
-      '/data-api/content/sitewide?format=readme',
+      '/public-api/content/sitewide?format=readme',
       {},
       { responseType: 'text', requireAuth: false, timeoutMs: 15_000 }
     );
@@ -42,7 +42,7 @@ export async function runGenerateReadme(options: GenerateReadmeOptions = {}): Pr
 
     logger.info('✅ README.md generated successfully!', { script: 'generate-readme' });
     logger.info(`   Bytes: ${readme.length}`, { script: 'generate-readme', bytes: readme.length });
-    logger.info('   Source: Supabase Edge Function (data-api/content)', {
+    logger.info('   Source: Supabase Edge Function (public-api/content)', {
       script: 'generate-readme',
     });
   } catch (error) {

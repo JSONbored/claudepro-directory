@@ -40,7 +40,19 @@ export default async function AccountLayout({ children }: { children: React.Reac
   if (session?.expires_at) {
     const expiresIn = session.expires_at - Math.floor(Date.now() / 1000);
     if (expiresIn < 3600) {
-      await supabase.auth.refreshSession();
+      const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
+      if (refreshError) {
+        const normalized = normalizeError(refreshError, 'Session refresh failed');
+        logger.warn('AccountLayout: session refresh failed', {
+          error: normalized.message,
+          userIdHash: hashUserId(user.id),
+        });
+        // Continue with existing session - user may need to re-authenticate on next request
+      } else if (refreshData.session) {
+        logger.debug('AccountLayout: session refreshed successfully', {
+          userIdHash: hashUserId(user.id),
+        });
+      }
     }
   }
 
@@ -50,6 +62,9 @@ export default async function AccountLayout({ children }: { children: React.Reac
     user.user_metadata?.['avatar_url'] ?? user.user_metadata?.['picture'] ?? null;
 
   const userIdHash = hashUserId(user.id);
+
+  // Fetch sponsorships in parallel with settings (they don't depend on each other)
+  const sponsorshipsPromise = getUserSponsorships(user.id);
 
   let settings: Awaited<ReturnType<typeof getUserSettings>> = null;
   let profile: NonNullable<Awaited<ReturnType<typeof getUserSettings>>>['user_data'] | null = null;
@@ -92,9 +107,10 @@ export default async function AccountLayout({ children }: { children: React.Reac
     }
   }
 
+  // Await sponsorships (fetched in parallel)
   let sponsorships: Awaited<ReturnType<typeof getUserSponsorships>> = [];
   try {
-    sponsorships = await getUserSponsorships(user.id);
+    sponsorships = await sponsorshipsPromise;
     if (!sponsorships) {
       logger.warn('AccountLayout: getUserSponsorships returned null', { userIdHash });
       sponsorships = [];
@@ -124,7 +140,7 @@ export default async function AccountLayout({ children }: { children: React.Reac
     <div className={'min-h-screen bg-background'}>
       <div className={'border-b px-4 py-4'}>
         <div className={'container mx-auto flex items-center justify-between'}>
-          <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+          <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} group`}>
             <Link href="/" className="transition-colors-smooth group-hover:text-accent">
               ← Back to Directory
             </Link>
@@ -160,7 +176,7 @@ export default async function AccountLayout({ children }: { children: React.Reac
               )}
               <div>
                 <p className="font-medium">{profile?.name || userNameMetadata}</p>
-                <p className={UI_CLASSES.TEXT_XS_MUTED}>{user.email}</p>
+                <p className={UI_CLASSES.TEXT_XS_MUTED}>{user.email ?? ''}</p>
               </div>
             </div>
 

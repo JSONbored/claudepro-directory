@@ -1,6 +1,6 @@
 /// <reference path="@heyclaude/edge-runtime/deno-globals.d.ts" />
 
-import { SearchService } from '@heyclaude/data-layer';
+import * as dataLayer from '@heyclaude/data-layer';
 import { Constants, type Database as DatabaseGenerated } from '@heyclaude/database-types';
 import {
   badRequestResponse,
@@ -70,7 +70,7 @@ interface SearchResponse {
     dbTime: number;
     totalTime: number;
   };
-  searchType: 'content' | 'unified';
+  searchType: 'content' | 'unified' | 'jobs';
 }
 
 /**
@@ -98,6 +98,15 @@ export async function handleSearch(req: Request, startTime: number): Promise<Res
     | 'popularity'
     | 'newest'
     | 'alphabetical';
+
+  // Validate sort parameter (applies to all search types)
+  const validSorts = ['relevance', 'popularity', 'newest', 'alphabetical'];
+  if (!validSorts.includes(sort)) {
+    return badRequestResponse(
+      `Invalid sort parameter. Must be one of: ${validSorts.join(', ')}`,
+      getWithAuthCorsHeaders
+    );
+  }
 
   // Parse job filter parameters
   const jobCategoryParam = url.searchParams.get('job_category') || undefined;
@@ -193,19 +202,8 @@ export async function handleSearch(req: Request, startTime: number): Promise<Res
     );
   }
 
-  // Validate sort parameter
-  if (searchType === 'content') {
-    const validSorts = ['relevance', 'popularity', 'newest', 'alphabetical'];
-    if (!validSorts.includes(sort)) {
-      return badRequestResponse(
-        `Invalid sort parameter. Must be one of: ${validSorts.join(', ')}`,
-        getWithAuthCorsHeaders
-      );
-    }
-  }
-
   const dbStartTime = performance.now();
-  const searchService = new SearchService(supabaseAnon);
+  const searchService = new dataLayer.SearchService(supabaseAnon);
 
   let data: ContentSearchResult[] | UnifiedSearchResult[] | JobSearchResult[];
   let totalCount: number | undefined;
@@ -225,7 +223,7 @@ export async function handleSearch(req: Request, startTime: number): Promise<Res
       data = result.jobs ?? [];
       totalCount = result.total_count ?? 0;
     } else if (searchType === 'unified') {
-      data = await searchService.searchUnified({
+      const result = await searchService.searchUnified({
         p_query: query,
         p_entities: entities || ['content', 'company', 'job', 'user'],
         ...(categories ? { p_categories: categories } : {}),
@@ -234,11 +232,13 @@ export async function handleSearch(req: Request, startTime: number): Promise<Res
         p_limit: limit,
         p_offset: offset,
       });
+      data = result.data ?? [];
+      totalCount = result.total_count ?? result.data?.length ?? 0;
     } else {
       // Content search
       // NOTE: SearchService.searchContent uses the optimized RPC which handles keywords.
       // Semantic search logic is handled within the RPC if implemented, or we rely on keywords.
-      data = await searchService.searchContent({
+      const result = await searchService.searchContent({
         p_query: query,
         ...(categories ? { p_categories: categories } : {}),
         ...(tags ? { p_tags: tags } : {}),
@@ -247,6 +247,8 @@ export async function handleSearch(req: Request, startTime: number): Promise<Res
         p_limit: limit,
         p_offset: offset,
       });
+      data = result.data ?? [];
+      totalCount = result.total_count ?? result.data?.length ?? 0;
     }
   } catch (err) {
     error = err;
@@ -377,7 +379,7 @@ export async function handleSearch(req: Request, startTime: number): Promise<Res
       dbTime: Math.round(dbEndTime - dbStartTime),
       totalTime: Math.round(totalTime),
     },
-    searchType: searchType === 'jobs' ? 'unified' : searchType,
+    searchType,
   };
 
   return new Response(JSON.stringify(response), {

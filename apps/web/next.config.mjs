@@ -378,6 +378,10 @@ const nextConfig = {
     const supabaseUrl =
       process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://hgtjdifxfapoltfflowc.supabase.co';
     // Unified public-api monolith (formerly data-api)
+    // WARNING: These rewrites depend on the public-api Supabase edge function being deployed.
+    // If the public-api function (and its internal routes /content, /sitemap.xml, /feeds, plus category exports)
+    // is not already deployed and wired up, these endpoints will return 404s.
+    // Ensure deployment before merging changes to this section.
     const publicApi = `${supabaseUrl}/functions/v1/public-api`;
     const contentApi = `${publicApi}/content`;
 

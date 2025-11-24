@@ -10,7 +10,15 @@ import { Constants } from '@heyclaude/database-types';
 import { logClientWarning, logUnhandledPromise } from '@heyclaude/web-runtime/core';
 import { getTimeoutConfig } from '@heyclaude/web-runtime/data';
 import { usePulse } from '@heyclaude/web-runtime/hooks';
-import { ChevronDown, ChevronUp, Filter, Search } from '@heyclaude/web-runtime/icons';
+import {
+  Bookmark,
+  ChevronDown,
+  ChevronUp,
+  Filter,
+  Plus,
+  Search,
+  X,
+} from '@heyclaude/web-runtime/icons';
 import type { FilterState, UnifiedSearchProps } from '@heyclaude/web-runtime/types/component.types';
 import { cn, POSITION_PATTERNS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { usePathname } from 'next/navigation';
@@ -67,6 +75,11 @@ function UnifiedSearchComponent({
   resultCount = 0,
   className,
   showFilters = true,
+  savedSearches = [],
+  onSelectSavedSearch,
+  onRemoveSavedSearch,
+  onSavePresetRequest,
+  isPresetSaveDisabled = false,
 }: UnifiedSearchProps & { showFilters?: boolean }) {
   const pulse = usePulse();
   const [localSearchQuery, setLocalSearchQuery] = useState('');
@@ -113,8 +126,44 @@ function UnifiedSearchComponent({
   const searchResultsId = useId();
   const filterPanelId = useId();
   const sortSelectId = useId();
+  const presetSectionLabelId = useId();
 
   const [debounceMs, setDebounceMs] = useState(150);
+
+  const presetsDefined = Array.isArray(savedSearches);
+  const savedSearchPresets = presetsDefined ? savedSearches : [];
+  const presetsLoading = !presetsDefined;
+  const hasSavedSearches = savedSearchPresets.length > 0;
+  const showPresetRail = hasSavedSearches || Boolean(onSavePresetRequest);
+  const canSelectSavedSearches = typeof onSelectSavedSearch === 'function';
+  const canRemoveSavedSearches = typeof onRemoveSavedSearch === 'function';
+  const savePresetButtonDisabled = Boolean(isPresetSaveDisabled);
+
+  const handlePresetSelect = useCallback(
+    (presetId: string) => {
+      if (!canSelectSavedSearches) return;
+      const target = savedSearchPresets.find((preset) => preset.id === presetId);
+      if (target) {
+        setLocalSearchQuery(target.query);
+        const trimmed = target.query?.trim();
+        if (trimmed && trimmed.length > 0) {
+          setAnnouncement(`Saved search "${target.label}" applied.`);
+        } else {
+          setAnnouncement(`Saved filters "${target.label}" applied.`);
+        }
+      }
+      onSelectSavedSearch?.(presetId);
+    },
+    [canSelectSavedSearches, onSelectSavedSearch, savedSearchPresets]
+  );
+
+  const handlePresetRemove = useCallback(
+    (presetId: string) => {
+      if (!canRemoveSavedSearches) return;
+      onRemoveSavedSearch?.(presetId);
+    },
+    [canRemoveSavedSearches, onRemoveSavedSearch]
+  );
 
   useEffect(() => {
     getTimeoutConfig()
@@ -269,6 +318,86 @@ function UnifiedSearchComponent({
             />
           </div>
 
+          {showPresetRail && (
+            <section
+              aria-labelledby={presetSectionLabelId}
+              className="rounded-lg border border-border/60 bg-card/40 p-3"
+            >
+              <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+                <p
+                  id={presetSectionLabelId}
+                  className="font-semibold text-muted-foreground text-xs uppercase tracking-wide"
+                >
+                  Saved searches
+                </p>
+                {onSavePresetRequest && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    type="button"
+                    onClick={onSavePresetRequest}
+                    disabled={savePresetButtonDisabled}
+                    className="gap-2 text-xs sm:text-sm"
+                  >
+                    <Plus className="h-3.5 w-3.5" aria-hidden="true" />
+                    <span>Save current filters</span>
+                  </Button>
+                )}
+              </div>
+              {hasSavedSearches ? (
+                <ul className="flex flex-wrap gap-2" aria-live="polite">
+                  {savedSearchPresets.map((preset) => (
+                    <li
+                      key={preset.id}
+                      className="flex items-center gap-1 rounded-full border border-border/60 bg-background/80 px-2 py-1"
+                    >
+                      <button
+                        type="button"
+                        onClick={() => handlePresetSelect(preset.id)}
+                        disabled={!canSelectSavedSearches}
+                        className={cn(
+                          'flex items-center gap-2 rounded-full px-2 py-1 font-medium text-xs transition-smooth focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 sm:text-sm',
+                          canSelectSavedSearches
+                            ? 'text-foreground hover:bg-accent/10'
+                            : 'cursor-not-allowed text-muted-foreground opacity-70'
+                        )}
+                        title={
+                          preset.query
+                            ? `${preset.label} • ${preset.query.slice(0, 80)}`
+                            : preset.label
+                        }
+                        aria-label={`Apply preset ${preset.label}`}
+                      >
+                        <Bookmark className="h-3.5 w-3.5 text-accent" aria-hidden="true" />
+                        <span className="max-w-[8rem] truncate">{preset.label}</span>
+                      </button>
+                      {canRemoveSavedSearches && (
+                        <button
+                          type="button"
+                          onClick={(event) => {
+                            event.preventDefault();
+                            event.stopPropagation();
+                            handlePresetRemove(preset.id);
+                          }}
+                          className="rounded-full p-1 text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60"
+                          aria-label={`Remove preset ${preset.label}`}
+                        >
+                          <X className="h-3 w-3" aria-hidden="true" />
+                        </button>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              ) : presetsLoading ? (
+                <p className="text-muted-foreground text-sm">Loading saved searches…</p>
+              ) : (
+                <p className="text-muted-foreground text-sm">
+                  No saved searches yet. Use “Save current filters” to store your favorite combos.
+                </p>
+              )}
+            </section>
+          )}
+
           {showFilters && (
             <div className={'flex justify-end gap-2'}>
               <Select
@@ -378,7 +507,12 @@ export const UnifiedSearch = memo(UnifiedSearchComponent, (prevProps, nextProps)
     JSON.stringify(prevProps.availableAuthors) === JSON.stringify(nextProps.availableAuthors) &&
     JSON.stringify(prevProps.availableCategories) ===
       JSON.stringify(nextProps.availableCategories) &&
-    JSON.stringify(prevProps.filters) === JSON.stringify(nextProps.filters)
+    JSON.stringify(prevProps.filters) === JSON.stringify(nextProps.filters) &&
+    JSON.stringify(prevProps.savedSearches) === JSON.stringify(nextProps.savedSearches) &&
+    prevProps.isPresetSaveDisabled === nextProps.isPresetSaveDisabled &&
+    prevProps.onSavePresetRequest === nextProps.onSavePresetRequest &&
+    prevProps.onSelectSavedSearch === nextProps.onSelectSavedSearch &&
+    prevProps.onRemoveSavedSearch === nextProps.onRemoveSavedSearch
   );
 });
 

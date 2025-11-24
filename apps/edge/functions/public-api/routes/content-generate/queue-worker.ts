@@ -19,7 +19,14 @@ import {
   successResponse,
   supabaseServiceRole,
 } from '@heyclaude/edge-runtime';
-import { errorToString, TIMEOUT_PRESETS, withTimeout } from '@heyclaude/shared-runtime';
+import type { BaseLogContext } from '@heyclaude/shared-runtime';
+import {
+  errorToString,
+  logError,
+  logInfo,
+  TIMEOUT_PRESETS,
+  withTimeout,
+} from '@heyclaude/shared-runtime';
 import { getGenerator } from './registry.ts';
 import type { ContentRow } from './types.ts';
 
@@ -43,7 +50,8 @@ interface PackageGenerationQueueMessage {
  * Process a single package generation job
  */
 async function processPackageGeneration(
-  message: PackageGenerationQueueMessage
+  message: PackageGenerationQueueMessage,
+  logContext?: BaseLogContext
 ): Promise<{ success: boolean; errors: string[] }> {
   const errors: string[] = [];
   const { content_id, category, slug } = message.message;
@@ -83,22 +91,31 @@ async function processPackageGeneration(
     // Generate package (this does: generate → upload → update DB)
     await generator.generate(contentRow);
 
-    console.log('[data-api] Package generated successfully', {
-      content_id,
-      category,
-      slug,
-    });
+    if (logContext) {
+      logInfo('Package generated successfully', {
+        ...logContext,
+        content_id,
+        category,
+        slug,
+      });
+    }
 
     return { success: true, errors: [] };
   } catch (error) {
     const errorMsg = errorToString(error);
     errors.push(`Generation failed: ${errorMsg}`);
-    console.error('[data-api] Package generation error', {
-      content_id,
-      category,
-      slug,
-      error: errorMsg,
-    });
+    if (logContext) {
+      logError(
+        'Package generation error',
+        {
+          ...logContext,
+          content_id,
+          category,
+          slug,
+        },
+        error
+      );
+    }
     return { success: false, errors };
   }
 }
@@ -107,7 +124,10 @@ async function processPackageGeneration(
  * Main queue worker handler
  * POST /content/generate-package/process
  */
-export async function handlePackageGenerationQueue(_req: Request): Promise<Response> {
+export async function handlePackageGenerationQueue(
+  _req: Request,
+  logContext?: BaseLogContext
+): Promise<Response> {
   try {
     // Read messages with timeout protection
     const messages = await withTimeout(
@@ -120,10 +140,15 @@ export async function handlePackageGenerationQueue(_req: Request): Promise<Respo
     );
 
     if (!messages || messages.length === 0) {
+      if (logContext) {
+        logInfo('No messages in queue', logContext);
+      }
       return successResponse({ message: 'No messages in queue', processed: 0 }, 200);
     }
 
-    console.log(`[data-api] Processing ${messages.length} package generation jobs`);
+    if (logContext) {
+      logInfo(`Processing ${messages.length} package generation jobs`, logContext);
+    }
 
     const results: Array<{
       msg_id: string;
@@ -175,18 +200,27 @@ export async function handlePackageGenerationQueue(_req: Request): Promise<Respo
     for (const msg of messages) {
       // Validate message structure
       if (!isValidQueueMessage(msg.message)) {
-        console.error('[data-api] Invalid queue message structure', {
-          msg_id: msg.msg_id.toString(),
-        });
+        if (logContext) {
+          logError('Invalid queue message structure', {
+            ...logContext,
+            msg_id: msg.msg_id.toString(),
+          });
+        }
 
         // Delete invalid message to prevent infinite retries
         try {
           await pgmqDelete(PACKAGE_GENERATION_QUEUE, msg.msg_id);
         } catch (error) {
-          console.error('[data-api] Failed to delete invalid message', {
-            msg_id: msg.msg_id.toString(),
-            error: errorToString(error),
-          });
+          if (logContext) {
+            logError(
+              'Failed to delete invalid message',
+              {
+                ...logContext,
+                msg_id: msg.msg_id.toString(),
+              },
+              error
+            );
+          }
         }
 
         results.push({
@@ -207,7 +241,7 @@ export async function handlePackageGenerationQueue(_req: Request): Promise<Respo
       };
 
       try {
-        const result = await processPackageGeneration(message);
+        const result = await processPackageGeneration(message, logContext);
 
         if (result.success) {
           await pgmqDelete(PACKAGE_GENERATION_QUEUE, message.msg_id);
@@ -227,10 +261,16 @@ export async function handlePackageGenerationQueue(_req: Request): Promise<Respo
         }
       } catch (error) {
         const errorMsg = errorToString(error);
-        console.error('[data-api] Unexpected error processing package generation', {
-          msg_id: message.msg_id.toString(),
-          error: errorMsg,
-        });
+        if (logContext) {
+          logError(
+            'Unexpected error processing package generation',
+            {
+              ...logContext,
+              msg_id: message.msg_id.toString(),
+            },
+            error
+          );
+        }
         results.push({
           msg_id: message.msg_id.toString(),
           status: 'failed',
@@ -238,6 +278,15 @@ export async function handlePackageGenerationQueue(_req: Request): Promise<Respo
           will_retry: true,
         });
       }
+    }
+
+    if (logContext) {
+      logInfo(`Processed ${messages.length} messages`, {
+        ...logContext,
+        processed: messages.length,
+        successCount: results.filter((r) => r.status === 'success').length,
+        failedCount: results.filter((r) => r.status === 'failed').length,
+      });
     }
 
     return successResponse(
@@ -249,9 +298,9 @@ export async function handlePackageGenerationQueue(_req: Request): Promise<Respo
       200
     );
   } catch (error) {
-    console.error('[data-api] Fatal package generation queue error', {
-      error: errorToString(error),
-    });
+    if (logContext) {
+      logError('Fatal package generation queue error', logContext, error);
+    }
     return errorResponse(error, 'data-api:package-generation-queue-fatal');
   }
 }

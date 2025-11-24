@@ -177,6 +177,14 @@ export interface FilterState {
   tags?: string[];
 }
 
+export interface SavedSearchPreset {
+  id: string;
+  label: string;
+  query: string;
+  filters: FilterState;
+  createdAt: number;
+}
+
 export interface UnifiedSearchProps {
   placeholder?: string;
   onSearch?: (query: string) => void;
@@ -187,6 +195,26 @@ export interface UnifiedSearchProps {
   availableCategories?: string[];
   resultCount?: number;
   className?: string;
+  /**
+   * Optional saved search presets rendered next to the search controls.
+   */
+  savedSearches?: SavedSearchPreset[];
+  /**
+   * Triggered when a preset is selected.
+   */
+  onSelectSavedSearch?: (presetId: string) => void;
+  /**
+   * Triggered when a preset removal action is requested.
+   */
+  onRemoveSavedSearch?: (presetId: string) => void;
+  /**
+   * Handler invoked when the user clicks "Save current filters".
+   */
+  onSavePresetRequest?: () => void;
+  /**
+   * When true, disables the save action (e.g., when limit reached).
+   */
+  isPresetSaveDisabled?: boolean;
 }
 
 export interface TrendingContentProps {
@@ -236,6 +264,18 @@ export type ContentSearchClientProps<T extends DisplayableContent = DisplayableC
   availableAuthors?: string[];
   availableCategories?: string[];
   zeroStateSuggestions?: T[];
+  /**
+   * Optional quick filter data derived server-side for zero-state UI.
+   * Falls back to facet-derived values when omitted.
+   */
+  quickTags?: string[];
+  quickAuthors?: string[];
+  quickCategories?: Database['public']['Enums']['content_category'][];
+  /**
+   * Suggested fallback content for empty states, typically from homepage data.
+   * Defaults to zeroStateSuggestions/items when not provided.
+   */
+  fallbackSuggestions?: T[];
 };
 
 export type ContentSidebarProps<T extends ContentItem = ContentItem> = {

@@ -1,13 +1,20 @@
-import { hashUserId, logger, normalizeError } from '@heyclaude/web-runtime/core';
+import type { Database } from '@heyclaude/database-types';
+import { ensureStringArray, hashUserId, logger, normalizeError } from '@heyclaude/web-runtime/core';
 import {
   generatePageMetadata,
   getAccountDashboard,
   getAuthenticatedUser,
+  getContentDetailCore,
+  getHomepageCategoryIds,
+  getHomepageData,
+  getUserLibrary,
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { Bookmark, Calendar } from '@heyclaude/web-runtime/icons';
+import type { HomepageContentItem } from '@heyclaude/web-runtime/types/component.types';
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import type { Metadata } from 'next';
+import dynamicImport from 'next/dynamic';
 import Link from 'next/link';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { NavLink } from '@/src/components/core/navigation/navigation-link';
@@ -19,6 +26,17 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/ui/card';
+
+const RecentlySavedGrid = dynamicImport(
+  () =>
+    import('@/src/components/features/account/recently-saved-grid').then(
+      (mod) => mod.RecentlySavedGrid
+    ),
+  {
+    ssr: false,
+    loading: () => <RecentlySavedSkeleton />,
+  }
+);
 
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/account');
@@ -59,13 +77,42 @@ export default async function AccountDashboard() {
   // Hash user ID for privacy-compliant logging (GDPR/CCPA)
   const userIdHash = hashUserId(user.id);
 
+  const [dashboardResult, libraryResult, homepageResult] = await Promise.allSettled([
+    getAccountDashboard(user.id),
+    getUserLibrary(user.id),
+    getHomepageData(getHomepageCategoryIds),
+  ]);
+
   let dashboardData: Awaited<ReturnType<typeof getAccountDashboard>> = null;
-  try {
-    dashboardData = await getAccountDashboard(user.id);
-  } catch (error) {
-    const normalized = normalizeError(error, 'Failed to load account dashboard data');
+  if (dashboardResult.status === 'fulfilled') {
+    dashboardData = dashboardResult.value;
+  } else {
+    const normalized = normalizeError(
+      dashboardResult.reason,
+      'Failed to load account dashboard data'
+    );
     logger.error('AccountDashboard: getAccountDashboard threw', normalized, {
       userIdHash,
+    });
+  }
+
+  let libraryData: Awaited<ReturnType<typeof getUserLibrary>> = null;
+  if (libraryResult.status === 'fulfilled') {
+    libraryData = libraryResult.value;
+  } else {
+    const normalized = normalizeError(libraryResult.reason, 'Failed to load user library snapshot');
+    logger.warn('AccountDashboard: getUserLibrary threw', {
+      userIdHash,
+      error: normalized.message,
+    });
+  }
+
+  const homepageData = homepageResult.status === 'fulfilled' ? homepageResult.value : null;
+  if (homepageResult.status === 'rejected') {
+    const normalized = normalizeError(homepageResult.reason, 'Failed to load homepage data');
+    logger.warn('AccountDashboard: getHomepageData threw', {
+      userIdHash,
+      error: normalized.message,
     });
   }
 
@@ -102,6 +149,75 @@ export default async function AccountDashboard() {
   const accountAge = profile?.created_at
     ? Math.floor((Date.now() - new Date(profile.created_at).getTime()) / (1000 * 60 * 60 * 24))
     : 0;
+
+  const bookmarks = (libraryData?.bookmarks ?? []).filter(
+    (bookmark) => bookmark?.content_slug && bookmark?.content_type
+  );
+  const recentBookmarks = bookmarks.slice(0, 3);
+  const recentlySavedContentResults = await Promise.all(
+    recentBookmarks.map(async (bookmark) => {
+      try {
+        const category = bookmark.content_type as Database['public']['Enums']['content_category'];
+        const slug = bookmark.content_slug as string;
+        const detail = await getContentDetailCore({ category, slug });
+        return detail?.content ?? null;
+      } catch (error) {
+        const normalized = normalizeError(error, 'Failed to load bookmark content');
+        logger.warn('AccountDashboard: getContentDetailCore failed for bookmark', {
+          userIdHash,
+          slug: bookmark.content_slug,
+          category: bookmark.content_type,
+          error: normalized.message,
+        });
+        return null;
+      }
+    })
+  );
+  const recentlySavedContent = recentlySavedContentResults.filter(
+    (item): item is Database['public']['Tables']['content']['Row'] =>
+      item !== null && typeof item === 'object'
+  );
+
+  const bookmarkedSlugs = new Set(
+    bookmarks.map((bookmark) => `${bookmark.content_type ?? ''}/${bookmark.content_slug ?? ''}`)
+  );
+
+  const savedTags = new Set<string>();
+  for (const contentItem of recentlySavedContent) {
+    const tagList = ensureStringArray((contentItem as { tags?: string[] }).tags);
+    for (const tag of tagList) {
+      if (tag) {
+        savedTags.add(tag.trim().toLowerCase());
+      }
+    }
+  }
+
+  const homepageCategoryData =
+    ((homepageData?.content as { categoryData?: Record<string, HomepageContentItem[]> }) ?? null)
+      ?.categoryData ?? {};
+
+  const homepageItems = Object.values(homepageCategoryData).flatMap((bucket) =>
+    Array.isArray(bucket) ? (bucket as HomepageContentItem[]) : []
+  );
+
+  const candidateRecommendations =
+    savedTags.size > 0
+      ? homepageItems.filter((item) =>
+          ensureStringArray(item.tags).some((tag) => savedTags.has(tag.toLowerCase()))
+        )
+      : homepageItems;
+
+  const recommendations = candidateRecommendations
+    .filter(
+      (item) => item.slug && !bookmarkedSlugs.has(`${item.category}/${item.slug}`) && item.title
+    )
+    .slice(0, 3);
+
+  const latestBookmark = recentBookmarks[0];
+  const resumeBookmarkHref =
+    latestBookmark?.content_slug && latestBookmark.content_type
+      ? `/${latestBookmark.content_type}/${latestBookmark.content_slug}`
+      : null;
 
   return (
     <div className="space-y-6">
@@ -166,24 +282,135 @@ export default async function AccountDashboard() {
           <CardTitle>Quick Actions</CardTitle>
           <CardDescription>Common tasks and features</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-2">
-          <p className="text-sm">
-            • View your <NavLink href={ROUTES.ACCOUNT_ACTIVITY}>contribution history</NavLink> and
-            earn badges
-          </p>
-          <p className="text-sm">
-            • Browse the <NavLink href={ROUTES.HOME}>directory</NavLink> and bookmark your favorite
-            configurations
-          </p>
-          <p className="text-sm">
-            • View your <NavLink href={ROUTES.ACCOUNT_LIBRARY}>library</NavLink> with saved
-            bookmarks and collections
-          </p>
-          <p className="text-sm">
-            • Update your profile in <NavLink href={ROUTES.ACCOUNT_SETTINGS}>settings</NavLink>
-          </p>
+        <CardContent className="space-y-3">
+          {resumeBookmarkHref && (
+            <QuickActionRow
+              title="Resume latest bookmark"
+              description={`Jump back into ${latestBookmark?.content_slug}`}
+              href={resumeBookmarkHref}
+            />
+          )}
+          <QuickActionRow
+            title="View all bookmarks"
+            description={`You have ${bookmarkCount ?? 0} saved configurations`}
+            href={ROUTES.ACCOUNT_LIBRARY}
+          />
+          <QuickActionRow
+            title="Manage profile"
+            description="Update your settings and preferences"
+            href={ROUTES.ACCOUNT_SETTINGS}
+          />
         </CardContent>
       </Card>
+
+      <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
+        <Card>
+          <CardHeader>
+            <CardTitle>Recently Saved</CardTitle>
+            <CardDescription>Your latest bookmarks at a glance</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {recentlySavedContent.length > 0 ? (
+              <RecentlySavedGrid items={recentlySavedContent} />
+            ) : (
+              <EmptyRecentlySavedState />
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Recommended next</CardTitle>
+            <CardDescription>Suggestions based on your saved tags</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {recommendations.length > 0 ? (
+              <ul className="space-y-3">
+                {recommendations.map((item) => {
+                  const firstTag = ensureStringArray(item.tags)[0];
+                  const href = firstTag
+                    ? `/search?tags=${encodeURIComponent(firstTag)}`
+                    : `/${item.category}/${item.slug}`;
+                  return (
+                    <li
+                      key={`${item.category}-${item.slug}`}
+                      className="rounded-xl border border-border/60 bg-muted/20 p-3"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <p className="font-semibold">{item.title}</p>
+                          {item.description && (
+                            <p className="line-clamp-2 text-muted-foreground text-sm">
+                              {item.description}
+                            </p>
+                          )}
+                        </div>
+                        <NavLink href={href} className="font-medium text-sm">
+                          Explore →
+                        </NavLink>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            ) : (
+              <p className="text-muted-foreground text-sm">
+                Start bookmarking configs to receive personalized recommendations.
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}
+
+function QuickActionRow({
+  title,
+  description,
+  href,
+}: {
+  title: string;
+  description: string;
+  href: string;
+}) {
+  return (
+    <div className="flex items-center justify-between gap-4 rounded-xl border border-border/50 p-3">
+      <div>
+        <p className="font-medium">{title}</p>
+        <p className="text-muted-foreground text-sm">{description}</p>
+      </div>
+      <NavLink href={href} className="font-semibold text-sm">
+        Open →
+      </NavLink>
+    </div>
+  );
+}
+
+function RecentlySavedSkeleton() {
+  const skeletonPlaceholders = ['first', 'second', 'third'];
+  return (
+    <div className="grid gap-4 sm:grid-cols-2">
+      {skeletonPlaceholders.map((token) => (
+        <div
+          key={`recently-saved-skeleton-${token}`}
+          className="h-32 animate-pulse rounded-2xl border border-border/50 bg-muted/20"
+        />
+      ))}
+    </div>
+  );
+}
+
+function EmptyRecentlySavedState() {
+  return (
+    <div className="rounded-2xl border border-border/70 border-dashed p-6 text-center">
+      <p className="font-medium">No saved configs yet</p>
+      <p className="text-muted-foreground text-sm">
+        Browse the directory and bookmark your favorite configurations to see them here.
+      </p>
+      <NavLink href={ROUTES.HOME} className="mt-4 inline-flex font-semibold">
+        Explore directory →
+      </NavLink>
     </div>
   );
 }

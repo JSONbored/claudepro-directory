@@ -45,6 +45,23 @@ import { handleExternalWebhook } from './routes/webhook/external.ts';
 // Use StandardContext directly
 type FluxStationContext = StandardContext;
 
+/**
+ * Timing-safe string comparison to prevent timing attacks
+ * Uses constant-time comparison by XORing all character codes
+ */
+function timingSafeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) {
+    return false;
+  }
+
+  let result = 0;
+  for (let i = 0; i < a.length; i++) {
+    result |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+
+  return result === 0;
+}
+
 const requireInternalSecret: Middleware<FluxStationContext> = async (
   ctx: FluxStationContext,
   next: () => Promise<Response>
@@ -66,7 +83,7 @@ const requireInternalSecret: Middleware<FluxStationContext> = async (
     );
   }
 
-  if (!authHeader || authHeader !== secret) {
+  if (!(authHeader && timingSafeEqual(authHeader, secret))) {
     return jsonResponse(
       { error: 'Unauthorized', code: 'auth:unauthorized' },
       401,
@@ -86,7 +103,9 @@ serveEdgeApp<FluxStationContext>({
   onNoMatch: (ctx) => {
     // Default route for unmatched POST requests (external webhooks)
     if (ctx.method === 'POST' || ctx.method === 'OPTIONS') {
-      return handleExternalWebhook(ctx.request);
+      return chain<FluxStationContext>(rateLimit('public'))((c) =>
+        handleExternalWebhook(c.request)
+      )(ctx);
     }
     return Promise.resolve(
       errorResponse(new Error(`Not Found: ${ctx.pathname}`), 'flux-station:not-found')
@@ -185,59 +204,66 @@ serveEdgeApp<FluxStationContext>({
       methods: ['POST', 'OPTIONS'],
       match: (ctx) =>
         ctx.pathname === '/changelog-webhook' || ctx.pathname === '/changelog-webhook/',
-      handler: chain<FluxStationContext>(rateLimit('queueWorker'))((ctx) =>
-        handleChangelogSyncRequest(ctx.request)
-      ),
+      handler: chain<FluxStationContext>(
+        rateLimit('queueWorker'),
+        requireInternalSecret
+      )((ctx) => handleChangelogSyncRequest(ctx.request)),
     },
     {
       name: 'pulse',
       methods: ['POST', 'OPTIONS'],
       match: (ctx) => ctx.pathname === '/pulse' || ctx.pathname === '/pulse/',
-      handler: chain<FluxStationContext>(rateLimit('queueWorker'))((ctx) =>
-        handlePulse(ctx.request)
-      ),
+      handler: chain<FluxStationContext>(
+        rateLimit('queueWorker'),
+        requireInternalSecret
+      )((ctx) => handlePulse(ctx.request)),
     },
     {
       name: 'changelog-process',
       methods: ['POST', 'OPTIONS'],
       match: (ctx) =>
         ctx.pathname === '/changelog/process' || ctx.pathname === '/changelog/process/',
-      handler: chain<FluxStationContext>(rateLimit('queueWorker'))((ctx) =>
-        handleChangelogProcess(ctx.request)
-      ),
+      handler: chain<FluxStationContext>(
+        rateLimit('queueWorker'),
+        requireInternalSecret
+      )((ctx) => handleChangelogProcess(ctx.request)),
     },
     {
       name: 'changelog-notify',
       methods: ['POST', 'OPTIONS'],
       match: (ctx) => ctx.pathname === '/changelog/notify' || ctx.pathname === '/changelog/notify/',
-      handler: chain<FluxStationContext>(rateLimit('queueWorker'))((ctx) =>
-        handleChangelogNotify(ctx.request)
-      ),
+      handler: chain<FluxStationContext>(
+        rateLimit('queueWorker'),
+        requireInternalSecret
+      )((ctx) => handleChangelogNotify(ctx.request)),
     },
     {
       name: 'discord-jobs',
       methods: ['POST', 'OPTIONS'],
       match: (ctx) => ctx.pathname === '/discord/jobs' || ctx.pathname === '/discord/jobs/',
-      handler: chain<FluxStationContext>(rateLimit('queueWorker'))((ctx) =>
-        handleDiscordJobs(ctx.request)
-      ),
+      handler: chain<FluxStationContext>(
+        rateLimit('queueWorker'),
+        requireInternalSecret
+      )((ctx) => handleDiscordJobs(ctx.request)),
     },
     {
       name: 'discord-submissions',
       methods: ['POST', 'OPTIONS'],
       match: (ctx) =>
         ctx.pathname === '/discord/submissions' || ctx.pathname === '/discord/submissions/',
-      handler: chain<FluxStationContext>(rateLimit('queueWorker'))((ctx) =>
-        handleDiscordSubmissions(ctx.request)
-      ),
+      handler: chain<FluxStationContext>(
+        rateLimit('queueWorker'),
+        requireInternalSecret
+      )((ctx) => handleDiscordSubmissions(ctx.request)),
     },
     {
       name: 'revalidation',
       methods: ['POST', 'OPTIONS'],
       match: (ctx) => ctx.pathname === '/revalidation' || ctx.pathname === '/revalidation/',
-      handler: chain<FluxStationContext>(rateLimit('queueWorker'))((ctx) =>
-        handleRevalidation(ctx.request)
-      ),
+      handler: chain<FluxStationContext>(
+        rateLimit('queueWorker'),
+        requireInternalSecret
+      )((ctx) => handleRevalidation(ctx.request)),
     },
     {
       name: 'active-notifications',

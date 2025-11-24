@@ -47,6 +47,26 @@ function escapeForSingleQuotedLiteral(s: string): string {
 }
 
 /**
+ * Safely extract properties from unknown objects
+ * Used for accessing nested properties in metadata JSON
+ */
+function getProperty(obj: unknown, key: string): unknown {
+  if (typeof obj !== 'object' || obj === null) {
+    return undefined;
+  }
+  const desc = Object.getOwnPropertyDescriptor(obj, key);
+  return desc ? desc.value : undefined;
+}
+
+/**
+ * Safely extract string properties from unknown objects
+ */
+function getStringProperty(obj: unknown, key: string): string | undefined {
+  const value = getProperty(obj, key);
+  return typeof value === 'string' ? value : undefined;
+}
+
+/**
  * Extract user_config from MCP metadata
  */
 function extractUserConfig(mcp: McpRow): Record<string, UserConfigEntry> {
@@ -83,20 +103,6 @@ function extractUserConfig(mcp: McpRow): Record<string, UserConfigEntry> {
  * Generate manifest.json for .mcpb package (v0.2 spec)
  */
 function generateManifest(mcp: McpRow): string {
-  // Safely extract properties from metadata
-  const getProperty = (obj: unknown, key: string): unknown => {
-    if (typeof obj !== 'object' || obj === null) {
-      return undefined;
-    }
-    const desc = Object.getOwnPropertyDescriptor(obj, key);
-    return desc ? desc.value : undefined;
-  };
-
-  const getStringProperty = (obj: unknown, key: string): string | undefined => {
-    const value = getProperty(obj, key);
-    return typeof value === 'string' ? value : undefined;
-  };
-
   const metadata = mcp.metadata;
   const config =
     metadata && typeof metadata === 'object' ? getProperty(metadata, 'configuration') : undefined;
@@ -172,20 +178,6 @@ function generateManifest(mcp: McpRow): string {
  * with tools/resources from metadata if available.
  */
 function generateServerIndex(mcp: McpRow): string {
-  // Safely extract properties from metadata (same logic as generateManifest)
-  const getProperty = (obj: unknown, key: string): unknown => {
-    if (typeof obj !== 'object' || obj === null) {
-      return undefined;
-    }
-    const desc = Object.getOwnPropertyDescriptor(obj, key);
-    return desc ? desc.value : undefined;
-  };
-
-  const getStringProperty = (obj: unknown, key: string): string | undefined => {
-    const value = getProperty(obj, key);
-    return typeof value === 'string' ? value : undefined;
-  };
-
   const metadata = mcp.metadata;
   const config =
     metadata && typeof metadata === 'object' ? getProperty(metadata, 'configuration') : undefined;
@@ -405,7 +397,7 @@ function generatePackageJson(mcp: McpRow): string {
     type: 'module',
     main: 'server/index.js',
     dependencies: {
-      '@modelcontextprotocol/sdk': '^1.0.0',
+      '@modelcontextprotocol/sdk': '^1.22.0',
     },
   };
 
@@ -712,8 +704,12 @@ export class McpGenerator implements PackageGenerator {
     // 5. Upload to Supabase Storage using shared utility
     const fileName = `packages/${mcp.slug}.mcpb`;
     // Convert Uint8Array to ArrayBuffer for upload
-    // Create a new ArrayBuffer by copying the Uint8Array data
-    const arrayBuffer = new Uint8Array(mcpbBuffer).buffer;
+    // Create a new ArrayBuffer to ensure type compatibility (ArrayBufferLike includes SharedArrayBuffer)
+    // Copy the buffer to ensure we have a proper ArrayBuffer, not SharedArrayBuffer
+    const arrayBuffer =
+      mcpbBuffer.buffer instanceof ArrayBuffer
+        ? mcpbBuffer.buffer
+        : (new Uint8Array(mcpbBuffer).buffer as ArrayBuffer);
     const uploadResult = await uploadObject({
       bucket: this.getBucketName(),
       buffer: arrayBuffer,

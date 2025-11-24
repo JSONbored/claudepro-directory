@@ -14,6 +14,7 @@ import {
   pgmqSend,
   successResponse,
   supabaseServiceRole,
+  unauthorizedResponse,
   webhookCorsHeaders,
 } from '@heyclaude/edge-runtime';
 import {
@@ -23,7 +24,9 @@ import {
   errorToString,
   logError,
   logInfo,
+  logWarn,
   TIMEOUT_PRESETS,
+  verifySupabaseDatabaseWebhook,
   withCircuitBreaker,
   withDuration,
   withTimeout,
@@ -317,6 +320,20 @@ export async function handleEmbeddingGenerationQueue(_req: Request): Promise<Res
           msg_id: msg.msg_id.toString(),
           message: queueMessage,
         });
+
+        // Delete invalid message to prevent infinite retry loop
+        try {
+          await pgmqDelete(EMBEDDING_GENERATION_QUEUE, msg.msg_id);
+          console.log('[generate-embedding] Deleted invalid message', {
+            msg_id: msg.msg_id.toString(),
+          });
+        } catch (deleteError) {
+          console.error('[generate-embedding] Failed to delete invalid message', {
+            msg_id: msg.msg_id.toString(),
+            error: errorToString(deleteError),
+          });
+        }
+
         results.push({
           msg_id: msg.msg_id.toString(),
           status: 'failed',
@@ -434,11 +451,91 @@ export async function handleEmbeddingWebhook(req: Request): Promise<Response> {
       });
     }
 
-    // Parse webhook payload
-    const parseResult = await parseJsonBody<ContentWebhookPayload>(req, {
-      maxSize: 100 * 1024, // 100KB max payload
-      cors: webhookCorsHeaders,
-    });
+    // Read raw body for signature verification (before parsing)
+    const rawBody = await req.text();
+
+    // Verify webhook signature if secret is configured
+    const webhookSecret = Deno.env.get('INTERNAL_API_SECRET');
+    if (webhookSecret) {
+      // Check for common signature header names
+      const signature =
+        req.headers.get('x-supabase-signature') ||
+        req.headers.get('x-webhook-signature') ||
+        req.headers.get('x-signature');
+      const timestamp = req.headers.get('x-webhook-timestamp') || req.headers.get('x-timestamp');
+
+      if (!signature) {
+        const headerNames: string[] = [];
+        req.headers.forEach((_, key) => {
+          headerNames.push(key);
+        });
+        logWarn('Missing webhook signature header', {
+          ...logContext,
+          headers: headerNames,
+        });
+        return unauthorizedResponse('Missing webhook signature', webhookCorsHeaders);
+      }
+
+      // Validate timestamp if provided (prevent replay attacks)
+      if (timestamp) {
+        const timestampMs = Number.parseInt(timestamp, 10);
+        if (Number.isNaN(timestampMs)) {
+          return badRequestResponse('Invalid timestamp format', webhookCorsHeaders);
+        }
+
+        const now = Date.now();
+        const timestampAge = now - timestampMs;
+        const maxAge = 5 * 60 * 1000; // 5 minutes
+
+        if (timestampAge > maxAge || timestampAge < -maxAge) {
+          logWarn('Webhook timestamp too old or too far in future', {
+            ...logContext,
+            timestamp: timestampMs,
+            now,
+            age_ms: timestampAge,
+          });
+          return unauthorizedResponse(
+            'Webhook timestamp out of acceptable range',
+            webhookCorsHeaders
+          );
+        }
+      }
+
+      const isValid = await verifySupabaseDatabaseWebhook({
+        rawBody,
+        signature,
+        timestamp: timestamp || null,
+        secret: webhookSecret,
+      });
+
+      if (!isValid) {
+        logWarn('Webhook signature verification failed', {
+          ...logContext,
+          has_timestamp: !!timestamp,
+        });
+        return unauthorizedResponse('Invalid webhook signature', webhookCorsHeaders);
+      }
+
+      logInfo('Webhook signature verified', {
+        ...logContext,
+        has_timestamp: !!timestamp,
+      });
+    } else {
+      logWarn('Webhook secret not configured - skipping signature verification', logContext);
+    }
+
+    // Parse webhook payload (create new request from raw body since we already read it)
+    const parseResult = await parseJsonBody<ContentWebhookPayload>(
+      new Request(req.url, {
+        method: req.method,
+        headers: req.headers,
+        body: rawBody,
+      }),
+      {
+        maxSize: 100 * 1024, // 100KB max payload
+        cors: webhookCorsHeaders,
+      }
+    );
 
     if (!parseResult.success) {
       return parseResult.response;

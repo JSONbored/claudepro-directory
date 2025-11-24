@@ -52,7 +52,7 @@ type PublicApiContext = StandardContext;
 // Helper to deduplicate manual rate limiting logic
 async function withRateLimit(
   ctx: PublicApiContext,
-  preset: typeof RATE_LIMIT_PRESETS.heavy,
+  preset: (typeof RATE_LIMIT_PRESETS)[keyof typeof RATE_LIMIT_PRESETS],
   handler: () => Promise<Response>
 ): Promise<Response> {
   const rateLimitResult = checkRateLimit(ctx.request, preset);
@@ -102,9 +102,12 @@ const ROUTE_HANDLERS: Record<string, (ctx: PublicApiContext) => Promise<Response
       });
     }
     if (ctx.segments[2] === 'process') {
-      return withRateLimit(ctx, RATE_LIMIT_PRESETS.heavy, async () =>
-        handlePackageGenerationQueue(ctx.request)
-      );
+      return withRateLimit(ctx, RATE_LIMIT_PRESETS.heavy, async () => {
+        const logContext = createPublicApiContext('content-generate-process', {
+          path: ctx.pathname,
+        });
+        return handlePackageGenerationQueue(ctx.request, logContext);
+      });
     }
     return withRateLimit(ctx, RATE_LIMIT_PRESETS.heavy, async () => {
       const logContext = createPublicApiContext('content-generate', {

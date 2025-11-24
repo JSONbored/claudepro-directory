@@ -17,7 +17,8 @@ export class SearchService {
   async searchUnified(args: Database['public']['Functions']['search_unified']['Args']) {
     const { data, error } = await this.supabase.rpc('search_unified', args);
     if (error) throw error;
-    return data as Database['public']['Functions']['search_unified']['Returns'];
+    const rows = data as Database['public']['Functions']['search_unified']['Returns'];
+    return { data: rows, total_count: rows?.length ?? 0 };
   }
 
   /**
@@ -26,7 +27,8 @@ export class SearchService {
   async searchContent(args: Database['public']['Functions']['search_content_optimized']['Args']) {
     const { data, error } = await this.supabase.rpc('search_content_optimized', args);
     if (error) throw error;
-    return data as Database['public']['Functions']['search_content_optimized']['Returns'];
+    const rows = data as Database['public']['Functions']['search_content_optimized']['Returns'];
+    return { data: rows, total_count: rows?.length ?? 0 };
   }
 
   /**

@@ -3,7 +3,7 @@
  */
 
 import type { Database } from '@heyclaude/database-types';
-import { logger, normalizeError } from '@heyclaude/web-runtime/core';
+import { hashUserId, logger, normalizeError } from '@heyclaude/web-runtime/core';
 import {
   generatePageMetadata,
   getAuthenticatedUser,
@@ -40,6 +40,8 @@ export default async function EditCompanyPage({ params }: EditCompanyPageProps) 
     redirect('/login');
   }
 
+  const hashedUserId = hashUserId(user.id);
+
   let company: Database['public']['CompositeTypes']['user_companies_company'] | null = null;
   let hasError = false;
   try {
@@ -48,7 +50,7 @@ export default async function EditCompanyPage({ params }: EditCompanyPageProps) 
     const normalized = normalizeError(error, 'Failed to load company for edit page');
     logger.error('EditCompanyPage: getUserCompanyById threw', normalized, {
       companyId: id,
-      userId: user.id,
+      hashedUserId,
     });
     hasError = true;
   }
@@ -74,7 +76,7 @@ export default async function EditCompanyPage({ params }: EditCompanyPageProps) 
   }
 
   if (!company) {
-    logger.warn('Company not found or access denied', { companyId: id, userId: user.id });
+    logger.warn('Company not found or access denied', { companyId: id, hashedUserId });
     notFound();
   }
 
