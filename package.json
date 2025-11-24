@@ -129,10 +129,10 @@
     "@types/canvas-confetti": "^1.9.0",
     "archiver": "^7.0.1",
     "knip": "^5.69.0",
-    "lefthook": "^2.0.3",
+    "lefthook": "^2.0.4",
     "ora": "^8.2.0",
     "turbo": "^2.6.1",
-    "ultracite": "^6.3.2"
+    "ultracite": "^6.3.6"
   },
   "pnpm": {
     "overrides": {
