@@ -32,16 +32,6 @@
     "**/*.generated.ts",
     "**/*.generated.tsx"
   ],
-  "ignoreNotes": {
-    "content/skills/**/*.zip": "Binary skill archives managed outside the codebase; Knip cannot analyze compressed assets.",
-    "reports/knip/**/*.json": "Machine-generated Knip outputs stored for auditing and should not influence unused-code detection.",
-    "**/.next/**": "Next.js build artifacts that re-export compiled output and routinely confuse unused-file scans.",
-    "**/build/**": "Generic build folders emitted by tooling packages; contents are derived from /src and safe to skip.",
-    "**/dist/**": "Package distribution directories compiled from source—scanning them duplicates findings and adds noise.",
-    "**/node_modules/**": "External dependencies vendored locally for certain workspaces; excluding prevents redundant scanning.",
-    "**/*.generated.ts": "Codegen outputs (db/services/types) may not have direct imports but are intentionally retained.",
-    "**/*.generated.tsx": "Same as above for React-facing codegen artifacts."
-  },
   "ignoreBinaries": ["skott", "madge"],
   "entry": [
     "apps/edge/functions/**/*.{ts,tsx}",

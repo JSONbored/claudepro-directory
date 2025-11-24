@@ -98,6 +98,12 @@ async function generateEmbedding(text: string): Promise<number[]> {
     if (!Array.isArray(embeddingResult)) {
       throw new Error('Embedding generation returned non-array result');
     }
+    if (embeddingResult.length === 0) {
+      throw new Error('Embedding generation returned empty array');
+    }
+    if (!embeddingResult.every((val) => typeof val === 'number' && !Number.isNaN(val))) {
+      throw new Error('Embedding generation returned non-numeric values');
+    }
     return embeddingResult;
   };
 
@@ -125,10 +131,13 @@ async function storeEmbedding(
   const storeEmbeddingInternal = async () => {
     type ContentEmbeddingsInsert =
       DatabaseGenerated['public']['Tables']['content_embeddings']['Insert'];
+    // Store embedding as JSON string for TEXT/JSONB column
+    // Note: If this column is a pgvector type, it would require format '[1,2,3]' instead
+    // The query_content_embeddings RPC function handles format conversion if needed
     const insertData: ContentEmbeddingsInsert = {
       content_id: contentId,
       content_text: contentText,
-      embedding: JSON.stringify(embedding), // pgvector expects JSON string
+      embedding: JSON.stringify(embedding),
       embedding_generated_at: new Date().toISOString(),
     };
     const { error } = await supabaseServiceRole.from('content_embeddings').upsert(insertData);
@@ -236,7 +245,9 @@ async function processEmbeddingGeneration(
 
     if (!searchableText || searchableText.trim().length === 0) {
       // Skip empty content (not an error, just nothing to embed)
-      console.log('[generate-embedding] Skipping embedding generation: empty searchable text', {
+      const logContext = createUtilityContext('generate-embedding', 'skip-empty');
+      logInfo('Skipping embedding generation: empty searchable text', {
+        ...logContext,
         content_id,
       });
       return { success: true, errors: [] }; // Mark as success (skipped)
@@ -248,7 +259,9 @@ async function processEmbeddingGeneration(
     // Store embedding (with circuit breaker + timeout)
     await storeEmbedding(content_id, searchableText, embedding);
 
-    console.log('[generate-embedding] Embedding generated and stored', {
+    const logContext = createUtilityContext('generate-embedding', 'store-success');
+    logInfo('Embedding generated and stored', {
+      ...logContext,
       content_id,
       embedding_dim: embedding.length,
     });
@@ -257,10 +270,15 @@ async function processEmbeddingGeneration(
   } catch (error) {
     const errorMsg = errorToString(error);
     errors.push(`Embedding generation failed: ${errorMsg}`);
-    console.error('[generate-embedding] Embedding generation error', {
-      content_id,
-      error: errorMsg,
-    });
+    const errorLogContext = createUtilityContext('generate-embedding', 'generation-error');
+    logError(
+      'Embedding generation error',
+      {
+        ...errorLogContext,
+        content_id,
+      },
+      error
+    );
     return { success: false, errors };
   }
 }
@@ -285,7 +303,11 @@ export async function handleEmbeddingGenerationQueue(_req: Request): Promise<Res
       return successResponse({ message: 'No messages in queue', processed: 0 }, 200);
     }
 
-    console.log(`[generate-embedding] Processing ${messages.length} embedding generation jobs`);
+    const logContext = createUtilityContext('generate-embedding', 'queue-processor');
+    logInfo(`Processing ${messages.length} embedding generation jobs`, {
+      ...logContext,
+      count: messages.length,
+    });
 
     const results: Array<{
       msg_id: string;
@@ -316,22 +338,32 @@ export async function handleEmbeddingGenerationQueue(_req: Request): Promise<Res
       }
 
       if (!isValidQueueMessage(queueMessage)) {
-        console.error('[generate-embedding] Invalid queue message format', {
-          msg_id: msg.msg_id.toString(),
-          message: queueMessage,
-        });
+        const errorLogContext = createUtilityContext('generate-embedding', 'invalid-message');
+        logError(
+          'Invalid queue message format',
+          {
+            ...errorLogContext,
+            msg_id: msg.msg_id.toString(),
+          },
+          new Error(`Invalid message: ${JSON.stringify(queueMessage)}`)
+        );
 
         // Delete invalid message to prevent infinite retry loop
         try {
           await pgmqDelete(EMBEDDING_GENERATION_QUEUE, msg.msg_id);
-          console.log('[generate-embedding] Deleted invalid message', {
+          logInfo('Deleted invalid message', {
+            ...errorLogContext,
             msg_id: msg.msg_id.toString(),
           });
         } catch (deleteError) {
-          console.error('[generate-embedding] Failed to delete invalid message', {
-            msg_id: msg.msg_id.toString(),
-            error: errorToString(deleteError),
-          });
+          logError(
+            'Failed to delete invalid message',
+            {
+              ...errorLogContext,
+              msg_id: msg.msg_id.toString(),
+            },
+            deleteError
+          );
         }
 
         results.push({
@@ -355,7 +387,8 @@ export async function handleEmbeddingGenerationQueue(_req: Request): Promise<Res
         },
       };
 
-      console.log('[generate-embedding] Processing queue message', {
+      logInfo('Processing queue message', {
+        ...logContext,
         msg_id: message.msg_id.toString(),
         content_id: message.message.content_id,
         attempt: Number(message.read_ct ?? 0) + 1,
@@ -385,7 +418,8 @@ export async function handleEmbeddingGenerationQueue(_req: Request): Promise<Res
               { sleepSeconds: 0 }
             );
             await pgmqDelete(EMBEDDING_GENERATION_QUEUE, message.msg_id);
-            console.warn('[generate-embedding] Message moved to DLQ after max attempts', {
+            logWarn('Message moved to DLQ after max attempts', {
+              ...logContext,
               msg_id: message.msg_id.toString(),
               content_id: message.message.content_id,
               attempts: message.read_ct,
@@ -408,10 +442,14 @@ export async function handleEmbeddingGenerationQueue(_req: Request): Promise<Res
         }
       } catch (error) {
         const errorMsg = errorToString(error);
-        console.error('[generate-embedding] Unexpected error processing embedding generation', {
-          msg_id: message.msg_id.toString(),
-          error: errorMsg,
-        });
+        logError(
+          'Unexpected error processing embedding generation',
+          {
+            ...logContext,
+            msg_id: message.msg_id.toString(),
+          },
+          error
+        );
         results.push({
           msg_id: message.msg_id.toString(),
           status: 'failed',
@@ -430,9 +468,8 @@ export async function handleEmbeddingGenerationQueue(_req: Request): Promise<Res
       200
     );
   } catch (error) {
-    console.error('[generate-embedding] Fatal embedding generation queue error', {
-      error: errorToString(error),
-    });
+    const fatalLogContext = createUtilityContext('generate-embedding', 'queue-fatal');
+    logError('Fatal embedding generation queue error', fatalLogContext, error);
     return errorResponse(error, 'generate-embedding:queue-fatal');
   }
 }

@@ -1,3 +1,4 @@
+import { OG_DEFAULTS, OG_DIMENSIONS } from '@heyclaude/shared-runtime';
 import { ImageResponse } from 'next/og';
 import type { NextRequest } from 'next/server';
 
@@ -5,10 +6,9 @@ export const runtime = 'edge';
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
-  const title = searchParams.get('title') || 'Claude Pro Directory';
-  const description =
-    searchParams.get('description') || 'Community-curated agents, MCPs, and rules';
-  const type = searchParams.get('type') || 'agents';
+  const title = searchParams.get('title') || OG_DEFAULTS.title;
+  const description = searchParams.get('description') || OG_DEFAULTS.description;
+  const type = searchParams.get('type') || OG_DEFAULTS.type;
   const rawTags = searchParams.get('tags');
   const tags = rawTags
     ? rawTags
@@ -88,26 +88,21 @@ export async function GET(request: NextRequest) {
       >
         {tags.length > 0 && (
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
-            {tags.slice(0, 5).map((tag) => {
-              // Use tag value as key since tags are static and won't reorder
-              // For duplicate tags, React will handle them correctly
-              const key = `tag-${tag}`;
-              return (
-                <div
-                  key={key}
-                  style={{
-                    backgroundColor: '#2a2010',
-                    color: '#f97316',
-                    padding: '6px 16px',
-                    borderRadius: '6px',
-                    fontSize: '20px',
-                    border: '1px solid #3a3020',
-                  }}
-                >
-                  {tag}
-                </div>
-              );
-            })}
+            {tags.slice(0, 5).map((tag, index) => (
+              <div
+                key={`${tag}-${index}`}
+                style={{
+                  backgroundColor: '#2a2010',
+                  color: '#f97316',
+                  padding: '6px 16px',
+                  borderRadius: '6px',
+                  fontSize: '20px',
+                  border: '1px solid #3a3020',
+                }}
+              >
+                {tag}
+              </div>
+            ))}
           </div>
         )}
 
@@ -139,8 +134,8 @@ export async function GET(request: NextRequest) {
       </div>
     </div>,
     {
-      width: 1200,
-      height: 630,
+      width: OG_DIMENSIONS.width,
+      height: OG_DIMENSIONS.height,
     }
   );
 }

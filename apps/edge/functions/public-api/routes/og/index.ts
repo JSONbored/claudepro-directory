@@ -22,10 +22,12 @@ import {
   type BaseLogContext,
   buildSecurityHeaders,
   CIRCUIT_BREAKER_CONFIGS,
+  deriveTitleFromRoute,
   errorToString,
   logError,
   logInfo,
   logWarn,
+  OG_DEFAULTS,
   sanitizeRoute,
   TIMEOUT_PRESETS,
   validateQueryString,
@@ -76,11 +78,12 @@ function createOGImageContext(action: string, options?: Record<string, unknown>)
 /**
  * Fetch metadata from data-api/seo endpoint with circuit breaker and timeout
  * Falls back to route-based title extraction if SEO API fails
+ * Always returns OGImageParams (never null)
  */
 async function fetchMetadataFromRoute(
   route: string,
   logContext: BaseLogContext
-): Promise<OGImageParams | null> {
+): Promise<OGImageParams> {
   const supabaseUrl = edgeEnv.supabase.url;
   // Compute route type upfront to reuse across all return paths
   const routeType = extractTypeFromRoute(route);
@@ -165,9 +168,9 @@ async function fetchMetadataFromRoute(
       }
 
       return {
-        title: metadata.title || 'Claude Pro Directory',
-        description: metadata.description || 'Community-curated agents, MCPs, and rules',
-        type: routeType || 'agents',
+        title: metadata.title || OG_DEFAULTS.title,
+        description: metadata.description || OG_DEFAULTS.description,
+        type: routeType || OG_DEFAULTS.type,
         tags: Array.isArray(metadata.keywords) ? metadata.keywords : [],
       };
     };
@@ -238,9 +241,9 @@ async function fetchMetadataFromRoute(
                   source: 'database-rpc',
                 });
                 return {
-                  title: title || 'Claude Pro Directory',
-                  description: description || 'Community-curated agents, MCPs, and rules',
-                  type: routeType || 'agents',
+                  title: title || OG_DEFAULTS.title,
+                  description: description || OG_DEFAULTS.description,
+                  type: routeType || OG_DEFAULTS.type,
                   tags,
                 };
               }
@@ -261,17 +264,12 @@ async function fetchMetadataFromRoute(
     }
 
     // Fallback 2: Extract basic info from route (last resort)
-    const slug = route.split('/').pop() || '';
-    const title =
-      slug
-        .split('-')
-        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-        .join(' ') || 'Claude Pro Directory';
+    const title = deriveTitleFromRoute(route);
 
     return {
       title,
-      description: 'Community-curated agents, MCPs, and rules',
-      type: routeType || 'agents',
+      description: OG_DEFAULTS.description,
+      type: routeType || OG_DEFAULTS.type,
       tags: [],
     };
   }
@@ -514,36 +512,15 @@ export async function handleOGImageRequest(req: Request, startTime: number): Pro
     }
 
     const sanitizedRoute = sanitizeRoute(routeParam);
-    // Compute route type upfront
-    const routeType = extractTypeFromRoute(sanitizedRoute);
-    const metadata = await fetchMetadataFromRoute(sanitizedRoute, logContext);
-
-    if (metadata) {
-      params = metadata;
-    } else {
-      logError('Failed to fetch metadata for route, using minimal fallback', logContext);
-      // Minimal fallback - at least show something
-      const slug = sanitizedRoute.split('/').pop() || '';
-      const fallbackTitle =
-        slug
-          .split('-')
-          .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-          .join(' ') || 'Claude Pro Directory';
-
-      params = {
-        title: fallbackTitle,
-        description: 'Community-curated agents, MCPs, and rules',
-        type: routeType || 'agents',
-        tags: [],
-      };
-    }
+    // fetchMetadataFromRoute always returns OGImageParams (never null)
+    params = await fetchMetadataFromRoute(sanitizedRoute, logContext);
   }
   // Direct params (fallback)
   else if (titleParam || descriptionParam || typeParam || tagsParam) {
     params = {
-      title: titleParam || 'Claude Pro Directory',
-      description: descriptionParam || 'Community-curated agents, MCPs, and rules',
-      type: typeParam || 'agents',
+      title: titleParam || OG_DEFAULTS.title,
+      description: descriptionParam || OG_DEFAULTS.description,
+      type: typeParam || OG_DEFAULTS.type,
       tags: tagsParam
         ? tagsParam
             .split(',')

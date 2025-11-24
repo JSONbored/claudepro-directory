@@ -108,9 +108,13 @@ export async function runGenerateReadme(options: GenerateReadmeOptions = {}): Pr
       { responseType: 'text', requireAuth: false, timeoutMs: 15_000 }
     );
 
-    // Validate content before writing to file system to prevent arbitrary file upload
+    // CRITICAL SECURITY: Validate HTTP-sourced content before writing to file system
+    // This prevents arbitrary file upload attacks. The validateReadmeContent function
+    // performs comprehensive checks: type validation, size limits, path safety,
+    // markdown format validation, and malicious pattern detection.
     const validatedReadme = validateReadmeContent(readme, README_PATH);
 
+    // Safe to write: content has passed all security validations
     writeFileSync(README_PATH, validatedReadme, 'utf-8');
 
     logger.info('✅ README.md generated successfully!', { script: 'generate-readme' });

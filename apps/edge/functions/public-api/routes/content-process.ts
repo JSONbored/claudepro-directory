@@ -16,6 +16,7 @@ import {
   highlightCode,
   logError,
   MAX_BODY_SIZE,
+  sanitizeFilename as sanitizeFilenameBase,
 } from '@heyclaude/shared-runtime';
 
 // CORS headers for POST requests
@@ -112,13 +113,11 @@ function sanitizeFilename(input: string | undefined): string {
     return 'untitled';
   }
   const normalized = normalizeSlug(input);
-  const secure = normalized
-    .replace(/[/\\]/g, '')
-    .replace(/^[.-]+|[.-]+$/g, '')
-    .replace(/-{2,}/g, '-')
-    .slice(0, MAX_FILENAME_LENGTH)
-    .trim();
-  return secure || 'untitled';
+  // Apply shared sanitization, then enforce local length limit
+  const sanitized = sanitizeFilenameBase(normalized);
+  return sanitized.length > MAX_FILENAME_LENGTH
+    ? sanitized.slice(0, MAX_FILENAME_LENGTH)
+    : sanitized;
 }
 
 function convertHookTypeToKebab(hook_type: string): string {
@@ -261,6 +260,48 @@ function generateHookFilename(
   return `${identifier}-${suffix}.${ext}`;
 }
 
+/**
+ * Validate and extract item parameter from request
+ * Returns validated item with category, slug, name, and hook_type, or undefined if invalid
+ */
+function validateItemParameter(item: unknown):
+  | {
+      category: string;
+      slug?: string | null;
+      name?: string | null;
+      hook_type?: string | null;
+    }
+  | undefined {
+  if (typeof item !== 'object' || item === null) {
+    return undefined;
+  }
+
+  const getProperty = (obj: unknown, key: string): unknown => {
+    if (typeof obj !== 'object' || obj === null) return undefined;
+    const desc = Object.getOwnPropertyDescriptor(obj, key);
+    return desc?.value;
+  };
+
+  const getStringProperty = (obj: unknown, key: string): string | undefined => {
+    const value = getProperty(obj, key);
+    return typeof value === 'string' ? value : undefined;
+  };
+
+  const category = getStringProperty(item, 'category');
+  if (!category) return undefined;
+
+  return {
+    category,
+    slug: getStringProperty(item, 'slug') ?? null,
+    name: getStringProperty(item, 'name') ?? null,
+    hook_type: getStringProperty(item, 'hook_type') ?? null,
+  };
+}
+
+/**
+ * Extract markdown headings from source text
+ * Extracts h2-h6 only; h1 is typically the document title and excluded from TOC
+ */
 function extractMarkdownHeadings(source: string): HeadingMetadata[] {
   if (!(source && /^(#{2,6})\s+.+/m.test(source))) {
     return [];
@@ -458,8 +499,9 @@ export async function handleContentProcess(
     }
 
     // Validate required fields based on operation
+    // Reject both empty strings and whitespace-only strings for consistency
     if (operation === 'full' || operation === 'highlight') {
-      if (!code || typeof code !== 'string') {
+      if (!code || typeof code !== 'string' || code.trim() === '') {
         return badRequestResponse('Invalid code parameter. Must be a non-empty string.', CORS);
       }
     }
@@ -480,63 +522,12 @@ export async function handleContentProcess(
         : undefined;
 
     // Type guard: item is guaranteed to be valid object with category for 'full' and 'filename' operations
-    const getProperty = (obj: unknown, key: string): unknown => {
-      if (typeof obj !== 'object' || obj === null) {
-        return undefined;
-      }
-      const desc = Object.getOwnPropertyDescriptor(obj, key);
-      return desc?.value;
-    };
+    const validItem =
+      operation === 'full' || operation === 'filename' ? validateItemParameter(item) : undefined;
 
-    const getStringProperty = (obj: unknown, key: string): string | undefined => {
-      const value = getProperty(obj, key);
-      return typeof value === 'string' ? value : undefined;
-    };
-
-    const validItem:
-      | {
-          category: string;
-          slug?: string | null;
-          name?: string | null;
-          hook_type?: string | null;
-        }
-      | undefined =
-      operation === 'full' || operation === 'filename'
-        ? (() => {
-            if (typeof item !== 'object' || item === null) {
-              return undefined;
-            }
-            const category = getStringProperty(item, 'category');
-            if (!category) {
-              return undefined;
-            }
-            return {
-              category,
-              slug: getStringProperty(item, 'slug') ?? null,
-              name: getStringProperty(item, 'name') ?? null,
-              hook_type: getStringProperty(item, 'hook_type') ?? null,
-            };
-          })()
-        : undefined;
-
-    // Handle empty code for highlight operations
-    if (
-      (operation === 'full' || operation === 'highlight') &&
-      codeString &&
-      codeString.trim() === ''
-    ) {
-      return jsonResponse(
-        {
-          html: '<pre class="sugar-high-empty"><code>No code provided</code></pre>',
-        } satisfies ProcessResponse,
-        200,
-        {
-          ...buildSecurityHeaders(),
-          ...CORS,
-          ...buildCacheHeaders('transform'),
-        }
-      );
-    }
+    // Note: Empty/whitespace-only code is now rejected at validation (line 462)
+    // This block is no longer reachable but kept for defensive programming
+    // in case codeString somehow bypasses validation
 
     // Process based on operation mode
     let result: ProcessResponse = {};

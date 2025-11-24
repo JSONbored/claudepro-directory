@@ -6,18 +6,12 @@ import {
   getUserDashboard,
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import {
-  CheckCircle,
-  Clock,
-  ExternalLink,
-  GitPullRequest,
-  Send,
-  XCircle,
-} from '@heyclaude/web-runtime/icons';
+import { CheckCircle, Clock, GitPullRequest, Send, XCircle } from '@heyclaude/web-runtime/icons';
 import { BADGE_COLORS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
+import { SubmissionCard } from '@/src/components/core/domain/submissions/submission-card';
 import { Button } from '@/src/components/primitives/ui/button';
 import {
   Card,
@@ -59,7 +53,8 @@ const OWNER_REGEX = /^[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,38})?$/;
 const REPO_REGEX = /^[\w.-]{1,100}$/;
 const PR_NUMBER_REGEX = /^\d+$/;
 // Full path pattern: /owner/repo/pull/number
-const PR_PATH_REGEX = /^\/([a-zA-Z0-9](?:[a-zA-Z0-9-]{0,38})?)\/([\w.-]{1,100})\/pull\/(\d+)$/;
+// Uses loose capture groups, then validates components separately to avoid duplication
+const PR_PATH_REGEX = /^\/([^/]+)\/([^/]+)\/pull\/(\d+)$/;
 
 function extractPrComponents(
   url: string | null | undefined
@@ -87,16 +82,16 @@ function extractPrComponents(
     if (parsed.search || parsed.hash) return null;
     // Reject if username/password present
     if (parsed.username || parsed.password) return null;
-    // Strict pattern: /owner/repo/pull/number
+    // Match path structure with loose capture groups, then validate components separately
     const pathMatch = parsed.pathname.match(PR_PATH_REGEX);
     if (!pathMatch || pathMatch.length < 4) return null;
 
-    const owner = pathMatch[1];
-    const repo = pathMatch[2];
-    const prNumber = pathMatch[3];
+    const [, owner, repo, prNumber] = pathMatch;
 
-    // Type guard: ensure all components are defined
-    if (!(owner && repo && prNumber)) return null;
+    // Validate owner and repo against their specific regex patterns
+    if (!(owner && OWNER_REGEX.test(owner))) return null;
+    if (!(repo && REPO_REGEX.test(repo))) return null;
+    if (!(prNumber && PR_NUMBER_REGEX.test(prNumber))) return null;
 
     return { owner, repo, prNumber };
   } catch {
@@ -227,15 +222,6 @@ export default async function SubmissionsPage() {
     'spam',
     'merged',
   ];
-  const VALID_SUBMISSION_TYPES: Database['public']['Enums']['submission_type'][] = [
-    'agents',
-    'mcp',
-    'rules',
-    'commands',
-    'hooks',
-    'statuslines',
-    'skills',
-  ];
 
   /**
    * Validate submission status against enum values
@@ -256,7 +242,7 @@ export default async function SubmissionsPage() {
     type: unknown
   ): type is Database['public']['Enums']['submission_type'] {
     if (typeof type !== 'string') return false;
-    return VALID_SUBMISSION_TYPES.includes(type as Database['public']['Enums']['submission_type']);
+    return ALLOWED_TYPES.includes(type as (typeof ALLOWED_TYPES)[number]);
   }
 
   const SUBMISSION_STATUS_VARIANTS: Record<
@@ -284,8 +270,8 @@ export default async function SubmissionsPage() {
     );
   };
 
-  const getTypeLabel = (type: Database['public']['Enums']['submission_type']) => {
-    const labels: Partial<Record<Database['public']['Enums']['submission_type'], string>> = {
+  const getTypeLabel = (type: Database['public']['Enums']['submission_type']): string => {
+    const labels: Record<Database['public']['Enums']['submission_type'], string> = {
       agents: 'Claude Agent',
       mcp: 'MCP Server',
       rules: 'Claude Rule',
@@ -294,7 +280,7 @@ export default async function SubmissionsPage() {
       statuslines: 'Statusline',
       skills: 'Skill',
     };
-    return labels[type] ?? type;
+    return labels[type];
   };
 
   /**
@@ -309,43 +295,18 @@ export default async function SubmissionsPage() {
   }
 
   /**
-   * Render PR link button helper
-   */
-  function PrLinkButton({ href }: { href: string }) {
-    return (
-      <Button variant="outline" size="sm" asChild={true}>
-        <a href={href} target="_blank" rel="noopener noreferrer">
-          <GitPullRequest className="mr-1 h-3 w-3" />
-          View PR
-          <ExternalLink className="ml-1 h-3 w-3" />
-        </a>
-      </Button>
-    );
-  }
-
-  /**
-   * Render content link button helper
-   */
-  function ContentLinkButton({ href }: { href: string }) {
-    return (
-      <Button variant="outline" size="sm" asChild={true}>
-        <Link href={href}>
-          <ExternalLink className="mr-1 h-3 w-3" />
-          View Live
-        </Link>
-      </Button>
-    );
-  }
-
-  /**
    * Get safe PR link props or null if PR URL is invalid
    * Extracts and validates PR components, then constructs a safe URL
    */
   function getPrLinkProps(submission: (typeof submissions)[number]) {
     const components = submission.pr_url ? extractPrComponents(submission.pr_url) : null;
-    const prNumber = submission.pr_number || components?.prNumber;
 
-    if (!(components && prNumber)) return null;
+    // Bail early if components are invalid
+    if (!components) return null;
+
+    // Use DB field with fallback to extracted value
+    const prNumber = submission.pr_number ?? components.prNumber;
+    if (!prNumber) return null;
 
     const safePrUrl = buildSafePrUrl(components.owner, components.repo, prNumber);
     return safePrUrl && safePrUrl !== '#' ? { href: safePrUrl } : null;
@@ -399,145 +360,24 @@ export default async function SubmissionsPage() {
         </Card>
       ) : (
         <div className="grid gap-4">
-          {submissions.map((submission, index) => {
-            const submissionId = submission.id ?? `submission-${index}`;
-
-            // Validate status - log warning if missing or invalid
-            let status: Database['public']['Enums']['submission_status'] | null = null;
-            if (submission.status) {
-              if (isValidSubmissionStatus(submission.status)) {
-                status = submission.status;
-              } else {
-                logger.warn('SubmissionsPage: Invalid submission status', {
-                  submissionId,
-                  invalidStatus: submission.status,
-                  validStatuses: VALID_SUBMISSION_STATUSES,
-                  error: `Invalid status: ${submission.status}`,
-                });
+          {submissions.map((submission, index) => (
+            <SubmissionCard
+              key={submission.id ?? `submission-${index}`}
+              submission={submission}
+              index={index}
+              getStatusBadge={getStatusBadge}
+              getTypeLabel={getTypeLabel}
+              formatSubmissionDate={formatSubmissionDate}
+              getPrLinkProps={getPrLinkProps}
+              getContentLinkProps={getContentLinkProps}
+              isValidSubmissionStatus={isValidSubmissionStatus}
+              isValidSubmissionType={isValidSubmissionType}
+              VALID_SUBMISSION_STATUSES={VALID_SUBMISSION_STATUSES}
+              VALID_SUBMISSION_TYPES={
+                [...ALLOWED_TYPES] as Database['public']['Enums']['submission_type'][]
               }
-            } else {
-              logger.warn('SubmissionsPage: Missing submission status', undefined, {
-                submissionId,
-              });
-            }
-
-            // Validate content_type - log warning if missing or invalid
-            let type: Database['public']['Enums']['submission_type'] | null = null;
-            if (submission.content_type) {
-              if (isValidSubmissionType(submission.content_type)) {
-                type = submission.content_type;
-              } else {
-                logger.warn('SubmissionsPage: Invalid submission content_type', {
-                  submissionId,
-                  invalidContentType: submission.content_type,
-                  validContentTypes: VALID_SUBMISSION_TYPES,
-                  error: `Invalid content_type: ${submission.content_type}`,
-                });
-              }
-            } else {
-              logger.warn('SubmissionsPage: Missing submission content_type', undefined, {
-                submissionId,
-              });
-            }
-
-            // Validate content_slug - log warning if missing
-            const contentSlug = submission.content_slug;
-            if (!contentSlug) {
-              logger.warn('SubmissionsPage: Missing submission content_slug', undefined, {
-                submissionId,
-              });
-            }
-
-            const prLinkProps = getPrLinkProps(submission);
-            // Only call getContentLinkProps if type, slug, and status are all valid
-            const contentLinkProps =
-              type && contentSlug && status ? getContentLinkProps(type, contentSlug, status) : null;
-            return (
-              <Card key={submission.id ?? `submission-${index}`}>
-                <CardHeader>
-                  <div className={UI_CLASSES.FLEX_ITEMS_START_JUSTIFY_BETWEEN}>
-                    <div className="flex-1">
-                      <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                        {status ? (
-                          getStatusBadge(status)
-                        ) : (
-                          <UnifiedBadge
-                            variant="base"
-                            style="outline"
-                            className="text-muted-foreground text-xs"
-                          >
-                            Status: Unknown
-                          </UnifiedBadge>
-                        )}
-                        {type ? (
-                          <UnifiedBadge variant="base" style="outline" className="text-xs">
-                            {getTypeLabel(type)}
-                          </UnifiedBadge>
-                        ) : (
-                          <UnifiedBadge
-                            variant="base"
-                            style="outline"
-                            className="text-muted-foreground text-xs"
-                          >
-                            Type: Unknown
-                          </UnifiedBadge>
-                        )}
-                      </div>
-                      <CardTitle className="mt-2">
-                        {submission.content_name ?? 'Untitled'}
-                      </CardTitle>
-                      <CardDescription className="mt-1">
-                        Slug: <code className="text-xs">{submission.content_slug ?? 'N/A'}</code>
-                      </CardDescription>
-                    </div>
-                  </div>
-                </CardHeader>
-
-                <CardContent>
-                  <div className={'mb-4 flex flex-wrap gap-4 text-muted-foreground text-sm'}>
-                    <div>
-                      Submitted{' '}
-                      {submission.created_at ? formatSubmissionDate(submission.created_at) : 'N/A'}
-                    </div>
-                    {submission.merged_at && (
-                      <>
-                        <span>•</span>
-                        <div>Merged {formatSubmissionDate(submission.merged_at)}</div>
-                      </>
-                    )}
-                    {submission.pr_number && (
-                      <>
-                        <span>•</span>
-                        <div>PR #{submission.pr_number}</div>
-                      </>
-                    )}
-                  </div>
-
-                  {status === 'rejected' && submission.rejection_reason && (
-                    <div className="mb-4 rounded border border-red-500/20 bg-red-500/10 p-3">
-                      <p className={'mb-1 font-medium text-red-400 text-sm'}>Rejection Reason:</p>
-                      <p className={'text-muted-foreground text-sm'}>
-                        {submission.rejection_reason}
-                      </p>
-                    </div>
-                  )}
-
-                  {status === 'merged' && (
-                    <div className="mb-4 rounded border border-green-500/20 bg-green-500/10 p-3">
-                      <p className={'font-medium text-green-400 text-sm'}>
-                        🎉 Your contribution is now live on ClaudePro Directory!
-                      </p>
-                    </div>
-                  )}
-
-                  <div className={UI_CLASSES.FLEX_GAP_2}>
-                    {prLinkProps && <PrLinkButton href={prLinkProps.href} />}
-                    {contentLinkProps && <ContentLinkButton href={contentLinkProps.href} />}
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
+            />
+          ))}
         </div>
       )}
 
