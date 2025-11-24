@@ -305,8 +305,8 @@ jobs:
         LINT_EDGE_OUTCOME: ${{ steps.lint_edge.outcome }}
       with:
         name: 'Vercel - heyclaude: lint-${{ matrix.target }}'
-        status: ${{ (matrix.target == 'web' && env.LINT_WEB_OUTCOME == 'success') || (matrix.target == 'edge' && env.LINT_EDGE_OUTCOME == 'success') ? 'success' : 'failure' }}
-        description: ${{ ((matrix.target == 'web' && env.LINT_WEB_OUTCOME == 'success') || (matrix.target == 'edge' && env.LINT_EDGE_OUTCOME == 'success')) ? format('{0} lint passed', matrix.label) : format('{0} lint failed', matrix.label) }}
+        status: '${{ (matrix.target == ''web'' && env.LINT_WEB_OUTCOME == ''success'') || (matrix.target == ''edge'' && env.LINT_EDGE_OUTCOME == ''success'') ? ''success'' : ''failure'' }}'
+        description: '${{ ((matrix.target == ''web'' && env.LINT_WEB_OUTCOME == ''success'') || (matrix.target == ''edge'' && env.LINT_EDGE_OUTCOME == ''success'')) ? format(''{0} lint passed'', matrix.label) : format(''{0} lint failed'', matrix.label) }}'
 
   build:
     name: Build

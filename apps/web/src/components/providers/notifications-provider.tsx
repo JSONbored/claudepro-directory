@@ -5,7 +5,10 @@
 'use client';
 
 import type { Database } from '@heyclaude/database-types';
-import { dismissNotificationsAction, getActiveNotificationsAction } from '@heyclaude/web-runtime';
+import {
+  dismissNotificationsAction,
+  getActiveNotificationsAction,
+} from '@heyclaude/web-runtime/actions';
 import { logger, normalizeError } from '@heyclaude/web-runtime/core';
 import { useAction } from 'next-safe-action/hooks';
 import {

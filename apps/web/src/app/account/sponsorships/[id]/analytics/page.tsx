@@ -1,5 +1,5 @@
 import { Constants, type Database } from '@heyclaude/database-types';
-import { logger, normalizeError } from '@heyclaude/web-runtime/core';
+import { hashUserId, logger, normalizeError } from '@heyclaude/web-runtime/core';
 import {
   generatePageMetadata,
   getAuthenticatedUser,
@@ -55,6 +55,8 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
     );
   }
 
+  const userIdHash = hashUserId(user.id);
+
   let analyticsData: SponsorshipAnalytics | null = null;
   try {
     analyticsData = await getSponsorshipAnalytics(user.id, id);
@@ -62,7 +64,7 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
     const normalized = normalizeError(error, 'Failed to load sponsorship analytics');
     logger.error('SponsorshipAnalyticsPage: getSponsorshipAnalytics threw', normalized, {
       sponsorshipId: id,
-      userId: user.id,
+      userIdHash,
     });
     throw normalized;
   }
@@ -70,7 +72,7 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
   if (!analyticsData) {
     logger.warn('SponsorshipAnalyticsPage: analytics not found or inaccessible', {
       sponsorshipId: id,
-      userId: user.id,
+      userIdHash,
     });
     notFound();
   }
@@ -88,7 +90,7 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
       new Error('Null fields in analytics data'),
       {
         sponsorshipId: id,
-        userId: user.id,
+        userIdHash,
       }
     );
     notFound();
@@ -115,7 +117,7 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
   if (!isTierValid) {
     logger.warn('SponsorshipAnalyticsPage: invalid tier value, using safe default', {
       sponsorshipId: id,
-      userId: user.id,
+      userIdHash,
       invalidTier: rawTier,
       expectedTiers: validTiers, // Now supports arrays directly - better for log querying
       fallbackTier: 'sponsored',

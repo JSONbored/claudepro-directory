@@ -9,10 +9,12 @@ import type { DisplayableContent } from '@heyclaude/web-runtime/types/component.
 import { motion } from 'motion/react';
 import Link from 'next/link';
 import { type FC, memo, useEffect, useMemo, useState } from 'react';
+import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { UnifiedCardGrid } from '@/src/components/core/domain/cards/card-grid';
 import { ConfigCard } from '@/src/components/core/domain/cards/config-card';
 import { Button } from '@/src/components/primitives/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/primitives/ui/tabs';
+import { getTrendingSlugs, isNewSince } from '@/src/utils/content-highlights';
 
 export interface TabsSectionProps {
   activeTab: string;
@@ -21,6 +23,7 @@ export interface TabsSectionProps {
   categoryConfigs: Record<string, UnifiedCategoryConfig>;
   onFetchMore?: () => Promise<void>;
   serverHasMore?: boolean;
+  weekStart?: string;
 }
 
 const TabsSectionComponent: FC<TabsSectionProps> = ({
@@ -30,6 +33,7 @@ const TabsSectionComponent: FC<TabsSectionProps> = ({
   categoryConfigs,
   onFetchMore,
   serverHasMore = false,
+  weekStart,
 }) => {
   const [tabCategories, setTabCategories] = useState<readonly string[]>([]);
   const [springDefault, setSpringDefault] = useState({
@@ -52,10 +56,10 @@ const TabsSectionComponent: FC<TabsSectionProps> = ({
   }, []);
 
   useEffect(() => {
-    getAnimationConfig({})
+    getAnimationConfig()
       .then((result) => {
-        if (!result?.data) return;
-        const config = result.data;
+        if (!result) return;
+        const config = result;
         setSpringDefault({
           type: 'spring' as const,
           stiffness: config['animation.spring.default.stiffness'],
@@ -71,6 +75,13 @@ const TabsSectionComponent: FC<TabsSectionProps> = ({
     () => tabCategories.filter((tab) => tab !== 'community'),
     [tabCategories]
   );
+
+  const weekStartDate = useMemo(() => {
+    if (!weekStart) return null;
+    const parsed = new Date(weekStart);
+    return Number.isNaN(parsed.getTime()) ? null : parsed;
+  }, [weekStart]);
+  const trendingSlugs = useMemo(() => getTrendingSlugs(filteredResults, 6), [filteredResults]);
 
   return (
     <Tabs value={activeTab} onValueChange={onTabChange} className="space-y-8">
@@ -118,9 +129,44 @@ const TabsSectionComponent: FC<TabsSectionProps> = ({
               emptyMessage={`No ${categoryName} found. Try adjusting your filters.`}
               ariaLabel={`${categoryName} results`}
               keyExtractor={(item) => item.slug ?? ''}
-              renderCard={(item) => (
-                <ConfigCard item={item} variant="default" showCategory={true} showActions={true} />
-              )}
+              renderCard={(item) => {
+                const slug = typeof item.slug === 'string' ? item.slug : null;
+                const showNew = Boolean(weekStartDate && isNewSince(item, weekStartDate));
+                const showTrending = Boolean(slug && trendingSlugs.has(slug));
+
+                return (
+                  <div className="relative h-full">
+                    {(showNew || showTrending) && (
+                      <div className="pointer-events-none absolute top-3 left-3 z-10 flex flex-col gap-2">
+                        {showNew && (
+                          <UnifiedBadge
+                            variant="base"
+                            style="secondary"
+                            className="text-[10px] uppercase"
+                          >
+                            New this week
+                          </UnifiedBadge>
+                        )}
+                        {showTrending && (
+                          <UnifiedBadge
+                            variant="base"
+                            style="outline"
+                            className="text-[10px] uppercase"
+                          >
+                            Trending
+                          </UnifiedBadge>
+                        )}
+                      </div>
+                    )}
+                    <ConfigCard
+                      item={item}
+                      variant="default"
+                      showCategory={true}
+                      showActions={true}
+                    />
+                  </div>
+                );
+              }}
               {...(tab === 'all' && onFetchMore ? { onFetchMore, serverHasMore } : {})}
             />
           </TabsContent>

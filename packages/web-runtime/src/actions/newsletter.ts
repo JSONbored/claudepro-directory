@@ -3,12 +3,13 @@
 import { z } from 'zod';
 import { getEnvVar } from '@heyclaude/shared-runtime';
 import { rateLimitedAction } from './safe-action.ts';
-import { getNewsletterSubscriberCount } from '../data/newsletter.ts';
+// import { getNewsletterSubscriberCount } from '../data/newsletter.ts'; // Lazy loaded
 
 export const getNewsletterCountAction = rateLimitedAction
   .inputSchema(z.object({}))
   .metadata({ actionName: 'newsletter.getCount', category: 'analytics' })
   .action(async () => {
+    const { getNewsletterSubscriberCount } = await import('../data/newsletter.ts');
     const count = await getNewsletterSubscriberCount();
     return count ?? null;
   });

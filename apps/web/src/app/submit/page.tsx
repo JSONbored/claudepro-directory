@@ -8,13 +8,13 @@ import {
   getSubmissionDashboard,
   getSubmissionFormFields,
 } from '@heyclaude/web-runtime/data';
-import dynamic from 'next/dynamic';
+import dynamicImport from 'next/dynamic';
 import { JobsPromo } from '@/src/components/core/domain/jobs/jobs-banner';
 import { SubmitFormClient } from '@/src/components/core/forms/content-submission-form';
 import { SidebarActivityCard } from '@/src/components/core/forms/sidebar-activity-card';
 import { SubmitPageHero } from '@/src/components/core/forms/submit-page-hero';
 
-const NewsletterCTAVariant = dynamic(
+const NewsletterCTAVariant = dynamicImport(
   () =>
     import('@/src/components/features/growth/newsletter/newsletter-cta-variants').then((mod) => ({
       default: mod.NewsletterCTAVariant,
@@ -30,6 +30,18 @@ import { generatePageMetadata } from '@heyclaude/web-runtime/data';
 import { TrendingUp } from '@heyclaude/web-runtime/icons';
 import { cn, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
+
+/**
+ * Dynamic Rendering Required
+ *
+ * This page must use dynamic rendering because it imports from @heyclaude/web-runtime
+ * which transitively imports feature-flags/flags.ts. The Vercel Flags SDK's flags/next
+ * module contains module-level code that calls server functions, which cannot be
+ * executed during static site generation.
+ *
+ * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic
+ */
+export const dynamic = 'force-dynamic';
 
 const SUBMISSION_TIPS = [
   'Be specific in your descriptions - help users understand what your config does',

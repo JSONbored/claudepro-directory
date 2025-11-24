@@ -38,10 +38,10 @@ export function ThemeToggle() {
 
   // Load transition duration from config
   useEffect(() => {
-    getTimeoutConfig({})
+    getTimeoutConfig()
       .then((result) => {
-        if (!result?.data) return;
-        const config = result.data;
+        if (!result) return;
+        const config = result;
         setTransitionMs(config['timeout.ui.transition_ms']);
       })
       .catch((error) => {

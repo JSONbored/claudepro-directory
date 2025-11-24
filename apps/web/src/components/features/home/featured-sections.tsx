@@ -12,14 +12,17 @@ import type {
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import Link from 'next/link';
 import { type FC, memo, useMemo } from 'react';
+import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { UnifiedCardGrid } from '@/src/components/core/domain/cards/card-grid';
 import { ConfigCard } from '@/src/components/core/domain/cards/config-card';
 import { JobCard } from '@/src/components/core/domain/cards/job-card';
+import { getTrendingSlugs, isNewSince } from '@/src/utils/content-highlights';
 
 interface FeaturedSectionProps {
   title: string;
   href: string;
   items: readonly DisplayableContent[];
+  weekStart?: string;
 }
 
 /**
@@ -32,11 +35,17 @@ interface FeaturedSectionProps {
  * Impact: ~180ms savings per state change (30 cards × 6ms each)
  */
 const FeaturedSection: FC<FeaturedSectionProps> = memo(
-  ({ title, href, items }: FeaturedSectionProps) => {
+  ({ title, href, items, weekStart }: FeaturedSectionProps) => {
     // PERFORMANCE: Memoize the sliced array to prevent re-creating on every render
     // Previous: rules.slice(0, 6) created new array on EVERY parent render
     // Current: Stable reference unless items array changes
     const featuredItems = useMemo(() => items.slice(0, 6), [items]);
+    const weekStartDate = useMemo(() => {
+      if (!weekStart) return null;
+      const parsed = new Date(weekStart);
+      return Number.isNaN(parsed.getTime()) ? null : parsed;
+    }, [weekStart]);
+    const trendingSlugs = useMemo(() => getTrendingSlugs(featuredItems, 2), [featuredItems]);
 
     return (
       <div>
@@ -48,7 +57,39 @@ const FeaturedSection: FC<FeaturedSectionProps> = memo(
         </div>
         <UnifiedCardGrid
           items={featuredItems}
-          renderCard={(item, index) => <ConfigCard item={item} showBorderBeam={index < 3} />}
+          renderCard={(item, index) => {
+            const slug = typeof item.slug === 'string' ? item.slug : null;
+            const showNew = Boolean(weekStartDate && isNewSince(item, weekStartDate));
+            const showTrending = Boolean(slug && trendingSlugs.has(slug));
+
+            return (
+              <div className="relative h-full">
+                {(showNew || showTrending) && (
+                  <div className="pointer-events-none absolute top-3 left-3 z-10 flex flex-col gap-2">
+                    {showNew && (
+                      <UnifiedBadge
+                        variant="base"
+                        style="secondary"
+                        className="text-[10px] uppercase tracking-wide"
+                      >
+                        New this week
+                      </UnifiedBadge>
+                    )}
+                    {showTrending && (
+                      <UnifiedBadge
+                        variant="base"
+                        style="outline"
+                        className="text-[10px] uppercase tracking-wide"
+                      >
+                        Trending
+                      </UnifiedBadge>
+                    )}
+                  </div>
+                )}
+                <ConfigCard item={item} showBorderBeam={index < 3} />
+              </div>
+            );
+          }}
           variant="normal"
           ariaLabel={`Featured ${title}`}
           prefetchCount={3}
@@ -65,6 +106,7 @@ export interface FeaturedSectionsProps {
   categoryConfigs: Record<string, UnifiedCategoryConfig>;
   featuredJobs?: ReadonlyArray<Database['public']['Tables']['jobs']['Row']>;
   featuredCategories: readonly Database['public']['Enums']['content_category'][];
+  weekStart?: string;
 }
 
 const FeaturedSectionsComponent: FC<FeaturedSectionsProps> = ({
@@ -72,6 +114,7 @@ const FeaturedSectionsComponent: FC<FeaturedSectionsProps> = ({
   categoryConfigs,
   featuredJobs = [],
   featuredCategories,
+  weekStart,
 }) => {
   return (
     <div className={'mb-16 space-y-16'}>
@@ -90,6 +133,7 @@ const FeaturedSectionsComponent: FC<FeaturedSectionsProps> = ({
             title={`Featured ${config.pluralTitle}`}
             href={`/${config.urlSlug}`}
             items={items}
+            {...(weekStart ? { weekStart } : {})}
           />
         );
       })}

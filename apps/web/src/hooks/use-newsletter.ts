@@ -106,7 +106,7 @@ export function useNewsletter(options: UseNewsletterOptions): UseNewsletterRetur
 
   // Load retry config from Statsig on mount
   useEffect(() => {
-    getNewsletterConfig({})
+    getNewsletterConfig()
       .then((result) => {
         if (result?.data) {
           const config = result.data;

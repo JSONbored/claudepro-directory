@@ -11,6 +11,7 @@ import { ContentSearchClient } from '@/src/components/content/content-search';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { LazySection } from '@/src/components/core/infra/scroll-animated-section';
 import { NewsletterCTAVariant } from '@/src/components/features/growth/newsletter/newsletter-cta-variants';
+import { RecentlyViewedSidebar } from '@/src/components/features/navigation/recently-viewed-sidebar';
 import { Skeleton } from '@/src/components/primitives/feedback/loading-skeleton';
 import { Button } from '@/src/components/primitives/ui/button';
 
@@ -124,21 +125,26 @@ export function ContentListServer<T extends DisplayableContent>({
         badges={badges}
       />
 
-      <section
-        className={'container mx-auto px-4 py-12'}
-        aria-label={`${title} content and search`}
-      >
-        {/* Search Component with Suspense boundary */}
-        <Suspense fallback={<ContentSearchSkeleton />}>
-          <ContentSearchClient
-            items={items}
-            type={type}
-            {...(category && { category })}
-            searchPlaceholder={searchPlaceholder}
-            title={title}
-            icon={icon}
-          />
-        </Suspense>
+      <section className="container mx-auto px-4 py-12" aria-label={`${title} content and search`}>
+        <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_18rem]">
+          <div>
+            <Suspense fallback={<ContentSearchSkeleton />}>
+              <ContentSearchClient
+                items={items}
+                type={type}
+                {...(category && { category })}
+                searchPlaceholder={searchPlaceholder}
+                title={title}
+                icon={icon}
+                zeroStateSuggestions={items.slice(0, 6)}
+              />
+            </Suspense>
+          </div>
+
+          <Suspense fallback={null}>
+            <RecentlyViewedSidebar />
+          </Suspense>
+        </div>
       </section>
 
       {/* Email CTA - Footer section (matching homepage pattern) with fade-in animation */}

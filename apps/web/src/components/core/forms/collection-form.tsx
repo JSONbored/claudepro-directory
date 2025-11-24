@@ -9,7 +9,7 @@
  */
 
 import type { Database } from '@heyclaude/database-types';
-import { createCollection, updateCollection } from '@heyclaude/web-runtime';
+import { createCollection, updateCollection } from '@heyclaude/web-runtime/actions';
 import { logClientWarning } from '@heyclaude/web-runtime/core';
 import { toasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { useRouter } from 'next/navigation';

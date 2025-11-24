@@ -4,21 +4,30 @@
 
 import type { Database } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
-import { addBookmark } from '@heyclaude/web-runtime';
+import { addBookmark, getComponentConfig } from '@heyclaude/web-runtime/actions';
 import {
   ensureStringArray,
   formatViewCount,
   getContentItemUrl,
+  getMetadata,
   isValidCategory,
   logClientWarning,
   logger,
   logUnhandledPromise,
   normalizeError,
 } from '@heyclaude/web-runtime/core';
-import { getComponentConfig } from '@heyclaude/web-runtime/data';
 import { useCopyToClipboard, usePulse } from '@heyclaude/web-runtime/hooks';
-import { Award, ExternalLink, Eye, Github, Layers, Sparkles } from '@heyclaude/web-runtime/icons';
-import type { ConfigCardProps } from '@heyclaude/web-runtime/types/component.types';
+import {
+  Award,
+  Bookmark,
+  BookmarkPlus,
+  ExternalLink,
+  Eye,
+  Github,
+  Layers,
+  Sparkles,
+} from '@heyclaude/web-runtime/icons';
+import type { ConfigCardProps, ContentItem } from '@heyclaude/web-runtime/types/component.types';
 import {
   BADGE_COLORS,
   getDisplayTitle,
@@ -36,6 +45,7 @@ import { HighlightedText } from '@/src/components/core/shared/highlighted-text';
 import { BorderBeam } from '@/src/components/primitives/animation/border-beam';
 import { ReviewRatingCompact } from '@/src/components/primitives/feedback/review-rating-compact';
 import { Button } from '@/src/components/primitives/ui/button';
+import { usePinboard } from '@/src/hooks/use-pinboard';
 
 // Experience level validation helper
 function isExperienceLevel(
@@ -81,43 +91,30 @@ function getSafeRepositoryUrl(url: string | null | undefined): string | null {
 }
 
 /**
- * Validate documentation URL is safe for opening
- * Only allows HTTPS URLs from trusted hosts.
- * TODO: For robust security, consider loading trusted hostnames from server-side configuration or environment variables.
- */
-const TRUSTED_DOC_HOSTNAMES = [
-  'docs.trusted.com', // Example trusted documentation domain
-  'developer.trusted.com', // Example additional trusted domain
-  // Wildcard domains (match any subdomain): add as '*.trusted.com'
-  // Add additional trusted documentation domains below.
-] as const;
-
-function isTrustedDocHostname(hostname: string): boolean {
-  return TRUSTED_DOC_HOSTNAMES.some((trusted) => {
-    // Handle wildcard domains of form "*.trusted.com"
-    if (trusted.startsWith('*.')) {
-      const root = trusted.slice(2); // remove "*."
-      return hostname === root || hostname.endsWith(`.${root}`);
-    }
-    return hostname === trusted;
-  });
-}
-
-/**
  * Validate and sanitize documentation URL
- * Returns sanitized URL (with query/fragment removed) or null if invalid
+ * Returns sanitized URL (strip credentials, normalize host) or null if invalid
  */
 function isTrustedDocumentationUrl(url: string): string | null {
   try {
     const parsed = new URL(url);
-    // Require HTTPS and trusted hostname
-    if (parsed.protocol === 'https:' && isTrustedDocHostname(parsed.hostname)) {
-      // Remove query string and fragment for redirect
-      parsed.search = '';
-      parsed.hash = '';
-      return parsed.toString();
+    // Require HTTPS protocol
+    if (parsed.protocol !== 'https:') {
+      return null;
     }
-    return null;
+
+    // Strip credentials
+    parsed.username = '';
+    parsed.password = '';
+
+    // Normalize hostname (remove trailing dot, lowercase)
+    parsed.hostname = parsed.hostname.replace(/\.$/, '').toLowerCase();
+
+    // Remove default HTTPS port
+    if (parsed.port === '443') {
+      parsed.port = '';
+    }
+
+    return parsed.toString();
   } catch {
     return null;
   }
@@ -170,6 +167,14 @@ export const ConfigCard = memo(
       slug: 'slug' in item ? (typeof item.slug === 'string' ? item.slug : null) : null,
       category: 'category' in item && isValidCategory(item.category) ? item.category : null,
     });
+    const cardCategory: Database['public']['Enums']['content_category'] = isValidCategory(
+      item.category ?? 'agents'
+    )
+      ? ((item.category ?? 'agents') as Database['public']['Enums']['content_category'])
+      : 'agents';
+    const cardSlug = typeof item.slug === 'string' ? item.slug : null;
+    const { togglePin, isPinned } = usePinboard();
+    const pinned = cardSlug ? isPinned(cardCategory, cardSlug) : false;
 
     // Use pre-highlighted HTML from edge function (unified-search)
     // All highlighting is now done server-side at the edge
@@ -229,10 +234,18 @@ export const ConfigCard = memo(
       return item.author;
     }, [item]);
 
+    const metadata = useMemo(() => getMetadata(item as ContentItem), [item]);
+    const packageName = metadata['package'] as string | undefined;
+    const configurationObject =
+      metadata['configuration'] && typeof metadata['configuration'] === 'object'
+        ? metadata['configuration']
+        : null;
+    const pnpmCommand = packageName ? `pnpm add ${packageName}` : null;
+
     // Initialize all hooks at the top level (before any conditional returns)
     const pulse = usePulse();
     const router = useRouter();
-    const { copy } = useCopyToClipboard({
+    const { copy: copyLink } = useCopyToClipboard({
       context: {
         component: 'ConfigCard',
         action: 'swipe_copy',
@@ -356,7 +369,7 @@ export const ConfigCard = memo(
     const handleSwipeRightCopy = useCallback(async () => {
       if (!(item.slug && targetPath)) return;
       const url = `${typeof window !== 'undefined' ? window.location.origin : ''}${targetPath}`;
-      await copy(url);
+      await copyLink(url);
 
       // Track user interaction for analytics and personalization
       const category = isValidCategory(item.category ?? 'agents')
@@ -375,7 +388,7 @@ export const ConfigCard = memo(
         });
 
       toasts.success.copied();
-    }, [targetPath, copy, item, pulse]);
+    }, [targetPath, copyLink, item, pulse]);
 
     const handleSwipeLeftBookmark = useCallback(async () => {
       if (!item.slug) return;
@@ -435,6 +448,90 @@ export const ConfigCard = memo(
         }
       }
     }, [item.category, item.slug, router, pulse]);
+
+    const copyInlineValue = useCallback(
+      async (value: string, successDescription: string, metadata?: Record<string, unknown>) => {
+        try {
+          if (navigator?.clipboard?.writeText) {
+            await navigator.clipboard.writeText(value);
+          } else {
+            await copyLink(value);
+          }
+          toasts.raw.success('Copied!', { description: successDescription });
+          if (cardSlug) {
+            pulse
+              .copy({
+                category: cardCategory,
+                slug: cardSlug,
+                ...(metadata ? { metadata } : {}),
+              })
+              .catch((error) => {
+                // Log but don't throw - tracking failures shouldn't break user experience
+                logger.error('Failed to track copy action', error as Error, {
+                  context: 'config_card_quick_copy',
+                  category: cardCategory,
+                  slug: cardSlug,
+                });
+              });
+          }
+        } catch (error) {
+          logger.error(
+            'ConfigCard: quick action copy failed',
+            error instanceof Error ? error : new Error(String(error))
+          );
+          toasts.raw.error('Copy failed', { description: 'Unable to copy to clipboard.' });
+        }
+      },
+      [cardCategory, cardSlug, copyLink, pulse]
+    );
+
+    const handlePinToggle = useCallback(
+      (event: React.MouseEvent<HTMLButtonElement>) => {
+        event.stopPropagation();
+        if (!cardSlug) {
+          toasts.raw.error('Unable to save item', {
+            description: 'Missing identifier for this configuration.',
+          });
+          return;
+        }
+
+        const pinPayload = {
+          category: cardCategory,
+          slug: cardSlug,
+          title: displayTitle || cardSlug,
+          description: typeof item.description === 'string' ? item.description.slice(0, 240) : '',
+          typeName: item.category ?? 'configuration',
+          tags,
+        };
+
+        try {
+          togglePin(pinPayload);
+          toasts.raw.success(pinned ? 'Removed from pinboard' : 'Pinned for later', {
+            description: pinned
+              ? 'Removed from your local pinboard.'
+              : 'Open the pinboard to review your saved configs.',
+          });
+        } catch (error) {
+          logger.error(
+            'ConfigCard: failed to toggle pinboard state',
+            error instanceof Error ? error : new Error(String(error))
+          );
+          toasts.raw.error('Unable to update pinboard', {
+            description: 'Please try again.',
+          });
+        }
+      },
+      [
+        cardCategory,
+        cardSlug,
+        displayTitle,
+        item.description,
+        item.category,
+        tags,
+        togglePin,
+        pinned,
+      ]
+    );
 
     // Extract sponsored metadata - use snake_case directly from database types
     const isSponsored: boolean | undefined =
@@ -797,6 +894,63 @@ export const ConfigCard = memo(
                     />
                   )}
                 </div>
+              )}
+
+              <div className="relative">
+                <Button
+                  variant={pinned ? 'secondary' : 'ghost'}
+                  size="sm"
+                  className={`${UI_CLASSES.ICON_BUTTON_SM} ${pinned ? '' : UI_CLASSES.BUTTON_GHOST_ICON}`}
+                  onClick={handlePinToggle}
+                  aria-label={pinned ? 'Remove from pinboard' : 'Pin for later'}
+                >
+                  {pinned ? (
+                    <Bookmark className={UI_CLASSES.ICON_XS} aria-hidden="true" />
+                  ) : (
+                    <BookmarkPlus className={UI_CLASSES.ICON_XS} aria-hidden="true" />
+                  )}
+                </Button>
+              </div>
+
+              {pnpmCommand && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className={UI_CLASSES.ICON_BUTTON_SM}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    copyInlineValue(pnpmCommand, pnpmCommand, {
+                      action_type: 'copy_install',
+                      manager: 'pnpm',
+                    }).catch((error) => {
+                      logger.error('Failed to copy pnpm command', error as Error);
+                    });
+                  }}
+                >
+                  pnpm add
+                </Button>
+              )}
+
+              {configurationObject && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className={UI_CLASSES.ICON_BUTTON_SM}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    copyInlineValue(
+                      JSON.stringify(configurationObject, null, 2),
+                      'Configuration JSON copied',
+                      {
+                        action_type: 'copy_configuration',
+                      }
+                    ).catch((error) => {
+                      logger.error('Failed to copy configuration', error as Error);
+                    });
+                  }}
+                >
+                  Copy config
+                </Button>
               )}
 
               {/* Copy button with count overlay */}

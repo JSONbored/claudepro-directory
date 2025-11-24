@@ -3,7 +3,7 @@
 /** FAB configuration for main button and speed dial actions */
 
 import { logger, normalizeError } from '@heyclaude/web-runtime/core';
-import { ArrowUp, Bell, FileText, Plus, Search } from '@heyclaude/web-runtime/icons';
+import { ArrowUp, Bell, Bookmark, FileText, Plus, Search } from '@heyclaude/web-runtime/icons';
 import type { MainFABConfig, SpeedDialAction } from '@heyclaude/web-runtime/types/component.types';
 
 export const handleScrollToTop = (): void => {
@@ -53,11 +53,13 @@ export const createSpeedDialActions = (
   unreadCount: number,
   onNotificationsClick: () => void,
   onSubmitClick: () => void,
+  onPinboardClick: () => void,
   flags: {
     showSubmit: boolean;
     showSearch: boolean;
     showScrollToTop: boolean;
     showNotifications: boolean;
+    showPinboard: boolean;
   }
 ): SpeedDialAction[] => [
   // Submit - All breakpoints
@@ -76,6 +78,15 @@ export const createSpeedDialActions = (
     label: 'Search (⌘K)',
     onClick: handleSearchClick,
     show: flags.showSearch,
+  },
+
+  // Pinboard - All breakpoints
+  {
+    id: 'pinboard',
+    icon: Bookmark,
+    label: 'Open pinboard',
+    onClick: onPinboardClick,
+    show: flags.showPinboard,
   },
 
   // Scroll to Top - All breakpoints

@@ -15,6 +15,8 @@ import {
   CardTitle,
 } from '@/src/components/primitives/ui/card';
 
+export const dynamic = 'force-dynamic';
+
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/auth/auth-code-error');
 }

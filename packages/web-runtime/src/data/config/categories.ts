@@ -1,8 +1,7 @@
-'use server';
-
 import type { Database } from '@heyclaude/database-types';
 import { isBuildTime } from '../../build-time.ts';
-import { getHomepageConfig } from '../../actions/feature-flags.ts';
+// Lazy import feature flags to avoid module-level server-only code execution
+// import { getHomepageConfig } from '../../actions/feature-flags.ts';
 
 function isValidCategoryValue(
   value: unknown
@@ -18,6 +17,8 @@ export async function getHomepageFeaturedCategories(): Promise<
   }
 
   try {
+    // Lazy import feature flags to avoid module-level server-only code execution
+    const { getHomepageConfig } = await import('../../actions/feature-flags.ts');
     const result = await getHomepageConfig({});
     const config = result?.data;
     if (!config) {
@@ -40,6 +41,8 @@ export async function getHomepageTabCategories(): Promise<readonly string[]> {
   }
 
   try {
+    // Lazy import feature flags to avoid module-level server-only code execution
+    const { getHomepageConfig } = await import('../../actions/feature-flags.ts');
     const result = await getHomepageConfig({});
     const config = result?.data;
     if (!config) {

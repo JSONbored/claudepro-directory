@@ -4,6 +4,16 @@
     "signature": true
   },
   "tasks": {
+    "generate:config": {
+      "outputs": [
+        "packages/web-runtime/src/config/generated-config.ts"
+      ],
+      "inputs": [
+        "packages/generators/src/**/*"
+      ],
+      "cache": false,
+      "passThroughEnv": ["NEXT_PUBLIC_SUPABASE_URL", "NEXT_PUBLIC_SUPABASE_ANON_KEY"]
+    },
     "generate:categories:exec": {
       "outputs": [
         "packages/web-runtime/src/data/config/category/category-config.generated.ts"
@@ -43,6 +53,10 @@
         ".build-cache/cache.json"
       ],
       "cache": true
+    },
+    "build": {
+      "outputs": [".next/**", "!.next/cache/**"],
+      "dependsOn": ["^build"]
     },
     "type-check": {
       "outputs": ["**/*.tsbuildinfo"],

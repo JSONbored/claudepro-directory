@@ -3,7 +3,7 @@ import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-process.env.BROWSERSLIST_CONFIG = resolve(__dirname, 'config/tools/browserslist');
+process.env.BROWSERSLIST_CONFIG = resolve(__dirname, '../../config/tools/browserslist');
 
 let withBundleAnalyzer = (config) => config;
 if (process.env.ANALYZE === 'true') {

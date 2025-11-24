@@ -13,6 +13,7 @@
     "@calcom/embed-react": "^1.5.3",
     "@flags-sdk/statsig": "^0.2.5",
     "@heyclaude/data-layer": "workspace:*",
+    "@heyclaude/database-types": "workspace:*",
     "@heyclaude/web-runtime": "workspace:*",
     "@hookform/resolvers": "^5.2.2",
     "@radix-ui/react-avatar": "^1.1.11",

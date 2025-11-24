@@ -10,6 +10,8 @@ import {
   chain,
   errorResponse,
   handleChangelogSyncRequest,
+  jsonResponse,
+  type Middleware,
   publicCorsHeaders,
   rateLimit,
   type StandardContext,
@@ -45,6 +47,38 @@ import { handleExternalWebhook } from './routes/webhook/external.ts';
 // Use StandardContext directly
 type FluxStationContext = StandardContext;
 
+const requireInternalSecret: Middleware<FluxStationContext> = async (
+  ctx: FluxStationContext,
+  next: () => Promise<Response>
+) => {
+  // Allow OPTIONS requests to pass through for CORS
+  if (ctx.request.method === 'OPTIONS') {
+    return next();
+  }
+
+  const authHeader = ctx.request.headers.get('X-Internal-Secret');
+  const secret = Deno.env.get('CRON_WORKER_SECRET') || Deno.env.get('INTERNAL_API_KEY');
+
+  if (!secret) {
+    console.error('Missing CRON_WORKER_SECRET or INTERNAL_API_KEY environment variable');
+    return jsonResponse(
+      { error: 'Server configuration error', code: 'auth:config_error' },
+      500,
+      publicCorsHeaders
+    );
+  }
+
+  if (!authHeader || authHeader !== secret) {
+    return jsonResponse(
+      { error: 'Unauthorized', code: 'auth:unauthorized' },
+      401,
+      publicCorsHeaders
+    );
+  }
+
+  return next();
+};
+
 serveEdgeApp<FluxStationContext>({
   buildContext: (request) => buildStandardContext(request, ['/flux-station']),
   defaultCors: {
@@ -68,49 +102,53 @@ serveEdgeApp<FluxStationContext>({
       name: 'email-subscribe',
       methods: ['POST', 'OPTIONS'],
       match: (ctx) => ctx.pathname === '/email/subscribe',
-      handler: chain(rateLimit('email'))((ctx) => handleSubscribe(ctx.request)),
+      handler: chain<FluxStationContext>(rateLimit('email'))((ctx) => handleSubscribe(ctx.request)),
     },
     {
       name: 'email-welcome',
       methods: ['POST', 'OPTIONS'],
       match: (ctx) => ctx.pathname === '/email/welcome',
-      handler: chain(rateLimit('email'))((ctx) => handleWelcome(ctx.request)),
+      handler: chain<FluxStationContext>(rateLimit('email'))((ctx) => handleWelcome(ctx.request)),
     },
     {
       name: 'email-transactional',
       methods: ['POST', 'OPTIONS'],
       match: (ctx) => ctx.pathname === '/email/transactional',
-      handler: chain(rateLimit('email'))((ctx) => handleTransactional(ctx.request)),
+      handler: chain<FluxStationContext>(rateLimit('email'))((ctx) =>
+        handleTransactional(ctx.request)
+      ),
     },
     {
       name: 'email-digest',
       methods: ['POST', 'OPTIONS'],
       match: (ctx) => ctx.pathname === '/email/digest',
-      handler: chain(rateLimit('email'))(() => handleDigest()),
+      handler: chain<FluxStationContext>(rateLimit('email'))(() => handleDigest()),
     },
     {
       name: 'email-sequence',
       methods: ['POST', 'OPTIONS'],
       match: (ctx) => ctx.pathname === '/email/sequence',
-      handler: chain(rateLimit('email'))(() => handleSequence()),
+      handler: chain<FluxStationContext>(rateLimit('email'))(() => handleSequence()),
     },
     {
       name: 'email-count',
       methods: ['POST', 'OPTIONS'],
       match: (ctx) => ctx.pathname === '/email/count',
-      handler: chain(rateLimit('public'))(() => handleGetNewsletterCount()),
+      handler: chain<FluxStationContext>(rateLimit('public'))(() => handleGetNewsletterCount()),
     },
     {
       name: 'email-contact',
       methods: ['POST', 'OPTIONS'],
       match: (ctx) => ctx.pathname === '/email/contact',
-      handler: chain(rateLimit('email'))((ctx) => handleContactSubmission(ctx.request)),
+      handler: chain<FluxStationContext>(rateLimit('email'))((ctx) =>
+        handleContactSubmission(ctx.request)
+      ),
     },
     {
       name: 'email-job-lifecycle',
       methods: ['POST', 'OPTIONS'],
       match: (ctx) => ctx.pathname === '/email/job-lifecycle',
-      handler: chain(rateLimit('email'))(async (ctx) => {
+      handler: chain<FluxStationContext>(rateLimit('email'))(async (ctx) => {
         // Extract action from header or body if needed, but handleJobLifecycleEmail expects action param
         // The original router passed 'action' from header. Let's fallback to header.
         const action = ctx.request.headers.get('X-Email-Action') || 'unknown';
@@ -123,7 +161,7 @@ serveEdgeApp<FluxStationContext>({
       name: 'embedding-process',
       methods: ['POST', 'OPTIONS'],
       match: (ctx) => ctx.pathname === '/embedding/process',
-      handler: chain(rateLimit('queueWorker'))((ctx) =>
+      handler: chain<FluxStationContext>(rateLimit('queueWorker'))((ctx) =>
         handleEmbeddingGenerationQueue(ctx.request)
       ),
     },
@@ -131,7 +169,9 @@ serveEdgeApp<FluxStationContext>({
       name: 'embedding-webhook',
       methods: ['POST', 'OPTIONS'],
       match: (ctx) => ctx.pathname === '/embedding/webhook',
-      handler: chain(rateLimit('public'))((ctx) => handleEmbeddingWebhook(ctx.request)),
+      handler: chain<FluxStationContext>(rateLimit('public'))((ctx) =>
+        handleEmbeddingWebhook(ctx.request)
+      ),
     },
 
     // Existing Routes
@@ -140,63 +180,84 @@ serveEdgeApp<FluxStationContext>({
       methods: ['POST', 'OPTIONS'],
       match: (ctx) =>
         ctx.pathname === '/changelog-webhook' || ctx.pathname === '/changelog-webhook/',
-      handler: chain(rateLimit('queueWorker'))((ctx) => handleChangelogSyncRequest(ctx.request)),
+      handler: chain<FluxStationContext>(rateLimit('queueWorker'))((ctx) =>
+        handleChangelogSyncRequest(ctx.request)
+      ),
     },
     {
       name: 'pulse',
       methods: ['POST', 'OPTIONS'],
       match: (ctx) => ctx.pathname === '/pulse' || ctx.pathname === '/pulse/',
-      handler: chain(rateLimit('queueWorker'))((ctx) => handlePulse(ctx.request)),
+      handler: chain<FluxStationContext>(rateLimit('queueWorker'))((ctx) =>
+        handlePulse(ctx.request)
+      ),
     },
     {
       name: 'changelog-process',
       methods: ['POST', 'OPTIONS'],
       match: (ctx) =>
         ctx.pathname === '/changelog/process' || ctx.pathname === '/changelog/process/',
-      handler: chain(rateLimit('queueWorker'))((ctx) => handleChangelogProcess(ctx.request)),
+      handler: chain<FluxStationContext>(rateLimit('queueWorker'))((ctx) =>
+        handleChangelogProcess(ctx.request)
+      ),
     },
     {
       name: 'changelog-notify',
       methods: ['POST', 'OPTIONS'],
       match: (ctx) => ctx.pathname === '/changelog/notify' || ctx.pathname === '/changelog/notify/',
-      handler: chain(rateLimit('queueWorker'))((ctx) => handleChangelogNotify(ctx.request)),
+      handler: chain<FluxStationContext>(rateLimit('queueWorker'))((ctx) =>
+        handleChangelogNotify(ctx.request)
+      ),
     },
     {
       name: 'discord-jobs',
       methods: ['POST', 'OPTIONS'],
       match: (ctx) => ctx.pathname === '/discord/jobs' || ctx.pathname === '/discord/jobs/',
-      handler: chain(rateLimit('queueWorker'))((ctx) => handleDiscordJobs(ctx.request)),
+      handler: chain<FluxStationContext>(rateLimit('queueWorker'))((ctx) =>
+        handleDiscordJobs(ctx.request)
+      ),
     },
     {
       name: 'discord-submissions',
       methods: ['POST', 'OPTIONS'],
       match: (ctx) =>
         ctx.pathname === '/discord/submissions' || ctx.pathname === '/discord/submissions/',
-      handler: chain(rateLimit('queueWorker'))((ctx) => handleDiscordSubmissions(ctx.request)),
+      handler: chain<FluxStationContext>(rateLimit('queueWorker'))((ctx) =>
+        handleDiscordSubmissions(ctx.request)
+      ),
     },
     {
       name: 'revalidation',
       methods: ['POST', 'OPTIONS'],
       match: (ctx) => ctx.pathname === '/revalidation' || ctx.pathname === '/revalidation/',
-      handler: chain(rateLimit('queueWorker'))((ctx) => handleRevalidation(ctx.request)),
+      handler: chain<FluxStationContext>(rateLimit('queueWorker'))((ctx) =>
+        handleRevalidation(ctx.request)
+      ),
     },
     {
       name: 'active-notifications',
       methods: ['GET', 'HEAD', 'OPTIONS'],
       match: (ctx) => ctx.pathname.startsWith('/active-notifications'),
-      handler: chain(rateLimit('public'))((ctx) => handleActiveNotifications(ctx.request)),
+      handler: chain<FluxStationContext>(rateLimit('public'))((ctx) =>
+        handleActiveNotifications(ctx.request)
+      ),
     },
     {
       name: 'dismiss-notifications',
       methods: ['POST', 'OPTIONS'],
       match: (ctx) => ctx.pathname.startsWith('/dismiss'),
-      handler: chain(rateLimit('public'))((ctx) => handleDismissNotifications(ctx.request)),
+      handler: chain<FluxStationContext>(rateLimit('public'))((ctx) =>
+        handleDismissNotifications(ctx.request)
+      ),
     },
     {
       name: 'create-notification',
       methods: ['POST', 'OPTIONS'],
       match: (ctx) => ctx.pathname.startsWith('/notifications/create'),
-      handler: chain(rateLimit('public'))((ctx) => handleCreateNotification(ctx.request)),
+      handler: chain<FluxStationContext>(
+        rateLimit('queueWorker'),
+        requireInternalSecret
+      )((ctx) => handleCreateNotification(ctx.request)),
     },
     {
       name: 'discord-direct',
@@ -205,16 +266,18 @@ serveEdgeApp<FluxStationContext>({
         const notificationType = ctx.request.headers.get('X-Discord-Notification-Type');
         return Boolean(notificationType);
       },
-      handler: chain(rateLimit('public'))((ctx) => handleDiscordDirect(ctx.request)),
+      handler: chain<FluxStationContext>(rateLimit('public'))((ctx) =>
+        handleDiscordDirect(ctx.request)
+      ),
     },
     {
       name: 'process-queues',
       methods: ['POST', 'OPTIONS'],
       match: (ctx) => ctx.pathname === '/process-queues' || ctx.pathname === '/process-queues/',
-      handler: async () => {
-        // No rate limit for internal queue processor cron? Or maybe 'heavy'?
-        // Keeping it without rate limit as per original logic (it didn't use checkRateLimit)
-        // Actually, original logic was just handler: async () => ...
+      handler: chain<FluxStationContext>(
+        rateLimit('queueWorker'),
+        requireInternalSecret
+      )(async () => {
         const summary = await processAllQueues();
         return new Response(
           JSON.stringify({
@@ -238,7 +301,7 @@ serveEdgeApp<FluxStationContext>({
             },
           }
         );
-      },
+      }),
     },
   ],
 });

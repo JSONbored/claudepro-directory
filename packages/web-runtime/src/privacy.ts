@@ -2,24 +2,25 @@
  * Privacy Utilities - PII-safe logging helpers
  *
  * Provides utilities to hash/redact user identifiers for compliance with
- * privacy regulations (GDPR, CCPA). User IDs are hashed using SHA-256
- * to maintain traceability while protecting PII.
+ * privacy regulations (GDPR, CCPA). User IDs are hashed using a consistent
+ * hashing algorithm to maintain traceability while protecting PII.
  *
  * Log retention: Logs containing hashed user IDs follow standard retention
  * policies. Hashed IDs cannot be reversed but can be used for correlation
  * across log entries.
  */
 
-import { createHash } from 'node:crypto';
-
 /**
- * Hash a user ID using SHA-256 for privacy-compliant logging
+ * Hash a user ID for privacy-compliant logging
  *
  * The hash is deterministic (same input = same output) allowing correlation
- * across log entries while protecting PII. The hash cannot be reversed.
+ * across log entries while protecting PII.
+ *
+ * Note: Switched to FNV-1a for isomorphic support (works in Browser/Edge/Node).
+ * This is adequate for log obfuscation but is not cryptographically secure.
  *
  * @param userId - The user ID to hash
- * @returns A hex-encoded SHA-256 hash of the user ID (first 16 chars for brevity)
+ * @returns A hex-encoded hash of the user ID
  *
  * @example
  * ```ts
@@ -32,7 +33,13 @@ export function hashUserId(userId: string): string {
     return 'invalid';
   }
 
-  // Use SHA-256 for deterministic hashing
-  // Take first 16 characters for brevity (collision risk is acceptable for logging)
-  return createHash('sha256').update(userId).digest('hex').slice(0, 16);
+  // FNV-1a hash implementation
+  let hash = 2166136261;
+  for (let i = 0; i < userId.length; i++) {
+    hash ^= userId.charCodeAt(i);
+    // Math.imul mimics C-like 32-bit multiplication
+    hash = Math.imul(hash, 16777619);
+  }
+  // Convert to unsigned 32-bit integer and then to hex
+  return (hash >>> 0).toString(16);
 }

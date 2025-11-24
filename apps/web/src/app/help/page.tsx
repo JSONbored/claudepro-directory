@@ -13,6 +13,18 @@ import { NavLink } from '@/src/components/core/navigation/navigation-link';
 import { HoverCard } from '@/src/components/primitives/animation/hover-card';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
 
+/**
+ * Dynamic Rendering Required
+ *
+ * This page must use dynamic rendering because it imports from @heyclaude/web-runtime
+ * which transitively imports feature-flags/flags.ts. The Vercel Flags SDK's flags/next
+ * module contains module-level code that calls server functions, which cannot be
+ * executed during static site generation.
+ *
+ * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic
+ */
+export const dynamic = 'force-dynamic';
+
 const helpTopics = [
   {
     title: 'Getting Started',

@@ -3,10 +3,23 @@
  */
 
 import { refreshProfileFromOAuthServer } from '@heyclaude/web-runtime';
+import { subscribeViaOAuthAction } from '@heyclaude/web-runtime/actions';
 import { logger, normalizeError } from '@heyclaude/web-runtime/core';
-import { createSupabaseServerClient, subscribeViaOAuthAction } from '@heyclaude/web-runtime/data';
 import { SECURITY_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
+import { createSupabaseServerClient } from '@heyclaude/web-runtime/server';
 import { type NextRequest, NextResponse } from 'next/server';
+
+/**
+ * Dynamic Rendering Required
+ *
+ * This route must use dynamic rendering because it imports from @heyclaude/web-runtime
+ * which transitively imports feature-flags/flags.ts. The Vercel Flags SDK's flags/next
+ * module contains module-level code that calls server functions, which cannot be
+ * executed during static site generation.
+ *
+ * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic
+ */
+export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
@@ -83,7 +96,16 @@ export async function GET(request: NextRequest) {
       const isLocalEnv = process.env.NODE_ENV === 'development';
 
       // Validate forwarded host against allowed origins to prevent open redirect attacks
-      const allowedHosts = SECURITY_CONFIG.allowedOrigins.map((url) => new URL(url).hostname);
+      const allowedHosts = SECURITY_CONFIG.allowedOrigins
+        .map((url) => {
+          try {
+            return new URL(url).hostname;
+          } catch {
+            logger.warn('Skipping invalid origin URL in SECURITY_CONFIG', { url });
+            return null;
+          }
+        })
+        .filter((host): host is string => Boolean(host));
       const isValidHost = forwardedHost ? allowedHosts.includes(forwardedHost) : false;
 
       const redirectUrl = isLocalEnv

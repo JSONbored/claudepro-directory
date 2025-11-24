@@ -86,6 +86,12 @@ export interface ConfigCardProps {
  * Client component props for home page - Database-First
  * Uses proper RPC return types from get_homepage_complete()
  */
+export interface SearchFilterOptions {
+  tags: string[];
+  authors: string[];
+  categories: Database['public']['Enums']['content_category'][];
+}
+
 export interface HomePageClientProps {
   /** Initial server-side data for client hydration (from get_homepage_complete RPC) */
   initialData: Record<string, unknown[]>;
@@ -95,6 +101,10 @@ export interface HomePageClientProps {
   stats?: Record<string, { total: number; featured: number }>;
   /** Featured jobs from database (includes placeholders if no real jobs) */
   featuredJobs?: Array<unknown>;
+  /** Precomputed search filter options (tags/authors/categories) */
+  searchFilters?: SearchFilterOptions;
+  /** Start of the current content week (ISO string) */
+  weekStart?: string;
 }
 
 export interface ContentListWithLoadMoreProps {
@@ -222,6 +232,10 @@ export type ContentSearchClientProps<T extends DisplayableContent = DisplayableC
   icon: string;
   type?: string;
   category?: Database['public']['Enums']['content_category'];
+  availableTags?: string[];
+  availableAuthors?: string[];
+  availableCategories?: string[];
+  zeroStateSuggestions?: T[];
 };
 
 export type ContentSidebarProps<T extends ContentItem = ContentItem> = {

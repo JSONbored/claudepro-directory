@@ -141,8 +141,8 @@ export function getContextualMessage(
  */
 export async function loadNewsletterConfig(): Promise<NewsletterConfig> {
   try {
-    const result = await getNewsletterConfig({});
-    return result?.data ?? ({} as NewsletterConfig); // Fall back to empty object
+    const result = await getNewsletterConfig();
+    return result ?? ({} as NewsletterConfig); // Fall back to empty object
   } catch {
     return {} as NewsletterConfig; // Fall back to hardcoded defaults
   }

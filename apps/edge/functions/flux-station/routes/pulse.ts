@@ -563,11 +563,14 @@ export async function handlePulse(_req: Request): Promise<Response> {
     }
 
     const pulseMessages: PulseQueueMessage[] = [];
+    const invalidMsgIds: bigint[] = [];
+
     for (const msg of messages || []) {
       if (!isValidPulseEvent(msg.message)) {
         console.warn('[flux-station] Invalid pulse event structure', {
           msg_id: msg.msg_id.toString(),
         });
+        invalidMsgIds.push(msg.msg_id);
         continue;
       }
 
@@ -578,6 +581,24 @@ export async function handlePulse(_req: Request): Promise<Response> {
         enqueued_at: msg.enqueued_at,
         message: msg.message,
       });
+    }
+
+    // Delete invalid messages immediately to prevent poison queue loop
+    if (invalidMsgIds.length > 0) {
+      try {
+        await deletePulseMessages(invalidMsgIds);
+        console.log('[flux-station] Deleted invalid pulse events', {
+          ...logContext,
+          count: invalidMsgIds.length,
+          msg_ids: invalidMsgIds.map((id) => id.toString()),
+        });
+      } catch (error) {
+        console.error('[flux-station] Failed to delete invalid pulse events', {
+          ...logContext,
+          count: invalidMsgIds.length,
+          error: errorToString(error),
+        });
+      }
     }
 
     // Process batch

@@ -142,7 +142,7 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPageProps
             </div>
             <div>
               <p className="text-muted-foreground">Location</p>
-              <p className="font-medium">{job.location || 'Remote'}</p>
+              <p className="font-medium">{job.location || 'Not specified'}</p>
             </div>
             <div>
               <p className="text-muted-foreground">Plan</p>
@@ -181,13 +181,13 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPageProps
           {
             label: 'Clicks',
             value: clickCount.toLocaleString(),
-            change: 'Users clicked to view',
+            change: 'Users who clicked to view',
             trend: clickCount > 0 ? 'up' : 'unchanged',
           },
           {
             label: 'Click-Through Rate',
             value: `${ctr}%`,
-            change: 'Of viewers who clicked Apply',
+            change: 'Of viewers who clicked apply',
             trend:
               viewCount === 0
                 ? 'unchanged'

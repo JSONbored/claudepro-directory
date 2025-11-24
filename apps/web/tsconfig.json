@@ -13,12 +13,6 @@
       "@heyclaude/shared-runtime": ["../../packages/shared-runtime/src/index.ts"],
       "@heyclaude/shared-runtime/*": ["../../packages/shared-runtime/src/*"],
       "@heyclaude/web-runtime": ["../../packages/web-runtime/src/index.ts"],
-      "@heyclaude/web-runtime/ui": ["../../packages/web-runtime/src/entries/ui.ts"],
-      "@heyclaude/web-runtime/hooks": ["../../packages/web-runtime/src/entries/hooks.ts"],
-      "@heyclaude/web-runtime/client": ["../../packages/web-runtime/src/entries/client.ts"],
-      "@heyclaude/web-runtime/core": ["../../packages/web-runtime/src/entries/core.ts"],
-      "@heyclaude/web-runtime/data": ["../../packages/web-runtime/src/entries/data.ts"],
-      "@heyclaude/web-runtime/*": ["../../packages/web-runtime/src/*"],
       "@heyclaude/data-layer": ["../../packages/data-layer/dist/index"]
     }
   },

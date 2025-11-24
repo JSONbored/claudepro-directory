@@ -11,9 +11,9 @@ import { useCallback } from 'react';
 export function useConfetti() {
   const fireConfetti = useCallback(
     async (variant: Database['public']['Enums']['confetti_variant'] = 'success') => {
-      const result = await getAnimationConfig({});
-      if (!result?.data) return;
-      const config = result.data;
+      const result = await getAnimationConfig();
+      if (!result) return;
+      const config = result;
 
       const configs: Record<Database['public']['Enums']['confetti_variant'], confetti.Options> = {
         // Green + gold for success actions (bookmark, save, etc)

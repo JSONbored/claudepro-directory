@@ -1,6 +1,8 @@
 'use client';
 
 import type { Database } from '@heyclaude/database-types';
+import { isValidCategory, logger } from '@heyclaude/web-runtime/core';
+import { usePulse } from '@heyclaude/web-runtime/hooks';
 import {
   Bookmark,
   BookOpen,
@@ -21,6 +23,7 @@ import { cn, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { motion } from 'motion/react';
 import { ProductionCodeBlock } from '@/src/components/content/interactive-code-block';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
+import { Button } from '@/src/components/primitives/ui/button';
 import {
   Card,
   CardContent,
@@ -79,6 +82,18 @@ function Wrapper({
       </Card>
     </motion.div>
   );
+}
+
+function downloadTextFile(filename: string, content: string) {
+  const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement('a');
+  anchor.href = url;
+  anchor.download = filename;
+  document.body.appendChild(anchor);
+  anchor.click();
+  document.body.removeChild(anchor);
+  URL.revokeObjectURL(url);
 }
 
 function List({ items, color }: { items: string[]; color: string }) {
@@ -188,6 +203,35 @@ function Platform({
 }
 
 export default function UnifiedSection(props: UnifiedSectionProps) {
+  const pulse = usePulse();
+  const baseItem = 'item' in props ? props.item : undefined;
+  const itemCategory =
+    baseItem &&
+    'category' in baseItem &&
+    typeof baseItem.category === 'string' &&
+    isValidCategory(baseItem.category)
+      ? (baseItem.category as Database['public']['Enums']['content_category'])
+      : null;
+  const itemSlug =
+    baseItem && 'slug' in baseItem && typeof baseItem.slug === 'string' ? baseItem.slug : null;
+
+  const trackDownload = () => {
+    if (!(itemCategory && itemSlug)) return;
+    pulse
+      .download({
+        category: itemCategory,
+        slug: itemSlug,
+      })
+      .catch((error) => {
+        // Log but don't throw - tracking failures shouldn't break user experience
+        logger.error('Failed to track download', error as Error, {
+          context: 'unified_section_download',
+          category: itemCategory,
+          slug: itemSlug,
+        });
+      });
+  };
+
   switch (props.variant) {
     case 'list': {
       if (props.items.length === 0) return null;
@@ -324,22 +368,52 @@ export default function UnifiedSection(props: UnifiedSectionProps) {
           >
             <div className="space-y-4">
               {props.hookConfig && (
-                <ProductionCodeBlock
-                  html={props.hookConfig.html}
-                  code={props.hookConfig.code}
-                  language="json"
-                  filename={props.hookConfig.filename}
-                  maxLines={20}
-                />
+                <div className="space-y-2">
+                  <ProductionCodeBlock
+                    html={props.hookConfig.html}
+                    code={props.hookConfig.code}
+                    language="json"
+                    filename={props.hookConfig.filename}
+                    maxLines={20}
+                  />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      downloadTextFile(
+                        props.hookConfig?.filename || 'hook-config.json',
+                        props.hookConfig?.code || ''
+                      );
+                      trackDownload();
+                    }}
+                  >
+                    Download hook config
+                  </Button>
+                </div>
               )}
               {props.scriptContent && (
-                <ProductionCodeBlock
-                  html={props.scriptContent.html}
-                  code={props.scriptContent.code}
-                  language="bash"
-                  filename={props.scriptContent.filename}
-                  maxLines={25}
-                />
+                <div className="space-y-2">
+                  <ProductionCodeBlock
+                    html={props.scriptContent.html}
+                    code={props.scriptContent.code}
+                    language="bash"
+                    filename={props.scriptContent.filename}
+                    maxLines={25}
+                  />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      downloadTextFile(
+                        props.scriptContent?.filename || 'hook-script.sh',
+                        props.scriptContent?.code || ''
+                      );
+                      trackDownload();
+                    }}
+                  >
+                    Download script
+                  </Button>
+                </div>
               )}
             </div>
           </Wrapper>

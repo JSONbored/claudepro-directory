@@ -135,9 +135,6 @@ const ALLOWED_TYPES = [
   'hooks',
   'statuslines',
   'skills',
-  'collections',
-  'guides',
-  'jobs',
 ] as const;
 
 // Strict content slug validation - only alphanumeric, hyphens, underscores

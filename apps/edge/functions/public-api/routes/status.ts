@@ -1,5 +1,6 @@
 import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
 import {
+  badRequestResponse,
   buildCacheHeaders,
   errorResponse,
   getOnlyCorsHeaders,
@@ -139,7 +140,7 @@ export async function handleStatusRoute(
   method: string
 ): Promise<Response> {
   if (segments.length > 0) {
-    return methodNotAllowedResponse('GET', CORS);
+    return badRequestResponse(`Invalid endpoint: /status/${segments.join('/')}`, CORS);
   }
 
   if (method !== 'GET') {

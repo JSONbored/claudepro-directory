@@ -1,5 +1,5 @@
 import { getActivitySummary, getActivityTimeline } from '@heyclaude/web-runtime';
-import { logger, normalizeError } from '@heyclaude/web-runtime/core';
+import { hashUserId, logger, normalizeError } from '@heyclaude/web-runtime/core';
 import { generatePageMetadata, getAuthenticatedUser } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { GitPullRequest } from '@heyclaude/web-runtime/icons';
@@ -61,7 +61,7 @@ export default async function ActivityPage() {
     const reason = result.reason;
     const normalized = normalizeError(reason, `Failed to load ${name}`);
     if (user) {
-      logger.error(`ActivityPage: ${name} failed`, normalized, { userId: user.id });
+      logger.error(`ActivityPage: ${name} failed`, normalized, { userId: hashUserId(user.id) });
     }
     return null;
   }
@@ -91,7 +91,9 @@ export default async function ActivityPage() {
 
   const activities = timeline.activities || [];
   if (activities.length === 0) {
-    logger.warn('ActivityPage: activity timeline returned no activities', { userId: user.id });
+    logger.warn('ActivityPage: activity timeline returned no activities', {
+      userId: hashUserId(user.id),
+    });
   }
 
   return (

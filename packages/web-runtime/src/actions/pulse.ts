@@ -3,15 +3,6 @@
 /**
  * Pulse Server Actions
  * Consolidated event tracking and recommendations
- * Moves all tracking-related Supabase RPC calls off the client bundle.
- *
- * Architecture:
- * - Tracking functions (writes): Enqueue to Supabase Queue → Worker processes in batches (hyper-optimized)
- * - Recommendation functions (reads): Use cached data layer (fetchCachedRpc)
- *
- * Egress Optimization:
- * - Events are queued (fast, non-blocking)
- * - Worker processes batches (100 events = 1 batch insert = 98% egress reduction)
  */
 
 import type { Database, Json } from '@heyclaude/database-types';
@@ -19,11 +10,12 @@ import { Constants } from '@heyclaude/database-types';
 import { z } from 'zod';
 import { logger } from '../logger.ts';
 import { normalizeError } from '../errors.ts';
-import { createSupabaseServerClient } from '../supabase/server.ts';
+// Lazy loaded to avoid server-only side effects
+// import { createSupabaseServerClient } from '../supabase/server.ts';
 import { optionalAuthAction, rateLimitedAction } from './safe-action.ts';
-import { getSimilarContent } from '../data/content/similar.ts';
-import { getConfigRecommendations } from '../data/tools/recommendations.ts';
-import { enqueuePulseEventServer } from '../pulse.ts';
+// import { getSimilarContent } from '../data/content/similar.ts';
+// import { getConfigRecommendations } from '../data/tools/recommendations.ts';
+// import { enqueuePulseEventServer } from '../pulse.ts';
 
 // Use enum values directly from @heyclaude/database-types Constants
 const EXPERIENCE_LEVEL_VALUES = Constants.public.Enums.experience_level;
@@ -39,7 +31,6 @@ const CONTENT_CATEGORY_VALUES = Constants.public.Enums.content_category;
 // TYPES
 // ============================================
 
-// Use generated types directly from @heyclaude/database-types
 export type TrackInteractionParams = Omit<
   Database['public']['Tables']['user_interactions']['Insert'],
   'id' | 'created_at' | 'user_id'
@@ -88,7 +79,7 @@ const trackInteractionSchema = z.object({
     .string()
     .refine(
       (val) => {
-        if (val === null || val === undefined || val === '') return true; // Allow null/empty for optional
+        if (val === null || val === undefined || val === '') return true;
         const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
         return uuidRegex.test(val);
       },
@@ -96,7 +87,7 @@ const trackInteractionSchema = z.object({
     )
     .optional()
     .nullable(),
-  metadata: z.unknown().optional().nullable(), // Json type - database validates
+  metadata: z.unknown().optional().nullable(),
 });
 
 const trackNewsletterEventSchema = z.object({
@@ -191,19 +182,10 @@ const generateConfigRecommendationsSchema = z.object({
     .optional(),
 });
 
-// Note: Cache invalidation for sponsored tracking removed
-// Eventual consistency is acceptable for analytics data
-// Cache invalidation happens when worker processes batches if needed
-
 // ============================================
 // USER INTERACTION TRACKING
 // ============================================
 
-/**
- * Track user interaction (view, click, share, etc.)
- * Enqueues to pulse queue → Worker processes in batches (hyper-optimized)
- * Fire-and-forget, non-blocking
- */
 export const trackInteractionAction = optionalAuthAction
   .inputSchema(trackInteractionSchema)
   .metadata({ actionName: 'pulse.trackInteraction', category: 'analytics' })
@@ -212,7 +194,8 @@ export const trackInteractionAction = optionalAuthAction
     const contentSlug = parsedInput.content_slug ?? null;
     const userId = ctx.userId ?? null;
 
-    // Enqueue to queue (fast, non-blocking)
+    const { enqueuePulseEventServer } = await import('../pulse.ts');
+
     await enqueuePulseEventServer({
       user_id: userId,
       content_type: contentType,
@@ -223,10 +206,6 @@ export const trackInteractionAction = optionalAuthAction
     });
   });
 
-/**
- * Track newsletter-specific events
- * Enqueues to queue (hyper-optimized batching)
- */
 export const trackNewsletterEventAction = optionalAuthAction
   .inputSchema(trackNewsletterEventSchema)
   .metadata({ actionName: 'pulse.trackNewsletterEvent', category: 'analytics' })
@@ -238,10 +217,11 @@ export const trackNewsletterEventAction = optionalAuthAction
 
     const userId = ctx.userId ?? null;
 
-    // Enqueue to queue (fast, non-blocking)
+    const { enqueuePulseEventServer } = await import('../pulse.ts');
+
     await enqueuePulseEventServer({
       user_id: userId,
-      content_type: null, // Newsletter is not a content category
+      content_type: null,
       content_slug: 'newsletter_cta',
       interaction_type: 'click',
       session_id: null,
@@ -249,21 +229,17 @@ export const trackNewsletterEventAction = optionalAuthAction
     });
   });
 
-/**
- * Track contact terminal command execution
- * Used by interactive contact terminal (e.g., typing "help", "report-bug")
- * Enqueues to queue (hyper-optimized batching)
- */
 export const trackTerminalCommandAction = optionalAuthAction
   .inputSchema(trackTerminalCommandSchema)
   .metadata({ actionName: 'pulse.trackTerminalCommand', category: 'analytics' })
   .action(async ({ parsedInput, ctx }) => {
     const userId = ctx.userId ?? null;
 
-    // Enqueue to queue (fast, non-blocking)
+    const { enqueuePulseEventServer } = await import('../pulse.ts');
+
     await enqueuePulseEventServer({
       user_id: userId,
-      content_type: null, // Terminal is not a content category
+      content_type: null,
       content_slug: 'contact-terminal',
       interaction_type: 'contact_interact',
       session_id: null,
@@ -279,21 +255,17 @@ export const trackTerminalCommandAction = optionalAuthAction
     });
   });
 
-/**
- * Track contact form submission
- * Used when contact form is submitted via terminal
- * Enqueues to queue (hyper-optimized batching)
- */
 export const trackTerminalFormSubmissionAction = optionalAuthAction
   .inputSchema(trackTerminalFormSubmissionSchema)
   .metadata({ actionName: 'pulse.trackTerminalFormSubmission', category: 'analytics' })
   .action(async ({ parsedInput, ctx }) => {
     const userId = ctx.userId ?? null;
 
-    // Enqueue to queue (fast, non-blocking)
+    const { enqueuePulseEventServer } = await import('../pulse.ts');
+
     await enqueuePulseEventServer({
       user_id: userId,
-      content_type: null, // Terminal is not a content category
+      content_type: null,
       content_slug: 'contact-form',
       interaction_type: 'contact_submit',
       session_id: null,
@@ -305,11 +277,6 @@ export const trackTerminalFormSubmissionAction = optionalAuthAction
     });
   });
 
-/**
- * Track content usage (copy, download) - Queue-Based
- * Enqueues to pulse queue → Worker processes in batches (hyper-optimized)
- * Fire-and-forget, non-blocking
- */
 export const trackUsageAction = optionalAuthAction
   .inputSchema(trackUsageSchema)
   .metadata({ actionName: 'pulse.trackUsage', category: 'analytics' })
@@ -317,8 +284,8 @@ export const trackUsageAction = optionalAuthAction
     const userId = ctx.userId ?? null;
     const interactionType = parsedInput.action_type === 'copy' ? 'copy' : 'download';
 
-    // Enqueue to queue instead of direct RPC
-    // This provides 98% egress reduction via batched processing
+    const { enqueuePulseEventServer } = await import('../pulse.ts');
+
     await enqueuePulseEventServer({
       user_id: userId,
       content_type: parsedInput.content_type,
@@ -326,34 +293,21 @@ export const trackUsageAction = optionalAuthAction
       interaction_type: interactionType,
       metadata: {
         action_type: parsedInput.action_type,
-        // Preserve original action_type for analytics (copy vs download_zip, etc.)
       } as Json,
     });
-
-    // Note: Cache invalidation will happen when worker processes the batch
-    // Eventual consistency is acceptable for analytics data
   });
 
 // ============================================
 // SPONSORED CONTENT TRACKING
 // ============================================
 
-/**
- * Track sponsored content impression - Queue-Based
- * Enqueues to pulse queue → Worker processes in batches (hyper-optimized)
- * Fire-and-forget, non-blocking
- *
- * Note: Uses actual content_category from sponsored_content table instead of 'sponsored' marker
- * since content_type is now an ENUM and cannot accept arbitrary strings.
- */
 export const trackSponsoredImpression = optionalAuthAction
   .inputSchema(trackSponsoredImpressionSchema)
   .metadata({ actionName: 'pulse.trackSponsoredImpression', category: 'analytics' })
   .action(async ({ parsedInput, ctx }) => {
     const userId = ctx.userId ?? null;
 
-    // Fetch actual content_type from sponsored_content table
-    // Since content_type is now an ENUM, we must use the actual content category
+    const { createSupabaseServerClient } = await import('../supabase/server.ts');
     const supabase = await createSupabaseServerClient();
 
     const { data: sponsoredContent, error } = await supabase
@@ -367,19 +321,16 @@ export const trackSponsoredImpression = optionalAuthAction
         sponsored_id: parsedInput.sponsoredId,
         error: error?.message ?? 'Not found',
       });
-      // If sponsored content doesn't exist, we can't track it
-      // This is acceptable since we don't have sponsored content yet
       return;
     }
 
-    // Use content_type directly from sponsored_content (now correctly typed as ENUM)
     const contentType = sponsoredContent.content_type;
 
-    // Enqueue to queue instead of direct RPC
-    // This provides 98% egress reduction via batched processing
+    const { enqueuePulseEventServer } = await import('../pulse.ts');
+
     await enqueuePulseEventServer({
       user_id: userId,
-      content_type: contentType, // Use actual content category from sponsored_content
+      content_type: contentType,
       content_slug: parsedInput.sponsoredId,
       interaction_type: 'sponsored_impression',
       metadata: {
@@ -389,27 +340,15 @@ export const trackSponsoredImpression = optionalAuthAction
         position: parsedInput.position,
       } as Json,
     });
-
-    // Note: Cache invalidation will happen when worker processes the batch
-    // Eventual consistency is acceptable for analytics data
   });
 
-/**
- * Track sponsored content click - Queue-Based
- * Enqueues to pulse queue → Worker processes in batches (hyper-optimized)
- * Fire-and-forget, non-blocking
- *
- * Note: Uses actual content_category from sponsored_content table instead of 'sponsored' marker
- * since content_type is now an ENUM and cannot accept arbitrary strings.
- */
 export const trackSponsoredClick = optionalAuthAction
   .inputSchema(trackSponsoredClickSchema)
   .metadata({ actionName: 'pulse.trackSponsoredClick', category: 'analytics' })
   .action(async ({ parsedInput, ctx }) => {
     const userId = ctx.userId ?? null;
 
-    // Fetch actual content_type from sponsored_content table
-    // Since content_type is now an ENUM, we must use the actual content category
+    const { createSupabaseServerClient } = await import('../supabase/server.ts');
     const supabase = await createSupabaseServerClient();
 
     const { data: sponsoredContent, error } = await supabase
@@ -423,19 +362,16 @@ export const trackSponsoredClick = optionalAuthAction
         sponsored_id: parsedInput.sponsoredId,
         error: error?.message ?? 'Not found',
       });
-      // If sponsored content doesn't exist, we can't track it
-      // This is acceptable since we don't have sponsored content yet
       return;
     }
 
-    // Use content_type directly from sponsored_content (now correctly typed as ENUM)
     const contentType = sponsoredContent.content_type;
 
-    // Enqueue to queue instead of direct RPC
-    // This provides 98% egress reduction via batched processing
+    const { enqueuePulseEventServer } = await import('../pulse.ts');
+
     await enqueuePulseEventServer({
       user_id: userId,
-      content_type: contentType, // Use actual content category from sponsored_content
+      content_type: contentType,
       content_slug: parsedInput.sponsoredId,
       interaction_type: 'sponsored_click',
       metadata: {
@@ -444,33 +380,24 @@ export const trackSponsoredClick = optionalAuthAction
         target_url: parsedInput.targetUrl,
       } as Json,
     });
-
-    // Note: Cache invalidation will happen when worker processes the batch
-    // Eventual consistency is acceptable for analytics data
   });
 
 // ============================================
 // CONTENT RECOMMENDATIONS
 // ============================================
 
-/**
- * Get similar content/configs for a given item
- * Returns similar items based on content type and slug
- * Uses cached data layer (fetchCachedRpc via getSimilarContent)
- */
 export const getSimilarConfigsAction = rateLimitedAction
   .inputSchema(getSimilarConfigsSchema)
   .metadata({ actionName: 'pulse.getSimilarConfigs', category: 'analytics' })
   .action(async ({ parsedInput }) => {
     try {
+      const { getSimilarContent } = await import('../data/content/similar.ts');
       return await getSimilarContent({
         contentType: parsedInput.content_type,
         contentSlug: parsedInput.content_slug,
         ...(parsedInput.limit ? { limit: parsedInput.limit } : {}),
       });
     } catch (error) {
-      // getSimilarContent uses fetchCachedRpc which should return fallback,
-      // but if it throws, we catch it here and return null
       const normalized = normalizeError(error, 'Failed to get similar configs');
       const logContext: Record<string, string | number | boolean> = {
         contentType: parsedInput.content_type,
@@ -484,16 +411,12 @@ export const getSimilarConfigsAction = rateLimitedAction
     }
   });
 
-/**
- * Generate personalized config recommendations based on quiz answers
- * Returns recommendations with match scores and reasoning
- * Uses cached data layer (fetchCachedRpc via getConfigRecommendations)
- */
 export const generateConfigRecommendationsAction = rateLimitedAction
   .inputSchema(generateConfigRecommendationsSchema)
   .metadata({ actionName: 'pulse.generateConfigRecommendations', category: 'analytics' })
   .action(async ({ parsedInput }) => {
     try {
+      const { getConfigRecommendations } = await import('../data/tools/recommendations.ts');
       const data = await getConfigRecommendations({
         useCase: parsedInput.useCase,
         experienceLevel: parsedInput.experienceLevel,

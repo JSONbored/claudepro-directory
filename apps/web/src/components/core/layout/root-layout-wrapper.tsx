@@ -6,14 +6,16 @@
 'use client';
 
 import type { Database } from '@heyclaude/database-types';
+import { checkConfettiEnabled } from '@heyclaude/web-runtime';
 import { logClientWarning, logger, normalizeError } from '@heyclaude/web-runtime/core';
-import { checkConfettiEnabled } from '@heyclaude/web-runtime/data';
 import { DIMENSIONS, toasts } from '@heyclaude/web-runtime/ui';
 import dynamic from 'next/dynamic';
 import { usePathname } from 'next/navigation';
 import { useEffect } from 'react';
 import { AnnouncementBannerClient } from '@/src/components/core/layout/announcement-banner-client';
 import { Navigation } from '@/src/components/core/layout/navigation';
+import { PinboardDrawerProvider } from '@/src/components/features/navigation/pinboard-drawer-provider';
+import { RecentlyViewedMobileTray } from '@/src/components/features/navigation/recently-viewed-mobile';
 import { useConfetti } from '@/src/hooks/use-confetti';
 
 const Footer = dynamic(
@@ -105,6 +107,7 @@ interface LayoutContentProps {
     showSearch: boolean;
     showScrollToTop: boolean;
     showNotifications: boolean;
+    showPinboard: boolean;
   };
   footerDelayVariant: '10s' | '30s' | '60s';
   ctaVariant: 'aggressive' | 'social_proof' | 'value_focused';
@@ -212,18 +215,21 @@ export function LayoutContent({
       >
         Skip to main content
       </a>
-      <div className={'flex min-h-screen flex-col bg-background'}>
-        {announcement && <AnnouncementBannerClient announcement={announcement} />}
-        <Navigation hideCreateButton={useFloatingActionBar} navigationData={navigationData} />
-        <main id="main-content" className="flex-1">
-          {children}
-        </main>
-        <Footer />
-        {/* Feature flag: Floating Action Bar (can be toggled on/off via Statsig) */}
-        {useFloatingActionBar && <FloatingActionBar fabFlags={fabFlags} />}
-        <NotificationSheet />
-        <NewsletterFooterBar source="footer" showAfterDelay={delayMs} ctaVariant={ctaVariant} />
-      </div>
+      <PinboardDrawerProvider>
+        <div className={'flex min-h-screen flex-col bg-background'}>
+          {announcement && <AnnouncementBannerClient announcement={announcement} />}
+          <Navigation hideCreateButton={useFloatingActionBar} navigationData={navigationData} />
+          <main id="main-content" className="flex-1">
+            {children}
+          </main>
+          <Footer />
+          {/* Feature flag: Floating Action Bar (can be toggled on/off via Statsig) */}
+          {useFloatingActionBar && <FloatingActionBar fabFlags={fabFlags} />}
+          <RecentlyViewedMobileTray />
+          <NotificationSheet />
+          <NewsletterFooterBar source="footer" showAfterDelay={delayMs} ctaVariant={ctaVariant} />
+        </div>
+      </PinboardDrawerProvider>
     </>
   );
 }

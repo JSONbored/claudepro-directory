@@ -10,7 +10,6 @@ import {
   isValidCategory,
   logger,
   normalizeError,
-  VALID_CATEGORIES,
 } from '@heyclaude/web-runtime/core';
 // NOTE: featureFlags is NOT imported at module level to avoid flags/next accessing
 // Vercel Edge Config during module initialization. It's lazy-loaded in the component
@@ -18,9 +17,8 @@ import {
 import {
   generatePageMetadata,
   getCategoryConfig,
-  getContentByCategory,
   getContentDetailComplete,
-} from '@heyclaude/web-runtime/data';
+} from '@heyclaude/web-runtime/server';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { CollectionDetailView } from '@/src/components/content/detail-page/collection-view';
@@ -31,49 +29,17 @@ import { StructuredData } from '@/src/components/core/infra/structured-data';
 import { RecentlyViewedTracker } from '@/src/components/features/navigation/recently-viewed-tracker';
 import type { RecentlyViewedCategory } from '@/src/hooks/use-recently-viewed';
 
-export const revalidate = false; // Static generation - zero database egress during serving
-
-export async function generateStaticParams() {
-  try {
-    const allParams: Array<{ category: string; slug: string }> = [];
-
-    for (const category of VALID_CATEGORIES) {
-      try {
-        const items = await getContentByCategory(category);
-
-        for (const item of items) {
-          if (item.slug) {
-            allParams.push({
-              category,
-              slug: item.slug,
-            });
-          }
-        }
-      } catch (error) {
-        const normalized = normalizeError(
-          error,
-          'getContentByCategory error in generateStaticParams'
-        );
-        logger.error('getContentByCategory error in generateStaticParams', normalized, {
-          category,
-          phase: 'build-time',
-          route: '[category]/[slug]/page.tsx',
-        });
-        // Continue with next category (partial build better than full failure)
-      }
-    }
-
-    return allParams;
-  } catch (error) {
-    const normalized = normalizeError(error, 'generateStaticParams error in [category]/[slug]');
-    logger.error('generateStaticParams error in [category]/[slug]', normalized, {
-      phase: 'build-time',
-      route: '[category]/[slug]/page.tsx',
-    });
-    // Return empty array (prevents build failure, skips detail pages)
-    return [];
-  }
-}
+/**
+ * Dynamic Rendering Required
+ *
+ * This page must use dynamic rendering because it imports from @heyclaude/web-runtime
+ * which transitively imports feature-flags/flags.ts. The Vercel Flags SDK's flags/next
+ * module contains module-level code that calls server functions, which cannot be
+ * executed during static site generation.
+ *
+ * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic
+ */
+export const dynamic = 'force-dynamic';
 
 export async function generateMetadata({
   params,
@@ -182,17 +148,13 @@ export default async function DetailPage({
 
   // Lazy-load feature flags at render-time (runtime, not build-time)
   // Use defaults during static generation to avoid Edge Config access
-  let tabsEnabled = false;
-  let recentlyViewedEnabled = false;
+  let tabsEnabled = true;
 
   if (!isBuildTime()) {
     try {
-      // Lazy-load featureFlags only at runtime (not during build)
-      const { featureFlags } = await import('@heyclaude/web-runtime');
+      const { featureFlags } = await import('@heyclaude/web-runtime/server');
       tabsEnabled = await featureFlags.contentDetailTabs();
-      recentlyViewedEnabled = await featureFlags.recentlyViewed();
     } catch (error) {
-      // Fallback to defaults on error (prevents page failure)
       const normalized = normalizeError(error, 'Failed to load feature flags');
       logger.warn('DetailPage: feature flags load failed, using defaults', {
         category,
@@ -216,23 +178,21 @@ export default async function DetailPage({
       <Pulse variant="page-view" category={category} slug={slug} />
       <StructuredData route={`/${category}/${slug}`} />
 
-      {/* Recently Viewed Tracking - gated by feature flag */}
-      {recentlyViewedEnabled && (
-        <RecentlyViewedTracker
-          category={category as RecentlyViewedCategory}
-          slug={slug}
-          title={
-            ('display_title' in fullItem && fullItem.display_title) ||
-            ('title' in fullItem && fullItem.title) ||
-            slug
-          }
-          description={fullItem.description}
-          {...(() => {
-            const itemTags = 'tags' in fullItem ? ensureStringArray(fullItem.tags).slice(0, 3) : [];
-            return itemTags.length ? { tags: itemTags } : {};
-          })()}
-        />
-      )}
+      {/* Recently Viewed Tracking */}
+      <RecentlyViewedTracker
+        category={category as RecentlyViewedCategory}
+        slug={slug}
+        title={
+          ('display_title' in fullItem && fullItem.display_title) ||
+          ('title' in fullItem && fullItem.title) ||
+          slug
+        }
+        description={fullItem.description}
+        {...(() => {
+          const itemTags = 'tags' in fullItem ? ensureStringArray(fullItem.tags).slice(0, 3) : [];
+          return itemTags.length ? { tags: itemTags } : {};
+        })()}
+      />
 
       <UnifiedDetailPage
         item={fullItem}

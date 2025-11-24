@@ -460,11 +460,12 @@ async function createMcpbPackage(
   // For simplicity, we'll create a basic ZIP structure
   // A proper ZIP library would be better, but this works for now
 
+  const encoder = new TextEncoder();
   const files = [
-    { name: 'manifest.json', content: new TextEncoder().encode(manifest) },
-    { name: 'server/index.js', content: new TextEncoder().encode(serverIndex) },
-    { name: 'package.json', content: new TextEncoder().encode(packageJson) },
-    { name: 'README.md', content: new TextEncoder().encode(readme) },
+    { name: 'manifest.json', content: encoder.encode(manifest) },
+    { name: 'server/index.js', content: encoder.encode(serverIndex) },
+    { name: 'package.json', content: encoder.encode(packageJson) },
+    { name: 'README.md', content: encoder.encode(readme) },
   ];
 
   const dosTime = dateToDosTime(new Date());
@@ -476,8 +477,15 @@ async function createMcpbPackage(
   let offset = 0;
 
   for (const file of files) {
+    const crc = crc32(file.content);
     // Local File Header
-    const localHeader = createZipLocalFileHeader(file.name, file.content.length, dosTime, dosDate);
+    const localHeader = createZipLocalFileHeader(
+      file.name,
+      file.content.length,
+      dosTime,
+      dosDate,
+      crc
+    );
     parts.push(localHeader);
     offset += localHeader.length;
 
@@ -491,7 +499,8 @@ async function createMcpbPackage(
       file.content.length,
       offset - file.content.length - localHeader.length,
       dosTime,
-      dosDate
+      dosDate,
+      crc
     );
     centralDir.push(cdEntry);
   }
@@ -526,7 +535,8 @@ function createZipLocalFileHeader(
   fileName: string,
   fileSize: number,
   dosTime: number,
-  dosDate: number
+  dosDate: number,
+  crc: number
 ): Uint8Array {
   const header = new Uint8Array(30 + fileName.length);
   const view = new DataView(header.buffer);
@@ -537,7 +547,7 @@ function createZipLocalFileHeader(
   view.setUint16(8, 0, true); // Compression method (0 = stored)
   view.setUint16(10, dosTime, true); // Last mod time
   view.setUint16(12, dosDate, true); // Last mod date
-  view.setUint32(14, 0, true); // CRC-32 (0 for now)
+  view.setUint32(14, crc, true); // CRC-32
   view.setUint32(18, fileSize, true); // Compressed size
   view.setUint32(22, fileSize, true); // Uncompressed size
   view.setUint16(26, fileName.length, true); // File name length
@@ -555,7 +565,8 @@ function createZipCentralDirEntry(
   fileSize: number,
   localHeaderOffset: number,
   dosTime: number,
-  dosDate: number
+  dosDate: number,
+  crc: number
 ): Uint8Array {
   const entry = new Uint8Array(46 + fileName.length);
   const view = new DataView(entry.buffer);
@@ -567,7 +578,7 @@ function createZipCentralDirEntry(
   view.setUint16(10, 0, true); // Compression method
   view.setUint16(12, dosTime, true); // Last mod time
   view.setUint16(14, dosDate, true); // Last mod date
-  view.setUint32(16, 0, true); // CRC-32
+  view.setUint32(16, crc, true); // CRC-32
   view.setUint32(20, fileSize, true); // Compressed size
   view.setUint32(24, fileSize, true); // Uncompressed size
   view.setUint16(28, fileName.length, true); // File name length
@@ -580,6 +591,17 @@ function createZipCentralDirEntry(
 
   new TextEncoder().encodeInto(fileName, entry.subarray(46));
   return entry;
+}
+
+function crc32(data: Uint8Array): number {
+  let crc = 0xffffffff;
+  for (const byte of data) {
+    crc ^= byte;
+    for (let j = 0; j < 8; j++) {
+      crc = (crc >>> 1) ^ (crc & 1 ? 0xedb88320 : 0);
+    }
+  }
+  return (crc ^ 0xffffffff) >>> 0;
 }
 
 /**

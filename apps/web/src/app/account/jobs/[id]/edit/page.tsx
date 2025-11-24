@@ -4,14 +4,15 @@
  */
 
 import type { Database } from '@heyclaude/database-types';
-import { type CreateJobInput, updateJob } from '@heyclaude/web-runtime';
+import type { CreateJobInput } from '@heyclaude/web-runtime';
+import { updateJob } from '@heyclaude/web-runtime/actions';
 import { logger, normalizeError } from '@heyclaude/web-runtime/core';
 import {
   generatePageMetadata,
   getAuthenticatedUser,
   getPaymentPlanCatalog,
   getUserJobById,
-} from '@heyclaude/web-runtime/data';
+} from '@heyclaude/web-runtime/server';
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import type { Metadata } from 'next';
 import { notFound, redirect } from 'next/navigation';

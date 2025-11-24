@@ -1,22 +1,12 @@
 // Update entry point
-export * from '../supabase/server.ts';
-export * from '../supabase/server-anon.ts';
-export * from '../auth/get-authenticated-user.ts';
-export * from '../supabase/admin.ts';
 export * from '../actions/safe-action.ts';
-export * from '../actions/feature-flags.ts';
-export * from '../feature-flags/flags.ts';
+// REMOVED: export * from '../actions/feature-flags.ts'; - Server-only, use lazy imports or import from @heyclaude/web-runtime/actions
 export * from '../storage/image-storage.ts';
+export * from '../storage/image-utils.ts';
 export * from '../edge/call-edge-function.ts';
 export * from '../edge/transform.ts';
 export * from '../edge/search-client.ts';
 export * from '../seo/og.ts';
-export * from '../seo/generator.ts';
-export * from '../cache-config.ts';
-export * from '../cache/fetch-cached.ts';
-export * from '../cache-tags.ts';
-export * from '../rpc/run-rpc.ts';
-export * from '../proxy/next.ts';
 
 // Data Services
 export * from '../data/content-helpers.ts';
@@ -29,24 +19,24 @@ export * from '../data/jobs.ts';
 export * from '../data/payments.ts';
 export * from '../data/community.ts';
 export * from '../data/account.ts';
-export { getActiveNotifications } from '../data/notifications.ts';
+export * from '../data/notifications.ts';
 export * from '../data/announcements.ts';
 export * from '../data/contact.ts';
 export { logActionFailure } from '../errors.ts';
-export * from '../data/marketing.ts';
+// REMOVED: export * from '../data/marketing.ts'; - Has module-level feature-flags import
 export * from '../data/marketing/site.ts';
 export * from '../data/seo/client.ts';
 export * from '../data/content/index.ts';
-export * from '../data/content/detail.ts';
 export * from '../data/content/templates.ts';
 export * from '../data/content/related.ts';
 export * from '../data/content/paginated.ts';
 export * from '../data/content/reviews.ts';
 export * from '../data/content/homepage.ts';
+export * from '../data/search/facets.ts';
 export * from '../data/changelog.ts';
 export * from '../data/forms/submission-form-fields.ts';
 export * from '../data/layout.ts';
-export * from '../data/config/categories.ts';
+// REMOVED: export * from '../data/config/categories.ts'; - Has module-level feature-flags import
 export * from '../data/config/category/index.ts';
 
 // Actions

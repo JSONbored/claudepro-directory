@@ -5,7 +5,11 @@
  */
 
 import type { Database } from '@heyclaude/database-types';
-import { createCompany, getCompanyByIdAction, searchCompaniesAction } from '@heyclaude/web-runtime';
+import {
+  createCompany,
+  getCompanyByIdAction,
+  searchCompaniesAction,
+} from '@heyclaude/web-runtime/actions';
 import { logger, normalizeError } from '@heyclaude/web-runtime/core';
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { Building2, Plus, Search } from 'lucide-react';

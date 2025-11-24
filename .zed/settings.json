@@ -4,7 +4,7 @@
   },
   "deno": {
     "enable": true,
-    "config": "apps/edge/functions/deno.json",
+    "config": "./apps/edge/functions/deno.json",
     "lint": true,
     "unstable": true,
     "internal_debug": false

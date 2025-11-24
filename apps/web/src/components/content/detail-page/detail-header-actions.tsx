@@ -76,16 +76,29 @@ function getSafeStorageUrl(url: string | null | undefined): string | null {
 import type { Database } from '@heyclaude/database-types';
 import { logUnhandledPromise } from '@heyclaude/web-runtime/core';
 import { useCopyToClipboard, usePulse } from '@heyclaude/web-runtime/hooks';
-import { ArrowLeft, Check, Copy, Download, FileText, Sparkles } from '@heyclaude/web-runtime/icons';
+import {
+  ArrowLeft,
+  Bookmark,
+  BookmarkPlus,
+  Check,
+  Copy,
+  Download,
+  FileText,
+  Share2,
+  Sparkles,
+} from '@heyclaude/web-runtime/icons';
 import type { ContentItem, CopyType } from '@heyclaude/web-runtime/types/component.types';
 import { STATE_PATTERNS, toasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { motion } from 'motion/react';
 import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 import { ContentActionButton } from '@/src/components/core/buttons/shared/content-action-button';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { usePostCopyEmail } from '@/src/components/core/infra/providers/email-capture-modal-provider';
+import { usePinboardDrawer } from '@/src/components/features/navigation/pinboard-drawer-provider';
 import { Button } from '@/src/components/primitives/ui/button';
 import { useCopyWithEmailCapture } from '@/src/hooks/use-copy-with-email-capture';
+import { usePinboard } from '@/src/hooks/use-pinboard';
 
 /**
  * Determine copy type based on content item structure
@@ -217,6 +230,7 @@ export function DetailHeaderActions({
   onCopyContent,
 }: DetailHeaderActionsProps) {
   const router = useRouter();
+  const [isSharing, setIsSharing] = useState(false);
   const referrer = typeof window !== 'undefined' ? window.location.pathname : undefined;
   const { copy: copyToClipboard } = useCopyToClipboard();
   const { showModal } = usePostCopyEmail();
@@ -246,6 +260,80 @@ export function DetailHeaderActions({
       action: 'copy-content',
     },
   });
+  const { pinnedItems, togglePin, isPinned } = usePinboard();
+  const { openDrawer: openPinboardDrawer } = usePinboardDrawer();
+  const pinned = isPinned(category, contentItem.slug);
+
+  const shareUrl =
+    typeof window !== 'undefined'
+      ? `${window.location.origin}/${category}/${contentItem.slug}`
+      : '';
+
+  const handleShare = async () => {
+    if (!shareUrl) {
+      toasts.raw.error('Unable to share', {
+        description: 'Share link is not available in this environment.',
+      });
+      return;
+    }
+    setIsSharing(true);
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: displayTitle,
+          url: shareUrl,
+          text: contentItem.description ?? undefined,
+        });
+        toasts.raw.success('Shared!', {
+          description: 'Link sent via the native share sheet.',
+        });
+      } else {
+        await copyToClipboard(shareUrl);
+        toasts.raw.success('Link copied', {
+          description: 'Paste anywhere to share.',
+        });
+      }
+    } catch (error) {
+      const aborted =
+        typeof DOMException !== 'undefined' &&
+        error instanceof DOMException &&
+        error.name === 'AbortError';
+      if (!aborted) {
+        await copyToClipboard(shareUrl);
+        toasts.raw.info('Link copied', {
+          description: 'Native share unavailable, copied instead.',
+        });
+      }
+    } finally {
+      setIsSharing(false);
+    }
+  };
+
+  const handleTogglePin = () => {
+    const tags = Array.isArray((contentItem as { tags?: string[] }).tags)
+      ? ((contentItem as { tags?: string[] }).tags ?? []).filter(
+          (tag): tag is string => typeof tag === 'string'
+        )
+      : undefined;
+
+    togglePin({
+      category,
+      slug: contentItem.slug,
+      title: displayTitle || contentItem.title || contentItem.slug,
+      typeName,
+      description: contentItem.description ?? '',
+      ...(tags ? { tags } : {}),
+      thumbnailUrl:
+        'thumbnail_url' in contentItem && typeof contentItem.thumbnail_url === 'string'
+          ? contentItem.thumbnail_url
+          : null,
+    });
+    toasts.raw.success(pinned ? 'Removed from pinboard' : 'Pinned for later', {
+      description: pinned
+        ? 'This item was removed from your local pinboard.'
+        : 'Saved locally—open the pinboard to revisit it anytime.',
+    });
+  };
 
   const handleCopyContent = async () => {
     if (onCopyContent) {
@@ -421,6 +509,38 @@ export function DetailHeaderActions({
 
         {/* Action buttons */}
         <div className={UI_CLASSES.FLEX_COL_SM_ROW_GAP_3}>
+          <Button variant="outline" onClick={handleShare} className="min-w-0" disabled={isSharing}>
+            <Share2 className={UI_CLASSES.ICON_SM_LEADING} />
+            {isSharing ? 'Sharing...' : 'Share'}
+          </Button>
+
+          <Button
+            variant={pinned ? 'secondary' : 'outline'}
+            onClick={handleTogglePin}
+            className="min-w-0"
+          >
+            {pinned ? (
+              <>
+                <Bookmark className={UI_CLASSES.ICON_SM_LEADING} />
+                Pinned
+              </>
+            ) : (
+              <>
+                <BookmarkPlus className={UI_CLASSES.ICON_SM_LEADING} />
+                Pin for later
+              </>
+            )}
+          </Button>
+
+          <Button
+            variant="ghost"
+            className="min-w-0 justify-start border border-border/50 border-dashed"
+            onClick={openPinboardDrawer}
+          >
+            <Bookmark className={UI_CLASSES.ICON_SM_LEADING} />
+            View pinboard ({pinnedItems.length})
+          </Button>
+
           {/* Primary action button - only show if not a download action, or if download is available */}
           {(!(primaryAction.type === 'download') || hasDownloadAvailable) && (
             <Button onClick={() => handleActionClick(primaryAction)} className="min-w-0">

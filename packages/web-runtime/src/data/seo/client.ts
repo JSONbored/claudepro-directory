@@ -1,5 +1,3 @@
-'use server';
-
 import type { Database } from '@heyclaude/database-types';
 import { fetchCached } from '../../cache/fetch-cached.ts';
 import { SeoService } from '@heyclaude/data-layer';

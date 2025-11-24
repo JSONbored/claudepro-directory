@@ -48,8 +48,8 @@ export function NewsletterFooterBar({
     loadConfigs(
       async () => {
         const [appConfigResult, newsletterConfigResult] = await Promise.all([
-          getAppSettings({}),
-          getNewsletterConfig({}),
+          getAppSettings(),
+          getNewsletterConfig(),
         ]);
 
         if (appConfigResult?.data) {

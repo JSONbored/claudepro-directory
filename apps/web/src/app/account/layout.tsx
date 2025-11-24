@@ -2,14 +2,9 @@
  * Account Layout - Protected dashboard layout with sidebar navigation.
  */
 
-import { ensureUserRecord } from '@heyclaude/web-runtime';
-import { logger, normalizeError } from '@heyclaude/web-runtime/core';
-import {
-  createSupabaseServerClient,
-  getAuthenticatedUser,
-  getUserSettings,
-  getUserSponsorships,
-} from '@heyclaude/web-runtime/data';
+import { ensureUserRecord } from '@heyclaude/web-runtime/actions';
+import { hashUserId, logger, normalizeError } from '@heyclaude/web-runtime/core';
+import { getUserSettings, getUserSponsorships } from '@heyclaude/web-runtime/data';
 import {
   Activity,
   Bookmark,
@@ -21,6 +16,7 @@ import {
   TrendingUp,
   User,
 } from '@heyclaude/web-runtime/icons';
+import { createSupabaseServerClient, getAuthenticatedUser } from '@heyclaude/web-runtime/server';
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -53,6 +49,8 @@ export default async function AccountLayout({ children }: { children: React.Reac
   const userImageMetadata =
     user.user_metadata?.['avatar_url'] ?? user.user_metadata?.['picture'] ?? null;
 
+  const userIdHash = hashUserId(user.id);
+
   let settings: Awaited<ReturnType<typeof getUserSettings>> = null;
   let profile: NonNullable<Awaited<ReturnType<typeof getUserSettings>>>['user_data'] | null = null;
   try {
@@ -60,11 +58,11 @@ export default async function AccountLayout({ children }: { children: React.Reac
     if (settings) {
       profile = settings.user_data ?? null;
     } else {
-      logger.warn('AccountLayout: getUserSettings returned null', { userId: user.id });
+      logger.warn('AccountLayout: getUserSettings returned null', { userId: userIdHash });
     }
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load user settings in account layout');
-    logger.error('AccountLayout: getUserSettings threw', normalized, { userId: user.id });
+    logger.error('AccountLayout: getUserSettings threw', normalized, { userId: userIdHash });
   }
 
   if (!profile) {
@@ -80,7 +78,7 @@ export default async function AccountLayout({ children }: { children: React.Reac
         profile = settings.user_data ?? null;
       } else {
         logger.warn('AccountLayout: getUserSettings returned null after ensureUserRecord', {
-          userId: user.id,
+          userId: userIdHash,
         });
       }
     } catch (error) {
@@ -89,7 +87,7 @@ export default async function AccountLayout({ children }: { children: React.Reac
         'Failed to ensure user record or reload settings in account layout'
       );
       logger.error('AccountLayout: ensureUserRecord or getUserSettings threw', normalized, {
-        userId: user.id,
+        userId: userIdHash,
       });
     }
   }
@@ -98,12 +96,12 @@ export default async function AccountLayout({ children }: { children: React.Reac
   try {
     sponsorships = await getUserSponsorships(user.id);
     if (!sponsorships) {
-      logger.warn('AccountLayout: getUserSponsorships returned null', { userId: user.id });
+      logger.warn('AccountLayout: getUserSponsorships returned null', { userId: userIdHash });
       sponsorships = [];
     }
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load user sponsorships in account layout');
-    logger.error('AccountLayout: getUserSponsorships threw', normalized, { userId: user.id });
+    logger.error('AccountLayout: getUserSponsorships threw', normalized, { userId: userIdHash });
     sponsorships = [];
   }
 

@@ -7,8 +7,8 @@
 
 import type { Database } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
+import { getQuizConfigurationAction } from '@heyclaude/web-runtime/actions';
 import { generateConfigRecommendations, normalizeError } from '@heyclaude/web-runtime/core';
-import { getQuizConfigurationAction } from '@heyclaude/web-runtime/data';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, useTransition } from 'react';
 import { z } from 'zod';

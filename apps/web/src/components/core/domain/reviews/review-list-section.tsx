@@ -1,7 +1,11 @@
 'use client';
 
 import type { Database } from '@heyclaude/database-types';
-import { deleteReview, getReviewsWithStats, markReviewHelpful } from '@heyclaude/web-runtime';
+import {
+  deleteReview,
+  getReviewsWithStats,
+  markReviewHelpful,
+} from '@heyclaude/web-runtime/actions';
 import {
   formatDistanceToNow,
   logClientWarning,

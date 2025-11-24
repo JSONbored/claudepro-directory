@@ -6,6 +6,7 @@ import { logger, normalizeError } from '@heyclaude/web-runtime/core';
 import { AnimatePresence, motion } from 'motion/react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { usePinboardDrawer } from '@/src/components/features/navigation/pinboard-drawer-provider';
 import { useNotificationsContext } from '@/src/components/providers/notifications-provider';
 import { createMainFABConfig, createSpeedDialActions } from './fab-config';
 import { SpeedDialItem } from './speed-dial-item';
@@ -20,12 +21,14 @@ interface FloatingActionBarProps {
     showSearch: boolean;
     showScrollToTop: boolean;
     showNotifications: boolean;
+    showPinboard: boolean;
   };
 }
 
 export function FloatingActionBar({ threshold = 100, fabFlags }: FloatingActionBarProps) {
   const router = useRouter();
   const [isExpanded, setIsExpanded] = useState(false);
+  const { openDrawer: openPinboardDrawer } = usePinboardDrawer();
 
   // Scroll state for visibility control
   const scrollState = useScrollDirection({ threshold });
@@ -66,6 +69,18 @@ export function FloatingActionBar({ threshold = 100, fabFlags }: FloatingActionB
       } catch (error) {
         const normalized = normalizeError(error, '[FloatingActionBar] Error navigating to /submit');
         logger.error('[FloatingActionBar] Error navigating to /submit', normalized);
+      }
+    },
+    () => {
+      try {
+        setIsExpanded(false);
+        openPinboardDrawer();
+      } catch (error) {
+        const normalized = normalizeError(
+          error,
+          '[FloatingActionBar] Error opening pinboard drawer'
+        );
+        logger.error('[FloatingActionBar] Error opening pinboard drawer', normalized);
       }
     },
     {

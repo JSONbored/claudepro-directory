@@ -1,6 +1,6 @@
 'use client';
 
-import { createReview, updateReview } from '@heyclaude/web-runtime';
+import { createReview, updateReview } from '@heyclaude/web-runtime/actions';
 import { logClientWarning } from '@heyclaude/web-runtime/core';
 import {
   MAX_REVIEW_LENGTH,

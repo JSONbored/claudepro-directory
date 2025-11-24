@@ -25,10 +25,7 @@ export default function CommunityError({
       description="The community hub hit an unexpected issue. Please try again or jump back to the directory."
       resetText="Retry community"
       onReset={reset}
-      links={[
-        { href: '/community', label: 'Go to community', variant: 'default' },
-        { href: '/', label: 'Back to home', variant: 'outline' },
-      ]}
+      links={[{ href: '/', label: 'Back to home', variant: 'outline' }]}
       error={error}
     />
   );

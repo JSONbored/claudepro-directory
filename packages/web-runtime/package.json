@@ -8,6 +8,14 @@
       "types": "./src/index.ts",
       "default": "./src/index.ts"
     },
+    "./server": {
+      "types": "./src/server.ts",
+      "default": "./src/server.ts"
+    },
+    "./actions": {
+      "types": "./src/entries/actions.ts",
+      "default": "./src/entries/actions.ts"
+    },
     "./ui": {
       "types": "./src/entries/ui.ts",
       "default": "./src/entries/ui.ts"
@@ -25,20 +33,61 @@
       "default": "./src/entries/core.ts"
     },
     "./data": {
-      "types": "./src/entries/data.ts",
-      "default": "./src/entries/data.ts"
+      "types": "./src/entries/data-server.ts",
+      "react-server": "./src/entries/data-server.ts",
+      "default": "./src/entries/data-client.ts"
     },
     "./config/security": {
       "types": "./src/config/security.ts",
       "default": "./src/config/security.ts"
     },
+    "./types/app.schema": {
+      "types": "./src/types/app.schema.ts",
+      "default": "./src/types/app.schema.ts"
+    },
+    "./ui/design-tokens/submission-form": {
+      "types": "./src/ui/design-tokens/submission-form.ts",
+      "default": "./src/ui/design-tokens/submission-form.ts"
+    },
+    "./utils/changelog": {
+      "types": "./src/utils/changelog.ts",
+      "default": "./src/utils/changelog.ts"
+    },
     "./config/actions": {
       "types": "./src/config/actions.config.ts",
       "default": "./src/config/actions.config.ts"
     },
+    "./data/drafts/draft-manager": {
+      "types": "./src/data/drafts/draft-manager.ts",
+      "default": "./src/data/drafts/draft-manager.ts"
+    },
+    "./hooks/use-authenticated-user": {
+      "types": "./src/hooks/use-authenticated-user.ts",
+      "default": "./src/hooks/use-authenticated-user.ts"
+    },
+    "./utils/error-handler": {
+      "types": "./src/utils/error-handler.ts",
+      "default": "./src/utils/error-handler.ts"
+    },
+    "./data/config/constants": {
+      "types": "./src/data/config/constants.ts",
+      "default": "./src/data/config/constants.ts"
+    },
+    "./edge/search-client": {
+      "types": "./src/edge/search-client.ts",
+      "default": "./src/edge/search-client.ts"
+    },
     "./data/config/category": {
       "types": "./src/data/config/category/index.ts",
       "default": "./src/data/config/category/index.ts"
+    },
+    "./icons": {
+      "types": "./src/icons.tsx",
+      "default": "./src/icons.tsx"
+    },
+    "./types/component.types": {
+      "types": "./src/types/component.types.ts",
+      "default": "./src/types/component.types.ts"
     },
     "./transformers/skill-to-md": {
       "types": "./src/transformers/skill-to-md.ts",
@@ -48,6 +97,7 @@
   "dependencies": {
     "@flags-sdk/statsig": "^0.2.5",
     "@heyclaude/data-layer": "workspace:*",
+    "@heyclaude/database-types": "workspace:*",
     "@supabase/ssr": "^0.7.0",
     "@supabase/supabase-js": "^2.84.0",
     "clsx": "^2.1.1",

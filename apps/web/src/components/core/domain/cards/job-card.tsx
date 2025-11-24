@@ -18,40 +18,25 @@ import { HighlightedText } from '@/src/components/core/shared/highlighted-text';
 import { Button } from '@/src/components/primitives/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
 
-/**
- * Validate job link is safe for use in href
- * Only allows absolute HTTPS URLs and whitelisted hostnames
- */
-const TRUSTED_JOB_LINK_HOSTNAMES = [
-  'jobs.example.com',
-  'www.example.com',
-  'indeed.com',
-  'www.indeed.com',
-  'greenhouse.io',
-  'www.greenhouse.io',
-  // Add other trusted job board/external application hostnames here as needed
-] as const;
-
 function getSafeJobLink(link?: string | null): string {
   if (!link || typeof link !== 'string') return '#';
   try {
-    // Only allow absolute URLs (must start with https://)
-    if (!link.startsWith('https://')) return '#';
-    const url = new URL(link);
-    // Only allow HTTPS protocol and whitelisted hostnames
-    if (
-      url.protocol === 'https:' &&
-      TRUSTED_JOB_LINK_HOSTNAMES.includes(
-        url.hostname as (typeof TRUSTED_JOB_LINK_HOSTNAMES)[number]
-      )
-    ) {
-      // Return normalized URL instead of original input
-      return url.href;
+    const url = new URL(link.trim());
+    if (url.protocol !== 'https:') {
+      return '#';
     }
+
+    url.username = '';
+    url.password = '';
+    url.hostname = url.hostname.replace(/\.$/, '').toLowerCase();
+    if (url.port === '443') {
+      url.port = '';
+    }
+
+    return url.href;
   } catch {
-    // Invalid URL
+    return '#';
   }
-  return '#';
 }
 
 export function JobCard({ job }: JobCardProps) {

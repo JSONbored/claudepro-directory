@@ -40,10 +40,10 @@ export function DuplicateWarning({ contentType: _contentType, name }: DuplicateW
 
   // Load debounce value from config
   useEffect(() => {
-    getTimeoutConfig({})
+    getTimeoutConfig()
       .then((result) => {
-        if (!result?.data) return;
-        const config = result.data;
+        if (!result) return;
+        const config = result;
         setDebounceMs(config['timeout.ui.form_debounce_ms']);
       })
       .catch((error) => {

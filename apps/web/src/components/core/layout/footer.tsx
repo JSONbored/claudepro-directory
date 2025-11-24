@@ -72,10 +72,10 @@ function FooterComponent() {
   }, []);
 
   useEffect(() => {
-    getAnimationConfig({})
+    getAnimationConfig()
       .then((result) => {
-        if (!result?.data) return;
-        const config = result.data;
+        if (!result) return;
+        const config = result;
         setSpringDefault({
           type: 'spring' as const,
           stiffness: config['animation.spring.default.stiffness'],

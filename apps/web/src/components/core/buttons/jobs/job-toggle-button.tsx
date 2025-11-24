@@ -6,7 +6,7 @@
  */
 
 import type { JobStatus } from '@heyclaude/web-runtime';
-import { toggleJobStatus } from '@heyclaude/web-runtime';
+import { toggleJobStatus } from '@heyclaude/web-runtime/actions';
 import { logClientWarning } from '@heyclaude/web-runtime/core';
 import { Pause, Play } from '@heyclaude/web-runtime/icons';
 import type { ButtonStyleProps } from '@heyclaude/web-runtime/types/component.types';

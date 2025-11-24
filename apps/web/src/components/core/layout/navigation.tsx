@@ -10,7 +10,7 @@
 
 import type { Database } from '@heyclaude/database-types';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { DiscordIcon } from '@heyclaude/web-runtime/icons';
+import { Bookmark, DiscordIcon } from '@heyclaude/web-runtime/icons';
 import {
   ANIMATION_CONSTANTS,
   POSITION_PATTERNS,
@@ -28,8 +28,10 @@ import { NavigationDesktop } from '@/src/components/core/layout/navigation-deskt
 import { NavigationMobile } from '@/src/components/core/layout/navigation-mobile';
 import { NavigationTablet } from '@/src/components/core/layout/navigation-tablet';
 import { UserMenu } from '@/src/components/core/layout/user-menu';
+import { usePinboardDrawer } from '@/src/components/features/navigation/pinboard-drawer-provider';
 import { Button } from '@/src/components/primitives/ui/button';
 import { ACTION_LINKS } from '@/src/config/navigation';
+import { usePinboard } from '@/src/hooks/use-pinboard';
 
 interface NavigationProps {
   /** Hide Create button when FloatingActionBar is enabled */
@@ -43,6 +45,9 @@ const NavigationComponent = ({ hideCreateButton = false, navigationData }: Navig
   const [isScrolled, setIsScrolled] = useState(false);
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const pathname = usePathname();
+  const { pinnedItems, isLoaded: pinboardLoaded } = usePinboard();
+  const { openDrawer: openPinboardDrawer } = usePinboardDrawer();
+  const pinCount = pinboardLoaded ? pinnedItems.length : 0;
 
   // Motion.dev scroll-based animations (Phase 1.5 - October 2025)
   const { scrollY } = useScroll();
@@ -142,6 +147,24 @@ const NavigationComponent = ({ hideCreateButton = false, navigationData }: Navig
 
                 {/* Right Side Actions */}
                 <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1_5}>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={openPinboardDrawer}
+                    className={`relative ${UI_CLASSES.BUTTON_GHOST_ICON}`}
+                    aria-label={
+                      pinCount > 0
+                        ? `Open pinboard (${pinCount} saved)`
+                        : 'Open pinboard (save items for later)'
+                    }
+                  >
+                    <Bookmark className={UI_CLASSES.ICON_XS} />
+                    {pinCount > 0 && (
+                      <span className="-right-1 -top-1 absolute flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 font-semibold text-[10px] text-primary-foreground">
+                        {pinCount > 99 ? '99+' : pinCount}
+                      </span>
+                    )}
+                  </Button>
                   {/* Action Links - Create Button (hidden when FloatingActionBar is enabled) */}
                   {!hideCreateButton &&
                     ACTION_LINKS.map((link) => {

@@ -60,6 +60,8 @@ function HomePageClientComponent({
   featuredByCategory,
   stats,
   featuredJobs = [],
+  searchFilters,
+  weekStart,
 }: HomePageClientProps) {
   const [allConfigs, setAllConfigs] = useState<ContentItem[]>([]);
   const [isLoadingAllConfigs, setIsLoadingAllConfigs] = useState(false);
@@ -92,10 +94,10 @@ function HomePageClientComponent({
   }, []);
 
   useEffect(() => {
-    getAnimationConfig({})
+    getAnimationConfig()
       .then((result) => {
-        if (!result?.data) return;
-        const config = result.data;
+        if (!result) return;
+        const config = result;
         setSpringDefault({
           type: 'spring' as const,
           stiffness: config['animation.spring.default.stiffness'],
@@ -130,7 +132,7 @@ function HomePageClientComponent({
           });
         }
 
-        const newItems = (result?.data ?? []) as ContentItem[];
+        const newItems = (result ?? []) as ContentItem[];
 
         if (newItems.length < limit) {
           setHasMoreAllConfigs(false);
@@ -203,7 +205,14 @@ function HomePageClientComponent({
     setFilters(newFilters);
   }, []);
 
-  const filterOptions = { tags: [], authors: [], categories: [] };
+  const filterOptions = useMemo(
+    () => ({
+      tags: searchFilters?.tags ?? [],
+      authors: searchFilters?.authors ?? [],
+      categories: searchFilters?.categories ?? [],
+    }),
+    [searchFilters]
+  );
 
   // Create lookup maps dynamically for all featured categories
   // O(1) slug checking instead of O(n) array.some() calls
@@ -408,6 +417,7 @@ function HomePageClientComponent({
               featuredJobs as ReadonlyArray<Database['public']['Tables']['jobs']['Row']>
             }
             featuredCategories={featuredCategories}
+            {...(weekStart ? { weekStart } : {})}
           />
         )}
 
@@ -420,6 +430,7 @@ function HomePageClientComponent({
             categoryConfigs={categoryConfigs}
             onFetchMore={handleFetchMore}
             serverHasMore={hasMoreAllConfigs}
+            {...(weekStart ? { weekStart } : {})}
           />
         )}
       </section>

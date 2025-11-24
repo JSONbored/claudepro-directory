@@ -1,12 +1,8 @@
-'use server';
-
 import { headers } from 'next/headers';
 import { createSafeActionClient, DEFAULT_SERVER_ERROR_MESSAGE } from 'next-safe-action';
 import { z } from 'zod';
-import { getAuthenticatedUserFromClient } from '../auth/get-authenticated-user.ts';
 import { logger, toLogContextValue } from '../logger.ts';
 import { logActionFailure, normalizeError } from '../errors.ts';
-import { createSupabaseServerClient } from '../supabase/server.ts';
 
 const actionMetadataSchema = z.object({
   actionName: z.string().min(1),
@@ -68,6 +64,10 @@ export const rateLimitedAction = loggedAction.use(async ({ next, metadata }) => 
 });
 
 export const authedAction = rateLimitedAction.use(async ({ next, metadata }) => {
+  // Lazy import server-only dependencies to keep this file client-safe for definition
+  const { createSupabaseServerClient } = await import('../supabase/server.ts');
+  const { getAuthenticatedUserFromClient } = await import('../auth/get-authenticated-user.ts');
+
   const supabase = await createSupabaseServerClient();
 
   const authResult = await getAuthenticatedUserFromClient(supabase, {
@@ -111,6 +111,10 @@ export const authedAction = rateLimitedAction.use(async ({ next, metadata }) => 
 });
 
 export const optionalAuthAction = rateLimitedAction.use(async ({ next, metadata }) => {
+  // Lazy import server-only dependencies
+  const { createSupabaseServerClient } = await import('../supabase/server.ts');
+  const { getAuthenticatedUserFromClient } = await import('../auth/get-authenticated-user.ts');
+
   const supabase = await createSupabaseServerClient();
 
   const authResult = await getAuthenticatedUserFromClient(supabase, {

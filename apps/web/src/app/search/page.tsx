@@ -3,9 +3,16 @@
  */
 
 import type { SearchFilters } from '@heyclaude/web-runtime/core';
-import { searchContent } from '@heyclaude/web-runtime/data';
+import {
+  generatePageMetadata,
+  getHomepageData,
+  getSearchFacets,
+  searchContent,
+} from '@heyclaude/web-runtime/data';
 import type { Metadata } from 'next';
+import { Suspense } from 'react';
 import { ContentSearchClient } from '@/src/components/content/content-search';
+import { RecentlyViewedSidebar } from '@/src/components/features/navigation/recently-viewed-sidebar';
 
 const VALID_SORT_OPTIONS: SearchFilters['sort'][] = [
   'relevance',
@@ -19,9 +26,19 @@ function isValidSort(value: string | undefined): value is SearchFilters['sort'] 
 }
 
 import { logger, normalizeError } from '@heyclaude/web-runtime/core';
-import { generatePageMetadata } from '@heyclaude/web-runtime/data';
+import { getHomepageCategoryIds } from '@heyclaude/web-runtime/data';
 
-export const revalidate = false;
+/**
+ * Dynamic Rendering Required
+ *
+ * This page must use dynamic rendering because it imports from @heyclaude/web-runtime
+ * which transitively imports feature-flags/flags.ts. The Vercel Flags SDK's flags/next
+ * module contains module-level code that calls server functions, which cannot be
+ * executed during static site generation.
+ *
+ * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic
+ */
+export const dynamic = 'force-dynamic';
 
 interface SearchPageProps {
   searchParams: Promise<{
@@ -83,18 +100,53 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
     throw normalized;
   }
 
+  let facetOptions = { tags: [] as string[], authors: [] as string[], categories: [] as string[] };
+  try {
+    const facetData = await getSearchFacets();
+    facetOptions = {
+      tags: facetData.tags,
+      authors: facetData.authors,
+      categories: facetData.categories,
+    };
+  } catch (error) {
+    const normalized = normalizeError(error, 'Search facets fetch failed');
+    logger.error('SearchPage: getSearchFacets invocation failed', normalized);
+  }
+
+  let zeroStateSuggestions: Awaited<ReturnType<typeof searchContent>> = [];
+  try {
+    const homepageData = await getHomepageData(getHomepageCategoryIds);
+    const categoryData = (homepageData?.content as { categoryData?: Record<string, unknown[]> })
+      ?.categoryData;
+    zeroStateSuggestions = categoryData
+      ? (Object.values(categoryData).flat() as Awaited<ReturnType<typeof searchContent>>)
+      : [];
+  } catch (error) {
+    const normalized = normalizeError(error, 'SearchPage: getHomepageData for suggestions failed');
+    logger.error('SearchPage: suggestions fetch failed', normalized);
+  }
+
   return (
     <main className="container mx-auto px-4 py-8">
       <h1 className="mb-8 font-bold text-4xl">
         {query ? `Search: "${query}"` : 'Search Claude Code Directory'}
       </h1>
-      <ContentSearchClient
-        items={results}
-        type="agents"
-        searchPlaceholder="Search agents, MCP servers, rules, commands..."
-        title="Results"
-        icon="Search"
-      />
+      <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_18rem]">
+        <ContentSearchClient
+          items={results}
+          type="agents"
+          searchPlaceholder="Search agents, MCP servers, rules, commands..."
+          title="Results"
+          icon="Search"
+          availableTags={facetOptions.tags}
+          availableAuthors={facetOptions.authors}
+          availableCategories={facetOptions.categories}
+          zeroStateSuggestions={zeroStateSuggestions.slice(0, 6)}
+        />
+        <Suspense fallback={null}>
+          <RecentlyViewedSidebar />
+        </Suspense>
+      </div>
     </main>
   );
 }

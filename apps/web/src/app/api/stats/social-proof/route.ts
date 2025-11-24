@@ -9,7 +9,7 @@
  */
 
 import { logger, normalizeError } from '@heyclaude/web-runtime/core';
-import { createSupabaseServerClient } from '@heyclaude/web-runtime/data';
+import { createSupabaseServerClient } from '@heyclaude/web-runtime/server';
 import { NextResponse } from 'next/server';
 
 export const revalidate = 300;
@@ -113,7 +113,7 @@ export async function GET() {
         return name.trim();
       });
 
-    const totalUsers = contentCount || null;
+    const totalUsers = contentCount ?? null;
 
     // Return stats
     return NextResponse.json(

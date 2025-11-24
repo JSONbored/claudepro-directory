@@ -223,9 +223,9 @@ export function ProductionCodeBlock({
 
   // Fetch timeout config once on mount
   useEffect(() => {
-    getTimeoutConfig({})
+    getTimeoutConfig()
       .then((result) => {
-        const override = result?.data?.['timeout.ui.clipboard_reset_delay_ms'];
+        const override = result?.['timeout.ui.clipboard_reset_delay_ms'];
         if (typeof override === 'number' && Number.isFinite(override) && override > 0) {
           setClipboardResetDelay(override);
         }

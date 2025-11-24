@@ -1,6 +1,7 @@
 import type { Database } from '@heyclaude/database-types';
-import type { JobBillingSummaryEntry, JobStatus } from '@heyclaude/web-runtime';
+import type { JobStatus } from '@heyclaude/web-runtime';
 import { formatRelativeDate, logger, normalizeError } from '@heyclaude/web-runtime/core';
+import type { JobBillingSummaryEntry } from '@heyclaude/web-runtime/data';
 import {
   generatePageMetadata,
   getAuthenticatedUser,
@@ -180,8 +181,11 @@ export default async function MyJobsPage({ searchParams }: MyJobsPageProps = {})
           'is_placeholder' in item &&
           typeof item['is_placeholder'] === 'boolean' &&
           'category' in item &&
+          typeof item['category'] === 'string' &&
           'plan' in item &&
-          'type' in item
+          (typeof item['plan'] === 'string' || item['plan'] === null) &&
+          'type' in item &&
+          typeof item['type'] === 'string'
         );
       })
       .map((item) => item as Database['public']['Tables']['jobs']['Row']);

@@ -149,10 +149,10 @@ function ViewVariant({
 
   useEffect(() => {
     if (delay === undefined) {
-      getPollingConfig({})
+      getPollingConfig()
         .then((result) => {
-          if (!result?.data) return;
-          const config = result.data;
+          if (!result) return;
+          const config = result;
           setActualDelay(config['polling.realtime_ms']);
         })
         .catch((error) => {

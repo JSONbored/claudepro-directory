@@ -18,7 +18,7 @@ import {
  */
 
 import type { Database } from '@heyclaude/database-types';
-import { ensureUserRecord } from '@heyclaude/web-runtime';
+import { ensureUserRecord } from '@heyclaude/web-runtime/actions';
 import { hashUserId, logger, normalizeError } from '@heyclaude/web-runtime/core';
 import {
   generatePageMetadata,

@@ -5,7 +5,6 @@
  * because it may lazily access runtime-only dependencies (e.g., Vercel Edge Config via flags).
  */
 
-import 'server-only';
 
 const isBrowserContext = typeof window !== 'undefined' || typeof document !== 'undefined';
 

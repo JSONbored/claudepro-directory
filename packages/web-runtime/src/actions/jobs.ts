@@ -1,4 +1,3 @@
-'use server';
 
 /**
  * Jobs Actions - Database-First Architecture

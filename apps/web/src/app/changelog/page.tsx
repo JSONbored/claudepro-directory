@@ -23,12 +23,12 @@
  */
 
 import type { Metadata } from 'next';
-import dynamic from 'next/dynamic';
+import dynamicImport from 'next/dynamic';
 import { StructuredData } from '@/src/components/core/infra/structured-data';
 import { NavLink } from '@/src/components/core/navigation/navigation-link';
 import { ChangelogListClient } from '@/src/components/features/changelog/changelog-list-client';
 
-const NewsletterCTAVariant = dynamic(
+const NewsletterCTAVariant = dynamicImport(
   () =>
     import('@/src/components/features/growth/newsletter/newsletter-cta-variants').then((mod) => ({
       default: mod.NewsletterCTAVariant,
@@ -44,6 +44,18 @@ import { generatePageMetadata, getChangelogOverview } from '@heyclaude/web-runti
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
 import { ArrowLeft } from '@heyclaude/web-runtime/icons';
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
+
+/**
+ * Dynamic Rendering Required
+ *
+ * This page must use dynamic rendering because it imports from @heyclaude/web-runtime
+ * which transitively imports feature-flags/flags.ts. The Vercel Flags SDK's flags/next
+ * module contains module-level code that calls server functions, which cannot be
+ * executed during static site generation.
+ *
+ * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic
+ */
+export const dynamic = 'force-dynamic';
 
 /**
  * Generate metadata for changelog list page
@@ -193,7 +205,11 @@ export default async function ChangelogPage() {
 
         {/* Email CTA - Footer section (matching homepage pattern) */}
         <section className={'mx-auto px-4 py-12'}>
-          <NewsletterCTAVariant source="content_page" variant="hero" />
+          <NewsletterCTAVariant
+            source="content_page"
+            variant="hero"
+            category="changelog" // Context needed for analytics and correct copy
+          />
         </section>
       </>
     );

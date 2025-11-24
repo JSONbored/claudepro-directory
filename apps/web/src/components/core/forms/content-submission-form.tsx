@@ -12,7 +12,7 @@
  */
 
 import type { Database } from '@heyclaude/database-types';
-import { submitContentForReview } from '@heyclaude/web-runtime';
+import { submitContentForReview } from '@heyclaude/web-runtime/actions';
 import { logger, normalizeError, ParseStrategy, safeParse } from '@heyclaude/web-runtime/core';
 import { getAnimationConfig } from '@heyclaude/web-runtime/data';
 import { useAuthenticatedUser } from '@heyclaude/web-runtime/hooks/use-authenticated-user';
@@ -175,10 +175,10 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
   });
 
   useEffect(() => {
-    getAnimationConfig({})
+    getAnimationConfig()
       .then((result) => {
-        if (!result?.data) return;
-        const config = result.data;
+        if (!result) return;
+        const config = result;
         setSpringSmooth({
           type: 'spring' as const,
           stiffness: config['animation.spring.smooth.stiffness'],

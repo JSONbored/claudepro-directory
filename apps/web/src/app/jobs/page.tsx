@@ -10,7 +10,7 @@ import { Briefcase, Clock, Filter, MapPin, Plus, Search } from '@heyclaude/web-r
 import type { PagePropsWithSearchParams } from '@heyclaude/web-runtime/types/app.schema';
 import { POSITION_PATTERNS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import type { Metadata } from 'next';
-import dynamic from 'next/dynamic';
+import dynamicImport from 'next/dynamic';
 import Link from 'next/link';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { JobCard } from '@/src/components/core/domain/cards/job-card';
@@ -26,7 +26,19 @@ import {
   SelectValue,
 } from '@/src/components/primitives/ui/select';
 
-const NewsletterCTAVariant = dynamic(
+/**
+ * Dynamic Rendering Required
+ *
+ * This page must use dynamic rendering because it imports from @heyclaude/web-runtime
+ * which transitively imports feature-flags/flags.ts. The Vercel Flags SDK's flags/next
+ * module contains module-level code that calls server functions, which cannot be
+ * executed during static site generation.
+ *
+ * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic
+ */
+export const dynamic = 'force-dynamic';
+
+const NewsletterCTAVariant = dynamicImport(
   () =>
     import('@/src/components/features/growth/newsletter/newsletter-cta-variants').then((mod) => ({
       default: mod.NewsletterCTAVariant,

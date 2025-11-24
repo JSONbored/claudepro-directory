@@ -16,10 +16,10 @@ import {
   logUnhandledPromise,
   sanitizeSlug,
 } from '@heyclaude/web-runtime/core';
-import { usePulse } from '@heyclaude/web-runtime/hooks';
-import { ExternalLink, Github, Thermometer } from '@heyclaude/web-runtime/icons';
+import { useCopyToClipboard, usePulse } from '@heyclaude/web-runtime/hooks';
+import { Copy, ExternalLink, Github, Thermometer } from '@heyclaude/web-runtime/icons';
 import type { ContentItem } from '@heyclaude/web-runtime/types/component.types';
-import { BADGE_COLORS, getDisplayTitle, UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { BADGE_COLORS, getDisplayTitle, toasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { memo } from 'react';
@@ -71,65 +71,22 @@ function getSafeContentItemUrl(category: string, slug: string): string | null {
   return url;
 }
 
-/**
- * Validate and sanitize documentation URL for safe use in href attributes
- * Only allows HTTPS URLs from trusted domains with common TLDs
- * Returns canonicalized URL or null if invalid
- */
 function getSafeDocumentationUrl(url: string | null | undefined): string | null {
   if (!url || typeof url !== 'string') return null;
 
   try {
     const parsed = new URL(url.trim());
-    // Only allow HTTPS protocol
-    if (parsed.protocol.toLowerCase() !== 'https:') return null;
+    if (parsed.protocol.toLowerCase() !== 'https:') {
+      return null;
+    }
 
-    // Reject dangerous components
-    if (parsed.username || parsed.password) return null;
-
-    // List of trusted TLDs for documentation sites
-    // These are common TLDs used by legitimate documentation platforms
-    const trustedTlds = [
-      '.com',
-      '.org',
-      '.net',
-      '.io',
-      '.ai',
-      '.dev',
-      '.co',
-      '.xyz',
-      '.info',
-      '.edu',
-      '.gov',
-      '.us',
-      '.uk',
-      '.ca',
-      '.au',
-      '.de',
-      '.fr',
-      '.jp',
-      '.cn',
-      '.tech',
-      '.site',
-      '.online',
-    ];
-
-    const hostname = parsed.hostname.toLowerCase().replace(/\.$/, '');
-    // Only allow hostnames ending with one of the trusted TLDs
-    const hasTrustedTld = trustedTlds.some((tld) => hostname.endsWith(tld));
-    if (!hasTrustedTld) return null;
-
-    // Sanitize: strip credentials but keep query/fragment for navigation
     parsed.username = '';
     parsed.password = '';
-    // Normalize hostname
-    parsed.hostname = hostname;
-    // Remove default ports
+    parsed.hostname = parsed.hostname.replace(/\.$/, '').toLowerCase();
     if (parsed.port === '443') {
       parsed.port = '';
     }
 
-    // Return canonicalized href (guaranteed to be normalized and safe)
     return parsed.href;
   } catch {
     return null;
@@ -185,6 +142,12 @@ export const DetailSidebar = memo(function DetailSidebar({
 }: DetailSidebarProps) {
   const router = useRouter();
   const pulse = usePulse();
+  const { copy: copyToClipboard } = useCopyToClipboard({
+    context: {
+      component: 'detail-sidebar',
+      action: 'quick_action',
+    },
+  });
 
   // Cast item to ContentItem for property access (content is Json type from RPC)
   const contentItem = item as ContentItem;
@@ -212,6 +175,110 @@ export const DetailSidebar = memo(function DetailSidebar({
   const hasPermissions = 'permissions' in metadata;
   const permissions = hasPermissions ? ensureStringArray(metadata['permissions']) : [];
   const hasSource = 'source' in contentItem && contentItem.source;
+  const mcpServers =
+    metadata['mcpServers'] && typeof metadata['mcpServers'] === 'object'
+      ? metadata['mcpServers']
+      : null;
+  const configurationObject =
+    metadata['configuration'] && typeof metadata['configuration'] === 'object'
+      ? metadata['configuration']
+      : null;
+  const pulseCategory = isValidCategory(contentItem.category)
+    ? (contentItem.category as Database['public']['Enums']['content_category'])
+    : null;
+  const contentSlug = typeof contentItem.slug === 'string' ? contentItem.slug : null;
+
+  type QuickAction = {
+    key: string;
+    label: string;
+    description?: string;
+    onClick: () => void | Promise<void>;
+  };
+
+  const trackCopyPulse = (metadata?: Record<string, unknown>) => {
+    if (!(pulseCategory && contentSlug)) return;
+    pulse
+      .copy({
+        category: pulseCategory,
+        slug: contentSlug,
+        ...(metadata ? { metadata } : {}),
+      })
+      .catch((error) => {
+        logUnhandledPromise('NavigationSidebar: quick action pulse failed', error, {
+          category: contentItem.category ?? 'null',
+          slug: contentSlug ?? 'null',
+        });
+      });
+  };
+
+  const quickActions: QuickAction[] = [];
+
+  if (hasPackage && packageName) {
+    const pnpmCommand = `pnpm add ${packageName}`;
+    quickActions.push({
+      key: 'pnpm-install',
+      label: `Copy “${pnpmCommand}”`,
+      description: 'Paste into your terminal to install this package',
+      onClick: async () => {
+        try {
+          await copyToClipboard(pnpmCommand);
+          toasts.raw.success('Install command copied', {
+            description: pnpmCommand,
+          });
+          trackCopyPulse({ action: 'copy_install', manager: 'pnpm' });
+        } catch (error) {
+          logger.error('NavigationSidebar: failed to copy pnpm command', error as Error);
+          toasts.raw.error('Copy failed', {
+            description: 'Unable to copy pnpm command.',
+          });
+        }
+      },
+    });
+  }
+
+  if (mcpServers) {
+    quickActions.push({
+      key: 'copy-mcp-config',
+      label: 'Copy Claude Desktop config',
+      description: 'Adds this MCP server to Claude Desktop settings',
+      onClick: async () => {
+        try {
+          await copyToClipboard(JSON.stringify({ mcpServers }, null, 2));
+          toasts.raw.success('Claude config copied', {
+            description: 'Paste into Claude Desktop → Settings → MCP Servers.',
+          });
+          trackCopyPulse({ action: 'copy_mcp_config' });
+        } catch (error) {
+          logger.error('NavigationSidebar: failed to copy MCP config', error as Error);
+          toasts.raw.error('Copy failed', {
+            description: 'Unable to copy Claude Desktop configuration.',
+          });
+        }
+      },
+    });
+  }
+
+  if (configurationObject && !mcpServers) {
+    quickActions.push({
+      key: 'copy-config-json',
+      label: 'Copy configuration JSON',
+      description: 'Use this configuration in your own project',
+      onClick: async () => {
+        try {
+          await copyToClipboard(JSON.stringify(configurationObject, null, 2));
+          toasts.raw.success('Configuration copied', {
+            description: 'JSON configuration saved to your clipboard.',
+          });
+          trackCopyPulse({ action: 'copy_configuration' });
+        } catch (error) {
+          logger.error('NavigationSidebar: failed to copy configuration JSON', error as Error);
+          toasts.raw.error('Copy failed', {
+            description: 'Unable to copy configuration JSON.',
+          });
+        }
+      },
+    });
+  }
 
   return (
     <div className="space-y-6">
@@ -407,6 +474,32 @@ export const DetailSidebar = memo(function DetailSidebar({
                 </UnifiedBadge>
               </div>
             )}
+          </CardContent>
+        </Card>
+      )}
+
+      {!!quickActions.length && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Quick Actions</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {quickActions.map((action) => (
+              <Button
+                key={action.key}
+                variant="secondary"
+                className="w-full justify-start gap-3 text-left"
+                onClick={action.onClick}
+              >
+                <Copy className={UI_CLASSES.ICON_SM_LEADING} />
+                <div className="text-left">
+                  <div className="font-medium text-sm">{action.label}</div>
+                  {action.description && (
+                    <p className="text-muted-foreground text-xs">{action.description}</p>
+                  )}
+                </div>
+              </Button>
+            ))}
           </CardContent>
         </Card>
       )}

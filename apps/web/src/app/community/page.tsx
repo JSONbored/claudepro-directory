@@ -1,9 +1,9 @@
-import dynamic from 'next/dynamic';
+import dynamicImport from 'next/dynamic';
 import Link from 'next/link';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { Button } from '@/src/components/primitives/ui/button';
 
-const NewsletterCTAVariant = dynamic(
+const NewsletterCTAVariant = dynamicImport(
   () =>
     import('@/src/components/features/growth/newsletter/newsletter-cta-variants').then((mod) => ({
       default: mod.NewsletterCTAVariant,
@@ -14,9 +14,22 @@ const NewsletterCTAVariant = dynamic(
 );
 
 import { getContactChannels, logger } from '@heyclaude/web-runtime/core';
-import { generatePageMetadata } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { Github, MessageCircle, MessageSquare, Twitter, Users } from '@heyclaude/web-runtime/icons';
+import {
+  Github,
+  Layers,
+  MessageCircle,
+  MessageSquare,
+  Twitter,
+  Users,
+} from '@heyclaude/web-runtime/icons';
+import {
+  generatePageMetadata,
+  getCommunityDirectory,
+  getConfigurationCount,
+  getHomepageCategoryIds,
+  getHomepageData,
+} from '@heyclaude/web-runtime/server';
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import type { Metadata } from 'next';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
@@ -26,12 +39,26 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 /**
- * Static Generation: Marketing pages are fully static
- * revalidate: false = Static generation at build time
+ * Dynamic Rendering Required
+ *
+ * This page must use dynamic rendering because it imports from @heyclaude/web-runtime
+ * which transitively imports feature-flags/flags.ts. The Vercel Flags SDK's flags/next
+ * module contains module-level code that calls server functions, which cannot be
+ * executed during static site generation.
+ *
+ * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic
  */
-export const revalidate = false;
+export const dynamic = 'force-dynamic';
 
-export default function CommunityPage() {
+function formatStatValue(value: number | null | undefined): string {
+  if (value == null || Number.isNaN(value)) return '0';
+  return Intl.NumberFormat('en', {
+    notation: 'compact',
+    maximumFractionDigits: 1,
+  }).format(value);
+}
+
+export default async function CommunityPage() {
   const channels = getContactChannels();
   if (!channels.discord) {
     logger.warn('CommunityPage: Discord channel is not configured', undefined, {
@@ -47,6 +74,48 @@ export default function CommunityPage() {
       configKey: 'TWITTER_URL',
     });
   }
+
+  const categoryIds = getHomepageCategoryIds;
+
+  const [communityDirectory, configurationCount, homepageData] = await Promise.all([
+    getCommunityDirectory({ limit: 500 }).catch((error) => {
+      logger.error('CommunityPage: failed to load community directory', error);
+      return null;
+    }),
+    getConfigurationCount().catch((error) => {
+      logger.error('CommunityPage: failed to load configuration count', error);
+      return 0;
+    }),
+    getHomepageData(categoryIds).catch((error) => {
+      logger.error('CommunityPage: failed to load homepage metrics', error);
+      return null;
+    }),
+  ]);
+
+  const totalConfigurations = configurationCount ?? 0;
+  const totalContributors = communityDirectory?.all_users?.length ?? 0;
+  const memberCount = homepageData?.member_count ?? totalContributors;
+
+  const statCards = [
+    {
+      icon: Layers,
+      title: 'Configurations',
+      value: formatStatValue(totalConfigurations),
+      description: 'Published Claude setups in the directory',
+    },
+    {
+      icon: MessageCircle,
+      title: 'Contributors',
+      value: formatStatValue(totalContributors),
+      description: 'Builders sharing agents, MCP servers, and hooks',
+    },
+    {
+      icon: Users,
+      title: 'Community Members',
+      value: formatStatValue(memberCount),
+      description: 'Discord, newsletter, and directory members',
+    },
+  ];
 
   return (
     <div className={'min-h-screen bg-background'}>
@@ -103,44 +172,20 @@ export default function CommunityPage() {
       <section className={'px-4 py-16'}>
         <div className={'container mx-auto'}>
           <div className={UI_CLASSES.GRID_RESPONSIVE_3}>
-            <Card>
-              <CardHeader>
-                <CardTitle className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                  <Github className="h-5 w-5 text-primary" />
-                  Open Source
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className={'font-bold text-3xl'}>100%</div>
-                <p className="text-muted-foreground">Free and open source</p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                  <MessageCircle className="h-5 w-5 text-primary" />
-                  Configurations
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className={'font-bold text-3xl'}>50+</div>
-                <p className="text-muted-foreground">Curated configurations</p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                  <Users className="h-5 w-5 text-primary" />
-                  Community Driven
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className={'font-bold text-3xl'}>Growing</div>
-                <p className="text-muted-foreground">Join us on GitHub</p>
-              </CardContent>
-            </Card>
+            {statCards.map(({ icon: Icon, title, value, description }) => (
+              <Card key={title}>
+                <CardHeader>
+                  <CardTitle className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+                    <Icon className="h-5 w-5 text-primary" />
+                    {title}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className={'font-bold text-3xl'}>{value}</div>
+                  <p className="text-muted-foreground">{description}</p>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         </div>
       </section>

@@ -1,4 +1,3 @@
-'use server';
 
 const UUID_REGEX = /\/api\/[^/]*\/[a-f0-9-]{36}/gi;
 const NUMERIC_ID_REGEX = /\/api\/[^/]*\/\d+/gi;

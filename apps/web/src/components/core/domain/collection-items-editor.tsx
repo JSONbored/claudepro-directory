@@ -13,7 +13,7 @@ import {
   addItemToCollection,
   removeItemFromCollection,
   reorderCollectionItems,
-} from '@heyclaude/web-runtime';
+} from '@heyclaude/web-runtime/actions';
 import { isValidCategory, logClientWarning, sanitizeSlug } from '@heyclaude/web-runtime/core';
 import { ArrowDown, ArrowUp, ExternalLink, Plus, Trash } from '@heyclaude/web-runtime/icons';
 import { toasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';

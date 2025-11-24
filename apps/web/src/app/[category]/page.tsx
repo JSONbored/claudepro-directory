@@ -44,51 +44,22 @@ import {
   generatePageMetadata,
   getCategoryConfig,
   getContentByCategory,
-} from '@heyclaude/web-runtime/data';
+} from '@heyclaude/web-runtime/server';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { ContentListServer } from '@/src/components/content/content-grid-list';
 
-// ISR: Revalidate every 4 hours (14400s) to pick up new content without requiring a full rebuild
-export const revalidate = 14400;
-
 /**
- * Generate static params for all valid categories
+ * Dynamic Rendering Required
  *
- * @description
- * Called at build time to generate static pages for all 6 categories.
- * Returns array of category slugs that Next.js uses to pre-render pages.
+ * This page must use dynamic rendering because it imports from @heyclaude/web-runtime
+ * which transitively imports feature-flags/flags.ts. The Vercel Flags SDK's flags/next
+ * module contains module-level code that calls server functions, which cannot be
+ * executed during static site generation.
  *
- * @returns {Promise<Array<{category: string}>>} Array of category params for static generation
- *
- * @example
- * // Returns:
- * // [
- * //   { category: 'agents' },
- * //   { category: 'mcp' },
- * //   { category: 'commands' },
- * //   { category: 'rules' },
- * //   { category: 'hooks' },
- * //   { category: 'statuslines' }
- * // ]
+ * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic
  */
-export async function generateStaticParams() {
-  try {
-    const { VALID_CATEGORIES } = await import('@heyclaude/web-runtime');
-
-    return VALID_CATEGORIES.map((category) => ({
-      category,
-    }));
-  } catch (error) {
-    const normalized = normalizeError(error, 'generateStaticParams error in [category]');
-    logger.error('generateStaticParams error in [category]', normalized, {
-      phase: 'build-time',
-      route: '[category]/page.tsx',
-    });
-    // Return empty array (prevents build failure, skips category pages)
-    return [];
-  }
-}
+export const dynamic = 'force-dynamic';
 
 /**
  * Generate metadata for category list pages
@@ -114,9 +85,9 @@ export async function generateStaticParams() {
 export async function generateMetadata({
   params,
 }: {
-  params: { category: string };
+  params: Promise<{ category: string }>;
 }): Promise<Metadata> {
-  const { category } = params;
+  const { category } = await params;
 
   // Validate category and load config
   if (!isValidCategory(category)) {

@@ -7,8 +7,9 @@
 
 import { Constants, type Database } from '@heyclaude/database-types';
 import { optionalAuthAction, rateLimitedAction } from './safe-action.ts';
-import { getPaginatedContent as getPaginatedContentData } from '../data/content/paginated.ts';
-import { getReviewsWithStatsData } from '../data/content/reviews.ts';
+// Lazy loaded to avoid server-only side effects
+// import { getPaginatedContent as getPaginatedContentData } from '../data/content/paginated.ts';
+// import { getReviewsWithStatsData } from '../data/content/reviews.ts';
 import { z } from 'zod';
 import type { DisplayableContent } from '../types/component.types.ts';
 
@@ -42,6 +43,8 @@ export const getReviewsWithStats = optionalAuthAction
   .inputSchema(getReviewsSchema)
   .action(async ({ parsedInput, ctx }) => {
     const { content_type, content_slug, sort_by, limit, offset } = parsedInput;
+
+    const { getReviewsWithStatsData } = await import('../data/content/reviews.ts');
 
     const data = await getReviewsWithStatsData({
       contentType: content_type,
@@ -84,6 +87,8 @@ export const fetchPaginatedContent = rateLimitedAction
   .metadata({ actionName: 'content.fetchPaginatedContent', category: 'content' })
   .action(async ({ parsedInput }) => {
     try {
+      const { getPaginatedContent: getPaginatedContentData } = await import('../data/content/paginated.ts');
+
       const data = await getPaginatedContentData({
         category: parsedInput.category,
         limit: parsedInput.limit,

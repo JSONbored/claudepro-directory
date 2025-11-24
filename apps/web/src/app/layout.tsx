@@ -7,12 +7,11 @@ import './view-transitions.css';
 import './micro-interactions.css';
 import './sugar-high.css';
 import { logger, normalizeError } from '@heyclaude/web-runtime/core';
-import { getLayoutData } from '@heyclaude/web-runtime/data';
 import { unstable_cache } from 'next/cache';
-import dynamic from 'next/dynamic';
+import dynamicImport from 'next/dynamic';
 import { Toaster } from 'sonner';
 
-const NotificationToastHandler = dynamic(
+const NotificationToastHandler = dynamicImport(
   () =>
     import('@/src/components/features/notifications/notification-toast-handler').then((mod) => ({
       default: mod.NotificationToastHandler,
@@ -23,8 +22,8 @@ const NotificationToastHandler = dynamic(
 );
 
 import type { Database } from '@heyclaude/database-types';
-import { generatePageMetadata } from '@heyclaude/web-runtime/data';
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
+import { generatePageMetadata, getLayoutData } from '@heyclaude/web-runtime/server';
 import { ErrorBoundary } from '@/src/components/core/infra/error-boundary';
 import { PostCopyEmailProvider } from '@/src/components/core/infra/providers/email-capture-modal-provider';
 import { Pulse } from '@/src/components/core/infra/pulse';
@@ -177,6 +176,18 @@ const DEFAULT_LAYOUT_FLAGS = {
   fabNotificationsEnabled: false,
 } as const;
 
+/**
+ * Dynamic Rendering Required
+ *
+ * This page must use dynamic rendering because it imports from @heyclaude/web-runtime
+ * which transitively imports feature-flags/flags.ts. The Vercel Flags SDK's flags/next
+ * module contains module-level code that calls server functions, which cannot be
+ * executed during static site generation.
+ *
+ * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic
+ */
+export const dynamic = 'force-dynamic';
+
 export default async function RootLayout({
   children,
 }: Readonly<{
@@ -272,6 +283,7 @@ export default async function RootLayout({
                     showSearch: layoutFlags.fabSearchAction,
                     showScrollToTop: layoutFlags.fabScrollToTop,
                     showNotifications: layoutFlags.fabNotificationsEnabled,
+                    showPinboard: true,
                   }}
                   footerDelayVariant={layoutFlags.footerDelayVariant}
                   ctaVariant={layoutFlags.ctaVariant}

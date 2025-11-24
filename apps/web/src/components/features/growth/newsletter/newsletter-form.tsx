@@ -23,8 +23,8 @@ export function NewsletterForm({ source, className }: NewsletterFormProps) {
     source,
     onSuccess: async () => {
       // Confetti gated by feature flag
-      const confettiResult = await checkConfettiEnabled({});
-      if (confettiResult?.data) {
+      const confettiResult = await checkConfettiEnabled();
+      if (confettiResult) {
         fireConfetti('subtle');
       }
     },

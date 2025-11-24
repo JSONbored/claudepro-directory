@@ -1,48 +1,11 @@
-'use server';
 
 import type { Database } from '@heyclaude/database-types';
-import { Constants } from '@heyclaude/database-types';
-import { z } from 'zod';
-import { logger } from '../logger.ts';
-import { normalizeError } from '../errors.ts';
 import { fetchCached } from '../cache/fetch-cached.ts';
 import { ChangelogService } from '@heyclaude/data-layer';
+import './changelog.shared.ts';
 
-const changeItemSchema = z.object({
-  content: z.string(),
-});
-
-const changesSchema = z
-  .object({
-    Added: z.array(changeItemSchema).optional(),
-    Changed: z.array(changeItemSchema).optional(),
-    Fixed: z.array(changeItemSchema).optional(),
-    Removed: z.array(changeItemSchema).optional(),
-    Deprecated: z.array(changeItemSchema).optional(),
-    Security: z.array(changeItemSchema).optional(),
-  })
-  .refine(
-    (data) => {
-      const validCategories = Constants.public.Enums.changelog_category;
-      const dataKeys = Object.keys(data);
-      return dataKeys.every((key) =>
-        validCategories.includes(key as Database['public']['Enums']['changelog_category'])
-      );
-    },
-    { message: 'Invalid changelog category in changes object' }
-  );
-
-export type ChangelogChanges = z.infer<typeof changesSchema>;
-
-export function parseChangelogChanges(changes: unknown): ChangelogChanges {
-  try {
-    return changesSchema.parse(changes);
-  } catch (error) {
-    const normalized = normalizeError(error, 'Failed to parse changelog changes');
-    logger.error('Failed to parse changelog changes', normalized);
-    return {};
-  }
-}
+// Export shared utils
+export * from './changelog.shared.ts';
 
 const CHANGELOG_TAG = 'changelog';
 const CHANGELOG_TTL_KEY = 'cache.changelog.ttl_seconds';
@@ -80,7 +43,7 @@ export async function getChangelogOverview(
 ): Promise<Database['public']['Functions']['get_changelog_overview']['Returns']> {
   const { category, publishedOnly = true, featuredOnly = false, limit = 50, offset = 0 } = options;
 
-  return fetchCached(
+  const result = await fetchCached(
     (client) => new ChangelogService(client).getChangelogOverview({
         ...(category ? { p_category: category } : {}),
         p_published_only: publishedOnly,
@@ -102,6 +65,8 @@ export async function getChangelogOverview(
       },
     }
   );
+  
+  return result ?? createEmptyOverview(limit, offset);
 }
 
 export async function getChangelogEntryBySlug(

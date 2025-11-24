@@ -5,9 +5,13 @@
  */
 
 import type { Database } from '@heyclaude/database-types';
-import { createCompany, updateCompany, uploadCompanyLogoAction } from '@heyclaude/web-runtime';
+import { getFormConfig } from '@heyclaude/web-runtime';
+import {
+  createCompany,
+  updateCompany,
+  uploadCompanyLogoAction,
+} from '@heyclaude/web-runtime/actions';
 import { logClientWarning, logger } from '@heyclaude/web-runtime/core';
-import { getFormConfig } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { FileText, X } from '@heyclaude/web-runtime/icons';
 import { toasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';

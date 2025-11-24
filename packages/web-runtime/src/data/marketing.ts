@@ -1,6 +1,7 @@
 'use server';
 
-import { getPricingConfig } from '../actions/feature-flags.ts';
+// Lazy import feature flags to avoid module-level server-only code execution
+// import { getPricingConfig } from '../actions/feature-flags.ts';
 
 export interface PartnerPricing {
   jobs: {
@@ -20,6 +21,9 @@ export interface PartnerPricing {
 }
 
 export async function getPartnerPricing(): Promise<PartnerPricing> {
+  // Lazy import feature flags to avoid module-level server-only code execution
+  const { getPricingConfig } = await import('../actions/feature-flags.ts');
+  
   const result = await getPricingConfig({});
   if (!result?.data) {
     throw new Error('Failed to load pricing config');

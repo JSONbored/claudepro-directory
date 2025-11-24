@@ -1,7 +1,19 @@
 // Feature flags are server/middleware only - this test page should use server actions
 
+import { checkTestFlag } from '@heyclaude/web-runtime/actions';
 import { logger, normalizeError } from '@heyclaude/web-runtime/core';
-import { checkTestFlag } from '@heyclaude/web-runtime/data';
+
+/**
+ * Dynamic Rendering Required
+ *
+ * This page must use dynamic rendering because it imports from @heyclaude/web-runtime
+ * which transitively imports feature-flags/flags.ts. The Vercel Flags SDK's flags/next
+ * module contains module-level code that calls server functions, which cannot be
+ * executed during static site generation.
+ *
+ * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic
+ */
+export const dynamic = 'force-dynamic';
 
 /**
  * Feature Flag Test Page

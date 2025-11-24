@@ -10,7 +10,7 @@ import { logger } from '@heyclaude/web-runtime/core';
 import {
   getActiveAnnouncement as fetchActiveAnnouncement,
   getCacheTtl,
-} from '@heyclaude/web-runtime/data';
+} from '@heyclaude/web-runtime/server';
 import { unstable_cache } from 'next/cache';
 import { cache } from 'react';
 

@@ -67,10 +67,10 @@ const DialogContent = ({
   });
 
   useEffect(() => {
-    getAnimationConfig({})
+    getAnimationConfig()
       .then((result) => {
-        if (!result?.data) return;
-        const config = result.data;
+        if (!result) return;
+        const config = result;
         setSpringSmooth({
           type: 'spring' as const,
           stiffness: config['animation.spring.smooth.stiffness'],

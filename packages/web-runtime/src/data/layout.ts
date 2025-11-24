@@ -2,7 +2,8 @@
 
 import type { Database } from '@heyclaude/database-types';
 import { cache } from 'react';
-import { logger, normalizeError, getActiveAnnouncement } from '../index.ts';
+import { logger, normalizeError } from '../index.ts';
+import { getActiveAnnouncement } from './announcements.ts';
 import { fetchCached } from '../cache/fetch-cached.ts';
 import { MiscService } from '@heyclaude/data-layer';
 

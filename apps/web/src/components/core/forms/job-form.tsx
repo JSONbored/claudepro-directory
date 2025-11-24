@@ -7,8 +7,9 @@
 
 import type { Database } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
-import type { CreateJobInput, PaymentPlanCatalogEntry } from '@heyclaude/web-runtime';
+import type { CreateJobInput } from '@heyclaude/web-runtime';
 import { logClientWarning } from '@heyclaude/web-runtime/core';
+import type { PaymentPlanCatalogEntry } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { Star } from '@heyclaude/web-runtime/icons';
 import { toasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';

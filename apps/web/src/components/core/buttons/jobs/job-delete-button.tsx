@@ -5,7 +5,7 @@
  * Uses deleteJob server action (calls delete_job RPC)
  */
 
-import { deleteJob } from '@heyclaude/web-runtime';
+import { deleteJob } from '@heyclaude/web-runtime/actions';
 import { logClientWarning } from '@heyclaude/web-runtime/core';
 import { Trash } from '@heyclaude/web-runtime/icons';
 import type { ButtonStyleProps } from '@heyclaude/web-runtime/types/component.types';

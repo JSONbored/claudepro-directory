@@ -10,10 +10,10 @@ import { useCallback, useState } from 'react';
 let DEFAULT_SUCCESS_DURATION = 2000;
 
 // Load config from Statsig on module initialization
-getTimeoutConfig({})
+getTimeoutConfig()
   .then((result) => {
-    if (result?.data) {
-      DEFAULT_SUCCESS_DURATION = result.data['timeout.ui.button_success_duration_ms'];
+    if (result) {
+      DEFAULT_SUCCESS_DURATION = result['timeout.ui.button_success_duration_ms'];
     }
   })
   .catch((error) => {

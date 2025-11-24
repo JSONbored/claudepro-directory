@@ -298,16 +298,27 @@ interface ProcessResponse {
  * - 'highlight': highlightCode only (for backward compatibility)
  */
 
+// Shared highlight logic
+function performHighlight(
+  code: string,
+  language: string | undefined,
+  showLineNumbers: boolean
+): { html: string; language: string } {
+  if (!code || code.trim() === '') {
+    return {
+      html: '<pre class="sugar-high-empty"><code>No code provided</code></pre>',
+      language: language || 'text',
+    };
+  }
+  const highlightLanguage = language || 'javascript';
+  const html = highlightCode(code, highlightLanguage, { showLineNumbers });
+  return { html, language: highlightLanguage };
+}
+
 export async function handleContentHighlight(
   req: Request,
   logContext: BaseLogContext
 ): Promise<Response> {
-  // Reuse logic for 'highlight' operation from handleContentProcess
-  // But since this handler is called directly for a specific route, we need to extract params
-  // The unified router sends the request here.
-  // We can just delegate to handleContentProcess with operation='highlight' if the body format matches,
-  // or implement a minimal version here.
-
   // Minimal implementation to avoid complex body parsing differences if any
   if (req.method === 'OPTIONS') {
     return new Response(null, { status: 204, headers: { ...buildSecurityHeaders(), ...CORS } });
@@ -336,27 +347,19 @@ export async function handleContentHighlight(
       return badRequestResponse('Invalid code parameter', CORS);
     }
 
-    if (code.trim() === '') {
-      return jsonResponse(
-        {
-          html: '<pre class="sugar-high-empty"><code>No code provided</code></pre>',
-        },
-        200,
-        { ...buildSecurityHeaders(), ...CORS, ...buildCacheHeaders('transform') }
-      );
-    }
+    const result = performHighlight(code, language, showLineNumbers);
 
-    const highlightLanguage = language || 'javascript';
-    const html = highlightCode(code, highlightLanguage, { showLineNumbers });
-
-    return jsonResponse({ html, language: highlightLanguage }, 200, {
+    return jsonResponse(result, 200, {
       ...buildSecurityHeaders(),
       ...CORS,
       ...buildCacheHeaders('transform'),
     });
   } catch (error) {
     logError('Content highlight failed', logContext, error);
-    return jsonResponse({ error: errorToString(error) }, 500, CORS);
+    return jsonResponse({ error: errorToString(error) }, 500, {
+      ...buildSecurityHeaders(),
+      ...CORS,
+    });
   }
 }
 
@@ -553,15 +556,8 @@ export async function handleContentProcess(
       }
 
       // Highlight only (for backward compatibility)
-      const highlightLanguage = language || 'javascript';
-      const highlightedHtml = highlightCode(codeString, highlightLanguage, {
-        showLineNumbers,
-      });
-
-      result = {
-        html: highlightedHtml,
-        language: highlightLanguage,
-      };
+      // Use shared helper
+      result = performHighlight(codeString, language, showLineNumbers);
     }
 
     return jsonResponse(result, 200, {
@@ -578,7 +574,10 @@ export async function handleContentProcess(
         error: errorToString(error),
       } satisfies ProcessResponse,
       500,
-      CORS
+      {
+        ...buildSecurityHeaders(),
+        ...CORS,
+      }
     );
   }
 }

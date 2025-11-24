@@ -3,7 +3,6 @@
  */
 
 import { logger, normalizeError } from '@heyclaude/web-runtime/core';
-import { generatePageMetadata, getJobBySlug } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import {
   ArrowLeft,
@@ -15,6 +14,7 @@ import {
   MapPin,
   Users,
 } from '@heyclaude/web-runtime/icons';
+import { generatePageMetadata, getJobBySlug } from '@heyclaude/web-runtime/server';
 import type { PageProps } from '@heyclaude/web-runtime/types/app.schema';
 import { slugParamsSchema } from '@heyclaude/web-runtime/types/app.schema';
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
@@ -129,7 +129,7 @@ export async function generateMetadata({
 }
 
 export async function generateStaticParams() {
-  const { getFilteredJobs } = await import('@heyclaude/web-runtime');
+  const { getFilteredJobs } = await import('@heyclaude/web-runtime/server');
   try {
     const jobsResult = await getFilteredJobs({});
     const jobs = jobsResult?.jobs ?? [];

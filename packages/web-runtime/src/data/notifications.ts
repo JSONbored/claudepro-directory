@@ -1,7 +1,8 @@
 'use server';
 
 import { revalidateTag } from 'next/cache';
-import { getCacheInvalidateTags, logger, normalizeError } from '../index.ts';
+import { getCacheInvalidateTags } from '../cache-config.ts';
+import { logger, normalizeError } from '../index.ts';
 import type { Database } from '@heyclaude/database-types';
 import { fetchCached } from '../cache/fetch-cached.ts';
 import { MiscService } from '@heyclaude/data-layer';

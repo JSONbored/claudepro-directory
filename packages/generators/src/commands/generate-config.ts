@@ -1,8 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { createClient } from '@supabase/supabase-js';
-import { ensureEnvVars } from '../toolkit/env.js';
+import { createServiceRoleClient } from '../toolkit/supabase.js';
 
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(SCRIPT_DIR, '../../../..');
@@ -15,16 +14,10 @@ async function generateConfig() {
   console.log('🏗️ Fetching build-time configuration from Supabase...');
 
   try {
-    await ensureEnvVars(['NEXT_PUBLIC_SUPABASE_URL', 'NEXT_PUBLIC_SUPABASE_ANON_KEY']);
-
-    const SUPABASE_URL = process.env['NEXT_PUBLIC_SUPABASE_URL'];
-    const SUPABASE_ANON_KEY = process.env['NEXT_PUBLIC_SUPABASE_ANON_KEY'];
-
-    if (!(SUPABASE_URL && SUPABASE_ANON_KEY)) {
-      throw new Error('Missing required environment variables');
-    }
-
-    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    // Use the shared service role client which handles fallbacks and standard env vars
+    // like other generator scripts (e.g. generate-category-config.ts).
+    // This uses SUPABASE_SERVICE_ROLE_KEY and falls back to DEFAULT_SUPABASE_URL if needed.
+    const supabase = createServiceRoleClient();
 
     const { data, error } = await supabase.rpc('get_all_app_settings');
 

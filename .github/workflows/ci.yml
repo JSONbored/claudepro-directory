@@ -32,6 +32,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
+      - name: Build
+        run: pnpm build
+
       - name: Lint
         run: pnpm lint
 
@@ -41,4 +44,4 @@ jobs:
       - name: Test
         # Only run tests if they exist to avoid failure on "no tests found"
         # We can make this strict once tests are added
-        run: pnpm test || true
+        run: pnpm test

@@ -9,14 +9,15 @@ import { createSupabaseAdminClient } from '../supabase/admin.ts';
 import { logActionFailure } from '../errors.ts';
 import { authedAction, rateLimitedAction } from './safe-action.ts';
 import {
+  uploadImageToStorage,
   deleteImageFromStorage,
+} from '../storage/image-storage.ts';
+import {
+  validateImageBuffer,
   extractPathFromUrl,
   IMAGE_CONFIG,
-  uploadImageToStorage,
-  validateImageBuffer,
-} from '../storage/image-storage.ts';
+} from '../storage/image-utils.ts';
 import { getCompanyAdminProfile, searchCompanies } from '../data/companies.ts';
-import { getTimeoutConfigValue } from './feature-flags.ts';
 import { z } from 'zod';
 
 // UUID validation helper
@@ -58,6 +59,9 @@ export const searchCompaniesAction = authedAction
     try {
       const limit = parsedInput.limit ?? 10;
       const companies = await searchCompanies(parsedInput.query, limit);
+      
+      // Lazy import feature flags to avoid module-level server-only code execution
+      const { getTimeoutConfigValue } = await import('./feature-flags.ts');
       const debounceResult = await getTimeoutConfigValue({ key: 'timeout.ui.form_debounce_ms' });
       const debounceMs = debounceResult?.data ?? 300;
 

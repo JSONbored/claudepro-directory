@@ -22,7 +22,7 @@
  */
 
 import type { Database } from '@heyclaude/database-types';
-import { submitContentForReview } from '@heyclaude/web-runtime';
+import { submitContentForReview } from '@heyclaude/web-runtime/actions';
 import { logger, normalizeError } from '@heyclaude/web-runtime/core';
 import { type DraftFormData, DraftManager } from '@heyclaude/web-runtime/data/drafts/draft-manager';
 import { useAuthenticatedUser } from '@heyclaude/web-runtime/hooks/use-authenticated-user';

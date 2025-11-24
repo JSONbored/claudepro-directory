@@ -1,5 +1,3 @@
-'use server';
-
 import type { Database } from '@heyclaude/database-types';
 import { cache } from 'react';
 import {
@@ -13,7 +11,7 @@ import { ContentService, TrendingService, type ContentFilterOptions } from '@hey
 export async function getContentByCategory(
   category: Database['public']['Enums']['content_category']
 ): Promise<Database['public']['Functions']['get_enriched_content_list']['Returns']> {
-  return fetchCached(
+  const result = await fetchCached(
     (client) => new ContentService(client).getEnrichedContentList({
       p_category: category,
       p_limit: 1000,
@@ -27,6 +25,7 @@ export async function getContentByCategory(
       logMeta: { category },
     }
   );
+  return result ?? [];
 }
 
 export const getContentBySlug = cache(
@@ -83,7 +82,7 @@ export const getAllContent = cache(
             p_limit: filters?.limit ?? 1000,
             p_offset: 0
          });
-         return (result.items ?? []) as Database['public']['CompositeTypes']['enriched_content_item'][];
+         return (result?.items ?? []) as Database['public']['CompositeTypes']['enriched_content_item'][];
       },
       {
         key: JSON.stringify(filters ?? {}),
@@ -107,7 +106,7 @@ export const getContentCount = cache(
           p_order_by: 'created_at',
           p_order_direction: 'desc'
         });
-        return result.pagination?.total_count ?? 0;
+        return result?.pagination?.total_count ?? 0;
       },
       {
         key: generateContentCacheKey(category),

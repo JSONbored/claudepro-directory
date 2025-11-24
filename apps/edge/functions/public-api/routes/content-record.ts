@@ -172,14 +172,36 @@ async function handleMarkdownFormat(
     content_id: contentId,
   };
 
+  // Sanitize header values to prevent injection
+  const sanitizeHeaderValue = (val: string): string => {
+    // Remove CR/LF and other control characters
+    return val.replace(/[\r\n\t\b\f\v]/g, '').trim();
+  };
+
+  const sanitizeFilename = (name: string): string => {
+    // Remove CR/LF, replace disallowed chars, ensure non-empty
+    let cleaned = name
+      .replace(/[\r\n\t\b\f\v]/g, '')
+      .replace(/["\\]/g, '') // Remove quotes and backslashes
+      .trim();
+
+    if (!cleaned) {
+      cleaned = 'export.md';
+    }
+    return cleaned;
+  };
+
+  const safeFilename = sanitizeFilename(result.filename);
+  const safeContentId = sanitizeHeaderValue(result.content_id);
+
   // TypeScript narrows to success case - all fields are properly typed
   return new Response(result.markdown, {
     status: 200,
     headers: {
       'Content-Type': 'text/markdown; charset=utf-8',
-      'Content-Disposition': `inline; filename="${result.filename}"`,
+      'Content-Disposition': `inline; filename="${safeFilename}"`,
       'X-Generated-By': 'supabase.rpc.generate_markdown_export',
-      'X-Content-ID': result.content_id,
+      'X-Content-ID': safeContentId,
       ...buildSecurityHeaders(),
       ...CORS_MARKDOWN,
       ...buildCacheHeaders('content_export'),
