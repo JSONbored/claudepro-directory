@@ -22,6 +22,7 @@ const NotificationToastHandler = dynamicImport(
 );
 
 import type { Database } from '@heyclaude/database-types';
+import { getComponentConfig } from '@heyclaude/web-runtime/actions';
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
 import { FeatureFlagsProvider } from '@heyclaude/web-runtime/feature-flags/provider';
 import { generatePageMetadata, getLayoutData } from '@heyclaude/web-runtime/server';
@@ -31,7 +32,11 @@ import { Pulse } from '@/src/components/core/infra/pulse';
 import { PulseCannon } from '@/src/components/core/infra/pulse-cannon';
 import { StructuredData } from '@/src/components/core/infra/structured-data';
 import { LayoutContent } from '@/src/components/core/layout/root-layout-wrapper';
-import { ComponentConfigProvider } from '@/src/components/providers/component-config-provider';
+import { ComponentConfigContextProvider } from '@/src/components/providers/component-config-context';
+import {
+  DEFAULT_COMPONENT_CARD_CONFIG,
+  mapComponentCardConfig,
+} from '@/src/components/providers/component-config-shared';
 import { NotificationsProvider } from '@/src/components/providers/notifications-provider';
 
 // CRITICAL: Lazy-load getLayoutFlags to prevent flags.ts from being analyzed during build
@@ -183,6 +188,20 @@ export default async function RootLayout({
     });
   }
 
+  let componentCardConfig = DEFAULT_COMPONENT_CARD_CONFIG;
+  try {
+    const componentConfigResult = await getComponentConfig({});
+    componentCardConfig = mapComponentCardConfig(componentConfigResult?.data ?? null);
+    if (componentConfigResult?.serverError) {
+      logger.warn('RootLayout: component config server error', {
+        error: componentConfigResult.serverError,
+      });
+    }
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to load component config');
+    logger.error('RootLayout: component config fallback to defaults', normalized);
+  }
+
   return (
     <html
       lang="en"
@@ -221,16 +240,16 @@ export default async function RootLayout({
         <Suspense fallback={null}>
           <StructuredData route="/" />
         </Suspense>
-        <ThemeProvider
-          attribute="data-theme"
-          defaultTheme="dark"
-          enableSystem={true}
-          storageKey="claudepro-theme"
-          disableTransitionOnChange={false}
-          enableColorScheme={false}
-        >
-          <FeatureFlagsProvider initialFlags={null}>
-            <ComponentConfigProvider>
+        <ComponentConfigContextProvider value={componentCardConfig}>
+          <ThemeProvider
+            attribute="data-theme"
+            defaultTheme="dark"
+            enableSystem={true}
+            storageKey="claudepro-theme"
+            disableTransitionOnChange={false}
+            enableColorScheme={false}
+          >
+            <FeatureFlagsProvider initialFlags={null}>
               <PostCopyEmailProvider>
                 <NotificationsProvider>
                   <ErrorBoundary>
@@ -246,9 +265,9 @@ export default async function RootLayout({
                   {/* Newsletter capture is conditionally rendered in LayoutContent for non-auth pages */}
                 </NotificationsProvider>
               </PostCopyEmailProvider>
-            </ComponentConfigProvider>
-          </FeatureFlagsProvider>
-        </ThemeProvider>
+            </FeatureFlagsProvider>
+          </ThemeProvider>
+        </ComponentConfigContextProvider>
         {/* Pulse Cannon - Unified pulse loading system (loads after page idle) */}
         {/* Zero initial bundle impact - all pulse services lazy-loaded */}
         <PulseCannon />

@@ -15,6 +15,26 @@ export interface SeoMetadataResult {
 }
 
 /**
+ * Valid values for the include parameter in generate_metadata_complete RPC
+ */
+export type SeoIncludeOption = 'metadata' | 'metadata,schemas';
+
+const VALID_INCLUDE_VALUES: readonly SeoIncludeOption[] = ['metadata', 'metadata,schemas'] as const;
+
+/**
+ * Validates and normalizes the include parameter
+ * @param include - The include value to validate
+ * @returns A valid include value, defaulting to 'metadata' if invalid
+ */
+function validateInclude(include: string): SeoIncludeOption {
+  if (VALID_INCLUDE_VALUES.includes(include as SeoIncludeOption)) {
+    return include as SeoIncludeOption;
+  }
+  // Default to 'metadata' for invalid values
+  return 'metadata';
+}
+
+/**
  * Get SEO metadata for a route by calling the database RPC directly
  * This avoids HTTP loopback calls and reduces latency
  *
@@ -26,17 +46,20 @@ export interface SeoMetadataResult {
 export async function getSeoMetadata(
   route: string,
   supabase: SupabaseClient<Database>,
-  include = 'metadata'
+  include: SeoIncludeOption = 'metadata'
 ): Promise<SeoMetadataResult | null> {
   // Sanitize route parameter
   const sanitizedRoute = sanitizeRoute(route);
+
+  // Validate include parameter to ensure only valid values are sent to RPC
+  const validatedInclude = validateInclude(include);
 
   const service = new SeoService(supabase);
 
   try {
     const data = await service.generateMetadata({
       p_route: sanitizedRoute,
-      p_include: include,
+      p_include: validatedInclude,
     });
 
     if (!data) {

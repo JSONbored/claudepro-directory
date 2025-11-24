@@ -1,22 +1,8 @@
 'use client';
 
 import { createContext, type ReactNode, useContext } from 'react';
-
-export type ComponentCardConfig = {
-  showCopyButton: boolean;
-  showBookmark: boolean;
-  showViewCount: boolean;
-  showCopyCount: boolean;
-  showRating: boolean;
-};
-
-export const DEFAULT_COMPONENT_CARD_CONFIG: ComponentCardConfig = {
-  showCopyButton: true,
-  showBookmark: true,
-  showViewCount: true,
-  showCopyCount: true,
-  showRating: true,
-};
+import type { ComponentCardConfig } from './component-config-shared';
+import { DEFAULT_COMPONENT_CARD_CONFIG } from './component-config-shared';
 
 const ComponentConfigContext = createContext<ComponentCardConfig>(DEFAULT_COMPONENT_CARD_CONFIG);
 
