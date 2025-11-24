@@ -8,48 +8,14 @@
 import type { Database } from '@heyclaude/database-types';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
-export interface ContentFilterOptions {
-  categories?: Database['public']['Enums']['content_category'][] | undefined;
-  tags?: string[] | undefined;
-  search?: string;
-  author?: string;
-  orderBy?: 'slug' | 'created_at' | 'updated_at' | 'title';
-  orderDirection?: 'asc' | 'desc';
-  limit?: number;
-  offset?: number;
-}
-
-export interface ReviewsFilterOptions {
-  contentType: Database['public']['Enums']['content_category'];
-  contentSlug: string;
-  sortBy?: string;
-  limit?: number;
-  offset?: number;
-  userId?: string;
-}
-
-export interface RelatedContentOptions {
-  category: Database['public']['Enums']['content_category'];
-  slug: string;
-  tags?: string[] | undefined;
-  limit?: number;
-  excludeSlugs?: string[];
-}
-
-export interface SimilarContentOptions {
-  contentType: Database['public']['Enums']['content_category'];
-  contentSlug: string;
-  limit?: number;
-}
-
 export class ContentService {
   constructor(private supabase: SupabaseClient<Database>) {}
 
   /**
    * Calls the database RPC: generate_readme_data
    */
-  async getSitewideReadme() {
-    const { data, error } = await this.supabase.rpc('generate_readme_data');
+  async getSitewideReadme(args: Database['public']['Functions']['generate_readme_data']['Args']) {
+    const { data, error } = await this.supabase.rpc('generate_readme_data', args);
     if (error) throw error;
     return data as Database['public']['Functions']['generate_readme_data']['Returns'];
   }
@@ -57,8 +23,8 @@ export class ContentService {
   /**
    * Calls the database RPC: generate_sitewide_llms_txt
    */
-  async getSitewideLlmsTxt() {
-    const { data, error } = await this.supabase.rpc('generate_sitewide_llms_txt');
+  async getSitewideLlmsTxt(args: Database['public']['Functions']['generate_sitewide_llms_txt']['Args']) {
+    const { data, error } = await this.supabase.rpc('generate_sitewide_llms_txt', args);
     if (error) throw error;
     return data as Database['public']['Functions']['generate_sitewide_llms_txt']['Returns'];
   }
@@ -66,8 +32,8 @@ export class ContentService {
   /**
    * Calls the database RPC: generate_changelog_llms_txt
    */
-  async getChangelogLlmsTxt() {
-    const { data, error } = await this.supabase.rpc('generate_changelog_llms_txt');
+  async getChangelogLlmsTxt(args: Database['public']['Functions']['generate_changelog_llms_txt']['Args']) {
+    const { data, error } = await this.supabase.rpc('generate_changelog_llms_txt', args);
     if (error) throw error;
     return data as Database['public']['Functions']['generate_changelog_llms_txt']['Returns'];
   }
@@ -102,8 +68,8 @@ export class ContentService {
   /**
    * Calls the database RPC: get_category_configs_with_features
    */
-  async getCategoryConfigs() {
-    const { data, error } = await this.supabase.rpc('get_category_configs_with_features');
+  async getCategoryConfigs(args: Database['public']['Functions']['get_category_configs_with_features']['Args']) {
+    const { data, error } = await this.supabase.rpc('get_category_configs_with_features', args);
     if (error) throw error;
     return data as Database['public']['Functions']['get_category_configs_with_features']['Returns'];
   }
@@ -124,6 +90,24 @@ export class ContentService {
     const { data, error } = await this.supabase.rpc('get_content_detail_complete', args);
     if (error) throw error;
     return data as Database['public']['Functions']['get_content_detail_complete']['Returns'];
+  }
+
+  /**
+   * Calls the database RPC: get_content_detail_core
+   */
+  async getContentDetailCore(args: Database['public']['Functions']['get_content_detail_core']['Args']) {
+    const { data, error } = await this.supabase.rpc('get_content_detail_core', args);
+    if (error) throw error;
+    return data as Database['public']['Functions']['get_content_detail_core']['Returns'];
+  }
+
+  /**
+   * Calls the database RPC: get_content_analytics
+   */
+  async getContentAnalytics(args: Database['public']['Functions']['get_content_analytics']['Args']) {
+    const { data, error } = await this.supabase.rpc('get_content_analytics', args);
+    if (error) throw error;
+    return data as Database['public']['Functions']['get_content_analytics']['Returns'];
   }
 
   /**
@@ -151,6 +135,15 @@ export class ContentService {
     const { data, error } = await this.supabase.rpc('get_homepage_complete', args);
     if (error) throw error;
     return data as Database['public']['Functions']['get_homepage_complete']['Returns'];
+  }
+
+  /**
+   * Calls the database RPC: get_homepage_optimized
+   */
+  async getHomepageOptimized(args: Database['public']['Functions']['get_homepage_optimized']['Args']) {
+    const { data, error } = await this.supabase.rpc('get_homepage_optimized', args);
+    if (error) throw error;
+    return data as Database['public']['Functions']['get_homepage_optimized']['Returns'];
   }
 
   /**
@@ -196,32 +189,5 @@ export class ContentService {
     const { data, error } = await this.supabase.rpc('get_content_paginated_slim', args);
     if (error) throw error;
     return data as Database['public']['Functions']['get_content_paginated_slim']['Returns'];
-  }
-
-  /**
-   * Calls the database RPC: get_content_detail_core
-   */
-  async getContentDetailCore(args: Database['public']['Functions']['get_content_detail_core']['Args']) {
-    const { data, error } = await this.supabase.rpc('get_content_detail_core', args);
-    if (error) throw error;
-    return data as Database['public']['Functions']['get_content_detail_core']['Returns'];
-  }
-
-  /**
-   * Calls the database RPC: get_content_analytics
-   */
-  async getContentAnalytics(args: Database['public']['Functions']['get_content_analytics']['Args']) {
-    const { data, error } = await this.supabase.rpc('get_content_analytics', args);
-    if (error) throw error;
-    return data as Database['public']['Functions']['get_content_analytics']['Returns'];
-  }
-
-  /**
-   * Calls the database RPC: get_homepage_optimized
-   */
-  async getHomepageOptimized(args: Database['public']['Functions']['get_homepage_optimized']['Args']) {
-    const { data, error } = await this.supabase.rpc('get_homepage_optimized', args);
-    if (error) throw error;
-    return data as Database['public']['Functions']['get_homepage_optimized']['Returns'];
   }
 }

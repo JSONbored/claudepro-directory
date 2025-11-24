@@ -50,18 +50,6 @@ export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/');
 }
 
-/**
- * Dynamic Rendering Required
- *
- * This page must use dynamic rendering because it imports from @heyclaude/web-runtime
- * which transitively imports feature-flags/flags.ts. The Vercel Flags SDK's flags/next
- * module contains module-level code that calls server functions, which cannot be
- * executed during static site generation.
- *
- * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic
- */
-export const dynamic = 'force-dynamic';
-
 interface HomePageProps {
   searchParams: Promise<{
     q?: string;
@@ -121,10 +109,8 @@ async function HomeContentSection({
 export default async function HomePage({ searchParams }: HomePageProps) {
   await searchParams;
 
-  // Dynamic configs are server/middleware only - use static defaults for static generation
-  // getHomepageFeaturedCategories() accesses flags.ts which triggers Edge Config during build
-  // Client components can fetch dynamic configs via server actions at runtime
-  const categoryIds = getHomepageCategoryIds; // Use static default for static generation
+  // Use static default for static generation
+  const categoryIds = getHomepageCategoryIds;
 
   // Extract member_count and top_contributors from consolidated response
   // Type-safe RPC return using centralized type definition

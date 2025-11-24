@@ -3,7 +3,9 @@ import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-process.env.BROWSERSLIST_CONFIG = resolve(__dirname, '../../config/tools/browserslist');
+if (!process.env.BROWSERSLIST_CONFIG) {
+  process.env.BROWSERSLIST_CONFIG = resolve(__dirname, '../../config/tools/browserslist');
+}
 
 let withBundleAnalyzer = (config) => config;
 if (process.env.ANALYZE === 'true') {
@@ -28,6 +30,12 @@ const nextConfig = {
   productionBrowserSourceMaps: false,
   reactCompiler: true,
   cacheComponents: false,
+  transpilePackages: [
+    '@heyclaude/web-runtime',
+    '@heyclaude/shared-runtime',
+    '@heyclaude/data-layer',
+    '@heyclaude/database-types',
+  ],
   // CRITICAL: Exclude flags/next from static analysis during build
   // flags/next uses Vercel Edge Config which triggers "Server Functions cannot be called" errors
   serverExternalPackages: ['flags', '@flags-sdk/statsig'],
@@ -168,6 +176,7 @@ const nextConfig = {
         'node:zlib': false,
         crypto: false,
         zlib: false,
+        'node:async_hooks': false,
         async_hooks: false,
       };
     }

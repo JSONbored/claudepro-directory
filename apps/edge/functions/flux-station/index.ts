@@ -1,5 +1,3 @@
-/// <reference path="@heyclaude/edge-runtime/deno-globals.d.ts" />
-
 /**
  * Flux Station - Unified notification and queue processing edge function
  * ... (comments preserved) ...
@@ -149,9 +147,16 @@ serveEdgeApp<FluxStationContext>({
       methods: ['POST', 'OPTIONS'],
       match: (ctx) => ctx.pathname === '/email/job-lifecycle',
       handler: chain<FluxStationContext>(rateLimit('email'))(async (ctx) => {
-        // Extract action from header or body if needed, but handleJobLifecycleEmail expects action param
-        // The original router passed 'action' from header. Let's fallback to header.
-        const action = ctx.request.headers.get('X-Email-Action') || 'unknown';
+        const action = (ctx.request.headers.get('X-Email-Action') || '').trim();
+
+        if (!action) {
+          return jsonResponse(
+            { error: 'Missing X-Email-Action header', code: 'email:missing_action' },
+            400,
+            publicCorsHeaders
+          );
+        }
+
         return handleJobLifecycleEmail(ctx.request, action);
       }),
     },

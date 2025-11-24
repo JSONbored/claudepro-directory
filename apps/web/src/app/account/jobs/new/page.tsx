@@ -12,7 +12,17 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function NewJobPage() {
-  const planCatalog = await getPaymentPlanCatalog();
+  let planCatalog: Awaited<ReturnType<typeof getPaymentPlanCatalog>> = [];
+  try {
+    planCatalog = await getPaymentPlanCatalog();
+  } catch (error) {
+    const normalized = normalizeError(error, 'NewJobPage: failed to fetch plan catalog');
+    logger.warn('NewJobPage: failed to fetch plan catalog, using fallback', {
+      error: normalized.message,
+      name: normalized.name,
+    });
+    // planCatalog remains [] - JobForm will use legacy fallback
+  }
 
   const handleSubmit = async (data: CreateJobInput) => {
     'use server';
@@ -91,9 +101,9 @@ export default async function NewJobPage() {
     logger.error('NewJobPage: createJob returned success=false', error, {
       title: data.title,
       company: data.company,
-      jobId: result.data.jobId,
-      companyId: result.data.companyId,
-      requiresPayment: result.data.requiresPayment,
+      jobId: result.data?.jobId ?? 'unknown',
+      companyId: result.data?.companyId ?? 'unknown',
+      requiresPayment: result.data?.requiresPayment ?? false,
     });
     return {
       success: false,

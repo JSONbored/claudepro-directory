@@ -23,6 +23,7 @@ const NotificationToastHandler = dynamicImport(
 
 import type { Database } from '@heyclaude/database-types';
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
+import { FeatureFlagsProvider } from '@heyclaude/web-runtime/feature-flags/provider';
 import { generatePageMetadata, getLayoutData } from '@heyclaude/web-runtime/server';
 import { ErrorBoundary } from '@/src/components/core/infra/error-boundary';
 import { PostCopyEmailProvider } from '@/src/components/core/infra/providers/email-capture-modal-provider';
@@ -159,54 +160,19 @@ const DEFAULT_LAYOUT_DATA: {
   },
 };
 
-const DEFAULT_LAYOUT_FLAGS = {
-  useFloatingActionBar: false,
-  fabSubmitAction: false,
-  fabSearchAction: false,
-  fabScrollToTop: false,
-  fabNotifications: false,
-  notificationsProvider: true,
-  notificationsSheet: true,
-  notificationsToasts: true,
-  footerDelayVariant: '30s' as const,
-  ctaVariant: 'value_focused' as const,
-  notificationsEnabled: true,
-  notificationsSheetEnabled: true,
-  notificationsToastsEnabled: true,
-  fabNotificationsEnabled: false,
-} as const;
-
-/**
- * Dynamic Rendering Required
- *
- * This page must use dynamic rendering because it imports from @heyclaude/web-runtime
- * which transitively imports feature-flags/flags.ts. The Vercel Flags SDK's flags/next
- * module contains module-level code that calls server functions, which cannot be
- * executed during static site generation.
- *
- * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic
- */
-export const dynamic = 'force-dynamic';
-
 export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   // Fetch layout data
-  // NOTE: Feature flags are server/middleware only - not for use in page components
-  // Layout flags should be evaluated in middleware and passed via headers/cookies
-  // For now, use defaults to allow static generation
+  // NOTE: Feature flags are handled via middleware (cookies) + client provider (context)
+  // This allows RootLayout to remain Static/ISR compatible where possible.
   const [layoutDataResult] = await Promise.allSettled([getLayoutData()]);
-  const layoutFlagsResult = { status: 'fulfilled' as const, value: DEFAULT_LAYOUT_FLAGS };
 
   // Extract layout data with fallbacks
   const layoutData =
     layoutDataResult.status === 'fulfilled' ? layoutDataResult.value : DEFAULT_LAYOUT_DATA;
-
-  // Extract layout flags with fallbacks
-  const layoutFlags =
-    layoutFlagsResult.status === 'fulfilled' ? layoutFlagsResult.value : DEFAULT_LAYOUT_FLAGS;
 
   // Log any failures for monitoring (but don't block render)
   if (layoutDataResult.status === 'rejected') {
@@ -215,8 +181,6 @@ export default async function RootLayout({
       source: 'root-layout',
     });
   }
-
-  // layoutFlagsResult is always fulfilled (using defaults) since flags are server/middleware only
 
   return (
     <html
@@ -264,38 +228,23 @@ export default async function RootLayout({
           disableTransitionOnChange={false}
           enableColorScheme={false}
         >
-          <PostCopyEmailProvider>
-            <NotificationsProvider
-              flags={{
-                enableNotifications: layoutFlags.notificationsEnabled,
-                enableSheet: layoutFlags.notificationsSheetEnabled,
-                enableToasts: layoutFlags.notificationsToastsEnabled,
-                enableFab: layoutFlags.fabNotificationsEnabled,
-              }}
-            >
-              <ErrorBoundary>
-                <LayoutContent
-                  announcement={layoutData.announcement}
-                  navigationData={layoutData.navigationData}
-                  useFloatingActionBar={layoutFlags.useFloatingActionBar}
-                  fabFlags={{
-                    showSubmit: layoutFlags.fabSubmitAction,
-                    showSearch: layoutFlags.fabSearchAction,
-                    showScrollToTop: layoutFlags.fabScrollToTop,
-                    showNotifications: layoutFlags.fabNotificationsEnabled,
-                    showPinboard: true,
-                  }}
-                  footerDelayVariant={layoutFlags.footerDelayVariant}
-                  ctaVariant={layoutFlags.ctaVariant}
-                >
-                  {children}
-                </LayoutContent>
-              </ErrorBoundary>
-              <Toaster />
-              <NotificationToastHandler />
-              {/* Newsletter capture is conditionally rendered in LayoutContent for non-auth pages */}
-            </NotificationsProvider>
-          </PostCopyEmailProvider>
+          <FeatureFlagsProvider initialFlags={null}>
+            <PostCopyEmailProvider>
+              <NotificationsProvider>
+                <ErrorBoundary>
+                  <LayoutContent
+                    announcement={layoutData.announcement}
+                    navigationData={layoutData.navigationData}
+                  >
+                    {children}
+                  </LayoutContent>
+                </ErrorBoundary>
+                <Toaster />
+                <NotificationToastHandler />
+                {/* Newsletter capture is conditionally rendered in LayoutContent for non-auth pages */}
+              </NotificationsProvider>
+            </PostCopyEmailProvider>
+          </FeatureFlagsProvider>
         </ThemeProvider>
         {/* Pulse Cannon - Unified pulse loading system (loads after page idle) */}
         {/* Zero initial bundle impact - all pulse services lazy-loaded */}

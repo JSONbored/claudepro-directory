@@ -63,8 +63,9 @@ function extractUserConfig(mcp: McpRow): Record<string, UserConfigEntry> {
 
   if (requiresAuth) {
     // Extract common API key patterns from metadata
-    const serverName = mcp.slug.replace(/-mcp-server$/, '').replace(/-mcp$/, '');
-    const apiKeyName = `${serverName}_api_key` || 'api_key';
+    const rawServerName = mcp.slug.replace(/-mcp-server$/, '').replace(/-mcp$/, '');
+    const serverName = rawServerName.trim();
+    const apiKeyName = serverName ? `${serverName}_api_key` : 'api_key';
 
     userConfig[apiKeyName] = {
       type: 'string',

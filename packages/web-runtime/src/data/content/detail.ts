@@ -53,3 +53,69 @@ export async function getContentDetailComplete(input: {
     throw normalized;
   }
 }
+
+export async function getContentDetailCore(input: {
+  category: string;
+  slug: string;
+}): Promise<Database['public']['Functions']['get_content_detail_core']['Returns'] | null> {
+  const { category, slug } = input;
+
+  if (!isValidContentCategory(category)) {
+    const normalized = normalizeError('Invalid category', 'Invalid category in getContentDetailCore');
+    logger.error('Invalid category in getContentDetailCore', normalized, {
+      category,
+      slug,
+    });
+    return null;
+  }
+
+  try {
+    return await fetchCached(
+      (client) => new ContentService(client).getContentDetailCore({ p_category: category, p_slug: slug }),
+      {
+        key: `${generateContentCacheKey(category, slug)}:core`,
+        tags: generateContentTags(category, slug),
+        ttlKey: 'cache.content_detail.ttl_seconds',
+        fallback: null,
+        logMeta: { category, slug, type: 'core' },
+      }
+    );
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to load content detail core');
+    logger.error('getContentDetailCore failed', normalized, { category, slug });
+    throw normalized;
+  }
+}
+
+export async function getContentAnalytics(input: {
+  category: string;
+  slug: string;
+}): Promise<Database['public']['Functions']['get_content_analytics']['Returns'] | null> {
+  const { category, slug } = input;
+
+  if (!isValidContentCategory(category)) {
+    const normalized = normalizeError('Invalid category', 'Invalid category in getContentAnalytics');
+    logger.error('Invalid category in getContentAnalytics', normalized, {
+      category,
+      slug,
+    });
+    return null;
+  }
+
+  try {
+    return await fetchCached(
+      (client) => new ContentService(client).getContentAnalytics({ p_category: category, p_slug: slug }),
+      {
+        key: `${generateContentCacheKey(category, slug)}:analytics`,
+        tags: generateContentTags(category, slug),
+        ttlKey: 'cache.content_detail.ttl_seconds',
+        fallback: null,
+        logMeta: { category, slug, type: 'analytics' },
+      }
+    );
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to load content analytics');
+    logger.error('getContentAnalytics failed', normalized, { category, slug });
+    throw normalized;
+  }
+}

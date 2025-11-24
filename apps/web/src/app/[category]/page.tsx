@@ -12,18 +12,13 @@
  * @architecture
  * Route Pattern: /[category] → /agents, /mcp, /commands, /rules, /hooks, /statuslines
  *
- * Static Generation: All category pages are pre-rendered at build time via generateStaticParams()
- * which returns the 6 valid categories from VALID_CATEGORIES. Next.js creates 6 static HTML files.
- *
- * ISR (Incremental Static Regeneration): Pages revalidate every 4 hours (14400s) to pick up new
- * content without requiring a full rebuild. Stale content is served while revalidating in background.
+ * Rendering Strategy: Dynamic Rendering (force-dynamic)
+ * This page uses dynamic rendering to ensure compatibility with the Vercel Flags SDK,
+ * which requires request-time evaluation for feature flags.
  *
  * @performance
- * Build Time: ~11.7s for all 187 pages (including 6 category pages)
- * Page Size: 7 kB per category page (minimal client JavaScript)
- * First Load JS: 382 kB (shared bundle + category page bundle)
- * Cache Hit: ~5-20ms (database) vs 48ms (file system)
- * TTFB: <100ms (static pages served from CDN)
+ * TTFB: Dependent on database query performance + serverless cold start
+ * Optimization: Database queries are optimized with proper indexing
  *
  * @example
  * // Data flow for /agents request:
@@ -48,18 +43,6 @@ import {
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { ContentListServer } from '@/src/components/content/content-grid-list';
-
-/**
- * Dynamic Rendering Required
- *
- * This page must use dynamic rendering because it imports from @heyclaude/web-runtime
- * which transitively imports feature-flags/flags.ts. The Vercel Flags SDK's flags/next
- * module contains module-level code that calls server functions, which cannot be
- * executed during static site generation.
- *
- * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic
- */
-export const dynamic = 'force-dynamic';
 
 /**
  * Generate metadata for category list pages

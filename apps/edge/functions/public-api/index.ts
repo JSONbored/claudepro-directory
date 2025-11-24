@@ -1,4 +1,6 @@
-/// <reference path="@heyclaude/edge-runtime/deno-globals.d.ts" />
+/**
+ * Public API - Main entry point for public API edge function
+ */
 
 import {
   analytics,
@@ -47,6 +49,39 @@ const createPublicApiContext = (
 // Use StandardContext directly as it matches our needs
 type PublicApiContext = StandardContext;
 
+// Helper to deduplicate manual rate limiting logic
+async function withRateLimit(
+  ctx: PublicApiContext,
+  preset: typeof RATE_LIMIT_PRESETS.heavy,
+  handler: () => Promise<Response>
+): Promise<Response> {
+  const rateLimitResult = checkRateLimit(ctx.request, preset);
+  if (!rateLimitResult.allowed) {
+    return jsonResponse(
+      {
+        error: 'Too Many Requests',
+        message: 'Rate limit exceeded',
+        retryAfter: rateLimitResult.retryAfter,
+      },
+      429,
+      BASE_CORS,
+      {
+        'Retry-After': String(rateLimitResult.retryAfter ?? 60),
+        'X-RateLimit-Limit': String(preset.maxRequests),
+        'X-RateLimit-Remaining': String(rateLimitResult.remaining),
+        'X-RateLimit-Reset': String(rateLimitResult.resetAt),
+      }
+    );
+  }
+
+  const response = await handler();
+  const headers = new Headers(response.headers);
+  headers.set('X-RateLimit-Limit', String(preset.maxRequests));
+  headers.set('X-RateLimit-Remaining', String(rateLimitResult.remaining));
+  headers.set('X-RateLimit-Reset', String(rateLimitResult.resetAt));
+  return new Response(response.body, { status: response.status, headers });
+}
+
 // Define handlers map
 const ROUTE_HANDLERS: Record<string, (ctx: PublicApiContext) => Promise<Response>> = {
   root: (ctx) => handleDirectoryIndex(ctx),
@@ -59,89 +94,26 @@ const ROUTE_HANDLERS: Record<string, (ctx: PublicApiContext) => Promise<Response
   'content-generate': async (ctx) => {
     // Check for sub-routes
     if (ctx.segments[2] === 'upload') {
-      const rateLimit = checkRateLimit(ctx.request, RATE_LIMIT_PRESETS.heavy);
-      if (!rateLimit.allowed) {
-        return jsonResponse(
-          {
-            error: 'Too Many Requests',
-            message: 'Rate limit exceeded',
-            retryAfter: rateLimit.retryAfter,
-          },
-          429,
-          BASE_CORS,
-          {
-            'Retry-After': String(rateLimit.retryAfter ?? 60),
-            'X-RateLimit-Limit': String(RATE_LIMIT_PRESETS.heavy.maxRequests),
-            'X-RateLimit-Remaining': String(rateLimit.remaining),
-            'X-RateLimit-Reset': String(rateLimit.resetAt),
-          }
-        );
-      }
-      const logContext = createPublicApiContext('content-generate-upload', {
-        path: ctx.pathname,
+      return withRateLimit(ctx, RATE_LIMIT_PRESETS.heavy, async () => {
+        const logContext = createPublicApiContext('content-generate-upload', {
+          path: ctx.pathname,
+        });
+        return handleUploadPackage(ctx.request, logContext);
       });
-      const response = await handleUploadPackage(ctx.request, logContext);
-      const headers = new Headers(response.headers);
-      headers.set('X-RateLimit-Limit', String(RATE_LIMIT_PRESETS.heavy.maxRequests));
-      headers.set('X-RateLimit-Remaining', String(rateLimit.remaining));
-      headers.set('X-RateLimit-Reset', String(rateLimit.resetAt));
-      return new Response(response.body, { status: response.status, headers });
     }
     if (ctx.segments[2] === 'process') {
-      const rateLimit = checkRateLimit(ctx.request, RATE_LIMIT_PRESETS.heavy);
-      if (!rateLimit.allowed) {
-        return jsonResponse(
-          {
-            error: 'Too Many Requests',
-            message: 'Rate limit exceeded',
-            retryAfter: rateLimit.retryAfter,
-          },
-          429,
-          BASE_CORS,
-          {
-            'Retry-After': String(rateLimit.retryAfter ?? 60),
-            'X-RateLimit-Limit': String(RATE_LIMIT_PRESETS.heavy.maxRequests),
-            'X-RateLimit-Remaining': String(rateLimit.remaining),
-            'X-RateLimit-Reset': String(rateLimit.resetAt),
-          }
-        );
-      }
-      const response = await handlePackageGenerationQueue(ctx.request);
-      const headers = new Headers(response.headers);
-      headers.set('X-RateLimit-Limit', String(RATE_LIMIT_PRESETS.heavy.maxRequests));
-      headers.set('X-RateLimit-Remaining', String(rateLimit.remaining));
-      headers.set('X-RateLimit-Reset', String(rateLimit.resetAt));
-      return new Response(response.body, { status: response.status, headers });
-    }
-    const rateLimitResult = checkRateLimit(ctx.request, RATE_LIMIT_PRESETS.heavy);
-    if (!rateLimitResult.allowed) {
-      return jsonResponse(
-        {
-          error: 'Too Many Requests',
-          message: 'Rate limit exceeded',
-          retryAfter: rateLimitResult.retryAfter,
-        },
-        429,
-        BASE_CORS,
-        {
-          'Retry-After': String(rateLimitResult.retryAfter ?? 60),
-          'X-RateLimit-Limit': String(RATE_LIMIT_PRESETS.heavy.maxRequests),
-          'X-RateLimit-Remaining': String(rateLimitResult.remaining),
-          'X-RateLimit-Reset': String(rateLimitResult.resetAt),
-        }
+      return withRateLimit(ctx, RATE_LIMIT_PRESETS.heavy, async () =>
+        handlePackageGenerationQueue(ctx.request)
       );
     }
-    const logContext = createPublicApiContext('content-generate', {
-      path: ctx.pathname,
-      method: ctx.method,
-      resource: 'generate-package',
+    return withRateLimit(ctx, RATE_LIMIT_PRESETS.heavy, async () => {
+      const logContext = createPublicApiContext('content-generate', {
+        path: ctx.pathname,
+        method: ctx.method,
+        resource: 'generate-package',
+      });
+      return handleGeneratePackage(ctx.request, logContext);
     });
-    const response = await handleGeneratePackage(ctx.request, logContext);
-    const headers = new Headers(response.headers);
-    headers.set('X-RateLimit-Limit', String(RATE_LIMIT_PRESETS.heavy.maxRequests));
-    headers.set('X-RateLimit-Remaining', String(rateLimitResult.remaining));
-    headers.set('X-RateLimit-Reset', String(rateLimitResult.resetAt));
-    return new Response(response.body, { status: response.status, headers });
   },
   content: (ctx) => {
     const logContext = createPublicApiContext('content', {

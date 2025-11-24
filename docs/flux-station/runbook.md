@@ -1,6 +1,6 @@
 # Flux Station Runbook & Decision Log
 
-Last updated: 2025-11-23  
+Last updated: 2025-11-24  
 Applies to Planner Steps FS-2 through FS-5.
 
 ## 1. Execution order & gating logic
@@ -38,8 +38,23 @@ Before code merges, ensure the relevant owner has updated this table or commente
 | Discord webhook URLs | Jobs, submissions, direct notifications. | Secrets store (per channel). |
 | BetterStack token | Queue processor heartbeat monitoring. | Infra team. |
 | Embedding provider API key (OpenAI or equivalent) | Embedding generation queue + webhook verification. | Edge runtime secrets. |
+| Cron worker secret (`CRON_WORKER_SECRET`) | Required `X-Internal-Secret` header for `/process-queues`; guards automated queue processor cron jobs. | Supabase secrets (set via `supabase secrets set`) – Platform owner. |
+| Internal API key (`INTERNAL_API_KEY`) | Fallback shared key for other internal callers (e.g., `/notifications/create`). Mirrors cron secret unless coordinated rotation needed. | Supabase secrets + shared vault – Platform owner. |
 
 Document who to contact before running soak or queue scripts; never hard-code secrets in scripts.
+
+### Internal secret contract
+
+* All routes wrapped with `requireInternalSecret` **must** include `X-Internal-Secret: <secret>`. Today this covers `/process-queues` and `/notifications/create`.
+* `CRON_WORKER_SECRET` is the canonical value for automation. `INTERNAL_API_KEY` is a synchronized fallback for other internal services—update both simultaneously.
+* Failure modes:
+  - If either secret is missing, Flux Station returns `500 auth:config_error` before handlers execute.
+  - Incorrect headers produce `401 auth:unauthorized`.
+* Recovery checklist:
+  1. `supabase secrets list --project-ref <ref>` to verify both keys exist.
+  2. `supabase secrets set CRON_WORKER_SECRET=... INTERNAL_API_KEY=... --project-ref <ref>` to rotate.
+  3. Manually hit `https://<ref>.supabase.co/functions/v1/flux-station/process-queues` with `curl -H "X-Internal-Secret: $SECRET" -X POST` and confirm a `200` JSON summary before re-enabling cron or BetterStack monitors.
+* Store the active secret string in the shared vault (not in git) and update cron job configs + internal clients during the same change window to prevent lockouts.
 
 ## 4. Testing & TDD approach
 

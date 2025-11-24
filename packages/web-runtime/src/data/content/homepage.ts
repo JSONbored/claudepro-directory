@@ -8,10 +8,10 @@ import { ContentService } from '@heyclaude/data-layer';
 
 export async function getHomepageData(
   categoryIds: readonly string[]
-): Promise<Database['public']['Functions']['get_homepage_complete']['Returns'] | null> {
+): Promise<Database['public']['Functions']['get_homepage_optimized']['Returns'] | null> {
   try {
     return await fetchCached(
-      (client) => new ContentService(client).getHomepageComplete({ p_category_ids: [...categoryIds] }),
+      (client) => new ContentService(client).getHomepageOptimized({ p_category_ids: [...categoryIds] }),
       {
         key: categoryIds.join('-') || 'all',
         tags: ['homepage', 'content', 'trending'],

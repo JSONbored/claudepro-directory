@@ -8,6 +8,8 @@
 import type { Database } from '@heyclaude/database-types';
 import { checkConfettiEnabled } from '@heyclaude/web-runtime';
 import { logClientWarning, logger, normalizeError } from '@heyclaude/web-runtime/core';
+import { EXPERIMENT_KEYS, FLAG_KEYS } from '@heyclaude/web-runtime/feature-flags/keys';
+import { useFeatureFlags } from '@heyclaude/web-runtime/feature-flags/provider';
 import { DIMENSIONS, toasts } from '@heyclaude/web-runtime/ui';
 import dynamic from 'next/dynamic';
 import { usePathname } from 'next/navigation';
@@ -101,29 +103,31 @@ interface LayoutContentProps {
   children: React.ReactNode;
   announcement: Database['public']['Tables']['announcements']['Row'] | null;
   navigationData: Database['public']['Functions']['get_navigation_menu']['Returns'];
-  useFloatingActionBar?: boolean;
-  fabFlags: {
-    showSubmit: boolean;
-    showSearch: boolean;
-    showScrollToTop: boolean;
-    showNotifications: boolean;
-    showPinboard: boolean;
-  };
-  footerDelayVariant: '10s' | '30s' | '60s';
-  ctaVariant: 'aggressive' | 'social_proof' | 'value_focused';
 }
 
-export function LayoutContent({
-  children,
-  announcement,
-  navigationData,
-  useFloatingActionBar = false,
-  fabFlags,
-  footerDelayVariant,
-  ctaVariant,
-}: LayoutContentProps) {
+export function LayoutContent({ children, announcement, navigationData }: LayoutContentProps) {
   const pathname = usePathname();
   const { fireConfetti } = useConfetti();
+  const { isEnabled, getExperiment } = useFeatureFlags();
+
+  const useFloatingActionBar = isEnabled(FLAG_KEYS.FLOATING_ACTION_BAR);
+  const fabFlags = {
+    showSubmit: isEnabled(FLAG_KEYS.FAB_SUBMIT_ACTION),
+    showSearch: isEnabled(FLAG_KEYS.FAB_SEARCH_ACTION),
+    showScrollToTop: isEnabled(FLAG_KEYS.FAB_SCROLL_TO_TOP),
+    showNotifications: isEnabled(FLAG_KEYS.FAB_NOTIFICATIONS),
+    showPinboard: true,
+  };
+
+  // Explicitly cast experiment values as strings since we know the expected types
+  const footerDelayVariant = getExperiment(EXPERIMENT_KEYS.NEWSLETTER_FOOTER_DELAY, '30s') as
+    | '10s'
+    | '30s'
+    | '60s';
+  const ctaVariant = getExperiment(EXPERIMENT_KEYS.NEWSLETTER_CTA_VARIANT, 'value_focused') as
+    | 'aggressive'
+    | 'social_proof'
+    | 'value_focused';
 
   // Convert variant to delay milliseconds
   const delayMs =

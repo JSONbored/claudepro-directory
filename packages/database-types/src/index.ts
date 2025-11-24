@@ -3996,6 +3996,20 @@ export type Database = {
           commands: Database["public"]["CompositeTypes"]["contact_command_result"][]
         }[]
       }
+      get_content_analytics: {
+        Args: {
+          p_category: Database["public"]["Enums"]["content_category"]
+          p_slug: string
+          p_user_id?: string
+        }
+        Returns: Database["public"]["CompositeTypes"]["content_detail_analytics"]
+        SetofOptions: {
+          from: "*"
+          to: "content_detail_analytics"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       get_content_detail_complete: {
         Args: {
           p_category: Database["public"]["Enums"]["content_category"]
@@ -4006,6 +4020,19 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "content_detail_complete_result"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      get_content_detail_core: {
+        Args: {
+          p_category: Database["public"]["Enums"]["content_category"]
+          p_slug: string
+        }
+        Returns: Database["public"]["CompositeTypes"]["content_detail_core_result"]
+        SetofOptions: {
+          from: "*"
+          to: "content_detail_core_result"
           isOneToOne: true
           isSetofReturn: false
         }
@@ -4215,6 +4242,16 @@ export type Database = {
       }
       get_homepage_complete: {
         Args: { p_category_ids?: string[] }
+        Returns: Database["public"]["CompositeTypes"]["homepage_complete_result"]
+        SetofOptions: {
+          from: "*"
+          to: "homepage_complete_result"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      get_homepage_optimized: {
+        Args: { p_category_ids: string[]; p_limit?: number }
         Returns: Database["public"]["CompositeTypes"]["homepage_complete_result"]
         SetofOptions: {
           from: "*"
@@ -6354,6 +6391,12 @@ export type Database = {
         related:
           | Database["public"]["CompositeTypes"]["content_detail_related_item"][]
           | null
+        collection_items:
+          | Database["public"]["CompositeTypes"]["content_detail_collection_item"][]
+          | null
+      }
+      content_detail_core_result: {
+        content: Json | null
         collection_items:
           | Database["public"]["CompositeTypes"]["content_detail_collection_item"][]
           | null

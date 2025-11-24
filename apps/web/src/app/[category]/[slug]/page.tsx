@@ -6,7 +6,6 @@
 import type { Database } from '@heyclaude/database-types';
 import {
   ensureStringArray,
-  isBuildTime,
   isValidCategory,
   logger,
   normalizeError,
@@ -17,7 +16,9 @@ import {
 import {
   generatePageMetadata,
   getCategoryConfig,
-  getContentDetailComplete,
+  getContentAnalytics,
+  getContentDetailCore,
+  getRelatedContent,
 } from '@heyclaude/web-runtime/server';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
@@ -28,18 +29,6 @@ import { Pulse } from '@/src/components/core/infra/pulse';
 import { StructuredData } from '@/src/components/core/infra/structured-data';
 import { RecentlyViewedTracker } from '@/src/components/features/navigation/recently-viewed-tracker';
 import type { RecentlyViewedCategory } from '@/src/hooks/use-recently-viewed';
-
-/**
- * Dynamic Rendering Required
- *
- * This page must use dynamic rendering because it imports from @heyclaude/web-runtime
- * which transitively imports feature-flags/flags.ts. The Vercel Flags SDK's flags/next
- * module contains module-level code that calls server functions, which cannot be
- * executed during static site generation.
- *
- * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic
- */
-export const dynamic = 'force-dynamic';
 
 export async function generateMetadata({
   params,
@@ -109,60 +98,50 @@ export default async function DetailPage({
     notFound();
   }
 
-  // Consolidated RPC: 2-3 calls → 1 (50-67% reduction)
-  // get_content_detail_complete() includes: content + analytics + related items + collection items
-  // Use anon client for ISR/static generation (no cookies/auth)
-  const detailData = await getContentDetailComplete({ category, slug });
+  // Optimized for PPR: Split core content (critical) from analytics/related (deferred)
+  // 1. Fetch Core Content (Blocking - for LCP)
+  const coreData = await getContentDetailCore({ category, slug });
 
-  if (!detailData) {
+  if (!coreData) {
     const normalized = normalizeError(
-      'Content detail data is null',
-      'DetailPage: get_content_detail_complete returned null'
+      'Content detail core data is null',
+      'DetailPage: get_content_detail_core returned null'
     );
-    logger.error('DetailPage: get_content_detail_complete returned null', normalized, {
+    logger.error('DetailPage: get_content_detail_core returned null', normalized, {
       category,
       slug,
     });
     notFound();
   }
 
-  // detailData.content is Json | null, but we know it's a content table row
-  // Use generated type directly (tags/features/use_cases are already text[] in database)
-  const fullItem = detailData.content as Database['public']['Tables']['content']['Row'] | null;
-  const { analytics, related } = detailData;
+  const fullItem = coreData.content as Database['public']['Tables']['content']['Row'] | null;
 
   // Null safety: If content doesn't exist in database, return 404
   if (!fullItem) {
     logger.warn('Content not found in RPC response', {
       category,
       slug,
-      rpcFunction: 'get_content_detail_complete',
+      rpcFunction: 'get_content_detail_core',
       phase: 'page-render',
     });
     notFound();
   }
 
-  const viewCount = analytics?.view_count || 0;
-  const copyCount = analytics?.copy_count || 0;
-  const relatedItems = related || [];
+  // 2. Fetch Analytics & Related (Non-blocking promise - for Suspense)
+  const analyticsPromise = getContentAnalytics({ category, slug });
 
-  // Lazy-load feature flags at render-time (runtime, not build-time)
-  // Use defaults during static generation to avoid Edge Config access
-  let tabsEnabled = true;
+  const viewCountPromise = analyticsPromise.then((data) => data?.view_count || 0);
+  const copyCountPromise = analyticsPromise.then((data) => data?.copy_count || 0);
 
-  if (!isBuildTime()) {
-    try {
-      const { featureFlags } = await import('@heyclaude/web-runtime/server');
-      tabsEnabled = await featureFlags.contentDetailTabs();
-    } catch (error) {
-      const normalized = normalizeError(error, 'Failed to load feature flags');
-      logger.warn('DetailPage: feature flags load failed, using defaults', {
-        category,
-        slug,
-        error: normalized.message,
-      });
-    }
-  }
+  const relatedItemsPromise = getRelatedContent({
+    currentPath: `/${category}/${slug}`,
+    currentCategory: category,
+    currentTags: 'tags' in fullItem ? ensureStringArray(fullItem.tags) : [],
+  }).then((res) => res.items);
+
+  // Use defaults during static generation/ISR
+  // For client-side toggling, components should use useFeatureFlags() hook
+  const tabsEnabled = true;
 
   // No transformation needed - displayTitle computed at build time
   // This eliminates runtime overhead and follows DRY principles
@@ -196,9 +175,9 @@ export default async function DetailPage({
 
       <UnifiedDetailPage
         item={fullItem}
-        relatedItems={relatedItems}
-        viewCount={viewCount}
-        copyCount={copyCount}
+        viewCountPromise={viewCountPromise}
+        copyCountPromise={copyCountPromise}
+        relatedItemsPromise={relatedItemsPromise}
         tabsEnabled={tabsEnabled}
         collectionSections={
           category === 'collections' && fullItem && fullItem.category === 'collections' ? (

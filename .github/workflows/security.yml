@@ -297,16 +297,21 @@ jobs:
       run: pnpm turbo run ${{ matrix.turboTask }} --cache-dir=.turbo
       continue-on-error: true
 
-    - name: Notify Vercel
-      if: github.event_name == 'push'
+    - name: Notify Vercel (Web)
+      if: github.event_name == 'push' && matrix.target == 'web'
       uses: vercel/repository-dispatch/actions/status@v1
-      env:
-        LINT_WEB_OUTCOME: ${{ steps.lint_web.outcome }}
-        LINT_EDGE_OUTCOME: ${{ steps.lint_edge.outcome }}
       with:
-        name: 'Vercel - heyclaude: lint-${{ matrix.target }}'
-        status: '${{ (matrix.target == ''web'' && env.LINT_WEB_OUTCOME == ''success'') || (matrix.target == ''edge'' && env.LINT_EDGE_OUTCOME == ''success'') ? ''success'' : ''failure'' }}'
-        description: '${{ ((matrix.target == ''web'' && env.LINT_WEB_OUTCOME == ''success'') || (matrix.target == ''edge'' && env.LINT_EDGE_OUTCOME == ''success'')) ? format(''{0} lint passed'', matrix.label) : format(''{0} lint failed'', matrix.label) }}'
+        name: 'Vercel - heyclaude: lint-web'
+        status: ${{ steps.lint_web.outcome == 'success' && 'success' || 'failure' }}
+        description: ${{ steps.lint_web.outcome == 'success' && 'Web lint passed' || 'Web lint failed' }}
+
+    - name: Notify Vercel (Edge)
+      if: github.event_name == 'push' && matrix.target == 'edge'
+      uses: vercel/repository-dispatch/actions/status@v1
+      with:
+        name: 'Vercel - heyclaude: lint-edge'
+        status: ${{ steps.lint_edge.outcome == 'success' && 'success' || 'failure' }}
+        description: ${{ steps.lint_edge.outcome == 'success' && 'Edge lint passed' || 'Edge lint failed' }}
 
   build:
     name: Build

@@ -18,6 +18,8 @@ import type { Metadata } from 'next';
 import { notFound, redirect } from 'next/navigation';
 import { JobForm } from '@/src/components/core/forms/job-form';
 
+type EditJobInput = Partial<CreateJobInput>;
+
 interface EditJobPageMetadataProps {
   params: Promise<{ id: string }>;
 }
@@ -58,9 +60,19 @@ export default async function EditJobPage({ params }: EditJobPageProps) {
     });
     notFound();
   }
-  const planCatalog = await getPaymentPlanCatalog();
 
-  const handleSubmit = async (data: CreateJobInput) => {
+  let planCatalog: Awaited<ReturnType<typeof getPaymentPlanCatalog>> = [];
+  try {
+    planCatalog = await getPaymentPlanCatalog();
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to load payment plan catalog');
+    logger.error('EditJobPage: getPaymentPlanCatalog threw', normalized, {
+      jobId: id,
+      userId: user.id,
+    });
+  }
+
+  const handleSubmit = async (data: EditJobInput) => {
     'use server';
 
     let result: Awaited<ReturnType<typeof updateJob>>;
@@ -103,6 +115,40 @@ export default async function EditJobPage({ params }: EditJobPageProps) {
     return { success: false };
   };
 
+  // Type guards to safely check enum values
+  function isValidJobType(value: string): value is Database['public']['Enums']['job_type'] {
+    return ['full-time', 'part-time', 'contract', 'freelance', 'internship'].includes(value);
+  }
+
+  function isValidJobCategory(value: string): value is Database['public']['Enums']['job_category'] {
+    return [
+      'engineering',
+      'design',
+      'product',
+      'marketing',
+      'sales',
+      'support',
+      'research',
+      'data',
+      'operations',
+      'leadership',
+      'consulting',
+      'education',
+      'other',
+    ].includes(value);
+  }
+
+  // Log warnings for invalid enum values to help track data integrity issues
+  if (job.type && !isValidJobType(job.type)) {
+    logger.warn('EditJobPage: encountered invalid job type', { jobId: id, type: job.type });
+  }
+  if (job.category && !isValidJobCategory(job.category)) {
+    logger.warn('EditJobPage: encountered invalid job category', {
+      jobId: id,
+      category: job.category,
+    });
+  }
+
   return (
     <div className="space-y-6">
       <div>
@@ -118,12 +164,10 @@ export default async function EditJobPage({ params }: EditJobPageProps) {
           description: job.description,
           salary: job.salary,
           remote: job.remote ?? undefined,
-          ...(job.type && { type: job.type as Database['public']['Enums']['job_type'] }),
+          ...(job.type && isValidJobType(job.type) && { type: job.type }),
           workplace: job.workplace,
           experience: job.experience,
-          ...(job.category && {
-            category: job.category as Database['public']['Enums']['job_category'],
-          }),
+          ...(job.category && isValidJobCategory(job.category) && { category: job.category }),
           tags: job.tags || [],
           requirements: job.requirements || [],
           benefits: job.benefits || [],

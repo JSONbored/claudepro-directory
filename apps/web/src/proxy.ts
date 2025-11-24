@@ -1,6 +1,7 @@
 import { env, isDevelopment } from '@heyclaude/shared-runtime';
 import { sanitizePathForLogging } from '@heyclaude/shared-runtime/proxy/guards';
 import { logger } from '@heyclaude/web-runtime/core';
+import { evaluateFlags } from '@heyclaude/web-runtime/feature-flags/middleware';
 import { applyNextProxyGuards } from '@heyclaude/web-runtime/server';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
@@ -42,6 +43,24 @@ export async function proxy(request: NextRequest) {
   // Create response with pathname header
   const response = NextResponse.next();
   response.headers.set('x-pathname', pathname);
+
+  // Evaluate Feature Flags (PPR-Ready)
+  // We intentionally do this after rate limiting to avoid cost on blocked requests
+  try {
+    const flags = await evaluateFlags(request);
+    if (flags) {
+      response.cookies.set('x-flags', flags, {
+        httpOnly: false, // Allow client-side reading for Static Pages (ISR)
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: '/',
+      });
+    }
+  } catch (error) {
+    // Non-blocking error handling for flags
+    logger.error('Middleware flag evaluation failed', error as Error);
+  }
+
   if (guardResult.rateLimitResult) {
     const remaining = Math.max(guardResult.rateLimitResult.remaining, 0);
     response.headers.set('RateLimit-Limit', `${PROXY_RATE_LIMIT.maxRequests}`);

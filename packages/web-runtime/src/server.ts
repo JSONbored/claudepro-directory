@@ -9,7 +9,7 @@
  * These exports MUST NOT be reachable from Client Components.
  */
 
-export * from './feature-flags/flags.ts';
+// export * from './feature-flags/flags.ts'; // Removed to prevent build-time side effects
 export * from './supabase/server.ts';
 export * from './supabase/server-anon.ts';
 export * from './supabase/admin.ts';

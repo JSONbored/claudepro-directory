@@ -10,6 +10,8 @@ import {
   getActiveNotificationsAction,
 } from '@heyclaude/web-runtime/actions';
 import { logger, normalizeError } from '@heyclaude/web-runtime/core';
+import { FLAG_KEYS } from '@heyclaude/web-runtime/feature-flags/keys';
+import { useFeatureFlags } from '@heyclaude/web-runtime/feature-flags/provider';
 import { useAction } from 'next-safe-action/hooks';
 import {
   createContext,
@@ -46,13 +48,19 @@ interface NotificationsContextValue {
 const NotificationsContext = createContext<NotificationsContextValue | null>(null);
 const DISMISSED_STORAGE_KEY = 'notification-storage';
 
-export function NotificationsProvider({
-  children,
-  flags,
-}: {
-  children: React.ReactNode;
-  flags: NotificationFeatureFlags;
-}) {
+export function NotificationsProvider({ children }: { children: React.ReactNode }) {
+  const { isEnabled } = useFeatureFlags();
+
+  const flags = useMemo(
+    () => ({
+      enableNotifications: isEnabled(FLAG_KEYS.NOTIFICATIONS_PROVIDER),
+      enableSheet: isEnabled(FLAG_KEYS.NOTIFICATIONS_SHEET),
+      enableToasts: isEnabled(FLAG_KEYS.NOTIFICATIONS_TOASTS),
+      enableFab: isEnabled(FLAG_KEYS.FAB_NOTIFICATIONS),
+    }),
+    [isEnabled]
+  );
+
   const [notifications, setNotifications] = useState<NotificationRecord[]>([]);
   const [dismissedIds, setDismissedIds] = useState<string[]>([]);
   const dismissedIdsRef = useRef<string[]>([]);

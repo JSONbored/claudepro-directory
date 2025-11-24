@@ -48,8 +48,12 @@ export interface UnifiedDetailPageProps {
     | Database['public']['Functions']['get_content_detail_complete']['Returns']['related'];
   viewCount?: number;
   copyCount?: number;
-  relatedItemsPromise?: Promise<ContentItem[]>;
+  relatedItemsPromise?: Promise<
+    | ContentItem[]
+    | Database['public']['Functions']['get_content_detail_complete']['Returns']['related']
+  >;
   viewCountPromise?: Promise<number>;
+  copyCountPromise?: Promise<number>;
   collectionSections?: React.ReactNode;
   tabsEnabled?: boolean;
 }
@@ -104,6 +108,7 @@ async function ViewCountMetadata({
   item,
   viewCountPromise,
   copyCount,
+  copyCountPromise,
 }: {
   item:
     | Database['public']['Tables']['content']['Row']
@@ -111,9 +116,13 @@ async function ViewCountMetadata({
         Database['public']['Tables']['content']['Row']);
   viewCountPromise: Promise<number>;
   copyCount?: number;
+  copyCountPromise?: Promise<number>;
 }) {
-  const viewCount = await viewCountPromise;
-  return <DetailMetadata item={item} viewCount={viewCount} copyCount={copyCount} />;
+  const [viewCount, resolvedCopyCount] = await Promise.all([
+    viewCountPromise,
+    copyCountPromise ? copyCountPromise : Promise.resolve(copyCount),
+  ]);
+  return <DetailMetadata item={item} viewCount={viewCount} copyCount={resolvedCopyCount} />;
 }
 
 async function SidebarWithRelated({
@@ -125,7 +134,10 @@ async function SidebarWithRelated({
     | Database['public']['Tables']['content']['Row']
     | (Database['public']['Functions']['get_content_detail_complete']['Returns']['content'] &
         Database['public']['Tables']['content']['Row']);
-  relatedItemsPromise: Promise<ContentItem[]>;
+  relatedItemsPromise: Promise<
+    | ContentItem[]
+    | Database['public']['Functions']['get_content_detail_complete']['Returns']['related']
+  >;
   config: {
     typeName: string;
     metadata?:
@@ -148,6 +160,7 @@ export async function UnifiedDetailPage({
   copyCount,
   relatedItemsPromise,
   viewCountPromise,
+  copyCountPromise,
   collectionSections,
   tabsEnabled = false,
 }: UnifiedDetailPageProps) {
@@ -762,6 +775,7 @@ export async function UnifiedDetailPage({
               item={item}
               viewCountPromise={viewCountPromise}
               {...(copyCount !== undefined && { copyCount })}
+              {...(copyCountPromise && { copyCountPromise })}
             />
           </Suspense>
         ) : (
@@ -800,6 +814,7 @@ export async function UnifiedDetailPage({
             item={item}
             viewCountPromise={viewCountPromise}
             {...(copyCount !== undefined && { copyCount })}
+            {...(copyCountPromise && { copyCountPromise })}
           />
         </Suspense>
       ) : (

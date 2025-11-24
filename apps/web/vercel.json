@@ -1,6 +1,5 @@
 {
-  "buildCommand": "cd ../.. && npx turbo run build --filter=web",
-  "installCommand": "cd ../.. && pnpm install --frozen-lockfile",
-  "framework": "nextjs",
-  "regions": ["iad1"]
+  "buildCommand": "cd ../.. && pnpm run generate:config && turbo run generate:categories:exec generate:service-worker:exec && cd apps/web && next build --turbopack",
+  "outputDirectory": ".next",
+  "framework": "nextjs"
 }

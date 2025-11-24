@@ -58,11 +58,11 @@ export default async function AccountLayout({ children }: { children: React.Reac
     if (settings) {
       profile = settings.user_data ?? null;
     } else {
-      logger.warn('AccountLayout: getUserSettings returned null', { userId: userIdHash });
+      logger.warn('AccountLayout: getUserSettings returned null', { userIdHash });
     }
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load user settings in account layout');
-    logger.error('AccountLayout: getUserSettings threw', normalized, { userId: userIdHash });
+    logger.error('AccountLayout: getUserSettings threw', normalized, { userIdHash });
   }
 
   if (!profile) {
@@ -78,7 +78,7 @@ export default async function AccountLayout({ children }: { children: React.Reac
         profile = settings.user_data ?? null;
       } else {
         logger.warn('AccountLayout: getUserSettings returned null after ensureUserRecord', {
-          userId: userIdHash,
+          userIdHash,
         });
       }
     } catch (error) {
@@ -87,7 +87,7 @@ export default async function AccountLayout({ children }: { children: React.Reac
         'Failed to ensure user record or reload settings in account layout'
       );
       logger.error('AccountLayout: ensureUserRecord or getUserSettings threw', normalized, {
-        userId: userIdHash,
+        userIdHash,
       });
     }
   }
@@ -96,12 +96,12 @@ export default async function AccountLayout({ children }: { children: React.Reac
   try {
     sponsorships = await getUserSponsorships(user.id);
     if (!sponsorships) {
-      logger.warn('AccountLayout: getUserSponsorships returned null', { userId: userIdHash });
+      logger.warn('AccountLayout: getUserSponsorships returned null', { userIdHash });
       sponsorships = [];
     }
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load user sponsorships in account layout');
-    logger.error('AccountLayout: getUserSponsorships threw', normalized, { userId: userIdHash });
+    logger.error('AccountLayout: getUserSponsorships threw', normalized, { userIdHash });
     sponsorships = [];
   }
 
