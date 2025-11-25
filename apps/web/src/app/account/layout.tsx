@@ -18,6 +18,7 @@ import {
 } from '@heyclaude/web-runtime/icons';
 import { createSupabaseServerClient, getAuthenticatedUser } from '@heyclaude/web-runtime/server';
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { generateRequestId } from '@heyclaude/web-runtime/utils/request-context';
 import Image from 'next/image';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
@@ -46,13 +47,17 @@ export default async function AccountLayout({ children }: { children: React.Reac
       const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
       if (refreshError) {
         const normalized = normalizeError(refreshError, 'Session refresh failed');
-        logger.warn('AccountLayout: session refresh failed', {
+        logger.warn('AccountLayout: session refresh failed', undefined, {
+          requestId: generateRequestId(),
+          operation: 'AccountLayout',
           error: normalized.message,
           userIdHash,
         });
         // Continue with existing session - user may need to re-authenticate on next request
       } else if (refreshData.session) {
         logger.debug('AccountLayout: session refreshed successfully', {
+          requestId: generateRequestId(),
+          operation: 'AccountLayout',
           userIdHash,
         });
       }
@@ -74,11 +79,19 @@ export default async function AccountLayout({ children }: { children: React.Reac
     if (settings) {
       profile = settings.user_data ?? null;
     } else {
-      logger.warn('AccountLayout: getUserSettings returned null', { userIdHash });
+      logger.warn('AccountLayout: getUserSettings returned null', undefined, {
+        requestId: generateRequestId(),
+        operation: 'AccountLayout',
+        userIdHash,
+      });
     }
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load user settings in account layout');
-    logger.error('AccountLayout: getUserSettings threw', normalized, { userIdHash });
+    logger.error('AccountLayout: getUserSettings threw', normalized, {
+      requestId: generateRequestId(),
+      operation: 'AccountLayout',
+      userIdHash,
+    });
   }
 
   if (!profile) {
@@ -93,9 +106,15 @@ export default async function AccountLayout({ children }: { children: React.Reac
       if (settings) {
         profile = settings.user_data ?? null;
       } else {
-        logger.warn('AccountLayout: getUserSettings returned null after ensureUserRecord', {
-          userIdHash,
-        });
+        logger.warn(
+          'AccountLayout: getUserSettings returned null after ensureUserRecord',
+          undefined,
+          {
+            requestId: generateRequestId(),
+            operation: 'AccountLayout',
+            userIdHash,
+          }
+        );
       }
     } catch (error) {
       const normalized = normalizeError(
@@ -103,6 +122,8 @@ export default async function AccountLayout({ children }: { children: React.Reac
         'Failed to ensure user record or reload settings in account layout'
       );
       logger.error('AccountLayout: ensureUserRecord or getUserSettings threw', normalized, {
+        requestId: generateRequestId(),
+        operation: 'AccountLayout',
         userIdHash,
       });
     }
@@ -113,12 +134,20 @@ export default async function AccountLayout({ children }: { children: React.Reac
   try {
     sponsorships = await sponsorshipsPromise;
     if (!sponsorships) {
-      logger.warn('AccountLayout: getUserSponsorships returned null', { userIdHash });
+      logger.warn('AccountLayout: getUserSponsorships returned null', undefined, {
+        requestId: generateRequestId(),
+        operation: 'AccountLayout',
+        userIdHash,
+      });
       sponsorships = [];
     }
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load user sponsorships in account layout');
-    logger.error('AccountLayout: getUserSponsorships threw', normalized, { userIdHash });
+    logger.error('AccountLayout: getUserSponsorships threw', normalized, {
+      requestId: generateRequestId(),
+      operation: 'AccountLayout',
+      userIdHash,
+    });
     sponsorships = [];
   }
 

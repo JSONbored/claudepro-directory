@@ -36,25 +36,31 @@
 import type { Database } from '@heyclaude/database-types';
 import { isValidCategory, logger, normalizeError } from '@heyclaude/web-runtime/core';
 import {
-  generatePageMetadata,
   getCategoryConfig,
-  getContentByCategory,
-} from '@heyclaude/web-runtime/server';
+  getHomepageCategoryIds,
+} from '@heyclaude/web-runtime/data/config/category';
+import { getContentByCategory } from '@heyclaude/web-runtime/data/content';
+import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
+import { generateRequestId } from '@heyclaude/web-runtime/utils/request-context';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { ContentListServer } from '@/src/components/content/content-grid-list';
 
 /**
- * Dynamic Rendering Required
+ * Static generation with incremental revalidation
  *
- * This page must use dynamic rendering because it imports from @heyclaude/web-runtime
- * which transitively imports feature-flags/flags.ts. The Vercel Flags SDK's flags/next
- * module contains module-level code that calls server functions, which cannot be
- * executed during static site generation.
- *
- * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic
+ * This page uses generateStaticParams to pre-render known categories at build time.
+ * It revalidates every 30 minutes (1800 seconds) to keep list content fresh.
  */
-export const dynamic = 'force-dynamic';
+export const revalidate = 1800;
+export const dynamicParams = true; // Allow unknown categories to be rendered on demand (will 404 if invalid)
+
+export async function generateStaticParams() {
+  const categories = getHomepageCategoryIds;
+  return categories.map((category) => ({
+    category,
+  }));
+}
 
 /**
  * Generate metadata for category list pages
@@ -101,6 +107,9 @@ export async function generateMetadata({
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load category config for metadata');
     logger.error('CategoryPage: category config lookup failed in metadata', normalized, {
+      requestId: generateRequestId(),
+      operation: 'CategoryPage',
+      route: `/${category}`,
       category,
     });
   }
@@ -137,7 +146,12 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
   const { category } = await params;
 
   if (!isValidCategory(category)) {
-    logger.warn('Invalid category in list page', { category });
+    logger.warn('Invalid category in list page', undefined, {
+      requestId: generateRequestId(),
+      operation: 'CategoryPage',
+      route: `/${category}`,
+      category,
+    });
     notFound();
   }
 
@@ -149,7 +163,12 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
     config = await getCategoryConfig(typedCategory);
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load category config for page render');
-    logger.error('CategoryPage: getCategoryConfig threw', normalized, { category });
+    logger.error('CategoryPage: getCategoryConfig threw', normalized, {
+      requestId: generateRequestId(),
+      operation: 'CategoryPage',
+      route: `/${category}`,
+      category,
+    });
   }
   if (!config) {
     const normalized = normalizeError(
@@ -157,6 +176,9 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
       'CategoryPage: missing category config'
     );
     logger.error('CategoryPage: missing category config', normalized, {
+      requestId: generateRequestId(),
+      operation: 'CategoryPage',
+      route: `/${category}`,
       category,
     });
     notFound();
@@ -169,13 +191,20 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load category list content');
     logger.error('CategoryPage: getContentByCategory threw', normalized, {
+      requestId: generateRequestId(),
+      operation: 'CategoryPage',
+      route: `/${category}`,
       category,
-      route: '[category]/page.tsx',
     });
     throw normalized;
   }
   if (!items || items.length === 0) {
-    logger.warn('CategoryPage: getContentByCategory returned no items', { category });
+    logger.warn('CategoryPage: getContentByCategory returned no items', undefined, {
+      requestId: generateRequestId(),
+      operation: 'CategoryPage',
+      route: `/${category}`,
+      category,
+    });
   }
 
   // Process badges (handle dynamic count badges)

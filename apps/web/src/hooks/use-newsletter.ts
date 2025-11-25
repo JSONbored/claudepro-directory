@@ -6,8 +6,8 @@
 'use client';
 
 import type { Database } from '@heyclaude/database-types';
+import { getNewsletterConfig } from '@heyclaude/web-runtime/actions/feature-flags';
 import { logClientWarning, logger, normalizeError } from '@heyclaude/web-runtime/core';
-import { getNewsletterConfig } from '@heyclaude/web-runtime/data';
 import { usePulse } from '@heyclaude/web-runtime/hooks';
 import { toasts } from '@heyclaude/web-runtime/ui';
 import { useCallback, useEffect, useState, useTransition } from 'react';
@@ -106,7 +106,7 @@ export function useNewsletter(options: UseNewsletterOptions): UseNewsletterRetur
 
   // Load retry config from Statsig on mount
   useEffect(() => {
-    getNewsletterConfig()
+    getNewsletterConfig({})
       .then((result) => {
         if (result?.data) {
           const config = result.data;

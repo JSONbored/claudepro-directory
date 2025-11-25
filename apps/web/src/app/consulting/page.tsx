@@ -14,7 +14,7 @@ export async function generateMetadata(): Promise<Metadata> {
 /**
  * Static generation - marketing page that doesn't change
  */
-export const revalidate = false;
+export const revalidate = 86400;
 
 export default function ConsultingPage() {
   return (

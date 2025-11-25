@@ -5,6 +5,7 @@ import { cache } from 'react';
 import { getContentCount } from '../../data/content/index.ts';
 import { logger } from '../../logger.ts';
 import { normalizeError } from '../../errors.ts';
+import { generateRequestId } from '../../utils/request-context.ts';
 
 const DESCRIPTION_FALLBACK =
   'Open-source directory of Claude AI configurations. Community-driven collection of MCP servers, automation hooks, custom commands, agents, and rules.';
@@ -55,7 +56,10 @@ const getVisitorStats = unstable_cache(
         monthlyPageViews: Number(data?.pageViews?.value ?? HERO_DEFAULTS.monthlyPageViews),
       };
     } catch (error) {
-      logger.error('MarketingSite: failed to load Vercel analytics', normalizeError(error));
+      logger.error('MarketingSite: failed to load Vercel analytics', normalizeError(error), {
+        requestId: generateRequestId(),
+        operation: 'getVisitorStats',
+      });
       return HERO_DEFAULTS;
     }
   },
@@ -70,7 +74,10 @@ export async function getContentDescriptionCopy(): Promise<string> {
     const count = await getConfigurationCountCached();
     return `Open-source directory of ${count}+ Claude AI configurations. Community-driven collection of MCP servers, automation hooks, custom commands, agents, and rules.`;
   } catch (error) {
-    logger.error('MarketingSite: failed to build content description', normalizeError(error));
+    logger.error('MarketingSite: failed to build content description', normalizeError(error), {
+      requestId: generateRequestId(),
+      operation: 'getContentDescriptionCopy',
+    });
     return DESCRIPTION_FALLBACK;
   }
 }
@@ -90,7 +97,10 @@ export async function getPartnerHeroStats(): Promise<PartnerHeroStats> {
       ...visitorStats,
     };
   } catch (error) {
-    logger.error('MarketingSite: failed to load hero stats', normalizeError(error));
+    logger.error('MarketingSite: failed to load hero stats', normalizeError(error), {
+      requestId: generateRequestId(),
+      operation: 'getPartnerHeroStats',
+    });
     return {
       configurationCount: 0,
       ...HERO_DEFAULTS,

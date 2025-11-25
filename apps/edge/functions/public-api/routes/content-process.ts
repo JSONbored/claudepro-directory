@@ -6,6 +6,7 @@
 import {
   badRequestResponse,
   buildCacheHeaders,
+  errorResponse,
   jsonResponse,
   parseJsonBody,
   publicCorsHeaders,
@@ -606,18 +607,6 @@ export async function handleContentProcess(
     });
   } catch (error) {
     logError('Content processing failed', logContext, error);
-
-    // DO NOT expose internal error details to user - use generic message
-    // Return error response
-    return jsonResponse(
-      {
-        error: 'Internal Server Error',
-      } satisfies ProcessResponse,
-      500,
-      {
-        ...buildSecurityHeaders(),
-        ...CORS,
-      }
-    );
+    return errorResponse(error, 'data-api:content-process', CORS, logContext);
   }
 }

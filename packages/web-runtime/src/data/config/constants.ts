@@ -223,3 +223,29 @@ export const ANIMATION_DURATIONS = {
     default: 15000, // 15 seconds (from border-beam component)
   },
 } as const;
+
+/**
+ * Query Limit Constants
+ * 
+ * Default limits for database queries to prevent excessive data fetching.
+ * These limits balance performance with functionality needs.
+ * 
+ * For admin/export use cases, use MAX_* constants or pass explicit limits.
+ */
+export const QUERY_LIMITS = {
+  // Content list queries
+  content: {
+    default: 50, // Default for category pages, search results, etc.
+    max: 1000, // Maximum for admin/export scenarios
+  },
+  // Changelog queries
+  changelog: {
+    default: 50, // Default for changelog pages, recent entries, etc.
+    max: 10000, // Maximum for admin/export scenarios (e.g., getAllChangelogEntries)
+  },
+  // Pagination
+  pagination: {
+    default: 30, // Default when no explicit limit is provided
+    max: 100, // Maximum to prevent excessive data fetching in a single request
+  },
+} as const;

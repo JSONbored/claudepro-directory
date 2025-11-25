@@ -13,7 +13,9 @@ export default function AccountError({
 }) {
   useEffect(() => {
     const normalized = normalizeError(error, 'Account segment rendering failed');
+    // Client-side error boundary - no requestId needed (not part of server request)
     logger.error('AccountErrorBoundary: account route crashed', normalized, {
+      operation: 'AccountErrorBoundary',
       segment: 'account',
       ...(error.digest && { digest: error.digest }),
     });

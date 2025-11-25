@@ -14,9 +14,17 @@ import {
   getUserJobById,
 } from '@heyclaude/web-runtime/server';
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { generateRequestId } from '@heyclaude/web-runtime/utils/request-context';
 import type { Metadata } from 'next';
 import { notFound, redirect } from 'next/navigation';
 import { JobForm } from '@/src/components/core/forms/job-form';
+
+/**
+ * Dynamic Rendering Required
+ * Authenticated route
+ */
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 type EditJobInput = Partial<CreateJobInput>;
 
@@ -38,7 +46,12 @@ export default async function EditJobPage({ params }: EditJobPageProps) {
   const { user } = await getAuthenticatedUser({ context: 'EditJobPage' });
 
   if (!user) {
-    logger.warn('EditJobPage: unauthenticated access attempt', { jobId: id });
+    logger.warn('EditJobPage: unauthenticated access attempt', undefined, {
+      requestId: generateRequestId(),
+      operation: 'EditJobPage',
+      route: `/account/jobs/${id}/edit`,
+      jobId: id,
+    });
     redirect('/login');
   }
 
@@ -48,13 +61,19 @@ export default async function EditJobPage({ params }: EditJobPageProps) {
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load user job for edit page');
     logger.error('EditJobPage: getUserJobById threw', normalized, {
+      requestId: generateRequestId(),
+      operation: 'EditJobPage',
+      route: `/account/jobs/${id}/edit`,
       jobId: id,
       userId: user.id,
     });
     throw normalized;
   }
   if (!job) {
-    logger.warn('EditJobPage: job not found or not owned by user', {
+    logger.warn('EditJobPage: job not found or not owned by user', undefined, {
+      requestId: generateRequestId(),
+      operation: 'EditJobPage',
+      route: `/account/jobs/${id}/edit`,
       jobId: id,
       userId: user.id,
     });
@@ -67,6 +86,9 @@ export default async function EditJobPage({ params }: EditJobPageProps) {
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load payment plan catalog');
     logger.error('EditJobPage: getPaymentPlanCatalog threw', normalized, {
+      requestId: generateRequestId(),
+      operation: 'EditJobPage',
+      route: `/account/jobs/${id}/edit`,
       jobId: id,
       userId: user.id,
     });
@@ -84,6 +106,9 @@ export default async function EditJobPage({ params }: EditJobPageProps) {
     } catch (error) {
       const normalized = normalizeError(error, 'updateJob server action failed');
       logger.error('EditJobPage: updateJob threw', normalized, {
+        requestId: generateRequestId(),
+        operation: 'EditJobPage',
+        route: `/account/jobs/${id}/edit`,
         jobId: id,
         userId: user.id,
       });
@@ -93,6 +118,9 @@ export default async function EditJobPage({ params }: EditJobPageProps) {
     if (result?.serverError) {
       const normalized = normalizeError(result.serverError, 'updateJob server error response');
       logger.error('EditJobPage: updateJob returned serverError', normalized, {
+        requestId: generateRequestId(),
+        operation: 'EditJobPage',
+        route: `/account/jobs/${id}/edit`,
         jobId: id,
         userId: user.id,
       });
@@ -102,6 +130,9 @@ export default async function EditJobPage({ params }: EditJobPageProps) {
     if (!result?.data) {
       const normalized = normalizeError('updateJob returned no data', 'updateJob returned no data');
       logger.error('EditJobPage: updateJob returned no data', normalized, {
+        requestId: generateRequestId(),
+        operation: 'EditJobPage',
+        route: `/account/jobs/${id}/edit`,
         jobId: id,
         userId: user.id,
       });
@@ -140,10 +171,19 @@ export default async function EditJobPage({ params }: EditJobPageProps) {
 
   // Log warnings for invalid enum values to help track data integrity issues
   if (job.type && !isValidJobType(job.type)) {
-    logger.warn('EditJobPage: encountered invalid job type', { jobId: id, type: job.type });
+    logger.warn('EditJobPage: encountered invalid job type', undefined, {
+      requestId: generateRequestId(),
+      operation: 'EditJobPage',
+      route: `/account/jobs/${id}/edit`,
+      jobId: id,
+      type: job.type,
+    });
   }
   if (job.category && !isValidJobCategory(job.category)) {
-    logger.warn('EditJobPage: encountered invalid job category', {
+    logger.warn('EditJobPage: encountered invalid job category', undefined, {
+      requestId: generateRequestId(),
+      operation: 'EditJobPage',
+      route: `/account/jobs/${id}/edit`,
       jobId: id,
       category: job.category,
     });

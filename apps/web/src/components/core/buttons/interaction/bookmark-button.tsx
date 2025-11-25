@@ -3,14 +3,15 @@
 /** Bookmark button - adds/removes content from user bookmarks with optional confetti */
 
 import type { Database } from '@heyclaude/database-types';
-import { addBookmark, removeBookmark } from '@heyclaude/web-runtime/actions';
+import { addBookmark } from '@heyclaude/web-runtime/actions/add-bookmark';
+import { checkConfettiEnabled } from '@heyclaude/web-runtime/actions/feature-flags';
+import { removeBookmark } from '@heyclaude/web-runtime/actions/remove-bookmark';
 import {
   isValidCategory,
   logClientWarning,
   logger,
   normalizeError,
 } from '@heyclaude/web-runtime/core';
-import { checkConfettiEnabled } from '@heyclaude/web-runtime/data';
 import { usePulse } from '@heyclaude/web-runtime/hooks';
 import { Bookmark, BookmarkCheck } from '@heyclaude/web-runtime/icons';
 import type { ButtonStyleProps } from '@heyclaude/web-runtime/types/component.types';
@@ -110,7 +111,7 @@ export function BookmarkButton({
               });
 
             // Confetti animation gated by feature flag
-            const confettiResult = await checkConfettiEnabled();
+            const confettiResult = await checkConfettiEnabled({});
             if (confettiResult) {
               celebrateBookmark();
             }

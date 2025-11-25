@@ -6,6 +6,7 @@ import { logger, normalizeError } from '../index.ts';
 import type { Database } from '@heyclaude/database-types';
 import { fetchCached } from '../cache/fetch-cached.ts';
 import { MiscService } from '@heyclaude/data-layer';
+import { generateRequestId } from '../utils/request-context.ts';
 
 export type ActiveNotificationRecord = Database['public']['Functions']['get_active_notifications']['Returns'][number];
 
@@ -28,7 +29,11 @@ export async function revalidateNotificationCache(userId: string): Promise<void>
     try {
       revalidateTag(tag, 'default');
     } catch (error) {
-      logger.error('Failed to revalidate notification cache tag', normalizeError(error), { tag });
+      logger.error('Failed to revalidate notification cache tag', normalizeError(error), {
+        requestId: generateRequestId(),
+        operation: 'revalidateNotificationCache',
+        tag,
+      });
     }
   }
 }
@@ -45,7 +50,7 @@ export async function getActiveNotifications({
   return fetchCached(
     (client) => new MiscService(client).getActiveNotifications({ p_dismissed_ids: dismissedIds }),
     {
-      key: `${userId}-${dismissedIds.join('|') || 'none'}`,
+      keyParts: ['notifications', userId, dismissedIds.join('|') || 'none'],
       tags: [DEFAULT_NOTIFICATION_TAG, `user-${userId}`],
       ttlKey: TTL_KEY,
       useAuth: true,

@@ -173,7 +173,8 @@ export async function handleGeneratePackage(
     return errorResponse(
       new Error(`Generator not found for category '${category}'`),
       'content-generate:getGenerator',
-      CORS
+      CORS,
+      logContext
     );
   }
 
@@ -269,22 +270,10 @@ export async function handleGeneratePackage(
         logError('Failed to enqueue package generation', logContext, error);
       }
 
-      return jsonResponse(
-        {
-          success: false,
-          content_id,
-          category,
-          slug: contentRow.slug || '',
-          storage_url: '', // Empty for error cases
-          error: 'Enqueue Failed',
-          message: 'Internal Server Error', // Never expose details to users
-        } satisfies GeneratePackageResponse,
-        500,
-        {
-          ...CORS,
-          ...buildSecurityHeaders(),
-        }
-      );
+      if (logContext) {
+        return errorResponse(error, 'data-api:content-generate-enqueue', CORS, logContext);
+      }
+      return errorResponse(error, 'data-api:content-generate-enqueue', CORS);
     }
   }
 
@@ -333,21 +322,9 @@ export async function handleGeneratePackage(
       logError('Package generation failed', logContext, error);
     }
 
-    return jsonResponse(
-      {
-        success: false,
-        content_id,
-        category,
-        slug: contentRow.slug || '',
-        storage_url: '', // Empty for error cases
-        error: 'Generation Failed',
-        message: 'Internal Server Error', // Never expose details to users
-      } satisfies GeneratePackageResponse,
-      500,
-      {
-        ...CORS,
-        ...buildSecurityHeaders(),
-      }
-    );
+    if (logContext) {
+      return errorResponse(error, 'data-api:content-generate-sync', CORS, logContext);
+    }
+    return errorResponse(error, 'data-api:content-generate-sync', CORS);
   }
 }

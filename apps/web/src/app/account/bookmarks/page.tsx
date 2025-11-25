@@ -3,6 +3,13 @@ import { generatePageMetadata } from '@heyclaude/web-runtime/data';
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 
+/**
+ * Dynamic Rendering Required
+ * Authenticated route (legacy redirect)
+ */
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
 export async function generateMetadata(): Promise<Metadata> {
   // Use /account/library metadata since this redirects there
   return generatePageMetadata('/account/library');

@@ -9,6 +9,7 @@ import { searchCompaniesUnified } from '../edge/search-client.ts';
 import { fetchCached } from '../cache/fetch-cached.ts';
 import { CompaniesService } from '@heyclaude/data-layer';
 import { normalizeRpcResult } from './content-helpers.ts';
+import { generateRequestId } from '../utils/request-context.ts';
 
 const COMPANY_DETAIL_TTL_KEY = 'cache.company_detail.ttl_seconds';
 
@@ -25,7 +26,7 @@ export async function getCompanyAdminProfile(
   const data = await fetchCached(
     (client) => new CompaniesService(client).getCompanyAdminProfile({ p_company_id: companyId }),
     {
-      key: companyId,
+      keyParts: ['company-admin', companyId],
       tags: ['companies', `company-id-${companyId}`],
       ttlKey: COMPANY_DETAIL_TTL_KEY,
       useAuth: true,
@@ -36,7 +37,11 @@ export async function getCompanyAdminProfile(
 
   const normalized = normalizeRpcResult(data);
   if (!normalized) {
-    logger.warn('getCompanyAdminProfile: company not found', { companyId });
+    logger.warn('getCompanyAdminProfile: company not found', undefined, {
+      requestId: generateRequestId(),
+      operation: 'getCompanyAdminProfile',
+      companyId,
+    });
     return null;
   }
 
@@ -49,7 +54,7 @@ export async function getCompanyProfile(
   return fetchCached(
     (client) => new CompaniesService(client).getCompanyProfile({ p_slug: slug }),
     {
-      key: slug,
+      keyParts: ['company', slug],
       tags: ['companies', 'jobs', `company-${slug}`],
       ttlKey: COMPANY_DETAIL_TTL_KEY,
       fallback: null,
@@ -65,7 +70,7 @@ export async function getCompaniesList(
   return fetchCached(
     (client) => new CompaniesService(client).getCompaniesList({ p_limit: limit, p_offset: offset }),
     {
-      key: `list-${limit}-${offset}`,
+      keyParts: ['companies-list', limit, offset],
       tags: ['companies', 'jobs'],
       ttlKey: 'cache.company_list.ttl_seconds',
       fallback: { companies: [], total: 0 },
@@ -96,6 +101,8 @@ async function fetchCompanySearchResults(
   } catch (error) {
     const normalized = normalizeError(error, 'Company search fetch error');
     logger.error('Company search fetch failed', normalized, {
+      requestId: generateRequestId(),
+      operation: 'fetchCompanySearchResults',
       query,
       limit,
     });

@@ -12,7 +12,7 @@ export async function getActiveAnnouncement(): Promise<
   return fetchCached(
     (client) => new MiscService(client).getActiveAnnouncement(),
     {
-      key: 'active',
+      keyParts: ['announcements', 'active'],
       tags: ['announcements'],
       ttlKey: ANNOUNCEMENT_TTL_KEY,
       fallback: null,

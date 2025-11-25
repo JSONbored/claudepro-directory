@@ -1,13 +1,13 @@
 'use client';
 
 import type { Database } from '@heyclaude/database-types';
+import { getAppSettings, getNewsletterConfig } from '@heyclaude/web-runtime/actions/feature-flags';
 import {
   ensureNumber,
   ensureStringArray,
   logUnhandledPromise,
   NEWSLETTER_CTA_CONFIG,
 } from '@heyclaude/web-runtime/core';
-import { getAppSettings, getNewsletterConfig } from '@heyclaude/web-runtime/data';
 import { Mail, X } from '@heyclaude/web-runtime/icons';
 import { DIMENSIONS, POSITION_PATTERNS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { usePathname } from 'next/navigation';
@@ -48,8 +48,8 @@ export function NewsletterFooterBar({
     loadConfigs(
       async () => {
         const [appConfigResult, newsletterConfigResult] = await Promise.all([
-          getAppSettings(),
-          getNewsletterConfig(),
+          getAppSettings({}),
+          getNewsletterConfig({}),
         ]);
 
         if (appConfigResult?.data) {

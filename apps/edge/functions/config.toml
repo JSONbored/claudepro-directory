@@ -14,3 +14,6 @@ verify_jwt = false
 # Write-heavy, async processing, webhooks, email, queues.
 [functions.flux-station]
 verify_jwt = false
+
+[functions.mcp-directory]
+verify_jwt = false

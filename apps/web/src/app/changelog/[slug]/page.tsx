@@ -21,6 +21,10 @@
  * - Accessibility support
  * - Responsive design
  */
+/**
+ * ISR: 2 hours (7200s) - Changelog entries are stable after publication
+ */
+export const revalidate = 7200;
 
 import { logger, normalizeError } from '@heyclaude/web-runtime/core';
 import {
@@ -32,6 +36,7 @@ import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { ArrowLeft, Calendar } from '@heyclaude/web-runtime/icons';
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { formatChangelogDate, getChangelogUrl } from '@heyclaude/web-runtime/utils/changelog';
+import { generateRequestId } from '@heyclaude/web-runtime/utils/request-context';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { ReadProgress } from '@/src/components/content/read-progress';
@@ -53,7 +58,11 @@ export async function generateStaticParams() {
     }));
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to generate changelog static params');
-    logger.error('ChangelogEntryPage: generateStaticParams threw', normalized);
+    logger.error('ChangelogEntryPage: generateStaticParams threw', normalized, {
+      requestId: generateRequestId(),
+      operation: 'ChangelogEntryPage',
+      route: '/changelog',
+    });
     // Re-throw so callers/CI see a hard failure rather than masking it
     throw normalized;
   }
@@ -74,7 +83,12 @@ export async function generateMetadata({
     entry = await getChangelogEntryBySlug(slug);
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load changelog entry for metadata');
-    logger.error('ChangelogEntryPage: metadata loader threw', normalized, { slug });
+    logger.error('ChangelogEntryPage: metadata loader threw', normalized, {
+      requestId: generateRequestId(),
+      operation: 'ChangelogEntryPage',
+      route: `/changelog/${slug}`,
+      slug,
+    });
   }
 
   return generatePageMetadata('/changelog/:slug', {
@@ -98,12 +112,22 @@ export default async function ChangelogEntryPage({
     entry = await getChangelogEntryBySlug(slug);
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load changelog entry');
-    logger.error('ChangelogEntryPage: getChangelogEntryBySlug threw', normalized, { slug });
+    logger.error('ChangelogEntryPage: getChangelogEntryBySlug threw', normalized, {
+      requestId: generateRequestId(),
+      operation: 'ChangelogEntryPage',
+      route: `/changelog/${slug}`,
+      slug,
+    });
     throw normalized;
   }
 
   if (!entry) {
-    logger.warn('ChangelogEntryPage: entry not found', { slug });
+    logger.warn('ChangelogEntryPage: entry not found', undefined, {
+      requestId: generateRequestId(),
+      operation: 'ChangelogEntryPage',
+      route: `/changelog/${slug}`,
+      slug,
+    });
     notFound();
   }
 

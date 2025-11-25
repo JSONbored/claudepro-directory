@@ -45,7 +45,14 @@ import {
   getSearchFacets,
 } from '@heyclaude/web-runtime/server';
 import type { SearchFilterOptions } from '@heyclaude/web-runtime/types/component.types';
+import { generateRequestId } from '@heyclaude/web-runtime/utils/request-context';
 import type { Metadata } from 'next';
+
+/**
+ * Dynamic Rendering Required
+ * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic
+ */
+export const revalidate = 1800;
 
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/');
@@ -86,7 +93,12 @@ async function HomeContentSection({
   } catch (error) {
     logger.error(
       'Homepage content section error',
-      error instanceof Error ? error : new Error(String(error))
+      error instanceof Error ? error : new Error(String(error)),
+      {
+        requestId: generateRequestId(),
+        operation: 'HomeContentSection',
+        route: '/',
+      }
     );
     const emptyData: Record<string, unknown[]> = {};
 
@@ -124,7 +136,11 @@ export default async function HomePage({ searchParams }: HomePageProps) {
 
   const facetData = await getSearchFacets().catch((error: unknown) => {
     const normalized = normalizeError(error, 'Homepage search facets fetch failed');
-    logger.error('HomePage: getSearchFacets invocation failed', normalized);
+    logger.error('HomePage: getSearchFacets invocation failed', normalized, {
+      requestId: generateRequestId(),
+      operation: 'HomePage',
+      route: '/',
+    });
     return emptyFacets;
   });
 

@@ -29,6 +29,7 @@ import { logger, normalizeError } from '@heyclaude/web-runtime/core';
 import { generatePageMetadata } from '@heyclaude/web-runtime/data';
 import { TrendingUp } from '@heyclaude/web-runtime/icons';
 import { cn, UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { generateRequestId } from '@heyclaude/web-runtime/utils/request-context';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
 
 /**
@@ -41,7 +42,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primi
  *
  * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic
  */
-export const dynamic = 'force-dynamic';
+export const revalidate = 86400;
 
 const SUBMISSION_TIPS = [
   'Be specific in your descriptions - help users understand what your config does',
@@ -104,7 +105,10 @@ function mapSubmissionTypeToContentCategory(
   }
 
   // Fallback if somehow an invalid value gets through (should never happen)
-  logger.warn('mapSubmissionTypeToContentCategory: invalid submission_type', {
+  logger.warn('mapSubmissionTypeToContentCategory: invalid submission_type', undefined, {
+    requestId: generateRequestId(),
+    operation: 'SubmitPage',
+    route: '/submit',
     submissionType,
   });
   return 'agents';
@@ -141,7 +145,7 @@ export async function generateMetadata(): Promise<Metadata> {
 /**
  * Edge-cached data: Dashboard data fetched from edge-cached data layer
  */
-export const revalidate = false;
+// revalidate is set at the top of the file
 
 export default async function SubmitPage() {
   // Fetch all data via data layer (edge-cached)
@@ -151,6 +155,9 @@ export default async function SubmitPage() {
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load submission dashboard');
     logger.error('SubmitPage: getSubmissionDashboard failed', normalized, {
+      requestId: generateRequestId(),
+      operation: 'SubmitPage',
+      route: '/submit',
       recentCount: 5,
       statsCount: 5,
     });
@@ -158,7 +165,10 @@ export default async function SubmitPage() {
   }
 
   if (!dashboardData) {
-    logger.warn('SubmitPage: getSubmissionDashboard returned no data', {
+    logger.warn('SubmitPage: getSubmissionDashboard returned no data', undefined, {
+      requestId: generateRequestId(),
+      operation: 'SubmitPage',
+      route: '/submit',
       recentCount: 5,
       statsCount: 5,
     });
@@ -169,7 +179,11 @@ export default async function SubmitPage() {
     formConfig = await getSubmissionFormFields();
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load submission form config');
-    logger.error('SubmitPage: getSubmissionFormFields failed', normalized);
+    logger.error('SubmitPage: getSubmissionFormFields failed', normalized, {
+      requestId: generateRequestId(),
+      operation: 'SubmitPage',
+      route: '/submit',
+    });
     throw normalized;
   }
 
@@ -178,6 +192,8 @@ export default async function SubmitPage() {
       'SubmitPage: submission form config is undefined',
       new Error('Submission form config is undefined'),
       {
+        requestId: generateRequestId(),
+        operation: 'SubmitPage',
         route: '/submit',
         phase: 'page-render',
       }
@@ -196,7 +212,12 @@ export default async function SubmitPage() {
           return type;
         }
         // This should never happen, but TypeScript requires handling the case
-        logger.warn('SubmitPage: invalid submission_type found', { type });
+        logger.warn('SubmitPage: invalid submission_type found', undefined, {
+          requestId: generateRequestId(),
+          operation: 'SubmitPage',
+          route: '/submit',
+          type,
+        });
         return 'agents' as Database['public']['Enums']['content_category'];
       })
       .filter((category): category is Database['public']['Enums']['content_category'] =>
@@ -208,6 +229,9 @@ export default async function SubmitPage() {
       getContentTemplates(category).catch((error) => {
         const normalized = normalizeError(error, `Failed to load templates for ${category}`);
         logger.error('SubmitPage: getContentTemplates failed for category', normalized, {
+          requestId: generateRequestId(),
+          operation: 'SubmitPage',
+          route: '/submit',
           category,
         });
         return []; // Return empty array on error for this category
@@ -217,12 +241,18 @@ export default async function SubmitPage() {
     templates = templateResults.flat();
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load submission templates');
-    logger.error('SubmitPage: getContentTemplates failed', normalized);
+    logger.error('SubmitPage: getContentTemplates failed', normalized, {
+      requestId: generateRequestId(),
+      operation: 'SubmitPage',
+      route: '/submit',
+    });
     // Continue with empty templates array - page will render without templates
   }
 
   if (templates.length === 0) {
     logger.warn('SubmitPage: no templates returned from getContentTemplates', undefined, {
+      requestId: generateRequestId(),
+      operation: 'SubmitPage',
       route: '/submit',
       supportedCategoriesCount: supportedCategories.length,
       categories: supportedCategories,

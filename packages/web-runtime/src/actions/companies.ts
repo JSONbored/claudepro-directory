@@ -17,7 +17,6 @@ import {
   extractPathFromUrl,
   IMAGE_CONFIG,
 } from '../storage/image-utils.ts';
-import { getCompanyAdminProfile, searchCompanies } from '../data/companies.ts';
 import { z } from 'zod';
 
 // UUID validation helper
@@ -57,6 +56,7 @@ export const searchCompaniesAction = authedAction
   .inputSchema(companySearchSchema)
   .action(async ({ parsedInput }) => {
     try {
+      const { searchCompanies } = await import('../data/companies.ts');
       const limit = parsedInput.limit ?? 10;
       const companies = await searchCompanies(parsedInput.query, limit);
       
@@ -84,6 +84,7 @@ export const getCompanyByIdAction = rateLimitedAction
   .metadata({ actionName: 'companies.getCompanyById', category: 'content' })
   .action(async ({ parsedInput }) => {
     try {
+      const { getCompanyAdminProfile } = await import('../data/companies.ts');
       const profile = await getCompanyAdminProfile(parsedInput.companyId);
       if (!profile) {
         // Return null instead of throwing - safe-action middleware handles logging
@@ -117,6 +118,7 @@ export const uploadCompanyLogoAction = authedAction
     }
 
     if (companyId) {
+      const { getCompanyAdminProfile } = await import('../data/companies.ts');
       const company = await getCompanyAdminProfile(companyId);
       if (!company) {
         throw new Error('Company not found.');

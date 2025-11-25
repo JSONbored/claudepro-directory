@@ -11,7 +11,7 @@ export async function getQuizConfiguration(): Promise<QuizConfigurationResult | 
   return fetchCached(
     (client) => new QuizService(client).getQuizConfiguration(),
     {
-      key: 'quiz-config',
+      keyParts: ['quiz-config'],
       tags: ['quiz'],
       ttlKey: 'cache.quiz.ttl_seconds',
       useAuth: true,

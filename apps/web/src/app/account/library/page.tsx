@@ -19,6 +19,7 @@ import {
   Plus,
 } from '@heyclaude/web-runtime/icons';
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { generateRequestId } from '@heyclaude/web-runtime/utils/request-context';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
@@ -33,6 +34,13 @@ import {
 } from '@/src/components/primitives/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/primitives/ui/tabs';
 
+/**
+ * Dynamic Rendering Required
+ * Authenticated user library
+ */
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/account/library');
 }
@@ -42,6 +50,8 @@ export default async function LibraryPage() {
 
   if (!user) {
     logger.warn('LibraryPage: unauthenticated access attempt detected', undefined, {
+      requestId: generateRequestId(),
+      operation: 'LibraryPage',
       route: '/account/library',
       timestamp: new Date().toISOString(),
     });
@@ -68,11 +78,21 @@ export default async function LibraryPage() {
   try {
     data = await getUserLibrary(user.id);
     if (!data) {
-      logger.warn('LibraryPage: getUserLibrary returned null', { userIdHash });
+      logger.warn('LibraryPage: getUserLibrary returned null', undefined, {
+        requestId: generateRequestId(),
+        operation: 'LibraryPage',
+        route: '/account/library',
+        userIdHash,
+      });
     }
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load user library');
-    logger.error('LibraryPage: getUserLibrary threw', normalized, { userIdHash });
+    logger.error('LibraryPage: getUserLibrary threw', normalized, {
+      requestId: generateRequestId(),
+      operation: 'LibraryPage',
+      route: '/account/library',
+      userIdHash,
+    });
   }
 
   if (!data) {

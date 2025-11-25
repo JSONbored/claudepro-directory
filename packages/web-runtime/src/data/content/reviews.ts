@@ -1,7 +1,6 @@
 'use server';
 
 import type { Database } from '@heyclaude/database-types';
-import { generateContentCacheKey } from '../content-helpers.ts';
 import { fetchCached } from '../../cache/fetch-cached.ts';
 import { ContentService } from '@heyclaude/data-layer';
 
@@ -29,7 +28,16 @@ export async function getReviewsWithStatsData(
         ...(userId ? { p_user_id: userId } : {})
     }),
     {
-      key: `${generateContentCacheKey(contentType, contentSlug, limit, offset)}-${sortBy ?? 'default'}-${userId ?? 'anon'}`,
+      // Next.js automatically handles serialization of keyParts array
+      keyParts: [
+        'reviews',
+        contentType,
+        contentSlug,
+        sortBy ?? 'default',
+        limit ?? 0,
+        offset ?? 0,
+        userId ?? 'anon',
+      ],
       tags: ['content', `content-${contentSlug}`, 'reviews'],
       ttlKey: 'cache.user_reviews.ttl_seconds',
       useAuth: true,

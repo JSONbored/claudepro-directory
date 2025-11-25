@@ -1,3 +1,5 @@
+import 'server-only';
+
 import type { Database } from '@heyclaude/database-types';
 import { isBuildTime } from '../../build-time.ts';
 // Lazy import feature flags to avoid module-level server-only code execution

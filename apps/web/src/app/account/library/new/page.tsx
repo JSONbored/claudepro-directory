@@ -6,12 +6,20 @@ import {
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { ArrowLeft } from '@heyclaude/web-runtime/icons';
+import { generateRequestId } from '@heyclaude/web-runtime/utils/request-context';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { CollectionForm } from '@/src/components/core/forms/collection-form';
 import { Button } from '@/src/components/primitives/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
+
+/**
+ * Dynamic Rendering Required
+ * Authenticated route
+ */
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/account/library/new');
@@ -22,6 +30,8 @@ export default async function NewCollectionPage() {
 
   if (!user) {
     logger.warn('NewCollectionPage: unauthenticated access attempt', undefined, {
+      requestId: generateRequestId(),
+      operation: 'NewCollectionPage',
       route: '/account/library/new',
       timestamp: new Date().toISOString(),
     });
@@ -31,7 +41,10 @@ export default async function NewCollectionPage() {
   const bookmarks = await getUserBookmarksForCollections(user.id);
   if (!bookmarks) {
     const hashedUserId = hashUserId(user.id);
-    logger.warn('NewCollectionPage: getUserBookmarksForCollections returned null', {
+    logger.warn('NewCollectionPage: getUserBookmarksForCollections returned null', undefined, {
+      requestId: generateRequestId(),
+      operation: 'NewCollectionPage',
+      route: '/account/library/new',
       userIdHash: hashedUserId,
     });
   }

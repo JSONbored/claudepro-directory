@@ -22,6 +22,7 @@
  */
 
 import type { Database } from '@heyclaude/database-types';
+import { getPollingConfig } from '@heyclaude/web-runtime/actions/feature-flags';
 import { trackInteraction } from '@heyclaude/web-runtime/client';
 import {
   logClientWarning,
@@ -29,7 +30,6 @@ import {
   logUnhandledPromise,
   normalizeError,
 } from '@heyclaude/web-runtime/core';
-import { getPollingConfig } from '@heyclaude/web-runtime/data';
 import { useEffect, useState } from 'react';
 
 export type PulseProps =
@@ -149,10 +149,10 @@ function ViewVariant({
 
   useEffect(() => {
     if (delay === undefined) {
-      getPollingConfig()
+      getPollingConfig({})
         .then((result) => {
-          if (!result) return;
-          const config = result;
+          if (!result?.data) return;
+          const config = result.data;
           setActualDelay(config['polling.realtime_ms']);
         })
         .catch((error) => {

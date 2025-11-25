@@ -4,7 +4,7 @@
 
 import { edgeEnv } from '../config/env.ts';
 import { getCacheConfigNumber } from '../config/statsig-cache.ts';
-import { errorToString } from '@heyclaude/shared-runtime';
+import { logError, type BaseLogContext } from '@heyclaude/shared-runtime';
 import { createUtilityContext } from '@heyclaude/shared-runtime';
 import { buildSecurityHeaders } from '@heyclaude/shared-runtime';
 
@@ -166,16 +166,18 @@ export function successResponse(data: unknown, status = 200, cors = publicCorsHe
 export function errorResponse(
   error: unknown,
   context: string,
-  cors: Record<string, string> = publicCorsHeaders
+  cors: Record<string, string> = publicCorsHeaders,
+  logContext?: BaseLogContext
 ): Response {
-  const logContext = createUtilityContext('http-utils', 'error-response', {
-    context,
-  });
-  const errorMsg = errorToString(error);
-  console.error(`${context} failed`, {
-    ...logContext,
-    error: errorMsg,
-  });
+  // Use provided logContext if available (preserves request_id), otherwise create new one
+  const finalLogContext: BaseLogContext = logContext
+    ? { ...logContext, action: logContext.action || 'error-response', context }
+    : createUtilityContext('http-utils', 'error-response', {
+        context,
+      });
+  
+  // Use logError from shared-runtime for consistent structured logging
+  logError(`${context} failed`, finalLogContext, error);
 
   // Never expose internal error details in HTTP responses
   const isTimeout = error instanceof Error && error.name === 'TimeoutError';

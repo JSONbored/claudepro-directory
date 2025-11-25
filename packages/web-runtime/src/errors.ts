@@ -34,7 +34,13 @@ export function logActionFailure(
   context?: ContextInput
 ): Error {
   const normalized = normalizeError(error);
-  logger.error(`[Action] ${actionName} failed`, normalized, sanitizeContext(context));
+  
+  // Note: requestId is already added in fetchCached for server-side errors
+  // For client-side errors, we don't need requestId (client components)
+  // Server actions will have requestId from their context
+  logger.error(`[Action] ${actionName} failed`, normalized, {
+    ...sanitizeContext(context),
+  });
   return normalized;
 }
 

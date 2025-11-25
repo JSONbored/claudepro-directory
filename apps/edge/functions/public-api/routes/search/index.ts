@@ -1,5 +1,3 @@
-/// <reference path="@heyclaude/edge-runtime/deno-globals.d.ts" />
-
 import * as dataLayer from '@heyclaude/data-layer';
 import { Constants, type Database as DatabaseGenerated } from '@heyclaude/database-types';
 import {
@@ -238,15 +236,19 @@ export async function handleSearch(req: Request, startTime: number): Promise<Res
       // Content search
       // NOTE: SearchService.searchContent uses the optimized RPC which handles keywords.
       // Semantic search logic is handled within the RPC if implemented, or we rely on keywords.
-      const result = await searchService.searchContent({
+      const searchArgs: Parameters<typeof searchService.searchContent>[0] = {
         p_query: query,
-        ...(categories ? { p_categories: categories } : {}),
-        ...(tags ? { p_tags: tags } : {}),
-        ...(authors ? { p_authors: authors } : {}),
-        p_sort: sort,
         p_limit: limit,
         p_offset: offset,
-      });
+      };
+      if (categories) {
+        searchArgs.p_categories =
+          categories as DatabaseGenerated['public']['Enums']['content_category'][];
+      }
+      if (tags) searchArgs.p_tags = tags;
+      if (authors) searchArgs.p_authors = authors;
+      if (sort) searchArgs.p_sort = sort;
+      const result = await searchService.searchContent(searchArgs);
       data = result.data ?? [];
       totalCount = result.total_count ?? result.data?.length ?? 0;
     }

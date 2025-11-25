@@ -1,5 +1,6 @@
 import { logger, normalizeError } from '@heyclaude/web-runtime/core';
 import { generatePageMetadata } from '@heyclaude/web-runtime/data';
+import { generateRequestId } from '@heyclaude/web-runtime/utils/request-context';
 import type { Metadata } from 'next';
 import { Suspense } from 'react';
 import { AuthBrandPanel } from '@/src/components/core/auth/auth-brand-panel';
@@ -29,7 +30,11 @@ export default async function LoginPage({
     redirectTo = resolvedSearchParams.redirect;
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to resolve login search params');
-    logger.error('LoginPage: resolving searchParams failed', normalized);
+    logger.error('LoginPage: resolving searchParams failed', normalized, {
+      requestId: generateRequestId(),
+      operation: 'LoginPage',
+      route: '/login',
+    });
     redirectTo = undefined;
   }
 

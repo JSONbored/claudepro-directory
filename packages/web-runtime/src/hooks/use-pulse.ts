@@ -29,7 +29,7 @@ import {
   trackInteraction,
   trackNewsletterEvent,
   trackUsage,
-} from '../index.ts';
+} from '../pulse-client.ts';
 import type { SharePlatform } from '../client.ts';
 import { useMemo } from 'react';
 

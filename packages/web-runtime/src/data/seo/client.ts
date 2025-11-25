@@ -1,3 +1,5 @@
+import 'server-only';
+
 import type { Database } from '@heyclaude/database-types';
 import { fetchCached } from '../../cache/fetch-cached.ts';
 import { SeoService } from '@heyclaude/data-layer';
@@ -34,7 +36,7 @@ export async function getSEOMetadata(route: string): Promise<{
   const result = await fetchCached(
     (client) => new SeoService(client).generateMetadata({ p_route: route, p_include: 'metadata' }),
     {
-      key: `metadata-${route}`,
+      keyParts: ['seo-metadata', route],
       tags: ['seo', `seo-${route}`],
       ttlKey: 'cache.seo.ttl_seconds',
       fallback: null,
@@ -114,7 +116,7 @@ export async function getSEOMetadataWithSchemas(route: string): Promise<{
   const result = await fetchCached(
     (client) => new SeoService(client).generateMetadata({ p_route: route, p_include: 'metadata,schemas' }),
     {
-      key: `metadata-schemas-${route}`,
+      keyParts: ['seo-metadata-schemas', route],
       tags: ['seo', `seo-${route}`, 'structured-data'],
       ttlKey: 'cache.seo.ttl_seconds',
       fallback: null,

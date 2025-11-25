@@ -38,6 +38,11 @@ jobs:
       - name: Lint
         run: pnpm lint
 
+      - name: Verify Architecture
+        run: |
+          pnpm verify:routes
+          pnpm verify:flags
+
       - name: Type Check
         run: pnpm type-check
 

@@ -1,6 +1,7 @@
 import type { Database } from '@heyclaude/database-types';
 import { logger, normalizeError } from '@heyclaude/web-runtime/core';
 import { generatePageMetadata, getCommunityDirectory } from '@heyclaude/web-runtime/data';
+import { generateRequestId } from '@heyclaude/web-runtime/utils/request-context';
 import type { Metadata } from 'next';
 import { Suspense } from 'react';
 import { ContributorsSidebar } from '@/src/components/features/community/contributors-sidebar';
@@ -23,13 +24,19 @@ async function CommunityDirectoryContent({ searchQuery }: { searchQuery: string 
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load community directory');
     logger.error('CommunityDirectoryContent: getCommunityDirectory failed', normalized, {
+      requestId: generateRequestId(),
+      operation: 'CommunityDirectoryContent',
+      route: '/community/directory',
       hasQuery: Boolean(searchQuery),
     });
     throw normalized;
   }
 
   if (!directoryData) {
-    logger.warn('CommunityDirectoryContent: directory data response is empty', {
+    logger.warn('CommunityDirectoryContent: directory data response is empty', undefined, {
+      requestId: generateRequestId(),
+      operation: 'CommunityDirectoryContent',
+      route: '/community/directory',
       hasQuery: Boolean(searchQuery),
     });
   }

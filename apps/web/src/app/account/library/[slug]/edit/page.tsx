@@ -5,12 +5,20 @@ import {
   getCollectionDetail,
 } from '@heyclaude/web-runtime/data';
 import { ArrowLeft } from '@heyclaude/web-runtime/icons';
+import { generateRequestId } from '@heyclaude/web-runtime/utils/request-context';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { CollectionForm } from '@/src/components/core/forms/collection-form';
 import { Button } from '@/src/components/primitives/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
+
+/**
+ * Dynamic Rendering Required
+ * Authenticated route
+ */
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 interface EditCollectionPageProps {
   params: Promise<{ slug: string }>;
@@ -26,7 +34,12 @@ export default async function EditCollectionPage({ params }: EditCollectionPageP
   const { user } = await getAuthenticatedUser({ context: 'EditCollectionPage' });
 
   if (!user) {
-    logger.warn('EditCollectionPage: unauthenticated access attempt', { slug });
+    logger.warn('EditCollectionPage: unauthenticated access attempt', undefined, {
+      requestId: generateRequestId(),
+      operation: 'EditCollectionPage',
+      route: `/account/library/${slug}/edit`,
+      slug,
+    });
     redirect('/login');
   }
 
@@ -38,6 +51,9 @@ export default async function EditCollectionPage({ params }: EditCollectionPageP
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load collection detail for edit page');
     logger.error('EditCollectionPage: getCollectionDetail threw', normalized, {
+      requestId: generateRequestId(),
+      operation: 'EditCollectionPage',
+      route: `/account/library/${slug}/edit`,
       slug,
       userIdHash,
     });
@@ -45,7 +61,10 @@ export default async function EditCollectionPage({ params }: EditCollectionPageP
   }
 
   if (!collectionData) {
-    logger.warn('EditCollectionPage: collection not found or inaccessible', {
+    logger.warn('EditCollectionPage: collection not found or inaccessible', undefined, {
+      requestId: generateRequestId(),
+      operation: 'EditCollectionPage',
+      route: `/account/library/${slug}/edit`,
       slug,
       userIdHash,
     });
@@ -55,7 +74,10 @@ export default async function EditCollectionPage({ params }: EditCollectionPageP
   const { collection, bookmarks } = collectionData;
 
   if (!collection) {
-    logger.warn('EditCollectionPage: collection is null in response', {
+    logger.warn('EditCollectionPage: collection is null in response', undefined, {
+      requestId: generateRequestId(),
+      operation: 'EditCollectionPage',
+      route: `/account/library/${slug}/edit`,
       slug,
       userIdHash,
     });

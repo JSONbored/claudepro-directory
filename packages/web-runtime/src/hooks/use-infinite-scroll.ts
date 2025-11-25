@@ -8,7 +8,8 @@
  * @module hooks/use-infinite-scroll
  */
 
-import { getAppSettings, getTimeoutConfig, logClientWarning, logger } from '../index.ts';
+import { getAppSettings, getTimeoutConfig } from '../actions/feature-flags.ts';
+import { logClientWarning, logger } from '../entries/core.ts';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 interface UseInfiniteScrollOptions {

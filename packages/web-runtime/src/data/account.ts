@@ -31,7 +31,7 @@ export async function getAccountDashboard(
   const result = await fetchCached(
     (client) => new AccountService(client).getAccountDashboard({ p_user_id: userId }),
     {
-      key: `dashboard-${userId}`,
+      keyParts: ['dashboard', userId],
       tags: ['users', `user-${userId}`],
       ttlKey: ACCOUNT_TTL_KEY,
       useAuth: true,
@@ -50,7 +50,7 @@ export async function getUserLibrary(
   return fetchCached(
     (client) => new AccountService(client).getUserLibrary({ p_user_id: userId }),
     {
-      key: `library-${userId}`,
+      keyParts: ['library', userId],
       tags: ['users', `user-${userId}`, 'user-bookmarks'],
       ttlKey: ACCOUNT_TTL_KEY,
       useAuth: true,
@@ -101,7 +101,7 @@ export async function getUserDashboard(
   return fetchCached(
     (client) => new AccountService(client).getUserDashboard({ p_user_id: userId }),
     {
-      key: `jobs-${userId}`,
+      keyParts: ['jobs', userId],
       tags: ['users', `user-${userId}`, 'jobs'],
       ttlKey: ACCOUNT_TTL_KEY,
       useAuth: true,
@@ -127,7 +127,7 @@ export async function getCollectionDetail(
   return fetchCached(
     (client) => new AccountService(client).getCollectionDetailWithItems({ p_user_id: userId, p_slug: slug }),
     {
-      key: `collection-${userId}-${slug}`,
+      keyParts: ['collection', userId, slug],
       tags: ['users', `user-${userId}`, 'collections', `collection-${slug}`],
       ttlKey: ACCOUNT_TTL_KEY,
       useAuth: true,
@@ -143,7 +143,7 @@ export async function getUserSettings(
   return fetchCached(
     (client) => new AccountService(client).getUserSettings({ p_user_id: userId }),
     {
-      key: `settings-${userId}`,
+      keyParts: ['settings', userId],
       tags: ['users', `user-${userId}`, 'settings'],
       ttlKey: ACCOUNT_TTL_KEY,
       useAuth: true,
@@ -160,7 +160,7 @@ export async function getSponsorshipAnalytics(
   return fetchCached(
     (client) => new AccountService(client).getSponsorshipAnalytics({ p_user_id: userId, p_sponsorship_id: sponsorshipId }),
     {
-      key: `sponsorship-${userId}-${sponsorshipId}`,
+      keyParts: ['sponsorship', userId, sponsorshipId],
       tags: ['users', `user-${userId}`, 'sponsorships', `sponsorship-${sponsorshipId}`],
       ttlKey: ACCOUNT_TTL_KEY,
       useAuth: true,
@@ -176,7 +176,7 @@ export async function getUserCompanies(
   return fetchCached(
     (client) => new AccountService(client).getUserCompanies({ p_user_id: userId }),
     {
-      key: `companies-${userId}`,
+      keyParts: ['companies', userId],
       tags: ['users', `user-${userId}`, 'companies'],
       ttlKey: ACCOUNT_TTL_KEY,
       useAuth: true,
@@ -192,7 +192,7 @@ export async function getUserSponsorships(
   return fetchCached(
     (client) => new AccountService(client).getUserSponsorships({ p_user_id: userId }),
     {
-      key: `sponsorships-${userId}`,
+      keyParts: ['sponsorships', userId],
       tags: ['users', `user-${userId}`, 'sponsorships'],
       ttlKey: ACCOUNT_TTL_KEY,
       useAuth: true,
@@ -223,7 +223,7 @@ export async function getSubmissionDashboard(
       p_contributors_limit: contributorsLimit,
     }),
     {
-      key: `${recentLimit}-${contributorsLimit}`,
+      keyParts: ['submission-dashboard', recentLimit, contributorsLimit],
       tags: ['submissions', 'dashboard', 'content'],
       ttlKey: 'cache.submission_dashboard.ttl_seconds',
       useAuth: true,
@@ -231,4 +231,45 @@ export async function getSubmissionDashboard(
       logMeta: { recentLimit, contributorsLimit },
     }
   );
+}
+
+/**
+ * Account Dashboard Bundle - Shared data per request
+ * 
+ * Fetches dashboard, user library, and homepage data in parallel to reduce
+ * duplicate data fetching across account pages. This ensures each request
+ * only fetches shared data once, improving performance and reducing Supabase load.
+ * 
+ * @param userId - Authenticated user ID
+ * @param categoryIds - Homepage category IDs (optional, defaults to getHomepageCategoryIds)
+ * @returns Bundle containing dashboard, library, and homepage data
+ */
+export interface AccountDashboardBundle {
+  dashboard: Awaited<ReturnType<typeof getAccountDashboard>>;
+  library: Awaited<ReturnType<typeof getUserLibrary>>;
+  homepage: Awaited<ReturnType<typeof import('./content/homepage.ts').getHomepageData>>;
+}
+
+export async function getAccountDashboardBundle(
+  userId: string,
+  categoryIds?: readonly string[]
+): Promise<AccountDashboardBundle> {
+  // Lazy import to avoid circular dependencies
+  const { getHomepageData } = await import('./content/homepage.ts');
+  const { getHomepageCategoryIds } = await import('./config/category/index.ts');
+  
+  const finalCategoryIds = categoryIds ?? getHomepageCategoryIds;
+  
+  // Fetch all three data sources in parallel
+  const [dashboard, library, homepage] = await Promise.all([
+    getAccountDashboard(userId),
+    getUserLibrary(userId),
+    getHomepageData(finalCategoryIds),
+  ]);
+  
+  return {
+    dashboard,
+    library,
+    homepage,
+  };
 }

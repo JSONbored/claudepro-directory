@@ -3,9 +3,17 @@ import { createJob } from '@heyclaude/web-runtime/actions';
 import { logger, normalizeError } from '@heyclaude/web-runtime/core';
 import { generatePageMetadata, getPaymentPlanCatalog } from '@heyclaude/web-runtime/server';
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { generateRequestId } from '@heyclaude/web-runtime/utils/request-context';
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { JobForm } from '@/src/components/core/forms/job-form';
+
+/**
+ * Dynamic Rendering Required
+ * Authenticated route using cookies
+ */
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/account/jobs/new');
@@ -17,7 +25,10 @@ export default async function NewJobPage() {
     planCatalog = await getPaymentPlanCatalog();
   } catch (error) {
     const normalized = normalizeError(error, 'NewJobPage: failed to fetch plan catalog');
-    logger.warn('NewJobPage: failed to fetch plan catalog, using fallback', {
+    logger.warn('NewJobPage: failed to fetch plan catalog, using fallback', undefined, {
+      requestId: generateRequestId(),
+      operation: 'NewJobPage',
+      route: '/account/jobs/new',
       error: normalized.message,
       name: normalized.name,
     });
@@ -34,6 +45,9 @@ export default async function NewJobPage() {
     } catch (error) {
       const normalized = normalizeError(error, 'createJob server action failed');
       logger.error('NewJobPage: createJob threw', normalized, {
+        requestId: generateRequestId(),
+        operation: 'NewJobPage',
+        route: '/account/jobs/new',
         title: data.title,
         company: data.company,
       });
@@ -43,6 +57,9 @@ export default async function NewJobPage() {
     if (result?.serverError) {
       const error = normalizeError(result.serverError, 'NewJobPage: createJob failed');
       logger.error('NewJobPage: createJob failed', error, {
+        requestId: generateRequestId(),
+        operation: 'NewJobPage',
+        route: '/account/jobs/new',
         title: data.title,
         company: data.company,
       });
@@ -55,6 +72,9 @@ export default async function NewJobPage() {
         'NewJobPage: createJob returned no data'
       );
       logger.error('NewJobPage: createJob returned no data', error, {
+        requestId: generateRequestId(),
+        operation: 'NewJobPage',
+        route: '/account/jobs/new',
         title: data.title,
         company: data.company,
       });
@@ -69,6 +89,9 @@ export default async function NewJobPage() {
             'NewJobPage: missing checkout URL'
           );
           logger.error('NewJobPage: missing checkout URL', error, {
+            requestId: generateRequestId(),
+            operation: 'NewJobPage',
+            route: '/account/jobs/new',
             title: data.title,
             company: data.company,
             jobId: result.data.jobId,
@@ -100,6 +123,9 @@ export default async function NewJobPage() {
       'NewJobPage: createJob returned success=false'
     );
     logger.error('NewJobPage: createJob returned success=false', error, {
+      requestId: generateRequestId(),
+      operation: 'NewJobPage',
+      route: '/account/jobs/new',
       title: data.title,
       company: data.company,
       jobId: result.data?.jobId ?? 'unknown',

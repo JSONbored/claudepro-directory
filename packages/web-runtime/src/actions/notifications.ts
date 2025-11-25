@@ -1,17 +1,8 @@
 'use server';
 
-import { dismissNotifications } from '../notifications.ts';
-import { getActiveNotifications } from '../data/notifications.ts';
-import { logActionFailure } from '../errors.ts';
 import { authedAction } from './safe-action.ts';
-import { traceMeta } from '../trace.ts'; import { type NotificationRecord } from '../notifications.ts'; // traceMeta is in trace.ts, NotificationRecord in notifications.ts (conflict?)
-// Check imports again. NotificationRecord was imported from `../core` in original, which exported it from `../notifications.ts`.
-// traceMeta was in `../core`.
-// In package:
-// notifications.ts has NotificationRecord
-// trace.ts has traceMeta
-
 import { z } from 'zod';
+import type { NotificationRecord } from '../notifications.ts';
 
 const MAX_NOTIFICATION_IDS = 50;
 
@@ -44,6 +35,10 @@ export const getActiveNotificationsAction = authedAction
   })
   .inputSchema(getActiveNotificationsSchema)
   .action(async ({ parsedInput, ctx }): Promise<GetActiveNotificationsActionResult> => {
+    const { getActiveNotifications } = await import('../data/notifications.ts');
+    const { traceMeta } = await import('../trace.ts');
+    const { logActionFailure } = await import('../errors.ts');
+
     const dismissedIds = parsedInput.dismissedIds ?? [];
     const meta = await traceMeta<{ dismissedCount: number }>({
       dismissedCount: dismissedIds.length,
@@ -74,6 +69,10 @@ export const dismissNotificationsAction = authedAction
   })
   .inputSchema(dismissNotificationsSchema)
   .action(async ({ parsedInput, ctx }): Promise<DismissNotificationsActionResult> => {
+    const { dismissNotifications } = await import('../notifications.ts');
+    const { traceMeta } = await import('../trace.ts');
+    const { logActionFailure } = await import('../errors.ts');
+
     const uniqueIds = Array.from(
       new Set(parsedInput.notificationIds.map((id) => id.trim()).filter(Boolean))
     ) as string[];

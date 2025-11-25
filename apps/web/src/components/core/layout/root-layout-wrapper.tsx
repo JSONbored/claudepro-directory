@@ -6,7 +6,7 @@
 'use client';
 
 import type { Database } from '@heyclaude/database-types';
-import { checkConfettiEnabled } from '@heyclaude/web-runtime';
+import { checkConfettiEnabled } from '@heyclaude/web-runtime/actions/feature-flags';
 import { logClientWarning, logger, normalizeError } from '@heyclaude/web-runtime/core';
 import { EXPERIMENT_KEYS, FLAG_KEYS } from '@heyclaude/web-runtime/feature-flags/keys';
 import { useFeatureFlags } from '@heyclaude/web-runtime/feature-flags/provider';

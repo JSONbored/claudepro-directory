@@ -82,6 +82,7 @@ manifest.json
 
 # Supabase schema dump (contains secrets in trigger definitions)
 apps/edge/schema.sql
+supabase/migrations/*
 
 .launchd/com.claudepro.backup.plist
 

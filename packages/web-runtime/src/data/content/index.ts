@@ -1,32 +1,38 @@
+import 'server-only';
+
 import type { Database } from '@heyclaude/database-types';
 import { cache } from 'react';
 import {
-  generateContentCacheKey,
   generateContentTags,
 } from '../content-helpers.ts';
 import { toLogContextValue } from '../../logger.ts';
 import { fetchCached } from '../../cache/fetch-cached.ts';
 import { ContentService, TrendingService, type ContentFilterOptions } from '@heyclaude/data-layer';
+import { QUERY_LIMITS } from '../config/constants.ts';
 
-export async function getContentByCategory(
-  category: Database['public']['Enums']['content_category']
-): Promise<Database['public']['Functions']['get_enriched_content_list']['Returns']> {
-  const result = await fetchCached(
-    (client) => new ContentService(client).getEnrichedContentList({
-      p_category: category,
-      p_limit: 1000,
-      p_offset: 0
-    }),
-    {
-      key: generateContentCacheKey(category),
-      tags: generateContentTags(category),
-      ttlKey: 'cache.content_list.ttl_seconds',
-      fallback: [],
-      logMeta: { category },
-    }
-  );
-  return result ?? [];
-}
+// OPTIMIZATION: Wrapped with React.cache() for request-level deduplication
+// This prevents duplicate calls within the same request (React Server Component tree)
+export const getContentByCategory = cache(
+  async (
+    category: Database['public']['Enums']['content_category']
+  ): Promise<Database['public']['Functions']['get_enriched_content_list']['Returns']> => {
+    const result = await fetchCached(
+      (client) => new ContentService(client).getEnrichedContentList({
+        p_category: category,
+        p_limit: QUERY_LIMITS.content.default,
+        p_offset: 0
+      }),
+      {
+        keyParts: ['content', category],
+        tags: generateContentTags(category),
+        ttlKey: 'cache.content_list.ttl_seconds',
+        fallback: [],
+        logMeta: { category },
+      }
+    );
+    return result ?? [];
+  }
+);
 
 export const getContentBySlug = cache(
   async (
@@ -45,7 +51,7 @@ export const getContentBySlug = cache(
          return data?.[0] ?? null;
        },
        {
-          key: generateContentCacheKey(category, slug),
+          keyParts: ['content', category, slug],
           tags: generateContentTags(category, slug),
           ttlKey: 'cache.content_detail.ttl_seconds',
           fallback: null,
@@ -55,14 +61,7 @@ export const getContentBySlug = cache(
   }
 );
 
-export const getFullContentBySlug = cache(
-  async (
-    category: Database['public']['Enums']['content_category'],
-    slug: string
-  ): Promise<Database['public']['CompositeTypes']['enriched_content_item'] | null> => {
-    return getContentBySlug(category, slug);
-  }
-);
+// REMOVED: getFullContentBySlug - redundant wrapper, use getContentBySlug directly
 
 export const getAllContent = cache(
   async (
@@ -79,13 +78,23 @@ export const getAllContent = cache(
             ...(filters?.author ? { p_author: filters.author } : {}),
             p_order_by: filters?.orderBy ?? 'created_at',
             p_order_direction: filters?.orderDirection ?? 'desc',
-            p_limit: filters?.limit ?? 1000,
+            p_limit: filters?.limit ?? QUERY_LIMITS.content.default,
             p_offset: 0
          });
          return (result?.items ?? []) as Database['public']['CompositeTypes']['enriched_content_item'][];
       },
       {
-        key: JSON.stringify(filters ?? {}),
+        // Next.js automatically handles serialization of keyParts array
+        keyParts: [
+          'content-all',
+          category ?? 'all',
+          ...(filters?.tags ?? []),
+          filters?.search ?? '',
+          filters?.author ?? '',
+          filters?.orderBy ?? 'created_at',
+          filters?.orderDirection ?? 'desc',
+          filters?.limit ?? QUERY_LIMITS.content.default,
+        ],
         tags: ['content-all'],
         ttlKey: 'cache.content_list.ttl_seconds',
         fallback: [] as Database['public']['CompositeTypes']['enriched_content_item'][],
@@ -109,7 +118,7 @@ export const getContentCount = cache(
         return result?.pagination?.total_count ?? 0;
       },
       {
-        key: generateContentCacheKey(category),
+        keyParts: ['content-count', category ?? 'all'],
         tags: generateContentTags(category),
         ttlKey: 'cache.content_list.ttl_seconds',
         fallback: 0,
@@ -127,7 +136,7 @@ export const getTrendingContent = cache(
         p_limit: limit
       }),
       {
-        key: generateContentCacheKey(category, null, limit),
+        keyParts: ['trending', category ?? 'all', limit],
         tags: ['trending', ...(category ? [`trending-${category}`] : ['trending-all'])],
         ttlKey: 'cache.content_list.ttl_seconds',
         fallback: [],
@@ -137,13 +146,7 @@ export const getTrendingContent = cache(
   }
 );
 
-export const getFilteredContent = cache(
-  async (
-    filters: ContentFilterOptions
-  ): Promise<Database['public']['CompositeTypes']['enriched_content_item'][]> => {
-    return getAllContent(filters);
-  }
-);
+// REMOVED: getFilteredContent - redundant wrapper, use getAllContent directly
 
 export const getConfigurationCount = cache(async () => getContentCount());
 
@@ -177,7 +180,7 @@ export async function getTrendingPageData(
         p_limit: safeLimit
       }),
       {
-        key: `metrics-${generateContentCacheKey(category, null, safeLimit)}`,
+        keyParts: ['trending-metrics', category ?? 'all', safeLimit],
         tags: ['trending', 'trending-page'],
         ttlKey: 'cache.content_list.ttl_seconds',
         fallback: [],
@@ -190,7 +193,7 @@ export async function getTrendingPageData(
         p_limit: safeLimit
       }),
       {
-        key: `popular-${generateContentCacheKey(category, null, safeLimit)}`,
+        keyParts: ['trending-popular', category ?? 'all', safeLimit],
         tags: ['trending', 'trending-popular'],
         ttlKey: 'cache.content_list.ttl_seconds',
         fallback: [],
@@ -204,7 +207,7 @@ export async function getTrendingPageData(
         p_days: 30
       }),
       {
-        key: `recent-${generateContentCacheKey(category, null, safeLimit)}`,
+        keyParts: ['trending-recent', category ?? 'all', safeLimit, 30],
         tags: ['trending', 'trending-recent'],
         ttlKey: 'cache.content_list.ttl_seconds',
         fallback: [],

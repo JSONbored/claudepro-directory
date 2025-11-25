@@ -2,7 +2,6 @@
 
 import type { Database } from '@heyclaude/database-types';
 import { fetchCached } from '../../cache/fetch-cached.ts';
-import { generateContentCacheKey } from '../content-helpers.ts';
 import { ContentService } from '@heyclaude/data-layer';
 
 export async function getSimilarContent(input: {
@@ -19,7 +18,7 @@ export async function getSimilarContent(input: {
         p_limit: limit
     }),
     {
-      key: generateContentCacheKey(contentType, contentSlug, limit),
+      keyParts: ['similar-content', contentType, contentSlug, limit],
       tags: ['content', 'similar', `content-${contentSlug}`],
       ttlKey: 'cache.content_detail.ttl_seconds',
       fallback: null,

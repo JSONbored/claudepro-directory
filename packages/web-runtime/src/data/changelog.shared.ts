@@ -3,6 +3,7 @@ import { Constants } from '@heyclaude/database-types';
 import { z } from 'zod';
 import { logger } from '../logger.ts';
 import { normalizeError } from '../errors.ts';
+import { generateRequestId } from '../utils/request-context.ts';
 
 const changeItemSchema = z.object({
   content: z.string(),
@@ -35,7 +36,10 @@ export function parseChangelogChanges(changes: unknown): ChangelogChanges {
     return changesSchema.parse(changes);
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to parse changelog changes');
-    logger.error('Failed to parse changelog changes', normalized);
+    logger.error('Failed to parse changelog changes', normalized, {
+      requestId: generateRequestId(),
+      operation: 'parseChangelogChanges',
+    });
     return {};
   }
 }

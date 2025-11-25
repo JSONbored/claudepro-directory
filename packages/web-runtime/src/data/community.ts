@@ -9,6 +9,7 @@ import {
 } from '../index.ts';
 import { fetchCached } from '../cache/fetch-cached.ts';
 import { CommunityService } from '@heyclaude/data-layer';
+import { generateRequestId } from '../utils/request-context.ts';
 
 const DEFAULT_DIRECTORY_LIMIT = 100;
 
@@ -48,7 +49,11 @@ export async function getCommunityDirectory(options: {
 
       pulseUserSearch(searchQuery.trim(), allUsers.length).catch((error) => {
         const normalized = normalizeError(error, 'Failed to pulse user search');
-        logger.warn('Failed to pulse user search', { error: normalized.message });
+        logger.warn('Failed to pulse user search', undefined, {
+          requestId: generateRequestId(),
+          operation: 'pulseUserSearch',
+          error: normalized.message,
+        });
       });
 
       return {
@@ -59,6 +64,8 @@ export async function getCommunityDirectory(options: {
     } catch (error) {
       const normalized = normalizeError(error, 'User search via unified-search failed');
       logger.error('User search via unified-search failed, falling back to RPC', normalized, {
+        requestId: generateRequestId(),
+        operation: 'getCommunityDirectory',
         query: searchQuery,
       });
     }
@@ -67,10 +74,10 @@ export async function getCommunityDirectory(options: {
   return fetchCached(
     (client) => new CommunityService(client).getCommunityDirectory({ p_limit: limit }),
     {
-      key: `all-${limit}`,
+      keyParts: ['community-directory', 'all', limit],
       tags: ['community', 'users'],
       ttlKey: 'cache.community.ttl_seconds',
-      useAuth: true,
+      useAuth: false,
       fallback: null,
       logMeta: {
         hasQuery: Boolean(searchQuery?.trim()),
@@ -93,7 +100,7 @@ export async function getPublicUserProfile(input: {
         ...(viewerId ? { p_viewer_id: viewerId } : {})
       }),
       {
-        key: viewerId ? `${slug}-viewer-${viewerId}` : slug,
+        keyParts: viewerId ? ['user-profile', slug, 'viewer', viewerId] : ['user-profile', slug],
         tags: ['users', `user-${slug}`],
         ttlKey: 'cache.user_profile.ttl_seconds',
         useAuth: true,
@@ -104,6 +111,8 @@ export async function getPublicUserProfile(input: {
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load user profile detail');
     logger.error('getPublicUserProfile failed', normalized, {
+      requestId: generateRequestId(),
+      operation: 'getPublicUserProfile',
       slug,
       ...(viewerId ? { viewerId } : {}),
     });
@@ -126,9 +135,9 @@ export async function getPublicCollectionDetail(input: {
         ...(viewerId ? { p_viewer_id: viewerId } : {})
       }),
       {
-        key: viewerId
-          ? `${userSlug}-${collectionSlug}-viewer-${viewerId}`
-          : `${userSlug}-${collectionSlug}`,
+        keyParts: viewerId
+          ? ['collection-detail', userSlug, collectionSlug, 'viewer', viewerId]
+          : ['collection-detail', userSlug, collectionSlug],
         tags: ['collections', `collection-${collectionSlug}`, `user-${userSlug}`],
         ttlKey: 'cache.content_list.ttl_seconds',
         useAuth: true,
@@ -142,7 +151,9 @@ export async function getPublicCollectionDetail(input: {
     );
 
     if (!data) {
-      logger.warn('getPublicCollectionDetail: RPC returned null', {
+      logger.warn('getPublicCollectionDetail: RPC returned null', undefined, {
+        requestId: generateRequestId(),
+        operation: 'getPublicCollectionDetail',
         slug: userSlug,
         collectionSlug,
         ...(viewerId ? { viewerId } : {}),
@@ -154,6 +165,8 @@ export async function getPublicCollectionDetail(input: {
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load user collection detail');
     logger.error('getPublicCollectionDetail failed', normalized, {
+      requestId: generateRequestId(),
+      operation: 'getPublicCollectionDetail',
       slug: userSlug,
       collectionSlug,
       ...(viewerId ? { viewerId } : {}),

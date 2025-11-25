@@ -11,7 +11,7 @@ export async function fetchContactCommands(): Promise<ContactCommandsRow | null>
   const result = await fetchCached(
     (client) => new MiscService(client).getContactCommands(),
     {
-      key: 'contact-commands',
+      keyParts: ['contact-commands'],
       tags: ['contact'],
       ttlKey: 'cache.contact.ttl_seconds',
       fallback: [],

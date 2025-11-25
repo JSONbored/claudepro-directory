@@ -19,7 +19,7 @@ export async function getContentTemplates(
   const result = await fetchCached(
     (client) => new ContentService(client).getContentTemplates({ p_category: category }),
     {
-      key: category,
+      keyParts: ['content-templates', category],
       tags: ['templates', `templates-${category}`],
       ttlKey: 'cache.templates.ttl_seconds',
       fallback: null,

@@ -3,6 +3,8 @@
  * Used for static generation + ISR where cookies aren't needed.
  */
 
+import 'server-only';
+
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '@heyclaude/database-types';
 import { logger } from '../logger.ts';

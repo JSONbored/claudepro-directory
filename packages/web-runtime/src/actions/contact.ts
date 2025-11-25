@@ -5,7 +5,6 @@
  * Calls get_contact_commands RPC.
  */
 
-import { fetchContactCommands } from '../data/contact.ts';
 import { rateLimitedAction } from './safe-action.ts';
 import { z } from 'zod';
 
@@ -18,6 +17,7 @@ export const getContactCommands = rateLimitedAction
   .metadata({ actionName: 'contact.getContactCommands', category: 'content' })
   .action(async () => {
     try {
+      const { fetchContactCommands } = await import('../data/contact.ts');
       const data = await fetchContactCommands();
       // Return empty commands structure if data is null (graceful fallback)
       return data ?? { commands: [] };

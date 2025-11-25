@@ -10,12 +10,10 @@ import type { Database } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
 import { runRpc } from './run-rpc-instance.ts';
 import { authedAction } from './safe-action.ts';
-import { fetchCached } from '../cache/fetch-cached.ts';
-import { getCacheConfigSnapshot, type CacheConfigPromise } from '../cache-config.ts';
-import { resolveInvalidateTags, revalidateCacheTags, type CacheInvalidateKey } from '../cache-tags.ts';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { z } from 'zod';
+import type { CacheConfigPromise, CacheInvalidateKey } from '../cache-config.ts';
 
 // Use enum values directly from @heyclaude/database-types Constants
 const CONTENT_CATEGORY_VALUES = Constants.public.Enums.content_category;
@@ -67,6 +65,7 @@ async function invalidateUserCaches({
   extraTags?: string[];
   userIds?: Array<string | null | undefined>;
 }): Promise<void> {
+  const { resolveInvalidateTags, revalidateCacheTags } = await import('../cache-tags.ts');
   const tags = new Set(extraTags ?? []);
   if (invalidateKeys?.length) {
     const resolved = await resolveInvalidateTags(invalidateKeys, cacheConfigPromise);
@@ -130,6 +129,7 @@ export const updateProfile = authedAction
     })
   )
   .action(async ({ parsedInput, ctx }) => {
+    const { getCacheConfigSnapshot } = await import('../cache-config.ts');
     const cacheConfigPromise = getCacheConfigSnapshot();
     const result = await runRpc<Database['public']['Functions']['update_user_profile']['Returns']>(
       'update_user_profile',
@@ -176,6 +176,7 @@ export const updateProfile = authedAction
   });
 
 async function refreshProfileFromOAuthInternal(userId: string) {
+  const { getCacheConfigSnapshot } = await import('../cache-config.ts');
   const cacheConfigPromise = getCacheConfigSnapshot();
   const result = await runRpc<
     Database['public']['Functions']['refresh_profile_from_oauth']['Returns']
@@ -231,6 +232,7 @@ export const isBookmarkedAction = authedAction
     })
   )
   .action(async ({ parsedInput, ctx }) => {
+    const { fetchCached } = await import('../cache/fetch-cached.ts');
     // Use AccountService instead of generic cache lookup
     const data = await fetchCached(
       (client: SupabaseClient<Database>) =>
@@ -240,7 +242,7 @@ export const isBookmarkedAction = authedAction
           p_content_slug: parsedInput.content_slug,
         }),
       {
-        key: `${ctx.userId}-${parsedInput.content_type}-${parsedInput.content_slug}`,
+        keyParts: ['user-bookmark', ctx.userId, parsedInput.content_type, parsedInput.content_slug],
         tags: ['user-bookmarks', `user-${ctx.userId}`, `content-${parsedInput.content_slug}`],
         ttlKey: 'cache.user_bookmarks.ttl_seconds',
         useAuth: true,
@@ -274,6 +276,7 @@ export const addBookmarkBatch = authedAction
     })
   )
   .action(async ({ parsedInput, ctx }) => {
+    const { getCacheConfigSnapshot } = await import('../cache-config.ts');
     const cacheConfigPromise = getCacheConfigSnapshot();
 
     // Construct composite type array from parsed input
@@ -322,6 +325,7 @@ export const toggleFollow = authedAction
   })
   .inputSchema(followSchema)
   .action(async ({ parsedInput: { action, user_id, slug }, ctx }) => {
+    const { getCacheConfigSnapshot } = await import('../cache-config.ts');
     const cacheConfigPromise = getCacheConfigSnapshot();
     const result = await runRpc<Database['public']['Functions']['toggle_follow']['Returns']>(
       'toggle_follow',
@@ -359,6 +363,7 @@ export const isFollowingAction = authedAction
     })
   )
   .action(async ({ parsedInput, ctx }) => {
+    const { fetchCached } = await import('../cache/fetch-cached.ts');
     const data = await fetchCached(
       (client: SupabaseClient<Database>) =>
         new AccountService(client).isFollowing({
@@ -366,7 +371,7 @@ export const isFollowingAction = authedAction
           following_id: parsedInput.user_id,
         }),
       {
-        key: `${ctx.userId}-${parsedInput.user_id}`,
+        keyParts: ['user-follow-status', ctx.userId, parsedInput.user_id],
         tags: ['users', `user-${ctx.userId}`, `user-${parsedInput.user_id}`],
         ttlKey: 'cache.user_profile.ttl_seconds',
         useAuth: true,
@@ -398,6 +403,7 @@ export const getBookmarkStatusBatch = authedAction
     })
   )
   .action(async ({ parsedInput, ctx }) => {
+    const { fetchCached } = await import('../cache/fetch-cached.ts');
     const data = await fetchCached(
       (client: SupabaseClient<Database>) =>
         new AccountService(client).isBookmarkedBatch({
@@ -405,7 +411,7 @@ export const getBookmarkStatusBatch = authedAction
           p_items: parsedInput.items,
         }),
       {
-        key: `${ctx.userId}-${JSON.stringify(parsedInput.items)}`,
+        keyParts: ['user-bookmark-batch', ctx.userId, ...parsedInput.items.map(i => `${i.content_type}:${i.content_slug}`)],
         tags: ['user-bookmarks', `user-${ctx.userId}`],
         ttlKey: 'cache.user_bookmarks.ttl_seconds',
         useAuth: true,
@@ -433,6 +439,7 @@ export const getFollowStatusBatch = authedAction
     })
   )
   .action(async ({ parsedInput, ctx }) => {
+    const { fetchCached } = await import('../cache/fetch-cached.ts');
     const data = await fetchCached(
       (client: SupabaseClient<Database>) =>
         new AccountService(client).isFollowingBatch({
@@ -440,7 +447,7 @@ export const getFollowStatusBatch = authedAction
           p_followed_user_ids: parsedInput.user_ids,
         }),
       {
-        key: `${ctx.userId}-${parsedInput.user_ids.sort().join('-')}`,
+        keyParts: ['user-follow-batch', ctx.userId, ...parsedInput.user_ids.sort()],
         tags: ['users', `user-${ctx.userId}`],
         ttlKey: 'cache.user_profile.ttl_seconds',
         useAuth: true,
@@ -458,11 +465,12 @@ export const getActivitySummary = authedAction
   .metadata({ actionName: 'getActivitySummary', category: 'user' })
   .inputSchema(z.void())
   .action(async ({ ctx }) => {
+    const { fetchCached } = await import('../cache/fetch-cached.ts');
     const data = await fetchCached(
       (client: SupabaseClient<Database>) =>
         new AccountService(client).getUserActivitySummary({ p_user_id: ctx.userId }),
       {
-        key: `${ctx.userId}-summary`,
+        keyParts: ['user-activity-summary', ctx.userId],
         tags: ['user-activity', `user-${ctx.userId}`],
         ttlKey: 'cache.user_activity.ttl_seconds',
         useAuth: true,
@@ -485,6 +493,7 @@ export const getActivityTimeline = authedAction
   .metadata({ actionName: 'getActivityTimeline', category: 'user' })
   .inputSchema(activityFilterSchema)
   .action(async ({ parsedInput: { type, limit = 20, offset = 0 }, ctx }) => {
+    const { fetchCached } = await import('../cache/fetch-cached.ts');
     const data = await fetchCached(
       (client: SupabaseClient<Database>) =>
         new AccountService(client).getUserActivityTimeline({
@@ -494,7 +503,7 @@ export const getActivityTimeline = authedAction
           p_offset: offset,
         }),
       {
-        key: `${ctx.userId}-${type ?? 'all'}-${limit}-${offset}`,
+        keyParts: ['user-activity-timeline', ctx.userId, type ?? 'all', limit, offset],
         tags: ['user-activity', `user-${ctx.userId}`],
         ttlKey: 'cache.user_activity.ttl_seconds',
         useAuth: true,
@@ -514,11 +523,12 @@ export const getUserIdentities = authedAction
   .metadata({ actionName: 'getUserIdentities', category: 'user' })
   .inputSchema(z.void())
   .action(async ({ ctx }) => {
+    const { fetchCached } = await import('../cache/fetch-cached.ts');
     const data = await fetchCached(
       (client: SupabaseClient<Database>) =>
         new AccountService(client).getUserIdentities({ p_user_id: ctx.userId }),
       {
-        key: `${ctx.userId}-identities`,
+        keyParts: ['user-identities', ctx.userId],
         tags: ['users', `user-${ctx.userId}`],
         ttlKey: 'cache.user_stats.ttl_seconds',
         useAuth: true,
@@ -540,6 +550,7 @@ export async function ensureUserRecord(params: {
 }) {
   'use server';
 
+  const { getCacheConfigSnapshot } = await import('../cache-config.ts');
   const cacheConfigPromise = getCacheConfigSnapshot();
   await runRpc<Database['public']['Tables']['users']['Row']>(
     'ensure_user_record',

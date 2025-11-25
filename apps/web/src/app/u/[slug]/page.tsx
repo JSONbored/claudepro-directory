@@ -13,6 +13,7 @@ import {
 } from '@heyclaude/web-runtime/data';
 import { FolderOpen, Globe, Users } from '@heyclaude/web-runtime/icons';
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { generateRequestId } from '@heyclaude/web-runtime/utils/request-context';
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
@@ -135,7 +136,12 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
 
   // Validate route slug before hitting the data layer
   if (!isValidSlug(slug)) {
-    logger.warn('UserProfilePage: invalid user slug', { slug });
+    logger.warn('UserProfilePage: invalid user slug', undefined, {
+      requestId: generateRequestId(),
+      operation: 'UserProfilePage',
+      route: `/u/${slug}`,
+      slug,
+    });
     notFound();
   }
 
@@ -153,6 +159,9 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load user profile detail');
     logger.error('UserProfilePage: get_user_profile threw', normalized, {
+      requestId: generateRequestId(),
+      operation: 'UserProfilePage',
+      route: `/u/${slug}`,
       slug,
       ...(currentUser?.id ? { viewerId: currentUser.id } : {}),
     });
@@ -160,7 +169,12 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
   }
 
   if (!profileData) {
-    logger.warn('UserProfilePage: user profile not found', { slug });
+    logger.warn('UserProfilePage: user profile not found', undefined, {
+      requestId: generateRequestId(),
+      operation: 'UserProfilePage',
+      route: `/u/${slug}`,
+      slug,
+    });
     notFound();
   }
 
@@ -308,12 +322,19 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                     .map((collection) => {
                       const safeCollectionUrl = getSafeCollectionUrl(slug, collection.slug);
                       if (!safeCollectionUrl) {
-                        logger.warn('UserProfilePage: skipping collection with invalid slug', {
-                          collectionId: collection.id,
-                          collectionName: collection.name ?? 'Unknown',
-                          collectionSlug: collection.slug ?? 'Unknown',
-                          userSlug: slug,
-                        });
+                        logger.warn(
+                          'UserProfilePage: skipping collection with invalid slug',
+                          undefined,
+                          {
+                            requestId: generateRequestId(),
+                            operation: 'UserProfilePage',
+                            route: `/u/${slug}`,
+                            collectionId: collection.id,
+                            collectionName: collection.name ?? 'Unknown',
+                            collectionSlug: collection.slug ?? 'Unknown',
+                            userSlug: slug,
+                          }
+                        );
                         return null;
                       }
                       return (
@@ -374,7 +395,11 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                       if (!safeContentUrl) {
                         logger.warn(
                           'UserProfilePage: skipping contribution with invalid type or slug',
+                          undefined,
                           {
+                            requestId: generateRequestId(),
+                            operation: 'UserProfilePage',
+                            route: `/u/${slug}`,
                             contentId: item.id,
                             contentType: item.content_type,
                             contentSlug: item.slug,

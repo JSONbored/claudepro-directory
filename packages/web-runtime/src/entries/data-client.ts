@@ -18,25 +18,36 @@ export * from '../config/client-defaults.ts';
 export * from '../storage/image-utils.ts';
 export * from '../edge/call-edge-function.ts';
 export * from '../edge/transform.ts';
-export * from '../edge/search-client.ts';
+export { searchUnifiedClient } from '../edge/search-client.ts';
+export type {
+  UnifiedSearchOptions,
+  UnifiedSearchResponse,
+  UnifiedSearchFilters,
+  SearchEntity,
+} from '../edge/search-client.ts';
 export * from '../seo/og.ts';
 
 // Shared Data Utils (No fetchers, no server-only imports)
 export * from '../data/changelog.shared.ts';
-export * from '../data/content-helpers.ts';
+// NOTE: content-helpers.ts is server-only - do not export from client entry point
+// export * from '../data/content-helpers.ts';
 export * from '../data/forms/submission-form-fields.ts';
 
-// Static Category Config (re-export from index, not from categories.ts which imports flags)
+// Static Category Config - RAW CONSTANTS ONLY
+// Do NOT export getCategoryConfig (uses cache()) or other server functions
 export { 
+  ALL_CATEGORY_IDS,
+  HOMEPAGE_CATEGORY_IDS,
+  CACHEABLE_CATEGORY_IDS,
+  isValidCategory,
+  VALID_CATEGORIES,
   getCategoryConfigs,
   getCategoryConfig,
   getAllCategoryIds,
   getHomepageCategoryIds,
   getCacheableCategoryIds,
   getCategoryStatsConfig,
-  getTotalResourceCount,
-  isValidCategory,
-  VALID_CATEGORIES
+  getTotalResourceCount
 } from '../data/config/category/index.ts';
 
 // Server Actions (Safe to import in client - they're RPC endpoints)

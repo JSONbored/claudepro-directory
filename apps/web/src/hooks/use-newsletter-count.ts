@@ -6,8 +6,8 @@
  * Uses secure server action for data fetching
  */
 
-import { getCacheConfig, getPollingConfig } from '@heyclaude/web-runtime';
 import { getNewsletterCountAction } from '@heyclaude/web-runtime/actions';
+import { getCacheConfig, getPollingConfig } from '@heyclaude/web-runtime/actions/feature-flags';
 import { logClientWarning, logger } from '@heyclaude/web-runtime/core';
 import { useEffect, useRef, useState } from 'react';
 

@@ -13,6 +13,7 @@ import type {
   HomepageContentItem,
 } from '@heyclaude/web-runtime/types/component.types';
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { generateRequestId } from '@heyclaude/web-runtime/utils/request-context';
 import type { Metadata } from 'next';
 import dynamicImport from 'next/dynamic';
 import { Suspense } from 'react';
@@ -40,7 +41,7 @@ const NewsletterCTAVariant = dynamicImport(
  *
  * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic
  */
-export const dynamic = 'force-dynamic';
+export const revalidate = 900; // 15 minutes for trending data
 
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/trending');
@@ -59,12 +60,18 @@ export default async function TrendingPage({ searchParams }: PagePropsWithSearch
   const normalizedCategory = categoryParam && isValidCategory(categoryParam) ? categoryParam : null;
 
   if (categoryParam && !normalizedCategory) {
-    logger.warn('TrendingPage: invalid category parameter provided', {
+    logger.warn('TrendingPage: invalid category parameter provided', undefined, {
+      requestId: generateRequestId(),
+      operation: 'TrendingPage',
+      route: '/trending',
       category: categoryParam,
     });
   }
 
   logger.info('Trending page accessed', {
+    requestId: generateRequestId(),
+    operation: 'TrendingPage',
+    route: '/trending',
     category: normalizedCategory ?? 'all',
     limit,
   });

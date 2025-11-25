@@ -7,6 +7,7 @@ import {
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { POSITION_PATTERNS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { generateRequestId } from '@heyclaude/web-runtime/utils/request-context';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -20,6 +21,13 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/ui/card';
+
+/**
+ * Dynamic Rendering Required
+ * Authenticated route
+ */
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 type SponsorshipAnalytics = Database['public']['Functions']['get_sponsorship_analytics']['Returns'];
 
@@ -37,7 +45,12 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
   const { user } = await getAuthenticatedUser({ context: 'SponsorshipAnalyticsPage' });
 
   if (!user) {
-    logger.warn('SponsorshipAnalyticsPage: unauthenticated access attempt', { sponsorshipId: id });
+    logger.warn('SponsorshipAnalyticsPage: unauthenticated access attempt', undefined, {
+      requestId: generateRequestId(),
+      operation: 'SponsorshipAnalyticsPage',
+      route: `/account/sponsorships/${id}/analytics`,
+      sponsorshipId: id,
+    });
     return (
       <div className="space-y-6">
         <Card>
@@ -63,6 +76,9 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load sponsorship analytics');
     logger.error('SponsorshipAnalyticsPage: getSponsorshipAnalytics threw', normalized, {
+      requestId: generateRequestId(),
+      operation: 'SponsorshipAnalyticsPage',
+      route: `/account/sponsorships/${id}/analytics`,
       sponsorshipId: id,
       userIdHash,
     });
@@ -70,7 +86,10 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
   }
 
   if (!analyticsData) {
-    logger.warn('SponsorshipAnalyticsPage: analytics not found or inaccessible', {
+    logger.warn('SponsorshipAnalyticsPage: analytics not found or inaccessible', undefined, {
+      requestId: generateRequestId(),
+      operation: 'SponsorshipAnalyticsPage',
+      route: `/account/sponsorships/${id}/analytics`,
       sponsorshipId: id,
       userIdHash,
     });
@@ -89,6 +108,9 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
       'SponsorshipAnalyticsPage: unexpected null fields in analytics data',
       new Error('Null fields in analytics data'),
       {
+        requestId: generateRequestId(),
+        operation: 'SponsorshipAnalyticsPage',
+        route: `/account/sponsorships/${id}/analytics`,
         sponsorshipId: id,
         userIdHash,
       }
@@ -115,7 +137,10 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
     : 'sponsored'; // Safe default for invalid values
 
   if (!isTierValid) {
-    logger.warn('SponsorshipAnalyticsPage: invalid tier value, using safe default', {
+    logger.warn('SponsorshipAnalyticsPage: invalid tier value, using safe default', undefined, {
+      requestId: generateRequestId(),
+      operation: 'SponsorshipAnalyticsPage',
+      route: `/account/sponsorships/${id}/analytics`,
       sponsorshipId: id,
       userIdHash,
       invalidTier: rawTier,

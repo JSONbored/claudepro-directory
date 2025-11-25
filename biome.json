@@ -210,6 +210,15 @@
               {
                 "group": ["**/generated/**", "**/src/generated/**"],
                 "message": "⛔ DEPRECATED: /generated directory is obsolete. Content now lives in Supabase database. Use supabase-content-loader.ts instead."
+              },
+              {
+                "group": [
+                  "**/packages/web-runtime/src/data/**",
+                  "**/packages/web-runtime/src/cache/**",
+                  "**/packages/web-runtime/src/supabase/server.ts",
+                  "**/packages/web-runtime/src/supabase/server-anon.ts"
+                ],
+                "message": "⛔ Client components should not import server-only data fetching functions. Pass data as props from Server Components instead."
               }
             ]
           }

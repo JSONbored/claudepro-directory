@@ -8,12 +8,13 @@ import { normalizeError } from '../errors.ts';
 import { logger } from '../logger.ts';
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
+import { generateRequestId } from './request-context.ts';
 
 /**
  * Create standardized error response with proper logging
  * Vercel automatically adds: x-vercel-id, timestamp, function name, region, duration
  */
-export function createErrorResponse(
+export async function createErrorResponse(
   error: unknown,
   context: {
     route?: string;
@@ -22,10 +23,14 @@ export function createErrorResponse(
     userId?: string;
     logContext?: Record<string, string | number | boolean>;
   } = {}
-): NextResponse {
-  // Log error with full context - BetterStack captures everything
+): Promise<NextResponse> {
+  // Generate request ID for tracing
+  const requestId = generateRequestId();
+  
+  // Log error with full context - Pino logger outputs to stdout (Vercel captures these logs)
   const normalized = normalizeError(error, 'API error occurred');
   logger.error('API error occurred', normalized, {
+    requestId,
     route: context.route || 'unknown',
     operation: context.operation || 'unknown',
     method: context.method || 'unknown',
@@ -70,7 +75,7 @@ export function createErrorResponse(
  * Convenience function for API route error handling
  * Drop-in replacement for old handleApiError
  */
-export function handleApiError(
+export async function handleApiError(
   error: unknown,
   config: {
     route?: string;
@@ -79,6 +84,6 @@ export function handleApiError(
     userId?: string;
     logContext?: Record<string, string | number | boolean>;
   } = {}
-): NextResponse {
+): Promise<NextResponse> {
   return createErrorResponse(error, config);
 }

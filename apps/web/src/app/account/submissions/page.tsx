@@ -8,6 +8,7 @@ import {
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { CheckCircle, Clock, GitPullRequest, Send, XCircle } from '@heyclaude/web-runtime/icons';
 import { BADGE_COLORS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { generateRequestId } from '@heyclaude/web-runtime/utils/request-context';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
@@ -20,6 +21,13 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/ui/card';
+
+/**
+ * Dynamic Rendering Required
+ * Authenticated user submissions
+ */
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/account/submissions');
@@ -165,6 +173,8 @@ export default async function SubmissionsPage() {
 
   if (!user) {
     logger.warn('SubmissionsPage: unauthenticated access attempt', undefined, {
+      requestId: generateRequestId(),
+      operation: 'SubmissionsPage',
       route: '/account/submissions',
       timestamp: new Date().toISOString(),
     });
@@ -198,6 +208,9 @@ export default async function SubmissionsPage() {
         'SubmissionsPage: getUserDashboard returned null',
         new Error('getUserDashboard returned null'),
         {
+          requestId: generateRequestId(),
+          operation: 'SubmissionsPage',
+          route: '/account/submissions',
           userId: user.id,
         }
       );
@@ -205,7 +218,12 @@ export default async function SubmissionsPage() {
     }
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load submissions from dashboard');
-    logger.error('SubmissionsPage: getUserDashboard threw', normalized, { userId: user.id });
+    logger.error('SubmissionsPage: getUserDashboard threw', normalized, {
+      requestId: generateRequestId(),
+      operation: 'SubmissionsPage',
+      route: '/account/submissions',
+      userId: user.id,
+    });
     hasError = true;
   }
 
@@ -339,6 +357,9 @@ export default async function SubmissionsPage() {
   submissions.forEach((sub, idx) => {
     if (!sub.id) {
       logger.warn('SubmissionsPage: submission missing ID', undefined, {
+        requestId: generateRequestId(),
+        operation: 'SubmissionsPage',
+        route: '/account/submissions',
         index: idx,
         userId: user.id,
       });

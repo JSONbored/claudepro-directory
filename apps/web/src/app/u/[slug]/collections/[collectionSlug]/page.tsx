@@ -11,6 +11,7 @@ import {
 } from '@heyclaude/web-runtime/data';
 import { ArrowLeft, ExternalLink } from '@heyclaude/web-runtime/icons';
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { generateRequestId } from '@heyclaude/web-runtime/utils/request-context';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -79,6 +80,9 @@ export async function generateMetadata({ params }: PublicCollectionPageProps): P
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load collection detail for metadata');
     logger.error('PublicCollectionPage: metadata fetch failed', normalized, {
+      requestId: generateRequestId(),
+      operation: 'PublicCollectionPage',
+      route: `/u/${slug}/collections/${collectionSlug}`,
       slug,
       collectionSlug,
     });
@@ -111,6 +115,9 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load collection detail for page render');
     logger.error('PublicCollectionPage: getPublicCollectionDetail threw', normalized, {
+      requestId: generateRequestId(),
+      operation: 'PublicCollectionPage',
+      route: `/u/${slug}/collections/${collectionSlug}`,
       slug,
       collectionSlug,
       ...(currentUser?.id ? { viewerId: currentUser.id } : {}),
@@ -119,7 +126,13 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
   }
 
   if (!collectionData) {
-    logger.warn('PublicCollectionPage: collection detail not found', { slug, collectionSlug });
+    logger.warn('PublicCollectionPage: collection detail not found', undefined, {
+      requestId: generateRequestId(),
+      operation: 'PublicCollectionPage',
+      route: `/u/${slug}/collections/${collectionSlug}`,
+      slug,
+      collectionSlug,
+    });
     notFound();
   }
 

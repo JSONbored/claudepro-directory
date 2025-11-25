@@ -2,17 +2,15 @@ import type { Database } from '@heyclaude/database-types';
 import { ensureStringArray, hashUserId, logger, normalizeError } from '@heyclaude/web-runtime/core';
 import {
   generatePageMetadata,
-  getAccountDashboard,
+  getAccountDashboardBundle,
   getAuthenticatedUser,
   getContentDetailCore,
-  getHomepageCategoryIds,
-  getHomepageData,
-  getUserLibrary,
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { Bookmark, Calendar } from '@heyclaude/web-runtime/icons';
 import type { HomepageContentItem } from '@heyclaude/web-runtime/types/component.types';
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { generateRequestId } from '@heyclaude/web-runtime/utils/request-context';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
@@ -35,14 +33,18 @@ export async function generateMetadata(): Promise<Metadata> {
  * Dynamic Rendering Required
  *
  * This page is dynamic because it displays user-specific account data.
+ * Runtime: Node.js (required for authenticated user data and Supabase server client)
  */
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 export default async function AccountDashboard() {
   const { user } = await getAuthenticatedUser({ context: 'AccountDashboard' });
 
   if (!user) {
     logger.warn('AccountDashboard: unauthenticated access attempt detected', undefined, {
+      requestId: generateRequestId(),
+      operation: 'AccountDashboard',
       route: '/account',
       timestamp: new Date().toISOString(),
     });
@@ -66,44 +68,23 @@ export default async function AccountDashboard() {
   // Hash user ID for privacy-compliant logging (GDPR/CCPA)
   const userIdHash = hashUserId(user.id);
 
-  const [dashboardResult, libraryResult, homepageResult] = await Promise.allSettled([
-    getAccountDashboard(user.id),
-    getUserLibrary(user.id),
-    getHomepageData(getHomepageCategoryIds),
-  ]);
-
-  let dashboardData: Awaited<ReturnType<typeof getAccountDashboard>> = null;
-  if (dashboardResult.status === 'fulfilled') {
-    dashboardData = dashboardResult.value;
-  } else {
-    const normalized = normalizeError(
-      dashboardResult.reason,
-      'Failed to load account dashboard data'
-    );
-    logger.error('AccountDashboard: getAccountDashboard threw', normalized, {
+  // Use bundle helper to fetch shared data per request (Phase 4 optimization)
+  let bundleData: Awaited<ReturnType<typeof getAccountDashboardBundle>> | null = null;
+  try {
+    bundleData = await getAccountDashboardBundle(user.id);
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to load account dashboard bundle');
+    logger.error('AccountDashboard: getAccountDashboardBundle threw', normalized, {
+      requestId: generateRequestId(),
+      operation: 'AccountDashboard',
+      route: '/account',
       userIdHash,
     });
   }
 
-  let libraryData: Awaited<ReturnType<typeof getUserLibrary>> = null;
-  if (libraryResult.status === 'fulfilled') {
-    libraryData = libraryResult.value;
-  } else {
-    const normalized = normalizeError(libraryResult.reason, 'Failed to load user library snapshot');
-    logger.warn('AccountDashboard: getUserLibrary threw', {
-      userIdHash,
-      error: normalized.message,
-    });
-  }
-
-  const homepageData = homepageResult.status === 'fulfilled' ? homepageResult.value : null;
-  if (homepageResult.status === 'rejected') {
-    const normalized = normalizeError(homepageResult.reason, 'Failed to load homepage data');
-    logger.warn('AccountDashboard: getHomepageData threw', {
-      userIdHash,
-      error: normalized.message,
-    });
-  }
+  const dashboardData = bundleData?.dashboard ?? null;
+  const libraryData = bundleData?.library ?? null;
+  const homepageData = bundleData?.homepage ?? null;
 
   if (!dashboardData) {
     const normalized = normalizeError(
@@ -111,6 +92,9 @@ export default async function AccountDashboard() {
       'AccountDashboard: dashboard data is null'
     );
     logger.error('AccountDashboard: dashboard data is null', normalized, {
+      requestId: generateRequestId(),
+      operation: 'AccountDashboard',
+      route: '/account',
       userIdHash,
     });
     return (
@@ -152,7 +136,10 @@ export default async function AccountDashboard() {
         return detail?.content ?? null;
       } catch (error) {
         const normalized = normalizeError(error, 'Failed to load bookmark content');
-        logger.warn('AccountDashboard: getContentDetailCore failed for bookmark', {
+        logger.warn('AccountDashboard: getContentDetailCore failed for bookmark', undefined, {
+          requestId: generateRequestId(),
+          operation: 'AccountDashboard',
+          route: '/account',
           userIdHash,
           slug: bookmark.content_slug,
           category: bookmark.content_type,
@@ -183,7 +170,7 @@ export default async function AccountDashboard() {
 
   // Helper to safely extract categoryData
   function extractHomepageCategoryData(
-    homepageData: Awaited<ReturnType<typeof getHomepageData>> | null
+    homepageData: Awaited<ReturnType<typeof getAccountDashboardBundle>>['homepage'] | null
   ): Record<string, HomepageContentItem[]> {
     if (!homepageData?.content || typeof homepageData.content !== 'object') {
       return {};

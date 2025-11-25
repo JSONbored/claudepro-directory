@@ -27,6 +27,7 @@ import {
   TrendingUp,
 } from '@heyclaude/web-runtime/icons';
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { generateRequestId } from '@heyclaude/web-runtime/utils/request-context';
 import {
   Card,
   CardContent,
@@ -94,7 +95,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 // Edge-cached via data layer (30min TTL from Statsig)
-export const revalidate = false;
+export const revalidate = 86400;
 
 export default async function CompaniesPage() {
   // Single RPC call via edge-cached data layer
@@ -104,6 +105,9 @@ export default async function CompaniesPage() {
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load companies list');
     logger.error('CompaniesPage: getCompaniesList failed', normalized, {
+      requestId: generateRequestId(),
+      operation: 'CompaniesPage',
+      route: '/companies',
       limit: 50,
       offset: 0,
     });
@@ -111,7 +115,13 @@ export default async function CompaniesPage() {
   }
 
   if (!companiesResponse?.companies) {
-    logger.warn('CompaniesPage: companies response is empty', { limit: 50, offset: 0 });
+    logger.warn('CompaniesPage: companies response is empty', undefined, {
+      requestId: generateRequestId(),
+      operation: 'CompaniesPage',
+      route: '/companies',
+      limit: 50,
+      offset: 0,
+    });
   }
 
   const companies = companiesResponse?.companies ?? [];

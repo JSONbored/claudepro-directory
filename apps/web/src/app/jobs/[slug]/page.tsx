@@ -18,6 +18,7 @@ import { generatePageMetadata, getJobBySlug } from '@heyclaude/web-runtime/serve
 import type { PageProps } from '@heyclaude/web-runtime/types/app.schema';
 import { slugParamsSchema } from '@heyclaude/web-runtime/types/app.schema';
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { generateRequestId } from '@heyclaude/web-runtime/utils/request-context';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -32,6 +33,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primi
  * Only allows HTTPS URLs (or HTTP for localhost in development)
  * Returns canonicalized URL or null if invalid
  */
+/**
+ * ISR: 2 hours (7200s) - Job postings are relatively stable
+ */
+export const revalidate = 7200;
+
 function getSafeWebsiteUrl(url: string | null | undefined): string | null {
   if (!url || typeof url !== 'string') return null;
 
@@ -118,7 +124,12 @@ export async function generateMetadata({
     job = await getJobBySlug(slug);
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load job for metadata');
-    logger.error('JobPage: getJobBySlug threw in generateMetadata', normalized, { slug });
+    logger.error('JobPage: getJobBySlug threw in generateMetadata', normalized, {
+      requestId: generateRequestId(),
+      operation: 'JobPage',
+      route: `/jobs/${slug}`,
+      slug,
+    });
   }
 
   return generatePageMetadata('/jobs/:slug', {
@@ -135,14 +146,22 @@ export async function generateStaticParams() {
     const jobs = jobsResult?.jobs ?? [];
 
     if (jobs.length === 0) {
-      logger.warn('generateStaticParams: no jobs available, returning placeholder', {});
+      logger.warn('generateStaticParams: no jobs available, returning placeholder', undefined, {
+        requestId: generateRequestId(),
+        operation: 'JobPage',
+        route: '/jobs',
+      });
       return [{ slug: 'placeholder' }];
     }
 
     return jobs.map((job) => ({ slug: job.slug }));
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load jobs for static params');
-    logger.error('JobPage: getJobs threw in generateStaticParams', normalized);
+    logger.error('JobPage: getJobs threw in generateStaticParams', normalized, {
+      requestId: generateRequestId(),
+      operation: 'JobPage',
+      route: '/jobs',
+    });
     return [{ slug: 'placeholder' }];
   }
 }
@@ -159,7 +178,13 @@ export default async function JobPage({ params }: PageProps) {
     logger.error(
       'Invalid slug parameter for job page',
       new Error(validationResult.error.issues[0]?.message || 'Invalid slug'),
-      { slug: String(rawParams['slug']), errorCount: validationResult.error.issues.length }
+      {
+        requestId: generateRequestId(),
+        operation: 'JobPage',
+        route: `/jobs/${String(rawParams['slug'])}`,
+        slug: String(rawParams['slug']),
+        errorCount: validationResult.error.issues.length,
+      }
     );
     notFound();
   }
@@ -170,12 +195,22 @@ export default async function JobPage({ params }: PageProps) {
     job = await getJobBySlug(slug);
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load job detail');
-    logger.error('JobPage: getJobBySlug threw', normalized, { slug });
+    logger.error('JobPage: getJobBySlug threw', normalized, {
+      requestId: generateRequestId(),
+      operation: 'JobPage',
+      route: `/jobs/${slug}`,
+      slug,
+    });
     throw normalized;
   }
 
   if (!job) {
-    logger.warn('JobPage: job not found', { slug });
+    logger.warn('JobPage: job not found', undefined, {
+      requestId: generateRequestId(),
+      operation: 'JobPage',
+      route: `/jobs/${slug}`,
+      slug,
+    });
     notFound();
   }
 

@@ -7,6 +7,7 @@ import { subscribeViaOAuthAction } from '@heyclaude/web-runtime/actions';
 import { logger, normalizeError } from '@heyclaude/web-runtime/core';
 import { SECURITY_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
 import { createSupabaseServerClient } from '@heyclaude/web-runtime/server';
+import { generateRequestId } from '@heyclaude/web-runtime/utils/request-context';
 import { type NextRequest, NextResponse } from 'next/server';
 
 /**
@@ -44,12 +45,19 @@ export async function GET(request: NextRequest) {
 
       try {
         await refreshProfileFromOAuthServer(user.id);
-        logger.info('Auth callback refreshed profile from OAuth', { userId: user.id });
+        logger.info('Auth callback refreshed profile from OAuth', {
+          requestId: generateRequestId(),
+          operation: 'AuthCallback',
+          route: '/auth/callback',
+          userId: user.id,
+        });
       } catch (refreshError) {
         const normalized = normalizeError(refreshError, 'Failed to refresh profile from OAuth');
-        logger.warn('Auth callback failed to refresh profile', {
+        logger.warn('Auth callback failed to refresh profile', undefined, {
+          requestId: generateRequestId(),
+          operation: 'AuthCallback',
+          route: '/auth/callback',
           userId: user.id,
-          route: 'auth/callback',
           errorMessage: normalized.message,
         });
       }
@@ -66,14 +74,20 @@ export async function GET(request: NextRequest) {
             });
 
             if (newsletterResult?.serverError) {
-              logger.warn('Newsletter opt-in via auth callback failed', {
+              logger.warn('Newsletter opt-in via auth callback failed', undefined, {
+                requestId: generateRequestId(),
+                operation: 'AuthCallback',
+                route: '/auth/callback',
                 userId: user.id,
                 error: newsletterResult.serverError,
               });
             } else if (newsletterResult?.data?.success) {
               shouldSetNewsletterCookie = true;
             } else {
-              logger.warn('Newsletter opt-in via auth callback failed', {
+              logger.warn('Newsletter opt-in via auth callback failed', undefined, {
+                requestId: generateRequestId(),
+                operation: 'AuthCallback',
+                route: '/auth/callback',
                 userId: user.id,
                 error: 'Unknown error',
               });
@@ -84,11 +98,19 @@ export async function GET(request: NextRequest) {
               'Newsletter opt-in via auth callback threw'
             );
             logger.error('Newsletter opt-in via auth callback threw', normalizedSubscribeError, {
+              requestId: generateRequestId(),
+              operation: 'AuthCallback',
+              route: '/auth/callback',
               userId: user.id,
             });
           }
         } else {
-          logger.warn('Newsletter opt-in skipped - user email missing', { userId: user.id });
+          logger.warn('Newsletter opt-in skipped - user email missing', undefined, {
+            requestId: generateRequestId(),
+            operation: 'AuthCallback',
+            route: '/auth/callback',
+            userId: user.id,
+          });
         }
       }
 
@@ -101,7 +123,12 @@ export async function GET(request: NextRequest) {
           try {
             return new URL(url).hostname;
           } catch {
-            logger.warn('Skipping invalid origin URL in SECURITY_CONFIG', { url });
+            logger.warn('Skipping invalid origin URL in SECURITY_CONFIG', undefined, {
+              requestId: generateRequestId(),
+              operation: 'AuthCallback',
+              route: '/auth/callback',
+              url,
+            });
             return null;
           }
         })
@@ -134,7 +161,9 @@ export async function GET(request: NextRequest) {
 
     const normalized = normalizeError(error, error?.message ?? 'Auth callback exchange failed');
     logger.error('Auth callback exchange failed', normalized, {
-      route: 'auth/callback',
+      requestId: generateRequestId(),
+      operation: 'AuthCallback',
+      route: '/auth/callback',
       hasCode: true,
       ...(error?.code && { errorCode: String(error.code) }),
       ...(error?.message && { errorMessage: error.message }),
@@ -145,7 +174,9 @@ export async function GET(request: NextRequest) {
       'Auth callback missing code'
     );
     logger.error('Auth callback no code provided', normalized, {
-      route: 'auth/callback',
+      requestId: generateRequestId(),
+      operation: 'AuthCallback',
+      route: '/auth/callback',
       hasCode: false,
       origin,
     });

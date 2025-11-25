@@ -4,9 +4,17 @@
 
 import { logger } from '@heyclaude/web-runtime/core';
 import { generatePageMetadata, getAuthenticatedUser } from '@heyclaude/web-runtime/data';
+import { generateRequestId } from '@heyclaude/web-runtime/utils/request-context';
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { CompanyForm } from '@/src/components/core/forms/company-form';
+
+/**
+ * Dynamic Rendering Required
+ * Authenticated route
+ */
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/account/companies/new');
@@ -17,6 +25,8 @@ export default async function NewCompanyPage() {
 
   if (!user) {
     logger.warn('NewCompanyPage: unauthenticated access attempt', undefined, {
+      requestId: generateRequestId(),
+      operation: 'NewCompanyPage',
       route: '/account/companies/new',
       timestamp: new Date().toISOString(),
     });

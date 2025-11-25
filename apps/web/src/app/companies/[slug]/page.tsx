@@ -16,6 +16,7 @@ import {
   Users,
 } from '@heyclaude/web-runtime/icons';
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { generateRequestId } from '@heyclaude/web-runtime/utils/request-context';
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -109,7 +110,12 @@ export default async function CompanyPage({ params }: CompanyPageProps) {
   const profile = await getCompanyProfile(slug);
 
   if (!profile?.company) {
-    logger.warn('CompanyPage: company not found', { slug });
+    logger.warn('CompanyPage: company not found', undefined, {
+      requestId: generateRequestId(),
+      operation: 'CompanyPage',
+      route: `/companies/${slug}`,
+      slug,
+    });
     notFound();
   }
 

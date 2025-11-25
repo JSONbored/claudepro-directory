@@ -2,8 +2,11 @@
 
 /** Recently viewed content tracking with localStorage persistence and LRU eviction */
 
+import {
+  getRecentlyViewedConfig,
+  getTimeoutConfig,
+} from '@heyclaude/web-runtime/actions/feature-flags';
 import { logClientWarning, logger } from '@heyclaude/web-runtime/core';
-import { getRecentlyViewedConfig, getTimeoutConfig } from '@heyclaude/web-runtime/data';
 import { useCallback, useEffect, useRef } from 'react';
 import { create } from 'zustand';
 
@@ -52,24 +55,6 @@ let DEBOUNCE_MS = 300;
 let MAX_DESCRIPTION_LENGTH = 150;
 let MAX_TAGS = 5;
 
-// Load configs on module initialization
-Promise.all([getRecentlyViewedConfig(), getTimeoutConfig()])
-  .then(([recentlyViewedResult, timeoutResult]) => {
-    if (recentlyViewedResult) {
-      const recentlyViewed = recentlyViewedResult;
-      MAX_ITEMS = recentlyViewed['recently_viewed.max_items'];
-      TTL_DAYS = recentlyViewed['recently_viewed.ttl_days'];
-      MAX_DESCRIPTION_LENGTH = recentlyViewed['recently_viewed.max_description_length'];
-      MAX_TAGS = recentlyViewed['recently_viewed.max_tags'];
-    }
-    if (timeoutResult) {
-      const timeout = timeoutResult;
-      DEBOUNCE_MS = timeout['timeout.ui.form_debounce_ms'];
-    }
-  })
-  .catch((error) => {
-    logClientWarning('useRecentlyViewed: failed to load configs', error);
-  });
 const useRecentlyViewedStore = create<RecentlyViewedState>((set) => ({
   items: [],
   isLoaded: false,
@@ -189,6 +174,25 @@ export function useRecentlyViewed(): UseRecentlyViewedReturn {
 
   // Load from localStorage on mount (client-side only)
   useEffect(() => {
+    // Load configs lazily on client
+    Promise.all([getRecentlyViewedConfig({}), getTimeoutConfig({})])
+      .then(([recentlyViewedResult, timeoutResult]) => {
+        if (recentlyViewedResult?.data) {
+          const recentlyViewed = recentlyViewedResult.data;
+          MAX_ITEMS = recentlyViewed['recently_viewed.max_items'];
+          TTL_DAYS = recentlyViewed['recently_viewed.ttl_days'];
+          MAX_DESCRIPTION_LENGTH = recentlyViewed['recently_viewed.max_description_length'];
+          MAX_TAGS = recentlyViewed['recently_viewed.max_tags'];
+        }
+        if (timeoutResult?.data) {
+          const timeout = timeoutResult.data;
+          DEBOUNCE_MS = timeout['timeout.ui.form_debounce_ms'];
+        }
+      })
+      .catch((error) => {
+        logClientWarning('useRecentlyViewed: failed to load configs', error);
+      });
+
     if (isLoaded) return;
 
     const loadedItems = loadFromStorage();

@@ -38,14 +38,15 @@ export async function getConfigRecommendations(
         ...(viewerId ? { p_viewer_id: viewerId } : {})
     }),
     {
-      key: [
+      keyParts: [
+        'tool-recommendations',
         useCase,
         experienceLevel,
         toolPreferences.join('-') || 'none',
         integrations.join('-') || 'none',
         focusAreas.join('-') || 'none',
         viewerId ?? 'anon',
-      ].join('|'),
+      ],
       tags: ['content', 'quiz'],
       ttlKey: 'cache.quiz.ttl_seconds',
       useAuth: true,

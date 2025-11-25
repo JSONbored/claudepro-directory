@@ -91,7 +91,7 @@ export interface ConfigCardProps {
 
 /**
  * Client component props for home page - Database-First
- * Uses proper RPC return types from get_homepage_complete()
+ * Uses proper RPC return types from get_homepage_optimized()
  */
 export interface SearchFilterOptions {
   tags: string[];
@@ -100,7 +100,7 @@ export interface SearchFilterOptions {
 }
 
 export interface HomePageClientProps {
-  /** Initial server-side data for client hydration (from get_homepage_complete RPC) */
+  /** Initial server-side data for client hydration (from get_homepage_optimized RPC) */
   initialData: Record<string, unknown[]>;
   /** Weekly featured content grouped by category */
   featuredByCategory?: Record<string, unknown[]>;

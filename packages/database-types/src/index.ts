@@ -287,7 +287,7 @@ export type Database = {
           robots_follow: boolean | null
           robots_index: boolean | null
           slug: string
-          source: string | null
+          source: Database["public"]["Enums"]["changelog_source"] | null
           title: string
           tldr: string | null
           twitter_card: string | null
@@ -315,7 +315,7 @@ export type Database = {
           robots_follow?: boolean | null
           robots_index?: boolean | null
           slug: string
-          source?: string | null
+          source?: Database["public"]["Enums"]["changelog_source"] | null
           title: string
           tldr?: string | null
           twitter_card?: string | null
@@ -343,7 +343,7 @@ export type Database = {
           robots_follow?: boolean | null
           robots_index?: boolean | null
           slug?: string
-          source?: string | null
+          source?: Database["public"]["Enums"]["changelog_source"] | null
           title?: string
           tldr?: string | null
           twitter_card?: string | null
@@ -469,13 +469,13 @@ export type Database = {
           action_type: Database["public"]["Enums"]["contact_action_type"]
           action_value: string | null
           aliases: string[] | null
-          category: string
+          category: Database["public"]["Enums"]["contact_command_category"]
           command_id: string
           command_text: string
           confetti_variant:
             | Database["public"]["Enums"]["confetti_variant"]
             | null
-          created_at: string | null
+          created_at: string
           description: string | null
           display_order: number
           icon_name: Database["public"]["Enums"]["contact_command_icon"] | null
@@ -483,19 +483,19 @@ export type Database = {
           is_active: boolean | null
           metadata: Json | null
           requires_auth: boolean | null
-          updated_at: string | null
+          updated_at: string
         }
         Insert: {
           action_type: Database["public"]["Enums"]["contact_action_type"]
           action_value?: string | null
           aliases?: string[] | null
-          category?: string
+          category?: Database["public"]["Enums"]["contact_command_category"]
           command_id: string
           command_text: string
           confetti_variant?:
             | Database["public"]["Enums"]["confetti_variant"]
             | null
-          created_at?: string | null
+          created_at?: string
           description?: string | null
           display_order: number
           icon_name?: Database["public"]["Enums"]["contact_command_icon"] | null
@@ -503,19 +503,19 @@ export type Database = {
           is_active?: boolean | null
           metadata?: Json | null
           requires_auth?: boolean | null
-          updated_at?: string | null
+          updated_at?: string
         }
         Update: {
           action_type?: Database["public"]["Enums"]["contact_action_type"]
           action_value?: string | null
           aliases?: string[] | null
-          category?: string
+          category?: Database["public"]["Enums"]["contact_command_category"]
           command_id?: string
           command_text?: string
           confetti_variant?:
             | Database["public"]["Enums"]["confetti_variant"]
             | null
-          created_at?: string | null
+          created_at?: string
           description?: string | null
           display_order?: number
           icon_name?: Database["public"]["Enums"]["contact_command_icon"] | null
@@ -523,14 +523,14 @@ export type Database = {
           is_active?: boolean | null
           metadata?: Json | null
           requires_auth?: boolean | null
-          updated_at?: string | null
+          updated_at?: string
         }
         Relationships: []
       }
       contact_submissions: {
         Row: {
           category: Database["public"]["Enums"]["contact_category"]
-          created_at: string | null
+          created_at: string
           email: string
           id: string
           message: string
@@ -540,12 +540,12 @@ export type Database = {
           response_sent_at: string | null
           session_id: string | null
           status: Database["public"]["Enums"]["submission_status"]
-          updated_at: string | null
+          updated_at: string
           user_id: string | null
         }
         Insert: {
           category?: Database["public"]["Enums"]["contact_category"]
-          created_at?: string | null
+          created_at?: string
           email: string
           id?: string
           message: string
@@ -555,12 +555,12 @@ export type Database = {
           response_sent_at?: string | null
           session_id?: string | null
           status?: Database["public"]["Enums"]["submission_status"]
-          updated_at?: string | null
+          updated_at?: string
           user_id?: string | null
         }
         Update: {
           category?: Database["public"]["Enums"]["contact_category"]
-          created_at?: string | null
+          created_at?: string
           email?: string
           id?: string
           message?: string
@@ -570,7 +570,7 @@ export type Database = {
           response_sent_at?: string | null
           session_id?: string | null
           status?: Database["public"]["Enums"]["submission_status"]
-          updated_at?: string | null
+          updated_at?: string
           user_id?: string | null
         }
         Relationships: []
@@ -611,7 +611,7 @@ export type Database = {
           robots_index: boolean | null
           seo_title: string | null
           slug: string
-          source: string | null
+          source: Database["public"]["Enums"]["content_source"] | null
           storage_url: string | null
           synced_at: string | null
           tags: string[]
@@ -656,7 +656,7 @@ export type Database = {
           robots_index?: boolean | null
           seo_title?: string | null
           slug: string
-          source?: string | null
+          source?: Database["public"]["Enums"]["content_source"] | null
           storage_url?: string | null
           synced_at?: string | null
           tags: string[]
@@ -701,7 +701,7 @@ export type Database = {
           robots_index?: boolean | null
           seo_title?: string | null
           slug?: string
-          source?: string | null
+          source?: Database["public"]["Enums"]["content_source"] | null
           storage_url?: string | null
           synced_at?: string | null
           tags?: string[]
@@ -760,7 +760,8 @@ export type Database = {
       }
       content_generation_tracking: {
         Row: {
-          category: string
+          category: Database["public"]["Enums"]["content_category"]
+          created_at: string
           discovery_metadata: Json | null
           generated_at: string
           generated_by: Database["public"]["Enums"]["generation_source"]
@@ -775,7 +776,8 @@ export type Database = {
           validation_passed: boolean
         }
         Insert: {
-          category: string
+          category: Database["public"]["Enums"]["content_category"]
+          created_at?: string
           discovery_metadata?: Json | null
           generated_at?: string
           generated_by: Database["public"]["Enums"]["generation_source"]
@@ -790,7 +792,8 @@ export type Database = {
           validation_passed?: boolean
         }
         Update: {
-          category?: string
+          category?: Database["public"]["Enums"]["content_category"]
+          created_at?: string
           discovery_metadata?: Json | null
           generated_at?: string
           generated_by?: Database["public"]["Enums"]["generation_source"]
@@ -976,25 +979,28 @@ export type Database = {
           email: string
           notes: string | null
           reason: Database["public"]["Enums"]["email_blocklist_reason"]
+          updated_at: string
         }
         Insert: {
           created_at?: string
           email: string
           notes?: string | null
           reason: Database["public"]["Enums"]["email_blocklist_reason"]
+          updated_at?: string
         }
         Update: {
           created_at?: string
           email?: string
           notes?: string | null
           reason?: Database["public"]["Enums"]["email_blocklist_reason"]
+          updated_at?: string
         }
         Relationships: []
       }
       email_engagement_summary: {
         Row: {
           clicks_last_30d: number | null
-          created_at: string | null
+          created_at: string
           email: string
           emails_bounced: number | null
           emails_clicked: number | null
@@ -1014,11 +1020,11 @@ export type Database = {
           last_sent_at: string | null
           opens_last_30d: number | null
           resend_contact_id: string | null
-          updated_at: string | null
+          updated_at: string
         }
         Insert: {
           clicks_last_30d?: number | null
-          created_at?: string | null
+          created_at?: string
           email: string
           emails_bounced?: number | null
           emails_clicked?: number | null
@@ -1038,11 +1044,11 @@ export type Database = {
           last_sent_at?: string | null
           opens_last_30d?: number | null
           resend_contact_id?: string | null
-          updated_at?: string | null
+          updated_at?: string
         }
         Update: {
           clicks_last_30d?: number | null
-          created_at?: string | null
+          created_at?: string
           email?: string
           emails_bounced?: number | null
           emails_clicked?: number | null
@@ -1062,7 +1068,7 @@ export type Database = {
           last_sent_at?: string | null
           opens_last_30d?: number | null
           resend_contact_id?: string | null
-          updated_at?: string | null
+          updated_at?: string
         }
         Relationships: [
           {
@@ -1082,8 +1088,9 @@ export type Database = {
           id: string
           processed: boolean
           processed_at: string | null
-          sequence_id: string
+          sequence_id: Database["public"]["Enums"]["email_sequence_id"]
           step: number
+          updated_at: string
         }
         Insert: {
           created_at?: string
@@ -1092,8 +1099,9 @@ export type Database = {
           id?: string
           processed?: boolean
           processed_at?: string | null
-          sequence_id: string
+          sequence_id: Database["public"]["Enums"]["email_sequence_id"]
           step: number
+          updated_at?: string
         }
         Update: {
           created_at?: string
@@ -1102,8 +1110,9 @@ export type Database = {
           id?: string
           processed?: boolean
           processed_at?: string | null
-          sequence_id?: string
+          sequence_id?: Database["public"]["Enums"]["email_sequence_id"]
           step?: number
+          updated_at?: string
         }
         Relationships: []
       }
@@ -1114,7 +1123,7 @@ export type Database = {
           email: string
           id: string
           last_sent_at: string | null
-          sequence_id: string
+          sequence_id: Database["public"]["Enums"]["email_sequence_id"]
           started_at: string
           status: Database["public"]["Enums"]["email_sequence_status"]
           total_steps: number
@@ -1126,7 +1135,7 @@ export type Database = {
           email: string
           id?: string
           last_sent_at?: string | null
-          sequence_id: string
+          sequence_id: Database["public"]["Enums"]["email_sequence_id"]
           started_at?: string
           status?: Database["public"]["Enums"]["email_sequence_status"]
           total_steps?: number
@@ -1138,7 +1147,7 @@ export type Database = {
           email?: string
           id?: string
           last_sent_at?: string | null
-          sequence_id?: string
+          sequence_id?: Database["public"]["Enums"]["email_sequence_id"]
           started_at?: string
           status?: Database["public"]["Enums"]["email_sequence_status"]
           total_steps?: number
@@ -1250,6 +1259,33 @@ export type Database = {
           id?: string
           placeholder?: string | null
           required?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      job_runs: {
+        Row: {
+          created_at: string
+          id: number
+          job_name: string
+          message: string | null
+          status: Database["public"]["Enums"]["job_run_status"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          job_name: string
+          message?: string | null
+          status?: Database["public"]["Enums"]["job_run_status"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          job_name?: string
+          message?: string | null
+          status?: Database["public"]["Enums"]["job_run_status"]
           updated_at?: string
         }
         Relationships: []
@@ -1480,7 +1516,7 @@ export type Database = {
           copy_category: Database["public"]["Enums"]["content_category"] | null
           copy_slug: string | null
           copy_type: Database["public"]["Enums"]["copy_type"] | null
-          created_at: string | null
+          created_at: string
           email: string
           engagement_score: number | null
           id: string
@@ -1504,7 +1540,7 @@ export type Database = {
           sync_status: Database["public"]["Enums"]["newsletter_sync_status"]
           total_copies: number | null
           unsubscribed_at: string | null
-          updated_at: string | null
+          updated_at: string
           user_agent: string | null
         }
         Insert: {
@@ -1516,7 +1552,7 @@ export type Database = {
           copy_category?: Database["public"]["Enums"]["content_category"] | null
           copy_slug?: string | null
           copy_type?: Database["public"]["Enums"]["copy_type"] | null
-          created_at?: string | null
+          created_at?: string
           email: string
           engagement_score?: number | null
           id?: string
@@ -1540,7 +1576,7 @@ export type Database = {
           sync_status?: Database["public"]["Enums"]["newsletter_sync_status"]
           total_copies?: number | null
           unsubscribed_at?: string | null
-          updated_at?: string | null
+          updated_at?: string
           user_agent?: string | null
         }
         Update: {
@@ -1552,7 +1588,7 @@ export type Database = {
           copy_category?: Database["public"]["Enums"]["content_category"] | null
           copy_slug?: string | null
           copy_type?: Database["public"]["Enums"]["copy_type"] | null
-          created_at?: string | null
+          created_at?: string
           email?: string
           engagement_score?: number | null
           id?: string
@@ -1576,7 +1612,7 @@ export type Database = {
           sync_status?: Database["public"]["Enums"]["newsletter_sync_status"]
           total_copies?: number | null
           unsubscribed_at?: string | null
-          updated_at?: string | null
+          updated_at?: string
           user_agent?: string | null
         }
         Relationships: []
@@ -1718,7 +1754,8 @@ export type Database = {
           product_id: string | null
           product_type: Database["public"]["Enums"]["payment_product_type"]
           status: Database["public"]["Enums"]["payment_transaction_status"]
-          user_id: string | null
+          updated_at: string
+          user_id: string
         }
         Insert: {
           amount: number
@@ -1734,7 +1771,8 @@ export type Database = {
           product_id?: string | null
           product_type: Database["public"]["Enums"]["payment_product_type"]
           status: Database["public"]["Enums"]["payment_transaction_status"]
-          user_id?: string | null
+          updated_at?: string
+          user_id: string
         }
         Update: {
           amount?: number
@@ -1750,7 +1788,8 @@ export type Database = {
           product_id?: string | null
           product_type?: Database["public"]["Enums"]["payment_product_type"]
           status?: Database["public"]["Enums"]["payment_transaction_status"]
-          user_id?: string | null
+          updated_at?: string
+          user_id?: string
         }
         Relationships: [
           {
@@ -1778,33 +1817,36 @@ export type Database = {
       }
       quiz_options: {
         Row: {
-          created_at: string | null
+          created_at: string
           description: string | null
           display_order: number
           icon_name: string | null
           id: string
           label: string
           question_id: string
+          updated_at: string
           value: string
         }
         Insert: {
-          created_at?: string | null
+          created_at?: string
           description?: string | null
           display_order: number
           icon_name?: string | null
           id?: string
           label: string
           question_id: string
+          updated_at?: string
           value: string
         }
         Update: {
-          created_at?: string | null
+          created_at?: string
           description?: string | null
           display_order?: number
           icon_name?: string | null
           id?: string
           label?: string
           question_id?: string
+          updated_at?: string
           value?: string
         }
         Relationships: [
@@ -1819,34 +1861,34 @@ export type Database = {
       }
       quiz_questions: {
         Row: {
-          created_at: string | null
+          created_at: string
           description: string | null
           display_order: number
           id: string
           question_id: string
           question_text: string
           required: boolean | null
-          updated_at: string | null
+          updated_at: string
         }
         Insert: {
-          created_at?: string | null
+          created_at?: string
           description?: string | null
           display_order: number
           id?: string
           question_id: string
           question_text: string
           required?: boolean | null
-          updated_at?: string | null
+          updated_at?: string
         }
         Update: {
-          created_at?: string | null
+          created_at?: string
           description?: string | null
           display_order?: number
           id?: string
           question_id?: string
           question_text?: string
           required?: boolean | null
-          updated_at?: string | null
+          updated_at?: string
         }
         Relationships: []
       }
@@ -1873,18 +1915,21 @@ export type Database = {
           created_at: string
           id: string
           review_id: string
+          updated_at: string
           user_id: string
         }
         Insert: {
           created_at?: string
           id?: string
           review_id: string
+          updated_at?: string
           user_id: string
         }
         Update: {
           created_at?: string
           id?: string
           review_id?: string
+          updated_at?: string
           user_id?: string
         }
         Relationships: [
@@ -2151,7 +2196,7 @@ export type Database = {
           start_date: string
           tier: Database["public"]["Enums"]["sponsorship_tier"]
           updated_at: string
-          user_id: string | null
+          user_id: string
         }
         Insert: {
           active?: boolean | null
@@ -2166,7 +2211,7 @@ export type Database = {
           start_date: string
           tier: Database["public"]["Enums"]["sponsorship_tier"]
           updated_at?: string
-          user_id?: string | null
+          user_id: string
         }
         Update: {
           active?: boolean | null
@@ -2181,7 +2226,7 @@ export type Database = {
           start_date?: string
           tier?: Database["public"]["Enums"]["sponsorship_tier"]
           updated_at?: string
-          user_id?: string | null
+          user_id?: string
         }
         Relationships: [
           {
@@ -2921,6 +2966,7 @@ export type Database = {
         Row: {
           bio: string | null
           bookmark_count: number
+          comment_count: number | null
           created_at: string
           display_name: string | null
           email: string | null
@@ -2933,20 +2979,24 @@ export type Database = {
           interests: string[] | null
           json_ld: Json | null
           name: string | null
+          post_count: number | null
           profile_public: boolean | null
           public: boolean | null
+          role: Database["public"]["Enums"]["user_role"]
           slug: string | null
           social_x_link: string | null
           status: string | null
           submission_count: number
           tier: Database["public"]["Enums"]["user_tier"] | null
           updated_at: string
+          votes_received_count: number | null
           website: string | null
           work: string | null
         }
         Insert: {
           bio?: string | null
           bookmark_count?: number
+          comment_count?: number | null
           created_at?: string
           display_name?: string | null
           email?: string | null
@@ -2959,20 +3009,24 @@ export type Database = {
           interests?: string[] | null
           json_ld?: Json | null
           name?: string | null
+          post_count?: number | null
           profile_public?: boolean | null
           public?: boolean | null
+          role?: Database["public"]["Enums"]["user_role"]
           slug?: string | null
           social_x_link?: string | null
           status?: string | null
           submission_count?: number
           tier?: Database["public"]["Enums"]["user_tier"] | null
           updated_at?: string
+          votes_received_count?: number | null
           website?: string | null
           work?: string | null
         }
         Update: {
           bio?: string | null
           bookmark_count?: number
+          comment_count?: number | null
           created_at?: string
           display_name?: string | null
           email?: string | null
@@ -2985,14 +3039,17 @@ export type Database = {
           interests?: string[] | null
           json_ld?: Json | null
           name?: string | null
+          post_count?: number | null
           profile_public?: boolean | null
           public?: boolean | null
+          role?: Database["public"]["Enums"]["user_role"]
           slug?: string | null
           social_x_link?: string | null
           status?: string | null
           submission_count?: number
           tier?: Database["public"]["Enums"]["user_tier"] | null
           updated_at?: string
+          votes_received_count?: number | null
           website?: string | null
           work?: string | null
         }
@@ -3072,6 +3129,7 @@ export type Database = {
           source: Database["public"]["Enums"]["webhook_source"]
           svix_id: string | null
           type: Database["public"]["Enums"]["webhook_event_type"]
+          updated_at: string
         }
         Insert: {
           attempt_count?: number
@@ -3092,6 +3150,7 @@ export type Database = {
           source?: Database["public"]["Enums"]["webhook_source"]
           svix_id?: string | null
           type: Database["public"]["Enums"]["webhook_event_type"]
+          updated_at?: string
         }
         Update: {
           attempt_count?: number
@@ -3112,6 +3171,7 @@ export type Database = {
           source?: Database["public"]["Enums"]["webhook_source"]
           svix_id?: string | null
           type?: Database["public"]["Enums"]["webhook_event_type"]
+          updated_at?: string
         }
         Relationships: []
       }
@@ -3135,19 +3195,6 @@ export type Database = {
             | Database["public"]["Enums"]["subscription_status"]
             | null
           tier: Database["public"]["Enums"]["job_tier"] | null
-        }
-        Relationships: []
-      }
-      mv_analytics_summary: {
-        Row: {
-          bookmark_count: number | null
-          category: Database["public"]["Enums"]["content_category"] | null
-          copy_count: number | null
-          last_interaction_at: string | null
-          last_viewed_at: string | null
-          slug: string | null
-          total_time_spent_seconds: number | null
-          view_count: number | null
         }
         Relationships: []
       }
@@ -3506,6 +3553,14 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      decrement_content_stat: {
+        Args: {
+          p_category: Database["public"]["Enums"]["content_category"]
+          p_slug: string
+          p_stat_name: string
+        }
+        Returns: boolean
+      }
       delete_company: {
         Args: { p_company_id: string; p_user_id: string }
         Returns: Database["public"]["CompositeTypes"]["delete_company_result"]
@@ -3546,6 +3601,7 @@ export type Database = {
         Returns: {
           bio: string | null
           bookmark_count: number
+          comment_count: number | null
           created_at: string
           display_name: string | null
           email: string | null
@@ -3558,14 +3614,17 @@ export type Database = {
           interests: string[] | null
           json_ld: Json | null
           name: string | null
+          post_count: number | null
           profile_public: boolean | null
           public: boolean | null
+          role: Database["public"]["Enums"]["user_role"]
           slug: string | null
           social_x_link: string | null
           status: string | null
           submission_count: number
           tier: Database["public"]["Enums"]["user_tier"] | null
           updated_at: string
+          votes_received_count: number | null
           website: string | null
           work: string | null
         }
@@ -3803,14 +3862,14 @@ export type Database = {
       get_all_content_categories: {
         Args: never
         Returns: {
-          category: string
+          category: Database["public"]["Enums"]["content_category"]
         }[]
       }
       get_analytics_summary: {
-        Args: { p_category?: string }
+        Args: { p_category?: Database["public"]["Enums"]["content_category"] }
         Returns: {
           avg_popularity: number
-          category: string
+          category: Database["public"]["Enums"]["content_category"]
           total_bookmarks: number
           total_copies: number
           total_items: number
@@ -3836,7 +3895,9 @@ export type Database = {
         }
       }
       get_bookmark_counts_by_category: {
-        Args: { category_filter: string }
+        Args: {
+          category_filter: Database["public"]["Enums"]["content_category"]
+        }
         Returns: {
           bookmark_count: number
           content_slug: string
@@ -4090,7 +4151,7 @@ export type Database = {
             }
             Returns: {
               bookmark_count: number
-              category: string
+              category: Database["public"]["Enums"]["content_category"]
               copy_count: number
               date_added: string
               description: string
@@ -4106,7 +4167,7 @@ export type Database = {
             }
             Returns: {
               bookmark_count: number
-              category: string
+              category: Database["public"]["Enums"]["content_category"]
               copy_count: number
               description: string
               id: string
@@ -4136,26 +4197,6 @@ export type Database = {
           isOneToOne: false
           isSetofReturn: true
         }
-      }
-      get_dynamic_featured_content: {
-        Args: {
-          p_category: Database["public"]["Enums"]["content_category"]
-          p_limit?: number
-        }
-        Returns: {
-          bookmark_count: number
-          content_slug: string
-          content_type: string
-          copy_count: number
-          days_old: number
-          engagement_score: number
-          final_score: number
-          freshness_score: number
-          growth_rate_pct: number
-          rank: number
-          total_views: number
-          trending_score: number
-        }[]
       }
       get_enriched_content_list: {
         Args: {
@@ -4231,14 +4272,8 @@ export type Database = {
         }
       }
       get_generation_config: {
-        Args: { p_category?: string }
-        Returns: Database["public"]["CompositeTypes"]["generation_config_item"][]
-        SetofOptions: {
-          from: "*"
-          to: "generation_config_item"
-          isOneToOne: false
-          isSetofReturn: true
-        }
+        Args: { p_category: Database["public"]["Enums"]["content_category"] }
+        Returns: Json
       }
       get_homepage_complete: {
         Args: { p_category_ids?: string[] }
@@ -4271,7 +4306,7 @@ export type Database = {
         }
       }
       get_jobs_by_category: {
-        Args: { p_category: string }
+        Args: { p_category: Database["public"]["Enums"]["job_category"] }
         Returns: {
           active: boolean | null
           admin_notes: string | null
@@ -4374,13 +4409,14 @@ export type Database = {
       get_pending_resend_syncs: {
         Args: { p_limit?: number }
         Returns: {
-          email: string
+          content_slug: string
+          content_type: string
+          created_at: string
           id: string
-          referrer: string
-          source: string
-          status: string
-          subscribed_at: string
-          unsubscribed_at: string
+          last_error: string
+          retry_count: number
+          scheduled_for: string
+          sync_type: string
         }[]
       }
       get_pending_submissions: {
@@ -4402,10 +4438,13 @@ export type Database = {
         }[]
       }
       get_popular_content: {
-        Args: { p_category?: string; p_limit?: number }
+        Args: {
+          p_category?: Database["public"]["Enums"]["content_category"]
+          p_limit?: number
+        }
         Returns: {
           author: string
-          category: string
+          category: Database["public"]["Enums"]["content_category"]
           copy_count: number
           description: string
           popularity_score: number
@@ -4462,7 +4501,7 @@ export type Database = {
           robots_index: boolean | null
           seo_title: string | null
           slug: string
-          source: string | null
+          source: Database["public"]["Enums"]["content_source"] | null
           storage_url: string | null
           synced_at: string | null
           tags: string[]
@@ -4515,7 +4554,7 @@ export type Database = {
       get_reviews_with_stats: {
         Args: {
           p_content_slug: string
-          p_content_type: string
+          p_content_type: Database["public"]["Enums"]["content_category"]
           p_limit?: number
           p_offset?: number
           p_sort_by?: string
@@ -4529,22 +4568,33 @@ export type Database = {
           isSetofReturn: false
         }
       }
-      get_search_count: {
-        Args: {
-          p_authors?: string[]
-          p_categories?: string[]
-          p_query?: string
-          p_tags?: string[]
-        }
-        Returns: number
-      }
+      get_search_count:
+        | {
+            Args: {
+              p_authors?: string[]
+              p_categories?: string[]
+              p_query?: string
+              p_tags?: string[]
+            }
+            Returns: number
+          }
+        | {
+            Args: {
+              p_categories?: Database["public"]["Enums"]["content_category"][]
+              p_query: string
+            }
+            Returns: {
+              by_category: Json
+              total_count: number
+            }[]
+          }
       get_search_facets: {
         Args: never
         Returns: {
           all_tags: string[]
           author_count: number
           authors: string[]
-          category: string
+          category: Database["public"]["Enums"]["content_category"]
           content_count: number
           tag_count: number
         }[]
@@ -4565,7 +4615,7 @@ export type Database = {
       get_similar_content: {
         Args: {
           p_content_slug: string
-          p_content_type: string
+          p_content_type: Database["public"]["Enums"]["content_category"]
           p_limit?: number
         }
         Returns: Database["public"]["CompositeTypes"]["similar_content_result"]
@@ -4622,16 +4672,6 @@ export type Database = {
           isSetofReturn: false
         }
       }
-      get_top_tags_for_category: {
-        Args: {
-          p_category: Database["public"]["Enums"]["content_category"]
-          p_limit?: number
-        }
-        Returns: {
-          tag: string
-          tag_count: number
-        }[]
-      }
       get_trending_content: {
         Args: {
           p_category?: Database["public"]["Enums"]["content_category"]
@@ -4672,7 +4712,7 @@ export type Database = {
           robots_index: boolean | null
           seo_title: string | null
           slug: string
-          source: string | null
+          source: Database["public"]["Enums"]["content_source"] | null
           storage_url: string | null
           synced_at: string | null
           tags: string[]
@@ -4711,11 +4751,14 @@ export type Database = {
         }[]
       }
       get_trending_metrics_with_content: {
-        Args: { p_category?: string; p_limit?: number }
+        Args: {
+          p_category?: Database["public"]["Enums"]["content_category"]
+          p_limit?: number
+        }
         Returns: {
           author: string
           bookmarks_total: number
-          category: string
+          category: Database["public"]["Enums"]["content_category"]
           copies_total: number
           description: string
           engagement_score: number
@@ -4860,7 +4903,7 @@ export type Database = {
           start_date: string
           tier: Database["public"]["Enums"]["sponsorship_tier"]
           updated_at: string
-          user_id: string | null
+          user_id: string
         }[]
         SetofOptions: {
           from: "*"
@@ -4945,6 +4988,14 @@ export type Database = {
           table_name: string
         }
         Returns: undefined
+      }
+      increment_content_stat: {
+        Args: {
+          p_category: Database["public"]["Enums"]["content_category"]
+          p_slug: string
+          p_stat_name: string
+        }
+        Returns: boolean
       }
       insert_contact_submission: {
         Args: {
@@ -5053,15 +5104,29 @@ export type Database = {
         }
         Returns: undefined
       }
-      mark_sequence_email_processed: {
-        Args: {
-          p_email: string
-          p_schedule_id: string
-          p_step: number
-          p_success?: boolean
-        }
-        Returns: undefined
-      }
+      mark_sequence_email_processed:
+        | {
+            Args: {
+              p_enrollment_id: string
+              p_sent_at?: string
+              p_step_number: number
+            }
+            Returns: {
+              current_step: number
+              enrollment_id: string
+              status: string
+              success: boolean
+            }[]
+          }
+        | {
+            Args: {
+              p_email: string
+              p_schedule_id: string
+              p_step: number
+              p_success?: boolean
+            }
+            Returns: undefined
+          }
       populate_content_seo_data: {
         Args: never
         Returns: {
@@ -5075,26 +5140,19 @@ export type Database = {
           match_limit?: number
           match_threshold?: number
           p_authors?: string[]
-          p_categories?: string[]
+          p_categories?: Database["public"]["Enums"]["content_category"][]
           p_offset?: number
           p_tags?: string[]
           query_embedding: string
         }
         Returns: {
           author: string
-          author_profile_url: string
-          bookmark_count: number
-          category: string
-          content_id: string
-          copy_count: number
-          created_at: string
+          category: Database["public"]["Enums"]["content_category"]
           description: string
+          id: string
           similarity: number
           slug: string
-          tags: string[]
           title: string
-          updated_at: string
-          view_count: number
         }[]
       }
       refresh_mv_site_urls: { Args: never; Returns: undefined }
@@ -5108,15 +5166,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
-      refresh_user_stats: {
-        Args: never
-        Returns: {
-          duration_ms: number
-          message: string
-          rows_refreshed: number
-          success: boolean
-        }[]
-      }
+      reindex_content_embeddings: { Args: never; Returns: string }
       reject_submission: {
         Args: { p_moderator_notes: string; p_submission_id: string }
         Returns: Database["public"]["CompositeTypes"]["reject_submission_result"]
@@ -5180,6 +5230,7 @@ export type Database = {
           source: Database["public"]["Enums"]["webhook_source"]
           svix_id: string | null
           type: Database["public"]["Enums"]["webhook_event_type"]
+          updated_at: string
         }
         SetofOptions: {
           from: "*"
@@ -5195,7 +5246,7 @@ export type Database = {
       search_by_popularity: {
         Args: {
           p_authors?: string[]
-          p_categories?: string[]
+          p_categories?: Database["public"]["Enums"]["content_category"][]
           p_limit?: number
           p_offset?: number
           p_query?: string
@@ -5205,21 +5256,20 @@ export type Database = {
           author: string
           author_profile_url: string
           bookmark_count: number
-          category: string
+          category: Database["public"]["Enums"]["content_category"]
           copy_count: number
           created_at: string
           date_added: string
           description: string
           examples: Json
-          features: Json
-          fts_vector: unknown
+          features: string[]
           id: string
           popularity_score: number
           slug: string
           tags: string[]
           title: string
           updated_at: string
-          use_cases: Json
+          use_cases: string[]
           view_count: number
         }[]
       }
@@ -5251,7 +5301,7 @@ export type Database = {
       search_content_optimized: {
         Args: {
           p_authors?: string[]
-          p_categories?: string[]
+          p_categories?: Database["public"]["Enums"]["content_category"][]
           p_limit?: number
           p_offset?: number
           p_query?: string
@@ -5263,14 +5313,14 @@ export type Database = {
           author: string
           author_profile_url: string
           bookmark_count: number
-          category: string
+          category: Database["public"]["Enums"]["content_category"]
           combined_score: number
           copyCount: number
           created_at: string
           date_added: string
           description: string
           examples: Json
-          features: Json
+          features: string[]
           id: string
           relevance_score: number
           slug: string
@@ -5278,7 +5328,7 @@ export type Database = {
           tags: string[]
           title: string
           updated_at: string
-          use_cases: Json
+          use_cases: string[]
           viewCount: number
         }[]
       }
@@ -5356,6 +5406,7 @@ export type Database = {
         Returns: {
           bio: string | null
           bookmark_count: number
+          comment_count: number | null
           created_at: string
           display_name: string | null
           email: string | null
@@ -5368,14 +5419,17 @@ export type Database = {
           interests: string[] | null
           json_ld: Json | null
           name: string | null
+          post_count: number | null
           profile_public: boolean | null
           public: boolean | null
+          role: Database["public"]["Enums"]["user_role"]
           slug: string | null
           social_x_link: string | null
           status: string | null
           submission_count: number
           tier: Database["public"]["Enums"]["user_tier"] | null
           updated_at: string
+          votes_received_count: number | null
           website: string | null
           work: string | null
         }[]
@@ -5477,6 +5531,15 @@ export type Database = {
           vacuum_command: string
         }[]
       }
+      test_enriched_content_list_minimal: {
+        Args: { p_category: Database["public"]["Enums"]["content_category"] }
+        Returns: {
+          category: Database["public"]["Enums"]["content_category"]
+          id: string
+          slug: string
+          title: string
+        }[]
+      }
       toggle_follow: {
         Args: {
           p_action: Database["public"]["Enums"]["follow_action"]
@@ -5571,7 +5634,33 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      upsert_content_by_slug: {
+        Args: {
+          p_category: Database["public"]["Enums"]["content_category"]
+          p_description?: string
+          p_metadata?: Json
+          p_slug: string
+          p_source?: string
+          p_tags?: string[]
+          p_title: string
+        }
+        Returns: {
+          category: Database["public"]["Enums"]["content_category"]
+          created_at: string
+          id: string
+          slug: string
+          title: string
+          updated_at: string
+        }[]
+      }
       validate_content_metadata: { Args: { metadata: Json }; Returns: boolean }
+      verify_content_slug_unique: {
+        Args: {
+          p_category: Database["public"]["Enums"]["content_category"]
+          p_slug: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
       announcement_icon:
@@ -5606,6 +5695,7 @@ export type Database = {
         | "Removed"
         | "Fixed"
         | "Security"
+      changelog_source: "manual" | "jsonbored" | "automation"
       company_size: "just_me" | "2-10" | "11-50" | "51-200" | "201-500" | "500+"
       confetti_variant: "success" | "celebration" | "milestone" | "subtle"
       config_format: "json" | "multi" | "hook"
@@ -5616,6 +5706,12 @@ export type Database = {
         | "sheet"
         | "easter-egg"
       contact_category: "bug" | "feature" | "partnership" | "general" | "other"
+      contact_command_category:
+        | "hidden"
+        | "info"
+        | "social"
+        | "support"
+        | "utility"
       contact_command_icon:
         | "Bug"
         | "Clock"
@@ -5642,6 +5738,7 @@ export type Database = {
         | "use_cases"
         | "troubleshooting"
         | "requirements"
+      content_source: "claudepro" | "community" | "official"
       copy_type: "llmstxt" | "markdown" | "code" | "link"
       crud_action: "create" | "update" | "delete" | "add_item" | "remove_item"
       educational_level: "Beginner" | "Intermediate" | "Advanced"
@@ -5651,6 +5748,7 @@ export type Database = {
         | "repeated_soft_bounce"
         | "manual"
       email_frequency: "weekly" | "biweekly" | "monthly" | "paused"
+      email_sequence_id: "onboarding"
       email_sequence_status: "active" | "completed" | "cancelled"
       environment: "development" | "preview" | "production"
       experience_level: "beginner" | "intermediate" | "advanced"
@@ -5860,6 +5958,7 @@ export type Database = {
         | "general-development"
         | "testing-qa"
         | "security-audit"
+      user_role: "user" | "admin" | "moderator"
       user_tier: "free" | "pro" | "enterprise"
       webhook_delivery_status: "running" | "succeeded" | "failed"
       webhook_direction: "inbound" | "outbound"
@@ -6521,8 +6620,8 @@ export type Database = {
         company_id: string | null
         payment_amount: number | null
         requires_payment: boolean | null
-        tier: string | null
-        plan: string | null
+        tier: Database["public"]["Enums"]["job_tier"] | null
+        plan: Database["public"]["Enums"]["job_plan"] | null
       }
       database_fingerprint_item: {
         table_name: string | null
@@ -6575,7 +6674,7 @@ export type Database = {
         description: string | null
         author: string | null
         author_profile_url: string | null
-        category: string | null
+        category: Database["public"]["Enums"]["content_category"] | null
         tags: string[] | null
         source_table: string | null
         created_at: string | null
@@ -7731,6 +7830,7 @@ export const Constants = {
         "Fixed",
         "Security",
       ],
+      changelog_source: ["manual", "jsonbored", "automation"],
       company_size: ["just_me", "2-10", "11-50", "51-200", "201-500", "500+"],
       confetti_variant: ["success", "celebration", "milestone", "subtle"],
       config_format: ["json", "multi", "hook"],
@@ -7742,6 +7842,13 @@ export const Constants = {
         "easter-egg",
       ],
       contact_category: ["bug", "feature", "partnership", "general", "other"],
+      contact_command_category: [
+        "hidden",
+        "info",
+        "social",
+        "support",
+        "utility",
+      ],
       contact_command_icon: [
         "Bug",
         "Clock",
@@ -7771,6 +7878,7 @@ export const Constants = {
         "troubleshooting",
         "requirements",
       ],
+      content_source: ["claudepro", "community", "official"],
       copy_type: ["llmstxt", "markdown", "code", "link"],
       crud_action: ["create", "update", "delete", "add_item", "remove_item"],
       educational_level: ["Beginner", "Intermediate", "Advanced"],
@@ -7781,6 +7889,7 @@ export const Constants = {
         "manual",
       ],
       email_frequency: ["weekly", "biweekly", "monthly", "paused"],
+      email_sequence_id: ["onboarding"],
       email_sequence_status: ["active", "completed", "cancelled"],
       environment: ["development", "preview", "production"],
       experience_level: ["beginner", "intermediate", "advanced"],
@@ -8009,6 +8118,7 @@ export const Constants = {
         "testing-qa",
         "security-audit",
       ],
+      user_role: ["user", "admin", "moderator"],
       user_tier: ["free", "pro", "enterprise"],
       webhook_delivery_status: ["running", "succeeded", "failed"],
       webhook_direction: ["inbound", "outbound"],

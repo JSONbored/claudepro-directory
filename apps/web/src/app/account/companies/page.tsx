@@ -26,6 +26,7 @@ import {
   Plus,
 } from '@heyclaude/web-runtime/icons';
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { generateRequestId } from '@heyclaude/web-runtime/utils/request-context';
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -38,6 +39,13 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/ui/card';
+
+/**
+ * Dynamic Rendering Required
+ * Authenticated user companies
+ */
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 /**
  * Validate company website URL is safe for use in href
@@ -65,6 +73,8 @@ export default async function CompaniesPage() {
 
   if (!user) {
     logger.warn('CompaniesPage: unauthenticated access attempt detected', undefined, {
+      requestId: generateRequestId(),
+      operation: 'CompaniesPage',
       route: '/account/companies',
       timestamp: new Date().toISOString(),
     });
@@ -98,12 +108,22 @@ export default async function CompaniesPage() {
     if (data) {
       companies = data.companies ?? [];
     } else {
-      logger.warn('CompaniesPage: getUserCompanies returned null', { hashedUserId });
+      logger.warn('CompaniesPage: getUserCompanies returned null', undefined, {
+        requestId: generateRequestId(),
+        operation: 'CompaniesPage',
+        route: '/account/companies',
+        hashedUserId,
+      });
       hasError = true;
     }
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to fetch user companies');
-    logger.error('CompaniesPage: getUserCompanies threw', normalized, { hashedUserId });
+    logger.error('CompaniesPage: getUserCompanies threw', normalized, {
+      requestId: generateRequestId(),
+      operation: 'CompaniesPage',
+      route: '/account/companies',
+      hashedUserId,
+    });
     hasError = true;
   }
 

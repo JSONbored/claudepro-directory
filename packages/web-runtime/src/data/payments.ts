@@ -4,6 +4,7 @@ import type { Database } from '@heyclaude/database-types';
 import { cache } from 'react';
 import { logger, normalizeError } from '../index.ts';
 import { createSupabaseServerClient } from '../supabase/server.ts';
+import { generateRequestId } from '../utils/request-context.ts';
 
 type PaymentPlanRow = Database['public']['Tables']['payment_plan_catalog']['Row'];
 type JobBillingSummaryRow = Database['public']['Views']['job_billing_summary']['Row'];
@@ -64,7 +65,10 @@ export const getPaymentPlanCatalog = cache(async (): Promise<PaymentPlanCatalogE
 
   if (error) {
     const normalized = normalizeError(error, 'Failed to load payment_plan_catalog');
-    logger.error('payments:getPaymentPlanCatalog failed', normalized);
+    logger.error('payments:getPaymentPlanCatalog failed', normalized, {
+      requestId: generateRequestId(),
+      operation: 'getPaymentPlanCatalog',
+    });
     throw normalized;
   }
 
@@ -120,6 +124,8 @@ export async function getJobBillingSummaries(
   if (error) {
     const normalized = normalizeError(error, 'Failed to fetch job billing summaries');
     logger.error('payments:getJobBillingSummaries failed', normalized, {
+      requestId: generateRequestId(),
+      operation: 'getJobBillingSummaries',
       jobCount: jobIds.length,
     });
     throw normalized;

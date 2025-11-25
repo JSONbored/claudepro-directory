@@ -7,6 +7,7 @@ import './view-transitions.css';
 import './micro-interactions.css';
 import './sugar-high.css';
 import { logger, normalizeError } from '@heyclaude/web-runtime/core';
+import { generateRequestId } from '@heyclaude/web-runtime/utils/request-context';
 import { unstable_cache } from 'next/cache';
 import dynamicImport from 'next/dynamic';
 import { Toaster } from 'sonner';
@@ -22,6 +23,7 @@ const NotificationToastHandler = dynamicImport(
 );
 
 import type { Database } from '@heyclaude/database-types';
+import { isBuildTime } from '@heyclaude/web-runtime';
 import { getComponentConfig } from '@heyclaude/web-runtime/actions';
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
 import { FeatureFlagsProvider } from '@heyclaude/web-runtime/feature-flags/provider';
@@ -184,22 +186,33 @@ export default async function RootLayout({
   if (layoutDataResult.status === 'rejected') {
     const normalized = normalizeError(layoutDataResult.reason, 'Failed to load layout data');
     logger.error('RootLayout: layout data fetch failed', normalized, {
+      requestId: generateRequestId(),
+      operation: 'RootLayout',
       source: 'root-layout',
     });
   }
 
   let componentCardConfig = DEFAULT_COMPONENT_CARD_CONFIG;
-  try {
-    const componentConfigResult = await getComponentConfig({});
-    componentCardConfig = mapComponentCardConfig(componentConfigResult?.data ?? null);
-    if (componentConfigResult?.serverError) {
-      logger.warn('RootLayout: component config server error', {
-        error: componentConfigResult.serverError,
+  if (isBuildTime()) {
+    logger.info('RootLayout: build-time detected, using default component config');
+  } else {
+    try {
+      const componentConfigResult = await getComponentConfig({});
+      componentCardConfig = mapComponentCardConfig(componentConfigResult?.data ?? null);
+      if (componentConfigResult?.serverError) {
+        logger.warn('RootLayout: component config server error', undefined, {
+          requestId: generateRequestId(),
+          operation: 'RootLayout',
+          error: componentConfigResult.serverError,
+        });
+      }
+    } catch (error) {
+      const normalized = normalizeError(error, 'Failed to load component config');
+      logger.error('RootLayout: component config fallback to defaults', normalized, {
+        requestId: generateRequestId(),
+        operation: 'RootLayout',
       });
     }
-  } catch (error) {
-    const normalized = normalizeError(error, 'Failed to load component config');
-    logger.error('RootLayout: component config fallback to defaults', normalized);
   }
 
   return (

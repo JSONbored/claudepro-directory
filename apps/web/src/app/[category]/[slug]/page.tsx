@@ -2,7 +2,10 @@
  * Dynamic detail pages for all content categories
  * Optimized: Uses getContentDetailCore() to split core content (blocking) from analytics/related (deferred)
  * for Partial Prerendering (PPR) - enables faster LCP by prioritizing critical content
+ *
+ * ISR: 2 hours (7200s) - Detail pages change less frequently than list pages
  */
+export const revalidate = 7200;
 
 import type { Database } from '@heyclaude/database-types';
 import {
@@ -18,6 +21,7 @@ import {
   getContentDetailCore,
   getRelatedContent,
 } from '@heyclaude/web-runtime/server';
+import { generateRequestId } from '@heyclaude/web-runtime/utils/request-context';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { CollectionDetailView } from '@/src/components/content/detail-page/collection-view';
@@ -64,6 +68,9 @@ export async function generateMetadata({
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load category config for metadata');
     logger.error('DetailPage: category config lookup failed', normalized, {
+      requestId: generateRequestId(),
+      operation: 'DetailPage',
+      route: `/${category}/${slug}`,
       category,
       slug,
       phase: 'generateMetadata',
@@ -86,7 +93,13 @@ export default async function DetailPage({
   const { category, slug } = await params;
 
   if (!isValidCategory(category)) {
-    logger.warn('Invalid category in detail page', { category, slug });
+    logger.warn('Invalid category in detail page', undefined, {
+      requestId: generateRequestId(),
+      operation: 'DetailPage',
+      route: `/${category}/${slug}`,
+      category,
+      slug,
+    });
     notFound();
   }
 
@@ -96,6 +109,9 @@ export default async function DetailPage({
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load category config');
     logger.error('DetailPage: category config lookup threw', normalized, {
+      requestId: generateRequestId(),
+      operation: 'DetailPage',
+      route: `/${category}/${slug}`,
       category,
       slug,
     });
@@ -106,6 +122,9 @@ export default async function DetailPage({
       'DetailPage: missing category config'
     );
     logger.error('DetailPage: missing category config', normalized, {
+      requestId: generateRequestId(),
+      operation: 'DetailPage',
+      route: `/${category}/${slug}`,
       category,
       slug,
     });
@@ -122,6 +141,9 @@ export default async function DetailPage({
       'DetailPage: get_content_detail_core returned null'
     );
     logger.error('DetailPage: get_content_detail_core returned null', normalized, {
+      requestId: generateRequestId(),
+      operation: 'DetailPage',
+      route: `/${category}/${slug}`,
       category,
       slug,
     });
@@ -132,7 +154,10 @@ export default async function DetailPage({
 
   // Null safety: If content doesn't exist in database, return 404
   if (!fullItem) {
-    logger.warn('Content not found in RPC response', {
+    logger.warn('Content not found in RPC response', undefined, {
+      requestId: generateRequestId(),
+      operation: 'DetailPage',
+      route: `/${category}/${slug}`,
       category,
       slug,
       rpcFunction: 'get_content_detail_core',
@@ -166,7 +191,10 @@ export default async function DetailPage({
       // Gracefully fall back to default if feature flags fail to load
       // This ensures the page still renders during static generation
       const normalized = normalizeError(error, 'feature-flag-load-failed');
-      logger.warn('Failed to load contentDetailTabs feature flag, using default', {
+      logger.warn('Failed to load contentDetailTabs feature flag, using default', undefined, {
+        requestId: generateRequestId(),
+        operation: 'DetailPage',
+        route: `/${category}/${slug}`,
         error: normalized.message,
         category,
         slug,

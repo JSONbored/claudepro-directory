@@ -19,6 +19,7 @@ import {
   Plus,
 } from '@heyclaude/web-runtime/icons';
 import { BADGE_COLORS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { generateRequestId } from '@heyclaude/web-runtime/utils/request-context';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { JobDeleteButton } from '@/src/components/core/buttons/jobs/job-delete-button';
@@ -33,6 +34,14 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/ui/card';
+
+/**
+ * Dynamic Rendering Required
+ * Authenticated user jobs
+ * Runtime: Node.js (required for authenticated user data and Supabase server client)
+ */
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 const JOB_PLAN_LABELS: Record<Database['public']['Enums']['job_plan'], string> = {
   'one-time': 'One-Time',
@@ -96,6 +105,8 @@ export default async function MyJobsPage({ searchParams }: MyJobsPageProps = {})
 
   if (!user) {
     logger.warn('MyJobsPage: unauthenticated access attempt detected', undefined, {
+      requestId: generateRequestId(),
+      operation: 'MyJobsPage',
       route: '/account/jobs',
       timestamp: new Date().toISOString(),
     });
@@ -122,12 +133,22 @@ export default async function MyJobsPage({ searchParams }: MyJobsPageProps = {})
     data = await getUserDashboard(user.id);
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load user dashboard for jobs');
-    logger.error('MyJobsPage: getUserDashboard threw', normalized, { userId: user.id });
+    logger.error('MyJobsPage: getUserDashboard threw', normalized, {
+      requestId: generateRequestId(),
+      operation: 'MyJobsPage',
+      route: '/account/jobs',
+      userId: user.id,
+    });
     fetchError = true;
   }
 
   if (!data) {
-    logger.warn('MyJobsPage: getUserDashboard returned no data', { userId: user.id });
+    logger.warn('MyJobsPage: getUserDashboard returned no data', undefined, {
+      requestId: generateRequestId(),
+      operation: 'MyJobsPage',
+      route: '/account/jobs',
+      userId: user.id,
+    });
     fetchError = true;
   }
 
@@ -202,7 +223,12 @@ export default async function MyJobsPage({ searchParams }: MyJobsPageProps = {})
       billingSummaries = await getJobBillingSummaries(jobIds);
     } catch (error) {
       const normalized = normalizeError(error, 'Failed to load job billing summaries');
-      logger.error('MyJobsPage: getJobBillingSummaries failed', normalized, { userId: user.id });
+      logger.error('MyJobsPage: getJobBillingSummaries failed', normalized, {
+        requestId: generateRequestId(),
+        operation: 'MyJobsPage',
+        route: '/account/jobs',
+        userId: user.id,
+      });
     }
   }
   const billingSummaryMap = new Map<string, JobBillingSummaryEntry>();

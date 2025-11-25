@@ -17,6 +17,7 @@ import {
   Sparkles,
 } from '@heyclaude/web-runtime/icons';
 import { RESPONSIVE_PATTERNS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { generateRequestId } from '@heyclaude/web-runtime/utils/request-context';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { HoverCard } from '@/src/components/primitives/animation/hover-card';
 import { Button } from '@/src/components/primitives/ui/button';
@@ -38,7 +39,7 @@ import {
  *
  * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic
  */
-export const dynamic = 'force-dynamic';
+export const revalidate = 86400;
 
 export default async function PartnerPage() {
   let pricing: Awaited<ReturnType<typeof getPartnerPricing>>;
@@ -46,7 +47,11 @@ export default async function PartnerPage() {
     pricing = await getPartnerPricing();
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load pricing config');
-    logger.error('PartnerPage: getPartnerPricing failed', normalized);
+    logger.error('PartnerPage: getPartnerPricing failed', normalized, {
+      requestId: generateRequestId(),
+      operation: 'PartnerPage',
+      route: '/partner',
+    });
     throw normalized;
   }
 

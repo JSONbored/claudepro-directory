@@ -184,7 +184,7 @@ async function handleSitewideLlmsTxt(logContext?: BaseLogContext): Promise<Respo
       },
     });
   } catch (error) {
-    return errorResponse(error, 'data-api:generate_sitewide_llms_txt', CORS);
+    return errorResponse(error, 'data-api:generate_sitewide_llms_txt', CORS, logContext);
   }
 }
 
@@ -499,6 +499,6 @@ async function handleMcpbGeneration(
       }
     );
   } catch (error) {
-    return errorResponse(error, 'data-api:get_api_content_full', CORS);
+    return errorResponse(error, 'data-api:get_api_content_full', CORS, logContext);
   }
 }

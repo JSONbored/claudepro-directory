@@ -2,11 +2,12 @@
 
 import type { Database } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
-import { generateContentCacheKey, generateContentTags } from '../content-helpers.ts';
-import { logger } from '../../logger.ts';
+import { generateContentTags } from '../content-helpers.ts';
 import { normalizeError } from '../../errors.ts';
 import { fetchCached } from '../../cache/fetch-cached.ts';
 import { ContentService } from '@heyclaude/data-layer';
+import { logger } from '../../logger.ts';
+import { generateRequestId } from '../../utils/request-context.ts';
 
 const CONTENT_CATEGORY_VALUES = Constants.public.Enums.content_category;
 
@@ -30,6 +31,8 @@ export async function getContentDetailComplete(input: {
   if (!isValidContentCategory(category)) {
     const normalized = normalizeError('Invalid category', 'Invalid category in getContentDetailComplete');
     logger.error('Invalid category in getContentDetailComplete', normalized, {
+      requestId: generateRequestId(),
+      operation: 'getContentDetailComplete',
       category,
       slug,
     });
@@ -40,7 +43,7 @@ export async function getContentDetailComplete(input: {
     return await fetchCached(
       (client) => new ContentService(client).getContentDetailComplete({ p_category: category, p_slug: slug }),
       {
-        key: generateContentCacheKey(category, slug),
+        keyParts: ['content', category, slug, 'complete'],
         tags: generateContentTags(category, slug),
         ttlKey: 'cache.content_detail.ttl_seconds',
         fallback: null,
@@ -49,7 +52,12 @@ export async function getContentDetailComplete(input: {
     );
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load content detail');
-    logger.error('getContentDetailComplete failed', normalized, { category, slug });
+    logger.error('getContentDetailComplete failed', normalized, {
+      requestId: generateRequestId(),
+      operation: 'getContentDetailComplete',
+      category,
+      slug,
+    });
     throw normalized;
   }
 }
@@ -63,6 +71,8 @@ export async function getContentDetailCore(input: {
   if (!isValidContentCategory(category)) {
     const normalized = normalizeError('Invalid category', 'Invalid category in getContentDetailCore');
     logger.error('Invalid category in getContentDetailCore', normalized, {
+      requestId: generateRequestId(),
+      operation: 'getContentDetailCore',
       category,
       slug,
     });
@@ -73,7 +83,7 @@ export async function getContentDetailCore(input: {
     return await fetchCached(
       (client) => new ContentService(client).getContentDetailCore({ p_category: category, p_slug: slug }),
       {
-        key: `${generateContentCacheKey(category, slug)}:core`,
+        keyParts: ['content', category, slug, 'core'],
         tags: generateContentTags(category, slug),
         ttlKey: 'cache.content_detail.ttl_seconds',
         fallback: null,
@@ -81,9 +91,14 @@ export async function getContentDetailCore(input: {
       }
     );
   } catch (error) {
-    const normalized = normalizeError(error, 'Failed to load content detail core');
-    logger.error('getContentDetailCore failed', normalized, { category, slug });
-    throw normalized;
+    const normalized = normalizeError(error, 'getContentDetailCore failed');
+    logger.error('getContentDetailCore failed', normalized, {
+      requestId: generateRequestId(),
+      operation: 'getContentDetailCore',
+      category,
+      slug,
+    });
+    return null;
   }
 }
 
@@ -96,6 +111,8 @@ export async function getContentAnalytics(input: {
   if (!isValidContentCategory(category)) {
     const normalized = normalizeError('Invalid category', 'Invalid category in getContentAnalytics');
     logger.error('Invalid category in getContentAnalytics', normalized, {
+      requestId: generateRequestId(),
+      operation: 'getContentAnalytics',
       category,
       slug,
     });
@@ -106,7 +123,7 @@ export async function getContentAnalytics(input: {
     return await fetchCached(
       (client) => new ContentService(client).getContentAnalytics({ p_category: category, p_slug: slug }),
       {
-        key: `${generateContentCacheKey(category, slug)}:analytics`,
+        keyParts: ['content', category, slug, 'analytics'],
         tags: generateContentTags(category, slug),
         ttlKey: 'cache.content_detail.ttl_seconds',
         fallback: null,
@@ -115,7 +132,12 @@ export async function getContentAnalytics(input: {
     );
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load content analytics');
-    logger.error('getContentAnalytics failed', normalized, { category, slug });
+    logger.error('getContentAnalytics failed', normalized, {
+      requestId: generateRequestId(),
+      operation: 'getContentAnalytics',
+      category,
+      slug,
+    });
     throw normalized;
   }
 }

@@ -44,6 +44,7 @@ import { generatePageMetadata, getChangelogOverview } from '@heyclaude/web-runti
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
 import { ArrowLeft } from '@heyclaude/web-runtime/icons';
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { generateRequestId } from '@heyclaude/web-runtime/utils/request-context';
 
 /**
  * Dynamic Rendering Required
@@ -78,7 +79,12 @@ export async function generateMetadata(): Promise<Metadata> {
   } catch (error) {
     logger.error(
       'Failed to generate changelog metadata',
-      error instanceof Error ? error : new Error(String(error))
+      error instanceof Error ? error : new Error(String(error)),
+      {
+        requestId: generateRequestId(),
+        operation: 'ChangelogPage',
+        route: '/changelog',
+      }
     );
     return {
       title: 'Changelog - Claude Pro Directory',
@@ -216,7 +222,12 @@ export default async function ChangelogPage() {
   } catch (error) {
     logger.error(
       'Failed to load changelog page',
-      error instanceof Error ? error : new Error(String(error))
+      error instanceof Error ? error : new Error(String(error)),
+      {
+        requestId: generateRequestId(),
+        operation: 'ChangelogPage',
+        route: '/changelog',
+      }
     );
 
     // Fallback UI on error

@@ -1,7 +1,9 @@
+import 'server-only';
 
 import type { Database } from '@heyclaude/database-types';
 import { fetchCached } from '../cache/fetch-cached.ts';
 import { ChangelogService } from '@heyclaude/data-layer';
+import { QUERY_LIMITS } from './config/constants.ts';
 import './changelog.shared.ts';
 
 // Export shared utils
@@ -52,7 +54,7 @@ export async function getChangelogOverview(
         p_offset: offset
     }),
     {
-      key: category ? `category-${category}-${limit}-${offset}` : `overview-${limit}-${offset}`,
+      keyParts: category ? ['changelog', category, limit, offset] : ['changelog', 'overview', limit, offset],
       tags: [CHANGELOG_TAG, ...(category ? [`changelog-category-${category}`] : [])],
       ttlKey: CHANGELOG_TTL_KEY,
       fallback: createEmptyOverview(limit, offset),
@@ -75,7 +77,7 @@ export async function getChangelogEntryBySlug(
   const result = await fetchCached(
     (client) => new ChangelogService(client).getChangelogDetail({ p_slug: slug }),
     {
-      key: slug,
+      keyParts: ['changelog-detail', slug],
       tags: [CHANGELOG_TAG, `changelog-${slug}`],
       ttlKey: CHANGELOG_DETAIL_TTL_KEY,
       fallback: { entry: null },
@@ -123,7 +125,8 @@ export async function getChangelog(): Promise<{
   offset: number;
   hasMore: boolean;
 }> {
-  const limit = 1000;
+  // OPTIMIZATION: Use configurable limit instead of hardcoded 1000
+  const limit = QUERY_LIMITS.changelog.default;
   const overview = await getChangelogOverview({
     publishedOnly: true,
     limit,
@@ -181,7 +184,8 @@ export async function getAllChangelogEntries(): Promise<
     }
   >
 > {
-  const limit = 10000;
+  // OPTIMIZATION: Use max limit constant for admin/export scenario (getAllChangelogEntries)
+  const limit = QUERY_LIMITS.changelog.max;
   const overview = await getChangelogOverview({
     publishedOnly: false,
     limit,
@@ -218,7 +222,8 @@ export async function getChangelogEntriesByCategory(
     }
   >
 > {
-  const limit = 1000;
+  // OPTIMIZATION: Use configurable limit instead of hardcoded 1000
+  const limit = QUERY_LIMITS.changelog.default;
   const overview = await getChangelogOverview({
     category,
     publishedOnly: true,

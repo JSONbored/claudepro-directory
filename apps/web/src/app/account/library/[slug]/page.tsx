@@ -7,6 +7,7 @@ import {
 import { APP_CONFIG, ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { ArrowLeft, Edit } from '@heyclaude/web-runtime/icons';
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { generateRequestId } from '@heyclaude/web-runtime/utils/request-context';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
@@ -22,6 +23,13 @@ import {
   CardTitle,
 } from '@/src/components/primitives/ui/card';
 
+/**
+ * Dynamic Rendering Required
+ * Authenticated route
+ */
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
 interface CollectionPageProps {
   params: { slug: string };
 }
@@ -36,7 +44,12 @@ export default async function CollectionDetailPage({ params }: CollectionPagePro
   const { user } = await getAuthenticatedUser({ context: 'CollectionDetailPage' });
 
   if (!user) {
-    logger.warn('CollectionDetailPage: unauthenticated access attempt', { slug });
+    logger.warn('CollectionDetailPage: unauthenticated access attempt', undefined, {
+      requestId: generateRequestId(),
+      operation: 'CollectionDetailPage',
+      route: `/account/library/${slug}`,
+      slug,
+    });
     redirect('/login');
   }
 
@@ -50,6 +63,9 @@ export default async function CollectionDetailPage({ params }: CollectionPagePro
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load collection detail for account view');
     logger.error('CollectionDetailPage: getCollectionDetail threw', normalized, {
+      requestId: generateRequestId(),
+      operation: 'CollectionDetailPage',
+      route: `/account/library/${slug}`,
       userIdHash,
       slug,
     });
@@ -77,7 +93,10 @@ export default async function CollectionDetailPage({ params }: CollectionPagePro
   }
 
   if (!collectionData) {
-    logger.warn('CollectionDetailPage: collection not found or inaccessible', {
+    logger.warn('CollectionDetailPage: collection not found or inaccessible', undefined, {
+      requestId: generateRequestId(),
+      operation: 'CollectionDetailPage',
+      route: `/account/library/${slug}`,
       slug,
       userIdHash,
     });
@@ -87,7 +106,10 @@ export default async function CollectionDetailPage({ params }: CollectionPagePro
   const { collection, items, bookmarks } = collectionData;
 
   if (!collection) {
-    logger.warn('CollectionDetailPage: collection is null in response', {
+    logger.warn('CollectionDetailPage: collection is null in response', undefined, {
+      requestId: generateRequestId(),
+      operation: 'CollectionDetailPage',
+      route: `/account/library/${slug}`,
       slug,
       userIdHash,
     });

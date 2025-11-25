@@ -42,6 +42,7 @@ import { logger, normalizeError } from '@heyclaude/web-runtime/core';
 import { generatePageMetadata } from '@heyclaude/web-runtime/data';
 import { BarChart, Clock, Sparkles, Target, Zap } from '@heyclaude/web-runtime/icons';
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { generateRequestId } from '@heyclaude/web-runtime/utils/request-context';
 import { QuizForm } from '@/src/components/features/tools/recommender/quiz-form';
 
 /**
@@ -54,7 +55,7 @@ import { QuizForm } from '@/src/components/features/tools/recommender/quiz-form'
  *
  * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic
  */
-export const dynamic = 'force-dynamic';
+export const revalidate = 86400;
 
 // Generate metadata from centralized registry
 export async function generateMetadata(): Promise<Metadata> {
@@ -249,7 +250,11 @@ export default function ConfigRecommenderPage() {
     );
   } catch (error) {
     const normalized = normalizeError(error, 'Config Recommender page render failed');
-    logger.error('ConfigRecommenderPage: render failed', normalized);
+    logger.error('ConfigRecommenderPage: render failed', normalized, {
+      requestId: generateRequestId(),
+      operation: 'ConfigRecommenderPage',
+      route: '/tools/config-recommender',
+    });
     throw normalized;
   }
 }

@@ -7,9 +7,16 @@ import { Constants, type Database } from '@heyclaude/database-types';
 import { logger, normalizeError } from '@heyclaude/web-runtime/core';
 import { generatePageMetadata, getConfigRecommendations } from '@heyclaude/web-runtime/data';
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
+import { generateRequestId } from '@heyclaude/web-runtime/utils/request-context';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { ResultsDisplay } from '@/src/components/features/tools/recommender/results-display';
+
+/**
+ * Dynamic Rendering Required
+ * Results depend on search params (answers)
+ */
+export const dynamic = 'force-dynamic';
 
 type RecommendationResponse = Database['public']['Functions']['get_recommendations']['Returns'] & {
   answers: DecodedQuizAnswers;
@@ -28,7 +35,7 @@ type DecodedQuizAnswers = {
   timestamp?: string;
 };
 
-function decodeQuizAnswers(encoded: string): DecodedQuizAnswers {
+function decodeQuizAnswers(encoded: string, resultId: string): DecodedQuizAnswers {
   try {
     const json = Buffer.from(encoded, 'base64url').toString('utf-8');
     const parsed = JSON.parse(json);
@@ -100,6 +107,9 @@ function decodeQuizAnswers(encoded: string): DecodedQuizAnswers {
   } catch (error) {
     const normalized = normalizeError(error, 'Invalid quiz answers encoding');
     logger.error('ConfigRecommenderResults: decodeQuizAnswers failed', normalized, {
+      requestId: generateRequestId(),
+      operation: 'ConfigRecommenderResults',
+      route: `/tools/config-recommender/results/${resultId}`,
       encodedLength: encoded.length,
     });
     throw normalized;
@@ -107,7 +117,8 @@ function decodeQuizAnswers(encoded: string): DecodedQuizAnswers {
 }
 
 function normalizeRecommendationResults(
-  results: Database['public']['Functions']['get_recommendations']['Returns']['results']
+  results: Database['public']['Functions']['get_recommendations']['Returns']['results'],
+  resultId: string
 ): Array<
   Database['public']['CompositeTypes']['recommendation_item'] & {
     slug: string;
@@ -127,7 +138,10 @@ function normalizeRecommendationResults(
   );
 
   if (normalized.length < results.length) {
-    logger.warn('ConfigRecommenderResults: filtered incomplete recommendation items', {
+    logger.warn('ConfigRecommenderResults: filtered incomplete recommendation items', undefined, {
+      requestId: generateRequestId(),
+      operation: 'ConfigRecommenderResults',
+      route: `/tools/config-recommender/results/${resultId}`,
       originalCount: results.length,
       filteredCount: normalized.length,
     });
@@ -161,7 +175,10 @@ export default async function ResultsPage({ params, searchParams }: PageProps) {
   const resolvedSearchParams = await searchParams;
 
   if (!resolvedSearchParams.answers) {
-    logger.warn('ConfigRecommenderResults: accessed without answers parameter', {
+    logger.warn('ConfigRecommenderResults: accessed without answers parameter', undefined, {
+      requestId: generateRequestId(),
+      operation: 'ConfigRecommenderResults',
+      route: `/tools/config-recommender/results/${resolvedParams.id}`,
       resultId: resolvedParams.id,
     });
     notFound();
@@ -169,10 +186,13 @@ export default async function ResultsPage({ params, searchParams }: PageProps) {
 
   let answers: DecodedQuizAnswers;
   try {
-    answers = decodeQuizAnswers(resolvedSearchParams.answers);
+    answers = decodeQuizAnswers(resolvedSearchParams.answers, resolvedParams.id);
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to decode quiz answers');
     logger.error('ConfigRecommenderResults: failed to decode quiz answers', normalized, {
+      requestId: generateRequestId(),
+      operation: 'ConfigRecommenderResults',
+      route: `/tools/config-recommender/results/${resolvedParams.id}`,
       resultId: resolvedParams.id,
     });
     notFound();
@@ -191,6 +211,9 @@ export default async function ResultsPage({ params, searchParams }: PageProps) {
       'ConfigRecommenderResults: get_recommendations returned no data',
       new Error('Recommendations result is null'),
       {
+        requestId: generateRequestId(),
+        operation: 'ConfigRecommenderResults',
+        route: `/tools/config-recommender/results/${resolvedParams.id}`,
         resultId: resolvedParams.id,
         useCase: answers.useCase,
       }
@@ -200,7 +223,7 @@ export default async function ResultsPage({ params, searchParams }: PageProps) {
 
   const recommendations: RecommendationResponse = {
     ...enrichedResult,
-    results: normalizeRecommendationResults(enrichedResult.results),
+    results: normalizeRecommendationResults(enrichedResult.results, resolvedParams.id),
     answers,
     id: resolvedParams.id,
     generatedAt: new Date().toISOString(),

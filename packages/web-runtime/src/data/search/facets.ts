@@ -39,7 +39,7 @@ export async function getSearchFacets(): Promise<SearchFacetAggregate> {
       return (data ?? []).map(normalizeFacetRow);
     },
     {
-      key: 'search-facets',
+      keyParts: ['search-facets'],
       tags: ['search', 'search-facets'],
       ttlKey: 'cache.search_facets.ttl_seconds',
       fallback: [] as SearchFacetSummary[],

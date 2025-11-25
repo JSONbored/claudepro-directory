@@ -1,5 +1,5 @@
+import { getNewsletterConfig } from '@heyclaude/web-runtime/actions/feature-flags';
 import { ensureString, NEWSLETTER_CTA_CONFIG } from '@heyclaude/web-runtime/core';
-import { getNewsletterConfig } from '@heyclaude/web-runtime/data';
 
 /**
  * Newsletter config type from Statsig
@@ -141,8 +141,9 @@ export function getContextualMessage(
  */
 export async function loadNewsletterConfig(): Promise<NewsletterConfig> {
   try {
-    const result = await getNewsletterConfig();
-    return result ?? ({} as NewsletterConfig); // Fall back to empty object
+    const result = await getNewsletterConfig({});
+    if (!result?.data) return {} as NewsletterConfig;
+    return result.data as NewsletterConfig;
   } catch {
     return {} as NewsletterConfig; // Fall back to hardcoded defaults
   }

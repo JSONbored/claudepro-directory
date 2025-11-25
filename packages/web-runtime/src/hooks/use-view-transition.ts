@@ -31,7 +31,7 @@
 
 'use client';
 
-import { logClientWarning, logger, normalizeError } from '../index.ts';
+import { logClientWarning, logger, normalizeError } from '../entries/core.ts';
 import { useCallback, useMemo } from 'react';
 
 interface UseViewTransitionReturn {

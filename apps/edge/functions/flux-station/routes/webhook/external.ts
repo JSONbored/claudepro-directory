@@ -16,7 +16,9 @@ import {
 } from '@heyclaude/edge-runtime';
 import {
   createNotificationRouterContext,
-  errorToString,
+  logError,
+  logInfo,
+  logWarn,
   MAX_BODY_SIZE,
   validateBodySize,
 } from '@heyclaude/shared-runtime';
@@ -49,13 +51,13 @@ export async function handleExternalWebhook(req: Request): Promise<Response> {
     });
 
     if (result.duplicate) {
-      console.log('[flux-station] Webhook already processed', {
+      logInfo('Webhook already processed', {
         ...logContext,
         duplicate: result.duplicate,
         received_at: new Date().toISOString(),
       });
     } else {
-      console.log('[flux-station] Webhook routed', {
+      logInfo('Webhook routed', {
         ...logContext,
         duplicate: result.duplicate,
         received_at: new Date().toISOString(),
@@ -90,21 +92,15 @@ export async function handleExternalWebhook(req: Request): Promise<Response> {
       try {
         await processPolarWebhook(result);
       } catch (error) {
-        console.error('[flux-station] Polar webhook processing failed', {
-          ...logContext,
-          error: errorToString(error),
-        });
-        return errorResponse(error, 'flux-station:polar-webhook', corsHeaders);
+        logError('Polar webhook processing failed', logContext, error);
+        return errorResponse(error, 'flux-station:polar-webhook', corsHeaders, logContext);
       }
     } else if (!result.duplicate && result.source === 'resend') {
       try {
         await processResendWebhook(result);
       } catch (error) {
-        console.error('[flux-station] Resend webhook processing failed', {
-          ...logContext,
-          error: errorToString(error),
-        });
-        return errorResponse(error, 'flux-station:resend-webhook', corsHeaders);
+        logError('Resend webhook processing failed', logContext, error);
+        return errorResponse(error, 'flux-station:resend-webhook', corsHeaders, logContext);
       }
     }
 
@@ -120,23 +116,14 @@ export async function handleExternalWebhook(req: Request): Promise<Response> {
 
     if (error instanceof WebhookIngestError) {
       if (error.status === 'unauthorized') {
-        console.warn('[flux-station] Unauthorized webhook', {
-          ...logContext,
-          message: error.message,
-        });
+        logWarn('Unauthorized webhook', logContext);
         return unauthorizedResponse(error.message, webhookCorsHeaders);
       }
-      console.warn('[flux-station] Bad webhook payload', {
-        ...logContext,
-        message: error.message,
-      });
+      logWarn('Bad webhook payload', logContext);
       return badRequestResponse(error.message, webhookCorsHeaders);
     }
 
-    console.error('[flux-station] Unexpected webhook error', {
-      ...logContext,
-      error: errorToString(error),
-    });
-    return errorResponse(error, 'flux-station:webhook', webhookCorsHeaders);
+    logError('Unexpected webhook error', logContext, error);
+    return errorResponse(error, 'flux-station:webhook', webhookCorsHeaders, logContext);
   }
 }

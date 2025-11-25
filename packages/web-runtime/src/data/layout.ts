@@ -6,6 +6,7 @@ import { logger, normalizeError } from '../index.ts';
 import { getActiveAnnouncement } from './announcements.ts';
 import { fetchCached } from '../cache/fetch-cached.ts';
 import { MiscService } from '@heyclaude/data-layer';
+import { generateRequestId } from '../utils/request-context.ts';
 
 const NAVIGATION_TTL_KEY = 'cache.navigation.ttl_seconds';
 
@@ -15,7 +16,7 @@ export async function getNavigationMenu(): Promise<
   return fetchCached(
     (client) => new MiscService(client).getNavigationMenu(),
     {
-      key: 'menu',
+      keyParts: ['navigation-menu'],
       tags: ['navigation', 'ui'],
       ttlKey: NAVIGATION_TTL_KEY,
       fallback: {
@@ -60,6 +61,8 @@ export const getLayoutData = cache(async (): Promise<LayoutData> => {
         'Failed to load active announcement'
       );
       logger.error('getLayoutData: announcement fetch failed', normalized, {
+        requestId: generateRequestId(),
+        operation: 'getLayoutData',
         source: 'layout-data',
       });
     }
@@ -72,6 +75,8 @@ export const getLayoutData = cache(async (): Promise<LayoutData> => {
     if (navigationResult.status === 'rejected') {
       const normalized = normalizeError(navigationResult.reason, 'Failed to load navigation menu');
       logger.error('getLayoutData: navigation fetch failed', normalized, {
+        requestId: generateRequestId(),
+        operation: 'getLayoutData',
         source: 'layout-data',
       });
     }
@@ -83,6 +88,8 @@ export const getLayoutData = cache(async (): Promise<LayoutData> => {
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to fetch layout data');
     logger.error('getLayoutData: catastrophic failure, using defaults', normalized, {
+      requestId: generateRequestId(),
+      operation: 'getLayoutData',
       source: 'layout-data',
     });
     return DEFAULT_LAYOUT_DATA;

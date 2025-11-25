@@ -3,7 +3,7 @@
 import type { Database } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
 import { fetchCached } from '../../cache/fetch-cached.ts';
-import { generateContentCacheKey, generateContentTags } from '../content-helpers.ts';
+import { generateContentTags } from '../content-helpers.ts';
 import { ContentService } from '@heyclaude/data-layer';
 
 const CONTENT_CATEGORY_VALUES = Constants.public.Enums.content_category;
@@ -50,7 +50,7 @@ export async function getRelatedContent(input: RelatedContentInput): Promise<Rel
         p_exclude_slugs: input.exclude || []
     }),
     {
-      key: generateContentCacheKey(category, currentSlug, input.limit || 3),
+      keyParts: ['related-content', category, currentSlug, input.limit || 3],
       tags: generateContentTags(category, null, ['related-content']),
       ttlKey: 'cache.related_content.ttl_seconds',
       fallback: [],

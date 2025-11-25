@@ -6,17 +6,23 @@
  * - Recent submission count
  * - Success rate
  * - Total user count
+ *
+ * Runtime: Node.js (required for Supabase client)
+ * ISR: 5 minutes (300s) - Social proof updates frequently
  */
-
-import { logger, normalizeError } from '@heyclaude/web-runtime/core';
-import { createSupabaseServerClient } from '@heyclaude/web-runtime/server';
-import { NextResponse } from 'next/server';
-
+export const runtime = 'nodejs';
 export const revalidate = 300;
 
+import { logger, normalizeError } from '@heyclaude/web-runtime/core';
+import { createSupabaseAnonClient } from '@heyclaude/web-runtime/server';
+import { createErrorResponse } from '@heyclaude/web-runtime/utils/error-handler';
+import { generateRequestId } from '@heyclaude/web-runtime/utils/request-context';
+import { NextResponse } from 'next/server';
+
 export async function GET() {
+  const startTime = Date.now();
   try {
-    const supabase = await createSupabaseServerClient();
+    const supabase = createSupabaseAnonClient();
 
     // Calculate date ranges
     const weekAgo = new Date();
@@ -50,6 +56,9 @@ export async function GET() {
     if (submissionsError) {
       const normalized = normalizeError(submissionsError, 'Failed to fetch recent submissions');
       logger.warn('Failed to fetch recent submissions', undefined, {
+        requestId: generateRequestId(),
+        operation: 'SocialProofStatsAPI',
+        route: '/api/stats/social-proof',
         error: normalized.message,
       });
     }
@@ -65,6 +74,9 @@ export async function GET() {
     if (monthError) {
       const normalized = normalizeError(monthError, 'Failed to fetch month submissions');
       logger.warn('Failed to fetch month submissions', undefined, {
+        requestId: generateRequestId(),
+        operation: 'SocialProofStatsAPI',
+        route: '/api/stats/social-proof',
         error: normalized.message,
       });
     }
@@ -80,6 +92,9 @@ export async function GET() {
     if (contentError) {
       const normalized = normalizeError(contentError, 'Failed to fetch content count');
       logger.warn('Failed to fetch content count', undefined, {
+        requestId: generateRequestId(),
+        operation: 'SocialProofStatsAPI',
+        route: '/api/stats/social-proof',
         error: normalized.message,
       });
     }
@@ -114,8 +129,31 @@ export async function GET() {
       });
 
     const totalUsers = contentCount ?? null;
+    const duration = Date.now() - startTime;
+    const timestamp = new Date().toISOString();
 
-    // Return stats
+    // Structured logging with cache tags, duration, and stats
+    logger.info('Social proof stats API: success', {
+      requestId: generateRequestId(),
+      operation: 'SocialProofStatsAPI',
+      route: '/api/stats/social-proof',
+      stats: {
+        contributorCount: topContributors.length,
+        submissionCount,
+        successRate,
+        totalUsers,
+      },
+      duration,
+      cacheTags: ['stats', 'social-proof'],
+      cacheTTL: 300,
+      revalidate: 300,
+    });
+
+    // Generate ETag from timestamp and stats hash for conditional requests
+    const statsHash = `${submissionCount}-${successRate}-${totalUsers}`;
+    const etag = `"${Buffer.from(`${timestamp}-${statsHash}`).toString('base64').slice(0, 16)}"`;
+
+    // Return stats with ETag and Last-Modified headers
     return NextResponse.json(
       {
         success: true,
@@ -128,32 +166,24 @@ export async function GET() {
           successRate,
           totalUsers,
         },
-        timestamp: new Date().toISOString(),
+        timestamp,
       },
       {
         status: 200,
         headers: {
           'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
+          ETag: etag,
+          'Last-Modified': new Date(timestamp).toUTCString(),
         },
       }
     );
   } catch (error) {
-    const normalized = normalizeError(error, 'Social proof stats API error');
-    logger.error('Social proof stats API error', normalized, {
-      endpoint: '/api/stats/social-proof',
+    const duration = Date.now() - startTime;
+    return createErrorResponse(error, {
+      route: '/api/stats/social-proof',
+      operation: 'SocialProofStatsAPI',
+      method: 'GET',
+      logContext: { duration },
     });
-
-    return NextResponse.json(
-      {
-        error: 'Failed to fetch stats',
-        message:
-          process.env.NODE_ENV === 'development'
-            ? error instanceof Error
-              ? error.message
-              : 'Unknown error'
-            : 'An error occurred while fetching statistics',
-      },
-      { status: 500 }
-    );
   }
 }

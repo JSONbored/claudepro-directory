@@ -301,6 +301,6 @@ export async function handlePackageGenerationQueue(
     if (logContext) {
       logError('Fatal package generation queue error', logContext, error);
     }
-    return errorResponse(error, 'data-api:package-generation-queue-fatal');
+    return errorResponse(error, 'data-api:package-generation-queue-fatal', undefined, logContext);
   }
 }

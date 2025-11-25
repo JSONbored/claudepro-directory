@@ -2,6 +2,7 @@
 
 import { checkTestFlag } from '@heyclaude/web-runtime/actions';
 import { logger, normalizeError } from '@heyclaude/web-runtime/core';
+import { generateRequestId } from '@heyclaude/web-runtime/utils/request-context';
 
 /**
  * Dynamic Rendering Required
@@ -27,7 +28,11 @@ export default async function TestFlagsPage() {
     testEnabled = result?.data ?? false;
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to check test flag');
-    logger.error('TestFlagsPage: checkTestFlag failed', normalized);
+    logger.error('TestFlagsPage: checkTestFlag failed', normalized, {
+      requestId: generateRequestId(),
+      operation: 'TestFlagsPage',
+      route: '/test-flags',
+    });
     // Keep default false on error
   }
 

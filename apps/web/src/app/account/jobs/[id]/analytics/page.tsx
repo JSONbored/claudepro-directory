@@ -12,6 +12,7 @@ import {
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { ArrowLeft, ExternalLink } from '@heyclaude/web-runtime/icons';
 import { BADGE_COLORS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { generateRequestId } from '@heyclaude/web-runtime/utils/request-context';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
@@ -25,6 +26,13 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/ui/card';
+
+/**
+ * Dynamic Rendering Required
+ * Authenticated route
+ */
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 interface JobAnalyticsPageProps {
   params: Promise<{ id: string }>;
@@ -40,7 +48,10 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPageProps
   const { id } = await params;
 
   if (!user) {
-    logger.warn('JobAnalyticsPage: unauthenticated access attempt', {
+    logger.warn('JobAnalyticsPage: unauthenticated access attempt', undefined, {
+      requestId: generateRequestId(),
+      operation: 'JobAnalyticsPage',
+      route: `/account/jobs/${id}/analytics`,
       jobId: id,
     });
     redirect(ROUTES.LOGIN);
@@ -53,13 +64,19 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPageProps
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load job analytics detail');
     logger.error('JobAnalyticsPage: getUserJobById threw', normalized, {
+      requestId: generateRequestId(),
+      operation: 'JobAnalyticsPage',
+      route: `/account/jobs/${id}/analytics`,
       jobId: id,
       userId: user.id,
     });
     fetchError = true;
   }
   if (!job || fetchError) {
-    logger.warn('JobAnalyticsPage: job not found or not owned by user', {
+    logger.warn('JobAnalyticsPage: job not found or not owned by user', undefined, {
+      requestId: generateRequestId(),
+      operation: 'JobAnalyticsPage',
+      route: `/account/jobs/${id}/analytics`,
       jobId: id,
       userId: user.id,
     });

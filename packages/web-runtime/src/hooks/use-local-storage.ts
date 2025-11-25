@@ -1,6 +1,7 @@
 'use client';
 
-import { logger, ParseStrategy, safeParse } from '../index.ts';
+import { logger } from '../logger.ts';
+import { ParseStrategy, safeParse } from '../data.ts';
 import { useCallback, useEffect, useState } from 'react';
 import { z } from 'zod';
 

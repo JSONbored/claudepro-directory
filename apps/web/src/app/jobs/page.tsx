@@ -17,9 +17,11 @@ import {
 } from '@heyclaude/web-runtime/icons';
 import type { PagePropsWithSearchParams } from '@heyclaude/web-runtime/types/app.schema';
 import { POSITION_PATTERNS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { generateRequestId } from '@heyclaude/web-runtime/utils/request-context';
 import type { Metadata } from 'next';
 import dynamicImport from 'next/dynamic';
 import Link from 'next/link';
+import { Suspense } from 'react';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { JobCard } from '@/src/components/core/domain/cards/job-card';
 import { JobAlertsCard } from '@/src/components/core/domain/jobs/job-alerts-card';
@@ -58,18 +60,13 @@ const NewsletterCTAVariant = dynamicImport(
 );
 
 /**
- * Caching Strategy: Delegated to Data Layer
+ * ISR: 15 minutes (900s) - Jobs update frequently but don't need real-time freshness
  *
- * revalidate = false means this page won't automatically revalidate via Next.js.
- * Instead, job listing freshness is controlled by the cache configuration in the data layer.
- *
- * The getFilteredJobs() function uses fetchCachedRpc() with TTL-based caching.
- * Cache duration is configured via cache.jobs.ttl_seconds in the data layer configuration.
- *
- * To adjust job listing cache duration, update the cache.jobs.ttl_seconds setting,
- * not the Next.js revalidate value on this page.
+ * Hybrid Rendering Strategy:
+ * - Base job list (no filters) uses ISR with 15min revalidation
+ * - Filtered queries bypass cache (uncached SSR) for real-time results
  */
-export const revalidate = false;
+export const revalidate = 900;
 
 export async function generateMetadata({
   searchParams,
@@ -81,6 +78,137 @@ export async function generateMetadata({
       remote: rawParams?.['remote'] === 'true',
     },
   });
+}
+
+// Deferred Jobs List Section Component for PPR
+async function JobsListSection({
+  searchQuery,
+  category,
+  employment,
+  experience,
+  remote,
+  sort,
+  limit,
+  offset,
+}: {
+  searchQuery?: string | undefined;
+  category?: string | undefined;
+  employment?: string | undefined;
+  experience?: string | undefined;
+  remote?: boolean | undefined;
+  sort: SortOption;
+  limit: number;
+  offset: number;
+}) {
+  const hasFilters = Boolean(
+    searchQuery ||
+      (category && category !== 'all') ||
+      (employment && employment !== 'any') ||
+      (experience && experience !== 'any') ||
+      remote !== undefined
+  );
+
+  // Use noCache for filtered queries (uncached SSR per Phase 3)
+  const noCache = hasFilters;
+
+  let jobsResponse: JobsFilterResult | null = null;
+  try {
+    jobsResponse = await getFilteredJobs(
+      {
+        ...(searchQuery ? { searchQuery } : {}),
+        ...(category ? { category } : {}),
+        ...(employment ? { employment } : {}),
+        ...(experience ? { experience } : {}),
+        ...(remote !== undefined ? { remote } : {}),
+        sort,
+        limit,
+        offset,
+      },
+      noCache
+    );
+  } catch (error) {
+    const normalized = normalizeError(error, 'Failed to load jobs list');
+    logger.error('JobsPage: getFilteredJobs failed', normalized, {
+      requestId: generateRequestId(),
+      operation: 'JobsPage',
+      route: '/jobs',
+      hasSearch: Boolean(searchQuery),
+      category: category || 'all',
+      employment: employment || 'any',
+      experience: experience || 'any',
+      remote: Boolean(remote),
+      sort,
+      limit,
+      offset,
+    });
+  }
+
+  const jobs = applyJobSorting(jobsResponse?.jobs ?? [], sort);
+  const total_count = jobsResponse?.total_count ?? 0;
+
+  if (total_count === 0) {
+    return (
+      <Card>
+        <CardContent className={'flex flex-col items-center justify-center py-24'}>
+          <div className={'mb-6 rounded-full bg-accent/10 p-4'}>
+            <Briefcase className={'h-12 w-12 text-muted-foreground'} />
+          </div>
+          <h3 className="mb-4 font-bold text-2xl">No Jobs Available Yet</h3>
+          <p className={'mb-8 max-w-md text-center text-muted-foreground leading-relaxed'}>
+            We're building our jobs board! Soon you'll find amazing opportunities with companies
+            working on the future of AI. Be the first to know when new positions are posted.
+          </p>
+          <div className="flex gap-4">
+            <Button asChild={true}>
+              <Link href={ROUTES.PARTNER}>
+                <Plus className="mr-2 h-4 w-4" />
+                Post the First Job
+              </Link>
+            </Button>
+            <Button variant="outline" asChild={true}>
+              <Link href={ROUTES.COMMUNITY}>Join Community</Link>
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (jobs.length === 0) {
+    return (
+      <Card>
+        <CardContent className={'flex flex-col items-center justify-center py-16'}>
+          <Briefcase className={'mb-4 h-16 w-16 text-muted-foreground'} />
+          <h3 className={'mb-2 font-semibold text-xl'}>No Jobs Found</h3>
+          <p className={'mb-6 max-w-md text-center text-muted-foreground'}>
+            No jobs match your current filters. Try adjusting your search criteria.
+          </p>
+          <Button variant="outline" asChild={true}>
+            <Link href={ROUTES.JOBS}>Clear All Filters</Link>
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <>
+      <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
+        <div>
+          <h2 className="font-bold text-2xl">
+            {jobs.length} {jobs.length === 1 ? 'Job' : 'Jobs'} Found
+          </h2>
+          <p className="text-muted-foreground">Showing all available positions</p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+        {jobs.map((job) => (
+          <JobCard key={job.slug} job={job} />
+        ))}
+      </div>
+    </>
+  );
 }
 
 export default async function JobsPage({ searchParams }: PagePropsWithSearchParams) {
@@ -113,36 +241,19 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
     limit,
   });
 
-  let jobsResponse: JobsFilterResult | null = null;
+  // Get total count for hero (cached, no filters)
+  let totalJobs = 0;
   try {
-    jobsResponse = await getFilteredJobs({
-      ...(searchQuery ? { searchQuery } : {}),
-      ...(category ? { category } : {}),
-      ...(employment ? { employment } : {}),
-      ...(experience ? { experience } : {}),
-      ...(remote !== undefined ? { remote } : {}),
-      sort,
-      limit,
-      offset,
-    });
+    const totalResponse = await getFilteredJobs({ limit: 1, offset: 0 }, false);
+    totalJobs = totalResponse?.total_count ?? 0;
   } catch (error) {
-    const normalized = normalizeError(error, 'Failed to load jobs list');
-    logger.error('JobsPage: getFilteredJobs failed', normalized, {
-      hasSearch: Boolean(searchQuery),
-      category: category || 'all',
-      employment: employment || 'any',
-      experience: experience || 'any',
-      remote: Boolean(remote),
-      sort,
-      page,
-      limit,
+    const normalized = normalizeError(error, 'Failed to load jobs total count');
+    logger.error('JobsPage: getFilteredJobs for total count failed', normalized, {
+      requestId: generateRequestId(),
+      operation: 'JobsPage',
+      route: '/jobs',
     });
   }
-
-  const jobs = applyJobSorting(jobsResponse?.jobs ?? [], sort);
-  const total_count = jobsResponse?.total_count ?? 0;
-
-  const totalJobs = total_count;
 
   const baseId = 'jobs-page';
   const searchInputId = `${baseId}-search`;
@@ -426,62 +537,34 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
       <section className={'container mx-auto px-4 py-12'}>
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_320px]">
           <div className="space-y-8">
-            {(totalJobs || 0) === 0 ? (
-              <Card>
-                <CardContent className={'flex flex-col items-center justify-center py-24'}>
-                  <div className={'mb-6 rounded-full bg-accent/10 p-4'}>
-                    <Briefcase className={'h-12 w-12 text-muted-foreground'} />
-                  </div>
-                  <h3 className="mb-4 font-bold text-2xl">No Jobs Available Yet</h3>
-                  <p className={'mb-8 max-w-md text-center text-muted-foreground leading-relaxed'}>
-                    We're building our jobs board! Soon you'll find amazing opportunities with
-                    companies working on the future of AI. Be the first to know when new positions
-                    are posted.
-                  </p>
-                  <div className="flex gap-4">
-                    <Button asChild={true}>
-                      <Link href={ROUTES.PARTNER}>
-                        <Plus className="mr-2 h-4 w-4" />
-                        Post the First Job
-                      </Link>
-                    </Button>
-                    <Button variant="outline" asChild={true}>
-                      <Link href={ROUTES.COMMUNITY}>Join Community</Link>
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ) : jobs.length === 0 ? (
-              <Card>
-                <CardContent className={'flex flex-col items-center justify-center py-16'}>
-                  <Briefcase className={'mb-4 h-16 w-16 text-muted-foreground'} />
-                  <h3 className={'mb-2 font-semibold text-xl'}>No Jobs Found</h3>
-                  <p className={'mb-6 max-w-md text-center text-muted-foreground'}>
-                    No jobs match your current filters. Try adjusting your search criteria.
-                  </p>
-                  <Button variant="outline" asChild={true}>
-                    <Link href={ROUTES.JOBS}>Clear All Filters</Link>
-                  </Button>
-                </CardContent>
-              </Card>
-            ) : (
-              <>
-                <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
-                  <div>
-                    <h2 className="font-bold text-2xl">
-                      {jobs.length} {jobs.length === 1 ? 'Job' : 'Jobs'} Found
-                    </h2>
-                    <p className="text-muted-foreground">Showing all available positions</p>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                  {jobs.map((job) => (
-                    <JobCard key={job.slug} job={job} />
-                  ))}
-                </div>
-              </>
-            )}
+            <Suspense
+              fallback={
+                <Card>
+                  <CardContent className={'flex flex-col items-center justify-center py-24'}>
+                    <div className={'mb-6 rounded-full bg-accent/10 p-4'}>
+                      <Briefcase className={'h-12 w-12 text-muted-foreground'} />
+                    </div>
+                    <h3 className="mb-4 font-bold text-2xl">Loading Jobs...</h3>
+                    <p
+                      className={'mb-8 max-w-md text-center text-muted-foreground leading-relaxed'}
+                    >
+                      Fetching the latest job listings...
+                    </p>
+                  </CardContent>
+                </Card>
+              }
+            >
+              <JobsListSection
+                searchQuery={searchQuery}
+                category={category}
+                employment={employment}
+                experience={experience}
+                remote={remote}
+                sort={sort}
+                limit={limit}
+                offset={offset}
+              />
+            </Suspense>
           </div>
 
           <aside className="w-full space-y-6 lg:sticky lg:top-24 lg:h-fit">

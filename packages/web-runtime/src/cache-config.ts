@@ -11,6 +11,7 @@ const isBrowserContext = typeof window !== 'undefined' || typeof document !== 'u
 import { logger } from './logger.ts';
 import { isBuildTime } from './build-time.ts';
 import { normalizeError } from './errors.ts';
+import { CACHE_CONFIG_DEFAULTS } from './feature-flags/defaults.ts';
 
 export const CACHE_TTL_KEYS = [
   'cache.homepage.ttl_seconds',
@@ -113,98 +114,31 @@ type CacheConfigSchema = { [K in CacheTtlKey]: number } & {
 export type CacheConfig = CacheConfigSchema;
 export type CacheConfigPromise = Promise<CacheConfig>;
 
-const BUILD_TIME_TTL_DEFAULTS: Record<CacheTtlKey, number> = {
-  'cache.homepage.ttl_seconds': 3600,
-  'cache.content_detail.ttl_seconds': 7200,
-  'cache.content_list.ttl_seconds': 1800,
-  'cache.content_trending.ttl_seconds': 1800,
-  'cache.config_detail.ttl_seconds': 7200,
-  'cache.config_list.ttl_seconds': 1800,
-  'cache.tool_detail.ttl_seconds': 7200,
-  'cache.tool_list.ttl_seconds': 1800,
-  'cache.company_detail.ttl_seconds': 1800,
-  'cache.company_list.ttl_seconds': 1800,
-  'cache.company_profile.ttl_seconds': 1800,
-  'cache.related_content.ttl_seconds': 3600,
-  'cache.recommendations.ttl_seconds': 3600,
-  'cache.content_export.ttl_seconds': 604800,
-  'cache.content_paginated.ttl_seconds': 86400,
-  'cache.feeds.ttl_seconds': 600,
-  'cache.seo.ttl_seconds': 86400,
-  'cache.sitemap.ttl_seconds': 86400,
-  'cache.status.ttl_seconds': 60,
-  'cache.navigation.ttl_seconds': 7200,
-  'cache.templates.ttl_seconds': 7200,
-  'cache.submission_dashboard.ttl_seconds': 900,
-  'cache.user_profile.ttl_seconds': 1800,
-  'cache.user_activity.ttl_seconds': 900,
-  'cache.user_stats.ttl_seconds': 1800,
-  'cache.user_bookmarks.ttl_seconds': 300,
-  'cache.user_submissions.ttl_seconds': 300,
-  'cache.user_reviews.ttl_seconds': 300,
-  'cache.community.ttl_seconds': 1800,
-  'cache.article.ttl_seconds': 7200,
-  'cache.boilerplate.ttl_seconds': 7200,
-  'cache.course.ttl_seconds': 7200,
-  'cache.book.ttl_seconds': 7200,
-  'cache.quiz.ttl_seconds': 3600,
-  'cache.search.ttl_seconds': 3600,
-  'cache.search_autocomplete.ttl_seconds': 3600,
-  'cache.search_facets.ttl_seconds': 3600,
-  'cache.jobs.ttl_seconds': 1800,
-  'cache.jobs_detail.ttl_seconds': 1800,
-  'cache.changelog.ttl_seconds': 3600,
-  'cache.changelog_detail.ttl_seconds': 7200,
-  'cache.announcements.ttl_seconds': 1800,
-  'cache.account.ttl_seconds': 300,
-  'cache.newsletter_count_ttl_s': 300,
-  'cache.company_search.ttl_seconds': 1800,
-  'cache.notifications.ttl_seconds': 300,
-  'cache.contact.ttl_seconds': 3600,
+// Helper to split the flat CACHE_CONFIG_DEFAULTS into TTL and Invalidate parts
+const getBuildTimeTtls = (): Record<CacheTtlKey, number> => {
+  const ttls: Partial<Record<CacheTtlKey, number>> = {};
+  for (const key of CACHE_TTL_KEYS) {
+    // Safe cast as we know the key exists in defaults
+    ttls[key] = (CACHE_CONFIG_DEFAULTS as unknown as Record<string, number>)[key] ?? 3600;
+  }
+  return ttls as Record<CacheTtlKey, number>;
 };
 
-const CACHE_INVALIDATE_DEFAULTS: Record<CacheInvalidateKey, readonly string[]> = {
-  'cache.invalidate.content_create': ['content', 'homepage', 'trending'],
-  'cache.invalidate.content_update': ['content', 'homepage', 'trending'],
-  'cache.invalidate.content_delete': ['content', 'homepage', 'trending'],
-  'cache.invalidate.config_create': ['configs', 'homepage'],
-  'cache.invalidate.config_update': ['configs', 'homepage'],
-  'cache.invalidate.config_delete': ['configs', 'homepage'],
-  'cache.invalidate.tool_create': ['tools', 'homepage'],
-  'cache.invalidate.tool_update': ['tools', 'homepage'],
-  'cache.invalidate.tool_delete': ['tools', 'homepage'],
-  'cache.invalidate.company_create': ['companies'],
-  'cache.invalidate.company_update': ['companies'],
-  'cache.invalidate.company_delete': ['companies'],
-  'cache.invalidate.user_update': ['users'],
-  'cache.invalidate.user_profile_oauth': ['users'],
-  'cache.invalidate.bookmark_create': ['user-bookmarks', 'users'],
-  'cache.invalidate.bookmark_delete': ['user-bookmarks', 'users'],
-  'cache.invalidate.follow': ['users'],
-  'cache.invalidate.oauth_unlink': ['users'],
-  'cache.invalidate.vote': ['content', 'trending'],
-  'cache.invalidate.job_create': ['jobs', 'companies'],
-  'cache.invalidate.job_update': ['jobs', 'companies'],
-  'cache.invalidate.job_delete': ['jobs', 'companies'],
-  'cache.invalidate.job_status': ['jobs', 'companies'],
-  'cache.invalidate.sponsored_tracking': ['jobs', 'companies'],
-  'cache.invalidate.collection_create': ['collections', 'users'],
-  'cache.invalidate.collection_update': ['collections', 'users'],
-  'cache.invalidate.collection_delete': ['collections', 'users'],
-  'cache.invalidate.collection_items': ['collections', 'users'],
-  'cache.invalidate.review_create': ['content', 'homepage', 'trending'],
-  'cache.invalidate.review_update': ['content'],
-  'cache.invalidate.notifications': ['notifications'],
-  'cache.invalidate.review_delete': ['content'],
-  'cache.invalidate.submission_create': ['submissions'],
-  'cache.invalidate.contact_submission': ['contact', 'submissions'],
-  'cache.invalidate.review_helpful': ['content'],
-  'cache.invalidate.usage_tracking': ['content'],
-  'cache.invalidate.changelog': ['changelog'],
-  'cache.invalidate.newsletter_subscribe': ['newsletter'],
+const getBuildTimeInvalidations = (): Record<CacheInvalidateKey, readonly string[]> => {
+  const invalidations: Partial<Record<CacheInvalidateKey, readonly string[]>> = {};
+  for (const key of CACHE_INVALIDATE_KEYS) {
+    invalidations[key] =
+      (CACHE_CONFIG_DEFAULTS as unknown as Record<string, readonly string[]>)[key] ?? [];
+  }
+  return invalidations as Record<CacheInvalidateKey, readonly string[]>;
 };
+
+const BUILD_TIME_TTL_DEFAULTS = getBuildTimeTtls();
+const CACHE_INVALIDATE_DEFAULTS = getBuildTimeInvalidations();
 
 let cacheConfigPromise: CacheConfigPromise | null = null;
+// OPTIMIZATION: Store resolved config to avoid re-awaiting the same promise
+let cachedConfig: CacheConfig | null = null;
 
 function isBuildTimeContext(error: unknown): boolean {
   if (error instanceof Error) {
@@ -225,54 +159,55 @@ async function loadCacheConfig(): Promise<CacheConfig> {
     } as CacheConfig;
   }
 
-  const buildTimeCheck1 = isBuildTime();
-  if (buildTimeCheck1) {
+  // Single build-time check - eliminates redundant calls
+  const isBuild = isBuildTime();
+  if (isBuild) {
     return {
       ...(BUILD_TIME_TTL_DEFAULTS as Record<CacheTtlKey, number>),
       ...(CACHE_INVALIDATE_DEFAULTS as Record<CacheInvalidateKey, readonly string[]>),
     } as CacheConfig;
   }
 
-  const buildTimeCheck2 = isBuildTime();
-  if (buildTimeCheck2) {
-    return {
-      ...(BUILD_TIME_TTL_DEFAULTS as Record<CacheTtlKey, number>),
-      ...(CACHE_INVALIDATE_DEFAULTS as Record<CacheInvalidateKey, readonly string[]>),
-    } as CacheConfig;
+  // OPTIMIZATION: Return cached config if already loaded (request-scoped memoization)
+  if (cachedConfig !== null) {
+    return cachedConfig;
   }
 
   if (!cacheConfigPromise) {
     try {
-      const buildTimeCheck3 = isBuildTime();
-      if (buildTimeCheck3) {
-        return {
-          ...(BUILD_TIME_TTL_DEFAULTS as Record<CacheTtlKey, number>),
-          ...(CACHE_INVALIDATE_DEFAULTS as Record<CacheInvalidateKey, readonly string[]>),
-        } as CacheConfig;
-      }
-
-      return {
+      // Note: Statsig/feature flags loading would happen here in runtime
+      // For now, return defaults (actual implementation would load from Statsig)
+      const defaultConfig = {
         ...(BUILD_TIME_TTL_DEFAULTS as Record<CacheTtlKey, number>),
         ...(CACHE_INVALIDATE_DEFAULTS as Record<CacheInvalidateKey, readonly string[]>),
       } as CacheConfig;
+      // Cache the default config to avoid re-computing
+      cachedConfig = defaultConfig;
+      return defaultConfig;
     } catch (error) {
       if (
         isBuildTimeContext(error) ||
         (error instanceof Error && error.message.includes('Server Functions'))
       ) {
-        return {
+        const defaultConfig = {
           ...(BUILD_TIME_TTL_DEFAULTS as Record<CacheTtlKey, number>),
           ...(CACHE_INVALIDATE_DEFAULTS as Record<CacheInvalidateKey, readonly string[]>),
         } as CacheConfig;
+        cachedConfig = defaultConfig;
+        return defaultConfig;
       }
       throw error;
     }
   }
 
   try {
-    return await cacheConfigPromise;
+    const config = await cacheConfigPromise;
+    // Cache the resolved config for subsequent calls in the same request
+    cachedConfig = config;
+    return config;
   } catch (error) {
     cacheConfigPromise = null;
+    cachedConfig = null;
 
     if (
       isBuildTimeContext(error) ||
@@ -288,15 +223,20 @@ async function loadCacheConfig(): Promise<CacheConfig> {
     logger.error('loadCacheConfig failed', normalized, {
       source: 'web-runtime/cache-config',
     });
-    return {
+    const fallbackConfig = {
       ...(BUILD_TIME_TTL_DEFAULTS as Record<CacheTtlKey, number>),
       ...(CACHE_INVALIDATE_DEFAULTS as Record<CacheInvalidateKey, readonly string[]>),
     } as CacheConfig;
+    // Cache the fallback config
+    cachedConfig = fallbackConfig;
+    return fallbackConfig;
   }
 }
 
 export async function primeCacheConfig(promise: CacheConfigPromise): Promise<void> {
   cacheConfigPromise = promise;
+  // Clear cached config when priming a new promise
+  cachedConfig = null;
 }
 
 export async function getCacheConfigSnapshot(): Promise<CacheConfig> {
@@ -326,6 +266,11 @@ export async function getCacheTtl(key: CacheTtlKey): Promise<number> {
     return BUILD_TIME_TTL_DEFAULTS[key] ?? 3600;
   }
 
+  // OPTIMIZATION: Use cached config if available (request-scoped memoization)
+  if (cachedConfig !== null) {
+    return cachedConfig[key];
+  }
+
   try {
     const config = await loadCacheConfig();
     return config[key];
@@ -343,6 +288,11 @@ export async function getCacheInvalidateTags(
 
   if (isBuildTime()) {
     return CACHE_INVALIDATE_DEFAULTS[key] ?? [];
+  }
+
+  // OPTIMIZATION: Use cached config if available (request-scoped memoization)
+  if (cachedConfig !== null) {
+    return cachedConfig[key];
   }
 
   try {

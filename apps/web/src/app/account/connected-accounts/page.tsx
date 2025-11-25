@@ -2,6 +2,7 @@ import { getUserIdentities } from '@heyclaude/web-runtime';
 import { logger, normalizeError } from '@heyclaude/web-runtime/core';
 import { generatePageMetadata, getAuthenticatedUser } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
+import { generateRequestId } from '@heyclaude/web-runtime/utils/request-context';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ConnectedAccountsClient } from '@/src/components/features/account/connected-accounts-client';
@@ -14,6 +15,13 @@ import {
   CardTitle,
 } from '@/src/components/primitives/ui/card';
 
+/**
+ * Dynamic Rendering Required
+ * Authenticated user connections
+ */
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
 export async function generateMetadata(): Promise<Metadata> {
   return await generatePageMetadata('/account/connected-accounts');
 }
@@ -22,7 +30,11 @@ export default async function ConnectedAccountsPage() {
   const { user } = await getAuthenticatedUser({ context: 'ConnectedAccountsPage' });
 
   if (!user) {
-    logger.warn('ConnectedAccountsPage: unauthenticated access attempt detected');
+    logger.warn('ConnectedAccountsPage: unauthenticated access attempt detected', undefined, {
+      requestId: generateRequestId(),
+      operation: 'ConnectedAccountsPage',
+      route: '/account/connected-accounts',
+    });
     return (
       <div className="space-y-6">
         <Card>
@@ -45,7 +57,12 @@ export default async function ConnectedAccountsPage() {
     result = await getUserIdentities();
   } catch (error) {
     const normalized = normalizeError(error, 'getUserIdentities invocation failed');
-    logger.error('ConnectedAccountsPage: getUserIdentities threw', normalized, { userId: user.id });
+    logger.error('ConnectedAccountsPage: getUserIdentities threw', normalized, {
+      requestId: generateRequestId(),
+      operation: 'ConnectedAccountsPage',
+      route: '/account/connected-accounts',
+      userId: user.id,
+    });
     result = { data: null, serverError: normalized.message };
   }
 
@@ -60,10 +77,16 @@ export default async function ConnectedAccountsPage() {
     if (result.serverError) {
       const normalized = normalizeError(result.serverError, 'Connected accounts server error');
       logger.error('ConnectedAccountsPage: getUserIdentities returned serverError', normalized, {
+        requestId: generateRequestId(),
+        operation: 'ConnectedAccountsPage',
+        route: '/account/connected-accounts',
         userId: user.id,
       });
     } else {
-      logger.warn('ConnectedAccountsPage: getUserIdentities returned no data', {
+      logger.warn('ConnectedAccountsPage: getUserIdentities returned no data', undefined, {
+        requestId: generateRequestId(),
+        operation: 'ConnectedAccountsPage',
+        route: '/account/connected-accounts',
         userId: user.id,
       });
     }

@@ -13,7 +13,7 @@ const NewsletterCTAVariant = dynamicImport(
   }
 );
 
-import { getContactChannels, logger } from '@heyclaude/web-runtime/core';
+import { getContactChannels, logger, normalizeError } from '@heyclaude/web-runtime/core';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import {
   Github,
@@ -31,6 +31,7 @@ import {
   getHomepageData,
 } from '@heyclaude/web-runtime/server';
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { generateRequestId } from '@heyclaude/web-runtime/utils/request-context';
 import type { Metadata } from 'next';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
 
@@ -48,7 +49,7 @@ export async function generateMetadata(): Promise<Metadata> {
  *
  * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic
  */
-export const dynamic = 'force-dynamic';
+export const revalidate = 86400;
 
 function formatStatValue(value: number | null | undefined): string {
   if (value == null || Number.isNaN(value)) return '0';
@@ -62,6 +63,8 @@ export default async function CommunityPage() {
   const channels = getContactChannels();
   if (!channels.discord) {
     logger.warn('CommunityPage: Discord channel is not configured', undefined, {
+      requestId: generateRequestId(),
+      operation: 'CommunityPage',
       route: '/community',
       channel: 'discord',
       configKey: 'DISCORD_INVITE_URL',
@@ -69,6 +72,8 @@ export default async function CommunityPage() {
   }
   if (!channels.twitter) {
     logger.warn('CommunityPage: Twitter channel is not configured', undefined, {
+      requestId: generateRequestId(),
+      operation: 'CommunityPage',
       route: '/community',
       channel: 'twitter',
       configKey: 'TWITTER_URL',
@@ -79,15 +84,27 @@ export default async function CommunityPage() {
 
   const [communityDirectory, configurationCount, homepageData] = await Promise.all([
     getCommunityDirectory({ limit: 500 }).catch((error) => {
-      logger.error('CommunityPage: failed to load community directory', error);
+      logger.error('CommunityPage: failed to load community directory', normalizeError(error), {
+        requestId: generateRequestId(),
+        operation: 'CommunityPage',
+        route: '/community',
+      });
       return null;
     }),
     getConfigurationCount().catch((error) => {
-      logger.error('CommunityPage: failed to load configuration count', error);
+      logger.error('CommunityPage: failed to load configuration count', normalizeError(error), {
+        requestId: generateRequestId(),
+        operation: 'CommunityPage',
+        route: '/community',
+      });
       return 0;
     }),
     getHomepageData(categoryIds).catch((error) => {
-      logger.error('CommunityPage: failed to load homepage metrics', error);
+      logger.error('CommunityPage: failed to load homepage metrics', normalizeError(error), {
+        requestId: generateRequestId(),
+        operation: 'CommunityPage',
+        route: '/community',
+      });
       return null;
     }),
   ]);

@@ -3,6 +3,20 @@
 import { z } from 'zod';
 import { rateLimitedAction } from './safe-action.ts';
 import { isBuildTime } from '../build-time.ts';
+import {
+  ANIMATION_CONFIG_DEFAULTS,
+  APP_SETTINGS_DEFAULTS,
+  COMPONENT_CONFIG_DEFAULTS,
+  EMAIL_CONFIG_DEFAULTS,
+  FORM_CONFIG_DEFAULTS,
+  HOMEPAGE_CONFIG_DEFAULTS,
+  NEWSLETTER_CONFIG_DEFAULTS,
+  POLLING_CONFIG_DEFAULTS,
+  PRICING_CONFIG_DEFAULTS,
+  RECENTLY_VIEWED_CONFIG_DEFAULTS,
+  TIMEOUT_CONFIG_DEFAULTS,
+  TOAST_CONFIG_DEFAULTS,
+} from '../feature-flags/defaults.ts';
 
 async function getFlagsModule() {
   if (isBuildTime()) {
@@ -126,10 +140,7 @@ function createTypedConfigAccessor<const Schema extends ConfigRecord>({
 }
 
 const newsletterConfigAccessor = createTypedConfigAccessor({
-  getDefaults: async () => {
-    const flagsModule = await getFlagsModule();
-    return flagsModule.NEWSLETTER_CONFIG_DEFAULTS;
-  },
+  getDefaults: async () => NEWSLETTER_CONFIG_DEFAULTS,
   getFetcher: (flagsModule) => () => flagsModule.newsletterConfigs() as Promise<ConfigRecord>,
   actionName: 'featureFlags.newsletterConfig',
 });
@@ -147,10 +158,7 @@ export async function getNewsletterConfigValue(
 }
 
 const pricingConfigAccessor = createTypedConfigAccessor({
-  getDefaults: async () => {
-    const flagsModule = await getFlagsModule();
-    return flagsModule.PRICING_CONFIG_DEFAULTS;
-  },
+  getDefaults: async () => PRICING_CONFIG_DEFAULTS,
   getFetcher: (flagsModule) => () => flagsModule.pricingConfigs() as Promise<ConfigRecord>,
   actionName: 'featureFlags.pricingConfig',
 });
@@ -168,10 +176,7 @@ export async function getPricingConfigValue(
 }
 
 const animationConfigAccessor = createTypedConfigAccessor({
-  getDefaults: async () => {
-    const flagsModule = await getFlagsModule();
-    return flagsModule.ANIMATION_CONFIG_DEFAULTS;
-  },
+  getDefaults: async () => ANIMATION_CONFIG_DEFAULTS,
   getFetcher: (flagsModule) => () => flagsModule.animationConfigs() as Promise<ConfigRecord>,
   actionName: 'featureFlags.animationConfig',
 });
@@ -189,10 +194,7 @@ export async function getAnimationConfigValue(
 }
 
 const timeoutConfigAccessor = createTypedConfigAccessor({
-  getDefaults: async () => {
-    const flagsModule = await getFlagsModule();
-    return flagsModule.TIMEOUT_CONFIG_DEFAULTS;
-  },
+  getDefaults: async () => TIMEOUT_CONFIG_DEFAULTS,
   getFetcher: (flagsModule) => () => flagsModule.timeoutConfigs() as Promise<ConfigRecord>,
   actionName: 'featureFlags.timeoutConfig',
 });
@@ -210,10 +212,7 @@ export async function getTimeoutConfigValue(
 }
 
 const formConfigAccessor = createTypedConfigAccessor({
-  getDefaults: async () => {
-    const flagsModule = await getFlagsModule();
-    return flagsModule.FORM_CONFIG_DEFAULTS;
-  },
+  getDefaults: async () => FORM_CONFIG_DEFAULTS,
   getFetcher: (flagsModule) => () => flagsModule.formConfigs() as Promise<ConfigRecord>,
   actionName: 'featureFlags.formConfig',
 });
@@ -231,10 +230,7 @@ export async function getFormConfigValue(
 }
 
 const recentlyViewedConfigAccessor = createTypedConfigAccessor({
-  getDefaults: async () => {
-    const flagsModule = await getFlagsModule();
-    return flagsModule.RECENTLY_VIEWED_CONFIG_DEFAULTS;
-  },
+  getDefaults: async () => RECENTLY_VIEWED_CONFIG_DEFAULTS,
   getFetcher: (flagsModule) => () => flagsModule.recentlyViewedConfigs() as Promise<ConfigRecord>,
   actionName: 'featureFlags.recentlyViewedConfig',
 });
@@ -252,10 +248,7 @@ export async function getRecentlyViewedConfigValue(
 }
 
 const appSettingsAccessor = createTypedConfigAccessor({
-  getDefaults: async () => {
-    const flagsModule = await getFlagsModule();
-    return flagsModule.APP_SETTINGS_DEFAULTS;
-  },
+  getDefaults: async () => APP_SETTINGS_DEFAULTS,
   getFetcher: (flagsModule) => () => flagsModule.appSettings() as Promise<ConfigRecord>,
   actionName: 'featureFlags.appSettings',
 });
@@ -273,10 +266,7 @@ export async function getAppSettingValue(
 }
 
 const pollingConfigAccessor = createTypedConfigAccessor({
-  getDefaults: async () => {
-    const flagsModule = await getFlagsModule();
-    return flagsModule.POLLING_CONFIG_DEFAULTS;
-  },
+  getDefaults: async () => POLLING_CONFIG_DEFAULTS,
   getFetcher: (flagsModule) => () => flagsModule.pollingConfigs() as Promise<ConfigRecord>,
   actionName: 'featureFlags.pollingConfig',
 });
@@ -294,10 +284,7 @@ export async function getPollingConfigValue(
 }
 
 const componentConfigAccessor = createTypedConfigAccessor({
-  getDefaults: async () => {
-    const flagsModule = await getFlagsModule();
-    return flagsModule.COMPONENT_CONFIG_DEFAULTS;
-  },
+  getDefaults: async () => COMPONENT_CONFIG_DEFAULTS,
   getFetcher: (flagsModule) => () => flagsModule.componentConfigs() as Promise<ConfigRecord>,
   actionName: 'featureFlags.componentConfig',
 });
@@ -315,10 +302,7 @@ export async function getComponentConfigValue(
 }
 
 const homepageConfigAccessor = createTypedConfigAccessor({
-  getDefaults: async () => {
-    const flagsModule = await getFlagsModule();
-    return flagsModule.HOMEPAGE_CONFIG_DEFAULTS;
-  },
+  getDefaults: async () => HOMEPAGE_CONFIG_DEFAULTS,
   getFetcher: (flagsModule) => () => flagsModule.homepageConfigs() as Promise<ConfigRecord>,
   actionName: 'featureFlags.homepageConfig',
 });
@@ -336,10 +320,7 @@ export async function getHomepageConfigValue(
 }
 
 const emailConfigAccessor = createTypedConfigAccessor({
-  getDefaults: async () => {
-    const flagsModule = await getFlagsModule();
-    return flagsModule.EMAIL_CONFIG_DEFAULTS;
-  },
+  getDefaults: async () => EMAIL_CONFIG_DEFAULTS,
   getFetcher: (flagsModule) => () => flagsModule.emailConfigs() as Promise<ConfigRecord>,
   actionName: 'featureFlags.emailConfig',
 });
@@ -357,10 +338,7 @@ export async function getEmailConfigValue(
 }
 
 const toastConfigAccessor = createTypedConfigAccessor({
-  getDefaults: async () => {
-    const flagsModule = await getFlagsModule();
-    return flagsModule.TOAST_CONFIG_DEFAULTS;
-  },
+  getDefaults: async () => TOAST_CONFIG_DEFAULTS,
   getFetcher: (flagsModule) => () => flagsModule.toastConfigs() as Promise<ConfigRecord>,
   actionName: 'featureFlags.toastConfig',
 });

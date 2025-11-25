@@ -24,7 +24,9 @@
     "heyclaude-generate-services": "./dist/bin/generate-services.js",
     "heyclaude-generate-zod": "./dist/bin/generate-zod-schemas.js",
     "heyclaude-generate-actions": "./dist/bin/generate-server-actions.js",
-    "heyclaude-generate-edge-routes": "./dist/bin/generate-edge-routes.js"
+    "heyclaude-generate-edge-routes": "./dist/bin/generate-edge-routes.js",
+    "heyclaude-verify-flags": "./dist/bin/verify-flags.js",
+    "heyclaude-verify-routes": "./dist/bin/verify-routes.js"
   },
   "exports": {
     "./toolkit/logger": "./src/toolkit/logger.ts",

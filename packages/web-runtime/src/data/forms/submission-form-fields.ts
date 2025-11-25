@@ -8,6 +8,7 @@ import { logger } from '../../logger.ts';
 import { normalizeError } from '../../errors.ts';
 import { fetchCached } from '../../cache/fetch-cached.ts';
 import { MiscService } from '@heyclaude/data-layer';
+import { generateRequestId } from '../../utils/request-context.ts';
 import type {
   SubmissionContentType,
   SubmissionFormConfig,
@@ -121,7 +122,7 @@ async function fetchFieldsForContentType(
   const result = await fetchCached(
     (client) => new MiscService(client).getFormFieldConfig({ p_form_type: contentType }),
     {
-      key: contentType,
+      keyParts: ['submission-form-fields', contentType],
       tags: ['templates', `submission-${contentType}`],
       ttlKey: 'cache.templates.ttl_seconds',
       fallback: null,
@@ -132,6 +133,8 @@ async function fetchFieldsForContentType(
   if (!result?.fields) {
     const normalized = normalizeError('RPC returned null or no fields', 'Failed to load form fields');
     logger.error('Failed to load form fields', normalized, {
+      requestId: generateRequestId(),
+      operation: 'fetchFieldsForContentType',
       contentType,
       source: 'SubmissionFormConfig',
     });

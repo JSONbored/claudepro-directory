@@ -3,18 +3,24 @@
  *
  * Fetches content templates by category for client-side consumption.
  * Used by the wizard to load templates dynamically.
+ *
+ * Runtime: Node.js (required for Supabase client with service role)
  */
+export const runtime = 'nodejs';
 
 import type { Database } from '@heyclaude/database-types';
-import { logger, normalizeError, VALID_CATEGORIES } from '@heyclaude/web-runtime/core';
+import { logger, VALID_CATEGORIES } from '@heyclaude/web-runtime/core';
 import { getContentTemplates } from '@heyclaude/web-runtime/data';
+import { createErrorResponse } from '@heyclaude/web-runtime/utils/error-handler';
+import { generateRequestId } from '@heyclaude/web-runtime/utils/request-context';
 import { type NextRequest, NextResponse } from 'next/server';
 
 export async function GET(request: NextRequest) {
-  try {
-    const searchParams = request.nextUrl.searchParams;
-    const category = searchParams.get('category');
+  const startTime = Date.now();
+  const searchParams = request.nextUrl.searchParams;
+  const category = searchParams.get('category');
 
+  try {
     // Validate category
     if (
       !(
@@ -22,6 +28,13 @@ export async function GET(request: NextRequest) {
         VALID_CATEGORIES.includes(category as Database['public']['Enums']['content_category'])
       )
     ) {
+      logger.warn('Templates API: invalid category', undefined, {
+        requestId: generateRequestId(),
+        operation: 'TemplatesAPI',
+        route: '/api/templates',
+        category,
+        duration: Date.now() - startTime,
+      });
       return NextResponse.json(
         {
           error: 'Invalid category',
@@ -36,6 +49,19 @@ export async function GET(request: NextRequest) {
 
     // Fetch templates from data layer
     const templates = await getContentTemplates(validCategory);
+    const duration = Date.now() - startTime;
+
+    // Structured logging with cache tags and duration
+    logger.info('Templates API: success', {
+      requestId: generateRequestId(),
+      operation: 'TemplatesAPI',
+      route: '/api/templates',
+      category: validCategory,
+      count: templates.length,
+      duration,
+      cacheTags: ['templates', `templates-${validCategory}`],
+      cacheTTL: 300,
+    });
 
     // Return success response
     return NextResponse.json(
@@ -53,17 +79,12 @@ export async function GET(request: NextRequest) {
       }
     );
   } catch (error) {
-    const normalized = normalizeError(error, 'Templates API error');
-    logger.error('Templates API error', normalized, {
-      endpoint: '/api/templates',
+    const duration = Date.now() - startTime;
+    return createErrorResponse(error, {
+      route: '/api/templates',
+      operation: 'TemplatesAPI',
+      method: 'GET',
+      logContext: category ? { category, duration } : { duration },
     });
-
-    return NextResponse.json(
-      {
-        error: 'Failed to fetch templates',
-        message: normalized.message,
-      },
-      { status: 500 }
-    );
   }
 }

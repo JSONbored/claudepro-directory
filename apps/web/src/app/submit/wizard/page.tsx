@@ -60,6 +60,12 @@ import { useFormTracking } from '@/src/hooks/use-form-tracking';
 import { useOnboardingToasts } from '@/src/hooks/use-onboarding-toasts';
 import { useTemplateApplication } from '@/src/hooks/use-template-application';
 
+/**
+ * Dynamic Rendering Required
+ * Multi-step form with state
+ */
+export const dynamic = 'force-dynamic';
+
 // Use generated type directly from @heyclaude/database-types
 type ContentTemplatesResult = Database['public']['Functions']['get_content_templates']['Returns'];
 type ContentTemplateItem = NonNullable<NonNullable<ContentTemplatesResult['templates']>[number]>;

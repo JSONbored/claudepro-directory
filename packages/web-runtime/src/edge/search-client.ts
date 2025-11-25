@@ -2,7 +2,6 @@
 
 import type { Database } from '@heyclaude/database-types';
 import { SearchService } from '@heyclaude/data-layer';
-import { fetchCached } from '../cache/fetch-cached.ts';
 import { SupabaseClient } from '@supabase/supabase-js';
 
 type ContentSearchResult =
@@ -68,75 +67,93 @@ export type SearchFilters = {
 
 export type SearchResult = ContentSearchResult;
 
+async function executeSearchDirect<T>(
+  options: UnifiedSearchOptions,
+): Promise<UnifiedSearchResponse<T>> {
+  const { createSupabaseAnonClient } = await import('../supabase/server-anon.ts');
+  const client = createSupabaseAnonClient();
+  
+  const start = performance.now();
+  const service = new SearchService(client as unknown as SupabaseClient<Database>);
+  
+  const entities = options.entities?.map(e => e as string) ?? ['content'];
+  const serviceResponse = await service.searchUnified({
+    p_query: options.query,
+    p_entities: entities,
+    ...(options.filters?.categories ? { p_categories: options.filters.categories } : {}),
+    ...(options.filters?.tags ? { p_tags: options.filters.tags } : {}),
+    ...(options.filters?.authors ? { p_authors: options.filters.authors } : {}),
+    p_limit: options.filters?.limit ?? 20,
+    p_offset: options.filters?.offset ?? 0
+  });
+  
+  // SearchService.searchUnified returns { data: UnifiedSearchResult[] | null, total_count: number }
+  // Type assertion needed because TypeScript may not infer the return type correctly
+  const searchResponse = serviceResponse as unknown as { data: UnifiedSearchResult[] | null; total_count: number } | null;
+  const results = (searchResponse?.data ?? []) as UnifiedSearchResult[];
+  const totalCount = searchResponse?.total_count ?? results.length;
+
+  const end = performance.now();
+  const totalTime = end - start;
+  
+  // Explicitly construct response object without undefined properties where possible
+  const response: UnifiedSearchResponse<T> = {
+    results: results as unknown as T[],
+    query: options.query,
+    filters: {
+      ...(options.filters?.categories ? { categories: options.filters.categories } : {}),
+      ...(options.filters?.tags ? { tags: options.filters.tags } : {}),
+      ...(options.filters?.authors ? { authors: options.filters.authors } : {}),
+      ...(options.entities ? { entities: options.entities.map(e => e as string) } : {}),
+      ...(options.filters?.sort ? { sort: options.filters.sort } : {}),
+      ...(options.filters?.job_category ? { job_category: options.filters.job_category } : {}),
+      ...(options.filters?.job_employment ? { job_employment: options.filters.job_employment } : {}),
+      ...(options.filters?.job_experience ? { job_experience: options.filters.job_experience } : {}),
+      ...(options.filters?.job_remote !== undefined ? { job_remote: options.filters.job_remote } : {})
+    },
+    pagination: {
+      total: totalCount, 
+      limit: options.filters?.limit ?? 20,
+      offset: options.filters?.offset ?? 0,
+      hasMore: totalCount > ((options.filters?.offset ?? 0) + results.length)
+    },
+    performance: {
+      dbTime: totalTime,
+      totalTime: totalTime
+    },
+    searchType:
+      options.filters?.job_category ||
+      options.filters?.job_employment ||
+      options.filters?.job_experience ||
+      options.filters?.job_remote !== undefined
+        ? 'jobs'
+        : entities.length === 1 && entities[0] === 'content'
+          ? 'content'
+          : 'unified',
+  };
+  return response;
+}
+
 async function executeSearch<T>(
   options: UnifiedSearchOptions,
   cacheTags: string[],
+  noCache = false,
 ): Promise<UnifiedSearchResponse<T>> {
+  // For search queries with filters, bypass cache (cache: 'no-store' equivalent)
+  if (noCache) {
+    return executeSearchDirect<T>(options);
+  }
+  
+  const { fetchCached } = await import('../cache/fetch-cached.ts');
   
   return fetchCached(
-    async (client: SupabaseClient<Database>) => {
-        const start = performance.now();
-        const service = new SearchService(client);
-        
-        const entities = options.entities?.map(e => e as string) ?? ['content'];
-        const serviceResponse = await service.searchUnified({
-          p_query: options.query,
-          p_entities: entities,
-          ...(options.filters?.categories ? { p_categories: options.filters.categories } : {}),
-          ...(options.filters?.tags ? { p_tags: options.filters.tags } : {}),
-          ...(options.filters?.authors ? { p_authors: options.filters.authors } : {}),
-          p_limit: options.filters?.limit ?? 20,
-          p_offset: options.filters?.offset ?? 0
-        });
-        
-        // SearchService.searchUnified returns { data: UnifiedSearchResult[] | null, total_count: number }
-        // Type assertion needed because TypeScript may not infer the return type correctly
-        const searchResponse = serviceResponse as unknown as { data: UnifiedSearchResult[] | null; total_count: number } | null;
-        const results = (searchResponse?.data ?? []) as UnifiedSearchResult[];
-        const totalCount = searchResponse?.total_count ?? results.length;
-
-        const end = performance.now();
-        const totalTime = end - start;
-        
-        // Explicitly construct response object without undefined properties where possible
-    const response: UnifiedSearchResponse<T> = {
-      results: results as unknown as T[],
-      query: options.query,
-      filters: {
-        ...(options.filters?.categories ? { categories: options.filters.categories } : {}),
-        ...(options.filters?.tags ? { tags: options.filters.tags } : {}),
-        ...(options.filters?.authors ? { authors: options.filters.authors } : {}),
-        ...(options.entities ? { entities: options.entities.map(e => e as string) } : {}),
-        ...(options.filters?.sort ? { sort: options.filters.sort } : {}),
-        ...(options.filters?.job_category ? { job_category: options.filters.job_category } : {}),
-        ...(options.filters?.job_employment ? { job_employment: options.filters.job_employment } : {}),
-        ...(options.filters?.job_experience ? { job_experience: options.filters.job_experience } : {}),
-        ...(options.filters?.job_remote !== undefined ? { job_remote: options.filters.job_remote } : {})
-      },
-      pagination: {
-        total: totalCount, 
-        limit: options.filters?.limit ?? 20,
-        offset: options.filters?.offset ?? 0,
-        hasMore: totalCount > ((options.filters?.offset ?? 0) + results.length)
-      },
-      performance: {
-        dbTime: totalTime,
-        totalTime: totalTime
-      },
-      searchType:
-        options.filters?.job_category ||
-        options.filters?.job_employment ||
-        options.filters?.job_experience ||
-        options.filters?.job_remote !== undefined
-          ? 'jobs'
-          : entities.length === 1 && entities[0] === 'content'
-            ? 'content'
-            : 'unified',
-    };
-    return response;
+    async (_client: SupabaseClient<Database>) => {
+        // Use executeSearchDirect which creates its own client
+        // (client parameter is required by fetchCached but not used here)
+        return executeSearchDirect<T>(options);
     },
     {
-       key: `unified-search-${JSON.stringify(options)}`,
+       keyParts: ['unified-search', options.query, options.filters?.limit ?? 10, ...(options.entities ?? ['content'])],
        tags: cacheTags,
        ttlKey: 'cache.content_list.ttl_seconds',
        fallback: {
@@ -152,14 +169,15 @@ async function executeSearch<T>(
 }
 
 export async function searchUnified<T = ContentSearchResult | UnifiedSearchResult>(
-  options: UnifiedSearchOptions
+  options: UnifiedSearchOptions,
+  noCache = false
 ): Promise<UnifiedSearchResponse<T>> {
   const { entities } = options;
   const cacheTags = ['search', ...(entities || ['content']).map((e) => `search-${e}`)];
-  return executeSearch<T>(options, cacheTags);
+  return executeSearch<T>(options, cacheTags, noCache);
 }
 
-export async function searchContent(query: string, filters: SearchFilters = {}) {
+export async function searchContent(query: string, filters: SearchFilters = {}, noCache = false) {
   const cleanFilters: UnifiedSearchFilters = {};
   if (filters.p_categories) cleanFilters.categories = filters.p_categories;
   if (filters.p_tags) cleanFilters.tags = filters.p_tags;
@@ -172,7 +190,7 @@ export async function searchContent(query: string, filters: SearchFilters = {}) 
     query,
     entities: ['content'],
     filters: cleanFilters,
-  });
+  }, noCache);
 
   return result.results;
 }

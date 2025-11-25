@@ -3,6 +3,8 @@
  * Handles cookie management + safe fallbacks for missing env vars.
  */
 
+import 'server-only';
+
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import type { Database } from '@heyclaude/database-types';

@@ -7,7 +7,7 @@ export async function getNewsletterSubscriberCount(): Promise<number | null> {
   return fetchCached(
     (client) => new NewsletterService(client).getNewsletterSubscriberCount(),
     {
-      key: 'newsletter-count',
+      keyParts: ['newsletter-count'],
       tags: ['newsletter', 'stats'],
       ttlKey: 'cache.newsletter_count_ttl_s',
       fallback: 0,

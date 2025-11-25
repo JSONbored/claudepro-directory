@@ -6,8 +6,8 @@
  */
 
 import type { Database } from '@heyclaude/database-types';
+import { getNewsletterConfigValue } from '@heyclaude/web-runtime/actions/feature-flags';
 import { ensureNumber, logUnhandledPromise } from '@heyclaude/web-runtime/core';
-import { getNewsletterConfigValue } from '@heyclaude/web-runtime/data';
 import { motion, useScroll } from 'motion/react';
 import { useEffect, useState } from 'react';
 import { useLoggedAsync } from '@/src/hooks/use-logged-async';

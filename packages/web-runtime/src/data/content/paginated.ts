@@ -4,7 +4,7 @@ import type { Database } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
 import { fetchCached } from '../../cache/fetch-cached.ts';
 import { ContentService } from '@heyclaude/data-layer';
-import { generateContentCacheKey, generateContentTags } from '../content-helpers.ts';
+import { generateContentTags } from '../content-helpers.ts';
 
 interface PaginatedContentParams {
   category?: string | null;
@@ -40,7 +40,7 @@ export async function getPaginatedContent({
       p_offset: offset
     }),
     {
-      key: generateContentCacheKey(normalizedCategory ?? category, null, limit, offset),
+      keyParts: ['content-paginated', normalizedCategory ?? category ?? 'all', limit, offset],
       tags: generateContentTags(normalizedCategory ?? category, null, ['content-paginated']),
       ttlKey: 'cache.content_paginated.ttl_seconds',
       fallback: null,

@@ -37,6 +37,7 @@ function isValidSort(value: string | undefined): value is SearchFilters['sort'] 
 
 import { logger, normalizeError } from '@heyclaude/web-runtime/core';
 import { getHomepageCategoryIds } from '@heyclaude/web-runtime/data';
+import { generateRequestId } from '@heyclaude/web-runtime/utils/request-context';
 
 /**
  * Dynamic Rendering Required
@@ -73,6 +74,67 @@ export async function generateMetadata({ searchParams }: SearchPageProps): Promi
   });
 }
 
+// Deferred Results Section Component for PPR
+async function SearchResultsSection({
+  query,
+  filters,
+  hasUserFilters,
+  facetOptions,
+  fallbackSuggestions,
+  quickTags,
+  quickAuthors,
+  quickCategories,
+}: {
+  query: string;
+  filters: SearchFilters;
+  hasUserFilters: boolean;
+  facetOptions: {
+    tags: string[];
+    authors: string[];
+    categories: ContentCategory[];
+  };
+  fallbackSuggestions: Awaited<ReturnType<typeof searchContent>>;
+  quickTags: string[];
+  quickAuthors: string[];
+  quickCategories: ContentCategory[];
+}) {
+  // Use noCache for search queries (cache: 'no-store' equivalent)
+  const noCache = query.length > 0 || hasUserFilters;
+
+  let results: Awaited<ReturnType<typeof searchContent>> = [];
+  try {
+    results = await searchContent(query, filters, noCache);
+  } catch (error) {
+    const normalized = normalizeError(error, 'Search content fetch failed');
+    logger.error('SearchPage: searchContent invocation failed', normalized, {
+      requestId: generateRequestId(),
+      operation: 'SearchPage',
+      route: '/search',
+      query,
+      hasFilters: hasUserFilters,
+    });
+    throw normalized;
+  }
+
+  return (
+    <ContentSearchClient
+      items={results}
+      type="agents"
+      searchPlaceholder="Search agents, MCP servers, rules, commands..."
+      title="Results"
+      icon="Search"
+      availableTags={facetOptions.tags}
+      availableAuthors={facetOptions.authors}
+      availableCategories={facetOptions.categories}
+      zeroStateSuggestions={fallbackSuggestions}
+      fallbackSuggestions={fallbackSuggestions}
+      quickTags={quickTags}
+      quickAuthors={quickAuthors}
+      quickCategories={quickCategories}
+    />
+  );
+}
+
 export default async function SearchPage({ searchParams }: SearchPageProps) {
   const resolvedParams = await searchParams;
   const query = (resolvedParams.q || '').trim().slice(0, 200);
@@ -98,18 +160,10 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
     (tags && tags.length > 0) ||
     !!author;
 
-  let results: Awaited<ReturnType<typeof searchContent>> = [];
-  try {
-    results = await searchContent(query, filters);
-  } catch (error) {
-    const normalized = normalizeError(error, 'Search content fetch failed');
-    logger.error('SearchPage: searchContent invocation failed', normalized, {
-      query,
-      hasFilters: hasUserFilters,
-    });
-    throw normalized;
-  }
+  // Gate zero-state data behind !query && !hasFilters (Phase 3 requirement)
+  const hasQueryOrFilters = query.length > 0 || hasUserFilters;
 
+  // Always fetch facets (needed for filters UI)
   let facetAggregate: SearchFacetAggregate | null = null;
   let facetOptions = {
     tags: [] as string[],
@@ -125,20 +179,34 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
     };
   } catch (error) {
     const normalized = normalizeError(error, 'Search facets fetch failed');
-    logger.error('SearchPage: getSearchFacets invocation failed', normalized);
+    logger.error('SearchPage: getSearchFacets invocation failed', normalized, {
+      requestId: generateRequestId(),
+      operation: 'SearchPage',
+      route: '/search',
+    });
   }
 
+  // Only fetch zero-state suggestions when there's no query or filters
   let zeroStateSuggestions: Awaited<ReturnType<typeof searchContent>> = [];
-  try {
-    const homepageData = await getHomepageData(getHomepageCategoryIds);
-    const categoryData = (homepageData?.content as { categoryData?: Record<string, unknown[]> })
-      ?.categoryData;
-    zeroStateSuggestions = categoryData
-      ? (Object.values(categoryData).flat() as Awaited<ReturnType<typeof searchContent>>)
-      : [];
-  } catch (error) {
-    const normalized = normalizeError(error, 'SearchPage: getHomepageData for suggestions failed');
-    logger.error('SearchPage: suggestions fetch failed', normalized);
+  if (!hasQueryOrFilters) {
+    try {
+      const homepageData = await getHomepageData(getHomepageCategoryIds);
+      const categoryData = (homepageData?.content as { categoryData?: Record<string, unknown[]> })
+        ?.categoryData;
+      zeroStateSuggestions = categoryData
+        ? (Object.values(categoryData).flat() as Awaited<ReturnType<typeof searchContent>>)
+        : [];
+    } catch (error) {
+      const normalized = normalizeError(
+        error,
+        'SearchPage: getHomepageData for suggestions failed'
+      );
+      logger.error('SearchPage: suggestions fetch failed', normalized, {
+        requestId: generateRequestId(),
+        operation: 'SearchPage',
+        route: '/search',
+      });
+    }
   }
 
   const fallbackSuggestions = dedupeSuggestions(zeroStateSuggestions, FALLBACK_SUGGESTION_LIMIT);
@@ -169,21 +237,36 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
         {query ? `Search: "${query}"` : 'Search Claude Code Directory'}
       </h1>
       <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_18rem]">
-        <ContentSearchClient
-          items={results}
-          type="agents"
-          searchPlaceholder="Search agents, MCP servers, rules, commands..."
-          title="Results"
-          icon="Search"
-          availableTags={facetOptions.tags}
-          availableAuthors={facetOptions.authors}
-          availableCategories={facetOptions.categories}
-          zeroStateSuggestions={fallbackSuggestions}
-          fallbackSuggestions={fallbackSuggestions}
-          quickTags={quickTags}
-          quickAuthors={quickAuthors}
-          quickCategories={quickCategories}
-        />
+        <Suspense
+          fallback={
+            <ContentSearchClient
+              items={[]}
+              type="agents"
+              searchPlaceholder="Search agents, MCP servers, rules, commands..."
+              title="Results"
+              icon="Search"
+              availableTags={facetOptions.tags}
+              availableAuthors={facetOptions.authors}
+              availableCategories={facetOptions.categories}
+              zeroStateSuggestions={fallbackSuggestions}
+              fallbackSuggestions={fallbackSuggestions}
+              quickTags={quickTags}
+              quickAuthors={quickAuthors}
+              quickCategories={quickCategories}
+            />
+          }
+        >
+          <SearchResultsSection
+            query={query}
+            filters={filters}
+            hasUserFilters={hasUserFilters}
+            facetOptions={facetOptions}
+            fallbackSuggestions={fallbackSuggestions}
+            quickTags={quickTags}
+            quickAuthors={quickAuthors}
+            quickCategories={quickCategories}
+          />
+        </Suspense>
         <Suspense fallback={null}>
           <RecentlyViewedSidebar />
         </Suspense>

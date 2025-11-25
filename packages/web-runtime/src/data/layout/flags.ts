@@ -18,6 +18,7 @@ import { logger } from '../../logger.ts';
 import { normalizeError } from '../../errors.ts';
 import { cache } from 'react';
 import { isBuildTime } from '../../build-time.ts';
+import { generateRequestId } from '../../utils/request-context.ts';
 
 /**
  * Layout feature flags result type
@@ -219,7 +220,9 @@ export const getLayoutFlags = cache(async (): Promise<LayoutFlags> => {
     }
 
     if (failures.length > 0) {
-      logger.warn('getLayoutFlags: some flags failed to load, using defaults', {
+      logger.warn('getLayoutFlags: some flags failed to load, using defaults', undefined, {
+        requestId: generateRequestId(),
+        operation: 'getLayoutFlags',
         failedFlags: failures.map((f) => f.flag).join(', '),
         failureCount: failures.length,
       });
@@ -251,6 +254,8 @@ export const getLayoutFlags = cache(async (): Promise<LayoutFlags> => {
     // Catastrophic failure - log and return all defaults
     const normalized = normalizeError(error, 'Failed to fetch layout feature flags');
     logger.error('getLayoutFlags: catastrophic failure, using all defaults', normalized, {
+      requestId: generateRequestId(),
+      operation: 'getLayoutFlags',
       source: 'layout-flags',
     });
     return DEFAULT_FLAGS;

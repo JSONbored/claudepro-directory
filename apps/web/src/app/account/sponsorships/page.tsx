@@ -7,6 +7,7 @@ import {
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { BarChart, Eye, MousePointer, TrendingUp } from '@heyclaude/web-runtime/icons';
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { generateRequestId } from '@heyclaude/web-runtime/utils/request-context';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
@@ -18,6 +19,13 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/ui/card';
+
+/**
+ * Dynamic Rendering Required
+ * Authenticated user sponsorships
+ */
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/account/sponsorships');
@@ -45,6 +53,8 @@ export default async function SponsorshipsPage() {
 
   if (!user) {
     logger.warn('SponsorshipsPage: unauthenticated access attempt', undefined, {
+      requestId: generateRequestId(),
+      operation: 'SponsorshipsPage',
       route: '/account/sponsorships',
       timestamp: new Date().toISOString(),
     });
@@ -73,6 +83,9 @@ export default async function SponsorshipsPage() {
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load user sponsorships');
     logger.error('SponsorshipsPage: getUserSponsorships threw', normalized, {
+      requestId: generateRequestId(),
+      operation: 'SponsorshipsPage',
+      route: '/account/sponsorships',
       userIdHash: hashedUserId,
     });
     return (

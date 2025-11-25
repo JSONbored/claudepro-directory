@@ -1,21 +1,14 @@
 'use client';
 
-import { getTimeoutConfig, logClientWarning, logger } from '../index.ts';
+import { getTimeoutConfig } from '../actions/feature-flags.ts';
+import { logClientWarning, logger } from '../entries/core.ts';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 // Clipboard reset delay (loaded from Statsig via server action)
 let DEFAULT_CLIPBOARD_RESET_DELAY = 2000;
 
-// Load config from Statsig on module initialization
-getTimeoutConfig({})
-  .then((result) => {
-    if (result?.data) {
-      DEFAULT_CLIPBOARD_RESET_DELAY = result.data['timeout.ui.clipboard_reset_delay_ms'];
-    }
-  })
-  .catch((error) => {
-    logClientWarning('useCopyToClipboard: failed to load timeout config', error);
-  });
+// Load config from Statsig on client mount (moved from module-level to prevent build-time execution)
+// This will be initialized in useEffect on first hook usage
 
 export interface UseCopyToClipboardOptions {
   /**
@@ -82,6 +75,23 @@ export function useCopyToClipboard(
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const configLoadedRef = useRef(false);
+
+  // Load config from Statsig on mount (client-side only, prevents build-time execution)
+  useEffect(() => {
+    if (configLoadedRef.current) return;
+    configLoadedRef.current = true;
+
+    getTimeoutConfig({})
+      .then((result) => {
+        if (result?.data) {
+          DEFAULT_CLIPBOARD_RESET_DELAY = result.data['timeout.ui.clipboard_reset_delay_ms'];
+        }
+      })
+      .catch((error) => {
+        logClientWarning('useCopyToClipboard: failed to load timeout config', error);
+      });
+  }, []);
 
   // Cleanup timeout on unmount
   useEffect(() => {

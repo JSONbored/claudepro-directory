@@ -4,7 +4,7 @@
 
 import type { Database } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
-import { addBookmark } from '@heyclaude/web-runtime/actions';
+import { addBookmark } from '@heyclaude/web-runtime/actions/add-bookmark';
 import {
   ensureStringArray,
   formatViewCount,

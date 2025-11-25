@@ -17,6 +17,18 @@
       "types": "./src/entries/actions.ts",
       "default": "./src/entries/actions.ts"
     },
+    "./actions/feature-flags": {
+      "types": "./src/actions/feature-flags.ts",
+      "default": "./src/actions/feature-flags.ts"
+    },
+    "./actions/add-bookmark": {
+      "types": "./src/actions/add-bookmark.generated.ts",
+      "default": "./src/actions/add-bookmark.generated.ts"
+    },
+    "./actions/remove-bookmark": {
+      "types": "./src/actions/remove-bookmark.generated.ts",
+      "default": "./src/actions/remove-bookmark.generated.ts"
+    },
     "./ui": {
       "types": "./src/entries/ui.ts",
       "default": "./src/entries/ui.ts"
@@ -70,6 +82,10 @@
       "types": "./src/utils/error-handler.ts",
       "default": "./src/utils/error-handler.ts"
     },
+    "./utils/request-context": {
+      "types": "./src/utils/request-context.ts",
+      "default": "./src/utils/request-context.ts"
+    },
     "./data/config/constants": {
       "types": "./src/data/config/constants.ts",
       "default": "./src/data/config/constants.ts"
@@ -82,6 +98,14 @@
       "types": "./src/data/config/category/index.ts",
       "default": "./src/data/config/category/index.ts"
     },
+    "./data/content": {
+      "types": "./src/data/content/index.ts",
+      "default": "./src/data/content/index.ts"
+    },
+    "./seo": {
+      "types": "./src/seo/generator.ts",
+      "default": "./src/seo/generator.ts"
+    },
     "./icons": {
       "types": "./src/icons.tsx",
       "default": "./src/icons.tsx"
@@ -89,6 +113,10 @@
     "./types/component.types": {
       "types": "./src/types/component.types.ts",
       "default": "./src/types/component.types.ts"
+    },
+    "./feature-flags/access": {
+      "types": "./src/feature-flags/access.ts",
+      "default": "./src/feature-flags/access.ts"
     },
     "./feature-flags/middleware": {
       "types": "./src/feature-flags/middleware-evaluator.ts",
