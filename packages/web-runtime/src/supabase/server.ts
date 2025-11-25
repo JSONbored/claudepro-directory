@@ -76,7 +76,11 @@ export async function createSupabaseServerClient(): Promise<SupabaseServerClient
     mockQueryBuilder.single = () => mockQueryBuilder;
     mockQueryBuilder.maybeSingle = () => mockQueryBuilder;
 
-    return {
+    // Type assertion: Mock client for development when env vars are missing
+    // This mock object doesn't match the full Supabase client interface, but provides
+    // the minimal structure needed to prevent runtime errors in development
+    // The 'as unknown as' pattern is necessary because the mock is intentionally incomplete
+    const mockClient = {
       auth: {
         getUser: async () => ({ data: { user: null }, error: null }),
         signOut: async () => ({ error: null }),
@@ -84,6 +88,8 @@ export async function createSupabaseServerClient(): Promise<SupabaseServerClient
       from: () => mockQueryBuilder,
       rpc: () => mockQueryBuilder,
     } as unknown as SupabaseServerClient;
+    
+    return mockClient;
   }
 
   return createServerClient<Database>(supabaseUrl, supabaseAnonKey, {

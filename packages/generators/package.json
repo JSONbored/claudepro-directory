@@ -26,7 +26,8 @@
     "heyclaude-generate-actions": "./dist/bin/generate-server-actions.js",
     "heyclaude-generate-edge-routes": "./dist/bin/generate-edge-routes.js",
     "heyclaude-verify-flags": "./dist/bin/verify-flags.js",
-    "heyclaude-verify-routes": "./dist/bin/verify-routes.js"
+    "heyclaude-verify-routes": "./dist/bin/verify-routes.js",
+    "heyclaude-mcp-login": "./dist/bin/mcp-login.js"
   },
   "exports": {
     "./toolkit/logger": "./src/toolkit/logger.ts",
@@ -34,6 +35,7 @@
     "./toolkit/cache": "./src/toolkit/cache.ts",
     "./toolkit/supabase": "./src/toolkit/supabase.ts",
     "./toolkit/edge": "./src/toolkit/edge.ts",
+    "./toolkit/mcp-token": "./src/toolkit/mcp-token.ts",
     "./commands/*": "./src/commands/*.ts"
   },
   "scripts": {
@@ -48,6 +50,7 @@
     "@supabase/supabase-js": "^2.84.0",
     "archiver": "^7.0.1",
     "jiti": "^2.6.1",
+    "open": "^11.0.0",
     "ora": "^9.0.0",
     "resend": "^4.0.1",
     "zod": "^4.1.12"

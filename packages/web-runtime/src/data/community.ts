@@ -23,8 +23,19 @@ export async function getCommunityDirectory(options: {
   const { searchQuery, limit = DEFAULT_DIRECTORY_LIMIT } = options;
 
   if (searchQuery?.trim()) {
+    const { trackPerformance } = await import('../utils/performance-metrics');
+    
     try {
-      const unifiedResults = await searchUsersUnified(searchQuery.trim(), limit);
+      const { result: unifiedResults } = await trackPerformance(
+        async () => {
+          return await searchUsersUnified(searchQuery.trim(), limit);
+        },
+        {
+          operation: 'getCommunityDirectory-search',
+          logMeta: { query: searchQuery.trim(), limit },
+          logLevel: 'info',
+        }
+      );
 
       const allUsers: Database['public']['CompositeTypes']['community_directory_user'][] =
         unifiedResults
@@ -62,12 +73,8 @@ export async function getCommunityDirectory(options: {
         new_members: [],
       };
     } catch (error) {
-      const normalized = normalizeError(error, 'User search via unified-search failed');
-      logger.error('User search via unified-search failed, falling back to RPC', normalized, {
-        requestId: generateRequestId(),
-        operation: 'getCommunityDirectory',
-        query: searchQuery,
-      });
+      // trackPerformance already logs the error with performance metrics
+      // Fall through to RPC fallback
     }
   }
 

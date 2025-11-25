@@ -13,13 +13,24 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { Button } from '@/src/components/primitives/ui/button';
 
-export type AuthSignOutButtonProps = ButtonStyleProps;
+export type AuthSignOutScope = 'global' | 'local' | 'others';
+
+export interface AuthSignOutButtonProps extends ButtonStyleProps {
+  /**
+   * Sign out scope:
+   * - 'global' (default): Terminates all sessions for the user
+   * - 'local': Only terminates the current session
+   * - 'others': Terminates all sessions except the current one
+   */
+  scope?: AuthSignOutScope;
+}
 
 export function AuthSignOutButton({
   size = 'sm',
   variant = 'ghost',
   className,
   disabled = false,
+  scope = 'global',
 }: AuthSignOutButtonProps) {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -27,7 +38,7 @@ export function AuthSignOutButton({
 
   const handleSignOut = async () => {
     setLoading(true);
-    const { error } = await supabase.auth.signOut();
+    const { error } = await supabase.auth.signOut({ scope });
 
     if (error) {
       toasts.error.authFailed(`Sign out failed: ${error.message}`);

@@ -6,7 +6,7 @@ import { logActionFailure, normalizeError } from '../errors.ts';
 
 const actionMetadataSchema = z.object({
   actionName: z.string().min(1),
-  category: z.enum(['analytics', 'form', 'content', 'user', 'admin', 'reputation']).optional(),
+  category: z.enum(['analytics', 'form', 'content', 'user', 'admin', 'reputation', 'mfa']).optional(),
 });
 
 export type ActionMetadata = z.infer<typeof actionMetadataSchema>;

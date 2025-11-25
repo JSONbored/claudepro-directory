@@ -43,13 +43,42 @@ export async function handleGetMcpServers(
     };
   }
 
-  // Format MCP servers
+  // Fetch metadata separately since content_paginated_item doesn't include it
+  const slugs = result.items
+    .map((item: ContentPaginatedItem) => item.slug)
+    .filter((slug): slug is string => typeof slug === 'string' && slug !== null);
+
+  const { data: metadataRows, error: metadataError } = await supabase
+    .from('content')
+    .select('slug, metadata, mcpb_storage_url')
+    .in('slug', slugs)
+    .eq('category', 'mcp');
+
+  // Create metadata map for quick lookup
+  const metadataMap = new Map<
+    string,
+    { metadata: Record<string, unknown>; mcpb_storage_url: string | null }
+  >();
+  if (metadataRows && !metadataError) {
+    for (const row of metadataRows) {
+      metadataMap.set(row.slug, {
+        metadata: (row.metadata as Record<string, unknown>) || {},
+        mcpb_storage_url: row.mcpb_storage_url,
+      });
+    }
+  }
+
+  // Format MCP servers with complete metadata
   const servers = result.items.map((item: ContentPaginatedItem) => {
-    // content_paginated_item doesn't include metadata field, so we'll use empty defaults
-    // Metadata would need to be fetched separately from the content table if needed
-    const metadata: Record<string, unknown> = {};
+    const itemMetadata = metadataMap.get(item.slug || '') || {
+      metadata: {},
+      mcpb_storage_url: null,
+    };
+    const metadata = itemMetadata.metadata;
     const mcpbUrl =
-      typeof metadata['mcpb_storage_url'] === 'string' ? metadata['mcpb_storage_url'] : null;
+      itemMetadata.mcpb_storage_url ||
+      (typeof metadata['mcpb_storage_url'] === 'string' ? metadata['mcpb_storage_url'] : null);
+
     const configuration = (
       typeof metadata['configuration'] === 'object' && metadata['configuration'] !== null
         ? metadata['configuration']

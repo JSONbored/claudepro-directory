@@ -10,12 +10,14 @@ import {
   invalidateCacheTags,
   pgmqDelete,
   pgmqRead,
+  publicCorsHeaders,
   runWithRetry,
   successResponse,
 } from '@heyclaude/edge-runtime';
 import {
   createUtilityContext,
   errorToString,
+  logError,
   TIMEOUT_PRESETS,
   withTimeout,
 } from '@heyclaude/shared-runtime';
@@ -236,9 +238,10 @@ export async function handleRevalidation(_req: Request): Promise<Response> {
       200
     );
   } catch (error) {
-    console.error('[flux-station] Content revalidation queue error', {
-      error: errorToString(error),
+    const logContext = createUtilityContext('flux-station', 'content-revalidation-error', {
+      operation: 'queue-processing',
     });
-    return errorResponse(error, 'flux-station:revalidation-error');
+    logError('Content revalidation queue error', logContext, error);
+    return errorResponse(error, 'flux-station:revalidation-error', publicCorsHeaders, logContext);
   }
 }

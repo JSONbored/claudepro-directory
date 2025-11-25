@@ -2,7 +2,7 @@ import { env, isDevelopment } from '@heyclaude/shared-runtime';
 import { sanitizePathForLogging } from '@heyclaude/shared-runtime/proxy/guards';
 import { logger } from '@heyclaude/web-runtime/core';
 import { evaluateFlags } from '@heyclaude/web-runtime/feature-flags/middleware';
-import { applyNextProxyGuards } from '@heyclaude/web-runtime/server';
+import { applyNextProxyGuards, updateSupabaseSession } from '@heyclaude/web-runtime/server';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 
@@ -40,12 +40,17 @@ export async function proxy(request: NextRequest) {
     return guardResult.blockedResponse;
   }
 
-  // Create response with pathname header
-  const response = NextResponse.next();
+  // Update Supabase Auth session (refresh tokens if needed)
+  // This must happen early to ensure cookies are synced
+  const authResponse = await updateSupabaseSession(request);
+
+  // Use auth response if tokens were refreshed, otherwise create new response
+  const response = authResponse ?? NextResponse.next();
   response.headers.set('x-pathname', pathname);
 
   // Evaluate Feature Flags (PPR-Ready)
   // We intentionally do this after rate limiting to avoid cost on blocked requests
+  // IMPORTANT: If authResponse exists, we must preserve its cookies when setting flags
   try {
     const flags = await evaluateFlags(request);
     if (flags) {
@@ -60,6 +65,9 @@ export async function proxy(request: NextRequest) {
     // Non-blocking error handling for flags
     logger.error('Middleware flag evaluation failed', error as Error);
   }
+
+  // IMPORTANT: If authResponse was created, we must return it as-is to preserve
+  // the refreshed auth cookies. Only modify headers, never recreate the response.
 
   if (guardResult.rateLimitResult) {
     const remaining = Math.max(guardResult.rateLimitResult.remaining, 0);

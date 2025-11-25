@@ -11,9 +11,16 @@ import {
   handleSubmissionNotificationDirect,
   pgmqDelete,
   pgmqRead,
+  publicCorsHeaders,
   successResponse,
 } from '@heyclaude/edge-runtime';
-import { errorToString, TIMEOUT_PRESETS, withTimeout } from '@heyclaude/shared-runtime';
+import {
+  createUtilityContext,
+  errorToString,
+  logError,
+  TIMEOUT_PRESETS,
+  withTimeout,
+} from '@heyclaude/shared-runtime';
 
 type ContentSubmission = DatabaseGenerated['public']['Tables']['content_submissions']['Row'];
 
@@ -191,9 +198,15 @@ export async function handleDiscordSubmissions(_req: Request): Promise<Response>
       200
     );
   } catch (error) {
-    console.error('[flux-station] Submission Discord queue error', {
-      error: errorToString(error),
+    const logContext = createUtilityContext('flux-station', 'discord-submissions-error', {
+      operation: 'queue-processing',
     });
-    return errorResponse(error, 'flux-station:discord-submissions-error');
+    logError('Submission Discord queue error', logContext, error);
+    return errorResponse(
+      error,
+      'flux-station:discord-submissions-error',
+      publicCorsHeaders,
+      logContext
+    );
   }
 }

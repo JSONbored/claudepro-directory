@@ -15,6 +15,7 @@ import {
   type StandardContext,
   serveEdgeApp,
 } from '@heyclaude/edge-runtime';
+import { createUtilityContext } from '@heyclaude/shared-runtime';
 import { handleChangelogNotify } from './routes/changelog/notify.ts';
 import { handleChangelogProcess } from './routes/changelog/process.ts';
 import { handleDiscordDirect } from './routes/discord/direct.ts';
@@ -107,8 +108,16 @@ serveEdgeApp<FluxStationContext>({
         handleExternalWebhook(c.request)
       )(ctx);
     }
+    const logContext = createUtilityContext('flux-station', 'not-found', {
+      pathname: ctx.pathname,
+    });
     return Promise.resolve(
-      errorResponse(new Error(`Not Found: ${ctx.pathname}`), 'flux-station:not-found')
+      errorResponse(
+        new Error(`Not Found: ${ctx.pathname}`),
+        'flux-station:not-found',
+        publicCorsHeaders,
+        logContext
+      )
     );
   },
   routes: [

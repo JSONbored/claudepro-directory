@@ -12,6 +12,7 @@ import {
   pgmqDelete,
   pgmqRead,
   pgmqSend,
+  publicCorsHeaders,
   successResponse,
   supabaseServiceRole,
   unauthorizedResponse,
@@ -191,7 +192,7 @@ function respondWithAnalytics(handler: () => Promise<Response>): Promise<Respons
     })
     .catch((error) => {
       logEvent(500, 'error', error);
-      return errorResponse(error, 'generate-embedding');
+      return errorResponse(error, 'generate-embedding', publicCorsHeaders, logContext);
     });
 }
 

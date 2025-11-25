@@ -84,7 +84,9 @@ export function UserMenu({ className }: UserMenuProps) {
     setSigningOut(true);
 
     try {
-      const { error } = await supabase.auth.signOut();
+      // Use 'local' scope to only sign out from current device
+      // Users can sign out from all devices via account settings if needed
+      const { error } = await supabase.auth.signOut({ scope: 'local' });
 
       if (error) {
         toasts.error.authFailed(`Sign out failed: ${error.message}`);

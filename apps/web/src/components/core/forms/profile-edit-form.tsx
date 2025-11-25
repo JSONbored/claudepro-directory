@@ -10,6 +10,7 @@ import { refreshProfileFromOAuth, updateProfile } from '@heyclaude/web-runtime';
 import { toasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useTransition } from 'react';
+import type { Resolver } from 'react-hook-form';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { FormField } from '@/src/components/core/forms/form-field-wrapper';
@@ -34,8 +35,18 @@ const profileFormSchema = z.object({
   name: z.string().min(1, 'Name is required').max(100),
   bio: z.string().max(500).optional(),
   work: z.string().max(100).optional(),
-  website: z.string().url('Must be a valid URL').optional().or(z.literal('')),
-  social_x_link: z.string().url('Must be a valid URL').optional().or(z.literal('')),
+  website: z
+    .string()
+    .refine((val) => val === '' || z.string().url().safeParse(val).success, {
+      message: 'Must be a valid URL',
+    })
+    .optional(),
+  social_x_link: z
+    .string()
+    .refine((val) => val === '' || z.string().url().safeParse(val).success, {
+      message: 'Must be a valid URL',
+    })
+    .optional(),
   interests: z.array(z.string()).max(10).optional(),
   public: z.boolean(),
   follow_email: z.boolean(),
@@ -57,7 +68,13 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
     reset,
     formState: { errors, isDirty },
   } = useForm<ProfileFormData>({
-    resolver: zodResolver(profileFormSchema),
+    // Type assertion needed due to version incompatibility between Zod v4 and @hookform/resolvers v5.2.2
+    // The resolver expects Zod v3 types but we're using Zod v4. This is a known compatibility issue.
+    // TODO: Update @hookform/resolvers when a version with full Zod v4 support is available
+    // Using double cast (as unknown as) as TypeScript requires when types don't overlap sufficiently
+    resolver: zodResolver(
+      profileFormSchema as unknown as Parameters<typeof zodResolver>[0]
+    ) as unknown as Resolver<ProfileFormData>,
     defaultValues: {
       name: profile.display_name || '',
       bio: profile.bio || '',

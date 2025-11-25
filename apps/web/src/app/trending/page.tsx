@@ -81,9 +81,9 @@ export default async function TrendingPage({ searchParams }: PagePropsWithSearch
     limit,
   });
 
-  const trendingDisplay = mapTrendingMetrics(pageData.trending, normalizedCategory);
-  const popularDisplay = mapPopularContent(pageData.popular, normalizedCategory);
-  const recentDisplay = mapRecentContent(pageData.recent, normalizedCategory);
+  const trendingDisplay = mapTrendingMetrics(pageData.trending ?? [], normalizedCategory);
+  const popularDisplay = mapPopularContent(pageData.popular ?? [], normalizedCategory);
+  const recentDisplay = mapRecentContent(pageData.recent ?? [], normalizedCategory);
 
   const pageTitleId = 'trending-page-title';
 
@@ -126,7 +126,7 @@ export default async function TrendingPage({ searchParams }: PagePropsWithSearch
               <li>
                 <UnifiedBadge variant="base" style="secondary">
                   <Users className="mr-1 h-3 w-3" aria-hidden="true" />
-                  {trendingDisplay.length} total configs
+                  {trendingDisplay?.length ?? 0} total configs
                 </UnifiedBadge>
               </li>
             </ul>

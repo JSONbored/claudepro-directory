@@ -623,6 +623,6 @@ export async function handleOGImageRequest(req: Request, startTime: number): Pro
     });
   } catch (error) {
     logError('Failed to generate OG image', withDuration(logContext, startTime), error);
-    return errorResponse(error, 'og-image:generate', CORS);
+    return errorResponse(error, 'og-image:generate', CORS, withDuration(logContext, startTime));
   }
 }

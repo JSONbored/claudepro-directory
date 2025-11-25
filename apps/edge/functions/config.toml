@@ -16,4 +16,4 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.mcp-directory]
-verify_jwt = false
+verify_jwt = true

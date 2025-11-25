@@ -12,7 +12,7 @@
  * @module components/features/social/follow-button
  */
 
-import { toggleFollow } from '@heyclaude/web-runtime';
+import { toggleFollow } from '@heyclaude/web-runtime/actions';
 import { logger, normalizeError } from '@heyclaude/web-runtime/core';
 import { useOptimistic, useTransition } from 'react';
 import { toast } from 'sonner';

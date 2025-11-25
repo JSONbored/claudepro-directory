@@ -43,53 +43,86 @@ function sanitizeBenefits(benefits: PaymentPlanRow['benefits']): string[] | null
 }
 
 export const getPaymentPlanCatalog = cache(async (): Promise<PaymentPlanCatalogEntry[]> => {
+  const { trackPerformance } = await import('../utils/performance-metrics');
   const supabase = await createSupabaseServerClient();
 
-  const { data, error } = await supabase
-    .from('payment_plan_catalog')
-    .select(
-      [
-        'plan',
-        'tier',
-        'price_cents',
-        'is_subscription',
-        'billing_cycle_days',
-        'job_expiry_days',
-        'description',
-        'benefits',
-        'product_type',
-      ].join(',')
-    )
-    .order('plan')
-    .order('tier');
+  try {
+    const { result: data } = await trackPerformance(
+      async () => {
+        const { data, error } = await supabase
+          .from('payment_plan_catalog')
+          .select(
+            [
+              'plan',
+              'tier',
+              'price_cents',
+              'is_subscription',
+              'billing_cycle_days',
+              'job_expiry_days',
+              'description',
+              'benefits',
+              'product_type',
+            ].join(',')
+          )
+          .order('plan')
+          .order('tier');
 
-  if (error) {
+        if (error) {
+          throw error;
+        }
+
+        return data;
+      },
+      {
+        operation: 'getPaymentPlanCatalog',
+        logLevel: 'info',
+      }
+    );
+
+    if (!data) {
+      return [];
+    }
+
+    // Type guard: Validate that data is an array and has expected structure
+    if (!Array.isArray(data)) {
+      logger.warn('getPaymentPlanCatalog: Expected array but got non-array data', {
+        requestId: generateRequestId(),
+        operation: 'getPaymentPlanCatalog',
+        dataType: typeof data,
+      });
+      return [];
+    }
+
+    // Type guard: Validate each entry has required fields
+    const rows: PaymentPlanCatalogRowSubset[] = [];
+    for (const entry of data) {
+      if (
+        entry &&
+        typeof entry === 'object' &&
+        'plan' in entry &&
+        'tier' in entry &&
+        'price_cents' in entry
+      ) {
+        rows.push(entry as PaymentPlanCatalogRowSubset);
+      }
+    }
+
+    return rows.map((entry) => ({
+      plan: entry.plan,
+      tier: entry.tier,
+      price_cents: entry.price_cents,
+      is_subscription: entry.is_subscription,
+      billing_cycle_days: entry.billing_cycle_days,
+      job_expiry_days: entry.job_expiry_days,
+      description: entry.description,
+      benefits: sanitizeBenefits(entry.benefits),
+      product_type: entry.product_type,
+    }));
+  } catch (error) {
+    // trackPerformance already logs the error with performance metrics
     const normalized = normalizeError(error, 'Failed to load payment_plan_catalog');
-    logger.error('payments:getPaymentPlanCatalog failed', normalized, {
-      requestId: generateRequestId(),
-      operation: 'getPaymentPlanCatalog',
-    });
     throw normalized;
   }
-
-  if (!data) {
-    return [];
-  }
-
-  // Cast data to known Row type to help inference if select string is ambiguous
-  const rows = data as unknown as PaymentPlanCatalogRowSubset[];
-
-  return rows.map((entry) => ({
-    plan: entry.plan,
-    tier: entry.tier,
-    price_cents: entry.price_cents,
-    is_subscription: entry.is_subscription,
-    billing_cycle_days: entry.billing_cycle_days,
-    job_expiry_days: entry.job_expiry_days,
-    description: entry.description,
-    benefits: sanitizeBenefits(entry.benefits),
-    product_type: entry.product_type,
-  }));
 });
 
 export async function getJobBillingSummaries(
@@ -99,38 +132,75 @@ export async function getJobBillingSummaries(
     return [];
   }
 
+  const { trackPerformance } = await import('../utils/performance-metrics');
+  const { createSupabaseServerClient } = await import('../supabase/server.ts');
   const supabase = await createSupabaseServerClient();
 
-  const { data, error } = await supabase
-    .from('job_billing_summary')
-    .select(
-      [
-        'job_id',
-        'plan',
-        'tier',
-        'price_cents',
-        'is_subscription',
-        'billing_cycle_days',
-        'job_expiry_days',
-        'last_payment_amount',
-        'last_payment_at',
-        'last_payment_status',
-        'subscription_status',
-        'subscription_renews_at',
-      ].join(',')
-    )
-    .in('job_id', jobIds);
+  try {
+    const { result: data } = await trackPerformance(
+      async () => {
+        const { data, error } = await supabase
+          .from('job_billing_summary')
+          .select(
+            [
+              'job_id',
+              'plan',
+              'tier',
+              'price_cents',
+              'is_subscription',
+              'billing_cycle_days',
+              'job_expiry_days',
+              'last_payment_amount',
+              'last_payment_at',
+              'last_payment_status',
+              'subscription_status',
+              'subscription_renews_at',
+            ].join(',')
+          )
+          .in('job_id', jobIds);
 
-  if (error) {
+        if (error) {
+          throw error;
+        }
+
+        return data;
+      },
+      {
+        operation: 'getJobBillingSummaries',
+        logMeta: { jobCount: jobIds.length },
+        logLevel: 'info',
+      }
+    );
+
+    // Type guard: Validate that data is an array
+    if (!Array.isArray(data)) {
+      logger.warn('getJobBillingSummaries: Expected array but got non-array data', {
+        requestId: generateRequestId(),
+        operation: 'getJobBillingSummaries',
+        dataType: typeof data,
+        jobCount: jobIds.length,
+      });
+      return [];
+    }
+
+    // Type guard: Validate each entry has required fields
+    const entries: JobBillingSummaryEntry[] = [];
+    for (const entry of data) {
+      if (
+        entry &&
+        typeof entry === 'object' &&
+        'job_id' in entry &&
+        'plan' in entry &&
+        'tier' in entry
+      ) {
+        entries.push(entry as JobBillingSummaryEntry);
+      }
+    }
+
+    return entries;
+  } catch (error) {
+    // trackPerformance already logs the error with performance metrics
     const normalized = normalizeError(error, 'Failed to fetch job billing summaries');
-    logger.error('payments:getJobBillingSummaries failed', normalized, {
-      requestId: generateRequestId(),
-      operation: 'getJobBillingSummaries',
-      jobCount: jobIds.length,
-    });
     throw normalized;
   }
-
-  // Cast to ensure type safety without using 'any'
-  return (data as unknown as JobBillingSummaryEntry[]) ?? [];
 }

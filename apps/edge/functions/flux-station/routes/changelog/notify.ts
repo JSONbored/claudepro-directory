@@ -16,6 +16,7 @@ import {
   insertNotification,
   pgmqDelete,
   pgmqRead,
+  publicCorsHeaders,
   revalidateChangelogPages,
   SITE_URL,
   sendDiscordWebhook,
@@ -24,6 +25,7 @@ import {
 import {
   createNotificationRouterContext,
   errorToString,
+  logError,
   TIMEOUT_PRESETS,
   withTimeout,
 } from '@heyclaude/shared-runtime';
@@ -460,9 +462,15 @@ export async function handleChangelogNotify(_req: Request): Promise<Response> {
       200
     );
   } catch (error) {
-    console.error('[flux-station] Fatal queue processing error', {
-      error: errorToString(error),
+    const logContext = createNotificationRouterContext('changelog-notify', {
+      source: 'queue-worker',
     });
-    return errorResponse(error, 'flux-station:changelog-notify-fatal');
+    logError('Fatal queue processing error', logContext, error);
+    return errorResponse(
+      error,
+      'flux-station:changelog-notify-fatal',
+      publicCorsHeaders,
+      logContext
+    );
   }
 }

@@ -96,6 +96,36 @@ interface CompanyPageProps {
 }
 
 export const revalidate = 1800; // 30min ISR (fallback if edge function cache misses)
+export const dynamicParams = true; // Allow unknown slugs to be rendered on demand (will 404 if invalid)
+
+/**
+ * Generate static params for company pages
+ * Pre-renders top 50 companies at build time for optimal SEO and performance
+ */
+export async function generateStaticParams() {
+  const { getCompaniesList } = await import('@heyclaude/web-runtime/data');
+  const { logger } = await import('@heyclaude/web-runtime/core');
+  const { generateRequestId } = await import('@heyclaude/web-runtime/utils/request-context');
+
+  try {
+    const result = await getCompaniesList(50, 0);
+    const companies = result?.companies ?? [];
+
+    return companies
+      .filter((company): company is typeof company & { slug: string } => Boolean(company.slug))
+      .map((company) => ({
+        slug: company.slug,
+      }));
+  } catch (error) {
+    logger.warn('generateStaticParams: failed to load companies', undefined, {
+      requestId: generateRequestId(),
+      operation: 'generateStaticParams',
+      route: '/companies/[slug]',
+      error: error instanceof Error ? error.message : String(error),
+    });
+    return [];
+  }
+}
 
 export async function generateMetadata({ params }: CompanyPageProps): Promise<Metadata> {
   const { slug } = await params;

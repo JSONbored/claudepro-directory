@@ -13,6 +13,7 @@ import {
   Plug,
   Send,
   Settings,
+  Shield,
   TrendingUp,
   User,
 } from '@heyclaude/web-runtime/icons';
@@ -22,6 +23,7 @@ import { generateRequestId } from '@heyclaude/web-runtime/utils/request-context'
 import Image from 'next/image';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
+import { AccountMFAGuard } from '@/src/components/core/auth/account-mfa-guard';
 import { AuthSignOutButton } from '@/src/components/core/buttons/auth/auth-signout-button';
 import { Button } from '@/src/components/primitives/ui/button';
 import { Card } from '@/src/components/primitives/ui/card';
@@ -163,6 +165,7 @@ export default async function AccountLayout({ children }: { children: React.Reac
       ? [{ name: 'Sponsorships', href: '/account/sponsorships', icon: TrendingUp }]
       : []),
     { name: 'Settings', href: '/account/settings', icon: Settings },
+    { name: 'Two-Factor Auth', href: '/account/settings/mfa', icon: Shield },
     { name: 'Connected Accounts', href: '/account/connected-accounts', icon: Plug },
   ];
 
@@ -221,7 +224,9 @@ export default async function AccountLayout({ children }: { children: React.Reac
               ))}
             </nav>
           </Card>
-          <div className="md:col-span-3">{children}</div>
+          <div className="md:col-span-3">
+            <AccountMFAGuard>{children}</AccountMFAGuard>
+          </div>
         </div>
       </div>
     </div>

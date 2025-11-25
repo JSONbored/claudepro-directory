@@ -102,14 +102,28 @@ function createTypedConfigAccessor<const Schema extends ConfigRecord>({
     .action(async () => {
       try {
         const defaults = await getDefaults();
+        // Check build-time before attempting to load flags
         if (isBuildTime()) {
           return defaults;
         }
-        const flagsModule = await getFlagsModule();
-        const fetcher = getFetcher(flagsModule);
-        const result = (await fetcher()) as Schema;
-        return { ...defaults, ...result };
+        try {
+          const flagsModule = await getFlagsModule();
+          const fetcher = getFetcher(flagsModule);
+          const result = (await fetcher()) as Schema;
+          return { ...defaults, ...result };
+        } catch (flagsError) {
+          // If flags loading fails (e.g., build-time detection issue), return defaults
+          if (
+            flagsError instanceof Error &&
+            (flagsError.message.includes('build-time') ||
+              flagsError.message.includes('Server Functions'))
+          ) {
+            return defaults;
+          }
+          throw flagsError;
+        }
       } catch {
+        // Final fallback: return defaults on any error
         const defaults = await getDefaults();
         return defaults;
       }

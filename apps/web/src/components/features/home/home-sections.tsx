@@ -116,7 +116,7 @@ function HomePageClientComponent({
       setIsLoadingAllConfigs(true);
 
       try {
-        const { fetchPaginatedContent } = await import('@heyclaude/web-runtime');
+        const { fetchPaginatedContent } = await import('@heyclaude/web-runtime/data');
 
         const result = await fetchPaginatedContent({
           offset,

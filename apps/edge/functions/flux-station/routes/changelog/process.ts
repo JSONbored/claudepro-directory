@@ -22,6 +22,7 @@ import {
   pgmqDelete,
   pgmqRead,
   pgmqSend,
+  publicCorsHeaders,
   SITE_URL,
   startWebhookEventRun,
   successResponse,
@@ -32,7 +33,9 @@ import {
 import {
   CIRCUIT_BREAKER_CONFIGS,
   createNotificationRouterContext,
+  createUtilityContext,
   errorToString,
+  logError,
   TIMEOUT_PRESETS,
   withCircuitBreaker,
   withTimeout,
@@ -645,9 +648,13 @@ export async function handleChangelogProcess(_req: Request): Promise<Response> {
       200
     );
   } catch (error) {
-    console.error('[flux-station] Fatal queue processing error', {
-      error: errorToString(error),
-    });
-    return errorResponse(error, 'flux-station:changelog-process-fatal');
+    const logContext = createUtilityContext('changelog-process', 'queue-worker');
+    logError('Fatal queue processing error', logContext, error);
+    return errorResponse(
+      error,
+      'flux-station:changelog-process-fatal',
+      publicCorsHeaders,
+      logContext
+    );
   }
 }

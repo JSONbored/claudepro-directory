@@ -37,16 +37,10 @@ import {
 } from '@/src/components/primitives/ui/card';
 
 /**
- * Dynamic Rendering Required
- *
- * This page must use dynamic rendering because it imports from @heyclaude/web-runtime
- * which transitively imports feature-flags/flags.ts. The Vercel Flags SDK's flags/next
- * module contains module-level code that calls server functions, which cannot be
- * executed during static site generation.
- *
- * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic
+ * ISR: 24 hours (86400s) - Companies list updates infrequently
+ * Uses ISR instead of force-dynamic for better performance and SEO
  */
-export const dynamic = 'force-dynamic';
+export const revalidate = 86400;
 
 /**
  * Validate and sanitize external website URL for safe use in href attributes
@@ -93,9 +87,6 @@ function getSafeWebsiteUrl(url: string | null | undefined): string | null {
 export async function generateMetadata(): Promise<Metadata> {
   return await generatePageMetadata('/companies');
 }
-
-// Edge-cached via data layer (30min TTL from Statsig)
-export const revalidate = 86400;
 
 export default async function CompaniesPage() {
   // Single RPC call via edge-cached data layer

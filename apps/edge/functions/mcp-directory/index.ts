@@ -14,8 +14,11 @@
  */
 
 import { zodToJsonSchema } from 'npm:zod-to-json-schema@3';
-import { supabaseServiceRole } from '@heyclaude/edge-runtime';
+import type { Database } from '@heyclaude/database-types';
+import { edgeEnv, requireAuthUser, supabaseServiceRole } from '@heyclaude/edge-runtime';
 import { createDataApiContext, logError } from '@heyclaude/shared-runtime';
+import type { User } from '@supabase/supabase-js';
+import { createClient } from '@supabase/supabase-js';
 import { Hono } from 'hono';
 import { McpServer, StreamableHttpTransport } from 'mcp-lite';
 import type { z } from 'zod';
@@ -99,130 +102,125 @@ const mcp = new McpServer({
 });
 
 /**
- * Get Supabase client for tool handlers
- * supabaseServiceRole is already a client instance, not a factory function
+ * Get authenticated Supabase client for tool handlers
+ * Creates client with user's auth context for RLS enforcement
  */
-const getSupabase = () => supabaseServiceRole;
+function getAuthenticatedSupabase(_user: User, token: string) {
+  const {
+    supabase: { url: SUPABASE_URL, anonKey: SUPABASE_ANON_KEY },
+  } = edgeEnv;
+
+  return createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    global: {
+      headers: { Authorization: `Bearer ${token}` },
+    },
+  });
+}
 
 /**
  * Register Core Tools (Phase 2)
  */
 
-// 1. listCategories - List all directory categories
-mcp.tool('listCategories', {
-  description:
-    'List all content categories in the HeyClaude directory with counts and descriptions',
-  inputSchema: ListCategoriesInputSchema,
-  handler: async (args) => {
-    return await handleListCategories(getSupabase(), args);
-  },
-});
+/**
+ * Register all tools with a given Supabase client
+ * This function is called for each request with an authenticated client
+ */
+function registerAllTools(
+  mcpServer: McpServer,
+  supabase: ReturnType<typeof getAuthenticatedSupabase>
+) {
+  // 1. listCategories - List all directory categories
+  mcpServer.tool('listCategories', {
+    description:
+      'List all content categories in the HeyClaude directory with counts and descriptions',
+    inputSchema: ListCategoriesInputSchema,
+    handler: async (args) => await handleListCategories(supabase, args),
+  });
 
-// 2. searchContent - Search with filters and pagination
-mcp.tool('searchContent', {
-  description:
-    'Search directory content with filters, pagination, and tag support. Returns matching items with metadata.',
-  inputSchema: SearchContentInputSchema,
-  handler: async (args) => {
-    return await handleSearchContent(getSupabase(), args);
-  },
-});
+  // 2. searchContent - Search with filters and pagination
+  mcpServer.tool('searchContent', {
+    description:
+      'Search directory content with filters, pagination, and tag support. Returns matching items with metadata.',
+    inputSchema: SearchContentInputSchema,
+    handler: async (args) => await handleSearchContent(supabase, args),
+  });
 
-// 3. getContentDetail - Get complete content metadata
-mcp.tool('getContentDetail', {
-  description:
-    'Get complete metadata for a specific content item by slug and category. Includes full description, tags, author info, and stats.',
-  inputSchema: GetContentDetailInputSchema,
-  handler: async (args) => {
-    return await handleGetContentDetail(getSupabase(), args);
-  },
-});
+  // 3. getContentDetail - Get complete content metadata
+  mcpServer.tool('getContentDetail', {
+    description:
+      'Get complete metadata for a specific content item by slug and category. Includes full description, tags, author info, and stats.',
+    inputSchema: GetContentDetailInputSchema,
+    handler: async (args) => await handleGetContentDetail(supabase, args),
+  });
 
-// 4. getTrending - Get trending content
-mcp.tool('getTrending', {
-  description:
-    'Get trending content across categories or within a specific category. Sorted by popularity and engagement.',
-  inputSchema: GetTrendingInputSchema,
-  handler: async (args) => {
-    return await handleGetTrending(getSupabase(), args);
-  },
-});
+  // 4. getTrending - Get trending content
+  mcpServer.tool('getTrending', {
+    description:
+      'Get trending content across categories or within a specific category. Sorted by popularity and engagement.',
+    inputSchema: GetTrendingInputSchema,
+    handler: async (args) => await handleGetTrending(supabase, args),
+  });
 
-// 5. getFeatured - Get featured/highlighted content
-mcp.tool('getFeatured', {
-  description:
-    'Get featured and highlighted content from the homepage. Includes hero items, latest additions, and popular content.',
-  inputSchema: GetFeaturedInputSchema,
-  handler: async (args) => {
-    return await handleGetFeatured(getSupabase(), args);
-  },
-});
+  // 5. getFeatured - Get featured/highlighted content
+  mcpServer.tool('getFeatured', {
+    description:
+      'Get featured and highlighted content from the homepage. Includes hero items, latest additions, and popular content.',
+    inputSchema: GetFeaturedInputSchema,
+    handler: async (args) => await handleGetFeatured(supabase, args),
+  });
 
-// 6. getTemplates - Get submission templates
-mcp.tool('getTemplates', {
-  description:
-    'Get submission templates for creating new content. Returns required fields and validation rules by category.',
-  inputSchema: GetTemplatesInputSchema,
-  handler: async (args) => {
-    return await handleGetTemplates(getSupabase(), args);
-  },
-});
+  // 6. getTemplates - Get submission templates
+  mcpServer.tool('getTemplates', {
+    description:
+      'Get submission templates for creating new content. Returns required fields and validation rules by category.',
+    inputSchema: GetTemplatesInputSchema,
+    handler: async (args) => await handleGetTemplates(supabase, args),
+  });
+
+  // 7. getMcpServers - List all MCP servers with download URLs
+  mcpServer.tool('getMcpServers', {
+    description:
+      'List all MCP servers in the directory with download URLs and configuration details',
+    inputSchema: GetMcpServersInputSchema,
+    handler: async (args) => await handleGetMcpServers(supabase, args),
+  });
+
+  // 8. getRelatedContent - Find related/similar content
+  mcpServer.tool('getRelatedContent', {
+    description: 'Find related or similar content based on tags, category, and semantic similarity',
+    inputSchema: GetRelatedContentInputSchema,
+    handler: async (args) => await handleGetRelatedContent(supabase, args),
+  });
+
+  // 9. getContentByTag - Filter content by tags with AND/OR logic
+  mcpServer.tool('getContentByTag', {
+    description: 'Get content filtered by specific tags with AND/OR logic support',
+    inputSchema: GetContentByTagInputSchema,
+    handler: async (args) => await handleGetContentByTag(supabase, args),
+  });
+
+  // 10. getPopular - Get popular content by views and engagement
+  mcpServer.tool('getPopular', {
+    description: 'Get most popular content by views and engagement metrics',
+    inputSchema: GetPopularInputSchema,
+    handler: async (args) => await handleGetPopular(supabase, args),
+  });
+
+  // 11. getRecent - Get recently added content
+  mcpServer.tool('getRecent', {
+    description: 'Get recently added content sorted by date',
+    inputSchema: GetRecentInputSchema,
+    handler: async (args) => await handleGetRecent(supabase, args),
+  });
+}
+
+// Register tools on base server (for health check, etc.)
+registerAllTools(mcp, supabaseServiceRole);
 
 /**
- * Register Advanced Tools (Phase 3)
+ * Note: MCP transport is created per-request in the /mcp endpoint handler
+ * to ensure each request has its own authenticated Supabase client context
  */
-
-// 7. getMcpServers - List all MCP servers with download URLs
-mcp.tool('getMcpServers', {
-  description: 'List all MCP servers in the directory with download URLs and configuration details',
-  inputSchema: GetMcpServersInputSchema,
-  handler: async (args) => {
-    return await handleGetMcpServers(getSupabase(), args);
-  },
-});
-
-// 8. getRelatedContent - Find related/similar content
-mcp.tool('getRelatedContent', {
-  description: 'Find related or similar content based on tags, category, and semantic similarity',
-  inputSchema: GetRelatedContentInputSchema,
-  handler: async (args) => {
-    return await handleGetRelatedContent(getSupabase(), args);
-  },
-});
-
-// 9. getContentByTag - Filter content by tags with AND/OR logic
-mcp.tool('getContentByTag', {
-  description: 'Get content filtered by specific tags with AND/OR logic support',
-  inputSchema: GetContentByTagInputSchema,
-  handler: async (args) => {
-    return await handleGetContentByTag(getSupabase(), args);
-  },
-});
-
-// 10. getPopular - Get popular content by views and engagement
-mcp.tool('getPopular', {
-  description: 'Get most popular content by views and engagement metrics',
-  inputSchema: GetPopularInputSchema,
-  handler: async (args) => {
-    return await handleGetPopular(getSupabase(), args);
-  },
-});
-
-// 11. getRecent - Get recently added content
-mcp.tool('getRecent', {
-  description: 'Get recently added content sorted by date',
-  inputSchema: GetRecentInputSchema,
-  handler: async (args) => {
-    return await handleGetRecent(getSupabase(), args);
-  },
-});
-
-/**
- * Bind StreamableHttpTransport to MCP server
- * This creates the handler that processes MCP protocol requests
- */
-const transport = new StreamableHttpTransport();
-const mcpHandler = transport.bind(mcp);
 
 /**
  * Health check endpoint
@@ -251,6 +249,7 @@ mcpApp.get('/', (c) => {
 /**
  * MCP protocol endpoint
  * Handles all MCP requests (tool calls, resource requests, etc.)
+ * Requires authentication - JWT token must be provided in Authorization header
  */
 mcpApp.all('/mcp', async (c) => {
   const logContext = createDataApiContext('mcp-protocol', {
@@ -259,11 +258,44 @@ mcpApp.all('/mcp', async (c) => {
   });
 
   try {
+    // Require authentication for all MCP requests
+    const authResult = await requireAuthUser(c.req.raw, {
+      cors: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+        'Access-Control-Allow-Headers':
+          'Content-Type, Authorization, Mcp-Session-Id, MCP-Protocol-Version',
+      },
+      errorMessage:
+        'Authentication required. Please provide a valid JWT token in the Authorization header.',
+    });
+
+    if ('response' in authResult) {
+      return authResult.response;
+    }
+
+    // Create authenticated Supabase client for this request
+    const authenticatedSupabase = getAuthenticatedSupabase(authResult.user, authResult.token);
+
+    // Create a new MCP server instance with authenticated client for this request
+    const requestMcp = new McpServer({
+      name: 'heyclaude-mcp',
+      version: MCP_SERVER_VERSION,
+      schemaAdapter: (schema) => zodToJsonSchema(schema as z.ZodType),
+    });
+
+    // Register all tools with authenticated client
+    registerAllTools(requestMcp, authenticatedSupabase);
+
+    // Create handler for this authenticated request
+    const requestTransport = new StreamableHttpTransport();
+    const requestHandler = requestTransport.bind(requestMcp);
+
     // Get the raw Request object from Hono context
     const request = c.req.raw;
 
     // Pass to MCP handler
-    const response = await mcpHandler(request);
+    const response = await requestHandler(request);
 
     return response;
   } catch (error) {
@@ -275,11 +307,14 @@ mcpApp.all('/mcp', async (c) => {
         jsonrpc: '2.0',
         error: {
           code: -32603, // Internal error
-          message: 'Internal server error',
+          message:
+            error instanceof Error && error.message === 'Authentication required'
+              ? 'Authentication required. Please provide a valid JWT token in the Authorization header.'
+              : 'Internal server error',
         },
         id: null,
       },
-      500
+      error instanceof Error && error.message === 'Authentication required' ? 401 : 500
     );
   }
 });

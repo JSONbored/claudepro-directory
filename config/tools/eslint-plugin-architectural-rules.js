@@ -100,6 +100,74 @@ export default {
         };
       },
     },
+    'no-server-imports-in-client': {
+      meta: {
+        type: 'problem',
+        docs: {
+          description: 'Prevent client components from importing server-only modules',
+          category: 'Best Practices',
+          recommended: true,
+        },
+        fixable: null,
+        schema: [],
+        messages: {
+          serverImportInClient:
+            "Client components ('use client') cannot import server-only modules. Import from '@heyclaude/web-runtime/data' (client-safe entry point) or pass data as props from Server Components.",
+        },
+      },
+      create(context) {
+        const sourceCode = context.getSourceCode();
+        const fileText = sourceCode.getText();
+
+        // Check if this is a client component
+        const isClientComponent =
+          fileText.includes("'use client'") || fileText.includes('"use client"');
+
+        if (!isClientComponent) {
+          return {};
+        }
+
+        // Server-only import patterns that should not be in client components
+        const serverOnlyPatterns = [
+          /packages\/web-runtime\/src\/data\/(?!config\/category|changelog\.shared|forms\/submission-form-fields)/,
+          /packages\/web-runtime\/src\/cache\//,
+          /packages\/web-runtime\/src\/supabase\/(server|server-anon)\.ts/,
+          /packages\/web-runtime\/src\/server\.ts/,
+          /\.server\.ts/,
+          /\.server\.tsx/,
+          /server-only/,
+        ];
+
+        return {
+          ImportDeclaration(node) {
+            if (!node.source?.value) {
+              return;
+            }
+
+            const importPath = node.source.value;
+
+            // Skip if importing from client-safe entry point
+            if (
+              importPath === '@heyclaude/web-runtime/data' ||
+              importPath.startsWith('@heyclaude/web-runtime/data/') ||
+              importPath.includes('/data-client')
+            ) {
+              return;
+            }
+
+            // Check against server-only patterns
+            const isServerOnly = serverOnlyPatterns.some((pattern) => pattern.test(importPath));
+
+            if (isServerOnly) {
+              context.report({
+                node: node.source,
+                messageId: 'serverImportInClient',
+              });
+            }
+          },
+        };
+      },
+    },
     'require-error-handler': {
       meta: {
         type: 'problem',

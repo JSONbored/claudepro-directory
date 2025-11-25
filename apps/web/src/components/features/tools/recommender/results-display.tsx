@@ -6,7 +6,7 @@
  */
 
 import type { Database } from '@heyclaude/database-types';
-import { addBookmarkBatch } from '@heyclaude/web-runtime';
+import { addBookmarkBatch } from '@heyclaude/web-runtime/actions';
 import { getContentItemUrl, isValidCategory, sanitizeSlug } from '@heyclaude/web-runtime/core';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import {

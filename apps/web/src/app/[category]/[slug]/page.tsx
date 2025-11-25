@@ -6,6 +6,50 @@
  * ISR: 2 hours (7200s) - Detail pages change less frequently than list pages
  */
 export const revalidate = 7200;
+export const dynamicParams = true; // Allow unknown slugs to be rendered on demand (will 404 if invalid)
+
+/**
+ * Generate static params for popular/recent content items
+ * Pre-renders top 50 items per category at build time for optimal SEO and performance
+ *
+ * Strategy: Pre-render popular content (most likely to be accessed) while allowing
+ * other content to be rendered on-demand via ISR. This balances build time with performance.
+ */
+export async function generateStaticParams() {
+  const { getHomepageCategoryIds } = await import('@heyclaude/web-runtime/data/config/category');
+  const { getContentByCategory } = await import('@heyclaude/web-runtime/data/content');
+  const { logger } = await import('@heyclaude/web-runtime/core');
+  const { generateRequestId } = await import('@heyclaude/web-runtime/utils/request-context');
+
+  const categories = getHomepageCategoryIds;
+  const params: Array<{ category: string; slug: string }> = [];
+
+  // Limit to top 50 items per category to balance build time vs. performance
+  const MAX_ITEMS_PER_CATEGORY = 50;
+
+  for (const category of categories) {
+    try {
+      const items = await getContentByCategory(category);
+      const topItems = items.slice(0, MAX_ITEMS_PER_CATEGORY);
+
+      for (const item of topItems) {
+        if (item.slug) {
+          params.push({ category, slug: item.slug });
+        }
+      }
+    } catch (error) {
+      // Log error but continue with other categories
+      logger.warn('generateStaticParams: failed to load content for category', undefined, {
+        requestId: generateRequestId(),
+        operation: 'generateStaticParams',
+        category,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
+
+  return params;
+}
 
 import type { Database } from '@heyclaude/database-types';
 import {

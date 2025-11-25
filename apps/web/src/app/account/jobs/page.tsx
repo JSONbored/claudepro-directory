@@ -96,7 +96,7 @@ interface MyJobsPageProps {
   searchParams?: Promise<{ payment?: string; job_id?: string }>;
 }
 
-export default async function MyJobsPage({ searchParams }: MyJobsPageProps = {}) {
+export default async function MyJobsPage({ searchParams }: MyJobsPageProps) {
   const resolvedSearchParams = searchParams ? await searchParams : {};
   const paymentStatus = resolvedSearchParams?.payment;
   const paymentJobId = resolvedSearchParams?.job_id;

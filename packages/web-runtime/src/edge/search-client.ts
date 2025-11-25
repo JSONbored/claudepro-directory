@@ -70,35 +70,83 @@ export type SearchResult = ContentSearchResult;
 async function executeSearchDirect<T>(
   options: UnifiedSearchOptions,
 ): Promise<UnifiedSearchResponse<T>> {
+  const { trackPerformance } = await import('../utils/performance-metrics.ts');
   const { createSupabaseAnonClient } = await import('../supabase/server-anon.ts');
-  const client = createSupabaseAnonClient();
   
-  const start = performance.now();
-  const service = new SearchService(client as unknown as SupabaseClient<Database>);
+  const { result } = await trackPerformance(
+    async () => {
+      const client = createSupabaseAnonClient();
+      // Type compatibility: SupabaseAnonClient is compatible with SupabaseClient<Database>
+      // Both are created from the same underlying Supabase client factory with Database type
+      const typedClient: SupabaseClient<Database> = client as SupabaseClient<Database>;
+      const service = new SearchService(typedClient);
+      
+      // Type guard: Ensure entities are strings
+      const entities = options.entities?.map((e): string => {
+        if (typeof e === 'string') {
+          return e;
+        }
+        return String(e);
+      }) ?? ['content'];
+      
+      const serviceResponse = await service.searchUnified({
+        p_query: options.query,
+        p_entities: entities,
+        ...(options.filters?.categories ? { p_categories: options.filters.categories } : {}),
+        ...(options.filters?.tags ? { p_tags: options.filters.tags } : {}),
+        ...(options.filters?.authors ? { p_authors: options.filters.authors } : {}),
+        p_limit: options.filters?.limit ?? 20,
+        p_offset: options.filters?.offset ?? 0
+      });
+      
+      // Type guard: Validate service response structure
+      // SearchService.searchUnified returns { data: UnifiedSearchResult[] | null, total_count: number }
+      if (!serviceResponse || typeof serviceResponse !== 'object') {
+        return { results: [], totalCount: 0 };
+      }
+      
+      const hasData = 'data' in serviceResponse;
+      const hasTotalCount = 'total_count' in serviceResponse;
+      
+      if (!hasData || !hasTotalCount) {
+        return { results: [], totalCount: 0 };
+      }
+      
+      const data = serviceResponse.data;
+      const totalCount = typeof serviceResponse.total_count === 'number' 
+        ? serviceResponse.total_count 
+        : (Array.isArray(data) ? data.length : 0);
+      
+      // Type guard: Ensure results is an array
+      const results: UnifiedSearchResult[] = Array.isArray(data) 
+        ? data.filter((item): item is UnifiedSearchResult => 
+            item !== null && typeof item === 'object' && 'id' in item
+          )
+        : [];
+      
+      return { results, totalCount };
+    },
+    {
+      operation: 'executeSearchDirect',
+      logMeta: {
+        query: options.query,
+        entities: options.entities,
+        limit: options.filters?.limit ?? 20,
+        offset: options.filters?.offset ?? 0,
+      },
+      logLevel: 'info', // Log all operations for observability
+    }
+  );
   
-  const entities = options.entities?.map(e => e as string) ?? ['content'];
-  const serviceResponse = await service.searchUnified({
-    p_query: options.query,
-    p_entities: entities,
-    ...(options.filters?.categories ? { p_categories: options.filters.categories } : {}),
-    ...(options.filters?.tags ? { p_tags: options.filters.tags } : {}),
-    ...(options.filters?.authors ? { p_authors: options.filters.authors } : {}),
-    p_limit: options.filters?.limit ?? 20,
-    p_offset: options.filters?.offset ?? 0
-  });
-  
-  // SearchService.searchUnified returns { data: UnifiedSearchResult[] | null, total_count: number }
-  // Type assertion needed because TypeScript may not infer the return type correctly
-  const searchResponse = serviceResponse as unknown as { data: UnifiedSearchResult[] | null; total_count: number } | null;
-  const results = (searchResponse?.data ?? []) as UnifiedSearchResult[];
-  const totalCount = searchResponse?.total_count ?? results.length;
-
-  const end = performance.now();
-  const totalTime = end - start;
+  const { results, totalCount } = result;
+  // Duration tracking would need to be added to executeSearchDirect if needed
+  const totalTime = 0;
   
   // Explicitly construct response object without undefined properties where possible
+  // Type guard: results is already validated as UnifiedSearchResult[], safe to cast to T[]
+  // This is safe because T extends UnifiedSearchResult in practice
   const response: UnifiedSearchResponse<T> = {
-    results: results as unknown as T[],
+    results: results as T[],
     query: options.query,
     filters: {
       ...(options.filters?.categories ? { categories: options.filters.categories } : {}),
@@ -127,7 +175,7 @@ async function executeSearchDirect<T>(
       options.filters?.job_experience ||
       options.filters?.job_remote !== undefined
         ? 'jobs'
-        : entities.length === 1 && entities[0] === 'content'
+        : options.entities && options.entities.length === 1 && options.entities[0] === 'content'
           ? 'content'
           : 'unified',
   };

@@ -10,9 +10,16 @@ import {
   handleJobNotificationDirect,
   pgmqDelete,
   pgmqRead,
+  publicCorsHeaders,
   successResponse,
 } from '@heyclaude/edge-runtime';
-import { errorToString, TIMEOUT_PRESETS, withTimeout } from '@heyclaude/shared-runtime';
+import {
+  createUtilityContext,
+  errorToString,
+  logError,
+  TIMEOUT_PRESETS,
+  withTimeout,
+} from '@heyclaude/shared-runtime';
 
 type JobRow = DatabaseGenerated['public']['Tables']['jobs']['Row'];
 
@@ -236,9 +243,10 @@ export async function handleDiscordJobs(_req: Request): Promise<Response> {
       200
     );
   } catch (error) {
-    console.error('[flux-station] Job Discord queue error', {
-      error: errorToString(error),
+    const logContext = createUtilityContext('flux-station', 'discord-jobs-error', {
+      operation: 'queue-processing',
     });
-    return errorResponse(error, 'flux-station:discord-jobs-error');
+    logError('Job Discord queue error', logContext, error);
+    return errorResponse(error, 'flux-station:discord-jobs-error', publicCorsHeaders, logContext);
   }
 }

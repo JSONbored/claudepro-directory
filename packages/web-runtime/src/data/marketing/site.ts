@@ -26,6 +26,8 @@ type VisitorStats = {
 
 const getVisitorStats = unstable_cache(
   async (): Promise<VisitorStats> => {
+    const { trackPerformance } = await import('../../utils/performance-metrics.ts');
+    
     if (!(VERCEL_ANALYTICS_TOKEN && VERCEL_PROJECT_ID)) {
       return HERO_DEFAULTS;
     }
@@ -39,27 +41,35 @@ const getVisitorStats = unstable_cache(
     url.searchParams.set('to', to.toISOString());
 
     try {
-      const response = await fetch(url.toString(), {
-        headers: {
-          Authorization: `Bearer ${VERCEL_ANALYTICS_TOKEN}`,
+      const { result } = await trackPerformance(
+        async () => {
+          const response = await fetch(url.toString(), {
+            headers: {
+              Authorization: `Bearer ${VERCEL_ANALYTICS_TOKEN}`,
+            },
+            next: { revalidate: 3600 },
+          });
+
+          if (!response.ok) {
+            throw new Error(`Vercel analytics error: ${response.status} ${response.statusText}`);
+          }
+
+          const data = await response.json();
+          return {
+            monthlyVisitors: Number(data?.visitors?.value ?? HERO_DEFAULTS.monthlyVisitors),
+            monthlyPageViews: Number(data?.pageViews?.value ?? HERO_DEFAULTS.monthlyPageViews),
+          };
         },
-        next: { revalidate: 3600 },
-      });
-
-      if (!response.ok) {
-        throw new Error(`Vercel analytics error: ${response.status} ${response.statusText}`);
-      }
-
-      const data = await response.json();
-      return {
-        monthlyVisitors: Number(data?.visitors?.value ?? HERO_DEFAULTS.monthlyVisitors),
-        monthlyPageViews: Number(data?.pageViews?.value ?? HERO_DEFAULTS.monthlyPageViews),
-      };
+        {
+          operation: 'getVisitorStats',
+          logMeta: { source: 'vercel-analytics-api' },
+          logLevel: 'info',
+        }
+      );
+      
+      return result;
     } catch (error) {
-      logger.error('MarketingSite: failed to load Vercel analytics', normalizeError(error), {
-        requestId: generateRequestId(),
-        operation: 'getVisitorStats',
-      });
+      // trackPerformance already logs the error with performance metrics
       return HERO_DEFAULTS;
     }
   },

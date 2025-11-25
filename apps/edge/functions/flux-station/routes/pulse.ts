@@ -12,12 +12,19 @@ import {
   getCacheConfigNumber,
   pgmqDelete,
   pgmqRead,
+  publicCorsHeaders,
   RESEND_ENV,
   successResponse,
   supabaseServiceRole,
   updateContactEngagement,
 } from '@heyclaude/edge-runtime';
-import { errorToString, TIMEOUT_PRESETS, withTimeout } from '@heyclaude/shared-runtime';
+import {
+  type BaseLogContext,
+  errorToString,
+  logError,
+  TIMEOUT_PRESETS,
+  withTimeout,
+} from '@heyclaude/shared-runtime';
 
 const PULSE_QUEUE_NAME = 'pulse';
 const PULSE_BATCH_SIZE_DEFAULT = 100; // Fallback if Statsig config unavailable
@@ -492,7 +499,9 @@ export async function handlePulse(_req: Request): Promise<Response> {
   // Validate batch size (safety limits)
   const safeBatchSize = Math.max(1, Math.min(batchSize, 500)); // Between 1 and 500
 
-  const logContext = {
+  const logContext: BaseLogContext = {
+    function: 'flux-station:pulse',
+    started_at: new Date().toISOString(),
     queue: PULSE_QUEUE_NAME,
     batch_size: safeBatchSize,
     config_source: batchSize !== PULSE_BATCH_SIZE_DEFAULT ? 'statsig' : 'default',
@@ -517,8 +526,8 @@ export async function handlePulse(_req: Request): Promise<Response> {
       messages = rawMessages as unknown as PulseQueueMessage[];
     } catch (error) {
       if (error instanceof Error && error.name === 'TimeoutError') {
-        console.error('[flux-station] Pulse queue read timeout', logContext);
-        return errorResponse(error, 'flux-station:pulse-timeout');
+        logError('Pulse queue read timeout', logContext, error);
+        return errorResponse(error, 'flux-station:pulse-timeout', publicCorsHeaders, logContext);
       }
       throw error;
     }
@@ -640,10 +649,7 @@ export async function handlePulse(_req: Request): Promise<Response> {
       200
     );
   } catch (error) {
-    console.error('[flux-station] Fatal pulse queue processing error', {
-      ...logContext,
-      error: errorToString(error),
-    });
-    return errorResponse(error, 'flux-station:pulse-fatal');
+    logError('Fatal pulse queue processing error', logContext, error);
+    return errorResponse(error, 'flux-station:pulse-fatal', publicCorsHeaders, logContext);
   }
 }

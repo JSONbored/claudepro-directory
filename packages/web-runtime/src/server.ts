@@ -13,6 +13,7 @@
 export * from './supabase/server.ts';
 export * from './supabase/server-anon.ts';
 export * from './supabase/admin.ts';
+export * from './supabase/middleware.ts';
 export * from './auth/get-authenticated-user.ts';
 export * from './rpc/run-rpc.ts';
 export * from './seo/generator.ts';

@@ -47,16 +47,10 @@ import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { generateRequestId } from '@heyclaude/web-runtime/utils/request-context';
 
 /**
- * Dynamic Rendering Required
- *
- * This page must use dynamic rendering because it imports from @heyclaude/web-runtime
- * which transitively imports feature-flags/flags.ts. The Vercel Flags SDK's flags/next
- * module contains module-level code that calls server functions, which cannot be
- * executed during static site generation.
- *
- * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic
+ * ISR: 1 hour (3600s) - Changelog list updates periodically
+ * Uses ISR for better performance while keeping content fresh
  */
-export const dynamic = 'force-dynamic';
+export const revalidate = 3600;
 
 /**
  * Generate metadata for changelog list page

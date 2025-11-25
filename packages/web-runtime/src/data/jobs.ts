@@ -33,8 +33,8 @@ export interface JobsFilterOptions {
 async function getFilteredJobsDirect(
   options: JobsFilterOptions
 ): Promise<JobsFilterResult | null> {
+  const { trackPerformance } = await import('../utils/performance-metrics');
   const { createSupabaseAnonClient } = await import('../supabase/server-anon.ts');
-  const client = createSupabaseAnonClient();
   const { searchQuery, category, employment, experience, remote, limit, offset, sort } = options;
   
   const filtersLog: Record<string, string | number | boolean | null> = {
@@ -49,43 +49,55 @@ async function getFilteredJobsDirect(
   };
   
   try {
-    // OPTIMIZATION: Use type guards instead of type assertions for runtime validation
-    // Build RPC args with proper type narrowing
-    const rpcArgs: Database['public']['Functions']['filter_jobs']['Args'] = {};
+    const { result } = await trackPerformance(
+      async () => {
+        const client = createSupabaseAnonClient();
+        
+        // OPTIMIZATION: Use type guards instead of type assertions for runtime validation
+        // Build RPC args with proper type narrowing
+        const rpcArgs: Database['public']['Functions']['filter_jobs']['Args'] = {};
+        
+        if (searchQuery) {
+          rpcArgs.p_search_query = searchQuery;
+        }
+        if (category && category !== 'all' && isValidJobCategory(category)) {
+          // Type guard ensures category is valid job_category enum
+          rpcArgs.p_category = category as Database['public']['Enums']['job_category'];
+        }
+        if (employment && employment !== 'any' && isValidJobType(employment)) {
+          // Type guard ensures employment is valid job_type enum
+          rpcArgs.p_employment_type = employment as Database['public']['Enums']['job_type'];
+        }
+        if (experience && experience !== 'any' && isValidExperienceLevel(experience)) {
+          // Type guard ensures experience is valid experience_level enum
+          rpcArgs.p_experience_level = experience as Database['public']['Enums']['experience_level'];
+        }
+        if (remote !== undefined) {
+          rpcArgs.p_remote_only = remote;
+        }
+        if (limit !== undefined) {
+          rpcArgs.p_limit = limit;
+        }
+        if (offset !== undefined) {
+          rpcArgs.p_offset = offset;
+        }
+        
+        // Type compatibility: SupabaseAnonClient is compatible with SupabaseClient<Database>
+        // Both are created from the same underlying Supabase client factory with Database type
+        // This is safe because createSupabaseAnonClient returns ReturnType<typeof createSupabaseClient<Database>>
+        // We use a type assertion here because TypeScript doesn't recognize the structural compatibility
+        return await new SearchService(client as SupabaseClient<Database>).filterJobs(rpcArgs);
+      },
+      {
+        operation: 'getFilteredJobsDirect',
+        logMeta: filtersLog,
+        logLevel: 'info',
+      }
+    );
     
-    if (searchQuery) {
-      rpcArgs.p_search_query = searchQuery;
-    }
-    if (category && category !== 'all' && isValidJobCategory(category)) {
-      // Type guard ensures category is valid job_category enum
-      rpcArgs.p_category = category as Database['public']['Enums']['job_category'];
-    }
-    if (employment && employment !== 'any' && isValidJobType(employment)) {
-      // Type guard ensures employment is valid job_type enum
-      rpcArgs.p_employment_type = employment as Database['public']['Enums']['job_type'];
-    }
-    if (experience && experience !== 'any' && isValidExperienceLevel(experience)) {
-      // Type guard ensures experience is valid experience_level enum
-      rpcArgs.p_experience_level = experience as Database['public']['Enums']['experience_level'];
-    }
-    if (remote !== undefined) {
-      rpcArgs.p_remote_only = remote;
-    }
-    if (limit !== undefined) {
-      rpcArgs.p_limit = limit;
-    }
-    if (offset !== undefined) {
-      rpcArgs.p_offset = offset;
-    }
-    
-    return await new SearchService(client as unknown as SupabaseClient<Database>).filterJobs(rpcArgs);
+    return result;
   } catch (error) {
-    const normalized = normalizeError(error);
-    logger.error('Failed to fetch filtered jobs (direct)', normalized, {
-      requestId: generateRequestId(),
-      operation: 'getFilteredJobsDirect',
-      ...filtersLog,
-    });
+    // trackPerformance already logs the error with performance metrics
     return null;
   }
 }

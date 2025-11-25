@@ -52,7 +52,23 @@ export default async function PartnerPage() {
       operation: 'PartnerPage',
       route: '/partner',
     });
-    throw normalized;
+    // Use defaults instead of throwing to prevent page crash
+    pricing = {
+      jobs: {
+        regular: 99,
+        discounted: 79,
+        durationDays: 30,
+      },
+      sponsored: {
+        regular: 199,
+        discounted: 149,
+      },
+      launch: {
+        discountPercent: 20,
+        enabled: false,
+        endDate: '',
+      },
+    };
   }
 
   const heroStats = await getPartnerHeroStats();

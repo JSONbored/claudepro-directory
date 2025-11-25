@@ -3,7 +3,6 @@
 import type { Database } from '@heyclaude/database-types';
 import { unstable_cache } from 'next/cache';
 import { getCacheTtl } from '../cache-config.ts';
-import { normalizeError } from '../errors.ts';
 import { logger } from '../logger.ts';
 import { searchCompaniesUnified } from '../edge/search-client.ts';
 import { fetchCached } from '../cache/fetch-cached.ts';
@@ -90,22 +89,29 @@ async function fetchCompanySearchResults(
   query: string,
   limit: number
 ): Promise<CompanySearchResult[]> {
+  const { trackPerformance } = await import('../utils/performance-metrics');
+  
   try {
-    const results = await searchCompaniesUnified(query, limit);
-    return results.map((entity) => ({
-      id: entity.id,
-      name: entity.title || entity.slug || '',
-      slug: entity.slug,
-      description: entity.description,
-    }));
+    const { result } = await trackPerformance(
+      async () => {
+        const results = await searchCompaniesUnified(query, limit);
+        return results.map((entity) => ({
+          id: entity.id,
+          name: entity.title || entity.slug || '',
+          slug: entity.slug,
+          description: entity.description,
+        }));
+      },
+      {
+        operation: 'fetchCompanySearchResults',
+        logMeta: { query, limit },
+        logLevel: 'info', // Log all operations for observability
+      }
+    );
+    
+    return result;
   } catch (error) {
-    const normalized = normalizeError(error, 'Company search fetch error');
-    logger.error('Company search fetch failed', normalized, {
-      requestId: generateRequestId(),
-      operation: 'fetchCompanySearchResults',
-      query,
-      limit,
-    });
+    // Error already logged by trackPerformance
     return [];
   }
 }

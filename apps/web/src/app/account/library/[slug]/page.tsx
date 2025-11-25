@@ -31,16 +31,16 @@ export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
 interface CollectionPageProps {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }
 
 export async function generateMetadata({ params }: CollectionPageProps): Promise<Metadata> {
-  const { slug } = params;
+  const { slug } = await params;
   return generatePageMetadata('/account/library/:slug', { params: { slug } });
 }
 
 export default async function CollectionDetailPage({ params }: CollectionPageProps) {
-  const { slug } = params;
+  const { slug } = await params;
   const { user } = await getAuthenticatedUser({ context: 'CollectionDetailPage' });
 
   if (!user) {

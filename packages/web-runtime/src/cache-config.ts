@@ -118,8 +118,17 @@ export type CacheConfigPromise = Promise<CacheConfig>;
 const getBuildTimeTtls = (): Record<CacheTtlKey, number> => {
   const ttls: Partial<Record<CacheTtlKey, number>> = {};
   for (const key of CACHE_TTL_KEYS) {
-    // Safe cast as we know the key exists in defaults
-    ttls[key] = (CACHE_CONFIG_DEFAULTS as unknown as Record<string, number>)[key] ?? 3600;
+    // Type guard: Validate that the key exists in defaults and is a number
+    const value = CACHE_CONFIG_DEFAULTS[key as keyof typeof CACHE_CONFIG_DEFAULTS];
+    if (typeof value === 'number') {
+      ttls[key] = value;
+    } else {
+      ttls[key] = 3600; // Default fallback
+    }
+  }
+  // Type guard: Ensure all keys are present
+  if (Object.keys(ttls).length !== CACHE_TTL_KEYS.length) {
+    throw new Error('getBuildTimeTtls: Missing TTL values in CACHE_CONFIG_DEFAULTS');
   }
   return ttls as Record<CacheTtlKey, number>;
 };
@@ -127,8 +136,17 @@ const getBuildTimeTtls = (): Record<CacheTtlKey, number> => {
 const getBuildTimeInvalidations = (): Record<CacheInvalidateKey, readonly string[]> => {
   const invalidations: Partial<Record<CacheInvalidateKey, readonly string[]>> = {};
   for (const key of CACHE_INVALIDATE_KEYS) {
-    invalidations[key] =
-      (CACHE_CONFIG_DEFAULTS as unknown as Record<string, readonly string[]>)[key] ?? [];
+    // Type guard: Validate that the key exists in defaults and is an array
+    const value = CACHE_CONFIG_DEFAULTS[key as keyof typeof CACHE_CONFIG_DEFAULTS];
+    if (Array.isArray(value) && value.every((item): item is string => typeof item === 'string')) {
+      invalidations[key] = value;
+    } else {
+      invalidations[key] = []; // Default fallback
+    }
+  }
+  // Type guard: Ensure all keys are present
+  if (Object.keys(invalidations).length !== CACHE_INVALIDATE_KEYS.length) {
+    throw new Error('getBuildTimeInvalidations: Missing invalidation values in CACHE_CONFIG_DEFAULTS');
   }
   return invalidations as Record<CacheInvalidateKey, readonly string[]>;
 };

@@ -72,21 +72,36 @@ export async function fetchCached<TResult>(
           
         // OPTIMIZATION: Add timeout protection to prevent hung requests
         // Wrap service call with timeout - returns fallback if timeout exceeded
-        const typedClient = client as unknown as SupabaseClient<Database>;
+        // Type compatibility: Both SupabaseServerClient and SupabaseAnonClient are compatible with SupabaseClient<Database>
+        // Both are created from the same underlying Supabase client factory with Database type
+        const typedClient: SupabaseClient<Database> = client as SupabaseClient<Database>;
         const result = await withTimeout(
           serviceCall(typedClient),
           timeoutMs,
           `Service call timed out after ${timeoutMs}ms: ${sanitizedKey}`
         );
         
-        // Log performance metrics for slow queries (>1s)
+        // Log performance metrics for all operations
         const duration = performance.now() - startTime;
+        const roundedDuration = Math.round(duration);
+        
+        // Always log slow queries (>1s) as warnings
         if (duration > 1000) {
           logger.warn(`Slow data fetch detected: ${sanitizedKey}`, {
             requestId,
             key: sanitizedKey,
-            duration: Math.round(duration),
+            duration: roundedDuration,
             timeoutMs,
+            cacheHit: false, // This is a cache miss (executed the service call)
+            ...sanitizedLogMeta,
+          });
+        } else {
+          // Log all operations at info level for observability
+          logger.info(`Data fetch completed: ${sanitizedKey}`, {
+            requestId,
+            key: sanitizedKey,
+            duration: roundedDuration,
+            cacheHit: false, // This is a cache miss (executed the service call)
             ...sanitizedLogMeta,
           });
         }

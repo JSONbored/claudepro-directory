@@ -73,6 +73,9 @@ export async function enqueuePulseEvent(
 export async function enqueuePulseEventServer(event: PulseEvent): Promise<void> {
   await enqueuePulseEvent(event, async () => {
     const supabase = await createSupabaseServerClient();
+    // Type compatibility: SupabaseServerClient has a schema().rpc() method that matches RpcClient interface
+    // The schema('public').rpc() method signature is compatible with RpcClient.schema().rpc()
+    // We use a type assertion here because TypeScript doesn't recognize the structural compatibility
     return supabase as unknown as RpcClient;
   });
 }

@@ -27,13 +27,15 @@ export async function GET(request: NextRequest) {
   const code = searchParams.get('code');
   const newsletterParam = searchParams.get('newsletter');
   const shouldSubscribeToNewsletter = newsletterParam === 'true';
-  const nextParam = searchParams.get('next') ?? '/';
+  const isLinkingFlow = searchParams.get('link') === 'true';
+  const nextParam =
+    searchParams.get('next') ?? (isLinkingFlow ? '/account/connected-accounts' : '/');
   const isValidRedirect =
     nextParam.startsWith('/') &&
     !nextParam.startsWith('//') &&
     !nextParam.startsWith('/\\') &&
     !nextParam.includes('@');
-  const next = isValidRedirect ? nextParam : '/';
+  const next = isValidRedirect ? nextParam : isLinkingFlow ? '/account/connected-accounts' : '/';
 
   if (code) {
     const supabase = await createSupabaseServerClient();
@@ -50,6 +52,7 @@ export async function GET(request: NextRequest) {
           operation: 'AuthCallback',
           route: '/auth/callback',
           userId: user.id,
+          isLinkingFlow,
         });
       } catch (refreshError) {
         const normalized = normalizeError(refreshError, 'Failed to refresh profile from OAuth');
@@ -59,6 +62,7 @@ export async function GET(request: NextRequest) {
           route: '/auth/callback',
           userId: user.id,
           errorMessage: normalized.message,
+          isLinkingFlow,
         });
       }
 

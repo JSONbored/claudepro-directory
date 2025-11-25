@@ -18,7 +18,10 @@ export * from './content.ts';
 export * from './notifications.ts';
 export * from './ui.ts';
 export * from './trace.ts';
-export * from './supabase/browser.ts';
+// Supabase server exports moved to @heyclaude/web-runtime/server to prevent client bundle inclusion
+// export * from './supabase/index.ts';
+export * from './auth/mfa.ts';
+export * from './auth/aal.ts';
 export * from './storage/image-utils.ts';
 export * from './edge/call-edge-function.ts';
 export * from './edge/transform.ts';

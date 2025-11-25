@@ -805,7 +805,7 @@ export async function handleGetNewsletterCount(): Promise<Response> {
     return jsonResponse({ count }, 200, headers);
   } catch (error) {
     logError('Newsletter count failed', logContext, error);
-    return errorResponse(error, 'handleGetNewsletterCount');
+    return errorResponse(error, 'handleGetNewsletterCount', publicCorsHeaders, logContext);
   }
 }
 

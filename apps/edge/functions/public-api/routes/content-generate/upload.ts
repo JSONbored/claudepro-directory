@@ -18,6 +18,7 @@ import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
 import {
   badRequestResponse,
+  errorResponse,
   getOnlyCorsHeaders,
   getStorageServiceClient,
   jsonResponse,
@@ -27,7 +28,12 @@ import {
   uploadObject,
 } from '@heyclaude/edge-runtime';
 import type { BaseLogContext } from '@heyclaude/shared-runtime';
-import { buildSecurityHeaders, logError, logInfo } from '@heyclaude/shared-runtime';
+import {
+  buildSecurityHeaders,
+  createDataApiContext,
+  logError,
+  logInfo,
+} from '@heyclaude/shared-runtime';
 
 const CORS = getOnlyCorsHeaders;
 
@@ -335,24 +341,16 @@ export async function handleUploadPackage(
     // Log the real error server-side for debugging
     if (logContext) {
       logError('Package upload failed', logContext, error);
+      // Use errorResponse for consistent error handling and logging
+      return errorResponse(error, 'data-api:content-generate-upload', CORS, logContext);
     }
 
-    // Return generic error message to client - never expose internal error details
-    return jsonResponse(
-      {
-        success: false,
-        content_id,
-        category,
-        slug: '',
-        storage_url: '',
-        error: 'Upload Failed',
-        message: 'An unexpected error occurred while uploading the package.',
-      } satisfies UploadPackageResponse,
-      500,
-      {
-        ...CORS,
-        ...buildSecurityHeaders(),
-      }
-    );
+    // Fallback if logContext is not available (shouldn't happen, but defensive)
+    const fallbackLogContext = createDataApiContext('content-generate-upload', {
+      path: 'upload',
+      method: 'POST',
+    });
+    logError('Package upload failed (no context)', fallbackLogContext, error);
+    return errorResponse(error, 'data-api:content-generate-upload', CORS, fallbackLogContext);
   }
 }
