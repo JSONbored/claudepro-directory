@@ -3,7 +3,14 @@
  */
 
 import type { JobStatus } from '@heyclaude/web-runtime';
-import { formatRelativeDate, logger, normalizeError } from '@heyclaude/web-runtime/core';
+import {
+  createWebAppContextWithId,
+  formatRelativeDate,
+  generateRequestId,
+  hashUserId,
+  logger,
+  normalizeError,
+} from '@heyclaude/web-runtime/core';
 import {
   generatePageMetadata,
   getAuthenticatedUser,
@@ -12,7 +19,6 @@ import {
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { ArrowLeft, ExternalLink } from '@heyclaude/web-runtime/icons';
 import { BADGE_COLORS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import { generateRequestId } from '@heyclaude/web-runtime/utils/request-context';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
@@ -44,18 +50,28 @@ export async function generateMetadata({ params }: JobAnalyticsPageProps): Promi
 }
 
 export default async function JobAnalyticsPage({ params }: JobAnalyticsPageProps) {
-  const { user } = await getAuthenticatedUser({ context: 'JobAnalyticsPage' });
   const { id } = await params;
 
-  if (!user) {
-    logger.warn('JobAnalyticsPage: unauthenticated access attempt', undefined, {
-      requestId: generateRequestId(),
-      operation: 'JobAnalyticsPage',
-      route: `/account/jobs/${id}/analytics`,
+  // Generate single requestId for this page request
+  const requestId = generateRequestId();
+  const baseLogContext = createWebAppContextWithId(
+    requestId,
+    `/account/jobs/${id}/analytics`,
+    'JobAnalyticsPage',
+    {
       jobId: id,
-    });
+    }
+  );
+
+  const { user } = await getAuthenticatedUser({ context: 'JobAnalyticsPage' });
+
+  if (!user) {
+    logger.warn('JobAnalyticsPage: unauthenticated access attempt', undefined, baseLogContext);
     redirect(ROUTES.LOGIN);
   }
+
+  const userIdHash = hashUserId(user.id);
+  const logContext = { ...baseLogContext, userIdHash };
 
   let job: Awaited<ReturnType<typeof getUserJobById>> | null = null;
   let fetchError = false;
@@ -63,23 +79,11 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPageProps
     job = await getUserJobById(user.id, id);
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load job analytics detail');
-    logger.error('JobAnalyticsPage: getUserJobById threw', normalized, {
-      requestId: generateRequestId(),
-      operation: 'JobAnalyticsPage',
-      route: `/account/jobs/${id}/analytics`,
-      jobId: id,
-      userId: user.id,
-    });
+    logger.error('JobAnalyticsPage: getUserJobById threw', normalized, logContext);
     fetchError = true;
   }
   if (!job || fetchError) {
-    logger.warn('JobAnalyticsPage: job not found or not owned by user', undefined, {
-      requestId: generateRequestId(),
-      operation: 'JobAnalyticsPage',
-      route: `/account/jobs/${id}/analytics`,
-      jobId: id,
-      userId: user.id,
-    });
+    logger.warn('JobAnalyticsPage: job not found or not owned by user', undefined, logContext);
     return (
       <div className="space-y-6">
         <Card>
@@ -160,11 +164,11 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPageProps
             </div>
             <div>
               <p className="text-muted-foreground">Plan</p>
-              <p className="font-medium capitalize">{job.plan}</p>
+              <p className="font-medium capitalize">{job.plan || 'Not specified'}</p>
             </div>
             <div>
               <p className="text-muted-foreground">Type</p>
-              <p className="font-medium capitalize">{job.type}</p>
+              <p className="font-medium capitalize">{job.type || 'Not specified'}</p>
             </div>
             {job.posted_at && (
               <div>

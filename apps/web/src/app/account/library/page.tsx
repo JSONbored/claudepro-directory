@@ -4,7 +4,13 @@
  */
 
 import type { Database } from '@heyclaude/database-types';
-import { hashUserId, logger, normalizeError } from '@heyclaude/web-runtime/core';
+import {
+  createWebAppContextWithId,
+  generateRequestId,
+  hashUserId,
+  logger,
+  normalizeError,
+} from '@heyclaude/web-runtime/core';
 import {
   generatePageMetadata,
   getAuthenticatedUser,
@@ -19,7 +25,6 @@ import {
   Plus,
 } from '@heyclaude/web-runtime/icons';
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import { generateRequestId } from '@heyclaude/web-runtime/utils/request-context';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
@@ -46,13 +51,15 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function LibraryPage() {
+  // Generate single requestId for this page request
+  const requestId = generateRequestId();
+  const baseLogContext = createWebAppContextWithId(requestId, '/account/library', 'LibraryPage');
+
   const { user } = await getAuthenticatedUser({ context: 'LibraryPage' });
 
   if (!user) {
     logger.warn('LibraryPage: unauthenticated access attempt detected', undefined, {
-      requestId: generateRequestId(),
-      operation: 'LibraryPage',
-      route: '/account/library',
+      ...baseLogContext,
       timestamp: new Date().toISOString(),
     });
     return (
@@ -72,27 +79,19 @@ export default async function LibraryPage() {
     );
   }
 
-  let data: Database['public']['Functions']['get_user_library']['Returns'] | null = null;
   // Hash user ID for privacy-compliant logging (GDPR/CCPA)
   const userIdHash = hashUserId(user.id);
+  const logContext = { ...baseLogContext, userIdHash };
+
+  let data: Database['public']['Functions']['get_user_library']['Returns'] | null = null;
   try {
     data = await getUserLibrary(user.id);
     if (!data) {
-      logger.warn('LibraryPage: getUserLibrary returned null', undefined, {
-        requestId: generateRequestId(),
-        operation: 'LibraryPage',
-        route: '/account/library',
-        userIdHash,
-      });
+      logger.warn('LibraryPage: getUserLibrary returned null', undefined, logContext);
     }
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load user library');
-    logger.error('LibraryPage: getUserLibrary threw', normalized, {
-      requestId: generateRequestId(),
-      operation: 'LibraryPage',
-      route: '/account/library',
-      userIdHash,
-    });
+    logger.error('LibraryPage: getUserLibrary threw', normalized, logContext);
   }
 
   if (!data) {
@@ -127,8 +126,7 @@ export default async function LibraryPage() {
   const bookmarkCount = stats.bookmark_count ?? 0;
   const collectionCount = stats.collection_count ?? 0;
   if (!(bookmarks.length || collections.length)) {
-    // Hash user ID for privacy-compliant logging (GDPR/CCPA)
-    logger.info('LibraryPage: library returned no bookmarks or collections', { userIdHash });
+    logger.info('LibraryPage: library returned no bookmarks or collections', logContext);
   }
 
   return (

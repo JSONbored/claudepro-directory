@@ -2,9 +2,10 @@
  * getTrending Tool Handler
  *
  * Get trending content across categories or within a specific category.
- * Uses the get_trending_content RPC.
+ * Uses TrendingService.getTrendingContent for consistent behavior with web app.
  */
 
+import { TrendingService } from '@heyclaude/data-layer';
 import type { Database } from '@heyclaude/database-types';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { GetTrendingInput } from '../lib/types.ts';
@@ -15,15 +16,12 @@ export async function handleGetTrending(
 ) {
   const { category, limit } = input;
 
-  // Call the RPC to get trending content
-  const { data, error } = await supabase.rpc('get_trending_content', {
+  // Use TrendingService for consistent behavior with web app
+  const trendingService = new TrendingService(supabase);
+  const data = await trendingService.getTrendingContent({
     ...(category ? { p_category: category } : {}),
     p_limit: limit,
   });
-
-  if (error) {
-    throw new Error(`Failed to fetch trending content: ${error.message}`);
-  }
 
   if (!data || data.length === 0) {
     const categoryMsg = category ? ` in ${category}` : '';

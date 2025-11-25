@@ -35,9 +35,13 @@ function isValidSort(value: string | undefined): value is SearchFilters['sort'] 
   return VALID_SORT_OPTIONS.some((option) => option === value);
 }
 
-import { logger, normalizeError } from '@heyclaude/web-runtime/core';
+import {
+  createWebAppContextWithId,
+  generateRequestId,
+  logger,
+  normalizeError,
+} from '@heyclaude/web-runtime/core';
 import { getHomepageCategoryIds } from '@heyclaude/web-runtime/data';
-import { generateRequestId } from '@heyclaude/web-runtime/utils/request-context';
 
 /**
  * Dynamic Rendering Required
@@ -84,6 +88,7 @@ async function SearchResultsSection({
   quickTags,
   quickAuthors,
   quickCategories,
+  logContext,
 }: {
   query: string;
   filters: SearchFilters;
@@ -97,6 +102,7 @@ async function SearchResultsSection({
   quickTags: string[];
   quickAuthors: string[];
   quickCategories: ContentCategory[];
+  logContext: ReturnType<typeof createWebAppContextWithId>;
 }) {
   // Use noCache for search queries (cache: 'no-store' equivalent)
   const noCache = query.length > 0 || hasUserFilters;
@@ -107,9 +113,7 @@ async function SearchResultsSection({
   } catch (error) {
     const normalized = normalizeError(error, 'Search content fetch failed');
     logger.error('SearchPage: searchContent invocation failed', normalized, {
-      requestId: generateRequestId(),
-      operation: 'SearchPage',
-      route: '/search',
+      ...logContext,
       query,
       hasFilters: hasUserFilters,
     });
@@ -136,6 +140,10 @@ async function SearchResultsSection({
 }
 
 export default async function SearchPage({ searchParams }: SearchPageProps) {
+  // Generate single requestId for this page request
+  const requestId = generateRequestId();
+  const baseLogContext = createWebAppContextWithId(requestId, '/search', 'SearchPage');
+
   const resolvedParams = await searchParams;
   const query = (resolvedParams.q || '').trim().slice(0, 200);
 
@@ -179,11 +187,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
     };
   } catch (error) {
     const normalized = normalizeError(error, 'Search facets fetch failed');
-    logger.error('SearchPage: getSearchFacets invocation failed', normalized, {
-      requestId: generateRequestId(),
-      operation: 'SearchPage',
-      route: '/search',
-    });
+    logger.error('SearchPage: getSearchFacets invocation failed', normalized, baseLogContext);
   }
 
   // Only fetch zero-state suggestions when there's no query or filters
@@ -201,11 +205,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
         error,
         'SearchPage: getHomepageData for suggestions failed'
       );
-      logger.error('SearchPage: suggestions fetch failed', normalized, {
-        requestId: generateRequestId(),
-        operation: 'SearchPage',
-        route: '/search',
-      });
+      logger.error('SearchPage: suggestions fetch failed', normalized, baseLogContext);
     }
   }
 
@@ -265,6 +265,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
             quickTags={quickTags}
             quickAuthors={quickAuthors}
             quickCategories={quickCategories}
+            logContext={baseLogContext}
           />
         </Suspense>
         <Suspense fallback={null}>

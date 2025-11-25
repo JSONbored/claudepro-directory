@@ -13,14 +13,27 @@
 export const runtime = 'nodejs';
 export const revalidate = 300;
 
-import { logger, normalizeError } from '@heyclaude/web-runtime/core';
+import {
+  createWebAppContextWithId,
+  generateRequestId,
+  logger,
+  normalizeError,
+  withDuration,
+} from '@heyclaude/web-runtime/core';
 import { createSupabaseAnonClient } from '@heyclaude/web-runtime/server';
 import { createErrorResponse } from '@heyclaude/web-runtime/utils/error-handler';
-import { generateRequestId } from '@heyclaude/web-runtime/utils/request-context';
 import { NextResponse } from 'next/server';
 
 export async function GET() {
   const startTime = Date.now();
+  // Generate single requestId for this API request
+  const requestId = generateRequestId();
+  const baseLogContext = createWebAppContextWithId(
+    requestId,
+    '/api/stats/social-proof',
+    'SocialProofStatsAPI'
+  );
+
   try {
     const supabase = createSupabaseAnonClient();
 
@@ -56,9 +69,7 @@ export async function GET() {
     if (submissionsError) {
       const normalized = normalizeError(submissionsError, 'Failed to fetch recent submissions');
       logger.warn('Failed to fetch recent submissions', undefined, {
-        requestId: generateRequestId(),
-        operation: 'SocialProofStatsAPI',
-        route: '/api/stats/social-proof',
+        ...baseLogContext,
         error: normalized.message,
       });
     }
@@ -74,9 +85,7 @@ export async function GET() {
     if (monthError) {
       const normalized = normalizeError(monthError, 'Failed to fetch month submissions');
       logger.warn('Failed to fetch month submissions', undefined, {
-        requestId: generateRequestId(),
-        operation: 'SocialProofStatsAPI',
-        route: '/api/stats/social-proof',
+        ...baseLogContext,
         error: normalized.message,
       });
     }
@@ -92,9 +101,7 @@ export async function GET() {
     if (contentError) {
       const normalized = normalizeError(contentError, 'Failed to fetch content count');
       logger.warn('Failed to fetch content count', undefined, {
-        requestId: generateRequestId(),
-        operation: 'SocialProofStatsAPI',
-        route: '/api/stats/social-proof',
+        ...baseLogContext,
         error: normalized.message,
       });
     }
@@ -129,25 +136,27 @@ export async function GET() {
       });
 
     const totalUsers = contentCount ?? null;
-    const duration = Date.now() - startTime;
     const timestamp = new Date().toISOString();
 
     // Structured logging with cache tags, duration, and stats
-    logger.info('Social proof stats API: success', {
-      requestId: generateRequestId(),
-      operation: 'SocialProofStatsAPI',
-      route: '/api/stats/social-proof',
-      stats: {
-        contributorCount: topContributors.length,
-        submissionCount,
-        successRate,
-        totalUsers,
-      },
-      duration,
-      cacheTags: ['stats', 'social-proof'],
-      cacheTTL: 300,
-      revalidate: 300,
-    });
+    logger.info(
+      'Social proof stats API: success',
+      withDuration(
+        {
+          ...baseLogContext,
+          stats: {
+            contributorCount: topContributors.length,
+            submissionCount,
+            successRate,
+            totalUsers,
+          },
+          cacheTags: ['stats', 'social-proof'],
+          cacheTTL: 300,
+          revalidate: 300,
+        },
+        startTime
+      )
+    );
 
     // Generate ETag from timestamp and stats hash for conditional requests
     const statsHash = `${submissionCount}-${successRate}-${totalUsers}`;

@@ -1,10 +1,14 @@
 import type { PagePropsWithSearchParams } from '@heyclaude/web-runtime/core';
-import { logger, normalizeError } from '@heyclaude/web-runtime/core';
+import {
+  createWebAppContextWithId,
+  generateRequestId,
+  logger,
+  normalizeError,
+} from '@heyclaude/web-runtime/core';
 import { generatePageMetadata } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { AlertCircle } from '@heyclaude/web-runtime/icons';
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import { generateRequestId } from '@heyclaude/web-runtime/utils/request-context';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Button } from '@/src/components/primitives/ui/button';
@@ -23,6 +27,14 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function AuthCodeError(props: PagePropsWithSearchParams) {
+  // Generate single requestId for this page request
+  const requestId = generateRequestId();
+  const logContext = createWebAppContextWithId(
+    requestId,
+    '/auth/auth-code-error',
+    'AuthCodeErrorPage'
+  );
+
   const searchParams = await props.searchParams;
 
   const rawCode = searchParams?.['code'];
@@ -40,9 +52,7 @@ export default async function AuthCodeError(props: PagePropsWithSearchParams) {
   );
 
   logger.error('AuthCodeErrorPage rendered', normalized, {
-    requestId: generateRequestId(),
-    operation: 'AuthCodeErrorPage',
-    route: '/auth-code-error',
+    ...logContext,
     // Redact sensitive code/provider values
     hasCode: Boolean(code && code !== 'unknown'),
     provider: provider === 'unknown' ? 'unknown' : 'redacted',

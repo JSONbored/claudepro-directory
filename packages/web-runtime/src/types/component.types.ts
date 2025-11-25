@@ -112,6 +112,8 @@ export interface HomePageClientProps {
   searchFilters?: SearchFilterOptions;
   /** Start of the current content week (ISO string) */
   weekStart?: string;
+  /** Server-provided category IDs (fallback if Statsig config fails) */
+  serverCategoryIds?: readonly string[];
 }
 
 export interface ContentListWithLoadMoreProps {

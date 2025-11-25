@@ -2,8 +2,9 @@
 
 /** Homepage tabs consuming homepageConfigs for runtime-tunable tab categories */
 
+import { getHomepageConfigBundle } from '@heyclaude/web-runtime/actions';
 import { logger, type UnifiedCategoryConfig } from '@heyclaude/web-runtime/core';
-import { getAnimationConfig, getHomepageTabCategories } from '@heyclaude/web-runtime/data';
+import { getHomepageTabCategories } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import type { DisplayableContent } from '@heyclaude/web-runtime/types/component.types';
 import { motion } from 'motion/react';
@@ -42,32 +43,33 @@ const TabsSectionComponent: FC<TabsSectionProps> = ({
     damping: 17,
   });
 
+  // OPTIMIZATION: Use config bundle instead of separate calls (reduces 2 calls to 1)
   useEffect(() => {
-    getHomepageTabCategories()
-      .then((categories) => {
-        setTabCategories(categories);
-      })
-      .catch((error) => {
-        logger.error(
-          'Homepage Tabs: failed to load tab categories',
-          error instanceof Error ? error : new Error(String(error))
-        );
-      });
-  }, []);
+    getHomepageConfigBundle()
+      .then((bundle) => {
+        // Extract tab categories from homepage config
+        const categories = Array.isArray(bundle.homepageConfig['homepage.tab_categories'])
+          ? bundle.homepageConfig['homepage.tab_categories']
+          : [];
+        setTabCategories(categories.map((value) => String(value)));
 
-  useEffect(() => {
-    getAnimationConfig()
-      .then((result) => {
-        if (!result) return;
-        const config = result;
+        // Extract animation config
         setSpringDefault({
           type: 'spring' as const,
-          stiffness: config['animation.spring.default.stiffness'],
-          damping: config['animation.spring.default.damping'],
+          stiffness: bundle.animationConfig['animation.spring.default.stiffness'],
+          damping: bundle.animationConfig['animation.spring.default.damping'],
         });
       })
       .catch((error) => {
-        logger.error('Homepage Tabs: failed to load animation config', error);
+        logger.error('Homepage Tabs: failed to load config bundle', error);
+        // Fallback: still try to get tab categories individually
+        getHomepageTabCategories()
+          .then((categories) => {
+            setTabCategories(categories);
+          })
+          .catch((err) => {
+            logger.error('Homepage Tabs: failed to load tab categories fallback', err);
+          });
       });
   }, []);
 

@@ -8,7 +8,7 @@
  * @module hooks/use-infinite-scroll
  */
 
-import { getAppSettings, getTimeoutConfig } from '../actions/feature-flags.ts';
+import { getHomepageConfigBundle, getTimeoutConfig } from '../actions/feature-flags.ts';
 import { logClientWarning, logger } from '../entries/core.ts';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
@@ -17,7 +17,7 @@ interface UseInfiniteScrollOptions {
   totalItems: number;
   /** Number of items to load per batch (default: 30) */
   batchSize?: number;
-  /** Root margin for intersection observer - when to trigger load (default: '400px') */
+  /** Root margin for intersection observer - when to trigger load (default: '600px' for prefetching) */
   rootMargin?: string;
   /** Threshold for intersection observer (0-1 range, default: 0.1) */
   threshold?: number;
@@ -47,7 +47,7 @@ interface UseInfiniteScrollReturn {
  * const { displayCount, isLoading, hasMore, sentinelRef } = useInfiniteScroll({
  *   totalItems: items.length,
  *   batchSize: 30, // Optional - falls back to app_settings value
- *   rootMargin: '400px',
+ *   rootMargin: '600px',
  * });
  *
  * const displayedItems = items.slice(0, displayCount);
@@ -56,7 +56,7 @@ interface UseInfiniteScrollReturn {
 export function useInfiniteScroll({
   totalItems,
   batchSize,
-  rootMargin = '400px',
+  rootMargin = '600px',
   threshold,
   root = null,
 }: UseInfiniteScrollOptions): UseInfiniteScrollReturn {
@@ -66,20 +66,20 @@ export function useInfiniteScroll({
     threshold: 0.1,
   });
 
+  // OPTIMIZATION: Use config bundle instead of separate getAppSettings call
   // Load Statsig config on mount (background, non-blocking)
   useEffect(() => {
     const loadDefaults = async () => {
       try {
-        const result = await getAppSettings({});
-        if (result?.data) {
-          const config = result.data;
+        const bundle = await getHomepageConfigBundle();
+        if (bundle.appSettings) {
           setConfigDefaults({
-            batchSize: config['hooks.infinite_scroll.batch_size'],
-            threshold: config['hooks.infinite_scroll.threshold'],
+            batchSize: bundle.appSettings['hooks.infinite_scroll.batch_size'],
+            threshold: bundle.appSettings['hooks.infinite_scroll.threshold'],
           });
         }
       } catch (error) {
-        logClientWarning('useInfiniteScroll: failed to load defaults', error);
+        logClientWarning('useInfiniteScroll: failed to load config bundle', error);
       }
     };
 

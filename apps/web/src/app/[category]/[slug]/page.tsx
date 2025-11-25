@@ -18,8 +18,9 @@ export const dynamicParams = true; // Allow unknown slugs to be rendered on dema
 export async function generateStaticParams() {
   const { getHomepageCategoryIds } = await import('@heyclaude/web-runtime/data/config/category');
   const { getContentByCategory } = await import('@heyclaude/web-runtime/data/content');
-  const { logger } = await import('@heyclaude/web-runtime/core');
-  const { generateRequestId } = await import('@heyclaude/web-runtime/utils/request-context');
+  const { logger, createWebAppContextWithId, generateRequestId } = await import(
+    '@heyclaude/web-runtime/core'
+  );
 
   const categories = getHomepageCategoryIds;
   const params: Array<{ category: string; slug: string }> = [];
@@ -39,10 +40,18 @@ export async function generateStaticParams() {
       }
     } catch (error) {
       // Log error but continue with other categories
+      // Generate requestId for static params generation (separate from page render)
+      const staticParamsRequestId = generateRequestId();
+      const staticParamsLogContext = createWebAppContextWithId(
+        staticParamsRequestId,
+        `/${category}`,
+        'DetailPageStaticParams',
+        {
+          category,
+        }
+      );
       logger.warn('generateStaticParams: failed to load content for category', undefined, {
-        requestId: generateRequestId(),
-        operation: 'generateStaticParams',
-        category,
+        ...staticParamsLogContext,
         error: error instanceof Error ? error.message : String(error),
       });
     }
@@ -53,7 +62,9 @@ export async function generateStaticParams() {
 
 import type { Database } from '@heyclaude/database-types';
 import {
+  createWebAppContextWithId,
   ensureStringArray,
+  generateRequestId,
   isValidCategory,
   logger,
   normalizeError,
@@ -65,7 +76,6 @@ import {
   getContentDetailCore,
   getRelatedContent,
 } from '@heyclaude/web-runtime/server';
-import { generateRequestId } from '@heyclaude/web-runtime/utils/request-context';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { CollectionDetailView } from '@/src/components/content/detail-page/collection-view';
@@ -99,6 +109,19 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { category, slug } = await params;
 
+  // Generate requestId for metadata generation (separate from page render)
+  const metadataRequestId = generateRequestId();
+  const metadataLogContext = createWebAppContextWithId(
+    metadataRequestId,
+    `/${category}/${slug}`,
+    'DetailPageMetadata',
+    {
+      category,
+      slug,
+      phase: 'generateMetadata',
+    }
+  );
+
   // Validate category at compile time
   if (!isValidCategory(category)) {
     return generatePageMetadata('/:category/:slug', {
@@ -111,14 +134,7 @@ export async function generateMetadata({
     config = await getCategoryConfig(category as Database['public']['Enums']['content_category']);
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load category config for metadata');
-    logger.error('DetailPage: category config lookup failed', normalized, {
-      requestId: generateRequestId(),
-      operation: 'DetailPage',
-      route: `/${category}/${slug}`,
-      category,
-      slug,
-      phase: 'generateMetadata',
-    });
+    logger.error('DetailPage: category config lookup failed', normalized, metadataLogContext);
   }
 
   return generatePageMetadata('/:category/:slug', {
@@ -136,14 +152,15 @@ export default async function DetailPage({
 }) {
   const { category, slug } = await params;
 
+  // Generate single requestId for this page request
+  const requestId = generateRequestId();
+  const logContext = createWebAppContextWithId(requestId, `/${category}/${slug}`, 'DetailPage', {
+    category,
+    slug,
+  });
+
   if (!isValidCategory(category)) {
-    logger.warn('Invalid category in detail page', undefined, {
-      requestId: generateRequestId(),
-      operation: 'DetailPage',
-      route: `/${category}/${slug}`,
-      category,
-      slug,
-    });
+    logger.warn('Invalid category in detail page', undefined, logContext);
     notFound();
   }
 
@@ -152,26 +169,14 @@ export default async function DetailPage({
     config = await getCategoryConfig(category as Database['public']['Enums']['content_category']);
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load category config');
-    logger.error('DetailPage: category config lookup threw', normalized, {
-      requestId: generateRequestId(),
-      operation: 'DetailPage',
-      route: `/${category}/${slug}`,
-      category,
-      slug,
-    });
+    logger.error('DetailPage: category config lookup threw', normalized, logContext);
   }
   if (!config) {
     const normalized = normalizeError(
       'Category config is null',
       'DetailPage: missing category config'
     );
-    logger.error('DetailPage: missing category config', normalized, {
-      requestId: generateRequestId(),
-      operation: 'DetailPage',
-      route: `/${category}/${slug}`,
-      category,
-      slug,
-    });
+    logger.error('DetailPage: missing category config', normalized, logContext);
     notFound();
   }
 
@@ -184,13 +189,7 @@ export default async function DetailPage({
       'Content detail core data is null',
       'DetailPage: get_content_detail_core returned null'
     );
-    logger.error('DetailPage: get_content_detail_core returned null', normalized, {
-      requestId: generateRequestId(),
-      operation: 'DetailPage',
-      route: `/${category}/${slug}`,
-      category,
-      slug,
-    });
+    logger.error('DetailPage: get_content_detail_core returned null', normalized, logContext);
     notFound();
   }
 
@@ -199,11 +198,7 @@ export default async function DetailPage({
   // Null safety: If content doesn't exist in database, return 404
   if (!fullItem) {
     logger.warn('Content not found in RPC response', undefined, {
-      requestId: generateRequestId(),
-      operation: 'DetailPage',
-      route: `/${category}/${slug}`,
-      category,
-      slug,
+      ...logContext,
       rpcFunction: 'get_content_detail_core',
       phase: 'page-render',
     });
@@ -236,12 +231,8 @@ export default async function DetailPage({
       // This ensures the page still renders during static generation
       const normalized = normalizeError(error, 'feature-flag-load-failed');
       logger.warn('Failed to load contentDetailTabs feature flag, using default', undefined, {
-        requestId: generateRequestId(),
-        operation: 'DetailPage',
-        route: `/${category}/${slug}`,
+        ...logContext,
         error: normalized.message,
-        category,
-        slug,
       });
     }
   }

@@ -71,38 +71,41 @@ function UnifiedCardGridComponent(props: UnifiedCardGridProps) {
     serverHasMore = false,
   } = props;
 
+  // Ensure items is always an array (defensive programming)
+  const safeItems = Array.isArray(items) ? items : [];
+
   const router = useRouter();
 
   useEffect(() => {
-    if (prefetchCount > 0 && items.length > 0) {
-      const itemsToPrefetch = items.slice(0, prefetchCount);
+    if (prefetchCount > 0 && safeItems.length > 0) {
+      const itemsToPrefetch = safeItems.slice(0, prefetchCount);
       for (const item of itemsToPrefetch) {
         const path = `/${item.category}/${item.slug}`;
         router.prefetch(path);
       }
     }
-  }, [items, prefetchCount, router]);
+  }, [safeItems, prefetchCount, router]);
 
   const { displayCount, isLoading, hasMore, sentinelRef } = useInfiniteScroll({
-    totalItems: items.length,
+    totalItems: safeItems.length,
     batchSize,
     rootMargin,
     threshold: 0.1,
   });
 
-  const displayedItems = infiniteScroll ? items.slice(0, displayCount) : items;
+  const displayedItems = infiniteScroll ? safeItems.slice(0, displayCount) : safeItems;
 
   useEffect(() => {
-    if (infiniteScroll && onFetchMore && displayCount >= items.length && serverHasMore) {
+    if (infiniteScroll && onFetchMore && displayCount >= safeItems.length && serverHasMore) {
       onFetchMore().catch((error) => {
         logUnhandledPromise('UnifiedCardGrid:onFetchMore', error);
       });
     }
-  }, [displayCount, items.length, infiniteScroll, onFetchMore, serverHasMore]);
+  }, [displayCount, safeItems.length, infiniteScroll, onFetchMore, serverHasMore]);
 
   const getKey = keyExtractor || ((item: DisplayableContent, index: number) => item.slug || index);
 
-  if (items.length === 0 && !loading) {
+  if (safeItems.length === 0 && !loading) {
     return (
       <output className="flex items-center justify-center py-12" aria-live="polite">
         <p className="text-lg text-muted-foreground">{emptyMessage}</p>

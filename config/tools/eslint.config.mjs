@@ -23,6 +23,7 @@ export default tseslint.config(
       '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
       'architectural-rules/require-request-id-in-logger': 'error',
       'architectural-rules/require-error-handler': 'error',
+      'architectural-rules/require-error-logging-in-catch': 'error',
       'architectural-rules/no-server-imports-in-client': 'error',
     },
   },
@@ -39,6 +40,7 @@ export default tseslint.config(
     files: ['../../apps/web/src/app/**/*.tsx', '../../apps/web/src/app/**/*.ts'],
     rules: {
       'architectural-rules/require-request-id-in-logger': 'error',
+      'architectural-rules/require-error-logging-in-catch': 'error',
     },
   },
   {

@@ -1,9 +1,13 @@
 import type { CreateJobInput } from '@heyclaude/web-runtime';
 import { createJob } from '@heyclaude/web-runtime/actions';
-import { logger, normalizeError } from '@heyclaude/web-runtime/core';
+import {
+  createWebAppContextWithId,
+  generateRequestId,
+  logger,
+  normalizeError,
+} from '@heyclaude/web-runtime/core';
 import { generatePageMetadata, getPaymentPlanCatalog } from '@heyclaude/web-runtime/server';
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import { generateRequestId } from '@heyclaude/web-runtime/utils/request-context';
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { JobForm } from '@/src/components/core/forms/job-form';
@@ -20,15 +24,17 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function NewJobPage() {
+  // Generate single requestId for this page request
+  const requestId = generateRequestId();
+  const baseLogContext = createWebAppContextWithId(requestId, '/account/jobs/new', 'NewJobPage');
+
   let planCatalog: Awaited<ReturnType<typeof getPaymentPlanCatalog>> = [];
   try {
     planCatalog = await getPaymentPlanCatalog();
   } catch (error) {
     const normalized = normalizeError(error, 'NewJobPage: failed to fetch plan catalog');
     logger.warn('NewJobPage: failed to fetch plan catalog, using fallback', undefined, {
-      requestId: generateRequestId(),
-      operation: 'NewJobPage',
-      route: '/account/jobs/new',
+      ...baseLogContext,
       error: normalized.message,
       name: normalized.name,
     });
@@ -38,31 +44,31 @@ export default async function NewJobPage() {
   const handleSubmit = async (data: CreateJobInput) => {
     'use server';
 
+    // Generate requestId for server action (separate from page render)
+    const actionRequestId = generateRequestId();
+    const actionLogContext = createWebAppContextWithId(
+      actionRequestId,
+      '/account/jobs/new',
+      'NewJobPageAction',
+      {
+        title: data.title,
+        company: data.company,
+      }
+    );
+
     let result: Awaited<ReturnType<typeof createJob>>;
     try {
       // Call createJob server action (calls create_job_with_payment RPC + Polar checkout)
       result = await createJob(data);
     } catch (error) {
       const normalized = normalizeError(error, 'createJob server action failed');
-      logger.error('NewJobPage: createJob threw', normalized, {
-        requestId: generateRequestId(),
-        operation: 'NewJobPage',
-        route: '/account/jobs/new',
-        title: data.title,
-        company: data.company,
-      });
+      logger.error('NewJobPage: createJob threw', normalized, actionLogContext);
       throw normalized;
     }
 
     if (result?.serverError) {
       const error = normalizeError(result.serverError, 'NewJobPage: createJob failed');
-      logger.error('NewJobPage: createJob failed', error, {
-        requestId: generateRequestId(),
-        operation: 'NewJobPage',
-        route: '/account/jobs/new',
-        title: data.title,
-        company: data.company,
-      });
+      logger.error('NewJobPage: createJob failed', error, actionLogContext);
       throw error;
     }
 
@@ -71,13 +77,7 @@ export default async function NewJobPage() {
         'createJob returned no data',
         'NewJobPage: createJob returned no data'
       );
-      logger.error('NewJobPage: createJob returned no data', error, {
-        requestId: generateRequestId(),
-        operation: 'NewJobPage',
-        route: '/account/jobs/new',
-        title: data.title,
-        company: data.company,
-      });
+      logger.error('NewJobPage: createJob returned no data', error, actionLogContext);
       throw error;
     }
 
@@ -89,11 +89,7 @@ export default async function NewJobPage() {
             'NewJobPage: missing checkout URL'
           );
           logger.error('NewJobPage: missing checkout URL', error, {
-            requestId: generateRequestId(),
-            operation: 'NewJobPage',
-            route: '/account/jobs/new',
-            title: data.title,
-            company: data.company,
+            ...actionLogContext,
             jobId: result.data.jobId,
             companyId: result.data.companyId,
           });
@@ -123,11 +119,7 @@ export default async function NewJobPage() {
       'NewJobPage: createJob returned success=false'
     );
     logger.error('NewJobPage: createJob returned success=false', error, {
-      requestId: generateRequestId(),
-      operation: 'NewJobPage',
-      route: '/account/jobs/new',
-      title: data.title,
-      company: data.company,
+      ...actionLogContext,
       jobId: result.data?.jobId ?? 'unknown',
       companyId: result.data?.companyId ?? 'unknown',
       requiresPayment: result.data?.requiresPayment ?? false,

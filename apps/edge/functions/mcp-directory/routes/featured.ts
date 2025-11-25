@@ -2,7 +2,7 @@
  * getFeatured Tool Handler
  *
  * Get featured and highlighted content from the homepage.
- * Uses the get_homepage_optimized RPC.
+ * Uses the get_content_paginated_slim RPC for each category in parallel.
  */
 
 import type { Database } from '@heyclaude/database-types';
@@ -47,26 +47,29 @@ export async function handleGetFeatured(
       const { data, error } = result.value;
 
       if (!error && data?.items) {
-        featured[category] = data.items.slice(0, 6).map((item: unknown) => {
-          if (typeof item !== 'object' || item === null) return null;
-          const itemObj = item as Record<string, unknown>;
-          return {
-            slug: typeof itemObj['slug'] === 'string' ? itemObj['slug'] : '',
-            title:
-              (typeof itemObj['title'] === 'string'
-                ? itemObj['title']
-                : typeof itemObj['display_title'] === 'string'
-                  ? itemObj['display_title']
-                  : '') || '',
-            category: typeof itemObj['category'] === 'string' ? itemObj['category'] : '',
-            description:
-              typeof itemObj['description'] === 'string'
-                ? itemObj['description'].substring(0, 150)
-                : '',
-            tags: Array.isArray(itemObj['tags']) ? itemObj['tags'] : [],
-            views: typeof itemObj['view_count'] === 'number' ? itemObj['view_count'] : 0,
-          };
-        });
+        featured[category] = data.items
+          .slice(0, 6)
+          .map((item: unknown) => {
+            if (typeof item !== 'object' || item === null) return null;
+            const itemObj = item as Record<string, unknown>;
+            return {
+              slug: typeof itemObj['slug'] === 'string' ? itemObj['slug'] : '',
+              title:
+                (typeof itemObj['title'] === 'string'
+                  ? itemObj['title']
+                  : typeof itemObj['display_title'] === 'string'
+                    ? itemObj['display_title']
+                    : '') || '',
+              category: typeof itemObj['category'] === 'string' ? itemObj['category'] : '',
+              description:
+                typeof itemObj['description'] === 'string'
+                  ? itemObj['description'].substring(0, 150)
+                  : '',
+              tags: Array.isArray(itemObj['tags']) ? itemObj['tags'] : [],
+              views: typeof itemObj['view_count'] === 'number' ? itemObj['view_count'] : 0,
+            };
+          })
+          .filter((item): item is NonNullable<typeof item> => item !== null);
       }
     }
     // If rejected, category will simply be missing from featured object

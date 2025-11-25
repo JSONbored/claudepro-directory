@@ -11,9 +11,11 @@ import {
 import {
   buildSecurityHeaders,
   createSearchContext,
-  errorToString,
   highlightSearchTerms,
   highlightSearchTermsArray,
+  logError,
+  logInfo,
+  logWarn,
   validateLimit,
   validateQueryString,
   withDuration,
@@ -172,10 +174,11 @@ export async function handleSearch(req: Request, startTime: number): Promise<Res
       ? 'unified'
       : 'content';
 
-  // Create logContext
+  // Create logContext with public-api app label
   const logContext = createSearchContext({
     query,
     searchType,
+    app: 'public-api',
     filters: {
       categories,
       tags,
@@ -260,11 +263,7 @@ export async function handleSearch(req: Request, startTime: number): Promise<Res
   const dbEndTime = performance.now();
 
   if (error) {
-    console.error('[unified-search] Search RPC error', {
-      ...logContext,
-      searchType,
-      error: errorToString(error),
-    });
+    logError('Search RPC error', { ...logContext, searchType }, error);
     return errorResponse(error, 'search-service', getWithAuthCorsHeaders);
   }
 
@@ -341,15 +340,22 @@ export async function handleSearch(req: Request, startTime: number): Promise<Res
     results.length,
     req.headers.get('Authorization')
   ).catch((error) => {
-    console.warn('[unified-search] Analytics tracking failed', {
-      ...logContext,
-      error: errorToString(error),
+    // Analytics failures shouldn't break search - log but don't throw
+    const logContext = createSearchContext({
+      query: query.substring(0, 50),
+      app: 'public-api',
     });
+    // Add error type to context for debugging (BaseLogContext allows additional fields)
+    const enhancedContext = {
+      ...logContext,
+      errorType: error instanceof Error ? error.constructor.name : typeof error,
+    };
+    logWarn('Failed to track search analytics', enhancedContext);
   });
 
   const totalTime = performance.now() - startTime;
 
-  console.log('[unified-search] Search completed', {
+  logInfo('Search completed', {
     ...withDuration(logContext, startTime),
     resultCount: results.length,
     searchType,
@@ -418,7 +424,7 @@ export async function handleAutocomplete(req: Request, startTime: number): Promi
   }
   const limit = limitValidation.limit;
 
-  const logContext = createSearchContext({ query, searchType: 'autocomplete' });
+  const logContext = createSearchContext({ query, searchType: 'autocomplete', app: 'public-api' });
 
   if (query.length < 2) {
     return badRequestResponse('Query must be at least 2 characters', getWithAuthCorsHeaders);
@@ -431,10 +437,7 @@ export async function handleAutocomplete(req: Request, startTime: number): Promi
   const { data, error } = await supabaseAnon.rpc('get_search_suggestions_from_history', rpcArgs);
 
   if (error) {
-    console.error('[unified-search] Autocomplete RPC error', {
-      ...logContext,
-      error: errorToString(error),
-    });
+    logError('Autocomplete RPC error', logContext, error);
     return errorResponse(error, 'get_search_suggestions_from_history', getWithAuthCorsHeaders);
   }
 
@@ -467,14 +470,11 @@ export async function handleAutocomplete(req: Request, startTime: number): Promi
  * Facets endpoint
  */
 export async function handleFacets(startTime: number): Promise<Response> {
-  const logContext = createSearchContext({ searchType: 'facets' });
+  const logContext = createSearchContext({ searchType: 'facets', app: 'public-api' });
   const { data, error } = await supabaseAnon.rpc('get_search_facets', undefined);
 
   if (error) {
-    console.error('[unified-search] Facets RPC error', {
-      ...logContext,
-      error: errorToString(error),
-    });
+    logError('Facets RPC error', logContext, error);
     return errorResponse(error, 'get_search_facets', getWithAuthCorsHeaders);
   }
 
@@ -533,9 +533,15 @@ async function trackSearchAnalytics(
     resultCount,
     authorizationHeader,
   }).catch((error) => {
-    console.warn('[unified-search] Failed to enqueue search analytics', {
-      error: errorToString(error),
+    const logContext = createSearchContext({
       query: query.substring(0, 50),
+      app: 'public-api',
     });
+    // Add error type to context for debugging (BaseLogContext allows additional fields)
+    const enhancedContext = {
+      ...logContext,
+      errorType: error instanceof Error ? error.constructor.name : typeof error,
+    };
+    logWarn('Failed to enqueue search analytics', enhancedContext);
   });
 }

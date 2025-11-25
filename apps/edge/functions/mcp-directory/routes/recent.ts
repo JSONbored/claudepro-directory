@@ -51,6 +51,7 @@ export async function handleGetRecent(supabase: SupabaseClient<Database>, input:
 
   // Create text summary with relative dates
   const categoryDesc = category ? ` in ${category}` : ' across all categories';
+  const now = new Date();
   const textSummary = items
     .map(
       (
@@ -64,7 +65,6 @@ export async function handleGetRecent(supabase: SupabaseClient<Database>, input:
         idx: number
       ) => {
         const date = new Date(item.dateAdded);
-        const now = new Date();
         const diffMs = now.getTime() - date.getTime();
         const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 

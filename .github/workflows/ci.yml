@@ -47,6 +47,4 @@ jobs:
         run: pnpm type-check
 
       - name: Test
-        # Only run tests if they exist to avoid failure on "no tests found"
-        # We can make this strict once tests are added
         run: pnpm test

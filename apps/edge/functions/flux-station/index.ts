@@ -15,7 +15,7 @@ import {
   type StandardContext,
   serveEdgeApp,
 } from '@heyclaude/edge-runtime';
-import { createUtilityContext } from '@heyclaude/shared-runtime';
+import { createUtilityContext, logError } from '@heyclaude/shared-runtime';
 import { handleChangelogNotify } from './routes/changelog/notify.ts';
 import { handleChangelogProcess } from './routes/changelog/process.ts';
 import { handleDiscordDirect } from './routes/discord/direct.ts';
@@ -76,7 +76,8 @@ const requireInternalSecret: Middleware<FluxStationContext> = async (
   const secret = Deno.env.get('CRON_WORKER_SECRET') || Deno.env.get('INTERNAL_API_KEY');
 
   if (!secret) {
-    console.error('Missing CRON_WORKER_SECRET or INTERNAL_API_KEY environment variable');
+    const logContext = createUtilityContext('flux-station', 'auth-config-check');
+    logError('Missing CRON_WORKER_SECRET or INTERNAL_API_KEY environment variable', logContext);
     return jsonResponse(
       { error: 'Server configuration error', code: 'auth:config_error' },
       500,

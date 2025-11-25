@@ -19,7 +19,13 @@ import {
 
 import type { Database } from '@heyclaude/database-types';
 import { ensureUserRecord } from '@heyclaude/web-runtime/actions';
-import { hashUserId, logger, normalizeError } from '@heyclaude/web-runtime/core';
+import {
+  createWebAppContextWithId,
+  generateRequestId,
+  hashUserId,
+  logger,
+  normalizeError,
+} from '@heyclaude/web-runtime/core';
 import {
   generatePageMetadata,
   getAuthenticatedUser,
@@ -27,7 +33,6 @@ import {
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import { generateRequestId } from '@heyclaude/web-runtime/utils/request-context';
 import type { Metadata } from 'next';
 
 /**
@@ -42,13 +47,15 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function SettingsPage() {
+  // Generate single requestId for this page request
+  const requestId = generateRequestId();
+  const baseLogContext = createWebAppContextWithId(requestId, '/account/settings', 'SettingsPage');
+
   const { user } = await getAuthenticatedUser({ context: 'SettingsPage' });
 
   if (!user) {
     logger.warn('SettingsPage: unauthenticated access attempt', undefined, {
-      requestId: generateRequestId(),
-      operation: 'SettingsPage',
-      route: '/account/settings',
+      ...baseLogContext,
       timestamp: new Date().toISOString(),
     });
     return (
@@ -69,26 +76,17 @@ export default async function SettingsPage() {
   }
 
   const hashedUserId = hashUserId(user.id);
+  const logContext = { ...baseLogContext, userIdHash: hashedUserId };
 
   let settingsData: Database['public']['Functions']['get_user_settings']['Returns'] | null = null;
   try {
     settingsData = await getUserSettings(user.id);
     if (!settingsData) {
-      logger.warn('SettingsPage: getUserSettings returned null', undefined, {
-        requestId: generateRequestId(),
-        operation: 'SettingsPage',
-        route: '/account/settings',
-        userIdHash: hashedUserId,
-      });
+      logger.warn('SettingsPage: getUserSettings returned null', undefined, logContext);
     }
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load user settings');
-    logger.error('SettingsPage: getUserSettings threw', normalized, {
-      requestId: generateRequestId(),
-      operation: 'SettingsPage',
-      route: '/account/settings',
-      userIdHash: hashedUserId,
-    });
+    logger.error('SettingsPage: getUserSettings threw', normalized, logContext);
   }
 
   if (!settingsData) {
@@ -118,10 +116,7 @@ export default async function SettingsPage() {
   // Initialize user if missing (consolidated - no more profiles table)
   if (!userData) {
     logger.warn('SettingsPage: user_data missing, invoking ensureUserRecord', undefined, {
-      requestId: generateRequestId(),
-      operation: 'SettingsPage',
-      route: '/account/settings',
-      userIdHash: hashedUserId,
+      ...logContext,
     });
     try {
       await ensureUserRecord({
@@ -138,22 +133,12 @@ export default async function SettingsPage() {
         logger.warn(
           'SettingsPage: getUserSettings returned null after ensureUserRecord',
           undefined,
-          {
-            requestId: generateRequestId(),
-            operation: 'SettingsPage',
-            route: '/account/settings',
-            userIdHash: hashedUserId,
-          }
+          logContext
         );
       }
     } catch (error) {
       const normalized = normalizeError(error, 'Failed to initialize user record');
-      logger.error('SettingsPage: ensureUserRecord failed', normalized, {
-        requestId: generateRequestId(),
-        operation: 'SettingsPage',
-        route: '/account/settings',
-        userIdHash: hashedUserId,
-      });
+      logger.error('SettingsPage: ensureUserRecord failed', normalized, logContext);
       // Leave userData/profile undefined so page can render fallback UI
     }
   }
@@ -163,12 +148,7 @@ export default async function SettingsPage() {
     logger.error(
       'SettingsPage: profile missing from getUserSettings response',
       new Error('Profile missing from response'),
-      {
-        requestId: generateRequestId(),
-        operation: 'SettingsPage',
-        route: '/account/settings',
-        userIdHash: hashedUserId,
-      }
+      logContext
     );
     return (
       <div className="space-y-6">

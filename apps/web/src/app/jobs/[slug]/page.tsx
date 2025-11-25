@@ -2,7 +2,12 @@
  * Job Detail Page - Database-first job listing display
  */
 
-import { logger, normalizeError } from '@heyclaude/web-runtime/core';
+import {
+  createWebAppContextWithId,
+  generateRequestId,
+  logger,
+  normalizeError,
+} from '@heyclaude/web-runtime/core';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import {
   ArrowLeft,
@@ -18,7 +23,6 @@ import { generatePageMetadata, getJobBySlug } from '@heyclaude/web-runtime/serve
 import type { PageProps } from '@heyclaude/web-runtime/types/app.schema';
 import { slugParamsSchema } from '@heyclaude/web-runtime/types/app.schema';
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import { generateRequestId } from '@heyclaude/web-runtime/utils/request-context';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -119,17 +123,23 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
+  // Generate requestId for metadata generation (separate from page render)
+  const metadataRequestId = generateRequestId();
+  const metadataLogContext = createWebAppContextWithId(
+    metadataRequestId,
+    `/jobs/${slug}`,
+    'JobPageMetadata',
+    {
+      slug,
+    }
+  );
+
   let job: Awaited<ReturnType<typeof getJobBySlug>> | null = null;
   try {
     job = await getJobBySlug(slug);
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load job for metadata');
-    logger.error('JobPage: getJobBySlug threw in generateMetadata', normalized, {
-      requestId: generateRequestId(),
-      operation: 'JobPage',
-      route: `/jobs/${slug}`,
-      slug,
-    });
+    logger.error('JobPage: getJobBySlug threw in generateMetadata', normalized, metadataLogContext);
   }
 
   return generatePageMetadata('/jobs/:slug', {
@@ -140,28 +150,36 @@ export async function generateMetadata({
 }
 
 export async function generateStaticParams() {
+  // Generate requestId for static params generation (build-time)
+  const staticParamsRequestId = generateRequestId();
+  const staticParamsLogContext = createWebAppContextWithId(
+    staticParamsRequestId,
+    '/jobs',
+    'JobPageStaticParams'
+  );
+
   const { getFilteredJobs } = await import('@heyclaude/web-runtime/server');
   try {
     const jobsResult = await getFilteredJobs({});
     const jobs = jobsResult?.jobs ?? [];
 
     if (jobs.length === 0) {
-      logger.warn('generateStaticParams: no jobs available, returning placeholder', undefined, {
-        requestId: generateRequestId(),
-        operation: 'JobPage',
-        route: '/jobs',
-      });
+      logger.warn(
+        'generateStaticParams: no jobs available, returning placeholder',
+        undefined,
+        staticParamsLogContext
+      );
       return [{ slug: 'placeholder' }];
     }
 
     return jobs.map((job) => ({ slug: job.slug }));
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load jobs for static params');
-    logger.error('JobPage: getJobs threw in generateStaticParams', normalized, {
-      requestId: generateRequestId(),
-      operation: 'JobPage',
-      route: '/jobs',
-    });
+    logger.error(
+      'JobPage: getJobs threw in generateStaticParams',
+      normalized,
+      staticParamsLogContext
+    );
     return [{ slug: 'placeholder' }];
   }
 }
@@ -174,43 +192,37 @@ export default async function JobPage({ params }: PageProps) {
   const rawParams = await params;
   const validationResult = slugParamsSchema.safeParse(rawParams);
 
+  // Generate single requestId for this page request
+  const requestId = generateRequestId();
+  const slug = validationResult.success ? validationResult.data.slug : String(rawParams['slug']);
+  const baseLogContext = createWebAppContextWithId(requestId, `/jobs/${slug}`, 'JobPage', {
+    slug,
+  });
+
   if (!validationResult.success) {
     logger.error(
       'Invalid slug parameter for job page',
       new Error(validationResult.error.issues[0]?.message || 'Invalid slug'),
       {
-        requestId: generateRequestId(),
-        operation: 'JobPage',
-        route: `/jobs/${String(rawParams['slug'])}`,
-        slug: String(rawParams['slug']),
+        ...baseLogContext,
         errorCount: validationResult.error.issues.length,
       }
     );
     notFound();
   }
 
-  const { slug } = validationResult.data;
+  const validatedSlug = validationResult.data.slug;
   let job: Awaited<ReturnType<typeof getJobBySlug>> | null = null;
   try {
-    job = await getJobBySlug(slug);
+    job = await getJobBySlug(validatedSlug);
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load job detail');
-    logger.error('JobPage: getJobBySlug threw', normalized, {
-      requestId: generateRequestId(),
-      operation: 'JobPage',
-      route: `/jobs/${slug}`,
-      slug,
-    });
+    logger.error('JobPage: getJobBySlug threw', normalized, baseLogContext);
     throw normalized;
   }
 
   if (!job) {
-    logger.warn('JobPage: job not found', undefined, {
-      requestId: generateRequestId(),
-      operation: 'JobPage',
-      route: `/jobs/${slug}`,
-      slug,
-    });
+    logger.warn('JobPage: job not found', undefined, baseLogContext);
     notFound();
   }
 

@@ -3,7 +3,13 @@
  * Single RPC call to filter_jobs() - all filtering in PostgreSQL
  */
 
-import { type JobsFilterResult, logger, normalizeError } from '@heyclaude/web-runtime/core';
+import {
+  createWebAppContextWithId,
+  generateRequestId,
+  type JobsFilterResult,
+  logger,
+  normalizeError,
+} from '@heyclaude/web-runtime/core';
 import { generatePageMetadata, getFilteredJobs } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import {
@@ -17,7 +23,6 @@ import {
 } from '@heyclaude/web-runtime/icons';
 import type { PagePropsWithSearchParams } from '@heyclaude/web-runtime/types/app.schema';
 import { POSITION_PATTERNS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import { generateRequestId } from '@heyclaude/web-runtime/utils/request-context';
 import type { Metadata } from 'next';
 import dynamicImport from 'next/dynamic';
 import Link from 'next/link';
@@ -90,6 +95,7 @@ async function JobsListSection({
   sort,
   limit,
   offset,
+  logContext,
 }: {
   searchQuery?: string | undefined;
   category?: string | undefined;
@@ -99,6 +105,7 @@ async function JobsListSection({
   sort: SortOption;
   limit: number;
   offset: number;
+  logContext: ReturnType<typeof createWebAppContextWithId>;
 }) {
   const hasFilters = Boolean(
     searchQuery ||
@@ -129,9 +136,7 @@ async function JobsListSection({
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load jobs list');
     logger.error('JobsPage: getFilteredJobs failed', normalized, {
-      requestId: generateRequestId(),
-      operation: 'JobsPage',
-      route: '/jobs',
+      ...logContext,
       hasSearch: Boolean(searchQuery),
       category: category || 'all',
       employment: employment || 'any',
@@ -212,6 +217,10 @@ async function JobsListSection({
 }
 
 export default async function JobsPage({ searchParams }: PagePropsWithSearchParams) {
+  // Generate single requestId for this page request
+  const requestId = generateRequestId();
+  const baseLogContext = createWebAppContextWithId(requestId, '/jobs', 'JobsPage');
+
   const rawParams = await searchParams;
 
   const searchQuery =
@@ -231,6 +240,7 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
   const offset = (page - 1) * limit;
 
   logger.info('Jobs page accessed', {
+    ...baseLogContext,
     searchQuery: searchQuery || 'none',
     category: category || 'all',
     employment: employment || 'any',
@@ -248,11 +258,7 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
     totalJobs = totalResponse?.total_count ?? 0;
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load jobs total count');
-    logger.error('JobsPage: getFilteredJobs for total count failed', normalized, {
-      requestId: generateRequestId(),
-      operation: 'JobsPage',
-      route: '/jobs',
-    });
+    logger.error('JobsPage: getFilteredJobs for total count failed', normalized, baseLogContext);
   }
 
   const baseId = 'jobs-page';
@@ -563,6 +569,7 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
                 sort={sort}
                 limit={limit}
                 offset={offset}
+                logContext={baseLogContext}
               />
             </Suspense>
           </div>

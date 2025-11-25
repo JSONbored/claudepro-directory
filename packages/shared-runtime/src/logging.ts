@@ -55,9 +55,10 @@ export function createSearchContext(options?: {
   query?: string;
   searchType?: string;
   filters?: Record<string, unknown>;
+  app?: string;
 }): BaseLogContext {
   return {
-    function: 'unified-search',
+    function: options?.app ?? 'public-api',
     action: options?.searchType ?? 'search',
     request_id: crypto.randomUUID(),
     started_at: new Date().toISOString(),

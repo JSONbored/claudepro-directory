@@ -1,10 +1,15 @@
 import { getActivitySummary, getActivityTimeline } from '@heyclaude/web-runtime';
-import { hashUserId, logger, normalizeError } from '@heyclaude/web-runtime/core';
+import {
+  createWebAppContextWithId,
+  generateRequestId,
+  hashUserId,
+  logger,
+  normalizeError,
+} from '@heyclaude/web-runtime/core';
 import { generatePageMetadata, getAuthenticatedUser } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { GitPullRequest } from '@heyclaude/web-runtime/icons';
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import { generateRequestId } from '@heyclaude/web-runtime/utils/request-context';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ActivityTimeline } from '@/src/components/features/user-activity/activity-timeline';
@@ -29,14 +34,14 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function ActivityPage() {
+  // Generate single requestId for this page request
+  const requestId = generateRequestId();
+  const baseLogContext = createWebAppContextWithId(requestId, '/account/activity', 'ActivityPage');
+
   const { user } = await getAuthenticatedUser({ context: 'ActivityPage' });
 
   if (!user) {
-    logger.warn('ActivityPage: unauthenticated access attempt detected', undefined, {
-      requestId: generateRequestId(),
-      operation: 'ActivityPage',
-      route: '/account/activity',
-    });
+    logger.warn('ActivityPage: unauthenticated access attempt detected', undefined, baseLogContext);
     return (
       <div className="space-y-6">
         <Card>
@@ -56,6 +61,9 @@ export default async function ActivityPage() {
     );
   }
 
+  const userIdHash = hashUserId(user.id);
+  const logContext = { ...baseLogContext, userIdHash };
+
   // Fetch activity data - use Promise.allSettled for partial success handling
   const [summaryResult, timelineResult] = await Promise.allSettled([
     getActivitySummary(),
@@ -73,12 +81,7 @@ export default async function ActivityPage() {
     const reason = result.reason;
     const normalized = normalizeError(reason, `Failed to load ${name}`);
     if (user) {
-      logger.error(`ActivityPage: ${name} failed`, normalized, {
-        requestId: generateRequestId(),
-        operation: 'ActivityPage',
-        route: '/account/activity',
-        userId: hashUserId(user.id),
-      });
+      logger.error(`ActivityPage: ${name} failed`, normalized, logContext);
     }
     return null;
   }
@@ -108,12 +111,7 @@ export default async function ActivityPage() {
 
   const activities = timeline.activities || [];
   if (activities.length === 0) {
-    logger.warn('ActivityPage: activity timeline returned no activities', undefined, {
-      requestId: generateRequestId(),
-      operation: 'ActivityPage',
-      route: '/account/activity',
-      userId: hashUserId(user.id),
-    });
+    logger.warn('ActivityPage: activity timeline returned no activities', undefined, logContext);
   }
 
   return (

@@ -34,14 +34,19 @@
  */
 
 import type { Database } from '@heyclaude/database-types';
-import { isValidCategory, logger, normalizeError } from '@heyclaude/web-runtime/core';
+import {
+  createWebAppContextWithId,
+  generateRequestId,
+  isValidCategory,
+  logger,
+  normalizeError,
+} from '@heyclaude/web-runtime/core';
 import {
   getCategoryConfig,
   getHomepageCategoryIds,
 } from '@heyclaude/web-runtime/data/config/category';
 import { getContentByCategory } from '@heyclaude/web-runtime/data/content';
 import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
-import { generateRequestId } from '@heyclaude/web-runtime/utils/request-context';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { ContentListServer } from '@/src/components/content/content-grid-list';
@@ -101,15 +106,21 @@ export async function generateMetadata({
   // Type narrowing: after isValidCategory check, we know category is a valid enum value
   const typedCategory = category as Database['public']['Enums']['content_category'];
 
+  // Generate requestId for metadata generation (separate from page render)
+  const metadataRequestId = generateRequestId();
+  const metadataLogContext = createWebAppContextWithId(
+    metadataRequestId,
+    `/${category}`,
+    'CategoryPageMetadata'
+  );
+
   let categoryConfig: Awaited<ReturnType<typeof getCategoryConfig>> | null = null;
   try {
     categoryConfig = await getCategoryConfig(typedCategory);
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load category config for metadata');
     logger.error('CategoryPage: category config lookup failed in metadata', normalized, {
-      requestId: generateRequestId(),
-      operation: 'CategoryPage',
-      route: `/${category}`,
+      ...metadataLogContext,
       category,
     });
   }
@@ -145,11 +156,13 @@ export async function generateMetadata({
 export default async function CategoryPage({ params }: { params: Promise<{ category: string }> }) {
   const { category } = await params;
 
+  // Generate single requestId for this page request
+  const requestId = generateRequestId();
+  const logContext = createWebAppContextWithId(requestId, `/${category}`, 'CategoryPage');
+
   if (!isValidCategory(category)) {
     logger.warn('Invalid category in list page', undefined, {
-      requestId: generateRequestId(),
-      operation: 'CategoryPage',
-      route: `/${category}`,
+      ...logContext,
       category,
     });
     notFound();
@@ -164,9 +177,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load category config for page render');
     logger.error('CategoryPage: getCategoryConfig threw', normalized, {
-      requestId: generateRequestId(),
-      operation: 'CategoryPage',
-      route: `/${category}`,
+      ...logContext,
       category,
     });
   }
@@ -176,9 +187,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
       'CategoryPage: missing category config'
     );
     logger.error('CategoryPage: missing category config', normalized, {
-      requestId: generateRequestId(),
-      operation: 'CategoryPage',
-      route: `/${category}`,
+      ...logContext,
       category,
     });
     notFound();
@@ -191,18 +200,16 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load category list content');
     logger.error('CategoryPage: getContentByCategory threw', normalized, {
-      requestId: generateRequestId(),
-      operation: 'CategoryPage',
-      route: `/${category}`,
+      ...logContext,
       category,
     });
-    throw normalized;
+    // Use empty array instead of re-throwing to prevent page crash
+    // The page will render with empty content, which is better than crashing
+    items = [];
   }
   if (!items || items.length === 0) {
     logger.warn('CategoryPage: getContentByCategory returned no items', undefined, {
-      requestId: generateRequestId(),
-      operation: 'CategoryPage',
-      route: `/${category}`,
+      ...logContext,
       category,
     });
   }

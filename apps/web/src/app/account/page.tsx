@@ -1,5 +1,12 @@
 import type { Database } from '@heyclaude/database-types';
-import { ensureStringArray, hashUserId, logger, normalizeError } from '@heyclaude/web-runtime/core';
+import {
+  createWebAppContextWithId,
+  ensureStringArray,
+  generateRequestId,
+  hashUserId,
+  logger,
+  normalizeError,
+} from '@heyclaude/web-runtime/core';
 import {
   generatePageMetadata,
   getAccountDashboardBundle,
@@ -10,7 +17,6 @@ import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { Bookmark, Calendar } from '@heyclaude/web-runtime/icons';
 import type { HomepageContentItem } from '@heyclaude/web-runtime/types/component.types';
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import { generateRequestId } from '@heyclaude/web-runtime/utils/request-context';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
@@ -39,13 +45,15 @@ export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
 export default async function AccountDashboard() {
+  // Generate single requestId for this page request
+  const requestId = generateRequestId();
+  const baseLogContext = createWebAppContextWithId(requestId, '/account', 'AccountDashboard');
+
   const { user } = await getAuthenticatedUser({ context: 'AccountDashboard' });
 
   if (!user) {
     logger.warn('AccountDashboard: unauthenticated access attempt detected', undefined, {
-      requestId: generateRequestId(),
-      operation: 'AccountDashboard',
-      route: '/account',
+      ...baseLogContext,
       timestamp: new Date().toISOString(),
     });
     return (
@@ -67,6 +75,7 @@ export default async function AccountDashboard() {
 
   // Hash user ID for privacy-compliant logging (GDPR/CCPA)
   const userIdHash = hashUserId(user.id);
+  const logContext = { ...baseLogContext, userIdHash };
 
   // Use bundle helper to fetch shared data per request (Phase 4 optimization)
   let bundleData: Awaited<ReturnType<typeof getAccountDashboardBundle>> | null = null;
@@ -74,12 +83,7 @@ export default async function AccountDashboard() {
     bundleData = await getAccountDashboardBundle(user.id);
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load account dashboard bundle');
-    logger.error('AccountDashboard: getAccountDashboardBundle threw', normalized, {
-      requestId: generateRequestId(),
-      operation: 'AccountDashboard',
-      route: '/account',
-      userIdHash,
-    });
+    logger.error('AccountDashboard: getAccountDashboardBundle threw', normalized, logContext);
   }
 
   const dashboardData = bundleData?.dashboard ?? null;
@@ -91,12 +95,7 @@ export default async function AccountDashboard() {
       'Dashboard data is null',
       'AccountDashboard: dashboard data is null'
     );
-    logger.error('AccountDashboard: dashboard data is null', normalized, {
-      requestId: generateRequestId(),
-      operation: 'AccountDashboard',
-      route: '/account',
-      userIdHash,
-    });
+    logger.error('AccountDashboard: dashboard data is null', normalized, logContext);
     return (
       <div className="space-y-6">
         <Card>
@@ -137,10 +136,7 @@ export default async function AccountDashboard() {
       } catch (error) {
         const normalized = normalizeError(error, 'Failed to load bookmark content');
         logger.warn('AccountDashboard: getContentDetailCore failed for bookmark', undefined, {
-          requestId: generateRequestId(),
-          operation: 'AccountDashboard',
-          route: '/account',
-          userIdHash,
+          ...logContext,
           slug: bookmark.content_slug,
           category: bookmark.content_type,
           error: normalized.message,

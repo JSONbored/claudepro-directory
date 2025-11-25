@@ -78,7 +78,7 @@ export async function fetchCached<TResult>(
         const result = await withTimeout(
           serviceCall(typedClient),
           timeoutMs,
-          `Service call timed out after ${timeoutMs}ms: ${sanitizedKey}`
+          `Service call timed out after ${timeoutMs}ms: [user:${sanitizedKey}]`
         );
         
         // Log performance metrics for all operations
@@ -87,7 +87,7 @@ export async function fetchCached<TResult>(
         
         // Always log slow queries (>1s) as warnings
         if (duration > 1000) {
-          logger.warn(`Slow data fetch detected: ${sanitizedKey}`, {
+          logger.warn(`Slow data fetch detected: [user:${sanitizedKey}]`, {
             requestId,
             key: sanitizedKey,
             duration: roundedDuration,
@@ -97,7 +97,7 @@ export async function fetchCached<TResult>(
           });
         } else {
           // Log all operations at info level for observability
-          logger.info(`Data fetch completed: ${sanitizedKey}`, {
+          logger.info(`Data fetch completed: [user:${sanitizedKey}]`, {
             requestId,
             key: sanitizedKey,
             duration: roundedDuration,
@@ -112,7 +112,7 @@ export async function fetchCached<TResult>(
         
         // Handle timeout errors specifically
         if (error instanceof TimeoutError) {
-          logger.warn(`Service call timed out: ${sanitizedKey}`, {
+          logger.warn(`Service call timed out: [user:${sanitizedKey}]`, {
             requestId,
             key: sanitizedKey,
             duration: Math.round(duration),
@@ -122,8 +122,8 @@ export async function fetchCached<TResult>(
           return fallback;
         }
         
-        const normalized = normalizeError(error, `Service call failed: ${sanitizedKey}`);
-        logger.error(`Service call failed: ${sanitizedKey}`, normalized, {
+        const normalized = normalizeError(error, `Service call failed: [user:${sanitizedKey}]`);
+        logger.error(`Service call failed: [user:${sanitizedKey}]`, normalized, {
           requestId,
           key: sanitizedKey,
           duration: Math.round(duration),

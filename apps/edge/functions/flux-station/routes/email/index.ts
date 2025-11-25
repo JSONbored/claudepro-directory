@@ -612,7 +612,96 @@ export async function handleDigest(): Promise<Response> {
     category: 'config',
     version: 1,
   };
-  await supabaseServiceRole.from('app_settings').upsert(upsertData);
+
+  // Upsert with retry logic and comprehensive error handling
+  const MAX_RETRIES = 3;
+  let retryAttempt = 0;
+
+  while (retryAttempt <= MAX_RETRIES) {
+    try {
+      const { error } = await supabaseServiceRole.from('app_settings').upsert(upsertData);
+
+      if (error) {
+        throw error;
+      }
+
+      // Success - break out of retry loop
+      break;
+    } catch (error) {
+      retryAttempt++;
+
+      // Type guard for Supabase PostgrestError
+      const isPostgrestError = (
+        err: unknown
+      ): err is { code: string; message: string; details?: string; hint?: string } => {
+        return typeof err === 'object' && err !== null && 'code' in err && 'message' in err;
+      };
+
+      // Log error with full context for observability
+      logError(
+        'Failed to upsert last_digest_email_timestamp',
+        {
+          ...logContext,
+          operation: 'upsert_digest_timestamp',
+          attempt: retryAttempt,
+          max_retries: MAX_RETRIES,
+          upsert_data: upsertData,
+          error_details:
+            error instanceof Error
+              ? {
+                  message: error.message,
+                  name: error.name,
+                  stack: error.stack,
+                }
+              : String(error),
+          supabase_error: isPostgrestError(error)
+            ? {
+                code: error.code,
+                message: error.message,
+                details: error.details,
+                hint: error.hint,
+              }
+            : undefined,
+        },
+        error instanceof Error ? error : new Error(String(error))
+      );
+
+      // If we've exhausted retries, throw to surface the error
+      if (retryAttempt > MAX_RETRIES) {
+        const errorMessage =
+          error instanceof Error
+            ? error.message
+            : 'Failed to update last_digest_email_timestamp after retries';
+        logError(
+          'Exhausted retries for upsert_digest_timestamp - marking run as failed',
+          {
+            ...logContext,
+            operation: 'upsert_digest_timestamp',
+            total_attempts: retryAttempt,
+            final_error: errorMessage,
+            upsert_data: upsertData,
+          },
+          error instanceof Error ? error : new Error(errorMessage)
+        );
+        throw new Error(
+          `Failed to update last_digest_email_timestamp after ${MAX_RETRIES} retries: ${errorMessage}`
+        );
+      }
+
+      // Exponential backoff: 100ms, 200ms, 400ms
+      const delayMs = 100 * 2 ** (retryAttempt - 1);
+      logWarn(
+        `Retrying upsert_digest_timestamp (attempt ${retryAttempt}/${MAX_RETRIES}) after ${delayMs}ms`,
+        {
+          ...logContext,
+          operation: 'upsert_digest_timestamp',
+          attempt: retryAttempt,
+          delay_ms: delayMs,
+        }
+      );
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
+    }
+  }
 
   logInfo('Digest completed', {
     ...withDuration(logContext, startTime),
@@ -620,6 +709,7 @@ export async function handleDigest(): Promise<Response> {
     failed: results.failed,
     success_rate: results.successRate,
     last_digest_timestamp: currentTimestamp,
+    timestamp_update_attempts: retryAttempt,
   });
 
   await sendBetterStackHeartbeat(edgeEnv.betterstack.weeklyTasks, results.failed, logContext);

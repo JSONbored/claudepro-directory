@@ -218,10 +218,48 @@ export class ContentService {
 
   /**
    * Calls the database RPC: get_homepage_optimized
+   * 
+   * CRITICAL: Supabase RPCs returning composite types (RETURNS, not RETURNS SETOF)
+   * return the data in a specific format. We need to handle this correctly.
    */
   async getHomepageOptimized(args: Database['public']['Functions']['get_homepage_optimized']['Args']) {
     const { data, error } = await this.supabase.rpc('get_homepage_optimized', args);
-    if (error) throw error;
+    
+    if (error) {
+      // Log the error for debugging
+      console.error('[ContentService.getHomepageOptimized] RPC error:', error);
+      throw error;
+    }
+    
+    // DEBUG: Log what we actually received
+    console.log('[ContentService.getHomepageOptimized] Raw data from RPC:', {
+      dataType: typeof data,
+      isNull: data === null,
+      isUndefined: data === undefined,
+      isArray: Array.isArray(data),
+      dataKeys: data && typeof data === 'object' ? Object.keys(data) : 'not-object',
+      dataSample: data && typeof data === 'object' ? JSON.stringify(data).substring(0, 200) : String(data),
+    });
+    
+    // Supabase returns composite types as a single object (not array) for RETURNS (not SETOF)
+    // But if function returns no rows, data will be null
+    if (data === null || data === undefined) {
+      console.warn('[ContentService.getHomepageOptimized] Data is null/undefined!');
+      return null;
+    }
+    
+    // If data is an array (shouldn't happen for non-SETOF, but be defensive), take first element
+    if (Array.isArray(data)) {
+      console.warn('[ContentService.getHomepageOptimized] Data is an array (unexpected for non-SETOF), taking first element');
+      return (data[0] ?? null) as Database['public']['Functions']['get_homepage_optimized']['Returns'];
+    }
+    
+    // Data should be a single object
+    if (typeof data !== 'object') {
+      console.error('[ContentService.getHomepageOptimized] Data is not an object:', typeof data, data);
+      return null;
+    }
+    
     return data as Database['public']['Functions']['get_homepage_optimized']['Returns'];
   }
 }

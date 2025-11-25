@@ -24,8 +24,11 @@ import {
 } from '@heyclaude/edge-runtime';
 import {
   createNotificationRouterContext,
+  createUtilityContext,
   errorToString,
   logError,
+  logInfo,
+  logWarn,
   TIMEOUT_PRESETS,
   withTimeout,
 } from '@heyclaude/shared-runtime';
@@ -125,7 +128,7 @@ async function processChangelogRelease(message: QueueMessage): Promise<{
 
   const startTime = Date.now();
 
-  console.log('[flux-station] Processing changelog release job', logContext);
+  logInfo('Processing changelog release job', logContext);
 
   // 1. Send Discord webhook (non-critical)
   if (DISCORD_CHANGELOG_WEBHOOK_URL) {
@@ -158,17 +161,14 @@ async function processChangelogRelease(message: QueueMessage): Promise<{
       );
 
       discordSuccess = true;
-      console.log('[flux-station] Discord webhook sent', {
+      logInfo('Discord webhook sent', {
         ...logContext,
         success: discordSuccess,
       });
     } catch (error) {
       const errorMsg = errorToString(error);
       errors.push(`Discord: ${errorMsg}`);
-      console.error('[flux-station] Discord webhook failed', {
-        ...logContext,
-        error: errorMsg,
-      });
+      logError('Discord webhook failed', logContext, error);
     }
   }
 
@@ -191,17 +191,14 @@ async function processChangelogRelease(message: QueueMessage): Promise<{
     );
 
     notificationSuccess = true;
-    console.log('[flux-station] Notification inserted', {
+    logInfo('Notification inserted', {
       ...logContext,
       success: notificationSuccess,
     });
   } catch (error) {
     const errorMsg = errorToString(error);
     errors.push(`Notification: ${errorMsg}`);
-    console.error('[flux-station] Notification insert failed', {
-      ...logContext,
-      error: errorMsg,
-    });
+    logError('Notification insert failed', logContext, error);
   }
 
   // 3. Invalidate cache tags (non-critical, after notification insert)
@@ -241,14 +238,14 @@ async function processChangelogRelease(message: QueueMessage): Promise<{
 
         if (response.ok) {
           cacheInvalidationSuccess = true;
-          console.log('[flux-station] Cache tags invalidated', {
+          logInfo('Cache tags invalidated', {
             ...logContext,
             success: cacheInvalidationSuccess,
             tags: cacheTags,
           });
         } else {
           const errorText = await response.text();
-          console.warn('[flux-station] Cache invalidation failed', {
+          logWarn('Cache invalidation failed', {
             ...logContext,
             status: response.status,
             error: errorText,
@@ -258,7 +255,7 @@ async function processChangelogRelease(message: QueueMessage): Promise<{
         }
       } catch (error) {
         const errorMsg = errorToString(error);
-        console.warn('[flux-station] Cache invalidation error', {
+        logWarn('Cache invalidation error', {
           ...logContext,
           error: errorMsg,
           tags: cacheTags,
@@ -267,7 +264,7 @@ async function processChangelogRelease(message: QueueMessage): Promise<{
         // Non-critical, don't fail the job
       }
     } else if (!REVALIDATE_SECRET) {
-      console.warn('[flux-station] Cache invalidation skipped (no secret)', logContext);
+      logWarn('Cache invalidation skipped (no secret)', logContext);
     }
   }
 
@@ -277,14 +274,14 @@ async function processChangelogRelease(message: QueueMessage): Promise<{
       invalidateTags: true,
     });
     revalidationSuccess = true;
-    console.log('[flux-station] Pages revalidated', {
+    logInfo('Pages revalidated', {
       ...logContext,
       success: revalidationSuccess,
     });
   } catch (error) {
     const errorMsg = errorToString(error);
     errors.push(`Revalidation: ${errorMsg}`);
-    console.warn('[flux-station] Revalidation failed', {
+    logWarn('Revalidation failed', {
       ...logContext,
       error: errorMsg,
     });
@@ -294,7 +291,7 @@ async function processChangelogRelease(message: QueueMessage): Promise<{
   if (notificationSuccess) {
     const durationMs = Date.now() - startTime;
     if (errors.length === 0) {
-      console.log('[flux-station] Changelog release completed successfully', {
+      logInfo('Changelog release completed successfully', {
         ...logContext,
         duration_ms: durationMs,
         discordSuccess,
@@ -303,7 +300,7 @@ async function processChangelogRelease(message: QueueMessage): Promise<{
         revalidationSuccess,
       });
     } else {
-      console.warn('[flux-station] Changelog release completed with partial errors', {
+      logWarn('Changelog release completed with partial errors', {
         ...logContext,
         duration_ms: durationMs,
         errors,
@@ -319,7 +316,7 @@ async function processChangelogRelease(message: QueueMessage): Promise<{
   const success = notificationSuccess || errors.length === 0;
   const durationMs = Date.now() - startTime;
 
-  console.log('[flux-station] Changelog release job completed', {
+  logInfo('Changelog release job completed', {
     ...logContext,
     success,
     errors: errors.length > 0 ? errors : undefined,
@@ -337,10 +334,10 @@ async function deleteQueueMessage(msgId: bigint): Promise<void> {
   try {
     await pgmqDelete(CHANGELOG_NOTIFICATIONS_QUEUE, msgId);
   } catch (error) {
-    console.error('[flux-station] Failed to delete queue message', {
+    const deleteLogContext = createUtilityContext('flux-station', 'changelog-notify-delete', {
       msg_id: msgId.toString(),
-      error: errorToString(error),
     });
+    logError('Failed to delete queue message', deleteLogContext, error);
     // Don't throw - message will remain in queue for retry
   }
 }
@@ -363,9 +360,8 @@ export async function handleChangelogNotify(_req: Request): Promise<Response> {
     const readError = messages === null ? new Error('Failed to read queue messages') : null;
 
     if (readError) {
-      console.error('[flux-station] Queue read error', {
-        error: readError.message,
-      });
+      const readLogContext = createUtilityContext('flux-station', 'changelog-notify-read');
+      logError('Queue read error', readLogContext, readError);
       return errorResponse(
         new Error(`Failed to read queue: ${readError.message}`),
         'flux-station:changelog-notify-read'
@@ -376,7 +372,10 @@ export async function handleChangelogNotify(_req: Request): Promise<Response> {
       return successResponse({ message: 'No messages in queue', processed: 0 }, 200);
     }
 
-    console.log(`[flux-station] Processing ${messages.length} changelog release jobs`);
+    const batchLogContext = createUtilityContext('flux-station', 'changelog-notify-batch', {
+      batch_size: messages.length,
+    });
+    logInfo(`Processing ${messages.length} changelog release jobs`, batchLogContext);
 
     const results: Array<{
       msg_id: string;
@@ -389,18 +388,20 @@ export async function handleChangelogNotify(_req: Request): Promise<Response> {
     for (const msg of messages || []) {
       // Validate queue message structure
       if (!isValidChangelogReleaseJob(msg.message)) {
-        console.error('[flux-station] Invalid changelog release job structure', {
-          msg_id: msg.msg_id.toString(),
-        });
+        const invalidLogContext = createUtilityContext(
+          'flux-station',
+          'changelog-notify-validate',
+          {
+            msg_id: msg.msg_id.toString(),
+          }
+        );
+        logError('Invalid changelog release job structure', invalidLogContext);
 
         // Delete invalid message to prevent infinite retries
         try {
           await pgmqDelete(CHANGELOG_NOTIFICATIONS_QUEUE, msg.msg_id);
         } catch (error) {
-          console.error('[flux-station] Failed to delete invalid message', {
-            msg_id: msg.msg_id.toString(),
-            error: errorToString(error),
-          });
+          logError('Failed to delete invalid message', invalidLogContext, error);
         }
 
         results.push({
@@ -440,10 +441,10 @@ export async function handleChangelogNotify(_req: Request): Promise<Response> {
         }
       } catch (error) {
         const errorMsg = errorToString(error);
-        console.error('[flux-station] Unexpected error processing message', {
+        const errorLogContext = createUtilityContext('flux-station', 'changelog-notify-message', {
           msg_id: message.msg_id.toString(),
-          error: errorMsg,
         });
+        logError('Unexpected error processing message', errorLogContext, error);
         results.push({
           msg_id: message.msg_id.toString(),
           status: 'failed',

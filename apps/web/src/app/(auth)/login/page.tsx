@@ -1,6 +1,10 @@
-import { logger, normalizeError } from '@heyclaude/web-runtime/core';
+import {
+  createWebAppContextWithId,
+  generateRequestId,
+  logger,
+  normalizeError,
+} from '@heyclaude/web-runtime/core';
 import { generatePageMetadata } from '@heyclaude/web-runtime/data';
-import { generateRequestId } from '@heyclaude/web-runtime/utils/request-context';
 import type { Metadata } from 'next';
 import { Suspense } from 'react';
 import { AuthBrandPanel } from '@/src/components/core/auth/auth-brand-panel';
@@ -15,7 +19,7 @@ export async function generateMetadata(): Promise<Metadata> {
 /**
  * Dynamic Rendering Required
  *
- * This page is dynamic because it handles authentication state and redirects.
+ * This page is dynamic because searchParams is async (Next.js 15+) and requires runtime resolution.
  */
 export const dynamic = 'force-dynamic';
 
@@ -24,17 +28,17 @@ export default async function LoginPage({
 }: {
   searchParams: Promise<{ redirect?: string }>;
 }) {
+  // Generate single requestId for this page request
+  const requestId = generateRequestId();
+  const logContext = createWebAppContextWithId(requestId, '/login', 'LoginPage');
+
   let redirectTo: string | undefined;
   try {
     const resolvedSearchParams = await searchParams;
     redirectTo = resolvedSearchParams.redirect;
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to resolve login search params');
-    logger.error('LoginPage: resolving searchParams failed', normalized, {
-      requestId: generateRequestId(),
-      operation: 'LoginPage',
-      route: '/login',
-    });
+    logger.error('LoginPage: resolving searchParams failed', normalized, logContext);
     redirectTo = undefined;
   }
 

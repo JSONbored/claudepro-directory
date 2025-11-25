@@ -54,14 +54,8 @@ export function toLogContextValue(value: unknown): LogContextValue {
 
 export function sanitizeLogMessage(message: string): string {
   if (typeof message !== 'string') return String(message);
-  let sanitized = message
-    .replace(/[\r\n\t]/g, ' ')
-    .split('')
-    .filter((char) => {
-      const code = char.charCodeAt(0);
-      return code >= 0x20 && (code < 0x7f || code > 0x9f);
-    })
-    .join('');
+  // Remove all ASCII control characters (except space), including line breaks and tabs
+  let sanitized = message.replace(/[\r\n\t\x00-\x1F]/g, '');
   if (sanitized.length > 1000) {
     sanitized = `${sanitized.slice(0, 1000)}... [truncated]`;
   }

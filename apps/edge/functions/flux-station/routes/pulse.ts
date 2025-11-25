@@ -20,8 +20,11 @@ import {
 } from '@heyclaude/edge-runtime';
 import {
   type BaseLogContext,
+  createUtilityContext,
   errorToString,
   logError,
+  logInfo,
+  logWarn,
   TIMEOUT_PRESETS,
   withTimeout,
 } from '@heyclaude/shared-runtime';
@@ -146,10 +149,10 @@ async function processSearchEventsBatch(messages: PulseQueueMessage[]): Promise<
   } catch (error) {
     const errorMsg = errorToString(error);
     errors.push(`Search events batch insert failed: ${errorMsg}`);
-    console.error('[flux-station] Search events batch insert error', {
-      error: errorMsg,
+    const logContext = createUtilityContext('flux-station', 'pulse-search-events', {
       message_count: messages.length,
     });
+    logError('Search events batch insert error', logContext, error);
     failed = messages.length;
     return { inserted: 0, failed, errors };
   }
@@ -404,9 +407,8 @@ async function processUserInteractionsBatch(messages: PulseQueueMessage[]): Prom
     if (inserted > 0 && RESEND_ENV.apiKey) {
       updateResendEngagement(messages).catch((error) => {
         // Silent fail - Resend updates are best-effort, don't block batch processing
-        console.warn('[flux-station] Resend engagement update failed', {
-          error: errorToString(error),
-        });
+        const logContext = createUtilityContext('flux-station', 'pulse-resend-engagement');
+        logError('Resend engagement update failed', logContext, error);
       });
     }
 
@@ -414,10 +416,10 @@ async function processUserInteractionsBatch(messages: PulseQueueMessage[]): Prom
   } catch (error) {
     const errorMsg = errorToString(error);
     errors.push(`Batch insert failed: ${errorMsg}`);
-    console.error('[flux-station] Pulse batch insert error', {
-      error: errorMsg,
+    const logContext = createUtilityContext('flux-station', 'pulse-batch-insert', {
       message_count: messages.length,
     });
+    logError('Pulse batch insert error', logContext, error);
     return { inserted: 0, failed: messages.length, errors };
   }
 }
@@ -482,10 +484,10 @@ async function deletePulseMessages(msgIds: bigint[]): Promise<void> {
         try {
           await pgmqDelete(PULSE_QUEUE_NAME, msgId);
         } catch (error) {
-          console.warn('[flux-station] Failed to delete pulse message', {
+          const logContext = createUtilityContext('flux-station', 'pulse-delete-message', {
             msg_id: msgId.toString(),
-            error: errorToString(error),
           });
+          logError('Failed to delete pulse message', logContext, error);
         }
       })
     );
@@ -536,7 +538,7 @@ export async function handlePulse(_req: Request): Promise<Response> {
       return successResponse({ message: 'No messages in pulse queue', processed: 0 }, 200);
     }
 
-    console.log(`[flux-station] Processing ${messages.length} pulse events`, logContext);
+    logInfo(`Processing ${messages.length} pulse events`, logContext);
 
     // Safely validate queue message structure
     function isValidPulseEvent(value: unknown): value is PulseEvent {
@@ -576,9 +578,10 @@ export async function handlePulse(_req: Request): Promise<Response> {
 
     for (const msg of messages || []) {
       if (!isValidPulseEvent(msg.message)) {
-        console.warn('[flux-station] Invalid pulse event structure', {
+        const invalidLogContext = createUtilityContext('flux-station', 'pulse-validate', {
           msg_id: msg.msg_id.toString(),
         });
+        logWarn('Invalid pulse event structure', invalidLogContext);
         invalidMsgIds.push(msg.msg_id);
         continue;
       }
@@ -596,17 +599,20 @@ export async function handlePulse(_req: Request): Promise<Response> {
     if (invalidMsgIds.length > 0) {
       try {
         await deletePulseMessages(invalidMsgIds);
-        console.log('[flux-station] Deleted invalid pulse events', {
+        logInfo('Deleted invalid pulse events', {
           ...logContext,
           count: invalidMsgIds.length,
           msg_ids: invalidMsgIds.map((id) => id.toString()),
         });
       } catch (error) {
-        console.error('[flux-station] Failed to delete invalid pulse events', {
-          ...logContext,
-          count: invalidMsgIds.length,
-          error: errorToString(error),
-        });
+        logError(
+          'Failed to delete invalid pulse events',
+          {
+            ...logContext,
+            count: invalidMsgIds.length,
+          },
+          error
+        );
       }
     }
 
@@ -623,14 +629,14 @@ export async function handlePulse(_req: Request): Promise<Response> {
       await deletePulseMessages(msgIds);
     } else if (result.inserted === 0) {
       // All failed - don't delete, let them retry via queue visibility timeout
-      console.warn('[flux-station] All pulse events failed, will retry', {
+      logWarn('All pulse events failed, will retry', {
         ...logContext,
         failed: result.failed,
         errors: result.errors,
       });
     }
 
-    console.log('[flux-station] Pulse batch processed', {
+    logInfo('Pulse batch processed', {
       ...logContext,
       processed: messages.length,
       inserted: result.inserted,

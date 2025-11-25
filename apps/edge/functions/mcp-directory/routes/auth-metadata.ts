@@ -1,0 +1,126 @@
+/**
+ * MCP Authorization Metadata Routes
+ *
+ * Implements OAuth 2.0 Protected Resource Metadata (RFC 9728)
+ * and provides authorization server discovery information.
+ */
+
+import { edgeEnv, jsonResponse } from '@heyclaude/edge-runtime';
+import { createDataApiContext, logError } from '@heyclaude/shared-runtime';
+import type { Context } from 'hono';
+
+const MCP_SERVER_URL = process.env['MCP_SERVER_URL'] || 'https://mcp.heyclau.de';
+const MCP_RESOURCE_URL = `${MCP_SERVER_URL}/mcp`;
+const SUPABASE_URL = edgeEnv.supabase.url;
+const SUPABASE_AUTH_URL = `${SUPABASE_URL}/auth/v1`;
+
+/**
+ * Get OAuth Protected Resource Metadata (RFC 9728)
+ *
+ * Endpoint: GET /.well-known/oauth-protected-resource
+ *
+ * This metadata document tells MCP clients:
+ * - Where to find the authorization server (Supabase Auth)
+ * - What scopes are supported
+ * - The resource identifier for this MCP server
+ */
+export async function handleProtectedResourceMetadata(_c: Context): Promise<Response> {
+  const logContext = createDataApiContext('oauth-protected-resource-metadata', {
+    app: 'mcp-directory',
+    method: 'GET',
+  });
+
+  try {
+    const metadata = {
+      resource: MCP_RESOURCE_URL,
+      authorization_servers: [
+        SUPABASE_AUTH_URL, // Supabase Auth acts as our authorization server
+      ],
+      scopes_supported: [
+        'mcp:tools', // Access to MCP tools
+        'mcp:resources', // Access to MCP resources (if we add them)
+      ],
+      bearer_methods_supported: ['header'],
+      resource_documentation: 'https://heyclau.de/mcp/heyclaude-mcp',
+      // Indicate that resource parameter (RFC 8707) is supported
+      resource_parameter_supported: true,
+    };
+
+    return jsonResponse(metadata, 200, {
+      'Content-Type': 'application/json',
+      'Cache-Control': 'public, max-age=3600', // Cache for 1 hour
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type',
+    });
+  } catch (error) {
+    logError('Failed to generate protected resource metadata', logContext, error);
+    return jsonResponse({ error: 'Internal server error' }, 500, {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, OPTIONS',
+    });
+  }
+}
+
+/**
+ * Get Authorization Server Metadata (RFC 8414 / OIDC Discovery)
+ *
+ * This endpoint proxies to Supabase Auth's OIDC discovery endpoint
+ * or returns metadata pointing to it.
+ *
+ * Endpoint: GET /.well-known/oauth-authorization-server
+ */
+export async function handleAuthorizationServerMetadata(_c: Context): Promise<Response> {
+  const logContext = createDataApiContext('oauth-authorization-server-metadata', {
+    app: 'mcp-directory',
+    method: 'GET',
+  });
+
+  try {
+    // Supabase Auth provides OIDC discovery at:
+    // https://<project>.supabase.co/.well-known/openid-configuration
+    //
+    // For OAuth 2.0 Authorization Server Metadata (RFC 8414), we can either:
+    // 1. Proxy to Supabase's OIDC discovery and transform it
+    // 2. Return a redirect to Supabase's endpoint
+    // 3. Return metadata pointing to Supabase
+
+    // Option: Return metadata that points clients to Supabase's OIDC discovery
+    // Clients should use Supabase's OIDC discovery endpoint directly
+    // For OAuth 2.1 with resource parameter (RFC 8707), we need to use our proxy endpoint
+    // which ensures the resource parameter is included and tokens have correct audience
+    const authorizationEndpoint = `${MCP_SERVER_URL}/oauth/authorize`;
+
+    const metadata = {
+      issuer: SUPABASE_AUTH_URL,
+      authorization_endpoint: authorizationEndpoint, // Our proxy endpoint
+      token_endpoint: `${SUPABASE_AUTH_URL}/token`,
+      // Supabase Auth supports OIDC Discovery, so clients should use that
+      // This is a fallback for OAuth 2.0-only clients
+      jwks_uri: `${SUPABASE_AUTH_URL}/.well-known/jwks.json`,
+      response_types_supported: ['code'],
+      grant_types_supported: ['authorization_code', 'refresh_token'],
+      code_challenge_methods_supported: ['S256'], // PKCE support (required for OAuth 2.1)
+      scopes_supported: ['openid', 'email', 'profile', 'mcp:tools'],
+      token_endpoint_auth_methods_supported: ['none', 'client_secret_post'],
+      // Resource Indicators (RFC 8707) - MCP spec requires this
+      resource_parameter_supported: true,
+      // Point to OIDC discovery for full metadata
+      oidc_discovery_url: `${SUPABASE_URL}/.well-known/openid-configuration`,
+    };
+
+    return jsonResponse(metadata, 200, {
+      'Content-Type': 'application/json',
+      'Cache-Control': 'public, max-age=3600',
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type',
+    });
+  } catch (error) {
+    logError('Failed to generate authorization server metadata', logContext, error);
+    return jsonResponse({ error: 'Internal server error' }, 500, {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, OPTIONS',
+    });
+  }
+}

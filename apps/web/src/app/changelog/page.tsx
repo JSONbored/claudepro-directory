@@ -39,12 +39,11 @@ const NewsletterCTAVariant = dynamicImport(
 );
 
 import type { Database } from '@heyclaude/database-types';
-import { logger } from '@heyclaude/web-runtime/core';
+import { createWebAppContextWithId, generateRequestId, logger } from '@heyclaude/web-runtime/core';
 import { generatePageMetadata, getChangelogOverview } from '@heyclaude/web-runtime/data';
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
 import { ArrowLeft } from '@heyclaude/web-runtime/icons';
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import { generateRequestId } from '@heyclaude/web-runtime/utils/request-context';
 
 /**
  * ISR: 1 hour (3600s) - Changelog list updates periodically
@@ -71,14 +70,18 @@ export async function generateMetadata(): Promise<Metadata> {
       },
     };
   } catch (error) {
+    // Generate requestId for metadata generation (separate from page render)
+    const metadataRequestId = generateRequestId();
+    const metadataLogContext = createWebAppContextWithId(
+      metadataRequestId,
+      '/changelog',
+      'ChangelogPageMetadata'
+    );
+
     logger.error(
       'Failed to generate changelog metadata',
       error instanceof Error ? error : new Error(String(error)),
-      {
-        requestId: generateRequestId(),
-        operation: 'ChangelogPage',
-        route: '/changelog',
-      }
+      metadataLogContext
     );
     return {
       title: 'Changelog - Claude Pro Directory',
@@ -97,6 +100,10 @@ export async function generateMetadata(): Promise<Metadata> {
  * Changelog List Page Component
  */
 export default async function ChangelogPage() {
+  // Generate single requestId for this page request
+  const requestId = generateRequestId();
+  const logContext = createWebAppContextWithId(requestId, '/changelog', 'ChangelogPage');
+
   try {
     // Load changelog overview with entries, metadata, and featured (database-cached)
     // This replaces getAllChangelogEntries() + client-side category counting
@@ -217,11 +224,7 @@ export default async function ChangelogPage() {
     logger.error(
       'Failed to load changelog page',
       error instanceof Error ? error : new Error(String(error)),
-      {
-        requestId: generateRequestId(),
-        operation: 'ChangelogPage',
-        route: '/changelog',
-      }
+      logContext
     );
 
     // Fallback UI on error

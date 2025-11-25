@@ -2,6 +2,7 @@
 
 import type { Database } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
+import { cache } from 'react';
 import { fetchCached } from '../../cache/fetch-cached.ts';
 import { ContentService } from '@heyclaude/data-layer';
 import { generateContentTags } from '../content-helpers.ts';
@@ -24,13 +25,16 @@ function toContentCategory(
     : undefined;
 }
 
-export async function getPaginatedContent({
-  category,
-  limit,
-  offset,
-}: PaginatedContentParams): Promise<
-  Database['public']['Functions']['get_content_paginated_slim']['Returns'] | null
-> {
+// OPTIMIZATION: Wrapped with React.cache() for request-level deduplication
+// This prevents duplicate calls within the same request (React Server Component tree)
+export const getPaginatedContent = cache(
+  async ({
+    category,
+    limit,
+    offset,
+  }: PaginatedContentParams): Promise<
+    Database['public']['Functions']['get_content_paginated_slim']['Returns'] | null
+  > => {
   const normalizedCategory = category ? toContentCategory(category) : undefined;
 
   return fetchCached(
@@ -47,4 +51,5 @@ export async function getPaginatedContent({
       logMeta: { category: normalizedCategory ?? category ?? 'all', limit, offset },
     }
   );
-}
+  }
+);

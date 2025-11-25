@@ -6,10 +6,14 @@
 'use client';
 
 import { createSupabaseBrowserClient } from '@heyclaude/web-runtime/client';
-import { logger, normalizeError } from '@heyclaude/web-runtime/core';
+import {
+  createWebAppContextWithId,
+  generateRequestId,
+  logger,
+  normalizeError,
+} from '@heyclaude/web-runtime/core';
 import { AlertCircle, Loader2 } from '@heyclaude/web-runtime/icons';
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import { generateRequestId } from '@heyclaude/web-runtime/utils/request-context';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { use, useEffect, useState } from 'react';
 import {
@@ -43,6 +47,14 @@ export default function OAuthLinkCallbackPage({
     let mounted = true;
 
     async function handleLink() {
+      // Generate single requestId for this client-side operation
+      const requestId = generateRequestId();
+      const baseLogContext = createWebAppContextWithId(
+        requestId,
+        `/auth/link/${resolvedParams.provider}/callback`,
+        'OAuthLinkCallback'
+      );
+
       try {
         // Get provider from params
         const rawProvider = resolvedParams.provider;
@@ -56,6 +68,7 @@ export default function OAuthLinkCallbackPage({
         }
 
         setProvider(rawProvider);
+        const logContext = { ...baseLogContext, provider: rawProvider };
 
         const supabase = createSupabaseBrowserClient();
 
@@ -69,11 +82,7 @@ export default function OAuthLinkCallbackPage({
           if (!mounted) return;
           setStatus('error');
           setErrorMessage('You must be signed in to link an account. Redirecting to login...');
-          logger.warn('OAuth link callback: user not authenticated', undefined, {
-            requestId: generateRequestId(),
-            operation: 'OAuthLinkCallback',
-            provider: rawProvider,
-          });
+          logger.warn('OAuth link callback: user not authenticated', undefined, logContext);
           setTimeout(() => {
             const next = searchParams.get('next') ?? '/account/connected-accounts';
             router.push(
@@ -101,9 +110,7 @@ export default function OAuthLinkCallbackPage({
           if (!mounted) return;
           const normalized = normalizeError(error, 'Failed to link OAuth provider');
           logger.error('OAuth link callback: linkIdentity failed', normalized, {
-            requestId: generateRequestId(),
-            operation: 'OAuthLinkCallback',
-            provider: rawProvider,
+            ...logContext,
             errorMessage: error.message,
           });
           setStatus('error');
@@ -124,10 +131,7 @@ export default function OAuthLinkCallbackPage({
       } catch (error) {
         if (!mounted) return;
         const normalized = normalizeError(error, 'OAuth link callback threw');
-        logger.error('OAuth link callback: unexpected error', normalized, {
-          requestId: generateRequestId(),
-          operation: 'OAuthLinkCallback',
-        });
+        logger.error('OAuth link callback: unexpected error', normalized, baseLogContext);
         setStatus('error');
         setErrorMessage('An unexpected error occurred. Please try again.');
       }

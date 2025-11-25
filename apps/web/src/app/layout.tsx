@@ -6,8 +6,12 @@ import './globals.css';
 import './view-transitions.css';
 import './micro-interactions.css';
 import './sugar-high.css';
-import { logger, normalizeError } from '@heyclaude/web-runtime/core';
-import { generateRequestId } from '@heyclaude/web-runtime/utils/request-context';
+import {
+  createWebAppContextWithId,
+  generateRequestId,
+  logger,
+  normalizeError,
+} from '@heyclaude/web-runtime/core';
 import { unstable_cache } from 'next/cache';
 import dynamicImport from 'next/dynamic';
 import { Toaster } from 'sonner';
@@ -173,6 +177,10 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Generate single requestId for this layout request
+  const requestId = generateRequestId();
+  const logContext = createWebAppContextWithId(requestId, '/', 'RootLayout');
+
   // Fetch layout data
   // NOTE: Feature flags are handled via middleware (cookies) + client provider (context)
   // This allows RootLayout to remain Static/ISR compatible where possible.
@@ -186,8 +194,7 @@ export default async function RootLayout({
   if (layoutDataResult.status === 'rejected') {
     const normalized = normalizeError(layoutDataResult.reason, 'Failed to load layout data');
     logger.error('RootLayout: layout data fetch failed', normalized, {
-      requestId: generateRequestId(),
-      operation: 'RootLayout',
+      ...logContext,
       source: 'root-layout',
     });
   }
@@ -201,17 +208,13 @@ export default async function RootLayout({
       componentCardConfig = mapComponentCardConfig(componentConfigResult?.data ?? null);
       if (componentConfigResult?.serverError) {
         logger.warn('RootLayout: component config server error', undefined, {
-          requestId: generateRequestId(),
-          operation: 'RootLayout',
+          ...logContext,
           error: componentConfigResult.serverError,
         });
       }
     } catch (error) {
       const normalized = normalizeError(error, 'Failed to load component config');
-      logger.error('RootLayout: component config fallback to defaults', normalized, {
-        requestId: generateRequestId(),
-        operation: 'RootLayout',
-      });
+      logger.error('RootLayout: component config fallback to defaults', normalized, logContext);
     }
   }
 

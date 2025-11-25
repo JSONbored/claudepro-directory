@@ -12,7 +12,7 @@
  * Uses extensible generator registry to support multiple content categories.
  */
 
-import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
+import { Constants, type Database as DatabaseGenerated } from '@heyclaude/database-types';
 import {
   badRequestResponse,
   errorResponse,
@@ -134,19 +134,8 @@ export async function handleGeneratePackage(
     if (typeof value !== 'string') {
       return false;
     }
-    const validValues: DatabaseGenerated['public']['Enums']['content_category'][] = [
-      'agents',
-      'mcp',
-      'rules',
-      'commands',
-      'hooks',
-      'statuslines',
-      'skills',
-      'collections',
-      'guides',
-      'jobs',
-      'changelog',
-    ];
+    // Use enum values directly from @heyclaude/database-types Constants
+    const validValues = Constants.public.Enums.content_category;
     for (const validValue of validValues) {
       if (value === validValue) {
         return true;

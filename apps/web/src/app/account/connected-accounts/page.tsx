@@ -1,8 +1,13 @@
 import { getUserIdentities } from '@heyclaude/web-runtime';
-import { logger, normalizeError } from '@heyclaude/web-runtime/core';
+import {
+  createWebAppContextWithId,
+  generateRequestId,
+  hashUserId,
+  logger,
+  normalizeError,
+} from '@heyclaude/web-runtime/core';
 import { generatePageMetadata, getAuthenticatedUser } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { generateRequestId } from '@heyclaude/web-runtime/utils/request-context';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ConnectedAccountsClient } from '@/src/components/features/account/connected-accounts-client';
@@ -27,14 +32,22 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function ConnectedAccountsPage() {
+  // Generate single requestId for this page request
+  const requestId = generateRequestId();
+  const baseLogContext = createWebAppContextWithId(
+    requestId,
+    '/account/connected-accounts',
+    'ConnectedAccountsPage'
+  );
+
   const { user } = await getAuthenticatedUser({ context: 'ConnectedAccountsPage' });
 
   if (!user) {
-    logger.warn('ConnectedAccountsPage: unauthenticated access attempt detected', undefined, {
-      requestId: generateRequestId(),
-      operation: 'ConnectedAccountsPage',
-      route: '/account/connected-accounts',
-    });
+    logger.warn(
+      'ConnectedAccountsPage: unauthenticated access attempt detected',
+      undefined,
+      baseLogContext
+    );
     return (
       <div className="space-y-6">
         <Card>
@@ -52,17 +65,15 @@ export default async function ConnectedAccountsPage() {
     );
   }
 
+  const userIdHash = hashUserId(user.id);
+  const logContext = { ...baseLogContext, userIdHash };
+
   let result: Awaited<ReturnType<typeof getUserIdentities>> | { data: null; serverError: string };
   try {
     result = await getUserIdentities();
   } catch (error) {
     const normalized = normalizeError(error, 'getUserIdentities invocation failed');
-    logger.error('ConnectedAccountsPage: getUserIdentities threw', normalized, {
-      requestId: generateRequestId(),
-      operation: 'ConnectedAccountsPage',
-      route: '/account/connected-accounts',
-      userId: user.id,
-    });
+    logger.error('ConnectedAccountsPage: getUserIdentities threw', normalized, logContext);
     result = { data: null, serverError: normalized.message };
   }
 
@@ -76,19 +87,17 @@ export default async function ConnectedAccountsPage() {
   if (!result.data || result.serverError) {
     if (result.serverError) {
       const normalized = normalizeError(result.serverError, 'Connected accounts server error');
-      logger.error('ConnectedAccountsPage: getUserIdentities returned serverError', normalized, {
-        requestId: generateRequestId(),
-        operation: 'ConnectedAccountsPage',
-        route: '/account/connected-accounts',
-        userId: user.id,
-      });
+      logger.error(
+        'ConnectedAccountsPage: getUserIdentities returned serverError',
+        normalized,
+        logContext
+      );
     } else {
-      logger.warn('ConnectedAccountsPage: getUserIdentities returned no data', undefined, {
-        requestId: generateRequestId(),
-        operation: 'ConnectedAccountsPage',
-        route: '/account/connected-accounts',
-        userId: user.id,
-      });
+      logger.warn(
+        'ConnectedAccountsPage: getUserIdentities returned no data',
+        undefined,
+        logContext
+      );
     }
 
     const errorMessage =
@@ -117,7 +126,7 @@ export default async function ConnectedAccountsPage() {
   const identities =
     result.data?.identities?.filter((i): i is NonNullable<typeof i> => i !== null) ?? [];
   if (identities.length === 0) {
-    logger.info('ConnectedAccountsPage: no OAuth identities found', { userId: user.id });
+    logger.info('ConnectedAccountsPage: no OAuth identities found', logContext);
   }
 
   return (

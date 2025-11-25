@@ -100,18 +100,16 @@ export async function handleDiscordJobs(_req: Request): Promise<Response> {
       try {
         // Validate queue message structure
         if (!isValidJobWebhookPayload(msg.message)) {
-          console.error('[flux-station] Invalid job webhook payload structure', {
+          const invalidLogContext = createUtilityContext('flux-station', 'discord-jobs-validate', {
             msg_id: msg.msg_id.toString(),
           });
+          logError('Invalid job webhook payload structure', invalidLogContext);
 
           // Delete invalid message to prevent infinite retries
           try {
             await pgmqDelete(JOB_DISCORD_QUEUE, msg.msg_id);
           } catch (error) {
-            console.error('[flux-station] Failed to delete invalid message', {
-              msg_id: msg.msg_id.toString(),
-              error: errorToString(error),
-            });
+            logError('Failed to delete invalid message', invalidLogContext, error);
           }
 
           results.push({
@@ -127,19 +125,21 @@ export async function handleDiscordJobs(_req: Request): Promise<Response> {
 
         // Validate webhook type
         if (!isValidWebhookType(payload.type)) {
-          console.error('[flux-station] Invalid webhook type', {
-            msg_id: msg.msg_id.toString(),
-            type: payload.type,
-          });
+          const invalidTypeLogContext = createUtilityContext(
+            'flux-station',
+            'discord-jobs-validate-type',
+            {
+              msg_id: msg.msg_id.toString(),
+              type: payload.type,
+            }
+          );
+          logError('Invalid webhook type', invalidTypeLogContext);
 
           // Delete invalid message to prevent infinite retries
           try {
             await pgmqDelete(JOB_DISCORD_QUEUE, msg.msg_id);
           } catch (error) {
-            console.error('[flux-station] Failed to delete invalid message', {
-              msg_id: msg.msg_id.toString(),
-              error: errorToString(error),
-            });
+            logError('Failed to delete invalid message', invalidTypeLogContext, error);
           }
 
           results.push({
@@ -220,10 +220,10 @@ export async function handleDiscordJobs(_req: Request): Promise<Response> {
         results.push({ msg_id: msg.msg_id.toString(), status: 'success' });
       } catch (error) {
         const errorMsg = errorToString(error);
-        console.error('[flux-station] Job Discord notification failed', {
+        const errorLogContext = createUtilityContext('flux-station', 'discord-jobs-notify', {
           msg_id: msg.msg_id.toString(),
-          error: errorMsg,
         });
+        logError('Job Discord notification failed', errorLogContext, error);
         // Leave in queue for retry
         results.push({
           msg_id: msg.msg_id.toString(),

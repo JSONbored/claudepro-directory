@@ -224,5 +224,122 @@ export default {
         };
       },
     },
+    'require-error-logging-in-catch': {
+      meta: {
+        type: 'problem',
+        docs: {
+          description: 'Catch blocks must log errors using logger.error with proper context',
+          category: 'Best Practices',
+          recommended: true,
+        },
+        fixable: null,
+        schema: [],
+        messages: {
+          missingErrorLogging:
+            'Catch blocks must log errors using logger.error() with normalized error and logContext. Use: logger.error("message", normalizeError(error, "fallback"), logContext)',
+          emptyCatchBlock:
+            'Empty catch blocks are not allowed. At minimum, log the error: logger.error("message", normalizeError(error), logContext)',
+        },
+      },
+      create(context) {
+        const filename = context.getFilename();
+        const sourceCode = context.getSourceCode();
+        const fileText = sourceCode.getText();
+
+        // Skip client components - they may use different error handling patterns
+        const isClientComponent =
+          filename.includes('error.tsx') ||
+          filename.includes('wizard') ||
+          filename.includes('draft-manager') ||
+          filename.includes('marketing/contact') ||
+          fileText.includes("'use client'") ||
+          fileText.includes('"use client"') ||
+          fileText.includes('localStorage');
+
+        // Skip edge functions - they use different logging (logError, logInfo, logWarn)
+        const isEdgeFunction = filename.includes('apps/edge/functions');
+
+        // Skip test files
+        const isTestFile = filename.includes('.test.') || filename.includes('.spec.');
+
+        if (isClientComponent || isEdgeFunction || isTestFile) {
+          return {};
+        }
+
+        // Only apply to server-side files (app directory, API routes, server components)
+        const isServerFile =
+          filename.includes('/app/') ||
+          filename.includes('/api/') ||
+          filename.includes('server.ts') ||
+          filename.includes('server.tsx');
+
+        if (!isServerFile) {
+          return {};
+        }
+
+        return {
+          CatchClause(node) {
+            if (!node.body || node.body.body.length === 0) {
+              context.report({
+                node,
+                messageId: 'emptyCatchBlock',
+              });
+              return;
+            }
+
+            const catchBodyText = sourceCode.getText(node.body);
+
+            // Check if catch block contains logger.error call
+            const hasLoggerError =
+              catchBodyText.includes('logger.error') ||
+              catchBodyText.includes('logger.warn') ||
+              catchBodyText.includes('logError') ||
+              catchBodyText.includes('logWarn');
+
+            // Check if it uses normalizeError
+            const hasNormalizeError = catchBodyText.includes('normalizeError');
+
+            // Check if it uses logContext (or baseLogContext, actionLogContext, etc.)
+            const hasLogContext =
+              catchBodyText.includes('logContext') ||
+              catchBodyText.includes('baseLogContext') ||
+              catchBodyText.includes('actionLogContext') ||
+              catchBodyText.includes('metadataLogContext') ||
+              catchBodyText.includes('staticParamsLogContext') ||
+              catchBodyText.includes('utilityLogContext');
+
+            // Allow if it's a re-throw pattern (error is logged elsewhere or will be caught by error boundary)
+            const isRethrow = catchBodyText.includes('throw');
+
+            // Allow if it uses createErrorResponse or handleApiError (API routes)
+            const usesErrorHandler =
+              catchBodyText.includes('createErrorResponse') ||
+              catchBodyText.includes('handleApiError');
+
+            // Allow if it's a Promise.catch with proper error handling
+            const isPromiseCatch = node.parent?.type === 'CallExpression';
+
+            if (!(hasLoggerError || usesErrorHandler || isRethrow || isPromiseCatch)) {
+              context.report({
+                node: node.body,
+                messageId: 'missingErrorLogging',
+              });
+            } else if (hasLoggerError && !hasNormalizeError) {
+              // Warn if logger.error is used but normalizeError is not
+              context.report({
+                node: node.body,
+                messageId: 'missingErrorLogging',
+              });
+            } else if (hasLoggerError && !hasLogContext) {
+              // Warn if logger.error is used but logContext is not provided
+              context.report({
+                node: node.body,
+                messageId: 'missingErrorLogging',
+              });
+            }
+          },
+        };
+      },
+    },
   },
 };

@@ -3,6 +3,7 @@
 /** Featured sections consuming homepageConfigs for runtime-tunable categories */
 
 import type { Database } from '@heyclaude/database-types';
+import { trackMissingData } from '@heyclaude/web-runtime/core';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { ExternalLink } from '@heyclaude/web-runtime/icons';
 import type {
@@ -11,7 +12,7 @@ import type {
 } from '@heyclaude/web-runtime/types/component.types';
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import Link from 'next/link';
-import { type FC, memo, useMemo } from 'react';
+import { type FC, memo, useEffect, useMemo } from 'react';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { UnifiedCardGrid } from '@/src/components/core/domain/cards/card-grid';
 import { ConfigCard } from '@/src/components/core/domain/cards/config-card';
@@ -39,7 +40,11 @@ const FeaturedSection: FC<FeaturedSectionProps> = memo(
     // PERFORMANCE: Memoize the sliced array to prevent re-creating on every render
     // Previous: rules.slice(0, 6) created new array on EVERY parent render
     // Current: Stable reference unless items array changes
-    const featuredItems = useMemo(() => items.slice(0, 6), [items]);
+    // Defensive check: ensure items is an array before calling .slice()
+    const featuredItems = useMemo(() => {
+      if (!(items && Array.isArray(items))) return [];
+      return items.slice(0, 6);
+    }, [items]);
     const weekStartDate = useMemo(() => {
       if (!weekStart) return null;
       const parsed = new Date(weekStart);
@@ -116,14 +121,38 @@ const FeaturedSectionsComponent: FC<FeaturedSectionsProps> = ({
   featuredCategories,
   weekStart,
 }) => {
+  // Track missing featured categories
+  useEffect(() => {
+    if (featuredCategories.length === 0) {
+      trackMissingData('featured', 'featured-categories', {
+        categoriesKeys: Object.keys(categories),
+        categoryConfigsKeys: Object.keys(categoryConfigs),
+        featuredJobsCount: featuredJobs.length,
+      });
+    }
+  }, [featuredCategories.length, categories, categoryConfigs, featuredJobs.length]);
+
   return (
     <div className={'mb-16 space-y-16'}>
+      {featuredCategories.length === 0 && (
+        <div className="py-8 text-center text-muted-foreground">
+          No featured categories available.
+        </div>
+      )}
       {featuredCategories.map((categorySlug) => {
         const items = categories[categorySlug];
         const config = categoryConfigs[categorySlug];
 
         // Skip if no config or no items for this category
-        if (!(config && items)) {
+        // Also validate that items is actually an array (defensive programming)
+        if (!(config && items && Array.isArray(items))) {
+          trackMissingData('featured', 'category-data', {
+            categorySlug,
+            hasConfig: !!config,
+            hasItems: !!items,
+            itemsIsArray: Array.isArray(items),
+            itemsType: typeof items,
+          });
           return null;
         }
 

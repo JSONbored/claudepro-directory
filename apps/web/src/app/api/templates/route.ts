@@ -9,14 +9,23 @@
 export const runtime = 'nodejs';
 
 import type { Database } from '@heyclaude/database-types';
-import { logger, VALID_CATEGORIES } from '@heyclaude/web-runtime/core';
+import {
+  createWebAppContextWithId,
+  generateRequestId,
+  logger,
+  VALID_CATEGORIES,
+  withDuration,
+} from '@heyclaude/web-runtime/core';
 import { getContentTemplates } from '@heyclaude/web-runtime/data';
 import { createErrorResponse } from '@heyclaude/web-runtime/utils/error-handler';
-import { generateRequestId } from '@heyclaude/web-runtime/utils/request-context';
 import { type NextRequest, NextResponse } from 'next/server';
 
 export async function GET(request: NextRequest) {
   const startTime = Date.now();
+  // Generate single requestId for this API request
+  const requestId = generateRequestId();
+  const baseLogContext = createWebAppContextWithId(requestId, '/api/templates', 'TemplatesAPI');
+
   const searchParams = request.nextUrl.searchParams;
   const category = searchParams.get('category');
 
@@ -28,13 +37,17 @@ export async function GET(request: NextRequest) {
         VALID_CATEGORIES.includes(category as Database['public']['Enums']['content_category'])
       )
     ) {
-      logger.warn('Templates API: invalid category', undefined, {
-        requestId: generateRequestId(),
-        operation: 'TemplatesAPI',
-        route: '/api/templates',
-        category,
-        duration: Date.now() - startTime,
-      });
+      logger.warn(
+        'Templates API: invalid category',
+        undefined,
+        withDuration(
+          {
+            ...baseLogContext,
+            category,
+          },
+          startTime
+        )
+      );
       return NextResponse.json(
         {
           error: 'Invalid category',
@@ -49,19 +62,21 @@ export async function GET(request: NextRequest) {
 
     // Fetch templates from data layer
     const templates = await getContentTemplates(validCategory);
-    const duration = Date.now() - startTime;
 
     // Structured logging with cache tags and duration
-    logger.info('Templates API: success', {
-      requestId: generateRequestId(),
-      operation: 'TemplatesAPI',
-      route: '/api/templates',
-      category: validCategory,
-      count: templates.length,
-      duration,
-      cacheTags: ['templates', `templates-${validCategory}`],
-      cacheTTL: 300,
-    });
+    logger.info(
+      'Templates API: success',
+      withDuration(
+        {
+          ...baseLogContext,
+          category: validCategory,
+          count: templates.length,
+          cacheTags: ['templates', `templates-${validCategory}`],
+          cacheTTL: 300,
+        },
+        startTime
+      )
+    );
 
     // Return success response
     return NextResponse.json(

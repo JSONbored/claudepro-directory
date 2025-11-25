@@ -214,6 +214,25 @@ interface EmbeddingGenerationQueueMessage {
 }
 
 /**
+ * Type guard to validate queue message structure
+ * Validates that message has required fields - uses satisfies pattern for type safety
+ */
+function isValidQueueMessage(
+  msg: unknown
+): msg is { content_id: string; type?: string; created_at?: string } {
+  if (typeof msg !== 'object' || msg === null) {
+    return false;
+  }
+  // Check for required content_id field
+  // Use Object.getOwnPropertyDescriptor to avoid type assertions
+  const contentIdDesc = Object.getOwnPropertyDescriptor(msg, 'content_id');
+  if (!contentIdDesc || typeof contentIdDesc.value !== 'string') {
+    return false;
+  }
+  return true;
+}
+
+/**
  * Process a single embedding generation job (from queue)
  */
 async function processEmbeddingGeneration(
@@ -328,23 +347,6 @@ export async function handleEmbeddingGenerationQueue(_req: Request): Promise<Res
     for (const msg of messages) {
       // Validate message structure matches expected format
       const queueMessage = msg.message;
-
-      // Type guard to validate message structure
-      // Validates that message has required fields - uses satisfies pattern for type safety
-      function isValidQueueMessage(
-        msg: unknown
-      ): msg is { content_id: string; type?: string; created_at?: string } {
-        if (typeof msg !== 'object' || msg === null) {
-          return false;
-        }
-        // Check for required content_id field
-        // Use Object.getOwnPropertyDescriptor to avoid type assertions
-        const contentIdDesc = Object.getOwnPropertyDescriptor(msg, 'content_id');
-        if (!contentIdDesc || typeof contentIdDesc.value !== 'string') {
-          return false;
-        }
-        return true;
-      }
 
       if (!isValidQueueMessage(queueMessage)) {
         const errorLogContext = createUtilityContext('generate-embedding', 'invalid-message');

@@ -1,5 +1,11 @@
 import type { Database } from '@heyclaude/database-types';
-import { logger, normalizeError } from '@heyclaude/web-runtime/core';
+import {
+  createWebAppContextWithId,
+  generateRequestId,
+  hashUserId,
+  logger,
+  normalizeError,
+} from '@heyclaude/web-runtime/core';
 import {
   generatePageMetadata,
   getAuthenticatedUser,
@@ -8,7 +14,6 @@ import {
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { CheckCircle, Clock, GitPullRequest, Send, XCircle } from '@heyclaude/web-runtime/icons';
 import { BADGE_COLORS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import { generateRequestId } from '@heyclaude/web-runtime/utils/request-context';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
@@ -169,13 +174,19 @@ function getSafeContentUrl(
 }
 
 export default async function SubmissionsPage() {
+  // Generate single requestId for this page request
+  const requestId = generateRequestId();
+  const baseLogContext = createWebAppContextWithId(
+    requestId,
+    '/account/submissions',
+    'SubmissionsPage'
+  );
+
   const { user } = await getAuthenticatedUser({ context: 'SubmissionsPage' });
 
   if (!user) {
     logger.warn('SubmissionsPage: unauthenticated access attempt', undefined, {
-      requestId: generateRequestId(),
-      operation: 'SubmissionsPage',
-      route: '/account/submissions',
+      ...baseLogContext,
       timestamp: new Date().toISOString(),
     });
     return (
@@ -195,6 +206,9 @@ export default async function SubmissionsPage() {
     );
   }
 
+  const userIdHash = hashUserId(user.id);
+  const logContext = { ...baseLogContext, userIdHash };
+
   let submissions: NonNullable<
     Database['public']['Functions']['get_user_dashboard']['Returns']['submissions']
   > = [];
@@ -207,23 +221,13 @@ export default async function SubmissionsPage() {
       logger.error(
         'SubmissionsPage: getUserDashboard returned null',
         new Error('getUserDashboard returned null'),
-        {
-          requestId: generateRequestId(),
-          operation: 'SubmissionsPage',
-          route: '/account/submissions',
-          userId: user.id,
-        }
+        logContext
       );
       hasError = true;
     }
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load submissions from dashboard');
-    logger.error('SubmissionsPage: getUserDashboard threw', normalized, {
-      requestId: generateRequestId(),
-      operation: 'SubmissionsPage',
-      route: '/account/submissions',
-      userId: user.id,
-    });
+    logger.error('SubmissionsPage: getUserDashboard threw', normalized, logContext);
     hasError = true;
   }
 
@@ -357,11 +361,8 @@ export default async function SubmissionsPage() {
   submissions.forEach((sub, idx) => {
     if (!sub.id) {
       logger.warn('SubmissionsPage: submission missing ID', undefined, {
-        requestId: generateRequestId(),
-        operation: 'SubmissionsPage',
-        route: '/account/submissions',
+        ...logContext,
         index: idx,
-        userId: user.id,
       });
     }
   });

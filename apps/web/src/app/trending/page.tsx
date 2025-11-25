@@ -4,7 +4,12 @@
  */
 
 import type { Database } from '@heyclaude/database-types';
-import { isValidCategory, logger } from '@heyclaude/web-runtime/core';
+import {
+  createWebAppContextWithId,
+  generateRequestId,
+  isValidCategory,
+  logger,
+} from '@heyclaude/web-runtime/core';
 import { generatePageMetadata, getTrendingPageData } from '@heyclaude/web-runtime/data';
 import { Clock, Star, TrendingUp, Users } from '@heyclaude/web-runtime/icons';
 import type { PagePropsWithSearchParams } from '@heyclaude/web-runtime/types/app.schema';
@@ -13,7 +18,6 @@ import type {
   HomepageContentItem,
 } from '@heyclaude/web-runtime/types/component.types';
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import { generateRequestId } from '@heyclaude/web-runtime/utils/request-context';
 import type { Metadata } from 'next';
 import dynamicImport from 'next/dynamic';
 import { Suspense } from 'react';
@@ -48,6 +52,10 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function TrendingPage({ searchParams }: PagePropsWithSearchParams) {
+  // Generate single requestId for this page request
+  const requestId = generateRequestId();
+  const baseLogContext = createWebAppContextWithId(requestId, '/trending', 'TrendingPage');
+
   const rawParams = await searchParams;
   const categoryParam = (() => {
     const category = rawParams?.['category'];
@@ -61,17 +69,13 @@ export default async function TrendingPage({ searchParams }: PagePropsWithSearch
 
   if (categoryParam && !normalizedCategory) {
     logger.warn('TrendingPage: invalid category parameter provided', undefined, {
-      requestId: generateRequestId(),
-      operation: 'TrendingPage',
-      route: '/trending',
+      ...baseLogContext,
       category: categoryParam,
     });
   }
 
   logger.info('Trending page accessed', {
-    requestId: generateRequestId(),
-    operation: 'TrendingPage',
-    route: '/trending',
+    ...baseLogContext,
     category: normalizedCategory ?? 'all',
     limit,
   });
@@ -199,6 +203,7 @@ function mapPopularContent(
   rows: Database['public']['Functions']['get_popular_content']['Returns'],
   category: Database['public']['Enums']['content_category'] | null
 ): DisplayableContent[] {
+  if (!rows || rows.length === 0) return [];
   return rows.map((row, index) => {
     const resolvedCategory =
       (row.category as Database['public']['Enums']['content_category']) ??
@@ -224,6 +229,7 @@ function mapRecentContent(
   rows: Database['public']['Functions']['get_recent_content']['Returns'],
   category: Database['public']['Enums']['content_category'] | null
 ): DisplayableContent[] {
+  if (!rows || rows.length === 0) return [];
   return rows.map((row, index) => {
     const resolvedCategory =
       (row.category as Database['public']['Enums']['content_category']) ??

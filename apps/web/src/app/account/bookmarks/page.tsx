@@ -1,4 +1,4 @@
-import { logger } from '@heyclaude/web-runtime/core';
+import { createWebAppContextWithId, generateRequestId, logger } from '@heyclaude/web-runtime/core';
 import { generatePageMetadata } from '@heyclaude/web-runtime/data';
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
@@ -20,14 +20,18 @@ export async function generateMetadata(): Promise<Metadata> {
  * Keeping this for backward compatibility
  */
 export default function BookmarksPage() {
+  // Generate single requestId for this page request
+  const requestId = generateRequestId();
+  const logContext = createWebAppContextWithId(requestId, '/account/bookmarks', 'BookmarksPage', {
+    sourceRoute: '/account/bookmarks',
+    targetRoute: '/account/library',
+    redirectReason: 'legacy-route-compatibility',
+  });
+
   logger.info(
     'BookmarksPage: redirecting legacy /account/bookmarks to /account/library',
     undefined,
-    {
-      sourceRoute: '/account/bookmarks',
-      targetRoute: '/account/library',
-      redirectReason: 'legacy-route-compatibility',
-    }
+    logContext
   );
   redirect('/account/library');
 }

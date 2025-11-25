@@ -1,6 +1,8 @@
+import { existsSync, readFileSync } from 'node:fs';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { resolve } from 'path';
 import { createServiceRoleClient } from '../toolkit/supabase.js';
 
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
@@ -9,6 +11,43 @@ const TARGET_CONFIG_PATH = path.resolve(
   REPO_ROOT,
   'packages/web-runtime/src/config/generated-config.ts'
 );
+
+/**
+ * Load environment variables from .env.local if it exists
+ * This ensures SUPABASE_SERVICE_ROLE_KEY is available during build
+ */
+function loadEnvFile(): void {
+  const envPath = resolve(REPO_ROOT, '.env.local');
+  if (!existsSync(envPath)) {
+    return; // .env.local doesn't exist - that's okay, use system env vars
+  }
+
+  try {
+    const envContent = readFileSync(envPath, 'utf-8');
+    const lines = envContent.split('\n');
+
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (!trimmed || trimmed.startsWith('#')) continue;
+
+      const match = trimmed.match(/^([^=]+)=(.*)$/);
+      if (match) {
+        const [, key, value] = match;
+        if (key && value !== undefined) {
+          const cleanValue = value.replace(/^["']|["']$/g, ''); // Remove quotes
+          if (!process.env[key]) {
+            process.env[key] = cleanValue;
+          }
+        }
+      }
+    }
+  } catch {
+    // .env.local exists but can't be read - that's okay, use system env vars
+  }
+}
+
+// Load .env.local if it exists
+loadEnvFile();
 
 async function generateConfig() {
   console.log('🏗️ Fetching build-time configuration from Supabase...');

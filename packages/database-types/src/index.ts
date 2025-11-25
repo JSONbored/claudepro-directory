@@ -1506,6 +1506,24 @@ export type Database = {
         }
         Relationships: []
       }
+      mfa_failed_verification_attempts: {
+        Row: {
+          factor_id: string
+          last_failed_at: string
+          user_id: string
+        }
+        Insert: {
+          factor_id: string
+          last_failed_at?: string
+          user_id: string
+        }
+        Update: {
+          factor_id?: string
+          last_failed_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       newsletter_subscriptions: {
         Row: {
           categories_visited: string[] | null
@@ -1694,6 +1712,24 @@ export type Database = {
           title?: string
           type?: Database["public"]["Enums"]["notification_type"]
           updated_at?: string
+        }
+        Relationships: []
+      }
+      password_failed_verification_attempts: {
+        Row: {
+          failed_attempts: number
+          last_failed_at: string
+          user_id: string
+        }
+        Insert: {
+          failed_attempts?: number
+          last_failed_at?: string
+          user_id: string
+        }
+        Update: {
+          failed_attempts?: number
+          last_failed_at?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -3553,6 +3589,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      custom_access_token_hook: { Args: { event: Json }; Returns: Json }
       decrement_content_stat: {
         Args: {
           p_category: Database["public"]["Enums"]["content_category"]
@@ -4967,6 +5004,8 @@ export type Database = {
         Args: { p_event_data: Json; p_webhook_id: string }
         Returns: undefined
       }
+      has_aal2: { Args: never; Returns: boolean }
+      has_enrolled_mfa: { Args: never; Returns: boolean }
       immutable_array_to_string: {
         Args: { arr: string[]; delimiter: string }
         Returns: string
@@ -5127,6 +5166,11 @@ export type Database = {
             }
             Returns: undefined
           }
+      mfa_verification_attempt_hook: { Args: { event: Json }; Returns: Json }
+      password_verification_attempt_hook: {
+        Args: { event: Json }
+        Returns: Json
+      }
       populate_content_seo_data: {
         Args: never
         Returns: {
@@ -5440,6 +5484,8 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      send_email_hook: { Args: { event: Json }; Returns: Json }
+      send_sms_hook: { Args: { event: Json }; Returns: Json }
       should_generate_embedding: {
         Args: {
           content_author: string
@@ -6682,7 +6728,7 @@ export type Database = {
         date_added: string | null
         features: string[] | null
         use_cases: string[] | null
-        source: string | null
+        source: Database["public"]["Enums"]["content_source"] | null
         documentation_url: string | null
         metadata: Json | null
         view_count: number | null

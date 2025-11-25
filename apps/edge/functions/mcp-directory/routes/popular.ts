@@ -45,10 +45,10 @@ export async function handleGetPopular(supabase: SupabaseClient<Database>, input
     description: item.description?.substring(0, 150) || '',
     tags: item.tags || [],
     author: item.author || 'Unknown',
-    dateAdded: '',
+    dateAdded: (item as unknown as { date_added?: string }).date_added || '',
     stats: {
       views: item.view_count || 0,
-      bookmarks: 0,
+      bookmarks: (item as unknown as { bookmark_count?: number }).bookmark_count || 0,
       upvotes: 0,
     },
   }));

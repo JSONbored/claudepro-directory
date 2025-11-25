@@ -13,6 +13,7 @@ export * from './circuit-breaker.ts';
 export * from './code-highlight.ts';
 export * from './rate-limit.ts';
 export * from './webhook/crypto.ts';
+export * from './crypto-utils.ts';
 // Resolve duplicate export ambiguity from env.ts
 export {
   getEnvVar,

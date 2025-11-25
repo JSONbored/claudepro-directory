@@ -1,4 +1,10 @@
-import { hashUserId, logger, normalizeError } from '@heyclaude/web-runtime/core';
+import {
+  createWebAppContextWithId,
+  generateRequestId,
+  hashUserId,
+  logger,
+  normalizeError,
+} from '@heyclaude/web-runtime/core';
 import {
   generatePageMetadata,
   getAuthenticatedUser,
@@ -7,7 +13,6 @@ import {
 import { APP_CONFIG, ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { ArrowLeft, Edit } from '@heyclaude/web-runtime/icons';
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import { generateRequestId } from '@heyclaude/web-runtime/utils/request-context';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
@@ -41,20 +46,28 @@ export async function generateMetadata({ params }: CollectionPageProps): Promise
 
 export default async function CollectionDetailPage({ params }: CollectionPageProps) {
   const { slug } = await params;
+
+  // Generate single requestId for this page request
+  const requestId = generateRequestId();
+  const baseLogContext = createWebAppContextWithId(
+    requestId,
+    `/account/library/${slug}`,
+    'CollectionDetailPage',
+    {
+      slug,
+    }
+  );
+
   const { user } = await getAuthenticatedUser({ context: 'CollectionDetailPage' });
 
   if (!user) {
-    logger.warn('CollectionDetailPage: unauthenticated access attempt', undefined, {
-      requestId: generateRequestId(),
-      operation: 'CollectionDetailPage',
-      route: `/account/library/${slug}`,
-      slug,
-    });
+    logger.warn('CollectionDetailPage: unauthenticated access attempt', undefined, baseLogContext);
     redirect('/login');
   }
 
   // Hash user ID for privacy-compliant logging (GDPR/CCPA)
   const userIdHash = hashUserId(user.id);
+  const logContext = { ...baseLogContext, userIdHash };
 
   let collectionData: Awaited<ReturnType<typeof getCollectionDetail>> = null;
   let hasError = false;
@@ -62,13 +75,7 @@ export default async function CollectionDetailPage({ params }: CollectionPagePro
     collectionData = await getCollectionDetail(user.id, slug);
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load collection detail for account view');
-    logger.error('CollectionDetailPage: getCollectionDetail threw', normalized, {
-      requestId: generateRequestId(),
-      operation: 'CollectionDetailPage',
-      route: `/account/library/${slug}`,
-      userIdHash,
-      slug,
-    });
+    logger.error('CollectionDetailPage: getCollectionDetail threw', normalized, logContext);
     hasError = true;
   }
 
@@ -93,26 +100,18 @@ export default async function CollectionDetailPage({ params }: CollectionPagePro
   }
 
   if (!collectionData) {
-    logger.warn('CollectionDetailPage: collection not found or inaccessible', undefined, {
-      requestId: generateRequestId(),
-      operation: 'CollectionDetailPage',
-      route: `/account/library/${slug}`,
-      slug,
-      userIdHash,
-    });
+    logger.warn(
+      'CollectionDetailPage: collection not found or inaccessible',
+      undefined,
+      logContext
+    );
     notFound();
   }
 
   const { collection, items, bookmarks } = collectionData;
 
   if (!collection) {
-    logger.warn('CollectionDetailPage: collection is null in response', undefined, {
-      requestId: generateRequestId(),
-      operation: 'CollectionDetailPage',
-      route: `/account/library/${slug}`,
-      slug,
-      userIdHash,
-    });
+    logger.warn('CollectionDetailPage: collection is null in response', undefined, logContext);
     notFound();
   }
 

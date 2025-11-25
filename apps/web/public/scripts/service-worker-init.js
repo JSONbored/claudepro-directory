@@ -20,13 +20,41 @@
   const error = isDev ? console.error.bind(console) : () => {};
 
   // Feature detection and security checks
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  // Check if service worker API is available
+  if (!("serviceWorker" in navigator)) {
+    if (isDev) {
+      log("[SW] Service worker API not available in this browser");
+    }
+    return;
+  }
+
+  // Verify register method exists (some browsers may have serviceWorker but not register)
+  // Use optional chaining and explicit check to avoid errors
   if (
-    typeof window === "undefined" ||
-    !("serviceWorker" in navigator) ||
-    (window.location.protocol !== "https:" &&
-      window.location.hostname !== "localhost" &&
-      window.location.hostname !== "127.0.0.1")
+    !navigator.serviceWorker ||
+    typeof navigator.serviceWorker.register !== "function"
   ) {
+    // Silent return - service workers not supported in this context
+    // Only log in development for debugging
+    if (isDev) {
+      log("[SW] Service worker API not fully supported in this browser/context");
+    }
+    return;
+  }
+
+  // Security check: HTTPS required (except localhost)
+  if (
+    window.location.protocol !== "https:" &&
+    window.location.hostname !== "localhost" &&
+    window.location.hostname !== "127.0.0.1"
+  ) {
+    if (isDev) {
+      log("[SW] Service worker requires HTTPS (or localhost)");
+    }
     return;
   }
 
@@ -45,6 +73,50 @@
    * Register service worker with proper error handling
    */
   async function registerServiceWorker() {
+    // Double-check register method is available before attempting registration
+    // This is a defensive check - we already checked above, but verify again
+    if (
+      !navigator.serviceWorker ||
+      typeof navigator.serviceWorker.register !== "function"
+    ) {
+      // Silent return - don't log errors for unsupported browsers
+      if (isDev) {
+        log("[SW] Service worker register method not available - browser may not support SW");
+      }
+      return null;
+    }
+
+    // Verify service worker file exists by attempting to fetch it
+    // This helps catch path issues early
+    try {
+      const swUrl = new URL(SW_PATH, window.location.origin);
+      const response = await fetch(swUrl, { method: "HEAD", cache: "no-store" });
+      if (!response.ok) {
+        // Log in dev, but don't block registration (might be first load or build issue)
+        if (isDev) {
+          log("[SW] Service worker file check:", {
+            status: response.status,
+            statusText: response.statusText,
+            url: swUrl.href,
+            note: response.status === 404 ? "File not found - may need to rebuild" : "Unexpected status",
+          });
+        }
+        // Don't return early - let registration attempt proceed
+        // Registration will fail gracefully if file doesn't exist
+      } else if (isDev) {
+        log("[SW] Service worker file verified:", swUrl.href);
+      }
+    } catch (fetchErr) {
+      // Network error checking SW file - log but continue (might be offline or dev server)
+      if (isDev) {
+        log("[SW] Could not verify service worker file (this is OK in development):", {
+          error: fetchErr.message,
+          note: "Registration will proceed - file may be served by Next.js dev server",
+        });
+      }
+      // Continue with registration attempt
+    }
+
     try {
       const registration = await navigator.serviceWorker.register(SW_PATH, {
         scope: SW_SCOPE,
@@ -78,18 +150,44 @@
 
       return registration;
     } catch (err) {
-      error("[SW] Registration failed:", err);
-
-      // Log specific error types for debugging
+      // Enhanced error handling with specific error types
       if (err.name === "SecurityError") {
-        error("[SW] Registration blocked by security policy");
+        error("[SW] Registration blocked by security policy - check HTTPS/localhost");
       } else if (err.name === "TypeError") {
-        error("[SW] Invalid service worker URL or scope");
-      } else if (err.name === "NetworkError") {
-        error("[SW] Network error while fetching service worker");
+        if (err.message && (err.message.includes("register") || err.message.includes("not a function"))) {
+          // This shouldn't happen due to our checks, but handle gracefully
+          // Use log instead of error since this is expected for unsupported browsers
+          if (isDev) {
+            log("[SW] Service worker register method not available (expected for unsupported browsers)", {
+              message: err.message,
+            });
+          }
+        } else {
+          error("[SW] Invalid service worker URL or scope", {
+            path: SW_PATH,
+            scope: SW_SCOPE,
+            origin: window.location.origin,
+            fullUrl: new URL(SW_PATH, window.location.origin).href,
+            errorMessage: err.message,
+          });
+        }
+      } else if (err.name === "NetworkError" || err.message?.includes("network")) {
+        error("[SW] Network error while fetching service worker", {
+          path: SW_PATH,
+          message: err.message,
+        });
+      } else {
+        error("[SW] Registration failed:", {
+          name: err.name,
+          message: err.message,
+          stack: err.stack,
+          path: SW_PATH,
+          scope: SW_SCOPE,
+        });
       }
 
-      throw err;
+      // Don't throw - allow page to continue loading
+      return null;
     }
   }
 
@@ -183,11 +281,12 @@
     try {
       const cacheNames = await caches.keys();
       const currentCachePrefix = "claudepro-";
+      // IMPORTANT: These cache names must match the ones in service-worker.js
+      // Current version: v1-1-0 (matches service-worker.js)
       const validCaches = [
-        "claudepro-v1.2",
-        "claudepro-static-v1.2",
-        "claudepro-dynamic-v1.2",
-        "claudepro-api-v1.2",
+        "claudepro-static-v1-1-0",
+        "claudepro-dynamic-v1-1-0",
+        "claudepro-api-v1-1-0",
       ];
 
       const deletePromises = cacheNames
@@ -210,29 +309,77 @@
    * Initialize service worker when page loads
    */
   function init() {
-    // Use 'load' event to avoid blocking initial page render
-    window.addEventListener(
-      "load",
-      async () => {
-        try {
-          // Clean up old caches first
-          await cleanupOldCaches();
+    // Wait for DOM to be ready before attempting registration
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", () => {
+        initServiceWorker();
+      });
+    } else {
+      // DOM already ready, but wait for window load to avoid blocking
+      window.addEventListener(
+        "load",
+        () => {
+          initServiceWorker();
+        },
+        { once: true },
+      );
+    }
+  }
 
-          // Register service worker
-          await registerServiceWorker();
+  /**
+   * Initialize service worker (separated for better error handling)
+   */
+  async function initServiceWorker() {
+    // Final safety check before attempting anything
+    if (
+      typeof window === "undefined" ||
+      !navigator.serviceWorker ||
+      typeof navigator.serviceWorker.register !== "function"
+    ) {
+      // Service workers not supported - silent return
+      if (isDev) {
+        log("[SW] Service workers not supported in this environment");
+      }
+      return;
+    }
 
-          // Mark PWA as ready
+    try {
+      // Clean up old caches first
+      await cleanupOldCaches();
+
+      // Register service worker
+      const registration = await registerServiceWorker();
+
+      if (registration) {
+        // Mark PWA as ready
+        if (typeof window !== "undefined") {
           window.claudeProPWAReady = true;
           window.dispatchEvent(new Event("pwa-ready"));
-        } catch (error) {
-          // Mark PWA as failed but don't break the app
-          window.claudeProPWAReady = false;
-          window.claudeProPWAError = error;
-          window.dispatchEvent(new Event("pwa-error"));
+          if (isDev) {
+            log("[SW] PWA ready - service worker active");
+          }
         }
-      },
-      { once: true },
-    );
+      } else {
+        // Registration returned null (failed but handled gracefully)
+        if (typeof window !== "undefined") {
+          window.claudeProPWAReady = false;
+          if (isDev) {
+            log("[SW] Service worker registration returned null - service workers may not be supported");
+          }
+        }
+      }
+    } catch (error) {
+      // Mark PWA as failed but don't break the app
+      if (typeof window !== "undefined") {
+        window.claudeProPWAReady = false;
+        window.claudeProPWAError = error;
+        window.dispatchEvent(new Event("pwa-error"));
+      }
+      // Only log errors in development
+      if (isDev) {
+        error("[SW] Service worker initialization failed:", error);
+      }
+    }
   }
 
   // Initialize

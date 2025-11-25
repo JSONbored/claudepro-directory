@@ -201,8 +201,12 @@ export function badRequestResponse(
   return jsonResponse({ error: 'Bad Request', message }, 400, cors, additionalHeaders);
 }
 
-export function unauthorizedResponse(message = 'Unauthorized', cors = publicCorsHeaders): Response {
-  return jsonResponse({ error: 'Unauthorized', message }, 401, cors);
+export function unauthorizedResponse(
+  message = 'Unauthorized',
+  cors: Record<string, string> = publicCorsHeaders,
+  additionalHeaders?: Record<string, string>
+): Response {
+  return jsonResponse({ error: 'Unauthorized', message }, 401, cors, additionalHeaders);
 }
 
 export function methodNotAllowedResponse(

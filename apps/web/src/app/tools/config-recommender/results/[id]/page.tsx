@@ -4,10 +4,14 @@
  */
 
 import { Constants, type Database } from '@heyclaude/database-types';
-import { logger, normalizeError } from '@heyclaude/web-runtime/core';
+import {
+  createWebAppContextWithId,
+  generateRequestId,
+  logger,
+  normalizeError,
+} from '@heyclaude/web-runtime/core';
 import { generatePageMetadata, getConfigRecommendations } from '@heyclaude/web-runtime/data';
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
-import { generateRequestId } from '@heyclaude/web-runtime/utils/request-context';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { ResultsDisplay } from '@/src/components/features/tools/recommender/results-display';
@@ -36,6 +40,15 @@ type DecodedQuizAnswers = {
 };
 
 function decodeQuizAnswers(encoded: string, resultId: string): DecodedQuizAnswers {
+  // Note: This is a module-level utility function, so it can't access component-level logContext
+  // Generate a new requestId for this utility function (acceptable for utility functions)
+  const utilityRequestId = generateRequestId();
+  const utilityLogContext = createWebAppContextWithId(
+    utilityRequestId,
+    `/tools/config-recommender/results/${resultId}`,
+    'ConfigRecommenderResultsUtility'
+  );
+
   try {
     const json = Buffer.from(encoded, 'base64url').toString('utf-8');
     const parsed = JSON.parse(json);
@@ -107,9 +120,7 @@ function decodeQuizAnswers(encoded: string, resultId: string): DecodedQuizAnswer
   } catch (error) {
     const normalized = normalizeError(error, 'Invalid quiz answers encoding');
     logger.error('ConfigRecommenderResults: decodeQuizAnswers failed', normalized, {
-      requestId: generateRequestId(),
-      operation: 'ConfigRecommenderResults',
-      route: `/tools/config-recommender/results/${resultId}`,
+      ...utilityLogContext,
       encodedLength: encoded.length,
     });
     throw normalized;
@@ -126,6 +137,15 @@ function normalizeRecommendationResults(
     category: Database['public']['Enums']['content_category'];
   }
 > {
+  // Note: This is a module-level utility function, so it can't access component-level logContext
+  // Generate a new requestId for this utility function (acceptable for utility functions)
+  const utilityRequestId = generateRequestId();
+  const utilityLogContext = createWebAppContextWithId(
+    utilityRequestId,
+    `/tools/config-recommender/results/${resultId}`,
+    'ConfigRecommenderResultsUtility'
+  );
+
   if (!results) return [];
   const normalized = results.filter(
     (
@@ -139,9 +159,7 @@ function normalizeRecommendationResults(
 
   if (normalized.length < results.length) {
     logger.warn('ConfigRecommenderResults: filtered incomplete recommendation items', undefined, {
-      requestId: generateRequestId(),
-      operation: 'ConfigRecommenderResults',
-      route: `/tools/config-recommender/results/${resultId}`,
+      ...utilityLogContext,
       originalCount: results.length,
       filteredCount: normalized.length,
     });
@@ -174,13 +192,23 @@ export default async function ResultsPage({ params, searchParams }: PageProps) {
   const resolvedParams = await params;
   const resolvedSearchParams = await searchParams;
 
-  if (!resolvedSearchParams.answers) {
-    logger.warn('ConfigRecommenderResults: accessed without answers parameter', undefined, {
-      requestId: generateRequestId(),
-      operation: 'ConfigRecommenderResults',
-      route: `/tools/config-recommender/results/${resolvedParams.id}`,
+  // Generate single requestId for this page request
+  const requestId = generateRequestId();
+  const baseLogContext = createWebAppContextWithId(
+    requestId,
+    `/tools/config-recommender/results/${resolvedParams.id}`,
+    'ConfigRecommenderResults',
+    {
       resultId: resolvedParams.id,
-    });
+    }
+  );
+
+  if (!resolvedSearchParams.answers) {
+    logger.warn(
+      'ConfigRecommenderResults: accessed without answers parameter',
+      undefined,
+      baseLogContext
+    );
     notFound();
   }
 
@@ -189,12 +217,11 @@ export default async function ResultsPage({ params, searchParams }: PageProps) {
     answers = decodeQuizAnswers(resolvedSearchParams.answers, resolvedParams.id);
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to decode quiz answers');
-    logger.error('ConfigRecommenderResults: failed to decode quiz answers', normalized, {
-      requestId: generateRequestId(),
-      operation: 'ConfigRecommenderResults',
-      route: `/tools/config-recommender/results/${resolvedParams.id}`,
-      resultId: resolvedParams.id,
-    });
+    logger.error(
+      'ConfigRecommenderResults: failed to decode quiz answers',
+      normalized,
+      baseLogContext
+    );
     notFound();
   }
 
@@ -211,10 +238,7 @@ export default async function ResultsPage({ params, searchParams }: PageProps) {
       'ConfigRecommenderResults: get_recommendations returned no data',
       new Error('Recommendations result is null'),
       {
-        requestId: generateRequestId(),
-        operation: 'ConfigRecommenderResults',
-        route: `/tools/config-recommender/results/${resolvedParams.id}`,
-        resultId: resolvedParams.id,
+        ...baseLogContext,
         useCase: answers.useCase,
       }
     );
@@ -232,7 +256,7 @@ export default async function ResultsPage({ params, searchParams }: PageProps) {
   const shareUrl = `${APP_CONFIG.url}/tools/config-recommender/results/${resolvedParams.id}?answers=${resolvedSearchParams.answers}`;
 
   logger.info('ConfigRecommenderResults: page viewed', {
-    resultId: resolvedParams.id,
+    ...baseLogContext,
     useCase: answers.useCase,
     experienceLevel: answers.experienceLevel,
     resultCount: recommendations.results?.length ?? 0,

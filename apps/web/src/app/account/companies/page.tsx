@@ -5,7 +5,9 @@
 
 import type { Database } from '@heyclaude/database-types';
 import {
+  createWebAppContextWithId,
   formatRelativeDate,
+  generateRequestId,
   hashUserId,
   logger,
   normalizeError,
@@ -26,7 +28,6 @@ import {
   Plus,
 } from '@heyclaude/web-runtime/icons';
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import { generateRequestId } from '@heyclaude/web-runtime/utils/request-context';
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -69,13 +70,19 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function CompaniesPage() {
+  // Generate single requestId for this page request
+  const requestId = generateRequestId();
+  const baseLogContext = createWebAppContextWithId(
+    requestId,
+    '/account/companies',
+    'CompaniesPage'
+  );
+
   const { user } = await getAuthenticatedUser({ context: 'CompaniesPage' });
 
   if (!user) {
     logger.warn('CompaniesPage: unauthenticated access attempt detected', undefined, {
-      requestId: generateRequestId(),
-      operation: 'CompaniesPage',
-      route: '/account/companies',
+      ...baseLogContext,
       timestamp: new Date().toISOString(),
     });
     return (
@@ -97,6 +104,7 @@ export default async function CompaniesPage() {
 
   // Hash user ID for privacy-compliant logging (GDPR/CCPA)
   const hashedUserId = hashUserId(user.id);
+  const logContext = { ...baseLogContext, userIdHash: hashedUserId };
 
   let companies: Database['public']['Functions']['get_user_companies']['Returns']['companies'] = [];
   let hasError = false;
@@ -108,22 +116,12 @@ export default async function CompaniesPage() {
     if (data) {
       companies = data.companies ?? [];
     } else {
-      logger.warn('CompaniesPage: getUserCompanies returned null', undefined, {
-        requestId: generateRequestId(),
-        operation: 'CompaniesPage',
-        route: '/account/companies',
-        hashedUserId,
-      });
+      logger.warn('CompaniesPage: getUserCompanies returned null', undefined, logContext);
       hasError = true;
     }
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to fetch user companies');
-    logger.error('CompaniesPage: getUserCompanies threw', normalized, {
-      requestId: generateRequestId(),
-      operation: 'CompaniesPage',
-      route: '/account/companies',
-      hashedUserId,
-    });
+    logger.error('CompaniesPage: getUserCompanies threw', normalized, logContext);
     hasError = true;
   }
 
@@ -148,7 +146,7 @@ export default async function CompaniesPage() {
   }
 
   if (companies.length === 0) {
-    logger.info('CompaniesPage: user has no companies', { hashedUserId });
+    logger.info('CompaniesPage: user has no companies', logContext);
   }
 
   return (

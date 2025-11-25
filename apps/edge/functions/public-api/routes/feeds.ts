@@ -9,7 +9,7 @@ import {
   methodNotAllowedResponse,
   supabaseAnon,
 } from '@heyclaude/edge-runtime';
-import { buildSecurityHeaders } from '@heyclaude/shared-runtime';
+import { buildSecurityHeaders, createDataApiContext, logInfo } from '@heyclaude/shared-runtime';
 
 type ContentCategory = DatabaseGenerated['public']['Enums']['content_category'];
 const CONTENT_CATEGORY_VALUES = Constants.public.Enums.content_category;
@@ -69,7 +69,14 @@ export async function handleFeedsRoute(
 
   try {
     const payload = await generateFeedPayload(type, category);
-    console.info('[feeds] delivery', {
+    const logContext = createDataApiContext('feeds', {
+      path: url.pathname,
+      method: 'GET',
+      app: 'public-api',
+      resource: type,
+    });
+    logInfo('Feed delivery', {
+      ...logContext,
       type,
       category: category ?? 'all',
       contentType: payload.contentType,

@@ -71,7 +71,7 @@ export async function handleSearchContent(
   const textSummary = formattedItems
     .map(
       (item, idx) =>
-        `${idx + 1}. ${item.title} (${item.category})\n   ${item.description}${item.description.length >= 200 ? '...' : ''}\n   Tags: ${item.tags.join(', ')}`
+        `${idx + 1}. ${item.title} (${item.category})\n   ${item.description}${item.description.length >= 200 ? '...' : ''}${item.tags.length > 0 ? `\n   Tags: ${item.tags.join(', ')}` : ''}`
     )
     .join('\n\n');
 

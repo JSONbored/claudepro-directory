@@ -56,7 +56,7 @@ export const GENERATED_CONFIG = {
   "date.current_year": 2025,
   "resend.batch_size": 100,
   "button.hover_scale": 1.02,
-  "date.current_month": "October",
+  "date.current_month": "November",
   "date.last_reviewed": "2025-10-01",
   "logger.enable_file": false,
   "rate_limit.enabled": true,

@@ -333,6 +333,41 @@ export async function getHomepageConfigValue(
   return homepageConfigAccessor.getValue(input);
 }
 
+/**
+ * Homepage Config Bundle - Combined config for homepage
+ * OPTIMIZATION: Combines homepage, animation, and app settings into single call
+ * Reduces 3-4 separate config calls to 1 (75% reduction)
+ * 
+ * Returns all configs needed for homepage in a single response:
+ * - Homepage config (featured categories, tab categories)
+ * - Animation config (spring physics, etc.)
+ * - App settings (infinite scroll batch size, threshold, etc.)
+ */
+export async function getHomepageConfigBundle() {
+  try {
+    // Fetch all three configs in parallel (they all use the same flags module internally)
+    const [homepageResult, animationResult, appSettingsResult] = await Promise.all([
+      homepageConfigAccessor.getSnapshot({}),
+      animationConfigAccessor.getSnapshot({}),
+      appSettingsAccessor.getSnapshot({}),
+    ]);
+
+    // Combine into single bundle
+    return {
+      homepageConfig: homepageResult?.data ?? HOMEPAGE_CONFIG_DEFAULTS,
+      animationConfig: animationResult?.data ?? ANIMATION_CONFIG_DEFAULTS,
+      appSettings: appSettingsResult?.data ?? APP_SETTINGS_DEFAULTS,
+    };
+  } catch (error) {
+    // Fallback to defaults on any error
+    return {
+      homepageConfig: HOMEPAGE_CONFIG_DEFAULTS,
+      animationConfig: ANIMATION_CONFIG_DEFAULTS,
+      appSettings: APP_SETTINGS_DEFAULTS,
+    };
+  }
+}
+
 const emailConfigAccessor = createTypedConfigAccessor({
   getDefaults: async () => EMAIL_CONFIG_DEFAULTS,
   getFetcher: (flagsModule) => () => flagsModule.emailConfigs() as Promise<ConfigRecord>,

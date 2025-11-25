@@ -1,4 +1,10 @@
-import { hashUserId, logger, normalizeError } from '@heyclaude/web-runtime/core';
+import {
+  createWebAppContextWithId,
+  generateRequestId,
+  hashUserId,
+  logger,
+  normalizeError,
+} from '@heyclaude/web-runtime/core';
 import {
   generatePageMetadata,
   getAuthenticatedUser,
@@ -7,7 +13,6 @@ import {
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { BarChart, Eye, MousePointer, TrendingUp } from '@heyclaude/web-runtime/icons';
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import { generateRequestId } from '@heyclaude/web-runtime/utils/request-context';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
@@ -49,13 +54,19 @@ function isSponsorshipActive(
 }
 
 export default async function SponsorshipsPage() {
+  // Generate single requestId for this page request
+  const requestId = generateRequestId();
+  const baseLogContext = createWebAppContextWithId(
+    requestId,
+    '/account/sponsorships',
+    'SponsorshipsPage'
+  );
+
   const { user } = await getAuthenticatedUser({ context: 'SponsorshipsPage' });
 
   if (!user) {
     logger.warn('SponsorshipsPage: unauthenticated access attempt', undefined, {
-      requestId: generateRequestId(),
-      operation: 'SponsorshipsPage',
-      route: '/account/sponsorships',
+      ...baseLogContext,
       timestamp: new Date().toISOString(),
     });
     return (
@@ -76,18 +87,14 @@ export default async function SponsorshipsPage() {
   }
 
   const hashedUserId = hashUserId(user.id);
+  const logContext = { ...baseLogContext, userIdHash: hashedUserId };
 
   let sponsorships: Awaited<ReturnType<typeof getUserSponsorships>>;
   try {
     sponsorships = await getUserSponsorships(user.id);
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load user sponsorships');
-    logger.error('SponsorshipsPage: getUserSponsorships threw', normalized, {
-      requestId: generateRequestId(),
-      operation: 'SponsorshipsPage',
-      route: '/account/sponsorships',
-      userIdHash: hashedUserId,
-    });
+    logger.error('SponsorshipsPage: getUserSponsorships threw', normalized, logContext);
     return (
       <div className="space-y-6">
         <div className="text-destructive">Failed to load sponsorships. Please try again later.</div>
@@ -96,7 +103,7 @@ export default async function SponsorshipsPage() {
   }
 
   if (sponsorships.length === 0) {
-    logger.info('SponsorshipsPage: user has no sponsorships', { userIdHash: hashedUserId });
+    logger.info('SponsorshipsPage: user has no sponsorships', logContext);
     return (
       <div className="space-y-6">
         <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>

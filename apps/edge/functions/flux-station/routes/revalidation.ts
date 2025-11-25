@@ -18,7 +18,9 @@ import {
   createUtilityContext,
   errorToString,
   logError,
+  logWarn,
   TIMEOUT_PRESETS,
+  timingSafeEqual,
   withTimeout,
 } from '@heyclaude/shared-runtime';
 
@@ -115,18 +117,17 @@ export async function handleRevalidation(_req: Request): Promise<Response> {
       try {
         // Validate queue message structure
         if (!isValidRevalidationPayload(msg.message)) {
-          console.error('[flux-station] Invalid revalidation payload structure', {
+          const invalidLogContext = createUtilityContext('flux-station', 'content-revalidation', {
             msg_id: msg.msg_id.toString(),
+            operation: 'validate-payload',
           });
+          logError('Invalid revalidation payload structure', invalidLogContext);
 
           // Delete invalid message to prevent infinite retries
           try {
             await pgmqDelete(CONTENT_REVALIDATION_QUEUE, msg.msg_id);
           } catch (error) {
-            console.error('[flux-station] Failed to delete invalid message', {
-              msg_id: msg.msg_id.toString(),
-              error: errorToString(error),
-            });
+            logError('Failed to delete invalid message', invalidLogContext, error);
           }
 
           results.push({
@@ -155,10 +156,19 @@ export async function handleRevalidation(_req: Request): Promise<Response> {
         };
 
         const secret = getStringProperty(payload, 'secret');
-        if (!secret || secret !== edgeEnv.revalidate.secret) {
-          console.warn('[flux-station] Content revalidation unauthorized', {
-            msg_id: msg.msg_id.toString(),
-          });
+        const expectedSecret = edgeEnv.revalidate.secret;
+
+        // Use timing-safe comparison to prevent timing attacks
+        if (!(secret && expectedSecret && timingSafeEqual(secret, expectedSecret))) {
+          const unauthorizedLogContext = createUtilityContext(
+            'flux-station',
+            'content-revalidation',
+            {
+              msg_id: msg.msg_id.toString(),
+              operation: 'authorize',
+            }
+          );
+          logWarn('Content revalidation unauthorized', unauthorizedLogContext);
           await pgmqDelete(CONTENT_REVALIDATION_QUEUE, msg.msg_id);
           results.push({
             msg_id: msg.msg_id.toString(),
@@ -214,11 +224,12 @@ export async function handleRevalidation(_req: Request): Promise<Response> {
         await pgmqDelete(CONTENT_REVALIDATION_QUEUE, msg.msg_id);
         results.push({ msg_id: msg.msg_id.toString(), status: 'success' });
       } catch (error) {
-        const errorMsg = errorToString(error);
-        console.error('[flux-station] Content revalidation failed', {
+        const errorLogContext = createUtilityContext('flux-station', 'content-revalidation', {
           msg_id: msg.msg_id.toString(),
-          error: errorMsg,
+          operation: 'process-message',
         });
+        const errorMsg = errorToString(error);
+        logError('Content revalidation failed', errorLogContext, error);
         // Leave in queue for retry
         results.push({
           msg_id: msg.msg_id.toString(),

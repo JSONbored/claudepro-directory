@@ -12,7 +12,7 @@
  */
 
 import { edgeEnv, pgmqMetrics } from '@heyclaude/edge-runtime';
-import { errorToString } from '@heyclaude/shared-runtime';
+import { createUtilityContext, errorToString, logError, logInfo } from '@heyclaude/shared-runtime';
 import { handleChangelogNotify } from './changelog/notify.ts';
 import { handleChangelogProcess } from './changelog/process.ts';
 import { handleDiscordJobs } from './discord/jobs.ts';
@@ -104,9 +104,10 @@ async function checkQueueMetrics(queueName: string): Promise<number> {
     return metrics?.queue_length ?? 0;
   } catch (error) {
     // If metrics check fails, treat as empty (safe fallback)
-    console.warn(`[queue-processor] Failed to check metrics for queue '${queueName}'`, {
-      error: errorToString(error),
+    const logContext = createUtilityContext('flux-station', 'queue-processor-metrics', {
+      queue_name: queueName,
     });
+    logError(`Failed to check metrics for queue '${queueName}'`, logContext, error);
     return 0;
   }
 }
@@ -270,10 +271,11 @@ export async function processAllQueues(): Promise<QueueProcessingSummary> {
   // 3. If no queues have messages, return early
   if (queuesToProcess.length === 0) {
     const durationMs = Date.now() - startTime;
-    console.log('[queue-processor] No queues with messages, skipping processing', {
-      totalQueues,
+    const logContext = createUtilityContext('flux-station', 'queue-processor', {
+      total_queues: totalQueues,
       duration_ms: durationMs,
     });
+    logInfo('No queues with messages, skipping processing', logContext);
     return {
       totalQueues,
       queuesWithMessages: 0,
@@ -282,13 +284,15 @@ export async function processAllQueues(): Promise<QueueProcessingSummary> {
     };
   }
 
-  console.log(`[queue-processor] Processing ${queuesToProcess.length} queues with messages`, {
+  const batchLogContext = createUtilityContext('flux-station', 'queue-processor-batch', {
+    queues_to_process: queuesToProcess.length,
     queues: queuesToProcess.map(({ config, queueLength }) => ({
       name: config.name,
       length: queueLength,
       priority: config.priority,
     })),
   });
+  logInfo(`Processing ${queuesToProcess.length} queues with messages`, batchLogContext);
 
   // 4. Process queues sequentially (one at a time)
   const results: QueueProcessingResult[] = [];
@@ -311,26 +315,31 @@ export async function processAllQueues(): Promise<QueueProcessingSummary> {
       }
 
       const queueDurationMs = Date.now() - queueStartTime;
+      const queueLogContext = createUtilityContext('flux-station', 'queue-processor-queue', {
+        queue_name: config.name,
+        queue_length: queueLength,
+        duration_ms: queueDurationMs,
+      });
       if (result.success) {
-        console.log(`[queue-processor] Queue '${config.name}' processed successfully`, {
-          queueLength,
+        logInfo(`Queue '${config.name}' processed successfully`, {
+          ...queueLogContext,
           processed: result.processed,
-          duration_ms: queueDurationMs,
         });
       } else {
-        console.error(`[queue-processor] Queue '${config.name}' processing failed`, {
-          queueLength,
-          error: result.error,
-          duration_ms: queueDurationMs,
-        });
+        logError(
+          `Queue '${config.name}' processing failed`,
+          queueLogContext,
+          new Error(result.error)
+        );
       }
     } catch (error) {
       // Unexpected error - log and continue
       const errorMsg = errorToString(error);
-      console.error(`[queue-processor] Unexpected error processing queue '${config.name}'`, {
-        queueLength,
-        error: errorMsg,
+      const errorLogContext = createUtilityContext('flux-station', 'queue-processor-error', {
+        queue_name: config.name,
+        queue_length: queueLength,
       });
+      logError(`Unexpected error processing queue '${config.name}'`, errorLogContext, error);
       result = {
         queue: config.name,
         success: false,
@@ -346,11 +355,11 @@ export async function processAllQueues(): Promise<QueueProcessingSummary> {
   const queuesProcessed = results.filter((r) => r.success).length;
   const totalProcessed = results.reduce((sum, r) => sum + (r.processed ?? 0), 0);
 
-  console.log('[queue-processor] Queue processing completed', {
-    totalQueues,
-    queuesWithMessages,
-    queuesProcessed,
-    totalMessagesProcessed: totalProcessed,
+  const summaryLogContext = createUtilityContext('flux-station', 'queue-processor-summary', {
+    total_queues: totalQueues,
+    queues_with_messages: queuesWithMessages,
+    queues_processed: queuesProcessed,
+    total_messages_processed: totalProcessed,
     duration_ms: durationMs,
     results: results.map((r) => ({
       queue: r.queue,
@@ -359,6 +368,7 @@ export async function processAllQueues(): Promise<QueueProcessingSummary> {
       processed: r.processed,
     })),
   });
+  logInfo('Queue processing completed', summaryLogContext);
 
   return {
     totalQueues,

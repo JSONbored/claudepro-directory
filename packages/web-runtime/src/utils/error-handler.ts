@@ -8,7 +8,7 @@ import { normalizeError } from '../errors.ts';
 import { logger } from '../logger.ts';
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { generateRequestId } from './request-context.ts';
+import { createWebAppContext } from './log-context.ts';
 
 /**
  * Create standardized error response with proper logging
@@ -24,20 +24,21 @@ export async function createErrorResponse(
     logContext?: Record<string, string | number | boolean>;
   } = {}
 ): Promise<NextResponse> {
-  // Generate request ID for tracing
-  const requestId = generateRequestId();
+  // Create standardized log context with single requestId
+  const logContext = createWebAppContext(
+    context.route || 'unknown',
+    context.operation || 'unknown',
+    {
+      method: context.method || 'unknown',
+      ...(context.userId && { userId: context.userId }),
+      sanitizedMessage: sanitizeError(error),
+      ...context.logContext,
+    }
+  );
   
   // Log error with full context - Pino logger outputs to stdout (Vercel captures these logs)
   const normalized = normalizeError(error, 'API error occurred');
-  logger.error('API error occurred', normalized, {
-    requestId,
-    route: context.route || 'unknown',
-    operation: context.operation || 'unknown',
-    method: context.method || 'unknown',
-    ...(context.userId && { userId: context.userId }),
-    sanitizedMessage: sanitizeError(error),
-    ...context.logContext,
-  });
+  logger.error('API error occurred', normalized, logContext);
 
   // Handle Zod validation errors
   if (error instanceof z.ZodError) {

@@ -8,6 +8,7 @@
  */
 
 import { createClient } from '@supabase/supabase-js';
+import escapeHtml from 'escape-html';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import { createServer } from 'http';
 import { homedir } from 'os';
@@ -31,7 +32,7 @@ function loadEnvFile(): void {
       const trimmed = line.trim();
       if (trimmed && !trimmed.startsWith('#')) {
         const match = trimmed.match(/^([^=]+)=(.*)$/);
-        if (match) {
+        if (match?.[1] && match[2] !== undefined) {
           const key = match[1].trim();
           let value = match[2].trim();
           // Remove quotes if present
@@ -188,17 +189,22 @@ async function loginWithOAuth(): Promise<void> {
         const error = parsedUrl.query['error'] as string | undefined;
 
         if (error) {
+          // Sanitize error to prevent log injection (remove newlines and other problematic characters)
+          const sanitizedError = error.replace(/[\r\n]+/g, ' ');
+          // Escape HTML to prevent XSS attacks
+          const escapedError = escapeHtml(sanitizedError);
+
           res.writeHead(400, { 'Content-Type': 'text/html' });
           res.end(`
             <html>
               <body style="font-family: system-ui; padding: 2rem; text-align: center;">
                 <h1>❌ Authentication Failed</h1>
-                <p>${error}</p>
+                <p>${escapedError}</p>
                 <p>You can close this window.</p>
               </body>
             </html>
           `);
-          reject(new Error(`OAuth error: ${error}`));
+          reject(new Error(`OAuth error: ${sanitizedError}`));
           server.close();
           return;
         }

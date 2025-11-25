@@ -1,7 +1,11 @@
 import type { Database } from '@heyclaude/database-types';
-import { logger, normalizeError } from '@heyclaude/web-runtime/core';
+import {
+  createWebAppContextWithId,
+  generateRequestId,
+  logger,
+  normalizeError,
+} from '@heyclaude/web-runtime/core';
 import { generatePageMetadata, getCommunityDirectory } from '@heyclaude/web-runtime/data';
-import { generateRequestId } from '@heyclaude/web-runtime/utils/request-context';
 import type { Metadata } from 'next';
 import { Suspense } from 'react';
 import { ContributorsSidebar } from '@/src/components/features/community/contributors-sidebar';
@@ -17,28 +21,33 @@ export const revalidate = false;
 const DEFAULT_DIRECTORY_LIMIT = 100;
 
 async function CommunityDirectoryContent({ searchQuery }: { searchQuery: string }) {
+  // Generate single requestId for this component
+  const requestId = generateRequestId();
+  const logContext = createWebAppContextWithId(
+    requestId,
+    '/community/directory',
+    'CommunityDirectoryContent',
+    {
+      hasQuery: Boolean(searchQuery),
+    }
+  );
+
   let directoryData: Database['public']['Functions']['get_community_directory']['Returns'] | null =
     null;
   try {
     directoryData = await getCommunityDirectory({ searchQuery, limit: DEFAULT_DIRECTORY_LIMIT });
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load community directory');
-    logger.error('CommunityDirectoryContent: getCommunityDirectory failed', normalized, {
-      requestId: generateRequestId(),
-      operation: 'CommunityDirectoryContent',
-      route: '/community/directory',
-      hasQuery: Boolean(searchQuery),
-    });
+    logger.error('CommunityDirectoryContent: getCommunityDirectory failed', normalized, logContext);
     throw normalized;
   }
 
   if (!directoryData) {
-    logger.warn('CommunityDirectoryContent: directory data response is empty', undefined, {
-      requestId: generateRequestId(),
-      operation: 'CommunityDirectoryContent',
-      route: '/community/directory',
-      hasQuery: Boolean(searchQuery),
-    });
+    logger.warn(
+      'CommunityDirectoryContent: directory data response is empty',
+      undefined,
+      logContext
+    );
   }
 
   const {

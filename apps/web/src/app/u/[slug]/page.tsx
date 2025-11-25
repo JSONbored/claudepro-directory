@@ -5,7 +5,13 @@
 
 import type { Database } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
-import { logger, normalizeError, sanitizeSlug } from '@heyclaude/web-runtime/core';
+import {
+  createWebAppContextWithId,
+  generateRequestId,
+  logger,
+  normalizeError,
+  sanitizeSlug,
+} from '@heyclaude/web-runtime/core';
 import {
   generatePageMetadata,
   getAuthenticatedUser,
@@ -13,7 +19,6 @@ import {
 } from '@heyclaude/web-runtime/data';
 import { FolderOpen, Globe, Users } from '@heyclaude/web-runtime/icons';
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import { generateRequestId } from '@heyclaude/web-runtime/utils/request-context';
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
@@ -134,14 +139,15 @@ export async function generateMetadata({ params }: UserProfilePageProps): Promis
 export default async function UserProfilePage({ params }: UserProfilePageProps) {
   const { slug } = await params;
 
+  // Generate single requestId for this page request
+  const requestId = generateRequestId();
+  const baseLogContext = createWebAppContextWithId(requestId, `/u/${slug}`, 'UserProfilePage', {
+    slug,
+  });
+
   // Validate route slug before hitting the data layer
   if (!isValidSlug(slug)) {
-    logger.warn('UserProfilePage: invalid user slug', undefined, {
-      requestId: generateRequestId(),
-      operation: 'UserProfilePage',
-      route: `/u/${slug}`,
-      slug,
-    });
+    logger.warn('UserProfilePage: invalid user slug', undefined, baseLogContext);
     notFound();
   }
 
@@ -149,6 +155,10 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
     requireUser: false,
     context: 'UserProfilePage',
   });
+
+  const logContext = currentUser?.id
+    ? { ...baseLogContext, viewerId: currentUser.id }
+    : baseLogContext;
 
   let profileData: Database['public']['Functions']['get_user_profile']['Returns'] | null = null;
   try {
@@ -158,23 +168,12 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
     });
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load user profile detail');
-    logger.error('UserProfilePage: get_user_profile threw', normalized, {
-      requestId: generateRequestId(),
-      operation: 'UserProfilePage',
-      route: `/u/${slug}`,
-      slug,
-      ...(currentUser?.id ? { viewerId: currentUser.id } : {}),
-    });
+    logger.error('UserProfilePage: get_user_profile threw', normalized, logContext);
     throw normalized;
   }
 
   if (!profileData) {
-    logger.warn('UserProfilePage: user profile not found', undefined, {
-      requestId: generateRequestId(),
-      operation: 'UserProfilePage',
-      route: `/u/${slug}`,
-      slug,
-    });
+    logger.warn('UserProfilePage: user profile not found', undefined, baseLogContext);
     notFound();
   }
 
@@ -326,13 +325,10 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                           'UserProfilePage: skipping collection with invalid slug',
                           undefined,
                           {
-                            requestId: generateRequestId(),
-                            operation: 'UserProfilePage',
-                            route: `/u/${slug}`,
+                            ...baseLogContext,
                             collectionId: collection.id,
                             collectionName: collection.name ?? 'Unknown',
                             collectionSlug: collection.slug ?? 'Unknown',
-                            userSlug: slug,
                           }
                         );
                         return null;
@@ -397,9 +393,7 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                           'UserProfilePage: skipping contribution with invalid type or slug',
                           undefined,
                           {
-                            requestId: generateRequestId(),
-                            operation: 'UserProfilePage',
-                            route: `/u/${slug}`,
+                            ...baseLogContext,
                             contentId: item.id,
                             contentType: item.content_type,
                             contentSlug: item.slug,

@@ -1,6 +1,13 @@
 import type { Database } from '@heyclaude/database-types';
 import type { JobStatus } from '@heyclaude/web-runtime';
-import { formatRelativeDate, logger, normalizeError } from '@heyclaude/web-runtime/core';
+import {
+  createWebAppContextWithId,
+  formatRelativeDate,
+  generateRequestId,
+  hashUserId,
+  logger,
+  normalizeError,
+} from '@heyclaude/web-runtime/core';
 import type { JobBillingSummaryEntry } from '@heyclaude/web-runtime/data';
 import {
   generatePageMetadata,
@@ -19,7 +26,6 @@ import {
   Plus,
 } from '@heyclaude/web-runtime/icons';
 import { BADGE_COLORS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import { generateRequestId } from '@heyclaude/web-runtime/utils/request-context';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { JobDeleteButton } from '@/src/components/core/buttons/jobs/job-delete-button';
@@ -101,13 +107,15 @@ export default async function MyJobsPage({ searchParams }: MyJobsPageProps) {
   const paymentStatus = resolvedSearchParams?.payment;
   const paymentJobId = resolvedSearchParams?.job_id;
 
+  // Generate single requestId for this page request
+  const requestId = generateRequestId();
+  const baseLogContext = createWebAppContextWithId(requestId, '/account/jobs', 'MyJobsPage');
+
   const { user } = await getAuthenticatedUser({ context: 'MyJobsPage' });
 
   if (!user) {
     logger.warn('MyJobsPage: unauthenticated access attempt detected', undefined, {
-      requestId: generateRequestId(),
-      operation: 'MyJobsPage',
-      route: '/account/jobs',
+      ...baseLogContext,
       timestamp: new Date().toISOString(),
     });
     return (
@@ -127,28 +135,21 @@ export default async function MyJobsPage({ searchParams }: MyJobsPageProps) {
     );
   }
 
+  const userIdHash = hashUserId(user.id);
+  const logContext = { ...baseLogContext, userIdHash };
+
   let data: Database['public']['Functions']['get_user_dashboard']['Returns'] | null = null;
   let fetchError = false;
   try {
     data = await getUserDashboard(user.id);
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load user dashboard for jobs');
-    logger.error('MyJobsPage: getUserDashboard threw', normalized, {
-      requestId: generateRequestId(),
-      operation: 'MyJobsPage',
-      route: '/account/jobs',
-      userId: user.id,
-    });
+    logger.error('MyJobsPage: getUserDashboard threw', normalized, logContext);
     fetchError = true;
   }
 
   if (!data) {
-    logger.warn('MyJobsPage: getUserDashboard returned no data', undefined, {
-      requestId: generateRequestId(),
-      operation: 'MyJobsPage',
-      route: '/account/jobs',
-      userId: user.id,
-    });
+    logger.warn('MyJobsPage: getUserDashboard returned no data', undefined, logContext);
     fetchError = true;
   }
 
@@ -213,7 +214,7 @@ export default async function MyJobsPage({ searchParams }: MyJobsPageProps) {
   })();
 
   if (jobs.length === 0) {
-    logger.info('MyJobsPage: user has no job listings', { userId: user.id });
+    logger.info('MyJobsPage: user has no job listings', logContext);
   }
 
   const jobIds = jobs.map((job) => job.id).filter((id): id is string => Boolean(id));
@@ -223,12 +224,7 @@ export default async function MyJobsPage({ searchParams }: MyJobsPageProps) {
       billingSummaries = await getJobBillingSummaries(jobIds);
     } catch (error) {
       const normalized = normalizeError(error, 'Failed to load job billing summaries');
-      logger.error('MyJobsPage: getJobBillingSummaries failed', normalized, {
-        requestId: generateRequestId(),
-        operation: 'MyJobsPage',
-        route: '/account/jobs',
-        userId: user.id,
-      });
+      logger.error('MyJobsPage: getJobBillingSummaries failed', normalized, logContext);
     }
   }
   const billingSummaryMap = new Map<string, JobBillingSummaryEntry>();

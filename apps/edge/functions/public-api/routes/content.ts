@@ -8,6 +8,14 @@ type ContentCategory = DatabaseGenerated['public']['Enums']['content_category'];
 // Use enum values directly from @heyclaude/database-types Constants
 const CONTENT_CATEGORY_VALUES = Constants.public.Enums.content_category;
 
+/**
+ * Type guard to validate content_category enum
+ * Validates that value is a valid content category from the database enum
+ */
+function isValidContentCategory(value: string): value is ContentCategory {
+  return CONTENT_CATEGORY_VALUES.includes(value as ContentCategory);
+}
+
 import {
   badRequestResponse,
   buildCacheHeaders,
@@ -84,14 +92,6 @@ export async function handleContentRoute(
       return handleCategoryConfigs();
     }
     // Validate content category without type assertion
-    const isValidContentCategory = (value: string): value is ContentCategory => {
-      for (const validValue of CONTENT_CATEGORY_VALUES) {
-        if (value === validValue) {
-          return true;
-        }
-      }
-      return false;
-    };
     if (first && isValidContentCategory(first)) {
       return handleCategoryOnly(first, format);
     }
@@ -106,14 +106,6 @@ export async function handleContentRoute(
       return handleToolLlmsTxt(second, format);
     }
     // Validate content category without type assertion
-    const isValidContentCategory = (value: string): value is ContentCategory => {
-      for (const validValue of CONTENT_CATEGORY_VALUES) {
-        if (value === validValue) {
-          return true;
-        }
-      }
-      return false;
-    };
     if (first && isValidContentCategory(first) && second !== undefined) {
       return handleRecordExport(first, second, url);
     }

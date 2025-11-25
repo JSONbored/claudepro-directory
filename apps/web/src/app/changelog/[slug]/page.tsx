@@ -26,7 +26,12 @@
  */
 export const revalidate = 7200;
 
-import { logger, normalizeError } from '@heyclaude/web-runtime/core';
+import {
+  createWebAppContextWithId,
+  generateRequestId,
+  logger,
+  normalizeError,
+} from '@heyclaude/web-runtime/core';
 import {
   generatePageMetadata,
   getAllChangelogEntries,
@@ -36,7 +41,6 @@ import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { ArrowLeft, Calendar } from '@heyclaude/web-runtime/icons';
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { formatChangelogDate, getChangelogUrl } from '@heyclaude/web-runtime/utils/changelog';
-import { generateRequestId } from '@heyclaude/web-runtime/utils/request-context';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { ReadProgress } from '@/src/components/content/read-progress';
@@ -50,6 +54,14 @@ import { Separator } from '@/src/components/primitives/ui/separator';
  * Generate static params for all changelog entries
  */
 export async function generateStaticParams() {
+  // Generate requestId for static params generation (build-time)
+  const staticParamsRequestId = generateRequestId();
+  const staticParamsLogContext = createWebAppContextWithId(
+    staticParamsRequestId,
+    '/changelog',
+    'ChangelogEntryPageStaticParams'
+  );
+
   try {
     const entries = await getAllChangelogEntries();
 
@@ -58,11 +70,11 @@ export async function generateStaticParams() {
     }));
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to generate changelog static params');
-    logger.error('ChangelogEntryPage: generateStaticParams threw', normalized, {
-      requestId: generateRequestId(),
-      operation: 'ChangelogEntryPage',
-      route: '/changelog',
-    });
+    logger.error(
+      'ChangelogEntryPage: generateStaticParams threw',
+      normalized,
+      staticParamsLogContext
+    );
     // Re-throw so callers/CI see a hard failure rather than masking it
     throw normalized;
   }
@@ -78,17 +90,23 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
 
+  // Generate requestId for metadata generation (separate from page render)
+  const metadataRequestId = generateRequestId();
+  const metadataLogContext = createWebAppContextWithId(
+    metadataRequestId,
+    `/changelog/${slug}`,
+    'ChangelogEntryPageMetadata',
+    {
+      slug,
+    }
+  );
+
   let entry: Awaited<ReturnType<typeof getChangelogEntryBySlug>> | null = null;
   try {
     entry = await getChangelogEntryBySlug(slug);
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load changelog entry for metadata');
-    logger.error('ChangelogEntryPage: metadata loader threw', normalized, {
-      requestId: generateRequestId(),
-      operation: 'ChangelogEntryPage',
-      route: `/changelog/${slug}`,
-      slug,
-    });
+    logger.error('ChangelogEntryPage: metadata loader threw', normalized, metadataLogContext);
   }
 
   return generatePageMetadata('/changelog/:slug', {
@@ -107,27 +125,29 @@ export default async function ChangelogEntryPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
+
+  // Generate single requestId for this page request
+  const requestId = generateRequestId();
+  const logContext = createWebAppContextWithId(
+    requestId,
+    `/changelog/${slug}`,
+    'ChangelogEntryPage',
+    {
+      slug,
+    }
+  );
+
   let entry: Awaited<ReturnType<typeof getChangelogEntryBySlug>> | null = null;
   try {
     entry = await getChangelogEntryBySlug(slug);
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load changelog entry');
-    logger.error('ChangelogEntryPage: getChangelogEntryBySlug threw', normalized, {
-      requestId: generateRequestId(),
-      operation: 'ChangelogEntryPage',
-      route: `/changelog/${slug}`,
-      slug,
-    });
+    logger.error('ChangelogEntryPage: getChangelogEntryBySlug threw', normalized, logContext);
     throw normalized;
   }
 
   if (!entry) {
-    logger.warn('ChangelogEntryPage: entry not found', undefined, {
-      requestId: generateRequestId(),
-      operation: 'ChangelogEntryPage',
-      route: `/changelog/${slug}`,
-      slug,
-    });
+    logger.warn('ChangelogEntryPage: entry not found', undefined, logContext);
     notFound();
   }
 

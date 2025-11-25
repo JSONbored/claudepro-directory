@@ -3,9 +3,8 @@
  * Initiates OAuth flow to link a provider to an existing authenticated account
  */
 
-import { logger } from '@heyclaude/web-runtime/core';
+import { createWebAppContextWithId, generateRequestId, logger } from '@heyclaude/web-runtime/core';
 import { getAuthenticatedUser } from '@heyclaude/web-runtime/server';
-import { generateRequestId } from '@heyclaude/web-runtime/utils/request-context';
 import { type NextRequest, NextResponse } from 'next/server';
 
 /**
@@ -31,6 +30,9 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ provider: string }> }
 ) {
+  // Generate single requestId for this route request
+  const requestId = generateRequestId();
+
   const { provider: rawProvider } = await params;
   const { searchParams, origin } = new URL(request.url);
   const nextParam = searchParams.get('next') ?? '/account/connected-accounts';
@@ -41,12 +43,16 @@ export async function GET(
     !nextParam.includes('@');
   const next = isValidRedirect ? nextParam : '/account/connected-accounts';
 
+  const baseLogContext = createWebAppContextWithId(
+    requestId,
+    `/auth/link/${rawProvider}`,
+    'OAuthLink'
+  );
+
   // Validate provider
   if (!isValidProvider(rawProvider)) {
     logger.warn('OAuth link: invalid provider', undefined, {
-      requestId: generateRequestId(),
-      operation: 'OAuthLink',
-      route: `/auth/link/${rawProvider}`,
+      ...baseLogContext,
       provider: rawProvider,
     });
     return NextResponse.redirect(`${origin}/account/connected-accounts?error=invalid_provider`);
@@ -60,14 +66,13 @@ export async function GET(
 
   if (!(authResult.isAuthenticated && authResult.user)) {
     logger.warn('OAuth link: user not authenticated', undefined, {
-      requestId: generateRequestId(),
-      operation: 'OAuthLink',
-      route: `/auth/link/${rawProvider}`,
+      ...baseLogContext,
       provider: rawProvider,
     });
-    // Redirect to login with return URL
+    // Redirect to login with return URL, preserving the 'next' parameter
     const loginUrl = new URL(`${origin}/login`);
-    loginUrl.searchParams.set('redirect', `/auth/link/${rawProvider}`);
+    const linkUrlWithNext = `/auth/link/${rawProvider}?next=${encodeURIComponent(next)}`;
+    loginUrl.searchParams.set('redirect', linkUrlWithNext);
     return NextResponse.redirect(loginUrl.toString());
   }
 

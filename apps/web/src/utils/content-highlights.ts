@@ -51,7 +51,8 @@ function getTrendingScore(item: DisplayableContent): number {
 }
 
 export function getTrendingSlugs(items: readonly DisplayableContent[], topN = 3): Set<string> {
-  if (!items.length || topN <= 0) {
+  // Defensive check: ensure items is not null/undefined before accessing .length
+  if (!items?.length || topN <= 0) {
     return new Set();
   }
 

@@ -3,7 +3,13 @@
  * Single RPC call to get_user_collection_detail() replaces 3 separate queries
  */
 
-import { type CollectionDetailData, logger, normalizeError } from '@heyclaude/web-runtime/core';
+import {
+  type CollectionDetailData,
+  createWebAppContextWithId,
+  generateRequestId,
+  logger,
+  normalizeError,
+} from '@heyclaude/web-runtime/core';
 import {
   generatePageMetadata,
   getAuthenticatedUser,
@@ -11,7 +17,6 @@ import {
 } from '@heyclaude/web-runtime/data';
 import { ArrowLeft, ExternalLink } from '@heyclaude/web-runtime/icons';
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import { generateRequestId } from '@heyclaude/web-runtime/utils/request-context';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -70,6 +75,18 @@ interface PublicCollectionPageProps {
 export async function generateMetadata({ params }: PublicCollectionPageProps): Promise<Metadata> {
   const { slug, collectionSlug } = await params;
 
+  // Generate requestId for metadata generation (separate from page render)
+  const metadataRequestId = generateRequestId();
+  const metadataLogContext = createWebAppContextWithId(
+    metadataRequestId,
+    `/u/${slug}/collections/${collectionSlug}`,
+    'PublicCollectionPageMetadata',
+    {
+      slug,
+      collectionSlug,
+    }
+  );
+
   try {
     // Warm cache for subsequent page render - this fetch in generateMetadata
     // ensures the data is cached when the page component fetches the same data
@@ -79,13 +96,7 @@ export async function generateMetadata({ params }: PublicCollectionPageProps): P
     });
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load collection detail for metadata');
-    logger.error('PublicCollectionPage: metadata fetch failed', normalized, {
-      requestId: generateRequestId(),
-      operation: 'PublicCollectionPage',
-      route: `/u/${slug}/collections/${collectionSlug}`,
-      slug,
-      collectionSlug,
-    });
+    logger.error('PublicCollectionPage: metadata fetch failed', normalized, metadataLogContext);
   }
 
   return generatePageMetadata('/u/:slug/collections/:collectionSlug', {
@@ -98,11 +109,27 @@ export async function generateMetadata({ params }: PublicCollectionPageProps): P
 export default async function PublicCollectionPage({ params }: PublicCollectionPageProps) {
   const { slug, collectionSlug } = await params;
 
+  // Generate single requestId for this page request
+  const requestId = generateRequestId();
+  const baseLogContext = createWebAppContextWithId(
+    requestId,
+    `/u/${slug}/collections/${collectionSlug}`,
+    'PublicCollectionPage',
+    {
+      slug,
+      collectionSlug,
+    }
+  );
+
   // Get current user (if logged in) for ownership check
   const { user: currentUser } = await getAuthenticatedUser({
     requireUser: false,
     context: 'PublicCollectionPage',
   });
+
+  const logContext = currentUser?.id
+    ? { ...baseLogContext, viewerId: currentUser.id }
+    : baseLogContext;
 
   // Single RPC call replaces 3 separate queries (user, collection, items)
   let collectionData: CollectionDetailData | null = null;
@@ -114,25 +141,12 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
     });
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load collection detail for page render');
-    logger.error('PublicCollectionPage: getPublicCollectionDetail threw', normalized, {
-      requestId: generateRequestId(),
-      operation: 'PublicCollectionPage',
-      route: `/u/${slug}/collections/${collectionSlug}`,
-      slug,
-      collectionSlug,
-      ...(currentUser?.id ? { viewerId: currentUser.id } : {}),
-    });
+    logger.error('PublicCollectionPage: getPublicCollectionDetail threw', normalized, logContext);
     throw normalized;
   }
 
   if (!collectionData) {
-    logger.warn('PublicCollectionPage: collection detail not found', undefined, {
-      requestId: generateRequestId(),
-      operation: 'PublicCollectionPage',
-      route: `/u/${slug}/collections/${collectionSlug}`,
-      slug,
-      collectionSlug,
-    });
+    logger.warn('PublicCollectionPage: collection detail not found', undefined, baseLogContext);
     notFound();
   }
 

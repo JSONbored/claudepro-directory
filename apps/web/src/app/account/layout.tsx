@@ -3,7 +3,13 @@
  */
 
 import { ensureUserRecord } from '@heyclaude/web-runtime/actions';
-import { hashUserId, logger, normalizeError } from '@heyclaude/web-runtime/core';
+import {
+  createWebAppContextWithId,
+  generateRequestId,
+  hashUserId,
+  logger,
+  normalizeError,
+} from '@heyclaude/web-runtime/core';
 import { getUserSettings, getUserSponsorships } from '@heyclaude/web-runtime/data';
 import {
   Activity,
@@ -19,7 +25,6 @@ import {
 } from '@heyclaude/web-runtime/icons';
 import { createSupabaseServerClient, getAuthenticatedUser } from '@heyclaude/web-runtime/server';
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import { generateRequestId } from '@heyclaude/web-runtime/utils/request-context';
 import Image from 'next/image';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
@@ -40,8 +45,12 @@ export default async function AccountLayout({ children }: { children: React.Reac
     data: { session },
   } = await supabase.auth.getSession();
 
-  // Compute userIdHash once for reuse in all log contexts
+  // Generate single requestId for this layout request
+  const requestId = generateRequestId();
   const userIdHash = hashUserId(user.id);
+  const logContext = createWebAppContextWithId(requestId, '/account', 'AccountLayout', {
+    userIdHash,
+  });
 
   if (session?.expires_at) {
     const expiresIn = session.expires_at - Math.floor(Date.now() / 1000);
@@ -50,18 +59,12 @@ export default async function AccountLayout({ children }: { children: React.Reac
       if (refreshError) {
         const normalized = normalizeError(refreshError, 'Session refresh failed');
         logger.warn('AccountLayout: session refresh failed', undefined, {
-          requestId: generateRequestId(),
-          operation: 'AccountLayout',
+          ...logContext,
           error: normalized.message,
-          userIdHash,
         });
         // Continue with existing session - user may need to re-authenticate on next request
       } else if (refreshData.session) {
-        logger.debug('AccountLayout: session refreshed successfully', {
-          requestId: generateRequestId(),
-          operation: 'AccountLayout',
-          userIdHash,
-        });
+        logger.debug('AccountLayout: session refreshed successfully', logContext);
       }
     }
   }
@@ -81,19 +84,11 @@ export default async function AccountLayout({ children }: { children: React.Reac
     if (settings) {
       profile = settings.user_data ?? null;
     } else {
-      logger.warn('AccountLayout: getUserSettings returned null', undefined, {
-        requestId: generateRequestId(),
-        operation: 'AccountLayout',
-        userIdHash,
-      });
+      logger.warn('AccountLayout: getUserSettings returned null', undefined, logContext);
     }
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load user settings in account layout');
-    logger.error('AccountLayout: getUserSettings threw', normalized, {
-      requestId: generateRequestId(),
-      operation: 'AccountLayout',
-      userIdHash,
-    });
+    logger.error('AccountLayout: getUserSettings threw', normalized, logContext);
   }
 
   if (!profile) {
@@ -111,11 +106,7 @@ export default async function AccountLayout({ children }: { children: React.Reac
         logger.warn(
           'AccountLayout: getUserSettings returned null after ensureUserRecord',
           undefined,
-          {
-            requestId: generateRequestId(),
-            operation: 'AccountLayout',
-            userIdHash,
-          }
+          logContext
         );
       }
     } catch (error) {
@@ -123,11 +114,11 @@ export default async function AccountLayout({ children }: { children: React.Reac
         error,
         'Failed to ensure user record or reload settings in account layout'
       );
-      logger.error('AccountLayout: ensureUserRecord or getUserSettings threw', normalized, {
-        requestId: generateRequestId(),
-        operation: 'AccountLayout',
-        userIdHash,
-      });
+      logger.error(
+        'AccountLayout: ensureUserRecord or getUserSettings threw',
+        normalized,
+        logContext
+      );
     }
   }
 
@@ -136,20 +127,12 @@ export default async function AccountLayout({ children }: { children: React.Reac
   try {
     sponsorships = await sponsorshipsPromise;
     if (!sponsorships) {
-      logger.warn('AccountLayout: getUserSponsorships returned null', undefined, {
-        requestId: generateRequestId(),
-        operation: 'AccountLayout',
-        userIdHash,
-      });
+      logger.warn('AccountLayout: getUserSponsorships returned null', undefined, logContext);
       sponsorships = [];
     }
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load user sponsorships in account layout');
-    logger.error('AccountLayout: getUserSponsorships threw', normalized, {
-      requestId: generateRequestId(),
-      operation: 'AccountLayout',
-      userIdHash,
-    });
+    logger.error('AccountLayout: getUserSponsorships threw', normalized, logContext);
     sponsorships = [];
   }
 

@@ -19,77 +19,18 @@ export async function createSupabaseServerClient(): Promise<SupabaseServerClient
   const supabaseUrl = process.env['NEXT_PUBLIC_SUPABASE_URL'];
   const supabaseAnonKey = process.env['NEXT_PUBLIC_SUPABASE_ANON_KEY'];
 
-  if (!(supabaseUrl && supabaseAnonKey)) {
-    if (process.env['NODE_ENV'] === 'development') {
-      logger.warn(
-        'Supabase env vars not found - using mock server client for development. Database features will not work.'
-      );
-    } else {
-      throw new Error(
-        'Missing required Supabase environment variables: NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY'
-      );
-    }
+  if (!supabaseUrl) {
+    throw new Error(
+      'Missing NEXT_PUBLIC_SUPABASE_URL environment variable. ' +
+      'Please ensure your .env.local file contains NEXT_PUBLIC_SUPABASE_URL.'
+    );
+  }
 
-    type MockQueryResult = Promise<{ data: null; error: null }>;
-
-    const promise = Promise.resolve({ data: null, error: null }) as MockQueryResult;
-
-    const mockQueryBuilder = promise as MockQueryResult & {
-      select: () => MockQueryResult;
-      insert: () => MockQueryResult;
-      update: () => MockQueryResult;
-      delete: () => MockQueryResult;
-      eq: () => MockQueryResult;
-      neq: () => MockQueryResult;
-      gt: () => MockQueryResult;
-      gte: () => MockQueryResult;
-      lt: () => MockQueryResult;
-      lte: () => MockQueryResult;
-      like: () => MockQueryResult;
-      ilike: () => MockQueryResult;
-      is: () => MockQueryResult;
-      in: () => MockQueryResult;
-      order: () => MockQueryResult;
-      limit: () => MockQueryResult;
-      range: () => MockQueryResult;
-      single: () => MockQueryResult;
-      maybeSingle: () => MockQueryResult;
-    };
-
-    mockQueryBuilder.select = () => mockQueryBuilder;
-    mockQueryBuilder.insert = () => mockQueryBuilder;
-    mockQueryBuilder.update = () => mockQueryBuilder;
-    mockQueryBuilder.delete = () => mockQueryBuilder;
-    mockQueryBuilder.eq = () => mockQueryBuilder;
-    mockQueryBuilder.neq = () => mockQueryBuilder;
-    mockQueryBuilder.gt = () => mockQueryBuilder;
-    mockQueryBuilder.gte = () => mockQueryBuilder;
-    mockQueryBuilder.lt = () => mockQueryBuilder;
-    mockQueryBuilder.lte = () => mockQueryBuilder;
-    mockQueryBuilder.like = () => mockQueryBuilder;
-    mockQueryBuilder.ilike = () => mockQueryBuilder;
-    mockQueryBuilder.is = () => mockQueryBuilder;
-    mockQueryBuilder.in = () => mockQueryBuilder;
-    mockQueryBuilder.order = () => mockQueryBuilder;
-    mockQueryBuilder.limit = () => mockQueryBuilder;
-    mockQueryBuilder.range = () => mockQueryBuilder;
-    mockQueryBuilder.single = () => mockQueryBuilder;
-    mockQueryBuilder.maybeSingle = () => mockQueryBuilder;
-
-    // Type assertion: Mock client for development when env vars are missing
-    // This mock object doesn't match the full Supabase client interface, but provides
-    // the minimal structure needed to prevent runtime errors in development
-    // The 'as unknown as' pattern is necessary because the mock is intentionally incomplete
-    const mockClient = {
-      auth: {
-        getUser: async () => ({ data: { user: null }, error: null }),
-        signOut: async () => ({ error: null }),
-      },
-      from: () => mockQueryBuilder,
-      rpc: () => mockQueryBuilder,
-    } as unknown as SupabaseServerClient;
-    
-    return mockClient;
+  if (!supabaseAnonKey) {
+    throw new Error(
+      'Missing NEXT_PUBLIC_SUPABASE_ANON_KEY environment variable. ' +
+      'Please ensure your .env.local file contains NEXT_PUBLIC_SUPABASE_ANON_KEY.'
+    );
   }
 
   return createServerClient<Database>(supabaseUrl, supabaseAnonKey, {

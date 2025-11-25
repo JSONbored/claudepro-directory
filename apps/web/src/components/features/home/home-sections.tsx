@@ -3,21 +3,20 @@
 /** Homepage client consuming homepageConfigs for runtime-tunable featured categories */
 
 import type { Database } from '@heyclaude/database-types';
+import { getHomepageConfigBundle } from '@heyclaude/web-runtime/actions';
 import {
   logClientWarning,
-  logger,
   logUnhandledPromise,
-  normalizeError,
+  trackHomepageSectionError,
+  trackMissingData,
 } from '@heyclaude/web-runtime/core';
 import {
-  getAnimationConfig,
   getCategoryConfigs,
   getCategoryStatsConfig,
   getHomepageFeaturedCategories,
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import type {
-  ContentItem,
   DisplayableContent,
   FilterState,
   HomePageClientProps,
@@ -62,8 +61,9 @@ function HomePageClientComponent({
   featuredJobs = [],
   searchFilters,
   weekStart,
+  serverCategoryIds,
 }: HomePageClientProps) {
-  const [allConfigs, setAllConfigs] = useState<ContentItem[]>([]);
+  const [allConfigs, setAllConfigs] = useState<DisplayableContent[]>([]);
   const [isLoadingAllConfigs, setIsLoadingAllConfigs] = useState(false);
   const [hasMoreAllConfigs, setHasMoreAllConfigs] = useState(true);
   const [activeTab, setActiveTab] = useState('all');
@@ -71,9 +71,30 @@ function HomePageClientComponent({
   const [isSearching, setIsSearching] = useState(false);
   const [filters, setFilters] = useState({});
   const [currentSearchQuery, setCurrentSearchQuery] = useState('');
+
+  // Initialize featuredCategories from server data immediately (before Statsig config loads)
+  // This ensures content renders even if Statsig config fails or is slow
   const [featuredCategories, setFeaturedCategories] = useState<
     readonly Database['public']['Enums']['content_category'][]
-  >([]);
+  >(() => {
+    // First, try using keys from initialData (most reliable - these are categories that have data)
+    const categoriesFromData = Object.keys(initialData).filter((cat) => {
+      const data = initialData[cat];
+      return Array.isArray(data) && data.length > 0;
+    }) as readonly Database['public']['Enums']['content_category'][];
+
+    if (categoriesFromData.length > 0) {
+      return categoriesFromData;
+    }
+
+    // Fallback: Use server-provided categoryIds if initialData is empty (shouldn't happen, but defensive)
+    if (serverCategoryIds && serverCategoryIds.length > 0) {
+      return serverCategoryIds as readonly Database['public']['Enums']['content_category'][];
+    }
+
+    // Final fallback: empty array
+    return [] as readonly Database['public']['Enums']['content_category'][];
+  });
   const [springDefault, setSpringDefault] = useState({
     type: 'spring' as const,
     stiffness: 400,
@@ -83,31 +104,80 @@ function HomePageClientComponent({
   const categoryStatsConfig = useMemo(() => getCategoryStatsConfig(), []);
   const categoryConfigs = useMemo(() => getCategoryConfigs(), []);
 
+  // Track missing stats data
   useEffect(() => {
-    getHomepageFeaturedCategories()
-      .then((categories) => {
-        setFeaturedCategories(categories);
-      })
-      .catch((error) => {
-        logClientWarning('HomePageClient: failed to load featured categories', error);
+    if (stats && Object.keys(stats).length === 0) {
+      trackMissingData('stats', 'stats-data', {
+        categoryStatsConfigCount: categoryStatsConfig.length,
+        expectedCategories: categoryStatsConfig.map((c) => c.categoryId),
       });
-  }, []);
+    }
+  }, [stats, categoryStatsConfig]);
 
+  // OPTIMIZATION: Use config bundle instead of separate calls (reduces 2 calls to 1)
   useEffect(() => {
-    getAnimationConfig()
-      .then((result) => {
-        if (!result) return;
-        const config = result;
+    getHomepageConfigBundle()
+      .then((bundle) => {
+        // Extract featured categories from homepage config
+        const categories = Array.isArray(bundle.homepageConfig['homepage.featured_categories'])
+          ? bundle.homepageConfig['homepage.featured_categories']
+          : [];
+
+        // Use Statsig categories if available, otherwise fall back to server-provided categoryIds
+        // Filter to only include categories that have data in initialData
+        const validCategories =
+          categories.length > 0
+            ? categories.filter(
+                (cat) =>
+                  initialData[cat] && Array.isArray(initialData[cat]) && initialData[cat].length > 0
+              )
+            : (serverCategoryIds ?? []).filter(
+                (cat) =>
+                  initialData[cat] && Array.isArray(initialData[cat]) && initialData[cat].length > 0
+              );
+
+        setFeaturedCategories(
+          validCategories as readonly Database['public']['Enums']['content_category'][]
+        );
+
+        // Extract animation config
         setSpringDefault({
           type: 'spring' as const,
-          stiffness: config['animation.spring.default.stiffness'],
-          damping: config['animation.spring.default.damping'],
+          stiffness: bundle.animationConfig['animation.spring.default.stiffness'],
+          damping: bundle.animationConfig['animation.spring.default.damping'],
         });
       })
       .catch((error) => {
-        logger.error('HomePageClient: failed to load animation config', error);
+        trackHomepageSectionError('featured', 'load-config-bundle', error, {
+          serverCategoryIds: serverCategoryIds?.length ?? 0,
+        });
+        logClientWarning('HomePageClient: failed to load config bundle', error);
+        // Fallback: Use server-provided categoryIds, filtered to only include categories with data
+        const validCategories = (serverCategoryIds ?? []).filter(
+          (cat) =>
+            initialData[cat] && Array.isArray(initialData[cat]) && initialData[cat].length > 0
+        );
+        if (validCategories.length > 0) {
+          setFeaturedCategories(
+            validCategories as readonly Database['public']['Enums']['content_category'][]
+          );
+        } else {
+          // Last resort: try to get featured categories individually
+          getHomepageFeaturedCategories()
+            .then((categories) => {
+              const valid = categories.filter(
+                (cat) =>
+                  initialData[cat] && Array.isArray(initialData[cat]) && initialData[cat].length > 0
+              );
+              setFeaturedCategories(valid);
+            })
+            .catch((err) => {
+              trackHomepageSectionError('featured', 'load-featured-categories-fallback', err);
+              logClientWarning('HomePageClient: failed to load featured categories fallback', err);
+            });
+        }
       });
-  }, []);
+  }, [serverCategoryIds, initialData]);
 
   const fetchAllConfigs = useCallback(
     async (offset: number, limit = 30) => {
@@ -126,13 +196,18 @@ function HomePageClientComponent({
 
         if (result?.serverError) {
           // Error already logged by safe-action middleware
-          const normalized = normalizeError(result.serverError, 'Failed to load content');
-          logger.error('Failed to load content', normalized, {
+          trackHomepageSectionError('all-content', 'fetch-paginated-content', result.serverError, {
+            offset,
+            limit,
             source: 'fetchAllConfigs',
           });
+          return; // Exit early on error
         }
 
-        const newItems = (result ?? []) as ContentItem[];
+        // Safe-action returns { data: T, serverError?: ... } structure
+        // fetchPaginatedContent returns DisplayableContent[] wrapped in { data: DisplayableContent[] }
+        // Defensive: Ensure data is an array before using it
+        const newItems: DisplayableContent[] = Array.isArray(result?.data) ? result.data : [];
 
         if (newItems.length < limit) {
           setHasMoreAllConfigs(false);
@@ -140,8 +215,11 @@ function HomePageClientComponent({
 
         setAllConfigs((prev) => [...prev, ...newItems]);
       } catch (error) {
-        const normalized = normalizeError(error, 'Failed to load content');
-        logger.error('Failed to load content', normalized, { source: 'fetchAllConfigs' });
+        trackHomepageSectionError('all-content', 'fetch-paginated-content', error, {
+          offset,
+          limit,
+          source: 'fetchAllConfigs',
+        });
       } finally {
         setIsLoadingAllConfigs(false);
       }
@@ -156,6 +234,9 @@ function HomePageClientComponent({
   useEffect(() => {
     if (activeTab === 'all' && allConfigs.length === 0 && !isLoadingAllConfigs) {
       fetchAllConfigs(0).catch((error) => {
+        trackHomepageSectionError('all-content', 'initial-fetch', error, {
+          activeTab,
+        });
         logUnhandledPromise('HomePageClient: initial fetchAllConfigs failed', error);
       });
     }
@@ -191,8 +272,11 @@ function HomePageClientComponent({
 
         setSearchResults(result.results as DisplayableContent[]);
       } catch (error) {
-        const normalized = normalizeError(error, 'Search failed');
-        logger.error('Search failed', normalized, { source: 'HomePageSearch' });
+        const effectiveTab = categoryOverride ?? activeTab;
+        trackHomepageSectionError('search', 'search-unified', error, {
+          query: query.trim(),
+          category: effectiveTab,
+        });
         setSearchResults(allConfigs);
       } finally {
         setIsSearching(false);
@@ -252,7 +336,7 @@ function HomePageClientComponent({
 
     const lookupSet = slugLookupMaps[activeTab as keyof typeof slugLookupMaps];
     return lookupSet
-      ? (dataSource || []).filter((item) => lookupSet.has(item.slug))
+      ? (dataSource || []).filter((item) => item.slug && lookupSet.has(item.slug))
       : dataSource || [];
   }, [searchResults, allConfigs, activeTab, slugLookupMaps, isSearching]);
 
@@ -263,6 +347,10 @@ function HomePageClientComponent({
       // If currently searching, re-run search with new category filter (DB-side)
       if (isSearching && currentSearchQuery) {
         handleSearch(currentSearchQuery, value).catch((error) => {
+          trackHomepageSectionError('search', 'search-retry', error, {
+            query: currentSearchQuery,
+            tab: value,
+          });
           logUnhandledPromise('HomePageClient: search retry failed', error, {
             tab: value,
           });
@@ -275,6 +363,7 @@ function HomePageClientComponent({
   // Handle clear search
   const handleClearSearch = useCallback(() => {
     handleSearch('').catch((error) => {
+      trackHomepageSectionError('search', 'clear-search', error);
       logUnhandledPromise('HomePageClient: clear search failed', error);
     });
   }, [handleSearch]);
@@ -298,7 +387,7 @@ function HomePageClientComponent({
 
           {/* Quick Stats - Below Search Bar - ENHANCED mobile version */}
           {/* Modern 2025 Architecture: Configuration-Driven Stats Display with Motion.dev */}
-          {stats ? (
+          {stats && Object.keys(stats).length > 0 ? (
             <>
               {/* Mobile Stats - Compact horizontal scroll carousel */}
               <motion.div

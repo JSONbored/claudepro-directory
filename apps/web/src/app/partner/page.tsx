@@ -1,4 +1,6 @@
 import {
+  createWebAppContextWithId,
+  generateRequestId,
   getPartnerContactChannels,
   getPartnerCtas,
   logger,
@@ -17,7 +19,6 @@ import {
   Sparkles,
 } from '@heyclaude/web-runtime/icons';
 import { RESPONSIVE_PATTERNS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import { generateRequestId } from '@heyclaude/web-runtime/utils/request-context';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { HoverCard } from '@/src/components/primitives/animation/hover-card';
 import { Button } from '@/src/components/primitives/ui/button';
@@ -42,16 +43,16 @@ import {
 export const revalidate = 86400;
 
 export default async function PartnerPage() {
+  // Generate single requestId for this page request
+  const requestId = generateRequestId();
+  const logContext = createWebAppContextWithId(requestId, '/partner', 'PartnerPage');
+
   let pricing: Awaited<ReturnType<typeof getPartnerPricing>>;
   try {
     pricing = await getPartnerPricing();
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load pricing config');
-    logger.error('PartnerPage: getPartnerPricing failed', normalized, {
-      requestId: generateRequestId(),
-      operation: 'PartnerPage',
-      route: '/partner',
-    });
+    logger.error('PartnerPage: getPartnerPricing failed', normalized, logContext);
     // Use defaults instead of throwing to prevent page crash
     pricing = {
       jobs: {

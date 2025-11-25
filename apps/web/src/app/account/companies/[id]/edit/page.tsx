@@ -3,14 +3,19 @@
  */
 
 import type { Database } from '@heyclaude/database-types';
-import { hashUserId, logger, normalizeError } from '@heyclaude/web-runtime/core';
+import {
+  createWebAppContextWithId,
+  generateRequestId,
+  hashUserId,
+  logger,
+  normalizeError,
+} from '@heyclaude/web-runtime/core';
 import {
   generatePageMetadata,
   getAuthenticatedUser,
   getUserCompanyById,
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { generateRequestId } from '@heyclaude/web-runtime/utils/request-context';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
@@ -41,19 +46,27 @@ interface EditCompanyPageProps {
 
 export default async function EditCompanyPage({ params }: EditCompanyPageProps) {
   const { id } = await params;
+
+  // Generate single requestId for this page request
+  const requestId = generateRequestId();
+  const baseLogContext = createWebAppContextWithId(
+    requestId,
+    `/account/companies/${id}/edit`,
+    'EditCompanyPage',
+    {
+      companyId: id,
+    }
+  );
+
   const { user } = await getAuthenticatedUser({ context: 'EditCompanyPage' });
 
   if (!user) {
-    logger.warn('EditCompanyPage: unauthenticated access attempt', undefined, {
-      requestId: generateRequestId(),
-      operation: 'EditCompanyPage',
-      route: `/account/companies/${id}/edit`,
-      companyId: id,
-    });
+    logger.warn('EditCompanyPage: unauthenticated access attempt', undefined, baseLogContext);
     redirect('/login');
   }
 
   const hashedUserId = hashUserId(user.id);
+  const logContext = { ...baseLogContext, userIdHash: hashedUserId };
 
   let company: Database['public']['CompositeTypes']['user_companies_company'] | null = null;
   let hasError = false;
@@ -61,13 +74,7 @@ export default async function EditCompanyPage({ params }: EditCompanyPageProps) 
     company = await getUserCompanyById(user.id, id);
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load company for edit page');
-    logger.error('EditCompanyPage: getUserCompanyById threw', normalized, {
-      requestId: generateRequestId(),
-      operation: 'EditCompanyPage',
-      route: `/account/companies/${id}/edit`,
-      companyId: id,
-      hashedUserId,
-    });
+    logger.error('EditCompanyPage: getUserCompanyById threw', normalized, logContext);
     hasError = true;
   }
 
@@ -92,13 +99,7 @@ export default async function EditCompanyPage({ params }: EditCompanyPageProps) 
   }
 
   if (!company) {
-    logger.warn('Company not found or access denied', undefined, {
-      requestId: generateRequestId(),
-      operation: 'EditCompanyPage',
-      route: `/account/companies/${id}/edit`,
-      companyId: id,
-      hashedUserId,
-    });
+    logger.warn('Company not found or access denied', undefined, logContext);
     notFound();
   }
 

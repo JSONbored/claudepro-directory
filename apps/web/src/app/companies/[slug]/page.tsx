@@ -4,7 +4,7 @@
  * Leverages get_company_profile() RPC + company_job_stats materialized view
  */
 
-import { logger } from '@heyclaude/web-runtime/core';
+import { createWebAppContextWithId, generateRequestId, logger } from '@heyclaude/web-runtime/core';
 import { generatePageMetadata, getCompanyProfile } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import {
@@ -16,7 +16,6 @@ import {
   Users,
 } from '@heyclaude/web-runtime/icons';
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import { generateRequestId } from '@heyclaude/web-runtime/utils/request-context';
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -104,8 +103,17 @@ export const dynamicParams = true; // Allow unknown slugs to be rendered on dema
  */
 export async function generateStaticParams() {
   const { getCompaniesList } = await import('@heyclaude/web-runtime/data');
-  const { logger } = await import('@heyclaude/web-runtime/core');
-  const { generateRequestId } = await import('@heyclaude/web-runtime/utils/request-context');
+  const { logger, createWebAppContextWithId, generateRequestId } = await import(
+    '@heyclaude/web-runtime/core'
+  );
+
+  // Generate requestId for static params generation (build-time)
+  const staticParamsRequestId = generateRequestId();
+  const staticParamsLogContext = createWebAppContextWithId(
+    staticParamsRequestId,
+    '/companies/[slug]',
+    'CompanyPageStaticParams'
+  );
 
   try {
     const result = await getCompaniesList(50, 0);
@@ -118,9 +126,7 @@ export async function generateStaticParams() {
       }));
   } catch (error) {
     logger.warn('generateStaticParams: failed to load companies', undefined, {
-      requestId: generateRequestId(),
-      operation: 'generateStaticParams',
-      route: '/companies/[slug]',
+      ...staticParamsLogContext,
       error: error instanceof Error ? error.message : String(error),
     });
     return [];
@@ -137,15 +143,16 @@ export async function generateMetadata({ params }: CompanyPageProps): Promise<Me
 export default async function CompanyPage({ params }: CompanyPageProps) {
   const { slug } = await params;
 
+  // Generate single requestId for this page request
+  const requestId = generateRequestId();
+  const logContext = createWebAppContextWithId(requestId, `/companies/${slug}`, 'CompanyPage', {
+    slug,
+  });
+
   const profile = await getCompanyProfile(slug);
 
   if (!profile?.company) {
-    logger.warn('CompanyPage: company not found', undefined, {
-      requestId: generateRequestId(),
-      operation: 'CompanyPage',
-      route: `/companies/${slug}`,
-      slug,
-    });
+    logger.warn('CompanyPage: company not found', undefined, logContext);
     notFound();
   }
 

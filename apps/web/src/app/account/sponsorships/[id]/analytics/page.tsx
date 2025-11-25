@@ -1,5 +1,11 @@
 import { Constants, type Database } from '@heyclaude/database-types';
-import { hashUserId, logger, normalizeError } from '@heyclaude/web-runtime/core';
+import {
+  createWebAppContextWithId,
+  generateRequestId,
+  hashUserId,
+  logger,
+  normalizeError,
+} from '@heyclaude/web-runtime/core';
 import {
   generatePageMetadata,
   getAuthenticatedUser,
@@ -7,7 +13,6 @@ import {
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { POSITION_PATTERNS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import { generateRequestId } from '@heyclaude/web-runtime/utils/request-context';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -42,15 +47,26 @@ export async function generateMetadata({ params }: AnalyticsPageProps): Promise<
 
 export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPageProps) {
   const { id } = await params;
+
+  // Generate single requestId for this page request
+  const requestId = generateRequestId();
+  const baseLogContext = createWebAppContextWithId(
+    requestId,
+    `/account/sponsorships/${id}/analytics`,
+    'SponsorshipAnalyticsPage',
+    {
+      sponsorshipId: id,
+    }
+  );
+
   const { user } = await getAuthenticatedUser({ context: 'SponsorshipAnalyticsPage' });
 
   if (!user) {
-    logger.warn('SponsorshipAnalyticsPage: unauthenticated access attempt', undefined, {
-      requestId: generateRequestId(),
-      operation: 'SponsorshipAnalyticsPage',
-      route: `/account/sponsorships/${id}/analytics`,
-      sponsorshipId: id,
-    });
+    logger.warn(
+      'SponsorshipAnalyticsPage: unauthenticated access attempt',
+      undefined,
+      baseLogContext
+    );
     return (
       <div className="space-y-6">
         <Card>
@@ -69,30 +85,23 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
   }
 
   const userIdHash = hashUserId(user.id);
+  const logContext = { ...baseLogContext, userIdHash };
 
   let analyticsData: SponsorshipAnalytics | null = null;
   try {
     analyticsData = await getSponsorshipAnalytics(user.id, id);
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load sponsorship analytics');
-    logger.error('SponsorshipAnalyticsPage: getSponsorshipAnalytics threw', normalized, {
-      requestId: generateRequestId(),
-      operation: 'SponsorshipAnalyticsPage',
-      route: `/account/sponsorships/${id}/analytics`,
-      sponsorshipId: id,
-      userIdHash,
-    });
+    logger.error('SponsorshipAnalyticsPage: getSponsorshipAnalytics threw', normalized, logContext);
     throw normalized;
   }
 
   if (!analyticsData) {
-    logger.warn('SponsorshipAnalyticsPage: analytics not found or inaccessible', undefined, {
-      requestId: generateRequestId(),
-      operation: 'SponsorshipAnalyticsPage',
-      route: `/account/sponsorships/${id}/analytics`,
-      sponsorshipId: id,
-      userIdHash,
-    });
+    logger.warn(
+      'SponsorshipAnalyticsPage: analytics not found or inaccessible',
+      undefined,
+      logContext
+    );
     notFound();
   }
 
@@ -107,13 +116,7 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
     logger.error(
       'SponsorshipAnalyticsPage: unexpected null fields in analytics data',
       new Error('Null fields in analytics data'),
-      {
-        requestId: generateRequestId(),
-        operation: 'SponsorshipAnalyticsPage',
-        route: `/account/sponsorships/${id}/analytics`,
-        sponsorshipId: id,
-        userIdHash,
-      }
+      logContext
     );
     notFound();
   }
@@ -138,11 +141,7 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
 
   if (!isTierValid) {
     logger.warn('SponsorshipAnalyticsPage: invalid tier value, using safe default', undefined, {
-      requestId: generateRequestId(),
-      operation: 'SponsorshipAnalyticsPage',
-      route: `/account/sponsorships/${id}/analytics`,
-      sponsorshipId: id,
-      userIdHash,
+      ...logContext,
       invalidTier: rawTier,
       expectedTiers: validTiers, // Now supports arrays directly - better for log querying
       fallbackTier: 'sponsored',

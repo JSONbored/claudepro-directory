@@ -1,4 +1,9 @@
-import { hashUserId, logger } from '@heyclaude/web-runtime/core';
+import {
+  createWebAppContextWithId,
+  generateRequestId,
+  hashUserId,
+  logger,
+} from '@heyclaude/web-runtime/core';
 import {
   generatePageMetadata,
   getAuthenticatedUser,
@@ -6,7 +11,6 @@ import {
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { ArrowLeft } from '@heyclaude/web-runtime/icons';
-import { generateRequestId } from '@heyclaude/web-runtime/utils/request-context';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
@@ -26,27 +30,34 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function NewCollectionPage() {
+  // Generate single requestId for this page request
+  const requestId = generateRequestId();
+  const baseLogContext = createWebAppContextWithId(
+    requestId,
+    '/account/library/new',
+    'NewCollectionPage'
+  );
+
   const { user } = await getAuthenticatedUser({ context: 'NewCollectionPage' });
 
   if (!user) {
     logger.warn('NewCollectionPage: unauthenticated access attempt', undefined, {
-      requestId: generateRequestId(),
-      operation: 'NewCollectionPage',
-      route: '/account/library/new',
+      ...baseLogContext,
       timestamp: new Date().toISOString(),
     });
     redirect('/login');
   }
 
+  const userIdHash = hashUserId(user.id);
+  const logContext = { ...baseLogContext, userIdHash };
+
   const bookmarks = await getUserBookmarksForCollections(user.id);
   if (!bookmarks) {
-    const hashedUserId = hashUserId(user.id);
-    logger.warn('NewCollectionPage: getUserBookmarksForCollections returned null', undefined, {
-      requestId: generateRequestId(),
-      operation: 'NewCollectionPage',
-      route: '/account/library/new',
-      userIdHash: hashedUserId,
-    });
+    logger.warn(
+      'NewCollectionPage: getUserBookmarksForCollections returned null',
+      undefined,
+      logContext
+    );
   }
 
   return (

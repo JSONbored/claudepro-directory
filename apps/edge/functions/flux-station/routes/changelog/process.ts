@@ -36,6 +36,7 @@ import {
   createUtilityContext,
   errorToString,
   logError,
+  logInfo,
   TIMEOUT_PRESETS,
   withCircuitBreaker,
   withTimeout,
@@ -231,7 +232,7 @@ async function processChangelogWebhook(message: ChangelogWebhookQueueMessage): P
     return result;
   };
 
-  console.log('[flux-station] Processing changelog webhook', logContext);
+  logInfo('Processing changelog webhook', logContext);
 
   try {
     // 1. Fetch webhook event from webhook_events table
@@ -244,10 +245,7 @@ async function processChangelogWebhook(message: ChangelogWebhookQueueMessage): P
     if (webhookError || !webhookEvent) {
       const errorMsg = errorToString(webhookError);
       errors.push(`Webhook fetch: ${errorMsg}`);
-      console.error('[flux-station] Failed to fetch webhook event', {
-        ...logContext,
-        error: errorMsg,
-      });
+      logError('Failed to fetch webhook event', logContext, webhookError);
       return exitWithResult({ success: false, errors }, { errorMessage: errorMsg });
     }
 
@@ -257,7 +255,7 @@ async function processChangelogWebhook(message: ChangelogWebhookQueueMessage): P
     if (!isValidVercelWebhookPayload(webhookData)) {
       const validationError = 'Invalid webhook payload structure';
       errors.push(validationError);
-      console.error('[flux-station] Invalid webhook payload structure', {
+      logError('Invalid webhook payload structure', {
         ...logContext,
         data_preview: JSON.stringify(webhookData).slice(0, 200),
       });
@@ -272,10 +270,7 @@ async function processChangelogWebhook(message: ChangelogWebhookQueueMessage): P
           })
           .eq('id', job.webhook_event_id);
       } catch (updateError) {
-        console.error('[flux-station] Failed to mark invalid webhook as processed', {
-          ...logContext,
-          error: errorToString(updateError),
-        });
+        logError('Failed to mark invalid webhook as processed', logContext, updateError);
       }
 
       return exitWithResult(
@@ -287,7 +282,7 @@ async function processChangelogWebhook(message: ChangelogWebhookQueueMessage): P
 
     // 3. Validate webhook type
     if (payload.type !== 'deployment.succeeded') {
-      console.log('[flux-station] Skipping non-deployment webhook', {
+      logInfo('Skipping non-deployment webhook', {
         ...logContext,
         type: payload.type,
       });
@@ -309,7 +304,7 @@ async function processChangelogWebhook(message: ChangelogWebhookQueueMessage): P
     if (!(baseCommit && headCommit)) {
       const errorMsg = 'Missing commit metadata in deployment payload';
       errors.push(errorMsg);
-      console.error('[flux-station] Missing commit metadata', logContext);
+      logError('Missing commit metadata', logContext);
       return exitWithResult({ success: false, errors }, { errorMessage: errorMsg });
     }
 
@@ -385,10 +380,7 @@ async function processChangelogWebhook(message: ChangelogWebhookQueueMessage): P
     } catch (error) {
       const errorMsg = errorToString(error);
       errors.push(`GitHub fetch: ${errorMsg}`);
-      console.error('[flux-station] Failed to fetch commits from GitHub', {
-        ...logContext,
-        error: errorMsg,
-      });
+      logError('Failed to fetch commits from GitHub', logContext, error);
       return exitWithResult({ success: false, errors }, { errorMessage: errorMsg });
     }
 
@@ -396,7 +388,7 @@ async function processChangelogWebhook(message: ChangelogWebhookQueueMessage): P
     const conventionalCommits = filterConventionalCommits(commits);
 
     if (conventionalCommits.length === 0) {
-      console.log('[flux-station] No conventional commits found', logContext);
+      logInfo('No conventional commits found', logContext);
       // Mark as processed and skip
       await supabaseServiceRole
         .from('webhook_events')
@@ -468,10 +460,7 @@ async function processChangelogWebhook(message: ChangelogWebhookQueueMessage): P
     if (insertError || !changelogData) {
       const errorMsg = errorToString(insertError);
       errors.push(`Changelog insert: ${errorMsg}`);
-      console.error('[flux-station] Failed to insert changelog entry', {
-        ...logContext,
-        error: errorMsg,
-      });
+      logError('Failed to insert changelog entry', logContext, insertError);
       return exitWithResult({ success: false, errors }, { errorMessage: errorMsg });
     }
 
@@ -489,7 +478,7 @@ async function processChangelogWebhook(message: ChangelogWebhookQueueMessage): P
 
     try {
       await pgmqSend('changelog_notify', notificationJob);
-      console.log('[flux-station] Changelog notification job enqueued', {
+      logInfo('Changelog notification job enqueued', {
         ...logContext,
         changelog_id: changelogData.id,
         slug: changelogData.slug,
@@ -497,10 +486,7 @@ async function processChangelogWebhook(message: ChangelogWebhookQueueMessage): P
     } catch (enqueueError) {
       const errorMsg = enqueueError instanceof Error ? enqueueError.message : String(enqueueError);
       errors.push(`Notification enqueue: ${errorMsg}`);
-      console.error('[flux-station] Failed to enqueue changelog notifications', {
-        ...logContext,
-        error: errorMsg,
-      });
+      logError('Failed to enqueue changelog notifications', logContext, enqueueError);
       // Don't fail the job - changelog is inserted, notifications can be retried
     }
 
@@ -515,7 +501,7 @@ async function processChangelogWebhook(message: ChangelogWebhookQueueMessage): P
       .eq('id', job.webhook_event_id);
 
     const durationMs = Date.now() - startTime;
-    console.log('[flux-station] Changelog webhook processed successfully', {
+    logInfo('Changelog webhook processed successfully', {
       ...logContext,
       changelog_id: changelogData.id,
       slug: changelogData.slug,
@@ -534,10 +520,7 @@ async function processChangelogWebhook(message: ChangelogWebhookQueueMessage): P
     );
   } catch (error) {
     const errorMsg = errorToString(error);
-    console.error('[flux-station] Unexpected error processing changelog webhook', {
-      ...logContext,
-      error: errorMsg,
-    });
+    logError('Unexpected error processing changelog webhook', logContext, error);
     return exitWithResult({ success: false, errors: [errorMsg] }, { errorMessage: errorMsg });
   }
 }
@@ -562,7 +545,10 @@ export async function handleChangelogProcess(_req: Request): Promise<Response> {
       return successResponse({ message: 'No messages in queue', processed: 0 }, 200);
     }
 
-    console.log(`[flux-station] Processing ${messages.length} changelog webhook jobs`);
+    const batchLogContext = createUtilityContext('flux-station', 'changelog-process-batch', {
+      batch_size: messages.length,
+    });
+    logInfo(`Processing ${messages.length} changelog webhook jobs`, batchLogContext);
 
     const results: Array<{
       msg_id: string;
@@ -574,18 +560,20 @@ export async function handleChangelogProcess(_req: Request): Promise<Response> {
     for (const msg of messages) {
       // Validate queue message structure
       if (!isValidChangelogWebhookProcessingJob(msg.message)) {
-        console.error('[flux-station] Invalid changelog webhook processing job structure', {
-          msg_id: msg.msg_id.toString(),
-        });
+        const invalidLogContext = createUtilityContext(
+          'flux-station',
+          'changelog-process-validate',
+          {
+            msg_id: msg.msg_id.toString(),
+          }
+        );
+        logError('Invalid changelog webhook processing job structure', invalidLogContext);
 
         // Delete invalid message to prevent infinite retries
         try {
           await pgmqDelete(CHANGELOG_PROCESSING_QUEUE, msg.msg_id);
         } catch (error) {
-          console.error('[flux-station] Failed to delete invalid message', {
-            msg_id: msg.msg_id.toString(),
-            error: errorToString(error),
-          });
+          logError('Failed to delete invalid message', invalidLogContext, error);
         }
 
         results.push({
@@ -626,10 +614,10 @@ export async function handleChangelogProcess(_req: Request): Promise<Response> {
         }
       } catch (error) {
         const errorMsg = errorToString(error);
-        console.error('[flux-station] Unexpected error processing message', {
+        const errorLogContext = createUtilityContext('flux-station', 'changelog-process-message', {
           msg_id: message.msg_id.toString(),
-          error: errorMsg,
         });
+        logError('Unexpected error processing message', errorLogContext, error);
         results.push({
           msg_id: message.msg_id.toString(),
           status: 'failed',

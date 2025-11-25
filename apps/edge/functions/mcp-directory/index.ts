@@ -15,13 +15,24 @@
 
 import { zodToJsonSchema } from 'npm:zod-to-json-schema@3';
 import type { Database } from '@heyclaude/database-types';
-import { edgeEnv, requireAuthUser, supabaseServiceRole } from '@heyclaude/edge-runtime';
+import { edgeEnv, requireAuthUser } from '@heyclaude/edge-runtime';
 import { createDataApiContext, logError } from '@heyclaude/shared-runtime';
 import type { User } from '@supabase/supabase-js';
 import { createClient } from '@supabase/supabase-js';
 import { Hono } from 'hono';
 import { McpServer, StreamableHttpTransport } from 'mcp-lite';
 import type { z } from 'zod';
+
+/**
+ * Authentication error for typed error handling
+ */
+class AuthenticationError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'AuthenticationError';
+  }
+}
+
 import {
   GetContentByTagInputSchema,
   GetContentDetailInputSchema,
@@ -37,12 +48,16 @@ import {
   MCP_SERVER_VERSION,
   SearchContentInputSchema,
 } from './lib/types.ts';
-
+import {
+  handleAuthorizationServerMetadata,
+  handleProtectedResourceMetadata,
+} from './routes/auth-metadata.ts';
 // Import tool handlers
 import { handleListCategories } from './routes/categories.ts';
 import { handleGetContentDetail } from './routes/detail.ts';
 import { handleGetFeatured } from './routes/featured.ts';
 import { handleGetMcpServers } from './routes/mcp-servers.ts';
+import { handleOAuthAuthorize } from './routes/oauth-authorize.ts';
 import { handleGetPopular } from './routes/popular.ts';
 import { handleGetRecent } from './routes/recent.ts';
 import { handleGetRelatedContent } from './routes/related.ts';
@@ -87,19 +102,10 @@ mcpApp.use('/*', async (c, next) => {
 });
 
 /**
- * Create MCP server instance
+ * MCP server configuration
+ * Note: A new McpServer instance is created per request (see requestMcp below)
+ * This allows each request to have its own authenticated Supabase client
  */
-const mcp = new McpServer({
-  name: 'heyclaude-mcp',
-  version: MCP_SERVER_VERSION,
-  /**
-   * Schema adapter: Convert Zod schemas to JSON Schema for MCP
-   * mcp-lite requires this for tool input validation
-   */
-  schemaAdapter: (schema) => {
-    return zodToJsonSchema(schema as z.ZodType);
-  },
-});
 
 /**
  * Get authenticated Supabase client for tool handlers
@@ -214,12 +220,11 @@ function registerAllTools(
   });
 }
 
-// Register tools on base server (for health check, etc.)
-registerAllTools(mcp, supabaseServiceRole);
-
 /**
  * Note: MCP transport is created per-request in the /mcp endpoint handler
  * to ensure each request has its own authenticated Supabase client context
+ * Tools are registered on each per-request instance with the authenticated Supabase client
+ * to enforce Row-Level Security (RLS) policies.
  */
 
 /**
@@ -235,6 +240,8 @@ mcpApp.get('/', (c) => {
     endpoints: {
       mcp: '/mcp-directory/mcp',
       health: '/mcp-directory/',
+      protectedResourceMetadata: '/mcp-directory/.well-known/oauth-protected-resource',
+      authorizationServerMetadata: '/mcp-directory/.well-known/oauth-authorization-server',
     },
     documentation: 'https://heyclau.de/mcp/heyclaude-mcp',
     status: 'operational',
@@ -247,15 +254,135 @@ mcpApp.get('/', (c) => {
 });
 
 /**
+ * OAuth Protected Resource Metadata (RFC 9728)
+ * Endpoint: GET /.well-known/oauth-protected-resource
+ *
+ * MCP clients use this to discover the authorization server
+ */
+mcpApp.get('/.well-known/oauth-protected-resource', handleProtectedResourceMetadata);
+
+/**
+ * OAuth Authorization Server Metadata (RFC 8414)
+ * Endpoint: GET /.well-known/oauth-authorization-server
+ *
+ * Provides metadata about Supabase Auth as the authorization server
+ */
+mcpApp.get('/.well-known/oauth-authorization-server', handleAuthorizationServerMetadata);
+
+/**
+ * OAuth Authorization Endpoint Proxy
+ * Endpoint: GET /oauth/authorize
+ *
+ * Proxies OAuth authorization requests to Supabase Auth with resource parameter (RFC 8707)
+ * This ensures tokens include the MCP server URL in the audience claim.
+ */
+mcpApp.get('/oauth/authorize', handleOAuthAuthorize);
+
+/**
+ * Get MCP server resource URL for audience validation
+ */
+function getMcpServerResourceUrl(): string {
+  // Use environment variable if set, otherwise default to production URL
+  return process.env['MCP_SERVER_URL'] || 'https://mcp.heyclau.de/mcp';
+}
+
+/**
+ * Validate JWT token audience claim
+ * Per MCP spec (RFC 8707), tokens MUST be issued for this specific resource
+ */
+function validateTokenAudience(token: string, expectedAudience: string): boolean {
+  try {
+    // Decode JWT without verification (we already verified via Supabase)
+    // We just need to check the audience claim
+    const parts = token.split('.');
+    if (parts.length !== 3) {
+      return false;
+    }
+
+    // Decode payload (base64url)
+    const payloadPart = parts[1];
+    if (!payloadPart) {
+      return false;
+    }
+    const payload = JSON.parse(
+      new TextDecoder().decode(
+        Uint8Array.from(atob(payloadPart.replace(/-/g, '+').replace(/_/g, '/')), (c) =>
+          c.charCodeAt(0)
+        )
+      )
+    );
+
+    // Check audience claim
+    // Per MCP spec (RFC 8707), tokens MUST include the resource in the audience claim
+    const aud = payload.aud;
+    if (!aud) {
+      // OAuth 2.1 with resource parameter requires audience claim
+      // Reject tokens without audience for security
+      return false;
+    }
+
+    // Audience can be string or array
+    const audiences = Array.isArray(aud) ? aud : [aud];
+
+    // For OAuth 2.1 with resource parameter, the audience MUST match the MCP server URL
+    // This prevents token passthrough attacks
+    const hasMcpServerAudience = audiences.some((a) => a === expectedAudience);
+
+    if (hasMcpServerAudience) {
+      return true;
+    }
+
+    // Fallback: Accept Supabase project URL as audience for backward compatibility
+    // This allows existing tokens to work while we transition to full OAuth 2.1
+    // TODO: Remove this fallback once all clients use OAuth 2.1 with resource parameter
+    const supabaseUrl = edgeEnv.supabase.url;
+    const hasSupabaseAudience = audiences.some((a) => {
+      return a === supabaseUrl || a === `${supabaseUrl}/auth/v1`;
+    });
+
+    return hasSupabaseAudience;
+  } catch (error) {
+    // If we can't decode, reject (shouldn't happen since Supabase already validated)
+    // Log for debugging but don't expose error details
+    const logContext = createDataApiContext('validate-token-audience', {
+      app: 'mcp-directory',
+    });
+    logError('Failed to decode JWT token for audience validation', logContext, error);
+    return false;
+  }
+}
+
+/**
+ * Create WWW-Authenticate header per MCP spec (RFC 9728)
+ */
+function createWwwAuthenticateHeader(resourceMetadataUrl: string, scope?: string): string {
+  const params = ['Bearer', `realm="mcp"`, `resource_metadata="${resourceMetadataUrl}"`];
+
+  if (scope) {
+    params.push(`scope="${scope}"`);
+  }
+
+  return params.join(', ');
+}
+
+/**
  * MCP protocol endpoint
  * Handles all MCP requests (tool calls, resource requests, etc.)
  * Requires authentication - JWT token must be provided in Authorization header
+ *
+ * Implements MCP OAuth 2.1 authorization per specification:
+ * - Returns 401 with WWW-Authenticate header for unauthenticated requests
+ * - Validates token audience (RFC 8707)
+ * - Enforces Row-Level Security via authenticated Supabase client
  */
 mcpApp.all('/mcp', async (c) => {
   const logContext = createDataApiContext('mcp-protocol', {
     app: 'mcp-directory',
     method: c.req.method,
   });
+
+  const mcpServerUrl = getMcpServerResourceUrl();
+  const resourceMetadataUrl = `${mcpServerUrl.replace('/mcp', '')}/.well-known/oauth-protected-resource`;
 
   try {
     // Require authentication for all MCP requests
@@ -271,7 +398,49 @@ mcpApp.all('/mcp', async (c) => {
     });
 
     if ('response' in authResult) {
-      return authResult.response;
+      // Add WWW-Authenticate header per MCP spec (RFC 9728)
+      const wwwAuthHeader = createWwwAuthenticateHeader(resourceMetadataUrl, 'mcp:tools');
+
+      // Clone response and add WWW-Authenticate header
+      const response = authResult.response;
+      const newHeaders = new Headers(response.headers);
+      newHeaders.set('WWW-Authenticate', wwwAuthHeader);
+
+      return new Response(response.body, {
+        status: response.status,
+        statusText: response.statusText,
+        headers: newHeaders,
+      });
+    }
+
+    // Validate token audience (RFC 8707 - Resource Indicators)
+    // This ensures tokens were issued specifically for this MCP server
+    if (!validateTokenAudience(authResult.token, mcpServerUrl)) {
+      logError(
+        'Token audience validation failed',
+        logContext,
+        new Error('Token audience mismatch')
+      );
+
+      const wwwAuthHeader = createWwwAuthenticateHeader(resourceMetadataUrl, 'mcp:tools');
+      return c.json(
+        {
+          jsonrpc: '2.0',
+          error: {
+            code: -32001, // Invalid token
+            message: 'Token audience mismatch. Token was not issued for this resource.',
+          },
+          id: null,
+        },
+        401,
+        {
+          'WWW-Authenticate': wwwAuthHeader,
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+          'Access-Control-Allow-Headers':
+            'Content-Type, Authorization, Mcp-Session-Id, MCP-Protocol-Version',
+        }
+      );
     }
 
     // Create authenticated Supabase client for this request
@@ -302,19 +471,34 @@ mcpApp.all('/mcp', async (c) => {
     logError('MCP protocol error handling request', logContext, error);
 
     // Return MCP-formatted error
+    const isAuthError =
+      error instanceof AuthenticationError ||
+      (error instanceof Error && error.message.includes('Authentication'));
+
+    const statusCode = isAuthError ? 401 : 500;
+    const wwwAuthHeader = isAuthError
+      ? createWwwAuthenticateHeader(resourceMetadataUrl, 'mcp:tools')
+      : undefined;
+
     return c.json(
       {
         jsonrpc: '2.0',
         error: {
-          code: -32603, // Internal error
-          message:
-            error instanceof Error && error.message === 'Authentication required'
-              ? 'Authentication required. Please provide a valid JWT token in the Authorization header.'
-              : 'Internal server error',
+          code: isAuthError ? -32001 : -32603, // Invalid token or Internal error
+          message: isAuthError
+            ? 'Authentication required. Please provide a valid JWT token in the Authorization header.'
+            : 'Internal server error',
         },
         id: null,
       },
-      error instanceof Error && error.message === 'Authentication required' ? 401 : 500
+      statusCode,
+      {
+        ...(wwwAuthHeader && { 'WWW-Authenticate': wwwAuthHeader }),
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+        'Access-Control-Allow-Headers':
+          'Content-Type, Authorization, Mcp-Session-Id, MCP-Protocol-Version',
+      }
     );
   }
 });

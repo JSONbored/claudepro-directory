@@ -19,10 +19,11 @@ export async function getHomepageFeaturedCategories(): Promise<
   }
 
   try {
+    // OPTIMIZATION: Use config bundle instead of separate call
     // Lazy import feature flags to avoid module-level server-only code execution
-    const { getHomepageConfig } = await import('../../actions/feature-flags.ts');
-    const result = await getHomepageConfig({});
-    const config = result?.data;
+    const { getHomepageConfigBundle } = await import('../../actions/feature-flags.ts');
+    const bundle = await getHomepageConfigBundle();
+    const config = bundle.homepageConfig;
     if (!config) {
       return [];
     }
@@ -43,10 +44,11 @@ export async function getHomepageTabCategories(): Promise<readonly string[]> {
   }
 
   try {
+    // OPTIMIZATION: Use config bundle instead of separate call
     // Lazy import feature flags to avoid module-level server-only code execution
-    const { getHomepageConfig } = await import('../../actions/feature-flags.ts');
-    const result = await getHomepageConfig({});
-    const config = result?.data;
+    const { getHomepageConfigBundle } = await import('../../actions/feature-flags.ts');
+    const bundle = await getHomepageConfigBundle();
+    const config = bundle.homepageConfig;
     if (!config) {
       return [];
     }

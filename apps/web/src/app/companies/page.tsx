@@ -15,7 +15,12 @@ const NewsletterCTAVariant = dynamicImport(
   }
 );
 
-import { logger, normalizeError } from '@heyclaude/web-runtime/core';
+import {
+  createWebAppContextWithId,
+  generateRequestId,
+  logger,
+  normalizeError,
+} from '@heyclaude/web-runtime/core';
 import { generatePageMetadata, getCompaniesList } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import {
@@ -27,7 +32,6 @@ import {
   TrendingUp,
 } from '@heyclaude/web-runtime/icons';
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import { generateRequestId } from '@heyclaude/web-runtime/utils/request-context';
 import {
   Card,
   CardContent,
@@ -89,30 +93,25 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function CompaniesPage() {
+  // Generate single requestId for this page request
+  const requestId = generateRequestId();
+  const logContext = createWebAppContextWithId(requestId, '/companies', 'CompaniesPage', {
+    limit: 50,
+    offset: 0,
+  });
+
   // Single RPC call via edge-cached data layer
   let companiesResponse: Awaited<ReturnType<typeof getCompaniesList>> | null = null;
   try {
     companiesResponse = await getCompaniesList(50, 0);
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load companies list');
-    logger.error('CompaniesPage: getCompaniesList failed', normalized, {
-      requestId: generateRequestId(),
-      operation: 'CompaniesPage',
-      route: '/companies',
-      limit: 50,
-      offset: 0,
-    });
+    logger.error('CompaniesPage: getCompaniesList failed', normalized, logContext);
     throw normalized;
   }
 
   if (!companiesResponse?.companies) {
-    logger.warn('CompaniesPage: companies response is empty', undefined, {
-      requestId: generateRequestId(),
-      operation: 'CompaniesPage',
-      route: '/companies',
-      limit: 50,
-      offset: 0,
-    });
+    logger.warn('CompaniesPage: companies response is empty', undefined, logContext);
   }
 
   const companies = companiesResponse?.companies ?? [];
