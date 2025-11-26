@@ -5,12 +5,12 @@
  * 
  * Optimizes company logos by:
  * - Resizing to maximum dimensions (maintains aspect ratio)
- * - Converting to WebP for optimal compression
+ * - Converting to PNG format
  * - Uploading to Supabase Storage
  * - Updating database with optimized logo URL
  * 
  * Performance optimizations:
- * - Uses efficient WebP format (better compression than PNG/JPEG)
+ * - Uses PNG format for compatibility and quality
  * - Processes in memory (no temp files for small logos)
  * - Validates input size before processing
  * - Returns early on validation failures
@@ -37,7 +37,7 @@ const CORS = getOnlyCorsHeaders;
 
 // Logo optimization constants (optimized for performance and quality)
 const LOGO_MAX_DIMENSION = 512; // Reasonable max for logos (balances quality vs file size)
-const LOGO_QUALITY = 90; // High quality for logos (90% is optimal for WebP logos)
+const LOGO_QUALITY = 90; // High quality for logos (90% is optimal for PNG logos)
 const MAX_INPUT_SIZE = 5 * 1024 * 1024; // 5MB max input (prevents memory issues)
 
 /**
@@ -137,10 +137,16 @@ export async function handleLogoOptimizeRoute(req: Request): Promise<Response> {
       if (!base64Data) {
         return badRequestResponse('Invalid base64 image data', CORS);
       }
-      const binaryString = atob(base64Data);
-      imageBytes = new Uint8Array(binaryString.length);
-      for (let i = 0; i < binaryString.length; i++) {
-        imageBytes[i] = binaryString.charCodeAt(i);
+      try {
+        const binaryString = atob(base64Data);
+        imageBytes = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) {
+          imageBytes[i] = binaryString.charCodeAt(i);
+        }
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        logError('Invalid base64 image data', logContext, error);
+        return badRequestResponse(`Invalid base64 image data: ${errorMessage}`, CORS);
       }
     } else {
       imageBytes = body.imageData;
@@ -181,11 +187,7 @@ export async function handleLogoOptimizeRoute(req: Request): Promise<Response> {
     // Verify output is PNG (Supabase example outputs PNG)
     const isPng = optimizedImage[0] === 0x89 && optimizedImage[1] === 0x50 && 
                    optimizedImage[2] === 0x4e && optimizedImage[3] === 0x47;
-    
-    // If not PNG, detect actual format for proper extension/MIME type
     const isJpeg = optimizedImage[0] === 0xff && optimizedImage[1] === 0xd8;
-    const actualFormat = isPng ? 'png' : (isJpeg ? 'jpeg' : 'png');
-    const actualMimeType = isPng ? 'image/png' : (isJpeg ? 'image/jpeg' : 'image/png');
     
     if (!isPng && !isJpeg) {
       logError('Optimized image format is unrecognized', logContext, new Error('Invalid image format'));
@@ -198,6 +200,9 @@ export async function handleLogoOptimizeRoute(req: Request): Promise<Response> {
         CORS
       );
     }
+
+    const actualFormat = isPng ? 'png' : 'jpeg';
+    const actualMimeType = isPng ? 'image/png' : 'image/jpeg';
 
     // Get optimized dimensions
     const optimizedDimensions = await getImageDimensions(optimizedImage);
@@ -228,7 +233,7 @@ export async function handleLogoOptimizeRoute(req: Request): Promise<Response> {
     // Upload to storage
     // Note: We skip validationPolicy here because:
     // 1. We've already validated and processed the input image
-    // 2. The optimized image is guaranteed to be smaller and valid WebP
+    // 2. The optimized image is guaranteed to be smaller and valid PNG
     // 3. We've validated size above against bucket limits
     // Convert Uint8Array to ArrayBuffer for uploadObject
     // Create a new ArrayBuffer to ensure proper conversion

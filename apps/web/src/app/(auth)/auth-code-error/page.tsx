@@ -17,11 +17,12 @@ import { UI_CLASSES, Button ,
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
+const AUTH_CODE_ERROR_PATH = '/auth/auth-code-error';
 
 export const dynamic = 'force-dynamic';
 
 export async function generateMetadata(): Promise<Metadata> {
-  return generatePageMetadata('/auth/auth-code-error');
+  return generatePageMetadata(AUTH_CODE_ERROR_PATH);
 }
 
 export default async function AuthCodeError(properties: PagePropsWithSearchParams) {
@@ -29,7 +30,7 @@ export default async function AuthCodeError(properties: PagePropsWithSearchParam
   const requestId = generateRequestId();
   const logContext = createWebAppContextWithId(
     requestId,
-    '/auth/auth-code-error',
+    AUTH_CODE_ERROR_PATH,
     'AuthCodeErrorPage'
   );
 

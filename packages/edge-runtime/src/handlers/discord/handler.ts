@@ -14,7 +14,7 @@ import {
   buildErrorEmbed,
   buildSubmissionEmbed,
 } from '../../utils/discord/embeds.ts';
-import { errorToString } from '@heyclaude/shared-runtime';
+import { errorToString, logError, logInfo } from '@heyclaude/shared-runtime';
 import {
   badRequestResponse,
   discordCorsHeaders,
@@ -22,6 +22,7 @@ import {
   successResponse,
 } from '../../utils/http.ts';
 import { createDiscordHandlerContext, withContext } from '@heyclaude/shared-runtime';
+import { pgmqSend } from '../../utils/pgmq-client.ts';
 import {
   type DatabaseWebhookPayload,
   didStatusChangeTo,
@@ -448,6 +449,43 @@ export async function handleContentNotificationDirect(
     },
     updatedContext
   );
+
+  // Enqueue content card generation (non-blocking, async processing)
+  // Only enqueue if content has a title (required for card generation)
+  const cardTitle = content.display_title ?? content.title;
+  if (cardTitle && cardTitle.trim()) {
+    try {
+      await pgmqSend('image_generation', {
+        type: 'card',
+        content_id: content.id,
+        category: content.category,
+        slug: content.slug,
+        params: {
+          title: cardTitle,
+          description: content.description ?? '',
+          author: content.author ?? '',
+          tags: content.tags ?? [],
+          featured: false, // Could check if content is featured in the future
+          rating: null,
+          viewCount: 0,
+        },
+        priority: 'normal',
+        created_at: new Date().toISOString(),
+      });
+      logInfo('Content card generation queued', {
+        ...updatedContext,
+        content_id: content.id,
+      });
+    } catch (error) {
+      // Non-critical - log but don't fail the webhook
+      logError('Failed to enqueue card generation', updatedContext, error);
+    }
+  } else {
+    logInfo('Skipping card generation - content has no title', {
+      ...updatedContext,
+      content_id: content.id,
+    });
+  }
 
   // Invalidate cache after notification insert (same as original handler)
   await invalidateCacheByKey('cache.invalidate.notifications', ['notifications'], {

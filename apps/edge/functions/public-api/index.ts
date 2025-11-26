@@ -136,7 +136,7 @@ const ROUTE_HANDLERS: Record<string, (ctx: PublicApiContext) => Promise<Response
         error: 'Not Found',
         message: 'Unknown image transform route',
         path: ctx.pathname,
-        availableRoutes: ['/transform/image/test', '/transform/image/logo', '/transform/image/thumbnail', '/transform/image/card'],
+        availableRoutes: ['/transform/image/logo', '/transform/image/thumbnail', '/transform/image/card'],
       },
       404,
       BASE_CORS

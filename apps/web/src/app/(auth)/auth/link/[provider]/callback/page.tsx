@@ -5,7 +5,7 @@
 
 'use client';
 
-import { isValidProvider } from '@heyclaude/web-runtime';
+import { isValidProvider, validateNextParameter  } from '@heyclaude/web-runtime';
 import {
   createWebAppContextWithId,
   generateRequestId,
@@ -48,17 +48,8 @@ export default function OAuthLinkCallbackPage({
     let mounted = true;
     let redirectTimeoutId: ReturnType<typeof setTimeout> | null = null;
 
-    // Helper to validate 'next' parameter to prevent open redirects
-    // Reused in both unauthenticated redirect and callback URL construction
-    const validateNextParameter = (nextParameter: string | null = null): string => {
-      const normalized = nextParameter ?? '/account/connected-accounts';
-      const isValidRedirect =
-        normalized.startsWith('/') &&
-        !normalized.startsWith('//') &&
-        !normalized.startsWith('/\\') &&
-        !normalized.includes('@');
-      return isValidRedirect ? normalized : '/account/connected-accounts';
-    };
+    // Use shared validation utility to prevent open redirects
+    // Matches server-side validation in route handlers
 
     async function handleLink() {
       // Prevent duplicate OAuth linking attempts (e.g., from Strict Mode re-mounts)
@@ -106,7 +97,7 @@ export default function OAuthLinkCallbackPage({
           // Guard redirect with mounted check and store timeout ID for cleanup
           redirectTimeoutId = setTimeout(() => {
             if (!mounted) return; // Don't redirect if component unmounted
-            const next = validateNextParameter(searchParameters.get('next'));
+            const next = validateNextParameter(searchParameters.get('next'), '/account/connected-accounts');
             router.push(
               `/login?redirect=${encodeURIComponent(`/auth/link/${rawProvider}?next=${encodeURIComponent(next)}`)}`
             );
@@ -116,7 +107,7 @@ export default function OAuthLinkCallbackPage({
 
         // Get the next redirect URL with validation
         // Validate 'next' parameter to prevent open redirects (matches server-side validation)
-        const next = validateNextParameter(searchParameters.get('next'));
+        const next = validateNextParameter(searchParameters.get('next'), '/account/connected-accounts');
         const callbackUrl = new URL(`${globalThis.location.origin}/auth/callback`);
         callbackUrl.searchParams.set('next', next);
         callbackUrl.searchParams.set('link', 'true'); // Flag to indicate this is a linking flow

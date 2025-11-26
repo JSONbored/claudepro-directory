@@ -22,16 +22,19 @@
  */
 
 import { Constants, type Database } from '@heyclaude/database-types';
+import { getEnvVar } from '@heyclaude/shared-runtime';
 import { submitContentForReview } from '@heyclaude/web-runtime/actions';
+import { createSupabaseBrowserClient } from '@heyclaude/web-runtime/client';
 import { logger, normalizeError } from '@heyclaude/web-runtime/core';
 import { type DraftFormData, DraftManager } from '@heyclaude/web-runtime/data/drafts/draft-manager';
 import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import { useAuthenticatedUser } from '@heyclaude/web-runtime/hooks/use-authenticated-user';
-import { Code, FileText, Plus, Sparkles, Tag, X } from '@heyclaude/web-runtime/icons';
+import { Code, FileText, Plus, Sparkles, Tag, X, Camera as ImageIcon } from '@heyclaude/web-runtime/icons';
 import type { SubmissionContentType } from '@heyclaude/web-runtime/types/component.types';
 import { toasts, Button , Card, CardContent, CardHeader, CardTitle, Input , Textarea, Badge    } from '@heyclaude/web-runtime/ui';
 import { SUBMISSION_FORM_TOKENS as TOKENS } from '@heyclaude/web-runtime/ui/design-tokens/submission-form';
 import { AnimatePresence, motion } from 'motion/react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
@@ -85,6 +88,7 @@ interface FormData {
   tags: string[];
   examples: string[];
   category: Database['public']['Enums']['content_category'];
+  thumbnail_url?: string; // Generated thumbnail URL from uploaded image
 }
 
 // Use Constants for default enum values
@@ -108,6 +112,7 @@ const DEFAULT_FORM_DATA: FormData = {
   tags: [],
   examples: [],
   category: DEFAULT_CONTENT_CATEGORY, // Default to match submission_type
+  // thumbnail_url is optional, don't include in default
 };
 
 export default function WizardSubmissionPage() {
@@ -142,6 +147,10 @@ export default function WizardSubmissionPage() {
     successRate?: number;
     totalUsers?: number;
   }>({});
+  
+  // Thumbnail upload state
+  const [isUploadingThumbnail, setIsUploadingThumbnail] = useState(false);
+  const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
 
   // Field highlighting for template application feedback
   const { highlightFields, getHighlightClasses } = useFieldHighlight();
@@ -259,6 +268,195 @@ export default function WizardSubmissionPage() {
 
     void loadSocialProofStats();
   }, [runLoggedAsync]);
+
+  // Handle thumbnail image upload
+  const handleImageUpload = useCallback(
+    async (file: File) => {
+      if (!user) {
+        toasts.error.authRequired();
+        return;
+      }
+
+      // Client-side validation
+      const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+      const MAX_DIMENSION = 2048; // 2048px
+
+      if (file.size > MAX_FILE_SIZE) {
+        toasts.error.actionFailed(`File too large. Maximum size is ${MAX_FILE_SIZE / 1024 / 1024}MB.`);
+        return;
+      }
+
+      if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+        toasts.error.actionFailed('Invalid file type. Only JPG, PNG, and WebP are allowed.');
+        return;
+      }
+
+      // Verify actual file content matches MIME type (magic bytes check)
+      try {
+        const buffer = await file.slice(0, 12).arrayBuffer();
+        const bytes = new Uint8Array(buffer);
+        const isValidImage =
+          // JPEG: FF D8 FF
+          (bytes[0] === 0xFF && bytes[1] === 0xD8 && bytes[2] === 0xFF) ||
+          // PNG: 89 50 4E 47
+          (bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4E && bytes[3] === 0x47) ||
+          // WebP: 52 49 46 46 ... 57 45 42 50
+          (bytes[0] === 0x52 &&
+            bytes[1] === 0x49 &&
+            bytes[2] === 0x46 &&
+            bytes[3] === 0x46 &&
+            bytes[8] === 0x57 &&
+            bytes[9] === 0x45 &&
+            bytes[10] === 0x42 &&
+            bytes[11] === 0x50);
+
+        if (!isValidImage) {
+          toasts.error.actionFailed(
+            'Invalid image file. File content does not match expected format.'
+          );
+          return;
+        }
+      } catch {
+        toasts.error.actionFailed('Failed to validate image file.');
+        return;
+      }
+
+      // Check dimensions using createImageBitmap
+      try {
+        const bitmap = await createImageBitmap(file);
+        const { width, height } = bitmap;
+        bitmap.close(); // Release memory
+
+        if (width > MAX_DIMENSION || height > MAX_DIMENSION) {
+          toasts.error.actionFailed(
+            `Image too large. Maximum dimensions are ${MAX_DIMENSION}x${MAX_DIMENSION}px.`
+          );
+          return;
+        }
+      } catch {
+        toasts.error.actionFailed('Failed to read image dimensions.');
+        return;
+      }
+
+      // Create preview URL for immediate feedback
+      const previewUrl = URL.createObjectURL(file);
+      setThumbnailPreview(previewUrl);
+
+      setIsUploadingThumbnail(true);
+
+      try {
+        await runLoggedAsync(
+          async () => {
+            // Get Supabase session for authentication
+            const supabase = createSupabaseBrowserClient();
+            const {
+              data: { session },
+            } = await supabase.auth.getSession();
+
+            if (!session?.access_token) {
+              throw new Error('Authentication required');
+            }
+
+            // Get edge function URL
+            const supabaseUrl = getEnvVar('NEXT_PUBLIC_SUPABASE_URL');
+            if (!supabaseUrl) {
+              throw new Error('NEXT_PUBLIC_SUPABASE_URL is not defined');
+            }
+
+            // Create FormData with file
+            const formData = new FormData();
+            formData.append('image', file);
+            formData.append('userId', user.id);
+
+            // Call edge function directly with FormData
+            const response = await fetch(
+              `${supabaseUrl}/functions/v1/public-api/transform/image/thumbnail`,
+              {
+                method: 'POST',
+                headers: {
+                  Authorization: `Bearer ${session.access_token}`,
+                },
+                body: formData,
+              }
+            );
+
+            if (!response.ok) {
+              const errorText = await response.text();
+              let errorMessage = `Thumbnail generation failed (${response.status})`;
+              try {
+                const errorJson = JSON.parse(errorText) as { error?: string };
+                errorMessage = errorJson.error ?? errorMessage;
+              } catch {
+                errorMessage = errorText || errorMessage;
+              }
+              throw new Error(errorMessage);
+            }
+
+            const result = (await response.json()) as {
+              success: boolean;
+              publicUrl?: string;
+              path?: string;
+              error?: string;
+            };
+
+            if (!result.success || !result.publicUrl) {
+              throw new Error(result.error ?? 'Thumbnail generation failed');
+            }
+
+            // Update form data with thumbnail URL
+            updateFormData({ thumbnail_url: result.publicUrl });
+            setThumbnailPreview(result.publicUrl); // Use the generated thumbnail for preview
+            toasts.success.actionCompleted('Thumbnail generated successfully!');
+          },
+          {
+            message: 'Thumbnail generation failed',
+            context: {
+              fileName: file.name,
+              fileSize: file.size,
+            },
+          }
+        );
+      } catch (error) {
+        // Error already logged by useLoggedAsync
+        setThumbnailPreview(null);
+        // Remove thumbnail_url from form data on error
+        setFormData((previous) => {
+          const {
+            submission_type,
+            name,
+            description,
+            author,
+            author_profile_url,
+            github_url,
+            type_specific,
+            tags,
+            examples,
+            category,
+          } = previous;
+          const newData: FormData = {
+            submission_type,
+            name,
+            description,
+            author,
+            ...(author_profile_url ? { author_profile_url } : {}),
+            ...(github_url ? { github_url } : {}),
+            type_specific,
+            tags,
+            examples,
+            category,
+          };
+          return newData;
+        });
+        toasts.error.fromError(
+          error instanceof Error ? error : new Error('Failed to generate thumbnail'),
+          'Failed to generate thumbnail'
+        );
+      } finally {
+        setIsUploadingThumbnail(false);
+      }
+    },
+    [user, runLoggedAsync, updateFormData, setFormData]
+  );
 
   // Check if can proceed from current step (defined early for draft resume validation)
   const canProceedFromStep = useCallback((step: number, data: FormData): boolean => {
@@ -488,6 +686,13 @@ export default function WizardSubmissionPage() {
         content_data: {
           ...formData.type_specific,
           examples: formData.examples,
+          ...(formData.thumbnail_url
+            ? {
+                metadata: {
+                  thumbnail_url: formData.thumbnail_url,
+                },
+              }
+            : {}),
         },
       });
 
@@ -531,7 +736,45 @@ export default function WizardSubmissionPage() {
         );
       }
       case 2: {
-        return <StepBasicInfo data={formData} onChange={updateFormData} />;
+        return (
+          <StepBasicInfo
+            data={formData}
+            onChange={updateFormData}
+            onImageUpload={handleImageUpload}
+            isUploadingThumbnail={isUploadingThumbnail}
+            thumbnailPreview={thumbnailPreview ?? formData.thumbnail_url ?? null}
+            onRemoveThumbnail={() => {
+              setFormData((previous) => {
+                const {
+                  submission_type,
+                  name,
+                  description,
+                  author,
+                  author_profile_url,
+                  github_url,
+                  type_specific,
+                  tags,
+                  examples,
+                  category,
+                } = previous;
+                const newData: FormData = {
+                  submission_type,
+                  name,
+                  description,
+                  author,
+                  ...(author_profile_url ? { author_profile_url } : {}),
+                  ...(github_url ? { github_url } : {}),
+                  type_specific,
+                  tags,
+                  examples,
+                  category,
+                };
+                return newData;
+              });
+              setThumbnailPreview(null);
+            }}
+          />
+        );
       }
       case 3: {
         return (
@@ -646,9 +889,17 @@ function StepTypeSelection({
 function StepBasicInfo({
   data,
   onChange,
+  onImageUpload,
+  isUploadingThumbnail,
+  thumbnailPreview,
+  onRemoveThumbnail,
 }: {
   data: FormData;
   onChange: (updates: Partial<FormData>) => void;
+  onImageUpload: (file: File) => Promise<void>;
+  isUploadingThumbnail: boolean;
+  thumbnailPreview: string | null;
+  onRemoveThumbnail: () => void;
 }) {
   const [nameValidation, setNameValidation] = useState<ValidationState>('idle');
   const [descValidation, setDescValidation] = useState<ValidationState>('idle');
@@ -788,6 +1039,81 @@ function StepBasicInfo({
                 onChange={(event) => onChange({ github_url: event.target.value })}
                 placeholder="https://github.com/..."
               />
+            </AnimatedFormField>
+
+            {/* Thumbnail Image Upload */}
+            <AnimatedFormField
+              label="Thumbnail Image (Optional)"
+              id="wizard-thumbnail"
+              helpText="Upload an image to generate an optimized thumbnail for your submission"
+            >
+              <div className="space-y-4">
+                {/* File Input */}
+                <div className="flex items-center gap-4">
+                  <label
+                    htmlFor="thumbnail-upload"
+                    className="flex cursor-pointer items-center gap-2 rounded-lg border border-dashed px-4 py-3 transition-colors hover:bg-accent/50"
+                    style={{
+                      borderColor: TOKENS.colors.border.light,
+                      ...(isUploadingThumbnail && { opacity: 0.6, pointerEvents: 'none' }),
+                    }}
+                  >
+                    <ImageIcon className="h-5 w-5 text-muted-foreground" />
+                    <span className="text-sm font-medium">
+                      {isUploadingThumbnail ? 'Generating thumbnail...' : 'Choose image'}
+                    </span>
+                    <input
+                      id="thumbnail-upload"
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      className="hidden"
+                      disabled={isUploadingThumbnail}
+                      onChange={(event) => {
+                        const file = event.target.files?.[0];
+                        if (file) {
+                          void onImageUpload(file);
+                        }
+                        // Reset input to allow re-selecting the same file
+                        event.target.value = '';
+                      }}
+                    />
+                  </label>
+                </div>
+
+                {/* Thumbnail Preview */}
+                <AnimatePresence mode="wait">
+                  {thumbnailPreview && (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      transition={TOKENS.animations.spring.smooth}
+                      className="relative inline-block"
+                    >
+                      <div className="relative h-32 w-32 overflow-hidden rounded-lg border"
+                        style={{ borderColor: TOKENS.colors.border.light }}>
+                        <Image
+                          src={thumbnailPreview}
+                          alt="Thumbnail preview"
+                          fill
+                          className="object-cover"
+                          unoptimized={thumbnailPreview.startsWith('blob:')}
+                        />
+                      </div>
+                      <motion.button
+                        type="button"
+                        onClick={onRemoveThumbnail}
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                        className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-destructive text-destructive-foreground shadow-sm"
+                        disabled={isUploadingThumbnail}
+                      >
+                        <X className="h-4 w-4" />
+                      </motion.button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             </AnimatedFormField>
           </CardContent>
         </Card>

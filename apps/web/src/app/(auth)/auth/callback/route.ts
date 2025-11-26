@@ -2,7 +2,7 @@
  * Auth Callback Route - OAuth redirect handler via Supabase Auth.
  */
 
-import { refreshProfileFromOAuthServer } from '@heyclaude/web-runtime';
+import { refreshProfileFromOAuthServer, validateNextParameter  } from '@heyclaude/web-runtime';
 import { subscribeViaOAuthAction } from '@heyclaude/web-runtime/actions';
 import {
   createWebAppContextWithId,
@@ -36,16 +36,8 @@ export async function GET(request: NextRequest) {
   const newsletterParameter = searchParams.get('newsletter');
   const shouldSubscribeToNewsletter = newsletterParameter === 'true';
   const isLinkingFlow = searchParams.get('link') === 'true';
-  const nextParameter =
-    searchParams.get('next') ?? (isLinkingFlow ? '/account/connected-accounts' : '/');
-  const isValidRedirect =
-    nextParameter.startsWith('/') &&
-    !nextParameter.startsWith('//') &&
-    !nextParameter.startsWith('/\\') &&
-    !nextParameter.includes('@');
-  const next = isValidRedirect
-    ? nextParameter
-    : (isLinkingFlow ? '/account/connected-accounts' : '/');
+  const defaultPath = isLinkingFlow ? '/account/connected-accounts' : '/';
+  const next = validateNextParameter(searchParams.get('next'), defaultPath);
 
   if (code) {
     const supabase = await createSupabaseServerClient();

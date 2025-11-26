@@ -46,6 +46,7 @@ import {
   handleEmbeddingGenerationQueue,
   handleEmbeddingWebhook,
 } from './routes/embedding/index.ts';
+import { handleImageGenerationQueue } from './routes/image-generation/index.ts';
 import { handleActiveNotifications } from './routes/notifications/active.ts';
 import { handleCreateNotification } from './routes/notifications/create.ts';
 import { handleDismissNotifications } from './routes/notifications/dismiss.ts';
@@ -159,17 +160,39 @@ const verifyDiscordWebhookSignatureMiddleware: Middleware<FluxStationContext> = 
     return badRequestResponse('Failed to read request body', discordCorsHeaders);
   }
 
-  // Double-check size after reading
-  if (rawBody.length > MAX_BODY_SIZE.discord) {
+  // Double-check size after reading (use byte length, not UTF-16 code units)
+  const bodySizeBytes = new TextEncoder().encode(rawBody).length;
+  if (bodySizeBytes > MAX_BODY_SIZE.discord) {
     logWarn('Discord webhook body size exceeded after reading', {
       ...logContext,
-      body_size: rawBody.length,
+      body_size_bytes: bodySizeBytes,
       max_size: MAX_BODY_SIZE.discord,
     });
     return badRequestResponse(
       `Request body too large (max ${MAX_BODY_SIZE.discord} bytes)`,
       discordCorsHeaders
     );
+  }
+
+  // Replay resistance: Validate timestamp is recent (within 5 minutes)
+  const timestampMs = Number.parseInt(timestamp, 10);
+  if (Number.isNaN(timestampMs)) {
+    logWarn('Invalid Discord webhook timestamp format', {
+      ...logContext,
+      timestamp,
+    });
+    return badRequestResponse('Invalid X-Signature-Timestamp format', discordCorsHeaders);
+  }
+  const currentTimeMs = Date.now();
+  const timestampAgeMs = currentTimeMs - timestampMs;
+  const MAX_TIMESTAMP_AGE_MS = 5 * 60 * 1000; // 5 minutes
+  if (timestampAgeMs > MAX_TIMESTAMP_AGE_MS || timestampAgeMs < -MAX_TIMESTAMP_AGE_MS) {
+    logWarn('Discord webhook timestamp too old or too far in future (possible replay attack)', {
+      ...logContext,
+      timestamp_age_ms: timestampAgeMs,
+      max_age_ms: MAX_TIMESTAMP_AGE_MS,
+    });
+    return badRequestResponse('Request timestamp is too old or invalid', discordCorsHeaders);
   }
 
   // Verify the signature
@@ -313,6 +336,15 @@ serveEdgeApp<FluxStationContext>({
         handleEmbeddingWebhook(ctx.request)
       ),
     },
+    // Image Generation Routes
+    {
+      name: 'image-generation-process',
+      methods: ['POST', 'OPTIONS'],
+      match: (ctx) => ctx.pathname === '/image-generation/process',
+      handler: chain<FluxStationContext>(rateLimit('queueWorker'))((ctx) =>
+        handleImageGenerationQueue(ctx.request)
+      ),
+    },
 
     // Existing Routes
     {
@@ -411,11 +443,8 @@ serveEdgeApp<FluxStationContext>({
       methods: ['POST', 'OPTIONS'],
       match: (ctx) => {
         // Match only on /discord/direct path to prevent unintended routing
-        if (ctx.pathname !== '/discord/direct' && ctx.pathname !== '/discord/direct/') {
-          return false;
-        }
-        const notificationType = ctx.request.headers.get('X-Discord-Notification-Type');
-        return Boolean(notificationType);
+        // Header validation happens in handler (returns 400 if missing)
+        return ctx.pathname === '/discord/direct' || ctx.pathname === '/discord/direct/';
       },
       handler: chain<FluxStationContext>(
         rateLimit('public'),

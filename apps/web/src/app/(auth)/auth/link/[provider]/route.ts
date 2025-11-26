@@ -3,7 +3,7 @@
  * Initiates OAuth flow to link a provider to an existing authenticated account
  */
 
-import { isValidProvider } from '@heyclaude/web-runtime';
+import { isValidProvider, validateNextParameter  } from '@heyclaude/web-runtime';
 import { createWebAppContextWithId, generateRequestId, logger } from '@heyclaude/web-runtime/core';
 import { getAuthenticatedUser } from '@heyclaude/web-runtime/server';
 import { type NextRequest, NextResponse } from 'next/server';
@@ -29,13 +29,7 @@ export async function GET(
 
   const { provider: rawProvider } = await params;
   const { searchParams, origin } = new URL(request.url);
-  const nextParameter = searchParams.get('next') ?? '/account/connected-accounts';
-  const isValidRedirect =
-    nextParameter.startsWith('/') &&
-    !nextParameter.startsWith('//') &&
-    !nextParameter.startsWith('/\\') &&
-    !nextParameter.includes('@');
-  const next = isValidRedirect ? nextParameter : '/account/connected-accounts';
+  const next = validateNextParameter(searchParams.get('next'), '/account/connected-accounts');
 
   const baseLogContext = createWebAppContextWithId(
     requestId,

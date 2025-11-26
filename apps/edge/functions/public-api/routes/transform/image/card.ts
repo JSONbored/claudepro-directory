@@ -208,6 +208,7 @@ function generateContentCardImage(params: ContentCardParams): Response {
               React.createElement(
                 'div',
                 {
+                  key: tag,
                   style: {
                     backgroundColor: '#2a2010',
                     color: accentColor,
@@ -428,93 +429,97 @@ export async function handleContentCardGenerateRoute(req: Request): Promise<Resp
     let publicUrl: string | undefined;
     let path: string | undefined;
 
-    if (body.saveToStorage !== false && body.userId) {
-      const arrayBuffer = optimizedImage.buffer.slice(
-        optimizedImage.byteOffset,
-        optimizedImage.byteOffset + optimizedImage.byteLength
-      ) as ArrayBuffer;
+    if (body.saveToStorage !== false) {
+      if (!body.userId) {
+        logInfo('Skipping storage upload - userId not provided', logContext);
+      } else {
+        const arrayBuffer = optimizedImage.buffer.slice(
+          optimizedImage.byteOffset,
+          optimizedImage.byteOffset + optimizedImage.byteLength
+        ) as ArrayBuffer;
 
-      logInfo('Uploading content card to storage', {
-        ...logContext,
-        optimizedSize: optimizedImage.length,
-        bucket: 'company-logos', // TODO: Create 'content-cards' bucket
-      });
+        logInfo('Uploading content card to storage', {
+          ...logContext,
+          optimizedSize: optimizedImage.length,
+          bucket: 'content-cards',
+        });
 
-      const uploadResult = await uploadObject({
-        bucket: 'company-logos', // TODO: Create 'content-cards' bucket
-        buffer: arrayBuffer,
-        mimeType: actualMimeType,
-        pathOptions: {
-          userId: body.userId,
-          fileName: 'content-card',
-          extension: actualFormat,
-          includeTimestamp: true,
-          sanitize: true,
-        },
-        cacheControl: '31536000', // 1 year cache
-      });
+        const uploadResult = await uploadObject({
+          bucket: 'content-cards',
+          buffer: arrayBuffer,
+          mimeType: actualMimeType,
+          pathOptions: {
+            userId: body.userId,
+            fileName: 'content-card',
+            extension: actualFormat,
+            includeTimestamp: true,
+            sanitize: true,
+          },
+          cacheControl: '31536000', // 1 year cache
+        });
 
-      if (!uploadResult.success || !uploadResult.publicUrl) {
-        logError('Failed to upload content card', logContext, new Error(uploadResult.error || 'Unknown upload error'));
-        return jsonResponse(
-          {
-            success: false,
-            error: uploadResult.error || 'Failed to upload content card to storage',
-          } satisfies ContentCardGenerateResponse,
-          500,
-          CORS
-        );
-      }
-
-      publicUrl = uploadResult.publicUrl;
-      path = uploadResult.path;
-
-      // Delete old card if provided
-      if (body.oldCardPath && path) {
-        try {
-          const supabase = getStorageServiceClient();
-          const { error: deleteError } = await supabase.storage
-            .from('company-logos') // TODO: Use 'content-cards' bucket when created
-            .remove([body.oldCardPath]);
-          if (deleteError) {
-            logError('Error deleting old card', logContext, deleteError);
-          } else {
-            logInfo('Old content card deleted', { ...logContext, oldPath: body.oldCardPath });
-          }
-        } catch (error) {
-          logError('Error deleting old card', logContext, error);
+        if (!uploadResult.success || !uploadResult.publicUrl) {
+          logError('Failed to upload content card', logContext, new Error(uploadResult.error || 'Unknown upload error'));
+          return jsonResponse(
+            {
+              success: false,
+              error: uploadResult.error || 'Failed to upload content card to storage',
+            } satisfies ContentCardGenerateResponse,
+            500,
+            CORS
+          );
         }
-      }
 
-      // Update database if contentId provided
-      if (body.contentId && publicUrl) {
-        try {
-          const supabase = getStorageServiceClient();
-          const updateData = { og_image: publicUrl };
-          
-          if (body.useSlug) {
-            const { error: updateError } = await supabase
-              .from('content')
-              .update(updateData)
-              .eq('slug', body.contentId);
-            if (updateError) {
-              logError('Error updating content card in database (slug)', logContext, updateError);
+        publicUrl = uploadResult.publicUrl;
+        path = uploadResult.path;
+
+        // Delete old card if provided
+        if (body.oldCardPath && path) {
+          try {
+            const supabase = getStorageServiceClient();
+            const { error: deleteError } = await supabase.storage
+              .from('content-cards')
+              .remove([body.oldCardPath]);
+            if (deleteError) {
+              logError('Error deleting old card', logContext, deleteError);
             } else {
-              logInfo('Content card URL updated in database (slug)', { ...logContext, slug: body.contentId });
+              logInfo('Old content card deleted', { ...logContext, oldPath: body.oldCardPath });
             }
-          } else {
-            const { error: updateError } = await supabase
-              .from('content')
-              .update(updateData)
-              .eq('id', body.contentId);
-            if (updateError) {
-              logError('Error updating content card in database (id)', logContext, updateError);
-            } else {
-              logInfo('Content card URL updated in database (id)', { ...logContext, contentId: body.contentId });
-            }
+          } catch (error) {
+            logError('Error deleting old card', logContext, error);
           }
-        } catch (error) {
-          logError('Error updating content card in database', logContext, error);
+        }
+
+        // Update database if contentId provided
+        if (body.contentId && publicUrl) {
+          try {
+            const supabase = getStorageServiceClient();
+            const updateData = { og_image: publicUrl };
+            
+            if (body.useSlug) {
+              const { error: updateError } = await supabase
+                .from('content')
+                .update(updateData)
+                .eq('slug', body.contentId);
+              if (updateError) {
+                logError('Error updating content card in database (slug)', logContext, updateError);
+              } else {
+                logInfo('Content card URL updated in database (slug)', { ...logContext, slug: body.contentId });
+              }
+            } else {
+              const { error: updateError } = await supabase
+                .from('content')
+                .update(updateData)
+                .eq('id', body.contentId);
+              if (updateError) {
+                logError('Error updating content card in database (id)', logContext, updateError);
+              } else {
+                logInfo('Content card URL updated in database (id)', { ...logContext, contentId: body.contentId });
+              }
+            }
+          } catch (error) {
+            logError('Error updating content card in database', logContext, error);
+          }
         }
       }
     }

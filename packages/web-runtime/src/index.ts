@@ -148,6 +148,7 @@ export * from './types/component.types.ts';
 export * from './transformers/skill-to-md.ts';
 export * from './hooks/index.ts';
 export * from './integrations/polar.ts';
+export * from './utils/auth-redirect.ts';
 export * from './utils/category-validation.ts';
 export * from './utils/content-highlights.ts';
 

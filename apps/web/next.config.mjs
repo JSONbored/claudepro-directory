@@ -124,7 +124,7 @@ const nextConfig = {
 
   experimental: {
     turbopackFileSystemCacheForDev: true,
-    staticGenerationMaxConcurrency: 16,
+    staticGenerationMaxConcurrency: 32,
     staleTimes: {
       dynamic: 30,
       static: 300,
@@ -157,6 +157,8 @@ const nextConfig = {
       'zod',
       'motion',
       'zustand',
+      'react-share',
+      'next-safe-action',
       '@radix-ui/react-avatar',
       '@radix-ui/react-checkbox',
       '@radix-ui/react-collapsible',

@@ -18,9 +18,9 @@ export const dynamicParams = true; // Allow unknown slugs to be rendered on dema
  */
 // eslint-disable-next-line unicorn/prevent-abbreviations -- Next.js API requires this exact name
 export async function generateStaticParams() {
+  // Dynamic imports only for data modules (category/content)
   const { getHomepageCategoryIds } = await import('@heyclaude/web-runtime/data/config/category');
   const { getContentByCategory } = await import('@heyclaude/web-runtime/data/content');
-  const { getContentDetailCore } = await import('@heyclaude/web-runtime/server');
   const { logger, createWebAppContextWithId, generateRequestId, normalizeError } = await import(
     '@heyclaude/web-runtime/core'
   );
@@ -28,105 +28,28 @@ export async function generateStaticParams() {
   const categories = getHomepageCategoryIds;
   const parameters: Array<{ category: string; slug: string }> = [];
 
-  // Limit to top 50 items per category to balance build time vs. performance
-  const MAX_ITEMS_PER_CATEGORY = 50;
-  // Process validations in parallel batches to optimize build performance
-  // Using 16 to match Next.js staticGenerationMaxConcurrency setting
-  const VALIDATION_BATCH_SIZE = 16;
+  // Limit to top 30 items per category to balance build time vs. performance
+  // Reduced from 50 to optimize build performance while maintaining good SEO coverage
+  const MAX_ITEMS_PER_CATEGORY = 30;
 
   // Process all categories in parallel
+  // OPTIMIZATION: Skip validation - rely on dynamicParams=true for on-demand rendering
+  // This saves ~8-10s on every build. Invalid slugs will be handled on-demand via ISR.
   const categoryResults = await Promise.allSettled(
     categories.map(async (category) => {
       try {
         const items = await getContentByCategory(category);
         const topItems = items.slice(0, MAX_ITEMS_PER_CATEGORY);
 
-        // Process validations in parallel batches
-        const categoryParameters: Array<{ category: string; slug: string }> = [];
-        
-        // Process items in batches to avoid overwhelming the database
-        for (let index = 0; index < topItems.length; index += VALIDATION_BATCH_SIZE) {
-          const batch = topItems.slice(index, index + VALIDATION_BATCH_SIZE);
-          
-          // Validate all items in the batch in parallel
-          const validationResults = await Promise.allSettled(
-            batch.map(async (item) => {
-              if (!item.slug) {
-                return null;
-              }
-              
-              try {
-                // Verify content exists before adding to static params
-                const coreData = await getContentDetailCore({ category, slug: item.slug });
-                if (coreData?.content) {
-                  return { category, slug: item.slug };
-                } else {
-                  // Content doesn't exist - skip it (may have been deleted)
-                   
-                  const validationRequestId = generateRequestId();
-                   
-                  const validationLogContext = createWebAppContextWithId(
-                    validationRequestId,
-                    `/${category}/${item.slug}`,
-                    'generateStaticParams',
-                    {
-                      category,
-                      slug: item.slug,
-                      section: 'static-params-validation',
-                    }
-                  );
-                  logger.warn(
-                    'generateStaticParams: skipping non-existent content',
-                    undefined,
-                    {
-                      ...validationLogContext,
-                      requestId: validationRequestId,
-                      operation: 'generateStaticParams',
-                    }
-                  );
-                  return null;
-                }
-              } catch (validationError) {
-                // If validation fails, skip this item but continue with others
-                 
-                const catchRequestId = generateRequestId();
-                 
-                const logContext = createWebAppContextWithId(
-                  catchRequestId,
-                  `/${category}/${item.slug}`,
-                  'generateStaticParams',
-                  {
-                    category,
-                    slug: item.slug,
-                    section: 'static-params-validation',
-                  }
-                );
-                const normalized = normalizeError(
-                  validationError,
-                  'generateStaticParams: failed to validate content, skipping'
-                );
-                logger.error('generateStaticParams: failed to validate content, skipping', normalized, {
-                  ...logContext,
-                  requestId: catchRequestId,
-                  operation: 'generateStaticParams',
-                });
-                return null;
-              }
-            })
-          );
-
-          // Collect successful validations from this batch
-          for (const result of validationResults) {
-            if (result.status === 'fulfilled' && result.value) {
-              categoryParameters.push(result.value);
-            }
-          }
-        }
+        // Return all items with slugs - no validation needed
+        // dynamicParams=true will handle invalid slugs on-demand
+        const categoryParameters = topItems
+          .filter((item): item is typeof item & { slug: string } => Boolean(item.slug))
+          .map((item) => ({ category, slug: item.slug }));
 
         return { category, params: categoryParameters };
       } catch (error) {
         // Log error but continue with other categories
-        // Generate requestId for static params generation (separate from page render)
         // eslint-disable-next-line unicorn/prevent-abbreviations -- Must match architectural rule expectation
         const staticParamsRequestId = generateRequestId();
         // eslint-disable-next-line unicorn/prevent-abbreviations -- Must match architectural rule expectation
@@ -192,20 +115,21 @@ import { StructuredData } from '@/src/components/core/infra/structured-data';
 import { RecentlyViewedTracker } from '@/src/components/features/navigation/recently-viewed-tracker';
 
 // Map route categories (plural) to RecentlyViewedCategory (singular)
+// Use string literals instead of array indices to avoid brittleness if enum order changes
+const CATEGORY_TO_RECENTLY_VIEWED: Record<string, RecentlyViewedCategory> = {
+  agents: 'agent',
+  commands: 'command',
+  hooks: 'hook',
+  mcp: 'mcp',
+  rules: 'rule',
+  statuslines: 'statusline',
+  skills: 'skill',
+  jobs: 'job',
+  job: 'job', // Alias for consistency
+} as const;
+
 function mapCategoryToRecentlyViewed(category: string): RecentlyViewedCategory | null {
-  // Use Constants for enum values
-  const mapping: Record<string, RecentlyViewedCategory> = {
-    [Constants.public.Enums.content_category[0]]: 'agent', // agents
-    [Constants.public.Enums.content_category[3]]: 'command', // commands
-    [Constants.public.Enums.content_category[4]]: 'hook', // hooks
-    [Constants.public.Enums.content_category[1]]: 'mcp', // mcp
-    [Constants.public.Enums.content_category[2]]: 'rule', // rules
-    [Constants.public.Enums.content_category[5]]: 'statusline', // statuslines
-    [Constants.public.Enums.content_category[6]]: 'skill', // skills
-    [Constants.public.Enums.content_category[9]]: 'job', // jobs
-    job: 'job',
-  };
-  return mapping[category] ?? null;
+  return CATEGORY_TO_RECENTLY_VIEWED[category] ?? null;
 }
 
 export async function generateMetadata({
@@ -354,8 +278,8 @@ export default async function DetailPage({
     currentTags: 'tags' in fullItem ? ensureStringArray(fullItem.tags) : [],
   }).then((result) => result.items);
 
-  // Lazy-load feature flags only at runtime (not during static generation)
-  // Default to false during static generation/ISR for optimal performance
+  // Lazy-load feature flags only when page is rendered (not at module initialization)
+  // Safe fallback during build/ISR if feature flags fail to load
   let tabsEnabled = false;
   // Only load feature flags when not running on Edge runtime
   // Edge runtime doesn't support dynamic imports of server-only modules

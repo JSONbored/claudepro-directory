@@ -126,10 +126,23 @@ export async function handleThumbnailGenerateRoute(req: Request): Promise<Respon
         imageBytes = new Uint8Array(await imageData.arrayBuffer());
       } else if (imageDataBase64) {
         // Decode base64
-        const binaryString = atob(imageDataBase64);
-        imageBytes = new Uint8Array(binaryString.length);
-        for (let i = 0; i < binaryString.length; i++) {
-          imageBytes[i] = binaryString.charCodeAt(i);
+        try {
+          const binaryString = atob(imageDataBase64);
+          imageBytes = new Uint8Array(binaryString.length);
+          for (let i = 0; i < binaryString.length; i++) {
+            imageBytes[i] = binaryString.charCodeAt(i);
+          }
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : String(error);
+          logError('Invalid base64 image data', logContext, error);
+          return jsonResponse(
+            {
+              success: false,
+              error: `Invalid base64 image data: ${errorMessage}`,
+            } satisfies ThumbnailGenerateResponse,
+            400,
+            CORS
+          );
         }
       } else {
         return jsonResponse(
@@ -168,18 +181,81 @@ export async function handleThumbnailGenerateRoute(req: Request): Promise<Respon
 
       // Handle base64 imageData
       if (typeof body.imageData === 'string') {
-        const binaryString = atob(body.imageData);
-        body.imageData = new Uint8Array(binaryString.length);
-        for (let i = 0; i < binaryString.length; i++) {
-          (body.imageData as Uint8Array)[i] = binaryString.charCodeAt(i);
+        try {
+          const binaryString = atob(body.imageData);
+          body.imageData = new Uint8Array(binaryString.length);
+          for (let i = 0; i < binaryString.length; i++) {
+            (body.imageData as Uint8Array)[i] = binaryString.charCodeAt(i);
+          }
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : String(error);
+          logError('Invalid base64 image data', logContext, error);
+          return jsonResponse(
+            {
+              success: false,
+              error: `Invalid base64 image data: ${errorMessage}`,
+            } satisfies ThumbnailGenerateResponse,
+            400,
+            CORS
+          );
         }
       }
     }
 
-    // Validate input size
-    const imageBytes = body.imageData instanceof Uint8Array 
-      ? body.imageData 
-      : new Uint8Array(Object.values(body.imageData as unknown as number[]));
+    // Validate and convert imageData to Uint8Array
+    let imageBytes: Uint8Array;
+    
+    // Type guard: check if imageData is a Uint8Array (from interface)
+    if (body.imageData instanceof Uint8Array) {
+      // Already a Uint8Array - use directly
+      imageBytes = body.imageData;
+    } else if (body.imageData && typeof body.imageData === 'object') {
+      // Could be ArrayBuffer or TypedArray - narrow the type
+      const data = body.imageData as unknown;
+      
+      if (data instanceof ArrayBuffer) {
+        // ArrayBuffer - create Uint8Array view
+        imageBytes = new Uint8Array(data);
+      } else if (
+        data instanceof Int8Array ||
+        data instanceof Uint8ClampedArray ||
+        data instanceof Int16Array ||
+        data instanceof Uint16Array ||
+        data instanceof Int32Array ||
+        data instanceof Uint32Array ||
+        data instanceof Float32Array ||
+        data instanceof Float64Array ||
+        data instanceof BigInt64Array ||
+        data instanceof BigUint64Array
+      ) {
+        // TypedArray view - create Uint8Array from it
+        imageBytes = new Uint8Array(data.buffer, data.byteOffset, data.byteLength);
+      } else {
+        // Invalid object type
+        const actualType = typeof body.imageData;
+        logError('Invalid imageData type', logContext, new Error(`Expected Uint8Array, ArrayBuffer, or TypedArray, got ${actualType}`));
+        return jsonResponse(
+          {
+            success: false,
+            error: `Invalid imageData type: expected Uint8Array, ArrayBuffer, or TypedArray, got ${actualType}`,
+          } satisfies ThumbnailGenerateResponse,
+          400,
+          CORS
+        );
+      }
+    } else {
+      // Invalid type (string, null, undefined, or other primitive)
+      const actualType = body.imageData === null ? 'null' : body.imageData === undefined ? 'undefined' : typeof body.imageData;
+      logError('Invalid imageData type', logContext, new Error(`Expected Uint8Array, ArrayBuffer, or TypedArray, got ${actualType}`));
+      return jsonResponse(
+        {
+          success: false,
+          error: `Invalid imageData type: expected Uint8Array, ArrayBuffer, or TypedArray, got ${actualType}`,
+        } satisfies ThumbnailGenerateResponse,
+        400,
+        CORS
+      );
+    }
 
     if (imageBytes.length > MAX_INPUT_SIZE) {
       return jsonResponse(
@@ -226,11 +302,7 @@ export async function handleThumbnailGenerateRoute(req: Request): Promise<Respon
     // Verify output is PNG (Supabase example outputs PNG)
     const isPng = optimizedImage[0] === 0x89 && optimizedImage[1] === 0x50 && 
                    optimizedImage[2] === 0x4e && optimizedImage[3] === 0x47;
-    
-    // If not PNG, detect actual format for proper extension/MIME type
     const isJpeg = optimizedImage[0] === 0xff && optimizedImage[1] === 0xd8;
-    const actualFormat = isPng ? 'png' : (isJpeg ? 'jpeg' : 'png');
-    const actualMimeType = isPng ? 'image/png' : (isJpeg ? 'image/jpeg' : 'image/png');
     
     if (!isPng && !isJpeg) {
       logError('Optimized image format is unrecognized', logContext, new Error('Invalid image format'));
@@ -243,6 +315,9 @@ export async function handleThumbnailGenerateRoute(req: Request): Promise<Respon
         CORS
       );
     }
+
+    const actualFormat = isPng ? 'png' : 'jpeg';
+    const actualMimeType = isPng ? 'image/png' : 'image/jpeg';
 
     // Get optimized dimensions
     const optimizedDimensions = await getImageDimensions(optimizedImage);
@@ -279,11 +354,11 @@ export async function handleThumbnailGenerateRoute(req: Request): Promise<Respon
       ...logContext,
       optimizedSize: optimizedImage.length,
       bufferSize: arrayBuffer.byteLength,
-      bucket: 'company-logos', // TODO: Create 'content-thumbnails' bucket
+      bucket: 'content-thumbnails',
     });
 
     const uploadResult = await uploadObject({
-      bucket: 'company-logos', // TODO: Create 'content-thumbnails' bucket
+      bucket: 'content-thumbnails',
       buffer: arrayBuffer,
       mimeType: actualMimeType,
       pathOptions: {
@@ -313,7 +388,7 @@ export async function handleThumbnailGenerateRoute(req: Request): Promise<Respon
       try {
         const supabase = getStorageServiceClient();
         const { error: deleteError } = await supabase.storage
-          .from('company-logos') // TODO: Use 'content-thumbnails' bucket when created
+          .from('content-thumbnails')
           .remove([body.oldThumbnailPath]);
 
         if (deleteError) {

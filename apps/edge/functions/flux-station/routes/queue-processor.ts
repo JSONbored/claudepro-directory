@@ -26,6 +26,7 @@ import { handleChangelogProcess } from './changelog/process.ts';
 import { handleDiscordJobs } from './discord/jobs.ts';
 import { handleDiscordSubmissions } from './discord/submissions.ts';
 import { handleEmbeddingGenerationQueue } from './embedding/index.ts';
+import { handleImageGenerationQueue } from './image-generation/index.ts';
 import { handlePulse } from './pulse.ts';
 import { handleRevalidation } from './revalidation.ts';
 
@@ -69,13 +70,19 @@ const QUEUE_REGISTRY: QueueConfig[] = [
     handlerFn: handleEmbeddingGenerationQueue,
     priority: 7,
   },
+  {
+    name: 'image_generation',
+    handler: 'internal',
+    handlerFn: handleImageGenerationQueue,
+    priority: 8,
+  },
 
   // External queues (other edge functions)
   {
     name: 'package_generation',
     handler: 'external',
     endpoint: '/functions/v1/public-api/content/generate-package/process',
-    priority: 8,
+    priority: 9,
   },
 ];
 

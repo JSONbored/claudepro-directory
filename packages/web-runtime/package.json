@@ -78,6 +78,10 @@
       "types": "./src/hooks/use-authenticated-user.ts",
       "default": "./src/hooks/use-authenticated-user.ts"
     },
+    "./utils/auth-redirect": {
+      "types": "./src/utils/auth-redirect.ts",
+      "default": "./src/utils/auth-redirect.ts"
+    },
     "./utils/error-handler": {
       "types": "./src/utils/error-handler.ts",
       "default": "./src/utils/error-handler.ts"
