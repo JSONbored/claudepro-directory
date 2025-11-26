@@ -115,27 +115,7 @@ declare namespace Deno {
   }
 }
 
-interface ImportMeta {
-  main: boolean;
-  url: string;
-}
-
 declare global {
   // deno-lint-ignore no-var
   var Deno: typeof Deno;
-
-  // Supabase global type for AI functionality
-  // Provided by Supabase Edge Runtime
-  var Supabase: {
-    ai: {
-      Session: new (
-        model: string
-      ) => {
-        run: (
-          text: string,
-          options?: { mean_pool?: boolean; normalize?: boolean }
-        ) => Promise<number[]>;
-      };
-    };
-  };
 }

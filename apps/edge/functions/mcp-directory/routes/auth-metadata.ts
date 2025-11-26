@@ -9,7 +9,7 @@ import { edgeEnv, jsonResponse } from '@heyclaude/edge-runtime';
 import { createDataApiContext, logError } from '@heyclaude/shared-runtime';
 import type { Context } from 'hono';
 
-const MCP_SERVER_URL = process.env['MCP_SERVER_URL'] || 'https://mcp.heyclau.de';
+const MCP_SERVER_URL = Deno.env.get('MCP_SERVER_URL') || 'https://mcp.heyclau.de';
 const MCP_RESOURCE_URL = `${MCP_SERVER_URL}/mcp`;
 const SUPABASE_URL = edgeEnv.supabase.url;
 const SUPABASE_AUTH_URL = `${SUPABASE_URL}/auth/v1`;

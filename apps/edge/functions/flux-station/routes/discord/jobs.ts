@@ -16,6 +16,7 @@ import {
 import {
   createUtilityContext,
   errorToString,
+  getProperty,
   logError,
   TIMEOUT_PRESETS,
   withTimeout,
@@ -31,14 +32,6 @@ function isValidJobWebhookPayload(value: unknown): value is DatabaseWebhookPaylo
   if (typeof value !== 'object' || value === null) {
     return false;
   }
-
-  const getProperty = (obj: unknown, key: string): unknown => {
-    if (typeof obj !== 'object' || obj === null) {
-      return undefined;
-    }
-    const desc = Object.getOwnPropertyDescriptor(obj, key);
-    return desc?.value;
-  };
 
   const getStringProperty = (obj: unknown, key: string): string | undefined => {
     const value = getProperty(obj, key);
@@ -160,6 +153,19 @@ export async function handleDiscordJobs(_req: Request): Promise<Response> {
           schema: payload.schema,
         };
 
+        // Handle DELETE webhook type
+        if (payload.type === 'DELETE') {
+          // DELETE events don't need Discord notifications for jobs
+          // Just delete the message and skip
+          await pgmqDelete(JOB_DISCORD_QUEUE, msg.msg_id);
+          results.push({
+            msg_id: msg.msg_id.toString(),
+            status: 'skipped',
+            reason: 'DELETE events not handled for job notifications',
+          });
+          continue;
+        }
+
         // Check trigger conditions (preserved from original triggers)
         if (payload.type === 'INSERT') {
           // Original condition: status != 'draft' AND NOT is_placeholder
@@ -188,19 +194,25 @@ export async function handleDiscordJobs(_req: Request): Promise<Response> {
             continue;
           }
 
-          const fieldsChanged =
-            oldRecord.status !== newRecord.status ||
-            oldRecord.tier !== newRecord.tier ||
-            oldRecord.title !== newRecord.title ||
-            oldRecord.company !== newRecord.company ||
-            oldRecord.description !== newRecord.description ||
-            oldRecord.location !== newRecord.location ||
-            oldRecord.salary !== newRecord.salary ||
-            oldRecord.remote !== newRecord.remote ||
-            oldRecord.type !== newRecord.type ||
-            oldRecord.workplace !== newRecord.workplace ||
-            oldRecord.experience !== newRecord.experience ||
-            oldRecord.category !== newRecord.category;
+          // Fields that trigger Discord notifications when changed
+          const JOB_MONITORED_FIELDS = [
+            'status',
+            'tier',
+            'title',
+            'company',
+            'description',
+            'location',
+            'salary',
+            'remote',
+            'type',
+            'workplace',
+            'experience',
+            'category',
+          ] as const;
+
+          const fieldsChanged = JOB_MONITORED_FIELDS.some(
+            (field) => oldRecord[field] !== newRecord[field]
+          );
 
           if (!fieldsChanged) {
             await pgmqDelete(JOB_DISCORD_QUEUE, msg.msg_id);

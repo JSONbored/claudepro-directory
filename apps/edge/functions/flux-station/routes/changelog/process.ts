@@ -208,8 +208,8 @@ async function processChangelogWebhook(message: ChangelogWebhookQueueMessage): P
   });
 
   const startTime = Date.now();
-  const run =
-    job.webhook_event_id !== undefined ? await startWebhookEventRun(job.webhook_event_id) : null;
+  // webhook_event_id is required in ChangelogWebhookProcessingJob interface
+  const run = await startWebhookEventRun(job.webhook_event_id);
   const baseMetadata: Record<string, unknown> = {
     queue: CHANGELOG_PROCESSING_QUEUE,
     deployment_id: job.deployment_id ?? null,
@@ -339,7 +339,7 @@ async function processChangelogWebhook(message: ChangelogWebhookQueueMessage): P
                 retryOn: [500, 502, 503, 504],
                 noRetryOn: [400, 401, 403, 404],
               },
-              ...(logContext !== undefined ? { logContext } : {}),
+              logContext,
             });
 
             if (!response.ok) {

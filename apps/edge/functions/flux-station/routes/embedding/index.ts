@@ -1,8 +1,8 @@
-/// <reference path="@heyclaude/edge-runtime/deno-globals.d.ts" />
-
 /**
  * Generate Embedding Edge Function
  */
+
+/// <reference types="@heyclaude/edge-runtime/deno-globals.d.ts" />
 
 import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
 import {
@@ -87,6 +87,7 @@ function buildSearchableText(record: ContentRow): string {
 async function generateEmbedding(text: string): Promise<number[]> {
   const generateEmbeddingInternal = async () => {
     // Initialize Supabase AI session with gte-small model
+    // Supabase global is provided by Supabase Edge Runtime (declared in @heyclaude/edge-runtime/deno-globals.d.ts)
     const model = new Supabase.ai.Session('gte-small');
 
     // Generate embedding with normalization
@@ -224,12 +225,7 @@ function isValidQueueMessage(
     return false;
   }
   // Check for required content_id field
-  // Use Object.getOwnPropertyDescriptor to avoid type assertions
-  const contentIdDesc = Object.getOwnPropertyDescriptor(msg, 'content_id');
-  if (!contentIdDesc || typeof contentIdDesc.value !== 'string') {
-    return false;
-  }
-  return true;
+  return 'content_id' in msg && typeof (msg as Record<string, unknown>)['content_id'] === 'string';
 }
 
 /**

@@ -1,5 +1,3 @@
-/// <reference path="@heyclaude/edge-runtime/deno-globals.d.ts" />
-
 /**
  * Consolidated Email Handler - Routes all email operations via action parameter
  */
@@ -133,17 +131,7 @@ export async function handleSubscribe(req: Request): Promise<Response> {
       logContext
     );
 
-    const newsletterSourceValues: readonly DatabaseGenerated['public']['Enums']['newsletter_source'][] =
-      [
-        'footer',
-        'homepage',
-        'modal',
-        'content_page',
-        'inline',
-        'post_copy',
-        'resend_import',
-        'oauth_signup',
-      ] as const satisfies readonly DatabaseGenerated['public']['Enums']['newsletter_source'][];
+    const newsletterSourceValues = Constants.public.Enums.newsletter_source;
 
     const isValidNewsletterSource = (
       value: string | null | undefined
@@ -651,7 +639,6 @@ export async function handleDigest(): Promise<Response> {
               ? {
                   message: error.message,
                   name: error.name,
-                  stack: error.stack,
                 }
               : String(error),
           supabase_error: isPostgrestError(error)

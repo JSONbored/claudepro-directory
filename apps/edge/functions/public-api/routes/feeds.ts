@@ -14,6 +14,9 @@ import { buildSecurityHeaders, createDataApiContext, logInfo } from '@heyclaude/
 type ContentCategory = DatabaseGenerated['public']['Enums']['content_category'];
 const CONTENT_CATEGORY_VALUES = Constants.public.Enums.content_category;
 
+type FeedType = 'rss' | 'atom';
+const SUPPORTED_TYPES = new Set<FeedType>(['rss', 'atom']);
+
 function toContentCategory(value: string | null): ContentCategory | null {
   if (!value) return null;
   return CONTENT_CATEGORY_VALUES.includes(value as ContentCategory)
@@ -22,7 +25,7 @@ function toContentCategory(value: string | null): ContentCategory | null {
 }
 
 const CORS = getOnlyCorsHeaders;
-const SUPPORTED_TYPES = new Set(['rss', 'atom']);
+const FEED_LIMIT = 50;
 
 export async function handleFeedsRoute(
   segments: string[],
@@ -44,18 +47,18 @@ export async function handleFeedsRoute(
     );
   }
 
-  const type = (url.searchParams.get('type') || 'rss').toLowerCase();
+  const type = (url.searchParams.get('type') || 'rss').toLowerCase() as FeedType;
   const categoryParam = url.searchParams.get('category');
   const category =
     categoryParam && categoryParam !== 'all' ? categoryParam.trim().toLowerCase() : null;
 
   if (!SUPPORTED_TYPES.has(type)) {
-    return badRequestResponse('Missing or invalid type. Valid types: rss, atom', CORS);
+    return badRequestResponse('Invalid type. Valid types: rss, atom', CORS);
   }
 
   if (category && category !== 'changelog' && !toContentCategory(category)) {
     return badRequestResponse(
-      `Invalid category parameter. Valid categories: changelog, ${CONTENT_CATEGORY_VALUES.join(', ')}, or omit for site-wide feed`,
+      `Invalid category parameter. Valid categories: changelog, ${CONTENT_CATEGORY_VALUES.join(', ')}, or omit/use 'all' for site-wide feed`,
       CORS
     );
   }
@@ -97,16 +100,16 @@ export async function handleFeedsRoute(
 }
 
 async function generateFeedPayload(
-  type: string,
+  type: FeedType,
   category: string | null
 ): Promise<{ xml: string; contentType: string; source: string }> {
   if (category === 'changelog') {
     if (type === 'rss') {
       const rpcArgs = {
-        p_limit: 50,
+        p_limit: FEED_LIMIT,
       } satisfies DatabaseGenerated['public']['Functions']['generate_changelog_rss_feed']['Args'];
       const { data, error } = await supabaseAnon.rpc('generate_changelog_rss_feed', rpcArgs);
-      if (error || !data) {
+      if (error || data == null) {
         throw error ?? new Error('generate_changelog_rss_feed returned null');
       }
       return {
@@ -116,10 +119,10 @@ async function generateFeedPayload(
       };
     }
     const rpcArgs2 = {
-      p_limit: 50,
+      p_limit: FEED_LIMIT,
     } satisfies DatabaseGenerated['public']['Functions']['generate_changelog_atom_feed']['Args'];
     const { data, error } = await supabaseAnon.rpc('generate_changelog_atom_feed', rpcArgs2);
-    if (error || !data) {
+    if (error || data == null) {
       throw error ?? new Error('generate_changelog_atom_feed returned null');
     }
     return {
@@ -134,10 +137,10 @@ async function generateFeedPayload(
   if (type === 'rss') {
     const rpcArgs3 = {
       ...(typedCategory ? { p_category: typedCategory } : {}),
-      p_limit: 50,
+      p_limit: FEED_LIMIT,
     } satisfies DatabaseGenerated['public']['Functions']['generate_content_rss_feed']['Args'];
     const { data, error } = await supabaseAnon.rpc('generate_content_rss_feed', rpcArgs3);
-    if (error || !data) {
+    if (error || data == null) {
       throw error ?? new Error('generate_content_rss_feed returned null');
     }
     return {
@@ -149,10 +152,10 @@ async function generateFeedPayload(
 
   const rpcArgs4 = {
     ...(typedCategory ? { p_category: typedCategory } : {}),
-    p_limit: 50,
+    p_limit: FEED_LIMIT,
   } satisfies DatabaseGenerated['public']['Functions']['generate_content_atom_feed']['Args'];
   const { data, error } = await supabaseAnon.rpc('generate_content_atom_feed', rpcArgs4);
-  if (error || !data) {
+  if (error || data == null) {
     throw error ?? new Error('generate_content_atom_feed returned null');
   }
   return {

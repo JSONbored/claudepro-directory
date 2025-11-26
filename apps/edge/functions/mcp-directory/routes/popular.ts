@@ -38,20 +38,26 @@ export async function handleGetPopular(supabase: SupabaseClient<Database>, input
   }
 
   // Format results
-  const items = data.map((item: PopularContentItem) => ({
-    slug: item.slug,
-    title: item.title,
-    category: item.category,
-    description: item.description?.substring(0, 150) || '',
-    tags: item.tags || [],
-    author: item.author || 'Unknown',
-    dateAdded: (item as unknown as { date_added?: string }).date_added || '',
-    stats: {
-      views: item.view_count || 0,
-      bookmarks: (item as unknown as { bookmark_count?: number }).bookmark_count || 0,
-      upvotes: 0,
-    },
-  }));
+  const items = data.map((item: PopularContentItem) => {
+    const originalDescription = item.description || '';
+    const truncatedDescription = originalDescription.substring(0, 150);
+    const wasTruncated = originalDescription.length > 150;
+    return {
+      slug: item.slug,
+      title: item.title,
+      category: item.category,
+      description: truncatedDescription,
+      wasTruncated,
+      tags: item.tags || [],
+      author: item.author || 'Unknown',
+      dateAdded: (item as unknown as { date_added?: string }).date_added || '',
+      stats: {
+        views: item.view_count || 0,
+        bookmarks: (item as unknown as { bookmark_count?: number }).bookmark_count || 0,
+        upvotes: 0,
+      },
+    };
+  });
 
   // Create text summary
   const categoryDesc = category ? ` in ${category}` : ' across all categories';
@@ -62,11 +68,12 @@ export async function handleGetPopular(supabase: SupabaseClient<Database>, input
           title: string;
           category: string;
           description: string;
+          wasTruncated: boolean;
           stats: { views: number; bookmarks: number };
         },
         idx: number
       ) =>
-        `${idx + 1}. ${item.title} (${item.category}) 👀 ${item.stats.views} views\n   ${item.description}${item.description.length >= 150 ? '...' : ''}\n   ${item.stats.bookmarks} bookmarks`
+        `${idx + 1}. ${item.title} (${item.category}) 👀 ${item.stats.views} views\n   ${item.description}${item.wasTruncated ? '...' : ''}\n   ${item.stats.bookmarks} bookmarks`
     )
     .join('\n\n');
 

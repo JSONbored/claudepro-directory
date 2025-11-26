@@ -12,6 +12,12 @@ export async function generateMetadata(): Promise<Metadata> {
 /**
  * Accessibility statement should reflect the latest compliance status.
  * revalidate: 3600 = Revalidate every hour
+ *
+ * Note: With hourly revalidation, getLastUpdatedDate() will effectively show
+ * the last regeneration time (up to an hour old). This aligns the displayed
+ * "last updated" timestamp with the actual page regeneration cycle, ensuring
+ * users see a timestamp that reflects when the page was last rebuilt rather
+ * than a fixed "statement last updated" date from config or content.
  */
 export const revalidate = 3600;
 

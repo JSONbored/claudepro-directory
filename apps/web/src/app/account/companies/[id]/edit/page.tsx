@@ -119,9 +119,8 @@ export default async function EditCompanyPage({ params }: EditCompanyPagePropert
         {
           ...logContext,
           section: 'company-data-fetch',
-          sectionDuration_ms: Date.now() - companySectionStart,
         },
-        startTime
+        companySectionStart
       )
     );
     hasError = true;
@@ -155,9 +154,8 @@ export default async function EditCompanyPage({ params }: EditCompanyPagePropert
         {
           ...logContext,
           section: 'company-data-fetch',
-          sectionDuration_ms: Date.now() - companySectionStart,
         },
-        startTime
+        companySectionStart
       )
     );
     notFound();

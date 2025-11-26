@@ -131,14 +131,18 @@ export default async function ActivityPage() {
   const summary = handleActionResult('activity summary', summaryResult);
   const timeline = handleActionResult('activity timeline', timelineResult);
 
-  if (!(summary && timeline)) {
+  const hasSummary = !!summary;
+  const hasTimeline = !!timeline;
+
+  // Only show global fallback when both fail
+  if (!(hasSummary || hasTimeline)) {
     return (
       <div className="space-y-6">
         <Card>
           <CardHeader>
             <CardTitle className="text-2xl">Activity unavailable</CardTitle>
             <CardDescription>
-              We couldn&apos;t load your activity summary. Please refresh or try again later.
+              We couldn&apos;t load your activity data. Please refresh or try again later.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -151,8 +155,8 @@ export default async function ActivityPage() {
     );
   }
 
-  const activities = timeline.activities ?? [];
-  if (activities.length === 0) {
+  const activities = timeline?.activities ?? [];
+  if (hasTimeline && activities.length === 0) {
     logger.warn(
       'ActivityPage: activity timeline returned no activities',
       undefined,
@@ -174,6 +178,8 @@ export default async function ActivityPage() {
         ...logContext,
         section: 'page-render',
         activitiesCount: activities.length,
+        hasSummary,
+        hasTimeline,
       },
       startTime
     )
@@ -187,36 +193,53 @@ export default async function ActivityPage() {
         <p className="text-muted-foreground">Your contribution history and community activity</p>
       </div>
 
-      {/* Stats Overview */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+      {/* Stats Overview - only render if summary is available */}
+      {hasSummary && (
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm">Submissions</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+                <GitPullRequest className={`${UI_CLASSES.ICON_MD} ${UI_CLASSES.ICON_INFO}`} />
+                <span className="font-bold text-2xl">
+                  {summary.merged_submissions}/{summary.total_submissions}
+                </span>
+              </div>
+              <p className={'mt-1 text-muted-foreground text-xs'}>Merged</p>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Timeline - only render if timeline is available */}
+      {hasTimeline ? (
         <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm">Submissions</CardTitle>
+          <CardHeader>
+            <CardTitle>Activity Timeline</CardTitle>
+            <CardDescription>
+              Your recent contributions and interactions
+              {hasSummary ? ` (${summary.total_activity} total)` : ''}
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-              <GitPullRequest className={`${UI_CLASSES.ICON_MD} ${UI_CLASSES.ICON_INFO}`} />
-              <span className="font-bold text-2xl">
-                {summary.merged_submissions}/{summary.total_submissions}
-              </span>
-            </div>
-            <p className={'mt-1 text-muted-foreground text-xs'}>Merged</p>
+            <ActivityTimeline activities={activities} />
           </CardContent>
         </Card>
-      </div>
-
-      {/* Timeline */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Activity Timeline</CardTitle>
-          <CardDescription>
-            Your recent contributions and interactions ({summary.total_activity} total)
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ActivityTimeline activities={activities} />
-        </CardContent>
-      </Card>
+      ) : (
+        <Card>
+          <CardHeader>
+            <CardTitle>Activity Timeline</CardTitle>
+            <CardDescription>Unable to load activity timeline</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="text-muted-foreground text-sm">
+              There was an error loading your activity timeline. Please try refreshing the page.
+            </p>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

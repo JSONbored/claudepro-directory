@@ -17,6 +17,7 @@ import {
 import {
   createUtilityContext,
   errorToString,
+  getProperty,
   logError,
   TIMEOUT_PRESETS,
   withTimeout,
@@ -34,14 +35,6 @@ function isValidSubmissionWebhookPayload(
   if (typeof value !== 'object' || value === null) {
     return false;
   }
-
-  const getProperty = (obj: unknown, key: string): unknown => {
-    if (typeof obj !== 'object' || obj === null) {
-      return undefined;
-    }
-    const desc = Object.getOwnPropertyDescriptor(obj, key);
-    return desc?.value;
-  };
 
   const getStringProperty = (obj: unknown, key: string): string | undefined => {
     const value = getProperty(obj, key);
@@ -72,6 +65,8 @@ function isValidSubmissionWebhookPayload(
 }
 
 // Type guard to validate webhook type enum
+// NOTE: This could be extracted to a shared module, but keeping it local for now
+// as it's a simple type guard used only in this file
 function isValidWebhookType(value: string): value is 'INSERT' | 'UPDATE' | 'DELETE' {
   return value === 'INSERT' || value === 'UPDATE' || value === 'DELETE';
 }
@@ -173,6 +168,15 @@ export async function handleDiscordSubmissions(_req: Request): Promise<Response>
         } else if (payload.type === 'UPDATE') {
           // Call content announcement handler (checks for status='merged' internally)
           await handleContentNotificationDirect(webhookPayload);
+        } else if (payload.type === 'DELETE') {
+          // DELETE not supported for submissions - skip silently
+          await pgmqDelete(SUBMISSION_DISCORD_QUEUE, msg.msg_id);
+          results.push({
+            msg_id: msg.msg_id.toString(),
+            status: 'skipped',
+            reason: 'DELETE not supported for submissions',
+          });
+          continue;
         }
 
         await pgmqDelete(SUBMISSION_DISCORD_QUEUE, msg.msg_id);

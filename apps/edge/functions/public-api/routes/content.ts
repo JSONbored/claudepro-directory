@@ -17,6 +17,7 @@ function isValidContentCategory(value: string): value is ContentCategory {
 }
 
 import {
+  SITE_URL,
   badRequestResponse,
   buildCacheHeaders,
   errorResponse,
@@ -381,7 +382,7 @@ async function handleMcpbGeneration(
     const data = await service.getApiContentFull({
       p_category: 'mcp',
       p_slug: sanitizedSlug,
-      p_base_url: Deno.env.get('SITE_URL') || '',
+      p_base_url: SITE_URL,
     });
 
     if (!data) {

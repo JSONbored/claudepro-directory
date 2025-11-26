@@ -12,7 +12,15 @@
  */
 
 import { edgeEnv, pgmqMetrics } from '@heyclaude/edge-runtime';
-import { createUtilityContext, errorToString, logError, logInfo } from '@heyclaude/shared-runtime';
+import {
+  createUtilityContext,
+  errorToString,
+  getProperty,
+  logError,
+  logInfo,
+  TIMEOUT_PRESETS,
+  withTimeout,
+} from '@heyclaude/shared-runtime';
 import { handleChangelogNotify } from './changelog/notify.ts';
 import { handleChangelogProcess } from './changelog/process.ts';
 import { handleDiscordJobs } from './discord/jobs.ts';
@@ -134,14 +142,6 @@ async function processInternalQueue(
       const body = await response.json();
       // Validate response structure
       if (typeof body === 'object' && body !== null) {
-        const getProperty = (obj: unknown, key: string): unknown => {
-          if (typeof obj !== 'object' || obj === null) {
-            return undefined;
-          }
-          const desc = Object.getOwnPropertyDescriptor(obj, key);
-          return desc?.value;
-        };
-
         const processedValue = getProperty(body, 'processed');
         if (typeof processedValue === 'number') {
           processed = processedValue;
@@ -180,13 +180,18 @@ async function processExternalQueue(
     }
 
     const url = `${SUPABASE_URL}${config.endpoint}`;
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
-        'Content-Type': 'application/json',
-      },
-    });
+    // Add timeout protection to prevent hanging the entire queue processor
+    const response = await withTimeout(
+      fetch(url, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+          'Content-Type': 'application/json',
+        },
+      }),
+      TIMEOUT_PRESETS.external,
+      `External queue '${config.name}' request timed out`
+    );
 
     // Try to extract processed count and error from response body
     let processed: number | undefined;
@@ -195,14 +200,6 @@ async function processExternalQueue(
       const body = await response.json();
       // Validate response structure
       if (typeof body === 'object' && body !== null) {
-        const getProperty = (obj: unknown, key: string): unknown => {
-          if (typeof obj !== 'object' || obj === null) {
-            return undefined;
-          }
-          const desc = Object.getOwnPropertyDescriptor(obj, key);
-          return desc?.value;
-        };
-
         const processedValue = getProperty(body, 'processed');
         if (typeof processedValue === 'number') {
           processed = processedValue;

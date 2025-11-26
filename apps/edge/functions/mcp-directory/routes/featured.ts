@@ -16,23 +16,23 @@ export async function handleGetFeatured(
 ) {
   // get_homepage_optimized returns empty categoryData due to RPC issues
   // Use get_content_paginated_slim as fallback for featured content
-  // OPTIMIZATION: Use validated enum values instead of string array
+  // Use explicit enum string values to avoid fragility from enum ordering changes
   const allowedCategoryValues: Database['public']['Enums']['content_category'][] = [
-    Constants.public.Enums.content_category[0], // 'agents'
-    Constants.public.Enums.content_category[2], // 'rules'
-    Constants.public.Enums.content_category[3], // 'commands'
-    Constants.public.Enums.content_category[6], // 'skills'
-    Constants.public.Enums.content_category[8], // 'collections'
-    Constants.public.Enums.content_category[1], // 'mcp'
+    'agents',
+    'rules',
+    'commands',
+    'skills',
+    'collections',
+    'mcp',
   ];
-  const validCategories = Constants.public.Enums.content_category.filter((cat) =>
-    allowedCategoryValues.includes(cat)
+  const validCategories = Constants.public.Enums.content_category.filter(
+    (cat: Database['public']['Enums']['content_category']) => allowedCategoryValues.includes(cat)
   );
   const featured: Record<string, unknown[]> = {};
 
   // OPTIMIZATION: Fetch all categories in parallel instead of sequentially
   // This reduces latency from sum(query_times) to max(query_time) - ~83% improvement
-  const categoryQueries = validCategories.map((category) =>
+  const categoryQueries = validCategories.map((category: Database['public']['Enums']['content_category']) =>
     supabase.rpc('get_content_paginated_slim', {
       p_category: category,
       p_limit: 6,
@@ -46,7 +46,7 @@ export async function handleGetFeatured(
   const results = await Promise.allSettled(categoryQueries);
 
   // Process results - handle both fulfilled and rejected promises
-  results.forEach((result, index) => {
+  results.forEach((result: PromiseSettledResult<Awaited<ReturnType<typeof supabase.rpc>>>, index: number) => {
     const category = validCategories[index];
 
     if (!category) return; // Skip if category is undefined
@@ -54,10 +54,22 @@ export async function handleGetFeatured(
     if (result.status === 'fulfilled') {
       const { data, error } = result.value;
 
-      if (!error && data?.items) {
-        featured[category] = data.items
-          .slice(0, 6)
-          .map((item: unknown) => {
+      if (!error && data) {
+        // Type the RPC return value
+        type PaginatedSlimResult = Database['public']['CompositeTypes']['content_paginated_slim_result'];
+        const typedData = data as PaginatedSlimResult;
+        
+        if (typedData.items) {
+          // p_limit: 6 already restricts results, so slice is unnecessary
+          type FeaturedItem = {
+            slug: string;
+            title: string;
+            category: string;
+            description: string;
+            tags: unknown[];
+            views: number;
+          };
+          featured[category] = typedData.items.map((item: unknown): FeaturedItem | null => {
             if (typeof item !== 'object' || item === null) return null;
             const itemObj = item as Record<string, unknown>;
             return {
@@ -77,7 +89,8 @@ export async function handleGetFeatured(
               views: typeof itemObj['view_count'] === 'number' ? itemObj['view_count'] : 0,
             };
           })
-          .filter((item): item is NonNullable<typeof item> => item !== null);
+          .filter((item: FeaturedItem | null): item is FeaturedItem => item !== null);
+        }
       }
     }
     // If rejected, category will simply be missing from featured object
@@ -108,8 +121,8 @@ export async function handleGetFeatured(
         typedItems
           .slice(0, 3)
           .map(
-            (item: { title: string; views: number; description: string }, idx: number) =>
-              `${idx + 1}. ${item.title} - ${item.views} views\n   ${item.description}${item.description.length >= 150 ? '...' : ''}`
+            (item: { title: string; views: number; description: string }, _idx: number) =>
+              `${_idx + 1}. ${item.title} - ${item.views} views\n   ${item.description}${item.description.length >= 150 ? '...' : ''}`
           )
           .join('\n\n')
       );

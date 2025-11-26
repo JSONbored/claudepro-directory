@@ -3,7 +3,7 @@
  * Processes revalidation queue: Invalidate Next.js cache tags
  */
 
-import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
+import { Constants, type Database as DatabaseGenerated } from '@heyclaude/database-types';
 import {
   edgeEnv,
   errorResponse,
@@ -68,26 +68,12 @@ function isValidRevalidationPayload(value: unknown): value is RevalidationPayloa
 }
 
 // Type guard to validate content_category enum
+// Uses canonical enum values from database-types to prevent drift
 function isValidContentCategory(
   value: string
 ): value is DatabaseGenerated['public']['Enums']['content_category'] {
-  const validCategories: DatabaseGenerated['public']['Enums']['content_category'][] = [
-    'agents',
-    'mcp',
-    'commands',
-    'hooks',
-    'rules',
-    'statuslines',
-    'skills',
-    'collections',
-    'guides',
-  ];
-  for (const validCategory of validCategories) {
-    if (value === validCategory) {
-      return true;
-    }
-  }
-  return false;
+  const validCategories = Constants.public.Enums.content_category;
+  return validCategories.includes(value as DatabaseGenerated['public']['Enums']['content_category']);
 }
 
 export async function handleRevalidation(_req: Request): Promise<Response> {

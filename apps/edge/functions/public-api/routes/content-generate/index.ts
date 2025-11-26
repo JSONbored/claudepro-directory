@@ -24,7 +24,7 @@ import {
   supabaseServiceRole,
 } from '@heyclaude/edge-runtime';
 import type { BaseLogContext } from '@heyclaude/shared-runtime';
-import { buildSecurityHeaders, logError, logInfo } from '@heyclaude/shared-runtime';
+import { buildSecurityHeaders, logError, logInfo, timingSafeEqual } from '@heyclaude/shared-runtime';
 import { getGenerator, getSupportedCategories, isCategorySupported } from './registry.ts';
 import type { GeneratePackageRequest, GeneratePackageResponse } from './types.ts';
 
@@ -85,7 +85,8 @@ export async function handleGeneratePackage(
   const authHeader = request.headers.get('Authorization');
   const providedKey = authHeader?.replace('Bearer ', '').trim();
 
-  if (!providedKey || providedKey !== serviceRoleKey) {
+  // Use timing-safe comparison to prevent timing attacks
+  if (!providedKey || !timingSafeEqual(providedKey, serviceRoleKey)) {
     if (logContext) {
       logInfo('Unauthorized package generation request', {
         ...logContext,
@@ -206,8 +207,9 @@ export async function handleGeneratePackage(
 
   // Check if async mode is requested (via query parameter or header)
   const url = new URL(request.url);
-  const asyncMode =
-    url.searchParams.get('async') === 'true' || request.headers.get('X-Async-Mode') === 'true';
+  const asyncParam = url.searchParams.get('async') === 'true';
+  const asyncHeader = request.headers.get('X-Async-Mode') === 'true';
+  const asyncMode = asyncParam || asyncHeader;
 
   // Async mode: Enqueue to queue and return immediately
   if (asyncMode) {
@@ -259,10 +261,8 @@ export async function handleGeneratePackage(
         logError('Failed to enqueue package generation', logContext, error);
       }
 
-      if (logContext) {
-        return errorResponse(error, 'data-api:content-generate-enqueue', CORS, logContext);
-      }
-      return errorResponse(error, 'data-api:content-generate-enqueue', CORS);
+      // errorResponse accepts optional logContext, so no need for conditional
+      return errorResponse(error, 'data-api:content-generate-enqueue', CORS, logContext);
     }
   }
 
@@ -311,9 +311,7 @@ export async function handleGeneratePackage(
       logError('Package generation failed', logContext, error);
     }
 
-    if (logContext) {
-      return errorResponse(error, 'data-api:content-generate-sync', CORS, logContext);
-    }
-    return errorResponse(error, 'data-api:content-generate-sync', CORS);
+    // errorResponse accepts optional logContext, so no need for conditional
+    return errorResponse(error, 'data-api:content-generate-sync', CORS, logContext);
   }
 }

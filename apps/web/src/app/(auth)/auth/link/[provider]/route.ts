@@ -3,6 +3,7 @@
  * Initiates OAuth flow to link a provider to an existing authenticated account
  */
 
+import { isValidProvider } from '@heyclaude/web-runtime';
 import { createWebAppContextWithId, generateRequestId, logger } from '@heyclaude/web-runtime/core';
 import { getAuthenticatedUser } from '@heyclaude/web-runtime/server';
 import { type NextRequest, NextResponse } from 'next/server';
@@ -18,13 +19,6 @@ import { type NextRequest, NextResponse } from 'next/server';
  * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic
  */
 export const dynamic = 'force-dynamic';
-
-const VALID_PROVIDERS = ['github', 'google', 'discord'] as const;
-type ValidProvider = (typeof VALID_PROVIDERS)[number];
-
-function isValidProvider(provider: string): provider is ValidProvider {
-  return VALID_PROVIDERS.includes(provider as ValidProvider);
-}
 
 export async function GET(
   request: NextRequest,

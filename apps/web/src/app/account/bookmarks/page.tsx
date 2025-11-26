@@ -3,6 +3,9 @@ import { generatePageMetadata } from '@heyclaude/web-runtime/data';
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 
+const SOURCE_ROUTE = '/account/bookmarks';
+const TARGET_ROUTE = '/account/library';
+
 /**
  * Dynamic Rendering Required
  * Authenticated route (legacy redirect)
@@ -11,8 +14,8 @@ export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
 export async function generateMetadata(): Promise<Metadata> {
-  // Use /account/library metadata since this redirects there
-  return generatePageMetadata('/account/library');
+  // Use target route metadata since this redirects there
+  return generatePageMetadata(TARGET_ROUTE);
 }
 
 /**
@@ -22,16 +25,16 @@ export async function generateMetadata(): Promise<Metadata> {
 export default function BookmarksPage() {
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  const logContext = createWebAppContextWithId(requestId, '/account/bookmarks', 'BookmarksPage', {
-    sourceRoute: '/account/bookmarks',
-    targetRoute: '/account/library',
+  const logContext = createWebAppContextWithId(requestId, SOURCE_ROUTE, 'BookmarksPage', {
+    sourceRoute: SOURCE_ROUTE,
+    targetRoute: TARGET_ROUTE,
     redirectReason: 'legacy-route-compatibility',
   });
 
   logger.info(
-    'BookmarksPage: redirecting legacy /account/bookmarks to /account/library',
+    `BookmarksPage: redirecting legacy ${SOURCE_ROUTE} to ${TARGET_ROUTE}`,
     undefined,
     logContext
   );
-  redirect('/account/library');
+  redirect(TARGET_ROUTE);
 }

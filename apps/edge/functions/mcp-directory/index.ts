@@ -283,7 +283,7 @@ mcpApp.get('/oauth/authorize', handleOAuthAuthorize);
  */
 function getMcpServerResourceUrl(): string {
   // Use environment variable if set, otherwise default to production URL
-  return process.env['MCP_SERVER_URL'] || 'https://mcp.heyclau.de/mcp';
+  return Deno.env.get('MCP_SERVER_URL') || 'https://mcp.heyclau.de/mcp';
 }
 
 /**
@@ -334,7 +334,8 @@ function validateTokenAudience(token: string, expectedAudience: string): boolean
 
     // Fallback: Accept Supabase project URL as audience for backward compatibility
     // This allows existing tokens to work while we transition to full OAuth 2.1
-    // TODO: Remove this fallback once all clients use OAuth 2.1 with resource parameter
+    // TODO: Remove this fallback by 2025-06-30 / v2.0.0
+    // See https://github.com/heyclaude/claudepro-directory/issues/XXX for migration status
     const supabaseUrl = edgeEnv.supabase.url;
     const hasSupabaseAudience = audiences.some((a) => {
       return a === supabaseUrl || a === `${supabaseUrl}/auth/v1`;

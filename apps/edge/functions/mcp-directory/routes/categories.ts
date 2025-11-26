@@ -34,7 +34,8 @@ export async function handleListCategories(
   );
 
   // Format the response for MCP
-  const categories = data.map((cat) => ({
+  type CategoryConfig = Database['public']['CompositeTypes']['category_config_with_features'];
+  const categories = data.map((cat: CategoryConfig) => ({
     name: cat.title || cat.category || '',
     slug: cat.category || '',
     description: cat.description || '',
@@ -44,7 +45,7 @@ export async function handleListCategories(
 
   // Return both structured data and a text summary
   const textSummary = categories
-    .map((c) => `• ${c.name} (${c.slug}): ${c.count} items - ${c.description}`)
+    .map((c: { name: string; slug: string; count: number; description: string }) => `• ${c.name} (${c.slug}): ${c.count} items - ${c.description}`)
     .join('\n');
 
   return {

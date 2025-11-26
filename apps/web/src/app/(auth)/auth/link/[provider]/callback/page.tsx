@@ -5,6 +5,7 @@
 
 'use client';
 
+import { isValidProvider } from '@heyclaude/web-runtime';
 import {
   createWebAppContextWithId,
   generateRequestId,
@@ -15,8 +16,10 @@ import { useAuthenticatedUser } from '@heyclaude/web-runtime/hooks';
 import { AlertCircle, Loader2 } from '@heyclaude/web-runtime/icons';
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { use, useEffect, useState } from 'react';
+import { use, useEffect, useRef, useState } from 'react';
 
+
+import { Button } from '@/src/components/primitives/ui/button';
 import {
   Card,
   CardContent,
@@ -24,13 +27,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/ui/card';
-
-const VALID_PROVIDERS = ['github', 'google', 'discord'] as const;
-type ValidProvider = (typeof VALID_PROVIDERS)[number];
-
-function isValidProvider(provider: string): provider is ValidProvider {
-  return VALID_PROVIDERS.includes(provider as ValidProvider);
-}
 
 export default function OAuthLinkCallbackPage({
   params,
@@ -43,6 +39,7 @@ export default function OAuthLinkCallbackPage({
   const [status, setStatus] = useState<'loading' | 'error' | 'success'>('loading');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [provider, setProvider] = useState<string | null>(null);
+  const hasAttempted = useRef<boolean>(false);
   const {
     user,
     isAuthenticated,
@@ -54,10 +51,18 @@ export default function OAuthLinkCallbackPage({
     let mounted = true;
 
     async function handleLink() {
+      // Prevent duplicate OAuth linking attempts (e.g., from Strict Mode re-mounts)
+      if (hasAttempted.current) {
+        return;
+      }
+
       // Wait for auth to load before proceeding
       if (isAuthLoading) {
         return;
       }
+
+      // Mark as attempted before proceeding
+      hasAttempted.current = true;
 
       // Generate single requestId for this client-side operation
       const requestId = generateRequestId();
@@ -89,7 +94,14 @@ export default function OAuthLinkCallbackPage({
           setErrorMessage('You must be signed in to link an account. Redirecting to login...');
           logger.warn('OAuth link callback: user not authenticated', undefined, logContext);
           setTimeout(() => {
-            const next = searchParameters.get('next') ?? '/account/connected-accounts';
+            // Validate 'next' parameter to prevent open redirects
+            const nextParameter = searchParameters.get('next') ?? '/account/connected-accounts';
+            const isValidRedirect =
+              nextParameter.startsWith('/') &&
+              !nextParameter.startsWith('//') &&
+              !nextParameter.startsWith('/\\') &&
+              !nextParameter.includes('@');
+            const next = isValidRedirect ? nextParameter : '/account/connected-accounts';
             router.push(
               `/login?redirect=${encodeURIComponent(`/auth/link/${rawProvider}?next=${encodeURIComponent(next)}`)}`
             );
@@ -97,8 +109,15 @@ export default function OAuthLinkCallbackPage({
           return;
         }
 
-        // Get the next redirect URL
-        const next = searchParameters.get('next') ?? '/account/connected-accounts';
+        // Get the next redirect URL with validation
+        // Validate 'next' parameter to prevent open redirects (matches server-side validation)
+        const nextParameter = searchParameters.get('next') ?? '/account/connected-accounts';
+        const isValidRedirect =
+          nextParameter.startsWith('/') &&
+          !nextParameter.startsWith('//') &&
+          !nextParameter.startsWith('/\\') &&
+          !nextParameter.includes('@');
+        const next = isValidRedirect ? nextParameter : '/account/connected-accounts';
         const callbackUrl = new URL(`${globalThis.location.origin}/auth/callback`);
         callbackUrl.searchParams.set('next', next);
         callbackUrl.searchParams.set('link', 'true'); // Flag to indicate this is a linking flow
@@ -195,13 +214,9 @@ export default function OAuthLinkCallbackPage({
             </CardDescription>
           </CardHeader>
           <CardContent className={UI_CLASSES.FLEX_COL_GAP_2}>
-            <button
-              type="button"
-              onClick={() => router.push('/account/connected-accounts')}
-              className="rounded-md bg-primary px-4 py-2 font-medium text-primary-foreground text-sm hover:bg-primary/90"
-            >
+            <Button type="button" onClick={() => router.push('/account/connected-accounts')}>
               Return to Connected Accounts
-            </button>
+            </Button>
           </CardContent>
         </Card>
       </div>

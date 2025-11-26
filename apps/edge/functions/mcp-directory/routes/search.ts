@@ -53,15 +53,21 @@ export async function handleSearchContent(
   const hasMore = page * limit < total;
 
   // Format results
-  const formattedItems = items.map((item: ContentPaginatedItem) => ({
-    slug: item.slug || '',
-    title: item.title || item.display_title || '',
-    category: item.category || '',
-    description: item.description?.substring(0, 200) || '',
-    tags: item.tags || [],
-    author: item.author || 'Unknown',
-    dateAdded: item.date_added || '',
-  }));
+  const formattedItems = items.map((item: ContentPaginatedItem) => {
+    const originalDescription = item.description || '';
+    const truncatedDescription = originalDescription.substring(0, 200);
+    const wasTruncated = originalDescription.length > 200;
+    return {
+      slug: item.slug || '',
+      title: item.title || item.display_title || '',
+      category: item.category || '',
+      description: truncatedDescription,
+      wasTruncated,
+      tags: item.tags || [],
+      author: item.author || 'Unknown',
+      dateAdded: item.date_added || '',
+    };
+  });
 
   // Create text summary
   const searchDesc = query ? `for "${query}"` : 'all content';
@@ -71,7 +77,7 @@ export async function handleSearchContent(
   const textSummary = formattedItems
     .map(
       (item, idx) =>
-        `${idx + 1}. ${item.title} (${item.category})\n   ${item.description}${item.description.length >= 200 ? '...' : ''}${item.tags.length > 0 ? `\n   Tags: ${item.tags.join(', ')}` : ''}`
+        `${idx + 1}. ${item.title} (${item.category})\n   ${item.description}${item.wasTruncated ? '...' : ''}${item.tags.length > 0 ? `\n   Tags: ${item.tags.join(', ')}` : ''}`
     )
     .join('\n\n');
 

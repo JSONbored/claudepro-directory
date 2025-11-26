@@ -73,11 +73,18 @@ declare module 'http://*' {
   export const __esModule: boolean;
 }
 
+// Specific declaration for zod-to-json-schema
+declare module 'npm:zod-to-json-schema@*' {
+  export function zodToJsonSchema(schema: any): any;
+  export default zodToJsonSchema;
+}
+
 // Generic npm: pattern for any npm package
 declare module 'npm:*' {
   const content: any;
   export default content;
   export const __esModule: boolean;
+  // Note: Named exports are handled by specific module declarations above
 }
 
 // Generic jsr: pattern for any JSR package

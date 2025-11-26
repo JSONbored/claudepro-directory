@@ -41,10 +41,7 @@ import {
   normalizeError,
   withDuration,
 } from '@heyclaude/web-runtime/core';
-import {
-  getCategoryConfig,
-  getHomepageCategoryIds,
-} from '@heyclaude/web-runtime/data/config/category';
+import { getCategoryConfig } from '@heyclaude/web-runtime/data/config/category';
 import { getContentByCategory } from '@heyclaude/web-runtime/data/content';
 import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
 import type { Metadata } from 'next';
@@ -53,22 +50,18 @@ import { notFound } from 'next/navigation';
 import { ContentListServer } from '@/src/components/content/content-grid-list';
 
 /**
- * Static generation with incremental revalidation
+ * Dynamic Rendering Required
  *
- * This page uses generateStaticParams to pre-render known categories at build time.
- * It revalidates every 30 minutes (1800 seconds) to keep list content fresh.
+ * This page must use dynamic rendering because it imports from @heyclaude/web-runtime
+ * which transitively imports feature-flags/flags.ts. The Vercel Flags SDK's flags/next
+ * module contains module-level code that calls server functions, which cannot be
+ * executed during static site generation.
+ *
+ * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic
  */
-export const revalidate = 1800;
+export const dynamic = 'force-dynamic';
 // eslint-disable-next-line unicorn/prevent-abbreviations -- Next.js API convention
 export const dynamicParams = true; // Allow unknown categories to be rendered on demand (will 404 if invalid)
-
-// eslint-disable-next-line unicorn/prevent-abbreviations -- Next.js API convention
-export function generateStaticParams() {
-  const categories = getHomepageCategoryIds;
-  return categories.map((category) => ({
-    category,
-  }));
-}
 
 /**
  * Generate metadata for category list pages

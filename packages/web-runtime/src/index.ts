@@ -22,6 +22,7 @@ export * from './trace.ts';
 // export * from './supabase/index.ts';
 export * from './auth/mfa.ts';
 export * from './auth/aal.ts';
+export * from './auth/oauth-providers.ts';
 export * from './storage/image-utils.ts';
 export * from './edge/call-edge-function.ts';
 export * from './edge/transform.ts';

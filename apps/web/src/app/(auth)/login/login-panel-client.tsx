@@ -1,5 +1,6 @@
 'use client';
 
+import { VALID_PROVIDERS } from '@heyclaude/web-runtime';
 import { ensureString, logClientWarning } from '@heyclaude/web-runtime/core';
 import { useEffect, useMemo, useState } from 'react';
 
@@ -40,26 +41,29 @@ export function LoginPanelClient({ redirectTo }: LoginPanelClientProperties) {
     };
   }, []);
 
-  const tileHeadline = ensureString(
-    newsletterConfig['newsletter.login_tile.headline'],
-    'Your weekly Claude upgrade drop'
-  );
-  const tileDescription = ensureString(
-    newsletterConfig['newsletter.login_tile.description'],
-    'New MCP servers, pro prompts, and community playbooks — no fluff, just signal.'
-  );
-  const tileBenefits = [
-    ensureString(newsletterConfig['newsletter.login_tile.benefit_primary']),
-    ensureString(newsletterConfig['newsletter.login_tile.benefit_secondary']),
-  ].filter(Boolean);
-  const tileSafety = ensureString(
-    newsletterConfig['newsletter.login_tile.safety'],
-    'No spam. Unsubscribe anytime.'
-  );
-  const badgePrefix = ensureString(
-    newsletterConfig['newsletter.login_tile.badge_prefix'],
-    '✨ Trusted by'
-  );
+  const tileProperties = useMemo(() => {
+    const tileHeadline = ensureString(
+      newsletterConfig['newsletter.login_tile.headline'],
+      'Your weekly Claude upgrade drop'
+    );
+    const tileDescription = ensureString(
+      newsletterConfig['newsletter.login_tile.description'],
+      'New MCP servers, pro prompts, and community playbooks — no fluff, just signal.'
+    );
+    const tileBenefits = [
+      ensureString(newsletterConfig['newsletter.login_tile.benefit_primary']),
+      ensureString(newsletterConfig['newsletter.login_tile.benefit_secondary']),
+    ].filter(Boolean);
+    const tileSafety = ensureString(
+      newsletterConfig['newsletter.login_tile.safety'],
+      'No spam. Unsubscribe anytime.'
+    );
+    const badgePrefix = ensureString(
+      newsletterConfig['newsletter.login_tile.badge_prefix'],
+      '✨ Trusted by'
+    );
+    return { tileHeadline, tileDescription, tileBenefits, tileSafety, badgePrefix };
+  }, [newsletterConfig]);
 
   return (
     <AuthFormPanel
@@ -71,29 +75,22 @@ export function LoginPanelClient({ redirectTo }: LoginPanelClientProperties) {
           onChange={setNewsletterOptIn}
           subscriberCountLabel={subscriberCountLabel}
           isLoadingCount={isLoading}
-          headline={tileHeadline}
-          description={tileDescription}
-          benefits={tileBenefits}
-          safetyCopy={tileSafety}
-          badgePrefix={badgePrefix}
+          headline={tileProperties.tileHeadline}
+          description={tileProperties.tileDescription}
+          benefits={tileProperties.tileBenefits}
+          safetyCopy={tileProperties.tileSafety}
+          badgePrefix={tileProperties.badgePrefix}
         />
       }
     >
-      <OAuthProviderButton
-        provider="github"
-        redirectTo={redirectTo}
-        newsletterOptIn={newsletterOptIn}
-      />
-      <OAuthProviderButton
-        provider="google"
-        redirectTo={redirectTo}
-        newsletterOptIn={newsletterOptIn}
-      />
-      <OAuthProviderButton
-        provider="discord"
-        redirectTo={redirectTo}
-        newsletterOptIn={newsletterOptIn}
-      />
+      {VALID_PROVIDERS.map((provider) => (
+        <OAuthProviderButton
+          key={provider}
+          provider={provider}
+          redirectTo={redirectTo}
+          newsletterOptIn={newsletterOptIn}
+        />
+      ))}
     </AuthFormPanel>
   );
 }

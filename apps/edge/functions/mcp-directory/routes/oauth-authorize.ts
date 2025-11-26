@@ -12,12 +12,13 @@
  */
 
 import { edgeEnv } from '@heyclaude/edge-runtime';
-import { createDataApiContext, logError } from '@heyclaude/shared-runtime';
+import { createDataApiContext, getEnvVar, logError } from '@heyclaude/shared-runtime';
 import type { Context } from 'hono';
 
 const SUPABASE_URL = edgeEnv.supabase.url;
 const SUPABASE_AUTH_URL = `${SUPABASE_URL}/auth/v1`;
-const MCP_SERVER_URL = process.env['MCP_SERVER_URL'] || 'https://mcp.heyclau.de';
+// Use getEnvVar for consistency with edgeEnv pattern (could be moved to edgeEnv config in future)
+const MCP_SERVER_URL = getEnvVar('MCP_SERVER_URL') ?? 'https://mcp.heyclau.de';
 const MCP_RESOURCE_URL = `${MCP_SERVER_URL}/mcp`;
 
 /**
@@ -131,12 +132,9 @@ export async function handleOAuthAuthorize(c: Context): Promise<Response> {
     if (state) {
       supabaseAuthUrl.searchParams.set('state', state);
     }
-    if (codeChallenge) {
-      supabaseAuthUrl.searchParams.set('code_challenge', codeChallenge);
-    }
-    if (codeChallengeMethod) {
-      supabaseAuthUrl.searchParams.set('code_challenge_method', codeChallengeMethod);
-    }
+    // PKCE parameters are validated as required above, so they're always present here
+    supabaseAuthUrl.searchParams.set('code_challenge', codeChallenge);
+    supabaseAuthUrl.searchParams.set('code_challenge_method', codeChallengeMethod);
 
     // Redirect to Supabase Auth with all parameters including resource
     return c.redirect(supabaseAuthUrl.toString(), 302);

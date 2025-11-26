@@ -224,8 +224,30 @@
   function promptUserToUpdate(worker) {
     // Only show update prompt if page has been visible for more than 30 seconds
     // This prevents annoying users immediately after they load the page
-    const pageLoadTime = performance.timing.loadEventEnd;
+    // Use Navigation Timing Level 2 API with fallbacks
+    let pageLoadTime = 0;
+    const navEntries = performance.getEntriesByType('navigation');
+    const navEntry = navEntries && navEntries.length > 0 ? navEntries[0] : null;
+    
+    if (navEntry && navEntry.loadEventEnd && navEntry.loadEventEnd > 0) {
+      // Navigation Timing Level 2 API
+      pageLoadTime = performance.timeOrigin + navEntry.loadEventEnd;
+    } else if (performance.timing && performance.timing.loadEventEnd && performance.timing.loadEventEnd > 0) {
+      // Fallback to deprecated performance.timing
+      pageLoadTime = performance.timing.loadEventEnd;
+    } else {
+      // Fallback: treat page as just loaded
+      pageLoadTime = Date.now();
+    }
+    
     const timeSinceLoad = Date.now() - pageLoadTime;
+    
+    // Guard against NaN/undefined values
+    if (isNaN(timeSinceLoad) || timeSinceLoad < 0) {
+      // If we can't determine load time, treat as just loaded
+      worker.postMessage({ type: "SKIP_WAITING" });
+      return;
+    }
 
     if (timeSinceLoad < 30000) {
       // Auto-update silently if page just loaded
@@ -368,16 +390,16 @@
           }
         }
       }
-    } catch (error) {
+    } catch (err) {
       // Mark PWA as failed but don't break the app
       if (typeof window !== "undefined") {
         window.claudeProPWAReady = false;
-        window.claudeProPWAError = error;
+        window.claudeProPWAError = err;
         window.dispatchEvent(new Event("pwa-error"));
       }
       // Only log errors in development
       if (isDev) {
-        error("[SW] Service worker initialization failed:", error);
+        error("[SW] Service worker initialization failed:", err);
       }
     }
   }
@@ -446,7 +468,7 @@
     install: async () => {
       if (!deferredPrompt) {
         log("[PWA] No install prompt available");
-        return { success: false, reason: "no_prompt" };
+        return { success: false, outcome: "no_prompt" };
       }
 
       // Show the install prompt

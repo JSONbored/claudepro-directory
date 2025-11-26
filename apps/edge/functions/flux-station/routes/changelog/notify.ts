@@ -313,7 +313,8 @@ async function processChangelogRelease(message: QueueMessage): Promise<{
   }
 
   // Success if notification inserted (most critical)
-  const success = notificationSuccess || errors.length === 0;
+  // Only mark as successful if the notification was actually inserted
+  const success = notificationSuccess;
   const durationMs = Date.now() - startTime;
 
   logInfo('Changelog release job completed', {

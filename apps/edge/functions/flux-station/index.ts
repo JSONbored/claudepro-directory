@@ -15,7 +15,7 @@ import {
   type StandardContext,
   serveEdgeApp,
 } from '@heyclaude/edge-runtime';
-import { createUtilityContext, logError } from '@heyclaude/shared-runtime';
+import { createUtilityContext, logError, timingSafeEqual } from '@heyclaude/shared-runtime';
 import { handleChangelogNotify } from './routes/changelog/notify.ts';
 import { handleChangelogProcess } from './routes/changelog/process.ts';
 import { handleDiscordDirect } from './routes/discord/direct.ts';
@@ -46,22 +46,6 @@ import { handleExternalWebhook } from './routes/webhook/external.ts';
 // Use StandardContext directly
 type FluxStationContext = StandardContext;
 
-/**
- * Timing-safe string comparison to prevent timing attacks
- * Uses constant-time comparison by XORing all character codes
- */
-function timingSafeEqual(a: string, b: string): boolean {
-  if (a.length !== b.length) {
-    return false;
-  }
-
-  let result = 0;
-  for (let i = 0; i < a.length; i++) {
-    result |= a.charCodeAt(i) ^ b.charCodeAt(i);
-  }
-
-  return result === 0;
-}
 
 const requireInternalSecret: Middleware<FluxStationContext> = async (
   ctx: FluxStationContext,
@@ -304,6 +288,10 @@ serveEdgeApp<FluxStationContext>({
       name: 'discord-direct',
       methods: ['POST', 'OPTIONS'],
       match: (ctx) => {
+        // Match only on /discord/direct path to prevent unintended routing
+        if (ctx.pathname !== '/discord/direct' && ctx.pathname !== '/discord/direct/') {
+          return false;
+        }
         const notificationType = ctx.request.headers.get('X-Discord-Notification-Type');
         return Boolean(notificationType);
       },

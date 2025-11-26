@@ -109,7 +109,6 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPagePrope
   // Section: Job Data Fetch
   const jobSectionStart = Date.now();
   let job: Awaited<ReturnType<typeof getUserJobById>> = null;
-  let fetchError = false;
   try {
     job = await getUserJobById(user.id, id);
     logger.info(
@@ -137,9 +136,8 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPagePrope
         startTime
       )
     );
-    fetchError = true;
   }
-  if (!job || fetchError) {
+  if (!job) {
     logger.warn(
       'JobAnalyticsPage: job not found or not owned by user',
       undefined,
@@ -208,7 +206,7 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPagePrope
           </div>
           {job.slug && (
             <Button variant="outline" asChild={true}>
-              <Link href={`/jobs/${job.slug}`}>
+              <Link href={`${ROUTES.JOBS}/${job.slug}`}>
                 <ExternalLink className="mr-2 h-4 w-4" />
                 View Listing
               </Link>

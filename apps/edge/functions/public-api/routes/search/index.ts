@@ -45,6 +45,8 @@ interface HighlightedSearchResult {
   tags_highlighted?: string[];
 }
 
+type SortType = 'relevance' | 'popularity' | 'newest' | 'alphabetical';
+
 interface SearchResponse {
   results: HighlightedSearchResult[];
   query: string;
@@ -52,7 +54,7 @@ interface SearchResponse {
     categories?: string[];
     tags?: string[];
     authors?: string[];
-    sort: string;
+    sort: SortType;
     entities?: string[];
     // Job filters
     job_category?: string;
@@ -89,7 +91,8 @@ export async function handleSearch(req: Request, startTime: number): Promise<Res
 
   // Parse and validate query parameters
   const query = url.searchParams.get('q')?.trim() || '';
-  const categories = url.searchParams.get('categories')?.split(',').filter(Boolean);
+  const categoriesParam = url.searchParams.get('categories');
+  const categories = categoriesParam?.split(',').filter(Boolean);
   const tags = url.searchParams.get('tags')?.split(',').filter(Boolean);
   const authors = url.searchParams.get('authors')?.split(',').filter(Boolean);
   const entities = url.searchParams.get('entities')?.split(',').filter(Boolean);
@@ -133,6 +136,30 @@ export async function handleSearch(req: Request, startTime: number): Promise<Res
   const jobTypeValues = Constants.public.Enums.job_type;
   const experienceLevelValues = Constants.public.Enums.experience_level;
 
+  // Validate job enum parameters - return 400 if invalid values are provided
+  const hasJobCategoryParam = jobCategoryParam !== undefined;
+  const hasJobEmploymentParam = jobEmploymentParam !== undefined;
+  const hasJobExperienceParam = jobExperienceParam !== undefined;
+
+  if (hasJobCategoryParam && !isValidEnum(jobCategoryParam, jobCategoryValues)) {
+    return badRequestResponse(
+      `Invalid job_category. Valid values: ${jobCategoryValues.join(', ')}`,
+      getWithAuthCorsHeaders
+    );
+  }
+  if (hasJobEmploymentParam && !isValidEnum(jobEmploymentParam, jobTypeValues)) {
+    return badRequestResponse(
+      `Invalid job_employment. Valid values: ${jobTypeValues.join(', ')}`,
+      getWithAuthCorsHeaders
+    );
+  }
+  if (hasJobExperienceParam && !isValidEnum(jobExperienceParam, experienceLevelValues)) {
+    return badRequestResponse(
+      `Invalid job_experience. Valid values: ${experienceLevelValues.join(', ')}`,
+      getWithAuthCorsHeaders
+    );
+  }
+
   const jobCategory = isValidEnum(jobCategoryParam, jobCategoryValues)
     ? jobCategoryParam
     : undefined;
@@ -168,11 +195,16 @@ export async function handleSearch(req: Request, startTime: number): Promise<Res
     isJobRemote !== undefined;
 
   // Determine search type based on entities parameter and job filters
-  const searchType: 'content' | 'unified' | 'jobs' = hasJobFilters
-    ? 'jobs'
-    : entities
-      ? 'unified'
-      : 'content';
+  // If entities is strictly ['job'], use 'jobs' search type
+  // Otherwise, use job filters presence or fall back to unified/content
+  const searchType: 'content' | 'unified' | 'jobs' =
+    entities?.length === 1 && entities[0] === 'job'
+      ? 'jobs'
+      : hasJobFilters
+        ? 'jobs'
+        : entities
+          ? 'unified'
+          : 'content';
 
   // Create logContext with public-api app label
   const logContext = createSearchContext({
@@ -239,14 +271,27 @@ export async function handleSearch(req: Request, startTime: number): Promise<Res
       // Content search
       // NOTE: SearchService.searchContent uses the optimized RPC which handles keywords.
       // Semantic search logic is handled within the RPC if implemented, or we rely on keywords.
+      const contentCategoryValues = Constants.public.Enums.content_category;
+      const validatedCategories = categories
+        ? categories.filter((cat) => contentCategoryValues.includes(cat as typeof contentCategoryValues[number]))
+        : undefined;
+
+      // If categories were provided but none were valid, return 400
+      if (categories && categories.length > 0 && (!validatedCategories || validatedCategories.length === 0)) {
+        return badRequestResponse(
+          `Invalid categories. Valid values: ${contentCategoryValues.join(', ')}`,
+          getWithAuthCorsHeaders
+        );
+      }
+
       const searchArgs: Parameters<typeof searchService.searchContent>[0] = {
         p_query: query,
         p_limit: limit,
         p_offset: offset,
       };
-      if (categories) {
+      if (validatedCategories && validatedCategories.length > 0) {
         searchArgs.p_categories =
-          categories as DatabaseGenerated['public']['Enums']['content_category'][];
+          validatedCategories as DatabaseGenerated['public']['Enums']['content_category'][];
       }
       if (tags) searchArgs.p_tags = tags;
       if (authors) searchArgs.p_authors = authors;
@@ -270,6 +315,9 @@ export async function handleSearch(req: Request, startTime: number): Promise<Res
   const results = data;
 
   // Apply search term highlighting if query provided
+  // NOTE: highlightSearchTerms and highlightSearchTermsArray use escapeHtml internally
+  // to prevent XSS. All user-controlled input and DB content is properly escaped before
+  // being wrapped in <mark> tags, making the returned HTML safe for direct DOM injection.
   const highlightedResults: HighlightedSearchResult[] = query.trim()
     ? results.map((result) => {
         const highlighted: HighlightedSearchResult = { ...result };
@@ -323,6 +371,7 @@ export async function handleSearch(req: Request, startTime: number): Promise<Res
     : results.map((result) => ({ ...result }));
 
   // Track analytics (fire and forget)
+  // trackSearchAnalytics already handles errors internally
   trackSearchAnalytics(
     query,
     {
@@ -339,18 +388,8 @@ export async function handleSearch(req: Request, startTime: number): Promise<Res
     },
     results.length,
     req.headers.get('Authorization')
-  ).catch((error) => {
-    // Analytics failures shouldn't break search - log but don't throw
-    const logContext = createSearchContext({
-      query: query.substring(0, 50),
-      app: 'public-api',
-    });
-    // Add error type to context for debugging (BaseLogContext allows additional fields)
-    const enhancedContext = {
-      ...logContext,
-      errorType: error instanceof Error ? error.constructor.name : typeof error,
-    };
-    logWarn('Failed to track search analytics', enhancedContext);
+  ).catch(() => {
+    // Fire-and-forget: errors are handled internally by trackSearchAnalytics
   });
 
   const totalTime = performance.now() - startTime;

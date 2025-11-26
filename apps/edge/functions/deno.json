@@ -31,7 +31,7 @@
 	},
 	"compilerOptions": {
 		"lib": ["deno.ns", "deno.unstable", "dom"],
-		"types": ["@heyclaude/edge-runtime/deno-globals.d.ts", "@heyclaude/edge-runtime/jsx-types.d.ts"],
+		"types": ["@heyclaude/edge-runtime/deno-globals.d.ts", "@heyclaude/edge-runtime/jsx-types.d.ts", "./tsconfig-setup.d.ts"],
 		"strict": true,
 		"noImplicitAny": true,
 		"strictNullChecks": true,

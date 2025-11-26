@@ -29,19 +29,17 @@ import {
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+const ROUTE = '/account/connected-accounts';
+
 export async function generateMetadata(): Promise<Metadata> {
-  return await generatePageMetadata('/account/connected-accounts');
+  return generatePageMetadata(ROUTE);
 }
 
 export default async function ConnectedAccountsPage() {
   const startTime = Date.now();
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  const baseLogContext = createWebAppContextWithId(
-    requestId,
-    '/account/connected-accounts',
-    'ConnectedAccountsPage'
-  );
+  const baseLogContext = createWebAppContextWithId(requestId, ROUTE, 'ConnectedAccountsPage');
 
   // Section: Authentication
   const authSectionStart = Date.now();
@@ -57,6 +55,17 @@ export default async function ConnectedAccountsPage() {
           section: 'authentication',
         },
         authSectionStart
+      )
+    );
+    logger.info(
+      'ConnectedAccountsPage: page render completed (unauthenticated)',
+      withDuration(
+        {
+          ...baseLogContext,
+          section: 'page-render',
+          outcome: 'unauthenticated',
+        },
+        startTime
       )
     );
     return (
@@ -114,9 +123,8 @@ export default async function ConnectedAccountsPage() {
         {
           ...logContext,
           section: 'identities-data-fetch',
-          sectionDuration_ms: Date.now() - identitiesSectionStart,
         },
-        startTime
+        identitiesSectionStart
       )
     );
     result = { data: null, serverError: normalized.message };
@@ -149,6 +157,18 @@ export default async function ConnectedAccountsPage() {
       result.serverError && typeof result.serverError === 'string'
         ? result.serverError
         : 'Failed to load connected accounts. Please try again later.';
+
+    logger.info(
+      'ConnectedAccountsPage: page render completed (error)',
+      withDuration(
+        {
+          ...logContext,
+          section: 'page-render',
+          outcome: result.serverError ? 'server-error' : 'no-data',
+        },
+        startTime
+      )
+    );
 
     return (
       <div className="space-y-6">
