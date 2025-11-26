@@ -76,7 +76,7 @@ export default async function ConnectedAccountsPage() {
             <CardDescription>Please sign in to manage your connected accounts.</CardDescription>
           </CardHeader>
           <CardContent>
-            <Button asChild={true}>
+            <Button asChild>
               <Link href={ROUTES.LOGIN}>Go to login</Link>
             </Button>
           </CardContent>
@@ -153,10 +153,9 @@ export default async function ConnectedAccountsPage() {
       );
     }
 
-    const errorMessage =
-      result.serverError && typeof result.serverError === 'string'
-        ? result.serverError
-        : 'Failed to load connected accounts. Please try again later.';
+    // Use generic error message for user-facing display to prevent leaking
+    // internal implementation details. Detailed errors are logged server-side.
+    const errorMessage = 'Failed to load connected accounts. Please try again later.';
 
     logger.info(
       'ConnectedAccountsPage: page render completed (error)',
@@ -179,7 +178,7 @@ export default async function ConnectedAccountsPage() {
             <CardDescription>{errorMessage}</CardDescription>
           </CardHeader>
           <CardContent>
-            <Button asChild={true} variant="outline">
+            <Button asChild variant="outline">
               <Link href={ROUTES.ACCOUNT_SETTINGS}>Go to settings</Link>
             </Button>
           </CardContent>

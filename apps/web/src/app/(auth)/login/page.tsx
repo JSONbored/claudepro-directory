@@ -49,7 +49,9 @@ export default async function LoginPage({
       <SplitAuthLayout
         brandPanel={<AuthBrandPanel />}
         mobileHeader={<AuthMobileHeader />}
-        authPanel={<LoginPanelClient redirectTo={redirectTo} />}
+        authPanel={
+          <LoginPanelClient {...(redirectTo ? { redirectTo } : {})} />
+        }
       />
     </Suspense>
   );

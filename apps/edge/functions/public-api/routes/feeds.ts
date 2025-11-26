@@ -47,14 +47,15 @@ export async function handleFeedsRoute(
     );
   }
 
-  const type = (url.searchParams.get('type') || 'rss').toLowerCase() as FeedType;
+  const typeParam = (url.searchParams.get('type') || 'rss').toLowerCase();
   const categoryParam = url.searchParams.get('category');
   const category =
     categoryParam && categoryParam !== 'all' ? categoryParam.trim().toLowerCase() : null;
 
-  if (!SUPPORTED_TYPES.has(type)) {
+  if (!SUPPORTED_TYPES.has(typeParam as FeedType)) {
     return badRequestResponse('Invalid type. Valid types: rss, atom', CORS);
   }
+  const type = typeParam as FeedType;
 
   if (category && category !== 'changelog' && !toContentCategory(category)) {
     return badRequestResponse(

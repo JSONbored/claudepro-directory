@@ -36,7 +36,7 @@ export default function OAuthLinkCallbackPage({
   const router = useRouter();
   const searchParameters = useSearchParams();
   const resolvedParameters = use(params);
-  const [status, setStatus] = useState<'loading' | 'error' | 'success'>('loading');
+  const [status, setStatus] = useState<'loading' | 'error'>('loading');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [provider, setProvider] = useState<string | null>(null);
   const hasAttempted = useRef<boolean>(false);
@@ -49,6 +49,19 @@ export default function OAuthLinkCallbackPage({
 
   useEffect(() => {
     let mounted = true;
+    let redirectTimeoutId: ReturnType<typeof setTimeout> | null = null;
+
+    // Helper to validate 'next' parameter to prevent open redirects
+    // Reused in both unauthenticated redirect and callback URL construction
+    const validateNextParameter = (nextParameter: string | null = null): string => {
+      const normalized = nextParameter ?? '/account/connected-accounts';
+      const isValidRedirect =
+        normalized.startsWith('/') &&
+        !normalized.startsWith('//') &&
+        !normalized.startsWith('/\\') &&
+        !normalized.includes('@');
+      return isValidRedirect ? normalized : '/account/connected-accounts';
+    };
 
     async function handleLink() {
       // Prevent duplicate OAuth linking attempts (e.g., from Strict Mode re-mounts)
@@ -93,15 +106,10 @@ export default function OAuthLinkCallbackPage({
           setStatus('error');
           setErrorMessage('You must be signed in to link an account. Redirecting to login...');
           logger.warn('OAuth link callback: user not authenticated', undefined, logContext);
-          setTimeout(() => {
-            // Validate 'next' parameter to prevent open redirects
-            const nextParameter = searchParameters.get('next') ?? '/account/connected-accounts';
-            const isValidRedirect =
-              nextParameter.startsWith('/') &&
-              !nextParameter.startsWith('//') &&
-              !nextParameter.startsWith('/\\') &&
-              !nextParameter.includes('@');
-            const next = isValidRedirect ? nextParameter : '/account/connected-accounts';
+          // Guard redirect with mounted check and store timeout ID for cleanup
+          redirectTimeoutId = setTimeout(() => {
+            if (!mounted) return; // Don't redirect if component unmounted
+            const next = validateNextParameter(searchParameters.get('next'));
             router.push(
               `/login?redirect=${encodeURIComponent(`/auth/link/${rawProvider}?next=${encodeURIComponent(next)}`)}`
             );
@@ -111,13 +119,7 @@ export default function OAuthLinkCallbackPage({
 
         // Get the next redirect URL with validation
         // Validate 'next' parameter to prevent open redirects (matches server-side validation)
-        const nextParameter = searchParameters.get('next') ?? '/account/connected-accounts';
-        const isValidRedirect =
-          nextParameter.startsWith('/') &&
-          !nextParameter.startsWith('//') &&
-          !nextParameter.startsWith('/\\') &&
-          !nextParameter.includes('@');
-        const next = isValidRedirect ? nextParameter : '/account/connected-accounts';
+        const next = validateNextParameter(searchParameters.get('next'));
         const callbackUrl = new URL(`${globalThis.location.origin}/auth/callback`);
         callbackUrl.searchParams.set('next', next);
         callbackUrl.searchParams.set('link', 'true'); // Flag to indicate this is a linking flow
@@ -167,6 +169,11 @@ export default function OAuthLinkCallbackPage({
 
     return () => {
       mounted = false;
+      // Clear any pending redirect timeout on unmount
+      if (redirectTimeoutId) {
+        clearTimeout(redirectTimeoutId);
+        redirectTimeoutId = null;
+      }
     };
   }, [
     resolvedParameters.provider,
@@ -196,32 +203,29 @@ export default function OAuthLinkCallbackPage({
     );
   }
 
-  if (status === 'error') {
-    return (
-      <div className="flex min-h-screen items-center justify-center p-4">
-        <Card className="w-full max-w-md">
-          <CardHeader className="text-center">
-            <div
-              className={
-                'mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10'
-              }
-            >
-              <AlertCircle className={`${UI_CLASSES.ICON_LG} text-destructive`} />
-            </div>
-            <CardTitle>Account Linking Failed</CardTitle>
-            <CardDescription>
-              {errorMessage ?? 'An error occurred while linking your account.'}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className={UI_CLASSES.FLEX_COL_GAP_2}>
-            <Button type="button" onClick={() => router.push('/account/connected-accounts')}>
-              Return to Connected Accounts
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  return null;
+  // status can only be 'error' at this point (TypeScript narrows the type)
+  return (
+    <div className="flex min-h-screen items-center justify-center p-4">
+      <Card className="w-full max-w-md">
+        <CardHeader className="text-center">
+          <div
+            className={
+              'mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10'
+            }
+          >
+            <AlertCircle className={`${UI_CLASSES.ICON_LG} text-destructive`} />
+          </div>
+          <CardTitle>Account Linking Failed</CardTitle>
+          <CardDescription>
+            {errorMessage ?? 'An error occurred while linking your account.'}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className={UI_CLASSES.FLEX_COL_GAP_2}>
+          <Button type="button" onClick={() => router.push('/account/connected-accounts')}>
+            Return to Connected Accounts
+          </Button>
+        </CardContent>
+      </Card>
+    </div>
+  );
 }

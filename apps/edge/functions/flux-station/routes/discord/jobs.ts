@@ -27,6 +27,22 @@ type JobRow = DatabaseGenerated['public']['Tables']['jobs']['Row'];
 const JOB_DISCORD_QUEUE = 'discord_jobs';
 const QUEUE_BATCH_SIZE = 10;
 
+// Fields that trigger Discord notifications when changed
+const JOB_MONITORED_FIELDS = [
+  'status',
+  'tier',
+  'title',
+  'company',
+  'description',
+  'location',
+  'salary',
+  'remote',
+  'type',
+  'workplace',
+  'experience',
+  'category',
+] as const;
+
 // Type guard to validate database webhook payload structure
 function isValidJobWebhookPayload(value: unknown): value is DatabaseWebhookPayload<JobRow> {
   if (typeof value !== 'object' || value === null) {
@@ -193,22 +209,6 @@ export async function handleDiscordJobs(_req: Request): Promise<Response> {
             });
             continue;
           }
-
-          // Fields that trigger Discord notifications when changed
-          const JOB_MONITORED_FIELDS = [
-            'status',
-            'tier',
-            'title',
-            'company',
-            'description',
-            'location',
-            'salary',
-            'remote',
-            'type',
-            'workplace',
-            'experience',
-            'category',
-          ] as const;
 
           const fieldsChanged = JOB_MONITORED_FIELDS.some(
             (field) => oldRecord[field] !== newRecord[field]

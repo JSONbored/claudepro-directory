@@ -22,6 +22,21 @@ const MCP_SERVER_URL = getEnvVar('MCP_SERVER_URL') ?? 'https://mcp.heyclau.de';
 const MCP_RESOURCE_URL = `${MCP_SERVER_URL}/mcp`;
 
 /**
+ * Helper function to return JSON error responses with CORS headers
+ */
+function jsonError(
+  c: Context,
+  error: string,
+  description: string,
+  status: 400 | 500 = 400
+): Response {
+  return c.json({ error, error_description: description }, status, {
+    'Content-Type': 'application/json',
+    'Access-Control-Allow-Origin': '*',
+  });
+}
+
+/**
  * OAuth Authorization Endpoint Proxy
  *
  * GET /oauth/authorize
@@ -61,55 +76,32 @@ export async function handleOAuthAuthorize(c: Context): Promise<Response> {
 
     // Validate required parameters
     if (!(clientId && responseType && redirectUri)) {
-      return c.json(
-        { error: 'invalid_request', error_description: 'Missing required OAuth parameters' },
-        400,
-        {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-        }
-      );
+      return jsonError(c, 'invalid_request', 'Missing required OAuth parameters', 400);
+    }
+
+    // Basic URL validation for redirect_uri to prevent open redirect attacks
+    // Note: Supabase Auth also validates registered redirect URIs, but we add
+    // an extra layer of defense here
+    if (redirectUri) {
+      try {
+        new URL(redirectUri);
+      } catch {
+        return jsonError(c, 'invalid_request', 'Invalid redirect_uri format', 400);
+      }
     }
 
     // Validate response_type (OAuth 2.1 requires 'code')
     if (responseType !== 'code') {
-      return c.json(
-        {
-          error: 'unsupported_response_type',
-          error_description: 'Only "code" response type is supported',
-        },
-        400,
-        {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-        }
-      );
+      return jsonError(c, 'unsupported_response_type', 'Only "code" response type is supported', 400);
     }
 
     // Validate PKCE (OAuth 2.1 requires PKCE)
     if (!(codeChallenge && codeChallengeMethod)) {
-      return c.json(
-        { error: 'invalid_request', error_description: 'PKCE (code_challenge) is required' },
-        400,
-        {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-        }
-      );
+      return jsonError(c, 'invalid_request', 'PKCE (code_challenge) is required', 400);
     }
 
     if (codeChallengeMethod !== 'S256') {
-      return c.json(
-        {
-          error: 'invalid_request',
-          error_description: 'Only S256 code challenge method is supported',
-        },
-        400,
-        {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-        }
-      );
+      return jsonError(c, 'invalid_request', 'Only S256 code challenge method is supported', 400);
     }
 
     // Build Supabase Auth authorization URL
@@ -140,9 +132,6 @@ export async function handleOAuthAuthorize(c: Context): Promise<Response> {
     return c.redirect(supabaseAuthUrl.toString(), 302);
   } catch (error) {
     logError('OAuth authorization proxy failed', logContext, error);
-    return c.json({ error: 'server_error', error_description: 'Internal server error' }, 500, {
-      'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': '*',
-    });
+    return jsonError(c, 'server_error', 'Internal server error', 500);
   }
 }

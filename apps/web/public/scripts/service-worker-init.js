@@ -19,6 +19,9 @@
   const log = isDev ? console.log.bind(console) : () => {};
   const error = isDev ? console.error.bind(console) : () => {};
 
+  // Store interval ID for update check cleanup
+  let updateCheckInterval = null;
+
   // Feature detection and security checks
   if (typeof window === "undefined") {
     return;
@@ -59,9 +62,18 @@
   }
 
   // Check if user has opted out of service workers (privacy preference)
-  if (localStorage.getItem("claudepro-disable-sw") === "true") {
-    // Silent return - no need to log in production
-    return;
+  // Guard localStorage access - can throw SecurityError in restricted contexts
+  try {
+    if (localStorage.getItem("claudepro-disable-sw") === "true") {
+      // Silent return - no need to log in production
+      return;
+    }
+  } catch (err) {
+    // If localStorage is unavailable (SecurityError, etc.), treat as not opted out
+    // Allow service worker registration to proceed
+    if (isDev) {
+      log("[SW] localStorage access failed (treating as not opted out):", err);
+    }
   }
 
   // Configuration
@@ -135,7 +147,8 @@
       handleServiceWorkerUpdates(registration);
 
       // Check for updates periodically
-      setInterval(() => {
+      // Store interval ID for cleanup in unregister()
+      updateCheckInterval = setInterval(() => {
         registration.update().catch((err) => {
           error("[SW] Update check failed:", err);
         });
@@ -442,27 +455,86 @@
   }
 
   // Expose control functions for debugging and user preferences
+  // All methods guard against missing APIs and handle errors gracefully
   window.claudeProSW = {
     unregister: async () => {
-      const registrations = await navigator.serviceWorker.getRegistrations();
-      for (const registration of registrations) {
-        await registration.unregister();
+      if (!navigator.serviceWorker || typeof navigator.serviceWorker.getRegistrations !== "function") {
+        return { success: false, error: "Service worker API not available" };
       }
-      localStorage.setItem("claudepro-disable-sw", "true");
-      log("[SW] Service worker unregistered and disabled");
+
+      try {
+        // Clear update check interval if running
+        if (updateCheckInterval) {
+          clearInterval(updateCheckInterval);
+          updateCheckInterval = null;
+        }
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        for (const registration of registrations) {
+          await registration.unregister();
+        }
+        try {
+          localStorage.setItem("claudepro-disable-sw", "true");
+        } catch (err) {
+          if (isDev) {
+            log("[SW] Failed to set localStorage:", err);
+          }
+        }
+        log("[SW] Service worker unregistered and disabled");
+        return { success: true };
+      } catch (err) {
+        if (isDev) {
+          error("[SW] Unregister failed:", err);
+        }
+        return { success: false, error: err instanceof Error ? err.message : "Unknown error" };
+      }
     },
     enable: () => {
-      localStorage.removeItem("claudepro-disable-sw");
-      window.location.reload();
+      try {
+        if (typeof localStorage !== "undefined") {
+          localStorage.removeItem("claudepro-disable-sw");
+        }
+        if (typeof window !== "undefined" && window.location) {
+          window.location.reload();
+        }
+        return { success: true };
+      } catch (err) {
+        if (isDev) {
+          error("[SW] Enable failed:", err);
+        }
+        return { success: false, error: err instanceof Error ? err.message : "Unknown error" };
+      }
     },
     status: async () => {
-      const registration = await navigator.serviceWorker.getRegistration();
-      return {
-        registered: !!registration,
-        active: registration?.active?.state,
-        waiting: !!registration?.waiting,
-        scope: registration?.scope,
-      };
+      if (!navigator.serviceWorker || typeof navigator.serviceWorker.getRegistration !== "function") {
+        return {
+          registered: false,
+          active: null,
+          waiting: null,
+          scope: null,
+          error: "Service worker API not available",
+        };
+      }
+
+      try {
+        const registration = await navigator.serviceWorker.getRegistration();
+        return {
+          registered: !!registration,
+          active: registration?.active?.state || null,
+          waiting: !!registration?.waiting,
+          scope: registration?.scope || null,
+        };
+      } catch (err) {
+        if (isDev) {
+          error("[SW] Status check failed:", err);
+        }
+        return {
+          registered: false,
+          active: null,
+          waiting: null,
+          scope: null,
+          error: err instanceof Error ? err.message : "Unknown error",
+        };
+      }
     },
     // PWA Install Control
     install: async () => {
@@ -471,21 +543,27 @@
         return { success: false, outcome: "no_prompt" };
       }
 
-      // Show the install prompt
-      deferredPrompt.prompt();
+      try {
+        // Show the install prompt
+        deferredPrompt.prompt();
 
-      // Wait for the user to respond to the prompt
-      const { outcome } = await deferredPrompt.userChoice;
+        // Wait for the user to respond to the prompt
+        const { outcome } = await deferredPrompt.userChoice;
 
-      log("[PWA] User choice:", outcome);
+        log("[PWA] User choice:", outcome);
 
-      // Clear the prompt
-      deferredPrompt = null;
+        // Clear the prompt
+        deferredPrompt = null;
 
-      return {
-        success: outcome === "accepted",
-        outcome,
-      };
+        return {
+          success: outcome === "accepted",
+          outcome,
+        };
+      } catch (err) {
+        log("[PWA] Install prompt failed:", err);
+        deferredPrompt = null;
+        return { success: false, outcome: "error", error: err instanceof Error ? err.message : "Unknown error" };
+      }
     },
     isInstallable: () => {
       return deferredPrompt !== null;

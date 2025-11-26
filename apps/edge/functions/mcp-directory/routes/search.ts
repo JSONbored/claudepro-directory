@@ -52,6 +52,14 @@ export async function handleSearchContent(
   const total = result.pagination?.total_count || 0;
   const hasMore = page * limit < total;
 
+  // Handle empty results explicitly
+  if (items.length === 0) {
+    return {
+      content: [{ type: 'text' as const, text: 'No results found.' }],
+      _meta: { items: [], total: 0, page, limit, hasMore: false },
+    };
+  }
+
   // Format results
   const formattedItems = items.map((item: ContentPaginatedItem) => {
     const originalDescription = item.description || '';

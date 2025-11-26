@@ -33,7 +33,7 @@ export default function BookmarksPage() {
 
   logger.info(
     `BookmarksPage: redirecting legacy ${SOURCE_ROUTE} to ${TARGET_ROUTE}`,
-    undefined,
+    undefined, // error parameter (not applicable for info logs)
     logContext
   );
   redirect(TARGET_ROUTE);

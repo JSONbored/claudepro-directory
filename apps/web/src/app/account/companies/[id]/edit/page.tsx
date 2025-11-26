@@ -163,11 +163,11 @@ export default async function EditCompanyPage({ params }: EditCompanyPagePropert
 
   // Final summary log
   logger.info(
-    'EditCompanyPage: page render completed',
+    'EditCompanyPage: page execution completed',
     withDuration(
       {
         ...logContext,
-        section: 'page-render',
+        section: 'page-execution',
       },
       startTime
     )

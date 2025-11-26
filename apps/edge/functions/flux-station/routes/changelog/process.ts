@@ -35,6 +35,7 @@ import {
   createNotificationRouterContext,
   createUtilityContext,
   errorToString,
+  getProperty,
   logError,
   logInfo,
   TIMEOUT_PRESETS,
@@ -58,24 +59,17 @@ interface ChangelogWebhookQueueMessage {
   message: ChangelogWebhookProcessingJob;
 }
 
+// Helper to safely get string property
+const getStringProperty = (obj: unknown, key: string): string | undefined => {
+  const value = getProperty(obj, key);
+  return typeof value === 'string' ? value : undefined;
+};
+
 // Type guard to validate VercelWebhookPayload structure
 function isValidVercelWebhookPayload(value: unknown): value is VercelWebhookPayload {
   if (typeof value !== 'object' || value === null) {
     return false;
   }
-
-  const getProperty = (obj: unknown, key: string): unknown => {
-    if (typeof obj !== 'object' || obj === null) {
-      return undefined;
-    }
-    const desc = Object.getOwnPropertyDescriptor(obj, key);
-    return desc?.value;
-  };
-
-  const getStringProperty = (obj: unknown, key: string): string | undefined => {
-    const value = getProperty(obj, key);
-    return typeof value === 'string' ? value : undefined;
-  };
 
   const type = getStringProperty(value, 'type');
   const id = getStringProperty(value, 'id');
@@ -121,19 +115,6 @@ function isValidChangelogWebhookProcessingJob(
     return false;
   }
 
-  const getProperty = (obj: unknown, key: string): unknown => {
-    if (typeof obj !== 'object' || obj === null) {
-      return undefined;
-    }
-    const desc = Object.getOwnPropertyDescriptor(obj, key);
-    return desc?.value;
-  };
-
-  const getStringProperty = (obj: unknown, key: string): string | undefined => {
-    const value = getProperty(obj, key);
-    return typeof value === 'string' ? value : undefined;
-  };
-
   const webhookEventId = getStringProperty(value, 'webhook_event_id');
   if (!webhookEventId) {
     return false;
@@ -158,19 +139,6 @@ function isValidGitHubCommitArray(value: unknown): value is GitHubCommit[] {
     if (typeof item !== 'object' || item === null) {
       return false;
     }
-
-    const getProperty = (obj: unknown, key: string): unknown => {
-      if (typeof obj !== 'object' || obj === null) {
-        return undefined;
-      }
-      const desc = Object.getOwnPropertyDescriptor(obj, key);
-      return desc?.value;
-    };
-
-    const getStringProperty = (obj: unknown, key: string): string | undefined => {
-      const value = getProperty(obj, key);
-      return typeof value === 'string' ? value : undefined;
-    };
 
     const sha = getStringProperty(item, 'sha');
     const commit = getProperty(item, 'commit');
@@ -352,14 +320,6 @@ async function processChangelogWebhook(message: ChangelogWebhookQueueMessage): P
             if (typeof data !== 'object' || data === null) {
               throw new Error('Invalid GitHub API response: expected object');
             }
-
-            const getProperty = (obj: unknown, key: string): unknown => {
-              if (typeof obj !== 'object' || obj === null) {
-                return undefined;
-              }
-              const desc = Object.getOwnPropertyDescriptor(obj, key);
-              return desc?.value;
-            };
 
             const commitsValue = getProperty(data, 'commits');
             if (!commitsValue) {

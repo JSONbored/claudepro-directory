@@ -26,6 +26,7 @@ import {
   createNotificationRouterContext,
   createUtilityContext,
   errorToString,
+  getProperty,
   logError,
   logInfo,
   logWarn,
@@ -62,15 +63,6 @@ function isValidChangelogReleaseJob(value: unknown): value is ChangelogReleaseJo
   if (typeof value !== 'object' || value === null) {
     return false;
   }
-
-  // Helper to safely get property
-  const getProperty = (obj: unknown, key: string): unknown => {
-    if (typeof obj !== 'object' || obj === null) {
-      return undefined;
-    }
-    const desc = Object.getOwnPropertyDescriptor(obj, key);
-    return desc?.value;
-  };
 
   const getStringProperty = (obj: unknown, key: string): string | undefined => {
     const value = getProperty(obj, key);

@@ -59,6 +59,11 @@ export async function handleGetFeatured(
         type PaginatedSlimResult = Database['public']['CompositeTypes']['content_paginated_slim_result'];
         const typedData = data as PaginatedSlimResult;
         
+        // Validate response structure
+        if (!typedData || typeof typedData !== 'object') {
+          return; // Skip malformed responses
+        }
+        
         if (typedData.items) {
           // p_limit: 6 already restricts results, so slice is unnecessary
           type FeaturedItem = {

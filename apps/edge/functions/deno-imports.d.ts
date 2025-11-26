@@ -80,6 +80,11 @@ declare module 'npm:zod-to-json-schema@*' {
 }
 
 // Generic npm: pattern for any npm package
+// NOTE: These catch-all declarations trade away type-safety for pragmatism.
+// As the edge workspace stabilizes, consider:
+// 1. Adding explicit module declarations for high-value packages (similar to npm:react@*, npm:zod-to-json-schema@*)
+// 2. Narrowing or removing these wildcards once core dependencies are covered
+// This prevents accidental 'any' creep while maintaining good DX now.
 declare module 'npm:*' {
   const content: any;
   export default content;
@@ -88,6 +93,7 @@ declare module 'npm:*' {
 }
 
 // Generic jsr: pattern for any JSR package
+// NOTE: Same considerations as npm:* above - consider tightening over time.
 declare module 'jsr:*' {
   const content: any;
   export default content;

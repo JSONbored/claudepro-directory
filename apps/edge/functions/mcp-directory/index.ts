@@ -304,11 +304,14 @@ function validateTokenAudience(token: string, expectedAudience: string): boolean
     if (!payloadPart) {
       return false;
     }
+    // Add padding if needed (base64 requires length to be multiple of 4)
+    const base64String = payloadPart
+      .replace(/-/g, '+')
+      .replace(/_/g, '/')
+      .padEnd(payloadPart.length + ((4 - (payloadPart.length % 4)) % 4), '=');
     const payload = JSON.parse(
       new TextDecoder().decode(
-        Uint8Array.from(atob(payloadPart.replace(/-/g, '+').replace(/_/g, '/')), (c) =>
-          c.charCodeAt(0)
-        )
+        Uint8Array.from(atob(base64String), (c) => c.charCodeAt(0))
       )
     );
 
@@ -335,7 +338,8 @@ function validateTokenAudience(token: string, expectedAudience: string): boolean
     // Fallback: Accept Supabase project URL as audience for backward compatibility
     // This allows existing tokens to work while we transition to full OAuth 2.1
     // TODO: Remove this fallback by 2025-06-30 / v2.0.0
-    // See https://github.com/heyclaude/claudepro-directory/issues/XXX for migration status
+    // See https://github.com/heyclaude/claudepro-directory/issues/ISSUE_NUMBER for migration status
+    // NOTE: Replace ISSUE_NUMBER with actual GitHub issue number after creating tracking issue
     const supabaseUrl = edgeEnv.supabase.url;
     const hasSupabaseAudience = audiences.some((a) => {
       return a === supabaseUrl || a === `${supabaseUrl}/auth/v1`;

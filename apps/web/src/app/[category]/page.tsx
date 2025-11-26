@@ -180,6 +180,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
 
   // Load content for this category (enriched with analytics, sponsorship, etc.)
   let items: Awaited<ReturnType<typeof getContentByCategory>> = [];
+  let hadError = false;
   try {
     items = await getContentByCategory(typedCategory);
   } catch (error) {
@@ -198,8 +199,10 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
     // Use empty array instead of re-throwing to prevent page crash
     // The page will render with empty content, which is better than crashing
     items = [];
+    hadError = true;
   }
-  if (items.length === 0) {
+  // Only log warning if no error occurred (to avoid duplicate logging)
+  if (items.length === 0 && !hadError) {
     logger.warn(
       'CategoryPage: getContentByCategory returned no items',
       undefined,

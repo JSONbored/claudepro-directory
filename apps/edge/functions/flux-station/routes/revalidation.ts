@@ -17,6 +17,7 @@ import {
 import {
   createUtilityContext,
   errorToString,
+  getProperty,
   logError,
   logWarn,
   TIMEOUT_PRESETS,
@@ -37,23 +38,16 @@ interface RevalidationPayload {
   secret?: string;
 }
 
+// Helper to safely get string property
+const getStringProperty = (obj: unknown, key: string): string | undefined => {
+  const value = getProperty(obj, key);
+  return typeof value === 'string' ? value : undefined;
+};
+
 function isValidRevalidationPayload(value: unknown): value is RevalidationPayload {
   if (typeof value !== 'object' || value === null) {
     return false;
   }
-
-  const getProperty = (obj: unknown, key: string): unknown => {
-    if (typeof obj !== 'object' || obj === null) {
-      return undefined;
-    }
-    const desc = Object.getOwnPropertyDescriptor(obj, key);
-    return desc?.value;
-  };
-
-  const getStringProperty = (obj: unknown, key: string): string | undefined => {
-    const value = getProperty(obj, key);
-    return typeof value === 'string' ? value : undefined;
-  };
 
   const type = getStringProperty(value, 'type');
   const table = getStringProperty(value, 'table');
@@ -128,19 +122,6 @@ export async function handleRevalidation(_req: Request): Promise<Response> {
         const payload = msg.message;
 
         // Verify secret (from database trigger)
-        const getProperty = (obj: unknown, key: string): unknown => {
-          if (typeof obj !== 'object' || obj === null) {
-            return undefined;
-          }
-          const desc = Object.getOwnPropertyDescriptor(obj, key);
-          return desc?.value;
-        };
-
-        const getStringProperty = (obj: unknown, key: string): string | undefined => {
-          const value = getProperty(obj, key);
-          return typeof value === 'string' ? value : undefined;
-        };
-
         const secret = getStringProperty(payload, 'secret');
         const expectedSecret = edgeEnv.revalidate.secret;
 

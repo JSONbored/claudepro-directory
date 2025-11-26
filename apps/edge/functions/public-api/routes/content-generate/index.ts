@@ -136,13 +136,9 @@ export async function handleGeneratePackage(
       return false;
     }
     // Use enum values directly from @heyclaude/database-types Constants
-    const validValues = Constants.public.Enums.content_category;
-    for (const validValue of validValues) {
-      if (value === validValue) {
-        return true;
-      }
-    }
-    return false;
+    return Constants.public.Enums.content_category.includes(
+      value as DatabaseGenerated['public']['Enums']['content_category']
+    );
   }
 
   if (!isValidContentCategory(category)) {

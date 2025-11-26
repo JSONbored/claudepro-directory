@@ -187,6 +187,8 @@ serveEdgeApp<FluxStationContext>({
       name: 'embedding-webhook',
       methods: ['POST', 'OPTIONS'],
       match: (ctx) => ctx.pathname === '/embedding/webhook',
+      // Note: Signature verification is handled inside handleEmbeddingWebhook
+      // using verifySupabaseDatabaseWebhook with INTERNAL_API_SECRET
       handler: chain<FluxStationContext>(rateLimit('public'))((ctx) =>
         handleEmbeddingWebhook(ctx.request)
       ),

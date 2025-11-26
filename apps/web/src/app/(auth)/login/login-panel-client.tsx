@@ -14,7 +14,7 @@ import {
 import { useNewsletterCount } from '@/src/hooks/use-newsletter-count';
 
 interface LoginPanelClientProperties {
-  redirectTo?: string | undefined;
+  redirectTo?: string;
 }
 
 export function LoginPanelClient({ redirectTo }: LoginPanelClientProperties) {
