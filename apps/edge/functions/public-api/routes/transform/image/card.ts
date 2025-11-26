@@ -67,6 +67,7 @@ export interface ContentCardGenerateResponse {
   optimizedSize?: number;
   dimensions?: { width: number; height: number };
   error?: string;
+  warning?: string; // Warning message when storage upload is skipped (e.g., missing userId)
 }
 
 /**
@@ -426,12 +427,16 @@ export async function handleContentCardGenerateRoute(req: Request): Promise<Resp
     }
 
     // Upload to storage if requested (default: true)
+    // Note: If saveToStorage is true but userId is missing, we skip upload and return success
+    // without publicUrl/path. Clients should check for publicUrl if they expect a stored asset.
     let publicUrl: string | undefined;
     let path: string | undefined;
+    let storageSkipped = false;
 
     if (body.saveToStorage !== false) {
       if (!body.userId) {
-        logInfo('Skipping storage upload - userId not provided', logContext);
+        logInfo('Skipping storage upload - userId not provided (saveToStorage requires userId)', logContext);
+        storageSkipped = true;
       } else {
         const arrayBuffer = optimizedImage.buffer.slice(
           optimizedImage.byteOffset,
@@ -527,6 +532,7 @@ export async function handleContentCardGenerateRoute(req: Request): Promise<Resp
     const response: ContentCardGenerateResponse = {
       success: true,
       ...(publicUrl ? { publicUrl } : {}),
+      ...(storageSkipped ? { warning: 'Storage upload skipped: userId required when saveToStorage is true' } : {}),
       ...(path ? { path } : {}),
       originalSize: cardImageData.length,
       optimizedSize: optimizedImage.length,

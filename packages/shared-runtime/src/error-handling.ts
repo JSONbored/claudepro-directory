@@ -7,8 +7,12 @@
  * Safely converts any error to a string message
  * Handles Error instances, PostgrestError objects, and plain objects
  *
+ * WARNING: This function may expose error messages that contain sensitive information.
+ * Only use this for server-side logging. For user-facing error responses, always use
+ * a generic message like "An unexpected error occurred" or use errorResponse() helper.
+ *
  * @param error - The error to stringify
- * @returns A human-readable error message
+ * @returns A human-readable error message (for logging purposes only)
  */
 export function errorToString(error: unknown): string {
   if (error instanceof Error) {
@@ -35,7 +39,8 @@ export function errorToString(error: unknown): string {
     return 'An unexpected error occurred';
   }
 
-  return String(error);
+  // Never expose internal error details - always use generic message
+  return 'An unexpected error occurred';
 }
 
 export function normalizeError(error: unknown, fallbackMessage = 'Unknown error'): Error {

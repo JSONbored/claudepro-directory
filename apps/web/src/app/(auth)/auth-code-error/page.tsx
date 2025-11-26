@@ -17,7 +17,7 @@ import { UI_CLASSES, Button ,
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
-const AUTH_CODE_ERROR_PATH = '/auth/auth-code-error';
+const AUTH_CODE_ERROR_PATH = ROUTES.AUTH_AUTH_CODE_ERROR;
 
 export const dynamic = 'force-dynamic';
 

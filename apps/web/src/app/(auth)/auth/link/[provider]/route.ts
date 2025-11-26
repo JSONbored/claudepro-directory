@@ -59,8 +59,9 @@ export async function GET(
     });
     // Redirect to login with return URL, preserving the 'next' parameter
     const loginUrl = new URL(`${origin}/login`);
-    const linkUrlWithNext = `/auth/link/${rawProvider}?next=${encodeURIComponent(next)}`;
-    loginUrl.searchParams.set('redirect', linkUrlWithNext);
+    const linkUrl = new URL(`${origin}/auth/link/${rawProvider}`);
+    linkUrl.searchParams.set('next', next);
+    loginUrl.searchParams.set('redirect', linkUrl.pathname + linkUrl.search);
     return NextResponse.redirect(loginUrl.toString());
   }
 

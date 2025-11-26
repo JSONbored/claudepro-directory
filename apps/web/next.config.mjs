@@ -421,6 +421,9 @@ const nextConfig = {
     // If the public-api function (and its internal routes /content, /sitemap.xml, /feeds, plus category exports)
     // is not already deployed and wired up, these endpoints will return 404s.
     // Ensure deployment before merging changes to this section.
+    //
+    // To verify public-api function exists and rewrites are configured correctly, run:
+    //   ./scripts/verify-public-api-rewrites.sh
     const publicApi = `${supabaseUrl}/functions/v1/public-api`;
     const contentApi = `${publicApi}/content`;
 

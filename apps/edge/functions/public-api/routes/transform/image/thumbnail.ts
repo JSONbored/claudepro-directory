@@ -23,6 +23,7 @@ import {
   logInfo,
 } from '@heyclaude/shared-runtime';
 import {
+  ensureImageMagickInitialized,
   optimizeImage,
   getImageDimensions,
 } from '@heyclaude/shared-runtime/image/manipulation.ts';
@@ -279,6 +280,9 @@ export async function handleThumbnailGenerateRoute(req: Request): Promise<Respon
       );
     }
 
+    // Ensure ImageMagick is initialized before processing
+    await ensureImageMagickInitialized();
+    
     // Get original dimensions for logging
     const originalDimensions = await getImageDimensions(imageBytes);
 

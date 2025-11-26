@@ -103,7 +103,8 @@ interface QueueProcessingResult {
 export interface QueueProcessingSummary {
   totalQueues: number;
   queuesWithMessages: number;
-  queuesProcessed: number;
+  queuesAttempted: number;
+  queuesSucceeded: number;
   results: QueueProcessingResult[];
 }
 
@@ -143,8 +144,10 @@ async function processInternalQueue(
     const request = new Request('http://localhost', { method: 'POST' });
     const response = await config.handlerFn(request);
 
-    // Try to extract processed count from response body
+    // Try to extract processed count and error from response body
     let processed: number | undefined;
+    let errorMessage: string | undefined;
+
     try {
       const body = await response.json();
       // Validate response structure
@@ -153,9 +156,23 @@ async function processInternalQueue(
         if (typeof processedValue === 'number') {
           processed = processedValue;
         }
+
+        // Extract error field if present
+        const errorValue = getProperty(body, 'error');
+        if (typeof errorValue === 'string') {
+          errorMessage = errorValue;
+        } else if (errorValue && typeof errorValue === 'object') {
+          errorMessage = JSON.stringify(errorValue);
+        }
       }
     } catch {
       // Response might not be JSON, that's okay
+    }
+
+    // Build error string if response is not OK
+    if (!response.ok) {
+      const baseError = `HTTP ${response.status} ${response.statusText}`;
+      errorMessage = errorMessage ? `${baseError}: ${errorMessage}` : baseError;
     }
 
     return {
@@ -163,6 +180,7 @@ async function processInternalQueue(
       success: response.ok,
       queueLength,
       ...(processed !== undefined && { processed }),
+      ...(errorMessage && { error: errorMessage }),
     };
   } catch (error) {
     return {
@@ -283,7 +301,8 @@ export async function processAllQueues(): Promise<QueueProcessingSummary> {
     return {
       totalQueues,
       queuesWithMessages: 0,
-      queuesProcessed: 0,
+      queuesAttempted: 0,
+      queuesSucceeded: 0,
       results: [],
     };
   }
@@ -356,13 +375,15 @@ export async function processAllQueues(): Promise<QueueProcessingSummary> {
   }
 
   const durationMs = Date.now() - startTime;
-  const queuesProcessed = results.filter((r) => r.success).length;
+  const queuesSucceeded = results.filter((r) => r.success).length;
+  const queuesAttempted = queuesToProcess.length;
   const totalProcessed = results.reduce((sum, r) => sum + (r.processed ?? 0), 0);
 
   const summaryLogContext = createUtilityContext('flux-station', 'queue-processor-summary', {
     total_queues: totalQueues,
     queues_with_messages: queuesWithMessages,
-    queues_processed: queuesProcessed,
+    queues_attempted: queuesAttempted,
+    queues_succeeded: queuesSucceeded,
     total_messages_processed: totalProcessed,
     duration_ms: durationMs,
     results: results.map((r) => ({
@@ -377,7 +398,8 @@ export async function processAllQueues(): Promise<QueueProcessingSummary> {
   return {
     totalQueues,
     queuesWithMessages,
-    queuesProcessed,
+    queuesAttempted,
+    queuesSucceeded,
     results,
   };
 }

@@ -6,7 +6,6 @@ import {
   analytics,
   buildStandardContext,
   chain,
-  getOnlyCorsHeaders,
   type HttpMethod,
   jsonResponse,
   rateLimit,
@@ -41,7 +40,17 @@ import { handleTrendingRoute } from './routes/trending.ts';
 
 import { ROUTES } from './routes.config.ts';
 
-const BASE_CORS = getOnlyCorsHeaders;
+/**
+ * CORS headers for public API endpoints
+ * Includes GET, POST, OPTIONS to support both read and write operations
+ */
+const PUBLIC_API_CORS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, X-Email-Action, Authorization',
+};
+
+const BASE_CORS = PUBLIC_API_CORS;
 const PUBLIC_API_APP_LABEL = 'public-api';
 const analyticsPublic = (routeName: string) => analytics(routeName, { app: PUBLIC_API_APP_LABEL });
 const createPublicApiContext = (

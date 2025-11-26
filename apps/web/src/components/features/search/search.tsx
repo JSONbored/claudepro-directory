@@ -369,7 +369,7 @@ function UnifiedSearchComponent({
                         aria-label={`Apply preset ${preset.label}`}
                       >
                         <Bookmark className="h-3.5 w-3.5 text-accent" aria-hidden="true" />
-                        <span className="max-w-[8rem] truncate">{preset.label}</span>
+                        <span className="max-w-32 truncate">{preset.label}</span>
                       </button>
                       {canRemoveSavedSearches && (
                         <button

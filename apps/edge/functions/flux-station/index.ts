@@ -175,14 +175,16 @@ const verifyDiscordWebhookSignatureMiddleware: Middleware<FluxStationContext> = 
   }
 
   // Replay resistance: Validate timestamp is recent (within 5 minutes)
-  const timestampMs = Number.parseInt(timestamp, 10);
-  if (Number.isNaN(timestampMs)) {
+  // Discord sends timestamp in seconds, convert to milliseconds for comparison with Date.now()
+  const timestampSeconds = Number.parseInt(timestamp, 10);
+  if (Number.isNaN(timestampSeconds)) {
     logWarn('Invalid Discord webhook timestamp format', {
       ...logContext,
       timestamp,
     });
     return badRequestResponse('Invalid X-Signature-Timestamp format', discordCorsHeaders);
   }
+  const timestampMs = timestampSeconds * 1000; // Convert seconds to milliseconds
   const currentTimeMs = Date.now();
   const timestampAgeMs = currentTimeMs - timestampMs;
   const MAX_TIMESTAMP_AGE_MS = 5 * 60 * 1000; // 5 minutes
@@ -466,7 +468,8 @@ serveEdgeApp<FluxStationContext>({
             summary: {
               totalQueues: summary.totalQueues,
               queuesWithMessages: summary.queuesWithMessages,
-              queuesProcessed: summary.queuesProcessed,
+              queuesAttempted: summary.queuesAttempted,
+              queuesSucceeded: summary.queuesSucceeded,
               totalMessagesProcessed: summary.results.reduce(
                 (sum, r) => sum + (r.processed ?? 0),
                 0
