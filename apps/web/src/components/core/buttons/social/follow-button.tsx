@@ -16,7 +16,7 @@ import { toggleFollow } from '@heyclaude/web-runtime/actions';
 import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import { useOptimistic, useTransition } from 'react';
 import { toast } from 'sonner';
-import { Button } from '@/src/components/primitives/ui/button';
+import { Button } from '@heyclaude/web-runtime/ui';
 
 export interface FollowButtonProps {
   userId: string;

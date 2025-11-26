@@ -12,16 +12,16 @@ import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import { AlertCircle, Loader2, Shield } from '@heyclaude/web-runtime/icons';
 import { errorToasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { useCallback, useEffect, useState } from 'react';
-import { Button } from '@/src/components/primitives/ui/button';
+import { Button } from '@heyclaude/web-runtime/ui';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '@/src/components/primitives/ui/dialog';
-import { Input } from '@/src/components/primitives/ui/input';
-import { Label } from '@/src/components/primitives/ui/label';
+} from '@heyclaude/web-runtime/ui';
+import { Input } from '@heyclaude/web-runtime/ui';
+import { Label } from '@heyclaude/web-runtime/ui';
 
 interface MFAChallengeDialogProps {
   open: boolean;

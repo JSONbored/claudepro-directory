@@ -15,21 +15,17 @@ import {
   Star,
   TrendingUp,
 } from '@heyclaude/web-runtime/icons';
-import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { UI_CLASSES, UnifiedBadge, Button ,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle  } from '@heyclaude/web-runtime/ui';
 import type { Metadata } from 'next';
 import dynamicImport from 'next/dynamic';
 import Image from 'next/image';
 import Link from 'next/link';
 
-import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
-import { Button } from '@/src/components/primitives/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/src/components/primitives/ui/card';
 
 const NewsletterCTAVariant = dynamicImport(
   () =>

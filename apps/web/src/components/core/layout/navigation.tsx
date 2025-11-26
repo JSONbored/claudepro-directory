@@ -29,9 +29,9 @@ import { NavigationMobile } from '@/src/components/core/layout/navigation-mobile
 import { NavigationTablet } from '@/src/components/core/layout/navigation-tablet';
 import { UserMenu } from '@/src/components/core/layout/user-menu';
 import { usePinboardDrawer } from '@/src/components/features/navigation/pinboard-drawer-provider';
-import { Button } from '@/src/components/primitives/ui/button';
+import { Button } from '@heyclaude/web-runtime/ui';
 import { ACTION_LINKS } from '@/src/config/navigation';
-import { usePinboard } from '@/src/hooks/use-pinboard';
+import { usePinboard } from '@heyclaude/web-runtime/hooks';
 
 interface NavigationProps {
   /** Hide Create button when FloatingActionBar is enabled */

@@ -13,9 +13,9 @@ import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, useTransition } from 'react';
 import { z } from 'zod';
-import { Button } from '@/src/components/primitives/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
-import { Separator } from '@/src/components/primitives/ui/separator';
+import { Button } from '@heyclaude/web-runtime/ui';
+import { Card, CardContent, CardHeader, CardTitle } from '@heyclaude/web-runtime/ui';
+import { Separator } from '@heyclaude/web-runtime/ui';
 
 // Use enum values directly from @heyclaude/database-types Constants
 const EXPERIENCE_LEVEL_VALUES = Constants.public.Enums.experience_level;
@@ -62,7 +62,7 @@ function mapQuizConfigToQuestions(config: QuizConfigurationResult | null): QuizQ
 
 import { ArrowLeft, ArrowRight, Sparkles } from '@heyclaude/web-runtime/icons';
 import { DIMENSIONS, toasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import { InlineSpinner } from '@/src/components/primitives/feedback/loading-factory';
+import { InlineSpinner } from '@heyclaude/web-runtime/ui';
 import { QuestionCard } from './question-card';
 import { QuizProgress } from './quiz-progress';
 

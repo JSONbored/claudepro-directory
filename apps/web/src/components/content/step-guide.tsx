@@ -8,9 +8,9 @@ import { Zap } from '@heyclaude/web-runtime/icons';
 import type { StepByStepGuideProps } from '@heyclaude/web-runtime/types/component.types';
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { ProductionCodeBlock } from '@/src/components/content/interactive-code-block';
-import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
+import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
 import { UnifiedContentBox } from '@/src/components/core/domain/content/featured-content-box';
-import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@heyclaude/web-runtime/ui';
 
 export async function StepByStepGuide(props: StepByStepGuideProps) {
   const { steps, title, description, totalTime } = props;

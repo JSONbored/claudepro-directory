@@ -50,16 +50,16 @@ import type {
   TLDRSummaryProps,
 } from '@heyclaude/web-runtime/types/component.types';
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/src/components/primitives/ui/avatar';
+import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
+import { Avatar, AvatarFallback, AvatarImage } from '@heyclaude/web-runtime/ui';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/src/components/primitives/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/primitives/ui/tabs';
+} from '@heyclaude/web-runtime/ui';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@heyclaude/web-runtime/ui';
 
 // ============================================================================
 // TYPE DEFINITIONS - Discriminated Union

@@ -6,10 +6,10 @@ import { NEWSLETTER_CTA_CONFIG } from '@heyclaude/web-runtime/core';
 import { Mail } from '@heyclaude/web-runtime/icons';
 import { cn, DIMENSIONS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { useId, useState } from 'react';
-import { InlineSpinner } from '@/src/components/primitives/feedback/loading-factory';
-import { Button } from '@/src/components/primitives/ui/button';
-import { Input } from '@/src/components/primitives/ui/input';
-import { useConfetti } from '@/src/hooks/use-confetti';
+import { InlineSpinner } from '@heyclaude/web-runtime/ui';
+import { Button } from '@heyclaude/web-runtime/ui';
+import { Input } from '@heyclaude/web-runtime/ui';
+import { useConfetti } from '@heyclaude/web-runtime/hooks';
 import { useNewsletter } from '@/src/hooks/use-newsletter';
 
 export interface NewsletterFormProps {

@@ -14,11 +14,11 @@ import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import { toasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { useRouter } from 'next/navigation';
 import { useId, useState, useTransition } from 'react';
-import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
+import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
 import { FormField } from '@/src/components/core/forms/form-field-wrapper';
-import { Button } from '@/src/components/primitives/ui/button';
-import { Checkbox } from '@/src/components/primitives/ui/checkbox';
-import { Label } from '@/src/components/primitives/ui/label';
+import { Button } from '@heyclaude/web-runtime/ui';
+import { Checkbox } from '@heyclaude/web-runtime/ui';
+import { Label } from '@heyclaude/web-runtime/ui';
 
 type Bookmark = Database['public']['Tables']['bookmarks']['Row'];
 type CollectionData = Database['public']['Tables']['user_collections']['Row'];

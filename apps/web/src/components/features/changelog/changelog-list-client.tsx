@@ -5,7 +5,7 @@ import { sanitizeSlug } from '@heyclaude/web-runtime/core';
 import { useState } from 'react';
 import { CategoryFilter } from '@/src/components/features/changelog/changelog-category-filter';
 import { ChangelogStickyEntry } from '@/src/components/features/changelog/changelog-sticky-entry';
-import { Tabs, TabsContent } from '@/src/components/primitives/ui/tabs';
+import { Tabs, TabsContent } from '@heyclaude/web-runtime/ui';
 
 type ChangelogEntry = Database['public']['Tables']['changelog']['Row'];
 

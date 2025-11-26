@@ -10,12 +10,12 @@ import type { DisplayableContent } from '@heyclaude/web-runtime/types/component.
 import { motion } from 'motion/react';
 import Link from 'next/link';
 import { type FC, memo, useEffect, useMemo, useState } from 'react';
-import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
-import { UnifiedCardGrid } from '@/src/components/core/domain/cards/card-grid';
-import { ConfigCard } from '@/src/components/core/domain/cards/config-card';
-import { Button } from '@/src/components/primitives/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/primitives/ui/tabs';
-import { getTrendingSlugs, isNewSince } from '@/src/utils/content-highlights';
+import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
+import { UnifiedCardGrid } from '@heyclaude/web-runtime/ui';
+import { ConfigCard } from '@heyclaude/web-runtime/ui';
+import { Button } from '@heyclaude/web-runtime/ui';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@heyclaude/web-runtime/ui';
+import { getTrendingSlugs, isNewSince } from '@heyclaude/web-runtime/core';
 
 export interface TabsSectionProps {
   activeTab: string;

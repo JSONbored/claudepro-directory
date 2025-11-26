@@ -33,7 +33,7 @@ import {
 import { generatePageMetadata, getChangelogOverview } from '@heyclaude/web-runtime/data';
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
 import { ArrowLeft } from '@heyclaude/web-runtime/icons';
-import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { UI_CLASSES, NavLink  } from '@heyclaude/web-runtime/ui';
 import type { Metadata } from 'next';
 import dynamicImport from 'next/dynamic';
 
@@ -48,7 +48,6 @@ const NewsletterCTAVariant = dynamicImport(
 );
 
 import { StructuredData } from '@/src/components/core/infra/structured-data';
-import { NavLink } from '@/src/components/core/navigation/navigation-link';
 import { ChangelogListClient } from '@/src/components/features/changelog/changelog-list-client';
 
 /**

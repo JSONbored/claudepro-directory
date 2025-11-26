@@ -4,7 +4,7 @@ import { cn } from '@heyclaude/web-runtime/ui';
 import type { CheckedState } from '@radix-ui/react-checkbox';
 import { motion } from 'motion/react';
 import { useId } from 'react';
-import { Checkbox } from '@/src/components/primitives/ui/checkbox';
+import { Checkbox } from '@heyclaude/web-runtime/ui';
 
 interface NewsletterOptInTileProps {
   checked: boolean;

@@ -19,7 +19,12 @@ import {
   getUserSettings,
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { UI_CLASSES, Button ,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle } from '@heyclaude/web-runtime/ui';
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -28,14 +33,6 @@ import {
   ProfileEditForm,
   RefreshProfileButton,
 } from '@/src/components/core/forms/profile-edit-form';
-import { Button } from '@/src/components/primitives/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/src/components/primitives/ui/card';
 
 /**
  * Dynamic Rendering Required

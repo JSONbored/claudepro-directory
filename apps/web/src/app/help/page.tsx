@@ -7,12 +7,9 @@ import {
   MessageSquare,
   Search,
 } from '@heyclaude/web-runtime/icons';
-import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { UI_CLASSES, NavLink, HoverCard , Card, CardContent, CardHeader, CardTitle   } from '@heyclaude/web-runtime/ui';
 import Link from 'next/link';
 
-import { NavLink } from '@/src/components/core/navigation/navigation-link';
-import { HoverCard } from '@/src/components/primitives/animation/hover-card';
-import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
 
 /**
  * Static Generation: Help page is fully static content

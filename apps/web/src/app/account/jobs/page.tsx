@@ -26,22 +26,17 @@ import {
   Eye,
   Plus,
 } from '@heyclaude/web-runtime/icons';
-import { BADGE_COLORS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { BADGE_COLORS, UI_CLASSES, UnifiedBadge, Button ,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle, Alert, AlertDescription, AlertTitle   } from '@heyclaude/web-runtime/ui';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
 import { JobDeleteButton } from '@/src/components/core/buttons/jobs/job-delete-button';
 import { JobToggleButton } from '@/src/components/core/buttons/jobs/job-toggle-button';
-import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
-import { Alert, AlertDescription, AlertTitle } from '@/src/components/primitives/ui/alert';
-import { Button } from '@/src/components/primitives/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/src/components/primitives/ui/card';
 
 /**
  * Dynamic Rendering Required

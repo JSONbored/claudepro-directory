@@ -6,7 +6,7 @@ import { useViewTransition } from '@heyclaude/web-runtime/hooks';
 import { Moon, Sun } from '@heyclaude/web-runtime/icons';
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { useEffect, useRef, useState } from 'react';
-import { Switch } from '@/src/components/primitives/ui/switch';
+import { Switch } from '@heyclaude/web-runtime/ui';
 
 /**
  * Type guard for theme validation

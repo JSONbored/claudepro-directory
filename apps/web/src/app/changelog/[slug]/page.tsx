@@ -40,7 +40,7 @@ import {
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { ArrowLeft, Calendar } from '@heyclaude/web-runtime/icons';
-import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { UI_CLASSES, NavLink, Separator   } from '@heyclaude/web-runtime/ui';
 import { formatChangelogDate, getChangelogUrl } from '@heyclaude/web-runtime/utils/changelog';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
@@ -48,9 +48,7 @@ import { notFound } from 'next/navigation';
 import { ReadProgress } from '@/src/components/content/read-progress';
 import { Pulse } from '@/src/components/core/infra/pulse';
 import { StructuredData } from '@/src/components/core/infra/structured-data';
-import { NavLink } from '@/src/components/core/navigation/navigation-link';
 import { ChangelogContent } from '@/src/components/features/changelog/changelog-content';
-import { Separator } from '@/src/components/primitives/ui/separator';
 
 /**
  * Generate static params for all changelog entries

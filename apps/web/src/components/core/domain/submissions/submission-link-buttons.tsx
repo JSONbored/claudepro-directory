@@ -1,6 +1,6 @@
 import { ExternalLink, GitPullRequest } from '@heyclaude/web-runtime/icons';
 import Link from 'next/link';
-import { Button } from '@/src/components/primitives/ui/button';
+import { Button } from '@heyclaude/web-runtime/ui';
 
 export function PrLinkButton({ href }: { href: string }) {
   return (

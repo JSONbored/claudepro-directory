@@ -21,23 +21,20 @@ import {
   TrendingUp,
   Users,
 } from '@heyclaude/web-runtime/icons';
-import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { UI_CLASSES, UnifiedBadge,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle  } from '@heyclaude/web-runtime/ui';
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import type React from 'react';
 
-import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { JobCard } from '@/src/components/core/domain/cards/job-card';
 import { StructuredData } from '@/src/components/core/infra/structured-data';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/src/components/primitives/ui/card';
 
 /**
  * Reusable component for rendering safe website links

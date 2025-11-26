@@ -24,26 +24,20 @@ import {
   SlidersHorizontal,
 } from '@heyclaude/web-runtime/icons';
 import type { PagePropsWithSearchParams } from '@heyclaude/web-runtime/types/app.schema';
-import { POSITION_PATTERNS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { POSITION_PATTERNS, UI_CLASSES, UnifiedBadge, Button , Card, CardContent, Input ,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue   } from '@heyclaude/web-runtime/ui';
 import type { Metadata } from 'next';
 import dynamicImport from 'next/dynamic';
 import Link from 'next/link';
 import { Suspense } from 'react';
 
-import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { JobCard } from '@/src/components/core/domain/cards/job-card';
 import { JobAlertsCard } from '@/src/components/core/domain/jobs/job-alerts-card';
 import { JobsPromo } from '@/src/components/core/domain/jobs/jobs-banner';
-import { Button } from '@/src/components/primitives/ui/button';
-import { Card, CardContent } from '@/src/components/primitives/ui/card';
-import { Input } from '@/src/components/primitives/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/src/components/primitives/ui/select';
 
 /**
  * Dynamic Rendering Required

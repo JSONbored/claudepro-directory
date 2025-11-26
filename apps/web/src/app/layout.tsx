@@ -14,7 +14,13 @@ import {
 } from '@heyclaude/web-runtime/core';
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
 import { FeatureFlagsProvider } from '@heyclaude/web-runtime/feature-flags/provider';
+import {
+  ComponentConfigContextProvider,
+  DEFAULT_COMPONENT_CARD_CONFIG,
+  mapComponentCardConfig,
+} from '@heyclaude/web-runtime/hooks';
 import { generatePageMetadata, getLayoutData } from '@heyclaude/web-runtime/server';
+import { ErrorBoundary } from '@heyclaude/web-runtime/ui';
 import type { Metadata } from 'next';
 import { unstable_cache } from 'next/cache';
 import dynamicImport from 'next/dynamic';
@@ -22,6 +28,13 @@ import localFont from 'next/font/local';
 import { ThemeProvider } from 'next-themes';
 import { Suspense } from 'react';
 import { Toaster } from 'sonner';
+
+import { PostCopyEmailProvider } from '@/src/components/core/infra/providers/email-capture-modal-provider';
+import { Pulse } from '@/src/components/core/infra/pulse';
+import { PulseCannon } from '@/src/components/core/infra/pulse-cannon';
+import { StructuredData } from '@/src/components/core/infra/structured-data';
+import { LayoutContent } from '@/src/components/core/layout/root-layout-wrapper';
+import { NotificationsProvider } from '@/src/components/providers/notifications-provider';
 
 const NotificationToastHandler = dynamicImport(
   () =>
@@ -32,19 +45,6 @@ const NotificationToastHandler = dynamicImport(
     loading: () => null,
   }
 );
-
-import { ErrorBoundary } from '@/src/components/core/infra/error-boundary';
-import { PostCopyEmailProvider } from '@/src/components/core/infra/providers/email-capture-modal-provider';
-import { Pulse } from '@/src/components/core/infra/pulse';
-import { PulseCannon } from '@/src/components/core/infra/pulse-cannon';
-import { StructuredData } from '@/src/components/core/infra/structured-data';
-import { LayoutContent } from '@/src/components/core/layout/root-layout-wrapper';
-import { ComponentConfigContextProvider } from '@/src/components/providers/component-config-context';
-import {
-  DEFAULT_COMPONENT_CARD_CONFIG,
-  mapComponentCardConfig,
-} from '@/src/components/providers/component-config-shared';
-import { NotificationsProvider } from '@/src/components/providers/notifications-provider';
 
 // CRITICAL: Lazy-load getLayoutFlags to prevent flags.ts from being analyzed during build
 // Even though getLayoutFlags has build-time checks, Next.js's static analyzer might

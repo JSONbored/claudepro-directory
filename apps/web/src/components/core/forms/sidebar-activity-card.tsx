@@ -10,10 +10,10 @@ import type { Database } from '@heyclaude/database-types';
 import { CheckCircle, Clock, Lightbulb } from '@heyclaude/web-runtime/icons';
 import { cn, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { motion } from 'motion/react';
-import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
-import { NavLink } from '@/src/components/core/navigation/navigation-link';
-import { Card, CardContent, CardHeader } from '@/src/components/primitives/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/primitives/ui/tabs';
+import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
+import { NavLink } from '@heyclaude/web-runtime/ui';
+import { Card, CardContent, CardHeader } from '@heyclaude/web-runtime/ui';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@heyclaude/web-runtime/ui';
 
 interface SidebarActivityCardProps {
   recentMerged: Array<{

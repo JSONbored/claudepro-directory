@@ -1,6 +1,5 @@
-import { getSkeletonKeys } from '@heyclaude/web-runtime/ui';
+import { getSkeletonKeys, Skeleton  } from '@heyclaude/web-runtime/ui';
 
-import { Skeleton } from '@/src/components/primitives/feedback/loading-skeleton';
 
 const CODE_LINE_KEYS = getSkeletonKeys(8);
 
@@ -48,9 +47,10 @@ export default function Loading() {
             <div className="space-y-4 rounded-lg border p-6">
               <Skeleton size="sm" width="sm" />
               <div className="space-y-2">
-                {Array.from({ length: 8 }, (_, index) => (
-                  <Skeleton key={CODE_LINE_KEYS[index]} size="sm" width={index % 3 === 0 ? '2/3' : '3xl'} />
-                ))}
+                {Array.from({ length: 8 }, (_, index) => {
+                  const width: '2/3' | '3xl' = index % 3 === 0 ? '2/3' : '3xl';
+                  return <Skeleton key={CODE_LINE_KEYS[index]} size="sm" width={width} />;
+                })}
               </div>
             </div>
           </div>

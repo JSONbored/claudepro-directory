@@ -9,18 +9,16 @@ import {
 } from '@heyclaude/web-runtime/core';
 import { generatePageMetadata, getAuthenticatedUser } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import type { Metadata } from 'next';
-import Link from 'next/link';
-
-import { ConnectedAccountsClient } from '@/src/components/features/account/connected-accounts-client';
-import { Button } from '@/src/components/primitives/ui/button';
-import {
+import { Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle,
-} from '@/src/components/primitives/ui/card';
+  CardTitle } from '@heyclaude/web-runtime/ui';
+import type { Metadata } from 'next';
+import Link from 'next/link';
+
+import { ConnectedAccountsClient } from '@/src/components/features/account/connected-accounts-client';
 
 /**
  * Dynamic Rendering Required

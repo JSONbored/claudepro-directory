@@ -8,12 +8,12 @@ import { ICON_NAME_MAP, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import Link from 'next/link';
 import { Suspense, useId } from 'react';
 import { ContentSearchClient } from '@/src/components/content/content-search';
-import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
+import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
 import { LazySection } from '@/src/components/core/infra/scroll-animated-section';
 import { NewsletterCTAVariant } from '@/src/components/features/growth/newsletter/newsletter-cta-variants';
 import { RecentlyViewedSidebar } from '@/src/components/features/navigation/recently-viewed-sidebar';
-import { Skeleton } from '@/src/components/primitives/feedback/loading-skeleton';
-import { Button } from '@/src/components/primitives/ui/button';
+import { Skeleton } from '@heyclaude/web-runtime/ui';
+import { Button } from '@heyclaude/web-runtime/ui';
 
 function ContentHeroSection<T extends DisplayableContent>({
   title,

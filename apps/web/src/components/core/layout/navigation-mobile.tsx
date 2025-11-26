@@ -18,16 +18,16 @@ import {
 import { motion } from 'motion/react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
+import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
 import { HeyClaudeLogo } from '@/src/components/core/layout/brand-logo';
-import { PrefetchLink } from '@/src/components/core/navigation/prefetch-link';
-import { Button } from '@/src/components/primitives/ui/button';
+import { PrefetchLink } from '@heyclaude/web-runtime/ui';
+import { Button } from '@heyclaude/web-runtime/ui';
 import {
   Sheet,
   SheetContent,
   SheetTitle,
   SheetTrigger,
-} from '@/src/components/primitives/ui/sheet';
+} from '@heyclaude/web-runtime/ui';
 import { ACTION_LINKS, PRIMARY_NAVIGATION, SECONDARY_NAVIGATION } from '@/src/config/navigation';
 
 interface NavLinkProps {

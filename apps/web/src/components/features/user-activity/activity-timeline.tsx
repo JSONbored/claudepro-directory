@@ -4,7 +4,7 @@
  */
 
 import type { Database } from '@heyclaude/database-types';
-import { Card, CardContent } from '@/src/components/primitives/ui/card';
+import { Card, CardContent } from '@heyclaude/web-runtime/ui';
 
 type Activity = Database['public']['CompositeTypes']['user_activity_timeline_item'];
 

@@ -3,9 +3,9 @@
  */
 
 import { generatePageMetadata } from '@heyclaude/web-runtime/data';
+import { ErrorBoundary } from '@heyclaude/web-runtime/ui';
 import type { Metadata } from 'next';
 
-import { ErrorBoundary } from '@/src/components/core/infra/error-boundary';
 import { ConsultingClient } from '@/src/components/features/consulting/consulting-page-content';
 
 export async function generateMetadata(): Promise<Metadata> {

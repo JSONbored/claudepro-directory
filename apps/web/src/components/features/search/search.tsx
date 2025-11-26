@@ -23,19 +23,19 @@ import type { FilterState, UnifiedSearchProps } from '@heyclaude/web-runtime/typ
 import { cn, POSITION_PATTERNS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { usePathname } from 'next/navigation';
 import { memo, useCallback, useEffect, useId, useState } from 'react';
-import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
-import { ErrorBoundary } from '@/src/components/core/infra/error-boundary';
+import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
+import { ErrorBoundary } from '@heyclaude/web-runtime/ui';
 import { SearchFilterPanel } from '@/src/components/features/search/search-filter-panel';
-import { Button } from '@/src/components/primitives/ui/button';
-import { Collapsible, CollapsibleContent } from '@/src/components/primitives/ui/collapsible';
-import { Input } from '@/src/components/primitives/ui/input';
+import { Button } from '@heyclaude/web-runtime/ui';
+import { Collapsible, CollapsibleContent } from '@heyclaude/web-runtime/ui';
+import { Input } from '@heyclaude/web-runtime/ui';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/src/components/primitives/ui/select';
+} from '@heyclaude/web-runtime/ui';
 import { useUnifiedSearch } from '@/src/hooks/use-unified-search';
 
 // Use enum values directly from @heyclaude/database-types Constants

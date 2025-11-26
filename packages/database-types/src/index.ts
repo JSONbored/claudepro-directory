@@ -603,6 +603,7 @@ export type Database = {
           mcpb_last_built_at: string | null
           mcpb_storage_url: string | null
           metadata: Json
+          og_image: string | null
           og_type: string | null
           popularity_score: number | null
           reading_time: number | null
@@ -648,6 +649,7 @@ export type Database = {
           mcpb_last_built_at?: string | null
           mcpb_storage_url?: string | null
           metadata?: Json
+          og_image?: string | null
           og_type?: string | null
           popularity_score?: number | null
           reading_time?: number | null
@@ -693,6 +695,7 @@ export type Database = {
           mcpb_last_built_at?: string | null
           mcpb_storage_url?: string | null
           metadata?: Json
+          og_image?: string | null
           og_type?: string | null
           popularity_score?: number | null
           reading_time?: number | null
@@ -4530,6 +4533,7 @@ export type Database = {
           mcpb_last_built_at: string | null
           mcpb_storage_url: string | null
           metadata: Json
+          og_image: string | null
           og_type: string | null
           popularity_score: number | null
           reading_time: number | null
@@ -4741,6 +4745,7 @@ export type Database = {
           mcpb_last_built_at: string | null
           mcpb_storage_url: string | null
           metadata: Json
+          og_image: string | null
           og_type: string | null
           popularity_score: number | null
           reading_time: number | null
@@ -5006,6 +5011,10 @@ export type Database = {
       }
       has_aal2: { Args: never; Returns: boolean }
       has_enrolled_mfa: { Args: never; Returns: boolean }
+      heyclaude_custom_access_token_hook: {
+        Args: { event: Json }
+        Returns: Json
+      }
       immutable_array_to_string: {
         Args: { arr: string[]; delimiter: string }
         Returns: string

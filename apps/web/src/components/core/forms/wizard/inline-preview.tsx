@@ -13,9 +13,9 @@ import { cn } from '@heyclaude/web-runtime/ui';
 import { SUBMISSION_FORM_TOKENS as TOKENS } from '@heyclaude/web-runtime/ui/design-tokens/submission-form';
 import { AnimatePresence, motion } from 'motion/react';
 import { useState } from 'react';
-import { Badge } from '@/src/components/primitives/ui/badge';
-import { Button } from '@/src/components/primitives/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
+import { Badge } from '@heyclaude/web-runtime/ui';
+import { Button } from '@heyclaude/web-runtime/ui';
+import { Card, CardContent, CardHeader, CardTitle } from '@heyclaude/web-runtime/ui';
 
 interface InlinePreviewProps {
   formData: {

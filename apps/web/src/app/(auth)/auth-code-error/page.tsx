@@ -8,18 +8,15 @@ import {
 import { generatePageMetadata } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { AlertCircle } from '@heyclaude/web-runtime/icons';
-import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import type { Metadata } from 'next';
-import Link from 'next/link';
-
-import { Button } from '@/src/components/primitives/ui/button';
-import {
+import { UI_CLASSES, Button ,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle,
-} from '@/src/components/primitives/ui/card';
+  CardTitle } from '@heyclaude/web-runtime/ui';
+import type { Metadata } from 'next';
+import Link from 'next/link';
+
 
 export const dynamic = 'force-dynamic';
 

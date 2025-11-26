@@ -8,6 +8,7 @@ import {
   getHomepageData,
 } from '@heyclaude/web-runtime/server';
 import type { SearchFilterOptions } from '@heyclaude/web-runtime/types/component.types';
+import { HomePageLoading } from '@heyclaude/web-runtime/ui';
 import type { Metadata } from 'next';
 import dynamicImport from 'next/dynamic';
 import { Suspense } from 'react';
@@ -18,7 +19,6 @@ import { HomepageContentServer } from '@/src/components/features/home/homepage-c
 import { HomepageHeroServer } from '@/src/components/features/home/homepage-hero-server';
 import { HomepageSearchFacetsServer } from '@/src/components/features/home/homepage-search-facets-server';
 import { RecentlyViewedRail } from '@/src/components/features/home/recently-viewed-rail';
-import { HomePageLoading } from '@/src/components/primitives/feedback/loading-factory';
 
 const NewsletterCTAVariant = dynamicImport(
   () =>

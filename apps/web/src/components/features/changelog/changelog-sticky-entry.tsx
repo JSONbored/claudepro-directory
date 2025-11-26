@@ -8,7 +8,7 @@ import {
 } from '@heyclaude/web-runtime/utils/changelog';
 import Image from 'next/image';
 import Link from 'next/link';
-import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
+import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
 
 interface ChangelogStickyEntryProps {
   entry: Database['public']['Tables']['changelog']['Row'];

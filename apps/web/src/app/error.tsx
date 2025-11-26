@@ -8,12 +8,10 @@ import {
 } from '@heyclaude/web-runtime/core';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { AlertCircle, Home, RefreshCw, Search } from '@heyclaude/web-runtime/icons';
-import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { UI_CLASSES, Button , Card  } from '@heyclaude/web-runtime/ui';
 import Link from 'next/link';
 import { useEffect } from 'react';
 
-import { Button } from '@/src/components/primitives/ui/button';
-import { Card } from '@/src/components/primitives/ui/card';
 
 export default function ErrorBoundary({
   error,

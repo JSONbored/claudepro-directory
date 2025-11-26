@@ -3,7 +3,7 @@
 import { Star } from '@heyclaude/web-runtime/icons';
 import type { ReviewRatingInteractiveProps } from '@heyclaude/web-runtime/types/component.types';
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import { Rating, RatingButton } from '@/src/components/primitives/feedback/rating';
+import { Rating, RatingButton } from '@heyclaude/web-runtime/ui';
 
 /**
  * Interactive star rating input component

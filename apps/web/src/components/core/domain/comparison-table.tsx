@@ -12,7 +12,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/src/components/primitives/ui/card';
+} from '@heyclaude/web-runtime/ui';
 
 export function ComparisonTable(props: ComparisonTableProps) {
   // Database CHECK constraint validates structure - no runtime validation needed

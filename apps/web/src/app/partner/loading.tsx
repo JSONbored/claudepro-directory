@@ -1,1 +1,1 @@
-export { CategoryLoading as default } from '@/src/components/primitives/feedback/loading-factory';
+export { CategoryLoading as default } from '@heyclaude/web-runtime/ui';

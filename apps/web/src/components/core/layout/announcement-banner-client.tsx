@@ -17,7 +17,7 @@ import {
   Announcement,
   AnnouncementTag,
   AnnouncementTitle,
-} from '@/src/components/primitives/feedback/announcement';
+} from '@heyclaude/web-runtime/ui';
 import { useAnnouncementDismissal } from '@/src/hooks/use-announcement-dismissal';
 
 /**

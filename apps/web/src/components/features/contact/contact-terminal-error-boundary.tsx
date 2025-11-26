@@ -13,8 +13,8 @@ import {
 } from '@heyclaude/web-runtime/core';
 import { AlertTriangle } from '@heyclaude/web-runtime/icons';
 import { Component, type ReactNode } from 'react';
-import { Terminal } from '@/src/components/primitives/display/terminal';
-import { Button } from '@/src/components/primitives/ui/button';
+import { Terminal } from '@heyclaude/web-runtime/ui';
+import { Button } from '@heyclaude/web-runtime/ui';
 
 interface Props {
   children: ReactNode;

@@ -13,21 +13,17 @@ import {
   getSponsorshipAnalytics,
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { POSITION_PATTERNS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import type { Metadata } from 'next';
-import Link from 'next/link';
-import { notFound } from 'next/navigation';
-
-import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
-import { MetricsDisplay } from '@/src/components/features/analytics/metrics-display';
-import { Button } from '@/src/components/primitives/ui/button';
-import {
+import { POSITION_PATTERNS, UI_CLASSES, UnifiedBadge, Button ,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle,
-} from '@/src/components/primitives/ui/card';
+  CardTitle  } from '@heyclaude/web-runtime/ui';
+import type { Metadata } from 'next';
+import Link from 'next/link';
+import { notFound } from 'next/navigation';
+
+import { MetricsDisplay } from '@/src/components/features/analytics/metrics-display';
 
 /**
  * Dynamic Rendering Required

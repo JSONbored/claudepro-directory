@@ -9,7 +9,7 @@
 import { CheckCircle, Clock, Send, Sparkles, Users } from '@heyclaude/web-runtime/icons';
 import { cn, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { motion } from 'motion/react';
-import { BorderBeam } from '@/src/components/primitives/animation/border-beam';
+import { BorderBeam } from '@heyclaude/web-runtime/ui';
 
 interface SubmitPageHeroProps {
   stats: {

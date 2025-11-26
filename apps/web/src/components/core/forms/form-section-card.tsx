@@ -10,8 +10,8 @@ import type { LucideIcon } from '@heyclaude/web-runtime/icons';
 import { cn, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { motion } from 'motion/react';
 import type { ReactNode } from 'react';
-import { BorderBeam } from '@/src/components/primitives/animation/border-beam';
-import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
+import { BorderBeam } from '@heyclaude/web-runtime/ui';
+import { Card, CardContent, CardHeader, CardTitle } from '@heyclaude/web-runtime/ui';
 
 type SectionTheme = 'primary' | 'blue' | 'green' | 'purple';
 

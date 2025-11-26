@@ -22,7 +22,7 @@ import {
   getHomepageCategoryIds,
   getHomepageData,
 } from '@heyclaude/web-runtime/server';
-import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { UI_CLASSES, UnifiedBadge, Button , Card, CardContent, CardHeader, CardTitle   } from '@heyclaude/web-runtime/ui';
 import type { Metadata } from 'next';
 import dynamicImport from 'next/dynamic';
 import Link from 'next/link';
@@ -37,9 +37,6 @@ const NewsletterCTAVariant = dynamicImport(
   }
 );
 
-import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
-import { Button } from '@/src/components/primitives/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
 
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/community');

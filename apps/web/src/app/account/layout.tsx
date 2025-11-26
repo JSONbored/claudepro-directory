@@ -24,15 +24,13 @@ import {
   User,
 } from '@heyclaude/web-runtime/icons';
 import { createSupabaseServerClient, getAuthenticatedUser } from '@heyclaude/web-runtime/server';
-import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { UI_CLASSES, Button , Card  } from '@heyclaude/web-runtime/ui';
 import Image from 'next/image';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
 import { AccountMFAGuard } from '@/src/components/core/auth/account-mfa-guard';
 import { AuthSignOutButton } from '@/src/components/core/buttons/auth/auth-signout-button';
-import { Button } from '@/src/components/primitives/ui/button';
-import { Card } from '@/src/components/primitives/ui/card';
 
 export default async function AccountLayout({ children }: { children: React.ReactNode }) {
   const { user } = await getAuthenticatedUser({

@@ -9,14 +9,14 @@ import { AlertTriangle, BookOpen, CheckCircle } from '@heyclaude/web-runtime/ico
 import type { ChecklistProps } from '@heyclaude/web-runtime/types/component.types';
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import React from 'react';
-import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
+import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/src/components/primitives/ui/card';
+} from '@heyclaude/web-runtime/ui';
 
 export function Checklist(props: ChecklistProps) {
   // Database CHECK constraint validates structure - no runtime validation needed

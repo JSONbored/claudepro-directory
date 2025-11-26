@@ -94,12 +94,12 @@ import { motion } from 'motion/react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { ContentActionButton } from '@/src/components/core/buttons/shared/content-action-button';
-import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
+import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
 import { usePostCopyEmail } from '@/src/components/core/infra/providers/email-capture-modal-provider';
 import { usePinboardDrawer } from '@/src/components/features/navigation/pinboard-drawer-provider';
-import { Button } from '@/src/components/primitives/ui/button';
+import { Button } from '@heyclaude/web-runtime/ui';
 import { useCopyWithEmailCapture } from '@/src/hooks/use-copy-with-email-capture';
-import { usePinboard } from '@/src/hooks/use-pinboard';
+import { usePinboard } from '@heyclaude/web-runtime/hooks';
 
 /**
  * Determine copy type based on content item structure

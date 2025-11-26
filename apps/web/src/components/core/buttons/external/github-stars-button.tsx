@@ -11,7 +11,7 @@ import { Github } from '@heyclaude/web-runtime/icons';
 import type { ButtonStyleProps } from '@heyclaude/web-runtime/types/component.types';
 import { cn, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { useEffect, useState } from 'react';
-import { Button } from '@/src/components/primitives/ui/button';
+import { Button } from '@heyclaude/web-runtime/ui';
 
 export interface GitHubStarsButtonProps extends ButtonStyleProps {
   repoUrl?: string;

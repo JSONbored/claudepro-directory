@@ -10,7 +10,7 @@
 'use client';
 
 import { cn, RESPONSIVE_PATTERNS } from '@heyclaude/web-runtime/ui';
-import { HighlightText } from '@/src/components/primitives/display/highlight-text';
+import { HighlightText } from '@heyclaude/web-runtime/ui';
 
 interface HeyClaudeLogoProps {
   /**

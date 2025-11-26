@@ -24,16 +24,13 @@ import {
 import { generatePageMetadata, getJobBySlug } from '@heyclaude/web-runtime/server';
 import type { PageProps } from '@heyclaude/web-runtime/types/app.schema';
 import { slugParamsSchema } from '@heyclaude/web-runtime/types/app.schema';
-import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { UI_CLASSES, UnifiedBadge, Button , Card, CardContent, CardHeader, CardTitle   } from '@heyclaude/web-runtime/ui';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
-import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { Pulse } from '@/src/components/core/infra/pulse';
 import { StructuredData } from '@/src/components/core/infra/structured-data';
-import { Button } from '@/src/components/primitives/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
 
 /**
  * Validate and sanitize external website URL for safe use in href attributes

@@ -12,8 +12,8 @@ import {
   UI_CLASSES,
 } from '@heyclaude/web-runtime/ui';
 import Link from 'next/link';
-import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
-import { PrefetchLink } from '@/src/components/core/navigation/prefetch-link';
+import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
+import { PrefetchLink } from '@heyclaude/web-runtime/ui';
 import { SearchTrigger } from '@/src/components/features/search/search-trigger';
 import {
   DropdownMenu,
@@ -23,7 +23,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/src/components/primitives/ui/dropdown-menu';
+} from '@heyclaude/web-runtime/ui';
 import { PRIMARY_NAVIGATION, SECONDARY_NAVIGATION } from '@/src/config/navigation';
 
 interface NavLinkProps {

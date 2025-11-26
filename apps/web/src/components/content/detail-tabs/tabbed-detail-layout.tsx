@@ -12,7 +12,7 @@ import { usePulse } from '@heyclaude/web-runtime/hooks';
 import type { TabbedDetailLayoutProps } from '@heyclaude/web-runtime/types/component.types';
 import { cn } from '@heyclaude/web-runtime/ui';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/primitives/ui/tabs';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@heyclaude/web-runtime/ui';
 
 import { TabSectionRenderer } from './tab-section-renderer';
 

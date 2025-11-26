@@ -9,14 +9,14 @@ import { CheckCircle } from '@heyclaude/web-runtime/icons';
 import type { DiagnosticFlowProps } from '@heyclaude/web-runtime/types/component.types';
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import React from 'react';
-import { Button } from '@/src/components/primitives/ui/button';
+import { Button } from '@heyclaude/web-runtime/ui';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/src/components/primitives/ui/card';
+} from '@heyclaude/web-runtime/ui';
 
 export function DiagnosticFlow(props: DiagnosticFlowProps) {
   // Database CHECK constraint validates structure - no runtime validation needed

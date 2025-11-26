@@ -14,8 +14,19 @@ import {
   rateLimit,
   type StandardContext,
   serveEdgeApp,
+  badRequestResponse,
+  unauthorizedResponse,
+  discordCorsHeaders,
 } from '@heyclaude/edge-runtime';
-import { createUtilityContext, logError, timingSafeEqual } from '@heyclaude/shared-runtime';
+import {
+  createUtilityContext,
+  logError,
+  logWarn,
+  timingSafeEqual,
+  verifyDiscordWebhookSignature,
+  MAX_BODY_SIZE,
+  validateBodySize,
+} from '@heyclaude/shared-runtime';
 import { handleChangelogNotify } from './routes/changelog/notify.ts';
 import { handleChangelogProcess } from './routes/changelog/process.ts';
 import { handleDiscordDirect } from './routes/discord/direct.ts';
@@ -76,6 +87,115 @@ const requireInternalSecret: Middleware<FluxStationContext> = async (
       publicCorsHeaders
     );
   }
+
+  return next();
+};
+
+/**
+ * Middleware to verify Discord webhook signatures using Ed25519
+ * Verifies X-Signature-Ed25519 and X-Signature-Timestamp headers
+ * Reconstructs the request with the body so handlers can read it
+ */
+const verifyDiscordWebhookSignatureMiddleware: Middleware<FluxStationContext> = async (
+  ctx: FluxStationContext,
+  next: () => Promise<Response>
+) => {
+  // Allow OPTIONS requests to pass through for CORS
+  if (ctx.request.method === 'OPTIONS') {
+    return next();
+  }
+
+  const logContext = createUtilityContext('flux-station', 'discord-webhook-verification');
+
+  // Get Discord public key from environment
+  const publicKey = Deno.env.get('DISCORD_PUBLIC_KEY');
+  if (!publicKey) {
+    logError('Missing DISCORD_PUBLIC_KEY environment variable', logContext);
+    return jsonResponse(
+      { error: 'Server configuration error', code: 'discord:config_error' },
+      500,
+      discordCorsHeaders
+    );
+  }
+
+  // Extract signature headers
+  const signature = ctx.request.headers.get('X-Signature-Ed25519');
+  const timestamp = ctx.request.headers.get('X-Signature-Timestamp');
+
+  if (!signature || !timestamp) {
+    logWarn('Missing Discord webhook signature headers', {
+      ...logContext,
+      has_signature: !!signature,
+      has_timestamp: !!timestamp,
+    });
+    return unauthorizedResponse(
+      'Missing X-Signature-Ed25519 or X-Signature-Timestamp header',
+      discordCorsHeaders
+    );
+  }
+
+  // Validate body size before reading
+  const contentLength = ctx.request.headers.get('content-length');
+  const bodySizeValidation = validateBodySize(contentLength, MAX_BODY_SIZE.discord);
+  if (!bodySizeValidation.valid) {
+    logWarn('Discord webhook body size validation failed', {
+      ...logContext,
+      content_length: contentLength,
+      error: bodySizeValidation.error,
+    });
+    return badRequestResponse(
+      bodySizeValidation.error ?? 'Request body too large',
+      discordCorsHeaders
+    );
+  }
+
+  // Clone request to read body without consuming the original
+  let rawBody: string;
+  try {
+    const clonedRequest = ctx.request.clone();
+    rawBody = await clonedRequest.text();
+  } catch (error) {
+    logError('Failed to read Discord webhook request body', logContext, error);
+    return badRequestResponse('Failed to read request body', discordCorsHeaders);
+  }
+
+  // Double-check size after reading
+  if (rawBody.length > MAX_BODY_SIZE.discord) {
+    logWarn('Discord webhook body size exceeded after reading', {
+      ...logContext,
+      body_size: rawBody.length,
+      max_size: MAX_BODY_SIZE.discord,
+    });
+    return badRequestResponse(
+      `Request body too large (max ${MAX_BODY_SIZE.discord} bytes)`,
+      discordCorsHeaders
+    );
+  }
+
+  // Verify the signature
+  const isValid = await verifyDiscordWebhookSignature({
+    rawBody,
+    signature,
+    timestamp,
+    publicKey,
+  });
+
+  if (!isValid) {
+    logWarn('Discord webhook signature verification failed', {
+      ...logContext,
+      has_timestamp: !!timestamp,
+      signature_length: signature.length,
+    });
+    return unauthorizedResponse('Invalid Discord webhook signature', discordCorsHeaders);
+  }
+
+  // Reconstruct the request with the body so handlers can read it
+  // This is necessary because we consumed the body stream during verification
+  ctx.request = new Request(ctx.request.url, {
+    method: ctx.request.method,
+    headers: ctx.request.headers,
+    body: rawBody,
+  });
 
   return next();
 };
@@ -297,9 +417,10 @@ serveEdgeApp<FluxStationContext>({
         const notificationType = ctx.request.headers.get('X-Discord-Notification-Type');
         return Boolean(notificationType);
       },
-      handler: chain<FluxStationContext>(rateLimit('public'))((ctx) =>
-        handleDiscordDirect(ctx.request)
-      ),
+      handler: chain<FluxStationContext>(
+        rateLimit('public'),
+        verifyDiscordWebhookSignatureMiddleware
+      )((ctx) => handleDiscordDirect(ctx.request)),
     },
     {
       name: 'process-queues',

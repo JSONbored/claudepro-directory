@@ -22,10 +22,10 @@
 import { X } from '@heyclaude/web-runtime/icons';
 import { cn, toasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { useState } from 'react';
-import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
-import { Button } from '@/src/components/primitives/ui/button';
-import { Input } from '@/src/components/primitives/ui/input';
-import { Label } from '@/src/components/primitives/ui/label';
+import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
+import { Button } from '@heyclaude/web-runtime/ui';
+import { Input } from '@heyclaude/web-runtime/ui';
+import { Label } from '@heyclaude/web-runtime/ui';
 
 // =============================================================================
 // TYPES

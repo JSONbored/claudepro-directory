@@ -1,8 +1,5 @@
 import dynamic from 'next/dynamic';
-import {
-  FeaturedSectionSkeleton,
-  Skeleton,
-} from '@/src/components/primitives/feedback/loading-skeleton';
+import { FeaturedSectionSkeleton, Skeleton } from '@heyclaude/web-runtime/ui';
 
 // Re-export section prop types so consumers can name the inferred component types without TS4023 issues.
 export type { FeaturedSectionsProps } from '@/src/components/features/home/featured-sections';

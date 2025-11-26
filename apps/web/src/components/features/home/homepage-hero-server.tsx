@@ -1,9 +1,9 @@
 import dynamicImport from 'next/dynamic';
-import { NumberTicker } from '@/src/components/primitives/animation/number-ticker';
-import { ParticlesBackground } from '@/src/components/primitives/animation/particles-background';
+import { NumberTicker } from '@heyclaude/web-runtime/ui';
+import { ParticlesBackground } from '@heyclaude/web-runtime/ui';
 
 const RollingText = dynamicImport(
-  () => import('@/src/components/primitives/animation/rolling-text').then((mod) => mod.RollingText),
+  () => import('@heyclaude/web-runtime/ui').then((mod) => ({ default: mod.RollingText })),
   {
     loading: () => <span className="text-accent">enthusiasts</span>,
   }

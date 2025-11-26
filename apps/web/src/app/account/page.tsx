@@ -17,21 +17,16 @@ import {
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { Bookmark, Calendar } from '@heyclaude/web-runtime/icons';
 import type { HomepageContentItem } from '@heyclaude/web-runtime/types/component.types';
-import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import type { Metadata } from 'next';
-import Link from 'next/link';
-
-import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
-import { NavLink } from '@/src/components/core/navigation/navigation-link';
-import { RecentlySavedGrid } from '@/src/components/features/account/recently-saved-grid';
-import { Button } from '@/src/components/primitives/ui/button';
-import {
+import { UI_CLASSES, NavLink, UnifiedBadge, Button ,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle,
-} from '@/src/components/primitives/ui/card';
+  CardTitle   } from '@heyclaude/web-runtime/ui';
+import type { Metadata } from 'next';
+import Link from 'next/link';
+
+import { RecentlySavedGrid } from '@/src/components/features/account/recently-saved-grid';
 
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/account');

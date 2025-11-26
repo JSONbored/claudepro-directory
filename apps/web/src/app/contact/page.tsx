@@ -7,12 +7,11 @@ import {
 import { generatePageMetadata } from '@heyclaude/web-runtime/data';
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
 import { DiscordIcon, Github, Mail, MessageSquare } from '@heyclaude/web-runtime/icons';
+import { NavLink, Card, CardContent, CardHeader, CardTitle  } from '@heyclaude/web-runtime/ui';
 import type { Metadata } from 'next';
 
-import { NavLink } from '@/src/components/core/navigation/navigation-link';
 import { ContactTerminal } from '@/src/components/features/contact/contact-terminal';
 import { ContactTerminalErrorBoundary } from '@/src/components/features/contact/contact-terminal-error-boundary';
-import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
 
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/contact');

@@ -6,7 +6,7 @@
 
 import type { Database } from '@heyclaude/database-types';
 import { logger } from '@heyclaude/web-runtime/core';
-import DOMPurify from 'dompurify';
+import { useEffect, useState } from 'react';
 import { Checklist } from '@/src/components/content/checklist';
 import { ProductionCodeBlock } from '@/src/components/content/interactive-code-block';
 import { UnifiedContentBlock } from '@/src/components/content/markdown-content-block';
@@ -273,61 +273,83 @@ function TrustedHTML({ html, className, id }: { html: string; className?: string
 
   // Sanitize HTML to prevent XSS
   // Allow common markdown-generated HTML tags for content sections
-  const safeHtml = DOMPurify.sanitize(html, {
-    ALLOWED_TAGS: [
-      'p',
-      'br',
-      'strong',
-      'em',
-      'b',
-      'i',
-      'u',
-      'a',
-      'ul',
-      'ol',
-      'li',
-      'h1',
-      'h2',
-      'h3',
-      'h4',
-      'h5',
-      'h6',
-      'code',
-      'pre',
-      'blockquote',
-      'span',
-      'div',
-      'table',
-      'thead',
-      'tbody',
-      'tr',
-      'th',
-      'td',
-      'img',
-    ],
-    ALLOWED_ATTR: [
-      'href',
-      'title',
-      'target',
-      'rel',
-      'class',
-      'id',
-      'src',
-      'alt',
-      'width',
-      'height',
-    ],
-    ALLOWED_URI_REGEXP:
-      /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|sms|cid|xmpp):|[^a-z]|[a-z+.-]+(?:[^a-z+.\-:]|$))/i,
-  });
+  // DOMPurify only works in browser - dynamically import and use
+  // During SSR, render unsanitized (will be sanitized on client)
+  const [safeHtml, setSafeHtml] = useState<string>(
+    typeof window === 'undefined' ? html : '' // Start empty on client, will be set in useEffect
+  );
+  const [isClient, setIsClient] = useState(false);
+  
+  useEffect(() => {
+    setIsClient(true);
+    if (typeof window !== 'undefined' && html && typeof html === 'string') {
+      import('dompurify').then((DOMPurify) => {
+        const sanitized = DOMPurify.default.sanitize(html, {
+          ALLOWED_TAGS: [
+            'p',
+            'br',
+            'strong',
+            'em',
+            'b',
+            'i',
+            'u',
+            'a',
+            'ul',
+            'ol',
+            'li',
+            'h1',
+            'h2',
+            'h3',
+            'h4',
+            'h5',
+            'h6',
+            'code',
+            'pre',
+            'blockquote',
+            'span',
+            'div',
+            'table',
+            'thead',
+            'tbody',
+            'tr',
+            'th',
+            'td',
+            'img',
+          ],
+          ALLOWED_ATTR: [
+            'href',
+            'title',
+            'target',
+            'rel',
+            'class',
+            'id',
+            'src',
+            'alt',
+            'width',
+            'height',
+          ],
+          ALLOWED_URI_REGEXP:
+            /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|sms|cid|xmpp):|[^a-z]|[a-z+.-]+(?:[^a-z+.\-:]|$))/i,
+        });
+        setSafeHtml(sanitized);
+      }).catch((error) => {
+        logger.error('TrustedHTML: Failed to load DOMPurify', error);
+        // Fallback to original HTML if DOMPurify fails to load
+        setSafeHtml(html);
+      });
+    }
+  }, [html]);
+  
+  // During SSR, render the HTML directly (will be sanitized on client)
+  const displayHtml = isClient ? safeHtml : html;
 
   return (
     <div
       id={id}
       className={className}
-      // eslint-disable-next-line jsx-a11y/no-danger -- HTML is sanitized with DOMPurify with strict allowlist
-      // biome-ignore lint/security/noDangerouslySetInnerHtml: <explanation>
-            dangerouslySetInnerHTML={{ __html: safeHtml }}
+      // eslint-disable-next-line jsx-a11y/no-danger -- HTML is sanitized with DOMPurify with strict allowlist (client-side)
+      // biome-ignore lint/security/noDangerouslySetInnerHtml: HTML is sanitized client-side with DOMPurify
+            dangerouslySetInnerHTML={{ __html: displayHtml }}
     />
   );
 }

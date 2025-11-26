@@ -17,7 +17,7 @@ import { z } from 'zod';
 import { FormField } from '@/src/components/core/forms/form-field-wrapper';
 import { ListItemManager } from '@/src/components/core/forms/list-items-editor';
 import { ToggleField } from '@/src/components/core/forms/toggle-field';
-import { Button } from '@/src/components/primitives/ui/button';
+import { Button } from '@heyclaude/web-runtime/ui';
 
 // Profile data consolidated into users table - use generated types
 type ProfileData = Pick<

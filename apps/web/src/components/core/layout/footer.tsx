@@ -22,7 +22,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTheme } from 'next-themes';
 import { memo, useEffect, useMemo, useState } from 'react';
-import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
+import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
 import { HeyClaudeLogo } from '@/src/components/core/layout/brand-logo';
 import { ThemeToggle } from '@/src/components/core/layout/theme-toggle';
 

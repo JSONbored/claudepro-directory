@@ -19,21 +19,17 @@ import {
   getPublicUserProfile,
 } from '@heyclaude/web-runtime/data';
 import { FolderOpen, Globe, Users } from '@heyclaude/web-runtime/icons';
-import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { UI_CLASSES, NavLink, UnifiedBadge,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle   } from '@heyclaude/web-runtime/ui';
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
 
 import { FollowButton } from '@/src/components/core/buttons/social/follow-button';
-import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
-import { NavLink } from '@/src/components/core/navigation/navigation-link';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/src/components/primitives/ui/card';
 
 // Use enum values directly from @heyclaude/database-types Constants
 const CONTENT_CATEGORY_VALUES = Constants.public.Enums.content_category;

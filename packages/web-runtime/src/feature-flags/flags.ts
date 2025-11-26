@@ -17,9 +17,8 @@ import 'server-only';
 
 import { type StatsigUser, statsigAdapter } from '@flags-sdk/statsig';
 import { createServerClient } from '@supabase/ssr';
-// Following official Vercel Flags SDK pattern - direct imports as shown in docs
-import { dedupe, flag } from 'flags/next';
 import { getAuthenticatedUserFromClient } from '../auth/get-authenticated-user.ts';
+import { isBuildTime } from '../build-time.ts';
 import { logger } from '../logger.ts';
 import {
   ANIMATION_CONFIG_DEFAULTS,
@@ -55,68 +54,99 @@ export {
 };
 
 /**
+ * Lazy loader for flags/next package
+ * CRITICAL: Only imports flags/next at runtime, never during build-time static analysis
+ * This prevents Next.js from analyzing the module and trying to access next/headers during build
+ */
+let flagsNextModulePromise: Promise<{ dedupe: typeof import('flags/next').dedupe; flag: typeof import('flags/next').flag }> | null = null;
+
+function getFlagsNextModule() {
+  if (isBuildTime()) {
+    throw new Error('Cannot load flags/next during build-time');
+  }
+  if (!flagsNextModulePromise) {
+    flagsNextModulePromise = import('flags/next');
+  }
+  return flagsNextModulePromise;
+}
+
+/**
  * Identify function - provides user context for flag evaluation
  * Statsig uses this to do % rollouts, user targeting, etc.
  *
  * Following official pattern: wrapped in dedupe for request-level deduplication
+ * CRITICAL: Lazy-loaded to prevent build-time module analysis
  */
-export const identify = dedupe(async ({ headers: _headers, cookies }): Promise<StatsigUser> => {
-  try {
-    const supabaseUrl = process.env['NEXT_PUBLIC_SUPABASE_URL'];
-    const supabaseAnonKey = process.env['NEXT_PUBLIC_SUPABASE_ANON_KEY'];
+let identifyFnPromise: Promise<({ headers, cookies }: { headers: unknown; cookies: { getAll: () => Array<{ name: string; value: string }> } }) => Promise<StatsigUser>> | null = null;
 
-    if (!(supabaseUrl && supabaseAnonKey)) {
-      return { userID: 'anonymous' };
-    }
+export async function identify({ headers: _headers, cookies }: { headers: unknown; cookies: { getAll: () => Array<{ name: string; value: string }> } }): Promise<StatsigUser> {
+  if (!identifyFnPromise) {
+    identifyFnPromise = (async () => {
+      const { dedupe } = await getFlagsNextModule();
+      return dedupe(async ({ headers: _headers, cookies }): Promise<StatsigUser> => {
+        try {
+          const supabaseUrl = process.env['NEXT_PUBLIC_SUPABASE_URL'];
+          const supabaseAnonKey = process.env['NEXT_PUBLIC_SUPABASE_ANON_KEY'];
 
-    const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
-      cookies: {
-        getAll() {
-          return cookies.getAll();
-        },
-        setAll() {
-          // Flags SDK cookies are read-only
-        },
-      },
-    });
+          if (!(supabaseUrl && supabaseAnonKey)) {
+            return { userID: 'anonymous' };
+          }
 
-    const { user } = await getAuthenticatedUserFromClient(supabase, {
-      context: 'feature_flags_identify',
-    });
+          const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
+            cookies: {
+              getAll() {
+                return cookies.getAll();
+              },
+              setAll() {
+                // Flags SDK cookies are read-only
+              },
+            },
+          });
 
-    const baseUser: StatsigUser = {
-      userID: user?.id || 'anonymous',
-    };
+          const { user } = await getAuthenticatedUserFromClient(supabase, {
+            context: 'feature_flags_identify',
+          });
 
-    if (user?.email) {
-      baseUser.email = user.email;
-    }
+          const baseUser: StatsigUser = {
+            userID: user?.id || 'anonymous',
+          };
 
-    if (user?.user_metadata?.['slug']) {
-      baseUser.customIDs = {
-        userSlug: user.user_metadata['slug'] as string,
-      };
-    }
+          if (user?.email) {
+            baseUser.email = user.email;
+          }
 
-    return baseUser;
-  } catch (error) {
-    logger.error(
-      'Failed to identify user for feature flags, falling back to anonymous',
-      error as Error,
-      {
-        context: 'feature_flags',
-        fallback: 'anonymous',
-      }
-    );
-    return { userID: 'anonymous' };
+          if (user?.user_metadata?.['slug']) {
+            baseUser.customIDs = {
+              userSlug: user.user_metadata['slug'] as string,
+            };
+          }
+
+          return baseUser;
+        } catch (error) {
+          logger.error(
+            'Failed to identify user for feature flags, falling back to anonymous',
+            error as Error,
+            {
+              context: 'feature_flags',
+              fallback: 'anonymous',
+            }
+          );
+          return { userID: 'anonymous' };
+        }
+      });
+    })();
   }
-});
+  const identifyFn = await identifyFnPromise;
+  return identifyFn({ headers: _headers, cookies });
+}
 
 /**
  * Factory function to create feature flags
  * Following the official pattern from Vercel docs
+ * CRITICAL: Lazy-loaded to prevent build-time module analysis
  */
-export const createFeatureFlag = (key: string) => {
+export async function createFeatureFlag(key: string) {
+  const { flag } = await getFlagsNextModule();
   return flag<boolean, StatsigUser>({
     key,
     adapter: statsigAdapter.featureGate((gate) => gate.value, {
@@ -125,12 +155,14 @@ export const createFeatureFlag = (key: string) => {
     identify,
     defaultValue: false,
   });
-};
+}
 
 /**
  * Factory function to create experiments (A/B tests with variants)
+ * CRITICAL: Lazy-loaded to prevent build-time module analysis
  */
-export const createExperiment = <T extends string>(key: string, defaultValue: T) => {
+export async function createExperiment<T extends string>(key: string, defaultValue: T) {
+  const { flag } = await getFlagsNextModule();
   return flag<T, StatsigUser>({
     key,
     adapter: statsigAdapter.experiment((exp) => exp.get('variant', defaultValue) as T, {
@@ -139,15 +171,17 @@ export const createExperiment = <T extends string>(key: string, defaultValue: T)
     identify,
     defaultValue,
   });
-};
+}
 
 /**
  * Factory function to create dynamic config groups (runtime-tunable values)
+ * CRITICAL: Lazy-loaded to prevent build-time module analysis
  */
-export const createDynamicConfigGroup = <T extends Record<string, unknown>>(
+export async function createDynamicConfigGroup<T extends Record<string, unknown>>(
   configName: string,
   defaults: T
-) => {
+) {
+  const { flag } = await getFlagsNextModule();
   return flag<T, StatsigUser>({
     key: configName,
     adapter: statsigAdapter.dynamicConfig((config) => {
@@ -157,7 +191,7 @@ export const createDynamicConfigGroup = <T extends Record<string, unknown>>(
     identify,
     defaultValue: defaults,
   });
-};
+}
 
 /**
  * Feature flags type - exported for TypeScript inference
@@ -190,49 +224,107 @@ export type FeatureFlags = {
 };
 
 let _featureFlags: FeatureFlags | null = null;
+let _featureFlagsPromise: Promise<FeatureFlags> | null = null;
 
-const getFeatureFlags = (): FeatureFlags => {
-  if (!_featureFlags) {
-    _featureFlags = {
-      // Test
-      testFlag: createFeatureFlag('test_flag'),
-      // Growth features
-      referralProgram: createFeatureFlag('referral_program'),
-      confettiAnimations: createFeatureFlag('confetti_animations'),
-      recentlyViewed: createFeatureFlag('recently_viewed_sidebar'),
-      compareConfigs: createFeatureFlag('compare_configs'),
-      // Monetization features
-      promotedConfigs: createFeatureFlag('promoted_configs'),
-      jobAlerts: createFeatureFlag('job_alerts'),
-      selfServiceCheckout: createFeatureFlag('self_service_checkout'),
-      // UX enhancements
-      contentDetailTabs: createFeatureFlag('content_detail_tabs'),
-      interactiveOnboarding: createFeatureFlag('interactive_onboarding'),
-      configPlayground: createFeatureFlag('config_playground'),
-      contactTerminalEnabled: createFeatureFlag('contact_terminal_enabled'),
-      // Infrastructure
-      publicAPI: createFeatureFlag('public_api'),
-      enhancedSkeletons: createFeatureFlag('enhanced_skeletons'),
-      // UI Components
-      floatingActionBar: createFeatureFlag('floating_action_bar'),
-      fabSubmitAction: createFeatureFlag('fab_submit_action'),
-      fabSearchAction: createFeatureFlag('fab_search_action'),
-      fabScrollToTop: createFeatureFlag('fab_scroll_to_top'),
-      fabNotifications: createFeatureFlag('fab_notifications'),
-      notificationsProvider: createFeatureFlag('notifications_provider'),
-      notificationsSheet: createFeatureFlag('notifications_sheet'),
-      notificationsToasts: createFeatureFlag('notifications_toasts'),
-      // Infrastructure - Logging
-      loggerConsole: createFeatureFlag('logger_console'),
-      loggerVerbose: createFeatureFlag('logger_verbose'),
-    };
+async function getFeatureFlags(): Promise<FeatureFlags> {
+  if (_featureFlags) {
+    return _featureFlags;
   }
-  return _featureFlags;
-};
+  if (!_featureFlagsPromise) {
+    _featureFlagsPromise = (async () => {
+      // Initialize all flags in parallel for better performance
+      const [
+        testFlag,
+        referralProgram,
+        confettiAnimations,
+        recentlyViewed,
+        compareConfigs,
+        promotedConfigs,
+        jobAlerts,
+        selfServiceCheckout,
+        contentDetailTabs,
+        interactiveOnboarding,
+        configPlayground,
+        contactTerminalEnabled,
+        publicAPI,
+        enhancedSkeletons,
+        floatingActionBar,
+        fabSubmitAction,
+        fabSearchAction,
+        fabScrollToTop,
+        fabNotifications,
+        notificationsProvider,
+        notificationsSheet,
+        notificationsToasts,
+        loggerConsole,
+        loggerVerbose,
+      ] = await Promise.all([
+        createFeatureFlag('test_flag'),
+        createFeatureFlag('referral_program'),
+        createFeatureFlag('confetti_animations'),
+        createFeatureFlag('recently_viewed_sidebar'),
+        createFeatureFlag('compare_configs'),
+        createFeatureFlag('promoted_configs'),
+        createFeatureFlag('job_alerts'),
+        createFeatureFlag('self_service_checkout'),
+        createFeatureFlag('content_detail_tabs'),
+        createFeatureFlag('interactive_onboarding'),
+        createFeatureFlag('config_playground'),
+        createFeatureFlag('contact_terminal_enabled'),
+        createFeatureFlag('public_api'),
+        createFeatureFlag('enhanced_skeletons'),
+        createFeatureFlag('floating_action_bar'),
+        createFeatureFlag('fab_submit_action'),
+        createFeatureFlag('fab_search_action'),
+        createFeatureFlag('fab_scroll_to_top'),
+        createFeatureFlag('fab_notifications'),
+        createFeatureFlag('notifications_provider'),
+        createFeatureFlag('notifications_sheet'),
+        createFeatureFlag('notifications_toasts'),
+        createFeatureFlag('logger_console'),
+        createFeatureFlag('logger_verbose'),
+      ]);
+
+      _featureFlags = {
+        testFlag,
+        referralProgram,
+        confettiAnimations,
+        recentlyViewed,
+        compareConfigs,
+        promotedConfigs,
+        jobAlerts,
+        selfServiceCheckout,
+        contentDetailTabs,
+        interactiveOnboarding,
+        configPlayground,
+        contactTerminalEnabled,
+        publicAPI,
+        enhancedSkeletons,
+        floatingActionBar,
+        fabSubmitAction,
+        fabSearchAction,
+        fabScrollToTop,
+        fabNotifications,
+        notificationsProvider,
+        notificationsSheet,
+        notificationsToasts,
+        loggerConsole,
+        loggerVerbose,
+      };
+      return _featureFlags;
+    })();
+  }
+  return _featureFlagsPromise;
+}
 
 export const featureFlags: FeatureFlags = new Proxy({} as FeatureFlags, {
   get(_target, prop) {
-    return getFeatureFlags()[prop as keyof FeatureFlags];
+    // Return a function that awaits the flag initialization, then calls the flag
+    return async () => {
+      const flags = await getFeatureFlags();
+      const flagFn = flags[prop as keyof FeatureFlags];
+      return flagFn();
+    };
   },
 });
 
@@ -244,22 +336,34 @@ let _newsletterExperiments: {
   footerDelay: () => Promise<'10s' | '30s' | '60s'>;
   ctaVariant: () => Promise<'aggressive' | 'social_proof' | 'value_focused'>;
 } | null = null;
+let _newsletterExperimentsPromise: Promise<{
+  footerDelay: () => Promise<'10s' | '30s' | '60s'>;
+  ctaVariant: () => Promise<'aggressive' | 'social_proof' | 'value_focused'>;
+}> | null = null;
 
-const getNewsletterExperiments = () => {
-  if (!_newsletterExperiments) {
-    _newsletterExperiments = {
-      // Footer delay timing test (10s vs 30s vs 60s)
-      footerDelay: createExperiment<'10s' | '30s' | '60s'>('newsletter_footer_delay', '30s'),
-
-      // CTA copy variant test (aggressive vs social_proof vs value_focused)
-      ctaVariant: createExperiment<'aggressive' | 'social_proof' | 'value_focused'>(
-        'newsletter_cta_variant',
-        'value_focused'
-      ),
-    };
+async function getNewsletterExperiments() {
+  if (_newsletterExperiments) {
+    return _newsletterExperiments;
   }
-  return _newsletterExperiments;
-};
+  if (!_newsletterExperimentsPromise) {
+    _newsletterExperimentsPromise = (async () => {
+      const [footerDelay, ctaVariant] = await Promise.all([
+        createExperiment<'10s' | '30s' | '60s'>('newsletter_footer_delay', '30s'),
+        createExperiment<'aggressive' | 'social_proof' | 'value_focused'>(
+          'newsletter_cta_variant',
+          'value_focused'
+        ),
+      ]);
+
+      _newsletterExperiments = {
+        footerDelay,
+        ctaVariant,
+      };
+      return _newsletterExperiments;
+    })();
+  }
+  return _newsletterExperimentsPromise;
+}
 
 export const newsletterExperiments = new Proxy(
   {} as {
@@ -268,7 +372,11 @@ export const newsletterExperiments = new Proxy(
   },
   {
     get(_target, prop) {
-      return getNewsletterExperiments()[prop as keyof typeof _newsletterExperiments];
+      return async () => {
+        const experiments = await getNewsletterExperiments();
+        const experimentFn = experiments[prop as keyof typeof experiments];
+        return experimentFn();
+      };
     },
   }
 );
@@ -285,9 +393,13 @@ export const newsletterExperiments = new Proxy(
  */
 // Lazy getter - only creates the config when first accessed
 let _appSettingsFn: (() => Promise<typeof APP_SETTINGS_DEFAULTS>) | null = null;
-export const appSettings = (): Promise<typeof APP_SETTINGS_DEFAULTS> => {
+let _appSettingsFnPromise: Promise<() => Promise<typeof APP_SETTINGS_DEFAULTS>> | null = null;
+export const appSettings = async (): Promise<typeof APP_SETTINGS_DEFAULTS> => {
   if (!_appSettingsFn) {
-    _appSettingsFn = createDynamicConfigGroup('app_settings', APP_SETTINGS_DEFAULTS);
+    if (!_appSettingsFnPromise) {
+      _appSettingsFnPromise = createDynamicConfigGroup('app_settings', APP_SETTINGS_DEFAULTS);
+    }
+    _appSettingsFn = await _appSettingsFnPromise;
   }
   return _appSettingsFn();
 };
@@ -299,9 +411,13 @@ export const appSettings = (): Promise<typeof APP_SETTINGS_DEFAULTS> => {
  */
 // Lazy getter - only creates the config when first accessed
 let _componentConfigsFn: (() => Promise<typeof COMPONENT_CONFIG_DEFAULTS>) | null = null;
-export const componentConfigs = (): Promise<typeof COMPONENT_CONFIG_DEFAULTS> => {
+let _componentConfigsFnPromise: Promise<() => Promise<typeof COMPONENT_CONFIG_DEFAULTS>> | null = null;
+export const componentConfigs = async (): Promise<typeof COMPONENT_CONFIG_DEFAULTS> => {
   if (!_componentConfigsFn) {
-    _componentConfigsFn = createDynamicConfigGroup('component_configs', COMPONENT_CONFIG_DEFAULTS);
+    if (!_componentConfigsFnPromise) {
+      _componentConfigsFnPromise = createDynamicConfigGroup('component_configs', COMPONENT_CONFIG_DEFAULTS);
+    }
+    _componentConfigsFn = await _componentConfigsFnPromise;
   }
   return _componentConfigsFn();
 };
@@ -313,9 +429,13 @@ export const componentConfigs = (): Promise<typeof COMPONENT_CONFIG_DEFAULTS> =>
  */
 // Lazy getter - only creates the config when first accessed
 let _emailConfigsFn: (() => Promise<typeof EMAIL_CONFIG_DEFAULTS>) | null = null;
-export const emailConfigs = (): Promise<typeof EMAIL_CONFIG_DEFAULTS> => {
+let _emailConfigsFnPromise: Promise<() => Promise<typeof EMAIL_CONFIG_DEFAULTS>> | null = null;
+export const emailConfigs = async (): Promise<typeof EMAIL_CONFIG_DEFAULTS> => {
   if (!_emailConfigsFn) {
-    _emailConfigsFn = createDynamicConfigGroup('email_configs', EMAIL_CONFIG_DEFAULTS);
+    if (!_emailConfigsFnPromise) {
+      _emailConfigsFnPromise = createDynamicConfigGroup('email_configs', EMAIL_CONFIG_DEFAULTS);
+    }
+    _emailConfigsFn = await _emailConfigsFnPromise;
   }
   return _emailConfigsFn();
 };
@@ -327,12 +447,16 @@ export const emailConfigs = (): Promise<typeof EMAIL_CONFIG_DEFAULTS> => {
  */
 // Lazy getter - only creates the config when first accessed
 let _newsletterConfigsFn: (() => Promise<typeof NEWSLETTER_CONFIG_DEFAULTS>) | null = null;
-export const newsletterConfigs = (): Promise<typeof NEWSLETTER_CONFIG_DEFAULTS> => {
+let _newsletterConfigsFnPromise: Promise<() => Promise<typeof NEWSLETTER_CONFIG_DEFAULTS>> | null = null;
+export const newsletterConfigs = async (): Promise<typeof NEWSLETTER_CONFIG_DEFAULTS> => {
   if (!_newsletterConfigsFn) {
-    _newsletterConfigsFn = createDynamicConfigGroup(
-      'newsletter_configs',
-      NEWSLETTER_CONFIG_DEFAULTS
-    );
+    if (!_newsletterConfigsFnPromise) {
+      _newsletterConfigsFnPromise = createDynamicConfigGroup(
+        'newsletter_configs',
+        NEWSLETTER_CONFIG_DEFAULTS
+      );
+    }
+    _newsletterConfigsFn = await _newsletterConfigsFnPromise;
   }
   return _newsletterConfigsFn();
 };
@@ -344,9 +468,13 @@ export const newsletterConfigs = (): Promise<typeof NEWSLETTER_CONFIG_DEFAULTS> 
  */
 // Lazy getter - only creates the config when first accessed
 let _pricingConfigsFn: (() => Promise<typeof PRICING_CONFIG_DEFAULTS>) | null = null;
-export const pricingConfigs = (): Promise<typeof PRICING_CONFIG_DEFAULTS> => {
+let _pricingConfigsFnPromise: Promise<() => Promise<typeof PRICING_CONFIG_DEFAULTS>> | null = null;
+export const pricingConfigs = async (): Promise<typeof PRICING_CONFIG_DEFAULTS> => {
   if (!_pricingConfigsFn) {
-    _pricingConfigsFn = createDynamicConfigGroup('pricing_configs', PRICING_CONFIG_DEFAULTS);
+    if (!_pricingConfigsFnPromise) {
+      _pricingConfigsFnPromise = createDynamicConfigGroup('pricing_configs', PRICING_CONFIG_DEFAULTS);
+    }
+    _pricingConfigsFn = await _pricingConfigsFnPromise;
   }
   return _pricingConfigsFn();
 };
@@ -358,9 +486,13 @@ export const pricingConfigs = (): Promise<typeof PRICING_CONFIG_DEFAULTS> => {
  */
 // Lazy getter - only creates the config when first accessed
 let _pollingConfigsFn: (() => Promise<typeof POLLING_CONFIG_DEFAULTS>) | null = null;
-export const pollingConfigs = (): Promise<typeof POLLING_CONFIG_DEFAULTS> => {
+let _pollingConfigsFnPromise: Promise<() => Promise<typeof POLLING_CONFIG_DEFAULTS>> | null = null;
+export const pollingConfigs = async (): Promise<typeof POLLING_CONFIG_DEFAULTS> => {
   if (!_pollingConfigsFn) {
-    _pollingConfigsFn = createDynamicConfigGroup('polling_configs', POLLING_CONFIG_DEFAULTS);
+    if (!_pollingConfigsFnPromise) {
+      _pollingConfigsFnPromise = createDynamicConfigGroup('polling_configs', POLLING_CONFIG_DEFAULTS);
+    }
+    _pollingConfigsFn = await _pollingConfigsFnPromise;
   }
   return _pollingConfigsFn();
 };
@@ -372,22 +504,27 @@ export const pollingConfigs = (): Promise<typeof POLLING_CONFIG_DEFAULTS> => {
  */
 // Lazy getter - only creates the config when first accessed
 let _animationConfigsFn: (() => Promise<typeof ANIMATION_CONFIG_DEFAULTS>) | null = null;
-export const animationConfigs = (): Promise<typeof ANIMATION_CONFIG_DEFAULTS> => {
+let _animationConfigsFnPromise: Promise<() => Promise<typeof ANIMATION_CONFIG_DEFAULTS>> | null = null;
+export const animationConfigs = async (): Promise<typeof ANIMATION_CONFIG_DEFAULTS> => {
   if (!_animationConfigsFn) {
-    _animationConfigsFn = createDynamicConfigGroup('animation_configs', ANIMATION_CONFIG_DEFAULTS);
+    if (!_animationConfigsFnPromise) {
+      _animationConfigsFnPromise = createDynamicConfigGroup('animation_configs', ANIMATION_CONFIG_DEFAULTS);
+    }
+    _animationConfigsFn = await _animationConfigsFnPromise;
   }
   return _animationConfigsFn();
 };
 
 /** Timeout Configs - UI/API timeouts and retry logic */
 // Lazy getter - only creates the config when first accessed
-let _timeoutConfigsFn: (() => Promise<typeof TIMEOUT_CONFIG_DEFAULTS>) | null = null;
-export const timeoutConfigs = (): Promise<typeof TIMEOUT_CONFIG_DEFAULTS> => {
-  if (!_timeoutConfigsFn) {
-    _timeoutConfigsFn = createDynamicConfigGroup('timeout_configs', TIMEOUT_CONFIG_DEFAULTS);
+let timeoutConfigsFnPromise: Promise<() => Promise<typeof TIMEOUT_CONFIG_DEFAULTS>> | null = null;
+export async function timeoutConfigs(): Promise<typeof TIMEOUT_CONFIG_DEFAULTS> {
+  if (!timeoutConfigsFnPromise) {
+    timeoutConfigsFnPromise = createDynamicConfigGroup('timeout_configs', TIMEOUT_CONFIG_DEFAULTS);
   }
-  return _timeoutConfigsFn();
-};
+  const fn = await timeoutConfigsFnPromise;
+  return fn();
+}
 
 /**
  * Toast Configs - Toast notification messages
@@ -395,13 +532,14 @@ export const timeoutConfigs = (): Promise<typeof TIMEOUT_CONFIG_DEFAULTS> => {
  * Usage: const config = await toastConfigs(); const message = config['toast.copied'];
  */
 // Lazy getter - only creates the config when first accessed
-let _toastConfigsFn: (() => Promise<typeof TOAST_CONFIG_DEFAULTS>) | null = null;
-export const toastConfigs = (): Promise<typeof TOAST_CONFIG_DEFAULTS> => {
-  if (!_toastConfigsFn) {
-    _toastConfigsFn = createDynamicConfigGroup('toast_configs', TOAST_CONFIG_DEFAULTS);
+let toastConfigsFnPromise: Promise<() => Promise<typeof TOAST_CONFIG_DEFAULTS>> | null = null;
+export async function toastConfigs(): Promise<typeof TOAST_CONFIG_DEFAULTS> {
+  if (!toastConfigsFnPromise) {
+    toastConfigsFnPromise = createDynamicConfigGroup('toast_configs', TOAST_CONFIG_DEFAULTS);
   }
-  return _toastConfigsFn();
-};
+  const fn = await toastConfigsFnPromise;
+  return fn();
+}
 
 /**
  * Homepage Configs - Homepage layout and categories
@@ -409,13 +547,14 @@ export const toastConfigs = (): Promise<typeof TOAST_CONFIG_DEFAULTS> => {
  * Usage: const config = await homepageConfigs(); const categories = config['homepage.featured_categories'];
  */
 // Lazy getter - only creates the config when first accessed
-let _homepageConfigsFn: (() => Promise<typeof HOMEPAGE_CONFIG_DEFAULTS>) | null = null;
-export const homepageConfigs = (): Promise<typeof HOMEPAGE_CONFIG_DEFAULTS> => {
-  if (!_homepageConfigsFn) {
-    _homepageConfigsFn = createDynamicConfigGroup('homepage_configs', HOMEPAGE_CONFIG_DEFAULTS);
+let homepageConfigsFnPromise: Promise<() => Promise<typeof HOMEPAGE_CONFIG_DEFAULTS>> | null = null;
+export async function homepageConfigs(): Promise<typeof HOMEPAGE_CONFIG_DEFAULTS> {
+  if (!homepageConfigsFnPromise) {
+    homepageConfigsFnPromise = createDynamicConfigGroup('homepage_configs', HOMEPAGE_CONFIG_DEFAULTS);
   }
-  return _homepageConfigsFn();
-};
+  const fn = await homepageConfigsFnPromise;
+  return fn();
+}
 
 /**
  * Form Configs - Form validation and limits (Phase 3)
@@ -423,13 +562,14 @@ export const homepageConfigs = (): Promise<typeof HOMEPAGE_CONFIG_DEFAULTS> => {
  * Usage: const config = await formConfigs(); const maxSize = config['form.max_file_size_mb'];
  */
 // Lazy getter - only creates the config when first accessed
-let _formConfigsFn: (() => Promise<typeof FORM_CONFIG_DEFAULTS>) | null = null;
-export const formConfigs = (): Promise<typeof FORM_CONFIG_DEFAULTS> => {
-  if (!_formConfigsFn) {
-    _formConfigsFn = createDynamicConfigGroup('form_configs', FORM_CONFIG_DEFAULTS);
+let formConfigsFnPromise: Promise<() => Promise<typeof FORM_CONFIG_DEFAULTS>> | null = null;
+export async function formConfigs(): Promise<typeof FORM_CONFIG_DEFAULTS> {
+  if (!formConfigsFnPromise) {
+    formConfigsFnPromise = createDynamicConfigGroup('form_configs', FORM_CONFIG_DEFAULTS);
   }
-  return _formConfigsFn();
-};
+  const fn = await formConfigsFnPromise;
+  return fn();
+}
 
 /**
  * Recently Viewed Configs - Recently viewed items settings (Phase 3)
@@ -437,16 +577,17 @@ export const formConfigs = (): Promise<typeof FORM_CONFIG_DEFAULTS> => {
  * Usage: const config = await recentlyViewedConfigs(); const ttl = config['recently_viewed.ttl_days'];
  */
 // Lazy getter - only creates the config when first accessed
-let _recentlyViewedConfigsFn: (() => Promise<typeof RECENTLY_VIEWED_CONFIG_DEFAULTS>) | null = null;
-export const recentlyViewedConfigs = (): Promise<typeof RECENTLY_VIEWED_CONFIG_DEFAULTS> => {
-  if (!_recentlyViewedConfigsFn) {
-    _recentlyViewedConfigsFn = createDynamicConfigGroup(
+let recentlyViewedConfigsFnPromise: Promise<() => Promise<typeof RECENTLY_VIEWED_CONFIG_DEFAULTS>> | null = null;
+export async function recentlyViewedConfigs(): Promise<typeof RECENTLY_VIEWED_CONFIG_DEFAULTS> {
+  if (!recentlyViewedConfigsFnPromise) {
+    recentlyViewedConfigsFnPromise = createDynamicConfigGroup(
       'recently_viewed_configs',
       RECENTLY_VIEWED_CONFIG_DEFAULTS
     );
   }
-  return _recentlyViewedConfigsFn();
-};
+  const fn = await recentlyViewedConfigsFnPromise;
+  return fn();
+}
 
 /**
  * Cache Configs - Cache TTL settings and invalidation rules
@@ -454,10 +595,11 @@ export const recentlyViewedConfigs = (): Promise<typeof RECENTLY_VIEWED_CONFIG_D
  * Usage: const config = await cacheConfigs(); const ttl = config['cache.homepage.ttl_seconds'];
  */
 // Lazy getter - only creates the config when first accessed
-let _cacheConfigsFn: (() => Promise<typeof CACHE_CONFIG_DEFAULTS>) | null = null;
-export const cacheConfigs = (): Promise<typeof CACHE_CONFIG_DEFAULTS> => {
-  if (!_cacheConfigsFn) {
-    _cacheConfigsFn = createDynamicConfigGroup('cache_configs', CACHE_CONFIG_DEFAULTS);
+let cacheConfigsFnPromise: Promise<() => Promise<typeof CACHE_CONFIG_DEFAULTS>> | null = null;
+export async function cacheConfigs(): Promise<typeof CACHE_CONFIG_DEFAULTS> {
+  if (!cacheConfigsFnPromise) {
+    cacheConfigsFnPromise = createDynamicConfigGroup('cache_configs', CACHE_CONFIG_DEFAULTS);
   }
-  return _cacheConfigsFn();
-};
+  const fn = await cacheConfigsFnPromise;
+  return fn();
+}

@@ -16,18 +16,18 @@
 import type { FilterState } from '@heyclaude/web-runtime/types/component.types';
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { memo, useId } from 'react';
-import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
-import { Button } from '@/src/components/primitives/ui/button';
-import { Label } from '@/src/components/primitives/ui/label';
-import { ScrollArea } from '@/src/components/primitives/ui/scroll-area';
+import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
+import { Button } from '@heyclaude/web-runtime/ui';
+import { Label } from '@heyclaude/web-runtime/ui';
+import { ScrollArea } from '@heyclaude/web-runtime/ui';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/src/components/primitives/ui/select';
-import { Slider } from '@/src/components/primitives/ui/slider';
+} from '@heyclaude/web-runtime/ui';
+import { Slider } from '@heyclaude/web-runtime/ui';
 
 export interface SearchFilterPanelProps {
   filters: FilterState;

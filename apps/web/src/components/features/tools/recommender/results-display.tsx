@@ -25,31 +25,31 @@ import {
 import { POSITION_PATTERNS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import Link from 'next/link';
 import { useState, useTransition } from 'react';
-import { BookmarkButton } from '@/src/components/core/buttons/interaction/bookmark-button';
-import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
-import { BaseCard } from '@/src/components/core/domain/cards/content-card-base';
-import { Button } from '@/src/components/primitives/ui/button';
+import { BookmarkButton } from '@heyclaude/web-runtime/ui';
+import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
+import { BaseCard } from '@heyclaude/web-runtime/ui';
+import { Button } from '@heyclaude/web-runtime/ui';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/src/components/primitives/ui/card';
+} from '@heyclaude/web-runtime/ui';
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from '@/src/components/primitives/ui/collapsible';
-import { Separator } from '@/src/components/primitives/ui/separator';
-import { Slider } from '@/src/components/primitives/ui/slider';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/primitives/ui/tabs';
+} from '@heyclaude/web-runtime/ui';
+import { Separator } from '@heyclaude/web-runtime/ui';
+import { Slider } from '@heyclaude/web-runtime/ui';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@heyclaude/web-runtime/ui';
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from '@/src/components/primitives/ui/tooltip';
+} from '@heyclaude/web-runtime/ui';
 
 // Type matching DecodedQuizAnswers from results page
 type DecodedQuizAnswers = {

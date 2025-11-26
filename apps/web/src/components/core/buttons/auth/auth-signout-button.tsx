@@ -12,7 +12,7 @@ import type { ButtonStyleProps } from '@heyclaude/web-runtime/types/component.ty
 import { toasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { Button } from '@/src/components/primitives/ui/button';
+import { Button } from '@heyclaude/web-runtime/ui';
 
 export type AuthSignOutScope = 'global' | 'local' | 'others';
 

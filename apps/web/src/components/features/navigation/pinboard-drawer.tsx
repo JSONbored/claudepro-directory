@@ -4,15 +4,15 @@ import { formatRelativeDate } from '@heyclaude/web-runtime';
 import { BookmarkMinus, BookmarkPlus } from '@heyclaude/web-runtime/icons';
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import Link from 'next/link';
-import { Button } from '@/src/components/primitives/ui/button';
+import { Button } from '@heyclaude/web-runtime/ui';
 import {
   Sheet,
   SheetContent,
   SheetDescription,
   SheetHeader,
   SheetTitle,
-} from '@/src/components/primitives/ui/sheet';
-import { usePinboard } from '@/src/hooks/use-pinboard';
+} from '@heyclaude/web-runtime/ui';
+import { usePinboard } from '@heyclaude/web-runtime/hooks';
 
 interface PinboardDrawerProps {
   open: boolean;

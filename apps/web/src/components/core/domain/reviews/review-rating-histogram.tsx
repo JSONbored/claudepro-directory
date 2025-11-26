@@ -11,7 +11,7 @@ import {
   HorizontalBarChart,
 } from '@/src/components/core/domain/charts/horizontal-bar-chart';
 import { StarDisplay } from '@/src/components/core/domain/reviews/shared/star-display';
-import { Card } from '@/src/components/primitives/ui/card';
+import { Card } from '@heyclaude/web-runtime/ui';
 
 export function ReviewRatingHistogram({
   distribution,

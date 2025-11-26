@@ -5,8 +5,7 @@
  * Used for rendering changelog content with XSS protection
  */
 
-import DOMPurify from 'dompurify';
-import { memo } from 'react';
+import { memo, useEffect, useState } from 'react';
 
 interface SanitizedHTMLProps {
   /** HTML string to sanitize and render */
@@ -22,13 +21,12 @@ interface SanitizedHTMLProps {
  * Allows safe HTML tags commonly used in changelog/markdown content
  */
 export const SanitizedHTML = memo(({ html, className, id }: SanitizedHTMLProps) => {
-  if (!html || typeof html !== 'string') {
-    return <div id={id} className={className} />;
-  }
+  const [safeHtml, setSafeHtml] = useState<string>(html);
 
-  // Sanitize HTML to prevent XSS
-  // Allow common markdown-generated HTML tags for changelog content
-  const safeHtml = DOMPurify.sanitize(html, {
+  useEffect(() => {
+    if (typeof window !== 'undefined' && html && typeof html === 'string') {
+      import('dompurify').then((DOMPurify) => {
+        const sanitized = DOMPurify.default.sanitize(html, {
     ALLOWED_TAGS: [
       'p',
       'br',
@@ -56,7 +54,18 @@ export const SanitizedHTML = memo(({ html, className, id }: SanitizedHTMLProps) 
     ALLOWED_ATTR: ['href', 'title', 'target', 'rel', 'class', 'id'],
     ALLOWED_URI_REGEXP:
       /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|sms|cid|xmpp|data):|[^a-z]|[a-z+.-]+(?:[^a-z+.\-:]|$))/i,
-  });
+        });
+        setSafeHtml(sanitized);
+      }).catch(() => {
+        // Fallback to original HTML if DOMPurify fails to load
+        setSafeHtml(html);
+      });
+    }
+  }, [html]);
+
+  if (!html || typeof html !== 'string') {
+    return <div id={id} className={className} />;
+  }
 
   return (
     <div

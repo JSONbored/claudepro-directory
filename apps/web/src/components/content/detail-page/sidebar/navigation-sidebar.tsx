@@ -23,10 +23,10 @@ import { BADGE_COLORS, getDisplayTitle, UI_CLASSES } from '@heyclaude/web-runtim
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { memo } from 'react';
-import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
+import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
 import { JobsPromo } from '@/src/components/core/domain/jobs/jobs-banner';
-import { Button } from '@/src/components/primitives/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
+import { Button } from '@heyclaude/web-runtime/ui';
+import { Card, CardContent, CardHeader, CardTitle } from '@heyclaude/web-runtime/ui';
 import { useDetailQuickActions } from '../use-detail-quick-actions';
 
 /**

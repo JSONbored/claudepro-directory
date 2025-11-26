@@ -21,15 +21,15 @@ import { useRouter } from 'next/navigation';
 import { useAction } from 'next-safe-action/hooks';
 import { useEffect, useId, useState, useTransition } from 'react';
 import { FormField } from '@/src/components/core/forms/form-field-wrapper';
-import { Button } from '@/src/components/primitives/ui/button';
+import { Button } from '@heyclaude/web-runtime/ui';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/src/components/primitives/ui/card';
-import { SelectItem } from '@/src/components/primitives/ui/select';
+} from '@heyclaude/web-runtime/ui';
+import { SelectItem } from '@heyclaude/web-runtime/ui';
 
 // Use the generated composite type from the RPC return
 type CompanyCompositeType = Database['public']['CompositeTypes']['user_companies_company'];

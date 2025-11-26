@@ -3,7 +3,7 @@
 import { Sparkles } from '@heyclaude/web-runtime/icons';
 import type { ContentItem } from '@heyclaude/web-runtime/types/component.types';
 import { cn } from '@heyclaude/web-runtime/ui';
-import { Button } from '@/src/components/primitives/ui/button';
+import { Button } from '@heyclaude/web-runtime/ui';
 import { useDetailQuickActions } from './use-detail-quick-actions';
 
 interface DetailQuickActionsBarProps {

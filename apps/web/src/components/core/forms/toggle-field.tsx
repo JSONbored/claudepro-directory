@@ -52,8 +52,8 @@
 
 import { cn } from '@heyclaude/web-runtime/ui';
 import { useId } from 'react';
-import { Label } from '@/src/components/primitives/ui/label';
-import { Switch } from '@/src/components/primitives/ui/switch';
+import { Label } from '@heyclaude/web-runtime/ui';
+import { Switch } from '@heyclaude/web-runtime/ui';
 
 // =============================================================================
 // TYPES

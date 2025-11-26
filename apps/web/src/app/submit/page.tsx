@@ -18,7 +18,7 @@ import {
   getSubmissionFormFields,
 } from '@heyclaude/web-runtime/data';
 import { TrendingUp } from '@heyclaude/web-runtime/icons';
-import { cn, UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { cn, UI_CLASSES, Card, CardContent, CardHeader, CardTitle  } from '@heyclaude/web-runtime/ui';
 import type { Metadata } from 'next';
 import dynamicImport from 'next/dynamic';
 
@@ -26,7 +26,6 @@ import { JobsPromo } from '@/src/components/core/domain/jobs/jobs-banner';
 import { SubmitFormClient } from '@/src/components/core/forms/content-submission-form';
 import { SidebarActivityCard } from '@/src/components/core/forms/sidebar-activity-card';
 import { SubmitPageHero } from '@/src/components/core/forms/submit-page-hero';
-import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
 const NewsletterCTAVariant = dynamicImport(
   () =>
     import('@/src/components/features/growth/newsletter/newsletter-cta-variants').then((module_) => ({

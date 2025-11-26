@@ -13,10 +13,10 @@ import { BADGE_COLORS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useMemo } from 'react';
-import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
-import { HighlightedText } from '@/src/components/core/shared/highlighted-text';
-import { Button } from '@/src/components/primitives/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
+import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
+import { HighlightedText } from '@heyclaude/web-runtime/ui';
+import { Button } from '@heyclaude/web-runtime/ui';
+import { Card, CardContent, CardHeader, CardTitle } from '@heyclaude/web-runtime/ui';
 
 function getSafeJobLink(link?: string | null): string {
   if (!link || typeof link !== 'string') return '#';

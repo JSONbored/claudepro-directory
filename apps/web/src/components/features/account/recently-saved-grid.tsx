@@ -1,7 +1,7 @@
 'use client';
 
 import type { DisplayableContent } from '@heyclaude/web-runtime/types/component.types';
-import { ConfigCard } from '@/src/components/core/domain/cards/config-card';
+import { ConfigCard } from '@heyclaude/web-runtime/ui';
 
 interface RecentlySavedGridProps {
   items: DisplayableContent[];

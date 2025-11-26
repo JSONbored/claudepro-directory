@@ -24,7 +24,7 @@ export const notificationCorsHeaders = {
 
 export const discordCorsHeaders = {
   ...publicCorsHeaders,
-  'Access-Control-Allow-Headers': 'Content-Type, X-Discord-Notification-Type',
+  'Access-Control-Allow-Headers': 'Content-Type, X-Discord-Notification-Type, X-Signature-Ed25519, X-Signature-Timestamp',
 };
 
 export const webhookCorsHeaders = {

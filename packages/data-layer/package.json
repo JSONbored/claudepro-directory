@@ -2,6 +2,7 @@
   "name": "@heyclaude/data-layer",
   "version": "0.0.0",
   "private": true,
+  "sideEffects": false,
   "exports": {
     ".": "./src/index.ts",
     "./services/trending": "./src/services/trending.ts"

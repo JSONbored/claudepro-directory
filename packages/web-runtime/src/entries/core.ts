@@ -12,6 +12,8 @@ export * from '../content.ts';
 export * from '../transformers/skill-to-md.ts';
 export * from '../types/category.ts';
 export * from '../utils/category-validation.ts';
+export * from '../utils/content-highlights.ts';
+export * from '../utils/url-validation.ts';
 export * from '../utils/log-context.ts';
 export * from '../utils/request-context.ts';
 export * from '../utils/homepage-error-tracking.ts';

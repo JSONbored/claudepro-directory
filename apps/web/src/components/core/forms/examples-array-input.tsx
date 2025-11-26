@@ -43,24 +43,24 @@
 import { ChevronDown, ChevronUp, Code, Plus, Trash } from '@heyclaude/web-runtime/icons';
 import { cn, DIMENSIONS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { useId, useState } from 'react';
-import { Button } from '@/src/components/primitives/ui/button';
+import { Button } from '@heyclaude/web-runtime/ui';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/src/components/primitives/ui/card';
-import { Input } from '@/src/components/primitives/ui/input';
-import { Label } from '@/src/components/primitives/ui/label';
+} from '@heyclaude/web-runtime/ui';
+import { Input } from '@heyclaude/web-runtime/ui';
+import { Label } from '@heyclaude/web-runtime/ui';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/src/components/primitives/ui/select';
-import { Textarea } from '@/src/components/primitives/ui/textarea';
+} from '@heyclaude/web-runtime/ui';
+import { Textarea } from '@heyclaude/web-runtime/ui';
 
 // Supported languages for syntax highlighting
 const SUPPORTED_LANGUAGES = [

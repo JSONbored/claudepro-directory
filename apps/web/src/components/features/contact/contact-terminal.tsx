@@ -31,26 +31,26 @@ import {
   AnimatedSpan,
   Terminal,
   TypingAnimation,
-} from '@/src/components/primitives/display/terminal';
-import { Button } from '@/src/components/primitives/ui/button';
+} from '@heyclaude/web-runtime/ui';
+import { Button } from '@heyclaude/web-runtime/ui';
 import {
   Command,
   CommandEmpty,
   CommandGroup,
   CommandItem,
   CommandList,
-} from '@/src/components/primitives/ui/command';
-import { Input } from '@/src/components/primitives/ui/input';
-import { Label } from '@/src/components/primitives/ui/label';
+} from '@heyclaude/web-runtime/ui';
+import { Input } from '@heyclaude/web-runtime/ui';
+import { Label } from '@heyclaude/web-runtime/ui';
 import {
   Sheet,
   SheetContent,
   SheetDescription,
   SheetHeader,
   SheetTitle,
-} from '@/src/components/primitives/ui/sheet';
-import { Textarea } from '@/src/components/primitives/ui/textarea';
-import { useConfetti } from '@/src/hooks/use-confetti';
+} from '@heyclaude/web-runtime/ui';
+import { Textarea } from '@heyclaude/web-runtime/ui';
+import { useConfetti } from '@heyclaude/web-runtime/hooks';
 
 // Internal type with non-nullable fields (after transformation)
 type ContactCommand = {

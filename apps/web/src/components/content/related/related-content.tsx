@@ -10,9 +10,9 @@ import { getRelatedContent } from '@heyclaude/web-runtime/data';
 import { Sparkles } from '@heyclaude/web-runtime/icons';
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { useEffect, useState } from 'react';
-import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
-import { UnifiedCardGrid } from '@/src/components/core/domain/cards/card-grid';
-import { BaseCard } from '@/src/components/core/domain/cards/content-card-base';
+import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
+import { UnifiedCardGrid } from '@heyclaude/web-runtime/ui';
+import { BaseCard } from '@heyclaude/web-runtime/ui';
 
 // Use the generated composite type directly
 type RelatedContentItemWithUI = Database['public']['CompositeTypes']['related_content_item'] & {

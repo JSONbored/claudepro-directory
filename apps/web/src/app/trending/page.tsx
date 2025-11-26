@@ -18,12 +18,11 @@ import type {
   DisplayableContent,
   HomepageContentItem,
 } from '@heyclaude/web-runtime/types/component.types';
-import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { UI_CLASSES, UnifiedBadge  } from '@heyclaude/web-runtime/ui';
 import type { Metadata } from 'next';
 import dynamicImport from 'next/dynamic';
 import { Suspense } from 'react';
 
-import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { LazySection } from '@/src/components/core/infra/scroll-animated-section';
 import { TrendingContent } from '@/src/components/core/shared/trending-content';
 

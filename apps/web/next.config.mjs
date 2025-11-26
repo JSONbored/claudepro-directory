@@ -38,7 +38,7 @@ const nextConfig = {
   ],
   // CRITICAL: Exclude flags/next from static analysis during build
   // flags/next uses Vercel Edge Config which triggers "Server Functions cannot be called" errors
-  serverExternalPackages: ['flags', '@flags-sdk/statsig'],
+  serverExternalPackages: ['flags', '@flags-sdk/statsig', '@imagemagick/magick-wasm'],
   cacheLife: {
     minutes: { stale: 300, revalidate: 60, expire: 3600 },
     quarter: { stale: 900, revalidate: 300, expire: 7200 },
@@ -83,6 +83,8 @@ const nextConfig = {
       '@utils': './lib/utils',
       '@content': './content',
       '@generated': './generated',
+      // Stub out edge function image manipulation code for web bundle
+      '@heyclaude/shared-runtime/src/image/manipulation': resolve(__dirname, './src/lib/stubs/image-manipulation-stub.ts'),
     },
   },
 
@@ -98,11 +100,26 @@ const nextConfig = {
       '__tests__/**/*',
       'tests/**/*',
       '*.test.*',
+      // Exclude edge function image manipulation code
+      '**/packages/shared-runtime/src/image/manipulation.ts',
+      '**/node_modules/@imagemagick/**/*',
       '*.spec.*',
       'vitest.config.ts',
       'playwright.config.ts',
     ],
     '/guides/**': ['./docs/**/*', './scripts/**/*'],
+  },
+  // Optimize output file tracing for standalone builds
+  // Only include essential files to reduce bundle size
+  outputFileTracingIncludes: {
+    '/': [
+      'packages/web-runtime/src/**/*',
+      'packages/shared-runtime/src/**/*',
+      'packages/data-layer/src/**/*',
+      'packages/database-types/dist/**/*',
+      'packages/web-runtime/src/config/generated-config.ts',
+      'packages/web-runtime/src/data/config/category/category-config.generated.ts',
+    ],
   },
 
   experimental: {
@@ -135,6 +152,11 @@ const nextConfig = {
       '@vercel/speed-insights',
       'next-themes',
       'react-error-boundary',
+      'react-hook-form',
+      '@hookform/resolvers',
+      'zod',
+      'motion',
+      'zustand',
       '@radix-ui/react-avatar',
       '@radix-ui/react-checkbox',
       '@radix-ui/react-collapsible',
@@ -150,6 +172,10 @@ const nextConfig = {
       '@radix-ui/react-switch',
       '@radix-ui/react-tabs',
       '@radix-ui/react-tooltip',
+      'cmdk',
+      'devalue',
+      'dompurify',
+      'sanitize-html',
     ],
   },
 
@@ -184,7 +210,18 @@ const nextConfig = {
     config.resolve.alias = {
       ...config.resolve.alias,
       '@': resolve(__dirname, './'),
+      // Stub out edge function image manipulation code for web bundle
+      '@heyclaude/shared-runtime/src/image/manipulation': resolve(__dirname, './src/lib/stubs/image-manipulation-stub.ts'),
     };
+
+    // Ignore edge function dependencies
+    if (!isServer) {
+      config.plugins.push(
+        new webpack.IgnorePlugin({
+          resourceRegExp: /^@imagemagick\/magick-wasm$/,
+        })
+      );
+    }
 
     return config;
   },

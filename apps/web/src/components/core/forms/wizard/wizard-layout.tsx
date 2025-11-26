@@ -23,7 +23,7 @@ import { SUBMISSION_FORM_TOKENS as TOKENS } from '@heyclaude/web-runtime/ui/desi
 import { AnimatePresence, motion } from 'motion/react';
 import { useRouter } from 'next/navigation';
 import { type ReactNode, useCallback, useEffect, useState } from 'react';
-import { Button } from '@/src/components/primitives/ui/button';
+import { Button } from '@heyclaude/web-runtime/ui';
 import { useFormTracking } from '@/src/hooks/use-form-tracking';
 import { ProgressIndicator, type WizardStep } from './progress-indicator';
 

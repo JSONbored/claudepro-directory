@@ -13,11 +13,11 @@ import type {
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import Link from 'next/link';
 import { type FC, memo, useEffect, useMemo } from 'react';
-import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
-import { UnifiedCardGrid } from '@/src/components/core/domain/cards/card-grid';
-import { ConfigCard } from '@/src/components/core/domain/cards/config-card';
+import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
+import { UnifiedCardGrid } from '@heyclaude/web-runtime/ui';
+import { ConfigCard } from '@heyclaude/web-runtime/ui';
 import { JobCard } from '@/src/components/core/domain/cards/job-card';
-import { getTrendingSlugs, isNewSince } from '@/src/utils/content-highlights';
+import { getTrendingSlugs, isNewSince } from '@heyclaude/web-runtime/core';
 
 interface FeaturedSectionProps {
   title: string;

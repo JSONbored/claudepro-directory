@@ -17,23 +17,23 @@ import { useEffect, useId, useMemo, useState, useTransition } from 'react';
 import { CompanySelector } from '@/src/components/core/forms/company-selector';
 import { FormField } from '@/src/components/core/forms/form-field-wrapper';
 import { ListItemManager } from '@/src/components/core/forms/list-items-editor';
-import { Button } from '@/src/components/primitives/ui/button';
+import { Button } from '@heyclaude/web-runtime/ui';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/src/components/primitives/ui/card';
-import { Checkbox } from '@/src/components/primitives/ui/checkbox';
-import { Label } from '@/src/components/primitives/ui/label';
+} from '@heyclaude/web-runtime/ui';
+import { Checkbox } from '@heyclaude/web-runtime/ui';
+import { Label } from '@heyclaude/web-runtime/ui';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/src/components/primitives/ui/select';
+} from '@heyclaude/web-runtime/ui';
 
 // Use enum values directly from @heyclaude/database-types Constants
 const JOB_PLAN_VALUES = Constants.public.Enums.job_plan;

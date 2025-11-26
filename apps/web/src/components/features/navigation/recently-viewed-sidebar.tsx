@@ -30,9 +30,9 @@ import { ANIMATION_CONSTANTS, cn, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { AnimatePresence, motion } from 'motion/react';
 import Link from 'next/link';
 import { memo, useState } from 'react';
-import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
-import { Button } from '@/src/components/primitives/ui/button';
-import { type RecentlyViewedItem, useRecentlyViewed } from '@/src/hooks/use-recently-viewed';
+import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
+import { Button } from '@heyclaude/web-runtime/ui';
+import { type RecentlyViewedItem, useRecentlyViewed } from '@heyclaude/web-runtime/hooks';
 
 // =============================================================================
 // ITEM COMPONENT

@@ -1,10 +1,9 @@
 import { getContactChannels, getLastUpdatedDate } from '@heyclaude/web-runtime/core';
 import { generatePageMetadata } from '@heyclaude/web-runtime/data';
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
-import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { UI_CLASSES, NavLink  } from '@heyclaude/web-runtime/ui';
 import type { Metadata } from 'next';
 
-import { NavLink } from '@/src/components/core/navigation/navigation-link';
 
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/terms');

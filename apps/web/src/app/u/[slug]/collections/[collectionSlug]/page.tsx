@@ -18,23 +18,17 @@ import {
   getPublicCollectionDetail,
 } from '@heyclaude/web-runtime/data';
 import { ArrowLeft, ExternalLink } from '@heyclaude/web-runtime/icons';
-import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import type { Metadata } from 'next';
-import Link from 'next/link';
-import { notFound } from 'next/navigation';
-
-import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
-import { Pulse } from '@/src/components/core/infra/pulse';
-import { NavLink } from '@/src/components/core/navigation/navigation-link';
-import { Button } from '@/src/components/primitives/ui/button';
-import {
+import { UI_CLASSES, NavLink, UnifiedBadge, Button ,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle,
-} from '@/src/components/primitives/ui/card';
-import { Separator } from '@/src/components/primitives/ui/separator';
+  CardTitle, Separator    } from '@heyclaude/web-runtime/ui';
+import type { Metadata } from 'next';
+import Link from 'next/link';
+import { notFound } from 'next/navigation';
+
+import { Pulse } from '@/src/components/core/infra/pulse';
 
 // Collection pages may have private content
 export const dynamic = 'force-dynamic';

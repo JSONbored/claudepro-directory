@@ -56,7 +56,20 @@
     },
     "build": {
       "outputs": [".next/**", "!.next/cache/**"],
-      "dependsOn": ["^build"]
+      "inputs": [
+        "apps/web/**/*",
+        "packages/**/src/**/*",
+        "packages/**/package.json",
+        "package.json",
+        "pnpm-lock.yaml",
+        "next.config.mjs",
+        "tsconfig.json"
+      ],
+      "dependsOn": [
+        "^build",
+        "generate:categories:exec",
+        "generate:service-worker:exec"
+      ]
     },
     "type-check": {
       "outputs": ["**/*.tsbuildinfo"],

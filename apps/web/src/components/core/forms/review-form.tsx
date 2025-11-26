@@ -10,9 +10,9 @@ import { toasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { useRouter } from 'next/navigation';
 import { useId, useState, useTransition } from 'react';
 import { ReviewRatingInteractive } from '@/src/components/core/domain/reviews/review-rating-interactive';
-import { Button } from '@/src/components/primitives/ui/button';
-import { Label } from '@/src/components/primitives/ui/label';
-import { Textarea } from '@/src/components/primitives/ui/textarea';
+import { Button } from '@heyclaude/web-runtime/ui';
+import { Label } from '@heyclaude/web-runtime/ui';
+import { Textarea } from '@heyclaude/web-runtime/ui';
 
 /**
  * Form for creating and editing reviews

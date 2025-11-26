@@ -1,5 +1,5 @@
 {
-  "buildCommand": "cd ../.. && pnpm run generate:config && turbo run generate:categories:exec generate:service-worker:exec && cd apps/web && next build --turbopack",
+  "buildCommand": "cd ../.. && turbo run generate:config generate:categories:exec generate:service-worker:exec --concurrency=4 && cd apps/web && next build --turbopack",
   "outputDirectory": ".next",
   "framework": "nextjs"
 }

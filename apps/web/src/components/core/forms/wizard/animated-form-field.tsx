@@ -20,7 +20,7 @@ import { cn } from '@heyclaude/web-runtime/ui';
 import { SUBMISSION_FORM_TOKENS as TOKENS } from '@heyclaude/web-runtime/ui/design-tokens/submission-form';
 import { AnimatePresence, motion } from 'motion/react';
 import { type FocusEvent, type ReactNode, useCallback, useState } from 'react';
-import { Label } from '@/src/components/primitives/ui/label';
+import { Label } from '@heyclaude/web-runtime/ui';
 
 export type ValidationState = 'idle' | 'valid' | 'invalid' | 'warning';
 

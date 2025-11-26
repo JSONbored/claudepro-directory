@@ -16,8 +16,8 @@ import type {
 } from '@heyclaude/web-runtime/types/component.types';
 import { cn, INFOBOX_COLORS, INFOBOX_ICON_COLORS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { useCallback, useState } from 'react';
-import { Alert, AlertDescription, AlertTitle } from '@/src/components/primitives/ui/alert';
-import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
+import { Alert, AlertDescription, AlertTitle } from '@heyclaude/web-runtime/ui';
+import { Card, CardContent, CardHeader, CardTitle } from '@heyclaude/web-runtime/ui';
 
 export type AccordionVariant = AccordionProps & {
   contentType: 'accordion';

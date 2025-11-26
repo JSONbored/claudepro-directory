@@ -16,11 +16,11 @@ import type { ReviewSectionProps } from '@heyclaude/web-runtime/types/component.
 import { toasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useId, useState } from 'react';
-import { BaseCard } from '@/src/components/core/domain/cards/content-card-base';
+import { BaseCard } from '@heyclaude/web-runtime/ui';
 import { ReviewForm } from '@/src/components/core/forms/review-form';
-import { Button } from '@/src/components/primitives/ui/button';
-import { Card } from '@/src/components/primitives/ui/card';
-import { Label } from '@/src/components/primitives/ui/label';
+import { Button } from '@heyclaude/web-runtime/ui';
+import { Card } from '@heyclaude/web-runtime/ui';
+import { Label } from '@heyclaude/web-runtime/ui';
 
 import { ReviewRatingHistogram } from './review-rating-histogram';
 import { StarDisplay } from './shared/star-display';

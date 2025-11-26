@@ -1,8 +1,8 @@
 import { getLastUpdatedDate } from '@heyclaude/web-runtime/core';
 import { generatePageMetadata } from '@heyclaude/web-runtime/data';
+import { NavLink } from '@heyclaude/web-runtime/ui';
 import type { Metadata } from 'next';
 
-import { NavLink } from '@/src/components/core/navigation/navigation-link';
 
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/cookies');

@@ -7,7 +7,7 @@
 
 import { CheckCircle } from '@heyclaude/web-runtime/icons';
 import { POSITION_PATTERNS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
+import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
 
 interface QuizProgressProps {
   currentQuestion: number;

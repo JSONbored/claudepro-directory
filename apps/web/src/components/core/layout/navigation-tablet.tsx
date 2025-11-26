@@ -11,8 +11,8 @@ import {
   UI_CLASSES,
 } from '@heyclaude/web-runtime/ui';
 import { motion } from 'motion/react';
-import { PrefetchLink } from '@/src/components/core/navigation/prefetch-link';
-import { Button } from '@/src/components/primitives/ui/button';
+import { PrefetchLink } from '@heyclaude/web-runtime/ui';
+import { Button } from '@heyclaude/web-runtime/ui';
 import { PRIMARY_NAVIGATION } from '@/src/config/navigation';
 
 interface NavLinkProps {

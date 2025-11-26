@@ -18,9 +18,9 @@ import { POSITION_PATTERNS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import Image from 'next/image';
 import Link from 'next/link';
 import { memo } from 'react';
-import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
+import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
 import type { UserProfile } from '@/src/components/core/domain/cards/user-profile-card';
-import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@heyclaude/web-runtime/ui';
 
 /**
  * Validate slug is safe for use in URLs

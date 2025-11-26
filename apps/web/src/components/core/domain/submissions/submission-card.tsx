@@ -2,14 +2,14 @@ import { Constants, type Database } from '@heyclaude/database-types';
 import { logger } from '@heyclaude/web-runtime/core';
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import type { ReactElement } from 'react';
-import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
+import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/src/components/primitives/ui/card';
+} from '@heyclaude/web-runtime/ui';
 import { ContentLinkButton, PrLinkButton } from './submission-link-buttons';
 
 type UserSubmission = NonNullable<

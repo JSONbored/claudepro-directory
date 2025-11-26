@@ -7,7 +7,7 @@ import { AlertTriangle } from '@heyclaude/web-runtime/icons';
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { motion } from 'motion/react';
 import { useEffect, useState } from 'react';
-import { Alert, AlertDescription, AlertTitle } from '@/src/components/primitives/ui/alert';
+import { Alert, AlertDescription, AlertTitle } from '@heyclaude/web-runtime/ui';
 
 interface DuplicateWarningProps {
   contentType: Database['public']['Enums']['content_category'];

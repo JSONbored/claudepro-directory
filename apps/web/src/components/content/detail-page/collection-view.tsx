@@ -34,9 +34,9 @@ import { getCategoryConfigs, getContentBySlug } from '@heyclaude/web-runtime/dat
 import { AlertTriangle, CheckCircle } from '@heyclaude/web-runtime/icons';
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { Suspense } from 'react';
-import { ConfigCard } from '@/src/components/core/domain/cards/config-card';
-import { Skeleton } from '@/src/components/primitives/feedback/loading-skeleton';
-import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
+import { ConfigCard } from '@heyclaude/web-runtime/ui';
+import { Skeleton } from '@heyclaude/web-runtime/ui';
+import { Card, CardContent, CardHeader, CardTitle } from '@heyclaude/web-runtime/ui';
 
 interface ItemWithData {
   category: string;

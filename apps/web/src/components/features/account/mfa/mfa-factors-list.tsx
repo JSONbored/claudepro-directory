@@ -11,8 +11,8 @@ import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import { AlertTriangle, CheckCircle, Loader2, Shield, Trash } from '@heyclaude/web-runtime/icons';
 import { errorToasts, successToasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { useCallback, useEffect, useState } from 'react';
-import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
-import { Button } from '@/src/components/primitives/ui/button';
+import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
+import { Button } from '@heyclaude/web-runtime/ui';
 import {
   Dialog,
   DialogContent,
@@ -20,7 +20,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/src/components/primitives/ui/dialog';
+} from '@heyclaude/web-runtime/ui';
 
 interface MFAFactorsListProps {
   onFactorUnenrolled?: () => void;

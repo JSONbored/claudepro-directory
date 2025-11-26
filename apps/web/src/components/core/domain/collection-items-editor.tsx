@@ -19,16 +19,16 @@ import { ArrowDown, ArrowUp, ExternalLink, Plus, Trash } from '@heyclaude/web-ru
 import { toasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
-import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
-import { Button } from '@/src/components/primitives/ui/button';
+import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
+import { Button } from '@heyclaude/web-runtime/ui';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/src/components/primitives/ui/select';
-import { Separator } from '@/src/components/primitives/ui/separator';
+} from '@heyclaude/web-runtime/ui';
+import { Separator } from '@heyclaude/web-runtime/ui';
 
 /**
  * Validate slug is safe for use in URLs

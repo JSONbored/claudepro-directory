@@ -13,22 +13,18 @@ import {
 } from '@heyclaude/web-runtime/data';
 import { APP_CONFIG, ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { ArrowLeft, Edit } from '@heyclaude/web-runtime/icons';
-import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import type { Metadata } from 'next';
-import Link from 'next/link';
-import { notFound, redirect } from 'next/navigation';
-
-import { SimpleCopyButton } from '@/src/components/core/buttons/shared/simple-copy-button';
-import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
-import { CollectionItemManager } from '@/src/components/core/domain/collection-items-editor';
-import { Button } from '@/src/components/primitives/ui/button';
-import {
+import { UI_CLASSES, UnifiedBadge, SimpleCopyButton,
+  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle,
-} from '@/src/components/primitives/ui/card';
+  CardTitle   } from '@heyclaude/web-runtime/ui';
+import type { Metadata } from 'next';
+import Link from 'next/link';
+import { notFound, redirect } from 'next/navigation';
+
+import { CollectionItemManager } from '@/src/components/core/domain/collection-items-editor';
 
 /**
  * Dynamic Rendering Required

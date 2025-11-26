@@ -37,12 +37,12 @@ import { cn, toasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { motion } from 'motion/react';
 import { useEffect, useId, useState, useTransition } from 'react';
 import { z } from 'zod';
-import { Button } from '@/src/components/primitives/ui/button';
-import { Card, CardContent } from '@/src/components/primitives/ui/card';
-import { Input } from '@/src/components/primitives/ui/input';
-import { Label } from '@/src/components/primitives/ui/label';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/primitives/ui/tabs';
-import { Textarea } from '@/src/components/primitives/ui/textarea';
+import { Button } from '@heyclaude/web-runtime/ui';
+import { Card, CardContent } from '@heyclaude/web-runtime/ui';
+import { Input } from '@heyclaude/web-runtime/ui';
+import { Label } from '@heyclaude/web-runtime/ui';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@heyclaude/web-runtime/ui';
+import { Textarea } from '@heyclaude/web-runtime/ui';
 
 // Use generated type directly from @heyclaude/database-types
 type ContentTemplatesResult = Database['public']['Functions']['get_content_templates']['Returns'];

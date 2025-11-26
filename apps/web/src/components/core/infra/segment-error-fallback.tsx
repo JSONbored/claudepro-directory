@@ -2,14 +2,14 @@
 
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import Link from 'next/link';
-import { Button } from '@/src/components/primitives/ui/button';
+import { Button } from '@heyclaude/web-runtime/ui';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/src/components/primitives/ui/card';
+} from '@heyclaude/web-runtime/ui';
 
 type FallbackLink = {
   href: string;

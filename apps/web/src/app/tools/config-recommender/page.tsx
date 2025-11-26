@@ -25,19 +25,16 @@ import {
 } from '@heyclaude/web-runtime/core';
 import { generatePageMetadata } from '@heyclaude/web-runtime/data';
 import { BarChart, Clock, Sparkles, Target, Zap } from '@heyclaude/web-runtime/icons';
-import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import type { Metadata } from 'next';
-import dynamicImport from 'next/dynamic';
-
-import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
-import { QuizForm } from '@/src/components/features/tools/recommender/quiz-form';
-import {
+import { UI_CLASSES, UnifiedBadge,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle,
-} from '@/src/components/primitives/ui/card';
+  CardTitle  } from '@heyclaude/web-runtime/ui';
+import type { Metadata } from 'next';
+import dynamicImport from 'next/dynamic';
+
+import { QuizForm } from '@/src/components/features/tools/recommender/quiz-form';
 
 const NewsletterCTAVariant = dynamicImport(
   () =>

@@ -20,10 +20,10 @@ import { usePulse } from '@heyclaude/web-runtime/hooks';
 import { Award, ExternalLink, Users } from '@heyclaude/web-runtime/icons';
 import { BADGE_COLORS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { memo } from 'react';
-import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
-import { BaseCard } from '@/src/components/core/domain/cards/content-card-base';
-import { Avatar, AvatarFallback, AvatarImage } from '@/src/components/primitives/ui/avatar';
-import { Button } from '@/src/components/primitives/ui/button';
+import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
+import { BaseCard } from '@heyclaude/web-runtime/ui';
+import { Avatar, AvatarFallback, AvatarImage } from '@heyclaude/web-runtime/ui';
+import { Button } from '@heyclaude/web-runtime/ui';
 
 /**
  * Validate and sanitize external URL for safe use in window.open

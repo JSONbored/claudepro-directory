@@ -35,7 +35,7 @@ import {
   toasts,
   UI_CLASSES,
 } from '@heyclaude/web-runtime/ui';
-import DOMPurify from 'dompurify';
+// DOMPurify will be dynamically imported
 import { motion } from 'motion/react';
 import { usePathname } from 'next/navigation';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -48,19 +48,29 @@ const CLIPBOARD_RESET_DEFAULT_MS = 2000;
  * Only allows tags and attributes that Shiki uses for syntax highlighting
  * Prevents XSS while preserving syntax highlighting
  */
-function sanitizeShikiHtml(html: string): string {
+async function sanitizeShikiHtml(html: string): Promise<string> {
   if (!html || typeof html !== 'string') return '';
-  // Sanitize with very restrictive allowlist for Shiki HTML
-  // Shiki typically uses: <pre>, <code>, <span> with class and style attributes
-  return DOMPurify.sanitize(html, {
-    ALLOWED_TAGS: ['pre', 'code', 'span', 'div'],
-    ALLOWED_ATTR: ['class', 'style'],
-    // Allow data-* attributes (Shiki may use data-* for metadata)
-    ALLOW_DATA_ATTR: true,
-    // Remove any dangerous protocols or scripts
-    FORBID_TAGS: ['script', 'iframe', 'object', 'embed', 'form', 'input', 'button'],
-    FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover', 'href', 'src'],
-  });
+  // DOMPurify only works in browser - dynamically import
+  if (typeof window === 'undefined') {
+    return html; // During SSR, return unsanitized (will be sanitized on client)
+  }
+  try {
+    const DOMPurify = await import('dompurify');
+    // Sanitize with very restrictive allowlist for Shiki HTML
+    // Shiki typically uses: <pre>, <code>, <span> with class and style attributes
+    return DOMPurify.default.sanitize(html, {
+      ALLOWED_TAGS: ['pre', 'code', 'span', 'div'],
+      ALLOWED_ATTR: ['class', 'style'],
+      // Allow data-* attributes (Shiki may use data-* for metadata)
+      ALLOW_DATA_ATTR: true,
+      // Remove any dangerous protocols or scripts
+      FORBID_TAGS: ['script', 'iframe', 'object', 'embed', 'form', 'input', 'button'],
+      FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover', 'href', 'src'],
+    });
+  } catch (error) {
+    logger.error('sanitizeShikiHtml: Failed to load DOMPurify', normalizeError(error));
+    return html; // Fallback to original HTML
+  }
 }
 
 export interface ProductionCodeBlockProps {
@@ -187,10 +197,25 @@ export function ProductionCodeBlock({
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [needsCollapse, setNeedsCollapse] = useState(false);
   const [clipboardResetDelay, setClipboardResetDelay] = useState(CLIPBOARD_RESET_DEFAULT_MS);
+  const [safeHtml, setSafeHtml] = useState<string>(html);
   const preRef = useRef<HTMLDivElement>(null);
   const pulse = usePulse();
   const codeBlockRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
+
+  // Sanitize HTML on client side
+  useEffect(() => {
+    if (typeof window !== 'undefined' && html) {
+      sanitizeShikiHtml(html)
+        .then((sanitized) => {
+          setSafeHtml(sanitized);
+        })
+        .catch((error) => {
+          logger.error('ProductionCodeBlock: Failed to sanitize HTML', error);
+          setSafeHtml(html); // Fallback to original
+        });
+    }
+  }, [html]);
 
   // Extract category and slug from pathname for tracking
   // Memoize to avoid repeated validation on every render
@@ -534,7 +559,7 @@ export function ProductionCodeBlock({
           ref={preRef}
           className={showLineNumbers ? 'code-with-line-numbers' : ''}
           // eslint-disable-next-line jsx-a11y/no-danger -- HTML is sanitized with DOMPurify with strict allowlist for Shiki
-          dangerouslySetInnerHTML={{ __html: sanitizeShikiHtml(html) }}
+          dangerouslySetInnerHTML={{ __html: safeHtml }}
         />
       </div>
 

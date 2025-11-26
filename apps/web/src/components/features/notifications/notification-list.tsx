@@ -7,7 +7,7 @@
 import type { Database } from '@heyclaude/database-types';
 import { AnimatePresence, motion } from 'motion/react';
 import { memo } from 'react';
-import { Button } from '@/src/components/primitives/ui/button';
+import { Button } from '@heyclaude/web-runtime/ui';
 import { useNotificationsContext } from '@/src/components/providers/notifications-provider';
 import { NotificationItem } from './notification-item';
 

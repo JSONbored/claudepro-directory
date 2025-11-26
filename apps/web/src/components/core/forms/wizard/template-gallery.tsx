@@ -28,10 +28,10 @@ import { cn } from '@heyclaude/web-runtime/ui';
 import { SUBMISSION_FORM_TOKENS as TOKENS } from '@heyclaude/web-runtime/ui/design-tokens/submission-form';
 import { AnimatePresence, motion } from 'motion/react';
 import { useEffect, useMemo, useState } from 'react';
-import { Alert, AlertDescription } from '@/src/components/primitives/ui/alert';
-import { Badge } from '@/src/components/primitives/ui/badge';
-import { Button } from '@/src/components/primitives/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
+import { Alert, AlertDescription } from '@heyclaude/web-runtime/ui';
+import { Badge } from '@heyclaude/web-runtime/ui';
+import { Button } from '@heyclaude/web-runtime/ui';
+import { Card, CardContent, CardHeader, CardTitle } from '@heyclaude/web-runtime/ui';
 
 // Use generated type directly from @heyclaude/database-types
 type ContentTemplatesResult = Database['public']['Functions']['get_content_templates']['Returns'];

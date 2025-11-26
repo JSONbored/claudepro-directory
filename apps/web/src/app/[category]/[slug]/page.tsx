@@ -20,6 +20,7 @@ export const dynamicParams = true; // Allow unknown slugs to be rendered on dema
 export async function generateStaticParams() {
   const { getHomepageCategoryIds } = await import('@heyclaude/web-runtime/data/config/category');
   const { getContentByCategory } = await import('@heyclaude/web-runtime/data/content');
+  const { getContentDetailCore } = await import('@heyclaude/web-runtime/server');
   const { logger, createWebAppContextWithId, generateRequestId, normalizeError } = await import(
     '@heyclaude/web-runtime/core'
   );
@@ -29,39 +30,133 @@ export async function generateStaticParams() {
 
   // Limit to top 50 items per category to balance build time vs. performance
   const MAX_ITEMS_PER_CATEGORY = 50;
+  // Process validations in parallel batches to optimize build performance
+  // Using 16 to match Next.js staticGenerationMaxConcurrency setting
+  const VALIDATION_BATCH_SIZE = 16;
 
-  for (const category of categories) {
-    try {
-      const items = await getContentByCategory(category);
-      const topItems = items.slice(0, MAX_ITEMS_PER_CATEGORY);
+  // Process all categories in parallel
+  const categoryResults = await Promise.allSettled(
+    categories.map(async (category) => {
+      try {
+        const items = await getContentByCategory(category);
+        const topItems = items.slice(0, MAX_ITEMS_PER_CATEGORY);
 
-      for (const item of topItems) {
-        if (item.slug) {
-          parameters.push({ category, slug: item.slug });
+        // Process validations in parallel batches
+        const categoryParameters: Array<{ category: string; slug: string }> = [];
+        
+        // Process items in batches to avoid overwhelming the database
+        for (let index = 0; index < topItems.length; index += VALIDATION_BATCH_SIZE) {
+          const batch = topItems.slice(index, index + VALIDATION_BATCH_SIZE);
+          
+          // Validate all items in the batch in parallel
+          const validationResults = await Promise.allSettled(
+            batch.map(async (item) => {
+              if (!item.slug) {
+                return null;
+              }
+              
+              try {
+                // Verify content exists before adding to static params
+                const coreData = await getContentDetailCore({ category, slug: item.slug });
+                if (coreData?.content) {
+                  return { category, slug: item.slug };
+                } else {
+                  // Content doesn't exist - skip it (may have been deleted)
+                   
+                  const validationRequestId = generateRequestId();
+                   
+                  const validationLogContext = createWebAppContextWithId(
+                    validationRequestId,
+                    `/${category}/${item.slug}`,
+                    'generateStaticParams',
+                    {
+                      category,
+                      slug: item.slug,
+                      section: 'static-params-validation',
+                    }
+                  );
+                  logger.warn(
+                    'generateStaticParams: skipping non-existent content',
+                    undefined,
+                    {
+                      ...validationLogContext,
+                      requestId: validationRequestId,
+                      operation: 'generateStaticParams',
+                    }
+                  );
+                  return null;
+                }
+              } catch (validationError) {
+                // If validation fails, skip this item but continue with others
+                 
+                const catchRequestId = generateRequestId();
+                 
+                const logContext = createWebAppContextWithId(
+                  catchRequestId,
+                  `/${category}/${item.slug}`,
+                  'generateStaticParams',
+                  {
+                    category,
+                    slug: item.slug,
+                    section: 'static-params-validation',
+                  }
+                );
+                const normalized = normalizeError(
+                  validationError,
+                  'generateStaticParams: failed to validate content, skipping'
+                );
+                logger.error('generateStaticParams: failed to validate content, skipping', normalized, {
+                  ...logContext,
+                  requestId: catchRequestId,
+                  operation: 'generateStaticParams',
+                });
+                return null;
+              }
+            })
+          );
+
+          // Collect successful validations from this batch
+          for (const result of validationResults) {
+            if (result.status === 'fulfilled' && result.value) {
+              categoryParameters.push(result.value);
+            }
+          }
         }
+
+        return { category, params: categoryParameters };
+      } catch (error) {
+        // Log error but continue with other categories
+        // Generate requestId for static params generation (separate from page render)
+        // eslint-disable-next-line unicorn/prevent-abbreviations -- Must match architectural rule expectation
+        const staticParamsRequestId = generateRequestId();
+        // eslint-disable-next-line unicorn/prevent-abbreviations -- Must match architectural rule expectation
+        const staticParamsLogContext = createWebAppContextWithId(
+          staticParamsRequestId,
+          `/${category}`,
+          'generateStaticParams',
+          {
+            category,
+          }
+        );
+        const normalized = normalizeError(
+          error,
+          'Failed to load content for category in generateStaticParams'
+        );
+        logger.error('generateStaticParams: failed to load content for category', normalized, {
+          ...staticParamsLogContext,
+          requestId: staticParamsRequestId,
+          operation: 'generateStaticParams',
+          section: 'static-params-generation',
+        });
+        return { category, params: [] };
       }
-    } catch (error) {
-      // Log error but continue with other categories
-      // Generate requestId for static params generation (separate from page render)
-      // eslint-disable-next-line unicorn/prevent-abbreviations -- Must match architectural rule expectation
-      const staticParamsRequestId = generateRequestId();
-      // eslint-disable-next-line unicorn/prevent-abbreviations -- Must match architectural rule expectation
-      const staticParamsLogContext = createWebAppContextWithId(
-        staticParamsRequestId,
-        `/${category}`,
-        'generateStaticParams',
-        {
-          category,
-        }
-      );
-      const normalized = normalizeError(
-        error,
-        'Failed to load content for category in generateStaticParams'
-      );
-      logger.error('generateStaticParams: failed to load content for category', normalized, {
-        ...staticParamsLogContext,
-        section: 'static-params-generation',
-      });
+    })
+  );
+
+  // Collect all parameters from all categories
+  for (const result of categoryResults) {
+    if (result.status === 'fulfilled') {
+      parameters.push(...result.value.params);
     }
   }
 
@@ -78,6 +173,7 @@ import {
   normalizeError,
   withDuration,
 } from '@heyclaude/web-runtime/core';
+import type { RecentlyViewedCategory } from '@heyclaude/web-runtime/hooks';
 import {
   generatePageMetadata,
   getCategoryConfig,
@@ -94,7 +190,6 @@ import { ReadProgress } from '@/src/components/content/read-progress';
 import { Pulse } from '@/src/components/core/infra/pulse';
 import { StructuredData } from '@/src/components/core/infra/structured-data';
 import { RecentlyViewedTracker } from '@/src/components/features/navigation/recently-viewed-tracker';
-import type { RecentlyViewedCategory } from '@/src/hooks/use-recently-viewed';
 
 // Map route categories (plural) to RecentlyViewedCategory (singular)
 function mapCategoryToRecentlyViewed(category: string): RecentlyViewedCategory | null {
@@ -197,13 +292,12 @@ export default async function DetailPage({
   const coreData = await getContentDetailCore({ category, slug });
 
   if (!coreData) {
-    const normalized = normalizeError(
-      'Content detail core data is null',
-      'DetailPage: get_content_detail_core returned null'
-    );
-    logger.error(
-      'DetailPage: get_content_detail_core returned null',
-      normalized,
+    // Content may not exist (deleted, never existed, or invalid slug)
+    // This is expected behavior during build-time static generation when generateStaticParams
+    // generates paths for content that may have been removed from the database
+    logger.warn(
+      'DetailPage: get_content_detail_core returned null - content may not exist',
+      undefined,
       withDuration(
         {
           ...baseLogContext,

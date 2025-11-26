@@ -12,7 +12,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/src/components/primitives/ui/card';
+} from '@heyclaude/web-runtime/ui';
 import { useNewsletterCount } from '@/src/hooks/use-newsletter-count';
 
 import { NewsletterForm } from './newsletter-form';

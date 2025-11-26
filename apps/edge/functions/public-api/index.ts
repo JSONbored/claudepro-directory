@@ -34,6 +34,9 @@ import {
   handleContentHighlightRoute,
   handleContentProcessRoute,
 } from './routes/transform/index.ts';
+import { handleLogoOptimizeRoute } from './routes/transform/image/logo.ts';
+import { handleThumbnailGenerateRoute } from './routes/transform/image/thumbnail.ts';
+import { handleContentCardGenerateRoute } from './routes/transform/image/card.ts';
 import { handleTrendingRoute } from './routes/trending.ts';
 
 import { ROUTES } from './routes.config.ts';
@@ -91,6 +94,54 @@ const ROUTE_HANDLERS: Record<string, (ctx: PublicApiContext) => Promise<Response
   'search-main': (ctx) => handleSearch(ctx.request, performance.now()),
   'transform-highlight': (ctx) => handleContentHighlightRoute(ctx.request),
   'transform-process': (ctx) => handleContentProcessRoute(ctx.request),
+  'transform-image': async (ctx) => {
+    // Handle nested image routes: /transform/image/logo, /transform/image/thumbnail, etc.
+    // segments[0] = 'transform', segments[1] = 'image', segments[2] = sub-route
+    const subRoute = ctx.segments[2];
+    
+    if (subRoute === 'logo') {
+      return withRateLimit(ctx, RATE_LIMIT_PRESETS.heavy, async () => {
+        return handleLogoOptimizeRoute(ctx.request);
+      });
+    }
+    
+    if (subRoute === 'thumbnail') {
+      return withRateLimit(ctx, RATE_LIMIT_PRESETS.heavy, async () => {
+        return handleThumbnailGenerateRoute(ctx.request);
+      });
+    }
+    
+    if (subRoute === 'card') {
+      return withRateLimit(ctx, RATE_LIMIT_PRESETS.heavy, async () => {
+        return handleContentCardGenerateRoute(ctx.request);
+      });
+    }
+    
+    // If no sub-route specified, return available routes
+    if (!subRoute) {
+      return jsonResponse(
+        {
+          error: 'No route specified',
+          message: 'Please specify a sub-route',
+          availableRoutes: ['/transform/image/logo', '/transform/image/thumbnail', '/transform/image/card'],
+        },
+        400,
+        BASE_CORS
+      );
+    }
+    
+    // Unknown sub-route
+    return jsonResponse(
+      {
+        error: 'Not Found',
+        message: 'Unknown image transform route',
+        path: ctx.pathname,
+        availableRoutes: ['/transform/image/test', '/transform/image/logo', '/transform/image/thumbnail', '/transform/image/card'],
+      },
+      404,
+      BASE_CORS
+    );
+  },
   'content-generate': async (ctx) => {
     // Check for sub-routes
     if (ctx.segments[1] === 'upload') {

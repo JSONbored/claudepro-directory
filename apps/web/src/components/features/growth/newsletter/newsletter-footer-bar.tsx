@@ -13,7 +13,7 @@ import { Mail, X } from '@heyclaude/web-runtime/icons';
 import { DIMENSIONS, POSITION_PATTERNS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { Button } from '@/src/components/primitives/ui/button';
+import { Button } from '@heyclaude/web-runtime/ui';
 
 import { NewsletterForm } from './newsletter-form';
 

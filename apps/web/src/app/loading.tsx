@@ -1,1 +1,1 @@
-export { DefaultLoading as default } from '@/src/components/primitives/feedback/loading-factory';
+export { DefaultLoading as default } from '@heyclaude/web-runtime/ui';

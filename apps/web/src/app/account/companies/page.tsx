@@ -28,20 +28,16 @@ import {
   Eye,
   Plus,
 } from '@heyclaude/web-runtime/icons';
-import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import type { Metadata } from 'next';
-import Image from 'next/image';
-import Link from 'next/link';
-
-import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
-import { Button } from '@/src/components/primitives/ui/button';
-import {
+import { UI_CLASSES, UnifiedBadge, Button ,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle,
-} from '@/src/components/primitives/ui/card';
+  CardTitle  } from '@heyclaude/web-runtime/ui';
+import type { Metadata } from 'next';
+import Image from 'next/image';
+import Link from 'next/link';
+
 
 /**
  * Dynamic Rendering Required

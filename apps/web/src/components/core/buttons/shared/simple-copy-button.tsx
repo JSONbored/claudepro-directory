@@ -6,7 +6,7 @@ import type { ButtonStyleProps } from '@heyclaude/web-runtime/types/component.ty
 import { toasts } from '@heyclaude/web-runtime/ui';
 import { Check, Copy } from 'lucide-react';
 import { useState } from 'react';
-import { Button } from '@/src/components/primitives/ui/button';
+import { Button } from '@heyclaude/web-runtime/ui';
 
 interface SimpleCopyButtonProps extends ButtonStyleProps {
   content: string;

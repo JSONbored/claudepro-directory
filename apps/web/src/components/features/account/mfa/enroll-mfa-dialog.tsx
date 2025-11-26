@@ -12,7 +12,7 @@ import { AlertCircle, Loader2, Shield } from '@heyclaude/web-runtime/icons';
 import { errorToasts, successToasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import Image from 'next/image';
 import { useState } from 'react';
-import { Button } from '@/src/components/primitives/ui/button';
+import { Button } from '@heyclaude/web-runtime/ui';
 import {
   Dialog,
   DialogContent,
@@ -20,9 +20,9 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/src/components/primitives/ui/dialog';
-import { Input } from '@/src/components/primitives/ui/input';
-import { Label } from '@/src/components/primitives/ui/label';
+} from '@heyclaude/web-runtime/ui';
+import { Input } from '@heyclaude/web-runtime/ui';
+import { Label } from '@heyclaude/web-runtime/ui';
 
 interface EnrollMFADialogProps {
   open: boolean;

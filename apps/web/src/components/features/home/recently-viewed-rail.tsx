@@ -8,9 +8,9 @@ import type { HomepageContentItem } from '@heyclaude/web-runtime/types/component
 import { cn } from '@heyclaude/web-runtime/ui';
 import { useRouter } from 'next/navigation';
 import { memo, useMemo } from 'react';
-import { ConfigCard } from '@/src/components/core/domain/cards/config-card';
-import { Button } from '@/src/components/primitives/ui/button';
-import { useRecentlyViewed } from '@/src/hooks/use-recently-viewed';
+import { ConfigCard } from '@heyclaude/web-runtime/ui';
+import { Button } from '@heyclaude/web-runtime/ui';
+import { useRecentlyViewed } from '@heyclaude/web-runtime/hooks';
 
 const MAX_RAIL_ITEMS = 6;
 

@@ -14,20 +14,16 @@ import {
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { CheckCircle, Clock, GitPullRequest, Send, XCircle } from '@heyclaude/web-runtime/icons';
-import { BADGE_COLORS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import type { Metadata } from 'next';
-import Link from 'next/link';
-
-import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
-import { SubmissionCard } from '@/src/components/core/domain/submissions/submission-card';
-import { Button } from '@/src/components/primitives/ui/button';
-import {
+import { BADGE_COLORS, UI_CLASSES, UnifiedBadge, Button ,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle,
-} from '@/src/components/primitives/ui/card';
+  CardTitle  } from '@heyclaude/web-runtime/ui';
+import type { Metadata } from 'next';
+import Link from 'next/link';
+
+import { SubmissionCard } from '@/src/components/core/domain/submissions/submission-card';
 
 /**
  * Dynamic Rendering Required

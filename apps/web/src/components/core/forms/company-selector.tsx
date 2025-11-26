@@ -14,10 +14,10 @@ import { logger, normalizeError } from '@heyclaude/web-runtime/core';
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { Building2, Plus, Search } from 'lucide-react';
 import { useCallback, useEffect, useId, useState, useTransition } from 'react';
-import { Button } from '@/src/components/primitives/ui/button';
-import { Input } from '@/src/components/primitives/ui/input';
-import { Label } from '@/src/components/primitives/ui/label';
-import { Popover, PopoverContent, PopoverTrigger } from '@/src/components/primitives/ui/popover';
+import { Button } from '@heyclaude/web-runtime/ui';
+import { Input } from '@heyclaude/web-runtime/ui';
+import { Label } from '@heyclaude/web-runtime/ui';
+import { Popover, PopoverContent, PopoverTrigger } from '@heyclaude/web-runtime/ui';
 
 type Company = Pick<
   Database['public']['Tables']['companies']['Row'],

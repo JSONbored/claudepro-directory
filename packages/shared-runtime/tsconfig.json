@@ -8,6 +8,7 @@
     "rootDir": "src",
     "outDir": "dist",
     "baseUrl": ".",
+    "skipLibCheck": true,
     "paths": {
       "@heyclaude/database-types": ["../database-types/src/index.ts"]
     }

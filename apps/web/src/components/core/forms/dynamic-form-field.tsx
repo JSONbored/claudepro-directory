@@ -26,9 +26,9 @@ import type {
   GridColumn,
 } from '@heyclaude/web-runtime/types/component.types';
 import { getResponsiveGridClass, POSITION_PATTERNS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import { Input } from '@/src/components/primitives/ui/input';
-import { Label } from '@/src/components/primitives/ui/label';
-import { Textarea } from '@/src/components/primitives/ui/textarea';
+import { Input } from '@heyclaude/web-runtime/ui';
+import { Label } from '@heyclaude/web-runtime/ui';
+import { Textarea } from '@heyclaude/web-runtime/ui';
 
 // ============================================================================
 // GRID LAYOUT SYSTEM

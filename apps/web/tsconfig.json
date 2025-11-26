@@ -2,7 +2,7 @@
   "$schema": "https://json.schemastore.org/tsconfig",
   "extends": "../../config/tsconfig.base.json",
   "compilerOptions": {
-    "composite": false,
+    "composite": true,
     "tsBuildInfoFile": "./.tsbuildinfo",
     "noEmit": true,
     "baseUrl": ".",
@@ -25,5 +25,14 @@
     "../../packages/web-runtime/src/**/*",
     "../../packages/data-layer/dist/**/*"
   ],
-  "exclude": ["node_modules"]
+  "exclude": [
+    "node_modules",
+    "../../packages/shared-runtime/src/image/**/*"
+  ],
+  "references": [
+    { "path": "../../packages/database-types/tsconfig.json" },
+    { "path": "../../packages/shared-runtime/tsconfig.json" },
+    { "path": "../../packages/web-runtime/tsconfig.json" },
+    { "path": "../../packages/data-layer/tsconfig.json" }
+  ]
 }

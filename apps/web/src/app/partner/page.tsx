@@ -18,18 +18,13 @@ import {
   MousePointer,
   Sparkles,
 } from '@heyclaude/web-runtime/icons';
-import { RESPONSIVE_PATTERNS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
-
-import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
-import { HoverCard } from '@/src/components/primitives/animation/hover-card';
-import { Button } from '@/src/components/primitives/ui/button';
-import {
+import { RESPONSIVE_PATTERNS, UI_CLASSES, UnifiedBadge, HoverCard , Button ,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle,
-} from '@/src/components/primitives/ui/card';
+  CardTitle  } from '@heyclaude/web-runtime/ui';
+
 
 /**
  * Dynamic Rendering Required

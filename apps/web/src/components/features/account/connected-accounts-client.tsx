@@ -16,8 +16,8 @@ import {
 } from '@heyclaude/web-runtime/icons';
 import { errorToasts, successToasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { type ComponentType, useState, useTransition } from 'react';
-import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
-import { Button } from '@/src/components/primitives/ui/button';
+import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
+import { Button } from '@heyclaude/web-runtime/ui';
 import {
   Dialog,
   DialogContent,
@@ -25,7 +25,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/src/components/primitives/ui/dialog';
+} from '@heyclaude/web-runtime/ui';
 
 type Identity = NonNullable<
   Database['public']['Functions']['get_user_identities']['Returns']['identities']

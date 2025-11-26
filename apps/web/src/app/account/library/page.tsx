@@ -25,21 +25,15 @@ import {
   Layers,
   Plus,
 } from '@heyclaude/web-runtime/icons';
-import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import type { Metadata } from 'next';
-import Link from 'next/link';
-
-import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
-import { NavLink } from '@/src/components/core/navigation/navigation-link';
-import { Button } from '@/src/components/primitives/ui/button';
-import {
+import { UI_CLASSES, NavLink, UnifiedBadge, Button ,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle,
-} from '@/src/components/primitives/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/primitives/ui/tabs';
+  CardTitle, Tabs, TabsContent, TabsList, TabsTrigger    } from '@heyclaude/web-runtime/ui';
+import type { Metadata } from 'next';
+import Link from 'next/link';
+
 
 /**
  * Dynamic Rendering Required

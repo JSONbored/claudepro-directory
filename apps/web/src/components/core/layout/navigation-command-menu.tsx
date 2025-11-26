@@ -13,7 +13,7 @@ import {
   CommandItem,
   CommandList,
   CommandSeparator,
-} from '@/src/components/primitives/ui/command';
+} from '@heyclaude/web-runtime/ui';
 
 /**
  * Command palette navigation - Uses server-provided data from getNavigationMenu()

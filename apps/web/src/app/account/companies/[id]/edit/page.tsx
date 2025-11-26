@@ -17,19 +17,17 @@ import {
   getUserCompanyById,
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
+import { Button,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle } from '@heyclaude/web-runtime/ui';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 
 import { CompanyForm } from '@/src/components/core/forms/company-form';
-import { Button } from '@/src/components/primitives/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/src/components/primitives/ui/card';
 
 /**
  * Dynamic Rendering Required

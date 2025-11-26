@@ -32,11 +32,8 @@ import {
   LazySearchSection,
   LazyTabsSection,
 } from '@/src/components/features/home/lazy-home-sections';
-import { NumberTicker } from '@/src/components/primitives/animation/number-ticker';
-import {
-  HomepageStatsSkeleton,
-  Skeleton,
-} from '@/src/components/primitives/feedback/loading-skeleton';
+import { NumberTicker } from '@heyclaude/web-runtime/ui';
+import { HomepageStatsSkeleton, Skeleton } from '@heyclaude/web-runtime/ui';
 
 /**
  * OPTIMIZATION (2025-10-22): Enabled SSR for UnifiedSearch

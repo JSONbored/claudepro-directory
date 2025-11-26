@@ -22,15 +22,15 @@ import type { UnifiedSectionProps } from '@heyclaude/web-runtime/types/component
 import { cn, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { motion } from 'motion/react';
 import { ProductionCodeBlock } from '@/src/components/content/interactive-code-block';
-import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
-import { Button } from '@/src/components/primitives/ui/button';
+import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
+import { Button } from '@heyclaude/web-runtime/ui';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/src/components/primitives/ui/card';
+} from '@heyclaude/web-runtime/ui';
 
 const ICONS: Record<Database['public']['Enums']['content_category'], LucideIcon> = {
   agents: Sparkles,

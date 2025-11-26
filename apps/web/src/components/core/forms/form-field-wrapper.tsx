@@ -24,15 +24,15 @@
 
 import { cn } from '@heyclaude/web-runtime/ui';
 import { useId, useState } from 'react';
-import { Input } from '@/src/components/primitives/ui/input';
-import { Label } from '@/src/components/primitives/ui/label';
+import { Input } from '@heyclaude/web-runtime/ui';
+import { Label } from '@heyclaude/web-runtime/ui';
 import {
   Select,
   SelectContent,
   SelectTrigger,
   SelectValue,
-} from '@/src/components/primitives/ui/select';
-import { Textarea } from '@/src/components/primitives/ui/textarea';
+} from '@heyclaude/web-runtime/ui';
+import { Textarea } from '@heyclaude/web-runtime/ui';
 
 // =============================================================================
 // TYPES

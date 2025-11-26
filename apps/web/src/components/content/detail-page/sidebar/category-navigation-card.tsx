@@ -67,7 +67,7 @@ import {
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from '@/src/components/primitives/ui/tooltip';
+} from '@heyclaude/web-runtime/ui';
 
 /**
  * Schema for category info

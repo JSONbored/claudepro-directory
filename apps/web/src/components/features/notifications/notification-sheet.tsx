@@ -22,7 +22,7 @@ import {
   SheetDescription,
   SheetHeader,
   SheetTitle,
-} from '@/src/components/primitives/ui/sheet';
+} from '@heyclaude/web-runtime/ui';
 import { useNotificationsContext } from '@/src/components/providers/notifications-provider';
 import { NotificationList } from './notification-list';
 

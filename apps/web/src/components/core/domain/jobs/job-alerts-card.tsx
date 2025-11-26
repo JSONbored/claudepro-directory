@@ -3,16 +3,16 @@
 import { Constants } from '@heyclaude/database-types';
 import { cn, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { useState } from 'react';
-import { Button } from '@/src/components/primitives/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
-import { Input } from '@/src/components/primitives/ui/input';
+import { Button } from '@heyclaude/web-runtime/ui';
+import { Card, CardContent, CardHeader, CardTitle } from '@heyclaude/web-runtime/ui';
+import { Input } from '@heyclaude/web-runtime/ui';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/src/components/primitives/ui/select';
+} from '@heyclaude/web-runtime/ui';
 import { useNewsletter } from '@/src/hooks/use-newsletter';
 
 // Use Constants for enum values

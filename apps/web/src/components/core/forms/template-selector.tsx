@@ -7,13 +7,13 @@
 import type { Database } from '@heyclaude/database-types';
 import { ChevronDown, FileText } from '@heyclaude/web-runtime/icons';
 import { DIMENSIONS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import { Button } from '@/src/components/primitives/ui/button';
+import { Button } from '@heyclaude/web-runtime/ui';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/src/components/primitives/ui/dropdown-menu';
+} from '@heyclaude/web-runtime/ui';
 
 // Use generated type directly from @heyclaude/database-types
 type ContentTemplatesResult = Database['public']['Functions']['get_content_templates']['Returns'];

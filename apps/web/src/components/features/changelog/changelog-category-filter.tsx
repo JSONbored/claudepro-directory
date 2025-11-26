@@ -7,8 +7,8 @@
 import type { Database } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
 import { DIMENSIONS } from '@heyclaude/web-runtime/ui';
-import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
-import { TabsList, TabsTrigger } from '@/src/components/primitives/ui/tabs';
+import { UnifiedBadge } from '@heyclaude/web-runtime/ui';
+import { TabsList, TabsTrigger } from '@heyclaude/web-runtime/ui';
 
 // Use enum values directly from @heyclaude/database-types Constants
 const CHANGELOG_CATEGORY_VALUES = Constants.public.Enums.changelog_category;

@@ -6,12 +6,12 @@ import {
   normalizeError,
 } from '@heyclaude/web-runtime/core';
 import { generatePageMetadata, getCommunityDirectory } from '@heyclaude/web-runtime/data';
+import { Skeleton } from '@heyclaude/web-runtime/ui';
 import type { Metadata } from 'next';
 import { Suspense } from 'react';
 
 import { ContributorsSidebar } from '@/src/components/features/community/contributors-sidebar';
 import { ProfileSearchClient } from '@/src/components/features/community/profile-search';
-import { Skeleton } from '@/src/components/primitives/feedback/loading-skeleton';
 
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/community/directory');

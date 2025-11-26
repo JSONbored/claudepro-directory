@@ -12,9 +12,9 @@ import { Search } from '@heyclaude/web-runtime/icons';
 import type { DisplayableContent } from '@heyclaude/web-runtime/types/component.types';
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { type FC, memo } from 'react';
-import { UnifiedCardGrid } from '@/src/components/core/domain/cards/card-grid';
-import { ConfigCard } from '@/src/components/core/domain/cards/config-card';
-import { Button } from '@/src/components/primitives/ui/button';
+import { UnifiedCardGrid } from '@heyclaude/web-runtime/ui';
+import { ConfigCard } from '@heyclaude/web-runtime/ui';
+import { Button } from '@heyclaude/web-runtime/ui';
 
 export interface SearchSectionProps {
   isSearching: boolean;

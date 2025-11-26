@@ -14,19 +14,16 @@ import {
 } from '@heyclaude/web-runtime/core';
 import { useAuthenticatedUser } from '@heyclaude/web-runtime/hooks';
 import { AlertCircle, Loader2 } from '@heyclaude/web-runtime/icons';
-import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { use, useEffect, useRef, useState } from 'react';
-
-
-import { Button } from '@/src/components/primitives/ui/button';
-import {
+import { UI_CLASSES, Button ,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle,
-} from '@/src/components/primitives/ui/card';
+  CardTitle } from '@heyclaude/web-runtime/ui';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { use, useEffect, useRef, useState } from 'react';
+
+
 
 export default function OAuthLinkCallbackPage({
   params,

@@ -3,11 +3,10 @@
 import dynamic from 'next/dynamic';
 import { usePathname } from 'next/navigation';
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
-import { UnifiedCardGrid } from '@/src/components/core/domain/cards/card-grid';
-import { ConfigCard } from '@/src/components/core/domain/cards/config-card';
-import { ErrorBoundary } from '@/src/components/core/infra/error-boundary';
-import { Skeleton } from '@/src/components/primitives/feedback/loading-skeleton';
-import { Button } from '@/src/components/primitives/ui/button';
+import { UnifiedCardGrid } from '@heyclaude/web-runtime/ui';
+import { ConfigCard, ErrorBoundary } from '@heyclaude/web-runtime/ui';
+import { Skeleton } from '@heyclaude/web-runtime/ui';
+import { Button } from '@heyclaude/web-runtime/ui';
 
 const UnifiedSearch = dynamic(
   () =>

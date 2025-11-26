@@ -10,8 +10,8 @@ import { Check, TrendingUp } from '@heyclaude/web-runtime/icons';
 import { cn, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { motion } from 'motion/react';
 import Link from 'next/link';
-import { Button } from '@/src/components/primitives/ui/button';
-import { Card, CardContent } from '@/src/components/primitives/ui/card';
+import { Button } from '@heyclaude/web-runtime/ui';
+import { Card, CardContent } from '@heyclaude/web-runtime/ui';
 
 export function JobsPromo() {
   return (

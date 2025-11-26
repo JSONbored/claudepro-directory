@@ -144,31 +144,6 @@ export function navigateWithTransition(
   }
 }
 
-/**
- * Get view transition name for a content item
- *
- * Generates a unique, stable view transition name for smooth card → detail morphing.
- *
- * @param type - Content type (e.g., 'card', 'detail')
- * @param slug - Content slug (unique identifier)
- * @returns View transition name string
- *
- * @example
- * ```typescript
- * const transitionName = getViewTransitionName('card', 'code-reviewer');
- * // Returns: 'config-card-code-reviewer'
- *
- * // Apply to JSX element:
- * <div style={{ viewTransitionName: transitionName }}>
- *   Card content here
- * </div>
- * ```
- */
-export function getViewTransitionName(type: 'card' | 'detail' | 'image', slug: string): string {
-  // Sanitize slug (remove special characters for CSS compatibility)
-  const sanitizedSlug = slug.replace(/[^a-z0-9-]/gi, '-').toLowerCase();
-  return `config-${type}-${sanitizedSlug}`;
-}
 
 /**
  * Apply view transition name to element

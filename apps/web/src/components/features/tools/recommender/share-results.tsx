@@ -8,16 +8,16 @@
 import { logger } from '@heyclaude/web-runtime/core';
 import { Facebook, Linkedin, Mail, Share2, Twitter } from '@heyclaude/web-runtime/icons';
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import { SimpleCopyButton } from '@/src/components/core/buttons/shared/simple-copy-button';
-import { Button } from '@/src/components/primitives/ui/button';
+import { SimpleCopyButton } from '@heyclaude/web-runtime/ui';
+import { Button } from '@heyclaude/web-runtime/ui';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '@/src/components/primitives/ui/dialog';
-import { Input } from '@/src/components/primitives/ui/input';
+} from '@heyclaude/web-runtime/ui';
+import { Input } from '@heyclaude/web-runtime/ui';
 
 interface ShareResultsProps {
   shareUrl: string;

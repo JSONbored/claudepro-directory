@@ -5,17 +5,15 @@
 
 import { Shield } from '@heyclaude/web-runtime/icons';
 import { getAuthenticatedUser } from '@heyclaude/web-runtime/server';
-import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import type { Metadata } from 'next';
-import { redirect } from 'next/navigation';
-
-import {
+import { UI_CLASSES,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle,
-} from '@/src/components/primitives/ui/card';
+  CardTitle } from '@heyclaude/web-runtime/ui';
+import type { Metadata } from 'next';
+import { redirect } from 'next/navigation';
+
 
 import { MFAFactorsListClient } from './mfa-factors-list-client';
 

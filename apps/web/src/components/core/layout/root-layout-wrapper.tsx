@@ -18,7 +18,7 @@ import { AnnouncementBannerClient } from '@/src/components/core/layout/announcem
 import { Navigation } from '@/src/components/core/layout/navigation';
 import { PinboardDrawerProvider } from '@/src/components/features/navigation/pinboard-drawer-provider';
 import { RecentlyViewedMobileTray } from '@/src/components/features/navigation/recently-viewed-mobile';
-import { useConfetti } from '@/src/hooks/use-confetti';
+import { useConfetti } from '@heyclaude/web-runtime/hooks';
 
 const Footer = dynamic(
   () => import('@/src/components/core/layout/footer').then((mod) => ({ default: mod.Footer })),

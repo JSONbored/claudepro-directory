@@ -7,7 +7,7 @@ import { toasts } from '@heyclaude/web-runtime/ui';
 import { Check, type LucideIcon } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useState } from 'react';
-import { Button } from '@/src/components/primitives/ui/button';
+import { Button } from '@heyclaude/web-runtime/ui';
 import { useButtonSuccess } from '@/src/hooks/use-button-success';
 
 interface ContentActionButtonProps extends ButtonStyleProps {

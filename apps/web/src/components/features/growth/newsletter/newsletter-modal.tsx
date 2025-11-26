@@ -5,15 +5,15 @@ import { logUnhandledPromise, NEWSLETTER_CTA_CONFIG } from '@heyclaude/web-runti
 import { usePulse } from '@heyclaude/web-runtime/hooks';
 import { cn, toasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { useEffect, useState } from 'react';
-import { Button } from '@/src/components/primitives/ui/button';
-import { Input } from '@/src/components/primitives/ui/input';
+import { Button } from '@heyclaude/web-runtime/ui';
+import { Input } from '@heyclaude/web-runtime/ui';
 import {
   Sheet,
   SheetContent,
   SheetDescription,
   SheetHeader,
   SheetTitle,
-} from '@/src/components/primitives/ui/sheet';
+} from '@heyclaude/web-runtime/ui';
 import { useNewsletter } from '@/src/hooks/use-newsletter';
 
 export interface NewsletterModalProps {

@@ -4,15 +4,15 @@ import { Clock, Trash, X } from '@heyclaude/web-runtime/icons';
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { Button } from '@/src/components/primitives/ui/button';
+import { Button } from '@heyclaude/web-runtime/ui';
 import {
   Sheet,
   SheetContent,
   SheetDescription,
   SheetHeader,
   SheetTitle,
-} from '@/src/components/primitives/ui/sheet';
-import { useRecentlyViewed } from '@/src/hooks/use-recently-viewed';
+} from '@heyclaude/web-runtime/ui';
+import { useRecentlyViewed } from '@heyclaude/web-runtime/hooks';
 
 const DISMISS_KEY = 'heyclaude_recently_viewed_mobile_dismissed';
 

@@ -34,9 +34,9 @@ import { motion } from 'motion/react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { Skeleton } from '@/src/components/primitives/feedback/loading-skeleton';
-import { Avatar, AvatarFallback, AvatarImage } from '@/src/components/primitives/ui/avatar';
-import { Button } from '@/src/components/primitives/ui/button';
+import { Skeleton } from '@heyclaude/web-runtime/ui';
+import { Avatar, AvatarFallback, AvatarImage } from '@heyclaude/web-runtime/ui';
+import { Button } from '@heyclaude/web-runtime/ui';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -44,7 +44,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/src/components/primitives/ui/dropdown-menu';
+} from '@heyclaude/web-runtime/ui';
 
 interface UserMenuProps {
   className?: string;
