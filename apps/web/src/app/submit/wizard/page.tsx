@@ -21,10 +21,11 @@
  * 5. Review & Submit - Celebration with confetti-style effects
  */
 
-import type { Database } from '@heyclaude/database-types';
+import { Constants, type Database } from '@heyclaude/database-types';
 import { submitContentForReview } from '@heyclaude/web-runtime/actions';
 import { logger, normalizeError } from '@heyclaude/web-runtime/core';
 import { type DraftFormData, DraftManager } from '@heyclaude/web-runtime/data/drafts/draft-manager';
+import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import { useAuthenticatedUser } from '@heyclaude/web-runtime/hooks/use-authenticated-user';
 import { Code, FileText, Plus, Sparkles, Tag, X } from '@heyclaude/web-runtime/icons';
 import type { SubmissionContentType } from '@heyclaude/web-runtime/types/component.types';
@@ -33,6 +34,7 @@ import { SUBMISSION_FORM_TOKENS as TOKENS } from '@heyclaude/web-runtime/ui/desi
 import { AnimatePresence, motion } from 'motion/react';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+
 import {
   AnimatedFormField,
   type ValidationState,
@@ -90,8 +92,18 @@ interface FormData {
   category: Database['public']['Enums']['content_category'];
 }
 
+// Use Constants for default enum values
+const DEFAULT_CONTENT_CATEGORY = Constants.public.Enums.content_category[0]; // 'agents'
+const DEFAULT_SUBMISSION_TYPE = Constants.public.Enums.submission_type[0]; // 'agents'
+
+// Submission type enum values for comparisons
+const SUBMISSION_TYPE_AGENTS = Constants.public.Enums.submission_type[0]; // 'agents'
+const SUBMISSION_TYPE_MCP = Constants.public.Enums.submission_type[1]; // 'mcp'
+const SUBMISSION_TYPE_RULES = Constants.public.Enums.submission_type[2]; // 'rules'
+const SUBMISSION_TYPE_COMMANDS = Constants.public.Enums.submission_type[3]; // 'commands'
+
 const DEFAULT_FORM_DATA: FormData = {
-  submission_type: 'agents',
+  submission_type: DEFAULT_SUBMISSION_TYPE,
   name: '',
   description: '',
   author: '',
@@ -100,7 +112,7 @@ const DEFAULT_FORM_DATA: FormData = {
   type_specific: {},
   tags: [],
   examples: [],
-  category: 'agents', // Default to match submission_type
+  category: DEFAULT_CONTENT_CATEGORY, // Default to match submission_type
 };
 
 export default function WizardSubmissionPage() {
@@ -112,6 +124,15 @@ export default function WizardSubmissionPage() {
     subscribe: false,
   });
   const formTracking = useFormTracking();
+   
+  const runLoggedAsync = useLoggedAsync({
+    scope: 'WizardSubmissionPage',
+    defaultMessage: 'Wizard submission operation failed',
+    defaultRethrow: false,
+  }) as <T>(
+    operation: () => Promise<T>,
+    options?: { message?: string; level?: 'error' | 'warn'; rethrow?: boolean; context?: Record<string, unknown> }
+  ) => Promise<T | undefined>;
 
   // Form state
   const [currentStep, setCurrentStep] = useState(1);
@@ -138,11 +159,11 @@ export default function WizardSubmissionPage() {
 
   // Update form data helper - centralizes category/submission_type sync
   const updateFormData = useCallback((updates: Partial<FormData>) => {
-    setFormData((prev) => {
-      const next: FormData = { ...prev, ...updates };
+    setFormData((previous) => {
+      const next: FormData = { ...previous, ...updates };
 
       // Keep category and submission_type in sync
-      if (updates.submission_type && updates.submission_type !== prev.submission_type) {
+      if (updates.submission_type && updates.submission_type !== previous.submission_type) {
         next.category = updates.submission_type as Database['public']['Enums']['content_category'];
       }
 
@@ -156,14 +177,13 @@ export default function WizardSubmissionPage() {
       // Use updateFormData to ensure category/submission_type sync is centralized
       // Filter out undefined values to satisfy exactOptionalPropertyTypes
       const cleanUpdates = Object.fromEntries(
-        Object.entries(updates).filter(([_, value]) => value !== undefined)
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- Required for exactOptionalPropertyTypes
+        Object.entries(updates).filter(([, value]) => value !== undefined)
       ) as Partial<FormData>;
       updateFormData(cleanUpdates);
 
       // Highlight fields that were updated
-      const updatedFields = Object.keys(updates).filter(
-        (key) => key !== 'type_specific' && updates[key as keyof typeof updates]
-      );
+      const updatedFields = Object.keys(updates).filter((key) => key !== 'type_specific');
       if (updatedFields.length > 0) {
         highlightFields(updatedFields);
       }
@@ -176,7 +196,10 @@ export default function WizardSubmissionPage() {
     currentFormData: formData,
     onTrackEvent: (event, data) => {
       if (event === 'template_applied') {
-        formTracking.trackFieldFocused('template_applied', { ...data });
+        formTracking.trackFieldFocused('template_applied', { ...data }).catch((error) => {
+          const normalized = normalizeError(error, 'Failed to track template applied event');
+          logger.warn('Failed to track template applied event', { error: normalized.message });
+        });
         toasts.success.templateApplied();
       }
     },
@@ -185,66 +208,84 @@ export default function WizardSubmissionPage() {
   // Load templates when submission type changes
   useEffect(() => {
     const loadTemplates = async () => {
-      if (!formData.submission_type) return;
-
       setTemplatesLoading(true);
-      try {
-        const response = await fetch(`/api/templates?category=${formData.submission_type}`);
-        if (response.ok) {
-          const data = await response.json();
-          setTemplates(data.templates || []);
+      await runLoggedAsync(
+        async () => {
+          const response = await fetch(`/api/templates?category=${formData.submission_type}`);
+          if (response.ok) {
+            const data = (await response.json()) as {
+              success: boolean;
+              templates: MergedTemplateItem[];
+              category: string;
+              count: number;
+            };
+            setTemplates(data.templates);
+          }
+        },
+        {
+          message: 'Failed to load templates',
+          level: 'warn',
+          rethrow: false,
         }
-      } catch (error) {
-        const normalized = normalizeError(error, 'Failed to load templates');
-        logger.warn('Failed to load templates', { error: normalized.message });
-        setTemplates([]);
-      } finally {
-        setTemplatesLoading(false);
-      }
+      );
+      setTemplatesLoading(false);
     };
 
-    loadTemplates().catch((error) => {
-      const normalized = normalizeError(error, 'Failed to load templates in useEffect');
-      logger.warn('Failed to load templates in useEffect', { error: normalized.message });
-    });
-  }, [formData.submission_type]);
+    void loadTemplates();
+  }, [formData.submission_type, runLoggedAsync]);
 
   // Load social proof stats on mount
   useEffect(() => {
     const loadSocialProofStats = async () => {
-      try {
-        const response = await fetch('/api/stats/social-proof');
-        if (response.ok) {
-          const data = await response.json();
-          setSocialProofStats(data.stats || {});
+      await runLoggedAsync(
+        async () => {
+          const response = await fetch('/api/stats/social-proof');
+          if (response.ok) {
+            const data = (await response.json()) as {
+              success: boolean;
+              stats: {
+                contributors?: { count: number; names: string[] };
+                submissions?: number;
+                successRate?: number;
+                totalUsers?: number;
+              };
+              timestamp: string;
+            };
+            setSocialProofStats(data.stats);
+          }
+        },
+        {
+          message: 'Failed to load social proof stats',
+          level: 'warn',
+          rethrow: false,
         }
-      } catch (error) {
-        const normalized = normalizeError(error, 'Failed to load social proof stats');
-        logger.warn('Failed to load social proof stats', { error: normalized.message });
-      }
+      );
     };
 
-    loadSocialProofStats().catch((error) => {
-      const normalized = normalizeError(error, 'Failed to load social proof stats in useEffect');
-      logger.warn('Failed to load social proof stats in useEffect', { error: normalized.message });
-    });
-  }, []);
+    void loadSocialProofStats();
+  }, [runLoggedAsync]);
 
   // Check if can proceed from current step (defined early for draft resume validation)
   const canProceedFromStep = useCallback((step: number, data: FormData): boolean => {
     switch (step) {
-      case 1:
+      case 1: {
         return !!data.submission_type;
-      case 2:
+      }
+      case 2: {
         return data.name.length >= 3 && data.description.length >= 10;
-      case 3:
-        return true; // Type-specific fields are optional
-      case 4:
-        return true; // Examples are optional
-      case 5:
-        return false; // Last step
-      default:
+      }
+      case 3: {
+        return true;
+      } // Type-specific fields are optional
+      case 4: {
+        return true;
+      } // Examples are optional
+      case 5: {
         return false;
+      } // Last step
+      default: {
+        return false;
+      }
     }
   }, []);
 
@@ -256,8 +297,8 @@ export default function WizardSubmissionPage() {
       description: formData.description,
       type_specific: formData.type_specific,
       // Convert string[] examples to structured format for DraftFormData
-      examples: formData.examples.map((ex, i) => ({
-        id: `ex-${i}`,
+      examples: formData.examples.map((ex, index) => ({
+        id: `ex-${index}`,
         title: ex,
         code: '',
         language: 'typescript',
@@ -274,24 +315,23 @@ export default function WizardSubmissionPage() {
     const draft = draftManager.load();
     if (draft) {
       const loadedFormData: FormData = {
-        submission_type: draft.submission_type || 'agents',
-        name: draft.name || '',
-        description: draft.description || '',
-        author: user?.email || '',
+        submission_type: draft.submission_type,
+        name: draft.name,
+        description: draft.description,
+        author: user?.email ?? '',
         author_profile_url: '',
         github_url: '',
-        type_specific: draft.type_specific || {},
-        tags: draft.tags || [],
+        type_specific: draft.type_specific,
+        tags: draft.tags,
         // Convert structured examples to string[] (extract title only for UI)
-        examples:
-          draft.examples?.map((ex) => ex.title).filter((title): title is string => !!title) || [],
+        examples: draft.examples.map((ex) => ex.title).filter(Boolean),
         category: draft.submission_type, // Use submission_type as category
       };
 
       setFormData(loadedFormData);
 
       // Resume wizard at the last step the user was on (clamped to valid range)
-      if (draft.last_step && draft.last_step >= 1 && draft.last_step <= 5) {
+      if (draft.last_step >= 1 && draft.last_step <= 5) {
         // Validate that we can proceed to this step using loaded form data
         const targetStep = draft.last_step;
         if (targetStep === 1 || canProceedFromStep(targetStep - 1, loadedFormData)) {
@@ -299,7 +339,7 @@ export default function WizardSubmissionPage() {
         }
       }
 
-      formTracking.trackDraftLoaded({
+      void formTracking.trackDraftLoaded({
         submission_type: draft.submission_type,
         quality_score: draft.quality_score,
       });
@@ -311,25 +351,20 @@ export default function WizardSubmissionPage() {
     let score = 0;
 
     // Name (20 points)
-    if (formData.name.length >= 5) score += 20;
-    else score += (formData.name.length / 5) * 20;
+    score += formData.name.length >= 5 ? 20 : (formData.name.length / 5) * 20;
 
     // Description (30 points)
-    if (formData.description.length >= 100) score += 30;
-    else score += (formData.description.length / 100) * 30;
+    score += formData.description.length >= 100 ? 30 : (formData.description.length / 100) * 30;
 
     // Examples (25 points)
-    if (formData.examples.length >= 3) score += 25;
-    else score += (formData.examples.length / 3) * 25;
+    score += formData.examples.length >= 3 ? 25 : (formData.examples.length / 3) * 25;
 
     // Tags (15 points)
-    if (formData.tags.length >= 3) score += 15;
-    else score += (formData.tags.length / 3) * 15;
+    score += formData.tags.length >= 3 ? 15 : (formData.tags.length / 3) * 15;
 
     // Type-specific fields (10 points)
     const typeFieldCount = Object.keys(formData.type_specific).length;
-    if (typeFieldCount >= 2) score += 10;
-    else score += (typeFieldCount / 2) * 10;
+    score += typeFieldCount >= 2 ? 10 : (typeFieldCount / 2) * 10;
 
     return Math.round(score);
   }, [formData]);
@@ -408,15 +443,15 @@ export default function WizardSubmissionPage() {
   );
 
   // Handle next step
-  const handleNext = useCallback(async () => {
+  const handleNext = useCallback(() => {
     if (canProceedFromCurrentStep(currentStep)) {
-      setCurrentStep((prev) => Math.min(prev + 1, 5));
+      setCurrentStep((previous) => Math.min(previous + 1, 5));
     }
   }, [currentStep, canProceedFromCurrentStep]);
 
   // Handle previous step
   const handlePrevious = useCallback(() => {
-    setCurrentStep((prev) => Math.max(prev - 1, 1));
+    setCurrentStep((previous) => Math.max(previous - 1, 1));
   }, []);
 
   // Handle step change (from progress indicator)
@@ -431,7 +466,7 @@ export default function WizardSubmissionPage() {
   );
 
   // Handle save draft
-  const handleSave = useCallback(async () => {
+  const handleSave = useCallback(() => {
     draftManager.save(buildDraftPayload(currentStep, qualityScore));
     toasts.success.changesSaved();
   }, [draftManager, buildDraftPayload, currentStep, qualityScore]);
@@ -451,9 +486,9 @@ export default function WizardSubmissionPage() {
         name: formData.name,
         description: formData.description,
         category: formData.category,
-        author: formData.author || user.email || 'Anonymous',
-        author_profile_url: formData.author_profile_url || '',
-        github_url: formData.github_url || '',
+        author: formData.author || (user.email ?? 'Anonymous'),
+        author_profile_url: formData.author_profile_url ?? '',
+        github_url: formData.github_url ?? '',
         tags: formData.tags,
         content_data: {
           ...formData.type_specific,
@@ -463,10 +498,10 @@ export default function WizardSubmissionPage() {
 
       await formTracking.trackSubmitted(formData.submission_type, {
         quality_score: qualityScore,
-        submission_id: result?.data?.submission_id,
+        submission_id: result.data?.submission_id,
       });
 
-      if (result?.data?.success) {
+      if (result.data?.success) {
         setShowCelebration(true);
         draftManager.clear();
         toasts.success.submissionCreated(formData.submission_type);
@@ -476,7 +511,7 @@ export default function WizardSubmissionPage() {
           router.push('/submit?success=true');
         }, 3000);
       } else {
-        toasts.error.submissionFailed(result?.serverError);
+        toasts.error.submissionFailed(result.serverError);
       }
     } catch (error) {
       const normalized = normalizeError(error, 'Submission failed');
@@ -492,16 +527,18 @@ export default function WizardSubmissionPage() {
   // Render step content
   const renderStepContent = () => {
     switch (currentStep) {
-      case 1:
+      case 1: {
         return (
           <StepTypeSelection
             selected={formData.submission_type}
             onSelect={(type) => updateFormData({ submission_type: type })}
           />
         );
-      case 2:
+      }
+      case 2: {
         return <StepBasicInfo data={formData} onChange={updateFormData} />;
-      case 3:
+      }
+      case 3: {
         return (
           <StepConfiguration
             submissionType={formData.submission_type}
@@ -513,20 +550,26 @@ export default function WizardSubmissionPage() {
             getHighlightClasses={getHighlightClasses}
           />
         );
-      case 4:
+      }
+      case 4: {
         return <StepExamplesTags data={formData} onChange={updateFormData} />;
-      case 5:
+      }
+      case 5: {
         return (
           <StepReviewSubmit
             data={formData}
             qualityScore={qualityScore}
-            onSubmit={handleSubmit}
+            onSubmit={() => {
+              void handleSubmit();
+            }}
             isSubmitting={isSubmitting}
             showCelebration={showCelebration}
           />
         );
-      default:
+      }
+      default: {
         return null;
+      }
     }
   };
 
@@ -689,7 +732,7 @@ function StepBasicInfo({
               <Input
                 id="wizard-name"
                 value={data.name}
-                onChange={(e) => onChange({ name: e.target.value })}
+                onChange={(event) => onChange({ name: event.target.value })}
                 placeholder="e.g., React Query Expert"
                 maxLength={100}
                 className="pr-12"
@@ -717,7 +760,7 @@ function StepBasicInfo({
               <Textarea
                 id="wizard-description"
                 value={data.description}
-                onChange={(e) => onChange({ description: e.target.value })}
+                onChange={(event) => onChange({ description: event.target.value })}
                 placeholder="Describe what your configuration does..."
                 rows={6}
                 maxLength={500}
@@ -733,7 +776,7 @@ function StepBasicInfo({
               <Input
                 id="wizard-author"
                 value={data.author}
-                onChange={(e) => onChange({ author: e.target.value })}
+                onChange={(event) => onChange({ author: event.target.value })}
                 placeholder="Your name"
               />
             </AnimatedFormField>
@@ -746,8 +789,8 @@ function StepBasicInfo({
               <Input
                 id="wizard-github"
                 type="url"
-                value={data.github_url || ''}
-                onChange={(e) => onChange({ github_url: e.target.value })}
+                value={data.github_url ?? ''}
+                onChange={(event) => onChange({ github_url: event.target.value })}
                 placeholder="https://github.com/..."
               />
             </AnimatedFormField>
@@ -842,7 +885,7 @@ function StepConfiguration({
           }}
         >
           <CardContent className="space-y-6 pt-6">
-            {submissionType === 'agents' && (
+            {submissionType === SUBMISSION_TYPE_AGENTS && (
               <>
                 <AnimatedFormField
                   label="System Prompt"
@@ -856,7 +899,7 @@ function StepConfiguration({
                   <Textarea
                     id="wizard-system-prompt"
                     value={(data['systemPrompt'] as string) || ''}
-                    onChange={(e) => onChange({ ...data, systemPrompt: e.target.value })}
+                    onChange={(event) => onChange({ ...data, systemPrompt: event.target.value })}
                     placeholder="You are an expert in..."
                     rows={8}
                     maxLength={2000}
@@ -877,8 +920,8 @@ function StepConfiguration({
                       max={1}
                       step={0.1}
                       value={(data['temperature'] as number | undefined) ?? 0.7}
-                      onChange={(e) => {
-                        const raw = e.target.value;
+                      onChange={(event) => {
+                        const raw = event.target.value;
                         const parsed = raw === '' ? undefined : Number.parseFloat(raw);
                         onChange({
                           ...data,
@@ -900,8 +943,8 @@ function StepConfiguration({
                       max={4096}
                       step={100}
                       value={(data['maxTokens'] as number | undefined) ?? 2048}
-                      onChange={(e) => {
-                        const raw = e.target.value;
+                      onChange={(event) => {
+                        const raw = event.target.value;
                         const parsed = raw === '' ? undefined : Number.parseInt(raw, 10);
                         onChange({
                           ...data,
@@ -914,7 +957,7 @@ function StepConfiguration({
               </>
             )}
 
-            {submissionType === 'mcp' && (
+            {submissionType === SUBMISSION_TYPE_MCP && (
               <>
                 <AnimatedFormField
                   label="NPM Package"
@@ -925,7 +968,7 @@ function StepConfiguration({
                   <Input
                     id="wizard-npm-package"
                     value={(data['npmPackage'] as string) || ''}
-                    onChange={(e) => onChange({ ...data, npmPackage: e.target.value })}
+                    onChange={(event) => onChange({ ...data, npmPackage: event.target.value })}
                     placeholder="@modelcontextprotocol/server-..."
                   />
                 </AnimatedFormField>
@@ -938,7 +981,7 @@ function StepConfiguration({
                   <Input
                     id="wizard-install-command"
                     value={(data['installCommand'] as string) || ''}
-                    onChange={(e) => onChange({ ...data, installCommand: e.target.value })}
+                    onChange={(event) => onChange({ ...data, installCommand: event.target.value })}
                     placeholder="npm install -g @modelcontextprotocol/..."
                   />
                 </AnimatedFormField>
@@ -951,10 +994,10 @@ function StepConfiguration({
                   <Textarea
                     id="wizard-tools-description"
                     value={(data['toolsDescription'] as string) || ''}
-                    onChange={(e) =>
+                    onChange={(event) =>
                       onChange({
                         ...data,
-                        toolsDescription: e.target.value,
+                        toolsDescription: event.target.value,
                       })
                     }
                     placeholder="This server provides tools for..."
@@ -964,7 +1007,7 @@ function StepConfiguration({
               </>
             )}
 
-            {submissionType === 'rules' && (
+            {submissionType === SUBMISSION_TYPE_RULES && (
               <AnimatedFormField
                 label="Rules Content"
                 id="wizard-rules-content"
@@ -977,7 +1020,7 @@ function StepConfiguration({
                 <Textarea
                   id="wizard-rules-content"
                   value={(data['rulesContent'] as string) || ''}
-                  onChange={(e) => onChange({ ...data, rulesContent: e.target.value })}
+                  onChange={(event) => onChange({ ...data, rulesContent: event.target.value })}
                   placeholder="When working with TypeScript..."
                   rows={10}
                   maxLength={3000}
@@ -985,7 +1028,7 @@ function StepConfiguration({
               </AnimatedFormField>
             )}
 
-            {submissionType === 'commands' && (
+            {submissionType === SUBMISSION_TYPE_COMMANDS && (
               <AnimatedFormField
                 label="Command Content"
                 id="wizard-command-content"
@@ -998,7 +1041,7 @@ function StepConfiguration({
                 <Textarea
                   id="wizard-command-content"
                   value={(data['commandContent'] as string) || ''}
-                  onChange={(e) => onChange({ ...data, commandContent: e.target.value })}
+                  onChange={(event) => onChange({ ...data, commandContent: event.target.value })}
                   placeholder="#!/bin/bash..."
                   rows={6}
                   maxLength={1000}
@@ -1035,7 +1078,7 @@ function StepExamplesTags({
 
   const removeExample = (index: number) => {
     onChange({
-      examples: data.examples.filter((_, i) => i !== index),
+      examples: data.examples.filter((_, index_) => index_ !== index),
     });
   };
 
@@ -1048,7 +1091,7 @@ function StepExamplesTags({
 
   const removeTag = (index: number) => {
     onChange({
-      tags: data.tags.filter((_, i) => i !== index),
+      tags: data.tags.filter((_, index_) => index_ !== index),
     });
   };
 
@@ -1105,10 +1148,10 @@ function StepExamplesTags({
             <div className="flex gap-2">
               <Input
                 value={newExample}
-                onChange={(e) => setNewExample(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault();
+                onChange={(event) => setNewExample(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter') {
+                    event.preventDefault();
                     addExample();
                   }
                 }}
@@ -1223,10 +1266,10 @@ function StepExamplesTags({
             <div className="flex gap-2">
               <Input
                 value={newTag}
-                onChange={(e) => setNewTag(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault();
+                onChange={(event) => setNewTag(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter') {
+                    event.preventDefault();
                     addTag();
                   }
                 }}

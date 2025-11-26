@@ -3,13 +3,14 @@
  * Uses getUserLibrary data function for fetching bookmarks and collections
  */
 
-import type { Database } from '@heyclaude/database-types';
+import { Constants, type Database } from '@heyclaude/database-types';
 import {
   createWebAppContextWithId,
   generateRequestId,
   hashUserId,
   logger,
   normalizeError,
+  withDuration,
 } from '@heyclaude/web-runtime/core';
 import {
   generatePageMetadata,
@@ -27,6 +28,7 @@ import {
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import type { Metadata } from 'next';
 import Link from 'next/link';
+
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { NavLink } from '@/src/components/core/navigation/navigation-link';
 import { Button } from '@/src/components/primitives/ui/button';
@@ -51,17 +53,28 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function LibraryPage() {
+  const startTime = Date.now();
   // Generate single requestId for this page request
   const requestId = generateRequestId();
   const baseLogContext = createWebAppContextWithId(requestId, '/account/library', 'LibraryPage');
 
+  // Section: Authentication
+  const authSectionStart = Date.now();
   const { user } = await getAuthenticatedUser({ context: 'LibraryPage' });
 
   if (!user) {
-    logger.warn('LibraryPage: unauthenticated access attempt detected', undefined, {
-      ...baseLogContext,
-      timestamp: new Date().toISOString(),
-    });
+    logger.warn(
+      'LibraryPage: unauthenticated access attempt detected',
+      undefined,
+      withDuration(
+        {
+          ...baseLogContext,
+          section: 'authentication',
+          timestamp: new Date().toISOString(),
+        },
+        authSectionStart
+      )
+    );
     return (
       <div className="space-y-6">
         <Card>
@@ -82,16 +95,62 @@ export default async function LibraryPage() {
   // Hash user ID for privacy-compliant logging (GDPR/CCPA)
   const userIdHash = hashUserId(user.id);
   const logContext = { ...baseLogContext, userIdHash };
+  logger.info(
+    'LibraryPage: authentication successful',
+    withDuration(
+      {
+        ...logContext,
+        section: 'authentication',
+      },
+      authSectionStart
+    )
+  );
 
+  // Section: Library Data Fetch
+  const librarySectionStart = Date.now();
   let data: Database['public']['Functions']['get_user_library']['Returns'] | null = null;
   try {
     data = await getUserLibrary(user.id);
-    if (!data) {
-      logger.warn('LibraryPage: getUserLibrary returned null', undefined, logContext);
+    if (data === null) {
+      logger.warn(
+        'LibraryPage: getUserLibrary returned null',
+        undefined,
+        withDuration(
+          {
+            ...logContext,
+            section: 'library-data-fetch',
+            sectionDuration_ms: Date.now() - librarySectionStart,
+          },
+          startTime
+        )
+      );
+    } else {
+      logger.info(
+        'LibraryPage: library data loaded',
+        withDuration(
+          {
+            ...logContext,
+            section: 'library-data-fetch',
+            hasData: !!data,
+          },
+          librarySectionStart
+        )
+      );
     }
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load user library');
-    logger.error('LibraryPage: getUserLibrary threw', normalized, logContext);
+    logger.error(
+      'LibraryPage: getUserLibrary threw',
+      normalized,
+      withDuration(
+        {
+          ...logContext,
+          section: 'library-data-fetch',
+          sectionDuration_ms: Date.now() - librarySectionStart,
+        },
+        startTime
+      )
+    );
   }
 
   if (!data) {
@@ -125,9 +184,32 @@ export default async function LibraryPage() {
   // Map snake_case to camelCase for compatibility
   const bookmarkCount = stats.bookmark_count ?? 0;
   const collectionCount = stats.collection_count ?? 0;
-  if (!(bookmarks.length || collections.length)) {
-    logger.info('LibraryPage: library returned no bookmarks or collections', logContext);
+  if (!(bookmarks.length > 0 || collections.length > 0)) {
+    logger.info(
+      'LibraryPage: library returned no bookmarks or collections',
+      withDuration(
+        {
+          ...logContext,
+          section: 'library-data-fetch',
+        },
+        librarySectionStart
+      )
+    );
   }
+
+  // Final summary log
+  logger.info(
+    'LibraryPage: page render completed',
+    withDuration(
+      {
+        ...logContext,
+        section: 'page-render',
+        bookmarksCount: bookmarks.length,
+        collectionsCount: collections.length,
+      },
+      startTime
+    )
+  );
 
   return (
     <div className="space-y-6">
@@ -152,14 +234,17 @@ export default async function LibraryPage() {
             <BookmarkIcon className="h-4 w-4" />
             Bookmarks ({bookmarkCount})
           </TabsTrigger>
-          <TabsTrigger value="collections" className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+          <TabsTrigger
+            value={Constants.public.Enums.content_category[8]} // 'collections'
+            className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}
+          >
             <FolderOpen className="h-4 w-4" />
             Collections ({collectionCount})
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="bookmarks" className="space-y-4">
-          {!bookmarks || bookmarks.length === 0 ? (
+          {bookmarks.length === 0 ? (
             <Card>
               <CardContent className={'flex flex-col items-center py-12'}>
                 <BookmarkIcon className="mb-4 h-12 w-12 text-muted-foreground" />
@@ -212,8 +297,11 @@ export default async function LibraryPage() {
           )}
         </TabsContent>
 
-        <TabsContent value="collections" className="space-y-4">
-          {!collections || collections.length === 0 ? (
+        <TabsContent
+          value={Constants.public.Enums.content_category[8]} // 'collections'
+          className="space-y-4"
+        >
+          {collections.length === 0 ? (
             <Card>
               <CardContent className={'flex flex-col items-center py-12'}>
                 <FolderOpen className="mb-4 h-12 w-12 text-muted-foreground" />

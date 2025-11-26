@@ -5,7 +5,7 @@
  * Uses RPC function returns + minimal UI enrichment only.
  */
 
-import type { Database } from '@heyclaude/database-types';
+import { Constants, type Database } from '@heyclaude/database-types';
 import { addBookmarkBatch } from '@heyclaude/web-runtime/actions';
 import { getContentItemUrl, isValidCategory, sanitizeSlug } from '@heyclaude/web-runtime/core';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
@@ -352,19 +352,8 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                 }
               )
               .map((result) => {
-                // Only allow categories from the explicit allowlist
-                const allowedCategories = [
-                  'agents',
-                  'mcp',
-                  'rules',
-                  'commands',
-                  'hooks',
-                  'statuslines',
-                  'skills',
-                  'collections',
-                  'guides',
-                  'jobs',
-                ] as const;
+                // Only allow categories from the explicit allowlist - use Constants
+                const allowedCategories = Constants.public.Enums.content_category;
                 // Validate slug pattern: alphanumeric start, then alphanumeric/hyphens/underscores, 3-32 chars
                 const slugPattern = /^[a-zA-Z0-9][a-zA-Z0-9-_]{2,32}$/;
                 if (

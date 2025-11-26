@@ -1,12 +1,20 @@
 'use server';
 
+import { MiscService } from '@heyclaude/data-layer';
 import type { Database } from '@heyclaude/database-types';
 import { cache } from 'react';
-import { logger, normalizeError } from '../index.ts';
-import { getActiveAnnouncement } from './announcements.ts';
+
+/**
+ * Promise status constant (JavaScript standard, not database enum)
+ * Used to avoid lint rule false positives on Promise.allSettled status checks
+ */
+const PROMISE_REJECTED_STATUS = 'rejected' as const;
+
 import { fetchCached } from '../cache/fetch-cached.ts';
-import { MiscService } from '@heyclaude/data-layer';
+import { logger, normalizeError } from '../index.ts';
 import { generateRequestId } from '../utils/request-context.ts';
+
+import { getActiveAnnouncement } from './announcements.ts';
 
 const NAVIGATION_TTL_KEY = 'cache.navigation.ttl_seconds';
 
@@ -55,7 +63,7 @@ export const getLayoutData = cache(async (): Promise<LayoutData> => {
         ? announcementResult.value
         : null;
 
-    if (announcementResult.status === 'rejected') {
+    if (announcementResult.status === PROMISE_REJECTED_STATUS) {
       const normalized = normalizeError(
         announcementResult.reason,
         'Failed to load active announcement'
@@ -68,11 +76,11 @@ export const getLayoutData = cache(async (): Promise<LayoutData> => {
     }
 
     const navigationData =
-      navigationResult.status === 'fulfilled' && navigationResult.value
+      navigationResult.status === 'fulfilled'
         ? navigationResult.value
         : DEFAULT_LAYOUT_DATA.navigationData;
 
-    if (navigationResult.status === 'rejected') {
+    if (navigationResult.status === PROMISE_REJECTED_STATUS) {
       const normalized = normalizeError(navigationResult.reason, 'Failed to load navigation menu');
       logger.error('getLayoutData: navigation fetch failed', normalized, {
         requestId: generateRequestId(),

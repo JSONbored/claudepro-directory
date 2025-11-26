@@ -1,11 +1,12 @@
 'use server';
 
+import { ContentService } from '@heyclaude/data-layer';
 import type { Database } from '@heyclaude/database-types';
 import { cache } from 'react';
+
 import { fetchCached } from '../../cache/fetch-cached.ts';
-import { ContentService } from '@heyclaude/data-layer';
-import { logger } from '../../logger.ts';
 import { normalizeError } from '../../errors.ts';
+import { logger } from '../../logger.ts';
 import { generateRequestId } from '../../utils/request-context.ts';
 
 // OPTIMIZATION: Wrapped with React.cache() for request-level deduplication

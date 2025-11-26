@@ -5,6 +5,7 @@ import {
   hashUserId,
   logger,
   normalizeError,
+  withDuration,
 } from '@heyclaude/web-runtime/core';
 import { generatePageMetadata, getAuthenticatedUser } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
@@ -12,6 +13,7 @@ import { GitPullRequest } from '@heyclaude/web-runtime/icons';
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import type { Metadata } from 'next';
 import Link from 'next/link';
+
 import { ActivityTimeline } from '@/src/components/features/user-activity/activity-timeline';
 import { Button } from '@/src/components/primitives/ui/button';
 import {
@@ -34,14 +36,27 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function ActivityPage() {
+  const startTime = Date.now();
   // Generate single requestId for this page request
   const requestId = generateRequestId();
   const baseLogContext = createWebAppContextWithId(requestId, '/account/activity', 'ActivityPage');
 
+  // Section: Authentication
+  const authSectionStart = Date.now();
   const { user } = await getAuthenticatedUser({ context: 'ActivityPage' });
 
   if (!user) {
-    logger.warn('ActivityPage: unauthenticated access attempt detected', undefined, baseLogContext);
+    logger.warn(
+      'ActivityPage: unauthenticated access attempt detected',
+      undefined,
+      withDuration(
+        {
+          ...baseLogContext,
+          section: 'authentication',
+        },
+        authSectionStart
+      )
+    );
     return (
       <div className="space-y-6">
         <Card>
@@ -63,7 +78,19 @@ export default async function ActivityPage() {
 
   const userIdHash = hashUserId(user.id);
   const logContext = { ...baseLogContext, userIdHash };
+  logger.info(
+    'ActivityPage: authentication successful',
+    withDuration(
+      {
+        ...logContext,
+        section: 'authentication',
+      },
+      authSectionStart
+    )
+  );
 
+  // Section: Activity Data Fetch
+  const activitySectionStart = Date.now();
   // Fetch activity data - use Promise.allSettled for partial success handling
   const [summaryResult, timelineResult] = await Promise.allSettled([
     getActivitySummary(),
@@ -75,13 +102,28 @@ export default async function ActivityPage() {
     result: PromiseSettledResult<{ data?: T | null; serverError?: unknown } | null>
   ): T | null {
     if (result.status === 'fulfilled') {
-      return result.value?.data ?? null;
+      const value = result.value;
+      if (value && typeof value === 'object' && 'data' in value) {
+        return (value.data as T | null | undefined) ?? null;
+      }
+      return null;
     }
     // result.status === 'rejected' at this point
-    const reason = result.reason;
+    const reason = result.reason as unknown;
     const normalized = normalizeError(reason, `Failed to load ${name}`);
     if (user) {
-      logger.error(`ActivityPage: ${name} failed`, normalized, logContext);
+      logger.error(
+        `ActivityPage: ${name} failed`,
+        normalized,
+        withDuration(
+          {
+            ...logContext,
+            section: 'activity-data-fetch',
+            sectionDuration_ms: Date.now() - activitySectionStart,
+          },
+          startTime
+        )
+      );
     }
     return null;
   }
@@ -109,10 +151,33 @@ export default async function ActivityPage() {
     );
   }
 
-  const activities = timeline.activities || [];
+  const activities = timeline.activities ?? [];
   if (activities.length === 0) {
-    logger.warn('ActivityPage: activity timeline returned no activities', undefined, logContext);
+    logger.warn(
+      'ActivityPage: activity timeline returned no activities',
+      undefined,
+      withDuration(
+        {
+          ...logContext,
+          section: 'activity-data-fetch',
+        },
+        activitySectionStart
+      )
+    );
   }
+
+  // Final summary log
+  logger.info(
+    'ActivityPage: page render completed',
+    withDuration(
+      {
+        ...logContext,
+        section: 'page-render',
+        activitiesCount: activities.length,
+      },
+      startTime
+    )
+  );
 
   return (
     <div className="space-y-6">

@@ -1,14 +1,15 @@
 import 'server-only';
 
-import type { Database } from '@heyclaude/database-types';
-import { fetchCached } from '../../cache/fetch-cached.ts';
 import { SeoService } from '@heyclaude/data-layer';
+import type { Database } from '@heyclaude/database-types';
+
+import { fetchCached } from '../../cache/fetch-cached.ts';
 
 function shouldSkipRpcCall(): boolean {
-  const hasEnvVars =
-    (process.env['NEXT_PUBLIC_SUPABASE_URL'] || process.env['SUPABASE_URL']) &&
-    (process.env['NEXT_PUBLIC_SUPABASE_ANON_KEY'] || process.env['SUPABASE_ANON_KEY']);
-  return !hasEnvVars;
+  const hasEnvironmentVariables =
+    (process.env['NEXT_PUBLIC_SUPABASE_URL'] ?? process.env['SUPABASE_URL']) &&
+    (process.env['NEXT_PUBLIC_SUPABASE_ANON_KEY'] ?? process.env['SUPABASE_ANON_KEY']);
+  return !hasEnvironmentVariables;
 }
 
 export async function getSEOMetadata(route: string): Promise<{
@@ -49,11 +50,8 @@ export async function getSEOMetadata(route: string): Promise<{
   }
 
   const metadata = result.metadata;
-  if (!metadata) {
-    return null;
-  }
 
-  const debugObj: {
+  const debugObject: {
     pattern: string;
     route: string;
     category?: string;
@@ -65,13 +63,13 @@ export async function getSEOMetadata(route: string): Promise<{
   };
 
   if (metadata.debug?.category) {
-    debugObj.category = metadata.debug.category;
+    debugObject.category = metadata.debug.category;
   }
   if (metadata.debug?.slug) {
-    debugObj.slug = metadata.debug.slug;
+    debugObject.slug = metadata.debug.slug;
   }
   if (metadata.debug?.error) {
-    debugObj.error = metadata.debug.error;
+    debugObject.error = metadata.debug.error;
   }
 
   return {
@@ -84,7 +82,7 @@ export async function getSEOMetadata(route: string): Promise<{
       index: metadata.robots?.index ?? true,
       follow: metadata.robots?.follow ?? true,
     },
-    ...(metadata.debug ? { _debug: debugObj } : {}),
+    ...(metadata.debug ? { _debug: debugObject } : {}),
   };
 }
 
@@ -129,11 +127,8 @@ export async function getSEOMetadataWithSchemas(route: string): Promise<{
   }
 
   const metadata = result.metadata;
-  if (!metadata) {
-    return null;
-  }
 
-  const debugObj: {
+  const debugObject: {
     pattern: string;
     route: string;
     category?: string;
@@ -145,13 +140,13 @@ export async function getSEOMetadataWithSchemas(route: string): Promise<{
   };
 
   if (metadata.debug?.category) {
-    debugObj.category = metadata.debug.category;
+    debugObject.category = metadata.debug.category;
   }
   if (metadata.debug?.slug) {
-    debugObj.slug = metadata.debug.slug;
+    debugObject.slug = metadata.debug.slug;
   }
   if (metadata.debug?.error) {
-    debugObj.error = metadata.debug.error;
+    debugObject.error = metadata.debug.error;
   }
 
   return {
@@ -165,7 +160,7 @@ export async function getSEOMetadataWithSchemas(route: string): Promise<{
         index: metadata.robots?.index ?? true,
         follow: metadata.robots?.follow ?? true,
       },
-      ...(metadata.debug ? { _debug: debugObj } : {}),
+      ...(metadata.debug ? { _debug: debugObject } : {}),
     },
     schemas: result.schemas,
   };

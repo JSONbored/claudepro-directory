@@ -40,7 +40,7 @@ export const HighlightedText = memo(({ html, fallback, className = '' }: Highlig
   return (
     <span
       className={className}
-      // biome-ignore lint/security/noDangerouslySetInnerHtml: HTML is sanitized with DOMPurify, only <mark> tags allowed
+      // eslint-disable-next-line jsx-a11y/no-danger -- HTML is sanitized with DOMPurify, only <mark> tags allowed
       dangerouslySetInnerHTML={{ __html: safeHtml }}
       suppressHydrationWarning={true}
     />

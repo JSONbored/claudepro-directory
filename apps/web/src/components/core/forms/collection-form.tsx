@@ -10,7 +10,7 @@
 
 import type { Database } from '@heyclaude/database-types';
 import { createCollection, updateCollection } from '@heyclaude/web-runtime/actions';
-import { logClientWarning } from '@heyclaude/web-runtime/core';
+import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import { toasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { useRouter } from 'next/navigation';
 import { useId, useState, useTransition } from 'react';
@@ -33,6 +33,11 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [selectedBookmarks, setSelectedBookmarks] = useState<string[]>([]);
+  const runLoggedAsync = useLoggedAsync({
+    scope: 'CollectionForm',
+    defaultMessage: 'Collection operation failed',
+    defaultRethrow: false,
+  });
 
   // Generate unique ID for checkbox (FormField auto-generates IDs for other fields)
   const isPublicId = useId();
@@ -71,47 +76,62 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
 
     startTransition(async () => {
       try {
-        if (mode === 'create') {
-          const result = await createCollection({
-            name: name.trim(),
-            slug: slug.trim(),
-            description: description.trim() || null,
-            is_public: isPublic,
-          });
+        await runLoggedAsync(
+          async () => {
+            if (mode === 'create') {
+              const result = await createCollection({
+                name: name.trim(),
+                slug: slug.trim(),
+                description: description.trim() || null,
+                is_public: isPublic,
+              });
 
-          if (result?.data?.success) {
-            if (!result.data.collection) {
-              throw new Error('Collection data not returned');
-            }
-            toasts.success.itemCreated('Collection');
-            const collectionSlug = result.data.collection.slug;
-            router.push(`/account/library/${collectionSlug}`);
-            router.refresh();
-          }
-        } else if (collection) {
-          const result = await updateCollection({
-            id: collection.id,
-            name: name.trim(),
-            slug: slug.trim(),
-            description: description.trim() || null,
-            is_public: isPublic,
-          });
+              if (result?.data?.success) {
+                if (!result.data.collection) {
+                  throw new Error('Collection data not returned');
+                }
+                toasts.success.itemCreated('Collection');
+                const collectionSlug = result.data.collection.slug;
+                router.push(`/account/library/${collectionSlug}`);
+                router.refresh();
+              } else {
+                throw new Error('Collection creation returned success: false');
+              }
+            } else if (collection) {
+              const result = await updateCollection({
+                id: collection.id,
+                name: name.trim(),
+                slug: slug.trim(),
+                description: description.trim() || null,
+                is_public: isPublic,
+              });
 
-          if (result?.data?.success) {
-            if (!result.data.collection) {
-              throw new Error('Collection data not returned');
+              if (result?.data?.success) {
+                if (!result.data.collection) {
+                  throw new Error('Collection data not returned');
+                }
+                toasts.success.itemUpdated('Collection');
+                router.push(`/account/library/${result.data.collection.slug}`);
+                router.refresh();
+              } else {
+                throw new Error('Collection update returned success: false');
+              }
             }
-            toasts.success.itemUpdated('Collection');
-            router.push(`/account/library/${result.data.collection.slug}`);
-            router.refresh();
+          },
+          {
+            message: mode === 'create' ? 'Collection creation failed' : 'Collection update failed',
+            context: {
+              mode,
+              collectionId: collection?.id,
+            },
           }
-        }
+        );
       } catch (error) {
-        logClientWarning('CollectionForm: save failed', error, {
-          mode,
-          collectionId: collection?.id,
-        });
-        toasts.error.fromError(error, 'Failed to save collection');
+        // Error already logged by useLoggedAsync
+        toasts.error.fromError(
+          error instanceof Error ? error : new Error('Failed to save collection'),
+          'Failed to save collection'
+        );
       }
     });
   };

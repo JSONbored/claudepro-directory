@@ -62,7 +62,7 @@ export const SanitizedHTML = memo(({ html, className, id }: SanitizedHTMLProps) 
     <div
       id={id}
       className={className}
-      // biome-ignore lint/security/noDangerouslySetInnerHtml: HTML is sanitized with DOMPurify with strict allowlist
+      // eslint-disable-next-line jsx-a11y/no-danger -- HTML is sanitized with DOMPurify with strict allowlist
       dangerouslySetInnerHTML={{ __html: safeHtml }}
     />
   );

@@ -7,6 +7,7 @@
 
 import { listMFAFactors, type MFAFactor, unenrollMFAFactor } from '@heyclaude/web-runtime';
 import { createSupabaseBrowserClient } from '@heyclaude/web-runtime/client';
+import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import { AlertTriangle, CheckCircle, Loader2, Shield, Trash } from '@heyclaude/web-runtime/icons';
 import { errorToasts, successToasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { useCallback, useEffect, useState } from 'react';
@@ -34,27 +35,41 @@ export function MFAFactorsList({ onFactorUnenrolled }: MFAFactorsListProps) {
   const [unenrolling, setUnenrolling] = useState(false);
 
   const supabase = createSupabaseBrowserClient();
+  const runLoggedAsync = useLoggedAsync({
+    scope: 'MFAFactorsList',
+    defaultMessage: 'MFA operation failed',
+    defaultRethrow: false,
+  });
 
   const loadFactors = useCallback(async () => {
     setLoading(true);
     setError(null);
 
     try {
-      const { factors: userFactors, error: listError } = await listMFAFactors(supabase);
+      await runLoggedAsync(
+        async () => {
+          const { factors: userFactors, error: listError } = await listMFAFactors(supabase);
 
-      if (listError) {
-        throw listError;
-      }
+          if (listError) {
+            throw listError;
+          }
 
-      setFactors(userFactors);
+          setFactors(userFactors);
+        },
+        {
+          message: 'Failed to load MFA factors',
+          level: 'warn',
+        }
+      );
     } catch (err) {
+      // Error already logged by useLoggedAsync
       const message = err instanceof Error ? err.message : 'Failed to load MFA factors';
       setError(message);
       errorToasts.actionFailed('load MFA factors', message);
     } finally {
       setLoading(false);
     }
-  }, [supabase]);
+  }, [supabase, runLoggedAsync]);
 
   useEffect(() => {
     loadFactors().catch(() => {
@@ -79,21 +94,33 @@ export function MFAFactorsList({ onFactorUnenrolled }: MFAFactorsListProps) {
     setUnenrolling(true);
 
     try {
-      const { success, error: unenrollError } = await unenrollMFAFactor(
-        supabase,
-        factorToUnenroll.id
+      await runLoggedAsync(
+        async () => {
+          const { success, error: unenrollError } = await unenrollMFAFactor(
+            supabase,
+            factorToUnenroll.id
+          );
+
+          if (unenrollError || !success) {
+            throw unenrollError || new Error('Unenrollment failed');
+          }
+
+          successToasts.actionCompleted('MFA factor unenrolled');
+          setUnenrollDialogOpen(false);
+          setFactorToUnenroll(null);
+          await loadFactors();
+          onFactorUnenrolled?.();
+        },
+        {
+          message: 'Failed to unenroll MFA factor',
+          context: {
+            factorId: factorToUnenroll.id,
+            factorType: factorToUnenroll.factor_type,
+          },
+        }
       );
-
-      if (unenrollError || !success) {
-        throw unenrollError || new Error('Unenrollment failed');
-      }
-
-      successToasts.actionCompleted('MFA factor unenrolled');
-      setUnenrollDialogOpen(false);
-      setFactorToUnenroll(null);
-      await loadFactors();
-      onFactorUnenrolled?.();
     } catch (err) {
+      // Error already logged by useLoggedAsync
       const message = err instanceof Error ? err.message : 'Failed to unenroll MFA factor';
       errorToasts.actionFailed('unenroll MFA factor', message);
     } finally {

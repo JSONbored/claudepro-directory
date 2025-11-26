@@ -6,7 +6,7 @@
  */
 
 import { deleteJob } from '@heyclaude/web-runtime/actions';
-import { logClientWarning } from '@heyclaude/web-runtime/core';
+import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import { Trash } from '@heyclaude/web-runtime/icons';
 import type { ButtonStyleProps } from '@heyclaude/web-runtime/types/component.types';
 import { cn, toasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
@@ -28,6 +28,11 @@ export function JobDeleteButton({
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [isDeleting, setIsDeleting] = useState(false);
+  const runLoggedAsync = useLoggedAsync({
+    scope: 'JobDeleteButton',
+    defaultMessage: 'Job deletion failed',
+    defaultRethrow: false,
+  });
 
   const handleDelete = () => {
     if (
@@ -39,18 +44,28 @@ export function JobDeleteButton({
     setIsDeleting(true);
     startTransition(async () => {
       try {
-        const result = await deleteJob({ job_id: jobId });
+        await runLoggedAsync(
+          async () => {
+            const result = await deleteJob({ job_id: jobId });
 
-        if (result?.data?.success) {
-          toasts.success.itemDeleted('Job listing');
-          router.refresh();
-        } else {
-          toasts.error.actionFailed('delete job listing');
-          setIsDeleting(false);
-        }
+            if (result?.data?.success) {
+              toasts.success.itemDeleted('Job listing');
+              router.refresh();
+            } else {
+              throw new Error('Job deletion returned success: false');
+            }
+          },
+          {
+            message: 'Job deletion failed',
+            context: { jobId },
+          }
+        );
       } catch (error) {
-        logClientWarning('JobDeleteButton: failed to delete job', error, { jobId });
-        toasts.error.fromError(error, 'Failed to delete job');
+        // Error already logged by useLoggedAsync
+        toasts.error.fromError(
+          error instanceof Error ? error : new Error('Failed to delete job'),
+          'Failed to delete job'
+        );
         setIsDeleting(false);
       }
     });

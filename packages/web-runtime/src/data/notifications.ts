@@ -1,11 +1,12 @@
 'use server';
 
+import { MiscService } from '@heyclaude/data-layer';
+import type { Database } from '@heyclaude/database-types';
 import { revalidateTag } from 'next/cache';
+
+import { fetchCached } from '../cache/fetch-cached.ts';
 import { getCacheInvalidateTags } from '../cache-config.ts';
 import { logger, normalizeError } from '../index.ts';
-import type { Database } from '@heyclaude/database-types';
-import { fetchCached } from '../cache/fetch-cached.ts';
-import { MiscService } from '@heyclaude/data-layer';
 import { generateRequestId } from '../utils/request-context.ts';
 
 export type ActiveNotificationRecord = Database['public']['Functions']['get_active_notifications']['Returns'][number];
@@ -20,7 +21,7 @@ export async function getNotificationCacheTags(userId: string): Promise<string[]
   for (const tag of dynamicTags) {
     tags.add(tag);
   }
-  return Array.from(tags);
+  return [...tags];
 }
 
 export async function revalidateNotificationCache(userId: string): Promise<void> {
@@ -38,7 +39,7 @@ export async function revalidateNotificationCache(userId: string): Promise<void>
   }
 }
 
-interface NotificationFetchParams {
+interface NotificationFetchParameters {
   userId: string;
   dismissedIds?: string[];
 }
@@ -46,7 +47,7 @@ interface NotificationFetchParams {
 export async function getActiveNotifications({
   userId,
   dismissedIds = [],
-}: NotificationFetchParams): Promise<ActiveNotificationRecord[]> {
+}: NotificationFetchParameters): Promise<ActiveNotificationRecord[]> {
   return fetchCached(
     (client) => new MiscService(client).getActiveNotifications({ p_dismissed_ids: dismissedIds }),
     {

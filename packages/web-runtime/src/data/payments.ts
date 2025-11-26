@@ -2,6 +2,7 @@
 
 import type { Database } from '@heyclaude/database-types';
 import { cache } from 'react';
+
 import { logger, normalizeError } from '../index.ts';
 import { createSupabaseServerClient } from '../supabase/server.ts';
 import { generateRequestId } from '../utils/request-context.ts';
@@ -79,10 +80,6 @@ export const getPaymentPlanCatalog = cache(async (): Promise<PaymentPlanCatalogE
       }
     );
 
-    if (!data) {
-      return [];
-    }
-
     // Type guard: Validate that data is an array and has expected structure
     if (!Array.isArray(data)) {
       logger.warn('getPaymentPlanCatalog: Expected array but got non-array data', {
@@ -97,7 +94,6 @@ export const getPaymentPlanCatalog = cache(async (): Promise<PaymentPlanCatalogE
     const rows: PaymentPlanCatalogRowSubset[] = [];
     for (const entry of data) {
       if (
-        entry &&
         typeof entry === 'object' &&
         'plan' in entry &&
         'tier' in entry &&
@@ -187,7 +183,6 @@ export async function getJobBillingSummaries(
     const entries: JobBillingSummaryEntry[] = [];
     for (const entry of data) {
       if (
-        entry &&
         typeof entry === 'object' &&
         'job_id' in entry &&
         'plan' in entry &&

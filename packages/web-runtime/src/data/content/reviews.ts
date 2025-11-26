@@ -1,10 +1,11 @@
 'use server';
 
-import type { Database } from '@heyclaude/database-types';
-import { fetchCached } from '../../cache/fetch-cached.ts';
 import { ContentService } from '@heyclaude/data-layer';
+import type { Database } from '@heyclaude/database-types';
 
-interface ReviewsWithStatsParams {
+import { fetchCached } from '../../cache/fetch-cached.ts';
+
+interface ReviewsWithStatsParameters {
   contentType: Database['public']['Enums']['content_category'];
   contentSlug: string;
   sortBy?: string;
@@ -14,9 +15,9 @@ interface ReviewsWithStatsParams {
 }
 
 export async function getReviewsWithStatsData(
-  params: ReviewsWithStatsParams
+  parameters: ReviewsWithStatsParameters
 ): Promise<Database['public']['Functions']['get_reviews_with_stats']['Returns'] | null> {
-  const { contentType, contentSlug, sortBy, limit, offset, userId } = params;
+  const { contentType, contentSlug, sortBy, limit, offset, userId } = parameters;
 
   return fetchCached(
     (client) => new ContentService(client).getReviewsWithStats({

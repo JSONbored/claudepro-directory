@@ -1,10 +1,11 @@
-import type { Database } from '@heyclaude/database-types';
+import { Constants, type Database } from '@heyclaude/database-types';
 import {
   createWebAppContextWithId,
   generateRequestId,
   hashUserId,
   logger,
   normalizeError,
+  withDuration,
 } from '@heyclaude/web-runtime/core';
 import {
   generatePageMetadata,
@@ -16,6 +17,7 @@ import { CheckCircle, Clock, GitPullRequest, Send, XCircle } from '@heyclaude/we
 import { BADGE_COLORS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import type { Metadata } from 'next';
 import Link from 'next/link';
+
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { SubmissionCard } from '@/src/components/core/domain/submissions/submission-card';
 import { Button } from '@/src/components/primitives/ui/button';
@@ -46,17 +48,17 @@ export async function generateMetadata(): Promise<Metadata> {
 // Dangerous Unicode characters that could be used for attacks
 // Using Set for O(1) lookup performance instead of O(n) array includes
 const dangerousCharsSet = new Set([
-  0x202e,
-  0x202d,
-  0x202c,
-  0x202b,
-  0x202a, // RTL override marks
-  0x200e,
-  0x200f, // Left-to-right/right-to-left marks
-  0x2066,
-  0x2067,
-  0x2068,
-  0x2069, // Directional isolates
+  0x20_2E,
+  0x20_2D,
+  0x20_2C,
+  0x20_2B,
+  0x20_2A, // RTL override marks
+  0x20_0E,
+  0x20_0F, // Left-to-right/right-to-left marks
+  0x20_66,
+  0x20_67,
+  0x20_68,
+  0x20_69, // Directional isolates
 ]);
 
 // Shared regex patterns for PR URL validation
@@ -69,17 +71,37 @@ const PR_NUMBER_REGEX = /^\d+$/;
 // Uses loose capture groups, then validates components separately to avoid duplication
 const PR_PATH_REGEX = /^\/([^/]+)\/([^/]+)\/pull\/(\d+)$/;
 
+/**
+ * Format date consistently using en-US locale
+ * Returns safe fallback for invalid or missing dates
+ */
+function formatSubmissionDate(dateString: string): string {
+  if (!dateString || typeof dateString !== 'string') {
+    return '-';
+  }
+  const date = new Date(dateString);
+  if (Number.isNaN(date.getTime())) {
+    return '-';
+  }
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  });
+}
+
 function extractPrComponents(
   url: string | null | undefined
 ): { owner: string; repo: string; prNumber: string } | null {
   if (!url || typeof url !== 'string') return null;
 
   // Disallow control characters, invisible chars, and dangerous unicode
-  for (let i = 0; i < url.length; i++) {
-    const code = url.charCodeAt(i);
+  for (let index = 0; index < url.length; index++) {
+    const code = url.codePointAt(index);
     if (
-      (code >= 0x00 && code <= 0x1f) ||
-      (code >= 0x7f && code <= 0x9f) ||
+      code === undefined ||
+      (code >= 0x0 && code <= 0x1F) ||
+      (code >= 0x7F && code <= 0x9F) ||
       dangerousCharsSet.has(code)
     ) {
       return null;
@@ -135,20 +157,13 @@ function buildSafePrUrl(owner: string, repo: string, prNumber: string): string {
 }
 
 // Allow-list of valid content types shown in URLs
-// NOTE: This array must be kept in sync with Database['public']['Enums']['submission_type']
-// If the enum changes, update this array accordingly to maintain type safety
-const ALLOWED_TYPES = [
-  'agents',
-  'mcp',
-  'rules',
-  'commands',
-  'hooks',
-  'statuslines',
-  'skills',
-] as const;
+// Use Constants from database types to ensure sync with database enum
+const ALLOWED_TYPES = Constants.public.Enums.submission_type;
 
-// Typed copy of ALLOWED_TYPES for use as submission_type array
-const ALLOWED_TYPES_ARRAY: Database['public']['Enums']['submission_type'][] = [...ALLOWED_TYPES];
+// Typed copy for use as submission_type array
+const ALLOWED_TYPES_ARRAY: Database['public']['Enums']['submission_type'][] = [
+  ...ALLOWED_TYPES,
+];
 
 // Strict content slug validation - only alphanumeric, hyphens, underscores
 function isValidSlug(slug: string): boolean {
@@ -159,7 +174,7 @@ function isValidSlug(slug: string): boolean {
 
 // Strict type validation - must be in allowlist
 function isSafeType(type: string): type is Database['public']['Enums']['submission_type'] {
-  return ALLOWED_TYPES.includes(type as (typeof ALLOWED_TYPES)[number]);
+  return (ALLOWED_TYPES as readonly string[]).includes(type);
 }
 
 // Safe URL constructor - validates both type and slug before constructing
@@ -174,6 +189,7 @@ function getSafeContentUrl(
 }
 
 export default async function SubmissionsPage() {
+  const startTime = Date.now();
   // Generate single requestId for this page request
   const requestId = generateRequestId();
   const baseLogContext = createWebAppContextWithId(
@@ -182,11 +198,17 @@ export default async function SubmissionsPage() {
     'SubmissionsPage'
   );
 
+  // Section: Authentication
+  const authSectionStart = Date.now();
   const { user } = await getAuthenticatedUser({ context: 'SubmissionsPage' });
 
   if (!user) {
     logger.warn('SubmissionsPage: unauthenticated access attempt', undefined, {
-      ...baseLogContext,
+      ...withDuration(baseLogContext, startTime),
+      requestId,
+      operation: 'SubmissionsPage',
+      section: 'authentication',
+      sectionDuration_ms: Date.now() - authSectionStart,
       timestamp: new Date().toISOString(),
     });
     return (
@@ -209,6 +231,8 @@ export default async function SubmissionsPage() {
   const userIdHash = hashUserId(user.id);
   const logContext = { ...baseLogContext, userIdHash };
 
+  // Section: Submissions Data Fetch
+  const submissionsSectionStart = Date.now();
   let submissions: NonNullable<
     Database['public']['Functions']['get_user_dashboard']['Returns']['submissions']
   > = [];
@@ -221,13 +245,25 @@ export default async function SubmissionsPage() {
       logger.error(
         'SubmissionsPage: getUserDashboard returned null',
         new Error('getUserDashboard returned null'),
-        logContext
+        {
+          ...withDuration(logContext, startTime),
+          requestId,
+          operation: 'SubmissionsPage',
+          section: 'submissions-data-fetch',
+          sectionDuration_ms: Date.now() - submissionsSectionStart,
+        }
       );
       hasError = true;
     }
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load submissions from dashboard');
-    logger.error('SubmissionsPage: getUserDashboard threw', normalized, logContext);
+    logger.error('SubmissionsPage: getUserDashboard threw', normalized, {
+      ...withDuration(logContext, startTime),
+      requestId,
+      operation: 'SubmissionsPage',
+      section: 'submissions-data-fetch',
+      sectionDuration_ms: Date.now() - submissionsSectionStart,
+    });
     hasError = true;
   }
 
@@ -239,14 +275,8 @@ export default async function SubmissionsPage() {
     );
   }
 
-  // Valid enum values for validation
-  const VALID_SUBMISSION_STATUSES: Database['public']['Enums']['submission_status'][] = [
-    'pending',
-    'approved',
-    'rejected',
-    'spam',
-    'merged',
-  ];
+  // Valid enum values for validation - use Constants from database types
+  const VALID_SUBMISSION_STATUSES = Constants.public.Enums.submission_status;
 
   /**
    * Validate submission status against enum values
@@ -255,9 +285,7 @@ export default async function SubmissionsPage() {
     status: unknown
   ): status is Database['public']['Enums']['submission_status'] {
     if (typeof status !== 'string') return false;
-    return VALID_SUBMISSION_STATUSES.includes(
-      status as Database['public']['Enums']['submission_status']
-    );
+    return (VALID_SUBMISSION_STATUSES as readonly string[]).includes(status);
   }
 
   /**
@@ -267,25 +295,25 @@ export default async function SubmissionsPage() {
     type: unknown
   ): type is Database['public']['Enums']['submission_type'] {
     if (typeof type !== 'string') return false;
-    return ALLOWED_TYPES.includes(type as (typeof ALLOWED_TYPES)[number]);
+    return (ALLOWED_TYPES as readonly string[]).includes(type);
   }
 
+  // Use Constants for enum values in Record keys
   const SUBMISSION_STATUS_VARIANTS: Record<
     Database['public']['Enums']['submission_status'],
     { icon: typeof Clock; label: string }
   > = {
-    pending: { icon: Clock, label: 'Pending Review' },
-    approved: { icon: CheckCircle, label: 'Approved' },
-    merged: { icon: CheckCircle, label: 'Merged ✓' },
-    rejected: { icon: XCircle, label: 'Rejected' },
-    spam: { icon: XCircle, label: 'Spam' },
+    [Constants.public.Enums.submission_status[0]]: { icon: Clock, label: 'Pending Review' }, // 'pending'
+    [Constants.public.Enums.submission_status[1]]: { icon: CheckCircle, label: 'Approved' }, // 'approved'
+    [Constants.public.Enums.submission_status[4]]: { icon: CheckCircle, label: 'Merged ✓' }, // 'merged'
+    [Constants.public.Enums.submission_status[2]]: { icon: XCircle, label: 'Rejected' }, // 'rejected'
+    [Constants.public.Enums.submission_status[3]]: { icon: XCircle, label: 'Spam' }, // 'spam'
   };
 
   const getStatusBadge = (status: Database['public']['Enums']['submission_status']) => {
-    const variant = SUBMISSION_STATUS_VARIANTS[status] || SUBMISSION_STATUS_VARIANTS.pending;
+    const variant = SUBMISSION_STATUS_VARIANTS[status];
     const Icon = variant.icon;
-    const colorClass =
-      BADGE_COLORS.submissionStatus[status] || BADGE_COLORS.submissionStatus.pending;
+    const colorClass = BADGE_COLORS.submissionStatus[status];
 
     return (
       <UnifiedBadge variant="base" style="outline" className={colorClass}>
@@ -296,42 +324,24 @@ export default async function SubmissionsPage() {
   };
 
   const getTypeLabel = (type: Database['public']['Enums']['submission_type']): string => {
+    // Use Constants for enum values in Record keys
     const labels: Record<Database['public']['Enums']['submission_type'], string> = {
-      agents: 'Claude Agent',
-      mcp: 'MCP Server',
-      rules: 'Claude Rule',
-      commands: 'Command',
-      hooks: 'Hook',
-      statuslines: 'Statusline',
-      skills: 'Skill',
+      [Constants.public.Enums.submission_type[0]]: 'Claude Agent', // 'agents'
+      [Constants.public.Enums.submission_type[1]]: 'MCP Server', // 'mcp'
+      [Constants.public.Enums.submission_type[2]]: 'Claude Rule', // 'rules'
+      [Constants.public.Enums.submission_type[3]]: 'Command', // 'commands'
+      [Constants.public.Enums.submission_type[4]]: 'Hook', // 'hooks'
+      [Constants.public.Enums.submission_type[5]]: 'Statusline', // 'statuslines'
+      [Constants.public.Enums.submission_type[6]]: 'Skill', // 'skills'
     };
     return labels[type];
   };
 
   /**
-   * Format date consistently using en-US locale
-   * Returns safe fallback for invalid or missing dates
-   */
-  function formatSubmissionDate(dateString: string): string {
-    if (!dateString || typeof dateString !== 'string') {
-      return '-';
-    }
-    const date = new Date(dateString);
-    if (Number.isNaN(date.getTime())) {
-      return '-';
-    }
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
-  }
-
-  /**
    * Get safe PR link props or null if PR URL is invalid
    * Extracts and validates PR components, then constructs a safe URL
    */
-  function getPrLinkProps(submission: (typeof submissions)[number]) {
+  function getPrLinkProperties(submission: (typeof submissions)[number]) {
     const components = submission.pr_url ? extractPrComponents(submission.pr_url) : null;
 
     // Bail early if components are invalid
@@ -348,24 +358,24 @@ export default async function SubmissionsPage() {
   /**
    * Get safe content URL or null if invalid
    */
-  function getContentLinkProps(
+  function getContentLinkProperties(
     type: Database['public']['Enums']['submission_type'],
     slug: string,
     status: Database['public']['Enums']['submission_status']
   ): { href: string } | null {
     const safeUrl = getSafeContentUrl(type, slug);
-    return safeUrl && status === 'merged' ? { href: safeUrl } : null;
+    return safeUrl && status === Constants.public.Enums.submission_status[4] ? { href: safeUrl } : null; // 'merged'
   }
 
   // Log any submissions with missing IDs for data integrity monitoring
-  submissions.forEach((sub, idx) => {
+  for (const [index, sub] of submissions.entries()) {
     if (!sub.id) {
       logger.warn('SubmissionsPage: submission missing ID', undefined, {
         ...logContext,
-        index: idx,
+        index: index,
       });
     }
-  });
+  }
 
   return (
     <div className="space-y-6">
@@ -411,11 +421,13 @@ export default async function SubmissionsPage() {
               getStatusBadge={getStatusBadge}
               getTypeLabel={getTypeLabel}
               formatSubmissionDate={formatSubmissionDate}
-              getPrLinkProps={getPrLinkProps}
-              getContentLinkProps={getContentLinkProps}
+              getPrLinkProps={getPrLinkProperties}
+              getContentLinkProps={getContentLinkProperties}
               isValidSubmissionStatus={isValidSubmissionStatus}
               isValidSubmissionType={isValidSubmissionType}
-              VALID_SUBMISSION_STATUSES={VALID_SUBMISSION_STATUSES}
+              VALID_SUBMISSION_STATUSES={
+                VALID_SUBMISSION_STATUSES as unknown as Database['public']['Enums']['submission_status'][]
+              }
               VALID_SUBMISSION_TYPES={ALLOWED_TYPES_ARRAY}
             />
           ))}

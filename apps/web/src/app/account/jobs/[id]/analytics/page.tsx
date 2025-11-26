@@ -10,6 +10,7 @@ import {
   hashUserId,
   logger,
   normalizeError,
+  withDuration,
 } from '@heyclaude/web-runtime/core';
 import {
   generatePageMetadata,
@@ -22,6 +23,7 @@ import { BADGE_COLORS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
+
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { MetricsDisplay } from '@/src/components/features/analytics/metrics-display';
 import { Button } from '@/src/components/primitives/ui/button';
@@ -40,16 +42,25 @@ import {
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-interface JobAnalyticsPageProps {
+interface JobAnalyticsPageProperties {
   params: Promise<{ id: string }>;
 }
 
-export async function generateMetadata({ params }: JobAnalyticsPageProps): Promise<Metadata> {
+function formatStatus(rawStatus: string): string {
+  return rawStatus.replaceAll('_', ' ').replaceAll(/\b\w/g, (c) => c.toUpperCase());
+}
+
+function getStatusColor(status: JobStatus): string {
+  return BADGE_COLORS.jobStatus[status];
+}
+
+export async function generateMetadata({ params }: JobAnalyticsPageProperties): Promise<Metadata> {
   const { id } = await params;
   return generatePageMetadata('/account/jobs/:id/analytics', { params: { id } });
 }
 
-export default async function JobAnalyticsPage({ params }: JobAnalyticsPageProps) {
+export default async function JobAnalyticsPage({ params }: JobAnalyticsPageProperties) {
+  const startTime = Date.now();
   const { id } = await params;
 
   // Generate single requestId for this page request
@@ -63,27 +74,84 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPageProps
     }
   );
 
+  // Section: Authentication
+  const authSectionStart = Date.now();
   const { user } = await getAuthenticatedUser({ context: 'JobAnalyticsPage' });
 
   if (!user) {
-    logger.warn('JobAnalyticsPage: unauthenticated access attempt', undefined, baseLogContext);
+    logger.warn(
+      'JobAnalyticsPage: unauthenticated access attempt',
+      undefined,
+      withDuration(
+        {
+          ...baseLogContext,
+          section: 'authentication',
+        },
+        authSectionStart
+      )
+    );
     redirect(ROUTES.LOGIN);
   }
 
   const userIdHash = hashUserId(user.id);
   const logContext = { ...baseLogContext, userIdHash };
+  logger.info(
+    'JobAnalyticsPage: authentication successful',
+    withDuration(
+      {
+        ...logContext,
+        section: 'authentication',
+      },
+      authSectionStart
+    )
+  );
 
-  let job: Awaited<ReturnType<typeof getUserJobById>> | null = null;
+  // Section: Job Data Fetch
+  const jobSectionStart = Date.now();
+  let job: Awaited<ReturnType<typeof getUserJobById>> = null;
   let fetchError = false;
   try {
     job = await getUserJobById(user.id, id);
+    logger.info(
+      'JobAnalyticsPage: job data loaded',
+      withDuration(
+        {
+          ...logContext,
+          section: 'job-data-fetch',
+          hasJob: !!job,
+        },
+        jobSectionStart
+      )
+    );
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load job analytics detail');
-    logger.error('JobAnalyticsPage: getUserJobById threw', normalized, logContext);
+    logger.error(
+      'JobAnalyticsPage: getUserJobById threw',
+      normalized,
+      withDuration(
+        {
+          ...logContext,
+          section: 'job-data-fetch',
+          sectionDuration_ms: Date.now() - jobSectionStart,
+        },
+        startTime
+      )
+    );
     fetchError = true;
   }
   if (!job || fetchError) {
-    logger.warn('JobAnalyticsPage: job not found or not owned by user', undefined, logContext);
+    logger.warn(
+      'JobAnalyticsPage: job not found or not owned by user',
+      undefined,
+      withDuration(
+        {
+          ...logContext,
+          section: 'job-data-fetch',
+          sectionDuration_ms: Date.now() - jobSectionStart,
+        },
+        startTime
+      )
+    );
     return (
       <div className="space-y-6">
         <Card>
@@ -108,15 +176,21 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPageProps
   const clickCount = job.click_count ?? 0;
   const ctr = viewCount > 0 ? ((clickCount / viewCount) * 100).toFixed(2) : '0.00';
 
-  const getStatusColor = (status: JobStatus) => {
-    return BADGE_COLORS.jobStatus[status] || 'bg-muted';
-  };
+  const status: JobStatus = job.status;
 
-  const status: JobStatus = job.status ?? 'draft';
-
-  const formatStatus = (rawStatus: string) => {
-    return rawStatus.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
-  };
+  // Final summary log
+  logger.info(
+    'JobAnalyticsPage: page render completed',
+    withDuration(
+      {
+        ...logContext,
+        section: 'page-render',
+        jobId: id,
+        status,
+      },
+      startTime
+    )
+  );
 
   return (
     <div className="space-y-6">
@@ -160,15 +234,15 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPageProps
             </div>
             <div>
               <p className="text-muted-foreground">Location</p>
-              <p className="font-medium">{job.location || 'Not specified'}</p>
+              <p className="font-medium">{job.location ?? 'Not specified'}</p>
             </div>
             <div>
               <p className="text-muted-foreground">Plan</p>
-              <p className="font-medium capitalize">{job.plan || 'Not specified'}</p>
+              <p className="font-medium capitalize">{job.plan}</p>
             </div>
             <div>
               <p className="text-muted-foreground">Type</p>
-              <p className="font-medium capitalize">{job.type || 'Not specified'}</p>
+              <p className="font-medium capitalize">{job.type}</p>
             </div>
             {job.posted_at && (
               <div>
@@ -206,14 +280,13 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPageProps
             label: 'Click-Through Rate',
             value: `${ctr}%`,
             change: 'Of viewers who clicked apply',
-            trend:
-              viewCount === 0
-                ? 'unchanged'
-                : Number.parseFloat(ctr) > 5
-                  ? 'up'
-                  : Number.parseFloat(ctr) > 0
-                    ? 'unchanged'
-                    : 'down',
+            trend: (() => {
+              if (viewCount === 0) return 'unchanged';
+              const ctrValue = Number.parseFloat(ctr);
+              if (ctrValue > 5) return 'up';
+              if (ctrValue > 0) return 'unchanged';
+              return 'down';
+            })(),
           },
         ]}
       />

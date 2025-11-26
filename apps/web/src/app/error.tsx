@@ -1,11 +1,17 @@
 'use client';
 
-import { logger, normalizeError } from '@heyclaude/web-runtime/core';
+import {
+  createWebAppContextWithId,
+  generateRequestId,
+  logger,
+  normalizeError,
+} from '@heyclaude/web-runtime/core';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { AlertCircle, Home, RefreshCw, Search } from '@heyclaude/web-runtime/icons';
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import Link from 'next/link';
 import { useEffect } from 'react';
+
 import { Button } from '@/src/components/primitives/ui/button';
 import { Card } from '@/src/components/primitives/ui/card';
 
@@ -17,15 +23,17 @@ export default function ErrorBoundary({
   reset: () => void;
 }) {
   useEffect(() => {
+    const requestId = generateRequestId();
+    const route = globalThis.location.pathname;
     const normalized = normalizeError(error, 'Application error boundary triggered');
-    logger.error('GlobalErrorBoundary: application crashed', normalized, {
-      errorDigest: error.digest || 'no-digest',
+    const logContext = createWebAppContextWithId(requestId, route, 'ApplicationErrorBoundary', {
+      errorDigest: error.digest ?? 'no-digest',
       digestAvailable: Boolean(error.digest),
-      userAgent: typeof window !== 'undefined' ? window.navigator?.userAgent || '' : '',
-      url: typeof window !== 'undefined' ? window.location?.href || '' : '',
-      timestamp: new Date().toISOString(),
+      userAgent: globalThis.navigator.userAgent,
+      url: globalThis.location.href,
       segment: 'global',
     });
+    logger.error('Application error boundary triggered', normalized, logContext);
   }, [error]);
 
   return (

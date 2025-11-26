@@ -6,6 +6,7 @@
  */
 
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
+
 import { Skeleton } from '@/src/components/primitives/feedback/loading-skeleton';
 import { Separator } from '@/src/components/primitives/ui/separator';
 
@@ -45,8 +46,8 @@ export default function ChangelogEntryLoading() {
 
         {/* Category Badges */}
         <div className={UI_CLASSES.FLEX_WRAP_GAP_2}>
-          {[...Array(4)].map((_, i) => (
-            <Skeleton key={`category-${i + 1}`} size="sm" width="xs" rounded="full" />
+          {Array.from({ length: 4 }).map((_, index) => (
+            <Skeleton key={`category-${index + 1}`} size="sm" width="xs" rounded="full" />
           ))}
         </div>
 
@@ -61,8 +62,8 @@ export default function ChangelogEntryLoading() {
 
         {/* Section Headers */}
         <div className="space-y-6">
-          {[...Array(3)].map((_, i) => (
-            <div key={`section-${i + 1}`} className="space-y-3">
+          {Array.from({ length: 3 }).map((_, index) => (
+            <div key={`section-${index + 1}`} className="space-y-3">
               <Skeleton size="lg" width="sm" />
               <Skeleton size="sm" width="3xl" />
               <Skeleton size="sm" width="5/6" />

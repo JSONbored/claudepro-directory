@@ -3,12 +3,14 @@
  * Single RPC call to get_user_collection_detail() replaces 3 separate queries
  */
 
+import { Constants } from '@heyclaude/database-types';
 import {
   type CollectionDetailData,
   createWebAppContextWithId,
   generateRequestId,
   logger,
   normalizeError,
+  withDuration,
 } from '@heyclaude/web-runtime/core';
 import {
   generatePageMetadata,
@@ -20,6 +22,7 @@ import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { Pulse } from '@/src/components/core/infra/pulse';
 import { NavLink } from '@/src/components/core/navigation/navigation-link';
@@ -36,23 +39,11 @@ import { Separator } from '@/src/components/primitives/ui/separator';
 // Collection pages may have private content
 export const dynamic = 'force-dynamic';
 
-// Whitelisted content types for outgoing links
-const ALLOWED_CONTENT_TYPES = [
-  'agents',
-  'mcp',
-  'rules',
-  'commands',
-  'hooks',
-  'statuslines',
-  'skills',
-  'collections',
-  'guides',
-  'jobs',
-  'changelog',
-] as const;
+// Whitelisted content types for outgoing links - use Constants from database types
+const ALLOWED_CONTENT_TYPES = Constants.public.Enums.content_category;
 
 function isValidContentType(type: string): boolean {
-  return ALLOWED_CONTENT_TYPES.includes(type as (typeof ALLOWED_CONTENT_TYPES)[number]);
+  return (ALLOWED_CONTENT_TYPES as readonly string[]).includes(type);
 }
 
 // Slug must be alphanumeric/dash/underscore, no slashes, no protocol
@@ -68,11 +59,11 @@ function getSafeContentLink(item: { content_type: string; content_slug: string }
   return null;
 }
 
-interface PublicCollectionPageProps {
+interface PublicCollectionPageProperties {
   params: Promise<{ slug: string; collectionSlug: string }>;
 }
 
-export async function generateMetadata({ params }: PublicCollectionPageProps): Promise<Metadata> {
+export async function generateMetadata({ params }: PublicCollectionPageProperties): Promise<Metadata> {
   const { slug, collectionSlug } = await params;
 
   // Generate requestId for metadata generation (separate from page render)
@@ -106,7 +97,8 @@ export async function generateMetadata({ params }: PublicCollectionPageProps): P
   });
 }
 
-export default async function PublicCollectionPage({ params }: PublicCollectionPageProps) {
+export default async function PublicCollectionPage({ params }: PublicCollectionPageProperties) {
+  const startTime = Date.now();
   const { slug, collectionSlug } = await params;
 
   // Generate single requestId for this page request
@@ -131,7 +123,8 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
     ? { ...baseLogContext, viewerId: currentUser.id }
     : baseLogContext;
 
-  // Single RPC call replaces 3 separate queries (user, collection, items)
+  // Section: Collection Detail Fetch
+  const collectionSectionStart = Date.now();
   let collectionData: CollectionDetailData | null = null;
   try {
     collectionData = await getPublicCollectionDetail({
@@ -139,14 +132,47 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
       collectionSlug,
       ...(currentUser?.id ? { viewerId: currentUser.id } : {}),
     });
+    logger.info(
+      'PublicCollectionPage: collection detail loaded',
+      withDuration(
+        {
+          ...logContext,
+          section: 'collection-detail-fetch',
+          hasData: !!collectionData,
+        },
+        collectionSectionStart
+      )
+    );
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load collection detail for page render');
-    logger.error('PublicCollectionPage: getPublicCollectionDetail threw', normalized, logContext);
+    logger.error(
+      'PublicCollectionPage: getPublicCollectionDetail threw',
+      normalized,
+      withDuration(
+        {
+          ...logContext,
+          section: 'collection-detail-fetch',
+          sectionDuration_ms: Date.now() - collectionSectionStart,
+        },
+        startTime
+      )
+    );
     throw normalized;
   }
 
   if (!collectionData) {
-    logger.warn('PublicCollectionPage: collection detail not found', undefined, baseLogContext);
+    logger.warn(
+      'PublicCollectionPage: collection detail not found',
+      undefined,
+      withDuration(
+        {
+          ...baseLogContext,
+          section: 'collection-detail-fetch',
+          sectionDuration_ms: Date.now() - collectionSectionStart,
+        },
+        startTime
+      )
+    );
     notFound();
   }
 
@@ -157,7 +183,7 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
       {/* Track view - non-blocking */}
       <Pulse
         variant="view"
-        category="collections"
+        category={Constants.public.Enums.content_category[8]} // 'collections'
         slug={collectionSlug}
         metadata={{
           user_slug: slug,
@@ -207,7 +233,7 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
           <div>
             <h2 className="mb-4 font-semibold text-xl">Items in this Collection</h2>
 
-            {!items || (items.length ?? 0) === 0 ? (
+            {!items || items.length === 0 ? (
               <Card>
                 <CardContent className={'flex flex-col items-center py-12'}>
                   <p className="text-muted-foreground">This collection is empty</p>
@@ -216,15 +242,14 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
             ) : (
               <div className="grid gap-4">
                 {items
-                  ?.filter(
+                  .filter(
                     (
                       item
-                    ): item is NonNullable<typeof item> & {
+                    ): item is typeof item & {
                       id: string;
                       content_type: string;
                       content_slug: string;
                     } =>
-                      item !== null &&
                       item.id !== null &&
                       item.content_type !== null &&
                       item.content_slug !== null

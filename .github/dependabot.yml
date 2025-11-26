@@ -47,7 +47,10 @@ updates:
       # Group linting and formatting tools
       linting:
         patterns:
-          - "ultracite"
+          - "eslint"
+          - "eslint-*"
+          - "@typescript-eslint/*"
+          - "eslint-plugin-*"
           - "lefthook"
       # Group Tailwind and CSS tooling
       styling:

@@ -4,7 +4,7 @@
  * DetailSidebar - Sidebar orchestrator for detail pages
  */
 
-import type { Database } from '@heyclaude/database-types';
+import { Constants, type Database } from '@heyclaude/database-types';
 import {
   type CategoryType,
   ensureStringArray,
@@ -302,7 +302,7 @@ export const DetailSidebar = memo(function DetailSidebar({
                     BADGE_COLORS.category.default
                   }`}
                 >
-                  {contentItem.category === 'mcp'
+                  {contentItem.category === Constants.public.Enums.content_category[1] // 'mcp'
                     ? 'MCP Server'
                     : contentItem.category.charAt(0).toUpperCase() + contentItem.category.slice(1)}
                 </UnifiedBadge>
@@ -422,7 +422,7 @@ export const DetailSidebar = memo(function DetailSidebar({
                 typeof relatedItem.category === 'string' &&
                 isValidCategory(relatedItem.category)
                   ? relatedItem.category
-                  : 'agents';
+                  : Constants.public.Enums.content_category[0]; // 'agents'
               const relatedSlug =
                 'slug' in relatedItem && typeof relatedItem.slug === 'string'
                   ? relatedItem.slug

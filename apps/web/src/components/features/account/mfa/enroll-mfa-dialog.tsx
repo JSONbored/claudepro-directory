@@ -7,6 +7,7 @@
 
 import { createMFAChallenge, enrollTOTPFactor, verifyMFAChallenge } from '@heyclaude/web-runtime';
 import { createSupabaseBrowserClient } from '@heyclaude/web-runtime/client';
+import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import { AlertCircle, Loader2, Shield } from '@heyclaude/web-runtime/icons';
 import { errorToasts, successToasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import Image from 'next/image';
@@ -39,24 +40,38 @@ export function EnrollMFADialog({ open, onOpenChange, onEnrolled }: EnrollMFADia
   const [verifyCode, setVerifyCode] = useState('');
 
   const supabase = createSupabaseBrowserClient();
+  const runLoggedAsync = useLoggedAsync({
+    scope: 'EnrollMFADialog',
+    defaultMessage: 'MFA enrollment failed',
+    defaultRethrow: false,
+  });
 
   const handleEnroll = async () => {
     setLoading(true);
     setError(null);
 
     try {
-      const { data, error: enrollError } = await enrollTOTPFactor(supabase);
+      await runLoggedAsync(
+        async () => {
+          const { data, error: enrollError } = await enrollTOTPFactor(supabase);
 
-      if (enrollError || !data) {
-        throw enrollError || new Error('Enrollment failed');
-      }
+          if (enrollError || !data) {
+            throw enrollError || new Error('Enrollment failed');
+          }
 
-      setFactorId(data.id);
-      setQrCode(data.qr_code);
-      setSecret(data.secret);
-      setStep('verify');
-      // challengeId will be created during verification
+          setFactorId(data.id);
+          setQrCode(data.qr_code);
+          setSecret(data.secret);
+          setStep('verify');
+          // challengeId will be created during verification
+        },
+        {
+          message: 'Failed to enroll MFA factor',
+          level: 'warn',
+        }
+      );
     } catch (err) {
+      // Error already logged by useLoggedAsync
       const message = err instanceof Error ? err.message : 'Failed to enroll MFA factor';
       setError(message);
       errorToasts.actionFailed('enroll MFA', message);
@@ -75,35 +90,47 @@ export function EnrollMFADialog({ open, onOpenChange, onEnrolled }: EnrollMFADia
     setError(null);
 
     try {
-      // Create challenge
-      const { data: challengeData, error: challengeError } = await createMFAChallenge(
-        supabase,
-        factorId
+      await runLoggedAsync(
+        async () => {
+          // Create challenge
+          const { data: challengeData, error: challengeError } = await createMFAChallenge(
+            supabase,
+            factorId
+          );
+
+          if (challengeError || !challengeData) {
+            throw challengeError || new Error('Failed to create challenge');
+          }
+
+          // challengeId stored in challengeData, used in verify call
+
+          // Verify challenge
+          const { success, error: verifyError } = await verifyMFAChallenge(
+            supabase,
+            factorId,
+            challengeData.id,
+            verifyCode
+          );
+
+          if (verifyError || !success) {
+            throw verifyError || new Error('Verification failed');
+          }
+
+          successToasts.actionCompleted('MFA factor enrolled successfully');
+          onEnrolled();
+          onOpenChange(false);
+          resetDialog();
+        },
+        {
+          message: 'MFA verification failed',
+          context: {
+            factorId,
+            hasCode: !!verifyCode,
+          },
+        }
       );
-
-      if (challengeError || !challengeData) {
-        throw challengeError || new Error('Failed to create challenge');
-      }
-
-      // challengeId stored in challengeData, used in verify call
-
-      // Verify challenge
-      const { success, error: verifyError } = await verifyMFAChallenge(
-        supabase,
-        factorId,
-        challengeData.id,
-        verifyCode
-      );
-
-      if (verifyError || !success) {
-        throw verifyError || new Error('Verification failed');
-      }
-
-      successToasts.actionCompleted('MFA factor enrolled successfully');
-      onEnrolled();
-      onOpenChange(false);
-      resetDialog();
     } catch (err) {
+      // Error already logged by useLoggedAsync
       const message = err instanceof Error ? err.message : 'Failed to verify MFA code';
       setError(message);
       errorToasts.actionFailed('verify MFA', message);

@@ -5,6 +5,8 @@
  * without triggering "Server Functions cannot be called" errors or importing the heavy Flags SDK.
  */
 
+import { Constants } from '@heyclaude/database-types';
+
 /**
  * App Settings (formerly from app_settings table)
  * Usage: const config = await appSettings(); const pages = config['newsletter.excluded_pages'];
@@ -249,25 +251,25 @@ export const TOAST_CONFIG_DEFAULTS = {
  */
 export const HOMEPAGE_CONFIG_DEFAULTS = {
   'homepage.featured_categories': [
-    'agents',
-    'mcp',
-    'commands',
-    'rules',
-    'skills',
-    'collections',
-    'hooks',
-    'statuslines',
+    Constants.public.Enums.content_category[0], // 'agents'
+    Constants.public.Enums.content_category[1], // 'mcp'
+    Constants.public.Enums.content_category[3], // 'commands'
+    Constants.public.Enums.content_category[2], // 'rules'
+    Constants.public.Enums.content_category[6], // 'skills'
+    Constants.public.Enums.content_category[8], // 'collections'
+    Constants.public.Enums.content_category[4], // 'hooks'
+    Constants.public.Enums.content_category[5], // 'statuslines'
   ] as const satisfies readonly string[],
   'homepage.tab_categories': [
     'all',
-    'agents',
-    'mcp',
-    'commands',
-    'rules',
-    'hooks',
-    'statuslines',
-    'collections',
-    'guides',
+    Constants.public.Enums.content_category[0], // 'agents'
+    Constants.public.Enums.content_category[1], // 'mcp'
+    Constants.public.Enums.content_category[3], // 'commands'
+    Constants.public.Enums.content_category[2], // 'rules'
+    Constants.public.Enums.content_category[4], // 'hooks'
+    Constants.public.Enums.content_category[5], // 'statuslines'
+    Constants.public.Enums.content_category[8], // 'collections'
+    Constants.public.Enums.content_category[7], // 'guides'
     'community',
   ] as const satisfies readonly string[],
 } as const;
@@ -370,15 +372,15 @@ export const CACHE_CONFIG_DEFAULTS = {
   'cache.invalidate.follow': ['users'] as string[],
   'cache.invalidate.oauth_unlink': ['users'] as string[],
   'cache.invalidate.vote': ['content', 'trending'] as string[],
-  'cache.invalidate.job_create': ['jobs', 'companies'] as string[],
-  'cache.invalidate.job_update': ['jobs', 'companies'] as string[],
-  'cache.invalidate.job_delete': ['jobs', 'companies'] as string[],
-  'cache.invalidate.job_status': ['jobs', 'companies'] as string[],
-  'cache.invalidate.sponsored_tracking': ['jobs', 'companies'] as string[],
-  'cache.invalidate.collection_create': ['collections', 'users'] as string[],
-  'cache.invalidate.collection_update': ['collections', 'users'] as string[],
-  'cache.invalidate.collection_delete': ['collections', 'users'] as string[],
-  'cache.invalidate.collection_items': ['collections', 'users'] as string[],
+  'cache.invalidate.job_create': [Constants.public.Enums.content_category[9], 'companies'] as string[], // 'jobs'
+  'cache.invalidate.job_update': [Constants.public.Enums.content_category[9], 'companies'] as string[], // 'jobs'
+  'cache.invalidate.job_delete': [Constants.public.Enums.content_category[9], 'companies'] as string[], // 'jobs'
+  'cache.invalidate.job_status': [Constants.public.Enums.content_category[9], 'companies'] as string[], // 'jobs'
+  'cache.invalidate.sponsored_tracking': [Constants.public.Enums.content_category[9], 'companies'] as string[], // 'jobs'
+  'cache.invalidate.collection_create': [Constants.public.Enums.content_category[8], 'users'] as string[], // 'collections'
+  'cache.invalidate.collection_update': [Constants.public.Enums.content_category[8], 'users'] as string[], // 'collections'
+  'cache.invalidate.collection_delete': [Constants.public.Enums.content_category[8], 'users'] as string[], // 'collections'
+  'cache.invalidate.collection_items': [Constants.public.Enums.content_category[8], 'users'] as string[], // 'collections'
   'cache.invalidate.review_create': ['content', 'homepage', 'trending'] as string[],
   'cache.invalidate.review_update': ['content'] as string[],
   'cache.invalidate.notifications': ['notifications'] as string[],
@@ -387,6 +389,6 @@ export const CACHE_CONFIG_DEFAULTS = {
   'cache.invalidate.contact_submission': ['contact', 'submissions'] as string[],
   'cache.invalidate.review_helpful': ['content'] as string[],
   'cache.invalidate.usage_tracking': ['content'] as string[],
-  'cache.invalidate.changelog': ['changelog'] as string[],
+  'cache.invalidate.changelog': [Constants.public.Enums.content_category[10]] as string[], // 'changelog'
   'cache.invalidate.newsletter_subscribe': ['newsletter'] as string[],
 } as const;

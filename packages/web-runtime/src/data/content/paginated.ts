@@ -1,13 +1,14 @@
 'use server';
 
+import { ContentService } from '@heyclaude/data-layer';
 import type { Database } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
 import { cache } from 'react';
+
 import { fetchCached } from '../../cache/fetch-cached.ts';
-import { ContentService } from '@heyclaude/data-layer';
 import { generateContentTags } from '../content-helpers.ts';
 
-interface PaginatedContentParams {
+interface PaginatedContentParameters {
   category?: string | null;
   limit: number;
   offset: number;
@@ -32,7 +33,7 @@ export const getPaginatedContent = cache(
     category,
     limit,
     offset,
-  }: PaginatedContentParams): Promise<
+  }: PaginatedContentParameters): Promise<
     Database['public']['Functions']['get_content_paginated_slim']['Returns'] | null
   > => {
   const normalizedCategory = category ? toContentCategory(category) : undefined;
@@ -45,7 +46,7 @@ export const getPaginatedContent = cache(
     }),
     {
       keyParts: ['content-paginated', normalizedCategory ?? category ?? 'all', limit, offset],
-      tags: generateContentTags(normalizedCategory ?? category, null, ['content-paginated']),
+      tags: generateContentTags(normalizedCategory ?? null, null, ['content-paginated']),
       ttlKey: 'cache.content_paginated.ttl_seconds',
       fallback: null,
       logMeta: { category: normalizedCategory ?? category ?? 'all', limit, offset },

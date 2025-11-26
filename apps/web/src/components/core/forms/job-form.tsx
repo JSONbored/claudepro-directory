@@ -8,9 +8,9 @@
 import type { Database } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
 import type { CreateJobInput } from '@heyclaude/web-runtime';
-import { logClientWarning } from '@heyclaude/web-runtime/core';
 import type { PaymentPlanCatalogEntry } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
+import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import { Star } from '@heyclaude/web-runtime/icons';
 import { toasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { useEffect, useId, useMemo, useState, useTransition } from 'react';
@@ -137,6 +137,11 @@ export function JobForm({
   submitLabel = 'Create Job',
   planCatalog,
 }: JobFormProps) {
+  const runLoggedAsync = useLoggedAsync({
+    scope: 'JobForm',
+    defaultMessage: 'Job submission failed',
+    defaultRethrow: false,
+  });
   const featuredCheckboxId = useId();
   const [isPending, startTransition] = useTransition();
   const planOptions = useMemo<PlanOption[]>(() => {
@@ -286,30 +291,36 @@ export function JobForm({
 
     startTransition(async () => {
       try {
-        const result = await onSubmit(jobData);
+        await runLoggedAsync(
+          async () => {
+            const result = await onSubmit(jobData);
 
-        if (result?.success) {
-          toasts.success.actionCompleted(
-            result.requiresPayment
-              ? 'Job created! Contact us for payment.'
-              : 'Job posted successfully!'
-          );
-        } else {
-          // Handle case when server action returns { success: false }
-          logClientWarning('JobForm: submit returned success: false', undefined, {
-            title: jobData.title,
-            company: jobData.company,
-            plan: jobData.plan,
-          });
-          toasts.raw.error('Failed to save job');
-        }
+            if (result?.success) {
+              toasts.success.actionCompleted(
+                result.requiresPayment
+                  ? 'Job created! Contact us for payment.'
+                  : 'Job posted successfully!'
+              );
+            } else {
+              // Handle case when server action returns { success: false }
+              throw new Error('Job submission returned success: false');
+            }
+          },
+          {
+            message: 'Job submission failed',
+            context: {
+              title: jobData.title ?? '',
+              company: jobData.company ?? '',
+              plan: jobData.plan ?? '',
+            },
+          }
+        );
       } catch (error) {
-        logClientWarning('JobForm: submit failed', error, {
-          title: jobData.title,
-          company: jobData.company,
-          plan: jobData.plan,
-        });
-        toasts.error.fromError(error, 'Failed to save job');
+        // Error already logged by useLoggedAsync
+        toasts.error.fromError(
+          error instanceof Error ? error : new Error('Failed to save job'),
+          'Failed to save job'
+        );
       }
     });
   };
@@ -345,14 +356,14 @@ export function JobForm({
               variant="select"
               label="Employment Type"
               name="type"
-              defaultValue={initialData?.type || 'full-time'}
+              defaultValue={initialData?.type || Constants.public.Enums.job_type[0]} // 'full-time'
               required={true}
             >
-              <SelectItem value="full-time">Full Time</SelectItem>
-              <SelectItem value="part-time">Part Time</SelectItem>
-              <SelectItem value="contract">Contract</SelectItem>
-              <SelectItem value="internship">Internship</SelectItem>
-              <SelectItem value="freelance">Freelance</SelectItem>
+              <SelectItem value={Constants.public.Enums.job_type[0]}>Full Time</SelectItem>
+              <SelectItem value={Constants.public.Enums.job_type[1]}>Part Time</SelectItem>
+              <SelectItem value={Constants.public.Enums.job_type[2]}>Contract</SelectItem>
+              <SelectItem value={Constants.public.Enums.job_type[4]}>Internship</SelectItem>
+              <SelectItem value={Constants.public.Enums.job_type[3]}>Freelance</SelectItem>
             </FormField>
 
             <FormField

@@ -7,6 +7,7 @@ import {
   hashUserId,
   logger,
   normalizeError,
+  withDuration,
 } from '@heyclaude/web-runtime/core';
 import type { JobBillingSummaryEntry } from '@heyclaude/web-runtime/data';
 import {
@@ -28,6 +29,7 @@ import {
 import { BADGE_COLORS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import type { Metadata } from 'next';
 import Link from 'next/link';
+
 import { JobDeleteButton } from '@/src/components/core/buttons/jobs/job-delete-button';
 import { JobToggleButton } from '@/src/components/core/buttons/jobs/job-toggle-button';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
@@ -80,44 +82,63 @@ function humanizeStatus(value?: string | null): string {
   return toTitleCase(value);
 }
 
-function resolvePlanLabel(plan?: string | null): string {
+function resolvePlanLabel(
+  plan?: Database['public']['Enums']['job_plan'] | null
+): string {
   if (!plan) {
     return JOB_PLAN_LABELS['one-time'];
   }
-  return JOB_PLAN_LABELS[plan as Database['public']['Enums']['job_plan']] ?? toTitleCase(plan);
+  return JOB_PLAN_LABELS[plan];
 }
 
-function resolveTierLabel(tier?: string | null): string {
+function resolveTierLabel(
+  tier?: Database['public']['Enums']['job_tier'] | null
+): string {
   if (!tier) {
     return JOB_TIER_LABELS.standard;
   }
-  return JOB_TIER_LABELS[tier as Database['public']['Enums']['job_tier']] ?? toTitleCase(tier);
+  return JOB_TIER_LABELS[tier];
+}
+
+function getStatusColor(status: JobStatus): string {
+  return BADGE_COLORS.jobStatus[status];
 }
 
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/account/jobs');
 }
 
-interface MyJobsPageProps {
+interface MyJobsPageProperties {
   searchParams?: Promise<{ payment?: string; job_id?: string }>;
 }
 
-export default async function MyJobsPage({ searchParams }: MyJobsPageProps) {
-  const resolvedSearchParams = searchParams ? await searchParams : {};
-  const paymentStatus = resolvedSearchParams?.payment;
-  const paymentJobId = resolvedSearchParams?.job_id;
+export default async function MyJobsPage({ searchParams }: MyJobsPageProperties) {
+  const startTime = Date.now();
+  const resolvedSearchParameters = searchParams ? await searchParams : {};
+  const paymentStatus = resolvedSearchParameters.payment;
+  const paymentJobId = resolvedSearchParameters.job_id;
 
   // Generate single requestId for this page request
   const requestId = generateRequestId();
   const baseLogContext = createWebAppContextWithId(requestId, '/account/jobs', 'MyJobsPage');
 
+  // Section: Authentication
+  const authSectionStart = Date.now();
   const { user } = await getAuthenticatedUser({ context: 'MyJobsPage' });
 
   if (!user) {
-    logger.warn('MyJobsPage: unauthenticated access attempt detected', undefined, {
-      ...baseLogContext,
-      timestamp: new Date().toISOString(),
-    });
+    logger.warn(
+      'MyJobsPage: unauthenticated access attempt detected',
+      undefined,
+      withDuration(
+        {
+          ...baseLogContext,
+          section: 'authentication',
+          timestamp: new Date().toISOString(),
+        },
+        authSectionStart
+      )
+    );
     return (
       <div className="space-y-6">
         <Card>
@@ -137,19 +158,64 @@ export default async function MyJobsPage({ searchParams }: MyJobsPageProps) {
 
   const userIdHash = hashUserId(user.id);
   const logContext = { ...baseLogContext, userIdHash };
+  logger.info(
+    'MyJobsPage: authentication successful',
+    withDuration(
+      {
+        ...logContext,
+        section: 'authentication',
+      },
+      authSectionStart
+    )
+  );
 
+  // Section: Dashboard Data Fetch
+  const dashboardSectionStart = Date.now();
   let data: Database['public']['Functions']['get_user_dashboard']['Returns'] | null = null;
   let fetchError = false;
   try {
     data = await getUserDashboard(user.id);
+    logger.info(
+      'MyJobsPage: dashboard data loaded',
+      withDuration(
+        {
+          ...logContext,
+          section: 'dashboard-data-fetch',
+          hasData: !!data,
+        },
+        dashboardSectionStart
+      )
+    );
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load user dashboard for jobs');
-    logger.error('MyJobsPage: getUserDashboard threw', normalized, logContext);
+    logger.error(
+      'MyJobsPage: getUserDashboard threw',
+      normalized,
+      withDuration(
+        {
+          ...logContext,
+          section: 'dashboard-data-fetch',
+          sectionDuration_ms: Date.now() - dashboardSectionStart,
+        },
+        startTime
+      )
+    );
     fetchError = true;
   }
 
   if (!data) {
-    logger.warn('MyJobsPage: getUserDashboard returned no data', undefined, logContext);
+    logger.warn(
+      'MyJobsPage: getUserDashboard returned no data',
+      undefined,
+      withDuration(
+        {
+          ...logContext,
+          section: 'dashboard-data-fetch',
+          sectionDuration_ms: Date.now() - dashboardSectionStart,
+        },
+        startTime
+      )
+    );
     fetchError = true;
   }
 
@@ -210,14 +276,14 @@ export default async function MyJobsPage({ searchParams }: MyJobsPageProps) {
           typeof item['type'] === 'string'
         );
       })
-      .map((item) => item as Database['public']['Tables']['jobs']['Row']);
+      .map((item) => item);
   })();
 
   if (jobs.length === 0) {
     logger.info('MyJobsPage: user has no job listings', logContext);
   }
 
-  const jobIds = jobs.map((job) => job.id).filter((id): id is string => Boolean(id));
+  const jobIds = jobs.map((job) => job.id).filter(Boolean);
   let billingSummaries: JobBillingSummaryEntry[] = [];
   if (jobIds.length > 0) {
     try {
@@ -248,27 +314,27 @@ export default async function MyJobsPage({ searchParams }: MyJobsPageProps) {
     paymentJobSummary?.tier ?? paymentJob?.tier ?? null
   );
   const paymentAlertPrice =
-    paymentJobSummary?.price_cents != null
-      ? formatPriceLabel(paymentJobSummary.price_cents, paymentJobSummary.is_subscription)
-      : null;
-  const paymentAlertRenewal =
-    paymentJobSummary?.is_subscription && paymentJobSummary.subscription_renews_at
-      ? `Renews ${formatRelativeDate(paymentJobSummary.subscription_renews_at, {
-          style: 'simple',
-        })}`
-      : paymentJobSummary?.is_subscription && paymentJobSummary.subscription_status
-        ? humanizeStatus(paymentJobSummary.subscription_status)
-        : paymentJob?.expires_at
-          ? `Expires ${formatRelativeDate(paymentJob.expires_at)}`
-          : null;
-
-  const getStatusColor = (status: JobStatus) => {
-    return BADGE_COLORS.jobStatus[status] || 'bg-muted';
-  };
+    paymentJobSummary?.price_cents == undefined
+      ? null
+      : formatPriceLabel(paymentJobSummary.price_cents, paymentJobSummary.is_subscription);
+  const paymentAlertRenewal = (() => {
+    if (paymentJobSummary?.is_subscription && paymentJobSummary.subscription_renews_at) {
+      return `Renews ${formatRelativeDate(paymentJobSummary.subscription_renews_at, {
+        style: 'simple',
+      })}`;
+    }
+    if (paymentJobSummary?.is_subscription && paymentJobSummary.subscription_status) {
+      return humanizeStatus(paymentJobSummary.subscription_status);
+    }
+    if (paymentJob?.expires_at) {
+      return `Expires ${formatRelativeDate(paymentJob.expires_at)}`;
+    }
+    return null;
+  })();
 
   const getPlanBadge = (
-    plan: Database['public']['Enums']['job_plan'] | string | null | undefined,
-    tier?: Database['public']['Enums']['job_tier'] | string | null
+    plan: Database['public']['Enums']['job_plan'] | null | undefined,
+    tier?: Database['public']['Enums']['job_tier'] | null
   ) => {
     if (tier === 'featured') {
       return (
@@ -342,12 +408,12 @@ export default async function MyJobsPage({ searchParams }: MyJobsPageProps) {
         <div className="grid gap-4">
           {jobs.map((job) => {
             const summary = billingSummaryMap.get(job.id);
-            const planLabel = resolvePlanLabel(summary?.plan ?? job.plan ?? null);
-            const tierLabel = resolveTierLabel(summary?.tier ?? job.tier ?? null);
+            const planLabel = resolvePlanLabel(summary?.plan ?? job.plan);
+            const tierLabel = resolveTierLabel(summary?.tier ?? job.tier);
             const planPriceLabel =
-              summary?.price_cents != null
-                ? formatPriceLabel(summary.price_cents, summary.is_subscription)
-                : null;
+              summary?.price_cents == undefined
+                ? null
+                : formatPriceLabel(summary.price_cents, summary.is_subscription);
             const renewalCopy = summary?.is_subscription
               ? [
                   summary.subscription_status ? humanizeStatus(summary.subscription_status) : null,
@@ -359,19 +425,19 @@ export default async function MyJobsPage({ searchParams }: MyJobsPageProps) {
                 ]
                   .filter(Boolean)
                   .join(' • ')
-              : job.expires_at
+              : (job.expires_at
                 ? `Active until ${formatRelativeDate(job.expires_at)}`
-                : null;
+                : null);
             const paymentCopy =
               summary?.last_payment_at && summary.last_payment_amount !== null
                 ? `${formatPriceLabel(summary.last_payment_amount, false)} • Received ${formatRelativeDate(
                     summary.last_payment_at
                   )}`
-                : summary?.last_payment_at
+                : (summary?.last_payment_at
                   ? `Last payment ${formatRelativeDate(summary.last_payment_at)}`
-                  : null;
+                  : null);
             const showBillingCard =
-              Boolean(planPriceLabel || renewalCopy || paymentCopy) || Boolean(summary);
+              Boolean(planPriceLabel ?? renewalCopy ?? paymentCopy) || Boolean(summary);
 
             return (
               <Card key={job.id}>
@@ -382,15 +448,15 @@ export default async function MyJobsPage({ searchParams }: MyJobsPageProps) {
                         <UnifiedBadge
                           variant="base"
                           style="outline"
-                          className={getStatusColor(job.status ?? 'draft')}
+                          className={getStatusColor(job.status)}
                         >
-                          {job.status ?? 'draft'}
+                          {job.status}
                         </UnifiedBadge>
-                        {getPlanBadge(job.plan ?? null, job.tier ?? null)}
+                        {getPlanBadge(job.plan, job.tier)}
                       </div>
                       <CardTitle className="mt-2">{job.title}</CardTitle>
                       <CardDescription>
-                        {job.company} • {job.location || 'Remote'} • {job.type}
+                        {job.company} • {job.location ?? 'Remote'} • {job.type}
                       </CardDescription>
                     </div>
                   </div>
@@ -446,7 +512,7 @@ export default async function MyJobsPage({ searchParams }: MyJobsPageProps) {
                     )}
 
                     {(() => {
-                      const status = job.status ?? 'draft';
+                      const status = job.status;
                       return status === 'active' || status === 'draft' ? (
                         <JobToggleButton jobId={job.id} currentStatus={status} />
                       ) : null;

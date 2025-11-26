@@ -8,7 +8,7 @@
  */
 
 import type { Database } from '@heyclaude/database-types';
-import type { UnifiedCategoryConfig } from '../../../types/category.ts';
+
 import {
   BookOpen,
   Briefcase,
@@ -21,6 +21,7 @@ import {
   Terminal,
   Webhook,
 } from '../../../icons.tsx';
+import type { UnifiedCategoryConfig } from '../../../types/category.ts';
 
 type ContentCategory = Database['public']['Enums']['content_category'];
 
@@ -36,17 +37,13 @@ const ICON_MAP: Record<string, LucideIcon> = {
   Code,
 };
 
-/**
- * Static category configurations (generated at build time)
- * ZERO runtime database queries - 100% faster than unstable_cache
- */
 export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<ContentCategory>> = {
   "mcp": {
     id: "mcp" as const,
     title: "MCP Server",
     pluralTitle: "MCP Servers",
     description: "Model Context Protocol servers that extend Claude's capabilities with external tools and data sources.",
-    icon: ICON_MAP['Server'] || FileText,
+    icon: ICON_MAP['Server'] ?? FileText,
     colorScheme: "orange-500",
     showOnHomepage: true,
     keywords: "MCP servers, Model Context Protocol, Claude Desktop, external tools, API integration",
@@ -57,7 +54,7 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
     buildConfig: {
       batchSize: 10,
       enableCache: true,
-      cacheTTL: 300000,
+      cacheTTL: 300_000,
     },
     apiConfig: {
       generateStaticAPI: true,
@@ -98,7 +95,7 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
     title: "Hook",
     pluralTitle: "Hooks",
     description: "Event-driven automation hooks that trigger during Claude Code operations.",
-    icon: ICON_MAP['Webhook'] || FileText,
+    icon: ICON_MAP['Webhook'] ?? FileText,
     colorScheme: "green-500",
     showOnHomepage: true,
     keywords: "Claude hooks, event hooks, automation, Claude Code hooks, git hooks",
@@ -109,7 +106,7 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
     buildConfig: {
       batchSize: 10,
       enableCache: true,
-      cacheTTL: 300000,
+      cacheTTL: 300_000,
     },
     apiConfig: {
       generateStaticAPI: true,
@@ -150,7 +147,7 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
     title: "Skill",
     pluralTitle: "Skills",
     description: "Task-focused capability guides for Claude (PDF, DOCX, PPTX, XLSX, and more) with requirements and runnable examples.",
-    icon: ICON_MAP['Sparkles'] || FileText,
+    icon: ICON_MAP['Sparkles'] ?? FileText,
     colorScheme: "pink-500",
     showOnHomepage: true,
     keywords: "Claude skills, AI capabilities, task guides, skill packages, Claude Desktop skills",
@@ -161,7 +158,7 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
     buildConfig: {
       batchSize: 10,
       enableCache: true,
-      cacheTTL: 300000,
+      cacheTTL: 300_000,
     },
     apiConfig: {
       generateStaticAPI: true,
@@ -202,7 +199,7 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
     title: "Command",
     pluralTitle: "Commands",
     description: "Custom slash commands to enhance your Claude Code workflow with reusable prompts and actions.",
-    icon: ICON_MAP['Terminal'] || FileText,
+    icon: ICON_MAP['Terminal'] ?? FileText,
     colorScheme: "blue-500",
     showOnHomepage: true,
     keywords: "Claude commands, slash commands, custom commands, Claude Code, CLI",
@@ -213,7 +210,7 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
     buildConfig: {
       batchSize: 10,
       enableCache: true,
-      cacheTTL: 300000,
+      cacheTTL: 300_000,
     },
     apiConfig: {
       generateStaticAPI: true,
@@ -254,7 +251,7 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
     title: "Changelog Entry",
     pluralTitle: "Changelog",
     description: "Product updates, new features, bug fixes, and improvements to the ClaudePro Directory.",
-    icon: ICON_MAP['FileText'] || FileText,
+    icon: ICON_MAP['FileText'] ?? FileText,
     colorScheme: "gray-500",
     showOnHomepage: false,
     keywords: "changelog, updates, release notes, new features, bug fixes",
@@ -265,7 +262,7 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
     buildConfig: {
       batchSize: 10,
       enableCache: true,
-      cacheTTL: 300000,
+      cacheTTL: 300_000,
     },
     apiConfig: {
       generateStaticAPI: true,
@@ -306,7 +303,7 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
     title: "Job",
     pluralTitle: "Jobs",
     description: "Job listings for Claude-related positions, AI engineering roles, and opportunities to work with AI technology.",
-    icon: ICON_MAP['Briefcase'] || FileText,
+    icon: ICON_MAP['Briefcase'] ?? FileText,
     colorScheme: "emerald-500",
     showOnHomepage: false,
     keywords: "Claude jobs, AI jobs, engineering jobs, remote AI positions",
@@ -317,7 +314,7 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
     buildConfig: {
       batchSize: 10,
       enableCache: true,
-      cacheTTL: 300000,
+      cacheTTL: 300_000,
     },
     apiConfig: {
       generateStaticAPI: true,
@@ -358,7 +355,7 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
     title: "Collection",
     pluralTitle: "Collections",
     description: "Curated bundles of related content items organized by theme, use case, or workflow for easy discovery.",
-    icon: ICON_MAP['Layers'] || FileText,
+    icon: ICON_MAP['Layers'] ?? FileText,
     colorScheme: "indigo-500",
     showOnHomepage: true,
     keywords: "Claude collections, curated content, workflow bundles, themed collections",
@@ -369,7 +366,7 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
     buildConfig: {
       batchSize: 10,
       enableCache: true,
-      cacheTTL: 300000,
+      cacheTTL: 300_000,
     },
     apiConfig: {
       generateStaticAPI: true,
@@ -410,7 +407,7 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
     title: "Rule",
     pluralTitle: "Rules",
     description: "Custom rules to guide Claude's behavior and responses in your projects.",
-    icon: ICON_MAP['BookOpen'] || FileText,
+    icon: ICON_MAP['BookOpen'] ?? FileText,
     colorScheme: "red-500",
     showOnHomepage: true,
     keywords: "Claude rules, custom rules, behavior rules, project rules, .cursorrules",
@@ -421,7 +418,7 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
     buildConfig: {
       batchSize: 10,
       enableCache: true,
-      cacheTTL: 300000,
+      cacheTTL: 300_000,
     },
     apiConfig: {
       generateStaticAPI: true,
@@ -462,7 +459,7 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
     title: "AI Agent",
     pluralTitle: "AI Agents",
     description: "Browse specialized AI agents designed for specific tasks and workflows using Claude's capabilities.",
-    icon: ICON_MAP['Sparkles'] || FileText,
+    icon: ICON_MAP['Sparkles'] ?? FileText,
     colorScheme: "purple-500",
     showOnHomepage: true,
     keywords: "Claude agents, AI agents, specialized assistants, workflow automation, Claude AI",
@@ -473,7 +470,7 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
     buildConfig: {
       batchSize: 10,
       enableCache: true,
-      cacheTTL: 300000,
+      cacheTTL: 300_000,
     },
     apiConfig: {
       generateStaticAPI: true,
@@ -514,7 +511,7 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
     title: "Statusline",
     pluralTitle: "Statuslines",
     description: "Customizable status line configurations for Claude Code CLI with real-time session information.",
-    icon: ICON_MAP['Terminal'] || FileText,
+    icon: ICON_MAP['Terminal'] ?? FileText,
     colorScheme: "cyan-500",
     showOnHomepage: true,
     keywords: "Claude statusline, CLI statusline, terminal status, Claude Code customization",
@@ -525,7 +522,7 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
     buildConfig: {
       batchSize: 10,
       enableCache: true,
-      cacheTTL: 300000,
+      cacheTTL: 300_000,
     },
     apiConfig: {
       generateStaticAPI: true,
@@ -566,7 +563,7 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
     title: "Guide",
     pluralTitle: "Guides",
     description: "Comprehensive guides, tutorials, comparisons, and workflows for Claude. SEO-optimized content covering best practices, use cases, and troubleshooting.",
-    icon: ICON_MAP['FileText'] || FileText,
+    icon: ICON_MAP['FileText'] ?? FileText,
     colorScheme: "yellow-500",
     showOnHomepage: false,
     keywords: "Claude guides, tutorials, how-to guides, best practices, workflows",
@@ -577,7 +574,7 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
     buildConfig: {
       batchSize: 10,
       enableCache: true,
-      cacheTTL: 300000,
+      cacheTTL: 300_000,
     },
     apiConfig: {
       generateStaticAPI: true,
@@ -615,17 +612,8 @@ export const CATEGORY_CONFIGS: Record<ContentCategory, UnifiedCategoryConfig<Con
   }
 };
 
-/**
- * All category IDs (static array)
- */
 export const ALL_CATEGORY_IDS = ["agents","changelog","collections","commands","guides","hooks","jobs","mcp","rules","skills","statuslines"] as const;
 
-/**
- * Homepage category IDs (filtered at build time)
- */
 export const HOMEPAGE_CATEGORY_IDS = ["agents","collections","commands","hooks","mcp","rules","skills","statuslines"] as const;
 
-/**
- * Cacheable category IDs (excludes jobs and changelog)
- */
 export const CACHEABLE_CATEGORY_IDS = ["agents","collections","commands","guides","hooks","mcp","rules","skills","statuslines"] as const;

@@ -2,6 +2,7 @@
 
 import { ensureString, logClientWarning } from '@heyclaude/web-runtime/core';
 import { useEffect, useMemo, useState } from 'react';
+
 import { AuthFormPanel } from '@/src/components/core/auth/auth-form-panel';
 import { NewsletterOptInTile } from '@/src/components/core/auth/newsletter-opt-in-tile';
 import { OAuthProviderButton } from '@/src/components/core/auth/oauth-provider-button';
@@ -11,11 +12,11 @@ import {
 } from '@/src/components/features/growth/newsletter/newsletter-utils';
 import { useNewsletterCount } from '@/src/hooks/use-newsletter-count';
 
-interface LoginPanelClientProps {
+interface LoginPanelClientProperties {
   redirectTo?: string | undefined;
 }
 
-export function LoginPanelClient({ redirectTo }: LoginPanelClientProps) {
+export function LoginPanelClient({ redirectTo }: LoginPanelClientProperties) {
   const [newsletterOptIn, setNewsletterOptIn] = useState(false);
   const [newsletterConfig, setNewsletterConfig] = useState<Record<string, unknown>>({});
   const { count, isLoading } = useNewsletterCount();
@@ -50,7 +51,7 @@ export function LoginPanelClient({ redirectTo }: LoginPanelClientProps) {
   const tileBenefits = [
     ensureString(newsletterConfig['newsletter.login_tile.benefit_primary']),
     ensureString(newsletterConfig['newsletter.login_tile.benefit_secondary']),
-  ].filter((benefit) => Boolean(benefit));
+  ].filter(Boolean);
   const tileSafety = ensureString(
     newsletterConfig['newsletter.login_tile.safety'],
     'No spam. Unsubscribe anytime.'

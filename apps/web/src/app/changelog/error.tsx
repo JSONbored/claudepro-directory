@@ -1,7 +1,14 @@
 'use client';
 
-import { logger, normalizeError } from '@heyclaude/web-runtime/core';
+import { Constants } from '@heyclaude/database-types';
+import {
+  createWebAppContextWithId,
+  generateRequestId,
+  logger,
+  normalizeError,
+} from '@heyclaude/web-runtime/core';
 import { useEffect } from 'react';
+
 import { SegmentErrorFallback } from '@/src/components/core/infra/segment-error-fallback';
 
 export default function ChangelogError({
@@ -12,11 +19,16 @@ export default function ChangelogError({
   reset: () => void;
 }) {
   useEffect(() => {
+    const requestId = generateRequestId();
+    const route = globalThis.location.pathname;
     const normalized = normalizeError(error, 'Changelog route rendering failed');
-    logger.error('ChangelogErrorBoundary: changelog segment crashed', normalized, {
-      segment: 'changelog',
+    const logContext = createWebAppContextWithId(requestId, route, 'ChangelogErrorBoundary', {
+      segment: Constants.public.Enums.content_category[10], // 'changelog'
       ...(error.digest && { digest: error.digest }),
+      userAgent: globalThis.navigator.userAgent,
+      url: globalThis.location.href,
     });
+    logger.error('Changelog error boundary triggered', normalized, logContext);
   }, [error]);
 
   return (

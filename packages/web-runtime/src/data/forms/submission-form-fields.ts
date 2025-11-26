@@ -1,14 +1,14 @@
 'use server';
 
+import { MiscService } from '@heyclaude/data-layer';
 import type { Database } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
 import { unstable_cache } from 'next/cache';
 import { cache } from 'react';
-import { logger } from '../../logger.ts';
-import { normalizeError } from '../../errors.ts';
+
 import { fetchCached } from '../../cache/fetch-cached.ts';
-import { MiscService } from '@heyclaude/data-layer';
-import { generateRequestId } from '../../utils/request-context.ts';
+import { normalizeError } from '../../errors.ts';
+import { logger } from '../../logger.ts';
 import type {
   SubmissionContentType,
   SubmissionFormConfig,
@@ -20,6 +20,7 @@ import type {
   SelectFieldDefinition,
   SelectOption
 } from '../../types/component.types.ts';
+import { generateRequestId } from '../../utils/request-context.ts';
 
 const SUBMISSION_CONTENT_TYPES = Constants.public.Enums.submission_type as readonly SubmissionContentType[];
 const FORM_FIELDS_CACHE_TAG = 'submission-form-fields';
@@ -46,14 +47,15 @@ function mapField(item: FormFieldConfigItem): FieldDefinition | null {
   const fieldType = item.type;
 
   switch (fieldType) {
-    case 'text':
+    case 'text': {
       return {
         ...base,
         type: 'text' as const,
         defaultValue: item.default_value ?? undefined,
       } as TextFieldDefinition;
+    }
 
-    case 'textarea':
+    case 'textarea': {
       return {
         ...base,
         type: 'textarea' as const,
@@ -61,8 +63,9 @@ function mapField(item: FormFieldConfigItem): FieldDefinition | null {
         monospace: item.monospace ?? false,
         defaultValue: item.default_value ?? undefined,
       } as TextareaFieldDefinition;
+    }
 
-    case 'number':
+    case 'number': {
       return {
         ...base,
         type: 'number' as const,
@@ -74,6 +77,7 @@ function mapField(item: FormFieldConfigItem): FieldDefinition | null {
             ? (item.default_value as number)
             : undefined,
       } as NumberFieldDefinition;
+    }
 
     case 'select': {
       const options: SelectOption[] = [];
@@ -102,8 +106,9 @@ function mapField(item: FormFieldConfigItem): FieldDefinition | null {
       } as SelectFieldDefinition;
     }
 
-    default:
+    default: {
       return null;
+    }
   }
 }
 
@@ -153,18 +158,22 @@ async function fetchFieldsForContentType(
     }
 
     switch (item.field_group) {
-      case 'common':
+      case 'common': {
         section.common.push(field);
         break;
-      case 'type_specific':
+      }
+      case 'type_specific': {
         section.typeSpecific.push(field);
         break;
-      case 'tags':
+      }
+      case 'tags': {
         section.tags.push(field);
         break;
-      default:
+      }
+      default: {
         section.common.push(field);
         break;
+      }
     }
   }
 

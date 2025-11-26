@@ -7,7 +7,7 @@
 
 import type { JobStatus } from '@heyclaude/web-runtime';
 import { toggleJobStatus } from '@heyclaude/web-runtime/actions';
-import { logClientWarning } from '@heyclaude/web-runtime/core';
+import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import { Pause, Play } from '@heyclaude/web-runtime/icons';
 import type { ButtonStyleProps } from '@heyclaude/web-runtime/types/component.types';
 import { toasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
@@ -30,6 +30,11 @@ export function JobToggleButton({
 }: JobToggleButtonProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+  const runLoggedAsync = useLoggedAsync({
+    scope: 'JobToggleButton',
+    defaultMessage: 'Job status toggle failed',
+    defaultRethrow: false,
+  });
 
   const handleToggle = () => {
     // Toggle between 'active' and 'draft' status
@@ -37,25 +42,33 @@ export function JobToggleButton({
 
     startTransition(async () => {
       try {
-        const result = await toggleJobStatus({
-          job_id: jobId,
-          new_status: newStatus,
-        });
+        await runLoggedAsync(
+          async () => {
+            const result = await toggleJobStatus({
+              job_id: jobId,
+              new_status: newStatus,
+            });
 
-        if (result?.data?.success) {
-          toasts.success.actionCompleted(
-            newStatus === 'active' ? 'Job listing resumed' : 'Job listing paused'
-          );
-          router.refresh();
-        } else {
-          toasts.error.actionFailed('update job status');
-        }
+            if (result?.data?.success) {
+              toasts.success.actionCompleted(
+                newStatus === 'active' ? 'Job listing resumed' : 'Job listing paused'
+              );
+              router.refresh();
+            } else {
+              throw new Error('Job status toggle returned success: false');
+            }
+          },
+          {
+            message: 'Job status toggle failed',
+            context: { jobId, newStatus, currentStatus },
+          }
+        );
       } catch (error) {
-        logClientWarning('JobToggleButton: toggle failed', error, {
-          jobId,
-          newStatus,
-        });
-        toasts.error.fromError(error, 'Failed to toggle job status');
+        // Error already logged by useLoggedAsync
+        toasts.error.fromError(
+          error instanceof Error ? error : new Error('Failed to toggle job status'),
+          'Failed to toggle job status'
+        );
       }
     });
   };

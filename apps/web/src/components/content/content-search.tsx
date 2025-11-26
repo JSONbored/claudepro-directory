@@ -22,8 +22,8 @@ const UnifiedSearch = dynamic(
 
 import type { Database } from '@heyclaude/database-types';
 import type { UnifiedSearchFilters } from '@heyclaude/web-runtime';
-import { logger, normalizeError } from '@heyclaude/web-runtime/core';
 import { searchUnifiedClient } from '@heyclaude/web-runtime/data';
+import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import { HelpCircle } from '@heyclaude/web-runtime/icons';
 import type {
   ContentSearchClientProps,
@@ -157,6 +157,11 @@ function ContentSearchClientComponent<T extends DisplayableContent>({
     applyPreset,
     removePreset,
   } = useSavedSearchPresets({ pathname });
+  const runLoggedAsync = useLoggedAsync({
+    scope: 'ContentSearchClient',
+    defaultMessage: 'Content search failed',
+    defaultRethrow: false,
+  });
 
   const combinedItems = useMemo(() => {
     const merged: T[] = [];
@@ -192,58 +197,67 @@ function ContentSearchClientComponent<T extends DisplayableContent>({
         return;
       }
 
-      try {
-        const searchFilters: UnifiedSearchFilters = {
-          limit: 100,
-        };
-
-        if (nextFilters.category) {
-          searchFilters.categories = [nextFilters.category];
-        } else if (category) {
-          searchFilters.categories = [category];
-        }
-
-        if (nextFilters.tags && nextFilters.tags.length > 0) {
-          searchFilters.tags = nextFilters.tags;
-        }
-
-        if (nextFilters.author) {
-          searchFilters.authors = [nextFilters.author];
-        }
-
-        if (nextFilters.sort) {
-          const sortMap: Record<string, 'relevance' | 'popularity' | 'newest' | 'alphabetical'> = {
-            relevance: 'relevance',
-            popularity: 'popularity',
-            newest: 'newest',
-            alphabetical: 'alphabetical',
+      const result = await runLoggedAsync(
+        async () => {
+          const searchFilters: UnifiedSearchFilters = {
+            limit: 100,
           };
-          const mappedSort = sortMap[nextFilters.sort];
-          if (mappedSort) {
-            searchFilters.sort = mappedSort;
+
+          if (nextFilters.category) {
+            searchFilters.categories = [nextFilters.category];
+          } else if (category) {
+            searchFilters.categories = [category];
           }
+
+          if (nextFilters.tags && nextFilters.tags.length > 0) {
+            searchFilters.tags = nextFilters.tags;
+          }
+
+          if (nextFilters.author) {
+            searchFilters.authors = [nextFilters.author];
+          }
+
+          if (nextFilters.sort) {
+            const sortMap: Record<string, 'relevance' | 'popularity' | 'newest' | 'alphabetical'> =
+              {
+                relevance: 'relevance',
+                popularity: 'popularity',
+                newest: 'newest',
+                alphabetical: 'alphabetical',
+              };
+            const mappedSort = sortMap[nextFilters.sort];
+            if (mappedSort) {
+              searchFilters.sort = mappedSort;
+            }
+          }
+
+          const result = await searchUnifiedClient({
+            query: sanitizedQuery,
+            entities: ['content'],
+            filters: searchFilters,
+          });
+
+          return result.results as T[];
+        },
+        {
+          context: {
+            query: sanitizedQuery,
+            hasFilters: hasFilterCriteria(nextFilters) ? 'true' : 'false',
+            quickFilterType: telemetry?.quickFilterType,
+            quickFilterValue: telemetry?.quickFilterValue,
+          },
+          rethrow: false,
         }
+      );
 
-        const result = await searchUnifiedClient({
-          query: sanitizedQuery,
-          entities: ['content'],
-          filters: searchFilters,
-        });
-
-        setSearchResults(result.results as T[]);
-      } catch (error) {
-        const normalized = normalizeError(error, 'Content search failed');
-        logger.error('Content search failed', normalized, {
-          source: 'ContentSearchClient',
-          query: sanitizedQuery,
-          hasFilters: hasFilterCriteria(nextFilters),
-          quickFilterType: telemetry?.quickFilterType,
-          quickFilterValue: telemetry?.quickFilterValue,
-        });
+      if (result) {
+        setSearchResults(result);
+      } else {
+        // On error, fallback to original items
         setSearchResults(items);
       }
     },
-    [category, filters, items]
+    [category, filters, items, runLoggedAsync]
   );
 
   const handleFiltersChange = useCallback(

@@ -28,7 +28,7 @@ The `.zed/debug.json` file contains debug configurations for runtime debugging (
 
 Your project uses:
 - **TypeScript** - Type checking (shows in Problems panel automatically)
-- **Biome** - Linting (shows in Problems panel automatically)
+- **ESLint** - Linting and code quality (shows in Problems panel automatically)
 - **Deno** - For edge functions (shows in Problems panel automatically)
 
 ### Viewing Issues
@@ -104,4 +104,4 @@ If static analysis doesn't work:
 1. Restart Zed
 2. Restart TypeScript server
 3. Check that `tsconfig.json` is valid
-4. Check that `biome.json` is valid
+4. Check that `eslint.config.mjs` is valid

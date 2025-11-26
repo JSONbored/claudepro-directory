@@ -1,10 +1,11 @@
 'use server';
 
+import { ContentService } from '@heyclaude/data-layer';
 import type { Database } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
+
 import { fetchCached } from '../../cache/fetch-cached.ts';
 import { generateContentTags } from '../content-helpers.ts';
-import { ContentService } from '@heyclaude/data-layer';
 
 const CONTENT_CATEGORY_VALUES = Constants.public.Enums.content_category;
 
@@ -32,7 +33,7 @@ export interface RelatedContentResult {
 }
 
 export async function getRelatedContent(input: RelatedContentInput): Promise<RelatedContentResult> {
-  const currentSlug = input.currentPath.split('/').pop() || '';
+  const currentSlug = input.currentPath.split('/').pop() ?? '';
   const category = input.currentCategory;
 
   if (!isValidContentCategory(category)) {
@@ -45,12 +46,12 @@ export async function getRelatedContent(input: RelatedContentInput): Promise<Rel
     (client) => new ContentService(client).getRelatedContent({
         p_category: category,
         p_slug: currentSlug,
-        p_tags: input.currentTags || [],
-        p_limit: input.limit || 3,
-        p_exclude_slugs: input.exclude || []
+        p_tags: input.currentTags ?? [],
+        p_limit: input.limit ?? 3,
+        p_exclude_slugs: input.exclude ?? []
     }),
     {
-      keyParts: ['related-content', category, currentSlug, input.limit || 3],
+      keyParts: ['related-content', category, currentSlug, input.limit ?? 3],
       tags: generateContentTags(category, null, ['related-content']),
       ttlKey: 'cache.related_content.ttl_seconds',
       fallback: [],

@@ -1,8 +1,17 @@
 /** Homepage consuming homepageConfigs for runtime-tunable categories */
 
 import type { Database } from '@heyclaude/database-types';
+import { trackRPCFailure } from '@heyclaude/web-runtime/core';
+import {
+  generatePageMetadata,
+  getHomepageCategoryIds,
+  getHomepageData,
+} from '@heyclaude/web-runtime/server';
+import type { SearchFilterOptions } from '@heyclaude/web-runtime/types/component.types';
+import type { Metadata } from 'next';
 import dynamicImport from 'next/dynamic';
 import { Suspense } from 'react';
+
 import { LazySection } from '@/src/components/core/infra/scroll-animated-section';
 import { TopContributors } from '@/src/components/features/community/top-contributors';
 import { HomepageContentServer } from '@/src/components/features/home/homepage-content-server';
@@ -13,22 +22,13 @@ import { HomePageLoading } from '@/src/components/primitives/feedback/loading-fa
 
 const NewsletterCTAVariant = dynamicImport(
   () =>
-    import('@/src/components/features/growth/newsletter/newsletter-cta-variants').then((mod) => ({
-      default: mod.NewsletterCTAVariant,
+    import('@/src/components/features/growth/newsletter/newsletter-cta-variants').then((module_) => ({
+      default: module_.NewsletterCTAVariant,
     })),
   {
     loading: () => <div className="h-32 animate-pulse rounded-lg bg-muted/20" />,
   }
 );
-
-import { trackRPCFailure } from '@heyclaude/web-runtime/core';
-import {
-  generatePageMetadata,
-  getHomepageCategoryIds,
-  getHomepageData,
-} from '@heyclaude/web-runtime/server';
-import type { SearchFilterOptions } from '@heyclaude/web-runtime/types/component.types';
-import type { Metadata } from 'next';
 
 /**
  * Dynamic Rendering Required
@@ -40,7 +40,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/');
 }
 
-interface HomePageProps {
+interface HomePageProperties {
   searchParams: Promise<{
     q?: string;
   }>;
@@ -71,18 +71,9 @@ async function TopContributorsServer() {
   }
 
   const topContributors = (homepageResult?.top_contributors ?? [])
-    .filter((c): c is TopContributor =>
-      Boolean(
-        c &&
-          typeof c === 'object' &&
-          'id' in c &&
-          'slug' in c &&
-          'name' in c &&
-          c.id &&
-          c.slug &&
-          c.name
-      )
-    )
+    .filter((c): c is TopContributor => {
+      return 'id' in c && 'slug' in c && 'name' in c && Boolean(c.id && c.slug && c.name);
+    })
     .map((contributor) => ({
       id: contributor.id,
       slug: contributor.slug,
@@ -90,7 +81,7 @@ async function TopContributorsServer() {
       image: contributor.image,
       bio: contributor.bio,
       work: contributor.work,
-      tier: (contributor.tier ?? 'free') as Database['public']['Enums']['user_tier'],
+      tier: contributor.tier ?? 'free',
       created_at: new Date().toISOString(),
     }));
 
@@ -109,7 +100,7 @@ async function TopContributorsServer() {
  * This improves TTFB by ~50% (200-300ms → 100-150ms) by allowing
  * the hero section to render immediately while other data loads.
  */
-export default async function HomePage({ searchParams }: HomePageProps) {
+export default async function HomePage({ searchParams }: HomePageProperties) {
   await searchParams;
 
   // Fetch member count for hero (lightweight, can be done in parallel with other data)

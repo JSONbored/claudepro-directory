@@ -41,14 +41,15 @@ pre-commit:
         fi
       fail_text: "❌ Type errors found in edge functions. Fix them before committing."
 
-    # 3. Auto-format with Biome (via ultracite)
-    format:
-      glob: "**/*.{ts,tsx,js,jsx,json}"
+    # 3. Lint and auto-fix with ESLint
+    lint:
+      glob: "**/*.{ts,tsx}"
+      exclude: "apps/edge/functions/**"
       run: |
-        echo "✨ Auto-formatting staged files..."
-        npx ultracite fix
+        echo "🔍 Linting and auto-fixing staged files..."
+        pnpm lint:eslint --fix
         git add -u
-      fail_text: "❌ Auto-formatting failed. Check for syntax errors."
+      fail_text: "❌ ESLint found errors. Fix them before committing."
 
 # ============================================================================
 # PRE-PUSH: Comprehensive checks before code reaches remote
@@ -203,7 +204,7 @@ min_version: 1.13.0
 # USAGE TIPS
 # ============================================================================
 # Skip specific commands:
-#   LEFTHOOK_EXCLUDE=type-check,format git commit
+#   LEFTHOOK_EXCLUDE=type-check,lint git commit
 #   LEFTHOOK_EXCLUDE=tech-debt git push
 #
 # Skip commit-msg validation:

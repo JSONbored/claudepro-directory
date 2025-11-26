@@ -1,5 +1,6 @@
 import { generatePageMetadata } from '@heyclaude/web-runtime/data';
 import type { Metadata } from 'next';
+
 import { NotFoundEmpty } from '@/src/components/primitives/feedback/empty-state';
 
 export async function generateMetadata(): Promise<Metadata> {

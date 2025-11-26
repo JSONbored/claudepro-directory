@@ -16,6 +16,7 @@ import {
   getHomepageFeaturedCategories,
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
+import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import type {
   DisplayableContent,
   FilterState,
@@ -71,6 +72,12 @@ function HomePageClientComponent({
   const [isSearching, setIsSearching] = useState(false);
   const [filters, setFilters] = useState({});
   const [currentSearchQuery, setCurrentSearchQuery] = useState('');
+
+  const runLoggedAsync = useLoggedAsync({
+    scope: 'HomePageClient',
+    defaultMessage: 'Homepage operation failed',
+    defaultRethrow: false,
+  });
 
   // Initialize featuredCategories from server data immediately (before Statsig config loads)
   // This ensures content renders even if Statsig config fails or is slow
@@ -186,45 +193,56 @@ function HomePageClientComponent({
       setIsLoadingAllConfigs(true);
 
       try {
-        const { fetchPaginatedContent } = await import('@heyclaude/web-runtime/data');
+        await runLoggedAsync(
+          async () => {
+            const { fetchPaginatedContent } = await import('@heyclaude/web-runtime/data');
 
-        const result = await fetchPaginatedContent({
-          offset,
-          limit,
-          category: null,
-        });
+            const result = await fetchPaginatedContent({
+              offset,
+              limit,
+              category: null,
+            });
 
-        if (result?.serverError) {
-          // Error already logged by safe-action middleware
-          trackHomepageSectionError('all-content', 'fetch-paginated-content', result.serverError, {
-            offset,
-            limit,
-            source: 'fetchAllConfigs',
-          });
-          return; // Exit early on error
-        }
+            if (result?.serverError) {
+              // Error already logged by safe-action middleware
+              trackHomepageSectionError(
+                'all-content',
+                'fetch-paginated-content',
+                result.serverError,
+                {
+                  offset,
+                  limit,
+                  source: 'fetchAllConfigs',
+                }
+              );
+              throw new Error(result.serverError);
+            }
 
-        // Safe-action returns { data: T, serverError?: ... } structure
-        // fetchPaginatedContent returns DisplayableContent[] wrapped in { data: DisplayableContent[] }
-        // Defensive: Ensure data is an array before using it
-        const newItems: DisplayableContent[] = Array.isArray(result?.data) ? result.data : [];
+            // Safe-action returns { data: T, serverError?: ... } structure
+            // fetchPaginatedContent returns DisplayableContent[] wrapped in { data: DisplayableContent[] }
+            // Defensive: Ensure data is an array before using it
+            const newItems: DisplayableContent[] = Array.isArray(result?.data) ? result.data : [];
 
-        if (newItems.length < limit) {
-          setHasMoreAllConfigs(false);
-        }
+            if (newItems.length < limit) {
+              setHasMoreAllConfigs(false);
+            }
 
-        setAllConfigs((prev) => [...prev, ...newItems]);
+            setAllConfigs((prev) => [...prev, ...newItems]);
+          },
+          {
+            message: 'Failed to fetch paginated content',
+            context: { offset, limit, section: 'all-content' },
+            level: 'warn',
+          }
+        );
       } catch (error) {
-        trackHomepageSectionError('all-content', 'fetch-paginated-content', error, {
-          offset,
-          limit,
-          source: 'fetchAllConfigs',
-        });
+        // Error already logged by useLoggedAsync, trackHomepageSectionError also called
+        // No need to do anything else - error is handled
       } finally {
         setIsLoadingAllConfigs(false);
       }
     },
-    [isLoadingAllConfigs, hasMoreAllConfigs]
+    [isLoadingAllConfigs, hasMoreAllConfigs, runLoggedAsync]
   );
 
   const handleFetchMore = useCallback(async () => {
@@ -255,23 +273,40 @@ function HomePageClientComponent({
       setIsSearching(true);
 
       try {
-        const { searchUnifiedClient } = await import('@heyclaude/web-runtime/edge/search-client');
+        await runLoggedAsync(
+          async () => {
+            const { searchUnifiedClient } = await import(
+              '@heyclaude/web-runtime/edge/search-client'
+            );
 
-        const effectiveTab = categoryOverride ?? activeTab;
-        const categories =
-          effectiveTab !== 'all' && effectiveTab !== 'community' ? [effectiveTab] : undefined;
+            const effectiveTab = categoryOverride ?? activeTab;
+            const categories =
+              effectiveTab !== 'all' && effectiveTab !== 'community' ? [effectiveTab] : undefined;
 
-        const result = await searchUnifiedClient({
-          query: query.trim(),
-          entities: ['content'],
-          filters: {
-            limit: 50,
-            ...(categories ? { categories } : {}),
+            const result = await searchUnifiedClient({
+              query: query.trim(),
+              entities: ['content'],
+              filters: {
+                limit: 50,
+                ...(categories ? { categories } : {}),
+              },
+            });
+
+            setSearchResults(result.results as DisplayableContent[]);
           },
-        });
-
-        setSearchResults(result.results as DisplayableContent[]);
+          {
+            message: 'Search operation failed',
+            context: {
+              query: query.trim(),
+              category: categoryOverride ?? activeTab,
+              section: 'search',
+            },
+            level: 'warn',
+          }
+        );
       } catch (error) {
+        // Error already logged by useLoggedAsync
+        // trackHomepageSectionError is called by the error handler if needed
         const effectiveTab = categoryOverride ?? activeTab;
         trackHomepageSectionError('search', 'search-unified', error, {
           query: query.trim(),
@@ -282,7 +317,7 @@ function HomePageClientComponent({
         setIsSearching(false);
       }
     },
-    [allConfigs, activeTab]
+    [allConfigs, activeTab, runLoggedAsync]
   );
 
   const handleFiltersChange = useCallback((newFilters: FilterState) => {

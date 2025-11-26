@@ -6,6 +6,7 @@
  */
 
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
+
 import {
   PageHeaderSkeleton,
   Skeleton,
@@ -26,15 +27,15 @@ export default function ChangelogLoading() {
 
       {/* Category Filter Skeleton */}
       <div className="grid w-full gap-1 lg:w-auto lg:grid-flow-col">
-        {[...Array(7)].map((_, i) => (
-          <Skeleton key={`tab-${i + 1}`} size="lg" width="lg" rounded="md" />
+        {Array.from({ length: 7 }).map((_, index) => (
+          <Skeleton key={`tab-${index + 1}`} size="lg" width="lg" rounded="md" />
         ))}
       </div>
 
       {/* Changelog Cards Skeleton */}
       <div className="space-y-6">
-        {[...Array(6)].map((_, i) => (
-          <div key={`changelog-skeleton-${i + 1}`} className="rounded-lg border bg-card p-6">
+        {Array.from({ length: 6 }).map((_, index) => (
+          <div key={`changelog-skeleton-${index + 1}`} className="rounded-lg border bg-card p-6">
             <div className={'mb-3 flex items-center gap-2'}>
               <Skeleton size="sm" width="xs" />
               <Skeleton size="sm" width="sm" />

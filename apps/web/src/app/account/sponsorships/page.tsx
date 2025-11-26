@@ -4,6 +4,7 @@ import {
   hashUserId,
   logger,
   normalizeError,
+  withDuration,
 } from '@heyclaude/web-runtime/core';
 import {
   generatePageMetadata,
@@ -15,6 +16,7 @@ import { BarChart, Eye, MousePointer, TrendingUp } from '@heyclaude/web-runtime/
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import type { Metadata } from 'next';
 import Link from 'next/link';
+
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { Button } from '@/src/components/primitives/ui/button';
 import {
@@ -54,6 +56,7 @@ function isSponsorshipActive(
 }
 
 export default async function SponsorshipsPage() {
+  const startTime = Date.now();
   // Generate single requestId for this page request
   const requestId = generateRequestId();
   const baseLogContext = createWebAppContextWithId(
@@ -62,11 +65,17 @@ export default async function SponsorshipsPage() {
     'SponsorshipsPage'
   );
 
+  // Section: Authentication
+  const authSectionStart = Date.now();
   const { user } = await getAuthenticatedUser({ context: 'SponsorshipsPage' });
 
   if (!user) {
     logger.warn('SponsorshipsPage: unauthenticated access attempt', undefined, {
-      ...baseLogContext,
+      ...withDuration(baseLogContext, startTime),
+      requestId,
+      operation: 'SponsorshipsPage',
+      section: 'authentication',
+      sectionDuration_ms: Date.now() - authSectionStart,
       timestamp: new Date().toISOString(),
     });
     return (
@@ -89,12 +98,20 @@ export default async function SponsorshipsPage() {
   const hashedUserId = hashUserId(user.id);
   const logContext = { ...baseLogContext, userIdHash: hashedUserId };
 
+  // Section: Sponsorships Data Fetch
+  const sponsorshipsSectionStart = Date.now();
   let sponsorships: Awaited<ReturnType<typeof getUserSponsorships>>;
   try {
     sponsorships = await getUserSponsorships(user.id);
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load user sponsorships');
-    logger.error('SponsorshipsPage: getUserSponsorships threw', normalized, logContext);
+    logger.error('SponsorshipsPage: getUserSponsorships threw', normalized, {
+      ...withDuration(logContext, startTime),
+      requestId,
+      operation: 'SponsorshipsPage',
+      section: 'sponsorships-data-fetch',
+      sectionDuration_ms: Date.now() - sponsorshipsSectionStart,
+    });
     return (
       <div className="space-y-6">
         <div className="text-destructive">Failed to load sponsorships. Please try again later.</div>
@@ -127,7 +144,7 @@ export default async function SponsorshipsPage() {
     );
   }
 
-  const orderedSponsorships = [...sponsorships].sort(
+  const orderedSponsorships = [...sponsorships].toSorted(
     (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
   );
 
@@ -160,7 +177,7 @@ export default async function SponsorshipsPage() {
           const clickCount = sponsorship.click_count ?? 0;
 
           const hasHitLimit =
-            sponsorship.impression_limit != null && impressionCount >= sponsorship.impression_limit;
+            sponsorship.impression_limit != undefined && impressionCount >= sponsorship.impression_limit;
 
           const ctr =
             impressionCount > 0 ? ((clickCount / impressionCount) * 100).toFixed(2) : '0.00';

@@ -1,6 +1,11 @@
 'use client';
 
-import { logger, normalizeError } from '@heyclaude/web-runtime/core';
+import {
+  createWebAppContextWithId,
+  generateRequestId,
+  logger,
+  normalizeError,
+} from '@heyclaude/web-runtime/core';
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { useEffect } from 'react';
 
@@ -13,15 +18,17 @@ export default function GlobalError({
 }) {
   useEffect(() => {
     // Log critical global errors with digest for Vercel observability
+    const requestId = generateRequestId();
+    const route = globalThis.location.pathname;
     const normalized = normalizeError(error, 'Global error boundary triggered');
-    logger.fatal('Global error boundary triggered', normalized, {
-      errorDigest: error.digest || 'no-digest',
+    const logContext = createWebAppContextWithId(requestId, route, 'GlobalErrorBoundary', {
+      errorDigest: error.digest ?? 'no-digest',
       digestAvailable: Boolean(error.digest),
-      userAgent: typeof window !== 'undefined' ? window.navigator?.userAgent || '' : '',
-      url: typeof window !== 'undefined' ? window.location?.href || '' : '',
-      timestamp: new Date().toISOString(),
+      userAgent: globalThis.navigator.userAgent,
+      url: globalThis.location.href,
       global: true,
     });
+    logger.error('Global error boundary triggered', normalized, logContext);
   }, [error]);
   return (
     <html lang="en">

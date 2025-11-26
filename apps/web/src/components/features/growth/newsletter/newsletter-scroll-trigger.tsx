@@ -8,9 +8,9 @@
 import type { Database } from '@heyclaude/database-types';
 import { getNewsletterConfigValue } from '@heyclaude/web-runtime/actions/feature-flags';
 import { ensureNumber, logUnhandledPromise } from '@heyclaude/web-runtime/core';
+import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import { motion, useScroll } from 'motion/react';
 import { useEffect, useState } from 'react';
-import { useLoggedAsync } from '@/src/hooks/use-logged-async';
 
 import { NewsletterCTAVariant } from './newsletter-cta-variants';
 

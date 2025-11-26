@@ -8,6 +8,7 @@ import {
 import { generatePageMetadata, getCommunityDirectory } from '@heyclaude/web-runtime/data';
 import type { Metadata } from 'next';
 import { Suspense } from 'react';
+
 import { ContributorsSidebar } from '@/src/components/features/community/contributors-sidebar';
 import { ProfileSearchClient } from '@/src/components/features/community/profile-search';
 import { Skeleton } from '@/src/components/primitives/feedback/loading-skeleton';
@@ -156,15 +157,15 @@ async function CommunityDirectoryContent({ searchQuery }: { searchQuery: string 
   );
 }
 
-interface CommunityDirectoryPageProps {
+interface CommunityDirectoryPageProperties {
   searchParams: Promise<{ q?: string }>;
 }
 
 export default async function CommunityDirectoryPage({
   searchParams,
-}: CommunityDirectoryPageProps) {
-  const resolvedParams = await searchParams;
-  const searchQuery = resolvedParams.q || '';
+}: CommunityDirectoryPageProperties) {
+  const resolvedParameters = await searchParams;
+  const searchQuery = resolvedParameters.q ?? '';
 
   return (
     <Suspense fallback={<Skeleton size="xl" className="h-screen w-full" />}>

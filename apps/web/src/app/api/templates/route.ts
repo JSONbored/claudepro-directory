@@ -26,8 +26,8 @@ export async function GET(request: NextRequest) {
   const requestId = generateRequestId();
   const baseLogContext = createWebAppContextWithId(requestId, '/api/templates', 'TemplatesAPI');
 
-  const searchParams = request.nextUrl.searchParams;
-  const category = searchParams.get('category');
+  const searchParameters = request.nextUrl.searchParams;
+  const category = searchParameters.get('category');
 
   try {
     // Validate category

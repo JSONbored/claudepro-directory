@@ -4,6 +4,7 @@ import {
   hashUserId,
   logger,
   normalizeError,
+  withDuration,
 } from '@heyclaude/web-runtime/core';
 import {
   generatePageMetadata,
@@ -16,6 +17,7 @@ import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
+
 import { SimpleCopyButton } from '@/src/components/core/buttons/shared/simple-copy-button';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { CollectionItemManager } from '@/src/components/core/domain/collection-items-editor';
@@ -35,16 +37,17 @@ import {
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-interface CollectionPageProps {
+interface CollectionPageProperties {
   params: Promise<{ slug: string }>;
 }
 
-export async function generateMetadata({ params }: CollectionPageProps): Promise<Metadata> {
+export async function generateMetadata({ params }: CollectionPageProperties): Promise<Metadata> {
   const { slug } = await params;
   return generatePageMetadata('/account/library/:slug', { params: { slug } });
 }
 
-export default async function CollectionDetailPage({ params }: CollectionPageProps) {
+export default async function CollectionDetailPage({ params }: CollectionPageProperties) {
+  const startTime = Date.now();
   const { slug } = await params;
 
   // Generate single requestId for this page request
@@ -58,24 +61,70 @@ export default async function CollectionDetailPage({ params }: CollectionPagePro
     }
   );
 
+  // Section: Authentication
+  const authSectionStart = Date.now();
   const { user } = await getAuthenticatedUser({ context: 'CollectionDetailPage' });
 
   if (!user) {
-    logger.warn('CollectionDetailPage: unauthenticated access attempt', undefined, baseLogContext);
+    logger.warn(
+      'CollectionDetailPage: unauthenticated access attempt',
+      undefined,
+      withDuration(
+        {
+          ...baseLogContext,
+          section: 'authentication',
+        },
+        authSectionStart
+      )
+    );
     redirect('/login');
   }
 
   // Hash user ID for privacy-compliant logging (GDPR/CCPA)
   const userIdHash = hashUserId(user.id);
   const logContext = { ...baseLogContext, userIdHash };
+  logger.info(
+    'CollectionDetailPage: authentication successful',
+    withDuration(
+      {
+        ...logContext,
+        section: 'authentication',
+      },
+      authSectionStart
+    )
+  );
 
+  // Section: Collection Data Fetch
+  const collectionSectionStart = Date.now();
   let collectionData: Awaited<ReturnType<typeof getCollectionDetail>> = null;
   let hasError = false;
   try {
     collectionData = await getCollectionDetail(user.id, slug);
+    logger.info(
+      'CollectionDetailPage: collection data loaded',
+      withDuration(
+        {
+          ...logContext,
+          section: 'collection-data-fetch',
+          hasData: !!collectionData,
+        },
+        collectionSectionStart
+      )
+    );
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load collection detail for account view');
-    logger.error('CollectionDetailPage: getCollectionDetail threw', normalized, logContext);
+    logger.error(
+      'CollectionDetailPage: getCollectionDetail threw',
+      normalized,
+      withDuration(
+        {
+          ...logContext,
+          section: 'collection-data-fetch',
+          sectionDuration_ms: Date.now() - collectionSectionStart,
+        },
+        startTime
+      )
+    );
     hasError = true;
   }
 
@@ -111,9 +160,32 @@ export default async function CollectionDetailPage({ params }: CollectionPagePro
   const { collection, items, bookmarks } = collectionData;
 
   if (!collection) {
-    logger.warn('CollectionDetailPage: collection is null in response', undefined, logContext);
+    logger.warn(
+      'CollectionDetailPage: collection is null in response',
+      undefined,
+      withDuration(
+        {
+          ...logContext,
+          section: 'collection-data-fetch',
+          sectionDuration_ms: Date.now() - collectionSectionStart,
+        },
+        startTime
+      )
+    );
     notFound();
   }
+
+  // Final summary log
+  logger.info(
+    'CollectionDetailPage: page render completed',
+    withDuration(
+      {
+        ...logContext,
+        section: 'page-render',
+      },
+      startTime
+    )
+  );
 
   const shareUrl = collection.is_public
     ? `${APP_CONFIG.url}/u/${user.id}/collections/${collection.slug}`
@@ -182,8 +254,8 @@ export default async function CollectionDetailPage({ params }: CollectionPagePro
         <CardContent>
           <CollectionItemManager
             collectionId={collection.id}
-            items={(items || []).map((item) => ({ ...item, notes: item.notes ?? '' }))}
-            availableBookmarks={(bookmarks || []).map((b) => ({ ...b, notes: b.notes ?? '' }))}
+            items={(items ?? []).map((item) => ({ ...item, notes: item.notes ?? '' }))}
+            availableBookmarks={(bookmarks ?? []).map((b) => ({ ...b, notes: b.notes ?? '' }))}
           />
         </CardContent>
       </Card>

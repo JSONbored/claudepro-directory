@@ -1,4 +1,4 @@
-import type { Database } from '@heyclaude/database-types';
+import { Constants, type Database } from '@heyclaude/database-types';
 import { logger } from '@heyclaude/web-runtime/core';
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import type { ReactElement } from 'react';
@@ -160,14 +160,14 @@ export function SubmissionCard({
           )}
         </div>
 
-        {status === 'rejected' && submission.rejection_reason && (
+        {status === Constants.public.Enums.submission_status[2] && submission.rejection_reason && ( // 'rejected'
           <div className="mb-4 rounded border border-red-500/20 bg-red-500/10 p-3">
             <p className={'mb-1 font-medium text-red-400 text-sm'}>Rejection Reason:</p>
             <p className={'text-muted-foreground text-sm'}>{submission.rejection_reason}</p>
           </div>
         )}
 
-        {status === 'merged' && (
+        {status === Constants.public.Enums.submission_status[4] && ( // 'merged'
           <div className="mb-4 rounded border border-green-500/20 bg-green-500/10 p-3">
             <p className={'font-medium text-green-400 text-sm'}>
               🎉 Your contribution is now live on ClaudePro Directory!

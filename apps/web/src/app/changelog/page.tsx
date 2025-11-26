@@ -22,28 +22,34 @@
  * - Responsive design
  */
 
+import { Constants } from '@heyclaude/database-types';
+import type { Database } from '@heyclaude/database-types';
+import {
+  createWebAppContextWithId,
+  generateRequestId,
+  logger,
+  normalizeError,
+} from '@heyclaude/web-runtime/core';
+import { generatePageMetadata, getChangelogOverview } from '@heyclaude/web-runtime/data';
+import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
+import { ArrowLeft } from '@heyclaude/web-runtime/icons';
+import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import type { Metadata } from 'next';
 import dynamicImport from 'next/dynamic';
-import { StructuredData } from '@/src/components/core/infra/structured-data';
-import { NavLink } from '@/src/components/core/navigation/navigation-link';
-import { ChangelogListClient } from '@/src/components/features/changelog/changelog-list-client';
 
 const NewsletterCTAVariant = dynamicImport(
   () =>
-    import('@/src/components/features/growth/newsletter/newsletter-cta-variants').then((mod) => ({
-      default: mod.NewsletterCTAVariant,
+    import('@/src/components/features/growth/newsletter/newsletter-cta-variants').then((module_) => ({
+      default: module_.NewsletterCTAVariant,
     })),
   {
     loading: () => <div className="h-32 animate-pulse rounded-lg bg-muted/20" />,
   }
 );
 
-import type { Database } from '@heyclaude/database-types';
-import { createWebAppContextWithId, generateRequestId, logger } from '@heyclaude/web-runtime/core';
-import { generatePageMetadata, getChangelogOverview } from '@heyclaude/web-runtime/data';
-import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
-import { ArrowLeft } from '@heyclaude/web-runtime/icons';
-import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import { StructuredData } from '@/src/components/core/infra/structured-data';
+import { NavLink } from '@/src/components/core/navigation/navigation-link';
+import { ChangelogListClient } from '@/src/components/features/changelog/changelog-list-client';
 
 /**
  * ISR: 1 hour (3600s) - Changelog list updates periodically
@@ -78,11 +84,8 @@ export async function generateMetadata(): Promise<Metadata> {
       'ChangelogPageMetadata'
     );
 
-    logger.error(
-      'Failed to generate changelog metadata',
-      error instanceof Error ? error : new Error(String(error)),
-      metadataLogContext
-    );
+    const normalized = normalizeError(error, 'Failed to generate changelog metadata');
+    logger.error('Failed to generate changelog metadata', normalized, metadataLogContext);
     return {
       title: 'Changelog - Claude Pro Directory',
       description: 'Track all updates, features, and improvements to Claude Pro Directory.',
@@ -109,7 +112,7 @@ export default async function ChangelogPage() {
     // This replaces getAllChangelogEntries() + client-side category counting
     const overview = await getChangelogOverview({
       publishedOnly: true, // Only get published entries
-      limit: 10000,
+      limit: 10_000,
       offset: 0,
     });
 
@@ -187,8 +190,7 @@ export default async function ChangelogPage() {
                 total updates
               </div>
               {publishedEntries.length > 0 &&
-                publishedEntries[0] &&
-                publishedEntries[0].release_date && (
+                publishedEntries[0]?.release_date && (
                   <div>
                     Latest:{' '}
                     <time
@@ -215,17 +217,14 @@ export default async function ChangelogPage() {
           <NewsletterCTAVariant
             source="content_page"
             variant="hero"
-            category="changelog" // Context needed for analytics and correct copy
+            category={Constants.public.Enums.content_category[10]} // 'changelog' - Context needed for analytics and correct copy
           />
         </section>
       </>
     );
   } catch (error) {
-    logger.error(
-      'Failed to load changelog page',
-      error instanceof Error ? error : new Error(String(error)),
-      logContext
-    );
+    const normalized = normalizeError(error, 'Failed to load changelog page');
+    logger.error('Failed to load changelog page', normalized, logContext);
 
     // Fallback UI on error
     return (

@@ -8,12 +8,12 @@ import {
   logUnhandledPromise,
   NEWSLETTER_CTA_CONFIG,
 } from '@heyclaude/web-runtime/core';
+import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import { Mail, X } from '@heyclaude/web-runtime/icons';
 import { DIMENSIONS, POSITION_PATTERNS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Button } from '@/src/components/primitives/ui/button';
-import { useLoggedAsync } from '@/src/hooks/use-logged-async';
 
 import { NewsletterForm } from './newsletter-form';
 

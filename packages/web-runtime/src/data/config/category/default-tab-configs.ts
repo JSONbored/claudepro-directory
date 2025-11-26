@@ -1,4 +1,5 @@
 import type { Database } from '@heyclaude/database-types';
+
 import type { TabConfig } from '../../../types/category.ts';
 
 const STANDARD_TABS: ReadonlyArray<TabConfig> = [

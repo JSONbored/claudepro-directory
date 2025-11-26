@@ -7,6 +7,7 @@
 
 import type { Database } from '@heyclaude/database-types';
 import { refreshProfileFromOAuth, updateProfile } from '@heyclaude/web-runtime';
+import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import { toasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useTransition } from 'react';
@@ -60,6 +61,11 @@ interface ProfileEditFormProps {
 
 export function ProfileEditForm({ profile }: ProfileEditFormProps) {
   const [isPending, startTransition] = useTransition();
+  const runLoggedAsync = useLoggedAsync({
+    scope: 'ProfileEditForm',
+    defaultMessage: 'Profile update failed',
+    defaultRethrow: false,
+  });
 
   const {
     handleSubmit,
@@ -93,22 +99,42 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
 
   const onSubmit = (data: ProfileFormData) => {
     startTransition(async () => {
-      const result = await updateProfile({
-        display_name: data.name || undefined,
-        bio: data.bio || '',
-        work: data.work || '',
-        website: data.website || '',
-        social_x_link: data.social_x_link || '',
-        interests: data.interests,
-        profile_public: data.public,
-        follow_email: data.follow_email,
-      });
+      try {
+        await runLoggedAsync(
+          async () => {
+            const result = await updateProfile({
+              display_name: data.name || undefined,
+              bio: data.bio || '',
+              work: data.work || '',
+              website: data.website || '',
+              social_x_link: data.social_x_link || '',
+              interests: data.interests,
+              profile_public: data.public,
+              follow_email: data.follow_email,
+            });
 
-      if (result?.data?.success) {
-        toasts.success.profileUpdated();
-        reset(data);
-      } else if (result?.serverError) {
-        toasts.error.serverError(result.serverError);
+            if (result?.data?.success) {
+              toasts.success.profileUpdated();
+              reset(data);
+            } else if (result?.serverError) {
+              throw new Error(result.serverError);
+            } else {
+              throw new Error('Profile update returned unexpected response');
+            }
+          },
+          {
+            message: 'Profile update failed',
+            context: {
+              hasName: !!data.name,
+              hasBio: !!data.bio,
+            },
+          }
+        );
+      } catch (error) {
+        // Error already logged by useLoggedAsync
+        toasts.error.serverError(
+          error instanceof Error ? error.message : 'Failed to update profile'
+        );
       }
     });
   };

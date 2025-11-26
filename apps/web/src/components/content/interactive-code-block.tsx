@@ -4,7 +4,7 @@
  * Code block with syntax highlighting, screenshot, share, and copy functionality
  */
 
-import type { Database } from '@heyclaude/database-types';
+import { Constants, type Database } from '@heyclaude/database-types';
 import {
   isValidCategory,
   logger,
@@ -204,9 +204,12 @@ export function ProductionCodeBlock({
       logger.warn('Invalid category in pathname, using fallback', {
         rawCategory,
         pathname,
-        fallback: 'agents',
+        fallback: Constants.public.Enums.content_category[0], // 'agents'
       });
-      return { category: 'agents' as Database['public']['Enums']['content_category'], slug };
+      return {
+        category: Constants.public.Enums.content_category[0] as Database['public']['Enums']['content_category'],
+        slug,
+      };
     }
 
     return { category: rawCategory, slug };
@@ -530,7 +533,7 @@ export function ProductionCodeBlock({
         <div
           ref={preRef}
           className={showLineNumbers ? 'code-with-line-numbers' : ''}
-          // biome-ignore lint/security/noDangerouslySetInnerHtml: HTML is sanitized with DOMPurify with strict allowlist for Shiki
+          // eslint-disable-next-line jsx-a11y/no-danger -- HTML is sanitized with DOMPurify with strict allowlist for Shiki
           dangerouslySetInnerHTML={{ __html: sanitizeShikiHtml(html) }}
         />
       </div>

@@ -53,7 +53,7 @@ export async function StructuredData({ route }: StructuredDataProps) {
             key={uniqueKey}
             id={`structured-data-${uniqueKey}`}
             type="application/ld+json"
-            // biome-ignore lint/security/noDangerouslySetInnerHtml: JSON-LD structured data is serialized with XSS protection via serializeJsonLd
+            // eslint-disable-next-line jsx-a11y/no-danger -- JSON-LD structured data is serialized with XSS protection via serializeJsonLd
             dangerouslySetInnerHTML={{
               __html: serialized,
             }}

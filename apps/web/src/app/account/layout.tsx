@@ -28,6 +28,7 @@ import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import Image from 'next/image';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
+
 import { AccountMFAGuard } from '@/src/components/core/auth/account-mfa-guard';
 import { AuthSignOutButton } from '@/src/components/core/buttons/auth/auth-signout-button';
 import { Button } from '@/src/components/primitives/ui/button';
@@ -69,20 +70,24 @@ export default async function AccountLayout({ children }: { children: React.Reac
     }
   }
 
-  const userNameMetadata =
-    user.user_metadata?.['full_name'] ?? user.user_metadata?.['name'] ?? user.email ?? null;
-  const userImageMetadata =
-    user.user_metadata?.['avatar_url'] ?? user.user_metadata?.['picture'] ?? null;
+  // Type-safe access to user_metadata (Record<string, unknown> from Supabase)
+  const userMetadata = user.user_metadata;
+  const fullName = typeof userMetadata['full_name'] === 'string' ? userMetadata['full_name'] : null;
+  const name = typeof userMetadata['name'] === 'string' ? userMetadata['name'] : null;
+  const avatarUrl = typeof userMetadata['avatar_url'] === 'string' ? userMetadata['avatar_url'] : null;
+  const picture = typeof userMetadata['picture'] === 'string' ? userMetadata['picture'] : null;
+  const userNameMetadata = fullName ?? name ?? user.email ?? null;
+  const userImageMetadata = avatarUrl ?? picture ?? null;
 
   // Fetch sponsorships in parallel with settings (they don't depend on each other)
   const sponsorshipsPromise = getUserSponsorships(user.id);
 
   let settings: Awaited<ReturnType<typeof getUserSettings>> = null;
-  let profile: NonNullable<Awaited<ReturnType<typeof getUserSettings>>>['user_data'] | null = null;
+  let profile: NonNullable<Awaited<ReturnType<typeof getUserSettings>>>['user_data'] = null;
   try {
     settings = await getUserSettings(user.id);
     if (settings) {
-      profile = settings.user_data ?? null;
+      profile = settings.user_data;
     } else {
       logger.warn('AccountLayout: getUserSettings returned null', undefined, logContext);
     }
@@ -126,10 +131,6 @@ export default async function AccountLayout({ children }: { children: React.Reac
   let sponsorships: Awaited<ReturnType<typeof getUserSponsorships>> = [];
   try {
     sponsorships = await sponsorshipsPromise;
-    if (!sponsorships) {
-      logger.warn('AccountLayout: getUserSponsorships returned null', undefined, logContext);
-      sponsorships = [];
-    }
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load user sponsorships in account layout');
     logger.error('AccountLayout: getUserSponsorships threw', normalized, logContext);
@@ -179,7 +180,7 @@ export default async function AccountLayout({ children }: { children: React.Reac
               {profile?.image ? (
                 <Image
                   src={profile.image}
-                  alt={`${profile.name || 'User'}'s avatar`}
+                  alt={`${profile.name ?? 'User'}'s avatar`}
                   width={48}
                   height={48}
                   className="h-12 w-12 rounded-full object-cover"
@@ -191,7 +192,7 @@ export default async function AccountLayout({ children }: { children: React.Reac
                 </div>
               )}
               <div>
-                <p className="font-medium">{profile?.name || userNameMetadata}</p>
+                <p className="font-medium">{profile?.name ?? userNameMetadata}</p>
                 <p className={UI_CLASSES.TEXT_XS_MUTED}>{user.email ?? ''}</p>
               </div>
             </div>

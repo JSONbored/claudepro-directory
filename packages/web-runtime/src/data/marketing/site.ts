@@ -2,9 +2,10 @@
 
 import { unstable_cache } from 'next/cache';
 import { cache } from 'react';
+
 import { getContentCount } from '../../data/content/index.ts';
-import { logger } from '../../logger.ts';
 import { normalizeError } from '../../errors.ts';
+import { logger } from '../../logger.ts';
 import { generateRequestId } from '../../utils/request-context.ts';
 
 const DESCRIPTION_FALLBACK =
@@ -12,17 +13,26 @@ const DESCRIPTION_FALLBACK =
 
 const HERO_DEFAULTS = {
   monthlyVisitors: 3000,
-  monthlyPageViews: 16000,
+  monthlyPageViews: 16_000,
 };
 
 const VERCEL_ANALYTICS_TOKEN = process.env['VERCEL_WEB_ANALYTICS_TOKEN'];
 const VERCEL_PROJECT_ID =
   process.env['VERCEL_PROJECT_ID'] ?? process.env['NEXT_PUBLIC_VERCEL_PROJECT_ID'];
 
-type VisitorStats = {
+interface VisitorStats {
   monthlyVisitors: number;
   monthlyPageViews: number;
-};
+}
+
+interface VercelAnalyticsResponse {
+  visitors?: {
+    value?: number | string;
+  };
+  pageViews?: {
+    value?: number | string;
+  };
+}
 
 const getVisitorStats = unstable_cache(
   async (): Promise<VisitorStats> => {
@@ -54,10 +64,10 @@ const getVisitorStats = unstable_cache(
             throw new Error(`Vercel analytics error: ${response.status} ${response.statusText}`);
           }
 
-          const data = await response.json();
+          const data = (await response.json()) as VercelAnalyticsResponse;
           return {
-            monthlyVisitors: Number(data?.visitors?.value ?? HERO_DEFAULTS.monthlyVisitors),
-            monthlyPageViews: Number(data?.pageViews?.value ?? HERO_DEFAULTS.monthlyPageViews),
+            monthlyVisitors: Number(data.visitors?.value ?? HERO_DEFAULTS.monthlyVisitors),
+            monthlyPageViews: Number(data.pageViews?.value ?? HERO_DEFAULTS.monthlyPageViews),
           };
         },
         {
@@ -69,7 +79,17 @@ const getVisitorStats = unstable_cache(
       
       return result;
     } catch (error) {
-      // trackPerformance already logs the error with performance metrics
+      // trackPerformance already logs the error, but we log again with context about fallback behavior
+      const normalized = normalizeError(error, 'Visitor stats fetch failed, using defaults');
+      const fallbackRequestId = generateRequestId();
+      logger.warn('Visitor stats fetch failed, using defaults', undefined, {
+        requestId: fallbackRequestId,
+        operation: 'getVisitorStats-fallback',
+        route: '/data/marketing/site',
+        source: 'vercel-analytics-api',
+        errorMessage: normalized.message,
+        fallbackStrategy: 'defaults',
+      });
       return HERO_DEFAULTS;
     }
   },

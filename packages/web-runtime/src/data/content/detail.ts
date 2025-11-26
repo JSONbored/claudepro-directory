@@ -1,13 +1,14 @@
 'use server';
 
+import { ContentService } from '@heyclaude/data-layer';
 import type { Database } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
-import { generateContentTags } from '../content-helpers.ts';
-import { normalizeError } from '../../errors.ts';
+
 import { fetchCached } from '../../cache/fetch-cached.ts';
-import { ContentService } from '@heyclaude/data-layer';
+import { normalizeError } from '../../errors.ts';
 import { logger } from '../../logger.ts';
 import { generateRequestId } from '../../utils/request-context.ts';
+import { generateContentTags } from '../content-helpers.ts';
 
 const CONTENT_CATEGORY_VALUES = Constants.public.Enums.content_category;
 

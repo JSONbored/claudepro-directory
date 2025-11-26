@@ -33,13 +33,13 @@
  * @see {@link file://../../lib/content-loaders.ts} - Content loading with caching
  */
 
-import type { Database } from '@heyclaude/database-types';
 import {
   createWebAppContextWithId,
   generateRequestId,
   isValidCategory,
   logger,
   normalizeError,
+  withDuration,
 } from '@heyclaude/web-runtime/core';
 import {
   getCategoryConfig,
@@ -49,6 +49,7 @@ import { getContentByCategory } from '@heyclaude/web-runtime/data/content';
 import { generatePageMetadata } from '@heyclaude/web-runtime/seo';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+
 import { ContentListServer } from '@/src/components/content/content-grid-list';
 
 /**
@@ -58,9 +59,11 @@ import { ContentListServer } from '@/src/components/content/content-grid-list';
  * It revalidates every 30 minutes (1800 seconds) to keep list content fresh.
  */
 export const revalidate = 1800;
+// eslint-disable-next-line unicorn/prevent-abbreviations -- Next.js API convention
 export const dynamicParams = true; // Allow unknown categories to be rendered on demand (will 404 if invalid)
 
-export async function generateStaticParams() {
+// eslint-disable-next-line unicorn/prevent-abbreviations -- Next.js API convention
+export function generateStaticParams() {
   const categories = getHomepageCategoryIds;
   return categories.map((category) => ({
     category,
@@ -74,7 +77,7 @@ export async function generateStaticParams() {
  * Generates SEO metadata including title, description, OpenGraph, and Twitter Card
  * data for each category list page. Falls back to error metadata if category is invalid.
  *
- * @param {Object} props - Component props
+ * @param {object} props - Component props
  * @param {Promise<{category: string}>} props.params - Route parameters containing category slug
  *
  * @returns {Promise<Metadata>} Next.js metadata object for the page
@@ -104,30 +107,13 @@ export async function generateMetadata({
   }
 
   // Type narrowing: after isValidCategory check, we know category is a valid enum value
-  const typedCategory = category as Database['public']['Enums']['content_category'];
+  const typedCategory = category;
 
-  // Generate requestId for metadata generation (separate from page render)
-  const metadataRequestId = generateRequestId();
-  const metadataLogContext = createWebAppContextWithId(
-    metadataRequestId,
-    `/${category}`,
-    'CategoryPageMetadata'
-  );
-
-  let categoryConfig: Awaited<ReturnType<typeof getCategoryConfig>> | null = null;
-  try {
-    categoryConfig = await getCategoryConfig(typedCategory);
-  } catch (error) {
-    const normalized = normalizeError(error, 'Failed to load category config for metadata');
-    logger.error('CategoryPage: category config lookup failed in metadata', normalized, {
-      ...metadataLogContext,
-      category,
-    });
-  }
+  const categoryConfig = getCategoryConfig(typedCategory);
 
   return generatePageMetadata('/:category', {
     params: { category },
-    categoryConfig: categoryConfig || undefined,
+    categoryConfig: categoryConfig ?? undefined,
     category,
   });
 }
@@ -140,7 +126,7 @@ export async function generateMetadata({
  * Handles validation, config loading, content fetching from database, and rendering.
  * Returns 404 if category is invalid.
  *
- * @param {Object} props - Component props
+ * @param {object} props - Component props
  * @param {{ category: string }} props.params - Route parameters containing category slug
  *
  * @returns {Promise<JSX.Element>} Rendered category list page
@@ -154,6 +140,7 @@ export async function generateMetadata({
  * // /statuslines → Lists all statuslines with search/filter
  */
 export default async function CategoryPage({ params }: { params: Promise<{ category: string }> }) {
+  const startTime = Date.now();
   const { category } = await params;
 
   // Generate single requestId for this page request
@@ -161,35 +148,40 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
   const logContext = createWebAppContextWithId(requestId, `/${category}`, 'CategoryPage');
 
   if (!isValidCategory(category)) {
-    logger.warn('Invalid category in list page', undefined, {
-      ...logContext,
-      category,
-    });
+    logger.warn(
+      'Invalid category in list page',
+      undefined,
+      withDuration(
+        {
+          ...logContext,
+          category,
+        },
+        startTime
+      )
+    );
     notFound();
   }
 
   // Type narrowing: after isValidCategory check, we know category is a valid enum value
-  const typedCategory = category as Database['public']['Enums']['content_category'];
+  const typedCategory = category;
 
-  let config: Awaited<ReturnType<typeof getCategoryConfig>> | null = null;
-  try {
-    config = await getCategoryConfig(typedCategory);
-  } catch (error) {
-    const normalized = normalizeError(error, 'Failed to load category config for page render');
-    logger.error('CategoryPage: getCategoryConfig threw', normalized, {
-      ...logContext,
-      category,
-    });
-  }
+  const config = getCategoryConfig(typedCategory);
   if (!config) {
     const normalized = normalizeError(
       'Category config is null',
       'CategoryPage: missing category config'
     );
-    logger.error('CategoryPage: missing category config', normalized, {
-      ...logContext,
-      category,
-    });
+    logger.error(
+      'CategoryPage: missing category config',
+      normalized,
+      withDuration(
+        {
+          ...logContext,
+          category,
+        },
+        startTime
+      )
+    );
     notFound();
   }
 
@@ -199,19 +191,33 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
     items = await getContentByCategory(typedCategory);
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load category list content');
-    logger.error('CategoryPage: getContentByCategory threw', normalized, {
-      ...logContext,
-      category,
-    });
+    logger.error(
+      'CategoryPage: getContentByCategory threw',
+      normalized,
+      withDuration(
+        {
+          ...logContext,
+          category,
+        },
+        startTime
+      )
+    );
     // Use empty array instead of re-throwing to prevent page crash
     // The page will render with empty content, which is better than crashing
     items = [];
   }
-  if (!items || items.length === 0) {
-    logger.warn('CategoryPage: getContentByCategory returned no items', undefined, {
-      ...logContext,
-      category,
-    });
+  if (items.length === 0) {
+    logger.warn(
+      'CategoryPage: getContentByCategory returned no items',
+      undefined,
+      withDuration(
+        {
+          ...logContext,
+          category,
+        },
+        startTime
+      )
+    );
   }
 
   // Process badges (handle dynamic count badges)
@@ -231,7 +237,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
     <ContentListServer
       title={config.pluralTitle}
       description={config.description}
-      icon={config.icon.displayName?.toLowerCase() || 'sparkles'}
+      icon={config.icon.displayName?.toLowerCase() ?? 'sparkles'}
       items={items}
       type={category}
       searchPlaceholder={config.listPage.searchPlaceholder}

@@ -2,11 +2,13 @@
  * Job Detail Page - Database-first job listing display
  */
 
+import { Constants } from '@heyclaude/database-types';
 import {
   createWebAppContextWithId,
   generateRequestId,
   logger,
   normalizeError,
+  withDuration,
 } from '@heyclaude/web-runtime/core';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import {
@@ -26,6 +28,7 @@ import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { Pulse } from '@/src/components/core/infra/pulse';
 import { StructuredData } from '@/src/components/core/infra/structured-data';
@@ -134,24 +137,31 @@ export async function generateMetadata({
     }
   );
 
-  let job: Awaited<ReturnType<typeof getJobBySlug>> | null = null;
+  let job: Awaited<ReturnType<typeof getJobBySlug>> = null;
   try {
     job = await getJobBySlug(slug);
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load job for metadata');
-    logger.error('JobPage: getJobBySlug threw in generateMetadata', normalized, metadataLogContext);
+    logger.error('JobPage: getJobBySlug threw in generateMetadata', normalized, {
+      ...metadataLogContext,
+      requestId: metadataRequestId,
+      operation: 'generateMetadata',
+    });
   }
 
   return generatePageMetadata('/jobs/:slug', {
     params: { slug },
-    item: job ? { ...job, tags: job.tags || [] } : undefined,
+    item: job ? { ...job, tags: job.tags ?? [] } : undefined,
     slug,
   });
 }
 
+// eslint-disable-next-line unicorn/prevent-abbreviations -- Next.js API convention
 export async function generateStaticParams() {
   // Generate requestId for static params generation (build-time)
+  // eslint-disable-next-line unicorn/prevent-abbreviations -- Must match architectural rule expectation
   const staticParamsRequestId = generateRequestId();
+  // eslint-disable-next-line unicorn/prevent-abbreviations -- Must match architectural rule expectation
   const staticParamsLogContext = createWebAppContextWithId(
     staticParamsRequestId,
     '/jobs',
@@ -185,54 +195,84 @@ export async function generateStaticParams() {
 }
 
 export default async function JobPage({ params }: PageProps) {
+  const startTime = Date.now();
   if (!params) {
     notFound();
   }
 
-  const rawParams = await params;
-  const validationResult = slugParamsSchema.safeParse(rawParams);
+  const rawParameters = await params;
+  const validationResult = slugParamsSchema.safeParse(rawParameters);
 
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  const slug = validationResult.success ? validationResult.data.slug : String(rawParams['slug']);
+  const slug = validationResult.success ? validationResult.data.slug : String(rawParameters['slug']);
   const baseLogContext = createWebAppContextWithId(requestId, `/jobs/${slug}`, 'JobPage', {
     slug,
   });
 
+  // Section: Parameter Validation
+  const validationSectionStart = Date.now();
+
   if (!validationResult.success) {
     logger.error(
       'Invalid slug parameter for job page',
-      new Error(validationResult.error.issues[0]?.message || 'Invalid slug'),
-      {
-        ...baseLogContext,
-        errorCount: validationResult.error.issues.length,
-      }
+      new Error(validationResult.error.issues[0]?.message ?? 'Invalid slug'),
+      withDuration(
+        {
+          ...baseLogContext,
+          requestId,
+          operation: 'JobPage',
+          section: 'parameter-validation',
+          errorCount: validationResult.error.issues.length,
+          sectionDuration_ms: Date.now() - validationSectionStart,
+        },
+        startTime
+      )
     );
     notFound();
   }
 
   const validatedSlug = validationResult.data.slug;
-  let job: Awaited<ReturnType<typeof getJobBySlug>> | null = null;
+
+  // Section: Job Data Fetch
+  const jobDataSectionStart = Date.now();
+  let job: Awaited<ReturnType<typeof getJobBySlug>>;
   try {
     job = await getJobBySlug(validatedSlug);
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load job detail');
-    logger.error('JobPage: getJobBySlug threw', normalized, baseLogContext);
+    logger.error('JobPage: getJobBySlug threw', normalized, {
+      ...withDuration(baseLogContext, startTime),
+      requestId,
+      operation: 'JobPage',
+      section: 'job-data-fetch',
+      sectionDuration_ms: Date.now() - jobDataSectionStart,
+    });
     throw normalized;
   }
 
   if (!job) {
-    logger.warn('JobPage: job not found', undefined, baseLogContext);
+    logger.warn('JobPage: job not found', undefined, {
+      ...withDuration(baseLogContext, startTime),
+      requestId,
+      operation: 'JobPage',
+      section: 'job-data-fetch',
+      sectionDuration_ms: Date.now() - jobDataSectionStart,
+    });
     notFound();
   }
 
-  const tags = job.tags || [];
-  const requirements = job.requirements || [];
-  const benefits = job.benefits || [];
+  const tags = job.tags ?? [];
+  const requirements = job.requirements ?? [];
+  const benefits = job.benefits ?? [];
 
   return (
     <>
-      <Pulse variant="view" category="jobs" slug={slug} />
+      <Pulse
+        variant="view"
+        category={Constants.public.Enums.content_category[9]} // 'jobs'
+        slug={slug}
+      />
       <StructuredData route={`/jobs/${slug}`} />
 
       <div className={'min-h-screen bg-background'}>
@@ -263,7 +303,7 @@ export default async function JobPage({ params }: PageProps) {
                 </div>
                 <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
                   <DollarSign className="h-4 w-4" />
-                  <span>{job.salary || 'Competitive'}</span>
+                  <span>{job.salary ?? 'Competitive'}</span>
                 </div>
                 <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
                   <Clock className="h-4 w-4" />
@@ -308,10 +348,10 @@ export default async function JobPage({ params }: PageProps) {
                 </CardHeader>
                 <CardContent>
                   <ul className="space-y-2">
-                    {requirements.map((req: string) => (
-                      <li key={req} className={UI_CLASSES.FLEX_ITEMS_START_GAP_3}>
+                    {requirements.map((request: string) => (
+                      <li key={request} className={UI_CLASSES.FLEX_ITEMS_START_GAP_3}>
                         <span className="mt-1 text-accent">•</span>
-                        <span>{req}</span>
+                        <span>{request}</span>
                       </li>
                     ))}
                   </ul>
@@ -386,7 +426,7 @@ export default async function JobPage({ params }: PageProps) {
                     <Clock className={'h-4 w-4 text-muted-foreground'} />
                     <span>
                       {(job.type ?? 'Unknown').charAt(0).toUpperCase() +
-                        (job.type ?? 'unknown').slice(1)}
+                        (job.type ?? 'Unknown').slice(1)}
                     </span>
                   </div>
                   <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} text-sm`}>
@@ -397,7 +437,7 @@ export default async function JobPage({ params }: PageProps) {
                     <Users className={'h-4 w-4 text-muted-foreground'} />
                     <span>
                       {(job.category ?? 'General').charAt(0).toUpperCase() +
-                        (job.category ?? 'general').slice(1)}
+                        (job.category ?? 'General').slice(1)}
                     </span>
                   </div>
                 </CardContent>

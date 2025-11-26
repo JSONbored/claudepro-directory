@@ -3,12 +3,13 @@
  * Server component uses getTrendingPageData (cached RPC). Data API exposes the same payload for external consumers.
  */
 
-import type { Database } from '@heyclaude/database-types';
+import { Constants, type Database } from '@heyclaude/database-types';
 import {
   createWebAppContextWithId,
   generateRequestId,
   isValidCategory,
   logger,
+  withDuration,
 } from '@heyclaude/web-runtime/core';
 import { generatePageMetadata, getTrendingPageData } from '@heyclaude/web-runtime/data';
 import { Clock, Star, TrendingUp, Users } from '@heyclaude/web-runtime/icons';
@@ -21,14 +22,15 @@ import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import type { Metadata } from 'next';
 import dynamicImport from 'next/dynamic';
 import { Suspense } from 'react';
+
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { LazySection } from '@/src/components/core/infra/scroll-animated-section';
 import { TrendingContent } from '@/src/components/core/shared/trending-content';
 
 const NewsletterCTAVariant = dynamicImport(
   () =>
-    import('@/src/components/features/growth/newsletter/newsletter-cta-variants').then((mod) => ({
-      default: mod.NewsletterCTAVariant,
+    import('@/src/components/features/growth/newsletter/newsletter-cta-variants').then((module_) => ({
+      default: module_.NewsletterCTAVariant,
     })),
   {
     loading: () => <div className="h-32 animate-pulse rounded-lg bg-muted/20" />,
@@ -52,42 +54,63 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function TrendingPage({ searchParams }: PagePropsWithSearchParams) {
+  const startTime = Date.now();
   // Generate single requestId for this page request
   const requestId = generateRequestId();
   const baseLogContext = createWebAppContextWithId(requestId, '/trending', 'TrendingPage');
 
-  const rawParams = await searchParams;
-  const categoryParam = (() => {
-    const category = rawParams?.['category'];
+  const rawParameters = await searchParams;
+  const categoryParameter = (() => {
+    const category = rawParameters?.['category'];
     if (Array.isArray(category)) {
       return category.length > 0 ? category[0] : undefined;
     }
-    return category as string | undefined;
+    return category;
   })();
-  const limit = Math.min(Number(rawParams?.['limit']) || 12, 100);
-  const normalizedCategory = categoryParam && isValidCategory(categoryParam) ? categoryParam : null;
+  const limit = Math.min(Number(rawParameters?.['limit']) || 12, 100);
+  const normalizedCategory = categoryParameter && isValidCategory(categoryParameter) ? categoryParameter : null;
 
-  if (categoryParam && !normalizedCategory) {
-    logger.warn('TrendingPage: invalid category parameter provided', undefined, {
-      ...baseLogContext,
-      category: categoryParam,
-    });
+  // Section: Category Validation
+  const validationSectionStart = Date.now();
+  if (categoryParameter && !normalizedCategory) {
+    logger.warn(
+      'TrendingPage: invalid category parameter provided',
+      undefined,
+      withDuration(
+        {
+          ...baseLogContext,
+          section: 'category-validation',
+          category: categoryParameter,
+        },
+        validationSectionStart
+      )
+    );
   }
 
-  logger.info('Trending page accessed', {
-    ...baseLogContext,
-    category: normalizedCategory ?? 'all',
-    limit,
-  });
-
+  // Section: Trending Data Fetch
   const pageData = await getTrendingPageData({
     category: normalizedCategory,
     limit,
   });
+  logger.info(
+    'Trending page accessed',
+    withDuration(
+      {
+        ...baseLogContext,
+        section: 'trending-data-fetch',
+        category: normalizedCategory ?? 'all',
+        limit,
+        trendingCount: pageData.trending.length,
+        popularCount: pageData.popular.length,
+        recentCount: pageData.recent.length,
+      },
+      startTime
+    )
+  );
 
-  const trendingDisplay = mapTrendingMetrics(pageData.trending ?? [], normalizedCategory);
-  const popularDisplay = mapPopularContent(pageData.popular ?? [], normalizedCategory);
-  const recentDisplay = mapRecentContent(pageData.recent ?? [], normalizedCategory);
+  const trendingDisplay = mapTrendingMetrics(pageData.trending, normalizedCategory);
+  const popularDisplay = mapPopularContent(pageData.popular, normalizedCategory);
+  const recentDisplay = mapRecentContent(pageData.recent, normalizedCategory);
 
   const pageTitleId = 'trending-page-title';
 
@@ -130,7 +153,7 @@ export default async function TrendingPage({ searchParams }: PagePropsWithSearch
               <li>
                 <UnifiedBadge variant="base" style="secondary">
                   <Users className="mr-1 h-3 w-3" aria-hidden="true" />
-                  {trendingDisplay?.length ?? 0} total configs
+                  {trendingDisplay.length} total configs
                 </UnifiedBadge>
               </li>
             </ul>
@@ -170,18 +193,16 @@ export default async function TrendingPage({ searchParams }: PagePropsWithSearch
   );
 }
 
-const DEFAULT_CATEGORY: Database['public']['Enums']['content_category'] = 'agents';
+const DEFAULT_CATEGORY: Database['public']['Enums']['content_category'] =
+  Constants.public.Enums.content_category[0]; // 'agents'
 
 function mapTrendingMetrics(
   rows: Database['public']['Functions']['get_trending_metrics_with_content']['Returns'],
   category: Database['public']['Enums']['content_category'] | null
 ): DisplayableContent[] {
-  if (!rows || rows.length === 0) return [];
+  if (rows.length === 0) return [];
   return rows.map((row, index) => {
-    const resolvedCategory =
-      (row.category as Database['public']['Enums']['content_category']) ??
-      category ??
-      DEFAULT_CATEGORY;
+    const resolvedCategory = category ?? row.category;
     const validCategory = isValidCategory(resolvedCategory) ? resolvedCategory : DEFAULT_CATEGORY;
     return toHomepageContentItem({
       slug: row.slug,
@@ -190,10 +211,10 @@ function mapTrendingMetrics(
       description: row.description,
       author: row.author,
       tags: row.tags,
-      source: row.source ?? 'trending',
-      viewCount: row.views_total ?? 0,
-      copyCount: row.copies_total ?? 0,
-      featuredScore: row.trending_score ?? row.engagement_score ?? row.freshness_score ?? 0,
+      source: row.source,
+      viewCount: row.views_total,
+      copyCount: row.copies_total,
+      featuredScore: row.trending_score,
       featuredRank: index + 1,
     });
   });
@@ -203,12 +224,9 @@ function mapPopularContent(
   rows: Database['public']['Functions']['get_popular_content']['Returns'],
   category: Database['public']['Enums']['content_category'] | null
 ): DisplayableContent[] {
-  if (!rows || rows.length === 0) return [];
+  if (rows.length === 0) return [];
   return rows.map((row, index) => {
-    const resolvedCategory =
-      (row.category as Database['public']['Enums']['content_category']) ??
-      category ??
-      DEFAULT_CATEGORY;
+    const resolvedCategory = category ?? row.category;
     const validCategory = isValidCategory(resolvedCategory) ? resolvedCategory : DEFAULT_CATEGORY;
     return toHomepageContentItem({
       slug: row.slug,
@@ -229,12 +247,9 @@ function mapRecentContent(
   rows: Database['public']['Functions']['get_recent_content']['Returns'],
   category: Database['public']['Enums']['content_category'] | null
 ): DisplayableContent[] {
-  if (!rows || rows.length === 0) return [];
+  if (rows.length === 0) return [];
   return rows.map((row, index) => {
-    const resolvedCategory =
-      (row.category as Database['public']['Enums']['content_category']) ??
-      category ??
-      DEFAULT_CATEGORY;
+    const resolvedCategory = category ?? row.category;
     const validCategory = isValidCategory(resolvedCategory) ? resolvedCategory : DEFAULT_CATEGORY;
     return toHomepageContentItem({
       slug: row.slug,
@@ -279,6 +294,6 @@ function toHomepageContentItem(input: {
     category: input.category,
     view_count: input.viewCount ?? 0,
     copy_count: input.copyCount ?? 0,
-    featured: input.featuredScore != null,
+    featured: input.featuredScore !== undefined,
   };
 }

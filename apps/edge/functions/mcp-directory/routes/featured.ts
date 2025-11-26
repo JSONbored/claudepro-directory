@@ -17,8 +17,16 @@ export async function handleGetFeatured(
   // get_homepage_optimized returns empty categoryData due to RPC issues
   // Use get_content_paginated_slim as fallback for featured content
   // OPTIMIZATION: Use validated enum values instead of string array
+  const allowedCategoryValues: Database['public']['Enums']['content_category'][] = [
+    Constants.public.Enums.content_category[0], // 'agents'
+    Constants.public.Enums.content_category[2], // 'rules'
+    Constants.public.Enums.content_category[3], // 'commands'
+    Constants.public.Enums.content_category[6], // 'skills'
+    Constants.public.Enums.content_category[8], // 'collections'
+    Constants.public.Enums.content_category[1], // 'mcp'
+  ];
   const validCategories = Constants.public.Enums.content_category.filter((cat) =>
-    ['agents', 'rules', 'commands', 'skills', 'collections', 'mcp'].includes(cat)
+    allowedCategoryValues.includes(cat)
   );
   const featured: Record<string, unknown[]> = {};
 

@@ -6,13 +6,8 @@ import type { Database } from '@heyclaude/database-types';
 import { addBookmark } from '@heyclaude/web-runtime/actions/add-bookmark';
 import { checkConfettiEnabled } from '@heyclaude/web-runtime/actions/feature-flags';
 import { removeBookmark } from '@heyclaude/web-runtime/actions/remove-bookmark';
-import {
-  isValidCategory,
-  logClientWarning,
-  logger,
-  normalizeError,
-} from '@heyclaude/web-runtime/core';
-import { usePulse } from '@heyclaude/web-runtime/hooks';
+import { isValidCategory, logClientWarning } from '@heyclaude/web-runtime/core';
+import { useLoggedAsync, usePulse } from '@heyclaude/web-runtime/hooks';
 import { Bookmark, BookmarkCheck } from '@heyclaude/web-runtime/icons';
 import type { ButtonStyleProps } from '@heyclaude/web-runtime/types/component.types';
 import { cn, toasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
@@ -43,16 +38,16 @@ export function BookmarkButton({
   const router = useRouter();
   const { celebrateBookmark } = useConfetti();
   const pulse = usePulse();
+  const runLoggedAsync = useLoggedAsync({
+    scope: 'BookmarkButton',
+    defaultMessage: 'Bookmark operation failed',
+    defaultRethrow: false,
+  });
 
   const handleToggle = async (e: React.MouseEvent) => {
     e.stopPropagation();
 
     if (!isValidCategory(contentType)) {
-      const normalized = normalizeError('Invalid content type', 'Invalid content type');
-      logger.error('Invalid content type', normalized, {
-        contentType,
-        contentSlug,
-      });
       toasts.error.fromError(new Error(`Invalid content type: ${contentType}`));
       return;
     }
@@ -62,69 +57,81 @@ export function BookmarkButton({
     startTransition(async () => {
       try {
         if (isBookmarked) {
-          const result = await removeBookmark({
-            content_type: validatedCategory,
-            content_slug: contentSlug,
-          });
-
-          if (result?.data?.success) {
-            setIsBookmarked(false);
-            toasts.success.bookmarkRemoved();
-
-            // Track bookmark removal
-            pulse
-              .bookmark({
-                category: validatedCategory,
-                slug: contentSlug,
-                action: 'remove',
-              })
-              .catch((error) => {
-                logClientWarning('BookmarkButton: bookmark removal tracking failed', error, {
-                  contentType,
-                  contentSlug,
-                });
-              });
-          }
-        } else {
-          const result = await addBookmark({
-            content_type: validatedCategory,
-            content_slug: contentSlug,
-            notes: '',
-          });
-
-          if (result?.data?.success) {
-            setIsBookmarked(true);
-            toasts.success.bookmarkAdded();
-
-            // Track bookmark addition
-            pulse
-              .bookmark({
-                category: validatedCategory,
-                slug: contentSlug,
-                action: 'add',
-              })
-              .catch((error) => {
-                logClientWarning('BookmarkButton: bookmark addition tracking failed', error, {
-                  contentType,
-                  contentSlug,
-                });
+          await runLoggedAsync(
+            async () => {
+              const result = await removeBookmark({
+                content_type: validatedCategory,
+                content_slug: contentSlug,
               });
 
-            // Confetti animation gated by feature flag
-            const confettiResult = await checkConfettiEnabled({});
-            if (confettiResult) {
-              celebrateBookmark();
+              if (result?.data?.success) {
+                setIsBookmarked(false);
+                toasts.success.bookmarkRemoved();
+
+                // Track bookmark removal (non-blocking)
+                pulse
+                  .bookmark({
+                    category: validatedCategory,
+                    slug: contentSlug,
+                    action: 'remove',
+                  })
+                  .catch((error) => {
+                    logClientWarning('BookmarkButton: bookmark removal tracking failed', error, {
+                      contentType,
+                      contentSlug,
+                    });
+                  });
+              }
+            },
+            {
+              message: 'Failed to remove bookmark',
+              context: { contentType, contentSlug, action: 'remove' },
             }
-          }
+          );
+        } else {
+          await runLoggedAsync(
+            async () => {
+              const result = await addBookmark({
+                content_type: validatedCategory,
+                content_slug: contentSlug,
+                notes: '',
+              });
+
+              if (result?.data?.success) {
+                setIsBookmarked(true);
+                toasts.success.bookmarkAdded();
+
+                // Track bookmark addition (non-blocking)
+                pulse
+                  .bookmark({
+                    category: validatedCategory,
+                    slug: contentSlug,
+                    action: 'add',
+                  })
+                  .catch((error) => {
+                    logClientWarning('BookmarkButton: bookmark addition tracking failed', error, {
+                      contentType,
+                      contentSlug,
+                    });
+                  });
+
+                // Confetti animation gated by feature flag
+                const confettiResult = await checkConfettiEnabled({});
+                if (confettiResult) {
+                  celebrateBookmark();
+                }
+              }
+            },
+            {
+              message: 'Failed to add bookmark',
+              context: { contentType, contentSlug, action: 'add' },
+            }
+          );
         }
 
         router.refresh();
       } catch (error) {
-        logClientWarning('BookmarkButton: toggle failed', error, {
-          contentType,
-          contentSlug,
-          wasBookmarked: isBookmarked,
-        });
+        // Error already logged by useLoggedAsync
         if (error instanceof Error && error.message.includes('signed in')) {
           toasts.raw.error('Please sign in to bookmark content', {
             action: {
@@ -135,12 +142,9 @@ export function BookmarkButton({
             },
           });
         } else {
-          const normalized = normalizeError(error, 'Failed to update bookmark');
-          logger.error('BookmarkButton: Failed to update bookmark', normalized, {
-            contentType,
-            contentSlug,
-          });
-          toasts.error.fromError(normalized);
+          toasts.error.fromError(
+            error instanceof Error ? error : new Error('Failed to update bookmark')
+          );
         }
       }
     });

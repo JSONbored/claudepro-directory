@@ -1,8 +1,9 @@
 'use server';
 
-import type { Database } from '@heyclaude/database-types';
-import { fetchCached } from '../cache/fetch-cached.ts';
 import { MiscService } from '@heyclaude/data-layer';
+import type { Database } from '@heyclaude/database-types';
+
+import { fetchCached } from '../cache/fetch-cached.ts';
 
 const ANNOUNCEMENT_TTL_KEY = 'cache.announcements.ttl_seconds';
 

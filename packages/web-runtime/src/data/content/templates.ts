@@ -1,8 +1,9 @@
 'use server';
 
-import type { Database } from '@heyclaude/database-types';
-import { fetchCached } from '../../cache/fetch-cached.ts';
 import { ContentService } from '@heyclaude/data-layer';
+import type { Database } from '@heyclaude/database-types';
+
+import { fetchCached } from '../../cache/fetch-cached.ts';
 
 type ContentTemplatesResult = Database['public']['Functions']['get_content_templates']['Returns'];
 type ContentTemplateItem = NonNullable<NonNullable<ContentTemplatesResult['templates']>[number]>;
@@ -27,9 +28,12 @@ export async function getContentTemplates(
     }
   );
 
+  if (!result) {
+    return [];
+  }
+
   const templates =
-    result?.templates?.filter((template): template is ContentTemplateItem => template !== null) ??
-    [];
+    result.templates?.filter(Boolean) ?? [];
 
   return templates.map((template) => {
     const templateData = template.template_data;

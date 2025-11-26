@@ -1,25 +1,9 @@
-import type { Metadata } from 'next';
-import dynamicImport from 'next/dynamic';
-import Image from 'next/image';
-import Link from 'next/link';
-import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
-import { Button } from '@/src/components/primitives/ui/button';
-
-const NewsletterCTAVariant = dynamicImport(
-  () =>
-    import('@/src/components/features/growth/newsletter/newsletter-cta-variants').then((mod) => ({
-      default: mod.NewsletterCTAVariant,
-    })),
-  {
-    loading: () => <div className="h-32 animate-pulse rounded-lg bg-muted/20" />,
-  }
-);
-
 import {
   createWebAppContextWithId,
   generateRequestId,
   logger,
   normalizeError,
+  withDuration,
 } from '@heyclaude/web-runtime/core';
 import { generatePageMetadata, getCompaniesList } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
@@ -32,6 +16,13 @@ import {
   TrendingUp,
 } from '@heyclaude/web-runtime/icons';
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import type { Metadata } from 'next';
+import dynamicImport from 'next/dynamic';
+import Image from 'next/image';
+import Link from 'next/link';
+
+import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
+import { Button } from '@/src/components/primitives/ui/button';
 import {
   Card,
   CardContent,
@@ -40,11 +31,21 @@ import {
   CardTitle,
 } from '@/src/components/primitives/ui/card';
 
+const NewsletterCTAVariant = dynamicImport(
+  () =>
+    import('@/src/components/features/growth/newsletter/newsletter-cta-variants').then((module_) => ({
+      default: module_.NewsletterCTAVariant,
+    })),
+  {
+    loading: () => <div className="h-32 animate-pulse rounded-lg bg-muted/20" />,
+  }
+);
+
 /**
  * ISR: 24 hours (86400s) - Companies list updates infrequently
  * Uses ISR instead of force-dynamic for better performance and SEO
  */
-export const revalidate = 86400;
+export const revalidate = 86_400;
 
 /**
  * Validate and sanitize external website URL for safe use in href attributes
@@ -93,6 +94,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function CompaniesPage() {
+  const startTime = Date.now();
   // Generate single requestId for this page request
   const requestId = generateRequestId();
   const logContext = createWebAppContextWithId(requestId, '/companies', 'CompaniesPage', {
@@ -100,21 +102,68 @@ export default async function CompaniesPage() {
     offset: 0,
   });
 
-  // Single RPC call via edge-cached data layer
+  // Section: Companies List
+  const companiesSectionStart = Date.now();
   let companiesResponse: Awaited<ReturnType<typeof getCompaniesList>> | null = null;
   try {
     companiesResponse = await getCompaniesList(50, 0);
+    logger.info(
+      'CompaniesPage: companies list loaded',
+      withDuration(
+        {
+          ...logContext,
+          section: 'companies-list',
+          companiesCount: companiesResponse.companies?.length ?? 0,
+        },
+        companiesSectionStart
+      )
+    );
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load companies list');
-    logger.error('CompaniesPage: getCompaniesList failed', normalized, logContext);
+    logger.error(
+      'CompaniesPage: getCompaniesList failed',
+      normalized,
+      withDuration(
+        {
+          ...logContext,
+          section: 'companies-list',
+          sectionDuration_ms: Date.now() - companiesSectionStart,
+        },
+        startTime
+      )
+    );
     throw normalized;
   }
 
-  if (!companiesResponse?.companies) {
-    logger.warn('CompaniesPage: companies response is empty', undefined, logContext);
+  if (!companiesResponse.companies) {
+    logger.warn(
+      'CompaniesPage: companies response is empty',
+      undefined,
+      withDuration(
+        {
+          ...logContext,
+          section: 'companies-list',
+          sectionDuration_ms: Date.now() - companiesSectionStart,
+        },
+        startTime
+      )
+    );
   }
 
-  const companies = companiesResponse?.companies ?? [];
+  const companies = companiesResponse.companies ?? [];
+
+  // Final summary log
+  logger.info(
+    'CompaniesPage: page render completed',
+    withDuration(
+      {
+        ...logContext,
+        section: 'page-render',
+        companiesCount: companies.length,
+      },
+      startTime
+    )
+  );
 
   return (
     <div className={'min-h-screen bg-background'}>
@@ -137,7 +186,7 @@ export default async function CompaniesPage() {
             <div className={'mb-8 flex justify-center gap-2'}>
               <UnifiedBadge variant="base" style="secondary">
                 <Building className="mr-1 h-3 w-3" />
-                {companies?.length || 0} Companies
+                {companies.length} Companies
               </UnifiedBadge>
               <UnifiedBadge variant="base" style="outline">
                 Verified Profiles
@@ -156,7 +205,7 @@ export default async function CompaniesPage() {
 
       {/* Companies Grid */}
       <section className={'container mx-auto px-4 py-12'}>
-        {!companies || companies.length === 0 ? (
+        {companies.length === 0 ? (
           <Card>
             <CardContent className={'flex flex-col items-center py-12'}>
               <Building className="mb-4 h-12 w-12 text-muted-foreground" />
@@ -243,6 +292,7 @@ export default async function CompaniesPage() {
                   )}
 
                   <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
+                    {/* eslint-disable-next-line unicorn/explicit-length-check -- company.size is an enum value, not a Set/Map */}
                     {company.size && (
                       <UnifiedBadge variant="base" style="outline" className="text-xs">
                         {company.size} employees

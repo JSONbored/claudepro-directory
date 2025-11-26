@@ -1,7 +1,13 @@
 'use client';
 
-import { logger, normalizeError } from '@heyclaude/web-runtime/core';
+import {
+  createWebAppContextWithId,
+  generateRequestId,
+  logger,
+  normalizeError,
+} from '@heyclaude/web-runtime/core';
 import { useEffect } from 'react';
+
 import { SegmentErrorFallback } from '@/src/components/core/infra/segment-error-fallback';
 
 export default function AccountError({
@@ -12,13 +18,16 @@ export default function AccountError({
   reset: () => void;
 }) {
   useEffect(() => {
+    const requestId = generateRequestId();
+    const route = globalThis.location.pathname;
     const normalized = normalizeError(error, 'Account segment rendering failed');
-    // Client-side error boundary - no requestId needed (not part of server request)
-    logger.error('AccountErrorBoundary: account route crashed', normalized, {
-      operation: 'AccountErrorBoundary',
+    const logContext = createWebAppContextWithId(requestId, route, 'AccountErrorBoundary', {
       segment: 'account',
       ...(error.digest && { digest: error.digest }),
+      userAgent: globalThis.navigator.userAgent,
+      url: globalThis.location.href,
     });
+    logger.error('Account error boundary triggered', normalized, logContext);
   }, [error]);
 
   return (

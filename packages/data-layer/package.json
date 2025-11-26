@@ -7,7 +7,7 @@
     "./services/trending": "./src/services/trending.ts"
   },
   "scripts": {
-    "lint": "biome check .",
+    "lint": "eslint . --config ../../config/tools/eslint.config.mjs",
     "type-check": "tsc --noEmit"
   },
   "dependencies": {

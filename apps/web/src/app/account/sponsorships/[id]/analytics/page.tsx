@@ -5,6 +5,7 @@ import {
   hashUserId,
   logger,
   normalizeError,
+  withDuration,
 } from '@heyclaude/web-runtime/core';
 import {
   generatePageMetadata,
@@ -16,6 +17,7 @@ import { POSITION_PATTERNS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { MetricsDisplay } from '@/src/components/features/analytics/metrics-display';
 import { Button } from '@/src/components/primitives/ui/button';
@@ -36,18 +38,19 @@ export const runtime = 'nodejs';
 
 type SponsorshipAnalytics = Database['public']['Functions']['get_sponsorship_analytics']['Returns'];
 
-interface AnalyticsPageProps {
+interface AnalyticsPageProperties {
   params: Promise<{ id: string }>;
 }
 
-export async function generateMetadata({ params }: AnalyticsPageProps): Promise<Metadata> {
+export async function generateMetadata({ params }: AnalyticsPageProperties): Promise<Metadata> {
   const { id } = await params;
   return generatePageMetadata('/account/sponsorships/:id/analytics', { params: { id } });
 }
 
-export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPageProps) {
+export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPageProperties) {
   const { id } = await params;
 
+  const startTime = Date.now();
   // Generate single requestId for this page request
   const requestId = generateRequestId();
   const baseLogContext = createWebAppContextWithId(
@@ -59,13 +62,21 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
     }
   );
 
+  // Section: Authentication
+  const authSectionStart = Date.now();
   const { user } = await getAuthenticatedUser({ context: 'SponsorshipAnalyticsPage' });
 
   if (!user) {
     logger.warn(
       'SponsorshipAnalyticsPage: unauthenticated access attempt',
       undefined,
-      baseLogContext
+      {
+        ...withDuration(baseLogContext, startTime),
+        requestId,
+        operation: 'SponsorshipAnalyticsPage',
+        section: 'authentication',
+        sectionDuration_ms: Date.now() - authSectionStart,
+      }
     );
     return (
       <div className="space-y-6">
@@ -87,12 +98,20 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
   const userIdHash = hashUserId(user.id);
   const logContext = { ...baseLogContext, userIdHash };
 
+  // Section: Analytics Data Fetch
+  const analyticsSectionStart = Date.now();
   let analyticsData: SponsorshipAnalytics | null = null;
   try {
     analyticsData = await getSponsorshipAnalytics(user.id, id);
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load sponsorship analytics');
-    logger.error('SponsorshipAnalyticsPage: getSponsorshipAnalytics threw', normalized, logContext);
+    logger.error('SponsorshipAnalyticsPage: getSponsorshipAnalytics threw', normalized, {
+      ...withDuration(logContext, startTime),
+      requestId,
+      operation: 'SponsorshipAnalyticsPage',
+      section: 'analytics-data-fetch',
+      sectionDuration_ms: Date.now() - analyticsSectionStart,
+    });
     throw normalized;
   }
 
@@ -160,8 +179,8 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
   const clicksMap = new Map<string, number>();
 
   for (const stat of daily_stats) {
-    if (stat.date && stat.impressions != null && stat.clicks != null) {
-      const day = stat.date.substring(0, 10);
+    if (stat.date && stat.impressions !== null && stat.clicks !== null) {
+      const day = stat.date.slice(0, 10);
       impressionsMap.set(day, stat.impressions);
       clicksMap.set(day, stat.clicks);
     }
@@ -204,7 +223,9 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
             value: `${ctr}%`,
             change: 'Clicks / Impressions',
             trend:
-              Number.parseFloat(ctr) > 2 ? 'up' : Number.parseFloat(ctr) > 0 ? 'unchanged' : 'down',
+              Number.parseFloat(ctr) > 2
+                ? 'up'
+                : (Number.parseFloat(ctr) > 0 ? 'unchanged' : 'down'),
           },
           {
             label: 'Avg. Daily Views',
@@ -274,13 +295,13 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
-            {Array.from({ length: 30 }).map((_, i) => {
+            {Array.from({ length: 30 }).map((_, index) => {
               const date = new Date();
-              date.setDate(date.getDate() - (29 - i));
-              const dayKey = date.toISOString().substring(0, 10); // Extract YYYY-MM-DD
-              const impressions = impressionsMap.get(dayKey) || 0;
-              const clicks = clicksMap.get(dayKey) || 0;
-              const maxImpressions = Math.max(...Array.from(impressionsMap.values()), 1);
+              date.setDate(date.getDate() - (29 - index));
+              const dayKey = date.toISOString().slice(0, 10); // Extract YYYY-MM-DD
+              const impressions = impressionsMap.get(dayKey) ?? 0;
+              const clicks = clicksMap.get(dayKey) ?? 0;
+              const maxImpressions = Math.max(...impressionsMap.values(), 1);
 
               return (
                 <div key={dayKey} className="grid grid-cols-12 items-center gap-2">

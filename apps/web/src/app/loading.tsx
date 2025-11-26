@@ -1,3 +1,1 @@
-import { DefaultLoading } from '@/src/components/primitives/feedback/loading-factory';
-
-export default DefaultLoading;
+export { DefaultLoading as default } from '@/src/components/primitives/feedback/loading-factory';

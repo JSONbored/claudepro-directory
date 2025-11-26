@@ -3,6 +3,7 @@ import {
   generateRequestId,
   hashUserId,
   logger,
+  withDuration,
 } from '@heyclaude/web-runtime/core';
 import {
   generatePageMetadata,
@@ -14,6 +15,7 @@ import { ArrowLeft } from '@heyclaude/web-runtime/icons';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
+
 import { CollectionForm } from '@/src/components/core/forms/collection-form';
 import { Button } from '@/src/components/primitives/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
@@ -30,6 +32,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function NewCollectionPage() {
+  const startTime = Date.now();
   // Generate single requestId for this page request
   const requestId = generateRequestId();
   const baseLogContext = createWebAppContextWithId(
@@ -38,27 +41,65 @@ export default async function NewCollectionPage() {
     'NewCollectionPage'
   );
 
+  // Section: Authentication
+  const authSectionStart = Date.now();
   const { user } = await getAuthenticatedUser({ context: 'NewCollectionPage' });
 
   if (!user) {
-    logger.warn('NewCollectionPage: unauthenticated access attempt', undefined, {
-      ...baseLogContext,
-      timestamp: new Date().toISOString(),
-    });
+    logger.warn(
+      'NewCollectionPage: unauthenticated access attempt',
+      undefined,
+      withDuration(
+        {
+          ...baseLogContext,
+          section: 'authentication',
+          timestamp: new Date().toISOString(),
+        },
+        authSectionStart
+      )
+    );
     redirect('/login');
   }
 
   const userIdHash = hashUserId(user.id);
   const logContext = { ...baseLogContext, userIdHash };
+  logger.info(
+    'NewCollectionPage: authentication successful',
+    withDuration(
+      {
+        ...logContext,
+        section: 'authentication',
+      },
+      authSectionStart
+    )
+  );
 
+  // Section: Bookmarks Data Fetch
+  const bookmarksSectionStart = Date.now();
   const bookmarks = await getUserBookmarksForCollections(user.id);
-  if (!bookmarks) {
-    logger.warn(
-      'NewCollectionPage: getUserBookmarksForCollections returned null',
-      undefined,
-      logContext
-    );
-  }
+  logger.info(
+    'NewCollectionPage: bookmarks data loaded',
+    withDuration(
+      {
+        ...logContext,
+        section: 'bookmarks-data-fetch',
+        bookmarksCount: bookmarks.length,
+      },
+      bookmarksSectionStart
+    )
+  );
+
+  // Final summary log
+  logger.info(
+    'NewCollectionPage: page render completed',
+    withDuration(
+      {
+        ...logContext,
+        section: 'page-render',
+      },
+      startTime
+    )
+  );
 
   return (
     <div className="space-y-6">
@@ -79,7 +120,7 @@ export default async function NewCollectionPage() {
         </CardHeader>
         <CardContent>
           <CollectionForm
-            bookmarks={(bookmarks || []).map((b) => ({ ...b, notes: b.notes ?? '' }))}
+            bookmarks={bookmarks.map((b) => ({ ...b, notes: b.notes ?? '' }))}
             mode="create"
           />
         </CardContent>

@@ -8,6 +8,7 @@ import { getAuthenticatedUser } from '@heyclaude/web-runtime/server';
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
+
 import {
   Card,
   CardContent,
@@ -15,6 +16,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/ui/card';
+
 import { MFAFactorsListClient } from './mfa-factors-list-client';
 
 export const metadata: Metadata = {

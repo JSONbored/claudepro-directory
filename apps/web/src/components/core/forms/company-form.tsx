@@ -13,6 +13,7 @@ import {
 } from '@heyclaude/web-runtime/actions';
 import { logClientWarning, logger } from '@heyclaude/web-runtime/core';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
+import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import { FileText, X } from '@heyclaude/web-runtime/icons';
 import { toasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import Image from 'next/image';
@@ -65,6 +66,11 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
   const [logoPreview, setLogoPreview] = useState<string | null>(initialData?.logo || null);
   const [useCursorDate, setUseCursorDate] = useState<boolean>(!!initialData?.using_cursor_since);
   const { executeAsync: uploadLogo } = useAction(uploadCompanyLogoAction);
+  const runLoggedAsync = useLoggedAsync({
+    scope: 'CompanyForm',
+    defaultMessage: 'Company form operation failed',
+    defaultRethrow: false,
+  });
 
   // Load form validation config from Statsig on mount
   useEffect(() => {
@@ -145,37 +151,48 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
     setIsUploadingLogo(true);
 
     try {
-      const fileBase64 = await fileToBase64(file);
-      const result = await uploadLogo({
-        fileName: file.name,
-        mimeType: file.type as AllowedImageMimeType,
-        fileBase64,
-        companyId: initialData?.id ?? undefined,
-        oldLogoUrl: logoUrl ?? undefined,
-      });
+      await runLoggedAsync(
+        async () => {
+          const fileBase64 = await fileToBase64(file);
+          const result = await uploadLogo({
+            fileName: file.name,
+            mimeType: file.type as AllowedImageMimeType,
+            fileBase64,
+            companyId: initialData?.id ?? undefined,
+            oldLogoUrl: logoUrl ?? undefined,
+          });
 
-      if (result?.serverError) {
-        throw new Error(result.serverError);
-      }
+          if (result?.serverError) {
+            throw new Error(result.serverError);
+          }
 
-      if (result?.validationErrors) {
-        throw new Error('Logo upload failed validation.');
-      }
+          if (result?.validationErrors) {
+            throw new Error('Logo upload failed validation.');
+          }
 
-      const uploaded = result?.data;
-      if (!uploaded?.publicUrl) {
-        throw new Error('Upload response was missing a public URL.');
-      }
+          const uploaded = result?.data;
+          if (!uploaded?.publicUrl) {
+            throw new Error('Upload response was missing a public URL.');
+          }
 
-      setLogoUrl(uploaded.publicUrl);
-      setLogoPreview(uploaded.publicUrl);
-      toasts.success.actionCompleted('Logo uploaded successfully!');
+          setLogoUrl(uploaded.publicUrl);
+          setLogoPreview(uploaded.publicUrl);
+          toasts.success.actionCompleted('Logo uploaded successfully!');
+        },
+        {
+          message: 'Logo upload failed',
+          context: {
+            fileName: file.name,
+            companyId: initialData?.id ?? undefined,
+          },
+        }
+      );
     } catch (error) {
-      logClientWarning('CompanyForm: logo upload failed', error, {
-        fileName: file.name,
-        companyId: initialData?.id ?? undefined,
-      });
-      toasts.error.fromError(error, 'Failed to upload logo');
+      // Error already logged by useLoggedAsync
+      toasts.error.fromError(
+        error instanceof Error ? error : new Error('Failed to upload logo'),
+        'Failed to upload logo'
+      );
     } finally {
       setIsUploadingLogo(false);
     }
@@ -203,42 +220,53 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
 
     startTransition(async () => {
       try {
-        if (mode === 'create') {
-          // Create company via server action
-          const result = await createCompany(data);
+        await runLoggedAsync(
+          async () => {
+            if (mode === 'create') {
+              // Create company via server action
+              const result = await createCompany(data);
 
-          if (result?.serverError || result?.validationErrors) {
-            throw new Error(result.serverError || 'Validation failed');
+              if (result?.serverError || result?.validationErrors) {
+                throw new Error(result.serverError || 'Validation failed');
+              }
+
+              toasts.success.actionCompleted('Company created successfully!');
+            } else {
+              // Update company via server action
+              const companyId = initialData?.id;
+              if (!companyId) {
+                throw new Error('Company ID is required for updates');
+              }
+
+              const result = await updateCompany({
+                id: companyId,
+                ...data,
+              });
+
+              if (result?.serverError || result?.validationErrors) {
+                throw new Error(result.serverError || 'Validation failed');
+              }
+
+              toasts.success.actionCompleted('Company updated successfully!');
+            }
+
+            router.push(ROUTES.ACCOUNT_COMPANIES);
+            router.refresh();
+          },
+          {
+            message: mode === 'create' ? 'Company creation failed' : 'Company update failed',
+            context: {
+              mode,
+              companyId: initialData?.id ?? undefined,
+            },
           }
-
-          toasts.success.actionCompleted('Company created successfully!');
-        } else {
-          // Update company via server action
-          const companyId = initialData?.id;
-          if (!companyId) {
-            throw new Error('Company ID is required for updates');
-          }
-
-          const result = await updateCompany({
-            id: companyId,
-            ...data,
-          });
-
-          if (result?.serverError || result?.validationErrors) {
-            throw new Error(result.serverError || 'Validation failed');
-          }
-
-          toasts.success.actionCompleted('Company updated successfully!');
-        }
-
-        router.push(ROUTES.ACCOUNT_COMPANIES);
-        router.refresh();
+        );
       } catch (error) {
-        logClientWarning('CompanyForm: save failed', error, {
-          mode,
-          companyId: initialData?.id ?? undefined,
-        });
-        toasts.error.fromError(error, 'Failed to save company');
+        // Error already logged by useLoggedAsync
+        toasts.error.fromError(
+          error instanceof Error ? error : new Error('Failed to save company'),
+          'Failed to save company'
+        );
       }
     });
   };

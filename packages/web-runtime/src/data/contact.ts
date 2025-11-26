@@ -1,8 +1,9 @@
 'use server';
 
-import type { Database } from '@heyclaude/database-types';
-import { fetchCached } from '../cache/fetch-cached.ts';
 import { MiscService } from '@heyclaude/data-layer';
+import type { Database } from '@heyclaude/database-types';
+
+import { fetchCached } from '../cache/fetch-cached.ts';
 
 type ContactCommandsRow =
   Database['public']['Functions']['get_contact_commands']['Returns'][number];

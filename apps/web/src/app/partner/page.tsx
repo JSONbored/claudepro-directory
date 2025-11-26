@@ -19,6 +19,7 @@ import {
   Sparkles,
 } from '@heyclaude/web-runtime/icons';
 import { RESPONSIVE_PATTERNS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
+
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { HoverCard } from '@/src/components/primitives/animation/hover-card';
 import { Button } from '@/src/components/primitives/ui/button';
@@ -40,7 +41,7 @@ import {
  *
  * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic
  */
-export const revalidate = 86400;
+export const revalidate = 86_400;
 
 export default async function PartnerPage() {
   // Generate single requestId for this page request

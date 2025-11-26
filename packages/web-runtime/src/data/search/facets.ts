@@ -1,6 +1,7 @@
 'use server';
 
 import type { Database } from '@heyclaude/database-types';
+
 import { fetchCached } from '../../cache/fetch-cached.ts';
 
 type SearchFacetsRow =
@@ -22,8 +23,8 @@ export interface SearchFacetAggregate {
 
 function normalizeFacetRow(row: SearchFacetsRow): SearchFacetSummary {
   return {
-    category: row.category as Database['public']['Enums']['content_category'],
-    contentCount: typeof row.content_count === 'number' ? row.content_count : Number(row.content_count ?? 0),
+    category: row.category,
+    contentCount: row.content_count,
     tags: Array.isArray(row.all_tags) ? row.all_tags.filter((tag): tag is string => typeof tag === 'string') : [],
     authors: Array.isArray(row.authors) ? row.authors.filter((author): author is string => typeof author === 'string') : [],
   };
@@ -36,7 +37,7 @@ export async function getSearchFacets(): Promise<SearchFacetAggregate> {
       if (error) {
         throw error;
       }
-      return (data ?? []).map(normalizeFacetRow);
+      return data.map((row) => normalizeFacetRow(row));
     },
     {
       keyParts: ['search-facets'],
@@ -53,14 +54,14 @@ export async function getSearchFacets(): Promise<SearchFacetAggregate> {
 
   for (const facet of facets) {
     categories.add(facet.category);
-    facet.tags.forEach((tag) => tags.add(tag));
-    facet.authors.forEach((author) => authors.add(author));
+    for (const tag of facet.tags) tags.add(tag);
+    for (const author of facet.authors) authors.add(author);
   }
 
   return {
     facets,
-    tags: Array.from(tags).sort((a, b) => a.localeCompare(b)),
-    authors: Array.from(authors).sort((a, b) => a.localeCompare(b)),
-    categories: Array.from(categories).sort((a, b) => a.localeCompare(b)),
+    tags: [...tags].toSorted((a, b) => a.localeCompare(b)),
+    authors: [...authors].toSorted((a, b) => a.localeCompare(b)),
+    categories: [...categories].toSorted((a, b) => a.localeCompare(b)),
   };
 }

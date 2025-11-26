@@ -108,7 +108,7 @@ function useTrackingEffect(
     }, delay);
 
     return () => clearTimeout(timer);
-    // biome-ignore lint/correctness/useExhaustiveDependencies: deps provided by caller
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- deps provided by caller
   }, deps);
 }
 

@@ -1,3 +1,4 @@
+import type { Database } from '@heyclaude/database-types';
 import type { CreateJobInput } from '@heyclaude/web-runtime';
 import { createJob } from '@heyclaude/web-runtime/actions';
 import {
@@ -5,11 +6,13 @@ import {
   generateRequestId,
   logger,
   normalizeError,
+  withDuration,
 } from '@heyclaude/web-runtime/core';
 import { generatePageMetadata, getPaymentPlanCatalog } from '@heyclaude/web-runtime/server';
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
+
 import { JobForm } from '@/src/components/core/forms/job-form';
 
 /**
@@ -24,20 +27,43 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function NewJobPage() {
+  const startTime = Date.now();
   // Generate single requestId for this page request
   const requestId = generateRequestId();
   const baseLogContext = createWebAppContextWithId(requestId, '/account/jobs/new', 'NewJobPage');
 
+  // Section: Plan Catalog Fetch
+  const planCatalogSectionStart = Date.now();
   let planCatalog: Awaited<ReturnType<typeof getPaymentPlanCatalog>> = [];
   try {
     planCatalog = await getPaymentPlanCatalog();
+    logger.info(
+      'NewJobPage: plan catalog loaded',
+      withDuration(
+        {
+          ...baseLogContext,
+          section: 'plan-catalog-fetch',
+          plansCount: planCatalog.length,
+        },
+        planCatalogSectionStart
+      )
+    );
   } catch (error) {
     const normalized = normalizeError(error, 'NewJobPage: failed to fetch plan catalog');
-    logger.warn('NewJobPage: failed to fetch plan catalog, using fallback', undefined, {
-      ...baseLogContext,
-      error: normalized.message,
-      name: normalized.name,
-    });
+    logger.warn(
+      'NewJobPage: failed to fetch plan catalog, using fallback',
+      undefined,
+      withDuration(
+        {
+          ...baseLogContext,
+          section: 'plan-catalog-fetch',
+          sectionDuration_ms: Date.now() - planCatalogSectionStart,
+          error: normalized.message,
+          name: normalized.name,
+        },
+        startTime
+      )
+    );
     // planCatalog remains [] - JobForm will use legacy fallback
   }
 
@@ -66,13 +92,13 @@ export default async function NewJobPage() {
       throw normalized;
     }
 
-    if (result?.serverError) {
+    if (result.serverError) {
       const error = normalizeError(result.serverError, 'NewJobPage: createJob failed');
       logger.error('NewJobPage: createJob failed', error, actionLogContext);
       throw error;
     }
 
-    if (!result?.data) {
+    if (!result.data) {
       const error = normalizeError(
         'createJob returned no data',
         'NewJobPage: createJob returned no data'
@@ -81,17 +107,23 @@ export default async function NewJobPage() {
       throw error;
     }
 
-    if (result.data.success) {
-      if (result.data.requiresPayment) {
-        if (!result.data.checkoutUrl) {
+    // Type the result data using generated database types
+    type CreateJobResult = Database['public']['CompositeTypes']['create_job_with_payment_result'] & {
+      checkoutUrl?: string | null;
+    };
+    const jobResult = result.data as CreateJobResult;
+
+    if (jobResult.success) {
+      if (jobResult.requires_payment) {
+        if (!jobResult.checkoutUrl) {
           const error = normalizeError(
-            'Missing checkout URL for paid job creation',
+            new Error('Missing checkout URL for paid job creation'),
             'NewJobPage: missing checkout URL'
           );
           logger.error('NewJobPage: missing checkout URL', error, {
             ...actionLogContext,
-            jobId: result.data.jobId,
-            companyId: result.data.companyId,
+            jobId: jobResult.job_id ?? 'unknown',
+            companyId: jobResult.company_id ?? 'unknown',
           });
           return {
             success: false,
@@ -104,7 +136,7 @@ export default async function NewJobPage() {
         return {
           success: true,
           requiresPayment: true,
-          checkoutUrl: result.data.checkoutUrl,
+          checkoutUrl: jobResult.checkoutUrl,
           message: 'Redirecting to payment...',
         };
       }
@@ -115,14 +147,14 @@ export default async function NewJobPage() {
 
     // Handle unexpected failure case
     const error = normalizeError(
-      'Job creation failed',
+      new Error('Job creation failed'),
       'NewJobPage: createJob returned success=false'
     );
     logger.error('NewJobPage: createJob returned success=false', error, {
       ...actionLogContext,
-      jobId: result.data?.jobId ?? 'unknown',
-      companyId: result.data?.companyId ?? 'unknown',
-      requiresPayment: result.data?.requiresPayment ?? false,
+      jobId: jobResult.job_id ?? 'unknown',
+      companyId: jobResult.company_id ?? 'unknown',
+      requiresPayment: jobResult.requires_payment ?? false,
     });
     return {
       success: false,

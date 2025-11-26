@@ -3,7 +3,7 @@ import 'server-only';
 import type { Database } from '@heyclaude/database-types';
 
 export function generateContentTags(
-  category?: Database['public']['Enums']['content_category'] | string | null,
+  category?: Database['public']['Enums']['content_category'] | null,
   slug?: string | null,
   additionalTags: string[] = []
 ): string[] {

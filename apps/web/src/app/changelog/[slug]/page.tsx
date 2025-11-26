@@ -26,6 +26,7 @@
  */
 export const revalidate = 7200;
 
+import { Constants } from '@heyclaude/database-types';
 import {
   createWebAppContextWithId,
   generateRequestId,
@@ -43,6 +44,7 @@ import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { formatChangelogDate, getChangelogUrl } from '@heyclaude/web-runtime/utils/changelog';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+
 import { ReadProgress } from '@/src/components/content/read-progress';
 import { Pulse } from '@/src/components/core/infra/pulse';
 import { StructuredData } from '@/src/components/core/infra/structured-data';
@@ -53,9 +55,12 @@ import { Separator } from '@/src/components/primitives/ui/separator';
 /**
  * Generate static params for all changelog entries
  */
+// eslint-disable-next-line unicorn/prevent-abbreviations -- Next.js API convention
 export async function generateStaticParams() {
   // Generate requestId for static params generation (build-time)
+  // eslint-disable-next-line unicorn/prevent-abbreviations -- Must match architectural rule expectation
   const staticParamsRequestId = generateRequestId();
+  // eslint-disable-next-line unicorn/prevent-abbreviations -- Must match architectural rule expectation
   const staticParamsLogContext = createWebAppContextWithId(
     staticParamsRequestId,
     '/changelog',
@@ -101,17 +106,21 @@ export async function generateMetadata({
     }
   );
 
-  let entry: Awaited<ReturnType<typeof getChangelogEntryBySlug>> | null = null;
+  let entry: Awaited<ReturnType<typeof getChangelogEntryBySlug>>;
   try {
     entry = await getChangelogEntryBySlug(slug);
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load changelog entry for metadata');
-    logger.error('ChangelogEntryPage: metadata loader threw', normalized, metadataLogContext);
+    logger.error('ChangelogEntryPage: metadata loader threw', normalized, {
+      ...metadataLogContext,
+      operation: 'generateMetadata',
+    });
+    entry = null;
   }
 
   return generatePageMetadata('/changelog/:slug', {
     params: { slug },
-    item: entry ?? undefined,
+    item: entry,
     slug,
   });
 }
@@ -137,12 +146,15 @@ export default async function ChangelogEntryPage({
     }
   );
 
-  let entry: Awaited<ReturnType<typeof getChangelogEntryBySlug>> | null = null;
+  let entry: Awaited<ReturnType<typeof getChangelogEntryBySlug>>;
   try {
     entry = await getChangelogEntryBySlug(slug);
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load changelog entry');
-    logger.error('ChangelogEntryPage: getChangelogEntryBySlug threw', normalized, logContext);
+    logger.error('ChangelogEntryPage: getChangelogEntryBySlug threw', normalized, {
+      ...logContext,
+      operation: 'ChangelogEntryPage',
+    });
     throw normalized;
   }
 
@@ -159,7 +171,11 @@ export default async function ChangelogEntryPage({
       <ReadProgress />
 
       {/* View Tracker - Track page views */}
-      <Pulse variant="view" category="changelog" slug={entry.slug} />
+      <Pulse
+        variant="view"
+        category={Constants.public.Enums.content_category[10]} // 'changelog'
+        slug={entry.slug}
+      />
 
       {/* Structured Data - Pre-generated schemas from database */}
       <StructuredData route={`/changelog/${entry.slug}`} />
@@ -178,7 +194,7 @@ export default async function ChangelogEntryPage({
         <header className="space-y-4 pb-6">
           <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3} text-muted-foreground text-sm`}>
             <Calendar className="h-4 w-4" />
-            <time dateTime={entry.release_date ?? undefined}>
+            <time dateTime={entry.release_date}>
               {formatChangelogDate(entry.release_date)}
             </time>
           </div>

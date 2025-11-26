@@ -4,6 +4,7 @@ import {
   hashUserId,
   logger,
   normalizeError,
+  withDuration,
 } from '@heyclaude/web-runtime/core';
 import {
   generatePageMetadata,
@@ -14,6 +15,7 @@ import { ArrowLeft } from '@heyclaude/web-runtime/icons';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
+
 import { CollectionForm } from '@/src/components/core/forms/collection-form';
 import { Button } from '@/src/components/primitives/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
@@ -25,16 +27,17 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primi
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-interface EditCollectionPageProps {
+interface EditCollectionPageProperties {
   params: Promise<{ slug: string }>;
 }
 
-export async function generateMetadata({ params }: EditCollectionPageProps): Promise<Metadata> {
+export async function generateMetadata({ params }: EditCollectionPageProperties): Promise<Metadata> {
   const { slug } = await params;
   return generatePageMetadata('/account/library/:slug/edit', { params: { slug } });
 }
 
-export default async function EditCollectionPage({ params }: EditCollectionPageProps) {
+export default async function EditCollectionPage({ params }: EditCollectionPageProperties) {
+  const startTime = Date.now();
   const { slug } = await params;
 
   // Generate single requestId for this page request
@@ -48,36 +51,116 @@ export default async function EditCollectionPage({ params }: EditCollectionPageP
     }
   );
 
+  // Section: Authentication
+  const authSectionStart = Date.now();
   const { user } = await getAuthenticatedUser({ context: 'EditCollectionPage' });
 
   if (!user) {
-    logger.warn('EditCollectionPage: unauthenticated access attempt', undefined, baseLogContext);
+    logger.warn(
+      'EditCollectionPage: unauthenticated access attempt',
+      undefined,
+      withDuration(
+        {
+          ...baseLogContext,
+          section: 'authentication',
+        },
+        authSectionStart
+      )
+    );
     redirect('/login');
   }
 
   const userIdHash = hashUserId(user.id);
   const logContext = { ...baseLogContext, userIdHash };
+  logger.info(
+    'EditCollectionPage: authentication successful',
+    withDuration(
+      {
+        ...logContext,
+        section: 'authentication',
+      },
+      authSectionStart
+    )
+  );
 
+  // Section: Collection Data Fetch
+  const collectionSectionStart = Date.now();
   let collectionData: Awaited<ReturnType<typeof getCollectionDetail>> = null;
   try {
     collectionData = await getCollectionDetail(user.id, slug);
+    logger.info(
+      'EditCollectionPage: collection data loaded',
+      withDuration(
+        {
+          ...logContext,
+          section: 'collection-data-fetch',
+          hasData: !!collectionData,
+        },
+        collectionSectionStart
+      )
+    );
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load collection detail for edit page');
-    logger.error('EditCollectionPage: getCollectionDetail threw', normalized, logContext);
+    logger.error(
+      'EditCollectionPage: getCollectionDetail threw',
+      normalized,
+      withDuration(
+        {
+          ...logContext,
+          section: 'collection-data-fetch',
+          sectionDuration_ms: Date.now() - collectionSectionStart,
+        },
+        startTime
+      )
+    );
     throw normalized;
   }
 
   if (!collectionData) {
-    logger.warn('EditCollectionPage: collection not found or inaccessible', undefined, logContext);
+    logger.warn(
+      'EditCollectionPage: collection not found or inaccessible',
+      undefined,
+      withDuration(
+        {
+          ...logContext,
+          section: 'collection-data-fetch',
+          sectionDuration_ms: Date.now() - collectionSectionStart,
+        },
+        startTime
+      )
+    );
     notFound();
   }
 
   const { collection, bookmarks } = collectionData;
 
   if (!collection) {
-    logger.warn('EditCollectionPage: collection is null in response', undefined, logContext);
+    logger.warn(
+      'EditCollectionPage: collection is null in response',
+      undefined,
+      withDuration(
+        {
+          ...logContext,
+          section: 'collection-data-fetch',
+          sectionDuration_ms: Date.now() - collectionSectionStart,
+        },
+        startTime
+      )
+    );
     notFound();
   }
+
+  // Final summary log
+  logger.info(
+    'EditCollectionPage: page render completed',
+    withDuration(
+      {
+        ...logContext,
+        section: 'page-render',
+      },
+      startTime
+    )
+  );
 
   return (
     <div className="space-y-6">

@@ -13,7 +13,7 @@
  */
 
 import { toggleFollow } from '@heyclaude/web-runtime/actions';
-import { logger, normalizeError } from '@heyclaude/web-runtime/core';
+import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import { useOptimistic, useTransition } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/src/components/primitives/ui/button';
@@ -40,6 +40,11 @@ export function FollowButton({
     initialIsFollowing,
     (_, newState: boolean) => newState
   );
+  const runLoggedAsync = useLoggedAsync({
+    scope: 'FollowButton',
+    defaultMessage: 'Follow operation failed',
+    defaultRethrow: false,
+  });
 
   const handleToggleFollow = () => {
     startTransition(async () => {
@@ -48,35 +53,37 @@ export function FollowButton({
       setOptimisticIsFollowing(newState);
 
       try {
-        // Server action
-        const result = await toggleFollow({
-          user_id: userId,
-          slug: userSlug,
-          action: newState ? 'follow' : 'unfollow',
-        });
+        await runLoggedAsync(
+          async () => {
+            // Server action
+            const result = await toggleFollow({
+              user_id: userId,
+              slug: userSlug,
+              action: newState ? 'follow' : 'unfollow',
+            });
 
-        if (result?.data?.success) {
-          toast.success(newState ? 'Following user' : 'Unfollowed user');
-        } else if (result?.serverError) {
-          // Rollback on server error
-          setOptimisticIsFollowing(!newState);
-          toast.error(result.serverError);
-          const normalized = normalizeError(result.serverError, 'Follow action failed');
-          logger.error('Follow action failed', normalized, {
-            userId,
-            action: newState ? 'follow' : 'unfollow',
-          });
-        } else {
-          // Fallback error
-          setOptimisticIsFollowing(!newState);
-          toast.error('Failed to update follow status');
-        }
+            if (result?.data?.success) {
+              toast.success(newState ? 'Following user' : 'Unfollowed user');
+            } else if (result?.serverError) {
+              // Rollback on server error
+              setOptimisticIsFollowing(!newState);
+              toast.error(result.serverError);
+              throw new Error(result.serverError);
+            } else {
+              // Fallback error
+              setOptimisticIsFollowing(!newState);
+              throw new Error('Failed to update follow status');
+            }
+          },
+          {
+            message: `Failed to ${newState ? 'follow' : 'unfollow'} user`,
+            context: { userId, userSlug, action: newState ? 'follow' : 'unfollow' },
+          }
+        );
       } catch (error) {
-        // Rollback on exception
+        // Rollback on exception (error already logged by useLoggedAsync)
         setOptimisticIsFollowing(!newState);
-        toast.error('An unexpected error occurred');
-        const normalized = normalizeError(error, 'Follow action exception');
-        logger.error('Follow action exception', normalized, { userId });
+        toast.error(error instanceof Error ? error.message : 'An unexpected error occurred');
       }
     });
   };

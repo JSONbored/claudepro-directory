@@ -1,7 +1,7 @@
 'use client';
 
 import { createReview, updateReview } from '@heyclaude/web-runtime/actions';
-import { logClientWarning } from '@heyclaude/web-runtime/core';
+import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import {
   MAX_REVIEW_LENGTH,
   type ReviewFormProps,
@@ -33,6 +33,11 @@ export function ReviewForm({
   const textareaId = useId();
   const ratingErrorId = useId();
   const textareaErrorId = useId();
+  const runLoggedAsync = useLoggedAsync({
+    scope: 'ReviewForm',
+    defaultMessage: 'Review submission failed',
+    defaultRethrow: false,
+  });
 
   const isEditing = !!existingReview;
   const charactersRemaining = MAX_REVIEW_LENGTH - reviewText.length;
@@ -52,40 +57,52 @@ export function ReviewForm({
 
     startTransition(async () => {
       try {
-        if (isEditing) {
-          const result = await updateReview({
-            review_id: existingReview.id,
-            rating,
-            review_text: reviewText.trim() || undefined,
-          });
+        await runLoggedAsync(
+          async () => {
+            if (isEditing) {
+              const result = await updateReview({
+                review_id: existingReview.id,
+                rating,
+                review_text: reviewText.trim() || undefined,
+              });
 
-          if (result?.data?.success) {
-            toasts.success.itemUpdated('Review');
-            router.refresh();
-            onSuccess?.();
-          }
-        } else {
-          const result = await createReview({
-            content_type: contentType,
-            content_slug: contentSlug,
-            rating,
-            review_text: reviewText.trim() || undefined,
-          });
+              if (result?.data?.success) {
+                toasts.success.itemUpdated('Review');
+                router.refresh();
+                onSuccess?.();
+              } else {
+                throw new Error('Review update returned success: false');
+              }
+            } else {
+              const result = await createReview({
+                content_type: contentType,
+                content_slug: contentSlug,
+                rating,
+                review_text: reviewText.trim() || undefined,
+              });
 
-          if (result?.data?.success) {
-            toasts.success.itemCreated('Review');
-            setRating(0);
-            setReviewText('');
-            router.refresh();
-            onSuccess?.();
+              if (result?.data?.success) {
+                toasts.success.itemCreated('Review');
+                setRating(0);
+                setReviewText('');
+                router.refresh();
+                onSuccess?.();
+              } else {
+                throw new Error('Review creation returned success: false');
+              }
+            }
+          },
+          {
+            message: isEditing ? 'Review update failed' : 'Review creation failed',
+            context: {
+              contentType,
+              contentSlug,
+              isEditing,
+            },
           }
-        }
+        );
       } catch (error) {
-        logClientWarning('ReviewForm: submit failed', error, {
-          contentType,
-          contentSlug,
-          isEditing,
-        });
+        // Error already logged by useLoggedAsync
         if (error instanceof Error && error.message.includes('signed in')) {
           toasts.raw.error('Please sign in to write a review', {
             action: {

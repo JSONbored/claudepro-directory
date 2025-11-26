@@ -6,6 +6,7 @@
  */
 
 import { createSupabaseBrowserClient } from '@heyclaude/web-runtime/client';
+import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import { LogOut } from '@heyclaude/web-runtime/icons';
 import type { ButtonStyleProps } from '@heyclaude/web-runtime/types/component.types';
 import { toasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
@@ -35,18 +36,36 @@ export function AuthSignOutButton({
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const supabase = createSupabaseBrowserClient();
+  const runLoggedAsync = useLoggedAsync({
+    scope: 'AuthSignOutButton',
+    defaultMessage: 'Sign out failed',
+    defaultRethrow: false,
+  });
 
   const handleSignOut = async () => {
     setLoading(true);
-    const { error } = await supabase.auth.signOut({ scope });
+    try {
+      await runLoggedAsync(
+        async () => {
+          const { error } = await supabase.auth.signOut({ scope });
 
-    if (error) {
-      toasts.error.authFailed(`Sign out failed: ${error.message}`);
-      setLoading(false);
-    } else {
-      toasts.success.signedOut();
-      router.push('/');
-      router.refresh();
+          if (error) {
+            throw new Error(`Sign out failed: ${error.message}`);
+          }
+
+          toasts.success.signedOut();
+          router.push('/');
+          router.refresh();
+        },
+        {
+          message: 'Sign out failed',
+          context: { scope },
+        }
+      );
+    } catch (error) {
+      // Error already logged by useLoggedAsync
+      toasts.error.authFailed(error instanceof Error ? error.message : 'Sign out failed');
+    } finally {
       setLoading(false);
     }
   };

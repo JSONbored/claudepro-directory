@@ -1,6 +1,6 @@
 'use client';
 
-import { logger, normalizeError } from '@heyclaude/web-runtime/core';
+import { logger, normalizeError } from '../entries/core.ts';
 import { useCallback } from 'react';
 
 type ContextValue = string | number | boolean;
@@ -47,7 +47,7 @@ interface RunOptions {
   rethrow?: boolean;
 }
 
-type LoggedAsyncRunner = <T>(
+export type LoggedAsyncRunner = <T>(
   operation: () => Promise<T>,
   options?: RunOptions
 ) => Promise<T | undefined>;

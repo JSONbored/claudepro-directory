@@ -1,7 +1,14 @@
 'use client';
 
-import { logger, normalizeError } from '@heyclaude/web-runtime/core';
+import { Constants } from '@heyclaude/database-types';
+import {
+  createWebAppContextWithId,
+  generateRequestId,
+  logger,
+  normalizeError,
+} from '@heyclaude/web-runtime/core';
 import { useEffect } from 'react';
+
 import { SegmentErrorFallback } from '@/src/components/core/infra/segment-error-fallback';
 
 export default function JobsError({
@@ -12,11 +19,16 @@ export default function JobsError({
   reset: () => void;
 }) {
   useEffect(() => {
+    const requestId = generateRequestId();
+    const route = globalThis.location.pathname;
     const normalized = normalizeError(error, 'Jobs route rendering failed');
-    logger.error('JobsErrorBoundary: jobs listing crashed', normalized, {
-      segment: 'jobs',
+    const logContext = createWebAppContextWithId(requestId, route, 'JobsErrorBoundary', {
+      segment: Constants.public.Enums.content_category[9], // 'jobs'
       ...(error.digest && { digest: error.digest }),
+      userAgent: globalThis.navigator.userAgent,
+      url: globalThis.location.href,
     });
+    logger.error('Jobs error boundary triggered', normalized, logContext);
   }, [error]);
 
   return (

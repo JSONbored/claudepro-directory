@@ -6,6 +6,7 @@ import { createWebAppContextWithId, generateRequestId, logger } from '@heyclaude
 import { generatePageMetadata, getAuthenticatedUser } from '@heyclaude/web-runtime/data';
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
+
 import { CompanyForm } from '@/src/components/core/forms/company-form';
 
 /**

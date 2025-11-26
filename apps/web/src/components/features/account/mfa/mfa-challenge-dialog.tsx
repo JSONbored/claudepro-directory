@@ -8,6 +8,7 @@
 import type { MFAFactor } from '@heyclaude/web-runtime';
 import { createMFAChallenge, listMFAFactors, verifyMFAChallenge } from '@heyclaude/web-runtime';
 import { createSupabaseBrowserClient } from '@heyclaude/web-runtime/client';
+import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import { AlertCircle, Loader2, Shield } from '@heyclaude/web-runtime/icons';
 import { errorToasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { useCallback, useEffect, useState } from 'react';
@@ -35,33 +36,47 @@ export function MFAChallengeDialog({ open, onVerified }: MFAChallengeDialogProps
   const [verifyCode, setVerifyCode] = useState('');
 
   const supabase = createSupabaseBrowserClient();
+  const runLoggedAsync = useLoggedAsync({
+    scope: 'MFAChallengeDialog',
+    defaultMessage: 'MFA operation failed',
+    defaultRethrow: false,
+  });
 
   const loadFactors = useCallback(async () => {
     setLoading(true);
     setError(null);
 
     try {
-      const { factors: userFactors, error: listError } = await listMFAFactors(supabase);
+      await runLoggedAsync(
+        async () => {
+          const { factors: userFactors, error: listError } = await listMFAFactors(supabase);
 
-      if (listError) {
-        throw listError;
-      }
+          if (listError) {
+            throw listError;
+          }
 
-      const verifiedFactors = userFactors.filter((f) => f.status === 'verified');
-      if (verifiedFactors.length === 0) {
-        throw new Error('No verified MFA factors found');
-      }
+          const verifiedFactors = userFactors.filter((f) => f.status === 'verified');
+          if (verifiedFactors.length === 0) {
+            throw new Error('No verified MFA factors found');
+          }
 
-      setFactors(verifiedFactors);
-      setSelectedFactor(verifiedFactors[0] || null);
+          setFactors(verifiedFactors);
+          setSelectedFactor(verifiedFactors[0] || null);
+        },
+        {
+          message: 'Failed to load MFA factors',
+          level: 'warn',
+        }
+      );
     } catch (err) {
+      // Error already logged by useLoggedAsync
       const message = err instanceof Error ? err.message : 'Failed to load MFA factors';
       setError(message);
       errorToasts.actionFailed('load MFA factors', message);
     } finally {
       setLoading(false);
     }
-  }, [supabase]);
+  }, [supabase, runLoggedAsync]);
 
   const handleVerify = useCallback(async () => {
     if (!(selectedFactor && verifyCode.trim()) || verifyCode.length !== 6) {
@@ -73,36 +88,48 @@ export function MFAChallengeDialog({ open, onVerified }: MFAChallengeDialogProps
     setError(null);
 
     try {
-      // Create challenge
-      const { data: challengeData, error: challengeError } = await createMFAChallenge(
-        supabase,
-        selectedFactor.id
+      await runLoggedAsync(
+        async () => {
+          // Create challenge
+          const { data: challengeData, error: challengeError } = await createMFAChallenge(
+            supabase,
+            selectedFactor.id
+          );
+
+          if (challengeError || !challengeData) {
+            throw challengeError || new Error('Failed to create challenge');
+          }
+
+          // challengeId from challengeData is used directly in verify call
+
+          // Verify challenge
+          const { success, error: verifyError } = await verifyMFAChallenge(
+            supabase,
+            selectedFactor.id,
+            challengeData.id,
+            verifyCode
+          );
+
+          if (verifyError || !success) {
+            throw verifyError || new Error('Invalid verification code');
+          }
+
+          // Session will be refreshed automatically by Supabase
+          // Wait a moment for session to update
+          await new Promise((resolve) => setTimeout(resolve, 500));
+
+          onVerified();
+        },
+        {
+          message: 'MFA verification failed',
+          context: {
+            factorId: selectedFactor.id,
+            hasCode: !!verifyCode,
+          },
+        }
       );
-
-      if (challengeError || !challengeData) {
-        throw challengeError || new Error('Failed to create challenge');
-      }
-
-      // challengeId from challengeData is used directly in verify call
-
-      // Verify challenge
-      const { success, error: verifyError } = await verifyMFAChallenge(
-        supabase,
-        selectedFactor.id,
-        challengeData.id,
-        verifyCode
-      );
-
-      if (verifyError || !success) {
-        throw verifyError || new Error('Invalid verification code');
-      }
-
-      // Session will be refreshed automatically by Supabase
-      // Wait a moment for session to update
-      await new Promise((resolve) => setTimeout(resolve, 500));
-
-      onVerified();
     } catch (err) {
+      // Error already logged by useLoggedAsync
       const message = err instanceof Error ? err.message : 'Verification failed';
       setError(message);
       errorToasts.actionFailed('verify MFA', message);
@@ -110,7 +137,7 @@ export function MFAChallengeDialog({ open, onVerified }: MFAChallengeDialogProps
     } finally {
       setLoading(false);
     }
-  }, [supabase, selectedFactor, verifyCode, onVerified]);
+  }, [supabase, selectedFactor, verifyCode, onVerified, runLoggedAsync]);
 
   useEffect(() => {
     if (open) {

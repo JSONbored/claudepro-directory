@@ -169,10 +169,10 @@ export const ConfigCard = memo(
       category: 'category' in item && isValidCategory(item.category) ? item.category : null,
     });
     const cardCategory: Database['public']['Enums']['content_category'] = isValidCategory(
-      item.category ?? 'agents'
+      item.category ?? Constants.public.Enums.content_category[0] // 'agents'
     )
-      ? ((item.category ?? 'agents') as Database['public']['Enums']['content_category'])
-      : 'agents';
+      ? ((item.category ?? Constants.public.Enums.content_category[0]) as Database['public']['Enums']['content_category']) // 'agents'
+      : Constants.public.Enums.content_category[0]; // 'agents'
     const cardSlug = typeof item.slug === 'string' ? item.slug : null;
     const { togglePin, isPinned } = usePinboard();
     const pinned = cardSlug ? isPinned(cardCategory, cardSlug) : false;
@@ -264,9 +264,9 @@ export const ConfigCard = memo(
     // Track card clicks
     const handleCardClickPulse = useCallback(() => {
       if (!item.slug) return;
-      const category = isValidCategory(item.category ?? 'agents')
-        ? (item.category ?? 'agents')
-        : 'agents';
+      const category = isValidCategory(item.category ?? Constants.public.Enums.content_category[0]) // 'agents'
+        ? (item.category ?? Constants.public.Enums.content_category[0]) // 'agents'
+        : Constants.public.Enums.content_category[0]; // 'agents'
       pulse
         .click({
           category: category as Database['public']['Enums']['content_category'],
@@ -281,7 +281,7 @@ export const ConfigCard = memo(
         .catch((error) => {
           logUnhandledPromise('ConfigCard: card click pulse failed', error, {
             category: (item.category ??
-              'agents') as Database['public']['Enums']['content_category'],
+              Constants.public.Enums.content_category[0]) as Database['public']['Enums']['content_category'], // 'agents'
             slug: item.slug ?? '',
           });
         });
@@ -299,9 +299,9 @@ export const ConfigCard = memo(
         if (hasHighlights && item.slug) {
           hasTrackedHighlight.current = true;
           // Track highlight interaction (non-blocking)
-          const category = isValidCategory(item.category ?? 'agents')
-            ? (item.category ?? 'agents')
-            : 'agents';
+          const category = isValidCategory(item.category ?? Constants.public.Enums.content_category[0]) // 'agents'
+            ? (item.category ?? Constants.public.Enums.content_category[0]) // 'agents'
+            : Constants.public.Enums.content_category[0]; // 'agents'
           pulse
             .search({
               category: category as Database['public']['Enums']['content_category'],
@@ -333,9 +333,9 @@ export const ConfigCard = memo(
     // Compute targetPath early (before hooks that use it)
     const targetPath = item.slug
       ? getContentItemUrl({
-          category: (isValidCategory(item.category ?? 'agents')
-            ? (item.category ?? 'agents')
-            : 'agents') as Database['public']['Enums']['content_category'],
+          category: (isValidCategory(item.category ?? Constants.public.Enums.content_category[0]) // 'agents'
+            ? (item.category ?? Constants.public.Enums.content_category[0]) // 'agents'
+            : Constants.public.Enums.content_category[0]) as Database['public']['Enums']['content_category'], // 'agents'
           slug: item.slug,
           subcategory:
             'subcategory' in item ? (item.subcategory as string | null | undefined) : undefined,
@@ -349,9 +349,9 @@ export const ConfigCard = memo(
       await copyLink(url);
 
       // Track user interaction for analytics and personalization
-      const category = isValidCategory(item.category ?? 'agents')
-        ? (item.category ?? 'agents')
-        : 'agents';
+      const category = isValidCategory(item.category ?? Constants.public.Enums.content_category[0]) // 'agents'
+        ? (item.category ?? Constants.public.Enums.content_category[0]) // 'agents'
+        : Constants.public.Enums.content_category[0]; // 'agents'
       pulse
         .copy({
           category: category as Database['public']['Enums']['content_category'],
@@ -370,7 +370,7 @@ export const ConfigCard = memo(
     const handleSwipeLeftBookmark = useCallback(async () => {
       if (!item.slug) return;
       // Type guard validation
-      const categoryValue = item.category ?? 'agents';
+      const categoryValue = item.category ?? Constants.public.Enums.content_category[0]; // 'agents'
       if (!isValidCategory(categoryValue)) {
         const normalized = normalizeError(
           'Invalid content type',
@@ -553,7 +553,7 @@ export const ConfigCard = memo(
     const hasRating = ratingData && ratingData.count > 0;
 
     // Extract collection-specific metadata (tree-shakeable - only loaded for collections)
-    const isCollection = item.category === ('collections' as const);
+    const isCollection = item.category === Constants.public.Enums.content_category[8]; // 'collections'
     const collectionType = 'collectionType' in item ? item.collectionType : undefined;
     const collectionDifficulty = 'difficulty' in item ? item.difficulty : undefined;
     const itemCount = 'itemCount' in item ? item.itemCount : undefined;
@@ -616,12 +616,12 @@ export const ConfigCard = memo(
           renderTopBadges={() => {
             // Runtime type guard ensures category is valid ContentCategory (excludes 'changelog' and 'jobs')
             // Type assertion is safe because isValidCategory() validates at runtime
-            const rawCategory = item.category ?? 'agents';
+            const rawCategory = item.category ?? Constants.public.Enums.content_category[0]; // 'agents'
             const category: Database['public']['Enums']['content_category'] = isValidCategory(
               rawCategory
             )
               ? (rawCategory as Database['public']['Enums']['content_category'])
-              : 'agents';
+              : Constants.public.Enums.content_category[0]; // 'agents'
             return (
               <>
                 {showCategory && (
@@ -755,9 +755,9 @@ export const ConfigCard = memo(
                   onClick={(e) => {
                     e.stopPropagation();
                     if (!item.slug) return;
-                    const category = isValidCategory(item.category ?? 'agents')
-                      ? (item.category ?? 'agents')
-                      : 'agents';
+                    const category = isValidCategory(item.category ?? Constants.public.Enums.content_category[0]) // 'agents'
+                      ? (item.category ?? Constants.public.Enums.content_category[0]) // 'agents'
+                      : Constants.public.Enums.content_category[0]; // 'agents'
                     pulse
                       .click({
                         category: category as Database['public']['Enums']['content_category'],
@@ -804,9 +804,9 @@ export const ConfigCard = memo(
                   onClick={(e) => {
                     e.stopPropagation();
                     if (!item.slug) return;
-                    const category = isValidCategory(item.category ?? 'agents')
-                      ? (item.category ?? 'agents')
-                      : 'agents';
+                    const category = isValidCategory(item.category ?? Constants.public.Enums.content_category[0]) // 'agents'
+                      ? (item.category ?? Constants.public.Enums.content_category[0]) // 'agents'
+                      : Constants.public.Enums.content_category[0]; // 'agents'
                     pulse
                       .click({
                         category: category as Database['public']['Enums']['content_category'],
@@ -856,9 +856,9 @@ export const ConfigCard = memo(
                   {item.slug && (
                     <BookmarkButton
                       contentType={
-                        isValidCategory(item.category ?? 'agents')
+                        isValidCategory(item.category ?? Constants.public.Enums.content_category[0]) // 'agents'
                           ? (item.category as Database['public']['Enums']['content_category'])
-                          : 'agents'
+                          : Constants.public.Enums.content_category[0] // 'agents'
                       }
                       contentSlug={item.slug}
                     />
@@ -944,9 +944,9 @@ export const ConfigCard = memo(
                     ariaLabel={`Copy link to ${displayTitle}`}
                     onCopySuccess={() => {
                       const category: Database['public']['Enums']['content_category'] =
-                        isValidCategory(item.category ?? 'agents')
+                        isValidCategory(item.category ?? Constants.public.Enums.content_category[0]) // 'agents'
                           ? (item.category as Database['public']['Enums']['content_category'])
-                          : 'agents';
+                          : Constants.public.Enums.content_category[0]; // 'agents'
                       if (item.slug) {
                         pulse.copy({ category, slug: item.slug }).catch((error) => {
                           logUnhandledPromise('ConfigCard: copy button pulse failed', error, {

@@ -1,7 +1,13 @@
 'use client';
 
-import { logger, normalizeError } from '@heyclaude/web-runtime/core';
+import {
+  createWebAppContextWithId,
+  generateRequestId,
+  logger,
+  normalizeError,
+} from '@heyclaude/web-runtime/core';
 import { useEffect } from 'react';
+
 import { SegmentErrorFallback } from '@/src/components/core/infra/segment-error-fallback';
 
 export default function ToolsError({
@@ -12,11 +18,16 @@ export default function ToolsError({
   reset: () => void;
 }) {
   useEffect(() => {
+    const requestId = generateRequestId();
+    const route = globalThis.window.location.pathname;
     const normalized = normalizeError(error, 'Tools route rendering failed');
-    logger.error('ToolsErrorBoundary: tools landing crashed', normalized, {
+    const logContext = createWebAppContextWithId(requestId, route, 'ToolsErrorBoundary', {
       segment: 'tools',
-      ...(error.digest && { digest: error.digest }),
+      ...(error.digest ? { digest: error.digest } : {}),
+      userAgent: globalThis.navigator.userAgent,
+      url: globalThis.location.href,
     });
+    logger.error('Tools error boundary triggered', normalized, logContext);
   }, [error]);
 
   return (

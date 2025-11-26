@@ -1,18 +1,19 @@
 import 'server-only';
 
-import { logger } from '../logger.ts';
-import { normalizeError } from '../errors.ts';
-import { pulseJobSearch } from '../pulse.ts';
-import { fetchCached } from '../cache/fetch-cached.ts';
 import { JobsService, SearchService } from '@heyclaude/data-layer';
-import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '@heyclaude/database-types';
+import type { SupabaseClient } from '@supabase/supabase-js';
+
+import { fetchCached } from '../cache/fetch-cached.ts';
+import { normalizeError } from '../errors.ts';
+import { logger } from '../logger.ts';
+import { pulseJobSearch } from '../pulse.ts';
+import { generateRequestId } from '../utils/request-context.ts';
 import {
   isValidJobCategory,
   isValidJobType,
   isValidExperienceLevel,
 } from '../utils/type-guards.ts';
-import { generateRequestId } from '../utils/request-context.ts';
 
 export type JobsFilterResult = Database['public']['Functions']['filter_jobs']['Returns'];
 
@@ -55,38 +56,38 @@ async function getFilteredJobsDirect(
         
         // OPTIMIZATION: Use type guards instead of type assertions for runtime validation
         // Build RPC args with proper type narrowing
-        const rpcArgs: Database['public']['Functions']['filter_jobs']['Args'] = {};
+        const rpcArguments: Database['public']['Functions']['filter_jobs']['Args'] = {};
         
         if (searchQuery) {
-          rpcArgs.p_search_query = searchQuery;
+          rpcArguments.p_search_query = searchQuery;
         }
         if (category && category !== 'all' && isValidJobCategory(category)) {
           // Type guard ensures category is valid job_category enum
-          rpcArgs.p_category = category as Database['public']['Enums']['job_category'];
+          rpcArguments.p_category = category;
         }
         if (employment && employment !== 'any' && isValidJobType(employment)) {
           // Type guard ensures employment is valid job_type enum
-          rpcArgs.p_employment_type = employment as Database['public']['Enums']['job_type'];
+          rpcArguments.p_employment_type = employment;
         }
         if (experience && experience !== 'any' && isValidExperienceLevel(experience)) {
           // Type guard ensures experience is valid experience_level enum
-          rpcArgs.p_experience_level = experience as Database['public']['Enums']['experience_level'];
+          rpcArguments.p_experience_level = experience;
         }
         if (remote !== undefined) {
-          rpcArgs.p_remote_only = remote;
+          rpcArguments.p_remote_only = remote;
         }
         if (limit !== undefined) {
-          rpcArgs.p_limit = limit;
+          rpcArguments.p_limit = limit;
         }
         if (offset !== undefined) {
-          rpcArgs.p_offset = offset;
+          rpcArguments.p_offset = offset;
         }
         
         // Type compatibility: SupabaseAnonClient is compatible with SupabaseClient<Database>
         // Both are created from the same underlying Supabase client factory with Database type
         // This is safe because createSupabaseAnonClient returns ReturnType<typeof createSupabaseClient<Database>>
         // We use a type assertion here because TypeScript doesn't recognize the structural compatibility
-        return await new SearchService(client as SupabaseClient<Database>).filterJobs(rpcArgs);
+        return await new SearchService(client).filterJobs(rpcArguments);
       },
       {
         operation: 'getFilteredJobsDirect',
@@ -97,7 +98,17 @@ async function getFilteredJobsDirect(
     
     return result;
   } catch (error) {
-    // trackPerformance already logs the error with performance metrics
+    // trackPerformance already logs the error, but we log again with context about fallback behavior
+    const normalized = normalizeError(error, 'Job filtering failed, returning null');
+    const fallbackRequestId = generateRequestId();
+    logger.warn('Job filtering failed, returning null', undefined, {
+      requestId: fallbackRequestId,
+      operation: 'getFilteredJobsDirect-fallback',
+      route: '/data/jobs',
+      ...filtersLog,
+      errorMessage: normalized.message,
+      fallbackStrategy: 'null',
+    });
     return null;
   }
 }
@@ -113,7 +124,13 @@ export async function getFilteredJobs(
   noCache = false
 ): Promise<JobsFilterResult | null> {
   const { searchQuery, category, employment, experience, remote, limit, offset, sort } = options;
-  const hasFilters = Boolean(searchQuery || (category && category !== 'all') || (employment && employment !== 'any') || (experience && experience !== 'any') || (remote !== undefined));
+  const hasFilters = Boolean(
+    (searchQuery ?? '') !== '' ||
+    (category !== undefined && category !== 'all') ||
+    (employment !== undefined && employment !== 'any') ||
+    (experience !== undefined && experience !== 'any') ||
+    remote !== undefined
+  );
 
   const filtersLog: Record<string, string | number | boolean | null> = {
     searchQuery: searchQuery ?? null,
@@ -130,8 +147,8 @@ export async function getFilteredJobs(
   if (!hasFilters) {
     return fetchCached(
       (client: SupabaseClient<Database>) => new SearchService(client).filterJobs({
-        ...(limit !== undefined ? { p_limit: limit } : {}),
-        ...(offset !== undefined ? { p_offset: offset } : {})
+        ...(limit === undefined ? {} : { p_limit: limit }),
+        ...(offset === undefined ? {} : { p_offset: offset })
       }),
       {
         keyParts: ['jobs-all', limit ?? 0, offset ?? 0],
@@ -147,8 +164,8 @@ export async function getFilteredJobs(
   if (noCache) {
     // Pulse the search for analytics (fire and forget)
     if (searchQuery) {
-      pulseJobSearch(searchQuery, {}, 0).catch((err: unknown) => {
-        const normalized = normalizeError(err);
+      pulseJobSearch(searchQuery, {}, 0).catch((error: unknown) => {
+        const normalized = normalizeError(error);
         logger.error('Failed to pulse job search', normalized, {
           requestId: generateRequestId(),
           operation: 'pulseJobSearch',
@@ -162,8 +179,8 @@ export async function getFilteredJobs(
   try {
     // Pulse the search for analytics (fire and forget)
     if (searchQuery) {
-      pulseJobSearch(searchQuery, {}, 0).catch((err: unknown) => {
-        const normalized = normalizeError(err);
+      pulseJobSearch(searchQuery, {}, 0).catch((error: unknown) => {
+        const normalized = normalizeError(error);
         logger.error('Failed to pulse job search', normalized, {
           requestId: generateRequestId(),
           operation: 'pulseJobSearch',
@@ -173,35 +190,35 @@ export async function getFilteredJobs(
 
     // OPTIMIZATION: Use type guards instead of type assertions for runtime validation
     // Build RPC args with proper type narrowing
-    const rpcArgs: Database['public']['Functions']['filter_jobs']['Args'] = {};
+    const rpcArguments: Database['public']['Functions']['filter_jobs']['Args'] = {};
     
     if (searchQuery) {
-      rpcArgs.p_search_query = searchQuery;
+      rpcArguments.p_search_query = searchQuery;
     }
     if (category && category !== 'all' && isValidJobCategory(category)) {
       // Type guard ensures category is valid job_category enum
-      rpcArgs.p_category = category as Database['public']['Enums']['job_category'];
+      rpcArguments.p_category = category;
     }
     if (employment && employment !== 'any' && isValidJobType(employment)) {
       // Type guard ensures employment is valid job_type enum
-      rpcArgs.p_employment_type = employment as Database['public']['Enums']['job_type'];
+      rpcArguments.p_employment_type = employment;
     }
     if (experience && experience !== 'any' && isValidExperienceLevel(experience)) {
       // Type guard ensures experience is valid experience_level enum
-      rpcArgs.p_experience_level = experience as Database['public']['Enums']['experience_level'];
+      rpcArguments.p_experience_level = experience;
     }
     if (remote !== undefined) {
-      rpcArgs.p_remote_only = remote;
+      rpcArguments.p_remote_only = remote;
     }
     if (limit !== undefined) {
-      rpcArgs.p_limit = limit;
+      rpcArguments.p_limit = limit;
     }
     if (offset !== undefined) {
-      rpcArgs.p_offset = offset;
+      rpcArguments.p_offset = offset;
     }
     
     return fetchCached(
-      (client: SupabaseClient<Database>) => new SearchService(client).filterJobs(rpcArgs),
+      (client: SupabaseClient<Database>) => new SearchService(client).filterJobs(rpcArguments),
       {
         // Next.js automatically handles serialization of keyParts array
         keyParts: [
@@ -250,7 +267,7 @@ export async function getJobBySlug(slug: string) {
 /**
  * Gets featured jobs
  */
-export async function getFeaturedJobs(limit: number = 5) {
+export async function getFeaturedJobs(limit = 5) {
   return fetchCached(
     (client: SupabaseClient<Database>) => new JobsService(client).getFeaturedJobs(),
     {

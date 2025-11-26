@@ -4,7 +4,13 @@
  * Leverages get_company_profile() RPC + company_job_stats materialized view
  */
 
-import { createWebAppContextWithId, generateRequestId, logger } from '@heyclaude/web-runtime/core';
+import type { Database } from '@heyclaude/database-types';
+import {
+  createWebAppContextWithId,
+  generateRequestId,
+  logger,
+  withDuration,
+} from '@heyclaude/web-runtime/core';
 import { generatePageMetadata, getCompanyProfile } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import {
@@ -21,6 +27,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import type React from 'react';
+
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { JobCard } from '@/src/components/core/domain/cards/job-card';
 import { StructuredData } from '@/src/components/core/infra/structured-data';
@@ -90,25 +97,29 @@ function getSafeWebsiteUrl(url: string | null | undefined): string | null {
   }
 }
 
-interface CompanyPageProps {
+interface CompanyPageProperties {
   params: Promise<{ slug: string }>;
 }
 
 export const revalidate = 1800; // 30min ISR (fallback if edge function cache misses)
+// eslint-disable-next-line unicorn/prevent-abbreviations -- Next.js API convention
 export const dynamicParams = true; // Allow unknown slugs to be rendered on demand (will 404 if invalid)
 
 /**
  * Generate static params for company pages
  * Pre-renders top 50 companies at build time for optimal SEO and performance
  */
+// eslint-disable-next-line unicorn/prevent-abbreviations -- Next.js API convention
 export async function generateStaticParams() {
   const { getCompaniesList } = await import('@heyclaude/web-runtime/data');
-  const { logger, createWebAppContextWithId, generateRequestId } = await import(
+  const { logger, createWebAppContextWithId, generateRequestId, normalizeError } = await import(
     '@heyclaude/web-runtime/core'
   );
 
   // Generate requestId for static params generation (build-time)
+  // eslint-disable-next-line unicorn/prevent-abbreviations -- Must match architectural rule expectation
   const staticParamsRequestId = generateRequestId();
+  // eslint-disable-next-line unicorn/prevent-abbreviations -- Must match architectural rule expectation
   const staticParamsLogContext = createWebAppContextWithId(
     staticParamsRequestId,
     '/companies/[slug]',
@@ -117,7 +128,7 @@ export async function generateStaticParams() {
 
   try {
     const result = await getCompaniesList(50, 0);
-    const companies = result?.companies ?? [];
+    const companies = result.companies ?? [];
 
     return companies
       .filter((company): company is typeof company & { slug: string } => Boolean(company.slug))
@@ -125,37 +136,45 @@ export async function generateStaticParams() {
         slug: company.slug,
       }));
   } catch (error) {
-    logger.warn('generateStaticParams: failed to load companies', undefined, {
-      ...staticParamsLogContext,
-      error: error instanceof Error ? error.message : String(error),
-    });
+    const normalized = normalizeError(error, 'Failed to load companies for generateStaticParams');
+    logger.error('generateStaticParams: failed to load companies', normalized, staticParamsLogContext);
     return [];
   }
 }
 
-export async function generateMetadata({ params }: CompanyPageProps): Promise<Metadata> {
+export async function generateMetadata({ params }: CompanyPageProperties): Promise<Metadata> {
   const { slug } = await params;
   return generatePageMetadata('/companies/:slug', {
     params: { slug },
   });
 }
 
-export default async function CompanyPage({ params }: CompanyPageProps) {
+export default async function CompanyPage({ params }: CompanyPageProperties) {
   const { slug } = await params;
 
+  const startTime = Date.now();
   // Generate single requestId for this page request
   const requestId = generateRequestId();
-  const logContext = createWebAppContextWithId(requestId, `/companies/${slug}`, 'CompanyPage', {
+  const baseLogContext = createWebAppContextWithId(requestId, `/companies/${slug}`, 'CompanyPage', {
     slug,
   });
 
+  // Section: Company Profile Fetch
+  const profileSectionStart = Date.now();
   const profile = await getCompanyProfile(slug);
 
   if (!profile?.company) {
-    logger.warn('CompanyPage: company not found', undefined, logContext);
+    logger.warn('CompanyPage: company not found', undefined, {
+      ...withDuration(baseLogContext, startTime),
+      requestId,
+      operation: 'CompanyPage',
+      section: 'company-profile-fetch',
+      sectionDuration_ms: Date.now() - profileSectionStart,
+    });
     notFound();
   }
 
+  // profile and profile.company are guaranteed to be non-null after the check above
   const { company, active_jobs, stats } = profile;
 
   return (
@@ -212,6 +231,7 @@ export default async function CompanyPage({ params }: CompanyPageProps) {
                     </div>
                   )}
 
+                  {/* eslint-disable-next-line unicorn/explicit-length-check -- company.size is an enum value, not a Set/Map */}
                   {company.size && (
                     <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
                       <Users className="h-4 w-4" />
@@ -242,7 +262,7 @@ export default async function CompanyPage({ params }: CompanyPageProps) {
             <div className="space-y-6">
               <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
                 <h2 className="font-bold text-2xl">
-                  Active Positions ({active_jobs?.length || 0})
+                  Active Positions ({active_jobs?.length ?? 0})
                 </h2>
               </div>
 
@@ -263,28 +283,22 @@ export default async function CompanyPage({ params }: CompanyPageProps) {
                 </Card>
               ) : (
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                  {(active_jobs ?? [])
-                    .filter((job) => {
-                      // Filter out jobs missing required fields
+                  {active_jobs
+                    .filter((job): job is typeof job & {
+                      id: string;
+                      slug: string;
+                      title: string;
+                      company: string;
+                      workplace: Database['public']['Enums']['workplace_type'];
+                      experience: Database['public']['Enums']['experience_level'];
+                      plan: Database['public']['Enums']['job_plan'];
+                      posted_at: string;
+                      expires_at: string;
+                      view_count: number;
+                      click_count: number;
+                    } => {
                       return Boolean(
-                        job?.id &&
-                          job?.slug &&
-                          job?.title &&
-                          job?.company &&
-                          job?.workplace &&
-                          job?.experience &&
-                          job?.plan &&
-                          job?.posted_at &&
-                          job?.expires_at &&
-                          job?.view_count != null &&
-                          job?.click_count != null
-                      );
-                    })
-                    .map((job) => {
-                      // Type narrowing: at this point we know all required fields exist
-                      if (
-                        !(
-                          job.id &&
+                        job.id &&
                           job.slug &&
                           job.title &&
                           job.company &&
@@ -292,13 +306,12 @@ export default async function CompanyPage({ params }: CompanyPageProps) {
                           job.experience &&
                           job.plan &&
                           job.posted_at &&
-                          job.expires_at
-                        ) ||
-                        job.view_count == null ||
-                        job.click_count == null
-                      ) {
-                        return null;
-                      }
+                          job.expires_at &&
+                          job.view_count !== null &&
+                          job.click_count !== null
+                      );
+                    })
+                    .map((job) => {
                       return (
                         <JobCard
                           key={job.id}
@@ -327,8 +340,7 @@ export default async function CompanyPage({ params }: CompanyPageProps) {
                           }}
                         />
                       );
-                    })
-                    .filter((card): card is React.ReactElement => card !== null)}
+                    })}
                 </div>
               )}
             </div>

@@ -6,6 +6,7 @@ import {
   hashUserId,
   logger,
   normalizeError,
+  withDuration,
 } from '@heyclaude/web-runtime/core';
 import {
   generatePageMetadata,
@@ -19,6 +20,7 @@ import type { HomepageContentItem } from '@heyclaude/web-runtime/types/component
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import type { Metadata } from 'next';
 import Link from 'next/link';
+
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { NavLink } from '@/src/components/core/navigation/navigation-link';
 import { RecentlySavedGrid } from '@/src/components/features/account/recently-saved-grid';
@@ -45,15 +47,23 @@ export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
 export default async function AccountDashboard() {
+  const startTime = Date.now();
   // Generate single requestId for this page request
   const requestId = generateRequestId();
   const baseLogContext = createWebAppContextWithId(requestId, '/account', 'AccountDashboard');
 
+  // Section: Authentication
+  const authSectionStart = Date.now();
   const { user } = await getAuthenticatedUser({ context: 'AccountDashboard' });
 
   if (!user) {
+    const authLogContext = withDuration(baseLogContext, startTime);
     logger.warn('AccountDashboard: unauthenticated access attempt detected', undefined, {
-      ...baseLogContext,
+      ...authLogContext,
+      requestId,
+      operation: 'AccountDashboard',
+      section: 'authentication',
+      sectionDuration_ms: Date.now() - authSectionStart,
       timestamp: new Date().toISOString(),
     });
     return (
@@ -76,26 +86,75 @@ export default async function AccountDashboard() {
   // Hash user ID for privacy-compliant logging (GDPR/CCPA)
   const userIdHash = hashUserId(user.id);
   const logContext = { ...baseLogContext, userIdHash };
+  logger.info(
+    'AccountDashboard: authentication successful',
+    withDuration(
+      {
+        ...logContext,
+        section: 'authentication',
+      },
+      authSectionStart
+    )
+  );
 
-  // Use bundle helper to fetch shared data per request (Phase 4 optimization)
+  // Section: Dashboard Bundle
+  const bundleSectionStart = Date.now();
   let bundleData: Awaited<ReturnType<typeof getAccountDashboardBundle>> | null = null;
   try {
     bundleData = await getAccountDashboardBundle(user.id);
+    logger.info(
+      'AccountDashboard: dashboard bundle loaded',
+      withDuration(
+        {
+          ...logContext,
+          section: 'dashboard-bundle',
+          hasDashboard: !!bundleData.dashboard,
+          hasLibrary: !!bundleData.library,
+          hasHomepage: !!bundleData.homepage,
+        },
+        bundleSectionStart
+      )
+    );
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load account dashboard bundle');
-    logger.error('AccountDashboard: getAccountDashboardBundle threw', normalized, logContext);
+    logger.error(
+      'AccountDashboard: getAccountDashboardBundle threw',
+      normalized,
+      withDuration(
+        {
+          ...logContext,
+          section: 'dashboard-bundle',
+          sectionDuration_ms: Date.now() - bundleSectionStart,
+        },
+        startTime
+      )
+    );
+    throw normalized;
   }
 
-  const dashboardData = bundleData?.dashboard ?? null;
-  const libraryData = bundleData?.library ?? null;
-  const homepageData = bundleData?.homepage ?? null;
+  // bundleData is guaranteed to be non-null after successful await
+  // (getAccountDashboardBundle returns Promise<AccountDashboardBundle>, not Promise<AccountDashboardBundle | null>)
+  const dashboardData = bundleData.dashboard;
+  const libraryData = bundleData.library;
+  const homepageData = bundleData.homepage;
 
   if (!dashboardData) {
     const normalized = normalizeError(
       'Dashboard data is null',
       'AccountDashboard: dashboard data is null'
     );
-    logger.error('AccountDashboard: dashboard data is null', normalized, logContext);
+    logger.error(
+      'AccountDashboard: dashboard data is null',
+      normalized,
+      withDuration(
+        {
+          ...logContext,
+          section: 'dashboard-bundle',
+          sectionDuration_ms: Date.now() - bundleSectionStart,
+        },
+        startTime
+      )
+    );
     return (
       <div className="space-y-6">
         <Card>
@@ -123,9 +182,12 @@ export default async function AccountDashboard() {
     : 0;
 
   const bookmarks = (libraryData?.bookmarks ?? []).filter(
-    (bookmark) => bookmark?.content_slug && bookmark?.content_type
+    (bookmark) => bookmark.content_slug !== null && bookmark.content_type !== null
   );
   const recentBookmarks = bookmarks.slice(0, 3);
+
+  // Section: Recent Bookmarks
+  const bookmarksSectionStart = Date.now();
   const recentlySavedContentResults = await Promise.all(
     recentBookmarks.map(async (bookmark) => {
       try {
@@ -137,6 +199,7 @@ export default async function AccountDashboard() {
         const normalized = normalizeError(error, 'Failed to load bookmark content');
         logger.warn('AccountDashboard: getContentDetailCore failed for bookmark', undefined, {
           ...logContext,
+          section: 'recent-bookmarks',
           slug: bookmark.content_slug,
           category: bookmark.content_type,
           error: normalized.message,
@@ -144,6 +207,18 @@ export default async function AccountDashboard() {
         return null;
       }
     })
+  );
+  logger.info(
+    'AccountDashboard: recent bookmarks loaded',
+    withDuration(
+      {
+        ...logContext,
+        section: 'recent-bookmarks',
+        bookmarkCount: recentBookmarks.length,
+        loadedCount: recentlySavedContentResults.filter(Boolean).length,
+      },
+      bookmarksSectionStart
+    )
   );
   const recentlySavedContent = recentlySavedContentResults.filter(
     (item): item is Database['public']['Tables']['content']['Row'] =>
@@ -166,7 +241,7 @@ export default async function AccountDashboard() {
 
   // Helper to safely extract categoryData
   function extractHomepageCategoryData(
-    homepageData: Awaited<ReturnType<typeof getAccountDashboardBundle>>['homepage'] | null
+    homepageData: Awaited<ReturnType<typeof getAccountDashboardBundle>>['homepage']
   ): Record<string, HomepageContentItem[]> {
     if (!homepageData?.content || typeof homepageData.content !== 'object') {
       return {};
@@ -180,7 +255,7 @@ export default async function AccountDashboard() {
   const homepageCategoryData = extractHomepageCategoryData(homepageData);
 
   const homepageItems = Object.values(homepageCategoryData).flatMap((bucket) =>
-    Array.isArray(bucket) ? (bucket as HomepageContentItem[]) : []
+    Array.isArray(bucket) ? bucket : []
   );
 
   const candidateRecommendations =
@@ -190,11 +265,26 @@ export default async function AccountDashboard() {
         )
       : homepageItems;
 
+  // Section: Recommendations
+  const recommendationsSectionStart = Date.now();
   const recommendations = candidateRecommendations
     .filter(
       (item) => item.slug && !bookmarkedSlugs.has(`${item.category}/${item.slug}`) && item.title
     )
     .slice(0, 3);
+  logger.info(
+    'AccountDashboard: recommendations generated',
+    withDuration(
+      {
+        ...logContext,
+        section: 'recommendations',
+        candidateCount: candidateRecommendations.length,
+        finalCount: recommendations.length,
+        savedTagsCount: savedTags.size,
+      },
+      recommendationsSectionStart
+    )
+  );
 
   const latestBookmark = recentBookmarks[0];
   const resumeBookmarkHref =
@@ -202,11 +292,26 @@ export default async function AccountDashboard() {
       ? `/${latestBookmark.content_type}/${latestBookmark.content_slug}`
       : null;
 
+  // Final summary log
+  logger.info(
+    'AccountDashboard: page render completed',
+    withDuration(
+      {
+        ...logContext,
+        section: 'page-render',
+        bookmarkCount,
+        recommendationsCount: recommendations.length,
+        recentlySavedCount: recentlySavedContent.length,
+      },
+      startTime
+    )
+  );
+
   return (
     <div className="space-y-6">
       <div>
         <h1 className="mb-2 font-bold text-3xl">Dashboard</h1>
-        <p className="text-muted-foreground">Welcome back, {profile?.name || 'User'}!</p>
+        <p className="text-muted-foreground">Welcome back, {profile?.name ?? 'User'}!</p>
       </div>
 
       {/* Stats cards */}
@@ -218,7 +323,7 @@ export default async function AccountDashboard() {
           <CardContent>
             <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
               <Bookmark className="h-5 w-5 text-primary" />
-              <span className="font-bold text-3xl">{bookmarkCount || 0}</span>
+              <span className="font-bold text-3xl">{bookmarkCount ?? 0}</span>
             </div>
             <p className={'mt-2 text-muted-foreground text-xs'}>Saved items</p>
           </CardContent>

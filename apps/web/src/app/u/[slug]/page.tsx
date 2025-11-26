@@ -11,6 +11,7 @@ import {
   logger,
   normalizeError,
   sanitizeSlug,
+  withDuration,
 } from '@heyclaude/web-runtime/core';
 import {
   generatePageMetadata,
@@ -22,6 +23,7 @@ import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
+
 import { FollowButton } from '@/src/components/core/buttons/social/follow-button';
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { NavLink } from '@/src/components/core/navigation/navigation-link';
@@ -90,29 +92,28 @@ function sanitizeDisplayText(text: string | null | undefined, fallback: string):
   if (!text || typeof text !== 'string') return fallback;
   // Remove all angle brackets to prevent HTML/script injection (safest for plain text display)
   // This completely eliminates any possibility of HTML tag injection
-  let sanitized = text.replace(/[<>]/g, '');
+  let sanitized = text.replaceAll(/[<>]/g, '');
   // Remove control characters and dangerous Unicode by filtering character codes
-  const dangerousChars = [
-    0x202e,
-    0x202d,
-    0x202c,
-    0x202b,
-    0x202a, // RTL override marks
-    0x200e,
-    0x200f, // Left-to-right/right-to-left marks
-    0x2066,
-    0x2067,
-    0x2068,
-    0x2069, // Directional isolates
-  ];
-  sanitized = sanitized
-    .split('')
+  const dangerousChars = new Set([
+    0x20_2E,
+    0x20_2D,
+    0x20_2C,
+    0x20_2B,
+    0x20_2A, // RTL override marks
+    0x20_0E,
+    0x20_0F, // Left-to-right/right-to-left marks
+    0x20_66,
+    0x20_67,
+    0x20_68,
+    0x20_69, // Directional isolates
+  ]);
+  sanitized = [...sanitized]
     .filter((char) => {
-      const code = char.charCodeAt(0);
+      const code = char.codePointAt(0) ?? 0;
       // Allow tab (0x09), newline (0x0a), and printable characters outside control ranges
-      const isControl = code < 0x20 || (code >= 0x7f && code <= 0x9f);
-      const isPrintable = code === 0x09 || code === 0x0a || !isControl;
-      return isPrintable && !dangerousChars.includes(code);
+      const isControl = code < 0x20 || (code >= 0x7F && code <= 0x9F);
+      const isPrintable = code === 0x09 || code === 0x0A || !isControl;
+      return isPrintable && !dangerousChars.has(code);
     })
     .join('');
   // Trim and limit length
@@ -120,7 +121,7 @@ function sanitizeDisplayText(text: string | null | undefined, fallback: string):
   return sanitized.length > 0 ? sanitized : fallback;
 }
 
-interface UserProfilePageProps {
+interface UserProfilePageProperties {
   params: Promise<{ slug: string }>;
 }
 
@@ -129,14 +130,15 @@ interface UserProfilePageProps {
  */
 export const revalidate = false;
 
-export async function generateMetadata({ params }: UserProfilePageProps): Promise<Metadata> {
+export async function generateMetadata({ params }: UserProfilePageProperties): Promise<Metadata> {
   const { slug } = await params;
   return generatePageMetadata('/u/:slug', {
     params: { slug },
   });
 }
 
-export default async function UserProfilePage({ params }: UserProfilePageProps) {
+export default async function UserProfilePage({ params }: UserProfilePageProperties) {
+  const startTime = Date.now();
   const { slug } = await params;
 
   // Generate single requestId for this page request
@@ -145,9 +147,20 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
     slug,
   });
 
-  // Validate route slug before hitting the data layer
+  // Section: Slug Validation
+  const validationSectionStart = Date.now();
   if (!isValidSlug(slug)) {
-    logger.warn('UserProfilePage: invalid user slug', undefined, baseLogContext);
+    logger.warn(
+      'UserProfilePage: invalid user slug',
+      undefined,
+      withDuration(
+        {
+          ...baseLogContext,
+          section: 'slug-validation',
+        },
+        validationSectionStart
+      )
+    );
     notFound();
   }
 
@@ -160,20 +173,55 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
     ? { ...baseLogContext, viewerId: currentUser.id }
     : baseLogContext;
 
+  // Section: User Profile Fetch
+  const profileSectionStart = Date.now();
   let profileData: Database['public']['Functions']['get_user_profile']['Returns'] | null = null;
   try {
     profileData = await getPublicUserProfile({
       slug,
       ...(currentUser?.id ? { viewerId: currentUser.id } : {}),
     });
+    logger.info(
+      'UserProfilePage: user profile loaded',
+      withDuration(
+        {
+          ...logContext,
+          section: 'user-profile-fetch',
+          hasProfile: !!profileData,
+        },
+        profileSectionStart
+      )
+    );
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load user profile detail');
-    logger.error('UserProfilePage: get_user_profile threw', normalized, logContext);
+    logger.error(
+      'UserProfilePage: get_user_profile threw',
+      normalized,
+      withDuration(
+        {
+          ...logContext,
+          section: 'user-profile-fetch',
+          sectionDuration_ms: Date.now() - profileSectionStart,
+        },
+        startTime
+      )
+    );
     throw normalized;
   }
 
   if (!profileData) {
-    logger.warn('UserProfilePage: user profile not found', undefined, baseLogContext);
+    logger.warn(
+      'UserProfilePage: user profile not found',
+      undefined,
+      withDuration(
+        {
+          ...baseLogContext,
+          section: 'user-profile-fetch',
+          sectionDuration_ms: Date.now() - profileSectionStart,
+        },
+        startTime
+      )
+    );
     notFound();
   }
 
@@ -192,7 +240,7 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
               {profile?.image ? (
                 <Image
                   src={profile.image}
-                  alt={`${sanitizeDisplayText(profile?.name ?? slug, slug)}'s profile picture`}
+                  alt={`${sanitizeDisplayText(profile.name ?? slug, slug)}'s profile picture`}
                   width={96}
                   height={96}
                   className="h-24 w-24 rounded-full border-4 border-background object-cover"
@@ -240,7 +288,7 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
               </div>
             </div>
 
-            {currentUser && currentUser.id !== profile?.id && profile?.id && profile?.slug && (
+            {currentUser && profile && currentUser.id !== profile.id && profile.id && profile.slug && (
               <FollowButton
                 userId={profile.id}
                 userSlug={profile.slug}
@@ -295,7 +343,7 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
             <div>
               <h2 className="mb-4 font-bold text-2xl">Public Collections</h2>
 
-              {!collections || (collections.length ?? 0) === 0 ? (
+              {!collections || collections.length === 0 ? (
                 <Card>
                   <CardContent className={'flex flex-col items-center py-12'}>
                     <FolderOpen className="mb-4 h-12 w-12 text-muted-foreground" />
@@ -305,15 +353,14 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
               ) : (
                 <div className="grid gap-4 sm:grid-cols-2">
                   {collections
-                    ?.filter(
+                    .filter(
                       (
                         collection
-                      ): collection is NonNullable<typeof collection> & {
+                      ): collection is typeof collection & {
                         id: string;
                         slug: string;
                         name: string | null;
                       } =>
-                        collection !== null &&
                         collection.id !== null &&
                         collection.slug !== null &&
                         collection.name !== null
@@ -328,7 +375,7 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                             ...baseLogContext,
                             collectionId: collection.id,
                             collectionName: collection.name ?? 'Unknown',
-                            collectionSlug: collection.slug ?? 'Unknown',
+                            collectionSlug: collection.slug,
                           }
                         );
                         return null;
@@ -366,21 +413,20 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
             </div>
 
             {/* Content Contributions */}
-            {contributions && (contributions.length ?? 0) > 0 && (
+            {contributions && contributions.length > 0 && (
               <div>
                 <h2 className="mb-4 font-bold text-2xl">Contributions</h2>
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                   {contributions
-                    ?.filter(
+                    .filter(
                       (
                         item
-                      ): item is NonNullable<typeof item> & {
+                      ): item is typeof item & {
                         id: string;
                         content_type: Database['public']['Enums']['content_category'];
                         slug: string;
                         name: string | null;
                       } =>
-                        item !== null &&
                         item.id !== null &&
                         item.content_type !== null &&
                         item.slug !== null &&

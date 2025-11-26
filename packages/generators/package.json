@@ -12,8 +12,6 @@
     "heyclaude-generate-readme": "./dist/bin/generate-readme.js",
     "heyclaude-verify-mcpb": "./dist/bin/verify-mcpb.js",
     "heyclaude-cache": "./dist/bin/cache.js",
-    "heyclaude-lint-auth-guards": "./dist/bin/lint-auth-guards.js",
-    "heyclaude-lint-data-layer": "./dist/bin/lint-data-layer.js",
     "heyclaude-sync-db": "./dist/bin/sync-db.js",
     "heyclaude-lint-unused": "./dist/bin/lint-unused.js",
     "heyclaude-webhooks-list": "./dist/bin/list-backlog.js",

@@ -2,6 +2,7 @@
 
 import type { Database } from '@heyclaude/database-types';
 import { logUnhandledPromise, NEWSLETTER_CTA_CONFIG } from '@heyclaude/web-runtime/core';
+import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import { Mail } from '@heyclaude/web-runtime/icons';
 import { cn, DIMENSIONS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { useEffect, useState } from 'react';
@@ -12,7 +13,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/primitives/ui/card';
-import { useLoggedAsync } from '@/src/hooks/use-logged-async';
 import { useNewsletterCount } from '@/src/hooks/use-newsletter-count';
 
 import { NewsletterForm } from './newsletter-form';

@@ -123,6 +123,24 @@ export async function runGenerateCategoryConfig(): Promise<boolean> {
         apiConfig?: { maxItemsPerResponse?: number };
       };
 
+      // Format numbers with proper separators for linting (groups of 3 digits)
+      const formatNumber = (num: number | undefined, fallback: number): string => {
+        const value = num ?? fallback;
+        if (value >= 1000) {
+          // Format with underscores every 3 digits from right
+          const str = String(value);
+          const parts = [];
+          for (let i = str.length; i > 0; i -= 3) {
+            parts.unshift(str.slice(Math.max(0, i - 3), i));
+          }
+          return parts.join('_');
+        }
+        return String(value);
+      };
+
+      const cacheTTL = formatNumber(generationConfig.buildConfig?.cacheTTL, 300_000);
+      const maxItemsPerResponse = formatNumber(apiSchema.apiConfig?.maxItemsPerResponse, 1_000);
+
       const badges = Array.isArray(dbConfig.badges)
         ? dbConfig.badges.map((badge: BadgeConfig) => {
             if (typeof badge !== 'object' || !badge) return '{ text: "" }';
@@ -139,8 +157,8 @@ export async function runGenerateCategoryConfig(): Promise<boolean> {
                 : `{ text: (count: number) => \`${template}\`.replace('{count}', String(count)) }`;
             }
             return badge.icon
-              ? `{ icon: ${JSON.stringify(badge.icon)}, text: ${JSON.stringify(badge.text || '')} }`
-              : `{ text: ${JSON.stringify(badge.text || '')} }`;
+              ? `{ icon: ${JSON.stringify(badge.icon)}, text: ${JSON.stringify(badge.text ?? '')} }`
+              : `{ text: ${JSON.stringify(badge.text ?? '')} }`;
           })
         : [];
 
@@ -149,7 +167,7 @@ export async function runGenerateCategoryConfig(): Promise<boolean> {
     title: ${JSON.stringify(dbConfig.title)},
     pluralTitle: ${JSON.stringify(dbConfig.plural_title)},
     description: ${JSON.stringify(dbConfig.description)},
-    icon: ICON_MAP['${dbConfig.icon_name}'] || FileText,
+    icon: ICON_MAP['${dbConfig.icon_name}'] ?? FileText,
     colorScheme: ${JSON.stringify(dbConfig.color_scheme)},
     showOnHomepage: ${features['show_on_homepage'] ?? true},
     keywords: ${JSON.stringify(dbConfig.keywords)},
@@ -158,14 +176,14 @@ export async function runGenerateCategoryConfig(): Promise<boolean> {
     generateFullContent: ${features['generate_full_content'] ?? true},
     metadataFields: ${JSON.stringify(dbConfig.metadata_fields)},
     buildConfig: {
-      batchSize: ${generationConfig.buildConfig?.batchSize || 10},
+      batchSize: ${generationConfig.buildConfig?.batchSize ?? 10},
       enableCache: ${features['build_enable_cache'] ?? true},
-      cacheTTL: ${generationConfig.buildConfig?.cacheTTL || 300000},
+      cacheTTL: ${cacheTTL},
     },
     apiConfig: {
       generateStaticAPI: ${features['api_generate_static'] ?? true},
       includeTrending: ${features['api_include_trending'] ?? true},
-      maxItemsPerResponse: ${apiSchema.apiConfig?.maxItemsPerResponse || 1000},
+      maxItemsPerResponse: ${maxItemsPerResponse},
     },
     listPage: {
       searchPlaceholder: ${JSON.stringify(dbConfig.search_placeholder)},
@@ -174,7 +192,7 @@ export async function runGenerateCategoryConfig(): Promise<boolean> {
     },
     detailPage: {
       displayConfig: ${features['display_config'] ?? true},
-      configFormat: ${JSON.stringify(dbConfig.config_format || 'json')},
+      configFormat: ${JSON.stringify(dbConfig.config_format ?? 'json')},
     },
     sections: {
       features: ${features['section_features'] ?? false},
@@ -209,7 +227,6 @@ export async function runGenerateCategoryConfig(): Promise<boolean> {
  */
 
 import type { Database } from '@heyclaude/database-types';
-import type { UnifiedCategoryConfig } from '../../../types/category.ts';
 import {
   BookOpen,
   Briefcase,
@@ -222,6 +239,7 @@ import {
   Terminal,
   Webhook,
 } from '../../../icons.tsx';
+import type { UnifiedCategoryConfig } from '../../../types/category.ts';
 
 type ContentCategory = Database['public']['Enums']['content_category'];
 

@@ -1,6 +1,11 @@
 'use client';
 
-type ErrorContext = Record<string, string | number | boolean>;
+import {
+  generateRequestId,
+  createWebAppContextWithId,
+  logger,
+  normalizeError,
+} from '@heyclaude/web-runtime/core';
 
 type ErrorResponse = {
   success: false;
@@ -11,13 +16,6 @@ type ErrorResponse = {
   requestId?: string;
   stack?: string;
 };
-
-function randomId(): string {
-  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
-    return crypto.randomUUID();
-  }
-  return `${Math.random().toString(36).slice(2, 10)}-${Date.now().toString(36)}`;
-}
 
 function determineErrorType(error: unknown): string {
   if (!(error instanceof Error)) return 'InternalServerError';
@@ -30,41 +28,28 @@ function determineErrorType(error: unknown): string {
   return 'InternalServerError';
 }
 
-function validateErrorContext(ctx: unknown): ErrorContext {
-  if (!ctx || typeof ctx !== 'object') return {};
-  const result: ErrorContext = {};
-  for (const [k, v] of Object.entries(ctx as Record<string, unknown>)) {
-    if (typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean') {
-      result[k] = v;
-    }
-  }
-  return result;
-}
-
 export function createErrorBoundaryFallback(
   error: Error,
   errorInfo: { componentStack: string }
 ): ErrorResponse {
   try {
     const errorType = determineErrorType(error);
-    const requestId = randomId();
-    const baseContext: ErrorContext = {
-      route: typeof window !== 'undefined' ? window.location.pathname : 'unknown',
-      operation: 'react_render',
-      method: 'unknown',
+    const requestId = generateRequestId();
+    const route = typeof window !== 'undefined' ? window.location.pathname : 'unknown';
+    const normalized = normalizeError(error, 'React error boundary triggered');
+    
+    // Create standardized log context
+    const logContext = createWebAppContextWithId(requestId, route, 'ReactErrorBoundary', {
       errorType,
-      timestamp: new Date().toISOString(),
-    };
-    const fullContext = validateErrorContext({
-      ...baseContext,
-      requestId,
-      componentStack: errorInfo.componentStack,
+      componentStack: errorInfo.componentStack || '',
       errorBoundary: true,
+      userAgent: typeof window !== 'undefined' ? window.navigator?.userAgent || '' : '',
+      url: typeof window !== 'undefined' ? window.location?.href || '' : '',
     });
-    console.error('Error Boundary', {
-      ...fullContext,
-      message: error.message,
-    });
+    
+    // Use structured logging instead of console.error
+    logger.error('React error boundary caught error', normalized, logContext);
+    
     return {
       success: false,
       error: error.name || 'React Error',
@@ -74,14 +59,31 @@ export function createErrorBoundaryFallback(
       requestId,
       ...(process.env['NODE_ENV'] === 'development' && error.stack && { stack: error.stack }),
     };
-  } catch {
+  } catch (fallbackError) {
+    // Fallback error handling - still try to log
+    const fallbackRequestId = generateRequestId();
+    const normalized = normalizeError(fallbackError, 'Error boundary fallback failed');
+    try {
+      const logContext = createWebAppContextWithId(
+        fallbackRequestId,
+        typeof window !== 'undefined' ? window.location.pathname : 'unknown',
+        'ReactErrorBoundary',
+        {
+          errorBoundary: true,
+          fallbackError: true,
+        }
+      );
+      logger.error('Error boundary fallback handler failed', normalized, logContext);
+    } catch {
+      // Last resort - if even logging fails, just return error response
+    }
     return {
       success: false,
       error: 'Internal Error',
       message: 'An unexpected error occurred',
       code: 'INT_FALLBACK',
       timestamp: new Date().toISOString(),
-      requestId: randomId(),
+      requestId: fallbackRequestId,
     };
   }
 }

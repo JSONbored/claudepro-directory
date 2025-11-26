@@ -6,25 +6,22 @@
  * for type safety and runtime validation.
  */
 
-import {
-  APP_CONFIG as SHARED_APP_CONFIG,
-  EXTERNAL_SERVICES as SHARED_EXTERNAL_SERVICES,
-  ROUTES as SHARED_ROUTES,
-  SECURITY_CONFIG as SHARED_SECURITY_CONFIG,
-  TIME_CONSTANTS as SHARED_TIME_CONSTANTS,
-} from '@heyclaude/shared-runtime';
-import { SOCIAL_LINKS as SHARED_SOCIAL_LINKS } from '../../config/social-links.ts';
-import { GENERATED_CONFIG } from '../../config/generated-config.ts';
+
+
 import { z } from 'zod';
+
+import { GENERATED_CONFIG } from '../../config/generated-config.ts';
+import { SOCIAL_LINKS } from '../../config/social-links.ts';
+import type { SocialLinkKey } from '../../config/social-links.ts';
 
 /**
  * Application Information
  */
-export const APP_CONFIG = SHARED_APP_CONFIG;
-export const SOCIAL_LINKS = SHARED_SOCIAL_LINKS;
-export const ROUTES = SHARED_ROUTES;
-export const EXTERNAL_SERVICES = SHARED_EXTERNAL_SERVICES;
-export const TIME_CONSTANTS = SHARED_TIME_CONSTANTS;
+
+
+
+
+
 
 /**
  * Claude Configuration Schema
@@ -42,7 +39,7 @@ const claudeConfigSchema = z.object({
 export const CLAUDE_CONFIG = claudeConfigSchema.parse({
   desktop: {
     macos: '~/Library/Application Support/Claude/claude_desktop_config.json',
-    windows: '%APPDATA%\\Claude\\claude_desktop_config.json',
+    windows: String.raw`%APPDATA%\Claude\claude_desktop_config.json`,
   },
   code: {
     command: 'claude mcp add',
@@ -112,38 +109,13 @@ export const GUIDE_CATEGORIES = {
  * UI Constants
  * Note: Breakpoints are in ui-constants.ts for consistency
  */
-// Fallback UI config if generated config is missing/partial
-const FALLBACK_UI_CONFIG = {
-  pagination: {
-    defaultLimit: 20,
-    maxLimit: 100,
-  },
-  animation: {
-    duration: 300,
-    easing: 'ease-in-out',
-  },
-};
-
-export const UI_CONFIG = (GENERATED_CONFIG.ui_config ||
-  FALLBACK_UI_CONFIG) as typeof FALLBACK_UI_CONFIG;
+export const UI_CONFIG = GENERATED_CONFIG.ui_config;
 
 /**
  * Date & Version Configuration - Database-First
  * Loads from app_settings table with hardcoded fallbacks
  */
-const FALLBACK_DATE_CONFIG = {
-  currentMonth: 'October',
-  currentYear: 2025,
-  currentDate: '2025-10-01',
-  lastReviewed: '2025-10-01',
-  claudeModels: {
-    sonnet: 'Claude Sonnet 4.5',
-    opus: 'Claude Opus 4.1',
-  },
-};
-
-export const DATE_CONFIG = (GENERATED_CONFIG.date_config ||
-  FALLBACK_DATE_CONFIG) as typeof FALLBACK_DATE_CONFIG;
+export const DATE_CONFIG = GENERATED_CONFIG.date_config;
 
 /**
  * Analytics Configuration
@@ -171,7 +143,7 @@ export const DEV_CONFIG = {
  * Security Configuration
  * Used for trusted hostname validation, security headers, and allowed origins
  */
-export const SECURITY_CONFIG = SHARED_SECURITY_CONFIG;
+
 
 /**
  * Polling Intervals Configuration
@@ -180,12 +152,12 @@ export const POLLING_INTERVALS = {
   // Real-time updates
   realtime: 1000, // 1 second
   // Badge notifications
-  badges: 30000, // 30 seconds
+  badges: 30_000, // 30 seconds
   // Status checks
   status: {
-    health: 60000, // 1 minute
-    api: 30000, // 30 seconds
-    database: 120000, // 2 minutes
+    health: 60_000, // 1 minute
+    api: 30_000, // 30 seconds
+    database: 120_000, // 2 minutes
   },
 } as const;
 
@@ -220,7 +192,7 @@ export const ANIMATION_DURATIONS = {
   },
   // Border beam animations
   beam: {
-    default: 15000, // 15 seconds (from border-beam component)
+    default: 15_000, // 15 seconds (from border-beam component)
   },
 } as const;
 
@@ -241,7 +213,7 @@ export const QUERY_LIMITS = {
   // Changelog queries
   changelog: {
     default: 50, // Default for changelog pages, recent entries, etc.
-    max: 10000, // Maximum for admin/export scenarios (e.g., getAllChangelogEntries)
+    max: 10_000, // Maximum for admin/export scenarios (e.g., getAllChangelogEntries)
   },
   // Pagination
   pagination: {
@@ -249,3 +221,14 @@ export const QUERY_LIMITS = {
     max: 100, // Maximum to prevent excessive data fetching in a single request
   },
 } as const;
+
+export {APP_CONFIG, EXTERNAL_SERVICES, ROUTES, SECURITY_CONFIG, TIME_CONSTANTS} from '@heyclaude/shared-runtime';
+export {SOCIAL_LINKS} from '../../config/social-links.ts';
+
+/**
+ * Get a social link by key
+ * This helper function allows other files to access social links without directly importing SOCIAL_LINKS
+ */
+export function getSocialLink(key: SocialLinkKey): string | undefined {
+  return SOCIAL_LINKS[key];
+}

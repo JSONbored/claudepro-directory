@@ -11,6 +11,7 @@ import { AlertCircle } from '@heyclaude/web-runtime/icons';
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import type { Metadata } from 'next';
 import Link from 'next/link';
+
 import { Button } from '@/src/components/primitives/ui/button';
 import {
   Card,
@@ -26,7 +27,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/auth/auth-code-error');
 }
 
-export default async function AuthCodeError(props: PagePropsWithSearchParams) {
+export default async function AuthCodeError(properties: PagePropsWithSearchParams) {
   // Generate single requestId for this page request
   const requestId = generateRequestId();
   const logContext = createWebAppContextWithId(
@@ -35,15 +36,15 @@ export default async function AuthCodeError(props: PagePropsWithSearchParams) {
     'AuthCodeErrorPage'
   );
 
-  const searchParams = await props.searchParams;
+  const searchParameters = await properties.searchParams;
 
-  const rawCode = searchParams?.['code'];
-  const rawProvider = searchParams?.['provider'];
-  const rawMessage = searchParams?.['message'];
+  const rawCode = searchParameters?.['code'];
+  const rawProvider = searchParameters?.['provider'];
+  const rawMessage = searchParameters?.['message'];
 
   // Handle array or string, and ensure we get a string or default
-  const code = (Array.isArray(rawCode) ? rawCode[0] : rawCode) || 'unknown';
-  const provider = (Array.isArray(rawProvider) ? rawProvider[0] : rawProvider) || 'unknown';
+  const code = (Array.isArray(rawCode) ? rawCode[0] : rawCode) ?? 'unknown';
+  const provider = (Array.isArray(rawProvider) ? rawProvider[0] : rawProvider) ?? 'unknown';
   const message = Array.isArray(rawMessage) ? rawMessage[0] : rawMessage;
 
   const normalized = normalizeError(
@@ -57,7 +58,7 @@ export default async function AuthCodeError(props: PagePropsWithSearchParams) {
     hasCode: Boolean(code && code !== 'unknown'),
     provider: provider === 'unknown' ? 'unknown' : 'redacted',
     hasMessage: Boolean(message),
-    hasSearchParams: Boolean(searchParams),
+    hasSearchParams: Boolean(searchParameters),
   });
 
   return (

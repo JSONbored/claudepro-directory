@@ -9,6 +9,7 @@ import {
   hashUserId,
   logger,
   normalizeError,
+  withDuration,
 } from '@heyclaude/web-runtime/core';
 import {
   generatePageMetadata,
@@ -19,6 +20,7 @@ import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
+
 import { CompanyForm } from '@/src/components/core/forms/company-form';
 import { Button } from '@/src/components/primitives/ui/button';
 import {
@@ -40,11 +42,12 @@ export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/account/companies/:id/edit');
 }
 
-interface EditCompanyPageProps {
+interface EditCompanyPageProperties {
   params: Promise<{ id: string }>;
 }
 
-export default async function EditCompanyPage({ params }: EditCompanyPageProps) {
+export default async function EditCompanyPage({ params }: EditCompanyPageProperties) {
+  const startTime = Date.now();
   const { id } = await params;
 
   // Generate single requestId for this page request
@@ -58,23 +61,69 @@ export default async function EditCompanyPage({ params }: EditCompanyPageProps) 
     }
   );
 
+  // Section: Authentication
+  const authSectionStart = Date.now();
   const { user } = await getAuthenticatedUser({ context: 'EditCompanyPage' });
 
   if (!user) {
-    logger.warn('EditCompanyPage: unauthenticated access attempt', undefined, baseLogContext);
+    logger.warn(
+      'EditCompanyPage: unauthenticated access attempt',
+      undefined,
+      withDuration(
+        {
+          ...baseLogContext,
+          section: 'authentication',
+        },
+        authSectionStart
+      )
+    );
     redirect('/login');
   }
 
   const hashedUserId = hashUserId(user.id);
   const logContext = { ...baseLogContext, userIdHash: hashedUserId };
+  logger.info(
+    'EditCompanyPage: authentication successful',
+    withDuration(
+      {
+        ...logContext,
+        section: 'authentication',
+      },
+      authSectionStart
+    )
+  );
 
+  // Section: Company Data Fetch
+  const companySectionStart = Date.now();
   let company: Database['public']['CompositeTypes']['user_companies_company'] | null = null;
   let hasError = false;
   try {
     company = await getUserCompanyById(user.id, id);
+    logger.info(
+      'EditCompanyPage: company data loaded',
+      withDuration(
+        {
+          ...logContext,
+          section: 'company-data-fetch',
+          hasCompany: !!company,
+        },
+        companySectionStart
+      )
+    );
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load company for edit page');
-    logger.error('EditCompanyPage: getUserCompanyById threw', normalized, logContext);
+    logger.error(
+      'EditCompanyPage: getUserCompanyById threw',
+      normalized,
+      withDuration(
+        {
+          ...logContext,
+          section: 'company-data-fetch',
+          sectionDuration_ms: Date.now() - companySectionStart,
+        },
+        startTime
+      )
+    );
     hasError = true;
   }
 
@@ -99,9 +148,32 @@ export default async function EditCompanyPage({ params }: EditCompanyPageProps) 
   }
 
   if (!company) {
-    logger.warn('Company not found or access denied', undefined, logContext);
+    logger.warn(
+      'Company not found or access denied',
+      undefined,
+      withDuration(
+        {
+          ...logContext,
+          section: 'company-data-fetch',
+          sectionDuration_ms: Date.now() - companySectionStart,
+        },
+        startTime
+      )
+    );
     notFound();
   }
+
+  // Final summary log
+  logger.info(
+    'EditCompanyPage: page render completed',
+    withDuration(
+      {
+        ...logContext,
+        section: 'page-render',
+      },
+      startTime
+    )
+  );
 
   return (
     <div className="space-y-6">

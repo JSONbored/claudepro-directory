@@ -4,21 +4,21 @@ import type { NextRequest } from 'next/server';
 
 export const runtime = 'edge';
 
-export async function GET(request: NextRequest) {
+export function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
-  const title = searchParams.get('title') || OG_DEFAULTS.title;
-  const description = searchParams.get('description') || OG_DEFAULTS.description;
-  const type = searchParams.get('type') || OG_DEFAULTS.type;
+  const title = searchParams.get('title') ?? OG_DEFAULTS.title;
+  const description = searchParams.get('description') ?? OG_DEFAULTS.description;
+  const type = searchParams.get('type') ?? OG_DEFAULTS.type;
   const rawTags = searchParams.get('tags');
   const tags = rawTags
-    ? Array.from(
-        new Set(
+    ? [
+        ...new Set(
           rawTags
             .split(',')
             .map((tag) => tag.trim())
             .filter((tag) => tag.length > 0)
-        )
-      )
+        ),
+      ]
     : [];
 
   return new ImageResponse(

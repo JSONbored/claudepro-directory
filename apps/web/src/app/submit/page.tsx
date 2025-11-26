@@ -3,38 +3,42 @@
  * All stats/recent/contributors from data layer with edge caching.
  */
 
-import {
-  getContentTemplates,
-  getSubmissionDashboard,
-  getSubmissionFormFields,
-} from '@heyclaude/web-runtime/data';
-import dynamicImport from 'next/dynamic';
-import { JobsPromo } from '@/src/components/core/domain/jobs/jobs-banner';
-import { SubmitFormClient } from '@/src/components/core/forms/content-submission-form';
-import { SidebarActivityCard } from '@/src/components/core/forms/sidebar-activity-card';
-import { SubmitPageHero } from '@/src/components/core/forms/submit-page-hero';
-
-const NewsletterCTAVariant = dynamicImport(
-  () =>
-    import('@/src/components/features/growth/newsletter/newsletter-cta-variants').then((mod) => ({
-      default: mod.NewsletterCTAVariant,
-    })),
-  {
-    loading: () => <div className="h-32 animate-pulse rounded-lg bg-muted/20" />,
-  }
-);
-
 import { Constants, type Database } from '@heyclaude/database-types';
 import {
   createWebAppContextWithId,
   generateRequestId,
   logger,
   normalizeError,
+  withDuration,
 } from '@heyclaude/web-runtime/core';
-import { generatePageMetadata } from '@heyclaude/web-runtime/data';
+import {
+  generatePageMetadata,
+  getContentTemplates,
+  getSubmissionDashboard,
+  getSubmissionFormFields,
+} from '@heyclaude/web-runtime/data';
 import { TrendingUp } from '@heyclaude/web-runtime/icons';
 import { cn, UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import type { Metadata } from 'next';
+import dynamicImport from 'next/dynamic';
+
+import { JobsPromo } from '@/src/components/core/domain/jobs/jobs-banner';
+import { SubmitFormClient } from '@/src/components/core/forms/content-submission-form';
+import { SidebarActivityCard } from '@/src/components/core/forms/sidebar-activity-card';
+import { SubmitPageHero } from '@/src/components/core/forms/submit-page-hero';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
+const NewsletterCTAVariant = dynamicImport(
+  () =>
+    import('@/src/components/features/growth/newsletter/newsletter-cta-variants').then((module_) => ({
+      default: module_.NewsletterCTAVariant,
+    })),
+  {
+    loading: () => <div className="h-32 animate-pulse rounded-lg bg-muted/20" />,
+  }
+);
+
+// Use enum values from Constants
+const DEFAULT_CONTENT_CATEGORY = Constants.public.Enums.content_category[0]; // 'agents'
 
 /**
  * Dynamic Rendering Required
@@ -46,7 +50,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primi
  *
  * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic
  */
-export const revalidate = 86400;
+export const revalidate = 86_400;
 
 const SUBMISSION_TIPS = [
   'Be specific in your descriptions - help users understand what your config does',
@@ -73,9 +77,9 @@ function formatTimeAgo(dateString: string): string {
 
   if (seconds < 60) return 'just now';
   if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
-  if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
-  if (seconds < 604800) return `${Math.floor(seconds / 86400)}d ago`;
-  return `${Math.floor(seconds / 604800)}w ago`;
+  if (seconds < 86_400) return `${Math.floor(seconds / 3600)}h ago`;
+  if (seconds < 604_800) return `${Math.floor(seconds / 86_400)}d ago`;
+  return `${Math.floor(seconds / 604_800)}w ago`;
 }
 
 /**
@@ -99,7 +103,7 @@ function mapSubmissionTypeToContentCategory(
   submissionType: Database['public']['Enums']['submission_type'] | null
 ): Database['public']['Enums']['content_category'] {
   if (submissionType === null) {
-    return 'agents'; // Safe default
+    return DEFAULT_CONTENT_CATEGORY; // Safe default
   }
 
   // Runtime validation: submission_type values are a subset of content_category
@@ -121,7 +125,7 @@ function mapSubmissionTypeToContentCategory(
     ...utilityLogContext,
     submissionType,
   });
-  return 'agents';
+  return DEFAULT_CONTENT_CATEGORY;
 }
 
 // Type guard for recent merged submissions
@@ -146,7 +150,6 @@ function isValidRecentSubmission(submission: unknown): submission is {
   );
 }
 
-import type { Metadata } from 'next';
 
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('/submit');
@@ -158,51 +161,96 @@ export async function generateMetadata(): Promise<Metadata> {
 // revalidate is set at the top of the file
 
 export default async function SubmitPage() {
+  const startTime = Date.now();
   // Generate single requestId for this page request
   const requestId = generateRequestId();
   const baseLogContext = createWebAppContextWithId(requestId, '/submit', 'SubmitPage');
 
-  // Fetch all data via data layer (edge-cached)
-  let dashboardData: Awaited<ReturnType<typeof getSubmissionDashboard>> | null = null;
+  // Section: Submission Dashboard
+  const dashboardSectionStart = Date.now();
+  let dashboardData: Awaited<ReturnType<typeof getSubmissionDashboard>> = null;
   try {
     dashboardData = await getSubmissionDashboard(5, 5);
+    logger.info(
+      'SubmitPage: submission dashboard loaded',
+      withDuration(
+        {
+          ...baseLogContext,
+          section: 'submission-dashboard',
+          recentCount: 5,
+          statsCount: 5,
+          hasData: !!dashboardData,
+        },
+        dashboardSectionStart
+      )
+    );
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load submission dashboard');
-    logger.error('SubmitPage: getSubmissionDashboard failed', normalized, {
-      ...baseLogContext,
-      recentCount: 5,
-      statsCount: 5,
-    });
+    logger.error(
+      'SubmitPage: getSubmissionDashboard failed',
+      normalized,
+      withDuration(
+        {
+          ...baseLogContext,
+          section: 'submission-dashboard',
+          recentCount: 5,
+          statsCount: 5,
+          sectionDuration_ms: Date.now() - dashboardSectionStart,
+        },
+        startTime
+      )
+    );
     // Continue with null dashboardData - page will render with fallback empty data
   }
 
   if (!dashboardData) {
-    logger.warn('SubmitPage: getSubmissionDashboard returned no data', undefined, {
-      ...baseLogContext,
-      recentCount: 5,
-      statsCount: 5,
-    });
+    logger.warn(
+      'SubmitPage: getSubmissionDashboard returned no data',
+      undefined,
+      withDuration(
+        {
+          ...baseLogContext,
+          section: 'submission-dashboard',
+          recentCount: 5,
+          statsCount: 5,
+          sectionDuration_ms: Date.now() - dashboardSectionStart,
+        },
+        startTime
+      )
+    );
   }
 
+  // Section: Form Configuration
+  const formConfigSectionStart = Date.now();
   let formConfig: Awaited<ReturnType<typeof getSubmissionFormFields>> | null = null;
   try {
     formConfig = await getSubmissionFormFields();
+    logger.info(
+      'SubmitPage: form configuration loaded',
+      withDuration(
+        {
+          ...baseLogContext,
+          section: 'form-config',
+          hasConfig: !!formConfig,
+        },
+        formConfigSectionStart
+      )
+    );
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load submission form config');
-    logger.error('SubmitPage: getSubmissionFormFields failed', normalized, baseLogContext);
-    throw normalized;
-  }
-
-  if (!formConfig) {
     logger.error(
-      'SubmitPage: submission form config is undefined',
-      new Error('Submission form config is undefined'),
-      {
-        ...baseLogContext,
-        phase: 'page-render',
-      }
+      'SubmitPage: getSubmissionFormFields failed',
+      normalized,
+      withDuration(
+        {
+          ...baseLogContext,
+          section: 'form-config',
+          sectionDuration_ms: Date.now() - formConfigSectionStart,
+        },
+        startTime
+      )
     );
-    throw new Error('Submission form configuration is unavailable');
+    throw normalized;
   }
 
   // Fetch templates for all supported submission types
@@ -210,7 +258,7 @@ export default async function SubmitPage() {
   // Map each element and validate using type guard to ensure type safety
   const supportedCategories: Database['public']['Enums']['content_category'][] =
     Constants.public.Enums.submission_type
-      .map((type) => {
+      .map((type): string => {
         // Runtime validation: all submission_type values are valid content_category values
         if (isValidContentCategory(type)) {
           return type;
@@ -220,11 +268,13 @@ export default async function SubmitPage() {
           ...baseLogContext,
           type,
         });
-        return 'agents' as Database['public']['Enums']['content_category'];
+        return DEFAULT_CONTENT_CATEGORY;
       })
       .filter((category): category is Database['public']['Enums']['content_category'] =>
         isValidContentCategory(category)
       );
+  // Section: Content Templates
+  const templatesSectionStart = Date.now();
   let templates: Awaited<ReturnType<typeof getContentTemplates>> = [];
   try {
     const templatePromises = supportedCategories.map((category) =>
@@ -232,6 +282,7 @@ export default async function SubmitPage() {
         const normalized = normalizeError(error, `Failed to load templates for ${category}`);
         logger.error('SubmitPage: getContentTemplates failed for category', normalized, {
           ...baseLogContext,
+          section: 'content-templates',
           category,
         });
         return []; // Return empty array on error for this category
@@ -239,6 +290,18 @@ export default async function SubmitPage() {
     );
     const templateResults = await Promise.all(templatePromises);
     templates = templateResults.flat();
+    logger.info(
+      'SubmitPage: content templates loaded',
+      withDuration(
+        {
+          ...baseLogContext,
+          section: 'content-templates',
+          templatesCount: templates.length,
+          categoriesCount: supportedCategories.length,
+        },
+        templatesSectionStart
+      )
+    );
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load submission templates');
     logger.error('SubmitPage: getContentTemplates failed', normalized, baseLogContext);
@@ -258,28 +321,29 @@ export default async function SubmitPage() {
     pending: dashboardData?.stats?.pending ?? 0,
     merged_this_week: dashboardData?.stats?.merged_this_week ?? 0,
   };
-  const recentMerged = (dashboardData?.recent || [])
-    .filter(isValidRecentSubmission)
-    .filter(
-      (
-        submission
-      ): submission is typeof submission & {
-        id: string;
-        content_name: string;
-        merged_at: string;
-      } => submission.merged_at != null && submission.id != null && submission.content_name != null
-    )
-    .map((submission) => ({
-      id: submission.id,
-      content_name: submission.content_name,
-      content_type: mapSubmissionTypeToContentCategory(submission.content_type),
-      merged_at: submission.merged_at,
-      merged_at_formatted: formatTimeAgo(submission.merged_at),
-      user:
-        submission.user?.name && submission.user?.slug
-          ? { name: submission.user.name, slug: submission.user.slug }
-          : null,
-    }));
+  const recentMerged = (dashboardData?.recent ?? [])
+    .filter((submission) => isValidRecentSubmission(submission))
+    .map((submission) => {
+      // Type guard ensures these are non-null, but TypeScript needs explicit checks
+      const id = submission.id;
+      const mergedAt = submission.merged_at;
+      const contentName = submission.content_name;
+      if (!id || !mergedAt || !contentName) {
+        // This should never happen due to type guard, but TypeScript needs this check
+        throw new Error('Invalid submission data');
+      }
+      return {
+        id,
+        content_name: contentName,
+        content_type: mapSubmissionTypeToContentCategory(submission.content_type),
+        merged_at: mergedAt,
+        merged_at_formatted: formatTimeAgo(mergedAt),
+        user:
+          submission.user && submission.user.name && submission.user.slug
+            ? { name: submission.user.name, slug: submission.user.slug }
+            : null,
+      };
+    });
 
   return (
     <div className="container mx-auto max-w-7xl px-4 py-8 sm:py-12">

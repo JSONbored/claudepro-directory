@@ -33,7 +33,12 @@ export async function POST(request: NextRequest) {
   const baseLogContext = createWebAppContextWithId(requestId, '/api/revalidate', 'RevalidateAPI');
 
   try {
-    const body = await request.json();
+    const body = (await request.json()) as {
+      secret?: unknown;
+      category?: unknown;
+      slug?: unknown;
+      tags?: unknown;
+    };
     const { secret, category, slug, tags } = body;
 
     // Verify secret from body (PostgreSQL trigger sends in payload)
@@ -45,7 +50,7 @@ export async function POST(request: NextRequest) {
           {
             ...baseLogContext,
             hasSecret: !!secret,
-            ip: request.headers.get('x-forwarded-for') || 'unknown',
+            ip: request.headers.get('x-forwarded-for') ?? 'unknown',
           },
           startTime
         )
@@ -59,10 +64,7 @@ export async function POST(request: NextRequest) {
     // Path revalidation (existing logic)
     if (category && typeof category === 'string') {
       // Always revalidate homepage (shows recent content)
-      paths.push('/');
-
-      // Revalidate category list page
-      paths.push(`/${category}`);
+      paths.push('/', `/${category}`);
 
       // Revalidate detail page if slug provided
       if (slug && typeof slug === 'string') {
@@ -97,15 +99,18 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      // Invalidate each tag
+      // Invalidate each tag (tags are validated as strings above)
       for (const tag of tags) {
-        revalidateTag(tag, 'default');
-        invalidatedTags.push(tag);
+        if (typeof tag === 'string') {
+          revalidateTag(tag, 'default');
+          invalidatedTags.push(tag);
+        }
       }
     }
 
     // If neither category nor tags provided, return error
-    if (!category && (!tags || tags.length === 0)) {
+    const tagsArray = Array.isArray(tags) ? tags : [];
+    if (!category && tagsArray.length === 0) {
       logger.warn(
         'Revalidate webhook invalid payload',
         undefined,
@@ -131,11 +136,11 @@ export async function POST(request: NextRequest) {
       withDuration(
         {
           ...baseLogContext,
-          category: category || null,
-          slug: slug || null,
+          ...(typeof category === 'string' ? { category } : {}),
+          ...(typeof slug === 'string' ? { slug } : {}),
           paths, // Array of revalidated paths - better for querying
           pathCount: paths.length,
-          tags: invalidatedTags, // Array support enables better log querying
+          tags: invalidatedTags.length > 0 ? invalidatedTags : undefined, // Array support enables better log querying
           tagCount: invalidatedTags.length,
           revalidationTargets: {
             paths,

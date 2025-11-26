@@ -12,6 +12,7 @@
  * Performance: Only the interactive buttons are client-side, rest is server-rendered
  */
 
+import { Constants } from '@heyclaude/database-types';
 import { logger } from '@heyclaude/web-runtime/core';
 
 /**
@@ -364,13 +365,13 @@ export function DetailHeaderActions({
 
   // Check if download is available for this item
   const hasMcpbDownload =
-    category === 'mcp' &&
+    category === Constants.public.Enums.content_category[1] && // 'mcp'
     'mcpb_storage_url' in contentItem &&
     contentItem.mcpb_storage_url &&
     typeof contentItem.mcpb_storage_url === 'string';
 
   const hasStorageDownload =
-    category === 'skills' &&
+    category === Constants.public.Enums.content_category[6] && // 'skills'
     'storage_url' in contentItem &&
     contentItem.storage_url &&
     typeof contentItem.storage_url === 'string';
@@ -561,7 +562,7 @@ export function DetailHeaderActions({
               className="min-w-0"
             >
               <Download className={UI_CLASSES.ICON_SM_LEADING} />
-              {category === 'mcp' ? 'Download .mcpb' : 'Download'}
+              {category === Constants.public.Enums.content_category[1] ? 'Download .mcpb' : 'Download'} // 'mcp'
             </Button>
           )}
 

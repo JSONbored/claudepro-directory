@@ -1,6 +1,7 @@
 
+import { SOCIAL_LINK_KEYS, type SocialLinkKey } from '../../config/social-links.ts';
 import { logger } from '../../logger.ts';
-import { SOCIAL_LINKS, SOCIAL_LINK_KEYS, type SocialLinkKey } from '../../config/social-links.ts';
+import { getSocialLink } from '../config/constants.ts';
 
 type SocialLinkSnapshot = Record<SocialLinkKey, string>;
 
@@ -17,7 +18,7 @@ const SOCIAL_LINK_FALLBACKS: SocialLinkSnapshot = {
 };
 
 function resolveSocialLink(key: SocialLinkKey): string {
-  const link = SOCIAL_LINKS[key];
+  const link = getSocialLink(key);
   if (typeof link === 'string' && link.length > 0) {
     return link;
   }
@@ -26,13 +27,10 @@ function resolveSocialLink(key: SocialLinkKey): string {
   return SOCIAL_LINK_FALLBACKS[key];
 }
 
-const SOCIAL_LINK_SNAPSHOT: SocialLinkSnapshot = SOCIAL_LINK_KEYS.reduce<SocialLinkSnapshot>(
-  (acc, key) => {
-    acc[key] = resolveSocialLink(key);
-    return acc;
-  },
-  {} as SocialLinkSnapshot
-);
+const SOCIAL_LINK_SNAPSHOT: SocialLinkSnapshot = {} as SocialLinkSnapshot;
+for (const key of SOCIAL_LINK_KEYS) {
+  SOCIAL_LINK_SNAPSHOT[key] = resolveSocialLink(key);
+}
 
 export function getSocialLinks(): SocialLinkSnapshot {
   return { ...SOCIAL_LINK_SNAPSHOT };
@@ -102,11 +100,12 @@ export function getPartnerCtas(
   const contacts = getPartnerContactChannels();
   const email = contacts[recipient];
 
-  return Object.entries(PARTNER_CTA_SUBJECTS).reduce<PartnerCtas>((acc, [key, subject]) => {
-    acc[key as PartnerCtaKey] = {
+  const result: PartnerCtas = {} as PartnerCtas;
+  for (const [key, subject] of Object.entries(PARTNER_CTA_SUBJECTS)) {
+    result[key as PartnerCtaKey] = {
       subject,
       href: `mailto:${email}?subject=${encodeURIComponent(subject)}`,
     };
-    return acc;
-  }, {} as PartnerCtas);
+  }
+  return result;
 }

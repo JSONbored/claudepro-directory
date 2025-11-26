@@ -33,23 +33,25 @@ export async function GET(request: NextRequest) {
 
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get('code');
-  const newsletterParam = searchParams.get('newsletter');
-  const shouldSubscribeToNewsletter = newsletterParam === 'true';
+  const newsletterParameter = searchParams.get('newsletter');
+  const shouldSubscribeToNewsletter = newsletterParameter === 'true';
   const isLinkingFlow = searchParams.get('link') === 'true';
-  const nextParam =
+  const nextParameter =
     searchParams.get('next') ?? (isLinkingFlow ? '/account/connected-accounts' : '/');
   const isValidRedirect =
-    nextParam.startsWith('/') &&
-    !nextParam.startsWith('//') &&
-    !nextParam.startsWith('/\\') &&
-    !nextParam.includes('@');
-  const next = isValidRedirect ? nextParam : isLinkingFlow ? '/account/connected-accounts' : '/';
+    nextParameter.startsWith('/') &&
+    !nextParameter.startsWith('//') &&
+    !nextParameter.startsWith('/\\') &&
+    !nextParameter.includes('@');
+  const next = isValidRedirect
+    ? nextParameter
+    : (isLinkingFlow ? '/account/connected-accounts' : '/');
 
   if (code) {
     const supabase = await createSupabaseServerClient();
     const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
-    if (!error && data.session) {
+    if (data.session) {
       const { user } = data;
       let shouldSetNewsletterCookie = false;
 
@@ -81,13 +83,13 @@ export async function GET(request: NextRequest) {
               },
             });
 
-            if (newsletterResult?.serverError) {
+            if (newsletterResult.serverError) {
               logger.warn('Newsletter opt-in via auth callback failed', undefined, {
                 ...baseLogContext,
                 userId: user.id,
                 error: newsletterResult.serverError,
               });
-            } else if (newsletterResult?.data?.success) {
+            } else if (newsletterResult.data?.success) {
               shouldSetNewsletterCookie = true;
             } else {
               logger.warn('Newsletter opt-in via auth callback failed', undefined, {
@@ -115,29 +117,31 @@ export async function GET(request: NextRequest) {
       }
 
       const forwardedHost = request.headers.get('x-forwarded-host');
-      const isLocalEnv = process.env.NODE_ENV === 'development';
+      const isLocalEnvironment = process.env.NODE_ENV === 'development';
 
       // Validate forwarded host against allowed origins to prevent open redirect attacks
       const allowedHosts = SECURITY_CONFIG.allowedOrigins
         .map((url) => {
           try {
             return new URL(url).hostname;
-          } catch {
+          } catch (urlError) {
+            const normalized = normalizeError(urlError, 'Invalid origin URL in SECURITY_CONFIG');
             logger.warn('Skipping invalid origin URL in SECURITY_CONFIG', undefined, {
               ...baseLogContext,
               url,
+              errorMessage: normalized.message,
             });
             return null;
           }
         })
-        .filter((host): host is string => Boolean(host));
+        .filter(Boolean);
       const isValidHost = forwardedHost ? allowedHosts.includes(forwardedHost) : false;
 
-      const redirectUrl = isLocalEnv
+      const redirectUrl = isLocalEnvironment
         ? `${origin}${next}`
-        : forwardedHost && isValidHost
+        : (forwardedHost && isValidHost
           ? `https://${forwardedHost}${next}`
-          : `${origin}${next}`;
+          : `${origin}${next}`);
 
       const response = NextResponse.redirect(redirectUrl);
       if (shouldSetNewsletterCookie) {

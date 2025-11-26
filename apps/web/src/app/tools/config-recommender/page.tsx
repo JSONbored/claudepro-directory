@@ -17,9 +17,20 @@
  * - Serverless-friendly architecture
  */
 
+import {
+  createWebAppContextWithId,
+  generateRequestId,
+  logger,
+  normalizeError,
+} from '@heyclaude/web-runtime/core';
+import { generatePageMetadata } from '@heyclaude/web-runtime/data';
+import { BarChart, Clock, Sparkles, Target, Zap } from '@heyclaude/web-runtime/icons';
+import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import type { Metadata } from 'next';
 import dynamicImport from 'next/dynamic';
+
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
+import { QuizForm } from '@/src/components/features/tools/recommender/quiz-form';
 import {
   Card,
   CardContent,
@@ -30,24 +41,13 @@ import {
 
 const NewsletterCTAVariant = dynamicImport(
   () =>
-    import('@/src/components/features/growth/newsletter/newsletter-cta-variants').then((mod) => ({
-      default: mod.NewsletterCTAVariant,
+    import('@/src/components/features/growth/newsletter/newsletter-cta-variants').then((module_) => ({
+      default: module_.NewsletterCTAVariant,
     })),
   {
     loading: () => <div className="h-32 animate-pulse rounded-lg bg-muted/20" />,
   }
 );
-
-import {
-  createWebAppContextWithId,
-  generateRequestId,
-  logger,
-  normalizeError,
-} from '@heyclaude/web-runtime/core';
-import { generatePageMetadata } from '@heyclaude/web-runtime/data';
-import { BarChart, Clock, Sparkles, Target, Zap } from '@heyclaude/web-runtime/icons';
-import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import { QuizForm } from '@/src/components/features/tools/recommender/quiz-form';
 
 /**
  * Dynamic Rendering Required
@@ -59,7 +59,7 @@ import { QuizForm } from '@/src/components/features/tools/recommender/quiz-form'
  *
  * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic
  */
-export const revalidate = 86400;
+export const revalidate = 86_400;
 
 // Generate metadata from centralized registry
 export async function generateMetadata(): Promise<Metadata> {

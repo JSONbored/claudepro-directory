@@ -1,37 +1,38 @@
-import type { Metadata } from 'next';
-import localFont from 'next/font/local';
-import { ThemeProvider } from 'next-themes';
-import { Suspense } from 'react';
 import './globals.css';
 import './view-transitions.css';
 import './micro-interactions.css';
 import './sugar-high.css';
+
+import type { Database } from '@heyclaude/database-types';
+import { isBuildTime } from '@heyclaude/web-runtime';
+import { getComponentConfig } from '@heyclaude/web-runtime/actions';
 import {
   createWebAppContextWithId,
   generateRequestId,
   logger,
   normalizeError,
 } from '@heyclaude/web-runtime/core';
+import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
+import { FeatureFlagsProvider } from '@heyclaude/web-runtime/feature-flags/provider';
+import { generatePageMetadata, getLayoutData } from '@heyclaude/web-runtime/server';
+import type { Metadata } from 'next';
 import { unstable_cache } from 'next/cache';
 import dynamicImport from 'next/dynamic';
+import localFont from 'next/font/local';
+import { ThemeProvider } from 'next-themes';
+import { Suspense } from 'react';
 import { Toaster } from 'sonner';
 
 const NotificationToastHandler = dynamicImport(
   () =>
-    import('@/src/components/features/notifications/notification-toast-handler').then((mod) => ({
-      default: mod.NotificationToastHandler,
+    import('@/src/components/features/notifications/notification-toast-handler').then((module_) => ({
+      default: module_.NotificationToastHandler,
     })),
   {
     loading: () => null,
   }
 );
 
-import type { Database } from '@heyclaude/database-types';
-import { isBuildTime } from '@heyclaude/web-runtime';
-import { getComponentConfig } from '@heyclaude/web-runtime/actions';
-import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
-import { FeatureFlagsProvider } from '@heyclaude/web-runtime/feature-flags/provider';
-import { generatePageMetadata, getLayoutData } from '@heyclaude/web-runtime/server';
 import { ErrorBoundary } from '@/src/components/core/infra/error-boundary';
 import { PostCopyEmailProvider } from '@/src/components/core/infra/providers/email-capture-modal-provider';
 import { Pulse } from '@/src/components/core/infra/pulse';
@@ -91,7 +92,7 @@ const getCachedHomeMetadata = unstable_cache(
   },
   ['layout-home-metadata'],
   {
-    revalidate: 86400,
+    revalidate: 86_400,
     tags: ['homepage-metadata'],
   }
 );
@@ -191,6 +192,7 @@ export default async function RootLayout({
     layoutDataResult.status === 'fulfilled' ? layoutDataResult.value : DEFAULT_LAYOUT_DATA;
 
   // Log any failures for monitoring (but don't block render)
+  // eslint-disable-next-line architectural-rules/no-hardcoded-enum-values -- PromiseSettledResult status is a standard JavaScript value, not a database enum
   if (layoutDataResult.status === 'rejected') {
     const normalized = normalizeError(layoutDataResult.reason, 'Failed to load layout data');
     logger.error('RootLayout: layout data fetch failed', normalized, {
@@ -205,8 +207,8 @@ export default async function RootLayout({
   } else {
     try {
       const componentConfigResult = await getComponentConfig({});
-      componentCardConfig = mapComponentCardConfig(componentConfigResult?.data ?? null);
-      if (componentConfigResult?.serverError) {
+      componentCardConfig = mapComponentCardConfig(componentConfigResult.data ?? null);
+      if (componentConfigResult.serverError) {
         logger.warn('RootLayout: component config server error', undefined, {
           ...logContext,
           error: componentConfigResult.serverError,

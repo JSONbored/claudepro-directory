@@ -3,7 +3,7 @@
  * Uses updateJob server action (calls update_job RPC)
  */
 
-import type { Database } from '@heyclaude/database-types';
+import { Constants, type Database } from '@heyclaude/database-types';
 import type { CreateJobInput } from '@heyclaude/web-runtime';
 import { updateJob } from '@heyclaude/web-runtime/actions';
 import {
@@ -12,6 +12,7 @@ import {
   hashUserId,
   logger,
   normalizeError,
+  withDuration,
 } from '@heyclaude/web-runtime/core';
 import {
   generatePageMetadata,
@@ -22,6 +23,7 @@ import {
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import type { Metadata } from 'next';
 import { notFound, redirect } from 'next/navigation';
+
 import { JobForm } from '@/src/components/core/forms/job-form';
 
 /**
@@ -33,20 +35,21 @@ export const runtime = 'nodejs';
 
 type EditJobInput = Partial<CreateJobInput>;
 
-interface EditJobPageMetadataProps {
+interface EditJobPageMetadataProperties {
   params: Promise<{ id: string }>;
 }
 
-export async function generateMetadata({ params }: EditJobPageMetadataProps): Promise<Metadata> {
+export async function generateMetadata({ params }: EditJobPageMetadataProperties): Promise<Metadata> {
   const { id } = await params;
   return generatePageMetadata('/account/jobs/:id/edit', { params: { id } });
 }
 
-interface EditJobPageProps {
+interface EditJobPageProperties {
   params: Promise<{ id: string }>;
 }
 
-export default async function EditJobPage({ params }: EditJobPageProps) {
+export default async function EditJobPage({ params }: EditJobPageProperties) {
+  const startTime = Date.now();
   const { id } = await params;
 
   // Generate single requestId for this page request
@@ -60,35 +63,116 @@ export default async function EditJobPage({ params }: EditJobPageProps) {
     }
   );
 
+  // Section: Authentication
+  const authSectionStart = Date.now();
   const { user } = await getAuthenticatedUser({ context: 'EditJobPage' });
 
   if (!user) {
-    logger.warn('EditJobPage: unauthenticated access attempt', undefined, baseLogContext);
+    logger.warn(
+      'EditJobPage: unauthenticated access attempt',
+      undefined,
+      withDuration(
+        {
+          ...baseLogContext,
+          section: 'authentication',
+        },
+        authSectionStart
+      )
+    );
     redirect('/login');
   }
 
   const userIdHash = hashUserId(user.id);
   const logContext = { ...baseLogContext, userIdHash };
+  logger.info(
+    'EditJobPage: authentication successful',
+    withDuration(
+      {
+        ...logContext,
+        section: 'authentication',
+      },
+      authSectionStart
+    )
+  );
 
+  // Section: Job Data Fetch
+  const jobSectionStart = Date.now();
   let job: Database['public']['Tables']['jobs']['Row'] | null = null;
   try {
     job = await getUserJobById(user.id, id);
+    logger.info(
+      'EditJobPage: job data loaded',
+      withDuration(
+        {
+          ...logContext,
+          section: 'job-data-fetch',
+          hasJob: !!job,
+        },
+        jobSectionStart
+      )
+    );
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load user job for edit page');
-    logger.error('EditJobPage: getUserJobById threw', normalized, logContext);
+    logger.error(
+      'EditJobPage: getUserJobById threw',
+      normalized,
+      withDuration(
+        {
+          ...logContext,
+          section: 'job-data-fetch',
+          sectionDuration_ms: Date.now() - jobSectionStart,
+        },
+        startTime
+      )
+    );
     throw normalized;
   }
   if (!job) {
-    logger.warn('EditJobPage: job not found or not owned by user', undefined, logContext);
+    logger.warn(
+      'EditJobPage: job not found or not owned by user',
+      undefined,
+      withDuration(
+        {
+          ...logContext,
+          section: 'job-data-fetch',
+          sectionDuration_ms: Date.now() - jobSectionStart,
+        },
+        startTime
+      )
+    );
     notFound();
   }
 
+  // Section: Plan Catalog Fetch
+  const planCatalogSectionStart = Date.now();
   let planCatalog: Awaited<ReturnType<typeof getPaymentPlanCatalog>> = [];
   try {
     planCatalog = await getPaymentPlanCatalog();
+    logger.info(
+      'EditJobPage: plan catalog loaded',
+      withDuration(
+        {
+          ...logContext,
+          section: 'plan-catalog-fetch',
+          plansCount: planCatalog.length,
+        },
+        planCatalogSectionStart
+      )
+    );
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load payment plan catalog');
-    logger.error('EditJobPage: getPaymentPlanCatalog threw', normalized, logContext);
+    logger.error(
+      'EditJobPage: getPaymentPlanCatalog threw',
+      normalized,
+      withDuration(
+        {
+          ...logContext,
+          section: 'plan-catalog-fetch',
+          sectionDuration_ms: Date.now() - planCatalogSectionStart,
+        },
+        startTime
+      )
+    );
   }
 
   const handleSubmit = async (data: EditJobInput) => {
@@ -117,13 +201,13 @@ export default async function EditJobPage({ params }: EditJobPageProps) {
       throw normalized;
     }
 
-    if (result?.serverError) {
+    if (result.serverError) {
       const normalized = normalizeError(result.serverError, 'updateJob server error response');
       logger.error('EditJobPage: updateJob returned serverError', normalized, actionLogContext);
       throw normalized;
     }
 
-    if (!result?.data) {
+    if (!result.data) {
       const normalized = normalizeError('updateJob returned no data', 'updateJob returned no data');
       logger.error('EditJobPage: updateJob returned no data', normalized, actionLogContext);
       throw normalized;
@@ -136,9 +220,9 @@ export default async function EditJobPage({ params }: EditJobPageProps) {
     return { success: false };
   };
 
-  // Type guards to safely check enum values
+  // Type guards to safely check enum values - use Constants
   function isValidJobType(value: string): value is Database['public']['Enums']['job_type'] {
-    return ['full-time', 'part-time', 'contract', 'freelance', 'internship'].includes(value);
+    return (Constants.public.Enums.job_type as readonly string[]).includes(value);
   }
 
   function isValidJobCategory(value: string): value is Database['public']['Enums']['job_category'] {
@@ -160,21 +244,36 @@ export default async function EditJobPage({ params }: EditJobPageProps) {
   }
 
   // Log warnings for invalid enum values to help track data integrity issues
-  if (job.type && !isValidJobType(job.type)) {
-    logger.warn('EditJobPage: encountered invalid job type', undefined, {
-      ...logContext,
-      type: job.type,
-    });
+  if (!isValidJobType(job.type)) {
+    logger.warn(
+      'EditJobPage: encountered invalid job type',
+      undefined,
+      withDuration(
+        {
+          ...logContext,
+          section: 'job-data-validation',
+          type: job.type,
+        },
+        startTime
+      )
+    );
   }
-  if (job.category && !isValidJobCategory(job.category)) {
-    logger.warn('EditJobPage: encountered invalid job category', undefined, {
-      ...logContext,
-      category: job.category,
-    });
+  if (!isValidJobCategory(job.category)) {
+    logger.warn(
+      'EditJobPage: encountered invalid job category',
+      undefined,
+      withDuration(
+        {
+          ...logContext,
+          section: 'job-data-validation',
+          category: job.category,
+        },
+        startTime
+      )
+    );
   }
 
-  const hasInvalidData =
-    (job.type && !isValidJobType(job.type)) || (job.category && !isValidJobCategory(job.category));
+  const hasInvalidData = !isValidJobType(job.type) || !isValidJobCategory(job.category);
 
   return (
     <div className="space-y-6">
@@ -198,13 +297,13 @@ export default async function EditJobPage({ params }: EditJobPageProps) {
           description: job.description,
           salary: job.salary,
           remote: job.remote ?? undefined,
-          ...(job.type && isValidJobType(job.type) && { type: job.type }),
+          ...(isValidJobType(job.type) && { type: job.type }),
           workplace: job.workplace,
           experience: job.experience,
-          ...(job.category && isValidJobCategory(job.category) && { category: job.category }),
-          tags: job.tags || [],
-          requirements: job.requirements || [],
-          benefits: job.benefits || [],
+          ...(isValidJobCategory(job.category) && { category: job.category }),
+          tags: job.tags,
+          requirements: job.requirements,
+          benefits: job.benefits,
           link: job.link,
           contact_email: job.contact_email,
           company_logo: job.company_logo,

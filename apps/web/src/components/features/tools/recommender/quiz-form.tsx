@@ -8,7 +8,8 @@
 import type { Database } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
 import { getQuizConfigurationAction } from '@heyclaude/web-runtime/actions';
-import { generateConfigRecommendations, normalizeError } from '@heyclaude/web-runtime/core';
+import { generateConfigRecommendations, logger, normalizeError } from '@heyclaude/web-runtime/core';
+import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, useTransition } from 'react';
 import { z } from 'zod';
@@ -59,7 +60,6 @@ function mapQuizConfigToQuestions(config: QuizConfigurationResult | null): QuizQ
   }));
 }
 
-import { logger } from '@heyclaude/web-runtime/core';
 import { ArrowLeft, ArrowRight, Sparkles } from '@heyclaude/web-runtime/icons';
 import { DIMENSIONS, toasts, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { InlineSpinner } from '@/src/components/primitives/feedback/loading-factory';
@@ -106,6 +106,11 @@ function encodeQuizAnswers(answers: QuizAnswers): string {
 export function QuizForm() {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+  const runLoggedAsync = useLoggedAsync({
+    scope: 'QuizForm',
+    defaultMessage: 'Quiz operation failed',
+    defaultRethrow: false,
+  });
   const [quizConfig, setQuizConfig] = useState<QuizQuestion[] | null>(null);
   const [currentQuestion, setCurrentQuestion] = useState(1);
   const [answers, setAnswers] = useState<Partial<QuizAnswers>>({
@@ -207,35 +212,48 @@ export function QuizForm() {
 
       startTransition(async () => {
         try {
-          const result = await generateConfigRecommendations({
-            useCase: validatedAnswers.useCase,
-            experienceLevel: validatedAnswers.experienceLevel,
-            toolPreferences: validatedAnswers.toolPreferences,
-            ...(validatedAnswers.p_integrations && {
-              integrations: validatedAnswers.p_integrations,
-            }),
-            ...(validatedAnswers.p_focus_areas && { focusAreas: validatedAnswers.p_focus_areas }),
-          });
+          await runLoggedAsync(
+            async () => {
+              const result = await generateConfigRecommendations({
+                useCase: validatedAnswers.useCase,
+                experienceLevel: validatedAnswers.experienceLevel,
+                toolPreferences: validatedAnswers.toolPreferences,
+                ...(validatedAnswers.p_integrations && {
+                  integrations: validatedAnswers.p_integrations,
+                }),
+                ...(validatedAnswers.p_focus_areas && {
+                  focusAreas: validatedAnswers.p_focus_areas,
+                }),
+              });
 
-          if (result?.success && result.recommendations) {
-            const encoded = encodeQuizAnswers(validatedAnswers);
+              if (result?.success && result.recommendations) {
+                const encoded = encodeQuizAnswers(validatedAnswers);
 
-            router.push(
-              `/tools/config-recommender/results/${result.recommendations.id}?answers=${encoded}`
-            );
+                router.push(
+                  `/tools/config-recommender/results/${result.recommendations.id}?answers=${encoded}`
+                );
 
-            logger.info('Quiz completed', {
-              useCase: validatedAnswers.useCase,
-              experienceLevel: validatedAnswers.experienceLevel,
-              resultId: result.recommendations.id,
-            });
-          } else {
-            throw new Error('Failed to generate recommendations');
-          }
+                logger.info('Quiz completed', {
+                  useCase: validatedAnswers.useCase,
+                  experienceLevel: validatedAnswers.experienceLevel,
+                  resultId: result.recommendations.id,
+                });
+              } else {
+                throw new Error('Failed to generate recommendations');
+              }
+            },
+            {
+              message: 'Quiz submission failed',
+              context: {
+                useCase: validatedAnswers.useCase,
+                experienceLevel: validatedAnswers.experienceLevel,
+                toolPreferencesCount: validatedAnswers.toolPreferences?.length ?? 0,
+              },
+            }
+          );
         } catch (error) {
+          // Error already logged by useLoggedAsync
           toasts.error.actionFailed('generate recommendations');
-          const normalized = normalizeError(error, 'Quiz submission failed');
-          logger.error('Quiz submission failed', normalized);
         }
       });
     } catch (error) {

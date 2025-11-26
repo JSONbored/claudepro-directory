@@ -21,6 +21,7 @@ import {
   trackTerminalFormSubmissionAction,
 } from '@heyclaude/web-runtime/actions';
 import { logger, logUnhandledPromise, normalizeError } from '@heyclaude/web-runtime/core';
+import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import { Check, X } from '@heyclaude/web-runtime/icons';
 import { cn } from '@heyclaude/web-runtime/ui';
 import { AnimatePresence, motion } from 'motion/react';
@@ -89,6 +90,11 @@ export function ContactTerminal() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const outputEndRef = useRef<HTMLDivElement>(null);
+  const runLoggedAsync = useLoggedAsync({
+    scope: 'ContactTerminal',
+    defaultMessage: 'Contact terminal operation failed',
+    defaultRethrow: false,
+  });
 
   // Define addOutput first (no dependencies)
   const addOutput = useCallback(
@@ -110,54 +116,54 @@ export function ContactTerminal() {
   const loadCommands = useCallback(async () => {
     try {
       setIsLoading(true);
-      const result = await getContactCommands({});
-      if (result?.data?.commands && Array.isArray(result.data.commands)) {
-        // RPC returns commands with snake_case fields - use directly
-        const transformedCommands: ContactCommand[] = result.data.commands.map((cmd) => ({
-          id: cmd.id ?? '',
-          text: cmd.text ?? '',
-          description: cmd.description,
-          category: cmd.category ?? '',
-          icon_name: cmd.icon_name,
-          action_type:
-            cmd.action_type ?? ('internal' as Database['public']['Enums']['contact_action_type']),
-          action_value: cmd.action_value,
-          confetti_variant: cmd.confetti_variant,
-          requires_auth: cmd.requires_auth ?? false,
-          aliases: cmd.aliases ?? [],
-        }));
-        setCommands(transformedCommands);
-        if (result.data.commands.length === 0) {
-          setLoadError('No commands available');
-          addOutput('error', 'No commands available');
-        } else {
-          setLoadError(null);
+      await runLoggedAsync(
+        async () => {
+          const result = await getContactCommands({});
+          if (result?.data?.commands && Array.isArray(result.data.commands)) {
+            // RPC returns commands with snake_case fields - use directly
+            const transformedCommands: ContactCommand[] = result.data.commands.map((cmd) => ({
+              id: cmd.id ?? '',
+              text: cmd.text ?? '',
+              description: cmd.description,
+              category: cmd.category ?? '',
+              icon_name: cmd.icon_name,
+              action_type:
+                cmd.action_type ??
+                ('internal' as Database['public']['Enums']['contact_action_type']),
+              action_value: cmd.action_value,
+              confetti_variant: cmd.confetti_variant,
+              requires_auth: cmd.requires_auth ?? false,
+              aliases: cmd.aliases ?? [],
+            }));
+            setCommands(transformedCommands);
+            if (result.data.commands.length === 0) {
+              setLoadError('No commands available');
+              addOutput('error', 'No commands available');
+            } else {
+              setLoadError(null);
+            }
+          } else {
+            throw new Error('Invalid commands response');
+          }
+          if (result?.serverError) {
+            // Error already logged by safe-action middleware
+            throw new Error(result.serverError);
+          }
+        },
+        {
+          message: 'Failed to load terminal commands',
+          context: { component: 'ContactTerminal', action: 'loadCommands' },
+          level: 'warn',
         }
-      } else {
-        throw new Error('Invalid commands response');
-      }
-      if (result?.serverError) {
-        // Error already logged by safe-action middleware
-        const normalized = normalizeError(result.serverError, 'Failed to load terminal commands');
-        logger.error('Failed to load terminal commands', normalized, {
-          component: 'ContactTerminal',
-          action: 'loadCommands',
-        });
-        setLoadError('Failed to load commands. Please refresh the page.');
-        addOutput('error', 'Failed to load commands. Please refresh the page.');
-      }
+      );
     } catch (error) {
-      const normalized = normalizeError(error, 'Failed to load terminal commands');
-      logger.error('Failed to load terminal commands', normalized, {
-        component: 'ContactTerminal',
-        action: 'loadCommands',
-      });
+      // Error already logged by useLoggedAsync
       setLoadError('Failed to load commands. Please refresh the page.');
       addOutput('error', 'Failed to load commands. Please refresh the page.');
     } finally {
       setIsLoading(false);
     }
-  }, [addOutput]);
+  }, [addOutput, runLoggedAsync]);
 
   // Initial load effect
   useEffect(() => {
@@ -349,50 +355,54 @@ export function ContactTerminal() {
     const message = formData.get('message') as string;
 
     try {
-      const result = await submitContactForm({
-        name,
-        email,
-        category: selectedCategory,
-        message,
-        metadata: { source: 'terminal' } as Record<string, unknown>,
-      });
+      await runLoggedAsync(
+        async () => {
+          const result = await submitContactForm({
+            name,
+            email,
+            category: selectedCategory,
+            message,
+            metadata: { source: 'terminal' } as Record<string, unknown>,
+          });
 
-      if (result?.data?.success) {
-        addOutput(
-          'success',
-          "✓ Message sent successfully! We'll get back to you soon.",
-          <Check className="h-3 w-3" />
-        );
-        setIsSheetOpen(false);
-        fireConfetti('success');
-        trackTerminalFormSubmissionAction({
-          category: selectedCategory,
-          success: true,
-        }).catch(() => {
-          // Fire-and-forget tracking
-        });
-        (e.target as HTMLFormElement).reset();
-      } else {
-        const error = result?.serverError || 'Failed to send message.';
-        addOutput('error', error, <X className="h-3 w-3" />);
-        trackTerminalFormSubmissionAction({
-          category: selectedCategory,
-          success: false,
-          ...(error && { error }),
-        }).catch(() => {
-          // Fire-and-forget tracking
-        });
-      }
+          if (result?.data?.success) {
+            addOutput(
+              'success',
+              "✓ Message sent successfully! We'll get back to you soon.",
+              <Check className="h-3 w-3" />
+            );
+            setIsSheetOpen(false);
+            fireConfetti('success');
+            trackTerminalFormSubmissionAction({
+              category: selectedCategory,
+              success: true,
+            }).catch(() => {
+              // Fire-and-forget tracking
+            });
+            (e.target as HTMLFormElement).reset();
+          } else {
+            const error = result?.serverError || 'Failed to send message.';
+            throw new Error(error);
+          }
+        },
+        {
+          message: 'Contact form submission failed',
+          context: {
+            component: 'ContactTerminal',
+            category: selectedCategory,
+            hasName: !!name,
+            hasEmail: !!email,
+            hasMessage: !!message,
+          },
+        }
+      );
     } catch (error) {
-      addOutput('error', 'An error occurred. Please try again.', <X className="h-3 w-3" />);
-      const normalized = normalizeError(error, 'Contact form submission failed');
-      logger.error('Contact form submission failed', normalized, {
-        component: 'ContactTerminal',
-        category: selectedCategory,
-        hasName: !!name,
-        hasEmail: !!email,
-        hasMessage: !!message,
-      });
+      // Error already logged by useLoggedAsync
+      addOutput(
+        'error',
+        error instanceof Error ? error.message : 'An error occurred. Please try again.',
+        <X className="h-3 w-3" />
+      );
       trackTerminalFormSubmissionAction({
         category: selectedCategory,
         success: false,

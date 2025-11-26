@@ -35,13 +35,13 @@ export async function GET(
 
   const { provider: rawProvider } = await params;
   const { searchParams, origin } = new URL(request.url);
-  const nextParam = searchParams.get('next') ?? '/account/connected-accounts';
+  const nextParameter = searchParams.get('next') ?? '/account/connected-accounts';
   const isValidRedirect =
-    nextParam.startsWith('/') &&
-    !nextParam.startsWith('//') &&
-    !nextParam.startsWith('/\\') &&
-    !nextParam.includes('@');
-  const next = isValidRedirect ? nextParam : '/account/connected-accounts';
+    nextParameter.startsWith('/') &&
+    !nextParameter.startsWith('//') &&
+    !nextParameter.startsWith('/\\') &&
+    !nextParameter.includes('@');
+  const next = isValidRedirect ? nextParameter : '/account/connected-accounts';
 
   const baseLogContext = createWebAppContextWithId(
     requestId,

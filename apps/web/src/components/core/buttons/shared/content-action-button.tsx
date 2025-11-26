@@ -1,6 +1,7 @@
 'use client';
 
-import { logClientWarning, normalizeError } from '@heyclaude/web-runtime/core';
+import { logClientWarning } from '@heyclaude/web-runtime/core';
+import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import type { ButtonStyleProps } from '@heyclaude/web-runtime/types/component.types';
 import { toasts } from '@heyclaude/web-runtime/ui';
 import { Check, type LucideIcon } from 'lucide-react';
@@ -54,6 +55,11 @@ export function ContentActionButton({
 }: ContentActionButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
   const { isSuccess, triggerSuccess } = useButtonSuccess();
+  const runLoggedAsync = useLoggedAsync({
+    scope: 'ContentActionButton',
+    defaultMessage: 'Content action failed',
+    defaultRethrow: false,
+  });
 
   const handleClick = async () => {
     // Prevent race conditions
@@ -67,31 +73,40 @@ export function ContentActionButton({
 
     setIsLoading(true);
     try {
-      const response = await fetch(url);
-      if (!response.ok) throw new Error('Failed to fetch content');
+      await runLoggedAsync(
+        async () => {
+          const response = await fetch(url);
+          if (!response.ok) throw new Error('Failed to fetch content');
 
-      const content = await response.text();
-      await action(content);
+          const content = await response.text();
+          await action(content);
 
-      triggerSuccess();
-      toasts.raw.success(successMessage);
+          triggerSuccess();
+          toasts.raw.success(successMessage);
 
-      // Wrap analytics in separate try/catch to avoid masking action success
-      if (trackAnalytics) {
-        try {
-          await trackAnalytics();
-        } catch (analyticsError) {
-          logClientWarning('ContentActionButton: analytics tracking failed', analyticsError, {
-            url,
-            label,
-          });
-          // Don't show error to user - action succeeded
+          // Wrap analytics in separate try/catch to avoid masking action success
+          if (trackAnalytics) {
+            await runLoggedAsync(
+              async () => {
+                await trackAnalytics();
+              },
+              {
+                message: 'Analytics tracking failed',
+                level: 'warn',
+                rethrow: false,
+                context: { url, label },
+              }
+            );
+          }
+        },
+        {
+          message: 'Content action failed',
+          context: { url, label },
         }
-      }
+      );
     } catch (error) {
-      const normalized = normalizeError(error, 'ContentActionButton: action failed');
-      logClientWarning('ContentActionButton: action failed', normalized, { url, label });
-      toasts.raw.error(normalized.message);
+      // Error already logged by useLoggedAsync, just show user-friendly message
+      toasts.raw.error(error instanceof Error ? error.message : 'Action failed');
     } finally {
       setIsLoading(false);
     }

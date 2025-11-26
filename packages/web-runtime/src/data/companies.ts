@@ -1,14 +1,20 @@
 'use server';
 
-import type { Database } from '@heyclaude/database-types';
-import { unstable_cache } from 'next/cache';
-import { getCacheTtl } from '../cache-config.ts';
-import { logger } from '../logger.ts';
-import { searchCompaniesUnified } from '../edge/search-client.ts';
-import { fetchCached } from '../cache/fetch-cached.ts';
 import { CompaniesService } from '@heyclaude/data-layer';
-import { normalizeRpcResult } from './content-helpers.ts';
+import { Constants, type Database } from '@heyclaude/database-types';
+import { unstable_cache } from 'next/cache';
+
+import { fetchCached } from '../cache/fetch-cached.ts';
+import { getCacheTtl } from '../cache-config.ts';
+import { searchCompaniesUnified } from '../edge/search-client.ts';
+import { normalizeError } from '../errors.ts';
+import { logger } from '../logger.ts';
 import { generateRequestId } from '../utils/request-context.ts';
+
+import { normalizeRpcResult } from './content-helpers.ts';
+
+const JOBS_CATEGORY = Constants.public.Enums.content_category[9] as string; // 'jobs'
+
 
 const COMPANY_DETAIL_TTL_KEY = 'cache.company_detail.ttl_seconds';
 
@@ -54,7 +60,7 @@ export async function getCompanyProfile(
     (client) => new CompaniesService(client).getCompanyProfile({ p_slug: slug }),
     {
       keyParts: ['company', slug],
-      tags: ['companies', 'jobs', `company-${slug}`],
+      tags: ['companies', JOBS_CATEGORY, `company-${slug}`],
       ttlKey: COMPANY_DETAIL_TTL_KEY,
       fallback: null,
       logMeta: { slug },
@@ -70,7 +76,7 @@ export async function getCompaniesList(
     (client) => new CompaniesService(client).getCompaniesList({ p_limit: limit, p_offset: offset }),
     {
       keyParts: ['companies-list', limit, offset],
-      tags: ['companies', 'jobs'],
+      tags: ['companies', JOBS_CATEGORY],
       ttlKey: 'cache.company_list.ttl_seconds',
       fallback: { companies: [], total: 0 },
       logMeta: { limit, offset },
@@ -78,12 +84,12 @@ export async function getCompaniesList(
   );
 }
 
-export type CompanySearchResult = {
+export interface CompanySearchResult {
   id: string;
   name: string;
   slug: string | null;
   description: string | null;
-};
+}
 
 async function fetchCompanySearchResults(
   query: string,
@@ -111,7 +117,18 @@ async function fetchCompanySearchResults(
     
     return result;
   } catch (error) {
-    // Error already logged by trackPerformance
+    // trackPerformance already logs the error, but we log again with context about fallback behavior
+    const normalized = normalizeError(error, 'Company search failed, returning empty results');
+    const fallbackRequestId = generateRequestId();
+    logger.warn('Company search failed, returning empty results', undefined, {
+      requestId: fallbackRequestId,
+      operation: 'fetchCompanySearchResults-fallback',
+      route: '/data/companies',
+      query,
+      limit,
+      errorMessage: normalized.message,
+      fallbackStrategy: 'empty-array',
+    });
     return [];
   }
 }

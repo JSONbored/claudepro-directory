@@ -1,24 +1,10 @@
-import dynamicImport from 'next/dynamic';
-import Link from 'next/link';
-import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
-import { Button } from '@/src/components/primitives/ui/button';
-
-const NewsletterCTAVariant = dynamicImport(
-  () =>
-    import('@/src/components/features/growth/newsletter/newsletter-cta-variants').then((mod) => ({
-      default: mod.NewsletterCTAVariant,
-    })),
-  {
-    loading: () => <div className="h-32 animate-pulse rounded-lg bg-muted/20" />,
-  }
-);
-
 import {
   createWebAppContextWithId,
   generateRequestId,
   getContactChannels,
   logger,
   normalizeError,
+  withDuration,
 } from '@heyclaude/web-runtime/core';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import {
@@ -38,6 +24,21 @@ import {
 } from '@heyclaude/web-runtime/server';
 import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import type { Metadata } from 'next';
+import dynamicImport from 'next/dynamic';
+import Link from 'next/link';
+
+const NewsletterCTAVariant = dynamicImport(
+  () =>
+    import('@/src/components/features/growth/newsletter/newsletter-cta-variants').then((module_) => ({
+      default: module_.NewsletterCTAVariant,
+    })),
+  {
+    loading: () => <div className="h-32 animate-pulse rounded-lg bg-muted/20" />,
+  }
+);
+
+import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
+import { Button } from '@/src/components/primitives/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/primitives/ui/card';
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -54,10 +55,10 @@ export async function generateMetadata(): Promise<Metadata> {
  *
  * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic
  */
-export const revalidate = 86400;
+export const revalidate = 86_400;
 
 function formatStatValue(value: number | null | undefined): string {
-  if (value == null || Number.isNaN(value)) return '0';
+  if (value === null || value === undefined || Number.isNaN(value)) return '0';
   return Intl.NumberFormat('en', {
     notation: 'compact',
     maximumFractionDigits: 1,
@@ -65,26 +66,39 @@ function formatStatValue(value: number | null | undefined): string {
 }
 
 export default async function CommunityPage() {
+  const startTime = Date.now();
   // Generate single requestId for this page request
   const requestId = generateRequestId();
   const baseLogContext = createWebAppContextWithId(requestId, '/community', 'CommunityPage');
 
+  // Section: Configuration Check
+  const configSectionStart = Date.now();
   const channels = getContactChannels();
   if (!channels.discord) {
     logger.warn('CommunityPage: Discord channel is not configured', undefined, {
-      ...baseLogContext,
+      ...withDuration(baseLogContext, startTime),
+      requestId,
+      operation: 'CommunityPage',
+      section: 'configuration-check',
+      sectionDuration_ms: Date.now() - configSectionStart,
       channel: 'discord',
       configKey: 'DISCORD_INVITE_URL',
     });
   }
   if (!channels.twitter) {
     logger.warn('CommunityPage: Twitter channel is not configured', undefined, {
-      ...baseLogContext,
+      ...withDuration(baseLogContext, startTime),
+      requestId,
+      operation: 'CommunityPage',
+      section: 'configuration-check',
+      sectionDuration_ms: Date.now() - configSectionStart,
       channel: 'twitter',
       configKey: 'TWITTER_URL',
     });
   }
 
+  // Section: Data Fetch
+  const dataFetchSectionStart = Date.now();
   const categoryIds = getHomepageCategoryIds;
 
   const [communityDirectory, configurationCount, homepageData] = await Promise.all([
@@ -92,7 +106,13 @@ export default async function CommunityPage() {
       logger.error(
         'CommunityPage: failed to load community directory',
         normalizeError(error),
-        baseLogContext
+        {
+          ...withDuration(baseLogContext, startTime),
+          requestId,
+          operation: 'CommunityPage',
+          section: 'data-fetch',
+          sectionDuration_ms: Date.now() - dataFetchSectionStart,
+        }
       );
       return null;
     }),
@@ -100,7 +120,13 @@ export default async function CommunityPage() {
       logger.error(
         'CommunityPage: failed to load configuration count',
         normalizeError(error),
-        baseLogContext
+        {
+          ...withDuration(baseLogContext, startTime),
+          requestId,
+          operation: 'CommunityPage',
+          section: 'data-fetch',
+          sectionDuration_ms: Date.now() - dataFetchSectionStart,
+        }
       );
       return 0;
     }),
@@ -108,13 +134,19 @@ export default async function CommunityPage() {
       logger.error(
         'CommunityPage: failed to load homepage metrics',
         normalizeError(error),
-        baseLogContext
+        {
+          ...withDuration(baseLogContext, startTime),
+          requestId,
+          operation: 'CommunityPage',
+          section: 'data-fetch',
+          sectionDuration_ms: Date.now() - dataFetchSectionStart,
+        }
       );
       return null;
     }),
   ]);
 
-  const totalConfigurations = configurationCount ?? 0;
+  const totalConfigurations = configurationCount;
   const totalContributors = communityDirectory?.all_users?.length ?? 0;
   const memberCount = homepageData?.member_count ?? totalContributors;
 

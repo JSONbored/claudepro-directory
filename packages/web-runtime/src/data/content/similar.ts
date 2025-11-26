@@ -1,8 +1,9 @@
 'use server';
 
-import type { Database } from '@heyclaude/database-types';
-import { fetchCached } from '../../cache/fetch-cached.ts';
 import { ContentService } from '@heyclaude/data-layer';
+import type { Database } from '@heyclaude/database-types';
+
+import { fetchCached } from '../../cache/fetch-cached.ts';
 
 export async function getSimilarContent(input: {
   contentType: Database['public']['Enums']['content_category'];

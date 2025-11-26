@@ -1,5 +1,6 @@
 'use client';
 
+import { Constants } from '@heyclaude/database-types';
 import { cn, UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import { useState } from 'react';
 import { Button } from '@/src/components/primitives/ui/button';
@@ -14,11 +15,12 @@ import {
 } from '@/src/components/primitives/ui/select';
 import { useNewsletter } from '@/src/hooks/use-newsletter';
 
+// Use Constants for enum values
 const EXPERIENCE_OPTIONS = [
   { value: 'any', label: 'All experience levels' },
-  { value: 'beginner', label: 'Entry level' },
-  { value: 'intermediate', label: 'Mid level' },
-  { value: 'advanced', label: 'Senior level' },
+  { value: Constants.public.Enums.experience_level[0], label: 'Entry level' }, // 'beginner'
+  { value: Constants.public.Enums.experience_level[1], label: 'Mid level' }, // 'intermediate'
+  { value: Constants.public.Enums.experience_level[2], label: 'Senior level' }, // 'advanced'
 ] as const;
 
 const REMOTE_OPTIONS = [

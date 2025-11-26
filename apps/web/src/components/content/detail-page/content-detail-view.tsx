@@ -3,7 +3,7 @@
  * Uses edge function for syntax highlighting (cached, fast)
  */
 
-import type { Database } from '@heyclaude/database-types';
+import { Constants, type Database } from '@heyclaude/database-types';
 import {
   ensureStringArray,
   getMetadata,
@@ -168,7 +168,7 @@ export async function UnifiedDetailPage({
 }: UnifiedDetailPageProps) {
   const category: Database['public']['Enums']['content_category'] = isValidCategory(item.category)
     ? item.category
-    : 'agents';
+    : Constants.public.Enums.content_category[0]; // 'agents'
   const config = await getCategoryConfig(category);
   const displayTitle = getDisplayTitle(item);
   const metadata = getMetadata(item);
@@ -231,7 +231,7 @@ export async function UnifiedDetailPage({
   // Start all promises first, then await them together
   const contentDataPromise = (async () => {
     // GUIDES: Skip content processing - structured sections rendered separately
-    if (item.category === 'guides') {
+    if (item.category === Constants.public.Enums.content_category[7]) { // 'guides'
       return null;
     }
 
@@ -290,7 +290,12 @@ export async function UnifiedDetailPage({
       ('configuration' in contentItem && contentItem['configuration']) || metadata['configuration'];
     if (!configuration) return null;
 
-    const format = item.category === 'mcp' ? 'multi' : item.category === 'hooks' ? 'hook' : 'json';
+    const format =
+      item.category === Constants.public.Enums.content_category[1] // 'mcp'
+        ? 'multi'
+        : item.category === Constants.public.Enums.content_category[4] // 'hooks'
+          ? 'hook'
+          : 'json';
 
     // Multi-format configuration (MCP servers)
     if (format === 'multi') {
@@ -645,7 +650,7 @@ export async function UnifiedDetailPage({
   const guideSectionsPromise = (async (): Promise<Array<
     Record<string, unknown> & { html?: string }
   > | null> => {
-    if (item.category !== 'guides') return null;
+    if (item.category !== Constants.public.Enums.content_category[7]) return null; // 'guides'
 
     const itemMetadata = getMetadata(item);
     if (!(itemMetadata?.['sections'] && Array.isArray(itemMetadata['sections']))) return null;

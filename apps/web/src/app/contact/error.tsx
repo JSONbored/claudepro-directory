@@ -1,7 +1,13 @@
 'use client';
 
-import { logger, normalizeError } from '@heyclaude/web-runtime/core';
+import {
+  createWebAppContextWithId,
+  generateRequestId,
+  logger,
+  normalizeError,
+} from '@heyclaude/web-runtime/core';
 import { useEffect } from 'react';
+
 import { SegmentErrorFallback } from '@/src/components/core/infra/segment-error-fallback';
 
 export default function ContactError({
@@ -12,11 +18,16 @@ export default function ContactError({
   reset: () => void;
 }) {
   useEffect(() => {
+    const requestId = generateRequestId();
+    const route = globalThis.location.pathname;
     const normalized = normalizeError(error, 'Contact route rendering failed');
-    logger.error('ContactErrorBoundary: contact page crashed', normalized, {
+    const logContext = createWebAppContextWithId(requestId, route, 'ContactErrorBoundary', {
       segment: 'contact',
       ...(error.digest && { digest: error.digest }),
+      userAgent: globalThis.navigator.userAgent,
+      url: globalThis.location.href,
     });
+    logger.error('Contact error boundary triggered', normalized, logContext);
   }, [error]);
 
   return (

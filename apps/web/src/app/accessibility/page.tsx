@@ -2,6 +2,7 @@ import { getContactChannels, getLastUpdatedDate } from '@heyclaude/web-runtime/c
 import { generatePageMetadata } from '@heyclaude/web-runtime/data';
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
 import type { Metadata } from 'next';
+
 import { NavLink } from '@/src/components/core/navigation/navigation-link';
 
 export async function generateMetadata(): Promise<Metadata> {

@@ -11,10 +11,11 @@
  * - Mobile: Single column, optimized spacing
  */
 
-import type { Database } from '@heyclaude/database-types';
+import { Constants, type Database } from '@heyclaude/database-types';
 import { submitContentForReview } from '@heyclaude/web-runtime/actions';
 import { logger, normalizeError, ParseStrategy, safeParse } from '@heyclaude/web-runtime/core';
 import { getAnimationConfig } from '@heyclaude/web-runtime/data';
+import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import { useAuthenticatedUser } from '@heyclaude/web-runtime/hooks/use-authenticated-user';
 import {
   CheckCircle,
@@ -66,7 +67,7 @@ import { TemplateSelector } from './template-selector';
  */
 const examplesArraySchema = z.array(z.string());
 
-const DEFAULT_CONTENT_TYPE: SubmissionContentType = 'agents';
+const DEFAULT_CONTENT_TYPE: SubmissionContentType = Constants.public.Enums.submission_type[0]; // 'agents'
 
 const EMPTY_SECTION: SubmissionFormSection = {
   nameField: null,
@@ -150,6 +151,12 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
 
   /** Form submission loading state */
   const [isPending, startTransition] = useTransition();
+
+  const runLoggedAsync = useLoggedAsync({
+    scope: 'SubmitFormClient',
+    defaultMessage: 'Content submission failed',
+    defaultRethrow: false,
+  });
 
   /** Submission result for success message display */
   const [submissionResult, setSubmissionResult] = useState<{
@@ -238,7 +245,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
         tokensInput.value = template['maxTokens'].toString();
     }
 
-    if (template.type === 'rules') {
+    if (template.type === Constants.public.Enums.submission_type[2]) { // 'rules'
       const rulesInput = form.querySelector('[name="rulesContent"]') as HTMLTextAreaElement;
       if (rulesInput && typeof template['rulesContent'] === 'string')
         rulesInput.value = template['rulesContent'];
@@ -252,7 +259,7 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
         tokensInput.value = template['maxTokens'].toString();
     }
 
-    if (template.type === 'mcp') {
+    if (template.type === Constants.public.Enums.submission_type[1]) { // 'mcp'
       const npmInput = form.querySelector('[name="npmPackage"]') as HTMLInputElement;
       if (npmInput && typeof template['npmPackage'] === 'string')
         npmInput.value = template['npmPackage'];
@@ -299,147 +306,144 @@ export function SubmitFormClient({ formConfig, templates }: SubmitFormClientProp
           return;
         }
 
-        const formData = new FormData(event.currentTarget);
+        await runLoggedAsync(
+          async () => {
+            const formData = new FormData(event.currentTarget);
 
-        /**
-         * DATABASE-FIRST SUBMISSION
-         * Extract form fields and call RPC directly.
-         * Database validates via CHECK constraints.
-         */
-        const submissionData: Record<string, unknown> = {};
+            /**
+             * DATABASE-FIRST SUBMISSION
+             * Extract form fields and call RPC directly.
+             * Database validates via CHECK constraints.
+             */
+            const submissionData: Record<string, unknown> = {};
 
-        // Extract all form fields generically
-        for (const [key, value] of formData.entries()) {
-          // Handle examples JSON parsing
-          if (key === 'examples') {
-            const examplesJson = value as string;
-            if (examplesJson && examplesJson !== '[]') {
-              try {
-                submissionData['examples'] = safeParse(examplesJson, examplesArraySchema, {
-                  strategy: ParseStrategy.VALIDATED_JSON,
-                });
-              } catch (error) {
-                const normalized = normalizeError(error, 'Failed to parse examples JSON');
-                logger.warn('Failed to parse examples JSON, field will be omitted', {
-                  error: normalized.message,
-                });
-                toasts.raw.warning('Examples field could not be parsed and will be omitted');
-                submissionData['examples'] = undefined;
+            // Extract all form fields generically
+            for (const [key, value] of formData.entries()) {
+              // Handle examples JSON parsing
+              if (key === 'examples') {
+                const examplesJson = value as string;
+                if (examplesJson && examplesJson !== '[]') {
+                  try {
+                    submissionData['examples'] = safeParse(examplesJson, examplesArraySchema, {
+                      strategy: ParseStrategy.VALIDATED_JSON,
+                    });
+                  } catch (error) {
+                    const normalized = normalizeError(error, 'Failed to parse examples JSON');
+                    logger.warn('Failed to parse examples JSON, field will be omitted', {
+                      error: normalized.message,
+                    });
+                    toasts.raw.warning('Examples field could not be parsed and will be omitted');
+                    submissionData['examples'] = undefined;
+                  }
+                }
+                continue;
+              }
+
+              submissionData[key] = value || undefined;
+            }
+
+            // Collect all required fields dynamically from form config
+            const activeSection = getSection(contentType);
+            const allFields = [
+              ...(activeSection.nameField ? [activeSection.nameField] : []),
+              ...activeSection.common,
+              ...activeSection.typeSpecific,
+              ...activeSection.tags,
+            ];
+            const requiredFieldNames = new Set(
+              allFields.filter((field) => field.required).map((field) => field.name)
+            );
+
+            // Validate all required fields (including dynamic ones from config)
+            for (const fieldName of requiredFieldNames) {
+              const value = submissionData[fieldName];
+              if (value === undefined || value === null || value === '') {
+                const field = allFields.find((f) => f.name === fieldName);
+                const fieldLabel = field?.label || fieldName;
+                toasts.error.submissionFailed(`Missing required field: ${fieldLabel}`);
+                throw new Error(`Missing required field: ${fieldLabel}`);
               }
             }
-            continue;
-          }
 
-          submissionData[key] = value || undefined;
-        }
+            // Extract specific fields for RPC parameters
+            const extractedFields = [
+              'name',
+              'description',
+              'category',
+              'author',
+              'author_profile_url',
+              'github_url',
+              'tags',
+            ] as const;
 
-        // Collect all required fields dynamically from form config
-        const activeSection = getSection(contentType);
-        const allFields = [
-          ...(activeSection.nameField ? [activeSection.nameField] : []),
-          ...activeSection.common,
-          ...activeSection.typeSpecific,
-          ...activeSection.tags,
-        ];
-        const requiredFieldNames = new Set(
-          allFields.filter((field) => field.required).map((field) => field.name)
-        );
-
-        // Validate all required fields (including dynamic ones from config)
-        for (const fieldName of requiredFieldNames) {
-          const value = submissionData[fieldName];
-          if (value === undefined || value === null || value === '') {
-            const field = allFields.find((f) => f.name === fieldName);
-            const fieldLabel = field?.label || fieldName;
-            toasts.error.submissionFailed(`Missing required field: ${fieldLabel}`);
-            return;
-          }
-        }
-
-        // Extract specific fields for RPC parameters
-        const extractedFields = [
-          'name',
-          'description',
-          'category',
-          'author',
-          'author_profile_url',
-          'github_url',
-          'tags',
-        ] as const;
-
-        // Filter out extracted fields from content_data to avoid duplicates
-        const contentData: Record<string, unknown> = {};
-        for (const [key, value] of Object.entries(submissionData)) {
-          if (!extractedFields.includes(key as (typeof extractedFields)[number])) {
-            contentData[key] = value;
-          }
-        }
-
-        // Server action call - database validates everything
-        const tags = submissionData['tags']
-          ? (submissionData['tags'] as string)
-              .split(',')
-              .map((tag) => tag.trim())
-              .filter((tag) => tag.length > 0)
-          : undefined;
-
-        const result = await submitContentForReview({
-          submission_type: contentType,
-          name: submissionData['name'] as string,
-          description: submissionData['description'] as string,
-          category: submissionData['category'] as Database['public']['Enums']['content_category'],
-          author: submissionData['author'] as string,
-          author_profile_url: (submissionData['author_profile_url'] as string) || '',
-          github_url: (submissionData['github_url'] as string) || '',
-          tags: tags || [],
-          content_data: contentData,
-        });
-
-        if (result?.serverError || result?.validationErrors) {
-          logger.error(
-            'Submission server action failed',
-            new Error(result.serverError || 'Validation failed'),
-            {
-              component: 'SubmitFormClient',
-              contentType,
-              submissionType: contentType,
-              hasName: !!submissionData['name'],
-              hasDescription: !!submissionData['description'],
-              hasAuthor: !!submissionData['author'],
+            // Filter out extracted fields from content_data to avoid duplicates
+            const contentData: Record<string, unknown> = {};
+            for (const [key, value] of Object.entries(submissionData)) {
+              if (!extractedFields.includes(key as (typeof extractedFields)[number])) {
+                contentData[key] = value;
+              }
             }
-          );
-          toasts.error.submissionFailed(
-            result.serverError || 'Failed to submit content. Please try again or contact support.'
-          );
-          return;
-        }
 
-        if (result?.data?.success) {
-          if (!result.data.submission_id) {
-            logger.warn('Success response missing submission ID', {
-              component: 'SubmitFormClient',
-              contentType,
+            // Server action call - database validates everything
+            const tags = submissionData['tags']
+              ? (submissionData['tags'] as string)
+                  .split(',')
+                  .map((tag) => tag.trim())
+                  .filter((tag) => tag.length > 0)
+              : undefined;
+
+            const result = await submitContentForReview({
+              submission_type: contentType,
+              name: submissionData['name'] as string,
+              description: submissionData['description'] as string,
+              category: submissionData[
+                'category'
+              ] as Database['public']['Enums']['content_category'],
+              author: submissionData['author'] as string,
+              author_profile_url: (submissionData['author_profile_url'] as string) || '',
+              github_url: (submissionData['github_url'] as string) || '',
+              tags: tags || [],
+              content_data: contentData,
             });
+
+            if (result?.serverError || result?.validationErrors) {
+              throw new Error(result.serverError || 'Validation failed');
+            }
+
+            if (result?.data?.success) {
+              if (!result.data.submission_id) {
+                logger.warn('Success response missing submission ID', {
+                  component: 'SubmitFormClient',
+                  contentType,
+                });
+              }
+
+              setSubmissionResult({
+                submission_id: (result.data.submission_id as string) || 'unknown',
+                status: Constants.public.Enums.submission_status[0], // 'pending'
+                message: 'Your submission has been received and is pending review!',
+              });
+
+              toasts.success.submissionCreated(contentType);
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            } else {
+              throw new Error('Submission failed: unexpected response format');
+            }
+          },
+          {
+            message: 'Content submission failed',
+            context: {
+              contentType,
+              hasName: !!name,
+              hasDescription: !!description,
+            },
           }
-
-          setSubmissionResult({
-            submission_id: (result.data.submission_id as string) || 'unknown',
-            status: 'pending',
-            message: 'Your submission has been received and is pending review!',
-          });
-
-          toasts.success.submissionCreated(contentType);
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
+        );
       } catch (error) {
-        const normalized = normalizeError(error, 'Content submission failed');
-        logger.error('Submission failed', normalized, {
-          component: 'SubmitFormClient',
-          contentType,
-          hasName: !!name,
-          hasDescription: !!description,
-        });
-        toasts.error.submissionFailed(normalized.message);
+        // Error already logged by useLoggedAsync
+        toasts.error.submissionFailed(
+          error instanceof Error ? error.message : 'Failed to submit content'
+        );
       }
     });
   };

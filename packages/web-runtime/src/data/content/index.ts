@@ -1,14 +1,15 @@
 import 'server-only';
 
+import { ContentService, TrendingService, type ContentFilterOptions } from '@heyclaude/data-layer';
 import type { Database } from '@heyclaude/database-types';
 import { cache } from 'react';
+
+import { fetchCached } from '../../cache/fetch-cached.ts';
+import { toLogContextValue } from '../../logger.ts';
+import { QUERY_LIMITS } from '../config/constants.ts';
 import {
   generateContentTags,
 } from '../content-helpers.ts';
-import { toLogContextValue } from '../../logger.ts';
-import { fetchCached } from '../../cache/fetch-cached.ts';
-import { ContentService, TrendingService, type ContentFilterOptions } from '@heyclaude/data-layer';
-import { QUERY_LIMITS } from '../config/constants.ts';
 
 // OPTIMIZATION: Wrapped with React.cache() for request-level deduplication
 // This prevents duplicate calls within the same request (React Server Component tree)
@@ -30,7 +31,7 @@ export const getContentByCategory = cache(
         logMeta: { category },
       }
     );
-    return result ?? [];
+    return result;
   }
 );
 
@@ -48,7 +49,7 @@ export const getContentBySlug = cache(
            p_limit: 1,
            p_offset: 0
          });
-         return data?.[0] ?? null;
+         return data[0] ?? null;
        },
        {
           keyParts: ['content', category, slug],
@@ -81,7 +82,7 @@ export const getAllContent = cache(
             p_limit: filters?.limit ?? QUERY_LIMITS.content.default,
             p_offset: 0
          });
-         return (result?.items ?? []) as Database['public']['CompositeTypes']['enriched_content_item'][];
+         return (result.items ?? []) as Database['public']['CompositeTypes']['enriched_content_item'][];
       },
       {
         // Next.js automatically handles serialization of keyParts array
@@ -115,7 +116,7 @@ export const getContentCount = cache(
           p_order_by: 'created_at',
           p_order_direction: 'desc'
         });
-        return result?.pagination?.total_count ?? 0;
+        return result.pagination?.total_count ?? 0;
       },
       {
         keyParts: ['content-count', category ?? 'all'],
@@ -150,7 +151,7 @@ export const getTrendingContent = cache(
 
 export const getConfigurationCount = cache(async () => getContentCount());
 
-interface TrendingPageParams {
+interface TrendingPageParameters {
   category?: Database['public']['Enums']['content_category'] | null;
   limit?: number;
 }
@@ -168,9 +169,9 @@ interface TrendingPageDataResult {
 }
 
 export async function getTrendingPageData(
-  params: TrendingPageParams = {}
+  parameters: TrendingPageParameters = {}
 ): Promise<TrendingPageDataResult> {
-  const { category = null, limit = 12 } = params;
+  const { category = null, limit = 12 } = parameters;
   const safeLimit = Math.min(Math.max(limit, 1), 100);
 
   const [trending, popular, recent] = await Promise.all([

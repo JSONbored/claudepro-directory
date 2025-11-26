@@ -1,18 +1,21 @@
 'use server';
 
+import { AccountService } from '@heyclaude/data-layer';
 import type { Database } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
 import { z } from 'zod';
+
 import { fetchCached } from '../cache/fetch-cached.ts';
-import { AccountService } from '@heyclaude/data-layer';
 
 const ACCOUNT_TTL_KEY = 'cache.account.ttl_seconds';
 
 const USER_TIER_VALUES = Constants.public.Enums.user_tier;
 
 const accountDashboardSchema = z.object({
+  // eslint-disable-next-line unicorn/prefer-top-level-await -- zod .catch() is not a promise, it's a schema method
   bookmark_count: z.number().catch(0),
   profile: z.object({
+    // eslint-disable-next-line unicorn/prefer-top-level-await -- zod .catch() is not a promise, it's a schema method
     name: z.string().nullable().catch(null),
     tier: z
       .enum([...USER_TIER_VALUES] as [
@@ -20,6 +23,7 @@ const accountDashboardSchema = z.object({
         ...Database['public']['Enums']['user_tier'][],
       ])
       .nullable()
+      // eslint-disable-next-line unicorn/prefer-top-level-await -- zod .catch() is not a promise, it's a schema method
       .catch(null),
     created_at: z.string(),
   }),
@@ -116,7 +120,7 @@ export async function getUserJobById(
   jobId: string
 ): Promise<Database['public']['Tables']['jobs']['Row'] | null> {
   const data = await getUserDashboard(userId);
-  const jobs = (data?.jobs as Array<Database['public']['Tables']['jobs']['Row']> | undefined) || [];
+  const jobs = (data?.jobs as Array<Database['public']['Tables']['jobs']['Row']> | undefined) ?? [];
   return jobs.find((job) => job.id === jobId) ?? null;
 }
 
@@ -207,9 +211,7 @@ export async function getUserCompanyById(
   companyId: string
 ): Promise<Database['public']['CompositeTypes']['user_companies_company'] | null> {
   const data = await getUserCompanies(userId);
-  const company = data?.companies?.find(
-    (c): c is NonNullable<typeof c> => c !== null && c.id === companyId
-  );
+  const company = data?.companies?.find((c) => c.id === companyId);
   return company ?? null;
 }
 

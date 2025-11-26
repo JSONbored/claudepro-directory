@@ -1,7 +1,13 @@
 'use client';
 
-import { logger, normalizeError } from '@heyclaude/web-runtime/core';
+import {
+  createWebAppContextWithId,
+  generateRequestId,
+  logger,
+  normalizeError,
+} from '@heyclaude/web-runtime/core';
 import { useEffect } from 'react';
+
 import { SegmentErrorFallback } from '@/src/components/core/infra/segment-error-fallback';
 
 export default function CommunityError({
@@ -12,11 +18,16 @@ export default function CommunityError({
   reset: () => void;
 }) {
   useEffect(() => {
+    const requestId = generateRequestId();
+    const route = globalThis.location.pathname;
     const normalized = normalizeError(error, 'Community route rendering failed');
-    logger.error('CommunityErrorBoundary: community page crashed', normalized, {
+    const logContext = createWebAppContextWithId(requestId, route, 'CommunityErrorBoundary', {
       segment: 'community',
       ...(error.digest && { digest: error.digest }),
+      userAgent: globalThis.navigator.userAgent,
+      url: globalThis.location.href,
     });
+    logger.error('Community error boundary triggered', normalized, logContext);
   }, [error]);
 
   return (

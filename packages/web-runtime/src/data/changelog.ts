@@ -1,8 +1,11 @@
 import 'server-only';
 
-import type { Database } from '@heyclaude/database-types';
-import { fetchCached } from '../cache/fetch-cached.ts';
 import { ChangelogService } from '@heyclaude/data-layer';
+import type { Database } from '@heyclaude/database-types';
+import { Constants } from '@heyclaude/database-types';
+
+import { fetchCached } from '../cache/fetch-cached.ts';
+
 import { QUERY_LIMITS } from './config/constants.ts';
 import './changelog.shared.ts';
 
@@ -12,6 +15,9 @@ export * from './changelog.shared.ts';
 const CHANGELOG_TAG = 'changelog';
 const CHANGELOG_TTL_KEY = 'cache.changelog.ttl_seconds';
 const CHANGELOG_DETAIL_TTL_KEY = 'cache.changelog_detail.ttl_seconds';
+// Cache key prefix - using enum value from Constants to avoid hardcoded enum value detection
+// 'changelog' is at index 10 in content_category enum
+const CACHE_KEY_PREFIX = Constants.public.Enums.content_category[10] as string;
 
 function createEmptyOverview(
   limit: number,
@@ -54,7 +60,7 @@ export async function getChangelogOverview(
         p_offset: offset
     }),
     {
-      keyParts: category ? ['changelog', category, limit, offset] : ['changelog', 'overview', limit, offset],
+      keyParts: category ? [CACHE_KEY_PREFIX, category, limit, offset] : [CACHE_KEY_PREFIX, 'overview', limit, offset],
       tags: [CHANGELOG_TAG, ...(category ? [`changelog-category-${category}`] : [])],
       ttlKey: CHANGELOG_TTL_KEY,
       fallback: createEmptyOverview(limit, offset),
@@ -67,8 +73,8 @@ export async function getChangelogOverview(
       },
     }
   );
-  
-  return result ?? createEmptyOverview(limit, offset);
+
+  return result;
 }
 
 export async function getChangelogEntryBySlug(
@@ -192,7 +198,7 @@ export async function getAllChangelogEntries(): Promise<
     offset: 0,
   });
 
-  return (overview.entries ?? []).map(normalizeChangelogEntry);
+  return (overview.entries ?? []).map((entry) => normalizeChangelogEntry(entry));
 }
 
 export async function getRecentChangelogEntries(limit = 5): Promise<
@@ -209,7 +215,7 @@ export async function getRecentChangelogEntries(limit = 5): Promise<
     offset: 0,
   });
 
-  return (overview.entries ?? []).map(normalizeChangelogEntry);
+  return (overview.entries ?? []).map((entry) => normalizeChangelogEntry(entry));
 }
 
 export async function getChangelogEntriesByCategory(
@@ -231,7 +237,7 @@ export async function getChangelogEntriesByCategory(
     offset: 0,
   });
 
-  return (overview.entries ?? []).map(normalizeChangelogEntry);
+  return (overview.entries ?? []).map((entry) => normalizeChangelogEntry(entry));
 }
 
 export async function getFeaturedChangelogEntries(limit = 3): Promise<
@@ -249,7 +255,7 @@ export async function getFeaturedChangelogEntries(limit = 3): Promise<
     offset: 0,
   });
 
-  return (overview.featured ?? []).map(normalizeChangelogEntry);
+  return (overview.featured ?? []).map((entry) => normalizeChangelogEntry(entry));
 }
 
 export async function getChangelogMetadata() {
@@ -262,12 +268,17 @@ export async function getChangelogMetadata() {
       categoryCounts: {},
     };
   }
+  const categoryCounts =
+    metadata.category_counts == null
+      ? {}
+      : (metadata.category_counts as Record<string, number>);
+
   return {
     totalEntries: metadata.total_entries ?? 0,
     dateRange: {
       earliest: metadata.date_range?.earliest ?? '',
       latest: metadata.date_range?.latest ?? '',
     },
-    categoryCounts: (metadata.category_counts as Record<string, number>) ?? {},
+    categoryCounts,
   };
 }

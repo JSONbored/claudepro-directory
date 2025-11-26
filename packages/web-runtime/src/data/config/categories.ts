@@ -1,6 +1,7 @@
 import 'server-only';
 
 import type { Database } from '@heyclaude/database-types';
+
 import { isBuildTime } from '../../build-time.ts';
 // Lazy import feature flags to avoid module-level server-only code execution
 // import { getHomepageConfig } from '../../actions/feature-flags.ts';
@@ -24,12 +25,9 @@ export async function getHomepageFeaturedCategories(): Promise<
     const { getHomepageConfigBundle } = await import('../../actions/feature-flags.ts');
     const bundle = await getHomepageConfigBundle();
     const config = bundle.homepageConfig;
-    if (!config) {
-      return [];
-    }
 
     const categories = Array.isArray(config['homepage.featured_categories'])
-      ? config['homepage.featured_categories'].filter(isValidCategoryValue)
+      ? config['homepage.featured_categories'].filter((value) => isValidCategoryValue(value))
       : [];
 
     return categories as readonly Database['public']['Enums']['content_category'][];
@@ -49,12 +47,9 @@ export async function getHomepageTabCategories(): Promise<readonly string[]> {
     const { getHomepageConfigBundle } = await import('../../actions/feature-flags.ts');
     const bundle = await getHomepageConfigBundle();
     const config = bundle.homepageConfig;
-    if (!config) {
-      return [];
-    }
 
     const categories = config['homepage.tab_categories'];
-    return Array.isArray(categories) ? categories.map((value) => String(value)) : [];
+    return Array.isArray(categories) ? categories.map(String) : [];
   } catch {
     return [];
   }

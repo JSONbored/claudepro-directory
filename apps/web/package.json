@@ -7,9 +7,8 @@
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
-    "lint": "pnpm lint:ultracite",
-    "lint:ultracite": "ultracite check",
-    "format": "ultracite fix",
+    "lint": "eslint --config ../../config/tools/eslint.config.mjs .",
+    "format": "eslint --config ../../config/tools/eslint.config.mjs . --fix",
     "type-check": "tsc --noEmit"
   },
   "dependencies": {

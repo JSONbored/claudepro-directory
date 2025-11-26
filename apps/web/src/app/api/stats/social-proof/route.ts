@@ -13,6 +13,7 @@
 export const runtime = 'nodejs';
 export const revalidate = 300;
 
+import { Constants } from '@heyclaude/database-types';
 import {
   createWebAppContextWithId,
   generateRequestId,
@@ -58,13 +59,25 @@ export async function GET() {
     ]);
 
     // Extract results and handle errors
-    const recentSubmissions = recentResult.status === 'fulfilled' ? recentResult.value.data : null;
-    const submissionsError =
-      recentResult.status === 'rejected'
-        ? recentResult.reason
-        : recentResult.status === 'fulfilled'
-          ? recentResult.value.error || null
-          : null;
+    interface SubmissionRow {
+      id: string;
+      status: string;
+      created_at: string;
+      author: string | null;
+    }
+    interface StatusRow {
+      status: string;
+    }
+
+    let recentSubmissions: SubmissionRow[] | null = null;
+    let submissionsError: unknown = null;
+    if (recentResult.status === 'fulfilled') {
+      const response = recentResult.value as { data: SubmissionRow[] | null; error: unknown };
+      recentSubmissions = response.data;
+      submissionsError = response.error ?? null;
+    } else {
+      submissionsError = recentResult.reason;
+    }
 
     if (submissionsError) {
       const normalized = normalizeError(submissionsError, 'Failed to fetch recent submissions');
@@ -74,13 +87,15 @@ export async function GET() {
       });
     }
 
-    const monthSubmissions = monthResult.status === 'fulfilled' ? monthResult.value.data : null;
-    const monthError =
-      monthResult.status === 'rejected'
-        ? monthResult.reason
-        : monthResult.status === 'fulfilled'
-          ? monthResult.value.error || null
-          : null;
+    let monthSubmissions: StatusRow[] | null = null;
+    let monthError: unknown = null;
+    if (monthResult.status === 'fulfilled') {
+      const response = monthResult.value as { data: StatusRow[] | null; error: unknown };
+      monthSubmissions = response.data;
+      monthError = response.error ?? null;
+    } else {
+      monthError = monthResult.reason;
+    }
 
     if (monthError) {
       const normalized = normalizeError(monthError, 'Failed to fetch month submissions');
@@ -90,13 +105,15 @@ export async function GET() {
       });
     }
 
-    const contentCount = contentResult.status === 'fulfilled' ? contentResult.value.count : null;
-    const contentError =
-      contentResult.status === 'rejected'
-        ? contentResult.reason
-        : contentResult.status === 'fulfilled'
-          ? contentResult.value.error || null
-          : null;
+    let contentCount: number | null = null;
+    let contentError: unknown = null;
+    if (contentResult.status === 'fulfilled') {
+      const response = contentResult.value as { count: number | null; error: unknown };
+      contentCount = response.count;
+      contentError = response.error ?? null;
+    } else {
+      contentError = contentResult.reason;
+    }
 
     if (contentError) {
       const normalized = normalizeError(contentError, 'Failed to fetch content count');
@@ -106,9 +123,12 @@ export async function GET() {
       });
     }
 
-    const submissionCount = recentSubmissions?.length || 0;
-    const total = monthSubmissions?.length || 0;
-    const approved = monthSubmissions?.filter((s) => s.status === 'merged').length || 0;
+    const submissionCount = recentSubmissions?.length ?? 0;
+    const total = monthSubmissions?.length ?? 0;
+    const approved =
+      monthSubmissions?.filter(
+        (s) => s.status === Constants.public.Enums.submission_status[4] // 'merged'
+      ).length ?? 0;
     const successRate = total > 0 ? Math.round((approved / total) * 100) : null;
 
     // Get top contributors this week (unique authors with most submissions)
@@ -116,20 +136,20 @@ export async function GET() {
     if (recentSubmissions) {
       for (const sub of recentSubmissions) {
         if (sub.author) {
-          contributorCounts.set(sub.author, (contributorCounts.get(sub.author) || 0) + 1);
+          contributorCounts.set(sub.author, (contributorCounts.get(sub.author) ?? 0) + 1);
         }
       }
     }
 
-    const topContributors = Array.from(contributorCounts.entries())
-      .sort((a, b) => b[1] - a[1])
+    const topContributors = [...contributorCounts.entries()]
+      .toSorted((a, b) => b[1] - a[1])
       .slice(0, 5)
       .map(([name]) => {
         // Defensively extract username: handle both email and non-email formats
         const atIndex = name.indexOf('@');
         if (atIndex !== -1) {
           // Email format: extract username part before '@'
-          return name.substring(0, atIndex);
+          return name.slice(0, Math.max(0, atIndex));
         }
         // Non-email format: return trimmed original name
         return name.trim();

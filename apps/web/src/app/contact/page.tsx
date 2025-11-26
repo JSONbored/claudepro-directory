@@ -8,6 +8,7 @@ import { generatePageMetadata } from '@heyclaude/web-runtime/data';
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
 import { DiscordIcon, Github, Mail, MessageSquare } from '@heyclaude/web-runtime/icons';
 import type { Metadata } from 'next';
+
 import { NavLink } from '@/src/components/core/navigation/navigation-link';
 import { ContactTerminal } from '@/src/components/features/contact/contact-terminal';
 import { ContactTerminalErrorBoundary } from '@/src/components/features/contact/contact-terminal-error-boundary';
@@ -27,9 +28,9 @@ export async function generateMetadata(): Promise<Metadata> {
  *
  * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic
  */
-export const revalidate = 86400;
+export const revalidate = 86_400;
 
-export default async function ContactPage() {
+export default function ContactPage() {
   // Generate single requestId for this page request
   const requestId = generateRequestId();
   const logContext = createWebAppContextWithId(requestId, '/contact', 'ContactPage');
@@ -59,6 +60,7 @@ export default async function ContactPage() {
 
   // Feature flags are server/middleware only - use default for static generation
   // Terminal feature should be evaluated in middleware, not in page components
+   
   const terminalEnabled = false; // Default for static generation
 
   return (
@@ -66,6 +68,7 @@ export default async function ContactPage() {
       <div className="mb-8 text-center">
         <h1 className="mb-4 font-bold text-3xl sm:text-4xl">Contact Us</h1>
         <p className="text-lg text-muted-foreground">
+          {/* eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- Feature flag placeholder */}
           {terminalEnabled
             ? 'Use our interactive terminal to get in touch, or choose an option below.'
             : "We'd love to hear from you. Choose the best way to reach us below."}
@@ -73,6 +76,7 @@ export default async function ContactPage() {
       </div>
 
       {/* Interactive Terminal (Feature Flagged) */}
+      {/* eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- Feature flag placeholder */}
       {terminalEnabled && (
         <div className="mb-12 flex justify-center">
           <div className="w-full max-w-4xl">
@@ -84,8 +88,10 @@ export default async function ContactPage() {
       )}
 
       {/* Traditional Contact Options */}
+      {/* eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- Feature flag placeholder */}
       <div className={terminalEnabled ? 'mt-12' : ''}>
         <h2 className="mb-6 text-center font-semibold text-2xl">
+          {/* eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- Feature flag placeholder */}
           {terminalEnabled ? 'Or reach us directly:' : 'Get in Touch'}
         </h2>
 

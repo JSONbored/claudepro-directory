@@ -1,7 +1,13 @@
 'use client';
 
-import { logger, normalizeError } from '@heyclaude/web-runtime/core';
+import {
+  createWebAppContextWithId,
+  generateRequestId,
+  logger,
+  normalizeError,
+} from '@heyclaude/web-runtime/core';
 import { useEffect } from 'react';
+
 import { SegmentErrorFallback } from '@/src/components/core/infra/segment-error-fallback';
 
 export default function UserSegmentError({
@@ -12,11 +18,16 @@ export default function UserSegmentError({
   reset: () => void;
 }) {
   useEffect(() => {
+    const requestId = generateRequestId();
+    const route = globalThis.window.location.pathname;
     const normalized = normalizeError(error, 'User profile route rendering failed');
-    logger.error('UserSegmentErrorBoundary: /u segment crashed', normalized, {
+    const logContext = createWebAppContextWithId(requestId, route, 'UserSegmentErrorBoundary', {
       segment: 'user-profile',
-      ...(error.digest && { digest: error.digest }),
+      ...(error.digest ? { digest: error.digest } : {}),
+      userAgent: globalThis.navigator.userAgent,
+      url: globalThis.location.href,
     });
+    logger.error('User segment error boundary triggered', normalized, logContext);
   }, [error]);
 
   return (

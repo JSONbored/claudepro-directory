@@ -11,6 +11,7 @@ import {
   hashUserId,
   logger,
   normalizeError,
+  withDuration,
 } from '@heyclaude/web-runtime/core';
 import {
   generatePageMetadata,
@@ -31,6 +32,7 @@ import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
+
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { Button } from '@/src/components/primitives/ui/button';
 import {
@@ -70,6 +72,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function CompaniesPage() {
+  const startTime = Date.now();
   // Generate single requestId for this page request
   const requestId = generateRequestId();
   const baseLogContext = createWebAppContextWithId(
@@ -78,13 +81,23 @@ export default async function CompaniesPage() {
     'CompaniesPage'
   );
 
+  // Section: Authentication
+  const authSectionStart = Date.now();
   const { user } = await getAuthenticatedUser({ context: 'CompaniesPage' });
 
   if (!user) {
-    logger.warn('CompaniesPage: unauthenticated access attempt detected', undefined, {
-      ...baseLogContext,
-      timestamp: new Date().toISOString(),
-    });
+    logger.warn(
+      'CompaniesPage: unauthenticated access attempt detected',
+      undefined,
+      withDuration(
+        {
+          ...baseLogContext,
+          section: 'authentication',
+          timestamp: new Date().toISOString(),
+        },
+        authSectionStart
+      )
+    );
     return (
       <div className="space-y-6">
         <Card>
@@ -105,7 +118,19 @@ export default async function CompaniesPage() {
   // Hash user ID for privacy-compliant logging (GDPR/CCPA)
   const hashedUserId = hashUserId(user.id);
   const logContext = { ...baseLogContext, userIdHash: hashedUserId };
+  logger.info(
+    'CompaniesPage: authentication successful',
+    withDuration(
+      {
+        ...logContext,
+        section: 'authentication',
+      },
+      authSectionStart
+    )
+  );
 
+  // Section: Companies Data Fetch
+  const companiesSectionStart = Date.now();
   let companies: Database['public']['Functions']['get_user_companies']['Returns']['companies'] = [];
   let hasError = false;
 
@@ -115,13 +140,46 @@ export default async function CompaniesPage() {
 
     if (data) {
       companies = data.companies ?? [];
+      logger.info(
+        'CompaniesPage: companies data loaded',
+        withDuration(
+          {
+            ...logContext,
+            section: 'companies-data-fetch',
+            companiesCount: companies.length,
+          },
+          companiesSectionStart
+        )
+      );
     } else {
-      logger.warn('CompaniesPage: getUserCompanies returned null', undefined, logContext);
+      logger.warn(
+        'CompaniesPage: getUserCompanies returned null',
+        undefined,
+        withDuration(
+          {
+            ...logContext,
+            section: 'companies-data-fetch',
+            sectionDuration_ms: Date.now() - companiesSectionStart,
+          },
+          startTime
+        )
+      );
       hasError = true;
     }
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to fetch user companies');
-    logger.error('CompaniesPage: getUserCompanies threw', normalized, logContext);
+    logger.error(
+      'CompaniesPage: getUserCompanies threw',
+      normalized,
+      withDuration(
+        {
+          ...logContext,
+          section: 'companies-data-fetch',
+          sectionDuration_ms: Date.now() - companiesSectionStart,
+        },
+        startTime
+      )
+    );
     hasError = true;
   }
 
@@ -146,8 +204,30 @@ export default async function CompaniesPage() {
   }
 
   if (companies.length === 0) {
-    logger.info('CompaniesPage: user has no companies', logContext);
+    logger.info(
+      'CompaniesPage: user has no companies',
+      withDuration(
+        {
+          ...logContext,
+          section: 'companies-data-fetch',
+        },
+        companiesSectionStart
+      )
+    );
   }
+
+  // Final summary log
+  logger.info(
+    'CompaniesPage: page render completed',
+    withDuration(
+      {
+        ...logContext,
+        section: 'page-render',
+        companiesCount: companies.length,
+      },
+      startTime
+    )
+  );
 
   return (
     <div className="space-y-6">
@@ -185,7 +265,7 @@ export default async function CompaniesPage() {
       ) : (
         <div className="grid gap-4">
           {companies
-            ?.filter(
+            .filter(
               (
                 company
               ): company is NonNullable<typeof company> & {
@@ -193,7 +273,6 @@ export default async function CompaniesPage() {
                 name: string;
                 slug: string;
               } =>
-                company !== null &&
                 company.id !== null &&
                 company.name !== null &&
                 company.slug !== null
@@ -257,7 +336,7 @@ export default async function CompaniesPage() {
                             )}
                           </div>
                           <CardDescription className="mt-1">
-                            {company.description || 'No description provided'}
+                            {company.description ?? 'No description provided'}
                           </CardDescription>
                           {(() => {
                             const website = company.website;
@@ -288,7 +367,7 @@ export default async function CompaniesPage() {
                               // Safe display text: hostname + pathname (no query/fragment)
                               // Pathname is already URL-encoded by the URL constructor, so it's safe
                               displayText =
-                                parsed.hostname + (parsed.pathname !== '/' ? parsed.pathname : '');
+                                parsed.hostname + (parsed.pathname === '/' ? '' : parsed.pathname);
                             } catch {
                               // If parsing fails, don't render the link
                               return null;
@@ -319,12 +398,12 @@ export default async function CompaniesPage() {
                     <div className={'mb-4 flex flex-wrap gap-4 text-muted-foreground text-sm'}>
                       <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
                         <Briefcase className="h-4 w-4" />
-                        {company.stats?.active_jobs || 0} active job
-                        {(company.stats?.active_jobs || 0) !== 1 ? 's' : ''}
+                        {company.stats?.active_jobs ?? 0} active job
+                        {(company.stats?.active_jobs ?? 0) === 1 ? '' : 's'}
                       </div>
                       <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
                         <Eye className="h-4 w-4" />
-                        {(company.stats?.total_views || 0).toLocaleString()} views
+                        {(company.stats?.total_views ?? 0).toLocaleString()} views
                       </div>
                       {company.stats?.latest_job_posted_at && (
                         <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
@@ -343,7 +422,7 @@ export default async function CompaniesPage() {
                       </Button>
 
                       <Button variant="ghost" size="sm" asChild={true}>
-                        <Link href={`/companies/${company.slug ?? ''}`}>
+                        <Link href={`/companies/${company.slug}`}>
                           <ExternalLink className="mr-1 h-3 w-3" />
                           View Profile
                         </Link>

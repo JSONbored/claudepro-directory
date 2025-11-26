@@ -3,12 +3,14 @@
  * Single RPC call to filter_jobs() - all filtering in PostgreSQL
  */
 
+import { Constants } from '@heyclaude/database-types';
 import {
   createWebAppContextWithId,
   generateRequestId,
   type JobsFilterResult,
   logger,
   normalizeError,
+  withDuration,
 } from '@heyclaude/web-runtime/core';
 import { generatePageMetadata, getFilteredJobs } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
@@ -27,6 +29,7 @@ import type { Metadata } from 'next';
 import dynamicImport from 'next/dynamic';
 import Link from 'next/link';
 import { Suspense } from 'react';
+
 import { UnifiedBadge } from '@/src/components/core/domain/badges/category-badge';
 import { JobCard } from '@/src/components/core/domain/cards/job-card';
 import { JobAlertsCard } from '@/src/components/core/domain/jobs/job-alerts-card';
@@ -56,8 +59,8 @@ export const dynamic = 'force-dynamic';
 
 const NewsletterCTAVariant = dynamicImport(
   () =>
-    import('@/src/components/features/growth/newsletter/newsletter-cta-variants').then((mod) => ({
-      default: mod.NewsletterCTAVariant,
+    import('@/src/components/features/growth/newsletter/newsletter-cta-variants').then((module_) => ({
+      default: module_.NewsletterCTAVariant,
     })),
   {
     loading: () => <div className="h-32 animate-pulse rounded-lg bg-muted/20" />,
@@ -76,11 +79,11 @@ export const revalidate = 900;
 export async function generateMetadata({
   searchParams,
 }: PagePropsWithSearchParams): Promise<Metadata> {
-  const rawParams = await searchParams;
+  const rawParameters = await searchParams;
   return generatePageMetadata('/jobs', {
     filters: {
-      category: rawParams?.['category'] as string | undefined,
-      remote: rawParams?.['remote'] === 'true',
+      category: rawParameters?.['category'] as string | undefined,
+      remote: rawParameters?.['remote'] === 'true',
     },
   });
 }
@@ -107,11 +110,12 @@ async function JobsListSection({
   offset: number;
   logContext: ReturnType<typeof createWebAppContextWithId>;
 }) {
+   
   const hasFilters = Boolean(
-    searchQuery ||
-      (category && category !== 'all') ||
-      (employment && employment !== 'any') ||
-      (experience && experience !== 'any') ||
+    (searchQuery ?? false) ||
+      (category ?? '') !== 'all' ||
+      (employment ?? '') !== 'any' ||
+      (experience ?? '') !== 'any' ||
       remote !== undefined
   );
 
@@ -126,7 +130,7 @@ async function JobsListSection({
         ...(category ? { category } : {}),
         ...(employment ? { employment } : {}),
         ...(experience ? { experience } : {}),
-        ...(remote !== undefined ? { remote } : {}),
+        ...(remote === undefined ? {} : { remote }),
         sort,
         limit,
         offset,
@@ -138,9 +142,9 @@ async function JobsListSection({
     logger.error('JobsPage: getFilteredJobs failed', normalized, {
       ...logContext,
       hasSearch: Boolean(searchQuery),
-      category: category || 'all',
-      employment: employment || 'any',
-      experience: experience || 'any',
+      category: category ?? 'all',
+      employment: employment ?? 'any',
+      experience: experience ?? 'any',
       remote: Boolean(remote),
       sort,
       limit,
@@ -217,48 +221,64 @@ async function JobsListSection({
 }
 
 export default async function JobsPage({ searchParams }: PagePropsWithSearchParams) {
+  const startTime = Date.now();
   // Generate single requestId for this page request
   const requestId = generateRequestId();
   const baseLogContext = createWebAppContextWithId(requestId, '/jobs', 'JobsPage');
 
-  const rawParams = await searchParams;
+  // Section: Parameter Parsing
+  const parameterParsingSectionStart = Date.now();
+  const rawParameters = (await searchParams) ?? {};
 
   const searchQuery =
-    (rawParams?.['q'] as string) ||
-    (rawParams?.['query'] as string) ||
-    (rawParams?.['search'] as string);
-  const category = rawParams?.['category'] as string | undefined;
-  const employment = rawParams?.['employment'] as string | undefined;
-  const experience = rawParams?.['experience'] as string | undefined;
-  const remote = rawParams?.['remote'] === 'true' ? true : undefined;
-  const sortParam = (rawParams?.['sort'] as string | undefined)?.toLowerCase();
-  const sort: SortOption = SORT_VALUES.has(sortParam as SortOption)
-    ? (sortParam as SortOption)
+    (rawParameters['q'] as string | undefined) ??
+    (rawParameters['query'] as string | undefined) ??
+    (rawParameters['search'] as string | undefined);
+  const category = rawParameters['category'] as string | undefined;
+  const employment = rawParameters['employment'] as string | undefined;
+  const experience = rawParameters['experience'] as string | undefined;
+  const remote = rawParameters['remote'] === 'true' ? true : undefined;
+  const sortParameter = (rawParameters['sort'] as string | undefined)?.toLowerCase();
+  const sort: SortOption = SORT_VALUES.has(sortParameter as SortOption)
+    ? (sortParameter as SortOption)
     : 'newest';
-  const page = Math.max(1, Math.min(Number(rawParams?.['page']) || 1, 10000));
-  const limit = Math.min(Number(rawParams?.['limit']) || 20, 100);
+  const pageParameter = rawParameters['page'];
+  const limitParameter = rawParameters['limit'];
+  const page = Math.max(1, Math.min(Number(pageParameter) || 1, 10_000));
+  const limit = Math.min(Number(limitParameter) || 20, 100);
   const offset = (page - 1) * limit;
 
   logger.info('Jobs page accessed', {
-    ...baseLogContext,
-    searchQuery: searchQuery || 'none',
-    category: category || 'all',
-    employment: employment || 'any',
+    ...withDuration(baseLogContext, startTime),
+    requestId,
+    operation: 'JobsPage',
+    section: 'parameter-parsing',
+    sectionDuration_ms: Date.now() - parameterParsingSectionStart,
+    searchQuery: searchQuery ?? 'none',
+    category: category ?? 'all',
+    employment: employment ?? 'any',
     remote: Boolean(remote),
-    experience: experience || 'any',
+    experience: experience ?? 'any',
     sort,
     page,
     limit,
   });
 
-  // Get total count for hero (cached, no filters)
+  // Section: Total Jobs Count Fetch
+  const totalCountSectionStart = Date.now();
   let totalJobs = 0;
   try {
     const totalResponse = await getFilteredJobs({ limit: 1, offset: 0 }, false);
     totalJobs = totalResponse?.total_count ?? 0;
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load jobs total count');
-    logger.error('JobsPage: getFilteredJobs for total count failed', normalized, baseLogContext);
+    logger.error('JobsPage: getFilteredJobs for total count failed', normalized, {
+      ...withDuration(baseLogContext, startTime),
+      requestId,
+      operation: 'JobsPage',
+      section: 'total-count-fetch',
+      sectionDuration_ms: Date.now() - totalCountSectionStart,
+    });
   }
 
   const baseId = 'jobs-page';
@@ -268,27 +288,28 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
   const experienceFilterId = `${baseId}-experience`;
   const sortFilterId = `${baseId}-sort`;
 
-  const buildFilterUrl = (newParams: Record<string, string | boolean | undefined>) => {
-    const urlParams = new URLSearchParams();
+  const buildFilterUrl = (newParameters: Record<string, string | boolean | undefined>) => {
+    const urlParameters = new URLSearchParams();
 
-    const currentParams: Record<string, string | undefined> = {
-      search: searchQuery,
-      category: category !== 'all' ? category : undefined,
-      employment: employment !== 'any' ? employment : undefined,
-      experience: experience !== 'any' ? experience : undefined,
+    const currentParameters: Record<string, string | undefined> = {
+      search: searchQuery ?? undefined,
+      category: category === 'all' ? undefined : category,
+      employment: employment === 'any' ? undefined : employment,
+      experience: experience === 'any' ? undefined : experience,
       remote: remote ? 'true' : undefined,
-      sort: sort !== 'newest' ? sort : undefined,
+      sort: sort === 'newest' ? undefined : sort,
     };
 
-    const merged = { ...currentParams, ...newParams };
+    const merged = { ...currentParameters, ...newParameters };
 
     for (const [key, value] of Object.entries(merged)) {
-      if (value !== undefined && value !== null && value !== '') {
-        urlParams.set(key, String(value));
+      if (value) {
+        urlParameters.set(key, String(value));
       }
     }
 
-    return `/jobs${urlParams.toString() ? `?${urlParams.toString()}` : ''}`;
+    const queryString = urlParameters.toString();
+    return `/jobs${queryString ? `?${queryString}` : ''}`;
   };
 
   return (
@@ -332,7 +353,7 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
         </div>
       </section>
 
-      {(totalJobs || 0) > 0 && (
+      {totalJobs > 0 && (
         <section className={'px-4 pb-8'}>
           <div className={'container mx-auto'}>
             <Card className="card-gradient glow-effect">
@@ -346,12 +367,12 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
                       id={searchInputId}
                       name="search"
                       placeholder="Search jobs, companies, or skills..."
-                      defaultValue={searchQuery || ''}
+                      defaultValue={searchQuery ?? ''}
                       className="pl-10"
                     />
                   </div>
 
-                  <Select name="category" defaultValue={category || 'all'}>
+                  <Select name="category" defaultValue={category ?? 'all'}>
                     <SelectTrigger id={categoryFilterId} aria-label="Filter jobs by category">
                       <Filter className={'mr-2 h-4 w-4'} />
                       <SelectValue placeholder="Category" />
@@ -374,7 +395,7 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
                     </SelectContent>
                   </Select>
 
-                  <Select name="employment" defaultValue={employment || 'any'}>
+                  <Select name="employment" defaultValue={employment ?? 'any'}>
                     <SelectTrigger
                       id={employmentFilterId}
                       aria-label="Filter jobs by employment type"
@@ -384,10 +405,10 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="any">All Types</SelectItem>
-                      <SelectItem value="fulltime">Full Time</SelectItem>
-                      <SelectItem value="parttime">Part Time</SelectItem>
-                      <SelectItem value="contract">Contract</SelectItem>
-                      <SelectItem value="freelance">Freelance</SelectItem>
+                      <SelectItem value={Constants.public.Enums.job_type[0]}>Full Time</SelectItem>
+                      <SelectItem value={Constants.public.Enums.job_type[1]}>Part Time</SelectItem>
+                      <SelectItem value={Constants.public.Enums.job_type[2]}>Contract</SelectItem>
+                      <SelectItem value={Constants.public.Enums.job_type[3]}>Freelance</SelectItem>
                     </SelectContent>
                   </Select>
 
@@ -412,7 +433,7 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
                     </Button>
                   </div>
 
-                  <Select name="experience" defaultValue={experience || 'any'}>
+                  <Select name="experience" defaultValue={experience ?? 'any'}>
                     <SelectTrigger
                       id={experienceFilterId}
                       aria-label="Filter jobs by experience level"
@@ -422,9 +443,15 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="any">All Levels</SelectItem>
-                      <SelectItem value="beginner">Entry level</SelectItem>
-                      <SelectItem value="intermediate">Mid level</SelectItem>
-                      <SelectItem value="advanced">Senior level</SelectItem>
+                      <SelectItem value={Constants.public.Enums.experience_level[0]}>
+                        Entry level
+                      </SelectItem>
+                      <SelectItem value={Constants.public.Enums.experience_level[1]}>
+                        Mid level
+                      </SelectItem>
+                      <SelectItem value={Constants.public.Enums.experience_level[2]}>
+                        Senior level
+                      </SelectItem>
                     </SelectContent>
                   </Select>
 
@@ -442,10 +469,11 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
                   <input type="hidden" name="page" value="1" />
                 </form>
 
-                {(searchQuery ||
-                  (category && category !== 'all') ||
-                  (employment && employment !== 'any') ||
-                  (experience && experience !== 'any') ||
+                { }
+                {((searchQuery ?? '') !== '' ||
+                  (category ?? '') !== 'all' ||
+                  (employment ?? '') !== 'any' ||
+                  (experience ?? '') !== 'any' ||
                   sort !== 'newest' ||
                   remote) && (
                   <div className={`${UI_CLASSES.FLEX_WRAP_GAP_2} mt-4 border-border border-t pt-4`}>
@@ -489,11 +517,11 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
                     )}
                     {experience && experience !== 'any' && (
                       <UnifiedBadge variant="base" style="secondary">
-                        {experience === 'beginner'
+                        {experience === Constants.public.Enums.experience_level[0]
                           ? 'Entry level'
-                          : experience === 'intermediate'
+                          : (experience === Constants.public.Enums.experience_level[1]
                             ? 'Mid level'
-                            : 'Senior level'}
+                            : 'Senior level')}
                         <Link
                           href={buildFilterUrl({ experience: undefined })}
                           className="ml-1 hover:text-destructive"
@@ -577,8 +605,8 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
           <aside className="w-full space-y-6 lg:sticky lg:top-24 lg:h-fit">
             <JobsPromo />
             <JobAlertsCard
-              defaultCategory={category || 'all'}
-              defaultExperience={experience || 'any'}
+              defaultCategory={category ?? 'all'}
+              defaultExperience={experience ?? 'any'}
               defaultRemote={remote ? 'remote' : 'any'}
             />
           </aside>
@@ -599,7 +627,7 @@ function applyJobSorting(jobs: JobsFilterResult['jobs'], sort: SortOption) {
   if (!(jobs && Array.isArray(jobs))) return [];
   const clone = [...jobs];
   if (sort === 'oldest') {
-    return clone.sort((a, b) => {
+    return clone.toSorted((a, b) => {
       const aDate = a.posted_at ? new Date(a.posted_at).getTime() : 0;
       const bDate = b.posted_at ? new Date(b.posted_at).getTime() : 0;
       return aDate - bDate;
@@ -607,7 +635,7 @@ function applyJobSorting(jobs: JobsFilterResult['jobs'], sort: SortOption) {
   }
 
   if (sort === 'salary') {
-    return clone.sort((a, b) => {
+    return clone.toSorted((a, b) => {
       const aMax = extractSalaryValue(a.salary);
       const bMax = extractSalaryValue(b.salary);
       return bMax - aMax;
@@ -615,7 +643,7 @@ function applyJobSorting(jobs: JobsFilterResult['jobs'], sort: SortOption) {
   }
 
   // newest default
-  return clone.sort((a, b) => {
+  return clone.toSorted((a, b) => {
     const aDate = a.posted_at ? new Date(a.posted_at).getTime() : 0;
     const bDate = b.posted_at ? new Date(b.posted_at).getTime() : 0;
     return bDate - aDate;
@@ -624,7 +652,7 @@ function applyJobSorting(jobs: JobsFilterResult['jobs'], sort: SortOption) {
 
 function extractSalaryValue(raw: string | null | undefined) {
   if (!raw) return 0;
-  const match = raw.replace(/,/g, '').match(/(\d{2,6})(?:\s?-\s?(\d{2,6}))?/);
+  const match = raw.replaceAll(',', '').match(/(\d{2,6})(?:\s?-\s?(\d{2,6}))?/);
   if (!match) return 0;
   const first = Number(match[1]) || 0;
   const second = match[2] ? Number(match[2]) : first;

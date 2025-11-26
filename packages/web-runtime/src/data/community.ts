@@ -1,14 +1,15 @@
 'use server';
 
-import type { Database } from '@heyclaude/database-types';
+import { CommunityService } from '@heyclaude/data-layer';
+import { Constants, type Database } from '@heyclaude/database-types';
+
+import { fetchCached } from '../cache/fetch-cached.ts';
 import {
   logger,
   normalizeError,
   pulseUserSearch,
   searchUsersUnified,
 } from '../index.ts';
-import { fetchCached } from '../cache/fetch-cached.ts';
-import { CommunityService } from '@heyclaude/data-layer';
 import { generateRequestId } from '../utils/request-context.ts';
 
 const DEFAULT_DIRECTORY_LIMIT = 100;
@@ -38,16 +39,7 @@ export async function getCommunityDirectory(options: {
       );
 
       const allUsers: Database['public']['CompositeTypes']['community_directory_user'][] =
-        unifiedResults
-          .filter(
-            (
-              result
-            ): result is typeof result & {
-              slug: string;
-              created_at: string;
-            } => result.slug != null && result.created_at != null
-          )
-          .map((result) => ({
+        unifiedResults.map((result) => ({
             id: result.id,
             slug: result.slug,
             name: result.title || result.slug || '',
@@ -73,7 +65,18 @@ export async function getCommunityDirectory(options: {
         new_members: [],
       };
     } catch (error) {
-      // trackPerformance already logs the error with performance metrics
+      // trackPerformance already logs the error, but we log again with context about fallback behavior
+      const normalized = normalizeError(error, 'Community directory search failed, falling back to RPC');
+      const fallbackRequestId = generateRequestId();
+      logger.warn('Community directory search failed, using RPC fallback', undefined, {
+        requestId: fallbackRequestId,
+        operation: 'getCommunityDirectory-fallback',
+        route: '/data/community',
+        searchQuery: searchQuery.trim(),
+        limit,
+        errorMessage: normalized.message,
+        fallbackStrategy: 'rpc',
+      });
       // Fall through to RPC fallback
     }
   }
@@ -145,7 +148,7 @@ export async function getPublicCollectionDetail(input: {
         keyParts: viewerId
           ? ['collection-detail', userSlug, collectionSlug, 'viewer', viewerId]
           : ['collection-detail', userSlug, collectionSlug],
-        tags: ['collections', `collection-${collectionSlug}`, `user-${userSlug}`],
+        tags: [Constants.public.Enums.content_category[7] as string, `collection-${collectionSlug}`, `user-${userSlug}`], // 'collections'
         ttlKey: 'cache.content_list.ttl_seconds',
         useAuth: true,
         fallback: null,

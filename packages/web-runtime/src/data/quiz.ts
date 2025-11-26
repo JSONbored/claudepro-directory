@@ -1,8 +1,9 @@
 'use server';
 
-import type { Database } from '@heyclaude/database-types';
-import { fetchCached } from '../cache/fetch-cached.ts';
 import { QuizService } from '@heyclaude/data-layer';
+import type { Database } from '@heyclaude/database-types';
+
+import { fetchCached } from '../cache/fetch-cached.ts';
 
 export type QuizConfigurationResult =
   Database['public']['Functions']['get_quiz_configuration']['Returns'];

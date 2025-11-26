@@ -1,5 +1,29 @@
+
+/**
+ * Settings Page - User profile and account management.
+ */
+
+import type { Database } from '@heyclaude/database-types';
+import { ensureUserRecord } from '@heyclaude/web-runtime/actions';
+import {
+  createWebAppContextWithId,
+  generateRequestId,
+  hashUserId,
+  logger,
+  normalizeError,
+  withDuration,
+} from '@heyclaude/web-runtime/core';
+import {
+  generatePageMetadata,
+  getAuthenticatedUser,
+  getUserSettings,
+} from '@heyclaude/web-runtime/data';
+import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
+import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
+import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
+
 import {
   ProfileEditForm,
   RefreshProfileButton,
@@ -14,28 +38,6 @@ import {
 } from '@/src/components/primitives/ui/card';
 
 /**
- * Settings Page - User profile and account management.
- */
-
-import type { Database } from '@heyclaude/database-types';
-import { ensureUserRecord } from '@heyclaude/web-runtime/actions';
-import {
-  createWebAppContextWithId,
-  generateRequestId,
-  hashUserId,
-  logger,
-  normalizeError,
-} from '@heyclaude/web-runtime/core';
-import {
-  generatePageMetadata,
-  getAuthenticatedUser,
-  getUserSettings,
-} from '@heyclaude/web-runtime/data';
-import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
-import { UI_CLASSES } from '@heyclaude/web-runtime/ui';
-import type { Metadata } from 'next';
-
-/**
  * Dynamic Rendering Required
  * Authenticated user settings
  */
@@ -47,15 +49,22 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function SettingsPage() {
+  const startTime = Date.now();
   // Generate single requestId for this page request
   const requestId = generateRequestId();
   const baseLogContext = createWebAppContextWithId(requestId, '/account/settings', 'SettingsPage');
 
+  // Section: Authentication
+  const authSectionStart = Date.now();
   const { user } = await getAuthenticatedUser({ context: 'SettingsPage' });
 
   if (!user) {
     logger.warn('SettingsPage: unauthenticated access attempt', undefined, {
-      ...baseLogContext,
+      ...withDuration(baseLogContext, startTime),
+      requestId,
+      operation: 'SettingsPage',
+      section: 'authentication',
+      sectionDuration_ms: Date.now() - authSectionStart,
       timestamp: new Date().toISOString(),
     });
     return (
@@ -78,15 +87,29 @@ export default async function SettingsPage() {
   const hashedUserId = hashUserId(user.id);
   const logContext = { ...baseLogContext, userIdHash: hashedUserId };
 
+  // Section: Settings Data Fetch
+  const settingsSectionStart = Date.now();
   let settingsData: Database['public']['Functions']['get_user_settings']['Returns'] | null = null;
   try {
     settingsData = await getUserSettings(user.id);
     if (!settingsData) {
-      logger.warn('SettingsPage: getUserSettings returned null', undefined, logContext);
+      logger.warn('SettingsPage: getUserSettings returned null', undefined, {
+        ...withDuration(logContext, startTime),
+        requestId,
+        operation: 'SettingsPage',
+        section: 'settings-data-fetch',
+        sectionDuration_ms: Date.now() - settingsSectionStart,
+      });
     }
   } catch (error) {
     const normalized = normalizeError(error, 'Failed to load user settings');
-    logger.error('SettingsPage: getUserSettings threw', normalized, logContext);
+    logger.error('SettingsPage: getUserSettings threw', normalized, {
+      ...withDuration(logContext, startTime),
+      requestId,
+      operation: 'SettingsPage',
+      section: 'settings-data-fetch',
+      sectionDuration_ms: Date.now() - settingsSectionStart,
+    });
   }
 
   if (!settingsData) {
@@ -119,11 +142,17 @@ export default async function SettingsPage() {
       ...logContext,
     });
     try {
+      // Type-safe access to user_metadata (Record<string, unknown> from Supabase)
+      const userMetadata = user.user_metadata;
+      const fullName = typeof userMetadata['full_name'] === 'string' ? userMetadata['full_name'] : null;
+      const name = typeof userMetadata['name'] === 'string' ? userMetadata['name'] : null;
+      const avatarUrl = typeof userMetadata['avatar_url'] === 'string' ? userMetadata['avatar_url'] : null;
+      const picture = typeof userMetadata['picture'] === 'string' ? userMetadata['picture'] : null;
       await ensureUserRecord({
         id: user.id,
         email: user.email ?? null,
-        name: user.user_metadata?.['full_name'] ?? user.user_metadata?.['name'] ?? null,
-        image: user.user_metadata?.['avatar_url'] ?? user.user_metadata?.['picture'] ?? null,
+        name: fullName ?? name ?? null,
+        image: avatarUrl ?? picture ?? null,
       });
       const refreshed = await getUserSettings(user.id);
       if (refreshed) {
@@ -202,7 +231,7 @@ export default async function SettingsPage() {
             <div>
               <p className={'font-medium text-sm'}>Member Since</p>
               <p className="text-muted-foreground">
-                {profile?.created_at
+                {profile.created_at
                   ? new Date(profile.created_at).toLocaleDateString('en-US', {
                       year: 'numeric',
                       month: 'long',
@@ -227,7 +256,7 @@ export default async function SettingsPage() {
             <div className="flex items-center gap-4">
               <Image
                 src={userData.image}
-                alt={`${userData.name || 'User'}'s avatar`}
+                alt={`${userData.name ?? 'User'}'s avatar`}
                 width={64}
                 height={64}
                 className="h-16 w-16 rounded-full object-cover"

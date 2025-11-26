@@ -325,8 +325,9 @@ function TrustedHTML({ html, className, id }: { html: string; className?: string
     <div
       id={id}
       className={className}
-      // biome-ignore lint/security/noDangerouslySetInnerHtml: HTML is sanitized with DOMPurify with strict allowlist
-      dangerouslySetInnerHTML={{ __html: safeHtml }}
+      // eslint-disable-next-line jsx-a11y/no-danger -- HTML is sanitized with DOMPurify with strict allowlist
+      // biome-ignore lint/security/noDangerouslySetInnerHtml: <explanation>
+            dangerouslySetInnerHTML={{ __html: safeHtml }}
     />
   );
 }

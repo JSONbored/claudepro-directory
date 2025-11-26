@@ -13,14 +13,16 @@
  *
  * Usage:
  * ```tsx
- * const draftManager = new DraftManager('agents');
+ * const draftManager = new DraftManager(Constants.public.Enums.submission_type[0]); // 'agents'
  * draftManager.save(formData);
  * const draft = draftManager.load();
  * ```
  */
 
-import { logger } from '../../logger.ts';
+import { Constants } from '@heyclaude/database-types';
+
 import { normalizeError } from '../../errors.ts';
+import { logger } from '../../logger.ts';
 import type { SubmissionContentType } from '../../types/component.types.ts';
 
 /**
@@ -93,17 +95,17 @@ export class DraftManager {
 
       // Load existing draft to preserve created_at
       const existing = this.loadRaw();
-      const createdAt = existing?.created_at || now.toISOString();
+      const createdAt = existing?.created_at ?? now.toISOString();
 
       const draftData: DraftFormData = {
-        submission_type: data.submission_type || 'agents',
-        name: data.name || '',
-        description: data.description || '',
-        type_specific: data.type_specific || {},
-        examples: data.examples || [],
-        tags: data.tags || [],
+        submission_type: data.submission_type ?? Constants.public.Enums.submission_type[0], // 'agents'
+        name: data.name ?? '',
+        description: data.description ?? '',
+        type_specific: data.type_specific ?? {},
+        examples: data.examples ?? [],
+        tags: data.tags ?? [],
         ...(data.template_used ? { template_used: data.template_used } : {}),
-        last_step: data.last_step || 1,
+        last_step: data.last_step ?? 1,
         quality_score: this.calculateQualityScore(data as DraftFormData),
       };
 
@@ -232,14 +234,12 @@ export class DraftManager {
 
     // Name (20 points)
     if (data.name) {
-      if (data.name.length >= 5) score += 20;
-      else score += (data.name.length / 5) * 20;
+      score += data.name.length >= 5 ? 20 : (data.name.length / 5) * 20;
     }
 
     // Description (30 points)
     if (data.description) {
-      if (data.description.length >= 100) score += 30;
-      else score += (data.description.length / 100) * 30;
+      score += data.description.length >= 100 ? 30 : (data.description.length / 100) * 30;
     }
 
     // Examples (30 points)
@@ -293,8 +293,8 @@ export class DraftManager {
     }> = [];
 
     try {
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
+      for (let index = 0; index < localStorage.length; index++) {
+        const key = localStorage.key(index);
         if (!key?.startsWith(DraftManager.STORAGE_PREFIX)) continue;
 
         const stored = localStorage.getItem(key);
@@ -340,8 +340,8 @@ export class DraftManager {
       const keys: string[] = [];
 
       // Collect all draft keys
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
+      for (let index = 0; index < localStorage.length; index++) {
+        const key = localStorage.key(index);
         if (key?.startsWith(DraftManager.STORAGE_PREFIX)) {
           keys.push(key);
         }
@@ -384,8 +384,8 @@ export class DraftManager {
       const keys: string[] = [];
 
       // Collect all draft keys
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
+      for (let index = 0; index < localStorage.length; index++) {
+        const key = localStorage.key(index);
         if (key?.startsWith(DraftManager.STORAGE_PREFIX)) {
           keys.push(key);
         }
@@ -411,8 +411,8 @@ export class DraftManager {
     let size = 0;
 
     try {
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
+      for (let index = 0; index < localStorage.length; index++) {
+        const key = localStorage.key(index);
         if (!key?.startsWith(DraftManager.STORAGE_PREFIX)) continue;
 
         const value = localStorage.getItem(key);
@@ -454,9 +454,9 @@ export function createDebouncedSave(
       const loadedDraft = draftManager.load();
       logger.debug('DraftManager: Auto-saved draft', {
         ...(data.submission_type ? { submission_type: data.submission_type } : {}),
-        ...(loadedDraft?.quality_score !== undefined
-          ? { quality_score: loadedDraft.quality_score }
-          : {}),
+        ...(loadedDraft?.quality_score === undefined
+          ? {}
+          : { quality_score: loadedDraft.quality_score }),
       });
     }, delay);
   };
