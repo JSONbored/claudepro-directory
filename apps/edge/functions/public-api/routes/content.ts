@@ -211,9 +211,7 @@ async function handleChangelogIndex(format: string): Promise<Response> {
 
 function parseContentCategory(value: string | null): ContentCategory | null {
   if (!value) return null;
-  return CONTENT_CATEGORY_VALUES.includes(value as ContentCategory)
-    ? (value as ContentCategory)
-    : null;
+  return isValidContentCategory(value) ? value : null;
 }
 
 async function handleCategoryOnly(category: string, format: string): Promise<Response> {

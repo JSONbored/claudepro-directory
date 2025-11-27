@@ -122,10 +122,12 @@ export async function handleDiscordJobs(_req: Request): Promise<Response> {
       try {
         // Validate queue message structure
         if (!isValidJobWebhookPayload(msg.message)) {
-          const invalidLogContext = createUtilityContext('flux-station', 'discord-jobs-validate', {
+          const validationLogContext = {
+            ...logContext,
             msg_id: msg.msg_id.toString(),
-          });
-          await logError('Invalid job webhook payload structure', invalidLogContext);
+            operation: 'validate-payload',
+          };
+          await logError('Invalid job webhook payload structure', validationLogContext);
 
           // Delete invalid message to prevent infinite retries
           try {
@@ -133,7 +135,7 @@ export async function handleDiscordJobs(_req: Request): Promise<Response> {
           } catch (error) {
             // Wrap logError in try-catch to prevent logging errors from blocking execution
             try {
-              await logError('Failed to delete invalid message', invalidLogContext, error);
+              await logError('Failed to delete invalid message', validationLogContext, error);
             } catch (logErr) {
               // Fallback to console.error if logging itself fails
               console.error('Failed to log error:', logErr);
@@ -153,21 +155,19 @@ export async function handleDiscordJobs(_req: Request): Promise<Response> {
 
         // Validate webhook type
         if (!isValidWebhookType(payload.type)) {
-          const invalidTypeLogContext = createUtilityContext(
-            'flux-station',
-            'discord-jobs-validate-type',
-            {
-              msg_id: msg.msg_id.toString(),
-              type: payload.type,
-            }
-          );
-          await logError('Invalid webhook type', invalidTypeLogContext);
+          const typeValidationLogContext = {
+            ...logContext,
+            msg_id: msg.msg_id.toString(),
+            type: payload.type,
+            operation: 'validate-type',
+          };
+          await logError('Invalid webhook type', typeValidationLogContext);
 
           // Delete invalid message to prevent infinite retries
           try {
             await pgmqDelete(JOB_DISCORD_QUEUE, msg.msg_id);
           } catch (error) {
-            await logError('Failed to delete invalid message', invalidTypeLogContext, error);
+            await logError('Failed to delete invalid message', typeValidationLogContext, error);
           }
 
           results.push({

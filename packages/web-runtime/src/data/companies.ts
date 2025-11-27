@@ -161,6 +161,8 @@ async function fetchCompanySearchResults(
       },
       {
         operation: 'fetchCompanySearchResults',
+        logger: requestLogger, // Use child logger to avoid passing requestId/operation repeatedly
+        requestId, // Pass requestId for return value
         logMeta: { query, limit },
         logLevel: 'info', // Log all operations for observability
       }

@@ -152,8 +152,9 @@ const ROUTE_HANDLERS: Record<string, (ctx: PublicApiContext) => Promise<Response
     );
   },
   'content-generate': async (ctx) => {
-    // Check for sub-routes
-    if (ctx.segments[1] === 'upload') {
+    // segments[0] = 'content', segments[1] = 'generate-package', segments[2] = sub-route
+    const subRoute = ctx.segments[2];
+    if (subRoute === 'upload') {
       return withRateLimit(ctx, RATE_LIMIT_PRESETS.heavy, async () => {
         const logContext = createPublicApiContext('content-generate-upload', {
           path: ctx.pathname,
@@ -161,7 +162,7 @@ const ROUTE_HANDLERS: Record<string, (ctx: PublicApiContext) => Promise<Response
         return handleUploadPackage(ctx.request, logContext);
       });
     }
-    if (ctx.segments[1] === 'process') {
+    if (subRoute === 'process') {
       return withRateLimit(ctx, RATE_LIMIT_PRESETS.heavy, async () => {
         const logContext = createPublicApiContext('content-generate-process', {
           path: ctx.pathname,

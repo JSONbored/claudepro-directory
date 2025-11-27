@@ -7,6 +7,7 @@
 
 import { Resend } from 'npm:resend@6.5.2';
 import type { Database as DatabaseGenerated, Json } from '@heyclaude/database-types';
+import { Constants } from '@heyclaude/database-types';
 import {
   errorResponse,
   getCacheConfigNumber,
@@ -35,6 +36,7 @@ import {
 
 const PULSE_QUEUE_NAME = 'pulse';
 const PULSE_BATCH_SIZE_DEFAULT = 100; // Fallback if config unavailable
+const MAX_PULSE_RETRY_ATTEMPTS = 5; // Maximum number of retry attempts before giving up
 
 interface PulseEvent {
   user_id?: string | null;
@@ -125,20 +127,9 @@ async function processSearchEventsBatch(messages: PulseQueueMessage[]): Promise<
         };
         // Conditionally add filters if it's valid Json
         // filters is optional in Insert type, so we only add it if present
+        // filters is already a valid JSON value from the message payload
         if (q.filters !== null && q.filters !== undefined) {
-          // Json type is recursive, so we use JSON.parse/stringify to ensure valid JSON
-          // After JSON.parse, the result is guaranteed to be valid Json type
-          try {
-            const jsonString = JSON.stringify(q.filters);
-            const parsed = JSON.parse(jsonString);
-            // JSON.parse returns a value that is valid Json (any value that can be JSON-serialized)
-            // We validate it's not undefined (JSON.parse never returns undefined)
-            if (parsed !== undefined) {
-              insert.filters = parsed satisfies Json | null;
-            }
-          } catch {
-            // Invalid JSON, skip filters
-          }
+          insert.filters = q.filters as Json | null;
         }
         return insert;
       });
@@ -265,19 +256,7 @@ async function processUserInteractionsBatch(messages: PulseQueueMessage[]): Prom
       if (typeof value !== 'string') {
         return false;
       }
-      const validValues: DatabaseGenerated['public']['Enums']['content_category'][] = [
-        'agents',
-        'mcp',
-        'rules',
-        'commands',
-        'hooks',
-        'statuslines',
-        'skills',
-        'collections',
-        'guides',
-        'jobs',
-        'changelog',
-      ];
+      const validValues = Constants.public.Enums.content_category;
       for (const validValue of validValues) {
         if (value === validValue) {
           return true;
@@ -293,31 +272,7 @@ async function processUserInteractionsBatch(messages: PulseQueueMessage[]): Prom
       if (typeof value !== 'string') {
         return false;
       }
-      const validValues: DatabaseGenerated['public']['Enums']['interaction_type'][] = [
-        'view',
-        'copy',
-        'bookmark',
-        'click',
-        'time_spent',
-        'search',
-        'filter',
-        'screenshot',
-        'share',
-        'download',
-        'pwa_installed',
-        'pwa_launched',
-        'newsletter_subscribe',
-        'contact_interact',
-        'contact_submit',
-        'form_started',
-        'form_step_completed',
-        'form_field_focused',
-        'form_template_selected',
-        'form_abandoned',
-        'form_submitted',
-        'sponsored_impression',
-        'sponsored_click',
-      ];
+      const validValues = Constants.public.Enums.interaction_type;
       for (const validValue of validValues) {
         if (value === validValue) {
           return true;
@@ -381,14 +336,14 @@ async function processUserInteractionsBatch(messages: PulseQueueMessage[]): Prom
 
     if (batchError) {
       // Use dbQuery serializer for consistent database query formatting
-      const errorLogContext = createUtilityContext('flux-station', 'pulse-batch-insert', {
+      const logContext = createUtilityContext('flux-station', 'pulse-batch-insert', {
         message_count: messages.length,
         dbQuery: {
           rpcName: 'batch_insert_user_interactions',
           args: rpcArgs, // Will be redacted by Pino's redact config
         },
       });
-      await logError('Pulse batch insert RPC error', errorLogContext, batchError);
+      await logError('Pulse batch insert RPC error', logContext, batchError);
       throw batchError;
     }
 
@@ -617,10 +572,10 @@ export async function handlePulse(_req: Request): Promise<Response> {
 
     for (const msg of messages || []) {
       if (!isValidPulseEvent(msg.message)) {
-        const invalidLogContext = createUtilityContext('flux-station', 'pulse-validate', {
+        const logContext = createUtilityContext('flux-station', 'pulse-validate', {
           msg_id: msg.msg_id.toString(),
         });
-        logWarn('Invalid pulse event structure', invalidLogContext);
+        logWarn('Invalid pulse event structure', logContext);
         invalidMsgIds.push(msg.msg_id);
         continue;
       }
@@ -667,12 +622,44 @@ export async function handlePulse(_req: Request): Promise<Response> {
       const msgIds = pulseMessages.map((msg) => msg.msg_id);
       await deletePulseMessages(msgIds);
     } else if (result.inserted === 0) {
-      // All failed - don't delete, let them retry via queue visibility timeout
-      logWarn('All pulse events failed, will retry', {
-        ...logContext,
-        failed: result.failed,
-        errors: result.errors,
-      });
+      // All failed - check if messages have exceeded max retry attempts
+      const maxAttemptsReached = pulseMessages.some(
+        (msg) => Number(msg.read_ct ?? 0) >= MAX_PULSE_RETRY_ATTEMPTS
+      );
+
+      if (maxAttemptsReached) {
+        // Delete messages that exceeded max retry attempts to prevent infinite retry loop
+        const exceededMsgIds = pulseMessages
+          .filter((msg) => Number(msg.read_ct ?? 0) >= MAX_PULSE_RETRY_ATTEMPTS)
+          .map((msg) => msg.msg_id);
+
+        try {
+          await deletePulseMessages(exceededMsgIds);
+          await logError('Pulse events exceeded max retry attempts, removed from queue', {
+            ...logContext,
+            failed: result.failed,
+            errors: result.errors,
+            deleted_count: exceededMsgIds.length,
+            max_attempts: MAX_PULSE_RETRY_ATTEMPTS,
+          });
+        } catch (deleteError) {
+          await logError(
+            'Failed to delete pulse events after max retries',
+            {
+              ...logContext,
+              count: exceededMsgIds.length,
+            },
+            deleteError
+          );
+        }
+      } else {
+        // Leave in queue for retry via queue visibility timeout
+        logWarn('All pulse events failed, will retry', {
+          ...logContext,
+          failed: result.failed,
+          errors: result.errors,
+        });
+      }
     }
 
     logInfo('Pulse batch processed', {

@@ -70,12 +70,12 @@ export async function batchProcess<T, R>(
           onError(item, error, attempt);
         }
 
-        const itemLogContext = createUtilityContext('batch-processor', 'item-error', {
+        const logContext = createUtilityContext('batch-processor', 'item-error', {
           attempt,
           total_retries: retries,
           item_index: items.indexOf(item),
         });
-        logWarn('Item processing failed, retrying', itemLogContext);
+        logWarn('Item processing failed, retrying', logContext);
 
         // Wait before retry (exponential backoff)
         if (attempt <= retries) {
@@ -86,11 +86,11 @@ export async function batchProcess<T, R>(
     }
 
     // All retries failed
-    const itemLogContext = createUtilityContext('batch-processor', 'item-failed', {
+    const logContext = createUtilityContext('batch-processor', 'item-failed', {
       item_index: items.indexOf(item),
       total_retries: retries,
     });
-    await logError('Item processing failed after all retries', itemLogContext, lastError);
+    await logError('Item processing failed after all retries', logContext, lastError);
     failed.push({ item, error: lastError });
     processed++;
     if (onProgress) {

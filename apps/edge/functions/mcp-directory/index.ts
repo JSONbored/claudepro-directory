@@ -15,7 +15,7 @@
 
 import { zodToJsonSchema } from 'npm:zod-to-json-schema@3';
 import type { Database } from '@heyclaude/database-types';
-import { edgeEnv, initRequestLogging, requireAuthUser, traceStep } from '@heyclaude/edge-runtime';
+import { edgeEnv, initRequestLogging, requireAuthUser, traceRequestComplete, traceStep } from '@heyclaude/edge-runtime';
 import { createDataApiContext, logError, logger } from '@heyclaude/shared-runtime';
 import type { User } from '@supabase/supabase-js';
 import { createClient } from '@supabase/supabase-js';
@@ -290,7 +290,7 @@ function getMcpServerResourceUrl(): string {
  * Validate JWT token audience claim
  * Per MCP spec (RFC 8707), tokens MUST be issued for this specific resource
  */
-async function validateTokenAudience(token: string, expectedAudience: string): Promise<boolean> {
+function validateTokenAudience(token: string, expectedAudience: string): boolean {
   try {
     // Decode JWT without verification (we already verified via Supabase)
     // We just need to check the audience claim
@@ -349,10 +349,13 @@ async function validateTokenAudience(token: string, expectedAudience: string): P
   } catch (error) {
     // If we can't decode, reject (shouldn't happen since Supabase already validated)
     // Log for debugging but don't expose error details
+    // Fire-and-forget error logging (non-blocking)
     const logContext = createDataApiContext('validate-token-audience', {
       app: 'mcp-directory',
     });
-    await logError('Failed to decode JWT token for audience validation', logContext, error);
+    logError('Failed to decode JWT token for audience validation', logContext, error).catch(() => {
+      // Swallow errors from logging itself - best effort
+    });
     return false;
   }
 }
@@ -432,7 +435,7 @@ mcpApp.all('/mcp', async (c) => {
 
     // Validate token audience (RFC 8707 - Resource Indicators)
     // This ensures tokens were issued specifically for this MCP server
-    if (!(await validateTokenAudience(authResult.token, mcpServerUrl))) {
+    if (!validateTokenAudience(authResult.token, mcpServerUrl)) {
       await logError(
         'Token audience validation failed',
         logContext,
@@ -483,6 +486,9 @@ mcpApp.all('/mcp', async (c) => {
     // Pass to MCP handler
     const response = await requestHandler(request);
 
+    // Trace successful request completion
+    traceRequestComplete(logContext);
+
     return response;
   } catch (error) {
     await logError('MCP protocol error handling request', logContext, error);
@@ -490,7 +496,7 @@ mcpApp.all('/mcp', async (c) => {
     // Return MCP-formatted error
     const isAuthError =
       error instanceof AuthenticationError ||
-      (error instanceof Error && error.message.includes('Authentication'));
+      (error instanceof Error && error.name === 'AuthenticationError');
 
     const statusCode = isAuthError ? 401 : 500;
     const wwwAuthHeader = isAuthError

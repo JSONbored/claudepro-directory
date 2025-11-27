@@ -23,10 +23,37 @@ import {
 } from '@heyclaude/edge-runtime';
 import {
   createNotificationRouterContext,
+  errorToString,
   logger,
   MAX_BODY_SIZE,
   validateBodySize,
 } from '@heyclaude/shared-runtime';
+
+// Type guards for enum validation (module scope - don't depend on handler-scoped variables)
+type NotificationType = DatabaseGenerated['public']['Enums']['notification_type'];
+type NotificationPriority = DatabaseGenerated['public']['Enums']['notification_priority'];
+
+// Use enum values directly from @heyclaude/database-types Constants
+const notificationTypeValues = Constants.public.Enums.notification_type;
+const notificationPriorityValues = Constants.public.Enums.notification_priority;
+
+function isValidNotificationType(value: string): value is NotificationType {
+  for (const validType of notificationTypeValues) {
+    if (value === validType) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function isValidNotificationPriority(value: string): value is NotificationPriority {
+  for (const validPriority of notificationPriorityValues) {
+    if (value === validPriority) {
+      return true;
+    }
+  }
+  return false;
+}
 
 export async function handleCreateNotification(req: Request): Promise<Response> {
   // Optional auth - use for logging context if provided
@@ -79,7 +106,6 @@ export async function handleCreateNotification(req: Request): Promise<Response> 
     }
     payload = JSON.parse(bodyText);
   } catch (error) {
-    const { errorToString } = await import('@heyclaude/shared-runtime');
     return badRequestResponse(
       `Invalid JSON payload: ${errorToString(error)}`,
       notificationCorsHeaders
@@ -99,32 +125,6 @@ export async function handleCreateNotification(req: Request): Promise<Response> 
     const value = getProperty(obj, key);
     return typeof value === 'string' ? value : undefined;
   };
-
-  // Type guards for enum validation
-  type NotificationType = DatabaseGenerated['public']['Enums']['notification_type'];
-  type NotificationPriority = DatabaseGenerated['public']['Enums']['notification_priority'];
-
-  // Use enum values directly from @heyclaude/database-types Constants
-  const notificationTypeValues = Constants.public.Enums.notification_type;
-  const notificationPriorityValues = Constants.public.Enums.notification_priority;
-
-  function isValidNotificationType(value: string): value is NotificationType {
-    for (const validType of notificationTypeValues) {
-      if (value === validType) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  function isValidNotificationPriority(value: string): value is NotificationPriority {
-    for (const validPriority of notificationPriorityValues) {
-      if (value === validPriority) {
-        return true;
-      }
-    }
-    return false;
-  }
 
   const title = getStringProperty(payload, 'title');
   const message = getStringProperty(payload, 'message');
@@ -152,6 +152,25 @@ export async function handleCreateNotification(req: Request): Promise<Response> 
   const priorityValue = getStringProperty(payload, 'priority');
   const actionLabel = getStringProperty(payload, 'action_label');
   const actionHref = getStringProperty(payload, 'action_href');
+
+  // Validate action_href as a URL if provided (prevent javascript: URIs and malformed URLs)
+  if (actionHref) {
+    try {
+      const url = new URL(actionHref);
+      // Reject javascript: and data: URIs for security
+      if (url.protocol === 'javascript:' || url.protocol === 'data:') {
+        return badRequestResponse(
+          'Invalid action_href: javascript: and data: URIs are not allowed',
+          notificationCorsHeaders
+        );
+      }
+    } catch {
+      return badRequestResponse(
+        'Invalid action_href: must be a valid URL',
+        notificationCorsHeaders
+      );
+    }
+  }
 
   const sanitizedPayload: NotificationInsertPayload = {
     title: sanitizedTitle,

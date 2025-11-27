@@ -56,7 +56,7 @@ export async function processSequenceEmail(
 
   const html = await renderEmailTemplate(Template, { email });
 
-  const itemLogContext = createEmailHandlerContext('sequence', {
+  const emailLogContext = createEmailHandlerContext('sequence', {
     email, // Use destructured email (non-null after type assertion)
   });
 
@@ -82,7 +82,7 @@ export async function processSequenceEmail(
         { name: 'step', value: step.toString() },
       ],
     },
-    itemLogContext,
+    emailLogContext,
     'Resend sequence email send timed out'
   );
 

@@ -80,25 +80,6 @@ interface SearchResponse {
 export async function handleSearch(req: Request): Promise<Response> {
   const url = new URL(req.url);
   
-  // Create log context for this search request
-  const queryParam = url.searchParams.get('q');
-  const logContext = createSearchContext({
-    ...(queryParam ? { query: queryParam } : {}),
-    searchType: 'search',
-  });
-  
-  // Initialize request logging with trace and bindings (Phase 1 & 2)
-  initRequestLogging(logContext);
-  traceStep('Search request received', logContext);
-  
-  // Set bindings for this request - mixin will automatically inject these into all subsequent logs
-  logger.setBindings({
-    requestId: logContext.request_id,
-    operation: logContext.action || 'search',
-    function: logContext.function,
-    query: url.searchParams.get('q') || undefined,
-  });
-  
   // Validate query string
   const queryStringValidation = validateQueryString(url);
   if (!queryStringValidation.valid) {
@@ -115,20 +96,17 @@ export async function handleSearch(req: Request): Promise<Response> {
   const tags = url.searchParams.get('tags')?.split(',').filter(Boolean);
   const authors = url.searchParams.get('authors')?.split(',').filter(Boolean);
   const entities = url.searchParams.get('entities')?.split(',').filter(Boolean);
-  const sort = (url.searchParams.get('sort') || 'relevance') as
-    | 'relevance'
-    | 'popularity'
-    | 'newest'
-    | 'alphabetical';
-
   // Validate sort parameter (applies to all search types)
-  const validSorts = ['relevance', 'popularity', 'newest', 'alphabetical'];
-  if (!validSorts.includes(sort)) {
+  const sortParam = url.searchParams.get('sort') || 'relevance';
+  const validSorts = ['relevance', 'popularity', 'newest', 'alphabetical'] as const;
+  type SortType = typeof validSorts[number];
+  if (!validSorts.includes(sortParam as SortType)) {
     return badRequestResponse(
       `Invalid sort parameter. Must be one of: ${validSorts.join(', ')}`,
       getWithAuthCorsHeaders
     );
   }
+  const sort = sortParam as SortType;
 
   // Parse job filter parameters
   const jobCategoryParam = url.searchParams.get('job_category') || undefined;

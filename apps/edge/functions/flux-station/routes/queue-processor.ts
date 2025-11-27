@@ -142,7 +142,11 @@ async function processInternalQueue(
 
     // Create a minimal request object for the handler
     const request = new Request('http://localhost', { method: 'POST' });
-    const response = await config.handlerFn(request);
+    const response = await withTimeout(
+      config.handlerFn(request),
+      TIMEOUT_PRESETS.external,
+      `Internal queue '${config.name}' handler timed out`
+    );
 
     // Try to extract processed count and error from response body
     let processed: number | undefined;
@@ -323,14 +327,15 @@ export async function processAllQueues(): Promise<QueueProcessingSummary> {
     };
   }
 
-  const batchLogContext = createUtilityContext('flux-station', 'queue-processor-batch', {
+  const batchLogContext = {
+    ...logContext,
     queues_to_process: queuesToProcess.length,
     queues: queuesToProcess.map(({ config, queueLength }) => ({
       name: config.name,
       length: queueLength,
       priority: config.priority,
     })),
-  });
+  };
   logInfo(`Processing ${queuesToProcess.length} queues with messages`, batchLogContext);
   traceStep(`Processing ${queuesToProcess.length} queues`, batchLogContext);
 
@@ -355,11 +360,12 @@ export async function processAllQueues(): Promise<QueueProcessingSummary> {
       }
 
       const queueDurationMs = Date.now() - queueStartTime;
-      const queueLogContext = createUtilityContext('flux-station', 'queue-processor-queue', {
+      const queueLogContext = {
+        ...batchLogContext,
         queue_name: config.name,
         queue_length: queueLength,
         duration_ms: queueDurationMs,
-      });
+      };
       if (result.success) {
         logInfo(`Queue '${config.name}' processed successfully`, {
           ...queueLogContext,
@@ -375,10 +381,11 @@ export async function processAllQueues(): Promise<QueueProcessingSummary> {
     } catch (error) {
       // Unexpected error - log and continue
       const errorMsg = errorToString(error);
-      const errorLogContext = createUtilityContext('flux-station', 'queue-processor-error', {
+      const errorLogContext = {
+        ...batchLogContext,
         queue_name: config.name,
         queue_length: queueLength,
-      });
+      };
       await logError(`Unexpected error processing queue '${config.name}'`, errorLogContext, error);
       result = {
         queue: config.name,

@@ -80,6 +80,8 @@ const getVisitorStats = unstable_cache(
         },
         {
           operation: 'getVisitorStats',
+          logger: requestLogger, // Use child logger to avoid passing requestId/operation repeatedly
+          requestId, // Pass requestId for return value
           logMeta: { source: 'vercel-analytics-api' },
           logLevel: 'info',
         }

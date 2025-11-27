@@ -108,17 +108,18 @@ export async function handleRevalidation(_req: Request): Promise<Response> {
       try {
         // Validate queue message structure
         if (!isValidRevalidationPayload(msg.message)) {
-          const invalidLogContext = createUtilityContext('flux-station', 'content-revalidation', {
+          const validationLogContext = {
+            ...logContext,
             msg_id: msg.msg_id.toString(),
             operation: 'validate-payload',
-          });
-          await logError('Invalid revalidation payload structure', invalidLogContext);
+          };
+          await logError('Invalid revalidation payload structure', validationLogContext);
 
           // Delete invalid message to prevent infinite retries
           try {
             await pgmqDelete(CONTENT_REVALIDATION_QUEUE, msg.msg_id);
           } catch (error) {
-            await logError('Failed to delete invalid message', invalidLogContext, error);
+            await logError('Failed to delete invalid message', validationLogContext, error);
           }
 
           results.push({
@@ -138,15 +139,12 @@ export async function handleRevalidation(_req: Request): Promise<Response> {
 
         // Use timing-safe comparison to prevent timing attacks
         if (!(secret && expectedSecret && timingSafeEqual(secret, expectedSecret))) {
-          const unauthorizedLogContext = createUtilityContext(
-            'flux-station',
-            'content-revalidation',
-            {
-              msg_id: msg.msg_id.toString(),
-              operation: 'authorize',
-            }
-          );
-          logWarn('Content revalidation unauthorized', unauthorizedLogContext);
+          const authLogContext = {
+            ...logContext,
+            msg_id: msg.msg_id.toString(),
+            operation: 'authorize',
+          };
+          await logWarn('Content revalidation unauthorized', authLogContext);
           await pgmqDelete(CONTENT_REVALIDATION_QUEUE, msg.msg_id);
           results.push({
             msg_id: msg.msg_id.toString(),
@@ -177,22 +175,23 @@ export async function handleRevalidation(_req: Request): Promise<Response> {
         // Call existing cache invalidation utility (which calls /api/revalidate)
         // Wrap with timeout and retry for reliability
         const contentId = getStringProperty(record, 'id');
-        const logContext = createUtilityContext('flux-station', 'content-revalidation', {
+        const messageLogContext = {
+          ...logContext,
           operation: payload.type,
           ...(contentId ? { contentId } : {}),
-        });
+        };
         await withTimeout(
           runWithRetry(
             () =>
               invalidateCacheTags(tagsToInvalidate, {
                 ...(category !== null && category !== undefined ? { category } : {}),
                 ...(slug !== null && slug !== undefined ? { slug } : {}),
-                logContext,
+                logContext: messageLogContext,
               }),
             {
               attempts: 2,
               baseDelayMs: 500,
-              logContext,
+              logContext: messageLogContext,
             }
           ),
           TIMEOUT_PRESETS.external,
@@ -202,10 +201,11 @@ export async function handleRevalidation(_req: Request): Promise<Response> {
         await pgmqDelete(CONTENT_REVALIDATION_QUEUE, msg.msg_id);
         results.push({ msg_id: msg.msg_id.toString(), status: 'success' });
       } catch (error) {
-        const errorLogContext = createUtilityContext('flux-station', 'content-revalidation', {
+        const errorLogContext = {
+          ...logContext,
           msg_id: msg.msg_id.toString(),
           operation: 'process-message',
-        });
+        };
         const errorMsg = errorToString(error);
         await logError('Content revalidation failed', errorLogContext, error);
         // Leave in queue for retry

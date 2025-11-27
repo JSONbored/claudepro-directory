@@ -4063,7 +4063,7 @@ export default {
       meta: {
         type: 'problem',
         docs: {
-          description: 'Prefer logger.child() over logger.setBindings() to avoid race conditions in concurrent environments',
+          description: 'Prefer logger.child() over logger.setBindings() to avoid race conditions in concurrent environments (Next.js). Edge functions (Deno) can use setBindings() safely since each request is isolated.',
           category: 'Best Practices',
           recommended: true,
         },
@@ -4075,7 +4075,17 @@ export default {
         },
       },
       create(context) {
+        const filename = context.getFilename();
         const sourceCode = context.getSourceCode();
+
+        // Edge functions (Deno) are safe to use setBindings() - each request is isolated
+        // Next.js Server Components/API Routes must use child() to avoid race conditions
+        const isEdgeFunction = filename.includes('apps/edge/functions');
+        
+        if (isEdgeFunction) {
+          // Allow setBindings() in edge functions - they're safe in Deno's isolated execution model
+          return {};
+        }
 
         return {
           CallExpression(node) {

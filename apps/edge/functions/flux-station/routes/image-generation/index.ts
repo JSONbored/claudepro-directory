@@ -220,32 +220,31 @@ export async function handleImageGenerationQueue(_req: Request): Promise<Respons
     }> = [];
 
     for (const msg of messages) {
-      const queueMessage = msg.message as unknown as ImageGenerationMessage;
-
-      // Validate message structure
-      if (!queueMessage.type || !['card', 'thumbnail', 'logo'].includes(queueMessage.type)) {
-        const errorLogContext = createUtilityContext('image-generation', 'invalid-message');
+      // Validate message structure before type assertion
+      const rawMessage = msg.message as Record<string, unknown>;
+      if (!rawMessage || typeof rawMessage['type'] !== 'string' || !['card', 'thumbnail', 'logo'].includes(rawMessage['type'] as string)) {
+        const logContext = createUtilityContext('image-generation', 'invalid-message');
         await logError(
           'Invalid queue message format',
           {
-            ...errorLogContext,
+            ...logContext,
             msg_id: msg.msg_id.toString(),
           },
-          new Error(`Invalid message type: ${JSON.stringify(queueMessage)}`)
+          new Error(`Invalid message type: ${JSON.stringify(rawMessage)}`)
         );
 
         // Delete invalid message to prevent infinite retry loop
         try {
           await pgmqDelete(IMAGE_GENERATION_QUEUE, msg.msg_id);
           logInfo('Deleted invalid message', {
-            ...errorLogContext,
+            ...logContext,
             msg_id: msg.msg_id.toString(),
           });
         } catch (deleteError) {
           await logError(
             'Failed to delete invalid message',
             {
-              ...errorLogContext,
+              ...logContext,
               msg_id: msg.msg_id.toString(),
             },
             deleteError
@@ -260,13 +259,16 @@ export async function handleImageGenerationQueue(_req: Request): Promise<Respons
         continue;
       }
 
+      // Type assertion is safe after validation
+      const queueMessage = rawMessage as unknown as ImageGenerationMessage;
+
       // Validate type-specific required fields
       if (queueMessage.type === 'card' && (!queueMessage.params?.title || !queueMessage.params.title.trim())) {
-        const errorLogContext = createUtilityContext('image-generation', 'invalid-message');
+        const logContext = createUtilityContext('image-generation', 'invalid-message');
         await logError(
           'Card generation message missing required title',
           {
-            ...errorLogContext,
+            ...logContext,
             msg_id: msg.msg_id.toString(),
             content_id: queueMessage.content_id,
           },
@@ -277,14 +279,14 @@ export async function handleImageGenerationQueue(_req: Request): Promise<Respons
         try {
           await pgmqDelete(IMAGE_GENERATION_QUEUE, msg.msg_id);
           logInfo('Deleted invalid card message (missing title)', {
-            ...errorLogContext,
+            ...logContext,
             msg_id: msg.msg_id.toString(),
           });
         } catch (deleteError) {
           await logError(
             'Failed to delete invalid message',
             {
-              ...errorLogContext,
+              ...logContext,
               msg_id: msg.msg_id.toString(),
             },
             deleteError
@@ -301,11 +303,11 @@ export async function handleImageGenerationQueue(_req: Request): Promise<Respons
 
       // Validate thumbnail has image_data
       if (queueMessage.type === 'thumbnail' && !queueMessage.image_data) {
-        const errorLogContext = createUtilityContext('image-generation', 'invalid-message');
+        const logContext = createUtilityContext('image-generation', 'invalid-message');
         await logError(
           'Thumbnail generation message missing required image_data',
           {
-            ...errorLogContext,
+            ...logContext,
             msg_id: msg.msg_id.toString(),
             content_id: queueMessage.content_id,
           },
@@ -316,14 +318,14 @@ export async function handleImageGenerationQueue(_req: Request): Promise<Respons
         try {
           await pgmqDelete(IMAGE_GENERATION_QUEUE, msg.msg_id);
           logInfo('Deleted invalid thumbnail message (missing image_data)', {
-            ...errorLogContext,
+            ...logContext,
             msg_id: msg.msg_id.toString(),
           });
         } catch (deleteError) {
           await logError(
             'Failed to delete invalid message',
             {
-              ...errorLogContext,
+              ...logContext,
               msg_id: msg.msg_id.toString(),
             },
             deleteError
@@ -340,11 +342,11 @@ export async function handleImageGenerationQueue(_req: Request): Promise<Respons
 
       // Validate logo has image_data and company_id
       if (queueMessage.type === 'logo' && (!queueMessage.image_data || !queueMessage.company_id)) {
-        const errorLogContext = createUtilityContext('image-generation', 'invalid-message');
+        const logContext = createUtilityContext('image-generation', 'invalid-message');
         await logError(
           'Logo generation message missing required fields',
           {
-            ...errorLogContext,
+            ...logContext,
             msg_id: msg.msg_id.toString(),
             company_id: queueMessage.company_id,
             has_image_data: !!queueMessage.image_data,
@@ -356,14 +358,14 @@ export async function handleImageGenerationQueue(_req: Request): Promise<Respons
         try {
           await pgmqDelete(IMAGE_GENERATION_QUEUE, msg.msg_id);
           logInfo('Deleted invalid logo message (missing required fields)', {
-            ...errorLogContext,
+            ...logContext,
             msg_id: msg.msg_id.toString(),
           });
         } catch (deleteError) {
           await logError(
             'Failed to delete invalid message',
             {
-              ...errorLogContext,
+              ...logContext,
               msg_id: msg.msg_id.toString(),
             },
             deleteError

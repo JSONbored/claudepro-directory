@@ -16,7 +16,16 @@
  * - Returns early on validation failures
  */
 
-import { badRequestResponse, initRequestLogging, publicCorsHeaders, traceRequestComplete, traceStep } from '@heyclaude/edge-runtime';
+import {
+  badRequestResponse,
+  initRequestLogging,
+  publicCorsHeaders,
+  traceRequestComplete,
+  traceStep,
+  jsonResponse,
+  uploadObject,
+  getStorageServiceClient,
+} from '@heyclaude/edge-runtime';
 import {
   createDataApiContext,
   logError,
@@ -28,11 +37,6 @@ import {
   getImageDimensions,
 } from '@heyclaude/shared-runtime/image/manipulation.ts';
 import { MagickFormat } from '@imagemagick/magick-wasm';
-import {
-  uploadObject,
-  getStorageServiceClient,
-  jsonResponse,
-} from '@heyclaude/edge-runtime';
 
 const CORS = publicCorsHeaders;
 
@@ -101,6 +105,38 @@ export async function handleLogoOptimizeRoute(req: Request): Promise<Response> {
 
   if (req.method !== 'POST') {
     return badRequestResponse('Method not allowed. Use POST.', CORS);
+  }
+
+  // Authenticate: Internal-only endpoint (requires service role key)
+  // This endpoint performs privileged operations (storage uploads, DB updates)
+  // and must be protected from unauthorized access
+  const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+  if (!serviceRoleKey) {
+    await logError('SUPABASE_SERVICE_ROLE_KEY not configured', logContext);
+    return jsonResponse(
+      {
+        success: false,
+        error: 'Internal Server Error',
+      } satisfies LogoOptimizeResponse,
+      500,
+      CORS
+    );
+  }
+
+  // Accept Authorization: Bearer <service_role_key> header
+  const authHeader = req.headers.get('Authorization');
+  const providedKey = authHeader?.replace('Bearer ', '').trim();
+
+  if (!providedKey || providedKey !== serviceRoleKey) {
+    logInfo('Unauthorized logo optimization request', logContext);
+    return jsonResponse(
+      {
+        success: false,
+        error: 'Unauthorized',
+      } satisfies LogoOptimizeResponse,
+      401,
+      CORS
+    );
   }
 
   try {

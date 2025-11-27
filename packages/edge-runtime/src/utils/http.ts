@@ -62,6 +62,12 @@ export const getHeadCorsHeaders = {
   'Access-Control-Allow-Headers': 'Content-Type',
 };
 
+export const postCorsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+};
+
 export function getAuthenticatedCorsHeaders(requestOrigin: string | null): Record<string, string> {
   const allowedOrigins = [
     'https://claudepro.directory',

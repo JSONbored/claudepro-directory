@@ -65,7 +65,7 @@ export interface GeneratePackageResponse {
   content_id: string;
   category: DatabaseGenerated['public']['Enums']['content_category'];
   slug: string;
-  storage_url: string; // Required for success, empty string for async/error cases
+  storage_url: string | null; // URL when generation completes, null for async/queued cases
   metadata?: Record<string, unknown>;
   message?: string;
   error?: string;

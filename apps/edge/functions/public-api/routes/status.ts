@@ -1,6 +1,5 @@
 import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
 import {
-  badRequestResponse,
   buildCacheHeaders,
   errorResponse,
   getOnlyCorsHeaders,
@@ -10,7 +9,14 @@ import {
   traceRequestComplete,
   traceStep,
 } from '@heyclaude/edge-runtime';
-import { buildSecurityHeaders, createDataApiContext, logger } from '@heyclaude/shared-runtime';
+import {
+  buildSecurityHeaders,
+  createDataApiContext,
+  logger,
+  getStringProperty,
+  getNumberProperty,
+  getObjectProperty,
+} from '@heyclaude/shared-runtime';
 
 const CORS = getOnlyCorsHeaders;
 
@@ -39,40 +45,6 @@ function transformHealthResult(
     };
   };
 } {
-  // Safely extract properties from result
-  const getStringProperty = (obj: unknown, key: string): string | undefined => {
-    if (typeof obj !== 'object' || obj === null) {
-      return undefined;
-    }
-    const desc = Object.getOwnPropertyDescriptor(obj, key);
-    if (desc && typeof desc.value === 'string') {
-      return desc.value;
-    }
-    return undefined;
-  };
-
-  const getNumberProperty = (obj: unknown, key: string): number | undefined => {
-    if (typeof obj !== 'object' || obj === null) {
-      return undefined;
-    }
-    const desc = Object.getOwnPropertyDescriptor(obj, key);
-    if (desc && typeof desc.value === 'number') {
-      return desc.value;
-    }
-    return undefined;
-  };
-
-  const getObjectProperty = (obj: unknown, key: string): unknown => {
-    if (typeof obj !== 'object' || obj === null) {
-      return undefined;
-    }
-    const desc = Object.getOwnPropertyDescriptor(obj, key);
-    if (desc && typeof desc.value === 'object' && desc.value !== null) {
-      return desc.value;
-    }
-    return undefined;
-  };
-
   const checks = getObjectProperty(result, 'checks');
   const checksDb = checks ? getObjectProperty(checks, 'database') : undefined;
   const checksContent = checks ? getObjectProperty(checks, 'content_table') : undefined;
@@ -160,7 +132,18 @@ export async function handleStatusRoute(
   });
   
   if (segments.length > 0) {
-    return badRequestResponse(`Invalid endpoint: /status/${segments.join('/')}`, CORS);
+    // Return 404 for paths that don't exist
+    return new Response(
+      JSON.stringify({ error: 'Not Found', message: `Endpoint /status/${segments.join('/')} does not exist` }),
+      { 
+        status: 404, 
+        headers: { 
+          'Content-Type': 'application/json; charset=utf-8',
+          ...buildSecurityHeaders(),
+          ...CORS,
+        } 
+      }
+    );
   }
 
   if (method !== 'GET') {

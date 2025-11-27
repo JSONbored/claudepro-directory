@@ -84,6 +84,8 @@ export const getPaymentPlanCatalog = cache(async (): Promise<PaymentPlanCatalogE
       },
       {
         operation: 'getPaymentPlanCatalog',
+        logger: reqLogger, // Use child logger to avoid passing requestId/operation repeatedly
+        requestId, // Pass requestId for return value
         logLevel: 'info',
       }
     );
@@ -178,6 +180,8 @@ export async function getJobBillingSummaries(
       },
       {
         operation: 'getJobBillingSummaries',
+        logger: reqLogger, // Use child logger to avoid passing requestId/operation repeatedly
+        requestId, // Pass requestId for return value
         logMeta: { jobCount: jobIds.length },
         logLevel: 'info',
       }

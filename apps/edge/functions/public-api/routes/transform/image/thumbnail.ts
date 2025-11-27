@@ -170,13 +170,42 @@ export async function handleThumbnailGenerateRoute(req: Request): Promise<Respon
         );
       }
 
+      // Validate maxDimension if provided
+      let maxDimension: number | undefined;
+      if (maxDimensionStr) {
+        // Reject if string contains decimal point or is not a valid integer string
+        if (!/^\d+$/.test(maxDimensionStr)) {
+          return jsonResponse(
+            {
+              success: false,
+              error: 'Invalid maxDimension: must be a positive integer',
+            } satisfies ThumbnailGenerateResponse,
+            400,
+            CORS
+          );
+        }
+        const parsed = parseInt(maxDimensionStr, 10);
+        if (Number.isFinite(parsed) && parsed > 0 && Number.isInteger(parsed)) {
+          maxDimension = parsed;
+        } else {
+          return jsonResponse(
+            {
+              success: false,
+              error: 'Invalid maxDimension: must be a positive integer',
+            } satisfies ThumbnailGenerateResponse,
+            400,
+            CORS
+          );
+        }
+      }
+
       body = {
         imageData: imageBytes,
         userId,
         useSlug,
         ...(contentId ? { contentId } : {}),
         ...(oldThumbnailPath ? { oldThumbnailPath } : {}),
-        ...(maxDimensionStr ? { maxDimension: parseInt(maxDimensionStr, 10) } : {}),
+        ...(maxDimension !== undefined ? { maxDimension } : {}),
       };
     } else {
       // JSON body
@@ -209,6 +238,26 @@ export async function handleThumbnailGenerateRoute(req: Request): Promise<Respon
             {
               success: false,
               error: `Invalid base64 image data: ${errorMessage}`,
+            } satisfies ThumbnailGenerateResponse,
+            400,
+            CORS
+          );
+        }
+      }
+
+      // Validate maxDimension if provided in JSON body
+      if (body.maxDimension !== undefined) {
+        const maxDim = body.maxDimension;
+        if (
+          typeof maxDim !== 'number' ||
+          !Number.isFinite(maxDim) ||
+          maxDim <= 0 ||
+          !Number.isInteger(maxDim)
+        ) {
+          return jsonResponse(
+            {
+              success: false,
+              error: 'Invalid maxDimension: must be a positive integer',
             } satisfies ThumbnailGenerateResponse,
             400,
             CORS

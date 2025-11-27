@@ -6,13 +6,37 @@
  */
 
 import { edgeEnv, initRequestLogging, jsonResponse, traceStep } from '@heyclaude/edge-runtime';
-import { createDataApiContext, logError, logger } from '@heyclaude/shared-runtime';
+import { createDataApiContext, getEnvVar, logError, logger } from '@heyclaude/shared-runtime';
 import type { Context } from 'hono';
 
-const MCP_SERVER_URL = Deno.env.get('MCP_SERVER_URL') || 'https://mcp.heyclau.de';
+const MCP_SERVER_URL = getEnvVar('MCP_SERVER_URL') ?? 'https://mcp.heyclau.de';
 const MCP_RESOURCE_URL = `${MCP_SERVER_URL}/mcp`;
 const SUPABASE_URL = edgeEnv.supabase.url;
 const SUPABASE_AUTH_URL = `${SUPABASE_URL}/auth/v1`;
+
+/**
+ * Common logging setup for metadata endpoints
+ */
+function setupMetadataLogging(action: string, method: string = 'GET') {
+  const logContext = createDataApiContext(action, {
+    app: 'mcp-directory',
+    method,
+  });
+
+  // Initialize request logging with trace and bindings (Phase 1 & 2)
+  initRequestLogging(logContext);
+  traceStep(`${action} request received`, logContext);
+  
+  // Set bindings for this request - mixin will automatically inject these into all subsequent logs
+  logger.setBindings({
+    requestId: logContext.request_id,
+    operation: logContext.action || action,
+    function: logContext.function,
+    method,
+  });
+
+  return logContext;
+}
 
 /**
  * Get OAuth Protected Resource Metadata (RFC 9728)
@@ -25,22 +49,7 @@ const SUPABASE_AUTH_URL = `${SUPABASE_URL}/auth/v1`;
  * - The resource identifier for this MCP server
  */
 export async function handleProtectedResourceMetadata(_c: Context): Promise<Response> {
-  const logContext = createDataApiContext('oauth-protected-resource-metadata', {
-    app: 'mcp-directory',
-    method: 'GET',
-  });
-
-  // Initialize request logging with trace and bindings (Phase 1 & 2)
-  initRequestLogging(logContext);
-  traceStep('Protected resource metadata request received', logContext);
-  
-  // Set bindings for this request - mixin will automatically inject these into all subsequent logs
-  logger.setBindings({
-    requestId: logContext.request_id,
-    operation: logContext.action || 'oauth-protected-resource-metadata',
-    function: logContext.function,
-    method: 'GET',
-  });
+  const logContext = setupMetadataLogging('oauth-protected-resource-metadata');
 
   try {
     const metadata = {
@@ -83,22 +92,7 @@ export async function handleProtectedResourceMetadata(_c: Context): Promise<Resp
  * Endpoint: GET /.well-known/oauth-authorization-server
  */
 export async function handleAuthorizationServerMetadata(_c: Context): Promise<Response> {
-  const logContext = createDataApiContext('oauth-authorization-server-metadata', {
-    app: 'mcp-directory',
-    method: 'GET',
-  });
-
-  // Initialize request logging with trace and bindings (Phase 1 & 2)
-  initRequestLogging(logContext);
-  traceStep('Authorization server metadata request received', logContext);
-  
-  // Set bindings for this request - mixin will automatically inject these into all subsequent logs
-  logger.setBindings({
-    requestId: logContext.request_id,
-    operation: logContext.action || 'oauth-authorization-server-metadata',
-    function: logContext.function,
-    method: 'GET',
-  });
+  const logContext = setupMetadataLogging('oauth-authorization-server-metadata');
 
   try {
     // Supabase Auth provides OIDC discovery at:

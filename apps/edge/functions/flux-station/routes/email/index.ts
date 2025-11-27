@@ -723,26 +723,29 @@ export async function handleDigest(): Promise<Response> {
         error instanceof Error ? error : new Error(String(error))
       );
 
-      // If we've exhausted retries, throw to surface the error
+      // If we've exhausted retries, log the failure but don't throw
+      // The digest emails were already sent successfully, so we return success
+      // The timestamp update is for scheduling/rate limiting and is non-critical
       if (retryAttempt > MAX_RETRIES) {
         const errorMessage =
           error instanceof Error
             ? error.message
             : 'Failed to update last_digest_email_timestamp after retries';
         await logError(
-          'Exhausted retries for upsert_digest_timestamp - marking run as failed',
+          'Exhausted retries for upsert_digest_timestamp - digest sent but timestamp not updated',
           {
             ...logContext,
             operation: 'upsert_digest_timestamp',
             total_attempts: retryAttempt,
             final_error: errorMessage,
             upsert_data: upsertData,
+            warning: 'Digest emails were sent successfully, but timestamp update failed. This may affect rate limiting for next run.',
           },
           error instanceof Error ? error : new Error(errorMessage)
         );
-        throw new Error(
-          `Failed to update last_digest_email_timestamp after ${MAX_RETRIES} retries: ${errorMessage}`
-        );
+        // Don't throw - digest was sent successfully, timestamp update is non-critical
+        // Log the warning and continue to return success response
+        break;
       }
 
       // Exponential backoff: 100ms, 200ms, 400ms

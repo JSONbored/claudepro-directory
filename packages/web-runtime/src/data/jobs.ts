@@ -99,6 +99,8 @@ async function getFilteredJobsDirect(
       },
       {
         operation: 'getFilteredJobsDirect',
+        logger: reqLogger, // Use child logger to avoid passing requestId/operation repeatedly
+        requestId, // Pass requestId for return value
         logMeta: filtersLog,
         logLevel: 'info',
       }

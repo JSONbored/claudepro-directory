@@ -104,8 +104,9 @@ export async function handleGeneratePackage(
 
   // Accept Authorization: Bearer <service_role_key> header
   // Database triggers use: Authorization: Bearer <service_role_key>
+  // Use case-insensitive matching per OAuth2 spec (RFC 6750)
   const authHeader = request.headers.get('Authorization');
-  const providedKey = authHeader?.replace('Bearer ', '').trim();
+  const providedKey = authHeader?.replace(/^Bearer /i, '').trim();
 
   // Use timing-safe comparison to prevent timing attacks
   if (!providedKey || !timingSafeEqual(providedKey, serviceRoleKey)) {
@@ -253,7 +254,7 @@ export async function handleGeneratePackage(
         content_id,
         category,
         slug: contentRow.slug || '',
-        storage_url: '', // Will be set when generation completes
+        storage_url: null, // Will be populated when generation completes
         message: 'Package generation queued successfully',
       };
 

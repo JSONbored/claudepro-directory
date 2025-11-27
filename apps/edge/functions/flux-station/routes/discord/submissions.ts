@@ -95,7 +95,7 @@ export async function handleDiscordSubmissions(_req: Request): Promise<Response>
 
     if (!messages || messages.length === 0) {
       traceRequestComplete(logContext);
-      return successResponse({ message: 'No messages in queue', processed: 0 }, 200);
+      return successResponse({ message: 'No messages in queue', processed: 0 }, 200, publicCorsHeaders);
     }
     
     traceStep(`Processing ${messages.length} Discord submission notifications`, logContext);
@@ -217,7 +217,8 @@ export async function handleDiscordSubmissions(_req: Request): Promise<Response>
         processed: messages.length,
         results,
       },
-      200
+      200,
+      publicCorsHeaders
     );
   } catch (error) {
     await logError('Submission Discord queue error', logContext, error);

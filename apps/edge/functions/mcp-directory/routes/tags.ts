@@ -61,6 +61,8 @@ export async function handleGetContentByTag(
   }
 
   // Filter by logic (AND vs OR)
+  // Note: RPC uses OR logic for tags, so AND filtering is done client-side.
+  // For large datasets, consider RPC-level AND support.
   let filteredItems = items;
 
   if (logic === 'AND') {

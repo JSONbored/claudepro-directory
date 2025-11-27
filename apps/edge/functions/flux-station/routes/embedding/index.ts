@@ -282,10 +282,10 @@ async function processEmbeddingGeneration(
 
     if (fetchError || !content) {
       // Use dbQuery serializer for consistent database query formatting
-      const errorLogContext = createUtilityContext('generate-embedding', 'fetch-content');
+      const logContext = createUtilityContext('generate-embedding', 'fetch-content');
       if (fetchError) {
         await logError('Failed to fetch content for embedding generation', {
-          ...errorLogContext,
+          ...logContext,
           dbQuery: {
             table: 'content',
             operation: 'select',
@@ -334,11 +334,11 @@ async function processEmbeddingGeneration(
   } catch (error) {
     const errorMsg = errorToString(error);
     errors.push(`Embedding generation failed: ${errorMsg}`);
-    const errorLogContext = createUtilityContext('generate-embedding', 'generation-error');
+    const logContext = createUtilityContext('generate-embedding', 'generation-error');
     await logError(
       'Embedding generation error',
       {
-        ...errorLogContext,
+        ...logContext,
         content_id,
       },
       error
@@ -393,11 +393,11 @@ export async function handleEmbeddingGenerationQueue(_req: Request): Promise<Res
       const queueMessage = msg.message;
 
       if (!isValidQueueMessage(queueMessage)) {
-        const errorLogContext = createUtilityContext('generate-embedding', 'invalid-message');
+        const logContext = createUtilityContext('generate-embedding', 'invalid-message');
         await logError(
           'Invalid queue message format',
           {
-            ...errorLogContext,
+            ...logContext,
             msg_id: msg.msg_id.toString(),
           },
           new Error(`Invalid message: ${JSON.stringify(queueMessage)}`)
@@ -407,14 +407,14 @@ export async function handleEmbeddingGenerationQueue(_req: Request): Promise<Res
         try {
           await pgmqDelete(EMBEDDING_GENERATION_QUEUE, msg.msg_id);
           logInfo('Deleted invalid message', {
-            ...errorLogContext,
+            ...logContext,
             msg_id: msg.msg_id.toString(),
           });
         } catch (deleteError) {
           await logError(
             'Failed to delete invalid message',
             {
-              ...errorLogContext,
+              ...logContext,
               msg_id: msg.msg_id.toString(),
             },
             deleteError
@@ -589,8 +589,10 @@ export async function handleEmbeddingWebhook(req: Request): Promise<Response> {
       const now = Date.now();
       const timestampAge = now - timestampMs;
       const maxAge = 5 * 60 * 1000; // 5 minutes
+      // Allow 30 seconds into the future for clock skew
+      const futureTolerance = 30 * 1000; // 30 seconds
 
-      if (timestampAge > maxAge || timestampAge < -maxAge) {
+      if (timestampAge > maxAge || timestampAge < -futureTolerance) {
         logWarn('Webhook timestamp too old or too far in future', {
           ...logContext,
           timestamp: timestampMs,

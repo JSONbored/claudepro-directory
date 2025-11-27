@@ -94,12 +94,11 @@ export async function handleOAuthAuthorize(c: Context): Promise<Response> {
     // Basic URL validation for redirect_uri to prevent open redirect attacks
     // Note: Supabase Auth also validates registered redirect URIs, but we add
     // an extra layer of defense here
-    if (redirectUri) {
-      try {
-        new URL(redirectUri);
-      } catch {
-        return jsonError(c, 'invalid_request', 'Invalid redirect_uri format', 400);
-      }
+    // redirectUri is guaranteed to be truthy from the check above
+    try {
+      new URL(redirectUri);
+    } catch {
+      return jsonError(c, 'invalid_request', 'Invalid redirect_uri format', 400);
     }
 
     // Validate response_type (OAuth 2.1 requires 'code')

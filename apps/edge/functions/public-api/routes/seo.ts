@@ -14,6 +14,7 @@ import {
 import type { BaseLogContext } from '@heyclaude/shared-runtime';
 import {
   buildSecurityHeaders,
+  createDataApiContext,
   logError,
   logInfo,
   logWarn,
@@ -32,12 +33,11 @@ export async function handleSeoRoute(
   logContext?: BaseLogContext
 ): Promise<Response> {
   // Create log context if not provided
-  const finalLogContext = logContext || {
-    function: 'seo',
-    action: 'seo-route',
-    request_id: crypto.randomUUID(),
-    started_at: new Date().toISOString(),
-  };
+  const finalLogContext = logContext || createDataApiContext('seo', {
+    path: url.pathname,
+    method,
+    app: 'public-api',
+  });
   
   // Initialize request logging with trace and bindings
   initRequestLogging(finalLogContext);

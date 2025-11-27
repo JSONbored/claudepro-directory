@@ -392,9 +392,10 @@ export async function handleChangelogNotify(_req: Request): Promise<Response> {
       return successResponse({ message: 'No messages in queue', processed: 0 }, 200);
     }
 
-    const batchLogContext = createUtilityContext('flux-station', 'changelog-notify-batch', {
+    const batchLogContext = {
+      ...logContext,
       batch_size: messages.length,
-    });
+    };
     logInfo(`Processing ${messages.length} changelog release jobs`, batchLogContext);
     traceStep(`Processing ${messages.length} changelog release jobs`, batchLogContext);
 
@@ -406,24 +407,22 @@ export async function handleChangelogNotify(_req: Request): Promise<Response> {
     }> = [];
 
     // Process each message
-    for (const msg of messages || []) {
+    for (const msg of messages) {
       // Validate queue message structure
       if (!isValidChangelogReleaseJob(msg.message)) {
-        const invalidLogContext = createUtilityContext(
-          'flux-station',
-          'changelog-notify-validate',
-          {
-            msg_id: msg.msg_id.toString(),
-          }
-        );
-        await logError('Invalid changelog release job structure', invalidLogContext);
+        const logContext = {
+          ...batchLogContext,
+          msg_id: msg.msg_id.toString(),
+          operation: 'validate-payload',
+        };
+        await logError('Invalid changelog release job structure', logContext);
 
-        // Delete invalid message to prevent infinite retries
-        try {
-          await pgmqDelete(CHANGELOG_NOTIFICATIONS_QUEUE, msg.msg_id);
-        } catch (error) {
-          await logError('Failed to delete invalid message', invalidLogContext, error);
-        }
+          // Delete invalid message to prevent infinite retries
+          try {
+            await pgmqDelete(CHANGELOG_NOTIFICATIONS_QUEUE, msg.msg_id);
+          } catch (error) {
+            await logError('Failed to delete invalid message', logContext, error);
+          }
 
         results.push({
           msg_id: msg.msg_id.toString(),
@@ -462,10 +461,11 @@ export async function handleChangelogNotify(_req: Request): Promise<Response> {
         }
       } catch (error) {
         const errorMsg = errorToString(error);
-        const errorLogContext = createUtilityContext('flux-station', 'changelog-notify-message', {
+        const logContext = {
+          ...batchLogContext,
           msg_id: message.msg_id.toString(),
-        });
-        await logError('Unexpected error processing message', errorLogContext, error);
+        };
+        await logError('Unexpected error processing message', logContext, error);
         results.push({
           msg_id: message.msg_id.toString(),
           status: 'failed',

@@ -18,6 +18,8 @@ import type { BaseLogContext } from '@heyclaude/shared-runtime';
 import {
   buildSecurityHeaders,
   createDataApiContext,
+  getNumberProperty,
+  getStringProperty,
   logError,
   logInfo,
   logger,
@@ -96,28 +98,6 @@ async function handleSitemapGet(url: URL, logContext: BaseLogContext): Promise<R
       return jsonResponse({ error: 'No URLs returned from database' }, 500, CORS);
     }
 
-    // Safely extract properties from URL objects
-    const getStringProperty = (obj: unknown, key: string): string | undefined => {
-      if (typeof obj !== 'object' || obj === null) {
-        return undefined;
-      }
-      const desc = Object.getOwnPropertyDescriptor(obj, key);
-      if (desc && typeof desc.value === 'string') {
-        return desc.value;
-      }
-      return undefined;
-    };
-
-    const getNumberProperty = (obj: unknown, key: string): number | undefined => {
-      if (typeof obj !== 'object' || obj === null) {
-        return undefined;
-      }
-      const desc = Object.getOwnPropertyDescriptor(obj, key);
-      if (desc && typeof desc.value === 'number') {
-        return desc.value;
-      }
-      return undefined;
-    };
 
     // Map URLs to response format, filtering out invalid entries
     const mappedUrls: Array<{
@@ -258,17 +238,6 @@ async function handleSitemapIndexNow(req: Request, logContext: BaseLogContext): 
     return jsonResponse({ error: 'No URLs to submit to IndexNow' }, 500, CORS);
   }
 
-  // Safely extract path property from URL objects
-  const getStringProperty = (obj: unknown, key: string): string | undefined => {
-    if (typeof obj !== 'object' || obj === null) {
-      return undefined;
-    }
-    const desc = Object.getOwnPropertyDescriptor(obj, key);
-    if (desc && typeof desc.value === 'string') {
-      return desc.value;
-    }
-    return undefined;
-  };
 
   const urlList = urls
     .map((u: unknown) => {

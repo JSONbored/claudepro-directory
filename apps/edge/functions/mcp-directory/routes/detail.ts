@@ -84,12 +84,16 @@ export async function handleGetContentDetail(
   };
 
   // Create detailed text summary
+  const dateAddedText = details.dateAdded
+    ? new Date(details.dateAdded).toLocaleDateString()
+    : 'Unknown';
+
   const textSummary = `
 # ${details.title}
 
 **Category:** ${details.category}
 **Author:** ${details.author}
-**Added:** ${details.dateAdded}
+**Added:** ${dateAddedText}
 **Tags:** ${details.tags.join(', ')}
 
 ## Description

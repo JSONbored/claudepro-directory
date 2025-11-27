@@ -8,11 +8,15 @@
 import { logger } from '../logger.ts';
 import { generateRequestId } from './request-id.ts';
 import { normalizeError } from '../errors.ts';
-import type { LogContext } from '../logger.ts';
 
 export interface PerformanceMetricsOptions {
   operation: string;
   requestId?: string;
+  /**
+   * Optional child logger to use instead of base logger
+   * If provided, requestId and operation from logger bindings will be used
+   */
+  logger?: typeof logger;
   logMeta?: Record<string, unknown>;
   /**
    * Log level for successful operations
@@ -58,6 +62,7 @@ export async function trackPerformance<T>(
   const {
     operation: operationName,
     requestId: providedRequestId,
+    logger: providedLogger,
     logMeta = {},
     logLevel = 'info',
     slowThreshold = 1000,
@@ -65,6 +70,13 @@ export async function trackPerformance<T>(
 
   const startTime = performance.now();
   const requestId = providedRequestId ?? generateRequestId();
+  
+  // Use provided child logger if available, otherwise create one from base logger
+  // This avoids passing requestId/operation in every log call
+  const perfLogger = providedLogger ?? logger.child({
+    requestId,
+    operation: operationName,
+  });
 
   try {
     const result = await operation();
@@ -73,29 +85,23 @@ export async function trackPerformance<T>(
 
     // Always log slow operations as warnings
     if (duration > slowThreshold) {
-      logger.warn(`Slow operation detected: ${operationName}`, {
-        requestId,
-        operation: operationName,
+      perfLogger.warn(`Slow operation detected: ${operationName}`, {
         duration: roundedDuration,
         slowThreshold,
         ...logMeta,
-      } as LogContext);
+      });
     } else if (logLevel === 'info') {
       // Log all operations at info level (useful for debugging)
-      logger.info(`Operation completed: ${operationName}`, {
-        requestId,
-        operation: operationName,
+      perfLogger.info(`Operation completed: ${operationName}`, {
         duration: roundedDuration,
         ...logMeta,
-      } as LogContext);
+      });
     } else if (logLevel === 'debug' && process.env.NODE_ENV === 'development') {
       // Only log in development for debug level
-      logger.info(`Operation completed: ${operationName}`, {
-        requestId,
-        operation: operationName,
+      perfLogger.info(`Operation completed: ${operationName}`, {
         duration: roundedDuration,
         ...logMeta,
-      } as LogContext);
+      });
     }
 
     return { result, duration, requestId };
@@ -105,12 +111,10 @@ export async function trackPerformance<T>(
 
     // Always log errors with duration
     const normalized = normalizeError(error, `Operation failed: ${operationName}`);
-    logger.error(`Operation failed: ${operationName}`, normalized, {
-      requestId,
-      operation: operationName,
+    perfLogger.error(`Operation failed: ${operationName}`, normalized, {
       duration: roundedDuration,
       ...logMeta,
-    } as LogContext);
+    });
 
     throw error;
   }
@@ -126,6 +130,7 @@ export function trackPerformanceSync<T>(
   const {
     operation: operationName,
     requestId: providedRequestId,
+    logger: providedLogger,
     logMeta = {},
     logLevel = 'info',
     slowThreshold = 1000,
@@ -133,6 +138,13 @@ export function trackPerformanceSync<T>(
 
   const startTime = performance.now();
   const requestId = providedRequestId ?? generateRequestId();
+  
+  // Use provided child logger if available, otherwise create one from base logger
+  // This avoids passing requestId/operation in every log call
+  const perfLogger = providedLogger ?? logger.child({
+    requestId,
+    operation: operationName,
+  });
 
   try {
     const result = operation();
@@ -141,27 +153,21 @@ export function trackPerformanceSync<T>(
 
     // Always log slow operations as warnings
     if (duration > slowThreshold) {
-      logger.warn(`Slow operation detected: ${operationName}`, {
-        requestId,
-        operation: operationName,
+      perfLogger.warn(`Slow operation detected: ${operationName}`, {
         duration: roundedDuration,
         slowThreshold,
         ...logMeta,
-      } as LogContext);
+      });
     } else if (logLevel === 'info') {
-      logger.info(`Operation completed: ${operationName}`, {
-        requestId,
-        operation: operationName,
+      perfLogger.info(`Operation completed: ${operationName}`, {
         duration: roundedDuration,
         ...logMeta,
-      } as LogContext);
+      });
     } else if (logLevel === 'debug' && process.env.NODE_ENV === 'development') {
-      logger.info(`Operation completed: ${operationName}`, {
-        requestId,
-        operation: operationName,
+      perfLogger.info(`Operation completed: ${operationName}`, {
         duration: roundedDuration,
         ...logMeta,
-      } as LogContext);
+      });
     }
 
     return { result, duration, requestId };
@@ -170,12 +176,10 @@ export function trackPerformanceSync<T>(
     const roundedDuration = Math.round(duration);
 
     const normalized = normalizeError(error, `Operation failed: ${operationName}`);
-    logger.error(`Operation failed: ${operationName}`, normalized, {
-      requestId,
-      operation: operationName,
+    perfLogger.error(`Operation failed: ${operationName}`, normalized, {
       duration: roundedDuration,
       ...logMeta,
-    } as LogContext);
+    });
 
     throw error;
   }

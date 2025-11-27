@@ -19,7 +19,7 @@ import { Constants } from '@heyclaude/database-types';
 import {
   badRequestResponse,
   errorResponse,
-  getOnlyCorsHeaders,
+  postCorsHeaders,
   getStorageServiceClient,
   initRequestLogging,
   jsonResponse,
@@ -37,9 +37,10 @@ import {
   logError,
   logInfo,
   logger,
+  timingSafeEqual,
 } from '@heyclaude/shared-runtime';
 
-const CORS = getOnlyCorsHeaders;
+const CORS = postCorsHeaders;
 
 interface UploadPackageRequest {
   content_id: string;
@@ -124,7 +125,7 @@ export async function handleUploadPackage(
   const authHeader = request.headers.get('Authorization');
   const providedKey = authHeader?.replace('Bearer ', '').trim();
 
-  if (!providedKey || providedKey !== serviceRoleKey) {
+  if (!providedKey || !timingSafeEqual(providedKey, serviceRoleKey)) {
     logInfo('Unauthorized package upload request', {
       ...finalLogContext,
       hasAuthHeader: !!authHeader,

@@ -39,6 +39,8 @@ export async function getCommunityDirectory(options: {
         },
         {
           operation: 'getCommunityDirectory-search',
+          logger: reqLogger, // Use child logger to avoid passing requestId/operation repeatedly
+          requestId, // Pass requestId for return value
           logMeta: { query: searchQuery.trim(), limit },
           logLevel: 'info',
         }

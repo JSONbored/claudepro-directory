@@ -287,7 +287,10 @@ async function processChangelogWebhook(message: ChangelogWebhookQueueMessage): P
       const errorMsg = 'Missing commit metadata in deployment payload';
       errors.push(errorMsg);
       await logError('Missing commit metadata', logContext);
-      return exitWithResult({ success: false, errors }, { errorMessage: errorMsg });
+      return exitWithResult(
+        { success: true, errors },
+        { errorMessage: errorMsg, metadata: { skipped: true, reason: 'missing_commit_metadata' } }
+      );
     }
 
     // 5. Fetch commits from GitHub (with timeout, retry, and circuit breaker)
@@ -534,9 +537,10 @@ export async function handleChangelogProcess(_req: Request): Promise<Response> {
       return successResponse({ message: 'No messages in queue', processed: 0 }, 200);
     }
 
-    const batchLogContext = createUtilityContext('flux-station', 'changelog-process-batch', {
+    const batchLogContext = {
+      ...logContext,
       batch_size: messages.length,
-    });
+    };
     logInfo(`Processing ${messages.length} changelog webhook jobs`, batchLogContext);
     traceStep(`Processing batch of ${messages.length} messages`, batchLogContext);
 
@@ -550,20 +554,18 @@ export async function handleChangelogProcess(_req: Request): Promise<Response> {
     for (const msg of messages) {
       // Validate queue message structure
       if (!isValidChangelogWebhookProcessingJob(msg.message)) {
-        const invalidLogContext = createUtilityContext(
-          'flux-station',
-          'changelog-process-validate',
-          {
-            msg_id: msg.msg_id.toString(),
-          }
-        );
-        await logError('Invalid changelog webhook processing job structure', invalidLogContext);
+        const logContext = {
+          ...batchLogContext,
+          msg_id: msg.msg_id.toString(),
+          operation: 'validate-payload',
+        };
+        await logError('Invalid changelog webhook processing job structure', logContext);
 
         // Delete invalid message to prevent infinite retries
         try {
           await pgmqDelete(CHANGELOG_PROCESSING_QUEUE, msg.msg_id);
         } catch (error) {
-          await logError('Failed to delete invalid message', invalidLogContext, error);
+          await logError('Failed to delete invalid message', logContext, error);
         }
 
         results.push({
@@ -604,10 +606,11 @@ export async function handleChangelogProcess(_req: Request): Promise<Response> {
         }
       } catch (error) {
         const errorMsg = errorToString(error);
-        const errorLogContext = createUtilityContext('flux-station', 'changelog-process-message', {
+        const logContext = {
+          ...batchLogContext,
           msg_id: message.msg_id.toString(),
-        });
-        await logError('Unexpected error processing message', errorLogContext, error);
+        };
+        await logError('Unexpected error processing message', logContext, error);
         results.push({
           msg_id: message.msg_id.toString(),
           status: 'failed',

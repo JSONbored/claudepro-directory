@@ -17,6 +17,8 @@ import {
 } from '@heyclaude/edge-runtime';
 import {
   createNotificationRouterContext,
+  errorToString,
+  getProperty,
   logger,
   MAX_BODY_SIZE,
   validateBodySize,
@@ -70,7 +72,6 @@ export async function handleDismissNotifications(req: Request): Promise<Response
     }
     payload = JSON.parse(bodyText);
   } catch (error) {
-    const { errorToString } = await import('@heyclaude/shared-runtime');
     return badRequestResponse(
       `Invalid JSON payload: ${errorToString(error)}`,
       notificationCorsHeaders
@@ -78,14 +79,6 @@ export async function handleDismissNotifications(req: Request): Promise<Response
   }
 
   // Validate payload structure
-  const getProperty = (obj: unknown, key: string): unknown => {
-    if (typeof obj !== 'object' || obj === null) {
-      return undefined;
-    }
-    const desc = Object.getOwnPropertyDescriptor(obj, key);
-    return desc?.value;
-  };
-
   const notificationIdsValue = getProperty(payload, 'notificationIds');
   const sanitizedIds = Array.isArray(notificationIdsValue)
     ? Array.from(

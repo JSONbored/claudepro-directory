@@ -12,7 +12,7 @@ import {
   traceRequestComplete,
   traceStep,
 } from '@heyclaude/edge-runtime';
-import { buildSecurityHeaders, createDataApiContext, logInfo, logger } from '@heyclaude/shared-runtime';
+import { buildSecurityHeaders, createDataApiContext, logError, logInfo, logger } from '@heyclaude/shared-runtime';
 
 type ContentCategory = DatabaseGenerated['public']['Enums']['content_category'];
 const CONTENT_CATEGORY_VALUES = Constants.public.Enums.content_category;
@@ -28,6 +28,29 @@ function toContentCategory(value: string | null): ContentCategory | null {
 }
 
 const CORS = getOnlyCorsHeaders;
+
+/**
+ * Execute RPC call with consistent error handling and logging
+ */
+async function executeRpcWithLogging<T>(
+  rpcName: string,
+  rpcCall: () => PromiseLike<{ data: T | null; error: unknown }>,
+  args: Record<string, unknown>
+): Promise<T> {
+  const { data, error } = await rpcCall();
+  if (error || data == null) {
+    if (error) {
+      await logError('RPC call failed in generateFeedPayload', {
+        dbQuery: {
+          rpcName,
+          args, // Will be redacted by Pino's redact config
+        },
+      }, error);
+    }
+    throw error ?? new Error(`${rpcName} returned null`);
+  }
+  return data;
+}
 const FEED_LIMIT = 50;
 
 export async function handleFeedsRoute(
@@ -142,22 +165,13 @@ async function generateFeedPayload(
       const rpcArgs = {
         p_limit: FEED_LIMIT,
       } satisfies DatabaseGenerated['public']['Functions']['generate_changelog_rss_feed']['Args'];
-      const { data, error } = await supabaseAnon.rpc('generate_changelog_rss_feed', rpcArgs);
-      if (error || data == null) {
-        // Use dbQuery serializer for consistent database query formatting
-        const { logError } = await import('@heyclaude/shared-runtime');
-        if (error) {
-          await logError('RPC call failed in generateFeedPayload', {
-            dbQuery: {
-              rpcName: 'generate_changelog_rss_feed',
-              args: rpcArgs, // Will be redacted by Pino's redact config
-            },
-          }, error);
-        }
-        throw error ?? new Error('generate_changelog_rss_feed returned null');
-      }
+      const feedData = await executeRpcWithLogging(
+        'generate_changelog_rss_feed',
+        () => supabaseAnon.rpc('generate_changelog_rss_feed', rpcArgs),
+        rpcArgs
+      );
       return {
-        xml: data,
+        xml: feedData,
         contentType: 'application/rss+xml; charset=utf-8',
         source: 'PostgreSQL changelog (rss)',
       };
@@ -165,22 +179,13 @@ async function generateFeedPayload(
     const rpcArgs2 = {
       p_limit: FEED_LIMIT,
     } satisfies DatabaseGenerated['public']['Functions']['generate_changelog_atom_feed']['Args'];
-    const { data, error } = await supabaseAnon.rpc('generate_changelog_atom_feed', rpcArgs2);
-    if (error || data == null) {
-      // Use dbQuery serializer for consistent database query formatting
-      const { logError } = await import('@heyclaude/shared-runtime');
-      if (error) {
-        await logError('RPC call failed in generateFeedPayload', {
-          dbQuery: {
-            rpcName: 'generate_changelog_atom_feed',
-            args: rpcArgs2, // Will be redacted by Pino's redact config
-          },
-        }, error);
-      }
-      throw error ?? new Error('generate_changelog_atom_feed returned null');
-    }
+    const feedData = await executeRpcWithLogging(
+      'generate_changelog_atom_feed',
+      () => supabaseAnon.rpc('generate_changelog_atom_feed', rpcArgs2),
+      rpcArgs2
+    );
     return {
-      xml: data,
+      xml: feedData,
       contentType: 'application/atom+xml; charset=utf-8',
       source: 'PostgreSQL changelog (atom)',
     };
@@ -193,22 +198,13 @@ async function generateFeedPayload(
       ...(typedCategory ? { p_category: typedCategory } : {}),
       p_limit: FEED_LIMIT,
     } satisfies DatabaseGenerated['public']['Functions']['generate_content_rss_feed']['Args'];
-    const { data, error } = await supabaseAnon.rpc('generate_content_rss_feed', rpcArgs3);
-    if (error || data == null) {
-      // Use dbQuery serializer for consistent database query formatting
-      const { logError } = await import('@heyclaude/shared-runtime');
-      if (error) {
-        await logError('RPC call failed in generateFeedPayload', {
-          dbQuery: {
-            rpcName: 'generate_content_rss_feed',
-            args: rpcArgs3, // Will be redacted by Pino's redact config
-          },
-        }, error);
-      }
-      throw error ?? new Error('generate_content_rss_feed returned null');
-    }
+    const feedData = await executeRpcWithLogging(
+      'generate_content_rss_feed',
+      () => supabaseAnon.rpc('generate_content_rss_feed', rpcArgs3),
+      rpcArgs3
+    );
     return {
-      xml: data,
+      xml: feedData,
       contentType: 'application/rss+xml; charset=utf-8',
       source: category ? `PostgreSQL content (${category})` : 'PostgreSQL content (all categories)',
     };
@@ -218,22 +214,13 @@ async function generateFeedPayload(
     ...(typedCategory ? { p_category: typedCategory } : {}),
     p_limit: FEED_LIMIT,
   } satisfies DatabaseGenerated['public']['Functions']['generate_content_atom_feed']['Args'];
-  const { data, error } = await supabaseAnon.rpc('generate_content_atom_feed', rpcArgs4);
-  if (error || data == null) {
-    // Use dbQuery serializer for consistent database query formatting
-    const { logError } = await import('@heyclaude/shared-runtime');
-    if (error) {
-      await logError('RPC call failed in generateFeedPayload', {
-        dbQuery: {
-          rpcName: 'generate_content_atom_feed',
-          args: rpcArgs4, // Will be redacted by Pino's redact config
-        },
-      }, error);
-    }
-    throw error ?? new Error('generate_content_atom_feed returned null');
-  }
+  const feedData = await executeRpcWithLogging(
+    'generate_content_atom_feed',
+    () => supabaseAnon.rpc('generate_content_atom_feed', rpcArgs4),
+    rpcArgs4
+  );
   return {
-    xml: data,
+    xml: feedData,
     contentType: 'application/atom+xml; charset=utf-8',
     source: category ? `PostgreSQL content (${category})` : 'PostgreSQL content (all categories)',
   };

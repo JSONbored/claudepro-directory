@@ -72,6 +72,16 @@ async function executeSearchDirect<T>(
 ): Promise<UnifiedSearchResponse<T>> {
   const { trackPerformance } = await import('../utils/performance-metrics.ts');
   const { createSupabaseAnonClient } = await import('../supabase/server-anon.ts');
+  const { logger } = await import('../logger.ts');
+  const { generateRequestId } = await import('../utils/request-id.ts');
+  
+  // Create request-scoped child logger to avoid race conditions
+  const requestId = generateRequestId();
+  const reqLogger = logger.child({
+    requestId,
+    operation: 'executeSearchDirect',
+    module: 'edge/search-client',
+  });
   
   const { result } = await trackPerformance(
     async () => {
@@ -128,6 +138,8 @@ async function executeSearchDirect<T>(
     },
     {
       operation: 'executeSearchDirect',
+      logger: reqLogger, // Use child logger to avoid passing requestId/operation repeatedly
+      requestId, // Pass requestId for return value
       logMeta: {
         query: options.query,
         entities: options.entities,
