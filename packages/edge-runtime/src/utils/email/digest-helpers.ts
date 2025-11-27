@@ -32,14 +32,19 @@ export function getPreviousWeekStart(): string {
  * Get all active newsletter subscribers
  */
 export async function getAllSubscribers(): Promise<string[]> {
-  const { data, error } = await supabaseServiceRole.rpc(
-    'get_active_subscribers',
-    {} as DatabaseGenerated['public']['Functions']['get_active_subscribers']['Args']
-  );
+  const rpcArgs = {} as DatabaseGenerated['public']['Functions']['get_active_subscribers']['Args'];
+  const { data, error } = await supabaseServiceRole.rpc('get_active_subscribers', rpcArgs);
 
   if (error) {
     const logContext = createEmailHandlerContext('get-all-subscribers');
-    logError('Failed to fetch subscribers', logContext, error);
+    // Use dbQuery serializer for consistent database query formatting
+    logError('Failed to fetch subscribers', {
+      ...logContext,
+      dbQuery: {
+        rpcName: 'get_active_subscribers',
+        args: rpcArgs, // Will be redacted by Pino's redact config
+      },
+    }, error);
     return [];
   }
 

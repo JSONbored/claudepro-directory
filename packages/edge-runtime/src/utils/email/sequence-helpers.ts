@@ -97,13 +97,37 @@ export async function processSequenceEmail(
     p_step: step,
     p_success: true,
   } satisfies DatabaseGenerated['public']['Functions']['mark_sequence_email_processed']['Args'];
-  await supabaseServiceRole.rpc('mark_sequence_email_processed', markProcessedArgs);
+  const { error: markError } = await supabaseServiceRole.rpc('mark_sequence_email_processed', markProcessedArgs);
+  
+  if (markError) {
+    // Use dbQuery serializer for consistent database query formatting
+    logError('Failed to mark sequence email processed', {
+      ...logContext,
+      dbQuery: {
+        rpcName: 'mark_sequence_email_processed',
+        args: markProcessedArgs, // Will be redacted by Pino's redact config
+      },
+    }, markError);
+    throw markError;
+  }
 
   const scheduleNextArgs = {
     p_email: email,
     p_current_step: step,
   } satisfies DatabaseGenerated['public']['Functions']['schedule_next_sequence_step']['Args'];
-  await supabaseServiceRole.rpc('schedule_next_sequence_step', scheduleNextArgs);
+  const { error: scheduleError } = await supabaseServiceRole.rpc('schedule_next_sequence_step', scheduleNextArgs);
+  
+  if (scheduleError) {
+    // Use dbQuery serializer for consistent database query formatting
+    logError('Failed to schedule next sequence step', {
+      ...logContext,
+      dbQuery: {
+        rpcName: 'schedule_next_sequence_step',
+        args: scheduleNextArgs, // Will be redacted by Pino's redact config
+      },
+    }, scheduleError);
+    throw scheduleError;
+  }
 
   logInfo('Sequence email processed', {
     ...logContext,

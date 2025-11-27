@@ -6,6 +6,7 @@
 import { highlight } from 'sugar-high';
 import { errorToString } from '@heyclaude/shared-runtime';
 import { createUtilityContext } from '@heyclaude/shared-runtime';
+import { logger } from './logger/index.ts';
 
 export interface HighlightCodeOptions {
   showLineNumbers?: boolean;
@@ -49,10 +50,8 @@ export function highlightCode(
     const logContext = createUtilityContext('code-highlight', 'highlight-failed', {
       code_preview: code.slice(0, 100),
     });
-    console.warn('[code-highlight] Highlighting failed, using fallback', {
-      ...logContext,
-      error: errorToString(error),
-    });
+    const errorObj = error instanceof Error ? error : new Error(errorToString(error));
+    logger.warn({ ...logContext, err: errorObj }, 'Highlighting failed, using fallback');
 
     // Fallback: escape code
     const escapedCode = code

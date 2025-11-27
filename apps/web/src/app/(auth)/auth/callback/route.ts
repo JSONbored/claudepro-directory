@@ -17,10 +17,7 @@ import { type NextRequest, NextResponse } from 'next/server';
 /**
  * Dynamic Rendering Required
  *
- * This route must use dynamic rendering because it imports from @heyclaude/web-runtime
- * which transitively imports feature-flags/flags.ts. The Vercel Flags SDK's flags/next
- * module contains module-level code that calls server functions, which cannot be
- * executed during static site generation.
+ * This route uses dynamic rendering for OAuth callback handling.
  *
  * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic
  */

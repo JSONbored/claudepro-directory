@@ -1,7 +1,7 @@
 'use client';
 
 import type { Database } from '@heyclaude/database-types';
-import { checkConfettiEnabled } from '@heyclaude/web-runtime/actions/feature-flags';
+import { checkConfettiEnabled } from '@heyclaude/web-runtime/config/static-configs';
 import { NEWSLETTER_CTA_CONFIG } from '@heyclaude/web-runtime/core';
 import { Mail } from '@heyclaude/web-runtime/icons';
 import { cn, DIMENSIONS, UI_CLASSES } from '@heyclaude/web-runtime/ui';
@@ -22,9 +22,9 @@ export function NewsletterForm({ source, className }: NewsletterFormProps) {
   const { email, setEmail, isSubmitting, subscribe, error } = useNewsletter({
     source,
     onSuccess: async () => {
-      // Confetti gated by feature flag
-      const confettiResult = await checkConfettiEnabled({});
-      if (confettiResult) {
+      // Check confetti enabled (static config)
+      const confettiEnabled = checkConfettiEnabled();
+      if (confettiEnabled) {
         fireConfetti('subtle');
       }
     },

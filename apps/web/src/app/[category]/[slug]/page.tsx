@@ -278,33 +278,9 @@ export default async function DetailPage({
     currentTags: 'tags' in fullItem ? ensureStringArray(fullItem.tags) : [],
   }).then((result) => result.items);
 
-  // Lazy-load feature flags only when page is rendered (not at module initialization)
-  // Safe fallback during build/ISR if feature flags fail to load
-  let tabsEnabled = false;
-  // Only load feature flags when not running on Edge runtime
-  // Edge runtime doesn't support dynamic imports of server-only modules
-  if (process.env['NEXT_RUNTIME'] !== 'edge') {
-    try {
-      const { featureFlags } = await import('@heyclaude/web-runtime/feature-flags/flags');
-      tabsEnabled = await featureFlags.contentDetailTabs();
-    } catch (error) {
-      // Gracefully fall back to default if feature flags fail to load
-      // This ensures the page still renders during static generation
-      const normalized = normalizeError(error, 'feature-flag-load-failed');
-      logger.warn(
-        'Failed to load contentDetailTabs feature flag, using default',
-        undefined,
-        withDuration(
-          {
-            ...baseLogContext,
-            section: 'feature-flags-fetch',
-            error: normalized.message,
-          },
-          startTime
-        )
-      );
-    }
-  }
+  // Content detail tabs - static default
+  // Set to false to disable tabbed layout, true to enable
+  const tabsEnabled = false;
 
   // No transformation needed - displayTitle computed at build time
   // This eliminates runtime overhead and follows DRY principles

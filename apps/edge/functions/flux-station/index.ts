@@ -470,11 +470,11 @@ serveEdgeApp<FluxStationContext>({
               queuesWithMessages: summary.queuesWithMessages,
               queuesAttempted: summary.queuesAttempted,
               queuesSucceeded: summary.queuesSucceeded,
-              totalMessagesProcessed: summary.results.reduce(
+              totalMessagesProcessed: (summary.results ?? []).reduce(
                 (sum, r) => sum + (r.processed ?? 0),
                 0
               ),
-              results: summary.results,
+              results: summary.results ?? [],
             },
           }),
           {

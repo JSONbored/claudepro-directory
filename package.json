@@ -72,7 +72,6 @@
     "type-check:unused:filtered": "pnpm run generators:build && pnpm exec heyclaude-lint-unused",
     "lint": "pnpm lint:eslint",
     "lint:eslint": "eslint --config config/tools/eslint.config.mjs packages/web-runtime/src/data apps/web/src/app",
-    "verify:flags": "pnpm run generators:build && pnpm exec heyclaude-verify-flags",
     "verify:routes": "pnpm run generators:build && pnpm exec heyclaude-verify-routes",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -93,7 +92,7 @@
     "@eslint/js": "^9.39.1",
     "@heyclaude/generators": "workspace:*",
     "@react-email/render": "^2.0.0",
-    "@supabase/supabase-js": "^2.84.0",
+    "@supabase/supabase-js": "^2.86.0",
     "@total-typescript/ts-reset": "^0.6.1",
     "@types/archiver": "^7.0.0",
     "@types/node": "^24.10.1",
@@ -117,7 +116,7 @@
     "typescript": "5.9.3",
     "typescript-eslint": "^8.48.0",
     "ultracite": "^6.3.6",
-    "vercel": "^48.10.14",
+    "vercel": "^48.11.0",
     "vitest": "^4.0.14"
   },
   "pnpm": {

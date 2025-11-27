@@ -7,6 +7,7 @@
 
 import type { Database } from '@heyclaude/database-types';
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { logRpcError } from '../utils/rpc-error-logging.ts';
 
 export class MiscService {
   constructor(private supabase: SupabaseClient<Database>) {}
@@ -15,44 +16,101 @@ export class MiscService {
    * Calls the database RPC: get_active_notifications
    */
   async getActiveNotifications(args: Database['public']['Functions']['get_active_notifications']['Args']) {
-    const { data, error } = await this.supabase.rpc('get_active_notifications', args);
-    if (error) throw error;
-    return data as Database['public']['Functions']['get_active_notifications']['Returns'];
+    try {
+      const { data, error } = await this.supabase.rpc('get_active_notifications', args);
+      if (error) {
+        logRpcError(error, {
+          rpcName: 'get_active_notifications',
+          operation: 'MiscService.getActiveNotifications',
+          args: args,
+        });
+        throw error;
+      }
+      return data as Database['public']['Functions']['get_active_notifications']['Returns'];
+    } catch (error) {
+      // Error already logged above
+      throw error;
+    }
   }
 
   /**
    * Calls the database RPC: get_active_announcement
    */
   async getActiveAnnouncement() {
-    const { data, error } = await this.supabase.rpc('get_active_announcement');
-    if (error) throw error;
-    return data as Database['public']['Functions']['get_active_announcement']['Returns'];
+    try {
+      const { data, error } = await this.supabase.rpc('get_active_announcement');
+      if (error) {
+        logRpcError(error, {
+          rpcName: 'get_active_announcement',
+          operation: 'MiscService.getActiveAnnouncement',
+        });
+        throw error;
+      }
+      return data as Database['public']['Functions']['get_active_announcement']['Returns'];
+    } catch (error) {
+      // Error already logged above
+      throw error;
+    }
   }
 
   /**
    * Calls the database RPC: get_navigation_menu
    */
   async getNavigationMenu() {
-    const { data, error } = await this.supabase.rpc('get_navigation_menu');
-    if (error) throw error;
-    return data as Database['public']['Functions']['get_navigation_menu']['Returns'];
+    try {
+      const { data, error } = await this.supabase.rpc('get_navigation_menu');
+      if (error) {
+        logRpcError(error, {
+          rpcName: 'get_navigation_menu',
+          operation: 'MiscService.getNavigationMenu',
+        });
+        throw error;
+      }
+      return data as Database['public']['Functions']['get_navigation_menu']['Returns'];
+    } catch (error) {
+      // Error already logged above
+      throw error;
+    }
   }
 
   /**
    * Calls the database RPC: get_contact_commands
    */
   async getContactCommands() {
-    const { data, error } = await this.supabase.rpc('get_contact_commands');
-    if (error) throw error;
-    return data as Database['public']['Functions']['get_contact_commands']['Returns'];
+    try {
+      const { data, error } = await this.supabase.rpc('get_contact_commands');
+      if (error) {
+        logRpcError(error, {
+          rpcName: 'get_contact_commands',
+          operation: 'MiscService.getContactCommands',
+        });
+        throw error;
+      }
+      return data as Database['public']['Functions']['get_contact_commands']['Returns'];
+    } catch (error) {
+      // Error already logged above
+      throw error;
+    }
   }
 
   /**
    * Calls the database RPC: get_form_field_config
    */
   async getFormFieldConfig(args: Database['public']['Functions']['get_form_field_config']['Args']) {
-    const { data, error } = await this.supabase.rpc('get_form_field_config', args);
-    if (error) throw error;
-    return data as Database['public']['Functions']['get_form_field_config']['Returns'];
+    try {
+      const { data, error } = await this.supabase.rpc('get_form_field_config', args);
+      if (error) {
+        logRpcError(error, {
+          rpcName: 'get_form_field_config',
+          operation: 'MiscService.getFormFieldConfig',
+          args: args,
+        });
+        throw error;
+      }
+      return data as Database['public']['Functions']['get_form_field_config']['Returns'];
+    } catch (error) {
+      // Error already logged above
+      throw error;
+    }
   }
 }

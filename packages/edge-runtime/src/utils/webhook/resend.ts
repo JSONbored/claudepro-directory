@@ -1,6 +1,7 @@
 import { errorToString } from '@heyclaude/shared-runtime';
 import type { WebhookIngestResult } from './ingest.ts';
 import { finishWebhookEventRun, startWebhookEventRun } from './run-logger.ts';
+import { logger } from '../logger.ts';
 
 type ResendEventPayload = {
   type?: string;
@@ -36,7 +37,7 @@ export async function processResendWebhook(event: WebhookIngestResult): Promise<
     const emailId = extractStringField(payload, 'email_id');
     const messageId = extractStringField(payload, 'message_id');
 
-    console.log('[resend-webhook] Processed event', {
+    logger.info('Processed event', {
       ...logContext,
       email_id: emailId,
       message_id: messageId,
@@ -53,9 +54,10 @@ export async function processResendWebhook(event: WebhookIngestResult): Promise<
     }
   } catch (error) {
     const errorMsg = errorToString(error);
-    console.error('[resend-webhook] Failed to process event', {
+    const errorObj = error instanceof Error ? error : new Error(errorMsg);
+    logger.error('Failed to process event', {
       ...logContext,
-      error: errorMsg,
+      err: errorObj,
     });
     if (run) {
       await finishWebhookEventRun(run.id, 'failed', {

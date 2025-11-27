@@ -73,7 +73,7 @@ export function NewsletterCTAVariant(props: NewsletterCTAVariantProps) {
     defaultRethrow: false,
   });
 
-  // Load newsletter config from Statsig
+  // Load newsletter config from static defaults
   useEffect(() => {
     loadConfig(
       async () => {

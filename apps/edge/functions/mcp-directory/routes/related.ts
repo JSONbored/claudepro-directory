@@ -5,6 +5,7 @@
 
 import type { Database } from '@heyclaude/database-types';
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { logError } from '@heyclaude/shared-runtime';
 import type { GetRelatedContentInput } from '../lib/types.ts';
 
 type RelatedContentItem = Database['public']['CompositeTypes']['related_content_item'];
@@ -17,15 +18,23 @@ export async function handleGetRelatedContent(
 
   // Call get_related_content RPC directly with correct parameter order
   // Signature: p_category, p_slug, p_tags, p_limit, p_exclude_slugs
-  const { data, error } = await supabase.rpc('get_related_content', {
+  const rpcArgs = {
     p_category: category,
     p_slug: slug,
     p_tags: [],
     p_limit: limit,
     p_exclude_slugs: [],
-  });
+  };
+  const { data, error } = await supabase.rpc('get_related_content', rpcArgs);
 
   if (error) {
+    // Use dbQuery serializer for consistent database query formatting
+    logError('RPC call failed in getRelatedContent', {
+      dbQuery: {
+        rpcName: 'get_related_content',
+        args: rpcArgs, // Will be redacted by Pino's redact config
+      },
+    }, error);
     throw new Error(`Failed to fetch related content: ${error.message}`);
   }
 

@@ -5,8 +5,8 @@
  * and provides authorization server discovery information.
  */
 
-import { edgeEnv, jsonResponse } from '@heyclaude/edge-runtime';
-import { createDataApiContext, logError } from '@heyclaude/shared-runtime';
+import { edgeEnv, initRequestLogging, jsonResponse, traceStep } from '@heyclaude/edge-runtime';
+import { createDataApiContext, logError, logger } from '@heyclaude/shared-runtime';
 import type { Context } from 'hono';
 
 const MCP_SERVER_URL = Deno.env.get('MCP_SERVER_URL') || 'https://mcp.heyclau.de';
@@ -27,6 +27,18 @@ const SUPABASE_AUTH_URL = `${SUPABASE_URL}/auth/v1`;
 export async function handleProtectedResourceMetadata(_c: Context): Promise<Response> {
   const logContext = createDataApiContext('oauth-protected-resource-metadata', {
     app: 'mcp-directory',
+    method: 'GET',
+  });
+
+  // Initialize request logging with trace and bindings (Phase 1 & 2)
+  initRequestLogging(logContext);
+  traceStep('Protected resource metadata request received', logContext);
+  
+  // Set bindings for this request - mixin will automatically inject these into all subsequent logs
+  logger.setBindings({
+    requestId: logContext.request_id,
+    operation: logContext.action || 'oauth-protected-resource-metadata',
+    function: logContext.function,
     method: 'GET',
   });
 
@@ -73,6 +85,18 @@ export async function handleProtectedResourceMetadata(_c: Context): Promise<Resp
 export async function handleAuthorizationServerMetadata(_c: Context): Promise<Response> {
   const logContext = createDataApiContext('oauth-authorization-server-metadata', {
     app: 'mcp-directory',
+    method: 'GET',
+  });
+
+  // Initialize request logging with trace and bindings (Phase 1 & 2)
+  initRequestLogging(logContext);
+  traceStep('Authorization server metadata request received', logContext);
+  
+  // Set bindings for this request - mixin will automatically inject these into all subsequent logs
+  logger.setBindings({
+    requestId: logContext.request_id,
+    operation: logContext.action || 'oauth-authorization-server-metadata',
+    function: logContext.function,
     method: 'GET',
   });
 

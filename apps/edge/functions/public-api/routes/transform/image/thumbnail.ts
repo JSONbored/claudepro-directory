@@ -16,11 +16,12 @@
  * - Returns early on validation failures
  */
 
-import { badRequestResponse, getOnlyCorsHeaders } from '@heyclaude/edge-runtime';
+import { badRequestResponse, initRequestLogging, publicCorsHeaders, traceRequestComplete, traceStep } from '@heyclaude/edge-runtime';
 import {
   createDataApiContext,
   logError,
   logInfo,
+  logger,
 } from '@heyclaude/shared-runtime';
 import {
   ensureImageMagickInitialized,
@@ -34,7 +35,7 @@ import {
   jsonResponse,
 } from '@heyclaude/edge-runtime';
 
-const CORS = getOnlyCorsHeaders;
+const CORS = publicCorsHeaders;
 
 // Thumbnail optimization constants
 const THUMBNAIL_MAX_DIMENSION = 400; // Good size for thumbnails (balances quality vs file size)
@@ -70,6 +71,7 @@ interface ThumbnailGenerateResponse {
   originalSize?: number;
   optimizedSize?: number;
   dimensions?: { width: number; height: number };
+  warning?: string; // Warning message when non-critical operations fail (e.g., database update)
   error?: string;
 }
 
@@ -85,6 +87,17 @@ export async function handleThumbnailGenerateRoute(req: Request): Promise<Respon
     method: 'POST',
     app: 'public-api',
   });
+  
+  // Initialize request logging with trace and bindings
+  initRequestLogging(logContext);
+  traceStep('Thumbnail generation request received', logContext);
+  
+  // Set bindings for this request
+  logger.setBindings({
+    requestId: logContext.request_id,
+    operation: logContext.action || 'thumbnail-generate',
+    method: req.method,
+  });
 
   // Handle OPTIONS for CORS
   if (req.method === 'OPTIONS') {
@@ -96,6 +109,7 @@ export async function handleThumbnailGenerateRoute(req: Request): Promise<Respon
   }
 
   try {
+    traceStep('Processing thumbnail generation', logContext);
     // Parse request body
     let body: ThumbnailGenerateRequest;
     const contentType = req.headers.get('content-type') || '';
@@ -411,6 +425,7 @@ export async function handleThumbnailGenerateRoute(req: Request): Promise<Respon
     }
 
     // Update database if contentId provided
+    let dbUpdateWarning: string | undefined;
     if (body.contentId && uploadResult.publicUrl) {
       try {
         const supabase = getStorageServiceClient();
@@ -423,7 +438,20 @@ export async function handleThumbnailGenerateRoute(req: Request): Promise<Respon
             .eq('slug', body.contentId);
 
           if (updateError) {
-            logError('Failed to update content thumbnail in database', logContext, updateError);
+            // Use dbQuery serializer for consistent database query formatting
+            logError('Failed to update content thumbnail in database', {
+              ...logContext,
+              dbQuery: {
+                table: 'content',
+                operation: 'update',
+                schema: 'public',
+                args: {
+                  slug: body.contentId,
+                  // Update fields redacted by Pino's redact config
+                },
+              },
+            }, updateError);
+            dbUpdateWarning = 'Thumbnail uploaded but database update failed';
           } else {
             logInfo('Content thumbnail updated in database (by slug)', {
               ...logContext,
@@ -437,7 +465,20 @@ export async function handleThumbnailGenerateRoute(req: Request): Promise<Respon
             .eq('id', body.contentId);
 
           if (updateError) {
-            logError('Failed to update content thumbnail in database', logContext, updateError);
+            // Use dbQuery serializer for consistent database query formatting
+            logError('Failed to update content thumbnail in database', {
+              ...logContext,
+              dbQuery: {
+                table: 'content',
+                operation: 'update',
+                schema: 'public',
+                args: {
+                  id: body.contentId,
+                  // Update fields redacted by Pino's redact config
+                },
+              },
+            }, updateError);
+            dbUpdateWarning = 'Thumbnail uploaded but database update failed';
           } else {
             logInfo('Content thumbnail updated in database (by ID)', {
               ...logContext,
@@ -447,7 +488,7 @@ export async function handleThumbnailGenerateRoute(req: Request): Promise<Respon
         }
       } catch (error) {
         logError('Error updating content thumbnail in database', logContext, error);
-        // Non-critical - return success with URL
+        dbUpdateWarning = 'Thumbnail uploaded but database update failed';
       }
     }
 
@@ -458,8 +499,10 @@ export async function handleThumbnailGenerateRoute(req: Request): Promise<Respon
       originalSize: imageBytes.length,
       optimizedSize: optimizedImage.length,
       ...(optimizedDimensions ? { dimensions: optimizedDimensions } : {}),
+      ...(dbUpdateWarning ? { warning: dbUpdateWarning } : {}),
     };
 
+    traceRequestComplete(logContext);
     return jsonResponse(response, 200, CORS);
   } catch (error) {
     logError('Thumbnail generation failed', logContext, error);

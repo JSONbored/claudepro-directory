@@ -123,7 +123,8 @@ export async function pulseJobSearch(
     });
   } catch (error) {
     const normalized = normalizeError(error, 'Job search pulsing error');
-    logger.warn('Job search pulsing error', { error: normalized.message });
+    // Pino's stdSerializers.err automatically handles error serialization
+    logger.warn('Job search pulsing error', { err: normalized });
   }
 }
 
@@ -149,6 +150,7 @@ export async function pulseUserSearch(query: string, resultCount: number): Promi
     });
   } catch (error) {
     const normalized = normalizeError(error, 'User search pulsing error');
-    logger.warn('User search pulsing error', { error: normalized.message });
+    // Pino's stdSerializers.err automatically handles error serialization
+    logger.warn('User search pulsing error', { err: normalized });
   }
 }

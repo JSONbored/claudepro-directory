@@ -1,7 +1,9 @@
 #!/usr/bin/env node
 import { verifyRoutes } from '../commands/verify-routes.js';
+import { logger } from '../toolkit/logger.ts';
 
 verifyRoutes().catch((err: unknown) => {
-  console.error(err);
+  const errorObj = err instanceof Error ? err : new Error(String(err));
+  logger.error('Verify routes error', errorObj);
   process.exit(1);
 });

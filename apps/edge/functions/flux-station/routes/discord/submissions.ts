@@ -9,10 +9,13 @@ import {
   errorResponse,
   handleContentNotificationDirect,
   handleSubmissionNotificationDirect,
+  initRequestLogging,
   pgmqDelete,
   pgmqRead,
   publicCorsHeaders,
   successResponse,
+  traceRequestComplete,
+  traceStep,
 } from '@heyclaude/edge-runtime';
 import {
   createUtilityContext,
@@ -72,8 +75,15 @@ function isValidWebhookType(value: string): value is 'INSERT' | 'UPDATE' | 'DELE
 }
 
 export async function handleDiscordSubmissions(_req: Request): Promise<Response> {
+  const logContext = createUtilityContext('flux-station', 'discord-submissions', {});
+  
+  // Initialize request logging with trace and bindings
+  initRequestLogging(logContext);
+  traceStep('Starting Discord submissions queue processing', logContext);
+  
   try {
     // Read messages with timeout protection
+    traceStep('Reading Discord submissions queue', logContext);
     const messages = await withTimeout(
       pgmqRead(SUBMISSION_DISCORD_QUEUE, {
         sleep_seconds: 0,
@@ -84,8 +94,11 @@ export async function handleDiscordSubmissions(_req: Request): Promise<Response>
     );
 
     if (!messages || messages.length === 0) {
+      traceRequestComplete(logContext);
       return successResponse({ message: 'No messages in queue', processed: 0 }, 200);
     }
+    
+    traceStep(`Processing ${messages.length} Discord submission notifications`, logContext);
 
     const results: Array<{
       msg_id: string;
@@ -197,6 +210,7 @@ export async function handleDiscordSubmissions(_req: Request): Promise<Response>
       }
     }
 
+    traceRequestComplete(logContext);
     return successResponse(
       {
         message: `Processed ${messages.length} messages`,
@@ -206,9 +220,6 @@ export async function handleDiscordSubmissions(_req: Request): Promise<Response>
       200
     );
   } catch (error) {
-    const logContext = createUtilityContext('flux-station', 'discord-submissions-error', {
-      operation: 'queue-processing',
-    });
     logError('Submission Discord queue error', logContext, error);
     return errorResponse(
       error,

@@ -7,6 +7,7 @@
 
 import type { Database } from '@heyclaude/database-types';
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { logError } from '@heyclaude/shared-runtime';
 import type { ListCategoriesInput } from '../lib/types.ts';
 
 export async function handleListCategories(
@@ -17,6 +18,12 @@ export async function handleListCategories(
   const { data, error } = await supabase.rpc('get_category_configs_with_features');
 
   if (error) {
+    // Use dbQuery serializer for consistent database query formatting
+    logError('RPC call failed in listCategories', {
+      dbQuery: {
+        rpcName: 'get_category_configs_with_features',
+      },
+    }, error);
     throw new Error(`Failed to fetch categories: ${error.message}`);
   }
 
@@ -25,7 +32,17 @@ export async function handleListCategories(
   }
 
   // Get content counts from get_search_facets
-  const { data: facetsData } = await supabase.rpc('get_search_facets');
+  const { data: facetsData, error: facetsError } = await supabase.rpc('get_search_facets');
+  
+  if (facetsError) {
+    // Use dbQuery serializer for consistent database query formatting
+    logError('RPC call failed in listCategories (get_search_facets)', {
+      dbQuery: {
+        rpcName: 'get_search_facets',
+      },
+    }, facetsError);
+    // Continue without counts - not critical
+  }
   const countsMap = new Map(
     (facetsData || []).map((f: { category: string; content_count: number }) => [
       f.category,

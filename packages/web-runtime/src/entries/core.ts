@@ -25,7 +25,7 @@ export type { CategoryType } from '../ui/constants.ts';
 export type { SharePlatform } from '../client/share.ts';
 export type { JobType } from '../ui/constants.ts';
 export type { NotificationRecord } from '../notifications.ts';
-export type { CacheConfigPromise, CacheInvalidateKey } from '../cache-config.ts';
+export type { CacheConfig, CacheInvalidateKey } from '../cache-config.ts';
 export { generateConfigRecommendations } from '../pulse-client.ts';
 export { getQuizConfiguration } from '../data/quiz.ts';
 export type { UseCopyToClipboardOptions } from '../hooks/use-copy-to-clipboard.ts';

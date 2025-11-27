@@ -56,7 +56,7 @@ export const deleteCollection = authedAction
       revalidatePath(`/account/library`);
       
       await nextInvalidateByKeys({
-        cacheConfigPromise: getCacheConfigSnapshot(),
+        cacheConfig: getCacheConfigSnapshot(),
         invalidateKeys: ['cache.invalidate.collection_delete']
       });
 

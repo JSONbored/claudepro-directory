@@ -11,6 +11,7 @@ import type { BaseLogContext } from '@heyclaude/shared-runtime';
 import { createUtilityContext, logError, logInfo, logWarn } from '@heyclaude/shared-runtime';
 import { TIMEOUT_PRESETS, withTimeout } from '@heyclaude/shared-runtime';
 import { runWithRetry } from './http-client.ts';
+import { logger } from '../logger.ts';
 
 const RESEND_API_BASE_URL = 'https://api.resend.com';
 
@@ -118,9 +119,29 @@ export async function callResendApi<T>({
       rawBody,
     };
   } catch (error) {
+    // Log all Resend API errors for observability
+    const logContext = createUtilityContext('resend', 'call-resend-api', {
+      path: normalizedPath,
+      method,
+    });
+    const errorObj = error instanceof Error ? error : new Error(String(error));
+    
     if (error instanceof ResendApiError) {
+      // Log Resend API errors with status and response body
+      logger.error('Resend API call failed', {
+        ...logContext,
+        status: error.status,
+        responseBody: error.rawBody,
+        err: errorObj,
+      });
       throw error;
     }
+    
+    // Log unexpected errors
+    logger.error('Resend API request error', {
+      ...logContext,
+      err: errorObj,
+    });
     throw new ResendApiError(
       error instanceof Error ? error.message : 'Unknown Resend request error',
       null

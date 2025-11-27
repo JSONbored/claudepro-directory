@@ -1,6 +1,6 @@
 /**
  * Server-Only Constants
- * Functions that require Statsig flags (server-only)
+ * Functions that use static configuration values (server-only)
  */
 
 import {
@@ -8,12 +8,9 @@ import {
   getAppSettings,
   getPollingConfig,
   getTimeoutConfig,
-} from '../actions/feature-flags.ts';
+} from '../config/static-configs.ts';
 import {
-  ANIMATION_DURATIONS,
   DATE_CONFIG,
-  POLLING_INTERVALS,
-  TIMEOUTS,
 } from '../data/config/constants.ts';
 
 /**
@@ -21,22 +18,15 @@ import {
  * Falls back to hardcoded values if database unavailable
  */
 export async function getDateConfig() {
-  try {
-    const result = await getAppSettings({});
-    if (!result?.data) {
-      return DATE_CONFIG;
-    }
-    const config = result.data;
-    return {
-      currentMonth: config['date.current_month'],
-      currentYear: config['date.current_year'],
-      currentDate: config['date.current_date'],
-      lastReviewed: config['date.last_reviewed'],
-      claudeModels: DATE_CONFIG.claudeModels,
-    };
-  } catch {
-    return DATE_CONFIG;
-  }
+  // Get app settings from static defaults
+  const config = getAppSettings();
+  return {
+    currentMonth: config['date.current_month'],
+    currentYear: config['date.current_year'],
+    currentDate: config['date.current_date'],
+    lastReviewed: config['date.last_reviewed'],
+    claudeModels: DATE_CONFIG.claudeModels,
+  };
 }
 
 /**
@@ -51,95 +41,74 @@ export async function getDateStrings() {
 }
 
 /**
- * Get polling intervals from Statsig Dynamic Configs
- * Falls back to hardcoded POLLING_INTERVALS if unavailable
+ * Get polling intervals from static config
+ * Returns values from static configuration defaults
  */
 export async function getPollingIntervals() {
-  try {
-    const result = await getPollingConfig({});
-    if (!result?.data) {
-      return POLLING_INTERVALS;
-    }
-    const config = result.data;
-    return {
-      realtime: config['polling.realtime_ms'],
-      badges: config['polling.badges_ms'],
-      status: {
-        health: config['polling.status.health_ms'],
-        api: config['polling.status.api_ms'],
-        database: config['polling.status.database_ms'],
-      },
-      analytics: {
-        views: config['polling.analytics.views_ms'],
-        stats: config['polling.analytics.stats_ms'],
-      },
-    };
-  } catch {
-    return POLLING_INTERVALS;
-  }
+  // Get polling config from static defaults
+  const config = getPollingConfig();
+  return {
+    realtime: config['polling.realtime_ms'],
+    badges: config['polling.badges_ms'],
+    status: {
+      health: config['polling.status.health_ms'],
+      api: config['polling.status.api_ms'],
+      database: config['polling.status.database_ms'],
+    },
+    analytics: {
+      views: config['polling.analytics.views_ms'],
+      stats: config['polling.analytics.stats_ms'],
+    },
+  };
 }
 
 /**
- * Get animation durations from Statsig Dynamic Configs
- * Falls back to hardcoded ANIMATION_DURATIONS if unavailable
+ * Get animation durations from static config
+ * Returns values from static configuration defaults
  */
 export async function getAnimationDurations() {
-  try {
-    const result = await getAnimationConfig({});
-    if (!result?.data) {
-      return ANIMATION_DURATIONS;
-    }
-    const config = result.data;
-    return {
-      ticker: {
-        default: config['animation.ticker.default_ms'],
-        fast: config['animation.ticker.fast_ms'],
-        slow: config['animation.ticker.slow_ms'],
-      },
-      stagger: {
-        fast: config['animation.stagger.fast_ms'],
-        medium: config['animation.stagger.medium_ms'],
-        slow: config['animation.stagger.slow_ms'],
-      },
-      beam: {
-        default: config['animation.beam.default_ms'],
-      },
-    };
-  } catch {
-    return ANIMATION_DURATIONS;
-  }
+  // Get animation config from static defaults
+  const config = getAnimationConfig();
+  return {
+    ticker: {
+      default: config['animation.ticker.default_ms'],
+      fast: config['animation.ticker.fast_ms'],
+      slow: config['animation.ticker.slow_ms'],
+    },
+    stagger: {
+      fast: config['animation.stagger.fast_ms'],
+      medium: config['animation.stagger.medium_ms'],
+      slow: config['animation.stagger.slow_ms'],
+    },
+    beam: {
+      default: config['animation.beam.default_ms'],
+    },
+  };
 }
 
 /**
- * Get timeout configurations from Statsig Dynamic Configs
- * Falls back to hardcoded TIMEOUTS if unavailable
+ * Get timeout configurations from static config
+ * Returns values from static configuration defaults
  */
 export async function getTimeouts() {
-  try {
-    const result = await getTimeoutConfig({});
-    if (!result?.data) {
-      return TIMEOUTS;
-    }
-    const config = result.data;
-    return {
-      api: {
-        default: config['timeout.api.default_ms'],
-        long: config['timeout.api.long_ms'],
-        short: config['timeout.api.short_ms'],
-      },
-      ui: {
-        debounce: config['timeout.ui.debounce_ms'],
-        tooltip: config['timeout.ui.tooltip_ms'],
-        animation: config['timeout.ui.animation_ms'],
-        transition: config['timeout.ui.transition_ms'],
-      },
-      test: {
-        default: config['timeout.test.default_ms'],
-        long: config['timeout.test.long_ms'],
-        network: config['timeout.test.network_ms'],
-      },
-    };
-  } catch {
-    return TIMEOUTS;
-  }
+  // Get timeout config from static defaults
+  const config = getTimeoutConfig();
+  return {
+    api: {
+      default: config['timeout.api.default_ms'],
+      long: config['timeout.api.long_ms'],
+      short: config['timeout.api.short_ms'],
+    },
+    ui: {
+      debounce: config['timeout.ui.debounce_ms'],
+      tooltip: config['timeout.ui.tooltip_ms'],
+      animation: config['timeout.ui.animation_ms'],
+      transition: config['timeout.ui.transition_ms'],
+    },
+    test: {
+      default: config['timeout.test.default_ms'],
+      long: config['timeout.test.long_ms'],
+      network: config['timeout.test.network_ms'],
+    },
+  };
 }

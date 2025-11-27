@@ -7,8 +7,11 @@ import {
   badRequestResponse,
   discordCorsHeaders,
   handleDiscordNotification,
+  initRequestLogging,
+  traceRequestComplete,
+  traceStep,
 } from '@heyclaude/edge-runtime';
-import { MAX_BODY_SIZE, validateBodySize } from '@heyclaude/shared-runtime';
+import { createUtilityContext, logger, MAX_BODY_SIZE, validateBodySize } from '@heyclaude/shared-runtime';
 
 export async function handleDiscordDirect(req: Request): Promise<Response> {
   const notificationType = req.headers.get('X-Discord-Notification-Type');
@@ -16,6 +19,22 @@ export async function handleDiscordDirect(req: Request): Promise<Response> {
   if (!notificationType) {
     return badRequestResponse('Missing X-Discord-Notification-Type header', discordCorsHeaders);
   }
+  
+  // Create log context for logging
+  const logContext = createUtilityContext('discord', 'direct-notification', {
+    notificationType,
+  });
+  
+  // Initialize request logging with trace and bindings
+  initRequestLogging(logContext);
+  traceStep('Discord direct notification request received', logContext);
+  
+  // Set bindings for this request
+  logger.setBindings({
+    requestId: logContext.request_id,
+    operation: logContext.action || 'discord-direct',
+    notificationType,
+  });
 
   // Validate body size before processing
   const contentLength = req.headers.get('content-length');
@@ -26,6 +45,17 @@ export async function handleDiscordDirect(req: Request): Promise<Response> {
       discordCorsHeaders
     );
   }
-
-  return handleDiscordNotification(req, notificationType);
+  
+  traceStep(`Processing Discord notification (type: ${notificationType})`, logContext);
+  
+  // Note: handleDiscordNotification will handle its own logging internally
+  // We'll add traceRequestComplete after it returns if needed
+  const response = await handleDiscordNotification(req, notificationType);
+  
+  // Check if response is successful (status 200-299)
+  if (response.status >= 200 && response.status < 300) {
+    traceRequestComplete(logContext);
+  }
+  
+  return response;
 }

@@ -20,6 +20,7 @@ import {
   getPreviousWeekStart,
   HELLO_FROM,
   handleDatabaseError,
+  initRequestLogging,
   invalidateCacheByKey,
   JOB_EMAIL_CONFIGS,
   JOBS_FROM,
@@ -38,6 +39,8 @@ import {
   successResponse,
   supabaseServiceRole,
   syncContactToResend,
+  traceRequestComplete,
+  traceStep,
   TRANSACTIONAL_EMAIL_CONFIGS,
   validateEnvironment,
   verifyAuthHookWebhook,
@@ -48,6 +51,7 @@ import {
   errorToString,
   logError,
   logInfo,
+  logger,
   logWarn,
   MAX_BODY_SIZE,
   validateEmail,
@@ -98,6 +102,17 @@ export async function handleSubscribe(req: Request): Promise<Response> {
   const normalizedEmail = emailValidation.normalized;
 
   const logContext = createEmailHandlerContext('subscribe', {
+    email: normalizedEmail,
+  });
+  
+  // Initialize request logging with trace and bindings
+  initRequestLogging(logContext);
+  traceStep('Newsletter subscription request received', logContext);
+  
+  // Set bindings for this request
+  logger.setBindings({
+    requestId: logContext.request_id,
+    operation: logContext.action || 'subscribe',
     email: normalizedEmail,
   });
 
@@ -329,6 +344,7 @@ export async function handleSubscribe(req: Request): Promise<Response> {
       email_sent: !emailError,
       email_id: emailData?.id || null,
     });
+    traceRequestComplete(logContext);
 
     return successResponse({
       success: true,
@@ -342,13 +358,28 @@ export async function handleSubscribe(req: Request): Promise<Response> {
   } catch (error) {
     if (error instanceof Response) return error; // Return handled responses directly
     logError('Newsletter subscription failed', withDuration(logContext, startTime), error);
-    return errorResponse(error, 'handleSubscribe');
+    return errorResponse(error, 'handleSubscribe', publicCorsHeaders, logContext);
   }
 }
 
 export async function handleWelcome(req: Request): Promise<Response> {
   const startTime = Date.now();
   const triggerSource = req.headers.get('X-Trigger-Source');
+  
+  const logContext = createEmailHandlerContext('welcome', {
+    triggerSource: triggerSource || 'unknown',
+  });
+  
+  // Initialize request logging with trace and bindings
+  initRequestLogging(logContext);
+  traceStep('Welcome email request received', logContext);
+  
+  // Set bindings for this request
+  logger.setBindings({
+    requestId: logContext.request_id,
+    operation: logContext.action || 'welcome',
+    triggerSource: triggerSource || 'unknown',
+  });
 
   // Newsletter subscription trigger
   if (triggerSource === 'newsletter_subscription') {
@@ -367,9 +398,10 @@ export async function handleWelcome(req: Request): Promise<Response> {
     const payload = parseResult.data;
     const { email, subscription_id } = payload;
 
-    const logContext = createEmailHandlerContext('welcome', {
-      ...(typeof email === 'string' ? { email } : {}),
-      ...(typeof subscription_id === 'string' ? { subscriptionId: subscription_id } : {}),
+    // Update bindings with subscription details
+    logger.setBindings({
+      email: typeof email === 'string' ? email : undefined,
+      subscriptionId: typeof subscription_id === 'string' ? subscription_id : undefined,
     });
 
     const html = await renderEmailTemplate(NewsletterWelcome, { email });
@@ -387,10 +419,10 @@ export async function handleWelcome(req: Request): Promise<Response> {
       'Resend welcome email send timed out'
     );
 
-    if (error) {
-      logError('Welcome email failed', logContext, error);
-      return errorResponse(new Error(error.message || 'Welcome email failed'), 'handleWelcome');
-    }
+  if (error) {
+    logError('Welcome email failed', logContext, error);
+    return errorResponse(new Error(error.message || 'Welcome email failed'), 'handleWelcome', publicCorsHeaders, logContext);
+  }
 
     await enrollInOnboardingSequence(email, logContext);
 
@@ -399,6 +431,7 @@ export async function handleWelcome(req: Request): Promise<Response> {
       subscription_id,
       email_id: data?.id,
     });
+    traceRequestComplete(logContext);
 
     return successResponse({ sent: true, id: data?.id, subscription_id });
   }
@@ -410,15 +443,17 @@ export async function handleWelcome(req: Request): Promise<Response> {
   }
   const { user, email_data } = verificationResult;
 
-  const logContext = createEmailHandlerContext('welcome', {
+  // Update bindings with user details
+  logger.setBindings({
     email: user.email,
+    userId: user.id,
   });
 
   // Only handle signup action type
   if (email_data.email_action_type !== 'signup') {
     logInfo('Auth hook skipped (not signup)', {
       ...logContext,
-      user_id: user.id,
+      user: { id: user.id, email: user.email }, // Use user serializer for consistent formatting
       email_action_type: email_data.email_action_type,
     });
     return successResponse({
@@ -444,18 +479,19 @@ export async function handleWelcome(req: Request): Promise<Response> {
   );
 
   if (error) {
-    logError('Signup email failed', { ...logContext, user_id: user.id }, error);
-    return errorResponse(new Error(error.message || 'Signup email failed'), 'handleWelcome');
+    logError('Signup email failed', { ...logContext, user: { id: user.id, email: user.email } }, error); // Use user serializer
+    return errorResponse(new Error(error.message || 'Signup email failed'), 'handleWelcome', publicCorsHeaders, logContext);
   }
 
   await enrollInOnboardingSequence(user.email, logContext);
 
   logInfo('Signup email sent', {
     ...logContext,
-    user_id: user.id,
+    user: { id: user.id, email: user.email }, // Use user serializer for consistent formatting
     email_id: data?.id,
     email_action_type: email_data.email_action_type,
   });
+  traceRequestComplete(logContext);
 
   return successResponse({ sent: true, id: data?.id, user_id: user.id });
 }
@@ -480,6 +516,19 @@ export async function handleTransactional(req: Request): Promise<Response> {
   const { type, email, data: emailData } = payload;
 
   const logContext = createEmailHandlerContext('transactional', {
+    ...(typeof email === 'string' ? { email } : {}),
+    type,
+  });
+  
+  // Initialize request logging with trace and bindings
+  initRequestLogging(logContext);
+  traceStep('Transactional email request received', logContext);
+  
+  // Set bindings for this request
+  logger.setBindings({
+    requestId: logContext.request_id,
+    operation: logContext.action || 'transactional',
+    type,
     ...(typeof email === 'string' ? { email } : {}),
   });
 
@@ -517,7 +566,9 @@ export async function handleTransactional(req: Request): Promise<Response> {
     logError('Failed to send transactional email', { ...logContext, type }, error);
     return errorResponse(
       new Error(error.message || 'Transactional email failed'),
-      'handleTransactional'
+      'handleTransactional',
+      publicCorsHeaders,
+      logContext
     );
   }
 
@@ -526,6 +577,7 @@ export async function handleTransactional(req: Request): Promise<Response> {
     type,
     email_id: data?.id,
   });
+  traceRequestComplete(logContext);
 
   return successResponse({ sent: true, id: data?.id, type });
 }
@@ -533,8 +585,19 @@ export async function handleTransactional(req: Request): Promise<Response> {
 export async function handleDigest(): Promise<Response> {
   const startTime = Date.now();
   const logContext = createEmailHandlerContext('digest');
+  
+  // Initialize request logging with trace and bindings
+  initRequestLogging(logContext);
+  traceStep('Digest email request received', logContext);
+  
+  // Set bindings for this request
+  logger.setBindings({
+    requestId: logContext.request_id,
+    operation: logContext.action || 'digest',
+  });
 
   // Check rate limiting
+  traceStep('Checking digest rate limit', logContext);
   const rateLimitCheck = await checkDigestRateLimit();
   if (rateLimitCheck.rateLimited) {
     logInfo('Digest rate limited', {
@@ -542,6 +605,7 @@ export async function handleDigest(): Promise<Response> {
       hours_since_last_run: rateLimitCheck.hoursSinceLastRun?.toFixed(1),
       next_allowed_at: rateLimitCheck.nextAllowedAt,
     });
+    traceRequestComplete(logContext);
     return successResponse({
       skipped: true,
       reason: 'rate_limited',
@@ -561,11 +625,19 @@ export async function handleDigest(): Promise<Response> {
   );
 
   if (digestError) {
-    logError('Failed to fetch weekly digest', logContext, digestError);
-    return errorResponse(digestError, 'handleDigest');
+    // Use dbQuery serializer for consistent database query formatting
+    logError('Failed to fetch weekly digest', {
+      ...logContext,
+      dbQuery: {
+        rpcName: 'get_weekly_digest',
+        args: digestArgs, // Will be redacted by Pino's redact config
+      },
+    }, digestError);
+    return errorResponse(digestError, 'handleDigest', publicCorsHeaders, logContext);
   }
 
   if (!digest) {
+    traceRequestComplete(logContext);
     return successResponse({ skipped: true, reason: 'invalid_data' });
   }
   // Use generated type directly from @heyclaude/database-types
@@ -577,12 +649,15 @@ export async function handleDigest(): Promise<Response> {
     Array.isArray(digestData.trending_content) && digestData.trending_content.length > 0;
 
   if (!(hasNewContent || hasTrendingContent)) {
+    traceRequestComplete(logContext);
     return successResponse({ skipped: true, reason: 'no_content' });
   }
 
+  traceStep('Fetching subscribers', logContext);
   const subscribers = await getAllSubscribers();
 
   if (subscribers.length === 0) {
+    traceRequestComplete(logContext);
     return successResponse({ skipped: true, reason: 'no_subscribers' });
   }
 
@@ -698,6 +773,7 @@ export async function handleDigest(): Promise<Response> {
     last_digest_timestamp: currentTimestamp,
     timestamp_update_attempts: retryAttempt,
   });
+  traceRequestComplete(logContext);
 
   await sendBetterStackHeartbeat(edgeEnv.betterstack.weeklyTasks, results.failed, logContext);
 
@@ -711,16 +787,34 @@ export async function handleDigest(): Promise<Response> {
 export async function handleSequence(): Promise<Response> {
   const startTime = Date.now();
   const logContext = createEmailHandlerContext('sequence');
+  
+  // Initialize request logging with trace and bindings
+  initRequestLogging(logContext);
+  traceStep('Sequence email request received', logContext);
+  
+  // Set bindings for this request
+  logger.setBindings({
+    requestId: logContext.request_id,
+    operation: logContext.action || 'sequence',
+  });
 
+  traceStep('Fetching due sequence emails', logContext);
   const { data, error } = await supabaseServiceRole.rpc('get_due_sequence_emails', undefined);
 
   if (error) {
-    logError('Failed to fetch due sequence emails', logContext, error);
-    return errorResponse(error, 'handleSequence');
+    // Use dbQuery serializer for consistent database query formatting
+    logError('Failed to fetch due sequence emails', {
+      ...logContext,
+      dbQuery: {
+        rpcName: 'get_due_sequence_emails',
+      },
+    }, error);
+    return errorResponse(error, 'handleSequence', publicCorsHeaders, logContext);
   }
 
   if (!Array.isArray(data) || data.length === 0) {
     logInfo('No due sequence emails', logContext);
+    traceRequestComplete(logContext);
     return successResponse({ sent: 0, failed: 0 });
   }
 
@@ -764,6 +858,7 @@ export async function handleSequence(): Promise<Response> {
     failed: failedCount,
     total: dueEmails.length,
   });
+  traceRequestComplete(logContext);
 
   await sendBetterStackHeartbeat(edgeEnv.betterstack.emailSequences, failedCount, logContext);
 
@@ -804,6 +899,19 @@ export async function handleJobLifecycleEmail(req: Request, action: string): Pro
 
   const logContext = createEmailHandlerContext(action, {
     email: userEmail,
+    jobId,
+  });
+  
+  // Initialize request logging with trace and bindings
+  initRequestLogging(logContext);
+  traceStep(`Job lifecycle email request received (action: ${action})`, logContext);
+  
+  // Set bindings for this request
+  logger.setBindings({
+    requestId: logContext.request_id,
+    operation: logContext.action || action,
+    action,
+    jobId,
   });
 
   const props = config.buildProps(payload);
@@ -834,7 +942,9 @@ export async function handleJobLifecycleEmail(req: Request, action: string): Pro
     );
     return errorResponse(
       new Error(error.message || `${action} email failed`),
-      'handleJobLifecycleEmail'
+      'handleJobLifecycleEmail',
+      publicCorsHeaders,
+      logContext
     );
   }
 
@@ -843,6 +953,7 @@ export async function handleJobLifecycleEmail(req: Request, action: string): Pro
     job_id: jobId,
     email_id: data?.id,
   });
+  traceRequestComplete(logContext);
 
   return successResponse({ sent: true, id: data?.id, jobId });
 }
@@ -865,7 +976,19 @@ async function getCachedNewsletterCount(): Promise<number> {
 
 export async function handleGetNewsletterCount(): Promise<Response> {
   const logContext = createEmailHandlerContext('get-newsletter-count');
+  
+  // Initialize request logging with trace and bindings
+  initRequestLogging(logContext);
+  traceStep('Newsletter count request received', logContext);
+  
+  // Set bindings for this request
+  logger.setBindings({
+    requestId: logContext.request_id,
+    operation: logContext.action || 'get-newsletter-count',
+  });
+  
   try {
+    traceStep('Fetching newsletter count', logContext);
     const count = await getCachedNewsletterCount();
     const cacheControl = `public, max-age=${NEWSLETTER_COUNT_TTL_SECONDS}, stale-while-revalidate=${NEWSLETTER_COUNT_TTL_SECONDS}`;
     const headers = {
@@ -879,6 +1002,7 @@ export async function handleGetNewsletterCount(): Promise<Response> {
       ...logContext,
       count,
     });
+    traceRequestComplete(logContext);
     return jsonResponse({ count }, 200, headers);
   } catch (error) {
     logError('Newsletter count failed', logContext, error);
@@ -909,8 +1033,22 @@ export async function handleContactSubmission(req: Request): Promise<Response> {
 
   const payload = parseResult.data;
   const { submissionId, name, email, category, message } = payload;
-
+  
   const logContext = createEmailHandlerContext('contact-submission', {
+    submissionId,
+    category,
+  });
+  
+  // Initialize request logging with trace and bindings
+  initRequestLogging(logContext);
+  traceStep('Contact submission request received', logContext);
+  
+  // Set bindings for this request
+  logger.setBindings({
+    requestId: logContext.request_id,
+    operation: logContext.action || 'contact-submission',
+    submissionId,
+    category,
     ...(typeof email === 'string' ? { email } : {}),
   });
 
@@ -1012,6 +1150,7 @@ export async function handleContactSubmission(req: Request): Promise<Response> {
       user_email_sent: !userError,
       user_email_id: userData?.id || null,
     });
+    traceRequestComplete(logContext);
 
     return successResponse({
       sent: true,
@@ -1022,6 +1161,6 @@ export async function handleContactSubmission(req: Request): Promise<Response> {
     });
   } catch (error) {
     logError('Contact submission email failed', withDuration(logContext, startTime), error);
-    return errorResponse(error, 'handleContactSubmission');
+    return errorResponse(error, 'handleContactSubmission', publicCorsHeaders, logContext);
   }
 }

@@ -5,6 +5,7 @@ export * from './utils/router.ts';
 export * from './utils/http.ts';
 export * from './utils/parse-json-body.ts';
 export * from './utils/rate-limit-middleware.ts';
+export * from './utils/logger-helpers.ts';
 
 // Clients & Utils
 export * from './clients/supabase.ts';
@@ -22,7 +23,7 @@ export * from './utils/integrations/resend.ts';
 // Config
 export * from './config/env.ts';
 export * from './config/email-config.ts';
-export * from './config/statsig-cache.ts';
+export * from './config/static-cache-config.ts';
 
 // Email
 export * from './utils/email/base-template.tsx';

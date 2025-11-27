@@ -7,6 +7,7 @@
 
 import type { Database } from '@heyclaude/database-types';
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { logRpcError } from '../utils/rpc-error-logging.ts';
 
 export class CompaniesService {
   constructor(private supabase: SupabaseClient<Database>) {}
@@ -15,26 +16,62 @@ export class CompaniesService {
    * Calls the database RPC: get_company_admin_profile
    */
   async getCompanyAdminProfile(args: Database['public']['Functions']['get_company_admin_profile']['Args']) {
-    const { data, error } = await this.supabase.rpc('get_company_admin_profile', args);
-    if (error) throw error;
-    return data as Database['public']['Functions']['get_company_admin_profile']['Returns'];
+    try {
+      const { data, error } = await this.supabase.rpc('get_company_admin_profile', args);
+      if (error) {
+        logRpcError(error, {
+          rpcName: 'get_company_admin_profile',
+          operation: 'CompaniesService.getCompanyAdminProfile',
+          args: args,
+        });
+        throw error;
+      }
+      return data as Database['public']['Functions']['get_company_admin_profile']['Returns'];
+    } catch (error) {
+      // Error already logged above
+      throw error;
+    }
   }
 
   /**
    * Calls the database RPC: get_company_profile
    */
   async getCompanyProfile(args: Database['public']['Functions']['get_company_profile']['Args']) {
-    const { data, error } = await this.supabase.rpc('get_company_profile', args);
-    if (error) throw error;
-    return data as Database['public']['Functions']['get_company_profile']['Returns'];
+    try {
+      const { data, error } = await this.supabase.rpc('get_company_profile', args);
+      if (error) {
+        logRpcError(error, {
+          rpcName: 'get_company_profile',
+          operation: 'CompaniesService.getCompanyProfile',
+          args: args,
+        });
+        throw error;
+      }
+      return data as Database['public']['Functions']['get_company_profile']['Returns'];
+    } catch (error) {
+      // Error already logged above
+      throw error;
+    }
   }
 
   /**
    * Calls the database RPC: get_companies_list
    */
   async getCompaniesList(args: Database['public']['Functions']['get_companies_list']['Args']) {
-    const { data, error } = await this.supabase.rpc('get_companies_list', args);
-    if (error) throw error;
-    return data as Database['public']['Functions']['get_companies_list']['Returns'];
+    try {
+      const { data, error } = await this.supabase.rpc('get_companies_list', args);
+      if (error) {
+        logRpcError(error, {
+          rpcName: 'get_companies_list',
+          operation: 'CompaniesService.getCompaniesList',
+          args: args,
+        });
+        throw error;
+      }
+      return data as Database['public']['Functions']['get_companies_list']['Returns'];
+    } catch (error) {
+      // Error already logged above
+      throw error;
+    }
   }
 }

@@ -5,14 +5,19 @@ import {
   buildCacheHeaders,
   errorResponse,
   getOnlyCorsHeaders,
+  initRequestLogging,
   methodNotAllowedResponse,
   supabaseAnon,
+  traceRequestComplete,
+  traceStep,
 } from '@heyclaude/edge-runtime';
 import type { BaseLogContext } from '@heyclaude/shared-runtime';
 import {
   buildSecurityHeaders,
+  logError,
   logInfo,
   logWarn,
+  logger,
   sanitizeRoute,
   serializeJsonLd,
 } from '@heyclaude/shared-runtime';
@@ -26,6 +31,25 @@ export async function handleSeoRoute(
   request?: Request,
   logContext?: BaseLogContext
 ): Promise<Response> {
+  // Create log context if not provided
+  const finalLogContext = logContext || {
+    function: 'seo',
+    action: 'seo-route',
+    request_id: crypto.randomUUID(),
+    started_at: new Date().toISOString(),
+  };
+  
+  // Initialize request logging with trace and bindings
+  initRequestLogging(finalLogContext);
+  traceStep('SEO request received', finalLogContext);
+  
+  // Set bindings for this request
+  logger.setBindings({
+    requestId: finalLogContext.request_id,
+    operation: finalLogContext.action || 'seo-route',
+    method,
+  });
+  
   if (method !== 'GET') {
     return methodNotAllowedResponse('GET', CORS);
   }
@@ -38,8 +62,8 @@ export async function handleSeoRoute(
   // In this case, we should use the direct function call instead of making another HTTP request
   // This prevents circular calls when OG route falls back to HTTP
   const isLoopback = request?.headers.get('X-Internal-Loopback') === 'true';
-  if (isLoopback && logContext) {
-    logWarn('Loopback call detected, consider using direct function call instead', logContext);
+  if (isLoopback) {
+    logWarn('Loopback call detected, consider using direct function call instead', finalLogContext);
   }
 
   const routeParam = url.searchParams.get('route');
@@ -54,6 +78,13 @@ export async function handleSeoRoute(
 
   // Sanitize route parameter
   const route = sanitizeRoute(routeParam);
+  
+  // Update bindings with route information
+  logger.setBindings({
+    route,
+    include,
+  });
+  traceStep('Generating SEO metadata', finalLogContext);
 
   const service = new SeoService(supabaseAnon);
 
@@ -152,15 +183,14 @@ export async function handleSeoRoute(
 
     const responseBody = JSON.stringify(responseData);
 
-    if (logContext) {
-      logInfo('SEO generated', {
-        ...logContext,
-        route,
-        include,
-        bytes: responseBody.length,
-        schemasSerialized: processedSchemas.length > 0,
-      });
-    }
+    logInfo('SEO generated', {
+      ...finalLogContext,
+      route,
+      include,
+      bytes: responseBody.length,
+      schemasSerialized: processedSchemas.length > 0,
+    });
+    traceRequestComplete(finalLogContext);
 
     return new Response(responseBody, {
       status: 200,
@@ -175,6 +205,7 @@ export async function handleSeoRoute(
       },
     });
   } catch (error) {
-    return errorResponse(error, 'data-api:generate_metadata_complete', CORS);
+    logError('SEO generation failed', finalLogContext, error);
+    return errorResponse(error, 'data-api:generate_metadata_complete', CORS, finalLogContext);
   }
 }

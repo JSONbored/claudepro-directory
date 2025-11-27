@@ -57,8 +57,9 @@ export const addBookmark = authedAction
       revalidateTag(`user-${ctx.userId}`, 'default');
       revalidateTag(`content-${parsedInput.content_slug}`, 'default');
       
+      const cacheConfig = getCacheConfigSnapshot();
       await nextInvalidateByKeys({
-        cacheConfigPromise: getCacheConfigSnapshot(),
+        cacheConfig,
         invalidateKeys: ['cache.invalidate.bookmark_create']
       });
 

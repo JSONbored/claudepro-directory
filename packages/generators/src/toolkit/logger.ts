@@ -1,68 +1,60 @@
+/**
+ * Generators Logger
+ * 
+ * Pino logger instance for CLI generators with centralized configuration.
+ * All generator commands should use this logger for consistent structured logging.
+ * 
+ * Uses Pino with centralized configuration for:
+ * - Error serialization (via stdSerializers.err)
+ * - Sensitive data redaction (via redact option in config)
+ * - ISO timestamps
+ * - Base context (env, service)
+ * 
+ * @module generators/toolkit/logger
+ */
+
+import pino from 'pino';
+import { createPinoConfig } from '@heyclaude/shared-runtime/logger/config';
+
+// Create Pino logger instance with centralized configuration
+// For CLI tools, we use a pretty-printed format for better readability
+const pinoLogger = pino(
+  createPinoConfig({
+    service: 'generators',
+    // For CLI, we can add pretty printing if needed via transport
+    // For now, structured JSON is fine (can be piped to jq for formatting)
+  })
+);
+
 type LogMeta = Record<string, unknown> | undefined;
 
-function toErrorPayload(error: unknown): Record<string, unknown> | undefined {
-  if (!error) {
-    return undefined;
-  }
-
-  if (error instanceof Error) {
-    return {
-      name: error.name,
-      message: error.message,
-      stack: error.stack,
-    };
-  }
-
-  if (typeof error === 'string') {
-    return { message: error };
-  }
-
-  return { error };
-}
-
-function serializeMeta(meta?: Record<string, unknown>): string {
-  if (!meta || Object.keys(meta).length === 0) {
-    return '';
-  }
-
-  try {
-    return ` ${JSON.stringify(meta)}`;
-  } catch {
-    return ' {"meta":"[unserializable]"}';
-  }
-}
-
-function format(level: string, message: string, meta?: Record<string, unknown>): string {
-  const timestamp = new Date().toISOString();
-  return `[${timestamp}] [${level}] ${message}${serializeMeta(meta)}`;
-}
-
-function mergeMeta(
-  meta?: LogMeta,
-  extra?: Record<string, unknown>
-): Record<string, unknown> | undefined {
-  if (!(meta || extra)) {
-    return undefined;
-  }
-  return { ...(meta ?? {}), ...(extra ?? {}) };
-}
-
+/**
+ * Generators Logger
+ * Compatible with previous logger interface, now using Pino
+ */
 export const logger = {
   info(message: string, meta?: LogMeta) {
-    console.log(format('INFO', message, meta));
+    // Pino handles redaction automatically via config
+    pinoLogger.info(meta || {}, message);
   },
 
   warn(message: string, meta?: LogMeta) {
-    console.warn(format('WARN', message, meta));
+    // Pino handles redaction automatically via config
+    pinoLogger.warn(meta || {}, message);
   },
 
   error(message: string, error?: unknown, meta?: LogMeta) {
-    const extra = toErrorPayload(error);
-    console.error(format('ERROR', message, mergeMeta(meta, extra)));
+    // Pino's stdSerializers.err automatically handles error serialization
+    const logData: Record<string, unknown> = { ...(meta || {}) };
+    if (error) {
+      const errorObj = error instanceof Error ? error : new Error(String(error));
+      logData['err'] = errorObj;
+    }
+    pinoLogger.error(logData, message);
   },
 
   debug(message: string, meta?: LogMeta) {
-    if (process.env['DEBUG'] !== 'true') return;
-    console.debug(format('DEBUG', message, meta));
+    // Pino handles level filtering automatically
+    pinoLogger.debug(meta || {}, message);
   },
 };

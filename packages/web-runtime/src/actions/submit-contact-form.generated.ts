@@ -58,7 +58,7 @@ export const submitContactForm = authedAction
       revalidateTag(`contact-submission-${result?.submission_id}`, 'default');
       
       await nextInvalidateByKeys({
-        cacheConfigPromise: getCacheConfigSnapshot(),
+        cacheConfig: getCacheConfigSnapshot(),
         invalidateKeys: ['cache.invalidate.contact_submission']
       });
 

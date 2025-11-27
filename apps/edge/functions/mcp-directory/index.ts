@@ -15,8 +15,8 @@
 
 import { zodToJsonSchema } from 'npm:zod-to-json-schema@3';
 import type { Database } from '@heyclaude/database-types';
-import { edgeEnv, requireAuthUser } from '@heyclaude/edge-runtime';
-import { createDataApiContext, logError } from '@heyclaude/shared-runtime';
+import { edgeEnv, initRequestLogging, requireAuthUser, traceStep } from '@heyclaude/edge-runtime';
+import { createDataApiContext, logError, logger } from '@heyclaude/shared-runtime';
 import type { User } from '@supabase/supabase-js';
 import { createClient } from '@supabase/supabase-js';
 import { Hono } from 'hono';
@@ -383,6 +383,18 @@ function createWwwAuthenticateHeader(resourceMetadataUrl: string, scope?: string
 mcpApp.all('/mcp', async (c) => {
   const logContext = createDataApiContext('mcp-protocol', {
     app: 'mcp-directory',
+    method: c.req.method,
+  });
+
+  // Initialize request logging with trace and bindings (Phase 1 & 2)
+  initRequestLogging(logContext);
+  traceStep('MCP protocol request received', logContext);
+  
+  // Set bindings for this request - mixin will automatically inject these into all subsequent logs
+  logger.setBindings({
+    requestId: logContext.request_id,
+    operation: logContext.action || 'mcp-protocol',
+    function: logContext.function,
     method: c.req.method,
   });
 

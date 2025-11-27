@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import { runCacheCli, showCacheCliHelp } from '../commands/cache-cli.js';
+import { logger } from '../toolkit/logger.ts';
 
 const args = process.argv.slice(2).filter((arg) => arg !== '--');
 const [command, pattern] = args;
@@ -17,6 +18,7 @@ try {
   }
   runCacheCli(options);
 } catch (error) {
-  console.error(error instanceof Error ? error.message : error);
+  const errorObj = error instanceof Error ? error : new Error(String(error));
+  logger.error('Cache CLI error', errorObj, { command, pattern });
   process.exit(1);
 }

@@ -1,6 +1,7 @@
 import { supabaseServiceRole } from '../../clients/supabase.ts';
 import type { Database as DatabaseGenerated, Json } from '@heyclaude/database-types';
 import { errorToString } from '@heyclaude/shared-runtime';
+import { logger } from '../logger.ts';
 
 type WebhookEventRunRow = DatabaseGenerated['public']['Tables']['webhook_event_runs']['Row'];
 type WebhookDeliveryStatus = DatabaseGenerated['public']['Enums']['webhook_delivery_status'];
@@ -17,9 +18,10 @@ export async function startWebhookEventRun(eventId: string): Promise<WebhookEven
   const { data, error } = await supabaseServiceRole.rpc('start_webhook_event_run', payload);
 
   if (error) {
-    console.error('[webhook-run-logger] Failed to start webhook run', {
+    const errorObj = error instanceof Error ? error : new Error(errorToString(error));
+    logger.error('Failed to start webhook run', {
       webhook_id: eventId,
-      error: errorToString(error),
+      err: errorObj,
     });
     return null;
   }
@@ -47,10 +49,11 @@ export async function finishWebhookEventRun(
   const { error } = await supabaseServiceRole.rpc('finish_webhook_event_run', payload);
 
   if (error) {
-    console.error('[webhook-run-logger] Failed to finish webhook run', {
+    const errorObj = error instanceof Error ? error : new Error(errorToString(error));
+    logger.error('Failed to finish webhook run', {
       run_id: runId,
       status,
-      error: errorToString(error),
+      err: errorObj,
     });
   }
 }

@@ -53,7 +53,7 @@ export const deleteCompany = authedAction
       revalidateTag(`company-id-${parsedInput.company_id}`, 'default');
       
       await nextInvalidateByKeys({
-        cacheConfigPromise: getCacheConfigSnapshot(),
+        cacheConfig: getCacheConfigSnapshot(),
         invalidateKeys: ['cache.invalidate.company_delete']
       });
 

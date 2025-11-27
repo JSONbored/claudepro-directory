@@ -13,6 +13,7 @@
   "dependencies": {
     "@heyclaude/database-types": "workspace:*",
     "@supabase/supabase-js": "^2.84.0",
+    "pino": "^10.1.0",
     "sanitize-html": "^2.17.0",
     "sugar-high": "^0.9.5",
     "zod": "^4.1.12"

@@ -16,7 +16,7 @@
  * ```
  */
 
-import { logger } from '../logger.ts';
+import { logger, toLogContextValue } from '../logger.ts';
 import { normalizeError } from '../errors.ts';
 import { generateRequestId } from './request-context.ts';
 
@@ -70,11 +70,16 @@ export function trackRPCFailure(
   const normalized = normalizeError(error, `RPC ${rpcName} failed`);
   const requestId = generateRequestId();
   
+  // Use dbQuery serializer for consistent database query formatting
+  // Convert dbQuery object to LogContextValue-compatible structure
+  const dbQueryContext: Record<string, unknown> = {
+    rpcName,
+    ...(context && Object.keys(context).length > 0 ? { args: toLogContextValue(context) } : {}),
+  };
   logger.error(`Homepage RPC failure: ${rpcName}`, normalized, {
     requestId,
     operation: 'homepage.rpc',
-    rpcName,
-    ...(context ?? {}),
+    dbQuery: toLogContextValue(dbQueryContext),
   });
 }
 

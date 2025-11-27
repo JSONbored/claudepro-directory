@@ -65,7 +65,7 @@ export const submitContentForReview = authedAction
       revalidatePath(`/account/submissions`);
       
       await nextInvalidateByKeys({
-        cacheConfigPromise: getCacheConfigSnapshot(),
+        cacheConfig: getCacheConfigSnapshot(),
         invalidateKeys: ['cache.invalidate.submission_create']
       });
 

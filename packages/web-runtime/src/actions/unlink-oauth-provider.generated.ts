@@ -49,7 +49,7 @@ export const unlinkOAuthProvider = authedAction
       revalidatePath(`/account/settings`);
       
       await nextInvalidateByKeys({
-        cacheConfigPromise: getCacheConfigSnapshot(),
+        cacheConfig: getCacheConfigSnapshot(),
         invalidateKeys: ['cache.invalidate.oauth_unlink']
       });
 

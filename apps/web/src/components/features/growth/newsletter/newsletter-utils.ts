@@ -1,8 +1,8 @@
-import { getNewsletterConfig } from '@heyclaude/web-runtime/actions/feature-flags';
+import { getNewsletterConfig } from '@heyclaude/web-runtime/config/static-configs';
 import { ensureString, NEWSLETTER_CTA_CONFIG } from '@heyclaude/web-runtime/core';
 
 /**
- * Newsletter config type from Statsig
+ * Newsletter config type
  */
 type NewsletterConfig = Record<string, unknown>;
 
@@ -22,7 +22,7 @@ export function formatSubscriberCount(count: number | null): string {
 /**
  * CTA copy variants for A/B testing
  * Returns headline/description based on experiment variant
- * Accepts optional Statsig config for dynamic copy
+ * Accepts optional config for dynamic copy
  */
 export function getCTAVariantCopy(
   variant: 'aggressive' | 'social_proof' | 'value_focused',
@@ -70,7 +70,7 @@ export function getCTAVariantCopy(
 
 /**
  * Get contextual newsletter message based on category
- * Accepts optional Statsig config for dynamic copy
+ * Accepts optional config for dynamic copy
  */
 export function getContextualMessage(
   category?: string,
@@ -136,15 +136,11 @@ export function getContextualMessage(
 }
 
 /**
- * Load newsletter config from Statsig
+ * Load newsletter config from static defaults
  * Call this once and pass to getCTAVariantCopy/getContextualMessage
  */
 export async function loadNewsletterConfig(): Promise<NewsletterConfig> {
-  try {
-    const result = await getNewsletterConfig({});
-    if (!result?.data) return {} as NewsletterConfig;
-    return result.data as NewsletterConfig;
-  } catch {
-    return {} as NewsletterConfig; // Fall back to hardcoded defaults
-  }
+  // Get newsletter config from static defaults
+  const config = getNewsletterConfig();
+  return config as NewsletterConfig;
 }

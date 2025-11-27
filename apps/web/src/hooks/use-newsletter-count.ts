@@ -7,7 +7,8 @@
  */
 
 import { getNewsletterCountAction } from '@heyclaude/web-runtime/actions';
-import { getCacheConfig, getPollingConfig } from '@heyclaude/web-runtime/actions/feature-flags';
+import { getPollingConfig } from '@heyclaude/web-runtime/config/static-configs';
+import { CACHE_CONFIG_DEFAULTS } from '@heyclaude/web-runtime/feature-flags/defaults';
 import { logClientWarning, logger } from '@heyclaude/web-runtime/core';
 import { useEffect, useRef, useState } from 'react';
 
@@ -20,14 +21,14 @@ export interface UseNewsletterCountReturn {
 const CACHE_KEY = 'newsletter_count';
 const CACHE_TIMESTAMP_KEY = 'newsletter_count_ts';
 
-// Default values (will be overridden by Dynamic Configs from Statsig)
+// Default values (will be overridden by static config)
 const DEFAULT_CACHE_TTL_MS = 300000; // 5 minutes (300 seconds)
 const DEFAULT_POLL_INTERVAL_MS = 300000; // 5 minutes
 
 /**
  * Hook to fetch and poll newsletter subscriber count
  * Features: localStorage caching, visibility-based polling optimization
- * Loads config from Statsig client-side (avoids build-time server calls)
+ * Loads config from static defaults client-side (avoids build-time server calls)
  */
 export function useNewsletterCount(): UseNewsletterCountReturn {
   const [count, setCount] = useState<number | null>(null);
@@ -38,33 +39,20 @@ export function useNewsletterCount(): UseNewsletterCountReturn {
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const configLoadedRef = useRef(false);
 
-  // Load config from Statsig once when hook mounts (client-side only)
+  // Load config from static defaults once when hook mounts (client-side only)
   useEffect(() => {
     if (configLoadedRef.current) return;
     configLoadedRef.current = true;
 
-    Promise.all([getCacheConfig({}), getPollingConfig({})])
-      .then(
-        ([cacheResult, pollingResult]: [
-          Awaited<ReturnType<typeof getCacheConfig>>,
-          Awaited<ReturnType<typeof getPollingConfig>>,
-        ]) => {
-          if (cacheResult?.data) {
-            const cache = cacheResult.data as Record<string, unknown>;
-            const cacheTtlSeconds = (cache['cache.newsletter_count_ttl_s'] as number) ?? 300;
-            setCacheTtlMs(cacheTtlSeconds * 1000);
-          }
-          if (pollingResult?.data) {
-            const polling = pollingResult.data as Record<string, unknown>;
-            const pollInterval = (polling['polling.newsletter_count_ms'] as number) ?? 300000;
-            setPollIntervalMs(pollInterval);
-          }
-        }
-      )
-      .catch((error) => {
-        logClientWarning('useNewsletterCount: failed to load cache/polling config', error);
-        // Keep default values on error
-      });
+    // Load config from static defaults
+    const cache = CACHE_CONFIG_DEFAULTS as Record<string, unknown>;
+    const polling = getPollingConfig();
+    
+    const cacheTtlSeconds = (cache['cache.newsletter_count_ttl_s'] as number) ?? 300;
+    setCacheTtlMs(cacheTtlSeconds * 1000);
+    
+    const pollInterval = (polling['polling.newsletter_count_ms'] as number) ?? 300000;
+    setPollIntervalMs(pollInterval);
   }, []);
 
   useEffect(() => {

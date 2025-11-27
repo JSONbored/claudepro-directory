@@ -1,6 +1,7 @@
 import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
 import { getAuthUserFromHeader } from '../auth.ts';
 import { pgmqSend } from '../pgmq-client.ts';
+import { logger } from '../logger.ts';
 
 type SearchQueryInsert = DatabaseGenerated['public']['Tables']['search_queries']['Insert'];
 
@@ -54,8 +55,9 @@ export async function enqueueSearchAnalytics({
     });
   } catch (error) {
     const { errorToString } = await import('@heyclaude/shared-runtime');
-    console.warn('[analytics] Failed to enqueue search analytics', {
-      error: errorToString(error),
+    const errorObj = error instanceof Error ? error : new Error(errorToString(error));
+    logger.warn('Failed to enqueue search analytics', {
+      err: errorObj,
       query: query.substring(0, 50),
     });
   }

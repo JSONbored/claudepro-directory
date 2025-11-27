@@ -7,6 +7,7 @@
 
 import type { Database } from '@heyclaude/database-types';
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { logRpcError } from '../utils/rpc-error-logging.ts';
 
 export class TrendingService {
   constructor(private supabase: SupabaseClient<Database>) {}
@@ -15,35 +16,83 @@ export class TrendingService {
    * Calls the database RPC: get_trending_metrics_with_content
    */
   async getTrendingMetrics(args: Database['public']['Functions']['get_trending_metrics_with_content']['Args']) {
-    const { data, error } = await this.supabase.rpc('get_trending_metrics_with_content', args);
-    if (error) throw error;
-    return data as Database['public']['Functions']['get_trending_metrics_with_content']['Returns'];
+    try {
+      const { data, error } = await this.supabase.rpc('get_trending_metrics_with_content', args);
+      if (error) {
+        logRpcError(error, {
+          rpcName: 'get_trending_metrics_with_content',
+          operation: 'TrendingService.getTrendingMetrics',
+          args: args,
+        });
+        throw error;
+      }
+      return data as Database['public']['Functions']['get_trending_metrics_with_content']['Returns'];
+    } catch (error) {
+      // Error already logged above
+      throw error;
+    }
   }
 
   /**
    * Calls the database RPC: get_popular_content
    */
   async getPopularContent(args: Database['public']['Functions']['get_popular_content']['Args']) {
-    const { data, error } = await this.supabase.rpc('get_popular_content', args);
-    if (error) throw error;
-    return data as Database['public']['Functions']['get_popular_content']['Returns'];
+    try {
+      const { data, error } = await this.supabase.rpc('get_popular_content', args);
+      if (error) {
+        logRpcError(error, {
+          rpcName: 'get_popular_content',
+          operation: 'TrendingService.getPopularContent',
+          args: args,
+        });
+        throw error;
+      }
+      return data as Database['public']['Functions']['get_popular_content']['Returns'];
+    } catch (error) {
+      // Error already logged above
+      throw error;
+    }
   }
 
   /**
    * Calls the database RPC: get_recent_content
    */
   async getRecentContent(args: Database['public']['Functions']['get_recent_content']['Args']) {
-    const { data, error } = await this.supabase.rpc('get_recent_content', args);
-    if (error) throw error;
-    return data as Database['public']['Functions']['get_recent_content']['Returns'];
+    try {
+      const { data, error } = await this.supabase.rpc('get_recent_content', args);
+      if (error) {
+        logRpcError(error, {
+          rpcName: 'get_recent_content',
+          operation: 'TrendingService.getRecentContent',
+          args: args,
+        });
+        throw error;
+      }
+      return data as Database['public']['Functions']['get_recent_content']['Returns'];
+    } catch (error) {
+      // Error already logged above
+      throw error;
+    }
   }
 
   /**
    * Calls the database RPC: get_trending_content
    */
   async getTrendingContent(args: Database['public']['Functions']['get_trending_content']['Args']) {
-    const { data, error } = await this.supabase.rpc('get_trending_content', args);
-    if (error) throw error;
-    return data as Database['public']['Functions']['get_trending_content']['Returns'];
+    try {
+      const { data, error } = await this.supabase.rpc('get_trending_content', args);
+      if (error) {
+        logRpcError(error, {
+          rpcName: 'get_trending_content',
+          operation: 'TrendingService.getTrendingContent',
+          args: args,
+        });
+        throw error;
+      }
+      return data as Database['public']['Functions']['get_trending_content']['Returns'];
+    } catch (error) {
+      // Error already logged above
+      throw error;
+    }
   }
 }

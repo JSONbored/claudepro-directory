@@ -11,7 +11,7 @@
  * Route: POST /image-generation/process
  */
 
-import { edgeEnv, pgmqDelete, pgmqRead } from '@heyclaude/edge-runtime';
+import { edgeEnv, initRequestLogging, pgmqDelete, pgmqRead, traceRequestComplete, traceStep } from '@heyclaude/edge-runtime';
 import type { BaseLogContext } from '@heyclaude/shared-runtime';
 import {
   createUtilityContext,
@@ -178,8 +178,15 @@ async function processImageGeneration(
  * Main queue worker handler
  */
 export async function handleImageGenerationQueue(_req: Request): Promise<Response> {
+  const logContext = createUtilityContext('image-generation', 'queue-processor', {});
+  
+  // Initialize request logging with trace and bindings
+  initRequestLogging(logContext);
+  traceStep('Starting image generation queue processing', logContext);
+  
   try {
     // Read messages with timeout protection
+    traceStep('Reading image generation queue', logContext);
     const messages = await withTimeout(
       pgmqRead(IMAGE_GENERATION_QUEUE, {
         sleep_seconds: 0,
@@ -190,6 +197,7 @@ export async function handleImageGenerationQueue(_req: Request): Promise<Respons
     );
 
     if (!messages || messages.length === 0) {
+      traceRequestComplete(logContext);
       return new Response(
         JSON.stringify({ message: 'No messages in queue', processed: 0 }),
         {
@@ -199,11 +207,11 @@ export async function handleImageGenerationQueue(_req: Request): Promise<Respons
       );
     }
 
-    const logContext = createUtilityContext('image-generation', 'queue-processor');
     logInfo(`Processing ${messages.length} image generation jobs`, {
       ...logContext,
       count: messages.length,
     });
+    traceStep(`Processing ${messages.length} image generation jobs`, logContext);
 
     const results: Array<{
       msg_id: string;
@@ -463,6 +471,7 @@ export async function handleImageGenerationQueue(_req: Request): Promise<Respons
       success: successCount,
       failed: failedCount,
     });
+    traceRequestComplete(logContext);
 
     return new Response(
       JSON.stringify({
@@ -478,7 +487,6 @@ export async function handleImageGenerationQueue(_req: Request): Promise<Respons
       }
     );
   } catch (error) {
-    const logContext = createUtilityContext('image-generation', 'queue-processor');
     // Log full error details server-side for troubleshooting
     logError('Image generation queue worker error', logContext, error);
     // Never expose internal error details to users - always use generic message

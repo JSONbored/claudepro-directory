@@ -1,12 +1,13 @@
 /**
  * Unified cache invalidation utility for edge functions
- * Uses Statsig config with fallback to defaults
+ * Uses static cache configs with defaults
  * Non-blocking error handling
  */
 
 import { edgeEnv } from '../config/env.ts';
-import { getCacheConfigStringArray } from '../config/statsig-cache.ts';
+import { getCacheConfigStringArray } from '../config/static-cache-config.ts';
 import type { Database } from '@heyclaude/database-types';
+import { logger } from './logger.ts';
 
 const REVALIDATE_SECRET = edgeEnv.revalidate.secret;
 const SITE_URL = edgeEnv.site.siteUrl;
@@ -36,7 +37,7 @@ export async function invalidateCacheTags(
 ): Promise<InvalidateCacheResult> {
   if (!REVALIDATE_SECRET) {
     if (options?.logContext) {
-      console.warn('[cache] Invalidation skipped (no secret)', options.logContext);
+      logger.warn('Invalidation skipped (no secret)', options.logContext);
     }
     return { success: false, error: 'REVALIDATE_SECRET not configured' };
   }
@@ -62,10 +63,10 @@ export async function invalidateCacheTags(
     if (!response.ok) {
       const errorText = await response.text();
       if (options?.logContext) {
-        console.warn('[cache] Invalidation failed', {
+        logger.warn('Invalidation failed', {
           ...options.logContext,
           status: response.status,
-          error: errorText,
+          err: new Error(errorText),
           tags,
         });
       }
@@ -73,7 +74,7 @@ export async function invalidateCacheTags(
     }
 
     if (options?.logContext) {
-      console.log('[cache] Tags invalidated', {
+      logger.info('Tags invalidated', {
         ...options.logContext,
         success: true,
         tags,
@@ -85,9 +86,10 @@ export async function invalidateCacheTags(
     const { errorToString } = await import('@heyclaude/shared-runtime');
     const errorMsg = errorToString(error);
     if (options?.logContext) {
-      console.warn('[cache] Invalidation error', {
+      const errorObj = error instanceof Error ? error : new Error(errorMsg);
+      logger.warn('Invalidation error', {
         ...options.logContext,
-        error: errorMsg,
+        err: errorObj,
         tags,
       });
     }
@@ -96,8 +98,8 @@ export async function invalidateCacheTags(
 }
 
 /**
- * Invalidate cache by Statsig config key
- * Fetches tags from Statsig with fallback to defaults
+ * Invalidate cache by config key
+ * Uses static cache configs
  */
 export async function invalidateCacheByKey(
   cacheKey: string,

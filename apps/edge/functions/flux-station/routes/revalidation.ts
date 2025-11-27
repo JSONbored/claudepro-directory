@@ -7,12 +7,15 @@ import { Constants, type Database as DatabaseGenerated } from '@heyclaude/databa
 import {
   edgeEnv,
   errorResponse,
+  initRequestLogging,
   invalidateCacheTags,
   pgmqDelete,
   pgmqRead,
   publicCorsHeaders,
   runWithRetry,
   successResponse,
+  traceRequestComplete,
+  traceStep,
 } from '@heyclaude/edge-runtime';
 import {
   createUtilityContext,
@@ -71,8 +74,15 @@ function isValidContentCategory(
 }
 
 export async function handleRevalidation(_req: Request): Promise<Response> {
+  const logContext = createUtilityContext('flux-station', 'content-revalidation', {});
+  
+  // Initialize request logging with trace and bindings
+  initRequestLogging(logContext);
+  traceStep('Starting revalidation processing', logContext);
+  
   try {
     // Read messages with timeout protection
+    traceStep('Reading revalidation queue', logContext);
     const messages = await withTimeout(
       pgmqRead(CONTENT_REVALIDATION_QUEUE, {
         sleep_seconds: 0,
@@ -83,6 +93,7 @@ export async function handleRevalidation(_req: Request): Promise<Response> {
     );
 
     if (!messages || messages.length === 0) {
+      traceRequestComplete(logContext);
       return successResponse({ message: 'No messages in queue', processed: 0 }, 200);
     }
 
@@ -207,6 +218,7 @@ export async function handleRevalidation(_req: Request): Promise<Response> {
       }
     }
 
+    traceRequestComplete(logContext);
     return successResponse(
       {
         message: `Processed ${messages.length} messages`,
@@ -216,9 +228,6 @@ export async function handleRevalidation(_req: Request): Promise<Response> {
       200
     );
   } catch (error) {
-    const logContext = createUtilityContext('flux-station', 'content-revalidation-error', {
-      operation: 'queue-processing',
-    });
     logError('Content revalidation queue error', logContext, error);
     return errorResponse(error, 'flux-station:revalidation-error', publicCorsHeaders, logContext);
   }

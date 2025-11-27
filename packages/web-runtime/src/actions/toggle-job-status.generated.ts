@@ -54,7 +54,7 @@ export const toggleJobStatus = authedAction
       revalidateTag(`job-${parsedInput.job_id}`, 'default');
       
       await nextInvalidateByKeys({
-        cacheConfigPromise: getCacheConfigSnapshot(),
+        cacheConfig: getCacheConfigSnapshot(),
         invalidateKeys: ['cache.invalidate.job_status']
       });
 

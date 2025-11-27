@@ -5,13 +5,14 @@
  * Handles syntax highlighting, content processing, and other expensive operations
  */
 
-import { applyRateLimitHeaders, createRateLimitErrorResponse } from '@heyclaude/edge-runtime';
+import { applyRateLimitHeaders, createRateLimitErrorResponse, initRequestLogging, traceStep } from '@heyclaude/edge-runtime';
 import {
   checkRateLimit,
   createTransformApiContext,
   errorToString,
   logError,
   logInfo,
+  logger,
   RATE_LIMIT_PRESETS,
 } from '@heyclaude/shared-runtime';
 import { handleContentHighlight, handleContentProcess } from '../../routes/content-process.ts';
@@ -97,6 +98,18 @@ export async function handleContentHighlightRoute(req: Request): Promise<Respons
       path: 'content/highlight',
       method: 'POST',
     });
+    
+    // Initialize request logging with trace and bindings
+    initRequestLogging(logContext);
+    traceStep('Content highlight request received', logContext);
+    
+    // Set bindings for this request
+    logger.setBindings({
+      requestId: logContext.request_id,
+      operation: logContext.action || 'content-highlight',
+      method: req.method,
+    });
+    
     const response = await handleContentHighlight(req, logContext);
     applyRateLimitHeaders(response, rateLimit, 'transform');
     return response;
@@ -118,6 +131,18 @@ export async function handleContentProcessRoute(req: Request): Promise<Response>
       path: 'content/process',
       method: 'POST',
     });
+    
+    // Initialize request logging with trace and bindings
+    initRequestLogging(logContext);
+    traceStep('Content process request received', logContext);
+    
+    // Set bindings for this request
+    logger.setBindings({
+      requestId: logContext.request_id,
+      operation: logContext.action || 'content-process',
+      method: req.method,
+    });
+    
     const response = await handleContentProcess(req, logContext);
     applyRateLimitHeaders(response, rateLimit, 'transform');
     return response;

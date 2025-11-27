@@ -15,6 +15,7 @@ import {
   buildSubmissionEmbed,
 } from '../../utils/discord/embeds.ts';
 import { errorToString, logError, logInfo } from '@heyclaude/shared-runtime';
+import { logger } from '../../utils/logger.ts';
 import {
   badRequestResponse,
   discordCorsHeaders,
@@ -184,21 +185,19 @@ export async function handleJobNotificationDirect(
 ): Promise<void> {
   const webhookUrl = validateWebhookUrl(edgeEnv.discord.jobs, 'DISCORD_WEBHOOK_JOBS');
   if (webhookUrl instanceof Response) {
-    console.error('[discord-handler] Discord webhook not configured for jobs');
+    logger.error('Discord webhook not configured for jobs');
     return;
   }
 
   const job = payload.record;
 
   if (job.is_placeholder) {
-    console.log('[discord-handler] Skipping placeholder job', {
-      jobId: job.id,
-    });
+    logger.info('Skipping placeholder job', { jobId: job.id });
     return;
   }
 
   if (!job.status || job.status === 'draft') {
-    console.log('[discord-handler] Skipping draft job', { jobId: job.id });
+    logger.info('Skipping draft job', { jobId: job.id });
     return;
   }
 
@@ -212,10 +211,8 @@ export async function handleJobNotificationDirect(
     const logContext = createDiscordHandlerContext('job-notification', {
       jobId: job.id,
     });
-    console.error('[discord-handler] Failed to build embed', {
-      ...logContext,
-      error: embedError instanceof Error ? embedError.message : String(embedError),
-    });
+    const error = embedError instanceof Error ? embedError : new Error(String(embedError));
+    logger.error('Failed to build embed', { ...logContext, err: error });
     return;
   }
 
@@ -252,7 +249,7 @@ async function createJobDiscordMessageDirect(
   );
 
   if (!messageId) {
-    console.error('[discord-handler] Discord response missing message ID', logContext);
+    logger.error('Discord response missing message ID', logContext);
     return;
   }
 
@@ -265,7 +262,7 @@ async function createJobDiscordMessageDirect(
     .eq('id', job.id);
 
   if (updateError) {
-    console.error('[discord-handler] Failed to store discord_message_id', {
+    logger.error('Failed to store discord_message_id', {
       ...logContext,
       error: updateError instanceof Error ? updateError.message : String(updateError),
     });
@@ -313,12 +310,12 @@ export async function handleSubmissionNotificationDirect(
 ): Promise<void> {
   const webhookUrl = validateWebhookUrl(edgeEnv.discord.defaultWebhook, 'DISCORD_WEBHOOK_URL');
   if (webhookUrl instanceof Response) {
-    console.error('[discord-handler] Discord webhook not configured for submissions');
+    logger.error('Discord webhook not configured for submissions');
     return;
   }
 
   if (!filterEventType(payload, ['INSERT'])) {
-    console.log('[discord-handler] Skipping non-INSERT submission event', {
+    logger.info('Skipping non-INSERT submission event', {
       type: payload.type,
       submissionId: payload.record.id,
     });
@@ -327,7 +324,7 @@ export async function handleSubmissionNotificationDirect(
 
   const SPAM_THRESHOLD = 0.7;
   if (payload.record.spam_score !== null && payload.record.spam_score > SPAM_THRESHOLD) {
-    console.log('[discord-handler] Skipping spam submission', {
+    logger.info('Skipping spam submission', {
       submissionId: payload.record.id,
       spamScore: payload.record.spam_score,
     });
@@ -366,12 +363,12 @@ export async function handleContentNotificationDirect(
     'DISCORD_ANNOUNCEMENTS_WEBHOOK_URL'
   );
   if (webhookUrl instanceof Response) {
-    console.error('[discord-handler] Discord webhook not configured for announcements');
+    logger.error('Discord webhook not configured for announcements');
     return;
   }
 
   if (!didStatusChangeTo(payload, 'merged')) {
-    console.log('[discord-handler] Skipping non-merged submission', {
+    logger.info('Skipping non-merged submission', {
       submissionId: payload.record.id,
       status: payload.record.status,
     });
@@ -396,7 +393,7 @@ export async function handleContentNotificationDirect(
   });
 
   if (contentError || !content) {
-    console.error('[discord-handler] Failed to fetch content', {
+    logger.error('Failed to fetch content', {
       ...logContext,
       error: errorToString(contentError),
       approved_slug: payload.record.approved_slug,
@@ -491,7 +488,7 @@ export async function handleContentNotificationDirect(
   await invalidateCacheByKey('cache.invalidate.notifications', ['notifications'], {
     logContext: updatedContext,
   }).catch((error) => {
-    console.warn('[discord-handler] Cache invalidation failed', {
+    logger.warn('Cache invalidation failed', {
       ...updatedContext,
       error: errorToString(error),
     });
@@ -506,7 +503,7 @@ export async function handleContentNotificationDirect(
       logContext: updatedContext,
     }
   ).catch((error) => {
-    console.warn('[discord-handler] Cache invalidation failed', {
+    logger.warn('Cache invalidation failed', {
       ...updatedContext,
       error: errorToString(error),
     });
@@ -583,7 +580,7 @@ async function handleJobNotification(req: Request): Promise<Response> {
     const logContext = createDiscordHandlerContext('job-notification', {
       jobId: job.id,
     });
-    console.error('[discord-handler] Failed to build embed', {
+    logger.error('Failed to build embed', {
       ...logContext,
       error: embedError instanceof Error ? embedError.message : String(embedError),
     });
@@ -637,7 +634,7 @@ async function createJobDiscordMessage(
     const logContext = createDiscordHandlerContext('job-notification', {
       jobId: job.id,
     });
-    console.error('[discord-handler] Failed to store discord_message_id', {
+    logger.error('Failed to store discord_message_id', {
       ...logContext,
       error: updateError instanceof Error ? updateError.message : String(updateError),
     });
@@ -794,7 +791,7 @@ async function handleContentNotification(req: Request): Promise<Response> {
   });
 
   if (contentError || !content) {
-    console.error('[discord-handler] Failed to fetch content', {
+    logger.error('Failed to fetch content', {
       ...logContext,
       error: contentError instanceof Error ? contentError.message : String(contentError),
       approved_slug: payload.record.approved_slug,
@@ -852,7 +849,7 @@ async function handleContentNotification(req: Request): Promise<Response> {
   await invalidateCacheByKey('cache.invalidate.notifications', ['notifications'], {
     logContext: updatedContext,
   }).catch((error) => {
-    console.warn('[discord-handler] Cache invalidation failed', {
+    logger.warn('Cache invalidation failed', {
       ...updatedContext,
       error: errorToString(error),
     });
@@ -867,7 +864,7 @@ async function handleContentNotification(req: Request): Promise<Response> {
       logContext: updatedContext,
     }
   ).catch((error) => {
-    console.warn('[discord-handler] Cache invalidation failed', {
+    logger.warn('Cache invalidation failed', {
       ...updatedContext,
       error: errorToString(error),
     });
@@ -1039,7 +1036,7 @@ async function handleChangelogNotification(req: Request): Promise<Response> {
   await invalidateCacheByKey('cache.invalidate.notifications', ['notifications'], {
     logContext,
   }).catch((error) => {
-    console.warn('[discord-handler] Cache invalidation failed', {
+    logger.warn('Cache invalidation failed', {
       ...logContext,
       error: errorToString(error),
     });
@@ -1050,7 +1047,7 @@ async function handleChangelogNotification(req: Request): Promise<Response> {
     slug: entry.slug,
     logContext,
   }).catch((error) => {
-    console.warn('[discord-handler] Cache invalidation failed', {
+    logger.warn('Cache invalidation failed', {
       ...logContext,
       error: errorToString(error),
     });

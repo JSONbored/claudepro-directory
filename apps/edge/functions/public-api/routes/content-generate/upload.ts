@@ -21,10 +21,13 @@ import {
   errorResponse,
   getOnlyCorsHeaders,
   getStorageServiceClient,
+  initRequestLogging,
   jsonResponse,
   methodNotAllowedResponse,
   parseJsonBody,
   supabaseServiceRole,
+  traceRequestComplete,
+  traceStep,
   uploadObject,
 } from '@heyclaude/edge-runtime';
 import type { BaseLogContext } from '@heyclaude/shared-runtime';
@@ -33,6 +36,7 @@ import {
   createDataApiContext,
   logError,
   logInfo,
+  logger,
 } from '@heyclaude/shared-runtime';
 
 const CORS = getOnlyCorsHeaders;
@@ -66,6 +70,24 @@ export async function handleUploadPackage(
   request: Request,
   logContext?: BaseLogContext
 ): Promise<Response> {
+  // Create log context if not provided
+  const finalLogContext = logContext || createDataApiContext('content-generate-upload', {
+    path: '/content/generate-package/upload',
+    method: request.method,
+    app: 'public-api',
+  });
+  
+  // Initialize request logging with trace and bindings
+  initRequestLogging(finalLogContext);
+  traceStep('Package upload request received', finalLogContext);
+  
+  // Set bindings for this request
+  logger.setBindings({
+    requestId: finalLogContext.request_id,
+    operation: finalLogContext.action || 'package-upload',
+    method: request.method,
+  });
+  
   // Only allow POST
   if (request.method === 'OPTIONS') {
     return new Response(null, {
@@ -84,9 +106,7 @@ export async function handleUploadPackage(
   // Authenticate: Internal-only endpoint (requires service role key)
   const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
   if (!serviceRoleKey) {
-    if (logContext) {
-      logError('SUPABASE_SERVICE_ROLE_KEY not configured', logContext);
-    }
+    logError('SUPABASE_SERVICE_ROLE_KEY not configured', finalLogContext);
     return jsonResponse(
       {
         error: 'Internal Server Error',
@@ -105,13 +125,11 @@ export async function handleUploadPackage(
   const providedKey = authHeader?.replace('Bearer ', '').trim();
 
   if (!providedKey || providedKey !== serviceRoleKey) {
-    if (logContext) {
-      logInfo('Unauthorized package upload request', {
-        ...logContext,
-        hasAuthHeader: !!authHeader,
-        hasKey: !!providedKey,
-      });
-    }
+    logInfo('Unauthorized package upload request', {
+      ...finalLogContext,
+      hasAuthHeader: !!authHeader,
+      hasKey: !!providedKey,
+    });
     return jsonResponse(
       {
         error: 'Unauthorized',
@@ -187,9 +205,18 @@ export async function handleUploadPackage(
       .single();
 
     if (fetchError || !contentData) {
-      if (logContext) {
-        logError('Content not found for upload', logContext, fetchError);
-      }
+      // Use dbQuery serializer for consistent database query formatting
+      logError('Content not found for upload', {
+        ...finalLogContext,
+        dbQuery: {
+          table: 'content',
+          operation: 'select',
+          schema: 'public',
+          args: {
+            id: content_id,
+          },
+        },
+      }, fetchError);
       return jsonResponse(
         {
           success: false,
@@ -235,9 +262,7 @@ export async function handleUploadPackage(
       }
       mcpbBuffer = bytes.buffer;
     } catch (error) {
-      if (logContext) {
-        logError('Failed to decode base64 mcpb_file', logContext, error);
-      }
+      logError('Failed to decode base64 mcpb_file', finalLogContext, error);
       return badRequestResponse('Invalid base64 encoding in mcpb_file', CORS);
     }
 
@@ -254,13 +279,11 @@ export async function handleUploadPackage(
     });
 
     if (!(uploadResult.success && uploadResult.publicUrl)) {
-      if (logContext) {
-        logError('Storage upload failed', logContext, {
-          error: uploadResult['error'] || 'Unknown upload error',
-          content_id,
-          slug: content.slug,
-        });
-      }
+      logError('Storage upload failed', finalLogContext, {
+        error: uploadResult['error'] || 'Unknown upload error',
+        content_id,
+        slug: content.slug,
+      });
       return jsonResponse(
         {
           success: false,
@@ -292,9 +315,19 @@ export async function handleUploadPackage(
       .eq('id', content_id);
 
     if (updateError) {
-      if (logContext) {
-        logError('Database update failed', logContext, updateError);
-      }
+      // Use dbQuery serializer for consistent database query formatting
+      logError('Database update failed', {
+        ...finalLogContext,
+        dbQuery: {
+          table: 'content',
+          operation: 'update',
+          schema: 'public',
+          args: {
+            id: content_id,
+            // Update fields redacted by Pino's redact config
+          },
+        },
+      }, updateError);
       return jsonResponse(
         {
           success: false,
@@ -313,15 +346,14 @@ export async function handleUploadPackage(
       );
     }
 
-    if (logContext) {
-      logInfo('Package uploaded successfully', {
-        ...logContext,
-        content_id,
-        category,
-        slug: content.slug,
-        storage_url: uploadResult.publicUrl,
-      });
-    }
+    logInfo('Package uploaded successfully', {
+      ...finalLogContext,
+      content_id,
+      category,
+      slug: content.slug,
+      storage_url: uploadResult.publicUrl,
+    });
+    traceRequestComplete(finalLogContext);
 
     const response: UploadPackageResponse = {
       success: true,
@@ -339,18 +371,7 @@ export async function handleUploadPackage(
     });
   } catch (error) {
     // Log the real error server-side for debugging
-    if (logContext) {
-      logError('Package upload failed', logContext, error);
-      // Use errorResponse for consistent error handling and logging
-      return errorResponse(error, 'data-api:content-generate-upload', CORS, logContext);
-    }
-
-    // Fallback if logContext is not available (shouldn't happen, but defensive)
-    const fallbackLogContext = createDataApiContext('content-generate-upload', {
-      path: 'upload',
-      method: 'POST',
-    });
-    logError('Package upload failed (no context)', fallbackLogContext, error);
-    return errorResponse(error, 'data-api:content-generate-upload', CORS, fallbackLogContext);
+    logError('Package upload failed', finalLogContext, error);
+    return errorResponse(error, 'data-api:content-generate-upload', CORS, finalLogContext);
   }
 }

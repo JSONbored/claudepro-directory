@@ -4,8 +4,7 @@ import './micro-interactions.css';
 import './sugar-high.css';
 
 import type { Database } from '@heyclaude/database-types';
-import { isBuildTime } from '@heyclaude/web-runtime';
-import { getComponentConfig } from '@heyclaude/web-runtime/actions';
+import { getComponentCardConfig } from '@heyclaude/web-runtime/config/static-configs';
 import {
   createWebAppContextWithId,
   generateRequestId,
@@ -13,12 +12,7 @@ import {
   normalizeError,
 } from '@heyclaude/web-runtime/core';
 import { APP_CONFIG } from '@heyclaude/web-runtime/data/config/constants';
-import { FeatureFlagsProvider } from '@heyclaude/web-runtime/feature-flags/provider';
-import {
-  ComponentConfigContextProvider,
-  DEFAULT_COMPONENT_CARD_CONFIG,
-  mapComponentCardConfig,
-} from '@heyclaude/web-runtime/hooks';
+import { ComponentConfigContextProvider } from '@heyclaude/web-runtime/hooks';
 import { generatePageMetadata, getLayoutData } from '@heyclaude/web-runtime/server';
 import { ErrorBoundary } from '@heyclaude/web-runtime/ui';
 import type { Metadata } from 'next';
@@ -46,9 +40,7 @@ const NotificationToastHandler = dynamicImport(
   }
 );
 
-// CRITICAL: Lazy-load getLayoutFlags to prevent flags.ts from being analyzed during build
-// Even though getLayoutFlags has build-time checks, Next.js's static analyzer might
-// still traverse the import chain and see flags/next imports
+// Component config is now static
 
 // Self-hosted fonts - no external requests, faster FCP, GDPR compliant
 const inter = localFont({
@@ -173,6 +165,13 @@ const DEFAULT_LAYOUT_DATA: {
   },
 };
 
+/**
+ * Static Rendering Enabled
+ *
+ * RootLayout now uses static component config (no server actions or headers()).
+ * This allows the layout to be statically generated, improving performance.
+ */
+
 export default async function RootLayout({
   children,
 }: Readonly<{
@@ -182,9 +181,7 @@ export default async function RootLayout({
   const requestId = generateRequestId();
   const logContext = createWebAppContextWithId(requestId, '/', 'RootLayout');
 
-  // Fetch layout data
-  // NOTE: Feature flags are handled via middleware (cookies) + client provider (context)
-  // This allows RootLayout to remain Static/ISR compatible where possible.
+  // Fetch layout data (announcements and navigation)
   const [layoutDataResult] = await Promise.allSettled([getLayoutData()]);
 
   // Extract layout data with fallbacks
@@ -201,24 +198,8 @@ export default async function RootLayout({
     });
   }
 
-  let componentCardConfig = DEFAULT_COMPONENT_CARD_CONFIG;
-  if (isBuildTime()) {
-    logger.info('RootLayout: build-time detected, using default component config');
-  } else {
-    try {
-      const componentConfigResult = await getComponentConfig({});
-      componentCardConfig = mapComponentCardConfig(componentConfigResult.data ?? null);
-      if (componentConfigResult.serverError) {
-        logger.warn('RootLayout: component config server error', undefined, {
-          ...logContext,
-          error: componentConfigResult.serverError,
-        });
-      }
-    } catch (error) {
-      const normalized = normalizeError(error, 'Failed to load component config');
-      logger.error('RootLayout: component config fallback to defaults', normalized, logContext);
-    }
-  }
+  // Get component card config from static defaults
+  const componentCardConfig = getComponentCardConfig();
 
   return (
     <html
@@ -267,23 +248,21 @@ export default async function RootLayout({
             disableTransitionOnChange={false}
             enableColorScheme={false}
           >
-            <FeatureFlagsProvider initialFlags={null}>
-              <PostCopyEmailProvider>
-                <NotificationsProvider>
-                  <ErrorBoundary>
-                    <LayoutContent
-                      announcement={layoutData.announcement}
-                      navigationData={layoutData.navigationData}
-                    >
-                      {children}
-                    </LayoutContent>
-                  </ErrorBoundary>
-                  <Toaster />
-                  <NotificationToastHandler />
-                  {/* Newsletter capture is conditionally rendered in LayoutContent for non-auth pages */}
-                </NotificationsProvider>
-              </PostCopyEmailProvider>
-            </FeatureFlagsProvider>
+            <PostCopyEmailProvider>
+              <NotificationsProvider>
+                <ErrorBoundary>
+                  <LayoutContent
+                    announcement={layoutData.announcement}
+                    navigationData={layoutData.navigationData}
+                  >
+                    {children}
+                  </LayoutContent>
+                </ErrorBoundary>
+                <Toaster />
+                <NotificationToastHandler />
+                {/* Newsletter capture is conditionally rendered in LayoutContent for non-auth pages */}
+              </NotificationsProvider>
+            </PostCopyEmailProvider>
           </ThemeProvider>
         </ComponentConfigContextProvider>
         {/* Pulse Cannon - Unified pulse loading system (loads after page idle) */}

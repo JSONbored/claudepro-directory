@@ -7,15 +7,19 @@ import {
   badRequestResponse,
   buildCacheHeaders,
   errorResponse,
+  initRequestLogging,
   jsonResponse,
   parseJsonBody,
   publicCorsHeaders,
+  traceRequestComplete,
+  traceStep,
 } from '@heyclaude/edge-runtime';
 import type { BaseLogContext } from '@heyclaude/shared-runtime';
 import {
   buildSecurityHeaders,
   highlightCode,
   logError,
+  logger,
   MAX_BODY_SIZE,
   sanitizeFilename as sanitizeFilenameBase,
 } from '@heyclaude/shared-runtime';
@@ -454,6 +458,17 @@ export async function handleContentProcess(
   req: Request,
   logContext: BaseLogContext
 ): Promise<Response> {
+  // Initialize request logging with trace and bindings
+  initRequestLogging(logContext);
+  traceStep('Content process request received', logContext);
+  
+  // Set bindings for this request
+  logger.setBindings({
+    requestId: logContext.request_id,
+    operation: logContext.action || 'content-process',
+    method: req.method,
+  });
+  
   if (req.method === 'OPTIONS') {
     return new Response(null, {
       status: 204,
@@ -469,6 +484,7 @@ export async function handleContentProcess(
   }
 
   try {
+    traceStep('Processing content', logContext);
     const parseResult = await parseJsonBody<ProcessRequest>(req, {
       maxSize: MAX_BODY_SIZE.default * 10, // Allow larger payloads for code (1MB)
       cors: CORS,
@@ -600,6 +616,7 @@ export async function handleContentProcess(
       result = performHighlight(codeString, language, showLineNumbers);
     }
 
+    traceRequestComplete(logContext);
     return jsonResponse(result, 200, {
       ...buildSecurityHeaders(),
       ...CORS,

@@ -20,10 +20,7 @@ export async function generateMetadata(): Promise<Metadata> {
 /**
  * Dynamic Rendering Required
  *
- * This page must use dynamic rendering because it imports from @heyclaude/web-runtime
- * which transitively imports feature-flags/flags.ts. The Vercel Flags SDK's flags/next
- * module contains module-level code that calls server functions, which cannot be
- * executed during static site generation.
+ * This page uses dynamic rendering for server-side data fetching and user-specific content.
  *
  * See: https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#dynamic
  */
@@ -57,7 +54,7 @@ export default function ContactPage() {
     });
   }
 
-  // Feature flags are server/middleware only - use default for static generation
+  // Feature flags are now static defaults - no server/middleware dependency
   // Terminal feature should be evaluated in middleware, not in page components
    
   const terminalEnabled = false; // Default for static generation

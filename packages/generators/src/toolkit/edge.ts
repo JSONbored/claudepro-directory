@@ -53,9 +53,23 @@ export async function callEdgeFunction<T = unknown>(
 
     return (await response.json()) as T;
   } catch (error) {
-    if (error instanceof Error && error.name === 'AbortError') {
-      throw new Error(`Edge function request timed out after ${timeoutMs}ms`);
+    // Import logger dynamically to avoid circular dependencies
+    const { logger } = await import('./logger.ts');
+    const errorObj = error instanceof Error ? error : new Error(String(error));
+    
+    if (errorObj.name === 'AbortError') {
+      const timeoutError = new Error(`Edge function request timed out after ${timeoutMs}ms`);
+      // Use Pino logger for consistent structured logging
+      logger.error('Edge function timeout', timeoutError, {
+        path,
+        timeoutMs,
+      });
+      throw timeoutError;
     }
+    // Log other errors using Pino
+    logger.error('Edge function request failed', errorObj, {
+      path,
+    });
     throw error;
   } finally {
     clearTimeout(timer);

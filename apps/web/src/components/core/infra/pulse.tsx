@@ -8,7 +8,7 @@
  * Data stored in user_interactions table via pulse queue-based system.
  *
  * Variants:
- * - view: Content view tracking (with delay from Statsig)
+ * - view: Content view tracking (with configurable delay)
  * - page-view: Page view tracking (immediate)
  * - pwa-install: PWA installation event (listens to DOM events)
  * - pwa-launch: PWA standalone launch (checks on mount)
@@ -16,20 +16,19 @@
  * Architecture:
  * - Auto-tracking on mount with configurable delay
  * - Uses trackInteraction() from edge/client (queue-based)
- * - Integrates with Statsig for polling config
+ * - Uses static polling config for delay values
  *
  * @module components/infra/pulse
  */
 
 import type { Database } from '@heyclaude/database-types';
-import { getPollingConfig } from '@heyclaude/web-runtime/actions/feature-flags';
-import { trackInteraction } from '@heyclaude/web-runtime/client';
+import { getPollingConfig } from '@heyclaude/web-runtime/config/static-configs';
 import {
-  logClientWarning,
   logger,
   logUnhandledPromise,
   normalizeError,
 } from '@heyclaude/web-runtime/core';
+import { trackInteraction } from '@heyclaude/web-runtime/client';
 import { useEffect, useState } from 'react';
 
 export type PulseProps =
@@ -137,7 +136,7 @@ export function Pulse(props: PulseProps) {
 
 /**
  * View variant - tracks content views with configurable delay
- * Fetches delay from Statsig if not provided
+ * Uses static polling config if delay not provided
  */
 function ViewVariant({
   category,
@@ -149,15 +148,9 @@ function ViewVariant({
 
   useEffect(() => {
     if (delay === undefined) {
-      getPollingConfig({})
-        .then((result) => {
-          if (!result?.data) return;
-          const config = result.data;
-          setActualDelay(config['polling.realtime_ms']);
-        })
-        .catch((error) => {
-          logClientWarning('Pulse: failed to load polling config', error);
-        });
+      // Get polling config from static defaults
+      const config = getPollingConfig();
+      setActualDelay(config['polling.realtime_ms']);
     }
   }, [delay]);
 

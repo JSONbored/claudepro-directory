@@ -56,7 +56,7 @@ export const removeBookmark = authedAction
       revalidateTag(`content-${parsedInput.content_slug}`, 'default');
       
       await nextInvalidateByKeys({
-        cacheConfigPromise: getCacheConfigSnapshot(),
+        cacheConfig: getCacheConfigSnapshot(),
         invalidateKeys: ['cache.invalidate.bookmark_delete']
       });
 

@@ -4,10 +4,13 @@ import {
   buildCacheHeaders,
   errorResponse,
   getOnlyCorsHeaders,
+  initRequestLogging,
   methodNotAllowedResponse,
   supabaseAnon,
+  traceRequestComplete,
+  traceStep,
 } from '@heyclaude/edge-runtime';
-import { buildSecurityHeaders } from '@heyclaude/shared-runtime';
+import { buildSecurityHeaders, createDataApiContext, logger } from '@heyclaude/shared-runtime';
 
 const CORS = getOnlyCorsHeaders;
 
@@ -139,6 +142,23 @@ export async function handleStatusRoute(
   _url: URL,
   method: string
 ): Promise<Response> {
+  const logContext = createDataApiContext('status', {
+    path: '/status',
+    method,
+    app: 'public-api',
+  });
+  
+  // Initialize request logging with trace and bindings
+  initRequestLogging(logContext);
+  traceStep('Status/health check request received', logContext);
+  
+  // Set bindings for this request
+  logger.setBindings({
+    requestId: logContext.request_id,
+    operation: logContext.action || 'status',
+    method,
+  });
+  
   if (segments.length > 0) {
     return badRequestResponse(`Invalid endpoint: /status/${segments.join('/')}`, CORS);
   }
@@ -147,13 +167,20 @@ export async function handleStatusRoute(
     return methodNotAllowedResponse('GET', CORS);
   }
 
+  traceStep('Running health checks', logContext);
   const { data, error } = await supabaseAnon.rpc('get_api_health', undefined);
   if (error) {
-    return errorResponse(error, 'data-api:get_api_health', CORS);
+    // Use dbQuery serializer for consistent database query formatting
+    return errorResponse(error, 'data-api:get_api_health', CORS, {
+      ...logContext,
+      dbQuery: {
+        rpcName: 'get_api_health',
+      },
+    });
   }
 
   if (!data) {
-    return errorResponse(new Error('Health check returned null'), 'data-api:get_api_health', CORS);
+    return errorResponse(new Error('Health check returned null'), 'data-api:get_api_health', CORS, logContext);
   }
 
   // Validate data structure without type assertion
@@ -163,6 +190,7 @@ export async function handleStatusRoute(
   const statusCode =
     transformed.status === 'healthy' ? 200 : transformed.status === 'degraded' ? 200 : 503;
 
+  traceRequestComplete(logContext);
   return new Response(JSON.stringify(transformed), {
     status: statusCode,
     headers: {

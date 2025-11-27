@@ -165,7 +165,7 @@ export const POLLING_INTERVALS = {
  * Timeout Configuration - UI timeouts only
  */
 export const TIMEOUTS = {
-  // UI interaction timeouts (not migrated to Statsig - still used directly)
+  // UI interaction timeouts (used directly, not via config accessors)
   ui: {
     debounce: 150, // Search debounce
     tooltip: 300, // Tooltip delay

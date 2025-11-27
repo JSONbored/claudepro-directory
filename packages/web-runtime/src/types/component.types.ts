@@ -112,7 +112,7 @@ export interface HomePageClientProps {
   searchFilters?: SearchFilterOptions;
   /** Start of the current content week (ISO string) */
   weekStart?: string;
-  /** Server-provided category IDs (fallback if Statsig config fails) */
+  /** Server-provided category IDs (fallback if static config unavailable) */
   serverCategoryIds?: readonly string[];
 }
 
@@ -387,8 +387,8 @@ export type ReviewProps =
   | ReviewRatingCompactProps;
 
 /**
- * Maximum review text length (loaded from Dynamic Config)
- * This is a runtime value that gets initialized from Statsig on module load.
+ * Maximum review text length (loaded from static config)
+ * This is a runtime value that gets initialized from static configuration on module load.
  */
 export let MAX_REVIEW_LENGTH = 2000;
 

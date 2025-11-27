@@ -51,8 +51,9 @@ export const deleteJob = authedAction
       revalidatePath(`/account/jobs`);
       revalidateTag(`job-${parsedInput.job_id}`, 'default');
       
+      const cacheConfig = getCacheConfigSnapshot();
       await nextInvalidateByKeys({
-        cacheConfigPromise: getCacheConfigSnapshot(),
+        cacheConfig,
         invalidateKeys: ['cache.invalidate.job_delete']
       });
 

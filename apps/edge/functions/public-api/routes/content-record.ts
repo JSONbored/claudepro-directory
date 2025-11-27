@@ -23,9 +23,12 @@ import {
   errorResponse,
   getOnlyCorsHeaders,
   getWithAcceptCorsHeaders,
+  initRequestLogging,
   proxyStorageFile,
+  traceRequestComplete,
+  traceStep,
 } from '@heyclaude/edge-runtime';
-import { buildSecurityHeaders } from '@heyclaude/shared-runtime';
+import { buildSecurityHeaders, createDataApiContext, logger } from '@heyclaude/shared-runtime';
 
 const CORS_JSON = getOnlyCorsHeaders;
 const CORS_MARKDOWN = getWithAcceptCorsHeaders;
@@ -35,6 +38,26 @@ export async function handleRecordExport(
   slug: string,
   url: URL
 ): Promise<Response> {
+  const logContext = createDataApiContext('content-record', {
+    path: url.pathname,
+    method: 'GET',
+    app: 'public-api',
+    category,
+    slug,
+  });
+  
+  // Initialize request logging with trace and bindings
+  initRequestLogging(logContext);
+  traceStep('Content record export request received', logContext);
+  
+  // Set bindings for this request
+  logger.setBindings({
+    requestId: logContext.request_id,
+    operation: logContext.action || 'content-record-export',
+    category,
+    slug,
+  });
+  
   // Validate category is valid ENUM value (for all formats)
   // Database will also validate, but we check early for better error messages
   if (!isValidContentCategory(category)) {
@@ -46,18 +69,24 @@ export async function handleRecordExport(
 
   // Type guard has narrowed category to ENUM - database will validate
   const format = (url.searchParams.get('format') || 'json').toLowerCase();
+  
+  // Update bindings with format
+  logger.setBindings({
+    format,
+  });
+  traceStep(`Processing record export (format: ${format})`, logContext);
 
   switch (format) {
     case 'json':
-      return handleJsonFormat(category, slug);
+      return handleJsonFormat(category, slug, logContext);
     case 'markdown':
     case 'md':
-      return handleMarkdownFormat(category, slug, url);
+      return handleMarkdownFormat(category, slug, url, logContext);
     case 'llms':
     case 'llms-txt':
-      return handleItemLlmsTxt(category, slug);
+      return handleItemLlmsTxt(category, slug, logContext);
     case 'storage':
-      return handleStorageFormat(category, slug);
+      return handleStorageFormat(category, slug, logContext);
     default:
       return badRequestResponse(
         'Invalid format. Valid formats: json, markdown, llms-txt, storage',
@@ -68,8 +97,11 @@ export async function handleRecordExport(
 
 async function handleJsonFormat(
   category: DatabaseGenerated['public']['Enums']['content_category'],
-  slug: string
+  slug: string,
+  logContext: ReturnType<typeof createDataApiContext>
 ): Promise<Response> {
+  traceStep('Fetching JSON format content', logContext);
+  
   // Category is already validated ENUM - database will validate
   const rpcArgs = {
     p_category: category,
@@ -79,7 +111,14 @@ async function handleJsonFormat(
   const { data, error } = await supabaseAnon.rpc('get_api_content_full', rpcArgs);
 
   if (error) {
-    return errorResponse(error, 'data-api:get_api_content_full', CORS_JSON);
+    // Use dbQuery serializer for consistent database query formatting
+    return errorResponse(error, 'data-api:get_api_content_full', CORS_JSON, {
+      ...logContext,
+      dbQuery: {
+        rpcName: 'get_api_content_full',
+        args: rpcArgs, // Will be redacted by Pino's redact config
+      },
+    });
   }
 
   if (!data) {
@@ -88,6 +127,7 @@ async function handleJsonFormat(
 
   // RPC returns JSON string - ensure it's properly typed as string for Response body
   const jsonData: string = typeof data === 'string' ? data : JSON.stringify(data);
+  traceRequestComplete(logContext);
   return new Response(jsonData, {
     status: 200,
     headers: {
@@ -103,8 +143,11 @@ async function handleJsonFormat(
 async function handleMarkdownFormat(
   category: DatabaseGenerated['public']['Enums']['content_category'],
   slug: string,
-  url: URL
+  url: URL,
+  logContext: ReturnType<typeof createDataApiContext>
 ): Promise<Response> {
+  traceStep('Generating markdown format content', logContext);
+  
   const includeMetadata = url.searchParams.get('includeMetadata') !== 'false';
   const includeFooter = url.searchParams.get('includeFooter') === 'true';
 
@@ -117,7 +160,14 @@ async function handleMarkdownFormat(
   const { data, error } = await supabaseAnon.rpc('generate_markdown_export', rpcArgs);
 
   if (error) {
-    return errorResponse(error, 'data-api:generate_markdown_export', CORS_MARKDOWN);
+    // Use dbQuery serializer for consistent database query formatting
+    return errorResponse(error, 'data-api:generate_markdown_export', CORS_MARKDOWN, {
+      ...logContext,
+      dbQuery: {
+        rpcName: 'generate_markdown_export',
+        args: rpcArgs, // Will be redacted by Pino's redact config
+      },
+    });
   }
 
   if (!data) {
@@ -195,6 +245,7 @@ async function handleMarkdownFormat(
   const safeContentId = sanitizeHeaderValue(result.content_id);
 
   // TypeScript narrows to success case - all fields are properly typed
+  traceRequestComplete(logContext);
   return new Response(result.markdown, {
     status: 200,
     headers: {
@@ -211,8 +262,11 @@ async function handleMarkdownFormat(
 
 async function handleItemLlmsTxt(
   category: DatabaseGenerated['public']['Enums']['content_category'],
-  slug: string
+  slug: string,
+  logContext: ReturnType<typeof createDataApiContext>
 ): Promise<Response> {
+  traceStep('Generating LLMs.txt format content', logContext);
+  
   const rpcArgs = {
     p_category: category,
     p_slug: slug,
@@ -220,7 +274,14 @@ async function handleItemLlmsTxt(
   const { data, error } = await supabaseAnon.rpc('generate_item_llms_txt', rpcArgs);
 
   if (error) {
-    return errorResponse(error, 'data-api:generate_item_llms_txt', CORS_JSON);
+    // Use dbQuery serializer for consistent database query formatting
+    return errorResponse(error, 'data-api:generate_item_llms_txt', CORS_JSON, {
+      ...logContext,
+      dbQuery: {
+        rpcName: 'generate_item_llms_txt',
+        args: rpcArgs, // Will be redacted by Pino's redact config
+      },
+    });
   }
 
   if (!data) {
@@ -230,6 +291,7 @@ async function handleItemLlmsTxt(
   // Ensure data is a string for Response body
   const dataString = typeof data === 'string' ? data : String(data);
   const formatted: string = dataString.replace(/\\n/g, '\n');
+  traceRequestComplete(logContext);
   return new Response(formatted, {
     status: 200,
     headers: {
@@ -244,8 +306,11 @@ async function handleItemLlmsTxt(
 
 async function handleStorageFormat(
   category: DatabaseGenerated['public']['Enums']['content_category'],
-  slug: string
+  slug: string,
+  logContext: ReturnType<typeof createDataApiContext>
 ): Promise<Response> {
+  traceStep(`Proxying storage file (category: ${category})`, logContext);
+  
   // Support both 'skills' and 'mcp' categories for storage format
   if (category === 'skills') {
     const rpcArgs = {
@@ -254,7 +319,14 @@ async function handleStorageFormat(
     const { data, error } = await supabaseAnon.rpc('get_skill_storage_path', rpcArgs);
 
     if (error) {
-      return errorResponse(error, 'data-api:get_skill_storage_path', CORS_JSON);
+      // Use dbQuery serializer for consistent database query formatting
+      return errorResponse(error, 'data-api:get_skill_storage_path', CORS_JSON, {
+        ...logContext,
+        dbQuery: {
+          rpcName: 'get_skill_storage_path',
+          args: rpcArgs, // Will be redacted by Pino's redact config
+        },
+      });
     }
 
     // Validate data structure without type assertion
@@ -282,6 +354,7 @@ async function handleStorageFormat(
 
     const typedLocation = { bucket, object_path: objectPath };
 
+    traceRequestComplete(logContext);
     return proxyStorageFile({
       bucket: typedLocation.bucket,
       path: typedLocation.object_path,
@@ -297,7 +370,14 @@ async function handleStorageFormat(
     const { data, error } = await supabaseAnon.rpc('get_mcpb_storage_path', rpcArgs);
 
     if (error) {
-      return errorResponse(error, 'data-api:get_mcpb_storage_path', CORS_JSON);
+      // Use dbQuery serializer for consistent database query formatting
+      return errorResponse(error, 'data-api:get_mcpb_storage_path', CORS_JSON, {
+        ...logContext,
+        dbQuery: {
+          rpcName: 'get_mcpb_storage_path',
+          args: rpcArgs, // Will be redacted by Pino's redact config
+        },
+      });
     }
 
     // Validate data structure without type assertion
@@ -325,6 +405,7 @@ async function handleStorageFormat(
 
     const typedLocation = { bucket, object_path: objectPath };
 
+    traceRequestComplete(logContext);
     return proxyStorageFile({
       bucket: typedLocation.bucket,
       path: typedLocation.object_path,

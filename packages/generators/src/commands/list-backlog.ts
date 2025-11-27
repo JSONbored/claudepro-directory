@@ -138,8 +138,10 @@ export async function runListBacklog(): Promise<void> {
   });
 
   if (options.json) {
-    // eslint-disable-next-line no-console
-    console.log(JSON.stringify(backlogEntries, null, 2));
+    // For JSON output, use logger for structured logging
+    logger.info('Webhook backlog entries', { entries: backlogEntries });
+    // Also output to stdout for piping/redirection
+    process.stdout.write(JSON.stringify(backlogEntries, null, 2) + '\n');
     return;
   }
 

@@ -1,7 +1,6 @@
 import { env, isDevelopment } from '@heyclaude/shared-runtime';
 import { sanitizePathForLogging } from '@heyclaude/shared-runtime/proxy/guards';
 import { logger } from '@heyclaude/web-runtime/core';
-import { evaluateFlags } from '@heyclaude/web-runtime/feature-flags/middleware';
 import { applyNextProxyGuards, updateSupabaseSession } from '@heyclaude/web-runtime/server';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
@@ -47,24 +46,6 @@ export async function proxy(request: NextRequest) {
   // Use auth response if tokens were refreshed, otherwise create new response
   const response = authResponse ?? NextResponse.next();
   response.headers.set('x-pathname', pathname);
-
-  // Evaluate Feature Flags (PPR-Ready)
-  // We intentionally do this after rate limiting to avoid cost on blocked requests
-  // IMPORTANT: If authResponse exists, we must preserve its cookies when setting flags
-  try {
-    const flags = await evaluateFlags(request);
-    if (flags) {
-      response.cookies.set('x-flags', flags, {
-        httpOnly: false, // Allow client-side reading for Static Pages (ISR)
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        path: '/',
-      });
-    }
-  } catch (error) {
-    // Non-blocking error handling for flags
-    logger.error('Middleware flag evaluation failed', error as Error);
-  }
 
   // IMPORTANT: If authResponse was created, we must return it as-is to preserve
   // the refreshed auth cookies. Only modify headers, never recreate the response.

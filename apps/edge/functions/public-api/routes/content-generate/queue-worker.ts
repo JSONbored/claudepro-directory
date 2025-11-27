@@ -14,13 +14,17 @@ import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
 import {
   errorResponse,
+  initRequestLogging,
   pgmqDelete,
   pgmqRead,
   successResponse,
   supabaseServiceRole,
+  traceRequestComplete,
+  traceStep,
 } from '@heyclaude/edge-runtime';
 import type { BaseLogContext } from '@heyclaude/shared-runtime';
 import {
+  createUtilityContext,
   errorToString,
   logError,
   logInfo,
@@ -65,6 +69,20 @@ async function processPackageGeneration(
       .single();
 
     if (fetchError || !content) {
+      // Use dbQuery serializer for consistent database query formatting
+      if (logContext) {
+        logError('Failed to fetch content for package generation', {
+          ...logContext,
+          dbQuery: {
+            table: 'content',
+            operation: 'select',
+            schema: 'public',
+            args: {
+              id: content_id,
+            },
+          },
+        }, fetchError);
+      }
       errors.push(`Failed to fetch content: ${fetchError?.message || 'Content not found'}`);
       return { success: false, errors };
     }
@@ -128,8 +146,16 @@ export async function handlePackageGenerationQueue(
   _req: Request,
   logContext?: BaseLogContext
 ): Promise<Response> {
+  // Create log context if not provided
+  const finalLogContext = logContext || createUtilityContext('content-generate', 'package-generation-queue', {});
+  
+  // Initialize request logging with trace and bindings
+  initRequestLogging(finalLogContext);
+  traceStep('Starting package generation queue processing', finalLogContext);
+  
   try {
     // Read messages with timeout protection
+    traceStep('Reading package generation queue', finalLogContext);
     const messages = await withTimeout(
       pgmqRead(PACKAGE_GENERATION_QUEUE, {
         sleep_seconds: 0,
@@ -140,15 +166,12 @@ export async function handlePackageGenerationQueue(
     );
 
     if (!messages || messages.length === 0) {
-      if (logContext) {
-        logInfo('No messages in queue', logContext);
-      }
+      traceRequestComplete(finalLogContext);
       return successResponse({ message: 'No messages in queue', processed: 0 }, 200);
     }
 
-    if (logContext) {
-      logInfo(`Processing ${messages.length} package generation jobs`, logContext);
-    }
+    logInfo(`Processing ${messages.length} package generation jobs`, finalLogContext);
+    traceStep(`Processing ${messages.length} package generation jobs`, finalLogContext);
 
     const results: Array<{
       msg_id: string;
@@ -200,27 +223,23 @@ export async function handlePackageGenerationQueue(
     for (const msg of messages) {
       // Validate message structure
       if (!isValidQueueMessage(msg.message)) {
-        if (logContext) {
-          logError('Invalid queue message structure', {
-            ...logContext,
-            msg_id: msg.msg_id.toString(),
-          });
-        }
+        logError('Invalid queue message structure', {
+          ...finalLogContext,
+          msg_id: msg.msg_id.toString(),
+        });
 
         // Delete invalid message to prevent infinite retries
         try {
           await pgmqDelete(PACKAGE_GENERATION_QUEUE, msg.msg_id);
         } catch (error) {
-          if (logContext) {
-            logError(
-              'Failed to delete invalid message',
-              {
-                ...logContext,
-                msg_id: msg.msg_id.toString(),
-              },
-              error
-            );
-          }
+          logError(
+            'Failed to delete invalid message',
+            {
+              ...finalLogContext,
+              msg_id: msg.msg_id.toString(),
+            },
+            error
+          );
         }
 
         results.push({
@@ -241,7 +260,7 @@ export async function handlePackageGenerationQueue(
       };
 
       try {
-        const result = await processPackageGeneration(message, logContext);
+        const result = await processPackageGeneration(message, finalLogContext);
 
         if (result.success) {
           await pgmqDelete(PACKAGE_GENERATION_QUEUE, message.msg_id);
@@ -261,16 +280,14 @@ export async function handlePackageGenerationQueue(
         }
       } catch (error) {
         const errorMsg = errorToString(error);
-        if (logContext) {
-          logError(
-            'Unexpected error processing package generation',
-            {
-              ...logContext,
-              msg_id: message.msg_id.toString(),
-            },
-            error
-          );
-        }
+        logError(
+          'Unexpected error processing package generation',
+          {
+            ...finalLogContext,
+            msg_id: message.msg_id.toString(),
+          },
+          error
+        );
         results.push({
           msg_id: message.msg_id.toString(),
           status: 'failed',
@@ -280,14 +297,13 @@ export async function handlePackageGenerationQueue(
       }
     }
 
-    if (logContext) {
-      logInfo(`Processed ${messages.length} messages`, {
-        ...logContext,
-        processed: messages.length,
-        successCount: results.filter((r) => r.status === 'success').length,
-        failedCount: results.filter((r) => r.status === 'failed').length,
-      });
-    }
+    logInfo('Package generation queue processing complete', {
+      ...finalLogContext,
+      processed: messages.length,
+      successCount: results.filter((r) => r.status === 'success').length,
+      failedCount: results.filter((r) => r.status === 'failed').length,
+    });
+    traceRequestComplete(finalLogContext);
 
     return successResponse(
       {
@@ -298,9 +314,7 @@ export async function handlePackageGenerationQueue(
       200
     );
   } catch (error) {
-    if (logContext) {
-      logError('Fatal package generation queue error', logContext, error);
-    }
-    return errorResponse(error, 'data-api:package-generation-queue-fatal', undefined, logContext);
+    logError('Fatal package generation queue error', finalLogContext, error);
+    return errorResponse(error, 'data-api:package-generation-queue-fatal', undefined, finalLogContext);
   }
 }

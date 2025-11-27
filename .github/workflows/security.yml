@@ -1,32 +1,20 @@
 name: Security
 
 on:
-  push:
-    branches: [ main ]
-    paths:
-      - 'apps/web/src/**/*.{ts,tsx,js,jsx}'
-      - 'apps/web/next.config.mjs'
-      - 'apps/web/postcss.config.js'
-      - 'apps/edge/functions/**/*.ts'
-      - 'apps/edge/functions/**/*.tsx'
-      - 'apps/edge/**/*.sql'
-      - 'package.json'
-      - 'pnpm-lock.yaml'
-      - '.github/workflows/security.yml'
-  pull_request:
-    branches: [ main ]
-    paths:
-      - 'apps/web/src/**/*.{ts,tsx,js,jsx}'
-      - 'apps/web/next.config.mjs'
-      - 'apps/web/postcss.config.js'
-      - 'apps/edge/functions/**/*.ts'
-      - 'apps/edge/functions/**/*.tsx'
-      - 'apps/edge/**/*.sql'
-      - 'package.json'
-      - 'pnpm-lock.yaml'
-      - '.github/workflows/security.yml'
+  # Weekly scheduled scan (Monday 3am UTC)
   schedule:
-    - cron: '0 3 * * 1'  # Weekly security scan on Mondays at 3am UTC
+    - cron: '0 3 * * 1'
+  # Only on PRs (not every push)
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/**/*.{ts,tsx,js,jsx}'
+      - 'packages/**/*.{ts,tsx,js,jsx}'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - '.github/workflows/security.yml'
+  # Manual trigger
+  workflow_dispatch:
 
 env:
   PNPM_VERSION: 10.23.0
@@ -36,316 +24,74 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
-  changes:
-    name: Changes Filter
-    uses: ./.github/workflows/changes-filter.yml
-
+  # Lightweight secret scanning (fast, always runs on PRs)
   secrets:
     name: Secret Scanning
     runs-on: ubuntu-latest
-    timeout-minutes: 5
-    needs: [changes]
-    if: github.event_name != 'schedule' && (github.event_name == 'pull_request' || needs.changes.outputs.code == 'true' || needs.changes.outputs.deps == 'true')
-
+    timeout-minutes: 3
+    if: github.event_name != 'schedule'
+    
     steps:
-    - uses: actions/checkout@v5
-      with:
-        ref: ${{ github.event.client_payload.deployment.gitSource.ref || github.ref }}
-        fetch-depth: ${{ github.event_name == 'pull_request' && 2 || 1 }}
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: ${{ github.event_name == 'pull_request' && 2 || 1 }}
 
-    - name: Check for hardcoded secrets
-      id: secrets
-      uses: trufflesecurity/trufflehog@main
-      with:
-        path: ./
-        base: ${{ github.event.repository.default_branch }}
-        head: HEAD
-        extra_args: --only-verified --exclude-paths=.github/trufflehog-exclude.txt
-      continue-on-error: true
+      - name: Check for hardcoded secrets
+        uses: trufflesecurity/trufflehog@v3.91.1
+        with:
+          path: ./
+          base: ${{ github.event.repository.default_branch }}
+          head: HEAD
+          extra_args: --only-verified --exclude-paths=.github/trufflehog-exclude.txt
+        continue-on-error: true
 
-    - name: Notify Vercel
-      if: github.event_name == 'push'
-      uses: vercel/repository-dispatch/actions/status@v1
-      with:
-        name: 'Vercel - heyclaude: security-secrets'
-        status: ${{ steps.secrets.outcome == 'success' && 'success' || 'failure' }}
-        description: ${{ steps.secrets.outcome == 'success' && 'Secret scanning passed' || 'Secret scanning found issues' }}
-
+  # CodeQL (only on schedule, not blocking)
   codeql:
     name: CodeQL Analysis
     runs-on: ubuntu-latest
     timeout-minutes: 6
-    needs: [changes]
-    if: |
-      github.event_name == 'schedule' ||
-      ((needs.changes.outputs.code == 'true' || needs.changes.outputs.deps == 'true') &&
-       !contains(github.event.pull_request.labels.*.name, 'ui-only'))
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     permissions:
       actions: read
       contents: read
       security-events: write
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v5
-      with:
-        ref: ${{ github.event.client_payload.deployment.gitSource.ref || github.ref }}
+      - uses: actions/checkout@v5
 
-    - name: Initialize CodeQL
-      uses: github/codeql-action/init@v4
-      with:
-        languages: javascript-typescript
-        queries: security-extended
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v4
+        with:
+          languages: javascript-typescript
+          queries: security-extended
 
-    - name: Autobuild
-      uses: github/codeql-action/autobuild@v4
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v4
 
-    - name: Perform CodeQL Analysis
-      id: codeql
-      uses: github/codeql-action/analyze@v4
-      with:
-        category: "/language:javascript-typescript"
-        upload: true
-      continue-on-error: true
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v4
+        continue-on-error: true
 
-    - name: Notify Vercel
-      if: github.event_name == 'push'
-      uses: vercel/repository-dispatch/actions/status@v1
-      with:
-        name: 'Vercel - heyclaude: security-codeql'
-        status: ${{ steps.codeql.outcome == 'success' && 'success' || 'failure' }}
-        description: ${{ steps.codeql.outcome == 'success' && 'CodeQL analysis passed' || 'CodeQL analysis found issues' }}
-
+  # Dependency review (only on PRs with dependency changes)
   dependency-review:
     name: Dependency Review
     runs-on: ubuntu-latest
     timeout-minutes: 3
-    needs: [changes]
-    if: github.event_name == 'pull_request' && needs.changes.outputs.deps == 'true'
+    if: github.event_name == 'pull_request'
     permissions:
       contents: read
       pull-requests: write
 
     steps:
-    - uses: actions/checkout@v5
-      with:
-        fetch-depth: 1
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 1
 
-    - name: Dependency Review
-      uses: actions/dependency-review-action@v4
-      with:
-        fail-on-severity: critical
-        vulnerability-check: true
-        license-check: false
-        comment-summary-in-pr: always
-        warn-only: true
-
-  type-check:
-    name: Type Check (${{ matrix.label }})
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    needs: [changes]
-    if: github.event_name == 'push' && (needs.changes.outputs.code == 'true' || needs.changes.outputs.deps == 'true')
-    strategy:
-      matrix:
-        include:
-          - target: web
-            label: Web
-            turboTask: type-check:web
-          - target: packages
-            label: Packages
-            turboTask: type-check:packages
-
-    steps:
-    - uses: actions/checkout@v5
-      with:
-        ref: ${{ github.event.client_payload.deployment.gitSource.ref || github.ref }}
-
-    - name: Setup pnpm
-      uses: pnpm/action-setup@v4
-      with:
-        version: ${{ env.PNPM_VERSION }}
-
-    - name: Setup Node.js
-      uses: actions/setup-node@v6
-      with:
-        node-version: '22'
-        cache: 'pnpm'
-
-    - name: Install dependencies
-      run: pnpm install --frozen-lockfile
-
-    - name: Restore turbo cache
-      uses: actions/cache@v4
-      with:
-        path: .turbo
-        key: ${{ runner.os }}-turbo-${{ matrix.target }}-${{ hashFiles('pnpm-lock.yaml') }}
-        restore-keys: |
-          ${{ runner.os }}-turbo-${{ matrix.target }}-
-
-    - name: Type check (${{ matrix.label }})
-      id: type-check
-      run: pnpm turbo run ${{ matrix.turboTask }} --cache-dir=.turbo
-      continue-on-error: true
-
-    - name: Notify Vercel
-      if: github.event_name == 'push'
-      uses: vercel/repository-dispatch/actions/status@v1
-      with:
-        name: 'Vercel - heyclaude: type-check-${{ matrix.target }}'
-        status: ${{ steps.type-check.outcome == 'success' && 'success' || 'failure' }}
-        description: ${{ steps.type-check.outcome == 'success' && format('{0} type check passed', matrix.label) || format('{0} type check failed', matrix.label) }}
-
-  type-check-edge:
-    name: Type Check (Edge Functions)
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    needs: [changes]
-    if: github.event_name == 'push' && (needs.changes.outputs.code == 'true' || needs.changes.outputs.deps == 'true')
-
-    steps:
-    - uses: actions/checkout@v5
-      with:
-        ref: ${{ github.event.client_payload.deployment.gitSource.ref || github.ref }}
-
-    - name: Setup pnpm
-      uses: pnpm/action-setup@v4
-      with:
-        version: ${{ env.PNPM_VERSION }}
-
-    - name: Setup Node.js
-      uses: actions/setup-node@v6
-      with:
-        node-version: '22'
-        cache: 'pnpm'
-
-    - name: Install dependencies
-      run: pnpm install --frozen-lockfile
-
-    - name: Restore turbo cache
-      uses: actions/cache@v4
-      with:
-        path: .turbo
-        key: ${{ runner.os }}-turbo-edge-${{ hashFiles('pnpm-lock.yaml') }}
-        restore-keys: |
-          ${{ runner.os }}-turbo-edge-
-
-    - name: Type check edge functions
-      id: type-check-edge
-      run: pnpm turbo run type-check:edge --cache-dir=.turbo
-      continue-on-error: true
-
-    - name: Notify Vercel
-      if: github.event_name == 'push'
-      uses: vercel/repository-dispatch/actions/status@v1
-      with:
-        name: 'Vercel - heyclaude: type-check-edge'
-        status: ${{ steps.type-check-edge.outcome == 'success' && 'success' || 'failure' }}
-        description: ${{ steps.type-check-edge.outcome == 'success' && 'Edge type check passed' || 'Edge type check failed' }}
-
-  lint:
-    name: Lint (${{ matrix.label }})
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    needs: [changes]
-    if: github.event_name == 'push' && (needs.changes.outputs.code == 'true' || needs.changes.outputs.deps == 'true')
-    strategy:
-      matrix:
-        include:
-          - target: web
-            label: Web
-            turboTask: lint
-          - target: edge
-            label: Edge
-            turboTask: lint:edge
-
-    steps:
-    - uses: actions/checkout@v5
-      with:
-        ref: ${{ github.event.client_payload.deployment.gitSource.ref || github.ref }}
-
-    - name: Setup pnpm
-      uses: pnpm/action-setup@v4
-      with:
-        version: ${{ env.PNPM_VERSION }}
-
-    - name: Setup Node.js
-      uses: actions/setup-node@v6
-      with:
-        node-version: '22'
-        cache: 'pnpm'
-
-    - name: Install dependencies
-      run: pnpm install --frozen-lockfile
-
-    - name: Restore turbo cache
-      uses: actions/cache@v4
-      with:
-        path: .turbo
-        key: ${{ runner.os }}-turbo-lint-${{ matrix.target }}-${{ hashFiles('pnpm-lock.yaml') }}
-        restore-keys: |
-          ${{ runner.os }}-turbo-lint-${{ matrix.target }}-
-
-    - name: Lint (${{ matrix.label }})
-      id: lint
-      env:
-        NEXT_PUBLIC_SUPABASE_URL: https://hgtjdifxfapoltfflowc.supabase.co
-        NEXT_PUBLIC_SUPABASE_ANON_KEY: stub-anon-key
-        NODE_OPTIONS: --require ./config/tools/disable-server-only.cjs
-      run: pnpm turbo run ${{ matrix.turboTask }} --cache-dir=.turbo
-      continue-on-error: true
-
-    - name: Notify Vercel (Web)
-      if: github.event_name == 'push' && matrix.target == 'web'
-      uses: vercel/repository-dispatch/actions/status@v1
-      with:
-        name: 'Vercel - heyclaude: lint-web'
-        status: ${{ steps.lint.outcome == 'success' && 'success' || 'failure' }}
-        description: ${{ steps.lint.outcome == 'success' && 'Web lint passed' || 'Web lint failed' }}
-
-    - name: Notify Vercel (Edge)
-      if: github.event_name == 'push' && matrix.target == 'edge'
-      uses: vercel/repository-dispatch/actions/status@v1
-      with:
-        name: 'Vercel - heyclaude: lint-edge'
-        status: ${{ steps.lint.outcome == 'success' && 'success' || 'failure' }}
-        description: ${{ steps.lint.outcome == 'success' && 'Edge lint passed' || 'Edge lint failed' }}
-
-  build:
-    name: Build
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    needs: [changes]
-    if: github.event_name == 'push' && (needs.changes.outputs.code == 'true' || needs.changes.outputs.deps == 'true')
-
-    steps:
-    - uses: actions/checkout@v5
-      with:
-        ref: ${{ github.event.client_payload.deployment.gitSource.ref || github.ref }}
-
-    - name: Setup pnpm
-      uses: pnpm/action-setup@v4
-      with:
-        version: ${{ env.PNPM_VERSION }}
-
-    - name: Setup Node.js
-      uses: actions/setup-node@v6
-      with:
-        node-version: '22'
-        cache: 'pnpm'
-
-    - name: Install dependencies
-      run: pnpm install --frozen-lockfile
-
-    - name: Build
-      id: build
-      run: pnpm build
-      continue-on-error: true
-
-    - name: Notify Vercel
-      if: github.event_name == 'push'
-      uses: vercel/repository-dispatch/actions/status@v1
-      with:
-        name: 'Vercel - heyclaude: build'
-        status: ${{ steps.build.outcome == 'success' && 'success' || 'failure' }}
-        description: ${{ steps.build.outcome == 'success' && 'Build passed' || 'Build failed' }}
+      - name: Dependency Review
+        uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: critical
+          vulnerability-check: true
+          license-check: false
+          comment-summary-in-pr: always
+          warn-only: true

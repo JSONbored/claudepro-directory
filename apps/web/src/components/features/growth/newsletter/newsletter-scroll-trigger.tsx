@@ -6,7 +6,7 @@
  */
 
 import type { Database } from '@heyclaude/database-types';
-import { getNewsletterConfigValue } from '@heyclaude/web-runtime/actions/feature-flags';
+import { getNewsletterConfigValue } from '@heyclaude/web-runtime/config/static-configs';
 import { ensureNumber, logUnhandledPromise } from '@heyclaude/web-runtime/core';
 import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
 import { motion, useScroll } from 'motion/react';
@@ -54,12 +54,10 @@ export function NewsletterScrollTrigger({
 
     loadScrollConfig(
       async () => {
-        const result = await getNewsletterConfigValue({
-          key: 'newsletter.scroll_trigger.min_scroll_height_px',
-        });
-        // getNewsletterConfigValue returns the typed value from defaults
+        // Get newsletter config value from static defaults
+        const configValue = getNewsletterConfigValue('newsletter.scroll_trigger.min_scroll_height_px');
         // Use ensureNumber to safely validate and fallback to 500 if invalid
-        const configHeight = ensureNumber(result?.data, 500);
+        const configHeight = ensureNumber(configValue, 500);
         setScrollHeightThreshold(configHeight);
       },
       {

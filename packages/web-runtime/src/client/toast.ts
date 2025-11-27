@@ -5,7 +5,7 @@
  * No server imports, synchronous calls for client components
  *
  * Note: Toast messages use hardcoded defaults for client-side performance.
- * Server components can use toastConfigs from flags.ts if dynamic control is needed.
+ * Server components can use toastConfigs from static-configs.ts if needed.
  */
 
 import { toast } from 'sonner';
@@ -25,7 +25,7 @@ const toastRaw: ToastRaw = toast;
 
 /**
  * Hardcoded toast messages (client-safe defaults)
- * These match the Statsig toastConfigs defaults in flags.ts
+ * These match the static toastConfigs defaults
  */
 const TOAST_MESSAGES = {
   profile_updated: 'Profile updated successfully',

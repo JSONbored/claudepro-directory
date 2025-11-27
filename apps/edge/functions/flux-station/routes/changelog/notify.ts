@@ -13,6 +13,7 @@ import {
   type GitHubCommit,
   getCacheConfigNumber,
   getCacheConfigStringArray,
+  initRequestLogging,
   insertNotification,
   pgmqDelete,
   pgmqRead,
@@ -21,6 +22,8 @@ import {
   SITE_URL,
   sendDiscordWebhook,
   successResponse,
+  traceRequestComplete,
+  traceStep,
 } from '@heyclaude/edge-runtime';
 import {
   createNotificationRouterContext,
@@ -30,6 +33,7 @@ import {
   logError,
   logInfo,
   logWarn,
+  logger,
   TIMEOUT_PRESETS,
   withTimeout,
 } from '@heyclaude/shared-runtime';
@@ -120,6 +124,20 @@ async function processChangelogRelease(message: QueueMessage): Promise<{
 
   const startTime = Date.now();
 
+  // Initialize request logging with trace and bindings (Phase 1 & 2)
+  initRequestLogging(logContext);
+  traceStep('Processing changelog release job', logContext);
+  
+  // Set bindings for this request - mixin will automatically inject these into all subsequent logs
+  logger.setBindings({
+    requestId: logContext.request_id,
+    operation: logContext.action || 'changelog-notify',
+    function: logContext.function,
+    entryId: changelogEntry.entryId,
+    slug: changelogEntry.slug,
+    attempt: message.read_ct,
+  });
+
   logInfo('Processing changelog release job', logContext);
 
   // 1. Send Discord webhook (non-critical)
@@ -195,7 +213,7 @@ async function processChangelogRelease(message: QueueMessage): Promise<{
 
   // 3. Invalidate cache tags (non-critical, after notification insert)
   if (notificationSuccess) {
-    // Fetch tags from Statsig (with fallback to default)
+    // Get cache tags from static config
     const cacheTags = getCacheConfigStringArray(
       'cache.invalidate.changelog',
       ['changelog'] // Fallback default
@@ -336,7 +354,14 @@ async function deleteQueueMessage(msgId: bigint): Promise<void> {
 }
 
 export async function handleChangelogNotify(_req: Request): Promise<Response> {
+  const logContext = createUtilityContext('flux-station', 'changelog-notify', {});
+  
+  // Initialize request logging with trace and bindings
+  initRequestLogging(logContext);
+  traceStep('Starting changelog notify processing', logContext);
+  
   try {
+    traceStep('Reading changelog notify queue', logContext);
     const batchSize = getCacheConfigNumber(
       'queue.changelog_notify.batch_size',
       CHANGELOG_NOTIFICATIONS_BATCH_SIZE
@@ -353,15 +378,17 @@ export async function handleChangelogNotify(_req: Request): Promise<Response> {
     const readError = messages === null ? new Error('Failed to read queue messages') : null;
 
     if (readError) {
-      const readLogContext = createUtilityContext('flux-station', 'changelog-notify-read');
-      logError('Queue read error', readLogContext, readError);
+      logError('Queue read error', logContext, readError);
       return errorResponse(
         new Error(`Failed to read queue: ${readError.message}`),
-        'flux-station:changelog-notify-read'
+        'flux-station:changelog-notify-read',
+        publicCorsHeaders,
+        logContext
       );
     }
 
     if (!messages || messages.length === 0) {
+      traceRequestComplete(logContext);
       return successResponse({ message: 'No messages in queue', processed: 0 }, 200);
     }
 
@@ -369,6 +396,7 @@ export async function handleChangelogNotify(_req: Request): Promise<Response> {
       batch_size: messages.length,
     });
     logInfo(`Processing ${messages.length} changelog release jobs`, batchLogContext);
+    traceStep(`Processing ${messages.length} changelog release jobs`, batchLogContext);
 
     const results: Array<{
       msg_id: string;
@@ -447,6 +475,7 @@ export async function handleChangelogNotify(_req: Request): Promise<Response> {
       }
     }
 
+    traceRequestComplete(batchLogContext);
     return successResponse(
       {
         message: `Processed ${messages.length} messages`,
@@ -456,9 +485,6 @@ export async function handleChangelogNotify(_req: Request): Promise<Response> {
       200
     );
   } catch (error) {
-    const logContext = createNotificationRouterContext('changelog-notify', {
-      source: 'queue-worker',
-    });
     logError('Fatal queue processing error', logContext, error);
     return errorResponse(
       error,

@@ -10,6 +10,7 @@ import { edgeEnv } from '../config/env.ts';
 import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
 import type { ExtendedDatabase } from '../database-extensions.types.ts';
 import { errorToString } from '@heyclaude/shared-runtime';
+import { logger } from './logger.ts';
 
 const {
   supabase: { url: SUPABASE_URL, serviceRoleKey: SUPABASE_SERVICE_ROLE_KEY },
@@ -150,8 +151,9 @@ export async function pgmqMetrics(queueName: string): Promise<{
     };
   } catch (error) {
     // If metrics check fails, return null (safe fallback - queue will be treated as empty)
-    console.warn(`[pgmq-client] Failed to get metrics for queue '${queueName}'`, {
-      error: errorToString(error),
+    const errorObj = error instanceof Error ? error : new Error(errorToString(error));
+    logger.warn(`Failed to get metrics for queue '${queueName}'`, {
+      err: errorObj,
     });
     return null;
   }

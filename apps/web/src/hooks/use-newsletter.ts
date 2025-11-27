@@ -6,18 +6,24 @@
 'use client';
 
 import type { Database } from '@heyclaude/database-types';
-import { getNewsletterConfig } from '@heyclaude/web-runtime/actions/feature-flags';
+import { getNewsletterConfig } from '@heyclaude/web-runtime/config/static-configs';
 import { logClientWarning, logger, normalizeError } from '@heyclaude/web-runtime/core';
 import { usePulse } from '@heyclaude/web-runtime/hooks';
 import { toasts } from '@heyclaude/web-runtime/ui';
-import { useCallback, useEffect, useState, useTransition } from 'react';
+import { useCallback, useMemo, useState, useTransition } from 'react';
 
 const SUPABASE_URL = process.env['NEXT_PUBLIC_SUPABASE_URL'];
 
-// Retry configuration (loaded from Statsig via server action)
-let MAX_RETRIES = 3;
-let INITIAL_RETRY_DELAY_MS = 1000;
-let RETRY_BACKOFF_MULTIPLIER = 2;
+// Default retry configuration (actual values loaded from static config per hook instance)
+const DEFAULT_MAX_RETRIES = 3;
+const DEFAULT_INITIAL_RETRY_DELAY_MS = 1000;
+const DEFAULT_RETRY_BACKOFF_MULTIPLIER = 2;
+
+interface RetryConfig {
+  maxRetries: number;
+  initialDelayMs: number;
+  backoffMultiplier: number;
+}
 
 /**
  * Retry helper with exponential backoff
@@ -26,7 +32,8 @@ let RETRY_BACKOFF_MULTIPLIER = 2;
 async function fetchWithRetry(
   url: string,
   options: RequestInit,
-  retries = MAX_RETRIES
+  retryConfig: RetryConfig,
+  retries = retryConfig.maxRetries
 ): Promise<Response> {
   try {
     const response = await fetch(url, options);
@@ -38,23 +45,23 @@ async function fetchWithRetry(
 
     // Retry on server errors (5xx)
     if (!response.ok && response.status >= 500 && retries > 0) {
-      const delay = INITIAL_RETRY_DELAY_MS * RETRY_BACKOFF_MULTIPLIER ** (MAX_RETRIES - retries);
+      const delay = retryConfig.initialDelayMs * retryConfig.backoffMultiplier ** (retryConfig.maxRetries - retries);
       await new Promise((resolve) => setTimeout(resolve, delay));
-      return fetchWithRetry(url, options, retries - 1);
+      return fetchWithRetry(url, options, retryConfig, retries - 1);
     }
 
     return response;
   } catch (error) {
     // Retry on network errors
     if (retries > 0) {
-      const delay = INITIAL_RETRY_DELAY_MS * RETRY_BACKOFF_MULTIPLIER ** (MAX_RETRIES - retries);
+      const delay = retryConfig.initialDelayMs * retryConfig.backoffMultiplier ** (retryConfig.maxRetries - retries);
       await new Promise((resolve) => setTimeout(resolve, delay));
-      return fetchWithRetry(url, options, retries - 1);
+      return fetchWithRetry(url, options, retryConfig, retries - 1);
     }
     const normalized = normalizeError(error, 'fetchWithRetry: request failed');
     logger.error('fetchWithRetry: request failed', normalized, {
       url,
-      attempt: MAX_RETRIES - retries + 1,
+      attempt: retryConfig.maxRetries - retries + 1,
     });
     throw error;
   }
@@ -104,24 +111,24 @@ export function useNewsletter(options: UseNewsletterOptions): UseNewsletterRetur
   const [isPending, startTransition] = useTransition();
   const pulse = usePulse();
 
-  // Load retry config from Statsig on mount
-  useEffect(() => {
-    getNewsletterConfig({})
-      .then((result) => {
-        if (result?.data) {
-          const config = result.data;
-          MAX_RETRIES = config['newsletter.max_retries'];
-          INITIAL_RETRY_DELAY_MS = config['newsletter.initial_retry_delay_ms'];
-          RETRY_BACKOFF_MULTIPLIER = config['newsletter.retry_backoff_multiplier'];
-        }
-      })
-      .catch((error) => {
-        logClientWarning('useNewsletter: failed to load retry config', error, {
-          source,
-          hook: 'useNewsletter',
-        });
-      });
-  }, [source]);
+  // Load retry config from static defaults (synchronous, per-hook instance)
+  const retryConfig = useMemo(() => {
+    try {
+      const config = getNewsletterConfig();
+      return {
+        maxRetries: config['newsletter.max_retries'] ?? DEFAULT_MAX_RETRIES,
+        initialDelayMs: config['newsletter.initial_retry_delay_ms'] ?? DEFAULT_INITIAL_RETRY_DELAY_MS,
+        backoffMultiplier: config['newsletter.retry_backoff_multiplier'] ?? DEFAULT_RETRY_BACKOFF_MULTIPLIER,
+      };
+    } catch (error) {
+      logClientWarning('useNewsletter: failed to load retry config', error);
+      return {
+        maxRetries: DEFAULT_MAX_RETRIES,
+        initialDelayMs: DEFAULT_INITIAL_RETRY_DELAY_MS,
+        backoffMultiplier: DEFAULT_RETRY_BACKOFF_MULTIPLIER,
+      };
+    }
+  }, []);
 
   const reset = useCallback(() => {
     setEmail('');
@@ -150,19 +157,23 @@ export function useNewsletter(options: UseNewsletterOptions): UseNewsletterRetur
         // Normalize email
         const normalizedEmail = email.toLowerCase().trim();
 
-        const response = await fetchWithRetry(`${SUPABASE_URL}/functions/v1/email-handler`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-Email-Action': 'subscribe',
+        const response = await fetchWithRetry(
+          `${SUPABASE_URL}/functions/v1/email-handler`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-Email-Action': 'subscribe',
+            },
+            body: JSON.stringify({
+              email: normalizedEmail,
+              source,
+              ...(referrer && { referrer }),
+              ...(metadata && metadata),
+            }),
           },
-          body: JSON.stringify({
-            email: normalizedEmail,
-            source,
-            ...(referrer && { referrer }),
-            ...(metadata && metadata),
-          }),
-        });
+          retryConfig
+        );
 
         const result = await response.json();
 
@@ -284,6 +295,7 @@ export function useNewsletter(options: UseNewsletterOptions): UseNewsletterRetur
     metadata,
     logContext,
     pulse,
+    retryConfig,
   ]);
 
   return {

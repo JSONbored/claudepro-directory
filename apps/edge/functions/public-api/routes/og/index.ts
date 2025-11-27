@@ -15,8 +15,11 @@ import {
   edgeEnv,
   errorResponse,
   getOnlyCorsHeaders,
+  initRequestLogging,
   SITE_URL,
   supabaseAnon,
+  traceRequestComplete,
+  traceStep,
 } from '@heyclaude/edge-runtime';
 import {
   type BaseLogContext,
@@ -27,6 +30,7 @@ import {
   logError,
   logInfo,
   logWarn,
+  logger,
   OG_DEFAULTS,
   sanitizeRoute,
   TIMEOUT_PRESETS,
@@ -233,14 +237,14 @@ async function fetchMetadataFromRoute(
         // Use filter(Boolean) to handle trailing slashes (e.g., /agents/foo/ -> 'foo')
         const slug = route.split('/').filter(Boolean).pop() || '';
         if (slug) {
+          // Try to get content directly from database
+          // Database validates ENUM - no type assertion needed after type guard
+          const rpcArgs = {
+            p_category: routeType, // Type guard has narrowed this to ENUM
+            p_slug: slug,
+            p_base_url: SITE_URL,
+          } satisfies DatabaseGenerated['public']['Functions']['get_api_content_full']['Args'];
           try {
-            // Try to get content directly from database
-            // Database validates ENUM - no type assertion needed after type guard
-            const rpcArgs = {
-              p_category: routeType, // Type guard has narrowed this to ENUM
-              p_slug: slug,
-              p_base_url: SITE_URL,
-            } satisfies DatabaseGenerated['public']['Functions']['get_api_content_full']['Args'];
             const { data: contentData, error: dbError } = await withTimeout(
               withCircuitBreaker(
                 'og-image:fetch-content',
@@ -252,6 +256,17 @@ async function fetchMetadataFromRoute(
             );
 
             // get_api_content_full returns a JSON string, not an object
+            if (dbError) {
+              // Use dbQuery serializer for consistent database query formatting
+              logWarn('RPC call failed in fetchMetadataFromRoute', {
+                ...logContext,
+                dbQuery: {
+                  rpcName: 'get_api_content_full',
+                  args: rpcArgs, // Will be redacted by Pino's redact config
+                },
+              }, dbError);
+            }
+            
             if (!dbError && contentData && typeof contentData === 'string') {
               try {
                 const parsedContent = JSON.parse(contentData);
@@ -293,10 +308,14 @@ async function fetchMetadataFromRoute(
               }
             }
           } catch (dbError) {
+            // Use dbQuery serializer for consistent database query formatting
             logWarn('Direct database fallback also failed, using route-based extraction', {
               ...logContext,
-              dbError: dbError instanceof Error ? dbError.message : String(dbError),
-            });
+              dbQuery: {
+                rpcName: 'get_api_content_full',
+                args: rpcArgs, // Will be redacted by Pino's redact config
+              },
+            }, dbError);
           }
         }
       }
@@ -541,6 +560,17 @@ export async function handleOGImageRequest(req: Request, startTime: number): Pro
   const logContext = createOGImageContext('generate', {
     route: routeParam || 'direct-params',
   });
+  
+  // Initialize request logging with trace and bindings (Phase 1 & 2)
+  initRequestLogging(logContext);
+  traceStep('OG image generation request received', logContext);
+  
+  // Set bindings for this request - mixin will automatically inject these into all subsequent logs
+  logger.setBindings({
+    requestId: logContext.request_id,
+    operation: logContext.action || 'og-image-generate',
+    function: logContext.function,
+  });
 
   let params: OGImageParams;
 
@@ -617,6 +647,7 @@ export async function handleOGImageRequest(req: Request, startTime: number): Pro
       headers.set(key, value);
     }
 
+    traceRequestComplete(logContext);
     return new Response(imageResponse.body, {
       status: 200,
       headers,

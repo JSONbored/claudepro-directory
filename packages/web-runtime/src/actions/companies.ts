@@ -61,9 +61,10 @@ export const searchCompaniesAction = authedAction
       const companies = await searchCompanies(parsedInput.query, limit);
       
       // Lazy import feature flags to avoid module-level server-only code execution
-      const { getTimeoutConfigValue } = await import('./feature-flags.ts');
-      const debounceResult = await getTimeoutConfigValue({ key: 'timeout.ui.form_debounce_ms' });
-      const debounceMs = debounceResult?.data ?? 300;
+      // Get timeout config from static defaults
+      const { getTimeoutConfig } = await import('../config/static-configs.ts');
+      const config = getTimeoutConfig();
+      const debounceMs = config['timeout.ui.form_debounce_ms'] ?? 300;
 
       return { companies, debounceMs };
     } catch (error) {

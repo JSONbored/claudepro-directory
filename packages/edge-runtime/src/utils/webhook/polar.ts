@@ -3,6 +3,7 @@ import type { Database as DatabaseGenerated, Json } from '@heyclaude/database-ty
 import { errorToString } from '@heyclaude/shared-runtime';
 import type { WebhookIngestResult } from './ingest.ts';
 import { finishWebhookEventRun, startWebhookEventRun } from './run-logger.ts';
+import { logger } from '../logger.ts';
 
 const POLAR_EVENT_RPC_MAP: Record<string, keyof DatabaseGenerated['public']['Functions']> = {
   'order.paid': 'handle_polar_order_paid',
@@ -44,7 +45,7 @@ export async function processPolarWebhook(event: WebhookIngestResult): Promise<v
 
   const rpcName = POLAR_EVENT_RPC_MAP[event.type];
   if (!rpcName) {
-    console.warn('[polar-webhook] Unsupported event type', {
+    logger.warn('Unsupported event type', {
       type: event.type,
       webhookId: event.webhookId,
     });
@@ -74,7 +75,7 @@ export async function processPolarWebhook(event: WebhookIngestResult): Promise<v
       );
     }
 
-    console.log('[polar-webhook] Processed event', logContext);
+    logger.info('Processed event', logContext);
     if (run) {
       await finishWebhookEventRun(run.id, 'succeeded', {
         metadata: {
@@ -84,9 +85,10 @@ export async function processPolarWebhook(event: WebhookIngestResult): Promise<v
       });
     }
   } catch (error) {
-    console.error('[polar-webhook] Failed to process event', {
+    const errorObj = error instanceof Error ? error : new Error(errorToString(error));
+    logger.error('Failed to process event', {
       ...logContext,
-      error: errorToString(error),
+      err: errorObj,
     });
     if (run) {
       await finishWebhookEventRun(run.id, 'failed', {

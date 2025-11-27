@@ -5,7 +5,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '@heyclaude/database-types';
 import { createSupabaseAnonClient } from '../supabase/server-anon.ts';
 import { getCacheTtl, type CacheTtlKey } from '../cache-config.ts';
-import { logger, sanitizeLogMessage, sanitizeLogContext, toLogContextValue, type LogContext } from '../logger.ts';
+import { logger, toLogContextValue, type LogContext } from '../logger.ts';
 import { normalizeError } from '../errors.ts';
 import { withTimeout, TimeoutError } from '@heyclaude/shared-runtime';
 import { generateRequestId } from '../utils/request-context.ts';
@@ -34,7 +34,7 @@ export async function fetchCached<TResult>(
 ): Promise<TResult> {
   const { keyParts, tags, ttlKey, useAuth = false, fallback, logMeta, timeoutMs = 10000 } = options;
   
-  const ttl = await getCacheTtl(ttlKey);
+  const ttl = getCacheTtl(ttlKey);
   
   // Filter out null/undefined and convert to strings for Next.js unstable_cache
   // Next.js expects keyParts to be string[]
@@ -49,13 +49,12 @@ export async function fetchCached<TResult>(
   const requestId = generateRequestId();
   
   // Pre-process log context for reuse
+  // Pino handles redaction automatically via centralized config
   const logContext: LogContext | undefined = logMeta
     ? Object.fromEntries(
         Object.entries(logMeta).map(([k, v]) => [k, toLogContextValue(v)])
       )
     : undefined;
-  const sanitizedLogMeta = sanitizeLogContext(logContext);
-  const sanitizedKey = sanitizeLogMessage(logKey);
   
   return unstable_cache(
     async () => {
@@ -78,7 +77,7 @@ export async function fetchCached<TResult>(
         const result = await withTimeout(
           serviceCall(typedClient),
           timeoutMs,
-          `Service call timed out after ${timeoutMs}ms: [user:${sanitizedKey}]`
+          `Service call timed out after ${timeoutMs}ms: [user:${logKey}]`
         );
         
         // Log performance metrics for all operations
@@ -86,23 +85,24 @@ export async function fetchCached<TResult>(
         const roundedDuration = Math.round(duration);
         
         // Always log slow queries (>1s) as warnings
+        // Pino handles redaction automatically via centralized config
         if (duration > 1000) {
-          logger.warn(`Slow data fetch detected: [user:${sanitizedKey}]`, {
+          logger.warn(`Slow data fetch detected: [user:${logKey}]`, {
             requestId,
-            key: sanitizedKey,
+            key: logKey,
             duration: roundedDuration,
             timeoutMs,
             cacheHit: false, // This is a cache miss (executed the service call)
-            ...sanitizedLogMeta,
+            ...logContext,
           });
         } else {
           // Log all operations at info level for observability
-          logger.info(`Data fetch completed: [user:${sanitizedKey}]`, {
+          logger.info(`Data fetch completed: [user:${logKey}]`, {
             requestId,
-            key: sanitizedKey,
+            key: logKey,
             duration: roundedDuration,
             cacheHit: false, // This is a cache miss (executed the service call)
-            ...sanitizedLogMeta,
+            ...logContext,
           });
         }
         
@@ -111,23 +111,24 @@ export async function fetchCached<TResult>(
         const duration = performance.now() - startTime;
         
         // Handle timeout errors specifically
+        // Pino handles redaction automatically via centralized config
         if (error instanceof TimeoutError) {
-          logger.warn(`Service call timed out: [user:${sanitizedKey}]`, {
+          logger.warn(`Service call timed out: [user:${logKey}]`, {
             requestId,
-            key: sanitizedKey,
+            key: logKey,
             duration: Math.round(duration),
             timeoutMs,
-            ...sanitizedLogMeta,
+            ...logContext,
           });
           return fallback;
         }
         
-        const normalized = normalizeError(error, `Service call failed: [user:${sanitizedKey}]`);
-        logger.error(`Service call failed: [user:${sanitizedKey}]`, normalized, {
+        const normalized = normalizeError(error, `Service call failed: [user:${logKey}]`);
+        logger.error(`Service call failed: [user:${logKey}]`, normalized, {
           requestId,
-          key: sanitizedKey,
+          key: logKey,
           duration: Math.round(duration),
-          ...sanitizedLogMeta,
+          ...logContext,
         });
         return fallback;
       }

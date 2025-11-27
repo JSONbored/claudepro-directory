@@ -3,6 +3,7 @@ import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
 import { invalidateCacheByKey } from '../utils/cache.ts';
 import { errorToString } from '@heyclaude/shared-runtime';
 import type { BaseLogContext } from '@heyclaude/shared-runtime';
+import { logger } from '../utils/logger.ts';
 
 const MAX_NOTIFICATION_IDS = 50;
 
@@ -38,11 +39,17 @@ export async function getActiveNotificationsForUser(
   const { data, error } = await supabaseServiceRole.rpc('get_active_notifications', rpcArgs);
 
   if (error) {
-    console.error('[notifications] get_active_notifications failed', {
+    const errorObj = error instanceof Error ? error : new Error(errorToString(error));
+    // Use dbQuery serializer for consistent database query formatting
+    logger.error('get_active_notifications failed', {
       ...(logContext || {}),
       user_id: userId,
       dismissedCount: sanitizedDismissedIds.length,
-      error: errorToString(error),
+      dbQuery: {
+        rpcName: 'get_active_notifications',
+        args: rpcArgs, // Will be redacted by Pino's redact config
+      },
+      err: errorObj,
     });
     throw error;
   }
@@ -84,16 +91,28 @@ export async function insertNotification(
     if (isConflictError(error) && record.id) {
       const existing = await getNotificationById(record.id);
       if (existing) {
-        console.info('[notifications] Reusing existing notification', {
+        logger.info('Reusing existing notification', {
           ...(logContext || {}),
           notification_id: existing.id,
         });
         return existing;
       }
     }
-    console.error('[notifications] Failed to insert notification', {
+    const errorObj = error instanceof Error ? error : new Error(errorToString(error));
+    // Use dbQuery serializer for consistent database query formatting
+    logger.error('Failed to insert notification', {
       ...(logContext || {}),
-      error: errorToString(error),
+      dbQuery: {
+        table: 'notifications',
+        operation: 'insert',
+        schema: 'public',
+        args: {
+          id: record.id,
+          title: record.title,
+          // Other fields redacted by Pino's redact config
+        },
+      },
+      err: errorObj,
     });
     throw error ?? new Error('Unknown notification insert error');
   }
@@ -102,17 +121,18 @@ export async function insertNotification(
   await invalidateCacheByKey('cache.invalidate.notifications', ['notifications'], {
     ...(logContext !== undefined ? { logContext } : {}),
   }).catch((cacheError) => {
-    console.warn('[notifications] Cache invalidation failed', {
+    const errorObj = cacheError instanceof Error ? cacheError : new Error(String(cacheError));
+    logger.warn('Cache invalidation failed', {
       ...(logContext || {}),
-      error: cacheError instanceof Error ? cacheError.message : String(cacheError),
+      err: errorObj,
     });
   });
 
-  console.info('[notifications] Inserted notification', {
-    ...(logContext || {}),
-    notification_id: data.id,
-    title: data.title,
-  });
+  logger.info('Inserted notification', {
+      ...(logContext || {}),
+      notification_id: data.id,
+      title: data.title,
+    });
   return data;
 }
 
@@ -126,7 +146,7 @@ export async function dismissNotificationsForUser(
   ).slice(0, MAX_NOTIFICATION_IDS);
 
   if (sanitizedIds.length === 0) {
-    console.warn('[notifications] dismissNotificationsForUser called without IDs', {
+    logger.warn('dismissNotificationsForUser called without IDs', {
       ...(logContext || {}),
       user_id: userId,
     });
@@ -140,10 +160,21 @@ export async function dismissNotificationsForUser(
   const { error } = await supabaseServiceRole.from('notification_dismissals').upsert(upsertData);
 
   if (error) {
-    console.error('[notifications] Failed to dismiss notifications', {
+    const errorObj = error instanceof Error ? error : new Error(errorToString(error));
+    // Use dbQuery serializer for consistent database query formatting
+    logger.error('Failed to dismiss notifications', {
       ...(logContext || {}),
       user_id: userId,
-      error: errorToString(error),
+      dbQuery: {
+        table: 'notification_dismissals',
+        operation: 'upsert',
+        schema: 'public',
+        args: {
+          count: sanitizedIds.length,
+          // Individual IDs redacted by Pino's redact config
+        },
+      },
+      err: errorObj,
     });
     throw error;
   }
@@ -152,17 +183,18 @@ export async function dismissNotificationsForUser(
   await invalidateCacheByKey('cache.invalidate.notifications', ['notifications'], {
     ...(logContext !== undefined ? { logContext } : {}),
   }).catch((cacheError) => {
-    console.warn('[notifications] Cache invalidation failed', {
+    const errorObj = cacheError instanceof Error ? cacheError : new Error(String(cacheError));
+    logger.warn('Cache invalidation failed', {
       ...(logContext || {}),
-      error: cacheError instanceof Error ? cacheError.message : String(cacheError),
+      err: errorObj,
     });
   });
 
-  console.info('[notifications] Dismissed notifications', {
-    ...(logContext || {}),
-    user_id: userId,
-    dismissCount: sanitizedIds.length,
-  });
+  logger.info('Dismissed notifications', {
+      ...(logContext || {}),
+      user_id: userId,
+      dismissCount: sanitizedIds.length,
+    });
 }
 
 export function createNotificationTrace(fields?: Record<string, unknown>) {
@@ -191,9 +223,19 @@ async function getNotificationById(id: string): Promise<NotificationRecord | nul
     .single<NotificationRecord>();
 
   if (error) {
-    console.error('[notifications] Failed to load existing notification', {
+    const errorObj = error instanceof Error ? error : new Error(errorToString(error));
+    // Use dbQuery serializer for consistent database query formatting
+    logger.error('Failed to load existing notification', {
       notification_id: id,
-      error: errorToString(error),
+      dbQuery: {
+        table: 'notifications',
+        operation: 'select',
+        schema: 'public',
+        args: {
+          id,
+        },
+      },
+      err: errorObj,
     });
     return null;
   }

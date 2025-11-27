@@ -2,6 +2,7 @@ import { supabaseServiceRole } from '../../clients/supabase.ts';
 import type { Database as DatabaseGenerated, Json } from '@heyclaude/database-types';
 import type { BaseLogContext } from '@heyclaude/shared-runtime';
 import { createUtilityContext } from '@heyclaude/shared-runtime';
+import { logger } from '../logger.ts';
 
 const MAX_RETRIES = 3;
 const INITIAL_RETRY_DELAY_MS = 1000;
@@ -48,9 +49,10 @@ export async function logOutboundWebhookEvent(
 
   if (logError) {
     const context = createUtilityContext('discord-client', 'log-outbound-webhook-event', { type });
-    console.error('[discord-client] Failed to log webhook event', {
+    const error = logError instanceof Error ? logError : new Error(String(logError));
+    logger.error('Failed to log webhook event', {
       ...context,
-      error: logError instanceof Error ? logError.message : String(logError),
+      err: error,
     });
     return null;
   }
@@ -133,7 +135,7 @@ export async function sendDiscordWebhook(
             .eq('id', webhookEventId);
         }
 
-        console.log('[discord-client] Webhook sent successfully', {
+        logger.info('Webhook sent successfully', {
           ...(logContext || {}),
           function: 'discord-client',
           action: 'send-discord-webhook',
@@ -160,7 +162,7 @@ export async function sendDiscordWebhook(
 
     if (attempt < MAX_RETRIES) {
       const delay = INITIAL_RETRY_DELAY_MS * 2 ** attempt;
-      console.log('[discord-client] Retry attempt', {
+      logger.info('Retry attempt', {
         ...(logContext || {}),
         function: 'discord-client',
         action: 'send-discord-webhook',
@@ -215,7 +217,7 @@ export async function createDiscordMessageWithLogging(
       : undefined;
 
   if (!response.ok) {
-    console.error('[discord-client] Failed to send Discord message', {
+    logger.error('Failed to send Discord message', {
         ...(options.logContext || {}),
         function: 'discord-client',
         action: 'create-discord-message',
@@ -242,7 +244,7 @@ export async function createDiscordMessageWithLogging(
     (parsedResponse?.['message_id'] as string | undefined);
 
   if (!messageId) {
-    console.warn('[discord-client] Discord response missing message ID', {
+    logger.warn('Discord response missing message ID', {
       ...(options.logContext || {}),
       function: 'discord-client',
       action: 'create-discord-message',
@@ -296,7 +298,7 @@ export async function updateDiscordMessage(
       });
 
       if (response.status === 404) {
-        console.log('[discord-client] Discord message deleted (404)', {
+        logger.info('Discord message deleted (404)', {
           ...(logContext || {}),
           function: 'discord-client',
           action: 'update-discord-message',
@@ -327,7 +329,7 @@ export async function updateDiscordMessage(
             attempt
           );
         }
-        console.log('[discord-client] Discord message updated successfully', {
+        logger.info('Discord message updated successfully', {
           ...(logContext || {}),
           function: 'discord-client',
           action: 'update-discord-message',
@@ -355,7 +357,7 @@ export async function updateDiscordMessage(
 
     if (attempt < MAX_RETRIES) {
       const delay = INITIAL_RETRY_DELAY_MS * 2 ** attempt;
-      console.log('[discord-client] Retry attempt', {
+      logger.info('Retry attempt', {
         ...(logContext || {}),
         function: 'discord-client',
         action: 'update-discord-message',

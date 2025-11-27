@@ -67,7 +67,7 @@ export const updateCollection = authedAction
       revalidatePath(`/account/library/${result?.collection?.slug}`);
       
       await nextInvalidateByKeys({
-        cacheConfigPromise: getCacheConfigSnapshot(),
+        cacheConfig: getCacheConfigSnapshot(),
         invalidateKeys: ['cache.invalidate.collection_update']
       });
 

@@ -7,6 +7,7 @@ export interface DatabaseWebhookPayload<T = Record<string, unknown>> {
 }
 
 import { createUtilityContext } from '@heyclaude/shared-runtime';
+import { logger } from '../logger.ts';
 
 export function validateWebhookUrl(
   envVar: string | undefined,
@@ -16,7 +17,7 @@ export function validateWebhookUrl(
     const logContext = createUtilityContext('webhook-utils', 'validate-webhook-url', {
       envVarName,
     });
-    console.error(`${envVarName} environment variable not set`, logContext);
+    logger.error(`${envVarName} environment variable not set`, logContext);
     return new Response('Discord webhook not configured', { status: 500 });
   }
   return envVar;

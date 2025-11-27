@@ -52,6 +52,8 @@ export type LoggedAsyncRunner = <T>(
   options?: RunOptions
 ) => Promise<T | undefined>;
 
+// Pino handles redaction automatically via centralized config
+// No need for manual sanitization - just filter undefined values
 function sanitizeContext(context: ContextInput): Record<string, ContextValue> | undefined {
   if (!context) {
     return undefined;
@@ -92,8 +94,13 @@ export function useLoggedAsync({
         const logLabel = `[${scope}] ${message ?? defaultMessage}`;
         const severity = level ?? defaultLevel;
 
+        // Pino's stdSerializers.err automatically handles error serialization
+        // Pass error as 'err' key for proper formatting
         if (severity === 'warn') {
-          logger.warn(logLabel, sanitizedContext, { error: normalized.message });
+          logger.warn(logLabel, {
+            ...sanitizedContext,
+            err: normalized,
+          });
         } else {
           logger.error(logLabel, normalized, sanitizedContext);
         }

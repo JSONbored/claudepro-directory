@@ -17,14 +17,17 @@ import {
   badRequestResponse,
   errorResponse,
   getOnlyCorsHeaders,
+  initRequestLogging,
   jsonResponse,
   methodNotAllowedResponse,
   parseJsonBody,
   pgmqSend,
   supabaseServiceRole,
+  traceRequestComplete,
+  traceStep,
 } from '@heyclaude/edge-runtime';
 import type { BaseLogContext } from '@heyclaude/shared-runtime';
-import { buildSecurityHeaders, logError, logInfo, timingSafeEqual } from '@heyclaude/shared-runtime';
+import { buildSecurityHeaders, logError, logInfo, logger, timingSafeEqual } from '@heyclaude/shared-runtime';
 import { getGenerator, getSupportedCategories, isCategorySupported } from './registry.ts';
 import type { GeneratePackageRequest, GeneratePackageResponse } from './types.ts';
 
@@ -45,6 +48,18 @@ export async function handleGeneratePackage(
   request: Request,
   logContext?: BaseLogContext
 ): Promise<Response> {
+  // Create log context if not provided
+  const finalLogContext = logContext || {
+    function: 'content-generate',
+    action: 'generate-package',
+    request_id: crypto.randomUUID(),
+    started_at: new Date().toISOString(),
+  };
+  
+  // Initialize request logging with trace and bindings
+  initRequestLogging(finalLogContext);
+  traceStep('Package generation request received', finalLogContext);
+  
   // Only allow POST
   if (request.method === 'OPTIONS') {
     return new Response(null, {
@@ -59,6 +74,13 @@ export async function handleGeneratePackage(
   if (request.method !== 'POST') {
     return methodNotAllowedResponse('POST', CORS);
   }
+  
+  // Set bindings for this request
+  logger.setBindings({
+    requestId: finalLogContext.request_id,
+    operation: finalLogContext.action || 'generate-package',
+    method: request.method,
+  });
 
   // Authenticate: Internal-only endpoint (requires service role key)
   // Database triggers and internal services use SUPABASE_SERVICE_ROLE_KEY
@@ -285,15 +307,14 @@ export async function handleGeneratePackage(
       message: 'Package generated successfully',
     };
 
-    if (logContext) {
-      logInfo('Package generated successfully', {
-        ...logContext,
-        content_id,
-        category,
-        slug: contentRow.slug,
-        storage_url: result.storageUrl,
-      });
-    }
+    logInfo('Package generated successfully', {
+      ...finalLogContext,
+      content_id,
+      category,
+      slug: contentRow.slug,
+      storage_url: result.storageUrl,
+    });
+    traceRequestComplete(finalLogContext);
 
     return jsonResponse(response, 200, {
       ...CORS,
@@ -303,11 +324,7 @@ export async function handleGeneratePackage(
     });
   } catch (error) {
     // Log error details server-side (not exposed to users)
-    if (logContext) {
-      logError('Package generation failed', logContext, error);
-    }
-
-    // errorResponse accepts optional logContext, so no need for conditional
-    return errorResponse(error, 'data-api:content-generate-sync', CORS, logContext);
+    logError('Package generation failed', finalLogContext, error);
+    return errorResponse(error, 'data-api:content-generate-sync', CORS, finalLogContext);
   }
 }

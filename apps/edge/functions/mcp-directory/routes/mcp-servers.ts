@@ -7,6 +7,7 @@
 import { ContentService } from '@heyclaude/data-layer';
 import type { Database } from '@heyclaude/database-types';
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { logError } from '@heyclaude/shared-runtime';
 import type { GetMcpServersInput } from '../lib/types.ts';
 
 type ContentPaginatedItem = Database['public']['CompositeTypes']['content_paginated_item'];
@@ -53,6 +54,22 @@ export async function handleGetMcpServers(
     .select('slug, metadata, mcpb_storage_url')
     .in('slug', slugs)
     .eq('category', 'mcp');
+
+  if (metadataError) {
+    // Use dbQuery serializer for consistent database query formatting
+    logError('Database query failed in getMcpServers', {
+      dbQuery: {
+        table: 'content',
+        operation: 'select',
+        schema: 'public',
+        args: {
+          slugs: slugs.slice(0, 10), // Log first 10 slugs to avoid huge logs
+          category: 'mcp',
+        },
+      },
+    }, metadataError);
+    // Continue without metadata - not critical
+  }
 
   // Create metadata map for quick lookup
   const metadataMap = new Map<

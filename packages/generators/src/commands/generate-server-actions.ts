@@ -223,8 +223,9 @@ async function generateActionFile(
   if (hasCacheInvalidation) {
     const keys = config.invalidateCacheConfigKeys?.map((k) => `'${k}'`).join(', ');
     revalidations.push(`
+      const cacheConfig = getCacheConfigSnapshot();
       await nextInvalidateByKeys({
-        cacheConfigPromise: getCacheConfigSnapshot(),
+        cacheConfig,
         invalidateKeys: [${keys}]
       });`);
   }

@@ -7,6 +7,7 @@
 
 import type { Database } from '@heyclaude/database-types';
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { logRpcError } from '../utils/rpc-error-logging.ts';
 
 export class CommunityService {
   constructor(private supabase: SupabaseClient<Database>) {}
@@ -15,26 +16,62 @@ export class CommunityService {
    * Calls the database RPC: get_community_directory
    */
   async getCommunityDirectory(args: Database['public']['Functions']['get_community_directory']['Args']) {
-    const { data, error } = await this.supabase.rpc('get_community_directory', args);
-    if (error) throw error;
-    return data as Database['public']['Functions']['get_community_directory']['Returns'];
+    try {
+      const { data, error } = await this.supabase.rpc('get_community_directory', args);
+      if (error) {
+        logRpcError(error, {
+          rpcName: 'get_community_directory',
+          operation: 'CommunityService.getCommunityDirectory',
+          args: args,
+        });
+        throw error;
+      }
+      return data as Database['public']['Functions']['get_community_directory']['Returns'];
+    } catch (error) {
+      // Error already logged above
+      throw error;
+    }
   }
 
   /**
    * Calls the database RPC: get_user_profile
    */
   async getUserProfile(args: Database['public']['Functions']['get_user_profile']['Args']) {
-    const { data, error } = await this.supabase.rpc('get_user_profile', args);
-    if (error) throw error;
-    return data as Database['public']['Functions']['get_user_profile']['Returns'];
+    try {
+      const { data, error } = await this.supabase.rpc('get_user_profile', args);
+      if (error) {
+        logRpcError(error, {
+          rpcName: 'get_user_profile',
+          operation: 'CommunityService.getUserProfile',
+          args: args,
+        });
+        throw error;
+      }
+      return data as Database['public']['Functions']['get_user_profile']['Returns'];
+    } catch (error) {
+      // Error already logged above
+      throw error;
+    }
   }
 
   /**
    * Calls the database RPC: get_user_collection_detail
    */
   async getUserCollectionDetail(args: Database['public']['Functions']['get_user_collection_detail']['Args']) {
-    const { data, error } = await this.supabase.rpc('get_user_collection_detail', args);
-    if (error) throw error;
-    return data as Database['public']['Functions']['get_user_collection_detail']['Returns'];
+    try {
+      const { data, error } = await this.supabase.rpc('get_user_collection_detail', args);
+      if (error) {
+        logRpcError(error, {
+          rpcName: 'get_user_collection_detail',
+          operation: 'CommunityService.getUserCollectionDetail',
+          args: args,
+        });
+        throw error;
+      }
+      return data as Database['public']['Functions']['get_user_collection_detail']['Returns'];
+    } catch (error) {
+      // Error already logged above
+      throw error;
+    }
   }
 }

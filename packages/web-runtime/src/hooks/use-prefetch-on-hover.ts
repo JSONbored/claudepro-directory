@@ -44,11 +44,11 @@
  */
 
 import { logClientWarning } from '../errors.ts';
-import { getTimeoutConfig } from '../actions/feature-flags.ts';
+import { getTimeoutConfig } from '../config/static-configs.ts';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef } from 'react';
 
-// Prefetch delay (loaded from Statsig via server action)
+// Prefetch delay (loaded from static config)
 let DEFAULT_PREFETCH_DELAY = 100;
 
 export interface UsePrefetchOnHoverOptions {
@@ -101,17 +101,10 @@ export function usePrefetchOnHover(
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const prefetchedRef = useRef(false);
 
-  // Load prefetch delay from Statsig on mount
+  // Load prefetch delay from static defaults
   useEffect(() => {
-    getTimeoutConfig({})
-      .then((result) => {
-        if (result?.data) {
-          DEFAULT_PREFETCH_DELAY = result.data['timeout.ui.prefetch_delay_ms'];
-        }
-      })
-      .catch((error: unknown) => {
-        logClientWarning('usePrefetchOnHover: failed to load prefetch delay', error);
-      });
+    const config = getTimeoutConfig();
+    DEFAULT_PREFETCH_DELAY = config['timeout.ui.prefetch_delay_ms'];
   }, []);
 
   const handleMouseEnter = useCallback(() => {

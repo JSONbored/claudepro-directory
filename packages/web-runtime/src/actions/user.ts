@@ -13,7 +13,7 @@ import { authedAction } from './safe-action.ts';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { z } from 'zod';
-import type { CacheConfigPromise, CacheInvalidateKey } from '../cache-config.ts';
+import type { CacheConfig, CacheInvalidateKey } from '../cache-config.ts';
 
 // Use enum values directly from @heyclaude/database-types Constants
 const CONTENT_CATEGORY_VALUES = Constants.public.Enums.content_category;
@@ -55,12 +55,12 @@ const USER_SURFACE_PATHS: Record<UserSurface, string> = {
 };
 
 async function invalidateUserCaches({
-  cacheConfigPromise,
+  cacheConfig,
   invalidateKeys,
   extraTags,
   userIds,
 }: {
-  cacheConfigPromise?: CacheConfigPromise;
+  cacheConfig?: CacheConfig;
   invalidateKeys?: CacheInvalidateKey[];
   extraTags?: string[];
   userIds?: Array<string | null | undefined>;
@@ -68,7 +68,7 @@ async function invalidateUserCaches({
   const { resolveInvalidateTags, revalidateCacheTags } = await import('../cache-tags.ts');
   const tags = new Set(extraTags ?? []);
   if (invalidateKeys?.length) {
-    const resolved = await resolveInvalidateTags(invalidateKeys, cacheConfigPromise);
+    const resolved = resolveInvalidateTags(invalidateKeys, cacheConfig);
     for (const tag of resolved) {
       tags.add(tag);
     }
@@ -130,7 +130,7 @@ export const updateProfile = authedAction
   )
   .action(async ({ parsedInput, ctx }) => {
     const { getCacheConfigSnapshot } = await import('../cache-config.ts');
-    const cacheConfigPromise = getCacheConfigSnapshot();
+    const cacheConfig = getCacheConfigSnapshot();
     const result = await runRpc<Database['public']['Functions']['update_user_profile']['Returns']>(
       'update_user_profile',
       {
@@ -167,7 +167,7 @@ export const updateProfile = authedAction
     });
 
     await invalidateUserCaches({
-      cacheConfigPromise,
+      cacheConfig,
       invalidateKeys: ['cache.invalidate.user_update'],
       userIds: [ctx.userId],
     });
@@ -177,7 +177,7 @@ export const updateProfile = authedAction
 
 async function refreshProfileFromOAuthInternal(userId: string) {
   const { getCacheConfigSnapshot } = await import('../cache-config.ts');
-  const cacheConfigPromise = getCacheConfigSnapshot();
+  const cacheConfig = getCacheConfigSnapshot();
   const result = await runRpc<
     Database['public']['Functions']['refresh_profile_from_oauth']['Returns']
   >(
@@ -195,7 +195,7 @@ async function refreshProfileFromOAuthInternal(userId: string) {
   });
 
   await invalidateUserCaches({
-    cacheConfigPromise,
+    cacheConfig,
     invalidateKeys: ['cache.invalidate.user_profile_oauth'],
     userIds: [userId],
   });
@@ -277,7 +277,7 @@ export const addBookmarkBatch = authedAction
   )
   .action(async ({ parsedInput, ctx }) => {
     const { getCacheConfigSnapshot } = await import('../cache-config.ts');
-    const cacheConfigPromise = getCacheConfigSnapshot();
+    const cacheConfig = getCacheConfigSnapshot();
 
     // Construct composite type array from parsed input
     const items: Database['public']['CompositeTypes']['bookmark_item_input'][] =
@@ -301,7 +301,7 @@ export const addBookmarkBatch = authedAction
 
     await revalidateUserSurfaces({ accountSections: ['account', 'library'] });
     await invalidateUserCaches({
-      cacheConfigPromise,
+      cacheConfig,
       invalidateKeys: ['cache.invalidate.bookmark_create'],
       extraTags: ['user-bookmarks'],
       userIds: [ctx.userId],
@@ -326,7 +326,7 @@ export const toggleFollow = authedAction
   .inputSchema(followSchema)
   .action(async ({ parsedInput: { action, user_id, slug }, ctx }) => {
     const { getCacheConfigSnapshot } = await import('../cache-config.ts');
-    const cacheConfigPromise = getCacheConfigSnapshot();
+    const cacheConfig = getCacheConfigSnapshot();
     const result = await runRpc<Database['public']['Functions']['toggle_follow']['Returns']>(
       'toggle_follow',
       {
@@ -346,7 +346,7 @@ export const toggleFollow = authedAction
       accountSections: ['account'],
     });
     await invalidateUserCaches({
-      cacheConfigPromise,
+      cacheConfig,
       invalidateKeys: ['cache.invalidate.follow'],
       extraTags: ['users'],
       userIds: [ctx.userId, user_id],
@@ -551,7 +551,7 @@ export async function ensureUserRecord(params: {
   'use server';
 
   const { getCacheConfigSnapshot } = await import('../cache-config.ts');
-  const cacheConfigPromise = getCacheConfigSnapshot();
+  const cacheConfig = getCacheConfigSnapshot();
   await runRpc<Database['public']['Tables']['users']['Row']>(
     'ensure_user_record',
     {
@@ -569,7 +569,7 @@ export async function ensureUserRecord(params: {
   );
 
   await invalidateUserCaches({
-    cacheConfigPromise,
+    cacheConfig,
     invalidateKeys: ['cache.invalidate.user_update'],
     userIds: [params.id],
   });

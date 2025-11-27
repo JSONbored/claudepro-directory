@@ -10,8 +10,7 @@ import {
   getActiveNotificationsAction,
 } from '@heyclaude/web-runtime/actions';
 import { logger, normalizeError } from '@heyclaude/web-runtime/core';
-import { FLAG_KEYS } from '@heyclaude/web-runtime/feature-flags/keys';
-import { useFeatureFlags } from '@heyclaude/web-runtime/feature-flags/provider';
+import { getLayoutFlags } from '@heyclaude/web-runtime/data';
 import { useAction } from 'next-safe-action/hooks';
 import {
   createContext,
@@ -49,16 +48,17 @@ const NotificationsContext = createContext<NotificationsContextValue | null>(nul
 const DISMISSED_STORAGE_KEY = 'notification-storage';
 
 export function NotificationsProvider({ children }: { children: React.ReactNode }) {
-  const { isEnabled } = useFeatureFlags();
+  // Get static layout flags
+  const layoutFlags = getLayoutFlags();
 
   const flags = useMemo(
     () => ({
-      enableNotifications: isEnabled(FLAG_KEYS.NOTIFICATIONS_PROVIDER),
-      enableSheet: isEnabled(FLAG_KEYS.NOTIFICATIONS_SHEET),
-      enableToasts: isEnabled(FLAG_KEYS.NOTIFICATIONS_TOASTS),
-      enableFab: isEnabled(FLAG_KEYS.FAB_NOTIFICATIONS),
+      enableNotifications: layoutFlags.notificationsProvider,
+      enableSheet: layoutFlags.notificationsSheet,
+      enableToasts: layoutFlags.notificationsToasts,
+      enableFab: layoutFlags.fabNotifications,
     }),
-    [isEnabled]
+    [layoutFlags]
   );
 
   const [notifications, setNotifications] = useState<NotificationRecord[]>([]);

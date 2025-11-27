@@ -7,6 +7,7 @@
 
 import type { Database } from '@heyclaude/database-types';
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { logRpcError } from '../utils/rpc-error-logging.ts';
 
 export class QuizService {
   constructor(private supabase: SupabaseClient<Database>) {}
@@ -15,17 +16,40 @@ export class QuizService {
    * Calls the database RPC: get_quiz_configuration
    */
   async getQuizConfiguration() {
-    const { data, error } = await this.supabase.rpc('get_quiz_configuration');
-    if (error) throw error;
-    return data as Database['public']['Functions']['get_quiz_configuration']['Returns'];
+    try {
+      const { data, error } = await this.supabase.rpc('get_quiz_configuration');
+      if (error) {
+        logRpcError(error, {
+          rpcName: 'get_quiz_configuration',
+          operation: 'QuizService.getQuizConfiguration',
+        });
+        throw error;
+      }
+      return data as Database['public']['Functions']['get_quiz_configuration']['Returns'];
+    } catch (error) {
+      // Error already logged above
+      throw error;
+    }
   }
 
   /**
    * Calls the database RPC: get_recommendations
    */
   async getRecommendations(args: Database['public']['Functions']['get_recommendations']['Args']) {
-    const { data, error } = await this.supabase.rpc('get_recommendations', args);
-    if (error) throw error;
-    return data as Database['public']['Functions']['get_recommendations']['Returns'];
+    try {
+      const { data, error } = await this.supabase.rpc('get_recommendations', args);
+      if (error) {
+        logRpcError(error, {
+          rpcName: 'get_recommendations',
+          operation: 'QuizService.getRecommendations',
+          args: args,
+        });
+        throw error;
+      }
+      return data as Database['public']['Functions']['get_recommendations']['Returns'];
+    } catch (error) {
+      // Error already logged above
+      throw error;
+    }
   }
 }

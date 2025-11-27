@@ -1,7 +1,7 @@
 /**
  * Pulse Route
  * Processes pulse queue in batches for hyper-optimized egress reduction
- * Batch size is configurable via Statsig dynamic config (queue.pulse.batch_size)
+ * Batch size is configurable via static config (queue.pulse.batch_size)
  * Default: 100 events per batch
  */
 
@@ -10,12 +10,15 @@ import type { Database as DatabaseGenerated, Json } from '@heyclaude/database-ty
 import {
   errorResponse,
   getCacheConfigNumber,
+  initRequestLogging,
   pgmqDelete,
   pgmqRead,
   publicCorsHeaders,
   RESEND_ENV,
   successResponse,
   supabaseServiceRole,
+  traceRequestComplete,
+  traceStep,
   updateContactEngagement,
 } from '@heyclaude/edge-runtime';
 import {
@@ -25,12 +28,13 @@ import {
   logError,
   logInfo,
   logWarn,
+  logger,
   TIMEOUT_PRESETS,
   withTimeout,
 } from '@heyclaude/shared-runtime';
 
 const PULSE_QUEUE_NAME = 'pulse';
-const PULSE_BATCH_SIZE_DEFAULT = 100; // Fallback if Statsig config unavailable
+const PULSE_BATCH_SIZE_DEFAULT = 100; // Fallback if config unavailable
 
 interface PulseEvent {
   user_id?: string | null;
@@ -152,6 +156,8 @@ async function processSearchEventsBatch(messages: PulseQueueMessage[]): Promise<
     const logContext = createUtilityContext('flux-station', 'pulse-search-events', {
       message_count: messages.length,
     });
+    // Use dbQuery serializer for consistent database query formatting
+    // Note: This is a direct table insert, not an RPC call, so no rpcName
     logError('Search events batch insert error', logContext, error);
     failed = messages.length;
     return { inserted: 0, failed, errors };
@@ -374,6 +380,15 @@ async function processUserInteractionsBatch(messages: PulseQueueMessage[]): Prom
     );
 
     if (batchError) {
+      // Use dbQuery serializer for consistent database query formatting
+      const errorLogContext = createUtilityContext('flux-station', 'pulse-batch-insert', {
+        message_count: messages.length,
+        dbQuery: {
+          rpcName: 'batch_insert_user_interactions',
+          args: rpcArgs, // Will be redacted by Pino's redact config
+        },
+      });
+      logError('Pulse batch insert RPC error', errorLogContext, batchError);
       throw batchError;
     }
 
@@ -418,6 +433,9 @@ async function processUserInteractionsBatch(messages: PulseQueueMessage[]): Prom
     errors.push(`Batch insert failed: ${errorMsg}`);
     const logContext = createUtilityContext('flux-station', 'pulse-batch-insert', {
       message_count: messages.length,
+      dbQuery: {
+        rpcName: 'batch_insert_user_interactions',
+      },
     });
     logError('Pulse batch insert error', logContext, error);
     return { inserted: 0, failed: messages.length, errors };
@@ -495,7 +513,7 @@ async function deletePulseMessages(msgIds: bigint[]): Promise<void> {
 }
 
 export async function handlePulse(_req: Request): Promise<Response> {
-  // Get batch size from Statsig dynamic config (with fallback)
+  // Get batch size from static config (with fallback)
   const batchSize = getCacheConfigNumber('queue.pulse.batch_size', PULSE_BATCH_SIZE_DEFAULT);
 
   // Validate batch size (safety limits)
@@ -503,14 +521,30 @@ export async function handlePulse(_req: Request): Promise<Response> {
 
   const logContext: BaseLogContext = {
     function: 'flux-station:pulse',
+    action: 'pulse-processing',
+    request_id: crypto.randomUUID(),
     started_at: new Date().toISOString(),
     queue: PULSE_QUEUE_NAME,
     batch_size: safeBatchSize,
-    config_source: batchSize !== PULSE_BATCH_SIZE_DEFAULT ? 'statsig' : 'default',
+    config_source: 'static', // Always static configs now
   };
+  
+  // Initialize request logging with trace and bindings (Phase 1 & 2)
+  initRequestLogging(logContext);
+  traceStep('Starting pulse processing', logContext);
+  
+  // Set bindings for this request - mixin will automatically inject these into all subsequent logs
+  logger.setBindings({
+    requestId: logContext.request_id,
+    operation: logContext.action || 'pulse-processing',
+    function: logContext.function,
+    queue: PULSE_QUEUE_NAME,
+    batchSize: safeBatchSize,
+  });
 
   try {
     // Read messages from queue (with timeout protection)
+    traceStep('Reading pulse queue', logContext);
     let messages: PulseQueueMessage[] | null = null;
     try {
       const rawMessages = await withTimeout(
@@ -535,10 +569,12 @@ export async function handlePulse(_req: Request): Promise<Response> {
     }
 
     if (!messages || messages.length === 0) {
+      traceRequestComplete(logContext);
       return successResponse({ message: 'No messages in pulse queue', processed: 0 }, 200);
     }
 
     logInfo(`Processing ${messages.length} pulse events`, logContext);
+    traceStep(`Processing ${messages.length} pulse events`, logContext);
 
     // Safely validate queue message structure
     function isValidPulseEvent(value: unknown): value is PulseEvent {
@@ -643,6 +679,7 @@ export async function handlePulse(_req: Request): Promise<Response> {
       failed: result.failed,
       errors: result.errors.length > 0 ? result.errors : undefined,
     });
+    traceRequestComplete(logContext);
 
     return successResponse(
       {

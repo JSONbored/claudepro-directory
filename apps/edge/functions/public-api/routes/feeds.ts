@@ -5,11 +5,14 @@ import {
   buildCacheHeaders,
   errorResponse,
   getOnlyCorsHeaders,
+  initRequestLogging,
   jsonResponse,
   methodNotAllowedResponse,
   supabaseAnon,
+  traceRequestComplete,
+  traceStep,
 } from '@heyclaude/edge-runtime';
-import { buildSecurityHeaders, createDataApiContext, logInfo } from '@heyclaude/shared-runtime';
+import { buildSecurityHeaders, createDataApiContext, logInfo, logger } from '@heyclaude/shared-runtime';
 
 type ContentCategory = DatabaseGenerated['public']['Enums']['content_category'];
 const CONTENT_CATEGORY_VALUES = Constants.public.Enums.content_category;
@@ -32,6 +35,23 @@ export async function handleFeedsRoute(
   url: URL,
   method: string
 ): Promise<Response> {
+  const logContext = createDataApiContext('feeds', {
+    path: url.pathname,
+    method,
+    app: 'public-api',
+  });
+  
+  // Initialize request logging with trace and bindings
+  initRequestLogging(logContext);
+  traceStep('Feeds request received', logContext);
+  
+  // Set bindings for this request
+  logger.setBindings({
+    requestId: logContext.request_id,
+    operation: logContext.action || 'feeds',
+    method,
+  });
+  
   if (method !== 'GET') {
     return methodNotAllowedResponse('GET', CORS);
   }
@@ -72,19 +92,23 @@ export async function handleFeedsRoute(
   };
 
   try {
-    const payload = await generateFeedPayload(type, category);
-    const logContext = createDataApiContext('feeds', {
-      path: url.pathname,
-      method: 'GET',
-      app: 'public-api',
-      resource: type,
+    traceStep('Generating feed payload', logContext);
+    
+    // Update bindings with feed type and category
+    logger.setBindings({
+      feedType: type,
+      category: category || 'all',
     });
+    
+    const payload = await generateFeedPayload(type, category);
+    
     logInfo('Feed delivery', {
       ...logContext,
       type,
       category: category ?? 'all',
       contentType: payload.contentType,
     });
+    traceRequestComplete(logContext);
 
     return new Response(payload.xml, {
       status: 200,
@@ -96,7 +120,16 @@ export async function handleFeedsRoute(
       },
     });
   } catch (error) {
-    return errorResponse(error, 'data-api:feeds', CORS);
+    // Use dbQuery serializer for consistent database query formatting
+    // Note: RPC name will be in the error message or logged by generateFeedPayload
+    return errorResponse(error, 'data-api:feeds', CORS, {
+      ...logContext,
+      dbQuery: {
+        // RPC name will be determined from error context or logged separately
+        feedType: type,
+        category: category || 'all',
+      },
+    });
   }
 }
 
@@ -111,6 +144,16 @@ async function generateFeedPayload(
       } satisfies DatabaseGenerated['public']['Functions']['generate_changelog_rss_feed']['Args'];
       const { data, error } = await supabaseAnon.rpc('generate_changelog_rss_feed', rpcArgs);
       if (error || data == null) {
+        // Use dbQuery serializer for consistent database query formatting
+        const { logError } = await import('@heyclaude/shared-runtime');
+        if (error) {
+          logError('RPC call failed in generateFeedPayload', {
+            dbQuery: {
+              rpcName: 'generate_changelog_rss_feed',
+              args: rpcArgs, // Will be redacted by Pino's redact config
+            },
+          }, error);
+        }
         throw error ?? new Error('generate_changelog_rss_feed returned null');
       }
       return {
@@ -124,6 +167,16 @@ async function generateFeedPayload(
     } satisfies DatabaseGenerated['public']['Functions']['generate_changelog_atom_feed']['Args'];
     const { data, error } = await supabaseAnon.rpc('generate_changelog_atom_feed', rpcArgs2);
     if (error || data == null) {
+      // Use dbQuery serializer for consistent database query formatting
+      const { logError } = await import('@heyclaude/shared-runtime');
+      if (error) {
+        logError('RPC call failed in generateFeedPayload', {
+          dbQuery: {
+            rpcName: 'generate_changelog_atom_feed',
+            args: rpcArgs2, // Will be redacted by Pino's redact config
+          },
+        }, error);
+      }
       throw error ?? new Error('generate_changelog_atom_feed returned null');
     }
     return {
@@ -142,6 +195,16 @@ async function generateFeedPayload(
     } satisfies DatabaseGenerated['public']['Functions']['generate_content_rss_feed']['Args'];
     const { data, error } = await supabaseAnon.rpc('generate_content_rss_feed', rpcArgs3);
     if (error || data == null) {
+      // Use dbQuery serializer for consistent database query formatting
+      const { logError } = await import('@heyclaude/shared-runtime');
+      if (error) {
+        logError('RPC call failed in generateFeedPayload', {
+          dbQuery: {
+            rpcName: 'generate_content_rss_feed',
+            args: rpcArgs3, // Will be redacted by Pino's redact config
+          },
+        }, error);
+      }
       throw error ?? new Error('generate_content_rss_feed returned null');
     }
     return {
@@ -157,6 +220,16 @@ async function generateFeedPayload(
   } satisfies DatabaseGenerated['public']['Functions']['generate_content_atom_feed']['Args'];
   const { data, error } = await supabaseAnon.rpc('generate_content_atom_feed', rpcArgs4);
   if (error || data == null) {
+    // Use dbQuery serializer for consistent database query formatting
+    const { logError } = await import('@heyclaude/shared-runtime');
+    if (error) {
+      logError('RPC call failed in generateFeedPayload', {
+        dbQuery: {
+          rpcName: 'generate_content_atom_feed',
+          args: rpcArgs4, // Will be redacted by Pino's redact config
+        },
+      }, error);
+    }
     throw error ?? new Error('generate_content_atom_feed returned null');
   }
   return {

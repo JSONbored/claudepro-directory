@@ -7,6 +7,7 @@
 
 import type { Database } from '@heyclaude/database-types';
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { logRpcError, logger } from '../utils/rpc-error-logging.ts';
 
 export interface ContentFilterOptions {
   categories?: Database['public']['Enums']['content_category'][] | undefined;
@@ -49,171 +50,395 @@ export class ContentService {
    * Calls the database RPC: generate_readme_data
    */
   async getSitewideReadme() {
-    const { data, error } = await this.supabase.rpc('generate_readme_data');
-    if (error) throw error;
-    return data as Database['public']['Functions']['generate_readme_data']['Returns'];
+    try {
+      const { data, error } = await this.supabase.rpc('generate_readme_data');
+      if (error) {
+        logRpcError(error, {
+          rpcName: 'generate_readme_data',
+          operation: 'ContentService.getSitewideReadme',
+        });
+        throw error;
+      }
+      return data as Database['public']['Functions']['generate_readme_data']['Returns'];
+    } catch (error) {
+      // Error already logged above
+      throw error;
+    }
   }
 
   /**
    * Calls the database RPC: generate_sitewide_llms_txt
    */
   async getSitewideLlmsTxt() {
-    const { data, error } = await this.supabase.rpc('generate_sitewide_llms_txt');
-    if (error) throw error;
-    return data as Database['public']['Functions']['generate_sitewide_llms_txt']['Returns'];
+    try {
+      const { data, error } = await this.supabase.rpc('generate_sitewide_llms_txt');
+      if (error) {
+        logRpcError(error, {
+          rpcName: 'generate_sitewide_llms_txt',
+          operation: 'ContentService.getSitewideLlmsTxt',
+        });
+        throw error;
+      }
+      return data as Database['public']['Functions']['generate_sitewide_llms_txt']['Returns'];
+    } catch (error) {
+      // Error already logged above
+      throw error;
+    }
   }
 
   /**
    * Calls the database RPC: generate_changelog_llms_txt
    */
   async getChangelogLlmsTxt() {
-    const { data, error } = await this.supabase.rpc('generate_changelog_llms_txt');
-    if (error) throw error;
-    return data as Database['public']['Functions']['generate_changelog_llms_txt']['Returns'];
+    try {
+      const { data, error } = await this.supabase.rpc('generate_changelog_llms_txt');
+      if (error) {
+        logRpcError(error, {
+          rpcName: 'generate_changelog_llms_txt',
+          operation: 'ContentService.getChangelogLlmsTxt',
+        });
+        throw error;
+      }
+      return data as Database['public']['Functions']['generate_changelog_llms_txt']['Returns'];
+    } catch (error) {
+      // Error already logged above
+      throw error;
+    }
   }
 
   /**
    * Calls the database RPC: generate_category_llms_txt
    */
   async getCategoryLlmsTxt(args: Database['public']['Functions']['generate_category_llms_txt']['Args']) {
-    const { data, error } = await this.supabase.rpc('generate_category_llms_txt', args);
-    if (error) throw error;
-    return data as Database['public']['Functions']['generate_category_llms_txt']['Returns'];
+    try {
+      const { data, error } = await this.supabase.rpc('generate_category_llms_txt', args);
+      if (error) {
+        logRpcError(error, {
+          rpcName: 'generate_category_llms_txt',
+          operation: 'ContentService.getCategoryLlmsTxt',
+          args: args,
+        });
+        throw error;
+      }
+      return data as Database['public']['Functions']['generate_category_llms_txt']['Returns'];
+    } catch (error) {
+      // Error already logged above
+      throw error;
+    }
   }
 
   /**
    * Calls the database RPC: generate_changelog_entry_llms_txt
    */
   async getChangelogEntryLlmsTxt(args: Database['public']['Functions']['generate_changelog_entry_llms_txt']['Args']) {
-    const { data, error } = await this.supabase.rpc('generate_changelog_entry_llms_txt', args);
-    if (error) throw error;
-    return data as Database['public']['Functions']['generate_changelog_entry_llms_txt']['Returns'];
+    try {
+      const { data, error } = await this.supabase.rpc('generate_changelog_entry_llms_txt', args);
+      if (error) {
+        logRpcError(error, {
+          rpcName: 'generate_changelog_entry_llms_txt',
+          operation: 'ContentService.getChangelogEntryLlmsTxt',
+          args: args,
+        });
+        throw error;
+      }
+      return data as Database['public']['Functions']['generate_changelog_entry_llms_txt']['Returns'];
+    } catch (error) {
+      // Error already logged above
+      throw error;
+    }
   }
 
   /**
    * Calls the database RPC: generate_tool_llms_txt
    */
   async getToolLlmsTxt(args: Database['public']['Functions']['generate_tool_llms_txt']['Args']) {
-    const { data, error } = await this.supabase.rpc('generate_tool_llms_txt', args);
-    if (error) throw error;
-    return data as Database['public']['Functions']['generate_tool_llms_txt']['Returns'];
+    try {
+      const { data, error } = await this.supabase.rpc('generate_tool_llms_txt', args);
+      if (error) {
+        logRpcError(error, {
+          rpcName: 'generate_tool_llms_txt',
+          operation: 'ContentService.getToolLlmsTxt',
+          args: args,
+        });
+        throw error;
+      }
+      return data as Database['public']['Functions']['generate_tool_llms_txt']['Returns'];
+    } catch (error) {
+      // Error already logged above
+      throw error;
+    }
   }
 
   /**
    * Calls the database RPC: get_category_configs_with_features
    */
   async getCategoryConfigs() {
-    const { data, error } = await this.supabase.rpc('get_category_configs_with_features');
-    if (error) throw error;
-    return data as Database['public']['Functions']['get_category_configs_with_features']['Returns'];
+    try {
+      const { data, error } = await this.supabase.rpc('get_category_configs_with_features');
+      if (error) {
+        logRpcError(error, {
+          rpcName: 'get_category_configs_with_features',
+          operation: 'ContentService.getCategoryConfigs',
+        });
+        throw error;
+      }
+      return data as Database['public']['Functions']['get_category_configs_with_features']['Returns'];
+    } catch (error) {
+      // Error already logged above
+      throw error;
+    }
   }
 
   /**
    * Calls the database RPC: get_api_content_full
    */
   async getApiContentFull(args: Database['public']['Functions']['get_api_content_full']['Args']) {
-    const { data, error } = await this.supabase.rpc('get_api_content_full', args);
-    if (error) throw error;
-    return data as Database['public']['Functions']['get_api_content_full']['Returns'];
+    try {
+      const { data, error } = await this.supabase.rpc('get_api_content_full', args);
+      if (error) {
+        logRpcError(error, {
+          rpcName: 'get_api_content_full',
+          operation: 'ContentService.getApiContentFull',
+          args: args,
+        });
+        throw error;
+      }
+      return data as Database['public']['Functions']['get_api_content_full']['Returns'];
+    } catch (error) {
+      // Error already logged above
+      throw error;
+    }
   }
 
   /**
    * Calls the database RPC: get_content_detail_complete
    */
   async getContentDetailComplete(args: Database['public']['Functions']['get_content_detail_complete']['Args']) {
-    const { data, error } = await this.supabase.rpc('get_content_detail_complete', args);
-    if (error) throw error;
-    return data as Database['public']['Functions']['get_content_detail_complete']['Returns'];
+    try {
+      const { data, error } = await this.supabase.rpc('get_content_detail_complete', args);
+      if (error) {
+        logRpcError(error, {
+          rpcName: 'get_content_detail_complete',
+          operation: 'ContentService.getContentDetailComplete',
+          args: args,
+        });
+        throw error;
+      }
+      return data as Database['public']['Functions']['get_content_detail_complete']['Returns'];
+    } catch (error) {
+      // Error already logged above
+      throw error;
+    }
   }
 
   /**
    * Calls the database RPC: get_enriched_content_list
    */
   async getEnrichedContentList(args: Database['public']['Functions']['get_enriched_content_list']['Args']) {
-    const { data, error } = await this.supabase.rpc('get_enriched_content_list', args);
-    if (error) throw error;
-    return data as Database['public']['Functions']['get_enriched_content_list']['Returns'];
+    try {
+      const { data, error } = await this.supabase.rpc('get_enriched_content_list', args);
+      if (error) {
+        logRpcError(error, {
+          rpcName: 'get_enriched_content_list',
+          operation: 'ContentService.getEnrichedContentList',
+          args: args,
+        });
+        throw error;
+      }
+      return data as Database['public']['Functions']['get_enriched_content_list']['Returns'];
+    } catch (error) {
+      // Error already logged above
+      throw error;
+    }
   }
 
   /**
    * Calls the database RPC: get_content_paginated
    */
   async getContentPaginated(args: Database['public']['Functions']['get_content_paginated']['Args']) {
-    const { data, error } = await this.supabase.rpc('get_content_paginated', args);
-    if (error) throw error;
-    return data as Database['public']['Functions']['get_content_paginated']['Returns'];
+    try {
+      const { data, error } = await this.supabase.rpc('get_content_paginated', args);
+      if (error) {
+        logRpcError(error, {
+          rpcName: 'get_content_paginated',
+          operation: 'ContentService.getContentPaginated',
+          args: args,
+        });
+        throw error;
+      }
+      return data as Database['public']['Functions']['get_content_paginated']['Returns'];
+    } catch (error) {
+      // Error already logged above
+      throw error;
+    }
   }
 
   /**
    * Calls the database RPC: get_homepage_complete
    */
   async getHomepageComplete(args: Database['public']['Functions']['get_homepage_complete']['Args']) {
-    const { data, error } = await this.supabase.rpc('get_homepage_complete', args);
-    if (error) throw error;
-    return data as Database['public']['Functions']['get_homepage_complete']['Returns'];
+    try {
+      const { data, error } = await this.supabase.rpc('get_homepage_complete', args);
+      if (error) {
+        logRpcError(error, {
+          rpcName: 'get_homepage_complete',
+          operation: 'ContentService.getHomepageComplete',
+          args: args,
+        });
+        throw error;
+      }
+      return data as Database['public']['Functions']['get_homepage_complete']['Returns'];
+    } catch (error) {
+      // Error already logged above
+      throw error;
+    }
   }
 
   /**
    * Calls the database RPC: get_reviews_with_stats
    */
   async getReviewsWithStats(args: Database['public']['Functions']['get_reviews_with_stats']['Args']) {
-    const { data, error } = await this.supabase.rpc('get_reviews_with_stats', args);
-    if (error) throw error;
-    return data as Database['public']['Functions']['get_reviews_with_stats']['Returns'];
+    try {
+      const { data, error } = await this.supabase.rpc('get_reviews_with_stats', args);
+      if (error) {
+        logRpcError(error, {
+          rpcName: 'get_reviews_with_stats',
+          operation: 'ContentService.getReviewsWithStats',
+          args: args,
+        });
+        throw error;
+      }
+      return data as Database['public']['Functions']['get_reviews_with_stats']['Returns'];
+    } catch (error) {
+      // Error already logged above
+      throw error;
+    }
   }
 
   /**
    * Calls the database RPC: get_related_content
    */
   async getRelatedContent(args: Database['public']['Functions']['get_related_content']['Args']) {
-    const { data, error } = await this.supabase.rpc('get_related_content', args);
-    if (error) throw error;
-    return data as Database['public']['Functions']['get_related_content']['Returns'];
+    try {
+      const { data, error } = await this.supabase.rpc('get_related_content', args);
+      if (error) {
+        logRpcError(error, {
+          rpcName: 'get_related_content',
+          operation: 'ContentService.getRelatedContent',
+          args: args,
+        });
+        throw error;
+      }
+      return data as Database['public']['Functions']['get_related_content']['Returns'];
+    } catch (error) {
+      // Error already logged above
+      throw error;
+    }
   }
 
   /**
    * Calls the database RPC: get_similar_content
    */
   async getSimilarContent(args: Database['public']['Functions']['get_similar_content']['Args']) {
-    const { data, error } = await this.supabase.rpc('get_similar_content', args);
-    if (error) throw error;
-    return data as Database['public']['Functions']['get_similar_content']['Returns'];
+    try {
+      const { data, error } = await this.supabase.rpc('get_similar_content', args);
+      if (error) {
+        logRpcError(error, {
+          rpcName: 'get_similar_content',
+          operation: 'ContentService.getSimilarContent',
+          args: args,
+        });
+        throw error;
+      }
+      return data as Database['public']['Functions']['get_similar_content']['Returns'];
+    } catch (error) {
+      // Error already logged above
+      throw error;
+    }
   }
 
   /**
    * Calls the database RPC: get_content_templates
    */
   async getContentTemplates(args: Database['public']['Functions']['get_content_templates']['Args']) {
-    const { data, error } = await this.supabase.rpc('get_content_templates', args);
-    if (error) throw error;
-    return data as Database['public']['Functions']['get_content_templates']['Returns'];
+    try {
+      const { data, error } = await this.supabase.rpc('get_content_templates', args);
+      if (error) {
+        logRpcError(error, {
+          rpcName: 'get_content_templates',
+          operation: 'ContentService.getContentTemplates',
+          args: args,
+        });
+        throw error;
+      }
+      return data as Database['public']['Functions']['get_content_templates']['Returns'];
+    } catch (error) {
+      // Error already logged above
+      throw error;
+    }
   }
 
   /**
    * Calls the database RPC: get_content_paginated_slim
    */
   async getContentPaginatedSlim(args: Database['public']['Functions']['get_content_paginated_slim']['Args']) {
-    const { data, error } = await this.supabase.rpc('get_content_paginated_slim', args);
-    if (error) throw error;
-    return data as Database['public']['Functions']['get_content_paginated_slim']['Returns'];
+    try {
+      const { data, error } = await this.supabase.rpc('get_content_paginated_slim', args);
+      if (error) {
+        logRpcError(error, {
+          rpcName: 'get_content_paginated_slim',
+          operation: 'ContentService.getContentPaginatedSlim',
+          args: args,
+        });
+        throw error;
+      }
+      return data as Database['public']['Functions']['get_content_paginated_slim']['Returns'];
+    } catch (error) {
+      // Error already logged above
+      throw error;
+    }
   }
 
   /**
    * Calls the database RPC: get_content_detail_core
    */
   async getContentDetailCore(args: Database['public']['Functions']['get_content_detail_core']['Args']) {
-    const { data, error } = await this.supabase.rpc('get_content_detail_core', args);
-    if (error) throw error;
-    return data as Database['public']['Functions']['get_content_detail_core']['Returns'];
+    try {
+      const { data, error } = await this.supabase.rpc('get_content_detail_core', args);
+      if (error) {
+        logRpcError(error, {
+          rpcName: 'get_content_detail_core',
+          operation: 'ContentService.getContentDetailCore',
+          args: args,
+        });
+        throw error;
+      }
+      return data as Database['public']['Functions']['get_content_detail_core']['Returns'];
+    } catch (error) {
+      // Error already logged above
+      throw error;
+    }
   }
 
   /**
    * Calls the database RPC: get_content_analytics
    */
   async getContentAnalytics(args: Database['public']['Functions']['get_content_analytics']['Args']) {
-    const { data, error } = await this.supabase.rpc('get_content_analytics', args);
-    if (error) throw error;
-    return data as Database['public']['Functions']['get_content_analytics']['Returns'];
+    try {
+      const { data, error } = await this.supabase.rpc('get_content_analytics', args);
+      if (error) {
+        logRpcError(error, {
+          rpcName: 'get_content_analytics',
+          operation: 'ContentService.getContentAnalytics',
+          args: args,
+        });
+        throw error;
+      }
+      return data as Database['public']['Functions']['get_content_analytics']['Returns'];
+    } catch (error) {
+      // Error already logged above
+      throw error;
+    }
   }
 
   /**
@@ -223,43 +448,59 @@ export class ContentService {
    * return the data in a specific format. We need to handle this correctly.
    */
   async getHomepageOptimized(args: Database['public']['Functions']['get_homepage_optimized']['Args']) {
-    const { data, error } = await this.supabase.rpc('get_homepage_optimized', args);
-    
-    if (error) {
-      // Log the error for debugging
-      console.error('[ContentService.getHomepageOptimized] RPC error:', error);
+    try {
+      const { data, error } = await this.supabase.rpc('get_homepage_optimized', args);
+      
+      if (error) {
+        // Log RPC error with business context
+        logRpcError(error, {
+          rpcName: 'get_homepage_optimized',
+          operation: 'ContentService.getHomepageOptimized',
+          args: args,
+        });
+        throw error;
+      }
+      
+      // Supabase returns composite types as a single object (not array) for RETURNS (not SETOF)
+      // But if function returns no rows, data will be null
+      if (data === null || data === undefined) {
+        // Null data is expected when no rows returned - not an error, just return null
+        return null;
+      }
+      
+      // If data is an array (shouldn't happen for non-SETOF, but be defensive), take first element
+      if (Array.isArray(data)) {
+        // Unexpected format but recoverable - log structured warning and continue
+        // Note: This is a data format issue, not an error, so we continue processing
+        // Use dbQuery serializer for consistent database query formatting
+        logger.warn({
+          dbQuery: {
+            rpcName: 'get_homepage_optimized',
+            operation: 'ContentService.getHomepageOptimized',
+          },
+        }, 'Unexpected array format from get_homepage_optimized (expected single object)');
+        return (data[0] ?? null) as Database['public']['Functions']['get_homepage_optimized']['Returns'];
+      }
+      
+      // Data should be a single object
+      if (typeof data !== 'object') {
+        // Invalid data type - log error
+        logRpcError(
+          new Error(`Invalid data type from get_homepage_optimized: expected object, got ${typeof data}`),
+          {
+            rpcName: 'get_homepage_optimized',
+            operation: 'ContentService.getHomepageOptimized',
+            args: args,
+          }
+        );
+        return null;
+      }
+      
+      return data as Database['public']['Functions']['get_homepage_optimized']['Returns'];
+    } catch (error) {
+      // Error already logged above if it was an RPC error
+      // Re-throw to maintain error propagation
       throw error;
     }
-    
-    // DEBUG: Log what we actually received
-    console.log('[ContentService.getHomepageOptimized] Raw data from RPC:', {
-      dataType: typeof data,
-      isNull: data === null,
-      isUndefined: data === undefined,
-      isArray: Array.isArray(data),
-      dataKeys: data && typeof data === 'object' ? Object.keys(data) : 'not-object',
-      dataSample: data && typeof data === 'object' ? JSON.stringify(data).substring(0, 200) : String(data),
-    });
-    
-    // Supabase returns composite types as a single object (not array) for RETURNS (not SETOF)
-    // But if function returns no rows, data will be null
-    if (data === null || data === undefined) {
-      console.warn('[ContentService.getHomepageOptimized] Data is null/undefined!');
-      return null;
-    }
-    
-    // If data is an array (shouldn't happen for non-SETOF, but be defensive), take first element
-    if (Array.isArray(data)) {
-      console.warn('[ContentService.getHomepageOptimized] Data is an array (unexpected for non-SETOF), taking first element');
-      return (data[0] ?? null) as Database['public']['Functions']['get_homepage_optimized']['Returns'];
-    }
-    
-    // Data should be a single object
-    if (typeof data !== 'object') {
-      console.error('[ContentService.getHomepageOptimized] Data is not an object:', typeof data, data);
-      return null;
-    }
-    
-    return data as Database['public']['Functions']['get_homepage_optimized']['Returns'];
   }
 }

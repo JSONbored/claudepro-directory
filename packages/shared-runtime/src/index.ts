@@ -4,6 +4,10 @@ export * from './input-validation.ts';
 export * from './search-highlight.ts';
 export * from './error-handling.ts';
 export * from './logging.ts';
+// Export logger from logger/index.ts (not from logging.ts to avoid duplicate)
+export { createLogger, logger as pinoLogger, createPinoConfig, SENSITIVE_PATTERNS, BASE_CONTEXT } from './logger/index.ts';
+// Export logTrace for trace-level logging
+export { logTrace } from './logging.ts';
 export * from './validate-email.ts';
 export * from './sanitize-text.ts';
 export * from './og-constants.ts';

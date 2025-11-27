@@ -13,13 +13,17 @@ import {
   createNotificationTrace,
   errorResponse,
   getAuthUserFromHeader,
+  initRequestLogging,
   insertNotification,
   type NotificationInsertPayload,
   notificationCorsHeaders,
   successResponse,
+  traceRequestComplete,
+  traceStep,
 } from '@heyclaude/edge-runtime';
 import {
   createNotificationRouterContext,
+  logger,
   MAX_BODY_SIZE,
   validateBodySize,
 } from '@heyclaude/shared-runtime';
@@ -36,6 +40,22 @@ export async function handleCreateNotification(req: Request): Promise<Response> 
       notificationCorsHeaders
     );
   }
+  
+  // Create log context early for logging
+  const logContext = createNotificationRouterContext('create-notification', {
+    userId: authResult.user.id,
+  });
+  
+  // Initialize request logging with trace and bindings
+  initRequestLogging(logContext);
+  traceStep('Create notification request received', logContext);
+  
+  // Set bindings for this request
+  logger.setBindings({
+    requestId: logContext.request_id,
+    operation: logContext.action || 'create-notification',
+    userId: authResult.user.id,
+  });
 
   // Validate body size before reading
   const contentLength = req.headers.get('content-length');
@@ -144,18 +164,22 @@ export async function handleCreateNotification(req: Request): Promise<Response> 
     ...(actionLabel ? { action_label: actionLabel } : {}),
     ...(actionHref ? { action_href: actionHref } : {}),
   };
+  
+  // Update bindings with notification details
+  logger.setBindings({
+    notificationType: typeValue || 'default',
+    priority: priorityValue || 'default',
+  });
+  traceStep('Inserting notification', logContext);
 
   try {
     const trace = createNotificationTrace({
-      userId: authResult?.user.id,
-      source: 'main-app',
-    });
-    const logContext = createNotificationRouterContext('create-notification', {
-      ...(authResult?.user.id !== undefined ? { userId: authResult.user.id } : {}),
+      userId: authResult.user.id,
       source: 'main-app',
     });
 
     const notification = await insertNotification(sanitizedPayload, logContext);
+    traceRequestComplete(logContext);
 
     return successResponse(
       {
@@ -166,6 +190,6 @@ export async function handleCreateNotification(req: Request): Promise<Response> 
       notificationCorsHeaders
     );
   } catch (error) {
-    return errorResponse(error, 'flux-station:create-notification', notificationCorsHeaders);
+    return errorResponse(error, 'flux-station:create-notification', notificationCorsHeaders, logContext);
   }
 }

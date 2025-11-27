@@ -8,12 +8,16 @@ import {
   createNotificationTrace,
   dismissNotificationsForUser,
   errorResponse,
+  initRequestLogging,
   notificationCorsHeaders,
   requireAuthUser,
   successResponse,
+  traceRequestComplete,
+  traceStep,
 } from '@heyclaude/edge-runtime';
 import {
   createNotificationRouterContext,
+  logger,
   MAX_BODY_SIZE,
   validateBodySize,
 } from '@heyclaude/shared-runtime';
@@ -27,6 +31,22 @@ export async function handleDismissNotifications(req: Request): Promise<Response
   if ('response' in authResult) {
     return authResult.response;
   }
+  
+  // Create log context early for logging
+  const logContext = createNotificationRouterContext('dismiss-notifications', {
+    userId: authResult.user.id,
+  });
+  
+  // Initialize request logging with trace and bindings
+  initRequestLogging(logContext);
+  traceStep('Dismiss notifications request received', logContext);
+  
+  // Set bindings for this request
+  logger.setBindings({
+    requestId: logContext.request_id,
+    operation: logContext.action || 'dismiss-notifications',
+    userId: authResult.user.id,
+  });
 
   // Validate body size before reading
   const contentLength = req.headers.get('content-length');
@@ -80,16 +100,22 @@ export async function handleDismissNotifications(req: Request): Promise<Response
   if (sanitizedIds.length === 0) {
     return badRequestResponse('notificationIds array is required', notificationCorsHeaders);
   }
+  
+  // Update bindings with notification count
+  logger.setBindings({
+    notificationCount: sanitizedIds.length,
+  });
+  traceStep(`Dismissing ${sanitizedIds.length} notifications`, logContext);
 
   try {
     const trace = createNotificationTrace({
       dismissRequestCount: sanitizedIds.length,
       userId: authResult.user.id,
     });
-    const logContext = createNotificationRouterContext('dismiss-notifications', {
-      userId: authResult.user.id,
-    });
+    
     await dismissNotificationsForUser(authResult.user.id, sanitizedIds, logContext);
+    traceRequestComplete(logContext);
+    
     return successResponse(
       {
         dismissed: sanitizedIds.length,
@@ -99,6 +125,6 @@ export async function handleDismissNotifications(req: Request): Promise<Response
       notificationCorsHeaders
     );
   } catch (error) {
-    return errorResponse(error, 'flux-station:dismiss', notificationCorsHeaders);
+    return errorResponse(error, 'flux-station:dismiss-notifications', notificationCorsHeaders, logContext);
   }
 }

@@ -7,6 +7,7 @@
 
 import type { Database } from '@heyclaude/database-types';
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { logRpcError } from '../utils/rpc-error-logging.ts';
 
 export class SeoService {
   constructor(private supabase: SupabaseClient<Database>) {}
@@ -15,8 +16,20 @@ export class SeoService {
    * Calls the database RPC: generate_metadata_complete
    */
   async generateMetadata(args: Database['public']['Functions']['generate_metadata_complete']['Args']) {
-    const { data, error } = await this.supabase.rpc('generate_metadata_complete', args);
-    if (error) throw error;
-    return data as Database['public']['Functions']['generate_metadata_complete']['Returns'];
+    try {
+      const { data, error } = await this.supabase.rpc('generate_metadata_complete', args);
+      if (error) {
+        logRpcError(error, {
+          rpcName: 'generate_metadata_complete',
+          operation: 'SeoService.generateMetadata',
+          args: args,
+        });
+        throw error;
+      }
+      return data as Database['public']['Functions']['generate_metadata_complete']['Returns'];
+    } catch (error) {
+      // Error already logged above
+      throw error;
+    }
   }
 }

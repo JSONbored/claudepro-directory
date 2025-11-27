@@ -1,4 +1,5 @@
 import { createUtilityContext } from '@heyclaude/shared-runtime';
+import { logger } from '../logger.ts';
 
 export interface FetchWithRetryOptions {
   url: string;
@@ -92,12 +93,12 @@ export async function fetchWithRetry({
 
     if (attempt < attempts) {
       const delay = baseDelay * 2 ** attempt;
-      console.warn('[fetchWithRetry] retrying request', {
+      logger.warn('retrying request', {
         ...context,
         attempt: attempt + 1,
         attempts,
         delay,
-        lastError: lastError?.message,
+        err: lastError || new Error('Unknown error'),
       });
       await new Promise((resolve) => setTimeout(resolve, delay));
     }
@@ -131,12 +132,12 @@ export async function runWithRetry<T>(
       if (onRetry) {
         onRetry(attempt + 1, errorForRetry, delay);
       } else {
-        console.warn('[runWithRetry] retrying operation', {
+        logger.warn('retrying operation', {
           ...context,
           attempt: attempt + 1,
           attempts,
           delay,
-          lastError: errorForRetry.message,
+          err: errorForRetry,
         });
       }
 

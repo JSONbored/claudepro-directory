@@ -42,6 +42,8 @@ import {
   withCircuitBreaker,
   withTimeout,
 } from '@heyclaude/shared-runtime';
+import { initRequestLogging, traceStep, traceRequestComplete } from '@heyclaude/edge-runtime';
+import { logger } from '@heyclaude/shared-runtime';
 
 const CHANGELOG_PROCESSING_QUEUE = 'changelog_process';
 const CHANGELOG_PROCESSING_BATCH_SIZE = 5;
@@ -176,6 +178,18 @@ async function processChangelogWebhook(message: ChangelogWebhookQueueMessage): P
   });
 
   const startTime = Date.now();
+  
+  // Initialize request logging with trace and bindings (Phase 1 & 2)
+  initRequestLogging(logContext);
+  traceStep('Processing changelog webhook', logContext);
+  
+  // Set bindings for this request - mixin will automatically inject these into all subsequent logs
+  logger.setBindings({
+    requestId: logContext.request_id,
+    operation: logContext.action || 'changelog-process',
+    function: logContext.function,
+    attempt: message.read_ct,
+  });
   // webhook_event_id is required in ChangelogWebhookProcessingJob interface
   const run = await startWebhookEventRun(job.webhook_event_id);
   const baseMetadata: Record<string, unknown> = {
@@ -486,7 +500,21 @@ async function processChangelogWebhook(message: ChangelogWebhookQueueMessage): P
 }
 
 export async function handleChangelogProcess(_req: Request): Promise<Response> {
+  const logContext = createUtilityContext('flux-station', 'changelog-process', {});
+  
+  // Initialize request logging with trace and bindings (Phase 1 & 2)
+  initRequestLogging(logContext);
+  traceStep('Reading changelog processing queue', logContext);
+  
+  // Set bindings for this request - mixin will automatically inject these into all subsequent logs
+  logger.setBindings({
+    requestId: logContext.request_id,
+    operation: logContext.action || 'changelog-process',
+    function: logContext.function,
+  });
+  
   try {
+    
     const batchSize = getCacheConfigNumber(
       'queue.changelog_process.batch_size',
       CHANGELOG_PROCESSING_BATCH_SIZE
@@ -502,6 +530,7 @@ export async function handleChangelogProcess(_req: Request): Promise<Response> {
     );
 
     if (!messages || messages.length === 0) {
+      traceRequestComplete(logContext);
       return successResponse({ message: 'No messages in queue', processed: 0 }, 200);
     }
 
@@ -509,6 +538,7 @@ export async function handleChangelogProcess(_req: Request): Promise<Response> {
       batch_size: messages.length,
     });
     logInfo(`Processing ${messages.length} changelog webhook jobs`, batchLogContext);
+    traceStep(`Processing batch of ${messages.length} messages`, batchLogContext);
 
     const results: Array<{
       msg_id: string;
@@ -587,6 +617,7 @@ export async function handleChangelogProcess(_req: Request): Promise<Response> {
       }
     }
 
+    traceRequestComplete(batchLogContext);
     return successResponse(
       {
         message: `Processed ${messages.length} messages`,
@@ -596,7 +627,6 @@ export async function handleChangelogProcess(_req: Request): Promise<Response> {
       200
     );
   } catch (error) {
-    const logContext = createUtilityContext('changelog-process', 'queue-worker');
     logError('Fatal queue processing error', logContext, error);
     return errorResponse(
       error,

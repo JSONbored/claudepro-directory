@@ -2,9 +2,8 @@
 
 /** Homepage tabs consuming homepageConfigs for runtime-tunable tab categories */
 
-import { getHomepageConfigBundle } from '@heyclaude/web-runtime/actions';
-import { logger, type UnifiedCategoryConfig } from '@heyclaude/web-runtime/core';
-import { getHomepageTabCategories } from '@heyclaude/web-runtime/data';
+import { getHomepageConfigBundle } from '@heyclaude/web-runtime/config/static-configs';
+import { type UnifiedCategoryConfig } from '@heyclaude/web-runtime/core';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import type { DisplayableContent } from '@heyclaude/web-runtime/types/component.types';
 import { motion } from 'motion/react';
@@ -43,34 +42,22 @@ const TabsSectionComponent: FC<TabsSectionProps> = ({
     damping: 17,
   });
 
-  // OPTIMIZATION: Use config bundle instead of separate calls (reduces 2 calls to 1)
+  // Get static config bundle
   useEffect(() => {
-    getHomepageConfigBundle()
-      .then((bundle) => {
-        // Extract tab categories from homepage config
-        const categories = Array.isArray(bundle.homepageConfig['homepage.tab_categories'])
-          ? bundle.homepageConfig['homepage.tab_categories']
-          : [];
-        setTabCategories(categories.map((value) => String(value)));
+    const bundle = getHomepageConfigBundle();
+    
+    // Extract tab categories from homepage config
+    const categories = Array.isArray(bundle.homepageConfig['homepage.tab_categories'])
+      ? bundle.homepageConfig['homepage.tab_categories']
+      : [];
+    setTabCategories(categories.map((value) => String(value)));
 
-        // Extract animation config
-        setSpringDefault({
-          type: 'spring' as const,
-          stiffness: bundle.animationConfig['animation.spring.default.stiffness'],
-          damping: bundle.animationConfig['animation.spring.default.damping'],
-        });
-      })
-      .catch((error) => {
-        logger.error('Homepage Tabs: failed to load config bundle', error);
-        // Fallback: still try to get tab categories individually
-        getHomepageTabCategories()
-          .then((categories) => {
-            setTabCategories(categories);
-          })
-          .catch((err) => {
-            logger.error('Homepage Tabs: failed to load tab categories fallback', err);
-          });
-      });
+    // Extract animation config
+    setSpringDefault({
+      type: 'spring' as const,
+      stiffness: bundle.animationConfig['animation.spring.default.stiffness'],
+      damping: bundle.animationConfig['animation.spring.default.damping'],
+    });
   }, []);
 
   const contentTabs = useMemo(

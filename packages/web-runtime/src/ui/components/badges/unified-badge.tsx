@@ -42,8 +42,7 @@
  */
 
 import type { Database } from '@heyclaude/database-types';
-import { logger } from '../../../logger.ts';
-import { getAnimationConfig } from '../../../actions/feature-flags.ts';
+import { getAnimationConfig } from '../../../config/static-configs.ts';
 import { Star, TrendingUp, Zap } from '../../../icons.tsx';
 import { ANIMATION_CONSTANTS, UI_CLASSES } from '../../constants.ts';
 import { cn } from '../../utils.ts';
@@ -238,23 +237,13 @@ export function UnifiedBadge(props: UnifiedBadgeProps) {
   });
 
   useEffect(() => {
-    getAnimationConfig({})
-      .then((result) => {
-        if (!result?.data) return;
-        const config = result.data as {
-          'animation.spring.default.stiffness': number;
-          'animation.spring.default.damping': number;
-        };
-        setSpringDefault({
-          type: 'spring' as const,
-          stiffness: config['animation.spring.default.stiffness'],
-          damping: config['animation.spring.default.damping'],
-        });
-      })
-      .catch((error: unknown) => {
-        const normalized = error instanceof Error ? error : new Error(String(error));
-        logger.error('UnifiedBadge: failed to load animation config', normalized);
-      });
+    // Load animation config from static defaults
+    const config = getAnimationConfig();
+    setSpringDefault({
+      type: 'spring' as const,
+      stiffness: config['animation.spring.default.stiffness'],
+      damping: config['animation.spring.default.damping'],
+    });
   }, []);
 
   // Base badge variant

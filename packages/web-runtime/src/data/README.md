@@ -7,32 +7,32 @@ All cached reads and repository-wide configuration now live under `src/lib/data`
 - `account/` – authenticated helpers (user dashboards, submissions, sponsorships)
 - `notifications/` – notification fetch/cache helpers
 - `forms/` – form field configuration
-- `config/` – shared configuration data (constants, category config, cache helpers, Statsig wrappers)
+- `config/` – shared configuration data (constants, category config, cache helpers, static config accessors)
 - `marketing/` – partner pricing, manifest copy, site-wide audience metrics, contact channels
 - `seo/` – metadata + structured data fetchers (edge SEO API client)
 
 When adding a new cached read:
 
 1. Create a module inside the appropriate domain folder (or a new folder if the domain does not yet exist).
-2. Use `fetchCachedRpc` for any Supabase RPC reads so Statsig TTL/tag behaviour stays consistent.
+2. Use `fetchCachedRpc` for any Supabase RPC reads so cache TTL/tag behaviour stays consistent.
 3. Export the helper from the domain `index.ts` (or create one) so consumers import from `@/src/lib/data/<domain>`.
 
-## Typed Statsig Accessors
+## Typed Cache Config Accessors
 
 Never read from `cacheConfigs()` directly. Instead, use the typed helpers from `src/lib/data/config/cache-config.ts`:
 
 ```ts
 import { getCacheTtl, getCacheInvalidateTags } from '@/src/lib/data/config/cache-config';
 
-const ttl = await getCacheTtl('cache.content_detail.ttl_seconds');
-const tags = await getCacheInvalidateTags('cache.invalidate.content_create');
+const ttl = getCacheTtl('cache.content_detail.ttl_seconds');
+const tags = getCacheInvalidateTags('cache.invalidate.content_create');
 ```
 
 These helpers:
 
 - Provide compile-time key validation via `CacheTtlKey` / `CacheInvalidateKey`
 - Return correctly typed values (numbers or `readonly string[]`)
-- Handle build-time fallbacks when Statsig isn’t available
+- Use static configuration defaults
 
 If you need the full cache config object (e.g., to prime a promise), use `getCacheConfigSnapshot()` instead of calling `cacheConfigs()` directly.
 

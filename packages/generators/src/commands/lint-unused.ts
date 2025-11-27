@@ -76,9 +76,10 @@ export function runLintUnusedTypes() {
     }
 
     const issueCount = filtered.length;
-    logger.info(`\n🔍 Found ${issueCount} unused type system issues:\n`);
-    console.log(filtered.join('\n'));
-    console.log('\n');
+    logger.info('Found unused type system issues', { count: issueCount });
+    // Output formatted list for CLI readability
+    process.stdout.write(`\n🔍 Found ${issueCount} unused type system issues:\n\n`);
+    process.stdout.write(filtered.join('\n') + '\n\n');
 
     // Group by category using shared patterns
     const typeGuards = filtered.filter((l) => TYPE_GUARD_PATTERN.test(l));

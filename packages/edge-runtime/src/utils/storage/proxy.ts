@@ -1,5 +1,6 @@
 import { createUtilityContext } from '@heyclaude/shared-runtime';
 import { getStorageAnonClient } from './client.ts';
+import { logger } from '../logger.ts';
 
 export interface StorageProxyOptions {
   bucket: string;
@@ -53,7 +54,7 @@ export async function proxyStorageFile(options: StorageProxyOptions): Promise<Re
       bucket,
       path,
     });
-    console.log('[Storage] Proxy download', {
+    logger.info('Proxy download', {
       ...logContext,
       size: data.size,
       contentType: detectedContentType,
@@ -78,9 +79,10 @@ export async function proxyStorageFile(options: StorageProxyOptions): Promise<Re
       path,
     });
     const { errorToString } = await import('@heyclaude/shared-runtime');
-    console.error('[Storage] Proxy error', {
+    const errorObj = error instanceof Error ? error : new Error(errorToString(error));
+    logger.error('Proxy error', {
       ...logContext,
-      error: errorToString(error),
+      err: errorObj,
     });
     return buildErrorResponse(
       {

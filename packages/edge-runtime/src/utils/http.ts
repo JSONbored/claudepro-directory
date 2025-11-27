@@ -3,7 +3,7 @@
  */
 
 import { edgeEnv } from '../config/env.ts';
-import { getCacheConfigNumber } from '../config/statsig-cache.ts';
+import { getCacheConfigNumber } from '../config/static-cache-config.ts';
 import { logError, type BaseLogContext } from '@heyclaude/shared-runtime';
 import { createUtilityContext } from '@heyclaude/shared-runtime';
 import { buildSecurityHeaders } from '@heyclaude/shared-runtime';
@@ -177,6 +177,9 @@ export function errorResponse(
       });
   
   // Use logError from shared-runtime for consistent structured logging
+  // Mixin automatically injects context from logger.bindings() (requestId, operation, userId, etc.)
+  // Only pass context-specific fields (context, action) that aren't in bindings
+  // logError already includes flush() internally for critical errors
   logError(`${context} failed`, finalLogContext, error);
 
   // Never expose internal error details in HTTP responses

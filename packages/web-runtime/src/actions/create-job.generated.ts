@@ -91,8 +91,9 @@ export const createJob = authedAction
       revalidateTag(`company-${result?.company_id}`, 'default');
       revalidateTag(`company-id-${result?.company_id}`, 'default');
       
+      const cacheConfig = getCacheConfigSnapshot();
       await nextInvalidateByKeys({
-        cacheConfigPromise: getCacheConfigSnapshot(),
+        cacheConfig,
         invalidateKeys: ['cache.invalidate.job_create']
       });
 

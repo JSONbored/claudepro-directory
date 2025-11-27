@@ -8,6 +8,7 @@ import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
 import {
   badRequestResponse,
   errorResponse,
+  initRequestLogging,
   parseJsonBody,
   pgmqDelete,
   pgmqRead,
@@ -15,6 +16,8 @@ import {
   publicCorsHeaders,
   successResponse,
   supabaseServiceRole,
+  traceRequestComplete,
+  traceStep,
   unauthorizedResponse,
   webhookCorsHeaders,
 } from '@heyclaude/edge-runtime';
@@ -26,6 +29,7 @@ import {
   logError,
   logInfo,
   logWarn,
+  logger,
   TIMEOUT_PRESETS,
   verifySupabaseDatabaseWebhook,
   withCircuitBreaker,
@@ -145,6 +149,20 @@ async function storeEmbedding(
     const { error } = await supabaseServiceRole.from('content_embeddings').upsert(insertData);
 
     if (error) {
+      // Use dbQuery serializer for consistent database query formatting
+      const logContext = createUtilityContext('generate-embedding', 'store-embedding');
+      logError('Failed to store embedding', {
+        ...logContext,
+        dbQuery: {
+          table: 'content_embeddings',
+          operation: 'upsert',
+          schema: 'public',
+          args: {
+            content_id: contentId,
+            // Embedding data redacted by Pino's redact config
+          },
+        },
+      }, error);
       throw new Error(`Failed to store embedding: ${errorToString(error)}`);
     }
   };
@@ -167,6 +185,17 @@ async function storeEmbedding(
 function respondWithAnalytics(handler: () => Promise<Response>): Promise<Response> {
   const startedAt = performance.now();
   const logContext = createUtilityContext('generate-embedding', 'webhook-handler');
+
+  // Initialize request logging with trace and bindings (Phase 1 & 2)
+  initRequestLogging(logContext);
+  traceStep('Embedding webhook handler started', logContext);
+  
+  // Set bindings for this request - mixin will automatically inject these into all subsequent logs
+  logger.setBindings({
+    requestId: logContext.request_id,
+    operation: logContext.action || 'embedding-webhook',
+    function: logContext.function,
+  });
 
   const logEvent = (status: number, outcome: 'success' | 'error', error?: unknown) => {
     const duration = Math.round(performance.now() - startedAt);
@@ -256,6 +285,21 @@ async function processEmbeddingGeneration(
     };
 
     if (fetchError || !content) {
+      // Use dbQuery serializer for consistent database query formatting
+      const errorLogContext = createUtilityContext('generate-embedding', 'fetch-content');
+      if (fetchError) {
+        logError('Failed to fetch content for embedding generation', {
+          ...errorLogContext,
+          dbQuery: {
+            table: 'content',
+            operation: 'select',
+            schema: 'public',
+            args: {
+              id: content_id,
+            },
+          },
+        }, fetchError);
+      }
       errors.push(`Failed to fetch content: ${fetchError?.message || 'Content not found'}`);
       return { success: false, errors };
     }
@@ -312,8 +356,15 @@ async function processEmbeddingGeneration(
  * POST /process - Processes embedding_generation queue
  */
 export async function handleEmbeddingGenerationQueue(_req: Request): Promise<Response> {
+  const logContext = createUtilityContext('generate-embedding', 'queue-processor', {});
+  
+  // Initialize request logging with trace and bindings
+  initRequestLogging(logContext);
+  traceStep('Starting embedding generation queue processing', logContext);
+  
   try {
     // Read messages with timeout protection
+    traceStep('Reading embedding generation queue', logContext);
     const messages = await withTimeout(
       pgmqRead(EMBEDDING_GENERATION_QUEUE, {
         sleep_seconds: 0,
@@ -324,14 +375,15 @@ export async function handleEmbeddingGenerationQueue(_req: Request): Promise<Res
     );
 
     if (!messages || messages.length === 0) {
+      traceRequestComplete(logContext);
       return successResponse({ message: 'No messages in queue', processed: 0 }, 200);
     }
 
-    const logContext = createUtilityContext('generate-embedding', 'queue-processor');
     logInfo(`Processing ${messages.length} embedding generation jobs`, {
       ...logContext,
       count: messages.length,
     });
+    traceStep(`Processing ${messages.length} embedding generation jobs`, logContext);
 
     const results: Array<{
       msg_id: string;
@@ -466,6 +518,7 @@ export async function handleEmbeddingGenerationQueue(_req: Request): Promise<Res
       }
     }
 
+    traceRequestComplete(logContext);
     return successResponse(
       {
         message: `Processed ${messages.length} messages`,
@@ -475,9 +528,8 @@ export async function handleEmbeddingGenerationQueue(_req: Request): Promise<Res
       200
     );
   } catch (error) {
-    const fatalLogContext = createUtilityContext('generate-embedding', 'queue-fatal');
-    logError('Fatal embedding generation queue error', fatalLogContext, error);
-    return errorResponse(error, 'generate-embedding:queue-fatal');
+    logError('Fatal embedding generation queue error', logContext, error);
+    return errorResponse(error, 'generate-embedding:queue-fatal', publicCorsHeaders, logContext);
   }
 }
 

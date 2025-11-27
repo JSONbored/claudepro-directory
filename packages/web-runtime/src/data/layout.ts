@@ -16,6 +16,9 @@ import { generateRequestId } from '../utils/request-context.ts';
 
 import { getActiveAnnouncement } from './announcements.ts';
 
+// Export layout flags (static defaults)
+export { getLayoutFlags, type LayoutFlags } from './layout/flags.ts';
+
 const NAVIGATION_TTL_KEY = 'cache.navigation.ttl_seconds';
 
 export async function getNavigationMenu(): Promise<

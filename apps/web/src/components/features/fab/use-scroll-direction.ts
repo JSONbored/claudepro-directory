@@ -24,7 +24,7 @@ import { useEffect, useState } from 'react';
 let DEFAULT_SCROLL_THRESHOLD = 100;
 let DEFAULT_SCROLL_HYSTERESIS = 50;
 
-// Load config from Statsig on module initialization
+// Load config from static defaults on module initialization
 getTimeoutConfig()
   .then((result) => {
     if (result) {

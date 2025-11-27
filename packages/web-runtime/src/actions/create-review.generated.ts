@@ -63,7 +63,7 @@ export const createReview = authedAction
       revalidateTag(`reviews:${result?.review?.content_type}:${result?.review?.content_slug}`, 'default');
       
       await nextInvalidateByKeys({
-        cacheConfigPromise: getCacheConfigSnapshot(),
+        cacheConfig: getCacheConfigSnapshot(),
         invalidateKeys: ['cache.invalidate.review_create']
       });
 

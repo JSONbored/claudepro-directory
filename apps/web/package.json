@@ -13,7 +13,6 @@
   },
   "dependencies": {
     "@calcom/embed-react": "^1.5.3",
-    "@flags-sdk/statsig": "^0.2.5",
     "@heyclaude/data-layer": "workspace:*",
     "@heyclaude/database-types": "workspace:*",
     "@heyclaude/web-runtime": "workspace:*",
@@ -46,7 +45,6 @@
     "devalue": "^5.5.0",
     "dompurify": "^3.3.0",
     "embla-carousel-react": "^8.6.0",
-    "flags": "^4.0.2",
     "geist": "^1.5.1",
     "html2canvas-pro": "^1.5.13",
     "lucide-react": "^0.553.0",

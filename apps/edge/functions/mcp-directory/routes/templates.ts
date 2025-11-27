@@ -7,6 +7,7 @@
 
 import type { Database } from '@heyclaude/database-types';
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { logError } from '@heyclaude/shared-runtime';
 import type { GetTemplatesInput } from '../lib/types.ts';
 
 type ContentTemplatesItem = Database['public']['CompositeTypes']['content_templates_item'];
@@ -20,11 +21,19 @@ export async function handleGetTemplates(
 
   // Call the RPC to get content templates
   // Note: get_content_templates requires p_category, so we use a default if not provided
-  const { data, error } = await supabase.rpc('get_content_templates', {
+  const rpcArgs = {
     p_category: category || 'agents', // Default to 'agents' if not provided
-  });
+  };
+  const { data, error } = await supabase.rpc('get_content_templates', rpcArgs);
 
   if (error) {
+    // Use dbQuery serializer for consistent database query formatting
+    logError('RPC call failed in getTemplates', {
+      dbQuery: {
+        rpcName: 'get_content_templates',
+        args: rpcArgs, // Will be redacted by Pino's redact config
+      },
+    }, error);
     throw new Error(`Failed to fetch templates: ${error.message}`);
   }
 

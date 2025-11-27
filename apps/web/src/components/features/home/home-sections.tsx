@@ -3,9 +3,8 @@
 /** Homepage client consuming homepageConfigs for runtime-tunable featured categories */
 
 import type { Database } from '@heyclaude/database-types';
-import { getHomepageConfigBundle } from '@heyclaude/web-runtime/actions';
+import { getHomepageConfigBundle } from '@heyclaude/web-runtime/config/static-configs';
 import {
-  logClientWarning,
   logUnhandledPromise,
   trackHomepageSectionError,
   trackMissingData,
@@ -13,7 +12,6 @@ import {
 import {
   getCategoryConfigs,
   getCategoryStatsConfig,
-  getHomepageFeaturedCategories,
 } from '@heyclaude/web-runtime/data';
 import { ROUTES } from '@heyclaude/web-runtime/data/config/constants';
 import { useLoggedAsync } from '@heyclaude/web-runtime/hooks';
@@ -76,8 +74,8 @@ function HomePageClientComponent({
     defaultRethrow: false,
   });
 
-  // Initialize featuredCategories from server data immediately (before Statsig config loads)
-  // This ensures content renders even if Statsig config fails or is slow
+  // Initialize featuredCategories from server data immediately
+  // This ensures content renders even if static config is unavailable
   const [featuredCategories, setFeaturedCategories] = useState<
     readonly Database['public']['Enums']['content_category'][]
   >(() => {
@@ -118,69 +116,38 @@ function HomePageClientComponent({
     }
   }, [stats, categoryStatsConfig]);
 
-  // OPTIMIZATION: Use config bundle instead of separate calls (reduces 2 calls to 1)
+  // Get static config bundle
   useEffect(() => {
-    getHomepageConfigBundle()
-      .then((bundle) => {
-        // Extract featured categories from homepage config
-        const categories = Array.isArray(bundle.homepageConfig['homepage.featured_categories'])
-          ? bundle.homepageConfig['homepage.featured_categories']
-          : [];
+    const bundle = getHomepageConfigBundle();
+    
+    // Extract featured categories from homepage config with defensive checks
+    const categories = Array.isArray(bundle?.homepageConfig?.['homepage.featured_categories'])
+      ? bundle.homepageConfig['homepage.featured_categories']
+      : [];
 
-        // Use Statsig categories if available, otherwise fall back to server-provided categoryIds
-        // Filter to only include categories that have data in initialData
-        const validCategories =
-          categories.length > 0
-            ? categories.filter(
-                (cat) =>
-                  initialData[cat] && Array.isArray(initialData[cat]) && initialData[cat].length > 0
-              )
-            : (serverCategoryIds ?? []).filter(
-                (cat) =>
-                  initialData[cat] && Array.isArray(initialData[cat]) && initialData[cat].length > 0
-              );
-
-        setFeaturedCategories(
-          validCategories as readonly Database['public']['Enums']['content_category'][]
-        );
-
-        // Extract animation config
-        setSpringDefault({
-          type: 'spring' as const,
-          stiffness: bundle.animationConfig['animation.spring.default.stiffness'],
-          damping: bundle.animationConfig['animation.spring.default.damping'],
-        });
-      })
-      .catch((error) => {
-        trackHomepageSectionError('featured', 'load-config-bundle', error, {
-          serverCategoryIds: serverCategoryIds?.length ?? 0,
-        });
-        logClientWarning('HomePageClient: failed to load config bundle', error);
-        // Fallback: Use server-provided categoryIds, filtered to only include categories with data
-        const validCategories = (serverCategoryIds ?? []).filter(
-          (cat) =>
-            initialData[cat] && Array.isArray(initialData[cat]) && initialData[cat].length > 0
-        );
-        if (validCategories.length > 0) {
-          setFeaturedCategories(
-            validCategories as readonly Database['public']['Enums']['content_category'][]
+    // Use static categories if available, otherwise fall back to server-provided categoryIds
+    // Filter to only include categories that have data in initialData
+    const validCategories =
+      categories.length > 0
+        ? categories.filter(
+            (cat) =>
+              initialData[cat] && Array.isArray(initialData[cat]) && initialData[cat].length > 0
+          )
+        : (serverCategoryIds ?? []).filter(
+            (cat) =>
+              initialData[cat] && Array.isArray(initialData[cat]) && initialData[cat].length > 0
           );
-        } else {
-          // Last resort: try to get featured categories individually
-          getHomepageFeaturedCategories()
-            .then((categories) => {
-              const valid = categories.filter(
-                (cat) =>
-                  initialData[cat] && Array.isArray(initialData[cat]) && initialData[cat].length > 0
-              );
-              setFeaturedCategories(valid);
-            })
-            .catch((err) => {
-              trackHomepageSectionError('featured', 'load-featured-categories-fallback', err);
-              logClientWarning('HomePageClient: failed to load featured categories fallback', err);
-            });
-        }
-      });
+
+    setFeaturedCategories(
+      validCategories as readonly Database['public']['Enums']['content_category'][]
+    );
+
+    // Extract animation config with fallbacks
+    setSpringDefault({
+      type: 'spring' as const,
+      stiffness: bundle?.animationConfig?.['animation.spring.default.stiffness'] ?? 400,
+      damping: bundle?.animationConfig?.['animation.spring.default.damping'] ?? 17,
+    });
   }, [serverCategoryIds, initialData]);
 
   const fetchAllConfigs = useCallback(

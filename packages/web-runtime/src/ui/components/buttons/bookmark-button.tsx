@@ -9,7 +9,7 @@
 
 import type { Database } from '@heyclaude/database-types';
 import { addBookmark } from '../../../actions/add-bookmark.generated.ts';
-import { checkConfettiEnabled } from '../../../actions/feature-flags.ts';
+import { checkConfettiEnabled } from '../../../config/static-configs.ts';
 import { removeBookmark } from '../../../actions/remove-bookmark.generated.ts';
 import { isValidCategory, logClientWarning, normalizeError } from '../../../entries/core.ts';
 import { useLoggedAsync, usePulse, useConfetti } from '../../../hooks/index.ts';
@@ -131,9 +131,9 @@ export function BookmarkButton({
                     });
                   });
 
-                // Confetti animation gated by feature flag
-                const confettiResult = await checkConfettiEnabled({});
-                if (confettiResult) {
+                // Check confetti enabled (static config)
+                const confettiEnabled = checkConfettiEnabled();
+                if (confettiEnabled) {
                   celebrateBookmark();
                 }
               }

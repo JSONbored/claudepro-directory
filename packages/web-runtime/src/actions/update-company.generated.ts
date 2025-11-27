@@ -74,7 +74,7 @@ export const updateCompany = authedAction
       revalidateTag(`company-id-${result?.company?.id}`, 'default');
       
       await nextInvalidateByKeys({
-        cacheConfigPromise: getCacheConfigSnapshot(),
+        cacheConfig: getCacheConfigSnapshot(),
         invalidateKeys: ['cache.invalidate.company_update']
       });
 

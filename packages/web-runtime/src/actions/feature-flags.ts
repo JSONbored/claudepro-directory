@@ -2,7 +2,6 @@
 
 import { z } from 'zod';
 import { rateLimitedAction } from './safe-action.ts';
-import { isBuildTime } from '../build-time.ts';
 import {
   ANIMATION_CONFIG_DEFAULTS,
   APP_SETTINGS_DEFAULTS,
@@ -18,27 +17,16 @@ import {
   TOAST_CONFIG_DEFAULTS,
 } from '../feature-flags/defaults.ts';
 
-async function getFlagsModule() {
-  if (isBuildTime()) {
-    throw new Error('Cannot load flags during build-time');
-  }
-  return await import('../feature-flags/flags.ts');
-}
-
-const emptyObject = <T extends Record<string, unknown>>(): T => {
-  return {} as T;
-};
+// getFlagsModule removed - no longer needed since all actions return static defaults
+// All callers have been migrated to static-configs.ts
 
 const checkConfettiEnabledAction = rateLimitedAction
   .inputSchema(z.object({}))
   .metadata({ actionName: 'featureFlags.checkConfettiEnabled', category: 'analytics' })
   .action(async () => {
-    try {
-      const { featureFlags } = await getFlagsModule();
-      return await featureFlags.confettiAnimations();
-    } catch {
-      return false;
-    }
+    // Return static default
+    // All callers have been migrated to static-configs.ts
+    return false;
   });
 
 export async function checkConfettiEnabled(
@@ -51,12 +39,8 @@ const checkContactTerminalEnabledAction = rateLimitedAction
   .inputSchema(z.object({}))
   .metadata({ actionName: 'featureFlags.checkContactTerminalEnabled', category: 'analytics' })
   .action(async () => {
-    try {
-      const { featureFlags } = await getFlagsModule();
-      return await featureFlags.contactTerminalEnabled();
-    } catch {
-      return false;
-    }
+    // Return static default
+    return false;
   });
 
 export async function checkContactTerminalEnabled(
@@ -69,12 +53,8 @@ const checkTestFlagAction = rateLimitedAction
   .inputSchema(z.object({}))
   .metadata({ actionName: 'featureFlags.checkTestFlag', category: 'analytics' })
   .action(async () => {
-    try {
-      const { featureFlags } = await getFlagsModule();
-      return await featureFlags.testFlag();
-    } catch {
-      return false;
-    }
+    // Return static default
+    return false;
   });
 
 export async function checkTestFlag(
@@ -87,75 +67,36 @@ type ConfigRecord = Record<string, unknown>;
 
 function createTypedConfigAccessor<const Schema extends ConfigRecord>({
   getDefaults,
-  getFetcher,
   actionName,
 }: {
-  getDefaults: () => Promise<Schema>;
-  getFetcher: (
-    flagsModule: Awaited<ReturnType<typeof getFlagsModule>>
-  ) => () => Promise<ConfigRecord>;
+  getDefaults: () => Schema;
   actionName: string;
 }) {
   const getSnapshot = rateLimitedAction
     .inputSchema(z.object({}))
     .metadata({ actionName: `${actionName}.getSnapshot`, category: 'analytics' })
     .action(async () => {
-      try {
-        const defaults = await getDefaults();
-        // Check build-time before attempting to load flags
-        if (isBuildTime()) {
-          return defaults;
-        }
-        try {
-          const flagsModule = await getFlagsModule();
-          const fetcher = getFetcher(flagsModule);
-          const result = (await fetcher()) as Schema;
-          return { ...defaults, ...result };
-        } catch (flagsError) {
-          // If flags loading fails (e.g., build-time detection issue), return defaults
-          if (
-            flagsError instanceof Error &&
-            (flagsError.message.includes('build-time') ||
-              flagsError.message.includes('Server Functions'))
-          ) {
-            return defaults;
-          }
-          throw flagsError;
-        }
-      } catch {
-        // Final fallback: return defaults on any error
-        const defaults = await getDefaults();
-        return defaults;
-      }
+      // Return static defaults
+      // All callers have been migrated to static-configs.ts
+      const defaults = getDefaults();
+      return defaults;
     });
 
   const getValue = rateLimitedAction
     .inputSchema(z.object({ key: z.string() }))
     .metadata({ actionName: `${actionName}.getValue`, category: 'analytics' })
     .action(async ({ parsedInput }) => {
-      try {
-        const snapshotResult = await getSnapshot({});
-        const defaults = await getDefaults();
-        if (!snapshotResult?.data) {
-          return defaults[parsedInput.key as keyof Schema] as Schema[keyof Schema];
-        }
-        const snapshot = snapshotResult.data;
-        const value = snapshot[parsedInput.key as keyof Schema];
-        return (
-          value === undefined ? defaults[parsedInput.key as keyof Schema] : value
-        ) as Schema[keyof Schema];
-      } catch {
-        const defaults = await getDefaults();
-        return defaults[parsedInput.key as keyof Schema] as Schema[keyof Schema];
-      }
+      // Return static default value
+      // All callers have been migrated to static-configs.ts
+      const defaults = getDefaults();
+      return defaults[parsedInput.key as keyof Schema] as Schema[keyof Schema];
     });
 
   return { getSnapshot, getValue };
 }
 
 const newsletterConfigAccessor = createTypedConfigAccessor({
-  getDefaults: async () => NEWSLETTER_CONFIG_DEFAULTS,
-  getFetcher: (flagsModule) => () => flagsModule.newsletterConfigs() as Promise<ConfigRecord>,
+  getDefaults: () => NEWSLETTER_CONFIG_DEFAULTS,
   actionName: 'featureFlags.newsletterConfig',
 });
 
@@ -172,8 +113,7 @@ export async function getNewsletterConfigValue(
 }
 
 const pricingConfigAccessor = createTypedConfigAccessor({
-  getDefaults: async () => PRICING_CONFIG_DEFAULTS,
-  getFetcher: (flagsModule) => () => flagsModule.pricingConfigs() as Promise<ConfigRecord>,
+  getDefaults: () => PRICING_CONFIG_DEFAULTS,
   actionName: 'featureFlags.pricingConfig',
 });
 
@@ -190,8 +130,7 @@ export async function getPricingConfigValue(
 }
 
 const animationConfigAccessor = createTypedConfigAccessor({
-  getDefaults: async () => ANIMATION_CONFIG_DEFAULTS,
-  getFetcher: (flagsModule) => () => flagsModule.animationConfigs() as Promise<ConfigRecord>,
+  getDefaults: () => ANIMATION_CONFIG_DEFAULTS,
   actionName: 'featureFlags.animationConfig',
 });
 
@@ -208,8 +147,7 @@ export async function getAnimationConfigValue(
 }
 
 const timeoutConfigAccessor = createTypedConfigAccessor({
-  getDefaults: async () => TIMEOUT_CONFIG_DEFAULTS,
-  getFetcher: (flagsModule) => () => flagsModule.timeoutConfigs() as Promise<ConfigRecord>,
+  getDefaults: () => TIMEOUT_CONFIG_DEFAULTS,
   actionName: 'featureFlags.timeoutConfig',
 });
 
@@ -226,8 +164,7 @@ export async function getTimeoutConfigValue(
 }
 
 const formConfigAccessor = createTypedConfigAccessor({
-  getDefaults: async () => FORM_CONFIG_DEFAULTS,
-  getFetcher: (flagsModule) => () => flagsModule.formConfigs() as Promise<ConfigRecord>,
+  getDefaults: () => FORM_CONFIG_DEFAULTS,
   actionName: 'featureFlags.formConfig',
 });
 
@@ -244,8 +181,7 @@ export async function getFormConfigValue(
 }
 
 const recentlyViewedConfigAccessor = createTypedConfigAccessor({
-  getDefaults: async () => RECENTLY_VIEWED_CONFIG_DEFAULTS,
-  getFetcher: (flagsModule) => () => flagsModule.recentlyViewedConfigs() as Promise<ConfigRecord>,
+  getDefaults: () => RECENTLY_VIEWED_CONFIG_DEFAULTS,
   actionName: 'featureFlags.recentlyViewedConfig',
 });
 
@@ -262,8 +198,7 @@ export async function getRecentlyViewedConfigValue(
 }
 
 const appSettingsAccessor = createTypedConfigAccessor({
-  getDefaults: async () => APP_SETTINGS_DEFAULTS,
-  getFetcher: (flagsModule) => () => flagsModule.appSettings() as Promise<ConfigRecord>,
+  getDefaults: () => APP_SETTINGS_DEFAULTS,
   actionName: 'featureFlags.appSettings',
 });
 
@@ -280,8 +215,7 @@ export async function getAppSettingValue(
 }
 
 const pollingConfigAccessor = createTypedConfigAccessor({
-  getDefaults: async () => POLLING_CONFIG_DEFAULTS,
-  getFetcher: (flagsModule) => () => flagsModule.pollingConfigs() as Promise<ConfigRecord>,
+  getDefaults: () => POLLING_CONFIG_DEFAULTS,
   actionName: 'featureFlags.pollingConfig',
 });
 
@@ -298,8 +232,7 @@ export async function getPollingConfigValue(
 }
 
 const componentConfigAccessor = createTypedConfigAccessor({
-  getDefaults: async () => COMPONENT_CONFIG_DEFAULTS,
-  getFetcher: (flagsModule) => () => flagsModule.componentConfigs() as Promise<ConfigRecord>,
+  getDefaults: () => COMPONENT_CONFIG_DEFAULTS,
   actionName: 'featureFlags.componentConfig',
 });
 
@@ -316,8 +249,7 @@ export async function getComponentConfigValue(
 }
 
 const homepageConfigAccessor = createTypedConfigAccessor({
-  getDefaults: async () => HOMEPAGE_CONFIG_DEFAULTS,
-  getFetcher: (flagsModule) => () => flagsModule.homepageConfigs() as Promise<ConfigRecord>,
+  getDefaults: () => HOMEPAGE_CONFIG_DEFAULTS,
   actionName: 'featureFlags.homepageConfig',
 });
 
@@ -335,42 +267,27 @@ export async function getHomepageConfigValue(
 
 /**
  * Homepage Config Bundle - Combined config for homepage
- * OPTIMIZATION: Combines homepage, animation, and app settings into single call
- * Reduces 3-4 separate config calls to 1 (75% reduction)
  * 
  * Returns all configs needed for homepage in a single response:
  * - Homepage config (featured categories, tab categories)
  * - Animation config (spring physics, etc.)
  * - App settings (infinite scroll batch size, threshold, etc.)
+ * 
+ * @deprecated Use getHomepageConfigBundle from @heyclaude/web-runtime/config/static-configs instead
+ * This server action version is kept for backward compatibility but returns static defaults.
  */
 export async function getHomepageConfigBundle() {
-  try {
-    // Fetch all three configs in parallel (they all use the same flags module internally)
-    const [homepageResult, animationResult, appSettingsResult] = await Promise.all([
-      homepageConfigAccessor.getSnapshot({}),
-      animationConfigAccessor.getSnapshot({}),
-      appSettingsAccessor.getSnapshot({}),
-    ]);
-
-    // Combine into single bundle
-    return {
-      homepageConfig: homepageResult?.data ?? HOMEPAGE_CONFIG_DEFAULTS,
-      animationConfig: animationResult?.data ?? ANIMATION_CONFIG_DEFAULTS,
-      appSettings: appSettingsResult?.data ?? APP_SETTINGS_DEFAULTS,
-    };
-  } catch (error) {
-    // Fallback to defaults on any error
-    return {
-      homepageConfig: HOMEPAGE_CONFIG_DEFAULTS,
-      animationConfig: ANIMATION_CONFIG_DEFAULTS,
-      appSettings: APP_SETTINGS_DEFAULTS,
-    };
-  }
+  // Return static defaults
+  // All callers have been migrated to static-configs.ts
+  return {
+    homepageConfig: HOMEPAGE_CONFIG_DEFAULTS,
+    animationConfig: ANIMATION_CONFIG_DEFAULTS,
+    appSettings: APP_SETTINGS_DEFAULTS,
+  };
 }
 
 const emailConfigAccessor = createTypedConfigAccessor({
-  getDefaults: async () => EMAIL_CONFIG_DEFAULTS,
-  getFetcher: (flagsModule) => () => flagsModule.emailConfigs() as Promise<ConfigRecord>,
+  getDefaults: () => EMAIL_CONFIG_DEFAULTS,
   actionName: 'featureFlags.emailConfig',
 });
 
@@ -387,8 +304,7 @@ export async function getEmailConfigValue(
 }
 
 const toastConfigAccessor = createTypedConfigAccessor({
-  getDefaults: async () => TOAST_CONFIG_DEFAULTS,
-  getFetcher: (flagsModule) => () => flagsModule.toastConfigs() as Promise<ConfigRecord>,
+  getDefaults: () => TOAST_CONFIG_DEFAULTS,
   actionName: 'featureFlags.toastConfig',
 });
 
@@ -404,23 +320,3 @@ export async function getToastConfigValue(
   return toastConfigAccessor.getValue(input);
 }
 
-const getCacheConfigAction = rateLimitedAction
-  .inputSchema(z.object({}))
-  .metadata({ actionName: 'featureFlags.getCacheConfig', category: 'analytics' })
-  .action(async () => {
-    try {
-      if (isBuildTime()) {
-        return emptyObject();
-      }
-      const { cacheConfigs } = await getFlagsModule();
-      return await cacheConfigs();
-    } catch {
-      return emptyObject();
-    }
-  });
-
-export async function getCacheConfig(
-  input: Parameters<typeof getCacheConfigAction>[0]
-): ReturnType<typeof getCacheConfigAction> {
-  return getCacheConfigAction(input);
-}

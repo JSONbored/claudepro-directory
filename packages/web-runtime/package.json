@@ -54,6 +54,10 @@
       "types": "./src/config/security.ts",
       "default": "./src/config/security.ts"
     },
+    "./config/static-configs": {
+      "types": "./src/config/static-configs.ts",
+      "default": "./src/config/static-configs.ts"
+    },
     "./types/app.schema": {
       "types": "./src/types/app.schema.ts",
       "default": "./src/types/app.schema.ts"
@@ -118,29 +122,9 @@
       "types": "./src/types/component.types.ts",
       "default": "./src/types/component.types.ts"
     },
-    "./feature-flags/access": {
-      "types": "./src/feature-flags/access.ts",
-      "default": "./src/feature-flags/access.ts"
-    },
-    "./feature-flags/middleware": {
-      "types": "./src/feature-flags/middleware-evaluator.ts",
-      "default": "./src/feature-flags/middleware-evaluator.ts"
-    },
-    "./feature-flags/reader": {
-      "types": "./src/feature-flags/flag-reader.ts",
-      "default": "./src/feature-flags/flag-reader.ts"
-    },
-    "./feature-flags/keys": {
-      "types": "./src/feature-flags/flag-keys.ts",
-      "default": "./src/feature-flags/flag-keys.ts"
-    },
-    "./feature-flags/flags": {
-      "types": "./src/feature-flags/flags.ts",
-      "default": "./src/feature-flags/flags.ts"
-    },
-    "./feature-flags/provider": {
-      "types": "./src/feature-flags/provider.tsx",
-      "default": "./src/feature-flags/provider.tsx"
+    "./feature-flags/defaults": {
+      "types": "./src/feature-flags/defaults.ts",
+      "default": "./src/feature-flags/defaults.ts"
     },
     "./transformers/skill-to-md": {
       "types": "./src/transformers/skill-to-md.ts",
@@ -166,7 +150,6 @@
     "@radix-ui/react-visually-hidden": "^1.2.4",
     "cmdk": "^1.1.1",
     "dompurify": "^3.3.0",
-    "@flags-sdk/statsig": "^0.2.5",
     "@heyclaude/data-layer": "workspace:*",
     "@heyclaude/database-types": "workspace:*",
     "@radix-ui/react-slot": "^1.2.4",
@@ -176,7 +159,6 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "devalue": "^5.5.0",
-    "flags": "^4.0.2",
     "html2canvas-pro": "^1.5.13",
     "lucide-react": "^0.460.0",
     "motion": "^12.23.24",

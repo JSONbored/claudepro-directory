@@ -1,7 +1,7 @@
 'use client';
 
 import type { Database } from '@heyclaude/database-types';
-import { getAppSettings, getNewsletterConfig } from '@heyclaude/web-runtime/actions/feature-flags';
+import { getAppSettings, getNewsletterConfig } from '@heyclaude/web-runtime/config/static-configs';
 import {
   ensureNumber,
   ensureStringArray,
@@ -47,21 +47,16 @@ export function NewsletterFooterBar({
   useEffect(() => {
     loadConfigs(
       async () => {
-        const [appConfigResult, newsletterConfigResult] = await Promise.all([
-          getAppSettings({}),
-          getNewsletterConfig({}),
-        ]);
+        // Get configs from static defaults
+        const appConfig = getAppSettings();
+        const newsletterConfig = getNewsletterConfig();
 
-        if (appConfigResult?.data) {
-          const appConfig = appConfigResult.data;
-          const excludedPages = ensureStringArray(appConfig['newsletter.excluded_pages']);
-          if (excludedPages.length > 0) {
-            setPagesWithInlineCTA(excludedPages);
-          }
+        const excludedPages = ensureStringArray(appConfig['newsletter.excluded_pages']);
+        if (excludedPages.length > 0) {
+          setPagesWithInlineCTA(excludedPages);
         }
 
-        if (showAfterDelay === undefined && newsletterConfigResult?.data) {
-          const newsletterConfig = newsletterConfigResult.data;
+        if (showAfterDelay === undefined) {
           const configDelay = ensureNumber(
             newsletterConfig['newsletter.footer_bar.show_after_delay_ms'],
             30000

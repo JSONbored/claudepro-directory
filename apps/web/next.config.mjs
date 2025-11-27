@@ -36,9 +36,8 @@ const nextConfig = {
     '@heyclaude/data-layer',
     '@heyclaude/database-types',
   ],
-  // CRITICAL: Exclude flags/next from static analysis during build
-  // flags/next uses Vercel Edge Config which triggers "Server Functions cannot be called" errors
-  serverExternalPackages: ['flags', '@flags-sdk/statsig', '@imagemagick/magick-wasm'],
+  // Exclude packages that shouldn't be bundled
+  serverExternalPackages: ['@imagemagick/magick-wasm'],
   cacheLife: {
     minutes: { stale: 300, revalidate: 60, expire: 3600 },
     quarter: { stale: 900, revalidate: 300, expire: 7200 },
@@ -68,6 +67,15 @@ const nextConfig = {
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     disableStaticImages: false,
     contentDispositionType: 'inline',
+    // SVG handling: enabled with strict CSP for defense-in-depth
+    // Trust model: We only use next/image with SVGs from trusted sources:
+    // - Internal assets (self-hosted)
+    // - GitHub/GitHubusercontent (for repository avatars/icons - trusted content)
+    // - Supabase storage (our own controlled content)
+    // - Googleusercontent (OAuth provider avatars - trusted)
+    // Note: SVGs in <img> tags are sandboxed by browsers and cannot execute scripts,
+    // and our CSP further restricts what can be loaded. We do NOT use next/image
+    // with untrusted user-controlled SVGs from these domains.
     dangerouslyAllowSVG: true,
     contentSecurityPolicy:
       "default-src 'none'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline';",
@@ -132,9 +140,42 @@ const nextConfig = {
     serverComponentsHmrCache: true,
     inlineCss: true,
     serverActions: {
-      allowedOrigins: process.env.VERCEL_URL
-        ? ['claudepro.directory', 'www.claudepro.directory', '*.vercel.app', process.env.VERCEL_URL]
-        : undefined,
+      // Normalize VERCEL_URL to extract hostname and include it explicitly for preview deployments.
+      // Note: Next.js does not support wildcard patterns (*.vercel.app) in allowedOrigins.
+      allowedOrigins: (() => {
+        if (!process.env.VERCEL_URL) {
+          return undefined;
+        }
+        const origins = ['claudepro.directory', 'www.claudepro.directory'];
+        // Normalize VERCEL_URL to extract hostname (e.g., "project-abc123.vercel.app")
+        try {
+          const vercelUrl = process.env.VERCEL_URL;
+          // VERCEL_URL can be a full URL or just hostname
+          const hostname = vercelUrl.startsWith('http')
+            ? new URL(vercelUrl).hostname
+            : vercelUrl;
+          // Validate hostname before adding (trim, non-empty)
+          if (hostname && hostname.trim() && !origins.includes(hostname)) {
+            origins.push(hostname.trim());
+          }
+        } catch (error) {
+          // If VERCEL_URL parsing fails, log warning and skip (origins already has production domains)
+          // Use Pino logger for consistent structured logging (config files can use Pino)
+          try {
+            const { createLogger } = await import('@heyclaude/shared-runtime/logger');
+            const logger = createLogger({ service: 'next-config' });
+            const errorObj = error instanceof Error ? error : new Error(String(error));
+            logger.warn('Failed to parse VERCEL_URL', {
+              vercelUrl: process.env.VERCEL_URL,
+              err: errorObj,
+            });
+          } catch {
+            // Fallback to console if logger import fails (shouldn't happen, but be safe)
+            console.warn('[next.config] Failed to parse VERCEL_URL:', process.env.VERCEL_URL, error);
+          }
+        }
+        return origins;
+      })(),
       bodySizeLimit: '1mb',
     },
     cssChunking: 'strict',

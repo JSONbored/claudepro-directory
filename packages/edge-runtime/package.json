@@ -8,5 +8,9 @@
       "types": "./src/index.ts",
       "default": "./src/index.ts"
     }
+  },
+  "dependencies": {
+    "@heyclaude/shared-runtime": "workspace:*",
+    "pino": "^10.1.0"
   }
 }

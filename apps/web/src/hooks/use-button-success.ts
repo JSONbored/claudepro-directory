@@ -3,30 +3,28 @@
  */
 
 import { logClientWarning } from '@heyclaude/web-runtime/core';
-import { getTimeoutConfig } from '@heyclaude/web-runtime/data';
-import { useCallback, useState } from 'react';
+import { getTimeoutConfig } from '@heyclaude/web-runtime/config/static-configs';
+import { useCallback, useMemo, useState } from 'react';
 
-// Default value (will be overridden by Dynamic Config)
-let DEFAULT_SUCCESS_DURATION = 2000;
-
-// Load config from Statsig on module initialization
-getTimeoutConfig()
-  .then((result) => {
-    if (result) {
-      DEFAULT_SUCCESS_DURATION = result['timeout.ui.button_success_duration_ms'];
+export function useButtonSuccess(duration?: number) {
+  // Load config synchronously per hook instance (static config, no async needed)
+  const defaultDuration = useMemo(() => {
+    try {
+      const config = getTimeoutConfig();
+      return config['timeout.ui.button_success_duration_ms'] ?? 2000;
+    } catch (error) {
+      logClientWarning('useButtonSuccess: failed to load duration', error);
+      return 2000; // Safe fallback
     }
-  })
-  .catch((error) => {
-    logClientWarning('useButtonSuccess: failed to load success duration', error);
-  });
+  }, []);
 
-export function useButtonSuccess(duration = DEFAULT_SUCCESS_DURATION) {
+  const actualDuration = duration ?? defaultDuration;
   const [isSuccess, setIsSuccess] = useState(false);
 
   const triggerSuccess = useCallback(() => {
     setIsSuccess(true);
-    setTimeout(() => setIsSuccess(false), duration);
-  }, [duration]);
+    setTimeout(() => setIsSuccess(false), actualDuration);
+  }, [actualDuration]);
 
   const reset = useCallback(() => {
     setIsSuccess(false);

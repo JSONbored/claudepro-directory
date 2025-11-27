@@ -41,9 +41,9 @@ interface CompanyFormProps {
   mode: 'create' | 'edit';
 }
 
-// Form validation (loaded from Statsig via server action)
-let MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-let MAX_DIMENSION = 2048; // 2048px
+// Default form validation values (will be loaded from config in component)
+const DEFAULT_MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const DEFAULT_MAX_DIMENSION = 2048; // 2048px
 
 async function fileToBase64(file: File) {
   const buffer = await file.arrayBuffer();
@@ -65,6 +65,8 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
   const [logoUrl, setLogoUrl] = useState<string | null>(initialData?.logo || null);
   const [logoPreview, setLogoPreview] = useState<string | null>(initialData?.logo || null);
   const [useCursorDate, setUseCursorDate] = useState<boolean>(!!initialData?.using_cursor_since);
+  const [maxFileSize, setMaxFileSize] = useState(DEFAULT_MAX_FILE_SIZE);
+  const [maxDimension, setMaxDimension] = useState(DEFAULT_MAX_DIMENSION);
   const { executeAsync: uploadLogo } = useAction(uploadCompanyLogoAction);
   const runLoggedAsync = useLoggedAsync({
     scope: 'CompanyForm',
@@ -72,15 +74,15 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
     defaultRethrow: false,
   });
 
-  // Load form validation config from Statsig on mount
+  // Load form validation config from static defaults on mount
   useEffect(() => {
     getFormConfig({})
       .then((result) => {
         if (!result?.data) return;
         const config = result.data;
         const maxMB = config['form.max_file_size_mb'];
-        MAX_FILE_SIZE = maxMB * 1024 * 1024;
-        MAX_DIMENSION = config['form.max_image_dimension_px'];
+        setMaxFileSize(maxMB * 1024 * 1024);
+        setMaxDimension(config['form.max_image_dimension_px']);
       })
       .catch((error) => {
         logClientWarning('CompanyForm: failed to load form config', error);
@@ -89,8 +91,8 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
 
   const handleLogoUpload = async (file: File) => {
     // Client-side validation
-    if (file.size > MAX_FILE_SIZE) {
-      toasts.error.actionFailed(`File too large. Maximum size is ${MAX_FILE_SIZE / 1024}KB.`);
+    if (file.size > maxFileSize) {
+      toasts.error.actionFailed(`File too large. Maximum size is ${maxFileSize / 1024}KB.`);
       return;
     }
 
@@ -136,9 +138,9 @@ export function CompanyForm({ initialData, mode }: CompanyFormProps) {
       const { width, height } = bitmap;
       bitmap.close(); // Release memory
 
-      if (width > MAX_DIMENSION || height > MAX_DIMENSION) {
+      if (width > maxDimension || height > maxDimension) {
         toasts.error.actionFailed(
-          `Image too large. Maximum dimensions are ${MAX_DIMENSION}x${MAX_DIMENSION}px.`
+          `Image too large. Maximum dimensions are ${maxDimension}x${maxDimension}px.`
         );
         return;
       }

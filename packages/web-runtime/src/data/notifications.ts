@@ -15,8 +15,8 @@ const DEFAULT_NOTIFICATION_TAG = 'notifications' as const;
 const TTL_KEY = 'cache.notifications.ttl_seconds' as const;
 const INVALIDATION_KEY = 'cache.invalidate.notifications' as const;
 
-export async function getNotificationCacheTags(userId: string): Promise<string[]> {
-  const dynamicTags = await getCacheInvalidateTags(INVALIDATION_KEY);
+export function getNotificationCacheTags(userId: string): string[] {
+  const dynamicTags = getCacheInvalidateTags(INVALIDATION_KEY);
   const tags = new Set<string>([DEFAULT_NOTIFICATION_TAG, `user-${userId}`]);
   for (const tag of dynamicTags) {
     tags.add(tag);
@@ -24,8 +24,8 @@ export async function getNotificationCacheTags(userId: string): Promise<string[]
   return [...tags];
 }
 
-export async function revalidateNotificationCache(userId: string): Promise<void> {
-  const tags = await getNotificationCacheTags(userId);
+export function revalidateNotificationCache(userId: string): void {
+  const tags = getNotificationCacheTags(userId);
   for (const tag of tags) {
     try {
       revalidateTag(tag, 'default');

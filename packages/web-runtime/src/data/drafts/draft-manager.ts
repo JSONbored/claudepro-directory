@@ -320,7 +320,8 @@ export class DraftManager {
       }
     } catch (error) {
       const normalized = normalizeError(error, 'DraftManager: Failed to list drafts');
-      logger.warn('DraftManager: Failed to list drafts', { error: normalized.message });
+      // Pino's stdSerializers.err automatically handles error serialization
+      logger.warn('DraftManager: Failed to list drafts', { err: normalized });
     }
 
     // Sort by updated_at (most recent first)
@@ -368,7 +369,8 @@ export class DraftManager {
       }
     } catch (error) {
       const normalized = normalizeError(error, 'DraftManager: Failed to clear expired drafts');
-      logger.warn('DraftManager: Failed to clear expired drafts', { error: normalized.message });
+      // Pino's stdSerializers.err automatically handles error serialization
+      logger.warn('DraftManager: Failed to clear expired drafts', { err: normalized });
     }
 
     return cleared;
@@ -398,7 +400,8 @@ export class DraftManager {
       }
     } catch (error) {
       const normalized = normalizeError(error, 'DraftManager: Failed to clear all drafts');
-      logger.warn('DraftManager: Failed to clear all drafts', { error: normalized.message });
+      // Pino's stdSerializers.err automatically handles error serialization
+      logger.warn('DraftManager: Failed to clear all drafts', { err: normalized });
     }
 
     return cleared;
@@ -423,7 +426,8 @@ export class DraftManager {
       }
     } catch (error) {
       const normalized = normalizeError(error, 'DraftManager: Failed to calculate storage size');
-      logger.warn('DraftManager: Failed to calculate storage size', { error: normalized.message });
+      // Pino's stdSerializers.err automatically handles error serialization
+      logger.warn('DraftManager: Failed to calculate storage size', { err: normalized });
     }
 
     return size;

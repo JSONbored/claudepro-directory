@@ -5,7 +5,7 @@
 
 import { SeoService } from '@heyclaude/data-layer';
 import type { Database } from '@heyclaude/database-types';
-import { logger, sanitizeRoute } from '@heyclaude/shared-runtime';
+import { sanitizeRoute } from '@heyclaude/shared-runtime';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
 export interface SeoMetadataResult {
@@ -108,10 +108,12 @@ export async function getSeoMetadata(
   } catch (error) {
     // Return null on error - caller should handle fallback
     // Log error for debugging while maintaining API contract
-    logger.error('Failed to generate SEO metadata', error as Error, {
+    // Use logError helper for proper error instrumentation
+    const { logError } = await import('@heyclaude/shared-runtime');
+    logError('Failed to generate SEO metadata', {
       route: sanitizedRoute,
       include: validatedInclude,
-    });
+    }, error);
     return null;
   }
 }

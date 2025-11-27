@@ -3,6 +3,7 @@ import { edgeEnv } from '../config/env.ts';
 import type { Database as DatabaseGenerated, Json } from '@heyclaude/database-types';
 import { invalidateCacheByKey } from '../utils/cache.ts';
 import type { ChangelogSection, GitHubCommit } from '../utils/discord/embeds.ts';
+import { logger } from '../utils/logger.ts';
 
 const GITHUB_TOKEN = edgeEnv.github.token;
 const GITHUB_REPO_OWNER = edgeEnv.github.repoOwner;
@@ -259,11 +260,12 @@ export async function revalidateChangelogPages(
       },
     }).catch(async (error) => {
       const { errorToString } = await import('@heyclaude/shared-runtime');
-      console.warn('[changelog-service] Cache tag invalidation failed', {
+      const errorObj = error instanceof Error ? error : new Error(errorToString(error));
+      logger.warn('Cache tag invalidation failed', {
         function: 'changelog-service',
         action: 'revalidate',
         slug,
-        error: errorToString(error),
+        err: errorObj,
       });
     });
   }
@@ -286,23 +288,24 @@ export async function revalidateChangelogPages(
 
         if (!response.ok) {
           const errorText = await response.text();
-          console.error('[changelog-service] Failed to revalidate path', {
+          logger.error('Failed to revalidate path', {
             function: 'changelog-service',
             action: 'revalidate',
             slug,
             path,
             status: response.status,
-            error: errorText,
+            err: new Error(errorText),
           });
         }
       } catch (error) {
         const { errorToString } = await import('@heyclaude/shared-runtime');
-        console.error('[changelog-service] Revalidate error', {
+        const errorObj = error instanceof Error ? error : new Error(errorToString(error));
+        logger.error('Revalidate error', {
           function: 'changelog-service',
           action: 'revalidate',
           slug,
           path,
-          error: errorToString(error),
+          err: errorObj,
         });
       }
     })

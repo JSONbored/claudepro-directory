@@ -51,7 +51,9 @@ export function logClientWarning(
 ): Error {
   const normalized = normalizeError(error);
   const sanitized = sanitizeContext(context);
-  logger.warn(message, { ...(sanitized ?? {}), error: normalized.message });
+  // Pino's stdSerializers.err automatically handles error serialization
+  // Pass error as 'err' key for proper formatting
+  logger.warn(message, { ...(sanitized ?? {}), err: normalized });
   return normalized;
 }
 

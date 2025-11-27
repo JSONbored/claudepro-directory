@@ -11,8 +11,8 @@
  * 4. Client uses token with MCP server
  */
 
-import { edgeEnv } from '@heyclaude/edge-runtime';
-import { createDataApiContext, getEnvVar, logError } from '@heyclaude/shared-runtime';
+import { edgeEnv, initRequestLogging, traceStep } from '@heyclaude/edge-runtime';
+import { createDataApiContext, getEnvVar, logError, logger } from '@heyclaude/shared-runtime';
 import type { Context } from 'hono';
 
 const SUPABASE_URL = edgeEnv.supabase.url;
@@ -49,6 +49,18 @@ function jsonError(
 export async function handleOAuthAuthorize(c: Context): Promise<Response> {
   const logContext = createDataApiContext('oauth-authorize', {
     app: 'mcp-directory',
+    method: 'GET',
+  });
+
+  // Initialize request logging with trace and bindings (Phase 1 & 2)
+  initRequestLogging(logContext);
+  traceStep('OAuth authorization request received', logContext);
+  
+  // Set bindings for this request - mixin will automatically inject these into all subsequent logs
+  logger.setBindings({
+    requestId: logContext.request_id,
+    operation: logContext.action || 'oauth-authorize',
+    function: logContext.function,
     method: 'GET',
   });
 

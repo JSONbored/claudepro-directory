@@ -54,8 +54,9 @@ export const updateJob = authedAction
       revalidatePath(`/jobs`);
       revalidateTag(`job-${parsedInput.job_id}`, 'default');
       
+      const cacheConfig = getCacheConfigSnapshot();
       await nextInvalidateByKeys({
-        cacheConfigPromise: getCacheConfigSnapshot(),
+        cacheConfig,
         invalidateKeys: ['cache.invalidate.job_update']
       });
 

@@ -6,7 +6,7 @@ import { getAnimationConfig } from '@heyclaude/web-runtime/data';
 import confetti from 'canvas-confetti';
 import { useCallback } from 'react';
 
-/** Confetti animations - config values from Statsig animationConfigs */
+/** Confetti animations - config values from static animation configs */
 
 export function useConfetti() {
   const fireConfetti = useCallback(

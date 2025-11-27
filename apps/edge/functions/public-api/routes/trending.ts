@@ -6,10 +6,14 @@ import {
   buildCacheHeaders,
   errorResponse,
   getOnlyCorsHeaders,
+  initRequestLogging,
   jsonResponse,
   methodNotAllowedResponse,
   supabaseAnon,
+  traceRequestComplete,
+  traceStep,
 } from '@heyclaude/edge-runtime';
+import { createDataApiContext, logger } from '@heyclaude/shared-runtime';
 
 const CORS = getOnlyCorsHeaders;
 type ContentCategory = DatabaseGenerated['public']['Enums']['content_category'];
@@ -27,29 +31,55 @@ export async function handleTrendingRoute(
   url: URL,
   method: string
 ): Promise<Response> {
+  const logContext = createDataApiContext('trending', {
+    path: url.pathname,
+    method,
+    app: 'public-api',
+  });
+  
+  // Initialize request logging with trace and bindings
+  initRequestLogging(logContext);
+  traceStep('Trending request received', logContext);
+  
+  // Set bindings for this request
+  logger.setBindings({
+    requestId: logContext.request_id,
+    operation: logContext.action || 'trending',
+    method,
+  });
+  
   if (method !== 'GET') {
     return methodNotAllowedResponse('GET', CORS);
   }
 
   if (segments.length > 0) {
     if (segments[0] === 'sidebar') {
-      return handleSidebar(url);
+      return handleSidebar(url, logContext);
     }
     return badRequestResponse('Invalid trending route path', CORS);
   }
 
   const mode = (url.searchParams.get('mode') || 'page').toLowerCase();
   if (mode === 'sidebar') {
-    return handleSidebar(url);
+    return handleSidebar(url, logContext);
   }
 
-  return handlePageTabs(url);
+  return handlePageTabs(url, logContext);
 }
 
-async function handlePageTabs(url: URL): Promise<Response> {
+async function handlePageTabs(url: URL, logContext: ReturnType<typeof createDataApiContext>): Promise<Response> {
   const tab = (url.searchParams.get('tab') || 'trending').toLowerCase();
   const limit = clampLimit(Number(url.searchParams.get('limit') || '12'));
   const category = parseCategory(url.searchParams.get('category'));
+  
+  traceStep(`Processing trending page tabs (tab: ${tab})`, logContext);
+  
+  // Update bindings with tab and category
+  logger.setBindings({
+    tab,
+    category: category || 'all',
+    limit,
+  });
 
   const service = new TrendingService(supabaseAnon);
 
@@ -60,6 +90,7 @@ async function handlePageTabs(url: URL): Promise<Response> {
         p_limit: limit,
       });
       const trending = mapTrendingRows(rows, category);
+      traceRequestComplete(logContext);
       return jsonResponse(
         {
           trending,
@@ -79,6 +110,7 @@ async function handlePageTabs(url: URL): Promise<Response> {
         p_limit: limit,
       });
       const popular = mapPopularRows(rows, category);
+      traceRequestComplete(logContext);
       return jsonResponse(
         {
           popular,
@@ -99,6 +131,7 @@ async function handlePageTabs(url: URL): Promise<Response> {
         p_days: 30,
       });
       const recent = mapRecentRows(rows, category);
+      traceRequestComplete(logContext);
       return jsonResponse(
         {
           recent,
@@ -114,13 +147,21 @@ async function handlePageTabs(url: URL): Promise<Response> {
 
     return badRequestResponse('Invalid tab. Valid tabs: trending, popular, recent', CORS);
   } catch (error) {
-    return errorResponse(error, 'data-api:trending', CORS);
+    return errorResponse(error, 'data-api:trending', CORS, logContext);
   }
 }
 
-async function handleSidebar(url: URL): Promise<Response> {
+async function handleSidebar(url: URL, logContext: ReturnType<typeof createDataApiContext>): Promise<Response> {
   const limit = clampLimit(Number(url.searchParams.get('limit') || '8'));
   const category = parseCategory(url.searchParams.get('category')) ?? 'guides';
+  
+  traceStep(`Processing trending sidebar (category: ${category})`, logContext);
+  
+  // Update bindings with category and limit
+  logger.setBindings({
+    category,
+    limit,
+  });
 
   const service = new TrendingService(supabaseAnon);
 
@@ -140,12 +181,13 @@ async function handleSidebar(url: URL): Promise<Response> {
     const trending = mapSidebarTrending(trendingRows, category);
     const recent = mapSidebarRecent(recentRows, category);
 
+    traceRequestComplete(logContext);
     return jsonResponse({ trending, recent }, 200, {
       ...CORS,
       ...buildCacheHeaders('trending_sidebar'),
     });
   } catch (error) {
-    return errorResponse(error, 'data-api:trending-sidebar', CORS);
+    return errorResponse(error, 'data-api:trending-sidebar', CORS, logContext);
   }
 }
 

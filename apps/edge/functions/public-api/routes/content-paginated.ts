@@ -5,10 +5,13 @@ import {
   buildCacheHeaders,
   errorResponse,
   getOnlyCorsHeaders,
+  initRequestLogging,
   jsonResponse,
   supabaseAnon,
+  traceRequestComplete,
+  traceStep,
 } from '@heyclaude/edge-runtime';
-import { buildSecurityHeaders } from '@heyclaude/shared-runtime';
+import { buildSecurityHeaders, createDataApiContext, logger } from '@heyclaude/shared-runtime';
 
 const CORS = getOnlyCorsHeaders;
 const CONTENT_CATEGORY_VALUES = Constants.public.Enums.content_category;
@@ -26,6 +29,23 @@ function toContentCategory(
 }
 
 export async function handlePaginatedContent(url: URL): Promise<Response> {
+  const logContext = createDataApiContext('content-paginated', {
+    path: url.pathname,
+    method: 'GET',
+    app: 'public-api',
+  });
+  
+  // Initialize request logging with trace and bindings
+  initRequestLogging(logContext);
+  traceStep('Paginated content request received', logContext);
+  
+  // Set bindings for this request
+  logger.setBindings({
+    requestId: logContext.request_id,
+    operation: logContext.action || 'content-paginated',
+    method: 'GET',
+  });
+  
   const offsetParam = Number.parseInt(url.searchParams.get('offset') ?? '0', 10);
   const limitParam = Number.parseInt(url.searchParams.get('limit') ?? '30', 10);
   const categoryParam = (url.searchParams.get('category') ?? 'all').trim().toLowerCase();
@@ -39,6 +59,14 @@ export async function handlePaginatedContent(url: URL): Promise<Response> {
   }
 
   const category = categoryParam === 'all' ? undefined : toContentCategory(categoryParam);
+  
+  // Update bindings with pagination parameters
+  logger.setBindings({
+    offset: offsetParam,
+    limit: limitParam,
+    category: category || 'all',
+  });
+  traceStep(`Fetching paginated content (offset: ${offsetParam}, limit: ${limitParam})`, logContext);
 
   const rpcArgs: DatabaseGenerated['public']['Functions']['get_content_paginated_slim']['Args'] = {
     ...(category !== undefined ? { p_category: category } : {}),
@@ -48,11 +76,19 @@ export async function handlePaginatedContent(url: URL): Promise<Response> {
   const { data, error } = await supabaseAnon.rpc('get_content_paginated_slim', rpcArgs);
 
   if (error) {
-    return errorResponse(error, 'data-api:get_content_paginated_slim', CORS);
+    // Use dbQuery serializer for consistent database query formatting
+    return errorResponse(error, 'data-api:get_content_paginated_slim', CORS, {
+      ...logContext,
+      dbQuery: {
+        rpcName: 'get_content_paginated_slim',
+        args: rpcArgs, // Will be redacted by Pino's redact config
+      },
+    });
   }
 
   // Validate RPC return value without type assertion
   if (!data || typeof data !== 'object' || !('items' in data)) {
+    traceRequestComplete(logContext);
     return jsonResponse([], 200, {
       ...buildSecurityHeaders(),
       ...CORS,
@@ -73,6 +109,7 @@ export async function handlePaginatedContent(url: URL): Promise<Response> {
   const itemsValue = getProperty(data, 'items');
   const items = Array.isArray(itemsValue) ? itemsValue : [];
 
+  traceRequestComplete(logContext);
   return jsonResponse(items, 200, {
     ...buildSecurityHeaders(),
     ...CORS,

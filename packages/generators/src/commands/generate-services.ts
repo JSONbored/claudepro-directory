@@ -179,9 +179,21 @@ async function generateServiceFile(className: string, config: ServiceConfig) {
    * Calls the database RPC: ${rpcName}
    */
   async ${methodName}(args: Database['public']['Functions']['${rpcName}']['Args']) {
-    const { data, error } = await this.supabase.rpc('${rpcName}', args);
-    if (error) throw error;
-    return data as Database['public']['Functions']['${rpcName}']['Returns'];
+    try {
+      const { data, error } = await this.supabase.rpc('${rpcName}', args);
+      if (error) {
+        logRpcError(error, {
+          rpcName: '${rpcName}',
+          operation: '${className}.${methodName}',
+          args: args,
+        });
+        throw error;
+      }
+      return data as Database['public']['Functions']['${rpcName}']['Returns'];
+    } catch (error) {
+      // Error already logged above
+      throw error;
+    }
   }`;
   });
 
@@ -194,6 +206,7 @@ async function generateServiceFile(className: string, config: ServiceConfig) {
 
 import type { Database } from '@heyclaude/database-types';
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { logRpcError } from '../utils/rpc-error-logging.js';
 
 export class ${className} {
   constructor(private supabase: SupabaseClient<Database>) {}

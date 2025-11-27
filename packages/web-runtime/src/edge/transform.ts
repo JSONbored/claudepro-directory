@@ -151,7 +151,8 @@ export async function processContentEdge(
   const data = (await response.json()) as ProcessContentResponse;
   if (data.error) {
     const normalized = normalizeError(new Error(data.error), 'Process content edge error');
-    logger.warn('processContentEdge fallback', undefined, { error: normalized.message });
+    // Pino's stdSerializers.err automatically handles error serialization
+    logger.warn('processContentEdge fallback', undefined, { err: normalized });
   }
   return data;
 }

@@ -8,6 +8,7 @@
 import type { Database } from '@heyclaude/database-types';
 import { Constants } from '@heyclaude/database-types';
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { logError } from '@heyclaude/shared-runtime';
 import type { GetFeaturedInput } from '../lib/types.ts';
 
 export async function handleGetFeatured(
@@ -54,7 +55,26 @@ export async function handleGetFeatured(
     if (result.status === 'fulfilled') {
       const { data, error } = result.value;
 
-      if (!error && data) {
+      if (error) {
+        // Use dbQuery serializer for consistent database query formatting
+        logError('RPC call failed in getFeatured', {
+          dbQuery: {
+            rpcName: 'get_content_paginated_slim',
+            args: {
+              p_category: category,
+              p_limit: 6,
+              p_offset: 0,
+              p_order_by: 'popularity_score',
+              p_order_direction: 'desc',
+            },
+          },
+          category,
+        }, error);
+        // Continue gracefully - category will be missing from featured object
+        return;
+      }
+
+      if (data) {
         // Type the RPC return value
         type PaginatedSlimResult = Database['public']['CompositeTypes']['content_paginated_slim_result'];
         const typedData = data as PaginatedSlimResult;
@@ -97,9 +117,23 @@ export async function handleGetFeatured(
           .filter((item: FeaturedItem | null): item is FeaturedItem => item !== null);
         }
       }
+    } else if (result.status === 'rejected') {
+      // Promise was rejected - log with dbQuery serializer
+      logError('RPC promise rejected in getFeatured', {
+        dbQuery: {
+          rpcName: 'get_content_paginated_slim',
+          args: {
+            p_category: category,
+            p_limit: 6,
+            p_offset: 0,
+            p_order_by: 'popularity_score',
+            p_order_direction: 'desc',
+          },
+        },
+        category,
+      }, result.reason);
+      // Continue gracefully - category will be missing from featured object
     }
-    // If rejected, category will simply be missing from featured object
-    // This maintains graceful degradation behavior
   });
 
   if (Object.keys(featured).length === 0) {

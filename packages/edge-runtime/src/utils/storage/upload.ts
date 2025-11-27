@@ -3,6 +3,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
 import { errorToString } from '@heyclaude/shared-runtime';
 import { createUtilityContext } from '@heyclaude/shared-runtime';
+import { logger } from '../logger.ts';
 import {
   type BuildStorageObjectPathOptions,
   buildStorageObjectPath,
@@ -127,11 +128,13 @@ export async function uploadObject({
         bucket,
         targetPath,
       });
-      console.error('[Storage] Upload failed', {
+      const errorObj = error instanceof Error ? error : new Error(String(error));
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error('Upload failed', {
         ...logContext,
-        error: error.message,
+        err: errorObj,
       });
-      return { success: false, error: error.message };
+      return { success: false, error: errorMessage };
     }
 
     const publicUrl = getPublicStorageUrl(bucket, data.path);
@@ -146,9 +149,10 @@ export async function uploadObject({
       bucket,
       targetPath,
     });
-    console.error('[Storage] Upload error', {
+    const errorObj = error instanceof Error ? error : new Error(errorToString(error));
+    logger.error('Upload error', {
       ...logContext,
-      error: errorToString(error),
+      err: errorObj,
     });
     return {
       success: false,

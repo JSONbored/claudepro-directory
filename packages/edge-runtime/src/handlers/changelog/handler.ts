@@ -8,6 +8,7 @@ import {
 } from '../../utils/http.ts';
 import { createChangelogHandlerContext, withContext } from '@heyclaude/shared-runtime';
 import { pgmqSend } from '../../utils/pgmq-client.ts';
+import { logger } from '../../utils/logger.ts';
 import {
   ingestWebhookEvent,
   WebhookIngestError,
@@ -47,7 +48,7 @@ export async function handleChangelogSyncRequest(req: Request): Promise<Response
 
     // If duplicate webhook, return early (idempotent)
     if (ingestResult.duplicate) {
-      console.log('[changelog-handler] Duplicate webhook detected, skipping', updatedContext);
+      logger.info('Duplicate webhook detected, skipping', updatedContext);
       return successResponse(
         { skipped: true, reason: 'Duplicate webhook', duplicate: true },
         200,
@@ -68,7 +69,7 @@ export async function handleChangelogSyncRequest(req: Request): Promise<Response
     if (!webhookEventId) {
       const idempotencyKey = payload.id || req.headers.get('x-vercel-id');
       if (!idempotencyKey) {
-        console.error('[changelog-handler] Missing idempotency key', updatedContext);
+        logger.error('Missing idempotency key', updatedContext);
         return errorResponse(
           new Error('Missing idempotency key in webhook'),
           'changelog-sync:missing-idempotency-key',
@@ -86,10 +87,11 @@ export async function handleChangelogSyncRequest(req: Request): Promise<Response
         .single<{ id: string }>();
 
       if (webhookError || !webhookEvent) {
-        console.error('[changelog-handler] Failed to retrieve webhook event ID', {
+        const errorObj = webhookError instanceof Error ? webhookError : new Error(String(webhookError));
+        logger.error('Failed to retrieve webhook event ID', {
           ...updatedContext,
           idempotencyKey,
-          error: webhookError instanceof Error ? webhookError.message : String(webhookError),
+          err: errorObj,
         });
         return errorResponse(
           new Error('Failed to retrieve webhook event ID'),
@@ -112,16 +114,17 @@ export async function handleChangelogSyncRequest(req: Request): Promise<Response
 
     try {
       await pgmqSend('changelog_process', queueJob);
-      console.log('[changelog-handler] Webhook processing job enqueued', {
+      logger.info('Webhook processing job enqueued', {
         ...updatedContext,
         webhook_event_id: webhookEventId,
       });
     } catch (queueError) {
       const errorMsg = queueError instanceof Error ? queueError.message : String(queueError);
-      console.error('[changelog-handler] Failed to enqueue webhook processing job', {
+      const errorObj = queueError instanceof Error ? queueError : new Error(errorMsg);
+      logger.error('Failed to enqueue webhook processing job', {
         ...updatedContext,
-      webhook_event_id: webhookEventId,
-        error: errorMsg,
+        webhook_event_id: webhookEventId,
+        err: errorObj,
       });
       return errorResponse(
         new Error(`Failed to enqueue processing job: ${errorMsg}`),

@@ -1,15 +1,15 @@
 'use client';
 
 /**
- * useInfiniteScroll Hook - Statsig Dynamic Config
+ * useInfiniteScroll Hook
  * Production-grade infinite scroll using Intersection Observer API
- * Loads default batch_size and threshold from Statsig
+ * Loads default batch_size and threshold from static config
  *
  * @module hooks/use-infinite-scroll
  */
 
-import { getHomepageConfigBundle, getTimeoutConfig } from '../actions/feature-flags.ts';
-import { logClientWarning, logger } from '../entries/core.ts';
+import { getHomepageConfigBundle, getTimeoutConfig } from '../config/static-configs.ts';
+import { logger } from '../entries/core.ts';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 interface UseInfiniteScrollOptions {
@@ -60,32 +60,21 @@ export function useInfiniteScroll({
   threshold,
   root = null,
 }: UseInfiniteScrollOptions): UseInfiniteScrollReturn {
-  // Hardcoded fallbacks (loaded from Statsig at mount)
+  // Default values (loaded from static config at mount)
   const [configDefaults, setConfigDefaults] = useState({
     batchSize: 30,
     threshold: 0.1,
   });
 
-  // OPTIMIZATION: Use config bundle instead of separate getAppSettings call
-  // Load Statsig config on mount (background, non-blocking)
+  // Load static config defaults on mount
   useEffect(() => {
-    const loadDefaults = async () => {
-      try {
-        const bundle = await getHomepageConfigBundle();
-        if (bundle.appSettings) {
-          setConfigDefaults({
-            batchSize: bundle.appSettings['hooks.infinite_scroll.batch_size'],
-            threshold: bundle.appSettings['hooks.infinite_scroll.threshold'],
-          });
-        }
-      } catch (error) {
-        logClientWarning('useInfiniteScroll: failed to load config bundle', error);
-      }
-    };
-
-    loadDefaults().catch((error) => {
-      logClientWarning('useInfiniteScroll: loadDefaults promise rejected', error);
-    });
+    const bundle = getHomepageConfigBundle();
+    if (bundle.appSettings) {
+      setConfigDefaults({
+        batchSize: bundle.appSettings['hooks.infinite_scroll.batch_size'] ?? 30,
+        threshold: bundle.appSettings['hooks.infinite_scroll.threshold'] ?? 0.1,
+      });
+    }
   }, []);
 
   // Merge user options with config defaults (user options take precedence)
@@ -123,21 +112,13 @@ export function useInfiniteScroll({
 
     setIsLoading(true);
 
-    getTimeoutConfig({})
-      .then((result) => {
-        const delay = result?.data?.['timeout.ui.transition_ms'] ?? 200;
-        setTimeout(() => {
-          setDisplayCount((prev) => Math.min(prev + finalBatchSize, totalItems));
-          setIsLoading(false);
-        }, delay);
-      })
-      .catch((error) => {
-        logClientWarning('useInfiniteScroll: failed to load transition timeout', error);
-        setTimeout(() => {
-          setDisplayCount((prev) => Math.min(prev + finalBatchSize, totalItems));
-          setIsLoading(false);
-        }, 200);
-      });
+    // Get timeout config from static defaults
+    const config = getTimeoutConfig();
+    const delay = config['timeout.ui.transition_ms'] ?? 200;
+    setTimeout(() => {
+      setDisplayCount((prev) => Math.min(prev + finalBatchSize, totalItems));
+      setIsLoading(false);
+    }, delay);
   }, [finalBatchSize, hasMore, isLoading, totalItems]);
 
   /**

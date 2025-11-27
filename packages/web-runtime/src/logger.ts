@@ -1,22 +1,13 @@
 import pino from 'pino';
+import { createPinoConfig } from '@heyclaude/shared-runtime/logger/config';
 
-const isDevelopment = process.env['NODE_ENV'] === 'development';
-const loggerConsoleEnabled = process.env['NEXT_PUBLIC_LOGGER_CONSOLE'] === 'true';
-const loggerVerbose = process.env['NEXT_PUBLIC_LOGGER_VERBOSE'] === 'true';
-
-const pinoInstance = isDevelopment
-  ? pino({
-      level: loggerVerbose ? 'debug' : 'info',
-      browser: {
-        disabled: !loggerConsoleEnabled,
-      },
-    })
-  : pino({
-      level: loggerVerbose ? 'debug' : 'info',
-      browser: {
-        disabled: !loggerConsoleEnabled,
-      },
-    });
+// Create Pino instance with centralized configuration
+// This uses the shared config which includes:
+// - Native redaction (replaces manual sanitization)
+// - Standard error serializers (replaces manual error serialization)
+// - ISO timestamps
+// - Base context (env, service)
+const pinoInstance = pino(createPinoConfig({ service: 'web-runtime' }));
 
 export type LogContextValue =
   | string
@@ -28,7 +19,8 @@ export type LogContextValue =
   | readonly number[]
   | readonly boolean[]
   | ReadonlyArray<LogContextValue>
-  | { readonly [key: string]: LogContextValue };
+  | { readonly [key: string]: LogContextValue }
+  | Error; // Allow Error objects for Pino's err serializer
 
 export type LogContext = Record<string, LogContextValue>;
 
@@ -52,173 +44,192 @@ export function toLogContextValue(value: unknown): LogContextValue {
   return String(value);
 }
 
-export function sanitizeLogMessage(message: string): string {
-  if (typeof message !== 'string') return String(message);
-  // Remove all ASCII control characters (except space), including line breaks and tabs
-  let sanitized = message.replace(/[\r\n\t\x00-\x1F]/g, '');
-  if (sanitized.length > 1000) {
-    sanitized = `${sanitized.slice(0, 1000)}... [truncated]`;
-  }
-  return sanitized;
-}
-
-function sanitizeStringValue(value: string, maxLength = 500): string {
-  let sanitized = value
-    .replace(/[\r\n\t]/g, ' ')
-    .split('')
-    .filter((char) => {
-      const code = char.charCodeAt(0);
-      return code >= 0x20 && (code < 0x7f || code > 0x9f);
-    })
-    .join('');
-  if (sanitized.length > maxLength) {
-    sanitized = `${sanitized.slice(0, maxLength)}... [truncated]`;
-  }
-  return sanitized;
-}
-
-export function sanitizeLogContext(
-  context?: LogContext,
-  depth = 0,
-  sizeLimit = 10 * 1024
-): LogContext | undefined {
-  if (!context) return context;
-  if (depth > 5) {
-    return { '[error]': 'Context too deeply nested' } as LogContext;
-  }
-  const sanitized = Object.create(null) as LogContext;
-  let currentSize = 0;
-
-  for (const [key, value] of Object.entries(context)) {
-    if (!key || typeof key !== 'string') continue;
-    if (!/^[a-zA-Z0-9_-]+$/.test(key)) continue;
-
-    const keySize = key.length;
-    if (currentSize + keySize > sizeLimit) {
-      sanitized['[truncated]'] = 'Context size limit exceeded';
-      break;
-    }
-    currentSize += keySize;
-
-    if (value === null) {
-      sanitized[key] = null;
-    } else if (typeof value === 'string') {
-      sanitized[key] = sanitizeStringValue(value);
-      currentSize += sanitized[key].length;
-    } else if (typeof value === 'number' || typeof value === 'boolean') {
-      sanitized[key] = value;
-      currentSize += 8;
-    } else if (Array.isArray(value)) {
-      const sanitizedArray: LogContextValue[] = [];
-      for (const item of value) {
-        if (currentSize > sizeLimit) {
-          sanitizedArray.push('[truncated]');
-          break;
-        }
-        if (typeof item === 'string') {
-          const sanitizedItem = sanitizeStringValue(item);
-          sanitizedArray.push(sanitizedItem);
-          currentSize += sanitizedItem.length;
-        } else if (typeof item === 'number' || typeof item === 'boolean') {
-          sanitizedArray.push(item);
-          currentSize += 8;
-        } else if (item === null) {
-          sanitizedArray.push(null);
-        } else if (typeof item === 'object' && !Array.isArray(item)) {
-          const nested = sanitizeLogContext(item as LogContext, depth + 1, sizeLimit - currentSize);
-          if (nested) {
-            sanitizedArray.push(nested);
-            currentSize += JSON.stringify(nested).length;
-          }
-        } else if (Array.isArray(item)) {
-          sanitizedArray.push('[nested array truncated]');
-        }
-      }
-      sanitized[key] = sanitizedArray;
-    } else if (typeof value === 'object' && !Array.isArray(value)) {
-      const nested = sanitizeLogContext(value as LogContext, depth + 1, sizeLimit - currentSize);
-      if (nested) {
-        sanitized[key] = nested;
-        currentSize += JSON.stringify(nested).length;
-      }
-    }
-  }
-
-  return sanitized;
-}
+// Manual sanitization functions removed - now using Pino's native redaction
+// Pino automatically handles:
+// - Sensitive data redaction (via redact option in config)
+// - Error serialization (via stdSerializers.err)
+// - Context sanitization (via redaction paths)
 
 class Logger {
   debug(message: string, context?: LogContext, metadata?: LogContext): void {
-    const sanitizedMessage = sanitizeLogMessage(message);
-    const sanitizedContext = sanitizeLogContext(context);
-    const sanitizedMetadata = sanitizeLogContext(metadata);
-    pinoInstance.debug({ ...sanitizedContext, ...sanitizedMetadata }, sanitizedMessage);
+    // Pino handles redaction automatically via config
+    // Mixin automatically injects context from logger.bindings() (requestId, operation, userId, etc.)
+    pinoInstance.debug({ ...context, ...metadata }, message);
   }
 
   info(message: string, context?: LogContext, metadata?: LogContext): void {
-    const sanitizedMessage = sanitizeLogMessage(message);
-    const sanitizedContext = sanitizeLogContext(context);
-    const sanitizedMetadata = sanitizeLogContext(metadata);
-    pinoInstance.info({ ...sanitizedContext, ...sanitizedMetadata }, sanitizedMessage);
+    // Pino handles redaction automatically via config
+    // Mixin automatically injects context from logger.bindings() (requestId, operation, userId, etc.)
+    pinoInstance.info({ ...context, ...metadata }, message);
   }
 
   warn(message: string, context?: LogContext, metadata?: LogContext): void {
-    const sanitizedMessage = sanitizeLogMessage(message);
-    const sanitizedContext = sanitizeLogContext(context);
-    const sanitizedMetadata = sanitizeLogContext(metadata);
-    pinoInstance.warn({ ...sanitizedContext, ...sanitizedMetadata }, sanitizedMessage);
+    // Pino handles redaction automatically via config
+    // Mixin automatically injects context from logger.bindings() (requestId, operation, userId, etc.)
+    pinoInstance.warn({ ...context, ...metadata }, message);
   }
 
   error(message: string, error?: Error | string, context?: LogContext, metadata?: LogContext): void {
-    const sanitizedMessage = sanitizeLogMessage(message);
-    const sanitizedContext = sanitizeLogContext(context);
-    const sanitizedMetadata = sanitizeLogContext(metadata);
-    const logData: Record<string, unknown> = { ...sanitizedContext, ...sanitizedMetadata };
+    // Pino's stdSerializers.err automatically handles error serialization
+    // Mixin automatically injects context from logger.bindings() (requestId, operation, userId, etc.)
+    // Pass error as 'err' key - Pino will serialize it properly
+    const logData: Record<string, unknown> = { ...context, ...metadata };
     if (error !== undefined) {
       if (error instanceof Error) {
-        logData['err'] = {
-          message: sanitizeLogMessage(error.message),
-          name: error.name,
-          stack: error.stack ? sanitizeLogMessage(error.stack) : undefined,
-        };
+        // Pino's stdSerializers.err handles this automatically
+        logData['err'] = error;
       } else if (typeof error === 'string') {
-        logData['err'] = sanitizeLogMessage(error);
+        logData['err'] = new Error(error);
       } else {
-        logData['err'] = sanitizeLogMessage(String(error));
+        logData['err'] = new Error(String(error));
       }
     }
-    pinoInstance.error(logData, sanitizedMessage);
+    pinoInstance.error(logData, message);
   }
 
   fatal(message: string, error?: Error | string, context?: LogContext, metadata?: LogContext): void {
-    const sanitizedMessage = sanitizeLogMessage(message);
-    const sanitizedContext = sanitizeLogContext(context);
-    const sanitizedMetadata = sanitizeLogContext(metadata);
-    const logData: Record<string, unknown> = { ...sanitizedContext, ...sanitizedMetadata };
+    // Pino's stdSerializers.err automatically handles error serialization
+    // Mixin automatically injects context from logger.bindings() (requestId, operation, userId, etc.)
+    const logData: Record<string, unknown> = { ...context, ...metadata };
     if (error !== undefined) {
       if (error instanceof Error) {
-        logData['err'] = {
-          message: sanitizeLogMessage(error.message),
-          name: error.name,
-          stack: error.stack ? sanitizeLogMessage(error.stack) : undefined,
-        };
+        // Pino's stdSerializers.err handles this automatically
+        logData['err'] = error;
       } else if (typeof error === 'string') {
-        logData['err'] = sanitizeLogMessage(error);
+        logData['err'] = new Error(error);
       } else {
-        logData['err'] = sanitizeLogMessage(String(error));
+        logData['err'] = new Error(String(error));
       }
     }
-    pinoInstance.fatal(logData, sanitizedMessage);
+    pinoInstance.fatal(logData, message);
+  }
+
+  trace(message: string, context?: LogContext, metadata?: LogContext): void {
+    // Trace level for finest-grained logging (detailed debugging, performance tracing)
+    pinoInstance.trace({ ...context, ...metadata }, message);
+  }
+
+  /**
+   * Get current logger bindings (context that will be included in all logs)
+   * @returns Current bindings object
+   */
+  bindings(): Record<string, unknown> {
+    return pinoInstance.bindings();
+  }
+
+  /**
+   * Update logger bindings dynamically (adds to existing bindings)
+   * Use this to add context that will be included in all subsequent logs
+   * @param bindings - Key-value pairs to add to logger context
+   */
+  setBindings(bindings: Record<string, unknown>): void {
+    pinoInstance.setBindings(bindings);
+  }
+
+  /**
+   * Flush buffered logs synchronously
+   * Use this in critical paths (shutdown, critical errors) to ensure logs are written
+   * @param callback - Optional callback when flush completes
+   */
+  flush(callback?: (err?: Error) => void): void {
+    pinoInstance.flush(callback);
+  }
+
+  /**
+   * Check if a log level is enabled
+   * Use this before expensive operations to avoid unnecessary work
+   * @param level - Log level to check ('trace', 'debug', 'info', 'warn', 'error', 'fatal')
+   * @returns true if the level is enabled, false otherwise
+   */
+  isLevelEnabled(level: 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'fatal'): boolean {
+    return pinoInstance.isLevelEnabled(level);
   }
 
   forRequest(request: Request): Logger {
     const url = new URL(request.url);
-    const child = pinoInstance.child({
+    // Create child logger with request context
+    // Pino's child() method creates a new logger with merged context
+    // Mixin will automatically inject these bindings into all log calls
+    const childPino = pinoInstance.child({
       method: request.method,
       url: url.pathname + url.search,
       userAgent: request.headers.get('user-agent') || '',
     });
-    return Object.assign(new Logger(), { pinoInstance: child });
+    // Create a new Logger instance that wraps the child Pino instance
+    return new RequestLogger(childPino);
+  }
+}
+
+/**
+ * Logger for request-specific context
+ * Wraps a Pino child logger instance
+ */
+class RequestLogger extends Logger {
+  private childPino: pino.Logger;
+
+  constructor(childPino: pino.Logger) {
+    super();
+    this.childPino = childPino;
+  }
+
+  override debug(message: string, context?: LogContext, metadata?: LogContext): void {
+    this.childPino.debug({ ...context, ...metadata }, message);
+  }
+
+  override info(message: string, context?: LogContext, metadata?: LogContext): void {
+    this.childPino.info({ ...context, ...metadata }, message);
+  }
+
+  override warn(message: string, context?: LogContext, metadata?: LogContext): void {
+    this.childPino.warn({ ...context, ...metadata }, message);
+  }
+
+  override error(message: string, error?: Error | string, context?: LogContext, metadata?: LogContext): void {
+    const logData: Record<string, unknown> = { ...context, ...metadata };
+    if (error !== undefined) {
+      if (error instanceof Error) {
+        logData['err'] = error;
+      } else if (typeof error === 'string') {
+        logData['err'] = new Error(error);
+      } else {
+        logData['err'] = new Error(String(error));
+      }
+    }
+    this.childPino.error(logData, message);
+  }
+
+  override fatal(message: string, error?: Error | string, context?: LogContext, metadata?: LogContext): void {
+    const logData: Record<string, unknown> = { ...context, ...metadata };
+    if (error !== undefined) {
+      if (error instanceof Error) {
+        logData['err'] = error;
+      } else if (typeof error === 'string') {
+        logData['err'] = new Error(error);
+      } else {
+        logData['err'] = new Error(String(error));
+      }
+    }
+    this.childPino.fatal(logData, message);
+  }
+
+  override trace(message: string, context?: LogContext, metadata?: LogContext): void {
+    this.childPino.trace({ ...context, ...metadata }, message);
+  }
+
+  override bindings(): Record<string, unknown> {
+    return this.childPino.bindings();
+  }
+
+  override setBindings(bindings: Record<string, unknown>): void {
+    this.childPino.setBindings(bindings);
+  }
+
+  override flush(callback?: (err?: Error) => void): void {
+    this.childPino.flush(callback);
+  }
+
+  override isLevelEnabled(level: 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'fatal'): boolean {
+    return this.childPino.isLevelEnabled(level);
   }
 }
 

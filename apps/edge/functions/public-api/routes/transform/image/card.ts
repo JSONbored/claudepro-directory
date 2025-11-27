@@ -8,13 +8,17 @@
 import { ImageResponse } from 'https://deno.land/x/og_edge@0.0.4/mod.ts';
 import React from 'npm:react@18.3.1';
 import {
-  getOnlyCorsHeaders,
+  initRequestLogging,
+  publicCorsHeaders,
   jsonResponse,
+  traceRequestComplete,
+  traceStep,
 } from '@heyclaude/edge-runtime';
 import {
   createDataApiContext,
   logError,
   logInfo,
+  logger,
 } from '@heyclaude/shared-runtime';
 import {
   ensureImageMagickInitialized,
@@ -27,7 +31,7 @@ import {
   getStorageServiceClient,
 } from '@heyclaude/edge-runtime';
 
-const CORS = getOnlyCorsHeaders;
+const CORS = publicCorsHeaders;
 const CARD_WIDTH = 1200;
 const CARD_HEIGHT = 630; // Same as OG images for consistency
 const CARD_MAX_DIMENSION = 1200;
@@ -312,6 +316,17 @@ export async function handleContentCardGenerateRoute(req: Request): Promise<Resp
     method: 'POST',
     app: 'public-api',
   });
+  
+  // Initialize request logging with trace and bindings
+  initRequestLogging(logContext);
+  traceStep('Content card generation request received', logContext);
+  
+  // Set bindings for this request
+  logger.setBindings({
+    requestId: logContext.request_id,
+    operation: logContext.action || 'card-generate',
+    method: req.method,
+  });
 
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
@@ -333,6 +348,7 @@ export async function handleContentCardGenerateRoute(req: Request): Promise<Resp
   }
 
   try {
+    traceStep('Processing content card generation', logContext);
     // Parse request body
     let body: ContentCardGenerateRequest;
     const contentType = req.headers.get('content-type') || '';
@@ -507,7 +523,19 @@ export async function handleContentCardGenerateRoute(req: Request): Promise<Resp
                 .update(updateData)
                 .eq('slug', body.contentId);
               if (updateError) {
-                logError('Error updating content card in database (slug)', logContext, updateError);
+                // Use dbQuery serializer for consistent database query formatting
+                logError('Error updating content card in database (slug)', {
+                  ...logContext,
+                  dbQuery: {
+                    table: 'content',
+                    operation: 'update',
+                    schema: 'public',
+                    args: {
+                      slug: body.contentId,
+                      // Update fields redacted by Pino's redact config
+                    },
+                  },
+                }, updateError);
               } else {
                 logInfo('Content card URL updated in database (slug)', { ...logContext, slug: body.contentId });
               }
@@ -517,7 +545,19 @@ export async function handleContentCardGenerateRoute(req: Request): Promise<Resp
                 .update(updateData)
                 .eq('id', body.contentId);
               if (updateError) {
-                logError('Error updating content card in database (id)', logContext, updateError);
+                // Use dbQuery serializer for consistent database query formatting
+                logError('Error updating content card in database (id)', {
+                  ...logContext,
+                  dbQuery: {
+                    table: 'content',
+                    operation: 'update',
+                    schema: 'public',
+                    args: {
+                      id: body.contentId,
+                      // Update fields redacted by Pino's redact config
+                    },
+                  },
+                }, updateError);
               } else {
                 logInfo('Content card URL updated in database (id)', { ...logContext, contentId: body.contentId });
               }
@@ -539,6 +579,7 @@ export async function handleContentCardGenerateRoute(req: Request): Promise<Resp
       ...(optimizedDimensions ? { dimensions: optimizedDimensions } : {}),
     };
 
+    traceRequestComplete(logContext);
     return jsonResponse(response, 200, CORS);
   } catch (error) {
     logError('Content card generation failed', logContext, error);

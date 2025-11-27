@@ -1,15 +1,15 @@
 /**
- * Feature Flag Defaults
+ * Static Configuration Defaults
  *
- * Extracted from flags.ts to allow safe importing in server actions and build-time scripts
- * without triggering "Server Functions cannot be called" errors or importing the heavy Flags SDK.
+ * Centralized source of truth for all static configuration values.
+ * These values are version-controlled in code.
  */
 
 import { Constants } from '@heyclaude/database-types';
 
 /**
- * App Settings (formerly from app_settings table)
- * Usage: const config = await appSettings(); const pages = config['newsletter.excluded_pages'];
+ * App Settings - Application-wide configuration values
+ * Usage: const config = APP_SETTINGS_DEFAULTS; const pages = config['newsletter.excluded_pages'];
  */
 export const APP_SETTINGS_DEFAULTS = {
   'newsletter.excluded_pages': [
@@ -42,7 +42,7 @@ export const APP_SETTINGS_DEFAULTS = {
 
 /**
  * Component Configs - Component-level UI behavior settings
- * Usage: const config = await componentConfigs(); const showCopy = config['cards.show_copy_button'];
+ * Usage: const config = COMPONENT_CONFIG_DEFAULTS; const showCopy = config['cards.show_copy_button'];
  */
 export const COMPONENT_CONFIG_DEFAULTS = {
   'cards.show_copy_button': true,
@@ -300,7 +300,8 @@ export const RECENTLY_VIEWED_CONFIG_DEFAULTS = {
 
 /**
  * Cache Configs - Cache TTL settings and invalidation rules
- * Usage: const config = await cacheConfigs(); const ttl = config['cache.homepage.ttl_seconds'];
+ * Usage: const config = getCacheConfigSnapshot(); const ttl = config['cache.homepage.ttl_seconds'];
+ * Or use typed helpers: const ttl = getCacheTtl('cache.homepage.ttl_seconds');
  */
 export const CACHE_CONFIG_DEFAULTS = {
   // TTL Settings (in seconds) - Optimized for low-traffic sites
@@ -391,4 +392,9 @@ export const CACHE_CONFIG_DEFAULTS = {
   'cache.invalidate.usage_tracking': ['content'] as string[],
   'cache.invalidate.changelog': [Constants.public.Enums.content_category[10]] as string[], // 'changelog'
   'cache.invalidate.newsletter_subscribe': ['newsletter'] as string[],
+
+  // Queue Batch Sizes (for edge functions)
+  'queue.pulse.batch_size': 100,
+  'queue.changelog_process.batch_size': 5,
+  'queue.changelog_notify.batch_size': 5,
 } as const;

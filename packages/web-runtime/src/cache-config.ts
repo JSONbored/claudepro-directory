@@ -1,16 +1,11 @@
 /**
  * Cache Configuration Utilities
  *
- * CRITICAL: This module is server-only. It must never execute in client/browser environments
- * because it may lazily access runtime-only dependencies (e.g., Vercel Edge Config via flags).
+ * CRITICAL: This module is server-only. It must never execute in client/browser environments.
+ * 
+ * Uses static configuration defaults from feature-flags/defaults.ts (no external dependencies).
  */
 
-
-const isBrowserContext = typeof window !== 'undefined' || typeof document !== 'undefined';
-
-import { logger } from './logger.ts';
-import { isBuildTime } from './build-time.ts';
-import { normalizeError } from './errors.ts';
 import { CACHE_CONFIG_DEFAULTS } from './feature-flags/defaults.ts';
 
 export const CACHE_TTL_KEYS = [
@@ -112,7 +107,6 @@ type CacheConfigSchema = { [K in CacheTtlKey]: number } & {
 };
 
 export type CacheConfig = CacheConfigSchema;
-export type CacheConfigPromise = Promise<CacheConfig>;
 
 // Helper to split the flat CACHE_CONFIG_DEFAULTS into TTL and Invalidate parts
 const getBuildTimeTtls = (): Record<CacheTtlKey, number> => {
@@ -154,169 +148,47 @@ const getBuildTimeInvalidations = (): Record<CacheInvalidateKey, readonly string
 const BUILD_TIME_TTL_DEFAULTS = getBuildTimeTtls();
 const CACHE_INVALIDATE_DEFAULTS = getBuildTimeInvalidations();
 
-let cacheConfigPromise: CacheConfigPromise | null = null;
-// OPTIMIZATION: Store resolved config to avoid re-awaiting the same promise
+// OPTIMIZATION: Store resolved config to avoid re-computing (request-scoped memoization)
 let cachedConfig: CacheConfig | null = null;
 
-function isBuildTimeContext(error: unknown): boolean {
-  if (error instanceof Error) {
-    const msg = error.message;
-    return (
-      (msg.includes('headers') && msg.includes('request scope')) ||
-      (msg.includes('Dynamic server usage') && msg.includes('headers'))
-    );
-  }
-  return false;
-}
-
-async function loadCacheConfig(): Promise<CacheConfig> {
-  if (isBrowserContext) {
-    return {
-      ...(BUILD_TIME_TTL_DEFAULTS as Record<CacheTtlKey, number>),
-      ...(CACHE_INVALIDATE_DEFAULTS as Record<CacheInvalidateKey, readonly string[]>),
-    } as CacheConfig;
-  }
-
-  // Single build-time check - eliminates redundant calls
-  const isBuild = isBuildTime();
-  if (isBuild) {
-    return {
-      ...(BUILD_TIME_TTL_DEFAULTS as Record<CacheTtlKey, number>),
-      ...(CACHE_INVALIDATE_DEFAULTS as Record<CacheInvalidateKey, readonly string[]>),
-    } as CacheConfig;
-  }
-
+function loadCacheConfig(): CacheConfig {
   // OPTIMIZATION: Return cached config if already loaded (request-scoped memoization)
   if (cachedConfig !== null) {
     return cachedConfig;
   }
 
-  if (!cacheConfigPromise) {
-    try {
-      // Note: Statsig/feature flags loading would happen here in runtime
-      // For now, return defaults (actual implementation would load from Statsig)
-      const defaultConfig = {
-        ...(BUILD_TIME_TTL_DEFAULTS as Record<CacheTtlKey, number>),
-        ...(CACHE_INVALIDATE_DEFAULTS as Record<CacheInvalidateKey, readonly string[]>),
-      } as CacheConfig;
-      // Cache the default config to avoid re-computing
-      cachedConfig = defaultConfig;
-      return defaultConfig;
-    } catch (error) {
-      if (
-        isBuildTimeContext(error) ||
-        (error instanceof Error && error.message.includes('Server Functions'))
-      ) {
-        const defaultConfig = {
-          ...(BUILD_TIME_TTL_DEFAULTS as Record<CacheTtlKey, number>),
-          ...(CACHE_INVALIDATE_DEFAULTS as Record<CacheInvalidateKey, readonly string[]>),
-        } as CacheConfig;
-        cachedConfig = defaultConfig;
-        return defaultConfig;
-      }
-      throw error;
-    }
-  }
-
-  try {
-    const config = await cacheConfigPromise;
-    // Cache the resolved config for subsequent calls in the same request
-    cachedConfig = config;
-    return config;
-  } catch (error) {
-    cacheConfigPromise = null;
-    cachedConfig = null;
-
-    if (
-      isBuildTimeContext(error) ||
-      (error instanceof Error && error.message.includes('Server Functions'))
-    ) {
-      return {
-        ...(BUILD_TIME_TTL_DEFAULTS as Record<CacheTtlKey, number>),
-        ...(CACHE_INVALIDATE_DEFAULTS as Record<CacheInvalidateKey, readonly string[]>),
-      } as CacheConfig;
-    }
-
-    const normalized = normalizeError(error, 'Failed to load cache config from Statsig');
-    logger.error('loadCacheConfig failed', normalized, {
-      source: 'web-runtime/cache-config',
-    });
-    const fallbackConfig = {
-      ...(BUILD_TIME_TTL_DEFAULTS as Record<CacheTtlKey, number>),
-      ...(CACHE_INVALIDATE_DEFAULTS as Record<CacheInvalidateKey, readonly string[]>),
-    } as CacheConfig;
-    // Cache the fallback config
-    cachedConfig = fallbackConfig;
-    return fallbackConfig;
-  }
+  const defaultConfig = {
+    ...(BUILD_TIME_TTL_DEFAULTS as Record<CacheTtlKey, number>),
+    ...(CACHE_INVALIDATE_DEFAULTS as Record<CacheInvalidateKey, readonly string[]>),
+  } as CacheConfig;
+  
+  // Cache the config to avoid re-computing
+  cachedConfig = defaultConfig;
+  return defaultConfig;
 }
 
-export async function primeCacheConfig(promise: CacheConfigPromise): Promise<void> {
-  cacheConfigPromise = promise;
-  // Clear cached config when priming a new promise
-  cachedConfig = null;
+export function getCacheConfigSnapshot(): CacheConfig {
+  return loadCacheConfig();
 }
 
-export async function getCacheConfigSnapshot(): Promise<CacheConfig> {
-  if (isBrowserContext) {
-    return {
-      ...(BUILD_TIME_TTL_DEFAULTS as Record<CacheTtlKey, number>),
-      ...(CACHE_INVALIDATE_DEFAULTS as Record<CacheInvalidateKey, readonly string[]>),
-    } as CacheConfig;
-  }
-
-  try {
-    return await loadCacheConfig();
-  } catch {
-    return {
-      ...(BUILD_TIME_TTL_DEFAULTS as Record<CacheTtlKey, number>),
-      ...(CACHE_INVALIDATE_DEFAULTS as Record<CacheInvalidateKey, readonly string[]>),
-    } as CacheConfig;
-  }
-}
-
-export async function getCacheTtl(key: CacheTtlKey): Promise<number> {
-  if (isBrowserContext) {
-    return BUILD_TIME_TTL_DEFAULTS[key] ?? 3600;
-  }
-
-  if (isBuildTime()) {
-    return BUILD_TIME_TTL_DEFAULTS[key] ?? 3600;
-  }
-
+export function getCacheTtl(key: CacheTtlKey): number {
   // OPTIMIZATION: Use cached config if available (request-scoped memoization)
   if (cachedConfig !== null) {
     return cachedConfig[key];
   }
 
-  try {
-    const config = await loadCacheConfig();
-    return config[key];
-  } catch {
-    return BUILD_TIME_TTL_DEFAULTS[key] ?? 3600;
-  }
+  // Load static config
+  const config = loadCacheConfig();
+  return config[key];
 }
 
-export async function getCacheInvalidateTags(
-  key: CacheInvalidateKey
-): Promise<readonly string[]> {
-  if (isBrowserContext) {
-    return CACHE_INVALIDATE_DEFAULTS[key] ?? [];
-  }
-
-  if (isBuildTime()) {
-    return CACHE_INVALIDATE_DEFAULTS[key] ?? [];
-  }
-
+export function getCacheInvalidateTags(key: CacheInvalidateKey): readonly string[] {
   // OPTIMIZATION: Use cached config if available (request-scoped memoization)
   if (cachedConfig !== null) {
     return cachedConfig[key];
   }
 
-  try {
-    const config = await loadCacheConfig();
-    return config[key];
-  } catch {
-    return CACHE_INVALIDATE_DEFAULTS[key] ?? [];
-  }
+  // Load static config
+  const config = loadCacheConfig();
+  return config[key];
 }

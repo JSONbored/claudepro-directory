@@ -3,8 +3,6 @@
  * Ensures consistent log structure across all functions
  */
 
-import { errorToString } from './error-handling.ts';
-
 export interface BaseLogContext {
   function: string;
   action?: string;
@@ -18,15 +16,17 @@ export interface BaseLogContext {
  */
 export function createEmailHandlerContext(
   action: string,
-  options?: { email?: string; requestId?: string; subscriptionId?: string }
+  options?: { email?: string; requestId?: string; subscriptionId?: string; [key: string]: unknown }
 ): BaseLogContext {
+  const { email, requestId, subscriptionId, ...rest } = options || {};
   return {
     function: 'email-handler',
     action,
-    request_id: options?.requestId ?? crypto.randomUUID(),
+    request_id: requestId ?? crypto.randomUUID(),
     started_at: new Date().toISOString(),
-    ...(options?.email && { email: options.email }),
-    ...(options?.subscriptionId && { subscription_id: options.subscriptionId }),
+    ...(email && { email }),
+    ...(subscriptionId && { subscription_id: subscriptionId }),
+    ...rest, // Include any additional properties
   };
 }
 
@@ -35,16 +35,18 @@ export function createEmailHandlerContext(
  */
 export function createDataApiContext(
   route: string,
-  options?: { path?: string; method?: string; resource?: string; app?: string; requestId?: string }
+  options?: { path?: string; method?: string; resource?: string; app?: string; requestId?: string; [key: string]: unknown }
 ): BaseLogContext {
+  const { path, method, resource, app, requestId, ...rest } = options || {};
   return {
-    function: options?.app ?? 'data-api',
+    function: app ?? 'data-api',
     action: route,
-    request_id: options?.requestId ?? crypto.randomUUID(),
+    request_id: requestId ?? crypto.randomUUID(),
     started_at: new Date().toISOString(),
-    ...(options?.path && { path: options.path }),
-    ...(options?.method && { method: options.method }),
-    ...(options?.resource && { resource: options.resource }),
+    ...(path && { path }),
+    ...(method && { method }),
+    ...(resource && { resource }),
+    ...rest, // Include any additional properties
   };
 }
 
@@ -221,60 +223,162 @@ export function createTransformApiContext(
 /**
  * Logging functions - use these instead of console.log/error/warn directly
  * All logging should use logContext for consistent structured logging
+ * 
+ * Now uses Pino logger with centralized configuration for consistent logging
+ * across the codebase. Pino automatically handles:
+ * - Error serialization (via stdSerializers.err)
+ * - Sensitive data redaction (via redact option in config)
  */
+
+import pino from 'pino';
+import { createPinoConfig } from './logger/config.ts';
+
+// Create Pino logger instance with centralized configuration
+// Pino automatically handles error serialization and redaction
+const pinoLogger = pino(createPinoConfig({ service: 'shared-runtime' }));
 
 /**
  * Log an info-level message
+ * Mixin function automatically injects context from logger.bindings() (requestId, operation, userId, etc.)
+ * 
+ * @param message - Log message
+ * @param logContext - Log context (can be partial - mixin will add missing fields from bindings)
  */
-function formatLabel(context: BaseLogContext): string {
-  return context.action ? `${context.function}:${context.action}` : context.function;
+export function logInfo(message: string, logContext: Partial<BaseLogContext> & Record<string, unknown>): void {
+  // Pino handles redaction automatically via config
+  // Mixin automatically injects bindings (requestId, operation, userId, etc.) from logger.bindings()
+  // Only pass logContext fields that aren't already in bindings (mixin handles bindings automatically)
+  pinoLogger.info(logContext, message);
 }
 
-export function logInfo(message: string, logContext: BaseLogContext): void {
-  console.log(`[${formatLabel(logContext)}] ${message}`, {
-    ...logContext,
-  });
+/**
+ * Log a trace-level message (finest-grained logging)
+ * Use for detailed debugging, performance tracing, request/response logging
+ * Mixin function automatically injects context from logger.bindings() (requestId, operation, userId, etc.)
+ * 
+ * @param message - Log message
+ * @param logContext - Log context (can be partial - mixin will add missing fields from bindings)
+ */
+export function logTrace(message: string, logContext: Partial<BaseLogContext> & Record<string, unknown>): void {
+  // Only log if trace level is enabled (avoids unnecessary work)
+  // Mixin automatically injects bindings (requestId, operation, userId, etc.) from logger.bindings()
+  if (pinoLogger.isLevelEnabled('trace')) {
+    pinoLogger.trace(logContext, message);
+  }
 }
 
 /**
  * Log an error-level message
+ * Mixin function automatically injects context from logger.bindings() (requestId, operation, userId, etc.)
+ * Flushes logs for critical errors to ensure they're written
+ * 
+ * @param message - Log message
+ * @param logContext - Log context (can be partial - mixin will add missing fields from bindings)
+ * @param error - Optional error object to include in log
  */
-export function logError(message: string, logContext: BaseLogContext, error?: unknown): void {
-  const errorData: Record<string, unknown> = {
+export function logError(message: string, logContext: Partial<BaseLogContext> & Record<string, unknown>, error?: unknown): void {
+  // Build log data - mixin will automatically inject bindings (requestId, operation, userId, etc.)
+  // Only include logContext fields that aren't already in bindings (mixin handles bindings automatically)
+  const logData: Record<string, unknown> = {
     ...logContext,
   };
-
+  
   if (error) {
-    errorData['error'] = errorToString(error);
+    const errorObj = error instanceof Error ? error : new Error(String(error));
+    logData['err'] = errorObj;
   }
-
-  console.error(`[${formatLabel(logContext)}] ${message}`, errorData);
+  
+  // Pino's mixin function will automatically inject:
+  // - requestId, operation, function (from logger.bindings())
+  // - userId, method, route, path (from logger.bindings())
+  // - category, slug, correlationId (from logger.bindings())
+  pinoLogger.error(logData, message);
+  
+  // Flush logs synchronously for errors to ensure they're written before response
+  // This is especially important in edge functions where execution may terminate quickly
+  pinoLogger.flush();
 }
 
 /**
  * Log a warning-level message
+ * Mixin function automatically injects context from logger.bindings() (requestId, operation, userId, etc.)
+ * 
+ * @param message - Log message
+ * @param logContext - Log context (can be partial - mixin will add missing fields from bindings)
+ * @param error - Optional error object to include in log
  */
-export function logWarn(message: string, logContext: BaseLogContext): void {
-  console.warn(`[${formatLabel(logContext)}] ${message}`, {
+export function logWarn(message: string, logContext: Partial<BaseLogContext> & Record<string, unknown>, error?: unknown): void {
+  // Build log data - mixin will automatically inject bindings (requestId, operation, userId, etc.)
+  const logData: Record<string, unknown> = {
     ...logContext,
-  });
+  };
+  
+  if (error) {
+    const errorObj = error instanceof Error ? error : new Error(String(error));
+    logData['err'] = errorObj;
+  }
+  
+  // Pino handles redaction automatically via config
+  // Mixin automatically injects bindings (requestId, operation, userId, etc.) from logger.bindings()
+  pinoLogger.warn(logData, message);
 }
 
 /**
  * Lightweight Logger for Shared Runtime
  * Compatible with Web Runtime Logger interface
+ * Now uses Pino for consistent logging across the codebase
  */
 export const logger = {
   info: (message: string, context?: Record<string, unknown>) => {
-    console.log(message, context);
+    pinoLogger.info(context || {}, message);
   },
   warn: (message: string, context?: Record<string, unknown>) => {
-    console.warn(message, context);
+    pinoLogger.warn(context || {}, message);
   },
   error: (message: string, error?: unknown, context?: Record<string, unknown>) => {
-    console.error(message, { error: errorToString(error), ...context });
+    const logData: Record<string, unknown> = { ...(context || {}) };
+    if (error) {
+      const errorObj = error instanceof Error ? error : new Error(String(error));
+      logData['err'] = errorObj;
+    }
+    pinoLogger.error(logData, message);
   },
   debug: (message: string, context?: Record<string, unknown>) => {
-    console.debug(message, context);
+    pinoLogger.debug(context || {}, message);
+  },
+  trace: (message: string, context?: Record<string, unknown>) => {
+    pinoLogger.trace(context || {}, message);
+  },
+  fatal: (message: string, error?: unknown, context?: Record<string, unknown>) => {
+    const logData: Record<string, unknown> = { ...(context || {}) };
+    if (error) {
+      const errorObj = error instanceof Error ? error : new Error(String(error));
+      logData['err'] = errorObj;
+    }
+    pinoLogger.fatal(logData, message);
+  },
+  /**
+   * Get current logger bindings (context that will be included in all logs)
+   */
+  bindings: (): Record<string, unknown> => {
+    return pinoLogger.bindings();
+  },
+  /**
+   * Update logger bindings dynamically (adds to existing bindings)
+   */
+  setBindings: (bindings: Record<string, unknown>): void => {
+    pinoLogger.setBindings(bindings);
+  },
+  /**
+   * Flush buffered logs synchronously
+   */
+  flush: (callback?: (err?: Error) => void): void => {
+    pinoLogger.flush(callback);
+  },
+  /**
+   * Check if a log level is enabled
+   */
+  isLevelEnabled: (level: 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'fatal'): boolean => {
+    return pinoLogger.isLevelEnabled(level);
   },
 };

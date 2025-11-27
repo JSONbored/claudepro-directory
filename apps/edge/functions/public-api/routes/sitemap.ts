@@ -6,16 +6,21 @@ import {
   errorResponse,
   fetchWithRetry,
   getOnlyCorsHeaders,
+  initRequestLogging,
   jsonResponse,
   methodNotAllowedResponse,
   SITE_URL,
   supabaseAnon,
+  traceRequestComplete,
+  traceStep,
 } from '@heyclaude/edge-runtime';
 import type { BaseLogContext } from '@heyclaude/shared-runtime';
 import {
   buildSecurityHeaders,
+  createDataApiContext,
   logError,
   logInfo,
+  logger,
   TIMEOUT_PRESETS,
   withTimeout,
 } from '@heyclaude/shared-runtime';
@@ -32,28 +37,59 @@ export async function handleSitemapRoute(
   req: Request,
   logContext?: BaseLogContext
 ): Promise<Response> {
+  // Create log context if not provided
+  const finalLogContext = logContext || createDataApiContext('sitemap', {
+    path: url.pathname,
+    method,
+    app: 'public-api',
+  });
+  
+  // Initialize request logging with trace and bindings
+  initRequestLogging(finalLogContext);
+  traceStep('Sitemap request received', finalLogContext);
+  
+  // Set bindings for this request
+  logger.setBindings({
+    requestId: finalLogContext.request_id,
+    operation: finalLogContext.action || 'sitemap',
+    method,
+  });
+  
   if (segments.length > 0) {
     return badRequestResponse('Sitemap path does not accept nested segments', CORS);
   }
 
   if (method === 'GET') {
-    return handleSitemapGet(url, logContext);
+    return handleSitemapGet(url, finalLogContext);
   }
 
   if (method === 'POST') {
-    return handleSitemapIndexNow(req, logContext);
+    return handleSitemapIndexNow(req, finalLogContext);
   }
 
   return methodNotAllowedResponse('GET, POST', CORS);
 }
 
-async function handleSitemapGet(url: URL, _logContext?: BaseLogContext): Promise<Response> {
+async function handleSitemapGet(url: URL, logContext: BaseLogContext): Promise<Response> {
   const format = (url.searchParams.get('format') || 'xml').toLowerCase();
+  
+  traceStep(`Generating sitemap (format: ${format})`, logContext);
+  
+  // Update bindings with format
+  logger.setBindings({
+    format,
+  });
 
   if (format === 'json') {
     const { data: urls, error } = await supabaseAnon.rpc('get_site_urls', undefined);
     if (error) {
-      return errorResponse(error, 'data-api:get_site_urls', CORS);
+      // Use dbQuery serializer for consistent database query formatting
+      return errorResponse(error, 'data-api:get_site_urls', CORS, {
+        ...logContext,
+        dbQuery: {
+          rpcName: 'get_site_urls',
+        },
+      });
     }
     // Validate data structure without type assertion
     if (!(urls && Array.isArray(urls)) || urls.length === 0) {
@@ -122,6 +158,7 @@ async function handleSitemapGet(url: URL, _logContext?: BaseLogContext): Promise
       }
     }
 
+    traceRequestComplete(logContext);
     return jsonResponse(
       {
         urls: mappedUrls,
@@ -146,13 +183,21 @@ async function handleSitemapGet(url: URL, _logContext?: BaseLogContext): Promise
   const { data, error } = await supabaseAnon.rpc('generate_sitemap_xml', rpcArgs);
 
   if (error) {
-    return errorResponse(error, 'data-api:generate_sitemap_xml', CORS);
+    // Use dbQuery serializer for consistent database query formatting
+    return errorResponse(error, 'data-api:generate_sitemap_xml', CORS, {
+      ...logContext,
+      dbQuery: {
+        rpcName: 'generate_sitemap_xml',
+        args: rpcArgs, // Will be redacted by Pino's redact config
+      },
+    });
   }
 
   if (!data) {
     return jsonResponse({ error: 'Sitemap XML generation returned null' }, 500, CORS);
   }
 
+  traceRequestComplete(logContext);
   return new Response(data, {
     status: 200,
     headers: {
@@ -167,7 +212,9 @@ async function handleSitemapGet(url: URL, _logContext?: BaseLogContext): Promise
   });
 }
 
-async function handleSitemapIndexNow(req: Request, logContext?: BaseLogContext): Promise<Response> {
+async function handleSitemapIndexNow(req: Request, logContext: BaseLogContext): Promise<Response> {
+  traceStep('Processing IndexNow submission', logContext);
+  
   const triggerKey = req.headers.get('X-IndexNow-Trigger-Key');
 
   if (!INDEXNOW_TRIGGER_KEY) {
@@ -198,7 +245,13 @@ async function handleSitemapIndexNow(req: Request, logContext?: BaseLogContext):
 
   const { data: urls, error } = await supabaseAnon.rpc('get_site_urls', undefined);
   if (error) {
-    return errorResponse(error, 'data-api:get_site_urls', CORS);
+    // Use dbQuery serializer for consistent database query formatting
+    return errorResponse(error, 'data-api:get_site_urls', CORS, {
+      ...logContext,
+      dbQuery: {
+        rpcName: 'get_site_urls',
+      },
+    });
   }
   // Validate data structure without type assertion
   if (!(urls && Array.isArray(urls)) || urls.length === 0) {
@@ -267,13 +320,12 @@ async function handleSitemapIndexNow(req: Request, logContext?: BaseLogContext):
       );
     }
 
-    if (logContext) {
-      logInfo('IndexNow submitted', {
-        ...logContext,
-        submitted: urlList.length,
-        status: finalResponse.status,
-      });
-    }
+    logInfo('IndexNow submitted', {
+      ...logContext,
+      submitted: urlList.length,
+      status: finalResponse.status,
+    });
+    traceRequestComplete(logContext);
 
     return jsonResponse(
       {
@@ -285,16 +337,15 @@ async function handleSitemapIndexNow(req: Request, logContext?: BaseLogContext):
     );
   } catch (error) {
     // Log error but return success to avoid blocking
-    if (logContext) {
-      logError(
-        'IndexNow submission failed',
-        {
-          ...logContext,
-          submitted: urlList.length,
-        },
-        error
-      );
-    }
+    logError(
+      'IndexNow submission failed',
+      {
+        ...logContext,
+        submitted: urlList.length,
+      },
+      error
+    );
+    traceRequestComplete(logContext);
 
     // Return success even if IndexNow fails (non-blocking)
     return jsonResponse(

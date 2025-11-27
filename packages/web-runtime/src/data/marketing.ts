@@ -1,7 +1,7 @@
 import 'server-only';
 
-// Lazy import feature flags to avoid module-level server-only code execution
-import { getPricingConfig } from '../feature-flags/access.ts';
+// Use static pricing config
+import { PRICING_CONFIG_DEFAULTS } from '../feature-flags/defaults.ts';
 
 export interface PartnerPricing {
   jobs: {
@@ -20,9 +20,9 @@ export interface PartnerPricing {
   };
 }
 
-export async function getPartnerPricing(): Promise<PartnerPricing> {
-  const result = await getPricingConfig();
-  const config = result;
+export function getPartnerPricing(): PartnerPricing {
+  // Get pricing config from static defaults
+  const config = PRICING_CONFIG_DEFAULTS;
 
   return {
     jobs: {

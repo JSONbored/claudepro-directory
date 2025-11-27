@@ -6,10 +6,12 @@
 import {
   badRequestResponse,
   errorResponse,
+  initRequestLogging,
   ingestWebhookEvent,
   processPolarWebhook,
   processResendWebhook,
   successResponse,
+  traceStep,
   unauthorizedResponse,
   WebhookIngestError,
   webhookCorsHeaders,
@@ -19,11 +21,27 @@ import {
   logError,
   logInfo,
   logWarn,
+  logger,
   MAX_BODY_SIZE,
   validateBodySize,
 } from '@heyclaude/shared-runtime';
 
 export async function handleExternalWebhook(req: Request): Promise<Response> {
+  const logContext = createNotificationRouterContext('external-webhook', {
+    source: 'unknown',
+  });
+  
+  // Initialize request logging with trace and bindings (Phase 1 & 2)
+  initRequestLogging(logContext);
+  traceStep('External webhook request received', logContext);
+  
+  // Set bindings for this request - mixin will automatically inject these into all subsequent logs
+  logger.setBindings({
+    requestId: logContext.request_id,
+    operation: logContext.action || 'external-webhook',
+    function: logContext.function,
+  });
+  
   try {
     // Validate body size before reading
     const contentLength = req.headers.get('content-length');
@@ -46,19 +64,25 @@ export async function handleExternalWebhook(req: Request): Promise<Response> {
     const result = await ingestWebhookEvent(body, req.headers);
     const cors = result.cors ?? webhookCorsHeaders;
 
-    const logContext = createNotificationRouterContext('external-webhook', {
+    // Update bindings with source information
+    logger.setBindings({
       source: result.source,
     });
+    
+    const enrichedLogContext = {
+      ...logContext,
+      source: result.source,
+    };
 
     if (result.duplicate) {
       logInfo('Webhook already processed', {
-        ...logContext,
+        ...enrichedLogContext,
         duplicate: result.duplicate,
         received_at: new Date().toISOString(),
       });
     } else {
       logInfo('Webhook routed', {
-        ...logContext,
+        ...enrichedLogContext,
         duplicate: result.duplicate,
         received_at: new Date().toISOString(),
       });
@@ -90,30 +114,31 @@ export async function handleExternalWebhook(req: Request): Promise<Response> {
 
     if (!result.duplicate && result.source === 'polar') {
       try {
+        traceStep('Processing Polar webhook', enrichedLogContext);
         await processPolarWebhook(result);
+        traceStep('Polar webhook processed successfully', enrichedLogContext);
       } catch (error) {
-        logError('Polar webhook processing failed', logContext, error);
-        return errorResponse(error, 'flux-station:polar-webhook', corsHeaders, logContext);
+        logError('Polar webhook processing failed', enrichedLogContext, error);
+        return errorResponse(error, 'flux-station:polar-webhook', corsHeaders, enrichedLogContext);
       }
     } else if (!result.duplicate && result.source === 'resend') {
       try {
+        traceStep('Processing Resend webhook', enrichedLogContext);
         await processResendWebhook(result);
+        traceStep('Resend webhook processed successfully', enrichedLogContext);
       } catch (error) {
-        logError('Resend webhook processing failed', logContext, error);
-        return errorResponse(error, 'flux-station:resend-webhook', corsHeaders, logContext);
+        logError('Resend webhook processing failed', enrichedLogContext, error);
+        return errorResponse(error, 'flux-station:resend-webhook', corsHeaders, enrichedLogContext);
       }
     }
 
+    traceStep('External webhook request completed successfully', enrichedLogContext);
     return successResponse(
       { message: 'OK', source: result.source, duplicate: result.duplicate },
       200,
       corsHeaders
     );
   } catch (error) {
-    const logContext = createNotificationRouterContext('external-webhook', {
-      source: 'unknown',
-    });
-
     if (error instanceof WebhookIngestError) {
       if (error.status === 'unauthorized') {
         logWarn('Unauthorized webhook', logContext);

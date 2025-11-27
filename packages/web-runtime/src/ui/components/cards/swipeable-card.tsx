@@ -38,13 +38,13 @@
 
 import { logger } from '../../../logger.ts';
 import { normalizeError } from '../../../errors.ts';
-import { getAnimationConfig } from '../../../actions/feature-flags.ts';
+import { getAnimationConfig } from '../../../config/static-configs.ts';
 import { Bookmark, Copy as CopyIcon } from '../../../icons.tsx';
 import { POSITION_PATTERNS, UI_CLASSES } from '../../constants.ts';
 import { SEMANTIC_COLORS } from '../../colors.ts';
 import { motion, useMotionValue, useTransform } from 'motion/react';
 import type { ReactNode } from 'react';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 export interface SwipeableCardWrapperProps {
   /** Child components to wrap with swipe gestures */
@@ -74,11 +74,28 @@ export function SwipeableCardWrapper({
 }: SwipeableCardWrapperProps) {
   const [isMobile, setIsMobile] = useState(false);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
-  const [springSmooth, setSpringSmooth] = useState({
-    type: 'spring' as const,
-    stiffness: 300,
-    damping: 25,
-  });
+  const springSmooth = useMemo(() => {
+    try {
+      const config = getAnimationConfig();
+      return {
+        type: 'spring' as const,
+        stiffness: config['animation.spring.smooth.stiffness'],
+        damping: config['animation.spring.smooth.damping'],
+      };
+    } catch (error) {
+      const normalized = normalizeError(error, 'SwipeableCardWrapper: Failed to load animation config');
+      logger.warn('SwipeableCardWrapper: Failed to load animation config', undefined, {
+        component: 'SwipeableCardWrapper',
+        error: normalized.message,
+      });
+      // Fallback to default values
+      return {
+        type: 'spring' as const,
+        stiffness: 300,
+        damping: 25,
+      };
+    }
+  }, []);
 
   // Detect mobile and reduced motion preference
   useEffect(() => {
@@ -124,26 +141,6 @@ export function SwipeableCardWrapper({
     }
   }, []);
 
-  // Load animation config
-  useEffect(() => {
-    getAnimationConfig({})
-      .then((result) => {
-        if (!result?.data) return;
-        const config = result.data;
-        setSpringSmooth({
-          type: 'spring' as const,
-          stiffness: config['animation.spring.smooth.stiffness'],
-          damping: config['animation.spring.smooth.damping'],
-        });
-      })
-      .catch((error: unknown) => {
-        const normalized = normalizeError(error, 'SwipeableCardWrapper: Failed to load animation config');
-        logger.error('SwipeableCardWrapper: Failed to load animation config', undefined, {
-          component: 'SwipeableCardWrapper',
-          error: normalized.message,
-        });
-      });
-  }, []);
 
   // Motion values for drag tracking
   const x = useMotionValue(0);

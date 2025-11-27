@@ -140,7 +140,7 @@ export async function searchCompanies(query: string, limit = 10): Promise<Compan
   }
 
   const normalized = trimmed.toLowerCase();
-  const ttl = await getCacheTtl('cache.company_search.ttl_seconds');
+  const ttl = getCacheTtl('cache.company_search.ttl_seconds');
 
   return unstable_cache(
     () => fetchCompanySearchResults(trimmed, limit),

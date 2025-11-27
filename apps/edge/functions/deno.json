@@ -22,7 +22,8 @@
 		"yoga-layout": "npm:yoga-layout@3.2.1",
 		"https://esm.sh/yoga-layout@3.2.1": "npm:yoga-layout@3.2.1",
 		"https://esm.sh/yoga-layout@3.2.1/": "npm:yoga-layout@3.2.1/",
-		"@imagemagick/magick-wasm": "npm:@imagemagick/magick-wasm@0.0.30"
+		"@imagemagick/magick-wasm": "npm:@imagemagick/magick-wasm@0.0.30",
+		"pino": "npm:pino@10.1.0"
 	},
 	"lint": {
 		"include": ["**/*.ts", "**/*.tsx"],

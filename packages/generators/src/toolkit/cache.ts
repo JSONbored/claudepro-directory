@@ -6,6 +6,7 @@ import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { logger } from './logger.ts';
 
 const ROOT = fileURLToPath(new URL('../../../../', import.meta.url));
 const CACHE_DIR = join(ROOT, '.build-cache');
@@ -46,7 +47,10 @@ function loadCache(): BuildCache {
     const cache = JSON.parse(content) as BuildCache;
 
     if (cache.version !== CACHE_VERSION) {
-      console.warn(`⚠️  Cache version mismatch (${cache.version} → ${CACHE_VERSION}), resetting`);
+      logger.warn('Cache version mismatch, resetting', {
+        oldVersion: cache.version,
+        newVersion: CACHE_VERSION,
+      });
       return {
         version: CACHE_VERSION,
         lastUpdated: new Date().toISOString(),
@@ -56,10 +60,8 @@ function loadCache(): BuildCache {
 
     return cache;
   } catch (error) {
-    console.warn(
-      '⚠️  Cache corrupted, resetting',
-      error instanceof Error ? error.message : String(error)
-    );
+    const errorObj = error instanceof Error ? error : new Error(String(error));
+    logger.warn('Cache corrupted, resetting', { err: errorObj });
     return {
       version: CACHE_VERSION,
       lastUpdated: new Date().toISOString(),
@@ -179,28 +181,30 @@ export function getCacheStats(): {
 
 export function printCache(): void {
   const cache = loadCache();
-  console.log('\n📦 Build Cache Contents\n');
-  console.log(`Version: ${cache.version}`);
-  console.log(`Last Updated: ${cache.lastUpdated}\n`);
+  // Use logger for structured logging, but format for CLI readability
+  logger.info('Build Cache Contents', {
+    version: cache.version,
+    lastUpdated: cache.lastUpdated,
+    entryCount: Object.keys(cache.caches).length,
+  });
 
   if (Object.keys(cache.caches).length === 0) {
-    console.log('   (empty)\n');
+    logger.info('Cache is empty');
     return;
   }
 
+  // Log each cache entry with structured data
   for (const [key, entry] of Object.entries(cache.caches)) {
-    console.log(`🔑 ${key}`);
-    console.log(`   Hash: ${entry.hash.slice(0, 16)}...`);
-    console.log(`   Time: ${new Date(entry.timestamp).toLocaleString()}`);
-    if (entry.metadata?.reason) {
-      console.log(`   Reason: ${entry.metadata.reason}`);
-    }
-    if (entry.metadata?.duration) {
-      console.log(`   Duration: ${entry.metadata.duration}ms`);
-    }
-    if (entry.metadata?.files && entry.metadata.files.length > 0) {
-      console.log(`   Files: ${entry.metadata.files.join(', ')}`);
-    }
-    console.log('');
+    logger.info('Cache entry', {
+      key,
+      hash: entry.hash.slice(0, 16) + '...',
+      timestamp: entry.timestamp,
+      time: new Date(entry.timestamp).toLocaleString(),
+      ...(entry.metadata?.reason && { reason: entry.metadata.reason }),
+      ...(entry.metadata?.duration && { duration: `${entry.metadata.duration}ms` }),
+      ...(entry.metadata?.files && entry.metadata.files.length > 0 && {
+        files: entry.metadata.files.join(', '),
+      }),
+    });
   }
 }

@@ -2,6 +2,7 @@ import { edgeEnv } from '../../config/env.ts';
 import { createUtilityContext } from '@heyclaude/shared-runtime';
 import { fetchWithRetry } from './http-client.ts';
 import type { Database } from '@heyclaude/database-types';
+import { logger } from '../logger.ts';
 
 /**
  * Polar.sh API utilities - checkout session creation with metadata
@@ -40,7 +41,7 @@ export async function createPolarCheckout(
   const polarEnvironment = edgeEnv.polar.environment;
 
   if (!polarAccessToken) {
-    console.error('POLAR_ACCESS_TOKEN not configured', logContext);
+    logger.error('POLAR_ACCESS_TOKEN not configured', logContext);
     return { error: 'Payment system not configured' };
   }
 
@@ -74,17 +75,17 @@ export async function createPolarCheckout(
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('Polar checkout creation failed', {
+      logger.error('Polar checkout creation failed', {
         ...logContext,
         status: response.status,
-        error: errorText,
+        err: new Error(errorText),
       });
       return { error: `Payment setup failed: ${response.statusText}` };
     }
 
     const session = (await response.json()) as PolarCheckoutResponse;
 
-    console.log('Polar checkout session created', {
+    logger.info('Polar checkout session created', {
       ...logContext,
       sessionId: session.id,
     });
@@ -95,9 +96,10 @@ export async function createPolarCheckout(
     };
   } catch (error) {
     const { errorToString } = await import('@heyclaude/shared-runtime');
-    console.error('Polar checkout creation error', {
+    const errorObj = error instanceof Error ? error : new Error(errorToString(error));
+    logger.error('Polar checkout creation error', {
       ...logContext,
-      error: errorToString(error),
+      err: errorObj,
     });
     return { error: 'Failed to create checkout session' };
   }

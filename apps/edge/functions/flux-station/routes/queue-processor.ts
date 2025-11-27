@@ -11,7 +11,7 @@
  * Called by pg_cron job every 2 minutes to process all queues automatically.
  */
 
-import { edgeEnv, pgmqMetrics } from '@heyclaude/edge-runtime';
+import { edgeEnv, initRequestLogging, pgmqMetrics, traceRequestComplete, traceStep } from '@heyclaude/edge-runtime';
 import {
   createUtilityContext,
   errorToString,
@@ -242,6 +242,14 @@ async function processExternalQueue(
     }
 
     if (!response.ok) {
+      const logContext = createUtilityContext('queue-processor', 'process-external-queue', {
+        queue: config.name,
+        queueLength,
+        status: response.status,
+      });
+      const error = new Error(errorMessage || `HTTP ${response.status} ${response.statusText}`);
+      logError('External queue processing failed', logContext, error);
+      
       return {
         queue: config.name,
         success: false,
@@ -273,8 +281,14 @@ async function processExternalQueue(
  */
 export async function processAllQueues(): Promise<QueueProcessingSummary> {
   const startTime = Date.now();
+  const logContext = createUtilityContext('flux-station', 'queue-processor', {});
+  
+  // Initialize request logging with trace and bindings
+  initRequestLogging(logContext);
+  traceStep('Starting queue processor', logContext);
 
   // 1. Check metrics for all queues in parallel (fast, non-blocking)
+  traceStep('Checking queue metrics', logContext);
   const queueStatuses = await Promise.all(
     QUEUE_REGISTRY.map(async (config) => ({
       config,
@@ -293,11 +307,13 @@ export async function processAllQueues(): Promise<QueueProcessingSummary> {
   // 3. If no queues have messages, return early
   if (queuesToProcess.length === 0) {
     const durationMs = Date.now() - startTime;
-    const logContext = createUtilityContext('flux-station', 'queue-processor', {
+    const emptyLogContext = {
+      ...logContext,
       total_queues: totalQueues,
       duration_ms: durationMs,
-    });
-    logInfo('No queues with messages, skipping processing', logContext);
+    };
+    logInfo('No queues with messages, skipping processing', emptyLogContext);
+    traceRequestComplete(emptyLogContext);
     return {
       totalQueues,
       queuesWithMessages: 0,
@@ -316,6 +332,7 @@ export async function processAllQueues(): Promise<QueueProcessingSummary> {
     })),
   });
   logInfo(`Processing ${queuesToProcess.length} queues with messages`, batchLogContext);
+  traceStep(`Processing ${queuesToProcess.length} queues`, batchLogContext);
 
   // 4. Process queues sequentially (one at a time)
   const results: QueueProcessingResult[] = [];
@@ -394,6 +411,7 @@ export async function processAllQueues(): Promise<QueueProcessingSummary> {
     })),
   });
   logInfo('Queue processing completed', summaryLogContext);
+  traceRequestComplete(summaryLogContext);
 
   return {
     totalQueues,

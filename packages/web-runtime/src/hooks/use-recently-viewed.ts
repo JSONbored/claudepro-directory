@@ -37,8 +37,8 @@
 import {
   getRecentlyViewedConfig,
   getTimeoutConfig,
-} from '../actions/feature-flags.ts';
-import { logClientWarning, logger } from '../entries/core.ts';
+} from '../config/static-configs.ts';
+import { logger } from '../entries/core.ts';
 import { useCallback, useEffect, useRef } from 'react';
 import { create } from 'zustand';
 
@@ -85,7 +85,7 @@ export interface UseRecentlyViewedReturn {
 
 const STORAGE_KEY = 'heyclaude_recently_viewed';
 
-// Configuration (loaded from Statsig via server action)
+// Configuration (loaded from static config)
 let MAX_ITEMS = 10;
 let TTL_DAYS = 30;
 let DEBOUNCE_MS = 300;
@@ -217,29 +217,23 @@ export function useRecentlyViewed(): UseRecentlyViewedReturn {
 
   // Load from localStorage on mount (client-side only)
   useEffect(() => {
-    // Load configs lazily on client
-    Promise.all([getRecentlyViewedConfig({}), getTimeoutConfig({})])
-      .then(([recentlyViewedResult, timeoutResult]) => {
-        if (recentlyViewedResult?.data) {
-          const recentlyViewed = recentlyViewedResult.data as {
-            'recently_viewed.max_items': number;
-            'recently_viewed.ttl_days': number;
-            'recently_viewed.max_description_length': number;
-            'recently_viewed.max_tags': number;
-          };
-          MAX_ITEMS = recentlyViewed['recently_viewed.max_items'];
-          TTL_DAYS = recentlyViewed['recently_viewed.ttl_days'];
-          MAX_DESCRIPTION_LENGTH = recentlyViewed['recently_viewed.max_description_length'];
-          MAX_TAGS = recentlyViewed['recently_viewed.max_tags'];
-        }
-        if (timeoutResult?.data) {
-          const timeout = timeoutResult.data as { 'timeout.ui.form_debounce_ms': number };
-          DEBOUNCE_MS = timeout['timeout.ui.form_debounce_ms'];
-        }
-      })
-      .catch((error: unknown) => {
-        logClientWarning('useRecentlyViewed: failed to load configs', error);
-      });
+    // Load configs from static defaults
+    const recentlyViewed = getRecentlyViewedConfig();
+    const timeout = getTimeoutConfig();
+    
+    const recentlyViewedConfig = recentlyViewed as {
+      'recently_viewed.max_items': number;
+      'recently_viewed.ttl_days': number;
+      'recently_viewed.max_description_length': number;
+      'recently_viewed.max_tags': number;
+    };
+    MAX_ITEMS = recentlyViewedConfig['recently_viewed.max_items'];
+    TTL_DAYS = recentlyViewedConfig['recently_viewed.ttl_days'];
+    MAX_DESCRIPTION_LENGTH = recentlyViewedConfig['recently_viewed.max_description_length'];
+    MAX_TAGS = recentlyViewedConfig['recently_viewed.max_tags'];
+    
+    const timeoutConfig = timeout as { 'timeout.ui.form_debounce_ms': number };
+    DEBOUNCE_MS = timeoutConfig['timeout.ui.form_debounce_ms'];
 
     if (isLoaded) return;
 

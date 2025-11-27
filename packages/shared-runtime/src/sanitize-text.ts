@@ -1,5 +1,6 @@
 import sanitizeHtml from 'sanitize-html';
 import { createUtilityContext } from './logging.ts';
+import { logger } from './logger/index.ts';
 
 export interface SanitizeTextOptions {
   maxLength?: number;
@@ -59,7 +60,7 @@ export function sanitizeText(text: unknown, options: SanitizeTextOptions = {}): 
       original_length: text.length,
       max_length: maxLength,
     });
-    console.warn('[sanitize-text] Text truncated due to length limit', logContext);
+    logger.warn(logContext, 'Text truncated due to length limit');
     sanitized = sanitized.slice(0, maxLength);
   }
 

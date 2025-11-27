@@ -49,15 +49,17 @@ export async function callEdgeFunction<T = unknown>(
 
   if (!response.ok) {
     const errorText = await response.text();
-    logger.error('Edge function error', errorText, {
+    const fetchError = new Error(`Edge function ${functionName} failed: ${response.status} ${response.statusText}`);
+    logger.error('Edge function error', fetchError, {
       functionName,
       status: response.status,
       method,
+      responseBody: errorText,
     });
 
     try {
-      const error = JSON.parse(errorText);
-      throw new Error(error.message || `Edge function ${functionName} failed`);
+      const parsedError = JSON.parse(errorText);
+      throw new Error(parsedError.message || `Edge function ${functionName} failed`);
     } catch {
       throw new Error(`Edge function ${functionName} failed: ${response.status}`);
     }

@@ -16,11 +16,12 @@
  * - Returns early on validation failures
  */
 
-import { badRequestResponse, getOnlyCorsHeaders } from '@heyclaude/edge-runtime';
+import { badRequestResponse, initRequestLogging, publicCorsHeaders, traceRequestComplete, traceStep } from '@heyclaude/edge-runtime';
 import {
   createDataApiContext,
   logError,
   logInfo,
+  logger,
 } from '@heyclaude/shared-runtime';
 import {
   optimizeImage,
@@ -33,7 +34,7 @@ import {
   jsonResponse,
 } from '@heyclaude/edge-runtime';
 
-const CORS = getOnlyCorsHeaders;
+const CORS = publicCorsHeaders;
 
 // Logo optimization constants (optimized for performance and quality)
 const LOGO_MAX_DIMENSION = 512; // Reasonable max for logos (balances quality vs file size)
@@ -81,6 +82,17 @@ export async function handleLogoOptimizeRoute(req: Request): Promise<Response> {
     method: 'POST',
     app: 'public-api',
   });
+  
+  // Initialize request logging with trace and bindings
+  initRequestLogging(logContext);
+  traceStep('Logo optimization request received', logContext);
+  
+  // Set bindings for this request
+  logger.setBindings({
+    requestId: logContext.request_id,
+    operation: logContext.action || 'logo-optimize',
+    method: req.method,
+  });
 
   // Handle OPTIONS for CORS
   if (req.method === 'OPTIONS') {
@@ -92,6 +104,7 @@ export async function handleLogoOptimizeRoute(req: Request): Promise<Response> {
   }
 
   try {
+    traceStep('Processing logo optimization', logContext);
     // Parse request body
     let body: LogoOptimizeRequest;
     const contentType = req.headers.get('content-type') || '';
@@ -309,7 +322,19 @@ export async function handleLogoOptimizeRoute(req: Request): Promise<Response> {
           .eq('id', body.companyId);
 
         if (updateError) {
-          logError('Failed to update company logo in database', logContext, updateError);
+          // Use dbQuery serializer for consistent database query formatting
+          logError('Failed to update company logo in database', {
+            ...logContext,
+            dbQuery: {
+              table: 'companies',
+              operation: 'update',
+              schema: 'public',
+              args: {
+                id: body.companyId,
+                // Update fields redacted by Pino's redact config
+              },
+            },
+          }, updateError);
           // Don't fail - return success with URL, client can update manually if needed
         } else {
           logInfo('Company logo updated in database', {
@@ -332,6 +357,7 @@ export async function handleLogoOptimizeRoute(req: Request): Promise<Response> {
       ...(optimizedDimensions ? { dimensions: optimizedDimensions } : {}),
     };
 
+    traceRequestComplete(logContext);
     return jsonResponse(response, 200, CORS);
   } catch (error) {
     logError('Logo optimization failed', logContext, error);

@@ -27,7 +27,7 @@ export interface ActionConfig {
   revalidateTags?: string[];
   
   /**
-   * Cache keys to invalidate via Statsig config.
+   * Cache keys to invalidate via static config.
    * e.g. 'cache.invalidate.job_delete'
    */
   invalidateCacheConfigKeys?: string[];

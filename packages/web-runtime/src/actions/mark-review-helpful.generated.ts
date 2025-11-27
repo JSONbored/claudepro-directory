@@ -53,7 +53,7 @@ export const markReviewHelpful = authedAction
       revalidateTag(`reviews:${result?.content_type}:${result?.content_slug}`, 'default');
       
       await nextInvalidateByKeys({
-        cacheConfigPromise: getCacheConfigSnapshot(),
+        cacheConfig: getCacheConfigSnapshot(),
         invalidateKeys: ['cache.invalidate.review_helpful']
       });
 

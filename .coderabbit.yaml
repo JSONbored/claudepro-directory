@@ -1,0 +1,222 @@
+# CodeRabbit Configuration - Optimized for Solo Developer
+# This file limits which files CodeRabbit reviews to stay under the 100 file limit
+
+language: en-US
+early_access: true
+enable_free_tier: true
+
+reviews:
+  # Chill profile = less strict, faster reviews, less noise
+  profile: chill
+  
+  # Don't block merges on suggestions
+  request_changes_workflow: false
+  
+  # Quick overview of changes
+  high_level_summary: true
+  
+  # Show review status but don't block commits (lefthook handles this)
+  review_status: true
+  commit_status: false
+  fail_commit_status: false
+  
+  # Reduce noise
+  collapse_walkthrough: false
+  changed_files_summary: true
+  poem: false
+  sequence_diagrams: false
+  estimate_code_review_effort: false
+  
+  # Auto-review PRs
+  auto_review:
+    enabled: true
+    drafts: false
+  
+  # PATH FILTERS - Critical for staying under file limit (now 200 with Pro)
+  # Only include source code files that should be reviewed
+  # Exclude everything else (generated files, binaries, docs, etc.)
+  #
+  # ⚠️ IMPORTANT: CodeRabbit CLI discovers ALL files first, then applies filters
+  # If >25% are excluded, it fails. For full directory reviews, use PR reviews instead.
+  # For CLI, use --type committed/uncommitted to review only changed files.
+  path_filters:
+    # ============================================
+    # INCLUDE PATHS (whitelist - ONLY these will be reviewed)
+    # ============================================
+    # When you have include paths, CodeRabbit ONLY reviews files matching these
+    # NOTE: For CLI with --type all, this still discovers all files first
+    # Use --type committed/uncommitted for CLI, or PR reviews for full directory reviews
+    
+    - "apps/web/src/**/*.{ts,tsx}"
+    - "apps/edge/functions/**/*.{ts,tsx}"
+    - "packages/**/src/**/*.{ts,tsx}"
+    
+    # ============================================
+    # EXCLUDE PATHS (further filtering within included paths)
+    # ============================================
+    # These exclude files from the included paths above
+    
+    # Exclude build/cache directories
+    - "!**/node_modules/**"
+    - "!**/.next/**"
+    - "!**/dist/**"
+    - "!**/out/**"
+    - "!**/.turbo/**"
+    - "!**/.build-cache/**"
+    - "!**/coverage/**"
+    - "!**/.nyc_output/**"
+    
+    # Exclude file types
+    - "!**/*.json"                 # Exclude JSON (except what we include)
+    - "!**/*.md"                    # Exclude markdown
+    - "!**/*.yml"                   # Exclude YAML
+    - "!**/*.yaml"                  # Exclude YAML
+    - "!**/*.toml"                  # Exclude TOML
+    - "!**/*.css"                   # Exclude CSS
+    - "!**/*.scss"                  # Exclude SCSS
+    - "!**/*.html"                  # Exclude HTML
+    
+    # Exclude generated files
+    - "!**/*.generated.ts"
+    - "!**/*.generated.tsx"
+    - "!packages/database-types/src/index.ts"
+    - "!packages/web-runtime/src/config/generated-config.ts"
+    - "!packages/web-runtime/src/data/config/category/category-config.generated.ts"
+    - "!apps/web/next-env.d.ts"
+    
+    # Exclude test files
+    - "!**/*.test.ts"
+    - "!**/*.test.tsx"
+    - "!**/*.spec.ts"
+    - "!**/*.spec.tsx"
+    - "!**/__tests__/**"
+    - "!**/tests/**"
+    
+    # Exclude binary files
+    - "!**/*.zip"
+    - "!**/*.png"
+    - "!**/*.jpg"
+    - "!**/*.jpeg"
+    - "!**/*.gif"
+    - "!**/*.svg"
+    - "!**/*.woff"
+    - "!**/*.woff2"
+    - "!**/*.ttf"
+    - "!**/*.eot"
+    - "!**/*.ico"
+    
+    # Exclude other files
+    - "!**/*.lock"
+    - "!**/*.log"
+    - "!**/*.cache"
+    - "!**/.env*"
+    - "!**/LICENSE"
+    - "!**/README.md"
+    - "!**/CHANGELOG.md"
+  
+  # Tool configuration - enable only what's relevant
+  tools:
+    # TypeScript/JavaScript tools
+    eslint:
+      enabled: true
+    biome:
+      enabled: true
+    
+    # Security tools
+    gitleaks:
+      enabled: true
+    
+    # Configuration file validation
+    actionlint:
+      enabled: true
+    yamllint:
+      enabled: true
+    
+    # GitHub integration
+    github-checks:
+      enabled: true
+      timeout_ms: 90000
+    
+    # Disable unused tools (reduces noise and improves speed)
+    ruff:
+      enabled: false
+    rubocop:
+      enabled: false
+    swiftlint:
+      enabled: false
+    golangci-lint:
+      enabled: false
+    phpstan:
+      enabled: false
+    detekt:
+      enabled: false
+    buf:
+      enabled: false
+    regal:
+      enabled: false
+    pmd:
+      enabled: false
+    phpmd:
+      enabled: false
+    phpcs:
+      enabled: false
+    cppcheck:
+      enabled: false
+    circleci:
+      enabled: false
+    clippy:
+      enabled: false
+    sqlfluff:
+      enabled: false
+    prismaLint:
+      enabled: false
+    pylint:
+      enabled: false
+    shopifyThemeCheck:
+      enabled: false
+    luacheck:
+      enabled: false
+    brakeman:
+      enabled: false
+    dotenvLint:
+      enabled: false
+    htmlhint:
+      enabled: false
+    checkmake:
+      enabled: false
+    hadolint:
+      enabled: false
+    semgrep:
+      enabled: false
+    checkov:
+      enabled: false
+    markdownlint:
+      enabled: false
+    languagetool:
+      enabled: false
+    shellcheck:
+      enabled: false
+    ast-grep:
+      essential_rules: false
+      rule_dirs: []
+      util_dirs: []
+      packages: []
+
+chat:
+  # Don't auto-reply (solo dev)
+  auto_reply: false
+
+knowledge_base:
+  # Keep learning enabled to improve over time
+  opt_out: false
+  web_search:
+    enabled: true
+  code_guidelines:
+    enabled: true
+    filePatterns: []
+  learnings:
+    scope: auto
+  issues:
+    scope: auto
+  pull_requests:
+    scope: auto

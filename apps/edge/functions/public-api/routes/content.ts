@@ -22,11 +22,13 @@ import {
   buildCacheHeaders,
   errorResponse,
   getOnlyCorsHeaders,
+  initRequestLogging,
   jsonResponse,
   methodNotAllowedResponse,
+  traceStep,
 } from '@heyclaude/edge-runtime';
 import type { BaseLogContext } from '@heyclaude/shared-runtime';
-import { buildSecurityHeaders, logInfo, validateSlug } from '@heyclaude/shared-runtime';
+import { buildSecurityHeaders, createDataApiContext, logInfo, logger, validateSlug } from '@heyclaude/shared-runtime';
 import { handlePaginatedContent } from './content-paginated.ts';
 import { handleRecordExport } from './content-record.ts';
 
@@ -43,6 +45,25 @@ export async function handleContentRoute(
   _request: Request,
   logContext?: BaseLogContext
 ): Promise<Response> {
+  // Create log context if not provided
+  const finalLogContext = logContext || createDataApiContext('content', {
+    path: url.pathname,
+    method,
+    app: 'public-api',
+  });
+  
+  // Initialize request logging with trace and bindings (Phase 1 & 2)
+  initRequestLogging(finalLogContext);
+  traceStep('Content route request received', finalLogContext);
+  
+  // Set bindings for this request - mixin will automatically inject these into all subsequent logs
+  logger.setBindings({
+    requestId: finalLogContext.request_id,
+    operation: finalLogContext.action || 'content-route',
+    function: finalLogContext.function,
+    method,
+  });
+  
   // Handle POST requests for content generation operations
   if (method === 'POST') {
     const action = url.searchParams.get('action')?.toLowerCase();

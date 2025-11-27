@@ -4,6 +4,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { resolve } from 'path';
 import { createServiceRoleClient } from '../toolkit/supabase.js';
+import { logger } from '../toolkit/logger.ts';
 
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(SCRIPT_DIR, '../../../..');
@@ -50,7 +51,7 @@ function loadEnvFile(): void {
 loadEnvFile();
 
 async function generateConfig() {
-  console.log('🏗️ Fetching build-time configuration from Supabase...');
+  logger.info('Fetching build-time configuration from Supabase');
 
   try {
     // Use the shared service role client which handles fallbacks and standard env vars
@@ -65,7 +66,7 @@ async function generateConfig() {
     }
 
     if (!data) {
-      console.warn('⚠️ No settings returned from get_all_app_settings RPC.');
+      logger.warn('No settings returned from get_all_app_settings RPC');
       return;
     }
 
@@ -81,14 +82,14 @@ export type GeneratedConfig = typeof GENERATED_CONFIG;
 `;
 
     await fs.writeFile(TARGET_CONFIG_PATH, configContent, 'utf-8');
-    console.log(`✅ Configuration generated successfully at: ${TARGET_CONFIG_PATH}`);
+    logger.info('Configuration generated successfully', { path: TARGET_CONFIG_PATH });
   } catch (err) {
-    console.error('❌ Error generating config:', err);
+    logger.error('Error generating config', err, { path: TARGET_CONFIG_PATH });
     process.exit(1);
   }
 }
 
 generateConfig().catch((err) => {
-  console.error('❌ Unhandled error:', err);
+  logger.error('Unhandled error in generateConfig', err);
   process.exit(1);
 });

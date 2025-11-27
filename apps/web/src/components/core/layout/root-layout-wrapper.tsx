@@ -6,10 +6,9 @@
 'use client';
 
 import type { Database } from '@heyclaude/database-types';
-import { checkConfettiEnabled } from '@heyclaude/web-runtime/actions/feature-flags';
-import { logClientWarning, logger, normalizeError } from '@heyclaude/web-runtime/core';
-import { EXPERIMENT_KEYS, FLAG_KEYS } from '@heyclaude/web-runtime/feature-flags/keys';
-import { useFeatureFlags } from '@heyclaude/web-runtime/feature-flags/provider';
+import { checkConfettiEnabled } from '@heyclaude/web-runtime/config/static-configs';
+import { logger, normalizeError } from '@heyclaude/web-runtime/core';
+import { getLayoutFlags } from '@heyclaude/web-runtime/data';
 import { DIMENSIONS, toasts } from '@heyclaude/web-runtime/ui';
 import dynamic from 'next/dynamic';
 import { usePathname } from 'next/navigation';
@@ -108,26 +107,22 @@ interface LayoutContentProps {
 export function LayoutContent({ children, announcement, navigationData }: LayoutContentProps) {
   const pathname = usePathname();
   const { fireConfetti } = useConfetti();
-  const { isEnabled, getExperiment } = useFeatureFlags();
+  
+  // Get static layout flags (no async operations)
+  const layoutFlags = getLayoutFlags();
 
-  const useFloatingActionBar = isEnabled(FLAG_KEYS.FLOATING_ACTION_BAR);
+  const useFloatingActionBar = layoutFlags.useFloatingActionBar;
   const fabFlags = {
-    showSubmit: isEnabled(FLAG_KEYS.FAB_SUBMIT_ACTION),
-    showSearch: isEnabled(FLAG_KEYS.FAB_SEARCH_ACTION),
-    showScrollToTop: isEnabled(FLAG_KEYS.FAB_SCROLL_TO_TOP),
-    showNotifications: isEnabled(FLAG_KEYS.FAB_NOTIFICATIONS),
+    showSubmit: layoutFlags.fabSubmitAction,
+    showSearch: layoutFlags.fabSearchAction,
+    showScrollToTop: layoutFlags.fabScrollToTop,
+    showNotifications: layoutFlags.fabNotifications,
     showPinboard: true,
   };
 
-  // Explicitly cast experiment values as strings since we know the expected types
-  const footerDelayVariant = getExperiment(EXPERIMENT_KEYS.NEWSLETTER_FOOTER_DELAY, '30s') as
-    | '10s'
-    | '30s'
-    | '60s';
-  const ctaVariant = getExperiment(EXPERIMENT_KEYS.NEWSLETTER_CTA_VARIANT, 'value_focused') as
-    | 'aggressive'
-    | 'social_proof'
-    | 'value_focused';
+  // Get newsletter experiment variants from static flags
+  const footerDelayVariant = layoutFlags.footerDelayVariant;
+  const ctaVariant = layoutFlags.ctaVariant;
 
   // Convert variant to delay milliseconds
   const delayMs =
@@ -173,21 +168,11 @@ export function LayoutContent({ children, announcement, navigationData }: Layout
       description: "We'll send the next Claude drop on Monday.",
     });
 
-    checkConfettiEnabled({})
-      .then((result) => {
-        if (result?.data) {
-          fireConfetti('subtle');
-        }
-        if (result?.serverError) {
-          logClientWarning('LayoutContent: confetti check failed', new Error(result.serverError));
-        }
-      })
-      .catch((error) => {
-        logClientWarning('LayoutContent: confetti check failed', error, {
-          component: 'LayoutContent',
-          pathname,
-        });
-      });
+    // Check confetti enabled (static config)
+    const confettiEnabled = checkConfettiEnabled();
+    if (confettiEnabled) {
+      fireConfetti('subtle');
+    }
 
     clearNewsletterOptInCookie().catch((error) => {
       const normalized = normalizeError(error, 'Failed to clear newsletter opt-in cookie');
@@ -227,7 +212,7 @@ export function LayoutContent({ children, announcement, navigationData }: Layout
             {children}
           </main>
           <Footer />
-          {/* Feature flag: Floating Action Bar (can be toggled on/off via Statsig) */}
+          {/* Floating Action Bar - controlled by static config */}
           {useFloatingActionBar && <FloatingActionBar fabFlags={fabFlags} />}
           <RecentlyViewedMobileTray />
           <NotificationSheet />

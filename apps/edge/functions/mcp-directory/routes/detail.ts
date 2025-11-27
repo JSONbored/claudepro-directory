@@ -2,11 +2,12 @@
  * getContentDetail Tool Handler
  *
  * Get complete metadata for a specific content item by slug and category.
- * Uses the get_content_detail_complete RPC.
+ * Uses direct table query for content details.
  */
 
 import type { Database } from '@heyclaude/database-types';
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { logError } from '@heyclaude/shared-runtime';
 import type { GetContentDetailInput } from '../lib/types.ts';
 
 export async function handleGetContentDetail(
@@ -41,6 +42,18 @@ export async function handleGetContentDetail(
     .single();
 
   if (error) {
+    // Use dbQuery serializer for consistent database query formatting
+    logError('Database query failed in getContentDetail', {
+      dbQuery: {
+        table: 'content',
+        operation: 'select',
+        schema: 'public',
+        args: {
+          category,
+          slug,
+        },
+      },
+    }, error);
     throw new Error(`Failed to fetch content details: ${error.message}`);
   }
 

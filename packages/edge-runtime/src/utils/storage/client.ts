@@ -3,6 +3,7 @@ import { supabaseAnon, supabaseServiceRole } from '../../clients/supabase.ts';
 import type { Database as DatabaseGenerated } from '@heyclaude/database-types';
 import { errorToString } from '@heyclaude/shared-runtime';
 import { createUtilityContext } from '@heyclaude/shared-runtime';
+import { logger } from '../logger.ts';
 
 export type StorageServiceClient = SupabaseClient<DatabaseGenerated>;
 
@@ -139,11 +140,13 @@ export async function deleteStorageObjects(
         bucket,
         pathCount: paths.length,
       });
-      console.error('[Storage] Delete failed', {
+      const errorObj = error instanceof Error ? error : new Error(String(error));
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error('Delete failed', {
         ...logContext,
-        error: error.message,
+        err: errorObj,
       });
-      return { success: false, error: error.message };
+      return { success: false, error: errorMessage };
     }
 
     return { success: true };
@@ -152,9 +155,10 @@ export async function deleteStorageObjects(
       bucket,
       pathCount: paths.length,
     });
-    console.error('[Storage] Delete error', {
+    const errorObj = error instanceof Error ? error : new Error(errorToString(error));
+    logger.error('Delete error', {
       ...logContext,
-      error: errorToString(error),
+      err: errorObj,
     });
     return {
       success: false,
@@ -182,11 +186,13 @@ export async function createSignedStorageUrl(
         bucket,
         path,
       });
-      console.error('[Storage] Signed URL error', {
+      const errorObj = error instanceof Error ? error : new Error(String(error));
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error('Signed URL error', {
         ...logContext,
-        error: error.message,
+        err: errorObj,
       });
-      return { success: false, error: error.message };
+      return { success: false, error: errorMessage };
     }
 
     return { success: true, signedUrl: data?.signedUrl };
@@ -195,9 +201,10 @@ export async function createSignedStorageUrl(
       bucket,
       path,
     });
-    console.error('[Storage] Signed URL exception', {
+    const errorObj = error instanceof Error ? error : new Error(errorToString(error));
+    logger.error('Signed URL exception', {
       ...logContext,
-      error: errorToString(error),
+      err: errorObj,
     });
     return {
       success: false,

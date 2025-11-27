@@ -7,6 +7,7 @@
 
 import type { Database } from '@heyclaude/database-types';
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { logRpcError } from '../utils/rpc-error-logging.ts';
 
 export class AccountService {
   constructor(private supabase: SupabaseClient<Database>) {}
@@ -15,143 +16,335 @@ export class AccountService {
    * Calls the database RPC: get_account_dashboard
    */
   async getAccountDashboard(args: Database['public']['Functions']['get_account_dashboard']['Args']) {
-    const { data, error } = await this.supabase.rpc('get_account_dashboard', args);
-    if (error) throw error;
-    return data as Database['public']['Functions']['get_account_dashboard']['Returns'];
+    try {
+      const { data, error } = await this.supabase.rpc('get_account_dashboard', args);
+      if (error) {
+        logRpcError(error, {
+          rpcName: 'get_account_dashboard',
+          operation: 'AccountService.getAccountDashboard',
+          args: args,
+        });
+        throw error;
+      }
+      return data as Database['public']['Functions']['get_account_dashboard']['Returns'];
+    } catch (error) {
+      // Error already logged above
+      throw error;
+    }
   }
 
   /**
    * Calls the database RPC: get_user_library
    */
   async getUserLibrary(args: Database['public']['Functions']['get_user_library']['Args']) {
-    const { data, error } = await this.supabase.rpc('get_user_library', args);
-    if (error) throw error;
-    return data as Database['public']['Functions']['get_user_library']['Returns'];
+    try {
+      const { data, error } = await this.supabase.rpc('get_user_library', args);
+      if (error) {
+        logRpcError(error, {
+          rpcName: 'get_user_library',
+          operation: 'AccountService.getUserLibrary',
+          args: args,
+        });
+        throw error;
+      }
+      return data as Database['public']['Functions']['get_user_library']['Returns'];
+    } catch (error) {
+      // Error already logged above
+      throw error;
+    }
   }
 
   /**
    * Calls the database RPC: get_user_dashboard
    */
   async getUserDashboard(args: Database['public']['Functions']['get_user_dashboard']['Args']) {
-    const { data, error } = await this.supabase.rpc('get_user_dashboard', args);
-    if (error) throw error;
-    return data as Database['public']['Functions']['get_user_dashboard']['Returns'];
+    try {
+      const { data, error } = await this.supabase.rpc('get_user_dashboard', args);
+      if (error) {
+        logRpcError(error, {
+          rpcName: 'get_user_dashboard',
+          operation: 'AccountService.getUserDashboard',
+          args: args,
+        });
+        throw error;
+      }
+      return data as Database['public']['Functions']['get_user_dashboard']['Returns'];
+    } catch (error) {
+      // Error already logged above
+      throw error;
+    }
   }
 
   /**
    * Calls the database RPC: get_collection_detail_with_items
    */
   async getCollectionDetailWithItems(args: Database['public']['Functions']['get_collection_detail_with_items']['Args']) {
-    const { data, error } = await this.supabase.rpc('get_collection_detail_with_items', args);
-    if (error) throw error;
-    return data as Database['public']['Functions']['get_collection_detail_with_items']['Returns'];
+    try {
+      const { data, error } = await this.supabase.rpc('get_collection_detail_with_items', args);
+      if (error) {
+        logRpcError(error, {
+          rpcName: 'get_collection_detail_with_items',
+          operation: 'AccountService.getCollectionDetailWithItems',
+          args: args,
+        });
+        throw error;
+      }
+      return data as Database['public']['Functions']['get_collection_detail_with_items']['Returns'];
+    } catch (error) {
+      // Error already logged above
+      throw error;
+    }
   }
 
   /**
    * Calls the database RPC: get_user_settings
    */
   async getUserSettings(args: Database['public']['Functions']['get_user_settings']['Args']) {
-    const { data, error } = await this.supabase.rpc('get_user_settings', args);
-    if (error) throw error;
-    return data as Database['public']['Functions']['get_user_settings']['Returns'];
+    try {
+      const { data, error } = await this.supabase.rpc('get_user_settings', args);
+      if (error) {
+        logRpcError(error, {
+          rpcName: 'get_user_settings',
+          operation: 'AccountService.getUserSettings',
+          args: args,
+        });
+        throw error;
+      }
+      return data as Database['public']['Functions']['get_user_settings']['Returns'];
+    } catch (error) {
+      // Error already logged above
+      throw error;
+    }
   }
 
   /**
    * Calls the database RPC: get_sponsorship_analytics
    */
   async getSponsorshipAnalytics(args: Database['public']['Functions']['get_sponsorship_analytics']['Args']) {
-    const { data, error } = await this.supabase.rpc('get_sponsorship_analytics', args);
-    if (error) throw error;
-    return data as Database['public']['Functions']['get_sponsorship_analytics']['Returns'];
+    try {
+      const { data, error } = await this.supabase.rpc('get_sponsorship_analytics', args);
+      if (error) {
+        logRpcError(error, {
+          rpcName: 'get_sponsorship_analytics',
+          operation: 'AccountService.getSponsorshipAnalytics',
+          args: args,
+        });
+        throw error;
+      }
+      return data as Database['public']['Functions']['get_sponsorship_analytics']['Returns'];
+    } catch (error) {
+      // Error already logged above
+      throw error;
+    }
   }
 
   /**
    * Calls the database RPC: get_user_companies
    */
   async getUserCompanies(args: Database['public']['Functions']['get_user_companies']['Args']) {
-    const { data, error } = await this.supabase.rpc('get_user_companies', args);
-    if (error) throw error;
-    return data as Database['public']['Functions']['get_user_companies']['Returns'];
+    try {
+      const { data, error } = await this.supabase.rpc('get_user_companies', args);
+      if (error) {
+        logRpcError(error, {
+          rpcName: 'get_user_companies',
+          operation: 'AccountService.getUserCompanies',
+          args: args,
+        });
+        throw error;
+      }
+      return data as Database['public']['Functions']['get_user_companies']['Returns'];
+    } catch (error) {
+      // Error already logged above
+      throw error;
+    }
   }
 
   /**
    * Calls the database RPC: get_user_sponsorships
    */
   async getUserSponsorships(args: Database['public']['Functions']['get_user_sponsorships']['Args']) {
-    const { data, error } = await this.supabase.rpc('get_user_sponsorships', args);
-    if (error) throw error;
-    return data as Database['public']['Functions']['get_user_sponsorships']['Returns'];
+    try {
+      const { data, error } = await this.supabase.rpc('get_user_sponsorships', args);
+      if (error) {
+        logRpcError(error, {
+          rpcName: 'get_user_sponsorships',
+          operation: 'AccountService.getUserSponsorships',
+          args: args,
+        });
+        throw error;
+      }
+      return data as Database['public']['Functions']['get_user_sponsorships']['Returns'];
+    } catch (error) {
+      // Error already logged above
+      throw error;
+    }
   }
 
   /**
    * Calls the database RPC: get_submission_dashboard
    */
   async getSubmissionDashboard(args: Database['public']['Functions']['get_submission_dashboard']['Args']) {
-    const { data, error } = await this.supabase.rpc('get_submission_dashboard', args);
-    if (error) throw error;
-    return data as Database['public']['Functions']['get_submission_dashboard']['Returns'];
+    try {
+      const { data, error } = await this.supabase.rpc('get_submission_dashboard', args);
+      if (error) {
+        logRpcError(error, {
+          rpcName: 'get_submission_dashboard',
+          operation: 'AccountService.getSubmissionDashboard',
+          args: args,
+        });
+        throw error;
+      }
+      return data as Database['public']['Functions']['get_submission_dashboard']['Returns'];
+    } catch (error) {
+      // Error already logged above
+      throw error;
+    }
   }
 
   /**
    * Calls the database RPC: is_bookmarked
    */
   async isBookmarked(args: Database['public']['Functions']['is_bookmarked']['Args']) {
-    const { data, error } = await this.supabase.rpc('is_bookmarked', args);
-    if (error) throw error;
-    return data as Database['public']['Functions']['is_bookmarked']['Returns'];
+    try {
+      const { data, error } = await this.supabase.rpc('is_bookmarked', args);
+      if (error) {
+        logRpcError(error, {
+          rpcName: 'is_bookmarked',
+          operation: 'AccountService.isBookmarked',
+          args: args,
+        });
+        throw error;
+      }
+      return data as Database['public']['Functions']['is_bookmarked']['Returns'];
+    } catch (error) {
+      // Error already logged above
+      throw error;
+    }
   }
 
   /**
    * Calls the database RPC: is_bookmarked_batch
    */
   async isBookmarkedBatch(args: Database['public']['Functions']['is_bookmarked_batch']['Args']) {
-    const { data, error } = await this.supabase.rpc('is_bookmarked_batch', args);
-    if (error) throw error;
-    return data as Database['public']['Functions']['is_bookmarked_batch']['Returns'];
+    try {
+      const { data, error } = await this.supabase.rpc('is_bookmarked_batch', args);
+      if (error) {
+        logRpcError(error, {
+          rpcName: 'is_bookmarked_batch',
+          operation: 'AccountService.isBookmarkedBatch',
+          args: args,
+        });
+        throw error;
+      }
+      return data as Database['public']['Functions']['is_bookmarked_batch']['Returns'];
+    } catch (error) {
+      // Error already logged above
+      throw error;
+    }
   }
 
   /**
    * Calls the database RPC: is_following
    */
   async isFollowing(args: Database['public']['Functions']['is_following']['Args']) {
-    const { data, error } = await this.supabase.rpc('is_following', args);
-    if (error) throw error;
-    return data as Database['public']['Functions']['is_following']['Returns'];
+    try {
+      const { data, error } = await this.supabase.rpc('is_following', args);
+      if (error) {
+        logRpcError(error, {
+          rpcName: 'is_following',
+          operation: 'AccountService.isFollowing',
+          args: args,
+        });
+        throw error;
+      }
+      return data as Database['public']['Functions']['is_following']['Returns'];
+    } catch (error) {
+      // Error already logged above
+      throw error;
+    }
   }
 
   /**
    * Calls the database RPC: is_following_batch
    */
   async isFollowingBatch(args: Database['public']['Functions']['is_following_batch']['Args']) {
-    const { data, error } = await this.supabase.rpc('is_following_batch', args);
-    if (error) throw error;
-    return data as Database['public']['Functions']['is_following_batch']['Returns'];
+    try {
+      const { data, error } = await this.supabase.rpc('is_following_batch', args);
+      if (error) {
+        logRpcError(error, {
+          rpcName: 'is_following_batch',
+          operation: 'AccountService.isFollowingBatch',
+          args: args,
+        });
+        throw error;
+      }
+      return data as Database['public']['Functions']['is_following_batch']['Returns'];
+    } catch (error) {
+      // Error already logged above
+      throw error;
+    }
   }
 
   /**
    * Calls the database RPC: get_user_activity_summary
    */
   async getUserActivitySummary(args: Database['public']['Functions']['get_user_activity_summary']['Args']) {
-    const { data, error } = await this.supabase.rpc('get_user_activity_summary', args);
-    if (error) throw error;
-    return data as Database['public']['Functions']['get_user_activity_summary']['Returns'];
+    try {
+      const { data, error } = await this.supabase.rpc('get_user_activity_summary', args);
+      if (error) {
+        logRpcError(error, {
+          rpcName: 'get_user_activity_summary',
+          operation: 'AccountService.getUserActivitySummary',
+          args: args,
+        });
+        throw error;
+      }
+      return data as Database['public']['Functions']['get_user_activity_summary']['Returns'];
+    } catch (error) {
+      // Error already logged above
+      throw error;
+    }
   }
 
   /**
    * Calls the database RPC: get_user_activity_timeline
    */
   async getUserActivityTimeline(args: Database['public']['Functions']['get_user_activity_timeline']['Args']) {
-    const { data, error } = await this.supabase.rpc('get_user_activity_timeline', args);
-    if (error) throw error;
-    return data as Database['public']['Functions']['get_user_activity_timeline']['Returns'];
+    try {
+      const { data, error } = await this.supabase.rpc('get_user_activity_timeline', args);
+      if (error) {
+        logRpcError(error, {
+          rpcName: 'get_user_activity_timeline',
+          operation: 'AccountService.getUserActivityTimeline',
+          args: args,
+        });
+        throw error;
+      }
+      return data as Database['public']['Functions']['get_user_activity_timeline']['Returns'];
+    } catch (error) {
+      // Error already logged above
+      throw error;
+    }
   }
 
   /**
    * Calls the database RPC: get_user_identities
    */
   async getUserIdentities(args: Database['public']['Functions']['get_user_identities']['Args']) {
-    const { data, error } = await this.supabase.rpc('get_user_identities', args);
-    if (error) throw error;
-    return data as Database['public']['Functions']['get_user_identities']['Returns'];
+    try {
+      const { data, error } = await this.supabase.rpc('get_user_identities', args);
+      if (error) {
+        logRpcError(error, {
+          rpcName: 'get_user_identities',
+          operation: 'AccountService.getUserIdentities',
+          args: args,
+        });
+        throw error;
+      }
+      return data as Database['public']['Functions']['get_user_identities']['Returns'];
+    } catch (error) {
+      // Error already logged above
+      throw error;
+    }
   }
 }

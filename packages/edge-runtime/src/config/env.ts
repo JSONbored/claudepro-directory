@@ -43,12 +43,6 @@ export interface EdgeEnv {
     anonKey: string;
     serviceRoleKey: string;
   };
-  statsig: {
-    apiUrl: string;
-    serverSecret?: string;
-    configName: string;
-    refreshIntervalMs: number;
-  };
   newsletter: {
     countTtlSeconds: number;
   };
@@ -112,13 +106,6 @@ export const edgeEnv: EdgeEnv = {
       'SUPABASE_SERVICE_ROLE_KEY',
       'SUPABASE_SERVICE_ROLE_KEY is required for edge functions'
     ),
-  },
-  statsig: {
-    apiUrl: getEnvOrDefault('STATSIG_CACHE_ENDPOINT', 'https://api.statsig.com/v1/get_config'),
-    ...optionalProp('serverSecret', getOptionalEnv('STATSIG_SERVER_SECRET')),
-    configName: getEnvOrDefault('STATSIG_CACHE_CONFIG_NAME', 'cache_configs'),
-      refreshIntervalMs:
-        getNumberEnv('STATSIG_CACHE_REFRESH_MS', 5 * 60 * 1000) ?? 5 * 60 * 1000,
   },
   newsletter: {
       countTtlSeconds: getNumberEnv('NEWSLETTER_COUNT_TTL_S', 300) ?? 300,

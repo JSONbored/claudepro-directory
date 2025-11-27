@@ -8,7 +8,7 @@ This package acts as the "SDK" for `apps/web`. It encapsulates:
 -   **Server Actions**: Type-safe mutations using `next-safe-action`.
 -   **Data Access**: Functions to fetch data from Supabase, handling caching and validation.
 -   **UI System**: Reusable components, hooks, and design tokens.
--   **Integrations**: wrappers for Logging, Analytics, and Feature Flags.
+-   **Integrations**: wrappers for Logging and Analytics.
 
 ## Exports by Category
 
@@ -46,7 +46,7 @@ Data fetching and Supabase interactions.
 Essential utilities and configuration.
 -   **Logging**: `logger` (Pino wrapper), `logActionFailure`.
 -   **Errors**: `normalizeError`, `sanitizeError`.
--   **Config**: `SOCIAL_LINKS`, `featureFlags`.
+-   **Config**: `SOCIAL_LINKS`, static configuration defaults.
 -   **Utils**: `formatDate`, `safeParse`, `hashUserId`.
 
 ### 🚀 Edge (`@heyclaude/web-runtime/edge`)

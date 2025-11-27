@@ -6,7 +6,10 @@ import {
   enqueueSearchAnalytics,
   errorResponse,
   getWithAuthCorsHeaders,
+  initRequestLogging,
   supabaseAnon,
+  traceRequestComplete,
+  traceStep,
 } from '@heyclaude/edge-runtime';
 import {
   buildSecurityHeaders,
@@ -16,6 +19,7 @@ import {
   logError,
   logInfo,
   logWarn,
+  logger,
   validateLimit,
   validateQueryString,
   withDuration,
@@ -80,6 +84,26 @@ interface SearchResponse {
  */
 export async function handleSearch(req: Request, startTime: number): Promise<Response> {
   const url = new URL(req.url);
+  
+  // Create log context for this search request
+  const queryParam = url.searchParams.get('q');
+  const logContext = createSearchContext({
+    ...(queryParam ? { query: queryParam } : {}),
+    searchType: 'search',
+  });
+  
+  // Initialize request logging with trace and bindings (Phase 1 & 2)
+  initRequestLogging(logContext);
+  traceStep('Search request received', logContext);
+  
+  // Set bindings for this request - mixin will automatically inject these into all subsequent logs
+  logger.setBindings({
+    requestId: logContext.request_id,
+    operation: logContext.action || 'search',
+    function: logContext.function,
+    query: url.searchParams.get('q') || undefined,
+  });
+  
   // Validate query string
   const queryStringValidation = validateQueryString(url);
   if (!queryStringValidation.valid) {
@@ -206,8 +230,8 @@ export async function handleSearch(req: Request, startTime: number): Promise<Res
           ? 'unified'
           : 'content';
 
-  // Create logContext with public-api app label
-  const logContext = createSearchContext({
+  // Create logContext with public-api app label (renamed to avoid conflict with outer scope)
+  const searchLogContext = createSearchContext({
     query,
     searchType,
     app: 'public-api',
@@ -224,6 +248,18 @@ export async function handleSearch(req: Request, startTime: number): Promise<Res
         job_remote: isJobRemote,
       }),
     },
+  });
+  
+  // Initialize request logging with trace and bindings (Phase 1 & 2)
+  initRequestLogging(searchLogContext);
+  traceStep('Processing search request', searchLogContext);
+  
+  // Set bindings for this request - mixin will automatically inject these into all subsequent logs
+  logger.setBindings({
+    requestId: searchLogContext.request_id,
+    operation: searchLogContext.action || 'search',
+    function: searchLogContext.function,
+    query: query || undefined,
   });
 
   // Validate entities if provided
@@ -308,7 +344,7 @@ export async function handleSearch(req: Request, startTime: number): Promise<Res
   const dbEndTime = performance.now();
 
   if (error) {
-    logError('Search RPC error', { ...logContext, searchType }, error);
+    logError('Search RPC error', { ...searchLogContext, searchType }, error);
     return errorResponse(error, 'search-service', getWithAuthCorsHeaders);
   }
 
@@ -395,7 +431,7 @@ export async function handleSearch(req: Request, startTime: number): Promise<Res
   const totalTime = performance.now() - startTime;
 
   logInfo('Search completed', {
-    ...withDuration(logContext, startTime),
+    ...withDuration(searchLogContext, startTime),
     resultCount: results.length,
     searchType,
     highlighted: query.trim().length > 0,
@@ -429,6 +465,7 @@ export async function handleSearch(req: Request, startTime: number): Promise<Res
     searchType,
   };
 
+  traceRequestComplete(logContext);
   return new Response(JSON.stringify(response), {
     status: 200,
     headers: {
@@ -445,6 +482,23 @@ export async function handleSearch(req: Request, startTime: number): Promise<Res
  */
 export async function handleAutocomplete(req: Request, startTime: number): Promise<Response> {
   const url = new URL(req.url);
+  
+  // Create log context for this autocomplete request
+  const query = url.searchParams.get('q')?.trim() || '';
+  const logContext = createSearchContext({ query, searchType: 'autocomplete', app: 'public-api' });
+  
+  // Initialize request logging with trace and bindings
+  initRequestLogging(logContext);
+  traceStep('Autocomplete request received', logContext);
+  
+  // Set bindings for this request - mixin will automatically inject these into all subsequent logs
+  logger.setBindings({
+    requestId: logContext.request_id,
+    operation: logContext.action || 'autocomplete',
+    function: logContext.function,
+    query,
+  });
+  
   const queryStringValidation = validateQueryString(url);
   if (!queryStringValidation.valid) {
     return badRequestResponse(
@@ -453,7 +507,6 @@ export async function handleAutocomplete(req: Request, startTime: number): Promi
     );
   }
 
-  const query = url.searchParams.get('q')?.trim() || '';
   const limitValidation = validateLimit(url.searchParams.get('limit'), 1, 20, 10);
   if (!limitValidation.valid || limitValidation.limit === undefined) {
     return badRequestResponse(
@@ -462,8 +515,6 @@ export async function handleAutocomplete(req: Request, startTime: number): Promi
     );
   }
   const limit = limitValidation.limit;
-
-  const logContext = createSearchContext({ query, searchType: 'autocomplete', app: 'public-api' });
 
   if (query.length < 2) {
     return badRequestResponse('Query must be at least 2 characters', getWithAuthCorsHeaders);
@@ -476,7 +527,14 @@ export async function handleAutocomplete(req: Request, startTime: number): Promi
   const { data, error } = await supabaseAnon.rpc('get_search_suggestions_from_history', rpcArgs);
 
   if (error) {
-    logError('Autocomplete RPC error', logContext, error);
+    // Use dbQuery serializer for consistent database query formatting
+    logError('Autocomplete RPC error', {
+      ...logContext,
+      dbQuery: {
+        rpcName: 'get_search_suggestions_from_history',
+        args: rpcArgs, // Will be redacted by Pino's redact config
+      },
+    }, error);
     return errorResponse(error, 'get_search_suggestions_from_history', getWithAuthCorsHeaders);
   }
 
@@ -493,6 +551,7 @@ export async function handleAutocomplete(req: Request, startTime: number): Promi
     query,
   };
 
+  traceRequestComplete(logContext);
   return new Response(JSON.stringify(response), {
     status: 200,
     headers: {
@@ -510,10 +569,28 @@ export async function handleAutocomplete(req: Request, startTime: number): Promi
  */
 export async function handleFacets(startTime: number): Promise<Response> {
   const logContext = createSearchContext({ searchType: 'facets', app: 'public-api' });
+  
+  // Initialize request logging with trace and bindings
+  initRequestLogging(logContext);
+  traceStep('Facets request received', logContext);
+  
+  // Set bindings for this request - mixin will automatically inject these into all subsequent logs
+  logger.setBindings({
+    requestId: logContext.request_id,
+    operation: logContext.action || 'facets',
+    function: logContext.function,
+  });
+  
   const { data, error } = await supabaseAnon.rpc('get_search_facets', undefined);
 
   if (error) {
-    logError('Facets RPC error', logContext, error);
+    // Use dbQuery serializer for consistent database query formatting
+    logError('Facets RPC error', {
+      ...logContext,
+      dbQuery: {
+        rpcName: 'get_search_facets',
+      },
+    }, error);
     return errorResponse(error, 'get_search_facets', getWithAuthCorsHeaders);
   }
 
@@ -530,6 +607,7 @@ export async function handleFacets(startTime: number): Promise<Response> {
     facets,
   };
 
+  traceRequestComplete(logContext);
   return new Response(JSON.stringify(response), {
     status: 200,
     headers: {
@@ -572,13 +650,13 @@ async function trackSearchAnalytics(
     resultCount,
     authorizationHeader,
   }).catch((error) => {
-    const logContext = createSearchContext({
+    const analyticsErrorContext = createSearchContext({
       query: query.substring(0, 50),
       app: 'public-api',
     });
     // Add error type to context for debugging (BaseLogContext allows additional fields)
     const enhancedContext = {
-      ...logContext,
+      ...analyticsErrorContext,
       errorType: error instanceof Error ? error.constructor.name : typeof error,
     };
     logWarn('Failed to enqueue search analytics', enhancedContext);
